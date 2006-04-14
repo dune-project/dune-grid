@@ -34,6 +34,14 @@ for OPT in "$@"; do
 			AMVERSION=$arg
 			;;
 	-h|--help) usage ; exit 0 ;;
+	*)
+            if test -d "$OPT/m4"; then
+              ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $OPT/m4"
+            fi
+            if test -d "$OPT/am"; then
+              am_dir="$OPT/am"
+            fi
+            ;;
     esac
 done
 
@@ -69,12 +77,18 @@ libtoolize --force
 
 # prepare everything
 echo "--> aclocal..."
-aclocal$AMVERSION -I m4
+aclocal$AMVERSION $ACLOCAL_FLAGS
 
 # applications should provide a config.h for now
 echo "--> autoheader..."
 autoheader$ACVERSION
 
+# create a link to the dune-common am directory
+echo "--> linking dune-common/am..."
+rm -f am
+ln -s $am_dir am
+
+# call automake/conf
 echo "--> automake..."
 automake$AMVERSION --add-missing
 
@@ -82,4 +96,4 @@ echo "--> autoconf..."
 autoconf$ACVERSION
 
 ## tell the user what to do next
-echo "Now run ./configure to setup your Dune"
+echo "Now run ./configure to setup dune-grid"

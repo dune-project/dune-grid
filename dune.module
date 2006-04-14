@@ -1,15 +1,16 @@
-Module: Dune
+Module: dune_grid
+Depends: dune_common
 Suggests: UG Alberta Alu3d
 
 run_configure () {
   if test "x$HAVE_UG" == "xyes"; then
-    PARAM="--with-ug=$PATH_UG"
+    PARAMS="$PARAMS \"--with-ug=$PATH_UG\""
   fi
   if test "x$HAVE_Alberta" == "xyes"; then
-    PARAM="$PARAM --with-alberta=$PATH_Alberta"
+    PARAMS="$PARAMS \"--with-alberta=$PATH_Alberta\""
   fi
   if test "x$HAVE_Alu3d" == "xyes"; then
-    PARAM="$PARAM --with-alberta=$PATH_Alu3d"
+    PARAMS="$PARAMS \"--with-alberta=$PATH_Alu3d\""
   fi
-  ./configure $PARAM
+  run_default_configure "$@"
 }
