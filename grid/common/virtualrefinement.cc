@@ -19,11 +19,11 @@
 
 #include <assert.h>
 
-#include "../../common/exceptions.hh"
-#include "../../common/geometrytype.hh"
+#include <dune/common/exceptions.hh>
+#include <dune/common/geometrytype.hh>
 #include "grid.hh"
-#include "../../common/iteratorfacades.hh"
-#include "../../common/fvector.hh"
+#include <dune/common/iteratorfacades.hh>
+#include <dune/common/fvector.hh>
 #include "refinement.hh"
 #include <dune/common/exceptions.hh>
 

@@ -8,13 +8,13 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
-#include "../common/stack.hh"
-#include "../common/capabilities.hh"
-#include "common/grid.hh"
-#include "sgrid/numbering.hh"
-#include "../common/bigunsignedint.hh"
-#include "../common/collectivecommunication.hh"
-#include "common/indexidset.hh"
+#include <dune/common/stack.hh>
+#include <dune/common/capabilities.hh>
+#include <dune/common/bigunsignedint.hh>
+#include <dune/common/collectivecommunication.hh>
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/sgrid/numbering.hh>
+#include <dune/grid/common/indexidset.hh>
 
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for

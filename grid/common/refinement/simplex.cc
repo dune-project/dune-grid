@@ -244,9 +244,9 @@
     - \f$x_{p_d}:=x_{p_d}-x_{p_{d+1}}\f$.
  */
 
-#include "../../../common/geometrytype.hh"
-#include "../../../common/fvector.hh"
-#include "../../../common/helpertemplates.hh"
+#include <dune/common/geometrytype.hh>
+#include <dune/common/fvector.hh>
+#include <dune/common/helpertemplates.hh>
 #include "base.cc"
 
 namespace Dune {

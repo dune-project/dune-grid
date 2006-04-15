@@ -49,10 +49,10 @@
    name RefinementSubEntityIteratorSpecial.
  */
 
-#include "../../../common/fvector.hh"
-#include "../../sgrid.hh"
-#include "../grid.hh"
-#include "../../../common/iteratorfacades.hh"
+#include <dune/common/fvector.hh>
+#include <dune/grid/sgrid.hh>
+#include <dune/grid/common/grid.hh>
+#include <dune/common/iteratorfacades.hh>
 #include "base.cc" // for RefinementTraits
 
 namespace Dune {

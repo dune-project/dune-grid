@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
 ONEDLIB = onedgrid/libonedgrid.la
-COMMONLIB = common/libgridcommon.la
+COMMONLIB = common/libgridcommon.la ../io/libio.la ../quadrature/libquadrature.la
 
 # conditional parts:
 if UG
@@ -21,6 +21,7 @@ endif
 # construct only from sub-libraries
 libgrid_la_SOURCES =
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB)
+
 
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \

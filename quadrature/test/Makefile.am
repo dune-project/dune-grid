@@ -13,10 +13,7 @@ check_PROGRAMS = $(TESTS)
 ## common flags
 #
 
-AM_LDFLAGS = $(LIBDUNE)
-
-# paranoia
-AM_CPPFLAGS =  -DDUNE_ISTL_WITH_CHECKING -DDUNE_DEVEL_MODE
+LDADD = $(LIBDUNE)
 
 #
 ## define the programs

@@ -7,19 +7,19 @@
 #include <vector>
 #include <map>
 
-#include "common/grid.hh"     // the grid base classes
-#include "yaspgrid/grids.hh"  // the yaspgrid base classes
-#include "../common/stack.hh" // the stack class
-#include "../common/capabilities.hh" // the capabilities
-#include "../common/helpertemplates.hh"
-#include "../common/bigunsignedint.hh"
-#include "../common/array.hh"
-#include "../common/typetraits.hh"
-#include "../common/collectivecommunication.hh"
-#include "common/indexidset.hh"
+#include <dune/grid/common/grid.hh>     // the grid base classes
+#include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
+#include <dune/common/stack.hh> // the stack class
+#include <dune/common/capabilities.hh> // the capabilities
+#include <dune/common/helpertemplates.hh>
+#include <dune/common/bigunsignedint.hh>
+#include <dune/common/array.hh>
+#include <dune/common/typetraits.hh>
+#include <dune/common/collectivecommunication.hh>
+#include <dune/grid/common/indexidset.hh>
 
 #if HAVE_MPI
-#include "../common/mpicollectivecommunication.hh"
+#include <dune/common/mpicollectivecommunication.hh>
 #endif
 
 /*! \file yaspgrid.hh

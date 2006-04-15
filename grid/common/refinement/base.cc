@@ -18,7 +18,7 @@
    @endverbatim
  */
 
-#include "../../../common/geometrytype.hh"
+#include <dune/common/geometrytype.hh>
 
 namespace Dune {
 

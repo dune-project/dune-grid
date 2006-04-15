@@ -269,8 +269,8 @@
  */
 
 #include <vector>
-#include "../../common/geometrytype.hh"
-#include "../../common/fvector.hh"
+#include <dune/common/geometrytype.hh>
+#include <dune/common/fvector.hh>
 #include "refinement.hh"
 
 namespace Dune {

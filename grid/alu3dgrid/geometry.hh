@@ -7,7 +7,7 @@
 
 // Dune includes
 #include <dune/common/misc.hh>
-#include "../common/grid.hh"
+#include <dune/grid/common/grid.hh>
 
 // Local includes
 #include "alu3dinclude.hh"

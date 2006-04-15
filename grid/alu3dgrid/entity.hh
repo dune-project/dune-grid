@@ -6,8 +6,8 @@
 // System includes
 
 // Dune includes
-#include "../common/entity.hh"
-#include "../common/intersectioniteratorwrapper.hh"
+#include <dune/common/entity.hh>
+#include <dune/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "alu3dinclude.hh"

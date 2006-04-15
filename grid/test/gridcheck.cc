@@ -11,11 +11,11 @@
 
  */
 
-#include "../../common/capabilities.hh"
-#include "../../common/helpertemplates.hh"
-#include "../../common/exceptions.hh"
-#include "../../common/stdstreams.hh"
-#include "../common/referenceelements.hh"
+#include <dune/common/capabilities.hh>
+#include <dune/common/helpertemplates.hh>
+#include <dune/common/exceptions.hh>
+#include <dune/common/stdstreams.hh>
+#include <dune/grid/common/referenceelements.hh>
 
 #include "checkindexset.cc"
 
