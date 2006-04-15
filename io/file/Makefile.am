@@ -15,6 +15,6 @@ endif
 endif
 
 libfileio_la_SOURCES =
-libfileio_la_LIBADD = $(AMIRALIB)
+libfileio_la_LIBADD = $(AMIRALIB) -lcommon
 
 include $(top_srcdir)/am/global-rules
