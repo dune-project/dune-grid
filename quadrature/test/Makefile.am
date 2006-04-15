@@ -13,7 +13,7 @@ check_PROGRAMS = $(TESTS)
 ## common flags
 #
 
-LDADD = $(LIBDUNE)
+AM_LDFLAGS = @DUNECOMMON_LDFLAGS@ $(LIBDUNE)
 
 #
 ## define the programs
