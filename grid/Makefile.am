@@ -20,7 +20,7 @@ endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB) -lcommon
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB) $(AM_LDFLAGS)
 
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \

@@ -25,8 +25,6 @@ check_PROGRAMS = $(NORMALTESTS)
 ## common flags
 #
 
-AM_LDFLAGS = @DUNECOMMON_LDFLAGS@ $(LIBDUNE)
-
 # paranoia
 DUNE_EXTRA_CHECKS =  -DDUNE_ISTL_WITH_CHECKING -DDUNE_DEVEL_MODE
 
@@ -40,7 +38,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS)
 test_albertawriter_SOURCES = test-albertawriter.cc
 test_albertawriter_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS)
 test_albertawriter_LDADD = $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
-test_albertawriter_DEPENDENCIES = $(LIBDUNE)
+test_albertawriter_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
 

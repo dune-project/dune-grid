@@ -46,8 +46,6 @@ check_PROGRAMS = $(NORMALTESTS) $(YPROG)
 ## common flags
 #
 
-AM_LDFLAGS = @DUNECOMMON_LDFLAGS@ $(LIBDUNE)
-
 # paranoia
 DUNE_EXTRA_CHECKS =  -DDUNE_ISTL_WITH_CHECKING -DDUNE_DEVEL_MODE
 # output coverage
@@ -59,33 +57,33 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(COVERAGE) $(DUNE_EXTRA_CHECKS)
 #
 
 test_sgrid_SOURCES = test-sgrid.cc
-test_sgrid_DEPENDENCIES = $(LIBDUNE)
+test_sgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 test_oned_SOURCES = test-oned.cc
-test_oned_DEPENDENCIES = $(LIBDUNE)
+test_oned_DEPENDENCIES = $(LOCAL_LIBS)
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CXXFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
 test_yaspgrid_LDADD = $(MPI_LDFLAGS) $(MPI_LIBS)
-test_yaspgrid_DEPENDENCIES = $(LIBDUNE)
+test_yaspgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # this implicitly checks the autoconf-test as well...
 test_alberta_SOURCES = test-alberta.cc
 test_alberta_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS)
 test_alberta_LDADD = $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
-test_alberta_DEPENDENCIES = $(LIBDUNE)
+test_alberta_DEPENDENCIES = $(LOCAL_LIBS)
 
 # files for alu3dgrid
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
 test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(AM_CPPFLAGS)
 test_alu3dgrid_LDADD = $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
-test_alu3dgrid_DEPENDENCIES = $(LIBDUNE)
+test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # libdune contains both libug2 and libug3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
 test_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
 test_ug_LDADD = $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
-test_ug_DEPENDENCIES = $(LIBDUNE)
+test_ug_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
 

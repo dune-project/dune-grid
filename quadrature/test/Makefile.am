@@ -13,13 +13,11 @@ check_PROGRAMS = $(TESTS)
 ## common flags
 #
 
-AM_LDFLAGS = @DUNECOMMON_LDFLAGS@ $(LIBDUNE)
-
 #
 ## define the programs
 #
 
 test_quadrature_SOURCES = test-quadrature.cc
-test_quadrature_DEPENDENCIES = $(LIBDUNE)
+test_quadrature_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
