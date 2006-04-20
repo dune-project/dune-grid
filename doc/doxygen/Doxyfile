@@ -453,13 +453,8 @@ WARN_LOGFILE           =
 INPUT                  = mainpage \
                          modules \
                          ../../grid/modules \
-                         ../../grid \
-                         ../../disc \
-                         ../../common \
-                         ../../fem \
+                         ../../grid
                          ../../quadrature \
-                         ../../solver \
-                         ../../istl \
                          ../../io
 
 # If the value of the INPUT tag contains directories, you can use the 
