@@ -13,11 +13,11 @@
 #include <dune/common/collectivecommunication.hh>
 #include <dune/common/bigunsignedint.hh>
 
-#include <dune/grid/common/grid.hh>
-#include <dune/grid/common/referenceelements.hh>
-#include <dune/grid/common/defaultindexsets.hh>
-#include <dune/grid/common/sizecache.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include "../common/grid.hh"
+#include "../common/referenceelements.hh"
+#include "../common/defaultindexsets.hh"
+#include "../common/sizecache.hh"
+#include "../common/intersectioniteratorwrapper.hh"
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -72,11 +72,15 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   struct ALU3dGridFamily
   {
-    //! Type of the global id set
-    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
-
     //! Type of the local id set
     typedef ALU3dGridLocalIdSet<dim,dimworld,elType> LocalIdSetImp;
+
+#ifdef _ALU3DGRID_PARALLEL_
+    //! Type of the global id set
+    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
+#else
+    typedef LocalIdSetImp GlobalIdSetImp;
+#endif
 
     //! Type of the level index set
     typedef DefaultLevelIndexSet<ALU3dGrid < dim, dimworld, elType > >  LevelIndexSetImp;
@@ -132,11 +136,12 @@ namespace Dune {
       typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
       typedef IndexSet<GridImp,LeafIndexSetImp,DefaultLeafIteratorTypes<GridImp> > LeafIndexSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
-      //#ifdef _ALU3DGRID_PARALLEL_
-      //      typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
-      //#else
+
+#ifdef _ALU3DGRID_PARALLEL_
+      typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
+#else
       typedef LocalIdSet GlobalIdSet;
-      //#endif
+#endif
 
       typedef CollectiveCommunication<GridImp> CollectiveCommunication;
 
@@ -218,14 +223,10 @@ namespace Dune {
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
 
     //! Type of the local id set
-    typedef ALU3dGridLocalIdSet<dim,dimworld,elType> LocalIdSetImp;
+    typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;
 
-    //#ifdef _ALU3DGRID_PARALLEL_
-    //    //! Type of the global id set
-    //    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
-    //#else
-    typedef LocalIdSetImp GlobalIdSetImp;
-    //#endif
+    //! Type of the global id set
+    typedef typename ALU3dGridFamily < dim , dimworld , elType > :: GlobalIdSetImp GlobalIdSetImp;
 
     //! Type of the global id set
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
@@ -510,11 +511,10 @@ namespace Dune {
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
 
-    //! return reference to org ALU3dGrid
-    //! private method, but otherwise we have to friend class all possible
-    //! types of LevelIterator ==> later
-    ALU3DSPACE GitterImplType & myGrid();
-    const ALU3DSPACE GitterImplType & myGrid() const;
+    // return reference to org ALU3dGrid
+    // private method, but otherwise we have to friend class all possible
+    // types of LevelIterator ==> later
+    ALU3DSPACE GitterImplType & myGrid() const;
 
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
@@ -539,11 +539,28 @@ namespace Dune {
     void recalcGlobalSize();
 
     // the real grid
-    ALU3DSPACE GitterImplType * mygrid_;
+    mutable ALU3DSPACE GitterImplType * mygrid_;
 #ifdef _ALU3DGRID_PARALLEL_
     ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
     const int myRank_;
+
+  public:
+    int nlinks () const {
+#ifdef _ALU3DGRID_PARALLEL_
+      return mpAccess_.nlinks();
+#endif
+      return 1;
+    }
+
+  private:
+    // return number of global processes, i.e. MPI_Comm_size
+    int psize () const {
+#ifdef _ALU3DGRID_PARALLEL_
+      return mpAccess_.psize();
+#endif
+      return 1;
+    }
 
     // max level of grid
     int maxlevel_;
@@ -576,8 +593,9 @@ namespace Dune {
     mutable LeafIndexSetImp * leafIndexSet_;
 
     // the entity codim 0
-    //typedef typename EntityTypeSelector<0>::EntityObject EntityObject;
+  public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+  private:
     typedef ALUMemoryProvider< EntityObject > EntityProvider;
 
     template <int codim>
