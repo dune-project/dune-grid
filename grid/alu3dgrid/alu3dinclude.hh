@@ -4,6 +4,7 @@
 #define DUNE_ALU3DINCLUDE_HH
 
 #ifndef _ANSI_HEADER
+#define _ANSI_HEADER_DEFINED_HERE
 #define _ANSI_HEADER
 #endif
 
@@ -14,12 +15,15 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-#ifdef HAVE_MPI_CPP
-// if this variable is defined,
-// // then parallel version of ALUGrid is compiled
-#define _ALU3DGRID_PARALLEL_
-#endif
-//
+/* use only in new ALUGrid version
+   #ifdef HAVE_MPI_CPP
+   // if this variable is defined,
+   // // then parallel version of ALUGrid is compiled
+   #ifndef _ALU3DGRID_PARALLEL_
+   #define _ALU3DGRID_PARALLEL_
+   #endif
+   #endif
+ */
 
 // if MPI was found include all headers
 #ifdef _ALU3DGRID_PARALLEL_
@@ -31,10 +35,6 @@
 #undef _DUNE_USES_ALU3DGRID_
 
 namespace ALUGridSpace {
-
-  //#ifndef NDEBUG
-  //  static bool global_Geometry_lock = false;
-  //#endif
 
 #ifdef _ALU3DGRID_PARALLEL_
   typedef GatherScatter GatherScatterType;
@@ -91,11 +91,6 @@ namespace Dune {
 
   // i.e. double or float
   typedef double alu3d_ctype;
-
-  //class ALU3dGridError : public Exception {};
-
-  //ALU3dGridElementType convertGeometryType2ALU3dGridElementType(GeometryType);
-  //GeometryType convertALU3dGridElementType2GeometryType(ALU3dGridElementType);
 
   template <ALU3dGridElementType elType>
   struct ALU3dImplTraits {};
@@ -240,5 +235,10 @@ namespace Dune {
   static int __MyRank__ = -1;
 #endif
 } // end namespace Dune
+
+#ifdef _ANSI_HEADER_DEFINED_HERE
+#undef _ANSI_HEADER
+#undef _ANSI_HEADER_DEFINED_HERE
+#endif
 
 #endif
