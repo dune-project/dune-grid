@@ -595,14 +595,18 @@ namespace Dune {
       , level_(level)
       , isCopy_ (0)
   {
-    IteratorType * it = new IteratorType ( this->grid_ , vxList , level_ );
+    IteratorType * it = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
     iter_.store( it );
 
     (*iter_).first();
     if(!(*iter_).done())
     {
       assert((*iter_).size() > 0);
-      this->updateEntityPointer( & (*iter_).item() );
+      val_t & item = (*iter_).item();
+      if( item.first )
+        this->updateEntityPointer( item.first );
+      else
+        this->updateGhostPointer( *item.second );
     }
   }
 
@@ -645,7 +649,12 @@ namespace Dune {
       return ;
     }
 
-    this->updateEntityPointer( & (*iter_).item() );
+    val_t & item = (*iter_).item();
+    if( item.first )
+      this->updateEntityPointer( item.first );
+    else
+      this->updateGhostPointer( *item.second );
+
     return ;
   }
 
@@ -669,7 +678,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   inline ALU3dGridLeafIterator<codim, pitype, GridImp> ::
   ALU3dGridLeafIterator(const GridImp &grid, int level,
-                        bool end, const int nlinks)
+                        bool end)
     : ALU3dGridEntityPointer <codim,GridImp> ( grid,level)
       , endIter_(end)
       , level_(level)
@@ -678,7 +687,7 @@ namespace Dune {
     if(!end)
     {
       // create interior iterator
-      IteratorType * it = new IteratorType ( this->grid_ , level_, nlinks );
+      IteratorType * it = new IteratorType ( this->grid_ , level_, grid.nlinks() );
       iter_.store( it );
 
       (*iter_).first();

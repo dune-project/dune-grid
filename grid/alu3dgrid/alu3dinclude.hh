@@ -15,7 +15,7 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-/* use only in new ALUGrid version
+/*
    #ifdef HAVE_MPI_CPP
    // if this variable is defined,
    // // then parallel version of ALUGrid is compiled
