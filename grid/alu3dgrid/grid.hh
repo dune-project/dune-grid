@@ -13,11 +13,11 @@
 #include <dune/common/collectivecommunication.hh>
 #include <dune/common/bigunsignedint.hh>
 
-#include <dune/common/grid.hh>
-#include <dune/common/referenceelements.hh>
-#include <dune/common/defaultindexsets.hh>
-#include <dune/common/sizecache.hh>
-#include <dune/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/defaultindexsets.hh>
+#include <dune/grid/common/sizecache.hh>
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
