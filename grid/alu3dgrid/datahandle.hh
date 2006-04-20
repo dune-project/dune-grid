@@ -16,8 +16,8 @@ namespace ALUGridSpace {
   template <class GridType, class DataCollectorType , int codim >
   class GatherScatterImpl : public GatherScatter
   {
-    GridType & grid_;
-    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    const GridType & grid_;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
@@ -34,7 +34,7 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterImpl(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterImpl(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc) {}
 
     //! returns contains of dc_
@@ -71,11 +71,14 @@ namespace ALUGridSpace {
     {
       // set element and then start
       realEntity_.setElement(elem);
-      /*
-         dc_.xtractData(str,entity_);
-       */
-      //std::cout << "set entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
       dc_.set(str,entity_);
+    }
+
+    //! write Data of one element to stream
+    void sendData ( ObjectStreamType & str , HElementType & elem )
+    {
+      realEntity_.setElement(elem);
+      dc_.gather(str, entity_ );
     }
 
     //! read Data of one element from stream
@@ -83,19 +86,9 @@ namespace ALUGridSpace {
     {
       // set ghost as entity
       realEntity_.setElement( elem );
-      //dc_.insertNewIndex( entity_ );
-      //dc_.checkMemorySize();
-      dc_.gather(str, entity_ );
-    }
-
-    //! write Data of one lement to stream
-    void sendData ( ObjectStreamType & str , HElementType & elem )
-    {
-      realEntity_.setElement(elem);
-      //dc_.insertNewIndex( entity_ );
-      //dc_.checkMemorySize();
       dc_.scatter(str,entity_,dc_.size(entity_));
     }
+
   };
 
   //***********************************************************
@@ -109,8 +102,8 @@ namespace ALUGridSpace {
   class GatherScatterImpl<GridType,DataCollectorType,0> : public GatherScatter
   {
     enum { codim = 0 };
-    GridType & grid_;
-    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    const GridType & grid_;
+    typedef typename GridType :: template Codim<0> :: Entity EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
@@ -123,8 +116,6 @@ namespace ALUGridSpace {
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::GhostImplementationType ImplGhostType;
 
-
-
     EntityType     & entity_;
     RealEntityType & realEntity_;
 
@@ -134,7 +125,7 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterImpl(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterImpl(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc) {}
 
     bool contains(int dim, int codim) const
@@ -148,7 +139,7 @@ namespace ALUGridSpace {
     void inlineData ( ObjectStreamType & str , HElementType & elem )
     {
       // set element and then start
-      realEntity_.setElement(elem,0,0);
+      realEntity_.setElement(elem);
       dc_.inlineData(str,entity_);
     }
 
@@ -158,16 +149,16 @@ namespace ALUGridSpace {
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
       // set element and then start
-      grid_.updateStatus();
-      realEntity_.setElement(elem,0,0);
+      const_cast<GridType &> (grid_).updateStatus();
+      realEntity_.setElement(elem);
       dc_.xtractData(str,entity_);
     }
 
-    //! write Data of one lement to stream
-    void sendData ( ObjectStreamType & str , HElementType & elem )
+    //! write Data of one element to stream
+    void sendData ( ObjectStreamType & str , const HElementType & elem )
     {
-      realEntity_.setElement( const_cast<HElementType &> (elem),0,0 );
-      dc_.scatter(str, entity_);
+      realEntity_.setElement( const_cast<HElementType &> (elem) );
+      dc_.gather(str, entity_);
     }
 
     //! read Data of one element from stream
@@ -177,13 +168,11 @@ namespace ALUGridSpace {
       ImplGhostType & gh = static_cast <ImplGhostType &> (ghost);
       realEntity_.setGhost( gh );
 
-      //dc_.insertNewIndex( entity_ );
-      //dc_.checkMemorySize();
-      dc_.gather(str, entity_);
+      dc_.scatter(str, entity_, dc_.size(entity_) );
     }
   };
 
-  template <class GridType, class DofManagerType, class RestrictProlongOperatorType >
+  template <class GridType , class RestrictProlongOperatorType >
   class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
   {
     GridType & grid_;
@@ -196,7 +185,7 @@ namespace ALUGridSpace {
     EntityImp & realFather_;
     EntityImp & realSon_;
 
-    DofManagerType & dm_;
+    //DofManagerType & dm_;
     RestrictProlongOperatorType & rp_;
 
     int maxlevel_;
@@ -206,14 +195,15 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     AdaptRestrictProlongImpl (GridType & grid,
-                              Entity & f, EntityImp & rf, Entity & s, EntityImp & rs,
-                              DofManagerType & dm, RestrictProlongOperatorType & rp )
+                              Entity & f, EntityImp & rf, Entity & s, EntityImp & rs
+                              , RestrictProlongOperatorType & rp)
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
         , realFather_(rf)
         , realSon_(rs)
-        , dm_(dm) , rp_(rp) , maxlevel_(-1)
+        , rp_(rp)
+        , maxlevel_(-1)
     {}
 
     virtual ~AdaptRestrictProlongImpl ()
@@ -265,7 +255,6 @@ namespace ALUGridSpace {
 
         realSon_.setElement(*son);
         rp_.prolongLocal(reFather_,reSon_, false);
-        //(*son).resetRefinedTag();
 
         son = son->next();
       }
@@ -276,22 +265,24 @@ namespace ALUGridSpace {
     //! this method is for ghost elements
     int preCoarsening ( HBndSegType & el )
     {
-      // hier nur die Indices einfügen
-      // da wir nur 4 ghost kenn macht das prolong keinen Sinn
+      /*
+         // hier nur die Indices einfügen
+         // da wir nur 4 ghost kenn macht das prolong keinen Sinn
 
-      PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
+         PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
 
-      realFather_.setGhost(elem);
-      dm_.insertNewIndex( reFather_ );
+         realFather_.setGhost(elem);
+         dm_.insertNewIndex( reFather_ );
 
-      // set element and then start
-      PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-      while( son )
-      {
-        realSon_.setGhost(*son);
-        dm_.removeOldIndex( reSon_ );
-        son = static_cast<PLLBndFaceType *> (son->next());
-      }
+         // set element and then start
+         PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
+         while( son )
+         {
+         realSon_.setGhost(*son);
+         dm_.removeOldIndex( reSon_ );
+         son = static_cast<PLLBndFaceType *> (son->next());
+         }
+       */
       return 0;
     }
 
@@ -299,28 +290,79 @@ namespace ALUGridSpace {
     //! prolong data, elem is the father
     int postRefinement ( HBndSegType & el )
     {
-      // for ghost only indices are inserted, because we only know 4 of 8
-      // elements and therefore no prolongation can be done
-      PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
+      /*
+         // for ghost only indices are inserted, because we only know 4 of 8
+         // elements and therefore no prolongation can be done
+         PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
 
-      realFather_.setGhost(elem);
-      dm_.insertNewIndex( reFather_ );
+         realFather_.setGhost(elem);
+         dm_.insertNewIndex( reFather_ );
 
-      // set element and then start
-      PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-      while( son )
-      {
-        assert( son );
-        realSon_.setGhost(*son);
-        dm_.insertNewIndex( reSon_ );
-        son = static_cast<PLLBndFaceType *> (son->next());
-      }
+         // set element and then start
+         PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
+         while( son )
+         {
+         assert( son );
+         realSon_.setGhost(*son);
+         dm_.insertNewIndex( reSon_ );
+         son = static_cast<PLLBndFaceType *> (son->next());
+         }
+       */
       return 0;
     }
-
     int maxLevel () const { return maxlevel_; }
   };
 
+  template <class GridType , class RestrictProlongOperatorType ,
+      class GlobalIdSetImp >
+  class AdaptRestrictProlongGlSet
+    : public AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType>
+  {
+    typedef AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType> BaseType;
+    GlobalIdSetImp & set_;
+    typedef typename GridType::template Codim<0>::Entity Entity;
+    typedef typename Entity :: ImplementationType EntityImp;
+
+  public:
+    //! Constructor
+    AdaptRestrictProlongGlSet(GridType & grid,
+                              Entity & f, EntityImp & rf, Entity & s, EntityImp & rs
+                              , RestrictProlongOperatorType & rp
+                              , GlobalIdSetImp & set )
+      : BaseType(grid,f,rf,s,rs,rp)
+        , set_(set)
+    {}
+
+    virtual ~AdaptRestrictProlongGlSet () {}
+
+    //! restrict data , elem is always the father
+    int preCoarsening ( HElementType & elem )
+    {
+      return BaseType :: preCoarsening (elem );
+    }
+
+    //! prolong data, elem is the father
+    int postRefinement ( HElementType & elem )
+    {
+      set_.postRefinement( elem );
+      return BaseType :: postRefinement(elem );
+    }
+
+    //! restrict data , elem is always the father
+    //! this method is for ghost elements
+    int preCoarsening ( HBndSegType & el )
+    {
+      return 0;
+    }
+
+
+    //! prolong data, elem is the father
+    int postRefinement ( HBndSegType & el )
+    {
+      return 0;
+    }
+
+  };
 
   //***************************************************************
   //
@@ -332,12 +374,13 @@ namespace ALUGridSpace {
   class LoadBalanceRestrictProlongImpl : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef typename GridType::template Codim<0>::Entity Entity;
+    typedef typename GridType:: EntityObject Entity;
     typedef typename Entity :: ImplementationType EntityImp;
 
     Entity & reFather_;
-    Entity & reSon_;
     EntityImp & realFather_;
+
+    Entity & reSon_;
     EntityImp & realSon_;
 
     DofManagerType & dm_;
