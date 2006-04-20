@@ -1,0 +1,60 @@
+/* This file determines the order how things appear in the doxygen
+   documentation within the Grid group. It works like this:
+
+   @defgroup commands appear only in this file here which is
+   parsed before the other files (because it is mentioned first 
+   in the Doxyfile).
+
+   Only @addtogroup is used in the code documentation.
+*/
+
+  /**
+	 @defgroup GridInterface 
+	 @ingroup Grid
+  */
+  /** @defgroup GIRelatedTypes Enumerations 
+      @ingroup GridInterface */
+  /** @defgroup GIGrid Grid Abstract Base Class
+      @ingroup GridInterface */
+  /** @defgroup GIEntity Entity 
+      @ingroup GridInterface */
+  /** @defgroup GIGeometryType GeometryType
+      @ingroup GridInterface */
+  /** @defgroup GIGeometry Geometry
+      @ingroup GridInterface */
+  /** @defgroup GIEntityPointer EntityPointer and Iterators
+      @ingroup GridInterface */
+  /** @defgroup GIIntersectionIterator IntersectionIterator
+      @ingroup GridInterface */
+  /** @defgroup IndexIdSets IndexSet and IdSet
+	  @ingroup GridInterface */
+  /** @defgroup GICollectiveCommunication CollectiveCommunication
+      @ingroup GridInterface */
+  /** @defgroup GIMiscellaneous Miscellaneous
+	  @ingroup GridInterface */
+  
+  /**
+     @defgroup GridReferenceElements
+     @ingroup Grid
+  */
+     
+
+  /**
+     @defgroup Mapper Mapper
+     @ingroup Grid
+   */
+
+  /**
+	 @defgroup GridImplementations
+	 @ingroup Grid
+  */
+ 
+  /**
+	 @defgroup GridDevel
+	 @ingroup Grid
+  */
+
+  /**
+     @defgroup Refinement Refinement
+     @ingroup Grid
+   */
