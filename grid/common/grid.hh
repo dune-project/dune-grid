@@ -349,16 +349,6 @@ namespace Dune {
          @brief A List of the different Implementations of the Dune Grid Interface.
    */
 
-  /*! Possible states of an entity before and/or after grid adaptation
-     @ingroup GIRelatedTypes
-   */
-  enum AdaptationState {
-    NONE ,   //!< notin' to do and notin' was done
-    COARSEN, //!< entity could be coarsend in adaptation step
-    REFINED  //!< enity was refined in adaptation step
-  };
-
-
   /*! \brief Attributes used in the generic overlap model
 
      The values are ordered intentionally in order to be able to
