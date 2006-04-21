@@ -15,15 +15,13 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-/*
-   #ifdef HAVE_MPI_CPP
-   // if this variable is defined,
-   // // then parallel version of ALUGrid is compiled
-   #ifndef _ALU3DGRID_PARALLEL_
-   #define _ALU3DGRID_PARALLEL_
-   #endif
-   #endif
- */
+#ifdef HAVE_MPI_CPP
+// if this variable is defined,
+// // then parallel version of ALUGrid is compiled
+#ifndef _ALU3DGRID_PARALLEL_
+#define _ALU3DGRID_PARALLEL_
+#endif
+#endif
 
 // if MPI was found include all headers
 #ifdef _ALU3DGRID_PARALLEL_
@@ -85,9 +83,12 @@ namespace ALUGridSpace {
   typedef GitterImplType::Objects::hbndseg4_IMPL ImplBndFace4Type;
 } // end namespace ALUGridSpace
 
+//- local includes
+#include "topology.hh"
+
 namespace Dune {
 
-  enum ALU3dGridElementType { tetra = 4, hexa = 7, mixed, error };
+  // typedef of ALU3dGridElementType see topology.hh
 
   // i.e. double or float
   typedef double alu3d_ctype;
