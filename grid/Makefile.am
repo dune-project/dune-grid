@@ -19,7 +19,7 @@ ALU3DLIB = alu3dgrid/libalu3d.la
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB) $(AM_LDFLAGS)
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB) -lcommon
 
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
