@@ -14,9 +14,8 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-if ALUGRID
-  ALU3DLIB = alu3dgrid/libalu3d.la
-endif
+# also contians items independent of ALUGrid
+ALU3DLIB = alu3dgrid/libalu3d.la
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
