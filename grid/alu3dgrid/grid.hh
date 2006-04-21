@@ -25,6 +25,7 @@
 #include "indexsets.hh"
 #include "memory.hh"
 #include "datahandle.hh"
+#include "alu3dutility.hh"
 
 
 namespace Dune {

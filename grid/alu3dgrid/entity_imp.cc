@@ -1,9 +1,10 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include "geometry.hh"
-#include "grid.hh"
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/referenceelements.hh>
+
+#include "geometry.hh"
+#include "grid.hh"
 
 namespace Dune {
 
@@ -328,6 +329,7 @@ namespace Dune {
     const int child = item_->nChild();
     typedef typename Geometry::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
+    // see alu3dutility.hh for implementation
     static LocalGeometryStorage<Geometry,8> geoms;
     if(!geoms.geomCreated(child))
     {

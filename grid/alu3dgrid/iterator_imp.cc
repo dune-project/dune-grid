@@ -4,6 +4,7 @@
 #include "entity.hh"
 #include "grid.hh"
 #include "faceutility.hh"
+#include "alu3dutility.hh"
 
 #include <dune/common/misc.hh>
 

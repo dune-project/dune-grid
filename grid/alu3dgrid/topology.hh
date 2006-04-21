@@ -3,18 +3,14 @@
 #ifndef DUNE_ALU3DGRIDTOPOLOGY_HH
 #define DUNE_ALU3DGRIDTOPOLOGY_HH
 
-
-//- Dune includes
-#include <dune/common/array.hh>
-
-//- local includes
-#include "alu3dinclude.hh"
+//- system includes
+#include <cassert>
 
 namespace Dune {
 
-  // types of the elementes, i.e . tetra or hexa, mixed is not implemeneted
-  // yet
-  //enum ALU3dGridElementType { tetra = 4, hexa = 7, mixed, error };
+  // types of the elementes,
+  // i.e . tetra or hexa, mixed is not implemeneted
+  enum ALU3dGridElementType { tetra = 4, hexa = 7, mixed, error };
 
   template <ALU3dGridElementType type>
   struct EntityCount {};
@@ -143,18 +139,6 @@ namespace Dune {
     const static int alu2duneEdge_[EntityCount<type>::numEdgesPerFace];
   };
 
-  inline const ALU3dImplTraits<tetra>::GEOFaceType*
-  getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) {
-    assert(index >= 0 && index < 4);
-    return elem.myhface3(ElementTopologyMapping<tetra>::dune2aluFace(index));
-  }
-
-  inline const ALU3dImplTraits<hexa>::GEOFaceType*
-  getFace(const ALU3DSPACE GEOHexaElementType& elem, int index) {
-    assert(index >= 0 && index < 6);
-    return elem.myhface4(ElementTopologyMapping<hexa>::dune2aluFace(index));
-  }
-
   //- IMPLEMENTATION
   //- class ElementTopologyMapping
   template <ALU3dGridElementType type>
@@ -260,54 +244,6 @@ namespace Dune {
     assert(index >= 0 && index < EntityCount<type>::numEdgesPerFace);
     return dune2aluEdge_[index];
   }
-
-
-  template <class GeometryImp, int nChild>
-  class LocalGeometryStorage
-  {
-    // array with pointers to the geometries
-    Array < GeometryImp * > geoms_;
-    // count local geometry creation
-    int count_;
-  public:
-    // create empty storage
-    LocalGeometryStorage () : geoms_ (nChild) , count_ (0) {
-      for(int i=0 ; i<geoms_.size(); ++i) geoms_[i] = 0;
-    }
-
-    // desctructor deleteing geometries
-    ~LocalGeometryStorage () {
-      for(int i=0 ; i<geoms_.size(); ++i)
-        if(geoms_[i]) delete geoms_[i];
-    }
-
-    // check if geometry has been created
-    bool geomCreated(int child) const { return geoms_[child] != 0; }
-
-    // create local geometry
-    template <class GridImp>
-    void create (const GridImp & grid, const GeometryImp & father, const GeometryImp & son, const int child)
-    {
-      assert( !geomCreated(child) );
-      assert( child >=0 && child < nChild );
-
-      assert( count_ < nChild );
-      ++count_;
-
-      typedef typename GeometryImp :: ImplementationType ImplType;
-      GeometryImp * g = new GeometryImp(ImplType());
-      geoms_[child] = g;
-      GeometryImp & geo = *g;
-      grid.getRealImplementation(geo).buildGeomInFather( father, son );
-    }
-
-    // return reference to local geometry
-    const GeometryImp & operator [] (int child) const
-    {
-      assert( geomCreated(child) );
-      return *(geoms_[child]);
-    }
-  };
 
 } // end namespace Dune
 #endif
