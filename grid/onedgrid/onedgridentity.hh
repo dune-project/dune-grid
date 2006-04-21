@@ -59,6 +59,7 @@ namespace Dune {
   class OneDEntityImp<1>
   {
   public:
+    enum AdaptationState { NONE , COARSEN , REFINED };
 
     OneDEntityImp(int level, unsigned int id)
       : id_(id), level_(level),
@@ -413,8 +414,10 @@ namespace Dune {
     //  Interface for Adaptation
     // ***************************************************************
 
-    /** \todo Please doc me! */
-    AdaptationState state() const {return target_->adaptationState_;}
+    /** returns true, if entity might be coarsened during next adaptation cycle */
+    bool mightBeCoarsened () const { return target_->adaptationState_ == OneDEntityImp<1> :: COARSEN; }
+    /** returns true, if entity was refined during last adaptation cycle */
+    bool wasRefined () const { return target_->adaptationState_ == OneDEntityImp<1> :: REFINED; }
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
