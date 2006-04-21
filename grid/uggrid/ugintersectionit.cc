@@ -114,6 +114,7 @@ UGGridIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, Gr
     } else {
 
       // A quadrilateral: compute the normal in each corner and do bilinear interpolation
+      // The cornerNormals array uses UG corner numbering
       FieldVector<UGCtype,3> cornerNormals[4];
       for (int i=0; i<4; i++) {
 
@@ -134,17 +135,12 @@ UGGridIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, Gr
         cornerNormals[i][2] = ba[0]*ca[1] - ba[1]*ca[0];
       }
 
-      //std::cout << "CornerNormal 0:  " << cornerNormals[0] << std::endl;
-      //std::cout << "CornerNormal 1:  " << cornerNormals[1] << std::endl;
-      //std::cout << "CornerNormal 2:  " << cornerNormals[2] << std::endl;
-      //std::cout << "CornerNormal 3:  " << cornerNormals[3] << std::endl;
-
       // Bilinear interpolation
       for (int i=0; i<3; i++)
         outerNormal_[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
-                          + (1-local[0])*local[1]*cornerNormals[1][i]
-                          + local[0]*local[1]*cornerNormals[2][i]
-                          + local[0]*(1-local[1])*cornerNormals[3][i];
+                          + local[0]     * (1-local[1]) * cornerNormals[1][i]
+                          + local[0]     * local[1]     * cornerNormals[2][i]
+                          + (1-local[0]) * local[1]     * cornerNormals[3][i];
 
     }
 
