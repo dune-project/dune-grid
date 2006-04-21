@@ -385,12 +385,6 @@ namespace Dune
      */
     bool mightBeCoarsened () const { return realEntity.mightBeCoarsened (); }
 
-    /**\brief Return current adaptation state of entity. See explanation of AdaptationState.
-     */
-    AdaptationState state () const DUNE_DEPRECATED { return realEntity.state(); }
-    //@}
-
-
     //===========================================================
     /** @name Interface for the implementor
      */
@@ -685,17 +679,6 @@ namespace Dune
     template <int cc> int subBoundaryId  ( int i ) const
     {
       return (asImp().template entity<cc>(i))->boundaryId();
-    }
-
-    //! return whether entity could be coarsened (COARSEN) or was refined
-    //! (REFINED) or nothing happend (NONE)
-    //! @return The default implementation returns NONE for grid with no
-    //! adaptation
-    AdaptationState state () const DUNE_DEPRECATED
-    {
-      if(asImp().wasRefined()) return REFINED;
-      if(asImp().mightBeCoarsened()) return COARSEN;
-      return NONE;
     }
 
     /**\brief Returns true, if entity was refined during last adaptation cycle
