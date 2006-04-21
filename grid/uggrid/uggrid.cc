@@ -171,22 +171,19 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
     char** argv = &arg;
 
 
-    UG_NS<dimworld>::InitUg(&argc, &argv);
+    if (UG_NS<dimworld>::InitUg(&argc, &argv))
+      DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
 
   }
 
   // Create a dummy problem
-  typename UG_NS<dim>::CoeffProcPtr coeffs[1];
-  typename UG_NS<dim>::UserProcPtr upp[1];
-
-  upp[0] = NULL;
-  coeffs[0] = NULL;
+  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {NULL};
+  typename UG_NS<dim>::UserProcPtr upp[1] = {NULL};
 
   // Create unique problem name
-  static unsigned int nameCounter = 0;
   std::stringstream numberAsAscii;
-  numberAsAscii << nameCounter;
-  name_ = "DuneUGGrid_" + numberAsAscii.str();
+  numberAsAscii << numOfUGGrids;
+  name_ = "DuneUGGrid_" + std::string((dim==2) ? "2" : "3") + std::string("d_") + numberAsAscii.str();
 
   std::string problemName = name_ + "_Problem";
 
@@ -197,7 +194,7 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
 
     if (dim==2)
     {
-      char* nfarg = "newformat DuneFormat";
+      char* nfarg = "newformat DuneFormat2d";
       if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
     }
@@ -207,7 +204,7 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
       for (int i=0; i<2; i++)
         newArgs[i] = (char*)::malloc(50*sizeof(char));
 
-      sprintf(newArgs[0], "newformat DuneFormat" );
+      sprintf(newArgs[0], "newformat DuneFormat3d" );
       sprintf(newArgs[1], "V s1 : vt 1" );             // generates side vectors in 3D
 
       if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
@@ -224,7 +221,6 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
   dverb << "UGGrid<" << dim << "," << dimworld <<"> with name "
         << name_ << " created!" << std::endl;
 
-  nameCounter++;
 }
 
 template < int dim, int dimworld >
@@ -250,7 +246,7 @@ inline Dune::UGGrid < dim, dimworld >::~UGGrid()
   numOfUGGrids--;
 
   // Shut down UG if this was the last existing UGGrid object
-  if (numOfUGGrids == 0) {
+  if (UGGrid<2,2>::numOfUGGrids + UGGrid<3,3>::numOfUGGrids == 0) {
 
     UG_NS<dim>::ExitUg();
 
@@ -941,7 +937,7 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
   sprintf(newArgs[0], "new %s", name_.c_str());
 
   sprintf(newArgs[1], "b %s_Problem", name_.c_str());
-  sprintf(newArgs[2], "f DuneFormat");
+  sprintf(newArgs[2], "f DuneFormat%dd", dim);
   sprintf(newArgs[3], "h %dM", heapsize);
 
   if (UG_NS<dim>::NewCommand(4, newArgs))

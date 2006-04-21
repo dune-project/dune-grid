@@ -485,8 +485,8 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static void InitUg(int* argcp, char*** argvp) {
-      UG3d::InitUg(argcp, argvp);
+    static int InitUg(int* argcp, char*** argvp) {
+      return UG3d::InitUg(argcp, argvp);
     }
 
     static void ExitUg() {

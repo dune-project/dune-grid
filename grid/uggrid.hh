@@ -174,6 +174,10 @@ namespace Dune {
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
     CompileTimeChecker< (dimworld==dim) && ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;
 
+    // The different instantiations are mutual friends so they can access
+    // each others numOfUGGrids field
+    friend class UGGrid<2,2>;
+    friend class UGGrid<3,3>;
     //**********************************************************
     // The Interface Methods
     //**********************************************************
