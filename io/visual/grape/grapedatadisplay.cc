@@ -140,6 +140,7 @@ namespace Dune
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
   evalCoordNow(EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
   {
+    assert( coord );
     enum { dim = GridType::dimension };
 
     assert( df );
@@ -148,31 +149,26 @@ namespace Dune
 
     typedef typename DiscreteFunctionType::LocalFunctionType LocalFunctionType;
 
-    if(coord)
-    {
-      // get local function
-      LocalFunctionType lf = func.localFunction( en );
 
-      static DomainType domTmp_;
+    const int * comp = df->comp;
+    assert( comp );
 
-      // convert double to FieldVector
-      for(int i=0; i<dim; i++) domTmp_[i] = coord[i];
+    // get local function
+    LocalFunctionType lf = func.localFunction( en );
 
-      static RangeType tmp_;
-      // evaluate local function on local (on reference element)
-      // point == domTmp
-      lf.evaluateLocal( en , domTmp_ , tmp_);
+    static DomainType domTmp_;
 
-      int dimVal = df->dimVal;
-      for(int i=0; i<dimVal; i++) val[i] = tmp_[i];
-      return;
-    }
-    else
-    {
-      std::cerr << "ERROR: No Coord, are ye crazzy? file = " << __FILE__ << ", line = " << __LINE__ << "\n";
-      val [0] = 0.0;
-      return;
-    }
+    // convert double to FieldVector
+    for(int i=0; i<dim; i++) domTmp_[i] = coord[i];
+
+    static RangeType tmp_;
+    // evaluate local function on local (on reference element)
+    // point == domTmp
+    lf.evaluateLocal( en , domTmp_ , tmp_);
+
+    const int dimVal = df->dimVal;
+    for(int i=0; i<dimVal; ++i) val[i] = tmp_[comp[i]];
+    return;
   }
 
 
