@@ -10,7 +10,7 @@
 typedef HELEMENT3D HELEMENT;
 typedef ELEMENT3D ELEMENT;
 typedef HMESH3D HMESH;
-typedef MESH3D GRAPEMESH;
+typedef HMESH GRAPEMESH;
 typedef GENMESH3D GENMESHnD;
 typedef HELEMENT3D_DESCRIPTION H_ELEMENT_DESCRIPTION;
 typedef ELEMENT3D_DESCRIPTION ELEMENT_DESCRIPTION;
@@ -18,20 +18,28 @@ typedef F_HDATA3D F_DATA;
 typedef F_HEL_INFO3D F_EL_INFO;
 #define HMesh       HMesh3d
 #define GenMesh     GenMesh3d
-#define GrapeMesh   Mesh3d
+#define GrapeMesh   HMesh
 #else
 typedef HELEMENT2D HELEMENT;
 typedef ELEMENT2D ELEMENT;
-typedef HMESH2D HMESH;
 typedef GENMESH2D GENMESHnD;
-typedef MESH2D GRAPEMESH;
 typedef HELEMENT2D_DESCRIPTION H_ELEMENT_DESCRIPTION;
 typedef ELEMENT2D_DESCRIPTION ELEMENT_DESCRIPTION;
-typedef F_HDATA2D F_DATA;
 typedef F_HEL_INFO2D F_EL_INFO;
-#define HMesh       HMesh2d
+
+// definitions for using HPMesh2d
+typedef HPMESH2D HMESH;
+typedef F_HPDATA2D F_DATA;
+#define HMesh       HPMesh2d
+
+// definitions for using Mesh2d
+//typedef HMESH2D    HMESH;
+//typedef F_HDATA2D   F_DATA;
+//#define HMesh       HMesh2d
+
+typedef HMESH GRAPEMESH;
 #define GenMesh     GenMesh2d
-#define GrapeMesh   Mesh2d
+#define GrapeMesh   HMesh
 #endif
 
 /**************************************************************************/

@@ -8,9 +8,11 @@
 #include "ghmesh.hh"
 #include "geldesc.hh"
 
-extern "C" {
-  extern MESH2D * mesh2d_isoline_disp();
-}
+/*
+   extern "C" {
+   extern MESH2D * mesh2d_isoline_disp();
+   }
+ */
 /*****************************************************************************
 * Globale defines                  *                     **
 *****************************************************************************/
@@ -454,10 +456,13 @@ inline double grape_get_element_estimate(HELEMENT *el, void *function_data)
 inline void dune_function_info(HELEMENT *el, F_EL_INFO *f_el_info,
                                void *function_data)
 {
-  // at the moment f_el_info only contains polynomial_degree
   assert( function_data );
-  f_el_info->polynomial_degree = ((DUNE_FDATA *) function_data)->polyOrd;
-  //std::cout << f_el_info->polynomial_degree << " poly order " << "\n";
+
+  DUNE_FUNC * df = (DUNE_FUNC *) function_data;
+  assert( df );
+
+  // at the moment f_el_info only contains polynomial_degree
+  f_el_info->polynomial_degree = ((DUNE_FDATA *) df->all)->polyOrd;
   return;
 }
 
@@ -484,7 +489,11 @@ inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
 {
   assert(el);
   DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
+  assert(elem != NULL);
   DUNE_FUNC * df = (DUNE_FUNC *) function_data;
+
+  assert( df );
+  assert( df->all );
   DUNE_FDATA *fem = df->all;
 
   /*
@@ -492,7 +501,6 @@ inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
      printf("Warning: data only on leaf level! \n");
    */
 
-  assert(elem != NULL);
   assert(fem != NULL);
   assert(fem->discFunc != NULL);
 
@@ -573,6 +581,10 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
       f_data->threshold     = 0.0;
 #if GRAPE_DIM == 3
       f_data->geometry_threshold     = 0.0;
+#else
+      // if pointer 0, nothing done with this functions
+      f_data->get_element_p_estimates = 0;
+      f_data->get_edge_p_estimates    = 0;
 #endif
       f_data->hp_threshold    = 0.0;
       f_data->hp_maxlevel     = grape_mesh->max_level;
@@ -598,6 +610,7 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
 /* the variables are only needed once, therefore static */
 static char * level_name = "level";
 static DUNE_FUNC level_func = {level_name,NULL,NULL};
+
 
 /* generates the function to display the level of an element */
 inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
@@ -634,6 +647,9 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
     f_data->threshold     = 0.0;
 #if GRAPE_DIM == 3
     f_data->geometry_threshold     = 0.0;
+#else
+    f_data->get_element_p_estimates = 0;
+    f_data->get_edge_p_estimates    = 0;
 #endif
     f_data->hp_threshold    = 0.0;
     f_data->hp_maxlevel     = grape_mesh->max_level;
@@ -667,7 +683,7 @@ inline static ELEMENT * copy_element(ELEMENT *el, MESH_ELEMENT_FLAGS flag)
   assert(el) ;
   assert(cel) ;
 
-  hexa_elem = (DUNE_ELEM *)el->user_data;
+  hexa_elem  = (DUNE_ELEM *)el->user_data;
   chexa_elem = (DUNE_ELEM *)
                (*((struct dune_dat *)el->mesh->user_data)->copy)(hexa_elem) ;
   assert(chexa_elem) ;
@@ -739,8 +755,8 @@ inline void * hmesh( void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind
   mesh->copy_element  = copy_element ;
   mesh->free_element  = gFreeElement ;
 
-  mesh->first_element = first_element;
-  mesh->next_element  = next_element;
+  //mesh->first_element = first_element;
+  //mesh->next_element  = next_element;
 
   mesh->max_number_of_vertices = MAX_EL_DOF ;
   mesh->max_eindex = noe ;
@@ -993,6 +1009,9 @@ inline void copyFdata(F_DATA *copy, F_DATA *org)
   copy->threshold = org->threshold;
 #if GRAPE_DIM == 3
   copy->geometry_threshold = org->geometry_threshold;
+#else
+  copy->get_element_p_estimates = org->get_element_p_estimates;
+  copy->get_edge_p_estimates    = org->get_edge_p_estimates;
 #endif
   copy->hp_threshold = org->hp_threshold;
   copy->hp_maxlevel = org->hp_maxlevel;
@@ -1095,8 +1114,8 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
   self->next_child = newMesh->next_child;
   self->select_child = newMesh->select_child;
 
-  self->first_element = newMesh->first_element;
-  self->next_element  = newMesh->next_element;
+  //self->first_element = newMesh->first_element;
+  //self->next_element  = newMesh->next_element;
 
   self->max_level = newMesh->max_level;
   self->level_of_interest = newMesh->level_of_interest;
