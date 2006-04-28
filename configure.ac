@@ -47,14 +47,12 @@ AC_CONFIG_FILES([Makefile
     grid/utility/Makefile
     grid/alu3dgrid/Makefile
     grid/Makefile
-    io/file/test/Makefile
-    io/file/amiramesh/Makefile
-    io/file/alberta/Makefile
-    io/file/Makefile
-    io/visual/grape/Makefile
-    io/visual/Makefile
-    io/Makefile
-    quadrature/test/Makefile
-    quadrature/Makefile
+    grid/io/file/test/Makefile
+    grid/io/file/amiramesh/Makefile
+    grid/io/file/alberta/Makefile
+    grid/io/file/Makefile
+    grid/io/visual/grape/Makefile
+    grid/io/visual/Makefile
+    grid/io/Makefile
     dune.pc])
 AC_OUTPUT

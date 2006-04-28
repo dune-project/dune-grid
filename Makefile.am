@@ -4,7 +4,7 @@
 # need automake >= 1.5
 AUTOMAKE_OPTIONS = foreign 1.5
 
-SUBDIRS = grid quadrature io doc
+SUBDIRS = grid doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = dune.pc

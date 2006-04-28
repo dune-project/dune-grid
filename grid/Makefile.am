@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
 ONEDLIB = onedgrid/libonedgrid.la
-COMMONLIB = common/libgridcommon.la ../io/libio.la ../quadrature/libquadrature.la
+COMMONLIB = common/libgridcommon.la io/libio.la
 
 # conditional parts:
 if UG
