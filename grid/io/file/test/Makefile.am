@@ -42,7 +42,7 @@ test_albertawriter_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
 
-testdir = $(includedir)/dune/io/file/test/
+testdir = $(includedir)/dune/grid/io/file/test/
 test_HEADERS =
 
 GRIDFILES = alberta-testgrid-2-2.al alberta-testgrid-3-3.al \

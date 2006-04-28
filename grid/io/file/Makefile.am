@@ -2,7 +2,7 @@
 
 SUBDIRS = alberta amiramesh test
 
-iofiledir = $(includedir)/dune/io/file
+iofiledir = $(includedir)/dune/grid/io/file
 iofile_HEADERS = amirameshreader.hh amirameshwriter.hh \
  albertawriter.hh alugridwriter.hh
 

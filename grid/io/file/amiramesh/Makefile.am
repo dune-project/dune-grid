@@ -17,7 +17,7 @@ endif
 endif
 endif
 
-amirameshdir = $(includedir)/dune/io/file/amiramesh
+amirameshdir = $(includedir)/dune/grid/io/file/amiramesh
 amiramesh_HEADERS = amirameshreader.cc amsgridwriter.cc \
   amirameshwriter.cc amsimplegridwriter.cc amuggridreader.hh
 

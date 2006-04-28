@@ -1,6 +1,6 @@
 # $Id$
 
-albertadir = $(includedir)/dune/io/file/alberta
+albertadir = $(includedir)/dune/grid/io/file/alberta
 alberta_HEADERS = albertawriter.cc
 
 include $(top_srcdir)/am/global-rules

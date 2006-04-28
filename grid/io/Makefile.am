@@ -2,7 +2,7 @@
 
 SUBDIRS = file visual
 
-iodir = $(includedir)/dune/io
+iodir = $(includedir)/dune/grid/io
 io_HEADERS =
 
 noinst_LTLIBRARIES = libio.la
