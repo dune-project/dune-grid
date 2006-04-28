@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile
     doc/doxygen/Makefile
     doc/layout/Makefile
     doc/Makefile
+    grid/Makefile
     grid/test/Makefile
     grid/common/test/Makefile
     grid/common/refinement/Makefile
