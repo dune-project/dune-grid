@@ -1,8 +1,8 @@
 # $Id$
 
 noinst_LTLIBRARIES = libgridcommon.la
-libgridcommon_la_SOURCES = referenceelements.cc
-libgridcommon_la_LIBADD = referenceelements.cc -lcommon
+libgridcommon_la_SOURCES = referenceelements.cc quadraturerules.cc
+libgridcommon_la_LIBADD = referenceelements.cc quadraturerules.cc -lcommon
 
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = virtualrefinement.cc  \
@@ -12,7 +12,7 @@ common_HEADERS = virtualrefinement.cc  \
   virtualrefinement.hh referenceelements.hh gridpart.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
-  intersectioniteratorwrapper.hh
+  intersectioniteratorwrapper.hh quadraturerules.hh
 
 SUBDIRS = refinement test
 
