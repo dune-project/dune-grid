@@ -5,7 +5,7 @@
 // /////////////////////////////////////////////////////////////////////////
 
 #include <dune/config.h>
-#include <dune/io/file/amiramesh/amuggridreader.hh>
+#include <dune/grid/io/file/amiramesh/amuggridreader.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/stdstreams.hh>

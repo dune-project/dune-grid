@@ -10,7 +10,7 @@
 
 
 #include <dune/grid/uggrid.hh>
-#include <dune/io/file/amirameshreader.hh>
+#include <dune/grid/io/file/amirameshreader.hh>
 
 
 class AmiraMesh;
