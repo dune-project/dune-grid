@@ -1,0 +1,1136 @@
+tester-main.o tester-main.o: main.cc ../../../../../config.h \
+  ../gridtype.hh ../dgfalu.hh ../../../../../dune/grid/alugrid.hh \
+  ../../../../../dune/grid/alu3dgrid.hh \
+  ../../../../../dune/grid/alugrid/3d/communications.hh \
+  ../../../../../dune/grid/common/grid.hh /usr/include/c++/3.4/iostream \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/c++config.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/os_defines.h \
+  /usr/include/features.h /usr/include/sys/cdefs.h \
+  /usr/include/gnu/stubs.h /usr/include/c++/3.4/ostream \
+  /usr/include/c++/3.4/ios /usr/include/c++/3.4/iosfwd \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/c++locale.h \
+  /usr/include/c++/3.4/cstring /usr/include/c++/3.4/cstddef \
+  /usr/lib/gcc/i486-linux-gnu/3.4.5/include/stddef.h \
+  /usr/include/string.h /usr/include/xlocale.h \
+  /usr/include/c++/3.4/cstdio /usr/include/stdio.h \
+  /usr/include/bits/types.h /usr/include/bits/wordsize.h \
+  /usr/include/bits/typesizes.h /usr/include/libio.h \
+  /usr/include/_G_config.h /usr/include/wchar.h /usr/include/bits/wchar.h \
+  /usr/include/gconv.h /usr/lib/gcc/i486-linux-gnu/3.4.5/include/stdarg.h \
+  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+  /usr/include/bits/stdio.h /usr/include/c++/3.4/clocale \
+  /usr/include/locale.h /usr/include/bits/locale.h \
+  /usr/include/langinfo.h /usr/include/nl_types.h /usr/include/iconv.h \
+  /usr/include/libintl.h /usr/include/c++/3.4/i486-linux-gnu/bits/c++io.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/gthr.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/gthr-default.h \
+  /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
+  /usr/include/bits/sched.h /usr/include/bits/time.h \
+  /usr/include/signal.h /usr/include/bits/sigset.h \
+  /usr/include/bits/pthreadtypes.h /usr/include/bits/initspin.h \
+  /usr/include/bits/sigthread.h /usr/include/unistd.h \
+  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
+  /usr/include/bits/confname.h /usr/include/getopt.h \
+  /usr/include/c++/3.4/cctype /usr/include/ctype.h /usr/include/endian.h \
+  /usr/include/bits/endian.h /usr/include/c++/3.4/bits/stringfwd.h \
+  /usr/include/c++/3.4/bits/postypes.h /usr/include/c++/3.4/cwchar \
+  /usr/include/c++/3.4/ctime /usr/include/stdint.h \
+  /usr/include/c++/3.4/bits/functexcept.h \
+  /usr/include/c++/3.4/exception_defines.h /usr/include/c++/3.4/exception \
+  /usr/include/c++/3.4/bits/char_traits.h \
+  /usr/include/c++/3.4/bits/stl_algobase.h /usr/include/c++/3.4/climits \
+  /usr/lib/gcc/i486-linux-gnu/3.4.5/include/limits.h \
+  /usr/lib/gcc/i486-linux-gnu/3.4.5/include/syslimits.h \
+  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+  /usr/include/c++/3.4/cstdlib /usr/include/stdlib.h \
+  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+  /usr/include/sys/types.h /usr/include/sys/select.h \
+  /usr/include/bits/select.h /usr/include/sys/sysmacros.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/alloca.h \
+  /usr/include/malloc.h /usr/include/c++/3.4/new \
+  /usr/include/c++/3.4/bits/stl_pair.h \
+  /usr/include/c++/3.4/bits/type_traits.h \
+  /usr/include/c++/3.4/bits/stl_iterator_base_types.h \
+  /usr/include/c++/3.4/bits/stl_iterator_base_funcs.h \
+  /usr/include/c++/3.4/bits/concept_check.h \
+  /usr/include/c++/3.4/bits/stl_iterator.h \
+  /usr/include/c++/3.4/debug/debug.h /usr/include/c++/3.4/cassert \
+  /usr/include/assert.h /usr/include/c++/3.4/bits/localefwd.h \
+  /usr/include/c++/3.4/bits/ios_base.h \
+  /usr/include/c++/3.4/bits/atomicity.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/atomic_word.h \
+  /usr/include/c++/3.4/bits/locale_classes.h /usr/include/c++/3.4/string \
+  /usr/include/c++/3.4/memory /usr/include/c++/3.4/bits/allocator.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/c++allocator.h \
+  /usr/include/c++/3.4/ext/mt_allocator.h \
+  /usr/include/c++/3.4/bits/stl_construct.h \
+  /usr/include/c++/3.4/bits/stl_uninitialized.h \
+  /usr/include/c++/3.4/bits/stl_raw_storage_iter.h \
+  /usr/include/c++/3.4/limits /usr/include/c++/3.4/bits/stl_function.h \
+  /usr/include/c++/3.4/bits/basic_string.h /usr/include/c++/3.4/algorithm \
+  /usr/include/c++/3.4/bits/stl_algo.h \
+  /usr/include/c++/3.4/bits/stl_heap.h \
+  /usr/include/c++/3.4/bits/stl_tempbuf.h \
+  /usr/include/c++/3.4/bits/basic_string.tcc \
+  /usr/include/c++/3.4/streambuf /usr/include/c++/3.4/bits/streambuf.tcc \
+  /usr/include/c++/3.4/bits/basic_ios.h \
+  /usr/include/c++/3.4/bits/streambuf_iterator.h \
+  /usr/include/c++/3.4/bits/locale_facets.h /usr/include/c++/3.4/cwctype \
+  /usr/include/wctype.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/ctype_base.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/ctype_inline.h \
+  /usr/include/c++/3.4/bits/codecvt.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/codecvt_specializations.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/time_members.h \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/messages_members.h \
+  /usr/include/c++/3.4/bits/basic_ios.tcc \
+  /usr/include/c++/3.4/bits/ostream.tcc /usr/include/c++/3.4/locale \
+  /usr/include/c++/3.4/bits/locale_facets.tcc \
+  /usr/include/c++/3.4/typeinfo /usr/include/c++/3.4/istream \
+  /usr/include/c++/3.4/bits/istream.tcc \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/exceptions.hh \
+  /usr/include/c++/3.4/sstream /usr/include/c++/3.4/bits/sstream.tcc \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/fvector.hh \
+  /usr/include/c++/3.4/cmath /usr/include/c++/3.4/bits/cpp_type_traits.h \
+  /usr/include/math.h /usr/include/bits/huge_val.h \
+  /usr/include/bits/huge_valf.h /usr/include/bits/huge_vall.h \
+  /usr/include/bits/inf.h /usr/include/bits/nan.h \
+  /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h \
+  /usr/include/bits/mathinline.h /usr/include/c++/3.4/bits/cmath.tcc \
+  /usr/include/c++/3.4/complex \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/exceptions.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/genericiterator.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/iteratorfacades.hh \
+  /usr/include/c++/3.4/iterator \
+  /usr/include/c++/3.4/bits/stream_iterator.h \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/typetraits.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/logictraits.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/helpertemplates.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/typetraits.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/geometrytype.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/capabilities.hh \
+  ../../../../../dune/grid/common/geometry.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/fmatrix.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/fvector.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/precision.hh \
+  ../../../../../dune/grid/common/referenceelements.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/misc.hh \
+  ../../../../../dune/grid/common/entity.hh \
+  ../../../../../dune/grid/common/grid.hh \
+  ../../../../../dune/grid/common/entitypointer.hh \
+  ../../../../../dune/grid/common/leveliterator.hh \
+  ../../../../../dune/grid/common/intersectioniterator.hh \
+  ../../../../../dune/grid/common/hierarchiciterator.hh \
+  ../../../../../dune/grid/common/leafiterator.hh \
+  ../../../../../dune/grid/common/indexidset.hh \
+  /usr/include/c++/3.4/vector /usr/include/c++/3.4/bits/stl_vector.h \
+  /usr/include/c++/3.4/bits/stl_bvector.h \
+  /usr/include/c++/3.4/bits/vector.tcc \
+  ../../../../../dune/grid/alugrid/3d/indexsets.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/stdstreams.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/debugstream.hh \
+  /usr/include/c++/3.4/stack /usr/include/c++/3.4/deque \
+  /usr/include/c++/3.4/bits/stl_deque.h \
+  /usr/include/c++/3.4/bits/deque.tcc \
+  /usr/include/c++/3.4/bits/stl_stack.h \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/bigunsignedint.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/array.hh \
+  /usr/include/c++/3.4/iomanip /usr/include/c++/3.4/functional \
+  /usr/include/rpc/rpc.h /usr/include/rpc/types.h /usr/include/sys/time.h \
+  /usr/include/sys/param.h /usr/include/linux/param.h \
+  /usr/include/asm/param.h /usr/include/asm-i386/param.h \
+  /usr/include/netinet/in.h /usr/include/sys/socket.h \
+  /usr/include/sys/uio.h /usr/include/bits/uio.h \
+  /usr/include/bits/socket.h /usr/include/bits/sockaddr.h \
+  /usr/include/asm/socket.h /usr/include/asm-i386/socket.h \
+  /usr/include/asm/sockios.h /usr/include/asm-i386/sockios.h \
+  /usr/include/bits/in.h /usr/include/bits/byteswap.h \
+  /usr/include/rpc/xdr.h /usr/include/rpc/auth.h /usr/include/rpc/clnt.h \
+  /usr/include/sys/un.h /usr/include/rpc/rpc_msg.h \
+  /usr/include/rpc/auth_unix.h /usr/include/rpc/auth_des.h \
+  /usr/include/rpc/svc.h /usr/include/rpc/svc_auth.h \
+  /usr/include/rpc/netdb.h ../../../../../dune/grid/common/indexidset.hh \
+  ../../../../../dune/grid/alugrid/3d/alu3dinclude.hh \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_parallel.h \
+  /usr/lib/mpich/include/mpi.h /usr/lib/mpich/include/mpidefs.h \
+  /usr/lib/mpich/include/mpi_fortdefs.h /usr/lib/mpich/include/mpio.h \
+  /usr/lib/mpich/include/mpi.h /usr/lib/mpich/include/mpi_errno.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_serial.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/stlheaders.h \
+  /usr/include/ulimit.h /usr/include/c++/3.4/fstream \
+  /usr/include/c++/3.4/i486-linux-gnu/bits/basic_file.h \
+  /usr/include/c++/3.4/bits/fstream.tcc /usr/include/c++/3.4/utility \
+  /usr/include/c++/3.4/bits/stl_relops.h /usr/include/c++/3.4/list \
+  /usr/include/c++/3.4/bits/stl_list.h /usr/include/c++/3.4/bits/list.tcc \
+  /usr/include/c++/3.4/map /usr/include/c++/3.4/bits/stl_tree.h \
+  /usr/include/c++/3.4/bits/stl_map.h \
+  /usr/include/c++/3.4/bits/stl_multimap.h /usr/include/c++/3.4/numeric \
+  /usr/include/c++/3.4/bits/stl_numeric.h /usr/include/c++/3.4/set \
+  /usr/include/c++/3.4/bits/stl_set.h \
+  /usr/include/c++/3.4/bits/stl_multiset.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/serialize.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/parallel.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/parallel.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/xdrclass.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/indexstack.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/alloca.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_cube_3d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d_ext.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_cube_3d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d_ext.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/walk.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/xdrclass.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_mgb.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/lock.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/lock.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_sti.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/serialize.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/walk.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_sti.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/ghost_elements.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_mgb.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_tetra_top_pll.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/../serial/parallel.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_hexa_top_pll.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess_MPI.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_mgb.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_pll_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h \
+  ../../../../../dune/grid/alugrid/3d/topology.hh \
+  ../../../../../dune/grid/alugrid/3d/iterator.hh \
+  ../../../../../dune/grid/common/intersectioniteratorwrapper.hh \
+  ../../../../../dune/grid/alugrid/3d/faceutility.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/misc.hh \
+  ../../../../../dune/grid/common/referenceelements.hh \
+  ../../../../../dune/grid/alugrid/3d/mappings.hh \
+  ../../../../../dune/grid/alugrid/3d/mappings_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/faceutility_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/myautoptr.hh \
+  ../../../../../dune/grid/alugrid/3d/iterator_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/geometry.hh \
+  ../../../../../dune/grid/alugrid/3d/geometry_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/grid.hh \
+  ../../../../../dune/grid/utility/grapedataioformattypes.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/interfaces.hh \
+  /home/robertk/work/Dune/testing/dune-common/dune/common/collectivecommunication.hh \
+  ../../../../../dune/grid/common/defaultindexsets.hh \
+  ../../../../../dune/grid/common/sizecache.hh \
+  ../../../../../dune/grid/alugrid/3d/indexsets.hh \
+  ../../../../../dune/grid/alugrid/3d/memory.hh \
+  ../../../../../dune/grid/alugrid/3d/datahandle.hh \
+  ../../../../../dune/grid/alugrid/3d/alu3dutility.hh \
+  ../../../../../dune/grid/alugrid/3d/grid_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/entity.hh \
+  ../../../../../dune/grid/common/entity.hh \
+  ../../../../../dune/grid/alugrid/3d/iterator.hh \
+  ../../../../../dune/grid/alugrid/3d/entity_imp.cc \
+  ../../../../../dune/grid/alugrid/3d/entity.hh \
+  ../../../../../dune/grid/alugrid/3d/geometry.hh \
+  ../../../../../dune/grid/alugrid/3d/grid.hh \
+  ../../../../../dune/grid/alugrid/2d/grid.hh \
+  ../../../../../dune/grid/alugrid/2d/alu2dinclude.hh \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/indexstack2d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/xdisplay.h \
+  /usr/include/X11/Xlib.h /usr/include/X11/X.h \
+  /usr/include/X11/Xfuncproto.h /usr/include/X11/Xosdefs.h \
+  /usr/include/X11/Xutil.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.h \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/hdlrw.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/mknbrs.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.cc \
+  /home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.cc \
+  ../../../../../dune/grid/alugrid/2d/indexsets.hh \
+  ../../../../../dune/grid/alugrid/2d/memory.hh \
+  ../../../../../dune/grid/alugrid/2d/entity.hh \
+  ../../../../../dune/grid/alugrid/2d/iterator.hh \
+  ../../../../../dune/grid/alugrid/2d/myautoptr.hh \
+  ../../../../../dune/grid/alugrid/2d/iterator_imp.cc \
+  ../../../../../dune/grid/alugrid/2d/geometry.hh \
+  ../../../../../dune/grid/alugrid/2d/geometry_imp.cc \
+  ../../../../../dune/grid/alugrid/2d/grid.hh \
+  ../../../../../dune/grid/alugrid/2d/entity_imp.cc \
+  ../../../../../dune/grid/alugrid/2d/grid_imp.cc ../dgfparser.hh \
+  ../dgfparserblocks.hh ../entitykey.hh ../dgfparser.cc ../dgfalu.cc \
+  ../../../../../dune/grid/io/visual/grapegriddisplay.hh \
+  ../../../../../dune/grid/io/visual/grape/grapeinclude.hh \
+  ../../../../../dune/grid/io/visual/grape/grapewrapper.hh \
+  /home/robertk/DuneAdds/modules/grape/grape.h /usr/include/fcntl.h \
+  /usr/include/bits/fcntl.h /usr/include/sys/stat.h \
+  /usr/include/bits/stat.h \
+  ../../../../../dune/grid/io/visual/grape/grapecommon.hh \
+  ../../../../../dune/grid/io/visual/grape/grapehmesh.hh \
+  ../../../../../dune/grid/io/visual/grape/ghmesh.hh \
+  ../../../../../dune/grid/io/visual/grape/geldesc.hh \
+  ../../../../../dune/grid/io/visual/grape/ghmesh.cc \
+  ../../../../../dune/grid/io/visual/grape/partitiondisplay.cc \
+  ../../../../../dune/grid/io/visual/grape/grapecommon.cc \
+  ../../../../../dune/grid/io/visual/grape/grapegriddisplay.cc \
+  ../../../../../dune/grid/io/visual/grape/grape_undefs.hh
+
+../../../../../config.h:
+
+../gridtype.hh:
+
+../dgfalu.hh:
+
+../../../../../dune/grid/alugrid.hh:
+
+../../../../../dune/grid/alu3dgrid.hh:
+
+../../../../../dune/grid/alugrid/3d/communications.hh:
+
+../../../../../dune/grid/common/grid.hh:
+
+/usr/include/c++/3.4/iostream:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/c++config.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/os_defines.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/c++/3.4/ostream:
+
+/usr/include/c++/3.4/ios:
+
+/usr/include/c++/3.4/iosfwd:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/c++locale.h:
+
+/usr/include/c++/3.4/cstring:
+
+/usr/include/c++/3.4/cstddef:
+
+/usr/lib/gcc/i486-linux-gnu/3.4.5/include/stddef.h:
+
+/usr/include/string.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/c++/3.4/cstdio:
+
+/usr/include/stdio.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/gconv.h:
+
+/usr/lib/gcc/i486-linux-gnu/3.4.5/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/usr/include/c++/3.4/clocale:
+
+/usr/include/locale.h:
+
+/usr/include/bits/locale.h:
+
+/usr/include/langinfo.h:
+
+/usr/include/nl_types.h:
+
+/usr/include/iconv.h:
+
+/usr/include/libintl.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/c++io.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/gthr.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/gthr-default.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/signal.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/initspin.h:
+
+/usr/include/bits/sigthread.h:
+
+/usr/include/unistd.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/c++/3.4/cctype:
+
+/usr/include/ctype.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/c++/3.4/bits/stringfwd.h:
+
+/usr/include/c++/3.4/bits/postypes.h:
+
+/usr/include/c++/3.4/cwchar:
+
+/usr/include/c++/3.4/ctime:
+
+/usr/include/stdint.h:
+
+/usr/include/c++/3.4/bits/functexcept.h:
+
+/usr/include/c++/3.4/exception_defines.h:
+
+/usr/include/c++/3.4/exception:
+
+/usr/include/c++/3.4/bits/char_traits.h:
+
+/usr/include/c++/3.4/bits/stl_algobase.h:
+
+/usr/include/c++/3.4/climits:
+
+/usr/lib/gcc/i486-linux-gnu/3.4.5/include/limits.h:
+
+/usr/lib/gcc/i486-linux-gnu/3.4.5/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+/usr/include/bits/xopen_lim.h:
+
+/usr/include/c++/3.4/cstdlib:
+
+/usr/include/stdlib.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/sys/sysmacros.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/alloca.h:
+
+/usr/include/malloc.h:
+
+/usr/include/c++/3.4/new:
+
+/usr/include/c++/3.4/bits/stl_pair.h:
+
+/usr/include/c++/3.4/bits/type_traits.h:
+
+/usr/include/c++/3.4/bits/stl_iterator_base_types.h:
+
+/usr/include/c++/3.4/bits/stl_iterator_base_funcs.h:
+
+/usr/include/c++/3.4/bits/concept_check.h:
+
+/usr/include/c++/3.4/bits/stl_iterator.h:
+
+/usr/include/c++/3.4/debug/debug.h:
+
+/usr/include/c++/3.4/cassert:
+
+/usr/include/assert.h:
+
+/usr/include/c++/3.4/bits/localefwd.h:
+
+/usr/include/c++/3.4/bits/ios_base.h:
+
+/usr/include/c++/3.4/bits/atomicity.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/atomic_word.h:
+
+/usr/include/c++/3.4/bits/locale_classes.h:
+
+/usr/include/c++/3.4/string:
+
+/usr/include/c++/3.4/memory:
+
+/usr/include/c++/3.4/bits/allocator.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/c++allocator.h:
+
+/usr/include/c++/3.4/ext/mt_allocator.h:
+
+/usr/include/c++/3.4/bits/stl_construct.h:
+
+/usr/include/c++/3.4/bits/stl_uninitialized.h:
+
+/usr/include/c++/3.4/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/3.4/limits:
+
+/usr/include/c++/3.4/bits/stl_function.h:
+
+/usr/include/c++/3.4/bits/basic_string.h:
+
+/usr/include/c++/3.4/algorithm:
+
+/usr/include/c++/3.4/bits/stl_algo.h:
+
+/usr/include/c++/3.4/bits/stl_heap.h:
+
+/usr/include/c++/3.4/bits/stl_tempbuf.h:
+
+/usr/include/c++/3.4/bits/basic_string.tcc:
+
+/usr/include/c++/3.4/streambuf:
+
+/usr/include/c++/3.4/bits/streambuf.tcc:
+
+/usr/include/c++/3.4/bits/basic_ios.h:
+
+/usr/include/c++/3.4/bits/streambuf_iterator.h:
+
+/usr/include/c++/3.4/bits/locale_facets.h:
+
+/usr/include/c++/3.4/cwctype:
+
+/usr/include/wctype.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/ctype_base.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/ctype_inline.h:
+
+/usr/include/c++/3.4/bits/codecvt.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/codecvt_specializations.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/time_members.h:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/messages_members.h:
+
+/usr/include/c++/3.4/bits/basic_ios.tcc:
+
+/usr/include/c++/3.4/bits/ostream.tcc:
+
+/usr/include/c++/3.4/locale:
+
+/usr/include/c++/3.4/bits/locale_facets.tcc:
+
+/usr/include/c++/3.4/typeinfo:
+
+/usr/include/c++/3.4/istream:
+
+/usr/include/c++/3.4/bits/istream.tcc:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/exceptions.hh:
+
+/usr/include/c++/3.4/sstream:
+
+/usr/include/c++/3.4/bits/sstream.tcc:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/fvector.hh:
+
+/usr/include/c++/3.4/cmath:
+
+/usr/include/c++/3.4/bits/cpp_type_traits.h:
+
+/usr/include/math.h:
+
+/usr/include/bits/huge_val.h:
+
+/usr/include/bits/huge_valf.h:
+
+/usr/include/bits/huge_vall.h:
+
+/usr/include/bits/inf.h:
+
+/usr/include/bits/nan.h:
+
+/usr/include/bits/mathdef.h:
+
+/usr/include/bits/mathcalls.h:
+
+/usr/include/bits/mathinline.h:
+
+/usr/include/c++/3.4/bits/cmath.tcc:
+
+/usr/include/c++/3.4/complex:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/exceptions.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/genericiterator.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/iteratorfacades.hh:
+
+/usr/include/c++/3.4/iterator:
+
+/usr/include/c++/3.4/bits/stream_iterator.h:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/typetraits.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/logictraits.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/helpertemplates.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/typetraits.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/geometrytype.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/capabilities.hh:
+
+../../../../../dune/grid/common/geometry.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/fmatrix.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/fvector.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/precision.hh:
+
+../../../../../dune/grid/common/referenceelements.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/misc.hh:
+
+../../../../../dune/grid/common/entity.hh:
+
+../../../../../dune/grid/common/grid.hh:
+
+../../../../../dune/grid/common/entitypointer.hh:
+
+../../../../../dune/grid/common/leveliterator.hh:
+
+../../../../../dune/grid/common/intersectioniterator.hh:
+
+../../../../../dune/grid/common/hierarchiciterator.hh:
+
+../../../../../dune/grid/common/leafiterator.hh:
+
+../../../../../dune/grid/common/indexidset.hh:
+
+/usr/include/c++/3.4/vector:
+
+/usr/include/c++/3.4/bits/stl_vector.h:
+
+/usr/include/c++/3.4/bits/stl_bvector.h:
+
+/usr/include/c++/3.4/bits/vector.tcc:
+
+../../../../../dune/grid/alugrid/3d/indexsets.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/stdstreams.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/debugstream.hh:
+
+/usr/include/c++/3.4/stack:
+
+/usr/include/c++/3.4/deque:
+
+/usr/include/c++/3.4/bits/stl_deque.h:
+
+/usr/include/c++/3.4/bits/deque.tcc:
+
+/usr/include/c++/3.4/bits/stl_stack.h:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/bigunsignedint.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/array.hh:
+
+/usr/include/c++/3.4/iomanip:
+
+/usr/include/c++/3.4/functional:
+
+/usr/include/rpc/rpc.h:
+
+/usr/include/rpc/types.h:
+
+/usr/include/sys/time.h:
+
+/usr/include/sys/param.h:
+
+/usr/include/linux/param.h:
+
+/usr/include/asm/param.h:
+
+/usr/include/asm-i386/param.h:
+
+/usr/include/netinet/in.h:
+
+/usr/include/sys/socket.h:
+
+/usr/include/sys/uio.h:
+
+/usr/include/bits/uio.h:
+
+/usr/include/bits/socket.h:
+
+/usr/include/bits/sockaddr.h:
+
+/usr/include/asm/socket.h:
+
+/usr/include/asm-i386/socket.h:
+
+/usr/include/asm/sockios.h:
+
+/usr/include/asm-i386/sockios.h:
+
+/usr/include/bits/in.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/rpc/xdr.h:
+
+/usr/include/rpc/auth.h:
+
+/usr/include/rpc/clnt.h:
+
+/usr/include/sys/un.h:
+
+/usr/include/rpc/rpc_msg.h:
+
+/usr/include/rpc/auth_unix.h:
+
+/usr/include/rpc/auth_des.h:
+
+/usr/include/rpc/svc.h:
+
+/usr/include/rpc/svc_auth.h:
+
+/usr/include/rpc/netdb.h:
+
+../../../../../dune/grid/common/indexidset.hh:
+
+../../../../../dune/grid/alugrid/3d/alu3dinclude.hh:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_parallel.h:
+
+/usr/lib/mpich/include/mpi.h:
+
+/usr/lib/mpich/include/mpidefs.h:
+
+/usr/lib/mpich/include/mpi_fortdefs.h:
+
+/usr/lib/mpich/include/mpio.h:
+
+/usr/lib/mpich/include/mpi.h:
+
+/usr/lib/mpich/include/mpi_errno.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_serial.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/stlheaders.h:
+
+/usr/include/ulimit.h:
+
+/usr/include/c++/3.4/fstream:
+
+/usr/include/c++/3.4/i486-linux-gnu/bits/basic_file.h:
+
+/usr/include/c++/3.4/bits/fstream.tcc:
+
+/usr/include/c++/3.4/utility:
+
+/usr/include/c++/3.4/bits/stl_relops.h:
+
+/usr/include/c++/3.4/list:
+
+/usr/include/c++/3.4/bits/stl_list.h:
+
+/usr/include/c++/3.4/bits/list.tcc:
+
+/usr/include/c++/3.4/map:
+
+/usr/include/c++/3.4/bits/stl_tree.h:
+
+/usr/include/c++/3.4/bits/stl_map.h:
+
+/usr/include/c++/3.4/bits/stl_multimap.h:
+
+/usr/include/c++/3.4/numeric:
+
+/usr/include/c++/3.4/bits/stl_numeric.h:
+
+/usr/include/c++/3.4/set:
+
+/usr/include/c++/3.4/bits/stl_set.h:
+
+/usr/include/c++/3.4/bits/stl_multiset.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/serialize.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/parallel.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/parallel.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/xdrclass.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/indexstack.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/alloca.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_cube_3d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d_ext.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_cube_3d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d_ext.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/walk.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/mapp_tetra_3d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/xdrclass.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_mgb.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/lock.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/lock.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_sti.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/serialize.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_sti.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/key.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/myalloc.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/walk.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_sti.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/ghost_elements.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_mgb.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_tetra_top_pll.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/../serial/parallel.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_tetra_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_hexa_top_pll.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/serial/gitter_hexa_top.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/mpAccess_MPI.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_mgb.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_pll_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/duneinterface/gitter_dune_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_impl.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/parallel/gitter_pll_ldb.h:
+
+../../../../../dune/grid/alugrid/3d/topology.hh:
+
+../../../../../dune/grid/alugrid/3d/iterator.hh:
+
+../../../../../dune/grid/common/intersectioniteratorwrapper.hh:
+
+../../../../../dune/grid/alugrid/3d/faceutility.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/misc.hh:
+
+../../../../../dune/grid/common/referenceelements.hh:
+
+../../../../../dune/grid/alugrid/3d/mappings.hh:
+
+../../../../../dune/grid/alugrid/3d/mappings_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/faceutility_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/myautoptr.hh:
+
+../../../../../dune/grid/alugrid/3d/iterator_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/geometry.hh:
+
+../../../../../dune/grid/alugrid/3d/geometry_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/grid.hh:
+
+../../../../../dune/grid/utility/grapedataioformattypes.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/interfaces.hh:
+
+/home/robertk/work/Dune/testing/dune-common/dune/common/collectivecommunication.hh:
+
+../../../../../dune/grid/common/defaultindexsets.hh:
+
+../../../../../dune/grid/common/sizecache.hh:
+
+../../../../../dune/grid/alugrid/3d/indexsets.hh:
+
+../../../../../dune/grid/alugrid/3d/memory.hh:
+
+../../../../../dune/grid/alugrid/3d/datahandle.hh:
+
+../../../../../dune/grid/alugrid/3d/alu3dutility.hh:
+
+../../../../../dune/grid/alugrid/3d/grid_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/entity.hh:
+
+../../../../../dune/grid/common/entity.hh:
+
+../../../../../dune/grid/alugrid/3d/iterator.hh:
+
+../../../../../dune/grid/alugrid/3d/entity_imp.cc:
+
+../../../../../dune/grid/alugrid/3d/entity.hh:
+
+../../../../../dune/grid/alugrid/3d/geometry.hh:
+
+../../../../../dune/grid/alugrid/3d/grid.hh:
+
+../../../../../dune/grid/alugrid/2d/grid.hh:
+
+../../../../../dune/grid/alugrid/2d/alu2dinclude.hh:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/indexstack2d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/xdisplay.h:
+
+/usr/include/X11/Xlib.h:
+
+/usr/include/X11/X.h:
+
+/usr/include/X11/Xfuncproto.h:
+
+/usr/include/X11/Xosdefs.h:
+
+/usr/include/X11/Xutil.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alugrid_2d.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/grid.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/handle.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.h:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/triang.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/hdlrw.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/mknbrs.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vmmap.cc:
+
+/home/robertk/DuneAdds/modules/alu3dgrid/include/alu2d/vtx_btree.cc:
+
+../../../../../dune/grid/alugrid/2d/indexsets.hh:
+
+../../../../../dune/grid/alugrid/2d/memory.hh:
+
+../../../../../dune/grid/alugrid/2d/entity.hh:
+
+../../../../../dune/grid/alugrid/2d/iterator.hh:
+
+../../../../../dune/grid/alugrid/2d/myautoptr.hh:
+
+../../../../../dune/grid/alugrid/2d/iterator_imp.cc:
+
+../../../../../dune/grid/alugrid/2d/geometry.hh:
+
+../../../../../dune/grid/alugrid/2d/geometry_imp.cc:
+
+../../../../../dune/grid/alugrid/2d/grid.hh:
+
+../../../../../dune/grid/alugrid/2d/entity_imp.cc:
+
+../../../../../dune/grid/alugrid/2d/grid_imp.cc:
+
+../dgfparser.hh:
+
+../dgfparserblocks.hh:
+
+../entitykey.hh:
+
+../dgfparser.cc:
+
+../dgfalu.cc:
+
+../../../../../dune/grid/io/visual/grapegriddisplay.hh:
+
+../../../../../dune/grid/io/visual/grape/grapeinclude.hh:
+
+../../../../../dune/grid/io/visual/grape/grapewrapper.hh:
+
+/home/robertk/DuneAdds/modules/grape/grape.h:
+
+/usr/include/fcntl.h:
+
+/usr/include/bits/fcntl.h:
+
+/usr/include/sys/stat.h:
+
+/usr/include/bits/stat.h:
+
+../../../../../dune/grid/io/visual/grape/grapecommon.hh:
+
+../../../../../dune/grid/io/visual/grape/grapehmesh.hh:
+
+../../../../../dune/grid/io/visual/grape/ghmesh.hh:
+
+../../../../../dune/grid/io/visual/grape/geldesc.hh:
+
+../../../../../dune/grid/io/visual/grape/ghmesh.cc:
+
+../../../../../dune/grid/io/visual/grape/partitiondisplay.cc:
+
+../../../../../dune/grid/io/visual/grape/grapecommon.cc:
+
+../../../../../dune/grid/io/visual/grape/grapegriddisplay.cc:
+
+../../../../../dune/grid/io/visual/grape/grape_undefs.hh:

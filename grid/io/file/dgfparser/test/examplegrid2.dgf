@@ -1,0 +1,18 @@
+DGF
+Interval
+-1  -1       % first corner 
+ 1  1        % second corner
+ 4  4        % 4 cells in x and 4 in y direction
+#
+Vertex       % some additional points
+ 0.75 0.75   % inside the interval
+ 0.9 0.9     % also inside the interval
+ 1.25 1.25   % and one outside of the interval
+#
+Simplexgenerator
+display 1    % show result using Triangle viewer
+path /usr/people/gersbach/work   % path to Triangle
+#
+BOUNDARYDOMAIN
+default 1    % all boundaries have id 1
+#BOUNDARYDOMAIN

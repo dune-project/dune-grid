@@ -1,0 +1,20 @@
+DGF
+Simplexgenerator
+% min-angle 1.1        % quality enhancment 
+% max-area 0.1         % maximum element area restriction
+display 0              % show result using the Tetgen viewer
+path /home/robertk/DuneAdds/modules/TetGen % path to Tetgen
+#
+
+Interval
+0 0 0                  % first corner
+10 10 10               % second corner
+2 5 10                 % 5 cells in x, 2 in y, and 10 in z direction
+#
+
+BOUNDARYDOMAIN
+default 1              % default boundary id 
+% all boundary segments in the interval [(-1,-1,-1),(11,11,0)]
+% have boundary id 2, i.e., the bottom boundary 
+2   -1 -1 -1    11 11 0
+#

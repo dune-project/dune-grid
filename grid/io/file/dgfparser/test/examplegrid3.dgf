@@ -1,0 +1,22 @@
+DGF
+Interval
+-1  -1       % first corner 
+ 1  1        % second corner
+ 4  4        % 4 cells in x and 4 in y direction
+#
+Vertex       % some additional points
+ 0.75 0.75   % inside the interval
+ 0.9 0.9     % also inside the interval
+ 1.25 1.25   % and one outside of the interval
+#
+Simplexgenerator  
+min-angle 30    % quality enhancment
+display 1       % area restriction
+path /home/robertk/DuneAdds/modules/ % show result using Triangle viewer
+#
+BOUNDARYDOMAIN
+1   1 -1    1.25  1.25  % right boundary has id 1
+2  -1  1    1.25  1.25  % upper boundary has id 2
+3  -1 -1   -1  1        % left boundary has id 3
+4  -1 -1    1 -1        % lower boundary has id 4
+#BOUNDARYDOMAIN

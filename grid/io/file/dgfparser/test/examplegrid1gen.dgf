@@ -1,0 +1,19 @@
+DGF
+Simplexgenerator
+min-angle 30
+display 1
+path /usr/people/gersbach/work   % path to Triangle
+#
+Vertex        % the verticies of the grid
+-1   -1       % vertex 0
+-0.2 -1       % vertex 1
+ 1   -1       % vertex 2
+ 1    -0.6    % vertex 3
+ 1    1       % vertex 4
+-1    1       % vertex 5
+0.2  -0.2     % vertex 6
+#
+BOUNDARYDOMAIN
+default 1     % all other boundary segments have id 1
+#
+
