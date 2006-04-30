@@ -10,7 +10,7 @@ else
   libalu3d_la_LIBADD = -lcommon
 endif
 
-alu3dgriddir = $(includedir)/dune/grid/alu3dgrid/
+alu3dgriddir = $(includedir)/dune/grid/alugrid/3d
 alu3dgrid_HEADERS = alu3dinclude.hh communications.hh \
   datahandle.hh memory.hh grid.hh grid_imp.cc \
   mappings.hh mappings_imp.cc topology.hh entity.hh entity_imp.cc \
