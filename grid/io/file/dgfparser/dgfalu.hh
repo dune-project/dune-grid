@@ -3,7 +3,6 @@
 #ifndef DUNE_DGFPARSERALU_HH
 #define DUNE_DGFPARSERALU_HH
 #if HAVE_ALUGRID
-// #include <dune/grid/alu3dgrid.hh>
 #include <dune/grid/alugrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
