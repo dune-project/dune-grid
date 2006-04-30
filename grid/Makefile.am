@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = albertagrid alu3dgrid common onedgrid sgrid uggrid utility yaspgrid \
+SUBDIRS = albertagrid alugrid common onedgrid sgrid uggrid utility yaspgrid \
 	test
 
 noinst_LTLIBRARIES = libgrid.la
@@ -15,15 +15,16 @@ if UG
 endif
 
 # also contians items independent of ALUGrid
-ALU3DLIB = alu3dgrid/libalu3d.la
+ALULIB = alugrid/libalu.la
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALU3DLIB) $(COMMONLIB) -lcommon
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(COMMONLIB) -lcommon
 
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alu3dgrid.hh \
+               alugrid.hh \
                sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \
