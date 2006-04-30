@@ -40,11 +40,11 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUSimplexGrid<2,2> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-    //#if defined _ALU3DGRID_PARALLEL_
-    //return new ALUSimplexGrid<2,2>(str.c_str(),MPICOMM);
-    //#else
+  #if defined _ALU3DGRID_PARALLEL_
+    return new ALUSimplexGrid<2,2>(str.c_str(),MPICOMM);
+  #else
     return new ALUSimplexGrid<2,2>(str.c_str());
-    //#endif
+  #endif
   }
   template <int dim,int dimworld>
   inline void
@@ -66,11 +66,7 @@ namespace Dune {
         }
         mg.setOrientation(0);
         str+=".ALUgrid";
-        std::string str1(str);
-      #if defined _ALU3DGRID_PARALLEL_
-        str1+=".0";
-      #endif
-        std::ofstream out(str1.c_str());
+        std::ofstream out(str.c_str());
         mg.writeAlu(out);
       }
     }
@@ -95,11 +91,7 @@ namespace Dune {
         }
         mg.setOrientation(0);
         str+=".ALUgrid";
-        std::string str1(str);
-      #if defined _ALU3DGRID_PARALLEL_
-        str1+=".0";
-      #endif
-        std::ofstream out(str1.c_str());
+        std::ofstream out(str.c_str());
         mg.writeAlu(out);
       }
     }
