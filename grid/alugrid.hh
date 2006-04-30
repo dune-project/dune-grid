@@ -7,7 +7,7 @@
 #include <dune/grid/alu3dgrid.hh>
 
 // 2d version
-#include <dune/grid/alu2dgrid.hh>
+#include <dune/grid/alugrid/2d/grid.hh>
 
 namespace Dune {
 
