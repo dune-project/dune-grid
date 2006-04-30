@@ -482,7 +482,7 @@ namespace Dune {
       }
       if (maxface!=fce) {
         // std::cout << "Rearranging verticies of simplex " << i
-        //	<< " since face " << maxface << " is largest" << std::endl;
+        //  << " since face " << maxface << " is largest" << std::endl;
         elements[i][fce]=idx[maxface];
         elements[i][(fce+1)%3]=idx[(maxface+1)%3];
         elements[i][(fce+2)%3]=idx[(maxface+2)%3];
