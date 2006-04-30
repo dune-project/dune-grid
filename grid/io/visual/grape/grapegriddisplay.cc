@@ -576,7 +576,7 @@ namespace Dune
   inline void GrapeGridDisplay<GridType>::display()
   {
     /* call handle mesh in g_hmesh.c */
-    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ );
+    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ , true );
     return ;
   }
 

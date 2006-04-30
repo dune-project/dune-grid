@@ -128,7 +128,7 @@ extern void *hmesh(
   DUNE_FDATA * fe, DUNE_DAT * dune);
 
 extern void displayTimeScene(INFO * info);
-extern void handleMesh (void *hmesh);
+extern void handleMesh (void *hmesh, bool gridMode );
 
 extern DUNE_FDATA * extractData (void *hmesh , int num );
 

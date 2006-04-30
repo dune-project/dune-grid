@@ -858,7 +858,7 @@ inline void colorBarMinMax(const double min, const double max)
 /* forward declaration */
 static void grape_add_remove_methods(void);
 
-inline void handleMesh(void *hmesh)
+inline void handleMesh(void *hmesh, bool gridMode )
 {
   GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
   assert(mesh != NULL);
@@ -868,7 +868,7 @@ inline void handleMesh(void *hmesh)
 
   addProjectUIF();
 
-  if(!mesh->f_data)
+  if(gridMode)
   {
     /* if no data then switch to grid mode */
     GRAPHICDEVICE *grdev;
