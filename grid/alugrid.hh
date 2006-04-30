@@ -80,7 +80,11 @@ namespace Dune {
     public Dune::ALU2dGrid<2,2> {
     typedef Dune::ALU2dGrid<2,2> BaseType;
   public:
-    ALUSimplexGrid(const std::string macroName ) :
+    ALUSimplexGrid(const std::string macroName
+#ifdef _ALU3DGRID_PARALLEL_
+                   , MPI_Comm mpiComm = MPI_COMM_WORLD
+#endif
+                   ) :
       BaseType(macroName) {}
     typedef BaseType::GridFamily GridFamily;
     typedef GridFamily::Traits Traits;
