@@ -452,6 +452,21 @@ namespace Dune {
     }
 
     //! return LevelIndex of given entity
+    template<class EntityType>
+    int index (const EntityType & en) const
+    {
+      enum { cd = EntityType :: codimension };
+      // this must not be true for vertices
+      // therefore only check other codims
+#ifndef NDEBUG
+      const int codim = cd;
+      assert( (codim == dim) ? (1) : (level_ == en.level() ));
+      assert( levelIndex_[codim][ hIndexSet_.index(en) ] >= 0 );
+#endif
+      return levelIndex_[cd][ hIndexSet_.index(en) ];
+    }
+
+    //! return LevelIndex of given entity
     template<int cd>
     int index (const typename GridImp::template Codim<cd>::Entity& en) const
     {
@@ -716,7 +731,17 @@ namespace Dune {
       calcNewIndex ();
     }
 
-    //! return LevelIndex of given entity
+    //! return LeafIndex of given entity
+    template<class EntityType>
+    int index (const EntityType & en) const
+    {
+      enum { cd = EntityType :: codimension };
+      // this must not be true for vertices
+      // therefore only check other codims
+      assert( index_[cd][ hIndexSet_.index(en) ] >= 0 );
+      return index_[cd][ hIndexSet_.index(en) ];
+    }
+
     template<int cd>
     int index (const typename GridImp::template Codim<cd>::Entity& en) const
     {
