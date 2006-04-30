@@ -6,7 +6,7 @@
 // System includes
 
 // Dune includes
-#include "../common/grid.hh"
+#include <dune/grid/common/grid.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
