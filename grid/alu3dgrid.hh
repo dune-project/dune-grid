@@ -3,11 +3,11 @@
 #ifndef DUNE_ALU3DGRID_HH
 #define DUNE_ALU3DGRID_HH
 
-#include "alu3dgrid/communications.hh"
-#include "alu3dgrid/indexsets.hh"
-#include "alu3dgrid/iterator.hh"
-#include "alu3dgrid/entity.hh"
-#include "alu3dgrid/geometry.hh"
-#include "alu3dgrid/grid.hh"
+#include "alugrid/3d/communications.hh"
+#include "alugrid/3d/indexsets.hh"
+#include "alugrid/3d/iterator.hh"
+#include "alugrid/3d/entity.hh"
+#include "alugrid/3d/geometry.hh"
+#include "alugrid/3d/grid.hh"
 
 #endif
