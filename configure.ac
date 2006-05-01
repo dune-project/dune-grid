@@ -46,7 +46,9 @@ AC_CONFIG_FILES([Makefile
     grid/yaspgrid/Makefile
     grid/onedgrid/Makefile
     grid/utility/Makefile
-    grid/alu3dgrid/Makefile
+    grid/alugrid/Makefile
+    grid/alugrid/2d/Makefile
+    grid/alugrid/3d/Makefile
     grid/io/file/test/Makefile
     grid/io/file/amiramesh/Makefile
     grid/io/file/alberta/Makefile
