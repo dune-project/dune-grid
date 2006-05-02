@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include <dune/grid/alu3dgrid.hh>
+#include <dune/grid/alugrid.hh>
 
 #define ALUGRID_TESTING
 #include "gridcheck.cc"
@@ -15,51 +15,51 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
-
 using namespace Dune;
+
+
+template <class GridType>
+void checkALU(GridType & grid, int mxl = 2)
+{
+  // be careful, each global refine create 8 x maxlevel elements
+  gridcheck(grid);
+  for(int i=0; i<mxl; i++) {
+    grid.globalRefine(1);
+    gridcheck(grid);
+  }
+
+  // check the method geometryInFather()
+  checkGeometryInFather(grid);
+
+  // check the intersection iterator and the geometries it returns
+  checkIntersectionIterator(grid);
+}
 
 int main () {
   try {
     /* use grid-file appropriate for dimensions */
-    std::string filename_hexa("alu-testgrid.hexa");
-    std::string filename_tetra("alu-testgrid.tetra");
 
     // extra-environment to check destruction
     {
       factorEpsilon = 500.0;
-      // be careful, each global refine create 8 x maxlevel elements
-      int mxl = 2;
+
       {
-        ALU3dGrid<3,3,hexa>
-        grid_hexa(filename_hexa);
-
-        gridcheck(grid_hexa);
-        for(int i=0; i<mxl; i++) {
-          grid_hexa.globalRefine(1);
-          gridcheck(grid_hexa);
-        }
-
-        // check the method geometryInFather()
-        checkGeometryInFather(grid_hexa);
-
-        // check the intersection iterator and the geometries it returns
-        checkIntersectionIterator(grid_hexa);
+        std::string filename("alu-testgrid.hexa");
+        ALUCubeGrid<3,3> grid(filename);
+        checkALU(grid);
       }
+
       {
-        ALU3dGrid<3,3,tetra>
-        grid_tetra(filename_tetra);
+        std::string filename("alu-testgrid.tetra");
+        ALUSimplexGrid<3,3>
+        grid(filename);
+        checkALU(grid);
+      }
 
-        gridcheck(grid_tetra);
-        for(int i=0; i<mxl; i++) {
-          grid_tetra.globalRefine(1);
-          gridcheck(grid_tetra);
-        }
-
-        // check the method geometryInFather()
-        checkGeometryInFather(grid_tetra);
-
-        // check the intersection iterator and the geometries it returns
-        checkIntersectionIterator(grid_tetra);
+      {
+        std::string filename("alu-testgrid.triang");
+        ALUSimplexGrid<2,2> grid(filename);
+        checkALU(grid,0);
       }
     };
 
