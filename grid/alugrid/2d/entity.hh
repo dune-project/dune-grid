@@ -214,9 +214,9 @@ namespace Dune {
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
     typedef ALU2dGridGeometry<dim,dimworld,GridImp> GeometryImp;
     //! tpye of intersection iterator
+
     typedef ALU2dGridIntersectionIterator<GridImp> IntersectionIteratorImp;
-    typedef IntersectionIteratorImp ALU2dGridIntersectionIteratorType;
-    // typedef IntersectionIteratorWrapper<GridImp> ALU2dGridIntersectionIteratorType;
+    typedef IntersectionIteratorWrapper< GridImp > ALU2dGridIntersectionIteratorType;
 
     //! type of entity interface
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -267,13 +267,13 @@ namespace Dune {
        referencing the first neighbor. */
     ALU2dGridIntersectionIteratorType ibegin () const
     {
-      return ALU2dGridIntersectionIteratorType(grid_, item_, this->level(), false);
+      return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(), false);
     }
 
     //! Reference to one past the last intersection with neighbor
     ALU2dGridIntersectionIteratorType iend () const
     {
-      return ALU2dGridIntersectionIteratorType(grid_, item_, this->level(),true);
+      return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(),true);
     }
 
     //! returns true if Entity is leaf (i.e. has no children)
@@ -367,6 +367,13 @@ namespace Dune {
 
     //! compare 2 entities, which means compare the item pointers
     bool equals ( const ALU2dGridEntity<0,dim,GridImp> & org ) const;
+
+    // return reference to HElement (needed by IntersectionIterator)
+    HElementType & getItem() const
+    {
+      assert( item_ );
+      return *item_;
+    }
 
   private:
     //! return which number of child we are, i.e. 0 or 1

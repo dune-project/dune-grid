@@ -7,7 +7,7 @@
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
-
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "entity.hh"
@@ -45,18 +45,21 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class ALU2dGridIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation<GridImp,ALU2dGridIntersectionIterator>
+  class ALU2dGridIntersectionIterator
+  //: public
+  //  IntersectionIteratorDefaultImplementation<GridImp,
+  //  ALU2dGridIntersectionIterator>
   {
+    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+
+    friend class IntersectionIteratorWrapper<GridImp>;
+  public:
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
-    //typedef ALU2dGridFaceInfo<GridImp::elementType> FaceInfoType;
-    //typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
+    enum { dimension       = GridImp::dimension };
+    enum { dimensionworld  = GridImp::dimensionworld };
 
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-
-  public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -68,6 +71,10 @@ namespace Dune {
 
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
+    //! neighbours
+    //! The default Constructor , createing an empty ALU2dGridIntersectionIterator
+    ALU2dGridIntersectionIterator(const GridImp & grid, int wLevel);
+
     //! The default Constructor , level tells on which level we want
     //! neighbours
     ALU2dGridIntersectionIterator(const GridImp & grid,
@@ -75,6 +82,9 @@ namespace Dune {
 
     //! The copy constructor
     ALU2dGridIntersectionIterator(const ALU2dGridIntersectionIterator<GridImp> & org);
+
+    //! The copy constructor
+    void assign (const ALU2dGridIntersectionIterator<GridImp> & org);
 
     //! check whether entities are the same or whether iterator is done
     bool equals (const ALU2dGridIntersectionIterator<GridImp> & i) const;
@@ -126,6 +136,10 @@ namespace Dune {
 
     //! reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
+
+    //! reset IntersectionIterator to first neighbour
+    template <class EntityType>
+    void first(const EntityType & en, int wLevel);
 
     // the local geometries
     mutable GeometryObject intersectionGlobal_;

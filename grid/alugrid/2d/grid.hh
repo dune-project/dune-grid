@@ -14,10 +14,9 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/defaultindexsets.hh>
-//#include <dune/grid/common/leafindexset.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/common/collectivecommunication.hh>
-//#include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 //- Local includes
 #include "indexsets.hh"
@@ -126,9 +125,7 @@ namespace Dune {
     {
       typedef ALU2dGrid<dim,dimworld> Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, ALU2dGridIntersectionIterator> IntersectionIterator;
-      //typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
-
+      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU2dGridHierarchicIterator> HierarchicIterator;
 
@@ -226,12 +223,6 @@ namespace Dune {
     //! Type of the local id set
     typedef ALU2dGridLocalIdSet<dim,dimworld> LocalIdSetImp;
     typedef LocalIdSetImp GlobalIdSetImp;
-
-    //! Type of the global id set
-    //typedef ALU2dGridGlobalIdSet<dim,dimworld> GlobalIdSetImp;
-
-    //! Type of the local id set
-    //typedef GlobalIdSetImp LocalIdSetImp;
 
     //! Type of the global id set
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
@@ -344,18 +335,6 @@ namespace Dune {
 
     //! one past the end on this leaf level (codim 0 and All_Partition)
     LeafIteratorType leafend () const;
-
-    /*
-       //! General definiton for a leaf iterator
-       template <int codim, PartitionIteratorType pitype>
-       typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-       createLeafIteratorBegin (int level) const;
-
-       //! General definition for an end iterator on leaf level
-       template <int codim, PartitionIteratorType pitype>
-       typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-       createLeafIteratorEnd(int level) const;
-     */
 
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
@@ -505,7 +484,18 @@ namespace Dune {
     typedef SingleTypeSizeCache<ThisType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
-
+    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
+  public:
+    typedef ALU2dGridIntersectionIterator<const ThisType>  IntersectionIteratorImp;
+    typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+  private:
+    friend class IntersectionIteratorWrapper< const ThisType > ;
+    // return reference to intersectioniterator storage
+    IntersectionIteratorProviderType & intersetionIteratorProvider() const
+    {
+      return interItProvider_;
+    }
+    mutable IntersectionIteratorProviderType interItProvider_;
   }; // end class ALU2dGrid
 
   template <class GridImp, int codim>

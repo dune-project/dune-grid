@@ -50,6 +50,24 @@ namespace Dune {
     }
   }
 
+  template<class GridImp>
+  inline ALU2dGridIntersectionIterator<GridImp> ::
+  ALU2dGridIntersectionIterator(const GridImp & grid, int wLevel) :
+    intersectionGlobal_(GeometryImp()),
+    intersectionSelfLocal_(GeometryImp()),
+    intersectionNeighborLocal_(GeometryImp()),
+    grid_(grid),
+    item_(0),
+    neigh_(0),
+    // change "3" as soon as non conform grids shall be allowed?
+    nFaces_(3),
+    walkLevel_(wLevel),
+    index_(0),
+    generatedGlobalGeometry_(false),
+    generatedLocalGeometries_(false),
+    done_(true)
+  {}
+
 
   //! The copy constructor
   template<class GridImp>
@@ -61,13 +79,12 @@ namespace Dune {
     grid_(org.grid_),
     item_(org.item_),
     neigh_(org.neigh_),
-    //nb_(org.nb_),
     nFaces_(org.nFaces_),
     walkLevel_(org.walkLevel_),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    outerNormal_(org.unitOuterNormal_),
-    unitOuterNormal_(org.unitOuterNormal_),
+    //outerNormal_(org.unitOuterNormal_), call default constructor of these
+    //unitOuterNormal_(org.unitOuterNormal_),
     done_(org.done_) {
 
     if(org.item_) { // else it's a end iterator
@@ -78,14 +95,31 @@ namespace Dune {
     }
   }
 
+  //! The copy constructor
+  template<class GridImp>
+  inline void
+  ALU2dGridIntersectionIterator<GridImp> ::
+  assign(const ALU2dGridIntersectionIterator<GridImp> & org)
+  {
+    assert( &grid_ == &org.grid_);
+    item_      = org.item_;
+    neigh_     = org.neigh_;
+    index_     = org.index_;
+    nFaces_    = org.nFaces_;
+    walkLevel_ = org.walkLevel_;
+    generatedGlobalGeometry_ = false;
+    generatedLocalGeometries_ = false;
+    done_ = org.done_;
+  }
 
   //! check whether entities are the same or whether iterator is done
   template<class GridImp>
-  inline bool ALU2dGridIntersectionIterator<GridImp> :: equals (const ALU2dGridIntersectionIterator<GridImp> & i) const {
+  inline bool ALU2dGridIntersectionIterator<GridImp> ::
+  equals (const ALU2dGridIntersectionIterator<GridImp> & i) const
+  {
     // this method is only to check equality of real iterators and end iterators
     return ((item_ == i.item_) &&
             (done_ == i.done_)
-            // && (&(connector_.outerEntity()) == &(i.connector_.outerEntity()) )
             );
   }
 
@@ -109,7 +143,6 @@ namespace Dune {
   //! return level of inside() entitiy
   template<class GridImp>
   inline int ALU2dGridIntersectionIterator<GridImp> :: level () const {
-    //return walkLevel_;
     return (*item_).level();
   }
 
@@ -122,6 +155,15 @@ namespace Dune {
     //index_= 3;
   }
 
+
+  //! reset IntersectionIterator to first neighbour
+  template<class GridImp>
+  template<class EntityType>
+  inline void ALU2dGridIntersectionIterator<GridImp> ::
+  first(const EntityType & en, int wLevel)
+  {
+    setFirstItem(en.getItem(),wLevel);
+  }
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
