@@ -4655,8 +4655,8 @@ namespace Dune
     ALBERTA read_macro(mesh_, filename.c_str(), ALBERTA AlbertHelp::initBoundary);
     ALBERTA AlbertHelp :: removeBndStack ();
 
-    if( !readParameter(filename,"Time",time) )
-      time = 0.0;
+    //if( !readParameter(filename,"Time",time) )
+    time = 0.0;
 
     // unset up2Dat status, if lbegin is called then this status is updated
     for(int l=0; l<MAXL; l++) vertexMarkerLevel_[l].unsetUp2Date();
