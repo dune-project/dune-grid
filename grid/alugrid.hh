@@ -46,6 +46,44 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
   };
 
+  namespace Capabilities {
+
+    template<int dim,int dimw>
+    struct hasLeafIterator< Dune::ALUCubeGrid<dim, dimw > >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw, int cdim >
+    struct hasEntity<Dune::ALUCubeGrid<dim, dimw>, cdim >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct isParallel<const ALUCubeGrid<dim, dimw> > {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct isLevelwiseConforming< ALUCubeGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct hasHangingNodes< ALUCubeGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct hasBackupRestoreFacilities< ALUCubeGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+  } // end namespace Capabilities
   template <>
   class ALUSimplexGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
@@ -98,6 +136,46 @@ namespace Dune {
     typedef Traits::Codim<0>::LeafIterator LeafIterator;
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
   };
+
+  namespace Capabilities {
+
+    template<int dim,int dimw>
+    struct hasLeafIterator< Dune::ALUSimplexGrid<dim, dimw > >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw, int cdim >
+    struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct isParallel<const ALUSimplexGrid<dim, dimw> > {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct hasHangingNodes< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim,int dimw>
+    struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+  } // end namespace Capabilities
+
 
 } //end  namespace Dune
 #endif
