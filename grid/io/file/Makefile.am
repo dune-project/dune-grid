@@ -1,10 +1,9 @@
 # $Id$
 
-SUBDIRS = alberta amiramesh test dgfparser
+SUBDIRS = amiramesh test dgfparser
 
 iofiledir = $(includedir)/dune/grid/io/file
-iofile_HEADERS = amirameshreader.hh amirameshwriter.hh \
- albertawriter.hh alugridwriter.hh
+iofile_HEADERS = amirameshreader.hh amirameshwriter.hh
 
 noinst_LTLIBRARIES = libfileio.la
 
