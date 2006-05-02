@@ -25,7 +25,8 @@ namespace Dune {
 
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry() :
-    myGeomType_(GeometryType::simplex,mydim) {
+    myGeomType_(GeometryType::simplex,mydim)
+  {
     // make empty element
     initGeom();
   }

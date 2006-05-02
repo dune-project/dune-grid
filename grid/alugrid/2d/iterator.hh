@@ -127,11 +127,7 @@ namespace Dune {
     //! reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
 
-    //structure containing the topological and geometrical information about
-    //the face which the iterator points to
-    //mutable FaceInfoType      connector_;
-    //mutable GeometryInfoType  geoProvider_; // need to initialise
-
+    // the local geometries
     mutable GeometryObject intersectionGlobal_;
     mutable GeometryObject intersectionSelfLocal_;
     mutable GeometryObject intersectionNeighborLocal_;

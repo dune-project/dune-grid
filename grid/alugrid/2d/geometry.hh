@@ -182,7 +182,7 @@ namespace Dune {
     mutable FieldVector<alu2d_ctype,cdim> tmpZ_;
 
     mutable FieldVector<alu2d_ctype,mydim> AT_x_;
-    const GeometryType myGeomType_;
+    GeometryType myGeomType_;
 
   };
 

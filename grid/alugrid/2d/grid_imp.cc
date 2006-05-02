@@ -203,10 +203,10 @@ namespace Dune {
 
   //! number of entities per level, codim and geometry type in this process
   template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: size (int level, int codim, GeometryType type) const
+  inline int ALU2dGrid<dim, dimworld> :: size (int level, GeometryType type) const
   {
     if (type.isSimplex()) {
-      return size(level, codim);
+      return size(level, dim-type.dim());
     }
     return 0;
   }
