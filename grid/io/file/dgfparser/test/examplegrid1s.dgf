@@ -19,7 +19,7 @@ SIMPLEX       % a simplex grid
 BOUNDARYSEGMENTS
 2   1 2       % between vertex 1,2 use id 2
 2   2 3       % between vertex 2,3 use id 2
-4   3 4       % between vertex 3,4 use id 2
+4   3 4       % between vertex 3,4 use id 4
 #
 BOUNDARYDOMAIN
 default 1     % all other boundary segments have id 1
