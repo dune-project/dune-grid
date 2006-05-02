@@ -4,16 +4,12 @@
 ## estimate which tests can be built
 #
 
-if ALBERTA
-  ALBERTATEST = test-albertawriter
-endif
-
 #
 ## define the lists of tests to build and run
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = $(ALBERTATEST)
+NORMALTESTS =
 
 # list of tests to run (yaspgrid is special case)
 TESTS = $(NORMALTESTS)
@@ -35,18 +31,12 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS)
 #
 
 #
-test_albertawriter_SOURCES = test-albertawriter.cc
-test_albertawriter_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS)
-test_albertawriter_LDADD = $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
-test_albertawriter_DEPENDENCIES = $(LOCAL_LIBS)
-
 ## distribution tarball
 
 testdir = $(includedir)/dune/grid/io/file/test/
 test_HEADERS =
 
-GRIDFILES = alberta-testgrid-2-2.al alberta-testgrid-3-3.al \
-  ug-testgrid-2.am ug-testgrid-3.am
+GRIDFILES = ug-testgrid-2.am ug-testgrid-3.am
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = gridcheck.cc $(GRIDFILES)
