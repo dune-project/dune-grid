@@ -303,30 +303,42 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 
   OneDEntityImp<1>* eIt;
 
-
   // for the return value:  true if the grid was changed
   bool changedGrid = false;
 
   // remove all elements that have been marked for coarsening
   for (int i=1; i<=maxLevel(); i++) {
+    int n = 0;
 
     for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
 
-      if (eIt->markState_ == OneDEntityImp<1> :: COARSEN
-          && eIt->isLeaf()) {
+      // ensure grid conformity
+      if (n%2 == 0 && eIt->isLeaf())
+      {
+        if (eIt->markState_ != OneDEntityImp<1>::COARSEN ||
+            eIt->succ_->markState_ != OneDEntityImp<1>::COARSEN)
+        {
+          if (eIt->markState_ == OneDEntityImp<1>::COARSEN)
+            eIt->markState_ = OneDEntityImp<1>::NONE;
+          if (eIt->succ_->markState_ == OneDEntityImp<1>::COARSEN)
+            eIt->succ_->markState_ = OneDEntityImp<1>::NONE;
+        }
+      }
+
+      if (eIt->markState_ == OneDEntityImp<1>::COARSEN && eIt->isLeaf()) {
 
         OneDEntityImp<1>* leftElement = eIt->pred_;
 
         OneDEntityImp<1>* rightElement = eIt->succ_;
 
         // Is the left vertex obsolete?
-        if (leftElement->vertex_[1] != eIt->vertex_[0]) {
+        if (leftElement==NULL || leftElement->vertex_[1] != eIt->vertex_[0]) {
           vertices[i].remove(eIt->vertex_[0]);
           delete(eIt->vertex_[0]);
         }
 
         // Is the right vertex obsolete?
-        if (rightElement->vertex_[0] != eIt->vertex_[1]) {
+        if (rightElement==NULL || rightElement->vertex_[0] != eIt->vertex_[1]) {
           vertices[i].remove(eIt->vertex_[1]);
           delete(eIt->vertex_[1]);
         }
@@ -343,11 +355,12 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
         elements[i].remove(eIt);
         delete(eIt);
 
+        if (n%2 == 1) eIt->father_->markState_ = OneDEntityImp<1>::NONE;
+
         // The grid has been changed
         changedGrid = true;
-
       }
-
+      n++;
     }
 
   }
@@ -358,7 +371,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
   // /////////////////////////////////////////////////////////////////////////
   bool toplevelRefinement = false;
   for (eIt = elements[maxLevel()].begin; eIt!=NULL; eIt=eIt->succ_)
-    if (eIt->markState_ == OneDEntityImp<1> :: REFINED) {
+    if (eIt->markState_ == OneDEntityImp<1>::REFINED) {
       toplevelRefinement = true;
       break;
     }
@@ -378,7 +391,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 
     for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
 
-      if (eIt->markState_ == OneDEntityImp<1>:: REFINED
+      if (eIt->markState_ == OneDEntityImp<1>::REFINED
           && eIt->isLeaf()) {
 
         // Does the left vertex exist on the next-higher level?
