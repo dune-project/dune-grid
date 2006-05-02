@@ -267,6 +267,10 @@ namespace Dune {
        one of the freely available grid generation tools
        Tetgen (http://tetgen.berlios.de) for \c dimworld=3 or
        Triangle (http://www.cs.cmu.edu/~quake/triangle.html) for \c dimworld=2.
+       This programs will be called via system call from the dgfparser.
+       Therefore one should add the path containing the executables of Triangle
+       and/or Tetgen to the environment variable PATH or use the path
+       option described below.
        Some identifiers can be
        given to influence the quality of the generated mesh:
        -  \b max-area
@@ -303,8 +307,9 @@ namespace Dune {
      \b Interval  block.
 
      @subsection CONSTRSIMPL Simplex grids
-     (Dune::AlbertaGrid , or
-      Dune::ALU3dGrid <dim,dimworld,tetra>)
+     (Dune::AlbertaGrid, or
+      Dune::ALUSimplexGrid<3,3>, and
+      Dune::ALUSimplexGrid<2,2>)
 
      The verticies and elements of the grid are constructed in one of the
      following four stages:
@@ -357,7 +362,7 @@ namespace Dune {
         longest edge in each triangle.
 
      @subsection CONSTRCUBE Cube grids
-     (Dune::ALU3dGrid <dim,dimworld,hexa>)
+     (Dune::ALUCubeGrid<3,3>)
 
      The grid is constructed using the information from the
      \b Interval  block, if present; otherwise the \b Vertex and \b Cube
