@@ -328,8 +328,8 @@ namespace Dune {
     if (dimw==2) {
       std::stringstream command;
       if (para.haspath())
-        command << para.path() << "/Triangle/";
-      command << "/triangle ";
+        command << para.path() << "/";
+      command << "triangle ";
       if (para.minAngle()>0)
         command << "-q" << para.minAngle() << " ";
       if (para.maxArea()>0)
@@ -340,7 +340,7 @@ namespace Dune {
       if (para.display()) {
         std::stringstream command;
         if (para.haspath())
-          command << para.path() << "/Triangle/";
+          command << para.path() << "/";
         command << "showme " << name << ".1.ele";
         std::cout << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
@@ -350,7 +350,7 @@ namespace Dune {
       { // first call
         std::stringstream command;
         if (para.haspath())
-          command << para.path() << "/TetGen/";
+          command << para.path() << "/";
 
         command << "tetgen ";
         command << name << ".node";
