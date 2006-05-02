@@ -1900,7 +1900,6 @@ namespace Dune
 } // namespace Dune
 
 #include "agmemory.hh"
-#include <dune/io/file/asciiparser.hh>
 #include "albertagrid.cc"
 
 // undef all dangerous defines
