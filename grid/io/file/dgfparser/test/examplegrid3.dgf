@@ -12,7 +12,7 @@ Vertex       % some additional points
 Simplexgenerator  
 min-angle 30    % quality enhancment
 display 1       % area restriction
-path /home/robertk/DuneAdds/modules/ % show result using Triangle viewer
+path $HOME      % show result using Triangle viewer
 #
 BOUNDARYDOMAIN
 1   1 -1    1.25  1.25  % right boundary has id 1

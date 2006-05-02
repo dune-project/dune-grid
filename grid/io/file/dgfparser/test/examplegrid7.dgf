@@ -3,7 +3,7 @@ Simplexgenerator
 % min-angle 1.1        % quality enhancment 
 % max-area 0.1         % maximum element area restriction
 display 0              % show result using the Tetgen viewer
-path /home/robertk/DuneAdds/modules/TetGen % path to Tetgen
+path $HOME             % path to Tetgen
 #
 
 Interval

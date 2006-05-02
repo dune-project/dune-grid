@@ -2,7 +2,7 @@ DGF
 Simplexgenerator
 min-angle 30
 display 1
-path /usr/people/gersbach/work   % path to Triangle
+path $HOME  % path to Triangle
 #
 Vertex        % the verticies of the grid
 -1   -1       % vertex 0

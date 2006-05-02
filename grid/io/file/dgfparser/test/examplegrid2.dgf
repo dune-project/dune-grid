@@ -11,7 +11,7 @@ Vertex       % some additional points
 #
 Simplexgenerator
 display 1    % show result using Triangle viewer
-path /usr/people/gersbach/work   % path to Triangle
+path $HOME   % path to Triangle
 #
 BOUNDARYDOMAIN
 default 1    % all boundaries have id 1

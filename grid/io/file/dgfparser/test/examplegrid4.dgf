@@ -13,7 +13,7 @@ Simplexgenerator
 min-angle 30    % quality enhancment
 max-area 0.01   % area restriction
 display 1       % show result using Triangle viewer
-path /usr/people/gersbach/work   % path to Triangle
+path $HOME      % path to Triangle
 #
 BOUNDARYDOMAIN
 1  -1 -1    1 -1       % lower boundary has id 1
