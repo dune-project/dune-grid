@@ -10,9 +10,13 @@ Vertex       % some additional points
  1.25 1.25   % and one outside of the interval
 #
 Simplexgenerator  
-min-angle 30    % quality enhancment
-display 1       % area restriction
-path $HOME      % show result using Triangle viewer
+min-angle 30      % quality enhancment
+display 1         % show result using Triangle viewer
+% area restriction
+
+% to use Triangle from a certain path, uncomment this path line
+%path $HOME/bin   % path to Triangle
+
 #
 BOUNDARYDOMAIN
 1   1 -1    1.25  1.25  % right boundary has id 1

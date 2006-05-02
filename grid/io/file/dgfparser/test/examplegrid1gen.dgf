@@ -2,7 +2,10 @@ DGF
 Simplexgenerator
 min-angle 30
 display 1
-path $HOME  % path to Triangle
+
+% to use Triangle from a certain path, uncomment this path line 
+%path $HOME/bin  % path to Triangle
+
 #
 Vertex        % the verticies of the grid
 -1   -1       % vertex 0

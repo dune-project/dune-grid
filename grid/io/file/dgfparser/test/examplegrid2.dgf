@@ -11,7 +11,10 @@ Vertex       % some additional points
 #
 Simplexgenerator
 display 1    % show result using Triangle viewer
-path $HOME   % path to Triangle
+
+% to use Triangle from a certain path, uncomment path line 
+%path $HOME/bin   % path to Triangle
+
 #
 BOUNDARYDOMAIN
 default 1    % all boundaries have id 1
