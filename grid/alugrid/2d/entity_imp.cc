@@ -302,7 +302,8 @@ namespace Dune {
   //! element is coarsend -refCount times
   //! mark returns true if element was marked, otherwise false
   template<int dim, class GridImp>
-  inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const {
+  inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
+  {
     assert(item_ != 0);
 
     // if this assertion is thrown then you try to mark a non leaf entity

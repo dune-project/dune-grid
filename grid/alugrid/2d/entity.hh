@@ -529,7 +529,7 @@ namespace Dune {
 
     ThisType & operator = (const ThisType & org) {
       this->done();
-      //assert(&grid_ == &org.grid_);
+      assert(&grid_ == &org.grid_);
       item_ = org.item_;
       face_ = org.face_;
       level_ = org.level_;
