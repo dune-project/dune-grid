@@ -19,10 +19,11 @@ check_PROGRAMS = $(TESTS)
 
 mcmgmappertest_SOURCES = mcmgmappertest.cc
 mcmgmappertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
-mcmgmappertest_LDADD = $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
+mcmgmappertest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
 mcmgmappertest_DEPENDENCIES = $(LOCAL_LIBS)
 
 test_quadrature_SOURCES = test-quadrature.cc
+test_quadrature_LDADD = $(LOCAL_LIBS)
 test_quadrature_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules

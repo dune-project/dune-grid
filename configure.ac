@@ -15,7 +15,7 @@ fi
 
 # preset variable to path such that #include <dune/...> works
 AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
-AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS) $(DUNE_LIBS) -L$(top_builddir)/grid -lgrid')
+AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS) $(DUNE_LIBS)')
 AC_SUBST([LOCAL_LIBS], '$(top_builddir)/grid/libgrid.la')
 
 DUNE_SUMMARY_ALL

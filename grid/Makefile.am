@@ -2,7 +2,6 @@
 
 SUBDIRS = albertagrid alugrid common onedgrid sgrid uggrid utility yaspgrid \
 	test io
-
 noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
@@ -21,6 +20,7 @@ ALULIB = alugrid/libalu.la
 libgrid_la_SOURCES =
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(COMMONLIB) -lcommon
 
+# These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid
 grid_HEADERS = albertagrid.hh \
                alu3dgrid.hh \

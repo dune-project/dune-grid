@@ -3,6 +3,7 @@ Makefile.in
 .deps
 .libs
 mcmgmappertest
+test-quadrature
 semantic.cache
 *.gcda
 *.gcno
