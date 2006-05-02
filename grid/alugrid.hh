@@ -11,11 +11,25 @@
 
 namespace Dune {
 
-  // ALUGrid version supporting cubes
-  template <int dim,int dimworld> class ALUCubeGrid;
+  /**
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief 3D grid with support for hexahedrons.
+     @ingroup GridImplementations
+     The ALUCubeGrid implements the Dune GridInterface for 3d hexahedral meshes.
+     This grid can be locally adapted and used in parallel
+     computations using dynamcic load balancing.
 
-  // ALUGrid version supporting simplices
-  template <int dim,int dimworld> class ALUSimplexGrid;
+     @note
+     Adaptive parallel grid supporting dynamic load balancing, written
+     mainly by Bernard Schupp. This grid supports hexahedrons and tetrahedrons.
+
+     (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
+
+     Two tools are available for partitioning :
+     \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
+     \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+   */
+  template <int dim,int dimworld> class ALUCubeGrid;
 
   template <>
   class ALUCubeGrid<3,3> :
@@ -84,6 +98,29 @@ namespace Dune {
     };
 
   } // end namespace Capabilities
+
+
+  /**
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief grid with support for simplicial mesh in 2d and 3d.
+     @ingroup GridImplementations
+     The ALUSimplexGrid implements the Dune GridInterface for 2d triangular and
+     3d tetrahedral meshes.
+     This grid can be locally adapted and used in parallel
+     computations using dynamcic load balancing.
+
+     @note
+     Adaptive parallel grid supporting dynamic load balancing, written
+     mainly by Bernard Schupp. This grid supports hexahedrons and tetrahedrons.
+
+     (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
+
+     Two tools are available for partitioning :
+     \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
+     \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+   */
+  template <int dim,int dimworld> class ALUSimplexGrid;
+
   template <>
   class ALUSimplexGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
@@ -113,6 +150,25 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
   };
 
+  /**
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief grid with support for simplicial mesh in 2d and 3d.
+     @ingroup GridImplementations
+     The ALUSimplexGrid implements the Dune GridInterface for 2d triangular and
+     3d tetrahedral meshes.
+     This grid can be locally adapted and used in parallel
+     computations using dynamcic load balancing.
+
+     @note
+     Adaptive parallel grid supporting dynamic load balancing, written
+     mainly by Bernard Schupp. This grid supports hexahedrons and tetrahedrons.
+
+     (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
+
+     Two tools are available for partitioning :
+     \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
+     \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+   */
   template <>
   class ALUSimplexGrid<2,2> :
     public Dune::ALU2dGrid<2,2> {
@@ -175,7 +231,6 @@ namespace Dune {
     };
 
   } // end namespace Capabilities
-
 
 } //end  namespace Dune
 #endif
