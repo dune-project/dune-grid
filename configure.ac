@@ -46,12 +46,14 @@ AC_CONFIG_FILES([Makefile
     grid/yaspgrid/Makefile
     grid/onedgrid/Makefile
     grid/utility/Makefile
-    grid/alugrid/Makefile
     grid/alugrid/2d/Makefile
     grid/alugrid/3d/Makefile
+    grid/alugrid/Makefile
     grid/io/file/test/Makefile
     grid/io/file/amiramesh/Makefile
     grid/io/file/alberta/Makefile
+    grid/io/file/dgfparser/Makefile
+    grid/io/file/dgfparser/test/Makefile
     grid/io/file/Makefile
     grid/io/visual/grape/Makefile
     grid/io/visual/Makefile
