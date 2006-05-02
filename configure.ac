@@ -51,7 +51,6 @@ AC_CONFIG_FILES([Makefile
     grid/alugrid/Makefile
     grid/io/file/test/Makefile
     grid/io/file/amiramesh/Makefile
-    grid/io/file/alberta/Makefile
     grid/io/file/dgfparser/Makefile
     grid/io/file/dgfparser/test/Makefile
     grid/io/file/Makefile
