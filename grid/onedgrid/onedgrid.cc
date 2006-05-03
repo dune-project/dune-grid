@@ -582,6 +582,18 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
   return changedGrid;
 }
 
+template <int dim, int dimworld>
+void Dune::OneDGrid<dim,dimworld>::postAdapt()
+{
+  for (int i=0; i<=maxLevel(); i++) {
+    OneDEntityImp<1>* eIt;
+    for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_)
+      eIt->markState_ = OneDEntityImp<1>::NONE;
+
+  }
+
+}
+
 template < int dim, int dimworld >
 void Dune::OneDGrid < dim, dimworld >::setIndices()
 {

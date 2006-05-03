@@ -375,6 +375,9 @@ namespace Dune {
     //! Triggers the grid refinement process
     bool adapt();
 
+    /** \brief Adaptation post-processing: Reset all adaptation state flags */
+    void postAdapt();
+
     /** \brief Dynamic type identification */
     GridIdentifier type () const { return OneDGrid_Id; }
 
