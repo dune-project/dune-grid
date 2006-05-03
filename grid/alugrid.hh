@@ -11,6 +11,8 @@
 
 namespace Dune {
 
+  template <int dim,int dimworld> class ALUCubeGrid;
+
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons.
@@ -29,8 +31,6 @@ namespace Dune {
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
    */
-  template <int dim,int dimworld> class ALUCubeGrid;
-
   template <>
   class ALUCubeGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::hexa> {
@@ -100,6 +100,8 @@ namespace Dune {
   } // end namespace Capabilities
 
 
+  template <int dim,int dimworld> class ALUSimplexGrid;
+
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 2d and 3d.
@@ -119,8 +121,6 @@ namespace Dune {
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
    */
-  template <int dim,int dimworld> class ALUSimplexGrid;
-
   template <>
   class ALUSimplexGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
