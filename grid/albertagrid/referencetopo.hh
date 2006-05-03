@@ -56,25 +56,16 @@ namespace AlbertHelp {
     int em_[6];
     const int (&edgemap_)[6];
 
-    const int (&localTriangleFaceNumber_)[3][2];
-    int lTFN[3][2];
-
   public:
     //! create reference topology
     AlbertaGridReferenceTopology()
-      : edgemap_ (em_) , localTriangleFaceNumber_(lTFN)
+      : edgemap_ (em_)
     {
       // the edgemap , see ALBERTA docu
       for(int i=0; i<6; i++) em_[i] = dune2AlbertaEdgeMap[i];
-      for(int i=0; i<3; i++)
-      {
-        for(int j=0; j<2; j++) lTFN[i][j] = localTriangleFaceNumber[i][j];
-      }
     }
 
-    //static int mapVertices (int i, int face, int edge, int vertex)
-
-    //! dune to alberta edge mapping
+    //! dune to alberta vetex mapping
     //! this is the id
     int dune2albertaVertex( int i ) const { return i; }
 
