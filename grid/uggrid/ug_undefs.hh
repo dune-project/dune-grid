@@ -919,13 +919,11 @@
 #undef ALIGNMENT
 #undef ALIGNMASK
 #undef F77SYM
-#undef CLOCKS_PER_SEC
 #undef CURRENT_TIME
 #undef ARCHNAME
 #undef ALIGNMENT
 #undef ALIGNMASK
 #undef F77SYM
-#undef CLOCKS_PER_SEC
 #undef CURRENT_TIME
 #undef ARCHNAME
 #undef ALIGNMENT
