@@ -141,7 +141,7 @@ namespace Dune
   }
 
   template <class GridImp, int mydim, int cdim>
-  struct CalcElementMatrix
+  struct AlbertaCalcElementMatrix
   {
     enum { matdim = (mydim > 0) ? mydim : 1 };
     static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
@@ -159,7 +159,7 @@ namespace Dune
   };
 
   template <class GridImp>
-  struct CalcElementMatrix<GridImp,1,2>
+  struct AlbertaCalcElementMatrix<GridImp,1,2>
   {
     enum { mydim  = 1 };
     enum { cdim   = 2 };
@@ -177,7 +177,7 @@ namespace Dune
   };
 
   template <class GridImp>
-  struct CalcElementMatrix<GridImp,2,2>
+  struct AlbertaCalcElementMatrix<GridImp,2,2>
   {
     enum { mydim  = 2 };
     enum { cdim   = 2 };
@@ -197,7 +197,7 @@ namespace Dune
   };
 
   template <class GridImp>
-  struct CalcElementMatrix<GridImp,2,3>
+  struct AlbertaCalcElementMatrix<GridImp,2,3>
   {
     enum { mydim  = 2 };
     enum { cdim   = 3 };
@@ -216,7 +216,7 @@ namespace Dune
   };
 
   template <class GridImp>
-  struct CalcElementMatrix<GridImp,3,3>
+  struct AlbertaCalcElementMatrix<GridImp,3,3>
   {
     enum { mydim  = 3 };
     enum { cdim   = 3 };
@@ -241,7 +241,7 @@ namespace Dune
     if(!builtElMat_)
     {
       // build mapping from reference element to actual element
-      builtElMat_ = CalcElementMatrix<GridImp,mydim,cdim>::calcElMatrix(coord_,elMat_);
+      builtElMat_ = AlbertaCalcElementMatrix<GridImp,mydim,cdim>::calcElMatrix(coord_,elMat_);
     }
   }
 
@@ -1373,7 +1373,7 @@ namespace Dune
   // GeometryType schould be of type Dune::Geometry
   template <class GeometryType>
   static inline GeometryType &
-  getGeometryInFather(const int child, const int orientation = 1)
+  getAlbertaGeometryInFather(const int child, const int orientation = 1)
   {
     typedef typename GeometryType :: ImplementationType GeometryImp;
     static GeometryType child0       (GeometryImp(0,1)); // child 0
@@ -1391,7 +1391,7 @@ namespace Dune
   inline const AlbertaGridEntity <0,2,const AlbertaGrid<2,2> >::Geometry &
   AlbertaGridEntity <0,2,const AlbertaGrid<2,2> >::geometryInFather() const
   {
-    return getGeometryInFather<Geometry> (this->nChild());
+    return getAlbertaGeometryInFather<Geometry> (this->nChild());
   }
 
   template<>
@@ -1404,7 +1404,7 @@ namespace Dune
       (elInfo_->el_type == 1) ? -1 :
 #endif
       1;
-    return getGeometryInFather<Geometry> (this->nChild(),orientation);
+    return getAlbertaGeometryInFather<Geometry> (this->nChild(),orientation);
   }
   // end AlbertaGridEntity
 
@@ -2207,12 +2207,18 @@ namespace Dune
   //  setup for 2d
   //*****************************************
   template <class GridImp, int dimworld , int dim >
-  struct SetupVirtualNeighbour
+  struct SetupVirtualNeighbour;
+
+
+#if DIM == 2
+  template <class GridImp>
+  struct SetupVirtualNeighbour<GridImp,2,2>
   {
+    enum { dim      = 2 };
+    enum { dimworld = 2 };
     static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
                               const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
     {
-
       // vx is the face number in the neighbour
       const int (& neighmap)[dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[vx];
       // neighborCount is the face number in the actual element
@@ -2231,18 +2237,20 @@ namespace Dune
       return 1;
     }
   };
+#endif
 
   //******************************************
   //  setup for 3d
   //******************************************
 #if DIM == 3
-  template <class GridImp, int dimworld >
-  struct SetupVirtualNeighbour<GridImp,dimworld,3>
+  template <class GridImp>
+  struct SetupVirtualNeighbour<GridImp,3,3>
   {
+    enum { dim      = 3 };
+    enum { dimworld = 3 };
     static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
                               const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
     {
-      enum { dim = 3 };
       // the face might be twisted when look from different elements
       // default is no, and then rthe orientation is -1
       int facemap[dim]   = {0,1,2};
