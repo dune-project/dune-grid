@@ -532,7 +532,7 @@ namespace Dune
     //! volume of the reference element
     double volume () const
     {
-      return 0;
+      return 1;     // This must be 1 to make *= volume work!
     }
 
   private:
@@ -1008,7 +1008,7 @@ namespace Dune
     //! volume of the reference element
     double volume () const
     {
-      return 0;
+      return 1;
     }
 
   private:
