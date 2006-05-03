@@ -635,6 +635,7 @@ namespace Dune {
     dm.reserveMemory( newElements );
 
     bool ref = false ;
+#ifdef _ALU3DGRID_PARALLEL_
     if(globalIdSet_)
     {
       // if global id set exists then include into
@@ -651,6 +652,7 @@ namespace Dune {
       if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
     }
     else
+#endif
     {
       ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>,
           COType >
