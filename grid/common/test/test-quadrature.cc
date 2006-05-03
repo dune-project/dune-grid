@@ -5,7 +5,7 @@
 
 #include <config.h>
 
-#include <dune/quadrature/quadraturerules.hh>
+#include <dune/grid/common/quadraturerules.hh>
 #include <dune/grid/common/referenceelements.hh>
 
 double success = true;
