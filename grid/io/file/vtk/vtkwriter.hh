@@ -351,7 +351,10 @@ namespace Dune
       {
         std::ofstream file;
         char fullname[128];
-        sprintf(fullname,"%s.vtu",name);
+        if (n>1)
+          sprintf(fullname,"%s.vtu",name);
+        else
+          sprintf(fullname,"%s.vtp",name);
         if (datamode==VTKOptions::binaryappended)
           file.open(fullname,std::ios::binary);
         else
@@ -363,7 +366,10 @@ namespace Dune
       {
         std::ofstream file;
         char fullname[128];
-        sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
+        if (n>1)
+          sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
+        else
+          sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
         if (datamode==VTKOptions::binaryappended)
           file.open(fullname,std::ios::binary);
         else
@@ -644,11 +650,18 @@ namespace Dune
       s << "<?xml version=\"1.0\"?>" << std::endl;
 
       // VTKFile
-      s << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      if (n>1)
+        s << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      else
+        s << "<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
       indentUp();
 
       // UnstructuredGrid
-      indent(s); s << "<UnstructuredGrid>" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "<UnstructuredGrid>" << std::endl;
+      else
+        s << "<PolyData>" << std::endl;
       indentUp();
 
       // Piece
@@ -670,7 +683,14 @@ namespace Dune
               number[alpha] = nvertices++;
           }
         }
-      indent(s); s << "<Piece NumberOfPoints=\"" << nvertices << "\" NumberOfCells=\"" << ncells << "\">" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "<Piece NumberOfPoints=\"" << nvertices << "\" NumberOfCells=\"" << ncells << "\">" << std::endl;
+      else
+        s << "<Piece NumberOfPoints=\"" << nvertices << "\""
+          << " NumberOfVerts=\"0\""
+          << " NumberOfLines=\"" << ncells << "\">"
+          << " NumberOfPolys=\"0\"" << std::endl;
       indentUp();
 
       // PointData
@@ -691,7 +711,11 @@ namespace Dune
 
       // /UnstructuredGrid
       indentDown();
-      indent(s); s << "</UnstructuredGrid>" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "</UnstructuredGrid>" << std::endl;
+      else
+        s << "</PolyData>" << std::endl;
 
       // write appended binary dat section
       if (datamode==VTKOptions::binaryappended)
@@ -821,7 +845,11 @@ namespace Dune
 
     void writeCellsConforming (std::ostream& s)
     {
-      indent(s); s << "<Cells>" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "<Cells>" << std::endl;
+      else
+        s << "<Lines>" << std::endl;
       indentUp();
 
       // connectivity
@@ -856,23 +884,30 @@ namespace Dune
       delete p2;
 
       // types
-      VTKDataArrayWriter<unsigned char> *p3=0;
-      if (datamode==VTKOptions::ascii)
-        p3 = new VTKAsciiDataArrayWriter<unsigned char>(s,"types",1);
-      if (datamode==VTKOptions::binary)
-        p3 = new VTKBinaryDataArrayWriter<unsigned char>(s,"types",1,ncells);
-      if (datamode==VTKOptions::binaryappended)
-        p3 = new VTKBinaryAppendedDataArrayWriter<unsigned char>(s,"types",1,bytecount);
-      for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-        if (it->partitionType()==InteriorEntity)
-        {
-          int vtktype = vtkType(it->geometry().type());
-          p3->write(vtktype);
-        }
-      delete p3;
+      if (n>1)
+      {
+        VTKDataArrayWriter<unsigned char> *p3=0;
+        if (datamode==VTKOptions::ascii)
+          p3 = new VTKAsciiDataArrayWriter<unsigned char>(s,"types",1);
+        if (datamode==VTKOptions::binary)
+          p3 = new VTKBinaryDataArrayWriter<unsigned char>(s,"types",1,ncells);
+        if (datamode==VTKOptions::binaryappended)
+          p3 = new VTKBinaryAppendedDataArrayWriter<unsigned char>(s,"types",1,bytecount);
+        for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
+          if (it->partitionType()==InteriorEntity)
+          {
+            int vtktype = vtkType(it->geometry().type());
+            p3->write(vtktype);
+          }
+        delete p3;
+      }
 
       indentDown();
-      indent(s); s << "</Cells>" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "</Cells>" << std::endl;
+      else
+        s << "</Lines>" << std::endl;
     }
 
 
@@ -972,14 +1007,17 @@ namespace Dune
         }
 
       // cell types
-      blocklength = ncells * sizeof(unsigned char);
-      stream.write(blocklength);
-      for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-        if (it->partitionType()==InteriorEntity)
-        {
-          unsigned char vtktype = vtkType(it->geometry().type());
-          stream.write(vtktype);
-        }
+      if (n>1)
+      {
+        blocklength = ncells * sizeof(unsigned char);
+        stream.write(blocklength);
+        for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
+          if (it->partitionType()==InteriorEntity)
+          {
+            unsigned char vtktype = vtkType(it->geometry().type());
+            stream.write(vtktype);
+          }
+      }
 
       s << std::endl;
       indentDown();
