@@ -77,9 +77,6 @@
 #undef __PC__
 #undef FOR_DUNE
 
-/** \todo Remove this once getChildrenOfSubface is gone */
-#include <dune/common/array.hh>
-
 // The components of the UGGrid interface
 #include "uggrid/uggridgeometry.hh"
 #include "uggrid/uggridentity.hh"
