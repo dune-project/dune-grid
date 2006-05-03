@@ -41,7 +41,7 @@
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
 // Here: The 2d-version of the macros
-#include "uggrid/ugfunctions.hh"
+#include "uggrid/ugwrapper2d.hh"
 
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
@@ -68,7 +68,7 @@
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
 // This time it's the 3d-versions.
-#include "uggrid/ugfunctions3d.hh"
+#include "uggrid/ugwrapper3d.hh"
 
 // undef all macros defined by UG
 #include "uggrid/ug_undefs.hh"

@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_UG_FUNCTIONS_3D_HH
-#define DUNE_UG_FUNCTIONS_3D_HH
+#ifndef DUNE_UG_WRAPPER_3D_HH
+#define DUNE_UG_WRAPPER_3D_HH
 
 /** \file
  * \brief Encapsulates some UG macros and functions

@@ -13,10 +13,10 @@ endif
 uggriddir = $(includedir)/dune/grid/uggrid/
 uggrid_HEADERS = uggridgeometry.cc \
   uggridentitypointer.hh uggridhieriterator.cc ugintersectionit.cc \
-  ugfunctions.hh uggridentity.hh uggridgeometry.hh \
+  ugwrapper2d.hh ugwrapper3d.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   ugintersectionit.hh ugtypes.hh ug_undefs.hh uggridindexsets.hh \
-  ugfunctions3d.hh uggridleafiterator.hh boundaryextractor.hh \
+  uggridleafiterator.hh boundaryextractor.hh \
   uggridrenumberer.hh
 
 # tricks like undefAllMacros.pl don't have to be shipped, have they?
