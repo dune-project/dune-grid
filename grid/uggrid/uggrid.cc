@@ -123,7 +123,8 @@ inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL),
                                                   globalIdSet_(*this),
                                                   localIdSet_(*this),
                                                   refinementType_(LOCAL),
-                                                  omitGreenClosure_(false)
+                                                  omitGreenClosure_(false),
+                                                  someElementHasBeenMarkedForRefinement_(false)
 {
   init(500, 10);
 }
@@ -135,7 +136,8 @@ inline Dune::UGGrid < dim, dimworld >::UGGrid(unsigned int heapSize, unsigned en
     globalIdSet_(*this),
     localIdSet_(*this),
     refinementType_(LOCAL),
-    omitGreenClosure_(false)
+    omitGreenClosure_(false),
+    someElementHasBeenMarkedForRefinement_(false)
 {
   init(heapSize, envHeapSize);
 }
@@ -428,6 +430,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
                                       0)      // Irrelevant if refinement rule is not BLUE
         ) DUNE_THROW(GridError, "UG" << dim << "d::MarkForRefinement returned error code!");
 
+    someElementHasBeenMarkedForRefinement_ = true;
     return true;
   } else if (refCount==-1) {
 
@@ -436,6 +439,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
                                       0)      // Irrelevant if refinement rule is not BLUE
         ) DUNE_THROW(GridError, "UG" << dim << "d::MarkForRefinement returned error code!");
 
+    someElementHasBeenMarkedForRefinement_ = true;
     return true;
   } else
     DUNE_THROW(GridError, "UGGrid only supports refCount values -1, 0, and for mark()!");
@@ -452,6 +456,8 @@ bool Dune::UGGrid < dim, dimworld >::mark(const typename Traits::template Codim<
   if (!UG_NS<dim>::isLeaf(target))
     return false;
 
+  someElementHasBeenMarkedForRefinement_ = true;
+
   return UG_NS<dim>::MarkForRefinement(target, rule, side);
 
 }
@@ -460,7 +466,7 @@ template < int dim, int dimworld >
 bool Dune::UGGrid < dim, dimworld >::preAdapt()
 {
   // returns always true, because for red-green refinement always some
-  // elements are coarsend, even if not marked.
+  // elements are coarsened, even if not marked.
   return true;
 }
 
@@ -505,9 +511,15 @@ bool Dune::UGGrid < dim, dimworld >::adapt()
   // Renumber everything
   setIndices();
 
-  /** \bug Should return true only if at least one element has actually
-      been refined */
-  return true;
+  // The Dune grid interface specifies that adapt() should return true iff the grid has
+  // been changed.  It is difficult to get that information from UG.  Therefore we
+  // return true iff some element had been marked for some form of refinement before.
+  // If this errs, it errs conservatively.
+  // What do you need that return value for anyways?
+  bool returnValue = someElementHasBeenMarkedForRefinement_;
+  someElementHasBeenMarkedForRefinement_ = false;
+
+  return returnValue;
 }
 
 template <int dim, int dimworld>

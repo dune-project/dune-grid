@@ -560,6 +560,13 @@ namespace Dune {
      */
     static int numOfUGGrids;
 
+    /** \brief Remember whether some element has been marked for refinement
+        ever since the last call to adapt().
+
+        This is here to implement the return value of adapt().
+     */
+    bool someElementHasBeenMarkedForRefinement_;
+
     /** \brief The arguments to UG's newformat command
      *
      * They need to be allocated dynamically, because UG writes into
