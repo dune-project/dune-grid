@@ -170,7 +170,7 @@ namespace Dune {
         the required header files for the desired grid and the macrogrid parser
         are included.
      -# By directly including one of the files macrogrid*.hh
-        from the dune/grid/utility/macrogridparser directory: \n
+        from the dune/grid/io/file/dgfparser directory: \n
         in this case only the required header files for the
         desired grid and the macrogrid parser are included but no typedef is made.
 
