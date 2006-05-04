@@ -310,7 +310,10 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
   for (int i=1; i<=maxLevel(); i++) {
     int n = 0;
 
-    for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
+    for (eIt = elements[i].begin; eIt!=NULL; ) {
+
+      OneDEntityImp<1>* leftElement = eIt->pred_;
+      OneDEntityImp<1>* rightElement = eIt->succ_;
 
       // ensure grid conformity
       if (n%2 == 0 && eIt->isLeaf())
@@ -326,10 +329,6 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
       }
 
       if (eIt->markState_ == OneDEntityImp<1>::COARSEN && eIt->isLeaf()) {
-
-        OneDEntityImp<1>* leftElement = eIt->pred_;
-
-        OneDEntityImp<1>* rightElement = eIt->succ_;
 
         // Is the left vertex obsolete?
         if (leftElement==NULL || leftElement->vertex_[1] != eIt->vertex_[0]) {
@@ -351,15 +350,21 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
           eIt->father_->sons_[1] = NULL;
         }
 
+        // Paranoia: make sure the father is not marked for refinement
+        if (n%2 == 1)
+          eIt->father_->markState_ = OneDEntityImp<1>::NONE;
+
         // Actually delete element
         elements[i].remove(eIt);
         delete(eIt);
 
-        if (n%2 == 1) eIt->father_->markState_ = OneDEntityImp<1>::NONE;
-
         // The grid has been changed
         changedGrid = true;
       }
+
+      // increment pointer
+      eIt = rightElement;
+
       n++;
     }
 
