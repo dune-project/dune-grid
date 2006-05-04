@@ -162,8 +162,6 @@ namespace Dune {
         \c ALBERTAGRID ,
         \c ALUGRID_CUBE ,
         \c ALUGRID_SIMPLEX ,
-        \c ALUGRID_PLL_CUBE ,
-        \c ALUGRID_PLL_SIMPLEX ,
         \c SGRID , or
         \c YASPGRID
         and the integer
