@@ -369,7 +369,7 @@ namespace Dune
         if (n>1)
           sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
         else
-          sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
+          sprintf(fullname,"%s-%04d-%04d.vtp",name,grid.comm().size(),grid.comm().rank());
         if (datamode==VTKOptions::binaryappended)
           file.open(fullname,std::ios::binary);
         else
@@ -379,7 +379,10 @@ namespace Dune
         grid.comm().barrier();
         if (grid.comm().rank()==0)
         {
-          sprintf(fullname,"%s-%04d.pvtu",name,grid.comm().size());
+          if (n>1)
+            sprintf(fullname,"%s-%04d.pvtu",name,grid.comm().size());
+          else
+            sprintf(fullname,"%s-%04d.pvtp",name,grid.comm().size());
           file.open(fullname);
           writeParallelHeader(file,name,"");
           file.close();
@@ -485,7 +488,10 @@ namespace Dune
         sprintf(relpiecepath,"%s",extendpath);
       }
       char fullname[256];
-      sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,name,grid.comm().size(),grid.comm().rank());
+      if (n>1)
+        sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,name,grid.comm().size(),grid.comm().rank());
+      else
+        sprintf(fullname,"%s%s-%04d-%04d.vtp",piecepath,name,grid.comm().size(),grid.comm().rank());
       if (datamode==VTKOptions::binaryappended)
         file.open(fullname,std::ios::binary);
       else
@@ -495,7 +501,10 @@ namespace Dune
       grid.comm().barrier();
       if (grid.comm().rank()==0)
       {
-        sprintf(fullname,"%s%s-%04d.pvtu",path,name,grid.comm().size());
+        if (n>1)
+          sprintf(fullname,"%s%s-%04d.pvtu",path,name,grid.comm().size());
+        else
+          sprintf(fullname,"%s%s-%04d.pvtp",path,name,grid.comm().size());
         file.open(fullname);
         writeParallelHeader(file,name,relpiecepath);
         file.close();
@@ -544,11 +553,18 @@ namespace Dune
       s << "<?xml version=\"1.0\"?>" << std::endl;
 
       // VTKFile
-      s << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      if (n>1)
+        s << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      else
+        s << "<VTKFile type=\"PPolyData\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
       indentUp();
 
       // PUnstructuredGrid
-      indent(s); s << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
+      else
+        s << "<PPolyData GhostLevel=\"0\">" << std::endl;
       indentUp();
 
       // PPointData
@@ -630,13 +646,20 @@ namespace Dune
       for (int i=0; i<grid.comm().size(); i++)
       {
         char fullname[128];
-        sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,piecename,grid.comm().size(),i);
+        if (n>1)
+          sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,piecename,grid.comm().size(),i);
+        else
+          sprintf(fullname,"%s%s-%04d-%04d.vtp",piecepath,piecename,grid.comm().size(),i);
         indent(s); s << "<Piece Source=\"" << fullname << "\"/>" << std::endl;
       }
 
       // /PUnstructuredGrid
       indentDown();
-      indent(s); s << "</PUnstructuredGrid>" << std::endl;
+      indent(s);
+      if (n>1)
+        s << "</PUnstructuredGrid>" << std::endl;
+      else
+        s << "</PPolyData>" << std::endl;
 
       // /VTKFile
       indentDown();
