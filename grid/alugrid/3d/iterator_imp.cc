@@ -260,7 +260,7 @@ namespace Dune {
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
   ALU3dGridIntersectionIterator<GridImp>::outside () const
   {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     if(connector_.ghostBoundary())
     {
       const BNDFaceType * ghost = &connector_.boundaryFace();

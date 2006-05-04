@@ -31,7 +31,7 @@ namespace Dune {
     typedef typename ALU3dImplTraits<type>::GEOFaceType GEOFaceType;
     typedef typename ALU3dImplTraits<type>::GEOElementType GEOElementType;
     typedef typename ALU3dImplTraits<type>::IMPLElementType IMPLElementType;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     typedef typename ALU3dImplTraits<type>::PLLBndFaceType BndFaceType;
 #else
     typedef typename ALU3dImplTraits<type>::BNDFaceType BndFaceType;

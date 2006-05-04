@@ -53,12 +53,12 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::
   ALU3dGrid(const std::string macroTriangFilename
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
             , MPI_Comm mpiComm
 #endif
             )
     : mygrid_ (0)
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
       , mpAccess_(mpiComm)
       , myRank_( mpAccess_.myrank() )
 #else
@@ -76,13 +76,13 @@ namespace Dune {
     makeGeomTypes();
 
     mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
                                              , mpAccess_
 #endif
                                              );
     assert(mygrid_ != 0);
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     //loadBalance();
     __MyRank__ = mpAccess_.myrank();
 
@@ -101,7 +101,7 @@ namespace Dune {
     std::cout << "Created ALU3dGrid from macro grid file '" << macroTriangFilename << "'. \n\n";
   }
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm)
     : mygrid_ (0)
@@ -222,7 +222,7 @@ namespace Dune {
     assert( sizeCache_ );
     int size = sizeCache_->size(codim);
 
-    //#ifdef _ALU3DGRID_PARALLEL_
+    //#if ALU3DGRID_PARALLEL
     if(elType == tetra)
     {
       // first is zero, because already exact size
@@ -274,7 +274,7 @@ namespace Dune {
     bool isSimplex = (elType == tetra) ? true : false;
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     {
       ghostElements_ = 0;
       typedef typename Traits :: template Codim<0> ::template
@@ -581,7 +581,7 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::adapt()
   {
     bool ref = false;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     if(globalIdSet_)
     {
       std::cout << "Start adapt with globalIdSet prolong \n";
@@ -635,7 +635,7 @@ namespace Dune {
     dm.reserveMemory( newElements );
 
     bool ref = false ;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     if(globalIdSet_)
     {
       // if global id set exists then include into
@@ -689,24 +689,7 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()
   {
-#ifndef _ALU3DGRID_PARALLEL_
-    //  if(mpAccess_.nlinks() < 1)
-    //#endif
-    {
-      maxlevel_ = 0;
-      ALU3DSPACE BSLeafIteratorMaxLevel w ( myGrid() ) ;
-      for (w->first () ; ! w->done () ; w->next ())
-      {
-        if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
-        w->item ().resetRefinedTag();
-
-        // note, resetRefinementRequest sets the request to coarsen
-        //w->item ().resetRefinementRequest();
-      }
-    }
-    //#ifdef _ALU3DGRID_PARALLEL_
-#else
-    //  else
+#if ALU3DGRID_PARALLEL
     {
       // we have to walk over all hierarchcy because during loadBalance
       // we get newly refined elements, which have to be cleared
@@ -741,13 +724,28 @@ namespace Dune {
         //w->item ().resetRefinementRequest();
       }
     }
+#else
+    //  if(mpAccess_.nlinks() < 1)
+    //#endif
+    {
+      maxlevel_ = 0;
+      ALU3DSPACE BSLeafIteratorMaxLevel w ( myGrid() ) ;
+      for (w->first () ; ! w->done () ; w->next ())
+      {
+        if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
+        w->item ().resetRefinedTag();
+
+        // note, resetRefinementRequest sets the request to coarsen
+        //w->item ().resetRefinementRequest();
+      }
+    }
 #endif
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
   inline T ALU3dGrid<dim, dimworld, elType>::globalMin(T val) const
   {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     T ret = mpAccess_.gmin(val);
     return ret;
 #else
@@ -757,7 +755,7 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
   inline T ALU3dGrid<dim, dimworld, elType>::globalMax(T val) const
   {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     T ret = mpAccess_.gmax(val);
     return ret;
 #else
@@ -767,7 +765,7 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
   inline T ALU3dGrid<dim, dimworld, elType>::globalSum(T val) const
   {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     T sum = mpAccess_.gsum(val);
     return sum;
 #else
@@ -777,7 +775,7 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
   inline void ALU3dGrid<dim, dimworld, elType>::globalSum(T * send, int s , T * recv) const
   {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     mpAccess_.gsum(send,s,recv);
     return ;
 #else
@@ -791,7 +789,7 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance()
   {
     if( psize() <= 1 ) return false ;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     bool changed = myGrid().duneLoadBalance();
     if(changed)
     {
@@ -810,7 +808,7 @@ namespace Dune {
   loadBalance(DataCollectorType & dc)
   {
     if( psize() <= 1 ) return false ;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
 
     typedef typename EntityObject :: ImplementationType EntityImp;
     EntityObject en     ( EntityImp(*this, this->maxLevel()) );
@@ -851,7 +849,7 @@ namespace Dune {
      template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataCollectorType>
      inline bool ALU3dGrid<dim, dimworld, elType>::communicate(DataCollectorType & dc)
      {
-     #ifdef _ALU3DGRID_PARALLEL_
+     #if ALU3DGRID_PARALLEL
      EntityImp en ( *this, this->maxLevel() );
 
      ALU3DSPACE GatherScatterExchange < ALU3dGrid<dim, dimworld, elType> , EntityImp ,
@@ -871,7 +869,7 @@ namespace Dune {
   communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
   {
     if( psize() <= 1 ) return ;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
     typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
@@ -1084,7 +1082,7 @@ namespace Dune {
       }
 
       mygrid_ = new ALU3DSPACE GitterImplType (macroName
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
                                                , mpAccess_
 #endif
                                                );

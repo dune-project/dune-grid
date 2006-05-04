@@ -15,16 +15,22 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-#ifdef HAVE_MPI_CPP
-// if this variable is defined,
-// // then parallel version of ALUGrid is compiled
-#ifndef _ALU3DGRID_PARALLEL_
-#define _ALU3DGRID_PARALLEL_
-#endif
-#endif
+//#include <defalugridparallel.h>
+#define ALU3DGRID_PARALLEL 0
+
+/*
+   #ifdef HAVE_MPI_CPP
+   // if this variable is defined,
+   // // then parallel version of ALUGrid is compiled
+   #if ALU3DGRID_PARALLEL == 0
+   #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
+   using the MPI compiler script or compile Dune without the MPI support!"
+   #endif
+   #endif
+ */
 
 // if MPI was found include all headers
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
 #include <alugrid_parallel.h>
 #else
 // if not, include only headers for serial version
@@ -34,7 +40,7 @@
 
 namespace ALUGridSpace {
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
   typedef GatherScatter GatherScatterType;
 
   typedef GitterDunePll GitterType;
@@ -232,7 +238,7 @@ namespace Dune {
     VertexListType vertexList_;
   };
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
   static int __MyRank__ = -1;
 #endif
 } // end namespace Dune
@@ -241,5 +247,6 @@ namespace Dune {
 #undef _ANSI_HEADER
 #undef _ANSI_HEADER_DEFINED_HERE
 #endif
+
 
 #endif

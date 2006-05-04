@@ -76,7 +76,7 @@ namespace Dune {
     //! Type of the local id set
     typedef ALU3dGridLocalIdSet<dim,dimworld,elType> LocalIdSetImp;
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     //! Type of the global id set
     typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
 #else
@@ -138,7 +138,7 @@ namespace Dune {
       typedef IndexSet<GridImp,LeafIndexSetImp,DefaultLeafIteratorTypes<GridImp> > LeafIndexSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
 #else
       typedef LocalIdSet GlobalIdSet;
@@ -263,7 +263,7 @@ namespace Dune {
 
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     ALU3dGrid(const std::string macroTriangFilename , MPI_Comm mpiComm = MPI_COMM_WORLD );
     ALU3dGrid(MPI_Comm mpiComm = MPI_COMM_WORLD);
 #else
@@ -541,14 +541,14 @@ namespace Dune {
 
     // the real grid
     mutable ALU3DSPACE GitterImplType * mygrid_;
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
     const int myRank_;
 
   public:
     int nlinks () const {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
       return mpAccess_.nlinks();
 #endif
       return 1;
@@ -557,7 +557,7 @@ namespace Dune {
   private:
     // return number of global processes, i.e. MPI_Comm_size
     int psize () const {
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
       return mpAccess_.psize();
 #endif
       return 1;

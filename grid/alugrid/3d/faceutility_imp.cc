@@ -45,7 +45,7 @@ namespace Dune {
     } // end if
 
     outerBoundary_ = outerElement_->isboundary();
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
     // check for ghosts
     // this check is only need in the parallel case
     if( outerBoundary_ )

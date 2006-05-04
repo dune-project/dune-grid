@@ -385,7 +385,7 @@ namespace ALUGridSpace {
     }
   };
 
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
 
   class LeafLevelIteratorTT
   {
