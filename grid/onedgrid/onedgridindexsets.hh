@@ -233,12 +233,22 @@ namespace Dune {
       // //////////////////////////////
       //   Init the vertex indices
       // //////////////////////////////
-      typename GridImp::Traits::template Codim<1>::LeafIterator vIt    = grid_.template leafbegin<1>();
-      typename GridImp::Traits::template Codim<1>::LeafIterator vEndIt = grid_.template leafend<1>();
 
       numVertices_ = 0;
-      for (; vIt!=vEndIt; ++vIt)
-        grid_.getRealImplementation(*vIt).target_->leafIndex_ = numVertices_++;
+
+      for (int i=grid_.maxLevel(); i>=0; i--) {
+
+        OneDEntityImp<0>* vIt;
+        for (vIt = grid_.vertices[i].begin; vIt!=NULL; vIt = vIt->succ_) {
+
+          if (vIt->isLeaf())
+            vIt->leafIndex_ = numVertices_++;
+          else
+            vIt->leafIndex_ = vIt->son_->leafIndex_;
+
+        }
+
+      }
 
       // ///////////////////////////////////////////////
       //   Update the list of geometry types present
