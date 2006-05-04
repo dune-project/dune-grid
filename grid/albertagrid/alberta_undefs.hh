@@ -7,10 +7,6 @@
  * This file is created automatically by the perl script <tt>undefAllMacros.pl</tt>.
  */
 
-#ifdef _ALBERTA_H_
-  #undef _ALBERTA_H_
-#endif // _ALBERTA_H_
-
 #ifdef ALBERTA_VERSION
   #undef ALBERTA_VERSION
 #endif // ALBERTA_VERSION
