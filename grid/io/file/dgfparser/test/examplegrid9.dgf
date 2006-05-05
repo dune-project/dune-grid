@@ -1,0 +1,14 @@
+DGF
+Simplexgenerator
+%min-angle 1.4        % quality enhancment 
+%max-area 5.0         % maximum element area restriction
+display 0             % show result using the Tetgen viewer
+
+% to use TetGen from a certain path, uncomment this path line
+% path $HOME/bin      % path to Tetgen
+meshfile Globe_cut    % download from here: http://www-c.inria.fr/Eric.Saltel/download/affichage.php?dir=GEOGRAPH&name=Globe_cut
+#
+
+BOUNDARYDOMAIN
+default 1
+#
