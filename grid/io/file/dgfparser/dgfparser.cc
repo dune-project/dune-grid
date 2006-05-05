@@ -209,9 +209,11 @@ namespace Dune {
       }
       // now read macrogrid segments... (works at the moment only for simplex)
       BoundarySegBlock segbound(gridin, nofvtx,dimw);
-      if (segbound.isactive()) {
+      if (segbound.isactive())
+      {
         std::vector<int> bound(dimw+1);
-        for (nofbound=0; segbound.ok(); segbound.next(), nofbound++) {
+        for (nofbound=0; segbound.ok(); segbound.next(), nofbound++)
+        {
           for (int j=0; j<dimw+1; j++) {
             bound[j] = segbound[j];
           }
@@ -287,45 +289,58 @@ namespace Dune {
   inline int DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
     VertexBlock bvtx(gridin,dimw);
     IntervalBlock interval(gridin);
-    if (!interval.isactive() && !bvtx.isactive()) {
-      std::cerr << "No vertex information found!" << std::endl;
-      return 0;
-    }
-    nofvtx = 0;
-    if (interval.ok()) {
-      std::cout << "Reading verticies from IntervalBlock" << std::flush;
-      dimw = interval.dimw();
-      nofvtx += interval.getVtx(vtx);
-      std::cout << "Done." << std::endl;
-    }
-    if (bvtx.ok()) {
-      std::cout << "Reading verticies from VertexBlock" << std::flush;
-      nofvtx += bvtx.get(vtx);
-      std::cout << "Done." << std::endl;
-    }
-    if (dimw!=2 && dimw!=3) {
-      std::cerr << "SimplexGen can only generate 2d or 3d meshes but not in "
-                << dimw << " dimensions!" << std::endl;
-      return 0;
-    }
-    std::string name = "/tmp/gridparsertmpfile.nodelists";
+    SimplexGenerationBlock para(gridin);
+
+    std::string name = "gridparsertmpfile.nodelists";
+    int offset = 0;
+
+    if(!para.hasmeshfile())
     {
-      std::string tmpname = name;
-      tmpname += ".node";
-      std::ofstream nodes(tmpname.c_str());
-      nodes << nofvtx << " " << dimw << " 0 1" << std::endl;
-      for (int n=0; n<nofvtx; n++) {
-        nodes << n << " ";
-        for (int j=0; j<dimw; j++) {
-          nodes << vtx[n][j] << " ";
+      if (!interval.isactive() && !bvtx.isactive()) {
+        std::cerr << "No vertex information found!" << std::endl;
+        abort();
+        return 0;
+      }
+      nofvtx = 0;
+      if (interval.ok()) {
+        std::cout << "Reading verticies from IntervalBlock" << std::flush;
+        dimw = interval.dimw();
+        nofvtx += interval.getVtx(vtx);
+        std::cout << "Done." << std::endl;
+      }
+      if (bvtx.ok()) {
+        std::cout << "Reading verticies from VertexBlock" << std::flush;
+        nofvtx += bvtx.get(vtx);
+        std::cout << "Done." << std::endl;
+      }
+      if (dimw!=2 && dimw!=3) {
+        std::cerr << "SimplexGen can only generate 2d or 3d meshes but not in "
+                  << dimw << " dimensions!" << std::endl;
+        return 0;
+      }
+
+      {
+        std::string tmpname = name;
+        tmpname += ".node";
+        std::ofstream nodes(tmpname.c_str());
+        nodes << nofvtx << " " << dimw << " 0 1" << std::endl;
+        for (int n=0; n<nofvtx; n++)
+        {
+          nodes << n << " ";
+          for (int j=0; j<dimw; j++) {
+            nodes << vtx[n][j] << " ";
+          }
+          nodes << "1";
+          nodes << std::endl;
         }
-        nodes << "1";
-        nodes << std::endl;
       }
     }
-    SimplexGenerationBlock para(gridin);
+    else
+      dimw = 3;
+
     int call_nr = 1;
-    if (dimw==2) {
+    if (dimw==2)
+    {
       std::stringstream command;
       if (para.haspath())
         command << para.path() << "/";
@@ -346,14 +361,27 @@ namespace Dune {
         system(command.str().c_str());
       }
     }
-    else if (dimw==3) {
+    else if (dimw==3)
+    {
       { // first call
         std::stringstream command;
+        std::string suffix;
+
         if (para.haspath())
           command << para.path() << "/";
 
+        if(para.hasmeshfile())
+        {
+          name = para.meshfile();
+          suffix = ".mesh";
+        }
+        else
+        {
+          suffix = ".node";
+        }
+
         command << "tetgen ";
-        command << name << ".node";
+        command << name << suffix;
         std::cout << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
@@ -362,20 +390,25 @@ namespace Dune {
         call_nr = 2;
         std::stringstream command;
         if (para.haspath())
-          command << para.path() << "/TetGen/";
+          command << para.path() << "/";
+
         command << "tetgen -r";
         if (para.minAngle()>0)
           command << "q" << para.minAngle();
+
         if (para.maxArea()>0)
           command << "a" << para.maxArea();
+
         command << " " << name << ".1.node";
         std::cout << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
-      if (para.display()) {
+      if (para.display())
+      {
         std::stringstream command;
         if (para.haspath())
-          command << para.path() << "/TetGen/";
+          command << para.path() << "/";
+
         command << "tetview-linux " << name << "." << call_nr << ".ele";
         std::cout << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
@@ -385,20 +418,39 @@ namespace Dune {
       std::stringstream nodename;
       nodename << name << "." << call_nr << ".node";
       int tmp,params;
-      std::ifstream node(nodename.str().c_str());
-      node >> nofvtx >> tmp >> tmp >> params;
-      vtx.resize(nofvtx);
-      for (int i=0; i<nofvtx; i++) {
-        vtx[i].resize(dimw);
-        int nr;
-        node >> nr;
-        for (int v=0; v<dimw; v++)
-          node >> vtx[i][v];
-        for (int p=0; p<params; p++)
-          node >> tmp;
-        assert(nr==i);
+
+      if(para.hasmeshfile())
+      {
+        std::cout << "calculating offset from " << nodename.str() << " .... offset = ";
+        std::ifstream node(nodename.str().c_str());
+        node >> nofvtx >> tmp >> tmp >> params;
+        // offset is 0 by default
+        // the offset it the difference of the first vertex number to zero
+        node >> offset;
+        std::cout << offset << " \n";
+      }
+
+      {
+        // first token is number of vertex which should equal i
+        std::cout << "opening " << nodename.str() << "\n";
+        std::ifstream node(nodename.str().c_str());
+        node >> nofvtx >> tmp >> tmp >> params;
+        vtx.resize(nofvtx);
+        for (int i=0; i<nofvtx; i++)
+        {
+          vtx[i].resize(dimw);
+          int nr;
+          node >> nr;
+          // first token is number of vertex which should equal i
+          assert(nr-offset==i);
+          for (int v=0; v<dimw; v++)
+            node >> vtx[i][v];
+          for (int p=0; p<params; p++)
+            node >> tmp;
+        }
       }
     }
+
     {
       std::stringstream elname;
       elname << name << "." << call_nr << ".ele";
@@ -406,13 +458,18 @@ namespace Dune {
       std::ifstream ele(elname.str().c_str());
       ele >> nofelements >> tmp >> tmp;
       elements.resize(nofelements);
-      for (int i=0; i<nofelements; i++) {
+      for (int i=0; i<nofelements; i++)
+      {
         elements[i].resize(dimw+1);
         int nr;
         ele >> nr;
+        assert(nr-offset==i);
         for (int v=0; v<dimw+1; v++)
-          ele >> elements[i][v];
-        assert(nr==i);
+        {
+          int elno;
+          ele >> elno;
+          elements[i][v] = elno - offset;
+        }
       }
     }
     return 1;
