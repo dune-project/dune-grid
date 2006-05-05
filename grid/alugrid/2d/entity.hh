@@ -336,7 +336,7 @@ namespace Dune {
       return ((item_->is(ALU2DSPACE Refco::crs))==1);
     }
     bool wasRefined () const {
-      return ((item_->wasRefined())==1);
+      return false; //((item_->wasRefined())==1);
     }
     //!<-----
 
