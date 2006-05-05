@@ -332,12 +332,26 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 
         // Is the left vertex obsolete?
         if (leftElement==NULL || leftElement->vertex_[1] != eIt->vertex_[0]) {
+
+          // If the left vertex has a father remove the reference to this vertex at this father
+          if (n%2==0) {
+            assert(eIt->father_->vertex_[0]->son_ = eIt->vertex_[0]);
+            eIt->father_->vertex_[0]->son_ = NULL;
+          }
+
           vertices[i].remove(eIt->vertex_[0]);
           delete(eIt->vertex_[0]);
         }
 
         // Is the right vertex obsolete?
         if (rightElement==NULL || rightElement->vertex_[0] != eIt->vertex_[1]) {
+
+          // If the left vertex has a father remove the reference to this vertex at this father
+          if (n%2==1) {
+            assert(eIt->father_->vertex_[1]->son_ = eIt->vertex_[1]);
+            eIt->father_->vertex_[1]->son_ = NULL;
+          }
+
           vertices[i].remove(eIt->vertex_[1]);
           delete(eIt->vertex_[1]);
         }
