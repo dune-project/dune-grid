@@ -336,7 +336,7 @@ namespace Dune {
       return ((item_->is(ALU2DSPACE Refco::crs))==1);
     }
     bool wasRefined () const {
-      return ((item_->was(ALU2DSPACE Refco::ref))==1);
+      return ((item_->wasRefined())==1);
     }
     //!<-----
 
@@ -398,7 +398,7 @@ namespace Dune {
     mutable GeometryImp & geoImp_;
     mutable bool builtgeometry_; //!< true if geometry has been constructed
 
-    mutable GeometryImp geoInFather_;
+    //mutable GeometryImp geoInFather_;
     //int index_; //! level index of entity
 
     mutable int walkLevel_; //! tells the actual level of walk put to LevelIterator..
@@ -444,30 +444,30 @@ namespace Dune {
       : grid_(grid)
         //, item_(const_cast<ElementType *>(&item))
         , item_(const_cast<ElementType *>(&item))
-        , entity_(0)
-        , entityImp_(0)
         , level_(-1)
         , face_(face)
+        , entity_(0)
+        , entityImp_(0)
     { }
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
     ALU2dGridEntityPointer(const GridImp & grid)
       : grid_(grid)
         , item_(0)
+        , level_(-1)
+        , face_(-1)
         , entity_(0)
         , entityImp_(0)
-        , face_(-1)
-        , level_(-1)
     { }
 
     //! Copy Constructor
     ALU2dGridEntityPointer(const ThisType & org)
       : grid_(org.grid_)
         , item_(org.item_)
+        , level_(org.level_)
+        , face_(org.face_)
         , entity_(org.entity_)
         , entityImp_(0)
-        , face_(org.face_)
-        , level_(org.level_)
     {
       if(org.entity_)
       {

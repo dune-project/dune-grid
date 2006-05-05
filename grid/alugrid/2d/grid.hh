@@ -257,14 +257,15 @@ namespace Dune {
       : mesh_ (macroTriangFilename.c_str())
         , hIndexSet_(*this)
         , globalIdSet_(0)
-        , geomTypes_(dim+1,1)
         , localIdSet_(*this)
-        , maxLevel_(0)
         , levelIndexVec_(MAXL,0)
+        , geomTypes_(dim+1,1)
         , leafIndexSet_(0)
+        , maxLevel_(0)
         , refineMarked_ (0)
         , coarsenMarked_ (0)
         , sizeCache_(0)
+
     {
       //assert(mesh_ != 0);
       makeGeomTypes();
@@ -442,10 +443,6 @@ namespace Dune {
       return ALU2dGridEntityFactory<ThisType,codim>::freeEntity(entityProvider_, en);
     }
 
-    // at the moment the number of different geom types is 1
-    enum { numberOfGeomTypes = 1 };
-    std::vector< std::vector<GeometryType> > geomTypes_;
-
     // create GeomTypes
     void makeGeomTypes ();
     friend class Conversion<ALU2dGrid<dim, dimworld>, HasObjectStream>;
@@ -470,6 +467,10 @@ namespace Dune {
 
     //! the level index set ( default type )
     mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
+
+    // at the moment the number of different geom types is 1
+    enum { numberOfGeomTypes = 1 };
+    std::vector< std::vector<GeometryType> > geomTypes_;
 
     //! the leaf index set
     mutable LeafIndexSetImp * leafIndexSet_;

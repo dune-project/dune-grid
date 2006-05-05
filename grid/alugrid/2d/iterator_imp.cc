@@ -346,13 +346,13 @@ namespace Dune {
   inline TreeIterator<cdim, pitype, GridImp> ::
   TreeIterator(const GridImp & grid, bool end) :
     EntityPointerType (grid),
-    elem_(0),
-    iter_(),
     endIter_(end),
     level_(0),
     face_(0),
-    isCopy_(0) {
-
+    isCopy_(0),
+    elem_(0),
+    iter_()
+  {
     if(!end) {
       IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()));
       iter_.store( it );
@@ -380,12 +380,13 @@ namespace Dune {
   inline TreeIterator<cdim, pitype, GridImp> ::
   TreeIterator(const GridImp & grid, int level, bool end) :
     EntityPointerType (grid),
-    elem_(0),
-    iter_(),
     endIter_(end),
     level_(level),
     face_(0),
-    isCopy_(0) {
+    isCopy_(0),
+    elem_(0),
+    iter_()
+  {
 
     if(!end) {
       IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()), level_);
@@ -416,12 +417,13 @@ namespace Dune {
   inline TreeIterator<cdim, pitype, GridImp> ::
   TreeIterator(const TreeIterator<cdim,pitype,GridImp> & org)
     : EntityPointerType (org)
-      , iter_ ( org.iter_ )
-      , elem_(org.elem_)
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
-      , isCopy_(org.isCopy_+1)  {
+      , isCopy_(org.isCopy_+1)
+      , elem_(org.elem_)
+      , iter_ ( org.iter_ )
+  {
     // don't copy a copy of a copy of a copy of a copy
     assert( org.isCopy_ < 3 );
   }
@@ -547,13 +549,12 @@ namespace Dune {
   inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
   ALU2dGridLevelIterator(const GridImp & grid, int level, bool end) :
     EntityPointerType (grid),
-    iter_(),
     endIter_(end),
     level_(level),
     face_(0),
     isCopy_(0),
-    nrOfVertices_(grid.size(2))
-  {
+    nrOfVertices_(grid.size(2)),
+    iter_() {
 
     indexList = new double[nrOfVertices_];
     for (int i = 0; i < nrOfVertices_; ++i)
@@ -584,7 +585,6 @@ namespace Dune {
   inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
   ALU2dGridLevelIterator(const ALU2dGridLevelIterator<2,pitype,GridImp> & org)
     : EntityPointerType (org)
-      , iter_ ( org.iter_ )
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
@@ -592,6 +592,7 @@ namespace Dune {
       , nrOfVertices_(org.nrOfVertices_)
       , item_(org.item_)
       , vertex_(org.vertex_)
+      , iter_ ( org.iter_ )
   {
 
     indexList = new double[nrOfVertices_];

@@ -91,12 +91,13 @@ namespace Dune {
     : grid_(org.grid_),
       item_(org.item_),
       father_(org.father_),
-      level_(org.level_),
-      face_(org.face_),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
       builtgeometry_(false),
-      localFCoordCalced_(org.localFCoordCalced_) {}
+      level_(org.level_),
+      face_(org.face_),
+      localFCoordCalced_(org.localFCoordCalced_),
+      localFatherCoords_() { }
 
   //! geometry of this entity
   template<int cd, int dim, class GridImp>
@@ -170,22 +171,27 @@ namespace Dune {
   //! Constructor creating empty Entity
   template<int dim, class GridImp>
   inline ALU2dGridEntity<0,dim,GridImp> ::
-  ALU2dGridEntity(const GridImp &grid, int level) : grid_(grid)
-                                                    , item_(0)
-                                                    , geoObj_(GeometryImp())
-                                                    , geoImp_(grid_.getRealImplementation(geoObj_))
-                                                    , builtgeometry_(false)
-                                                    //, index_()
-                                                    , walkLevel_ (level)
-                                                    , isLeaf_ (false) {}
+  ALU2dGridEntity(const GridImp &grid, int level) :
+    grid_(grid)
+    , item_(0)
+    , geoObj_(GeometryImp())
+    , geoImp_(grid_.getRealImplementation(geoObj_))
+    , builtgeometry_(false)
+    //, index_()
+    , walkLevel_ (level)
+    , isLeaf_ (false) {}
 
   //! Copy Constructor
   template<int dim, class GridImp>
   inline ALU2dGridEntity<0, dim, GridImp> ::
   ALU2dGridEntity(const ALU2dGridEntity<0,dim,GridImp> & org)
-    : grid_(org.grid_), item_(org.item_), walkLevel_(org.walkLevel_), geoObj_(GeometryImp())
-      , geoImp_(grid_.getRealImplementation(geoObj_))
-      , builtgeometry_(false), isLeaf_(org.isLeaf_) {}
+    : grid_(org.grid_),
+      item_(org.item_),
+      geoObj_(GeometryImp()),
+      geoImp_(grid_.getRealImplementation(geoObj_)),
+      builtgeometry_(false),
+      walkLevel_(org.walkLevel_),
+      isLeaf_(org.isLeaf_) { }
 
   //! level of this element
   template<int dim, class GridImp>
@@ -226,21 +232,23 @@ namespace Dune {
 
   // singletons of geometry in father geometries
   // GeometryType schould be of type Dune::Geometry
-  template <class GeometryType>
-  static inline GeometryType &
-  getGeometryInFather(const int child, const int orientation = 1)
-  {
-    typedef typename GeometryType :: ImplementationType GeometryImp;
-    static GeometryType child0       (GeometryImp(0,1)); // child 0
-    static GeometryType child1_plus  (GeometryImp(1,1)); // child 1
-    static GeometryType child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
+  /*
+     template <class GeometryType>
+     static inline GeometryType &
+     getGeometryInFather(const int child, const int orientation = 1)
+     {
+     typedef typename GeometryType :: ImplementationType GeometryImp;
+     static GeometryType child0       (GeometryImp(0,1)); // child 0
+     static GeometryType child1_plus  (GeometryImp(1,1)); // child 1
+     static GeometryType child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
 
-    if(child == 0) return child0;
-    if(child == 1) return (orientation > 0) ? child1_plus : child1_minus;
+     if(child == 0) return child0;
+     if(child == 1) return (orientation > 0) ? child1_plus : child1_minus;
 
-    DUNE_THROW(NotImplemented,"wrong number of child given!");
-    return child0;
-  }
+     DUNE_THROW(NotImplemented,"wrong number of child given!");
+     return child0;
+     }
+   */
 
   template<int dim, class GridImp>
   inline const typename ALU2dGridEntity<0, dim, GridImp>:: Geometry & ALU2dGridEntity<0,dim,GridImp> ::
@@ -304,7 +312,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
   {
-    assert(item_ != 0);
+    //assert(item_ != 0);
 
     // if this assertion is thrown then you try to mark a non leaf entity
     // which is leads to unpredictable results

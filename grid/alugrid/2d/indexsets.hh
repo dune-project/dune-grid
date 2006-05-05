@@ -126,420 +126,421 @@ namespace Dune {
   };
 
 
+
+  //*****************************************************************
+  //
+  //  --GlobalIdSet
+  //
+  //*****************************************************************
   /*
-     //*****************************************************************
-     //
-     //  --GlobalIdSet
-     //
-     //*****************************************************************
      //! global id set for ALU2dGrid
      template <int dim, int dimworld>
      class ALU2dGridGlobalIdSet :
-      public IdSetDefaultImplementation  < ALU2dGrid<dim,dimworld> ,
-                     ALU2dGridGlobalIdSet<dim,dimworld> ,
-                     typename
-                       ALU2dGrid<dim,dimworld>::Traits::GlobalIdType >
+     public IdSetDefaultImplementation  < ALU2dGrid<dim,dimworld> ,
+                   ALU2dGridGlobalIdSet<dim,dimworld> ,
+                   typename
+                     ALU2dGrid<dim,dimworld>::Traits::GlobalIdType >
      {
-      typedef ALU2dGrid<dim,dimworld> GridType;
-      typedef typename GridType :: HierarchicIndexSet  HierarchicIndexSetType;
+     typedef ALU2dGrid<dim,dimworld> GridType;
+     typedef typename GridType :: HierarchicIndexSet  HierarchicIndexSetType;
 
-      // ???
-      typedef ALU2dImplTraits<elType> ImplTraitsType;
-      typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
-      typedef typename ImplTraitsType::GEOFaceType GEOFaceType;
-      typedef typename ImplTraitsType::GEOEdgeType GEOEdgeType;
+     // ???
+     typedef ALU2dImplTraits<elType> ImplTraitsType;
+     typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
+     typedef typename ImplTraitsType::GEOFaceType GEOFaceType;
+     typedef typename ImplTraitsType::GEOEdgeType GEOEdgeType;
 
-      typedef ALU3DSPACE HElementType HElementType;
-      typedef ALU3DSPACE HFaceType HFaceType;
-      typedef ALU3DSPACE HEdgeType HEdgeType;
-      typedef ALU3DSPACE VertexType VertexType;
+     typedef ALU3DSPACE HElementType HElementType;
+     typedef ALU3DSPACE HFaceType HFaceType;
+     typedef ALU3DSPACE HEdgeType HEdgeType;
+     typedef ALU3DSPACE VertexType VertexType;
 
-      enum { vertexShiftBits = 32 };
-      enum { codimShiftBits  = 2  };
-      enum { levelShiftBits  = 6  };
-      enum { nChildShiftBits = 4  };
+     enum { vertexShiftBits = 32 };
+     enum { codimShiftBits  = 2  };
+     enum { levelShiftBits  = 6  };
+     enum { nChildShiftBits = 4  };
 
      public:
-      //! export type of id
-      typedef typename ALU2dGrid<dim,dimworld>::Traits::GlobalIdType IdType;
+     //! export type of id
+     typedef typename ALU2dGrid<dim,dimworld>::Traits::GlobalIdType IdType;
 
      private:
-      enum { numCodim = dim+1 };
+     enum { numCodim = dim+1 };
 
-      // this means that only up to 300000000 entities are allowed
-      typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
+     // this means that only up to 300000000 entities are allowed
+     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
 
-      //! create id set, only allowed for ALU3dGrid
-      ALU2dGridGlobalIdSet(const GridType & grid) : grid_(grid), hset_(grid.hierarchicIndexSet())
+     //! create id set, only allowed for ALU3dGrid
+     ALU2dGridGlobalIdSet(const GridType & grid) : grid_(grid), hset_(grid.hierarchicIndexSet())
+     {
+      if(elType == hexa)
       {
-        if(elType == hexa)
-        {
-          // see ALUGrid/src/serial/gitter_mgb.cc
-          // InsertUniqueHexa
-          const int vxKey[4] = {0,1,3,4};
-          for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
-        }
-        else
-        {
-          assert( elType == tetra );
-          // see ALUGrid/src/serial/gitter_mgb.cc
-          // InsertUniqueTetra
-          const int vxKey[4] = {0,1,2,3};
-          for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
-        }
-
-        // setup the id set
-        buildIdSet();
+        // see ALUGrid/src/serial/gitter_mgb.cc
+        // InsertUniqueHexa
+        const int vxKey[4] = {0,1,3,4};
+        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
+      }
+      else
+      {
+        assert( elType == tetra );
+        // see ALUGrid/src/serial/gitter_mgb.cc
+        // InsertUniqueTetra
+        const int vxKey[4] = {0,1,2,3};
+        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
       }
 
-      // update id set after adaptation
-      void updateIdSet()
-      {
-        // to be revised
-        buildIdSet();
-      }
+      // setup the id set
+      buildIdSet();
+     }
 
-      // print all ids
-      void print () const
+     // update id set after adaptation
+     void updateIdSet()
+     {
+      // to be revised
+      buildIdSet();
+     }
+
+     // print all ids
+     void print () const
+     {
+      for(int i=0 ;i<numCodim; ++i)
       {
-        for(int i=0 ;i<numCodim; ++i)
+        std::cout << "*****************************************************\n";
+        std::cout << "Ids for codim " << i << "\n";
+        std::cout << "*****************************************************\n";
+        for(unsigned int k=0; k<ids_[i].size(); ++k)
         {
-          std::cout << "*****************************************************\n";
-          std::cout << "Ids for codim " << i << "\n";
-          std::cout << "*****************************************************\n";
-          for(unsigned int k=0; k<ids_[i].size(); ++k)
-          {
-            std::cout << "Item[" << i << "," << k <<"] has id " << ids_[i][k] << "\n";
-          }
-          std::cout << "\n\n\n";
+          std::cout << "Item[" << i << "," << k <<"] has id " << ids_[i][k] << "\n";
         }
+        std::cout << "\n\n\n";
       }
+     }
 
-      void checkId(const IdType & id , int codim , unsigned int num ) const
+     void checkId(const IdType & id , int codim , unsigned int num ) const
+     {
+      for(int i=0 ;i<numCodim; ++i)
       {
-        for(int i=0 ;i<numCodim; ++i)
+        for(unsigned int k=0; k<ids_[i].size(); ++k)
         {
-          for(unsigned int k=0; k<ids_[i].size(); ++k)
-          {
-            if((i == codim) && (k == num)) continue;
-            assert(!(id == ids_[i][k]));
-          }
-        }
-      }
-
-      // check id set for uniqueness
-      void uniquenessCheck() const
-      {
-        for(int i=0 ;i<numCodim; i++)
-        {
-          for(unsigned int k=0; k<ids_[i].size(); ++k)
-          {
-            checkId(ids_[i][k],i,k);
-          }
+          if((i == codim) && (k == num)) continue;
+          assert(!(id == ids_[i][k]));
         }
       }
+     }
 
-      // creates the id set
-      void buildIdSet ()
+     // check id set for uniqueness
+     void uniquenessCheck() const
+     {
+      for(int i=0 ;i<numCodim; i++)
       {
-        for(int i=0; i<numCodim; ++i)
+        for(unsigned int k=0; k<ids_[i].size(); ++k)
         {
-          ids_[i].resize( hset_.size(i) );
-          for(unsigned int k=0; k<ids_[i].size(); ++k)
-          {
-            ids_[i][k] = -1;
-          }
+          checkId(ids_[i][k],i,k);
         }
+      }
+     }
 
-        ALU2DSPACE GitterImplType & gitter = const_cast<ALU2DSPACE
-          GitterImplType &> (grid_.myGrid());
-
+     // creates the id set
+     void buildIdSet ()
+     {
+      for(int i=0; i<numCodim; ++i)
+      {
+        ids_[i].resize( hset_.size(i) );
+        for(unsigned int k=0; k<ids_[i].size(); ++k)
         {
-          ALU2DSPACE AccessIterator <VertexType>::Handle fw (gitter.container ()) ;
-          for (fw.first () ; ! fw.done () ; fw.next ())
-          {
-            int idx = fw.item().getIndex();
-            ids_[3][idx] = buildVertexId( fw.item() );
-          }
+          ids_[i][k] = -1;
         }
-
-        // create ids for all macro edges
-        {
-          ALU3DSPACE AccessIterator <HEdgeType> :: Handle w (gitter.container ()) ;
-          for (w.first(); !w.done(); w.next())
-          {
-            int idx = w.item().getIndex();
-            ids_[2][idx] = buildEdgeId( w.item() );
-            buildEdgeIds( w.item() , ids_[2][idx] , 0 );
-          }
-        }
-
-        // for all macro faces and all children
-        {
-          ALU3DSPACE AccessIterator <HFaceType>::Handle w (gitter.container ()) ;
-          for (w.first () ; ! w.done () ; w.next ())
-          {
-            int idx = w.item().getIndex();
-            ids_[1][idx] = buildFaceId( w.item() );
-            buildFaceIds( w.item() , ids_[1][idx] , 0 );
-          }
-        }
-
-        // for all macro elements and all internal entities
-        {
-          ALU3DSPACE AccessIterator <HElementType> :: Handle w (gitter.container ()) ;
-          for (w.first () ; ! w.done () ; w.next ())
-          {
-            int idx = w.item().getIndex();
-            ids_[0][idx] = buildMacroId( w.item() );
-            buildElementIds( w.item() , ids_[0][idx] , 0);
-          }
-        }
-
-        uniquenessCheck();
-        //print();
       }
 
-      IdType buildVertexId(const VertexType & item )
-      {
-        // first the codim
-        IdType id(3);
+      ALU2DSPACE GitterImplType & gitter = const_cast<ALU2DSPACE
+        GitterImplType &> (grid_.myGrid());
 
-        // then the four identifying vertex indices
-        int idx = item.ident();
+      {
+        ALU2DSPACE AccessIterator <VertexType>::Handle fw (gitter.container ()) ;
+        for (fw.first () ; ! fw.done () ; fw.next ())
+        {
+          int idx = fw.item().getIndex();
+          ids_[3][idx] = buildVertexId( fw.item() );
+        }
+      }
+
+      // create ids for all macro edges
+      {
+        ALU3DSPACE AccessIterator <HEdgeType> :: Handle w (gitter.container ()) ;
+        for (w.first(); !w.done(); w.next())
+        {
+          int idx = w.item().getIndex();
+          ids_[2][idx] = buildEdgeId( w.item() );
+          buildEdgeIds( w.item() , ids_[2][idx] , 0 );
+        }
+      }
+
+      // for all macro faces and all children
+      {
+        ALU3DSPACE AccessIterator <HFaceType>::Handle w (gitter.container ()) ;
+        for (w.first () ; ! w.done () ; w.next ())
+        {
+          int idx = w.item().getIndex();
+          ids_[1][idx] = buildFaceId( w.item() );
+          buildFaceIds( w.item() , ids_[1][idx] , 0 );
+        }
+      }
+
+      // for all macro elements and all internal entities
+      {
+        ALU3DSPACE AccessIterator <HElementType> :: Handle w (gitter.container ()) ;
+        for (w.first () ; ! w.done () ; w.next ())
+        {
+          int idx = w.item().getIndex();
+          ids_[0][idx] = buildMacroId( w.item() );
+          buildElementIds( w.item() , ids_[0][idx] , 0);
+        }
+      }
+
+      uniquenessCheck();
+      //print();
+     }
+
+     IdType buildVertexId(const VertexType & item )
+     {
+      // first the codim
+      IdType id(3);
+
+      // then the four identifying vertex indices
+      int idx = item.ident();
+      id = id << vertexShiftBits;
+      id = id+ IdType(idx);
+
+      //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
+      // create offset
+      id = id << 3*vertexShiftBits;
+      return id;
+     }
+
+     IdType buildEdgeId(const HEdgeType & item )
+     {
+      const GEOEdgeType & elem = static_cast<const GEOEdgeType &> (item);
+      assert( elem.level () == 0);
+      //assert( elem.nChild() == 0);
+
+      // first the codim
+      IdType id(2);
+
+      // then the four identifying vertex indices
+      for(int i=0; i<2; i++)
+      {
+        int idx = elem.myvertex(i)->ident();
         id = id << vertexShiftBits;
         id = id+ IdType(idx);
-
-        //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
-        // create offset
-        id = id << 3*vertexShiftBits;
-        return id;
       }
 
-      IdType buildEdgeId(const HEdgeType & item )
+      // create offset
+      id = id << 2*vertexShiftBits;
+
+      //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
+      return id;
+     }
+
+     IdType buildFaceId(const HFaceType & item )
+     {
+      const GEOFaceType & elem = static_cast<const GEOFaceType &> (item);
+      assert( elem.level () == 0);
+      //assert( elem.nChild() == 0);
+
+      // first the codim
+      IdType id(1);
+
+      // then the four identifying vertex indices
+      for(int i=0; i<3; i++)
       {
-        const GEOEdgeType & elem = static_cast<const GEOEdgeType &> (item);
-        assert( elem.level () == 0);
-        //assert( elem.nChild() == 0);
-
-        // first the codim
-        IdType id(2);
-
-        // then the four identifying vertex indices
-        for(int i=0; i<2; i++)
-        {
-          int idx = elem.myvertex(i)->ident();
-          id = id << vertexShiftBits;
-          id = id+ IdType(idx);
-        }
-
-        // create offset
-        id = id << 2*vertexShiftBits;
-
-        //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
-        return id;
-      }
-
-      IdType buildFaceId(const HFaceType & item )
-      {
-        const GEOFaceType & elem = static_cast<const GEOFaceType &> (item);
-        assert( elem.level () == 0);
-        //assert( elem.nChild() == 0);
-
-        // first the codim
-        IdType id(1);
-
-        // then the four identifying vertex indices
-        for(int i=0; i<3; i++)
-        {
-          int idx = elem.myvertex(i)->ident();
-          id = id << vertexShiftBits;
-          id = id+ IdType(idx);
-        }
-
-        // create offset
+        int idx = elem.myvertex(i)->ident();
         id = id << vertexShiftBits;
-        //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
-        return id;
+        id = id+ IdType(idx);
       }
 
-      IdType buildMacroId(const ALU3DSPACE HElementType & item )
+      // create offset
+      id = id << vertexShiftBits;
+      //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
+      return id;
+     }
+
+     IdType buildMacroId(const ALU3DSPACE HElementType & item )
+     {
+      const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
+      assert( elem.level () == 0);
+      //assert( elem.nChild() == 0);
+
+
+      // first the codim
+      IdType id(0);
+
+      // then the four identifying vertex indices
+      for(int i=0; i<4; i++)
       {
-        const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
-        assert( elem.level () == 0);
-        //assert( elem.nChild() == 0);
-
-
-        // first the codim
-        IdType id(0);
-
-        // then the four identifying vertex indices
-        for(int i=0; i<4; i++)
-        {
-          int idx = elem.myvertex(vertexKey_[i])->ident();
-          id = id << vertexShiftBits;
-          id = id+ IdType(idx);
-        }
-
-        //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
-        return id;
+        int idx = elem.myvertex(vertexKey_[i])->ident();
+        id = id << vertexShiftBits;
+        id = id+ IdType(idx);
       }
 
-      template <int cd>
-      IdType createId(const typename ImplTraitsType::
-          template Codim<cd>::InterfaceType & item , const IdType & fatherId , int nChild )
+      //std::cout << "Element[" << elem.getIndex() << "] has id = " <<id<< " key\n";
+      return id;
+     }
+
+     template <int cd>
+     IdType createId(const typename ImplTraitsType::
+        template Codim<cd>::InterfaceType & item , const IdType & fatherId , int nChild )
+     {
+      // id is fathers id + number of child
+      IdType id(fatherId);
+
+      id = id << codimShiftBits;
+      id = id + IdType(cd);
+
+      id = id << nChildShiftBits;
+      id = id + IdType(nChild);
+
+      //std::cout << "Item<" << cd << ">[" << elem.getIndex() << "] has id = " <<id<< " key\n";
+      return id;
+     }
+
+     void buildElementIds(const HElementType & item , const IdType & macroId , int nChild )
+     {
+      enum { codim = 0 };
+      ids_[codim][item.getIndex()] = createId<codim>(item,macroId,nChild);
+      const IdType & fatherId = ids_[codim][item.getIndex()];
+
+      // build id for inner vertex
       {
-        // id is fathers id + number of child
-        IdType id(fatherId);
-
-        id = id << codimShiftBits;
-        id = id + IdType(cd);
-
-        id = id << nChildShiftBits;
-        id = id + IdType(nChild);
-
-        //std::cout << "Item<" << cd << ">[" << elem.getIndex() << "] has id = " <<id<< " key\n";
-        return id;
+        const VertexType * v = item.innerVertex() ;
+        if(v) buildVertexIds(*v,fatherId );
       }
 
-      void buildElementIds(const HElementType & item , const IdType & macroId , int nChild )
+      // build edge ids for all inner edges
       {
-        enum { codim = 0 };
-        ids_[codim][item.getIndex()] = createId<codim>(item,macroId,nChild);
-        const IdType & fatherId = ids_[codim][item.getIndex()];
-
-        // build id for inner vertex
+        int inneredge = 0;
+        for(const HEdgeType * e = item.innerHedge () ; e ; e = e->next ())
         {
-          const VertexType * v = item.innerVertex() ;
-          if(v) buildVertexIds(*v,fatherId );
-        }
-
-        // build edge ids for all inner edges
-        {
-          int inneredge = 0;
-          for(const HEdgeType * e = item.innerHedge () ; e ; e = e->next ())
-          {
-            buildEdgeIds(*e,fatherId,inneredge);
+          buildEdgeIds(*e,fatherId,inneredge);
      ++inneredge;
-          }
         }
+      }
 
-        // build face ids for all inner faces
+      // build face ids for all inner faces
+      {
+        int innerface = 0;
+        for(const HFaceType * f = item.innerHface () ; f ; f = f->next ())
         {
-          int innerface = 0;
-          for(const HFaceType * f = item.innerHface () ; f ; f = f->next ())
-          {
-            buildFaceIds(*f,fatherId,innerface);
+          buildFaceIds(*f,fatherId,innerface);
      ++innerface;
-          }
         }
+      }
 
-        // build ids of all children
+      // build ids of all children
+      {
+        int numChild = 0;
+        for(const HElementType * child = item.down(); child; child =child->next() )
         {
-          int numChild = 0;
-          for(const HElementType * child = item.down(); child; child =child->next() )
-          {
-            buildElementIds(*child, fatherId, numChild);
+          buildElementIds(*child, fatherId, numChild);
      ++numChild;
-          }
         }
       }
+     }
 
-      void buildFaceIds(const HFaceType & face, const IdType & fatherId , int
-          innerFace )
+     void buildFaceIds(const HFaceType & face, const IdType & fatherId , int
+        innerFace )
+     {
+      enum { codim = 1 };
+      ids_[codim][face.getIndex()] = createId<codim>(face,fatherId,innerFace);
+      const IdType & faceId = ids_[codim][face.getIndex()];
+      // build id for inner vertex
       {
-        enum { codim = 1 };
-        ids_[codim][face.getIndex()] = createId<codim>(face,fatherId,innerFace);
-        const IdType & faceId = ids_[codim][face.getIndex()];
-        // build id for inner vertex
-        {
-          const VertexType * v = face.innerVertex() ;
-          if(v) buildVertexIds(*v,faceId );
-        }
+        const VertexType * v = face.innerVertex() ;
+        if(v) buildVertexIds(*v,faceId );
+      }
 
-        // build ids for all inner edges
+      // build ids for all inner edges
+      {
+        int inneredge = 0;
+        for (const HEdgeType * e = face.innerHedge () ; e ; e = e->next ())
         {
-          int inneredge = 0;
-          for (const HEdgeType * e = face.innerHedge () ; e ; e = e->next ())
-          {
-            buildEdgeIds(*e,faceId ,inneredge );
+          buildEdgeIds(*e,faceId ,inneredge );
      ++inneredge;
-          }
-        }
-
-        // build ids for all child faces
-        {
-          int child = 0;
-          for(const HFaceType * f = face.down () ; f ; f = f->next ())
-          {
-            buildFaceIds(*f,faceId,child);
-     ++child;
-          }
         }
       }
 
-      void buildEdgeIds(const HEdgeType & edge, const IdType & fatherId , int inneredge )
+      // build ids for all child faces
       {
-        enum { codim = 2 };
-        ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge);
-        const IdType & edgeId = ids_[codim][edge.getIndex()];
-
-        // build id for inner vertex
+        int child = 0;
+        for(const HFaceType * f = face.down () ; f ; f = f->next ())
         {
-          const VertexType * v = edge.innerVertex() ;
-          if(v) buildVertexIds(*v,edgeId );
-        }
-
-        // build ids for all inner edges
-        {
-          int child = 0;
-          for (const HEdgeType * e = edge.down () ; e ; e = e->next ())
-          {
-            buildEdgeIds(*e,edgeId , child );
+          buildFaceIds(*f,faceId,child);
      ++child;
-          }
         }
       }
+     }
 
-      void buildVertexIds(const VertexType & vertex, const IdType & fatherId )
+     void buildEdgeIds(const HEdgeType & edge, const IdType & fatherId , int inneredge )
+     {
+      enum { codim = 2 };
+      ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge);
+      const IdType & edgeId = ids_[codim][edge.getIndex()];
+
+      // build id for inner vertex
       {
-        enum { codim = 3 };
-        ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,0);
+        const VertexType * v = edge.innerVertex() ;
+        if(v) buildVertexIds(*v,edgeId );
       }
 
-      friend class ALU3dGrid<dim,dimworld,elType>;
+      // build ids for all inner edges
+      {
+        int child = 0;
+        for (const HEdgeType * e = edge.down () ; e ; e = e->next ())
+        {
+          buildEdgeIds(*e,edgeId , child );
+     ++child;
+        }
+      }
+     }
+
+     void buildVertexIds(const VertexType & vertex, const IdType & fatherId )
+     {
+      enum { codim = 3 };
+      ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,0);
+     }
+
+     friend class ALU3dGrid<dim,dimworld,elType>;
      public:
-      //! return global id of given entity
-      template <class EntityType>
-      IdType id (const EntityType & ep) const
-      {
-        enum { cd = EntityType :: codimension };
-        return ids_[cd][hset_.index(ep)];
-      }
+     //! return global id of given entity
+     template <class EntityType>
+     IdType id (const EntityType & ep) const
+     {
+      enum { cd = EntityType :: codimension };
+      return ids_[cd][hset_.index(ep)];
+     }
 
-      //! return global id of given entity
-      template <int codim>
-      IdType id (const typename GridType:: template Codim<codim> :: Entity & ep) const
-      {
-        return ids_[codim][hset_.index(ep)];
-      }
+     //! return global id of given entity
+     template <int codim>
+     IdType id (const typename GridType:: template Codim<codim> :: Entity & ep) const
+     {
+      return ids_[codim][hset_.index(ep)];
+     }
 
-      //! return subId of given entity
-      template <int cd>
-      IdType subId (const EntityCodim0Type & ep, int i) const
-      {
-        return ids_[cd][hset_.template subIndex<cd>(ep,i)];
-      }
+     //! return subId of given entity
+     template <int cd>
+     IdType subId (const EntityCodim0Type & ep, int i) const
+     {
+      return ids_[cd][hset_.template subIndex<cd>(ep,i)];
+     }
 
      private:
-      mutable std::vector< IdType > ids_[numCodim];
-      // our Grid
-      const GridType & grid_;
+     mutable std::vector< IdType > ids_[numCodim];
+     // our Grid
+     const GridType & grid_;
 
-      // the hierarchicIndexSet
-      const HierarchicIndexSetType & hset_;
+     // the hierarchicIndexSet
+     const HierarchicIndexSetType & hset_;
 
-      int vertexKey_[4];
+     int vertexKey_[4];
      };
    */
 
