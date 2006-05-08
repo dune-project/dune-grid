@@ -29,6 +29,7 @@ echo
 
 # write output
 AC_CONFIG_FILES([Makefile
+    lib/Makefile
     doc/appl/refelements/Makefile
     doc/appl/Makefile
     doc/refinement/Makefile
