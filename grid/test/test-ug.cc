@@ -133,103 +133,95 @@ void markOne ( GridType & grid , int num , int ref )
   grid.postAdapt();
 }
 
-int main () {
-  try {
+int main () try
+{
 
-    // ////////////////////////////////////////////////////////////////////////
-    //  Do the standard grid test for a 2d UGGrid
-    // ////////////////////////////////////////////////////////////////////////
+  // ////////////////////////////////////////////////////////////////////////
+  //  Do the standard grid test for a 2d UGGrid
+  // ////////////////////////////////////////////////////////////////////////
+  // extra-environment to check destruction
+  {
 
-    // extra-environment to check destruction
-    {
-      std::cout << std::endl << "UGGrid<2,2> with grid file: ug-testgrid-2.am"
-                << std::endl << std::endl;
-      Dune::UGGrid<2,2> grid;
-      Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(grid, "ug-testgrid-2.am");
+    std::cout << "Testing UGGrid<2,2> with grid file: ug-testgrid-2.am" << std::endl;
+    std::cout << "Testing UGGrid<3,3> with grid file: ug-testgrid-3.am" << std::endl;
 
-      // check macro grid
-      gridcheck(grid);
+    Dune::UGGrid<2,2> grid2d;
+    Dune::UGGrid<3,3> grid3d;
 
-      // create hybrid grid
-      markOne(grid,0,1) ;
-      gridcheck(grid);
+    Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(grid2d, "ug-testgrid-2.am");
+    Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(grid3d, "ug-testgrid-3.am");
 
-      grid.globalRefine(1);
-      gridcheck(grid);
+    // check macro grid
+    gridcheck(grid2d);
+    gridcheck(grid3d);
 
-      // check the method geometryInFather()
-      checkGeometryInFather(grid);
+    // create hybrid grid
+    markOne(grid2d,0,1) ;
+    markOne(grid3d,0,1) ;
+    gridcheck(grid2d);
+    gridcheck(grid3d);
 
-      // check the intersection iterator
-      checkIntersectionIterator(grid);
-    }
+    grid2d.globalRefine(1);
+    grid3d.globalRefine(1);
+    gridcheck(grid2d);
+    gridcheck(grid3d);
 
-    // ////////////////////////////////////////////////////////////////////////
-    //  Do the standard grid test for a 3d UGGrid
-    // ////////////////////////////////////////////////////////////////////////
-    {
-      std::cout << std::endl << "UGGrid<3,3> with grid file: ug-testgrid-3.am"
-                << std::endl << std::endl;
-      Dune::UGGrid<3,3> grid;
-      Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(grid, "ug-testgrid-3.am");
+    // check the method geometryInFather()
+    checkGeometryInFather(grid2d);
+    checkGeometryInFather(grid3d);
 
-      // check macro grid
-      gridcheck(grid);
+    // check the intersection iterator
+    checkIntersectionIterator(grid2d);
+    checkIntersectionIterator(grid3d);
 
-      // create hybrid grid
-      markOne(grid,0,1) ;
-      gridcheck(grid);
+  }
 
-      grid.globalRefine(1);
-      gridcheck(grid);
+  // ////////////////////////////////////////////////////////////////////////
+  //   Check whether geometryInFather returns equal results with and
+  //   without parametrized boundaries
+  // ////////////////////////////////////////////////////////////////////////
 
-      // check the method geometryInFather()
-      checkGeometryInFather(grid);
+  Dune::UGGrid<2,2> gridWithParametrization, gridWithoutParametrization;
 
-      // check the intersection iterator
-      checkIntersectionIterator(grid);
-    }
+  // make grids
+  makeHalfCircleQuad(gridWithoutParametrization, false);
+  makeHalfCircleQuad(gridWithParametrization, true);
 
-    // ////////////////////////////////////////////////////////////////////////
-    //   Check whether geometryInFather returns equal results with and
-    //   without parametrized boundaries
-    // ////////////////////////////////////////////////////////////////////////
+  // make grids again just to check this is possible
+#if 0
+  makeHalfCircleQuad(gridWithoutParametrization, false);
+  makeHalfCircleQuad(gridWithParametrization, true);
+#endif
 
-    Dune::UGGrid<2,2> gridWithParametrization, gridWithoutParametrization;
+  gridWithParametrization.globalRefine(1);
+  gridWithoutParametrization.globalRefine(1);
 
-    makeHalfCircleQuad(gridWithParametrization, true);
-    makeHalfCircleQuad(gridWithoutParametrization, false);
+  typedef Dune::UGGrid<2,2>::Codim<0>::LevelIterator ElementIterator;
+  ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
+  ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
+  ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
 
-    gridWithParametrization.globalRefine(1);
-    gridWithoutParametrization.globalRefine(1);
+  for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
 
-    typedef Dune::UGGrid<2,2>::Codim<0>::LevelIterator ElementIterator;
-    ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
-    ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
-    ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
+    // The grids where constructed identically and they are traversed identically
+    // Thus their respective output from geometryInFather should be the same
+    for (int i=0; i<eIt->geometry().corners(); i++) {
 
-    for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
+      Dune::FieldVector<double,2> diff = eIt->geometryInFather()[i] - eWoIt->geometryInFather()[i];
 
-      // The grids where constructed identically and they are traversed identically
-      // Thus their respective output from geometryInFather should be the same
-      for (int i=0; i<eIt->geometry().corners(); i++) {
-
-        Dune::FieldVector<double,2> diff = eIt->geometryInFather()[i] - eWoIt->geometryInFather()[i];
-
-        if ( diff.two_norm() > 1e-5 )
-          DUNE_THROW(Dune::GridError, "output of geometryInFather() depends on boundary parametrization!");
-
-      }
+      if ( diff.two_norm() > 1e-5 )
+        DUNE_THROW(Dune::GridError, "output of geometryInFather() depends on boundary parametrization!");
 
     }
 
-  } catch (Dune::Exception &e) {
-    std::cerr << e << std::endl;
-    return 1;
-  } catch (...) {
-    std::cerr << "Generic exception!" << std::endl;
-    return 2;
   }
 
   return 0;
+}
+catch (Dune::Exception& e) {
+  std::cerr << e << std::endl;
+  return 1;
+} catch (...) {
+  std::cerr << "Generic exception!" << std::endl;
+  return 2;
 }
