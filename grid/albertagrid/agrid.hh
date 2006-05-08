@@ -760,9 +760,6 @@ namespace Dune
 
     // entity that this EntityPointer points to
     EntityObject * entity_;
-
-    // pointer to internal realEntity of Entity Object
-    EntityImp * entityImp_;
   };
 
 

@@ -1421,11 +1421,11 @@ namespace Dune
     : grid_(grid)
       , isLeaf_ (true)
       , entity_ ( grid_.template getNewEntity<codim> ( level , isLeaf_ ))
-      , entityImp_ ( &grid_.getRealImplementation( *entity_ ))
   {
     assert( entity_ );
     // set elinfo and level
     entityImp().setElInfo(elInfo,face,edge,vertex);
+    entityImp().setTraverseStack(0);
   }
 
   template<int codim, class GridImp >
@@ -1435,7 +1435,6 @@ namespace Dune
     : grid_(grid)
       , isLeaf_ (true)
       , entity_ ( grid_.template getNewEntity<codim> ( level , isLeaf_ ))
-      , entityImp_ ( &grid_.getRealImplementation( *entity_ ))
   {
     // set elinfo and level
     entityImp().setElInfo(elInfo,face,edge,vertex);
@@ -1448,7 +1447,6 @@ namespace Dune
     : grid_(grid)
       , isLeaf_ (isLeaf)
       , entity_ ( grid_.template getNewEntity<codim> (level, isLeaf_) )
-      , entityImp_ ( &grid_.getRealImplementation( *entity_ ))
   {
     if(end) this->done();
   }
@@ -1459,8 +1457,7 @@ namespace Dune
   AlbertaGridEntityPointer(const AlbertaGridEntityPointer<codim,GridImp> & org)
     : grid_(org.grid_)
       , isLeaf_ ( org.isLeaf_ )
-      , entity_ ( grid_.template getNewEntity<codim> ( org.entity_->level() , isLeaf_) )
-      , entityImp_ ( &grid_.getRealImplementation( *entity_ ))
+      , entity_ ( grid_.template getNewEntity<codim> ( org.level() , isLeaf_) )
   {
     entityImp().setEntity( org.entityImp() );
   }
@@ -1471,7 +1468,7 @@ namespace Dune
   operator = (const AlbertaGridEntityPointerType & org)
   {
     assert( & grid_ == & org.grid_ );
-    isLeaf_ = ( org.isLeaf_ );
+    isLeaf_ = org.isLeaf_ ;
     entityImp().setEntity( org.entityImp() );
     return *this;
   }
@@ -1480,16 +1477,16 @@ namespace Dune
   inline typename AlbertaGridEntityPointer<codim,GridImp> :: EntityImp &
   AlbertaGridEntityPointer<codim,GridImp> :: entityImp ()
   {
-    assert( entityImp_ );
-    return *entityImp_;
+    assert( entity_ );
+    return grid_.getRealImplementation( *entity_ );
   }
 
   template<int codim, class GridImp >
   inline const typename AlbertaGridEntityPointer<codim,GridImp> :: EntityImp &
   AlbertaGridEntityPointer<codim,GridImp> :: entityImp () const
   {
-    assert( entityImp_ );
-    return *entityImp_;
+    assert( entity_ );
+    return grid_.getRealImplementation( *entity_ );
   }
 
   template<int codim, class GridImp >
@@ -1498,7 +1495,6 @@ namespace Dune
     : grid_(grid)
       , isLeaf_ ( en.leafIt() )
       , entity_ ( grid_.template getNewEntity<codim> ( en.level(), isLeaf_ ) )
-      , entityImp_ ( &grid_.getRealImplementation( *entity_ ))
   {
     entityImp().setEntity( en );
   }
@@ -1508,7 +1504,7 @@ namespace Dune
   {
     this->done();
     grid_.template freeEntity<codim>( entity_ );
-    entityImp_ = 0;
+    entity_    = 0;
   }
 
   template<int codim, class GridImp >
