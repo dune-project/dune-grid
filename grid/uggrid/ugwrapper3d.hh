@@ -17,48 +17,48 @@ namespace Dune {
    * UG.  There are two reasons for doing this.  First, we don't want
    * to call UG macros directly from DUNE, because they pollute the
    * namespace and therefore we undefine them all.  Secondly,  UG methods
-   * appear in the namespaces UG2d and UG3d, but we need the dimension
+   * appear in the namespaces UG::D2 and UG::D3, but we need the dimension
    * as a template parameter.
    */
   template<>
   class UG_NS<3> {
   public:
 
-    typedef UG3d::RefinementRule RefinementRule;
+    typedef UG::D3::RefinementRule RefinementRule;
 
-    typedef UG3d::CoeffProcPtr CoeffProcPtr;
+    typedef UG::D3::CoeffProcPtr CoeffProcPtr;
 
-    typedef UG3d::UserProcPtr UserProcPtr;
+    typedef UG::D3::UserProcPtr UserProcPtr;
 
-    typedef UG3d::BndSegFuncPtr BndSegFuncPtr;
+    typedef UG::D3::BndSegFuncPtr BndSegFuncPtr;
 
-    enum {GM_REFINE_NOT_CLOSED = UG3d::GM_REFINE_NOT_CLOSED};
+    enum {GM_REFINE_NOT_CLOSED = UG::D3::GM_REFINE_NOT_CLOSED};
 
-    enum {GM_COPY_ALL = UG3d::GM_COPY_ALL};
+    enum {GM_COPY_ALL = UG::D3::GM_COPY_ALL};
 
-    enum {GM_REFINE_TRULY_LOCAL = UG3d::GM_REFINE_TRULY_LOCAL};
+    enum {GM_REFINE_TRULY_LOCAL = UG::D3::GM_REFINE_TRULY_LOCAL};
 
-    enum {GM_REFINE_PARALLEL = UG3d::GM_REFINE_PARALLEL};
+    enum {GM_REFINE_PARALLEL = UG::D3::GM_REFINE_PARALLEL};
 
-    enum {GM_REFINE_NOHEAPTEST = UG3d::GM_REFINE_NOHEAPTEST};
+    enum {GM_REFINE_NOHEAPTEST = UG::D3::GM_REFINE_NOHEAPTEST};
 
-    enum {NEWEL_CE = UG3d::NEWEL_CE};
+    enum {NEWEL_CE = UG::D3::NEWEL_CE};
 
-    enum {COARSEN_CE = UG3d::COARSEN_CE};
+    enum {COARSEN_CE = UG::D3::COARSEN_CE};
 
-    enum {REFINECLASS_CE = UG3d::REFINECLASS_CE};
+    enum {REFINECLASS_CE = UG::D3::REFINECLASS_CE};
 
-    enum {ECLASS_CE = UG3d::ECLASS_CE};
+    enum {ECLASS_CE = UG::D3::ECLASS_CE};
 
-    enum {RED = UG3d::RED};
+    enum {RED = UG::D3::RED};
 
-    enum {YELLOW_CLASS = UG3d::YELLOW_CLASS};
+    enum {YELLOW_CLASS = UG::D3::YELLOW_CLASS};
 
-    enum {RED_CLASS = UG3d::RED_CLASS};
+    enum {RED_CLASS = UG::D3::RED_CLASS};
 
-    enum {COARSE = UG3d::COARSE};
+    enum {COARSE = UG::D3::COARSE};
 
-    enum {GM_OK = UG3d::GM_OK};
+    enum {GM_OK = UG::D3::GM_OK};
 
     /** \brief The PFIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
@@ -111,65 +111,65 @@ namespace Dune {
     /** \brief Returns pointers to the coordinate arrays of an UG element */
     static void Corner_Coordinates(TargetType<0,3>::T* theElement, double* x[]) {
 
-      using UG3d::TETRAHEDRON;
-      using UG3d::NODE;
-      using UG3d::PYRAMID;
-      using UG3d::PRISM;
-      using UG3d::HEXAHEDRON;
-      using UG3d::n_offset;
+      using UG::D3::TETRAHEDRON;
+      using UG::D3::NODE;
+      using UG::D3::PYRAMID;
+      using UG::D3::PRISM;
+      using UG::D3::HEXAHEDRON;
+      using UG::D3::n_offset;
       int n;    // Dummy variable just to please the macro
       CORNER_COORDINATES(theElement, n, x);
     }
 
     static int GlobalToLocal(int n, const double** cornerCoords,
                              const double* EvalPoint, double* localCoord) {
-      return UG3d::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
+      return UG::D3::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
     //! return true if element has an exact copy on the next level
     static bool hasCopy (TargetType<0,3>::T* theElement) {
-      using UG3d::ELEMENT;
-      using UG3d::control_entries;
+      using UG::D3::ELEMENT;
+      using UG::D3::control_entries;
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
     //! return true if element has an exact copy on the next level
     static bool isRegular (TargetType<0,3>::T* theElement) {
-      using UG3d::ELEMENT;
-      using UG3d::control_entries;
+      using UG::D3::ELEMENT;
+      using UG::D3::control_entries;
       return ECLASS(theElement) == RED_CLASS;
     }
 
     //! \todo Please doc me!
     static int Sides_Of_Elem(TargetType<0,3>::T* theElement) {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       return SIDES_OF_ELEM(theElement);
     }
 
     //! Encapsulates the NBELEM macro
     static TargetType<0,3>::T* NbElem(TargetType<0,3>::T* theElement, int nb) {
-      using UG3d::ELEMENT;
-      using UG3d::nb_offset;
+      using UG::D3::ELEMENT;
+      using UG::D3::nb_offset;
       return NBELEM(theElement, nb);
     }
 
     //! Returns true if the i-th side of the element is on the domain boundary
     static bool Side_On_Bnd(TargetType<0,3>::T* theElement, int i) {
-      using UG3d::BNDS;
-      using UG3d::BEOBJ;
-      using UG3d::side_offset;
+      using UG::D3::BNDS;
+      using UG::D3::BEOBJ;
+      using UG::D3::side_offset;
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
     //! \todo Please doc me!
     static int Edges_Of_Elem(const TargetType<0,3>::T* theElement) {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       return EDGES_OF_ELEM(theElement);
     }
 
     //! \todo Please doc me!
     static int Corners_Of_Elem(const TargetType<0,3>::T* theElement) {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       return CORNERS_OF_ELEM(theElement);
     }
 
@@ -181,27 +181,27 @@ namespace Dune {
 
     //! \todo Please doc me!
     static int Corners_Of_Side(const TargetType<0,3>::T* theElement, int side) {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       return CORNERS_OF_SIDE(theElement, side);
     }
 
     //! \todo Please doc me!
     static int Corner_Of_Side(const TargetType<0,3>::T* theElement, int side, int corner) {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       return CORNER_OF_SIDE(theElement, side, corner);
     }
 
-    static int nSons(const UG3d::element* element) {
-      return UG3d::ReadCW(element, UG3d::NSONS_CE);
+    static int nSons(const UG::D3::element* element) {
+      return UG::D3::ReadCW(element, UG::D3::NSONS_CE);
     }
 
     static int myLevel (TargetType<0,3>::T* theElement) {
-      using UG3d::ELEMENT;
+      using UG::D3::ELEMENT;
       return LEVEL(theElement);
     }
 
     static int myLevel (TargetType<3,3>::T* theNode) {
-      using UG3d::NODE;
+      using UG::D3::NODE;
       return LEVEL(theNode);
     }
 
@@ -212,11 +212,11 @@ namespace Dune {
 
     //! get father node of vertex
     static TargetType<3,3>::T* NodeNodeFather(TargetType<3,3>::T* theNode) {
-      using UG3d::NDOBJ;
+      using UG::D3::NDOBJ;
       if (theNode->father==0)
         return 0;         // no father at all
       if (OBJT(theNode->father)==NDOBJ)
-        return (UG3d::node*) theNode->father;
+        return (UG::D3::node*) theNode->father;
       else
         return 0;         // may be edge or element
     }
@@ -235,12 +235,12 @@ namespace Dune {
       global[2] = theNode->myvertex->iv.x[2];
     }
 
-    static int GetSons(const UG3d::element* element, UG3d::element* sonList[MAX_SONS]) {
-      return UG3d::GetSons(element, sonList);
+    static int GetSons(const UG::D3::element* element, UG::D3::element* sonList[MAX_SONS]) {
+      return UG::D3::GetSons(element, sonList);
     }
 
-    static int GetNodeContext(const UG3d::element* element, const UG3d::node** context) {
-      return UG3d::GetNodeContext(element, const_cast<UG3d::node**>(context));
+    static int GetNodeContext(const UG::D3::element* element, const UG::D3::node** context) {
+      return UG::D3::GetNodeContext(element, const_cast<UG::D3::node**>(context));
     }
 
     //! Encapsulates the GRID_ATTR macro
@@ -255,8 +255,8 @@ namespace Dune {
 #undef GRID_ATTR
     }
 
-    static int MarkForRefinement(UG3d::element* element, int rule, int data) {
-      return UG3d::MarkForRefinement(element, (UG3d::RefinementRule)rule, data);
+    static int MarkForRefinement(UG::D3::element* element, int rule, int data) {
+      return UG::D3::MarkForRefinement(element, (UG::D3::RefinementRule)rule, data);
     }
 
     //! Encapsulates the TAG macro
@@ -274,7 +274,7 @@ namespace Dune {
     template<class T>
     static void  getCornerLocal (const TargetType<0,3>::T* theElement, int corner, FieldVector<T, 3>& local)
     {
-      using UG3d::element_descriptors;
+      using UG::D3::element_descriptors;
       local[0] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[0];
       local[1] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[1];
       local[2] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[2];
@@ -298,7 +298,7 @@ namespace Dune {
 
     //! Return true if the element is a leaf element
     static bool isLeaf(const TargetType<0,3>::T* theElement) {
-      return UG3d::EstimateHere(theElement);
+      return UG::D3::EstimateHere(theElement);
     }
 
     //! Return true if the node is a leaf node
@@ -429,7 +429,7 @@ namespace Dune {
      */
     static int Transformation(int n, double** x,
                               const FieldVector<double, 3>& local, FieldMatrix<double,3,3>& mat) {
-      using UG3d::DOUBLE_VECTOR;
+      using UG::D3::DOUBLE_VECTOR;
       double det;
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
@@ -444,133 +444,133 @@ namespace Dune {
                                  const double co_global[MAX_CORNERS_OF_ELEM][3],
                                  const double ip_local[3]) {
       double result;
-      if (UG3d::SurfaceElement(3, nc, co_global, ip_local, &result))
-        DUNE_THROW(GridError, "UG3d::SurfaceElement returned error code!");
+      if (UG::D3::SurfaceElement(3, nc, co_global, ip_local, &result))
+        DUNE_THROW(GridError, "UG::D3::SurfaceElement returned error code!");
       return result;
     }
 
     //! Returns the i-th corner of a UG element
     static TargetType<3,3>::T* Corner(TargetType<0,3>::T* theElement, int i) {
-      using UG3d::NODE;
-      using UG3d::n_offset;
+      using UG::D3::NODE;
+      using UG::D3::n_offset;
       return CORNER(theElement, i);
     }
 
     //! get edge from node i to node j (in UG's numbering !
     static TargetType<2,3>::T* GetEdge (TargetType<3,3>::T* nodei, TargetType<3,3>::T* nodej) {
-      return UG3d::GetEdge(nodei,nodej);
+      return UG::D3::GetEdge(nodei,nodej);
     }
 
     //! access side vector from element
     static UGVectorType<3>::T* SideVector (TargetType<0,3>::T* theElement, int i)
     {
-      using UG3d::VECTOR;
-      using UG3d::svector_offset;
+      using UG::D3::VECTOR;
+      using UG::D3::svector_offset;
       return SVECTOR(theElement,i);
     }
 
     //! \todo Please doc me!
     static TargetType<0,3>::T* EFather(TargetType<0,3>::T* theElement) {
-      using UG3d::ELEMENT;
-      using UG3d::father_offset;
+      using UG::D3::ELEMENT;
+      using UG::D3::father_offset;
       return EFATHER(theElement);
     }
 
     static unsigned int ReadCW(void* obj, int ce) {
-      return UG3d::ReadCW(obj, ce);
+      return UG::D3::ReadCW(obj, ce);
     }
 
     static void WriteCW(void* obj, int ce, int n) {
-      UG3d::WriteCW(obj, ce, n);
+      UG::D3::WriteCW(obj, ce, n);
     }
 
     //! \todo Please doc me!
     static int InitUg(int* argcp, char*** argvp) {
-      return UG3d::InitUg(argcp, argvp);
+      return UG::D3::InitUg(argcp, argvp);
     }
 
     static void ExitUg() {
-      UG3d::ExitUg();
+      UG::D3::ExitUg();
     }
 
-    static void DisposeMultiGrid(UG3d::multigrid* mg) {
-      UG3d::DisposeMultiGrid(mg);
+    static void DisposeMultiGrid(UG::D3::multigrid* mg) {
+      UG::D3::DisposeMultiGrid(mg);
     }
 
     //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                             int numOfCoeffFunc,
-                                            UG3d::CoeffProcPtr coeffs[],
+                                            UG::D3::CoeffProcPtr coeffs[],
                                             int numOfUserFct,
-                                            UG3d::UserProcPtr userfct[]) {
-      return UG3d::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
-                                              numOfUserFct, userfct);
+                                            UG::D3::UserProcPtr userfct[]) {
+      return UG::D3::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
+                                                numOfUserFct, userfct);
     }
 
     static void* BVP_GetByName(const char* bvpName) {
-      return UG3d::BVP_GetByName(bvpName);
+      return UG::D3::BVP_GetByName(bvpName);
     }
 
     static void Set_Current_BVP(void** thisBVP) {
-      UG3d::Set_Current_BVP(thisBVP);
+      UG::D3::Set_Current_BVP(thisBVP);
     }
 
     //! \todo Please doc me!
     static UGTypes<3>::MultiGridType* GetMultigrid(const char* name) {
-      return UG3d::GetMultigrid(name);
+      return UG::D3::GetMultigrid(name);
     }
 
     //! \todo Please doc me!
     static void SetSubdomain(TargetType<0,3>::T* theElement, int id) {
-      using UG3d::control_entries;
-      using UG3d::SUBDOMAIN_CE;
+      using UG::D3::control_entries;
+      using UG::D3::SUBDOMAIN_CE;
       SETSUBDOMAIN(theElement, id);
     }
 
     static int LBCommand(int argc, const char** argv) {
       /** \todo Can we remove the cast? */
-      return UG3d::LBCommand(argc, (char**)argv);
+      return UG::D3::LBCommand(argc, (char**)argv);
     }
 
     static int ConfigureCommand(int argc, const char** argv) {
       /** \todo Kann man ConfigureCommand so ‰ndern daﬂ man auch ohne den const_cast auskommt? */
-      return UG3d::ConfigureCommand(argc, (char**)argv);
+      return UG::D3::ConfigureCommand(argc, (char**)argv);
     }
 
     static int NewCommand(int argc, char** argv) {
-      return UG3d::NewCommand(argc, argv);
+      return UG::D3::NewCommand(argc, argv);
     }
 
     static int CreateFormatCmd(int argc, char** argv) {
-      return UG3d::CreateFormatCmd(argc, argv);
+      return UG::D3::CreateFormatCmd(argc, argv);
     }
 
     static void* CreateDomain(const char* name, const double* midPoint, double radius,
                               int segments, int corners, int convex) {
-      return UG3d::CreateDomain(name, midPoint, radius, segments, corners, convex);
+      return UG::D3::CreateDomain(name, midPoint, radius, segments, corners, convex);
     }
 
-    static void* InsertInnerNode(UG3d::grid* grid, const double* pos) {
-      return UG3d::InsertInnerNode(grid, pos);
+    static void* InsertInnerNode(UG::D3::grid* grid, const double* pos) {
+      return UG::D3::InsertInnerNode(grid, pos);
     }
 
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
                                        int *point,
                                        const double *alpha, const double *beta,
-                                       UG3d::BndSegFuncPtr boundarySegmentFunction,
+                                       UG::D3::BndSegFuncPtr boundarySegmentFunction,
                                        void *userData) {
-      return UG3d::CreateBoundarySegment(name,            // internal name of the boundary segment
-                                         left,                      //  id of left subdomain
-                                         right,                      //  id of right subdomain
-                                         index,                  // Index of the segment
-                                         UG3d::NON_PERIODIC,     // I don't know what this means
-                                         res,                      // Resolution, only for the UG graphics
-                                         point,
-                                         alpha,
-                                         beta,
-                                         boundarySegmentFunction,
-                                         userData);
+      return UG::D3::CreateBoundarySegment(name,            // internal name of the boundary segment
+                                           left,                    //  id of left subdomain
+                                           right,                    //  id of right subdomain
+                                           index,                // Index of the segment
+                                           UG::D3::NON_PERIODIC,   // I don't know what this means
+                                           res,                    // Resolution, only for the UG graphics
+                                           point,
+                                           alpha,
+                                           beta,
+                                           boundarySegmentFunction,
+                                           userData);
     }
   };
 

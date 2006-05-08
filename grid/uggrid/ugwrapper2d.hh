@@ -17,7 +17,7 @@ namespace Dune {
    * UG.  There are two reasons for doing this.  First, we don't want
    * to call UG macros directly from DUNE, because they pollute the
    * namespace and therefore we undefine them all.  Secondly,  UG methods
-   * appear in the namespaces UG2d and UG3d, but we need the dimension
+   * appear in the namespaces UG::D2 and UG::D3, but we need the dimension
    * as a template parameter.
    */
   template<int dim>
@@ -27,41 +27,41 @@ namespace Dune {
   class UG_NS<2> {
   public:
 
-    typedef UG2d::RefinementRule RefinementRule;
+    typedef UG::D2::RefinementRule RefinementRule;
 
-    typedef UG2d::CoeffProcPtr CoeffProcPtr;
+    typedef UG::D2::CoeffProcPtr CoeffProcPtr;
 
-    typedef UG2d::UserProcPtr UserProcPtr;
+    typedef UG::D2::UserProcPtr UserProcPtr;
 
-    typedef UG2d::BndSegFuncPtr BndSegFuncPtr;
+    typedef UG::D2::BndSegFuncPtr BndSegFuncPtr;
 
-    enum {GM_REFINE_NOT_CLOSED = UG2d::GM_REFINE_NOT_CLOSED};
+    enum {GM_REFINE_NOT_CLOSED = UG::D2::GM_REFINE_NOT_CLOSED};
 
-    enum {GM_COPY_ALL = UG2d::GM_COPY_ALL};
+    enum {GM_COPY_ALL = UG::D2::GM_COPY_ALL};
 
-    enum {GM_REFINE_TRULY_LOCAL = UG2d::GM_REFINE_TRULY_LOCAL};
+    enum {GM_REFINE_TRULY_LOCAL = UG::D2::GM_REFINE_TRULY_LOCAL};
 
-    enum {GM_REFINE_PARALLEL = UG2d::GM_REFINE_PARALLEL};
+    enum {GM_REFINE_PARALLEL = UG::D2::GM_REFINE_PARALLEL};
 
-    enum {GM_REFINE_NOHEAPTEST = UG2d::GM_REFINE_NOHEAPTEST};
+    enum {GM_REFINE_NOHEAPTEST = UG::D2::GM_REFINE_NOHEAPTEST};
 
-    enum {NEWEL_CE = UG2d::NEWEL_CE};
+    enum {NEWEL_CE = UG::D2::NEWEL_CE};
 
-    enum {COARSEN_CE = UG2d::COARSEN_CE};
+    enum {COARSEN_CE = UG::D2::COARSEN_CE};
 
-    enum {REFINECLASS_CE = UG2d::REFINECLASS_CE};
+    enum {REFINECLASS_CE = UG::D2::REFINECLASS_CE};
 
-    enum {ECLASS_CE = UG2d::ECLASS_CE};
+    enum {ECLASS_CE = UG::D2::ECLASS_CE};
 
-    enum {RED = UG2d::RED};
+    enum {RED = UG::D2::RED};
 
-    enum {YELLOW_CLASS = UG2d::YELLOW_CLASS};
+    enum {YELLOW_CLASS = UG::D2::YELLOW_CLASS};
 
-    enum {RED_CLASS = UG2d::RED_CLASS};
+    enum {RED_CLASS = UG::D2::RED_CLASS};
 
-    enum {COARSE = UG2d::COARSE};
+    enum {COARSE = UG::D2::COARSE};
 
-    enum {GM_OK = UG2d::GM_OK};
+    enum {GM_OK = UG::D2::GM_OK};
 
     /** \brief The PFIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
@@ -113,73 +113,73 @@ namespace Dune {
 
     /** \brief Returns pointers to the coordinate arrays of an UG element */
     static void Corner_Coordinates(TargetType<0,2>::T* theElement, double* x[]) {
-      using UG2d::NODE;
-      using UG2d::TRIANGLE;
-      using UG2d::QUADRILATERAL;
-      using UG2d::n_offset;
+      using UG::D2::NODE;
+      using UG::D2::TRIANGLE;
+      using UG::D2::QUADRILATERAL;
+      using UG::D2::n_offset;
       int n;    // Dummy variable just to please the macro
       CORNER_COORDINATES(theElement, n, x);
     }
 
     static int GlobalToLocal(int n, const double** cornerCoords,
                              const double* EvalPoint, double* localCoord) {
-      return UG2d::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
+      return UG::D2::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
     static int myLevel (TargetType<0,2>::T* theElement) {
-      using UG2d::ELEMENT;
+      using UG::D2::ELEMENT;
       return LEVEL(theElement);
     }
 
     static int myLevel (TargetType<2,2>::T* theNode) {
-      using UG2d::NODE;
+      using UG::D2::NODE;
       return LEVEL(theNode);
     }
 
     //! return true if element has an exact copy on the next level
     static bool hasCopy (TargetType<0,2>::T* theElement) {
-      using UG2d::ELEMENT;
-      using UG2d::control_entries;
+      using UG::D2::ELEMENT;
+      using UG::D2::control_entries;
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
     //! return true if element has an exact copy on the next level
     static bool isRegular (TargetType<0,2>::T* theElement) {
-      using UG2d::ELEMENT;
-      using UG2d::control_entries;
+      using UG::D2::ELEMENT;
+      using UG::D2::control_entries;
       return ECLASS(theElement) == RED_CLASS;
     }
 
     //! \todo Please doc me!
     static int Sides_Of_Elem(TargetType<0,2>::T* theElement) {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       return SIDES_OF_ELEM(theElement);
     }
 
     //! Encapsulates the NBELEM macro
     static TargetType<0,2>::T* NbElem(TargetType<0,2>::T* theElement, int nb) {
-      using UG2d::ELEMENT;
-      using UG2d::nb_offset;
+      using UG::D2::ELEMENT;
+      using UG::D2::nb_offset;
       return NBELEM(theElement, nb);
     }
 
     //! Returns true if the i-th side of the element is on the domain boundary
     static bool Side_On_Bnd(TargetType<0,2>::T* theElement, int i) {
-      using UG2d::BNDS;
-      using UG2d::BEOBJ;
-      using UG2d::side_offset;
+      using UG::D2::BNDS;
+      using UG::D2::BEOBJ;
+      using UG::D2::side_offset;
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
     //! \todo Please doc me!
     static int Edges_Of_Elem(const TargetType<0,2>::T* theElement) {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       return EDGES_OF_ELEM(theElement);
     }
 
     //! \todo Please doc me!
     static int Corners_Of_Elem(const TargetType<0,2>::T* theElement) {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       return CORNERS_OF_ELEM(theElement);
     }
 
@@ -191,27 +191,27 @@ namespace Dune {
 
     //! \todo Please doc me!
     static int Corners_Of_Side(const TargetType<0,2>::T* theElement, int side) {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       return CORNERS_OF_SIDE(theElement, side);
     }
 
     //! \todo Please doc me!
     static int Corner_Of_Side(const TargetType<0,2>::T* theElement, int side, int corner) {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       return CORNER_OF_SIDE(theElement, side, corner);
     }
 
-    static int nSons(const UG2d::element* element) {
-      return UG2d::ReadCW(element, UG2d::NSONS_CE);
+    static int nSons(const UG::D2::element* element) {
+      return UG::D2::ReadCW(element, UG::D2::NSONS_CE);
     }
 
-    static int GetSons(const UG2d::element* element, UG2d::element* sonList[MAX_SONS]) {
-      return UG2d::GetSons(element, sonList);
+    static int GetSons(const UG::D2::element* element, UG::D2::element* sonList[MAX_SONS]) {
+      return UG::D2::GetSons(element, sonList);
     }
 
     /** \todo Remove the const casts */
-    static int GetNodeContext(const UG2d::element* element, const UG2d::node** context) {
-      return UG2d::GetNodeContext(element, const_cast<UG2d::node**>(context));
+    static int GetNodeContext(const UG::D2::element* element, const UG::D2::node** context) {
+      return UG::D2::GetNodeContext(element, const_cast<UG::D2::node**>(context));
     }
 
     //! Encapsulates the GRID_ATTR macro
@@ -219,8 +219,8 @@ namespace Dune {
       return GRID_ATTR(grid);
     }
 
-    static int MarkForRefinement(UG2d::element* element, int rule, int data) {
-      return UG2d::MarkForRefinement(element, (UG2d::RefinementRule)rule, data);
+    static int MarkForRefinement(UG::D2::element* element, int rule, int data) {
+      return UG::D2::MarkForRefinement(element, (UG::D2::RefinementRule)rule, data);
     }
 
     //! Encapsulates the TAG macro
@@ -238,7 +238,7 @@ namespace Dune {
     template<class T>
     static void  getCornerLocal (const TargetType<0,2>::T* theElement, int corner, FieldVector<T, 2>& local)
     {
-      using UG2d::element_descriptors;
+      using UG::D2::element_descriptors;
       local[0] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[0];
       local[1] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[1];
     }
@@ -261,7 +261,7 @@ namespace Dune {
 
     //! Return true if the element is a leaf element
     static bool isLeaf(const TargetType<0,2>::T* theElement) {
-      return UG2d::EstimateHere(theElement);
+      return UG::D2::EstimateHere(theElement);
     }
 
     //! Return true if the node is a leaf node
@@ -394,7 +394,7 @@ namespace Dune {
      */
     static int Transformation(int n, double** x,
                               const FieldVector<double, 2>& local, FieldMatrix<double,2,2>& mat) {
-      using UG2d::DOUBLE_VECTOR;
+      using UG::D2::DOUBLE_VECTOR;
       double det;
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
@@ -410,21 +410,21 @@ namespace Dune {
                                  double co_global[MAX_CORNERS_OF_ELEM][2],
                                  double ip_local[2]) {
       double result;
-      if (UG2d::SurfaceElement(2, nc, co_global, ip_local, &result))
-        DUNE_THROW(GridError, "UG2d::SurfaceElement returned error code!");
+      if (UG::D2::SurfaceElement(2, nc, co_global, ip_local, &result))
+        DUNE_THROW(GridError, "UG::D2::SurfaceElement returned error code!");
       return result;
     }
 
     //! Returns the i-th corner of a UG element
     static TargetType<2,2>::T* Corner(TargetType<0,2>::T* theElement, int i) {
-      using UG2d::NODE;
-      using UG2d::n_offset;
+      using UG::D2::NODE;
+      using UG::D2::n_offset;
       return CORNER(theElement, i);
     }
 
     //! get edge from node i to node j (in UG's numbering !
     static TargetType<1,2>::T* GetEdge (TargetType<2,2>::T* nodei, TargetType<2,2>::T* nodej) {
-      return UG2d::GetEdge(nodei,nodej);
+      return UG::D2::GetEdge(nodei,nodej);
     }
 
     //! access side vector from element (this is just a dummy to compile code also in 2d)
@@ -436,8 +436,8 @@ namespace Dune {
 
     //! \todo Please doc me!
     static TargetType<0,2>::T* EFather(TargetType<0,2>::T* theElement) {
-      using UG2d::ELEMENT;
-      using UG2d::father_offset;
+      using UG::D2::ELEMENT;
+      using UG::D2::father_offset;
       return EFATHER(theElement);
     }
 
@@ -448,11 +448,11 @@ namespace Dune {
 
     //! get father node of vertex
     static TargetType<2,2>::T* NodeNodeFather(TargetType<2,2>::T* theNode) {
-      using UG2d::NDOBJ;
+      using UG::D2::NDOBJ;
       if (theNode->father==0)
         return 0;         // no father at all
       if (OBJT(theNode->father)==NDOBJ)
-        return (UG2d::node*) theNode->father;
+        return (UG::D2::node*) theNode->father;
       else
         return 0;         // may be edge or element
     }
@@ -470,100 +470,100 @@ namespace Dune {
     }
 
     static unsigned int ReadCW(void* obj, int ce) {
-      return UG2d::ReadCW(obj, ce);
+      return UG::D2::ReadCW(obj, ce);
     }
 
     static void WriteCW(void* obj, int ce, int n) {
-      UG2d::WriteCW(obj, ce, n);
+      UG::D2::WriteCW(obj, ce, n);
     }
 
     //! \todo Please doc me!
     static int InitUg(int* argcp, char*** argvp) {
-      return UG2d::InitUg(argcp, argvp);
+      return UG::D2::InitUg(argcp, argvp);
     }
 
     static void ExitUg() {
-      UG2d::ExitUg();
+      UG::D2::ExitUg();
     }
 
-    static void DisposeMultiGrid(UG2d::multigrid* mg) {
-      UG2d::DisposeMultiGrid(mg);
+    static void DisposeMultiGrid(UG::D2::multigrid* mg) {
+      UG::D2::DisposeMultiGrid(mg);
     }
 
     //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                             int numOfCoeffFunc,
-                                            UG2d::CoeffProcPtr coeffs[],
+                                            UG::D2::CoeffProcPtr coeffs[],
                                             int numOfUserFct,
-                                            UG2d::UserProcPtr userfct[]) {
-      return UG2d::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
-                                              numOfUserFct, userfct);
+                                            UG::D2::UserProcPtr userfct[]) {
+      return UG::D2::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
+                                                numOfUserFct, userfct);
     }
 
     static void* BVP_GetByName(const char* bvpName) {
-      return UG2d::BVP_GetByName(bvpName);
+      return UG::D2::BVP_GetByName(bvpName);
     }
 
     static void Set_Current_BVP(void** thisBVP) {
-      UG2d::Set_Current_BVP(thisBVP);
+      UG::D2::Set_Current_BVP(thisBVP);
     }
 
     //! \todo Please doc me!
     static UGTypes<2>::MultiGridType* GetMultigrid(const char* name) {
-      return UG2d::GetMultigrid(name);
+      return UG::D2::GetMultigrid(name);
     }
 
     //! \todo Please doc me!
     static void SetSubdomain(TargetType<0,2>::T* theElement, int id) {
-      using UG2d::control_entries;
-      using UG2d::SUBDOMAIN_CE;
+      using UG::D2::control_entries;
+      using UG::D2::SUBDOMAIN_CE;
       SETSUBDOMAIN(theElement, id);
     }
 
     static int LBCommand(int argc, const char** argv) {
       /** \todo Can we remove the cast? */
-      return UG2d::LBCommand(argc, (char**)argv);
+      return UG::D2::LBCommand(argc, (char**)argv);
     }
 
     static int ConfigureCommand(int argc, const char** argv) {
       /** \todo Kann man ConfigureCommand so ‰ndern daﬂ man auch ohne den cast auskommt? */
-      return UG2d::ConfigureCommand(argc, (char**)argv);
+      return UG::D2::ConfigureCommand(argc, (char**)argv);
     }
 
     static int NewCommand(int argc, char** argv) {
-      return UG2d::NewCommand(argc, argv);
+      return UG::D2::NewCommand(argc, argv);
     }
 
     static int CreateFormatCmd(int argc, char** argv) {
-      return UG2d::CreateFormatCmd(argc, argv);
+      return UG::D2::CreateFormatCmd(argc, argv);
     }
 
     static void* CreateDomain(const char* name, const double* midPoint, double radius,
                               int segments, int corners, int convex) {
-      return UG2d::CreateDomain(name, midPoint, radius, segments, corners, convex);
+      return UG::D2::CreateDomain(name, midPoint, radius, segments, corners, convex);
     }
 
-    static void* InsertInnerNode(UG2d::grid* grid, const double* pos) {
-      return UG2d::InsertInnerNode(grid, pos);
+    static void* InsertInnerNode(UG::D2::grid* grid, const double* pos) {
+      return UG::D2::InsertInnerNode(grid, pos);
     }
 
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
                                        int *point,
                                        const double *alpha, const double *beta,
-                                       UG2d::BndSegFuncPtr boundarySegmentFunction,
+                                       UG::D2::BndSegFuncPtr boundarySegmentFunction,
                                        void *userData) {
-      return UG2d::CreateBoundarySegment(name,            // internal name of the boundary segment
-                                         left,                      //  id of left subdomain
-                                         right,                      //  id of right subdomain
-                                         index,                  // Index of the segment
-                                         UG2d::NON_PERIODIC,     // I don't know what this means
-                                         res,                      // Resolution, only for the UG graphics
-                                         point,
-                                         alpha,
-                                         beta,
-                                         boundarySegmentFunction,
-                                         userData);
+      return UG::D2::CreateBoundarySegment(name,            // internal name of the boundary segment
+                                           left,                    //  id of left subdomain
+                                           right,                    //  id of right subdomain
+                                           index,                // Index of the segment
+                                           UG::D2::NON_PERIODIC,   // I don't know what this means
+                                           res,                    // Resolution, only for the UG graphics
+                                           point,
+                                           alpha,
+                                           beta,
+                                           boundarySegmentFunction,
+                                           userData);
     }
 
   };

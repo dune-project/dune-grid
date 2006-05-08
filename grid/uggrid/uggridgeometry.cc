@@ -25,9 +25,9 @@ inline Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() c
   case 2 :
 
     switch (UG_NS<coorddim>::Tag(target_)) {
-    case UG2d::TRIANGLE :
+    case UG::D2::TRIANGLE :
       return GeometryType(GeometryType::simplex,2);
-    case UG2d::QUADRILATERAL :
+    case UG::D2::QUADRILATERAL :
       return GeometryType(GeometryType::cube,2);
     default :
       DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
@@ -37,13 +37,13 @@ inline Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() c
   case 3 :
     switch (UG_NS<coorddim>::Tag(target_)) {
 
-    case UG3d::TETRAHEDRON :
+    case UG::D3::TETRAHEDRON :
       return GeometryType(GeometryType::simplex,3);
-    case UG3d::PYRAMID :
+    case UG::D3::PYRAMID :
       return GeometryType(GeometryType::pyramid,3);
-    case UG3d::PRISM :
+    case UG::D3::PRISM :
       return GeometryType(GeometryType::prism,3);
-    case UG3d::HEXAHEDRON :
+    case UG::D3::HEXAHEDRON :
       return GeometryType(GeometryType::cube,3);
     default :
       DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
@@ -168,9 +168,9 @@ checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
   case 2 :
 
     switch (UG_NS<coorddim>::Tag(target_)) {
-    case UG2d::TRIANGLE :
+    case UG::D2::TRIANGLE :
       return 0 <= loc[0] && 0 <= loc[1] && (loc[0]+loc[1])<=1;
-    case UG2d::QUADRILATERAL :
+    case UG::D2::QUADRILATERAL :
       return 0 <= loc[0] && loc[0] <= 1
              && 0 <= loc[1] && loc[1] <= 1;
     default :
@@ -181,18 +181,18 @@ checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
   case 3 :
     switch (UG_NS<coorddim>::Tag(target_)) {
 
-    case UG3d::TETRAHEDRON :
+    case UG::D3::TETRAHEDRON :
       return 0 <= loc[0] && 0 <= loc[1] && 0 <= loc[2]
              && (loc[0]+loc[1]+loc[2]) <= 1;
-    case UG3d::PYRAMID :
+    case UG::D3::PYRAMID :
       return 0 <= loc[0] && 0 <= loc[1] && 0 <= loc[2]
              && (loc[0]+loc[2]) <= 1
              && (loc[1]+loc[2]) <= 1;
-    case UG3d::PRISM :
+    case UG::D3::PRISM :
       return 0 <= loc[0] && 0 <= loc[1]
              && (loc[0]+loc[1])<=1
              && 0 <= loc[2] && loc[2] <= 1;
-    case UG3d::HEXAHEDRON :
+    case UG::D3::HEXAHEDRON :
       return 0 <= loc[0] && loc[0] <= 1
              && 0 <= loc[1] && loc[1] <= 1
              && 0 <= loc[2] && loc[2] <= 1;

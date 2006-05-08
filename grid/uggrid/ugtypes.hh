@@ -7,24 +7,36 @@
  * \brief Encapsulates a few types from UG
  */
 
-namespace UG2d {
-  struct multigrid;
-  struct grid;
+namespace UG {
 
-  union element;
-  struct node;
-  struct edge;
-  struct vector;
+  namespace D2 {
+
+    struct multigrid;
+    struct grid;
+
+    union element;
+    struct node;
+    struct edge;
+    struct vector;
+
+  }
+
 };
 
-namespace UG3d {
-  struct multigrid;
-  struct grid;
+namespace UG {
 
-  union element;
-  struct node;
-  struct edge;
-  struct vector;
+  namespace D3 {
+
+    struct multigrid;
+    struct grid;
+
+    union element;
+    struct node;
+    struct edge;
+    struct vector;
+
+  }
+
 };
 
 
@@ -37,26 +49,26 @@ namespace Dune {
   class UGTypes<2>
   {
   public:
-    typedef UG2d::multigrid MultiGridType;
+    typedef UG::D2::multigrid MultiGridType;
 
-    typedef UG2d::grid GridType;
+    typedef UG::D2::grid GridType;
 
-    typedef UG2d::node Node;
+    typedef UG::D2::node Node;
 
-    typedef UG2d::element Element;
+    typedef UG::D2::element Element;
   };
 
   template <>
   class UGTypes<3>
   {
   public:
-    typedef UG3d::multigrid MultiGridType;
+    typedef UG::D3::multigrid MultiGridType;
 
-    typedef UG3d::grid GridType;
+    typedef UG::D3::grid GridType;
 
-    typedef UG3d::node Node;
+    typedef UG::D3::node Node;
 
-    typedef UG3d::element Element;
+    typedef UG::D3::element Element;
   };
 
 
@@ -73,14 +85,14 @@ namespace Dune {
   class UGVectorType<3>
   {
   public:
-    typedef UG3d::vector T;
+    typedef UG::D3::vector T;
   };
 
   template <>
   class UGVectorType<2>
   {
   public:
-    typedef UG2d::vector T;
+    typedef UG::D2::vector T;
   };
 
   template <int codim, int dim>
@@ -90,42 +102,42 @@ namespace Dune {
   class TargetType<0,3>
   {
   public:
-    typedef UG3d::element T;
+    typedef UG::D3::element T;
   };
 
   template <>
   class TargetType<2,3>
   {
   public:
-    typedef UG3d::edge T;
+    typedef UG::D3::edge T;
   };
 
   template <>
   class TargetType<3,3>
   {
   public:
-    typedef UG3d::node T;
+    typedef UG::D3::node T;
   };
 
   template <>
   class TargetType<0,2>
   {
   public:
-    typedef UG2d::element T;
+    typedef UG::D2::element T;
   };
 
   template <>
   class TargetType<1,2>
   {
   public:
-    typedef UG2d::edge T;
+    typedef UG::D2::edge T;
   };
 
   template <>
   class TargetType<2,2>
   {
   public:
-    typedef UG2d::node T;
+    typedef UG::D2::node T;
   };
 
 } // end namespace Dune

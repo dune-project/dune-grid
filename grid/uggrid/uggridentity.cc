@@ -244,7 +244,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
     if (dim==2) {
       switch (UG_NS<dim>::Tag(fatherElement)) {
 
-      case UG2d::TRIANGLE : {
+      case UG::D2::TRIANGLE : {
 
         const double coords[6][2] = {
           // The corners
@@ -255,7 +255,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
-      case UG2d::QUADRILATERAL : {
+      case UG::D2::QUADRILATERAL : {
 
         const double coords[9][2] = {
           // The corners
@@ -273,7 +273,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
     } else {
       switch (UG_NS<dim>::Tag(fatherElement)) {
-      case UG3d::TETRAHEDRON : {
+      case UG::D3::TETRAHEDRON : {
 
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
@@ -293,7 +293,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
-      case UG3d::PYRAMID : {
+      case UG::D3::PYRAMID : {
 
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
@@ -314,7 +314,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
-      case UG3d::PRISM : {
+      case UG::D3::PRISM : {
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
         assert(idx!=15 && idx!=19);
@@ -337,7 +337,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
-      case UG3d::HEXAHEDRON : {
+      case UG::D3::HEXAHEDRON : {
 
         const double coords[27][3] = {
           // The corners
