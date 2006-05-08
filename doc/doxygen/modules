@@ -1,6 +1,4 @@
 /**
   @defgroup Grid
-  @defgroup Common
   @defgroup Quadrature
-  @defgroup ISTL
 */
