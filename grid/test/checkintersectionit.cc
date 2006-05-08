@@ -143,7 +143,7 @@ void checkIntersectionIterator(const GridType& grid) {
         const FieldMatrix<ctype, Geometry::mydimension, Geometry::mydimension> jacobi
           = intersectionGlobal.jacobianInverseTransposed(localCenter);
 #else
-#warning Test disabled, as UG does support local-to-global for faces
+#warning Test disabled, as UG does not support global-to-local for faces
 #endif
 
         // //////////////////////////////////////////////////////////
