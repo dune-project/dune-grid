@@ -20,7 +20,7 @@
    particular data structures in the headers.
    UG was never supposed to provide 2d and 3d grids at the same time.
    However, when compiling it as c++, the dimension-dependent parts are
-   wrapped up cleanly in the namespaces UG2d and UG3d, respectively.  That
+   wrapped up cleanly in the namespaces UG::D2 and UG::D3, respectively.  That
    way it is possible to link together the UG lib for 2d and the one for 3d.
    But we also need the headers twice!  Once with _2 set and once with _3!
    So here we go:*/
@@ -143,8 +143,9 @@ namespace Dune {
 
      In your %Dune application, you can now instantiate objects of the
      type UGGrid<2,2> or UGGrid<3,3>.  You can have more than one, if
-     you choose.  However, it is currently not possible to mix 2d and 3d
-     UGGrids.
+     you choose.  It is even possible to have 2d and 3d grids at the same
+     time, even though the original UG system never intended to support
+     this!
 
      Please send any questions, suggestions, or bug reports to
      sander@math.fu-berlin.de
@@ -318,7 +319,7 @@ namespace Dune {
 
        \param e Pointer to the element to be marked for refinement
        \param rule One of the UG refinement rules
-       \param side If rule==UG2d::BLUE (one quadrilateral is split into two rectangles)
+       \param side If rule==UG::D2::BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
      */
     bool mark(const typename Traits::template Codim<0>::EntityPointer & e,
@@ -438,8 +439,8 @@ namespace Dune {
        WARNING: This is a very special method.  Omitting the green closure does
        not mean that UG creates correct nonconforming meshes.  For internal
        reasons (bugs?) though, it allows you to do uniform refinement with
-       a few anisotropic refinement rules such as UG3d::PRISM_QUADSECT or
-       UG3d::HEX_QUADSECT_0.
+       a few anisotropic refinement rules such as UG::D3::PRISM_QUADSECT or
+       UG::D3::HEX_QUADSECT_0.
      */
     void adaptWithoutClosure();
 
