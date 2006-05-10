@@ -389,6 +389,7 @@ namespace ALUGridSpace {
 
   class LeafLevelIteratorTT
   {
+    // type is hface_STI
     typedef ALUHElementType<1>::ElementType ElType;
 
     typedef leaf_or_father_of_leaf < ElType > StopRule_t;
@@ -1061,8 +1062,7 @@ namespace Dune {
     //! access entity where iteration started
     EntityPointer inside() const;
 
-    //! return true if intersection is with boundary. \todo connection with
-    //! boundary information, processor/outer boundary
+    //! return true if intersection is with boundary.
     bool boundary () const;
 
     //! return true if across the edge an neighbor on this level exists
