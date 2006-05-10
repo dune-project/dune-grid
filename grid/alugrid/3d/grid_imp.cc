@@ -139,6 +139,9 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const ALU3dGrid<dim, dimworld, elType> & g)
     : mygrid_ (0)
+#if ALU3DGRID_PARALLEL
+      , mpAccess_(g.mpAccess_)
+#endif
       , myRank_(-1)
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)

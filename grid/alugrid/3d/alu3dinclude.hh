@@ -15,19 +15,19 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-//#include <defalugridparallel.h>
+//#include <alugrid_defineparallel.h>
 #define ALU3DGRID_PARALLEL 0
 
-/*
-   #ifdef HAVE_MPI_CPP
-   // if this variable is defined,
-   // // then parallel version of ALUGrid is compiled
-   #if ALU3DGRID_PARALLEL == 0
-   #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
-   using the MPI compiler script or compile Dune without the MPI support!"
-   #endif
-   #endif
- */
+#ifdef HAVE_MPI_CPP
+// if this variable is defined,
+// // then parallel version of ALUGrid is compiled
+#if ALU3DGRID_PARALLEL == 0
+#warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
+  using the MPI compiler script or compile Dune without the MPI support!"
+#endif
+#else
+#error
+#endif
 
 // if MPI was found include all headers
 #if ALU3DGRID_PARALLEL
