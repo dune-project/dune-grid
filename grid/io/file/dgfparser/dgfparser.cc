@@ -291,10 +291,9 @@ namespace Dune {
     IntervalBlock interval(gridin);
     SimplexGenerationBlock para(gridin);
 
-    std::string name = "gridparsertmpfile.nodelists";
-    int offset = 0;
+    std::string name = "gridparserfile.nodelists.tmp";
 
-    if(!para.hasmeshfile())
+    if(!para.hasfile())
     {
       if (!interval.isactive() && !bvtx.isactive()) {
         std::cerr << "No vertex information found!" << std::endl;
@@ -335,21 +334,44 @@ namespace Dune {
         }
       }
     }
-    else
-      dimw = 3;
-
+    else {
+      if (para.filetype().size()==0)
+        return readTetgenTriangle(para.filename());
+      dimw = para.dimension();
+      if (dimw!=2 && dimw!=3 && dimw!=-1) {
+        std::cerr << "SimplexGen can only generate 2d or 3d meshes but not " << dimw << " dimensions!" << std::endl;
+        abort();
+      } else if (dimw==-1) {
+        std::cerr << "SimplexGen: connot determine dimension of grid, include parameter DIMENSION in the "
+                  << "Simplexgeneration-Block" << std::endl;
+        abort();
+      }
+    }
     int call_nr = 1;
     if (dimw==2)
     {
       std::stringstream command;
+      std::string suffix;
+
       if (para.haspath())
         command << para.path() << "/";
-      command << "triangle ";
+      command << "triangle -j ";
+      if(para.hasfile())
+      {
+        name = para.filename();
+        suffix = "."+para.filetype();
+        command << " " << para.parameter() << " ";
+      }
+      else
+      {
+        suffix = ".node";
+      }
+
       if (para.minAngle()>0)
         command << "-q" << para.minAngle() << " ";
       if (para.maxArea()>0)
         command << "-a" << para.maxArea() << " ";
-      command << name << ".node";
+      command << name << suffix;
       std::cout << "Calling : " << command.str() << std::endl;
       system(command.str().c_str());
       if (para.display()) {
@@ -369,18 +391,17 @@ namespace Dune {
 
         if (para.haspath())
           command << para.path() << "/";
-
-        if(para.hasmeshfile())
+        command << "tetgen ";
+        if(para.hasfile())
         {
-          name = para.meshfile();
-          suffix = ".mesh";
+          name = para.filename();
+          suffix = "."+para.filetype();
+          command << " " << para.parameter() << " ";
         }
         else
         {
           suffix = ".node";
         }
-
-        command << "tetgen ";
         command << name << suffix;
         std::cout << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
@@ -414,58 +435,67 @@ namespace Dune {
         system(command.str().c_str());
       }
     }
+    std::stringstream nodename;
+    nodename << name << "." << call_nr;
+    return readTetgenTriangle(nodename.str());
+  }
+  inline int DuneGridFormatParser::readTetgenTriangle(std::string name) {
+    int offset,tmp,params;
+    std::string nodename = name + ".node";
+    std::string elename = name + ".ele";
+    std::cout << "opening " << nodename << "\n";
+    std::ifstream node(nodename.c_str());
+    if (!node) {
+      std::cerr << "DGF PARSER ERROR: ";
+      std::cerr << "could not find file " << nodename;
+      std::cerr << " prehaps something went wrong with Tetgen/Triangle?";
+      std::cerr << std::endl;
+      abort();
+    }
+    std::cout << "opening " << elename << "\n";
+    std::ifstream ele(elename.c_str());
+    if (!ele) {
+      std::cerr << "DGF PARSER ERROR: ";
+      std::cerr << "could not find file " << elename;
+      std::cerr << " prehaps something went wrong with Tetgen/Triangle?";
+      std::cerr << std::endl;
+      abort();
+    }
     {
-      std::stringstream nodename;
-      nodename << name << "." << call_nr << ".node";
-      int tmp,params;
-
-      if(para.hasmeshfile())
-      {
-        std::cout << "calculating offset from " << nodename.str() << " .... offset = ";
-        std::ifstream node(nodename.str().c_str());
-        node >> nofvtx >> tmp >> tmp >> params;
-        // offset is 0 by default
-        // the offset it the difference of the first vertex number to zero
-        node >> offset;
-        std::cout << offset << " \n";
-      }
-
-      {
+      std::cout << "calculating offset from " << name << " .... offset = ";
+      node >> nofvtx >> dimw >> tmp >> params;
+      // offset is 0 by default
+      // the offset it the difference of the first vertex number to zero
+      node >> offset;
+      std::cout << offset << " \n";
+      node.seekg(0);
+    }
+    {
+      // first token is number of vertex which should equal i
+      node >> nofvtx >> tmp >> tmp >> params;
+      vtx.resize(nofvtx);
+      for (int i=0; i<nofvtx; i++) {
+        vtx[i].resize(dimw);
+        int nr;
+        node >> nr;
         // first token is number of vertex which should equal i
-        std::cout << "opening " << nodename.str() << "\n";
-        std::ifstream node(nodename.str().c_str());
-        node >> nofvtx >> tmp >> tmp >> params;
-        vtx.resize(nofvtx);
-        for (int i=0; i<nofvtx; i++)
-        {
-          vtx[i].resize(dimw);
-          int nr;
-          node >> nr;
-          // first token is number of vertex which should equal i
-          assert(nr-offset==i);
-          for (int v=0; v<dimw; v++)
-            node >> vtx[i][v];
-          for (int p=0; p<params; p++)
-            node >> tmp;
-        }
+        assert(nr-offset==i);
+        for (int v=0; v<dimw; v++)
+          node >> vtx[i][v];
+        for (int p=0; p<params; p++)
+          node >> tmp;
       }
     }
-
     {
-      std::stringstream elname;
-      elname << name << "." << call_nr << ".ele";
       int tmp;
-      std::ifstream ele(elname.str().c_str());
       ele >> nofelements >> tmp >> tmp;
       elements.resize(nofelements);
-      for (int i=0; i<nofelements; i++)
-      {
+      for (int i=0; i<nofelements; i++) {
         elements[i].resize(dimw+1);
         int nr;
         ele >> nr;
         assert(nr-offset==i);
-        for (int v=0; v<dimw+1; v++)
-        {
+        for (int v=0; v<dimw+1; v++) {
           int elno;
           ele >> elno;
           elements[i][v] = elno - offset;

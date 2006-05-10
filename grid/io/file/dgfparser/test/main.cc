@@ -25,6 +25,5 @@ int main(int argc, char ** argv, char ** envp) {
   grid->globalRefine(refStepsForHalf);
   if (myrank<=0)
     test(*grid);
-  //delete grid;
   MPIEND
 }

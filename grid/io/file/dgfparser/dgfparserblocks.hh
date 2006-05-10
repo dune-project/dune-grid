@@ -109,6 +109,20 @@ namespace Dune {
         line >> entry;
         return line;
       }
+      bool gettokenparam(std::string token,std::string& entry) {
+        makeupcase(token);
+        std::string ltoken;
+        reset();
+        do {
+          getnextline();
+          if (oneline.size()==0)
+            return false;
+          line >> ltoken;
+          makeupcase(ltoken);
+        } while (ltoken!=token);
+        getline(line,entry);
+        return true;
+      }
       bool findtoken(std::string token) {
         makeupcase(token);
         std::string ltoken;
@@ -259,8 +273,11 @@ namespace Dune {
       bool display_;
       std::string path_;
       bool haspath_;
-      std::string meshfile_;
-      bool hasmeshfile_;
+      std::string filename_;
+      std::string filetype_;
+      std::string parameter_;
+      bool hasfile_;
+      int dimension_;
     public:
       SimplexGenerationBlock(std::istream& in) :
         BasicBlock(in,ID),
@@ -268,15 +285,18 @@ namespace Dune {
         angle_(-1),
         display_(false),
         haspath_(false),
-        hasmeshfile_(false)
+        hasfile_(false),
+        dimension_(-1),
+        filetype_(),
+        parameter_()
       {
         double x;
         bool b;
+        int i;
         std::string p;
-        if (findtoken("max-area")) {
+        if (findtoken("max-area"))
           if (getnextentry(x))
             area_=x;
-        }
         if (findtoken("min-angle"))
           if (getnextentry(x))
             angle_=x;
@@ -291,12 +311,20 @@ namespace Dune {
             path_=p;
             haspath_=true;
           }
-
-        if (findtoken("meshfile"))
+        if (findtoken("file")) {
           if (getnextentry(p)) {
-            meshfile_=p;
-            hasmeshfile_=true;
+            filename_=p;
+            hasfile_=true;
           }
+          if (getnextentry(p)) {
+            filetype_=p;
+          }
+          if (findtoken("dimension"))
+            if (getnextentry(i)) {
+              dimension_=i;
+            }
+          gettokenparam("parameter",parameter_);
+        }
       }
       double maxArea() {
         return area_;
@@ -313,11 +341,20 @@ namespace Dune {
       std::string path() {
         return path_;
       }
-      bool hasmeshfile() {
-        return hasmeshfile_;
+      bool hasfile() {
+        return hasfile_;
       }
-      std::string meshfile() {
-        return meshfile_;
+      std::string filename() {
+        return filename_;
+      }
+      std::string filetype() {
+        return filetype_;
+      }
+      int dimension() {
+        return dimension_;
+      }
+      std::string parameter() {
+        return parameter_;
       }
     };
     const char* SimplexGenerationBlock::ID = "Simplexgenerator";

@@ -76,6 +76,7 @@ namespace Dune {
     bool isInterval;
     // call to tetgen/triangle
     inline int generateSimplexGrid(std::istream&);
+    inline int readTetgenTriangle(std::string);
     // helper methods
     inline void setOrientation(int fixvtx,orientation_t orientation=counterclockwise);
     inline void setRefinement(int);
@@ -162,8 +163,6 @@ namespace Dune {
         \c ALBERTAGRID ,
         \c ALUGRID_CUBE ,
         \c ALUGRID_SIMPLEX ,
-        \c UGGRID ,
-        \c ONEDGRID ,
         \c SGRID , or
         \c YASPGRID
         and the integer
@@ -246,7 +245,7 @@ namespace Dune {
        describing one boundary patch of the macrogrid.
        \e Note: so far only simplex grid patches can be prescribed in this way.
      - \b Cube  \n
-       Each line consists of \c dimworld^2 vertex indices (see \b Vertex block)
+       Each line consists of \c dimworld<SUP>2</SUP> vertex indices (see \b Vertex block)
        describing one cube
        of the macrogrid. \e Note that the ordering of the local vertices
        has to follow the %Dune
@@ -267,27 +266,8 @@ namespace Dune {
        one of the freely available grid generation tools
        Tetgen (http://tetgen.berlios.de) for \c dimworld=3 or
        Triangle (http://www.cs.cmu.edu/~quake/triangle.html) for \c dimworld=2.
-       This programs will be called via system call from the dgfparser.
-       Therefore one should add the path containing the executables of Triangle
-       and/or Tetgen to the environment variable PATH or use the path
-       option described below.
-       Some identifiers can be
-       given to influence the quality of the generated mesh:
-       -  \b max-area
-          followed by a positive real number used as an upper bound for the
-          area of all simplicies of the mesh.
-       -  \b min-angle
-          followed by a positive number. In 2d this limits the angles in
-          resulting mesh from below; in 3d this bounds the radius-edge ratio
-          from above.
-       -  In addition the identifier \b path
-          (followed by a path name) can be used
-          to give search path for Triangle/Tetgen.
-       -  The identifier \b display
-          followed by 1 can be used to get a first impression
-          of the resulting mesh using the visualization tools distributed with
-          Triangle/Tetgen.
-       .
+       For more detail see \ref Simplexgeneration.
+      .
      - \b Vertex \n
        Each line consists of a vector representing a vertex of the
        macrogrid. The vertices are consecutively numbered starting from zero -
@@ -422,9 +402,9 @@ namespace Dune {
 
    In three space dimensions:
    - \ref dgfexample4
- */
-/*!
-   \page dgfexample1 Manual Grid Construction
+   - \ref dgfexample5
+
+   \section dgfexample1 Manual Grid Construction
    A tessellation of the unit square into six simplex entities.
    Some boundary segments on the lower and right
    boundary are given their own id the remaining are
@@ -452,9 +432,8 @@ namespace Dune {
 
    \image html  examplegrid1cs.png "The resulting grid"
    \image latex examplegrid1cs.eps "The resulting grid" width=\textwidth
- */
-/*!
-   \page dgfexample2 Automated Grid Construction
+
+   \section dgfexample2 Automated Grid Construction
    Automatic tessellation using Triangle,
    with verticies defined as in the example \ref dgfexample1:
 
@@ -500,9 +479,8 @@ namespace Dune {
 
    \image html  examplegrid4.png "The resulting grid"
    \image latex examplegrid4.eps "The resulting grid" width=\textwidth
- */
-/*!
-   \page dgfexample3 Interval Domain
+
+   \section dgfexample3 Interval Domain
    A automatic tessellation of the unit square using
    a Cartesian Grid.
    All boundaries have id 1.
@@ -522,9 +500,8 @@ namespace Dune {
    @endcode
    is added than the same simplex grid as for AlbertaGrid<2,2> would be
    constructed.
- */
-/*!
-   \page dgfexample4 Interval Domain and Automated Grid Generation
+
+   \section dgfexample4 Interval Domain and Automated Grid Generation
    An automatic tessellation of the unit square using
    a Cartesian Grid is shown.
    All boundaries have id 1 except boundary segment on the lower boundary
@@ -534,10 +511,10 @@ namespace Dune {
 
    @include examplegrid6.dgf
 
-   \image html  examplegrid6c.png "The resulting grid using ALU3dGrid<3,3,hexa>"
-   \image latex examplegrid6c.eps "The resulting grid using ALU3dGrid<3,3,hexa>" width=\textwidth
-   \image html  examplegrid6s.png "The resulting grid using ALU3dGrid<3,3,tetra>"
-   \image latex examplegrid6s.eps "The resulting grid using ALU3dGrid<3,3,tetra>" width=\textwidth
+   \image html  examplegrid6c.png "The resulting grid using ALUCubeGrid<3,3>"
+   \image latex examplegrid6c.eps "The resulting grid using ALUCubeGrid<3,3>" width=\textwidth
+   \image html  examplegrid6s.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid6s.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Now the verticies are still defined through the interval block; the simplicies
    are constructed using Tetgen (note the comment symbol \% in the
@@ -545,25 +522,93 @@ namespace Dune {
 
    @include examplegrid7.dgf
 
-   \image html  examplegrid7.png "The resulting grid using ALU3dGrid<3,3,tetra>"
-   \image latex examplegrid7.eps "The resulting grid using ALU3dGrid<3,3,tetra>" width=\textwidth
+   \image html  examplegrid7.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid7.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Note that in the grid would be the same as in the above example if
-   ALU3dGrid<3,3,hexa> where used.
+   ALUCubeGrid<3,3> where used.
 
    Now we can also include some quality enhancement:
 
    First: \b min-angle = 1.2
           (remove the first \% in the \b Simplexgeneration block)
-   \image html  examplegrid7angle.png "The resulting grid using ALU3dGrid<3,3,tetra>"
-   \image latex examplegrid7angle.eps "The resulting grid using ALU3dGrid<3,3,tetra>" width=\textwidth
+   \image html  examplegrid7angle.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid7angle.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Second: \b min-angle = 1.2 and \b max-area = 0.1
            (remove both \% in the \b Simplexgeneration block)
-   \image html  examplegrid7area.png "The resulting grid using ALU3dGrid<3,3,tetra>"
-   \image latex examplegrid7area.eps "The resulting grid using ALU3dGrid<3,3,tetra>" width=\textwidth
+   \image html  examplegrid7area.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid7area.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
+   \section dgfexample5 Importing Grids Generated by Tetgen/Triangle
 
+   Here a .mesh file used to generate a 3d simplex grid through Tetgen. The
+   mesh file is taken from
+   http://www-c.inria.fr/Eric.Saltel/download/download.php
+
+   @include examplegrid9.dgf
+
+   \image html  BBEETH1M.d_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+
+   \image html  Orb_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+
+   \image html  m125.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+
+   \section Simplexgeneration Using Tetgen/Triangle
+       The freely available simplex grid generators are direcltly
+       called via system
+       call through the dgfparser.
+       Therefore one should either add the path containing the executables of Triangle
+       and/or Tetgen to the environment variable PATH or use the path
+       option described below. One can either use Tetgen/Triangle directly to generate
+       a .node and .ele file or one can prescribe vertices direcly in th DGF file which
+       will be used to generate the grid:
+       -# For the first approach use the token \b file to give a filemane
+          and the type of the file (e.g. node, mesh, ply...). Example:
+          \code
+          file name mesh
+          \endcode
+          If the filetype is givn, it will be appended to \b name and this will be
+          passed to Tetgen/Triangle. Additional parameters for the grid generators
+          can be given by the the \b parameter token.
+          If no file type is given it is assumed that in a previous run of Tetgen/Triangle
+          files name.node and name.ele were generated and these will be used
+          to described the verticies and elements of the Dune grid.
+       -# For the second approach the vertex block and the interval blocks (if present)
+          are used to generate a .node file which is passed to Tetgen/Triangle.
+       .
+
+       Some identifiers can be
+       used to influence the quality of the generated mesh:
+       -  \b max-area
+          followed by a positive real number used as an upper bound for the
+          area of all simplicies of the mesh.
+       -  \b min-angle
+          followed by a positive number. In 2d this limits the angles in
+          resulting mesh from below; in 3d this bounds the radius-edge ratio
+          from above.
+       .
+       If these identifiers are present then in 3d the grid is generated in two
+       steps: first tetgen is called with only a .node file and then
+       tetgen is run a second time including the -r switch and
+       the -a and -q switch with the parameters given in the dgf file. In 2d the
+       -a and -q switches are added directly in the first run.
+
+       The remaining identifiers are
+       -  The identifier \b path
+          (followed by a path name) can be used
+          to give search path for Triangle/Tetgen.
+       -  The identifier \b display
+          followed by 1 can be used to get a first impression
+          of the resulting mesh using the visualization tools distributed with
+          Triangle/Tetgen.
+       .
+       Download
+       - Tetgen http://tetgen.berlios.de
+       - Triangle http://www.cs.cmu.edu/~quake/triangle.html
  */
 
 
