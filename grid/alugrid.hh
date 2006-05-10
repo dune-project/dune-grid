@@ -36,14 +36,18 @@ namespace Dune {
     public Dune::ALU3dGrid<3,3,Dune::hexa> {
     typedef Dune::ALU3dGrid<3,3,Dune::hexa> BaseType;
   public:
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
+    //! constructor taking filename of macro grid and MPI_Comm
     ALUCubeGrid(const std::string macroName , MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(macroName,mpiComm) {}
+    //! constructor creating empty grid
     ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(mpiComm) {}
 #else
+    //! constructor taking filename of macro grid
     ALUCubeGrid(const std::string macroName ) :
       BaseType(macroName) {}
+    //! constructor creating empty grid
     ALUCubeGrid(int myrank = -1) :
       BaseType(myrank) {}
 #endif
@@ -57,7 +61,16 @@ namespace Dune {
     typedef BaseType::LeafIteratorImp LeafIteratorImp;
     typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
     typedef Traits::Codim<0>::LeafIterator LeafIterator;
+
+    // ALUGrid only typedefs
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+    typedef BaseType::ObjectStreamType ObjectStreamType;
+
+    friend class Conversion< ALUCubeGrid<dim,dimworld> , HasObjectStream > ;
+    friend class Conversion< const ALUCubeGrid<dim,dimworld> , HasObjectStream > ;
+
+  private:
+    ALUCubeGrid(const ALUCubeGrid & g) : BaseType(g) {}
   };
 
   namespace Capabilities {
@@ -126,14 +139,18 @@ namespace Dune {
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
     typedef Dune::ALU3dGrid<3,3,Dune::tetra> BaseType;
   public:
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
+    //! constructor taking filename of macro grid and MPI_Comm
     ALUSimplexGrid(const std::string macroName, MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(macroName,mpiComm) {}
+    //! constructor creating empty grid
     ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(mpiComm) {}
 #else
+    //! constructor taking filename of macro grid
     ALUSimplexGrid(const std::string macroName ) :
       BaseType(macroName) {}
+    //! constructor creating empty grid
     ALUSimplexGrid(int myrank = -1) :
       BaseType(myrank) {}
 #endif
@@ -147,7 +164,16 @@ namespace Dune {
     typedef BaseType::LeafIteratorImp LeafIteratorImp;
     typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
     typedef Traits::Codim<0>::LeafIterator LeafIterator;
+
+    // ALUGrid only typedefs
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+    typedef BaseType::ObjectStreamType ObjectStreamType;
+
+    friend class Conversion< ALUSimplexGrid<dim,dimworld> , HasObjectStream > ;
+    friend class Conversion< const ALUSimplexGrid<dim,dimworld> , HasObjectStream > ;
+
+  private:
+    ALUSimplexGrid(const ALUSimplexGrid & g) : BaseType(g) {}
   };
 
   /**
@@ -175,7 +201,7 @@ namespace Dune {
     typedef Dune::ALU2dGrid<2,2> BaseType;
   public:
     ALUSimplexGrid(const std::string macroName
-#ifdef _ALU3DGRID_PARALLEL_
+#if ALU3DGRID_PARALLEL
                    , MPI_Comm mpiComm = MPI_COMM_WORLD
 #endif
                    ) :
