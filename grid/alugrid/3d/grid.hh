@@ -522,7 +522,7 @@ namespace Dune {
 
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
-  private:
+  protected:
     //! Copy constructor should not be used
     ALU3dGrid( const MyType & g );
 
