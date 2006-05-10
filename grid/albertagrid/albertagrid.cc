@@ -2177,6 +2177,7 @@ namespace Dune
   inline int AlbertaGridIntersectionIterator<GridImp>::
   twistInSelf() const
   {
+    // always 0 for indside
     return 0;
   }
 
@@ -2309,6 +2310,7 @@ namespace Dune
       if (facemap[1] == (facemap[0]+1)%3) {
         return facemap[0];
       }
+      // twist
       return facemap[1]-3;
     }
   };

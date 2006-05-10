@@ -602,32 +602,32 @@ namespace Dune
         adaption cycle */
     bool mightBeCoarsened () const ;
 
-    //***************************************************************
-    //  Interface for parallelisation
-    //***************************************************************
-    //! \todo brief me
-    void setLeafData( int proc );
-
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const;
 
-    //! return true if this entity belong to master set of this grid
-    bool master() const;
-
-    //! return 0 for elements
-    int getFEVnum () const { return 0; }
-
-    //! needed for LevelIterator to compare
-    ALBERTA EL_INFO *getElInfo () const;
-
-    //! return element for equaltiy in EntityPointer
-    ALBERTA EL *getElement () const;
-
-    //! set elInfo and Element to nil
-    void removeElInfo();
-
     //! equality of entities
     bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
+
+    //***************************************************************
+    //  Interface for parallelisation
+    //***************************************************************
+    // set leaf data with processor number
+    void setLeafData( int proc );
+
+    // return true if this entity belong to master set of this grid
+    bool master() const;
+
+    // return 0 for elements
+    int getFEVnum () const { return 0; }
+
+    // needed for LevelIterator to compare
+    ALBERTA EL_INFO *getElInfo () const;
+
+    // return element for equaltiy in EntityPointer
+    ALBERTA EL *getElement () const;
+
+    // set elInfo and Element to nil
+    void removeElInfo();
 
     // returns true if entity comes from LeafIterator
     bool leafIt () const { return leafIt_; }
@@ -640,7 +640,7 @@ namespace Dune
                     int edge = 0,
                     int vertex = 0 );
 
-    //! same as setElInfo just with a entity given
+    // same as setElInfo just with a entity given
     void setEntity (const AlbertaGridEntity<0,dim,GridImp> & org);
 
   private:
@@ -907,8 +907,7 @@ namespace Dune
     //! The Destructor
     //~AlbertaGridIntersectionIterator();
 
-    //! return true if intersection is with boundary. \todo connection with
-    //! boundary information, processor/outer boundary
+    //! return true if intersection is with boundary.
     bool boundary () const;
 
     //! return true if across the edge an neighbor on this level exists
@@ -960,13 +959,14 @@ namespace Dune
     //! return level of inside entity
     int level () const;
 
-    //! reset IntersectionIterator
-    template <class EntityType>
-    void first(const EntityType & en, int level );
-
     //**********************************************************
     //  private methods
     //**********************************************************
+
+    // reset IntersectionIterator
+    template <class EntityType>
+    void first(const EntityType & en, int level );
+
     // calls EntityPointer done and sets done_ to true
     void done ();
 
