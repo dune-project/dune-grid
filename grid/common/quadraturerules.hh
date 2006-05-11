@@ -1823,6 +1823,13 @@ namespace Dune {
                                              << type << " not available");
     }
 
+    ~QuadratureRuleContainer()
+    {
+      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
+      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
+        delete (*entry);
+    }
+
     //! ConstIterator class for sequential access
     class const_iterator
     {
@@ -1953,6 +1960,13 @@ namespace Dune {
 
     }
 
+
+    ~QuadratureRuleContainer()
+    {
+      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
+      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
+        delete (*entry);
+    }
 
     //! select the appropriate rule
     const QuadratureRule<ct,dim>& operator() (GeometryType type, int p)
@@ -2215,6 +2229,12 @@ namespace Dune {
                                              << type << " not available");
     }
 
+    ~QuadratureRuleContainer()
+    {
+      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
+      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
+        delete (*entry);
+    }
     //! ConstIterator class for sequential access
     class const_iterator
     {
