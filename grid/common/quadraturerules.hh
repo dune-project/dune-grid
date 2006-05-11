@@ -1187,7 +1187,7 @@ namespace Dune {
   //!
   {
   public:
-    enum { MAXP=8};
+    enum { MAXP=15};
     enum { highest_order=5 };
 
     //! initialize quadrature points on the interval for all orders
