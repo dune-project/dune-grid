@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
@@ -2187,6 +2188,13 @@ namespace Dune {
       theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dimworld> >(*this) );
     }
 
+    ~YaspGrid()
+    {
+      deallocatePointers(indexsets);
+      deallocatePointers(theleafindexset);
+      deallocatePointers(theglobalidset);
+    }
+
     /*! Return maximum level defined in this grid. Levels are numbered
           0 ... maxlevel with 0 the coarsest level.
      */
@@ -2790,6 +2798,15 @@ namespace Dune {
     friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim,dimworld> >;
     friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim,dimworld> >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim,dimworld> >;
+
+    template<class T>
+    void deallocatePointers(T& container)
+    {
+      typedef typename T::iterator Iterator;
+
+      for(Iterator entry=container.begin(); entry != container.end(); ++entry)
+        delete (*entry);
+    }
 
     template<int codim>
     YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >&
