@@ -1572,32 +1572,56 @@ namespace Dune {
   class PrismQuadratureRule<ct,3> : public QuadratureRule<ct,3>
   {
   public:
-    enum {d=3};
-    enum {highest_order=PrismQuadraturePoints<3>::highest_order};
+    enum { d=3 };
+    enum {
+      /* min(Line::order, Triangle::order) */
+      highest_order =
+        CubeQuadratureRule<ct,1>::highest_order
+        < SimplexQuadratureRule<ct,2>::highest_order
+        ? CubeQuadratureRule<ct,1>::highest_order
+        : SimplexQuadratureRule<ct,2>::highest_order
+    };
     typedef ct CoordType;
     typedef PrismQuadratureRule<ct,3> value_type;
     PrismQuadratureRule(int p)
     {
-      switch(p)
-      {
-      case 2 :
-        m=6;
-        break;
-      default : m=6;
+      if (p<=2) {
+        int m=6;
+        delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
+        for(int i=0; i<m; ++i)
+        {
+          FieldVector<ct, d> local;
+          double weight;
+          for(int k=0; k<d; ++k)
+            local[k]=PrismQuadraturePointsSingleton<3>::prqp.point(m,i)[k];
+          // put in container
+          push_back(QuadraturePoint<ct,d>(local,weight));
+        }
       }
-      delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
-      FieldVector<ct, d> local;
-      double weight;
-      for(int i=0; i<m; ++i)
-      {
-        for(int k=0; k<d; ++k)
-          local[k]=PrismQuadraturePointsSingleton<3>::prqp.point(m,i)[k];
-        weight=PrismQuadraturePointsSingleton<3>::prqp.weight(m,i);
-        // put in container
-        push_back(QuadraturePoint<ct,d>(local,weight));
+      else {
+        SimplexQuadratureRule<ct,2> triangle(p);
+        CubeQuadratureRule<ct,1> line(p);
 
+        delivered_order = std::min(triangle.order(),line.order());
+
+        for (typename CubeQuadratureRule<ct,1>::iterator
+             lit = line.begin(); lit != line.end(); ++lit)
+        {
+          for (typename SimplexQuadratureRule<ct,2>::iterator
+               tit = triangle.begin(); tit != triangle.end(); ++tit)
+          {
+            FieldVector<ct, d> local;
+            local[0] = tit->position()[0];
+            local[1] = tit->position()[1];
+            local[2] = lit->position()[0];
+
+            double weight = tit->weight() * lit->weight();
+
+            // put in container
+            push_back(QuadraturePoint<ct,d>(local,weight));
+          }
+        }
       }
-
     }
 
     //! return order
@@ -1621,7 +1645,7 @@ namespace Dune {
     ~PrismQuadratureRule(){}
 
   private:
-    int delivered_order, m;
+    int delivered_order;
   };
 
   /***********************************************************
@@ -2263,7 +2287,6 @@ namespace Dune {
         dverb << "Warning: Quadrature rule order " << pmax
               << " requested for pyramid" <<" but only " << pyramid_maxorder << " available" << std::endl;
     }
-
 
     //! select the appropriate rule
     const QuadratureRule<ct,dim>& operator() (GeometryType type, int p)
