@@ -43,8 +43,15 @@ namespace Dune
      function calls to corresponding members of this class. In that sense IntersectionIterator
      defines the interface and IntersectionIteratorImp supplies the implementation.
 
+     <h2>Intersections, leaf grid and level grid</h2>
 
-     <h2>Intersections and locally refined meshes</h2>
+     Note that the intersections of an element accessible via the
+     %IntersectionIterator
+     are independent of whether the element results from a grid traversal with
+     a %LevelIterator or a %LeafIterator. For example, if the grid is traversed
+     with a %LevelIterator the %IntersectionIterator may provide access to an
+     element
+     that is not on the same level (but only if started at a leaf element).
 
      Consider a situtation where two elements a and b have a common intersection.
      %Element b has been refined into an element c (and others) while a has not
@@ -63,79 +70,90 @@ namespace Dune
      with b and c, the intersection itersection iterator started at c delivers intersections
      with a and d and b has an intersection with a.
 
-     <h2>Intersections, leaf grid and level grid</h2>
+     <h2>Methods neighbor and boundary </h2>
 
-     Note that the intersections of an element accessible via the %IntersectionIterator
-     are independent of whether the element results from a grid traversal with
-     a %LevelIterator or a %LeafIterator. For example, if the grid is traversed
-     with a %LevelIterator the %IntersectionIterator may provide access to an element
-     that is not on the same level (but only if started at a leaf element).
+     The %intersectioniterator is started on a codimension 0 entity of the grid.
+     If this entity belongs to the interior or the overlap region
+     (see. ???) then the union of all intersections is identical to the
+     boundary of the entity. On ghost elements the iterator only stops
+     on the border of the domain, i.e., only on the intersections with
+     entities in the interior region. Depending on the boolean values returned by
+     the methods %boundary() and %neighbor()
+     one can detect the position of an intersection
+     relative to the boundary. In general
+     the method boundary() returns true if and only if the intersection is
+     part of the physical boundary of the domain. The method neighbor() returns
+     true only if the method outside() has a well defined return value.
 
-
-     <h2>Interior and boundary entities</h2>
-
-     Depending on the boolean values returned by the methods boundary() and neighbor()
-     one can detect the position of an entity relative to the boundary. The
-     following cases are possible.
-
-     <h2>Intersections and processor boundaries</h2>
-
-     %At processor boundaries, i.e. when an element has an intersection with another element
-     in the sequential grid but this element is only stored in other processors the
-     intersection iterator stops but neither leafNeighbor(), levelNeighbor() nor boundary()
-     are true.
+     The following cases are possible if the intersection iterator is
+     started on an entity in the interior or overlap region. More
+     details are given below:
 
      <table>
      <tr>
-     <td></td><td></td><td>neighbor()</td><td>boundary()</td><td>outside()</td>
+     <td></td><td>intersection</td><td>neighbor()</td><td>boundary()</td><td>outside()</td>
      </tr>
 
      <tr>
-     <td>1</td><td>periodic boundary</td>
-     <td>true</td><td>true</td><td>Ghost-/Overlap cell@br (with transformed geometry)</td>
-     </tr>
-
-     <tr>
-     <td>2</td><td>inner cell</td>
-     <td>true</td><td>true <em>for inner boundaries,</em><br>false <em>otherwise</em></td>
+     <td>1</td><td>with inner, overlap <br>
+                  or ghost entity</td>
+     <td>true</td><td>false</td>
      <td>the neighbor entity</td>
      </tr>
 
      <tr>
-     <td>3</td><td>domain boundary</td>
+     <td>2</td><td>on domain boundary</td>
      <td>false</td><td>true</td><td><em>undefined</em></td></tr>
 
      <tr>
-     <td>4</td><td>processor boundary</td>
-     <td>false</td><td>true <em>for inner boundaries,</em><br>false <em>otherwise</em></td>
-     <td><em>undefined</em></td></tr>
+     <td>3</td><td>on periodic boundary</td>
+     <td>true</td><td>true</td><td>Ghost-/Overlap cell@br (with transformed geometry)</td>
+     </tr>
+
+     <tr>
+     <td>4</td><td>on processor boundary</td>
+     <td>false <em>if grid has no ghosts</em><br>false <em>otherwise</em></td><td>false </td>
+     <td>ghost entity <em>(if it exists)</em></td></tr>
      </table>
 
-     <h2>Handling periodic boundaries</h2>
-     - The IntersectionIterator stops at periodic boundaries
-     - periodic grids are handled in correspondence to parallel grids
-     - %At the periodic boundary one can adjust an overlap- or ghost-layer.
-     - outer() returns a ghost or overlap cell (for ghost and overlap look into the documentation of the parallel grid interface)
-     - outer() cell has a periodically transformed geometry (so that one does not see a jump or something like that)
-     - outer() cell has its own index
-     - outer() cell has the same id as the corresponding "original" cell
-
-     <h2>Handling physical boundaries</h2>
-     - We require differently constructed geometries outside the domain
-     - The kind of construction depends on the problem ine is discretizing
-     - Therefor these constructions can't be part of the Grid interface
-     - Utility classes are required to do this construction
-     - The utility classes must be parametrized with the intersection (in our case the IntersectionIterator)
-     - The utility classen return a suitable transformation of of the inner() entitys geometry (with respect to the intersection)
-     - reflection at the intersection
-     - point reflection
-     - reflection combined with translation
-     - ...
-
-     <h2>Identifying boundaries</h2> As long we don't have a domain
-     interface in Dune one can only identify a boundary by it's
-     boundaryId().
-
+     -# <b> Inner Intersections: </b> \n
+       The type of the neighboring entity can be determined through
+       methods defined on the outside entity.
+     -# <b>  Handling physical boundaries: </b>
+       - We require differently constructed geometries outside the domain
+       - The kind of construction depends on the problem ine is discretizing
+       - Therefor these constructions can't be part of the Grid interface
+       - Utility classes are required to do this construction
+       - The utility classes must be parametrized with the intersection (in our
+         case the IntersectionIterator)
+       - The utility classen return a suitable transformation of of the inner()
+         entitys geometry (with respect to the intersection)
+       - reflection at the intersection
+       - point reflection
+       - reflection combined with translation
+       - ...
+       .
+       Identifying physical boundaries</h2> As long we don't have a domain
+       interface in Dune one can only identify a boundary by it's
+       boundaryId().
+     -# <b> Handling periodic boundaries: </b>
+       - The IntersectionIterator stops at periodic boundaries
+       - periodic grids are handled in correspondence to parallel grids
+       - %At the periodic boundary one can adjust an overlap- or ghost-layer.
+       - outer() returns a ghost or overlap cell (for ghost and overlap look into
+         the documentation of the parallel grid interface)
+       - outer() cell has a periodically transformed geometry (so that one does
+         not see a jump or something like that)
+       - outer() cell has its own index
+       - outer() cell has the same id as the corresponding "original" cell
+     -# <b> Processor boundaries: </b> \n
+       At processor boundaries, i.e. when an element has an intersection with
+       another element
+       in the sequential grid but this element is only stored in other processors
+       the intersection iterator stops but neither
+       neighbor(), leafNeighbor(), levelNeighbor(), nor boundary()
+       are true.
+     .
      @ingroup GIIntersectionIterator
    */
   template<class GridImp, template<class> class IntersectionIteratorImp>
