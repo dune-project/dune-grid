@@ -1391,7 +1391,11 @@ namespace Dune {
       case 3 :
         m=8;
         break;
-      default : m=8;
+      case 4 :
+      case 5 :
+        m=15;
+        break;
+      default : m=15;
       }
       delivered_order = SimplexQuadraturePointsSingleton<3>::sqp.order(m);
       FieldVector<ct, d> local;
