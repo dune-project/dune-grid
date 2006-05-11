@@ -357,7 +357,7 @@ namespace Dune {
   class SimplexQuadratureRule;
 
   template<typename ct>
-  class SimplexQuadratureRule<ct,1> : public QuadratureRule<ct,1>
+  class SimplexQuadratureRule<ct,1> : public CubeQuadratureRule<ct,1>
   {
   public:
     enum {d=1};
@@ -365,53 +365,8 @@ namespace Dune {
     enum {highest_order=GaussPoints::highest_order};
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
-    SimplexQuadratureRule(int p)
-    {
-      // find the right Gauss Rule from given order
-      int m=0;
-      for (int i=0; i<=GaussPoints::MAXP; i++)
-        if (GaussPointsSingleton::gp.order(i)>=p)
-        {
-          m = i;
-          break;
-        }
-      if (m==0) DUNE_THROW(QuadratureOrderOutOfRange, "order not implemented");
-      delivered_order = GaussPointsSingleton::gp.order(m);
-
-      // fill in all the gauss points
-      n = power(m,dim);
-      for (int i=0; i<n; i++)
-      {
-        // compute multidimensional coordinates of Gauss point
-        int x[dim];
-        int z = i;
-        for (int k=0; k<dim; ++k)
-        {
-          x[k] = z%m;
-          z = z/m;
-        }
-
-        // compute coordinates and weight
-        double weight = 1.0;
-        FieldVector<ct, dim> local;
-        for (int k=0; k<dim; k++)
-        {
-          local[k] = GaussPointsSingleton::gp.point(m,x[k]);
-          weight *= GaussPointsSingleton::gp.weight(m,x[k]);
-        }
-
-        // put in container
-        push_back(QuadraturePoint<ct,dim>(local,weight));
-      }
-    }
-
-
-
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
+    SimplexQuadratureRule(int p) :
+      CubeQuadratureRule<ct,1>(p) {}
 
     //! return type of element
     GeometryType type () const
@@ -426,18 +381,6 @@ namespace Dune {
       return *this;
     }
     ~SimplexQuadratureRule(){}
-
-
-  private:
-    int delivered_order;
-    int n; // integration points
-    int power (int y,int d)
-    {
-      int m=1;
-      for (int i=0; i<d; ++i) m*=y;
-      return m;
-    }
-
   };
 
 
