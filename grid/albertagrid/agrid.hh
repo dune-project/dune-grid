@@ -1758,7 +1758,7 @@ namespace Dune
       return this->getRealImplementation(it);
     }
 
-    AlbertaGridIntersectionIteratorType &
+    const AlbertaGridIntersectionIteratorType &
     getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
     {
       return this->getRealImplementation(it);
