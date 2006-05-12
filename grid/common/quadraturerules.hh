@@ -1293,7 +1293,6 @@ namespace Dune {
 
   private:
     FieldVector<double, 3> G[MAXP+1][MAXP];
-    //double G[MAXP+1][MAXP]; // positions of Gauss points
     double W[MAXP+1][MAXP];     // weights associated with points
     int O[MAXP+1];              // order of the rule
   };
@@ -1519,10 +1518,10 @@ namespace Dune {
     enum {
       /* min(Line::order, Triangle::order) */
       highest_order =
-        CubeQuadratureRule<ct,1>::highest_order
-        < SimplexQuadratureRule<ct,2>::highest_order
-        ? CubeQuadratureRule<ct,1>::highest_order
-        : SimplexQuadratureRule<ct,2>::highest_order
+        (int)CubeQuadratureRule<ct,1>::highest_order
+        < (int)SimplexQuadratureRule<ct,2>::highest_order
+        ? (int)CubeQuadratureRule<ct,1>::highest_order
+        : (int)SimplexQuadratureRule<ct,2>::highest_order
     };
     typedef ct CoordType;
     typedef PrismQuadratureRule<ct,3> value_type;
@@ -1533,10 +1532,11 @@ namespace Dune {
         delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
         for(int i=0; i<m; ++i)
         {
-          FieldVector<ct, d> local;
-          double weight;
-          for(int k=0; k<d; ++k)
-            local[k]=PrismQuadraturePointsSingleton<3>::prqp.point(m,i)[k];
+          FieldVector<ct,3> local;
+          for (int k=0; k<d; k++)
+            local[k] = PrismQuadraturePointsSingleton<3>::prqp.point(m,i)[k];
+          double weight =
+            PrismQuadraturePointsSingleton<3>::prqp.weight(m,i);
           // put in container
           push_back(QuadraturePoint<ct,d>(local,weight));
         }
@@ -2161,12 +2161,12 @@ namespace Dune {
       ////////////
       // prism rule
       /////////
-
-      for (int m=1; m<=PrismQuadraturePoints<3>::MAXP; m++)
-      {
-        int p = PrismQuadraturePointsSingleton<3>::prqp.order(m);           // order of rule with m points
-        if (p<=pmax)
-        {
+      /*
+         for (int m=1; m<=PrismQuadraturePoints<3>::MAXP; m++)
+              {
+                int p = PrismQuadraturePointsSingleton<3>::prqp.order(m); // order of rule with m points
+                if (p<=pmax)
+         {
           QuadratureRule<ct,dim>* pointer = new PrismQuadratureRule<ct,3>(p);
           rules.push_back(pointer);
           if (m==1)
@@ -2177,12 +2177,20 @@ namespace Dune {
               if (rules[prism_order_to_index[i]]->order()<i)
                 prism_order_to_index[i] = index;
 
-          ++index;
+         ++index;
           prisindex=index;
-        }
-        else break;
+         }
+                else break;
+              }
+       */
+      for (int p=0; p<pmax; p++)
+      {
+        QuadratureRule<ct,dim>* pointer = new PrismQuadratureRule<ct,3>(p);
+        rules.push_back(pointer);
+        prism_order_to_index[p] = index;
+        index++;
+        prisindex=index;
       }
-
       ////////////
       // pyramid rule
       /////////
@@ -2336,10 +2344,10 @@ namespace Dune {
     int prism_maxorder;
     int pyramid_maxorder;
 
-    int cube_order_to_index[GaussPoints::highest_order+1];
-    int simplex_order_to_index[SimplexQuadraturePoints<dim>::highest_order+1];
-    int prism_order_to_index[PrismQuadraturePoints<3>::highest_order+1];
-    int pyramid_order_to_index[PyramidQuadraturePoints<3>::highest_order+1];
+    int cube_order_to_index[CubeQuadratureRule<ct,dim>::highest_order+1];
+    int simplex_order_to_index[SimplexQuadratureRule<ct,dim>::highest_order+1];
+    int prism_order_to_index[PrismQuadratureRule<ct,3>::highest_order+1];
+    int pyramid_order_to_index[PyramidQuadratureRule<ct,3>::highest_order+1];
 
   };
 
