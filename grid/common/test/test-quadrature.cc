@@ -19,6 +19,13 @@ void checkQuadrature(Dune::GeometryType t, int p)
   typedef typename Quad::const_iterator QuadIterator;
   const Quad & quad =
     Dune::QuadratureRules<ctype,dim>::rule(t, p);
+  if (quad.type() != t || quad.order() < p) {
+    std::cerr << "Error: Type mismatch! Requested Quadrature for " << t
+              << " and order=" << p << "." << std::endl
+              << "\tGot Quadrature for " << quad.type() << " and order="
+              << quad.order() << std::endl;
+    success = false;
+  }
   QuadIterator qp = quad.begin();
   QuadIterator qend = quad.end();
   for (; qp!=qend; ++qp)
@@ -33,10 +40,11 @@ void checkQuadrature(Dune::GeometryType t, int p)
               << " does not sum to volume of RefElem" << std::endl;
     std::cerr << "\tSums to " << volume << "( RefElem.volume() = "
               << Dune::ReferenceElements<ctype, dim>::general(t).volume()
+              << ")" << "(difference " << volume -
+    Dune::ReferenceElements<ctype, dim>::general(t).volume()
               << ")" << std::endl;
     success = false;
   }
-  //  checkQuadrature<ctype,dim>(t, p+1);
 }
 
 template<class ctype, int dim>
