@@ -112,7 +112,7 @@ namespace Dune
 
      <tr>
      <td>4</td><td>on processor boundary</td>
-     <td>false <em>if grid has no ghosts</em><br>false <em>otherwise</em></td><td>false </td>
+     <td>false <em>if grid has no ghosts</em><br>true <em>otherwise</em></td><td>false </td>
      <td>ghost entity <em>(if it exists)</em></td></tr>
      </table>
 
@@ -133,9 +133,9 @@ namespace Dune
        - reflection combined with translation
        - ...
        .
-       Identifying physical boundaries</h2> As long we don't have a domain
-       interface in Dune one can only identify a boundary by it's
-       boundaryId().
+       At the moment we have no domain interface in Dune, therefore it
+       is only possible to identify physical boundaries using the
+       boundaryId() method.
      -# <b> Handling periodic boundaries: </b>
        - The IntersectionIterator stops at periodic boundaries
        - periodic grids are handled in correspondence to parallel grids
