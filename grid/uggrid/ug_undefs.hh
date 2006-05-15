@@ -931,16 +931,6 @@
 #undef F77SYM
 #undef CURRENT_TIME
 #undef ARCHNAME
-#undef ALIGNMENT
-#undef ALIGNMASK
-#undef F77SYM
-#undef CURRENT_TIME
-#undef ARCHNAME
-#undef ALIGNMENT
-#undef ALIGNMASK
-#undef F77SYM
-#undef CURRENT_TIME
-#undef ARCHNAME
 #undef USES_UNIVERSAL_HEADERS
 #undef __MWCW_oldVersion__
 #undef malloc
@@ -984,6 +974,7 @@
 #undef UG_NAMESPACE_H
 #undef START_UG_NAMESPACE
 #undef END_NAMESPACE
+#undef END_UGDIM_NAMESPACE
 #undef NS_PREFIX
 #undef USING_UG_NAMESPACE
 #undef START_UGDIM_NAMESPACE
@@ -997,7 +988,6 @@
 #undef NS_DIM_PREFIX
 #undef __UGENV__
 #undef NAMELENSTR
-#undef SEARCHALL
 #undef DIRSEP
 #undef ROOT_DIR
 #undef ENVITEM_DOWN
