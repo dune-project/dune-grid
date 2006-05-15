@@ -31,8 +31,12 @@ namespace Dune {
 
     friend class OneDGridEntity<0,dim,GridImp>;
 
-    //! Constructor for a given grid entity
+    //! Constructor for a given grid entity and a given neighbor
     OneDGridIntersectionIterator(OneDEntityImp<1>* center, int nb) : center_(center), neighbor_(nb)
+    {}
+
+    /** \brief Constructor creating the 'one-after-last'-iterator */
+    OneDGridIntersectionIterator(OneDEntityImp<1>* center) : center_(center), neighbor_(4)
     {}
 
   public:
@@ -52,26 +56,107 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
+
       neighbor_++;
+
+      if (neighbor_==2) {
+        if (!center_->isLeaf())
+          // Skip next leaf intersection, because inside is not a leaf element
+          neighbor_++;
+        else if (boundary())
+          // Skip next leaf intersection because it is a boundary intersection
+          // and therefore coincides with the level intersection
+          neighbor_++;
+        else if (center_->pred_!=NULL && center_->pred_->isLeaf())
+          // Skip next leaf intersection because it coincides with a level intersection
+          neighbor_++;
+
+      }
+
+      if (neighbor_==3) {
+        if (!center_->isLeaf())
+          // Skip next leaf intersection, because inside is not a leaf element
+          neighbor_++;
+        else if (boundary())
+          // Skip next leaf intersection because it is a boundary intersection
+          // and therefore coincides with the level intersection
+          neighbor_++;
+        else if (center_->succ_!=NULL && center_->succ_->isLeaf())
+          // Skip next leaf intersection because it coincides with a level intersection
+          neighbor_++;
+
+      }
+
     }
 
     OneDEntityImp<1>* target() const {
-      const bool isValid = center_ && (neighbor_==0 || neighbor_==1);
+      const bool isValid = center_ && neighbor_>=0 && neighbor_<4;
 
       if (!isValid)
         return center_;
       else if (!neighbor())
         return NULL;
-      else
-        return (neighbor_==0) ? center_->pred_ : center_->succ_;
+      else if (neighbor_==0)
+        return center_->pred_;
+      else if (neighbor_==1)
+        return center_->succ_;
+      else if (neighbor_==2) {
+
+        // Get left leaf neighbor
+        if (center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0]) {
+
+          OneDEntityImp<1>* leftLeafNeighbor = center_->pred_;
+          while (!leftLeafNeighbor->isLeaf())
+            leftLeafNeighbor = leftLeafNeighbor->sons_[1];
+          return leftLeafNeighbor;
+
+        } else {
+
+          OneDEntityImp<1>* ancestor = center_;
+          while (ancestor->father_) {
+            ancestor = ancestor->father_;
+            if (ancestor->pred_ && ancestor->pred_->vertex_[1] == ancestor->vertex_[0]) {
+              assert(ancestor->pred_->isLeaf());
+              return ancestor->pred_;
+            }
+          }
+
+          DUNE_THROW(GridError, "Programming error, apparently we're on the left boundary, neighbor_==2 should not occur!");
+        }
+
+      } else {
+
+        // Get right leaf neighbor
+        if (center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1]) {
+
+          OneDEntityImp<1>* rightLeafNeighbor = center_->succ_;
+          while (!rightLeafNeighbor->isLeaf())
+            rightLeafNeighbor = rightLeafNeighbor->sons_[0];
+          return rightLeafNeighbor;
+
+        } else {
+
+          OneDEntityImp<1>* ancestor = center_;
+          while (ancestor->father_) {
+            ancestor = ancestor->father_;
+            if (ancestor->succ_ && ancestor->succ_->vertex_[0] == ancestor->vertex_[1]) {
+              assert(ancestor->succ_->isLeaf());
+              return ancestor->succ_;
+            }
+          }
+
+          DUNE_THROW(GridError, "Programming error, apparently we're on the right boundary, neighbor_==3 should not occur!");
+        }
+
+      }
+
     }
 
     //! return true if intersection is with boundary.
     bool boundary () const {
-      assert(neighbor_==0 || neighbor_==1);
 
       // Check whether we're on the left boundary
-      if (neighbor_==0) {
+      if ((neighbor_%2)==0) {
 
         // If there's an element to the left we can't be on the boundary
         if (center_->pred_)
@@ -164,39 +249,34 @@ namespace Dune {
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const {
-      assert (neighbor_ == 0 || neighbor_ == 1);
-      intersectionGlobal_.setToTarget(center_->vertex_[neighbor_]);
+      intersectionGlobal_.setToTarget(center_->vertex_[neighbor_%2]);
       return intersectionGlobal_;
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {return neighbor_;}
+    int numberInSelf () const {return neighbor_%2;}
 
     //! local number of codim 1 entity in neighbor where intersection is contained
     int numberInNeighbor () const {
       // If numberInSelf is 0 then numberInNeighbor is 1 and vice versa
-      return 1-neighbor_;
+      return 1-(neighbor_%2);
     }
 
     //! return outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
+      outerNormal_[0] = ((neighbor_%2)==0) ? -1 : 1;
       return outerNormal_;
     }
 
-    //! return unit outer normal, this should be dependent on
-    //! local coordinates for higher order boundary
-    //! the normal is scaled with the integration element
+    //! Return outer normal scaled with the integration element
     const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
     {
-      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
-      return outerNormal_;
+      return outerNormal(local);
     }
 
     //! return unit outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
-      return outerNormal_;
+      return outerNormal(local);
     }
 
   private:
@@ -209,14 +289,17 @@ namespace Dune {
     //! vector storing the outer normal
     mutable FieldVector<typename GridImp::ctype, dimworld> outerNormal_;
 
-    //! count on which neighbor we are lookin' at
+    /** \brief Count on which neighbor we are lookin' at
+
+       0,1 are the level neighbors, 2 and 3 are the leaf neighbors,
+       if they differ from the level neighbors. */
     int neighbor_;
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
     mutable OneDMakeableGeometry<0,1,GridImp> intersectionSelfLocal_;
 
-    /** \brief The geometry that's being returned when intersectionSelfLocal() is called
+    /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
     mutable OneDMakeableGeometry<0,1,GridImp> intersectionNeighborLocal_;
 

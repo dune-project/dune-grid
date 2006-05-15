@@ -325,7 +325,7 @@ namespace Dune {
 
     /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
-       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
+       is provided using iterators. Returns iterator
        referencing the first neighbor. */
     IntersectionIterator ibegin () const {
       return OneDGridIntersectionIterator<GridImp>(target_, 0);
@@ -333,7 +333,7 @@ namespace Dune {
 
     //! Reference to one past the last neighbor
     IntersectionIterator iend () const {
-      return OneDGridIntersectionIterator<GridImp>(target_, 2);
+      return OneDGridIntersectionIterator<GridImp>(target_);
     }
 
     //! returns true if Entity has no children
