@@ -66,8 +66,7 @@ namespace Dune
     template<class EntityType>
     int map (const EntityType& e) const
     {
-      enum { cc = EntityType::codimension };
-      return is.index(e) + offset[cc].find(e.geometry().type())->second;
+      return is.index(e) + offset.find(e.geometry().type())->second;
     }
 
 
@@ -80,10 +79,9 @@ namespace Dune
     template<int cc>
     int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
-
       GeometryType gt=ReferenceElements<double,G::dimension>::general(e.geometry().type()).type(i,cc);
-      //	  std::cout << "map: cc=" << cc << " gt=" << gt << " offset=" << offset[cc].find(gt)->second << std::endl;
-      return is.template subIndex<cc>(e,i) + offset[cc].find(gt)->second;
+      //	  std::cout << "map: cc=" << cc << " gt=" << gt << " offset=" << offset.find(gt)->second << std::endl;
+      return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -136,7 +134,7 @@ namespace Dune
 
       n=0;     // zero data elements
       for (int c=0; c<=G::dimension; c++)
-        offset[c].clear();         // clear all maps
+        offset.clear();         // clear all maps
 
       // Compute offsets for the different geometry types.
       // Note that mapper becomes invalid when the grid is modified.
@@ -145,17 +143,8 @@ namespace Dune
           if (layout.contains(c,is.geomTypes(c)[i]))
           {
             //			  std::cout << "offset " << c << " " << is.geomTypes(c)[i] << " is " << n << std::endl;
-            if (c<G::dimension-1)
-            {
-              offset[c][is.geomTypes(c)[i]] = n;
-              n += is.size(is.geomTypes(c)[i]);
-            }
-            else               // the grid is only allowed to deliver one geometry type !
-            {
-              // put entry with arbitrary BasicType in the map because they are equal
-              offset[c][GeometryType(GeometryType::cube,G::dimension-c)] = n;
-              n += is.size(is.geomTypes(c)[i]);
-            }
+            offset[is.geomTypes(c)[i]] = n;
+            n += is.size(is.geomTypes(c)[i]);
           }
     }
 
@@ -163,7 +152,7 @@ namespace Dune
     int n;     // number of data elements required
     const G& g;
     const IS& is;
-    std::map<GeometryType,int> offset[G::dimension+1];     // for each codim provide a map with all geometry types
+    std::map<GeometryType,int> offset;     // provide a map with all geometry types
   };
 
 
