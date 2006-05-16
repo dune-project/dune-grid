@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <dune/common/exceptions.hh>
-#include "dune/common/helpertemplates.hh"
+#include <dune/common/helpertemplates.hh>
 
 /** @file
  * @author Peter Bastian
