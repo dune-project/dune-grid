@@ -11,6 +11,7 @@
 #include <list>
 #include <string.h>
 #include <dune/common/exceptions.hh>
+#include <dune/common/iteratorfacades.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/referenceelements.hh>
 
@@ -121,6 +122,25 @@ namespace Dune
    */
   template<class GridImp, class IS=typename GridImp::template Codim<0>::LeafIndexSet>
   class VTKWriter {
+    template<int dim>
+    struct P0Layout
+    {
+      bool contains (int codim, Dune::GeometryType gt)
+      {
+        if (codim==0) return true;
+        return false;
+      }
+    };
+
+    template<int dim>
+    struct P1Layout
+    {
+      bool contains (int codim, Dune::GeometryType gt)
+      {
+        if (codim==dim) return true;
+        return false;
+      }
+    };
 
     // extract types
     enum {n=GridImp::dimension};
@@ -129,7 +149,11 @@ namespace Dune
     typedef typename GridImp::Traits::template Codim<0>::Entity Entity;
     typedef typename GridImp::Traits::template Codim<0>::Entity Cell;
     typedef typename GridImp::Traits::template Codim<n>::Entity Vertex;
-
+    typedef IS IndexSet;
+    static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
+    typedef typename IS::template Codim<0>::template Partition<vtkPartition>::Iterator GridCellIterator;
+    typedef typename IS::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;
+    typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P1Layout> VertexMapper;
   public:
     // A base class for grid functions with any return type and dimension
     // Trick : use double as return type
@@ -158,30 +182,162 @@ namespace Dune
   private:
     typedef typename std::list<VTKFunction*>::iterator functioniterator;
 
-    template<int dim>
-    struct P0Layout
+    class CellIterator :
+      public ForwardIteratorFacade<CellIterator, Entity, Entity&, int>
     {
-      bool contains (int codim, Dune::GeometryType gt)
+      GridCellIterator git;
+    public:
+      CellIterator(const GridCellIterator & x) : git(x) {};
+      void increment ()
       {
-        if (codim==0) return true;
-        return false;
+        ++git;
+        while (git->partitionType()!=InteriorEntity) ++git;
+      }
+      bool equals (const CellIterator & cit) const
+      {
+        return git == cit.git;
+      }
+      bool operator != (const GridCellIterator & cit) const DUNE_DEPRECATED
+      {
+        return git != cit;
+      }
+      Entity& dereference() const
+      {
+        return *git;
       }
     };
-    template<int dim>
-    struct P1Layout
+    CellIterator cellBegin() const
     {
-      bool contains (int codim, Dune::GeometryType gt)
-      {
-        if (codim==dim) return true;
-        return false;
-      }
-    };
-    typedef IS IndexSet;
-    static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
-    typedef typename IS::template Codim<0>::template Partition<vtkPartition>::Iterator CellIterator;
-    typedef typename IS::template Codim<n>::template Partition<vtkPartition>::Iterator VertexIterator;
-    typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P1Layout> VertexMapper;
+      return is.template begin<0,vtkPartition>();
+    }
+    CellIterator cellEnd() const
+    {
+      return is.template end<0,vtkPartition>();
+    }
 
+    class VertexIterator :
+      public ForwardIteratorFacade<VertexIterator, Entity, Entity&, int>
+    {
+      GridCellIterator git;
+      VTKOptions::DataMode datamode;
+      int index;
+      const VertexMapper & vertexmapper;
+      std::vector<bool> visited;
+      const std::vector<int> & number;
+      int offset;
+      void basicIncrement ()
+      {
+        index++;
+        if (index == git->template count<n>()) {
+          offset += git->template count<n>();
+          index = 0;
+          ++git;
+          while (git->partitionType()!=InteriorEntity) ++git;
+        }
+      }
+    public:
+      VertexIterator(const GridCellIterator & x,
+                     const VTKOptions::DataMode & dm,
+                     const VertexMapper & vm,
+                     const std::vector<int> & n) :
+        git(x), datamode(dm), index(0),
+        vertexmapper(vm), visited(vm.size(), false),
+        number(n), offset(0) {};
+      void increment ()
+      {
+        switch (datamode)
+        {
+        case VTKOptions::conforming :
+          basicIncrement();
+          for(int alpha = vertexmapper.template map<n>(*git,index);
+              !visited[alpha];
+              basicIncrement())
+          {
+            alpha = vertexmapper.template map<n>(*git,index);
+          }
+          break;
+        case VTKOptions::nonconforming :
+          basicIncrement();
+          break;
+        }
+      }
+      bool equals (const VertexIterator & cit) const
+      {
+        return git == cit.git
+               && index == cit.index && datamode == cit.datamode;
+      }
+      int id () const DUNE_DEPRECATED
+      {
+        switch (datamode)
+        {
+        case VTKOptions::conforming :
+          return
+            number[vertexmapper.template map<n>(*git,renumber(*git,index))];
+        case VTKOptions::nonconforming :
+          return offset + renumber(*git,index);
+        }
+        assert(false);
+      }
+      Entity& dereference() const
+      {
+        return *git;
+      }
+    };
+    VertexIterator vertexBegin() const
+    {
+      return VertexIterator(is.template begin<0,vtkPartition>(),
+                            datamode, *vertexmapper, number);
+    }
+    VertexIterator vertexEnd() const
+    {
+      return VertexIterator(is.template end<0,vtkPartition>(),
+                            datamode, *vertexmapper, number);
+    }
+
+    class CornerIterator :
+      public ForwardIteratorFacade<CornerIterator, Entity, Entity&, int>
+    {
+      GridCellIterator git;
+      VTKOptions::DataMode datamode;
+      int index;
+    public:
+      CornerIterator(const GridCellIterator & x,
+                     const VTKOptions::DataMode & dm) :
+        git(x), datamode(dm), index(0) {};
+      void increment ()
+      {
+        index ++;
+        if (index == git->template count<n>()) {
+          ++git;
+          while (git->partitionType()!=InteriorEntity) ++git;
+          index = 0;
+        }
+      }
+      bool equals (const CornerIterator & cit) const
+      {
+        return git == cit.git
+               && index == cit.index && datamode == cit.datamode;
+      }
+      bool operator != (const GridCellIterator & cit) const DUNE_DEPRECATED
+      {
+        return git != cit;
+      }
+      int id () const DUNE_DEPRECATED
+      {
+        switch (datamode)
+        {
+        case VTKOptions::conforming :
+          return 0;
+        case VTKOptions::nonconforming :
+          return 0;
+        }
+        assert(false);
+      }
+      Entity& dereference() const
+      {
+        return *git;
+      }
+    };
 
     // take a vector and interpret it as cell data
     template<class V>
@@ -532,7 +688,7 @@ namespace Dune
     };
 
     //! mapping from GeometryType to VTKGeometryType
-    VTKGeometryType vtkType(const Dune::GeometryType & t) const
+    static VTKGeometryType vtkType(const Dune::GeometryType & t)
     {
       if (t.isLine())
         return vtkLine;
@@ -695,25 +851,25 @@ namespace Dune
       nvertices = 0;
       ncells = 0;
       ncorners = 0;
-      for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-        if (it->partitionType()==InteriorEntity)
+      CellIterator endit = is.template end<0,vtkPartition>();
+      for (CellIterator it=is.template begin<0,vtkPartition>(); it!=endit; ++it)
+      {
+        ncells++;
+        for (int i=0; i<it->template count<n>(); ++i)
         {
-          ncells++;
-          for (int i=0; i<it->template count<n>(); ++i)
+          ncorners++;
+          if (datamode == VTKOptions::conforming)
           {
-            ncorners++;
-            if (datamode == VTKOptions::conforming)
-            {
-              int alpha = vertexmapper->template map<n>(*it,i);
-              if (number[alpha]<0)
-                number[alpha] = nvertices++;
-            }
-            else
-            {
-              nvertices++;
-            }
+            int alpha = vertexmapper->template map<n>(*it,i);
+            if (number[alpha]<0)
+              number[alpha] = nvertices++;
+          }
+          else
+          {
+            nvertices++;
           }
         }
+      }
 
       // UnstructuredGrid
       indent(s);
@@ -796,9 +952,8 @@ namespace Dune
         if (outputtype==VTKOptions::binaryappended)
           p = new VTKBinaryAppendedDataArrayWriter<float>(s,(*it)->name(),(*it)->ncomps(),bytecount);
         for (CellIterator i=is.template begin<0,vtkPartition>(); i!=is.template end<0,vtkPartition>(); ++i)
-          if (i->partitionType()==InteriorEntity)
-            for (int j=0; j<(*it)->ncomps(); j++)
-              p->write((*it)->evaluate(j,*i,ReferenceElements<DT,n>::general(i->geometry().type()).position(0,0)));
+          for (int j=0; j<(*it)->ncomps(); j++)
+            p->write((*it)->evaluate(j,*i,ReferenceElements<DT,n>::general(i->geometry().type()).position(0,0)));
         delete p;
       }
       indentDown();
@@ -833,25 +988,24 @@ namespace Dune
           p = new VTKBinaryAppendedDataArrayWriter<float>(s,(*it)->name(),(*it)->ncomps(),bytecount);
         std::vector<bool> visited(vertexmapper->size(), false);
         for (CellIterator eit=is.template begin<0,vtkPartition>(); eit!=is.template end<0,vtkPartition>(); ++eit)
-          if (eit->partitionType()==InteriorEntity)
-            for (int i=0; i<eit->template count<n>(); ++i)
+          for (int i=0; i<eit->template count<n>(); ++i)
+          {
+            if (datamode == VTKOptions::conforming)
             {
-              if (datamode == VTKOptions::conforming)
-              {
-                int alpha = vertexmapper->template map<n>(*eit,i);
-                if (!visited[alpha])
-                {
-                  for (int j=0; j<(*it)->ncomps(); j++)
-                    p->write((*it)->evaluate(j,*eit,ReferenceElements<DT,n>::general(eit->geometry().type()).position(i,n)));
-                  visited[alpha] = true;
-                }
-              }
-              else
+              int alpha = vertexmapper->template map<n>(*eit,i);
+              if (!visited[alpha])
               {
                 for (int j=0; j<(*it)->ncomps(); j++)
                   p->write((*it)->evaluate(j,*eit,ReferenceElements<DT,n>::general(eit->geometry().type()).position(i,n)));
+                visited[alpha] = true;
               }
             }
+            else
+            {
+              for (int j=0; j<(*it)->ncomps(); j++)
+                p->write((*it)->evaluate(j,*eit,ReferenceElements<DT,n>::general(eit->geometry().type()).position(i,n)));
+            }
+          }
         delete p;
       }
       indentDown();
@@ -872,31 +1026,30 @@ namespace Dune
         p = new VTKBinaryAppendedDataArrayWriter<float>(s,"Coordinates",3,bytecount);
       std::vector<bool> visited(vertexmapper->size(), false);
       for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-        if (it->partitionType()==InteriorEntity)
-          for (int i=0; i<it->template count<n>(); ++i)
+        for (int i=0; i<it->template count<n>(); ++i)
+        {
+          if (datamode == VTKOptions::conforming)
           {
-            if (datamode == VTKOptions::conforming)
-            {
-              int alpha = vertexmapper->template map<n>(*it,i);
-              if (!visited[alpha])
-              {
-                int dimw=w;
-                for (int j=0; j<std::min(dimw,3); j++)
-                  p->write(it->geometry()[i][j]);
-                for (int j=std::min(dimw,3); j<3; j++)
-                  p->write(0.0);
-                visited[alpha] = true;
-              }
-            }
-            else
+            int alpha = vertexmapper->template map<n>(*it,i);
+            if (!visited[alpha])
             {
               int dimw=w;
               for (int j=0; j<std::min(dimw,3); j++)
                 p->write(it->geometry()[i][j]);
               for (int j=std::min(dimw,3); j<3; j++)
                 p->write(0.0);
+              visited[alpha] = true;
             }
           }
+          else
+          {
+            int dimw=w;
+            for (int j=0; j<std::min(dimw,3); j++)
+              p->write(it->geometry()[i][j]);
+            for (int j=std::min(dimw,3); j<3; j++)
+              p->write(0.0);
+          }
+        }
       delete p;
 
       indentDown();
@@ -920,26 +1073,30 @@ namespace Dune
         p1 = new VTKBinaryDataArrayWriter<int>(s,"connectivity",1,ncorners);
       if (outputtype==VTKOptions::binaryappended)
         p1 = new VTKBinaryAppendedDataArrayWriter<int>(s,"connectivity",1,bytecount);
+#if 0
       if (datamode == VTKOptions::conforming)
       {
         for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-          if (it->partitionType()==InteriorEntity)
-            for (int i=0; i<it->template count<n>(); ++i)
-              p1->write(number[vertexmapper->template map<n>(*it,renumber(*it,i))]);
+          for (int i=0; i<it->template count<n>(); ++i)
+            p1->write(number[vertexmapper->template map<n>(*it,renumber(*it,i))]);
       }
       else
       {
         int offset=0;
         for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-          if (it->partitionType()==InteriorEntity)
+        {
+          for (int i=0; i<it->template count<n>(); ++i)
           {
-            for (int i=0; i<it->template count<n>(); ++i)
-            {
-              p1->write(offset + renumber(*it,i));
-            }
-            offset += it->template count<n>();
+            p1->write(offset + renumber(*it,i));
           }
+          offset += it->template count<n>();
+        }
       }
+#else
+      for (VertexIterator it=vertexBegin();
+           it != vertexEnd(); ++it)
+        p1->write(it.id());
+#endif
       delete p1;
 
       // offsets
@@ -1320,7 +1477,7 @@ namespace Dune
     }
 
     // renumber VTK -> Dune
-    int renumber (const Entity& e, int i)
+    static int renumber (const Entity& e, int i)
     {
       static const int quadRenumbering[4] = {0,1,3,2};
       static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
