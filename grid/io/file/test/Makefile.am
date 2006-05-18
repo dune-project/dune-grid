@@ -39,7 +39,7 @@ test_HEADERS =
 GRIDFILES = ug-testgrid-2.am ug-testgrid-3.am
 
 # gridcheck not used explicitly, we should still ship it :)
-EXTRA_DIST = gridcheck.cc $(GRIDFILES)
+#EXTRA_DIST = gridcheck.cc $(GRIDFILES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache
 

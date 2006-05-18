@@ -9,7 +9,7 @@ install-sh
 missing
 mkinstalldirs
 libtool
-dune.pc
+dunei-grid.pc
 semantic.cache
 configure.lineno
 stamp-h1

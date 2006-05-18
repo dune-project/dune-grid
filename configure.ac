@@ -58,5 +58,5 @@ AC_CONFIG_FILES([Makefile
     grid/io/visual/grape/Makefile
     grid/io/visual/Makefile
     grid/io/Makefile
-    dune.pc])
+    dune-grid.pc])
 AC_OUTPUT
