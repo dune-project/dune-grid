@@ -94,8 +94,6 @@ namespace Dune {
 
       if (!isValid)
         return center_;
-      else if (!neighbor())
-        return NULL;
       else if (neighbor_==0)
         return center_->pred_;
       else if (neighbor_==1)
@@ -203,11 +201,50 @@ namespace Dune {
     }
 
     //! return true if across the edge an neighbor on this level exists
-    bool neighbor () const {
-      if (neighbor_==0)
+    bool levelNeighbor () const {
+      assert(neighbor_ >= 0 && neighbor_ < 4);
+
+      switch (neighbor_) {
+      case 0 :
         return center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0];
-      else
+      case 1 :
         return center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1];
+      case 2 :
+        // true if the leaf neighbor happens to be the level neighbor
+        return center_->pred_
+               && center_->pred_->vertex_[1] == center_->vertex_[0]
+               && center_->pred_->isLeaf();
+      default :
+        // true if the leaf neighbor happens to be the level neighbor
+        return center_->succ_
+               && center_->succ_->vertex_[0] == center_->vertex_[1]
+               && center_->succ_->isLeaf();
+      }
+
+    }
+
+    //! return true if across the edge an neighbor on this level exists
+    bool leafNeighbor () const {
+      assert(neighbor_ >= 0 && neighbor_ < 4);
+      switch (neighbor_) {
+
+      case 0 :
+        return center_->isLeaf()
+               && center_->pred_
+               && center_->pred_->vertex_[1] == center_->vertex_[0]
+               && center_->pred_->isLeaf();
+
+      case 1 :
+        return center_->isLeaf()
+               && center_->succ_
+               && center_->succ_->vertex_[0] == center_->vertex_[1]
+               && center_->succ_->isLeaf();
+
+      default :
+        // neighbor_==2 and neighbor_==3 are leaf neighbors by construction of neighbor_
+        return !boundary();
+      }
+
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
