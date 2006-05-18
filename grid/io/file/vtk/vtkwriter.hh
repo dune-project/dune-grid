@@ -367,6 +367,7 @@ namespace Dune
           return offset + renumber(*git,index);
         }
         assert(false);
+        return 0;
       }
       int localindex () const
       {
