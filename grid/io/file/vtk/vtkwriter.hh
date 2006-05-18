@@ -248,7 +248,7 @@ namespace Dune
         vertexmapper(vm), visited(vm.size(), false),
         number(num), offset(0)
       {
-        if (datamode == VTKOptions::conforming)
+        if (datamode == VTKOptions::conforming && git != gend)
           visited[vertexmapper.template map<n>(*git,index)] = true;
       };
       void increment ()
