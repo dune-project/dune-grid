@@ -51,8 +51,6 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0)
 {
-  typedef const OneDGrid<dim,dimworld> GridImp;
-
   // Init grid hierarchy
   vertices.resize(1);
   elements.resize(1);
@@ -121,8 +119,6 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const std::vector<OneDCType>& coords)
 template <int dim, int dimworld>
 Dune::OneDGrid<dim,dimworld>::~OneDGrid()
 {
-  typedef const OneDGrid<dim,dimworld> GridImp;
-
   // Delete all vertices
   for (unsigned int i=0; i<vertices.size(); i++) {
 
@@ -299,8 +295,6 @@ Dune::OneDGrid<dim,dimworld>::getLeftNeighborWithSon(OneDEntityImp<1>* eIt)
 template <int dim, int dimworld>
 bool Dune::OneDGrid<dim,dimworld>::adapt()
 {
-  typedef const OneDGrid<dim,dimworld> GridImp;
-
   OneDEntityImp<1>* eIt;
 
   // for the return value:  true if the grid was changed
