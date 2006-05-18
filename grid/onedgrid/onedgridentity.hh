@@ -70,6 +70,7 @@ namespace Dune {
     }
 
     bool isLeaf() const {
+      assert( (sons_[0]==NULL && sons_[1]==NULL) || (sons_[0]!=NULL && sons_[1]!=NULL) );
       return sons_[0]==NULL && sons_[1]==NULL;
     }
 

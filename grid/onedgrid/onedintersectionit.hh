@@ -104,8 +104,10 @@ namespace Dune {
         if (center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0]) {
 
           OneDEntityImp<1>* leftLeafNeighbor = center_->pred_;
-          while (!leftLeafNeighbor->isLeaf())
+          while (!leftLeafNeighbor->isLeaf()) {
+            assert (leftLeafNeighbor->sons_[1] != NULL);
             leftLeafNeighbor = leftLeafNeighbor->sons_[1];
+          }
           return leftLeafNeighbor;
 
         } else {
@@ -128,8 +130,10 @@ namespace Dune {
         if (center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1]) {
 
           OneDEntityImp<1>* rightLeafNeighbor = center_->succ_;
-          while (!rightLeafNeighbor->isLeaf())
+          while (!rightLeafNeighbor->isLeaf()) {
+            assert (rightLeafNeighbor->sons_[0] != NULL);
             rightLeafNeighbor = rightLeafNeighbor->sons_[0];
+          }
           return rightLeafNeighbor;
 
         } else {
