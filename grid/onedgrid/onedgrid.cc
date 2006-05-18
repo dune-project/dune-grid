@@ -302,78 +302,70 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 
   // remove all elements that have been marked for coarsening
   for (int i=1; i<=maxLevel(); i++) {
-    int n = 0;
 
     for (eIt = elements[i].begin; eIt!=NULL; ) {
 
-      OneDEntityImp<1>* leftElement = eIt->pred_;
-      OneDEntityImp<1>* rightElement = eIt->succ_;
+      OneDEntityImp<1>* leftElementToBeDeleted  = eIt;
+      OneDEntityImp<1>* rightElementToBeDeleted = eIt->succ_;
 
-      // ensure grid conformity
-      if (n%2 == 0 && eIt->isLeaf())
-      {
-        if (eIt->markState_ != OneDEntityImp<1>::COARSEN ||
-            eIt->succ_->markState_ != OneDEntityImp<1>::COARSEN)
-        {
-          if (eIt->markState_ == OneDEntityImp<1>::COARSEN)
-            eIt->markState_ = OneDEntityImp<1>::NONE;
-          if (eIt->succ_->markState_ == OneDEntityImp<1>::COARSEN)
-            eIt->succ_->markState_ = OneDEntityImp<1>::NONE;
-        }
-      }
+      assert(eIt->succ_);
+      OneDEntityImp<1>* nextElement = eIt->succ_->succ_;
 
-      if (eIt->markState_ == OneDEntityImp<1>::COARSEN && eIt->isLeaf()) {
+      if (leftElementToBeDeleted->markState_ == OneDEntityImp<1>::COARSEN && leftElementToBeDeleted->isLeaf()
+          && rightElementToBeDeleted->markState_ == OneDEntityImp<1>::COARSEN && rightElementToBeDeleted->isLeaf()) {
+
+        assert(rightElementToBeDeleted->isLeaf());
 
         // Is the left vertex obsolete?
-        if (leftElement==NULL || leftElement->vertex_[1] != eIt->vertex_[0]) {
+        if (leftElementToBeDeleted->pred_==NULL
+            || leftElementToBeDeleted->pred_->vertex_[1] != leftElementToBeDeleted->vertex_[0]) {
 
           // If the left vertex has a father remove the reference to this vertex at this father
-          if (n%2==0) {
-            assert(eIt->father_->vertex_[0]->son_ = eIt->vertex_[0]);
-            eIt->father_->vertex_[0]->son_ = NULL;
-          }
+          assert(leftElementToBeDeleted->father_->vertex_[0]->son_ == leftElementToBeDeleted->vertex_[0]);
+          leftElementToBeDeleted->father_->vertex_[0]->son_ = NULL;
 
-          vertices[i].remove(eIt->vertex_[0]);
-          delete(eIt->vertex_[0]);
+          vertices[i].remove(leftElementToBeDeleted->vertex_[0]);
+          delete(leftElementToBeDeleted->vertex_[0]);
         }
 
         // Is the right vertex obsolete?
-        if (rightElement==NULL || rightElement->vertex_[0] != eIt->vertex_[1]) {
+        if (rightElementToBeDeleted->succ_==NULL
+            || rightElementToBeDeleted->succ_->vertex_[0] != rightElementToBeDeleted->vertex_[1]) {
 
           // If the left vertex has a father remove the reference to this vertex at this father
-          if (n%2==1) {
-            assert(eIt->father_->vertex_[1]->son_ = eIt->vertex_[1]);
-            eIt->father_->vertex_[1]->son_ = NULL;
-          }
+          assert(rightElementToBeDeleted->father_->vertex_[1]->son_ == rightElementToBeDeleted->vertex_[1]);
+          rightElementToBeDeleted->father_->vertex_[1]->son_ = NULL;
 
-          vertices[i].remove(eIt->vertex_[1]);
-          delete(eIt->vertex_[1]);
+          vertices[i].remove(rightElementToBeDeleted->vertex_[1]);
+          delete(rightElementToBeDeleted->vertex_[1]);
         }
 
-        // Remove reference from the father element
-        if (eIt->father_->sons_[0] == eIt)
-          eIt->father_->sons_[0] = NULL;
-        else {
-          assert (eIt->father_->sons_[1] == eIt);
-          eIt->father_->sons_[1] = NULL;
-        }
+        // Delete vertex between left and right element to be deleted
+        assert(leftElementToBeDeleted->vertex_[1] == rightElementToBeDeleted->vertex_[0]);
+        vertices[i].remove(leftElementToBeDeleted->vertex_[1]);
+        delete(leftElementToBeDeleted->vertex_[1]);
+
+        // Remove references from the father element
+        assert(rightElementToBeDeleted->father_->sons_[1] == rightElementToBeDeleted);
+        leftElementToBeDeleted->father_->sons_[0]  = NULL;
+        rightElementToBeDeleted->father_->sons_[1] = NULL;
 
         // Paranoia: make sure the father is not marked for refinement
-        if (n%2 == 1)
-          eIt->father_->markState_ = OneDEntityImp<1>::NONE;
+        rightElementToBeDeleted->father_->markState_ = OneDEntityImp<1>::NONE;
 
-        // Actually delete element
-        elements[i].remove(eIt);
-        delete(eIt);
+        // Actually delete elements
+        elements[i].remove(leftElementToBeDeleted);
+        elements[i].remove(rightElementToBeDeleted);
+        delete(leftElementToBeDeleted);
+        delete(rightElementToBeDeleted);
 
         // The grid has been changed
         changedGrid = true;
       }
 
       // increment pointer
-      eIt = rightElement;
+      eIt = nextElement;
 
-      n++;
     }
 
   }
