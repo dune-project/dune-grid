@@ -31,17 +31,16 @@ namespace Dune {
     grid_(grid),
     item_(0),
     neigh_(0),
-    // change "3" as soon as non conform grids shall be allowed?
     nFaces_(3),
     walkLevel_(wLevel),
     index_(0),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
     done_(end)
-    //, nb_(0)
   {
     if (!end)
     {
+      assert(walkLevel_ >= 0);
       setFirstItem(*el,wLevel);
     }
     else
@@ -59,13 +58,14 @@ namespace Dune {
     grid_(grid),
     item_(0),
     neigh_(0),
-    // change "3" as soon as non conform grids shall be allowed?
     nFaces_(3),
     walkLevel_(wLevel),
     index_(0),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(true)
+    done_(true) ,
+    calledOnLeaf_(false),
+    visitedLeaf_(false)
   {}
 
 
@@ -81,19 +81,15 @@ namespace Dune {
     neigh_(org.neigh_),
     nFaces_(org.nFaces_),
     walkLevel_(org.walkLevel_),
+    index_(org.index_),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
     //outerNormal_(org.unitOuterNormal_), call default constructor of these
     //unitOuterNormal_(org.unitOuterNormal_),
-    done_(org.done_) {
-
-    if(org.item_) { // else it's a end iterator
-      item_           = org.item_;
-      index_          = org.index_;
-    } else {
-      done();
-    }
-  }
+    done_(org.done_),
+    calledOnLeaf_(org.calledOnLeaf_),
+    visitedLeaf_(org.visitedLeaf_)
+  {}
 
   //! The copy constructor
   template<class GridImp>
@@ -110,6 +106,8 @@ namespace Dune {
     generatedGlobalGeometry_ = false;
     generatedLocalGeometries_ = false;
     done_ = org.done_;
+    calledOnLeaf_ = org.calledOnLeaf_;
+    visitedLeaf_ = org.visitedLeaf_;
   }
 
   //! check whether entities are the same or whether iterator is done
@@ -117,27 +115,109 @@ namespace Dune {
   inline bool ALU2dGridIntersectionIterator<GridImp> ::
   equals (const ALU2dGridIntersectionIterator<GridImp> & i) const
   {
-    // this method is only to check equality of real iterators and end iterators
     return ((item_ == i.item_) &&
-            (done_ == i.done_)
-            );
+            (done_ == i.done_));
+
   }
 
 
   //! increment iterator
   template<class GridImp>
-  inline void ALU2dGridIntersectionIterator<GridImp> :: increment () {
+  inline void ALU2dGridIntersectionIterator<GridImp> :: increment ()
+  {
     if (index_ >= nFaces_) {
       done();
       return ;
     }
     else {
-      ++index_;
-      neigh_ = item_->nbel(index_);
-      if (index_ >= nFaces_) done();
+      if(!calledOnLeaf_) // we don't want leaf intersections
+      {
+        ++index_;
+        if (index_ >= nFaces_)
+        {
+          done();
+          return ;
+        }
+        neigh_ = item_->nbel(index_); //! maybe NULL, check boundary()
+        if (neigh_ == 0) // on boundary do nothing
+          return;
+        else {
+          int nlevel = neigh_->level();
+          if (nlevel == walkLevel_) // intersection is on desired level
+            return;
+          if (nlevel < walkLevel_) { // then we don't have an intersection on walkLevel_
+            increment();
+            return;
+          }
+          else {
+            while (neigh_ != 0 && nlevel > walkLevel_) {
+              neigh_ = neigh_->father(); // maybe NULL?
+              nlevel = neigh_->level();
+            }
+            return;
+          }
+        }
+      }
+      else { // now return leaf elements too
+        if (!visitedLeaf_)
+        {
+          ++index_;
+          if (index_ >= nFaces_)
+          {
+            done();
+            return ;
+          }
+          neigh_ = item_->nbel(index_); //! maybe NULL, check boundary()
+          visitedLeaf_ = true;
+        }
+        else {
+          if (neigh_ == 0) { // on boundary do nothing
+            visitedLeaf_ = false;
+            return;
+          }
+          else {
+            int nlevel = neigh_->level();
+            if (nlevel == walkLevel_) { // intersection is on desired level
+              visitedLeaf_ = false;
+              return;
+            }
+            if (nlevel < walkLevel_) { // then we don't have an intersection on walkLevel_
+              visitedLeaf_ = false;
+              increment();
+              return;
+            }
+            else {
+              assert(nlevel > 0);
+              while (neigh_ != 0 && nlevel > walkLevel_) {
+                neigh_ = neigh_->father(); // maybe NULL?
+                assert(neigh_ != 0);
+                nlevel = neigh_->level();
+                assert(nlevel > 0);
+              }
+              assert(neigh_ != 0);
+              visitedLeaf_ = false;
+              return;
+            }
+          }
+        }
+      }
     }
-    return ;
   }
+
+  /*
+        if (index_ >= nFaces_) {
+        done();
+        return ;
+      }
+     ++index_;
+      if (index_ >= nFaces_)
+      {
+        done();
+        return ;
+      }
+      neigh_ = item_->nbel(index_);  //! maybe NULL
+     }
+   */
 
 
   //! return level of inside() entitiy
@@ -152,7 +232,8 @@ namespace Dune {
   inline void ALU2dGridIntersectionIterator<GridImp> :: done () {
     done_ = true;
     item_ = 0;
-    //index_= 3;
+    neigh_ = 0;
+    index_= nFaces_;
   }
 
 
@@ -168,14 +249,17 @@ namespace Dune {
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
   inline void ALU2dGridIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel) {
-    item_      = const_cast<HElementType *> (&elem);
-    walkLevel_ = wLevel;
 
-    //grid_.myGrid().makeneighbours();
-    neigh_ = 0;
+    item_      = const_cast<HElementType *> (&elem);
+    assert( item_ );
+    walkLevel_ = wLevel;
+    done_ = false;
+    calledOnLeaf_= (elem.down() == 0);
+    visitedLeaf_ = false;
+
     index_ = 0;
-    while (!item_->nbel(index_) && index_ < 3)
-      ++index_;
+    //while (!item_->nbel(index_) && index_ < 3)
+    //  ++index_;
     neigh_ = item_->nbel(index_); //! maybe NULL
   }
 
@@ -183,13 +267,19 @@ namespace Dune {
   //! return true if intersection is with boundary
   template<class GridImp>
   inline bool ALU2dGridIntersectionIterator<GridImp> :: boundary() const {
-    ALU2DSPACE Thinelement * nb = item_->neighbour(index_);
-    return nb->thinis(ALU2DSPACE Thinelement::bndel_like);
+    return (neigh_ == 0);
+    //ALU2DSPACE Thinelement * nb = item_->neighbour(index_);
+    //return nb->thinis(ALU2DSPACE Thinelement::bndel_like);
   }
 
   template<class GridImp>
-  inline int ALU2dGridIntersectionIterator<GridImp> :: boundaryId() const {
-    return item_->nbbnd(index_)->type();
+  inline int ALU2dGridIntersectionIterator<GridImp> :: boundaryId() const
+  {
+    int isBoundary=0;
+    assert(item_);
+    if(item_->nbbnd(index_) != 0)
+      isBoundary = item_->nbbnd(index_)->type();
+    return isBoundary;
   }
 
 
@@ -202,19 +292,26 @@ namespace Dune {
   //! return true if intersection is with neighbor on this level
   template<class GridImp>
   inline bool ALU2dGridIntersectionIterator<GridImp> :: leafNeighbor () const {
-    return neighbor();
+    if (!boundary() && calledOnLeaf_)
+      return (neigh_->down()==0);
+    else
+      return false;
   }
 
   //! return true if intersection is with neighbor on this level
   template<class GridImp>
   inline bool ALU2dGridIntersectionIterator<GridImp> :: levelNeighbor () const {
-    return neighbor();
+    if (!boundary() && neigh_ != 0)
+      return (neigh_->level()==walkLevel_);
+    else
+      return false;
   }
 
   //! return EntityPointer to the Entity on the inside of this intersection.
   template<class GridImp>
   inline typename ALU2dGridIntersectionIterator<GridImp> :: EntityPointer
   ALU2dGridIntersectionIterator<GridImp> :: inside() const {
+    assert( item_ );
     return EntityPointer(grid_, *item_);
   }
 
@@ -224,6 +321,7 @@ namespace Dune {
   inline typename ALU2dGridIntersectionIterator<GridImp> :: EntityPointer
   ALU2dGridIntersectionIterator<GridImp> :: outside() const {
     assert(!boundary());
+    assert( neigh_ );
     return EntityPointer(grid_, *neigh_);
   }
 
@@ -237,7 +335,27 @@ namespace Dune {
   //! local number of codim 1 entity in neighbor where intersection is contained in
   template<class GridImp>
   inline int ALU2dGridIntersectionIterator<GridImp> :: numberInNeighbor () const {
-    return item_->opposite(index_);
+    if (neigh_->down() == 0)
+      return item_->opposite(index_);
+    else {
+      int i=0;
+      assert(index_ < 3);
+      assert(neigh_->level() == walkLevel_);
+      //for (int i=0; i < 3; ++i)
+      //  std::cout << index << "  " <<  item_->vertex(i)->coord()[0] << "  " << item_->vertex(i)->coord()[1] << endl ;
+      //for (int i=0; i < 3; ++i)
+      //  std::cout << neigh_->vertex(i)->coord()[0] << "  " << neigh_->vertex(i)->coord()[1] << endl;
+
+
+      EntityPointer item(grid_, *item_);
+      EntityPointer neigh(grid_, *neigh_);
+      while(i<3 && grid_.levelIndexSet(walkLevel_).template subIndex<1>(item.dereference(), index_)!= grid_.levelIndexSet(walkLevel_).template subIndex<1>(neigh.dereference(),i)) {
+        ++i;
+      }
+      //assert(i<3);
+      return i;
+    }
+
   }
 
   template<class GridImp>
@@ -272,7 +390,9 @@ namespace Dune {
   inline const typename ALU2dGridIntersectionIterator<GridImp>::LocalGeometry&
   ALU2dGridIntersectionIterator<GridImp> ::intersectionSelfLocal () const {
     assert(item_ != 0);
-    this->grid_.getRealImplementation(intersectionSelfLocal_).builtLocalGeom(intersectionGlobal_, intersectionSelfLocal_, item_, index_);
+    typename ALU2dGridIntersectionIterator<GridImp> :: EntityPointer ep = inside();
+    this->grid_.getRealImplementation(intersectionSelfLocal_).builtLocalGeom( ep.dereference().geometry() , intersectionGlobal() );
+    //, intersectionSelfLocal_, item_, index_);
     return intersectionSelfLocal_;
   }
 
@@ -280,7 +400,8 @@ namespace Dune {
   inline const typename ALU2dGridIntersectionIterator<GridImp>::LocalGeometry&
   ALU2dGridIntersectionIterator<GridImp> :: intersectionNeighborLocal () const {
     assert(item_ != 0 && neigh_ != 0);
-    this->grid_.getRealImplementation(intersectionSelfLocal_).builtLocalGeom(intersectionGlobal_, intersectionNeighborLocal_, neigh_ , numberInNeighbor());
+    typename ALU2dGridIntersectionIterator<GridImp> :: EntityPointer ep = outside();
+    this->grid_.getRealImplementation(intersectionNeighborLocal_).builtLocalGeom( ep.dereference().geometry() , intersectionGlobal()); //, intersectionNeighborLocal_, neigh_ , numberInNeighbor());
     return intersectionNeighborLocal_;
   }
 
@@ -288,7 +409,7 @@ namespace Dune {
   inline const typename ALU2dGridIntersectionIterator<GridImp>::Geometry&
   ALU2dGridIntersectionIterator<GridImp> ::intersectionGlobal () const {
     assert(item_ != 0);
-    this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*item_, 0, index_, 0);
+    this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*item_, index_);
     return intersectionGlobal_;
   }
 
@@ -305,7 +426,8 @@ namespace Dune {
   // specialisation for elements
   template<PartitionIteratorType pitype, class GridImp>
   struct CheckElementType<0,pitype,GridImp>{
-    static inline int checkFace(typename ALU2dGridLeafIterator<0,pitype,GridImp>::ElementType & item, int & face) {
+    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    static inline int checkFace(HElementType & item, int & face, int level, bool isLeafIterator) {
       return 1;
     }
   };
@@ -313,12 +435,18 @@ namespace Dune {
   // specialisation for edges
   template<PartitionIteratorType pitype, class GridImp>
   struct CheckElementType<1,pitype,GridImp>{
-    static inline int checkFace(typename ALU2dGridLeafIterator<1,pitype,GridImp>::ElementType & item, int & face) {
+    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+
+    //static inline int checkFace(typename ALU2dGridLeafIterator<1,pitype,GridImp>::ElementType & item, int & face) {
+    static inline int checkFace(HElementType & item, int & face, int level, bool isLeafIterator) {
       assert(face>=0);
+      assert(isLeafIterator);
+
       while (face < 3) {
         if(item.normaldir(face)==1) {
           return 0;
         }
+        else ;
         ++face;
       }
       return 1;
@@ -328,7 +456,7 @@ namespace Dune {
   // specialisation for vertices
   template<PartitionIteratorType pitype, class GridImp>
   struct CheckElementType<2,pitype,GridImp>{
-    static inline int checkFace(typename ALU2dGridLeafIterator<2,pitype,GridImp>::ElementType & item, int & face) {
+    static inline int checkFace(ALU2DSPACE Vertex & item, int & face, int level, bool isLeafIterator) {
       return 1;
     }
   };
@@ -347,11 +475,12 @@ namespace Dune {
   TreeIterator(const GridImp & grid, bool end) :
     EntityPointerType (grid),
     endIter_(end),
-    level_(0),
+    level_(-1),
     face_(0),
     isCopy_(0),
     elem_(0),
-    iter_()
+    iter_(),
+    isLeafIterator_(true)
   {
     if(!end) {
       IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()));
@@ -385,7 +514,8 @@ namespace Dune {
     face_(0),
     isCopy_(0),
     elem_(0),
-    iter_()
+    iter_(),
+    isLeafIterator_(false)
   {
 
     if(!end) {
@@ -423,6 +553,7 @@ namespace Dune {
       , isCopy_(org.isCopy_+1)
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
+      , isLeafIterator_(org.isLeafIterator_)
   {
     // don't copy a copy of a copy of a copy of a copy
     assert( org.isCopy_ < 3 );
@@ -436,7 +567,7 @@ namespace Dune {
       return ;
 
     IteratorType & iter = iter_.operator *();
-    int goNext = CheckElementType<cdim,pitype,GridImp>::checkFace(*(this->item_), face_);
+    int goNext = CheckElementType<cdim,pitype,GridImp>::checkFace(*(this->item_), face_, level_, isLeafIterator_);
 
     if (goNext) {
       if (cdim ==1) {
@@ -518,24 +649,6 @@ namespace Dune {
   ALU2dGridLevelIterator(const ALU2dGridLevelIterator<cd,pitype,GridImp> & org)
     :   TreeIterator<cd,pitype,GridImp> (org) {  }
 
-  /*
-     //! prefix increment, go to next entity
-     template<int cd, PartitionIteratorType pitype, class GridImp>
-     inline void ALU2dGridLevelIterator<cd, pitype, GridImp> :: increment () {
-
-     if(endIter_)
-      return ;
-
-     IteratorType & iter = iter_.operator *();
-     iter->next();
-     if(iter->done()) {
-      endIter_ = true;
-      this->done();
-      return ;
-     }
-     this->updateEntityPointer(&(iter->getitem()), face_);
-     }
-   */
 
   //********************************************************************
   //
@@ -652,6 +765,120 @@ namespace Dune {
     item_ = &iter->getitem();
     vertex_ = item_->vertex(face_);
     this->updateEntityPointer(vertex_, face_, level_);
+    ++face_;
+  }
+
+
+  //********************************************************************
+  //
+  //  --ALU2dLevelLeafIterator
+  //  --LevelIterator, specialized for cd=1
+  //
+  //********************************************************************
+
+  //! constructor for cd=1
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLevelIterator<1, pitype, GridImp> ::
+  ALU2dGridLevelIterator(const GridImp & grid, int level, bool end) :
+    EntityPointerType (grid),
+    endIter_(end),
+    level_(level),
+    face_(0),
+    isCopy_(0),
+    nrOfEdges_(grid.hierSetSize(1)),
+    iter_() {
+
+    indexList = new double[nrOfEdges_];
+    for (int i = 0; i < nrOfEdges_; ++i)
+      indexList[i]= 0;
+
+    if(!end) {
+      IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()), level_);
+      iter_.store( it );
+      IteratorType & iter = *it;
+      iter->first();
+      if((!iter->done()))
+      {
+        elem_ = &(iter->getitem());
+        this->updateEntityPointer(elem_, face_, level_);
+        increment();
+      }
+    }
+    else
+    {
+      endIter_ = true;
+      this->done();
+    }
+  }
+
+  //! copy constructor for cd=1
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLevelIterator<1, pitype, GridImp> ::
+  ALU2dGridLevelIterator(const ALU2dGridLevelIterator<1,pitype,GridImp> & org)
+    : EntityPointerType (org)
+      , endIter_( org.endIter_ )
+      , level_( org.level_ )
+      , face_(org.face_)
+      , isCopy_(org.isCopy_+1)
+      , nrOfEdges_(org.nrOfEdges_)
+      , item_(org.item_)
+      , elem_(org.elem_)
+      , iter_ ( org.iter_ )
+  {
+
+    indexList = new double[nrOfEdges_];
+    for (int i = 0; i < nrOfEdges_; ++i)
+      indexList[i] = org.indexList[i];
+
+    // don't copy a copy of a copy of a copy of a copy
+    assert( org.isCopy_ < 3 );
+  }
+
+  //! prefix increment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment () {
+
+    if(endIter_)
+      return ;
+    IteratorType & iter = iter_.operator *();
+    assert(face_>=0);
+
+    int goNext = 1;
+    item_ = &iter->getitem();
+    while (face_ < 3) {
+      int idx = item_->edge_idx(face_);
+      if(!indexList[idx]) {
+        indexList[idx]=1;
+        goNext = 0;
+        break;
+      }
+      ++face_;
+    }
+
+    if (goNext) {
+      assert(face_==3);
+      iter->next();
+      if(iter->done()) {
+        endIter_ = true;
+        face_= 0;
+        this->done();
+        return ;
+      }
+      face_=0;
+      item_ = &iter->getitem();
+      this->updateEntityPointer(item_, face_, level_);
+      increment();
+      return;
+    }
+
+    if(iter->done()) {
+      endIter_ = true;
+      face_= 0;
+      this->done();
+      return ;
+    }
+    item_ = &iter->getitem();
+    this->updateEntityPointer(item_, face_, level_);
     ++face_;
   }
 

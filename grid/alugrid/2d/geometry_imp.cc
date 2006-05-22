@@ -39,44 +39,12 @@ namespace Dune {
     buildGeomInFather(child,orientation);
   }
 
-  /*
-     template <int mydim, int cdim, class GridImp>
-     inline ALBERTA EL_INFO * AlbertaGridGeometry<mydim,cdim,GridImp>::
-     makeEmptyElInfo()
-     {
-     ALBERTA EL_INFO * elInfo = &statElInfo[mydim];
-
-     elInfo->mesh = 0;
-     elInfo->el = 0;
-     elInfo->parent = 0;
-     elInfo->macro_el = 0;
-     elInfo->level = 0;
-     #if DIM > 2
-     elInfo->orientation = 0;
-     elInfo->el_type = 0;
-     #endif
-
-     for(int i =0; i<mydim+1; i++)
-     {
-      for(int j =0; j< cdim; j++)
-      {
-        elInfo->coord[i][j] = 0.0;
-        elInfo->opp_coord[i][j] = 0.0;
-      }
-      elInfo->bound[i] = 0;
-     }
-     return elInfo;
-     }
-   */
-
   template <int mydim, int cdim, class GridImp>
   inline void ALU2dGridGeometry<mydim,cdim,GridImp>::
   initGeom()
   {
     //elInfo_ = 0;
-    face_ = 0;
-    edge_ = 0;
-    vertex_ = 0;
+    face_ = -1;
     builtinverse_ = false;
     builtElMat_   = false;
     calcedDet_    = false;
@@ -419,53 +387,54 @@ namespace Dune {
   //! built Geometry
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  builtGeom(const HElementType & item, int face,
-            int edge, int vertex)
+  builtGeom(const HElementType & item, int face)
   {
     //elInfo_ = elInfo;
     face_ = face;
-    edge_ = edge;
-    vertex_ = vertex;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(&item!=0)
+    assert( &item );
+
+
+    if (mydim == 1) {
+      // copy coordinates
+      for(int i=0; i<mydim+1; ++i)
+      {
+        int vx = (i+face_+1)%3;
+        //std::cout << " set vertex " << vx << "\n";
+        const double (&p)[cdim] = item.vertex(vx)->coord();
+        for(int j=0; j<cdim; ++j)
+        {
+          coord_[i][j] = p[j];
+        }
+        //std::cout << coord_[i] << " c\n";
+      }
+    }
+    else
     {
       // copy coordinates
       for(int i=0; i<mydim+1; ++i)
       {
         // copy coordinates
-        if (mydim == 1)
-          for(int j=0; j<cdim; ++j) coord_[i][j] = item.vertex((i+edge+1)%3)->coord()[j];
-        else
-          for(int j=0; j<cdim; ++j) coord_[i][j] = item.vertex(i)->coord()[j];
+        for(int j=0; j<cdim; ++j)
+          coord_[i][j] = item.vertex(i)->coord()[j];
       }
-
-      elDet_     = elDeterminant();
-      calcedDet_ = true;
-      // geometry built
-      return true;
     }
-    else
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-    }
-    // geometry not built
-    return false;
+    elDet_     = elDeterminant();
+    calcedDet_ = true;
+    // geometry built
+    return true;
   }
 
 
   //! built Geometry
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  builtGeom(const ALU2DSPACE Vertex & item, int face,
-            int edge, int vertex)
+  builtGeom(const ALU2DSPACE Vertex & item, int )
   {
     //elInfo_ = elInfo;
-    face_ = face;
-    edge_ = edge;
-    vertex_ = vertex;
+    face_ = -1;
     builtinverse_ = false;
     builtElMat_   = false;
 
@@ -498,40 +467,29 @@ namespace Dune {
   template <int mydim, int cdim, class GridImp>
   template <class GeometryType, class LocalGeometryType >
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom,
-                 HElementType * item,int face)
+  builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom)
+  //HElementType * item,int face)
   {
     //elInfo_ = elInfo;
-    face_ = face;
-    edge_   = 0;
-    vertex_ = 0;
+    face_ = -1;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(item)
+    //geo.realGeometry.print(std::cout);
+    // just map the point of the global intersection to the local
+    // coordinates , this is the default procedure
+    // for simplices this is not so bad
+    for(int i=0; i<mydim+1; i++)
     {
-      // just map the point of the global intersection to the local
-      // coordinates , this is the default procedure
-      // for simplices this is not so bad
-      for(int i=0; i<mydim+1; i++)
-      {
-        coord_[i] = geo.local( localGeom[i] );
-      }
-
-      elDet_     = elDeterminant();
-      calcedDet_ = true;
-
-      // geometry built
-      return true;
+      coord_[i] = geo.local( localGeom[i] );
     }
-    else
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-    }
+    //std::cout << coord_ << " builkdLocal " <<endl;
 
-    // geometry not built
-    return false;
+    elDet_     = elDeterminant();
+    calcedDet_ = true;
+
+    // geometry built
+    return true;
   }
 
   /*
@@ -611,95 +569,6 @@ namespace Dune {
     buildJacobianInverseTransposed();
     return true;
   }
-
-  // altes Zeug!
-  /*
-     //! generate the geometry for out of given ALU2dGridElement
-     template <int mydim, int cdim, class GridImp>
-     inline bool ALU2dGridGeometry<mydim, cdim, GridImp> :: buildGeom(const HElementType & item) {
-     enum { dim = 2 };
-     enum { dimworld = 2};
-
-
-     builtinverse_ = builtA_ =  false;
-     detDF_ = 2.*item.area();
-     builtDetDF_ = true;
-
-     for(int i=0; i<3; ++i)
-      for(int j=0; j<2;++j)
-        coord_[i][j]=item.vertex(i)->coord()[j];
-     return true;
-     }
-
-     //! generate the geometry for out of given ALU2dGridElement
-     template <int mydim, int cdim, class GridImp>
-     inline bool ALU2dGridGeometry<mydim, cdim, GridImp> :: buildGeomInFather(const GeometryImp &fatherGeom , const GeometryImp & myGeom)
-     {
-     // reset flags, because mappings need to be calculated again
-     builtinverse_ = builtA_ = builtDetDF_ = false;
-
-     // compute the local coordinates in father refelem
-     for(int i=0; i < myGeom.corners() ; i++)
-      for(int j=0; j<2;++j)
-        coord_[i] = fatherGeom.local( myGeom[i] );
-     return true;
-     }
-
-     //! generate transposed Jacobian Inverse and calculate integration_element
-     template <int mydim, int cdim, class GridImp>
-     inline void ALU2dGridGeometry <mydim, cdim, GridImp> :: buildJacobianInverseTransposed() const {
-     if(!builtinverse_)  {
-      calcElMatrix();
-
-      // DetDf = integrationElement
-      detDF_ = std::abs( FMatrixHelp::invertMatrix(AT_,Jinv_) );
-      // transpose Jinv_
-      for (int i = 0; i < matdim; ++i) {
-        for (int j = i+1; j < matdim; ++j) {
-          alu2d_ctype tmp = Jinv_[i][j];
-          Jinv_[i][j] = Jinv_[j][i];
-          Jinv_[j][i] = tmp;
-        }
-      }
-      //builtinverse_ = builtDetDF_ = true;
-      builtinverse_  = true;
-     }
-     }
-
-     //! calculates the element matrix for calculation of the jacobian inverse
-     template <int mydim, int cdim, class GridImp>
-     inline void ALU2dGridGeometry <mydim, cdim, GridImp> :: calcElMatrix () const {
-     if(!builtA_)
-     {
-      // create Matrix A (=Df)               INDIZES: row/col
-      // Mapping: R^dim -> R^2,  F(x) = A x + p_0
-      // columns:    p_1 - p_0  |  p_2 - p_0
-
-      for (int i=0; i<mydim; i++) {
-        AT_[i] = coord_[i+1] - coord_[0];
-      }
-      builtA_ = true;
-     }
-     }
-
-     //! A(l) , see grid.hh
-     template <int mydim, int cdim, class GridImp>
-     inline alu2d_ctype ALU2dGridGeometry <mydim, cdim, GridImp> :: integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const {
-     // if (!builtDetDF_)
-     //   buildJacobianInverseTransposed();
-     return detDF_;
-     }
-
-     //! can only be called for dim=dimworld!
-     template <int mydim, int cdim, class GridImp>
-     inline const FieldMatrix<alu2d_ctype,mydim,mydim>& ALU2dGridGeometry <mydim, cdim, GridImp> ::
-     jacobianInverseTransposed (const FieldVector<alu2d_ctype, cdim>& local) const {
-     if(!builtinverse_)
-      buildJacobianInverseTransposed();
-     return Jinv_;
-     }
-
-   */
 
 } //end namespace Dune
 

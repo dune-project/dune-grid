@@ -516,31 +516,34 @@ namespace Dune {
     template <class EntityProviderType>
     static void freeEntity( EntityProviderType & ep, EntityObj * e )
     {
-      if( e ) delete e;
+      //if( e )
+      delete e;
     }
   };
 
-  /*
-      template <class GridImp>
-      struct ALU2dGridEntityFactory<GridImp,0>
-      {
-        typedef typename GridImp:: template Codim<0>::Entity Entity;
-        typedef MakeableInterfaceObject<Entity> EntityObj;
+  template <class GridImp>
+  struct ALU2dGridEntityFactory<GridImp,0>
+  {
+    enum {codim =0};
+    typedef typename GridImp:: template Codim<codim>::Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObj;
+    //typedef typename Entity :: ImplementationType EntityImp;
 
-        template <class EntityProviderType>
-        static EntityObj *
-        getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
-        {
-          return ep.getObject( grid, level);
-        }
+    template <class EntityProviderType>
+    static EntityObj *
+    getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
+    {
+      //return ep.template getEntityObject( grid, level, (EntityImp *) 0)
+      return ep.getObject( grid, level);
+    }
 
-        template <class EntityProviderType>
-        static void freeEntity( EntityProviderType & ep, EntityObj * e )
-        {
-          ep.freeObject( e );
-        }
-      };
-   */
+    template <class EntityProviderType>
+    static void freeEntity( EntityProviderType & ep, EntityObj * e )
+    {
+      ep.freeObject( e );
+    }
+  };
+
 
   namespace Capabilities
   {

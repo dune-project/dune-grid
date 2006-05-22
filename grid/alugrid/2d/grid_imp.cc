@@ -190,7 +190,6 @@ namespace Dune {
   template <int dim, int dimworld>
   inline int ALU2dGrid<dim, dimworld>:: hierSetSize (int cd) const {
     return mesh_.indexManagerSize(cd);
-    //return size(cd);
   }
 
   //! number of grid entities per level and codim
@@ -231,7 +230,6 @@ namespace Dune {
   //! refine grid refCount times
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: globalRefine(int refCount) {
-
     for (int j = 0; j < refCount; ++j) {
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh_);
       for( walk->first() ; ! walk->done() ; walk->next()) {

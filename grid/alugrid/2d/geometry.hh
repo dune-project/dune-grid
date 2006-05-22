@@ -96,8 +96,8 @@ namespace Dune {
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry for out of given ALU2dGridElement
-    bool builtGeom(const ALU2DSPACE Vertex & item, int face, int edge, int vertex);
-    bool builtGeom(const HElementType & item, int face, int edge, int vertex);
+    bool builtGeom(const ALU2DSPACE Vertex & item, int );
+    bool builtGeom(const HElementType & item, int face);
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal
@@ -105,8 +105,8 @@ namespace Dune {
     //bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg,
     //                    ALBERTA EL_INFO *elInfo, int face);
     template <class GeometryType, class LocalGeomType >
-    bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg,
-                        HElementType * item, int face);
+    bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
+    //HElementType * item, int face);
 
     // init geometry with zeros
     //! no interface method
@@ -155,11 +155,6 @@ namespace Dune {
     //! Which Face of the Geometry 0...dim+1
     int face_;
 
-    //! Which Edge of the Face of the Geometry 0...dim
-    int edge_;
-
-    //! Which Edge of the Face of the Geometry 0...dim-1
-    int vertex_;
 
     enum { matdim = (mydim > 0) ? mydim : 1 };
     mutable FieldMatrix<alu2d_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
@@ -231,9 +226,6 @@ namespace Dune {
       return *(geoms_[child]);
     }
   };
-
-
-
 
 } // end namespace Dune
 

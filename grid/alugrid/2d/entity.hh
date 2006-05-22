@@ -105,24 +105,11 @@ namespace Dune {
       setElement(*(org.item_), org.face_);
     }
 
-    //! compare 2 elements by comparing the item pointers
+    //! compare 2 elements
     bool equals ( const ALU2dGridEntity<cd,dim,GridImp> & org ) const;
-    /*
-       {
-       if (cd != 1)
-       return (item_ == org.item_);
-       else if (item_ == org.item_) {
-       assert(face_ >=0 && face_ < 3);
-       if (face_ == org.face_)
-         return true;
-       else return false;
-       }
-       else ;  // Hier noch Vergleich der Knoten der Kanten einfuegen!!!
-       return false;
-       };
-     */
+
     //! return partition type of this entity ( see grid.hh )
-    //! dummy implementation return interior entity
+    //! dummy implementation return InteriorEntity
     PartitionType partitionType() const { return InteriorEntity; }
 
     /**
@@ -155,13 +142,13 @@ namespace Dune {
 
     mutable GeometryObj geoObj_;
     mutable GeometryImp & geoImp_;
-    mutable bool builtgeometry_;       //!< true if geometry has been constructed
+    mutable bool builtgeometry_;       // true if geometry has been constructed
 
     mutable int level_;
     mutable int face_;
 
     mutable bool localFCoordCalced_;
-    mutable FieldVector<alu2d_ctype, dim> localFatherCoords_; //! coords of vertex in father
+    mutable FieldVector<alu2d_ctype, dim> localFatherCoords_; // coords of vertex in father
 
   };
 
@@ -316,9 +303,6 @@ namespace Dune {
     int subBoundaryId  ( int i ) const;
 
 
-
-    //!----------------------------> to do:
-
     /*! Location of this element relative to the reference element
        of the father. This is sufficient to interpolate all
        dofs in conforming case. Nonconforming may require access to
@@ -338,7 +322,6 @@ namespace Dune {
     bool wasRefined () const {
       return false; //((item_->wasRefined())==1);
     }
-    //!<-----
 
     //***************************************************************
     //  Interface for Adaptation
@@ -442,12 +425,10 @@ namespace Dune {
                            int face=0
                            )
       : grid_(grid)
-        //, item_(const_cast<ElementType *>(&item))
         , item_(const_cast<ElementType *>(&item))
         , level_(-1)
         , face_(face)
         , entity_(0)
-        , entityImp_(0)
     { }
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
@@ -457,7 +438,6 @@ namespace Dune {
         , level_(-1)
         , face_(-1)
         , entity_(0)
-        , entityImp_(0)
     { }
 
     //! Copy Constructor
@@ -466,14 +446,16 @@ namespace Dune {
         , item_(org.item_)
         , level_(org.level_)
         , face_(org.face_)
-        , entity_(org.entity_)
-        , entityImp_(0)
+        , entity_(0)
     {
-      if(org.entity_)
-      {
-        entityImp_ = &grid_.getRealImplementation(*entity_);
-        entityImp().setElement(grid_.getRealImplementation(*org.entity_));
-      }
+      /*
+         if(org.entity_)
+         {
+         level_ = org.entity_->level();
+         entity_ = new EntityObj(EntityImp(grid_, level()));
+              entityImp().setElement(grid_.getRealImplementation(*org.entity_));
+         }
+       */
     }
 
     //! Destructor
@@ -484,20 +466,6 @@ namespace Dune {
     //! equality
     // this may have to be changed!
     bool equals (const ThisType & i) const;
-    /*
-       {
-       if (cd != 1)
-        return (item_ == i.item_);
-       else if (item_ == i.item_) {
-        //assert(face_ >=0 && face_ < 3);
-        //if (face_ == i.face_)
-          return true;
-        //else return false;
-       }
-       else ;  // Hier noch Vergleich der Knoten der Kanten einfuegen!!!
-       return false;
-       }
-     */
 
     //! dereferencing
     Entity & dereference() const
@@ -507,7 +475,6 @@ namespace Dune {
       {
         //entity_ = grid_.getNewEntity(level());
         entity_ = new EntityObj(EntityImp(grid_, level()));
-        entityImp_ = &grid_.getRealImplementation(*entity_);
         entityImp().setElement(*item_, face_, level());
       }
       assert( entity_ );
@@ -529,16 +496,23 @@ namespace Dune {
 
     ThisType & operator = (const ThisType & org) {
       this->done();
+      entity_ = 0;
       assert(&grid_ == &org.grid_);
+      //if(entity_) this->done();
       item_ = org.item_;
+      //std::cout << item_ << " assign entity \n";
       face_ = org.face_;
       level_ = org.level_;
       return *this;
     }
 
   protected:
-    EntityImp & entityImp() { assert( entityImp_ ); return *entityImp_; }
-    const EntityImp & entityImp() const { assert( entityImp_ ); return *entityImp_; }
+    EntityImp & entityImp() {
+      assert( entity_ ); return grid_.getRealImplementation(*entity_);
+    }
+    const EntityImp & entityImp() const {
+      assert( entity_ ); return grid_.getRealImplementation(*entity_);
+    }
 
     //! has to be called when iterator is finished
     void done ();
@@ -556,7 +530,6 @@ namespace Dune {
     int face_;
     //! entity that this EntityPointer points to
     mutable EntityObj * entity_;
-    mutable EntityImp * entityImp_;
   };
 
 } // end namespace Dune

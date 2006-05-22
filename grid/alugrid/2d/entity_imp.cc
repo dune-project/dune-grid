@@ -103,7 +103,7 @@ namespace Dune {
   template<int cd, int dim, class GridImp>
   inline const typename ALU2dGridEntity<cd, dim, GridImp> :: Geometry & ALU2dGridEntity<cd, dim, GridImp> ::
   geometry () const {
-    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,0,face_,0);
+    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,face_);
     assert(builtgeometry_ == true);
     return geoObj_;
   }
@@ -204,7 +204,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline const typename ALU2dGridEntity<0, dim, GridImp> :: Geometry & ALU2dGridEntity<0,dim,GridImp> :: geometry () const {
     assert(item_ != 0);
-    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,0,0,0);
+    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,-1);
 
     assert(builtgeometry_ == true);
     return geoObj_;
@@ -387,6 +387,7 @@ namespace Dune {
     if(entity_)  {
       entityImp().removeElement();
       //grid_.freeEntity( entity_ );
+      delete entity_;
       entity_ = 0;
     }
   }
