@@ -25,8 +25,6 @@
 #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
   using the MPI compiler script or compile Dune without the MPI support!"
 #endif
-#else
-#error
 #endif
 
 // if MPI was found include all headers
