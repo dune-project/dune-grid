@@ -67,7 +67,9 @@ namespace Dune {
           // Skip next leaf intersection because it is a boundary intersection
           // and therefore coincides with the level intersection
           neighbor_++;
-        else if (center_->pred_!=NULL && center_->pred_->isLeaf())
+        else if (center_->pred_!=NULL
+                 && center_->pred_->vertex_[1] == center_->vertex_[0]
+                 && center_->pred_->isLeaf())
           // Skip next leaf intersection because it coincides with a level intersection
           neighbor_++;
 
@@ -81,7 +83,9 @@ namespace Dune {
           // Skip next leaf intersection because it is a boundary intersection
           // and therefore coincides with the level intersection
           neighbor_++;
-        else if (center_->succ_!=NULL && center_->succ_->isLeaf())
+        else if (center_->succ_!=NULL
+                 && center_->succ_->vertex_[0] == center_->vertex_[1]
+                 && center_->succ_->isLeaf())
           // Skip next leaf intersection because it coincides with a level intersection
           neighbor_++;
 
