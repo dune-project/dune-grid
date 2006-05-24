@@ -15,8 +15,8 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-#include <alugrid_defineparallel.h>
-//#define ALU3DGRID_BUILD_FOR_PARALLEL 0
+//#include <alugrid_defineparallel.h>
+#define ALU3DGRID_BUILD_FOR_PARALLEL 0
 
 #ifdef HAVE_MPI_CPP
 // if this variable is defined,
