@@ -10,7 +10,6 @@
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/common/capabilities.hh>
 #include <dune/common/interfaces.hh>
-#include <dune/common/collectivecommunication.hh>
 #include <dune/common/bigunsignedint.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -27,6 +26,11 @@
 #include "datahandle.hh"
 #include "alu3dutility.hh"
 
+#if ALU3DGRID_PARALLEL
+#include <dune/common/mpicollectivecommunication.hh>
+#else
+#include <dune/common/collectivecommunication.hh>
+#endif
 
 namespace Dune {
 
@@ -140,12 +144,11 @@ namespace Dune {
 
 #if ALU3DGRID_PARALLEL
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
+      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
 #else
       typedef LocalIdSet GlobalIdSet;
+      typedef CollectiveCommunication<GridType> CollectiveCommunication;
 #endif
-
-      typedef CollectiveCommunication<GridImp> CollectiveCommunication;
-
     };
   };
 
@@ -250,6 +253,10 @@ namespace Dune {
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
     typedef ALU3dGridHierarchicIterator<MyType> HierarchicIteratorImp;
+
+    typedef typename Traits :: CollectiveCommunication
+    CollectiveCommunicationType;
+
 
     //! maximal number of levels
     enum { MAXL = 64 };
@@ -430,18 +437,12 @@ namespace Dune {
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {}
 
-    /** dummy communicate */
+    /** leaf communicate  */
     template<class DataHandle>
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const;
 
-    /** dummy collective communication */
-    const CollectiveCommunication<ALU3dGrid>& comm () const
-    {
-      return ccobj;
-    }
-
-  private:
-    CollectiveCommunication<ALU3dGrid> ccobj;
+    /** collective communicate object */
+    const CollectiveCommunicationType & comm () const { return ccobj_; }
 
   public:
 
@@ -545,6 +546,9 @@ namespace Dune {
     ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
     const int myRank_;
+
+    // collective comm, same as mpAccess_, only Peters "generic" (haha)version
+    CollectiveCommunicationType ccobj_;
 
   public:
     int nlinks () const {

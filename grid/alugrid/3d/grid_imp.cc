@@ -61,6 +61,7 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
       , mpAccess_(mpiComm)
       , myRank_( mpAccess_.myrank() )
+      , ccobj_(mpiComm)
 #else
       , myRank_(-1)
 #endif
@@ -107,6 +108,7 @@ namespace Dune {
     : mygrid_ (0)
       , mpAccess_(mpiComm)
       , myRank_( mpAccess_.myrank() )
+      , ccobj_(mpiComm)
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
       , geomTypes_(dim+1, std::vector<GeometryType>(1) )
@@ -143,6 +145,7 @@ namespace Dune {
       , mpAccess_(g.mpAccess_)
 #endif
       , myRank_(-1)
+      , ccobj_(g.ccobj_)
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
       , geomTypes_(dim+1, std::vector<GeometryType>(1) )
@@ -802,6 +805,8 @@ namespace Dune {
       updateStatus();
     }
     return changed;
+#else
+    return false;
 #endif
   }
 
