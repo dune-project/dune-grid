@@ -147,7 +147,7 @@ namespace Dune {
       typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
 #else
       typedef LocalIdSet GlobalIdSet;
-      typedef CollectiveCommunication<GridType> CollectiveCommunication;
+      typedef CollectiveCommunication<Grid> CollectiveCommunication;
 #endif
     };
   };
