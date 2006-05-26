@@ -230,7 +230,7 @@ namespace Dune
     }
 
     //! @brief return true if intersection is shared with another element.
-    bool neighbor () const DUNE_DEPRECATED
+    bool neighbor () const
     {
       return this->realIterator.neighbor();
     }
