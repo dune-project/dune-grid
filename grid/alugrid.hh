@@ -35,6 +35,8 @@ namespace Dune {
   class ALUCubeGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::hexa> {
     typedef Dune::ALU3dGrid<3,3,Dune::hexa> BaseType;
+    enum { dim      = 3 };
+    enum { dimworld = 3 };
   public:
 #if ALU3DGRID_PARALLEL
     //! constructor taking filename of macro grid and MPI_Comm
@@ -138,6 +140,8 @@ namespace Dune {
   class ALUSimplexGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
     typedef Dune::ALU3dGrid<3,3,Dune::tetra> BaseType;
+    enum { dim      = 3 };
+    enum { dimworld = 3 };
   public:
 #if ALU3DGRID_PARALLEL
     //! constructor taking filename of macro grid and MPI_Comm
@@ -199,6 +203,8 @@ namespace Dune {
   class ALUSimplexGrid<2,2> :
     public Dune::ALU2dGrid<2,2> {
     typedef Dune::ALU2dGrid<2,2> BaseType;
+    enum { dim      = 2 };
+    enum { dimworld = 2 };
   public:
     ALUSimplexGrid(const std::string macroName
 #if ALU3DGRID_PARALLEL
