@@ -549,13 +549,13 @@ namespace Dune {
    @include examplegrid9.dgf
 
    \image html  BBEETH1M.d_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+   \image latex BBEETH1M.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    \image html  Orb_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+   \image latex Orb_cut.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
-   \image html  m125.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid9.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+   \image html  bunny.p65.param_skin.png "The resulting grid using ALUSimplexGrid<3,3>"
+   \image latex bunny.p65.param_skin.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    \section Simplexgeneration Using Tetgen/Triangle
        The freely available simplex grid generators are direcltly
