@@ -737,9 +737,9 @@ inline HMESH * get_partition_number (int * partition)
 **
 ******************************************************************************
 *****************************************************************************/
-inline void * hmesh( void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *, double *),
-                     const int noe, const int nov, const int maxlev,
-                     DUNE_FDATA * fe, DUNE_DAT * dune )
+inline void * setupHmesh( void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *, double *),
+                          const int noe, const int nov, const int maxlev,
+                          DUNE_FDATA * fe, DUNE_DAT * dune )
 {
   GRAPEMESH * mesh = (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance") ("Dune Mesh");
   assert(mesh != NULL);
@@ -803,6 +803,14 @@ inline void * hmesh( void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind
   setupReferenceElements();
 
   return ((void *) mesh);
+}
+
+// delete Hmesh , not really working yet
+inline void deleteHmesh( void * hmesh )
+{
+  assert( hmesh );
+  GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
+  GRAPE(mesh,"free") ();
 }
 
 static inline void addProjectUIF()

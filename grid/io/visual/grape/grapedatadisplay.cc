@@ -240,14 +240,15 @@ namespace Dune
   //****************************************************************
   template <class GridType>
   inline GrapeDataDisplay<GridType>::
-  GrapeDataDisplay (const GridType &grid) :
-    GrapeGridDisplay < GridType > (grid) , vecFdata_ (0)
+  GrapeDataDisplay (const GridType &grid, const int myrank ) :
+    GrapeGridDisplay < GridType > (grid,myrank) , vecFdata_ (0)
   {}
 
   template <class GridType>
+  template <class GridPartType>
   inline GrapeDataDisplay<GridType>::
-  GrapeDataDisplay (const GridType &grid, const int myrank ) :
-    GrapeGridDisplay < GridType > (grid,myrank) , vecFdata_ (0)
+  GrapeDataDisplay (const GridPartType &gridPart, const int myrank ) :
+    GrapeGridDisplay < GridType > (gridPart,myrank) , vecFdata_ (0)
   {}
 
   template <class GridType>

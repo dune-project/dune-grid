@@ -122,10 +122,12 @@ struct dune_dat
 
 
 /* setup hmesh with given data */
-extern void *hmesh(
+extern void *setupHmesh(
   void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
   const int noe, const int nov, const int maxlev,
   DUNE_FDATA * fe, DUNE_DAT * dune);
+/* delete given hmesh pointer */
+extern void deleteHmesh( void * hmesh );
 
 extern void displayTimeScene(INFO * info);
 extern void handleMesh (void *hmesh, bool gridMode );

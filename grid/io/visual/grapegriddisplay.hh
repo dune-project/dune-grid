@@ -46,12 +46,6 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
 
   public:
-    typedef GridType MyGridType;
-
-    typedef typename GridType::Traits::template Codim<0>::LevelIterator LevelIteratorType ;
-    //typedef typename GridType::Traits::template Codim<0>::template Partition<Ghost_Partition>::LeafIterator LeafIteratorType ;
-    typedef typename GridType::Traits::template Codim<0>::template Partition<Interior_Partition>::LeafIterator LeafIteratorType ;
-
     typedef typename GridType::template Codim<0>:: HierarchicIterator
     HierarchicIteratorType;
 
@@ -63,7 +57,7 @@ namespace Dune
     const GridType &grid_;
 
     //! leaf index set of the grid
-    const LeafIndexSetType & leafset_;
+    void * indexSet_;
 
     //! leaf index set of the grid
     const LocalIdSetType & lid_;
@@ -85,10 +79,11 @@ namespace Dune
 
   public:
     //! Constructor, make a GrapeGridDisplay for given grid
-    inline GrapeGridDisplay(const GridType &grid, const int myrank );
+    inline GrapeGridDisplay(const GridType &grid, const int myrank = -1);
 
     //! Constructor, make a GrapeGridDisplay for given grid
-    inline GrapeGridDisplay(const GridType &grid);
+    template <class GridPartType>
+    inline GrapeGridDisplay(const GridPartType &gridPart, const int myrank = -1);
 
     //! Destructor for GrapeGridDisplay
     inline ~GrapeGridDisplay();
@@ -118,6 +113,37 @@ namespace Dune
     // generate hmesh
     inline void * setupHmesh();
 
+    inline void deleteHmesh();
+
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
+    // type of index method
+    typedef int EntityIndexFuncType (void * iset, const EntityCodim0Type & en);
+    // type of vertex method
+    typedef int VertexIndexFuncType (void * iset, const EntityCodim0Type & en, int vx);
+
+    // pointer to index method
+    const EntityIndexFuncType * entityIndex;
+    // pointer to vertex method
+    const VertexIndexFuncType * vertexIndex;
+
+    // return element index from given index set
+    template <class IndexSetType>
+    static int getEntityIndex(void * iset, const EntityCodim0Type & en)
+    {
+      assert( iset );
+      const IndexSetType * set = ((const IndexSetType *) iset);
+      return (en.isLeaf()) ? set->index(en) : -1;
+    }
+
+    // return vertex index from given index set
+    template <class IndexSetType>
+    static int getVertexIndex(void * iset, const EntityCodim0Type & en, int vx)
+    {
+      assert( iset );
+      const IndexSetType * set = ((const IndexSetType *) iset);
+      return set->template subIndex<dim> (en,vx);
+    }
   public:
     //****************************************************************
     //
@@ -184,7 +210,7 @@ namespace Dune
 
     // dito
     template <class EntityType>
-    inline int  checkInside(EntityType &en, const double * w);
+    inline int checkInside(EntityType &en, const double * w);
 
     // dito
     template <class EntityType>

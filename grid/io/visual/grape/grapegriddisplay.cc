@@ -11,28 +11,32 @@ namespace Dune
 
   template<class GridType>
   inline GrapeGridDisplay<GridType>::
-  GrapeGridDisplay(const GridType &grid, const int myrank ) :
-    grid_(grid)
-    , leafset_(grid.leafIndexSet())
-    , lid_(grid.localIdSet())
-    , myRank_(myrank)
-    , hmesh_ (0)
+  GrapeGridDisplay(const GridType &grid, const int myrank )
+    : grid_(grid)
+      , indexSet_( (void *)(&grid.leafIndexSet()) )
+      , lid_(grid.localIdSet())
+      , myRank_(myrank)
+      , hmesh_ (0)
+      , entityIndex(GrapeGridDisplay<GridType>::template getEntityIndex<LeafIndexSetType>)
+      , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>)
   {
-    hel_.liter   = 0;
-    hel_.enditer = 0;
-
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
   }
 
   template<class GridType>
+  template<class GridPartType>
   inline GrapeGridDisplay<GridType>::
-  GrapeGridDisplay(const GridType &grid ) :
-    grid_(grid)
-    , leafset_(grid.leafIndexSet())
-    , lid_(grid.localIdSet())
-    , myRank_(-1)
-    , hmesh_ (0)
+  GrapeGridDisplay(const GridPartType &gridPart, const int myrank )
+    : grid_(gridPart.grid())
+      , indexSet_( (void *)(&gridPart.indexSet()) )
+      , lid_(grid_.localIdSet())
+      , myRank_(myrank)
+      , hmesh_ (0)
+      , entityIndex(GrapeGridDisplay<GridType>::
+                    template getEntityIndex<typename GridPartType::IndexSetType>)
+      , vertexIndex(GrapeGridDisplay<GridType>::
+                    template getVertexIndex<typename GridPartType::IndexSetType>)
   {
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
@@ -41,7 +45,9 @@ namespace Dune
   template<class GridType>
   inline GrapeGridDisplay<GridType>::
   ~GrapeGridDisplay()
-  {}
+  {
+    //deleteHmesh();
+  }
 
   //****************************************************************
   //
@@ -57,7 +63,7 @@ namespace Dune
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
     typedef typename Entity::IntersectionIterator IntersectionIterator;
-    typedef typename Entity::Geometry DuneElement;
+    typedef typename Entity::Geometry DuneGeometryType;
 
     enum { dim      = Entity::dimension };
     enum { dimworld = Entity::dimensionworld };
@@ -67,11 +73,9 @@ namespace Dune
     // only for debuging, becsaue normaly references are != NULL
     if(&en)
     {
-      const DuneElement &geometry = en.geometry();
+      const DuneGeometryType &geometry = en.geometry();
 
-      //if( en.isLeaf() ) he->eindex = lid_.id(en);
-      if( en.isLeaf() ) he->eindex = leafset_.index(en);
-      else he->eindex = -1;
+      he->eindex = this->entityIndex(indexSet_,en);
       he->level  = en.level();
 
       // if not true, only the macro level is drawn
@@ -84,22 +88,24 @@ namespace Dune
       {
         // set the vertex coordinates
         double (* vpointer)[3] = he->vpointer;
-        for(int i= 0 ; i<geometry.corners(); i++)
+
+        // number of corners and number of vertices schould be the same
+        // grape visual does not work for other situations
+        assert( en.template count<dim>() == geometry.corners() );
+
+        for(int i= 0 ; i<geometry.corners(); ++i)
         {
-          for(int j = 0; j < Entity::dimensionworld ; j++)
+          const int grapeVx = mapDune2GrapeVertex(geomType,i);
+          he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
+
+          for(int j = 0; j < Entity::dimensionworld ; ++j)
           {
             // here the mapping from dune to grape elements is done
             // it's only different for quads and hexas
-            vpointer[i][j] = geometry[ mapDune2GrapeVertex(geomType,i) ][j] ;
+            vpointer[i][j] = geometry[ grapeVx ][j] ;
           }
         }
       } // end set all vertex coordinates
-
-      // store vertex numbers
-      for(int i = 0; i< en.template count<dim>(); i++)
-      {
-        he->vindex[i] = leafset_. template subIndex<dim> (en,i);
-      }
 
       {
         // reset the boundary information
@@ -137,6 +143,7 @@ namespace Dune
           int help_bnd [MAX_EL_FACE];
           for(int i=0; i < MAX_EL_FACE; i++) help_bnd[i] = he->bnd[i] ;
 
+          assert( MAX_EL_FACE == 6 );
           // do the mapping from dune to grape hexa
           he->bnd[0] = help_bnd[4];
           he->bnd[1] = help_bnd[5];
@@ -612,8 +619,8 @@ namespace Dune
 
     int maxlevel = grid_.maxLevel();
 
-    int noe = leafset_.size(0);
-    int nov = leafset_.size(dim);
+    int noe = grid_.size(0);
+    int nov = grid_.size(dim);
 
     hel_.display = (void *) this;
     hel_.liter   = 0;
@@ -621,7 +628,7 @@ namespace Dune
 
     hel_.hiter    = 0;
 
-    hel_.actElement = NULL;
+    hel_.actElement = 0;
 
     DUNE_DAT * dune = &dune_;
 
@@ -642,7 +649,16 @@ namespace Dune
     setIterationMethods(dune);
 
     /* return hmesh with no data */
-    return GrapeInterface<dim,dimworld>::hmesh(NULL,noe,nov,maxlevel,NULL,dune);
+    return GrapeInterface<dim,dimworld>::setupHmesh(0,noe,nov,maxlevel,0,dune);
+  }
+
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::deleteHmesh()
+  {
+    if( hmesh_ )
+    {
+      GrapeInterface<dim,dimworld>::deleteHmesh(hmesh_);
+    }
   }
 
 } // end namespace Dune

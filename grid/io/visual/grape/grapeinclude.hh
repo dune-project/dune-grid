@@ -66,13 +66,18 @@ namespace Dune
       GrapeInterface_two_two::addDataToHmesh(hmesh,fe,func_real);
     }
 
-    inline static void *hmesh(
+    inline static void *setupHmesh(
       void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
       const int noe, const int nov, const int maxlev,
       DUNE_FDATA * fe, DUNE_DAT * dune )
     {
-      return GrapeInterface_two_two::hmesh(
+      return GrapeInterface_two_two::setupHmesh(
                func_real,noe,nov,maxlev,fe,dune);
+    }
+
+    inline static void deleteHmesh( void * hmesh )
+    {
+      GrapeInterface_two_two::deleteHmesh( hmesh );
     }
 
     inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)
@@ -91,44 +96,6 @@ namespace Dune
     }
   };
 
-  // not tested yet
-  /*
-     // the interface to dune
-     template <>
-     struct GrapeInterface<2,3>
-     {
-     typedef GrapeInterface_two_three::DUNE_ELEM  DUNE_ELEM;
-     typedef GrapeInterface_two_three::DUNE_FDATA DUNE_FDATA;
-
-     inline static void handleMesh (void *hmesh, bool grdMode = false )
-     {
-      GrapeInterface_two_three::handleMesh(hmesh,grdMode);
-     }
-     static void addDataToHmesh(void  *hmesh, DUNE_FDATA * fe,
-           void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const
-            double *, double *)  )
-     {
-      GrapeInterface_two_three::addDataToHmesh(hmesh,fe,func_real);
-     }
-
-     static void *hmesh(
-            int (* const f_leaf)(DUNE_ELEM *), int (* const n_leaf)(DUNE_ELEM *),
-            int (* const f_mac)(DUNE_ELEM *), int (* const n_mac)(DUNE_ELEM *),
-            int (* const f_chi)(DUNE_ELEM *), int (* const n_chi)(DUNE_ELEM *),
-            void * (* const cp)(const void *),
-            int  (* const check_inside)(DUNE_ELEM *, const double *),
-            int  (* const wtoc)(DUNE_ELEM *, const double *, double *),
-            void (* const ctow)(DUNE_ELEM *, const double *, double *),
-            void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
-            const int noe, const int nov, const int maxlev,int partition,
-            DUNE_ELEM *he , DUNE_FDATA * fe)
-     {
-      return  GrapeInterface_two_three::hmesh(f_leaf,n_leaf,f_mac,n_mac,f_chi,n_chi,
-            cp,check_inside,wtoc,ctow,func_real,noe,nov,maxlev,partition,he,fe);
-     }
-     };
-   */
-
   // the interface to dune for dim = dimworld = 3
   template <>
   struct GrapeInterface<3,3>
@@ -141,8 +108,6 @@ namespace Dune
     {
       GrapeInterface_three_three::initPartitionDisp(__MaxPartition);
       GrapeInterface_three_three::grape_add_remove_methods();
-      //if((!leafButton) || (!maxlevelButton))
-      //GrapeInterface_two_two::setupLeafButton(mgr,tsc,1);
     }
 
     inline static void setThread(int t)
@@ -161,13 +126,18 @@ namespace Dune
       GrapeInterface_three_three::addDataToHmesh(hmesh,fe,func_real);
     }
 
-    inline static void *hmesh(
+    inline static void *setupHmesh(
       void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
       const int noe, const int nov, const int maxlev,
       DUNE_FDATA * fe, DUNE_DAT * dune )
     {
       return GrapeInterface_three_three::
-             hmesh(func_real,noe,nov,maxlev,fe,dune);
+             setupHmesh(func_real,noe,nov,maxlev,fe,dune);
+    }
+
+    inline static void deleteHmesh( void * hmesh )
+    {
+      GrapeInterface_three_three::deleteHmesh( hmesh );
     }
 
     inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)

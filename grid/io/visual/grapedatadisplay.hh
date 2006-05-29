@@ -154,11 +154,12 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
 
   public:
-    //! Constructor, make a GrapeDataDisplay for given grid and myRank = -1
-    inline GrapeDataDisplay(const GridType &grid);
+    //! Constructor, make a GrapeDataDisplay for given grid
+    inline GrapeDataDisplay(const GridType &grid, const int myrank = -1);
 
     //! Constructor, make a GrapeDataDisplay for given grid
-    inline GrapeDataDisplay(const GridType &grid, const int myrank);
+    template <class GridPartType>
+    inline GrapeDataDisplay(const GridPartType & gridPart, const int myrank = -1);
 
     //! Desctructor
     inline ~GrapeDataDisplay();
