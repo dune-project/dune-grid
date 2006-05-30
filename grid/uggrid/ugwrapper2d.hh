@@ -117,6 +117,7 @@ namespace Dune {
       using UG::D2::TRIANGLE;
       using UG::D2::QUADRILATERAL;
       using UG::D2::n_offset;
+      using UG::UINT;
       int n;    // Dummy variable just to please the macro
       CORNER_COORDINATES(theElement, n, x);
     }
@@ -128,11 +129,13 @@ namespace Dune {
 
     static int myLevel (TargetType<0,2>::T* theElement) {
       using UG::D2::ELEMENT;
+      using UG::UINT;
       return LEVEL(theElement);
     }
 
     static int myLevel (TargetType<2,2>::T* theNode) {
       using UG::D2::NODE;
+      using UG::UINT;
       return LEVEL(theNode);
     }
 
@@ -140,6 +143,7 @@ namespace Dune {
     static bool hasCopy (TargetType<0,2>::T* theElement) {
       using UG::D2::ELEMENT;
       using UG::D2::control_entries;
+      using UG::UINT;
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
@@ -147,12 +151,14 @@ namespace Dune {
     static bool isRegular (TargetType<0,2>::T* theElement) {
       using UG::D2::ELEMENT;
       using UG::D2::control_entries;
+      using UG::UINT;
       return ECLASS(theElement) == RED_CLASS;
     }
 
     //! \todo Please doc me!
     static int Sides_Of_Elem(TargetType<0,2>::T* theElement) {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       return SIDES_OF_ELEM(theElement);
     }
 
@@ -160,6 +166,7 @@ namespace Dune {
     static TargetType<0,2>::T* NbElem(TargetType<0,2>::T* theElement, int nb) {
       using UG::D2::ELEMENT;
       using UG::D2::nb_offset;
+      using UG::UINT;
       return NBELEM(theElement, nb);
     }
 
@@ -168,18 +175,21 @@ namespace Dune {
       using UG::D2::BNDS;
       using UG::D2::BEOBJ;
       using UG::D2::side_offset;
+      using UG::UINT;
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
     //! \todo Please doc me!
     static int Edges_Of_Elem(const TargetType<0,2>::T* theElement) {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       return EDGES_OF_ELEM(theElement);
     }
 
     //! \todo Please doc me!
     static int Corners_Of_Elem(const TargetType<0,2>::T* theElement) {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       return CORNERS_OF_ELEM(theElement);
     }
 
@@ -192,12 +202,14 @@ namespace Dune {
     //! \todo Please doc me!
     static int Corners_Of_Side(const TargetType<0,2>::T* theElement, int side) {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       return CORNERS_OF_SIDE(theElement, side);
     }
 
     //! \todo Please doc me!
     static int Corner_Of_Side(const TargetType<0,2>::T* theElement, int side, int corner) {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       return CORNER_OF_SIDE(theElement, side, corner);
     }
 
@@ -225,6 +237,7 @@ namespace Dune {
 
     //! Encapsulates the TAG macro
     static unsigned int Tag(const TargetType<0,2>::T* theElement) {
+      using UG::UINT;
       return TAG(theElement);
     }
 
@@ -239,6 +252,7 @@ namespace Dune {
     static void  getCornerLocal (const TargetType<0,2>::T* theElement, int corner, FieldVector<T, 2>& local)
     {
       using UG::D2::element_descriptors;
+      using UG::UINT;
       local[0] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[0];
       local[1] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[1];
     }
@@ -378,7 +392,7 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static void Local_To_Global(int n, DOUBLE** y,
+    static void Local_To_Global(int n, double** y,
                                 const FieldVector<double, 2>& local,
                                 FieldVector<double, 2>& global) {
       LOCAL_TO_GLOBAL(n,y,local,global);
@@ -395,6 +409,7 @@ namespace Dune {
     static int Transformation(int n, double** x,
                               const FieldVector<double, 2>& local, FieldMatrix<double,2,2>& mat) {
       using UG::D2::DOUBLE_VECTOR;
+      using UG::DOUBLE;
       double det;
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
@@ -419,6 +434,7 @@ namespace Dune {
     static TargetType<2,2>::T* Corner(TargetType<0,2>::T* theElement, int i) {
       using UG::D2::NODE;
       using UG::D2::n_offset;
+      using UG::UINT;
       return CORNER(theElement, i);
     }
 
@@ -438,6 +454,7 @@ namespace Dune {
     static TargetType<0,2>::T* EFather(TargetType<0,2>::T* theElement) {
       using UG::D2::ELEMENT;
       using UG::D2::father_offset;
+      using UG::UINT;
       return EFATHER(theElement);
     }
 
@@ -449,6 +466,7 @@ namespace Dune {
     //! get father node of vertex
     static TargetType<2,2>::T* NodeNodeFather(TargetType<2,2>::T* theNode) {
       using UG::D2::NDOBJ;
+      using UG::UINT;
       if (theNode->father==0)
         return 0;         // no father at all
       if (OBJT(theNode->father)==NDOBJ)
@@ -517,6 +535,7 @@ namespace Dune {
     static void SetSubdomain(TargetType<0,2>::T* theElement, int id) {
       using UG::D2::control_entries;
       using UG::D2::SUBDOMAIN_CE;
+      using UG::UINT;
       SETSUBDOMAIN(theElement, id);
     }
 
