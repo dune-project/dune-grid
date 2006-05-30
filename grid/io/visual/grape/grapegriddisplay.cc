@@ -223,13 +223,13 @@ namespace Dune
   template<class GridType>
   template<PartitionIteratorType pitype>
   inline int GrapeGridDisplay<GridType>::
-  first_level (DUNE_ELEM * he, int level)
+  first_level (DUNE_ELEM * he, int lvl)
   {
     he->liter   = 0;
     he->enditer = 0;
 
-    // for leaf level, level has the value -1
-    if(level < 0) level = grid_.maxLevel();
+    // for leaf level, lvl has the value -1
+    int level = (lvl < 0) ? grid_.maxLevel() : lvl;
 
     typedef typename GridType :: template Codim<0> ::
     template Partition<pitype> :: LevelIterator LevelIteratorType;
