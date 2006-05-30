@@ -150,7 +150,7 @@ namespace Dune {
      Please send any questions, suggestions, or bug reports to
      sander@math.fu-berlin.de
    */
-  template <int dim, int dimworld>
+  template <int dim, int dimworld=dim>
   class UGGrid : public GridDefaultImplementation  <dim, dimworld, double, UGGridFamily<dim,dimworld> >
   {
 
