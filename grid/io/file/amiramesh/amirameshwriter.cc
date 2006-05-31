@@ -450,8 +450,6 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
                                                        const VectorType& f,
                                                        const std::string& filename)
 {
-  int level = grid.maxLevel();
-
   // Find out whether the grid contains only tetrahedra.  If yes, then
   // it is written in TetraGrid format.  If not, it is written in
   // hexagrid format.
@@ -472,24 +470,24 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
 
   if (!containsOnlyTetrahedra && GridType::dimension==3) {
 
-    int numElements = grid.size(level, 0);
-    AmiraMesh::Location* hexa_loc = new AmiraMesh::Location("Hexahedra", numElements);
+    AmiraMesh::Location* hexa_loc = new AmiraMesh::Location("Hexahedra", grid.size(0));
     am.insert(hexa_loc);
 
   }
 
   AmiraMesh::Location* amLocation;
-  if (f.size()==grid.size(level,dim)) {
+  if (f.size()==grid.size(dim)) {
 
     // P1 data
     amLocation = new AmiraMesh::Location("Nodes", f.size());
 
-  } else {
+  } else if (f.size()==grid.size(0)) {
 
     // P0 data
     amLocation = new AmiraMesh::Location((containsOnlyTetrahedra) ? "Tetrahedra" : "Hexahedra", f.size());
 
-  }
+  } else
+    DUNE_THROW(IOError, "BlockVector doesn't match the leaf grid!");
 
   am.insert(amLocation);
 
@@ -499,7 +497,7 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
 
   AmiraMesh::Field* nodeField;
 
-  if (f.size()==grid.size(level,0)) {
+  if (f.size()==grid.size(0)) {
     // P0 data
     nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
                                      AmiraMesh::t_constant, nodeData);
