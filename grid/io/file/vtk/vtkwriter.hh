@@ -779,17 +779,17 @@ namespace Dune
       indentUp();
 
       // PPointData
-      indent(s); s << "<PPointData ";
+      indent(s); s << "<PPointData";
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
-          s << "Scalars=\"" << (*it)->name() << "\"" ;
+          s << " Scalars=\"" << (*it)->name() << "\"" ;
           break;
         }
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()>1)
         {
-          s << "Vectors=\"" << (*it)->name() << "\"" ;
+          s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
       s << ">" << std::endl;
@@ -810,17 +810,17 @@ namespace Dune
       indent(s); s << "</PPointData>" << std::endl;
 
       // PCellData
-      indent(s); s << "<PCellData ";
+      indent(s); s << "<PCellData";
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
-          s << "Scalars=\"" << (*it)->name() << "\"" ;
+          s << " Scalars=\"" << (*it)->name() << "\"" ;
           break;
         }
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()>1)
         {
-          s << "Vectors=\"" << (*it)->name() << "\"" ;
+          s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
       s << ">" << std::endl;
@@ -975,17 +975,17 @@ namespace Dune
 
     void writeCellData (std::ostream& s)
     {
-      indent(s); s << "<CellData ";
+      indent(s); s << "<CellData";
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
-          s << "Scalars=\"" << (*it)->name() << "\"" ;
+          s << " Scalars=\"" << (*it)->name() << "\"" ;
           break;
         }
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
         if ((*it)->ncomps()>1)
         {
-          s << "Vectors=\"" << (*it)->name() << "\"" ;
+          s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
       s << ">" << std::endl;
@@ -1010,17 +1010,17 @@ namespace Dune
 
     void writeVertexData (std::ostream& s)
     {
-      indent(s); s << "<PointData ";
+      indent(s); s << "<PointData";
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()==1)
         {
-          s << "Scalars=\"" << (*it)->name() << "\"" ;
+          s << " Scalars=\"" << (*it)->name() << "\"" ;
           break;
         }
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
         if ((*it)->ncomps()>1)
         {
-          s << "Vectors=\"" << (*it)->name() << "\"" ;
+          s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
       s << ">" << std::endl;
