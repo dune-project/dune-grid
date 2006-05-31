@@ -371,7 +371,7 @@ namespace Dune
     dune->partitionIteratorType = g_All_Partition;
 
     /* return hmesh with no data */
-    return GrapeInterface<dim,dimworld>::hmesh(NULL,noe,nov,maxlevel,NULL,dune);
+    return GrapeInterface<dim,dimworld>::setupHmesh(NULL,noe,nov,maxlevel,NULL,dune);
   }
 
 } // end namespace Dune

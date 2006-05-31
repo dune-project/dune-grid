@@ -154,6 +154,8 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
 
   public:
+    typedef GridType MyGridType;
+
     //! Constructor, make a GrapeDataDisplay for given grid
     inline GrapeDataDisplay(const GridType &grid, const int myrank = -1);
 
