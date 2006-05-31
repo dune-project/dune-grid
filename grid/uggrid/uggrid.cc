@@ -594,7 +594,8 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   // ///////////////
   //   init list
   // ///////////////
-  if (level < maxl) {
+  if (!e->isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
+      && level < maxl) {
 
     ElementType* theElement = getRealImplementation(*e).target_;
 
@@ -603,7 +604,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     int SonSides[MAX_SONS];
 
     int rv = Get_Sons_of_ElementSide(theElement,
-                                     elementSide,      // needs to be renumbered!
+                                     elementSide,
                                      &Sons_of_Side,
                                      SonList,          // the output elements
                                      SonSides,         // Output element side numbers
