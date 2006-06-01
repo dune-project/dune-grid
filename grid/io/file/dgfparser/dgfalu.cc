@@ -11,7 +11,7 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUSimplexGrid<3,3> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-  #if defined _ALU3DGRID_PARALLEL_
+  #if ALU3DGRID_PARALLEL
     return new ALUSimplexGrid<3,3>(str.c_str(),MPICOMM);
   #else
     return new ALUSimplexGrid<3,3>(str.c_str());
@@ -25,7 +25,7 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUCubeGrid<3,3> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-  #if defined _ALU3DGRID_PARALLEL_
+  #if ALU3DGRID_PARALLEL
     return new ALUCubeGrid<3,3>(str.c_str(),MPICOMM);
   #else
     return new ALUCubeGrid<3,3>(str.c_str());
@@ -40,7 +40,7 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUSimplexGrid<2,2> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-  #if defined _ALU3DGRID_PARALLEL_
+  #if ALU3DGRID_PARALLEL
     return new ALUSimplexGrid<2,2>(str.c_str(),MPICOMM);
   #else
     return new ALUSimplexGrid<2,2>(str.c_str());
@@ -51,7 +51,7 @@ namespace Dune {
   MacroGrid :: Impl<ALUSimplexGrid<dim,dimworld> > :: generateAlu3d
     (MacroGrid& mg,const char* filename, std::string& str,int MPICOMM) {
     int myrank=-1;
-  #if defined _ALU3DGRID_PARALLEL_
+  #if ALU3DGRID_PARALLEL
     MPI_Comm_rank(MPICOMM,&myrank);
   #endif
     if (myrank<=0) {
@@ -76,7 +76,7 @@ namespace Dune {
   MacroGrid :: Impl<ALUCubeGrid<dim,dimworld> > :: generateAlu3d
     (MacroGrid& mg,const char* filename, std::string& str,int MPICOMM) {
     int myrank=-1;
-  #if defined _ALU3DGRID_PARALLEL_
+  #if ALU3DGRID_PARALLEL
     MPI_Comm_rank(MPICOMM,&myrank);
   #endif
     if (myrank<=0) {
