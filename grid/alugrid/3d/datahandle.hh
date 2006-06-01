@@ -150,7 +150,7 @@ namespace ALUGridSpace {
     {
       // set element and then start
       realEntity_.setElement(elem);
-      dc_.inlineData(str,entity_);
+      // dc_.inlineData(str,entity_);
     }
 
     //! this method is called from the duneUnpackSelf method of the corresponding
@@ -161,7 +161,7 @@ namespace ALUGridSpace {
       // set element and then start
       const_cast<GridType &> (grid_).updateStatus();
       realEntity_.setElement(elem);
-      dc_.xtractData(str,entity_);
+      // dc_.xtractData(str,entity_);
     }
 
     //! write Data of one element to stream
