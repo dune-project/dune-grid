@@ -53,6 +53,8 @@ namespace Dune {
     ALUCubeGrid(int myrank = -1) :
       BaseType(myrank) {}
 #endif
+    enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
     typedef GridFamily::Traits Traits;
     typedef BaseType::LocalIdSetImp LocalIdSetImp;
@@ -68,8 +70,8 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
     typedef BaseType::ObjectStreamType ObjectStreamType;
 
-    friend class Conversion< ALUCubeGrid<dim,dimworld> , HasObjectStream > ;
-    friend class Conversion< const ALUCubeGrid<dim,dimworld> , HasObjectStream > ;
+    friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
+    friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
 
   private:
     ALUCubeGrid(const ALUCubeGrid & g) : BaseType(g) {}
@@ -158,6 +160,8 @@ namespace Dune {
     ALUSimplexGrid(int myrank = -1) :
       BaseType(myrank) {}
 #endif
+    enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
     typedef GridFamily::Traits Traits;
     typedef BaseType::LocalIdSetImp LocalIdSetImp;
@@ -173,8 +177,8 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
     typedef BaseType::ObjectStreamType ObjectStreamType;
 
-    friend class Conversion< ALUSimplexGrid<dim,dimworld> , HasObjectStream > ;
-    friend class Conversion< const ALUSimplexGrid<dim,dimworld> , HasObjectStream > ;
+    friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
+    friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
 
   private:
     ALUSimplexGrid(const ALUSimplexGrid & g) : BaseType(g) {}
@@ -212,6 +216,8 @@ namespace Dune {
 #endif
                    ) :
       BaseType(macroName) {}
+    enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
     typedef GridFamily::Traits Traits;
     typedef BaseType::LocalIdSetImp LocalIdSetImp;
