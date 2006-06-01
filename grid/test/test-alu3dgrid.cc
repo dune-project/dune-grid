@@ -133,8 +133,11 @@ int main (int argc , char **argv) {
          }
        */
       {
-        //std::string filename("alu-testgrid.hexa");
-        std::string filename("largegrid_alu.hexa");
+        std::string filename;
+        if (mysize<=2)
+          filename += "alu-testgrid.hexa";
+        else
+          filename += "largegrid_alu.hexa";
         ALUCubeGrid<3,3>* grid=new ALUCubeGrid<3,3>(filename,MPI_COMM_WORLD);
         //std::string filename("alu-testgrid.dgf");
         //GridPtr<GridType> grid(filename.c_str(),MPI_COMM_WORLD);
@@ -146,8 +149,11 @@ int main (int argc , char **argv) {
         checkALUParallel(*grid,0,2);
       }
       {
-        // std::string filename("alu-testgrid.tetra");
-        std::string filename("examplegrid9.dgf.ALUgrid");
+        std::string filename;
+        if (mysize<=2)
+          filename += "alu-testgrid.tetra";
+        else
+          filename += "examplegrid9.dgf.ALUgrid";
         ALUSimplexGrid<3,3>* grid=new ALUSimplexGrid<3,3>(filename,MPI_COMM_WORLD);
         //std::string filename("examplegrid9.dgf");
         //GridPtr<GridType> grid(filename.c_str(),MPI_COMM_WORLD);
