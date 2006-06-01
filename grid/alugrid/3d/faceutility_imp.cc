@@ -57,6 +57,7 @@ namespace Dune {
         // at the moment there is no difference between internalBoundary
         // and ghostBoundary
         ghostBoundary_  = true;
+        outerFaceNumber_ = bnd->getGhostFaceNumber();
 
         // this doesn't count as outer boundary
         outerBoundary_ = false;

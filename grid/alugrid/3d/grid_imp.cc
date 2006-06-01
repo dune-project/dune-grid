@@ -54,7 +54,7 @@ namespace Dune {
   inline ALU3dGrid<dim, dimworld, elType>::
   ALU3dGrid(const std::string macroTriangFilename
 #if ALU3DGRID_PARALLEL
-            , MPI_Comm mpiComm
+            , const MPI_Comm mpiComm
 #endif
             )
     : mygrid_ (0)
@@ -95,16 +95,18 @@ namespace Dune {
     this->checkMacroGrid ();
 
     // print size of grid
-    myGrid().printsize();
+    // myGrid().printsize();
 
     postAdapt();
     calcExtras();
-    std::cout << "Created ALU3dGrid from macro grid file '" << macroTriangFilename << "'. \n\n";
+    if (size(0)>0)
+      std::cout << "Created ALU3dGrid from macro grid file '"
+                << macroTriangFilename << "'. \n\n";
   }
 
 #if ALU3DGRID_PARALLEL
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm)
+  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const MPI_Comm mpiComm)
     : mygrid_ (0)
       , mpAccess_(mpiComm)
       , myRank_( mpAccess_.myrank() )
@@ -570,7 +572,7 @@ namespace Dune {
 
     // important that loadbalance is called on each processor
     // so dont put any if statements arround here
-    this->loadBalance();
+    // this->loadBalance();
 
     return ref;
   }
@@ -797,11 +799,12 @@ namespace Dune {
     if( psize() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
     bool changed = myGrid().duneLoadBalance();
-    if(changed)
+    if(1 || changed)
     {
-      std::cout << "Grid was balanced on p = " << myRank() << std::endl;
+      // std::cout << "Grid was balanced on p = " << myRank() << std::endl;
       // calculate new maxlevel
       // reset size and things
+      myGrid().duneExchangeDynamicState();
       updateStatus();
     }
     return changed;
@@ -843,10 +846,11 @@ namespace Dune {
       dverb << "Grid was balanced on p = " << myRank() << std::endl;
       // calculate new maxlevel
       // reset size and things
-      updateStatus();
     }
 
     // checken, ob wir das hier wirklich brauchen
+    // problem!!!!!!!!!!!!!!!!!!!!!!!
+    updateStatus();
     myGrid().duneExchangeData(gs);
     return changed;
 #endif

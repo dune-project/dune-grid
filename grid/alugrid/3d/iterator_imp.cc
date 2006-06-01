@@ -595,6 +595,7 @@ namespace Dune {
       , endIter_(false)
       , level_(level)
       , isCopy_ (0)
+      , rank_(grid.comm().rank())
   {
     IteratorType * it = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
     iter_.store( it );
@@ -619,6 +620,7 @@ namespace Dune {
       , endIter_(true)
       , level_(level)
       , isCopy_ (0)
+      , rank_(grid.comm().rank())
   {
     this->done();
   }
@@ -631,6 +633,7 @@ namespace Dune {
       , level_( org.level_ )
       , iter_ ( org.iter_ )
       , isCopy_(org.isCopy_+1)
+      , rank_( org.rank_)
   {
     // don't copy a copy of a copy of a copy of a copy
     assert( org.isCopy_ < 3 );
@@ -663,6 +666,7 @@ namespace Dune {
   inline typename ALU3dGridLevelIterator<cdim, pitype, GridImp> :: Entity &
   ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const
   {
+    // std::cerr << "DEREF : <" << rank_ << ">" << std::endl;
     // don't dereference empty entity pointer
     assert( this->item_ );
     assert( this->entity_ );

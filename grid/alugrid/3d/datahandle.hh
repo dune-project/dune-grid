@@ -89,6 +89,16 @@ namespace ALUGridSpace {
       dc_.scatter(str,entity_,dc_.size(entity_));
     }
 
+    //! remove data from stream
+    void removeData ( ObjectStreamType & str , HElementType & elem )
+    {
+      realEntity_.setElement(elem);
+      for (int i=0; i<dc_.size(entity_); i++) {
+        typename DataCollectorType::DataType tmp;
+        str.read(tmp);
+      }
+    }
+
   };
 
   //***********************************************************

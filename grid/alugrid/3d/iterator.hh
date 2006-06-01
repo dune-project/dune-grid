@@ -374,7 +374,13 @@ namespace ALUGridSpace {
       : it_(const_cast<GridImp &> (grid).myGrid()), elem_(0,0) {}
 
     int size  ()    { return it_->size(); }
-    void next ()    { it_->next(); }
+    void next ()    {
+      it_->next();
+      if (!it_->done()) {
+        if (!it_->item().isLeafEntity())
+          next();
+      }
+    }
     void first()    { it_->first(); }
     int done ()     { return it_->done(); }
     val_t & item ()
@@ -552,7 +558,7 @@ namespace ALUGridSpace {
           {
             HBndSegType * dwn = face->down();
             assert( dwn );
-            // if owr child is ok then we go to the children
+            // if one child is ok then we go to the children
             if(dwn->ghostLevel() == dwn->level())
               next();
           }
@@ -605,6 +611,7 @@ namespace ALUGridSpace {
     }
   };
 
+
   // the all partition iterator
   template <>
   class ALU3dGridLeafIteratorWrapper<0,Dune::All_Partition>
@@ -617,13 +624,16 @@ namespace ALUGridSpace {
 
     bool useInterior_;
 
+    int myRank_;
+
   public:
     typedef ElementPllXIF_t ItemType;
 
     template <class GridImp>
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : interior_ ( grid, level , nlinks )
-        , ghosts_ ( grid, level, nlinks ) , useInterior_(true) {}
+        , ghosts_ ( grid, level, nlinks ) , useInterior_(true),
+        myRank_(grid.comm().rank()) {}
 
     int size  ()
     {
@@ -650,12 +660,15 @@ namespace ALUGridSpace {
     void first() {
       useInterior_ = true;
       interior_.first();
+      if (interior_.done()) {
+        useInterior_ = false;
+        ghosts_.first();
+      }
     }
 
     int done ()
     {
-      if(useInterior_) return 0;
-      return ghosts_.done();
+      return std::min(interior_.done() , ghosts_.done());
     }
 
     val_t & item ()
@@ -899,6 +912,7 @@ namespace ALUGridSpace {
     typedef LeafValType val_t;
 
     bool useInterior_;
+    int rank;
 
   public:
     typedef ElementPllXIF_t ItemType;
@@ -907,7 +921,8 @@ namespace ALUGridSpace {
     ALU3dGridLevelIteratorWrapper (const GridImp & grid,
                                    const VertexListType & vxList, int level , const int nlinks )
       : interior_ ( grid, vxList, level , nlinks )
-        , ghosts_ ( grid, vxList, level, nlinks ) , useInterior_(true) {}
+        , ghosts_ ( grid, vxList, level, nlinks ) , useInterior_(true),
+        rank(grid.comm().rank()) {}
 
     int size  ()
     {
@@ -934,16 +949,20 @@ namespace ALUGridSpace {
     void first() {
       useInterior_ = true;
       interior_.first();
+      if (interior_.done()) {
+        useInterior_ = false;
+        ghosts_.first();
+      }
     }
 
     int done ()
     {
-      if(useInterior_) return 0;
-      return ghosts_.done();
+      return std::min(interior_.done() , ghosts_.done());
     }
 
     val_t & item ()
     {
+      assert(!done());
       if(useInterior_)
         return interior_.item();
       else
@@ -1251,6 +1270,8 @@ namespace Dune {
 
     // actual level
     int level_;
+
+    int rank_;
 
     // the wrapper for the original iterator of the ALU3dGrid
     typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> IteratorType;
