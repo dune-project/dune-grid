@@ -22,7 +22,7 @@ namespace Dune {
   template <typename ctype, int dim>
   bool compareVec(const FieldVector<ctype,dim> & vx1 , const FieldVector<ctype,dim> & vx2 )
   {
-    const ctype eps = 1e2 * std::numeric_limits<ctype>::epsilon();
+    const ctype eps = 1e5 * std::numeric_limits<ctype>::epsilon();
     bool comp = true;
     for(int i=0; i<dim; i++)
     {
@@ -117,7 +117,7 @@ namespace Dune {
               FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[global[j]] );
               if( ! compareVec( vxcheck, vx ) )
               {
-                std::cerr << "map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
+                std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
                 assert( compareVec( vxcheck, vx ) );
               }
             }
@@ -132,12 +132,13 @@ namespace Dune {
             FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[global[j]] );
             if( ! compareVec( vxcheck, vx ) )
             {
-              std::cerr << "map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
+              std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
               assert( compareVec( vxcheck, vx ) );
             }
           }
           sout << "vx[" << global[j] << "] = "  << vx << "\n";
         }
+        sout << "sort vector of global vertex\n";
 
         // sort vector of global vertex number for storage in map
         // the smallest entry is the first entry
@@ -182,6 +183,7 @@ namespace Dune {
         }
       }
     }   // end check sub entities
+    sout << "end check sub entities\n";
   }
 
   // check some functionality of grid
@@ -208,6 +210,8 @@ namespace Dune {
     IteratorType it = lset.template begin<codim,All_Partition> ();
 
     std::set<GeometryType> geometryTypes;
+
+    if (it == endit) return;
 
     for (; it!=endit; ++it)
       geometryTypes.insert(it->geometry().type());
@@ -278,6 +282,8 @@ namespace Dune {
       std::map < IdType , bool > entityfound;
       int mycount = 0;
       Iterator endit  = lset.template end  <0,All_Partition> ();
+      if (lset.template begin<0,All_Partition> () == endit)
+        return;
       for(Iterator it = lset.template begin<0,All_Partition> ();
           it != endit ; ++it )
       {
@@ -303,7 +309,6 @@ namespace Dune {
       //assert( gridsize <= (int) entityfound.size() );
     }
 
-
     //******************************************************************
 
     typedef std::pair < int , GeometryType > SubEntityKeyType;
@@ -317,13 +322,15 @@ namespace Dune {
       unsigned int count = 0;
       typedef typename IndexSetType :: template Codim<dim>::template Partition<All_Partition> :: Iterator VxIterator;
       VxIterator end = lset.template end <dim,All_Partition>();
-      for(VxIterator it = lset.template begin <dim,All_Partition>(); it != end; ++it )
+      for(VxIterator it = lset.template begin <dim,All_Partition>();
+          it != end; ++it )
       {
         count ++ ;
         // get coordinates of vertex
         FieldVector<coordType,dim> vx ( it->geometry()[0] );
 
         // get index of vertex
+        sout << "Vertex " << vx << "\n";
         int idx = lset.index( *it );
 
         sout << "Vertex " << idx << " = [" << vx << "]\n";
@@ -338,6 +345,13 @@ namespace Dune {
       assert( vertexCoordsMap.size() == count );
 
       // check whether size of vertices of set equals all found vertices
+      sout << "Checking size of vertices "
+           << count
+           << " equals all found vertices "
+           << (unsigned int)lset.size(Dune::GeometryType(0))
+           << "\n";
+      // assertion goes wrong for parallel grid since no iteration over ghost
+      // subentities
       assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
     }
 
@@ -372,6 +386,7 @@ namespace Dune {
       for(Iterator it = lset.template begin<0,All_Partition>();
           it != endit; ++it)
       {
+        // if (it->partitionType()==4) continue;
         sout << "****************************************\n";
         sout << "Element = " << lset.index(*it) << " on level " << it->level () << "\n";
         sout << "Vertices      = [";
@@ -407,10 +422,11 @@ namespace Dune {
           assert( vxidx == realidx );
 
           // check whether the coordinates are the same
+          assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
           FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[vxidx] );
           if( ! compareVec( vxcheck, vx ) )
           {
-            sout << "map global vertex " << vxidx << " vx " << vxcheck << " is not " << vx << "\n";
+            sout << "ERROR: map global vertex " << vxidx << " vx " << vxcheck << " is not " << vx << " type:" << it->partitionType() << "\n";
             assert( compareVec( vxcheck, vx ) );
           }
         }
@@ -485,6 +501,7 @@ namespace Dune {
   void checkIndexSet( const GridType &grid , const IndexSetType & iset,
                       OutputStreamImp & sout ,  bool levelIndex = false )
   {
+    std::cout << "Index check started" << std::endl;
     CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
         GridType::dimension, true> ::
     checkIndexSet (grid,iset,sout,levelIndex);
