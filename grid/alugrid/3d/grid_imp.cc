@@ -799,7 +799,7 @@ namespace Dune {
     if( psize() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
     bool changed = myGrid().duneLoadBalance();
-    if(1 || changed)
+    if(changed)
     {
       // std::cout << "Grid was balanced on p = " << myRank() << std::endl;
       // calculate new maxlevel
