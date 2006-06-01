@@ -10,6 +10,8 @@
 
 #include "gridcheck.cc"
 
+#include "checkcommunicate.cc"
+
 int rank;
 
 template <int dim>
@@ -28,9 +30,11 @@ void check_yasp() {
 
   Dune::YaspGrid<dim,dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
 
-  grid.globalRefine(1);
+  grid.globalRefine(2);
 
   gridcheck(grid);
+
+  checkCommunication(grid,0,0,Dune::dvverb);
 };
 
 int main (int argc , char **argv) {
