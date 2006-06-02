@@ -9,6 +9,9 @@
 
 #include "ugtypes.hh"
 
+/** \todo Here only to provide the constant DBL_EPSILON.  There's maybe a better way? */
+#include "float.h"
+
 namespace Dune {
 
   /** \brief Encapsulates a few UG methods and macros
@@ -411,6 +414,9 @@ namespace Dune {
       using UG::D2::DOUBLE_VECTOR;
       using UG::DOUBLE;
       double det;
+#ifndef SMALL_D
+      const double SMALL_D = DBL_EPSILON*10;
+#endif
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
     }

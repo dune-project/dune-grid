@@ -448,6 +448,9 @@ namespace Dune {
       using UG::D3::DOUBLE_VECTOR;
       using UG::DOUBLE;
       double det;
+#ifndef SMALL_D
+      const double SMALL_D = DBL_EPSILON*10;
+#endif
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
     }
