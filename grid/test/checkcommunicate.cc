@@ -31,6 +31,15 @@ using namespace Dune;
    methods.
  ******/
 /*******************************************************************/
+namespace {
+  template <class GridType,int c> struct NextCodim {
+    static const bool next = Dune::Capabilities::hasEntity<GridType, c-1>::v;
+    static const int calc = ((next) ? c-1 : NextCodim<GridType,c-1>::calc);
+  };
+  template <class GridType> struct NextCodim<GridType,0> {
+    static const int calc = -1;
+  };
+}
 template <class IndexSetImp,
     class DataVectorType >
 class ExampleDataHandle
@@ -116,6 +125,7 @@ public:
     int idx = iset_.index(e);
     DataType x=0.0;
     buff.read(x);
+    assert(x>=0);
     data2_[idx] = x;
     x=0.;
     buff.read(x);
@@ -338,12 +348,10 @@ public:
       std::cerr << "ERROR in communication test for codim " << cdim << "!!!"
                 << std::endl;
     }
-    /*
-       // for automatic testing of all codims
-       static const bool next = Dune::Capabilities::hasEntity<GridType, cdim-1>::v;
-       CheckCommunication<GridType,(next)?cdim-1:0,OutputStreamImp>
-       test(grid,sout);
-     */
+    // for automatic testing of all codims
+    // static const int next = NextCodim<GridType,cdim>::calc();
+    CheckCommunication<GridType,NextCodim<GridType,cdim>::calc,
+        OutputStreamImp> test(grid,sout);
   }
 };
 template <class GridType,class OutputStreamImp>
@@ -356,18 +364,20 @@ template <class GridType,class OutputStreamImp>
 void checkCommunication(GridType &grid,int level,int adapt,
                         OutputStreamImp & out) {
   {
+    // for automatic testing of all codims
+    CheckCommunication<GridType,GridType::dimension,OutputStreamImp>
+    test(grid,out);
     /*
-       // for automatic testing of all codims
-       CheckCommunication<GridType,GridType::dimension,OutputStreamImp>
-       test(grid,out);
+       {
+       CheckCommunication<GridType,2,OutputStreamImp>
+        test(grid,out);
+       }
      */
-    {
-      CheckCommunication<GridType,GridType::dimension,OutputStreamImp>
-      test(grid,out);
-    }
-    {
-      CheckCommunication<GridType,0,OutputStreamImp>
-      test(grid,out);
-    }
+    /*
+       {
+       CheckCommunication<GridType,0,OutputStreamImp>
+        test(grid,out);
+       }
+     */
   }
 }
