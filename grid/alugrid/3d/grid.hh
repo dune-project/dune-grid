@@ -636,11 +636,73 @@ namespace Dune {
     typedef ALU3dGridIntersectionIterator<const MyType>
     IntersectionIteratorImp;
     typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    void getLeafEntities(std::set<int>& dset,std::set<int>& s) {
+      {
+        typedef ALU3DSPACE LeafIterator < ALU3DSPACE Gitter::helement_STI >
+        vtxIteratorType;
+        vtxIteratorType iter(myGrid());
+        for (iter->first(); !iter->done(); iter->next()) {
+          typename ALU3dImplTraits<elType>::IMPLElementType& element =
+            static_cast<typename ALU3dImplTraits<elType>::IMPLElementType&>
+            (iter->item());
+          for (int i=0; i<12; i++) {
+            if (element.myhedge1(i)->isLeafEntity()) {
+              s.insert(element.myhedge1(i)->getIndex());
+            }
+          }
+        }
+      }
+      {
+        typedef ALU3DSPACE
+        Insert < ALU3DSPACE AccessIterator
+            < typename ALU3DSPACE Gitter :: hbndseg_STI > :: Handle,
+            ALU3DSPACE TreeIterator < ALU3DSPACE Gitter :: hbndseg_STI,
+                ALU3DSPACE is_def_true < ALU3DSPACE Gitter :: hbndseg_STI> > >
+        all_bnd__macro_bnd__iterator ;
+        typedef all_bnd__macro_bnd__iterator bndIteratorType;
+        bndIteratorType iter(myGrid().container());
+        for (iter.first(); !iter.done(); iter.next()) {
+          if (iter.item().isLeafEntity()) {
+            ALU3DSPACE Gitter :: helement*   gh = iter.item().getGhost();
+            switch (elType) {
+            case tetra : {
+              for (int i=0; i<4; i++)
+                s.insert
+                  (static_cast<ALU3DSPACE Gitter::Geometric::tetra_GEO*>(gh)->
+                  myhedge1(i)->getIndex());
+            } break;
+            case hexa : {
+              for (int i=0; i<12; i++) {
+                int index = static_cast<ALU3DSPACE Gitter::Geometric::hexa_GEO*>(gh)->
+                            myhedge1(i)->getIndex();
+                s.insert(index);
+                /*
+                   if (dset.find(index)==dset.end()) {
+                   std::cerr << "Error in ghost/border vertex " << i << " "
+                            << static_cast<ALU3DSPACE Gitter::Geometric::hexa_GEO*>(gh)->
+                    myvertex(i)->Point()[0] << ","
+                            << static_cast<ALU3DSPACE Gitter::Geometric::hexa_GEO*>(gh)->
+                    myvertex(i)->Point()[1] << ","
+                            << static_cast<ALU3DSPACE Gitter::Geometric::hexa_GEO*>(gh)->
+                    myvertex(i)->Point()[2] << "  "
+                            << index << endl;
+                   }
+                 */
+              }
+            } break;
+            default : assert(0);
+            }
+          }
+        }
+      }
+    }
   private:
     friend class IntersectionIteratorWrapper< const MyType > ;
     // return reference to intersectioniterator storage
     IntersectionIteratorProviderType & intersetionIteratorProvider() const { return interItProvider_; }
     mutable IntersectionIteratorProviderType interItProvider_;
+
+
   }; // end class ALU3dGrid
 
 
