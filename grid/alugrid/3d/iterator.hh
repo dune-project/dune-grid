@@ -449,6 +449,8 @@ namespace ALUGridSpace {
     // current link
     int link_;
 
+    bool usingInner_;
+
     const int levelMinusOne_;
 
   public:
@@ -461,11 +463,12 @@ namespace ALUGridSpace {
 
     template <class GridImp>
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : gitter_(const_cast<GridImp &> (grid).myGrid()) , iterTT_(0) , it_(0), nl_(nlinks) , link_(0) , levelMinusOne_ ( (level > 0) ? (level-1) : 0)
+      : gitter_(const_cast<GridImp &> (grid).myGrid()) , iterTT_(0) , it_(0), nl_(nlinks) , link_(-1) , levelMinusOne_ ( (level > 0) ? (level-1) : 0),
+        usingInner_(false)
     {
       elem_.first  = 0;
       elem_.second = 0;
-      createIterator();
+      //createIterator();
     }
 
     ~ALU3dGridLeafIteratorWrapper ()
@@ -475,42 +478,47 @@ namespace ALUGridSpace {
 
     void createIterator()
     {
-      if(link_ < nl_)
-      {
-        if(iterTT_) delete iterTT_;iterTT_ = 0;
-        iterTT_ = new IteratorType ( gitter_, link_, levelMinusOne_ );
-        assert(iterTT_);
+      if (usingInner_)
         checkInnerOuter();
-      }
-      else
-      {
-        if(iterTT_) delete iterTT_;
-        iterTT_ = 0;
-        it_ = 0;
+      if (!usingInner_) {
+        link_++;
+        if(link_ < nl_) {
+          if(iterTT_) delete iterTT_;iterTT_ = 0;
+          iterTT_ = new IteratorType ( gitter_, link_, levelMinusOne_ );
+          assert(iterTT_);
+          checkInnerOuter();
+          if (!it_)
+            createIterator();
+        }
+        else {
+          if(iterTT_) delete iterTT_;
+          iterTT_ = 0;
+          it_ = 0;
+        }
       }
     }
 
     void checkInnerOuter()
     {
-      assert(iterTT_);
-      it_ = &( iterTT_->inner() );
-      InnerIteratorType & it = iterTT_->inner();
-      it.first();
+      if (!usingInner_) {
+        assert(iterTT_);
+        it_ = &( iterTT_->inner() );
+        InnerIteratorType & it = iterTT_->inner();
+        it.first();
+        if(!it.done()) {
+          usingInner_ = true;
+          pair < ElementPllXIF_t *, int > p = it.item ().accessPllX ().accessOuterPllX () ;
+          pair < HElementType * , HBndSegType * > elems;
+          p.first->getAttachedElement(elems);
 
-      if(!it.done())
-      {
-        pair < ElementPllXIF_t *, int > p = it.item ().accessPllX ().accessOuterPllX () ;
-        pair < HElementType * , HBndSegType * > elems;
-        p.first->getAttachedElement(elems);
+          assert( elems.first || elems.second );
 
-        assert( elems.first || elems.second );
-
-        if(elems.second)
-        {
-          return;
+          if(elems.second) {
+            return;
+          }
         }
       }
-
+      usingInner_ = false;
       InnerIteratorType & out = iterTT_->outer();
       out.first();
       if(!out.done())
@@ -527,7 +535,7 @@ namespace ALUGridSpace {
       it_ = 0;
     }
 
-    int size  ()
+    int size  ()    // ???? gives size only of small part of ghost cells ????
     {
       // if no iterator then size is zero
       // which can happen in the case of parallel grid with 1 processor
@@ -548,20 +556,24 @@ namespace ALUGridSpace {
           HBndSegType * face = el.second;
           assert( face );
 
-          if( face->leaf() )
-          {
-            // if the ghost is not used, go to next ghost
-            if(face->ghostLevel() != face->level() )
+          if (!face->isLeafEntity())
+            next();
+          /*
+             if( face->leaf() )
+             {
+             // if the ghost is not used, go to next ghost
+             if(face->ghostLevel() != face->level() )
               next () ;
-          }
-          else
-          {
-            HBndSegType * dwn = face->down();
-            assert( dwn );
-            // if one child is ok then we go to the children
-            if(dwn->ghostLevel() == dwn->level())
+             }
+             else
+             {
+             HBndSegType * dwn = face->down();
+             assert( dwn );
+             // if one child is ok then we go to the children
+             if(dwn->ghostLevel() == dwn->level())
               next();
-          }
+             }
+           */
         }
       }
     }
@@ -575,7 +587,6 @@ namespace ALUGridSpace {
       }
       if(it_->done())
       {
-        link_++;
         createIterator();
       }
       checkLevel();
@@ -584,7 +595,8 @@ namespace ALUGridSpace {
 
     void first()
     {
-      link_ = 0;
+      link_ = -1;
+      usingInner_ = false;
       createIterator();
       if(it_)
       {
@@ -595,6 +607,7 @@ namespace ALUGridSpace {
 
     int done ()
     {
+      return ((link_ >= nl_ || !it_) ? 1 : 0);
       if(link_ >= nl_ ) return 1;
       return ((it_) ? it_->done() : 1);
     }
