@@ -22,6 +22,12 @@ namespace ALUGridSpace {
     //! if a copy is made, the refcount is increased
     inline AutoPointer(const AutoPointer<Pointer> & copy)
     {
+      clone(copy);
+    }
+
+  private:
+    void clone (const AutoPointer<Pointer> & copy)
+    {
       ptr_ = 0;
       refCount_ = 0;
       if(copy.ptr_)
@@ -35,6 +41,23 @@ namespace ALUGridSpace {
       }
     }
 
+    void remove ()
+    {
+      if(refCount_ && ptr_)
+      {
+        (*refCount_)--;
+        if((*refCount_) <= 0)
+        {
+          if(ptr_) delete ptr_;
+          ptr_ = 0;
+          if(refCount_) delete refCount_;
+          refCount_ = 0;
+          owner_ = false;
+        }
+      }
+    }
+
+  public:
     //! initialize the member variables
     AutoPointer() : ptr_ (0) , refCount_ (0) , owner_(false) {}
 
@@ -55,41 +78,33 @@ namespace ALUGridSpace {
     //! set Stack free, if no more refences exist
     ~AutoPointer()
     {
-      if(refCount_ && ptr_)
-      {
-        (*refCount_)--;
-        if((*refCount_) <= 0)
-        {
-          if(ptr_) delete ptr_;
-          if(refCount_) delete refCount_;
-          owner_ = false;
-        }
-      }
+      remove();
     }
 
     //! return object reference
     Pointer & operator * () const
     {
-      assert(ptr_ != 0);
-      assert(owner_);
+      //assert(ptr_ != 0);
+      //assert(owner_);
       return *ptr_;
     }
 
     //! return object pointer
     Pointer * operator -> () const
     {
-      assert(ptr_ != 0);
-      assert(owner_);
+      //assert(ptr_ != 0);
+      //assert(owner_);
       return ptr_;
     }
 
-  private:
     //! if copy is made than one more Reference exists
     AutoPointer<Pointer> & operator = (const AutoPointer<Pointer> & copy)
     {
-      assert(false);
+      remove();
+      clone(copy);
       return (*this);
     }
+  private:
   }; // end class AutoPointer
 
 } // end namespace ALU3dGridSpace
