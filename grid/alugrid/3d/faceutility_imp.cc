@@ -51,13 +51,16 @@ namespace Dune {
     if( outerBoundary_ )
     {
       const BndFaceType * bnd = dynamic_cast<const BndFaceType *> (outerElement_);
-      if(bnd->bndtype() ==  ALU3DSPACE ProcessorBoundary_t)
+
+      if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
       {
         // NOTE: this changes if ghost elements are implemented
         // at the moment there is no difference between internalBoundary
         // and ghostBoundary
-        ghostBoundary_  = true;
+        // --new
+        //outerFaceNumber_ = bnd->getGhost().second;
         outerFaceNumber_ = bnd->getGhostFaceNumber();
+        ghostBoundary_   = true;
 
         // this doesn't count as outer boundary
         outerBoundary_ = false;
