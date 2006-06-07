@@ -275,7 +275,9 @@ namespace Dune {
   {
     // use element as ghost
     typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
-    item_    = static_cast<IMPLElementType *> (ghost.getGhost());
+    //item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
+    item_  = static_cast<IMPLElementType *> ( ghost.getGhost() );
+    // --new
 
     // method getGhost can return 0, but then is something wrong
     assert(item_);
