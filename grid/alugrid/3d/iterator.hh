@@ -1454,9 +1454,10 @@ namespace Dune {
     //! dereference Entity, faster then the entity pointersmethod
     Entity & dereference () const;
 
+  private:
     //! do not allow assigment
     ThisType & operator = (const ThisType & org);
-  private:
+
     // actual level
     int level_;
 

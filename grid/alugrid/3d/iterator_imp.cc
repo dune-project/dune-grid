@@ -665,7 +665,9 @@ namespace Dune {
     removeIter();
     ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
     level_ = org.level_;
-    if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
+    //if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
+    // --new
+    iter_ = org.iter_;
     return *this;
   }
 
