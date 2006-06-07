@@ -84,7 +84,7 @@ namespace Dune {
         }
       } else {
         std::vector<unsigned int> el;
-        for (int j=0; j<elements[n].size(); j++)
+        for (size_t j=0; j<elements[n].size(); j++)
           el.push_back((elements[n][j]));
         if (el.size()==8) {
           unsigned int tmp = el[2];
@@ -187,7 +187,7 @@ namespace Dune {
         if (bsimplex.isactive()) {
           simplexgrid=true;
           nofelements+=bsimplex.get(elements);
-          for (int i=0; i<elements.size(); i++) {
+          for (size_t i=0; i<elements.size(); i++) {
             if (testTriang(i)==0) {
               std::cerr << "Found an error in description of Simplex no. "
                         << i << std::endl;

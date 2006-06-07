@@ -285,10 +285,10 @@ namespace Dune {
         angle_(-1),
         display_(false),
         haspath_(false),
-        hasfile_(false),
-        dimension_(-1),
         filetype_(),
-        parameter_()
+        parameter_(),
+        hasfile_(false),
+        dimension_(-1)
       {
         double x;
         bool b;
@@ -412,8 +412,11 @@ namespace Dune {
           elements.resize(6*cubes.size());
           for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
             elements[countsimpl].resize(4);
-          for (int c=0; c<cubes.size(); c++) {
-            for(int tetra=0; tetra < 6 ; tetra++) {
+
+          for (size_t c=0; c<cubes.size(); c++)
+          {
+            for(int tetra=0; tetra < 6 ; tetra++)
+            {
               for (int v=0; v<4; v++) {
                 elements[c*6+tetra][v]=
                   cubes[c][offset3[tetra][v][0]+
@@ -427,18 +430,22 @@ namespace Dune {
           elements.resize(2*cubes.size() );
           for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
             elements[countsimpl].resize(3);
-          for (int c=0; c<cubes.size(); c++) {
+          for (size_t c=0; c<cubes.size(); c++)
+          {
             int diag = 0;
             double mind = 0;
-            for (int d=0; d<2; d++) {
+            for (int d=0; d<2; d++)
+            {
               double diaglen =
                 pow(vtx[cubes[c][d]][0]-vtx[cubes[c][2+((d+1)%2)]][0],2) +
                 pow(vtx[cubes[c][d]][1]-vtx[cubes[c][2+((d+1)%2)]][1],2);
-              if (diaglen<mind) {
+              if (diaglen<mind)
+              {
                 mind=diaglen;
                 diag = d;
               }
             }
+
             if (diag == 0) {
               int tmp0 = cubes[c][0];
               cubes[c][0] = cubes[c][1];
@@ -527,7 +534,7 @@ namespace Dune {
         simplex.resize(nofsimplex());
         for (nofsimpl=0; ok(); next(), nofsimpl++) {
           simplex[nofsimpl].resize(p.size());
-          for (int j=0; j<p.size(); j++) {
+          for (size_t j=0; j<p.size(); j++) {
             simplex[nofsimpl][j] = p[j];
           }
         }
@@ -557,17 +564,20 @@ namespace Dune {
           return goodline;
         }
         int x;
-        while (getnextentry(x)) {
-          if (n<p.size()) {
+        while (getnextentry(x))
+        {
+          if (n<(int)p.size())
+          {
             p[n]=x;
-            if (x< 0 && x>= nofvtx) { std::cerr << "ERROR in " << *this
-                                                << "      wrong index of vertices: "
-                                                << x << " read but expected value between 0 and" << nofvtx-1 << std::endl;}
+            if (x< 0 && x>= nofvtx)
+            { std::cerr << "ERROR in " << *this
+                        << "      wrong index of vertices: "
+                        << x << " read but expected value between 0 and" << nofvtx-1 << std::endl;}
           }
           n++;
         }
         // tests if the written block is ok in its size
-        goodline=(n==p.size());
+        goodline=(n==(int)p.size());
         if (!goodline) {
           std::cerr << "ERROR in " << *this
                     << "      wrong number of vertices: "
@@ -579,7 +589,7 @@ namespace Dune {
       int operator[](int i) {
         assert(ok());
         assert(linenumber()>=0);
-        assert(0<=i && i<p.size());
+        assert(0<=i && i< (int)p.size());
         return p[i];
       }
     };
