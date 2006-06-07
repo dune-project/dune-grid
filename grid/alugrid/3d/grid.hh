@@ -446,11 +446,6 @@ namespace Dune {
 
   public:
 
-    template <class T> T globalMin (T val) const ;
-    template <class T> T globalMax (T val) const ;
-    template <class T> T globalSum (T val) const ;
-    template <class T> void globalSum (T *, int , T *) const ;
-
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
 
@@ -559,14 +554,6 @@ namespace Dune {
     }
 
   private:
-    // return number of global processes, i.e. MPI_Comm_size
-    int psize () const {
-#if ALU3DGRID_PARALLEL
-      return mpAccess_.psize();
-#endif
-      return 1;
-    }
-
     // max level of grid
     int maxlevel_;
 
