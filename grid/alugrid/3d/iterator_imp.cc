@@ -592,24 +592,16 @@ namespace Dune {
   ALU3dGridLevelIterator(const GridImp & grid,
                          VertexListType & vxList , int level)
     : ALU3dGridEntityPointer<codim,GridImp> (grid,level)
-      , endIter_(false)
       , level_(level)
-      , isCopy_ (0)
+      //, iter_ (0)
+      , iter_ ()
       , rank_(grid.comm().rank())
   {
     IteratorType * it = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
     iter_.store( it );
-
-    (*iter_).first();
-    if(!(*iter_).done())
-    {
-      assert((*iter_).size() > 0);
-      val_t & item = (*iter_).item();
-      if( item.first )
-        this->updateEntityPointer( item.first );
-      else
-        this->updateGhostPointer( *item.second );
-    }
+    //iter_  = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
+    //assert( iter_ );
+    this->firstItem(*this);
   }
 
   // Constructor for end iterator
@@ -617,9 +609,9 @@ namespace Dune {
   inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const GridImp & grid, int level)
     : ALU3dGridEntityPointer<codim,GridImp> (grid ,level)
-      , endIter_(true)
       , level_(level)
-      , isCopy_ (0)
+      //, iter_ (0)
+      , iter_ ()
       , rank_(grid.comm().rank())
   {
     this->done();
@@ -629,36 +621,58 @@ namespace Dune {
   inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org )
     : ALU3dGridEntityPointer<codim,GridImp> ( org )
-      , endIter_( org.endIter_ )
       , level_( org.level_ )
-      , iter_ ( org.iter_ )
-      , isCopy_(org.isCopy_+1)
+      //, iter_(0)
+      , iter_()
       , rank_( org.rank_)
   {
-    // don't copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_ < 3 );
+    /*
+       const IteratorType * orgIt = org.iter_;
+       if( orgIt )
+       {
+       iter_ = new IteratorType ( *orgIt ) ;
+       assert( iter_ );
+       if(!(iter_->done()))
+       {
+        this->setItem(*this,*iter_);
+        assert( this->equals(org) );
+       }
+       }
+     */
+    iter_ = org.iter_;
+  }
+
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+  ~ALU3dGridLevelIterator ()
+  {
+    removeIter();
+  }
+
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+  removeIter ()
+  {
+    this->done();
+    //delete iter_; iter_ = 0;
+  }
+
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLevelIterator<codim, pitype, GridImp> &
+  ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    removeIter();
+    ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
+    level_ = org.level_;
+    if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
+    return *this;
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp >
   inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
   {
-    // if assertion is thrown then end iterator was forgotten or didnt stop
-    assert(!endIter_);
-
-    (*iter_).next();
-    if ((*iter_).done())
-    {
-      endIter_ = true;
-      this->done();
-      return ;
-    }
-
-    val_t & item = (*iter_).item();
-    if( item.first )
-      this->updateEntityPointer( item.first );
-    else
-      this->updateGhostPointer( *item.second );
-
+    this->incrementIterator(*this);
     return ;
   }
 
@@ -666,7 +680,12 @@ namespace Dune {
   inline typename ALU3dGridLevelIterator<cdim, pitype, GridImp> :: Entity &
   ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const
   {
-    // std::cerr << "DEREF : <" << rank_ << ">" << std::endl;
+#ifndef NDEBUG
+    const ALU3dGridLevelIterator<cdim, pitype, GridImp> endIterator (this->grid_,level_);
+    // assert that iterator not equals end iterator
+    assert( ! this->equals(endIterator) );
+#endif
+
     // don't dereference empty entity pointer
     assert( this->item_ );
     assert( this->entity_ );
@@ -680,14 +699,14 @@ namespace Dune {
   //
   //--LeafIterator
   //*******************************************************************
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline ALU3dGridLeafIterator<codim, pitype, GridImp> ::
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
   ALU3dGridLeafIterator(const GridImp &grid, int level,
                         bool end)
-    : ALU3dGridEntityPointer <codim,GridImp> ( grid,level)
-      , endIter_(end)
+    : ALU3dGridEntityPointer <cdim,GridImp> ( grid,level)
       , level_(level)
-      , isCopy_ (0)
+      , iter_ ()
+      //, iter_ (0)
   {
     if(!end)
     {
@@ -695,58 +714,71 @@ namespace Dune {
       IteratorType * it = new IteratorType ( this->grid_ , level_, grid.nlinks() );
       iter_.store( it );
 
-      (*iter_).first();
-      if((!(*iter_).done()) && grid.hierSetSize(0) > 0) // else iterator empty
-      {
-        assert((*iter_).size() > 0);
-        val_t & item = (*iter_).item();
-        if( item.first )
-          this->updateEntityPointer( item.first );
-        else
-          this->updateGhostPointer( *item.second );
-      }
+      //assert( iter_ );
+      this->firstItem(*this);
     }
     else
     {
-      endIter_ = true;
       this->done();
     }
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
-  ALU3dGridLeafIterator(const ALU3dGridLeafIterator<cdim, pitype, GridImp> &org)
+  ALU3dGridLeafIterator(const ThisType & org)
     : ALU3dGridEntityPointer <cdim,GridImp> ( org )
-      , endIter_(org.endIter_)
       , level_(org.level_)
-      , iter_ ( org.iter_ )
-      , isCopy_ (org.isCopy_+1)
+      //, iter_(0)
+      ,iter_(org.iter_)
   {
-    // dont copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_  < 3 );
+    //const IteratorType * orgIt = org.iter_;
+    //if( orgIt )
+    /*
+       {
+       iter_ = new IteratorType ( *orgIt ) ;
+       assert( iter_ );
+       if(!(iter_->done()))
+       {
+        this->setItem(*this,*iter_);
+        assert( this->equals(org) );
+       }
+       }
+     */
+  }
+
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+  ~ALU3dGridLeafIterator()
+  {
+    removeIter();
+  }
+
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+  removeIter ()
+  {
+    this->done();
+    //delete iter_; iter_ = 0;
+  }
+
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLeafIterator<cdim, pitype, GridImp> &
+  ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    /*
+       removeIter();
+       ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
+       level_ = org.level_;
+       if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
+     */
+    return *this;
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
   {
-    // if assertion is thrown then end iterator was forgotten or didnt stop
-    assert( !endIter_ );
-
-    (*iter_).next();
-
-    if((*iter_).done())
-    {
-      endIter_ = true;
-      this->done();
-      return ;
-    }
-
-    val_t & item = (*iter_).item();
-    if( item.first )
-      this->updateEntityPointer( item.first );
-    else
-      this->updateGhostPointer( *item.second );
-
+    this->incrementIterator(*this);
     return ;
   }
 
@@ -754,6 +786,12 @@ namespace Dune {
   inline typename ALU3dGridLeafIterator<cdim, pitype, GridImp> :: Entity &
   ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const
   {
+#ifndef NDEBUG
+    const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->grid_,level_,true);
+    // assert that iterator not equals end iterator
+    assert( ! this->equals(endIterator) );
+#endif
+
     // don't dereference empty entity pointer
     assert( this->item_ );
     assert( this->entity_ );
