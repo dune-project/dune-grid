@@ -84,7 +84,6 @@ namespace Dune {
     assert(mygrid_ != 0);
 
 #if ALU3DGRID_PARALLEL
-    //loadBalance();
     __MyRank__ = mpAccess_.myrank();
 
     dverb << "************************************************\n";
@@ -94,11 +93,9 @@ namespace Dune {
 #endif
     this->checkMacroGrid ();
 
-    // print size of grid
-    // myGrid().printsize();
-
     postAdapt();
     calcExtras();
+
     if (size(0)>0)
       std::cout << "Created ALU3dGrid from macro grid file '"
                 << macroTriangFilename << "'. \n\n";
@@ -750,53 +747,10 @@ namespace Dune {
 #endif
   }
 
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
-  inline T ALU3dGrid<dim, dimworld, elType>::globalMin(T val) const
-  {
-#if ALU3DGRID_PARALLEL
-    T ret = mpAccess_.gmin(val);
-    return ret;
-#else
-    return val;
-#endif
-  }
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
-  inline T ALU3dGrid<dim, dimworld, elType>::globalMax(T val) const
-  {
-#if ALU3DGRID_PARALLEL
-    T ret = mpAccess_.gmax(val);
-    return ret;
-#else
-    return val;
-#endif
-  }
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
-  inline T ALU3dGrid<dim, dimworld, elType>::globalSum(T val) const
-  {
-#if ALU3DGRID_PARALLEL
-    T sum = mpAccess_.gsum(val);
-    return sum;
-#else
-    return val;
-#endif
-  }
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class T>
-  inline void ALU3dGrid<dim, dimworld, elType>::globalSum(T * send, int s , T * recv) const
-  {
-#if ALU3DGRID_PARALLEL
-    mpAccess_.gsum(send,s,recv);
-    return ;
-#else
-    std::memcpy(recv,send,s*sizeof(T));
-    return ;
-#endif
-  }
-
-
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance()
   {
-    if( psize() <= 1 ) return false ;
+    if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
     bool changed = myGrid().duneLoadBalance();
     if(changed)
@@ -818,7 +772,7 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::
   loadBalance(DataCollectorType & dc)
   {
-    if( psize() <= 1 ) return false ;
+    if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
 
     typedef typename EntityObject :: ImplementationType EntityImp;
@@ -853,34 +807,17 @@ namespace Dune {
     updateStatus();
     myGrid().duneExchangeData(gs);
     return changed;
+#else
+    return false;
 #endif
   }
-
-  /*
-     // adapt grid
-     template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataCollectorType>
-     inline bool ALU3dGrid<dim, dimworld, elType>::communicate(DataCollectorType & dc)
-     {
-     #if ALU3DGRID_PARALLEL
-     EntityImp en ( *this, this->maxLevel() );
-
-     ALU3DSPACE GatherScatterExchange < ALU3dGrid<dim, dimworld, elType> , EntityImp ,
-        DataCollectorType > gs(*this,en,dc);
-
-     myGrid().duneExchangeData(gs);
-     return true;
-     #else
-     return false;
-     #endif
-     }
-   */
 
   // communicate data
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandle>
   inline void ALU3dGrid<dim, dimworld, elType>::
   communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
   {
-    if( psize() <= 1 ) return ;
+    if( comm().size() <= 1 ) return ;
 #if ALU3DGRID_PARALLEL
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
