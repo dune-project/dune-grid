@@ -93,7 +93,7 @@ namespace ALUGridSpace {
     void removeData ( ObjectStreamType & str , HElementType & elem )
     {
       realEntity_.setElement(elem);
-      for (int i=0; i<dc_.size(entity_); i++) {
+      for (size_t i=0; i<dc_.size(entity_); i++) {
         typename DataCollectorType::DataType tmp;
         str.read(tmp);
       }
@@ -150,7 +150,8 @@ namespace ALUGridSpace {
     {
       // set element and then start
       realEntity_.setElement(elem);
-      // dc_.inlineData(str,entity_);
+      dc_.gather(str,entity_);
+      //dc_.inlineData(str,entity_);
     }
 
     //! this method is called from the duneUnpackSelf method of the corresponding
@@ -161,6 +162,7 @@ namespace ALUGridSpace {
       // set element and then start
       const_cast<GridType &> (grid_).updateStatus();
       realEntity_.setElement(elem);
+      dc_.scatter(str,entity_,dc_.size(entity_));
       // dc_.xtractData(str,entity_);
     }
 
