@@ -21,14 +21,15 @@
 #ifdef HAVE_MPI_CPP
 // if this variable is defined,
 // // then parallel version of ALUGrid is compiled
-#if ALU3DGRID_BUILD_FOR_PARALLEL == 0
-#warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
+  #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
+    #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
   using the MPI compiler script or compile Dune without the MPI support!"
+    #define ALU3DGRID_PARALLEL 0
+  #else
+    #define ALU3DGRID_PARALLEL 1
+  #endif
 #else
-#define ALU3DGRID_PARALLEL 1
-#endif
-#else
-#define ALU3DGRID_PARALLEL 0
+  #define ALU3DGRID_PARALLEL 0
 #endif
 
 // if MPI was found include all headers
