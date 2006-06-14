@@ -187,13 +187,14 @@ namespace Dune {
         if (bsimplex.isactive()) {
           simplexgrid=true;
           nofelements+=bsimplex.get(elements);
-          for (size_t i=0; i<elements.size(); i++) {
-            if (testTriang(i)==0) {
-              std::cerr << "Found an error in description of Simplex no. "
-                        << i << std::endl;
-              return 0;
+          if (dimw == 2)
+            for (size_t i=0; i<elements.size(); i++) {
+              if (testTriang(i)==0) {
+                std::cerr << "Found an error in description of Simplex no. "
+                          << i << std::endl;
+                return 0;
+              }
             }
-          }
         } else {
           nofelements=bcube.get(elements);
           // make simplex grid
