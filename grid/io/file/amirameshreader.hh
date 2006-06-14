@@ -26,9 +26,15 @@ namespace Dune {
     static void read(GridType& grid,
                      const std::string& filename);
 
+    /** \brief Read a block vector from an AmiraMesh file
+     *
+     * \param f The vector to read into.  Implicitly assumed to be an ISTL vector
+     * \param filename Name of the AmiraMesh file
+     */
     template<class DiscFuncType>
     static void readFunction(DiscFuncType& f, const std::string& filename);
 
+    /** \brief Dummy constructor */
     AmiraMeshReader() {}
 
   };
