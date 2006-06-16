@@ -51,6 +51,11 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0)
 {
+  if (numElements<1)
+    DUNE_THROW(GridError, "Nonpositive number of elements requested!");
+
+  if (leftBoundary >= rightBoundary)
+    DUNE_THROW(GridError, "The left boundary coordinate has to be strictly less than the right boundary one!");
   // Init grid hierarchy
   vertices.resize(1);
   elements.resize(1);
@@ -89,6 +94,9 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const std::vector<OneDCType>& coords)
     freeVertexIdCounter_(0),
     freeElementIdCounter_(0)
 {
+  if (coords.size()<2)
+    DUNE_THROW(GridError, "You have to provide at least two coordinates!");
+
   // Init grid hierarchy
   vertices.resize(1);
   elements.resize(1);
@@ -107,6 +115,9 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const std::vector<OneDCType>& coords)
     newElement->vertex_[0] = it;
     it = it->succ_;
     newElement->vertex_[1] = it;
+
+    if (newElement->vertex_[0]->pos_ >= newElement->vertex_[1]->pos_)
+      DUNE_THROW(GridError, "The coordinates have to be in ascending order!");
 
     elements[0].insert_after(elements[0].rbegin, newElement);
 
