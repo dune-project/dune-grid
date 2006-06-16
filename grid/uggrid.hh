@@ -25,11 +25,6 @@
    But we also need the headers twice!  Once with _2 set and once with _3!
    So here we go:*/
 
-/** \todo Defining __PC__ here is certainly not the perfect way... */
-/* We're still forced to include compiler.h, which expects the architecture
-   as a macro.  This sucks, but currently there's no better way.  We
-   choose __PC__ and hope for the best. */
-#define __PC__
 /* The following define tells the UG headers that we want access to a few
    special fields, for example the extra index fields in the element data structures. */
 #define FOR_DUNE
@@ -56,7 +51,7 @@
    Therefore, we set a few single-inclusion defines manually before including
    ugincludes.hh again.
  */
-//#define __COMPILER__
+#define UGTYPES_H
 #define __HEAPS__
 #define __UGENV__
 #define __PARGM_H__
@@ -74,7 +69,6 @@
 #include "uggrid/ug_undefs.hh"
 
 #undef _3
-#undef __PC__
 #undef FOR_DUNE
 
 // The components of the UGGrid interface
