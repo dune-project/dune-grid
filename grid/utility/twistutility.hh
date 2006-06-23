@@ -69,11 +69,11 @@ namespace Dune {
     {}
 
     int twistInSelf(IntersectionIterator& it) const {
-      return 0;
+      return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
 
     int twistInNeighbor(IntersectionIterator& it) const {
-      return 1;
+      return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
 
   private:
