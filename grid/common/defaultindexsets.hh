@@ -489,7 +489,7 @@ namespace Dune {
       // therefore only check other codims
 #ifndef NDEBUG
       const int codim = cd;
-      assert( (codim == dim) ? (1) : (level_ == en.level() ));
+      assert( (codim != 0) ? (1) : (level_ == en.level() ));
       assert(levelIndex_[codim][ hIndexSet_.template subIndex<cd>(en,i) ] >= 0 );
 #endif
       return levelIndex_[cd][ hIndexSet_.template subIndex<cd>(en,i) ];
@@ -500,8 +500,7 @@ namespace Dune {
     bool contains (const EntityType& en) const
     {
       enum { cd = EntityType :: codimension };
-      return ((en.level() == level_) &&
-              (levelIndex_[cd][ hIndexSet_.index(en) ] >= 0 ));
+      return (levelIndex_[cd][ hIndexSet_.index(en) ] >= 0);
     }
 
     //! return size of IndexSet for a given level and codim
@@ -539,6 +538,7 @@ namespace Dune {
       for(IteratorType it = this->template begin< 0, All_Partition > ();
           it != endit; ++it)
       {
+        assert( it->level() == level_ );
         insertEntity(*it,num);
       }
 
@@ -563,7 +563,7 @@ namespace Dune {
       // walk grid and store index
       typedef typename DefaultLevelIteratorTypes<GridImp>:: template Codim<cd>::
       template Partition<All_Partition> :: Iterator LevelIterator;
-      //int num = 0;
+
       LevelIterator endit  = this->template end  < cd , All_Partition > ();
       for(LevelIterator it = this->template begin< cd , All_Partition > (); it != endit; ++it)
       {
@@ -594,6 +594,17 @@ namespace Dune {
     template Partition<pitype>::Iterator end () const
     {
       return this->grid_.template lend<cd,pitype> (level_);
+    }
+
+    //! returns true if this set provides an index for given entity
+    bool containsIndex (int cd , int idx) const
+    {
+      assert( cd >= 0 );
+      assert( cd < ncodim );
+
+      assert( idx >= 0);
+      assert( idx < levelIndex_[cd].size());
+      return (levelIndex_[cd][ idx ] >= 0);
     }
 
   private:
@@ -801,10 +812,13 @@ namespace Dune {
       int num[ncodim];
       for(int cd=0; cd<ncodim; ++cd) num[cd] = 0;
 
+      int elems=0;
+
       IteratorType endit  = this->template end  < 0, All_Partition > ();
       for(IteratorType it = this->template begin< 0, All_Partition > ();
           it != endit; ++it)
       {
+        ++elems;
         insertEntity(*it,num);
       }
 
@@ -812,7 +826,7 @@ namespace Dune {
       for(int cd=0; cd<ncodim; ++cd)
       {
         size_[cd] = num[cd];
-        //assert( size_[cd] == grid_.size(cd) );
+        assert( size_[cd] == grid_.size(cd) );
       }
     }
 
@@ -856,7 +870,7 @@ namespace Dune {
       {
         a.resize(newNumberOfEntries);
       }
-      for(int i=0; i<a.size(); i++) a[i] = -1;
+      for(int i=0; i<a.size(); ++i) a[i] = -1;
     }
 
     // method prints indices of given codim, for debugging
