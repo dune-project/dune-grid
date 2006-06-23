@@ -132,6 +132,8 @@ namespace Dune {
 
     mutable bool localFCoordCalced_;
     mutable FieldVector<alu3d_ctype, dim> localFatherCoords_; //! coords of vertex in father
+
+    mutable PartitionType partitionType_;
   };
 
   /*!
