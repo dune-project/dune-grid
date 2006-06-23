@@ -15,8 +15,7 @@
 // for the Dune interface
 #define _DUNE_USES_ALU3DGRID_
 
-//#include <alugrid_defineparallel.h>
-#define ALU3DGRID_BUILD_FOR_PARALLEL 0
+#include <alugrid_defineparallel.h>
 
 #ifdef HAVE_MPI_CPP
 // if this variable is defined,
@@ -73,6 +72,7 @@ namespace ALUGridSpace {
   typedef GitterType::hedge_STI HEdgeType;                     // Interface Edge
   typedef GitterType::vertex_STI VertexType;                   // Interface Vertex
   typedef GitterType::hbndseg_STI HBndSegType;
+  typedef GitterType::ghostpair_STI GhostPairType;
   typedef GitterType::Geometric::hface3_GEO GEOFace3Type;     // Tetra Face
   typedef GitterType::Geometric::hface4_GEO GEOFace4Type; // Hexa Face
   typedef GitterType::Geometric::hedge1_GEO GEOEdgeT;     // * stays real Face
@@ -236,14 +236,40 @@ namespace Dune {
 
     IteratorType begin () { return vertexList_.begin(); }
     IteratorType end   () { return vertexList_.end(); }
+
+    VertexListType & getItemList() { return vertexList_; }
   private:
     bool up2Date_;
     VertexListType vertexList_;
   };
 
-#if ALU3DGRID_PARALLEL
-  static int __MyRank__ = -1;
-#endif
+  class ALU3dGridItemList
+  {
+  public:
+    // level vertex iterator list
+    typedef std::vector < void * > ItemListType;
+    typedef ItemListType :: iterator IteratorType;
+
+    ALU3dGridItemList () : up2Date_(false) {}
+
+    size_t size () const { return itemList_.size(); }
+
+    bool up2Date () const { return up2Date_;  }
+    void unsetUp2Date ()  { up2Date_ = false; }
+
+    void markAsUp2Date() { up2Date_ = true; }
+
+    IteratorType begin () { return itemList_.begin(); }
+    IteratorType end   () { return itemList_.end(); }
+
+    ItemListType & getItemList() { return itemList_; }
+  private:
+    bool up2Date_;
+    ItemListType itemList_;
+  };
+
+  typedef ALU3dGridItemList ALU3dGridItemListType;
+
 } // end namespace Dune
 
 #ifdef _ANSI_HEADER_DEFINED_HERE
