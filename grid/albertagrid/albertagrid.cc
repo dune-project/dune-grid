@@ -3540,8 +3540,17 @@ namespace Dune
     for(int i=dim; i>= 0; i--)
       geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
 
-    assert(dimworld == DIM_OF_WORLD);
-    assert(dim      == DIM);
+    if(dimworld != DIM_OF_WORLD)
+    {
+      DUNE_THROW(AlbertaError,"DUNE wasn't configured for dimworld = " <<
+                 dimworld << ". Reconfigure with the --with-world-dim="<<dimworld<<" option!");
+    }
+
+    if(dim      != DIM)
+    {
+      DUNE_THROW(AlbertaError,"DUNE wasn't configured for dim = " <<
+                 dim << ". Reconfigure with the --with-problem-dim="<<dim<<" option!");
+    }
 
     const char * MacroTriangFilename = macroTriangFilename.c_str();
     assert( MacroTriangFilename );
