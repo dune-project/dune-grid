@@ -22,7 +22,8 @@ namespace Dune {
     geo_( GeometryImp() ),
     geoImp_(grid.getRealImplementation(geo_)),
     builtgeometry_(false),
-    localFCoordCalced_ (false)
+    localFCoordCalced_ (false),
+    partitionType_(InteriorEntity)
   {}
 
   // --Entity
@@ -39,7 +40,8 @@ namespace Dune {
     geo_( GeometryImp() ),
     geoImp_(grid_.getRealImplementation(geo_)),
     builtgeometry_(false),
-    localFCoordCalced_ (false)
+    localFCoordCalced_ (false),
+    partitionType_(org.partitionType_)
   {}
 
   template<int cd, int dim, class GridImp>
@@ -79,6 +81,7 @@ namespace Dune {
     father_ = org.father_;
     builtgeometry_= false;
     localFCoordCalced_ = false;
+    partitionType_ = org.partitionType_;
   }
 
   template<int cd, int dim, class GridImp>
@@ -91,6 +94,7 @@ namespace Dune {
     face_   = face;
     builtgeometry_=false;
     localFCoordCalced_ = false;
+    partitionType_ = grid_.convertBndId( *item_ );
   }
 
   template<>
@@ -103,6 +107,7 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
+    partitionType_ = grid_.convertBndId( *item_ );
   }
 
   template<>
@@ -116,6 +121,7 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
+    partitionType_ = grid_.convertBndId( *item_ );
   }
 
   template<int cd, int dim, class GridImp>
@@ -144,7 +150,7 @@ namespace Dune {
   inline PartitionType ALU3dGridEntity<cd,dim,GridImp> ::
   partitionType () const
   {
-    return InteriorEntity;
+    return partitionType_;
   }
 
   template<int cd, int dim, class GridImp>
@@ -222,7 +228,6 @@ namespace Dune {
   removeElement ()
   {
     item_  = 0;
-    //ghost_ = 0;
   }
 
   template<int dim, class GridImp>
@@ -232,11 +237,9 @@ namespace Dune {
     assert( walkLevel_ >= 0 );
 
     item_       = 0;
-    //ghost_      = 0;
     isGhost_    = false;
     builtgeometry_ = false;
     walkLevel_     = walkLevel;
-    //glIndex_    = -1;
     level_      = -1;
     isLeaf_     = false;
   }
@@ -275,12 +278,11 @@ namespace Dune {
   {
     // use element as ghost
     typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
-    //item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
-    item_  = static_cast<IMPLElementType *> ( ghost.getGhost() );
-    // --new
+    item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
 
     // method getGhost can return 0, but then is something wrong
     assert(item_);
+    assert(item_->isGhost());
 
     level_   = item_->level();
     isGhost_ = true;
@@ -291,8 +293,10 @@ namespace Dune {
     else
     {
       assert( ghost.level() == level_ );
-      if(dwn->ghostLevel() == level_) isLeaf_ = true;
-      else isLeaf_ = false;
+      if(dwn->ghostLevel() == level_)
+        isLeaf_ = true;
+      else
+        isLeaf_ = false;
     }
     // check wether ghost is leaf or not, ghost leaf means
     // that this is the ghost that we want in the leaf iterator
@@ -530,6 +534,8 @@ namespace Dune {
   inline PartitionType ALU3dGridEntity<0,dim,GridImp> ::
   partitionType () const
   {
+    assert( item_ );
+    assert( isGhost_ == item_->isGhost() );
     return ((isGhost_) ?  GhostEntity : InteriorEntity);
   }
 
