@@ -432,19 +432,27 @@ namespace Dune {
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int codim) const { return 0; }
 
-    /** dummy communicate */
+    /** level communicate */
     template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
+    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const;
 
     /** leaf communicate  */
     template<class DataHandle>
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const;
 
-    /** collective communicate object */
-    const CollectiveCommunicationType & comm () const { return ccobj_; }
+  private:
+    typedef ALU3DSPACE GatherScatter GatherScatterType;
+    /** do communication  */
+    void doCommunication (
+      GatherScatterType & vertexData,
+      GatherScatterType & edgeData,
+      GatherScatterType & faceData,
+      GatherScatterType & elementData,
+      InterfaceType iftype, CommunicationDirection dir) const;
 
   public:
+    /** collective communicate object */
+    const CollectiveCommunicationType & comm () const { return ccobj_; }
 
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
@@ -518,6 +526,21 @@ namespace Dune {
 
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
+
+    template <class HItemType>
+    PartitionType convertBndId(const HItemType & item) const
+    {
+      if(item.bndId() == 0) return InteriorEntity;
+      if(item.bndId() == 222) return GhostEntity;
+      if(item.bndId() == 111) return BorderEntity;
+
+      /*
+         if(item.isInterior()) return InteriorEntity;
+         if(item.isGhost())    return GhostEntity;
+         if(item.isBorder())   return BorderEntity;
+       */
+      return InteriorEntity;
+    }
   protected:
     //! Copy constructor should not be used
     ALU3dGrid( const MyType & g );
@@ -610,6 +633,36 @@ namespace Dune {
 
     typedef ALU3dGridVertexList VertexListType;
     mutable VertexListType vertexList_[MAXL];
+
+    mutable ALU3dGridItemListType ghostLeafList_[dim];
+    mutable ALU3dGridItemListType ghostLevelList_[dim][MAXL];
+
+    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
+  public:
+    ALU3dGridItemListType & getGhostLeafList(int codim) const
+    {
+      assert( codim >= 1 );
+      assert( codim <= 3 );
+      return ghostLeafList_[codim-1];
+    }
+
+    ALU3dGridItemListType & getGhostLevelList(int codim, int level) const
+    {
+      assert( codim >= 1 );
+      assert( codim <= 3 );
+
+      assert( level >= 0 );
+      assert( level <= maxLevel() );
+      return ghostLevelList_[codim-1][level];
+    }
+
+    ALU3dGridItemListType & getEdgeList(int level) const
+    {
+      assert( level >= 0 );
+      assert( level <= maxLevel() );
+      return levelEdgeList_[level];
+    }
+  private:
 
     // the type of our size cache
     typedef SingleTypeSizeCache<MyType> SizeCacheType;

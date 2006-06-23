@@ -23,25 +23,60 @@ namespace Dune {
     VertexListType & vxList = vertexList_;
 
     unsigned int vxsize = grid.hierarchicIndexSet().size(codim);
-    if( vxList.size() < vxsize ) vxList.resize(vxsize);
-    for(unsigned int i=0; i<vxsize; i++) vxList[i] = 0;
+    if( vxList.size() < vxsize ) vxList.reserve(vxsize);
+    Array<int> visited_(vxsize);
+
+    for(unsigned int i=0; i<vxsize; i++)
+    {
+      visited_[i] = 0;
+    }
+
+    vxList.resize(0);
 
     const ALU3dGridElementType elType = GridType:: elementType;
-    typedef ALU3DSPACE LevelIterator < ALU3DSPACE HElementType > IteratorType;
+
+    typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper<0,Dune::All_Partition>  ElementLevelIteratorType;
+    typedef typename ElementLevelIteratorType :: val_t val_t;
+
     typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
     typedef ALU3DSPACE VertexType VertexType;
+
     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
 
-    IteratorType it (grid.myGrid(),level);
-    for( it->first(); !it->done() ; it->next())
+    ElementLevelIteratorType it ( grid, *this , level, grid.nlinks() );
+
+    int count = 0;
+    for( it.first(); !it.done() ; it.next())
     {
-      IMPLElementType & elem = static_cast<IMPLElementType &> (it->item());
-      for(int i=0; i<nVx; i++)
+      val_t & item = it.item();
+
+      IMPLElementType * elem = 0;
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first);
+      else if( item.second )
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+      assert( elem );
+
+      for(int i=0; i<nVx; ++i)
       {
-        VertexType * vx = elem.myvertex(i);
-        vxList[vx->getIndex()] = vx;
+        VertexType * vx = elem->myvertex(i);
+        assert( vx );
+
+        // insert only interior and border vertices
+        if( vx->isGhost() ) continue;
+
+        const int idx = vx->getIndex();
+        if(visited_[idx] == 0)
+        {
+          vxList.push_back(vx);
+          ++count;
+        }
+        visited_[idx] = 1;
       }
     }
+    assert( count == (int) vxList.size());;
+    up2Date_ = true;
   }
 
 
@@ -84,12 +119,9 @@ namespace Dune {
     assert(mygrid_ != 0);
 
 #if ALU3DGRID_PARALLEL
-    __MyRank__ = mpAccess_.myrank();
-
     dverb << "************************************************\n";
     dverb << "Created grid on p=" << mpAccess_.myrank() << "\n";
     dverb << "************************************************\n";
-
 #endif
     this->checkMacroGrid ();
 
@@ -97,8 +129,16 @@ namespace Dune {
     calcExtras();
 
     if (size(0)>0)
+    {
       std::cout << "Created ALU3dGrid from macro grid file '"
                 << macroTriangFilename << "'. \n\n";
+    }
+    /*
+       else
+       {
+       std::cout << "Created empty ALU3dGrid. \n\n";
+       }
+     */
   }
 
 #if ALU3DGRID_PARALLEL
@@ -225,24 +265,7 @@ namespace Dune {
     assert( codim < dim +1 );
 
     assert( sizeCache_ );
-    int size = sizeCache_->size(codim);
-
-    //#if ALU3DGRID_PARALLEL
-    if(elType == tetra)
-    {
-      // first is zero, because already exact size
-      const int offset[4] = {0,3,3,1};
-      size += offset[codim] * ghostElements_;
-    }
-    if(elType == hexa)
-    {
-      // first is zero, because already exact size
-      const int offset[4] = {0,5,8,4};
-      size += offset[codim] * ghostElements_;
-    }
-    //#endif
-
-    return size;
+    return sizeCache_->size(codim);
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -279,21 +302,6 @@ namespace Dune {
     bool isSimplex = (elType == tetra) ? true : false;
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
-#if ALU3DGRID_PARALLEL
-    {
-      ghostElements_ = 0;
-      typedef typename Traits :: template Codim<0> ::template
-      Partition<Ghost_Partition> :: LeafIterator IteratorType;
-
-      IteratorType end = this->template leafend<0,Ghost_Partition> ();
-      for(IteratorType it = this->template leafbegin<0,Ghost_Partition> ();
-          it != end; ++it)
-      {
-        ++ghostElements_;
-      }
-    }
-#endif
-
     for(size_t i=0; i<levelIndexVec_.size(); i++)
     {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
@@ -307,8 +315,18 @@ namespace Dune {
     //if(globalIdSet_) globalIdSet_->uniquenessCheck();
 #endif
 
-    for(size_t i=0; i<MAXL; i++) vertexList_[i].unsetUp2Date();
-
+    for(size_t i=0; i<MAXL; i++)
+    {
+      vertexList_[i].unsetUp2Date();
+      levelEdgeList_[i].unsetUp2Date();
+    }
+#if ALU3DGRID_PARALLEL
+    for(int i=0; i<dim; ++i)
+    {
+      ghostLeafList_[i].unsetUp2Date();
+      for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();
+    }
+#endif
     coarsenMarked_ = 0;
     refineMarked_  = 0;
   }
@@ -374,7 +392,7 @@ namespace Dune {
     // if we dont have this level return empty iterator
     if(level > maxlevel_) return this->template lend<cd,pitype> (level);
     VertexListType & vxList = vertexList_[level];
-    if(cd == 3)
+    if(cd > 1)
     {
       // if vertex list is not up2date, update it
       if(!vxList.up2Date()) vxList.setupVxList(*this,level);
@@ -418,7 +436,7 @@ namespace Dune {
   createLeafIteratorBegin(int level) const
   {
     assert( level >= 0 );
-    return ALU3dGridLeafIterator<cd, pitype, const MyType> ((*this),level, false);
+    return ALU3dGridLeafIterator<cd, pitype, const MyType> ((*this),level,true);
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -479,9 +497,7 @@ namespace Dune {
   createLeafIteratorEnd(int level) const
   {
     assert( level >= 0 );
-    return ALU3dGridLeafIterator<cd, pitype, const MyType> ((*this),
-                                                            level,
-                                                            true);
+    return ALU3dGridLeafIterator<cd, pitype, const MyType> ((*this),level);
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -586,10 +602,10 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::adapt()
   {
     bool ref = false;
-#if ALU3DGRID_PARALLEL
-    if(globalIdSet_)
+    // if prallel run, then adapt also global id set
+    if(globalIdSet_ && comm().size() > 1)
     {
-      std::cout << "Start adapt with globalIdSet prolong \n";
+      //std::cout << "Start adapt with globalIdSet prolong \n";
       int defaultChunk = newElementsChunk_;
       int actChunk     = refineEstimate_ * refineMarked_;
 
@@ -597,13 +613,13 @@ namespace Dune {
       int newElements = std::max( actChunk , defaultChunk );
 
       globalIdSet_->setChunkSize( newElements );
+      //ref = myGrid().adaptWithDataAdaptation(*globalIdSet_); // adapt grid
       ref = myGrid().duneAdapt(*globalIdSet_); // adapt grid
     }
     else
-      ref = myGrid().dAdapt();
-#else
-    ref = myGrid().adapt(); // adapt grid
-#endif
+    {
+      ref = myGrid().adaptWithoutLoadBalancing();
+    }
 
     if(ref)
     {
@@ -640,8 +656,7 @@ namespace Dune {
     dm.reserveMemory( newElements );
 
     bool ref = false ;
-#if ALU3DGRID_PARALLEL
-    if(globalIdSet_)
+    if(globalIdSet_ && comm().size() > 1)
     {
       // if global id set exists then include into
       // prolongation process
@@ -657,7 +672,6 @@ namespace Dune {
       if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
     }
     else
-#endif
     {
       ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>,
           COType >
@@ -679,10 +693,7 @@ namespace Dune {
     }
 
     // check whether we have balance
-    //loadBalance(dm);
     dm.dofCompress();
-
-    //communicate(dm);
 
     postAdapt();
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
@@ -780,7 +791,7 @@ namespace Dune {
     EntityObject father ( EntityImp(*this, this->maxLevel()) );
     EntityObject son    ( EntityImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim, dimworld, elType>, DataCollectorType , 0>
+    ALU3DSPACE GatherScatterLeafData< ALU3dGrid<dim, dimworld, elType>, DataCollectorType , 0>
     gs(*this,en,this->getRealImplementation(en),dc);
 
     ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataCollectorType >
@@ -789,11 +800,13 @@ namespace Dune {
            son    , this->getRealImplementation( son ) ,
            dc );
 
+    // reserve memory for unpacking data
     int defaultChunk = newElementsChunk_;
-
-    bool changed = myGrid().duneLoadBalance(gs,idxop);
     int memSize = std::max( idxop.newElements(), defaultChunk );
     dc.reserveMemory ( memSize );
+
+    // call load Balance
+    bool changed = myGrid().duneLoadBalance(gs,idxop);
 
     if(changed)
     {
@@ -812,43 +825,151 @@ namespace Dune {
 #endif
   }
 
+  // communicate level data
+  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandle>
+  inline void ALU3dGrid<dim, dimworld, elType>::
+  communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level ) const
+  {
+    // if only one process, no communication needed
+    if( comm().size() <= 1 ) return ;
+
+#if ALU3DGRID_PARALLEL
+    const LevelIndexSetImp * levelISet = 0;
+    LevelIndexSetImp * newSet = 0;
+
+    if( levelIndexVec_[level] == 0 )
+    {
+      newSet = new LevelIndexSetImp ( *this , level );
+      levelISet = newSet;
+    }
+    else
+      levelISet = levelIndexVec_[level] ;
+
+    typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
+    typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
+    VertexObject vx( VertexImp(*this, level ) );
+
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, dim>
+    vertexData(*this,vx,this->getRealImplementation(vx),data,*levelISet,level);
+
+    typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
+    typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
+    EdgeObject edge( EdgeImp(*this, level ) );
+
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, dim-1>
+    edgeData(*this,edge,this->getRealImplementation(edge),data,*levelISet,level);
+
+    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
+    typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
+    FaceObject face( FaceImp(*this, level ) );
+
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, 1>
+    faceData(*this,face,this->getRealImplementation(face),data,*levelISet,level);
+
+    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
+    typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
+    ElementObject element( ElementImp(*this, level ) );
+
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, 0>
+    elementData(*this,element,this->getRealImplementation(element),data,*levelISet,level);
+
+    doCommunication( vertexData, edgeData, faceData, elementData , iftype, dir );
+
+    if(newSet) delete newSet;
+#endif
+  }
+
   // communicate data
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandle>
   inline void ALU3dGrid<dim, dimworld, elType>::
   communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
   {
+    // if only one process, no communication needed
     if( comm().size() <= 1 ) return ;
+
 #if ALU3DGRID_PARALLEL
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
     typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
     VertexObject vx( VertexImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterImpl < ThisType, DataHandle, dim>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, dim>
     vertexData(*this,vx,this->getRealImplementation(vx),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
     typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
     EdgeObject edge( EdgeImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterImpl < ThisType, DataHandle, dim-1>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, dim-1>
     edgeData(*this,edge,this->getRealImplementation(edge),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
     FaceObject face( FaceImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterImpl < ThisType, DataHandle, 1>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, 1>
     faceData(*this,face,this->getRealImplementation(face),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
     typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
     ElementObject element( ElementImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterImpl < ThisType, DataHandle, 0>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, 0>
     elementData(*this,element,this->getRealImplementation(element),data);
 
-    myGrid().ALUcomm(vertexData,edgeData,faceData,elementData);
+    doCommunication( vertexData, edgeData, faceData, elementData , iftype, dir );
+#endif
+  }
+
+  // communicate data
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline void ALU3dGrid<dim, dimworld, elType>::
+  doCommunication ( GatherScatterType & vertexData,
+                    GatherScatterType & edgeData,
+                    GatherScatterType & faceData,
+                    GatherScatterType & elementData,
+                    InterfaceType iftype, CommunicationDirection dir) const
+  {
+    // check interface types
+    if( (iftype == Overlap_OverlapFront_Interface) ||
+        (iftype == Overlap_All_Interface) )
+    {
+      dverb << "ALUGrid contains no overlap, therefore no communication for\n";
+      dverb << "Overlap_OverlapFront_Interface or Overlap_All_Interface interfaces! \n";
+      return ;
+    }
+#if ALU3DGRID_PARALLEL
+    // communication from border to border
+    if( iftype == InteriorBorder_InteriorBorder_Interface )
+    {
+      myGrid().borderBorderCommunication(vertexData,edgeData,faceData,elementData);
+      return ;
+    }
+
+    // communication from interior to ghost including border
+    if( iftype == InteriorBorder_All_Interface )
+    {
+      if( dir == ForwardCommunication )
+      {
+        myGrid().interiorGhostCommunication(vertexData,edgeData,faceData,elementData);
+        return ;
+      }
+      // reverse communiction interface (here All_InteriorBorder)
+      if( dir == BackwardCommunication )
+      {
+        myGrid().ghostInteriorCommunication(vertexData,edgeData,faceData,elementData);
+        return ;
+      }
+    }
+
+    // communication from interior to ghost including border
+    if( iftype == All_All_Interface )
+    {
+      myGrid().allAllCommunication(vertexData,edgeData,faceData,elementData);
+      return ;
+    }
+
+    DUNE_THROW(GridError,"wrong set of parameters in ALUGrid::doCommunication");
 #endif
   }
 
