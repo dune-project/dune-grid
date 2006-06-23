@@ -14,7 +14,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 
-#if HAVE_MPI_CPP
+#ifdef HAVE_MPI_CPP
 #include <mpi.h>
 #define MPISTART \
   int myrank=-1; \
@@ -34,9 +34,8 @@
 
 //#include <dune/grid/alugrid.hh>
 
-#define ALUGRID_TESTING
+//#define ALUGRID_TESTING
 #include "gridcheck.cc"
-#undef ALUGRID_TESTING
 
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
@@ -48,7 +47,6 @@ using namespace Dune;
 template <class GridType>
 void makeNonConfGrid(GridType &grid,int level,int adapt) {
   int myrank = grid.comm().rank();
-  int mysize = grid.comm().size();
   grid.loadBalance();
   grid.globalRefine(level);
   grid.loadBalance();
@@ -75,7 +73,6 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
 {
-  return;
   // be careful, each global refine create 8 x maxlevel elements
   gridcheck(grid);
   for(int i=0; i<mxl; i++) {
@@ -92,10 +89,13 @@ template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
   makeNonConfGrid(grid,gref,mxl);
-  int myrank = grid.comm().rank();
-  int mysize = grid.comm().size();
-  // gridcheck(grid);
-  checkCommunication(grid,gref,mxl,Dune::dvverb);
+  //gridcheck(grid);
+
+  // -1 stands for leaf check
+  checkCommunication(grid,grid.leafIndexSet(), -1, Dune::dvverb);
+
+  for(int l=0; l<= mxl; ++l)
+    checkCommunication(grid,grid.levelIndexSet(l), l , Dune::dvverb);
 }
 #else
 template <class GridType>
@@ -115,38 +115,34 @@ int main (int argc , char **argv) {
       if (myrank == 0)
         std::cout << "Check empty grids" << std::endl;
       {
-        std::string filename("");
-        ALUCubeGrid<3,3> grid(filename,MPI_COMM_WORLD);
+        ALUCubeGrid<3,3> grid(MPI_COMM_WORLD);
         checkALUSerial(grid);
       }
       {
-        std::string filename("");
-        ALUSimplexGrid<3,3>
-        grid(filename,MPI_COMM_WORLD);
+        ALUSimplexGrid<3,3> grid(MPI_COMM_WORLD);
         checkALUSerial(grid);
       }
+
       /*
          {
          std::string filename("alu-testgrid.triang");
          ALUSimplexGrid<2,2> grid(filename);
-         checkALU(grid,0);
+         checkALUSerial(grid,0);
          }
        */
+
       {
         std::string filename;
         if (mysize<=2)
           filename += "alu-testgrid.hexa";
         else
           filename += "largegrid_alu.hexa";
-        ALUCubeGrid<3,3>* grid=new ALUCubeGrid<3,3>(filename,MPI_COMM_WORLD);
-        //std::string filename("alu-testgrid.dgf");
-        //GridPtr<GridType> grid(filename.c_str(),MPI_COMM_WORLD);
-        if (myrank == 0)
-          std::cout << "Check conform grid" << std::endl;
-        checkALUParallel(*grid,1,0);
-        if (myrank == 0)
-          std::cout << "Check non-conform grid" << std::endl;
-        checkALUParallel(*grid,0,2);
+
+        ALUCubeGrid<3,3> grid (filename,MPI_COMM_WORLD);
+        if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+        checkALUParallel(grid,1,0);
+        if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+        checkALUParallel(grid,0,2);
       }
       {
         std::string filename;
@@ -154,15 +150,12 @@ int main (int argc , char **argv) {
           filename += "alu-testgrid.tetra";
         else
           filename += "examplegrid9.dgf.ALUgrid";
-        ALUSimplexGrid<3,3>* grid=new ALUSimplexGrid<3,3>(filename,MPI_COMM_WORLD);
-        //std::string filename("examplegrid9.dgf");
-        //GridPtr<GridType> grid(filename.c_str(),MPI_COMM_WORLD);
-        if (myrank == 0)
-          std::cout << "Check conform grid" << std::endl;
-        checkALUParallel(*grid,0,0);  //1,3
-        if (myrank == 0)
-          std::cout << "Check non-conform grid" << std::endl;
-        checkALUParallel(*grid,0,2);  //1,3
+
+        ALUSimplexGrid<3,3> grid(filename,MPI_COMM_WORLD);
+        if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+        checkALUParallel(grid,0,0);  //1,3
+        if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+        checkALUParallel(grid,0,2);  //1,3
       }
     };
 
