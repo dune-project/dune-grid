@@ -691,7 +691,11 @@ namespace Dune {
     public IdSetDefaultImplementation < ALU3dGrid<dim,dimworld,elType> ,
         ALU3dGridLocalIdSet<dim,dimworld,elType> ,
         int >
+    , public ALU3DSPACE AdaptRestrictProlongType
   {
+    typedef ALU3DSPACE HElementType HElementType;
+    typedef ALU3DSPACE HBndSegType HBndSegType;
+
     typedef ALU3dGrid<dim,dimworld,elType> GridType;
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
@@ -739,6 +743,19 @@ namespace Dune {
       assert( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
     }
+
+    // dummy functions
+    int preCoarsening( HElementType & elem )  { return 0; }
+    // create ids for refined elements
+    int postRefinement( HElementType & item )  { return 0; }
+
+    // dummy functions
+    int preCoarsening ( HBndSegType & el ) { return 0; }
+
+    //! prolong data, elem is the father
+    int postRefinement ( HBndSegType & el ) { return 0; }
+
+    void setChunkSize( int chunkSize ) {}
 
   private:
     // our HierarchicIndexSet
