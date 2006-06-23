@@ -687,10 +687,10 @@ void assertNeighbor (Grid &g)
   if( e != eend)
 #else
   LevelIterator next = e;
-  ++next;
   if (next != eend)
 #endif
   {
+    ++next;
     for (; e != eend; ++e)
     {
       // flag vector for elements faces
