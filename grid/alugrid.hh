@@ -42,12 +42,12 @@ namespace Dune {
     //! constructor taking filename of macro grid and MPI_Comm
     ALUCubeGrid(const std::string macroName , MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(macroName,mpiComm) {}
-    //! constructor creating empty grid
+    //! constructor creating empty grid, empty string creates empty grid
     ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(mpiComm) {}
+      BaseType("",mpiComm) {}
 #else
     //! constructor taking filename of macro grid
-    ALUCubeGrid(const std::string macroName ) :
+    ALUCubeGrid(const std::string macroName , int mpicomm = 0 ) :
       BaseType(macroName) {}
     //! constructor creating empty grid
     ALUCubeGrid(int myrank = -1) :
@@ -149,12 +149,12 @@ namespace Dune {
     //! constructor taking filename of macro grid and MPI_Comm
     ALUSimplexGrid(const std::string macroName, MPI_Comm mpiComm = MPI_COMM_WORLD) :
       BaseType(macroName,mpiComm) {}
-    //! constructor creating empty grid
+    //! constructor creating empty grid, empty string creates empty grid
     ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(mpiComm) {}
+      BaseType("",mpiComm) {}
 #else
     //! constructor taking filename of macro grid
-    ALUSimplexGrid(const std::string macroName ) :
+    ALUSimplexGrid(const std::string macroName , int mpicomm = 0) :
       BaseType(macroName) {}
     //! constructor creating empty grid
     ALUSimplexGrid(int myrank = -1) :
