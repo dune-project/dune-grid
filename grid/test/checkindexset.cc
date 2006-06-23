@@ -501,7 +501,6 @@ namespace Dune {
   void checkIndexSet( const GridType &grid , const IndexSetType & iset,
                       OutputStreamImp & sout ,  bool levelIndex = false )
   {
-    std::cout << "Index check started" << std::endl;
     CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
         GridType::dimension, true> ::
     checkIndexSet (grid,iset,sout,levelIndex);
