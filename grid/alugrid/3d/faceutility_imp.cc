@@ -32,12 +32,15 @@ namespace Dune {
     ghostBoundary_   = false;
 
     // points face from inner element away?
-    if (innerTwist < 0) {
+    if (innerTwist < 0)
+    {
       innerElement_ = face.nb.rear().first;
       innerFaceNumber_ = face.nb.rear().second;
       outerElement_ = face.nb.front().first;
       outerFaceNumber_ = face.nb.front().second;
-    } else {
+    }
+    else
+    {
       innerElement_ = face.nb.front().first;
       innerFaceNumber_ = face.nb.front().second;
       outerElement_ = face.nb.rear().first;
@@ -57,9 +60,7 @@ namespace Dune {
         // NOTE: this changes if ghost elements are implemented
         // at the moment there is no difference between internalBoundary
         // and ghostBoundary
-        // --new
-        //outerFaceNumber_ = bnd->getGhost().second;
-        outerFaceNumber_ = bnd->getGhostFaceNumber();
+        outerFaceNumber_ = bnd->getGhost().second;
         ghostBoundary_   = true;
 
         // this doesn't count as outer boundary
