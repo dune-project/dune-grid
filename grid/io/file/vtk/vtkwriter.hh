@@ -235,6 +235,7 @@ namespace Dune
           offset += git->template count<n>();
           index = 0;
           ++git;
+          if(git == gend) return;
           while (git->partitionType()!=InteriorEntity) ++git;
         }
       }
@@ -331,6 +332,7 @@ namespace Dune
           offset += git->template count<n>();
           index = 0;
           ++git;
+          if (git == gend) return;
           while (git->partitionType()!=InteriorEntity) ++git;
         }
       }
