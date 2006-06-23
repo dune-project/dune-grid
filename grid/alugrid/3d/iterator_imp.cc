@@ -269,11 +269,16 @@ namespace Dune {
       if( ghost->level () != ghost->ghostLevel() )
         ghost = static_cast<const BNDFaceType *>(ghost->up());
 
+      /*
+         if( levelNeighbor() )
+         {
+         assert( item_->level() == ghost->level() );
+         }
+       */
       // set bnd face as ghost
       return EntityPointer(this->grid_, *ghost );
     }
 #endif
-
     assert( &connector_.outerEntity() );
     return EntityPointer(this->grid_, connector_.outerEntity() );
   }
@@ -440,11 +445,29 @@ namespace Dune {
 
   template <class GridImp>
   void ALU3dGridIntersectionIterator<GridImp>::
-  setNewFace(const GEOFaceType& newFace) {
-    levelNeighbor_ = newFace.level() == item_->level();
-    leafNeighbor_  = newFace.down () == 0;
+  setNewFace(const GEOFaceType& newFace)
+  {
+    const int itemLevel = item_->level();
+    levelNeighbor_ = (newFace.level() == itemLevel);
+    leafNeighbor_  = (newFace.down () == 0);
     connector_.updateFaceInfo(newFace,item_->twist(ElementTopo::dune2aluFace(index_)));
     geoProvider_.resetFaceGeom();
+
+    // check again level neighbor because outer element might be coarser then
+    // this element
+    if( isLeafItem_ && levelNeighbor_ )
+    {
+      if( connector_.ghostBoundary() )
+      {
+        const BNDFaceType & ghost = connector_.boundaryFace();
+        // if nonconformity occurs then no level neighbor
+        levelNeighbor_ = (itemLevel == ghost.ghostLevel() );
+      }
+      else if ( ! connector_.outerBoundary() )
+      {
+        levelNeighbor_ = (connector_.outerEntity().level() == itemLevel);
+      }
+    }
   }
 
   template <class GridImp>
@@ -593,14 +616,10 @@ namespace Dune {
                          VertexListType & vxList , int level)
     : ALU3dGridEntityPointer<codim,GridImp> (grid,level)
       , level_(level)
-      //, iter_ (0)
-      , iter_ ()
-      , rank_(grid.comm().rank())
+      , iter_ (0)
   {
-    IteratorType * it = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
-    iter_.store( it );
-    //iter_  = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
-    //assert( iter_ );
+    iter_  = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
+    assert( iter_ );
     this->firstItem(*this);
   }
 
@@ -610,9 +629,7 @@ namespace Dune {
   ALU3dGridLevelIterator(const GridImp & grid, int level)
     : ALU3dGridEntityPointer<codim,GridImp> (grid ,level)
       , level_(level)
-      //, iter_ (0)
-      , iter_ ()
-      , rank_(grid.comm().rank())
+      , iter_ (0)
   {
     this->done();
   }
@@ -622,24 +639,19 @@ namespace Dune {
   ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org )
     : ALU3dGridEntityPointer<codim,GridImp> ( org )
       , level_( org.level_ )
-      //, iter_(0)
-      , iter_()
-      , rank_( org.rank_)
+      , iter_(0)
   {
-    /*
-       const IteratorType * orgIt = org.iter_;
-       if( orgIt )
-       {
-       iter_ = new IteratorType ( *orgIt ) ;
-       assert( iter_ );
-       if(!(iter_->done()))
-       {
+    const IteratorType * orgIt = org.iter_;
+    if( orgIt )
+    {
+      iter_ = new IteratorType ( *orgIt ) ;
+      assert( iter_ );
+      if(!(iter_->done()))
+      {
         this->setItem(*this,*iter_);
         assert( this->equals(org) );
-       }
-       }
-     */
-    iter_ = org.iter_;
+      }
+    }
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -654,7 +666,8 @@ namespace Dune {
   removeIter ()
   {
     this->done();
-    //delete iter_; iter_ = 0;
+    if(iter_) delete iter_;
+    iter_ = 0;
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -665,9 +678,16 @@ namespace Dune {
     removeIter();
     ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
     level_ = org.level_;
-    //if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
-    // --new
-    iter_ = org.iter_;
+    if( org.iter_ )
+    {
+      iter_ = new IteratorType ( *(org.iter_) );
+      assert( iter_ );
+      if(!(iter_->done()))
+      {
+        this->setItem(*this,*iter_);
+        assert( this->equals(org) );
+      }
+    }
     return *this;
   }
 
@@ -701,51 +721,37 @@ namespace Dune {
   //
   //--LeafIterator
   //*******************************************************************
+  // constructor for end iterators
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
-  ALU3dGridLeafIterator(const GridImp &grid, int level,
-                        bool end)
-    : ALU3dGridEntityPointer <cdim,GridImp> ( grid,level)
-      , level_(level)
-      , iter_ ()
-      //, iter_ (0)
+  ALU3dGridLeafIterator( const GridImp &grid, int level )
+    : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
+      , iter_ (0)
   {
-    if(!end)
-    {
-      // create interior iterator
-      IteratorType * it = new IteratorType ( this->grid_ , level_, grid.nlinks() );
-      iter_.store( it );
+    this->done();
+  }
 
-      //assert( iter_ );
-      this->firstItem(*this);
-    }
-    else
-    {
-      this->done();
-    }
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+  ALU3dGridLeafIterator(const GridImp &grid, int level ,
+                        bool isBegin)
+    : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
+      , iter_ (0)
+  {
+    // create interior iterator
+    iter_ = new IteratorType ( this->grid_ , level , grid.nlinks() );
+    assert( iter_ );
+    this->firstItem(*this);
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
   ALU3dGridLeafIterator(const ThisType & org)
     : ALU3dGridEntityPointer <cdim,GridImp> ( org )
-      , level_(org.level_)
-      //, iter_(0)
-      ,iter_(org.iter_)
+      , iter_(0)
   {
-    //const IteratorType * orgIt = org.iter_;
-    //if( orgIt )
-    /*
-       {
-       iter_ = new IteratorType ( *orgIt ) ;
-       assert( iter_ );
-       if(!(iter_->done()))
-       {
-        this->setItem(*this,*iter_);
-        assert( this->equals(org) );
-       }
-       }
-     */
+    // assign iterator without cloning entity pointer again
+    assign(org,false);
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -760,7 +766,8 @@ namespace Dune {
   removeIter ()
   {
     this->done();
-    //delete iter_; iter_ = 0;
+    if(iter_) delete iter_;
+    iter_ = 0;
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -768,13 +775,36 @@ namespace Dune {
   ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
   operator = (const ThisType & org)
   {
-    /*
-       removeIter();
-       ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
-       level_ = org.level_;
-       if( org.iter_ ) iter_ = new IteratorType ( *(org.iter_) );
-     */
+    removeIter();
+    assign(org);
     return *this;
+  }
+
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+  assign (const ThisType & org, bool clone ) // default clone = true
+  {
+    assert( iter_ == 0 );
+    if(clone) ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
+
+    if( org.iter_ )
+    {
+      assert( !org.iter_->done() );
+      iter_ = new IteratorType ( *(org.iter_) );
+      assert( iter_ );
+
+      if( !(iter_->done() ))
+      {
+        assert( !iter_->done());
+        assert( !org.iter_->done() );
+        this->setItem(*this, *iter_);
+        assert( this->equals(org) );
+      }
+    }
+    else
+    {
+      this->done();
+    }
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -789,7 +819,7 @@ namespace Dune {
   ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const
   {
 #ifndef NDEBUG
-    const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->grid_,level_,true);
+    const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->grid_, this->grid_.maxLevel());
     // assert that iterator not equals end iterator
     assert( ! this->equals(endIterator) );
 #endif
