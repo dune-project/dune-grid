@@ -54,16 +54,22 @@ public:
                     DataVectorType & d1, DataVectorType & d2) :
     iset_(iset), cdim_(cdim), data1_(d1) , data2_(d2)
   {}
+
   //! returns true if data for this codim should be communicated
   bool contains (int dim, int codim) const
   {
     return (codim==cdim_);
   }
+
   //! returns true if size per entity of given dim and codim is a constant
   bool fixedsize (int dim, int codim) const
   {
-    return true;
+    // this problem ist a fixed size problem,
+    // but to simulate also non-fixed size problems
+    // we set this to false, should work anyway
+    return false;
   }
+
   /*! how many objects of type DataType have to be sent for a given entity
      Note: Only the sender side needs to know this size.
    */
@@ -73,6 +79,7 @@ public:
     // flag+data+coordinates
     return 2+e.geometry().corners()*e.geometry().dimensionworld;
   }
+
   //! pack data from user to message buffer
   template<class MessageBuffer, class EntityType>
   void gather (MessageBuffer& buff, const EntityType& e) const
@@ -81,35 +88,52 @@ public:
     buff.write(data2_[idx]);   // flag
     buff.write(data1_[idx]);   // data
     // all corner coordinates
-    for (int i=0; i<e.geometry().corners(); ++i) {
-      for (size_t j=0; j<e.geometry().dimensionworld; ++j)
+    for (int i=0; i<e.geometry().corners(); ++i)
+    {
+      for (int j=0; j<e.geometry().dimensionworld; ++j)
         buff.write(e.geometry()[i][j]);
     }
   }
+
   /*! unpack data from message buffer to user
      n is the number of objects sent by the sender
    */
   template<class MessageBuffer, class EntityType>
   void scatter (MessageBuffer& buff, const EntityType& e, size_t n)
   {
+    // as this problem is a fixed size problem we can check the sizes
+    assert( n == size(e) );
+
+    // else do normal scatter
     int idx = iset_.index(e);
     DataType x=0.0;
-    buff.read(x);  // flag
-    if (x>=0) { // only overwrite existing data if flag = 1, i.e.,
-                // the sending processor acctually computed the value
+    buff.read(x); // flag
+
+    // for ghost entities x > 0 must be true
+    assert( ( e.partitionType() == GhostEntity ) ? (x>=0.0) : 1);
+
+    if (x>=0)
+    { // only overwrite existing data if flag = 1, i.e.,
+      // the sending processor acctually computed the value
       data2_[idx] = x;
       x=0.;
       buff.read(x);  // correct function value
       data1_[idx] = x;
-    } else {
+    }
+    else
+    {
       x=0.;
       buff.read(x);
     }
+
     // test if the sending/receving entities are geometrically the same
-    for (int i=0; i<e.geometry().corners(); ++i) {
-      for (size_t j=0; j<e.geometry().dimensionworld; ++j) {
+    for (int i=0; i<e.geometry().corners(); ++i)
+    {
+      for (int j=0; j<e.geometry().dimensionworld; ++j)
+      {
         buff.read(x);
-        if (fabs(e.geometry()[i][j]-x)>1e-8) {
+        if (fabs(e.geometry()[i][j]-x)>1e-8)
+        {
           std::cerr << "ERROR in scatter: Vertex <" << i << "," << j << ">: "
                     << " this : (" << e.geometry()[i][j] << ")"
                     << " other : (" << x << ")"
@@ -118,40 +142,20 @@ public:
       }
     }
   }
-  template<class MessageBuffer, class EntityType>
-  void set (MessageBuffer& buff, const EntityType& e)
-  {
-    // just overwrite all values
-    int idx = iset_.index(e);
-    DataType x=0.0;
-    buff.read(x);
-    assert(x>=0);
-    data2_[idx] = x;
-    x=0.;
-    buff.read(x);
-    data1_[idx] = x;
-    for (int i=0; i<e.geometry().corners(); ++i) {
-      for (size_t j=0; j<e.geometry().dimensionworld; ++j) {
-        buff.read(x);
-        if (fabs(e.geometry()[i][j]-x)>1e-8) {
-          std::cerr << "ERROR in set: Vertex <" << i << "," << j << ">: "
-                    << " this : (" << e.geometry()[i][j] << ")"
-                    << " other : (" << x << ")"
-                    << std::endl;
-        }
-      }
-    }
-  }
+
 };
+
 /*******************************************************************/
 /*******************************************************************/
-template <class GridType,int cdim,class OutputStreamImp>
+template <class GridType, class IndexSet, int cdim,class OutputStreamImp>
 class CheckCommunication {
   enum {dimworld = GridType::dimensionworld,
         dim = GridType::dimension};
   FieldVector<double,dimworld> upwind;
-  typedef typename GridType :: Traits :: LeafIndexSet IndexSet;
+
   const IndexSet & set;
+  const int level_;
+
   // the function
   double f(const FieldVector<double,dimworld>& x) {
     FieldVector<double,dimworld> a(1.);
@@ -163,22 +167,29 @@ class CheckCommunication {
   void project ( GridType & grid ,
                  int dataSize,
                  VectorType & data,
-                 VectorType & weight, int rank) {
-    for(int i=0 ; i<dataSize; ++i) {
+                 VectorType & weight, int rank)
+  {
+    // set initial data
+    for(int i=0 ; i<dataSize; ++i)
+    {
       data[i] = 0.0;
       weight[i] = -1.0;
     }
+
     enum { dim = GridType :: dimension };
-    typedef typename GridType :: template Codim<0> ::
-    template Partition<Interior_Partition> :: LeafIterator LeafIterator;
+    typedef typename IndexSet :: template Codim<0> ::
+    template Partition<Interior_Partition> :: Iterator IteratorType;
     typedef typename GridType::Traits::IntersectionIterator IntersectionIterator;
-    LeafIterator endit = grid.template leafend<0,Interior_Partition>   ();
-    for(LeafIterator it = grid.template leafbegin<0,Interior_Partition> ();
-        it != endit ; ++it ) {
+
+    IteratorType endit = set.template end<0,Interior_Partition>   ();
+    for(IteratorType it = set.template begin<0,Interior_Partition> ();
+        it != endit ; ++it )
+    {
       GeometryType type = it->geometry().type();
       const ReferenceElement<double, dimworld > & refElem =
         ReferenceElements<double, dimworld >::general(type);
-      if (cdim==0) {
+      if (cdim==0)
+      {
         FieldVector<double,dimworld> mid(0.);
         for(int i=0; i<it->template count<dimworld>(); ++i) {
           mid += it->geometry()[i];
@@ -187,38 +198,64 @@ class CheckCommunication {
         int idx = set.index(*it);
         data[idx]  = f(mid);
         weight[idx] = 1.0;
-      } else {
+      }
+      else
+      {
         IntersectionIterator endnit = it->iend();
-        for (IntersectionIterator nit = it->ibegin(); nit != endnit; ++nit) {
-          const FieldVector<double,dimworld> normal = nit.integrationOuterNormal
-                                                        (FieldVector<double,dim-1>(0));
+        for (IntersectionIterator nit = it->ibegin(); nit != endnit; ++nit)
+        {
+          const FieldVector<double,dimworld> normal = nit.integrationOuterNormal(FieldVector<double,dim-1>(0));
           double calc = normal*upwind;
-          if (calc>-1e-8 || nit.boundary()) {
-            for(int i=0; i<refElem.size(nit.numberInSelf(),1,cdim); ++i) {
+
+          // if testing level, then on non-conform grid also set values on
+          // intersections that are not boundary, but has no level
+          // neighbor
+          bool proceedAnyways = (level_ < 0) ? false : (! nit.levelNeighbor() );
+
+          if ((calc>-1e-8 || nit.boundary()) || proceedAnyways )
+          {
+            for(int i=0; i<refElem.size(nit.numberInSelf(),1,cdim); ++i)
+            {
               int e = refElem.subEntity(nit.numberInSelf(),1,i,cdim);
               int idx = set.template subIndex<cdim>(*it,e);
               FieldVector<double,dimworld> cmid(0.);
               int c = (it->template entity<cdim>(e))->geometry().corners();
-              for (int j=0; j<c; j++) {
+              for (int j=0; j<c; j++)
+              {
                 cmid += it->template entity<cdim>(e)->geometry()[j];
               }
+
               cmid /= double(c);
               data[idx] = f(cmid);
               weight[idx] = 1.0;
             }
+
             // on non-conforming grids the neighbor entities might not
             // be the same as those on *it, therefore set data on neighbor
             // as well
-            if ( nit.leafNeighbor() ) {
-              assert(nit.outside()->isLeaf());
-              for(int i=0; i<refElem.size(nit.numberInNeighbor(),1,cdim); ++i) {
+            bool checkNeigh = (level_ < 0) ? nit.leafNeighbor() : ( nit.levelNeighbor() );
+
+            if( checkNeigh )
+            {
+              typedef typename GridType :: template Codim<0> :: EntityPointer EntityPointerType;
+              typedef typename GridType :: template Codim<0> :: Entity EntityType;
+              EntityPointerType ep = nit.outside();
+              const EntityType & neigh = *ep;
+
+              assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
+              assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
+
+              for(int i=0; i<refElem.size(nit.numberInNeighbor(),1,cdim); ++i)
+              {
                 int e = refElem.subEntity(nit.numberInNeighbor(),1,i,cdim);
-                int idx = set.template subIndex<cdim>(*nit.outside(),e);
+                int idx = set.template subIndex<cdim>(neigh, e);
                 FieldVector<double,dimworld> cmid(0.);
-                int c = (nit.outside()->template entity<cdim>(e))->
-                        geometry().corners();
-                for (int j=0; j<c; j++) {
-                  cmid += nit.outside()->template entity<cdim>(e)->geometry()[j];
+                typedef typename GridType:: template Codim<cdim> :: EntityPointer SubEntityPointer;
+                SubEntityPointer subEp = neigh. template entity<cdim>(e);
+                int c = subEp->geometry().corners();
+                for (int j=0; j<c; j++)
+                {
+                  cmid += subEp->geometry()[j];
                 }
                 cmid /= double(c);
                 data[idx] = f(cmid);
@@ -239,31 +276,31 @@ class CheckCommunication {
                 int dataSize,
                 VectorType & data,
                 VectorType & weight, int rank,
-                bool testweight) {
+                bool testweight)
+  {
     enum { dim = GridType :: dimension };
     //Variante MIT Geisterzellen
-    typedef typename GridType :: template Codim<0> :: LeafIterator LeafIterator;
-    //OHNE Geister
-    //typedef typename GridType :: template Codim<0> :: template Partition<Interior_Partition> :: LeafIterator LeafIterator;
+    typedef typename IndexSet :: template Codim<0> :: template Partition<All_Partition> :: Iterator IteratorType;
     double maxerr = 0.;
-    //MIT
-    LeafIterator endit = grid.template leafend<0>   ();
-    for(LeafIterator it    = grid.template leafbegin<0> (); //MIT
-        //OHNE
-        //LeafIterator endit = grid.template leafend<0,Interior_Partition>   ();
-        //for(LeafIterator it    = grid.template leafbegin<0,Interior_Partition> ();
-        it != endit ; ++it ) {
+    IteratorType endit  = set.template end<0,All_Partition>   ();
+    for(IteratorType it = set.template begin<0,All_Partition> ();
+        it != endit ; ++it )
+    {
       FieldVector<double,dimworld> mid(0.);
-      for(int i=0; i<it->template count<dim>(); ++i) {
+      for(int i=0; i<it->template count<dim>(); ++i)
+      {
         mid += it->geometry()[i];
       }
       mid /= double(it->template count<dim>());
-      if (cdim==0) {
+      if (cdim==0)
+      {
         int idx = set.index(*it);
         double lerr = fabs(f(mid)-data[idx]);
         maxerr = std::max(maxerr,lerr);
-        if (testweight) {
-          if (weight[idx] < 0) {
+        if (testweight)
+        {
+          if (weight[idx] < 0)
+          {
             sout << "<" << rank << "/test> ERROR in communication test. ";
             sout << "weight:" << weight[idx] << " should be zero!";
             sout << " value is : " << data[idx]
@@ -272,17 +309,23 @@ class CheckCommunication {
             sout << "\n";
           }
         }
-      } else {
-        for(int i=0; i<it->template count<cdim>(); ++i) {
+      }
+      else
+      {
+        for(int i=0; i<it->template count<cdim>(); ++i)
+        {
           int idx = set.template subIndex<cdim>(*it,i);
           FieldVector<double,dimworld> cmid(0.);
           int c = (it->template entity<cdim>(i))->geometry().corners();
-          for (int j=0; j<c; j++) {
+          for (int j=0; j<c; j++)
+          {
             cmid += it->template entity<cdim>(i)->geometry()[j];
           }
+
           cmid /= double(c);
           double lerr = fabs(f(cmid)-data[idx]);
-          if (testweight) {
+          if (testweight)
+          {
             if (weight[idx] < 0) {
               sout << "<" << rank << "/test> ERROR in communication test. ";
               sout << "weight:" << weight[idx] << " should be zero!";
@@ -291,7 +334,8 @@ class CheckCommunication {
               sout << idx << "  lvl:" << it->level() << "  " ;
               sout << "\n";
               int c = (it->template entity<cdim>(i))->geometry().corners();
-              for (int j=0; j<c; j++) {
+              for (int j=0; j<c; j++)
+              {
                 GeometryType type = it->geometry().type();
                 const ReferenceElement<double, dimworld > & refElem =
                   ReferenceElements<double, dimworld >::general(type);
@@ -309,12 +353,19 @@ class CheckCommunication {
     return maxerr;
   }
   // The main ''algorithn''
-  bool checkCommunication(GridType &grid) {
+  bool checkCommunication(GridType &grid)
+  {
     upwind[0] = -0.1113;
     int myrank = grid.comm().rank();
-    int mysize = grid.comm().size();
+
     if (myrank == 0)
-      std::cout << "TEST Communication for codim: " << cdim << "\n";
+      std::cout << "TEST ";
+    if( level_ < 0)
+      std::cout << "Leaf";
+    else
+      std::cout << "Level<" << level_ << ">";
+    std::cout << " Communication for codim: " << cdim << "\n";
+
     int dataSize = set.size(cdim);
     typedef Dune::Array<double> ArrayType;
     ArrayType data(dataSize);
@@ -328,10 +379,22 @@ class CheckCommunication {
     // Communicate
     ExampleDataHandle<IndexSet,ArrayType> dh (set,cdim,data,weight);
     // std::cout << "STARTING COMMUNICATION ... " << std::flush;
-    grid.communicate(dh,
-                     InteriorBorder_All_Interface,
-                     //All_All_Interface,
-                     ForwardCommunication);
+
+    // call communication of grid
+    // if level < 0 then check leaf level
+    if(level_ < 0 )
+    {
+      grid.communicate(dh,
+                       InteriorBorder_All_Interface,
+                       ForwardCommunication);
+    }
+    else
+    {
+      grid.communicate(dh,
+                       InteriorBorder_All_Interface,
+                       ForwardCommunication, level_);
+    }
+
     double result = test(grid,dataSize,data,weight,myrank,true);
     sout << "Test after Communication on <" << myrank << "> "  << std::flush
          << result << std::endl;
@@ -340,44 +403,40 @@ class CheckCommunication {
   OutputStreamImp& sout;
 public:
   CheckCommunication(GridType &grid,
-                     OutputStreamImp & out
-                     ) : upwind(-1.), sout(out),
-                         set(grid.leafIndexSet()) {
-    //set(grid.hierarchicIndexSet()) {
+                     const IndexSet & iset,
+                     OutputStreamImp & out,
+                     const int level
+                     ) : upwind(-1.)
+                         , set(iset)
+                         , level_(level)
+                         , sout(out)
+  {
     if (!checkCommunication(grid)) {
       std::cerr << "ERROR in communication test for codim " << cdim << "!!!"
                 << std::endl;
     }
     // for automatic testing of all codims
     // static const int next = NextCodim<GridType,cdim>::calc();
-    CheckCommunication<GridType,NextCodim<GridType,cdim>::calc,
-        OutputStreamImp> test(grid,sout);
+    CheckCommunication<GridType,IndexSet,NextCodim<GridType,cdim>::calc,
+        OutputStreamImp> test(grid,set,sout,level_);
   }
 };
-template <class GridType,class OutputStreamImp>
-class CheckCommunication<GridType,-1,OutputStreamImp> {
+
+template <class GridType,class IndexSet, class OutputStreamImp>
+class CheckCommunication<GridType,IndexSet,-1,OutputStreamImp> {
 public:
-  CheckCommunication(GridType &grid,
-                     OutputStreamImp & out) {}
+  CheckCommunication(GridType &grid,const IndexSet &,
+                     OutputStreamImp & out, int) {}
 };
-template <class GridType,class OutputStreamImp>
-void checkCommunication(GridType &grid,int level,int adapt,
-                        OutputStreamImp & out) {
+
+template <class GridType, class IndexSet, class OutputStreamImp>
+void checkCommunication(GridType &grid, const IndexSet & set,
+                        int level , OutputStreamImp & out)
+{
   {
-    // for automatic testing of all codims
-    CheckCommunication<GridType,GridType::dimension,OutputStreamImp>
-    test(grid,out);
-    /*
-       {
-       CheckCommunication<GridType,2,OutputStreamImp>
-        test(grid,out);
-       }
-     */
-    /*
-       {
-       CheckCommunication<GridType,0,OutputStreamImp>
-        test(grid,out);
-       }
-     */
+    {
+      CheckCommunication<GridType,IndexSet,3,OutputStreamImp>
+      test(grid,set,out,level);
+    }
   }
 }
