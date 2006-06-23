@@ -184,6 +184,7 @@ namespace Dune {
     template <int codim>
     int countLeafEntities() const
     {
+      // count All_Partition entities
       typedef typename GridType::template Codim<codim> :: LeafIterator LeafIterator;
       LeafIterator it  = grid_.template leafbegin<codim> ();
       LeafIterator end = grid_.template leafend<codim>   ();
@@ -204,7 +205,7 @@ namespace Dune {
         for( ; it != end; ++it )
         {
           if(it->geometry().type() == type)
-            count ++ ;
+            ++ count ;
         }
       }
       return count;
@@ -217,7 +218,7 @@ namespace Dune {
       int count = 0;
       for( ; it != end; ++it )
       {
-        count ++ ;
+        ++ count ;
       }
       return count;
     }
