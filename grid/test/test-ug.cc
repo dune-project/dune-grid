@@ -142,14 +142,14 @@ int main () try
   // extra-environment to check destruction
   {
 
-    std::cout << "Testing UGGrid<2,2> with grid file: ug-testgrid-2.am" << std::endl;
-    std::cout << "Testing UGGrid<3,3> with grid file: ug-testgrid-3.am" << std::endl;
+    std::cout << "Testing UGGrid<2> with grid file: ug-testgrid-2.am" << std::endl;
+    std::cout << "Testing UGGrid<3> with grid file: ug-testgrid-3.am" << std::endl;
 
-    Dune::UGGrid<2,2> grid2d;
-    Dune::UGGrid<3,3> grid3d;
+    Dune::UGGrid<2> grid2d;
+    Dune::UGGrid<3> grid3d;
 
-    Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(grid2d, "ug-testgrid-2.am");
-    Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(grid3d, "ug-testgrid-3.am");
+    Dune::AmiraMeshReader<Dune::UGGrid<2> >::read(grid2d, "ug-testgrid-2.am");
+    Dune::AmiraMeshReader<Dune::UGGrid<3> >::read(grid3d, "ug-testgrid-3.am");
 
     // check macro grid
     gridcheck(grid2d);
@@ -181,7 +181,7 @@ int main () try
   //   without parametrized boundaries
   // ////////////////////////////////////////////////////////////////////////
 
-  Dune::UGGrid<2,2> gridWithParametrization, gridWithoutParametrization;
+  Dune::UGGrid<2> gridWithParametrization, gridWithoutParametrization;
 
   // make grids
   makeHalfCircleQuad(gridWithoutParametrization, false);
@@ -196,7 +196,7 @@ int main () try
   gridWithParametrization.globalRefine(1);
   gridWithoutParametrization.globalRefine(1);
 
-  typedef Dune::UGGrid<2,2>::Codim<0>::LevelIterator ElementIterator;
+  typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
   ElementIterator eIt    = gridWithParametrization.lbegin<0>(1);
   ElementIterator eWoIt  = gridWithoutParametrization.lbegin<0>(1);
   ElementIterator eEndIt = gridWithParametrization.lend<0>(1);
