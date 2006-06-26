@@ -51,7 +51,7 @@ namespace Dune {
       BaseType(macroName) {}
     //! constructor creating empty grid
     ALUCubeGrid(int myrank = -1) :
-      BaseType(myrank) {}
+      BaseType("",myrank) {}
 #endif
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
@@ -158,7 +158,7 @@ namespace Dune {
       BaseType(macroName) {}
     //! constructor creating empty grid
     ALUSimplexGrid(int myrank = -1) :
-      BaseType(myrank) {}
+      BaseType("",myrank) {}
 #endif
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
