@@ -90,6 +90,8 @@ namespace Dune {
   ALU3dGrid(const std::string macroTriangFilename
 #if ALU3DGRID_PARALLEL
             , const MPI_Comm mpiComm
+#else
+            , int myrank
 #endif
             )
     : mygrid_ (0)
@@ -98,7 +100,7 @@ namespace Dune {
       , myRank_( mpAccess_.myrank() )
       , ccobj_(mpiComm)
 #else
-      , myRank_(-1)
+      , myRank_(myrank)
 #endif
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
@@ -128,74 +130,18 @@ namespace Dune {
     postAdapt();
     calcExtras();
 
-    if (size(0)>0)
+    if(comm().rank() == 0)
     {
-      std::cout << "Created ALU3dGrid from macro grid file '"
-                << macroTriangFilename << "'. \n\n";
+      if (size(0)>0)
+      {
+        std::cout << "Created ALU3dGrid from macro grid file '"
+                  << macroTriangFilename << "'. \n\n";
+      }
+      else
+      {
+        std::cout << "Created empty ALU3dGrid. \n\n";
+      }
     }
-    /*
-       else
-       {
-       std::cout << "Created empty ALU3dGrid. \n\n";
-       }
-     */
-  }
-
-#if ALU3DGRID_PARALLEL
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const MPI_Comm mpiComm)
-    : mygrid_ (0)
-      , mpAccess_(mpiComm)
-      , myRank_( mpAccess_.myrank() )
-      , ccobj_(mpiComm)
-      , maxlevel_(0)
-      , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1, std::vector<GeometryType>(1) )
-      , hIndexSet_ (*this)
-      , globalIdSet_(0), localIdSet_(*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-      , sizeCache_ (0)
-      , ghostElements_(0)
-  {
-    makeGeomTypes();
-  }
-#else
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(int myrank)
-    : mygrid_ (0)
-      , myRank_(myrank)
-      , maxlevel_(0)
-      , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1, std::vector<GeometryType>(1) )
-      , hIndexSet_ (*this)
-      , globalIdSet_ (0)
-      , localIdSet_ (*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-      , ghostElements_(0)
-  {
-    makeGeomTypes();
-  }
-#endif
-
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const ALU3dGrid<dim, dimworld, elType> & g)
-    : mygrid_ (0)
-#if ALU3DGRID_PARALLEL
-      , mpAccess_(g.mpAccess_)
-#endif
-      , myRank_(-1)
-      , ccobj_(g.ccobj_)
-      , maxlevel_(0)
-      , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1, std::vector<GeometryType>(1) )
-      , hIndexSet_(*this)
-      , globalIdSet_ (0)
-      , localIdSet_ (*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-      , sizeCache_ (0)
-      , ghostElements_(0)
-  {
-    DUNE_THROW(GridError,"Do not use copy constructor of ALU3dGrid! \n");
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -834,6 +780,8 @@ namespace Dune {
     if( comm().size() <= 1 ) return ;
 
 #if ALU3DGRID_PARALLEL
+    // for level communication the level index set is needed.
+    // fi non-existent, then create for communicaton
     const LevelIndexSetImp * levelISet = 0;
     LevelIndexSetImp * newSet = 0;
 
@@ -1151,6 +1099,8 @@ namespace Dune {
         check.close();
       }
 
+      // if grid exists delete first
+      if( mygrid_ ) delete mygrid_;
       mygrid_ = new ALU3DSPACE GitterImplType (macroName
 #if ALU3DGRID_PARALLEL
                                                , mpAccess_

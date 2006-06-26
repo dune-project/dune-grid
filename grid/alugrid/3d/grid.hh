@@ -272,11 +272,8 @@ namespace Dune {
     //! or given GridFile
 #if ALU3DGRID_PARALLEL
     ALU3dGrid(const std::string macroTriangFilename , MPI_Comm mpiComm = MPI_COMM_WORLD );
-    ALU3dGrid(MPI_Comm mpiComm = MPI_COMM_WORLD);
 #else
-    ALU3dGrid(const std::string macroTriangFilename );
-    //! empty Constructor
-    ALU3dGrid(int myrank = -1);
+    ALU3dGrid(const std::string macroTriangFilename , int myrank = -1);
 #endif
 
     //! Desctructor
