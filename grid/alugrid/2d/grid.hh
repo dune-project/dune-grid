@@ -39,8 +39,14 @@ namespace Dune {
   class ALU2dGridGeometry;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
+  //template<class GridImp>
+  //class ALU2dGridIntersectionIterator;
   template<class GridImp>
-  class ALU2dGridIntersectionIterator;
+  class ALU2dGridIntersectionBase;
+  template<class GridImp>
+  class ALU2dGridLevelIntersectionIterator;
+  template<class GridImp>
+  class ALU2dGridLeafIntersectionIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU2dGridLeafIterator;
   template <int mydim, int coorddim, class GridImp>
@@ -204,7 +210,9 @@ namespace Dune {
     //friend class ALU2dGridGlobalIdSet<dim,dimworld>;
     //friend class ALU2dGridLocalIdSet<dim,dimworld>;
 
-    friend class ALU2dGridIntersectionIterator< const ThisType > ;
+    friend class ALU2dGridIntersectionBase < const ThisType > ;
+    friend class ALU2dGridLevelIntersectionIterator< const ThisType > ;
+    friend class ALU2dGridLeafIntersectionIterator< const ThisType > ;
 
     //**********************************************************
     // The Interface Methods
@@ -487,7 +495,7 @@ namespace Dune {
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
-    typedef ALU2dGridIntersectionIterator<const ThisType>  IntersectionIteratorImp;
+    typedef ALU2dGridLeafIntersectionIterator<const ThisType>  IntersectionIteratorImp;
     typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
   private:
     friend class IntersectionIteratorWrapper< const ThisType > ;

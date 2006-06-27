@@ -25,6 +25,10 @@ namespace Dune {
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
   template<class GridImp>
+  class ALU2dGridLevelIntersectionIterator;
+  template<class GridImp>
+  class ALU2dGridLeafIntersectionIterator;
+  template<class GridImp>
   class ALU2dGridIntersectionIterator;
   template<int codim, PartitionIteratorType, class GridImp>
   class ALU2dGridLeafIterator;
@@ -52,6 +56,10 @@ namespace Dune {
     friend class ALU2dGrid < dim , dimworld>;
     friend class ALU2dGridIntersectionIterator < GridImp >;
     friend class ALU2dGridIntersectionIterator < const GridImp >;
+    friend class ALU2dGridLevelIntersectionIterator < GridImp >;
+    friend class ALU2dGridLevelIntersectionIterator < const GridImp >;
+    friend class ALU2dGridLeafIntersectionIterator < GridImp >;
+    friend class ALU2dGridLeafIntersectionIterator < const GridImp >;
     friend class ALU2dGridHierarchicIterator   < const GridImp >;
     friend class ALU2dGridHierarchicIterator   < GridImp >;
     friend class ALU2dGridLevelIterator <0,All_Partition,GridImp>;
@@ -180,6 +188,10 @@ namespace Dune {
     friend class ALU2dGrid < dim , dimworld>;
     friend class ALU2dGridIntersectionIterator < GridImp >;
     friend class ALU2dGridIntersectionIterator < const GridImp >;
+    friend class ALU2dGridLevelIntersectionIterator < GridImp >;
+    friend class ALU2dGridLevelIntersectionIterator < const GridImp >;
+    friend class ALU2dGridLeafIntersectionIterator < GridImp >;
+    friend class ALU2dGridLeafIntersectionIterator < const GridImp >;
     friend class ALU2dGridHierarchicIterator   < const GridImp >;
     friend class ALU2dGridHierarchicIterator   < GridImp >;
     friend class ALU2dGridLevelIterator <0,All_Partition,GridImp>;
@@ -202,7 +214,8 @@ namespace Dune {
     typedef ALU2dGridGeometry<dim,dimworld,GridImp> GeometryImp;
     //! tpye of intersection iterator
 
-    typedef ALU2dGridIntersectionIterator<GridImp> IntersectionIteratorImp;
+    typedef ALU2dGridLeafIntersectionIterator<GridImp> IntersectionIteratorImp;
+    //typedef ALU2dGridIntersectionBase<GridImp> IntersectionIteratorImp;
     typedef IntersectionIteratorWrapper< GridImp > ALU2dGridIntersectionIteratorType;
 
     //! type of entity interface
@@ -256,11 +269,26 @@ namespace Dune {
     {
       return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(), false);
     }
-
     //! Reference to one past the last intersection with neighbor
     ALU2dGridIntersectionIteratorType iend () const
     {
       return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(),true);
+    }
+    ALU2dGridIntersectionIteratorType libegin () const
+    {
+      return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),false);
+    }
+    ALU2dGridIntersectionIteratorType liend () const
+    {
+      return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),true);
+    }
+    ALU2dGridIntersectionIteratorType leafibegin () const
+    {
+      return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(), false);
+    }
+    ALU2dGridIntersectionIteratorType leafiend () const
+    {
+      return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(),true);
     }
 
     //! returns true if Entity is leaf (i.e. has no children)
