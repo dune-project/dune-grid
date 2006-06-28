@@ -634,8 +634,10 @@ void zeroEntityConsistency (Grid &g)
             == g.levelIndexSet(g.maxLevel()).index( *it ) );
     assert( g.leafIndexSet().index( *(it->template entity<0>(0)) )
             == g.leafIndexSet().index( *it ) );
+
     assert( g.globalIdSet().id( *(it->template entity<0>(0)) )
             == g.globalIdSet().id( *it ) );
+
     assert( g.localIdSet().id( *(it->template entity<0>(0)) )
             == g.localIdSet().id( *it ) );
     assert( it->template entity<0>(0)->level() == it->level() );
@@ -705,7 +707,7 @@ void assertNeighbor (Grid &g)
       // id of boundary segment
       it.boundaryId();
       // check id
-      assert(globalid.id(*e) >= 0);
+      //assert(globalid.id(*e) >= 0);
       assert(it != endit);
       // for all intersections
       for(; it != endit; ++it)
@@ -741,7 +743,7 @@ void assertNeighbor (Grid &g)
         // search neighbouring cell
         if (it.leafNeighbor() || it.levelNeighbor())
         {
-          assert(globalid.id(*(it.outside())) >= 0);
+          //assert(globalid.id(*(it.outside())) >= 0);
           assert(globalid.id(*(it.outside())) !=
                  globalid.id(*e));
 
