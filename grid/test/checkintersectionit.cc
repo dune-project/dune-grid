@@ -198,23 +198,21 @@ void checkIntersectionIterator(const GridType& grid) {
           EntityPointer outside = iIt.outside();
           EntityPointer inside = iIt.inside();
 
-          typedef
-          std::set< FieldVector<ctype,GridType::dimensionworld>, ltfv<ctype,GridType::dimensionworld> >
-          CornerSet;
+          typedef std::vector < FieldVector<ctype,GridType::dimensionworld> > CornerSet;
           CornerSet corners_self, corners_neighbor, corners_global;
 
           for(int k=0; k<intersectionSelfLocal.corners(); ++k) {
-            corners_self.insert( inside->geometry().global( intersectionSelfLocal[k]) );
-            corners_neighbor.insert( outside->geometry().global( intersectionNeighborLocal[k]) );
-            corners_global.insert( intersectionGlobal[k] );
+            corners_self.push_back( inside->geometry().global( intersectionSelfLocal[k]) );
+            corners_neighbor.push_back( outside->geometry().global( intersectionNeighborLocal[k]) );
+            corners_global.push_back( intersectionGlobal[k] );
           }
 
           // check arbitrary local coordinate
           FieldVector<ctype,GridType::dimension-1> localCoord (0.1);
 
-          corners_self.insert    ( inside->geometry().global( intersectionSelfLocal.global(localCoord) ));
-          corners_neighbor.insert( outside->geometry().global( intersectionNeighborLocal.global(localCoord) ));
-          corners_global.insert  ( intersectionGlobal.global(localCoord) );
+          corners_self.push_back ( inside->geometry().global( intersectionSelfLocal.global(localCoord) ));
+          corners_neighbor.push_back( outside->geometry().global( intersectionNeighborLocal.global(localCoord) ));
+          corners_global.push_back ( intersectionGlobal.global(localCoord) );
 
           // check points of intersection neighbor local
           typename CornerSet::iterator s_i = corners_self.begin();
@@ -224,18 +222,24 @@ void checkIntersectionIterator(const GridType& grid) {
           for( ; g_i != corners_global.end(); ++s_i,++n_i,++g_i)
           {
             if (( *s_i - *g_i ).infinity_norm() > 1e-6)
+            {
               DUNE_THROW(GridError,
                          "global( intersectionSelfLocal[" << *s_i << "] ) is not the same as intersectionGlobal[" << *g_i <<
                          "] (delta_max = " << ( *s_i - *g_i ).infinity_norm() << ")!");
+            }
             if (( *n_i - *g_i ).infinity_norm() > 1e-6)
+            {
               DUNE_THROW(GridError,
                          "global( intersectionNeighborLocal[" << *n_i << "] ) is not the same as intersectionGlobal[" << *g_i <<
                          "] (delta_max = " << ( *n_i - *g_i ).infinity_norm() << ")!");
+            }
             if (( *s_i - *n_i ).infinity_norm() > 1e-6)
+            {
               DUNE_THROW(GridError,
                          "global( intersectionSelfLocal[" << *s_i <<
                          "] ) is not the same as global( intersectionNeighborLocal[" << *n_i <<
                          "] (delta_max = " << ( *s_i - *n_i ).infinity_norm() << ")!");
+            }
           }
 
         }
