@@ -564,20 +564,17 @@ namespace Dune {
     endIter_(end),
     level_(-1),
     face_(0),
-    isCopy_(0),
     elem_(0),
     iter_()
   {
     if(!end) {
-      IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()));
-      iter_.store( it );
 
-      IteratorType & iter = *it;
+      iter_ = IteratorType(grid.myGrid());
 
-      iter->first();
-      if((!iter->done()))
+      iter_->first();
+      if((!iter_->done()))
       {
-        elem_ = &(iter->getitem());
+        elem_ = &(iter_->getitem());
         this->updateEntityPointer(elem_, face_, elem_->level());
         if(cdim==1)
           increment();
@@ -598,12 +595,23 @@ namespace Dune {
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
-      , isCopy_(org.isCopy_+1)
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
+  {}
+
+  //! assignment
+  template<int cdim, PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLeafIterator<cdim, pitype, GridImp> &
+  ALU2dGridLeafIterator<cdim, pitype, GridImp> ::
+  operator = (const ThisType & org)
   {
-    // don't copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_ < 3 );
+    EntityPointerType :: operator = (org);
+    endIter_ =  org.endIter_ ;
+    level_   =  org.level_;
+    face_    =  org.face_;
+    elem_    =  org.elem_;
+    iter_    =  org.iter_;
+    return *this;
   }
 
   //! prefix increment
@@ -613,7 +621,8 @@ namespace Dune {
     if(endIter_)
       return ;
 
-    IteratorType & iter = iter_.operator *();
+    IteratorType & iter = iter_;
+
     int goNext = CheckElementType<cdim,pitype,GridImp>::checkFace(*(this->item_), face_, level_);
 
     if (goNext) {
@@ -668,17 +677,14 @@ namespace Dune {
     endIter_(end),
     level_(level),
     face_(0),
-    isCopy_(0),
-    iter_() {
-
+    iter_()
+  {
     if(!end) {
-      IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()), level_);
-      iter_.store( it );
-      IteratorType & iter = *it;
-      iter->first();
-      if((!iter->done()))
+      iter_ = IteratorType(grid.myGrid(), level_);
+      iter_->first();
+      if((!iter_->done()))
       {
-        item_ = &(iter->getitem());
+        item_ = &(iter_->getitem());
         this->updateEntityPointer(item_, face_, level_);
         increment();
       }
@@ -698,12 +704,23 @@ namespace Dune {
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
-      , isCopy_(org.isCopy_+1)
       , item_(org.item_)
       , iter_ ( org.iter_ )
+  {}
+
+  //! assignment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLevelIterator<0, pitype, GridImp> &
+  ALU2dGridLevelIterator<0, pitype, GridImp> ::
+  operator = (const ThisType & org)
   {
-    // don't copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_ < 3 );
+    EntityPointerType :: operator = (org);
+    endIter_ =  org.endIter_ ;
+    level_   =  org.level_;
+    face_    =  org.face_;
+    item_    =  org.item_;
+    iter_    =  org.iter_;
+    return *this;
   }
 
   //! prefix increment
@@ -713,7 +730,8 @@ namespace Dune {
     if(endIter_)
       return ;
 
-    IteratorType & iter = iter_.operator *();
+    IteratorType & iter = iter_;
+
     iter->next();
     if(iter->done()) {
       endIter_ = true;
@@ -742,22 +760,20 @@ namespace Dune {
     endIter_(end),
     level_(level),
     face_(0),
-    isCopy_(0),
     nrOfEdges_(grid.hierSetSize(1)),
-    iter_() {
-
+    iter_()
+  {
     indexList = new int[nrOfEdges_];
     for (int i = 0; i < nrOfEdges_; ++i)
       indexList[i]= 0;
 
-    if(!end) {
-      IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()), level_);
-      iter_.store( it );
-      IteratorType & iter = *it;
-      iter->first();
-      if((!iter->done()))
+    if(!end)
+    {
+      iter_ = IteratorType(grid.myGrid(), level_);
+      iter_->first();
+      if((!iter_->done()))
       {
-        elem_ = &(iter->getitem());
+        elem_ = &(iter_->getitem());
         this->updateEntityPointer(elem_, face_, level_);
         increment();
       }
@@ -777,19 +793,37 @@ namespace Dune {
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
-      , isCopy_(org.isCopy_+1)
       , nrOfEdges_(org.nrOfEdges_)
       , item_(org.item_)
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
   {
+    indexList = new int[nrOfEdges_];
+    for (int i = 0; i < nrOfEdges_; ++i)
+      indexList[i] = org.indexList[i];
+  }
 
+  //! assignment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLevelIterator<1, pitype, GridImp> &
+  ALU2dGridLevelIterator<1, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    EntityPointerType :: operator = (org);
+    endIter_ =  org.endIter_ ;
+    level_   =  org.level_;
+    face_    =  org.face_;
+    nrOfEdges_ = org.nrOfEdges_;
+    item_    = org.item_;
+    elem_    = org.elem_;
+    iter_    =  org.iter_;
+
+    if(indexList) delete indexList;
     indexList = new int[nrOfEdges_];
     for (int i = 0; i < nrOfEdges_; ++i)
       indexList[i] = org.indexList[i];
 
-    // don't copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_ < 3 );
+    return *this;
   }
 
   template<PartitionIteratorType pitype, class GridImp>
@@ -805,7 +839,8 @@ namespace Dune {
 
     if(endIter_)
       return ;
-    IteratorType & iter = iter_.operator *();
+
+    IteratorType & iter = iter_;
     assert(face_>=0);
 
     int goNext = 1;
@@ -863,22 +898,20 @@ namespace Dune {
     endIter_(end),
     level_(level),
     face_(0),
-    isCopy_(0),
     nrOfVertices_(grid.size(2)),
-    iter_() {
-
+    iter_()
+  {
     indexList = new int[nrOfVertices_];
     for (int i = 0; i < nrOfVertices_; ++i)
       indexList[i]= 0;
 
-    if(!end) {
-      IteratorType * it = new IteratorType(const_cast<ALU2DSPACE Hmesh&>(grid.myGrid()), level_);
-      iter_.store( it );
-      IteratorType & iter = *it;
-      iter->first();
-      if((!iter->done()))
+    if(!end)
+    {
+      iter_ = IteratorType(grid.myGrid(), level_);
+      iter_->first();
+      if((!iter_->done()))
       {
-        item_ = &iter->getitem();
+        item_ = &iter_->getitem();
         vertex_ = item_->vertex(face_);
         indexList[vertex_->getIndex()] = 1;
         this->updateEntityPointer(vertex_, face_, level_);
@@ -899,20 +932,39 @@ namespace Dune {
       , endIter_( org.endIter_ )
       , level_( org.level_ )
       , face_(org.face_)
-      , isCopy_(org.isCopy_+1)
       , nrOfVertices_(org.nrOfVertices_)
       , item_(org.item_)
       , vertex_(org.vertex_)
       , iter_ ( org.iter_ )
   {
+    indexList = new int[nrOfVertices_];
+    for (int i = 0; i < nrOfVertices_; ++i)
+      indexList[i] = org.indexList[i];
+  }
 
+  //! assignment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLevelIterator<2, pitype, GridImp> &
+  ALU2dGridLevelIterator<2, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    EntityPointerType :: operator = (org);
+    endIter_ = org.endIter_ ;
+    level_   = org.level_;
+    face_    = org.face_;
+    nrOfVertices_ = org.nrOfVertices_;
+    item_    = org.item_;
+    vertex_  = org.vertex_;
+    iter_    = org.iter_;
+
+    if(indexList) delete indexList;
     indexList = new int[nrOfVertices_];
     for (int i = 0; i < nrOfVertices_; ++i)
       indexList[i] = org.indexList[i];
 
-    // don't copy a copy of a copy of a copy of a copy
-    assert( org.isCopy_ < 3 );
+    return *this;
   }
+
 
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
@@ -928,7 +980,7 @@ namespace Dune {
     if(endIter_)
       return ;
 
-    IteratorType & iter = iter_.operator *();
+    IteratorType & iter = iter_;
 
     assert(face_>=0);
     int goNext = 1;
@@ -969,7 +1021,6 @@ namespace Dune {
     }
     item_ = &iter->getitem();
     vertex_ = item_->vertex(face_);
-    assert(vertex_->level() == level_);
     this->updateEntityPointer(vertex_, face_, level_);
     ++face_;
   }

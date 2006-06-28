@@ -108,6 +108,8 @@ namespace Dune {
     //! The copy constructor
     ALU2dGridIntersectionBase(const ALU2dGridIntersectionBase<GridImp> & org);
 
+    virtual ~ALU2dGridIntersectionBase() {}
+
     //! The copy constructor
     void assign (const ALU2dGridIntersectionBase<GridImp> & org);
 
@@ -328,6 +330,8 @@ namespace Dune {
     typedef ALU2dGridEntityPointer<cdim,GridImp> EntityPointerType;
     typedef ALU2dGridEntity<cdim,dim,GridImp> EntityImp;
 
+    typedef ALU2dGridLeafIterator<cdim, pitype, GridImp> ThisType;
+
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
@@ -337,32 +341,28 @@ namespace Dune {
     ALU2dGridLeafIterator(const GridImp & grid, bool end);
 
     //! copy Constructor
-    ALU2dGridLeafIterator(const ALU2dGridLeafIterator<cdim, pitype, GridImp> & org);
+    ALU2dGridLeafIterator(const ThisType & org);
 
     //! prefix increment
     void increment ();
 
+    //! assigment of iterator
+    ThisType & operator = (const ThisType & org);
+
   private:
-
-    //! do not allow assigment
-    ALU2dGridLeafIterator<cdim, pitype, GridImp> & operator = (const ALU2dGridLeafIterator<cdim, pitype, GridImp> & org) {
-      return *this;
-    }
-
     //! true if iterator is end iterator
     bool endIter_;
     //! actual level
     int level_;
     //! information for edges
     int face_;
-    //! true if iterator is already a copy
-    int isCopy_;
 
     ElementType * elem_;
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
-    typedef typename ALU2dGridSpace:: AutoPointer< IteratorType >  IteratorPointerType ;
-    IteratorPointerType iter_;
+
+    // Listwalkptr, behaves like a proxy for Leafwalk and Levelwalk Ptrs
+    IteratorType iter_;
 
   }; // end ALU2dGridLeafIterator
 
@@ -392,6 +392,7 @@ namespace Dune {
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef ALU2dGridLevelIterator<0,pitype,GridImp> ThisType;
 
   public:
 
@@ -401,33 +402,28 @@ namespace Dune {
     ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
 
     //! copy constructor
-    ALU2dGridLevelIterator(const ALU2dGridLevelIterator<0,pitype,GridImp> & org);
+    ALU2dGridLevelIterator(const ThisType & org);
 
     //! prefix increment
     void increment ();
 
-  private:
     //! do not allow assigment
-    ALU2dGridLevelIterator<codim, pitype, GridImp> & operator = (const ALU2dGridLeafIterator<codim, pitype, GridImp> & org)  {
-      return *this;
-    }
+    ThisType & operator = (const ThisType & org);
 
+  private:
     //! true if iterator is end iterator
     bool endIter_;
     //! actual level
     int level_;
     //! information for edges
     int face_;
-    //! true if iterator is already a copy
-    int isCopy_;
 
     HElementType * item_;
 
     //! type of entity we iterate (interface)
     typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
-    typedef typename ALU2dGridSpace:: AutoPointer< IteratorType >  IteratorPointerType ;
-    IteratorPointerType iter_;
+    IteratorType iter_;
 
   };
 
@@ -456,6 +452,7 @@ namespace Dune {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
+    typedef ALU2dGridLevelIterator<1,pitype,GridImp> ThisType;
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
@@ -464,27 +461,25 @@ namespace Dune {
     ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
 
     //! copy constructor
-    ALU2dGridLevelIterator(const ALU2dGridLevelIterator<1,pitype,GridImp> & org);
+    ALU2dGridLevelIterator(const ThisType & org);
 
     ~ALU2dGridLevelIterator();
 
     //! prefix increment
     void increment ();
 
-  private:
-    //! do not allow assigment
-    ALU2dGridLevelIterator<codim, pitype, GridImp> & operator = (const ALU2dGridLeafIterator<codim, pitype, GridImp> & org)  {
-      return *this;
-    }
+    //! assigment of iterator
+    ThisType & operator = (const ThisType & org);
 
+  private:
     //! true if iterator is end iterator
     bool endIter_;
     //! actual level
     int level_;
     //! information for edges
     int face_;
+
     //! true if iterator is already a copy
-    int isCopy_;
     int nrOfEdges_;
     int* indexList;
 
@@ -493,10 +488,10 @@ namespace Dune {
     //! type of entity we iterate (interface)
     typedef typename Dune::ALU2dImplTraits::template Codim<1>::InterfaceType ElementType;
     ElementType * elem_;
+    // Listwalkptr is a proxy for iterator pointers
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
-    typedef typename ALU2dGridSpace:: AutoPointer< IteratorType >  IteratorPointerType ;
-    IteratorPointerType iter_;
 
+    IteratorType iter_;
   };
 
   //**********************************************************************
@@ -523,6 +518,7 @@ namespace Dune {
     typedef ALU2dGridEntity<codim,dim,GridImp> EntityImp;
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
+    typedef ALU2dGridLevelIterator<2,pitype,GridImp> ThisType;
 
   public:
 
@@ -532,19 +528,17 @@ namespace Dune {
     ALU2dGridLevelIterator(const GridImp & grid, int level, bool end);
 
     //! copy constructor
-    ALU2dGridLevelIterator(const ALU2dGridLevelIterator<2,pitype,GridImp> & org);
+    ALU2dGridLevelIterator(const ThisType & org);
 
     ~ALU2dGridLevelIterator();
 
     //! prefix increment
     void increment ();
 
-  private:
-    //! do not allow assigment
-    ALU2dGridLevelIterator<codim, pitype, GridImp> & operator = (const ALU2dGridLeafIterator<codim, pitype, GridImp> & org)  {
-      return *this;
-    }
+    //! assigment of iterator
+    ThisType & operator = (const ThisType & org);
 
+  private:
     //! true if iterator is end iterator
     bool endIter_;
     //! actual level
@@ -552,7 +546,6 @@ namespace Dune {
     //! information for edges
     int face_;
     //! true if iterator is already a copy
-    int isCopy_;
     int nrOfVertices_;
     int* indexList;
 
@@ -563,8 +556,7 @@ namespace Dune {
     typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
-    typedef typename ALU2dGridSpace:: AutoPointer< IteratorType >  IteratorPointerType ;
-    IteratorPointerType iter_;
+    IteratorType iter_;
 
   };
 
