@@ -390,6 +390,7 @@ namespace Dune {
         break;
       default :
         assert(false);
+        abort();
       } // end switch
 
       generatedLocal_ = true;
