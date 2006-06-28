@@ -23,7 +23,7 @@ namespace Dune {
       virtualEntity_.setToTarget(0);
     }
 
-    void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
       virtualEntity_.setToTarget(target, level);
     }
 

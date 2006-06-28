@@ -35,7 +35,7 @@ namespace Dune {
 
     // Stack entry
     struct StackEntry {
-      typename UGTypes<GridImp::dimension>::Element* element;
+      typename UG_NS<GridImp::dimension>::Element* element;
       int level;
     };
 

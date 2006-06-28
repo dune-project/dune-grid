@@ -72,7 +72,7 @@ operator [](int i) const
     // is only correct if this geometry represents a vertex.  But this is so since
     // we are within an if (mydim==0) clause.
     for (int i=0; i<coorddim; i++)
-      coord_[0][i] = ((typename UGTypes<coorddim>::Node*)target_)->myvertex->iv.x[i];
+      coord_[0][i] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[i];
 
     return coord_[0];
   }
@@ -85,7 +85,7 @@ operator [](int i) const
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
   if (mode_==element_mode) {
-    typename UGTypes<coorddim>::Node* corner = UG_NS<coorddim>::Corner(((typename UGTypes<coorddim>::Element*)target_),i);
+    typename UG_NS<coorddim>::Node* corner = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i);
     for (int j=0; j<coorddim; j++)
       coord_[i][j] = corner->myvertex->iv.x[j];
   }

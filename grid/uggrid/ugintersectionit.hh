@@ -45,7 +45,7 @@ namespace Dune {
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridIntersectionIterator(typename TargetType<0,GridImp::dimensionworld>::T* center, int nb, int level)
+    UGGridIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, int level)
       : center_(center), level_(level), neighborCount_(nb), subCount_(0)
     {}
 
@@ -63,7 +63,7 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
-      typename UGTypes<dim>::Element* p = getLevelNeighbor();
+      typename UG_NS<dim>::Element* p = getLevelNeighbor();
       bool secondnb=false;
       if (subCount_==0 && p!=0)
         if (UG_NS<dim>::isLeaf(p)==false && getLeafNeighbor()!=NULL)
@@ -91,10 +91,10 @@ namespace Dune {
     //! (that is the neighboring Entity)
     EntityPointer outside() const {
       UGGridEntityPointer<0,GridImp> other;
-      typename TargetType<0,GridImp::dimensionworld>::T* otherelem = getNeighbor();
+      typename UG_NS<dim>::Element* otherelem = getNeighbor();
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
-      other.setToTarget(otherelem,UG_NS<GridImp::dimensionworld>::myLevel(otherelem));
+      other.setToTarget(otherelem,UG_NS<dim>::myLevel(otherelem));
       return other;
     }
 
@@ -140,13 +140,13 @@ namespace Dune {
     //**********************************************************
 
     //! get neighbor on same or lower level or 0
-    typename UGTypes<GridImp::dimension>::Element* getNeighbor () const;
+    typename UG_NS<GridImp::dimension>::Element* getNeighbor () const;
 
     //! returns a neighbor that is a leaf or nothing (neighbor might be on the same level)
-    typename UGTypes<GridImp::dimension>::Element* getLeafNeighbor () const;
+    typename UG_NS<GridImp::dimension>::Element* getLeafNeighbor () const;
 
     //! return a neighbor that is on the same level or nothing (neighbor might be a leaf)
-    typename UGTypes<GridImp::dimension>::Element* getLevelNeighbor () const;
+    typename UG_NS<GridImp::dimension>::Element* getLevelNeighbor () const;
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
@@ -161,7 +161,7 @@ namespace Dune {
     mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
 
     //! The UG element the iterator was created from
-    typename UGTypes<dim>::Element *center_;
+    typename UG_NS<dim>::Element *center_;
 
     //! The level we're on
     int level_;

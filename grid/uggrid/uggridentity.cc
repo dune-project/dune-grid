@@ -93,15 +93,15 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
 
   if (cc==dim) {
 
-    typename UGTypes<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, geometry().type()));
+    typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, geometry().type()));
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
-    return UGGridLevelIterator<cc,All_Partition,GridImp>((typename TargetType<cc,dim>::T*)subEntity, level_);
+    return UGGridLevelIterator<cc,All_Partition,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, level_);
 
   } else if (cc==0) {
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
-    typename TargetType<cc,dim>::T* myself = (typename TargetType<cc,dim>::T*)target_;
+    typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
     return UGGridLevelIterator<cc,All_Partition,GridImp>(myself, level_);
   } else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
@@ -109,7 +109,7 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
 
 template<int dim, class GridImp>
 inline void Dune::UGGridEntity < 0, dim ,GridImp >::
-setToTarget(typename TargetType<0,dim>::T* target, int level)
+setToTarget(typename UG_NS<dim>::Element* target, int level)
 {
   target_ = target;
   level_  = level;
@@ -118,7 +118,7 @@ setToTarget(typename TargetType<0,dim>::T* target, int level)
 
 template<int dim, class GridImp>
 inline void Dune::UGGridEntity < 0, dim ,GridImp >::
-setToTarget(typename TargetType<0,dim>::T* target)
+setToTarget(typename UG_NS<dim>::Element* target)
 {
   target_ = target;
   geo_.setToTarget(target);
@@ -205,7 +205,7 @@ inline const typename Dune::UGGridEntity<0,dim,GridImp>::Geometry&
 Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 {
   // we need to have a father element
-  typename TargetType<0,dim>::T* fatherElement = UG_NS<dim>::EFather(target_);
+  typename UG_NS<dim>::Element* fatherElement = UG_NS<dim>::EFather(target_);
   if (!fatherElement)
     DUNE_THROW(GridError, "Called geometryInFather() for an entity which doesn't have a father!");
 
@@ -220,14 +220,14 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   // order, therefore we can infer the local positions in the father element.
   const int MAX_CORNERS_OF_ELEM = 8;  // this is two much in 2d, but UG is that way
   const int MAX_NEW_CORNERS_DIM = (dim==2) ? 5 : 19;
-  const typename TargetType<dim,dim>::T* context[MAX_CORNERS_OF_ELEM + MAX_NEW_CORNERS_DIM];
+  const typename UG_NS<dim>::Node* context[MAX_CORNERS_OF_ELEM + MAX_NEW_CORNERS_DIM];
   UG_NS<dim>::GetNodeContext(fatherElement, context);
 
   // loop through all corner nodes
   for (int i=0; i<UG_NS<dim>::Corners_Of_Elem(target_); i++) {
 
     // get corner node pointer
-    const typename TargetType<dim,dim>::T* fnode = UG_NS<dim>::Corner(target_,i);
+    const typename UG_NS<dim>::Node* fnode = UG_NS<dim>::Corner(target_,i);
 
     // Find out where in the father's context this node is
     int idx = -1;

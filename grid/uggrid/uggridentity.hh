@@ -7,7 +7,6 @@
  * \brief The UGGridEntity class and its specializations
  */
 
-#include "ugtypes.hh"
 #include "uggridrenumberer.hh"
 
 #include <dune/grid/common/referenceelements.hh>
@@ -39,15 +38,15 @@ namespace Dune {
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>(level))
     {}
 
-    void setToTarget(typename TargetType<codim,dim>::T* target) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       this->realEntity.setToTarget(target);
     }
 
-    void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
       this->realEntity.setToTarget(target, level);
     }
 
-    typename TargetType<codim,dim>::T* getTarget() {
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
       return this->realEntity.target_;
     }
 
@@ -170,12 +169,12 @@ namespace Dune {
   private:
 
 
-    void setToTarget(typename TargetType<codim,dim>::T* target) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       target_ = target;
       geo_.setToTarget(target);
     }
 
-    void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
       target_ = target;
       level_  = level;
       geo_.setToTarget(target);
@@ -189,7 +188,7 @@ namespace Dune {
     //! level
     int level_;
 
-    typename TargetType<codim,dim>::T* target_;
+    typename UG_NS<dim>::template Entity<codim>::T* target_;
 
     mutable FieldVector<UGCtype, dim> pos_;
 
@@ -448,10 +447,10 @@ namespace Dune {
     bool mightBeCoarsened() const;
 
     //private:
-    void setToTarget(typename TargetType<0,dim>::T* target, int level);
+    void setToTarget(typename UG_NS<dim>::Element* target, int level);
 
     //! Leaves the level untouched
-    void setToTarget(typename TargetType<0,dim>::T* target);
+    void setToTarget(typename UG_NS<dim>::Element* target);
 
     //! the current geometry
     UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geo_;
@@ -462,7 +461,7 @@ namespace Dune {
     //! the level of the entity
     int level_;
 
-    typename TargetType<0,dim>::T* target_;
+    typename UG_NS<dim>::Element* target_;
 
 
   }; // end of UGGridEntity codim = 0

@@ -7,7 +7,6 @@
  * \brief The UGGridElement class and its specializations
  */
 
-#include "ugtypes.hh"
 #include "uggridrenumberer.hh"
 #include <dune/common/fixedarray.hh>
 #include <dune/common/fmatrix.hh>
@@ -26,7 +25,7 @@ namespace Dune {
       Geometry<mydim, coorddim, GridImp, UGGridGeometry>(UGGridGeometry<mydim, coorddim, GridImp>())
     {};
 
-    void setToTarget(typename TargetType<coorddim-mydim,coorddim>::T* target) {
+    void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target) {
       this->realGeometry.setToTarget(target);
     }
 
@@ -209,7 +208,7 @@ namespace Dune {
     SourceMode mode_;
 
     /** \brief Init the element with a given UG element */
-    void setToTarget(typename TargetType<coorddim-mydim,coorddim>::T* target)
+    void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
     }
@@ -232,7 +231,7 @@ namespace Dune {
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
-    typename TargetType<coorddim-mydim,coorddim>::T* target_;
+    typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target_;
 
     // in coord_mode we explicitely store an array of coordinates
     // containing the position in the fathers reference element
@@ -406,7 +405,7 @@ namespace Dune {
   private:
 
     // This method needs to be here to compile, but it should never be called
-    void setToTarget(TargetType<1,2>::T* target) {
+    void setToTarget(UG_NS<2>::Entity<1>::T* target) {
       DUNE_THROW(GridError, "UGGridElement<1,2>::setToTarget called!");
     }
 

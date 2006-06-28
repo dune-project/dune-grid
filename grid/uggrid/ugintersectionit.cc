@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 template<class GridImp>
-inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getNeighbor () const
+inline typename UG_NS<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getNeighbor () const
 {
   // if subcount is zero and there is a level neighbor return it
   if (subCount_==0 && getLevelNeighbor()!=NULL)
@@ -18,10 +18,10 @@ inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator
 // returns a neighbor that is a leaf or nothing (neighbor might be on the same level)
 // works only on leaf elements!
 template<class GridImp>
-inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getLeafNeighbor () const
+inline typename UG_NS<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getLeafNeighbor () const
 {
   // if the level neighbor exists and is a leaf then return it
-  typename UGTypes<dim>::Element* p = UG_NS<dim>::NbElem(center_, neighborCount_);
+  typename UG_NS<dim>::Element* p = UG_NS<dim>::NbElem(center_, neighborCount_);
   if (p!=NULL)
     if (UG_NS<dim>::isLeaf(p))
       return p;
@@ -34,7 +34,7 @@ inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator
   if (p==NULL)
   {
     // I am a leaf and the neighbor does not exist: go down
-    typename UGTypes<dim>::Element* father_ = UG_NS<GridImp::dimensionworld>::EFather(center_);
+    typename UG_NS<dim>::Element* father_ = UG_NS<GridImp::dimensionworld>::EFather(center_);
     while (father_!=0)
     {
       if (!UG_NS<dim>::hasCopy(father_)) break;             // father must be a copy
@@ -50,7 +50,7 @@ inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator
     while (p!=0)
     {
       if (!UG_NS<dim>::hasCopy(p)) break;             // element must be copy refined
-      typename UGTypes<dim>::Element *sons[32];
+      typename UG_NS<dim>::Element *sons[32];
       UG_NS<dim>::GetSons(p,sons);
       p = sons[0];
       if (UG_NS<dim>::isLeaf(p))
@@ -64,7 +64,7 @@ inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator
 
 // return a neighbor that is on the same level or nothing (neighbor might be a leaf)
 template<class GridImp>
-inline typename UGTypes<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getLevelNeighbor () const
+inline typename UG_NS<GridImp::dimension>::Element* UGGridIntersectionIterator< GridImp >::getLevelNeighbor () const
 {
   // return level neighbor or NULL
   return UG_NS<dim>::NbElem(center_, neighborCount_);
@@ -202,7 +202,7 @@ intersectionGlobal() const
   for (int i=0; i<numCornersOfSide; i++) {
 
     int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-    typename UGTypes<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+    typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
     neighGlob_.setCoords(i, node->myvertex->iv.x);
 
@@ -216,7 +216,7 @@ inline const typename UGGridIntersectionIterator<GridImp>::LocalGeometry&
 UGGridIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
-  typename UGTypes<dim>::Element *other,*self;
+  typename UG_NS<dim>::Element *other,*self;
 
   // if we have a neighbor on this level, then return it
   if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
@@ -227,7 +227,7 @@ intersectionNeighborLocal() const
   else
   {
     // now go down the stack of copies to find a lower level leaf neighbor
-    typename UGTypes<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
+    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
     while (father_!=0)
     {
       if (!UG_NS<dim>::hasCopy(father_))
@@ -287,7 +287,7 @@ template< class GridImp>
 inline int UGGridIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
-  typename UGTypes<dim>::Element *other, *self;
+  typename UG_NS<dim>::Element *other, *self;
 
   // if we have a neighbor on this level, then return it
   if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
@@ -298,7 +298,7 @@ numberInNeighbor () const
   else
   {
     // now go down the stack of copies to find a lower level leaf neighbor
-    typename UGTypes<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
+    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
     while (father_!=0)
     {
       if (!UG_NS<dim>::hasCopy(father_))

@@ -283,7 +283,7 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
 
-  const typename UGTypes<dim>::GridType* theGrid = multigrid_->grids[level];
+  const typename UG_NS<dim>::Grid* theGrid = multigrid_->grids[level];
 
   if (!theGrid)
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
@@ -291,11 +291,11 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
   if (codim==0)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename TargetType<codim,dim>::T*)UG_NS<dim>::PFirstElement(theGrid), level);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid), level);
   else if (codim==dim)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename TargetType<codim,dim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
 
   DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
 }
@@ -308,28 +308,28 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
 
-  typename UGTypes<dim>::GridType* theGrid = multigrid_->grids[level];
+  typename UG_NS<dim>::Grid* theGrid = multigrid_->grids[level];
 
   if (!theGrid)
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
   if (codim==0) {
 
-    typename UGTypes<dim>::Element* firstElement =
+    typename UG_NS<dim>::Element* firstElement =
       (PiType==All_Partition || PiType==Ghost_Partition)
       ? UG_NS<dim>::PFirstElement(theGrid)
       : UG_NS<dim>::FirstElement(theGrid);
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename TargetType<codim,dim>::T*)firstElement, level);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement, level);
 
   } else if (codim==dim) {
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
     /** \todo Parallel vertex level iterators not properly implemented yet! */
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename TargetType<codim,dim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
 
   }
 
@@ -418,7 +418,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
   if (refCount==0)
     return false;
 
-  typename TargetType<0,dim>::T* target = getRealImplementation(*e).target_;
+  typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
 
   // Check whether element can be marked for refinement
   if (!EstimateHere(target))
@@ -451,7 +451,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(const typename Traits::template Codim<
                                           typename UG_NS<dim>::RefinementRule rule,
                                           int side)
 {
-  typename TargetType<0,dim>::T* target = getRealImplementation(*e).target_;
+  typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
 
   if (!UG_NS<dim>::isLeaf(target))
     return false;
@@ -574,8 +574,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                                                       std::vector<unsigned char>& childElementSides) const
 {
 
-  typedef typename TargetType<0,dim>::T ElementType;
-  typedef Tuple<ElementType*,int, int> ListEntryType;
+  typedef Tuple<typename UG_NS<dim>::Element*,int, int> ListEntryType;
 
   SLList<ListEntryType> list;
 
@@ -597,10 +596,10 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   if (!e->isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
       && level < maxl) {
 
-    ElementType* theElement = getRealImplementation(*e).target_;
+    typename UG_NS<dim>::Element* theElement = getRealImplementation(*e).target_;
 
     int Sons_of_Side = 0;
-    ElementType* SonList[MAX_SONS];
+    typename UG_NS<dim>::Element* SonList[MAX_SONS];
     int SonSides[MAX_SONS];
 
     int rv = Get_Sons_of_ElementSide(theElement,
@@ -625,12 +624,12 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   typename SLList<ListEntryType>::iterator f = list.begin();
   for (; f!=list.end(); ++f) {
 
-    ElementType* theElement = Element<0>::get(*f);
+    typename::UG_NS<dim>::Element* theElement = Element<0>::get(*f);
     int side                 = Element<1>::get(*f);
     level                    = Element<2>::get(*f);
 
     int Sons_of_Side = 0;
-    ElementType* SonList[MAX_SONS];
+    typename::UG_NS<dim>::Element* SonList[MAX_SONS];
     int SonSides[MAX_SONS];
 
     if (level < maxl) {
@@ -1009,7 +1008,7 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
   // /////////////////////////////////////////
   // set the subdomainIDs
   // /////////////////////////////////////////
-  typename TargetType<0,dim>::T* theElement;
+  typename UG_NS<dim>::Element* theElement;
   for (theElement=multigrid_->grids[0]->elements[0]; theElement!=NULL; theElement=theElement->ge.succ)
     UG_NS<dim>::SetSubdomain(theElement, 1);
 
@@ -1216,7 +1215,7 @@ template < int dim, int dimworld >
 void Dune::UGGrid < dim, dimworld >::setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
                                                  const FieldVector<double, dimworld>& pos)
 {
-  typename TargetType<dim,dim>::T* target = getRealImplementation(*e).target_;
+  typename UG_NS<dim>::Node* target = getRealImplementation(*e).target_;
 
   for (int i=0; i<dimworld; i++)
     target->myvertex->iv.x[i] = pos[i];

@@ -145,7 +145,7 @@ namespace Dune {
       typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(level_);
 
       for (; eIt!=eEndIt; ++eIt) {
-        typename TargetType<0,dim>::T* target_ = grid_->getRealImplementation(*eIt).target_;
+        typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(*eIt).target_;
         // codim dim-1
         for (int i=0; i<eIt->template count<dim-1>(); i++)
         {
@@ -200,7 +200,7 @@ namespace Dune {
                                                           << ", which should never occur in a UGGrid!");
         }
 
-        typename TargetType<0,dim>::T* target_ = grid_->getRealImplementation(*eIt).target_;
+        typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(*eIt).target_;
 
         // codim dim-1 (edges)
         for (int i=0; i<eIt->template count<dim-1>(); i++)
@@ -406,7 +406,7 @@ namespace Dune {
         for (; eIt!=eEndIt; ++eIt)
         {
           // get pointer to UG object
-          typename TargetType<0,dim>::T* target_ = grid_.getRealImplementation(*eIt).target_;
+          typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
 
           // codim dim-1
           for (int i=0; i<eIt->template count<dim-1>(); i++)
@@ -456,7 +456,7 @@ namespace Dune {
             containsLeafElements = true;
 
           // get pointer to UG object
-          typename TargetType<0,dim>::T* target_ = grid_.getRealImplementation(*eIt).target_;
+          typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(*eIt).target_;
 
           // codim dim-1 (edges)
           for (int i=0; i<eIt->template count<dim-1>(); i++)
@@ -473,7 +473,7 @@ namespace Dune {
               // get new index and assign
               index = numEdges_++;
               // write index through to coarser grids
-              typename TargetType<0,dim>::T* father_ = UG_NS<dim>::EFather(target_);
+              typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(target_);
               while (father_!=0)
               {
                 if (!UG_NS<dim>::hasCopy(father_)) break;                                         // handle only copies
@@ -505,7 +505,7 @@ namespace Dune {
                   DUNE_THROW(GridError, "wrong geometry type in face");
                 }
                 // write index through to coarser grid
-                typename TargetType<0,dim>::T* father_ = UG_NS<dim>::EFather(target_);
+                typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(target_);
                 while (father_!=0)
                 {
                   if (!UG_NS<dim>::hasCopy(father_)) break;                                         // handle only copies

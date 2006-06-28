@@ -7,8 +7,6 @@
  * \brief Encapsulates some UG macros and functions
  */
 
-#include "ugtypes.hh"
-
 namespace Dune {
 
   /** \brief Encapsulates a few UG methods and macros
@@ -24,6 +22,10 @@ namespace Dune {
   class UG_NS<3> {
   public:
 
+    // //////////////////////////////////////////////
+    //   Types exported by UG
+    // //////////////////////////////////////////////
+
     typedef UG::D3::RefinementRule RefinementRule;
 
     typedef UG::D3::CoeffProcPtr CoeffProcPtr;
@@ -31,6 +33,27 @@ namespace Dune {
     typedef UG::D3::UserProcPtr UserProcPtr;
 
     typedef UG::D3::BndSegFuncPtr BndSegFuncPtr;
+
+    /** \todo This type becomes obsolete as soon as UG implements faces and edges */
+    typedef UG::D3::vector Vector;
+
+    typedef UG::D3::multigrid MultiGrid;
+
+    typedef UG::D3::grid Grid;
+
+    typedef UG::D3::edge Edge;
+
+    typedef UG::D3::node Node;
+
+    typedef UG::D3::element Element;
+
+    /** \brief Types of the subentities parametrized by the codimension.  Gets specialized below */
+    template <int codim>
+    class Entity;
+
+    // //////////////////////////////////////////////
+    //   Constants exported by UG
+    // //////////////////////////////////////////////
 
     enum {GM_REFINE_NOT_CLOSED = UG::D3::GM_REFINE_NOT_CLOSED};
 
@@ -63,7 +86,7 @@ namespace Dune {
     /** \brief The PFIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
      */
-    static TargetType<3,3>::T* PFirstNode(const UGTypes<3>::GridType* grid) {
+    static UG_NS<3>::Node* PFirstNode(const UG_NS<3>::Grid* grid) {
       using UG::PrioHGhost;
       using UG::PrioVGhost;
       using UG::PrioVHGhost;
@@ -75,7 +98,7 @@ namespace Dune {
     /** \brief The FIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
      */
-    static TargetType<3,3>::T* FirstNode(const UGTypes<3>::GridType* grid) {
+    static UG_NS<3>::Node* FirstNode(const UG_NS<3>::Grid* grid) {
       using UG::PrioHGhost;
       using UG::PrioVGhost;
       using UG::PrioVHGhost;
@@ -87,7 +110,7 @@ namespace Dune {
     /** \brief The PFIRSTELEMENT macro which returns the first element in a
      * grid even in a parallel setting.
      */
-    static TargetType<0,3>::T* PFirstElement(const UGTypes<3>::GridType* grid) {
+    static UG_NS<3>::Element* PFirstElement(const UG_NS<3>::Grid* grid) {
       using UG::PrioHGhost;
       using UG::PrioVGhost;
       using UG::PrioVHGhost;
@@ -99,7 +122,7 @@ namespace Dune {
     /** \brief The FIRSTELEMENT macro which returns the first element in a
      * grid even in a parallel setting.
      */
-    static TargetType<0,3>::T* FirstElement(const UGTypes<3>::GridType* grid) {
+    static UG_NS<3>::Element* FirstElement(const UG_NS<3>::Grid* grid) {
       using UG::PrioHGhost;
       using UG::PrioVGhost;
       using UG::PrioVHGhost;
@@ -109,7 +132,7 @@ namespace Dune {
     }
 
     /** \brief Returns pointers to the coordinate arrays of an UG element */
-    static void Corner_Coordinates(TargetType<0,3>::T* theElement, double* x[]) {
+    static void Corner_Coordinates(UG_NS<3>::Element* theElement, double* x[]) {
 
       using UG::D3::TETRAHEDRON;
       using UG::D3::NODE;
@@ -128,7 +151,7 @@ namespace Dune {
     }
 
     //! return true if element has an exact copy on the next level
-    static bool hasCopy (TargetType<0,3>::T* theElement) {
+    static bool hasCopy (UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::control_entries;
       using UG::UINT;
@@ -136,7 +159,7 @@ namespace Dune {
     }
 
     //! return true if element has an exact copy on the next level
-    static bool isRegular (TargetType<0,3>::T* theElement) {
+    static bool isRegular (UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::control_entries;
       using UG::UINT;
@@ -144,14 +167,14 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static int Sides_Of_Elem(TargetType<0,3>::T* theElement) {
+    static int Sides_Of_Elem(UG_NS<3>::Element* theElement) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return SIDES_OF_ELEM(theElement);
     }
 
     //! Encapsulates the NBELEM macro
-    static TargetType<0,3>::T* NbElem(TargetType<0,3>::T* theElement, int nb) {
+    static UG_NS<3>::Element* NbElem(UG_NS<3>::Element* theElement, int nb) {
       using UG::D3::ELEMENT;
       using UG::D3::nb_offset;
       using UG::UINT;
@@ -159,7 +182,7 @@ namespace Dune {
     }
 
     //! Returns true if the i-th side of the element is on the domain boundary
-    static bool Side_On_Bnd(TargetType<0,3>::T* theElement, int i) {
+    static bool Side_On_Bnd(UG_NS<3>::Element* theElement, int i) {
       using UG::D3::BNDS;
       using UG::D3::BEOBJ;
       using UG::D3::side_offset;
@@ -168,14 +191,14 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static int Edges_Of_Elem(const TargetType<0,3>::T* theElement) {
+    static int Edges_Of_Elem(const UG_NS<3>::Element* theElement) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return EDGES_OF_ELEM(theElement);
     }
 
     //! \todo Please doc me!
-    static int Corners_Of_Elem(const TargetType<0,3>::T* theElement) {
+    static int Corners_Of_Elem(const UG_NS<3>::Element* theElement) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return CORNERS_OF_ELEM(theElement);
@@ -183,19 +206,19 @@ namespace Dune {
 
     //! \todo Please doc me!
     // Dummy implementation for vertices
-    static int Corners_Of_Elem(const TargetType<3,3>::T* theElement) {
+    static int Corners_Of_Elem(const UG_NS<3>::Node* theElement) {
       return 1;
     }
 
     //! \todo Please doc me!
-    static int Corners_Of_Side(const TargetType<0,3>::T* theElement, int side) {
+    static int Corners_Of_Side(const UG_NS<3>::Element* theElement, int side) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return CORNERS_OF_SIDE(theElement, side);
     }
 
     //! \todo Please doc me!
-    static int Corner_Of_Side(const TargetType<0,3>::T* theElement, int side, int corner) {
+    static int Corner_Of_Side(const UG_NS<3>::Element* theElement, int side, int corner) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return CORNER_OF_SIDE(theElement, side, corner);
@@ -205,25 +228,25 @@ namespace Dune {
       return UG::D3::ReadCW(element, UG::D3::NSONS_CE);
     }
 
-    static int myLevel (TargetType<0,3>::T* theElement) {
+    static int myLevel (const UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::UINT;
       return LEVEL(theElement);
     }
 
-    static int myLevel (TargetType<3,3>::T* theNode) {
+    static int myLevel (const UG_NS<3>::Node* theNode) {
       using UG::D3::NODE;
       using UG::UINT;
       return LEVEL(theNode);
     }
 
     //! get father element of vertex
-    static TargetType<0,3>::T* NFather(TargetType<3,3>::T* theNode) {
+    static UG_NS<3>::Element* NFather(UG_NS<3>::Node* theNode) {
       return theNode->myvertex->iv.father;
     }
 
     //! get father node of vertex
-    static TargetType<3,3>::T* NodeNodeFather(TargetType<3,3>::T* theNode) {
+    static UG_NS<3>::Node* NodeNodeFather(UG_NS<3>::Node* theNode) {
       using UG::D3::NDOBJ;
       using UG::UINT;
       if (theNode->father==0)
@@ -235,14 +258,14 @@ namespace Dune {
     }
 
     //! get father element of vertex
-    static void PositionInFather(TargetType<3,3>::T* theNode, FieldVector<double, 3>& local) {
+    static void PositionInFather(UG_NS<3>::Node* theNode, FieldVector<double, 3>& local) {
       local[0] = theNode->myvertex->iv.xi[0];
       local[1] = theNode->myvertex->iv.xi[1];
       local[2] = theNode->myvertex->iv.xi[2];
     }
 
     //! get father element of vertex
-    static void NodePositionGlobal(TargetType<3,3>::T* theNode, FieldVector<double, 3>& global) {
+    static void NodePositionGlobal(UG_NS<3>::Node* theNode, FieldVector<double, 3>& global) {
       global[0] = theNode->myvertex->iv.x[0];
       global[1] = theNode->myvertex->iv.x[1];
       global[2] = theNode->myvertex->iv.x[2];
@@ -262,7 +285,7 @@ namespace Dune {
         The clean solution would be to turn the macro into an inline function within
         pargm.h.  But then pargm.h would have to include gm.h in order to know the
         type grid, and I am reluctant to do that. */
-    static unsigned char Grid_Attr(const UGTypes<3>::GridType* grid) {
+    static unsigned char Grid_Attr(const UG_NS<3>::Grid* grid) {
 #define GRID_ATTR(g) g->level+32
       return GRID_ATTR(grid);
 #undef GRID_ATTR
@@ -273,20 +296,20 @@ namespace Dune {
     }
 
     //! Encapsulates the TAG macro
-    static unsigned int Tag(const TargetType<0,3>::T* theElement) {
+    static unsigned int Tag(const UG_NS<3>::Element* theElement) {
       using UG::UINT;
       return TAG(theElement);
     }
 
     //! Doesn't ever get called, but needs to be there to calm the compiler
-    static unsigned int Tag(const TargetType<3,3>::T* theNode) {
+    static unsigned int Tag(const UG_NS<3>::Node* theNode) {
       DUNE_THROW(GridError, "Called method Tag() for a vertex.  This should never happen!");
       return 0;
     }
 
     //! get corner in local coordinates, corner number in UG's numbering system
     template<class T>
-    static void  getCornerLocal (const TargetType<0,3>::T* theElement, int corner, FieldVector<T, 3>& local)
+    static void  getCornerLocal (const UG_NS<3>::Element* theElement, int corner, FieldVector<T, 3>& local)
     {
       using UG::D3::element_descriptors;
       using UG::UINT;
@@ -296,12 +319,12 @@ namespace Dune {
     }
 
     //! Next element in the UG element lists
-    static TargetType<0,3>::T* succ(const TargetType<0,3>::T* theElement) {
+    static UG_NS<3>::Element* succ(const UG_NS<3>::Element* theElement) {
       return theElement->ge.succ;
     }
 
     //! Next element in the UG nodes lists
-    static TargetType<3,3>::T* succ(const TargetType<3,3>::T* theNode) {
+    static UG_NS<3>::Node* succ(const UG_NS<3>::Node* theNode) {
       return theNode->succ;
     }
 
@@ -312,12 +335,12 @@ namespace Dune {
     }
 
     //! Return true if the element is a leaf element
-    static bool isLeaf(const TargetType<0,3>::T* theElement) {
+    static bool isLeaf(const UG_NS<3>::Element* theElement) {
       return UG::D3::EstimateHere(theElement);
     }
 
     //! Return true if the node is a leaf node
-    static bool isLeaf(const TargetType<3,3>::T* theNode) {
+    static bool isLeaf(const UG_NS<3>::Node* theNode) {
 #ifndef ModelP
       return !theNode->son;
 #else
@@ -330,42 +353,42 @@ namespace Dune {
     // /////////////////////////////////////////////
 
     //! Gets the level index of a UG element
-    static int& levelIndex(TargetType<0,3>::T* theElement) {
+    static int& levelIndex(UG_NS<3>::Element* theElement) {
       return theElement->ge.levelIndex;
     }
 
     //! Gets the level index of a UG element
-    static const int& levelIndex(const TargetType<0,3>::T* theElement) {
+    static const int& levelIndex(const UG_NS<3>::Element* theElement) {
       return theElement->ge.levelIndex;
     }
 
     //! Gets the level index of a UG sidevector
-    static int& levelIndex(UGVectorType<3>::T* theVector) {
+    static int& levelIndex(Vector* theVector) {
       return reinterpret_cast<int&>(theVector->index);
     }
 
     //! Gets the level index of a UG sidevector
-    static const int& levelIndex(const UGVectorType<3>::T* theVector) {
+    static const int& levelIndex(const Vector* theVector) {
       return reinterpret_cast<const int&>(theVector->index);
     }
 
     //! Gets the level index of a UG edge
-    static int& levelIndex(TargetType<2,3>::T* theEdge) {
+    static int& levelIndex(UG_NS<3>::Edge* theEdge) {
       return theEdge->levelIndex;
     }
 
     //! Gets the level index of a UG edge
-    static const int& levelIndex(const TargetType<2,3>::T* theEdge) {
+    static const int& levelIndex(const UG_NS<3>::Edge* theEdge) {
       return theEdge->levelIndex;
     }
 
     //! Gets the level index of a UG node
-    static int& levelIndex(TargetType<3,3>::T* theNode) {
+    static int& levelIndex(UG_NS<3>::Node* theNode) {
       return theNode->levelIndex;
     }
 
     //! Gets the level index of a UG node
-    static const int& levelIndex(const TargetType<3,3>::T* theNode) {
+    static const int& levelIndex(const UG_NS<3>::Node* theNode) {
       return theNode->levelIndex;
     }
 
@@ -374,42 +397,42 @@ namespace Dune {
     // /////////////////////////////////////////////
 
     //! Gets the leaf index of a UG element
-    static int& leafIndex(TargetType<0,3>::T* theElement) {
+    static int& leafIndex(UG_NS<3>::Element* theElement) {
       return theElement->ge.leafIndex;
     }
 
     //! Gets the leaf index of a UG element
-    static const int& leafIndex(const TargetType<0,3>::T* theElement) {
+    static const int& leafIndex(const UG_NS<3>::Element* theElement) {
       return theElement->ge.leafIndex;
     }
 
     //! Gets the level index of a UG sidevector
-    static int& leafIndex(UGVectorType<3>::T* theVector) {
+    static int& leafIndex(Vector* theVector) {
       return reinterpret_cast<int &>(theVector->skip);
     }
 
     //! Gets the level index of a UG sidevector
-    static const int& leafIndex(const UGVectorType<3>::T* theVector) {
+    static const int& leafIndex(const Vector* theVector) {
       return reinterpret_cast<const int &>(theVector->skip);
     }
 
     //! Gets the leaf index of a UG edge
-    static int& leafIndex(TargetType<2,3>::T* theEdge) {
+    static int& leafIndex(UG_NS<3>::Edge* theEdge) {
       return theEdge->leafIndex;
     }
 
     //! Gets the leaf index of a UG edge
-    static const int& leafIndex(const TargetType<2,3>::T* theEdge) {
+    static const int& leafIndex(const UG_NS<3>::Edge* theEdge) {
       return theEdge->leafIndex;
     }
 
     //! Gets the leaf index of a UG node
-    static int& leafIndex(TargetType<3,3>::T* theNode) {
+    static int& leafIndex(UG_NS<3>::Node* theNode) {
       return theNode->myvertex->iv.leafIndex;
     }
 
     //! Gets the leaf index of a UG node
-    static const int& leafIndex(const TargetType<3,3>::T* theNode) {
+    static const int& leafIndex(const UG_NS<3>::Node* theNode) {
       return theNode->myvertex->iv.leafIndex;
     }
 
@@ -418,12 +441,12 @@ namespace Dune {
     // /////////////////////////////////////////////
 
     //! Gets the index of a UG element
-    static unsigned int id(const TargetType<0,3>::T* theElement) {
+    static unsigned int id(const UG_NS<3>::Element* theElement) {
       return theElement->ge.id;
     }
 
     //! Gets the index of a UG node
-    static unsigned int id(const TargetType<3,3>::T* theNode) {
+    static unsigned int id(const UG_NS<3>::Node* theNode) {
       return theNode->myvertex->iv.id | 0xC0000000;
     }
 
@@ -470,7 +493,7 @@ namespace Dune {
     }
 
     //! Returns the i-th corner of a UG element
-    static TargetType<3,3>::T* Corner(TargetType<0,3>::T* theElement, int i) {
+    static UG_NS<3>::Node* Corner(UG_NS<3>::Element* theElement, int i) {
       using UG::D3::NODE;
       using UG::D3::n_offset;
       using UG::UINT;
@@ -478,12 +501,12 @@ namespace Dune {
     }
 
     //! get edge from node i to node j (in UG's numbering !
-    static TargetType<2,3>::T* GetEdge (TargetType<3,3>::T* nodei, TargetType<3,3>::T* nodej) {
+    static UG_NS<3>::Edge* GetEdge (UG_NS<3>::Node* nodei, UG_NS<3>::Node* nodej) {
       return UG::D3::GetEdge(nodei,nodej);
     }
 
     //! access side vector from element
-    static UGVectorType<3>::T* SideVector (TargetType<0,3>::T* theElement, int i)
+    static UG_NS<3>::Vector* SideVector (UG_NS<3>::Element* theElement, int i)
     {
       using UG::D3::VECTOR;
       using UG::D3::svector_offset;
@@ -492,7 +515,7 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static TargetType<0,3>::T* EFather(TargetType<0,3>::T* theElement) {
+    static UG_NS<3>::Element* EFather(UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::father_offset;
       using UG::UINT;
@@ -539,12 +562,12 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static UGTypes<3>::MultiGridType* GetMultigrid(const char* name) {
+    static UG_NS<3>::MultiGrid* GetMultigrid(const char* name) {
       return UG::D3::GetMultigrid(name);
     }
 
     //! \todo Please doc me!
-    static void SetSubdomain(TargetType<0,3>::T* theElement, int id) {
+    static void SetSubdomain(UG_NS<3>::Element* theElement, int id) {
       using UG::D3::control_entries;
       using UG::D3::SUBDOMAIN_CE;
       using UG::UINT;
@@ -597,6 +620,25 @@ namespace Dune {
                                            userData);
     }
   };
+
+  template <>
+  class UG_NS<3>::Entity<0> {
+  public:
+    typedef UG::D3::element T;
+  };
+
+  template <>
+  class UG_NS<3>::Entity<2> {
+  public:
+    typedef UG::D3::edge T;
+  };
+
+  template <>
+  class UG_NS<3>::Entity<3> {
+  public:
+    typedef UG::D3::node T;
+  };
+
 
 } // namespace Dune
 

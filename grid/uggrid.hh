@@ -484,7 +484,7 @@ namespace Dune {
 
   private:
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
-    typename UGTypes<dimworld>::MultiGridType* multigrid_;
+    typename UG_NS<dimworld>::MultiGrid* multigrid_;
 
     /** \brief The classes implementing the geometry of the boundary segments */
     std::vector<const BoundarySegment<dimworld>*> boundarySegments_;

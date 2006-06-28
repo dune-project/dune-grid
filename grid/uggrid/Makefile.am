@@ -15,7 +15,7 @@ uggrid_HEADERS = uggridgeometry.cc \
   uggridentitypointer.hh uggridhieriterator.cc ugintersectionit.cc \
   ugwrapper2d.hh ugwrapper3d.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
-  ugintersectionit.hh ugtypes.hh ug_undefs.hh uggridindexsets.hh \
+  ugintersectionit.hh ug_undefs.hh uggridindexsets.hh \
   uggridleafiterator.hh boundaryextractor.hh \
   uggridrenumberer.hh
 
