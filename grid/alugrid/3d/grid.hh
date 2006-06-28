@@ -84,7 +84,8 @@ namespace Dune {
     //! Type of the global id set
     typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
 #else
-    typedef LocalIdSetImp GlobalIdSetImp;
+    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
+    //typedef LocalIdSetImp GlobalIdSetImp;
 #endif
 
     //! Type of the level index set
@@ -106,7 +107,7 @@ namespace Dune {
       typedef int LocalIdType;
 
       //! type of ALU3dGrids global id
-      typedef bigunsignedint<6*32> GlobalIdType;
+      typedef ALUGridId<ALUMacroKey> GlobalIdType;
 
       typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
@@ -146,6 +147,8 @@ namespace Dune {
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
 #else
+      // in serial we use LocalIdSet as GlobalIdSet because it much faster
+      // that global id set
       typedef LocalIdSet GlobalIdSet;
       typedef CollectiveCommunication<Grid> CollectiveCommunication;
 #endif
@@ -390,8 +393,13 @@ namespace Dune {
 
     //! get global id set of grid
     const GlobalIdSet & globalIdSet () const {
+#if ALU3DGRID_PARALLEL
       if(!globalIdSet_) globalIdSet_ = new GlobalIdSetImp(*this);
       return *globalIdSet_;
+#else
+      // use local id set in serial
+      return localIdSet();
+#endif
     }
 
     //! get global id set of grid
@@ -636,6 +644,15 @@ namespace Dune {
 
     mutable ALU3dGridItemListType levelEdgeList_[MAXL];
   public:
+    VertexListType & getVertexList(int level) const
+    {
+      assert( level >= 0 );
+      assert( level <= maxLevel() );
+      VertexListType & vxList = vertexList_[level];
+      if(!vxList.up2Date()) vxList.setupVxList(*this,level);
+      return vxList;
+    }
+
     ALU3dGridItemListType & getGhostLeafList(int codim) const
     {
       assert( codim >= 1 );

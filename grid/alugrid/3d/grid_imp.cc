@@ -43,7 +43,7 @@ namespace Dune {
 
     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
 
-    ElementLevelIteratorType it ( grid, *this , level, grid.nlinks() );
+    ElementLevelIteratorType it ( grid, level, grid.nlinks() );
 
     int count = 0;
     for( it.first(); !it.done() ; it.next())
@@ -134,12 +134,12 @@ namespace Dune {
     {
       if (size(0)>0)
       {
-        std::cout << "Created ALU3dGrid from macro grid file '"
+        std::cout << "\nCreated ALU3dGrid from macro grid file '"
                   << macroTriangFilename << "'. \n\n";
       }
       else
       {
-        std::cout << "Created empty ALU3dGrid. \n\n";
+        std::cout << "\nCreated empty ALU3dGrid. \n\n";
       }
     }
   }
@@ -170,8 +170,6 @@ namespace Dune {
     assert( codim >= 0);
     assert( codim < dim+1 );
 
-    //assert( levelIndexSet(level).size(codim,this->geomTypes(codim)[0]) ==
-    //   sizeCache_->size(level,codim) );
     assert( sizeCache_ );
     return sizeCache_->size(level,codim);
   }
@@ -241,6 +239,7 @@ namespace Dune {
     }
   }
 
+  // --calcExtras
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::calcExtras()
   {
@@ -255,17 +254,12 @@ namespace Dune {
 
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
 
-    // update id set, i.e. insert new elements
-    //if(globalIdSet_) globalIdSet_->updateIdSet();
-#ifndef NDEBUG
-    //if(globalIdSet_) globalIdSet_->uniquenessCheck();
-#endif
-
     for(size_t i=0; i<MAXL; i++)
     {
       vertexList_[i].unsetUp2Date();
       levelEdgeList_[i].unsetUp2Date();
     }
+
 #if ALU3DGRID_PARALLEL
     for(int i=0; i<dim; ++i)
     {
@@ -337,13 +331,8 @@ namespace Dune {
     assert( level >= 0 );
     // if we dont have this level return empty iterator
     if(level > maxlevel_) return this->template lend<cd,pitype> (level);
-    VertexListType & vxList = vertexList_[level];
-    if(cd > 1)
-    {
-      // if vertex list is not up2date, update it
-      if(!vxList.up2Date()) vxList.setupVxList(*this,level);
-    }
-    return ALU3dGridLevelIterator<cd,pitype,const MyType> (*this,vxList,level);
+
+    return ALU3dGridLevelIterator<cd,pitype,const MyType> (*this,level,true);
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -549,7 +538,7 @@ namespace Dune {
   {
     bool ref = false;
     // if prallel run, then adapt also global id set
-    if(globalIdSet_ && comm().size() > 1)
+    if(globalIdSet_)
     {
       //std::cout << "Start adapt with globalIdSet prolong \n";
       int defaultChunk = newElementsChunk_;
@@ -559,7 +548,6 @@ namespace Dune {
       int newElements = std::max( actChunk , defaultChunk );
 
       globalIdSet_->setChunkSize( newElements );
-      //ref = myGrid().adaptWithDataAdaptation(*globalIdSet_); // adapt grid
       ref = myGrid().duneAdapt(*globalIdSet_); // adapt grid
     }
     else
@@ -602,8 +590,10 @@ namespace Dune {
     dm.reserveMemory( newElements );
 
     bool ref = false ;
-    if(globalIdSet_ && comm().size() > 1)
+    if(globalIdSet_)
     {
+      //std::cout << "adapt with global Id set \n";
+
       // if global id set exists then include into
       // prolongation process
       ALU3DSPACE AdaptRestrictProlongGlSet<ALU3dGrid<dim, dimworld, elType>,
@@ -660,9 +650,8 @@ namespace Dune {
       for(int l=0; l<= fakeLevel; l++)
       {
         {
-          VertexListType & vxList = vertexList_[l];
           typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper<0,Interior_Partition> IteratorType;
-          IteratorType w ( *this,vxList,l ,nlinks() ) ;
+          IteratorType w ( *this, l ,nlinks() ) ;
           for (w.first () ; ! w.done () ; w.next ())
           {
             typedef typename IteratorType :: val_t val_t;
@@ -716,6 +705,7 @@ namespace Dune {
       // calculate new maxlevel
       // reset size and things
       myGrid().duneExchangeDynamicState();
+      if(globalIdSet_) globalIdSet_->updateIdSet();
       updateStatus();
     }
     return changed;
@@ -759,12 +749,10 @@ namespace Dune {
       dverb << "Grid was balanced on p = " << myRank() << std::endl;
       // calculate new maxlevel
       // reset size and things
+      myGrid().duneExchangeData(gs);
+      if(globalIdSet_) globalIdSet_->updateIdSet();
+      updateStatus();
     }
-
-    // checken, ob wir das hier wirklich brauchen
-    // problem!!!!!!!!!!!!!!!!!!!!!!!
-    updateStatus();
-    myGrid().duneExchangeData(gs);
     return changed;
 #else
     return false;

@@ -613,13 +613,12 @@ namespace Dune {
   // Constructor for begin iterator
   template<int codim, PartitionIteratorType pitype, class GridImp >
   inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
-  ALU3dGridLevelIterator(const GridImp & grid,
-                         VertexListType & vxList , int level)
+  ALU3dGridLevelIterator(const GridImp & grid, int level, bool )
     : ALU3dGridEntityPointer<codim,GridImp> (grid,level)
       , level_(level)
       , iter_ (0)
   {
-    iter_  = new IteratorType ( this->grid_ , vxList , level_, grid.nlinks() );
+    iter_  = new IteratorType ( this->grid_ , level_, grid.nlinks() );
     assert( iter_ );
     this->firstItem(*this);
   }
