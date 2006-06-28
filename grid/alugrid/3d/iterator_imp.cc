@@ -419,7 +419,8 @@ namespace Dune {
   }
 
   template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const {
+  void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
+  {
     intersectionSelfLocalImp_.buildGeom(geoProvider_.intersectionSelfLocal());
     if (!connector_.outerBoundary()) {
       intersectionNeighborLocalImp_.buildGeom(geoProvider_.intersectionNeighborLocal());
