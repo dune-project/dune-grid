@@ -209,12 +209,19 @@ void checkIntersectionIterator(const GridType& grid) {
             corners_global.insert( intersectionGlobal[k] );
           }
 
+          // check arbitrary local coordinate
+          FieldVector<ctype,GridType::dimension-1> localCoord (0.1);
+
+          corners_self.insert    ( inside->geometry().global( intersectionSelfLocal.global(localCoord) ));
+          corners_neighbor.insert( outside->geometry().global( intersectionNeighborLocal.global(localCoord) ));
+          corners_global.insert  ( intersectionGlobal.global(localCoord) );
+
           // check points of intersection neighbor local
           typename CornerSet::iterator s_i = corners_self.begin();
           typename CornerSet::iterator n_i = corners_neighbor.begin();
-          typename CornerSet::iterator
-          g_i = corners_global.begin();
-          for(int k=0; k<intersectionNeighborLocal.corners(); ++k)
+          typename CornerSet::iterator g_i = corners_global.begin();
+
+          for( ; g_i != corners_global.end(); ++s_i,++n_i,++g_i)
           {
             if (( *s_i - *g_i ).infinity_norm() > 1e-6)
               DUNE_THROW(GridError,
@@ -229,9 +236,6 @@ void checkIntersectionIterator(const GridType& grid) {
                          "global( intersectionSelfLocal[" << *s_i <<
                          "] ) is not the same as global( intersectionNeighborLocal[" << *n_i <<
                          "] (delta_max = " << ( *s_i - *n_i ).infinity_norm() << ")!");
-            s_i++;
-            n_i++;
-            g_i++;
           }
 
         }
