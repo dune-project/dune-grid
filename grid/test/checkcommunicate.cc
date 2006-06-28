@@ -41,18 +41,22 @@ namespace {
   };
 }
 template <class IndexSetImp,
+    class GlobalIdSetImp,
     class DataVectorType >
 class ExampleDataHandle
 {
   const IndexSetImp & iset_;
+  const GlobalIdSetImp & ids_;
   int cdim_;
   DataVectorType & data1_;
   DataVectorType & data2_;
 public:
   typedef typename DataVectorType :: value_type DataType;
-  ExampleDataHandle(const IndexSetImp & iset,int cdim,
+  ExampleDataHandle(const IndexSetImp & iset,
+                    const GlobalIdSetImp & ids,
+                    int cdim,
                     DataVectorType & d1, DataVectorType & d2) :
-    iset_(iset), cdim_(cdim), data1_(d1) , data2_(d2)
+    iset_(iset), ids_(ids) , cdim_(cdim), data1_(d1) , data2_(d2)
   {}
 
   //! returns true if data for this codim should be communicated
@@ -64,7 +68,7 @@ public:
   //! returns true if size per entity of given dim and codim is a constant
   bool fixedsize (int dim, int codim) const
   {
-    // this problem ist a fixed size problem,
+    // this problem is a fixed size problem,
     // but to simulate also non-fixed size problems
     // we set this to false, should work anyway
     return false;
@@ -76,8 +80,8 @@ public:
   template<class EntityType>
   size_t size (EntityType& e) const
   {
-    // flag+data+coordinates
-    return 2+e.geometry().corners()*e.geometry().dimensionworld;
+    // id+flag+data+coordinates
+    return 3+e.geometry().corners()*e.geometry().dimensionworld;
   }
 
   //! pack data from user to message buffer
@@ -85,6 +89,8 @@ public:
   void gather (MessageBuffer& buff, const EntityType& e) const
   {
     int idx = iset_.index(e);
+    typename GlobalIdSetImp :: IdType id = ids_.id( e );
+    buff.write( id );
     buff.write(data2_[idx]);   // flag
     buff.write(data1_[idx]);   // data
     // all corner coordinates
@@ -103,6 +109,14 @@ public:
   {
     // as this problem is a fixed size problem we can check the sizes
     assert( n == size(e) );
+
+    // make sure that global id on all processors are the same
+    // here compare the id of the entity that sended the data with my id
+    typename GlobalIdSetImp :: IdType id;
+    buff.read( id );
+    typename GlobalIdSetImp :: IdType myId = ids_.id( e );
+    //std::cout << id << " id | my Id = " << myId << "\n";
+    assert( id == myId );
 
     // else do normal scatter
     int idx = iset_.index(e);
@@ -377,7 +391,9 @@ class CheckCommunication {
     sout << "Test before Communication on <" << myrank << "> "
          << preresult << std::endl;
     // Communicate
-    ExampleDataHandle<IndexSet,ArrayType> dh (set,cdim,data,weight);
+    typedef typename GridType :: Traits :: GlobalIdSet GlobalIdSetType;
+    ExampleDataHandle<IndexSet,GlobalIdSetType,ArrayType>
+    dh (set,grid.globalIdSet(),cdim,data,weight);
     // std::cout << "STARTING COMMUNICATION ... " << std::flush;
 
     // call communication of grid
