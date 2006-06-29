@@ -376,14 +376,12 @@ namespace Dune {
     // actual level
     int level_;
 
-    // the wrapper for the original iterator of the ALU3dGrid
-    typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> IteratorType;
-
     // the internal iterator
     IteratorType * iter_ ;
 
     // deletes iter_
     void removeIter ();
+
     IteratorType & internalIterator ()
     {
       assert( iter_ );
