@@ -2,15 +2,20 @@
 
 #refinementdir = $(includedir)/dune/grid/common/refinement
 
-EXTRA_DIST = referencetokuhn0.svg referencetokuhn0.png \
+PICS = referencetokuhn0.svg referencetokuhn0.png \
 	     simplexvertexindex.svg simplexvertexindex.png \
 	     kuhntriangulation.svg
 
 if BUILD_DOCS
  DOCS = referencetokuhn0.png simplexvertexindex.png \
-	refinement.pdf refinement.ps
+	refinement.pdf
 endif
 EXTRAINSTALL = refinement.pdf
+
+EXTRA_DIST = $(PICS) refinement.tex
+
+docdir=$(datadir)/doc/dune-grid/refinement
+doc_DATA = refinement.pdf
 
 all: $(DOCS)
 

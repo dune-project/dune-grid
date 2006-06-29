@@ -9,6 +9,11 @@ EXTRAINSTALL=hexahedron.png line.png prism.png pyramid.png \
   quadrilateral.png tetrahedron.png triangle.png\
   hexahedron_edges.png tetrahedron_edges.png prism_edges.png pyramid_edges.png
 
+# install docs when distributing
+docdir=$(datadir)/doc/dune-grid/appl/refelements
+doc_DATA = $(EXTRAINSTALL)
+EXTRA_DIST= $(EXTRAINSTALL)
+
 include $(top_srcdir)/am/webstuff
 
 # !! rules to convert fig, svg -> png

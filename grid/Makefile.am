@@ -13,8 +13,10 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
+if ALUGRID
 # also contians items independent of ALUGrid
 ALULIB = alugrid/libalu.la
+endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
