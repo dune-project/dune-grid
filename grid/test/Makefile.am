@@ -27,6 +27,11 @@ endif
 
 if UG
   UPROG = $(DO_UGTEST)
+if ALUGRID
+  DGFALU_UGGRID = test-dgfalu-uggrid-combination
+else
+  DGFALU_UGGRID =
+endif
 endif
 
 #
@@ -34,7 +39,7 @@ endif
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned $(APROG) $(UPROG) $(ALUPROG)
+NORMALTESTS = test-sgrid test-oned $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
 # list of tests to run (yaspgrid is special case)
 TESTS = $(NORMALTESTS) $(YRUN)
@@ -86,6 +91,12 @@ test_ug_SOURCES = test-ug.cc
 test_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
 test_ug_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
 test_ug_DEPENDENCIES = $(LOCAL_LIBS)
+
+# Test whether you can combine the different implementations in one file
+test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
+test_dgfalu_uggrid_combination_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
+test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
+test_dgfalu_uggrid_combination_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
 
