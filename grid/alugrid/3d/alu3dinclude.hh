@@ -22,7 +22,8 @@
 // // then parallel version of ALUGrid is compiled
   #if ALU3DGRID_BUILD_FOR_PARALLEL == 0
     #warning "The ALUGrid-library wasn't compiled for parallel usage. Reconfigure\
-  using the MPI compiler script or compile Dune without the MPI support!"
+  using the MPI compiler script or compile Dune without the MPI support!\
+  Defaulting to serial ALUGrid!"
     #define ALU3DGRID_PARALLEL 0
   #else
     #define ALU3DGRID_PARALLEL 1
