@@ -85,6 +85,8 @@ namespace Dune {
     friend class ALU3dGridEntity<0,dim,GridImp>;
     friend class IntersectionIteratorWrapper<GridImp>;
 
+    enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -162,7 +164,10 @@ namespace Dune {
     //! contained
     int numberInNeighbor () const;
 
+    //! returns twist of face compared to inner element
     int twistInSelf() const;
+
+    //! returns twist of face compared to outer element
     int twistInNeighbor() const;
 
     //! return unit outer normal, this should be dependent on local
@@ -233,7 +238,7 @@ namespace Dune {
     const IMPLElementType* item_;
 
     mutable int nFaces_;
-    mutable int walkLevel_;
+    //mutable int walkLevel_;
     mutable int index_;
 
     mutable bool generatedGlobalGeometry_;
@@ -256,6 +261,8 @@ namespace Dune {
     bool leafNeighbor_;
     bool goneDown_;
     bool isLeafItem_;
+
+    IntersectionIteratorType myType_;
   };
 
   //////////////////////////////////////////////////////////////////////////////
