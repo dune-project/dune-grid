@@ -718,38 +718,11 @@ namespace Dune {
 #endif
   }
 
-  template <class GridImp, class DataHandleImp, bool isDofManager>
-  struct ALUGridLoadBalanceSwitch
-  {
-    static bool callLoadBalance(GridImp & grid, DataHandleImp & data)
-    {
-      return grid.loadBalanceNormal(data);
-    }
-  };
-
-  template <class GridImp, class DataHandleImp>
-  struct ALUGridLoadBalanceSwitch<GridImp,DataHandleImp,true>
-  {
-    static bool callLoadBalance(GridImp & grid, DataHandleImp & data)
-    {
-      return grid.loadBalanceDofManager(data);
-    }
-  };
-
   // load balance grid
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
   inline bool ALU3dGrid<dim, dimworld, elType>::
   loadBalance(DataHandleType & data)
   {
-    return ALUGridLoadBalanceSwitch<ThisType,DataHandleType,
-        Conversion<DataHandleType,IsDofManager>::exists>::callLoadBalance(*this,data);
-  }
-
-  // load balance grid
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::
-  loadBalanceNormal(DataHandleType & data)
-  {
     if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
     typedef typename EntityObject :: ImplementationType EntityImp;
@@ -757,57 +730,20 @@ namespace Dune {
     EntityObject father ( EntityImp(*this, this->maxLevel()) );
     EntityObject son    ( EntityImp(*this, this->maxLevel()) );
 
-    typedef ALU3DSPACE EmptyRestrictProlong LDBRestProlType;
-    LDBRestProlType idxop;
-
-    ALU3DSPACE GatherScatterLoadBalanceNormal< ALU3dGrid<dim, dimworld, elType>, DataHandleType>
-    gs(*this,en,this->getRealImplementation(en),data);
-
-    // call load Balance
-    bool changed = myGrid().duneLoadBalance(gs,idxop);
-
-    if(changed)
-    {
-      // exchange some data for internal useage
-      myGrid().duneExchangeDynamicState();
-      // build new id set
-      if(globalIdSet_) globalIdSet_->updateIdSet();
-      // calculate new maxlevel
-      // reset size and things
-      updateStatus();
-    }
-    return changed;
-#else
-    return false;
-#endif
-  }
-
-
-  // load balance grid
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::
-  loadBalanceDofManager(DataHandleType & data)
-  {
-    if( comm().size() <= 1 ) return false ;
-#if ALU3DGRID_PARALLEL
-    typedef typename EntityObject :: ImplementationType EntityImp;
-    EntityObject en     ( EntityImp(*this, this->maxLevel()) );
-    EntityObject father ( EntityImp(*this, this->maxLevel()) );
-    EntityObject son    ( EntityImp(*this, this->maxLevel()) );
-
-    typedef ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataHandleType > LDBRestProlType;
-    LDBRestProlType idxop( *this,
-                           father , this->getRealImplementation(father),
-                           son    , this->getRealImplementation( son ) ,
-                           data
-                           );
+    typedef ALU3DSPACE LoadBalanceElementCount<ThisType,DataHandleType,
+        Conversion<DataHandleType,IsDofManager>::exists > LDBElCountType;
+    LDBElCountType elCount(*this,
+                           father,this->getRealImplementation(father),
+                           son,this->getRealImplementation(son),
+                           data);
 
     ALU3DSPACE GatherScatterLoadBalance< ALU3dGrid<dim, dimworld, elType>,
-        DataHandleType, LDBRestProlType>
-    gs(*this,en,this->getRealImplementation(en),data,idxop);
+        DataHandleType, LDBElCountType,
+        Conversion<DataHandleType,IsDofManager>::exists >
+    gs(*this,en,this->getRealImplementation(en),data,elCount);
 
     // call load Balance
-    bool changed = myGrid().duneLoadBalance(gs,idxop);
+    bool changed = myGrid().duneLoadBalance(gs,elCount);
 
     if(changed)
     {
@@ -820,8 +756,8 @@ namespace Dune {
       // reset size and things
       updateStatus();
 
-      // compress data
-      data.dofCompress();
+      // compress data , wrapper for dof manager
+      gs.dofCompress();
     }
     return changed;
 #else

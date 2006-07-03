@@ -394,7 +394,7 @@ namespace ALUGridSpace {
 #endif
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType, class IndexOperatorType >
+  template <class GridType, class DataCollectorType, class IndexOperatorType , bool isDofManager >
   class GatherScatterLoadBalance : public GatherScatter
   {
   protected:
@@ -470,16 +470,23 @@ namespace ALUGridSpace {
 
       // reserve memory for new elements
       int elChunk_ = idxOp_.newElements();
-      if( elChunk_ > 0 ) dc_.reserveMemory( elChunk_ );
+      assert( elChunk_ > 0 );
+      dc_.reserveMemory( elChunk_ , true );
 
       realEntity_.setElement(elem);
       dc_.xtractData(str,entity_);
     }
+
+    void dofCompress ()
+    {
+      dc_.dofCompress();
+    }
   };
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType >
-  class GatherScatterLoadBalanceNormal : public GatherScatter
+  template <class GridType, class DataCollectorType, class IndexOperatorType >
+  class GatherScatterLoadBalance<GridType,DataCollectorType,IndexOperatorType,false>
+    : public GatherScatter
   {
   protected:
     enum { codim = 0 };
@@ -517,7 +524,7 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterLoadBalanceNormal(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp )
       : grid_(grid), entity_(en), realEntity_(realEntity)
         , dc_(dc)
     {}
@@ -557,6 +564,10 @@ namespace ALUGridSpace {
       realEntity_.setElement(elem);
       dc_.xtractData(str,entity_);
     }
+
+    // empty because we do not know whether data handle has this method or not
+    void dofCompress ()
+    {}
   };
 
   /////////////////////////////////////////////////////////////////
@@ -657,24 +668,6 @@ namespace ALUGridSpace {
     //! this method is for ghost elements
     int preCoarsening ( HBndSegType & el )
     {
-      /*
-         // hier nur die Indices einfügen
-         // da wir nur 4 ghost kenn macht das prolong keinen Sinn
-
-         PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
-
-         realFather_.setGhost(elem);
-         dm_.insertNewIndex( reFather_ );
-
-         // set element and then start
-         PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-         while( son )
-         {
-         realSon_.setGhost(*son);
-         dm_.removeOldIndex( reSon_ );
-         son = static_cast<PLLBndFaceType *> (son->next());
-         }
-       */
       return 0;
     }
 
@@ -682,24 +675,6 @@ namespace ALUGridSpace {
     //! prolong data, elem is the father
     int postRefinement ( HBndSegType & el )
     {
-      /*
-         // for ghost only indices are inserted, because we only know 4 of 8
-         // elements and therefore no prolongation can be done
-         PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
-
-         realFather_.setGhost(elem);
-         dm_.insertNewIndex( reFather_ );
-
-         // set element and then start
-         PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-         while( son )
-         {
-         assert( son );
-         realSon_.setGhost(*son);
-         dm_.insertNewIndex( reSon_ );
-         son = static_cast<PLLBndFaceType *> (son->next());
-         }
-       */
       return 0;
     }
     int maxLevel () const { return maxlevel_; }
@@ -747,73 +722,52 @@ namespace ALUGridSpace {
       return 0;
     }
 
-
-    //! prolong data, elem is the father
-    int postRefinement ( HBndSegType & el )
-    {
-      return 0;
-    }
-
   };
 
-  //***************************************************************
-  //
-  //  for load balancing
-  //
-  //***************************************************************
-  struct EmptyRestrictProlong : public AdaptRestrictProlongType
-  {
-    virtual ~EmptyRestrictProlong () {}
-    virtual int preCoarsening (HElementType & elem ) { return 0; }
-    virtual int postRefinement (HElementType & elem ) { return 0; }
-    virtual int preCoarsening (HBndSegType & bnd ) { return 0; }
-    virtual int postRefinement (HBndSegType & bnd ) { return 0; }
-  };
-
-  template <class GridType, class DofManagerType>
-  class LoadBalanceRestrictProlongImpl : public AdaptRestrictProlongType
+  // this class is for counting the tree depth of the
+  // element when unpacking data from load balance
+  template <class GridType , class DofManagerType, bool isDofManager>
+  class LoadBalanceElementCount : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef typename GridType:: EntityObject Entity;
+    typedef typename GridType::template Codim<0>::Entity Entity;
     typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
     Entity & reFather_;
-    EntityImp & realFather_;
-
     Entity & reSon_;
+    EntityImp & realFather_;
     EntityImp & realSon_;
 
     DofManagerType & dm_;
-
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
+    typedef typename  Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
 
     int newMemSize_;
-
   public:
     //! Constructor
-    LoadBalanceRestrictProlongImpl (GridType & grid, Entity & f, EntityImp &
-                                    rf, Entity & s, EntityImp & rs, DofManagerType & dm )
-      : grid_(grid), reFather_(f), realFather_(rf) , reSon_(s), realSon_(rs)
-        , dm_(dm), newMemSize_ (1) {}
+    LoadBalanceElementCount (GridType & grid,
+                             Entity & f, EntityImp & rf, Entity & s, EntityImp & rs,DofManagerType & dm)
+      : grid_(grid)
+        , reFather_(f)
+        , reSon_(s)
+        , realFather_(rf)
+        , realSon_(rs)
+        , dm_(dm)
+        , newMemSize_ (1) // we have at least one element (the macro element)
+    {}
 
-    virtual ~LoadBalanceRestrictProlongImpl () {};
+    virtual ~LoadBalanceElementCount () {};
 
     //! restrict data , elem is always the father
     int postRefinement ( HElementType & elem )
     {
       // when called for a macro element, then a new tree is starting
       // set to 1 because for only macro elements this method is not called
-      if( elem.level() == 0) newMemSize_ = 1;
-      realFather_.setElement(elem);
-      dm_.removeOldIndex( reFather_ );
+      if( elem.level() == 0 ) newMemSize_ = 1;
 
-      HElementType * son = elem.down();
-      while( son )
+      for( HElementType * son = elem.down() ; son ; son= son->next())
       {
-        realSon_.setElement(*son);
-        dm_.insertNewIndex( reSon_ );
-        son = son->next();
-        newMemSize_ ++ ;
+        ++ newMemSize_;
       }
       return 0;
     }
@@ -821,16 +775,6 @@ namespace ALUGridSpace {
     //! prolong data, elem is the father
     int preCoarsening ( HElementType & elem )
     {
-      realFather_.setElement(elem);
-      dm_.insertNewIndex( reFather_ );
-
-      HElementType * son = elem.down();
-      while( son )
-      {
-        realSon_.setElement(*son);
-        dm_.removeOldIndex( reSon_ );
-        son = son->next();
-      }
       return 0;
     }
 
@@ -856,13 +800,11 @@ namespace ALUGridSpace {
 
     //! restrict data , elem is always the father
     //! this method is for ghost elements
+    //! we need the ghost method because data is only inlined for interior
+    //! elements, but we have to arange the ghost indices
     int postRefinement ( HBndSegType & el )
     {
-      // when called for a macro element, then a new tree is starting
-      // set to 1 because for only macro elements this method is not called
-      if( el.level() == 0 ) newMemSize_ = 1;
       PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
-
       PLLBndFaceType * vati = static_cast<PLLBndFaceType *> ( elem.up());
       if( vati )
       {
@@ -872,7 +814,6 @@ namespace ALUGridSpace {
 
       realFather_.setGhost(elem);
       dm_.insertNewIndex( reFather_ );
-      newMemSize_ ++;
 
       // set element and then start
       PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
@@ -881,12 +822,59 @@ namespace ALUGridSpace {
         realSon_.setGhost(*son);
         dm_.insertNewIndex( reSon_ );
         son = static_cast<PLLBndFaceType *> (son->next());
-        newMemSize_ ++;
       }
       return 0;
     }
 
     int newElements () const { return newMemSize_; }
+  };
+
+  // this class is for counting the tree depth of the
+  // element when unpacking data from load balance
+  template <class GridType , class DofManagerType>
+  class LoadBalanceElementCount<GridType,DofManagerType,false> : public AdaptRestrictProlongType
+  {
+    typedef typename GridType::template Codim<0>::Entity Entity;
+    typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
+
+  public:
+    //! Constructor
+    LoadBalanceElementCount (GridType & grid,
+                             Entity & f, EntityImp & rf, Entity & s, EntityImp & rs,DofManagerType & dm)
+    {}
+
+    virtual ~LoadBalanceElementCount () {};
+
+    //! restrict data , elem is always the father
+    int postRefinement ( HElementType & elem )
+    {
+      return 0;
+    }
+
+    //! prolong data, elem is the father
+    int preCoarsening ( HElementType & elem )
+    {
+      return 0;
+    }
+
+    //! restrict data , elem is always the father
+    //! this method is for ghost elements
+    int preCoarsening ( HBndSegType & el )
+    {
+      return 0;
+    }
+
+    //! restrict data , elem is always the father
+    //! this method is for ghost elements
+    //! we need the ghost method because data is only inlined for interior
+    //! elements, but we have to arange the ghost indices
+    int postRefinement ( HBndSegType & el )
+    {
+      return 0;
+    }
+
+    int newElements () const { return 0; }
   };
 
 } // end namespace
