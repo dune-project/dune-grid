@@ -394,8 +394,92 @@ namespace ALUGridSpace {
 #endif
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType >
+  template <class GridType, class DataCollectorType, class IndexOperatorType >
   class GatherScatterLoadBalance : public GatherScatter
+  {
+  protected:
+    enum { codim = 0 };
+    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::ImplementationType IMPLElementType;
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::InterfaceType HElementType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<1>::InterfaceType HFaceType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::GhostInterfaceType HGhostType;
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::GhostImplementationType ImplGhostType;
+
+#if ALU3DGRID_PARALLEL
+    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+#else
+    typedef HElementType PllElementType;
+#endif
+    GridType & grid_;
+
+    EntityType     & entity_;
+    RealEntityType & realEntity_;
+
+    // data handle
+    DataCollectorType & dc_;
+    IndexOperatorType & idxOp_;
+
+    // used MessageBuffer
+    typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
+
+  public:
+    //! Constructor
+    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp )
+      : grid_(grid), entity_(en), realEntity_(realEntity)
+        , dc_(dc) , idxOp_(idxOp)
+    {}
+
+    // return true if dim,codim combination is contained in data set
+    bool contains(int dim, int codim) const
+    {
+      return true;
+    }
+
+    //! this method is called from the dunePackAll method of the corresponding
+    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
+    //! here the data is written to the ObjectStream
+    void inlineData ( ObjectStreamType & str , HElementType & elem )
+    {
+      str.write(grid_.maxLevel());
+      // set element and then start
+      assert( elem.level () == 0 );
+      realEntity_.setElement(elem);
+      dc_.inlineData(str,entity_);
+    }
+
+    //! this method is called from the duneUnpackSelf method of the corresponding
+    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
+    //! here the data is read from the ObjectStream
+    void xtractData ( ObjectStreamType & str , HElementType & elem )
+    {
+      assert( elem.level () == 0 );
+      int mxl;
+      str.read(mxl);
+      // set element and then start
+      grid_.setMaxLevel(mxl);
+
+      // reserve memory for new elements
+      int elChunk_ = idxOp_.newElements();
+      if( elChunk_ > 0 ) dc_.reserveMemory( elChunk_ );
+
+      realEntity_.setElement(elem);
+      dc_.xtractData(str,entity_);
+    }
+  };
+
+  //! the corresponding interface class is defined in bsinclude.hh
+  template <class GridType, class DataCollectorType >
+  class GatherScatterLoadBalanceNormal : public GatherScatter
   {
   protected:
     enum { codim = 0 };
@@ -433,7 +517,7 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterLoadBalanceNormal(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity)
         , dc_(dc)
     {}
@@ -449,9 +533,10 @@ namespace ALUGridSpace {
     //! here the data is written to the ObjectStream
     void inlineData ( ObjectStreamType & str , HElementType & elem )
     {
+      // this method is only called for macro elements
+      assert( elem.level () == 0 );
       str.write(grid_.maxLevel());
       // set element and then start
-      assert( elem.level () == 0 );
       realEntity_.setElement(elem);
       dc_.inlineData(str,entity_);
     }
@@ -461,11 +546,14 @@ namespace ALUGridSpace {
     //! here the data is read from the ObjectStream
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
+      // this method is only called for macro elements
       assert( elem.level () == 0 );
+
       int mxl;
       str.read(mxl);
       // set element and then start
       grid_.setMaxLevel(mxl);
+
       realEntity_.setElement(elem);
       dc_.xtractData(str,entity_);
     }
@@ -673,6 +761,14 @@ namespace ALUGridSpace {
   //  for load balancing
   //
   //***************************************************************
+  struct EmptyRestrictProlong : public AdaptRestrictProlongType
+  {
+    virtual ~EmptyRestrictProlong () {}
+    virtual int preCoarsening (HElementType & elem ) { return 0; }
+    virtual int postRefinement (HElementType & elem ) { return 0; }
+    virtual int preCoarsening (HBndSegType & bnd ) { return 0; }
+    virtual int postRefinement (HBndSegType & bnd ) { return 0; }
+  };
 
   template <class GridType, class DofManagerType>
   class LoadBalanceRestrictProlongImpl : public AdaptRestrictProlongType
@@ -698,13 +794,16 @@ namespace ALUGridSpace {
     LoadBalanceRestrictProlongImpl (GridType & grid, Entity & f, EntityImp &
                                     rf, Entity & s, EntityImp & rs, DofManagerType & dm )
       : grid_(grid), reFather_(f), realFather_(rf) , reSon_(s), realSon_(rs)
-        , dm_(dm), newMemSize_ (0) {}
+        , dm_(dm), newMemSize_ (1) {}
 
     virtual ~LoadBalanceRestrictProlongImpl () {};
 
     //! restrict data , elem is always the father
     int postRefinement ( HElementType & elem )
     {
+      // when called for a macro element, then a new tree is starting
+      // set to 1 because for only macro elements this method is not called
+      if( elem.level() == 0) newMemSize_ = 1;
       realFather_.setElement(elem);
       dm_.removeOldIndex( reFather_ );
 
@@ -759,6 +858,9 @@ namespace ALUGridSpace {
     //! this method is for ghost elements
     int postRefinement ( HBndSegType & el )
     {
+      // when called for a macro element, then a new tree is starting
+      // set to 1 because for only macro elements this method is not called
+      if( el.level() == 0 ) newMemSize_ = 1;
       PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
 
       PLLBndFaceType * vati = static_cast<PLLBndFaceType *> ( elem.up());

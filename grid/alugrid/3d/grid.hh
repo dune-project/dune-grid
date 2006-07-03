@@ -421,8 +421,20 @@ namespace Dune {
     bool loadBalance ();
 
     //! calculate load of each proc and repartition if neccessary
+    template <class DataHandleType>
+    bool loadBalance (DataHandleType & data);
+
+    // no interface method
+    // calculate load of each proc and repartition if neccessary
+    // with data transfer, here tpye of data handle is of type DofManager
     template <class DofManagerType>
-    bool loadBalance (DofManagerType & dm);
+    bool loadBalanceDofManager (DofManagerType & dm);
+
+    // no interface method
+    // calculate load of each proc and repartition if neccessary
+    // with data transfer, here Datahandle is arbitrary type
+    template <class DataHandleType>
+    bool loadBalanceNormal (DataHandleType & data);
 
     //! calculate load of each proc and repartition if neccessary
     //template <class DofManagerType>

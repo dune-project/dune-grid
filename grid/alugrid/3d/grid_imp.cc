@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 // Dune includes
 #include <dune/common/stdstreams.hh>
+#include <dune/common/interfaces.hh>
 
 // Local includes
 #include "entity.hh"
@@ -524,11 +525,6 @@ namespace Dune {
       ref = this->adapt();
       if(ref) this->postAdapt();
     }
-
-    // important that loadbalance is called on each processor
-    // so dont put any if statements arround here
-    // this->loadBalance();
-
     return ref;
   }
 
@@ -708,12 +704,12 @@ namespace Dune {
     bool changed = myGrid().duneLoadBalance();
     if(changed)
     {
-      // std::cout << "Grid was balanced on p = " << myRank() << std::endl;
-      // calculate new maxlevel
-      // reset size and things
+      // some exchanges on ALUGrid side
       myGrid().duneExchangeDynamicState();
       // build new Id Set.
       if(globalIdSet_) globalIdSet_->updateIdSet();
+      // calculate new maxlevel
+      // reset size and things
       updateStatus();
     }
     return changed;
@@ -722,27 +718,50 @@ namespace Dune {
 #endif
   }
 
-  // adapt grid
+  template <class GridImp, class DataHandleImp, bool isDofManager>
+  struct ALUGridLoadBalanceSwitch
+  {
+    static bool callLoadBalance(GridImp & grid, DataHandleImp & data)
+    {
+      return grid.loadBalanceNormal(data);
+    }
+  };
+
+  template <class GridImp, class DataHandleImp>
+  struct ALUGridLoadBalanceSwitch<GridImp,DataHandleImp,true>
+  {
+    static bool callLoadBalance(GridImp & grid, DataHandleImp & data)
+    {
+      return grid.loadBalanceDofManager(data);
+    }
+  };
+
+  // load balance grid
   template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
   inline bool ALU3dGrid<dim, dimworld, elType>::
   loadBalance(DataHandleType & data)
   {
+    return ALUGridLoadBalanceSwitch<ThisType,DataHandleType,
+        Conversion<DataHandleType,IsDofManager>::exists>::callLoadBalance(*this,data);
+  }
+
+  // load balance grid
+  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
+  inline bool ALU3dGrid<dim, dimworld, elType>::
+  loadBalanceNormal(DataHandleType & data)
+  {
     if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
-
     typedef typename EntityObject :: ImplementationType EntityImp;
     EntityObject en     ( EntityImp(*this, this->maxLevel()) );
     EntityObject father ( EntityImp(*this, this->maxLevel()) );
     EntityObject son    ( EntityImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLoadBalance< ALU3dGrid<dim, dimworld, elType>, DataHandleType>
-    gs(*this,en,this->getRealImplementation(en),data);
+    typedef ALU3DSPACE EmptyRestrictProlong LDBRestProlType;
+    LDBRestProlType idxop;
 
-    ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataHandleType >
-    idxop( *this,
-           father , this->getRealImplementation(father),
-           son    , this->getRealImplementation( son ) ,
-           data);
+    ALU3DSPACE GatherScatterLoadBalanceNormal< ALU3dGrid<dim, dimworld, elType>, DataHandleType>
+    gs(*this,en,this->getRealImplementation(en),data);
 
     // call load Balance
     bool changed = myGrid().duneLoadBalance(gs,idxop);
@@ -756,6 +775,53 @@ namespace Dune {
       // calculate new maxlevel
       // reset size and things
       updateStatus();
+    }
+    return changed;
+#else
+    return false;
+#endif
+  }
+
+
+  // load balance grid
+  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
+  inline bool ALU3dGrid<dim, dimworld, elType>::
+  loadBalanceDofManager(DataHandleType & data)
+  {
+    if( comm().size() <= 1 ) return false ;
+#if ALU3DGRID_PARALLEL
+    typedef typename EntityObject :: ImplementationType EntityImp;
+    EntityObject en     ( EntityImp(*this, this->maxLevel()) );
+    EntityObject father ( EntityImp(*this, this->maxLevel()) );
+    EntityObject son    ( EntityImp(*this, this->maxLevel()) );
+
+    typedef ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataHandleType > LDBRestProlType;
+    LDBRestProlType idxop( *this,
+                           father , this->getRealImplementation(father),
+                           son    , this->getRealImplementation( son ) ,
+                           data
+                           );
+
+    ALU3DSPACE GatherScatterLoadBalance< ALU3dGrid<dim, dimworld, elType>,
+        DataHandleType, LDBRestProlType>
+    gs(*this,en,this->getRealImplementation(en),data,idxop);
+
+    // call load Balance
+    bool changed = myGrid().duneLoadBalance(gs,idxop);
+
+    if(changed)
+    {
+      // exchange some data for internal useage
+      myGrid().duneExchangeDynamicState();
+      // build new id set
+      if(globalIdSet_) globalIdSet_->updateIdSet();
+
+      // calculate new maxlevel
+      // reset size and things
+      updateStatus();
+
+      // compress data
+      data.dofCompress();
     }
     return changed;
 #else
