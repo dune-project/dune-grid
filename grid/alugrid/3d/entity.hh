@@ -233,7 +233,7 @@ namespace Dune {
     template <int cc>
     typename Codim<cc>::EntityPointer entity (int i) const;
 
-    /*! Intra-level access to intersection with neighboring elements.
+    /*! Intra-level and leaf access to intersection with neighboring elements.
        A neighbor is an entity of codimension 0
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
@@ -242,6 +242,26 @@ namespace Dune {
 
     //! Reference to one past the last intersection with neighbor
     ALU3dGridIntersectionIteratorType iend () const;
+
+    /*! Access to intersection with neighboring elements that are leaf
+     * elements. A neighbor is an entity of codimension 0
+       which has an entity of codimension 1 in commen with this entity. Access to neighbors
+       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
+       referencing the first neighbor. */
+    ALU3dGridIntersectionIteratorType ileafbegin () const;
+
+    //! Reference to one past the last intersection with neighbor
+    ALU3dGridIntersectionIteratorType ileafend () const;
+
+    /*! Intra-level access to intersection with neighboring elements.
+       A neighbor is an entity of codimension 0
+       which has an entity of codimension 1 in commen with this entity. Access to neighbors
+       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
+       referencing the first neighbor. */
+    ALU3dGridIntersectionIteratorType ilevelbegin () const;
+
+    //! Reference to one past the last intersection with neighbor
+    ALU3dGridIntersectionIteratorType ilevelend () const;
 
     //! returns true if Entity is leaf (i.e. has no children)
     bool isLeaf () const;
