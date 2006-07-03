@@ -3,7 +3,10 @@
 #ifndef DUNE_ALU3DGRIDDATAHANDLE_HH
 #define DUNE_ALU3DGRIDDATAHANDLE_HH
 
+//- system includes
 #include <iostream>
+
+//- local includes
 #include "alu3dinclude.hh"
 
 using std::endl;
@@ -49,33 +52,6 @@ namespace ALUGridSpace {
     // returns true, if element is contained in set of comm interface
     // this method must be overlaoded by the impl classes
     virtual bool containsItem (const HElementType & elem) const = 0;
-
-    //! this method is called from the dunePackAll method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is written to the ObjectStream
-    void inlineData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // set element and then start
-      realEntity_.setElement(elem);
-      //dc_.inlineData(str,entity_);
-      //std::cout << "inline entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
-      dc_.gather(str,entity_);
-    }
-
-    //! this method is called from the duneUnpackSelf method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is read from the ObjectStream
-    void xtractData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // set element and then start
-      grid_.updateStatus();
-      realEntity_.setElement(elem);
-      /*
-         dc_.xtractData(str,entity_);
-       */
-      //std::cout << "xtract entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
-      dc_.scatter(str,entity_,dc_.size(entity_));
-    }
 
     void setData ( ObjectStreamType & str , HElementType & elem )
     {
@@ -200,29 +176,6 @@ namespace ALUGridSpace {
 
     // return true if item might from entity belonging to data set
     virtual bool containsItem (const HGhostType & ghost) const = 0;
-
-    //! this method is called from the dunePackAll method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is written to the ObjectStream
-    void inlineData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // set element and then start
-      realEntity_.setElement(elem);
-      dc_.gather(str,entity_);
-      //dc_.inlineData(str,entity_);
-    }
-
-    //! this method is called from the duneUnpackSelf method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is read from the ObjectStream
-    void xtractData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // set element and then start
-      const_cast<GridType &> (grid_).updateStatus();
-      realEntity_.setElement(elem);
-      dc_.scatter(str,entity_,dc_.size(entity_));
-      // dc_.xtractData(str,entity_);
-    }
 
     //! write Data of one element to stream
     void sendData ( ObjectStreamType & str , const HElementType & elem )
@@ -439,6 +392,84 @@ namespace ALUGridSpace {
     }
   };
 #endif
+
+  //! the corresponding interface class is defined in bsinclude.hh
+  template <class GridType, class DataCollectorType >
+  class GatherScatterLoadBalance : public GatherScatter
+  {
+  protected:
+    enum { codim = 0 };
+    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::ImplementationType IMPLElementType;
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::InterfaceType HElementType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<1>::InterfaceType HFaceType;
+
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::GhostInterfaceType HGhostType;
+    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
+    template Codim<codim>::GhostImplementationType ImplGhostType;
+
+#if ALU3DGRID_PARALLEL
+    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
+#else
+    typedef HElementType PllElementType;
+#endif
+    GridType & grid_;
+
+    EntityType     & entity_;
+    RealEntityType & realEntity_;
+
+    // data handle
+    DataCollectorType & dc_;
+
+    // used MessageBuffer
+    typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
+
+  public:
+    //! Constructor
+    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+      : grid_(grid), entity_(en), realEntity_(realEntity)
+        , dc_(dc)
+    {}
+
+    // return true if dim,codim combination is contained in data set
+    bool contains(int dim, int codim) const
+    {
+      return true;
+    }
+
+    //! this method is called from the dunePackAll method of the corresponding
+    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
+    //! here the data is written to the ObjectStream
+    void inlineData ( ObjectStreamType & str , HElementType & elem )
+    {
+      str.write(grid_.maxLevel());
+      // set element and then start
+      assert( elem.level () == 0 );
+      realEntity_.setElement(elem);
+      dc_.inlineData(str,entity_);
+    }
+
+    //! this method is called from the duneUnpackSelf method of the corresponding
+    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
+    //! here the data is read from the ObjectStream
+    void xtractData ( ObjectStreamType & str , HElementType & elem )
+    {
+      assert( elem.level () == 0 );
+      int mxl;
+      str.read(mxl);
+      // set element and then start
+      grid_.setMaxLevel(mxl);
+      realEntity_.setElement(elem);
+      dc_.xtractData(str,entity_);
+    }
+  };
 
   /////////////////////////////////////////////////////////////////
   //
