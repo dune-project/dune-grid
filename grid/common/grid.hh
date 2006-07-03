@@ -1058,7 +1058,23 @@ namespace Dune {
     }
     //@}
 
+    /*! \brief Re-balances the load each process has to handle for a parallel grid,
+     *  if grid has changed , true is returned
+     */
+    bool loadBalance()
+    {
+      return asImp().loadBalance();
+    }
 
+    /*! \brief Re-balances the load each process has to handle for a parallel grid,
+     * the DataHandle data works like the data handle for the communicate
+     * methods. If grid has changed , true is returned.
+     */
+    template<class DataHandle>
+    bool loadBalance (DataHandle& data) const
+    {
+      return asImp().loadBalance(data);
+    }
   private:
     //!  Barton-Nackman trick
     GridImp& asImp () {return static_cast<GridImp &> (*this);}
@@ -1189,6 +1205,18 @@ namespace Dune {
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
     {}
 
+    /*! \brief default implementation of load balance does nothing and returns false */
+    bool loadBalance()
+    {
+      return false;
+    }
+
+    /*! \brief default implementation of load balance does nothing and returns false */
+    template<class DataHandle>
+    bool loadBalance (DataHandle& data) const
+    {
+      return false;
+    }
   protected:
     /**
      * @brief Helper class to choose correct implemetation return type for getRealImplementation
