@@ -222,6 +222,13 @@ namespace Dune {
 
   // calc all necessary things that might have changed
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline void ALU3dGrid<dim, dimworld, elType>::setMaxLevel(int mxl)
+  {
+    maxlevel_ = std::max(maxlevel_,mxl);
+  }
+
+  // calc all necessary things that might have changed
+  template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::updateStatus()
   {
     calcMaxlevel();
@@ -705,6 +712,7 @@ namespace Dune {
       // calculate new maxlevel
       // reset size and things
       myGrid().duneExchangeDynamicState();
+      // build new Id Set.
       if(globalIdSet_) globalIdSet_->updateIdSet();
       updateStatus();
     }
@@ -715,9 +723,9 @@ namespace Dune {
   }
 
   // adapt grid
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataCollectorType>
+  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
   inline bool ALU3dGrid<dim, dimworld, elType>::
-  loadBalance(DataCollectorType & dc)
+  loadBalance(DataHandleType & data)
   {
     if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
@@ -727,31 +735,34 @@ namespace Dune {
     EntityObject father ( EntityImp(*this, this->maxLevel()) );
     EntityObject son    ( EntityImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLeafData< ALU3dGrid<dim, dimworld, elType>, DataCollectorType , 0>
-    gs(*this,en,this->getRealImplementation(en),dc);
+    ALU3DSPACE GatherScatterLoadBalance< ALU3dGrid<dim, dimworld, elType>, DataHandleType>
+    gs(*this,en,this->getRealImplementation(en),data);
 
-    ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataCollectorType >
+    ALU3DSPACE LoadBalanceRestrictProlongImpl < MyType , DataHandleType >
     idxop( *this,
            father , this->getRealImplementation(father),
            son    , this->getRealImplementation( son ) ,
-           dc );
+           data);
 
     // reserve memory for unpacking data
     int defaultChunk = newElementsChunk_;
     int memSize = std::max( idxop.newElements(), defaultChunk );
-    dc.reserveMemory ( memSize );
+    //std::cout << memSize << " memChunk fo p = " << myRank() << std::endl;
+    data.reserveMemory ( memSize );
+    //std::cout << "Start balance on p = " << myRank() << std::endl;
 
     // call load Balance
     bool changed = myGrid().duneLoadBalance(gs,idxop);
 
     if(changed)
     {
-      dverb << "Grid was balanced on p = " << myRank() << std::endl;
       // calculate new maxlevel
       // reset size and things
-      myGrid().duneExchangeData(gs);
+      myGrid().duneExchangeDynamicState();
+      // build new id set
       if(globalIdSet_) globalIdSet_->updateIdSet();
       updateStatus();
+      //std::cout << "Grid was balanced on p = " << myRank() << std::endl;
     }
     return changed;
 #else
