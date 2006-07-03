@@ -744,25 +744,18 @@ namespace Dune {
            son    , this->getRealImplementation( son ) ,
            data);
 
-    // reserve memory for unpacking data
-    int defaultChunk = newElementsChunk_;
-    int memSize = std::max( idxop.newElements(), defaultChunk );
-    //std::cout << memSize << " memChunk fo p = " << myRank() << std::endl;
-    data.reserveMemory ( memSize );
-    //std::cout << "Start balance on p = " << myRank() << std::endl;
-
     // call load Balance
     bool changed = myGrid().duneLoadBalance(gs,idxop);
 
     if(changed)
     {
-      // calculate new maxlevel
-      // reset size and things
+      // exchange some data for internal useage
       myGrid().duneExchangeDynamicState();
       // build new id set
       if(globalIdSet_) globalIdSet_->updateIdSet();
+      // calculate new maxlevel
+      // reset size and things
       updateStatus();
-      //std::cout << "Grid was balanced on p = " << myRank() << std::endl;
     }
     return changed;
 #else
