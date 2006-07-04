@@ -450,7 +450,7 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU2dGridEntityPointer(const GridImp & grid,
                            const ElementType & item,
-                           int face=0
+                           int face = -1
                            )
       : grid_(grid)
         , item_(const_cast<ElementType *>(&item))
@@ -475,16 +475,7 @@ namespace Dune {
         , level_(org.level_)
         , face_(org.face_)
         , entity_(0)
-    {
-      /*
-         if(org.entity_)
-         {
-         level_ = org.entity_->level();
-         entity_ = new EntityObj(EntityImp(grid_, level()));
-              entityImp().setElement(grid_.getRealImplementation(*org.entity_));
-         }
-       */
-    }
+    {}
 
     //! Destructor
     ~ALU2dGridEntityPointer() {
@@ -526,9 +517,7 @@ namespace Dune {
       this->done();
       entity_ = 0;
       assert(&grid_ == &org.grid_);
-      //if(entity_) this->done();
       item_ = org.item_;
-      //std::cout << item_ << " assign entity \n";
       face_ = org.face_;
       level_ = org.level_;
       return *this;
@@ -552,7 +541,6 @@ namespace Dune {
     const GridImp & grid_;
 
     //! pointer to the real (H)Element
-    //mutable HElementType * item_;
     mutable ElementType * item_;
     mutable int level_;
     int face_;
@@ -563,5 +551,4 @@ namespace Dune {
 } // end namespace Dune
 
 #include "entity_imp.cc"
-
 #endif

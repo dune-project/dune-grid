@@ -83,12 +83,18 @@ namespace Dune {
     friend class ALU2dGridLeafIntersectionIterator<GridImp>;
 
   protected:
-    struct impl {
-      impl() {
-        item_ = 0;
-        neigh_ = 0;
-        index_= 0;
-        opposite_ = 0;
+    struct impl
+    {
+      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0) {}
+      impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_) {}
+
+      impl & operator = (const impl & org)
+      {
+        item_ = org.item_;
+        neigh_ = org.neigh_;
+        index_ = org.index_;
+        opposite_ = org.opposite_;
+        return *this;
       }
       // current element from which we started the intersection iterator
       mutable HElementType* item_;
@@ -117,7 +123,7 @@ namespace Dune {
     bool equals (const ALU2dGridIntersectionBase<GridImp> & i) const;
 
     //! increment iterator
-    virtual void increment() = 0;
+    virtual void increment() { abort(); };
 
     //! return level of inside(entity)
     int level () const;
@@ -415,8 +421,6 @@ namespace Dune {
     bool endIter_;
     //! actual level
     int level_;
-    //! information for edges
-    int face_;
 
     HElementType * item_;
 
@@ -477,12 +481,9 @@ namespace Dune {
     //! actual level
     int level_;
     //! information for edges
-    int face_;
+    int myFace_;
 
-    //! true if iterator is already a copy
-    int nrOfEdges_;
-    int* indexList;
-
+    // current item
     HElementType * item_;
 
     //! type of entity we iterate (interface)
@@ -492,6 +493,8 @@ namespace Dune {
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
     IteratorType iter_;
+
+    ALU2dGridMarkerVector & marker_;
   };
 
   //**********************************************************************

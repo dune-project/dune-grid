@@ -29,11 +29,8 @@ namespace Dune {
     intersectionSelfLocal_(GeometryImp()),
     intersectionNeighborLocal_(GeometryImp()),
     grid_(grid),
-    //item_(0),
-    //neigh_(0),
     nFaces_(3),
     walkLevel_(wLevel),
-    //index_(0),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
     done_(end)
@@ -49,6 +46,7 @@ namespace Dune {
     }
   }
 
+  //constructor for end iterator
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
   ALU2dGridIntersectionBase(const GridImp & grid, int wLevel) :
@@ -61,13 +59,16 @@ namespace Dune {
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
     done_(true)
-  {}
+  {
+    this->done();
+  }
 
 
   //! The copy constructor
   template<class GridImp>
   inline ALU2dGridIntersectionBase<GridImp> ::
   ALU2dGridIntersectionBase(const ALU2dGridIntersectionBase<GridImp> & org) :
+    current(org.current),
     intersectionGlobal_(GeometryImp()),
     intersectionSelfLocal_(GeometryImp()),
     intersectionNeighborLocal_(GeometryImp()),
@@ -90,6 +91,7 @@ namespace Dune {
     generatedGlobalGeometry_ = false;
     generatedLocalGeometries_ = false;
     done_ = org.done_;
+    current = org.current;
   }
 
   //! check whether entities are the same or whether iterator is done
@@ -105,6 +107,7 @@ namespace Dune {
   //! return level of inside() entitiy
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp> :: level () const {
+    assert( this->current.item_ );
     return this->current.item_->level();
   }
 
@@ -166,6 +169,13 @@ namespace Dune {
     current.item_ = 0;
     current.neigh_ = 0;
     current.index_= nFaces_;
+
+    /*
+       #ifndef NDEBUG
+       static const ALU2dGridIntersectionBase<GridImp> end (this->grid_,current.item_,walkLevel_,true);
+       assert( this->equals(end) );
+       #endif
+     */
   }
 
   //! return EntityPointer to the Entity on the outside of this intersection.
@@ -676,17 +686,16 @@ namespace Dune {
     EntityPointerType (grid),
     endIter_(end),
     level_(level),
-    face_(0),
     iter_()
   {
-    if(!end) {
+    if(!end)
+    {
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
       if((!iter_->done()))
       {
         item_ = &(iter_->getitem());
-        this->updateEntityPointer(item_, face_, level_);
-        increment();
+        this->updateEntityPointer(item_, -1 , level_);
       }
     }
     else
@@ -703,9 +712,8 @@ namespace Dune {
     : EntityPointerType (org)
       , endIter_( org.endIter_ )
       , level_( org.level_ )
-      , face_(org.face_)
       , item_(org.item_)
-      , iter_ ( org.iter_ )
+      , iter_ (org.iter_)
   {}
 
   //! assignment
@@ -717,7 +725,6 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ =  org.endIter_ ;
     level_   =  org.level_;
-    face_    =  org.face_;
     item_    =  org.item_;
     iter_    =  org.iter_;
     return *this;
@@ -727,20 +734,18 @@ namespace Dune {
   template<PartitionIteratorType pitype, class GridImp>
   inline void ALU2dGridLevelIterator<0, pitype, GridImp> :: increment () {
 
-    if(endIter_)
-      return ;
+    if(endIter_) return ;
 
     IteratorType & iter = iter_;
 
     iter->next();
     if(iter->done()) {
       endIter_ = true;
-      face_= 0;
       this->done();
       return ;
     }
     item_ = &iter->getitem();
-    this->updateEntityPointer(item_, face_, level_);
+    this->updateEntityPointer(item_, -1 , level_);
     return;
   }
 
@@ -759,22 +764,22 @@ namespace Dune {
     EntityPointerType (grid),
     endIter_(end),
     level_(level),
-    face_(0),
-    nrOfEdges_(grid.hierSetSize(1)),
-    iter_()
+    myFace_(0),
+    iter_(),
+    marker_(grid.getMarkerVector(level))
   {
-    indexList = new int[nrOfEdges_];
-    for (int i = 0; i < nrOfEdges_; ++i)
-      indexList[i]= 0;
-
     if(!end)
     {
+      // update marker Vector if necessary
+      if( ! marker_.up2Date() ) marker_.update(grid,level);
+
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
+
       if((!iter_->done()))
       {
         elem_ = &(iter_->getitem());
-        this->updateEntityPointer(elem_, face_, level_);
+        this->updateEntityPointer(elem_, myFace_, level_);
         increment();
       }
     }
@@ -792,16 +797,12 @@ namespace Dune {
     : EntityPointerType (org)
       , endIter_( org.endIter_ )
       , level_( org.level_ )
-      , face_(org.face_)
-      , nrOfEdges_(org.nrOfEdges_)
+      , myFace_(org.myFace_)
       , item_(org.item_)
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
-  {
-    indexList = new int[nrOfEdges_];
-    for (int i = 0; i < nrOfEdges_; ++i)
-      indexList[i] = org.indexList[i];
-  }
+      , marker_(org.marker_)
+  {}
 
   //! assignment
   template<PartitionIteratorType pitype, class GridImp>
@@ -812,74 +813,72 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ =  org.endIter_ ;
     level_   =  org.level_;
-    face_    =  org.face_;
-    nrOfEdges_ = org.nrOfEdges_;
+    myFace_    =  org.myFace_;
     item_    = org.item_;
     elem_    = org.elem_;
     iter_    =  org.iter_;
 
-    if(indexList) delete indexList;
-    indexList = new int[nrOfEdges_];
-    for (int i = 0; i < nrOfEdges_; ++i)
-      indexList[i] = org.indexList[i];
-
+    assert(&marker_ == &org.marker_);
     return *this;
   }
 
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<1, pitype, GridImp> ::
   ~ALU2dGridLevelIterator()
-  {
-    delete indexList;
-  }
+  {}
 
   //! prefix increment
   template<PartitionIteratorType pitype, class GridImp>
   inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment () {
 
-    if(endIter_)
-      return ;
+    // if already end iter, return
+    if(endIter_) return ;
 
     IteratorType & iter = iter_;
-    assert(face_>=0);
+    assert(myFace_>=0);
 
     int goNext = 1;
     item_ = &iter->getitem();
-    while (face_ < 3) {
-      int idx = item_->edge_idx(face_);
-      if(!indexList[idx]) {
-        indexList[idx]=1;
+    int elIdx = item_->getIndex();
+
+    while (myFace_ < 3) {
+      int idx = item_->edge_idx(myFace_);
+      // check if face is visited on this element
+      if( marker_.isOnElement(elIdx,idx,1) )
+      {
         goNext = 0;
         break;
       }
-      ++face_;
+      ++myFace_;
     }
 
     if (goNext) {
-      assert(face_==3);
+      assert(myFace_==3);
       iter->next();
       if(iter->done()) {
         endIter_ = true;
-        face_= 0;
+        myFace_= 0;
         this->done();
         return ;
       }
-      face_=0;
+
+      myFace_= 0;
       item_ = &iter->getitem();
-      this->updateEntityPointer(item_, face_, level_);
+      this->updateEntityPointer(item_, myFace_, level_);
       increment();
       return;
     }
 
-    if(iter->done()) {
+    if(iter->done())
+    {
       endIter_ = true;
-      face_= 0;
+      myFace_= 0; // set face to non valid value
       this->done();
       return ;
     }
     item_ = &iter->getitem();
-    this->updateEntityPointer(item_, face_, level_);
-    ++face_;
+    this->updateEntityPointer(item_, myFace_, level_);
+    ++myFace_;
   }
 
 

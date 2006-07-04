@@ -106,12 +106,6 @@ namespace Dune {
   struct ALU2dGridFamily
   {
     //! Type of the global id set
-    //typedef ALU2dGridGlobalIdSet<dim,dimworld> GlobalIdSetImp;
-
-    //! Type of the local id set
-    //typedef GlobalIdSetImp LocalIdSetImp;
-
-    //! Type of the global id set
     typedef ALU2dGridLocalIdSet<dim,dimworld> GlobalIdSetImp;
 
     //! Type of the local id set
@@ -264,7 +258,6 @@ namespace Dune {
     ALU2dGrid(std::string macroTriangFilename )
       : mesh_ (macroTriangFilename.c_str())
         , hIndexSet_(*this)
-        , globalIdSet_(0)
         , localIdSet_(*this)
         , levelIndexVec_(MAXL,0)
         , geomTypes_(dim+1,1)
@@ -367,14 +360,12 @@ namespace Dune {
 
     //! get global id set of grid
     const GlobalIdSet & globalIdSet () const {
-      if(!globalIdSet_) globalIdSet_ = new GlobalIdSetImp(*this);
-      return *globalIdSet_;
+      return localIdSet();
     }
 
     //! get global id set of grid
     const LocalIdSet & localIdSet () const {
       return localIdSet_;
-      //return *globalIdSet();
     }
 
     //! number of grid entities in the entire grid for given codim
@@ -468,8 +459,6 @@ namespace Dune {
     //! the hierarchic index set
     HierarchicIndexSet hIndexSet_;
 
-    //! the id set
-    mutable GlobalIdSetImp * globalIdSet_;
     //! out global id set
     LocalIdSetImp localIdSet_;
 
@@ -505,6 +494,16 @@ namespace Dune {
       return interItProvider_;
     }
     mutable IntersectionIteratorProviderType interItProvider_;
+
+    mutable ALU2dGridMarkerVector marker_[MAXL];
+  public:
+    ALU2dGridMarkerVector & getMarkerVector(int level) const
+    {
+      assert( level >= 0);
+      assert( level <= MAXL);
+      return marker_[level];
+    }
+
   }; // end class ALU2dGrid
 
   template <class GridImp, int codim>

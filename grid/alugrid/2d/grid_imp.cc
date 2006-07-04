@@ -171,10 +171,10 @@ namespace Dune {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
     }
 
+    for(int i=0; i<MAXL; ++i) marker_[i].unsetUp2Date();
+
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
     // update id set, i.e. insert new elements
-    if(globalIdSet_) globalIdSet_->updateIdSet();
-    //for(unsigned int i=0; i<MAXL; i++) vertexList_[i].unsetUp2Date();
     coarsenMarked_ = 0;
     refineMarked_  = 0;
   }
@@ -354,7 +354,6 @@ namespace Dune {
       , coarsenMarked_(0) , refineMarked_(0)
       , geomTypes_(dim+1,1)
       , hIndexSet_(*this)
-      , globalIdSet_ (0)
       , localIdSet_ (*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
@@ -365,7 +364,6 @@ namespace Dune {
   inline ALU2dGrid<dim, dimworld>::~ALU2dGrid()
   {
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
-    delete globalIdSet_; globalIdSet_ = 0;
     delete leafIndexSet_; leafIndexSet_ = 0;
     delete sizeCache_; sizeCache_ = 0;
   }

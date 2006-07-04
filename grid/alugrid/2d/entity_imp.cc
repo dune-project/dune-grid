@@ -382,9 +382,10 @@ namespace Dune {
   template<int cd, class GridImp>
   inline void ALU2dGridEntityPointer<cd, GridImp> :: done() {
     item_ = 0;
-    face_ = 0;
+    face_ = -1; // set face to non-valid value
     // sets entity pointer in the status of an empty entity
-    if(entity_)  {
+    if(entity_)
+    {
       entityImp().removeElement();
       //grid_.freeEntity( entity_ );
       delete entity_;
@@ -393,26 +394,9 @@ namespace Dune {
   }
 
   template<int cd, class GridImp>
-  inline bool ALU2dGridEntityPointer<cd, GridImp> :: equals(const ALU2dGridEntityPointer<cd, GridImp> & i) const {
-    return ElementWrapper<cd,dim, GridImp>::isTheSame (*item_, face_, *i.item_, i.face_);
-
-    /*
-       if (cd != 1)
-        return (item_ == i.item_);
-       else {
-        if (item_ == i.item_)
-          if (face_ == i.face_)
-            return true;
-          else
-            return false;
-        else {
-          if (item_->edge(face_).coord()[0] == i.item_->edge(i.face_).coord()[0])
-            if (item_->edge(face_).coord()[1] == i.item_->edge(i.face_).coord()[1])
-              return true;
-        }
-       }
-       return false;
-     */
+  inline bool ALU2dGridEntityPointer<cd, GridImp> :: equals(const ALU2dGridEntityPointer<cd, GridImp> & i) const
+  {
+    return ElementWrapper<cd,dim, GridImp>::isTheSame (item_, face_, i.item_, i.face_);
   }
 
   //! update underlying item pointer and set entity
@@ -461,8 +445,8 @@ namespace Dune {
       return elem.nbbnd(i)->type();
 
     }
-    static inline bool isTheSame(const HElementType & elem, int face, const HElementType & org, int org_face) {
-      return (&elem == &org);
+    static inline bool isTheSame(const HElementType * elem, int face, const HElementType * org, int org_face) {
+      return (elem == org);
     }
   };
 
@@ -488,16 +472,16 @@ namespace Dune {
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
     }
-    static inline bool isTheSame(const HElementType & elem, int face, const HElementType & org, int org_face) {
-      if (&elem == &org) {
+    static inline bool isTheSame(const HElementType * elem, int face, const HElementType * org, int org_face) {
+      if (elem == org) {
         if (face == org_face)
           return true;
         else
           return false;
       }
       else {
-        if (&elem != 0 && &org != 0)
-          return  (elem.edge_idx(face) == org.edge_idx(org_face));
+        if (elem != 0 && org != 0)
+          return  (elem->edge_idx(face) == org->edge_idx(org_face));
       }
       return false;
     }
@@ -529,8 +513,8 @@ namespace Dune {
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented this codim!");
     }
-    static inline bool isTheSame(const ALU2DSPACE Vertex & elem, int face, const ALU2DSPACE Vertex & org, int org_face) {
-      return (&elem == &org);
+    static inline bool isTheSame(const ALU2DSPACE Vertex * elem, int face, const ALU2DSPACE Vertex * org, int org_face) {
+      return (elem == org);
     }
   };
 

@@ -85,7 +85,6 @@ namespace Dune {
       if( type != grid_.geomTypes(codim)[0] ) return 0;
       // return size of hierarchic index set
       return grid_.hierSetSize(codim);
-      //return grid_.size(codim);
     }
 
     //! return size of indexset, i.e. maxindex+1
@@ -93,7 +92,6 @@ namespace Dune {
     {
       // return size of hierarchic index set
       return grid_.hierSetSize(codim);
-      //return grid_.size(codim);
     }
 
     //! deliver all geometry types used in this grid
@@ -124,8 +122,6 @@ namespace Dune {
     // our Grid
     const GridType & grid_;
   };
-
-
 
   //*****************************************************************
   //
