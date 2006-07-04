@@ -280,7 +280,8 @@ namespace Dune {
       const double (&_p2)[3] = face.myvertex(2)->Point();
 
       // change sign if face normal points into inner element
-      const double factor = (this->connector_.innerTwist() < 0) ? 0.5 : -0.5;
+      // factor is 1.0 to get integration outer normal and not volume outer normal
+      const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0;
 
       // see mapp_tetra_3d.h for this piece of code
       outerNormal_[0] = factor * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2]));
