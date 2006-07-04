@@ -78,9 +78,6 @@ namespace Dune {
           if( marker_[edgeCodim][edgeIdx] < 0) marker_[edgeCodim][edgeIdx] = elIdx;
         }
       }
-
-      //for(size_t k=0; k<marker_[0].size(); ++k)
-      //  std::cout << "Edge[" << k <<"] is watched on el " << marker_[0][k] << "\n";
       up2Date_ = true;
     }
 
