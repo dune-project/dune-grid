@@ -1184,11 +1184,13 @@ namespace Dune {
   //************************************************************************
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
-     \brief A structured mesh in d dimensions consisting of "cubes".
+     \brief A structured mesh in d dimensions consisting of "cubes" (pilot implementation of the Dune grid interface, for debugging only).
      \ingroup GridImplementations
 
           This module describes the pilot implementation of the Dune grid interface.
           It implements the grid interface for simple structured meshes.
+
+          \warning SGrid is slow. It is intended for debugging only.
 
           The following class diagram shows how the classes are related with
           each other:
