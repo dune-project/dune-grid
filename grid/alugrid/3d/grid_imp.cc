@@ -576,8 +576,8 @@ namespace Dune {
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
 
     typedef typename EntityObject :: ImplementationType EntityImp;
-    EntityObject f  ( EntityImp(*this, this->maxLevel()) );
-    EntityObject s  ( EntityImp(*this, this->maxLevel()) );
+    EntityObject father  ( EntityImp(*this, this->maxLevel()) );
+    EntityObject son     ( EntityImp(*this, this->maxLevel()) );
 
     typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
     typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
@@ -595,15 +595,13 @@ namespace Dune {
     bool ref = false ;
     if(globalIdSet_)
     {
-      //std::cout << "adapt with global Id set \n";
-
       // if global id set exists then include into
       // prolongation process
       ALU3DSPACE AdaptRestrictProlongGlSet<ALU3dGrid<dim, dimworld, elType>,
           COType, GlobalIdSetImp  >
       rp(*this,
-         f,this->getRealImplementation(f),
-         s,this->getRealImplementation(s),
+         father,this->getRealImplementation(father),
+         son,   this->getRealImplementation(son),
          tmprpop,
          *globalIdSet_);
 
@@ -615,8 +613,8 @@ namespace Dune {
       ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>,
           COType >
       rp(*this,
-         f,this->getRealImplementation(f),
-         s,this->getRealImplementation(s),
+         father,this->getRealImplementation(father),
+         son,   this->getRealImplementation(son),
          tmprpop);
 
       ref = myGrid().duneAdapt(rp); // adapt grid
