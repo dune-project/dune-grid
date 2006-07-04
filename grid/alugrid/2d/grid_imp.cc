@@ -159,19 +159,20 @@ namespace Dune {
   template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld>::calcExtras()
   {
-
     // Segmentation faults (!) beim SizeCache
     if(sizeCache_) delete sizeCache_;
     bool isSimplex = true;
 
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
+    // place this before update of level index, because
+    // marker vector is used by level index set
+    for(int i=0; i<MAXL; ++i) marker_[i].unsetUp2Date();
+
     for(unsigned int i=0; i<levelIndexVec_.size(); i++)
     {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
     }
-
-    for(int i=0; i<MAXL; ++i) marker_[i].unsetUp2Date();
 
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
     // update id set, i.e. insert new elements
@@ -230,6 +231,7 @@ namespace Dune {
   //! refine grid refCount times
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: globalRefine(int refCount) {
+
     for (int j = 0; j < refCount; ++j) {
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh_);
       for( walk->first() ; ! walk->done() ; walk->next()) {
@@ -253,7 +255,8 @@ namespace Dune {
 
   //! clear all entity new markers
   template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld> :: postAdapt () {
+  inline void ALU2dGrid<dim, dimworld> :: postAdapt ()
+  {
     ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh_);
     for( walk->first() ; ! walk->done() ; walk->next()) {
       ALU2DSPACE Element & tr = walk->getitem();
@@ -266,7 +269,8 @@ namespace Dune {
      return true if a least one entity was refined
    */
   template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: adapt ( ) {
+  inline bool ALU2dGrid<dim, dimworld> :: adapt ( )
+  {
     if (preAdapt()) {
       mesh_.coarse();
       mesh_.refine();
