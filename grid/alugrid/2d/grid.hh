@@ -250,6 +250,8 @@ namespace Dune {
 
     typedef ALU2dGridHierarchicIterator<ThisType> HierarchicIteratorImp;
 
+    typedef typename Traits::CollectiveCommunication CollectiveCommunicationType;
+
     //! maximal number of levels
     enum { MAXL = 64 };
 
@@ -415,8 +417,10 @@ namespace Dune {
     //! refinement, one refinement will create 8 children per element
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
-
+    //! return dummy communication
+    const CollectiveCommunicationType & comm() const { return comm_; }
   private:
+    CollectiveCommunicationType comm_;
 
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 

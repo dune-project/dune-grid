@@ -493,10 +493,7 @@ namespace Dune {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
-    static inline int getElemIndex(GridImp & grid, const ALU2DSPACE Vertex &elem, int i) {
-      assert(i < 3 && i >= 0);
-      //cout << "  getElemIndex: " << elem.getIndex() << endl;
-      //cout << "  coord: " << elem.coord()[0] << " " << elem.coord()[1] << endl;
+    static inline int getElemIndex(GridImp & grid, const ALU2DSPACE Vertex &elem, int) {
       return elem.getIndex();
     }
     static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {
