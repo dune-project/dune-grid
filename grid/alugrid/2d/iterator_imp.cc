@@ -897,24 +897,24 @@ namespace Dune {
     EntityPointerType (grid),
     endIter_(end),
     level_(level),
-    face_(0),
-    nrOfVertices_(grid.size(2)),
-    iter_()
+    myFace_(0),
+    iter_(),
+    marker_(grid.getMarkerVector(level))
   {
-    indexList = new int[nrOfVertices_];
-    for (int i = 0; i < nrOfVertices_; ++i)
-      indexList[i]= 0;
-
     if(!end)
     {
+      // update marker Vector if necessary
+      if( ! marker_.up2Date() ) marker_.update(grid,level_);
+
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
+
       if((!iter_->done()))
       {
         item_ = &iter_->getitem();
-        vertex_ = item_->vertex(face_);
-        indexList[vertex_->getIndex()] = 1;
-        this->updateEntityPointer(vertex_, face_, level_);
+        vertex_ = item_->vertex(myFace_);
+        this->updateEntityPointer(vertex_, myFace_, level_);
+        increment();
       }
     }
     else
@@ -931,16 +931,12 @@ namespace Dune {
     : EntityPointerType (org)
       , endIter_( org.endIter_ )
       , level_( org.level_ )
-      , face_(org.face_)
-      , nrOfVertices_(org.nrOfVertices_)
+      , myFace_(org.myFace_)
       , item_(org.item_)
       , vertex_(org.vertex_)
       , iter_ ( org.iter_ )
-  {
-    indexList = new int[nrOfVertices_];
-    for (int i = 0; i < nrOfVertices_; ++i)
-      indexList[i] = org.indexList[i];
-  }
+      , marker_(org.marker_)
+  {}
 
   //! assignment
   template<PartitionIteratorType pitype, class GridImp>
@@ -951,16 +947,12 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ = org.endIter_ ;
     level_   = org.level_;
-    face_    = org.face_;
-    nrOfVertices_ = org.nrOfVertices_;
+    myFace_    = org.face_;
     item_    = org.item_;
     vertex_  = org.vertex_;
     iter_    = org.iter_;
 
-    if(indexList) delete indexList;
-    indexList = new int[nrOfVertices_];
-    for (int i = 0; i < nrOfVertices_; ++i)
-      indexList[i] = org.indexList[i];
+    assert(&marker_ == &org.marker_);
 
     return *this;
   }
@@ -969,9 +961,7 @@ namespace Dune {
   template<PartitionIteratorType pitype, class GridImp>
   inline ALU2dGridLevelIterator<2, pitype, GridImp> ::
   ~ALU2dGridLevelIterator()
-  {
-    delete indexList;
-  }
+  {}
 
   //! prefix increment
   template<PartitionIteratorType pitype, class GridImp>
@@ -981,48 +971,53 @@ namespace Dune {
       return ;
 
     IteratorType & iter = iter_;
+    assert(myFace_>=0);
 
-    assert(face_>=0);
     int goNext = 1;
     item_ = &iter->getitem();
-    while (face_ < 3) {
-      vertex_ = item_->vertex(face_);
+    int elIdx = item_->getIndex();
+
+    while (myFace_ < 3) {
+      vertex_ = item_->vertex(myFace_);
       int idx = vertex_->getIndex();
-      if(!indexList[idx]) {
-        indexList[idx]=1;
+
+      // check if face is visited on this element
+      if( marker_.isOnElement(elIdx,idx,2) )
+      {
         goNext = 0;
         break;
       }
-      ++face_;
+      ++myFace_;
     }
 
     if (goNext) {
-      assert(face_==3);
+      assert(myFace_==3);
       iter->next();
       if(iter->done()) {
         endIter_ = true;
-        face_= 0;
+        myFace_= 0;
         this->done();
         return ;
       }
-      face_=0;
+
+      myFace_ = 0;
       item_ = &iter->getitem();
-      vertex_ = item_->vertex(face_);
-      this->updateEntityPointer(vertex_, face_, level_);
+      vertex_ = item_->vertex(myFace_);
+      this->updateEntityPointer(vertex_, myFace_, level_);
       increment();
       return;
     }
 
     if(iter->done()) {
       endIter_ = true;
-      face_= 0;
+      myFace_= 0;
       this->done();
       return ;
     }
     item_ = &iter->getitem();
-    vertex_ = item_->vertex(face_);
-    this->updateEntityPointer(vertex_, face_, level_);
-    ++face_;
+    vertex_ = item_->vertex(myFace_);
+    this->updateEntityPointer(vertex_, myFace_, level_);
+    ++myFace_;
   }
 
 

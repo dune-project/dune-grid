@@ -547,10 +547,8 @@ namespace Dune {
     //! actual level
     int level_;
     //! information for edges
-    int face_;
+    int myFace_;
     //! true if iterator is already a copy
-    int nrOfVertices_;
-    int* indexList;
 
     HElementType * item_;
     ALU2DSPACE Vertex * vertex_;
@@ -560,7 +558,7 @@ namespace Dune {
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     IteratorType iter_;
-
+    ALU2dGridMarkerVector & marker_;
   };
 
   //***************************************************************
