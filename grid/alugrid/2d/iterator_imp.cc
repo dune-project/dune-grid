@@ -772,7 +772,7 @@ namespace Dune {
     if(!end)
     {
       // update marker Vector if necessary
-      if( ! marker_.up2Date() ) marker_.update(grid,level);
+      if( ! marker_.up2Date() ) marker_.update(grid,level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
