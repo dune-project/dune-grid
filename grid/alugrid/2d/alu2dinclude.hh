@@ -63,9 +63,11 @@ namespace Dune {
 
       enum { dim = GridType::dimension };
       IteratorType iter(grid.myGrid(), level);
+
       for(iter->first(); !iter->done(); iter->next())
       {
         ElementType & elem = iter->getitem();
+
         int elIdx = elem.getIndex();
         for(int i=0; i<dim+1; ++i)
         {
