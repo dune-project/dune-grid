@@ -483,7 +483,8 @@ namespace Dune {
         this->done();
     }
     if (this->current.neigh_ != 0)
-      assert(this->current.neigh_->leaf());
+      this->current.opposite_= this->current.item_->opposite(this->current.index_);
+
     return;
   }
 
