@@ -157,7 +157,7 @@ namespace Dune {
      There are two ways of constructing Dune grids using DGF files:
 
      -# By including the file gridtype.hh from the
-        dune/grid/utility/macrogridparser
+        dune/grid/io/file/dgfparser
         directory: \n
         by defining one of the symbols
         \c ALBERTAGRID ,
@@ -170,7 +170,7 @@ namespace Dune {
         one obtains a definition of the type \c GridType and
         the required header files for the desired grid and the macrogrid parser
         are included.
-     -# By directly including one of the files macrogrid*.hh
+     -# By directly including one of the files dgf*.hh
         from the dune/grid/io/file/dgfparser directory: \n
         in this case only the required header files for the
         desired grid and the macrogrid parser are included but no typedef is made.
