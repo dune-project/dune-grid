@@ -24,3 +24,5 @@ BOUNDARYDOMAIN
 3  -1 -1   -1  1        % left boundary has id 3
 4  -1 -1    1 -1        % lower boundary has id 4
 #BOUNDARYDOMAIN
+# examplegrid3.dgf
+

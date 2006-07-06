@@ -11,3 +11,5 @@ default 1      % default boundary id
 % have boundary id 2, i.e., the bottom boundary 
 2   -1 -1 -1    11 11 0  
 #
+# examplegrid6.dgf
+

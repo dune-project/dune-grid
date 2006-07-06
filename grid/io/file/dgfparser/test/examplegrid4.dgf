@@ -22,3 +22,5 @@ BOUNDARYDOMAIN
 1  -1 -1    1 -1       % lower boundary has id 1
 2  -10 -10    10  10   % all others have id 2 (could use default keyword...)
 #BOUNDARYDOMAIN
+# examplegrid4.dgf
+

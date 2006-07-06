@@ -23,4 +23,4 @@ BOUNDARYSEGMENTS
 BOUNDARYDOMAIN
 default 1     % all other boundary segments have id 1
 #
-
+# examplegrid1c.dgf

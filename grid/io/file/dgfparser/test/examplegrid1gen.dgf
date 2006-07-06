@@ -19,4 +19,4 @@ Vertex        % the verticies of the grid
 BOUNDARYDOMAIN
 default 1     % all other boundary segments have id 1
 #
-
+# examplegrid1gen.dgf

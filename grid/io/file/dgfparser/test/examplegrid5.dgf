@@ -9,3 +9,4 @@ Simplex
 BOUNDARYDOMAIN
 default 1     % default boundary id
 #BOUNDARYDOMAIN
+# examplegrid5.dgf

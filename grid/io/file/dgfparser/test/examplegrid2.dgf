@@ -19,3 +19,4 @@ display 1    % show result using Triangle viewer
 BOUNDARYDOMAIN
 default 1    % all boundaries have id 1
 #BOUNDARYDOMAIN
+# examplegrid2.dgf
