@@ -59,4 +59,4 @@ testug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(MPI_LDFLAGS) $(UG_
 testug_DEPENDENCIES = $(LOCAL_LIBS)
 endif
 
-
+include $(top_srcdir)/am/global-rules
