@@ -3,11 +3,11 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALUGRID_CPPFLAGS)
 if ALUGRID
   noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
-  #libalu3d_la_LIBADD = -lcommon
+  # libalu3d_la_LIBADD = -lcommon
 else
   noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = topology.cc
-  #libalu3d_la_LIBADD = -lcommon
+  # libalu3d_la_LIBADD = -lcommon
 endif
 
 alu3dgriddir = $(includedir)/dune/grid/alugrid/3d
