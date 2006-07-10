@@ -237,6 +237,11 @@ namespace Dune {
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
 
+    //! Constructor
+    HierarchicGridPart(const GridType& grid, const IndexSetType & ) :
+      GridPartDefault<Traits>(grid, isetWrapper_),
+      isetWrapper_(grid) {}
+
     //! Begin iterator on the leaf level
     template <int cd>
     typename Traits::template Codim<cd>::IteratorType begin() const {

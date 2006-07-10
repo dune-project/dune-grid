@@ -113,7 +113,7 @@ namespace Dune {
     //! no extra memory for restriction is needed
     int additionalSizeEstimate () const { return 0; }
 
-    int type() const { return myType; }
+    static int type() { return myType; }
 
     //! we have no old size
     int numberOfHoles ( int codim ) const { return 0; }
@@ -289,7 +289,7 @@ namespace Dune {
       : IndexSetWrapper<  LevelIndexSetType > (grid.levelIndexSet(level)) {}
 
     //! return type of index set (for input/output)
-    int type() const { return myType; }
+    static int type() { return myType; }
   };
 
   //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid
@@ -311,7 +311,7 @@ namespace Dune {
       : IndexSetWrapper< HSetType > (grid.hierarchicIndexSet(),true) {}
 
     //! return type (for Grape In/Output)
-    int type() const { return myType; }
+    static int type() { return myType; }
   };
 
   //! Wraps LeafIndexSet of Dune Grids for use with LagrangeFunctionSpace
@@ -332,7 +332,7 @@ namespace Dune {
       : IndexSetWrapper < IndexSetType > (grid.leafIndexSet()) {}
 
     //! return type (for Grape In/Output)
-    int type() const { return myType; }
+    static int type() { return myType; }
   };
 
   //*********************************************************************
