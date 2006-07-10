@@ -7,11 +7,13 @@
 if BUILD_DOCS
   DOXYGENTAG = doxygen-tag
   WHAT = bestpractice.html
+  DOXYGEN_HTML = html
+  DOXYGEN_DIST = html-dist
 endif
 
 DISTCLEANFILES = doxygen.log doxygen-tag
 
-all: $(WHAT) html
+all: $(WHAT) $(DOXYGEN_HTML)
 
 # setting like in dune-web
 BASEDIR=../..
