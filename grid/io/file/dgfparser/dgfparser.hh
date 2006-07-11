@@ -191,7 +191,7 @@ namespace Dune {
         \c MPISTART , \c MPIEND  and the integer variable
         \c MPI_COMM_WORLD
         are defined - in the serial case the macros are empty whereas
-        in the parallel case, i.e., when \c HAVE_MPI_CPP is set,
+        in the parallel case, i.e., when \c HAVE_MPI is set,
         \c MPI_INIT(&argc, &argv)
         is called through \c MPISTART  and in addition
         \c myrank  and \c mysize

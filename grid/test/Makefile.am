@@ -71,7 +71,7 @@ test_oned_LDADD = $(LOCAL_LIBS)
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CXXFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
-test_yaspgrid_LDADD = $(LOCAL_LIBS) $(MPI_LDFLAGS) $(MPI_LIBS)
+test_yaspgrid_LDADD = $(LOCAL_LIBS) $(MPI_LDFLAGS)
 test_yaspgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # this implicitly checks the autoconf-test as well...
@@ -82,8 +82,8 @@ test_alberta_DEPENDENCIES = $(LOCAL_LIBS)
 
 # files for alu3dgrid
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
-test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(AM_CPPFLAGS)
-test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
+test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
+test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # libdune contains both libug2 and libug3, always test both dimensions

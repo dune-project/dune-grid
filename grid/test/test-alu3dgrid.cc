@@ -14,7 +14,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 
-#ifdef HAVE_MPI_CPP
+#ifdef HAVE_MPI
 #include <mpi.h>
 #define MPISTART \
   int myrank=-1; \
@@ -87,7 +87,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
 }
-#if HAVE_MPI_CPP
+#if HAVE_MPI
 template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
@@ -167,19 +167,19 @@ int main (int argc , char **argv) {
     };
 
   } catch (Dune::Exception &e) {
-    #if HAVE_MPI_CPP
+    #if HAVE_MPI
     MPI_Finalize();
     #endif
     std::cerr << e << std::endl;
     return 1;
   } catch (...) {
-    #if HAVE_MPI_CPP
+    #if HAVE_MPI
     MPI_Finalize();
     #endif
     std::cerr << "Generic exception!" << std::endl;
     return 2;
   }
-  #if HAVE_MPI_CPP
+  #if HAVE_MPI
   MPI_Finalize();
   #endif
 

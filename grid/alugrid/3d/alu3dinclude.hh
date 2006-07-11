@@ -17,7 +17,7 @@
 
 #include <alugrid_defineparallel.h>
 
-#ifdef HAVE_MPI_CPP
+#ifdef HAVE_MPI
 // if this variable is defined,
 // // then parallel version of ALUGrid is compiled
   #if ALU3DGRID_BUILD_FOR_PARALLEL == 0

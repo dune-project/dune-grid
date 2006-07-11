@@ -30,7 +30,7 @@ namespace Dune {
       lang[i] = interval.length(i);
       anz[i]  = interval.segments(i);
     }
-  #if HAVE_MPI_CPP
+  #if HAVE_MPI
     if (MPICOMM==-1) {
       std::cerr << "should not be default MPICOMM as last parameter to "
                 << "MacroGrid::generate(const char*,int)" << std::endl;

@@ -44,7 +44,7 @@
  * To reduce differences between seriell and parallel runs as much as possible
  * additional macros are defined in this file
  * @code
- *#if HAVE_MPI_CPP &&
+ *#if HAVE_MPI &&
      (defined YASPGRID || defined  ALUGRID_SIMPLEX || defined ALUGRID_CUBE)
  *#include <mpi.h>
  *#define MPISTART \
@@ -92,6 +92,25 @@ const int dimworld = DUNE_PROBLEM_DIM;
 const int dimworld = GRIDDIM;
   #endif
 #endif
+
+#if HAVE_MPI
+#include <mpi.h>
+#define MPISTART \
+  int myrank=-1; \
+  int mysize = 1; \
+  MPI_Init(&argc, &argv); \
+  MPI_Comm_rank(MPI_COMM_WORLD,&myrank); \
+  MPI_Comm_size(MPI_COMM_WORLD,&mysize);
+#define MPIEND \
+  MPI_Finalize();
+#else
+#define MPISTART \
+  int myrank=-1; \
+  int mysize = 1;
+#define MPI_COMM_WORLD -1
+#define MPIEND
+#endif
+
 #if defined ALBERTAGRID && HAVE_ALBERTA
   #if GRIDDIM == 1
     #include "dgfoned.hh"
@@ -143,23 +162,5 @@ const int refStepsForHalf = 1;
   #warning --- No GRIDTYPE defined, defaulting to YASPGRID
 #endif
 #undef GRIDDIM
-
-#if HAVE_MPI_CPP && (defined YASPGRID || defined  ALUGRID_SIMPLEX || defined ALUGRID_CUBE)
-#include <mpi.h>
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1; \
-  MPI_Init(&argc, &argv); \
-  MPI_Comm_rank(MPI_COMM_WORLD,&myrank); \
-  MPI_Comm_size(MPI_COMM_WORLD,&mysize);
-#define MPIEND \
-  MPI_Finalize();
-#else
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1;
-#define MPI_COMM_WORLD -1
-#define MPIEND
-#endif
 
 #endif

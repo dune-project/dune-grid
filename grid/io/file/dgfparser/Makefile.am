@@ -1,5 +1,7 @@
 SUBDIRS = test
 
+AM_LDFLAGS=
+
 dgfparserdir = $(includedir)/dune/grid/io/file/dgfparser
 dgfparser_HEADERS = \
 dgfalberta.hh  dgfoned.hh    dgfparserblocks.hh  dgfug.hh    entitykey.hh\

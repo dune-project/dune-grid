@@ -34,7 +34,7 @@ void check_yasp() {
 
   gridcheck(grid);
 
-  checkCommunication(grid,0,0,Dune::dvverb);
+  //  checkCommunication(grid,grid.levelIndexSet(0),0,Dune::dvverb);
 };
 
 int main (int argc , char **argv) {
