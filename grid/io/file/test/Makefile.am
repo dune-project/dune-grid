@@ -32,10 +32,6 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS)
 
 #
 ## distribution tarball
-
-testdir = $(includedir)/dune/grid/io/file/test/
-test_HEADERS =
-
 GRIDFILES = ug-testgrid-2.am ug-testgrid-3.am
 
 # gridcheck not used explicitly, we should still ship it :)

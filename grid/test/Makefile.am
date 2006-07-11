@@ -99,9 +99,7 @@ test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(
 test_dgfalu_uggrid_combination_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
-
-testdir = $(includedir)/dune/grid/test/
-test_HEADERS = gridcheck.cc checkindexset.cc checkgeometryinfather.cc \
+SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc \
                checkintersectionit.cc checkcommunicate.cc
 
 GRIDFILES = alberta-testgrid-2-2.al alberta-testgrid-3-3.al \
