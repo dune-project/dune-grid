@@ -127,10 +127,6 @@ namespace Dune
       codim = IteratorImp::codimension
     };
 
-    /** \brief Engine is also derived from this class */
-    typedef IteratorImp DerivedType;
-
-
     //===========================================================
     /** @name Constructor & conversion
      */
