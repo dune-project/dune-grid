@@ -110,6 +110,13 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 #endif
 
 int main (int argc , char **argv) {
+  #if ! (HAVE_MPI && defined HAVE_ALUGRID_PARALLEL_H)
+  std::cerr << "The sequentiell test of alugrid is currently broken"
+            << std::endl
+            << "Aborting test-alu3dgrid" << std::endl;
+  exit(1);
+  #endif
+
   MPISTART
   try {
     /* use grid-file appropriate for dimensions */
