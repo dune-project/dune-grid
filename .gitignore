@@ -9,12 +9,12 @@ install-sh
 missing
 mkinstalldirs
 libtool
-dunei-grid.pc
+dune-grid.pc
 semantic.cache
 configure.lineno
 stamp-h1
-dune-*.tar.gz
-dune-?.?
+dune-grid-*.tar.gz
+dune-grid-?.?
 ltmain.sh
 dune
 am
