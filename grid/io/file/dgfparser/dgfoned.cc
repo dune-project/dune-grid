@@ -5,7 +5,7 @@ namespace Dune {
   inline OneDGrid<dim,dimworld>*
   MacroGrid ::
   Impl<OneDGrid<dim,dimworld> >::generate(MacroGrid& mg,
-                                          const char* filename, int MPICOMM) {
+                                          const char* filename, MPI_Comm MPICOMM) {
     mg.element=Cube;
     std::ifstream gridin(filename);
     if (mg.readDuneGrid(gridin) == 1) {

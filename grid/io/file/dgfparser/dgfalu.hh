@@ -12,11 +12,11 @@ namespace Dune {
      public:
      static ALU3dGrid<dim,dimworld,elType>*
      generate(MacroGrid& mg,
-             const char* filename,int MPICOMM=-1);
+             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
      private:
      inline void
      generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,int MPICOMM);
+                  const char* filename, std::string& str,MPI_Comm MPICOMM);
      };
    */
   //*********************************
@@ -25,22 +25,22 @@ namespace Dune {
   public:
     static ALUCubeGrid<dim,dimworld>*
     generate(MacroGrid& mg,
-             const char* filename,int MPICOMM=-1);
+             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
   private:
     inline void
     generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,int MPICOMM);
+                  const char* filename, std::string& str,MPI_Comm MPICOMM);
   };
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> > {
   public:
     static ALUSimplexGrid<dim,dimworld>*
     generate(MacroGrid& mg,
-             const char* filename,int MPICOMM=-1);
+             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
   private:
     inline void
     generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,int MPICOMM);
+                  const char* filename, std::string& str,MPI_Comm MPICOMM);
   };
 }
 #include "dgfalu.cc"

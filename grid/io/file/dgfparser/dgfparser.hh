@@ -96,7 +96,7 @@ namespace Dune {
   class MacroGrid : protected DuneGridFormatParser {
   public:
     //! constructor given the name of a DGF file
-    MacroGrid(const char* filename,int MPICOMM=-1) :
+    MacroGrid(const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD) :
       DuneGridFormatParser(),
       filename_(filename),
       MPICOMM_(MPICOMM) {}
@@ -111,16 +111,16 @@ namespace Dune {
     template <class GT>
     class Impl {
     public:
-      static GT* generate(MacroGrid& mg,const char* filename,int MPICOMM=-1);
+      static GT* generate(MacroGrid& mg,const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
     };
     const char* filename_;
-    int MPICOMM_;
+    MPI_Comm MPICOMM_;
   };
   template <class GridType>
   class GridPtr : private MacroGrid {
   public:
     //! constructor given the name of a DGF file
-    GridPtr(const char* filename,int MPICOMM=-1) :
+    GridPtr(const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD) :
       MacroGrid(filename,MPICOMM),
       grid_(*this) {}
     ~GridPtr() {
@@ -593,7 +593,7 @@ namespace Dune {
        .
        If these identifiers are present then in 3d the grid is generated in two
        steps: first tetgen is called with only a .node file and then
-       tetgen is run a second time including the -r switch and
+      tetgen is run a second time including the -r switch and
        the -a and -q switch with the parameters given in the dgf file. In 2d the
        -a and -q switches are added directly in the first run.
 

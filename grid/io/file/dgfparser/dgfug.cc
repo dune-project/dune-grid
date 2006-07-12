@@ -4,7 +4,7 @@ namespace Dune {
   template <int dim,int dimworld>
   inline UGGrid<dim,dimworld>*
   MacroGrid::Impl<UGGrid<dim,dimworld> >::generate(MacroGrid& mg,
-                                                   const char* filename,int) {
+                                                   const char* filename,MPI_Comm) {
     mg.element=General;
     std::ifstream gridin(filename);
 

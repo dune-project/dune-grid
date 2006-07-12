@@ -4,7 +4,7 @@ namespace Dune {
   template <int dim,int dimworld>
   inline AlbertaGrid<dim,dimworld>*
   MacroGrid::Impl<AlbertaGrid<dim,dimworld> >::generate(MacroGrid& mg,
-                                                        const char* filename,int) {
+                                                        const char* filename,MPI_Comm) {
     mg.element=Simplex;
     std::ifstream gridin(filename);
 

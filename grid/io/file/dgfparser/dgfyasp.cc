@@ -5,7 +5,7 @@ namespace Dune {
   inline YaspGrid<dim,dimworld>*
   MacroGrid ::
   Impl<YaspGrid<dim,dimworld> > ::
-  generate(MacroGrid& mg,const char* filename, int MPICOMM) {
+  generate(MacroGrid& mg,const char* filename, MPI_Comm MPICOMM) {
     mg.element=Cube;
     std::ifstream gridin(filename);
     IntervalBlock interval(gridin);
@@ -31,9 +31,9 @@ namespace Dune {
       anz[i]  = interval.segments(i);
     }
   #if HAVE_MPI
-    if (MPICOMM==-1) {
+    if (MPICOMM==MPI_COMM_WORLD) {
       std::cerr << "should not be default MPICOMM as last parameter to "
-                << "MacroGrid::generate(const char*,int)" << std::endl;
+                << "MacroGrid::generate(const char*,MPI_Comm)" << std::endl;
       abort();
     }
     return new YaspGrid<dim,dimworld>(MPICOMM,lang, anz, per , 1 );

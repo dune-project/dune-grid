@@ -9,7 +9,7 @@ namespace Dune {
   class MacroGrid::Impl<OneDGrid<dim,dimworld> > {
   public:
     static OneDGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                            const char* filename,int MPICOMM=-1);
+                                            const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
   };
 }
 #include "dgfoned.cc"

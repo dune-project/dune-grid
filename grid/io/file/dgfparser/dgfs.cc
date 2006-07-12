@@ -5,7 +5,7 @@ namespace Dune {
   inline SGrid<dim,dimworld>*
   MacroGrid ::
   Impl< SGrid<dim,dimworld> > ::
-  generate(MacroGrid& mg,const char* filename, int MPICOMM) {
+  generate(MacroGrid& mg,const char* filename, MPI_Comm MPICOMM) {
     mg.element=Cube;
     std::ifstream gridin(filename);
     IntervalBlock interval(gridin);

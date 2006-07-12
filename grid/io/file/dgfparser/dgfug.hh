@@ -10,7 +10,7 @@ namespace Dune {
   class MacroGrid::Impl<UGGrid<dim,dimworld> > {
   public:
     static UGGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                          const char* filename,int MPICOMM=-1);
+                                          const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
   };
 }
 #include "dgfug.cc"

@@ -107,6 +107,7 @@ const int dimworld = GRIDDIM;
 #define MPISTART \
   int myrank=-1; \
   int mysize = 1;
+#define MPI_Comm int
 #define MPI_COMM_WORLD -1
 #define MPIEND
 #endif
