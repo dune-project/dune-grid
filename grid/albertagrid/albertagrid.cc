@@ -4908,7 +4908,8 @@ namespace Dune
     }
 
     // calculate neighbours
-    if(fill_flag & FILL_NEIGH)
+    // neighbor info does not work for hierarchical walk
+    if(fill_flag & FILL_NEIGH && ! hierarchical )
     {
       // allow to go down on neighbour more than once
       // if the following condition is satisfied
