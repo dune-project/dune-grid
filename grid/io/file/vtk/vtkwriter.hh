@@ -37,7 +37,12 @@ namespace Dune
   struct VTKOptions
   {
     enum OutputType {
-      ascii, binary, binaryappended
+      /** @brief Output to the file is in ascii. */
+      ascii,
+      /** @brief Output to the file is binary. */
+      binary,
+      /** @brief Ouput is appended to the binary file. */
+      binaryappended
     };
     enum DataMode {
       conforming, nonconforming
@@ -118,7 +123,12 @@ namespace Dune
   };
 
 
-  /** @brief A class providing vtk file i/o
+  /**
+   * @brief Writer for the ouput of grid functions in the vtk format.
+   *
+   * Writes arbitrary grid functions (living on cells or vertices of a grid)
+   * to a file suitable for easy visualization with
+   * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
    */
   template<class GridImp, class IS=typename GridImp::template Codim<0>::LeafIndexSet>
   class VTKWriter {
@@ -488,7 +498,15 @@ namespace Dune
     };
 
   public:
-    //! constructor from a grid (uses a leaf indexset)
+    /**
+     * @brief Constructs a VTKWriter working on the leaf index set of a grid.
+     *
+     * All functions are supposed to live on the leaf elements of the grid.
+     * E. g. you could use a VTKWriter constructed like this for the
+     * visualization of the solution.
+     * @param g The grid where the functions to be visualized live.
+     * @param dm The data mode??
+     */
     VTKWriter (const GridImp& g, VTKOptions::DataMode dm = VTKOptions::conforming) :
       grid(g), is(grid.leafIndexSet()), datamode(dm)
     {
@@ -496,7 +514,14 @@ namespace Dune
       numPerLine = 4*3;   //should be a multiple of 3 !
     }
 
-    //! constructor from a grid and an indexset
+    /**
+     * @brief Construct a VTKWriter working on a specific index set of a grid.
+     *
+     *
+     * @param g The grid where the functions to be visualized live.
+     * @param i The index set the grid functions live on. (E. g. a level index set.)
+     * @param dm The data mode.
+     */
     VTKWriter (const GridImp& g, const IndexSet& i, VTKOptions::DataMode dm = VTKOptions::conforming) :
       grid(g), is(i), datamode(dm)
     {
@@ -504,13 +529,26 @@ namespace Dune
       numPerLine = 4*3;   //should be a multiple of 3 !
     }
 
-    //! add a grid function for output
+    /**
+     * @brief Add a grid function that lives on the cells of the grid to the visualization.
+     * @param p The function to visualize.
+     */
     void addCellData (VTKFunction* p)
     {
       celldata.push_back(p);
     }
 
-    //! add a grid function for output
+    /**
+     * @brief Add a grid function (represented by container) that lives on the cells of
+     * the grid to the visualization.
+     *
+     * The container has to have random access via operator[] (e. g. std::vector). The
+     * value of the grid function for an arbitrary element
+     * will be accessed by calling operator[] with the id of the element.
+     *
+     * @param v The container with the values of the grid function for each cell.
+     * @param name A name to indentify the grid function.
+     */
     template<class V>
     void addCellData (const V& v, std::string name)
     {
@@ -518,13 +556,26 @@ namespace Dune
       celldata.push_back(p);
     }
 
-    //! add a grid function for output
+    /**
+     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
+     * @param p The function to visualize.
+     */
     void addVertexData (VTKFunction* p)
     {
       vertexdata.push_back(p);
     }
 
-    //! add a grid function for output
+    /**
+     * @brief Add a grid function (represented by container) that lives on the cells of the
+     * grid to the visualization output.
+     *
+     * The container has to have random access via operator[] (e. g. std::vector). The value
+     * of the grid function for an arbitrary element
+     * will be accessed by calling operator[] with the id of the element.
+     *
+     * @param v The container with the values of the grid function for each cell.
+     * @param name A name to indentify the grid function.
+     */
     template<class V>
     void addVertexData (const V& v, std::string name)
     {
@@ -551,7 +602,11 @@ namespace Dune
       this->clear();
     }
 
-    //! write output; interface might change later
+    /**
+     * @brief write output; interface might change later
+     * @param name The name of the file to write to.
+     * @param ot The output type for the file.
+     */
     void write (const char* name, VTKOptions::OutputType ot = VTKOptions::ascii)
     {
       // make data mode visible to private functions
