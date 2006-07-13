@@ -196,12 +196,13 @@ namespace Dune
       public ForwardIteratorFacade<CellIterator, Entity, Entity&, int>
     {
       GridCellIterator git;
+      GridCellIterator gend;
     public:
-      CellIterator(const GridCellIterator & x) : git(x) {};
+      CellIterator(const GridCellIterator & x, const GridCellIterator & end) : git(x), gend(end) {};
       void increment ()
       {
         ++git;
-        while (git->partitionType()!=InteriorEntity) ++git;
+        while (git!=gend && git->partitionType()!=InteriorEntity) ++git;
       }
       bool equals (const CellIterator & cit) const
       {
@@ -218,11 +219,11 @@ namespace Dune
     };
     CellIterator cellBegin() const
     {
-      return is.template begin<0,vtkPartition>();
+      return CellIterator(is.template begin<0,vtkPartition>(), is.template end<0,vtkPartition>());
     }
     CellIterator cellEnd() const
     {
-      return is.template end<0,vtkPartition>();
+      return CellIterator(is.template end<0,vtkPartition>(), is.template end<0,vtkPartition>());
     }
 
     class VertexIterator :
