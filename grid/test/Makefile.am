@@ -99,8 +99,7 @@ test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(
 test_dgfalu_uggrid_combination_DEPENDENCIES = $(LOCAL_LIBS)
 
 ## distribution tarball
-SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc \
-               checkintersectionit.cc checkcommunicate.cc
+SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc
 
 GRIDFILES = alberta-testgrid-2-2.al alberta-testgrid-3-3.al \
   ug-testgrid-2.am ug-testgrid-3.am
