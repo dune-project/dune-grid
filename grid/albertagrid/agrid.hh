@@ -1544,16 +1544,6 @@ namespace Dune
     //! clean up some markers
     bool postAdapt();
 
-    //! fake implementation of load-balance
-    template <class DofManagerType>
-    bool loadBalance (DofManagerType & dm) { return false; }
-
-    /*
-       //! fake implementation of communicate
-       template <class DofManagerType>
-       bool communicate (DofManagerType & dm) { return false; }
-     */
-
     /** dummy collective communication */
     const CollectiveCommunication<AlbertaGrid>& comm () const
     {
