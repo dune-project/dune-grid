@@ -5,14 +5,14 @@
 
 namespace Dune {
 
-  template<typename ct>
-  CubeQuadratureRule<ct,1,QuadratureType::Gauss>::CubeQuadratureRule (int p)
+  template<typename ct, int o>
+  CubeQuadratureRule<ct,1,o,QuadratureType::Gauss>::CubeQuadratureRule ()
   {
-    //! set up quadrature of given order in d dimensions
+    //! set up quadrature of order o in 1 dimension
     std::vector< FieldVector<ct, dim> > _points;
     std::vector< double > _weight;
 
-    switch(p)
+    switch(o)
     {
     // order 1
     case 0 :
@@ -697,7 +697,7 @@ namespace Dune {
       break;
 
     default :
-      DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << p << " not supported!");
+      DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << o << " not supported!");
     }
 
     assert(_points.size() == _weight.size());
@@ -718,12 +718,23 @@ namespace Dune {
   PyramidQuadraturePoints<3> PyramidQuadraturePointsSingleton<3>::pyqp;
 
   // singleton holding a quadrature rule container
-  template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule(19);
-  template<> QuadratureRuleContainer<float, 2> QuadratureRules<float, 2>::rule(19);
-  template<> QuadratureRuleContainer<float, 3> QuadratureRules<float, 3>::rule(19);
+  template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule();
+  template<> QuadratureRuleContainer<float, 2> QuadratureRules<float, 2>::rule();
+  template<> QuadratureRuleContainer<float, 3> QuadratureRules<float, 3>::rule();
 
-  template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule(19);
-  template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule(19);
-  template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule(19);
+  template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule();
+  template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule();
+  template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule();
+
+  // init singletons holding cube quadrature rules
+  template<class ct>
+  int _init_CubeQuadratureRules()
+  {
+    for (int i=0; i<CubeQuadratureRule<ct,1,0>::highest_order+1; i++)
+      CubeQuadratureRuleContainer<ct,1>::rule(i);
+    return 0;
+  }
+  static int _init_CubeQuadratureRules_f1=_init_CubeQuadratureRules<float>();
+  static int _init_CubeQuadratureRules_d1=_init_CubeQuadratureRules<double>();
 
 } // namespace
