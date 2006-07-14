@@ -3,6 +3,8 @@
 #ifndef DUNE_ALU3DGRID_HH
 #define DUNE_ALU3DGRID_HH
 
+#warning "ALU3dGrid is deprecated. Use ALUSimplexGrid or ALUCubeGrid instead!!!"
+
 #include "alugrid/3d/indexsets.hh"
 #include "alugrid/3d/iterator.hh"
 #include "alugrid/3d/entity.hh"
