@@ -4,7 +4,11 @@
 #define DUNE_ALUGRID_HH
 
 // 3d version
-#include <dune/grid/alu3dgrid.hh>
+#include "alugrid/3d/indexsets.hh"
+#include "alugrid/3d/iterator.hh"
+#include "alugrid/3d/entity.hh"
+#include "alugrid/3d/geometry.hh"
+#include "alugrid/3d/grid.hh"
 
 // 2d version
 #include <dune/grid/alugrid/2d/grid.hh>
