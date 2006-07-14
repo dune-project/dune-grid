@@ -5,14 +5,14 @@
 
 namespace Dune {
 
-  template<typename ct, int o>
-  CubeQuadratureRule<ct,1,o,QuadratureType::Gauss>::CubeQuadratureRule ()
+  template<typename ct>
+  CubeQuadratureRule<ct,1,QuadratureType::Gauss>::CubeQuadratureRule (int p)
   {
-    //! set up quadrature of order o in 1 dimension
+    //! set up quadrature of given order in d dimensions
     std::vector< FieldVector<ct, dim> > _points;
     std::vector< double > _weight;
 
-    switch(o)
+    switch(p)
     {
     // order 1
     case 0 :
@@ -697,7 +697,7 @@ namespace Dune {
       break;
 
     default :
-      DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << o << " not supported!");
+      DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << p << " not supported!");
     }
 
     assert(_points.size() == _weight.size());
@@ -725,16 +725,5 @@ namespace Dune {
   template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule(19);
   template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule(19);
   template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule(19);
-
-  // init singletons holding cube quadrature rules
-  template<class ct>
-  int _init_CubeQuadratureRules()
-  {
-    for (int i=0; i<CubeQuadratureRule<ct,1,0>::highest_order+1; i++)
-      CubeQuadratureRuleContainer<ct,1>::rule(i);
-    return 0;
-  }
-  static int _init_CubeQuadratureRules_f1=_init_CubeQuadratureRules<float>();
-  static int _init_CubeQuadratureRules_d1=_init_CubeQuadratureRules<double>();
 
 } // namespace
