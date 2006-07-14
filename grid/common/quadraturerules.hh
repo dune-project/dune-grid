@@ -233,7 +233,7 @@ namespace Dune {
       delivered_order = CubeQuadratureRule<ct,1,o,QType>::instance().order();
     }
 
-    int delivered_order;      // delivered order
+    int delivered_order;  // delivered order
   };
 
   template<typename ct, int dim, int order, int QType>
@@ -886,8 +886,8 @@ namespace Dune {
   private:
     FieldVector<double, 2> G[MAXP+1][MAXP];
 
-    double W[MAXP+1][MAXP];     // weights associated with points
-    int O[MAXP+1];              // order of the rule
+    double W[MAXP+1][MAXP]; // weights associated with points
+    int O[MAXP+1];          // order of the rule
   };
 
 
@@ -1175,8 +1175,8 @@ namespace Dune {
 
   private:
     FieldVector<double, 3> G[MAXP+1][MAXP];
-    double W[MAXP+1][MAXP];     // weights associated with points
-    int O[MAXP+1];              // order of the rule
+    double W[MAXP+1][MAXP]; // weights associated with points
+    int O[MAXP+1];          // order of the rule
   };
 
 
@@ -1374,8 +1374,8 @@ namespace Dune {
   private:
     FieldVector<double, 3> G[MAXP+1][MAXP]; //positions
 
-    double W[MAXP+1][MAXP];     // weights associated with points
-    int O[MAXP+1];              // order of the rule
+    double W[MAXP+1][MAXP]; // weights associated with points
+    int O[MAXP+1];          // order of the rule
   };
 
 
@@ -1560,8 +1560,8 @@ namespace Dune {
   private:
     FieldVector<double, 3> G[MAXP+1][MAXP];
     //double G[MAXP+1][MAXP]; // positions of Gauss points
-    double W[MAXP+1][MAXP];     // weights associated with points
-    int O[MAXP+1];              // order of the rule
+    double W[MAXP+1][MAXP]; // weights associated with points
+    int O[MAXP+1];          // order of the rule
   };
 
 
@@ -1655,7 +1655,7 @@ namespace Dune {
 
       for (int m=1; m<=SimplexQuadraturePoints<dim>::MAXP; m++)
       {
-        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);       // order of rule with m points
+        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);   // order of rule with m points
         if (p<=pmax)
         {
           QuadratureRule<ct,dim>* pointer = new SimplexQuadratureRule<ct,dim>(p);
@@ -1692,7 +1692,7 @@ namespace Dune {
       }
       if (type.isSimplex())
       {
-        //            if(dim>=2 && p>=1 && p<=simplex_maxorder)
+        //        if(dim>=2 && p>=1 && p<=simplex_maxorder)
         //             return *(rules[simplex_order_to_index[p]]);
       }
 
@@ -1920,7 +1920,7 @@ namespace Dune {
 
       for (int m=1; m<=SimplexQuadraturePoints<dim>::MAXP; m++)
       {
-        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);       // order of rule with m points
+        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);   // order of rule with m points
         if (p<=pmax)
         {
           QuadratureRule<ct,dim>* pointer = new SimplexQuadratureRule<ct,dim>(p);
@@ -1944,9 +1944,9 @@ namespace Dune {
       /////////
       /*
          for (int m=1; m<=PrismQuadraturePoints<3>::MAXP; m++)
-              {
-                int p = PrismQuadraturePointsSingleton<3>::prqp.order(m); // order of rule with m points
-                if (p<=pmax)
+         {
+         int p = PrismQuadraturePointsSingleton<3>::prqp.order(m); // order of rule with m points
+         if (p<=pmax)
          {
           QuadratureRule<ct,dim>* pointer = new PrismQuadratureRule<ct,3>(p);
           rules.push_back(pointer);
@@ -1961,8 +1961,8 @@ namespace Dune {
          ++index;
           prisindex=index;
          }
-                else break;
-              }
+         else break;
+         }
        */
       for (int p=0; p<pmax; p++)
       {
@@ -1978,7 +1978,7 @@ namespace Dune {
 
       for (int m=1; m<=PyramidQuadraturePoints<3>::MAXP; m++)
       {
-        int p = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);           // order of rule with m points
+        int p = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);   // order of rule with m points
         if (p<=pmax)
         {
           QuadratureRule<ct,dim>* pointer = new PyramidQuadratureRule<ct,3>(p);

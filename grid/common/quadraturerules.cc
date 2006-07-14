@@ -718,13 +718,13 @@ namespace Dune {
   PyramidQuadraturePoints<3> PyramidQuadraturePointsSingleton<3>::pyqp;
 
   // singleton holding a quadrature rule container
-  template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule();
-  template<> QuadratureRuleContainer<float, 2> QuadratureRules<float, 2>::rule();
-  template<> QuadratureRuleContainer<float, 3> QuadratureRules<float, 3>::rule();
+  template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule(19);
+  template<> QuadratureRuleContainer<float, 2> QuadratureRules<float, 2>::rule(19);
+  template<> QuadratureRuleContainer<float, 3> QuadratureRules<float, 3>::rule(19);
 
-  template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule();
-  template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule();
-  template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule();
+  template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule(19);
+  template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule(19);
+  template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule(19);
 
   // init singletons holding cube quadrature rules
   template<class ct>
