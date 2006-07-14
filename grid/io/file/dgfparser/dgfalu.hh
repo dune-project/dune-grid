@@ -6,19 +6,6 @@
 #include <dune/grid/alugrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
-  /*
-     template <int dim,int dimworld,ALU3dGridElementType elType>
-     class MacroGrid::Impl<ALU3dGrid<dim,dimworld,elType> > {
-     public:
-     static ALU3dGrid<dim,dimworld,elType>*
-     generate(MacroGrid& mg,
-             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
-     private:
-     inline void
-     generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,MPI_Comm MPICOMM);
-     };
-   */
   //*********************************
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUCubeGrid<dim,dimworld> > {
