@@ -379,6 +379,8 @@ namespace Dune {
     //! assignment of iterators
     ThisType & operator = (const ThisType & org);
   private:
+    //! do assignment
+    void assign (const ThisType & org);
 
     // actual level
     int level_;
@@ -452,7 +454,7 @@ namespace Dune {
     IteratorType * iter_;
 
     //! do assignment
-    void assign (const ThisType & org, bool clone = true );
+    void assign (const ThisType & org);
 
     // deletes iter_
     void removeIter () ;

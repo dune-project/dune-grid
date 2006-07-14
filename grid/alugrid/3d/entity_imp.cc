@@ -733,8 +733,16 @@ namespace Dune {
       , item_(org.item_)
       , entity_(0)
   {
-    if(org.entity_)
+    getEntity(org);
+  }
+
+  template<int codim, class GridImp >
+  inline void ALU3dGridEntityPointerBase<codim,GridImp> ::
+  getEntity(const ALU3dGridEntityPointerType & org)
+  {
+    if( org.entity_ )
     {
+      assert( entity_ == 0 );
       int level = org.entity_->level();
       entity_ = grid_.template getNewEntity<codim> ( level );
       this->entityImp().setEntity( org.entityImp() );
@@ -764,14 +772,15 @@ namespace Dune {
     item_ = org.item_;
 
     // if entity exists, just remove item pointer
-    if(entity_)
+    if(item_)
     {
-      if(item_)
-        this->entityImp().setElement( *item_ );
+      if( !entity_ )
+        getEntity(org);
       else
-        this->entityImp().removeElement();
+        this->entityImp().setElement( *item_ );
     }
-
+    else
+      this->done();
     return ;
   }
 

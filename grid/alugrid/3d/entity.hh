@@ -429,6 +429,9 @@ namespace Dune {
     // clones object
     void clone (const ALU3dGridEntityPointerType & org);
 
+    // get entity and assign from org.entity
+    void getEntity (const ALU3dGridEntityPointerType & org);
+
     //! has to be called when iterator is finished
     void done ();
 

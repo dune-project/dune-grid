@@ -644,17 +644,7 @@ namespace Dune {
       , level_( org.level_ )
       , iter_(0)
   {
-    const IteratorType * orgIt = org.iter_;
-    if( orgIt )
-    {
-      iter_ = new IteratorType ( *orgIt ) ;
-      assert( iter_ );
-      if(!(iter_->done()))
-      {
-        this->setItem(*this,*iter_);
-        assert( this->equals(org) );
-      }
-    }
+    assign(org);
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -677,11 +667,10 @@ namespace Dune {
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline ALU3dGridLevelIterator<codim, pitype, GridImp> &
-  ALU3dGridLevelIterator<codim, pitype, GridImp> ::
-  operator = (const ThisType & org)
+  inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+  assign(const ThisType & org)
   {
-    removeIter();
+    assert( iter_ == 0 );
     ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
     level_ = org.level_;
     if( org.iter_ )
@@ -690,10 +679,22 @@ namespace Dune {
       assert( iter_ );
       if(!(iter_->done()))
       {
-        this->setItem(*this,*iter_);
+        this->setItem(*this, *iter_);
         assert( this->equals(org) );
       }
     }
+    else
+    {
+      this->done();
+    }
+  }
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  inline ALU3dGridLevelIterator<codim, pitype, GridImp> &
+  ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    removeIter();
+    assign(org);
     return *this;
   }
 
@@ -757,7 +758,7 @@ namespace Dune {
       , iter_(0)
   {
     // assign iterator without cloning entity pointer again
-    assign(org,false);
+    assign(org);
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -791,10 +792,10 @@ namespace Dune {
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
-  assign (const ThisType & org, bool clone ) // default clone = true
+  assign (const ThisType & org)
   {
     assert( iter_ == 0 );
-    if(clone) ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
+    ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
 
     if( org.iter_ )
     {
