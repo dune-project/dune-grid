@@ -186,6 +186,15 @@ namespace Dune {
     {
       return instance()._rule(t,p);
     }
+#ifndef MUTABLE_QUADRATURERULES
+    static const QuadratureRule& rule(const GeometryType::BasicType t, int p)
+#else
+    static QuadratureRule & rule(const GeometryType::BasicType t, int p)
+#endif
+    {
+      GeometryType gt(t,dim);
+      return instance()._rule(gt,p);
+    }
   };
 
   /***********************************************************/
@@ -248,7 +257,6 @@ namespace Dune {
   {
   public:
     enum {d=2};
-    //    enum{highest_order=SimplexQuadraturePoints<2>::highest_order};
     enum { highest_order=12 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
@@ -262,7 +270,6 @@ namespace Dune {
 
   public:
     enum {d=3};
-    //    enum{highest_order=SimplexQuadraturePoints<3>::highest_order};
     enum { highest_order=5 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule<ct,3> value_type;
