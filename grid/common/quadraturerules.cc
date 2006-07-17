@@ -6,7 +6,7 @@
 namespace Dune {
 
   template<typename ct>
-  CubeQuadratureRule<ct,1,QuadratureType::Gauss>::CubeQuadratureRule (int p)
+  CubeQuadratureRule<ct,1>::CubeQuadratureRule (int p)
   {
     //! set up quadrature of given order in d dimensions
     std::vector< FieldVector<ct, dim> > _points;
@@ -715,7 +715,7 @@ namespace Dune {
   PrismQuadraturePoints<3> PrismQuadraturePointsSingleton<3>::prqp;
 
   /** Singleton holding the Quadrature  points  */
-  PyramidQuadraturePoints<3> PyramidQuadraturePointsSingleton<3>::pyqp;
+  PyramidQuadraturePoints PyramidQuadraturePointsSingleton<3>::pyqp;
 
   //   // singleton holding a quadrature rule container
   //   template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule(19);
@@ -728,8 +728,8 @@ namespace Dune {
 
   int _init_quadrature()
   {
-    Dune::CubeQuadratureRule<float, 1, QuadratureType::Gauss> q1(0);
-    Dune::CubeQuadratureRule<double, 1, QuadratureType::Gauss> q2(0);
+    Dune::CubeQuadratureRule<float, 1> q1(0);
+    Dune::CubeQuadratureRule<double, 1> q2(0);
   }
   int _init_quadrature_val = _init_quadrature();
 

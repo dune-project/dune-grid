@@ -3,6 +3,8 @@
 #ifndef DUNE_QUADRATURERULES_HH
 #define DUNE_QUADRATURERULES_HH
 
+#define MUTABLE_QUADRATURERULES
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -12,19 +14,22 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/common/geometrytype.hh>
 
+/**
+   \file
+   Interface for quadrature points and rules
+ */
+
 namespace Dune {
 
   /**
-     Exception thrown if an Aquired Exception is not available,
+     Exception thrown if an Aquired QuadratureRule is not available,
      because the order is to high
    */
   class QuadratureOrderOutOfRange : public NotImplemented {};
 
-  /***********************************************************
-  * Interface for quadrature points and rules
-  ***********************************************************/
-
-  //! quadrature rules for cubes of any dimension based on Gauss quadrature
+  /**
+     quadrature rules for cubes of any dimension based on Gauss quadrature
+   */
   template<typename ct, int dim>
   class QuadraturePoint {
   public:
@@ -57,10 +62,10 @@ namespace Dune {
   };
 
   /**
-   * Defines an \p enum for currently available quadrature rules.
+     Defines an \p enum for currently available quadrature rules.
    */
   namespace QuadratureType {
-    enum {
+    enum Enum {
       Gauss      = 0,
 
       Jacobian_1_0 = 1,
@@ -76,8 +81,10 @@ namespace Dune {
     };
   };
 
-  //! abstract base class for quadrature rules
-  template<typename ct, int dim, int QType=QuadratureType::Gauss>
+  /**
+     abstract base class for quadrature rules
+   */
+  template<typename ct, int dim>
   class QuadratureRule : public std::vector<QuadraturePoint<ct,dim> >
   {
   public:
@@ -94,7 +101,7 @@ namespace Dune {
     virtual ~QuadratureRule(){}
 
   protected:
-    void tensor_product (QuadratureRule<ct,1,QType> & q1d)
+    void tensor_product (const QuadratureRule<ct,1> & q1d)
     {
       // fill in all the gauss points
       int m = q1d.size();
@@ -132,18 +139,111 @@ namespace Dune {
     }
   };
 
-  /***********************************************************
-  * Gauss quadrature for the n-dimensional cube
-  ***********************************************************/
+  // Forward declaration of the factory class,
+  // needed internally by the QuadratureRules container class.
+  template<typename ctype, int dim> struct QuadratureRuleFactory;
 
-  //! A cube quadrature rule for a fixed order is a container of cube quadrature points
-  template<typename ct, int dim, int QType=QuadratureType::Gauss>
-  class CubeQuadratureRule : public QuadratureRule<ct,dim,QType>
-  {};
+  /**
+     A container for all quadrature rules of dimension dim
+   */
+  template<typename ctype, int dim>
+  struct QuadratureRules {
+    typedef std::pair<GeometryType,int> QuadratureRuleKey;
+    typedef QuadratureRule<ctype, dim>* QuadratureRulePtr;
+    // real creator
+#ifndef MUTABLE_QUADRATURERULES
+    const QuadratureRule<ctype, dim>& _rule(const GeometryType& t, int p)
+#else
+    QuadratureRule<ctype, dim>& _rule(const GeometryType & t, int p)
+#endif
+    {
+      static std::map<QuadratureRuleKey, QuadratureRulePtr> _quadratureMap;
+      QuadratureRuleKey key(t,p);
+      if (_quadratureMap.find(key) == _quadratureMap.end()) {
+        QuadratureRulePtr ptr = QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
 
+        if (p==0)
+          DUNE_THROW(QuadratureOrderOutOfRange,
+                     "QuadratureRule for order " << p << " and GeometryType "
+                                                 << t << " not available");
+
+        _quadratureMap[key] = ptr;
+      }
+      return *_quadratureMap[key];
+    }
+    // singleton provider
+    static QuadratureRules& instance()
+    {
+      static QuadratureRules instance;
+      return instance;
+    }
+    // private constructor
+    QuadratureRules () {};
+  public:
+#ifndef MUTABLE_QUADRATURERULES
+    static const QuadratureRule<ctype,dim>& rule(const GeometryType& t, int p)
+#else
+    static QuadratureRule<ctype,dim>& rule(const GeometryType & t, int p)
+#endif
+    {
+      return instance()._rule(t,p);
+    }
+  };
+
+  /***********************************************************/
+
+  //! Gauss quadrature for the n-dimensional cube
+  template<typename ct, int dim>
+  class CubeQuadratureRule :
+    public QuadratureRule<ct,dim>
+  {
+  public:
+    // compile time parameters
+    enum { d=dim };
+    enum { highest_order=CubeQuadratureRule<ct,1>::highest_order };
+    typedef ct CoordType;
+    typedef CubeQuadratureRule value_type;
+
+    //! set up quadrature of given order in d dimensions
+    CubeQuadratureRule (int p)
+    {
+#ifndef SEGFAULT
+      CubeQuadratureRule<ct,1> q1D(p);
+#else
+      const QuadratureRule<ct,1> & q1D = QuadratureRules<ct,1>::rule(type(),p);
+#endif
+      tensor_product( q1D );
+      delivered_order = q1D.order();
+    }
+
+    //! return order
+    int order () const
+    {
+      return delivered_order;
+    }
+
+    //! return type of element
+    GeometryType type () const
+    {
+      static const GeometryType cube (GeometryType::cube, d);
+      return cube;
+    }
+
+    //! appear as your own container
+    const CubeQuadratureRule& getelement (GeometryType type, int p)
+    {
+      return *this;
+    }
+    ~CubeQuadratureRule(){}
+  private:
+    int delivered_order;      // delivered order
+  };
+
+  //! @copydoc CubeQuadratureRule
+  //! Specialization for 1D.
   template<typename ct>
-  class CubeQuadratureRule<ct,1,QuadratureType::Gauss> :
-    public QuadratureRule<ct,1,QuadratureType::Gauss>
+  class CubeQuadratureRule<ct,1> :
+    public QuadratureRule<ct,1>
   {
   public:
     // compile time parameters
@@ -178,86 +278,6 @@ namespace Dune {
   private:
     int delivered_order;  // delivered order
   };
-
-  template<typename ct, int dim>
-  class CubeQuadratureRule<ct,dim,QuadratureType::Gauss> :
-    public QuadratureRule<ct,dim,QuadratureType::Gauss>
-  {
-  public:
-    // compile time parameters
-    enum { d=dim };
-    enum { highest_order=CubeQuadratureRule<ct,1,QuadratureType::Gauss>::highest_order };
-    enum { QType=QuadratureType::Gauss };
-    typedef ct CoordType;
-    typedef CubeQuadratureRule value_type;
-
-    //! set up quadrature of given order in d dimensions
-    CubeQuadratureRule (int p)
-    {
-      CubeQuadratureRule<ct,1,QType> q1D(p);
-      tensor_product( q1D );
-      delivered_order = q1D.order();
-    }
-
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType cube (GeometryType::cube, d);
-      return cube;
-    }
-
-    //! appear as your own container
-    const CubeQuadratureRule& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
-    ~CubeQuadratureRule(){}
-  private:
-    int delivered_order;      // delivered order
-  };
-
-  /*********************************
-   * Quadrature rules for Simplices
-   ***********************************/
-
-  //--specialization for simplex DIM==1
-  //--it use cube quadrature rule for DIM==1
-  template<typename ct, int dim>
-  class SimplexQuadratureRule;
-
-  template<typename ct>
-  class SimplexQuadratureRule<ct,1> : public CubeQuadratureRule<ct,1>
-  {
-  public:
-    enum {d=1};
-    enum {dim=1};
-    enum {highest_order=CubeQuadratureRule<ct,1>::highest_order};
-    typedef ct CoordType;
-    typedef SimplexQuadratureRule value_type;
-    SimplexQuadratureRule(int p) :
-      CubeQuadratureRule<ct,1>(p) {}
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType simplex (GeometryType::simplex, d);
-      return simplex;
-    }
-
-    //! appear as your own container
-    const SimplexQuadratureRule<ct,dim>& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
-    ~SimplexQuadratureRule(){}
-  };
-
 
   /************************************************
    * Quadrature points for Simplices/ triangle
@@ -1480,16 +1500,9 @@ namespace Dune {
     int delivered_order;
   };
 
-  /***********************************************************
-  *   quadrature for Pyramid
-  ***********************************************************/
+  /** Singleton holding the Pyramid Quadrature points  */
 
-  //!
-  template<int dim>
-  class PyramidQuadraturePoints;
-
-  template<>
-  class PyramidQuadraturePoints<3>
+  class PyramidQuadraturePoints
   {
   public:
     enum { MAXP=8};
@@ -1566,21 +1579,15 @@ namespace Dune {
 
   private:
     FieldVector<double, 3> G[MAXP+1][MAXP];
-    //double G[MAXP+1][MAXP]; // positions of Gauss points
     double W[MAXP+1][MAXP];     // weights associated with points
     int O[MAXP+1];              // order of the rule
   };
 
-
-  /** Singleton holding the Quadrature  points  */
-
   template<int dim>
-  struct PyramidQuadraturePointsSingleton {
-    static PyramidQuadraturePoints<3> pyqp;
-  };
+  struct PyramidQuadraturePointsSingleton {};
   template<>
   struct PyramidQuadraturePointsSingleton<3> {
-    static PyramidQuadraturePoints<3> pyqp;
+    static PyramidQuadraturePoints pyqp;
   };
 
   template<typename ct, int dim>
@@ -1591,7 +1598,7 @@ namespace Dune {
   {
   public:
     enum {d=3};
-    enum {highest_order=PyramidQuadraturePoints<3>::highest_order};
+    enum {highest_order=PyramidQuadraturePoints::highest_order};
     typedef ct CoordType;
     typedef PyramidQuadratureRule<ct,3> value_type;
     PyramidQuadratureRule(int p)
@@ -1643,617 +1650,18 @@ namespace Dune {
     int delivered_order, m;
   };
 
-
-
-  /***********************************************************
-  * The general container and the singleton
-  ***********************************************************/
-
-  //! A container for all quadrature rules
-  template<typename ct, int dim>
-  class QuadratureRuleContainer
-  {
-  public:
-    typedef QuadratureRule<ct,dim> value_type;
-
-    //! make rules for all element types up to given order
-    QuadratureRuleContainer (int pmax)
-    {
-      // initialize index counter for rules in the array
-      int index=0;
-      int cubeindex=0;
-      int simpindex=0;
-
-      ////////////////////////
-      // the cube rules
-      ////////////////////////
-
-      // allocate all rules up to requested order
-      for (int p=1; p<=CubeQuadratureRule<ct,dim>::highest_order; p++)
-      {
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new CubeQuadratureRule<ct,dim>(p);
-          rules.push_back(pointer);
-          cube_order_to_index[p] = index;
-          index++;
-          cubeindex=index;
-        }
-        else break;
-      }
-
-      ////////////
-      // simplex rule
-      /////////
-
-      for (int m=1; m<=SimplexQuadraturePoints<dim>::MAXP; m++)
-      {
-        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);       // order of rule with m points
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new SimplexQuadratureRule<ct,dim>(p);
-          rules.push_back(pointer);
-          if (m==1)
-            for (int i=0; i<=SimplexQuadraturePoints<dim>::highest_order; i++)
-              simplex_order_to_index[i] = index;
-          else
-            for (int i=0; i<=SimplexQuadraturePoints<dim>::highest_order; i++)
-              if (rules[simplex_order_to_index[i]]->order()<i)
-                simplex_order_to_index[i] = index;
-
-          ++index;
-          simpindex=index;
-        }
-        else break;
-      }
-
-
-      // check if order can be achieved
-
-      cube_maxorder = rules[cubeindex-1]->order();
-      if (cube_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for cubes but only " << cube_maxorder << " available" << std::endl;
-
-      simplex_maxorder = rules[simpindex-1]->order();
-      if(simplex_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for simplex-" << dim <<"D"<<" but only " << simplex_maxorder << " available" << std::endl;
-
-    }
-
-
-    //! select the appropriate rule
-    const QuadratureRule<ct,dim>& operator() (GeometryType type, int p)
-    {
-      if (type.isCube())
-      {
-        if (p>=1 && p<=cube_maxorder)
-          return *(rules[cube_order_to_index[p]]);
-      }
-      if (type.isSimplex())
-      {
-        if(dim>=2 && p>=1 && p<=simplex_maxorder)
-          return *(rules[simplex_order_to_index[p]]);
-      }
-
-      DUNE_THROW(QuadratureOrderOutOfRange,
-                 "QuadratureRule for order " << p << " and GeometryType "
-                                             << type << " not available");
-    }
-
-    ~QuadratureRuleContainer()
-    {
-      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
-      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
-        delete (*entry);
-    }
-
-    //! ConstIterator class for sequential access
-    class const_iterator
-    {
-    public:
-      //! construct from stl iterator
-      const_iterator (const typename std::vector<QuadratureRule<ct,dim>*>::const_iterator& _i) : i(_i)
-      {       }
-
-      //! prefix increment
-      const_iterator& operator++()
-      {
-        ++i;
-        return *this;
-      }
-
-      //! prefix decrement
-      const_iterator& operator--()
-      {
-        --i;
-        return *this;
-      }
-
-      //! equality
-      bool operator== (const const_iterator& it) const
-      {
-        return i==it.i;
-      }
-
-      //! inequality
-      bool operator!= (const const_iterator& it) const
-      {
-        return i!=it.i;
-      }
-
-      //! dereferencing
-      const QuadratureRule<ct,dim>& operator* () const
-      {
-        return **i;
-      }
-
-      //! arrow
-      const QuadratureRule<ct,dim>* operator-> () const
-      {
-        return *i;
-      }
-
-    private:
-      typename std::vector<QuadratureRule<ct,dim>*>::const_iterator i;
-    };
-
-    const_iterator begin ()
-    {
-      return const_iterator(rules.begin());
-    }
-
-    const_iterator end ()
-    {
-      return const_iterator(rules.end());
-    }
-
-  private:
-    // the vector of all rules
-    std::vector<QuadratureRule<ct,dim>*> rules;
-
-    // mapping for cube rules
-    int cube_maxorder;
-    int simplex_maxorder;
-    int cube_order_to_index[CubeQuadratureRule<ct,1>::highest_order+1];
-    int simplex_order_to_index[SimplexQuadraturePoints<dim>::highest_order+1];
-  };
-
-  /*-----------------------------------
-     Specialization for 1D simplex
-     if instantiated 1D simplex,
-     it use ID cube quadrature rule
-   * General container and singletons
-     --------------------------------*/
-
-  //! A container for all quadrature rules
-  template<typename ct>
-  class QuadratureRuleContainer<ct,1>
-  {
-    enum { dim=1 };
-  public:
-    typedef QuadratureRule<ct,dim> value_type;
-
-    //! make rules for all element types up to given order
-    QuadratureRuleContainer (int pmax)
-    {
-      ////////////////////////
-      // the cube rules
-      ////////////////////////
-
-      // allocate all rules up to requested order
-      for (int p=1; p<=CubeQuadratureRule<ct,dim>::highest_order; p++)
-      {
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new CubeQuadratureRule<ct,dim>(p);
-          rules.push_back(pointer);
-        }
-        else break;
-      }
-
-      // check if order can be achieved
-      cube_maxorder = rules.back()->order();
-      if (cube_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for cubes but only " << cube_maxorder
-              << " available" << std::endl;
-    }
-
-
-    ~QuadratureRuleContainer()
-    {
-      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
-      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
-        delete (*entry);
-    }
-
-    //! select the appropriate rule
-    const QuadratureRule<ct,dim>& operator() (GeometryType type, int p)
-    {
-      if ( type.isLine() )
-      {
-        if (p>=1 && p<=cube_maxorder)
-          return *(rules[p-1]);
-      }
-
-      DUNE_THROW(QuadratureOrderOutOfRange,
-                 "QuadratureRule for order " << p << " and GeometryType "
-                                             << type << " not available");
-    }
-
-    //! ConstIterator class for sequential access
-    class const_iterator
-    {
-    public:
-      //! construct from stl iterator
-      const_iterator (const typename std::vector<QuadratureRule<ct,dim>*>::const_iterator& _i) : i(_i)
-      {       }
-
-      //! prefix increment
-      const_iterator& operator++()
-      {
-        ++i;
-        return *this;
-      }
-
-      //! prefix decrement
-      const_iterator& operator--()
-      {
-        --i;
-        return *this;
-      }
-
-      //! equality
-      bool operator== (const const_iterator& it) const
-      {
-        return i==it.i;
-      }
-
-      //! inequality
-      bool operator!= (const const_iterator& it) const
-      {
-        return i!=it.i;
-      }
-
-      //! dereferencing
-      const QuadratureRule<ct,dim>& operator* () const
-      {
-        return **i;
-      }
-
-      //! arrow
-      const QuadratureRule<ct,dim>* operator-> () const
-      {
-        return *i;
-      }
-
-    private:
-      typename std::vector<QuadratureRule<ct,dim>*>::const_iterator i;
-    };
-
-    const_iterator begin ()
-    {
-      return const_iterator(rules.begin());
-    }
-
-    const_iterator end ()
-    {
-      return const_iterator(rules.end());
-    }
-
-  private:
-    // the vector of all rules
-    std::vector<QuadratureRule<ct,dim>*> rules;
-
-    // mapping for cube rules
-    int cube_maxorder;
-  };
-
-
-  /*-------------------------------------
-     specialization for 3D-pyramids/prisms
-     The general container and the singleton
-     --------------------------------------*/
-
-  //! A container for all quadrature rules
-  template<typename ct>
-  class QuadratureRuleContainer<ct,3>
-  {
-    enum { dim=3 };
-  public:
-    typedef QuadratureRule<ct,3> value_type;
-
-    //! make rules for all element types up to given order
-    QuadratureRuleContainer (int pmax)
-    {
-      // initialize index counter for rules in the array
-      int index=0;
-      int cubeindex=0;
-      int simpindex=0;
-      int prisindex=0;
-      int pyrindex=0;
-
-      ////////////////////////
-      // the cube rules
-      ////////////////////////
-
-      // allocate all rules up to requested order
-      // allocate all rules up to requested order
-      for (int p=1; p<=CubeQuadratureRule<ct,dim>::highest_order; p++)
-      {
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new CubeQuadratureRule<ct,dim>(p);
-          rules.push_back(pointer);
-          cube_order_to_index[p] = index;
-          index++;
-          cubeindex=index;
-        }
-        else break;
-      }
-
-      ////////////
-      // simplex rule
-      /////////
-
-      for (int m=1; m<=SimplexQuadraturePoints<dim>::MAXP; m++)
-      {
-        int p = SimplexQuadraturePointsSingleton<dim>::sqp.order(m);       // order of rule with m points
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new SimplexQuadratureRule<ct,dim>(p);
-          rules.push_back(pointer);
-          if (m==1)
-            for (int i=0; i<=SimplexQuadraturePoints<dim>::highest_order; i++)
-              simplex_order_to_index[i] = index;
-          else
-            for (int i=0; i<=SimplexQuadraturePoints<dim>::highest_order; i++)
-              if (rules[simplex_order_to_index[i]]->order()<i)
-                simplex_order_to_index[i] = index;
-
-          ++index;
-          simpindex=index;
-        }
-        else break;
-      }
-
-      ////////////
-      // prism rule
-      /////////
-      /*
-         for (int m=1; m<=PrismQuadraturePoints<3>::MAXP; m++)
-              {
-                int p = PrismQuadraturePointsSingleton<3>::prqp.order(m); // order of rule with m points
-                if (p<=pmax)
-         {
-          QuadratureRule<ct,dim>* pointer = new PrismQuadratureRule<ct,3>(p);
-          rules.push_back(pointer);
-          if (m==1)
-            for (int i=0; i<=PrismQuadraturePoints<3>::highest_order; i++)
-              prism_order_to_index[i] = index;
-          else
-            for (int i=0; i<=PrismQuadraturePoints<3>::highest_order; i++)
-              if (rules[prism_order_to_index[i]]->order()<i)
-                prism_order_to_index[i] = index;
-
-         ++index;
-          prisindex=index;
-         }
-                else break;
-              }
-       */
-      for (int p=0; p<pmax; p++)
-      {
-        QuadratureRule<ct,dim>* pointer = new PrismQuadratureRule<ct,3>(p);
-        rules.push_back(pointer);
-        prism_order_to_index[p] = index;
-        index++;
-        prisindex=index;
-      }
-      ////////////
-      // pyramid rule
-      /////////
-
-      for (int m=1; m<=PyramidQuadraturePoints<3>::MAXP; m++)
-      {
-        int p = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);           // order of rule with m points
-        if (p<=pmax)
-        {
-          QuadratureRule<ct,dim>* pointer = new PyramidQuadratureRule<ct,3>(p);
-          rules.push_back(pointer);
-          if (m==1)
-            for (int i=0; i<=PyramidQuadraturePoints<3>::highest_order; i++)
-              pyramid_order_to_index[i] = index;
-          else
-            for (int i=0; i<=PyramidQuadraturePoints<3>::highest_order; i++)
-              if (rules[pyramid_order_to_index[i]]->order()<i)
-                pyramid_order_to_index[i] = index;
-
-          ++index;
-          pyrindex=index;
-        }
-        else break;
-      }
-
-
-      // check if order can be achieved
-      cube_maxorder = rules[cubeindex-1]->order();
-      if (cube_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for cubes but only " << cube_maxorder << " available" << std::endl;
-
-      simplex_maxorder = rules[simpindex-1]->order();
-      if(simplex_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for simplex-" << (int)dim <<"D"<<" but only " << simplex_maxorder << " available" << std::endl;
-
-      prism_maxorder = rules[prisindex-1]->order();
-      if(prism_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for prism" <<" but only " << prism_maxorder << " available" << std::endl;
-      pyramid_maxorder = rules[pyrindex-1]->order();
-
-      if(pyramid_maxorder<pmax)
-        dverb << "Warning: Quadrature rule order " << pmax
-              << " requested for pyramid" <<" but only " << pyramid_maxorder << " available" << std::endl;
-    }
-
-    //! select the appropriate rule
-    const QuadratureRule<ct,dim>& operator() (GeometryType type, int p)
-    {
-      if (type.isCube())
-      {
-        if (p>=1 && p<=cube_maxorder)
-          return *(rules[cube_order_to_index[p]]);
-      }
-      if (type.isSimplex())
-      {
-        if(p>=1 && p<=simplex_maxorder)
-          return *(rules[simplex_order_to_index[p]]);
-      }
-      if (type.isPrism())
-      {
-        if(p>=1 && p<=prism_maxorder)
-          return *(rules[prism_order_to_index[p]]);
-      }
-      if(type.isPyramid())
-      {
-        if(p>=1 && p<=pyramid_maxorder)
-          return *(rules[pyramid_order_to_index[p]]);
-      }
-
-      DUNE_THROW(QuadratureOrderOutOfRange,
-                 "QuadratureRule for order " << p << " and GeometryType "
-                                             << type << " not available");
-    }
-
-    ~QuadratureRuleContainer()
-    {
-      typedef typename std::vector<QuadratureRule<ct,dim>*>::iterator Iterator;
-      for(Iterator entry = rules.begin(); entry != rules.end(); ++entry)
-        delete (*entry);
-    }
-    //! ConstIterator class for sequential access
-    class const_iterator
-    {
-    public:
-      //! construct from stl iterator
-      const_iterator (const typename std::vector<QuadratureRule<ct,dim>*>::const_iterator& _i) : i(_i)
-      {       }
-
-      //! prefix increment
-      const_iterator& operator++()
-      {
-        ++i;
-        return *this;
-      }
-
-      //! prefix decrement
-      const_iterator& operator--()
-      {
-        --i;
-        return *this;
-      }
-
-      //! equality
-      bool operator== (const const_iterator& it) const
-      {
-        return i==it.i;
-      }
-
-      //! inequality
-      bool operator!= (const const_iterator& it) const
-      {
-        return i!=it.i;
-      }
-
-      //! dereferencing
-      const QuadratureRule<ct,dim>& operator* () const
-      {
-        return **i;
-      }
-
-      //! arrow
-      const QuadratureRule<ct,dim>* operator-> () const
-      {
-        return *i;
-      }
-
-    private:
-      typename std::vector<QuadratureRule<ct,dim>*>::const_iterator i;
-    };
-
-    const_iterator begin ()
-    {
-      return const_iterator(rules.begin());
-    }
-
-    const_iterator end ()
-    {
-      return const_iterator(rules.end());
-    }
-
-  private:
-    // the vector of all rules
-    std::vector<QuadratureRule<ct,dim>*> rules;
-
-    // mapping for cube rules
-    int cube_maxorder;
-    int simplex_maxorder;
-    int prism_maxorder;
-    int pyramid_maxorder;
-
-    int cube_order_to_index[CubeQuadratureRule<ct,dim>::highest_order+1];
-    int simplex_order_to_index[SimplexQuadratureRule<ct,dim>::highest_order+1];
-    int prism_order_to_index[PrismQuadratureRule<ct,3>::highest_order+1];
-    int pyramid_order_to_index[PyramidQuadratureRule<ct,3>::highest_order+1];
-
-  };
-
-  template<typename ctype, int dim> struct QuadratureRuleFactory;
-
-  template<typename ctype, int dim>
-  struct QuadratureRules {
-    typedef std::pair<GeometryType,int> QuadratureRuleKey;
-    typedef QuadratureRule<ctype, dim>* QuadratureRulePtr;
-    // real creator
-    const QuadratureRule<ctype, dim>& _rule(const GeometryType& t, int p)
-    {
-      static std::map<QuadratureRuleKey, QuadratureRulePtr> _quadratureMap;
-      QuadratureRuleKey key(t,p);
-      if (_quadratureMap.find(key) == _quadratureMap.end()) {
-        QuadratureRulePtr ptr = QuadratureRuleFactory<ctype,dim>::rule(t,p);
-
-        if (p==0)
-          DUNE_THROW(QuadratureOrderOutOfRange,
-                     "QuadratureRule for order " << p << " and GeometryType "
-                                                 << t << " not available");
-
-        _quadratureMap[key] = ptr;
-      }
-      return *_quadratureMap[key];
-    }
-    // singleton provider
-    static QuadratureRules& instance()
-    {
-      static QuadratureRules instance;
-      return instance;
-    }
-    // private constructor
-    QuadratureRules () {};
-  public:
-    static const QuadratureRule<ctype,dim>& rule(const GeometryType& t, int p)
-    {
-      return instance()._rule(t,p);
-    }
-  };
+  /**
+     Factory class for creation of quadrature rules,
+     depending on GeometryType, order and QuadratureType.
+
+     The whole class is private and can only be accessed
+     by the singleton container class QuadratureRules.
+   */
 
   template<typename ctype, int dim>
   struct QuadratureRuleFactory {
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isCube())
       {
@@ -2271,11 +1679,16 @@ namespace Dune {
   struct QuadratureRuleFactory<ctype, 1> {
     enum { dim = 1 };
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isLine())
       {
-        return new CubeQuadratureRule<ctype,dim>(p);
+        switch (qt) {
+        case QuadratureType::Gauss :
+          return new CubeQuadratureRule<ctype,dim>(p);
+        default :
+          return 0;
+        }
       }
       return 0;
     }
@@ -2285,7 +1698,7 @@ namespace Dune {
   struct QuadratureRuleFactory<ctype, 3> {
     enum { dim = 3 };
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isCube())
       {

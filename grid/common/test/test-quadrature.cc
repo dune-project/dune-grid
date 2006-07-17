@@ -16,8 +16,10 @@ void checkQuadrature(Dune::GeometryType t, int p)
   double volume = 0;
   // Quadratures
   typedef Dune::QuadratureRule<ctype, dim> Quad;
-  typedef typename Quad::const_iterator QuadIterator;
-  const Quad & quad =
+  //  typedef typename Quad::const_iterator QuadIterator;
+  typedef typename Quad::iterator QuadIterator;
+  //  const Quad & quad =
+  Quad & quad =
     Dune::QuadratureRules<ctype,dim>::rule(t, p);
   if (quad.type() != t || quad.order() < p) {
     std::cerr << "Error: Type mismatch! Requested Quadrature for " << t
