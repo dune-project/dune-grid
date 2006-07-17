@@ -7,10 +7,13 @@ namespace Dune {
 
   template<typename ct>
   CubeQuadratureRule<ct,1>::CubeQuadratureRule (int p)
+    : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
   {
     //! set up quadrature of given order in d dimensions
     std::vector< FieldVector<ct, dim> > _points;
     std::vector< double > _weight;
+
+    int delivered_order;
 
     switch(p)
     {
@@ -700,6 +703,7 @@ namespace Dune {
       DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << p << " not supported!");
     }
 
+    this->delivered_order = delivered_order;
     assert(_points.size() == _weight.size());
     for (size_t i = 0; i < _points.size(); i++)
       this->push_back(QuadraturePoint<ct,dim>(_points[i], _weight[i]));
@@ -714,17 +718,8 @@ namespace Dune {
   /** Singleton holding the Prism Quadrature points  */
   PrismQuadraturePoints<3> PrismQuadraturePointsSingleton<3>::prqp;
 
-  /** Singleton holding the Quadrature  points  */
+  /** Singleton holding the Quadrature points  */
   PyramidQuadraturePoints PyramidQuadraturePointsSingleton<3>::pyqp;
-
-  //   // singleton holding a quadrature rule container
-  //   template<> QuadratureRuleContainer<float, 1> QuadratureRules<float, 1>::rule(19);
-  //   template<> QuadratureRuleContainer<float, 2> QuadratureRules<float, 2>::rule(19);
-  //   template<> QuadratureRuleContainer<float, 3> QuadratureRules<float, 3>::rule(19);
-
-  //   template<> QuadratureRuleContainer<double, 1> QuadratureRules<double, 1>::rule(19);
-  //   template<> QuadratureRuleContainer<double, 2> QuadratureRules<double, 2>::rule(19);
-  //   template<> QuadratureRuleContainer<double, 3> QuadratureRules<double, 3>::rule(19);
 
   int _init_quadrature()
   {

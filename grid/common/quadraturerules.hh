@@ -88,19 +88,24 @@ namespace Dune {
   class QuadratureRule : public std::vector<QuadraturePoint<ct,dim> >
   {
   public:
-    QuadratureRule(){}
+    QuadratureRule() : delivered_order(-1) {}
+    QuadratureRule(GeometryType t) : geometry_type(t), delivered_order(-1) {}
+    QuadratureRule(GeometryType t, int order) : geometry_type(t), delivered_order(order) {}
     // compile time parameters
     enum { d=dim };
     typedef ct CoordType;
 
     //! return order
-    virtual int order () const = 0;
+    virtual int order () const { return delivered_order; }
 
     //! return type of element
-    virtual GeometryType type () const = 0;
+    virtual GeometryType type () const { return geometry_type; }
     virtual ~QuadratureRule(){}
 
   protected:
+    GeometryType geometry_type;
+    int delivered_order;
+
     void tensor_product (const QuadratureRule<ct,1> & q1d)
     {
       // fill in all the gauss points
@@ -149,27 +154,20 @@ namespace Dune {
   template<typename ctype, int dim>
   struct QuadratureRules {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
-    typedef QuadratureRule<ctype, dim>* QuadratureRulePtr;
+    typedef QuadratureRule<ctype, dim> QuadratureRule;
     // real creator
 #ifndef MUTABLE_QUADRATURERULES
-    const QuadratureRule<ctype, dim>& _rule(const GeometryType& t, int p)
+    const QuadratureRule& _rule(const GeometryType& t, int p)
 #else
-    QuadratureRule<ctype, dim>& _rule(const GeometryType & t, int p)
+    QuadratureRule& _rule(const GeometryType & t, int p)
 #endif
     {
-      static std::map<QuadratureRuleKey, QuadratureRulePtr> _quadratureMap;
+      static std::map<QuadratureRuleKey, QuadratureRule> _quadratureMap;
       QuadratureRuleKey key(t,p);
       if (_quadratureMap.find(key) == _quadratureMap.end()) {
-        QuadratureRulePtr ptr = QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
-
-        if (p==0)
-          DUNE_THROW(QuadratureOrderOutOfRange,
-                     "QuadratureRule for order " << p << " and GeometryType "
-                                                 << t << " not available");
-
-        _quadratureMap[key] = ptr;
+        _quadratureMap[key] = QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
       }
-      return *_quadratureMap[key];
+      return _quadratureMap[key];
     }
     // singleton provider
     static QuadratureRules& instance()
@@ -181,9 +179,9 @@ namespace Dune {
     QuadratureRules () {};
   public:
 #ifndef MUTABLE_QUADRATURERULES
-    static const QuadratureRule<ctype,dim>& rule(const GeometryType& t, int p)
+    static const QuadratureRule& rule(const GeometryType& t, int p)
 #else
-    static QuadratureRule<ctype,dim>& rule(const GeometryType & t, int p)
+    static QuadratureRule & rule(const GeometryType & t, int p)
 #endif
     {
       return instance()._rule(t,p);
@@ -205,7 +203,7 @@ namespace Dune {
     typedef CubeQuadratureRule value_type;
 
     //! set up quadrature of given order in d dimensions
-    CubeQuadratureRule (int p)
+    CubeQuadratureRule (int p) : QuadratureRule<ct,dim>(GeometryType(GeometryType::cube, d))
     {
 #ifndef SEGFAULT
       CubeQuadratureRule<ct,1> q1D(p);
@@ -213,30 +211,10 @@ namespace Dune {
       const QuadratureRule<ct,1> & q1D = QuadratureRules<ct,1>::rule(type(),p);
 #endif
       tensor_product( q1D );
-      delivered_order = q1D.order();
+      this->delivered_order = q1D.order();
     }
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType cube (GeometryType::cube, d);
-      return cube;
-    }
-
-    //! appear as your own container
-    const CubeQuadratureRule& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
     ~CubeQuadratureRule(){}
-  private:
-    int delivered_order;      // delivered order
   };
 
   //! @copydoc CubeQuadratureRule
@@ -255,28 +233,7 @@ namespace Dune {
 
     CubeQuadratureRule (int p);
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType cube (GeometryType::cube, d);
-      return cube;
-    }
-
-    //! appear as your own container
-    const CubeQuadratureRule& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
-
     ~CubeQuadratureRule(){}
-  private:
-    int delivered_order;  // delivered order
   };
 
   /************************************************
@@ -927,12 +884,13 @@ namespace Dune {
     enum {highest_order=SimplexQuadraturePoints<2>::highest_order};
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
-    SimplexQuadratureRule(int p)
+    SimplexQuadratureRule(int p) : QuadratureRule<ct,2>(GeometryType(GeometryType::simplex, d))
     {
+      int m;
       if (p>highest_order)
         DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
-                                               << type() << " not available");
+                                               << this->type() << " not available");
 
       switch(p)
       {
@@ -977,7 +935,7 @@ namespace Dune {
         break;
       default : m=33;
       }
-      delivered_order = SimplexQuadraturePointsSingleton<2>::sqp.order(m);
+      this->delivered_order = SimplexQuadraturePointsSingleton<2>::sqp.order(m);
       FieldVector<ct, d> local;
       double weight;
       for(int i=0; i<m; ++i)
@@ -991,29 +949,7 @@ namespace Dune {
       }
     }
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType simplex (GeometryType::simplex, d);
-      return simplex;
-    }
-
-    //! appear as your own container
-    const SimplexQuadratureRule<ct,2>& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
     ~SimplexQuadratureRule(){}
-
-
-  private:
-    int delivered_order, m;
   };
 
 
@@ -1216,12 +1152,13 @@ namespace Dune {
     enum {highest_order=SimplexQuadraturePoints<3>::highest_order};
     typedef ct CoordType;
     typedef SimplexQuadratureRule<ct,3> value_type;
-    SimplexQuadratureRule(int p)
+    SimplexQuadratureRule(int p) : QuadratureRule<ct,3>(GeometryType(GeometryType::simplex, d))
     {
+      int m;
       if (p>highest_order)
         DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
-                                               << type() << " not available");
+                                               << this->type() << " not available");
 
       switch(p)
       {
@@ -1243,7 +1180,7 @@ namespace Dune {
         break;
       default : m=15;
       }
-      delivered_order = SimplexQuadraturePointsSingleton<3>::sqp.order(m);
+      this->delivered_order = SimplexQuadraturePointsSingleton<3>::sqp.order(m);
       FieldVector<ct, d> local;
       double weight;
       for(int i=0; i<m; ++i)
@@ -1258,28 +1195,7 @@ namespace Dune {
 
     }
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType simplex (GeometryType::simplex, d);
-      return simplex;
-    }
-
-    //! appear as your own container
-    const SimplexQuadratureRule<ct,d>& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
-
     ~SimplexQuadratureRule(){}
-  private:
-    int delivered_order, m;
   };
 
 
@@ -1429,16 +1345,16 @@ namespace Dune {
     };
     typedef ct CoordType;
     typedef PrismQuadratureRule<ct,3> value_type;
-    PrismQuadratureRule(int p)
+    PrismQuadratureRule(int p) : QuadratureRule<ct,3>(GeometryType(GeometryType::prism, d))
     {
       if (p>highest_order)
         DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
-                                               << type() << " not available");
+                                               << this->type() << " not available");
 
       if (p<=2) {
         int m=6;
-        delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
+        this->delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
         for(int i=0; i<m; ++i)
         {
           FieldVector<ct,3> local;
@@ -1454,7 +1370,7 @@ namespace Dune {
         SimplexQuadratureRule<ct,2> triangle(p);
         CubeQuadratureRule<ct,1> line(p);
 
-        delivered_order = std::min(triangle.order(),line.order());
+        this->delivered_order = std::min(triangle.order(),line.order());
 
         for (typename CubeQuadratureRule<ct,1>::iterator
              lit = line.begin(); lit != line.end(); ++lit)
@@ -1476,28 +1392,7 @@ namespace Dune {
       }
     }
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType prism (GeometryType::prism, d);
-      return prism;
-    }
-
-    //! appear as your own container
-    const PrismQuadratureRule<ct,3>& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
     ~PrismQuadratureRule(){}
-
-  private:
-    int delivered_order;
   };
 
   /** Singleton holding the Pyramid Quadrature points  */
@@ -1601,19 +1496,21 @@ namespace Dune {
     enum {highest_order=PyramidQuadraturePoints::highest_order};
     typedef ct CoordType;
     typedef PyramidQuadratureRule<ct,3> value_type;
-    PyramidQuadratureRule(int p)
+    PyramidQuadratureRule(int p) : QuadratureRule<ct,3>(GeometryType(GeometryType::pyramid, d))
     {
+      int m;
+
       if (p>highest_order)
         DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
-                                               << type() << " not available");
+                                               << this->type() << " not available");
 
       switch(p)
       {
       default : m=8;
       }
 
-      delivered_order = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);
+      this->delivered_order = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);
       FieldVector<ct, d> local;
       double weight;
       for(int i=0; i<m; ++i)
@@ -1626,28 +1523,7 @@ namespace Dune {
       }
     }
 
-    //! return order
-    int order () const
-    {
-      return delivered_order;
-    }
-
-    //! return type of element
-    GeometryType type () const
-    {
-      static const GeometryType pyramid (GeometryType::pyramid, d);
-      return pyramid;
-    }
-
-    //! appear as your own container
-    const PyramidQuadratureRule<ct,3>& getelement (GeometryType type, int p)
-    {
-      return *this;
-    }
     ~PyramidQuadratureRule(){}
-
-  private:
-    int delivered_order, m;
   };
 
   /**
@@ -1662,17 +1538,17 @@ namespace Dune {
   class QuadratureRuleFactory {
   private:
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
+    static QuadratureRule<ctype, dim> rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isCube())
       {
-        return new CubeQuadratureRule<ctype,dim>(p);
+        return CubeQuadratureRule<ctype,dim>(p);
       }
       if (t.isSimplex())
       {
-        return new SimplexQuadratureRule<ctype,dim>(p);
+        return SimplexQuadratureRule<ctype,dim>(p);
       }
-      return 0;
+      DUNE_THROW(Exception, "Unknown GeometryType");
     }
   };
 
@@ -1681,18 +1557,18 @@ namespace Dune {
   private:
     enum { dim = 1 };
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
+    static QuadratureRule<ctype, dim> rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isLine())
       {
         switch (qt) {
         case QuadratureType::Gauss :
-          return new CubeQuadratureRule<ctype,dim>(p);
+          return CubeQuadratureRule<ctype,dim>(p);
         default :
-          return 0;
+          DUNE_THROW(Exception, "Unknown QuadratureType");
         }
       }
-      return 0;
+      DUNE_THROW(Exception, "Unknown GeometryType");
     }
   };
 
@@ -1701,25 +1577,25 @@ namespace Dune {
   private:
     enum { dim = 3 };
     friend class QuadratureRules<ctype, dim>;
-    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
+    static QuadratureRule<ctype, dim> rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
       if (t.isCube())
       {
-        return new CubeQuadratureRule<ctype,dim>(p);
+        return CubeQuadratureRule<ctype,dim>(p);
       }
       if (t.isSimplex())
       {
-        return new SimplexQuadratureRule<ctype,dim>(p);
+        return SimplexQuadratureRule<ctype,dim>(p);
       }
       if (t.isPrism())
       {
-        return new PrismQuadratureRule<ctype,dim>(p);
+        return PrismQuadratureRule<ctype,dim>(p);
       }
       if (t.isPyramid())
       {
-        return new PyramidQuadratureRule<ctype,dim>(p);
+        return PyramidQuadratureRule<ctype,dim>(p);
       }
-      return 0;
+      DUNE_THROW(Exception, "Unknown GeometryType");
     }
   };
 
