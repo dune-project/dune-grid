@@ -155,7 +155,7 @@ namespace Dune {
   struct QuadratureRules {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
     typedef QuadratureRule<ctype, dim> QuadratureRule;
-    // real creator
+    //! real rule creator
 #ifndef MUTABLE_QUADRATURERULES
     const QuadratureRule& _rule(const GeometryType& t, int p)
 #else
@@ -169,15 +169,16 @@ namespace Dune {
       }
       return _quadratureMap[key];
     }
-    // singleton provider
+    //! singleton provider
     static QuadratureRules& instance()
     {
       static QuadratureRules instance;
       return instance;
     }
-    // private constructor
+    //! private constructor
     QuadratureRules () {};
   public:
+    //! select the appropriate QuadratureRule for GeometryType t and order p
 #ifndef MUTABLE_QUADRATURERULES
     static const QuadratureRule& rule(const GeometryType& t, int p)
 #else
@@ -186,6 +187,7 @@ namespace Dune {
     {
       return instance()._rule(t,p);
     }
+    //! @copydoc rule
 #ifndef MUTABLE_QUADRATURERULES
     static const QuadratureRule& rule(const GeometryType::BasicType t, int p)
 #else
@@ -211,19 +213,17 @@ namespace Dune {
     typedef ct CoordType;
     typedef CubeQuadratureRule value_type;
 
+    ~CubeQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,dim>;
     //! set up quadrature of given order in d dimensions
     CubeQuadratureRule (int p) : QuadratureRule<ct,dim>(GeometryType(GeometryType::cube, d))
     {
-#ifndef SEGFAULT
-      CubeQuadratureRule<ct,1> q1D(p);
-#else
-      const QuadratureRule<ct,1> & q1D = QuadratureRules<ct,1>::rule(type(),p);
-#endif
+      const QuadratureRule<ct,1> & q1D = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
       tensor_product( q1D );
       this->delivered_order = q1D.order();
     }
 
-    ~CubeQuadratureRule(){}
   };
 
   //! @copydoc CubeQuadratureRule
@@ -240,9 +240,10 @@ namespace Dune {
     typedef ct CoordType;
     typedef CubeQuadratureRule value_type;
 
-    CubeQuadratureRule (int p);
-
     ~CubeQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,dim>;
+    CubeQuadratureRule (int p);
   };
 
   /************************************************
@@ -260,8 +261,10 @@ namespace Dune {
     enum { highest_order=12 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
-    SimplexQuadratureRule(int p);
     ~SimplexQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,d>;
+    SimplexQuadratureRule (int p);
   };
 
   template<typename ct>
@@ -273,8 +276,10 @@ namespace Dune {
     enum { highest_order=5 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule<ct,3> value_type;
-    SimplexQuadratureRule(int p);
     ~SimplexQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,d>;
+    SimplexQuadratureRule (int p);
   };
 
   /***********************************
@@ -422,6 +427,10 @@ namespace Dune {
     };
     typedef ct CoordType;
     typedef PrismQuadratureRule<ct,3> value_type;
+
+    ~PrismQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,d>;
     PrismQuadratureRule(int p) : QuadratureRule<ct,3>(GeometryType(GeometryType::prism, d))
     {
       if (p>highest_order)
@@ -444,15 +453,15 @@ namespace Dune {
         }
       }
       else {
-        SimplexQuadratureRule<ct,2> triangle(p);
-        CubeQuadratureRule<ct,1> line(p);
+        const QuadratureRule<ct,2> & triangle = QuadratureRules<ct,2>::rule(GeometryType::simplex, p);
+        const QuadratureRule<ct,1> & line = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
 
         this->delivered_order = std::min(triangle.order(),line.order());
 
-        for (typename CubeQuadratureRule<ct,1>::iterator
+        for (typename QuadratureRule<ct,1>::const_iterator
              lit = line.begin(); lit != line.end(); ++lit)
         {
-          for (typename SimplexQuadratureRule<ct,2>::iterator
+          for (typename QuadratureRule<ct,2>::const_iterator
                tit = triangle.begin(); tit != triangle.end(); ++tit)
           {
             FieldVector<ct, d> local;
@@ -468,8 +477,6 @@ namespace Dune {
         }
       }
     }
-
-    ~PrismQuadratureRule(){}
   };
 
   /** Singleton holding the Pyramid Quadrature points  */
@@ -573,6 +580,10 @@ namespace Dune {
     enum {highest_order=PyramidQuadraturePoints::highest_order};
     typedef ct CoordType;
     typedef PyramidQuadratureRule<ct,3> value_type;
+
+    ~PyramidQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,d>;
     PyramidQuadratureRule(int p) : QuadratureRule<ct,3>(GeometryType(GeometryType::pyramid, d))
     {
       int m;
@@ -599,8 +610,6 @@ namespace Dune {
         push_back(QuadraturePoint<ct,d>(local,weight));
       }
     }
-
-    ~PyramidQuadratureRule(){}
   };
 
   /**

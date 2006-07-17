@@ -1638,15 +1638,11 @@ namespace Dune {
   /** Singleton holding the Quadrature points  */
   PyramidQuadraturePoints PyramidQuadraturePointsSingleton<3>::pyqp;
 
-  int _init_quadrature()
-  {
-    Dune::CubeQuadratureRule<float, 1> q1(0);
-    Dune::CubeQuadratureRule<double, 1> q2(0);
-    Dune::SimplexQuadratureRule<float, 2> s1(0);
-    Dune::SimplexQuadratureRule<double, 2> s2(0);
-    Dune::SimplexQuadratureRule<float, 3> s3(0);
-    Dune::SimplexQuadratureRule<double, 3> s4(0);
-  }
-  int _init_quadrature_val = _init_quadrature();
+  template CubeQuadratureRule<float, 1>::CubeQuadratureRule(int);
+  template CubeQuadratureRule<double, 1>::CubeQuadratureRule(int);
+  template SimplexQuadratureRule<float, 2>::SimplexQuadratureRule(int);
+  template SimplexQuadratureRule<double, 2>::SimplexQuadratureRule(int);
+  template SimplexQuadratureRule<float, 3>::SimplexQuadratureRule(int);
+  template SimplexQuadratureRule<double, 3>::SimplexQuadratureRule(int);
 
 } // namespace
