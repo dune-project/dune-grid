@@ -1659,7 +1659,8 @@ namespace Dune {
    */
 
   template<typename ctype, int dim>
-  struct QuadratureRuleFactory {
+  class QuadratureRuleFactory {
+  private:
     friend class QuadratureRules<ctype, dim>;
     static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
     {
@@ -1676,7 +1677,8 @@ namespace Dune {
   };
 
   template<typename ctype>
-  struct QuadratureRuleFactory<ctype, 1> {
+  class QuadratureRuleFactory<ctype, 1> {
+  private:
     enum { dim = 1 };
     friend class QuadratureRules<ctype, dim>;
     static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
@@ -1695,7 +1697,8 @@ namespace Dune {
   };
 
   template<typename ctype>
-  struct QuadratureRuleFactory<ctype, 3> {
+  class QuadratureRuleFactory<ctype, 3> {
+  private:
     enum { dim = 3 };
     friend class QuadratureRules<ctype, dim>;
     static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p, QuadratureType::Enum qt)
