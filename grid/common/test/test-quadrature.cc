@@ -50,12 +50,15 @@ void checkQuadrature(Dune::GeometryType t, int p)
 template<class ctype, int dim>
 void checkQuadrature(Dune::GeometryType t)
 {
-  for (int i=0; i<100; i++)
+  for (int i=1;; i++)
   {
     try {
       checkQuadrature<ctype,dim>(t, i);
     }
-    catch (Dune::QuadratureOrderOutOfRange & e) {}
+    catch (Dune::QuadratureOrderOutOfRange & e) {
+      std::cout << "tested " << t << " up to max_order = " << i-1 << std::endl;
+      break;
+    }
   }
 }
 

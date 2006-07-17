@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
@@ -908,6 +909,11 @@ namespace Dune {
     typedef SimplexQuadratureRule value_type;
     SimplexQuadratureRule(int p)
     {
+      if (p>highest_order)
+        DUNE_THROW(QuadratureOrderOutOfRange,
+                   "QuadratureRule for order " << p << " and GeometryType "
+                                               << type() << " not available");
+
       switch(p)
       {
       case 0 :  // to be verified
@@ -963,7 +969,6 @@ namespace Dune {
         push_back(QuadraturePoint<ct,d>(local,weight));
 
       }
-
     }
 
     //! return order
@@ -1193,6 +1198,11 @@ namespace Dune {
     typedef SimplexQuadratureRule<ct,3> value_type;
     SimplexQuadratureRule(int p)
     {
+      if (p>highest_order)
+        DUNE_THROW(QuadratureOrderOutOfRange,
+                   "QuadratureRule for order " << p << " and GeometryType "
+                                               << type() << " not available");
+
       switch(p)
       {
       case 0 :  // to be verified
@@ -1401,6 +1411,11 @@ namespace Dune {
     typedef PrismQuadratureRule<ct,3> value_type;
     PrismQuadratureRule(int p)
     {
+      if (p>highest_order)
+        DUNE_THROW(QuadratureOrderOutOfRange,
+                   "QuadratureRule for order " << p << " and GeometryType "
+                                               << type() << " not available");
+
       if (p<=2) {
         int m=6;
         delivered_order = PrismQuadraturePointsSingleton<3>::prqp.order(m);
@@ -1581,6 +1596,11 @@ namespace Dune {
     typedef PyramidQuadratureRule<ct,3> value_type;
     PyramidQuadratureRule(int p)
     {
+      if (p>highest_order)
+        DUNE_THROW(QuadratureOrderOutOfRange,
+                   "QuadratureRule for order " << p << " and GeometryType "
+                                               << type() << " not available");
+
       switch(p)
       {
       default : m=8;
@@ -2192,10 +2212,99 @@ namespace Dune {
 
   };
 
-  // singleton holding a quadrature rule container
+  template<typename ctype, int dim> struct QuadratureRuleFactory;
+
   template<typename ctype, int dim>
   struct QuadratureRules {
-    static QuadratureRuleContainer<ctype,dim> rule;
+    typedef std::pair<GeometryType,int> QuadratureRuleKey;
+    typedef QuadratureRule<ctype, dim>* QuadratureRulePtr;
+    // real creator
+    const QuadratureRule<ctype, dim>& _rule(const GeometryType& t, int p)
+    {
+      static std::map<QuadratureRuleKey, QuadratureRulePtr> _quadratureMap;
+      QuadratureRuleKey key(t,p);
+      if (_quadratureMap.find(key) == _quadratureMap.end()) {
+        QuadratureRulePtr ptr = QuadratureRuleFactory<ctype,dim>::rule(t,p);
+
+        if (p==0)
+          DUNE_THROW(QuadratureOrderOutOfRange,
+                     "QuadratureRule for order " << p << " and GeometryType "
+                                                 << t << " not available");
+
+        _quadratureMap[key] = ptr;
+      }
+      return *_quadratureMap[key];
+    }
+    // singleton provider
+    static QuadratureRules& instance()
+    {
+      static QuadratureRules instance;
+      return instance;
+    }
+    // private constructor
+    QuadratureRules () {};
+  public:
+    static const QuadratureRule<ctype,dim>& rule(const GeometryType& t, int p)
+    {
+      return instance()._rule(t,p);
+    }
+  };
+
+  template<typename ctype, int dim>
+  struct QuadratureRuleFactory {
+    friend class QuadratureRules<ctype, dim>;
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    {
+      if (t.isCube())
+      {
+        return new CubeQuadratureRule<ctype,dim>(p);
+      }
+      if (t.isSimplex())
+      {
+        return new SimplexQuadratureRule<ctype,dim>(p);
+      }
+      return 0;
+    }
+  };
+
+  template<typename ctype>
+  struct QuadratureRuleFactory<ctype, 1> {
+    enum { dim = 1 };
+    friend class QuadratureRules<ctype, dim>;
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    {
+      if (t.isLine())
+      {
+        return new CubeQuadratureRule<ctype,dim>(p);
+      }
+      return 0;
+    }
+  };
+
+  template<typename ctype>
+  struct QuadratureRuleFactory<ctype, 3> {
+    enum { dim = 3 };
+    friend class QuadratureRules<ctype, dim>;
+    static QuadratureRule<ctype, dim>* rule(const GeometryType& t, int p)
+    {
+      if (t.isCube())
+      {
+        return new CubeQuadratureRule<ctype,dim>(p);
+      }
+      if (t.isSimplex())
+      {
+        return new SimplexQuadratureRule<ctype,dim>(p);
+      }
+      if (t.isPrism())
+      {
+        return new PrismQuadratureRule<ctype,dim>(p);
+      }
+      if (t.isPyramid())
+      {
+        return new PyramidQuadratureRule<ctype,dim>(p);
+      }
+      return 0;
+    }
   };
 
 } // end namespace
