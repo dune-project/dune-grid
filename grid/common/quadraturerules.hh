@@ -3,8 +3,6 @@
 #ifndef DUNE_QUADRATURERULES_HH
 #define DUNE_QUADRATURERULES_HH
 
-#define MUTABLE_QUADRATURERULES
-
 #include <iostream>
 #include <vector>
 #include <map>
@@ -102,6 +100,10 @@ namespace Dune {
     virtual GeometryType type () const { return geometry_type; }
     virtual ~QuadratureRule(){}
 
+    //! this container is always a const container,
+    //! therefor iterator is the same as const_iterator
+    typedef typename std::vector<QuadraturePoint<ct,dim> >::const_iterator iterator;
+
   protected:
     GeometryType geometry_type;
     int delivered_order;
@@ -156,11 +158,7 @@ namespace Dune {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
     typedef QuadratureRule<ctype, dim> QuadratureRule;
     //! real rule creator
-#ifndef MUTABLE_QUADRATURERULES
     const QuadratureRule& _rule(const GeometryType& t, int p)
-#else
-    QuadratureRule& _rule(const GeometryType & t, int p)
-#endif
     {
       static std::map<QuadratureRuleKey, QuadratureRule> _quadratureMap;
       QuadratureRuleKey key(t,p);
@@ -179,20 +177,12 @@ namespace Dune {
     QuadratureRules () {};
   public:
     //! select the appropriate QuadratureRule for GeometryType t and order p
-#ifndef MUTABLE_QUADRATURERULES
     static const QuadratureRule& rule(const GeometryType& t, int p)
-#else
-    static QuadratureRule & rule(const GeometryType & t, int p)
-#endif
     {
       return instance()._rule(t,p);
     }
     //! @copydoc rule
-#ifndef MUTABLE_QUADRATURERULES
     static const QuadratureRule& rule(const GeometryType::BasicType t, int p)
-#else
-    static QuadratureRule & rule(const GeometryType::BasicType t, int p)
-#endif
     {
       GeometryType gt(t,dim);
       return instance()._rule(gt,p);
