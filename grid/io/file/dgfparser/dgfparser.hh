@@ -13,7 +13,9 @@
 #include <map>
 #include <assert.h>
 #include <cmath>
-
+#if HAVE_MPI
+#include "mpi.h"
+#endif
 #include "dgfparserblocks.hh"
 
 /**
