@@ -116,7 +116,7 @@ namespace Dune {
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief Provides the meshes of the finite element toolbox UG.
-     \brief (http://cox.iwr.uni-heidelberg.de/~ug).
+     \brief (http://sit.iwr.uni-heidelberg.de/~ug).
      \ingroup GridImplementations
 
      This is the implementation of the grid interface
