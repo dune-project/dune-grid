@@ -1,5 +1,5 @@
-Module: dune_grid
-Depends: dune_common
+Module: dune-grid
+Depends: dune-common
 Suggests: UG Alberta Alu3d
 
 run_configure () {
