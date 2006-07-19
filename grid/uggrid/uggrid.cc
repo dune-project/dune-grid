@@ -725,10 +725,10 @@ namespace Dune {
       int index = 0;
       switch (codim) {
       case 0 :
-        index = UG_NS<GridDim>::index((typename TargetType<0,GridDim>::T*)obj);
+        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Element*)obj);
         break;
       case GridDim :
-        index = UG_NS<GridDim>::index((typename TargetType<GridDim,GridDim>::T*)obj);
+        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Node*)obj);
         break;
       default :
         DUNE_THROW(GridError, "UGGrid::communicate only implemented for this codim");
@@ -748,10 +748,10 @@ namespace Dune {
       int index = 0;
       switch (codim) {
       case 0 :
-        index = UG_NS<GridDim>::index((typename TargetType<0,GridDim>::T*)obj);
+        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Element*)obj);
         break;
       case GridDim :
-        index = UG_NS<GridDim>::index((typename TargetType<GridDim,GridDim>::T*)obj);
+        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Node*)obj);
         break;
       default :
         DUNE_THROW(GridError, "UGGrid::communicate only implemented for codim 0 and dim");
