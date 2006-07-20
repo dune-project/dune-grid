@@ -113,7 +113,7 @@ namespace Dune
     //! number of entities of codim c
     virtual int size (int c) const = 0;
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     virtual int size (int i, int c, int cc) const = 0;
 
     //! number of ii'th subentity with codim cc>c of (i,c)
@@ -160,7 +160,7 @@ namespace Dune
       return Imp::size(c);
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return Imp::size(i,c,cc);
@@ -289,7 +289,7 @@ namespace Dune
       return sizes[c];
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return subsizes[i][c][cc];
@@ -499,7 +499,7 @@ namespace Dune
       return 1;
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return 1;
@@ -653,7 +653,7 @@ namespace Dune
       //entity_size(c);
       return sizes[c];
     }
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return subsizes[i][c][cc];
@@ -975,7 +975,7 @@ namespace Dune
       return 1;
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return 1;
@@ -1105,7 +1105,7 @@ namespace Dune
       return sizes[c];
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return subsizes[i][c][cc];
@@ -1462,7 +1462,7 @@ namespace Dune
       return sizes[c];
     }
 
-    //! number of subentities of codim cc of entitity (i,c)
+    //! number of subentities of codim cc of entity (i,c)
     int size (int i, int c, int cc) const
     {
       return subsizes[i][c][cc];
