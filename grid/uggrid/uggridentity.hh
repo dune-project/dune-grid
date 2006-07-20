@@ -258,7 +258,7 @@ namespace Dune {
 
     unsigned int globalId() const {
 #ifdef ModelP
-      return target_->ddd.gid;
+      return target_->ge.ddd.gid;
 #else
       return UG_NS<dim>::id(target_);
 #endif
