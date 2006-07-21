@@ -163,7 +163,14 @@ namespace Dune {
       static std::map<QuadratureRuleKey, QuadratureRule> _quadratureMap;
       QuadratureRuleKey key(t,p);
       if (_quadratureMap.find(key) == _quadratureMap.end()) {
-        _quadratureMap[key] = QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
+        /*
+           The rule must be acquired before we can store it.
+           If we write this in one command, an invalid rule
+           would get stored in case of an exception.
+         */
+        QuadratureRule rule =
+          QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
+        _quadratureMap[key] = rule;
       }
       return _quadratureMap[key];
     }
@@ -209,7 +216,11 @@ namespace Dune {
     //! set up quadrature of given order in d dimensions
     CubeQuadratureRule (int p) : QuadratureRule<ct,dim>(GeometryType(GeometryType::cube, d))
     {
-      const QuadratureRule<ct,1> & q1D = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
+      //         if (p > highest_order)
+      //           DUNE_THROW(QuadratureOrderOutOfRange,
+      //                      "Quadrature rule " << p << " not supported!");
+
+      QuadratureRule<ct,1> q1D = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
       tensor_product( q1D );
       this->delivered_order = q1D.order();
     }
