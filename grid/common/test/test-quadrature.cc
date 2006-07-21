@@ -28,6 +28,7 @@ void checkQuadrature(Dune::GeometryType t, int p)
               << "\tGot Quadrature for " << quad.type() << " and order="
               << quad.order() << std::endl;
     success = false;
+    return;
   }
   QuadIterator qp = quad.begin();
   QuadIterator qend = quad.end();
@@ -53,13 +54,30 @@ void checkQuadrature(Dune::GeometryType t, int p)
 template<class ctype, int dim>
 void checkQuadrature(Dune::GeometryType t)
 {
+  int maxorder;
   for (int i=1;; i++)
   {
     try {
       checkQuadrature<ctype,dim>(t, i);
     }
     catch (Dune::QuadratureOrderOutOfRange & e) {
-      std::cout << "tested " << t << " up to max_order = " << i-1 << std::endl;
+      maxorder = i-1;
+      break;
+    }
+  }
+  for (int i=maxorder;; i++)
+  {
+    try {
+      checkQuadrature<ctype,dim>(t, i);
+    }
+    catch (Dune::QuadratureOrderOutOfRange & e) {
+      if (i-1 > maxorder)
+      {
+        std::cout << "Error: " << t << " allows higher order in the second run." << std::endl;
+        std::cout << "       " << maxorder << " in the first run, "
+                  << i-1 << " in the second run." << std::endl;
+      }
+      std::cout << "tested " << t << " up to max order = " << maxorder << std::endl;
       break;
     }
   }
