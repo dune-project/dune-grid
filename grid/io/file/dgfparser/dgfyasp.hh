@@ -7,9 +7,10 @@
 namespace Dune {
   template <int dim,int dimworld>
   class MacroGrid::Impl<YaspGrid<dim,dimworld> > {
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
     static YaspGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                            const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
+                                            const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
 }
 #include "dgfyasp.cc"
