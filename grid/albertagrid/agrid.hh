@@ -1868,6 +1868,12 @@ namespace Dune
     template<int dim, int dimw>
     struct isLevelwiseConforming< AlbertaGrid<dim,dimw> >
     {
+      static const bool v = false;
+    };
+
+    template<int dim, int dimw>
+    struct isLeafwiseConforming< AlbertaGrid<dim,dimw> >
+    {
       static const bool v = true;
     };
 

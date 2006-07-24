@@ -493,6 +493,12 @@ namespace Dune {
     };
 
     template<int dim, int dimw>
+    struct isLeafwiseConforming< OneDGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim, int dimw>
     struct hasHangingNodes< OneDGrid<dim,dimw> >
     {
       static const bool v = false;

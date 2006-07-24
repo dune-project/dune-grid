@@ -2995,6 +2995,18 @@ namespace Dune {
     };
 
     template<int dim, int dimw>
+    struct isLeafwiseConforming< YaspGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    template<int dim, int dimw>
+    struct IsUnstructured< YaspGrid<dim,dimw> >
+    {
+      static const bool v = false;
+    };
+
+    template<int dim, int dimw>
     struct hasHangingNodes< YaspGrid<dim,dimw> >
     {
       static const bool v = false;
