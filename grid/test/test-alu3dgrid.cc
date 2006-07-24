@@ -83,7 +83,6 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
-  grid.globalIdSet();
   // only refine once
   checkALUSerial(grid,1);
 }
