@@ -13,9 +13,11 @@
 #include <map>
 #include <assert.h>
 #include <cmath>
-#if HAVE_MPI
-#include "mpi.h"
-#endif
+
+//- Dune includes
+#include <dune/common/mpihelper.hh>
+
+//- local includes
 #include "dgfparserblocks.hh"
 
 /**
@@ -96,12 +98,15 @@ namespace Dune {
   //! GridType* grid = Dune::MacroGrid(filename,MPI_COMM_WORLD);
   //! @endcode
   class MacroGrid : protected DuneGridFormatParser {
+
   public:
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+
     //! constructor given the name of a DGF file
-    MacroGrid(const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD) :
-      DuneGridFormatParser(),
-      filename_(filename),
-      MPICOMM_(MPICOMM) {}
+    MacroGrid(const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
+      : DuneGridFormatParser()
+        , filename_(filename)
+        , MPICOMM_(MPICOMM) {}
     //! conversion method from a DGF file to a GridType* instance
     template <class GridType>
     inline operator GridType* () {
@@ -112,17 +117,19 @@ namespace Dune {
     //! grid implementation
     template <class GT>
     class Impl {
+      typedef MPIHelper::MPICommunicator MPICommunicatorType;
     public:
-      static GT* generate(MacroGrid& mg,const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
+      static GT* generate(MacroGrid& mg,const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
     };
     const char* filename_;
-    MPI_Comm MPICOMM_;
+    MPICommunicatorType MPICOMM_;
   };
   template <class GridType>
   class GridPtr : private MacroGrid {
   public:
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
     //! constructor given the name of a DGF file
-    GridPtr(const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD) :
+    GridPtr(const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
       MacroGrid(filename,MPICOMM),
       grid_(*this) {}
     ~GridPtr() {
@@ -308,11 +315,11 @@ namespace Dune {
         block is found, the grid is generated using the information
         from the \b Vertex  and the \b Simplex  blocks.
         Note that no specific ordering of the local numbering of each simplex
-        is required.
+   is required.
      -# If so far no element information has been generated, the parser
         tries to first generate a cube grid using information from
-        the \b Vertex and the \b Cube  blocks, If this is successful,
-        each cube is split into simplex elements.
+   the \b Vertex and the \b Cube  blocks, If this is successful,
+   each cube is split into simplex elements.
      .
      If the simplex generation process was successful, boundary ids are
      assigned to all boundary faces of the macrogrid.
@@ -373,11 +380,11 @@ namespace Dune {
      -# If neither a \b Simplexgeneration  nor a \b Interval
         block is found, the grid is generated using the information
         from the \b Vertex block; cube elements are constructed if the
-        \b Cube block is present otherwise the \b Simplex blocks is read.
-        If both a \b Cube and a \b Simplex block is found, then only
-        the element information from the \b Cube block is used and each
+   \b Cube block is present otherwise the \b Simplex blocks is read.
+   If both a \b Cube and a \b Simplex block is found, then only
+   the element information from the \b Cube block is used and each
         cube is split into simplex elements so that
-        a simplex grid is constructed.
+   a simplex grid is constructed.
      .
      Boundary ids are assigned in the same manner as described for
      simplex grids.
@@ -570,14 +577,14 @@ namespace Dune {
        will be used to generate the grid:
        -# For the first approach use the token \b file to give a filemane
           and the type of the file (e.g. node, mesh, ply...). Example:
-          \code
+    \code
           file name mesh
-          \endcode
-          If the filetype is givn, it will be appended to \b name and this will be
-          passed to Tetgen/Triangle. Additional parameters for the grid generators
-          can be given by the the \b parameter token.
+    \endcode
+    If the filetype is givn, it will be appended to \b name and this will be
+    passed to Tetgen/Triangle. Additional parameters for the grid generators
+    can be given by the the \b parameter token.
           If no file type is given it is assumed that in a previous run of Tetgen/Triangle
-          files name.node and name.ele were generated and these will be used
+    files name.node and name.ele were generated and these will be used
           to described the verticies and elements of the Dune grid.
        -# For the second approach the vertex block and the interval blocks (if present)
           are used to generate a .node file which is passed to Tetgen/Triangle.

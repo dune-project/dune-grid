@@ -93,25 +93,6 @@ const int dimworld = GRIDDIM;
   #endif
 #endif
 
-#if HAVE_MPI
-#include <mpi.h>
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1; \
-  MPI_Init(&argc, &argv); \
-  MPI_Comm_rank(MPI_COMM_WORLD,&myrank); \
-  MPI_Comm_size(MPI_COMM_WORLD,&mysize);
-#define MPIEND \
-  MPI_Finalize();
-#else
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1;
-#define MPI_Comm int
-#define MPI_COMM_WORLD -1
-#define MPIEND
-#endif
-
 #if defined ALBERTAGRID && HAVE_ALBERTA
   #if GRIDDIM == 1
     #include "dgfoned.hh"

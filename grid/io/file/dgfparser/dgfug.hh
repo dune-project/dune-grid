@@ -8,9 +8,10 @@
 namespace Dune {
   template <int dim,int dimworld>
   class MacroGrid::Impl<UGGrid<dim,dimworld> > {
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
     static UGGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                          const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
+                                          const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
 }
 #include "dgfug.cc"

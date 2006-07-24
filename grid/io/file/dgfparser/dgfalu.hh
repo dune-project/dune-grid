@@ -9,25 +9,29 @@ namespace Dune {
   //*********************************
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUCubeGrid<dim,dimworld> > {
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
     static ALUCubeGrid<dim,dimworld>*
     generate(MacroGrid& mg,
-             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
+             const char* filename,
+             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   private:
     inline void
     generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,MPI_Comm MPICOMM);
+                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
   };
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> > {
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
     static ALUSimplexGrid<dim,dimworld>*
     generate(MacroGrid& mg,
-             const char* filename,MPI_Comm MPICOMM=MPI_COMM_WORLD);
+             const char* filename,
+             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   private:
     inline void
     generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str,MPI_Comm MPICOMM);
+                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
   };
 }
 #include "dgfalu.cc"
