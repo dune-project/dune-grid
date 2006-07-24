@@ -8,12 +8,6 @@
 
 #include <dune/common/mpihelper.hh>
 
-#if HAVE_MPI
-#include <dune/common/mpicollectivecommunication.hh>
-#else
-#include <dune/common/collectivecommunication.hh>
-#endif
-
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include "gridcheck.cc"
 
@@ -92,10 +86,8 @@ int main (int argc , char **argv) {
 
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
-
-  CollectiveCommunication<MPIHelper::MPICommunicator> comm(mpihelper.getCommunicator());
-  int myrank = comm.rank();
-  int mysize = comm.size();
+  int myrank = mpihelper.rank();
+  int mysize = mpihelper.size();
 
   try {
     /* use grid-file appropriate for dimensions */
