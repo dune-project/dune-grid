@@ -3,7 +3,6 @@
 noinst_LTLIBRARIES = libonedgrid.la
 
 libonedgrid_la_SOURCES = onedgrid.cc
-libonedgrid_la_CXXFLAGS = -DDUNE_EXPRESSIONTEMPLATES
 libonedgrid_la_LIBADD = -lcommon
 
 onedgriddir = $(includedir)/dune/grid/onedgrid/
