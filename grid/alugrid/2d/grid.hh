@@ -258,6 +258,7 @@ namespace Dune {
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
     ALU2dGrid(std::string macroTriangFilename )
+    //: mesh_ (macroTriangFilename.c_str(), 1, ALU2DSPACE Refco::quart)
       : mesh_ (macroTriangFilename.c_str())
         , hIndexSet_(*this)
         , localIdSet_(*this)

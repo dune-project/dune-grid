@@ -123,7 +123,7 @@ namespace Dune {
     bool equals (const ALU2dGridIntersectionBase<GridImp> & i) const;
 
     //! increment iterator
-    virtual void increment() { abort(); };
+    virtual void increment() { };
 
     //! return level of inside(entity)
     int level () const;
@@ -308,6 +308,9 @@ namespace Dune {
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
+
+    std::stack<ALU2DSPACE Thinelement*> nbStack_;
+
 
   }; // end ALU2dGridLeafIntersectionIterator
 

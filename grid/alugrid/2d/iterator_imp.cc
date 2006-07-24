@@ -434,6 +434,7 @@ namespace Dune {
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, el, wLevel, end)
+    //, nbStack_(0)
   {
     if (!end)
     {
@@ -450,6 +451,7 @@ namespace Dune {
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const GridImp & grid, int wLevel) :
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, wLevel)
+    //, nbStack_(0)
   {}
 
 
@@ -457,7 +459,9 @@ namespace Dune {
   template<class GridImp>
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const ALU2dGridLeafIntersectionIterator<GridImp> & org)
-    :  ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(org) {}
+    :  ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(org) {
+    nbStack_ = org.nbStack_;
+  }
 
   //! The copy constructor
   template<class GridImp>
@@ -465,6 +469,7 @@ namespace Dune {
   ALU2dGridLeafIntersectionIterator<GridImp> ::
   assign(const ALU2dGridLeafIntersectionIterator<GridImp> & org){
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase::assign(org);
+    nbStack_ = org.nbStack_;
   }
 
 
@@ -476,14 +481,49 @@ namespace Dune {
       this->done();
       return ;
     }
-    else {
-      ++this->current.index_;
-      this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-      if (this->current.index_ >= this->nFaces_)
-        this->done();
-    }
-    if (this->current.neigh_ != 0)
+
+    // non conform case and we still have neighbours
+    if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty()) {
+      this->current.neigh_= static_cast<HElementType *>(nbStack_.top());
+      nbStack_.pop();
       this->current.opposite_= this->current.item_->opposite(this->current.index_);
+      return;
+    }
+
+
+    ++this->current.index_;
+    if (this->current.index_ >= this->nFaces_) {
+      this->done();
+      return;
+    }
+    //if (this->current.item_->hashvtx(this->current.index_)) {
+    if (this->current.item_->hasHangingNode(this->current.index_)) {
+      this->current.item_->getNbList(this->current.index_, nbStack_);
+      //assert(!nbStack_.empty());
+      if (nbStack_.empty()) {
+        //std::cout << "Stack empty at index: " << this->current.index_ << std::endl;
+        //this->current.neigh_ = 0;
+        //this->current.opposite_ = -1;
+        increment();
+        return;
+      }
+
+      this->current.neigh_= static_cast<HElementType *>(nbStack_.top());
+      nbStack_.pop();
+      this->current.opposite_= this->current.item_->opposite(this->current.index_);
+    }
+
+    //conform case
+    else {
+      this->current.neigh_ = this->current.item_->nbel(this->current.index_);
+      if (this->current.neigh_ != 0) {
+        this->current.opposite_= this->current.item_->opposite(this->current.index_);
+        //assert(this->current.neigh_->leaf());
+      }
+    }
+
+    if (this->current.index_ >= this->nFaces_)
+      this->done();
 
     return;
   }
@@ -503,12 +543,13 @@ namespace Dune {
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel) {
 
     this->current.item_ = const_cast<HElementType *> (&elem);
-    this->current.index_ = 0;
-    this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-    this->current.opposite_= this->current.item_->opposite(this->current.index_);
+    this->current.index_ = -1;
+    //this->current.neigh_ = this->current.item_->nbel(this->current.index_);
+    //this->current.opposite_= this->current.item_->opposite(this->current.index_);
     assert(this->current.item_ );
     this->walkLevel_ = wLevel;
     this->done_ = false;
+    increment();
   }
 
 
