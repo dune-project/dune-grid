@@ -6,41 +6,20 @@
 #include <sstream>
 #include <string>
 
-// #define ALUGRID_SIMPLEX
-// #define GRIDDIM 3
-// #include <dune/grid/io/file/dgfparser/gridtype.hh>
-// #undef GRIDDIM
-// #undef ALUGRID_SIMPLEX
+#include <dune/common/mpihelper.hh>
 
-#include <dune/grid/io/file/dgfparser/dgfalu.hh>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1; \
-  MPI_Init(&argc, &argv); \
-  MPI_Comm_rank(MPI_COMM_WORLD,&myrank); \
-  MPI_Comm_size(MPI_COMM_WORLD,&mysize);
-#define MPIEND \
-  MPI_Finalize();
+#if HAVE_MPI
+#include <dune/common/mpicollectivecommunication.hh>
 #else
-#define MPISTART \
-  int myrank=-1; \
-  int mysize = 1;
-#define MPI_COMM_WORLD -1
-#define MPIEND
+#include <dune/common/collectivecommunication.hh>
 #endif
 
-//#include <dune/grid/alugrid.hh>
-
-//#define ALUGRID_TESTING
+#include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #include "gridcheck.cc"
 
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
-
 
 using namespace Dune;
 
@@ -105,19 +84,20 @@ template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
   grid.globalIdSet();
-  checkALUSerial(grid,2);
+  // only refine once
+  checkALUSerial(grid,1);
 }
 #endif
 
 int main (int argc , char **argv) {
-  #if ! (HAVE_MPI && defined HAVE_ALUGRID_PARALLEL_H)
-  std::cerr << "The sequentiell test of alugrid is currently broken"
-            << std::endl
-            << "Aborting test-alu3dgrid" << std::endl;
-  exit(1);
-  #endif
 
-  MPISTART
+  // this method calls MPI_Init, if MPI is enabled
+  MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
+
+  CollectiveCommunication<MPIHelper::MPICommunicator> comm(mpihelper.getCommunicator());
+  int myrank = comm.rank();
+  int mysize = comm.size();
+
   try {
     /* use grid-file appropriate for dimensions */
 
@@ -125,9 +105,9 @@ int main (int argc , char **argv) {
     {
       factorEpsilon = 5.e+5;
       // check empty grid
+
       if (myrank == 0)
         std::cout << "Check empty grids" << std::endl;
-
       {
         ALUCubeGrid<3,3> grid(MPI_COMM_WORLD);
         checkALUSerial(grid);
@@ -153,6 +133,7 @@ int main (int argc , char **argv) {
           filename += "largegrid_alu.hexa";
 
         ALUCubeGrid<3,3> grid (filename,MPI_COMM_WORLD);
+
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,1,0);
         if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
@@ -166,6 +147,7 @@ int main (int argc , char **argv) {
           filename += "examplegrid9.dgf.ALUgrid";
 
         ALUSimplexGrid<3,3> grid(filename,MPI_COMM_WORLD);
+
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,0,0);  //1,3
         if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
@@ -174,21 +156,12 @@ int main (int argc , char **argv) {
     };
 
   } catch (Dune::Exception &e) {
-    #if HAVE_MPI
-    MPI_Finalize();
-    #endif
     std::cerr << e << std::endl;
     return 1;
   } catch (...) {
-    #if HAVE_MPI
-    MPI_Finalize();
-    #endif
     std::cerr << "Generic exception!" << std::endl;
     return 2;
   }
-  #if HAVE_MPI
-  MPI_Finalize();
-  #endif
 
   return 0;
 }
