@@ -121,7 +121,7 @@ namespace Dune
     //! number of ii'th subentity with codim cc>c of (i,c)
     virtual int subEntity (int i, int c, int ii, int cc) const = 0;
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     virtual const FieldVector<ctype,dim>& position (int i, int c) const = 0;
 
     //! maps local coordinate on subentity i of codim cdim onto reference element coordinates
@@ -174,7 +174,7 @@ namespace Dune
       return Imp::subEntity(i,c,ii,cc);
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<CoordType,d>& position (int i, int c) const
     {
       return Imp::position(i,c);
@@ -303,7 +303,7 @@ namespace Dune
       return hierarchy[i][c][ii][cc];
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,dim>& position (int i, int c) const
     {
       return pos[i][c];
@@ -328,7 +328,7 @@ namespace Dune
       return 1.0;
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<int,dim>& iposition (int i, int c) const
     {
       return ipos[i][c];
@@ -513,7 +513,7 @@ namespace Dune
       return 0;
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,d>& position (int i, int c) const
     {
       return pos;
@@ -666,7 +666,7 @@ namespace Dune
       return subentityindex[i][c][ii][cc];
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,dim>& position (int i, int c) const
     {
       return pos[i][c];
@@ -688,7 +688,7 @@ namespace Dune
     //! volume of the reference element
     double volume () const { return volume_; }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     //   const FieldVector<int,dim>& iposition (int i, int c) const
     //     {
     //       //return ipos[i][c];
@@ -989,7 +989,7 @@ namespace Dune
       return 0;
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,d>& position (int i, int c) const
     {
       return pos;
@@ -1119,7 +1119,7 @@ namespace Dune
       return subentityindex[i][c][ii][cc];
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,dim>& position (int i, int c) const
     {
       return pos[i][c];
@@ -1476,7 +1476,7 @@ namespace Dune
       return subentityindex[i][c][ii][cc];
     }
 
-    //! position of entity (i,c)
+    //! Position of center of gravity of entity (i,c)
     const FieldVector<ctype,dim>& position (int i, int c) const
     {
       return pos[i][c];
