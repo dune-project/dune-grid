@@ -291,6 +291,7 @@ namespace Dune {
       for(Iterator it = lset.template begin<0,All_Partition> ();
           it != endit ; ++it )
       {
+        assert( lset.contains ( *it ) );
         int suben = it->template count<codim> ();
         for(int i=0 ; i<suben; i++)
         {
@@ -335,6 +336,7 @@ namespace Dune {
 
         // get index of vertex
         sout << "Vertex " << vx << "\n";
+        assert( lset.contains ( *it ) );
         int idx = lset.index( *it );
 
         sout << "Vertex " << idx << " = [" << vx << "]\n";
