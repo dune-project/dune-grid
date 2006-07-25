@@ -1152,7 +1152,7 @@ namespace Dune {
         derr << "\nERROR: " << elType2Name(elType) << " Grid tries to read a ";
         derr << elType2Name(type) << " macro grid file! \n\n";
         assert(type == elType);
-        abort();
+        DUNE_THROW(GridError,"\nERROR: " << elType2Name(elType) << " Grid tries to read a " << elType2Name(type) << " macro grid file! ");
       }
     }
   }

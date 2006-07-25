@@ -1,14 +1,12 @@
-libalu3d_la_CXXFLAGS = @AM_CPPFLAGS@ $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
-libalu3d_la_LIBADD = $(MPI_LDFLAGS)
+libalu3d_la_CXXFLAGS = @AM_CPPFLAGS@ $(ALUGRID_CPPFLAGS)
+libalu3d_la_LIBADD =
 
 if ALUGRID
   noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
-  # libalu3d_la_LIBADD = -lcommon
 else
   noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = topology.cc
-  # libalu3d_la_LIBADD = -lcommon
 endif
 
 alu3dgriddir = $(includedir)/dune/grid/alugrid/3d

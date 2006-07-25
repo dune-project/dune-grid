@@ -420,15 +420,19 @@ namespace Dune {
           {
             //std::cout << "Check(codim,num = " << codim<< "," << num <<") failed for k="<<k << " codim = " << i << "\n";
             std::cout << id << " equals " << checkId << "\n";
-            assert(false);
-            abort();
+            assert( id != checkId );
+            DUNE_THROW(GridError," " << id << " equals " << checkId << "\n");
           }
           else
           {
             bool lesser  = (id < checkId);
             bool greater = (id > checkId);
             assert( lesser != greater );
-            if( lesser == greater ) abort();
+            if( lesser == greater )
+            {
+              assert( lesser != greater );
+              DUNE_THROW(GridError," lesser equals greater of one id ");
+            }
           }
         }
       }
