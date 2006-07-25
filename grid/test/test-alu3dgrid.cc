@@ -100,11 +100,11 @@ int main (int argc , char **argv) {
       if (myrank == 0)
         std::cout << "Check empty grids" << std::endl;
       {
-        ALUCubeGrid<3,3> grid(MPI_COMM_WORLD);
+        ALUCubeGrid<3,3> grid;
         checkALUSerial(grid);
       }
       {
-        ALUSimplexGrid<3,3> grid(MPI_COMM_WORLD);
+        ALUSimplexGrid<3,3> grid;
         checkALUSerial(grid);
       }
 
@@ -123,7 +123,7 @@ int main (int argc , char **argv) {
         else
           filename += "largegrid_alu.hexa";
 
-        ALUCubeGrid<3,3> grid (filename,MPI_COMM_WORLD);
+        ALUCubeGrid<3,3> grid (filename);
 
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,1,0);
@@ -137,7 +137,7 @@ int main (int argc , char **argv) {
         else
           filename += "examplegrid9.dgf.ALUgrid";
 
-        ALUSimplexGrid<3,3> grid(filename,MPI_COMM_WORLD);
+        ALUSimplexGrid<3,3> grid(filename);
 
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,0,0);  //1,3
