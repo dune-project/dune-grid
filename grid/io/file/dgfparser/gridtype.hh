@@ -42,37 +42,30 @@
  * -# For \c ALBERTAGRID or \c ALUGRID with \c dimworld=1 Dune::OneDGrid is used.
 
  * To reduce differences between seriell and parallel runs as much as possible
- * additional macros are defined in this file
- * @code
- *#if HAVE_MPI &&
-     (defined YASPGRID || defined  ALUGRID_SIMPLEX || defined ALUGRID_CUBE)
- *#include <mpi.h>
- *#define MPISTART \
-   int myrank=-1; \
-   int mysize = 1; \
-   MPI_Init(&argc, &argv); \
-   MPI_Comm_rank(MPI_COMM_WORLD,&myrank); \
-   MPI_Comm_size(MPI_COMM_WORLD,&mysize);
- *#define MPIEND \
-   MPI_Finalize();
- *#else
- *#define MPISTART \
-   int myrank=-1; \
-   int mysize = 1;
- *#define MPI_COMM_WORLD -1
- *#define MPIEND
- *#endif
- * @endcode
- * To use this feature, MPISTART should always be called at the beginning
- * of the function main and MPIEND at the end of the main function:
+ * additional the MPIHelper class is used to toggle between serial and parallel
+ * runs via specialization of this class for runs using MPI und such that
+ * doesn't.
+ * To use this feature, the following code should always be called at the beginning
+ * of the function main:
  * @code
    int main(int argc, char ** argv, char ** envp) {
-   MPISTART
+
+   // get reference to the singelton MPIHelper
+   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
+
+   // optional one can get rank and size from this little helper class
+   int myrank = mpiHelper.rank();
+   int mysize = mpiHelper.size();
+
    ...
    // construct the grid
-   GridType* grid = MacroGrid(filename,MPI_COMM_WORLD);
+   GridPtr<GridType> grid(argv[1], mpiHelper.getCommunicator() );
+
+   GridType & grid = *gridptr;
    ...
-   MPIEND
+
+   // as the MPIHelper is a singleton, on it's destruction the
+   // MPI_Finalize() command is called.
    }
  * @endcode
  * @author Andreas Dedner
