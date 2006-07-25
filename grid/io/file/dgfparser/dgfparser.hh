@@ -95,7 +95,8 @@ namespace Dune {
   //! GridType instance. A pointer to a grid of type GridType is constructed
   //! as follows:
   //! @code
-  //! GridType* grid = Dune::MacroGrid(filename,MPI_COMM_WORLD);
+  //! GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
+  //! GridType & grid = *gridptr;
   //! @endcode
   class MacroGrid : protected DuneGridFormatParser {
 
