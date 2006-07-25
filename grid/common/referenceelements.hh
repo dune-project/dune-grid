@@ -21,6 +21,8 @@
 namespace Dune
 {
   namespace {
+
+    /** \todo Please doc me! */
     template <class RT, int codim>
     FieldVector<typename RT::CoordType, RT::d>
     mapGlobal(const RT& refElem,
