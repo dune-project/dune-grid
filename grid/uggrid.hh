@@ -611,7 +611,7 @@ namespace Dune {
     };
 
     template<int dim, int dimw>
-    struct isLeafwiseConforming< AlbertaGrid<dim,dimw> >
+    struct isLeafwiseConforming< UGGrid<dim,dimw> >
     {
       static const bool v = true;
     };
