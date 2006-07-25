@@ -13,18 +13,20 @@ void test(GridType& grid) {
 void test(GridType& grid) {}
 #endif
 
-int main(int argc, char ** argv, char ** envp) {
-
+int main(int argc, char ** argv, char ** envp)
+{
   // this method calls MPI_Init, if MPI is enabled
-  MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
-  int myrank = mpihelper.rank();
+  MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
+  int myrank = mpiHelper.rank();
+  //int mysize = mpiHelper.size();
 
   if (argc<2) {
     std::cerr << "supply grid file as parameter!" << std::endl;
     return 1;
   }
 
-  GridPtr<GridType> grid(argv[1], mpihelper.getCommunicator() );
+  GridPtr<GridType> grid(argv[1], mpiHelper.getCommunicator() );
+  //grid->globalRefine(1);
   if (myrank<=0)
     test(*grid);
   grid->globalRefine(refStepsForHalf);
