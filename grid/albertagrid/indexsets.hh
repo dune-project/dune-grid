@@ -83,10 +83,11 @@ namespace Dune {
                       ,i,Int2Type<dim-cd>());
     }
 
-    //! return size of set
-    int size (int codim, GeometryType type) const
+    //! return size of set for given GeometryType
+    int size (GeometryType type) const
     {
-      return grid_.global_size(codim);
+      if( !type.isSimplex() ) return 0;
+      return this->size(GridType::dimension-type.dim());
     }
 
     //! return size of set
