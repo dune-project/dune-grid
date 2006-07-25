@@ -4299,7 +4299,7 @@ namespace Dune
     wasChanged_ = false;
 
     std::cerr << "Method adapt 2 not implemented! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-    abort();
+    DUNE_THROW(AlbertaError,"Method not implemented \n");
     return refined;
   }
 
