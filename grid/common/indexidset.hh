@@ -185,11 +185,7 @@ namespace Dune
      */
     int size (int codim) const
     {
-      int s=0;
-      const std::vector<GeometryType>& geomTs = this->geomTypes(codim);
-      for (unsigned int i=0; i<geomTs.size(); i++)
-        s += this->size(geomTs[i]);
-      return s;
+      return asImp().size(codim);
     }
 
     /** @brief Return true if the given entity is contained in \f$E\f$.
@@ -197,15 +193,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      enum { cd = EntityType::codimension };
-      /*
-         return asImp().template contains<cd>(e);
-       */
-      typename Codim<cd>::template Partition<All_Partition>::Iterator it=begin<cd,All_Partition>();
-      typename Codim<cd>::template Partition<All_Partition>::Iterator iend=end<cd,All_Partition>();
-      for (; it != iend; ++it)
-        if (it->level() == e.level() && index(*it) == index(e)) return true;
-      return false;
+      return asImp().contains(e);
     }
 
     /** @brief Iterator to first entity of given codimension and partition type in \f$E\f$.
@@ -285,6 +273,45 @@ namespace Dune
     {
       return this->index( *(e.template entity<cc>(i) ));
     }
+
+    /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
+            is simply a sum over all geometry types.
+
+       \param[in] codim A valid codimension
+                \return    number of entities.
+     */
+
+    int size (int codim) const
+    {
+      int s=0;
+      const std::vector<GeometryType>& geomTs = asImp().geomTypes(codim);
+      for (unsigned int i=0; i<geomTs.size(); ++i)
+        s += asImp().size(geomTs[i]);
+      return s;
+    }
+
+    /** @brief Return true if the given entity is contained in \f$E\f$.
+     */
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename Codim<cd>::template Partition<All_Partition>::Iterator IteratorType;
+      IteratorType iend = asImp().template end<cd,All_Partition>();
+      for (IteratorType it = asImp().template begin<cd,All_Partition>();
+           it != iend; ++it)
+      {
+        // this code is not really valid
+        if (it->level() == e.level() && index(*it) == index(e)) return true;
+      }
+      return false;
+    }
+
+  private:
+    //!  Barton-Nackman trick
+    IndexSetImp& asImp () {return static_cast<IndexSetImp &> (*this);}
+    //!  Barton-Nackman trick
+    const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
 
