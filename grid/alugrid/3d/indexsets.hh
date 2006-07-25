@@ -81,12 +81,12 @@ namespace Dune {
 
     //! return size of indexset, i.e. maxindex+1
     //! for given type, if type is not exisiting within grid 0 is returned
-    int size ( int codim , GeometryType type ) const
+    int size ( GeometryType type ) const
     {
-      assert( grid_.geomTypes(codim).size() == 1 );
-      if( type != grid_.geomTypes(codim)[0] ) return 0;
+      if( elType == tetra && !type.isSimplex() ) return 0;
+      if( elType == hexa  && !type.isCube() ) return 0;
       // return size of hierarchic index set
-      return grid_.hierSetSize(codim);
+      return this->size(GridType::dimension-type.dim());
     }
 
     //! return size of indexset, i.e. maxindex+1
