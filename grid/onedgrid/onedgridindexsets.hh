@@ -28,9 +28,9 @@ namespace Dune {
 
 
   template<class GridImp>
-  class OneDGridLevelIndexSet : public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> >
+  class OneDGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> > Base;
   public:
 
     /** \brief Constructor for a given level of a given grid
@@ -148,9 +148,10 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class OneDGridLeafIndexSet : public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> >
+  class OneDGridLeafIndexSet :
+    public IndexSetDefaultImplementation<GridImp,OneDGridLeafIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,OneDGridLeafIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> > Base;
   public:
     //! constructor stores reference to a grid and level
     OneDGridLeafIndexSet (const GridImp& g) : grid_(g)
@@ -192,6 +193,12 @@ namespace Dune {
       }
 
       return 0;
+    }
+
+    //! get number of entities of given codim, type on the leaf level
+    int size(int codim) const
+    {
+      return Base::size(codim);
     }
 
     /** deliver all geometry types used in this grid */
@@ -319,8 +326,6 @@ namespace Dune {
 
     const GridImp& grid_;
   };
-
-
 
 }  // namespace Dune
 

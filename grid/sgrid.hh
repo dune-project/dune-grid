@@ -964,7 +964,7 @@ namespace Dune {
   template<class GridImp>
   class SGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
   public:
 
     //! constructor stores reference to a grid and level
@@ -993,6 +993,12 @@ namespace Dune {
     int size (GeometryType type) const
     {
       return grid.size(level,GridImp::dimension-type.dim());
+    }
+
+    //! return size of set for a given codim
+    int size (int codim) const
+    {
+      return Base::size(codim);
     }
 
     //! deliver all geometry types used in this grid
@@ -1041,7 +1047,7 @@ namespace Dune {
   template<class GridImp>
   class SGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
     enum {dim = RemoveConst<GridImp>::Type::dimension};
   public:
 
@@ -1079,6 +1085,12 @@ namespace Dune {
     int size (GeometryType type) const
     {
       return grid.size(grid.maxLevel(),GridImp::dimension-type.dim());
+    }
+
+    //! return size of set for a given codim
+    int size (int codim) const
+    {
+      return Base::size(codim);
     }
 
     //! deliver all geometry types used in this grid

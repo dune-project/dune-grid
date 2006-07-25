@@ -1867,9 +1867,9 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class YaspLevelIndexSet : public IndexSet<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> >
+  class YaspLevelIndexSet : public IndexSetDefaultImplementation<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> > Base;
   public:
 
     //! constructor stores reference to a grid and level
@@ -1898,6 +1898,12 @@ namespace Dune {
     int size (GeometryType type) const
     {
       return grid.size(level,GridImp::dimension-type.dim());
+    }
+
+    //! return size of set for a given codim
+    int size (int codim) const
+    {
+      return Base::size(codim);
     }
 
     //! deliver all geometry types used in this grid
@@ -1945,9 +1951,9 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class YaspLeafIndexSet : public IndexSet<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> >
+  class YaspLeafIndexSet : public IndexSetDefaultImplementation<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> > Base;
   public:
 
     //! constructor stores reference to a grid
@@ -1985,6 +1991,12 @@ namespace Dune {
     int size (GeometryType type) const
     {
       return grid.size(grid.maxLevel(),GridImp::dimension-type.dim());
+    }
+
+    //! return size of set for a given codim
+    int size (int codim) const
+    {
+      return Base::size(codim);
     }
 
     //! deliver all geometry types used in this grid
