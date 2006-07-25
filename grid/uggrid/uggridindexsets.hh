@@ -29,10 +29,10 @@ namespace Dune {
 
 
   template<class GridImp>
-  class UGGridLevelIndexSet : public IndexSet<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> >
+  class UGGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> >
   {
     enum {dim = GridImp::dimension};
-    typedef IndexSet<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> > Base;
 
   public:
 
@@ -305,9 +305,9 @@ namespace Dune {
 
 
   template<class GridImp>
-  class UGGridLeafIndexSet : public IndexSet<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> >
+  class UGGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> >
   {
-    typedef IndexSet<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> > Base;
   public:
 
     /*
@@ -369,6 +369,12 @@ namespace Dune {
         return numQuadFaces_;
 
       return 0;
+    }
+
+    //! get number of entities of given codim
+    int size (int codim) const
+    {
+      return Base::size(codim);
     }
 
     /** deliver all geometry types used in this grid */
