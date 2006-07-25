@@ -80,7 +80,6 @@ namespace Dune {
     up2Date_ = true;
   }
 
-
   //--Grid
   //template <int dim, int dimworld, ALU3dGridElementType elType>
   //const ALU3dGridElementType

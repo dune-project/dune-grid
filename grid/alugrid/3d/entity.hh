@@ -87,7 +87,7 @@ namespace Dune {
     FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
 
     // set element as normal entity
-    void setElement(const ElementType & item, int twist=0, int face = -1);
+    void setElement(const ElementType & item, const int level, int twist=0, int face = -1);
     void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
 
     //! setGhost is not valid for this codim
@@ -401,6 +401,7 @@ namespace Dune {
 
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointerBase(const GridImp & grid,
+                               const int level,
                                const MyHElementType & item);
 
     //! Constructor for EntityPointer that points to an ghost
@@ -489,7 +490,7 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointer(const GridImp & grid,
                            const MyHElementType & item)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,item) {}
+      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1,item) {} // -1 is fake level here
 
     //! Constructor for EntityPointer that points to an ghost
     ALU3dGridEntityPointer(const GridImp & grid,
@@ -533,6 +534,7 @@ namespace Dune {
 
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointer(const GridImp & grid,
+                           const int level,
                            const MyHElementType & item,
                            const int twist = 0,
                            const int duneFace = -1
@@ -547,17 +549,28 @@ namespace Dune {
     //! assignment operator
     ThisType & operator = (const ThisType & org);
 
+    //! ask for level of entities
+    int level () const ;
+
   protected:
+    // clones object
+    void clone (const ALU3dGridEntityPointerType & org);
+
+    void updateEntityPointer( MyHElementType * item );
+
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator
     ALU3dGridEntityPointer(const GridImp & grid, int level )
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid,level)
+        , level_(level)
         , twist_(0) , face_(-1) {}
 
+    // level of entity
+    int level_;
     // twist of face, for codim 1 only
-    const int twist_;
+    int twist_;
     // face number, for codim 1 only
-    const int face_;
+    int face_;
   };
 
 } // end namespace Dune
