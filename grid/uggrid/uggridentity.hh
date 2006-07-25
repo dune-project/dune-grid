@@ -349,7 +349,7 @@ namespace Dune {
       if (cc==0)
       {
 #ifdef ModelP
-        return target_->ddd.gid;
+        return target_->ge.ddd.gid;
 #else
         return UG_NS<dim>::id(target_);
 #endif
