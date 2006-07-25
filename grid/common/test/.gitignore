@@ -4,6 +4,7 @@ Makefile.in
 .libs
 mcmgmappertest
 test-quadrature
+referenceelementstest
 semantic.cache
 *.gcda
 *.gcno
