@@ -126,6 +126,10 @@ namespace Dune {
           typedef typename GridType :: template Codim<codim> :: EntityPointer SubEnPointerType;
           SubEnPointerType subenp = en.template entity<codim> (subEntity);
 
+          // assert that all sub entities have the same level
+          // otherwise one of the theoretical conditions is violated
+          assert( subenp.level() == en.level() );
+
           FieldVector<coordType,dim> vx ( subenp->geometry()[j]);
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
