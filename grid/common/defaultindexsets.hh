@@ -384,7 +384,7 @@ namespace Dune {
    */
   template <class GridImp>
   class DefaultLevelIndexSet :
-    public IndexSet< GridImp,
+    public IndexSetDefaultImplementation< GridImp,
         DefaultLevelIndexSet <GridImp>,
         DefaultLevelIteratorTypes<GridImp> >
 
@@ -506,6 +506,7 @@ namespace Dune {
     //! return size of IndexSet for a given level and codim
     int size ( int codim ) const
     {
+      assert( codim >= 0 && codim <= GridType::dimension );
       return size_[codim];
     }
 
@@ -513,6 +514,7 @@ namespace Dune {
     //! this method is to be revised
     int size ( GeometryType type ) const
     {
+      if( typeNotValid(type) ) return 0;
       return size_[GridType::dimension-type.dim()];
     }
 
@@ -608,6 +610,14 @@ namespace Dune {
     }
 
   private:
+    // return whether set has this type stored or not
+    bool typeNotValid (const GeometryType & type) const
+    {
+      int codim = GridType :: dimension - type.dim();
+      const std::vector<GeometryType> & geomT = geomTypes(codim);
+      for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
+      return true;
+    }
     // calculate index for the codim
     template <class EntityType>
     void insertEntity(EntityType & en, int (&num)[ncodim])
@@ -674,7 +684,7 @@ namespace Dune {
   //! Default LeafIndexSet
   template <class GridImp>
   class DefaultLeafIndexSet :
-    public IndexSet< GridImp,
+    public IndexSetDefaultImplementation< GridImp,
         DefaultLeafIndexSet <GridImp>,
         DefaultLeafIteratorTypes<GridImp> >
 
@@ -778,12 +788,13 @@ namespace Dune {
     bool contains (const EntityType& en) const
     {
       enum { cd = EntityType :: codimension };
-      return (en.isLeaf() && (index_[cd][ hIndexSet_.index(en) ] >= 0 ));
+      return (index_[cd][ hIndexSet_.index(en) ] >= 0 );
     }
 
-    //! return size of IndexSet for a given level and codim
+    //! return size of IndexSet for a given codim
     int size ( int codim ) const
     {
+      assert( codim >= 0 && codim <= GridType::dimension );
       return size_[codim];
     }
 
@@ -791,6 +802,7 @@ namespace Dune {
     //! this method is to be revised
     int size ( GeometryType type ) const
     {
+      if( typeNotValid(type) ) return 0;
       return size_[GridType::dimension-type.dim()];
     }
 
@@ -856,6 +868,14 @@ namespace Dune {
     }
 
   private:
+    // return whether set has this type stored or not
+    bool typeNotValid (const GeometryType & type) const
+    {
+      int codim = GridType :: dimension - type.dim();
+      const std::vector<GeometryType> & geomT = geomTypes(codim);
+      for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
+      return true;
+    }
     // calculate index for the codim
     template <class EntityType>
     void insertEntity(EntityType & en, int (&num)[ncodim])
