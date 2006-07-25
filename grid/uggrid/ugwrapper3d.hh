@@ -7,6 +7,18 @@
  * \brief Encapsulates some UG macros and functions
  */
 
+/** \todo These macros have been copied from pargm.h to here, because currently there
+    are problems with the double inclusion. */
+#define PRIO2LISTPART(listtype,prio)                                         \
+  ((listtype == ELEMENT_LIST) ? ((prio == PrioHGhost) ? 0 :                \
+                                 (prio == PrioVGhost) ? 0 : (prio == PrioVHGhost) ? 0 :               \
+                                 (prio == PrioMaster) ? 1 : -1) :                                 \
+   ((prio == PrioHGhost) ? 0 : (prio ==PrioVGhost) ? 0 :            \
+      (prio == PrioVHGhost) ? 0 :                                  \
+      (prio == PrioBorder) ? 2 : (prio == PrioMaster) ? 2 : -1))
+
+#define GRID_ATTR(g) g->level+32
+
 namespace Dune {
 
   /** \brief Encapsulates a few UG methods and macros
@@ -83,6 +95,8 @@ namespace Dune {
 
     enum {GM_OK = UG::D3::GM_OK};
 
+    enum {MAX_SONS = UG::D2::MAX_SONS};
+
     /** \brief The PFIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
      */
@@ -92,6 +106,8 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::NODE_LIST;
+      using UG::ELEMENT_LIST;
       return PFIRSTNODE(grid);
     }
 
@@ -104,6 +120,8 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::NODE_LIST;
+      using UG::ELEMENT_LIST;
       return FIRSTNODE(grid);
     }
 
@@ -116,6 +134,7 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
       return PFIRSTELEMENT(grid);
     }
 
@@ -128,6 +147,7 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
       return FIRSTELEMENT(grid);
     }
 
@@ -280,15 +300,8 @@ namespace Dune {
     }
 
     //! Encapsulates the GRID_ATTR macro
-    /** \todo I have to define GRID_ATTR myself here because I cannot include pargm.h again
-        after GRID_ATTR has been undef'ed away (it contains stuff in the namespace UG).
-        The clean solution would be to turn the macro into an inline function within
-        pargm.h.  But then pargm.h would have to include gm.h in order to know the
-        type grid, and I am reluctant to do that. */
     static unsigned char Grid_Attr(const UG_NS<3>::Grid* grid) {
-#define GRID_ATTR(g) g->level+32
       return GRID_ATTR(grid);
-#undef GRID_ATTR
     }
 
     static int MarkForRefinement(UG::D3::element* element, int rule, int data) {
@@ -641,5 +654,8 @@ namespace Dune {
 
 
 } // namespace Dune
+
+#undef PRIO2LISTPART
+#undef GRID_ATTR
 
 #endif

@@ -89,6 +89,8 @@ namespace Dune {
 
     enum {GM_OK = UG::D2::GM_OK};
 
+    enum {MAX_SONS = UG::D2::MAX_SONS};
+
     /** \brief The PFIRSTNODE macro which returns the first node in a
      * grid even in a parallel setting.
      */
@@ -98,6 +100,8 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
+      using UG::NODE_LIST;
       return PFIRSTNODE(grid);
     }
 
@@ -110,6 +114,8 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
+      using UG::NODE_LIST;
       return FIRSTNODE(grid);
     }
 
@@ -122,6 +128,8 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
+      using UG::NODE_LIST;
       return PFIRSTELEMENT(grid);
     }
 
@@ -134,6 +142,7 @@ namespace Dune {
       using UG::PrioVHGhost;
       using UG::PrioMaster;
       using UG::PrioBorder;
+      using UG::ELEMENT_LIST;
       return FIRSTELEMENT(grid);
     }
 

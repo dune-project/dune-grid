@@ -581,9 +581,6 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   // The starting level
   int level = e->level();
 
-  /** \todo This is a copy from within UG.  It should be used directly. */
-  const int MAX_SONS = 30;
-
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
   // //////////////////////////////////////////////////////////////////////
@@ -599,8 +596,8 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     typename UG_NS<dim>::Element* theElement = getRealImplementation(*e).target_;
 
     int Sons_of_Side = 0;
-    typename UG_NS<dim>::Element* SonList[MAX_SONS];
-    int SonSides[MAX_SONS];
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    int SonSides[UG_NS<dim>::MAX_SONS];
 
     int rv = Get_Sons_of_ElementSide(theElement,
                                      elementSide,
@@ -629,8 +626,8 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     level                    = Element<2>::get(*f);
 
     int Sons_of_Side = 0;
-    typename::UG_NS<dim>::Element* SonList[MAX_SONS];
-    int SonSides[MAX_SONS];
+    typename::UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    int SonSides[UG_NS<dim>::MAX_SONS];
 
     if (level < maxl) {
 
