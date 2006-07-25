@@ -7,7 +7,7 @@ endif
 endif
 
 # which tests to run
-TESTS = test-quadrature $(TESTPROGS)
+TESTS = test-quadrature referenceelementstest $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -21,6 +21,10 @@ mcmgmappertest_SOURCES = mcmgmappertest.cc
 mcmgmappertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS)
 mcmgmappertest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
 mcmgmappertest_DEPENDENCIES = $(LOCAL_LIBS)
+
+referenceelementstest_SOURCES = referenceelementstest.cc
+referenceelementstest_LDADD = $(LOCAL_LIBS)
+referenceelementstest_DEPENDENCIES = $(LOCAL_LIBS)
 
 test_quadrature_SOURCES = test-quadrature.cc
 test_quadrature_LDADD = $(LOCAL_LIBS)
