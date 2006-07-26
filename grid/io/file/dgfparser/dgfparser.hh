@@ -209,7 +209,7 @@ namespace Dune {
 
      Remarks:
      -# The last argument \c should be of the type \c MPIHelper::MPICommunicator
-        which defaults to MPI_COMM_WORLD for parallel runs or some default value for serial runs.
+        which defaults to \c MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
         a suitable constructure on the \c GridType class is called - if
         one is available.
