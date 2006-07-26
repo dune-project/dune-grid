@@ -126,13 +126,16 @@ namespace Dune {
   // read the DGF file and store vertex/element/bound structure
   inline int DuneGridFormatParser::readDuneGrid(std::istream& gridin)
   {
+    static const std::string dgfid("DGF");
+    std::string idline;
+    std::getline(gridin,idline);
+    makeupcase(idline);
+    std::stringstream idstream(idline);
     std::string id;
-    std::getline(gridin,id);
-    makeupcase(id);
+    idstream >> id;
 
     // compare id to DGF keyword
-    if ( strncmp(id.c_str(),"DGF",3) ) // if result > 0 strings do no match
-      return -1; // not a DGF file, prehaps native file format
+    if ( id != dgfid ) return -1; // not a DGF file, prehaps native file format
 
     dimw=-1;
     IntervalBlock interval(gridin);

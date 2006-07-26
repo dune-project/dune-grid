@@ -33,7 +33,8 @@ namespace Dune {
           std::string upcaseid;
           idstream >> upcaseid;
           makeupcase(upcaseid);
-          if (upcaseid==identifier) {
+          if (upcaseid==identifier)
+          {
             active=true;
             break;
           }
@@ -183,7 +184,7 @@ namespace Dune {
     // derived classes for each block in grid file
     // *************************************************************
     class VertexBlock : public BasicBlock {
-      const static char* ID;
+      static const char* ID;
       int dimworld;      // the dimesnsion of the verticies (is given from user)
       bool goodline;     // active line describes a vertex
       std::vector<double> p; // active vertex

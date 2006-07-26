@@ -86,23 +86,13 @@ namespace Dune {
     inline void setRefinement(int);
     double testTriang(int snr);
   };
-  //! \brief Class for constructing grids from DGF files.
-  //!
-  //! The constructor of the class is given the filename of the DGF file and
-  //! the class exports a template method
-  //! operator GridType* () which
-  //! reads a file in the DGF file and constructes a pointer to a
-  //! GridType instance. A pointer to a grid of type GridType is constructed
-  //! as follows:
-  //! @code
-  //! GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
-  //! GridType & grid = *gridptr;
-  //! @endcode
+
   class MacroGrid : protected DuneGridFormatParser {
 
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
+  protected:
     //! constructor given the name of a DGF file
     MacroGrid(const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
       : DuneGridFormatParser()
@@ -125,13 +115,26 @@ namespace Dune {
     const char* filename_;
     MPICommunicatorType MPICOMM_;
   };
+
+  //! \brief Class for constructing grids from DGF files.
+  //!
+  //! The constructor of the class is given the filename of the DGF file.
+  //! From that file a pointer to an instance of type GridType is created by reading
+  //! the given file which is translated to the specific format of the given
+  //! GridType. The GridPtr class behaves like an auto pointer of GridType.
+  //! An auto pointer to a grid of type GridType is constructed
+  //! as follows:
+  //! @code
+  //! GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
+  //! GridType & grid = *gridptr;
+  //! @endcode
   template <class GridType>
   class GridPtr : private MacroGrid {
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     //! constructor given the name of a DGF file
-    GridPtr(const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
-      MacroGrid(filename,MPICOMM),
+    GridPtr(const std::string filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
+      MacroGrid(filename.c_str(),MPICOMM),
       grid_(*this) {}
     ~GridPtr() {
       delete grid_;
@@ -188,10 +191,12 @@ namespace Dune {
      After a grid type (denoted with \c GridType in the following)
      is selected in some way, the grid can be constructed either by calling
      @code
-     GridType* grid = Dune::MacroGrid(filename,MPI_COMM_WORLD);
+       GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
+       GridType & grid = *gridptr;
      @endcode
-     here \c filename is the name of the dgf file. The method returns a
-     pointer to a \c GridType instance whose macrogrid is described through the
+     here \c filename is the name of the dgf file. This creates an
+     auto pointer like object GridPtr which holds a pointer to an instance
+     of \c GridType whose macrogrid is described through the
      dgf file.
 
      Remarks:
