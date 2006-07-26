@@ -191,15 +191,15 @@ namespace Dune {
      After a grid type (denoted with \c GridType in the following)
      is selected in some way, the grid can be constructed either by calling
      @code
-       GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
+       Dune::GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
      @endcode
       or
      @code
-       GridPtr<GridType> gridptr(filename);
+       Dune::GridPtr<GridType> gridptr(filename);
      @endcode
      where in the second example \c MPI_COMM_WORLD is selected as default
      value. Here \c filename is the name of the dgf file. This creates an
-     auto pointer like object GridPtr which holds a pointer to an instance
+     auto pointer like object \c GridPtr which holds a pointer to an instance
      of \c GridType whose macrogrid is described through the
      dgf file. Access to the grid is gained by calling the operator * of
      \c GridPtr.
@@ -208,7 +208,7 @@ namespace Dune {
      @endcode
 
      Remarks:
-     -# The last argument \c should be of the type\c MPIHelper::MPICommunicator
+     -# The last argument \c should be of the type \c MPIHelper::MPICommunicator
         which defaults to MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
         a suitable constructure on the \c GridType class is called - if
