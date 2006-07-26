@@ -18,6 +18,8 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/common/datahandleif.hh>
+
 
 #if HAVE_MPI
 #include <dune/common/mpicollectivecommunication.hh>
@@ -2483,8 +2485,8 @@ namespace Dune {
 
        communicate objects for all codims on a given level
      */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    template<class DataHandleImp, class DataType>
+    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,level);
     }
@@ -2493,8 +2495,8 @@ namespace Dune {
 
        communicate objects for all codims on the leaf grid
      */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+    template<class DataHandleImp, class DataType>
+    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
       YaspCommunicateMeta<dim,dim>::comm(*this,data,iftype,dir,this->maxLevel());
     }
@@ -2858,7 +2860,7 @@ namespace Dune {
 
       // read data from message buffer, acts like a stream !
       template<class Y>
-      void read (Y& data)
+      void read (Y& data) const
       {
         IsTrue< ( SameType<DT,Y>::value ) >::yes();
         data = a[j++];
@@ -2866,7 +2868,8 @@ namespace Dune {
 
     private:
       DT *a;
-      int i,j;
+      int i;
+      mutable int j;
     };
 
     void setsizes ()
