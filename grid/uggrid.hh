@@ -7,7 +7,7 @@
  * \brief The UGGrid class
  */
 
-#include <dune/common/capabilities.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/misc.hh>

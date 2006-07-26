@@ -8,7 +8,7 @@
 
 //- Dune includes
 #include <dune/grid/utility/grapedataioformattypes.hh>
-#include <dune/common/capabilities.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
 

@@ -13,7 +13,7 @@
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/geometrytype.hh>
-#include <dune/common/capabilities.hh>
+#include <dune/grid/common/capabilities.hh>
 
 #include <dune/grid/common/datahandleif.hh>
 

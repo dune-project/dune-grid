@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/capabilities.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/referenceelements.hh>
 
 

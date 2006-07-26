@@ -5,7 +5,7 @@ libgridcommon_la_SOURCES = referenceelements.cc quadraturerules.cc
 libgridcommon_la_LIBADD = -lcommon
 
 commondir = $(includedir)/dune/grid/common
-common_HEADERS = virtualrefinement.cc  \
+common_HEADERS = virtualrefinement.cc capabilities.hh \
   defaultindexsets.hh entity.hh entitypointer.hh geometry.hh grid.hh \
   hierarchiciterator.hh indexstack.hh intersectioniterator.hh \
   leafiterator.hh leveliterator.hh refinement.hh \

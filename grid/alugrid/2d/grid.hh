@@ -8,7 +8,7 @@
 #include <vector>
 
 //- Dune includes
-#include <dune/common/capabilities.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/common/interfaces.hh>
 
 #include <dune/grid/common/grid.hh>

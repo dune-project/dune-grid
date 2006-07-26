@@ -11,7 +11,7 @@
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
 #include <dune/common/stack.hh> // the stack class
-#include <dune/common/capabilities.hh> // the capabilities
+#include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/array.hh>
