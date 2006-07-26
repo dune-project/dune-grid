@@ -10,7 +10,8 @@ namespace Dune {
 
     std::string str(filename);
 
-    if (mg.readDuneGrid(gridin) == 1) {
+    if (mg.readDuneGrid(gridin) == 1)
+    {
       if (mg.dimw != dimworld) {
         std::cerr << "ERROR: "
                   << "Macrofile " << filename << " is for dimension " << mg.dimw

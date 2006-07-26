@@ -42,7 +42,17 @@ namespace Dune {
   class DuneGridFormatParser {
   public:
     //! default constructor which does nothing
-    DuneGridFormatParser() :  vtx(0), elements(0) , bound(0) {}
+    DuneGridFormatParser() :
+      dimw(-1),
+      vtx(0), nofvtx(0),
+      elements(0) , nofelements(0),
+      bound(0) , nofbound(0),
+      facemap(),
+      element(General),
+      simplexgrid(false),
+      isInterval(false)
+    {}
+
     typedef enum {Simplex,Cube,General} element_t;
     typedef enum {counterclockwise=1,clockwise=-1} orientation_t;
     //! \brief method which reads the dgf file

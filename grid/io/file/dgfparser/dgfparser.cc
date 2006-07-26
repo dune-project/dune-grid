@@ -230,6 +230,7 @@ namespace Dune {
         }
       }
     }
+
     // **************************************************
     // up to here:
     // filled vertex and element block, now look at boundaries...
@@ -267,8 +268,10 @@ namespace Dune {
           if(pos->second == 0) {
             // if an edge of a simplex is inside the domain it has the value zero
             bool isinside=true;
-            for (int i=0; i<pos->first.size(); i++) {
-              if (!dombound.inside(vtx[pos->first[i]])) {
+            for (int i=0; i<pos->first.size(); i++)
+            {
+              if (!dombound.inside(vtx[pos->first[i]]))
+              {
                 isinside=false;
                 break;
               }
