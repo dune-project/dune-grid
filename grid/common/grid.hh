@@ -15,6 +15,8 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/common/capabilities.hh>
 
+#include <dune/grid/common/datahandleif.hh>
+
 namespace Dune {
 
   // compares a and b and if they are equal then throw and NotImplemented
@@ -1017,32 +1019,32 @@ namespace Dune {
     }
 
     /*! \brief Communicate information on distributed entities on a given level
-          Template parameter is a model of Dune::CommDataHandle
+          Template parameter is a model of Dune::CommDataHandleIF
      */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    template<class DataHandleImp, class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       // compare addresses of the method, if they are equal then derived
       // class has the method not overloaded which leads to a seg fault
       //     CHECK_INTERFACE_IMPLEMENTATION(
       //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(ThisType::template communicate<DataHandle>)),
       //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(GridImp ::template communicate<DataHandle>)));
-      asImp().template communicate<DataHandle>(data,iftype,dir,level);
+      asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level);
       return;
     }
 
     /*! \brief Communicate information on distributed entities on the leaf grid
-          Template parameter is a model of Dune::CommDataHandle
+          Template parameter is a model of Dune::CommDataHandleIF
      */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+    template<class DataHandleImp, class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
       // compare addresses of the method, if they are equal then derived
       // class has the method not overloaded which leads to a seg fault
       //     CHECK_INTERFACE_IMPLEMENTATION(
       //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(ThisType::template communicate<DataHandle>)),
       //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(GridImp ::template communicate<DataHandle>)));
-      asImp().template communicate<DataHandle>(data,iftype,dir);
+      asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir);
       return;
     }
 
@@ -1196,13 +1198,15 @@ namespace Dune {
     int overlapSize (int codim) const { return 0; }
 
     /** dummy communicate, doing nothing  */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    template<class DataHandleImp, class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir, int level) const
     {}
 
     /** dummy communicate, doing nothing  */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+    template<class DataHandleImp, class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir) const
     {}
 
     /*! \brief default implementation of load balance does nothing and returns false */
