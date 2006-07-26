@@ -496,8 +496,11 @@ namespace Dune {
       this->done();
       return;
     }
+
+#if 0
     //if (this->current.item_->hashvtx(this->current.index_)) {
-    if (this->current.item_->hasHangingNode(this->current.index_)) {
+    if (this->current.item_->hasHangingNode(this->current.index_))
+    {
       this->current.item_->getNbList(this->current.index_, nbStack_);
       //assert(!nbStack_.empty());
       if (nbStack_.empty()) {
@@ -512,6 +515,7 @@ namespace Dune {
       nbStack_.pop();
       this->current.opposite_= this->current.item_->opposite(this->current.index_);
     }
+#endif
 
     //conform case
     else {
