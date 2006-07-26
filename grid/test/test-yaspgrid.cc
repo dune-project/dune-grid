@@ -9,7 +9,6 @@
 #include <dune/grid/yaspgrid.hh>
 
 #include "gridcheck.cc"
-
 #include "checkcommunicate.cc"
 
 int rank;
@@ -34,7 +33,10 @@ void check_yasp() {
 
   gridcheck(grid);
 
-  //  checkCommunication(grid,grid.levelIndexSet(0),0,Dune::dvverb);
+  // check communication interface
+  checkCommunication(grid,grid.leafIndexSet(),-1,Dune::dvverb);
+  for(int l=0; l<=grid.maxLevel(); ++l)
+    checkCommunication(grid,grid.levelIndexSet(l),l,Dune::dvverb);
 };
 
 int main (int argc , char **argv) {
