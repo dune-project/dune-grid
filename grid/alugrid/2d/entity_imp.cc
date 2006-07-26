@@ -413,6 +413,102 @@ namespace Dune {
   }
 
 
+  //! Constructor for EntityPointer that points to an element
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid,
+                                                                      const ElementType & item,
+                                                                      int face = -1
+                                                                      )
+    : grid_(grid)
+      , item_(const_cast<ElementType *>(&item))
+      , level_(-1)
+      , face_(face)
+      , entity_(0)
+  { }
+
+  //! Constructor for EntityPointer init of Level- and LeafIterator
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid)
+    : grid_(grid)
+      , item_(0)
+      , level_(-1)
+      , face_(-1)
+      , entity_(0)
+  { }
+
+  //! Copy Constructor
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const ThisType & org)
+    : grid_(org.grid_)
+      , item_(org.item_)
+      , level_(org.level_)
+      , face_(org.face_)
+      , entity_(0)
+  {  }
+
+  //! Destructor
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>::~ALU2dGridEntityPointer() {
+    this->done();
+  }
+
+  //! dereferencing
+  template<int cd, class GridImp>
+  inline typename ALU2dGridEntityPointer<cd, GridImp>::Entity &
+  ALU2dGridEntityPointer<cd, GridImp>:: dereference() const
+  {
+    assert( item_ );
+    if( !entity_ )
+    {
+      //entity_ = grid_.getNewEntity(level());
+      entity_ = new EntityObj(EntityImp(grid_, level()));
+      entityImp().setElement(*item_, face_, level());
+    }
+    assert( entity_ );
+    return *entity_;
+  }
+
+  //! ask for level of entities
+  template<int cd, class GridImp>
+  inline int ALU2dGridEntityPointer<cd, GridImp>:: level () const
+  {
+    assert( item_ );
+    if (level_ == -1) {
+      if (cd!=2)
+        level_ = item_->level();
+      else
+        level_ = item_->level()+1;
+    }
+    return level_;
+  }
+  template<int cd, class GridImp>
+  inline typename ALU2dGridEntityPointer<cd, GridImp>:: ThisType &
+  ALU2dGridEntityPointer<cd, GridImp>:: operator = (const typename ALU2dGridEntityPointer<cd, GridImp>::ThisType & org)
+  {
+    this->done();
+    entity_ = 0;
+    assert(&grid_ == &org.grid_);
+    item_ = org.item_;
+    face_ = org.face_;
+    level_ = org.level_;
+    return *this;
+  }
+
+  template<int cd, class GridImp>
+  inline typename ALU2dGridEntityPointer<cd, GridImp>::EntityImp & ALU2dGridEntityPointer<cd, GridImp>::entityImp() {
+    assert( entity_ ); return grid_.getRealImplementation(*entity_);
+  }
+
+  template<int cd, class GridImp>
+  inline const typename ALU2dGridEntityPointer<cd, GridImp>:: EntityImp &
+  ALU2dGridEntityPointer<cd, GridImp>::entityImp() const {
+    assert( entity_ );
+    return grid_.getRealImplementation(*entity_);
+  }
+
+
+
+
   //********* begin struct ElementWrapper ********************
   //template <int codim, int dim, class GridImp>
   //struct ElementWrapper;

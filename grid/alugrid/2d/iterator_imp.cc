@@ -312,6 +312,7 @@ namespace Dune {
     if (ret==0)
       if(nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0)
         ret = -1;
+    assert(ret >= -1 && ret < 3);
     return ret;
   }
 
@@ -322,6 +323,7 @@ namespace Dune {
     if (ret==0)
       if(nrInFather-nrOfChild==1)
         ret = -1;
+    assert(ret >= -1 && ret < 3);
     return ret;
   }
 
@@ -340,9 +342,18 @@ namespace Dune {
         return ;
       }
       addNeighboursToStack();
+      if (neighbourStack_.empty()) {
+        this->current.neigh_ = 0;
+        this->current.opposite_ = this->current.item_->opposite(this->current.index_);
+        return;
+      }
     }
-    this->current.neigh_ = neighbourStack_.top().first();
-    this->current.opposite_ = neighbourStack_.top().second();
+
+    this->current.neigh_ = neighbourStack_.top().first;
+    assert( this->current.neigh_ );
+    this->current.opposite_ = neighbourStack_.top().second;
+    assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
+
     neighbourStack_.pop();
 
     if(this->current.neigh_!=0)
@@ -353,47 +364,57 @@ namespace Dune {
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: addNeighboursToStack ()
   {
+    assert (this->current.index_ < 3);
     typename ALU2dGridLevelIntersectionIterator<GridImp>::HElementType* neighTmp = this->current.item_->nbel(this->current.index_);
-    int oppositeTmp = this->current.item_->opposite(this->current.index_);
-    if(neighTmp==0)
+
+    if(neighTmp==0) {
       return ;
-    else {
-      if (neighTmp->level() == this->walkLevel_) {
-        std::pair<typename ALU2dGridLevelIntersectionIterator<GridImp>::HElementType*, int> dummy(neighTmp,oppositeTmp);
-        neighbourStack_.push(dummy);
-        return;
-      }
-      else if (neighTmp->level() > this->walkLevel_) {
-        while (neighTmp->level() > this->walkLevel_) {
-          oppositeTmp = getOppositeInFather(oppositeTmp, neighTmp->nchild());
-          neighTmp = neighTmp->father();
-        }
-        assert(neighTmp->level()==this->walkLevel_);
-        std::pair<HElementType *, int> dummy(neighTmp,oppositeTmp);
-        neighbourStack_.push(dummy);
-        return;
-      }
-      else {
-        while (neighTmp->level() < this->walkLevel - 1 && neighTmp != 0) {
-          oppositeTmp = getOppositeInChild(oppositeTmp, neighTmp->nchild());
-          neighTmp = neighTmp->down();
-        }
-        if (neighTmp == 0)
-          return;
-        assert(neighTmp->level()==this->walkLevel_ - 1);
-        HElementType * tmp = neighTmp->down();
-        if (tmp == 0)
-          return;
-        while (!tmp->next()) {
-          int tmpOpposite = getOppositeInChild(oppositeTmp, tmp->nchild());
-          if (tmpOpposite != -1) {
-            std::pair<HElementType *, int> dummy(tmp, tmpOpposite);
-            neighbourStack_.push(dummy);
-          }
-        }
-        return;
-      }
     }
+
+    int oppositeTmp = this->current.item_->opposite(this->current.index_);
+    assert(oppositeTmp >= 0 && oppositeTmp < 3);
+
+    if (neighTmp->level() == this->walkLevel_) {
+      std::pair<typename ALU2dGridLevelIntersectionIterator<GridImp>::HElementType*, int> dummy(neighTmp,oppositeTmp);
+      neighbourStack_.push(dummy);
+      return;
+    }
+    else if (neighTmp->level() > this->walkLevel_) {
+      while (neighTmp->level() > this->walkLevel_) {
+        oppositeTmp = getOppositeInFather(oppositeTmp, neighTmp->childNr());
+        assert(oppositeTmp >= 0 && oppositeTmp < 3);
+        neighTmp = neighTmp->father();
+      }
+      assert(neighTmp->level()==this->walkLevel_);
+      assert(oppositeTmp >= 0 && oppositeTmp < 3);
+      std::pair<HElementType *, int> dummy(neighTmp,oppositeTmp);
+      neighbourStack_.push(dummy);
+      return;
+    }
+    else {
+      while (neighTmp->level() < this->walkLevel_ - 1 && neighTmp != 0) {
+        oppositeTmp = getOppositeInChild(oppositeTmp, neighTmp->childNr());
+        assert(oppositeTmp >= 0 && oppositeTmp < 3);
+        neighTmp = neighTmp->down();
+      }
+      if (neighTmp == 0)
+        return;
+      assert(neighTmp->level()==this->walkLevel_ - 1);
+      assert(oppositeTmp >= 0 && oppositeTmp < 3);
+
+      HElementType * tmp = neighTmp->down();
+      if (tmp == 0)
+        return;
+      while (!tmp->next()) {
+        int tmpOpposite = getOppositeInChild(oppositeTmp, tmp->nchild());
+        if (tmpOpposite != -1) {
+          std::pair<HElementType *, int> dummy(tmp, tmpOpposite);
+          neighbourStack_.push(dummy);
+        }
+      }
+      return;
+    }
+
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -402,7 +423,7 @@ namespace Dune {
   inline void ALU2dGridLevelIntersectionIterator<GridImp> ::
   first(const EntityType & en, int wLevel)
   {
-    setFirstItem(en.getItem(),this->wLevel);
+    setFirstItem(en.getItem(),wLevel);
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -411,8 +432,8 @@ namespace Dune {
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = 0;
-    this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-    this->current.opposite_= this->current.item_->opposite(this->current.index_);
+    this->current.neigh_ = elem.nbel(0);
+    this->current.opposite_= elem.opposite(0);assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
     assert(this->current. item_ );
     this->walkLevel_ = wLevel;
     this->done_ = false;

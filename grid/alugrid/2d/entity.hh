@@ -76,7 +76,7 @@ namespace Dune {
 
   public:
     typedef typename Dune::ALU2dImplTraits::template Codim<cd>::InterfaceType ElementType;
-    //typedef ALU2DSPACE Hmesh_basic::helement_t HElementType;
+
     //! type of our interface entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     //! tpye of corresponding interface geometry
@@ -212,9 +212,10 @@ namespace Dune {
     //! type of our Geometry implementation
     typedef MakeableInterfaceObject<Geometry> GeometryObj;
     typedef ALU2dGridGeometry<dim,dimworld,GridImp> GeometryImp;
-    //! tpye of intersection iterator
 
-    typedef ALU2dGridLeafIntersectionIterator<GridImp> IntersectionIteratorImp;
+    //! tpye of intersection iterator
+    //typedef ALU2dGridLeafIntersectionIterator<GridImp> IntersectionIteratorImp;
+    typedef ALU2dGridLevelIntersectionIterator<GridImp> IntersectionIteratorImp;
     //typedef ALU2dGridIntersectionBase<GridImp> IntersectionIteratorImp;
     typedef IntersectionIteratorWrapper< GridImp > ALU2dGridIntersectionIteratorType;
 
@@ -265,6 +266,8 @@ namespace Dune {
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
+
+    // As ibegin() and iend() are deprecated these methods will deliver a LeafIntersectionIterator
     ALU2dGridIntersectionIteratorType ibegin () const
     {
       return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(), false);
@@ -274,6 +277,7 @@ namespace Dune {
     {
       return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(),true);
     }
+
     ALU2dGridIntersectionIteratorType libegin () const
     {
       return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),false);
@@ -450,86 +454,34 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU2dGridEntityPointer(const GridImp & grid,
                            const ElementType & item,
-                           int face = -1
-                           )
-      : grid_(grid)
-        , item_(const_cast<ElementType *>(&item))
-        , level_(-1)
-        , face_(face)
-        , entity_(0)
-    { }
+                           int face
+                           );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
-    ALU2dGridEntityPointer(const GridImp & grid)
-      : grid_(grid)
-        , item_(0)
-        , level_(-1)
-        , face_(-1)
-        , entity_(0)
-    { }
+    ALU2dGridEntityPointer(const GridImp & grid) ;
 
     //! Copy Constructor
-    ALU2dGridEntityPointer(const ThisType & org)
-      : grid_(org.grid_)
-        , item_(org.item_)
-        , level_(org.level_)
-        , face_(org.face_)
-        , entity_(0)
-    {}
+    ALU2dGridEntityPointer(const ThisType & org) ;
 
     //! Destructor
-    ~ALU2dGridEntityPointer() {
-      this->done();
-    }
+    ~ALU2dGridEntityPointer();
 
     //! equality
     // this may have to be changed!
     bool equals (const ThisType & i) const;
 
     //! dereferencing
-    Entity & dereference() const
-    {
-      assert( item_ );
-      if( !entity_ )
-      {
-        //entity_ = grid_.getNewEntity(level());
-        entity_ = new EntityObj(EntityImp(grid_, level()));
-        entityImp().setElement(*item_, face_, level());
-      }
-      assert( entity_ );
-      return *entity_;
-    }
+    Entity & dereference() const ;
 
     //! ask for level of entities
-    int level () const
-    {
-      assert( item_ );
-      if (level_ == -1) {
-        if (cd!=2)
-          level_ = item_->level();
-        else
-          level_ = item_->level()+1;
-      }
-      return level_;
-    }
+    int level () const;
 
-    ThisType & operator = (const ThisType & org) {
-      this->done();
-      entity_ = 0;
-      assert(&grid_ == &org.grid_);
-      item_ = org.item_;
-      face_ = org.face_;
-      level_ = org.level_;
-      return *this;
-    }
+    ThisType & operator = (const ThisType & org);
 
   protected:
-    EntityImp & entityImp() {
-      assert( entity_ ); return grid_.getRealImplementation(*entity_);
-    }
-    const EntityImp & entityImp() const {
-      assert( entity_ ); return grid_.getRealImplementation(*entity_);
-    }
+    EntityImp & entityImp();
+
+    const EntityImp & entityImp() const;
 
     //! has to be called when iterator is finished
     void done ();

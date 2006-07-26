@@ -68,33 +68,7 @@ namespace Dune {
   template <class GridImp, int codim>
   struct ALU2dGridEntityFactory;
 
-  /*
-     //! contains list of vertices of one level
-     class ALU2dGridVertexList
-     {
-     public:
-     // level vertex iterator list
-     typedef std::vector < ALU2DSPACE Vertex* > VertexListType;
-     typedef VertexListType :: iterator IteratorType;
 
-     ALU2dGridVertexList () : up2Date_(false) {}
-
-     size_t size () const  { return vertexList_.size(); }
-
-     bool up2Date () const { return up2Date_;  }
-     void unsetUp2Date ()  { up2Date_ = false; }
-
-     // make grid walkthrough and calc global size
-     template <class GridType>
-     void setupVxList (const GridType & grid, int level);
-
-     IteratorType begin () { return vertexList_.begin(); }
-     IteratorType end   () { return vertexList_.end(); }
-     private:
-     bool up2Date_;
-     VertexListType vertexList_;
-     };
-   */
 
   //**********************************************************************
   //
@@ -257,24 +231,7 @@ namespace Dune {
 
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
-    ALU2dGrid(std::string macroTriangFilename )
-    //: mesh_ (macroTriangFilename.c_str(), 1, ALU2DSPACE Refco::quart)
-      : mesh_ (macroTriangFilename.c_str())
-        , hIndexSet_(*this)
-        , localIdSet_(*this)
-        , levelIndexVec_(MAXL,0)
-        , geomTypes_(dim+1,1)
-        , leafIndexSet_(0)
-        , maxLevel_(0)
-        , refineMarked_ (0)
-        , coarsenMarked_ (0)
-        , sizeCache_(0)
-
-    {
-      //assert(mesh_ != 0);
-      makeGeomTypes();
-      updateStatus();
-    }
+    ALU2dGrid(std::string macroTriangFilename );
 
     //! Desctructor
     ~ALU2dGrid();
@@ -489,8 +446,10 @@ namespace Dune {
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
+    //typedef ALU2dGridLevelIntersectionIterator<const ThisType> IntersectionIteratorImp;
     typedef ALU2dGridLeafIntersectionIterator<const ThisType>  IntersectionIteratorImp;
     typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+
   private:
     friend class IntersectionIteratorWrapper< const ThisType > ;
     // return reference to intersectioniterator storage
@@ -574,7 +533,7 @@ namespace Dune {
     template<int dim, int dimw>
     struct isLevelwiseConforming< ALU2dGrid<dim,dimw> >
     {
-      static const bool v = true;
+      static const bool v = false;
     };
 
     template<int dim, int dimw>

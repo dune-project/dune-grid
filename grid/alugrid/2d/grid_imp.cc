@@ -6,41 +6,32 @@
 
 namespace Dune {
 
-  /*
-     template <class GridType >
-     inline void ALU2dGridVertexList ::
-     setupVxList(const GridType & grid, int level)
-     {
-      // iterates over grid elements of given level and adds all vertices to
-      // given list
-      enum { codim = 3 };
-
-      VertexListType & vxList = vertexList_;
-
-      unsigned int vxsize = grid.hierarchicIndexSet().size(codim);
-      if( vxList.size() < vxsize ) vxList.resize(vxsize);
-      for(unsigned int i=0; i<vxsize; i++) vxList[i] = 0;
-
-      const ALU3dGridElementType elType = GridType:: elementType;
-      typedef ALU3DSPACE LevelIterator < ALU3DSPACE HElementType > IteratorType;
-      typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
-      typedef ALU3DSPACE VertexType VertexType;
-      enum { nVx = ElementTopologyMapping < elType > :: numVertices };
-
-      IteratorType it (const_cast<GridType &> (grid).myGrid(),level);
-      for( it->first(); !it->done() ; it->next())
-      {
-        IMPLElementType & elem = static_cast<IMPLElementType &> (it->item());
-        for(int i=0; i<nVx; i++)
-        {
-          VertexType * vx = elem.myvertex(i);
-          vxList[vx->getIndex()] = vx;
-        }
-      }
-     }
-   */
-
   //--Grid
+
+
+  //! Constructor which reads an ALU2dGrid Macro Triang file
+  //! or given GridFile
+  template<int dim, int dimworld>
+  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
+  //: mesh_ (macroTriangFilename.c_str(), 1, ALU2DSPACE Refco::quart)
+    : mesh_ (macroTriangFilename.c_str())
+      , hIndexSet_(*this)
+      , localIdSet_(*this)
+      , levelIndexVec_(MAXL,0)
+      , geomTypes_(dim+1,1)
+      , leafIndexSet_(0)
+      , maxLevel_(0)
+      , refineMarked_ (0)
+      , coarsenMarked_ (0)
+      , sizeCache_(0)
+
+  {
+    //assert(mesh_ != 0);
+    makeGeomTypes();
+    updateStatus();
+  }
+
+
 
   //! Iterator to first entity of given codim on level
   template <int dim, int dimworld>
