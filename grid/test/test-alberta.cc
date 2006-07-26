@@ -19,6 +19,8 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkcommunicate.cc"
+
 
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )
@@ -73,6 +75,8 @@ int main () {
 
       checkGeometryInFather(grid);
       checkIntersectionIterator(grid);
+
+      checkCommunication(grid,grid.leafIndexSet(), -1, Dune::dvverb);
     };
 
   } catch (Dune::Exception &e) {
