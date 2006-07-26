@@ -87,6 +87,7 @@ namespace Dune {
     FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
 
     // set element as normal entity
+    void setElement(const ElementType & item);
     void setElement(const ElementType & item, const int level, int twist=0, int face = -1);
     void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
 

@@ -86,12 +86,18 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
+  setElement(const ElementType & item)
+  {
+    setElement(item,item.level());
+  }
+
+  template<int cd, int dim, class GridImp>
+  inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const ElementType & item, const int level, int twist , int face )
   {
     item_   = static_cast<const IMPLElementType *> (&item);
     gIndex_ = (*item_).getIndex();
     twist_  = twist;
-    //level_  = (*item_).level();
     level_  = level;
     face_   = face;
     builtgeometry_=false;
