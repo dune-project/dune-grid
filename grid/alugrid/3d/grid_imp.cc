@@ -158,6 +158,11 @@ namespace Dune {
     delete globalIdSet_; globalIdSet_ = 0;
     delete leafIndexSet_; leafIndexSet_ = 0;
     delete sizeCache_; sizeCache_ = 0;
+
+    if(myGrid().container().iterators_attached())
+    {
+      dwarn << "WRANING: There still exists instances of iterators giving access to this grid which is about to be removed! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
+    }
     delete mygrid_; mygrid_ = 0;
   }
 
