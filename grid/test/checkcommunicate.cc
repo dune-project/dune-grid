@@ -6,6 +6,8 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
+
+#include <dune/grid/common/datahandleif.hh>
 using namespace Dune;
 
 /*******
@@ -44,6 +46,9 @@ template <class IndexSetImp,
     class GlobalIdSetImp,
     class DataVectorType >
 class ExampleDataHandle
+  : public CommDataHandleIF <
+        ExampleDataHandle<IndexSetImp,GlobalIdSetImp,DataVectorType> ,
+        typename DataVectorType :: value_type >
 {
   const IndexSetImp & iset_;
   const GlobalIdSetImp & ids_;
@@ -80,8 +85,8 @@ public:
   template<class EntityType>
   size_t size (EntityType& e) const
   {
-    // id+flag+data+coordinates
-    return 3+e.geometry().corners()*e.geometry().dimensionworld;
+    // flag+data+coordinates
+    return 2+e.geometry().corners()*e.geometry().dimensionworld;
   }
 
   //! pack data from user to message buffer
@@ -89,8 +94,10 @@ public:
   void gather (MessageBuffer& buff, const EntityType& e) const
   {
     int idx = iset_.index(e);
-    typename GlobalIdSetImp :: IdType id = ids_.id( e );
-    buff.write( id );
+
+    //typename GlobalIdSetImp :: IdType id = ids_.id( e );
+    //buff.write( id );
+
     buff.write(data2_[idx]);   // flag
     buff.write(data1_[idx]);   // data
     // all corner coordinates
@@ -113,10 +120,10 @@ public:
     // make sure that global id on all processors are the same
     // here compare the id of the entity that sended the data with my id
     typename GlobalIdSetImp :: IdType id;
-    buff.read( id );
-    typename GlobalIdSetImp :: IdType myId = ids_.id( e );
+    //buff.read( id );
+    //typename GlobalIdSetImp :: IdType myId = ids_.id( e );
     //std::cout << id << " id | my Id = " << myId << "\n";
-    assert( id == myId );
+    //assert( id == myId );
 
     // else do normal scatter
     int idx = iset_.index(e);
@@ -451,7 +458,7 @@ void checkCommunication(GridType &grid, const IndexSet & set,
 {
   {
     {
-      CheckCommunication<GridType,IndexSet,3,OutputStreamImp>
+      CheckCommunication<GridType,IndexSet,GridType::dimension,OutputStreamImp>
       test(grid,set,out,level);
     }
   }
