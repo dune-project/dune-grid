@@ -192,26 +192,24 @@ namespace Dune {
      is selected in some way, the grid can be constructed either by calling
      @code
        GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
-       GridType & grid = *gridptr;
      @endcode
-     here \c filename is the name of the dgf file. This creates an
+      or
+     @code
+       GridPtr<GridType> gridptr(filename);
+     @endcode
+     where in the second example \c MPI_COMM_WORLD is selected as default
+     value. Here \c filename is the name of the dgf file. This creates an
      auto pointer like object GridPtr which holds a pointer to an instance
      of \c GridType whose macrogrid is described through the
-     dgf file.
+     dgf file. Access to the grid is gained by calling the operator * of
+     \c GridPtr.
+     @code
+       GridType & grid = *gridptr;
+     @endcode
 
      Remarks:
-     -# The last argument \c MPI_COMM_WORLD
-        defaults to -1, a value which can be used in a serial run.
-        If gridtype.hh is included, then macros
-        \c MPISTART , \c MPIEND  and the integer variable
-        \c MPI_COMM_WORLD
-        are defined - in the serial case the macros are empty whereas
-        in the parallel case, i.e., when \c HAVE_MPI is set,
-        \c MPI_INIT(&argc, &argv)
-        is called through \c MPISTART  and in addition
-        \c myrank  and \c mysize
-        are set through the corresponding MPI commands. See gridtype.hh
-        for more details.
+     -# The last argument \c should be of the type\c MPIHelper::MPICommunicator
+        which defaults to MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
         a suitable constructure on the \c GridType class is called - if
         one is available.
