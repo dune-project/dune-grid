@@ -17,6 +17,7 @@
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/common/datahandleif.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -437,12 +438,12 @@ namespace Dune {
     int overlapSize (int codim) const { return 0; }
 
     /** level communicate */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const;
+    template<class DataHandleImp,class DataType>
+    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const;
 
     /** leaf communicate  */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const;
+    template<class DataHandleImp,class DataType>
+    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const;
 
   private:
     typedef ALU3DSPACE GatherScatter GatherScatterType;

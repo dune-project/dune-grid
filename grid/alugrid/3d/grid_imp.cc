@@ -763,14 +763,17 @@ namespace Dune {
   }
 
   // communicate level data
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandle>
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template <class DataHandleImp,class DataType>
   inline void ALU3dGrid<dim, dimworld, elType>::
-  communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level ) const
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level ) const
   {
     // if only one process, no communication needed
     if( comm().size() <= 1 ) return ;
 
 #if ALU3DGRID_PARALLEL
+    typedef CommDataHandleIF<DataHandleImp,DataType> DataHandleType;
+
     // for level communication the level index set is needed.
     // fi non-existent, then create for communicaton
     const LevelIndexSetImp * levelISet = 0;
@@ -788,28 +791,28 @@ namespace Dune {
     typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
     VertexObject vx( VertexImp(*this, level ) );
 
-    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, dim>
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, dim>
     vertexData(*this,vx,this->getRealImplementation(vx),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
     typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
     EdgeObject edge( EdgeImp(*this, level ) );
 
-    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, dim-1>
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, dim-1>
     edgeData(*this,edge,this->getRealImplementation(edge),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
     FaceObject face( FaceImp(*this, level ) );
 
-    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, 1>
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, 1>
     faceData(*this,face,this->getRealImplementation(face),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
     typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
     ElementObject element( ElementImp(*this, level ) );
 
-    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandle, 0>
+    ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, 0>
     elementData(*this,element,this->getRealImplementation(element),data,*levelISet,level);
 
     doCommunication( vertexData, edgeData, faceData, elementData , iftype, dir );
@@ -819,41 +822,43 @@ namespace Dune {
   }
 
   // communicate data
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandle>
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template <class DataHandleImp, class DataType>
   inline void ALU3dGrid<dim, dimworld, elType>::
-  communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
   {
     // if only one process, no communication needed
     if( comm().size() <= 1 ) return ;
 
 #if ALU3DGRID_PARALLEL
+    typedef CommDataHandleIF<DataHandleImp,DataType> DataHandleType;
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
     typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
     VertexObject vx( VertexImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, dim>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, dim>
     vertexData(*this,vx,this->getRealImplementation(vx),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
     typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
     EdgeObject edge( EdgeImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, dim-1>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, dim-1>
     edgeData(*this,edge,this->getRealImplementation(edge),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
     FaceObject face( FaceImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, 1>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, 1>
     faceData(*this,face,this->getRealImplementation(face),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
     typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
     ElementObject element( ElementImp(*this, this->maxLevel()) );
 
-    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandle, 0>
+    ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, 0>
     elementData(*this,element,this->getRealImplementation(element),data);
 
     doCommunication( vertexData, edgeData, faceData, elementData , iftype, dir );
