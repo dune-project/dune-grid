@@ -20,6 +20,10 @@ namespace Dune
      this interface class. Therefore we just apply the engine concept to
      wrap the message buffer call and make sure that the interface is
      fulfilled.
+
+     Template parameters:
+
+     - <tt>MessageBufferImp</tt> implementation of message buffer used by the grids communication method
      \ingroup GICollectiveCommunication
    */
   template <class MessageBufferImp>
@@ -27,21 +31,25 @@ namespace Dune
   {
     MessageBufferImp & buff_;
   public:
-    //! stores reference to original buffer
+    //! stores reference to original buffer \c buff
     MessageBufferIF(MessageBufferImp & buff) : buff_(buff) {}
 
-    //! just wraps the call of the internal buffer method write
-    //! which writes the data of type T from the buffer by using the
-    //! assigment operator of T
+    /** @brief just wraps the call of the internal buffer method write
+       which writes the data of type T from the buffer by using the
+       assigment operator of T
+       @param val reference to object that is written
+     */
     template <class T>
     void write(const T & val)
     {
       buff_.write(val);
     }
 
-    //! just wraps the call of the internal buffer method read
-    //! which reads the data of type T from the buffer by using the
-    //! assigment operator of T
+    /** @brief just wraps the call of the internal buffer method read
+       which reads the data of type T from the buffer by using the
+       assigment operator of T
+       @param val reference to object that is read
+     */
     template <class T>
     void read(T & val) const
     {
@@ -51,10 +59,15 @@ namespace Dune
 
 
   /** @brief CommDataHandleIF describes the features of a data handle for
-     communication in parallel runs using the Grid::communication methods.
+     communication in parallel runs using the Grid::communicate methods.
      Here the Barton-Nackman trick is used to interprete data handle objects
      as it's interface. Therefore usable data handle classes need to be
      derived from this class.
+
+     Template parameters:
+
+     - <tt>DataHandleImp</tt> implementation of the users data handle
+     - <tt>DataTypeImp</tt> type of data that are going to be communicated which is exported as \c DataType (for example double)
      \ingroup GICollectiveCommunication
    */
   template <class DataHandleImp, class DataTypeImp>
@@ -68,22 +81,33 @@ namespace Dune
     // one should not create an explicit instance of this inteface object
     CommDataHandleIF() {};
 
+  private:
+    CommDataHandleIF(const CommDataHandleIF &);
+
   public:
-    //! returns true if data for this codim should be communicated
+    /** @brief
+       returns true if data for given valid codim should be communicated
+       @param dim valid dimension (i.e. the grids dimension)
+       @param codim valid codimension of the entity set for which data should be communicated
+     */
     bool contains (int dim, int codim) const
     {
       return asImp().contains(dim,codim);
     }
 
-    //! returns true if size of data per entity of given dim and codim is a constant
+    /** @brief
+       returns true if size of data per entity of given dim and codim is a constant
+       @param dim valid dimension (i.e. the grids dimension)
+       @param codim valid codimension of the entity set for which data should be communicated
+     */
     bool fixedsize (int dim, int codim) const
     {
       return asImp().fixedsize(dim,codim);
     }
 
     /** @brief how many objects of type DataType have to be sent for a given entity
-        Note: Only the sender side needs to know this size.
-        @param e for which the size should be dertermined
+        @note Only the sender side needs to know this size.
+        @param e entity for which the size should be dertermined
      */
     template<class EntityType>
     size_t size (const EntityType& e) const
