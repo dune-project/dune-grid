@@ -1127,6 +1127,12 @@ void Dune::UGGrid<dim, dimworld>::insertBoundarySegment(const std::vector<unsign
   for (size_t i=0; i<vertices.size(); i++)
     segmentVertices[i] = vertices[i];
 
+  // DUNE --> UG vertex renumbering for quadrilateral boundary segments
+  if (vertices.size()==4) {
+    segmentVertices[2] = vertices[3];
+    segmentVertices[3] = vertices[2];
+  }
+
   boundarySegmentVertices_.push_back(segmentVertices);
 
   // Append boundary segment class to the boundary segment class list, so we can
