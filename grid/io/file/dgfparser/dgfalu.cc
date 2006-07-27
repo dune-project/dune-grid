@@ -60,9 +60,9 @@ namespace Dune {
       if (mg.dimw != dimworld)
       {
         DUNE_THROW(DGFException,
-                   << "Macrofile " << filename << " is for dimension " << mg.dimw
-                   << " and connot be used to initialize an ALUGrid of dimension "
-                   << dimworld);
+                   "Macrofile " << filename << " is for dimension " << mg.dimw
+                                << " and connot be used to initialize an ALUGrid of dimension "
+                                << dimworld);
       }
       mg.setOrientation(0);
       str+=".ALUgrid";
