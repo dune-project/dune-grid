@@ -25,30 +25,30 @@ tester_DEPENDENCIES = $(LOCAL_LIBS)
 
 if ALUGRID
 testalu_CXXFLAGS = $(AM_CPPFLAGS) -DALUGRID_SIMPLEX -DGRIDDIM=3 $(MPI_CPPFLAGS)
-testalu_SOURCES = main.cc
+testalu_SOURCES = testalu.cc
 testalu_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS) $(MPILIBS)
 testalu_DEPENDENCIES = $(LOCAL_LIBS)
 endif
 
 if ALBERTA
-testalberta_CXXFLAGS = $(AM_CPPFLAGS) -DALBERTAGRID -DGRIDDIM=3
-testalberta_SOURCES = main.cc
+testalberta_CXXFLAGS = $(AM_CPPFLAGS) -DGRIDDIM=3
+testalberta_SOURCES = testalberta.cc
 testalberta_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
 testalberta_DEPENDENCIES = $(LOCAL_LIBS)
 endif
 
-testsgrid_CXXFLAGS = $(AM_CPPFLAGS) -DSGRID -DGRIDDIM=2
-testsgrid_SOURCES = main.cc
+testsgrid_CXXFLAGS = $(AM_CPPFLAGS)
+testsgrid_SOURCES = testsg.cc
 testsgrid_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS)
 testsgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
-testyasp_CXXFLAGS = $(AM_CPPFLAGS) -DYASPGRID -DGRIDDIM=2
-testyasp_SOURCES = main.cc
+testyasp_CXXFLAGS = $(AM_CPPFLAGS)
+testyasp_SOURCES = testyasp.cc
 testyasp_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS)
 testyasp_DEPENDENCIES = $(LOCAL_LIBS)
 
-testoned_CXXFLAGS = $(AM_CPPFLAGS) -DONEDGRID -DGRIDDIM=1
-testoned_SOURCES = main.cc
+testoned_CXXFLAGS = $(AM_CPPFLAGS)
+testoned_SOURCES = testoned.cc
 testoned_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS)
 testoned_DEPENDENCIES = $(LOCAL_LIBS)
 
