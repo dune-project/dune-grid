@@ -112,7 +112,7 @@ int main ()
   }
   catch (...) {
     std::cerr << "Generic exception!" << std::endl;
-    return 2;
+    return 1;
   }
 
   return success ? 0 : 1;
