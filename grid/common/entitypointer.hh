@@ -133,9 +133,6 @@ namespace Dune
     //@{
     //===========================================================
 
-    /** \brief Default constructor, the result is undefined. */
-    EntityPointer() {}
-
     /** \brief Templatized copy constructor from arbitrary IteratorImp.
             This enables that an EntityPointer can be copy-constructed from
             LevelIterator, LeafIterator and HierarchicIterator (because

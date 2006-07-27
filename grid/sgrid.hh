@@ -667,8 +667,6 @@ namespace Dune {
     public GridImp::template Codim<codim>::Entity
   {
   public:
-    /** \brief Default constructor */
-    SMakeableEntity() : GridImp::template Codim<codim>::Entity (SEntity<codim, dim, GridImp>()) {}
 
     SMakeableEntity(GridImp* _grid, int _l, int _id) :
       GridImp::template Codim<codim>::Entity (SEntity<codim, dim, GridImp>(_grid,_l,_id))
@@ -903,9 +901,6 @@ namespace Dune {
     Entity& dereference() const;
     //! ask for level of entity
     int level () const;
-
-    //! Default constructor
-    SEntityPointer() {}
 
     //! constructor
     SEntityPointer (GridImp * _grid, int _l, int _id) :
