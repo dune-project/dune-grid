@@ -11,6 +11,7 @@
 using namespace Dune;
 
 int main(int argc, char ** argv, char ** envp)
+try
 {
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
@@ -24,4 +25,12 @@ int main(int argc, char ** argv, char ** envp)
     gridcheck(*gridptr);
   }
   return 0;
+}
+catch (Dune::Exception &e) {
+  std::cerr << e << std::endl;
+  return 1;
+}
+catch (...) {
+  std::cerr << "Generic exception!" << std::endl;
+  return 1;
 }
