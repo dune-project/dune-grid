@@ -27,10 +27,10 @@ int main(int argc, char ** argv, char ** envp)
 
   GridPtr<GridType> grid(argv[1], mpiHelper.getCommunicator() );
   //grid->globalRefine(1);
-  if (myrank<=0)
+  if (MPIHelper::isFake)
     test(*grid);
   grid->globalRefine(refStepsForHalf);
-  if (myrank<=0)
+  if (MPIHelper::isFake)
     test(*grid);
 
 }
