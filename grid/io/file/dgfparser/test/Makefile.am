@@ -16,7 +16,13 @@ if UG
   TESTUG = testug
 endif
 
-check_PROGRAMS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
+ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
+
+# programs just to build when "make check" is used
+check_PROGRAMS = $(ALLTEST)
+
+# list of tests to run
+TESTS = $(ALLTEST)
 
 if ALUGRID
 testalu_CXXFLAGS = $(AM_CPPFLAGS) -DALUGRID_SIMPLEX -DGRIDDIM=3 $(MPI_CPPFLAGS)
