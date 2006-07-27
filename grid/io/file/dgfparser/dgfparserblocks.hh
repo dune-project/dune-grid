@@ -7,6 +7,9 @@
 
 namespace Dune {
 
+  //! \brief exception class for IO errors in the DGF parser
+  class DGFException : public IOError {};
+
   // *************************************************************
   // Read one block with given identifier from disk
   // and allows the line-wise extraction from this block
@@ -57,8 +60,8 @@ namespace Dune {
             block << oneline << "\n";
           }
           if (!blockend) {
-            std::cerr << "Error: block must end with a #-line" << std::endl;
-            abort();
+            DUNE_THROW(DGFException,
+                       "Error: block must end with a #-line");
           }
         }
         else {
@@ -150,7 +153,8 @@ namespace Dune {
         in.clear();
         in.seekg(0);
         if (!in) {
-          std::cerr << "ERROR: file not found in BasicBlock::BasicBlock" << std::endl;
+          DUNE_THROW(DGFException,
+                     "file not found in BasicBlock::BasicBlock");
         }
         getblock(in);
         if (active && !empty) {
@@ -221,8 +225,7 @@ namespace Dune {
           }
         }
         if (nofvtx!=vtx.size()) {
-          std::cerr << "ERROR: Wrong number of verticies read!" << std::endl;
-          return 0;
+          DUNE_THROW(DGFException, "Wrong number of verticies read!");
         }
         return nofvertex();
       }
@@ -251,9 +254,10 @@ namespace Dune {
         }
         goodline=(n==dimworld);
         if (!goodline) {
-          std::cerr << "ERROR in " << *this
-                    << "      wrong number of coordinates: "
-                    << n << " read but expected " << dimworld << std::endl;
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      wrong number of coordinates: "
+                                 << n << " read but expected " << dimworld);
         }
         return goodline;
       }
@@ -389,9 +393,10 @@ namespace Dune {
           }
         }
         if (nofsimpl!=nofsimplex()) {
-          std::cerr << "ERROR:  Wrong number of simplex elements read!" << std::endl;
-          std::cerr << "        Read " << nofsimpl << " elements, expected " << nofsimplex() << std::endl;
-          return 0;
+          DUNE_THROW(DGFException,
+                     "Wrong number of simplex elements read!" << std::endl
+                                                              << "        Read " << nofsimpl
+                                                              << " elements, expected " << nofsimplex());
         }
         return nofsimpl;
       }
@@ -486,9 +491,13 @@ namespace Dune {
         while (getnextentry(x)) {
           if (n<(dimworld+1)) {
             p[n]=x;
-            if (n< 0 && x>= nofvtx) { std::cerr << "ERROR in " << *this
-                                                << "      wrong index of vertices: "
-                                                << x << " read but expected value between 0 and" << nofvtx-1 << std::endl;}
+            if (n< 0 && x>= nofvtx) {
+              DUNE_THROW(DGFException,
+                         "ERROR in " << *this
+                                     << "      wrong index of vertices: "
+                                     << x << " read but expected value between 0 and"
+                                     << nofvtx-1);
+            }
           }
           n++;
         }
@@ -496,9 +505,10 @@ namespace Dune {
         int dimnew = dimworld +1 ;
         goodline=(n==(dimworld+1));
         if (!goodline) {
-          std::cerr << "ERROR in " << *this
-                    << "      wrong number of vertices: "
-                    << n << " read but expected " << dimnew << std::endl;
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      wrong number of vertices: "
+                                 << n << " read but expected " << dimnew);
         }
         return goodline;
       }
@@ -540,10 +550,12 @@ namespace Dune {
           }
         }
         if (nofsimpl!=nofsimplex()) {
-          std::cerr << "ERROR:  Error occured while reading element information!" << std::endl;
-          std::cerr << "        expected " << nofsimplex() << " element information " << std::endl;
-          std::cerr << "        but only read " << nofsimpl << " elements." << std::endl;
-          return 0;
+          DUNE_THROW(DGFException,
+                     "Error occured while reading element information!"
+                     << std::endl
+                     << "        expected " << nofsimplex()
+                     << " element information "
+                     << "        but only read " << nofsimpl << " elements.");
         }
         return nofsimpl;
       }
@@ -571,18 +583,23 @@ namespace Dune {
           {
             p[n]=x;
             if (x< 0 && x>= nofvtx)
-            { std::cerr << "ERROR in " << *this
-                        << "      wrong index of vertices: "
-                        << x << " read but expected value between 0 and" << nofvtx-1 << std::endl;}
+            {
+              DUNE_THROW(DGFException,
+                         "ERROR in " << *this
+                                     << "      wrong index of vertices: "
+                                     << x << " read but expected value between 0 and "
+                                     << nofvtx-1);
+            }
           }
           n++;
         }
         // tests if the written block is ok in its size
         goodline=(n==(int)p.size());
         if (!goodline) {
-          std::cerr << "ERROR in " << *this
-                    << "      wrong number of vertices: "
-                    << "      read " << n << " but expected " << p.size() << std::endl;
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      wrong number of vertices: "
+                                 << "      read " << n << " but expected " << p.size());
         }
         return goodline;
       }
@@ -648,22 +665,22 @@ namespace Dune {
             else if (dimworld<=n && n<2*dimworld) {
               p2.at(n-dimworld)=x;
               if (p2.at(n-dimworld)<p1.at(n-dimworld)) {
-                std::cerr << "ERROR in " << *this
-                          << "      second coordinate smaller than first coordinate: "
-                          << p2.at(n-dimworld)
-                          << " read but expected value larger or equal to "
-                          << p1.at(n-dimworld) << std::endl;
-                goodline=false;
-                return goodline;
+                DUNE_THROW(DGFException,
+                           "ERROR in " << *this
+                                       << "      second coordinate smaller than first coordinate: "
+                                       << p2.at(n-dimworld)
+                                       << " read but expected value larger or equal to "
+                                       << p1.at(n-dimworld));
               }
             }
             n++;
           }
           goodline=(n==dimworld*2);
           if (!goodline) {
-            std::cerr << "ERROR in " << *this
-                      << "      wrong number of coordinates: "
-                      << n << " read but expected " << dimworld << std::endl;
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      wrong number of coordinates: "
+                                   << n << " read but expected " << dimworld);
           }
         }
         else
@@ -740,9 +757,10 @@ namespace Dune {
         }
         goodline=(n==dimworld+1);
         if (!goodline) {
-          std::cerr << "ERROR in " << *this
-                    << "      wrong number of coordinates: "
-                    << n << " read but expected " << dimworld << std::endl;
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      wrong number of coordinates: "
+                                 << n << " read but expected " << dimworld);
         }
         return goodline;
       }
@@ -763,32 +781,30 @@ namespace Dune {
       const static char* ID;
       int _dimworld; // dimension of world
       int _dim;      // dimension of grid
-      bool good;     // dimension of world > 0, dim <= dimworld
     public:
       // initialize block and get dimension of world
       DimBlock(std::istream& in) :
         BasicBlock(in,ID)
       {
         if (isempty()) {
-          // std::cerr << "ERROR: no dimension of world specified!" << std::endl;
-          good=false;
+          DUNE_THROW(DGFException,
+                     "no dimension of world specified!");
         } else {
           getnextline();
           line >> _dim;
           if (_dim<1) {
-            std::cerr << "ERROR: negative dimension of world specified!" << std::endl;
-            good=false;
+            DUNE_THROW(DGFException,
+                       "negative dimension of world specified!");
           }
           else {
-            good=true;
             if (noflines()==1)
               _dimworld=_dim;
             else {
               getnextline();
               line >> _dimworld;
               if (_dimworld < _dim) {
-                std::cerr << "ERROR: dimension of world smaller than dim!" << std::endl;
-                good=false;
+                DUNE_THROW(DGFException,
+                           "negative dimension of world smaller than dim!");
               }
             }
           }
@@ -803,7 +819,7 @@ namespace Dune {
       }
       // some information
       bool ok() {
-        return good;
+        return true;
       }
     };
     const char* DimBlock::ID = "Dimensions";
@@ -833,8 +849,8 @@ namespace Dune {
             dimw_++;
           }
           if (dimw_==0) {
-            std::cerr << "ERROR: Too few coordinates for lower point p0" << std::endl;
-            abort();
+            DUNE_THROW(DGFException,
+                       "Too few coordinates for lower point p0");
           }
           p1_.resize(dimw_);
           h_.resize(dimw_);
@@ -844,8 +860,8 @@ namespace Dune {
             if(getnextentry(x))
               p1_[i] = x;
             else  {
-              std::cerr << "ERROR :Too few coordinates for upper point p1" << std::endl;
-              abort();
+              DUNE_THROW(DGFException,
+                         "Too few coordinates for lower point p1");
             }
           //assert((p0_[0] < p1_[0]) && (p0_[1] < p1_[1]) && (p0_[2] < p1_[2]));
 
@@ -864,9 +880,8 @@ namespace Dune {
             if(getnextentry(number))
               nofcells_[i] = number;
             else {
-              std::cerr << "ERROR: Couldn't detect a number of cells for every direction"
-                        << std::endl;
-              abort();
+              DUNE_THROW(DGFException,
+                         "Couldn't detect a number of cells for every direction");
             }
           good_ = true;
           for(int i =0; i < dimw_; i++)

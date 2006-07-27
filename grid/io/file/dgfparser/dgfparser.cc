@@ -1,6 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune {
+
   // Output to Alberta macrogridfile (2d/3d)
   inline void DuneGridFormatParser::writeAlberta(std::ostream& out) {
     // writes an output file for in gird type Alberta
@@ -50,6 +51,7 @@ namespace Dune {
       out << " " << std::endl;
     }
   }
+
   // Output to ALU macrogridfile (3d tetra/hexa)
   inline void DuneGridFormatParser::writeAlu(std::ostream& out) {
     // wirtes an output file in grid type ALU
@@ -61,8 +63,7 @@ namespace Dune {
     }
     if (dimw==2) {
       if (!simplexgrid) {
-        std::cerr << "ERROR: ALU can only handle simplex grids in 2d!" << std::endl;
-        return;
+        DUNE_THROW(IOError, "ALU can only handle simplex grids in 2d!");
       }
     }
     std::cout << "Writing vertices...";
@@ -123,8 +124,9 @@ namespace Dune {
     std::cout << "done" << std::endl;
     std::cout.flush();
   }
+
   // read the DGF file and store vertex/element/bound structure
-  inline int DuneGridFormatParser::readDuneGrid(std::istream& gridin)
+  inline void DuneGridFormatParser::readDuneGrid(std::istream& gridin)
   {
     static const std::string dgfid("DGF");
     std::string idline;
@@ -137,8 +139,8 @@ namespace Dune {
     // compare id to DGF keyword
     if ( id != dgfid )
     {
-      std::cerr << "WARNING: Couldn't find 'DGF' keyword -- exiting DGFParser! \n";
-      return -1;
+      DUNE_THROW(DGFException,
+                 "Couldn't find 'DGF' keyword, file is no DuneGridFormat file");
     } // not a DGF file, prehaps native file format
 
     dimw=-1;
@@ -148,10 +150,7 @@ namespace Dune {
     if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
       simplexgrid=true;
       nofelements=0;
-      int ok=generateSimplexGrid(gridin);
-      if (!ok) {
-        return 0;
-      }
+      generateSimplexGrid(gridin);
     }
     else if(interval.ok()) { // generate cartesian grid?
       isInterval = true;
@@ -160,8 +159,9 @@ namespace Dune {
       if (element == General) {
         SimplexBlock bsimplex(gridin,-1,dimw);
         simplexgrid = bsimplex.isactive();
-      } else
+      } else {
         simplexgrid = (element == Simplex);
+      }
       nofvtx=interval.getVtx(vtx);
       if(simplexgrid)
         nofelements=interval.getSimplex(elements);
@@ -174,15 +174,14 @@ namespace Dune {
         nofvtx=bvtx.get(vtx);
       }
       else {
-        return 0;
+        DUNE_THROW(DGFException, "Unknown Error in DGFParser");
       }
       nofelements=0;
       SimplexBlock bsimplex(gridin,bvtx.nofvertex(),dimw);
       CubeBlock bcube(gridin,bvtx.nofvertex(),dimw);
       if (!bcube.isactive() && !bsimplex.isactive() ||
           (element==Cube && !bcube.isactive()) ) {
-        std::cerr << "no element info found..." << std::endl;
-        return 0;
+        DUNE_THROW(DGFException, "no element info found...");
       }
       if (bcube.isactive() && element!=Simplex) {
         nofelements=bcube.get(elements);
@@ -200,11 +199,7 @@ namespace Dune {
           nofelements+=bsimplex.get(elements);
           if (dimw == 2)
             for (size_t i=0; i<elements.size(); i++) {
-              if (testTriang(i)==0) {
-                std::cerr << "Found an error in description of Simplex no. "
-                          << i << std::endl;
-                return 0;
-              }
+              testTriang(i);
             }
         } else {
           nofelements=bcube.get(elements);
@@ -215,9 +210,9 @@ namespace Dune {
         }
       }
       if (nofelements<=0) {
-        std::cerr << "An Error occured while reading element information ";
-        std::cerr << "from the DGF file!" << std::endl;
-        return 0;
+        DUNE_THROW(DGFException,
+                   "An Error occured while reading element information "
+                   << "from the DGF file!");
       }
       // now read macrogrid segments... (works at the moment only for simplex)
       BoundarySegBlock segbound(gridin, nofvtx,dimw);
@@ -241,8 +236,9 @@ namespace Dune {
     // **************************************************
     // first generate a map with all macroboundary segments...
     std::map<EntityKey<int>,int>::iterator pos;
-    if(isInterval && !simplexgrid)
+    if(isInterval && !simplexgrid) {
       interval.getCubeBoundary(facemap);
+    }
     else {
       // at the moment: automatic generation only for simplex grids
       for(int simpl=0; simpl < nofelements ; simpl++) {
@@ -296,12 +292,12 @@ namespace Dune {
     }
     // we made it -
     // although prehaps a few boundary segments are still without id :-<
-    return 1;
   }
+
   /*************************************************************
      caller to tetgen/triangle
    ****************************************************/
-  inline int DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
+  inline void DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
     VertexBlock bvtx(gridin,dimw);
     IntervalBlock interval(gridin);
     SimplexGenerationBlock para(gridin);
@@ -311,9 +307,7 @@ namespace Dune {
     if(!para.hasfile())
     {
       if (!interval.isactive() && !bvtx.isactive()) {
-        std::cerr << "No vertex information found!" << std::endl;
-        abort();
-        return 0;
+        DUNE_THROW(DGFException, "No vertex information found!");
       }
       nofvtx = 0;
       if (interval.ok()) {
@@ -328,9 +322,9 @@ namespace Dune {
         std::cout << "Done." << std::endl;
       }
       if (dimw!=2 && dimw!=3) {
-        std::cerr << "SimplexGen can only generate 2d or 3d meshes but not in "
-                  << dimw << " dimensions!" << std::endl;
-        return 0;
+        DUNE_THROW(DGFException,
+                   "SimplexGen can only generate 2d or 3d meshes but not in "
+                   << dimw << " dimensions!");
       }
 
       {
@@ -350,16 +344,19 @@ namespace Dune {
       }
     }
     else {
-      if (para.filetype().size()==0)
-        return readTetgenTriangle(para.filename());
+      if (para.filetype().size()==0) {
+        readTetgenTriangle(para.filename());
+      }
       dimw = para.dimension();
       if (dimw!=2 && dimw!=3 && dimw!=-1) {
-        std::cerr << "SimplexGen can only generate 2d or 3d meshes but not " << dimw << " dimensions!" << std::endl;
-        abort();
+        DUNE_THROW(DGFException,
+                   "SimplexGen can only generate 2d or 3d meshes but not in "
+                   << dimw << " dimensions!");
       } else if (dimw==-1) {
-        std::cerr << "SimplexGen: connot determine dimension of grid, include parameter DIMENSION in the "
-                  << "Simplexgeneration-Block" << std::endl;
-        abort();
+        DUNE_THROW(DGFException,
+                   "SimplexGen: connot determine dimension of grid," <<
+                   " include parameter DIMENSION in the "
+                                                                     << "Simplexgeneration-Block");
       }
     }
     int call_nr = 1;
@@ -452,29 +449,26 @@ namespace Dune {
     }
     std::stringstream nodename;
     nodename << name << "." << call_nr;
-    return readTetgenTriangle(nodename.str());
+    readTetgenTriangle(nodename.str());
   }
-  inline int DuneGridFormatParser::readTetgenTriangle(std::string name) {
+
+  inline void DuneGridFormatParser::readTetgenTriangle(std::string name) {
     int offset,tmp,params;
     std::string nodename = name + ".node";
     std::string elename = name + ".ele";
     std::cout << "opening " << nodename << "\n";
     std::ifstream node(nodename.c_str());
     if (!node) {
-      std::cerr << "DGF PARSER ERROR: ";
-      std::cerr << "could not find file " << nodename;
-      std::cerr << " prehaps something went wrong with Tetgen/Triangle?";
-      std::cerr << std::endl;
-      abort();
+      DUNE_THROW(DGFException,
+                 "could not find file " << nodename
+                                        << " prehaps something went wrong with Tetgen/Triangle?");
     }
     std::cout << "opening " << elename << "\n";
     std::ifstream ele(elename.c_str());
     if (!ele) {
-      std::cerr << "DGF PARSER ERROR: ";
-      std::cerr << "could not find file " << elename;
-      std::cerr << " prehaps something went wrong with Tetgen/Triangle?";
-      std::cerr << std::endl;
-      abort();
+      DUNE_THROW(DGFException,
+                 "could not find file " << elename
+                                        << " prehaps something went wrong with Tetgen/Triangle?");
     }
     {
       std::cout << "calculating offset from " << name << " .... offset = ";
@@ -517,7 +511,6 @@ namespace Dune {
         }
       }
     }
-    return 1;
   }
   /***************************
      Helper methods mostly only for simplex grids
@@ -600,12 +593,12 @@ namespace Dune {
       (vtx[elements[snr][1]][1]-vtx[elements[snr][0]][1])*
       (vtx[elements[snr][2]][0]-vtx[elements[snr][1]][0]);
     if (fabs(o)<1e-10) {
-      std::cerr << "Simplex number " << snr << " with vertex numbers "
-                << "(" << elements[snr][0]
-                << "," << elements[snr][1]
-                << "," << elements[snr][2] << ")"
-                << " has zero volume!" << std::endl;
-      return 0;
+      DUNE_THROW(DGFException,
+                 "Simplex number " << snr << " with vertex numbers "
+                                   << "(" << elements[snr][0]
+                                   << "," << elements[snr][1]
+                                   << "," << elements[snr][2] << ")"
+                                   << " has zero volume!");
     }
     return o;
   }

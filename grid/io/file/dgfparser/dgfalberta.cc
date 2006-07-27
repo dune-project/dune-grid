@@ -10,24 +10,21 @@ namespace Dune {
 
     std::string str(filename);
 
-    if (mg.readDuneGrid(gridin) == 1)
-    {
-      if (mg.dimw != dimworld) {
-        std::cerr << "ERROR: "
-                  << "Macrofile " << filename << " is for dimension " << mg.dimw
-                  << " and connot be used to initialize an "
-                  << "AlbertaGrid of dimension "
-                  << dimworld << std::endl;
-        abort();
-      }
-      if (mg.dimw == 2) {
-        mg.setRefinement(mg.dimw);
-        mg.setOrientation(mg.dimw);
-      } else {}
-      str+=".albertagrid";
-      std::ofstream out(str.c_str());
-      mg.writeAlberta(out);
+    mg.readDuneGrid(gridin);
+    if (mg.dimw != dimworld) {
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " is for dimension " << mg.dimw
+                              << " and connot be used to initialize an "
+                              << "AlbertaGrid of dimension "
+                              << dimworld);
     }
+    if (mg.dimw == 2) {
+      mg.setRefinement(mg.dimw);
+      mg.setOrientation(mg.dimw);
+    }
+    str+=".albertagrid";
+    std::ofstream out(str.c_str());
+    mg.writeAlberta(out);
 
     return new AlbertaGrid<dim,dimworld>(str.c_str());
   }

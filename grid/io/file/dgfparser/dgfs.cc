@@ -10,18 +10,17 @@ namespace Dune {
     std::ifstream gridin(filename);
     IntervalBlock interval(gridin);
     if(!interval.ok()) {
-      std::cerr << "Macrofile " << filename << " must have Intervall-Block "
-                << "to be used to initialize SGrid!\n"
-                << "No alternative File-Format defined" << std::endl;
-      abort();
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " must have Intervall-Block "
+                              << "to be used to initialize SGrid!\n"
+                              << "No alternative File-Format defined");
     }
     mg.dimw = interval.dimw();
     if (mg.dimw != dimworld) {
-      std::cerr << "ERROR: "
-                << "Macrofile " << filename << " is for dimension " << mg.dimw
-                << " and connot be used to initialize an SGrid of dimension "
-                << dimworld << std::endl;
-      abort();
+      DUNE_THROW(DGFException,
+                 "Macrofile " << filename << " is for dimension " << mg.dimw
+                              << " and connot be used to initialize an SGrid of dimension "
+                              << dimworld);
     }
     FieldVector<double,dimworld> start;
     FieldVector<double,dimworld> lang;

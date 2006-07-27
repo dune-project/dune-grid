@@ -8,12 +8,11 @@ namespace Dune {
                                           const char* filename, MPICommunicatorType ) {
     mg.element=Cube;
     std::ifstream gridin(filename);
-    if (mg.readDuneGrid(gridin) == 1) {
-      std::vector<double> vtxlist(mg.vtx.size());
-      for (typename std::vector<double>::size_type i=0; i<vtxlist.size(); ++i)
-        vtxlist[i] = mg.vtx[i][0];
-      return new OneDGrid<dim,dimworld>(vtxlist);
-    }
-    DUNE_THROW(Exception, "Unrecoverable Error in dgfpaser<OneDGrid>");
+    mg.readDuneGrid(gridin);
+    std::vector<double> vtxlist(mg.vtx.size());
+    for (typename std::vector<double>::size_type i=0; i<vtxlist.size(); ++i)
+      vtxlist[i] = mg.vtx[i][0];
+    return new OneDGrid<dim,dimworld>(vtxlist);
+    DUNE_THROW(DGFException, "Unrecoverable Error in dgfpaser<OneDGrid>");
   }
 }

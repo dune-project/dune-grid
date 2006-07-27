@@ -37,6 +37,7 @@
  */
 
 namespace Dune {
+
   //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
   //! build information in vector structures used by the MacroGrid class.
   class DuneGridFormatParser {
@@ -58,11 +59,7 @@ namespace Dune {
     //! \brief method which reads the dgf file
     //!
     //! fills the vtx,element, and bound vectors
-    //! \return: \n
-    //! -1: no DGF file (prehaps a native file format) \n
-    //!  0: some error during parsing of file \n
-    //!  1: everything fine
-    inline int readDuneGrid(std::istream&);
+    inline void readDuneGrid(std::istream&);
     //! method to write macrogridfiles in alu format (cam be used without dune)
     inline void writeAlu(std::ostream&);
     //! method to write macrogridfiles in alberta format (cam be used without dune)
@@ -89,8 +86,8 @@ namespace Dune {
     // true if grid is generated using the intervall Block
     bool isInterval;
     // call to tetgen/triangle
-    inline int generateSimplexGrid(std::istream&);
-    inline int readTetgenTriangle(std::string);
+    inline void generateSimplexGrid(std::istream&);
+    inline void readTetgenTriangle(std::string);
     // helper methods
     inline void setOrientation(int fixvtx,orientation_t orientation=counterclockwise);
     inline void setRefinement(int);
