@@ -121,11 +121,10 @@ namespace Dune {
     return LeafIteratorImp(*this,true);
   }
 
-  //! for type identification
+  //! for grid identification
   template <int dim, int dimworld>
-  inline GridIdentifier ALU2dGrid<dim, dimworld> :: type  () const {
-    //type ALU2dGrid_Id has to be set in dune/common/grid.hh!
-    return ALU3dGrid_Id;
+  inline std::string ALU2dGrid<dim, dimworld> :: name () const {
+    return "ALUSimplexGrid";
   }
 
   //! Return maximum level defined in this grid. Levels are numbered

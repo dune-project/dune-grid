@@ -419,42 +419,6 @@ namespace Dune {
     BackwardCommunication         //!< reverse communication direction
   };
 
-  /*! Id for each model of the grid interface
-        @ingroup GIRelatedTypes
-   */
-  enum GridIdentifier {
-    SGrid_Id,            //!< Id for SGrid
-    AlbertaGrid_Id ,     //!< Id for AlbertaGrid
-    UGGrid_Id,           //!< Id for UGGrid
-    YaspGrid_Id ,        //!< Id for YaspGrid
-    ALU3dGrid_Id,        //!< Id for ALU3dGrid
-    OneDGrid_Id          //!< Id for OneDGrid
-  };
-
-  /*! Provide names for the different grid types.
-        @ingroup GIRelatedTypes
-   */
-  inline std::string transformToGridName(GridIdentifier type)
-  {
-    switch(type) {
-    case SGrid_Id :
-      return "SGrid";
-    case AlbertaGrid_Id :
-      return "AlbertaGrid";
-    case ALU3dGrid_Id :
-      return "ALU3dGrid";
-    case UGGrid_Id :
-      return "UGGrid";
-    case YaspGrid_Id :
-      return "YaspGrid";
-    case OneDGrid_Id :
-      return "OneDGrid";
-    default :
-      return "unknown";
-    }
-  }
-
-
   //************************************************************************
   // G R I D E R R O R
   //************************************************************************
@@ -647,13 +611,20 @@ namespace Dune {
     //===========================================================
 
     //! Return the id of the grid
-    GridIdentifier type() const
+    std::string name() const
     {
       CHECK_INTERFACE_IMPLEMENTATION(
-        ((GridIdentifier (GridImp::*)() const) &(ThisType::type)),
-        ((GridIdentifier (GridImp::*)() const) &(GridImp::type)));
-      return asImp().type();
+        ((std::string (GridImp::*)() const) &(ThisType::name)),
+        ((std::string (GridImp::*)() const) &(GridImp::name)));
+      return asImp().name();
     }
+
+    //! Return the id of the grid
+    std::string type() const DUNE_DEPRECATED
+    {
+      return name();
+    }
+
     //@}
 
     //===========================================================
@@ -1367,10 +1338,20 @@ inline std::ostream& operator<< (std::ostream& s, Dune::PartitionType t)
   return s;
 }
 
-inline std::ostream& operator<< (std::ostream& s, Dune::GridIdentifier t)
+template<int d, int dw, class ct, class gf>
+inline std::ostream& operator<< (std::ostream& s,
+                                 const Dune::Grid<d,dw,ct,gf> & g)
 {
-  s << Dune::transformToGridName(t);
+  s << g.name();
   return s;
+}
+
+namespace Dune {
+  DUNE_DEPRECATED
+  inline std::string transformToGridName(const std::string & s)
+  {
+    return s;
+  }
 }
 
 #endif

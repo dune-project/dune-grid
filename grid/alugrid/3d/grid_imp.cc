@@ -1301,9 +1301,12 @@ namespace Dune {
 
   // return Grid type
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline GridIdentifier ALU3dGrid<dim, dimworld, elType>::type () const
+  inline std::string ALU3dGrid<dim, dimworld, elType>::name () const
   {
-    return ALU3dGrid_Id;
+    if(elType == hexa)
+      return "ALUCubeGrid";
+    assert( elType == tetra );
+    return "ALUSimplexGrid";
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>

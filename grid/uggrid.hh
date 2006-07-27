@@ -331,8 +331,8 @@ namespace Dune {
     void postAdapt();
     /*@}*/
 
-    /** \brief Returns UGGrid_Id for run-time type identification */
-    GridIdentifier type () const { return UGGrid_Id; };
+    /** \brief return name of the grid */
+    std::string name () const { return "UGGrid"; };
 
     /** \brief Size of the overlap on the leaf level */
     unsigned int overlapSize(int codim) const {

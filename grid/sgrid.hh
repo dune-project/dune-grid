@@ -1266,8 +1266,8 @@ namespace Dune {
     //! define type used for coordinates in grid module
     typedef sgrid_ctype ctype;
 
-    //! return GridIdentifierType of Grid, in this case SGrid_Id
-    GridIdentifier type() const { return SGrid_Id; };
+    //! return the name of this grid
+    std::string name() const { return "SGrid"; };
 
     // constructors
 

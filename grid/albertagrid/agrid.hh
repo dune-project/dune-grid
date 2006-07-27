@@ -1550,8 +1550,8 @@ namespace Dune
       return ccobj;
     }
 
-    /** \brief return type of grid, here AlbertaGrid_Id. */
-    GridIdentifier type () const { return AlbertaGrid_Id; };
+    /** \brief return name of the grid */
+    std::string name () const { return "AlbertaGrid"; };
 
     //**********************************************************
     // End of Interface Methods

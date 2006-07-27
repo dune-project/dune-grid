@@ -2174,8 +2174,8 @@ namespace Dune {
     typedef typename MultiYGrid<dim,ctype>::Intersection IS;
     typedef typename std::deque<IS>::const_iterator ISIT;
 
-    //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ...
-    GridIdentifier type() const { return YaspGrid_Id; };
+    //! return the name of this Grid
+    std::string name() const { return "YaspGrid"; };
 
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
           @param comm MPI communicator where this mesh is distributed to

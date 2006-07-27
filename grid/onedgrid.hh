@@ -378,8 +378,8 @@ namespace Dune {
     /** \brief Adaptation post-processing: Reset all adaptation state flags */
     void postAdapt();
 
-    /** \brief Dynamic type identification */
-    GridIdentifier type () const { return OneDGrid_Id; }
+    /** \brief grid identification */
+    std::string name () const { return "OneDGrid"; }
 
     // **********************************************************
     // End of Interface Methods
