@@ -15,6 +15,7 @@
 using namespace Dune;
 
 #define test(a) if (! (a) ) { std::cerr << __FILE__ << ":" << __LINE__ << ": Test `" # a "' failed" << std::endl; errors++; }
+#define testcmp(a,b) if (! (a == b) ) { std::cerr << __FILE__ << ":" << __LINE__ << ": Test `" # a " == " # b "' failed (got " << a << ")" << std::endl; errors++; }
 
 int main () try
 {
@@ -37,14 +38,14 @@ int main () try
   const ReferenceElement<double,1>& referenceLine = ReferenceElements<double, 1>::general(type);
 
   // size(int c)
-  test(referenceLine.size(0)==1);
-  test(referenceLine.size(1)==2);
+  testcmp(referenceLine.size(0),1);
+  testcmp(referenceLine.size(1),2);
 
   // size(int i, int c, int cc)
-  test(referenceLine.size(0,0,0)==1);
-  test(referenceLine.size(0,0,1)==2);
-  test(referenceLine.size(0,1,1)==1);
-  test(referenceLine.size(1,1,1)==1);
+  testcmp(referenceLine.size(0,0,0),1);
+  testcmp(referenceLine.size(0,0,1),2);
+  testcmp(referenceLine.size(0,1,1),1);
+  testcmp(referenceLine.size(1,1,1),1);
 
   // subEntity(int i, int c, int ii, int cc)
 
@@ -63,49 +64,49 @@ int main () try
   const ReferenceElement<double,2>& referenceTriangle = ReferenceElements<double, 2>::general(type);
 
   // size(int c)
-  test(referenceTriangle.size(0)==1);
-  test(referenceTriangle.size(1)==3);
-  test(referenceTriangle.size(2)==3);
+  testcmp(referenceTriangle.size(0),1);
+  testcmp(referenceTriangle.size(1),3);
+  testcmp(referenceTriangle.size(2),3);
 
   // size(int i, int c, int cc)
-  test(referenceTriangle.size(0,0,0)==1);
-  test(referenceTriangle.size(0,0,1)==3);
-  test(referenceTriangle.size(0,0,2)==3);
+  testcmp(referenceTriangle.size(0,0,0),1);
+  testcmp(referenceTriangle.size(0,0,1),3);
+  testcmp(referenceTriangle.size(0,0,2),3);
 
-  test(referenceTriangle.size(0,1,1)==1);
-  test(referenceTriangle.size(0,1,2)==2);
-  test(referenceTriangle.size(1,1,1)==1);
-  test(referenceTriangle.size(1,1,2)==2);
-  test(referenceTriangle.size(2,1,1)==1);
-  test(referenceTriangle.size(2,1,2)==2);
+  testcmp(referenceTriangle.size(0,1,1),1);
+  testcmp(referenceTriangle.size(0,1,2),2);
+  testcmp(referenceTriangle.size(1,1,1),1);
+  testcmp(referenceTriangle.size(1,1,2),2);
+  testcmp(referenceTriangle.size(2,1,1),1);
+  testcmp(referenceTriangle.size(2,1,2),2);
 
-  test(referenceTriangle.size(0,2,2)==1);
-  test(referenceTriangle.size(1,2,2)==1);
-  test(referenceTriangle.size(2,2,2)==1);
+  testcmp(referenceTriangle.size(0,2,2),1);
+  testcmp(referenceTriangle.size(1,2,2),1);
+  testcmp(referenceTriangle.size(2,2,2),1);
 
   // subEntity(int i, int c, int ii, int cc)
-  test(referenceTriangle.subEntity(0,0,0,0)==0);
-  test(referenceTriangle.subEntity(0,0,0,1)==0);
-  test(referenceTriangle.subEntity(0,0,1,1)==1);
-  test(referenceTriangle.subEntity(0,0,2,1)==2);
-  test(referenceTriangle.subEntity(0,0,0,2)==0);
-  test(referenceTriangle.subEntity(0,0,1,2)==1);
-  test(referenceTriangle.subEntity(0,0,2,2)==2);
+  testcmp(referenceTriangle.subEntity(0,0,0,0),0);
+  testcmp(referenceTriangle.subEntity(0,0,0,1),0);
+  testcmp(referenceTriangle.subEntity(0,0,1,1),1);
+  testcmp(referenceTriangle.subEntity(0,0,2,1),2);
+  testcmp(referenceTriangle.subEntity(0,0,0,2),0);
+  testcmp(referenceTriangle.subEntity(0,0,1,2),1);
+  testcmp(referenceTriangle.subEntity(0,0,2,2),2);
 
-  test(referenceTriangle.subEntity(0,1,0,1)==0);
-  test(referenceTriangle.subEntity(1,1,0,1)==1);
-  test(referenceTriangle.subEntity(2,1,0,1)==2);
+  testcmp(referenceTriangle.subEntity(0,1,0,1),0);
+  testcmp(referenceTriangle.subEntity(1,1,0,1),1);
+  testcmp(referenceTriangle.subEntity(2,1,0,1),2);
 
-  test(referenceTriangle.subEntity(0,1,0,2)==1);
-  test(referenceTriangle.subEntity(0,1,1,2)==2);
-  test(referenceTriangle.subEntity(1,1,0,2)==2);
-  test(referenceTriangle.subEntity(1,1,1,2)==0);
-  test(referenceTriangle.subEntity(2,1,0,2)==0);
-  test(referenceTriangle.subEntity(2,1,1,2)==1);
+  testcmp(referenceTriangle.subEntity(0,1,0,2),1);
+  testcmp(referenceTriangle.subEntity(0,1,1,2),2);
+  testcmp(referenceTriangle.subEntity(1,1,0,2),2);
+  testcmp(referenceTriangle.subEntity(1,1,1,2),0);
+  testcmp(referenceTriangle.subEntity(2,1,0,2),0);
+  testcmp(referenceTriangle.subEntity(2,1,1,2),1);
 
-  test(referenceTriangle.subEntity(0,2,0,2)==0);
-  test(referenceTriangle.subEntity(1,2,0,2)==1);
-  test(referenceTriangle.subEntity(2,2,0,2)==2);
+  testcmp(referenceTriangle.subEntity(0,2,0,2),0);
+  testcmp(referenceTriangle.subEntity(1,2,0,2),1);
+  testcmp(referenceTriangle.subEntity(2,2,0,2),2);
 
   // type(int i, int c)
   test(referenceTriangle.type(0,0).isTriangle());
@@ -128,58 +129,58 @@ int main () try
   const ReferenceElement<double,2>& referenceQuad = ReferenceElements<double, 2>::general(type);
 
   // size(int c)
-  test(referenceQuad.size(0)==1);
-  test(referenceQuad.size(1)==4);
-  test(referenceQuad.size(2)==4);
+  testcmp(referenceQuad.size(0),1);
+  testcmp(referenceQuad.size(1),4);
+  testcmp(referenceQuad.size(2),4);
 
   // size(int i, int c, int cc)
-  test(referenceQuad.size(0,0,0)==1);
-  test(referenceQuad.size(0,0,1)==4);
-  test(referenceQuad.size(0,0,2)==4);
+  testcmp(referenceQuad.size(0,0,0),1);
+  testcmp(referenceQuad.size(0,0,1),4);
+  testcmp(referenceQuad.size(0,0,2),4);
 
-  test(referenceQuad.size(0,1,1)==1);
-  test(referenceQuad.size(0,1,2)==2);
-  test(referenceQuad.size(1,1,1)==1);
-  test(referenceQuad.size(1,1,2)==2);
-  test(referenceQuad.size(2,1,1)==1);
-  test(referenceQuad.size(2,1,2)==2);
-  test(referenceQuad.size(3,1,1)==1);
-  test(referenceQuad.size(3,1,2)==2);
+  testcmp(referenceQuad.size(0,1,1),1);
+  testcmp(referenceQuad.size(0,1,2),2);
+  testcmp(referenceQuad.size(1,1,1),1);
+  testcmp(referenceQuad.size(1,1,2),2);
+  testcmp(referenceQuad.size(2,1,1),1);
+  testcmp(referenceQuad.size(2,1,2),2);
+  testcmp(referenceQuad.size(3,1,1),1);
+  testcmp(referenceQuad.size(3,1,2),2);
 
-  test(referenceQuad.size(0,2,2)==1);
-  test(referenceQuad.size(1,2,2)==1);
-  test(referenceQuad.size(2,2,2)==1);
-  test(referenceQuad.size(3,2,2)==1);
+  testcmp(referenceQuad.size(0,2,2),1);
+  testcmp(referenceQuad.size(1,2,2),1);
+  testcmp(referenceQuad.size(2,2,2),1);
+  testcmp(referenceQuad.size(3,2,2),1);
 
   // subEntity(int i, int c, int ii, int cc)
-  test(referenceQuad.subEntity(0,0,0,0)==0);
-  test(referenceQuad.subEntity(0,0,0,1)==0);
-  test(referenceQuad.subEntity(0,0,1,1)==1);
-  test(referenceQuad.subEntity(0,0,2,1)==2);
-  test(referenceQuad.subEntity(0,0,3,1)==3);
-  test(referenceQuad.subEntity(0,0,0,2)==0);
-  test(referenceQuad.subEntity(0,0,1,2)==1);
-  test(referenceQuad.subEntity(0,0,2,2)==2);
-  test(referenceQuad.subEntity(0,0,3,2)==3);
+  testcmp(referenceQuad.subEntity(0,0,0,0),0);
+  testcmp(referenceQuad.subEntity(0,0,0,1),0);
+  testcmp(referenceQuad.subEntity(0,0,1,1),1);
+  testcmp(referenceQuad.subEntity(0,0,2,1),2);
+  testcmp(referenceQuad.subEntity(0,0,3,1),3);
+  testcmp(referenceQuad.subEntity(0,0,0,2),0);
+  testcmp(referenceQuad.subEntity(0,0,1,2),1);
+  testcmp(referenceQuad.subEntity(0,0,2,2),2);
+  testcmp(referenceQuad.subEntity(0,0,3,2),3);
 
-  test(referenceQuad.subEntity(0,1,0,1)==0);
-  test(referenceQuad.subEntity(1,1,0,1)==1);
-  test(referenceQuad.subEntity(2,1,0,1)==2);
-  test(referenceQuad.subEntity(3,1,0,1)==3);
+  testcmp(referenceQuad.subEntity(0,1,0,1),0);
+  testcmp(referenceQuad.subEntity(1,1,0,1),1);
+  testcmp(referenceQuad.subEntity(2,1,0,1),2);
+  testcmp(referenceQuad.subEntity(3,1,0,1),3);
 
-  test(referenceQuad.subEntity(0,1,0,2)==2);
-  test(referenceQuad.subEntity(0,1,1,2)==0);
-  test(referenceQuad.subEntity(1,1,0,2)==1);
-  test(referenceQuad.subEntity(1,1,1,2)==3);
-  test(referenceQuad.subEntity(2,1,0,2)==0);
-  test(referenceQuad.subEntity(2,1,1,2)==1);
-  test(referenceQuad.subEntity(3,1,0,2)==3);
-  test(referenceQuad.subEntity(3,1,1,2)==2);
+  testcmp(referenceQuad.subEntity(0,1,0,2),2);
+  testcmp(referenceQuad.subEntity(0,1,1,2),0);
+  testcmp(referenceQuad.subEntity(1,1,0,2),1);
+  testcmp(referenceQuad.subEntity(1,1,1,2),3);
+  testcmp(referenceQuad.subEntity(2,1,0,2),0);
+  testcmp(referenceQuad.subEntity(2,1,1,2),1);
+  testcmp(referenceQuad.subEntity(3,1,0,2),3);
+  testcmp(referenceQuad.subEntity(3,1,1,2),2);
 
-  test(referenceQuad.subEntity(0,2,0,2)==0);
-  test(referenceQuad.subEntity(1,2,0,2)==1);
-  test(referenceQuad.subEntity(2,2,0,2)==2);
-  test(referenceQuad.subEntity(3,2,0,2)==3);
+  testcmp(referenceQuad.subEntity(0,2,0,2),0);
+  testcmp(referenceQuad.subEntity(1,2,0,2),1);
+  testcmp(referenceQuad.subEntity(2,2,0,2),2);
+  testcmp(referenceQuad.subEntity(3,2,0,2),3);
 
   // type(int i, int c)
   test(referenceQuad.type(0,0).isQuadrilateral());
@@ -204,30 +205,30 @@ int main () try
   const ReferenceElement<double,3>& referenceTetra = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  test(referenceTetra.size(0)==1);
-  test(referenceTetra.size(1)==4);
-  test(referenceTetra.size(2)==6);
-  test(referenceTetra.size(3)==4);
+  testcmp(referenceTetra.size(0),1);
+  testcmp(referenceTetra.size(1),4);
+  testcmp(referenceTetra.size(2),6);
+  testcmp(referenceTetra.size(3),4);
 
   // size(int i, int c, int cc)
-  test(referenceTetra.size(0,0,0)==1);
-  test(referenceTetra.size(0,0,1)==4);
-  test(referenceTetra.size(0,0,2)==6);
-  test(referenceTetra.size(0,0,3)==4);
+  testcmp(referenceTetra.size(0,0,0),1);
+  testcmp(referenceTetra.size(0,0,1),4);
+  testcmp(referenceTetra.size(0,0,2),6);
+  testcmp(referenceTetra.size(0,0,3),4);
 
   for (int i=0; i<referenceTetra.size(1); i++) {
-    test(referenceTetra.size(i,1,1)==1);
-    test(referenceTetra.size(i,1,2)==3);
-    test(referenceTetra.size(i,1,3)==3);
+    testcmp(referenceTetra.size(i,1,1),1);
+    testcmp(referenceTetra.size(i,1,2),3);
+    testcmp(referenceTetra.size(i,1,3),3);
   }
 
   for (int i=0; i<referenceTetra.size(2); i++) {
-    test(referenceTetra.size(i,2,2)==1);
-    test(referenceTetra.size(i,2,3)==2);
+    testcmp(referenceTetra.size(i,2,2),1);
+    testcmp(referenceTetra.size(i,2,3),2);
   }
 
   for (int i=0; i<referenceTetra.size(3); i++)
-    test(referenceTetra.size(i,3,3)==1);
+    testcmp(referenceTetra.size(i,3,3),1);
 
   // subEntity(int i, int c, int ii, int cc)
 
@@ -253,40 +254,40 @@ int main () try
   const ReferenceElement<double,3>& referencePyramid = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  test(referencePyramid.size(0)==1);
-  test(referencePyramid.size(1)==5);
-  test(referencePyramid.size(2)==8);
-  test(referencePyramid.size(3)==5);
+  testcmp(referencePyramid.size(0),1);
+  testcmp(referencePyramid.size(1),5);
+  testcmp(referencePyramid.size(2),8);
+  testcmp(referencePyramid.size(3),5);
 
   // size(int i, int c, int cc)
-  test(referencePyramid.size(0,0,0)==1);
-  test(referencePyramid.size(0,0,1)==5);
-  test(referencePyramid.size(0,0,2)==8);
-  test(referencePyramid.size(0,0,3)==5);
+  testcmp(referencePyramid.size(0,0,0),1);
+  testcmp(referencePyramid.size(0,0,1),5);
+  testcmp(referencePyramid.size(0,0,2),8);
+  testcmp(referencePyramid.size(0,0,3),5);
 
-  test(referencePyramid.size(0,1,1)==1);
-  test(referencePyramid.size(0,1,2)==4);
-  test(referencePyramid.size(0,1,3)==4);
-  test(referencePyramid.size(1,1,1)==1);
-  test(referencePyramid.size(1,1,2)==3);
-  test(referencePyramid.size(1,1,3)==3);
-  test(referencePyramid.size(2,1,1)==1);
-  test(referencePyramid.size(2,1,2)==3);
-  test(referencePyramid.size(2,1,3)==3);
-  test(referencePyramid.size(3,1,1)==1);
-  test(referencePyramid.size(3,1,2)==3);
-  test(referencePyramid.size(3,1,3)==3);
-  test(referencePyramid.size(4,1,1)==1);
-  test(referencePyramid.size(4,1,2)==3);
-  test(referencePyramid.size(4,1,3)==3);
+  testcmp(referencePyramid.size(0,1,1),1);
+  testcmp(referencePyramid.size(0,1,2),4);
+  testcmp(referencePyramid.size(0,1,3),4);
+  testcmp(referencePyramid.size(1,1,1),1);
+  testcmp(referencePyramid.size(1,1,2),3);
+  testcmp(referencePyramid.size(1,1,3),3);
+  testcmp(referencePyramid.size(2,1,1),1);
+  testcmp(referencePyramid.size(2,1,2),3);
+  testcmp(referencePyramid.size(2,1,3),3);
+  testcmp(referencePyramid.size(3,1,1),1);
+  testcmp(referencePyramid.size(3,1,2),3);
+  testcmp(referencePyramid.size(3,1,3),3);
+  testcmp(referencePyramid.size(4,1,1),1);
+  testcmp(referencePyramid.size(4,1,2),3);
+  testcmp(referencePyramid.size(4,1,3),3);
 
   for (int i=0; i<referencePyramid.size(2); i++) {
-    test(referencePyramid.size(i,2,2)==1);
-    test(referencePyramid.size(i,2,3)==2);
+    testcmp(referencePyramid.size(i,2,2),1);
+    testcmp(referencePyramid.size(i,2,3),2);
   }
 
   for (int i=0; i<referencePyramid.size(3); i++)
-    test(referencePyramid.size(i,3,3)==1);
+    testcmp(referencePyramid.size(i,3,3),1);
 
   // subEntity(int i, int c, int ii, int cc)
 
@@ -315,40 +316,40 @@ int main () try
   const ReferenceElement<double,3>& referencePrism = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  test(referencePrism.size(0)==1);
-  test(referencePrism.size(1)==5);
-  test(referencePrism.size(2)==9);
-  test(referencePrism.size(3)==6);
+  testcmp(referencePrism.size(0),1);
+  testcmp(referencePrism.size(1),5);
+  testcmp(referencePrism.size(2),9);
+  testcmp(referencePrism.size(3),6);
 
   // size(int i, int c, int cc)
-  test(referencePrism.size(0,0,0)==1);
-  test(referencePrism.size(0,0,1)==5);
-  test(referencePrism.size(0,0,2)==9);
-  test(referencePrism.size(0,0,3)==6);
+  testcmp(referencePrism.size(0,0,0),1);
+  testcmp(referencePrism.size(0,0,1),5);
+  testcmp(referencePrism.size(0,0,2),9);
+  testcmp(referencePrism.size(0,0,3),6);
 
-  test(referencePrism.size(0,1,1)==1);
-  test(referencePrism.size(0,1,2)==3);
-  test(referencePrism.size(0,1,3)==3);
-  test(referencePrism.size(1,1,1)==1);
-  test(referencePrism.size(1,1,2)==4);
-  test(referencePrism.size(1,1,3)==4);
-  test(referencePrism.size(2,1,1)==1);
-  test(referencePrism.size(2,1,2)==4);
-  test(referencePrism.size(2,1,3)==4);
-  test(referencePrism.size(3,1,1)==1);
-  test(referencePrism.size(3,1,2)==4);
-  test(referencePrism.size(3,1,3)==4);
-  test(referencePrism.size(4,1,1)==1);
-  test(referencePrism.size(4,1,2)==3);
-  test(referencePrism.size(4,1,3)==3);
+  testcmp(referencePrism.size(0,1,1),1);
+  testcmp(referencePrism.size(0,1,2),3);
+  testcmp(referencePrism.size(0,1,3),3);
+  testcmp(referencePrism.size(1,1,1),1);
+  testcmp(referencePrism.size(1,1,2),4);
+  testcmp(referencePrism.size(1,1,3),4);
+  testcmp(referencePrism.size(2,1,1),1);
+  testcmp(referencePrism.size(2,1,2),4);
+  testcmp(referencePrism.size(2,1,3),4);
+  testcmp(referencePrism.size(3,1,1),1);
+  testcmp(referencePrism.size(3,1,2),4);
+  testcmp(referencePrism.size(3,1,3),4);
+  testcmp(referencePrism.size(4,1,1),1);
+  testcmp(referencePrism.size(4,1,2),3);
+  testcmp(referencePrism.size(4,1,3),3);
 
   for (int i=0; i<referencePrism.size(2); i++) {
-    test(referencePrism.size(i,2,2)==1);
-    test(referencePrism.size(i,2,3)==2);
+    testcmp(referencePrism.size(i,2,2),1);
+    testcmp(referencePrism.size(i,2,3),2);
   }
 
   for (int i=0; i<referencePrism.size(3); i++)
-    test(referencePrism.size(i,3,3)==1);
+    testcmp(referencePrism.size(i,3,3),1);
 
   // subEntity(int i, int c, int ii, int cc)
 
@@ -376,30 +377,30 @@ int main () try
   const ReferenceElement<double,3>& referenceHexa = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  test(referenceHexa.size(0)==1);
-  test(referenceHexa.size(1)==6);
-  test(referenceHexa.size(2)==12);
-  test(referenceHexa.size(3)==8);
+  testcmp(referenceHexa.size(0),1);
+  testcmp(referenceHexa.size(1),6);
+  testcmp(referenceHexa.size(2),12);
+  testcmp(referenceHexa.size(3),8);
 
   // size(int i, int c, int cc)
-  test(referenceHexa.size(0,0,0)==1);
-  test(referenceHexa.size(0,0,1)==6);
-  test(referenceHexa.size(0,0,2)==12);
-  test(referenceHexa.size(0,0,3)==8);
+  testcmp(referenceHexa.size(0,0,0),1);
+  testcmp(referenceHexa.size(0,0,1),6);
+  testcmp(referenceHexa.size(0,0,2),12);
+  testcmp(referenceHexa.size(0,0,3),8);
 
   for (int i=0; i<referenceHexa.size(1); i++) {
-    test(referenceHexa.size(i,1,1)==1);
-    test(referenceHexa.size(i,1,2)==4);
-    test(referenceHexa.size(i,1,3)==4);
+    testcmp(referenceHexa.size(i,1,1),1);
+    testcmp(referenceHexa.size(i,1,2),4);
+    testcmp(referenceHexa.size(i,1,3),4);
   }
 
   for (int i=0; i<referenceHexa.size(2); i++) {
-    test(referenceHexa.size(i,2,2)==1);
-    test(referenceHexa.size(i,2,3)==2);
+    testcmp(referenceHexa.size(i,2,2),1);
+    testcmp(referenceHexa.size(i,2,3),2);
   }
 
   for (int i=0; i<referenceHexa.size(3); i++)
-    test(referenceHexa.size(i,3,3)==1);
+    testcmp(referenceHexa.size(i,3,3),1);
 
   // subEntity(int i, int c, int ii, int cc)
 
