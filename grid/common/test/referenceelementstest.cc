@@ -14,8 +14,11 @@
 
 using namespace Dune;
 
+#define test(a) if (! (a) ) { std::cerr << __FILE__ << ":" << __LINE__ << ": Test `" # a "' failed" << std::endl; errors++; }
+
 int main () try
 {
+  int errors = 0;
 
   // //////////////////////////////////////////////////////////////////////////
   //   We test the different elements separately.  I will not try to be smart
@@ -34,21 +37,21 @@ int main () try
   const ReferenceElement<double,1>& referenceLine = ReferenceElements<double, 1>::general(type);
 
   // size(int c)
-  assert(referenceLine.size(0)==1);
-  assert(referenceLine.size(1)==2);
+  test(referenceLine.size(0)==1);
+  test(referenceLine.size(1)==2);
 
   // size(int i, int c, int cc)
-  assert(referenceLine.size(0,0,0)==1);
-  assert(referenceLine.size(0,0,1)==2);
-  assert(referenceLine.size(0,1,1)==1);
-  assert(referenceLine.size(1,1,1)==1);
+  test(referenceLine.size(0,0,0)==1);
+  test(referenceLine.size(0,0,1)==2);
+  test(referenceLine.size(0,1,1)==1);
+  test(referenceLine.size(1,1,1)==1);
 
   // subEntity(int i, int c, int ii, int cc)
 
   // type(int i, int c)
-  assert(referenceLine.type(0,0).isLine());
-  assert(referenceLine.type(0,1).isVertex());
-  assert(referenceLine.type(1,1).isVertex());
+  test(referenceLine.type(0,0).isLine());
+  test(referenceLine.type(0,1).isVertex());
+  test(referenceLine.type(1,1).isVertex());
 
 
   // //////////////////////////////////////////////////////////////////////////
@@ -60,60 +63,60 @@ int main () try
   const ReferenceElement<double,2>& referenceTriangle = ReferenceElements<double, 2>::general(type);
 
   // size(int c)
-  assert(referenceTriangle.size(0)==1);
-  assert(referenceTriangle.size(1)==3);
-  assert(referenceTriangle.size(2)==3);
+  test(referenceTriangle.size(0)==1);
+  test(referenceTriangle.size(1)==3);
+  test(referenceTriangle.size(2)==3);
 
   // size(int i, int c, int cc)
-  assert(referenceTriangle.size(0,0,0)==1);
-  assert(referenceTriangle.size(0,0,1)==3);
-  assert(referenceTriangle.size(0,0,2)==3);
+  test(referenceTriangle.size(0,0,0)==1);
+  test(referenceTriangle.size(0,0,1)==3);
+  test(referenceTriangle.size(0,0,2)==3);
 
-  assert(referenceTriangle.size(0,1,1)==1);
-  assert(referenceTriangle.size(0,1,2)==2);
-  assert(referenceTriangle.size(1,1,1)==1);
-  assert(referenceTriangle.size(1,1,2)==2);
-  assert(referenceTriangle.size(2,1,1)==1);
-  assert(referenceTriangle.size(2,1,2)==2);
+  test(referenceTriangle.size(0,1,1)==1);
+  test(referenceTriangle.size(0,1,2)==2);
+  test(referenceTriangle.size(1,1,1)==1);
+  test(referenceTriangle.size(1,1,2)==2);
+  test(referenceTriangle.size(2,1,1)==1);
+  test(referenceTriangle.size(2,1,2)==2);
 
-  assert(referenceTriangle.size(0,2,2)==1);
-  assert(referenceTriangle.size(1,2,2)==1);
-  assert(referenceTriangle.size(2,2,2)==1);
+  test(referenceTriangle.size(0,2,2)==1);
+  test(referenceTriangle.size(1,2,2)==1);
+  test(referenceTriangle.size(2,2,2)==1);
 
   // subEntity(int i, int c, int ii, int cc)
-  assert(referenceTriangle.subEntity(0,0,0,0)==0);
-  assert(referenceTriangle.subEntity(0,0,0,1)==0);
-  assert(referenceTriangle.subEntity(0,0,1,1)==1);
-  assert(referenceTriangle.subEntity(0,0,2,1)==2);
-  assert(referenceTriangle.subEntity(0,0,0,2)==0);
-  assert(referenceTriangle.subEntity(0,0,1,2)==1);
-  assert(referenceTriangle.subEntity(0,0,2,2)==2);
+  test(referenceTriangle.subEntity(0,0,0,0)==0);
+  test(referenceTriangle.subEntity(0,0,0,1)==0);
+  test(referenceTriangle.subEntity(0,0,1,1)==1);
+  test(referenceTriangle.subEntity(0,0,2,1)==2);
+  test(referenceTriangle.subEntity(0,0,0,2)==0);
+  test(referenceTriangle.subEntity(0,0,1,2)==1);
+  test(referenceTriangle.subEntity(0,0,2,2)==2);
 
-  assert(referenceTriangle.subEntity(0,1,0,1)==0);
-  assert(referenceTriangle.subEntity(1,1,0,1)==1);
-  assert(referenceTriangle.subEntity(2,1,0,1)==2);
+  test(referenceTriangle.subEntity(0,1,0,1)==0);
+  test(referenceTriangle.subEntity(1,1,0,1)==1);
+  test(referenceTriangle.subEntity(2,1,0,1)==2);
 
-  assert(referenceTriangle.subEntity(0,1,0,2)==1);
-  assert(referenceTriangle.subEntity(0,1,1,2)==2);
-  assert(referenceTriangle.subEntity(1,1,0,2)==2);
-  assert(referenceTriangle.subEntity(1,1,1,2)==0);
-  assert(referenceTriangle.subEntity(2,1,0,2)==0);
-  assert(referenceTriangle.subEntity(2,1,1,2)==1);
+  test(referenceTriangle.subEntity(0,1,0,2)==1);
+  test(referenceTriangle.subEntity(0,1,1,2)==2);
+  test(referenceTriangle.subEntity(1,1,0,2)==2);
+  test(referenceTriangle.subEntity(1,1,1,2)==0);
+  test(referenceTriangle.subEntity(2,1,0,2)==0);
+  test(referenceTriangle.subEntity(2,1,1,2)==1);
 
-  assert(referenceTriangle.subEntity(0,2,0,2)==0);
-  assert(referenceTriangle.subEntity(1,2,0,2)==1);
-  assert(referenceTriangle.subEntity(2,2,0,2)==2);
+  test(referenceTriangle.subEntity(0,2,0,2)==0);
+  test(referenceTriangle.subEntity(1,2,0,2)==1);
+  test(referenceTriangle.subEntity(2,2,0,2)==2);
 
   // type(int i, int c)
-  assert(referenceTriangle.type(0,0).isTriangle());
+  test(referenceTriangle.type(0,0).isTriangle());
 
-  assert(referenceTriangle.type(0,1).isLine());
-  assert(referenceTriangle.type(1,1).isLine());
-  assert(referenceTriangle.type(2,1).isLine());
+  test(referenceTriangle.type(0,1).isLine());
+  test(referenceTriangle.type(1,1).isLine());
+  test(referenceTriangle.type(2,1).isLine());
 
-  assert(referenceTriangle.type(0,2).isVertex());
-  assert(referenceTriangle.type(1,2).isVertex());
-  assert(referenceTriangle.type(2,2).isVertex());
+  test(referenceTriangle.type(0,2).isVertex());
+  test(referenceTriangle.type(1,2).isVertex());
+  test(referenceTriangle.type(2,2).isVertex());
 
 
   // //////////////////////////////////////////////////////////////////////////
@@ -125,71 +128,71 @@ int main () try
   const ReferenceElement<double,2>& referenceQuad = ReferenceElements<double, 2>::general(type);
 
   // size(int c)
-  assert(referenceQuad.size(0)==1);
-  assert(referenceQuad.size(1)==4);
-  assert(referenceQuad.size(2)==4);
+  test(referenceQuad.size(0)==1);
+  test(referenceQuad.size(1)==4);
+  test(referenceQuad.size(2)==4);
 
   // size(int i, int c, int cc)
-  assert(referenceQuad.size(0,0,0)==1);
-  assert(referenceQuad.size(0,0,1)==4);
-  assert(referenceQuad.size(0,0,2)==4);
+  test(referenceQuad.size(0,0,0)==1);
+  test(referenceQuad.size(0,0,1)==4);
+  test(referenceQuad.size(0,0,2)==4);
 
-  assert(referenceQuad.size(0,1,1)==1);
-  assert(referenceQuad.size(0,1,2)==2);
-  assert(referenceQuad.size(1,1,1)==1);
-  assert(referenceQuad.size(1,1,2)==2);
-  assert(referenceQuad.size(2,1,1)==1);
-  assert(referenceQuad.size(2,1,2)==2);
-  assert(referenceQuad.size(3,1,1)==1);
-  assert(referenceQuad.size(3,1,2)==2);
+  test(referenceQuad.size(0,1,1)==1);
+  test(referenceQuad.size(0,1,2)==2);
+  test(referenceQuad.size(1,1,1)==1);
+  test(referenceQuad.size(1,1,2)==2);
+  test(referenceQuad.size(2,1,1)==1);
+  test(referenceQuad.size(2,1,2)==2);
+  test(referenceQuad.size(3,1,1)==1);
+  test(referenceQuad.size(3,1,2)==2);
 
-  assert(referenceQuad.size(0,2,2)==1);
-  assert(referenceQuad.size(1,2,2)==1);
-  assert(referenceQuad.size(2,2,2)==1);
-  assert(referenceQuad.size(3,2,2)==1);
+  test(referenceQuad.size(0,2,2)==1);
+  test(referenceQuad.size(1,2,2)==1);
+  test(referenceQuad.size(2,2,2)==1);
+  test(referenceQuad.size(3,2,2)==1);
 
   // subEntity(int i, int c, int ii, int cc)
-  assert(referenceQuad.subEntity(0,0,0,0)==0);
-  assert(referenceQuad.subEntity(0,0,0,1)==0);
-  assert(referenceQuad.subEntity(0,0,1,1)==1);
-  assert(referenceQuad.subEntity(0,0,2,1)==2);
-  assert(referenceQuad.subEntity(0,0,3,1)==3);
-  assert(referenceQuad.subEntity(0,0,0,2)==0);
-  assert(referenceQuad.subEntity(0,0,1,2)==1);
-  assert(referenceQuad.subEntity(0,0,2,2)==2);
-  assert(referenceQuad.subEntity(0,0,3,2)==3);
+  test(referenceQuad.subEntity(0,0,0,0)==0);
+  test(referenceQuad.subEntity(0,0,0,1)==0);
+  test(referenceQuad.subEntity(0,0,1,1)==1);
+  test(referenceQuad.subEntity(0,0,2,1)==2);
+  test(referenceQuad.subEntity(0,0,3,1)==3);
+  test(referenceQuad.subEntity(0,0,0,2)==0);
+  test(referenceQuad.subEntity(0,0,1,2)==1);
+  test(referenceQuad.subEntity(0,0,2,2)==2);
+  test(referenceQuad.subEntity(0,0,3,2)==3);
 
-  assert(referenceQuad.subEntity(0,1,0,1)==0);
-  assert(referenceQuad.subEntity(1,1,0,1)==1);
-  assert(referenceQuad.subEntity(2,1,0,1)==2);
-  assert(referenceQuad.subEntity(3,1,0,1)==3);
+  test(referenceQuad.subEntity(0,1,0,1)==0);
+  test(referenceQuad.subEntity(1,1,0,1)==1);
+  test(referenceQuad.subEntity(2,1,0,1)==2);
+  test(referenceQuad.subEntity(3,1,0,1)==3);
 
-  assert(referenceQuad.subEntity(0,1,0,2)==2);
-  assert(referenceQuad.subEntity(0,1,1,2)==0);
-  assert(referenceQuad.subEntity(1,1,0,2)==1);
-  assert(referenceQuad.subEntity(1,1,1,2)==3);
-  assert(referenceQuad.subEntity(2,1,0,2)==0);
-  assert(referenceQuad.subEntity(2,1,1,2)==1);
-  assert(referenceQuad.subEntity(3,1,0,2)==3);
-  assert(referenceQuad.subEntity(3,1,1,2)==2);
+  test(referenceQuad.subEntity(0,1,0,2)==2);
+  test(referenceQuad.subEntity(0,1,1,2)==0);
+  test(referenceQuad.subEntity(1,1,0,2)==1);
+  test(referenceQuad.subEntity(1,1,1,2)==3);
+  test(referenceQuad.subEntity(2,1,0,2)==0);
+  test(referenceQuad.subEntity(2,1,1,2)==1);
+  test(referenceQuad.subEntity(3,1,0,2)==3);
+  test(referenceQuad.subEntity(3,1,1,2)==2);
 
-  assert(referenceQuad.subEntity(0,2,0,2)==0);
-  assert(referenceQuad.subEntity(1,2,0,2)==1);
-  assert(referenceQuad.subEntity(2,2,0,2)==2);
-  assert(referenceQuad.subEntity(3,2,0,2)==3);
+  test(referenceQuad.subEntity(0,2,0,2)==0);
+  test(referenceQuad.subEntity(1,2,0,2)==1);
+  test(referenceQuad.subEntity(2,2,0,2)==2);
+  test(referenceQuad.subEntity(3,2,0,2)==3);
 
   // type(int i, int c)
-  assert(referenceQuad.type(0,0).isQuadrilateral());
+  test(referenceQuad.type(0,0).isQuadrilateral());
 
-  assert(referenceQuad.type(0,1).isLine());
-  assert(referenceQuad.type(1,1).isLine());
-  assert(referenceQuad.type(2,1).isLine());
-  assert(referenceQuad.type(3,1).isLine());
+  test(referenceQuad.type(0,1).isLine());
+  test(referenceQuad.type(1,1).isLine());
+  test(referenceQuad.type(2,1).isLine());
+  test(referenceQuad.type(3,1).isLine());
 
-  assert(referenceQuad.type(0,2).isVertex());
-  assert(referenceQuad.type(1,2).isVertex());
-  assert(referenceQuad.type(2,2).isVertex());
-  assert(referenceQuad.type(3,2).isVertex());
+  test(referenceQuad.type(0,2).isVertex());
+  test(referenceQuad.type(1,2).isVertex());
+  test(referenceQuad.type(2,2).isVertex());
+  test(referenceQuad.type(3,2).isVertex());
 
 
   // //////////////////////////////////////////////////////////////////////////
@@ -201,45 +204,45 @@ int main () try
   const ReferenceElement<double,3>& referenceTetra = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  assert(referenceTetra.size(0)==1);
-  assert(referenceTetra.size(1)==4);
-  assert(referenceTetra.size(2)==6);
-  assert(referenceTetra.size(3)==4);
+  test(referenceTetra.size(0)==1);
+  test(referenceTetra.size(1)==4);
+  test(referenceTetra.size(2)==6);
+  test(referenceTetra.size(3)==4);
 
   // size(int i, int c, int cc)
-  assert(referenceTetra.size(0,0,0)==1);
-  assert(referenceTetra.size(0,0,1)==4);
-  assert(referenceTetra.size(0,0,2)==6);
-  assert(referenceTetra.size(0,0,3)==4);
+  test(referenceTetra.size(0,0,0)==1);
+  test(referenceTetra.size(0,0,1)==4);
+  test(referenceTetra.size(0,0,2)==6);
+  test(referenceTetra.size(0,0,3)==4);
 
   for (int i=0; i<referenceTetra.size(1); i++) {
-    assert(referenceTetra.size(i,1,1)==1);
-    assert(referenceTetra.size(i,1,2)==3);
-    assert(referenceTetra.size(i,1,3)==3);
+    test(referenceTetra.size(i,1,1)==1);
+    test(referenceTetra.size(i,1,2)==3);
+    test(referenceTetra.size(i,1,3)==3);
   }
 
   for (int i=0; i<referenceTetra.size(2); i++) {
-    assert(referenceTetra.size(i,2,2)==1);
-    assert(referenceTetra.size(i,2,3)==2);
+    test(referenceTetra.size(i,2,2)==1);
+    test(referenceTetra.size(i,2,3)==2);
   }
 
   for (int i=0; i<referenceTetra.size(3); i++)
-    assert(referenceTetra.size(i,3,3)==1);
+    test(referenceTetra.size(i,3,3)==1);
 
   // subEntity(int i, int c, int ii, int cc)
 
 
   // type(int i, int c)
-  assert(referenceTetra.type(0,0).isTetrahedron());
+  test(referenceTetra.type(0,0).isTetrahedron());
 
   for (int i=0; i<referenceTetra.size(1); i++)
-    assert(referenceTetra.type(i,1).isTriangle());
+    test(referenceTetra.type(i,1).isTriangle());
 
   for (int i=0; i<referenceTetra.size(2); i++)
-    assert(referenceTetra.type(i,2).isLine());
+    test(referenceTetra.type(i,2).isLine());
 
   for (int i=0; i<referenceTetra.size(3); i++)
-    assert(referenceTetra.type(i,3).isVertex());
+    test(referenceTetra.type(i,3).isVertex());
 
   // //////////////////////////////////////////////////////////////////////////
   //   Test pyramid
@@ -250,57 +253,57 @@ int main () try
   const ReferenceElement<double,3>& referencePyramid = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  assert(referencePyramid.size(0)==1);
-  assert(referencePyramid.size(1)==5);
-  assert(referencePyramid.size(2)==8);
-  assert(referencePyramid.size(3)==5);
+  test(referencePyramid.size(0)==1);
+  test(referencePyramid.size(1)==5);
+  test(referencePyramid.size(2)==8);
+  test(referencePyramid.size(3)==5);
 
   // size(int i, int c, int cc)
-  assert(referencePyramid.size(0,0,0)==1);
-  assert(referencePyramid.size(0,0,1)==5);
-  assert(referencePyramid.size(0,0,2)==8);
-  assert(referencePyramid.size(0,0,3)==5);
+  test(referencePyramid.size(0,0,0)==1);
+  test(referencePyramid.size(0,0,1)==5);
+  test(referencePyramid.size(0,0,2)==8);
+  test(referencePyramid.size(0,0,3)==5);
 
-  assert(referencePyramid.size(0,1,1)==1);
-  assert(referencePyramid.size(0,1,2)==4);
-  assert(referencePyramid.size(0,1,3)==4);
-  assert(referencePyramid.size(1,1,1)==1);
-  assert(referencePyramid.size(1,1,2)==3);
-  assert(referencePyramid.size(1,1,3)==3);
-  assert(referencePyramid.size(2,1,1)==1);
-  assert(referencePyramid.size(2,1,2)==3);
-  assert(referencePyramid.size(2,1,3)==3);
-  assert(referencePyramid.size(3,1,1)==1);
-  assert(referencePyramid.size(3,1,2)==3);
-  assert(referencePyramid.size(3,1,3)==3);
-  assert(referencePyramid.size(4,1,1)==1);
-  assert(referencePyramid.size(4,1,2)==3);
-  assert(referencePyramid.size(4,1,3)==3);
+  test(referencePyramid.size(0,1,1)==1);
+  test(referencePyramid.size(0,1,2)==4);
+  test(referencePyramid.size(0,1,3)==4);
+  test(referencePyramid.size(1,1,1)==1);
+  test(referencePyramid.size(1,1,2)==3);
+  test(referencePyramid.size(1,1,3)==3);
+  test(referencePyramid.size(2,1,1)==1);
+  test(referencePyramid.size(2,1,2)==3);
+  test(referencePyramid.size(2,1,3)==3);
+  test(referencePyramid.size(3,1,1)==1);
+  test(referencePyramid.size(3,1,2)==3);
+  test(referencePyramid.size(3,1,3)==3);
+  test(referencePyramid.size(4,1,1)==1);
+  test(referencePyramid.size(4,1,2)==3);
+  test(referencePyramid.size(4,1,3)==3);
 
   for (int i=0; i<referencePyramid.size(2); i++) {
-    assert(referencePyramid.size(i,2,2)==1);
-    assert(referencePyramid.size(i,2,3)==2);
+    test(referencePyramid.size(i,2,2)==1);
+    test(referencePyramid.size(i,2,3)==2);
   }
 
   for (int i=0; i<referencePyramid.size(3); i++)
-    assert(referencePyramid.size(i,3,3)==1);
+    test(referencePyramid.size(i,3,3)==1);
 
   // subEntity(int i, int c, int ii, int cc)
 
   // type(int i, int c)
-  assert(referencePyramid.type(0,0).isPyramid());
+  test(referencePyramid.type(0,0).isPyramid());
 
-  assert(referencePyramid.type(0,1).isQuadrilateral());
-  assert(referencePyramid.type(1,1).isTriangle());
-  assert(referencePyramid.type(2,1).isTriangle());
-  assert(referencePyramid.type(3,1).isTriangle());
-  assert(referencePyramid.type(4,1).isTriangle());
+  test(referencePyramid.type(0,1).isQuadrilateral());
+  test(referencePyramid.type(1,1).isTriangle());
+  test(referencePyramid.type(2,1).isTriangle());
+  test(referencePyramid.type(3,1).isTriangle());
+  test(referencePyramid.type(4,1).isTriangle());
 
   for (int i=0; i<referencePyramid.size(2); i++)
-    assert(referencePyramid.type(i,2).isLine());
+    test(referencePyramid.type(i,2).isLine());
 
   for (int i=0; i<referencePyramid.size(3); i++)
-    assert(referencePyramid.type(i,3).isVertex());
+    test(referencePyramid.type(i,3).isVertex());
 
 
   // //////////////////////////////////////////////////////////////////////////
@@ -312,57 +315,57 @@ int main () try
   const ReferenceElement<double,3>& referencePrism = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  assert(referencePrism.size(0)==1);
-  assert(referencePrism.size(1)==5);
-  assert(referencePrism.size(2)==9);
-  assert(referencePrism.size(3)==6);
+  test(referencePrism.size(0)==1);
+  test(referencePrism.size(1)==5);
+  test(referencePrism.size(2)==9);
+  test(referencePrism.size(3)==6);
 
   // size(int i, int c, int cc)
-  assert(referencePrism.size(0,0,0)==1);
-  assert(referencePrism.size(0,0,1)==5);
-  assert(referencePrism.size(0,0,2)==9);
-  assert(referencePrism.size(0,0,3)==6);
+  test(referencePrism.size(0,0,0)==1);
+  test(referencePrism.size(0,0,1)==5);
+  test(referencePrism.size(0,0,2)==9);
+  test(referencePrism.size(0,0,3)==6);
 
-  assert(referencePrism.size(0,1,1)==1);
-  assert(referencePrism.size(0,1,2)==3);
-  assert(referencePrism.size(0,1,3)==3);
-  assert(referencePrism.size(1,1,1)==1);
-  assert(referencePrism.size(1,1,2)==4);
-  assert(referencePrism.size(1,1,3)==4);
-  assert(referencePrism.size(2,1,1)==1);
-  assert(referencePrism.size(2,1,2)==4);
-  assert(referencePrism.size(2,1,3)==4);
-  assert(referencePrism.size(3,1,1)==1);
-  assert(referencePrism.size(3,1,2)==4);
-  assert(referencePrism.size(3,1,3)==4);
-  assert(referencePrism.size(4,1,1)==1);
-  assert(referencePrism.size(4,1,2)==3);
-  assert(referencePrism.size(4,1,3)==3);
+  test(referencePrism.size(0,1,1)==1);
+  test(referencePrism.size(0,1,2)==3);
+  test(referencePrism.size(0,1,3)==3);
+  test(referencePrism.size(1,1,1)==1);
+  test(referencePrism.size(1,1,2)==4);
+  test(referencePrism.size(1,1,3)==4);
+  test(referencePrism.size(2,1,1)==1);
+  test(referencePrism.size(2,1,2)==4);
+  test(referencePrism.size(2,1,3)==4);
+  test(referencePrism.size(3,1,1)==1);
+  test(referencePrism.size(3,1,2)==4);
+  test(referencePrism.size(3,1,3)==4);
+  test(referencePrism.size(4,1,1)==1);
+  test(referencePrism.size(4,1,2)==3);
+  test(referencePrism.size(4,1,3)==3);
 
   for (int i=0; i<referencePrism.size(2); i++) {
-    assert(referencePrism.size(i,2,2)==1);
-    assert(referencePrism.size(i,2,3)==2);
+    test(referencePrism.size(i,2,2)==1);
+    test(referencePrism.size(i,2,3)==2);
   }
 
   for (int i=0; i<referencePrism.size(3); i++)
-    assert(referencePrism.size(i,3,3)==1);
+    test(referencePrism.size(i,3,3)==1);
 
   // subEntity(int i, int c, int ii, int cc)
 
   // type(int i, int c)
-  assert(referencePrism.type(0,0).isPrism());
+  test(referencePrism.type(0,0).isPrism());
 
-  assert(referencePrism.type(0,1).isTriangle());
-  assert(referencePrism.type(1,1).isQuadrilateral());
-  assert(referencePrism.type(2,1).isQuadrilateral());
-  assert(referencePrism.type(3,1).isQuadrilateral());
-  assert(referencePrism.type(4,1).isTriangle());
+  test(referencePrism.type(0,1).isTriangle());
+  test(referencePrism.type(1,1).isQuadrilateral());
+  test(referencePrism.type(2,1).isQuadrilateral());
+  test(referencePrism.type(3,1).isQuadrilateral());
+  test(referencePrism.type(4,1).isTriangle());
 
   for (int i=0; i<referencePrism.size(2); i++)
-    assert(referencePrism.type(i,2).isLine());
+    test(referencePrism.type(i,2).isLine());
 
   for (int i=0; i<referencePrism.size(3); i++)
-    assert(referencePrism.type(i,3).isVertex());
+    test(referencePrism.type(i,3).isVertex());
 
   // //////////////////////////////////////////////////////////////////////////
   //   Test hexahedron
@@ -373,47 +376,46 @@ int main () try
   const ReferenceElement<double,3>& referenceHexa = ReferenceElements<double, 3>::general(type);
 
   // size(int c)
-  assert(referenceHexa.size(0)==1);
-  assert(referenceHexa.size(1)==6);
-  assert(referenceHexa.size(2)==12);
-  assert(referenceHexa.size(3)==8);
+  test(referenceHexa.size(0)==1);
+  test(referenceHexa.size(1)==6);
+  test(referenceHexa.size(2)==12);
+  test(referenceHexa.size(3)==8);
 
   // size(int i, int c, int cc)
-  assert(referenceHexa.size(0,0,0)==1);
-  assert(referenceHexa.size(0,0,1)==6);
-  assert(referenceHexa.size(0,0,2)==12);
-  assert(referenceHexa.size(0,0,3)==8);
+  test(referenceHexa.size(0,0,0)==1);
+  test(referenceHexa.size(0,0,1)==6);
+  test(referenceHexa.size(0,0,2)==12);
+  test(referenceHexa.size(0,0,3)==8);
 
   for (int i=0; i<referenceHexa.size(1); i++) {
-    assert(referenceHexa.size(i,1,1)==1);
-    assert(referenceHexa.size(i,1,2)==4);
-    assert(referenceHexa.size(i,1,3)==4);
+    test(referenceHexa.size(i,1,1)==1);
+    test(referenceHexa.size(i,1,2)==4);
+    test(referenceHexa.size(i,1,3)==4);
   }
 
   for (int i=0; i<referenceHexa.size(2); i++) {
-    assert(referenceHexa.size(i,2,2)==1);
-    assert(referenceHexa.size(i,2,3)==2);
+    test(referenceHexa.size(i,2,2)==1);
+    test(referenceHexa.size(i,2,3)==2);
   }
 
   for (int i=0; i<referenceHexa.size(3); i++)
-    assert(referenceHexa.size(i,3,3)==1);
+    test(referenceHexa.size(i,3,3)==1);
 
   // subEntity(int i, int c, int ii, int cc)
 
   // type(int i, int c)
-  assert(referenceHexa.type(0,0).isHexahedron());
+  test(referenceHexa.type(0,0).isHexahedron());
 
   for (int i=0; i<referenceHexa.size(1); i++)
-    assert(referenceHexa.type(i,1).isQuadrilateral());
+    test(referenceHexa.type(i,1).isQuadrilateral());
 
   for (int i=0; i<referenceHexa.size(2); i++)
-    assert(referenceHexa.type(i,2).isLine());
+    test(referenceHexa.type(i,2).isLine());
 
   for (int i=0; i<referenceHexa.size(3); i++)
-    assert(referenceHexa.type(i,3).isVertex());
+    test(referenceHexa.type(i,3).isVertex());
 
-
-  return 0;
+  return errors>0 ? 1 : 0;
 
 }
 catch (Exception &e) {
