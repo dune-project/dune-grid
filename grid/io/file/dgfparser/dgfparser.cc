@@ -135,7 +135,11 @@ namespace Dune {
     idstream >> id;
 
     // compare id to DGF keyword
-    if ( id != dgfid ) return -1; // not a DGF file, prehaps native file format
+    if ( id != dgfid )
+    {
+      std::cerr << "WARNING: Couldn't find 'DGF' keyword -- exiting DGFParser! \n";
+      return -1;
+    } // not a DGF file, prehaps native file format
 
     dimw=-1;
     IntervalBlock interval(gridin);
