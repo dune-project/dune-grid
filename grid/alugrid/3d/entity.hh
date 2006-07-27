@@ -42,6 +42,30 @@ namespace Dune {
   class ALU3dGridEntity :
     public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
   {
+    // default just returns level
+    template <class GridType, int cdim>
+    struct GetLevel
+    {
+      template <class ItemType>
+      static int getLevel(const GridType & grid, const ItemType & item )
+      {
+        return item.level();
+      }
+    };
+
+    // for leaf vertices the level is somewhat difficult to obtain, because
+    // this the maximum of levels of elements that have this vertex as sub
+    // entity
+    template <class GridType>
+    struct GetLevel<GridType,3>
+    {
+      template <class ItemType>
+      static int getLevel(const GridType & grid, const ItemType & item)
+      {
+        return (item.isLeafEntity()) ? grid.getLevelOfLeafVertex(item) : item.level();
+      }
+    };
+
     enum { dimworld = GridImp::dimensionworld };
 
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
@@ -444,7 +468,7 @@ namespace Dune {
     // update underlying item pointer and set ghost entity
     void updateGhostPointer( HBndSegType & ghostFace );
     // update underlying item pointer and set entity
-    void updateEntityPointer( MyHElementType * item );
+    void updateEntityPointer( MyHElementType * item , int level = -1 );
 
     // reference to grid
     const GridImp & grid_;
@@ -557,7 +581,7 @@ namespace Dune {
     // clones object
     void clone (const ALU3dGridEntityPointerType & org);
 
-    void updateEntityPointer( MyHElementType * item );
+    void updateEntityPointer( MyHElementType * item , int level );
 
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator

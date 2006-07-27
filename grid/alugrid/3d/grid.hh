@@ -647,7 +647,22 @@ namespace Dune {
     mutable ALU3dGridItemListType ghostLevelList_[dim][MAXL];
 
     mutable ALU3dGridItemListType levelEdgeList_[MAXL];
+
+    typedef ALU3dGridLeafVertexList LeafVertexListType;
+    mutable LeafVertexListType leafVertexList_;
   public:
+    LeafVertexListType & getLeafVertexList() const
+    {
+      if( !leafVertexList_.up2Date() ) leafVertexList_.setupVxList(*this);
+      return leafVertexList_;
+    }
+
+    int getLevelOfLeafVertex(const ALU3DSPACE VertexType & vertex) const
+    {
+      assert( leafVertexList_.up2Date() );
+      return leafVertexList_.getLevel(vertex);
+    }
+
     VertexListType & getVertexList(int level) const
     {
       assert( level >= 0 );

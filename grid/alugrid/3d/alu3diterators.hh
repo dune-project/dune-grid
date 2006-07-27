@@ -64,6 +64,7 @@ namespace ALUGridSpace {
   };
 
   typedef Dune :: ALU3dGridVertexList VertexListType;
+  typedef Dune :: ALU3dGridLeafVertexList LeafVertexListType;
 
   //*********************************************************
   //  LevelIterator Wrapper
@@ -79,8 +80,7 @@ namespace ALUGridSpace {
     virtual void first() = 0;
     virtual int done  () const = 0;
     virtual val_t & item () const = 0;
-    virtual IteratorSTI< val_t > * clone () const { assert(false); return 0; }
-
+    virtual IteratorSTI< val_t > * clone () const { assert(false); abort(); return 0; }
   };
 
   typedef Dune::PartitionIteratorType PartitionIteratorType;
@@ -184,7 +184,6 @@ namespace ALUGridSpace {
 
     mutable int count_;
     const int size_;
-
   public:
     typedef IteratorElType<3>::val_t val_t;
     mutable val_t elem_;
@@ -202,7 +201,8 @@ namespace ALUGridSpace {
 
     // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_) , elem_(org.elem_)
+      : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_)
+        , elem_(org.elem_)
     {}
 
     // returns size of leaf iterator, wrong here, return leaf size
@@ -368,54 +368,149 @@ namespace ALUGridSpace {
     }
   };
 
+
+  // the vertex leaf iterator, little bit different to the others
   template <PartitionIteratorType pitype>
   class ALU3dGridLeafIteratorWrapper<3,pitype>
-    : public IteratorWrapperInterface < typename IteratorElType<3>::val_t >
+    : public IteratorWrapperInterface< typename IteratorElType<3>::val_t >
   {
+    typedef LeafVertexListType :: IteratorType IteratorType;
+    typedef LeafVertexListType :: ItemType VxItemType;
     typedef IteratorElType<3>::ElType ElType;
     typedef typename LeafStopRule< ElType, pitype > :: StopRule_t StopRule_t;
-    // ElType is vertex_STI
-    typedef LeafIterator < ElType > IteratorType;
 
-    // the vertex iterator
-    IteratorType it_;
+    mutable LeafVertexListType & vxList_;
+    typedef typename LeafVertexListType :: IteratorType ListIteratorType;
+
+    mutable int count_;
+    const int size_;
 
   public:
     typedef IteratorElType<3>::val_t val_t;
-  private:
     mutable val_t elem_;
     const StopRule_t rule_;
-  public:
-    // constructor creating Iterator
+
+    // constructor creating iterator
     template <class GridImp>
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid()), elem_(0,0) , rule_ () {}
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
+      : vxList_ (grid.getLeafVertexList())
+        , count_(0)
+        , size_(vxList_.size())
+        , elem_(0,0)
+        , rule_()
+    {
+      assert( vxList_.up2Date() );
+    }
 
-    // constructor copying iterator
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_) , rule_() {}
+    // copy constructor
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
+      : vxList_(org.vxList_)
+        , count_(org.count_) , size_(org.size_)
+        , elem_(org.elem_)
+        , rule_()
+    {}
 
-    int size  ()    { return it_->size(); }
+    // returns size of leaf iterator, wrong here, return leaf size
+    int size  ()  { return size_; }
 
+    //! if level of item is larger then walk level, go next
     void next ()
     {
+      ++count_;
+      goNextValid();
+      return ;
+    }
+
+    void first()
+    {
+      count_ = 0;
+      goNextValid();
+    }
+    int done () const { return (count_ >= size_) ? 1 : 0; }
+    val_t & item () const
+    {
+      assert( ! done () );
+      assert( elem_.first );
+      return elem_;
+    }
+  private:
+    val_t & getItem () const
+    {
+      //elem_.first = vxList_.getItemList()[count_].first;
+      assert( ! done () );
+      elem_.first = vxList_.getItemList()[count_].first;
+      return elem_;
+    }
+    void goNextValid()
+    {
+      if( done() ) return ;
+      if( getItem().first == 0)
+      {
+        ++count_;
+        goNextValid();
+      }
+      else
+      {
+        assert( elem_.first );
+        if(! rule_( elem_.first ) )
+        {
+          ++count_;
+          goNextValid();
+        }
+      }
+    }
+  };
+
+  /*
+     template <PartitionIteratorType pitype>
+     class ALU3dGridLeafIteratorWrapper<3,pitype>
+     : public IteratorWrapperInterface < typename IteratorElType<3>::val_t >
+     {
+     typedef IteratorElType<3>::ElType ElType;
+     typedef typename LeafStopRule< ElType, pitype > :: StopRule_t StopRule_t;
+     // ElType is vertex_STI
+     typedef LeafIterator < ElType > IteratorType;
+
+     // the vertex iterator
+     IteratorType it_;
+
+     public:
+     typedef IteratorElType<3>::val_t val_t;
+     private:
+     mutable val_t elem_;
+     const StopRule_t rule_;
+     public:
+     // constructor creating Iterator
+     template <class GridImp>
+     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
+      : it_(grid.myGrid()), elem_(0,0) , rule_ () {}
+
+     // constructor copying iterator
+     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
+      : it_( org.it_ ), elem_(org.elem_) , rule_() {}
+
+     int size  ()    { return it_->size(); }
+
+     void next ()
+     {
       it_->next();
       if (!it_->done())
       {
         // take standard walk rule to cehck vertices again, see walk.h
         if(! rule_(it_->item()) ) next();
       }
-    }
+     }
 
-    void first()     { it_->first(); }
-    int done () const { return it_->done(); }
-    val_t & item () const
-    {
+     void first()     { it_->first(); }
+     int done () const{ return it_->done(); }
+     val_t & item () const
+     {
       assert( ! done () );
       elem_.first  = & it_->item();
       return elem_;
-    }
-  };
+     }
+     };
+   */
 
 #if ALU3DGRID_PARALLEL
   template <int codim>

@@ -80,11 +80,163 @@ namespace Dune {
     up2Date_ = true;
   }
 
-  //--Grid
-  //template <int dim, int dimworld, ALU3dGridElementType elType>
-  //const ALU3dGridElementType
-  //ALU3dGrid<dim, dimworld, elType>::elementType = elType;
+  template <class GridType >
+  inline void ALU3dGridLeafVertexList ::
+  setupVxList(const GridType & grid)
+  {
+    // iterates over grid elements of given level and adds all vertices to
+    // given list
+    enum { codim = 3 };
 
+    VertexListType & vxList = vertexList_;
+    size_t vxsize = grid.hierarchicIndexSet().size(codim);
+    if( vxList.capacity() < vxsize) vxList.reserve(vxsize);
+    vxList.resize(vxsize);
+
+    for(size_t i=0; i<vxsize; ++i)
+    {
+      ItemType & vx = vxList[i];
+      vx.first  = 0;
+      vx.second = -1;
+    }
+
+    const ALU3dGridElementType elType = GridType:: elementType;
+
+    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,Dune::All_Partition>  ElementIteratorType;
+    typedef typename ElementIteratorType :: val_t val_t;
+
+    typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
+    typedef ALU3DSPACE VertexType VertexType;
+
+    enum { nVx = ElementTopologyMapping < elType > :: numVertices };
+
+    ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
+
+#ifndef NDEBUG
+    int count = 0;
+#endif
+    for( it.first(); !it.done() ; it.next())
+    {
+      val_t & item = it.item();
+
+      IMPLElementType * elem = 0;
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first);
+      else if( item.second )
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+      assert( elem );
+      int level = elem->level();
+
+      for(int i=0; i<nVx; ++i)
+      {
+        VertexType * vx = elem->myvertex(i);
+        assert( vx );
+
+        // insert only interior and border vertices
+        if( vx->isGhost() ) continue;
+
+        const int idx = vx->getIndex();
+        ItemType & vxpair = vxList[idx];
+        if( vxpair.first == 0 )
+        {
+          vxpair.first  = vx;
+          vxpair.second = level;
+#ifndef NDEBUG
+          ++ count;
+#endif
+        }
+        // always store max level of vertex as grdi definition says
+        else
+        {
+          // set the max level for each vertex, see Grid definition
+          if (vxpair.second < level) vxpair.second = level;
+        }
+      }
+    }
+
+    //std::cout << count << "c | s " << vxList.size() << "\n";
+    // make sure that the found number of vertices equals to stored ones
+    //assert( count == (int)vxList.size() );
+    up2Date_ = true;
+  }
+
+  /*
+     template <class GridType >
+     inline void ALU3dGridLeafVertexList ::
+     setupVxList(const GridType & grid)
+     {
+     // iterates over grid elements of given level and adds all vertices to
+     // given list
+     enum { codim = 3 };
+
+     VertexListType & vxmap = vertexList_;
+     vxmap.clear();
+
+     const ALU3dGridElementType elType = GridType:: elementType;
+
+     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,Dune::All_Partition>  ElementIteratorType;
+     typedef typename ElementIteratorType :: val_t val_t;
+
+     typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
+     typedef ALU3DSPACE VertexType VertexType;
+
+     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
+
+     ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
+
+     #ifndef NDEBUG
+     int count = 0;
+     #endif
+     for( it.first(); !it.done() ; it.next())
+     {
+      val_t & item = it.item();
+
+      IMPLElementType * elem = 0;
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first);
+      else if( item.second )
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+      assert( elem );
+      int level = elem->level();
+
+      for(int i=0; i<nVx; ++i)
+      {
+        VertexType * vx = elem->myvertex(i);
+        assert( vx );
+
+        // insert only interior and border vertices
+        if( vx->isGhost() ) continue;
+
+        const int idx = vx->getIndex();
+        if(vxmap.find(idx) == vxmap.end())
+        {
+          ItemType p ( vx, level );
+          vxmap[idx] = p;
+     #ifndef NDEBUG
+   ++ count;
+   ++#endif
+        }
+        // always store max level of vertex as grdi definition says
+        else
+        {
+          // if vertex exists in map, check level
+          ItemType & p = vxmap[idx];
+          // set the max level for each vertex, see Grid definition
+          if (p.second < level) p.second = level;
+        }
+      }
+     }
+
+     //std::cout << count << "c | s " << vxList.size() << "\n";
+     // make sure that the found number of vertices equals to stored ones
+     assert( count == (int)vxmap.size() );
+     up2Date_ = true;
+     }
+   */
+
+  //--Grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::
   ALU3dGrid(const std::string macroTriangFilename
@@ -159,10 +311,12 @@ namespace Dune {
     delete leafIndexSet_; leafIndexSet_ = 0;
     delete sizeCache_; sizeCache_ = 0;
 
-    if(myGrid().container().iterators_attached())
-    {
-      dwarn << "WRANING: There still exists instances of iterators giving access to this grid which is about to be removed! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
-    }
+    /*
+       if(myGrid().container().iterators_attached())
+       {
+       dwarn << "WRANING: There still exists instances of iterators giving access to this grid which is about to be removed! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
+       }
+     */
     delete mygrid_; mygrid_ = 0;
   }
 
@@ -259,11 +413,14 @@ namespace Dune {
     bool isSimplex = (elType == tetra) ? true : false;
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
+    // unset up2date before recalculating the index sets , becasue they
+    // will use this feature
+    leafVertexList_.unsetUp2Date();
+    // make sure all lists have been set to not up to date
     for(size_t i=0; i<levelIndexVec_.size(); i++)
     {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
     }
-
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
 
     for(size_t i=0; i<MAXL; i++)
@@ -279,6 +436,7 @@ namespace Dune {
       for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();
     }
 #endif
+
     coarsenMarked_ = 0;
     refineMarked_  = 0;
   }

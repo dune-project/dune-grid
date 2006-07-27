@@ -244,6 +244,48 @@ namespace Dune {
     VertexListType vertexList_;
   };
 
+  //! contains list of vertices of one level
+  //! needed for VertexLevelIterator
+  class ALU3dGridLeafVertexList
+  {
+  public:
+    // level vertex iterator list
+    typedef std::pair < ALU3DSPACE VertexType * , int > ItemType;
+    typedef std::vector < ItemType > VertexListType;
+    typedef VertexListType :: iterator IteratorType;
+
+    ALU3dGridLeafVertexList () : up2Date_(false) {}
+
+    size_t size () const { return vertexList_.size(); }
+
+    bool up2Date () const { return up2Date_;  }
+    void unsetUp2Date ()  { up2Date_ = false; }
+
+    // make grid walkthrough and calc global size
+    template <class GridType>
+    void setupVxList (const GridType & grid);
+
+    IteratorType begin () { return vertexList_.begin(); }
+    IteratorType end   () { return vertexList_.end(); }
+
+    VertexListType & getItemList() { return vertexList_; }
+    int getLevel(const ALU3DSPACE VertexType & vertex) const
+    {
+      const int idx = vertex.getIndex();
+      assert( idx >= 0 );
+      assert( idx < (int)size());
+      const ItemType & p = vertexList_[idx];
+      if( p.first == 0 )
+        return vertex.level();
+      else
+        return p.second;
+    }
+  private:
+    bool up2Date_;
+    VertexListType vertexList_;
+  };
+  typedef ALU3dGridLeafVertexList LeafVertexListType;
+
   class ALU3dGridItemList
   {
   public:
@@ -264,6 +306,7 @@ namespace Dune {
     IteratorType end   () { return itemList_.end(); }
 
     ItemListType & getItemList() { return itemList_; }
+
   private:
     bool up2Date_;
     ItemListType itemList_;

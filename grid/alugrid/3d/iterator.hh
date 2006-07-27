@@ -274,17 +274,51 @@ namespace Dune {
   struct ALU3dGridTreeIterator
   {
     typedef typename InternalIteratorType :: val_t val_t;
+
+    // here the items level will do
+    template <class GridImp, int codim>
+    struct GetLevel
+    {
+      template <class ItemType>
+      static int getLevel(const GridImp & grid, const ItemType & item, int level )
+      {
+        assert( & item );
+        return (level < 0) ? item.level() : level;
+      }
+    };
+
+    // level is not needed for codim = 0
+    template <class GridImp>
+    struct GetLevel<GridImp,0>
+    {
+      template <class ItemType>
+      static int getLevel(const GridImp & grid, const ItemType & item, int level )
+      {
+        return level;
+      }
+    };
+
+    template <class GridImp>
+    struct GetLevel<GridImp,3>
+    {
+      template <class ItemType>
+      static int getLevel(const GridImp & grid, const ItemType & item, int level)
+      {
+        return (level < 0) ? grid.getLevelOfLeafVertex(item) : level;
+      }
+    };
+
   protected:
     // set iterator to first item
-    template <class IteratorImp>
-    void firstItem(IteratorImp & it)
+    template <class GridImp, class IteratorImp>
+    void firstItem(const GridImp & grid, IteratorImp & it, int level )
     {
       InternalIteratorType & iter = it.internalIterator();
       iter.first();
       if( ! iter.done() )
       {
         assert( iter.size() > 0 );
-        setItem(it,iter);
+        setItem(grid,it,iter,level);
       }
       else
       {
@@ -293,20 +327,24 @@ namespace Dune {
     }
 
     // set the iterators entity to actual item
-    template <class IteratorImp>
-    void setItem (IteratorImp & it, InternalIteratorType & iter)
+    template <class GridImp, class IteratorImp>
+    void setItem (const GridImp & grid, IteratorImp & it, InternalIteratorType & iter, int level)
     {
+      enum { codim = IteratorImp :: codimension };
       val_t & item = iter.item();
       assert( item.first || item.second );
       if( item.first )
-        it.updateEntityPointer( item.first );
+      {
+        it.updateEntityPointer( item.first ,
+                                GetLevel<GridImp,codim>::getLevel(grid, *(item.first) , level) );
+      }
       else
         it.updateGhostPointer( *item.second );
     }
 
     // increment iterator
-    template <class IteratorImp>
-    void incrementIterator(IteratorImp & it)
+    template <class GridImp, class IteratorImp>
+    void incrementIterator(const GridImp & grid, IteratorImp & it, int level)
     {
       // if iter_ is zero, then end iterator
       InternalIteratorType & iter = it.internalIterator();
@@ -319,7 +357,7 @@ namespace Dune {
         return ;
       }
 
-      setItem(it,iter);
+      setItem(grid,it,iter,level);
       return ;
     }
   };

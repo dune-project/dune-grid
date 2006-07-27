@@ -88,7 +88,7 @@ namespace Dune {
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const ElementType & item)
   {
-    setElement(item,item.level());
+    setElement(item,GetLevel<GridImp,cd>::getLevel(grid_,item));
   }
 
   template<int cd, int dim, class GridImp>
@@ -863,7 +863,7 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::
-  updateEntityPointer( MyHElementType * item )
+  updateEntityPointer( MyHElementType * item , int )
   {
     item_ = item;
     if( item_ && entity_ )
@@ -959,12 +959,13 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointer<codim,GridImp>::
-  updateEntityPointer( MyHElementType * item )
+  updateEntityPointer( MyHElementType * item, int level)
   {
     this->item_ = item;
+    level_ = level;
     if( this->item_ && this->entity_ )
     {
-      this->entityImp().setElement( *this->item_ , this->level() );
+      this->entityImp().setElement( *this->item_ , level_ );
     }
   }
 

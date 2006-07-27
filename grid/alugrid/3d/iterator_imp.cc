@@ -623,7 +623,7 @@ namespace Dune {
   {
     iter_  = new IteratorType ( this->grid_ , level_, grid.nlinks() );
     assert( iter_ );
-    this->firstItem(*this);
+    this->firstItem(this->grid_,*this,level_);
   }
 
   // Constructor for end iterator
@@ -679,7 +679,7 @@ namespace Dune {
       assert( iter_ );
       if(!(iter_->done()))
       {
-        this->setItem(*this, *iter_);
+        this->setItem(this->grid_, *this, *iter_, level_ );
         assert( this->equals(org) );
       }
     }
@@ -701,7 +701,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp >
   inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
   {
-    this->incrementIterator(*this);
+    this->incrementIterator(this->grid_,*this,level_);
     return ;
   }
 
@@ -748,7 +748,8 @@ namespace Dune {
     // create interior iterator
     iter_ = new IteratorType ( this->grid_ , level , grid.nlinks() );
     assert( iter_ );
-    this->firstItem(*this);
+    // -1 to identify as leaf iterator
+    this->firstItem(this->grid_,*this,-1);
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -807,7 +808,8 @@ namespace Dune {
       {
         assert( !iter_->done());
         assert( !org.iter_->done() );
-        this->setItem(*this, *iter_);
+        // -1 to identify leaf iterator
+        this->setItem(this->grid_,*this, *iter_,-1);
         assert( this->equals(org) );
       }
     }
@@ -820,7 +822,8 @@ namespace Dune {
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
   {
-    this->incrementIterator(*this);
+    // -1 to identify leaf iterator
+    this->incrementIterator(this->grid_,*this,-1);
     return ;
   }
 
