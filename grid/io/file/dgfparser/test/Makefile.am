@@ -16,7 +16,7 @@ if UG
   TESTUG = testug
 endif
 
-check_PROGRAMS = tester $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
+check_PROGRAMS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
 
 tester_SOURCES = main.cc
 tester_CXXFLAGS = -g -DGRIDDIM=$(DUNE_PROBLEM_DIM) -DGRIDDIMWORLD=$(DUNE_WORLD_DIM) $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(UG_CPPFLAGS)
@@ -53,8 +53,8 @@ testoned_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS)
 testoned_DEPENDENCIES = $(LOCAL_LIBS)
 
 if UG
-testug_CXXFLAGS = $(AM_CPPFLAGS) -DUGGRID -DGRIDDIM=3
-testug_SOURCES = main.cc
+testug_CXXFLAGS = $(AM_CPPFLAGS)
+testug_SOURCES = testug.cc
 testug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(UG_LDFLAGS) $(UG_LIBS)
 testug_DEPENDENCIES = $(LOCAL_LIBS)
 endif
