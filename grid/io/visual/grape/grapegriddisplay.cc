@@ -127,7 +127,8 @@ namespace Dune
           if(num != lastElNum)
           {
             he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
-            if(nit.levelNeighbor() || nit.leafNeighbor() )
+            //if(nit.levelNeighbor() || nit.leafNeighbor() )
+            if( nit.neighbor() )
               if(nit.outside()->partitionType() != InteriorEntity )
                 he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
             lastElNum = num;
