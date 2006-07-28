@@ -56,18 +56,20 @@ namespace Dune {
   #endif
     if (myrank<=0) {
       std::ifstream gridin(filename);
-      mg.readDuneGrid(gridin);
-      if (mg.dimw != dimworld)
+      if(mg.readDuneGrid(gridin) == 1)
       {
-        DUNE_THROW(DGFException,
-                   "Macrofile " << filename << " is for dimension " << mg.dimw
-                                << " and connot be used to initialize an ALUGrid of dimension "
-                                << dimworld);
+        if (mg.dimw != dimworld)
+        {
+          DUNE_THROW(DGFException,
+                     "Macrofile " << filename << " is for dimension " << mg.dimw
+                                  << " and connot be used to initialize an ALUGrid of dimension "
+                                  << dimworld);
+        }
+        mg.setOrientation(0);
+        str+=".ALUgrid";
+        std::ofstream out(str.c_str());
+        mg.writeAlu(out);
       }
-      mg.setOrientation(0);
-      str+=".ALUgrid";
-      std::ofstream out(str.c_str());
-      mg.writeAlu(out);
     }
   }
   template <int dim,int dimworld>
@@ -81,18 +83,20 @@ namespace Dune {
   #endif
     if (myrank<=0) {
       std::ifstream gridin(filename);
-      mg.readDuneGrid(gridin);
-      if (mg.dimw != dimworld)
+      if(mg.readDuneGrid(gridin) == 1)
       {
-        DUNE_THROW(DGFException,
-                   "Macrofile " << filename << " is for dimension " << mg.dimw
-                                << " and connot be used to initialize an ALUGrid of dimension "
-                                << dimworld);
+        if (mg.dimw != dimworld)
+        {
+          DUNE_THROW(DGFException,
+                     "Macrofile " << filename << " is for dimension " << mg.dimw
+                                  << " and connot be used to initialize an ALUGrid of dimension "
+                                  << dimworld);
+        }
+        mg.setOrientation(0);
+        str+=".ALUgrid";
+        std::ofstream out(str.c_str());
+        mg.writeAlu(out);
       }
-      mg.setOrientation(0);
-      str+=".ALUgrid";
-      std::ofstream out(str.c_str());
-      mg.writeAlu(out);
     }
   }
 
