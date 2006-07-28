@@ -394,9 +394,29 @@ namespace Dune {
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
     UGGridIntersectionIterator<GridImp> ibegin () const;
+    //! \todo implement me
+    UGGridIntersectionIterator<GridImp> ileafbegin () const {
+      DUNE_THROW(NotImplemented,"ileafbegin is not implemented yet");
+      return ibegin();
+    }
+    //! \todo implement me
+    UGGridIntersectionIterator<GridImp> ilevelbegin () const {
+      DUNE_THROW(NotImplemented,"ilevelbegin is not implemented yet");
+      return ibegin();
+    }
 
     //! Reference to one past the last neighbor
     UGGridIntersectionIterator<GridImp> iend () const;
+    //! \todo implement me
+    UGGridIntersectionIterator<GridImp> ileafend () const {
+      DUNE_THROW(NotImplemented,"ileafend is not implemented yet");
+      return iend();
+    }
+    //! \todo implement me
+    UGGridIntersectionIterator<GridImp> ilevelend () const {
+      DUNE_THROW(NotImplemented,"ilevelend is not implemented yet");
+      return iend();
+    }
 
     //! returns true if Entity has NO children
     bool isLeaf() const {

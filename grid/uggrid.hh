@@ -91,7 +91,8 @@ namespace Dune {
         UGGridEntity,
         UGGridEntityPointer,
         UGGridLevelIterator,
-        UGGridIntersectionIterator,
+        UGGridIntersectionIterator,              // leaf  intersection iterartor
+        UGGridIntersectionIterator,              // level intersection iterartor
         UGGridHierarchicIterator,
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim,dimworld> >,
