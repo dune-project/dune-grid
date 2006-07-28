@@ -140,13 +140,13 @@ namespace Dune {
     //! ibegin of corresponding intersection iterator for given entity
     IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
     {
-      return en.ibegin();
+      return en.ilevelbegin();
     }
 
     //! iend of corresponding intersection iterator for given entity
     IntersectionIteratorType iend(const EntityCodim0Type & en) const
     {
-      return en.iend();
+      return en.ilevelend();
     }
 
     //! Level which this GridPart belongs to
@@ -173,7 +173,7 @@ namespace Dune {
     typedef LevelGridPart<GridImp,pitype> GridPartType;
     typedef WrappedLevelIndexSet<GridType> IndexSetType;
     typedef typename GridType::template Codim<0>::Entity::
-    IntersectionIterator IntersectionIteratorType;
+    LevelIntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
@@ -227,13 +227,13 @@ namespace Dune {
     //! ibegin of corresponding intersection iterator for given entity
     IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
     {
-      return en.ibegin();
+      return en.ileafbegin();
     }
 
     //! iend of corresponding intersection iterator for given entity
     IntersectionIteratorType iend(const EntityCodim0Type & en) const
     {
-      return en.iend();
+      return en.ileafend();
     }
 
     //! Returns maxlevel of the grid
@@ -259,7 +259,7 @@ namespace Dune {
     typedef LeafGridPart<GridImp,pitype> GridPartType;
     typedef WrappedLeafIndexSet<GridType> IndexSetType;
     typedef typename GridType::template Codim<0>::Entity::
-    IntersectionIterator IntersectionIteratorType;
+    LeafIntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
@@ -321,13 +321,13 @@ namespace Dune {
     //! ibegin of corresponding intersection iterator for given entity
     IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
     {
-      return en.ibegin();
+      return en.ileafbegin();
     }
 
     //! iend of corresponding intersection iterator for given entity
     IntersectionIteratorType iend(const EntityCodim0Type & en) const
     {
-      return en.iend();
+      return en.ileafend();
     }
 
     //! Returns maxlevel of the grid
@@ -353,7 +353,7 @@ namespace Dune {
     typedef HierarchicGridPart<GridImp,pitype> GridPartType;
     typedef WrappedHierarchicIndexSet<GridType> IndexSetType;
     typedef typename GridType::template Codim<0>::Entity::
-    IntersectionIterator IntersectionIteratorType;
+    LeafIntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
