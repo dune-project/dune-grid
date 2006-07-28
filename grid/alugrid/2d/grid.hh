@@ -229,10 +229,12 @@ namespace Dune {
     //! maximal number of levels
     enum { MAXL = 64 };
 
+  protected:
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
     ALU2dGrid(std::string macroTriangFilename );
 
+  public:
     //! Desctructor
     ~ALU2dGrid();
 

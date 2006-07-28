@@ -275,6 +275,7 @@ namespace Dune {
     //! this number of new elements
     enum { refineEstimate_ = 40 };
 
+  protected:
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
 #if ALU3DGRID_PARALLEL
@@ -282,6 +283,7 @@ namespace Dune {
 #else
     ALU3dGrid(const std::string macroTriangFilename , int myrank = -1);
 #endif
+  public:
 
     //! Desctructor
     ~ALU3dGrid();
