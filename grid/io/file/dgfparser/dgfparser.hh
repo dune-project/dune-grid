@@ -137,6 +137,11 @@ namespace Dune {
   //! @endcode
   template <class GridType>
   class GridPtr : private MacroGrid {
+    // make operator new and delete private, because this class is only a
+    // pointer
+    void * operator new (size_t);
+    void operator delete (void *);
+    GridPtr(const GridPtr & );
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     //! constructor given the name of a DGF file
@@ -154,7 +159,7 @@ namespace Dune {
     }
   private:
     GridType* grid_;
-  };
+  }; // end of class GridPtr
 }
 #include "dgfparser.cc"
 
@@ -223,7 +228,6 @@ namespace Dune {
      -# If the file given through the first argument is not a dgf file
         a suitable constructure on the \c GridType class is called - if
         one is available.
-     -# The caller must free the allocated memory by calling \c delete \c grid
 
      @section FORMAT Format Description
      <!--=========-->
