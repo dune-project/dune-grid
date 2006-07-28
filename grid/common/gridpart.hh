@@ -8,6 +8,7 @@
 //- Dune includes
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/defaultindexsets.hh>
+#include <dune/grid/common/datahandleif.hh>
 
 namespace Dune {
 
@@ -99,11 +100,17 @@ namespace Dune {
     //! Level index set that corresponds to the grid
     typedef typename Traits::IndexSetType IndexSetType;
 
+    //! The corresponding IntersectionIterator
+    typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
     //! Struct defining the iterator types for codimension cd
     template <int cd>
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+  private:
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
   public:
     //- Public methods
     //! Constructor
@@ -130,8 +137,28 @@ namespace Dune {
       return this->grid().template lend<cd,pitype>(level_);
     }
 
+    //! ibegin of corresponding intersection iterator for given entity
+    IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
+    {
+      return en.ibegin();
+    }
+
+    //! iend of corresponding intersection iterator for given entity
+    IntersectionIteratorType iend(const EntityCodim0Type & en) const
+    {
+      return en.iend();
+    }
+
     //! Level which this GridPart belongs to
     int level() const { return level_; }
+
+    //! corresponding communication method for this grid part
+    template <class DataHandleImp,class DataType>
+    void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
+                     InterfaceType iftype, CommunicationDirection dir) const
+    {
+      this->grid().communicate(data,iftype,dir,level());
+    }
 
   private:
     //! GridDefaultIndexSet Wrapper
@@ -145,6 +172,8 @@ namespace Dune {
     typedef GridImp GridType;
     typedef LevelGridPart<GridImp,pitype> GridPartType;
     typedef WrappedLevelIndexSet<GridType> IndexSetType;
+    typedef typename GridType::template Codim<0>::Entity::
+    IntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
@@ -165,11 +194,17 @@ namespace Dune {
     //! The leaf index set of the grid implementation
     typedef typename Traits::IndexSetType IndexSetType;
 
+    //! The corresponding IntersectionIterator
+    typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+  private:
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
   public:
     //- Public methods
     //! Constructor
@@ -189,8 +224,28 @@ namespace Dune {
       return this->grid().template leafend<cd,pitype>();
     }
 
+    //! ibegin of corresponding intersection iterator for given entity
+    IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
+    {
+      return en.ibegin();
+    }
+
+    //! iend of corresponding intersection iterator for given entity
+    IntersectionIteratorType iend(const EntityCodim0Type & en) const
+    {
+      return en.iend();
+    }
+
     //! Returns maxlevel of the grid
     int level() const { return this->grid().maxLevel(); }
+
+    //! corresponding communication method for this grid part
+    template <class DataHandleImp,class DataType>
+    void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
+                     InterfaceType iftype, CommunicationDirection dir) const
+    {
+      this->grid().communicate(data,iftype,dir);
+    }
 
   private:
     //! GridDefaultIndexSet Wrapper
@@ -203,6 +258,8 @@ namespace Dune {
     typedef GridImp GridType;
     typedef LeafGridPart<GridImp,pitype> GridPartType;
     typedef WrappedLeafIndexSet<GridType> IndexSetType;
+    typedef typename GridType::template Codim<0>::Entity::
+    IntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
@@ -225,11 +282,18 @@ namespace Dune {
     //! The leaf index set of the grid implementation
     typedef typename Traits::IndexSetType IndexSetType;
 
+    //! The corresponding IntersectionIterator
+    typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+
+  private:
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
   public:
     //- Public methods
     //! Constructor
@@ -254,8 +318,28 @@ namespace Dune {
       return this->grid().template leafend<cd,pitype>();
     }
 
+    //! ibegin of corresponding intersection iterator for given entity
+    IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
+    {
+      return en.ibegin();
+    }
+
+    //! iend of corresponding intersection iterator for given entity
+    IntersectionIteratorType iend(const EntityCodim0Type & en) const
+    {
+      return en.iend();
+    }
+
     //! Returns maxlevel of the grid
     int level() const { return this->grid().maxLevel(); }
+
+    //! corresponding communication method for this grid part
+    template <class DataHandleImp,class DataType>
+    void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
+                     InterfaceType iftype, CommunicationDirection dir) const
+    {
+      this->grid().communicate(data,iftype,dir);
+    }
 
   private:
     //! GridDefaultIndexSet Wrapper
@@ -268,12 +352,17 @@ namespace Dune {
     typedef GridImp GridType;
     typedef HierarchicGridPart<GridImp,pitype> GridPartType;
     typedef WrappedHierarchicIndexSet<GridType> IndexSetType;
+    typedef typename GridType::template Codim<0>::Entity::
+    IntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator IteratorType;
     };
   };
+
+
+
   //! quick hack, to be revised by me
   //! \brief Selects the leaf level of a grid
   template <class GridImp, class IndexSetImp , PartitionIteratorType pitype = Interior_Partition>
@@ -288,11 +377,17 @@ namespace Dune {
     //! The leaf index set of the grid implementation
     typedef typename Traits::IndexSetType IndexSetType;
 
+    //! The corresponding IntersectionIterator
+    typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+  private:
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
   public:
     //- Public methods
     //! Constructor
@@ -311,8 +406,28 @@ namespace Dune {
       return this->grid().template leafend<cd,pitype>();
     }
 
+    //! ibegin of corresponding intersection iterator for given entity
+    IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
+    {
+      return en.ibegin();
+    }
+
+    //! iend of corresponding intersection iterator for given entity
+    IntersectionIteratorType iend(const EntityCodim0Type & en) const
+    {
+      return en.iend();
+    }
+
     //! Level of the grid part
     int level() const { return this->grid().maxLevel(); }
+
+    //! corresponding communication method for this grid part
+    template <class DataHandleImp,class DataType>
+    void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
+                     InterfaceType iftype, CommunicationDirection dir) const
+    {
+      this->grid().communicate(data,iftype,dir);
+    }
   };
 
   //! Type definitions for the LeafGridPart class
@@ -321,6 +436,8 @@ namespace Dune {
     typedef GridImp GridType;
     typedef DefaultGridPart<GridImp,IndexSetImp,pitype> GridPartType;
     typedef IndexSetImp IndexSetType;
+    typedef typename GridType::template Codim<0>::Entity::
+    IntersectionIterator IntersectionIteratorType;
 
     template <int cd>
     struct Codim {
