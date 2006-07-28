@@ -302,7 +302,7 @@ namespace Dune
            it != iend; ++it)
       {
         // this code is not really valid
-        if (it->level() == e.level() && index(*it) == index(e)) return true;
+        if (it->level() == e.level() && this->index(*it) == this->index(e)) return true;
       }
       return false;
     }
