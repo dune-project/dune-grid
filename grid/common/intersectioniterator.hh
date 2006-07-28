@@ -166,7 +166,7 @@ namespace Dune
     typedef typename GridImp::ctype ct;
   public:
 
-    //! type of real implementation
+    // type of real implementation
     typedef IntersectionIteratorImp<const GridImp> ImplementationType;
 
     /** \brief Type of entity that this IntersectionIterator belongs to */
@@ -235,13 +235,13 @@ namespace Dune
       return this->realIterator.neighbor();
     }
     //! @brief return true if intersection is shared with another element on the same level.
-    bool levelNeighbor () const
+    bool levelNeighbor () const DUNE_DEPRECATED
     {
       return this->realIterator.levelNeighbor();
     }
 
     //! @brief return true if intersection is shared with another leaf element.
-    bool leafNeighbor () const
+    bool leafNeighbor () const DUNE_DEPRECATED
     {
       return this->realIterator.leafNeighbor();
     }
