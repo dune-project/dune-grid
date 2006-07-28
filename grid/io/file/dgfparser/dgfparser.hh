@@ -59,7 +59,7 @@ namespace Dune {
     //! \brief method which reads the dgf file
     //!
     //! fills the vtx,element, and bound vectors
-    inline void readDuneGrid(std::istream&);
+    inline int readDuneGrid(std::istream&);
     //! method to write macrogridfiles in alu format (cam be used without dune)
     inline void writeAlu(std::ostream&);
     //! method to write macrogridfiles in alberta format (cam be used without dune)
