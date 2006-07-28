@@ -15,6 +15,7 @@
 #include "faceutility.hh"
 #include "myautoptr.hh"
 #include "alu3diterators.hh"
+#include "memory.hh"
 
 namespace Dune {
   // Forward declarations
@@ -82,9 +83,12 @@ namespace Dune {
              EntityCount<GridImp::elementType>::numVerticesPerFace };
     enum { numVertices = EntityCount<GridImp::elementType>::numVertices };
 
-    friend class ALU3dGridEntity<0,dim,GridImp>;
-    friend class IntersectionIteratorWrapper<GridImp>;
+    typedef ALU3dGridIntersectionIterator<GridImp> ThisType;
 
+    friend class ALU3dGridEntity<0,dim,GridImp>;
+    friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+
+  protected:
     enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
 
   public:
@@ -97,6 +101,8 @@ namespace Dune {
 
     typedef FieldVector<alu3d_ctype, dimworld> NormalType;
     typedef ALU3dGridEntityPointer<0,GridImp> EntityPointer;
+
+    typedef ALUMemoryProvider< ThisType > StorageType;
 
     //! The default Constructor , level tells on which level we want
     //! neighbours
@@ -185,7 +191,7 @@ namespace Dune {
     //! return level of iterator
     int level () const;
 
-  private:
+  protected:
     // set interator to end iterator
     void done () ;
 
@@ -212,9 +218,6 @@ namespace Dune {
     // set new face
     void setNewFace(const GEOFaceType& newFace);
 
-    // is there a refined element at the outer side of the face which needs to be considered when incrementing the iterator?
-    bool canGoDown(const GEOFaceType& nextFace) const;
-
     void buildLocalGeometries() const;
 
     void buildGlobalGeometry() const;
@@ -237,7 +240,7 @@ namespace Dune {
     //! current element from which we started the intersection iterator
     const IMPLElementType* item_;
 
-    mutable int nFaces_;
+    //mutable int nFaces_;
     //mutable int walkLevel_;
     mutable int index_;
 
@@ -256,13 +259,87 @@ namespace Dune {
 
     // true if end iterator
     bool done_;
+  };
+
+  template<class GridImp>
+  class ALU3dGridLevelIntersectionIterator :
+    public ALU3dGridIntersectionIterator<GridImp>
+  {
+    enum { dim       = GridImp::dimension };
+    enum { dimworld  = GridImp::dimensionworld };
+
+    typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
+    typedef typename ImplTraits::GEOElementType GEOElementType;
+    typedef typename ImplTraits::IMPLElementType IMPLElementType;
+    typedef typename ImplTraits::GEOFaceType GEOFaceType;
+    typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
+    typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
+    typedef typename ImplTraits::BNDFaceType BNDFaceType;
+
+    typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
+    typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
+
+    typedef typename SelectType<
+        SameType<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
+        ALU3dGridGeometricFaceInfoTetra,
+        ALU3dGridGeometricFaceInfoHexa
+        >::Type GeometryInfoType;
+
+    typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
+    typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
+
+    enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
+    enum { numVerticesPerFace =
+             EntityCount<GridImp::elementType>::numVerticesPerFace };
+    enum { numVertices = EntityCount<GridImp::elementType>::numVertices };
+
+    typedef ALU3dGridLevelIntersectionIterator<GridImp> ThisType;
+
+    friend class ALU3dGridEntity<0,dim,GridImp>;
+    friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+
+  public:
+    typedef ALUMemoryProvider< ThisType > StorageType;
+
+    //! The default Constructor , level tells on which level we want
+    //! neighbours
+    ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+                                       ALU3DSPACE HElementType *el,
+                                       int wLevel,bool end=false);
+
+    ALU3dGridLevelIntersectionIterator(const GridImp & grid,int wLevel);
+
+    //! The copy constructor
+    ALU3dGridLevelIntersectionIterator(const ThisType & org);
+
+    //! assignment of iterators
+    void assign(const ThisType & org);
+
+    //! increment iterator
+    void increment ();
+
+    // reset IntersectionIterator to first neighbour
+    template <class EntityType>
+    void first(const EntityType & en, int wLevel);
+
+    //! return true if across the edge an neighbor on this level exists
+    bool neighbor () const;
+
+    //! return true if across the edge an neighbor on this level exists
+    bool levelNeighbor () const;
+
+    //! return true if across the edge an neighbor on leaf level exists
+    bool leafNeighbor () const;
+
+  private:
+    // set new face
+    void setNewFace(const GEOFaceType& newFace);
+
+    // reset IntersectionIterator to first neighbour
+    void setFirstItem(const ALU3DSPACE HElementType & elem, int wLevel);
 
     bool levelNeighbor_;
-    bool leafNeighbor_;
-    bool goneDown_;
     bool isLeafItem_;
-
-    IntersectionIteratorType myType_;
   };
 
   //////////////////////////////////////////////////////////////////////////////

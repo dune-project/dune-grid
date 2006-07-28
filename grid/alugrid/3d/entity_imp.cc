@@ -581,7 +581,7 @@ namespace Dune {
     // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridIntersectionIteratorType (grid_,*this,-2-walkLevel_, isGhost_ );
+    return ALU3dGridIntersectionIteratorType (grid_,*this, walkLevel_, isGhost_ );
   }
 
   template<int dim, class GridImp>
@@ -589,33 +589,12 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: iend () const
   {
     assert(item_ != 0);
-    return ALU3dGridIntersectionIteratorType (grid_, *this ,-2-walkLevel_,true);
+    return ALU3dGridIntersectionIteratorType (grid_, *this ,walkLevel_,true);
   }
 
   template<int dim, class GridImp>
-  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLeafIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const
-  {
-    assert(item_ != 0);
-
-    // NOTE: normaly here false should be given, which means that we create a non
-    // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
-    // an end iterator is created,
-    // because on ghosts we dont run itersection iterators
-    return ALU3dGridIntersectionIteratorType (grid_,*this,-1, isGhost_ );
-  }
-
-  template<int dim, class GridImp>
-  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
-  ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
-  {
-    assert(item_ != 0);
-    return ALU3dGridIntersectionIteratorType (grid_, *this ,-1,true);
-  }
-
-  template<int dim, class GridImp>
-  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
-  ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
   {
     assert(item_ != 0);
 
@@ -627,11 +606,32 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLeafIntersectionIteratorType
+  ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
+  {
+    assert(item_ != 0);
+    return ALU3dGridLeafIntersectionIteratorType (grid_, *this ,walkLevel_,true);
+  }
+
+  template<int dim, class GridImp>
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLevelIntersectionIteratorType
+  ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
+  {
+    assert(item_ != 0);
+
+    // NOTE: normaly here false should be given, which means that we create a non
+    // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
+    // an end iterator is created,
+    // because on ghosts we dont run itersection iterators
+    return ALU3dGridLevelIntersectionIteratorType (grid_,*this,walkLevel_, isGhost_ );
+  }
+
+  template<int dim, class GridImp>
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridLevelIntersectionIteratorType
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
     assert(item_ != 0);
-    return ALU3dGridIntersectionIteratorType (grid_, *this ,walkLevel_,true);
+    return ALU3dGridLevelIntersectionIteratorType (grid_, *this ,walkLevel_,true);
   }
 
   template<int dim, class GridImp>

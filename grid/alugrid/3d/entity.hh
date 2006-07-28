@@ -222,7 +222,10 @@ namespace Dune {
     typedef ALU3dGridGeometry<dim,dimworld,GridImp> GeometryImp;
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef ALU3dGridIntersectionIterator<GridImp> IntersectionIteratorImp;
-    typedef IntersectionIteratorWrapper<GridImp> ALU3dGridIntersectionIteratorType;
+
+    typedef LeafIntersectionIteratorWrapper <GridImp>  ALU3dGridIntersectionIteratorType;
+    typedef LeafIntersectionIteratorWrapper <GridImp>  ALU3dGridLeafIntersectionIteratorType;
+    typedef LevelIntersectionIteratorWrapper<GridImp>  ALU3dGridLevelIntersectionIteratorType;
 
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -273,20 +276,20 @@ namespace Dune {
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
-    ALU3dGridIntersectionIteratorType ileafbegin () const;
+    ALU3dGridLeafIntersectionIteratorType ileafbegin () const;
 
     //! Reference to one past the last intersection with neighbor
-    ALU3dGridIntersectionIteratorType ileafend () const;
+    ALU3dGridLeafIntersectionIteratorType ileafend () const;
 
     /*! Intra-level access to intersection with neighboring elements.
        A neighbor is an entity of codimension 0
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
-    ALU3dGridIntersectionIteratorType ilevelbegin () const;
+    ALU3dGridLevelIntersectionIteratorType ilevelbegin () const;
 
     //! Reference to one past the last intersection with neighbor
-    ALU3dGridIntersectionIteratorType ilevelend () const;
+    ALU3dGridLevelIntersectionIteratorType ilevelend () const;
 
     //! returns true if Entity is leaf (i.e. has no children)
     bool isLeaf () const;

@@ -28,7 +28,6 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(grid),
     item_(0),
-    nFaces_(0),
     index_(0),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
@@ -38,12 +37,7 @@ namespace Dune {
     intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
     intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
-    done_(true),
-    levelNeighbor_(false),
-    leafNeighbor_(false),
-    goneDown_(false),
-    isLeafItem_(false),
-    myType_(IntersectionBoth)
+    done_(true)
   {}
 
   // --IntersectionIterator
@@ -56,7 +50,6 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(grid),
     item_(0),
-    nFaces_(el ? el->nFaces() : 0),
     index_(0),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
@@ -66,12 +59,7 @@ namespace Dune {
     intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
     intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
-    done_(end),
-    levelNeighbor_(false),
-    leafNeighbor_(false),
-    goneDown_(false),
-    isLeafItem_(false),
-    myType_(IntersectionBoth)
+    done_(end)
   {
     if (!end)
     {
@@ -89,9 +77,6 @@ namespace Dune {
   {
     done_ = true;
     item_ = 0;
-    levelNeighbor_ = false;
-    leafNeighbor_  = false;
-    goneDown_      = false;
   }
 
   template<class GridImp>
@@ -99,22 +84,12 @@ namespace Dune {
   setFirstItem (const ALU3DSPACE HElementType & elem, int wLevel)
   {
     item_         = static_cast<const IMPLElementType *> (&elem);
-    myType_       = (wLevel >= 0) ? IntersectionLevel : ((wLevel < -1) ? IntersectionBoth : IntersectionLeaf);
-    goneDown_     = false;
-    isLeafItem_   = (item_->down() == 0);
 
     // Get first face
     const GEOFaceType* firstFace = getFace(*item_, index_);
 
-    // if IntersectionLeaf
-    // we can go down at first face
-    if(myType_ == IntersectionLeaf)
-    {
-      if (canGoDown(*firstFace))
-      {
-        firstFace = firstFace->down();
-      }
-    }
+    const GEOFaceType * childFace = firstFace->down();
+    if( childFace ) firstFace = childFace;
 
     // Store the face in the connector
     setNewFace(*firstFace);
@@ -125,8 +100,14 @@ namespace Dune {
   inline void ALU3dGridIntersectionIterator<GridImp> ::
   first (const EntityType & en, int wLevel)
   {
+    if( ! en.isLeaf() )
+    {
+      done();
+      return ;
+    }
+
     done_   = false;
-    nFaces_ = en.getItem().nFaces();
+    assert( numFaces == en.getItem().nFaces() );
     index_  = 0;
     generatedGlobalGeometry_ = false;
     generatedLocalGeometries_= false;
@@ -141,7 +122,6 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(org.grid_),
     item_(org.item_),
-    nFaces_(org.nFaces_),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
     intersectionGlobal_(GeometryImp()),
@@ -150,12 +130,7 @@ namespace Dune {
     intersectionSelfLocalImp_(grid_.getRealImplementation(intersectionSelfLocal_)),
     intersectionNeighborLocal_(GeometryImp()),
     intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
-    done_(org.done_),
-    levelNeighbor_(org.levelNeighbor_),
-    leafNeighbor_(org.leafNeighbor_),
-    goneDown_(org.goneDown_),
-    isLeafItem_(org.isLeafItem_),
-    myType_(org.myType_)
+    done_(org.done_)
   {
     if(org.item_) { // else it's a end iterator
       item_           = org.item_;
@@ -174,18 +149,12 @@ namespace Dune {
     if(org.item_)
     {
       // else it's a end iterator
-      nFaces_    = org.nFaces_;
       generatedGlobalGeometry_ =false;
       generatedLocalGeometries_=false;
       item_      = org.item_;
       index_     = org.index_;
       connector_.updateFaceInfo(org.connector_.face(),item_->twist(ElementTopo::dune2aluFace(index_)));
       geoProvider_.resetFaceGeom();
-      levelNeighbor_ = org.levelNeighbor_;
-      leafNeighbor_  = org.leafNeighbor_;
-      goneDown_      = org.goneDown_;
-      isLeafItem_    = org.isLeafItem_;
-      myType_        = org.myType_;
     }
     else {
       done();
@@ -207,34 +176,13 @@ namespace Dune {
   template<class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   {
+    // leaf increment
     assert(item_);
+
     const GEOFaceType * nextFace = 0;
 
-    // ... else we can take the actual face
-    if(isLeafItem_ && !goneDown_ )
-    {
-      const GEOFaceType * thisFace = getFace(connector_.innerEntity(), index_);
-      assert(thisFace);
-
-      // Check whether we need to go down first
-      if (canGoDown(*thisFace))
-      {
-        nextFace = thisFace->down();
-
-        if(nextFace)
-        {
-          setNewFace(*nextFace);
-          goneDown_ = true;
-          return ;
-        }
-      }
-    }
-
-    // the dune interface gives neighbour on the same level
-    // there dont go down anymore, but keep the code
     // When neighbour element is refined, try to get the next child on the face
-    if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER)
-    {
+    if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER) {
       nextFace = connector_.face().next();
 
       // There was a next child face...
@@ -249,18 +197,25 @@ namespace Dune {
 
     // When the face number is larger than the number of faces an element
     // can have, we've reached the end...
-    if (index_ >= nFaces_) {
+    if (index_ >= numFaces) {
       this->done();
       return;
     }
 
+    // ... else we can take the next face
     nextFace = getFace(connector_.innerEntity(), index_);
     assert(nextFace);
-    goneDown_ = false;
 
+    // Check whether we need to go down first
+    //if (nextFace has children which need to be visited)
+    const GEOFaceType * childFace = nextFace->down();
+    if( childFace ) nextFace = childFace;
+
+    assert(nextFace);
     setNewFace(*nextFace);
     return;
   }
+
 
   template<class GridImp>
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
@@ -298,21 +253,19 @@ namespace Dune {
   template<class GridImp>
   inline bool ALU3dGridIntersectionIterator<GridImp>::neighbor () const
   {
-    if(myType_ == IntersectionLeaf) return leafNeighbor();
-    if(myType_ == IntersectionLevel) return levelNeighbor();
-    return leafNeighbor() || levelNeighbor() ;
+    return ! boundary();
   }
 
   template<class GridImp>
   inline bool ALU3dGridIntersectionIterator<GridImp>::levelNeighbor () const
   {
-    return !(this->boundary()) && levelNeighbor_;
+    return false;
   }
 
   template<class GridImp>
   inline bool ALU3dGridIntersectionIterator<GridImp>::leafNeighbor () const
   {
-    return !(this->boundary()) && leafNeighbor_;
+    return neighbor();
   }
 
   template<class GridImp>
@@ -414,13 +367,13 @@ namespace Dune {
   }
 
   template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::buildGlobalGeometry() const {
+  inline void ALU3dGridIntersectionIterator<GridImp>::buildGlobalGeometry() const {
     intersectionGlobalImp_.buildGeom(geoProvider_.intersectionGlobal());
     generatedGlobalGeometry_ = true;
   }
 
   template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
+  inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
   {
     intersectionSelfLocalImp_.buildGeom(geoProvider_.intersectionSelfLocal());
     if (!connector_.outerBoundary()) {
@@ -446,37 +399,12 @@ namespace Dune {
   }
 
   template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::
+  inline void ALU3dGridIntersectionIterator<GridImp>::
   setNewFace(const GEOFaceType& newFace)
   {
-    const int itemLevel = item_->level();
-    levelNeighbor_ = (myType_ != IntersectionLeaf ) ? (newFace.level() == itemLevel) : false;
-    leafNeighbor_  = (myType_ != IntersectionLevel) ? (newFace.down () == 0) : false;
-    connector_.updateFaceInfo(newFace,item_->twist(ElementTopo::dune2aluFace(index_)));
+    connector_.updateFaceInfo(newFace,
+                              item_->twist(ElementTopo::dune2aluFace(index_)));
     geoProvider_.resetFaceGeom();
-
-    // check again level neighbor because outer element might be coarser then
-    // this element
-    if( isLeafItem_ && levelNeighbor_ )
-    {
-      if( connector_.ghostBoundary() )
-      {
-        const BNDFaceType & ghost = connector_.boundaryFace();
-        // if nonconformity occurs then no level neighbor
-        levelNeighbor_ = (itemLevel == ghost.ghostLevel() );
-      }
-      else if ( ! connector_.outerBoundary() )
-      {
-        levelNeighbor_ = (connector_.outerEntity().level() == itemLevel);
-      }
-    }
-  }
-
-  template <class GridImp>
-  bool ALU3dGridIntersectionIterator<GridImp>::
-  canGoDown(const GEOFaceType& nextFace) const
-  {
-    return ((myType_ != IntersectionLevel) && isLeafItem_ && nextFace.down());
   }
 
   template <class GridImp>
@@ -604,6 +532,151 @@ namespace Dune {
     return item_->level();
   }
 
+  /************************************************************************************
+  ###
+  #     #    #   #####  ######  #####    ####   ######   ####      #     #####
+  #     ##   #     #    #       #    #  #       #       #    #     #       #
+  #     # #  #     #    #####   #    #   ####   #####   #          #       #
+  #     #  # #     #    #       #####        #  #       #          #       #
+  #     #   ##     #    #       #   #   #    #  #       #    #     #       #
+  ###    #    #     #    ######  #    #   ####   ######   ####      #       #
+  ************************************************************************************/
+
+  // --IntersectionIterator
+  template<class GridImp>
+  inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+  ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+                                     int wLevel)
+    : ALU3dGridIntersectionIterator<GridImp>(grid,wLevel)
+      , levelNeighbor_(false)
+      , isLeafItem_(false)
+  {}
+
+  // --IntersectionIterator
+  template<class GridImp>
+  inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+  ALU3dGridLevelIntersectionIterator(const GridImp & grid,
+                                     ALU3DSPACE HElementType *el,
+                                     int wLevel,bool end)
+    : ALU3dGridIntersectionIterator<GridImp>(grid,el,wLevel,end)
+      , levelNeighbor_(false)
+      , isLeafItem_(false)
+  {}
+
+  template<class GridImp>
+  template <class EntityType>
+  inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+  first (const EntityType & en, int wLevel)
+  {
+    // if given Entity is not leaf, we create an end iterator
+    this->done_   = false;
+    assert( numFaces == en.getItem().nFaces() );
+    this->index_  = 0;
+    this->generatedGlobalGeometry_ = false;
+    this->generatedLocalGeometries_= false;
+    isLeafItem_ = en.isLeaf();
+    setFirstItem(en.getItem(),wLevel);
+  }
+
+  template<class GridImp>
+  inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+  setFirstItem (const ALU3DSPACE HElementType & elem, int wLevel)
+  {
+    this->item_         = static_cast<const IMPLElementType *> (&elem);
+    // Get first face
+    const GEOFaceType* firstFace = getFace(*this->item_, this->index_);
+    // Store the face in the connector
+    setNewFace(*firstFace);
+  }
+
+  // copy constructor
+  template<class GridImp>
+  inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+  ALU3dGridLevelIntersectionIterator(const ThisType & org)
+    : ALU3dGridIntersectionIterator<GridImp>(org)
+      , levelNeighbor_(org.levelNeighbor_)
+      , isLeafItem_(org.isLeafItem_)
+  {}
+
+  // copy constructor
+  template<class GridImp>
+  inline void
+  ALU3dGridLevelIntersectionIterator<GridImp> ::
+  assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
+  {
+    ALU3dGridIntersectionIterator<GridImp>::assign(org);
+    levelNeighbor_ = org.levelNeighbor_;
+    isLeafItem_    = org.isLeafItem_;
+  }
+
+  template<class GridImp>
+  inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
+  {
+    // level increment
+    assert(this->item_);
+
+    // Next face number of starting element
+    ++this->index_;
+
+    // When the face number is larger than the number of faces an element
+    // can have, we've reached the end...
+    if (this->index_ >= numFaces) {
+      this->done();
+      return;
+    }
+
+    // ... else we can take the next face
+    const GEOFaceType * nextFace = this->getFace(this->connector_.innerEntity(), this->index_);
+    assert(nextFace);
+
+    setNewFace(*nextFace);
+    return;
+  }
+
+  template<class GridImp>
+  inline bool ALU3dGridLevelIntersectionIterator<GridImp>::neighbor () const
+  {
+    return levelNeighbor();
+  }
+
+  template<class GridImp>
+  inline bool ALU3dGridLevelIntersectionIterator<GridImp>::levelNeighbor () const
+  {
+    return levelNeighbor_ && (! this->boundary());
+  }
+
+  template<class GridImp>
+  inline bool ALU3dGridLevelIntersectionIterator<GridImp>::leafNeighbor () const
+  {
+    return false;
+  }
+
+
+  template <class GridImp>
+  inline void ALU3dGridLevelIntersectionIterator<GridImp>::
+  setNewFace(const GEOFaceType& newFace)
+  {
+    const int itemLevel = this->item_->level();
+    levelNeighbor_ = (newFace.level() == itemLevel);
+    this->connector_.updateFaceInfo(newFace,this->item_->twist(ElementTopo::dune2aluFace(this->index_)));
+    this->geoProvider_.resetFaceGeom();
+
+    // check again level neighbor because outer element might be coarser then
+    // this element
+    if( isLeafItem_ )
+    {
+      if( this->connector_.ghostBoundary() )
+      {
+        const BNDFaceType & ghost = this->connector_.boundaryFace();
+        // if nonconformity occurs then no level neighbor
+        levelNeighbor_ = (itemLevel == ghost.ghostLevel() );
+      }
+      else if ( ! this->connector_.outerBoundary() )
+      {
+        levelNeighbor_ = (this->connector_.outerEntity().level() == itemLevel);
+      }
+    }
+  }
   /*************************************************************************
   #       ######  #    #  ######  #          #     #####  ######  #####
   #       #       #    #  #       #          #       #    #       #    #

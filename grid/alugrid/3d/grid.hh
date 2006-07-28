@@ -95,7 +95,7 @@ namespace Dune {
     typedef DefaultLeafIndexSet<ALU3dGrid < dim, dimworld, elType > >   LeafIndexSetImp;
 
     //! type of ALU3dGrids global id
-    typedef bigunsignedint<6*32> GlobalIdType;
+    typedef ALUGridId<ALUMacroKey> GlobalIdType;
 
     //! type of ALU3dGrids local id
     typedef int LocalIdType;
@@ -112,10 +112,10 @@ namespace Dune {
 
       typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper> IntersectionIterator;
 
-      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> LevelIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper> LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
@@ -512,17 +512,19 @@ namespace Dune {
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 
   public:
-    IntersectionIteratorWrapper<const MyType>&
-    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
-    {
-      return this->getRealImplementation(it);
-    }
+    /*
+       IntersectionIteratorWrapper<const MyType>&
+       getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+       {
+       return this->getRealImplementation(it);
+       }
 
-    const IntersectionIteratorWrapper<const MyType>&
-    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it)  const
-    {
-      return this->getRealImplementation(it);
-    }
+       const IntersectionIteratorWrapper<const MyType>&
+       getRealIntersectionIterator(const typename Traits::IntersectionIterator& it)  const
+       {
+       return this->getRealImplementation(it);
+       }
+     */
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
@@ -710,12 +712,20 @@ namespace Dune {
   public:
     typedef ALU3dGridIntersectionIterator<const MyType>
     IntersectionIteratorImp;
-    typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    typedef ALU3dGridIntersectionIterator<const MyType>
+    LeafIntersectionIteratorImp;
+    typedef ALU3dGridLevelIntersectionIterator<const MyType>
+    LevelIntersectionIteratorImp;
+    typedef typename LeafIntersectionIteratorImp  :: StorageType LeafIntersectionIteratorProviderType;
+    typedef typename LevelIntersectionIteratorImp :: StorageType LevelIntersectionIteratorProviderType;
   private:
-    friend class IntersectionIteratorWrapper< const MyType > ;
+    friend class LeafIntersectionIteratorWrapper < const MyType > ;
+    friend class LevelIntersectionIteratorWrapper< const MyType > ;
     // return reference to intersectioniterator storage
-    IntersectionIteratorProviderType & intersetionIteratorProvider() const { return interItProvider_; }
-    mutable IntersectionIteratorProviderType interItProvider_;
+    LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
+    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
+    LevelIntersectionIteratorProviderType & levelIntersetionIteratorProvider() const { return levelInterItProvider_; }
+    mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
   }; // end class ALU3dGrid
 
