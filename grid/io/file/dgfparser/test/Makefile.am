@@ -5,7 +5,7 @@ LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS) $(MPI_LDFLAGS)
 AM_CPPFLAGS =  @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) -D$(GRIDTYPE) $(UG_CPPFLAGS)
 
 if ALUGRID
- TESTALU = testalu
+  TESTALU = testalu
 endif
 
 if ALBERTA
@@ -19,10 +19,10 @@ endif
 ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
 
 # programs just to build when "make check" is used
-check_PROGRAMS = $(ALLTEST)
+check_PROGRAMS = $(ALLTESTS)
 
 # list of tests to run
-TESTS = $(ALLTEST)
+TESTS = $(ALLTESTS)
 
 if ALUGRID
 testalu_CXXFLAGS = $(AM_CPPFLAGS) -DALUGRID_SIMPLEX -DGRIDDIM=3 $(MPI_CPPFLAGS)
