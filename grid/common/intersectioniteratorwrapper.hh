@@ -9,19 +9,19 @@ namespace Dune {
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
   //! internal object from a object stack hold by the grid
-  template <class GridImp>
+  template <class GridImp, class IntersectionIteratorImpl>
   class IntersectionIteratorWrapper
-    : public IntersectionIteratorDefaultImplementation<GridImp,IntersectionIteratorWrapper>
+  //: public IntersectionIteratorDefaultImplementation<GridImp,IntersectionIteratorWrapper>
   {
     enum { dim = GridImp :: dimension };
     enum { dimworld = GridImp :: dimensionworld };
 
-    typedef IntersectionIteratorWrapper<GridImp> ThisType;
+    typedef IntersectionIteratorWrapper<GridImp,IntersectionIteratorImpl> ThisType;
 
-    typedef typename GridImp :: IntersectionIteratorProviderType
-    IntersectionIteratorProviderType;
+    typedef IntersectionIteratorImpl IntersectionIteratorImp;
 
-    typedef typename GridImp :: IntersectionIteratorImp IntersectionIteratorImp;
+    typedef typename IntersectionIteratorImp :: StorageType IntersectionIteratorProviderType;
+
   public:
     //! dimension
     enum { dimension      = dim };
@@ -46,8 +46,9 @@ namespace Dune {
 
     //! constructor called from the ibegin and iend method
     template <class EntityImp>
-    IntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
-      : storage_(grid.intersetionIteratorProvider())
+    IntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end ,
+                                IntersectionIteratorProviderType & storage)
+      : storage_(storage)
         , it_(*(storage_.getObject(grid,wLevel)))
     {
       if(end)
@@ -166,6 +167,104 @@ namespace Dune {
 
     IntersectionIteratorProviderType & storage_;
     IntersectionIteratorImp & it_;
+  }; // end class IntersectionIteratorWrapper
+
+  //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
+  //! internal object from a object stack hold by the grid
+  template <class GridImp>
+  class LeafIntersectionIteratorWrapper
+    : public IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp>
+  {
+    typedef LeafIntersectionIteratorWrapper<GridImp> ThisType;
+    typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
+  public:
+    //! dimension
+    enum { dimension      = GridImp :: dimension  };
+    //! dimensionworld
+    enum { dimensionworld = GridImp :: dimensionworld };
+
+    //! define type used for coordinates in grid module
+    typedef typename GridImp :: ctype ctype;
+
+    //! Entity type
+    typedef typename GridImp::template Codim<0>::Entity Entity;
+    //! type of EntityPointer
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+
+    //! type of intersectionGlobal
+    typedef typename GridImp::template Codim<1>::Geometry Geometry;
+    //! type of intersection*Local
+    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+
+    //! type of normal vector
+    typedef FieldVector<ctype , dimensionworld> NormalType;
+
+    //! constructor called from the ibegin and iend method
+    template <class EntityImp>
+    LeafIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
+      : BaseType(grid,en,wLevel,end,grid.leafIntersetionIteratorProvider())
+    {}
+
+    //! The copy constructor
+    LeafIntersectionIteratorWrapper(const ThisType & org)
+      : BaseType(org)
+    {}
+
+    //! the f*cking assignment operator
+    ThisType & operator = (const ThisType & org)
+    {
+      BaseType::operator = (org);
+      return *this;
+    }
+  }; // end class IntersectionIteratorWrapper
+
+  //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
+  //! internal object from a object stack hold by the grid
+  template <class GridImp>
+  class LevelIntersectionIteratorWrapper
+    : public IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp>
+  {
+    typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
+    typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
+  public:
+    //! dimension
+    enum { dimension      = GridImp :: dimension  };
+    //! dimensionworld
+    enum { dimensionworld = GridImp :: dimensionworld };
+
+    //! define type used for coordinates in grid module
+    typedef typename GridImp :: ctype ctype;
+
+    //! Entity type
+    typedef typename GridImp::template Codim<0>::Entity Entity;
+    //! type of EntityPointer
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+
+    //! type of intersectionGlobal
+    typedef typename GridImp::template Codim<1>::Geometry Geometry;
+    //! type of intersection*Local
+    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+
+    //! type of normal vector
+    typedef FieldVector<ctype , dimensionworld> NormalType;
+
+    //! constructor called from the ibegin and iend method
+    template <class EntityImp>
+    LevelIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
+      : BaseType(grid,en,wLevel,end,grid.levelIntersetionIteratorProvider())
+    {}
+
+    //! The copy constructor
+    LevelIntersectionIteratorWrapper(const ThisType & org)
+      : BaseType(org)
+    {}
+
+    //! the f*cking assignment operator
+    ThisType & operator = (const ThisType & org)
+    {
+      BaseType::operator = (org);
+      return *this;
+    }
   }; // end class IntersectionIteratorWrapper
 
 } // end namespace Dune
