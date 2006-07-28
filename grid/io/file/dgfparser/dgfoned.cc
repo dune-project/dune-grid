@@ -8,7 +8,7 @@ namespace Dune {
                                           const char* filename, MPICommunicatorType ) {
     mg.element=Cube;
     std::ifstream gridin(filename);
-    if(mg.readDuneGrid(gridin) == 1)
+    if(mg.readDuneGrid(gridin))
     {
       std::vector<double> vtxlist(mg.vtx.size());
       for (typename std::vector<double>::size_type i=0; i<vtxlist.size(); ++i)

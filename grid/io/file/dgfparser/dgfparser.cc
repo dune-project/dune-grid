@@ -126,7 +126,7 @@ namespace Dune {
   }
 
   // read the DGF file and store vertex/element/bound structure
-  inline int DuneGridFormatParser::readDuneGrid(std::istream& gridin)
+  inline bool DuneGridFormatParser::readDuneGrid(std::istream& gridin)
   {
     static const std::string dgfid("DGF");
     std::string idline;
@@ -140,7 +140,7 @@ namespace Dune {
     if ( id != dgfid )
     {
       std::cerr << "Couldn't find 'DGF' keyword, file is not a DuneGridFormat file ... exiting parser! \n";
-      return -1 ;
+      return false;
     } // not a DGF file, prehaps native file format
 
     dimw=-1;
@@ -292,7 +292,7 @@ namespace Dune {
     }
     // we made it -
     // although prehaps a few boundary segments are still without id :-<
-    return 1;
+    return true;
   }
 
   /*************************************************************

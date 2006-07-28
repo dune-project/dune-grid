@@ -56,7 +56,7 @@ namespace Dune {
   #endif
     if (myrank<=0) {
       std::ifstream gridin(filename);
-      if(mg.readDuneGrid(gridin) == 1)
+      if(mg.readDuneGrid(gridin))
       {
         if (mg.dimw != dimworld)
         {
@@ -83,7 +83,7 @@ namespace Dune {
   #endif
     if (myrank<=0) {
       std::ifstream gridin(filename);
-      if(mg.readDuneGrid(gridin) == 1)
+      if(mg.readDuneGrid(gridin))
       {
         if (mg.dimw != dimworld)
         {

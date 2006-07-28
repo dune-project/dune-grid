@@ -10,7 +10,7 @@ namespace Dune {
 
     std::string str(filename);
 
-    if(mg.readDuneGrid(gridin) == 1)
+    if(mg.readDuneGrid(gridin))
     {
       if (mg.dimw != dimworld) {
         DUNE_THROW(DGFException,
