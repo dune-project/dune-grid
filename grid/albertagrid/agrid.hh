@@ -519,7 +519,9 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    typedef IntersectionIteratorWrapper<GridImp> AlbertaGridIntersectionIteratorType;
+    typedef LeafIntersectionIteratorWrapper<GridImp> AlbertaGridLeafIntersectionIteratorType;
+    typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridIntersectionIteratorType;
+    typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridLevelIntersectionIteratorType;
 
     enum { dimension = dim };
 
@@ -561,10 +563,26 @@ namespace Dune
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
-    AlbertaGridIntersectionIteratorType ibegin () const;
+    AlbertaGridLeafIntersectionIteratorType ileafbegin () const;
+    AlbertaGridIntersectionIteratorType ibegin () const
+    {
+      return ileafbegin();
+    }
+
+    AlbertaGridLevelIntersectionIteratorType ilevelbegin () const
+    {
+      DUNE_THROW(NotImplemented,"method ilevelbegin not implemented!");
+      return ileafbegin();
+    }
 
     //! Reference to one past the last intersection with neighbor
-    AlbertaGridIntersectionIteratorType iend () const;
+    AlbertaGridIntersectionIteratorType ileafend () const;
+    AlbertaGridIntersectionIteratorType iend () const { return ileafend();}
+    AlbertaGridLeafIntersectionIteratorType ilevelend () const
+    {
+      DUNE_THROW(NotImplemented,"method ilevelend not implemented!");
+      return ibegin();
+    }
 
     //! returns true if entity is leaf entity, i.e. has no children
     bool isLeaf () const ;
@@ -856,7 +874,9 @@ namespace Dune
     enum { dimworld = GridImp::dimensionworld };
 
     friend class AlbertaGridEntity<0,dim,GridImp>;
+    typedef AlbertaGridIntersectionIterator<GridImp> ThisType;
   public:
+    typedef AGMemoryProvider< ThisType > StorageType;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -1250,7 +1270,9 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper > IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 
@@ -1733,26 +1755,29 @@ namespace Dune
     mutable EntityProvider entityProvider_;
 
     typedef AlbertaGridIntersectionIterator< const MyType > IntersectionIteratorImp;
-    typedef AGMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
-    friend class IntersectionIteratorWrapper< const MyType > ;
+    typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
+    typedef typename LeafIntersectionIteratorImp :: StorageType LeafIntersectionIteratorProviderType;
+    friend class LeafIntersectionIteratorWrapper< const MyType > ;
 
-    typedef IntersectionIteratorWrapper<const MyType >
+    typedef LeafIntersectionIteratorWrapper<const MyType >
     AlbertaGridIntersectionIteratorType;
 
-    IntersectionIteratorProviderType & intersetionIteratorProvider() const { return interItProvider_; }
-    mutable IntersectionIteratorProviderType interItProvider_;
+    LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
+    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
-    AlbertaGridIntersectionIteratorType &
-    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
-    {
-      return this->getRealImplementation(it);
-    }
+    /*
+       AlbertaGridIntersectionIteratorType &
+       getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+       {
+       return this->getRealImplementation(it);
+       }
 
-    const AlbertaGridIntersectionIteratorType &
-    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
-    {
-      return this->getRealImplementation(it);
-    }
+       const AlbertaGridIntersectionIteratorType &
+       getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
+       {
+       return this->getRealImplementation(it);
+       }
+     */
 
     //! return obj pointer to EntityImp
     template <int codim>
