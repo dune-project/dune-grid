@@ -6,8 +6,8 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
-
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/gridpart.hh>
 using namespace Dune;
 
 /*******
@@ -168,8 +168,11 @@ public:
 
 /*******************************************************************/
 /*******************************************************************/
-template <class GridType, class IndexSet, int cdim,class OutputStreamImp>
+template <class GridPartType, int cdim, class OutputStreamImp>
 class CheckCommunication {
+  typedef typename GridPartType :: GridType GridType;
+  typedef typename GridPartType :: IndexSetType IndexSet;
+
   enum {dimworld = GridType::dimensionworld,
         dim = GridType::dimension};
   FieldVector<double,dimworld> upwind;
@@ -185,10 +188,10 @@ class CheckCommunication {
   }
   // compute the data on the upwind entities
   template <class VectorType >
-  void project ( GridType & grid ,
-                 int dataSize,
-                 VectorType & data,
-                 VectorType & weight, int rank)
+  void project (const GridType & grid ,
+                int dataSize,
+                VectorType & data,
+                VectorType & weight, int rank)
   {
     // set initial data
     for(int i=0 ; i<dataSize; ++i)
@@ -200,7 +203,7 @@ class CheckCommunication {
     enum { dim = GridType :: dimension };
     typedef typename IndexSet :: template Codim<0> ::
     template Partition<Interior_Partition> :: Iterator IteratorType;
-    typedef typename GridType::Traits::IntersectionIterator IntersectionIterator;
+    typedef typename GridPartType::IntersectionIteratorType IntersectionIterator;
 
     IteratorType endit = set.template end<0,Interior_Partition>   ();
     for(IteratorType it = set.template begin<0,Interior_Partition> ();
@@ -222,8 +225,8 @@ class CheckCommunication {
       }
       else
       {
-        IntersectionIterator endnit = it->iend();
-        for (IntersectionIterator nit = it->ibegin(); nit != endnit; ++nit)
+        IntersectionIterator endnit = gridPart_.iend(*it);
+        for (IntersectionIterator nit = gridPart_.ibegin(*it); nit != endnit; ++nit)
         {
           const FieldVector<double,dimworld> normal = nit.integrationOuterNormal(FieldVector<double,dim-1>(0));
           double calc = normal*upwind;
@@ -231,7 +234,7 @@ class CheckCommunication {
           // if testing level, then on non-conform grid also set values on
           // intersections that are not boundary, but has no level
           // neighbor
-          bool proceedAnyways = (level_ < 0) ? false : (! nit.levelNeighbor() );
+          bool proceedAnyways = (level_ < 0) ? false : (! nit.neighbor() );
 
           if ((calc>-1e-8 || nit.boundary()) || proceedAnyways )
           {
@@ -254,7 +257,7 @@ class CheckCommunication {
             // on non-conforming grids the neighbor entities might not
             // be the same as those on *it, therefore set data on neighbor
             // as well
-            bool checkNeigh = (level_ < 0) ? nit.leafNeighbor() : ( nit.levelNeighbor() );
+            bool checkNeigh = nit.neighbor(); //(level_ < 0) ? nit.leafNeighbor() : ( nit.levelNeighbor() );
 
             if( checkNeigh )
             {
@@ -293,11 +296,11 @@ class CheckCommunication {
   // if testweight is true an error is printed for each
   // flag not equal to 1
   template <class VectorType  >
-  double test ( GridType & grid ,
-                int dataSize,
-                VectorType & data,
-                VectorType & weight, int rank,
-                bool testweight)
+  double test (const GridType & grid ,
+               int dataSize,
+               VectorType & data,
+               VectorType & weight, int rank,
+               bool testweight)
   {
     enum { dim = GridType :: dimension };
     //Variante MIT Geisterzellen
@@ -374,7 +377,7 @@ class CheckCommunication {
     return maxerr;
   }
   // The main ''algorithn''
-  bool checkCommunication(GridType &grid)
+  bool checkCommunication(const GridType &grid)
   {
     upwind[0] = -0.1113;
     int myrank = grid.comm().rank();
@@ -405,18 +408,7 @@ class CheckCommunication {
 
     // call communication of grid
     // if level < 0 then check leaf level
-    if(level_ < 0 )
-    {
-      grid.communicate(dh,
-                       InteriorBorder_All_Interface,
-                       ForwardCommunication);
-    }
-    else
-    {
-      grid.communicate(dh,
-                       InteriorBorder_All_Interface,
-                       ForwardCommunication, level_);
-    }
+    gridPart_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
 
     double result = test(grid,dataSize,data,weight,myrank,true);
     sout << "Test after Communication on <" << myrank << "> "  << std::flush
@@ -424,42 +416,52 @@ class CheckCommunication {
     return (fabs(result)<1e-8);
   }
   OutputStreamImp& sout;
+  const GridPartType & gridPart_;
 public:
-  CheckCommunication(GridType &grid,
-                     const IndexSet & iset,
+  // --constructor
+  CheckCommunication(const GridPartType &gridPart,
                      OutputStreamImp & out,
                      const int level
+
                      ) : upwind(-1.)
-                         , set(iset)
+                         , set(gridPart.indexSet())
                          , level_(level)
                          , sout(out)
+                         , gridPart_(gridPart)
   {
-    if (!checkCommunication(grid)) {
+    if (!checkCommunication(gridPart.grid())) {
       std::cerr << "ERROR in communication test for codim " << cdim << "!!!"
                 << std::endl;
     }
     // for automatic testing of all codims
-    // static const int next = NextCodim<GridType,cdim>::calc();
-    CheckCommunication<GridType,IndexSet,NextCodim<GridType,cdim>::calc,
-        OutputStreamImp> test(grid,set,sout,level_);
+    CheckCommunication<GridPartType,NextCodim<GridType,cdim>::calc,
+        OutputStreamImp> test(gridPart_,sout,level_);
   }
 };
 
-template <class GridType,class IndexSet, class OutputStreamImp>
-class CheckCommunication<GridType,IndexSet,-1,OutputStreamImp> {
+template <class GridPartType, class OutputStreamImp>
+class CheckCommunication<GridPartType,-1,OutputStreamImp> {
 public:
-  CheckCommunication(GridType &grid,const IndexSet &,
-                     OutputStreamImp & out, int) {}
+  CheckCommunication(const GridPartType &grid,OutputStreamImp & out, const int level) {}
 };
 
-template <class GridType, class IndexSet, class OutputStreamImp>
-void checkCommunication(GridType &grid, const IndexSet & set,
-                        int level , OutputStreamImp & out)
+template <class GridType, class OutputStreamImp>
+void checkCommunication(GridType &grid, int level , OutputStreamImp & out)
 {
   {
+    if(level < 0)
     {
-      CheckCommunication<GridType,IndexSet,GridType::dimension,OutputStreamImp>
-      test(grid,set,out,level);
+      typedef LeafGridPart<GridType> GridPartType;
+      GridPartType gridPart(grid);
+      CheckCommunication<GridPartType,GridType::dimension,OutputStreamImp>
+      test(gridPart,out,level);
+    }
+    else
+    {
+      typedef LevelGridPart<GridType> GridPartType;
+      GridPartType gridPart(grid,level);
+      CheckCommunication<GridPartType,GridType::dimension,OutputStreamImp>
+      test(gridPart,out,level);
     }
   }
 }

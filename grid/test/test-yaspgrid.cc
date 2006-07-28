@@ -34,9 +34,9 @@ void check_yasp() {
   gridcheck(grid);
 
   // check communication interface
-  checkCommunication(grid,grid.leafIndexSet(),-1,Dune::dvverb);
+  checkCommunication(grid,-1,Dune::dvverb);
   for(int l=0; l<=grid.maxLevel(); ++l)
-    checkCommunication(grid,grid.levelIndexSet(l),l,Dune::dvverb);
+    checkCommunication(grid,l,Dune::dvverb);
 };
 
 int main (int argc , char **argv) {

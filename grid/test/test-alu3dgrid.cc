@@ -68,10 +68,10 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   //gridcheck(grid);
 
   // -1 stands for leaf check
-  checkCommunication(grid,grid.leafIndexSet(), -1, Dune::dvverb);
+  checkCommunication(grid, -1, Dune::dvverb);
 
   for(int l=0; l<= mxl; ++l)
-    checkCommunication(grid,grid.levelIndexSet(l), l , Dune::dvverb);
+    checkCommunication(grid, l , Dune::dvverb);
 }
 #else
 template <class GridType>
