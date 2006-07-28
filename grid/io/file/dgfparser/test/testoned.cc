@@ -13,6 +13,8 @@ using namespace Dune;
 int main(int argc, char ** argv, char ** envp)
 try
 {
+  std::cout << std::endl << "start OneDGrid test" << std::endl;
+
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
 
