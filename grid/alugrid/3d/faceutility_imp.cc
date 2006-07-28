@@ -390,8 +390,9 @@ namespace Dune {
         referenceElementCoordinatesRefined(OUTER, coordsNeighborLocal_);
         break;
       default :
+        std::cerr << "ERROR: Wrong conformanceState in generateLocalGeometries! in: " << __FILE__ << " line: " << __LINE__<< std::endl;
         assert(false);
-        abort();
+        exit(1);
       } // end switch
 
       generatedLocal_ = true;
