@@ -99,7 +99,9 @@ namespace Dune {
     {
       typedef ALU2dGrid<dim,dimworld> Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper> IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper> LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper> LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU2dGridHierarchicIterator> HierarchicIterator;
 
@@ -448,18 +450,29 @@ namespace Dune {
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
-    //typedef ALU2dGridLevelIntersectionIterator<const ThisType> IntersectionIteratorImp;
-    typedef ALU2dGridLeafIntersectionIterator<const ThisType>  IntersectionIteratorImp;
-    typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
+    typedef ALU2dGridLevelIntersectionIterator<const ThisType> LevelIntersectionIteratorImp;
+
+    typedef typename LeafIntersectionIteratorImp ::StorageType LeafIntersectionIteratorProviderType;
+    typedef typename LevelIntersectionIteratorImp::StorageType LevelIntersectionIteratorProviderType;
+    //typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    //typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
 
   private:
-    friend class IntersectionIteratorWrapper< const ThisType > ;
+    friend class LeafIntersectionIteratorWrapper< const ThisType > ;
+    friend class LevelIntersectionIteratorWrapper< const ThisType > ;
     // return reference to intersectioniterator storage
-    IntersectionIteratorProviderType & intersetionIteratorProvider() const
+    LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const
     {
-      return interItProvider_;
+      return leafInterItProvider_;
     }
-    mutable IntersectionIteratorProviderType interItProvider_;
+    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
+
+    LevelIntersectionIteratorProviderType & levelIntersetionIteratorProvider() const
+    {
+      return levelInterItProvider_;
+    }
+    mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
   public:

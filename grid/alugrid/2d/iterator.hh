@@ -78,7 +78,6 @@ namespace Dune {
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-    friend class IntersectionIteratorWrapper<GridImp>;
     friend class ALU2dGridLevelIntersectionIterator<GridImp>;
     friend class ALU2dGridLeafIntersectionIterator<GridImp>;
 
@@ -202,9 +201,12 @@ namespace Dune {
   {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-    friend class IntersectionIteratorWrapper<GridImp>;
+    friend class LevelIntersectionIteratorWrapper<GridImp>;
 
+    typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
   public:
+    typedef ALUMemoryProvider< ThisType > StorageType;
+
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -267,9 +269,11 @@ namespace Dune {
       //, public IntersectionIteratorDefaultImplementation<GridImp, ALU2dGridLevelIntersectionIterator>
   {
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-    friend class IntersectionIteratorWrapper<GridImp>;
+    friend class LeafIntersectionIteratorWrapper<GridImp>;
 
+    typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
   public:
+    typedef ALUMemoryProvider< ThisType > StorageType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 

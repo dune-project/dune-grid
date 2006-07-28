@@ -214,10 +214,9 @@ namespace Dune {
     typedef ALU2dGridGeometry<dim,dimworld,GridImp> GeometryImp;
 
     //! tpye of intersection iterator
-    //typedef ALU2dGridLeafIntersectionIterator<GridImp> IntersectionIteratorImp;
-    typedef ALU2dGridLevelIntersectionIterator<GridImp> IntersectionIteratorImp;
-    //typedef ALU2dGridIntersectionBase<GridImp> IntersectionIteratorImp;
-    typedef IntersectionIteratorWrapper< GridImp > ALU2dGridIntersectionIteratorType;
+    typedef LeafIntersectionIteratorWrapper< GridImp > ALU2dGridLeafIntersectionIteratorType;
+    typedef LevelIntersectionIteratorWrapper< GridImp > ALU2dGridLevelIntersectionIteratorType;
+    typedef ALU2dGridLeafIntersectionIteratorType ALU2dGridIntersectionIteratorType;
 
     //! type of entity interface
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -270,27 +269,27 @@ namespace Dune {
     // As ibegin() and iend() are deprecated these methods will deliver a LeafIntersectionIterator
     ALU2dGridIntersectionIteratorType ibegin () const
     {
-      return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(), false);
+      return ileafbegin();
     }
     //! Reference to one past the last intersection with neighbor
     ALU2dGridIntersectionIteratorType iend () const
     {
-      return ALU2dGridIntersectionIteratorType(grid_, *this, this->level(),true);
+      return ileafend();
     }
 
-    ALU2dGridIntersectionIteratorType libegin () const
+    ALU2dGridIntersectionIteratorType ilevelbegin () const
     {
       return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),false);
     }
-    ALU2dGridIntersectionIteratorType liend () const
+    ALU2dGridIntersectionIteratorType ilevelend () const
     {
       return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),true);
     }
-    ALU2dGridIntersectionIteratorType leafibegin () const
+    ALU2dGridIntersectionIteratorType ileafbegin () const
     {
       return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(), false);
     }
-    ALU2dGridIntersectionIteratorType leafiend () const
+    ALU2dGridIntersectionIteratorType ileafend () const
     {
       return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(),true);
     }
