@@ -93,7 +93,7 @@ namespace Dune
     //@{
     //===========================================================
 
-    //! \brief The type of the wrapped implementation
+    // The type of the wrapped implementation, for internal use only
     typedef EntityImp<cd,dim,GridImp> ImplementationType;
 
     //! \brief The corresponding geometry type
@@ -218,7 +218,7 @@ namespace Dune
     //@{
     //===========================================================
 
-    /** \brief the type of the wrapped implementation */
+    // The type of the wrapped implementation, for internal use only
     typedef EntityImp<0,dim,GridImp> ImplementationType;
 
     /** \brief The geometry type of this entity */
@@ -241,6 +241,12 @@ namespace Dune
 
     /** \brief The IntersectionIterator type*/
     typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+
+    /** \brief The LeafIntersectionIterator type*/
+    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
+
+    /** \brief The LevelIntersectionIterator type*/
+    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
 
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
@@ -309,16 +315,52 @@ namespace Dune
        Access to those neighbors is provided using the IntersectionIterator.
        This method returns an iterator refering to the first neighbor.
      */
-    IntersectionIterator ibegin () const
+    IntersectionIterator ibegin () const DUNE_DEPRECATED
     {
       return realEntity.ibegin();
     }
 
     /**\brief Reference to an IntersectionIterator one past the last intersection
      */
-    IntersectionIterator iend () const
+    IntersectionIterator iend () const DUNE_DEPRECATED
     {
       return realEntity.iend();
+    }
+
+    /**\brief Access to intersections with neighboring leaf elements.
+       A neighbor is an entity of codimension 0
+       which has an intersection of codimension 1 in common with this entity.
+       Access to those neighbors is provided using the IntersectionIterator.
+       This method returns an iterator refering to the first neighbor.
+     */
+    LeafIntersectionIterator ileafbegin () const
+    {
+      return realEntity.ileafbegin();
+    }
+
+    /**\brief Reference to an IntersectionIterator one past the last intersection
+     */
+    LeafIntersectionIterator ileafend () const
+    {
+      return realEntity.ileafend();
+    }
+
+    /**\brief Intra-level access to intersections with neighboring elements.
+       A neighbor is an entity of codimension 0
+       which has an intersection of codimension 1 in common with this entity.
+       Access to those neighbors is provided using the IntersectionIterator.
+       This method returns an iterator refering to the first neighbor.
+     */
+    LevelIntersectionIterator ilevelbegin () const
+    {
+      return realEntity.ilevelbegin();
+    }
+
+    /**\brief Reference to an IntersectionIterator one past the last intersection
+     */
+    LevelIntersectionIterator ilevelend () const
+    {
+      return realEntity.ilevelend();
     }
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
@@ -467,7 +509,7 @@ namespace Dune
     //@{
     //===========================================================
 
-    /** \brief the type of the wrapped implementation */
+    // the type of the wrapped implementation, for internal use only
     typedef EntityImp<dim,dim,GridImp> ImplementationType;
 
     /** \brief Geometry type of this entity */
