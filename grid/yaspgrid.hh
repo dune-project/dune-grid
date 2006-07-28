@@ -708,10 +708,34 @@ namespace Dune {
       return YaspIntersectionIterator<GridImp>(*this,false);
     }
 
+    //! returns intersection iterator for first intersection
+    IntersectionIterator ileafbegin () const
+    {
+      return ibegin();
+    }
+
+    //! returns intersection iterator for first intersection
+    IntersectionIterator ilevelbegin () const
+    {
+      return ibegin();
+    }
+
     //! Reference to one past the last neighbor
     IntersectionIterator iend () const
     {
       return YaspIntersectionIterator<GridImp>(*this,true);
+    }
+
+    //! Reference to one past the last neighbor
+    IntersectionIterator ileafend () const
+    {
+      return iend();
+    }
+
+    //! Reference to one past the last neighbor
+    IntersectionIterator ilevelend () const
+    {
+      return iend();
     }
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
@@ -2091,7 +2115,9 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,YaspLevelIterator,
-        YaspIntersectionIterator,YaspHierarchicIterator,
+        YaspIntersectionIterator,                                  // leaf  intersection iter
+        YaspIntersectionIterator,                                  // level intersection iter
+        YaspHierarchicIterator,
         YaspLevelIterator,
         YaspLevelIndexSet<const YaspGrid<dim,dimworld> >,
         YaspLevelIndexSetTypes<const YaspGrid<dim,dimworld> >,

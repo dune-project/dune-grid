@@ -523,8 +523,12 @@ namespace Dune {
        nonmatching. Returns iterator referencing the first neighbor.
      */
     IntersectionIterator ibegin () const;
+    IntersectionIterator ileafbegin () const;
+    IntersectionIterator ilevelbegin () const;
     //! Reference to one past the last intersection
     IntersectionIterator iend () const;
+    IntersectionIterator ileafend () const;
+    IntersectionIterator ilevelend () const;
 
     /**
        @brief Inter-level access to father element on coarser grid.
@@ -1179,7 +1183,9 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
         SGeometry,SEntity,
         SEntityPointer,SLevelIterator,
-        SIntersectionIterator,SHierarchicIterator,
+        SIntersectionIterator,              // leaf  intersection iter
+        SIntersectionIterator,              // level intersection iter
+        SHierarchicIterator,
         SLevelIterator,
         SGridLevelIndexSet<const SGrid<dim,dimworld> >,
         SGridLevelIndexSetTypes<const SGrid<dim,dimworld> >,

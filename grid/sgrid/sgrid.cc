@@ -305,11 +305,33 @@ namespace Dune {
   {
     return IntersectionIterator(SIntersectionIterator<GridImp>(this->grid,this,0));
   }
+  template<int dim, class GridImp>
+  inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ileafbegin () const
+  {
+    return ibegin();
+  }
+
+  template<int dim, class GridImp>
+  inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ilevelbegin () const
+  {
+    return ibegin();
+  }
 
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::iend () const
   {
     return IntersectionIterator(SIntersectionIterator<GridImp>(this->grid,this,count<1>()));
+  }
+  template<int dim, class GridImp>
+  inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ileafend () const
+  {
+    return iend();
+  }
+
+  template<int dim, class GridImp>
+  inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ilevelend () const
+  {
+    return iend();
   }
 
   template<int dim, class GridImp>
