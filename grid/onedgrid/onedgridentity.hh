@@ -331,10 +331,31 @@ namespace Dune {
     IntersectionIterator ibegin () const {
       return OneDGridIntersectionIterator<GridImp>(target_, 0);
     }
+    //! \todo implement me
+    IntersectionIterator ileafbegin () const {
+      DUNE_THROW(NotImplemented,"method ileafbegin not implemented!");
+      return ibegin();
+    }
+    //! \todo implement me
+    IntersectionIterator ilevelbegin () const {
+      DUNE_THROW(NotImplemented,"method ilevelbegin not implemented!");
+      return ibegin();
+    }
 
     //! Reference to one past the last neighbor
     IntersectionIterator iend () const {
       return OneDGridIntersectionIterator<GridImp>(target_);
+    }
+
+    //! \todo implement me
+    IntersectionIterator ileafend () const {
+      DUNE_THROW(NotImplemented,"method ileafend not implemented!");
+      return iend();
+    }
+    //! \todo implement me
+    IntersectionIterator ilevelend () const {
+      DUNE_THROW(NotImplemented,"method ilevelend not implemented!");
+      return iend();
     }
 
     //! returns true if Entity has no children
