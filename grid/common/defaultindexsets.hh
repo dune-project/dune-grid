@@ -29,6 +29,7 @@ namespace Dune {
   {
     // dummy value
     enum { myType = -1 };
+  protected:
     const bool adaptive_;
   public:
     template <class IndexSetType, class EntityType,int enCodim, int codim>
@@ -198,6 +199,18 @@ namespace Dune {
   class IndexSetWrapper : public DefaultEmptyIndexSet
   {
   public:
+    //! The types of the iterator
+    template<int cd>
+    struct Codim
+    {
+      template<PartitionIteratorType pitype>
+      struct Partition
+      {
+        typedef typename IndexSetImp::template Codim<cd>::
+        template Partition<pitype>::Iterator Iterator;
+      };
+    };
+
     //! store const reference to set
     IndexSetWrapper(const IndexSetImp & set, bool adaptive = false)
       : DefaultEmptyIndexSet(adaptive)
@@ -248,6 +261,22 @@ namespace Dune {
       return IndexWrapper<IndexSetImp,EntityType,enCodim,codim>::index(set_,en,num);
     }
 
+    /** @brief Iterator to first entity of given codimension and partition type.
+     */
+    template<int cd, PartitionIteratorType pitype>
+    typename Codim<cd>::template Partition<pitype>::Iterator begin () const
+    {
+      return set_.template begin<cd,pitype> ();
+    }
+
+    /** @brief Iterator to one past the last entity of given codim for partition type
+     */
+    template<int cd, PartitionIteratorType pitype>
+    typename Codim<cd>::template Partition<pitype>::Iterator end () const
+    {
+      return set_.template end<cd,pitype> ();
+    }
+
   private:
     const IndexSetImp & set_;
   };
@@ -280,7 +309,9 @@ namespace Dune {
     enum { myType = 1 };
 
     typedef typename GridType :: Traits :: LevelIndexSet LevelIndexSetType;
+    typedef WrappedLevelIndexSet < GridType >  ThisType;
   public:
+
     //! number of codimensions
     enum { ncodim = GridType::dimension + 1 };
 
@@ -290,6 +321,13 @@ namespace Dune {
 
     //! return type of index set (for input/output)
     static int type() { return myType; }
+    //! returns reference to singleton
+    static ThisType & instance (const GridType & grid)
+    {
+      static ThisType set(grid,grid.maxLevel());
+      return set;
+    }
+
   };
 
   //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid
@@ -302,6 +340,8 @@ namespace Dune {
 
     // my index set type
     typedef typename GridType :: HierarchicIndexSet HSetType;
+
+    typedef WrappedHierarchicIndexSet<GridType> ThisType;
   public:
     //! number of codimensions
     enum { ncodim = GridType::dimension + 1 };
@@ -312,6 +352,14 @@ namespace Dune {
 
     //! return type (for Grape In/Output)
     static int type() { return myType; }
+
+    //! returns reference to singleton
+    static ThisType & instance (const GridType & grid)
+    {
+      static ThisType set(grid);
+      return set;
+    }
+
   };
 
   //! Wraps LeafIndexSet of Dune Grids for use with LagrangeFunctionSpace
@@ -324,6 +372,7 @@ namespace Dune {
 
     // my index set type
     typedef typename GridType :: Traits :: LeafIndexSet IndexSetType;
+    typedef WrappedLeafIndexSet<GridType> ThisType;
   public:
     //! number of codimensions
     enum { ncodim = GridType::dimension + 1 };
@@ -333,6 +382,13 @@ namespace Dune {
 
     //! return type (for Grape In/Output)
     static int type() { return myType; }
+    //! returns reference to singleton
+    static ThisType & instance (const GridType & grid)
+    {
+      static ThisType set(grid,grid.maxLevel());
+      return set;
+    }
+
   };
 
   //*********************************************************************
@@ -838,6 +894,8 @@ namespace Dune {
       for(int cd=0; cd<ncodim; ++cd)
       {
         size_[cd] = num[cd];
+        //if( size_[cd] != grid_.size(cd) )
+        //  std::cout << size_[cd] << " calc | grid " << grid_.size(cd)  << "\n";
         assert( size_[cd] == grid_.size(cd) );
       }
     }
