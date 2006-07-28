@@ -70,7 +70,7 @@ namespace Dune
   protected:
     GeometryImp<mydim,cdim,GridImp> realGeometry;
   public:
-    //! type of underlying implementation
+    // type of underlying implementation, for internal use only
     typedef GeometryImp<mydim,cdim,GridImp> ImplementationType;
 
     //! @brief export grid dimension
