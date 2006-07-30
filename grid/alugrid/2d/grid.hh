@@ -453,10 +453,8 @@ namespace Dune {
     typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
     typedef ALU2dGridLevelIntersectionIterator<const ThisType> LevelIntersectionIteratorImp;
 
-    typedef typename LeafIntersectionIteratorImp ::StorageType LeafIntersectionIteratorProviderType;
-    typedef typename LevelIntersectionIteratorImp::StorageType LevelIntersectionIteratorProviderType;
-    //typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
-    //typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
+    typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
 
   private:
     friend class LeafIntersectionIteratorWrapper< const ThisType > ;

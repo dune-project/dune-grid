@@ -50,6 +50,8 @@ namespace Dune {
   class ALU3dGridHierarchicIterator;
   template<class GridImp>
   class ALU3dGridIntersectionIterator;
+  template<class GridImp>
+  class ALU3dGridLevelIntersectionIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLeafIterator;
   template <int mydim, int coorddim, class GridImp>
@@ -710,17 +712,18 @@ namespace Dune {
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
-    typedef ALU3dGridIntersectionIterator<const MyType>
+    typedef ALU3dGridIntersectionIterator<const ThisType>
     IntersectionIteratorImp;
-    typedef ALU3dGridIntersectionIterator<const MyType>
+    typedef ALU3dGridIntersectionIterator<const ThisType>
     LeafIntersectionIteratorImp;
-    typedef ALU3dGridLevelIntersectionIterator<const MyType>
+    typedef ALU3dGridLevelIntersectionIterator<const ThisType>
     LevelIntersectionIteratorImp;
-    typedef typename LeafIntersectionIteratorImp  :: StorageType LeafIntersectionIteratorProviderType;
-    typedef typename LevelIntersectionIteratorImp :: StorageType LevelIntersectionIteratorProviderType;
+
+    typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
+    typedef ALUMemoryProvider< LevelIntersectionIteratorImp >   LevelIntersectionIteratorProviderType;
   private:
-    friend class LeafIntersectionIteratorWrapper < const MyType > ;
-    friend class LevelIntersectionIteratorWrapper< const MyType > ;
+    friend class LeafIntersectionIteratorWrapper < const ThisType > ;
+    friend class LevelIntersectionIteratorWrapper< const ThisType > ;
     // return reference to intersectioniterator storage
     LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;

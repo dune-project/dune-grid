@@ -52,8 +52,8 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class ALU3dGridIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,ALU3dGridIntersectionIterator>
+  class ALU3dGridIntersectionIterator
+    : public IntersectionIteratorDefaultImplementation <GridImp,ALU3dGridIntersectionIterator>
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
