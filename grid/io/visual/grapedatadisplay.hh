@@ -246,6 +246,66 @@ namespace Dune
   protected:
     inline static void func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind,
                                   const double *coord, double *val);
+
+    template <PartitionIteratorType pitype, class GridPartType>
+    struct IterationMethodsGP
+    {
+      // wrapper methods for first_item and next_item
+      inline static int fst_item (DUNE_ELEM * he)
+      {
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        return disp.first_item(he);
+      }
+      inline static int nxt_item (DUNE_ELEM * he)
+      {
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        return disp.next_item(he);
+      }
+    };
+
+    template <class GridPartImp>
+    struct SetIter
+    {
+
+      template <PartitionIteratorType pitype>
+      static void setIterators (DUNE_DAT * dune, void * gridPart)
+      {
+        dune->gridPart = gridPart;
+        dune->first_macro = &IterationMethodsGP<pitype,GridPartImp>::fst_item;
+        dune->next_macro  = &IterationMethodsGP<pitype,GridPartImp>::nxt_item;
+
+        dune->first_child = 0;
+        dune->next_child = 0;
+      }
+
+      static void setGPIterator (DUNE_DAT * dune ,void * gridPart)
+      {
+        assert( gridPart );
+
+        // have to check for partition tpye again, because we lost the
+        // template parameter
+        switch(dune->partitionIteratorType)
+        {
+        case g_All_Partition :            setIterators<All_Partition> (dune,gridPart) ;
+          return;
+        case g_Interior_Partition :       setIterators<Interior_Partition> (dune,gridPart) ;
+          return;
+        case g_InteriorBorder_Partition : setIterators<InteriorBorder_Partition> (dune,gridPart) ;
+          return;
+        case g_Overlap_Partition :        setIterators<Overlap_Partition> (dune,gridPart) ;
+          return;
+        case g_OverlapFront_Partition :   setIterators<OverlapFront_Partition> (dune,gridPart) ;
+          return;
+        case g_Ghost_Partition :          setIterators<Ghost_Partition> (dune,gridPart) ;
+          return;
+        default : assert(false);
+          abort();
+          return ;
+        }
+
+
+      }
+    };
   };
 
   template <typename ctype, int dim, int dimworld, int polOrd>

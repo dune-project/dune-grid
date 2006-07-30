@@ -47,6 +47,7 @@ typedef struct stackentry
 } STACKENTRY;
 
 
+#if 0
 /**********************************************************************
 * storage of the dune data ( discrete functions )
 *
@@ -61,6 +62,7 @@ typedef struct dune_func
   /* struct storing the pointer to the disrete function */
   DUNE_FDATA * all;
 } DUNE_FUNC;
+#endif
 
 /* definition of dune_dat in g_eldesc.h */
 /* stored as user_data in the mesh pointer */
@@ -114,10 +116,11 @@ inline static DUNE_ELEM * getNewDuneElem ()
       elem->vpointer[i][j] = 0.0;
     }
   }
-  elem->display = NULL;
-  elem->liter = NULL;
-  elem->hiter = NULL;
-  elem->actElement = NULL;
+  elem->display = 0;
+  elem->liter = 0;
+  elem->hiter = 0;
+  elem->actElement = 0;
+  elem->gridPart = 0;
   return elem;
 }
 
@@ -224,8 +227,16 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
   GRAPE(iteratorButton,      "get-value") (&(dat->iteratorType));
   GRAPE(partitionTypeButton, "get-value") (&(dat->partitionIteratorType));
 
+  F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
+                      ("scalar","scalar","vector","default", NULL);
+  assert( f_data );
+
   assert( dat->setIterationModus );
-  dat->setIterationModus(dat);
+  DUNE_FUNC * func = (DUNE_FUNC *) f_data->function_data;
+  dat->setIterationModus(dat,func);
+
+  elem->gridPart = dat->gridPart;
+  assert( elem->gridPart );
 
   /* store level of interest for LeafIterator */
   if(maxlevelButton->on_off == OFF) /* dont know why wrong, but it works */

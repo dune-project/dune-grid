@@ -7,6 +7,7 @@ enum { MAX_NAME_LENGTH = 32 };
 
 typedef struct dune_elem DUNE_ELEM;
 typedef struct dune_fdata DUNE_FDATA;
+typedef struct dune_dat DUNE_DAT;
 
 typedef void evalDof_t (DUNE_ELEM *, DUNE_FDATA *, int , double *);
 typedef void evalCoord_t (DUNE_ELEM *, DUNE_FDATA *, const double *, double * );
@@ -37,6 +38,9 @@ typedef struct dune_elem
   /* points to actual iterator to compare an get type */
   /* down cast to EntityPointer */
   void          * actElement;
+
+  /* actual choosen gridPart */
+  void          * gridPart;
 
   // pointer to my display class
   void          * display;
@@ -85,9 +89,29 @@ typedef struct dune_fdata
   /* max number of components */
   int compName;
 
+  /* the corresponding gridPart */
+  void * gridPart;
+
+  void (*setGridPartIterators)(DUNE_DAT * , void * gridPart);
 };
 
-typedef struct dune_dat DUNE_DAT;
+/**********************************************************************
+ *  * storage of the dune data ( discrete functions )
+ *   *
+ *    * normaly stored as function_data in the F_DATA pointer
+ *     **********************************************************************/
+typedef struct dune_func
+{
+  const char * name;
+  /* the function to evaluate */
+  void (* func_real)(DUNE_ELEM *he, DUNE_FDATA *fe, int ind,
+                     double G_CONST *coord, double *val);
+  /* struct storing the pointer to the disrete function */
+  DUNE_FDATA * all;
+} DUNE_FUNC;
+
+
+
 
 struct dune_dat
 {
@@ -106,7 +130,7 @@ struct dune_dat
   void (* ctow)(DUNE_ELEM *, const double *, double * ) ;
 
   /* selects the iterators, like leaf iterator .. */
-  void (* setIterationModus)(DUNE_DAT *);
+  void (* setIterationModus)(DUNE_DAT *, DUNE_FUNC *);
 
   /* to which processor partition the element belongs */
   int partition;
@@ -116,6 +140,9 @@ struct dune_dat
 
   /* type of partition to iterate */
   int partitionIteratorType;
+
+  /* actual gridPart */
+  void * gridPart;
 
   DUNE_ELEM * all;
 };

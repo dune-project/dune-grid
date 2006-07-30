@@ -167,6 +167,62 @@ namespace Dune
   }
 
   template<class GridType>
+  template<PartitionIteratorType pitype, class GridPartType>
+  inline int GrapeGridDisplay<GridType>::
+  first_entity (DUNE_ELEM * he)
+  {
+    GridPartType & gridPart = *((GridPartType*) he->gridPart);
+    typedef typename GridPartType :: Traits:: template Codim<0> ::
+    IteratorType IteratorType;
+
+    he->liter   = 0;
+    he->enditer = 0;
+
+    IteratorType * it    = new IteratorType ( gridPart.template begin<0>() );
+    IteratorType * endit = new IteratorType ( gridPart.template end  <0>() );
+
+    if(it[0] == endit[0])
+    {
+      he->actElement = 0;
+      delete it;
+      delete endit;
+      return 0;
+    }
+
+    he->liter   = (void *) it;
+    he->enditer = (void *) endit;
+    return el_update(it,he);
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype, class GridPartType>
+  inline int GrapeGridDisplay<GridType>::
+  next_entity (DUNE_ELEM * he)
+  {
+    typedef typename GridPartType :: Traits:: template Codim<0> ::
+    IteratorType IteratorType;
+
+    IteratorType * it    = (IteratorType *) he->liter;
+    IteratorType * endit = (IteratorType *) he->enditer;
+    assert( it );
+    assert( endit );
+
+    if( ++it[0] != endit[0] )
+    {
+      return el_update(it,he);
+    }
+    else
+    {
+      delete it;
+      delete endit;
+      he->liter      = 0;
+      he->enditer    = 0;
+      he->actElement = 0;
+    }
+    return 0;
+  }
+
+  template<class GridType>
   template<PartitionIteratorType pitype>
   inline int GrapeGridDisplay<GridType>::
   first_leaf (DUNE_ELEM * he)
@@ -203,6 +259,61 @@ namespace Dune
 
     LeafIteratorType * it    = (LeafIteratorType *) he->liter;
     LeafIteratorType * endit = (LeafIteratorType *) he->enditer;
+    assert( it );
+    assert( endit );
+
+    if( ++it[0] != endit[0] )
+    {
+      return el_update(it,he);
+    }
+    else
+    {
+      delete it;
+      delete endit;
+      he->liter      = 0;
+      he->enditer    = 0;
+      he->actElement = 0;
+    }
+    return 0;
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype, class GridPartType>
+  inline int GrapeGridDisplay<GridType>::
+  first_item (DUNE_ELEM * he)
+  {
+    typedef typename GridPartType :: IteratorType IteratorType;
+
+    GridPartType & gridPart = *((GridPartType *) he->gridPart);
+
+    he->liter   = 0;
+    he->enditer = 0;
+
+    IteratorType * it    = new IteratorType ( gridPart.template begin<0,pitype> () );
+    IteratorType * endit = new IteratorType ( gridPart.template end  <0,pitype> () );
+
+    if(it[0] == endit[0])
+    {
+      he->actElement = 0;
+      delete it;
+      delete endit;
+      return 0;
+    }
+
+    he->liter   = (void *) it;
+    he->enditer = (void *) endit;
+    return el_update(it,he);
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype, class GridPartType>
+  inline int GrapeGridDisplay<GridType>::
+  next_item (DUNE_ELEM * he)
+  {
+    typedef typename GridPartType :: IteratorType IteratorType;
+
+    IteratorType * it    = (IteratorType *) he->liter;
+    IteratorType * endit = (IteratorType *) he->enditer;
     assert( it );
     assert( endit );
 
@@ -385,7 +496,7 @@ namespace Dune
   copy_iterator (const void * i)
   {
     std::cerr << "ERROR: copt_iterator not implemented! file = " << __FILE__ << ", line = " << __LINE__ << "\n";
-    abort () ;
+    DUNE_THROW(NotImplemented,"method copy_iterator not implemented!");
     return 0 ;
   }
 
@@ -477,11 +588,10 @@ namespace Dune
   template<class GridType>
   template<PartitionIteratorType pitype>
   inline void GrapeGridDisplay<GridType>::
-  selectIterators(DUNE_DAT * dune) const
+  selectIterators(DUNE_DAT * dune, DUNE_FUNC * func) const
   {
     if(dune->iteratorType == g_LeafIterator)
     {
-      /* the button is pressed */
       dune->first_macro = &IterationMethods<pitype>::fst_leaf;
       dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
 
@@ -514,6 +624,31 @@ namespace Dune
       return ;
     }
 
+    if(dune->iteratorType == g_GridPart)
+    {
+      bool validFunction = (func) ? (func->all) ? true : false : false;
+
+      if(!validFunction)
+      {
+        std::cerr << "No function or function data, therefore no GridPart! Defaulting Iterator to LeafIterator! \n";
+        dune->first_macro = &IterationMethods<pitype>::fst_leaf;
+        dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
+
+        // if pointer are 0, then nor evaluation is done
+        dune->first_child = 0;
+        dune->next_child  = 0;
+
+        return ;
+      }
+
+      assert( func );
+      assert( func->all );
+
+      func->all->setGridPartIterators(dune,func->all->gridPart);
+
+      return ;
+    }
+
     // wrong iteratorType here
     assert(false);
     abort();
@@ -523,21 +658,21 @@ namespace Dune
   // setIterationsMethods
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  setIterationMethods(DUNE_DAT * dune) const
+  setIterationMethods(DUNE_DAT * dune, DUNE_FUNC * func ) const
   {
     switch(dune->partitionIteratorType)
     {
-    case g_All_Partition :            selectIterators<All_Partition> (dune) ;
+    case g_All_Partition :            selectIterators<All_Partition> (dune,func) ;
       return;
-    case g_Interior_Partition :       selectIterators<Interior_Partition> (dune) ;
+    case g_Interior_Partition :       selectIterators<Interior_Partition> (dune,func) ;
       return;
-    case g_InteriorBorder_Partition : selectIterators<InteriorBorder_Partition> (dune) ;
+    case g_InteriorBorder_Partition : selectIterators<InteriorBorder_Partition> (dune,func) ;
       return;
-    case g_Overlap_Partition :        selectIterators<Overlap_Partition> (dune) ;
+    case g_Overlap_Partition :        selectIterators<Overlap_Partition> (dune,func) ;
       return;
-    case g_OverlapFront_Partition :   selectIterators<OverlapFront_Partition> (dune) ;
+    case g_OverlapFront_Partition :   selectIterators<OverlapFront_Partition> (dune,func) ;
       return;
-    case g_Ghost_Partition :          selectIterators<Ghost_Partition> (dune) ;
+    case g_Ghost_Partition :          selectIterators<Ghost_Partition> (dune,func) ;
       return;
     default : assert(false);
       abort();
@@ -574,10 +709,10 @@ namespace Dune
 
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  setIterationModus(DUNE_DAT * dat)
+  setIterationModus(DUNE_DAT * dat, DUNE_FUNC * func)
   {
     MyDisplayType * disp = (MyDisplayType *) dat->all->display;
-    disp[0].setIterationMethods(dat);
+    disp[0].setIterationMethods(dat,func);
   }
 
   template<class GridType>
@@ -647,7 +782,7 @@ namespace Dune
     dune->iteratorType          = g_LeafIterator;
     dune->partitionIteratorType = g_All_Partition;
 
-    setIterationMethods(dune);
+    setIterationMethods(dune,0);
 
     /* return hmesh with no data */
     return GrapeInterface<dim,dimworld>::setupHmesh(0,noe,nov,maxlevel,0,dune);

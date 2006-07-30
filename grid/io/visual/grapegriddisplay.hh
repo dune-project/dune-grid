@@ -31,7 +31,8 @@ namespace Dune
   {
     g_LeafIterator       = 0,
     g_LevelIterator      = 1,
-    g_HierarchicIterator = 2
+    g_HierarchicIterator = 2,
+    g_GridPart           = 3
   };
 
   template<class GridType>
@@ -44,6 +45,7 @@ namespace Dune
     // defined in griddisplay.hh
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
+    typedef typename GrapeInterface<dim,dimworld>::DUNE_FUNC DUNE_FUNC;
 
   public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
@@ -167,6 +169,18 @@ namespace Dune
     template <PartitionIteratorType pitype>
     inline int next_leaf (DUNE_ELEM * he) ;
 
+    // first and next macro element via LevelIterator level 0
+    template <PartitionIteratorType pitype, class GridPartImp>
+    inline int first_item (DUNE_ELEM * he) ;
+    template <PartitionIteratorType pitype, class GridPartImp>
+    inline int next_item (DUNE_ELEM * he) ;
+
+    // first and next macro element via LevelIterator level 0
+    template <PartitionIteratorType pitype, class GridPartImp>
+    inline int first_entity (DUNE_ELEM * he) ;
+    template <PartitionIteratorType pitype, class GridPartImp>
+    inline int next_entity (DUNE_ELEM * he) ;
+
     // first and next macro element via LevelIterator level
     template <PartitionIteratorType pitype>
     inline int first_level (DUNE_ELEM * he, int level) ;
@@ -221,9 +235,9 @@ namespace Dune
     inline void local_to_world(EntityType &en, const double * c, double * w);
 
     template <PartitionIteratorType pitype>
-    inline void selectIterators(DUNE_DAT * dat) const;
+    inline void selectIterators(DUNE_DAT * dat, DUNE_FUNC * func) const;
 
-    inline void setIterationMethods(DUNE_DAT * dat) const;
+    inline void setIterationMethods(DUNE_DAT * dat, DUNE_FUNC *) const;
 
     template <PartitionIteratorType pitype>
     struct IterationMethods
@@ -273,7 +287,7 @@ namespace Dune
       }
     };
 
-    inline static void setIterationModus(DUNE_DAT * dat);
+    inline static void setIterationModus(DUNE_DAT * , DUNE_FUNC *);
 
   }; // end class GrapeGridDisplay
 

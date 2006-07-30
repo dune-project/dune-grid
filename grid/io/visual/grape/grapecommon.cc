@@ -18,11 +18,12 @@ static char *partitionNames[numberOfPartitionTypes] = {
   "Ghost_Partition"
 };
 
-enum { numberOfIterators = 3 };
+enum { numberOfIterators = 4 };
 static char *iteratorNames[numberOfIterators] = {
   "LeafIterator",
   "LevelIterator",
   "Macro + HierarchicIterator",
+  "GridPart Iterator",
 };
 
 static int actualPartitionType = 0;

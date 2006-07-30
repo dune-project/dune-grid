@@ -46,6 +46,7 @@ namespace Dune
     typedef GrapeInterface_two_two::DUNE_ELEM DUNE_ELEM;
     typedef GrapeInterface_two_two::DUNE_FDATA DUNE_FDATA;
     typedef GrapeInterface_two_two::DUNE_DAT DUNE_DAT;
+    typedef GrapeInterface_two_two::DUNE_FUNC DUNE_FUNC;
 
     inline static void init()
     {
@@ -103,6 +104,7 @@ namespace Dune
     typedef GrapeInterface_three_three::DUNE_ELEM DUNE_ELEM;
     typedef GrapeInterface_three_three::DUNE_FDATA DUNE_FDATA;
     typedef GrapeInterface_three_three::DUNE_DAT DUNE_DAT;
+    typedef GrapeInterface_three_three::DUNE_FUNC DUNE_FUNC;
 
     inline static void init()
     {
