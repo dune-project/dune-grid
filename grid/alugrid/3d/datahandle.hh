@@ -53,13 +53,17 @@ namespace ALUGridSpace {
     // this method must be overlaoded by the impl classes
     virtual bool containsItem (const HElementType & elem) const = 0;
 
+    // set elem to realEntity
+    virtual void setElement(const HElementType & elem) = 0;
+
     void setData ( ObjectStreamType & str , HElementType & elem )
     {
       // one of this should be either true
       assert( this->containsItem( elem ) || elem.isGhost() );
 
       // set element and then start
-      realEntity_.setElement(elem);
+      setElement(elem);
+
       // contiansItem might fail for ghost elements, which is not a bug
       // containsItem just returns right values for interior elements
       assert( entity_.partitionType() == Dune :: GhostEntity );
@@ -73,7 +77,7 @@ namespace ALUGridSpace {
     void sendData ( ObjectStreamType & str , HElementType & elem )
     {
       assert( this->containsItem( elem ) );
-      realEntity_.setElement(elem);
+      setElement(elem);
 
       // if varaible size, also send size
       if( variableSize_ )
@@ -89,7 +93,7 @@ namespace ALUGridSpace {
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
       assert( this->containsItem( elem ) );
-      realEntity_.setElement( elem );
+      setElement( elem );
 
       size_t size = getSize(str, entity_);
       dc_.scatter(str,entity_, size );
@@ -256,7 +260,11 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     GatherScatterLeafData(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
-      : BaseType(grid,en,realEntity,dc) {}
+      : BaseType(grid,en,realEntity,dc)
+    {
+      // if leaf vertices are communicated, make sure that vertex list is up2date
+      if(codim == 3) grid.getLeafVertexList();
+    }
 
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HElementType & elem) const
@@ -281,6 +289,14 @@ namespace ALUGridSpace {
     {
       return pll.ghostLeaf();
     }
+
+    // set elem to realEntity
+    void setElement(const HElementType & elem)
+    {
+      this->realEntity_.setElement(elem);
+    }
+
+
   };
 
   //! the corresponding interface class is defined in bsinclude.hh
@@ -321,6 +337,13 @@ namespace ALUGridSpace {
     {
       return levelSet_.containsIndex(codim, elem.getIndex() );
     }
+
+    // set elem to realEntity
+    void setElement(const HElementType & elem)
+    {
+      this->realEntity_.setElement(elem,level_);
+    }
+
   };
 
 
