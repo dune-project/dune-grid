@@ -666,7 +666,6 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
     f_data->hp_maxlevel     = grape_mesh->max_level;
 
     grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
-    std::cout << "Add level function \n";
   }
   else if (grape_mesh->f_data != (GENMESH_FDATA *)f_data)
   {
