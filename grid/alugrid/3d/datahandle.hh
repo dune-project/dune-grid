@@ -422,7 +422,7 @@ namespace ALUGridSpace {
   {
   protected:
     enum { codim = 0 };
-    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
@@ -513,7 +513,7 @@ namespace ALUGridSpace {
   {
   protected:
     enum { codim = 0 };
-    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
@@ -602,14 +602,13 @@ namespace ALUGridSpace {
   class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef typename GridType::template Codim<0>::Entity Entity;
-    typedef typename Entity :: ImplementationType EntityImp;
-    typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
 
-    Entity & reFather_;
-    Entity & reSon_;
-    EntityImp & realFather_;
-    EntityImp & realSon_;
+    EntityType & reFather_;
+    EntityType & reSon_;
+    RealEntityType & realFather_;
+    RealEntityType & realSon_;
 
     //DofManagerType & dm_;
     RestrictProlongOperatorType & rp_;
@@ -621,7 +620,7 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     AdaptRestrictProlongImpl (GridType & grid,
-                              Entity & f, EntityImp & rf, Entity & s, EntityImp & rs
+                              EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
                               , RestrictProlongOperatorType & rp)
       : grid_(grid)
         , reFather_(f)
@@ -710,13 +709,13 @@ namespace ALUGridSpace {
   {
     typedef AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType> BaseType;
     GlobalIdSetImp & set_;
-    typedef typename GridType::template Codim<0>::Entity Entity;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
 
   public:
     //! Constructor
     AdaptRestrictProlongGlSet(GridType & grid,
-                              Entity & f, EntityImp & rf, Entity & s, EntityImp & rs
+                              EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
                               , RestrictProlongOperatorType & rp
                               , GlobalIdSetImp & set )
       : BaseType(grid,f,rf,s,rs,rp)
@@ -753,14 +752,15 @@ namespace ALUGridSpace {
   class LoadBalanceElementCount : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef typename GridType::template Codim<0>::Entity Entity;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
+
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
-    Entity & reFather_;
-    Entity & reSon_;
-    EntityImp & realFather_;
-    EntityImp & realSon_;
+    EntityType & reFather_;
+    EntityType & reSon_;
+    RealEntityType & realFather_;
+    RealEntityType & realSon_;
 
     DofManagerType & dm_;
     typedef typename  Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
@@ -769,7 +769,7 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     LoadBalanceElementCount (GridType & grid,
-                             Entity & f, EntityImp & rf, Entity & s, EntityImp & rs,DofManagerType & dm)
+                             EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs,DofManagerType & dm)
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
@@ -857,14 +857,15 @@ namespace ALUGridSpace {
   template <class GridType , class DofManagerType>
   class LoadBalanceElementCount<GridType,DofManagerType,false> : public AdaptRestrictProlongType
   {
-    typedef typename GridType::template Codim<0>::Entity Entity;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+    typedef typename EntityType :: ImplementationType RealEntityType;
+
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
   public:
     //! Constructor
     LoadBalanceElementCount (GridType & grid,
-                             Entity & f, EntityImp & rf, Entity & s, EntityImp & rs,DofManagerType & dm)
+                             EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs,DofManagerType & dm)
     {}
 
     virtual ~LoadBalanceElementCount () {};
@@ -901,5 +902,4 @@ namespace ALUGridSpace {
   };
 
 } // end namespace
-
 #endif
