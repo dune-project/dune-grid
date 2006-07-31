@@ -277,19 +277,19 @@ namespace Dune {
       return ileafend();
     }
 
-    ALU2dGridIntersectionIteratorType ilevelbegin () const
+    ALU2dGridLevelIntersectionIteratorType ilevelbegin () const
     {
       return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),false);
     }
-    ALU2dGridIntersectionIteratorType ilevelend () const
+    ALU2dGridLevelIntersectionIteratorType ilevelend () const
     {
       return ALU2dGridLevelIntersectionIteratorType(grid_, *this, this->level(),true);
     }
-    ALU2dGridIntersectionIteratorType ileafbegin () const
+    ALU2dGridLeafIntersectionIteratorType ileafbegin () const
     {
       return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(), false);
     }
-    ALU2dGridIntersectionIteratorType ileafend () const
+    ALU2dGridLeafIntersectionIteratorType ileafend () const
     {
       return ALU2dGridLeafIntersectionIteratorType(grid_, *this, this->level(),true);
     }
