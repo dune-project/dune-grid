@@ -69,10 +69,10 @@ namespace Dune
     typedef typename GridImp::ctype ct;
   protected:
     GeometryImp<mydim,cdim,GridImp> realGeometry;
-  public:
+
     // type of underlying implementation, for internal use only
     typedef GeometryImp<mydim,cdim,GridImp> ImplementationType;
-
+  public:
     //! @brief export grid dimension
     enum { dimension=GridImp::dimension /*!< grid dimension */ };
     //! @brief export geometry dimension

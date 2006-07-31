@@ -1214,16 +1214,24 @@ namespace Dune {
      * just typename ::ImplementationType.
      */
     template<class T>
-    struct ReturnImplementationType
+    class ReturnImplementationType : public T // implement friendship via derivation
     {
+    public:
       /** @brief The correct type of the implementation to return. */
       typedef typename T::ImplementationType ImplementationType;
+    private:
+      // constructor in only need to compile
+      ReturnImplementationType(const T& t) : T(t) {}
     };
 
     template<class T>
-    struct ReturnImplementationType<const T>
+    class ReturnImplementationType<const T> : public T // implement friendship via derivation
     {
+    public:
       typedef const typename T::ImplementationType ImplementationType;
+    private:
+      // constructor in only need to compile
+      ReturnImplementationType(const T& t) : T(t) {}
     };
 
     //! return real implementation of interface class

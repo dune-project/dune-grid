@@ -92,10 +92,11 @@ namespace Dune
      */
     //@{
     //===========================================================
-
+  protected:
     // The type of the wrapped implementation, for internal use only
     typedef EntityImp<cd,dim,GridImp> ImplementationType;
 
+  public:
     //! \brief The corresponding geometry type
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
@@ -210,6 +211,9 @@ namespace Dune
 
   protected:
     EntityImp<0,dim,GridImp> realEntity;
+
+    // The type of the wrapped implementation, for internal use only
+    typedef EntityImp<0,dim,GridImp> ImplementationType;
   public:
 
     //===========================================================
@@ -217,9 +221,6 @@ namespace Dune
      */
     //@{
     //===========================================================
-
-    // The type of the wrapped implementation, for internal use only
-    typedef EntityImp<0,dim,GridImp> ImplementationType;
 
     /** \brief The geometry type of this entity */
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -501,6 +502,9 @@ namespace Dune
 
   protected:
     EntityImp<dim,dim,GridImp> realEntity;
+
+    // the type of the wrapped implementation, for internal use only
+    typedef EntityImp<dim,dim,GridImp> ImplementationType;
   public:
 
     //===========================================================
@@ -508,9 +512,6 @@ namespace Dune
      */
     //@{
     //===========================================================
-
-    // the type of the wrapped implementation, for internal use only
-    typedef EntityImp<dim,dim,GridImp> ImplementationType;
 
     /** \brief Geometry type of this entity */
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
