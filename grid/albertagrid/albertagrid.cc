@@ -1371,14 +1371,15 @@ namespace Dune
 
   // singletons of geometry in father geometries
   // GeometryType schould be of type Dune::Geometry
-  template <class GeometryType>
-  static inline GeometryType &
+  template <class Geometry>
+  static inline Geometry &
   getAlbertaGeometryInFather(const int child, const int orientation = 1)
   {
-    typedef typename GeometryType :: ImplementationType GeometryImp;
-    static GeometryType child0       (GeometryImp(0,1)); // child 0
-    static GeometryType child1_plus  (GeometryImp(1,1)); // child 1
-    static GeometryType child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
+    typedef MakeableInterfaceObject<Geometry> GeometryObject;
+    typedef typename GeometryObject :: ImplementationType GeometryImp;
+    static GeometryObject child0       (GeometryImp(0,1)); // child 0
+    static GeometryObject child1_plus  (GeometryImp(1,1)); // child 1
+    static GeometryObject child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
 
     if(child == 0) return child0;
     if(child == 1) return (orientation > 0) ? child1_plus : child1_minus;
