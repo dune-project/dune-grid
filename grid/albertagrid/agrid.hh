@@ -620,6 +620,10 @@ namespace Dune
         adaption cycle */
     bool mightBeCoarsened () const ;
 
+    /**\brief Returns true, if entity has intersections with boundary
+     */
+    bool hasBoundaryIntersections () const ;
+
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const;
 

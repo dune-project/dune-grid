@@ -1134,6 +1134,18 @@ namespace Dune
   }
 
   template<int dim, class GridImp>
+  inline bool AlbertaGridEntity <0,dim,GridImp>::
+  hasBoundaryIntersections () const
+  {
+    assert( elInfo_ );
+    for(int i=0; i<dim+1; ++i)
+    {
+      if( elInfo_->boundary[i] != 0 ) return true;
+    }
+    return false;
+  }
+
+  template<int dim, class GridImp>
   inline PartitionType AlbertaGridEntity <0,dim,GridImp>::
   partitionType () const
   {
