@@ -202,7 +202,6 @@ namespace Dune {
     typedef typename IndexSetType :: template Codim<0>::template Partition<All_Partition> :: Iterator Iterator;
     typedef typename GridType :: ctype coordType;
     typedef typename GridType :: template Codim<0>:: Entity EntityCodim0Type;
-    typedef typename EntityCodim0Type :: IntersectionIterator IntersectionIterator;
 
     // ////////////////////////////////////////////////////////////////
     //   Check whether geomTypes() returns correct result
@@ -446,16 +445,50 @@ namespace Dune {
         // check neighbors
         if(codim == 1)
         {
-          IntersectionIterator endnit  = it->iend();
-          for(IntersectionIterator nit = it->ibegin(); nit != endnit; ++nit)
+          std::string name = grid.name();
+          if( name != "AlbertaGrid" )
           {
-            if((levelIndex && nit.levelNeighbor()) || (!levelIndex && nit.leafNeighbor()))
+            if( levelIndex )
             {
-              typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
-              EnPointer ep = nit.outside();
+              typedef typename EntityCodim0Type :: LevelIntersectionIterator IntersectionIterator;
+              IntersectionIterator endnit  = it->ilevelend();
+              for(IntersectionIterator nit = it->ilevelbegin(); nit != endnit; ++nit)
+              {
+                if(nit.neighbor())
+                {
+                  typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
+                  EnPointer ep = nit.outside();
 
-              checkSubEntity<codim> (grid, *ep, lset, sout,
-                                     subEntities, vertices, vertexCoordsMap);
+                  checkSubEntity<codim> (grid, *ep, lset, sout,
+                                         subEntities, vertices, vertexCoordsMap);
+                }
+              }
+            }
+          }
+          else
+          {
+            static bool called = false;
+            if( !called )
+            {
+              std::cerr << "WARNING: skip indices test using LevelIntersectionIterator!\n";
+              called = true;
+            }
+          }
+
+          if( !levelIndex )
+          {
+            typedef typename EntityCodim0Type :: LeafIntersectionIterator IntersectionIterator;
+            IntersectionIterator endnit  = it->ileafend();
+            for(IntersectionIterator nit = it->ileafbegin(); nit != endnit; ++nit)
+            {
+              if(nit.neighbor())
+              {
+                typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
+                EnPointer ep = nit.outside();
+
+                checkSubEntity<codim> (grid, *ep, lset, sout,
+                                       subEntities, vertices, vertexCoordsMap);
+              }
             }
           }
         }

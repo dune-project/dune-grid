@@ -239,23 +239,22 @@ struct IntersectionIteratorInterface
 
     // state
     i.boundary();
-    i.levelNeighbor();
-    i.leafNeighbor();
+    i.neighbor();
 
     // id of boundary segment
     i.boundaryId();
 
     // neighbouring elements
     i.inside();
-    if(i.leafNeighbor() || i.levelNeighbor()) i.outside();
+    if(i.neighbor()) i.outside();
 
     // geometry
     i.intersectionSelfLocal();
-    if(i.leafNeighbor() || i.levelNeighbor()) i.intersectionNeighborLocal();
+    if(i.neighbor()) i.intersectionNeighborLocal();
     i.intersectionGlobal();
 
     i.numberInSelf();
-    if(i.leafNeighbor() || i.levelNeighbor()) i.numberInNeighbor();
+    if(i.neighbor()) i.numberInNeighbor();
 
     Dune::FieldVector<ct, dim-1> v(0);
     i.outerNormal(v);
@@ -338,9 +337,13 @@ struct EntityInterface<Grid, 0, dim, true>
     e.geometryInFather();
 
     // intersection iterator
-    e.ibegin();
-    e.iend();
-    IntersectionIteratorInterface<Grid>(e.ibegin());
+    e.ilevelbegin();
+    e.ilevelend();
+
+    e.ileafbegin();
+    e.ileafend();
+
+    IntersectionIteratorInterface<Grid>(e.ilevelbegin());
 
     // hierarchic iterator
     e.hbegin(0);
@@ -668,7 +671,7 @@ template <class Grid>
 void assertNeighbor (Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  typedef typename Grid::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename Grid::template Codim<0>::LevelIntersectionIterator IntersectionIterator;
   enum { dim = Grid::dimension };
   typedef typename Grid::ctype ct;
 
@@ -698,17 +701,17 @@ void assertNeighbor (Grid &g)
       // flag vector for elements faces
       std::vector<bool> visited(e->template count<1>(), false);
       // loop over intersections
-      IntersectionIterator endit = e->iend();
-      IntersectionIterator it = e->ibegin();
+      IntersectionIterator endit = e->ilevelend();
+      IntersectionIterator it = e->ilevelbegin();
       // state
       it.boundary();
-      it.leafNeighbor();
-      it.levelNeighbor();
+      it.neighbor();
       // id of boundary segment
       it.boundaryId();
       // check id
       //assert(globalid.id(*e) >= 0);
       assert(it != endit);
+
       // for all intersections
       for(; it != endit; ++it)
       {
@@ -722,7 +725,7 @@ void assertNeighbor (Grid &g)
         int num = it.numberInSelf();
         assert( num >= 0 && num < e->template count<1> () );
 
-        if(it.leafNeighbor() || it.levelNeighbor())
+        if(it.neighbor())
         {
           // geometry
           it.intersectionNeighborLocal();
@@ -741,7 +744,7 @@ void assertNeighbor (Grid &g)
         it.integrationOuterNormal(v);
         it.unitOuterNormal(v);
         // search neighbouring cell
-        if (it.leafNeighbor() || it.levelNeighbor())
+        if (it.neighbor())
         {
           //assert(globalid.id(*(it.outside())) >= 0);
           assert(globalid.id(*(it.outside())) !=
@@ -880,7 +883,7 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   typedef typename Grid::template Codim<0>::HierarchicIterator HierarchicIterator;
-  typedef typename Grid::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename Grid::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
 
   LevelIterator l1 = g.template lbegin<0>(0);
@@ -893,8 +896,8 @@ void iteratorEquals (Grid &g)
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
-  IntersectionIterator i1 = l1->ibegin();
-  IntersectionIterator i2 = l2->ibegin();
+  IntersectionIterator i1 = l1->ileafbegin();
+  IntersectionIterator i2 = l2->ileafbegin();
   EntityPointer e1 = l1;
   EntityPointer e2 = h2;
 
@@ -923,14 +926,14 @@ void iteratorEquals (Grid &g)
     i == h2; \
     i == L2; \
     i == i2.inside(); \
-    if (i2.leafNeighbor() || i2.levelNeighbor()) i == i2.outside(); \
+    if (i2.neighbor()) i == i2.outside(); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
   TestEquals(i1.inside());
-  if (i2.leafNeighbor() || i2.levelNeighbor()) TestEquals(i1.outside());
+  if (i1.neighbor()) TestEquals(i1.outside());
 }
 
 template <class Grid>
