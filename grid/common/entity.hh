@@ -433,6 +433,10 @@ namespace Dune
      */
     //@{
     //===========================================================
+    /**\brief Returns true, if entity has intersections with boundary, see
+         default implementation
+     */
+    bool hasBoundaryIntersections () const { return realEntity.hasBoundaryIntersections(); }
 
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};
@@ -646,7 +650,6 @@ namespace Dune
   {
     enum { dimworld = GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
-
   public:
     //! know your own codimension
     enum { codimension=cd };
@@ -692,6 +695,7 @@ namespace Dune
   {
     enum { dimworld = GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
+
   public:
     //! know your own codimension
     enum { codimension=0 };
@@ -731,6 +735,35 @@ namespace Dune
     /**\brief Returns true, if entity might be coarsened during next adaption cycle
      */
     bool mightBeCoarsened () const { return false; }
+
+    /**\brief Returns true, if entity has intersections with boundary,
+       this implementation uses the Level- and LeafIntersectionIterator to
+       check for boundary intersections
+     */
+    bool hasBoundaryIntersections () const
+    {
+      {
+        typedef typename GridImp :: template Codim<0> :: LevelIntersectionIterator
+        IntersectionIterator;
+        IntersectionIterator end = asImp().ilevelend();
+        for(IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
+        {
+          if( it.boundary() ) return true;
+        }
+      }
+
+      {
+        typedef typename GridImp :: template Codim<0> :: LeafIntersectionIterator
+        IntersectionIterator;
+        IntersectionIterator end = asImp().ileafend();
+        for(IntersectionIterator it = asImp().ileafbegin(); it != end; ++it)
+        {
+          if( it.boundary() ) return true;
+        }
+      }
+
+      return false;
+    }
 
   private:
     //  Barton-Nackman trick
