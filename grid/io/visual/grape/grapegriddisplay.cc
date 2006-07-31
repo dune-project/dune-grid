@@ -278,19 +278,19 @@ namespace Dune
   }
 
   template<class GridType>
-  template<PartitionIteratorType pitype, class GridPartType>
+  template<class GridPartType>
   inline int GrapeGridDisplay<GridType>::
   first_item (DUNE_ELEM * he)
   {
-    typedef typename GridPartType :: IteratorType IteratorType;
+    typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
 
     GridPartType & gridPart = *((GridPartType *) he->gridPart);
 
     he->liter   = 0;
     he->enditer = 0;
 
-    IteratorType * it    = new IteratorType ( gridPart.template begin<0,pitype> () );
-    IteratorType * endit = new IteratorType ( gridPart.template end  <0,pitype> () );
+    IteratorType * it    = new IteratorType ( gridPart.template begin<0> () );
+    IteratorType * endit = new IteratorType ( gridPart.template end  <0> () );
 
     if(it[0] == endit[0])
     {
@@ -306,11 +306,11 @@ namespace Dune
   }
 
   template<class GridType>
-  template<PartitionIteratorType pitype, class GridPartType>
+  template<class GridPartType>
   inline int GrapeGridDisplay<GridType>::
   next_item (DUNE_ELEM * he)
   {
-    typedef typename GridPartType :: IteratorType IteratorType;
+    typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
 
     IteratorType * it    = (IteratorType *) he->liter;
     IteratorType * endit = (IteratorType *) he->enditer;
@@ -627,6 +627,10 @@ namespace Dune
     if(dune->iteratorType == g_GridPart)
     {
       bool validFunction = (func) ? (func->all) ? true : false : false;
+      if(validFunction)
+      {
+        validFunction = (func->all->setGridPartIterators) ? true : false;
+      }
 
       if(!validFunction)
       {
@@ -643,7 +647,9 @@ namespace Dune
 
       assert( func );
       assert( func->all );
+      assert( func->all->setGridPartIterators );
 
+      // set first and next methods due to grid part
       func->all->setGridPartIterators(dune,func->all->gridPart);
 
       return ;

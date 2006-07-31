@@ -111,7 +111,7 @@ namespace Dune
     FieldVector<double,dimworld> globalVec_;
     FieldVector<double,dim> localVec_;
 
-  private:
+  protected:
     // generate hmesh
     inline void * setupHmesh();
 
@@ -170,9 +170,9 @@ namespace Dune
     inline int next_leaf (DUNE_ELEM * he) ;
 
     // first and next macro element via LevelIterator level 0
-    template <PartitionIteratorType pitype, class GridPartImp>
+    template <class GridPartImp>
     inline int first_item (DUNE_ELEM * he) ;
-    template <PartitionIteratorType pitype, class GridPartImp>
+    template <class GridPartImp>
     inline int next_item (DUNE_ELEM * he) ;
 
     // first and next macro element via LevelIterator level 0

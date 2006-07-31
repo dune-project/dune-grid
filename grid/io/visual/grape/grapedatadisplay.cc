@@ -373,6 +373,11 @@ namespace Dune
         vecFdata_[n]->dimVal   = dimVal;
         vecFdata_[n]->dimRange = FunctionSpaceType::DimRange;
 
+        // set grid part selection methods
+        typedef typename FunctionSpaceType :: GridPartType GridPartType;
+        vecFdata_[n]->gridPart = ((void *) &func.getFunctionSpace().gridPart());
+        vecFdata_[n]->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n],&func_real);
       }
     }
@@ -495,8 +500,9 @@ namespace Dune
         }
         vecFdata_[n]->dimVal   = dimVal;
         vecFdata_[n]->dimRange = dimRange;
-        vecFdata_[n]->gridPart = ((*void) &func.getFunctionSpace().gridPart());
-        vecFdata_[n]->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+
+        vecFdata_[n]->gridPart = 0;
+        vecFdata_[n]->setGridPartIterators = 0;
 
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n],&func_real);
       }
