@@ -74,7 +74,7 @@ int main () {
       }
 
       checkGeometryInFather(grid);
-      checkIntersectionIterator(grid);
+      checkIntersectionIterator(grid,true);
 
       checkCommunication(grid, -1, Dune::dvverb);
     };
