@@ -229,10 +229,10 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
 
   F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
                       ("scalar","scalar","vector","default", NULL);
-  assert( f_data );
 
   assert( dat->setIterationModus );
-  DUNE_FUNC * func = (DUNE_FUNC *) f_data->function_data;
+  DUNE_FUNC * func = 0;
+  if(f_data) func = (DUNE_FUNC *) f_data->function_data;
   dat->setIterationModus(dat,func);
 
   elem->gridPart = dat->gridPart;
@@ -666,6 +666,7 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
     f_data->hp_maxlevel     = grape_mesh->max_level;
 
     grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
+    std::cout << "Add level function \n";
   }
   else if (grape_mesh->f_data != (GENMESH_FDATA *)f_data)
   {
@@ -1051,6 +1052,9 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
   else
     newMesh = mesh2;
 
+  //GRAPE(newMesh, "copy-functions")(self);
+
+#if 1
   if( (!self->f_data) && (newMesh->f_data) )
   {
     self->level_of_interest = newMesh->level_of_interest;
@@ -1071,6 +1075,7 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
       next_data = (F_DATA *) next_data->last;
     }
   }
+#endif
 
   self->max_dimension_of_coord = newMesh->max_dimension_of_coord;
   self->max_eindex = newMesh->max_eindex;

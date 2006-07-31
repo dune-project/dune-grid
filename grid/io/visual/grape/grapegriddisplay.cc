@@ -62,7 +62,6 @@ namespace Dune
   el_update (EntityPointerType * it, DUNE_ELEM * he)
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
-    typedef typename Entity::IntersectionIterator IntersectionIterator;
     typedef typename Entity::Geometry DuneGeometryType;
 
     enum { dim      = Entity::dimension };
@@ -109,48 +108,51 @@ namespace Dune
 
       {
         // reset the boundary information
-        for(int i=0; i < MAX_EL_FACE; i++) he->bnd[i] = -1;
+        for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = 0;
 
-        IntersectionIterator endnit = en.iend();
-        IntersectionIterator nit    = en.ibegin();
-
-        // value < zero otherwise first test fails
-        int lastElNum = -1;
-
-        // check all faces for boundary or not
-        while ( nit != endnit )
+        if( en.hasBoundaryIntersections() )
         {
-          int num = nit.numberInSelf();
-          assert( num >= 0 );
-          assert( num < MAX_EL_FACE );
+          typedef typename Entity::LeafIntersectionIterator IntersectionIterator;
+          IntersectionIterator endnit = en.ileafend();
+          IntersectionIterator nit    = en.ileafbegin();
 
-          if(num != lastElNum)
+          // value < zero otherwise first test fails
+          int lastElNum = -1;
+
+          // check all faces for boundary or not
+          while ( nit != endnit )
           {
-            he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
-            //if(nit.levelNeighbor() || nit.leafNeighbor() )
-            if( nit.neighbor() )
-              if(nit.outside()->partitionType() != InteriorEntity )
-                he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
-            lastElNum = num;
+            int num = nit.numberInSelf();
+            assert( num >= 0 );
+            assert( num < MAX_EL_FACE );
+
+            if(num != lastElNum)
+            {
+              he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
+              //if(nit.levelNeighbor() || nit.leafNeighbor() )
+              if( nit.neighbor() )
+                if(nit.outside()->partitionType() != InteriorEntity )
+                  he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
+              lastElNum = num;
+            }
+            ++nit;
           }
-          ++nit;
-        }
-      }
 
-      {
-        // for this type of element we have to swap the faces
-        if(he->type == g_hexahedron)
-        {
-          int help_bnd [MAX_EL_FACE];
-          for(int i=0; i < MAX_EL_FACE; i++) help_bnd[i] = he->bnd[i] ;
+          // for this type of element we have to swap the faces
+          if(he->type == g_hexahedron)
+          {
+            int help_bnd [MAX_EL_FACE];
+            for(int i=0; i < MAX_EL_FACE; ++i) help_bnd[i] = he->bnd[i] ;
 
-          assert( MAX_EL_FACE == 6 );
-          // do the mapping from dune to grape hexa
-          he->bnd[0] = help_bnd[4];
-          he->bnd[1] = help_bnd[5];
-          he->bnd[3] = help_bnd[1];
-          he->bnd[4] = help_bnd[3];
-          he->bnd[5] = help_bnd[0];
+            assert( MAX_EL_FACE == 6 );
+            // do the mapping from dune to grape hexa
+            he->bnd[0] = help_bnd[4];
+            he->bnd[1] = help_bnd[5];
+            he->bnd[3] = help_bnd[1];
+            he->bnd[4] = help_bnd[3];
+            he->bnd[5] = help_bnd[0];
+          }
+
         }
       }
 
@@ -164,62 +166,6 @@ namespace Dune
       he->actElement = 0;
       return 0;
     }
-  }
-
-  template<class GridType>
-  template<PartitionIteratorType pitype, class GridPartType>
-  inline int GrapeGridDisplay<GridType>::
-  first_entity (DUNE_ELEM * he)
-  {
-    GridPartType & gridPart = *((GridPartType*) he->gridPart);
-    typedef typename GridPartType :: Traits:: template Codim<0> ::
-    IteratorType IteratorType;
-
-    he->liter   = 0;
-    he->enditer = 0;
-
-    IteratorType * it    = new IteratorType ( gridPart.template begin<0>() );
-    IteratorType * endit = new IteratorType ( gridPart.template end  <0>() );
-
-    if(it[0] == endit[0])
-    {
-      he->actElement = 0;
-      delete it;
-      delete endit;
-      return 0;
-    }
-
-    he->liter   = (void *) it;
-    he->enditer = (void *) endit;
-    return el_update(it,he);
-  }
-
-  template<class GridType>
-  template<PartitionIteratorType pitype, class GridPartType>
-  inline int GrapeGridDisplay<GridType>::
-  next_entity (DUNE_ELEM * he)
-  {
-    typedef typename GridPartType :: Traits:: template Codim<0> ::
-    IteratorType IteratorType;
-
-    IteratorType * it    = (IteratorType *) he->liter;
-    IteratorType * endit = (IteratorType *) he->enditer;
-    assert( it );
-    assert( endit );
-
-    if( ++it[0] != endit[0] )
-    {
-      return el_update(it,he);
-    }
-    else
-    {
-      delete it;
-      delete endit;
-      he->liter      = 0;
-      he->enditer    = 0;
-      he->actElement = 0;
-    }
-    return 0;
   }
 
   template<class GridType>

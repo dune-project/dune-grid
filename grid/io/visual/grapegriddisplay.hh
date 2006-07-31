@@ -39,6 +39,7 @@ namespace Dune
   class GrapeGridDisplay
   {
     typedef GrapeGridDisplay < GridType > MyDisplayType;
+    typedef  MyDisplayType ThisType;
     enum { dim = GridType::dimension };
     enum { dimworld = GridType::dimensionworld };
 
@@ -79,6 +80,9 @@ namespace Dune
     typedef typename HierarchicIteratorList::iterator ListIteratorType;
     HierarchicIteratorList hierList_;
 
+  private:
+    //! copy Constructor
+    GrapeGridDisplay(const GrapeGridDisplay &);
   public:
     //! Constructor, make a GrapeGridDisplay for given grid
     inline GrapeGridDisplay(const GridType &grid, const int myrank = -1);
@@ -110,6 +114,7 @@ namespace Dune
     // internal vec for local to global methods
     FieldVector<double,dimworld> globalVec_;
     FieldVector<double,dim> localVec_;
+
 
   protected:
     // generate hmesh
@@ -146,6 +151,7 @@ namespace Dune
       const IndexSetType * set = ((const IndexSetType *) iset);
       return set->template subIndex<dim> (en,vx);
     }
+
   public:
     //****************************************************************
     //
@@ -174,12 +180,6 @@ namespace Dune
     inline int first_item (DUNE_ELEM * he) ;
     template <class GridPartImp>
     inline int next_item (DUNE_ELEM * he) ;
-
-    // first and next macro element via LevelIterator level 0
-    template <PartitionIteratorType pitype, class GridPartImp>
-    inline int first_entity (DUNE_ELEM * he) ;
-    template <PartitionIteratorType pitype, class GridPartImp>
-    inline int next_entity (DUNE_ELEM * he) ;
 
     // first and next macro element via LevelIterator level
     template <PartitionIteratorType pitype>
