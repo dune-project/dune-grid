@@ -699,6 +699,26 @@ namespace Dune {
     return ((*item_).requestrule() == coarse_element_t);
   }
 
+  template<int dim, class GridImp>
+  inline bool ALU3dGridEntity<0,dim,GridImp> :: hasBoundaryIntersections () const
+  {
+    enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
+    typedef typename ALU3dImplTraits<GridImp::elementType>::HasFaceType HasFaceType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::GEOFaceType GEOFaceType;
+
+    assert( item_ );
+    for(int i=0; i<numFaces; ++i)
+    {
+      const GEOFaceType & face = *getFace(*item_,i);
+      const HasFaceType * outerElement = (item_->twist(i) < 0) ?
+                                         (face.nb.front().first) : (face.nb.rear().first);
+      assert( outerElement );
+      // if one boundary found, return true
+      if( outerElement->isboundary() ) return true;
+    }
+    return false;
+  }
+
   //*******************************************************************
   //
   //  --EntityPointer

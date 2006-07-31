@@ -327,6 +327,9 @@ namespace Dune {
     //! returns true, if entity might be coarsened during next adaptation cycle
     bool mightBeCoarsened () const;
 
+    //! returns true, if entity has intersections with boundary
+    bool hasBoundaryIntersections () const;
+
     // private method
     //! marks an element for refCount refines. if refCount is negative the
     //! element is coarsend -refCount times
