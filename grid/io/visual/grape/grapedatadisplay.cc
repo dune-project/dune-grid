@@ -295,7 +295,7 @@ namespace Dune
   dataDisplay(DiscFuncType &func, bool vector)
   {
     /* add function data */
-    this->addData(func,"myFunc",0.0,vector);
+    this->addData(func,func.name(),0.0,vector);
 
     /* display mesh */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
