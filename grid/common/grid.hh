@@ -1371,12 +1371,10 @@ inline std::ostream& operator<< (std::ostream& s,
   return s;
 }
 
-namespace Dune {
-  DUNE_DEPRECATED
-  inline std::string transformToGridName(const std::string & s)
-  {
-    return s;
-  }
+DUNE_DEPRECATED
+inline std::string transformToGridName(const std::string & s)
+{
+  return s;
 }
 
 #endif
