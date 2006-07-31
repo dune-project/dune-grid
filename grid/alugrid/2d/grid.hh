@@ -190,9 +190,14 @@ namespace Dune {
   public:
     //! my Traits class
     typedef typename ALU2dGridFamily < dim , dimworld > :: Traits Traits;
-    friend class ALU2DLocalGeometryStorage<typename Traits::template
-        Codim<0>::Geometry, 4 >;
 
+  protected:
+
+    typedef MakeableInterfaceObject<typename Traits::template
+        Codim<0>::Geometry> GeometryObject;
+    friend class ALU2DLocalGeometryStorage<GeometryObject, 4 >;
+
+  public:
     //! my Traits class
     typedef ALU2dGridFamily < dim , dimworld > GridFamily;
     //! Type of the hierarchic index set

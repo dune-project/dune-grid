@@ -204,8 +204,8 @@ namespace Dune {
     bool geomCreated(int child) const { return geoms_[child] != 0; }
 
     // create local geometry
-    template <class GridImp>
-    void create (const GridImp & grid, const GeometryImp & father, const GeometryImp & son, const int child)
+    template <class GridImp, class Geometry>
+    void create (const GridImp & grid, const Geometry & father, const Geometry & son, const int child)
     {
       assert( !geomCreated(child) );
       assert( child >=0 && child < nChild );

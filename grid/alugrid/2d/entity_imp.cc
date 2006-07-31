@@ -256,9 +256,10 @@ namespace Dune {
   {
     assert( item_ );
     const int child = this->nChild();
-    typedef typename Geometry::ImplementationType GeometryImp;
+    typedef MakeableInterfaceObject<Geometry> GeometryObject;
+    typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
-    static ALU2DLocalGeometryStorage<Geometry,4> geoms;
+    static ALU2DLocalGeometryStorage<GeometryObject,4> geoms;
     if(!geoms.geomCreated(child))
     {
       typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;

@@ -78,9 +78,12 @@ namespace Dune {
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-    friend class ALU2dGridLevelIntersectionIterator<GridImp>;
-    friend class ALU2dGridLeafIntersectionIterator<GridImp>;
 
+    typedef ALU2dGridIntersectionBase<GridImp> ThisType;
+    friend class LevelIntersectionIteratorWrapper<GridImp>;
+    friend class LeafIntersectionIteratorWrapper<GridImp>;
+
+    friend class IntersectionIteratorWrapper<GridImp,ThisType>;
   protected:
     struct impl
     {
@@ -111,15 +114,15 @@ namespace Dune {
     ALU2dGridIntersectionBase(const GridImp & grid, const HElementType* el, int wLevel, bool end=true);
 
     //! The copy constructor
-    ALU2dGridIntersectionBase(const ALU2dGridIntersectionBase<GridImp> & org);
+    ALU2dGridIntersectionBase(const ThisType & org);
 
     virtual ~ALU2dGridIntersectionBase() {}
 
     //! The copy constructor
-    void assign (const ALU2dGridIntersectionBase<GridImp> & org);
+    void assign (const ThisType & org);
 
     //! check whether entities are the same or whether iterator is done
-    bool equals (const ALU2dGridIntersectionBase<GridImp> & i) const;
+    bool equals (const ThisType & i) const;
 
     //! increment iterator
     virtual void increment() { };
@@ -155,16 +158,16 @@ namespace Dune {
     const LocalGeometry & intersectionNeighborLocal () const;
     const Geometry & intersectionGlobal () const;
 
-  private:
-
+  protected:
     // set interator to end iterator
     void done () ;
-    // reset IntersectionIterator to first neighbour
-    virtual void setFirstItem(const HElementType & elem, int wLevel);
+
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
 
+    // reset IntersectionIterator to first neighbour
+    virtual void setFirstItem(const HElementType & elem, int wLevel);
     // the local geometries
     mutable GeometryObject intersectionGlobal_;
     mutable GeometryObject intersectionSelfLocal_;
@@ -204,6 +207,7 @@ namespace Dune {
     friend class LevelIntersectionIteratorWrapper<GridImp>;
 
     typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
+    friend class IntersectionIteratorWrapper<GridImp,ThisType>;
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
 
@@ -268,10 +272,11 @@ namespace Dune {
     : public ALU2dGridIntersectionBase<GridImp>
       //, public IntersectionIteratorDefaultImplementation<GridImp, ALU2dGridLevelIntersectionIterator>
   {
+    typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
     friend class LeafIntersectionIteratorWrapper<GridImp>;
+    friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
-    typedef ALU2dGridLeafIntersectionIterator<GridImp> ThisType;
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
     enum { dim       = GridImp::dimension };
