@@ -1414,6 +1414,11 @@ namespace Dune {
     void writeObject (T &) {}
     void writeObject (int) {}
     void writeObject (double) {}
+
+    template <class T>
+    void read (T &) const {}
+    template <class T>
+    void write (const T &) {}
   };
 
   typedef ObjectStream ObjectStreamType;
