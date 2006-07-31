@@ -214,7 +214,6 @@ namespace Dune {
     friend class ALU3dGridGlobalIdSet<dim,dimworld,elType>;
     friend class ALU3dGridLocalIdSet<dim,dimworld,elType>;
 
-
     //**********************************************************
     // The Interface Methods
     //**********************************************************
@@ -229,8 +228,12 @@ namespace Dune {
 
     //! my Traits class
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: Traits Traits;
-    friend class LocalGeometryStorage< typename Traits::template Codim<0>::Geometry , 8 >;
 
+  protected:
+    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Geometry> GeometryObject;
+    friend class LocalGeometryStorage< GeometryObject , 8 >;
+
+  public:
 
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
@@ -738,7 +741,7 @@ namespace Dune {
   {
     typedef typename GridImp :: template Codim<codim> :: Entity Entity;
     typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename EntityObject :: ImplementationType EntityImp;
 
     template <class EntityProviderType>
     static EntityObject *
@@ -760,7 +763,7 @@ namespace Dune {
     enum { codim = 0 };
     typedef typename GridImp :: template Codim<codim> :: Entity Entity;
     typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename EntityObject :: ImplementationType EntityImp;
 
     template <class EntityProviderType>
     inline static EntityObject *

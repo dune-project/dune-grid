@@ -419,7 +419,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     //! underlying EntityImplementation
     typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename EntityObject :: ImplementationType EntityImp;
 
     //! typedef of my type
     typedef ThisType ALU3dGridEntityPointerType;

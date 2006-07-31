@@ -341,10 +341,11 @@ namespace Dune {
   {
     assert( item_ );
     const int child = item_->nChild();
-    typedef typename Geometry::ImplementationType GeometryImp;
+    typedef MakeableInterfaceObject<Geometry> GeometryObject;
+    typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
     // see alu3dutility.hh for implementation
-    static LocalGeometryStorage<Geometry,8> geoms;
+    static LocalGeometryStorage<GeometryObject,8> geoms;
     if(!geoms.geomCreated(child))
     {
       typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;

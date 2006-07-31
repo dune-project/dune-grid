@@ -951,28 +951,28 @@ namespace Dune {
       levelISet = levelIndexVec_[level] ;
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
-    typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
+    typedef typename VertexObject::ImplementationType VertexImp;
     VertexObject vx( VertexImp(*this, level ) );
 
     ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, dim>
     vertexData(*this,vx,this->getRealImplementation(vx),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
-    typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
+    typedef typename EdgeObject::ImplementationType EdgeImp;
     EdgeObject edge( EdgeImp(*this, level ) );
 
     ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, dim-1>
     edgeData(*this,edge,this->getRealImplementation(edge),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
-    typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
+    typedef typename FaceObject::ImplementationType FaceImp;
     FaceObject face( FaceImp(*this, level ) );
 
     ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, 1>
     faceData(*this,face,this->getRealImplementation(face),data,*levelISet,level);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
-    typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
+    typedef typename ElementObject::ImplementationType ElementImp;
     ElementObject element( ElementImp(*this, level ) );
 
     ALU3DSPACE GatherScatterLevelData < ThisType, DataHandleType, 0>
@@ -997,28 +997,28 @@ namespace Dune {
     typedef CommDataHandleIF<DataHandleImp,DataType> DataHandleType;
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim>::Entity> VertexObject;
-    typedef typename Traits :: template Codim<dim>::Entity::ImplementationType VertexImp;
+    typedef typename VertexObject::ImplementationType VertexImp;
     VertexObject vx( VertexImp(*this, this->maxLevel()) );
 
     ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, dim>
     vertexData(*this,vx,this->getRealImplementation(vx),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<dim-1>::Entity> EdgeObject;
-    typedef typename Traits::template Codim<dim-1>::Entity::ImplementationType EdgeImp;
+    typedef typename EdgeObject::ImplementationType EdgeImp;
     EdgeObject edge( EdgeImp(*this, this->maxLevel()) );
 
     ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, dim-1>
     edgeData(*this,edge,this->getRealImplementation(edge),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
-    typedef typename Traits::template Codim<1>::Entity::ImplementationType FaceImp;
+    typedef typename FaceObject::ImplementationType FaceImp;
     FaceObject face( FaceImp(*this, this->maxLevel()) );
 
     ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, 1>
     faceData(*this,face,this->getRealImplementation(face),data);
 
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> ElementObject;
-    typedef typename Traits::template Codim<0>::Entity::ImplementationType ElementImp;
+    typedef typename ElementObject::ImplementationType ElementImp;
     ElementObject element( ElementImp(*this, this->maxLevel()) );
 
     ALU3DSPACE GatherScatterLeafData < ThisType, DataHandleType, 0>

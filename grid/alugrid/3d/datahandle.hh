@@ -126,7 +126,7 @@ namespace ALUGridSpace {
   protected:
     enum { codim = 0 };
     const GridType & grid_;
-    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
