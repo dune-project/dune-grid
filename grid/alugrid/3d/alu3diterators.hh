@@ -868,9 +868,12 @@ namespace ALUGridSpace {
   class ALU3dGridGhostIteratorHigherCodim
     : public IteratorWrapperInterface < typename IteratorElType<codim>::val_t >
   {
+
+  public:
     typedef typename IteratorElType<codim>::ElType ElType;
     typedef typename IteratorElType<codim>::val_t val_t;
 
+  private:
     template<Dune :: ALU3dGridElementType elType, int cd>
     struct SelectVector
     {};
