@@ -26,6 +26,12 @@ namespace Dune {
     // stores all sizes of leafs
     mutable int leafSizes_[nCodim];
 
+    // stores all sizes of the levels
+    mutable std::vector<int> ghostLevelSizes_[nCodim];
+
+    // stores all sizes of leafs
+    mutable int ghostLeafSizes_[nCodim];
+
     // the grid
     const GridType & grid_;
 
@@ -37,61 +43,63 @@ namespace Dune {
     bool notWorry_;
 
     // count elements of set by iterating the grid
-    template <class SzCacheType , int codim >
+    template <class SzCacheType ,PartitionIteratorType pitype, int codim >
     struct CountLevelEntities
     {
       static inline int count (const SzCacheType & sc, int level, int cd)
       {
         if( cd == codim )
         {
-          return sc.template countLevelEntities<codim> (level);
+          return sc.template countLevelEntities<pitype,codim> (level);
         }
         else
-          return CountLevelEntities < SzCacheType, codim-1> :: count (sc,level,cd);
+          return CountLevelEntities < SzCacheType, pitype, codim-1> :: count (sc,level,cd);
       }
     };
 
     // count elements of set by iterating the grid
-    template <class SzCacheType>
-    struct CountLevelEntities<SzCacheType,0>
+    template <class SzCacheType,PartitionIteratorType pitype>
+    struct CountLevelEntities<SzCacheType,pitype,0>
     {
       static inline int count (const SzCacheType & sc, int level, int cd)
       {
         enum { codim = 0 };
         assert( cd == codim );
-        return sc.template countLevelEntities<codim> (level);
+        return sc.template countLevelEntities<pitype,codim> (level);
       }
     };
 
 
     // count elements of set by iterating the grid
-    template <class SzCacheType , int codim >
+    template <class SzCacheType , PartitionIteratorType pitype, int codim >
     struct CountLeafEntities
     {
       static inline int count (const SzCacheType & sc, int cd)
       {
         if( cd == codim )
         {
-          return sc.template countLeafEntities<codim> ();
+          return sc.template countLeafEntities<pitype,codim> ();
         }
         else
-          return CountLeafEntities < SzCacheType, codim-1> :: count (sc,cd);
+          return CountLeafEntities < SzCacheType, pitype, codim-1> :: count (sc,cd);
       }
     };
 
     // count elements of set by iterating the grid
-    template <class SzCacheType>
-    struct CountLeafEntities<SzCacheType,0>
+    template <class SzCacheType,PartitionIteratorType pitype>
+    struct CountLeafEntities<SzCacheType,pitype,0>
     {
       static inline int count (const SzCacheType & sc, int cd)
       {
         enum { codim = 0 };
         assert( cd == codim );
-        return sc.template countLeafEntities<codim> ();
+        return sc.template countLeafEntities<pitype,codim> ();
       }
     };
 
 
+    // private copy constructor
+    SingleTypeSizeCache (const SingleTypeSizeCache & );
   public:
     SingleTypeSizeCache (const GridType & grid,
                          const bool isSimplex , const bool isCube, bool notWorry = false )
@@ -101,17 +109,19 @@ namespace Dune {
       for(int i=0; i<nCodim; i++)
       {
         leafSizes_[i] = -1;
+        ghostLeafSizes_[i] = -1;
       }
 
       int numMxl = grid_.maxLevel()+1;
-      for(int level = 0; level< numMxl; level++)
+      for(int i=0; i<nCodim; i++)
       {
-        for(int i=0; i<nCodim; i++)
-        {
-          std::vector<int> & vec = levelSizes_[i];
-          vec.resize(numMxl);
-          for(int level = 0; level<numMxl; level++) vec[level] = -1;
-        }
+        std::vector<int> & vec = levelSizes_[i];
+        vec.resize(numMxl);
+        for(int level = 0; level<numMxl; level++) vec[level] = -1;
+
+        std::vector<int> & ghVec = ghostLevelSizes_[i];
+        ghVec.resize(numMxl);
+        for(int level = 0; level<numMxl; level++) ghVec[level] = -1;
       }
     }
 
@@ -130,7 +140,7 @@ namespace Dune {
       if( level >= (int) levelSizes_[codim].size() ) return 0;
 
       if( levelSizes_[codim][level] < 0)
-        levelSizes_[codim][level] = CountLevelEntities<ThisType,dim>::count(*this,level,codim);
+        levelSizes_[codim][level] = CountLevelEntities<ThisType,All_Partition,dim>::count(*this,level,codim);
       return levelSizes_[codim][level];
     }
 
@@ -153,7 +163,7 @@ namespace Dune {
       assert( codim >= 0 );
       assert( codim < nCodim );
       if( leafSizes_[codim] < 0)
-        leafSizes_[codim] = CountLeafEntities<ThisType,dim>::count(*this,codim);
+        leafSizes_[codim] = CountLeafEntities<ThisType,All_Partition,dim>::count(*this,codim);
       return leafSizes_[codim];
     };
 
@@ -167,13 +177,31 @@ namespace Dune {
       return size(codim);
     }
 
+    //! return number of ghost entities for codimension codim
+    int ghostSize (int codim) const {
+      if( ghostLeafSizes_[codim] < 0)
+        ghostLeafSizes_[codim] = CountLeafEntities<ThisType,Ghost_Partition,dim>::count(*this,codim);
+      return ghostLeafSizes_[codim];
+    }
+
+    /** \brief ghostSize is zero for this grid  */
+    int ghostSize (int level, int codim) const
+    {
+      // if level is larger than grid max level , return 0
+      if( level >= (int) ghostLevelSizes_[codim].size() ) return 0;
+
+      if( ghostLevelSizes_[codim][level] < 0)
+        ghostLevelSizes_[codim][level] = CountLevelEntities<ThisType,Ghost_Partition,dim>::count(*this,level,codim);
+      return ghostLevelSizes_[codim][level];
+    }
+
   private:
-    template <int codim>
+    template <PartitionIteratorType pitype, int codim>
     int countLevelEntities(int level) const
     {
-      typedef typename GridType::template Codim<codim> :: LevelIterator LevelIterator;
-      LevelIterator it  = grid_.template lbegin<codim> (level);
-      LevelIterator end = grid_.template lend<codim>   (level);
+      typedef typename GridType::template Codim<codim> :: template Partition<pitype> :: LevelIterator LevelIterator;
+      LevelIterator it  = grid_.template lbegin<codim,pitype> (level);
+      LevelIterator end = grid_.template lend<codim,pitype>   (level);
 
       GeometryType type (((isSimplex_) ? GeometryType::simplex : GeometryType::cube ),dim-codim);
       assert( ((dim-codim) > 1) ? (type.isCube() == isCube_) : 1);
@@ -181,13 +209,13 @@ namespace Dune {
       return countElements(it,end);
     }
 
-    template <int codim>
+    template <PartitionIteratorType pitype, int codim>
     int countLeafEntities() const
     {
       // count All_Partition entities
-      typedef typename GridType::template Codim<codim> :: LeafIterator LeafIterator;
-      LeafIterator it  = grid_.template leafbegin<codim> ();
-      LeafIterator end = grid_.template leafend<codim>   ();
+      typedef typename GridType::template Codim<codim> :: template Partition<pitype> :: LeafIterator LeafIterator;
+      LeafIterator it  = grid_.template leafbegin<codim,pitype> ();
+      LeafIterator end = grid_.template leafend<codim,pitype>   ();
       GeometryType type (((isSimplex_) ? GeometryType::simplex : GeometryType::cube ),dim-codim);
       assert( ((dim-codim) > 1) ? (type.isCube() == isCube_) : 1);
       if( notWorry_ ) return countElements(it,end,type);
@@ -294,9 +322,20 @@ namespace Dune {
       if( type.isCube()    ) return cubeSize_(codim);
       return 0;
     }
+
+    //! number of leaf entities per codim and geometry type in this process
+    int ghostSize (int codim) const
+    {
+      return simplexSize_.ghostSize(codim) + cubeSize_.ghostSize(codim);
+    }
+
+    //! number of leaf entities per codim and geometry type in this process
+    int ghostSize (int level, int codim) const
+    {
+      return simplexSize_.ghostSize(level,codim) + cubeSize_.ghostSize(level,codim);
+    }
   };
 
 
 } // end namespace Dune
-
 #endif
