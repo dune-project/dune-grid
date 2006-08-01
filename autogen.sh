@@ -5,7 +5,7 @@
 set -e
 
 usage () {
-    echo "Usage: ./autogen.sh [options]"
+    echo "Usage: ./autogen.sh DUNE_COMMON_DIR [options]"
     echo "  --ac=, --acversion=VERSION   use a specific VERSION of autoconf"
     echo "  --am=, --amversion=VERSION   use a specific VERSION of automake"
     echo "  -h,    --help                you already found this :-)"
@@ -88,9 +88,16 @@ echo "--> autoheader..."
 autoheader$ACVERSION
 
 # create a link to the dune-common am directory
-echo "--> linking dune-common/am..."
-rm -f am
-ln -s $am_dir am
+if [ -n "$am_dir" ] && [ -d $am_dir ]; then
+  echo "--> linking dune-common/am..."
+  rm -f am
+  ln -s $am_dir am
+else
+  echo
+  echo "Error: Could not find dune-common/am!"
+  usage
+  exit 1
+fi
 
 # call automake/conf
 echo "--> automake..."
