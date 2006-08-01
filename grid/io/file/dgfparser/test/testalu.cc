@@ -19,7 +19,7 @@ try {
 
   {
     typedef ALUSimplexGrid<3,3> GridType;
-    std::string filename("examplegrid7.dgf");
+    std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -27,7 +27,7 @@ try {
   }
   {
     typedef ALUCubeGrid<3,3> GridType;
-    std::string filename("examplegrid7.dgf");
+    std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid

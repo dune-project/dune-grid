@@ -22,7 +22,7 @@ try {
     typedef AlbertaGrid<GRIDDIM,GRIDDIM> GridType;
     std::string filename;
     if(GRIDDIM == 2) filename += "examplegrid5.dgf";
-    if(GRIDDIM == 3) filename += "examplegrid7.dgf";
+    if(GRIDDIM == 3) filename += "examplegrid6.dgf";
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
