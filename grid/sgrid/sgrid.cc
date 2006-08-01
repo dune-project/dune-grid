@@ -308,7 +308,9 @@ namespace Dune {
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ileafbegin () const
   {
-    return ibegin();
+    // only obtain leaf intersections on maxLevel
+    if(isLeaf()) return ibegin();
+    return iend();
   }
 
   template<int dim, class GridImp>
