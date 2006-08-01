@@ -14,7 +14,6 @@
 
 // Local includes
 #include "entity.hh"
-#include "myautoptr.hh"
 
 namespace Dune {
   // Forward declarations
