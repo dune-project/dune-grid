@@ -255,6 +255,12 @@ namespace Dune {
 
     }
 
+    //! return true if across the edge an neighbor exists
+    bool neighbor() const
+    {
+      return leafNeighbor() || levelNeighbor();
+    }
+
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const
