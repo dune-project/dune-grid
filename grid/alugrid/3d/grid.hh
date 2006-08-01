@@ -433,13 +433,13 @@ namespace Dune {
     bool loadBalance (DataHandleType & data);
 
     /** \brief ghostSize is zero for this grid  */
-    int ghostSize (int level, int codim) const { return 0; }
+    int ghostSize (int level, int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int level, int codim) const { return 0; }
 
     /** \brief ghostSize is zero for this grid  */
-    int ghostSize (int codim) const { return 0; }
+    int ghostSize (int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int codim) const { return 0; }

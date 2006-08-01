@@ -161,80 +161,6 @@ namespace Dune {
     up2Date_ = true;
   }
 
-  /*
-     template <class GridType >
-     inline void ALU3dGridLeafVertexList ::
-     setupVxList(const GridType & grid)
-     {
-     // iterates over grid elements of given level and adds all vertices to
-     // given list
-     enum { codim = 3 };
-
-     VertexListType & vxmap = vertexList_;
-     vxmap.clear();
-
-     const ALU3dGridElementType elType = GridType:: elementType;
-
-     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,Dune::All_Partition>  ElementIteratorType;
-     typedef typename ElementIteratorType :: val_t val_t;
-
-     typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
-     typedef ALU3DSPACE VertexType VertexType;
-
-     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
-
-     ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
-
-     #ifndef NDEBUG
-     int count = 0;
-     #endif
-     for( it.first(); !it.done() ; it.next())
-     {
-      val_t & item = it.item();
-
-      IMPLElementType * elem = 0;
-      if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
-      else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
-
-      assert( elem );
-      int level = elem->level();
-
-      for(int i=0; i<nVx; ++i)
-      {
-        VertexType * vx = elem->myvertex(i);
-        assert( vx );
-
-        // insert only interior and border vertices
-        if( vx->isGhost() ) continue;
-
-        const int idx = vx->getIndex();
-        if(vxmap.find(idx) == vxmap.end())
-        {
-          ItemType p ( vx, level );
-          vxmap[idx] = p;
-     #ifndef NDEBUG
-   ++ count;
-   ++#endif
-        }
-        // always store max level of vertex as grdi definition says
-        else
-        {
-          // if vertex exists in map, check level
-          ItemType & p = vxmap[idx];
-          // set the max level for each vertex, see Grid definition
-          if (p.second < level) p.second = level;
-        }
-      }
-     }
-
-     //std::cout << count << "c | s " << vxList.size() << "\n";
-     // make sure that the found number of vertices equals to stored ones
-     assert( count == (int)vxmap.size() );
-     up2Date_ = true;
-     }
-   */
 
   //--Grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -353,6 +279,7 @@ namespace Dune {
     DUNE_THROW(GridError,"Geometrytype not implemented!");
   }
 
+  // --size
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline int ALU3dGrid<dim, dimworld, elType>::size(int level, GeometryType type) const
   {
@@ -377,6 +304,35 @@ namespace Dune {
     if(elType == tetra && !type.isSimplex()) return 0;
     if(elType == hexa  && !type.isCube   ()) return 0;
     return size(dim-type.dim());
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline int ALU3dGrid<dim, dimworld, elType>::ghostSize(int codim) const
+  {
+#if ALU3DGRID_PARALLEL
+    assert( codim >= 0 );
+    assert( codim < dim +1 );
+
+    assert( sizeCache_ );
+    return sizeCache_->ghostSize(codim);
+#else
+    return 0;
+#endif
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline int ALU3dGrid<dim, dimworld, elType>::ghostSize(int level, int codim) const
+  {
+#if ALU3DGRID_PARALLEL
+    assert( codim >= 0 );
+    assert( codim < dim +1 );
+    assert( level >= 0);
+
+    assert( sizeCache_ );
+    return sizeCache_->ghostSize(level,codim);
+#else
+    return 0;
+#endif
   }
 
   // calc all necessary things that might have changed
