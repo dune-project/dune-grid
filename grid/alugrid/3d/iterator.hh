@@ -13,7 +13,6 @@
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "faceutility.hh"
-#include "myautoptr.hh"
 #include "alu3diterators.hh"
 #include "memory.hh"
 

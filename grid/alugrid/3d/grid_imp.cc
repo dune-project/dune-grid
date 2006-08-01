@@ -7,7 +7,6 @@
 // Local includes
 #include "entity.hh"
 #include "iterator.hh"
-#include "myautoptr.hh"
 #include "datahandle.hh"
 
 namespace Dune {
