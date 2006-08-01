@@ -3593,6 +3593,7 @@ namespace Dune
     }
     else
     {
+      derr<<"Couldn't read grid file '"<<macroTriangFilename<<"' because it's not in ALBERTA macro triangulation format! \n";
       DUNE_THROW(NotImplemented,"Constructor reading backup file not implemented!");
     }
     std::cout << "AlbertaGrid<"<<dim<<","<<dimworld<<"> created from macro grid file '" << macroTriangFilename << "'. \n\n";
