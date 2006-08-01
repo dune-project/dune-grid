@@ -95,8 +95,8 @@ namespace Dune {
     double testTriang(int snr);
   };
 
-  class MacroGrid : protected DuneGridFormatParser {
-
+  class MacroGrid : protected DuneGridFormatParser
+  {
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
@@ -106,9 +106,10 @@ namespace Dune {
       : DuneGridFormatParser()
         , filename_(filename)
         , MPICOMM_(MPICOMM) {}
-    //! conversion method from a DGF file to a GridType* instance
+
+    //! returns pointer to a new instance of type GridType created from a DGF file
     template <class GridType>
-    inline operator GridType* () {
+    inline GridType * createGrid () {
       return Impl<GridType>::generate(*this,filename_,MPICOMM_);
     }
   private:
@@ -137,29 +138,48 @@ namespace Dune {
   //! GridType & grid = *gridptr;
   //! @endcode
   template <class GridType>
-  class GridPtr : private MacroGrid {
+  class GridPtr : public MacroGrid {
     // make operator new and delete private, because this class is only a
     // pointer
     void * operator new (size_t);
     void operator delete (void *);
-    GridPtr(const GridPtr & );
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     //! constructor given the name of a DGF file
     GridPtr(const std::string filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
       MacroGrid(filename.c_str(),MPICOMM),
-      grid_(*this) {}
-    ~GridPtr() {
-      delete grid_;
-    }
+      gridptr_(this->template createGrid<GridType>()) {}
+
+    //! copy constructor, copies internal smart pointer
+    GridPtr(const GridPtr & org) : gridptr_(org.gridptr_) {}
+
+    //! return reference to GridType instance
     GridType& operator*() {
-      return *grid_;
+      return *gridptr_;
     }
+    //! return pointer to GridType instance
     GridType* operator->() {
-      return grid_;
+      return gridptr_.operator -> ();
+    }
+
+    //! return const reference to GridType instance
+    const GridType& operator*() const {
+      return *gridptr_;
+    }
+    //! return const pointer to GridType instance
+    const GridType* operator->() const {
+      return gridptr_.operator -> ();
+    }
+
+    //! assignment of grid pointer
+    GridPtr & operator = (const GridPtr & org )
+    {
+      gridptr_ = org.gridptr_;
+      return *this;
     }
   private:
-    GridType* grid_;
+    // grid smart pointer
+    std::auto_ptr<GridType> gridptr_;
   }; // end of class GridPtr
 }
 #include "dgfparser.cc"
