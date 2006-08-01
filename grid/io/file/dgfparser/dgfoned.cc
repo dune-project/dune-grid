@@ -31,13 +31,16 @@ namespace Dune {
       }
 
       std::vector<double> vtx;
+      vtx.reserve(vtxlist.size());
       iterator vtxend = vtxlist.end();
       for(iterator it=vtxlist.begin(); it!= vtxend; ++it)
       {
         vtx.push_back( (*it).second );
       }
 
+      // sort vector, otherwise OneDGrid not satisfied
       std::sort(vtx.begin(), vtx.end());
+
       return new OneDGrid<dim,dimworld>(vtx);
     }
     DUNE_THROW(DGFException, "Unrecoverable Error in dgfpaser<OneDGrid>");
