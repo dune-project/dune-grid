@@ -192,7 +192,7 @@ namespace Dune {
         \c SGRID , or
         \c YASPGRID
         and the integer
-        \c DUNE_PROBLEM_DIM
+        \c GRIDDIM
         one obtains a definition of the type \c GridType and
         the required header files for the desired grid and the macrogrid parser
         are included.

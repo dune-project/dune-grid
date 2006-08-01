@@ -43,8 +43,8 @@ void markOne ( GridType & grid , int num , int ref )
 
 int main () {
   try {
-    const int dim      = DUNE_PROBLEM_DIM;
-    const int dimworld = DUNE_WORLD_DIM;
+    const int dim      = ALBERTA_DIM;
+    const int dimworld = ALBERTA_WORLD_DIM;
     /* use grid-file appropriate for dimensions */
     std::ostringstream filename;
     filename << "alberta-testgrid-" << dim

@@ -27,15 +27,7 @@
  * @endcode
  * The variable dimworld is determined by
  * @code
- *#if !defined GRIDDIM
-   const int dimworld = DUNE_PROBLEM_DIM;
- *#else
- *#if !GRIDDIM
-     const int dimworld = DUNE_PROBLEM_DIM;
- *#else
-      const int dimworld = GRIDDIM;
- *#endif
- *#endif
+   const int dimworld = GRIDDIM;
  * @endcode
  * Remark:
  * -# By defauly Dune::YaspGrid<2,2> is used.
@@ -72,19 +64,7 @@
  */
 
 
-#if !defined GRIDDIM
-const int dimworld = DUNE_PROBLEM_DIM;
-  #define GRIDDIM DUNE_PROBLEM_DIM
-  #warning --- No GRIDDIM defined, defaulting to DUNE_PROBLEM_DIM
-#else
-  #if !GRIDDIM
-const int dimworld = DUNE_PROBLEM_DIM;
-    #define GRIDDIM DUNE_PROBLEM_DIM
-    #warning --- No GRIDDIM defined, defaulting to DUNE_PROBLEM_DIM
-  #else
 const int dimworld = GRIDDIM;
-  #endif
-#endif
 
 #if defined ALBERTAGRID && HAVE_ALBERTA
   #if GRIDDIM == 1
