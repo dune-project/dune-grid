@@ -26,6 +26,14 @@ try
     // run grid check to check grid
     gridcheck(*gridptr);
   }
+  {
+    typedef OneDGrid<1,1> GridType;
+    std::string filename("examplegrid6.dgf");
+    GridPtr<GridType> gridptr(filename);
+
+    // run grid check to check grid
+    gridcheck(*gridptr);
+  }
   return 0;
 }
 catch (Dune::Exception &e) {

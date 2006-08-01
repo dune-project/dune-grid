@@ -10,10 +10,35 @@ namespace Dune {
     std::ifstream gridin(filename);
     if(mg.readDuneGrid(gridin))
     {
-      std::vector<double> vtxlist(mg.vtx.size());
-      for (typename std::vector<double>::size_type i=0; i<vtxlist.size(); ++i)
-        vtxlist[i] = mg.vtx[i][0];
-      return new OneDGrid<dim,dimworld>(vtxlist);
+      typedef std::map<size_t,double> VtxMapType;
+      typedef typename VtxMapType :: iterator iterator;
+      VtxMapType vtxlist;
+      size_t size = mg.vtx.size();
+      for(size_t i=0; i<size; ++i)
+      {
+        iterator vtxend = vtxlist.end();
+        bool found = false;
+        for(iterator it=vtxlist.begin(); it!= vtxend; ++it)
+        {
+          if( std::abs((*it).second - mg.vtx[i][0]) < 1e-10)
+          {
+            found = true;
+            break;
+          }
+        }
+
+        if(!found) vtxlist[i] = mg.vtx[i][0];
+      }
+
+      std::vector<double> vtx;
+      iterator vtxend = vtxlist.end();
+      for(iterator it=vtxlist.begin(); it!= vtxend; ++it)
+      {
+        vtx.push_back( (*it).second );
+      }
+
+      std::sort(vtx.begin(), vtx.end());
+      return new OneDGrid<dim,dimworld>(vtx);
     }
     DUNE_THROW(DGFException, "Unrecoverable Error in dgfpaser<OneDGrid>");
     return 0;
