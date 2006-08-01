@@ -712,8 +712,7 @@ namespace Dune {
     IntersectionIterator ileafbegin () const
     {
       // only if entity is leaf this iterator delivers intersections
-      if(isLeaf()) return ibegin();
-      return iend();
+      return ibegin();
     }
 
     //! returns intersection iterator for first intersection
