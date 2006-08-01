@@ -1760,7 +1760,7 @@ namespace Dune
 
     typedef AlbertaGridIntersectionIterator< const MyType > IntersectionIteratorImp;
     typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
-    typedef typename LeafIntersectionIteratorImp :: StorageType LeafIntersectionIteratorProviderType;
+    typedef AGMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     friend class LeafIntersectionIteratorWrapper< const MyType > ;
 
     typedef LeafIntersectionIteratorWrapper<const MyType >
