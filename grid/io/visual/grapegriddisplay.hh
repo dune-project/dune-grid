@@ -59,6 +59,9 @@ namespace Dune
     //! the grid we want to display
     const GridType &grid_;
 
+    //! true if we can use LevelIntersectionIterator
+    const bool hasLevelIntersections_;
+
     //! leaf index set of the grid
     void * indexSet_;
 
@@ -158,6 +161,11 @@ namespace Dune
     // --GrapeGridDisplay, Some Subroutines needed for display with GRAPE
     //
     //****************************************************************
+    // update element from entity
+    template <class IntersectionIteratorType>
+    inline void checkNeighbors(IntersectionIteratorType&,
+                               const IntersectionIteratorType&, DUNE_ELEM *) ;
+
     // update element from entity
     template <class EntityPointerType>
     inline int el_update (EntityPointerType *, DUNE_ELEM *) ;

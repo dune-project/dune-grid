@@ -13,6 +13,7 @@ namespace Dune
   inline GrapeGridDisplay<GridType>::
   GrapeGridDisplay(const GridType &grid, const int myrank )
     : grid_(grid)
+      , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , indexSet_( (void *)(&grid.leafIndexSet()) )
       , lid_(grid.localIdSet())
       , myRank_(myrank)
@@ -29,6 +30,7 @@ namespace Dune
   inline GrapeGridDisplay<GridType>::
   GrapeGridDisplay(const GridPartType &gridPart, const int myrank )
     : grid_(gridPart.grid())
+      , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , indexSet_( (void *)(&gridPart.indexSet()) )
       , lid_(grid_.localIdSet())
       , myRank_(myrank)
@@ -55,6 +57,36 @@ namespace Dune
   //
   //****************************************************************
   /** hmesh functionen **/
+
+  template<class GridType>
+  template <class IntersectionIteratorType>
+  inline void GrapeGridDisplay<GridType>::
+  checkNeighbors(IntersectionIteratorType & nit,
+                 const IntersectionIteratorType & endnit, DUNE_ELEM * he)
+  {
+    typedef typename GridType::Traits::template Codim<0>::Entity Entity;
+    int lastElNum = -1;
+
+    // check all faces for boundary or not
+    while ( nit != endnit )
+    {
+      int num = nit.numberInSelf();
+      assert( num >= 0 );
+      assert( num < MAX_EL_FACE );
+
+      if(num != lastElNum)
+      {
+        he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
+        if( nit.neighbor() )
+        {
+          if(nit.outside()->partitionType() != InteriorEntity )
+            he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
+        }
+        lastElNum = num;
+      }
+      ++nit;
+    }
+  }
 
   template<class GridType>
   template <class EntityPointerType>
@@ -107,35 +139,26 @@ namespace Dune
       } // end set all vertex coordinates
 
       {
-        // reset the boundary information
-        for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = 0;
-
         if( en.hasBoundaryIntersections() )
         {
-          typedef typename Entity::LeafIntersectionIterator IntersectionIterator;
-          IntersectionIterator endnit = en.ileafend();
-          IntersectionIterator nit    = en.ileafbegin();
+          // reset the boundary information
+          for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = -1;
 
-          // value < zero otherwise first test fails
-          int lastElNum = -1;
-
-          // check all faces for boundary or not
-          while ( nit != endnit )
+          if( en.isLeaf() )
           {
-            int num = nit.numberInSelf();
-            assert( num >= 0 );
-            assert( num < MAX_EL_FACE );
+            typedef typename Entity::LeafIntersectionIterator IntersectionIterator;
+            IntersectionIterator endnit = en.ileafend();
+            IntersectionIterator nit    = en.ileafbegin();
 
-            if(num != lastElNum)
-            {
-              he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
-              //if(nit.levelNeighbor() || nit.leafNeighbor() )
-              if( nit.neighbor() )
-                if(nit.outside()->partitionType() != InteriorEntity )
-                  he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
-              lastElNum = num;
-            }
-            ++nit;
+            checkNeighbors(nit,endnit,he);
+          }
+          else if(hasLevelIntersections_)
+          {
+            typedef typename Entity::LevelIntersectionIterator IntersectionIterator;
+            IntersectionIterator endnit = en.ilevelend();
+            IntersectionIterator nit    = en.ilevelbegin();
+
+            checkNeighbors(nit,endnit,he);
           }
 
           // for this type of element we have to swap the faces
@@ -152,7 +175,11 @@ namespace Dune
             he->bnd[4] = help_bnd[3];
             he->bnd[5] = help_bnd[0];
           }
-
+        }
+        else
+        {
+          // if no boundary intersections, then all faces are interior
+          for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = 0;
         }
       }
 
