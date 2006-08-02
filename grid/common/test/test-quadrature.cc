@@ -65,13 +65,13 @@ void checkQuadrature(Dune::GeometryType t)
       break;
     }
   }
-  for (int i=maxorder;; i++)
+  for (int i=maxorder+1;; i++)
   {
     try {
       checkQuadrature<ctype,dim>(t, i);
     }
     catch (Dune::QuadratureOrderOutOfRange & e) {
-      if (i-1 > maxorder)
+      if (i > maxorder+1)
       {
         std::cout << "Error: " << t << " allows higher order in the second run." << std::endl;
         std::cout << "       " << maxorder << " in the first run, "
