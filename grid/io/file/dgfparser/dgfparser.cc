@@ -66,7 +66,7 @@ namespace Dune {
         DUNE_THROW(IOError, "ALU can only handle simplex grids in 2d!");
       }
     }
-    std::cout << "Writing vertices...";
+    dverb << "Writing vertices...";
     out << nofvtx << std::endl;
     for (int n=0; n<nofvtx; n++) {
       for (int j=0; j<dimw; j++) {
@@ -74,9 +74,9 @@ namespace Dune {
       }
       out << std::endl;
     }
-    std::cout << "done" << std::endl;
-    std::cout.flush();
-    std::cout << "Writing Simplices...";
+    dverb << "done" << std::endl;
+    dverb.flush();
+    dverb << "Writing Simplices...";
     out << nofelements << std::endl;
     for (int n=0; n<nofelements; n++) {
       if (simplexgrid) {
@@ -101,9 +101,9 @@ namespace Dune {
       }
       out << std::endl;
     }
-    std::cout << "done" << std::endl;
-    std::cout.flush();
-    std::cout << "Writing Boundary...";
+    dverb << "done" << std::endl;
+    dverb.flush();
+    dverb << "Writing Boundary...";
     out << facemap.size() << std::endl;
     std::map<EntityKey<int>,int>::iterator pos;
     for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
@@ -121,8 +121,8 @@ namespace Dune {
       for (int n=0; n<nofvtx; n++) {
         out << n << " " << -1 << std::endl;
       }
-    std::cout << "done" << std::endl;
-    std::cout.flush();
+    dverb << "done" << std::endl;
+    dverb.flush();
   }
 
   // read the DGF file and store vertex/element/bound structure
@@ -312,15 +312,15 @@ namespace Dune {
       }
       nofvtx = 0;
       if (interval.ok()) {
-        std::cout << "Reading verticies from IntervalBlock" << std::flush;
+        dverb << "Reading verticies from IntervalBlock" << std::flush;
         dimw = interval.dimw();
         nofvtx += interval.getVtx(vtx);
-        std::cout << "Done." << std::endl;
+        dverb << "Done." << std::endl;
       }
       if (bvtx.ok()) {
-        std::cout << "Reading verticies from VertexBlock" << std::flush;
+        dverb << "Reading verticies from VertexBlock" << std::flush;
         nofvtx += bvtx.get(vtx);
-        std::cout << "Done." << std::endl;
+        dverb << "Done." << std::endl;
       }
       if (dimw!=2 && dimw!=3) {
         DUNE_THROW(DGFException,
@@ -385,14 +385,14 @@ namespace Dune {
       if (para.maxArea()>0)
         command << "-a" << para.maxArea() << " ";
       command << name << suffix;
-      std::cout << "Calling : " << command.str() << std::endl;
+      dverb << "Calling : " << command.str() << std::endl;
       system(command.str().c_str());
       if (para.display()) {
         std::stringstream command;
         if (para.haspath())
           command << para.path() << "/";
         command << "showme " << name << ".1.ele";
-        std::cout << "Calling : " << command.str() << std::endl;
+        dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
     }
@@ -416,7 +416,7 @@ namespace Dune {
           suffix = ".node";
         }
         command << name << suffix;
-        std::cout << "Calling : " << command.str() << std::endl;
+        dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
       if (para.minAngle()>0 || para.maxArea()>0)
@@ -434,7 +434,7 @@ namespace Dune {
           command << "a" << para.maxArea();
 
         command << " " << name << ".1.node";
-        std::cout << "Calling : " << command.str() << std::endl;
+        dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
       if (para.display())
@@ -444,7 +444,7 @@ namespace Dune {
           command << para.path() << "/";
 
         command << "tetview-linux " << name << "." << call_nr << ".ele";
-        std::cout << "Calling : " << command.str() << std::endl;
+        dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
     }
@@ -457,14 +457,14 @@ namespace Dune {
     int offset,tmp,params;
     std::string nodename = name + ".node";
     std::string elename = name + ".ele";
-    std::cout << "opening " << nodename << "\n";
+    dverb << "opening " << nodename << "\n";
     std::ifstream node(nodename.c_str());
     if (!node) {
       DUNE_THROW(DGFException,
                  "could not find file " << nodename
                                         << " prehaps something went wrong with Tetgen/Triangle?");
     }
-    std::cout << "opening " << elename << "\n";
+    dverb << "opening " << elename << "\n";
     std::ifstream ele(elename.c_str());
     if (!ele) {
       DUNE_THROW(DGFException,
@@ -472,12 +472,12 @@ namespace Dune {
                                         << " prehaps something went wrong with Tetgen/Triangle?");
     }
     {
-      std::cout << "calculating offset from " << name << " .... offset = ";
+      dverb << "calculating offset from " << name << " .... offset = ";
       node >> nofvtx >> dimw >> tmp >> params;
       // offset is 0 by default
       // the offset it the difference of the first vertex number to zero
       node >> offset;
-      std::cout << offset << " \n";
+      dverb << offset << " \n";
       node.seekg(0);
     }
     {
@@ -528,7 +528,7 @@ namespace Dune {
       for (int i=0; i<nofelements; i++) {
         double o=testTriang(i);
         if (o*orientation<0) { // wrong orientation
-          // std::cout << "Reorientation of simplex " << i << std::endl;
+          // dverb << "Reorientation of simplex " << i << std::endl;
           int tmp=elements[i][(fixvtx+1)%3];
           elements[i][(fixvtx+1)%3] = elements[i][(fixvtx+2)%3];
           elements[i][(fixvtx+2)%3] = tmp;
@@ -577,7 +577,7 @@ namespace Dune {
         }
       }
       if (maxface!=fce) {
-        // std::cout << "Rearranging verticies of simplex " << i
+        // dverb << "Rearranging verticies of simplex " << i
         //  << " since face " << maxface << " is largest" << std::endl;
         elements[i][fce]=idx[maxface];
         elements[i][(fce+1)%3]=idx[(maxface+1)%3];

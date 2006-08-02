@@ -3,6 +3,7 @@
 #ifndef DUNE_MACROGRIDPARSERBLOCKS_HH
 #define DUNE_MACROGRIDPARSERBLOCKS_HH
 
+#include <dune/common/stdstreams.hh>
 #include "entitykey.hh"
 
 namespace Dune {
@@ -411,8 +412,8 @@ namespace Dune {
                                        {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
         static int offset2[2][3][2] = {{{0,0},{1,0},{0,1}},
                                        {{1,1},{0,1},{1,0}}};
-        std::cout << "generating simplices...";
-        std::cout.flush();
+        dverb << "generating simplices...";
+        dverb.flush();
         std::vector<std::vector<int> > cubes = elements;
         if(dimworld == 3) {
           elements.resize(6*cubes.size());
@@ -887,26 +888,26 @@ namespace Dune {
           for(int i =0; i < dimw_; i++)
             h_[i] = (p1_[i] - p0_[i])/nofcells_[i];
           //Printing Data on screen
-          std::cout << "p0 = (";
+          dverb << "p0 = (";
           for(int i = 0; i<dimw_-1; i++)
-            std::cout << p0_[i]  <<",";
-          std::cout << p0_[dimw_-1] <<") \n";
-          std::cout << "p1 = (";
+            dverb << p0_[i]  <<",";
+          dverb << p0_[dimw_-1] <<") \n";
+          dverb << "p1 = (";
           for(int i = 0; i<dimw_-1; i++)
-            std::cout << p1_[i]  <<",";
-          std::cout << p1_[dimw_-1] <<") \n";
-          std::cout << "n = (";
+            dverb << p1_[i]  <<",";
+          dverb << p1_[dimw_-1] <<") \n";
+          dverb << "n = (";
           for(int i = 0; i<dimw_-1; i++)
-            std::cout << nofcells_[i]  <<",";
-          std::cout << nofcells_[dimw_-1] <<") \n";
-          std::cout << std::endl;
+            dverb << nofcells_[i]  <<",";
+          dverb << nofcells_[dimw_-1] <<") \n";
+          dverb << std::endl;
         }
       }
       int getVtx(std::vector<std::vector<double> >& vtx) {
         size_t countvtx;
         size_t old_size = vtx.size();
         //fill vtx
-        std::cout << "reading vertices...";
+        dverb << "reading vertices...";
         vtx.resize(vtx.size()+nofvtx());
         for (countvtx=old_size; countvtx < vtx.size(); countvtx++)
           vtx[countvtx].resize(dimw_);
@@ -929,7 +930,7 @@ namespace Dune {
               m++;
             }
         }
-        std::cout << "done" << std::endl;
+        dverb << "done" << std::endl;
         return nofvtx();
       }
 
@@ -949,8 +950,8 @@ namespace Dune {
                                       {{0,0,0},{1,1,1},{1,1,0},{0,1,0}},
                                       {{0,0,0},{1,1,1},{0,1,0},{0,1,1}},
                                       {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
-        std::cout << "generating simplices...";
-        std::cout.flush();
+        dverb << "generating simplices...";
+        dverb.flush();
         if(dimw_ == 3) {
           simplex.resize(6*nofhexa() );
           for(countsimpl=0; countsimpl < simplex.size(); countsimpl++)
@@ -983,8 +984,8 @@ namespace Dune {
             }
         }
 
-        std::cout << "done" << std::endl;
-        std::cout.flush();
+        dverb << "done" << std::endl;
+        dverb.flush();
         return simplex.size();
       }
       int getHexa(std::vector<std::vector<int> >& simplex) {
@@ -996,7 +997,7 @@ namespace Dune {
           verticesPerCube = 8;
         else
           verticesPerCube = 4;
-        std::cout << "generating hexaeder...";
+        dverb << "generating hexaeder...";
         simplex.resize(nofhexa());
         for (counthexa=0; counthexa < simplex.size(); counthexa++)
           simplex[counthexa].resize(verticesPerCube);
@@ -1025,14 +1026,14 @@ namespace Dune {
               m++;
             }
         }
-        std::cout << "done" << std::endl;
+        dverb << "done" << std::endl;
         return simplex.size();
       }
 
       void getCubeBoundary(std::map<EntityKey<int>,int>& facemap) {
 
         //fill facemap
-        std::cout << "Filling boundary facemap of Hexagrid...";
+        dverb << "Filling boundary facemap of Hexagrid...";
         if(dimw_ == 3) {
           for(int j=0; j < nofcells_[1]; j++)
             for(int k=0; k < nofcells_[2]; k++) {
@@ -1107,7 +1108,7 @@ namespace Dune {
             facemap[key4] = 0;
           }
         }
-        std::cout << "done" << std::endl;
+        dverb << "done" << std::endl;
       }
 
       int nofvtx() {
