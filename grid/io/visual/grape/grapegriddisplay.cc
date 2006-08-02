@@ -257,6 +257,7 @@ namespace Dune
   {
     typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
 
+    assert( he->gridPart );
     GridPartType & gridPart = *((GridPartType *) he->gridPart);
 
     he->liter   = 0;
@@ -615,6 +616,7 @@ namespace Dune
         dune->first_child = 0;
         dune->next_child  = 0;
 
+        dune->gridPart = 0;
         return ;
       }
 
@@ -742,6 +744,7 @@ namespace Dune
     hel_.enditer = 0;
 
     hel_.hiter    = 0;
+    hel_.gridPart = 0;
 
     hel_.actElement = 0;
 
@@ -761,6 +764,7 @@ namespace Dune
     dune->iteratorType          = g_LeafIterator;
     dune->partitionIteratorType = g_All_Partition;
 
+    dune->gridPart = 0;
     setIterationMethods(dune,0);
 
     /* return hmesh with no data */

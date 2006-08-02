@@ -235,8 +235,8 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
   if(f_data) func = (DUNE_FUNC *) f_data->function_data;
   dat->setIterationModus(dat,func);
 
+  // note this pointer can be NULL
   elem->gridPart = dat->gridPart;
-  assert( elem->gridPart );
 
   /* store level of interest for LeafIterator */
   if(maxlevelButton->on_off == OFF) /* dont know why wrong, but it works */
