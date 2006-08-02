@@ -862,7 +862,7 @@ namespace Dune {
         return id;
       }
 
-      if (cc==1)   // faces, i.e. for dim=2 codim=1 is treated as a face
+      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
       {
         // Idea: Use the doubled grid to assign coordinates to faces
 
@@ -871,7 +871,7 @@ namespace Dune {
 
         // compute position from cell position
         for (int k=0; k<dim; k++)
-          coord[k] = coord[k]*2 + 1;         // the doubled grid
+          coord[k] = coord[k]*2 + 1; // the doubled grid
         if (i%2)
           coord[ivar] += 1;
         else
@@ -894,7 +894,7 @@ namespace Dune {
         return id;
       }
 
-      if (cc==dim-1)   // edges, exist only for dim>2
+      if (cc==dim-1) // edges, exist only for dim>2
       {
         // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
 
@@ -908,7 +908,7 @@ namespace Dune {
         int bit=1;
         for (int k=0; k<dim; k++)
         {
-          coord[k] = coord[k]*2+1;               // cell position in doubled grid
+          coord[k] = coord[k]*2+1;   // cell position in doubled grid
           if (k==ifix) continue;
           if ((i%m)&bit) coord[k] += 1;else coord[k] -= 1;
           bit *= 2;
@@ -946,7 +946,7 @@ namespace Dune {
       for (int k=0; k<dim; ++k)
         coord[k] = _it.coord(k)-_g.cell_overlap().origin(k);
 
-      if (cc==dim)   // vertices
+      if (cc==dim) // vertices
       {
         // transform cell coordinate to corner coordinate
         for (int k=0; k<dim; k++)
@@ -959,7 +959,7 @@ namespace Dune {
         return index;
       }
 
-      if (cc==1)   // faces, i.e. for dim=2 codim=1 is treated as a face
+      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
       {
         // Idea: direction ivar varies, all others are fixed, i.e. 2 possibilities per direction
 
@@ -973,7 +973,7 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k==ivar)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k];             // one more
+            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
           else
             index = (index*(_g.cell_overlap().size(k)))+coord[k];
 
@@ -989,7 +989,7 @@ namespace Dune {
         return index;
       }
 
-      if (cc==dim-1)   // edges, exist only for dim>2
+      if (cc==dim-1) // edges, exist only for dim>2
       {
         // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
 
@@ -1012,7 +1012,7 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k!=ifix)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k];             // one more
+            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
           else
             index = (index*(_g.cell_overlap().size(k)))+coord[k];
 
@@ -1043,7 +1043,7 @@ namespace Dune {
       for (int k=0; k<dim; ++k)
         coord[k] = _it.coord(k)-_g.cell_overlap().origin(k);
 
-      if (cc==dim)   // vertices
+      if (cc==dim) // vertices
       {
         // transform cell coordinate to corner coordinate
         for (int k=0; k<dim; k++)
@@ -1060,7 +1060,7 @@ namespace Dune {
         return index;
       }
 
-      if (cc==1)   // faces, i.e. for dim=2 codim=1 is treated as a face
+      if (cc==1) // faces, i.e. for dim=2 codim=1 is treated as a face
       {
         // Idea: direction ivar varies, all others are fixed, i.e. 2 possibilities per direction
 
@@ -1074,7 +1074,7 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k==ivar)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k];             // one more
+            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
           else
             index = (index*(_g.cell_overlap().size(k)))+coord[k];
 
@@ -1090,7 +1090,7 @@ namespace Dune {
         return index;
       }
 
-      if (cc==dim-1)   // edges, exist only for dim>2
+      if (cc==dim-1) // edges, exist only for dim>2
       {
         // Idea: direction i is fixed, all others are vary, i.e. 2^(dim-1) possibilities per direction
 
@@ -1113,7 +1113,7 @@ namespace Dune {
         int index = coord[dim-1];
         for (int k=dim-2; k>=0; --k)
           if (k!=ifix)
-            index = (index*(_g.cell_overlap().size(k)+1))+coord[k];             // one more
+            index = (index*(_g.cell_overlap().size(k)+1))+coord[k]; // one more
           else
             index = (index*(_g.cell_overlap().size(k)))+coord[k];
 
@@ -2116,8 +2116,8 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,YaspLevelIterator,
-        YaspIntersectionIterator,                                  // leaf  intersection iter
-        YaspIntersectionIterator,                                  // level intersection iter
+        YaspIntersectionIterator,              // leaf  intersection iter
+        YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,
         YaspLevelIndexSet<const YaspGrid<dim,dimworld> >,
@@ -2536,7 +2536,7 @@ namespace Dune {
     void communicateCodim (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       // check input
-      if (!data.contains(dim,codim)) return;   // should have been checked outside
+      if (!data.contains(dim,codim)) return; // should have been checked outside
 
       // data types
       typedef typename DataHandle::DataType DataType;
@@ -2547,10 +2547,10 @@ namespace Dune {
       // find send/recv lists or throw error
       const std::deque<IS>* sendlist=0;
       const std::deque<IS>* recvlist=0;
-      if (codim==0)   // the elements
+      if (codim==0) // the elements
       {
         if (iftype==InteriorBorder_InteriorBorder_Interface)
-          return;         // there is nothing to do in this case
+          return; // there is nothing to do in this case
         if (iftype==InteriorBorder_All_Interface)
         {
           sendlist = &g.send_cell_interior_overlap();
@@ -2562,7 +2562,7 @@ namespace Dune {
           recvlist = &g.recv_cell_overlap_overlap();
         }
       }
-      if (codim==dim)   // the vertices
+      if (codim==dim) // the vertices
       {
         if (iftype==InteriorBorder_InteriorBorder_Interface)
         {
@@ -2596,10 +2596,10 @@ namespace Dune {
         std::swap(sendlist,recvlist);
 
       // Size computation (requires communication if variable size)
-      std::map<int,int> send_size;        // map rank to total number of objects (of type DataType) to be sent
-      std::map<int,int> recv_size;        // map rank to total number of objects (of type DataType) to be recvd
-      std::map<int,size_t*> send_sizes;   // map rank to array giving number of objects per entity to be sent
-      std::map<int,size_t*> recv_sizes;   // map rank to array giving number of objects per entity to be recvd
+      std::map<int,int> send_size;    // map rank to total number of objects (of type DataType) to be sent
+      std::map<int,int> recv_size;    // map rank to total number of objects (of type DataType) to be recvd
+      std::map<int,size_t*> send_sizes; // map rank to array giving number of objects per entity to be sent
+      std::map<int,size_t*> recv_sizes; // map rank to array giving number of objects per entity to be recvd
       if (data.fixedsize(dim,codim))
       {
         // fixed size: just take a dummy entity, size can be computed without communication
@@ -2681,13 +2681,13 @@ namespace Dune {
 
 
       // allocate & fill the send buffers & store send request
-      std::map<int,DataType*> sends;   // store pointers to send buffers
+      std::map<int,DataType*> sends; // store pointers to send buffers
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
-        //              std::cout << "[" << this->comm().rank() << "] "
-        //                                << " send " << " dest=" << is->rank
-        //                                << " size=" << send_size[is->rank]
-        //                                << std::endl;
+        //      std::cout << "[" << this->comm().rank() << "] "
+        //                << " send " << " dest=" << is->rank
+        //                << " size=" << send_size[is->rank]
+        //                << std::endl;
 
         // allocate send buffer
         DataType *buf = new DataType[send_size[is->rank]];
@@ -2711,13 +2711,13 @@ namespace Dune {
       }
 
       // allocate recv buffers and store receive request
-      std::map<int,DataType*> recvs;   // store pointers to send buffers
+      std::map<int,DataType*> recvs; // store pointers to send buffers
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
       {
-        //              std::cout << "[" << this->comm().rank() << "] "
-        //                                << " recv " << "  src=" << is->rank
-        //                                << " size=" << recv_size[is->rank]
-        //                                << std::endl;
+        //      std::cout << "[" << this->comm().rank() << "] "
+        //                << " recv " << "  src=" << is->rank
+        //                << " size=" << recv_size[is->rank]
+        //                << std::endl;
 
         // allocate recv buffer
         DataType *buf = new DataType[recv_size[is->rank]];
