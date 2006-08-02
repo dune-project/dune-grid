@@ -66,8 +66,7 @@ namespace Dune {
     // no assignment operator allowed
     IndexStack<T,length> & operator = ( const IndexStack<T,length> & s)
     {
-      std::cerr << "IndexStack::operator = () not allowed! in: " __FILE__ << " line:" << __LINE__ << "\n";
-      abort();
+      DUNE_THROW(Exception, "IndexStack::operator = () not allowed!");
       return *this;
     }
 
