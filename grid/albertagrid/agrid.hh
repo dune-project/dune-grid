@@ -1357,11 +1357,18 @@ namespace Dune
      </tt>
 
      Now you must use the AlbertaGrid with DIM and DIMWORLD, otherwise
-     unpredictable results may occur.
+     unpredictable results may occur. The alberta-dim value is defaulted to 2
+     if --with-alberta-dim is not provided and --with-alberta-world-dim is
+     defaulted to alberta-dim if not provided. If the --with-grid-dim (see
+     DGF Parser's gridtype.hh) is provided the alberta-dim,
+     if not provided, is defaulted to the value of grid-dim.
 
-     \e Note: Although ALBERTA supports different combination of DIM<=DIMWORLD,
+
+     \e Note: Although ALBERTA supports different combination of DIM <= DIMWORLD,
         so far only the combinations \c DIM=DIMWORLD=2 and \c DIM=DIMWORLD=3
         are supported.
+
+     @author Robert Kloefkorn
    */
   template <int dim, int dimworld>
   class AlbertaGrid :
