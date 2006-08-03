@@ -180,12 +180,16 @@ namespace Dune {
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
 
+     @author Robert Kloefkorn
    */
   template <int dim, int dimworld, ALU3dGridElementType elType>
   class ALU3dGrid :
     public GridDefaultImplementation<dim, dimworld, alu3d_ctype, ALU3dGridFamily <dim,dimworld,elType> >,
     public HasObjectStream
   {
+    // type of base class
+    typedef GridDefaultImplementation<dim, dimworld, alu3d_ctype, ALU3dGridFamily <dim,dimworld,elType> > BaseType;
+
     CompileTimeChecker<(dim      == 3)> ALU3dGrid_only_implemented_for_3dp;
     CompileTimeChecker<(dimworld == 3)> ALU3dGrid_only_implemented_for_3dw;
 
@@ -517,19 +521,13 @@ namespace Dune {
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 
   public:
-    /*
-       IntersectionIteratorWrapper<const MyType>&
-       getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
-       {
-       return this->getRealImplementation(it);
-       }
-
-       const IntersectionIteratorWrapper<const MyType>&
-       getRealIntersectionIterator(const typename Traits::IntersectionIterator& it)  const
-       {
-       return this->getRealImplementation(it);
-       }
-     */
+    template <class IntersectionInterfaceType>
+    const typename BaseType::
+    template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
+    getRealIntersectionIterator(const IntersectionInterfaceType & it) const
+    {
+      return this->getRealImplementation(it);
+    }
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
