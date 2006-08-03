@@ -107,6 +107,12 @@ namespace Dune {
         , filename_(filename)
         , MPICOMM_(MPICOMM) {}
 
+    //! constructor given the name of a DGF file
+    MacroGrid()
+      : DuneGridFormatParser()
+        , filename_(0)
+        , MPICOMM_(MPIHelper::getCommunicator()) {}
+
     //! returns pointer to a new instance of type GridType created from a DGF file
     template <class GridType>
     inline GridType * createGrid () {
@@ -150,6 +156,9 @@ namespace Dune {
       MacroGrid(filename.c_str(),MPICOMM),
       gridptr_(this->template createGrid<GridType>()) {}
 
+    //! default constructor, creating empty GridPtr
+    GridPtr() : MacroGrid() , gridptr_() {}
+
     //! copy constructor, copies internal smart pointer
     GridPtr(const GridPtr & org) : gridptr_(org.gridptr_) {}
 
@@ -172,14 +181,14 @@ namespace Dune {
     }
 
     //! assignment of grid pointer
-    GridPtr & operator = (const GridPtr & org )
+    GridPtr & operator = (const GridPtr & org)
     {
       gridptr_ = org.gridptr_;
       return *this;
     }
   private:
     // grid smart pointer
-    std::auto_ptr<GridType> gridptr_;
+    mutable std::auto_ptr<GridType> gridptr_;
   }; // end of class GridPtr
 }
 #include "dgfparser.cc"
@@ -244,7 +253,7 @@ namespace Dune {
      @endcode
 
      Remarks:
-     -# The last argument \c should be of the type \c MPIHelper::MPICommunicator
+     -# The last argument \c should be of the type \c Dune::MPIHelper::MPICommunicator
         which defaults to \c MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
         a suitable constructure on the \c GridType class is called - if
