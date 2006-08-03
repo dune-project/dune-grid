@@ -18,7 +18,7 @@
 #endif
 
 #if HAVE_ALUGRID_FOUND
-#include <dune/grid/alu3dgrid.hh>
+#include <dune/grid/alugrid.hh>
 #endif
 
 #if HAVE_ALBERTA_FOUND
