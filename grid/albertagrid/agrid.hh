@@ -1789,19 +1789,13 @@ namespace Dune
     LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
-    /*
-       AlbertaGridIntersectionIteratorType &
-       getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
-       {
-       return this->getRealImplementation(it);
-       }
-
-       const AlbertaGridIntersectionIteratorType &
-       getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
-       {
-       return this->getRealImplementation(it);
-       }
-     */
+    template <class IntersectionInterfaceType>
+    const typename BaseType::
+    template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
+    getRealIntersectionIterator(const IntersectionInterfaceType & it) const
+    {
+      return this->getRealImplementation(it);
+    }
 
     //! return obj pointer to EntityImp
     template <int codim>
