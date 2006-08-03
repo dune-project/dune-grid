@@ -9,16 +9,25 @@
 #include <assert.h>
 #include <algorithm>
 
-#if defined GRIDDIM && defined GRIDDIMWORLD
+#if defined GRIDDIM
   #define DIM GRIDDIM
-  #define DIM_OF_WORLD GRIDDIMWORLD
+  #if defined GRIDDIMWORLD
+    #define DIM_OF_WORLD GRIDDIMWORLD
+  #else
+// DIM_OF_WORLD is set to DIM by default
+    #define DIM_OF_WORLD GRIDDIM
+  #endif
 #else
   #ifndef ALBERTA_DIM
     #error "ALBERTA_DIM needed to compile AlbertaGrid! \n"
   #endif
 
   #ifndef ALBERTA_WORLD_DIM
-    #error "ALBERTA_WORLD_DIM needed to compile AlbertaGrid! \n"
+    #ifdef ALBERTA_DIM
+      #define ALBERTA_WORLD_DIM ALBERTA_DIM
+    #else
+      #error "ALBERTA_WORLD_DIM needed to compile AlbertaGrid! \n"
+    #endif
   #endif
 
   #define DIM ALBERTA_DIM
@@ -1344,11 +1353,15 @@ namespace Dune
 
      <tt> ./autogen.sh [OPTIONS]
      --with-alberta=PATH_TO_ALBERTA and
-     --with-problem-dim=DIM --with-world-dim=DIMWORLD
+     --with-alberta-dim=DIM --with-alberta-world-dim=DIMWORLD
      </tt>
 
      Now you must use the AlbertaGrid with DIM and DIMWORLD, otherwise
      unpredictable results may occur.
+
+     \e Note: Although ALBERTA supports different combination of DIM<=DIMWORLD,
+        so far only the combinations \c DIM=DIMWORLD=2 and \c DIM=DIMWORLD=3
+        are supported.
    */
   template <int dim, int dimworld>
   class AlbertaGrid :
