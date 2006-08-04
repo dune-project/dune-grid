@@ -345,6 +345,9 @@ struct EntityInterface<Grid, 0, dim, true>
 
     IntersectionIteratorInterface<Grid>(e.ilevelbegin());
 
+    if(e.isLeaf())
+      IntersectionIteratorInterface<Grid>(e.ileafbegin());
+
     // hierarchic iterator
     e.hbegin(0);
     e.hend(0);
