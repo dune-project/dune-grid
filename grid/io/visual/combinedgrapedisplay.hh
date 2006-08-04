@@ -12,6 +12,11 @@
 //- Local includes
 #include "grapedatadisplay.hh"
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Combines several mesh scenes for visualisation of parallel data
+ */
+
 namespace Dune
 {
 

@@ -12,6 +12,11 @@
 //-local includes
 #include "grape/grapeinclude.hh"
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides a GridDisplay class using the GRAPE-HMesh Interface.
+ */
+
 namespace Dune
 {
 

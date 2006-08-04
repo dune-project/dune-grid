@@ -9,6 +9,12 @@
 //- local includes
 #include "grapegriddisplay.hh"
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides a DataDisplay class using the GridDisplay and
+   dune-fem module for class DiscreteFubctions support.
+ */
+
 namespace Dune
 {
 
