@@ -74,17 +74,17 @@ namespace Dune {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
 
-    int twistInSelf(const LevelIntersectionIterator& it) const {
-      return grid_.getRealIntersectionIterator(it).twistInSelf();
-    }
+    //int twistInSelf(const LevelIntersectionIterator& it) const {
+    //  return grid_.getRealIntersectionIterator(it).twistInSelf();
+    //}
 
     int twistInNeighbor(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
 
-    int twistInNeighbor(const LevelIntersectionIterator& it) const {
-      return grid_.getRealIntersectionIterator(it).twistInNeighbor();
-    }
+    //int twistInNeighbor(const LevelIntersectionIterator& it) const {
+    //  return grid_.getRealIntersectionIterator(it).twistInNeighbor();
+    //}
 
   private:
     const GridType& grid_;
