@@ -86,8 +86,9 @@ namespace Dune {
   protected:
     struct impl
     {
-      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0) {}
-      impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_) {}
+      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false) { }
+      impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_),
+                               isBoundary_(org.isBoundary_) { }
 
       impl & operator = (const impl & org)
       {
@@ -95,6 +96,7 @@ namespace Dune {
         neigh_ = org.neigh_;
         index_ = org.index_;
         opposite_ = org.opposite_;
+        isBoundary_ = org.isBoundary_;
         return *this;
       }
       // current element from which we started the intersection iterator
@@ -102,6 +104,7 @@ namespace Dune {
       mutable HElementType* neigh_;
       mutable int index_;
       mutable int opposite_;
+      mutable bool isBoundary_;
     } current;
 
   public:
@@ -185,7 +188,7 @@ namespace Dune {
 
     // true if end iterator
     bool done_;
-  }; // end ALU2dGridIntersectionIterator
+  }; // end ALU2dGridIntersectionBase
 
 
 

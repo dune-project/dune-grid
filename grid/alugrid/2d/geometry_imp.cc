@@ -417,8 +417,9 @@ namespace Dune {
       for(int i=0; i<mydim+1; ++i)
       {
         // copy coordinates
+        const double (&p)[cdim] = item.vertex(i)->coord();
         for(int j=0; j<cdim; ++j)
-          coord_[i][j] = item.vertex(i)->coord()[j];
+          coord_[i][j] = p[j];
       }
     }
     elDet_     = elDeterminant();

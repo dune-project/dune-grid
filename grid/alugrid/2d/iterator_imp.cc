@@ -136,23 +136,24 @@ namespace Dune {
   //! return true if intersection is with boundary
   template<class GridImp>
   inline bool ALU2dGridIntersectionBase<GridImp> :: boundary() const {
-    return (this->current.neigh_ == 0);
+    return this->current.isBoundary_;
+    //return (this->current.neigh_ == 0);
   }
 
   template<class GridImp>
   inline int ALU2dGridIntersectionBase<GridImp> :: boundaryId() const
   {
-    int isBoundary=0;
+    int isBoundaryType=0;
     assert(this->current.item_);
     if(this->current.item_->nbbnd(this->current.index_) != 0)
-      isBoundary = this->current.item_->nbbnd(this->current.index_)->type();
-    return isBoundary;
+      isBoundaryType = this->current.item_->nbbnd(this->current.index_)->type();
+    return isBoundaryType;
   }
 
   //! return true if intersection is with neighbor on this level
   template<class GridImp>
   inline bool ALU2dGridIntersectionBase<GridImp> :: neighbor () const {
-    return !(this->boundary());
+    return (this->current.neigh_ && !boundary() );
   }
 
   //! return EntityPointer to the Entity on the inside of this intersection.
@@ -239,7 +240,8 @@ namespace Dune {
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
   ALU2dGridIntersectionBase<GridImp> :: intersectionNeighborLocal () const {
-    assert(this->current.item_ != 0 && this->current.neigh_ != 0);
+    assert(this->current.item_ != 0);
+    assert(this->current.neigh_ != 0);
     EntityPointer ep = outside();
     this->grid_.getRealImplementation(intersectionNeighborLocal_).builtLocalGeom( ep->geometry() , intersectionGlobal());
     return intersectionNeighborLocal_;
@@ -345,6 +347,7 @@ namespace Dune {
       if (neighbourStack_.empty()) {
         this->current.neigh_ = 0;
         this->current.opposite_ = this->current.item_->opposite(this->current.index_);
+        this->current.isBoundary_ = true;
         return;
       }
     }
@@ -352,12 +355,13 @@ namespace Dune {
     this->current.neigh_ = neighbourStack_.top().first;
     assert( this->current.neigh_ );
     this->current.opposite_ = neighbourStack_.top().second;
+    this->current.isBoundary_ = false;
     assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
 
     neighbourStack_.pop();
 
-    if(this->current.neigh_!=0)
-      assert(this->current.neigh_->level()==this->walkLevel_);
+    //if(this->current.neigh_!=0)
+    //  assert(this->current.neigh_->level()==this->walkLevel_);
     return;
   }
 
@@ -433,14 +437,25 @@ namespace Dune {
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = 0;
     this->current.neigh_ = elem.nbel(0);
-    this->current.opposite_= elem.opposite(0);assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
+    this->current.opposite_= elem.opposite(0);
+
+    assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
     assert(this->current. item_ );
+
     this->walkLevel_ = wLevel;
     this->done_ = false;
-    if (this->current.neigh_ && this->current.neigh_->level() != this->walkLevel_) {
-      this->current.index_ = 0;
-      this->current.neigh_ = 0;
-      //increment();
+
+    if(!this->current.neigh_ ) {
+      this->current.isBoundary_ = true;
+      this->current.opposite_ = -1;
+    }
+    else {
+      this->current.isBoundary_ = false;
+      if (this->current.neigh_->level() != this->walkLevel_) {
+        this->current.index_ = 0;
+        this->current.neigh_ = 0;
+        //increment();
+      }
     }
   }
 
@@ -524,7 +539,6 @@ namespace Dune {
       return;
     }
 
-
     ++this->current.index_;
     if (this->current.index_ >= this->nFaces_) {
       this->done();
@@ -554,7 +568,12 @@ namespace Dune {
     //conform case
     else {
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-      if (this->current.neigh_ != 0) {
+      if (this->current.neigh_ == 0) {
+        this->current.isBoundary_ = true;
+        this->current.opposite_ = -1;
+      }
+      else  {
+        this->current.isBoundary_ = false;
         this->current.opposite_= this->current.item_->opposite(this->current.index_);
         //assert(this->current.neigh_->leaf());
       }
