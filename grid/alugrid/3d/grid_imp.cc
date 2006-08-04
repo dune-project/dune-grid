@@ -190,6 +190,9 @@ namespace Dune {
   {
     makeGeomTypes();
 
+    // check macro grid file for keyword
+    this->checkMacroGridFile (macroTriangFilename);
+
     mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
 #if ALU3DGRID_PARALLEL
                                              , mpAccess_
@@ -1262,6 +1265,31 @@ namespace Dune {
       return "ALUCubeGrid";
     assert( elType == tetra );
     return "ALUSimplexGrid";
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline void ALU3dGrid<dim, dimworld, elType>::checkMacroGridFile(const std::string filename)
+  {
+    std::ifstream file(filename.c_str());
+    if(!file)
+    {
+      std::cerr << "Couldn't open file '" << filename <<"' !" << std::endl;
+      DUNE_THROW(IOError,"Couldn't open file '" << filename <<"' !");
+    }
+
+    const std::string aluid((elType == tetra) ? "!Tetraeder" : "!Hexaeder");
+    std::string idline;
+    std::getline(file,idline);
+    std::stringstream idstream(idline);
+    std::string id;
+    idstream >> id;
+
+    if(id != aluid)
+    {
+      std::cerr << "Delivered file '"<<filename<<"' does not contain keyword '"
+                << aluid << "'. Found id '" <<id<< "'. Check the macro grid file! Bye." << std::endl;
+      DUNE_THROW(IOError,"Wrong file format! ");
+    }
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>

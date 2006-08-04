@@ -540,9 +540,6 @@ namespace Dune {
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
 
-    //! check whether macro grid has the right element type
-    void checkMacroGrid ();
-
     template <class HItemType>
     PartitionType convertBndId(const HItemType & item) const
     {
@@ -573,6 +570,12 @@ namespace Dune {
 
     // make grid walkthrough and calc global size
     void recalcGlobalSize();
+
+    //! check whether macro grid format is of our type
+    void checkMacroGridFile (const std::string filename);
+
+    //! check whether macro grid has the right element type
+    void checkMacroGrid ();
 
     // the real grid
     mutable ALU3DSPACE GitterImplType * mygrid_;
