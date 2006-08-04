@@ -160,7 +160,7 @@ namespace Dune {
   inline typename ALU2dGridIntersectionBase<GridImp> :: EntityPointer
   ALU2dGridIntersectionBase<GridImp> :: inside() const {
     assert(this->current.item_);
-    return EntityPointerImp(grid_, *(this->current.item_));
+    return EntityPointerImp(grid_, *(this->current.item_), -1, walkLevel_);
   }
 
   template<class GridImp>
@@ -184,7 +184,7 @@ namespace Dune {
   ALU2dGridIntersectionBase<GridImp> :: outside() const {
     assert(!this->boundary());
     assert( this->current.neigh_ );
-    return EntityPointerImp(grid_, *(this->current.neigh_));
+    return EntityPointerImp(grid_, *(this->current.neigh_),-1, walkLevel_);
   }
 
   //! local number of codim 1 entity in self where intersection is contained in
@@ -437,9 +437,22 @@ namespace Dune {
     assert(this->current. item_ );
     this->walkLevel_ = wLevel;
     this->done_ = false;
+    if (this->current.neigh_ && this->current.neigh_->level() != this->walkLevel_) {
+      this->current.index_ = 0;
+      this->current.neigh_ = 0;
+      //increment();
+    }
   }
 
-
+  //! return EntityPointer to the Entity on the outside of this intersection.
+  template<class GridImp>
+  inline typename ALU2dGridLevelIntersectionIterator<GridImp> :: EntityPointer
+  ALU2dGridLevelIntersectionIterator<GridImp> :: outside() const {
+    assert(!this->boundary());
+    assert( this->current.neigh_ );
+    assert(this->current.neigh_->level() == this->walkLevel_);
+    return typename ALU2dGridIntersectionBase<GridImp>::EntityPointerImp(this->grid_, *(this->current.neigh_),-1, this->walkLevel_);
+  }
 
 
   //********************************************************************

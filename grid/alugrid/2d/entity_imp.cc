@@ -416,12 +416,10 @@ namespace Dune {
   //! Constructor for EntityPointer that points to an element
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid,
-                                                                      const ElementType & item,
-                                                                      int face = -1
-                                                                      )
+                                                                      const ElementType & item, int face=-1, int level=-1)
     : grid_(grid)
       , item_(const_cast<ElementType *>(&item))
-      , level_(-1)
+      , level_(level)
       , face_(face)
       , entity_(0)
   { }
@@ -534,7 +532,7 @@ namespace Dune {
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<0>:: EntityPointer
     subEntity(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
-      return ALU2dGridEntityPointer<0, GridImp > (grid, elem);
+      return ALU2dGridEntityPointer<0, GridImp > (grid, elem, -1, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       //assert(!i);
@@ -563,7 +561,7 @@ namespace Dune {
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<1>:: EntityPointer
     subEntity(GridImp & grid, const HElementType &elem, int i) {
       assert(i < 3 && i >= 0);
-      return ALU2dGridEntityPointer<1, GridImp > (grid, elem, i);
+      return ALU2dGridEntityPointer<1, GridImp > (grid, elem, i, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
@@ -601,7 +599,7 @@ namespace Dune {
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<2>:: EntityPointer
     subEntity(GridImp & grid, const HElementType &elem, int i) {
       assert(i < 3 && i >= 0);
-      return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.vertex(i)));
+      return ALU2dGridEntityPointer<2, GridImp > (grid, *(elem.vertex(i)), -1, elem.level());
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented this codim!");

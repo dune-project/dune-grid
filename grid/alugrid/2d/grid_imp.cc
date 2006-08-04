@@ -313,6 +313,24 @@ namespace Dune {
     return;
   }
 
+  //! get global id set of grid
+  template <int dim, int dimworld>
+  inline const typename ALU2dGrid<dim, dimworld>::GlobalIdSet & ALU2dGrid<dim, dimworld>:: globalIdSet () const {
+    return localIdSet();
+  }
+
+  //! get global id set of grid
+  template <int dim, int dimworld>
+  inline const typename ALU2dGrid<dim, dimworld>::LocalIdSet & ALU2dGrid<dim, dimworld>:: localIdSet () const {
+    return localIdSet_;
+  }
+
+  //! get hierarchic index set of the grid
+  template <int dim, int dimworld>
+  inline const typename ALU2dGrid<dim, dimworld>::HierarchicIndexSet & ALU2dGrid<dim, dimworld>::hierarchicIndexSet () const {
+    return hIndexSet_;
+  }
+
   template <int dim, int dimworld>
   inline const typename ALU2dGrid<dim, dimworld>::Traits :: LeafIndexSet &
   ALU2dGrid<dim, dimworld>::leafIndexSet() const
@@ -340,6 +358,26 @@ namespace Dune {
     DUNE_THROW(GridError,"Do not use assignment operator of ALU2dGrid! \n");
     return (*this);
   }
+
+  // private methods that return underlying ALU2D Grid
+  template <int dim, int dimworld>
+  inline ALU2DSPACE Hmesh & ALU2dGrid<dim, dimworld>::myGrid()
+  {
+    return mesh_;
+  }
+  template <int dim, int dimworld>
+  inline ALU2DSPACE Hmesh & ALU2dGrid<dim, dimworld>::myGrid() const
+  {
+    return mesh_;
+  }
+
+  //! return dummy communication
+  template <int dim, int dimworld>
+  inline const typename ALU2dGrid<dim, dimworld>::CollectiveCommunicationType & ALU2dGrid<dim, dimworld>::comm() const
+  {
+    return comm_;
+  }
+
 
   template <int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(const ALU2dGrid<dim, dimworld> & g)

@@ -239,6 +239,9 @@ namespace Dune {
 
     void assign (const ALU2dGridLevelIntersectionIterator<GridImp> & org);
 
+    //! return EntityPointer to the Entity on the outside of this intersection.
+    EntityPointer outside() const;
+
     //! increment iterator
     void increment ();
 

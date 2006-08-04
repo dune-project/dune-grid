@@ -39,8 +39,6 @@ namespace Dune {
   class ALU2dGridGeometry;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
-  //template<class GridImp>
-  //class ALU2dGridIntersectionIterator;
   template<class GridImp>
   class ALU2dGridIntersectionBase;
   template<class GridImp>
@@ -328,26 +326,20 @@ namespace Dune {
     //****************************************************************
 
     //! get global id set of grid
-    const GlobalIdSet & globalIdSet () const {
-      return localIdSet();
-    }
+    const GlobalIdSet & globalIdSet () const;
 
     //! get global id set of grid
-    const LocalIdSet & localIdSet () const {
-      return localIdSet_;
-    }
+    const LocalIdSet & localIdSet () const;
 
     //! number of grid entities in the entire grid for given codim
     int hierSetSize (int cd) const;
 
     //! get hierarchic index set of the grid
-    const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
+    const HierarchicIndexSet & hierarchicIndexSet () const ;
 
-    //! Not yet implemented...
     //! get leaf index set of the grid
     const typename Traits :: LeafIndexSet & leafIndexSet () const;
 
-    //! Not yet implemented...
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
 
@@ -359,8 +351,8 @@ namespace Dune {
     //! return reference to org ALU2dGrid
     //! private method, but otherwise we have to friend class all possible
     //! types of LevelIterator ==> later
-    ALU2DSPACE Hmesh & myGrid() { return mesh_; }
-    ALU2DSPACE Hmesh & myGrid() const { return mesh_; }
+    ALU2DSPACE Hmesh & myGrid();
+    ALU2DSPACE Hmesh & myGrid() const;
 
     //! refine grid refCount times
     bool globalRefine(int refCount);
@@ -385,7 +377,7 @@ namespace Dune {
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
     //! return dummy communication
-    const CollectiveCommunicationType & comm() const { return comm_; }
+    const CollectiveCommunicationType & comm() const;
   private:
     CollectiveCommunicationType comm_;
 
