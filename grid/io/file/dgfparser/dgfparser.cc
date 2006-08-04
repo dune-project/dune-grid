@@ -65,6 +65,7 @@ namespace Dune {
       if (!simplexgrid) {
         DUNE_THROW(IOError, "ALU can only handle simplex grids in 2d!");
       }
+      //out << "!Triangles" << std::endl;
     }
     dverb << "Writing vertices...";
     out << nofvtx << std::endl;
