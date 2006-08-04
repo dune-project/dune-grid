@@ -43,7 +43,7 @@ namespace Dune {
     }
 
     /*
-       const std::string aluid("!Dreiecke");
+       const std::string aluid("!Triangles");
        std::string idline;
        std::getline(file,idline);
        std::stringstream idstream(idline);
