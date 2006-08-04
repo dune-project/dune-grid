@@ -262,7 +262,7 @@ namespace Dune {
     template<int dim,int dimw>
     struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
     {
-      static const bool v = true;
+      static const bool v = false;
     };
 
     template<int dim,int dimw>
