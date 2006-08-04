@@ -34,6 +34,8 @@ namespace Dune {
      Two tools are available for partitioning :
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+
+     @author Robert Kloefkorn
    */
   template <>
   class ALUCubeGrid<3,3> :
@@ -141,6 +143,8 @@ namespace Dune {
      Two tools are available for partitioning :
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+
+     @author Robert Kloefkorn
    */
   template <>
   class ALUSimplexGrid<3,3> :
@@ -206,6 +210,7 @@ namespace Dune {
      Two tools are available for partitioning :
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
+
    */
   template <>
   class ALUSimplexGrid<2,2> :
