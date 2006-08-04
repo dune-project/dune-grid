@@ -1,42 +1,13 @@
-# $Id$
-
-#
-## estimate which tests can be built
-#
-
-#
-## define the lists of tests to build and run
-#
-
-# tests where program to build and program to run are equal
-NORMALTESTS =
-
-# list of tests to run (yaspgrid is special case)
-TESTS = $(NORMALTESTS)
+ALLTESTS = vtktest
 
 # programs just to build when "make check" is used
-check_PROGRAMS = $(NORMALTESTS)
+check_PROGRAMS = $(ALLTESTS)
 
-#
-## common flags
-#
+# list of tests to run
+TESTS = $(ALLTESTS)
 
-# paranoia
-DUNE_EXTRA_CHECKS =  -DDUNE_ISTL_WITH_CHECKING -DDUNE_DEVEL_MODE
-
-AM_CPPFLAGS = @AM_CPPFLAGS@ $(DUNE_EXTRA_CHECKS)
-
-#
-## define the programs
-#
-
-#
-## distribution tarball
-GRIDFILES = ug-testgrid-2.am ug-testgrid-3.am
-
-# gridcheck not used explicitly, we should still ship it :)
-#EXTRA_DIST = gridcheck.cc $(GRIDFILES)
-
-CLEANFILES = *.gcda *.gcno semantic.cache
+vtktest_SOURCES = vtktest.cc
+vtktest_LDADD = $(LOCAL_LIBS)
+vtktest_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules

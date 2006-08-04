@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = amiramesh test dgfparser
+SUBDIRS = amiramesh test dgfparser vtk
 
 iofiledir = $(includedir)/dune/grid/io/file
 iofile_HEADERS = amirameshreader.hh amirameshwriter.hh

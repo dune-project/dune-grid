@@ -298,8 +298,9 @@ namespace Dune
             number[vertexmapper.template map<n>(*git,renumber(*git,index))];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
+        default :
+          DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }
-        assert(false);
       }
       int localindex () const
       {
@@ -378,9 +379,9 @@ namespace Dune
             number[vertexmapper.template map<n>(*git,renumber(*git,index))];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
+        default :
+          DUNE_THROW(IOError,"VTKWriter: unsupported DataMode" << datamode);
         }
-        assert(false);
-        return 0;
       }
       int localindex () const
       {
@@ -811,8 +812,7 @@ namespace Dune
         return vtkPrism;
       if (t.isHexahedron())
         return vtkHexahedron;
-      DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType "
-                 << t <<std::endl);
+      DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);
     }
 
     //! write header file in parallel case to stream
