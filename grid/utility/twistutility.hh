@@ -36,19 +36,30 @@ namespace Dune {
   {
   public:
     typedef GridImp GridType;
-    typedef typename GridImp::Traits::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::Traits::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridImp::Traits::LevelIntersectionIterator LevelIntersectionIterator;
   public:
     TwistUtility(const GridType& grid) :
       grid_(grid)
     {}
 
     // default twist is zero
-    int twistInSelf(IntersectionIterator& it) const {
+    int twistInSelf(const LeafIntersectionIterator& it) const {
       return 0;
     }
 
     // default twist is zero
-    int twistInNeighbor(IntersectionIterator& it) const {
+    int twistInSelf(const LevelIntersectionIterator& it) const {
+      return 0;
+    }
+
+    // default twist is zero
+    int twistInNeighbor(const LeafIntersectionIterator& it) const {
+      return 0;
+    }
+
+    // default twist is zero
+    int twistInNeighbor(const LevelIntersectionIterator& it) const {
       return 0;
     }
 
@@ -62,17 +73,26 @@ namespace Dune {
   {
   public:
     typedef AlbertaGrid<dim, dimW> GridType;
-    typedef typename GridType::Traits::IntersectionIterator IntersectionIterator;
+    typedef typename GridType::Traits::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridType::Traits::LevelIntersectionIterator LevelIntersectionIterator;
   public:
     TwistUtility(const GridType& grid) :
       grid_(grid)
     {}
 
-    int twistInSelf(IntersectionIterator& it) const {
+    int twistInSelf(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
 
-    int twistInNeighbor(IntersectionIterator& it) const {
+    int twistInSelf(const LevelIntersectionIterator& it) const {
+      return grid_.getRealIntersectionIterator(it).twistInSelf();
+    }
+
+    int twistInNeighbor(const LeafIntersectionIterator& it) const {
+      return grid_.getRealIntersectionIterator(it).twistInNeighbor();
+    }
+
+    int twistInNeighbor(const LevelIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
 
@@ -87,17 +107,26 @@ namespace Dune {
   {
   public:
     typedef ALU3dGrid<dim, dimW, elType> GridType;
-    typedef typename GridType::Traits::IntersectionIterator IntersectionIterator;
+    typedef typename GridType::Traits::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridType::Traits::LevelIntersectionIterator LevelIntersectionIterator;
   public:
     TwistUtility(const GridType& grid) :
       grid_(grid)
     {}
 
-    int twistInSelf(const IntersectionIterator& it) const {
+    int twistInSelf(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
 
-    int twistInNeighbor(const IntersectionIterator& it) const {
+    int twistInSelf(const LevelIntersectionIterator& it) const {
+      return grid_.getRealIntersectionIterator(it).twistInSelf();
+    }
+
+    int twistInNeighbor(const LeafIntersectionIterator& it) const {
+      return grid_.getRealIntersectionIterator(it).twistInNeighbor();
+    }
+
+    int twistInNeighbor(const LevelIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
 
