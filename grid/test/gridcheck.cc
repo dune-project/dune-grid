@@ -929,14 +929,14 @@ void iteratorEquals (Grid &g)
     i == h2; \
     i == L2; \
     i == i2.inside(); \
-    if (i2.neighbor()) i == i2.outside(); \
+    if (i2 != l2->ileafend() && i2.neighbor()) i == i2.outside(); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
   TestEquals(i1.inside());
-  if (i1.neighbor()) TestEquals(i1.outside());
+  if (i1 != l1->ileafend() && i1.neighbor()) TestEquals(i1.outside());
 }
 
 template <class Grid>
