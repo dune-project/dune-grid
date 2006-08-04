@@ -16,6 +16,11 @@
 #include <vector>
 #include <limits>
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides a GridDisplay class using the GRAPE-HMesh Interface.
+ */
+
 namespace Dune {
 
   // compare 2 FieldVectors
