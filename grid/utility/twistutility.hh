@@ -36,30 +36,20 @@ namespace Dune {
   {
   public:
     typedef GridImp GridType;
-    typedef typename GridImp::Traits::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename GridImp::Traits::LevelIntersectionIterator LevelIntersectionIterator;
   public:
     TwistUtility(const GridType& grid) :
       grid_(grid)
     {}
 
     // default twist is zero
-    int twistInSelf(const LeafIntersectionIterator& it) const {
+    template <class IntersectionIterator>
+    int twistInSelf(const IntersectionIterator& it) const {
       return 0;
     }
 
     // default twist is zero
-    int twistInSelf(const LevelIntersectionIterator& it) const {
-      return 0;
-    }
-
-    // default twist is zero
-    int twistInNeighbor(const LeafIntersectionIterator& it) const {
-      return 0;
-    }
-
-    // default twist is zero
-    int twistInNeighbor(const LevelIntersectionIterator& it) const {
+    template <class IntersectionIterator>
+    int twistInNeighbor(const IntersectionIterator& it) const {
       return 0;
     }
 
