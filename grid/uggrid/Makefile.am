@@ -4,7 +4,7 @@ if UG
 
 noinst_LTLIBRARIES = libuggrid.la
 
-libuggrid_la_SOURCES  = uggrid.cc uggridentity.cc boundaryextractor.cc
+libuggrid_la_SOURCES  = uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh
 libuggrid_la_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
 libuggrid_la_LIBADD   = $(UG_LDFLAGS) $(UG_LIBS) -lcommon
 
@@ -16,8 +16,7 @@ uggrid_HEADERS = uggridgeometry.cc \
   ugwrapper2d.hh ugwrapper3d.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   ugintersectionit.hh ug_undefs.hh uggridindexsets.hh \
-  uggridleafiterator.hh boundaryextractor.hh \
-  uggridrenumberer.hh
+  uggridleafiterator.hh uggridrenumberer.hh
 
 # tricks like undefAllMacros.pl don't have to be shipped, have they?
 # Oliver Sander: It depends. undefAllMacros.pl creates the file ug_undefs.hh
