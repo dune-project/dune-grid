@@ -388,8 +388,7 @@ namespace Dune {
     if(entity_)
     {
       entityImp().removeElement();
-      //grid_.freeEntity( entity_ );
-      delete entity_;
+      grid_.freeEntity( entity_ );
       entity_ = 0;
     }
   }
@@ -461,8 +460,8 @@ namespace Dune {
     assert( item_ );
     if( !entity_ )
     {
-      //entity_ = grid_.getNewEntity(level());
-      entity_ = new EntityObj(EntityImp(grid_, level()));
+      entity_ = grid_.template getNewEntity<cd> (level());
+      //entity_ = new EntityObj(EntityImp(grid_, level()));
       entityImp().setElement(*item_, face_, level());
     }
     assert( entity_ );

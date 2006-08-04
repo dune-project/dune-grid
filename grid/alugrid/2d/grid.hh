@@ -20,7 +20,7 @@
 
 //- Local includes
 #include "indexsets.hh"
-#include "memory.hh"
+#include "../3d/memory.hh"
 
 namespace Dune {
 
@@ -397,9 +397,12 @@ namespace Dune {
 
     void calcExtras();
 
-    // fake dummy
-    typedef int EntityProviderType;
-    int entityProvider_;
+  public:
+    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+  private:
+    typedef ALUMemoryProvider< EntityObject > EntityProviderType;
+
+    mutable EntityProviderType entityProvider_;
 
     template <int codim>
     MakeableInterfaceObject<typename Traits::template Codim<codim>:: Entity> * getNewEntity ( int level ) const
@@ -407,9 +410,10 @@ namespace Dune {
       return ALU2dGridEntityFactory<ThisType,codim>::getNewEntity(*this,entityProvider_,level);
     }
 
-    template <int codim>
-    void freeEntity (MakeableInterfaceObject<typename Traits::template Codim<codim>:: Entity> * en) const
+    template <class EntityType>
+    void freeEntity (EntityType * en) const
     {
+      enum { codim = EntityType::codimension };
       return ALU2dGridEntityFactory<ThisType,codim>::freeEntity(entityProvider_, en);
     }
 
@@ -493,7 +497,7 @@ namespace Dune {
   {
     typedef typename GridImp:: template Codim<codim>::Entity Entity;
     typedef MakeableInterfaceObject<Entity> EntityObj;
-    typedef ALU2dGridEntity<codim,GridImp::dimension,GridImp> EntityImp;
+    typedef typename EntityObj::ImplementationType EntityImp;
 
     template <class EntityProviderType>
     static EntityObj *
@@ -505,7 +509,6 @@ namespace Dune {
     template <class EntityProviderType>
     static void freeEntity( EntityProviderType & ep, EntityObj * e )
     {
-      //if( e )
       delete e;
     }
   };
@@ -513,17 +516,16 @@ namespace Dune {
   template <class GridImp>
   struct ALU2dGridEntityFactory<GridImp,0>
   {
-    enum {codim =0};
+    enum {codim = 0};
     typedef typename GridImp:: template Codim<codim>::Entity Entity;
     typedef MakeableInterfaceObject<Entity> EntityObj;
-    //typedef typename Entity :: ImplementationType EntityImp;
+    typedef typename EntityObj :: ImplementationType EntityImp;
 
     template <class EntityProviderType>
     static EntityObj *
     getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
     {
-      //return ep.template getEntityObject( grid, level, (EntityImp *) 0)
-      return ep.getObject( grid, level);
+      return ep.template getEntityObject( grid, level, (EntityImp *) 0);
     }
 
     template <class EntityProviderType>
