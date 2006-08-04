@@ -8,13 +8,12 @@ namespace Dune {
 
   //--Grid
 
-
   //! Constructor which reads an ALU2dGrid Macro Triang file
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
   //: mesh_ (macroTriangFilename.c_str(), 1, ALU2DSPACE Refco::quart)
-    : mesh_ (macroTriangFilename.c_str())
+    : mesh_ (checkMacroGridFile(macroTriangFilename))
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
@@ -29,6 +28,36 @@ namespace Dune {
     //assert(mesh_ != 0);
     makeGeomTypes();
     updateStatus();
+  }
+
+  //! Iterator to first entity of given codim on level
+  template <int dim, int dimworld>
+  inline const char *
+  ALU2dGrid<dim, dimworld> :: checkMacroGridFile(const std::string & filename)
+  {
+    std::ifstream file(filename.c_str());
+    if(!file)
+    {
+      std::cerr << "Couldn't open file '" << filename <<"' !" << std::endl;
+      DUNE_THROW(IOError,"Couldn't open file '" << filename <<"' !");
+    }
+
+    /*
+       const std::string aluid("!Dreiecke");
+       std::string idline;
+       std::getline(file,idline);
+       std::stringstream idstream(idline);
+       std::string id;
+       idstream >> id;
+
+       if(id != aluid)
+       {
+       std::cerr << "Delivered file '"<<filename<<"' does not contain keyword '"
+        << aluid << "'. Found id '" <<id<< "'. Check the macro grid file! Bye." << std::endl;
+       DUNE_THROW(IOError,"Wrong file format! ");
+       }
+     */
+    return filename.c_str();
   }
 
 

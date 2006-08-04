@@ -420,6 +420,9 @@ namespace Dune {
     //! assignment operator should not be used
     ThisType & operator = (const ThisType & g);
 
+    // check macro file and return const char * to filename
+    const char * checkMacroGridFile(const std::string & filename);
+
     //! the real grid
     mutable ALU2DSPACE Hmesh mesh_;
 
