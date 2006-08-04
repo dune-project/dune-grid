@@ -18,7 +18,7 @@
 
 /** @file
    @author Robert Kloefkorn
-   @brief Provides a GridDisplay class using the GRAPE-HMesh Interface.
+   @brief Provides a check of the grids index set.
  */
 
 namespace Dune {
