@@ -10,6 +10,12 @@
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/datahandleif.hh>
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides views of grid via grid parts, heavily used in the
+   dune-fem module.
+ */
+
 namespace Dune {
 
   // Forward declarations

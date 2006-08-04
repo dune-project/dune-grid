@@ -4,7 +4,7 @@
 #define DUNE_DATAHANDLEIF_HH
 
 /** @file
-   @author FR-dune
+   @author Robert Kloefkorn
    @brief Describes the parallel communication interface class for
    MessageBuffers and DataHandles
  */

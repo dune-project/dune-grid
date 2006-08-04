@@ -5,6 +5,12 @@
 
 #include <dune/common/array.hh>
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides size cache classes to
+   implement the grids size method efficiently.
+ */
+
 namespace Dune {
 
   //! organizes the caching of sizes for one grid and one GeometryType

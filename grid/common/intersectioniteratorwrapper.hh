@@ -5,6 +5,11 @@
 
 #include "intersectioniterator.hh"
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides proxy classes for IntersectionsIterators
+ */
+
 namespace Dune {
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's

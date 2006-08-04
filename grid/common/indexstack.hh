@@ -8,6 +8,12 @@
 
 #include <dune/common/stack.hh>
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides an index stack that supplies indices for element numbering
+   for a grid (i.e. AlbertaGrid and ALUGrid)
+ */
+
 namespace Dune {
 
   //!  IndexStack providing indices via getIndex and freeIndex
@@ -195,5 +201,4 @@ namespace Dune {
   }
 
 } // end namespace Dune
-
 #endif
