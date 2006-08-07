@@ -91,8 +91,8 @@ namespace Dune {
         UGGridEntity,
         UGGridEntityPointer,
         UGGridLevelIterator,
-        UGGridIntersectionIterator,              // leaf  intersection iterartor
-        UGGridIntersectionIterator,              // level intersection iterartor
+        UGGridLeafIntersectionIterator,              // leaf  intersection iterartor
+        UGGridLevelIntersectionIterator,              // level intersection iterartor
         UGGridHierarchicIterator,
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim,dimworld> >,
@@ -137,7 +137,7 @@ namespace Dune {
      on how to obtain and install it.
 
      In your %Dune application, you can now instantiate objects of the
-     type UGGrid<2,2> or UGGrid<3,3>.  You can have more than one, if
+     type UGGrid<2> or UGGrid<3>.  You can have more than one, if
      you choose.  It is even possible to have 2d and 3d grids at the same
      time, even though the original UG system never intended to support
      this!
@@ -152,7 +152,8 @@ namespace Dune {
     friend class UGGridEntity <0,dim,const UGGrid<dim,dimworld> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim,dimworld> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim,dimworld> >;
-    friend class UGGridIntersectionIterator<const UGGrid<dim,dimworld> >;
+    friend class UGGridLeafIntersectionIterator<const UGGrid<dim,dimworld> >;
+    friend class UGGridLevelIntersectionIterator<const UGGrid<dim,dimworld> >;
 
     friend class UGGridLevelIndexSet<const UGGrid<dim,dimworld> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim,dimworld> >;

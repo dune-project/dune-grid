@@ -23,6 +23,11 @@ namespace Dune {
       virtualEntity_.setToTarget(0);
     }
 
+    //! constructor
+    UGGridEntityPointer (typename UG_NS<dim>::template Entity<codim>::T* target, int level)
+      : virtualEntity_(target, level)
+    {}
+
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
       virtualEntity_.setToTarget(target, level);
     }

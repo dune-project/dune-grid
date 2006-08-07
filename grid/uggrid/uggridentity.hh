@@ -24,7 +24,9 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class UGGridLevelIterator;
   template<class GridImp>
-  class UGGridIntersectionIterator;
+  class UGGridLevelIntersectionIterator;
+  template<class GridImp>
+  class UGGridLeafIntersectionIterator;
   template<class GridImp>
   class UGGridHierarchicIterator;
 
@@ -33,6 +35,12 @@ namespace Dune {
     public GridImp::template Codim<codim>::Entity
   {
   public:
+
+    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target, int level) :
+      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>(level))
+    {
+      this->realEntity.setToTarget(target);
+    }
 
     UGMakeableEntity(int level) :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>(level))
@@ -215,7 +223,7 @@ namespace Dune {
     public EntityDefaultImplementation<0,dim,GridImp, UGGridEntity>
   {
     friend class UGGrid < dim , dim>;
-    friend class UGGridIntersectionIterator <GridImp>;
+    friend class UGGridLeafIntersectionIterator <GridImp>;
     friend class UGGridHierarchicIterator <GridImp>;
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
@@ -229,8 +237,11 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
-    //! The Iterator over neighbors
-    typedef UGGridIntersectionIterator<GridImp> IntersectionIterator;
+    //! The Iterator over neighbors on this level
+    typedef UGGridLevelIntersectionIterator<GridImp> LevelIntersectionIterator;
+
+    //! The Iterator over neighbors on the leaf level
+    typedef UGGridLeafIntersectionIterator<GridImp> LeafIntersectionIterator;
 
     //! Iterator over descendants of the entity
     typedef UGGridHierarchicIterator<GridImp> HierarchicIterator;
@@ -389,33 +400,21 @@ namespace Dune {
     template<int cc>
     typename GridImp::template Codim<cc>::EntityPointer entity (int i) const;
 
-    /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
-       which has an entity of codimension 1 in commen with this entity. Access to neighbors
-       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
-       referencing the first neighbor. */
-    UGGridIntersectionIterator<GridImp> ibegin () const;
-    //! \todo implement me
-    UGGridIntersectionIterator<GridImp> ileafbegin () const {
-      DUNE_THROW(NotImplemented,"ileafbegin is not implemented yet");
-      return ibegin();
+    UGGridLeafIntersectionIterator<GridImp> ileafbegin () const {
+      return UGGridLeafIntersectionIterator<GridImp>(target_, 0, level());
     }
-    //! \todo implement me
-    UGGridIntersectionIterator<GridImp> ilevelbegin () const {
-      DUNE_THROW(NotImplemented,"ilevelbegin is not implemented yet");
-      return ibegin();
+
+    UGGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
+      return UGGridLevelIntersectionIterator<GridImp>(target_, 0, level());
     }
 
     //! Reference to one past the last neighbor
-    UGGridIntersectionIterator<GridImp> iend () const;
-    //! \todo implement me
-    UGGridIntersectionIterator<GridImp> ileafend () const {
-      DUNE_THROW(NotImplemented,"ileafend is not implemented yet");
-      return iend();
+    UGGridLeafIntersectionIterator<GridImp> ileafend () const {
+      return UGGridLeafIntersectionIterator<GridImp>(target_, -1, -1);
     }
-    //! \todo implement me
-    UGGridIntersectionIterator<GridImp> ilevelend () const {
-      DUNE_THROW(NotImplemented,"ilevelend is not implemented yet");
-      return iend();
+
+    UGGridLevelIntersectionIterator<GridImp> ilevelend () const {
+      return UGGridLevelIntersectionIterator<GridImp>(target_, -1, -1);
     }
 
     //! returns true if Entity has NO children

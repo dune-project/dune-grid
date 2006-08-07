@@ -125,21 +125,6 @@ setToTarget(typename UG_NS<dim>::Element* target)
 }
 
 template<int dim, class GridImp>
-inline Dune::UGGridIntersectionIterator<GridImp>
-Dune::UGGridEntity < 0, dim ,GridImp >::ibegin() const
-{
-  return UGGridIntersectionIterator<GridImp>(target_, 0, level());
-}
-
-
-template< int dim, class GridImp>
-inline Dune::UGGridIntersectionIterator<GridImp>
-Dune::UGGridEntity < 0, dim ,GridImp >::iend() const
-{
-  return UGGridIntersectionIterator<GridImp>(target_, -1, -1);
-}
-
-template<int dim, class GridImp>
 inline Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
