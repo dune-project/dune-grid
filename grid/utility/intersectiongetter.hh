@@ -78,7 +78,7 @@ namespace Dune
     {
       // Trigger a compile error
       IsTrue<SameType<TypeTag,LevelTag>::value||SameType<TypeTag,LevelTag>::value>::yes();
-      return iter.ileafbegin();
+      return iter.ileafend();
     }
   };
 
@@ -97,7 +97,7 @@ namespace Dune
     template<typename T>
     inline static IntersectionIterator end(T& iter)
     {
-      return iter.ileafbegin();
+      return iter.ileafend();
     }
   };
 
@@ -116,7 +116,7 @@ namespace Dune
     template<typename T>
     inline static IntersectionIterator end(T& iter)
     {
-      return iter.ilevelbegin();
+      return iter.ilevelend();
     }
   };
 
