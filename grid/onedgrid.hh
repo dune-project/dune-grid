@@ -25,7 +25,7 @@ namespace Dune
 
   template<int mydim, int coordworld, class GridImp>            class OneDGridGeometry;
   template<class GridImp>            class OneDGridHierarchicIterator;
-  template<class GridImp>            class OneDGridIntersectionIterator;
+  template<class GridImp, bool LeafIterator> class OneDGridIntersectionIterator;
   template<int dim, int dimworld>            class OneDGrid;
 
   template<int codim>                        class OneDGridLevelIteratorFactory;
@@ -158,8 +158,8 @@ namespace Dune {
         OneDGridEntity,
         OneDGridEntityPointer,
         OneDGridLevelIterator,
-        OneDGridIntersectionIterator,                // leaf  intersection iter
-        OneDGridIntersectionIterator,                // level intersection iter
+        OneDGridLeafIntersectionIterator,                // leaf  intersection iter
+        OneDGridLevelIntersectionIterator,                // level intersection iter
         OneDGridHierarchicIterator,
         OneDGridLeafIterator,
         OneDGridLevelIndexSet<const OneDGrid<dim,dimw> >,
@@ -200,7 +200,8 @@ namespace Dune {
     friend class OneDGridEntity <0,dim,OneDGrid>;
     friend class OneDGridEntity <dim,dim,OneDGrid>;
     friend class OneDGridHierarchicIterator<OneDGrid>;
-    friend class OneDGridIntersectionIterator<OneDGrid>;
+    friend class OneDGridLeafIntersectionIterator<OneDGrid>;
+    friend class OneDGridLevelIntersectionIterator<OneDGrid>;
 
     friend class OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >;
     friend class OneDGridLeafIndexSet<const OneDGrid<dim,dimworld> >;
@@ -372,6 +373,9 @@ namespace Dune {
      * \return false, which is not compliant with the official specification!
      */
     bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer& e );
+
+    //! Does nothing except return true if some element has been marked for refinement
+    bool preAdapt();
 
     //! Triggers the grid refinement process
     bool adapt();

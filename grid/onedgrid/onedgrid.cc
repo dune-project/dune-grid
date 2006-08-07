@@ -599,6 +599,19 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 }
 
 template <int dim, int dimworld>
+bool Dune::OneDGrid<dim,dimworld>::preAdapt()
+{
+  typename Traits::template Codim<0>::LeafIterator eIt    = leafbegin<0>();
+  typename Traits::template Codim<0>::LeafIterator eEndIt = leafend<0>();
+
+  for (; eIt!=eEndIt; ++eIt)
+    if (getRealImplementation(*eIt).target_->markState_ != OneDEntityImp<1>::NONE)
+      return true;
+
+  return false;
+}
+
+template <int dim, int dimworld>
 void Dune::OneDGrid<dim,dimworld>::postAdapt()
 {
   for (int i=0; i<=maxLevel(); i++) {
@@ -639,11 +652,11 @@ void Dune::OneDGrid < dim, dimworld >::setIndices()
 template <int dim, int dimworld>
 void Dune::OneDGrid<dim,dimworld>::globalRefine(int refCount)
 {
-  for (int i=0; i<refCount; i++)
-  {
+  for (int i=0; i<refCount; i++) {
+
     // mark all entities for grid refinement
-    typename Traits::template Codim<0>::LevelIterator iIt    = lbegin<0>(maxLevel());
-    typename Traits::template Codim<0>::LevelIterator iEndIt = lend<0>(maxLevel());
+    typename Traits::template Codim<0>::LeafIterator iIt    = leafbegin<0>();
+    typename Traits::template Codim<0>::LeafIterator iEndIt = leafend<0>();
 
     for (; iIt!=iEndIt; ++iIt)
       mark(1, iIt);

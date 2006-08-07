@@ -5,12 +5,19 @@
 
 #include <dune/common/fixedarray.hh>
 
-
 /** \file
  * \brief The OneDGridEntity class and its specializations
  */
 
 namespace Dune {
+
+  // forward declarations
+  template <class GridImp>
+  class OneDGridLeafIntersectionIterator;
+  template <class GridImp>
+  class OneDGridLevelIntersectionIterator;
+  template <int mydim, int coorddim, class GridImp>
+  class OneDMakeableGeometry;
 
   template <int mydim>
   class OneDEntityImp {};
@@ -106,11 +113,6 @@ namespace Dune {
 
   };
 
-}
-
-#include "onedgridgeometry.hh"
-
-namespace Dune {
 
   template<int cd, int dim, class GridImp>
   class OneDEntityWrapper :
@@ -239,14 +241,18 @@ namespace Dune {
     public EntityDefaultImplementation<0,dim,GridImp, OneDGridEntity>
   {
     friend class OneDGrid <dim, GridImp::dimensionworld>;
-    friend class OneDGridIntersectionIterator <GridImp>;
+    template <class GridImp_>
+    friend class OneDGridLevelIntersectionIterator;
+    template <class GridImp_>
+    friend class OneDGridLeafIntersectionIterator;
     friend class OneDGridHierarchicIterator <GridImp>;
     friend class OneDGridLevelIterator <0,All_Partition,GridImp>;
 
   public:
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     //! Default Constructor
@@ -323,39 +329,20 @@ namespace Dune {
       }
     }
 
-
-    /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
-       which has an entity of codimension 1 in commen with this entity. Access to neighbors
-       is provided using iterators. Returns iterator
-       referencing the first neighbor. */
-    IntersectionIterator ibegin () const {
-      return OneDGridIntersectionIterator<GridImp>(target_, 0);
-    }
-    //! \todo implement me
-    IntersectionIterator ileafbegin () const {
-      DUNE_THROW(NotImplemented,"method ileafbegin not implemented!");
-      return ibegin();
-    }
-    //! \todo implement me
-    IntersectionIterator ilevelbegin () const {
-      DUNE_THROW(NotImplemented,"method ilevelbegin not implemented!");
-      return ibegin();
+    LeafIntersectionIterator ileafbegin () const {
+      return OneDGridLeafIntersectionIterator<GridImp>(target_, 0);
     }
 
-    //! Reference to one past the last neighbor
-    IntersectionIterator iend () const {
-      return OneDGridIntersectionIterator<GridImp>(target_);
+    LevelIntersectionIterator ilevelbegin () const {
+      return OneDGridLevelIntersectionIterator<GridImp>(target_, 0);
     }
 
-    //! \todo implement me
-    IntersectionIterator ileafend () const {
-      DUNE_THROW(NotImplemented,"method ileafend not implemented!");
-      return iend();
+    LeafIntersectionIterator ileafend () const {
+      return OneDGridLeafIntersectionIterator<GridImp>(target_);
     }
-    //! \todo implement me
-    IntersectionIterator ilevelend () const {
-      DUNE_THROW(NotImplemented,"method ilevelend not implemented!");
-      return iend();
+
+    LevelIntersectionIterator ilevelend () const {
+      return OneDGridLevelIntersectionIterator<GridImp>(target_);
     }
 
     //! returns true if Entity has no children

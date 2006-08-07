@@ -144,7 +144,10 @@ namespace Dune {
     template <int cc_, int dim_, class GridImp_>
     friend class OneDGridSubEntityFactory;
 
-    friend class OneDGridIntersectionIterator<GridImp>;
+    template <class GridImp_>
+    friend class OneDGridLevelIntersectionIterator;
+    template <class GridImp_>
+    friend class OneDGridLeafIntersectionIterator;
 
   public:
 

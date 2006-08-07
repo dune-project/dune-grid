@@ -13,7 +13,10 @@ namespace Dune {
     : public EntityPointerDefaultImplementation <codim, GridImp, Dune::OneDGridEntityPointer<codim,GridImp> >
   {
     enum { dim = GridImp::dimension };
-    friend class OneDGridIntersectionIterator<GridImp>;
+    template <class GridImp_>
+    friend class OneDGridLevelIntersectionIterator;
+    template <class GridImp_>
+    friend class OneDGridLeafIntersectionIterator;
     friend class OneDGridEntity<0,dim,GridImp>;
 
   public:
