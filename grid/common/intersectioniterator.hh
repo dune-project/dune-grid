@@ -328,9 +328,11 @@ namespace Dune
     {
       return this->realIterator.integrationOuterNormal(local);
     }
-    /*! @brief return unit outer normal (length == 1)
-       @copydoc outerNormal
-       The normal vector scaled to length 1.
+
+    /*! @brief Return unit outer normal (length == 1)
+
+       The returned vector may depend on the local position within the intersection.
+       It is scaled to have unit length.
      */
     FieldVector<ct, dimworld> unitOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
