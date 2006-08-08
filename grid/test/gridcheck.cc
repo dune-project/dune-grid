@@ -486,13 +486,6 @@ struct GridInterface
     g.overlapSize(0);
     g.ghostSize(0);
 
-    // adaption
-    EntityPointer ept = g.template leafbegin<0>();
-    g.mark(100, ept);
-    g.adapt();
-    g.preAdapt();
-    g.postAdapt();
-
     // check for iterator functions
     g.template lbegin<0>(0);
     g.template lend<0>(0);
@@ -773,20 +766,6 @@ void assertNeighbor (Grid &g)
 /*
  * Iterate over the grid und do some runtime checks
  */
-template <class Grid, class It>
-struct _callMark {
-  static void mark (Grid & g, const It & it) { g.mark(1,it); };
-};
-template <class Grid, class It>
-struct _callMark<const Grid, It> {
-  static void mark (const Grid & g, const It & it) { };
-};
-template <class Grid, class It>
-void callMark(Grid & g, const It & it)
-{
-  assert (it->isLeaf());
-  _callMark<Grid,It>::mark(g,it);
-}
 
 template <class Grid>
 void iterate(Grid &g)
@@ -836,13 +815,6 @@ void iterate(Grid &g)
     it->geometry().corners();
     it->geometry()[0];
 
-    // Mark is only defined for leaf entities
-    callMark(g, it);
-    EntityPointer ept = it;
-    callMark(g, ept);
-    HierarchicIterator hit = ept->hbegin(99);
-    HierarchicIterator hend = ept->hend(99);
-    if (hit != hend) callMark(g, hit);
   }
 
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
