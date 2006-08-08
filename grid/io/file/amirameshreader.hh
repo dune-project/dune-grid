@@ -46,8 +46,7 @@ template<class GridType>
 void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename)
 {
-  /** \todo We should somehow output the grid type name here */
-  DUNE_THROW(IOError, "No AmiraMesh reading has been implemented for this grid type!");
+  DUNE_THROW(IOError, "No AmiraMesh reading has been implemented for " << grid.name() << "!");
 }
 
 #include "amiramesh/amirameshreader.cc"
