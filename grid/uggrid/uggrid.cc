@@ -442,7 +442,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
     someElementHasBeenMarkedForRefinement_ = true;
     return true;
   } else
-    DUNE_THROW(GridError, "UGGrid only supports refCount values -1, 0, and for mark()!");
+    DUNE_THROW(GridError, "UGGrid only supports refCount values -1, 0, and 1 for mark()!");
 
 }
 
@@ -465,9 +465,7 @@ bool Dune::UGGrid < dim, dimworld >::mark(const typename Traits::template Codim<
 template < int dim, int dimworld >
 bool Dune::UGGrid < dim, dimworld >::preAdapt()
 {
-  // returns always true, because for red-green refinement always some
-  // elements are coarsened, even if not marked.
-  return true;
+  return someElementHasBeenMarkedForRefinement_;
 }
 
 template < int dim, int dimworld >
