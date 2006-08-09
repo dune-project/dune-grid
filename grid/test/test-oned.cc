@@ -13,25 +13,6 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
-template <class GridType >
-void markOne ( GridType & grid , int num , int ref )
-{
-  typedef typename GridType::template Codim<0>::LeafIterator LeafIterator;
-
-  int count = 0;
-
-  LeafIterator endit = grid.template leafend  <0> ();
-  for(LeafIterator it = grid.template leafbegin<0> (); it != endit ; ++it )
-  {
-    if(num == count) grid.mark( ref, it );
-    count++;
-  }
-
-  grid.preAdapt();
-  grid.adapt();
-  grid.postAdapt();
-}
-
 int main () try
 {
 
@@ -52,7 +33,13 @@ int main () try
     gridcheck(grid);
 
     // create hybrid grid
-    markOne(grid,0,1) ;
+    grid.mark(1, grid.leafbegin<0>());
+    grid.preAdapt();
+    grid.adapt();
+    grid.postAdapt();
+    checkIntersectionIterator(grid);
+
+    // check the grid again
     gridcheck(grid);
 
     grid.globalRefine(1);
