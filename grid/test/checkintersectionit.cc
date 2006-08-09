@@ -9,24 +9,13 @@
     \brief Tests for the IntersectionIterator
  */
 
-template<class K, int N>
-struct ltfv
-{
-  bool operator()(const Dune::FieldVector<K,N> & v1, const Dune::FieldVector<K,N> & v2) const
-  {
-    for (int i=0; i<N; i++)
-      if (v1[i] != v2[i]) return (v1[i] < v2[i]);
-    return false;
-  }
-};
-
-
 /** \brief Test the IntersectionIterator
  */
-template <class GridType, class ElementIterator, class IntersectionIterator>
-void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
+template <class GridType, class IndexSet, class ElementIterator, class IntersectionIterator>
+void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
+                           const ElementIterator & eIt,
                            IntersectionIterator & iIt, const IntersectionIterator &iEndIt,
-                           const bool isLevelWiseConforming, const bool isLeafWiseConforming)
+                           bool isConforming)
 {
   using namespace Dune;
 
@@ -37,19 +26,21 @@ void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
 
+    assert(eIt == iIt.inside());
+
     // /////////////////////////////////////////////////////////////
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( isLevelWiseConforming && iIt.neighbor() )
+    if ( isConforming && iIt.neighbor() )
     {
       int i = iIt.level();
       EntityPointer outside = iIt.outside();
       int numberInSelf     = iIt.numberInSelf();
       int numberInNeighbor = iIt.numberInNeighbor();
 
-      assert(grid.levelIndexSet(i).template subIndex<1>(*eIt, numberInSelf)
-             == grid.levelIndexSet(i).template subIndex<1>(*outside, numberInNeighbor));
+      assert(indexSet.template subIndex<1>(*eIt, numberInSelf)
+             == indexSet.template subIndex<1>(*outside, numberInNeighbor));
 
 #ifndef DUNE_UGGRID_HH
       assert(grid.localIdSet().template subId<1>(*eIt, numberInSelf)
@@ -60,23 +51,6 @@ void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
 #else
 #warning Test disabled, as UG does not have Face IDs
 #endif
-    }
-
-    // here check for leaf wise conforming is needed ,
-    // otherwise this test fails for all non-conform grids
-
-    if (isLeafWiseConforming && iIt.neighbor())
-    {
-      typedef typename EntityType::EntityPointer EntityPointer;
-      EntityPointer outside = iIt.outside();
-      int numberInSelf     = iIt.numberInSelf();
-      int numberInNeighbor = iIt.numberInNeighbor();
-
-      // if entity is leaf entity then check leaf index set
-      if((eIt->isLeaf()) && (outside->isLeaf()))
-        assert(grid.leafIndexSet().template subIndex<1>(*eIt, numberInSelf)
-               == grid.leafIndexSet().template subIndex<1>(*outside, numberInNeighbor));
-
     }
 
     // //////////////////////////////////////////////////////////
@@ -115,8 +89,11 @@ void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
     if (intElement <=0)
       DUNE_THROW(GridError, "nonpositive integration element found!");
 
+#if 0
+    // This method exists in the interface, but it is not expected to work
     const FieldMatrix<ctype, Geometry::mydimension, Geometry::mydimension> jacobi
       = intersectionGlobal.jacobianInverseTransposed(localCenter);
+#endif
 #else
 #warning Test disabled, as UG does not support global-to-local for faces
 #endif
@@ -153,10 +130,10 @@ void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
         DUNE_THROW(GridError, "Local intersection has nonpositive number of corners!");
 
       if (intersectionSelfLocal.corners() != intersectionNeighborLocal.corners())
-        DUNE_THROW(GridError, "Geometry of intersection is incosistent from left and right hand side!");
+        DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left and right hand side!");
 
       if (intersectionSelfLocal.corners() != intersectionGlobal.corners())
-        DUNE_THROW(GridError, "Geometry of intersection is incosistent from left hand side and global view!");
+        DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
       typedef typename EntityType::EntityPointer EntityPointer;
       EntityPointer outside = iIt.outside();
@@ -209,6 +186,7 @@ void checkIntersectionIter(const GridType & grid,ElementIterator & eIt,
     }
 
   }
+
 }
 
 /** \brief Test both IntersectionIterators
@@ -242,11 +220,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
 
         IntersectionIterator iIt    = eIt->ilevelbegin();
         IntersectionIterator iEndIt = eIt->ilevelend();
-        bool isLevelWiseConforming = Dune :: Capabilities ::
-                                     isLevelwiseConforming < GridType > :: v ;
-
-        bool isLeafWiseConforming = false;
-        // Dune :: Capabilities ::isLeafwiseConforming < GridType > :: v ;
+        bool isConforming = Dune::Capabilities::isLevelwiseConforming < GridType > :: v ;
 
         // /////////////////////////////////////////////////////////
         //   Check the types defined by the iterator
@@ -261,12 +235,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
         IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
             == static_cast<int>(GridType::dimensionworld)>::yes();
 
-        if( iIt.neighbor())
-        {
-          assert( i == iIt.level());
-          assert(eIt == iIt.inside());
-        }
-        checkIntersectionIter(grid,eIt,iIt,iEndIt,isLevelWiseConforming,isLeafWiseConforming);
+        checkIntersectionIter(grid,grid.levelIndexSet(i),eIt,iIt,iEndIt,isConforming);
       }
     }
   }
@@ -283,8 +252,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
 
       IntersectionIterator iIt    = eIt->ileafbegin();
       IntersectionIterator iEndIt = eIt->ileafend();
-      bool isLevelWiseConforming = false;
-      bool isLeafWiseConforming = Dune :: Capabilities ::isLeafwiseConforming < GridType > :: v ;
+      bool isConforming = Dune :: Capabilities ::isLeafwiseConforming < GridType > :: v ;
 
       // /////////////////////////////////////////////////////////
       //   Check the types defined by the iterator
@@ -299,11 +267,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
       IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
           == static_cast<int>(GridType::dimensionworld)>::yes();
 
-      if( iIt.neighbor())
-      {
-        assert(eIt == iIt.inside());
-      }
-      checkIntersectionIter(grid,eIt,iIt,iEndIt,isLevelWiseConforming,isLeafWiseConforming);
+      checkIntersectionIter(grid,grid.leafIndexSet(),eIt,iIt,iEndIt,isConforming);
     }
   }
 }
