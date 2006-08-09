@@ -161,11 +161,7 @@ namespace Dune {
         /** \todo codim 1 (faces) */
         if (dim==3)
           for (int i=0; i<eIt->template count<1>(); i++)
-          {
-            GeometryType gt = eIt->geometry().type();
-            int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
-            index = -1;
-          }
+            UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,i)) = -1;
 
       }
 
@@ -185,44 +181,43 @@ namespace Dune {
 
       for (; eIt!=eEndIt; ++eIt) {
 
+        typename UG_NS<dim>::Element* target = grid_->getRealImplementation(*eIt).target_;
+
         // codim 0 (elements)
         GeometryType eType = eIt->geometry().type();
         if (eType.isSimplex()) {
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*eIt).target_) = numSimplices_++;
+          UG_NS<dim>::levelIndex(target) = numSimplices_++;
         } else if (eType.isPyramid()) {
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*eIt).target_) = numPyramids_++;
+          UG_NS<dim>::levelIndex(target) = numPyramids_++;
         } else if (eType.isPrism()) {
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*eIt).target_) = numPrisms_++;
+          UG_NS<dim>::levelIndex(target) = numPrisms_++;
         } else if (eType.isCube()) {
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*eIt).target_) = numCubes_++;
+          UG_NS<dim>::levelIndex(target) = numCubes_++;
         } else {
           DUNE_THROW(GridError, "Found the GeometryType " << eIt->geometry().type()
                                                           << ", which should never occur in a UGGrid!");
         }
 
-        typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(*eIt).target_;
-
         // codim dim-1 (edges)
         for (int i=0; i<eIt->template count<dim-1>(); i++)
         {
-          GeometryType gt = eIt->geometry().type();
-          int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-          int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
-          int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
-                                                                  UG_NS<dim>::Corner(target_,
-                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
-          if (index<0) index = numEdges_++;
+          int a=ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,0,dim);
+          int b=ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,1,dim);
+          int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,eType)),
+                                                                  UG_NS<dim>::Corner(target,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,eType))));
+          if (index<0)
+            index = numEdges_++;
         }
 
         // codim 1 (faces): todo
         if (dim==3)
           for (int i=0; i<eIt->template count<1>(); i++)
           {
-            GeometryType gt = eIt->geometry().type();
-            int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
+            int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
             if (index<0) {                       // not visited yet
-              GeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
+              GeometryType gtType = ReferenceElements<double,dim>::general(eType).type(i,1);
               if (gtType.isSimplex()) {
                 index = numTriFaces_++;
               } else if (gtType.isCube()) {
