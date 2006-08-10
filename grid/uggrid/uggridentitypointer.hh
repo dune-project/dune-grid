@@ -19,17 +19,17 @@ namespace Dune {
     typedef UGGridEntityPointer<codim,GridImp> Base;
 
     //! constructor
-    UGGridEntityPointer () : virtualEntity_(-1) {
+    UGGridEntityPointer ()  {
       virtualEntity_.setToTarget(0);
     }
 
     //! constructor
-    UGGridEntityPointer (typename UG_NS<dim>::template Entity<codim>::T* target, int level)
-      : virtualEntity_(target, level)
+    UGGridEntityPointer (typename UG_NS<dim>::template Entity<codim>::T* target)
+      : virtualEntity_(target)
     {}
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
-      virtualEntity_.setToTarget(target, level);
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
+      virtualEntity_.setToTarget(target);
     }
 
     //! equality

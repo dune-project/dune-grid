@@ -19,10 +19,8 @@ namespace Dune {
    * \ingroup UGGrid
      Mesh entities of codimension 0 ("elements") allow to visit all entities of
      codimension 0 obtained through nested, hierarchic refinement of the entity.
-     Iteration over this set of entities is provided by the HIerarchicIterator,
+     Iteration over this set of entities is provided by the HierarchicIterator,
      starting from a given entity.
-     This is redundant but important for memory efficient implementations of unstru
-     hierarchically refined meshes.
    */
 
   template<class GridImp>
@@ -32,12 +30,6 @@ namespace Dune {
   {
 
     friend class UGGridEntity<0,GridImp::dimension,GridImp>;
-
-    // Stack entry
-    struct StackEntry {
-      typename UG_NS<GridImp::dimension>::Element* element;
-      int level;
-    };
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -50,7 +42,8 @@ namespace Dune {
     //! max level to go down
     int maxlevel_;
 
-    Stack<StackEntry> elemStack;
+    //Stack<StackEntry> elemStack;
+    Stack<typename UG_NS<GridImp::dimension>::Element*> elementStack_;
 
   };
 

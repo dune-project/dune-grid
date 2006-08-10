@@ -96,24 +96,17 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
     typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, geometry().type()));
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
-    return UGGridLevelIterator<cc,All_Partition,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, level_);
+    /** \todo Should this be a constructor of EntityPointer ?*/
+    return UGGridLevelIterator<cc,All_Partition,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
 
   } else if (cc==0) {
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
-    return UGGridLevelIterator<cc,All_Partition,GridImp>(myself, level_);
+    /** \todo Should this be a constructor of EntityPointer ?*/
+    return UGGridLevelIterator<cc,All_Partition,GridImp>(myself);
   } else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
-}
-
-template<int dim, class GridImp>
-inline void Dune::UGGridEntity < 0, dim ,GridImp >::
-setToTarget(typename UG_NS<dim>::Element* target, int level)
-{
-  target_ = target;
-  level_  = level;
-  geo_.setToTarget(target);
 }
 
 template<int dim, class GridImp>
@@ -133,13 +126,11 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
   if (level()<=maxlevel) {
 
     // Put myself on the stack
-    typename UGGridHierarchicIterator<GridImp>::StackEntry se;
-    se.element = target_;
-    se.level   = level();
-    it.elemStack.push(se);
+    typename UG_NS<dim>::Element* t = target_;
+    it.elementStack_.push(t);
 
     // Set intersection iterator to myself
-    it.virtualEntity_.setToTarget(target_, level());
+    it.virtualEntity_.setToTarget(target_);
 
     /** \todo Directly put all sons onto the stack */
     it.increment();
@@ -159,14 +150,6 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
   return UGGridHierarchicIterator<GridImp>(maxlevel);
 }
 
-
-template<int dim, class GridImp>
-inline int Dune::UGGridEntity < 0, dim ,GridImp >::
-level() const
-{
-  return level_;
-}
-
 template< int dim, class GridImp>
 inline const typename Dune::UGGridEntity<0,dim,GridImp>::Geometry&
 Dune::UGGridEntity < 0, dim ,GridImp >::
@@ -180,9 +163,8 @@ template<int dim, class GridImp>
 inline Dune::UGGridLevelIterator<0,Dune::All_Partition,GridImp>
 Dune::UGGridEntity < 0, dim, GridImp>::father() const
 {
-  UGGridLevelIterator<0,All_Partition,GridImp> it(level()-1);
-  it.setToTarget(UG_NS<dim>::EFather(target_), level()-1);
-  return it;
+  /** \todo This shouldn't be a constructor of LevelIterator! */
+  return UGGridLevelIterator<0,All_Partition,GridImp> (UG_NS<dim>::EFather(target_));
 }
 
 template<int dim, class GridImp>

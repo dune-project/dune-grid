@@ -30,9 +30,9 @@ namespace Dune {
       const unsigned int startingLevel = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
 
       if (pitype==All_Partition || pitype==Ghost_Partition)
-        setToTarget(UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]), startingLevel);
+        setToTarget(UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
       else
-        setToTarget(UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]), startingLevel);
+        setToTarget(UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
 
       if (!UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
         increment();
@@ -67,9 +67,9 @@ namespace Dune {
       if (!this->virtualEntity_.getTarget() && level < grid_->maxLevel()) {
 
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget(UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]), level+1);
+          setToTarget(UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[level+1]));
         else
-          setToTarget(UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]), level+1);
+          setToTarget(UG_NS<dim>::FirstNode(grid_->multigrid_->grids[level+1]));
 
       }
 
@@ -98,9 +98,9 @@ namespace Dune {
       const int startingLevel = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
 
       if (pitype==All_Partition || pitype==Ghost_Partition)
-        setToTarget(UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]), startingLevel);
+        setToTarget(UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
       else
-        setToTarget(UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]), startingLevel);
+        setToTarget(UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
 
       // If this is not a leaf entity already increment to find the first leaf entity
       if (!UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
@@ -136,9 +136,9 @@ namespace Dune {
       if (!this->virtualEntity_.getTarget() && level < grid_->maxLevel()) {
 
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget(UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]), level+1);
+          setToTarget(UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[level+1]));
         else
-          this->setToTarget(UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]), level+1);
+          this->setToTarget(UG_NS<dim>::FirstElement(grid_->multigrid_->grids[level+1]));
 
       }
 

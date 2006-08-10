@@ -85,7 +85,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_, this->level());
+      return UGGridEntityPointer<0,GridImp>(center_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -97,7 +97,7 @@ namespace Dune {
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem,UG_NS<dim>::myLevel(otherelem));
+      return UGGridEntityPointer<0,GridImp>(otherelem);
     }
 
     //! return true if intersection is with boundary. \todo connection with
@@ -229,9 +229,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
-      UGGridEntityPointer<0,GridImp> center;
-      center.setToTarget(center_, this->level());
-      return center;
+      return UGGridEntityPointer<0,GridImp>(center_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -242,7 +240,7 @@ namespace Dune {
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem,UG_NS<dim>::myLevel(otherelem));
+      return UGGridEntityPointer<0,GridImp>(otherelem);
     }
 
     //! return true if intersection is with boundary. \todo connection with

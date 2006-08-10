@@ -18,31 +18,29 @@ UGGridHierarchicIterator<GridImp>::UGGridHierarchicIterator(int maxLevel)
 template<class GridImp>
 void UGGridHierarchicIterator<GridImp>::increment()
 {
-  if (elemStack.empty())
+  if (elementStack_.empty())
     return;
 
-  StackEntry old_target = elemStack.pop();
+  const int dim = GridImp::dimension;
+
+  //StackEntry old_target = elemStack.pop();
+  const typename UG_NS<dim>::Element* oldTarget = elementStack_.pop();
 
   // Traverse the tree no deeper than maxlevel
-  if (old_target.level < maxlevel_) {
+  if (UG_NS<dim>::myLevel(oldTarget) < maxlevel_) {
 
-    // The 30 is the macro MAX_SONS from ug/gm/gm.h
-    typename UG_NS<GridImp::dimension>::Element* sonList[UG_NS<GridImp::dimension>::MAX_SONS];
-    UG_NS<GridImp::dimension>::GetSons(old_target.element,sonList);
+    typename UG_NS<dim>::Element* sonList[UG_NS<dim>::MAX_SONS];
+    UG_NS<dim>::GetSons(oldTarget, sonList);
 
     // Load sons of old target onto the iterator stack
-    for (int i=0; i<UG_NS<GridImp::dimension>::nSons(old_target.element); i++) {
-      StackEntry se;
-      se.element = sonList[i];
-      se.level   = old_target.level + 1;
-      elemStack.push(se);
-    }
+    for (int i=0; i<UG_NS<dim>::nSons(oldTarget); i++)
+      elementStack_.push(sonList[i]);
 
   }
 
-  if (elemStack.empty())
-    this->virtualEntity_.setToTarget(0);
+  if (elementStack_.empty())
+    this->virtualEntity_.setToTarget(NULL);
   else
-    this->virtualEntity_.setToTarget(elemStack.top().element, elemStack.top().level);
+    this->virtualEntity_.setToTarget(elementStack_.top());
 
 }

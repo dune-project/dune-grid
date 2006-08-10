@@ -291,11 +291,11 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
   if (codim==0)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid), level);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid));
   else if (codim==dim)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
 }
@@ -322,14 +322,14 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement, level);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement);
 
   } else if (codim==dim) {
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
     /** \todo Parallel vertex level iterators not properly implemented yet! */
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid), level);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   }
 
@@ -341,7 +341,7 @@ template<int codim>
 typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::LevelIterator
 Dune::UGGrid < dim, dimworld >::lend (int level) const
 {
-  return UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> >(level);
+  return UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> >();
 }
 
 template < int dim, int dimworld >
@@ -349,7 +349,7 @@ template<int codim, Dune::PartitionIteratorType PiType>
 inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::UGGrid < dim, dimworld >::lend (int level) const
 {
-  return UGGridLevelIterator<codim,PiType, const UGGrid<dim,dimworld> >(level);
+  return UGGridLevelIterator<codim,PiType, const UGGrid<dim,dimworld> >();
 }
 
 template < int dim, int dimworld >
@@ -657,7 +657,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
 
     // Set element
     //childElements[i].setToTarget(Element<0>::get(*f), Element<2>::get(*f));
-    this->getRealImplementation(childElements[i]).setToTarget(Element<0>::get(*f), Element<2>::get(*f));
+    this->getRealImplementation(childElements[i]).setToTarget(Element<0>::get(*f));
 
     int side = Element<1>::get(*f);
 

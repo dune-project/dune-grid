@@ -36,22 +36,18 @@ namespace Dune {
   {
   public:
 
-    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target, int level) :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>(level))
+    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target) :
+      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {
       this->realEntity.setToTarget(target);
     }
 
-    UGMakeableEntity(int level) :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>(level))
+    UGMakeableEntity() :
+      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {}
 
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       this->realEntity.setToTarget(target);
-    }
-
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
-      this->realEntity.setToTarget(target, level);
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
@@ -96,12 +92,10 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
-    //! Constructor for an entity in a given grid level
-    UGGridEntity(int level)
-      : level_(level) {}
-
     //! level of this element
-    int level () const {return level_;}
+    int level () const {
+      return UG_NS<dim>::myLevel(target_);
+    }
 
     int levelIndex() const {
       return UG_NS<dim>::levelIndex(target_);
@@ -148,7 +142,7 @@ namespace Dune {
       if (UG_NS<dim>::NFather(target_)!=0)
         if (UG_NS<dim>::myLevel(UG_NS<dim>::NFather(target_)) == this->level()-1)
         {
-          myfather.setToTarget(UG_NS<dim>::NFather(target_), this->level()-1);
+          myfather.setToTarget(UG_NS<dim>::NFather(target_));
           return myfather;
         }
       DUNE_THROW(NotImplemented, "ownersFather for anything else than new vertices");
@@ -182,19 +176,10 @@ namespace Dune {
       geo_.setToTarget(target);
     }
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, int level) {
-      target_ = target;
-      level_  = level;
-      geo_.setToTarget(target);
-    }
-
     //! the current geometry
     UGMakeableGeometry<dim-codim,dim,GridImp> geo_;
 
     FieldVector<UGCtype, dim> localFatherCoords_;
-
-    //! level
-    int level_;
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
@@ -246,14 +231,10 @@ namespace Dune {
     //! Iterator over descendants of the entity
     typedef UGGridHierarchicIterator<GridImp> HierarchicIterator;
 
-    //! Constructor with a given grid level
-    UGGridEntity(int level) : level_(level) {}
-
-    //! Destructor
-    ~UGGridEntity() {};
-
     //! Level of this element
-    int level () const;
+    int level () const {
+      return UG_NS<dim>::myLevel(target_);
+    }
 
     int levelIndex() const {
       return UG_NS<dim>::levelIndex(target_);
@@ -465,10 +446,7 @@ namespace Dune {
        returns false) */
     bool mightBeCoarsened() const;
 
-    //private:
-    void setToTarget(typename UG_NS<dim>::Element* target, int level);
-
-    //! Leaves the level untouched
+    //!
     void setToTarget(typename UG_NS<dim>::Element* target);
 
     //! the current geometry
@@ -476,9 +454,6 @@ namespace Dune {
 
     //! geometry for mapping into father's reference element
     mutable UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geometryInFather_;
-
-    //! the level of the entity
-    int level_;
 
     typename UG_NS<dim>::Element* target_;
 

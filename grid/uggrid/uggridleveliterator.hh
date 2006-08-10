@@ -33,19 +33,20 @@ namespace Dune {
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 
     //! Constructor
-    explicit UGGridLevelIterator(int travLevel)
+    explicit UGGridLevelIterator()
     {
-      this->virtualEntity_.setToTarget(0,travLevel);
+      this->virtualEntity_.setToTarget(NULL);
     }
 
     //! Constructor
-    explicit UGGridLevelIterator(typename UG_NS<dim>::template Entity<codim>::T* target, int level)
+    explicit UGGridLevelIterator(typename UG_NS<dim>::template Entity<codim>::T* target)
     {
-      this->virtualEntity_.setToTarget(target, level);
+      this->virtualEntity_.setToTarget(target);
     }
 
     //! prefix increment
     void increment() {
+      assert(this->level() == UG_NS<dim>::myLevel(this->virtualEntity_.getTarget()));
       this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()));
     }
 
