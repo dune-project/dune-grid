@@ -11,7 +11,7 @@
 /*! @file
 
    @brief This file simply includes all @ref Refinement implementations
-         so you don't have to do them seperately.
+         so you don't have to do them separately.
 
    @verbatim
    $Id$
