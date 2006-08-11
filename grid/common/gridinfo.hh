@@ -6,8 +6,8 @@
 #define DUNE_GRIDINFO_HH
 
 #include <iostream>
-#include <common/exceptions.hh>
-#include "common/helpertemplates.hh"
+#include <dune/common/exceptions.hh>
+#include "dune/common/helpertemplates.hh"
 #include "grid.hh"
 #include "referenceelements.hh"
 
