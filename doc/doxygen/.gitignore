@@ -8,3 +8,5 @@ latex
 Makefile
 Makefile.in
 semantic.cache
+Doxyfile.tmp
+html-dist
