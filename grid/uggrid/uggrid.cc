@@ -7,8 +7,7 @@
 #include <dune/grid/uggrid.hh>
 #include "boundaryextractor.hh"
 
-/** \todo Remove the following two includes once getAllSubfaces... is gone */
-#include <dune/common/tuples.hh>
+/** \todo Remove the following include once getAllSubfaces... is gone */
 #include <dune/common/sllist.hh>
 #include <dune/common/stdstreams.hh>
 
@@ -572,12 +571,9 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                                                       std::vector<unsigned char>& childElementSides) const
 {
 
-  typedef Tuple<typename UG_NS<dim>::Element*,int, int> ListEntryType;
+  typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
 
   SLList<ListEntryType> list;
-
-  // The starting level
-  int level = e->level();
 
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
@@ -589,7 +585,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   //   init list
   // ///////////////
   if (!e->isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
-      && level < maxl) {
+      && e->level() < maxl) {
 
     typename UG_NS<dim>::Element* theElement = getRealImplementation(*e).target_;
 
@@ -608,7 +604,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_back(ListEntryType(SonList[i],SonSides[i], level+1));
+      list.push_back(ListEntryType(SonList[i],SonSides[i]));
 
   }
 
@@ -619,15 +615,14 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   typename SLList<ListEntryType>::iterator f = list.begin();
   for (; f!=list.end(); ++f) {
 
-    typename::UG_NS<dim>::Element* theElement = Element<0>::get(*f);
-    int side                 = Element<1>::get(*f);
-    level                    = Element<2>::get(*f);
+    typename::UG_NS<dim>::Element* theElement = f->first;
+    int side                                  = f->second;
 
     int Sons_of_Side = 0;
     typename::UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
     int SonSides[UG_NS<dim>::MAX_SONS];
 
-    if (level < maxl) {
+    if (UG_NS<dim>::myLevel(theElement) < maxl) {
 
       Get_Sons_of_ElementSide(theElement,
                               side,             // Input element side number
@@ -638,7 +633,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                               true);
 
       for (int i=0; i<Sons_of_Side; i++)
-        list.push_back(ListEntryType(SonList[i],SonSides[i], level+1));
+        list.push_back(ListEntryType(SonList[i],SonSides[i]));
 
     }
 
@@ -656,15 +651,13 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
   for (f = list.begin(); f!=list.end(); ++f, ++i) {
 
     // Set element
-    //childElements[i].setToTarget(Element<0>::get(*f), Element<2>::get(*f));
-    this->getRealImplementation(childElements[i]).setToTarget(Element<0>::get(*f));
+    this->getRealImplementation(childElements[i]).setToTarget(f->first);
 
-    int side = Element<1>::get(*f);
+    int side = f->second;
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
-    side = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->geometry().type());
-    childElementSides[i] = side;
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->geometry().type());
 
   }
 
