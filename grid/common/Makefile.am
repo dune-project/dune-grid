@@ -1,8 +1,8 @@
 # $Id$
 
 noinst_LTLIBRARIES = libgridcommon.la
-libgridcommon_la_SOURCES = referenceelements.cc quadraturerules.cc
-libgridcommon_la_LIBADD = -lcommon
+libgridcommon_la_SOURCES = referenceelements.cc
+libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la -lcommon
 
 commondir = $(includedir)/dune/grid/common
 common_HEADERS = virtualrefinement.cc capabilities.hh \
@@ -15,6 +15,6 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   intersectioniteratorwrapper.hh quadraturerules.hh \
   datahandleif.hh
 
-SUBDIRS = refinement test
+SUBDIRS = refinement test quadraturerules
 
 include $(top_srcdir)/am/global-rules

@@ -247,6 +247,52 @@ namespace Dune {
     CubeQuadratureRule (int p);
   };
 
+  //! Jacobi-Gauss quadrature for alpha=1, beta=0
+  template<typename ct, int dim>
+  class Jacobi1QuadratureRule;
+
+  //! Jacobi-Gauss quadrature for alpha=1, beta=0
+  template<typename ct>
+  class Jacobi1QuadratureRule<ct,1> :
+    public QuadratureRule<ct,1>
+  {
+  public:
+    // compile time parameters
+    enum { d=1 };
+    enum { dim=1 };
+    enum { highest_order=44 };
+    typedef ct CoordType;
+    typedef Jacobi1QuadratureRule value_type;
+
+    ~Jacobi1QuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,dim>;
+    Jacobi1QuadratureRule (int p);
+  };
+
+  //! Jacobi-Gauss quadrature for alpha=2, beta=0
+  template<typename ct, int dim>
+  class Jacobi2QuadratureRule;
+
+  //! Jacobi-Gauss quadrature for alpha=2, beta=0
+  template<typename ct>
+  class Jacobi2QuadratureRule<ct,1> :
+    public QuadratureRule<ct,1>
+  {
+  public:
+    // compile time parameters
+    enum { d=1 };
+    enum { dim=1 };
+    enum { highest_order=44 };
+    typedef ct CoordType;
+    typedef Jacobi2QuadratureRule value_type;
+
+    ~Jacobi2QuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,dim>;
+    Jacobi2QuadratureRule (int p);
+  };
+
   /************************************************
    * Quadraturerule for Simplices/Triangle
    *************************************************/
@@ -651,6 +697,10 @@ namespace Dune {
         switch (qt) {
         case QuadratureType::Gauss :
           return CubeQuadratureRule<ctype,dim>(p);
+        case QuadratureType::Jacobian_1_0 :
+          return Jacobi1QuadratureRule<ctype,dim>(p);
+        case QuadratureType::Jacobian_2_0 :
+          return Jacobi2QuadratureRule<ctype,dim>(p);
         default :
           DUNE_THROW(Exception, "Unknown QuadratureType");
         }
