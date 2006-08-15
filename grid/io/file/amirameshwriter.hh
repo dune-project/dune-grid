@@ -4,7 +4,6 @@
 #define DUNE_AMIRAMESH_WRITER_HH
 
 #include <string>
-#include <dune/istl/bvector.hh>
 
 namespace Dune {
 
