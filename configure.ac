@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile
     grid/Makefile
     grid/test/Makefile
     grid/common/test/Makefile
+    grid/common/quadraturerules/Makefile
     grid/common/refinement/Makefile
     grid/common/Makefile
     grid/uggrid/Makefile
