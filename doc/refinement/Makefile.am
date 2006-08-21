@@ -7,17 +7,17 @@ PICS = referencetokuhn0.svg referencetokuhn0.png \
 	     kuhntriangulation.svg
 
 if BUILD_DOCS
- DOCS = referencetokuhn0.png simplexvertexindex.png \
-	refinement.pdf
+ DOCS = referencetokuhn0.png simplexvertexindex.png
+ PDFDOC = refinement.pdf
 endif
 EXTRAINSTALL = refinement.pdf
 
 EXTRA_DIST = $(PICS) refinement.tex
 
 docdir=$(datadir)/doc/dune-grid/refinement
-doc_DATA = refinement.pdf
+doc_DATA = $(PDFDOC)
 
-all: $(DOCS)
+all: $(DOCS) $(PDFDOC)
 
 refinement.dvi: refinement.tex simplexvertexindex.eps referencetokuhn0.eps kuhntriangulation.eps
 
