@@ -34,7 +34,7 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     // /////////////////////////////////////////////////////////////
     if ( isConforming && iIt.neighbor() )
     {
-      int i = iIt.level();
+      assert(iIt.level() >= 0);
       EntityPointer outside = iIt.outside();
       int numberInSelf     = iIt.numberInSelf();
       int numberInNeighbor = iIt.numberInNeighbor();
