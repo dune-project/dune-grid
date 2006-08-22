@@ -38,7 +38,7 @@ void checkQuadrature(Dune::GeometryType t, int p)
   }
   if (std::abs(volume -
                Dune::ReferenceElements<ctype, dim>::general(t).volume())
-      > 2*p*std::numeric_limits<double>::epsilon())
+      > 4*dim*p*std::numeric_limits<double>::epsilon())
   {
     std::cerr << "Error: Quadrature for " << t << " and order=" << p
               << " does not sum to volume of RefElem" << std::endl;
