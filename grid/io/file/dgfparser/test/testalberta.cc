@@ -19,7 +19,7 @@ try {
   MPIHelper::instance(argc,argv);
 
   {
-    typedef AlbertaGrid<GRIDDIM,GRIDDIM> GridType;
+    typedef AlbertaGrid<ALBERTA_DIM,ALBERTA_WORLDDIM> GridType;
     std::string filename;
     if(GRIDDIM == 2) filename += "examplegrid5.dgf";
     if(GRIDDIM == 3) filename += "examplegrid6.dgf";
