@@ -1270,6 +1270,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::checkMacroGridFile(const std::string filename)
   {
+    if(filename == "") return;
+
     std::ifstream file(filename.c_str());
     if(!file)
     {
