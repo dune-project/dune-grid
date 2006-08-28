@@ -1707,7 +1707,9 @@ namespace Dune
     friend class Conversion<AlbertaGrid<dim, dimworld>, HasObjectStream>;
     friend class Conversion<const AlbertaGrid<dim, dimworld>, HasObjectStream>;
 
+    // do not use copy constructor
     AlbertaGrid(const MyType& other);
+    // do not use assigment
     MyType& operator=(const MyType& other);
 
   private:
