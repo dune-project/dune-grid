@@ -564,10 +564,12 @@ namespace Dune {
       return;
     }
     for (int i=0; i<nofelements; i++) {
-      double maxlen=0;
-      int maxface;
+      double maxlen=0.0;
+      int maxface = -1;
       int idx[3] = {elements[i][0],elements[i][1],elements[i][2]};
-      for (int k=0; k<dimw+1; k++) {
+
+      for (int k=0; k<dimw+1; k++)
+      {
         double len=sqrt
                       (pow(vtx[idx[(k+2)%3]][0]-vtx[idx[(k+1)%3]][0],2.)+
                       pow(vtx[idx[(k+2)%3]][1]-vtx[idx[(k+1)%3]][1],2.)
@@ -577,6 +579,7 @@ namespace Dune {
           maxlen=len;
         }
       }
+      assert(maxface >= 0);
       if (maxface!=fce) {
         // dverb << "Rearranging verticies of simplex " << i
         //  << " since face " << maxface << " is largest" << std::endl;
