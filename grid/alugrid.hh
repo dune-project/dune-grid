@@ -79,6 +79,9 @@ namespace Dune {
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
 
+    friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
   private:
     ALUCubeGrid(const ALUCubeGrid & g) : BaseType(g) {}
   };
@@ -188,6 +191,9 @@ namespace Dune {
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
 
+    friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
   private:
     ALUSimplexGrid(const ALUSimplexGrid & g) : BaseType(g) {}
   };
@@ -238,6 +244,12 @@ namespace Dune {
     typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
     typedef Traits::Codim<0>::LeafIterator LeafIterator;
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+
+    friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
+    friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
+
+    friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
   };
 
   namespace Capabilities {
