@@ -174,10 +174,7 @@ namespace Dune {
     : mygrid_ (0)
 #if ALU3DGRID_PARALLEL
       , mpAccess_(mpiComm)
-      , myRank_( mpAccess_.myrank() )
       , ccobj_(mpiComm)
-#else
-      , myRank_(myrank)
 #endif
       , maxlevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)

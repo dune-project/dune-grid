@@ -161,11 +161,9 @@ namespace Dune {
     };
   };
 
-
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons and tetrahedrons.
-     @ingroup GridImplementations
      The ALU3dGrid implements the Dune GridInterface for 3d tetrahedral and
      hexahedral meshes. This grid can be locally adapted and used in parallel
      computations using dynamcic load balancing.
@@ -273,16 +271,25 @@ namespace Dune {
     typedef typename Traits :: CollectiveCommunication
     CollectiveCommunicationType;
 
+    //! max number of levels
+    enum {
+      //! \brief maximal number of levels is 64
+      MAXL = 64
+    };
 
-    //! maximal number of levels
-    enum { MAXL = 64 };
+    //! element chunk for refinement
+    enum {
+      //! \brief normal default number of new elements for new adapt method
+      newElementsChunk_ = 100
+    };
 
-    //! normal default number of new elements for new adapt method
-    enum { newElementsChunk_ = 100 };
-
-    //! if one element is refined then it causes apporximately not more than
-    //! this number of new elements
-    enum { refineEstimate_ = 40 };
+    //! upper estimate on number of elements that could be created when a new element is created
+    enum {
+      /** \brief if one element is refined then it
+          causes apporximately not more than
+          this number of new elements  */
+      refineEstimate_ = 40
+    };
 
   protected:
     //! Constructor which reads an ALU3dGrid Macro Triang file
@@ -294,14 +301,15 @@ namespace Dune {
 #endif
   public:
 
-    //! Desctructor
+    //! \brief Desctructor
     ~ALU3dGrid();
 
-    //! for grid identification
+    //! \brief for grid identification
     std::string name () const;
 
-    //! Return maximum level defined in this grid. Levels are numbered
-    //! 0 ... maxLevel with 0 the coarsest level.
+    /** \brief  Return maximum level defined in this grid. Levels are numbered
+        maxLevel with 0 the coarsest level.
+     */
     int maxLevel() const;
 
     //! Iterator to first entity of given codim on level
@@ -326,6 +334,7 @@ namespace Dune {
     template Partition<All_Partition>::LevelIterator
     lend (int level) const;
 
+  private:
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
@@ -352,32 +361,34 @@ namespace Dune {
     //! one past the end on this leaf level (codim 0 and All_Partition)
     LeafIteratorType leafend (int level) const;
 
-    //! General definiton for a leaf iterator
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin() const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend() const;
-
-    //! General definiton for a leaf iterator
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafbegin() const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend() const;
-
     //! Iterator to first entity of codim 0 on leaf level (All_Partition)
     LeafIteratorType leafbegin () const;
 
     //! one past the end on this leaf level (codim 0 and All_Partition)
     LeafIteratorType leafend () const;
 
+  public:
+    //! General definiton for a leaf iterator
+    template <int codim, PartitionIteratorType pitype>
+    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+    leafbegin() const;
+
+    //! General definition for an end iterator on leaf level
+    template <int codim, PartitionIteratorType pitype>
+    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+    leafend() const;
+
+    //! General definiton for a leaf iterator
+    template <int codim>
+    typename Traits::template Codim<codim>::LeafIterator
+    leafbegin() const;
+
+    //! General definition for an end iterator on leaf level
+    template <int codim>
+    typename Traits::template Codim<codim>::LeafIterator
+    leafend() const;
+
+  private:
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
@@ -388,6 +399,7 @@ namespace Dune {
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
     createLeafIteratorEnd(int level) const;
 
+  public:
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
 
@@ -403,7 +415,7 @@ namespace Dune {
     //! number of grid entities on all levels for given codim
     int global_size (int cd) const ;
 
-    //! number of grid entities in the entire grid for given codim
+    // (no interface method) number of grid entities in the entire grid for given codim
     int hierSetSize (int cd) const;
 
     //! get global id set of grid
@@ -419,9 +431,6 @@ namespace Dune {
 
     //! get global id set of grid
     const LocalIdSet & localIdSet () const { return localIdSet_; }
-
-    //! get hierarchic index set of the grid
-    const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
     //! get leaf index set of the grid
     const typename Traits :: LeafIndexSet & leafIndexSet () const;
@@ -484,12 +493,12 @@ namespace Dune {
     template <class DofManagerType, class RestrictProlongOperatorType>
     bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
 
-    //**********************************************************
-    // End of Interface Methods
-    //**********************************************************
     //! uses the interface, mark on entity and refineLocal
     bool globalRefine(int refCount);
 
+    //**********************************************************
+    // End of Interface Methods
+    //**********************************************************
     /** \brief write Grid to file in specified FileFormatType
      */
     template <GrapeIOFileFormatType ftype>
@@ -503,14 +512,14 @@ namespace Dune {
     template <GrapeIOFileFormatType ftype>
     bool readGrid( const std::string filename, alu3d_ctype & time );
 
-    //! return my rank (only parallel)
-    int myRank () const { return myRank_; }
+    // (no interface method) get hierarchic index set of the grid
+    const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
-    //! set max of given mxl and actual maxLevel
-    //! for loadBalance
+    // set max of given mxl and actual maxLevel
+    // for loadBalance
     void setMaxLevel (int mxl);
 
-    //! no interface method, but has to be public
+    // no interface method, but has to be public
     void updateStatus ();
 
     //! mark entities for refinement or coarsening, refCount < 0 will mark
@@ -540,20 +549,6 @@ namespace Dune {
     //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
 
-    template <class HItemType>
-    PartitionType convertBndId(const HItemType & item) const
-    {
-      if(item.bndId() == 0) return InteriorEntity;
-      if(item.bndId() == 222) return GhostEntity;
-      if(item.bndId() == 111) return BorderEntity;
-
-      /*
-         if(item.isInterior()) return InteriorEntity;
-         if(item.isGhost())    return GhostEntity;
-         if(item.isBorder())   return BorderEntity;
-       */
-      return InteriorEntity;
-    }
   protected:
     //! Copy constructor should not be used
     ALU3dGrid( const MyType & g );
@@ -562,13 +557,13 @@ namespace Dune {
     ALU3dGrid<dim,dimworld,elType>&
     operator = (const MyType & g);
 
-    // reset size and global size
+    //! reset size and global size, update Level- and LeafIndexSet, if they exist
     void calcExtras();
 
-    // calculate maxlevel
+    //! calculate maxlevel
     void calcMaxlevel();
 
-    // make grid walkthrough and calc global size
+    //! make grid walkthrough and calc global size
     void recalcGlobalSize();
 
     //! check whether macro grid format is of our type
@@ -577,17 +572,17 @@ namespace Dune {
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
 
-    // the real grid
+    // the real ALU grid
     mutable ALU3DSPACE GitterImplType * mygrid_;
 #if ALU3DGRID_PARALLEL
     ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
-    const int myRank_;
 
     // collective comm, same as mpAccess_, only Peters "generic" (haha)version
     CollectiveCommunicationType ccobj_;
 
   public:
+    // number of links to other processors, for internal use only
     int nlinks () const {
 #if ALU3DGRID_PARALLEL
       return mpAccess_.nlinks();
@@ -602,7 +597,6 @@ namespace Dune {
     // count how much elements where marked
     mutable int coarsenMarked_;
     mutable int refineMarked_;
-
 
     // at the moment the number of different geom types is 1
     enum { numberOfGeomTypes = 1 };

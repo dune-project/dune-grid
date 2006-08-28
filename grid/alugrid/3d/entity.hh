@@ -137,6 +137,15 @@ namespace Dune {
     //! index is unique within the grid hierachy and per codim
     int getIndex () const;
 
+    //! convert ALUGrid partition type to dune partition type
+    PartitionType convertBndId(const ElementType & item) const
+    {
+      if(item.isGhost()) return GhostEntity;
+      if(item.isBorder()) return BorderEntity;
+      if(item.isInterior()) return InteriorEntity;
+      return InteriorEntity;
+    }
+
     // the grid this entity belongs to
     const GridImp &grid_;
 

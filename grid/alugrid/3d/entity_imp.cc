@@ -102,7 +102,8 @@ namespace Dune {
     face_   = face;
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    partitionType_ = grid_.convertBndId( *item_ );
+    //partitionType_ = grid_.convertBndId( *item_ );
+    partitionType_ = this->convertBndId( *item_ );
   }
 
   template<>
@@ -115,7 +116,8 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    partitionType_ = grid_.convertBndId( *item_ );
+    //partitionType_ = grid_.convertBndId( *item_ );
+    partitionType_ = this->convertBndId( *item_ );
   }
 
   template<>
@@ -129,7 +131,8 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    partitionType_ = grid_.convertBndId( *item_ );
+    //partitionType_ = grid_.convertBndId( *item_ );
+    partitionType_ = this->convertBndId( *item_ );
   }
 
   template<int cd, int dim, class GridImp>
