@@ -1433,32 +1433,39 @@ namespace Dune
 
     typedef ObjectStream ObjectStreamType;
 
-    //! we always have dim+1 codimensions
-    enum { numCodim = dim+1 };
+    //! number of codimensions
+    enum {
+      //! \brief we always have dim+1 codimensions
+      numCodim = dim+1
+    };
 
-    //! max number of allowed levels
-    enum { MAXL = 64 };
+    //! max number of levels
+    enum {
+      //! \brief max number of allowed levels is 64
+      MAXL = 64
+    };
 
-    //! Constructor which reads an Albert Macro Triang file
-    //! or given GridFile
-    //! levInd = true means that a consecutive level index is generated
-    //! if levInd == true the the element number of first macro element is
-    //! set to 1 so hasLevelIndex_ can be identified we grid is read from
-    //! file
+    /** \brief Constructor which reads an Albert Macro Triang file
+       or given GridFile
+       levInd = true means that a consecutive level index is generated
+       if levInd == true the the element number of first macro element is
+       set to 1 so hasLevelIndex_ can be identified we grid is read from
+       file */
     AlbertaGrid(const std::string macroTriangFilename);
 
-    //! Constructor which reads an Albert Macro Triang file
-    //! or given GridFile , proc is the number of domain ,
-    //! levInd = true means that a consecutive level index is generated
-    //! if levInd == true the the element number of first macro element is
-    //! set to 1 so hasLevelIndex_ can be identified we grid is read from
-    //! file
+    /* (for internal use only)
+       Constructor which reads an Albert Macro Triang file
+       or given GridFile , proc is the number of domain ,
+       levInd = true means that a consecutive level index is generated
+       if levInd == true the the element number of first macro element is
+       set to 1 so hasLevelIndex_ can be identified we grid is read from
+       file */
     AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc);
 
-    //! empty Constructor
+    //! \brief empty Constructor
     AlbertaGrid();
 
-    //! Desctructor
+    //! \brief Desctructor
     ~AlbertaGrid();
 
     //! Return maximum level defined in this grid. Levels are numbered
@@ -1488,6 +1495,27 @@ namespace Dune
     //! return LeafIterator which points to first leaf entity
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+    leafbegin () const;
+
+    //! return LeafIterator which points to first leaf entity
+    template <int codim>
+    typename Traits::template Codim<codim>::LeafIterator
+    leafbegin () const;
+
+    //! return LeafIterator which points behind last leaf entity
+    template <int codim, PartitionIteratorType pitype>
+    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
+    leafend   () const;
+
+    //! return LeafIterator which points behind last leaf entity
+    template <int codim>
+    typename Traits::template Codim<codim>::LeafIterator
+    leafend   () const;
+
+  private:
+    //! return LeafIterator which points to first leaf entity
+    template <int codim, PartitionIteratorType pitype>
+    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
     leafbegin ( int maxlevel, int proc = -1 ) const;
 
     //! return LeafIterator which points to first leaf entity
@@ -1512,32 +1540,12 @@ namespace Dune
     LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
 
     //! return LeafIterator which points to first leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin () const;
-
-    //! return LeafIterator which points to first leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafbegin () const;
-
-    //! return LeafIterator which points behind last leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend   () const;
-
-    //! return LeafIterator which points behind last leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend   () const;
-
-    //! return LeafIterator which points to first leaf entity
     LeafIterator leafbegin () const;
 
     //! return LeafIterator which points behind last leaf entity
     LeafIterator leafend   () const;
 
-
+  public:
     /** \brief Number of grid entities per level and codim
      * because lbegin and lend are none const, and we need this methods
      * counting the entities on each level, you know.
@@ -1610,19 +1618,20 @@ namespace Dune
     template <GrapeIOFileFormatType ftype>
     bool readGrid( const std::basic_string<char> filename, albertCtype & time );
 
-    //! returns size of mesh include all levels
-    //! max Index of grid entities with given codim
-    //! for outside the min index is 0, the shift has to done inside
-    //! the grid which is of minor cost
+    /* returns size of mesh include all levels
+       max Index of grid entities with given codim
+       for outside the min index is 0, the shift has to done inside
+       the grid which is of minor cost
+     */
     int global_size (int codim) const;
 
-    //! return number of my processor
+    // return number of my processor
     int myRank () const { return myRank_; };
 
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
 
-    //! return hierarchic index set
+    // return hierarchic index set
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
     //! return level index set for given level
@@ -1637,10 +1646,10 @@ namespace Dune
     //! return local IdSet
     const LocalIdSet & localIdSet () const { return globalIdSet_; }
 
-    //! access to mesh pointer, needed by some methods
+    // access to mesh pointer, needed by some methods
     ALBERTA MESH* getMesh () const { return mesh_; };
 
-    //! return real entity implementation
+    // return real entity implementation
     template <int cd>
     AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
     getRealEntity(typename Traits::template Codim<cd>::Entity& entity)
@@ -1658,30 +1667,30 @@ namespace Dune
     }
 
   public:
-    //! create ghost cells
+    // create ghost cells
     void createGhosts ();
 
-    //! get adaptation mark
+    // get adaptation mark
     template <class EntityType>
     int getMark(const EntityType & ) const;
 
-    //! return processor number where entity is master
+    // return processor number where entity is master
     template <class EntityType>
     int owner (const EntityType & ) const;
 
-    //! AlbertaGrid internal method for partitioning
-    //! set processor number of this entity
+    // AlbertaGrid internal method for partitioning
+    // set processor number of this entity
     template <class EntityType>
     bool partition( int proc , EntityType & );
 
-    //! unpack recieved ObjectStream
+    // unpack recieved ObjectStream
     void unpackAll ( ObjectStreamType & os );
 
-    //! pack this entity and all chilcren to ObjectStream
+    // pack this entity and all chilcren to ObjectStream
     template <class EntityType>
     void packAll ( ObjectStreamType & os, EntityType & en );
 
-    //! pack this entity and all chilcren to ObjectStream
+    // pack this entity and all chilcren to ObjectStream
     template <class EntityType>
     void packBorder ( ObjectStreamType & os, EntityType & en );
 
@@ -1776,7 +1785,6 @@ namespace Dune
 
   public:
     typedef AGMemoryProvider< EntityObject > EntityProvider;
-    mutable EntityProvider entityProvider_;
 
     typedef AlbertaGridIntersectionIterator< const MyType > IntersectionIteratorImp;
     typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
@@ -1787,8 +1795,12 @@ namespace Dune
     AlbertaGridIntersectionIteratorType;
 
     LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
+
+  private:
+    mutable EntityProvider entityProvider_;
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
+  public:
     template <class IntersectionInterfaceType>
     const typename BaseType::
     template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
@@ -1797,12 +1809,12 @@ namespace Dune
       return this->getRealImplementation(it);
     }
 
-    //! return obj pointer to EntityImp
+    // (for internal use only) return obj pointer to EntityImp
     template <int codim>
     typename SelectEntityImp<codim,dim,const MyType>::EntityObject *
     getNewEntity (int level, bool leafIt ) const;
 
-    //! free obj pointer of EntityImp
+    // (for internal use only) free obj pointer of EntityImp
     template <int codim>
     void freeEntity (typename SelectEntityImp<codim,dim,const MyType>::EntityObject * en) const;
 
