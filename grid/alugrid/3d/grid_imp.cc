@@ -209,17 +209,18 @@ namespace Dune {
 
     if(comm().rank() == 0)
     {
+      const char * typeName = (elType == tetra) ? "tetra" : "hexa";
       if (size(0)>0)
       {
-        std::cout << "\nCreated ALU3dGrid from macro grid file '"
+        std::cout << "\nCreated ALU3dGrid<"<<dim<<","<<dimworld<<"," << typeName <<"> from macro grid file '"
                   << macroTriangFilename << "'. \n\n";
       }
       else
       {
-        std::cout << "\nCreated empty ALU3dGrid. \n\n";
+        std::cout << "\nCreated empty ALU3dGrid<"<<dim<<","<<dimworld<<","<<typeName<<"> \n\n";
       }
     }
-  }
+  } // end Constructor
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType> & ALU3dGrid<dim, dimworld, elType>::operator = (const ALU3dGrid<dim, dimworld, elType> & g)
