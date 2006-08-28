@@ -31,35 +31,78 @@ namespace Dune {
   //! \brief Interface for the GridPart classes
   //! A GridPart class allows to access only a specific subset of a grid's
   //! entities. A GridPart implementation provides the corresponding index set
-  //! and a begin/end iterator pair for accessing those entities. GridParts
-  //! are used to parametrize spaces (see DiscreteFunctionSpaceDefault).
+  //! and a begin/end iterator pair for accessing those entities, the
+  //! corresponding intersection iterators and a appropriate communication
+  //! method.
+  //! GridParts are used to parametrize spaces (see DiscreteFunctionSpaceDefault).
   template <class GridPartTraits>
   class GridPartInterface {
   public:
-    //! Type of the implementation
+    //! \brief Type of the implementation
     typedef typename GridPartTraits::GridPartType GridPartType;
 
+    //! \biref type of Grid implementation
+    typedef typename GridPartTraits::GridType GridType;
+
+    //! \brief Index set implementation
+    typedef typename GridPartTraits::IndexSetType IndexSetType;
+
+    //! \brief type of IntersectionIterator
+    typedef typename GridPartTraits::IntersectionIteratorType IntersectionIteratorType;
+
+    //! \brief type of Entity with codim=0
+    typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
   public:
-    //! Returns first iterator of the subset of the entities of codimension cd
-    //! specified by this class
+    //! \brief Returns reference to the underlying grid
+    const GridType & grid () const { return asImp().grid(); }
+
+    //! \brief Returns reference to index set of the underlying grid
+    const IndexSetType& indexSet() const { return asImp().indexSet(); }
+
+    /** \brief  Returns first iterator of the subset of the entities of codimension cd
+        specified by this class
+     */
     template <int cd>
     typename GridPartTraits::template Codim<cd>::IteratorType
     begin() const { return asImp().begin(); }
 
-    //! Returns end iterator of the subset of the entities of codimension cd
-    //! specified by this class
+    /** \brief Returns end iterator of the subset of the entities of codimension cd
+        specified by this class
+     */
     template <int cd>
     typename GridPartTraits::template Codim<cd>::IteratorType
     end() const { return asImp().end(); }
 
-    //! Level of the grid part
-    int level() const { return asImp().end(); }
+    //! \brief Level of the grid part
+    int level() const { return asImp().level(); }
+
+    //! \brief ibegin of corresponding intersection iterator for given entity
+    IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
+    {
+      return asImp().ibegin(en);
+    }
+
+    //! \brief iend of corresponding intersection iterator for given entity
+    IntersectionIteratorType iend(const EntityCodim0Type & en) const
+    {
+      return asImp().iend(en);
+    }
+
+    //! \brief corresponding communication method for grid part
+    template <class DataHandleImp,class DataType>
+    void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
+                     InterfaceType iftype, CommunicationDirection dir) const
+    {
+      asImp().communicate(data,iftype,dir);
+    }
 
   private:
+    // Barton-Nackman
     GridPartType& asImp() {
       return static_cast<GridPartType&>(*this);
     }
 
+    // const Barton-Nackman
     const GridPartType& asImp() const {
       return static_cast<const GridPartType&>(*this);
     }
