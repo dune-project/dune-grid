@@ -66,7 +66,7 @@ namespace Dune {
   template <class GridImp, int codim>
   struct ALU2dGridEntityFactory;
 
-
+  class ALU2dObjectStream;
 
   //**********************************************************************
   //
@@ -140,7 +140,6 @@ namespace Dune {
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 2D grid, will provide non conform grids
-     @ingroup GridImplementations
      The ALU2dGrid implements the Dune GridInterface for 2d meshes.
      This grid can be locally adapted and will provide non conform grids.
 
@@ -155,7 +154,8 @@ namespace Dune {
   template <int dim, int dimworld>
   class ALU2dGrid :
     public GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> >,
-    public HasObjectStream
+    public HasObjectStream,
+    public HasHierarchicIndexSet
   {
     CompileTimeChecker<(dim      == 2)> ALU2dGrid_only_implemented_for_2dp;
     CompileTimeChecker<(dimworld == 2)> ALU2dGrid_only_implemented_for_2dw;
@@ -190,12 +190,14 @@ namespace Dune {
     typedef typename ALU2dGridFamily < dim , dimworld > :: Traits Traits;
 
   protected:
-
     typedef MakeableInterfaceObject<typename Traits::template
         Codim<0>::Geometry> GeometryObject;
     friend class ALU2DLocalGeometryStorage<GeometryObject, 4 >;
 
   public:
+    //! dummy object stream
+    typedef ALU2dGridObjectStream ObjectStreamType;
+
     //! my Traits class
     typedef ALU2dGridFamily < dim , dimworld > GridFamily;
     //! Type of the hierarchic index set
@@ -232,7 +234,12 @@ namespace Dune {
     typedef typename Traits::CollectiveCommunication CollectiveCommunicationType;
 
     //! maximal number of levels
-    enum { MAXL = 64 };
+    enum {
+      //! maximal number of levels is 64
+      MAXL = 64
+    };
+
+
 
   protected:
     //! Constructor which reads an ALU2dGrid Macro Triang file
@@ -299,12 +306,14 @@ namespace Dune {
     typename Traits::template Codim<codim>::LeafIterator
     leafend() const;
 
+  private:
     //! Iterator to first entity of codim 0 on leaf level (All_Partition)
     LeafIteratorType leafbegin () const;
 
     //! one past the end on this leaf level (codim 0 and All_Partition)
     LeafIteratorType leafend () const;
 
+  public:
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
 
@@ -319,7 +328,6 @@ namespace Dune {
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
-
 
     //****************************************************************
     // index and id sets
@@ -348,9 +356,9 @@ namespace Dune {
     // End of Interface Methods
     //**********************************************************
 
-    //! return reference to org ALU2dGrid
-    //! private method, but otherwise we have to friend class all possible
-    //! types of LevelIterator ==> later
+    // return reference to org ALU2dGrid
+    // private method, but otherwise we have to friend class all possible
+    // types of LevelIterator ==> later
     ALU2DSPACE Hmesh & myGrid();
     ALU2DSPACE Hmesh & myGrid() const;
 
@@ -368,7 +376,7 @@ namespace Dune {
      */
     bool adapt ( );
 
-    //! refine grid
+    // refine grid
     bool refineGrid();
 
     //! mark entities for refinement or coarsening, refCount < 0 will mark
@@ -411,8 +419,12 @@ namespace Dune {
 
     // create GeomTypes
     void makeGeomTypes ();
+
     friend class Conversion<ALU2dGrid<dim, dimworld>, HasObjectStream>;
     friend class Conversion<const ALU2dGrid<dim, dimworld>, HasObjectStream>;
+
+    friend class Conversion<ALU2dGrid<dim, dimworld>, HasHierarchicIndexSet>;
+    friend class Conversion<const ALU2dGrid<dim, dimworld>, HasHierarchicIndexSet>;
 
     //! Copy constructor should not be used
     ALU2dGrid( const ThisType & g );

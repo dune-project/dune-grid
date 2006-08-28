@@ -183,7 +183,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   class ALU3dGrid :
     public GridDefaultImplementation<dim, dimworld, alu3d_ctype, ALU3dGridFamily <dim,dimworld,elType> >,
-    public HasObjectStream
+    public HasObjectStream,
+    public HasHierarchicIndexSet
   {
     // type of base class
     typedef GridDefaultImplementation<dim, dimworld, alu3d_ctype, ALU3dGridFamily <dim,dimworld,elType> > BaseType;
@@ -227,6 +228,9 @@ namespace Dune {
 
     friend class Conversion< ALU3dGrid<dim,dimworld,elementType> , HasObjectStream > ;
     friend class Conversion< const ALU3dGrid<dim,dimworld,elementType> , HasObjectStream > ;
+
+    friend class Conversion< ALU3dGrid<dim,dimworld,elementType> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALU3dGrid<dim,dimworld,elementType> , HasHierarchicIndexSet > ;
 
     //! my Traits class
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: Traits Traits;

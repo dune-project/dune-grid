@@ -89,5 +89,25 @@ namespace Dune {
     bool up2Date_;
   };
 
+  // dummy object stream class
+  class ALU2dGridObjectStream
+  {
+  public:
+    class EOFException {} ;
+    template <class T>
+    void readObject (T &) {}
+    void readObject (int) {}
+    void readObject (double) {}
+    template <class T>
+    void writeObject (T &) {}
+    void writeObject (int) {}
+    void writeObject (double) {}
+
+    template <class T>
+    void read (T &) const {}
+    template <class T>
+    void write (const T &) {}
+  };
+
 } //end namespace Dune
 #endif
