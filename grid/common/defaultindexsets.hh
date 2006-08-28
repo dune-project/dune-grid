@@ -336,16 +336,59 @@ namespace Dune {
 
   };
 
+  //! compile time chooser for hierarchic or leaf index set
+  template <class GridImp>
+  class HierarchicIndexSetSelector
+  {
+
+    // true if GridImp has HierarchicIndexSet
+    enum { hasHierarchicIndexSet = Conversion<GridImp,HasHierarchicIndexSet>::exists };
+
+    template <class GridType, bool hasHSet>
+    struct HSetChooser
+    {
+      typedef typename GridType::Traits::LeafIndexSet IndexSetType;
+      static const IndexSetType & hierarchicIndexSet(const GridType & grid)
+      {
+        return grid.leafIndexSet();
+      }
+    };
+
+    template <class GridType>
+    struct HSetChooser<GridType,true>
+    {
+      typedef typename GridImp:: HierarchicIndexSet IndexSetType;
+      static const IndexSetType & hierarchicIndexSet(const GridType & grid)
+      {
+        return grid.hierarchicIndexSet();
+      }
+    };
+
+  public:
+    //! \brief type of HierarchicIndexSet, default is LeafIndexSet
+    typedef typename HSetChooser<GridImp,hasHierarchicIndexSet>::IndexSetType HierarchicIndexSet;
+
+    //! \brief return reference to hierarchic index set
+    static const HierarchicIndexSet & hierarchicIndexSet(const GridImp & grid)
+    {
+      return HSetChooser<GridImp,hasHierarchicIndexSet>::hierarchicIndexSet(grid);
+    }
+  };
+
   //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid
   template <class GridType>
   class WrappedHierarchicIndexSet
-    : public IndexSetWrapper< typename GridType :: HierarchicIndexSet >
+    : public IndexSetWrapper< typename HierarchicIndexSetSelector<GridType> :: HierarchicIndexSet >
   {
     // my type, to be revised
     enum { myType = 0 };
 
+
+    //! type of hset selector
+    typedef HierarchicIndexSetSelector<GridType> SelectorType;
+
     // my index set type
-    typedef typename GridType :: HierarchicIndexSet HSetType;
+    typedef typename SelectorType :: HierarchicIndexSet HSetType;
 
     typedef WrappedHierarchicIndexSet<GridType> ThisType;
   public:
@@ -354,7 +397,7 @@ namespace Dune {
 
     //! constructor
     WrappedHierarchicIndexSet ( const GridType & grid , const int level =-1 )
-      : IndexSetWrapper< HSetType > (grid.hierarchicIndexSet(),true) {}
+      : IndexSetWrapper< HSetType > ( SelectorType :: hierarchicIndexSet(grid) ,true) {}
 
     //! return type (for Grape In/Output)
     static int type() { return myType; }
@@ -394,7 +437,6 @@ namespace Dune {
       static ThisType set(grid,grid.maxLevel());
       return set;
     }
-
   };
 
   //*********************************************************************

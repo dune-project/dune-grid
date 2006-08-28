@@ -96,6 +96,10 @@ namespace Dune {
       asImp().communicate(data,iftype,dir);
     }
 
+  protected:
+    //! do not create explict instances of this class
+    GridPartInterface () {}
+
   private:
     // Barton-Nackman
     GridPartType& asImp() {
@@ -118,13 +122,16 @@ namespace Dune {
     //! Index set implementation
     typedef typename GridPartTraits::IndexSetType IndexSetType;
 
-  public:
+  protected:
     //! Constructor
     GridPartDefault(const GridType& grid, const IndexSetType& iset) :
       GridPartInterface<GridPartTraits>(),
       grid_(grid),
       iset_(iset) {}
 
+    ~GridPartDefault() {}
+
+  public:
     //! Returns reference to the underlying grid
     const GridType& grid() const { return grid_; }
 
