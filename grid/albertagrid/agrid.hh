@@ -1373,7 +1373,8 @@ namespace Dune
   template <int dim, int dimworld>
   class AlbertaGrid :
     public GridDefaultImplementation <dim,dimworld,albertCtype, AlbertaGridFamily<dim,dimworld> >,
-    public HasObjectStream
+    public HasObjectStream ,
+    public HasHierarchicIndexSet
   {
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntity <1,dim,const AlbertaGrid<dim,dimworld> >;
@@ -1706,6 +1707,9 @@ namespace Dune
   private:
     friend class Conversion<AlbertaGrid<dim, dimworld>, HasObjectStream>;
     friend class Conversion<const AlbertaGrid<dim, dimworld>, HasObjectStream>;
+
+    friend class Conversion<AlbertaGrid<dim, dimworld>, HasHierarchicIndexSet >;
+    friend class Conversion<const AlbertaGrid<dim, dimworld>, HasHierarchicIndexSet>;
 
     // do not use copy constructor
     AlbertaGrid(const MyType& other);
