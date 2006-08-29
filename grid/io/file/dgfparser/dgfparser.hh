@@ -156,10 +156,13 @@ namespace Dune {
       MacroGrid(filename.c_str(),MPICOMM),
       gridptr_(this->template createGrid<GridType>()) {}
 
-    //! default constructor, creating empty GridPtr
+    //! Default constructor, creating empty GridPtr
     GridPtr() : MacroGrid() , gridptr_() {}
 
-    //! copy constructor, copies internal smart pointer
+    //! Constructor storing given pointer to internal auto pointer
+    GridPtr(GridType * grd) : MacroGrid() , gridptr_(grd) {}
+
+    //! Copy constructor, copies internal auto pointer
     GridPtr(const GridPtr & org) : gridptr_(org.gridptr_) {}
 
     //! return reference to GridType instance
@@ -186,8 +189,15 @@ namespace Dune {
       gridptr_ = org.gridptr_;
       return *this;
     }
+
+    //! assignment of pointer to internal auto pointer
+    GridPtr & operator = (GridType * grd)
+    {
+      gridptr_ = std::auto_ptr<GridType>(grd);
+      return *this;
+    }
   private:
-    // grid smart pointer
+    // grid auto pointer
     mutable std::auto_ptr<GridType> gridptr_;
   }; // end of class GridPtr
 }
