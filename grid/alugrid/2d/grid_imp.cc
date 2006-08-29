@@ -12,7 +12,7 @@ namespace Dune {
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
-  //: mesh_ (macroTriangFilename.c_str(), 1, ALU2DSPACE Refco::quart)
+  //: mesh_ (checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart)
     : mesh_ (checkMacroGridFile(macroTriangFilename))
       , hIndexSet_(*this)
       , localIdSet_(*this)
@@ -28,6 +28,8 @@ namespace Dune {
     //assert(mesh_ != 0);
     makeGeomTypes();
     updateStatus();
+
+    std::cout << "\nCreated ALU2dGrid<"<<dim<<","<<dimworld<<"> from macro grid file '"<< macroTriangFilename << "'. \n\n";
   }
 
   //! Iterator to first entity of given codim on level
