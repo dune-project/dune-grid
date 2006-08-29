@@ -615,11 +615,19 @@ namespace AlbertHelp
     DOF_INT_VEC * elNewCheck;
     // stores the processor number of proc where element is master
     DOF_INT_VEC * owner;
+
+#ifndef CALC_COORD
+    // vector that stores the coordinates
+    DOF_REAL_D_VEC * coords;
+#endif
   };
 
   static DOF_INT_VEC * elNumbers[numOfElNumVec];
   static DOF_INT_VEC * elNewCheck = 0;
   static DOF_INT_VEC * elOwner    = 0;
+#ifndef CALC_COORD
+  static DOF_REAL_D_VEC * coordVec = 0;
+#endif
 
   // return pointer to created elNumbers Vector to mesh
   inline DOF_INT_VEC * getElNumbers(int i)
@@ -659,6 +667,55 @@ namespace AlbertHelp
     return elOwner;
   }
 
+#ifndef CALC_COORD
+  template <int dimworld>
+  inline static void setLocalCoords(const EL_INFO * elf)
+  {
+    const EL * element = elf->el;
+    assert(element);
+    const DOF_ADMIN  * admin = coordVec->fe_space->admin;
+    REAL_D * vec = 0;
+    const int nv = admin->n0_dof[VERTEX];
+
+    GET_DOF_VEC(vec,coordVec);
+    assert(vec);
+
+    for(int i=0; i<N_VERTICES; ++i)
+    {
+      int dof = element->dof[i][nv];
+      REAL_D & vecCoord = vec[dof];
+      const REAL_D & coord = elf->coord[i];
+      for(int j=0; j<dimworld; ++j)
+      {
+        vecCoord[j] = coord[j];
+      }
+    }
+  }
+
+  // return pointer to created elNewCheck Vector to mesh
+  template <int dimworld>
+  inline DOF_REAL_D_VEC * getCoordVec()
+  {
+    MESH * mesh = coordVec->fe_space->admin->mesh;
+    assert(mesh);
+    mesh_traverse(mesh,-1, CALL_EVERY_EL_PREORDER|FILL_COORDS,& setLocalCoords<dimworld>);
+
+    /*
+       REAL_D * vec = 0;
+       GET_DOF_VEC(vec,coordVec);
+       FOR_ALL_DOFS(coordVec->fe_space->admin,
+        std::cout << "vec["<<dof<<"] = {";
+        for(int i=0; i<dimworld; ++i)
+          std::cout << vec[dof][i] << ",";
+        std::cout << "}\n";
+       );
+     */
+
+    return coordVec;
+  }
+#endif
+
+  template <int dimworld>
   inline void getDofVecs(DOFVEC_STACK * dofvecs)
   {
     for(int i=0; i<numOfElNumVec; i++)
@@ -669,7 +726,39 @@ namespace AlbertHelp
 
     dofvecs->elNewCheck   = getElNewCheck();  elNewCheck = 0;
     dofvecs->owner        = getOwner();       elOwner    = 0;
+#ifndef CALC_COORD
+    dofvecs->coords       = getCoordVec<dimworld> ();    coordVec   = 0;
+#endif
   }
+
+#ifndef CALC_COORD
+  // set entry for new elements to 1
+  template <int dim>
+  inline static void refineCoords ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
+  {
+    const DOF_ADMIN * admin = drv->fe_space->admin;
+    const int nv = admin->n0_dof[CENTER];
+    REAL_D* vec = 0;
+
+    GET_DOF_VEC(vec,drv);
+    assert(ref > 0);
+
+    for(int i=0; i<ref; i++)
+    {
+      const EL * el = list[i].el;
+      // for 2d, new dof is always the 2
+      REAL_D & newCoord = vec[el->child[0]->dof[2][nv]];
+      for(int j=0; j<dim; ++j) newCoord[j] = 0.0;
+      for(int i=0; i<2; ++i)
+      {
+        // new coord is the mean value of coord 0 and 1 of father element
+        const REAL_D & oldCoord = vec[el->dof[i][nv]];
+        for(int j=0; j<dim; ++j)
+          newCoord[j] += 0.5*oldCoord[j];
+      }
+    }
+  }
+#endif
 
   // set entry for new elements to 1
   inline static void refineElNewCheck ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
@@ -847,10 +936,14 @@ namespace AlbertHelp
     // if owner vec not has been read
     if(!dofvecs->owner) dofvecs->owner = getDofNewCheck(dofvecs->elNumbers[0]->fe_space);
     dofvecs->owner->refine_interpol = &refineElOwner;
+
+    //if(!dofvecs->coords) dofvecs->coords =
+    //dofvecs->coords = getCoordVec<dimworld> ();    coordVec   = 0;
   }
 
   // initialize dofAdmin for vertex and element numbering
   // and a given dim
+  // --initDofAdmin
   template <int dim>
   static inline void initDofAdmin(MESH *mesh)
   {
@@ -872,7 +965,18 @@ namespace AlbertHelp
     fdof[dim-1] = 1; // means edges in 2d and faces in 3d
     edof[dim] = 1;
 
-    get_fe_space(mesh, "vertex_dofs", vdof, 0);
+    {
+#ifndef CALC_COORD
+      const FE_SPACE * vSpace =
+#endif
+      get_fe_space(mesh, "vertex_dofs", vdof, 0);
+
+#ifndef CALC_COORD
+      coordVec = get_dof_real_d_vec("coordinates",vSpace);
+      coordVec->refine_interpol = &refineCoords<dim>;
+      coordVec->coarse_restrict = 0; // coords don't need to be coarsened
+#endif
+    }
 
     //**********************************************************************
     // all the element vectors

@@ -64,6 +64,7 @@
 // 10000 is the size of the finite stack used by IndexStack
 typedef Dune::IndexStack<int,10000> IndexManagerType;
 
+#define CALC_COORD
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 
@@ -189,6 +190,7 @@ namespace Dune
   {
 
     typedef AlbertaGridGeometry<mydim,cdim,GridImp> ThisType;
+
     //! know dimension of barycentric coordinates
     enum { dimbary=mydim+1};
   public:
@@ -259,7 +261,8 @@ namespace Dune
     //***********************************************************************
     //! generate the geometry for the ALBERTA EL_INFO
     //! no interface method
-    bool builtGeom(ALBERTA EL_INFO *elInfo, int face, int edge, int vertex);
+    typedef GridImp GridType;
+    bool builtGeom(const GridImp & grid, ALBERTA EL_INFO *elInfo, int face, int edge, int vertex);
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal
@@ -1836,6 +1839,9 @@ namespace Dune
     mutable ALBERTA AlbertHelp::DOFVEC_STACK dofvecs_;
 
     const ALBERTA DOF_ADMIN * elAdmin_;
+
+    const ALBERTA REAL_D * coordsVec_;
+
     // pointer to vec of elNumbers_
     const int * elNewVec_;
 
@@ -1849,6 +1855,19 @@ namespace Dune
   public:
     // return true if el is new
     bool checkElNew ( const ALBERTA EL * el ) const;
+
+    // read global element number from elNumbers_
+    const ALBERTA REAL_D & getCoord ( const ALBERTA EL_INFO * elInfo, int vx ) const
+    {
+      assert( vx>= 0);
+      assert( vx < dim+1 );
+#ifndef CALC_COORD
+      assert(coordsVec_);
+      return coordsVec_[elInfo->el->dof[vx][0]];
+#else
+      return elInfo->coord[vx];
+#endif
+    }
 
     // read level from elNewCehck vector
     int getLevelOfElement ( const ALBERTA EL * el ) const;
@@ -1959,5 +1978,6 @@ namespace Dune
 // undef all dangerous defines
 #undef DIM
 #undef DIM_OF_WORLD
+#undef CALC_COORD
 #include "alberta_undefs.hh"
 #endif

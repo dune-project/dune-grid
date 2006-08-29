@@ -496,7 +496,7 @@ namespace Dune
   // built Geometry
   template <int mydim, int cdim, class GridImp>
   inline bool AlbertaGridGeometry<mydim,cdim,GridImp>::
-  builtGeom(ALBERTA EL_INFO *elInfo, int face,
+  builtGeom(const GridImp & grid, ALBERTA EL_INFO *elInfo, int face,
             int edge, int vertex)
   {
     elInfo_ = elInfo;
@@ -511,7 +511,7 @@ namespace Dune
       // copy coordinates
       for(int i=0; i<mydim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
         // copy coordinates
         for(int j=0; j<cdim; ++j) coord_[i][j] = elcoord[j];
       }
@@ -534,7 +534,7 @@ namespace Dune
   // specialization yields speed up, because vertex_ .. is not copied
   template <>
   inline bool AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::
-  builtGeom(ALBERTA EL_INFO *elInfo, int face,
+  builtGeom(const GridType & grid, ALBERTA EL_INFO *elInfo, int face,
             int edge, int vertex)
   {
     typedef AlbertaGrid<2,2> GridImp;
@@ -550,7 +550,7 @@ namespace Dune
       // copy coordinates
       for(int i=0; i<dim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
         for(int j=0; j<dimworld; ++j)
           coord_[i][j] = elcoord[j];
       }
@@ -586,7 +586,7 @@ namespace Dune
 
   template <>
   inline bool AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::
-  builtGeom(ALBERTA EL_INFO *elInfo, int face,
+  builtGeom(const GridType & grid, ALBERTA EL_INFO *elInfo, int face,
             int edge, int vertex)
   {
     typedef AlbertaGrid<3,3> GridImp;
@@ -602,7 +602,7 @@ namespace Dune
       // copy coordinates
       for(int i=0; i<dim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
         for(int j=0; j<dimworld; ++j)
           coord_[i][j] = elcoord[j];
       }
@@ -893,7 +893,7 @@ namespace Dune
       element_ = elInfo_->el;
     else
       element_ = 0;
-    builtgeometry_ = geoImp_.builtGeom(elInfo_,face,edge,vertex);
+    builtgeometry_ = geoImp_.builtGeom(grid_,elInfo_,face,edge,vertex);
     localFCoordCalced_ = false;
   }
 
@@ -1336,7 +1336,7 @@ namespace Dune
   {
     assert( elInfo_ && element_ );
     // geometry is only build on demand
-    if(!builtgeometry_) builtgeometry_ = geo_.builtGeom(elInfo_,0,0,0);
+    if(!builtgeometry_) builtgeometry_ = geo_.builtGeom(grid_,elInfo_,0,0,0);
 
     assert(builtgeometry_ == true);
     return geoObj_;
@@ -1793,8 +1793,6 @@ namespace Dune
       level_++;
       this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
                              stack->elinfo_stack+stack->stack_used+1 ,true);
-      //ALBERTA fill_elinfo(i, stack->elinfo_stack + stack->stack_used,
-      //  stack->elinfo_stack + (stack->stack_used + 1));
 
       stack->stack_used++;
       stack->info_stack[stack->stack_used] = 0;
@@ -1806,51 +1804,7 @@ namespace Dune
 
     return (stack->elinfo_stack + stack->stack_used);
   } // recursive traverse over all childs
-
-  // end AlbertaGridHierarchicIterator
-  //***************************************************************
-  //
-  //  --AlbertaGridBoundaryEntity
-  //  --BoundaryEntity
-  //
-  //***************************************************************
-#if 0
-  template< class GridImp >
-  inline AlbertaGridBoundaryEntity<GridImp>::
-  AlbertaGridBoundaryEntity () : _geom () , _elInfo ( 0 ),
-                                 _neigh (-1) {}
-
-  template< class GridImp >
-  inline int AlbertaGridBoundaryEntity<GridImp>::id () const
-  {
-    assert(_elInfo->boundary[_neigh] != 0);
-    return _elInfo->boundary[_neigh]->bound;
-  }
-
-  template< class GridImp >
-  inline bool AlbertaGridBoundaryEntity<GridImp>::hasGeometry () const
-  {
-    return _geom.builtGeom(_elInfo,0,0,0);
-  }
-
-  template< class GridImp >
-  inline const typename AlbertaGridBoundaryEntity<GridImp>::Geometry &
-  AlbertaGridBoundaryEntity<GridImp>::geometry () const
-  {
-    return _geom;
-  }
-
-  template< class GridImp >
-  inline void AlbertaGridBoundaryEntity<GridImp>::
-  setElInfo (ALBERTA EL_INFO * elInfo, int nb)
-  {
-    _neigh = nb;
-    if(elInfo)
-      _elInfo = elInfo;
-    else
-      _elInfo = 0;
-  }
-#endif
+    // end AlbertaGridHierarchicIterator
 
   //***************************************************************
   //
@@ -2076,12 +2030,19 @@ namespace Dune
   AlbertaGridIntersectionIterator<const AlbertaGrid<2,2> >::calcOuterNormal () const
   {
     assert( elInfo_ );
-    // seems to work
-    const ALBERTA REAL_D *coord = elInfo_->coord;
+    /*
+       const ALBERTA REAL_D *coord = elInfo_->coord;
 
-    outNormal_[0] = -(coord[(neighborCount_+1)%3][1] - coord[(neighborCount_+2)%3][1]);
-    outNormal_[1] =   coord[(neighborCount_+1)%3][0] - coord[(neighborCount_+2)%3][0];
+       outNormal_[0] = -(coord[(neighborCount_+1)%3][1] - coord[(neighborCount_+2)%3][1]);
+       outNormal_[1] =   coord[(neighborCount_+1)%3][0] - coord[(neighborCount_+2)%3][0];
+     */
+    //const ALBERTA REAL_D & coordOne = elInfo_->coord[(neighborCount_+1)%3];
+    //const ALBERTA REAL_D & coordTwo = elInfo_->coord[(neighborCount_+2)%3];
+    const ALBERTA REAL_D & coordOne = grid_.getCoord(elInfo_,(neighborCount_+1)%3);
+    const ALBERTA REAL_D & coordTwo = grid_.getCoord(elInfo_,(neighborCount_+2)%3);
 
+    outNormal_[0] = -(coordOne[1] - coordTwo[1]);
+    outNormal_[1] =   coordOne[0] - coordTwo[0];
     return ;
   }
 
@@ -2153,7 +2114,7 @@ namespace Dune
   {
     assert( elInfo_ );
 
-    if(neighGlob_.builtGeom(elInfo_,neighborCount_,0,0))
+    if(neighGlob_.builtGeom(grid_,elInfo_,neighborCount_,0,0))
       return neighGlobObj_;
     else
     {
@@ -2229,6 +2190,8 @@ namespace Dune
     static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
                               const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
     {
+
+#ifdef CALC_COORD
       // vx is the face number in the neighbour
       const int (& neighmap)[dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[vx];
       // neighborCount is the face number in the actual element
@@ -2242,6 +2205,8 @@ namespace Dune
         ALBERTA REAL_D & newcoord    = neighInfo->coord[ neighmap[(dim-1) - i] ];
         for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
       }
+#endif
+
       //****************************************
       // twist is always 1
       return 1;
@@ -2306,6 +2271,7 @@ namespace Dune
       // is used when calculation the outerNormal
       neighInfo->orientation = ( rightOriented ) ? elInfo->orientation : -elInfo->orientation;
 
+#ifdef CALC_COORD
       // vx is the face number in the neighbour
       const int * neighmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
       // neighborCount is the face number in the actual element
@@ -2319,6 +2285,8 @@ namespace Dune
         ALBERTA REAL_D & newcoord    = neighInfo->coord[ neighmap[ facemap[i] ] ];
         for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
       }
+#endif
+
       //****************************************
       if (facemap[1] == (facemap[0]+1)%3) {
         return facemap[0];
@@ -2343,6 +2311,8 @@ namespace Dune
     neighElInfo_.el = NEIGH(elInfo_->el,elInfo_)[neighborCount_];
 
     const int vx = elInfo_->opp_vertex[neighborCount_];
+
+#ifdef CALC_COORD
     // copy the one opposite vertex
     // the same for 2d and 3d
     {
@@ -2350,6 +2320,7 @@ namespace Dune
       ALBERTA REAL_D & newcoord    = neighElInfo_.coord[vx];
       for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
     }
+#endif
 
     // setup coordinates of neighbour elInfo
     twist_ = SetupVirtualNeighbour<GridImp,dimworld,dim>::
@@ -3510,12 +3481,15 @@ namespace Dune
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++) dofvecs_.elNumbers[i] = 0;
     dofvecs_.elNewCheck = 0;
     dofvecs_.owner      = 0;
+#ifndef CALC_COORD
+    dofvecs_.coords     = 0;
+#endif
   }
 
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::initGrid(int proc)
   {
-    ALBERTA AlbertHelp::getDofVecs(&dofvecs_);
+    ALBERTA AlbertHelp::getDofVecs<dimworld> (&dofvecs_);
     ALBERTA AlbertHelp::setDofVec ( dofvecs_.owner, -1 );
 
     // dont delete dofs on higher levels
@@ -3599,6 +3573,7 @@ namespace Dune
     std::cout << "AlbertaGrid<"<<dim<<","<<dimworld<<"> created from macro grid file '" << macroTriangFilename << "'. \n\n";
   }
 
+#if 0
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::
   AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
@@ -3624,6 +3599,7 @@ namespace Dune
 
     DUNE_THROW(AlbertaError,"To be revised!");
   }
+#endif
 
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::
@@ -3636,15 +3612,32 @@ namespace Dune
   inline void AlbertaGrid < dim, dimworld >::removeMesh()
   {
     for(unsigned int i=0; i<levelIndexVec_.size(); i++)
-      if(levelIndexVec_[i]) delete levelIndexVec_[i];
+    {
+      if(levelIndexVec_[i])
+      {
+        delete levelIndexVec_[i];
+        levelIndexVec_[i] = 0;
+      }
 
-    if(leafIndexSet_) delete leafIndexSet_;
+    }
+
+    if(leafIndexSet_)
+    {
+      delete leafIndexSet_;
+      leafIndexSet_ = 0;
+    }
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
+    {
       if(dofvecs_.elNumbers[i]) ALBERTA free_dof_int_vec(dofvecs_.elNumbers[i]);
+      dofvecs_.elNumbers[i] = 0;
+    }
 
-    if(dofvecs_.elNewCheck) ALBERTA free_dof_int_vec(dofvecs_.elNewCheck);
-    if(dofvecs_.owner ) ALBERTA free_dof_int_vec(dofvecs_.owner);
+    if(dofvecs_.elNewCheck) ALBERTA free_dof_int_vec(dofvecs_.elNewCheck);dofvecs_.elNewCheck = 0;
+    if(dofvecs_.owner ) ALBERTA free_dof_int_vec(dofvecs_.owner);dofvecs_.owner = 0;
+#ifndef CALC_COORD
+    if(dofvecs_.coords ) ALBERTA free_dof_real_d_vec(dofvecs_.coords);dofvecs_.coords = 0;
+#endif
 
     if(sizeCache_) delete sizeCache_;sizeCache_ = 0;
 
@@ -3656,13 +3649,12 @@ namespace Dune
       rclist = 0;
     }
 #endif
-    if(mesh_) ALBERTA free_mesh(mesh_);
+    if(mesh_) ALBERTA free_mesh(mesh_);mesh_ = 0;
 
     // delete all created boundary structures
     while ( !bndStack_.empty() )
     {
       ALBERTA BOUNDARY * obj = bndStack_.top();
-      //std::cout << "Delete obj with bound = " << (int) obj->bound << "\n";
       bndStack_.pop();
       if( obj ) delete obj;
     }
@@ -4449,9 +4441,12 @@ namespace Dune
   {
     hIndexSet_.updatePointers(dofvecs_);
 
-    elNewVec_ = (dofvecs_.elNewCheck)->vec;  assert(elNewVec_);
-    ownerVec_ = (dofvecs_.owner)->vec;       assert(ownerVec_);
-    elAdmin_ = dofvecs_.elNumbers[0]->fe_space->admin;
+#ifndef CALC_COORD
+    coordsVec_ = (dofvecs_.coords)->vec;      assert(coordsVec_);
+#endif
+    elNewVec_  = (dofvecs_.elNewCheck)->vec;  assert(elNewVec_);
+    ownerVec_  = (dofvecs_.owner)->vec;       assert(ownerVec_);
+    elAdmin_   = dofvecs_.elNumbers[0]->fe_space->admin;
 
     // see Albert Doc. , should stay the same
     const_cast<int &> (nv_)  = elAdmin_->n0_dof[CENTER];
@@ -4599,6 +4594,10 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::
   readGridXdr (const std::basic_string<char> filename, albertCtype & time )
   {
+    // remove all old stuff
+    // to be reivised
+    //removeMesh();
+
     const char * fn = filename.c_str();
 
     ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
@@ -4704,7 +4703,6 @@ namespace Dune
   //*********************************************************************
   //  fillElInfo 2D
   //*********************************************************************
-#define CALC_COORD
   typedef U_CHAR ALBERTA_CHAR;
 
   template<int dim, int dimworld>
@@ -4712,14 +4710,16 @@ namespace Dune
   firstNeigh(const int ichild, const ALBERTA EL_INFO *elinfo_old,
              ALBERTA EL_INFO *elinfo, const bool leafLevel) const
   {
+#ifdef CALC_COORD
     // old stuff
     const ALBERTA REAL_D * old_opp_coord  = elinfo_old->opp_coord;
     const ALBERTA REAL_D * old_coord      = elinfo_old->coord;
 
     // new stuff
+    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
+#endif
     ALBERTA ALBERTA_CHAR * opp_vertex     = elinfo->opp_vertex;
     ALBERTA EL ** neigh = NEIGH(el,elinfo);
-    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
 
     assert(neigh != 0);
     assert(neigh == NEIGH(el,elinfo));
@@ -4772,12 +4772,14 @@ namespace Dune
               ALBERTA EL_INFO *elinfo, const bool leafLevel) const
   {
     // old stuff
+#ifdef CALC_COORD
     const ALBERTA REAL_D * old_coord      = elinfo_old->coord;
 
     // new stuff
+    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
+#endif
     ALBERTA ALBERTA_CHAR * opp_vertex     = elinfo->opp_vertex;
     ALBERTA EL ** neigh = NEIGH(el,elinfo);
-    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
 
     assert(neigh != 0);
     assert(neigh == NEIGH(el,elinfo));
@@ -4817,13 +4819,15 @@ namespace Dune
   {
     // old stuff
     const ALBERTA ALBERTA_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
+#ifdef CALC_COORD
     const ALBERTA REAL_D * old_opp_coord  = elinfo_old->opp_coord;
     const ALBERTA REAL_D * old_coord      = elinfo_old->coord;
 
     // new stuff
+    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
+#endif
     ALBERTA ALBERTA_CHAR * opp_vertex     = elinfo->opp_vertex;
     ALBERTA EL ** neigh = NEIGH(el,elinfo);
-    ALBERTA REAL_D * opp_coord = elinfo->opp_coord;
 
     assert(neigh != 0);
     assert(neigh == NEIGH(el,elinfo));
@@ -5313,6 +5317,5 @@ namespace Dune
 
 } // namespace Dune
 
-#undef CALC_COORD
 #undef ALBERTA_CHAR
 #endif
