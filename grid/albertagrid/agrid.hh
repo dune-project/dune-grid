@@ -1418,7 +1418,6 @@ namespace Dune
     typedef GridDefaultImplementation <dim,dimworld,albertCtype,
         AlbertaGridFamily<dim,dimworld> > BaseType;
 
-
     //! the Traits
     typedef typename AlbertaGridFamily<dim,dimworld> :: Traits Traits;
 
@@ -1437,34 +1436,32 @@ namespace Dune
 
     typedef ObjectStream ObjectStreamType;
 
-    //! number of codimensions
     enum {
       //! \brief we always have dim+1 codimensions
       numCodim = dim+1
     };
 
-    //! max number of levels
     enum {
       //! \brief max number of allowed levels is 64
       MAXL = 64
     };
 
-    /** \brief Constructor which reads an Albert Macro Triang file
-       or given GridFile
+    /*
        levInd = true means that a consecutive level index is generated
        if levInd == true the the element number of first macro element is
        set to 1 so hasLevelIndex_ can be identified we grid is read from
        file */
+    /** \brief Constructor which reads an ALBERTA macro triangulation file.*/
     AlbertaGrid(const std::string macroTriangFilename);
 
     /* (for internal use only)
-       Constructor which reads an Albert Macro Triang file
+       Constructor which reads an ALBERTA macro triangulation file
        or given GridFile , proc is the number of domain ,
        levInd = true means that a consecutive level index is generated
        if levInd == true the the element number of first macro element is
        set to 1 so hasLevelIndex_ can be identified we grid is read from
        file */
-    AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc);
+    //AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc);
 
     //! \brief empty Constructor
     AlbertaGrid();
