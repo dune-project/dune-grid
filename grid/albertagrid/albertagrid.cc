@@ -2030,14 +2030,6 @@ namespace Dune
   AlbertaGridIntersectionIterator<const AlbertaGrid<2,2> >::calcOuterNormal () const
   {
     assert( elInfo_ );
-    /*
-       const ALBERTA REAL_D *coord = elInfo_->coord;
-
-       outNormal_[0] = -(coord[(neighborCount_+1)%3][1] - coord[(neighborCount_+2)%3][1]);
-       outNormal_[1] =   coord[(neighborCount_+1)%3][0] - coord[(neighborCount_+2)%3][0];
-     */
-    //const ALBERTA REAL_D & coordOne = elInfo_->coord[(neighborCount_+1)%3];
-    //const ALBERTA REAL_D & coordTwo = elInfo_->coord[(neighborCount_+2)%3];
     const ALBERTA REAL_D & coordOne = grid_.getCoord(elInfo_,(neighborCount_+1)%3);
     const ALBERTA REAL_D & coordTwo = grid_.getCoord(elInfo_,(neighborCount_+2)%3);
 
@@ -2052,31 +2044,33 @@ namespace Dune
   {
     assert( elInfo_ );
     enum { dim = 3 };
-    // rechne Kreuzprodukt der Vectoren aus
-    const ALBERTA REAL_D *coord = elInfo_->coord;
 
     // in this case the orientation is negative, therefore multiply with -1
 #if DIM == 3
-    const albertCtype val = (elInfo_->orientation > 0) ? 0.5 : -0.5;
+    const albertCtype val = (elInfo_->orientation > 0) ? 1.0 : -1.0;
 #else
-    const albertCtype val = 0.5;
+    const albertCtype val = 1.0;
 #endif
 
     // neighborCount_ is the local face number
     const int * localFaces = ALBERTA AlbertHelp::localAlbertaFaceNumber[neighborCount_];
-    for(int i=0; i<dim; i++)
+
+    const ALBERTA REAL_D & coordZero = grid_.getCoord(elInfo_, localFaces[0] );
+    const ALBERTA REAL_D & coordOne  = grid_.getCoord(elInfo_, localFaces[1] );
+    const ALBERTA REAL_D & coordTwo  = grid_.getCoord(elInfo_, localFaces[2] );
+
+    for(int i=0; i<dim; ++i)
     {
-      tmpV_[i] = coord[localFaces[1]][i] - coord[localFaces[0]][i];
-      tmpU_[i] = coord[localFaces[2]][i] - coord[localFaces[1]][i];
+      tmpV_[i] = coordOne[i] - coordZero[i];
+      tmpU_[i] = coordTwo[i] - coordOne[i];
     }
 
     // outNormal_ has length 3
-    for(int i=0; i<dim; i++)
+    for(int i=0; i<dim; ++i)
       outNormal_[i] = tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim]
                       - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim];
 
     outNormal_ *= val;
-
     return ;
   }
 

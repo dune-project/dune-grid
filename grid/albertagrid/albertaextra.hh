@@ -736,27 +736,31 @@ namespace AlbertHelp
   template <int dim>
   inline static void refineCoords ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
   {
-    const DOF_ADMIN * admin = drv->fe_space->admin;
-    const int nv = admin->n0_dof[CENTER];
+    const int nv = drv->fe_space->admin->n0_dof[VERTEX];
     REAL_D* vec = 0;
-
     GET_DOF_VEC(vec,drv);
     assert(ref > 0);
 
-    for(int i=0; i<ref; i++)
-    {
-      const EL * el = list[i].el;
-      // for 2d, new dof is always the 2
-      REAL_D & newCoord = vec[el->child[0]->dof[2][nv]];
-      for(int j=0; j<dim; ++j) newCoord[j] = 0.0;
-      for(int i=0; i<2; ++i)
-      {
-        // new coord is the mean value of coord 0 and 1 of father element
-        const REAL_D & oldCoord = vec[el->dof[i][nv]];
-        for(int j=0; j<dim; ++j)
-          newCoord[j] += 0.5*oldCoord[j];
-      }
-    }
+    const EL * el = list->el;
+
+    // refinement edge is alwyas between vertex 0 and 1
+    const int dof0 = el->dof[0][nv];
+    const int dof1 = el->dof[1][nv];
+
+    assert( el->child[0] );
+    // new dof has local number dim
+    const int dofnew = el->child[0]->dof[dim][nv];
+
+    // get coordinates
+    const REAL_D & oldCoordZero = vec[dof0];
+    const REAL_D & oldCoordOne  = vec[dof1];
+    REAL_D & newCoord = vec[dofnew];
+
+    // new coordinate is average between old on same edge
+    // see ALBERTA docu page 159, where this method is described
+    // as real_refine_inter
+    for(int j=0; j<dim; ++j)
+      newCoord[j] = 0.5*(oldCoordZero[j] + oldCoordOne[j]);
   }
 #endif
 
