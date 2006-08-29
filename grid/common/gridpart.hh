@@ -447,8 +447,8 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    DefaultGridPart(const GridType& grid, const IndexSetType & iset ) :
-      GridPartDefault<Traits>(grid, iset) {}
+    DefaultGridPart(const GridType& grid, const IndexSetType & iset ) DUNE_DEPRECATED
+      : GridPartDefault<Traits>(grid, iset) {}
 
     //! Begin iterator on the leaf level
     template <int cd>
