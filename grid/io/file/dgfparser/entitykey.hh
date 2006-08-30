@@ -33,9 +33,13 @@ namespace Dune {
       }
       inline void orientation (int base,std::vector<std::vector<double> >& vtx) {
         if (key_.size()==3)  {
+          assert( (size_t) origKey_[0] < vtx.size() );
           std::vector<double>& p0 = vtx[origKey_[0]];
+          assert( (size_t) origKey_[1] < vtx.size() );
           std::vector<double>& p1 = vtx[origKey_[1]];
+          assert( (size_t) origKey_[2] < vtx.size() );
           std::vector<double>& p2 = vtx[origKey_[2]];
+          assert( (size_t) base < vtx.size() );
           std::vector<double>& q  = vtx[base];
           double n[3];
           n[0] = (p1[1]-p0[1])*(p2[2]-p0[2])-(p2[1]-p0[1])*(p1[2]-p0[2]);
