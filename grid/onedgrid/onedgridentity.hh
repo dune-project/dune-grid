@@ -364,7 +364,6 @@ namespace Dune {
        several times. If we store interpolation matrices, this is tolerable.
        We assume that on-the-fly implementation of numerical algorithms
        is only done for simple discretizations. Assumes that meshes are nested.
-       \todo Implement this!
      */
     const Geometry& geometryInFather () const {
       assert(target_->father_);
