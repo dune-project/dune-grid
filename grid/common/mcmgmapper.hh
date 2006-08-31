@@ -46,7 +46,7 @@ namespace Dune
   class MultipleCodimMultipleGeomTypeMapper : Mapper<G,MultipleCodimMultipleGeomTypeMapper<G,IS,Layout> > {
   public:
 
-    /** @brief Construct mapper from grid and one fo its index sets.
+    /** @brief Construct mapper from grid and one of its index sets.
 
        \param grid A Dune grid object.
        \param indexset IndexSet object returned by grid.
