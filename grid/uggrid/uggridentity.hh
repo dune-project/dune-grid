@@ -410,7 +410,9 @@ namespace Dune {
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
-    UGGridLevelIterator<0,All_Partition,GridImp> father () const;
+    typename GridImp::template Codim<0>::EntityPointer father () const {
+      return typename GridImp::template Codim<0>::EntityPointer (UG_NS<dim>::EFather(target_));
+    }
 
     /*! Location of this element relative to the reference element element of the father.
        This is sufficient to interpolate all dofs in conforming case.

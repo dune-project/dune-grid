@@ -96,15 +96,13 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
     typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, geometry().type()));
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
-    /** \todo Should this be a constructor of EntityPointer ?*/
-    return UGGridLevelIterator<cc,All_Partition,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
+    return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
 
   } else if (cc==0) {
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
-    /** \todo Should this be a constructor of EntityPointer ?*/
-    return UGGridLevelIterator<cc,All_Partition,GridImp>(myself);
+    return typename GridImp::template Codim<cc>::EntityPointer(myself);
   } else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
 }
@@ -156,15 +154,6 @@ Dune::UGGridEntity < 0, dim ,GridImp >::
 geometry() const
 {
   return geo_;
-}
-
-
-template<int dim, class GridImp>
-inline Dune::UGGridLevelIterator<0,Dune::All_Partition,GridImp>
-Dune::UGGridEntity < 0, dim, GridImp>::father() const
-{
-  /** \todo This shouldn't be a constructor of LevelIterator! */
-  return UGGridLevelIterator<0,All_Partition,GridImp> (UG_NS<dim>::EFather(target_));
 }
 
 template<int dim, class GridImp>
