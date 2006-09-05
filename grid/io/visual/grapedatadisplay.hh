@@ -276,7 +276,7 @@ namespace Dune
       {
         assert( he->display );
         MyDisplayType & disp = *((MyDisplayType *) he->display);
-        typedef typename GridPartType :: IteratorType IteratorType;
+        typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
         disp.template delete_iterators<IteratorType> (he);
       }
     };
