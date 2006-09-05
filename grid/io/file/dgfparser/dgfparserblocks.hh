@@ -383,21 +383,46 @@ namespace Dune {
         next();
       }
       ~SimplexBlock() {}
-      int get(std::vector<std::vector<int> >& simplex) {
+      int get(std::vector<std::vector<int> >& simplex)
+      {
         int nofsimpl;
         simplex.resize(nofsimplex());
-        for (nofsimpl=0; ok(); next(), nofsimpl++) {
+        int offset = 0;
+        bool first = true;
+        for (nofsimpl=0; ok(); next(), nofsimpl++)
+        {
           assert(nofsimpl<nofsimplex());
           simplex[nofsimpl].resize(dimworld+1);
-          for (int j=0; j<dimworld+1; j++) {
+          if(first)
+          {
+            offset = p[0];
+            first = false;
+          }
+          for (int j=0; j<dimworld+1; j++)
+          {
             simplex[nofsimpl][j] = p[j];
+            offset = std::min(p[j],offset);
           }
         }
+
         if (nofsimpl!=nofsimplex()) {
           DUNE_THROW(DGFException,
                      "Wrong number of simplex elements read!" << std::endl
                                                               << "        Read " << nofsimpl
                                                               << " elements, expected " << nofsimplex());
+        }
+
+        // make numbering starting from zero
+        // not matter whether offset is positive or negative
+        if(offset != 0)
+        {
+          for (int i=0; i<nofsimpl; ++i)
+          {
+            for (int j=0; j<dimworld+1; ++j)
+            {
+              simplex[i][j] -= offset;
+            }
+          }
         }
         return nofsimpl;
       }
