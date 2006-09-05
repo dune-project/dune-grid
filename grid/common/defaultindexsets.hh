@@ -3,12 +3,15 @@
 #ifndef DUNE_DEFAULTINDEXSETS_HH
 #define DUNE_DEFAULTINDEXSETS_HH
 
+//- system includes
 #include <vector>
+#include <rpc/rpc.h>
+
+//- Dune includes
 #include <dune/common/misc.hh>
 #include <dune/common/array.hh>
+#include <dune/common/interfaces.hh>
 #include <dune/grid/common/grid.hh>
-
-#include <rpc/rpc.h>
 
 /** @file
    @author Robert Kloefkorn
