@@ -270,6 +270,15 @@ namespace Dune
         MyDisplayType & disp = *((MyDisplayType *) he->display);
         return disp.template next_item<GridPartType>(he);
       }
+
+      // delete iterators
+      inline static void del_iter (DUNE_ELEM * he)
+      {
+        assert( he->display );
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        typedef typename GridPartType :: IteratorType IteratorType;
+        disp.template delete_iterators<IteratorType> (he);
+      }
     };
 
     template <class GridPartImp>
@@ -281,6 +290,7 @@ namespace Dune
         dune->gridPart = gridPart;
         dune->first_macro = &IterationMethodsGP<GridPartImp>::fst_item;
         dune->next_macro  = &IterationMethodsGP<GridPartImp>::nxt_item;
+        dune->delete_iter = &IterationMethodsGP<GridPartImp>::del_iter;
 
         dune->first_child = 0;
         dune->next_child = 0;

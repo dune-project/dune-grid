@@ -211,6 +211,22 @@ namespace Dune
     inline int first_child (DUNE_ELEM * he) ;
     inline int next_child (DUNE_ELEM * he) ;
 
+  public:
+    // delete leaf iterators
+    template <PartitionIteratorType pitype>
+    inline void delete_leaf (DUNE_ELEM * he) ;
+    // delete level iterators
+    template <PartitionIteratorType pitype>
+    inline void delete_level (DUNE_ELEM * he) ;
+    // delete level and hierarchical iterators
+    template <PartitionIteratorType pitype>
+    inline void delete_hier (DUNE_ELEM * he) ;
+
+    // delete iterators
+    template <class IteratorType>
+    inline void delete_iterators(DUNE_ELEM * he) ;
+  public:
+
     // fake function for copy iterator
     inline static void * copy_iterator (const void * i) ;
 
@@ -298,6 +314,28 @@ namespace Dune
         MyDisplayType & disp = *((MyDisplayType *) he->display);
         return disp.next_child(he);
       }
+
+      // wrapper methods for deleting iterators
+      inline static void del_leaf (DUNE_ELEM * he)
+      {
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        disp.template delete_leaf<pitype>(he);
+      }
+
+      // wrapper methods for deleting iterators
+      inline static void del_level (DUNE_ELEM * he)
+      {
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        disp.template delete_level<pitype>(he);
+      }
+
+      // wrapper methods for deleting iterators
+      inline static void del_hier (DUNE_ELEM * he)
+      {
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        disp.template delete_hier<pitype>(he);
+      }
+
     };
 
     inline static void setIterationModus(DUNE_DAT * , DUNE_FUNC *);

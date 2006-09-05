@@ -48,6 +48,7 @@ namespace Dune
   inline GrapeGridDisplay<GridType>::
   ~GrapeGridDisplay()
   {
+    dune_.delete_iter(&hel_);
     //deleteHmesh();
   }
 
@@ -203,22 +204,23 @@ namespace Dune
     typedef typename GridType :: template Codim<0> ::
     template Partition<pitype> :: LeafIterator LeafIteratorType;
 
+    if(he->liter) dune_.delete_iter(he);
+
     he->liter   = 0;
     he->enditer = 0;
 
     LeafIteratorType * it    = new LeafIteratorType ( grid_.template leafbegin<0, pitype> () );
     LeafIteratorType * endit = new LeafIteratorType ( grid_.template leafend  <0, pitype> () );
 
+    he->liter   = (void *) it;
+    he->enditer = (void *) endit;
+
     if(it[0] == endit[0])
     {
-      he->actElement = 0;
-      delete it;
-      delete endit;
+      this->template delete_leaf<pitype>(he);
       return 0;
     }
 
-    he->liter   = (void *) it;
-    he->enditer = (void *) endit;
     return el_update(it,he);
   }
 
@@ -241,11 +243,7 @@ namespace Dune
     }
     else
     {
-      delete it;
-      delete endit;
-      he->liter      = 0;
-      he->enditer    = 0;
-      he->actElement = 0;
+      this->template delete_leaf<pitype> (he);
     }
     return 0;
   }
@@ -257,25 +255,26 @@ namespace Dune
   {
     typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
 
+    if(he->liter) dune_.delete_iter(he);
+
     assert( he->gridPart );
     GridPartType & gridPart = *((GridPartType *) he->gridPart);
 
-    he->liter   = 0;
-    he->enditer = 0;
+    assert( he->liter   == 0 );
+    assert( he->enditer == 0 );
 
     IteratorType * it    = new IteratorType ( gridPart.template begin<0> () );
     IteratorType * endit = new IteratorType ( gridPart.template end  <0> () );
 
+    he->liter   = (void *) it;
+    he->enditer = (void *) endit;
+
     if(it[0] == endit[0])
     {
-      he->actElement = 0;
-      delete it;
-      delete endit;
+      this->template delete_iterators<IteratorType> (he);
       return 0;
     }
 
-    he->liter   = (void *) it;
-    he->enditer = (void *) endit;
     return el_update(it,he);
   }
 
@@ -297,11 +296,7 @@ namespace Dune
     }
     else
     {
-      delete it;
-      delete endit;
-      he->liter      = 0;
-      he->enditer    = 0;
-      he->actElement = 0;
+      this->template delete_iterators<IteratorType> (he);
     }
     return 0;
   }
@@ -311,8 +306,10 @@ namespace Dune
   inline int GrapeGridDisplay<GridType>::
   first_level (DUNE_ELEM * he, int lvl)
   {
-    he->liter   = 0;
-    he->enditer = 0;
+    if(he->liter) dune_.delete_iter(he);
+
+    assert( he->liter   == 0 );
+    assert( he->enditer == 0 );
 
     // for leaf level, lvl has the value -1
     int level = (lvl < 0) ? grid_.maxLevel() : lvl;
@@ -324,16 +321,15 @@ namespace Dune
     LevelIteratorType * it    = new LevelIteratorType( grid_.template lbegin<0,pitype> (level) );
     LevelIteratorType * endit = new LevelIteratorType( grid_.template lend<0,pitype>   (level) );
 
+    he->liter   = (void *) it;
+    he->enditer = (void *) endit;
+
     if(it[0] == endit[0])
     {
-      he->actElement = 0;
-      delete it;
-      delete endit;
+      this->template delete_level<pitype>(he);
       return 0;
     }
 
-    he->liter   = (void *) it;
-    he->enditer = (void *) endit;
     return el_update(it,he);
   }
 
@@ -357,12 +353,7 @@ namespace Dune
     }
     else
     {
-      delete it;
-      delete endit;
-      he->liter   = 0;
-      he->enditer = 0;
-      he->actElement = 0;
-      he->hiter = 0;
+      this->template delete_level<pitype>(he);
 
       // clear all hierachic iterators
       while(!hierList_.empty())
@@ -442,6 +433,73 @@ namespace Dune
     he->hiter = 0;
 
     return 0;
+  }
+
+
+
+  template<class GridType>
+  template<class IteratorType>
+  inline void GrapeGridDisplay<GridType>::
+  delete_iterators(DUNE_ELEM * he)
+  {
+    IteratorType * it  = ((IteratorType *) he->liter);
+    if(it)
+    {
+      IteratorType * endit = ((IteratorType *) he->enditer);
+      assert( endit );
+
+      delete it;
+      delete endit;
+
+      he->actElement = 0;
+      he->liter      = 0;
+      he->enditer    = 0;
+    }
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype>
+  inline void GrapeGridDisplay<GridType>::
+  delete_leaf (DUNE_ELEM * he)
+  {
+    assert( he );
+    typedef typename GridType :: template Codim<0> ::
+    template Partition<pitype> :: LeafIterator IteratorType;
+
+    this->template delete_iterators<IteratorType> (he);
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype>
+  inline void GrapeGridDisplay<GridType>::
+  delete_level (DUNE_ELEM * he)
+  {
+    assert( he );
+    typedef typename GridType :: template Codim<0> ::
+    template Partition<pitype> :: LevelIterator IteratorType;
+
+    this->template delete_iterators<IteratorType> (he);
+  }
+
+  template<class GridType>
+  template<PartitionIteratorType pitype>
+  inline void GrapeGridDisplay<GridType>::
+  delete_hier (DUNE_ELEM * he)
+  {
+    assert( he );
+    typedef typename GridType :: template Codim<0> ::
+    template Partition<pitype> :: LevelIterator IteratorType;
+
+    this->template delete_iterators<IteratorType> (he);
+
+    // clear all hierachic iterators
+    while(!hierList_.empty())
+    {
+      HierarchicIteratorType * hit = hierList_.back();
+      hierList_.pop_back();
+      delete hit;
+    }
+    assert( hierList_.size () == 0 );
   }
 
 
@@ -568,6 +626,7 @@ namespace Dune
     {
       dune->first_macro = &IterationMethods<pitype>::fst_leaf;
       dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
+      dune->delete_iter = &IterationMethods<pitype>::del_leaf;
 
       // if pointer are 0, then nor evaluation is done
       dune->first_child = 0;
@@ -580,6 +639,7 @@ namespace Dune
     {
       dune->first_macro = &IterationMethods<pitype>::first_lev;
       dune->next_macro  = &IterationMethods<pitype>::next_lev;
+      dune->delete_iter = &IterationMethods<pitype>::del_level;
 
       dune->first_child = 0;
       dune->next_child  = 0;
@@ -591,6 +651,7 @@ namespace Dune
     {
       dune->first_macro = &IterationMethods<pitype>::first_mac;
       dune->next_macro  = &IterationMethods<pitype>::next_lev;
+      dune->delete_iter = &IterationMethods<pitype>::del_hier;
 
       dune->first_child = &IterationMethods<pitype>::fst_child;
       dune->next_child  = &IterationMethods<pitype>::nxt_child;
@@ -641,6 +702,8 @@ namespace Dune
   inline void GrapeGridDisplay<GridType>::
   setIterationMethods(DUNE_DAT * dune, DUNE_FUNC * func ) const
   {
+    if(dune->delete_iter) dune->delete_iter(dune->all);
+
     switch(dune->partitionIteratorType)
     {
     case g_All_Partition :            selectIterators<All_Partition> (dune,func) ;
@@ -727,30 +790,17 @@ namespace Dune
   template<class GridType>
   inline void * GrapeGridDisplay<GridType>::setupHmesh()
   {
-    // default set all coordinates to zero
-    for(int i=0; i<MAX_EL_DOF; i++)
-      for(int j=0; j<3; j++)
-      {
-        hel_.vpointer[i][j] = 0.0;
-      }
-
     int maxlevel = grid_.maxLevel();
 
     int noe = grid_.size(0);
     int nov = grid_.size(dim);
 
+    // set pointer to me
     hel_.display = (void *) this;
-    hel_.liter   = 0;
-    hel_.enditer = 0;
 
-    hel_.hiter    = 0;
-    hel_.gridPart = 0;
-
-    hel_.actElement = 0;
-
+    // set dune pointers
     DUNE_DAT * dune = &dune_;
 
-    dune->copy         = 0; // no copy at the moment
     dune->wtoc         = wtoc;
     dune->ctow         = ctow;
     dune->check_inside = check_inside;
@@ -764,7 +814,6 @@ namespace Dune
     dune->iteratorType          = g_LeafIterator;
     dune->partitionIteratorType = g_All_Partition;
 
-    dune->gridPart = 0;
     setIterationMethods(dune,0);
 
     /* return hmesh with no data */

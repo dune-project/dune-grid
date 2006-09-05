@@ -15,6 +15,37 @@ typedef void evalCoord_t (DUNE_ELEM *, DUNE_FDATA *, const double *, double * );
 /* interface element */
 typedef struct dune_elem
 {
+
+  // default constructor
+  dune_elem()
+    : type(-1)
+      , eindex(-1)
+      , level(-1)
+      , level_of_interest(-1)
+      , has_children(0)
+      , liter(0)
+      , enditer(0)
+      , hiter(0)
+      , actElement(0)
+      , gridPart(0)
+      , display(0)
+      , mesh(0)
+  {
+    // default set all coordinates to zero
+    for(int i=0; i<MAX_EL_DOF; ++i)
+    {
+      vindex [i] = -1;
+      for(int j=0; j<3; ++j)
+      {
+        vpointer[i][j] = 0.0;
+      }
+    }
+    for(int i=0; i<MAX_EL_FACE; ++i)
+    {
+      bnd [i] = -1;
+    }
+  }
+
   /*
    *  see g_eldesc.h for ElementType
    */
@@ -51,6 +82,24 @@ typedef struct dune_elem
 
 typedef struct dune_fdata
 {
+  // default constructor
+  dune_fdata()
+    : mynum (-1)
+      , name(0)
+      , evalCoord(0)
+      , evalDof(0)
+      , discFunc(0)
+      , indexSet(0)
+      , allLevels(0)
+      , dimVal(0)
+      , dimRange(0)
+      , comp(0)
+      , polyOrd(0)
+      , continuous(0)
+      , compName(0)
+      , gridPart(0)
+      , setGridPartIterators(0) {}
+
   /* my number in the data vector */
   int mynum;
 
@@ -102,6 +151,7 @@ typedef struct dune_fdata
  *     **********************************************************************/
 typedef struct dune_func
 {
+  /* name */
   const char * name;
   /* the function to evaluate */
   void (* func_real)(DUNE_ELEM *he, DUNE_FDATA *fe, int ind,
@@ -115,9 +165,31 @@ typedef struct dune_func
 
 struct dune_dat
 {
+  // default constructor
+  dune_dat()
+    : first_macro(0)
+      , next_macro(0)
+      , delete_iter(0)
+      , first_child(0)
+      , next_child(0)
+      , copy(0)
+      , check_inside(0)
+      , wtoc(0)
+      , ctow(0)
+      , setIterationModus(0)
+      , partition(-1)
+      , iteratorType(-1) // g_LeafIterator
+      , partitionIteratorType(-1)
+      , gridPart(0)
+      , all (0) {}
+
+
   /* the actual first and next macro for Iteration  */
   int (* first_macro)(DUNE_ELEM *) ;
   int (* next_macro)(DUNE_ELEM *) ;
+
+  /* method to delete iterators */
+  void (* delete_iter)(DUNE_ELEM *) ;
 
   /* first and next child , if 0, then no child iteration */
   int (* first_child)(DUNE_ELEM *) ;

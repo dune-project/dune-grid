@@ -342,12 +342,10 @@ namespace Dune
       nov += grid.leafIndexSet().size(dim);
     }
 
+    // set display pointer
     hel_.display = (void *) this;
-    hel_.liter = NULL;
-    hel_.enditer = 0;
-    hel_.hiter = NULL;
-    hel_.actElement = NULL;
 
+    // set dune data
     DUNE_DAT * dune = &dune_;
 
     dune->first_macro = &first_mac;
@@ -356,7 +354,6 @@ namespace Dune
     dune->first_child = &fst_child;
     dune->next_child  = &nxt_child;
 
-    dune->copy         = 0; // no copy at the moment
     dune->wtoc         = wtoc;
     dune->ctow         = ctow;
     dune->check_inside = check_inside;
@@ -369,6 +366,8 @@ namespace Dune
 
     dune->iteratorType          = g_LeafIterator;
     dune->partitionIteratorType = g_All_Partition;
+
+    this->setIterationMethods(dune,0);
 
     /* return hmesh with no data */
     return GrapeInterface<dim,dimworld>::setupHmesh(NULL,noe,nov,maxlevel,NULL,dune);

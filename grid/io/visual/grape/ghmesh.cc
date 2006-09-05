@@ -37,6 +37,8 @@ GENMESHnD *genmesh3d_partition_disp();
 /***************************/
 typedef struct stackentry
 {
+  stackentry () : hel(), next(0), ref_flag(0), hmax(-1.0) {}
+
   HELEMENT hel;
 
   struct stackentry *next;
@@ -47,32 +49,14 @@ typedef struct stackentry
 } STACKENTRY;
 
 
-#if 0
-/**********************************************************************
-* storage of the dune data ( discrete functions )
-*
-* normaly stored as function_data in the F_DATA pointer
-**********************************************************************/
-typedef struct dune_func
-{
-  const char * name;
-  /* the function to evaluate */
-  void (* func_real)(DUNE_ELEM *he, DUNE_FDATA *fe, int ind,
-                     double G_CONST *coord, double *val);
-  /* struct storing the pointer to the disrete function */
-  DUNE_FDATA * all;
-} DUNE_FUNC;
-#endif
-
 /* definition of dune_dat in g_eldesc.h */
 /* stored as user_data in the mesh pointer */
-
 
 /*****************************************************************************
 * Statische Variablen                *                     **
 *****************************************************************************/
 
-static STACKENTRY *stackfree = NULL;
+static STACKENTRY * stackfree = NULL;
 
 /**************************************************************************
 *
@@ -136,7 +120,8 @@ inline static HELEMENT *get_stackentry()
   }
   else
   {
-    stel = (STACKENTRY *)malloc(sizeof(STACKENTRY));
+    //stel = (STACKENTRY *)malloc(sizeof(STACKENTRY));
+    stel = new STACKENTRY ();
     elem = getNewDuneElem ();
     assert( elem );
     ((HELEMENT *)stel)->user_data = (void *)elem;
