@@ -158,7 +158,9 @@ namespace Dune
 
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
+    typedef typename GrapeInterface<dim,dimworld>::DUNE_FUNC DUNE_FUNC;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
+    typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
 
   public:
     typedef GridType MyGridType;
@@ -204,7 +206,7 @@ namespace Dune
     bool hasData () { return vecFdata_.size() > 0; }
 
     // return vector for copying in combined display
-    std::vector < DUNE_FDATA * > & getFdataVec () { return vecFdata_; }
+    std::vector < DUNE_FUNC * > & getFdataVec () { return vecFdata_; }
 
     //! set min and max value for colorbar
     void setMinMaxValue(const double minValue, const double maxValue) const;
@@ -240,7 +242,7 @@ namespace Dune
                           const int polOrd , const int dimRange, bool continuous );
 
     //! hold the diffrent datas on this mesh
-    std::vector < DUNE_FDATA * > vecFdata_;
+    std::vector < DUNE_FUNC * > vecFdata_;
 
     enum { polynomialOrder = 1 };
     // store lagrange points for evaluation
@@ -296,6 +298,12 @@ namespace Dune
         dune->next_child = 0;
       }
     };
+
+    // create object DUNE_FUNC
+    DUNE_FUNC * createDuneFunc () const;
+    // delete object DUNE_FUNC
+    void deleteDuneFunc (DUNE_FUNC *) const;
+
   };
 
   template <typename ctype, int dim, int dimworld, int polOrd>

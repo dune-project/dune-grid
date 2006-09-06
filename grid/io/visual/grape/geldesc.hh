@@ -482,119 +482,126 @@ static int  cube_world2coord(HELEMENT3D *cube,
 /* fill the upper reference elements */
 inline void setupReferenceElements()
 {
-  /* fill the helement description in 2D*/
+  static bool initialized = false;
 
-  triangle_description.dindex             = 0;   // index of description
-  triangle_description.number_of_vertices = 3;
-  /* dimension of local coords */
-  triangle_description.dimension_of_coord = GRAPE_DIM;
-  triangle_description.coord              = triangle_local_coordinate_system;
-  triangle_description.parametric_degree  = 1;
-  triangle_description.world_to_coord     = world2coord;
-  triangle_description.coord_to_world     = coord2world;
-  triangle_description.check_inside       = el_check_inside;
-  triangle_description.neighbour          = triangle_neighbour;
-  triangle_description.boundary           = triangle_boundary;
+  if(!initialized)
+  {
+    /* fill the helement description in 2D*/
 
-
-  quadrilateral_description.dindex             = 1;   // index of description
-  quadrilateral_description.number_of_vertices = 4;
-  quadrilateral_description.dimension_of_coord = GRAPE_DIM;
-  quadrilateral_description.coord              = quadrilateral_local_coordinate_system;
-  quadrilateral_description.parametric_degree  = 1;
-  quadrilateral_description.world_to_coord     = world2coord;
-  quadrilateral_description.coord_to_world     = coord2world;
-  quadrilateral_description.check_inside       = el_check_inside;
-  quadrilateral_description.neighbour          = triangle_neighbour;
-  quadrilateral_description.boundary           = triangle_boundary;
-
-  /* fill the helement description in 3D*/
-
-  tetra_description.dindex             = 2;   // index of description
-  tetra_description.number_of_vertices = 4;
-  tetra_description.number_of_polygons = 4;   // i.e. number of faces
-  tetra_description.polygon_length = tetra_polygon_length;
-  tetra_description.polygon_vertex  = tetra_vertex_e;
-  tetra_description.polygon_neighbour  = tetra_next_polygon_e;
-  tetra_description.dimension_of_coord = 3;   // GRAPE_DIM
-  tetra_description.coord              = tetra_local_coordinate_system;
-  tetra_description.parametric_degree  = 1;
-  tetra_description.world_to_coord     = world2coord_3d;
-  tetra_description.coord_to_world     = coord2world_3d;
-  tetra_description.check_inside       = el_check_inside_3d;
-  tetra_description.neighbour          = dummy_neighbour;
-  tetra_description.boundary           = wrap_boundary;
-  tetra_description.get_boundary_vertex_estimate = NULL;
-  tetra_description.get_boundary_face_estimate   = NULL;
-  tetra_description.coord_of_parent              = NULL;
-
-  /* pyramid */
-  pyra_description.dindex             = 3;   // index of description , see element type
-  pyra_description.number_of_vertices = 5;
-  pyra_description.number_of_polygons = 5;   // i.e. number of faces
-  pyra_description.polygon_length     = pyra_polygon_length;
-  pyra_description.polygon_vertex     = pyra_polygon_vertex;
-  pyra_description.polygon_neighbour  = pyra_polygon_neighbour;
-  pyra_description.dimension_of_coord = 3;   // GRAPE_DIM
-  pyra_description.coord              = pyra_local_coordinate_system;
-  pyra_description.parametric_degree  = 1;
-  pyra_description.world_to_coord     = world2coord_3d;
-  pyra_description.coord_to_world     = coord2world_3d;
-  pyra_description.check_inside       = el_check_inside_3d;
-  pyra_description.neighbour          = dummy_neighbour;
-  pyra_description.boundary           = wrap_boundary;
-  pyra_description.get_boundary_vertex_estimate = NULL;
-  pyra_description.get_boundary_face_estimate   = NULL;
-  pyra_description.coord_of_parent              = NULL;
+    triangle_description.dindex             = 0; // index of description
+    triangle_description.number_of_vertices = 3;
+    /* dimension of local coords */
+    triangle_description.dimension_of_coord = GRAPE_DIM;
+    triangle_description.coord              = triangle_local_coordinate_system;
+    triangle_description.parametric_degree  = 1;
+    triangle_description.world_to_coord     = world2coord;
+    triangle_description.coord_to_world     = coord2world;
+    triangle_description.check_inside       = el_check_inside;
+    triangle_description.neighbour          = triangle_neighbour;
+    triangle_description.boundary           = triangle_boundary;
 
 
-  /* prism */
-  prism_description.dindex             = 4;   // index of description
-  prism_description.number_of_vertices = 6;
-  prism_description.number_of_polygons = 5;   // i.e. number of faces
-  prism_description.polygon_length     = prism_polygon_length;
-  prism_description.polygon_vertex     = prism_polygon_vertex;
-  prism_description.polygon_neighbour  = prism_polygon_neighbour;
-  prism_description.dimension_of_coord = 3;   // GRAPE_DIM
-  prism_description.coord              = prism_local_coordinate_system;
-  prism_description.parametric_degree  = 1;
-  prism_description.world_to_coord     = world2coord_3d;
-  prism_description.coord_to_world     = coord2world_3d;
-  prism_description.check_inside       = el_check_inside_3d;
-  prism_description.neighbour          = dummy_neighbour;
-  prism_description.boundary           = wrap_boundary;
-  prism_description.get_boundary_vertex_estimate = NULL;
-  prism_description.get_boundary_face_estimate   = NULL;
-  prism_description.coord_of_parent              = NULL;
+    quadrilateral_description.dindex             = 1; // index of description
+    quadrilateral_description.number_of_vertices = 4;
+    quadrilateral_description.dimension_of_coord = GRAPE_DIM;
+    quadrilateral_description.coord              = quadrilateral_local_coordinate_system;
+    quadrilateral_description.parametric_degree  = 1;
+    quadrilateral_description.world_to_coord     = world2coord;
+    quadrilateral_description.coord_to_world     = coord2world;
+    quadrilateral_description.check_inside       = el_check_inside;
+    quadrilateral_description.neighbour          = triangle_neighbour;
+    quadrilateral_description.boundary           = triangle_boundary;
 
-  /* Hexahedrons */
-  cube_description.dindex             = 5;   // index of description
-  cube_description.number_of_vertices = 8;
-  cube_description.number_of_polygons = 6;   // i.e. number of faces
-  cube_description.polygon_length     = cube_polygon_length;
-  cube_description.polygon_vertex     = cube_polygon_vertex;
-  cube_description.polygon_neighbour  = cube_polygon_neighbour;
-  cube_description.dimension_of_coord = 3;   // GRAPE_DIM
-  cube_description.coord              = cube_local_coordinate_system;
-  cube_description.parametric_degree  = 1;
-  cube_description.world_to_coord     = world2coord_3d;
-  cube_description.coord_to_world     = coord2world_3d;
-  cube_description.check_inside       = el_check_inside_3d;
-  cube_description.neighbour          = dummy_neighbour;
-  cube_description.boundary           = wrap_boundary;
-  cube_description.get_boundary_vertex_estimate = NULL;
-  cube_description.get_boundary_face_estimate = NULL;
-  cube_description.coord_of_parent = NULL;
+    /* fill the helement description in 3D*/
+
+    tetra_description.dindex             = 2; // index of description
+    tetra_description.number_of_vertices = 4;
+    tetra_description.number_of_polygons = 4; // i.e. number of faces
+    tetra_description.polygon_length = tetra_polygon_length;
+    tetra_description.polygon_vertex  = tetra_vertex_e;
+    tetra_description.polygon_neighbour  = tetra_next_polygon_e;
+    tetra_description.dimension_of_coord = 3; // GRAPE_DIM
+    tetra_description.coord              = tetra_local_coordinate_system;
+    tetra_description.parametric_degree  = 1;
+    tetra_description.world_to_coord     = world2coord_3d;
+    tetra_description.coord_to_world     = coord2world_3d;
+    tetra_description.check_inside       = el_check_inside_3d;
+    tetra_description.neighbour          = dummy_neighbour;
+    tetra_description.boundary           = wrap_boundary;
+    tetra_description.get_boundary_vertex_estimate = NULL;
+    tetra_description.get_boundary_face_estimate   = NULL;
+    tetra_description.coord_of_parent              = NULL;
+
+    /* pyramid */
+    pyra_description.dindex             = 3; // index of description , see element type
+    pyra_description.number_of_vertices = 5;
+    pyra_description.number_of_polygons = 5; // i.e. number of faces
+    pyra_description.polygon_length     = pyra_polygon_length;
+    pyra_description.polygon_vertex     = pyra_polygon_vertex;
+    pyra_description.polygon_neighbour  = pyra_polygon_neighbour;
+    pyra_description.dimension_of_coord = 3; // GRAPE_DIM
+    pyra_description.coord              = pyra_local_coordinate_system;
+    pyra_description.parametric_degree  = 1;
+    pyra_description.world_to_coord     = world2coord_3d;
+    pyra_description.coord_to_world     = coord2world_3d;
+    pyra_description.check_inside       = el_check_inside_3d;
+    pyra_description.neighbour          = dummy_neighbour;
+    pyra_description.boundary           = wrap_boundary;
+    pyra_description.get_boundary_vertex_estimate = NULL;
+    pyra_description.get_boundary_face_estimate   = NULL;
+    pyra_description.coord_of_parent              = NULL;
 
 
-  /* inheritance rules */
-  inheritance_rule_in_child_0[0] = vinherit_point_0_in_child_0;
-  inheritance_rule_in_child_0[1] = vinherit_point_1_in_child_0;
-  inheritance_rule_in_child_0[2] = vinherit_point_2;
+    /* prism */
+    prism_description.dindex             = 4; // index of description
+    prism_description.number_of_vertices = 6;
+    prism_description.number_of_polygons = 5; // i.e. number of faces
+    prism_description.polygon_length     = prism_polygon_length;
+    prism_description.polygon_vertex     = prism_polygon_vertex;
+    prism_description.polygon_neighbour  = prism_polygon_neighbour;
+    prism_description.dimension_of_coord = 3; // GRAPE_DIM
+    prism_description.coord              = prism_local_coordinate_system;
+    prism_description.parametric_degree  = 1;
+    prism_description.world_to_coord     = world2coord_3d;
+    prism_description.coord_to_world     = coord2world_3d;
+    prism_description.check_inside       = el_check_inside_3d;
+    prism_description.neighbour          = dummy_neighbour;
+    prism_description.boundary           = wrap_boundary;
+    prism_description.get_boundary_vertex_estimate = NULL;
+    prism_description.get_boundary_face_estimate   = NULL;
+    prism_description.coord_of_parent              = NULL;
 
-  inheritance_rule_in_child_1[0] = vinherit_point_0_in_child_1;
-  inheritance_rule_in_child_1[1] = vinherit_point_1_in_child_1;
-  inheritance_rule_in_child_1[2] = vinherit_point_2;
+    /* Hexahedrons */
+    cube_description.dindex             = 5; // index of description
+    cube_description.number_of_vertices = 8;
+    cube_description.number_of_polygons = 6; // i.e. number of faces
+    cube_description.polygon_length     = cube_polygon_length;
+    cube_description.polygon_vertex     = cube_polygon_vertex;
+    cube_description.polygon_neighbour  = cube_polygon_neighbour;
+    cube_description.dimension_of_coord = 3; // GRAPE_DIM
+    cube_description.coord              = cube_local_coordinate_system;
+    cube_description.parametric_degree  = 1;
+    cube_description.world_to_coord     = world2coord_3d;
+    cube_description.coord_to_world     = coord2world_3d;
+    cube_description.check_inside       = el_check_inside_3d;
+    cube_description.neighbour          = dummy_neighbour;
+    cube_description.boundary           = wrap_boundary;
+    cube_description.get_boundary_vertex_estimate = NULL;
+    cube_description.get_boundary_face_estimate = NULL;
+    cube_description.coord_of_parent = NULL;
+
+
+    /* inheritance rules */
+    inheritance_rule_in_child_0[0] = vinherit_point_0_in_child_0;
+    inheritance_rule_in_child_0[1] = vinherit_point_1_in_child_0;
+    inheritance_rule_in_child_0[2] = vinherit_point_2;
+
+    inheritance_rule_in_child_1[0] = vinherit_point_0_in_child_1;
+    inheritance_rule_in_child_1[1] = vinherit_point_1_in_child_1;
+    inheritance_rule_in_child_1[2] = vinherit_point_2;
+
+    initialized = true;
+  }
 }
 
 //vector holding the descriptions enumerated after it's index

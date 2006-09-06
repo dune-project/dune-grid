@@ -257,16 +257,48 @@ namespace Dune
     typedef typename GridType::Traits::template Codim<0>::LevelIterator LevIter;
     for(unsigned int i=0 ; i<vecFdata_.size(); i++)
     {
-      DUNE_FDATA * fd = vecFdata_[i];
-      if( fd )
-      {
-        int * comps = fd->comp;
-        if( comps ) delete [] comps;
-        delete fd;
-        vecFdata_[i] = 0;
-      }
+      if( vecFdata_[i] ) deleteDuneFunc(vecFdata_[i]);
+      vecFdata_[i] = 0;
     }
   }
+
+  template<class GridType>
+  inline void GrapeDataDisplay<GridType>::
+  deleteDuneFunc(DUNE_FUNC * dfunc) const
+  {
+    DUNE_FDATA * fd = dfunc->all;
+    if( fd )
+    {
+      int * comps = fd->comp;
+      if( comps ) delete [] comps;
+      delete fd;
+      dfunc->all = 0;
+    }
+
+    F_DATA * f_data = (F_DATA *) dfunc->f_data;
+    if( f_data )
+    {
+      delete f_data;
+      dfunc->f_data = 0;
+    }
+    delete dfunc;
+  }
+
+  template<class GridType>
+  inline typename GrapeDataDisplay<GridType>::DUNE_FUNC * GrapeDataDisplay<GridType>::
+  createDuneFunc() const
+  {
+    DUNE_FUNC * dfunc = new DUNE_FUNC ();
+    dfunc->func_real = &func_real;
+    dfunc->name = 0;
+
+    F_DATA * f_data = new F_DATA ();
+    dfunc->f_data = (void *) f_data;
+
+    dfunc->all = new DUNE_FDATA();
+    return dfunc;
+  }
+
 
   //****************************************************************
   //
@@ -338,47 +370,52 @@ namespace Dune
       vecFdata_.resize(size+num);
       for(int n=size; n < size+num; n++)
       {
-        vecFdata_[n] = new DUNE_FDATA ();
-
-        // set the rigth evaluation functions
-        vecFdata_[n]->evalDof =
-          EvalDiscreteFunctions<GridType,DiscFuncType>::evalDof;
-
-        vecFdata_[n]->evalCoord =
-          EvalDiscreteFunctions<GridType,DiscFuncType>::evalCoord;
-
-        vecFdata_[n]->mynum = n;
-        vecFdata_[n]->name = name;
-        vecFdata_[n]->allLevels = 0;
-
-        vecFdata_[n]->discFunc = (void *) &func;
-        vecFdata_[n]->indexSet = 0;
-        vecFdata_[n]->polyOrd = func.getFunctionSpace().polynomOrder();
-        vecFdata_[n]->continuous = (func.getFunctionSpace().continuous() == true ) ? 1 : 0;
-        if(vecFdata_[n]->polyOrd == 0) vecFdata_[n]->continuous = 0;
-
-        int dimVal = dinf->dimVal;
-        int * comp = new int [dimVal];
-        vecFdata_[n]->comp = comp;
-        if(vector)
+        vecFdata_[n] = createDuneFunc();
+        // set data components
         {
-          for(int j=0; j<dimVal; j++) comp[j] = dinf->comp[j];
-          vecFdata_[n]->compName = -1;
-        }
-        else
-        {
-          comp[0] = n-size;
-          vecFdata_[n]->compName = n-size;
-        }
-        vecFdata_[n]->dimVal   = dimVal;
-        vecFdata_[n]->dimRange = FunctionSpaceType::DimRange;
+          DUNE_FDATA * data = vecFdata_[n]->all;
+          assert( data );
 
-        // set grid part selection methods
-        typedef typename FunctionSpaceType :: GridPartType GridPartType;
-        vecFdata_[n]->gridPart = ((void *) &func.getFunctionSpace().gridPart());
-        vecFdata_[n]->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+          // set the rigth evaluation functions
+          data->evalDof =
+            EvalDiscreteFunctions<GridType,DiscFuncType>::evalDof;
 
-        GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n],&func_real);
+          data->evalCoord =
+            EvalDiscreteFunctions<GridType,DiscFuncType>::evalCoord;
+
+          data->mynum = n;
+          data->name = name;
+          data->allLevels = 0;
+
+          data->discFunc = (void *) &func;
+          data->indexSet = 0;
+          data->polyOrd = func.getFunctionSpace().polynomOrder();
+          data->continuous = (func.getFunctionSpace().continuous() == true ) ? 1 : 0;
+          if(data->polyOrd == 0) data->continuous = 0;
+
+          int dimVal = dinf->dimVal;
+          int * comp = new int [dimVal];
+          data->comp = comp;
+          if(vector)
+          {
+            for(int j=0; j<dimVal; j++) comp[j] = dinf->comp[j];
+            data->compName = -1;
+          }
+          else
+          {
+            comp[0] = n-size;
+            data->compName = n-size;
+          }
+          data->dimVal   = dimVal;
+          data->dimRange = FunctionSpaceType::DimRange;
+
+          // set grid part selection methods
+          typedef typename FunctionSpaceType :: GridPartType GridPartType;
+          data->gridPart = ((void *) &func.getFunctionSpace().gridPart());
+          data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+        }
+
+        GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
     }
   }
@@ -466,45 +503,49 @@ namespace Dune
       vecFdata_.resize(size+num);
       for(int n=size; n < size+num; n++)
       {
-        vecFdata_[n] = new DUNE_FDATA ();
-
-        // set the rigth evaluation functions
-        vecFdata_[n]->evalDof =
-          EvalVectorData<GridType,VectorType,IndexSetType>::evalDof;
-
-        vecFdata_[n]->evalCoord =
-          EvalVectorData<GridType,VectorType,IndexSetType>::evalCoord;
-
-        vecFdata_[n]->mynum = n;
-        vecFdata_[n]->name = name;
-        vecFdata_[n]->allLevels = 0;
-
-        vecFdata_[n]->discFunc = (void *) &func;
-        vecFdata_[n]->indexSet = (void *) &indexSet;
-        vecFdata_[n]->polyOrd  = polOrd;
-        vecFdata_[n]->continuous = (continuous == true ) ? 1 : 0;
-        if(vecFdata_[n]->polyOrd == 0) vecFdata_[n]->continuous = 0;
-
-        int dimVal = dinf->dimVal;
-        int * comp = new int [dimVal];
-        vecFdata_[n]->comp = comp;
-        if(vector)
+        vecFdata_[n] = createDuneFunc();
         {
-          for(int j=0; j<dimVal; j++) comp[j] = dinf->comp[j];
-          vecFdata_[n]->compName = -1;
-        }
-        else
-        {
-          comp[0] = n-size;
-          vecFdata_[n]->compName = n-size;
-        }
-        vecFdata_[n]->dimVal   = dimVal;
-        vecFdata_[n]->dimRange = dimRange;
+          DUNE_FDATA * data = vecFdata_[n]->all;
+          assert(data);
 
-        vecFdata_[n]->gridPart = 0;
-        vecFdata_[n]->setGridPartIterators = 0;
+          // set the rigth evaluation functions
+          data->evalDof =
+            EvalVectorData<GridType,VectorType,IndexSetType>::evalDof;
 
-        GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n],&func_real);
+          data->evalCoord =
+            EvalVectorData<GridType,VectorType,IndexSetType>::evalCoord;
+
+          data->mynum = n;
+          data->name = name;
+          data->allLevels = 0;
+
+          data->discFunc = (void *) &func;
+          data->indexSet = (void *) &indexSet;
+          data->polyOrd  = polOrd;
+          data->continuous = (continuous == true ) ? 1 : 0;
+          if(data->polyOrd == 0) data->continuous = 0;
+
+          int dimVal = dinf->dimVal;
+          int * comp = new int [dimVal];
+          data->comp = comp;
+          if(vector)
+          {
+            for(int j=0; j<dimVal; j++) comp[j] = dinf->comp[j];
+            data->compName = -1;
+          }
+          else
+          {
+            comp[0] = n-size;
+            data->compName = n-size;
+          }
+          data->dimVal   = dimVal;
+          data->dimRange = dimRange;
+
+          data->gridPart = 0;
+          data->setGridPartIterators = 0;
+        }
+
+        GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
     }
   }

@@ -47,6 +47,7 @@ namespace Dune
     typedef GrapeInterface_two_two::DUNE_FDATA DUNE_FDATA;
     typedef GrapeInterface_two_two::DUNE_DAT DUNE_DAT;
     typedef GrapeInterface_two_two::DUNE_FUNC DUNE_FUNC;
+    typedef GrapeInterface_two_two::F_DATA F_DATA;
 
     inline static void init()
     {
@@ -60,20 +61,17 @@ namespace Dune
     {
       GrapeInterface_two_two::handleMesh(hmesh,grdMode);
     }
-    inline static void addDataToHmesh(void  *hmesh, DUNE_FDATA * fe,
-                                      void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const
-                                                                double *, double *)  )
+    inline static void addDataToHmesh(void  *hmesh, DUNE_FUNC * dfunc)
     {
-      GrapeInterface_two_two::addDataToHmesh(hmesh,fe,func_real);
+      GrapeInterface_two_two::addDataToHmesh(hmesh,dfunc);
     }
 
     inline static void *setupHmesh(
-      void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
       const int noe, const int nov, const int maxlev,
-      DUNE_FDATA * fe, DUNE_DAT * dune )
+      DUNE_DAT * dune , F_DATA * levelData )
     {
       return GrapeInterface_two_two::setupHmesh(
-               func_real,noe,nov,maxlev,fe,dune);
+               noe,nov,maxlev,dune, (void *)levelData);
     }
 
     inline static void deleteHmesh( void * hmesh )
@@ -105,6 +103,7 @@ namespace Dune
     typedef GrapeInterface_three_three::DUNE_FDATA DUNE_FDATA;
     typedef GrapeInterface_three_three::DUNE_DAT DUNE_DAT;
     typedef GrapeInterface_three_three::DUNE_FUNC DUNE_FUNC;
+    typedef GrapeInterface_three_three::F_DATA F_DATA;
 
     inline static void init()
     {
@@ -121,20 +120,17 @@ namespace Dune
     {
       GrapeInterface_three_three::handleMesh(hmesh,grdMode);
     }
-    inline static void addDataToHmesh(void  *hmesh, DUNE_FDATA * fe,
-                                      void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const
-                                                                double *, double *)  )
+    inline static void addDataToHmesh(void  *hmesh, DUNE_FUNC * dfunc)
     {
-      GrapeInterface_three_three::addDataToHmesh(hmesh,fe,func_real);
+      GrapeInterface_three_three::addDataToHmesh(hmesh,dfunc);
     }
 
     inline static void *setupHmesh(
-      void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
       const int noe, const int nov, const int maxlev,
-      DUNE_FDATA * fe, DUNE_DAT * dune )
+      DUNE_DAT * dune , F_DATA * levelData )
     {
       return GrapeInterface_three_three::
-             setupHmesh(func_real,noe,nov,maxlev,fe,dune);
+             setupHmesh(noe,nov,maxlev,dune,(void*) levelData);
     }
 
     inline static void deleteHmesh( void * hmesh )

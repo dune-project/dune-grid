@@ -21,6 +21,9 @@ namespace Dune
       , entityIndex(GrapeGridDisplay<GridType>::template getEntityIndex<LeafIndexSetType>)
       , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>)
   {
+    levelData_.next = 0;
+    levelData_.last = 0;
+
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
   }
@@ -817,7 +820,7 @@ namespace Dune
     setIterationMethods(dune,0);
 
     /* return hmesh with no data */
-    return GrapeInterface<dim,dimworld>::setupHmesh(0,noe,nov,maxlevel,0,dune);
+    return GrapeInterface<dim,dimworld>::setupHmesh(noe,nov,maxlevel,dune,&levelData_);
   }
 
   template<class GridType>

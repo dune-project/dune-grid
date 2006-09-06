@@ -52,6 +52,7 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FUNC DUNE_FUNC;
+    typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
 
   public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
@@ -79,6 +80,9 @@ namespace Dune
     //! store the actual element pointer
     DUNE_ELEM hel_;
     DUNE_DAT dune_;
+
+    //! grape data for level function
+    F_DATA levelData_;
 
     // no better way than this canot export HMESH structure to here
     //! pointer to hmesh

@@ -151,6 +151,9 @@ typedef struct dune_fdata
  *     **********************************************************************/
 typedef struct dune_func
 {
+  /* string holding mem for name */
+  std::string nameValue;
+
   /* name */
   const char * name;
   /* the function to evaluate */
@@ -158,6 +161,10 @@ typedef struct dune_func
                      double G_CONST *coord, double *val);
   /* struct storing the pointer to the disrete function */
   DUNE_FDATA * all;
+
+  /* pointer to f_data */
+  void * f_data;
+
 } DUNE_FUNC;
 
 
@@ -222,9 +229,8 @@ struct dune_dat
 
 /* setup hmesh with given data */
 extern void *setupHmesh(
-  void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
   const int noe, const int nov, const int maxlev,
-  DUNE_FDATA * fe, DUNE_DAT * dune);
+  DUNE_DAT * dune, void * levelData );
 /* delete given hmesh pointer */
 extern void deleteHmesh( void * hmesh );
 
@@ -235,8 +241,8 @@ extern DUNE_FDATA * extractData (void *hmesh , int num );
 
 /* setup TimeScene Tree  */
 extern void timeSceneInit(INFO *info, int n_info, int procs , int time_bar);
-extern void addDataToHmesh(void  *hmesh, DUNE_FDATA * fe,
-                           void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *, double *)  );
+extern void addDataToHmesh(void  *hmesh, DUNE_FUNC * dfunc);
+
 extern void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc);
 
 extern void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc);

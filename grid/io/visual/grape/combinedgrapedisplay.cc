@@ -20,6 +20,7 @@ namespace Dune
   inline CombinedGrapeDisplay<DisplayType>::
   ~CombinedGrapeDisplay()
   {
+    assert(false);
     for(unsigned int i=0 ; i<vecFdata_.size(); i++)
     {
       DUNE_FDATA * fd = vecFdata_[i];
@@ -285,6 +286,7 @@ namespace Dune
   template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::addDisplay(DisplayType & disp)
   {
+    assert(false);
     dispList_.push_back( &disp );
     if(!hmesh_) hmesh_ = setupHmesh();
     if(disp.hasData())
@@ -370,7 +372,7 @@ namespace Dune
     this->setIterationMethods(dune,0);
 
     /* return hmesh with no data */
-    return GrapeInterface<dim,dimworld>::setupHmesh(NULL,noe,nov,maxlevel,NULL,dune);
+    return GrapeInterface<dim,dimworld>::setupHmesh(noe,nov,maxlevel,dune);
   }
 
 } // end namespace Dune
