@@ -262,6 +262,13 @@ namespace Dune {
       return set_.geomTypes(codim);
     }
 
+    //! returns true if this set provides an index for given entity
+    template<class EntityType>
+    bool contains (const EntityType& en) const
+    {
+      return set_.contains(en);
+    }
+
     //! return index
     template <int codim, class EntityType>
     int index (const EntityType & en, int num) const
