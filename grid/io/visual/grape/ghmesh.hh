@@ -18,7 +18,7 @@ typedef struct dune_elem
 
   // default constructor
   dune_elem()
-    : type(-1)
+    : type(127)
       , eindex(-1)
       , level(-1)
       , level_of_interest(-1)

@@ -8,11 +8,6 @@
 #include "ghmesh.hh"
 #include "geldesc.hh"
 
-/*
-   extern "C" {
-   extern MESH2D * mesh2d_isoline_disp();
-   }
- */
 /*****************************************************************************
 * Globale defines                  *                     **
 *****************************************************************************/
@@ -77,37 +72,6 @@ int switchMethods( GENMESHnD *actHmesh);
 **                      **
 ******************************************************************************
 *****************************************************************************/
-inline static DUNE_ELEM * getNewDuneElem ()
-{
-  DUNE_ELEM * elem = (DUNE_ELEM *) malloc(sizeof(DUNE_ELEM));
-  assert(elem);
-
-  elem->type = gr_unknown;
-
-  for(int i=0 ; i<MAX_EL_FACE; i++) elem->bnd[i] = -1;
-  elem->eindex = -1;
-  elem->level = -1;
-  elem->level_of_interest = -1;;
-  elem->has_children = 0;;
-
-  elem->mesh = 0;
-
-  for(int i=0; i<MAX_EL_DOF; i++)
-  {
-    elem->vindex [i] = -i;
-    for(int j=0; j<3; j++)
-    {
-      elem->vpointer[i][j] = 0.0;
-    }
-  }
-  elem->display = 0;
-  elem->liter = 0;
-  elem->hiter = 0;
-  elem->actElement = 0;
-  elem->gridPart = 0;
-  return elem;
-}
-
 inline static HELEMENT *get_stackentry()
 {
   STACKENTRY *stel;
@@ -120,9 +84,8 @@ inline static HELEMENT *get_stackentry()
   }
   else
   {
-    //stel = (STACKENTRY *)malloc(sizeof(STACKENTRY));
     stel = new STACKENTRY ();
-    elem = getNewDuneElem ();
+    elem = new DUNE_ELEM ();
     assert( elem );
     ((HELEMENT *)stel)->user_data = (void *)elem;
   }
@@ -492,11 +455,6 @@ inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
   assert( df->all );
   DUNE_FDATA *fem = df->all;
 
-  /*
-     if((!fem->allLevels) && levelButton->on_off == OFF)
-     printf("Warning: data only on leaf level! \n");
-   */
-
   assert(fem != NULL);
   assert(fem->discFunc != NULL);
 
@@ -506,6 +464,8 @@ inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
   }
   else
   {
+    // if polynomial order zero, then only evaluate for ind = 0
+    if((fem->polyOrd == 0) && (ind > 0)) return;
     fem->evalDof(elem,fem,ind,val);
   }
 
