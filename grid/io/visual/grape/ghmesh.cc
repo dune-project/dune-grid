@@ -578,29 +578,31 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
 }
 
 /***************************************************************************/
-/* function info for level display */
-/* the variables are only needed once, therefore static */
-static char * level_name = "level";
-static DUNE_FUNC level_func = {level_name,NULL,NULL};
-
 
 /* generates the function to display the level of an element */
 inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh, F_DATA *f_data )
 {
-  //F_DATA *f_data = NULL;
+  assert( grape_mesh );
 
-  if (!grape_mesh)
+  /* function info for level display */
+  /* the variables are only needed once, therefore static */
+
+  static DUNE_FUNC level_func;
+  static bool initialized = false;
+
+  if(!initialized)
   {
-    fprintf(stderr,"ERROR: no grape_mesh in grapeInitScalarData! file = %s, line = %d \n",__FILE__,__LINE__);
-    exit(1);
-    return;
+    level_func.nameValue = "level";
+    level_func.name = level_func.nameValue.c_str();
+    initialized = true;
   }
+
 
   if (f_data)
   {
     assert( f_data != NULL );
 
-    f_data->name = level_name;
+    f_data->name = (char *) level_func.name;
     f_data->dimension_of_value = 1;
     f_data->continuous_data    = 0;
 

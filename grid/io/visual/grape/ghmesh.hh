@@ -151,6 +151,14 @@ typedef struct dune_fdata
  *     **********************************************************************/
 typedef struct dune_func
 {
+  /* default constructor */
+  dune_func()
+    : nameValue()
+      , name(0)
+      , func_real(0)
+      , all(0)
+      , f_data(0) {}
+
   /* string holding mem for name */
   std::string nameValue;
 
