@@ -10,6 +10,7 @@
 //  namespace Dune
 //
 //************************************************************************
+#include "datahandle.hh"
 namespace Dune
 {
 
@@ -4291,13 +4292,32 @@ namespace Dune
   template < int dim, int dimworld >
   template <class DofManagerType, class RestrictProlongOperatorType>
   inline bool AlbertaGrid < dim, dimworld >::
-  adapt(DofManagerType &, RestrictProlongOperatorType &, bool verbose)
+  adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
   {
-    bool refined = false;
-    wasChanged_ = false;
+    typedef typename SelectEntityImp<0,dim,const MyType>::EntityImp EntityImp;
 
-    std::cerr << "Method adapt 2 not implemented! in: " << __FILE__ << " line: " << __LINE__ << "\n";
-    DUNE_THROW(AlbertaError,"Method not implemented \n");
+    EntityObject father(EntityImp(*this,maxLevel(),true));
+    EntityObject son(EntityImp(*this,maxLevel(),true));
+
+    typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
+    typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
+    COType tmprpop ( dm.indexSetRPop() , data );
+
+    // reserve memory
+    dm.reserveMemory( 10000 );
+
+    ALBERTA AlbertHelp::AdaptRestrictProlongHandler < MyType , COType >
+    handler ( *this,
+              father, this->getRealImplementation(father) ,
+              son   , this->getRealImplementation(son) ,
+              tmprpop );
+
+    ALBERTA AlbertHelp::MeshCallBack::setPointers(mesh_,handler);
+
+    bool refined = this->adapt();
+
+    ALBERTA AlbertHelp::MeshCallBack::reset();
+    dm.dofCompress();
     return refined;
   }
 

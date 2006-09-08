@@ -412,6 +412,30 @@ inline static U_CHAR AlbertCoarsen ( MESH * mesh )
 namespace AlbertHelp
 {
 
+  template <int mydim, int cdim>
+  inline void makeEmptyElInfo(EL_INFO * elInfo)
+  {
+    elInfo->mesh = 0;
+    elInfo->el = 0;
+    elInfo->parent = 0;
+    elInfo->macro_el = 0;
+    elInfo->level = 0;
+#if DIM > 2
+    elInfo->orientation = 0;
+    elInfo->el_type = 0;
+#endif
+
+    for(int i =0; i<mydim+1; i++)
+    {
+      for(int j =0; j< cdim; j++)
+      {
+        elInfo->coord[i][j] = 0.0;
+        elInfo->opp_coord[i][j] = 0.0;
+      }
+      elInfo->bound[i] = 0;
+    }
+  }
+
   static EL_INFO * getFatherInfo(TRAVERSE_STACK * stack, EL_INFO * elInfo, int level)
   {
     //assert( level == elInfo->level );
@@ -731,10 +755,75 @@ namespace AlbertHelp
 #endif
   }
 
+  struct MeshCallBack
+  {
+    typedef void callBackPointer_t (void * , EL * );
+
+    template <class HandlerImp>
+    struct Refinement
+    {
+      static void apply(void * handler, EL * el)
+      {
+        assert( handler );
+        ((HandlerImp *) handler)->postRefinement(el);
+      }
+    };
+
+    template <class HandlerImp>
+    struct Coarsening
+    {
+      static void apply(void * handler, EL * el)
+      {
+        assert( handler );
+        ((HandlerImp *) handler)->preCoarsening(el);
+      }
+    };
+
+    static callBackPointer_t * postRefinementPtr;
+    static callBackPointer_t * preCoarseningPtr;
+    static MESH * lockMeshPtr;
+    static void * dataHandler;
+
+    template <class HandlerImp>
+    static void setPointers(MESH * mesh, HandlerImp & handler)
+    {
+      lockMeshPtr = mesh; // set mesh pointer for checking
+      dataHandler = (void *) &handler; // set pointer of data handler
+
+      postRefinementPtr = & Refinement<HandlerImp>::apply;
+      preCoarseningPtr  = & Coarsening<HandlerImp>::apply;
+    }
+
+    static void reset()
+    {
+      postRefinementPtr = 0;
+      preCoarseningPtr  = 0;
+      lockMeshPtr    = 0;
+      dataHandler    = 0;
+    }
+
+    static void postRefinement(EL * el)
+    {
+      assert( postRefinementPtr );
+      postRefinementPtr(dataHandler,el);
+    }
+    static void preCoarsening(EL * el)
+    {
+      assert( preCoarseningPtr );
+      preCoarseningPtr(dataHandler,el);
+    }
+  };
+
+  MeshCallBack::callBackPointer_t * MeshCallBack::postRefinementPtr = 0;
+  MeshCallBack::callBackPointer_t * MeshCallBack::preCoarseningPtr  = 0;
+  MESH * MeshCallBack::lockMeshPtr = 0;
+  void * MeshCallBack::dataHandler = 0;
+
+
 #ifndef CALC_COORD
   // set entry for new elements to 1
   template <int dim>
-  inline static void refineCoords ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
+  inline static void refineCoordsAndRefineCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
   {
     const int nv = drv->fe_space->admin->n0_dof[VERTEX];
     REAL_D* vec = 0;
@@ -761,6 +850,35 @@ namespace AlbertHelp
     // as real_refine_inter
     for(int j=0; j<dim; ++j)
       newCoord[j] = 0.5*(oldCoordZero[j] + oldCoordOne[j]);
+
+    if(MeshCallBack::dataHandler)
+    {
+      // make sure that mesh is the same as in MeshCallBack
+      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr );
+      for(int i=0; i<ref; ++i)
+      {
+        EL * elem = list[i].el;
+
+        //std::cout << "call refine for element " << elem << "\n";
+        MeshCallBack::postRefinement(elem);
+      }
+    }
+  }
+
+  inline static void
+  coarseCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
+  {
+    if(MeshCallBack::dataHandler)
+    {
+      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr );
+      assert(ref > 0);
+      for(int i=0; i<ref; ++i)
+      {
+        EL * el = list[i].el;
+        //std::cout << "call coarse for element " << el << "\n";
+        MeshCallBack::preCoarsening(el);
+      }
+    }
   }
 #endif
 
@@ -795,17 +913,13 @@ namespace AlbertHelp
     }
   }
 
-  // put element index to stack, if element is coarsend
-  inline static void coarseElNewCheck ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
-  {}
-
-
   // set entry for new elements to 1
-  inline static void refineElOwner ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
+  inline static void refineElOwner( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
   {
     const DOF_ADMIN * admin = drv->fe_space->admin;
     const int nv = admin->n0_dof[CENTER];
     const int k  = admin->mesh->node[CENTER];
+
     int *vec = 0;
     int val = -1;
 
@@ -813,19 +927,16 @@ namespace AlbertHelp
 
     assert(ref > 0);
 
-    for(int i=0; i<ref; i++)
+    for(int i=0; i<ref; ++i)
     {
       const EL * el = list[i].el;
 
-      //std::cout << "refine ElOwner for el = " << el << "\n";
       val = vec[el->dof[k][nv]];
-      //printf("refine owner %d \n",val);
       // in case of ghosts
-      for(int ch=0; ch<2; ch++)
+      for(int ch=0; ch<2; ++ch)
       {
         // set processor
         vec[el->child[ch]->dof[k][nv]] = val;
-        //printf("child %d \n",vec[el->child[ch]->dof[k][nv]]);
       }
     }
   }
@@ -970,6 +1081,10 @@ namespace AlbertHelp
     edof[dim] = 1;
 
     {
+      // !! NOTE:
+      // the order in which the refine routines are called is jsut turned
+      // arround, which mean that actual the coordinates are refined at last
+      // and therefore the element call back is done in this function
 #ifndef CALC_COORD
       const FE_SPACE * vSpace =
 #endif
@@ -977,43 +1092,41 @@ namespace AlbertHelp
 
 #ifndef CALC_COORD
       coordVec = get_dof_real_d_vec("coordinates",vSpace);
-      coordVec->refine_interpol = &refineCoords<dim>;
-      coordVec->coarse_restrict = 0; // coords don't need to be coarsened
+      coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dim>;
+      coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
 #endif
     }
 
     //**********************************************************************
     // all the element vectors
     //**********************************************************************
-    {
-      // space for center dofs , i.e. element numbers
-      const FE_SPACE * eSpace = get_fe_space(mesh, "center_dofs", edof, 0);
+    // space for center dofs , i.e. element numbers
+    const FE_SPACE * elemSpace = get_fe_space(mesh, "center_dofs", edof, 0);
 
-      // the first entry is called at last for refinement and coarsening
-      // the methods for the adaptation call back are put to elNewCheck
-      // refine and coarsening procedures
-      elNewCheck = get_dof_int_vec("el_new_check",eSpace);
-      elNewCheck->refine_interpol = &refineElNewCheck;
-      elNewCheck->coarse_restrict = &coarseElNewCheck;
+    // the first entry is called at last for refinement and coarsening
+    // the methods for the adaptation call back are put to elNewCheck
+    // refine and coarsening procedures
+    elNewCheck = get_dof_int_vec("el_new_check",elemSpace);
+    elNewCheck->refine_interpol = &refineElNewCheck;
+    elNewCheck->coarse_restrict = 0;
 
-      elOwner = get_dof_int_vec("el_owner",eSpace);
-      elOwner->refine_interpol = &refineElOwner;
-      elOwner->coarse_restrict = 0;
+    // the element numbers, ie. codim = 0
+    elNumbers[0] = get_dof_int_vec("element_numbers",elemSpace);
+    elNumbers[0]->refine_interpol = &RefineNumbering<dim,0>::refineNumbers;
+    elNumbers[0]->coarse_restrict = &RefineNumbering<dim,0>::coarseNumbers;
 
-      // the element numbers, ie. codim = 0
-      elNumbers[0] = get_dof_int_vec("element_numbers",eSpace);
-      elNumbers[0]->refine_interpol = &RefineNumbering<dim,0>::refineNumbers;
-      elNumbers[0]->coarse_restrict = &RefineNumbering<dim,0>::coarseNumbers;
-    }
+    elOwner = get_dof_int_vec("el_owner",elemSpace);
+    elOwner->refine_interpol = &refineElOwner;
+    elOwner->coarse_restrict = 0; //&coarseCallBack;
 
     //**********************************************************************
 
     {
       // the face number space , i.e. codim == 1
-      const FE_SPACE * eSpace = get_fe_space(mesh, "face_dofs", fdof, 0);
+      const FE_SPACE * fSpace = get_fe_space(mesh, "face_dofs", fdof, 0);
 
       // the face numbers, i.e. codim = 1
-      elNumbers[1] = get_dof_int_vec("face_numbers",eSpace);
+      elNumbers[1] = get_dof_int_vec("face_numbers",fSpace);
       elNumbers[1]->refine_interpol = &RefineNumbering<dim,1>::refineNumbers;
       elNumbers[1]->coarse_restrict = &RefineNumbering<dim,1>::coarseNumbers;
     }

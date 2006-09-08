@@ -1563,7 +1563,7 @@ namespace Dune
     int size (GeometryType type) const;
 
   private:
-    CollectiveCommunication<AlbertaGrid> ccobj;
+    CollectiveCommunication<AlbertaGrid> ccobj_;
 
   public:
     //***************************************************************
@@ -1602,7 +1602,7 @@ namespace Dune
     /** dummy collective communication */
     const CollectiveCommunication<AlbertaGrid>& comm () const
     {
-      return ccobj;
+      return ccobj_;
     }
 
     /** \brief return name of the grid */
@@ -1846,10 +1846,10 @@ namespace Dune
     const int nv_;
     const int dof_;
 
+  public:
     // make some shortcuts
     void arrangeDofVec();
 
-  public:
     // return true if el is new
     bool checkElNew ( const ALBERTA EL * el ) const;
 
