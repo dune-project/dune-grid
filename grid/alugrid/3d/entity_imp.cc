@@ -713,10 +713,15 @@ namespace Dune {
     for(int i=0; i<numFaces; ++i)
     {
       const GEOFaceType & face = *getFace(*item_,i);
-      const HasFaceType * outerElement = (item_->twist(i) < 0) ?
-                                         (face.nb.front().first) : (face.nb.rear().first);
+      // check both
+      const HasFaceType * outerElement = face.nb.front().first;
+      // if we got our own element, get other side
+      if( item_ == outerElement )
+      {
+        outerElement = face.nb.rear().first;
+      }
+
       assert( outerElement );
-      // if one boundary found, return true
       if( outerElement->isboundary() ) return true;
     }
     return false;
