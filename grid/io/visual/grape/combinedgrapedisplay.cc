@@ -20,17 +20,18 @@ namespace Dune
   inline CombinedGrapeDisplay<DisplayType>::
   ~CombinedGrapeDisplay()
   {
-    for(size_t i=0 ; i<vecFdata_.size(); i++)
-    {
-      if( vecFdata_[i] ) DisplayType::deleteDuneFunc(vecFdata_[i]);
-      vecFdata_[i] = 0;
-    }
-
-    DisplayType::deleteStackEntry(stackEntry_);
     if( hmesh_ )
     {
       GrapeInterface<dim,dimworld>::deleteHmesh(hmesh_);
     }
+    /*
+       for(size_t i=0 ;i<vecFdata_.size(); i++)
+       {
+       if( vecFdata_[i] ) DisplayType::deleteDuneFunc(vecFdata_[i]);
+       vecFdata_[i] = 0;
+       }
+     */
+    DisplayType::deleteStackEntry(stackEntry_);
   }
 
 
@@ -45,14 +46,17 @@ namespace Dune
   {
     grditer_ = dispList_.begin();
     enditer_ = dispList_.end();
+
     disp_ = 0;
 
     if(grditer_ != enditer_)
     {
       disp_ = *grditer_;
       GrapeInterface<dim,dimworld>::setThread( disp_->myRank() );
-      std::cout << "call first macro of " << disp_ << "\n";
-      return disp_->firstMacro(he);
+      he->display = (void *) disp_;
+      int ret = disp_->firstMacro(he);
+      he->display = (void *) this;
+      return ret;
     }
     return 0;
   }
@@ -64,6 +68,7 @@ namespace Dune
     int ret = 0;
     if( disp_ )
     {
+      he->display = (void *) disp_;
       ret = disp_->nextMacro(he);
       if(!ret)
       {
@@ -73,9 +78,11 @@ namespace Dune
         {
           disp_ = *grditer_;
           GrapeInterface<dim,dimworld>::setThread( disp_->myRank() );
-          return disp_->firstMacro(he);
+          he->display = (void *) disp_;
+          ret = disp_->firstMacro(he);
         }
       }
+      he->display = (void *)this;
     }
     return ret;
   }
@@ -85,7 +92,12 @@ namespace Dune
   first_child(DUNE_ELEM * he)
   {
     if(disp_)
-      return disp_->firstChild(he);
+    {
+      he->display = (void *) disp_;
+      int ret = disp_->firstChild(he);
+      he->display = (void *)this;
+      return ret;
+    }
     else
       return 0;
   }
@@ -96,7 +108,12 @@ namespace Dune
   next_child(DUNE_ELEM * he)
   {
     if( disp_ )
-      return disp_->nextChild(he);
+    {
+      he->display = (void *) disp_;
+      int ret = disp_->nextChild(he);
+      he->display = (void *)this;
+      return ret;
+    }
     else
       return 0;
   }
@@ -186,7 +203,7 @@ namespace Dune
   fst_child (DUNE_ELEM * he)
   {
     MyDisplayType * disp = (MyDisplayType *) he->display;
-    return disp[0].first_child(he);
+    return disp->first_child(he);
   }
 
 
@@ -195,7 +212,7 @@ namespace Dune
   nxt_child (DUNE_ELEM * he)
   {
     MyDisplayType * disp = (MyDisplayType *) he->display;
-    return disp[0].next_child(he);
+    return disp->next_child(he);
   }
 
   template<class DisplayType>
@@ -203,7 +220,7 @@ namespace Dune
   setIterationModus(DUNE_DAT * dat, DUNE_FDATA * func)
   {
     MyDisplayType * disp = (MyDisplayType *) dat->all->display;
-    disp[0].setIterationMethods(dat,func);
+    disp->setIterationMethods(dat,func);
   }
 
   template<class DisplayType>
@@ -211,9 +228,21 @@ namespace Dune
   setIterationMethods(DUNE_DAT * dat, DUNE_FDATA * func)
   {
     enditer_ = dispList_.end();
+    const int iteratorType = dat->iteratorType;
+    const int partitionIteratorType = dat->partitionIteratorType;
+
     for(grditer_ = dispList_.begin(); grditer_ != enditer_; ++grditer_)
     {
-      (*grditer_)->setIterationMethods(dat,func);
+      DisplayType & disp = * (*grditer_);
+
+      DUNE_FDATA * data = 0;
+      if(func)
+      {
+        std::vector < DUNE_FDATA * > & vec = disp.getFdataVec();
+        data = vec[func->mynum];
+      }
+
+      disp.changeIterationMethods(iteratorType,partitionIteratorType,data);
     }
   }
 

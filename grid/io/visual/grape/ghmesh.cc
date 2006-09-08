@@ -856,6 +856,10 @@ inline void handleMesh(void *hmesh, bool gridMode )
   grape_add_remove_methods();
 
   GRAPE(mgr,"handle") (sc);  // grape display call
+
+  sc->object = 0;
+  GRAPE(sc,"delete") ();
+  GRAPE(mgr,"delete") ();
   return ;
 }
 

@@ -117,6 +117,8 @@ namespace Dune
     //! return pointer to Grape Hmesh
     inline void * getHmesh();
 
+    DUNE_DAT & getDuneDat () { return dune_; }
+
     inline void addMyMeshToTimeScene(void * timescene, double time, int proc);
 
     //! return reference to Dune Grid
@@ -272,6 +274,8 @@ namespace Dune
     inline void selectIterators(DUNE_DAT *, DUNE_FDATA *) const;
 
     inline void setIterationMethods(DUNE_DAT *, DUNE_FDATA *) const;
+
+    inline void changeIterationMethods(int iterType, int partType, DUNE_FDATA *);
 
     template <PartitionIteratorType pitype>
     struct IterationMethods

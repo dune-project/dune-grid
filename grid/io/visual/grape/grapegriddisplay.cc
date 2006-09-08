@@ -736,6 +736,17 @@ namespace Dune
     }
   }
 
+  // setIterationsMethods
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::
+  changeIterationMethods(int iterType, int partType, DUNE_FDATA * func )
+  {
+    dune_.iteratorType = iterType;
+    dune_.partitionIteratorType = partType;
+    setIterationMethods(&dune_,func);
+  }
+
+
   // check inside
   template<class GridType>
   inline int GrapeGridDisplay<GridType>::
