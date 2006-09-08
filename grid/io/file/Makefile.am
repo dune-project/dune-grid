@@ -14,6 +14,6 @@ endif
 endif
 
 libfileio_la_SOURCES =
-libfileio_la_LIBADD = $(AMIRALIB) -lcommon
+libfileio_la_LIBADD = $(AMIRALIB) $(DUNE_COMMON_LIBS)
 
 include $(top_srcdir)/am/global-rules

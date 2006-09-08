@@ -20,7 +20,8 @@ endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(COMMONLIB) -lcommon
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(COMMONLIB) \
+  $(DUNE_COMMON_LIBS)
 
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid
