@@ -231,6 +231,7 @@ namespace Dune
   evalCoordNow(EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
   {
     assert( false );
+    abort();
   }
 
   //****************************************************************
@@ -254,8 +255,9 @@ namespace Dune
   template <class GridType>
   inline GrapeDataDisplay<GridType>::~GrapeDataDisplay()
   {
-    typedef typename GridType::Traits::template Codim<0>::LevelIterator LevIter;
-    for(unsigned int i=0 ; i<vecFdata_.size(); i++)
+    GrapeInterface<dim,dimworld>::deleteFunctions(this->hmesh_);
+
+    for(size_t i=0 ; i<vecFdata_.size(); i++)
     {
       if( vecFdata_[i] ) deleteDuneFunc(vecFdata_[i]);
       vecFdata_[i] = 0;
@@ -264,39 +266,47 @@ namespace Dune
 
   template<class GridType>
   inline void GrapeDataDisplay<GridType>::
-  deleteDuneFunc(DUNE_FUNC * dfunc) const
+  deleteDuneFunc(DUNE_FDATA * fd)
   {
-    DUNE_FDATA * fd = dfunc->all;
     if( fd )
     {
       int * comps = fd->comp;
       if( comps ) delete [] comps;
-      delete fd;
-      dfunc->all = 0;
-    }
 
-    F_DATA * f_data = (F_DATA *) dfunc->f_data;
-    if( f_data )
-    {
-      delete f_data;
-      dfunc->f_data = 0;
+      F_DATA * f_data = (F_DATA *) fd->f_data;
+      if( f_data )
+      {
+        char * name = f_data->name;
+        if(name)
+        {
+          std::string tmp(name);
+          // use free here, because mem has be allocated with malloc
+          // when name has been overwritten, dont free memory
+          if(tmp == fd->name)
+          {
+            std::free(name);
+            f_data->name = 0;
+          }
+        }
+
+        delete f_data;
+        fd->f_data = 0;
+      }
+      delete fd;
     }
-    delete dfunc;
   }
 
   template<class GridType>
-  inline typename GrapeDataDisplay<GridType>::DUNE_FUNC * GrapeDataDisplay<GridType>::
-  createDuneFunc() const
+  inline typename GrapeDataDisplay<GridType>::DUNE_FDATA * GrapeDataDisplay<GridType>::
+  createDuneFunc()
   {
-    DUNE_FUNC * dfunc = new DUNE_FUNC ();
-    dfunc->func_real = &func_real;
-    dfunc->name = 0;
-
+    DUNE_FDATA * func = new DUNE_FDATA();
+    assert (func );
     F_DATA * f_data = new F_DATA ();
-    dfunc->f_data = (void *) f_data;
+    f_data->name = 0;
 
-    dfunc->all = new DUNE_FDATA();
-    return dfunc;
+    func->f_data = (void *) f_data;
+    return func;
   }
 
 
@@ -305,22 +315,6 @@ namespace Dune
   // --GrapeDataDisplay, Some Subroutines needed in display
   //
   //****************************************************************
-
-  template<class GridType>
-  inline void GrapeDataDisplay<GridType>::
-  func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind, const double *coord, double *val )
-  {
-    if(coord)
-    {
-      fe->evalCoord(he,fe,coord,val);
-    }
-    else
-    {
-      fe->evalDof(he,fe,ind,val);
-    }
-    return;
-  }
-
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
@@ -332,6 +326,21 @@ namespace Dune
     /* display mesh */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
     return ;
+  }
+
+  template<class GridType>
+  template<class DiscFuncType>
+  inline void GrapeDataDisplay<GridType>::
+  addData(DiscFuncType &func, double time)
+  {
+    typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
+    enum { dimR = FunctionSpaceType::DimRange };
+    int comp[dimR];
+    for(int i=0; i<dimR; ++i) comp[i] = i;
+    std::string name = func.name();
+    // name, base_name, next, dimVal, comp
+    DATAINFO dinf = { name.c_str() , name.c_str() , 0 , dimR , (int *) &comp };
+    addData(func,&dinf,time);
   }
 
   template<class GridType>
@@ -354,7 +363,7 @@ namespace Dune
     typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
-    const char * name = dinf->name;
+    std::string name(dinf->name);
     assert( dinf->dimVal > 0);
     bool vector = (dinf->dimVal > 1) ? true : false;
 
@@ -373,7 +382,7 @@ namespace Dune
         vecFdata_[n] = createDuneFunc();
         // set data components
         {
-          DUNE_FDATA * data = vecFdata_[n]->all;
+          DUNE_FDATA * data = vecFdata_[n];
           assert( data );
 
           // set the rigth evaluation functions
@@ -384,7 +393,7 @@ namespace Dune
             EvalDiscreteFunctions<GridType,DiscFuncType>::evalCoord;
 
           data->mynum = n;
-          data->name = name;
+
           data->allLevels = 0;
 
           data->discFunc = (void *) &func;
@@ -406,6 +415,16 @@ namespace Dune
             comp[0] = n-size;
             data->compName = n-size;
           }
+
+          if(data->compName >= 0)
+          {
+            std::stringstream str;
+            str << name << "[" << data->compName << "]";
+            data->name = str.str();
+          }
+          else
+            data->name = name;
+
           data->dimVal   = dimVal;
           data->dimRange = FunctionSpaceType::DimRange;
 
@@ -516,7 +535,8 @@ namespace Dune
             EvalVectorData<GridType,VectorType,IndexSetType>::evalCoord;
 
           data->mynum = n;
-          data->name = name;
+          data->nameValue = name;
+          data->name = data->nameValue.c_str();
           data->allLevels = 0;
 
           data->discFunc = (void *) &func;
@@ -548,6 +568,8 @@ namespace Dune
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
     }
+
+    getFdataVec();
   }
 
   template<class GridType>

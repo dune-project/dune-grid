@@ -20,17 +20,16 @@ namespace Dune
   inline CombinedGrapeDisplay<DisplayType>::
   ~CombinedGrapeDisplay()
   {
-    assert(false);
-    for(unsigned int i=0 ; i<vecFdata_.size(); i++)
+    for(size_t i=0 ; i<vecFdata_.size(); i++)
     {
-      DUNE_FDATA * fd = vecFdata_[i];
-      if( fd )
-      {
-        int * comps = fd->comp;
-        if( comps ) delete [] comps;
-        delete fd;
-        vecFdata_[i] = 0;
-      }
+      if( vecFdata_[i] ) DisplayType::deleteDuneFunc(vecFdata_[i]);
+      vecFdata_[i] = 0;
+    }
+
+    DisplayType::deleteStackEntry(stackEntry_);
+    if( hmesh_ )
+    {
+      GrapeInterface<dim,dimworld>::deleteHmesh(hmesh_);
     }
   }
 
@@ -52,6 +51,7 @@ namespace Dune
     {
       disp_ = *grditer_;
       GrapeInterface<dim,dimworld>::setThread( disp_->myRank() );
+      std::cout << "call first macro of " << disp_ << "\n";
       return disp_->firstMacro(he);
     }
     return 0;
@@ -200,21 +200,39 @@ namespace Dune
 
   template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::
-  setIterationModus(DUNE_DAT * dat)
+  setIterationModus(DUNE_DAT * dat, DUNE_FDATA * func)
   {
     MyDisplayType * disp = (MyDisplayType *) dat->all->display;
-    disp[0].setIterationMethods(dat);
+    disp[0].setIterationMethods(dat,func);
   }
 
   template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::
-  setIterationMethods(DUNE_DAT * dat)
+  setIterationMethods(DUNE_DAT * dat, DUNE_FDATA * func)
   {
     enditer_ = dispList_.end();
     for(grditer_ = dispList_.begin(); grditer_ != enditer_; ++grditer_)
     {
-      (*grditer_)->setIterationMethods(dat);
+      (*grditer_)->setIterationMethods(dat,func);
     }
+  }
+
+  template<class DisplayType>
+  inline void * CombinedGrapeDisplay<DisplayType>::
+  getStackEn(DUNE_DAT * dat)
+  {
+    MyDisplayType * disp = (MyDisplayType *) dat->all->display;
+    assert( disp );
+    return DisplayType::getStackEntry(disp->stackEntry_);
+  }
+
+  template<class DisplayType>
+  inline void CombinedGrapeDisplay<DisplayType>::
+  freeStackEn(DUNE_DAT * dat, void * entry)
+  {
+    MyDisplayType * disp = (MyDisplayType *) dat->all->display;
+    assert( disp );
+    DisplayType::freeStackEntry(disp->stackEntry_,entry);
   }
 
   template<class DisplayType>
@@ -238,7 +256,8 @@ namespace Dune
   {
     assert( disp_ );
     std::vector < DUNE_FDATA * > & vec = disp_->getFdataVec();
-    vec[df->mynum]->evalCoord(he,vec[df->mynum],coord,val);
+    DUNE_FDATA * data = vec[df->mynum];
+    data->evalCoord(he,data,coord,val);
     return ;
   }
 
@@ -248,7 +267,8 @@ namespace Dune
   {
     assert( disp_ );
     std::vector < DUNE_FDATA * > & vec = disp_->getFdataVec();
-    vec[df->mynum]->evalDof(he,vec[df->mynum],localNum,val);
+    DUNE_FDATA * data = vec[df->mynum];
+    data->evalDof(he,data,localNum,val);
     return ;
   }
 
@@ -273,22 +293,11 @@ namespace Dune
   }
 
   template<class DisplayType>
-  inline void CombinedGrapeDisplay<DisplayType>::
-  func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind, const double *coord, double *val )
-  {
-    //MyDisplayType * disp = (MyDisplayType *) he->display;
-    // this methtod is to be removed
-    assert(false);
-    abort();
-    return;
-  }
-
-  template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::addDisplay(DisplayType & disp)
   {
-    assert(false);
     dispList_.push_back( &disp );
     if(!hmesh_) hmesh_ = setupHmesh();
+
     if(disp.hasData())
     {
       // get functions data vector of given display
@@ -298,24 +307,38 @@ namespace Dune
       // all functions should be the same on every partition
       if(vec.size() > vecFdata_.size())
       {
+        assert( vecFdata_.size() == 0 );
+        // mem leak
+        vecFdata_.clear();
         vecFdata_.resize( vec.size() );
 
-        for(unsigned int n = 0; n < vecFdata_.size(); n++)
+        for(size_t n = 0; n < vecFdata_.size(); n++)
         {
-          vecFdata_[n] = new DUNE_FDATA () ;
+          assert( n < vec.size());
+
+          vecFdata_[n] = DisplayType::createDuneFunc();
           assert( vecFdata_[n] );
 
+          // save pointer
+          void * f_data = vecFdata_[n]->f_data;
+
+          // copy, note that comp and f_data pointer are overwritten
+          // we have to reset them
           std::memcpy(vecFdata_[n],vec[n],sizeof(DUNE_FDATA));
 
+          DUNE_FDATA * data = vecFdata_[n];
+          // set f_data pointer to our allocated value
+          data->f_data = f_data;
+
           // we only need the two new functions for evaluation
-          vecFdata_[n]->evalCoord = this->evalCoordWrap;
-          vecFdata_[n]->evalDof = this->evalDofWrap;
+          data->evalCoord = this->evalCoordWrap;
+          data->evalDof = this->evalDofWrap;
 
           // not needed here
-          vecFdata_[n]->comp = 0;
+          data->comp = 0;
 
           // add function data to hmesh
-          GrapeInterface<dim,dimworld>::addDataToHmesh(hmesh_,vecFdata_[n],&func_real);
+          GrapeInterface<dim,dimworld>::addDataToHmesh(hmesh_,vecFdata_[n]);
         }
       }
     }
@@ -362,6 +385,9 @@ namespace Dune
 
     // set method to select iterators
     dune->setIterationModus = &setIterationModus;
+
+    dune->get_stackentry  = &getStackEn;
+    dune->free_stackentry = &freeStackEn;
 
     dune->all          = &hel_;
     dune->partition    = __MaxPartition-1;

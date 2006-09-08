@@ -51,8 +51,9 @@ namespace Dune
     // defined in griddisplay.hh
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
-    typedef typename GrapeInterface<dim,dimworld>::DUNE_FUNC DUNE_FUNC;
+    typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
     typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
+    typedef typename GrapeInterface<dim,dimworld>::STACKENTRY STACKENTRY;
 
   public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
@@ -61,6 +62,7 @@ namespace Dune
     typedef typename GridType::Traits::LocalIdSet LocalIdSetType;
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
+    typedef typename std::stack < STACKENTRY * > StackEntryType;
   protected:
     //! the grid we want to display
     const GridType &grid_;
@@ -81,9 +83,6 @@ namespace Dune
     DUNE_ELEM hel_;
     DUNE_DAT dune_;
 
-    //! grape data for level function
-    F_DATA levelData_;
-
     // no better way than this canot export HMESH structure to here
     //! pointer to hmesh
     void * hmesh_;
@@ -91,6 +90,8 @@ namespace Dune
     typedef std::list<HierarchicIteratorType *> HierarchicIteratorList;
     typedef typename HierarchicIteratorList::iterator ListIteratorType;
     HierarchicIteratorList hierList_;
+
+    StackEntryType stackEntry_;
 
   private:
     //! copy Constructor
@@ -268,9 +269,9 @@ namespace Dune
     inline void local_to_world(EntityType &en, const double * c, double * w);
 
     template <PartitionIteratorType pitype>
-    inline void selectIterators(DUNE_DAT * dat, DUNE_FUNC * func) const;
+    inline void selectIterators(DUNE_DAT *, DUNE_FDATA *) const;
 
-    inline void setIterationMethods(DUNE_DAT * dat, DUNE_FUNC *) const;
+    inline void setIterationMethods(DUNE_DAT *, DUNE_FDATA *) const;
 
     template <PartitionIteratorType pitype>
     struct IterationMethods
@@ -342,7 +343,21 @@ namespace Dune
 
     };
 
-    inline static void setIterationModus(DUNE_DAT * , DUNE_FUNC *);
+    inline static void setIterationModus(DUNE_DAT * , DUNE_FDATA *);
+
+    // create STACKENTRY or get from stack
+    inline static void * getStackEntry(StackEntryType & stackEntry);
+
+    // push STACKENTRY to stack
+    inline static void freeStackEntry(StackEntryType & stackEntry, void * entry);
+
+    // get StackEntry Wrapper
+    inline static void * getStackEn(DUNE_DAT * dune);
+
+    // free StackEntry Wrapper
+    inline static void freeStackEn(DUNE_DAT * dune, void * entry);
+
+    inline static void deleteStackEntry(StackEntryType &);
 
   }; // end class GrapeGridDisplay
 

@@ -85,7 +85,7 @@ typedef struct dune_fdata
   // default constructor
   dune_fdata()
     : mynum (-1)
-      , name(0)
+      , name()
       , evalCoord(0)
       , evalDof(0)
       , discFunc(0)
@@ -98,12 +98,14 @@ typedef struct dune_fdata
       , continuous(0)
       , compName(0)
       , gridPart(0)
-      , setGridPartIterators(0) {}
+      , setGridPartIterators(0)
+      , f_data (0) {}
 
   /* my number in the data vector */
   int mynum;
 
-  const char * name;
+  /* name of data */
+  std::string name;
 
   // functions to evaluate
   evalCoord_t * evalCoord;
@@ -142,42 +144,12 @@ typedef struct dune_fdata
   void * gridPart;
 
   void (*setGridPartIterators)(DUNE_DAT * , void * gridPart);
-};
-
-/**********************************************************************
- *  * storage of the dune data ( discrete functions )
- *   *
- *    * normaly stored as function_data in the F_DATA pointer
- *     **********************************************************************/
-typedef struct dune_func
-{
-  /* default constructor */
-  dune_func()
-    : nameValue()
-      , name(0)
-      , func_real(0)
-      , all(0)
-      , f_data(0) {}
-
-  /* string holding mem for name */
-  std::string nameValue;
-
-  /* name */
-  const char * name;
-  /* the function to evaluate */
-  void (* func_real)(DUNE_ELEM *he, DUNE_FDATA *fe, int ind,
-                     double G_CONST *coord, double *val);
-  /* struct storing the pointer to the disrete function */
-  DUNE_FDATA * all;
 
   /* pointer to f_data */
   void * f_data;
+};
 
-} DUNE_FUNC;
-
-
-
-
+/* dune_dat */
 struct dune_dat
 {
   // default constructor
@@ -196,8 +168,9 @@ struct dune_dat
       , iteratorType(-1) // g_LeafIterator
       , partitionIteratorType(-1)
       , gridPart(0)
-      , all (0) {}
-
+      , all (0)
+      , get_stackentry(0)
+      , free_stackentry(0) {}
 
   /* the actual first and next macro for Iteration  */
   int (* first_macro)(DUNE_ELEM *) ;
@@ -216,8 +189,9 @@ struct dune_dat
   int (* wtoc)(DUNE_ELEM *, const double *, double * ) ;
   void (* ctow)(DUNE_ELEM *, const double *, double * ) ;
 
+
   /* selects the iterators, like leaf iterator .. */
-  void (* setIterationModus)(DUNE_DAT *, DUNE_FUNC *);
+  void (* setIterationModus)(DUNE_DAT *, DUNE_FDATA *);
 
   /* to which processor partition the element belongs */
   int partition;
@@ -232,15 +206,21 @@ struct dune_dat
   void * gridPart;
 
   DUNE_ELEM * all;
+
+  /* get HELEMENT */
+  void * (*get_stackentry)(DUNE_DAT * );
+  /* free HELEMENT */
+  void (*free_stackentry)(DUNE_DAT * , void *);
 };
 
 
 /* setup hmesh with given data */
-extern void *setupHmesh(
-  const int noe, const int nov, const int maxlev,
-  DUNE_DAT * dune, void * levelData );
+extern void *setupHmesh(const int noe, const int nov,
+                        const int maxlev, DUNE_DAT * dune);
+
 /* delete given hmesh pointer */
 extern void deleteHmesh( void * hmesh );
+extern void deleteFunctions( void * hmesh );
 
 extern void displayTimeScene(INFO * info);
 extern void handleMesh (void *hmesh, bool gridMode );
@@ -249,7 +229,7 @@ extern DUNE_FDATA * extractData (void *hmesh , int num );
 
 /* setup TimeScene Tree  */
 extern void timeSceneInit(INFO *info, int n_info, int procs , int time_bar);
-extern void addDataToHmesh(void  *hmesh, DUNE_FUNC * dfunc);
+extern void addDataToHmesh(void  *hmesh, DUNE_FDATA * data);
 
 extern void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc);
 

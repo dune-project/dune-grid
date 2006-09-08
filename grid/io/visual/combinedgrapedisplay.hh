@@ -37,6 +37,8 @@ namespace Dune
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
+    typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
+    typedef typename GrapeInterface<dim,dimworld>::STACKENTRY STACKENTRY;
 
   protected:
     typedef typename std::list< DisplayType * > DisplayListType;
@@ -58,7 +60,6 @@ namespace Dune
     DUNE_DAT dune_;
 
   public:
-
     // no better way than this canot export HMESH structure to here
     //! pointer to hmesh
     void *hmesh_;
@@ -86,9 +87,11 @@ namespace Dune
     // generate hmesh
     inline void * setupHmesh();
 
+    typedef typename DisplayType :: StackEntryType StackEntryType;
+    StackEntryType stackEntry_;
+
   protected:
     std::vector < DUNE_FDATA * > vecFdata_;
-
     //****************************************************************
     //
     // --GrapeGridDisplay, Some Subroutines needed for display with GRAPE
@@ -156,13 +159,15 @@ namespace Dune
     inline static void func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind,
                                   const double *coord, double *val);
 
-    inline void setIterationMethods(DUNE_DAT * dat);
-    static inline void setIterationModus(DUNE_DAT * dat);
+    inline void setIterationMethods(DUNE_DAT *, DUNE_FDATA *);
+    static inline void setIterationModus(DUNE_DAT *, DUNE_FDATA *);
+
+    static void * getStackEn(DUNE_DAT *);
+    static void freeStackEn(DUNE_DAT *, void *);
 
   }; // end class GrapeGridDisplay
 
 } // end namespace Dune
-
 
 #include "grape/combinedgrapedisplay.cc"
 #endif

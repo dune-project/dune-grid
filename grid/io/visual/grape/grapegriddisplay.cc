@@ -21,9 +21,6 @@ namespace Dune
       , entityIndex(GrapeGridDisplay<GridType>::template getEntityIndex<LeafIndexSetType>)
       , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>)
   {
-    levelData_.next = 0;
-    levelData_.last = 0;
-
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
   }
@@ -52,8 +49,25 @@ namespace Dune
   ~GrapeGridDisplay()
   {
     dune_.delete_iter(&hel_);
-    //deleteHmesh();
+    ThisType::deleteStackEntry(stackEntry_);
+    deleteHmesh();
   }
+
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::
+  deleteStackEntry(StackEntryType & stackEntry)
+  {
+    while( !stackEntry.empty() )
+    {
+      STACKENTRY * entry = stackEntry.top();
+      stackEntry.pop();
+
+      DUNE_ELEM * elem = (DUNE_ELEM *) entry->hel.user_data;
+      delete elem;
+      delete entry;
+    }
+  }
+
 
   //****************************************************************
   //
@@ -623,7 +637,7 @@ namespace Dune
   template<class GridType>
   template<PartitionIteratorType pitype>
   inline void GrapeGridDisplay<GridType>::
-  selectIterators(DUNE_DAT * dune, DUNE_FUNC * func) const
+  selectIterators(DUNE_DAT * dune, DUNE_FDATA * func) const
   {
     if(dune->iteratorType == g_LeafIterator)
     {
@@ -664,11 +678,7 @@ namespace Dune
 
     if(dune->iteratorType == g_GridPart)
     {
-      bool validFunction = (func) ? (func->all) ? true : false : false;
-      if(validFunction)
-      {
-        validFunction = (func->all->setGridPartIterators) ? true : false;
-      }
+      bool validFunction = (func) ? (func->setGridPartIterators) ? true : false : false;
 
       if(!validFunction)
       {
@@ -685,11 +695,10 @@ namespace Dune
       }
 
       assert( func );
-      assert( func->all );
-      assert( func->all->setGridPartIterators );
+      assert( func->setGridPartIterators );
 
       // set first and next methods due to grid part
-      func->all->setGridPartIterators(dune,func->all->gridPart);
+      func->setGridPartIterators(dune,func->gridPart);
 
       return ;
     }
@@ -703,7 +712,7 @@ namespace Dune
   // setIterationsMethods
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  setIterationMethods(DUNE_DAT * dune, DUNE_FUNC * func ) const
+  setIterationMethods(DUNE_DAT * dune, DUNE_FDATA * func ) const
   {
     if(dune->delete_iter) dune->delete_iter(dune->all);
 
@@ -756,7 +765,7 @@ namespace Dune
 
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  setIterationModus(DUNE_DAT * dat, DUNE_FUNC * func)
+  setIterationModus(DUNE_DAT * dat, DUNE_FDATA * func)
   {
     MyDisplayType * disp = (MyDisplayType *) dat->all->display;
     disp[0].setIterationMethods(dat,func);
@@ -811,6 +820,9 @@ namespace Dune
     // set method to select iterators
     dune->setIterationModus = &setIterationModus;
 
+    dune->get_stackentry = &getStackEn;
+    dune->free_stackentry = &freeStackEn;
+
     dune->all          = &hel_;
     dune->partition    = myRank_;
 
@@ -820,7 +832,8 @@ namespace Dune
     setIterationMethods(dune,0);
 
     /* return hmesh with no data */
-    return GrapeInterface<dim,dimworld>::setupHmesh(noe,nov,maxlevel,dune,&levelData_);
+    return GrapeInterface<dim,dimworld>::
+           setupHmesh(noe,nov,maxlevel,dune);
   }
 
   template<class GridType>
@@ -830,6 +843,53 @@ namespace Dune
     {
       GrapeInterface<dim,dimworld>::deleteHmesh(hmesh_);
     }
+  }
+
+
+  template<class GridType>
+  inline void * GrapeGridDisplay<GridType>::
+  getStackEntry(StackEntryType & stackEntry)
+  {
+    STACKENTRY * entry = 0;
+
+    if( stackEntry.empty() )
+    {
+      entry = new STACKENTRY ();
+      DUNE_ELEM * elem = new DUNE_ELEM ();
+      assert( elem );
+      entry->hel.user_data = (void *)elem;
+    }
+    else
+    {
+      entry = stackEntry.top();
+      stackEntry.pop();
+    }
+    assert( entry );
+    return( (void *) entry);
+  }
+
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::
+  freeStackEntry(StackEntryType & stackEntry, void * entry)
+  {
+    assert( entry );
+    stackEntry.push( ((STACKENTRY *) entry) );
+  }
+
+  template<class GridType>
+  inline void * GrapeGridDisplay<GridType>::
+  getStackEn(DUNE_DAT * dune)
+  {
+    MyDisplayType * disp = (MyDisplayType *) dune->all->display;
+    return MyDisplayType::getStackEntry(disp->stackEntry_);
+  }
+
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::
+  freeStackEn(DUNE_DAT * dune, void * entry)
+  {
+    MyDisplayType * disp = (MyDisplayType *) dune->all->display;
+    MyDisplayType::freeStackEntry(disp->stackEntry_,entry);
   }
 
 } // end namespace Dune

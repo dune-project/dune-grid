@@ -28,21 +28,18 @@ GENMESHnD *genmesh3d_partition_disp();
 /*****************************************************************************
 * Verwendete Strukturen                *                     **
 *****************************************************************************/
-
-/***************************/
 typedef struct stackentry
 {
-  stackentry () : hel(), next(0), ref_flag(0), hmax(-1.0) {}
-
   HELEMENT hel;
 
-  struct stackentry *next;
   int ref_flag ;
 
   double hmax;
 
+  // default constructor
+  stackentry () : hel()
+                  , ref_flag(0), hmax(-1.0) {}
 } STACKENTRY;
-
 
 /* definition of dune_dat in g_eldesc.h */
 /* stored as user_data in the mesh pointer */
@@ -51,7 +48,7 @@ typedef struct stackentry
 * Statische Variablen                *                     **
 *****************************************************************************/
 
-static STACKENTRY * stackfree = NULL;
+//static STACKENTRY * stackfree = NULL;
 
 /**************************************************************************
 *
@@ -72,41 +69,21 @@ int switchMethods( GENMESHnD *actHmesh);
 **                      **
 ******************************************************************************
 *****************************************************************************/
-inline static HELEMENT *get_stackentry()
-{
-  STACKENTRY *stel;
-  DUNE_ELEM * elem = 0;
-
-  if ( stackfree)
-  {
-    stel = stackfree;
-    stackfree = stackfree->next;
-  }
-  else
-  {
-    stel = new STACKENTRY ();
-    elem = new DUNE_ELEM ();
-    assert( elem );
-    ((HELEMENT *)stel)->user_data = (void *)elem;
-  }
-  return( (HELEMENT *)stel);
-}
-
-
-inline static void free_stackentry(HELEMENT *stel)
-{
-  ((STACKENTRY *)stel)->next = stackfree ;
-  stackfree = (STACKENTRY*)stel;
-}
-
-
 inline static void gFreeElement(ELEMENT *el)
 {
   if(el)
   {
-    free_stackentry((HELEMENT *)el);
+    DUNE_DAT * dat = (DUNE_DAT *) el->mesh->user_data;
+    assert(dat);
+    dat->free_stackentry(dat,(void *)el);
   }
   return ;
+}
+
+/* complete element does nothing at the moment */
+inline static ELEMENT * complete_element(ELEMENT *el, MESH_ELEMENT_FLAGS flags)
+{
+  return el;
 }
 
 /*****************************************************************************
@@ -161,15 +138,15 @@ inline static void helementUpdate( DUNE_ELEM *elem, HELEMENT *grapeEl )
 
 inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
 {
-  HELEMENT * el = get_stackentry();
-  DUNE_ELEM * elem = (DUNE_ELEM *) el->user_data;
-
   assert(mesh);
-  assert(el);
-  assert(elem);
-
   DUNE_DAT * dat = (DUNE_DAT *) mesh->user_data;
   assert( dat );
+
+  HELEMENT * el = (HELEMENT *) dat->get_stackentry(dat);
+  DUNE_ELEM * elem = (DUNE_ELEM *) el->user_data;
+
+  assert(el);
+  assert(elem);
 
   // set iterator type depending on value of button
   GRAPE(iteratorButton,      "get-value") (&(dat->iteratorType));
@@ -179,8 +156,8 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
                       ("scalar","scalar","vector","default", NULL);
 
   assert( dat->setIterationModus );
-  DUNE_FUNC * func = 0;
-  if(f_data) func = (DUNE_FUNC *) f_data->function_data;
+  DUNE_FDATA * func = 0;
+  if(f_data) func = (DUNE_FDATA *) f_data->function_data;
   dat->setIterationModus(dat,func);
 
   // note this pointer can be NULL
@@ -258,7 +235,7 @@ inline static HELEMENT * first_child (HELEMENT * ael, MESH_ELEMENT_FLAGS flag)
   {
     if ( actlevel < ((HMESH *)ael->mesh)->level_of_interest )
     {
-      HELEMENT * el = get_stackentry();
+      HELEMENT * el = (HELEMENT *) dat->get_stackentry(dat);
       assert(el);
 
       DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
@@ -412,26 +389,33 @@ inline double grape_get_element_estimate(HELEMENT *el, void *function_data)
 }
 
 /***************************************************************************/
-inline void dune_function_info(HELEMENT *el, F_EL_INFO *f_el_info,
-                               void *function_data)
+inline static void dune_function_info(HELEMENT *el, F_EL_INFO *f_el_info,
+                                      void *function_data)
 {
   assert( function_data );
 
-  DUNE_FUNC * df = (DUNE_FUNC *) function_data;
+  DUNE_FDATA * df = (DUNE_FDATA *) function_data;
   assert( df );
 
   // at the moment f_el_info only contains polynomial_degree
-  f_el_info->polynomial_degree = ((DUNE_FDATA *) df->all)->polyOrd;
+  f_el_info->polynomial_degree = df->polyOrd;
+  return;
+}
+
+inline static void level_function_info(HELEMENT *el, F_EL_INFO *f_el_info,
+                                       void *function_data)
+{
+  // the level function has polynomial order 0
+  f_el_info->polynomial_degree = 0;
   return;
 }
 
 /***************************************************************************/
 
-/* print DUNE_FUNC STRUCT */
-inline void printfFdata(DUNE_FUNC *df)
+/* print DUNE_FDATA STRUCT */
+inline void printfFdata(DUNE_FDATA *fem)
 {
-  DUNE_FDATA *fem = df->all;
-  printf("Dune Func %p | Dune Fdata %p \n",df,fem);
+  printf("Dune Fdata %p \n",fem);
   printf("comp %d      | DiscFunc   %p \n",fem->comp[0],fem->discFunc);
   printf("-------------------------------------------\n");
 }
@@ -468,7 +452,7 @@ static inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
   assert(el);
   DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
   assert(elem != NULL);
-  DUNE_FDATA *fem = ((DUNE_FUNC *) function_data)->all;
+  DUNE_FDATA *fem = (DUNE_FDATA *) function_data;
 
   assert(fem != NULL);
   assert(fem->discFunc != NULL);
@@ -484,7 +468,7 @@ static inline void f_real_polOrd_zero(HELEMENT *el, int ind, double G_CONST *coo
   assert(el);
   DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
   assert(elem != NULL);
-  DUNE_FDATA *fem = ((DUNE_FUNC *) function_data)->all;
+  DUNE_FDATA *fem = (DUNE_FDATA *) function_data;
 
   assert(fem != NULL);
   assert(fem->discFunc != NULL);
@@ -506,7 +490,7 @@ inline void f_level(HELEMENT *el, int ind, double G_CONST *coord,
 }
 
 /***************************************************************************/
-inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
+inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FDATA * dfunc)
 {
   assert( grape_mesh );
 
@@ -515,34 +499,19 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
     F_DATA * f_data = (F_DATA *) dfunc->f_data;
     if (f_data)
     {
-      f_data->next = NULL;
-      f_data->last = NULL;
+      f_data->next = 0;
+      f_data->last = 0;
 
-      {
-        /* little hack to cover a grape bug */
-        int compName = ((DUNE_FDATA *) dfunc->all)->compName;
-        const char * vecName  = ((DUNE_FDATA *) dfunc->all)->name;
+      int length = 2*strlen(dfunc->name.c_str());
+      f_data->name = (char *) malloc(length*sizeof(char));
+      sprintf(f_data->name,"%s",dfunc->name.c_str());
+      printf("generate data for discrete function '%s'!\n",f_data->name);
 
-        std::string funcName(vecName);
-        if(compName >= 0)
-        {
-          char tmp[16];
-          sprintf(tmp," [%d]",compName);
-          funcName += tmp;
-        }
+      f_data->dimension_of_value = dfunc->dimVal;
 
-        dfunc->nameValue = funcName;
-        dfunc->name = dfunc->nameValue.c_str();
-        f_data->name = (char *) dfunc->name;
-      }
+      f_data->continuous_data = dfunc->continuous;
 
-      printf("generate data for discrete function '%s'!\n",dfunc->name);
-
-      f_data->dimension_of_value = dfunc->all->dimVal;
-
-      f_data->continuous_data = dfunc->all->continuous;
-
-      f_data->f                   = (dfunc->all->polyOrd == 0) ? f_real_polOrd_zero : f_real;
+      f_data->f                   = (dfunc->polyOrd == 0) ? f_real_polOrd_zero : f_real;
       f_data->f_el_info           = dune_function_info;
 
       f_data->function_data = (void *) dfunc;
@@ -580,36 +549,32 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FUNC * dfunc)
 /***************************************************************************/
 
 /* generates the function to display the level of an element */
-inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh, F_DATA *f_data )
+inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
 {
   assert( grape_mesh );
 
   /* function info for level display */
   /* the variables are only needed once, therefore static */
 
-  static DUNE_FUNC level_func;
-  static bool initialized = false;
+  static std::string level_name("level");
+  static F_DATA levelData;
 
-  if(!initialized)
+  static F_DATA * f_data = 0;
+
+  if (!f_data)
   {
-    level_func.nameValue = "level";
-    level_func.name = level_func.nameValue.c_str();
-    initialized = true;
-  }
+    f_data = &levelData;
+    assert( f_data );
 
-
-  if (f_data)
-  {
-    assert( f_data != NULL );
-
-    f_data->name = (char *) level_func.name;
+    f_data->name = (char *) level_name.c_str();
     f_data->dimension_of_value = 1;
     f_data->continuous_data    = 0;
 
     f_data->f                   = f_level;
-    f_data->f_el_info           = dune_function_info;
+    f_data->f_el_info           = &level_function_info;
 
-    f_data->function_data = (void *) &level_func;
+    // no function data here
+    f_data->function_data = 0;
 
     f_data->get_bounds      = f_bounds;
     f_data->get_vertex_estimate   = grape_get_vertex_estimate;
@@ -623,18 +588,32 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh, F_DATA *f_data )
 #endif
     f_data->hp_threshold    = 0.0;
     f_data->hp_maxlevel     = grape_mesh->max_level;
-
-    grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
-  }
-  else if (grape_mesh->f_data != (GENMESH_FDATA *)f_data)
-  {
-    printf("select f_data for \n");
-    grape_mesh->f_data = (GENMESH_FDATA *)f_data;
   }
 
+  assert( f_data );
+  grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
   return;
 }
 
+/* add data to Hmesh  */
+inline void addDataToHmesh(void  *hmesh, DUNE_FDATA * data)
+{
+  GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
+  assert(mesh);
+
+  if(data)
+  {
+    assert( data->f_data );
+    assert( data->discFunc );
+
+    /* setup dune data */
+    grapeInitScalarData (mesh, data );
+  }
+  else
+  {
+    fprintf(stderr,"ERROR: no function data for setup in addDataToHmesh! \n");
+  }
+}
 
 /*****************************************************************************
 ******************************************************************************
@@ -646,16 +625,17 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh, F_DATA *f_data )
 
 inline static ELEMENT * copy_element(ELEMENT *el, MESH_ELEMENT_FLAGS flag)
 {
-  HELEMENT * cel = get_stackentry();
-
-  DUNE_ELEM * hexa_elem, * chexa_elem ;
+  DUNE_DAT * dat = (DUNE_DAT *) el->mesh->user_data;
+  HELEMENT * cel = (HELEMENT *) dat->get_stackentry(dat);
 
   assert(el) ;
   assert(cel) ;
 
-  hexa_elem  = (DUNE_ELEM *)el->user_data;
-  chexa_elem = (DUNE_ELEM *)
-               (*((struct dune_dat *)el->mesh->user_data)->copy)(hexa_elem) ;
+  DUNE_ELEM * hexa_elem = 0, * chexa_elem = 0;
+
+  hexa_elem  = (DUNE_ELEM *) el->user_data;
+  chexa_elem = (DUNE_ELEM *) dat->copy(hexa_elem) ;
+
   assert(chexa_elem) ;
   cel->mesh              = el->mesh ;
   cel->vertex            = (double G_CONST*G_CONST*)chexa_elem->vpointer;
@@ -708,9 +688,10 @@ inline HMESH * get_partition_number (int * partition)
 ******************************************************************************
 *****************************************************************************/
 inline void * setupHmesh(const int noe, const int nov,
-                         const int maxlev, DUNE_DAT * dune, void * levelData )
+                         const int maxlev, DUNE_DAT * dune)
 {
   GRAPEMESH * mesh = (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance") ("Dune Mesh");
+
   assert(mesh != NULL);
 
   mesh->first_macro = first_macro ;
@@ -723,6 +704,7 @@ inline void * setupHmesh(const int noe, const int nov,
 
   mesh->copy_element  = copy_element ;
   mesh->free_element  = gFreeElement ;
+  mesh->complete_element = complete_element;
 
   mesh->max_number_of_vertices = MAX_EL_DOF ;
   mesh->max_eindex = noe ;
@@ -739,17 +721,17 @@ inline void * setupHmesh(const int noe, const int nov,
 
   mesh->get_geometry_vertex_estimate  = get_geometry_vertex_estimate;
   mesh->get_geometry_element_estimate = get_geometry_element_estimate;
-  mesh->get_lens_element_estimate = NULL;
+  mesh->get_lens_element_estimate = 0;
+
   mesh->threshold              = 1.0;
 
   mesh->user_data = (void *) dune;
 
-  mesh->set_time = NULL;
-  mesh->get_time = NULL;
-  mesh->f_data   = NULL;
+  mesh->set_time = 0;
+  mesh->get_time = 0;
+  mesh->f_data   = 0;
 
-  assert( levelData );
-  grapeAddLevelFunction(mesh,(F_DATA *) levelData);
+  grapeAddLevelFunction(mesh);
 
   /* fill the reference elements */
   setupReferenceElements();
@@ -762,7 +744,34 @@ inline void deleteHmesh( void * hmesh )
 {
   assert( hmesh );
   GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
-  GRAPE(mesh,"free") ();
+  //assert( mesh->f_data == 0 );
+  mesh->f_data = 0;
+  mesh->user_data = 0;
+  GRAPE(mesh,"delete") ();
+}
+
+// delete Hmesh , not really working yet
+inline void deleteFunctions( void * hmesh )
+{
+  assert( hmesh );
+  GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
+
+  /*
+     GENMESH_FDATA * f_data = mesh->f_data;
+     while( f_data )
+     {
+     char * name = f_data->name;
+     if(name)
+     {
+      std::cout << "Got " << name << " func \n";
+      mesh = (GRAPEMESH *) GRAPE(mesh,"remove-function")(name);
+     }
+     f_data = mesh->f_data;
+     }
+   */
+
+  mesh->f_data = 0;
+  mesh->user_data = 0;
 }
 
 static inline void addProjectUIF()
@@ -850,28 +859,6 @@ inline void handleMesh(void *hmesh, bool gridMode )
   return ;
 }
 
-/* setup TimeScene Tree  */
-inline void addDataToHmesh(void  *hmesh, DUNE_FUNC * dfunc)
-{
-  GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
-  assert(mesh != NULL);
-
-  if(dfunc)
-  {
-    assert( dfunc->all );
-    assert( dfunc->func_real );
-    assert( dfunc->all->discFunc );
-
-    /* setup dune data */
-    grapeInitScalarData (mesh, dfunc );
-  }
-  else
-  {
-    fprintf(stderr,"ERROR: no function data for setup in addDataToHmesh! \n");
-    mesh->f_data = NULL;
-  }
-}
-
 /*
  * setup TimeScene Tree  */
 inline void addHmeshToTimeScene(void * timescene, double time, void  *hmesh, int proc)
@@ -933,8 +920,8 @@ inline DUNE_FDATA * extractData ( void * hmesh , int num )
 
   if( next_data )
   {
-    DUNE_FDATA * df = ((DUNE_FUNC *) next_data->function_data)->all;
-    printf("df->name %s \n",df->name);
+    DUNE_FDATA * df = (DUNE_FDATA *) next_data->function_data;
+    std::cout << "df->name = " << df->name << std::endl;
     return df;
   }
 
@@ -1027,13 +1014,13 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
     GENMESH_FDATA * sf = self->f_data;
     while(sf != NULL)
     {
-      const char * sfname = ((DUNE_FUNC *) sf->function_data)->name;
+      const char * sfname = sf->name;
       GENMESH_FDATA * nf = newMesh->f_data;
       int length = strlen(sfname);
       while( (nf != NULL) )
       {
         /* compare the real function name, ha, not with me */
-        const char * nfname = ((DUNE_FUNC *) nf->function_data)->name;
+        const char * nfname = nf->name;
         if( strncmp(sfname,nfname,length) == 0 )
         {
           sf->function_data = nf->function_data;

@@ -158,7 +158,6 @@ namespace Dune
 
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
-    typedef typename GrapeInterface<dim,dimworld>::DUNE_FUNC DUNE_FUNC;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
     typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
 
@@ -196,6 +195,10 @@ namespace Dune
 
     //! add discrete function to display
     template <class DiscFuncType>
+    inline void addData(DiscFuncType &func, double time = 0.0);
+
+    //! add discrete function to display
+    template <class DiscFuncType>
     inline void addData(DiscFuncType &func, const DATAINFO * , double time );
 
     //! add discrete function to display
@@ -203,10 +206,10 @@ namespace Dune
     inline void addData(DiscFuncType &func, std::string name , double time , bool vector = false );
 
     // retrun whether we have data or not
-    bool hasData () { return vecFdata_.size() > 0; }
+    bool hasData () { return (vecFdata_.size() > 0); }
 
     // return vector for copying in combined display
-    std::vector < DUNE_FUNC * > & getFdataVec () { return vecFdata_; }
+    std::vector < DUNE_FDATA * > & getFdataVec () { return vecFdata_; }
 
     //! set min and max value for colorbar
     void setMinMaxValue(const double minValue, const double maxValue) const;
@@ -242,7 +245,7 @@ namespace Dune
                           const int polOrd , const int dimRange, bool continuous );
 
     //! hold the diffrent datas on this mesh
-    std::vector < DUNE_FUNC * > vecFdata_;
+    std::vector < DUNE_FDATA * > vecFdata_;
 
     enum { polynomialOrder = 1 };
     // store lagrange points for evaluation
@@ -253,9 +256,6 @@ namespace Dune
     typedef void evalDof_t (EntityCodim0Type &,int , DUNE_FDATA * , int , double * );
 
   protected:
-    inline static void func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind,
-                                  const double *coord, double *val);
-
     template <class GridPartType>
     struct IterationMethodsGP
     {
@@ -299,11 +299,11 @@ namespace Dune
       }
     };
 
-    // create object DUNE_FUNC
-    DUNE_FUNC * createDuneFunc () const;
-    // delete object DUNE_FUNC
-    void deleteDuneFunc (DUNE_FUNC *) const;
-
+  public:
+    // create object DUNE_FDATA
+    static DUNE_FDATA * createDuneFunc ();
+    // delete object DUNE_FDATA
+    static void deleteDuneFunc (DUNE_FDATA *);
   };
 
   template <typename ctype, int dim, int dimworld, int polOrd>
