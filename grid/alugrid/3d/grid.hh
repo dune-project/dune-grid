@@ -709,9 +709,6 @@ namespace Dune {
     typedef SingleTypeSizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
-    // actual number of ghost elements
-    int ghostElements_;
-
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
     typedef ALU3dGridIntersectionIterator<const ThisType>

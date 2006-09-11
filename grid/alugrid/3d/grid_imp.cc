@@ -183,7 +183,6 @@ namespace Dune {
       , globalIdSet_(0), localIdSet_(*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
       , sizeCache_ (0)
-      , ghostElements_(0)
   {
     makeGeomTypes();
 
