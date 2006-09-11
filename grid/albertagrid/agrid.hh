@@ -64,7 +64,7 @@
 // 10000 is the size of the finite stack used by IndexStack
 typedef Dune::IndexStack<int,10000> IndexManagerType;
 
-//#define CALC_COORD
+#define CALC_COORD
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 

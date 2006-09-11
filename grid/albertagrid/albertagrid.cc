@@ -4325,7 +4325,7 @@ namespace Dune
     int newElementChunk_ = std::max( defaultElChunk , (refineMarked_ * 4) );
 
     // reserve memory
-    dm.reserveMemory( 10000 );
+    dm.reserveMemory( newElementChunk_ );
 
     ALBERTA AlbertHelp::AdaptRestrictProlongHandler < MyType , COType >
     handler ( *this,
