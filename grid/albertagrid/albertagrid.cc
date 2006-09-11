@@ -3459,7 +3459,6 @@ namespace Dune
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid() :
     mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , isMarked_ (false)
     , vertexMarkerLeaf_(false) // creates LeafMarkerVector
     , nv_ (dim+1) , dof_ (0) , myRank_ (0)
     , hIndexSet_(*this)
@@ -3468,6 +3467,9 @@ namespace Dune
     , leafIndexSet_ (0)
     , geomTypes_(dim+1,1)
     , sizeCache_ (0)
+    , coarsenMarked_(0)
+    , refineMarked_(0)
+    , lockPostAdapt_(false)
   {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
@@ -3494,7 +3496,6 @@ namespace Dune
     calcExtras();
 
     wasChanged_ = true;
-    isMarked_ = false;
 
     macroVertices_.resize( mesh_->n_vertices );
 
@@ -3506,7 +3507,6 @@ namespace Dune
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename) :
     mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , isMarked_ (false)
     , vertexMarkerLeaf_(false) // creates LeafMarkerVector
     , nv_ (dim+1) , dof_ (0) , myRank_ (-1)
     , hIndexSet_(*this)
@@ -3515,6 +3515,9 @@ namespace Dune
     , leafIndexSet_ (0)
     , geomTypes_(dim+1,1)
     , sizeCache_ (0)
+    , coarsenMarked_(0)
+    , refineMarked_(0)
+    , lockPostAdapt_(false)
   {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
@@ -3573,7 +3576,6 @@ namespace Dune
   inline AlbertaGrid < dim, dimworld >::
   AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
     mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , isMarked_ (false)
     , vertexMarkerLeaf_(false) // creates LeafMarkerVector
     , nv_ (dim+1) , dof_ (0), myRank_ (proc)
     , hIndexSet_(*this)
@@ -3582,6 +3584,9 @@ namespace Dune
     , leafIndexSet_ (0)
     , geomTypes_(dim+1,1)
     , sizeCache_ (0)
+    , coarsenMarked_(0)
+    , refineMarked_(0)
+    , lockPostAdapt_(false)
   {
     for(int i=dim; i>= 0; i--)
       geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
@@ -3890,19 +3895,25 @@ namespace Dune
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::preAdapt()
   {
-    return isMarked_;
+    return (coarsenMarked_ > 0);
   }
 
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::postAdapt()
   {
-    isMarked_ = false;
     assert( (leafIndexSet_) ? (mesh_->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
     assert( (leafIndexSet_) ? (mesh_->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
 #if DIM == 3
     //assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
     assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
 #endif
+    assert( lockPostAdapt_ );
+    // unlock post adapt
+    lockPostAdapt_ = false;
+
+    coarsenMarked_ = 0;
+    refineMarked_  = 0;
+
     return wasChanged_;
   }
 
@@ -4234,12 +4245,15 @@ namespace Dune
       if( refCount > 0)
       {
         elInfo->el->mark = refCount;
+        int factor = 2;
+        for(int i=0; i<refCount; ++i) factor *= 2;
+        refineMarked_ += factor;
         return true;
       }
       if( refCount < 0)
       {
-        this->setMark ( true );
         elInfo->el->mark = refCount;
+        ++coarsenMarked_;
         return true;
       }
     }
@@ -4256,6 +4270,10 @@ namespace Dune
     bool refined = false;
     wasChanged_ = false;
 
+    // if lockPostAdapt == true, the user forgot to call postAdapt
+    assert( ! lockPostAdapt_ );
+    lockPostAdapt_ = true;
+
     // set global pointer to index manager in elmem.cc
     ALBERTA AlbertHelp::initIndexManager_elmem_cc( indexStack_ );
 
@@ -4265,7 +4283,7 @@ namespace Dune
     flag = ALBERTA AlbertRefine ( mesh_ );
     refined = (flag == 0) ? false : true;
 
-    if(isMarked_) // true if a least on element is marked for coarseing
+    if(preAdapt()) // true if a least on element is marked for coarseing
       flag = ALBERTA AlbertCoarsen( mesh_ );
 
     if(!refined)
@@ -4278,7 +4296,6 @@ namespace Dune
     if(wasChanged_)
     {
       calcExtras();
-      isMarked_ = false;
     }
 
     ALBERTA AlbertHelp::setElOwnerNew(mesh_, dofvecs_.owner);
@@ -4294,6 +4311,7 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::
   adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
   {
+#ifndef CALC_COORD
     typedef typename SelectEntityImp<0,dim,const MyType>::EntityImp EntityImp;
 
     EntityObject father(EntityImp(*this,maxLevel(),true));
@@ -4302,6 +4320,9 @@ namespace Dune
     typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
     typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
     COType tmprpop ( dm.indexSetRPop() , data );
+
+    int defaultElChunk = defaultElementChunk_;
+    int newElementChunk_ = std::max( defaultElChunk , (refineMarked_ * 4) );
 
     // reserve memory
     dm.reserveMemory( 10000 );
@@ -4318,13 +4339,12 @@ namespace Dune
 
     ALBERTA AlbertHelp::MeshCallBack::reset();
     dm.dofCompress();
+    postAdapt();
     return refined;
-  }
-
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::setMark (bool isMarked) const
-  {
-    isMarked_ = isMarked;
+#else
+    derr << "AlbertaGrid::adapt(dm,rp) : CALC_COORD defined, therefore adapt with call back not defined! \n";
+    return false ;
+#endif
   }
 
   template < int dim, int dimworld >

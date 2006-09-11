@@ -64,7 +64,7 @@
 // 10000 is the size of the finite stack used by IndexStack
 typedef Dune::IndexStack<int,10000> IndexManagerType;
 
-#define CALC_COORD
+//#define CALC_COORD
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 
@@ -1409,6 +1409,9 @@ namespace Dune
     friend class AlbertaMarkerVector;
     friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
 
+    // minimum number of elements assumed to be created during adaption
+    enum { defaultElementChunk_ = 100 };
+
     //**********************************************************
     // The Interface Methods
     //**********************************************************
@@ -1747,13 +1750,6 @@ namespace Dune
     // true if grid was refined or coarsend
     bool wasChanged_;
 
-    // is true, if a least one entity is marked for coarsening
-    mutable bool isMarked_;
-
-    // set isMarked, isMarked is true if at least one entity is marked for
-    // coarsening
-    void setMark ( bool isMarked ) const;
-
     // help vector for setNewCoords
     mutable Array<int> macroVertices_;
 
@@ -1925,6 +1921,12 @@ namespace Dune
 
     typedef SingleTypeSizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
+
+    // count how much elements where marked
+    mutable int coarsenMarked_;
+    mutable int refineMarked_;
+
+    mutable bool lockPostAdapt_;
   }; // end class AlbertaGrid
 
 
