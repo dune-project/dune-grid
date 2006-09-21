@@ -210,6 +210,9 @@ namespace Dune {
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
 
+    friend class OneDGridFirstEntity<const OneDGrid<1,1>,0>;
+    friend class OneDGridFirstEntity<const OneDGrid<1,1>,1>;
+
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
 
