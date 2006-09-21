@@ -480,7 +480,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-#if 0  // to be implemented
     template<int dim,int dimw>
     struct hasLeafIterator< OneDGrid<dim,dimw> >
     {
@@ -490,9 +489,8 @@ namespace Dune {
     template<int dim,int dimw>
     struct isParallel< OneDGrid<dim,dimw> >
     {
-      static const bool v = true;
+      static const bool v = false;
     };
-#endif
 
     template<int dim, int dimw>
     struct isLevelwiseConforming< OneDGrid<dim,dimw> >
