@@ -84,7 +84,7 @@ namespace Dune {
 
   private:
     //! Copy constructor should not be used
-    ALUCubeGrid( const ALUCubeGrid & g ) : BaseType(g) {}
+    ALUCubeGrid( const ALUCubeGrid & g ) ; // : BaseType(g) {}
 
     //! assignment operator should not be used
     ALUCubeGrid<dim,dimworld>&
@@ -201,7 +201,7 @@ namespace Dune {
 
   private:
     //! Copy constructor should not be used
-    ALUSimplexGrid( const ALUSimplexGrid & g ) : BaseType(g) {}
+    ALUSimplexGrid( const ALUSimplexGrid & g ); //  : BaseType(g) {}
 
     //! assignment operator should not be used
     ALUSimplexGrid<dim,dimworld>&
@@ -265,7 +265,7 @@ namespace Dune {
   private:
 
     //! Copy constructor should not be used
-    ALUSimplexGrid( const ALUSimplexGrid & g ) : BaseType(g) {}
+    ALUSimplexGrid( const ALUSimplexGrid & g ) ; // : BaseType(g) {}
 
     //! assignment operator should not be used
     ALUSimplexGrid<dim,dimworld>&
