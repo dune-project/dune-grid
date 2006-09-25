@@ -83,7 +83,12 @@ namespace Dune {
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
   private:
-    ALUCubeGrid(const ALUCubeGrid & g) : BaseType(g) {}
+    //! Copy constructor should not be used
+    ALUCubeGrid( const ALUCubeGrid & g ) : BaseType(g) {}
+
+    //! assignment operator should not be used
+    ALUCubeGrid<dim,dimworld>&
+    operator = (const ALUCubeGrid& g);
   };
 
   namespace Capabilities {
@@ -195,7 +200,13 @@ namespace Dune {
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
   private:
-    ALUSimplexGrid(const ALUSimplexGrid & g) : BaseType(g) {}
+    //! Copy constructor should not be used
+    ALUSimplexGrid( const ALUSimplexGrid & g ) : BaseType(g) {}
+
+    //! assignment operator should not be used
+    ALUSimplexGrid<dim,dimworld>&
+    operator = (const ALUSimplexGrid& g);
+
   };
 
   /**
@@ -250,6 +261,15 @@ namespace Dune {
 
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
+  private:
+
+    //! Copy constructor should not be used
+    ALUSimplexGrid( const ALUSimplexGrid & g ) : BaseType(g) {}
+
+    //! assignment operator should not be used
+    ALUSimplexGrid<dim,dimworld>&
+    operator = (const ALUSimplexGrid& g);
   };
 
   namespace Capabilities {
