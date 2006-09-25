@@ -399,7 +399,7 @@ namespace Dune {
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
-  private:
+  protected:
     typedef ALUMemoryProvider< EntityObject > EntityProviderType;
 
     mutable EntityProviderType entityProvider_;
