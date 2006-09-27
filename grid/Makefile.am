@@ -14,14 +14,18 @@ if UG
 endif
 
 if ALUGRID
-# also contians items independent of ALUGrid
+# also contains items independent of ALUGrid
 ALULIB = alugrid/libalu.la
+endif
+
+if ALBERTA
+ALBERTALIB = albertagrid/libalberta.la
 endif
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(COMMONLIB) \
-  $(DUNE_COMMON_LIBS)
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(ALBERTALIB) \
+  $(COMMONLIB) $(DUNE_COMMON_LIBS)
 
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid

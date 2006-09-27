@@ -814,11 +814,12 @@ namespace AlbertHelp
     }
   };
 
-  MeshCallBack::callBackPointer_t * MeshCallBack::postRefinementPtr = 0;
-  MeshCallBack::callBackPointer_t * MeshCallBack::preCoarseningPtr  = 0;
-  MESH * MeshCallBack::lockMeshPtr = 0;
-  void * MeshCallBack::dataHandler = 0;
-
+  // the following definitions are shifted to the non-inline file
+  // albertaextra.cc for inclusion in libdunegrid
+  //MeshCallBack::callBackPointer_t * MeshCallBack::postRefinementPtr = 0;
+  //MeshCallBack::callBackPointer_t * MeshCallBack::preCoarseningPtr  = 0;
+  //MESH * MeshCallBack::lockMeshPtr = 0;
+  //void * MeshCallBack::dataHandler = 0;
 
 #ifndef CALC_COORD
   // set entry for new elements to 1
