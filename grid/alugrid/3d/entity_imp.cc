@@ -102,7 +102,6 @@ namespace Dune {
     face_   = face;
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    //partitionType_ = grid_.convertBndId( *item_ );
     partitionType_ = this->convertBndId( *item_ );
   }
 
@@ -116,7 +115,6 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    //partitionType_ = grid_.convertBndId( *item_ );
     partitionType_ = this->convertBndId( *item_ );
   }
 
@@ -131,7 +129,6 @@ namespace Dune {
     father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
-    //partitionType_ = grid_.convertBndId( *item_ );
     partitionType_ = this->convertBndId( *item_ );
   }
 
