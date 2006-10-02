@@ -632,7 +632,7 @@ namespace Dune {
 
     template <int codim>
     inline MakeableInterfaceObject<typename Traits::template Codim<codim>::Entity> *
-    getNewEntity ( int level ) const
+    getNewEntity ( int level = -1 ) const
     {
       return ALU3dGridEntityFactory<MyType,codim>::getNewEntity(*this,entityProvider_,level);
     }
