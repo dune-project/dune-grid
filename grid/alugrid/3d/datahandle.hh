@@ -613,8 +613,6 @@ namespace ALUGridSpace {
     //DofManagerType & dm_;
     RestrictProlongOperatorType & rp_;
 
-    int maxlevel_;
-
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
 
   public:
@@ -628,7 +626,6 @@ namespace ALUGridSpace {
         , realFather_(rf)
         , realSon_(rs)
         , rp_(rp)
-        , maxlevel_(-1)
     {}
 
     virtual ~AdaptRestrictProlongImpl ()
@@ -639,9 +636,7 @@ namespace ALUGridSpace {
     {
       // set element and then start
       HElementType * son = elem.down();
-      if(elem.level() > maxlevel_) maxlevel_ = elem.level();
 
-      //elem.resetRefinedTag();
       assert( son );
 
       realSon_.setElement(*son);
@@ -655,6 +650,9 @@ namespace ALUGridSpace {
         rp_.restrictLocal(reFather_,reSon_,false);
         son = son->next();
       }
+
+      // reset refinement marker
+      elem.resetRefinedTag();
       return 0;
     }
 
@@ -664,12 +662,12 @@ namespace ALUGridSpace {
       // set element and then start
       HElementType * son = elem.down();
       assert( son );
-      //elem.resetRefinedTag();
+
+      // reset refinement marker
+      elem.resetRefinedTag();
 
       realFather_.setElement(elem);
       realSon_.setElement(*son);
-      int level = realSon_.level();
-      if(level > maxlevel_) maxlevel_ = level;
 
       rp_.prolongLocal(reFather_,reSon_, false);
 
@@ -680,6 +678,9 @@ namespace ALUGridSpace {
 
         realSon_.setElement(*son);
         rp_.prolongLocal(reFather_,reSon_, false);
+
+        // reset refinement tag
+        son->resetRefinedTag();
 
         son = son->next();
       }
@@ -699,7 +700,6 @@ namespace ALUGridSpace {
     {
       return 0;
     }
-    int maxLevel () const { return maxlevel_; }
   };
 
   template <class GridType , class RestrictProlongOperatorType ,

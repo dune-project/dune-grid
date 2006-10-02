@@ -205,20 +205,6 @@ namespace Dune {
 
     postAdapt();
     calcExtras();
-
-    if(comm().rank() == 0)
-    {
-      const char * typeName = (elType == tetra) ? "tetra" : "hexa";
-      if (size(0)>0)
-      {
-        std::cout << "\nCreated ALU3dGrid<"<<dim<<","<<dimworld<<"," << typeName <<"> from macro grid file '"
-                  << macroTriangFilename << "'. \n\n";
-      }
-      else
-      {
-        std::cout << "\nCreated empty ALU3dGrid<"<<dim<<","<<dimworld<<","<<typeName<<"> \n\n";
-      }
-    }
   } // end Constructor
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -657,6 +643,9 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::adapt()
   {
     bool ref = false;
+
+    bool mightCoarse = preAdapt();
+
     // if prallel run, then adapt also global id set
     if(globalIdSet_)
     {
@@ -675,7 +664,7 @@ namespace Dune {
       ref = myGrid().adaptWithoutLoadBalancing();
     }
 
-    if(ref)
+    if(ref || mightCoarse )
     {
       // calcs maxlevel and other extras
       updateStatus();
@@ -709,7 +698,9 @@ namespace Dune {
     // reserve memory
     dm.reserveMemory( newElements );
 
-    bool ref = false ;
+    bool refined = false ;
+    bool mightCoarse = preAdapt();
+
     if(globalIdSet_)
     {
       // if global id set exists then include into
@@ -722,8 +713,7 @@ namespace Dune {
          tmprpop,
          *globalIdSet_);
 
-      ref = myGrid().duneAdapt(rp); // adapt grid
-      if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
+      refined = myGrid().duneAdapt(rp); // adapt grid
     }
     else
     {
@@ -734,14 +724,13 @@ namespace Dune {
          son,   this->getRealImplementation(son),
          tmprpop);
 
-      ref = myGrid().duneAdapt(rp); // adapt grid
-      if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
+      refined = myGrid().duneAdapt(rp); // adapt grid
     }
 
     // if new maxlevel was claculated
     assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
 
-    if(ref)
+    if(refined || mightCoarse )
     {
       updateStatus();
     }
@@ -749,9 +738,12 @@ namespace Dune {
     // check whether we have balance
     dm.dofCompress();
 
-    postAdapt();
+    // here postAdapt is not called, because
+    // reset of refinedTag is done in preCoarsening and postRefinement
+    // methods of datahandle (see datahandle.hh)
+
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
-    return ref;
+    return refined;
   }
 
 
