@@ -777,7 +777,8 @@ namespace Dune {
       , item_(org.item_)
       , entity_(0)
   {
-    getEntity(org);
+    // if entity exists then copy entity
+    getEntity( org );
   }
 
   template<int codim, class GridImp >
@@ -787,8 +788,7 @@ namespace Dune {
     if( org.entity_ )
     {
       assert( entity_ == 0 );
-      int level = org.entity_->level();
-      entity_ = grid_.template getNewEntity<codim> ( level );
+      entity_ = grid_.template getNewEntity<codim> ();
       this->entityImp().setEntity( org.entityImp() );
     }
   }
@@ -843,8 +843,7 @@ namespace Dune {
     if(entity_)
     {
       this->entityImp().removeElement();
-      EntityObject * en = entity_;
-      grid_.template freeEntity<codim> ( en );
+      grid_.template freeEntity<codim> ( (EntityObject *) entity_ );
       entity_ = 0;
     }
   }
@@ -865,7 +864,7 @@ namespace Dune {
     assert( item_ );
     if(!entity_)
     {
-      entity_ = grid_.template getNewEntity<codim> ( item_->level() );
+      entity_ = grid_.template getNewEntity<codim> ();
       this->entityImp().setElement( *item_ );
     }
     assert( item_ == & this->entityImp().getItem() );
@@ -956,7 +955,7 @@ namespace Dune {
     // if entity exists, just remove item pointer
     if(this->item_)
     {
-      if( !this->entity_ )
+      if( ! this->entity_ )
         this->getEntity(org);
       else
         this->entityImp().setElement( *this->item_ , this->level(), twist_ , face_ );
@@ -974,7 +973,7 @@ namespace Dune {
     assert( this->item_ );
     if(!this->entity_)
     {
-      this->entity_ = this->grid_.template getNewEntity<codim> ( this->level() );
+      this->entity_ = this->grid_.template getNewEntity<codim> ();
       this->entityImp().setElement( *this->item_ , this->level(), twist_ , face_ );
     }
     assert( this->item_ == & this->entityImp().getItem() );
