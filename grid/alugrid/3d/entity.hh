@@ -134,7 +134,7 @@ namespace Dune {
     const IMPLElementType & getItem () const { return *item_; }
 
   private:
-    //! index is unique within the grid hierachy and per codim
+    //! index is unique within the grid hierarchy and per codim
     int getIndex () const;
 
     //! convert ALUGrid partition type to dune partition type
