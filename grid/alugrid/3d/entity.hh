@@ -373,7 +373,7 @@ namespace Dune {
     const IMPLElementType & getItem () const { return *item_; }
 
   private:
-    //! index is unique within the grid hierachie and per codim
+    //! index is unique within the grid hierachy and per codim
     int getIndex () const;
 
     // corresponding grid
