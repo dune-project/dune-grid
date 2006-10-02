@@ -11,6 +11,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/common/geometrytype.hh>
+#include <dune/grid/common/referenceelements.hh>
 
 /**
    \file
@@ -138,6 +139,35 @@ namespace Dune {
       }
     }
 
+    void tensor_product_tri(const QuadratureRule<ct,1> & gauss1D, const QuadratureRule<ct,1> & jac1D)
+    {
+      // Both rules should be of the same order
+      assert(gauss1D.size() == jac1D.size());
+      // Save the number of points as a convenient variable
+      const unsigned int m = gauss1D.size();
+
+      GeometryType simplex2d(GeometryType::simplex,2);
+
+      // Compute the conical product
+      for (unsigned int i=0; i<m; i++)
+        for (unsigned int j=0; j<m; j++)
+        {
+          // compute coordinates and weight
+          double weight = 1.0;
+          FieldVector<ct, dim> local;
+
+          //s[j];
+          local[0] = jac1D[j].position()[0];
+          //r[i]*(1.-s[j]);
+          local[1] = gauss1D[i].position()[0] * (1.-jac1D[j].position()[0]);
+          //A[i]*B[j];
+          weight   = ReferenceElements<ct, 2>::simplices(simplex2d).volume()
+                     * gauss1D[i].weight() * jac1D[j].weight();
+          // put in container
+          push_back(QuadraturePoint<ct,dim>(local,weight));
+        }
+    }
+
     int power (int y, int d)
     {
       int m=1;
@@ -158,7 +188,7 @@ namespace Dune {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
     typedef QuadratureRule<ctype, dim> QuadratureRule;
     //! real rule creator
-    const QuadratureRule& _rule(const GeometryType& t, int p)
+    const QuadratureRule& _rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
       static std::map<QuadratureRuleKey, QuadratureRule> _quadratureMap;
       QuadratureRuleKey key(t,p);
@@ -169,7 +199,7 @@ namespace Dune {
            would get stored in case of an exception.
          */
         QuadratureRule rule =
-          QuadratureRuleFactory<ctype,dim>::rule(t,p,QuadratureType::Gauss);
+          QuadratureRuleFactory<ctype,dim>::rule(t,p,qt);
         _quadratureMap[key] = rule;
       }
       return _quadratureMap[key];
@@ -184,15 +214,15 @@ namespace Dune {
     QuadratureRules () {};
   public:
     //! select the appropriate QuadratureRule for GeometryType t and order p
-    static const QuadratureRule& rule(const GeometryType& t, int p)
+    static const QuadratureRule& rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
-      return instance()._rule(t,p);
+      return instance()._rule(t,p,qt);
     }
     //! @copydoc rule
-    static const QuadratureRule& rule(const GeometryType::BasicType t, int p)
+    static const QuadratureRule& rule(const GeometryType::BasicType t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
       GeometryType gt(t,dim);
-      return instance()._rule(gt,p);
+      return instance()._rule(gt,p,qt);
     }
   };
 
@@ -216,10 +246,6 @@ namespace Dune {
     //! set up quadrature of given order in d dimensions
     CubeQuadratureRule (int p) : QuadratureRule<ct,dim>(GeometryType(GeometryType::cube, d))
     {
-      //         if (p > highest_order)
-      //           DUNE_THROW(QuadratureOrderOutOfRange,
-      //                      "Quadrature rule " << p << " not supported!");
-
       QuadratureRule<ct,1> q1D = QuadratureRules<ct,1>::rule(GeometryType::cube, p);
       tensor_product( q1D );
       this->delivered_order = q1D.order();
@@ -305,7 +331,7 @@ namespace Dune {
   {
   public:
     enum {d=2};
-    enum { highest_order=12 };
+    enum { highest_order=44 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
     ~SimplexQuadratureRule(){}

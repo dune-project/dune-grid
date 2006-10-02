@@ -742,7 +742,6 @@ namespace Dune {
     //! initialize quadrature points on the interval for all orders
     SimplexQuadraturePoints ()
     {
-
       int m = 0;
       O[m] = 0;
 
@@ -1357,6 +1356,20 @@ namespace Dune {
                  "QuadratureRule for order " << p << " and GeometryType "
                                              << this->type() << " not available");
 
+    if (p>SimplexQuadraturePoints<2>::highest_order)
+    {
+      // Define the quadrature rules...
+      QuadratureRule<ct,1> gauss1D =
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Gauss);
+      QuadratureRule<ct,1> jac1D =
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
+
+      // Compute the tensor product
+      tensor_product_tri(gauss1D, jac1D);
+      this->delivered_order = std::min(gauss1D.order(), jac1D.order());
+      return;
+    }
+
     switch(p)
     {
     case 0 : // to be verified
@@ -1410,7 +1423,6 @@ namespace Dune {
       weight=SimplexQuadraturePointsSingleton<2>::sqp.weight(m,i);
       // put in container
       push_back(QuadraturePoint<ct,d>(local,weight));
-
     }
   }
 
