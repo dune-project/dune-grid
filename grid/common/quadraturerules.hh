@@ -139,35 +139,6 @@ namespace Dune {
       }
     }
 
-    void tensor_product_tri(const QuadratureRule<ct,1> & gauss1D, const QuadratureRule<ct,1> & jac1D)
-    {
-      // Both rules should be of the same order
-      assert(gauss1D.size() == jac1D.size());
-      // Save the number of points as a convenient variable
-      const unsigned int m = gauss1D.size();
-
-      GeometryType simplex2d(GeometryType::simplex,2);
-
-      // Compute the conical product
-      for (unsigned int i=0; i<m; i++)
-        for (unsigned int j=0; j<m; j++)
-        {
-          // compute coordinates and weight
-          double weight = 1.0;
-          FieldVector<ct, dim> local;
-
-          //s[j];
-          local[0] = jac1D[j].position()[0];
-          //r[i]*(1.-s[j]);
-          local[1] = gauss1D[i].position()[0] * (1.-jac1D[j].position()[0]);
-          //A[i]*B[j];
-          weight   = ReferenceElements<ct, 2>::simplices(simplex2d).volume()
-                     * gauss1D[i].weight() * jac1D[j].weight();
-          // put in container
-          push_back(QuadraturePoint<ct,dim>(local,weight));
-        }
-    }
-
     int power (int y, int d)
     {
       int m=1;
@@ -263,7 +234,7 @@ namespace Dune {
     // compile time parameters
     enum { d=1 };
     enum { dim=1 };
-    enum { highest_order=43 };
+    enum { highest_order=44 };
     typedef ct CoordType;
     typedef CubeQuadratureRule value_type;
 
@@ -346,7 +317,7 @@ namespace Dune {
 
   public:
     enum {d=3};
-    enum { highest_order=5 };
+    enum { highest_order=44 };
     typedef ct CoordType;
     typedef SimplexQuadratureRule<ct,3> value_type;
     ~SimplexQuadratureRule(){}

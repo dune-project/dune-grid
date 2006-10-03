@@ -1365,7 +1365,33 @@ namespace Dune {
         QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
 
       // Compute the tensor product
-      tensor_product_tri(gauss1D, jac1D);
+
+      // Both rules should be of the same order
+      assert(gauss1D.size() == jac1D.size());
+      // Save the number of points as a convenient variable
+      const unsigned int m = gauss1D.size();
+
+      GeometryType simplex2d(GeometryType::simplex,2);
+
+      // Compute the conical product
+      for (unsigned int i=0; i<m; i++)
+        for (unsigned int j=0; j<m; j++)
+        {
+          // compute coordinates and weight
+          double weight = 1.0;
+          FieldVector<ct, d> local;
+
+          //s[j];
+          local[0] = jac1D[j].position()[0];
+          //r[i]*(1.-s[j]);
+          local[1] = gauss1D[i].position()[0] * (1.-jac1D[j].position()[0]);
+          //A[i]*B[j];
+          weight   = ReferenceElements<ct, 2>::simplices(simplex2d).volume()
+                     * gauss1D[i].weight() * jac1D[j].weight();
+          // put in container
+          push_back(QuadraturePoint<ct,d>(local,weight));
+        }
+
       this->delivered_order = std::min(gauss1D.order(), jac1D.order());
       return;
     }
@@ -1606,6 +1632,52 @@ namespace Dune {
       DUNE_THROW(QuadratureOrderOutOfRange,
                  "QuadratureRule for order " << p << " and GeometryType "
                                              << this->type() << " not available");
+
+    if (p>SimplexQuadraturePoints<3>::highest_order)
+    {
+      // Define the quadrature rules...
+      QuadratureRule<ct,1> gauss1D =
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Gauss);
+      QuadratureRule<ct,1> jacA1D =
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
+      QuadratureRule<ct,1> jacB1D =
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_2_0);
+
+      // Compute the tensor product
+
+      // All rules should be of the same order
+      assert(gauss1D.size() == jacA1D.size());
+      assert(gauss1D.size() == jacB1D.size());
+      // Save the number of points as a convenient variable
+      const unsigned int m = gauss1D.size();
+
+      GeometryType simplex3d(GeometryType::simplex,3);
+
+      // Compute the conical product
+      for (unsigned int i=0; i<m; i++)
+        for (unsigned int j=0; j<m; j++)
+          for (unsigned int k=0; k<m; k++)
+          {
+            // compute coordinates and weight
+            double weight = 1.0;
+            FieldVector<ct, d> local;
+
+            //t[k];
+            local[0] = jacB1D[k].position()[0];
+            //s[j]*(1.-t[k]);
+            local[1] = jacA1D[j].position()[0] * (1.0-jacB1D[k].position()[0]);
+            //r[i]*(1.-s[j])*(1.-t[k]);
+            local[2] = gauss1D[i].position()[0] * (1.-jacA1D[j].position()[0]) * (1.0-jacB1D[k].position()[0]);
+            //A[i]*B[j]*C[k];
+            weight   = ReferenceElements<ct, 3>::simplices(simplex3d).volume()
+                       * gauss1D[i].weight() * jacA1D[j].weight() * jacB1D[k].weight();
+            // put in container
+            push_back(QuadraturePoint<ct,d>(local,weight));
+          }
+
+      this->delivered_order = std::min(gauss1D.order(), std::min(jacA1D.order(), jacB1D.order()));
+      return;
+    }
 
     switch(p)
     {
