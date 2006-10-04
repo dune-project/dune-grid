@@ -10,6 +10,42 @@
 
 double success = true;
 
+// This is a simple accuracy test on the unit triangle. It integrates
+// x^p and y^p with the quadrature rule of order p, which should give
+// an exact result (the exact value is easily computed analytically as
+// 1/((p+2)*(p+1))).
+template <class ctype>
+void checkSimplexQuadrature()
+{
+  using namespace Dune;
+
+  for (int p=0; ; ++p)
+    try {
+      QuadratureRule<ctype,2> const& qr = QuadratureRules<ctype,2>::rule(GeometryType(GeometryType::simplex,2),p);
+      double integX = 0, integY=0;
+      for (size_t g=0; g<qr.size(); ++g) {
+        // pos of integration point
+        FieldVector<ctype,2> const& x = qr[g].position();
+        double weight = qr[g].weight();
+
+        integX += weight*std::pow(x[0],p);
+        integY += weight*std::pow(x[1],p);
+      }
+
+      double exact = 1.0/((p+2)*(p+1));
+      double relativeError = std::max(std::abs(integX-exact) / (std::abs(integX)+std::abs(exact)),
+                                      std::abs(integY-exact) / (std::abs(integY)+std::abs(exact)));
+      if (relativeError > 4*p*std::numeric_limits<double>::epsilon()) {
+        std::cerr << "Error: Quadrature for triangle and order=" << p
+                  << " has a relative error " << relativeError << std::endl;
+        success = false;
+      }
+    }
+    catch (Dune::QuadratureOrderOutOfRange & e) {
+      break;
+    }
+}
+
 template<class ctype, int dim>
 void checkQuadrature(Dune::GeometryType t, int p)
 {
@@ -105,6 +141,8 @@ int main ()
 
     checkQuadrature<double, 3>(prism3d);
     checkQuadrature<double, 3>(pyramid3d);
+
+    checkSimplexQuadrature<double>();
   }
   catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
