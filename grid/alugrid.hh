@@ -236,12 +236,10 @@ namespace Dune {
     enum { dim      = 2 };
     enum { dimworld = 2 };
   public:
-    ALUSimplexGrid(const std::string macroName
-#if ALU3DGRID_PARALLEL
-                   , MPI_Comm mpiComm = MPI_COMM_WORLD
-#endif
-                   ) :
+    ALUSimplexGrid(const std::string macroName ) :
       BaseType(macroName) {}
+    ALUSimplexGrid( ) :
+      BaseType() {}
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
