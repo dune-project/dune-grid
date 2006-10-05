@@ -1034,9 +1034,10 @@ namespace AlbertHelp
     return myProc;
   }
 
-  inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace)
+  inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
+                                      const char * name)
   {
-    DOF_INT_VEC * drv = get_dof_int_vec("el_new_check",espace);
+    DOF_INT_VEC * drv = get_dof_int_vec(name,espace);
     int * vec=0;
     drv->refine_interpol = &refineElNewCheck;
     drv->coarse_restrict = 0;
@@ -1046,15 +1047,41 @@ namespace AlbertHelp
   }
 
   // setup of DOF_INT_VEC for reading
-  inline void makeTheRest( DOFVEC_STACK * dofvecs)
+  template <int dimworld>
+  inline void makeTheRest(DOFVEC_STACK * dofvecs)
   {
-    dofvecs->elNewCheck = getDofNewCheck(dofvecs->elNumbers[0]->fe_space);
+    dofvecs->elNewCheck = getDofNewCheck(dofvecs->elNumbers[0]->fe_space,"el_new_check");
     // if owner vec not has been read
-    if(!dofvecs->owner) dofvecs->owner = getDofNewCheck(dofvecs->elNumbers[0]->fe_space);
+    if(!dofvecs->owner) dofvecs->owner = getDofNewCheck(dofvecs->elNumbers[0]->fe_space,"el_owner");
     dofvecs->owner->refine_interpol = &refineElOwner;
 
-    //if(!dofvecs->coords) dofvecs->coords =
-    //dofvecs->coords = getCoordVec<dimworld> ();    coordVec   = 0;
+#ifndef CALC_COORD
+    {
+      MESH * mesh = dofvecs->elNumbers[0]->fe_space->admin->mesh;
+      assert( mesh );
+
+      enum { dim = dimworld };
+      int vdof[dim+1]; // add at each vertex one dof for vertex numbering
+
+      for(int i=0; i<dim+1; i++)
+      {
+        vdof[i] = 0;
+      }
+      vdof[0] = 1;
+
+      const FE_SPACE * vSpace = get_fe_space(mesh, "vertex_dofs", vdof, 0);
+
+      // coords should not exist at this point
+      assert( !dofvecs->coords );
+
+      coordVec = get_dof_real_d_vec("coordinates",vSpace);
+      coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dimworld>;
+      coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
+
+      dofvecs->coords = getCoordVec<dimworld> ();
+      coordVec = 0;
+    }
+#endif
   }
 
   // initialize dofAdmin for vertex and element numbering

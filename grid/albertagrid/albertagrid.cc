@@ -4678,11 +4678,12 @@ namespace Dune
     }
 
     // make the rest of the dofvecs
-    ALBERTA AlbertHelp::makeTheRest(&dofvecs_);
+    ALBERTA AlbertHelp::makeTheRest<dimworld>(&dofvecs_);
 
     // restore level information for each element by traversing the mesh
     ALBERTA AlbertHelp::restoreElNewCheck( mesh_ , dofvecs_.elNewCheck );
 
+    // make vectors know in grid and hSet
     arrangeDofVec();
 
     // calc maxlevel and indexOnLevel and so on
@@ -4695,7 +4696,8 @@ namespace Dune
       indexStack_[i].setMaxIndex(maxIdx);
     }
 
-    leafIndexSet();
+    // assertion here
+    // leafIndexSet();
 
     return true;
   }
