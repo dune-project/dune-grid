@@ -347,11 +347,11 @@ namespace Dune {
     const Geometry & geometryInFather () const;
 
     //! The former state() method has been replaced by:
-    bool mightBeCoarsend () const {
+    bool mightBeCoarsened () const {
       return ((item_->is(ALU2DSPACE Refco::crs))==1);
     }
     bool wasRefined () const {
-      return false; //((item_->wasRefined())==1);
+      return ((item_->wasRefined())==1);
     }
 
     //***************************************************************

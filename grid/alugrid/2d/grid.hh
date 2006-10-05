@@ -21,7 +21,7 @@
 //- Local includes
 #include "indexsets.hh"
 #include "../3d/memory.hh"
-
+#include "datahandle.hh"
 namespace Dune {
 
   typedef double alu2d_ctype;
@@ -239,12 +239,27 @@ namespace Dune {
       MAXL = 64
     };
 
+    //! element chunk for refinement
+    enum {
+      //! \brief normal default number of new elements for new adapt method
+      newElementsChunk_ = 100
+    };
+
+    //! upper estimate on number of elements that could be created when a new element is created
+    enum {
+      /** \brief if one element is refined then it
+          causes apporximately not more than
+          this number of new elements  */
+      refineEstimate_ = 40
+    };
 
 
   protected:
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
     ALU2dGrid(std::string macroTriangFilename );
+    //! Constructor which constructs an empty ALU2dGrid
+    ALU2dGrid();
 
   public:
     //! Desctructor
@@ -376,6 +391,10 @@ namespace Dune {
      */
     bool adapt ( );
 
+    //! adapt with DofManager
+    template <class DofManagerType, class RestrictProlongOperatorType>
+    bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
+
     // refine grid
     bool refineGrid();
 
@@ -399,7 +418,7 @@ namespace Dune {
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
-  protected:
+  private:
     typedef ALUMemoryProvider< EntityObject > EntityProviderType;
 
     mutable EntityProviderType entityProvider_;
@@ -436,7 +455,16 @@ namespace Dune {
     const char * checkMacroGridFile(const std::string & filename);
 
     //! the real grid
-    mutable ALU2DSPACE Hmesh mesh_;
+    mutable ALU2DSPACE Hmesh* mygrid_;
+    ALU2DSPACE Hmesh& mesh() {
+      assert(mygrid_);
+      return *mygrid_;
+    }
+    ALU2DSPACE Hmesh& mesh() const {
+      assert(mygrid_);
+      return *mygrid_;
+    }
+    // mutable ALU2DSPACE Hmesh& mesh_;
 
     //! the hierarchic index set
     HierarchicIndexSet hIndexSet_;
@@ -473,6 +501,8 @@ namespace Dune {
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
 
   private:
+    // max level of grid
+    int maxlevel_;
     friend class LeafIntersectionIteratorWrapper< const ThisType > ;
     friend class LevelIntersectionIteratorWrapper< const ThisType > ;
     // return reference to intersectioniterator storage
@@ -496,6 +526,21 @@ namespace Dune {
       assert( level <= MAXL);
       return marker_[level];
     }
+
+    /** \brief write Grid to file in specified FileFormatType
+     */
+    template <GrapeIOFileFormatType ftype>
+    bool writeGrid( const std::string filename, alu2d_ctype time ) const ;
+
+    bool writeGrid_Xdr( const std::string filename, alu2d_ctype time ) const ;
+    bool writeGrid_Ascii( const std::string filename, alu2d_ctype time ) const ;
+
+    /** \brief read Grid from file filename and store time of mesh in time
+     */
+    template <GrapeIOFileFormatType ftype>
+    bool readGrid( const std::string filename, alu2d_ctype & time );
+
+
 
   }; // end class ALU2dGrid
 

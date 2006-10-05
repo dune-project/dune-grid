@@ -294,17 +294,27 @@ namespace Dune {
 
   template <int mydim, int cdim, class GridImp>
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const {
-    if (cdim == 0) {
+    //std::cerr << "volume with mydim = " << mydim << " "
+    //	    << "cdim = " << cdim << " " << std::flush;
+    if (mydim == 2) {
       assert( calcedDet_ );
+      //std::cerr << elDet_ << std::endl;
       return 0.5*elDet_;
     }
-    else if(cdim == 1) {
-      tmpZ_[0] = coord_[0][0] - coord_[1][0];
-      tmpZ_[1] = coord_[0][1] - coord_[1][1];
-      return tmpZ_.two_norm();
+    else if(mydim == 1) {
+      assert( calcedDet_ );
+      return elDet_;
+      //tmpZ_[0] = coord_[0][0] - coord_[1][0];
+      //tmpZ_[1] = coord_[0][1] - coord_[1][1];
+      //return tmpZ_.two_norm();
     }
-    else
-      return 0.;
+    else if (mydim == 0) {
+      return 1.;
+    }
+    else {
+      assert(0);
+      return 0.0;
+    }
   }
 
 
@@ -410,6 +420,8 @@ namespace Dune {
         }
         //std::cout << coord_[i] << " c\n";
       }
+      elDet_     = item.sidelength(face_);
+      calcedDet_ = true;
     }
     else
     {
@@ -421,9 +433,9 @@ namespace Dune {
         for(int j=0; j<cdim; ++j)
           coord_[i][j] = p[j];
       }
+      elDet_ = 2.0*item.area();
+      calcedDet_ = true;
     }
-    elDet_     = elDeterminant();
-    calcedDet_ = true;
     // geometry built
     return true;
   }
@@ -450,7 +462,7 @@ namespace Dune {
       coord_[0][0] = item.coord()[0];
       coord_[0][1] = item.coord()[1];
 
-      elDet_     = elDeterminant();
+      elDet_     = 1.0; // inant();
       calcedDet_ = true;
       // geometry built
       return true;
