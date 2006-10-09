@@ -658,34 +658,23 @@ namespace Dune {
       QuadratureRule<ct,1> jac1D =
         QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
 
-      // Compute the tensor product
-
-      // Both rules should be of the same order
-      assert(gauss1D.size() == jac1D.size());
-      // Save the number of points as a convenient variable
-      const unsigned int m = gauss1D.size();
-
-      GeometryType simplex2d(GeometryType::simplex,2);
-
       // Compute the conical product
-      for (unsigned int i=0; i<m; i++)
-        for (unsigned int j=0; j<m; j++)
+      for (typename QuadratureRule<ct,1>::const_iterator
+           gp=gauss1D.begin(); gp!=gauss1D.end(); ++gp)
+      {
+        for (typename QuadratureRule<ct,1>::const_iterator
+             jp=jac1D.begin(); jp!=jac1D.end(); ++jp)
         {
           // compute coordinates and weight
           double weight = 1.0;
-          FieldVector<ct, d> local;
-
-          //s[j];
-          local[0] = jac1D[j].position()[0];
-          //r[i]*(1.-s[j]);
-          local[1] = gauss1D[i].position()[0] * (1.-jac1D[j].position()[0]);
-          //A[i]*B[j];
-          weight   = ReferenceElements<ct, 2>::simplices(simplex2d).volume()
-                     * gauss1D[i].weight() * jac1D[j].weight();
+          FieldVector<ct,2> local(0.0);
+          local[0] = jp->position()[0];
+          local[1] = gp->position()[0] * (1. - jp->position()[0]);
+          weight   = gp->weight() * jp->weight() * (1. - jp->position()[0]);
           // put in container
           push_back(QuadraturePoint<ct,d>(local,weight));
         }
-
+      }
       this->delivered_order = std::min(gauss1D.order(), jac1D.order());
       return;
     }
