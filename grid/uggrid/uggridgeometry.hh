@@ -288,18 +288,62 @@ namespace Dune {
     //! Maps a global coordinate within the element to a
     //! local coordinate in its reference element
     FieldVector<UGCtype, 2> local (const FieldVector<UGCtype, 3>& global) const {
-      DUNE_THROW(NotImplemented, "local");
-#if 0
-      // UG_GlobalToLocalBnd doesn't seem to do what I want it to do.
-      // Actually nobody in UG seems to use it.
+
+      // The UG method UG_GlobalToLocalBnd pretends to do what this method does,
+      // but in reality it is buggy!
       FieldVector<UGCtype,2> result;
 
-      const double* coordPtrs[4] = {&coord_[0][0], &coord_[1][0], &coord_[2][0], &coord_[3][0]};
-      if (int error = UG3d::UG_GlobalToLocalBnd(corners(), coordPtrs, &global[0], &result[0]))
-        DUNE_THROW(GridError, "UG_GlobalToLocalBnd returned error code " << error << "!");
+      FieldMatrix<UGCtype,2,2> M;
+      FieldVector<UGCtype,2> partialDiff;
+
+      FieldVector<UGCtype,3> diff = global;
+      diff -= coord_[0];
+
+      if (elementType_.isTriangle())
+      {
+        /* the simplex case */
+        FieldMatrix<UGCtype,3,2> matrix;
+        for (int i=0; i<3; i++) {
+          matrix[i][0] = coord_[1][i] - coord_[0][i];
+          matrix[i][1] = coord_[2][i] - coord_[0][i];
+        }
+
+        // Simply regard the projection onto the x-y plane
+        M[0] = matrix[0];
+        M[1] = matrix[1];
+        partialDiff[0] = diff[0];
+        partialDiff[1] = diff[1];
+
+        if (M.determinant()!=0) {
+          M.solve(result, partialDiff);
+          return result;
+        }
+
+        // The triangle is orthogonal to the x-y plane.  try the x-z plane
+        M[1]           = matrix[2];
+        partialDiff[1] = diff[2];
+
+        if (M.determinant()!=0) {
+          M.solve(result, partialDiff);
+          return result;
+        }
+
+        // Last attempt: the y-z plane
+        M[0]           = matrix[1];
+        partialDiff[0] = diff[1];
+
+        if (M.determinant()!=0) {
+          M.solve(result, partialDiff);
+          return result;
+        }
+
+        // There must be something wrong here
+        assert(false);
+      } else {
+        DUNE_THROW(NotImplemented, "local for quadrilateral boundary faces");
+      }
 
       return result;
-#endif
     }
 
     //! Returns true if the point is in the current element

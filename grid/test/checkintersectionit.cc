@@ -69,7 +69,10 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
 
     center /= intersectionGlobal.corners();
 
-#ifndef DUNE_UGGRID_HH
+#ifdef DUNE_UGGRID_HH
+#warning Test for quadrilateral intersections disabled!
+    if (!intersectionGlobal.type().isQuadrilateral()) {
+#endif
     // The geometry center in local coordinates
     FieldVector<ctype, Geometry::mydimension> localCenter = intersectionGlobal.local(center);
 
@@ -94,8 +97,8 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     const FieldMatrix<ctype, Geometry::mydimension, Geometry::mydimension> jacobi
       = intersectionGlobal.jacobianInverseTransposed(localCenter);
 #endif
-#else
-#warning Test disabled, as UG does not support global-to-local for faces
+#ifdef DUNE_UGGRID_HH
+  }
 #endif
 
     // //////////////////////////////////////////////////////////
