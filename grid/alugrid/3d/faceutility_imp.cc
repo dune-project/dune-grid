@@ -47,6 +47,11 @@ namespace Dune {
       outerFaceNumber_ = face.nb.rear().second;
     } // end if
 
+    // if not true we are accessing a fake bnd
+    assert( innerElement_->isRealObject() );
+    // if not true we are accessing a fake bnd
+    assert( outerElement_->isRealObject() );
+
     outerBoundary_ = outerElement_->isboundary();
 #if ALU3DGRID_PARALLEL
     // check for ghosts
