@@ -8,7 +8,7 @@
 #include <dune/grid/common/quadraturerules.hh>
 #include <dune/grid/common/referenceelements.hh>
 
-double success = true;
+bool success = true;
 
 // This is a simple accuracy test on the unit triangle. It integrates
 // x^p and y^p with the quadrature rule of order p, which should give
@@ -52,12 +52,8 @@ void checkQuadrature(Dune::GeometryType t, int p)
   double volume = 0;
   // Quadratures
   typedef Dune::QuadratureRule<ctype, dim> Quad;
-  // Test the backwards compatible interface
-  //  typedef typename Quad::const_iterator QuadIterator;
   typedef typename Quad::iterator QuadIterator;
-  const Quad & quad =
-    //  Quad & quad =
-    Dune::QuadratureRules<ctype,dim>::rule(t, p);
+  const Quad & quad = Dune::QuadratureRules<ctype,dim>::rule(t, p);
   if (quad.type() != t || quad.order() < p) {
     std::cerr << "Error: Type mismatch! Requested Quadrature for " << t
               << " and order=" << p << "." << std::endl
