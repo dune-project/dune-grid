@@ -45,7 +45,8 @@ namespace Dune {
 
   //dim = dimworld = 3
   template<int mydim, int cdim>
-  inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: buildJacobianInverseTransposed() const
+  inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::
+  buildJacobianInverseTransposed() const
   {
     if(!builtinverse_)
     {
@@ -171,12 +172,14 @@ namespace Dune {
 #ifndef NDEBUG
     builtDetDF_ = true ;
 #endif
+    // get volume and calc elDet
     volume_ = item.volume();
-    detDF_ = 6.0 * volume_;
-    for(int i=0; i<4; ++i)
-    {
-      copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(i))->Point(), coord_[i]);
-    }
+    detDF_  = 6.0 * volume_;
+
+    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(0))->Point(), coord_[0]);
+    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(1))->Point(), coord_[1]);
+    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(2))->Point(), coord_[2]);
+    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(3))->Point(), coord_[3]);
     return true;
   }
 
@@ -203,7 +206,7 @@ namespace Dune {
       }
     }
 
-    buildJacobianInverseTransposed();
+    //buildJacobianInverseTransposed();
     return true;
   }
 
@@ -219,7 +222,7 @@ namespace Dune {
       coord_[i] = coords[i];
     }
 
-    buildJacobianInverseTransposed();
+    //buildJacobianInverseTransposed();
     return true;
   }
 
@@ -694,9 +697,10 @@ namespace Dune {
     for (int i = 0; i < corners(); ++i) {
       const double (&p)[3] =
         item.myvertex(ElementTopo::dune2aluVertex(i))->Point();
-      for (int j = 0; j < dimworld; ++j) {
-        coord_[i][j] = p[j];
-      }
+
+      coord_[i][0] = p[0];
+      coord_[i][1] = p[1];
+      coord_[i][2] = p[2];
     }
 
     // delete old mapping and creats new mapping
