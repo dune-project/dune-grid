@@ -477,11 +477,7 @@ RECURSIVE              = YES
 
 EXCLUDE                = ../../grid/onedgrid \
                          ../../grid/uggrid \
-                         ../../grid/test \
-                         ../../istl/test \
-                         ../../istl/paamg/test \
-                         ../../lib/test \
-                         ../../common/test
+                         ../../grid/test
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
