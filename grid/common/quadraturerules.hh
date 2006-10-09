@@ -637,21 +637,44 @@ namespace Dune {
                    "QuadratureRule for order " << p << " and GeometryType "
                                                << this->type() << " not available");
 
-      switch(p)
-      {
-      default : m=8;
+      if(p<=2) {
+        m=8;
+        this->delivered_order = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);
+        FieldVector<ct, d> local;
+        double weight;
+        for(int i=0; i<m; ++i)
+        {
+          for(int k=0; k<d; ++k)
+            local[k]=PyramidQuadraturePointsSingleton<3>::pyqp.point(m,i)[k];
+          weight=PyramidQuadraturePointsSingleton<3>::pyqp.weight(m,i);
+          // put in container
+          push_back(QuadraturePoint<ct,d>(local,weight));
+        }
       }
-
-      this->delivered_order = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);
-      FieldVector<ct, d> local;
-      double weight;
-      for(int i=0; i<m; ++i)
+      else
       {
-        for(int k=0; k<d; ++k)
-          local[k]=PyramidQuadraturePointsSingleton<3>::pyqp.point(m,i)[k];
-        weight=PyramidQuadraturePointsSingleton<3>::pyqp.weight(m,i);
-        // put in container
-        push_back(QuadraturePoint<ct,d>(local,weight));
+        return;
+        // Define the quadrature rules...
+        QuadratureRule<ct,3> simplex =
+          QuadratureRules<ct,3>::rule(GeometryType::simplex, p);
+
+        for (typename QuadratureRule<ct,3>::const_iterator
+             it=simplex.begin(); it != simplex.end(); ++it)
+        {
+          FieldVector<ct,3> local = it->position();
+          ct weight = it->weight();
+          // Simplex 1
+          // x:=x+y
+          local[0] = local[0]+local[1];
+          push_back(QuadraturePoint<ct,d>(local,weight));
+          // Simplex 2
+          // y:=x+y
+          local[0] = it->position()[0];
+          local[1] = local[0]+local[1];
+          push_back(QuadraturePoint<ct,d>(local,weight));
+        }
+
+        this->delivered_order = simplex.order();
       }
     }
   };
