@@ -221,6 +221,8 @@ namespace Dune {
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
   ALU3dGridIntersectionIterator<GridImp>::outside () const
   {
+    // make sure that outside is not called for an end iterator
+    assert( !done_ );
 #if ALU3DGRID_PARALLEL
     if(connector_.ghostBoundary())
     {
@@ -241,6 +243,8 @@ namespace Dune {
   template<class GridImp>
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
   ALU3dGridIntersectionIterator<GridImp>::inside () const {
+    // make sure that inside is not called for an end iterator
+    assert( !done_ );
     return EntityPointer(this->grid_, connector_.innerEntity() );
   }
 
