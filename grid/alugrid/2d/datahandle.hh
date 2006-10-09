@@ -13,8 +13,9 @@ using std::endl;
 using std::cout;
 using std::flush;
 
-namespace ALU2dGridSpace {
-  struct AdaptRestrictProlongType {};
+namespace ALU2DSPACENAME {
+  //struct AdaptRestrictProlong2dType {
+  //};
 
   /////////////////////////////////////////////////////////////////
   //
@@ -22,7 +23,7 @@ namespace ALU2dGridSpace {
   //
   /////////////////////////////////////////////////////////////////
   template <class GridType , class RestrictProlongOperatorType >
-  class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
+  class AdaptRestrictProlong2dImpl : public AdaptRestrictProlong2dType
   {
     GridType & grid_;
     typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
@@ -42,9 +43,9 @@ namespace ALU2dGridSpace {
 
   public:
     //! Constructor
-    AdaptRestrictProlongImpl (GridType & grid,
-                              EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
-                              , RestrictProlongOperatorType & rp)
+    AdaptRestrictProlong2dImpl (GridType & grid,
+                                EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
+                                , RestrictProlongOperatorType & rp)
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
@@ -54,7 +55,7 @@ namespace ALU2dGridSpace {
         , maxlevel_(-1)
     {}
 
-    virtual ~AdaptRestrictProlongImpl ()
+    virtual ~AdaptRestrictProlong2dImpl ()
     {}
 
     //! restrict data , elem is always the father

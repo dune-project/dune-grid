@@ -340,7 +340,7 @@ namespace Dune {
       sum += local[i];
       if(local[i] < 0.0)
       {
-        if(std::abs(local[i]) > 1e-15)
+        if(std::abs(local[i]) > 1e-8)
         {
           return false;
         }
@@ -349,7 +349,7 @@ namespace Dune {
 
     if( sum > 1.0 )
     {
-      if(sum > (1.0 + 1e-15))
+      if(sum > (1.0 + 1e-8))
         return false;
     }
 
@@ -420,7 +420,7 @@ namespace Dune {
         }
         //std::cout << coord_[i] << " c\n";
       }
-      elDet_     = item.sidelength(face_);
+      elDet_     = item.sidelength((face_)%3);
       calcedDet_ = true;
     }
     else

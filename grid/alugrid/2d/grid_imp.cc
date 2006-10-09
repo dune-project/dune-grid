@@ -333,7 +333,7 @@ namespace Dune {
 
     bool ref = false ;
     {
-      ALU2DSPACE AdaptRestrictProlongImpl<ALU2dGrid<dim, dimworld>,COType >
+      ALU2DSPACE AdaptRestrictProlong2dImpl<ALU2dGrid<dim, dimworld>,COType >
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
@@ -543,12 +543,8 @@ namespace Dune {
     {
       // if grid exists delete first
       if( mygrid_ ) delete mygrid_;
-      mygrid_ = new ALU2DSPACE Hmesh (((filename+".macro").c_str()));
+      mygrid_ = new ALU2DSPACE Hmesh (filename.c_str());
       assert(mygrid_ != 0);
-    }
-    {
-      ALU2DSPACE Listwalkptr < ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
-      std::cout << "GRID SIZEL " << walk->size() << std::endl;
     }
     {
       std::string extraName (filename);

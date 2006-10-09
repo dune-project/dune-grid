@@ -4,7 +4,8 @@
 #define DUNE_ALU2DGRID_INCLUDE_HH
 
 #include <alugrid_2d.h>
-#define ALU2DSPACE ALU2dGridSpace ::
+#define ALU2DSPACE ALUGridSpace ::
+#define ALU2DSPACENAME ALUGridSpace
 
 namespace Dune {
 
