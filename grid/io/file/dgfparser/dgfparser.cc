@@ -57,9 +57,9 @@ namespace Dune {
     // wirtes an output file in grid type ALU
     if (dimw==3) {
       if (simplexgrid)
-        out << "!Tetraeder" << std::endl;
+        out << "!Tetrahedra" << std::endl;
       else
-        out << "!Hexaeder" << std::endl;
+        out << "!Hexahedra" << std::endl;
     }
     if (dimw==2) {
       if (!simplexgrid) {
