@@ -931,33 +931,30 @@ namespace Dune {
       // All rules should be of the same order
       assert(gauss1D.size() == jacA1D.size());
       assert(gauss1D.size() == jacB1D.size());
-      // Save the number of points as a convenient variable
-      const unsigned int m = gauss1D.size();
-
-      GeometryType simplex3d(GeometryType::simplex,3);
 
       // Compute the conical product
-      for (unsigned int i=0; i<m; i++)
-        for (unsigned int j=0; j<m; j++)
-          for (unsigned int k=0; k<m; k++)
+      for (typename QuadratureRule<ct,1>::const_iterator
+           gp=gauss1D.begin(); gp!=gauss1D.end(); ++gp)
+      {
+        for (typename QuadratureRule<ct,1>::const_iterator
+             j1p=jacA1D.begin(); j1p!=jacA1D.end(); ++j1p)
+        {
+          for (typename QuadratureRule<ct,1>::const_iterator
+               j2p=jacB1D.begin(); j2p!=jacB1D.end(); ++j2p)
           {
             // compute coordinates and weight
             double weight = 1.0;
             FieldVector<ct, d> local;
-
-            //t[k];
-            local[0] = jacB1D[k].position()[0];
-            //s[j]*(1.-t[k]);
-            local[1] = jacA1D[j].position()[0] * (1.0-jacB1D[k].position()[0]);
-            //r[i]*(1.-s[j])*(1.-t[k]);
-            local[2] = gauss1D[i].position()[0] * (1.-jacA1D[j].position()[0]) * (1.0-jacB1D[k].position()[0]);
-            //A[i]*B[j]*C[k];
-            weight   = ReferenceElements<ct, 3>::simplices(simplex3d).volume()
-                       * gauss1D[i].weight() * jacA1D[j].weight() * jacB1D[k].weight();
+            local[0] = j2p->position()[0];
+            local[1] = j1p->position()[0] * (1.0-j2p->position()[0]);
+            local[2] = gp->position()[0] * (1.-j1p->position()[0]) * (1.0-j2p->position()[0]);
+            weight   = (1.0-j2p->position()[0]) * (1.-j1p->position()[0]) * (1.0-j2p->position()[0])
+                       * gp->weight() * j1p->weight() * j2p->weight();
             // put in container
             push_back(QuadraturePoint<ct,d>(local,weight));
           }
-
+        }
+      }
       this->delivered_order = std::min(gauss1D.order(), std::min(jacA1D.order(), jacB1D.order()));
       return;
     }
