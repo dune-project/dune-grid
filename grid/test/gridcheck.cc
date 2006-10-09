@@ -459,7 +459,7 @@ struct LeafInterface<Grid, false>
 template <class Grid>
 struct GridInterface
 {
-  static void check (Grid &g)
+  static void check (const Grid &g)
   {
     // check for exported types
     typedef typename Grid::ctype ctype;
@@ -549,7 +549,7 @@ struct GridInterface
     c = check;
   }
   // member just to avoid "unused variable"-warning in constructor
-  void (*c)(Grid&);
+  void (*c)(const Grid&);
 };
 
 #if 0
@@ -912,7 +912,7 @@ void iteratorEquals (Grid &g)
 }
 
 template <class Grid>
-void gridcheck (Grid &g)
+void gridcheck (const Grid &g)
 {
   /*
    * first do the compile-test: this will not produce any code but
@@ -927,7 +927,7 @@ void gridcheck (Grid &g)
 
   // type of GridInterface == GridDefaultImplementation
   typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
-  GridIF & gridIF = g;
+  const GridIF & gridIF = g;
   // check functionality when grid is interpreted as reference to interface
   GridInterface<GridIF>::check(gridIF);
   /*
