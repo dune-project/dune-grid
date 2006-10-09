@@ -3,17 +3,8 @@
 #ifndef DUNE_ALU3DINCLUDE_HH
 #define DUNE_ALU3DINCLUDE_HH
 
-#ifndef _ANSI_HEADER
-#define _ANSI_HEADER_DEFINED_HERE
-#define _ANSI_HEADER
-#endif
-
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ALUGridSpace ::
-
-// if this is defined in bsgrid some methods are added which we only need
-// for the Dune interface
-#define _DUNE_USES_ALU3DGRID_
 
 #include <alugrid_defineparallel.h>
 
@@ -39,7 +30,6 @@
 // if not, include only headers for serial version
 #include <alugrid_serial.h>
 #endif
-#undef _DUNE_USES_ALU3DGRID_
 
 namespace ALUGridSpace {
 
@@ -315,11 +305,5 @@ namespace Dune {
   typedef ALU3dGridItemList ALU3dGridItemListType;
 
 } // end namespace Dune
-
-#ifdef _ANSI_HEADER_DEFINED_HERE
-#undef _ANSI_HEADER
-#undef _ANSI_HEADER_DEFINED_HERE
-#endif
-
 
 #endif
