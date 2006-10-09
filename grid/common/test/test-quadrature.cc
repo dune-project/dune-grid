@@ -14,29 +14,48 @@ bool success = true;
 // x^p and y^p with the quadrature rule of order p, which should give
 // an exact result (the exact value is easily computed analytically as
 // 1/((p+2)*(p+1))).
-template <class ctype>
+template <class ct, int dim>
+struct exactHelper {
+  static ct sum(int p) { return (dim+p) * exactHelper<ct,dim-1>::sum(p); }
+};
+template <class ct>
+struct exactHelper<ct,0> { static ct sum(int p) { return 1; } };
+template <class ctype, int dim>
 void checkSimplexQuadrature()
 {
   using namespace Dune;
 
   for (int p=0; ; ++p)
     try {
-      QuadratureRule<ctype,2> const& qr = QuadratureRules<ctype,2>::rule(GeometryType(GeometryType::simplex,2),p);
-      double integX = 0, integY=0;
-      for (size_t g=0; g<qr.size(); ++g) {
+      GeometryType simplex(GeometryType::simplex,dim);
+      QuadratureRule<ctype,dim> const& qr =
+        QuadratureRules<ctype,dim>::rule(simplex,p);
+      FieldVector<ctype,dim> integral(0);
+      for (typename QuadratureRule<ctype,dim>::const_iterator
+           qp=qr.begin(); qp!=qr.end(); ++qp)
+      {
         // pos of integration point
-        FieldVector<ctype,2> const& x = qr[g].position();
-        double weight = qr[g].weight();
+        FieldVector<ctype,dim> const& x = qp->position();
+        double weight = qp->weight();
 
-        integX += weight*std::pow(x[0],p);
-        integY += weight*std::pow(x[1],p);
+        for (int d=0; d<dim; d++)
+        {
+          integral[d] += weight*std::pow(x[d],p);
+        }
       }
 
-      double exact = 1.0/((p+2)*(p+1));
-      double relativeError = std::max(std::abs(integX-exact) / (std::abs(integX)+std::abs(exact)),
-                                      std::abs(integY-exact) / (std::abs(integY)+std::abs(exact)));
-      if (relativeError > 4*p*std::numeric_limits<double>::epsilon()) {
-        std::cerr << "Error: Quadrature for triangle and order=" << p
+      double exact = 1.0/exactHelper<ctype,dim>::sum(p);
+      double relativeError = 0;
+      for (int d=0; d<dim; d++)
+      {
+        relativeError =
+          std::max(relativeError,
+                   std::abs(integral[d]-exact) /
+                   (std::abs(integral[d])+std::abs(exact)));
+      }
+      if (relativeError > std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon()) {
+        std::cerr << "Error: Quadrature for " << simplex
+                  << " and order=" << p
                   << " has a relative error " << relativeError << std::endl;
         success = false;
       }
@@ -138,7 +157,9 @@ int main ()
     checkQuadrature<double, 3>(prism3d);
     checkQuadrature<double, 3>(pyramid3d);
 
-    checkSimplexQuadrature<double>();
+    checkSimplexQuadrature<double, 1>();
+    checkSimplexQuadrature<double, 2>();
+    checkSimplexQuadrature<double, 3>();
   }
   catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
