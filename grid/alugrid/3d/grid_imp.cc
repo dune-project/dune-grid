@@ -331,19 +331,78 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::updateStatus()
   {
-    calcMaxlevel();
+    calcMaxLevel();
     calcExtras();
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline void ALU3dGrid<dim, dimworld, elType>::calcMaxlevel()
+  inline void ALU3dGrid<dim, dimworld, elType>::calcMaxLevel()
   {
-    maxlevel_ = 0;
-    ALU3DSPACE BSLeafIteratorMaxLevel w (myGrid()) ;
-    for (w->first () ; ! w->done () ; w->next ())
+    /*
+       // old fashioned way
+       int testMaxLevel = 0;
+       typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
+       IteratorType w (*this, maxLevel(), nlinks() );
+
+       typedef typename IteratorType :: val_t val_t ;
+       typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
+
+       for (w.first () ; ! w.done () ; w.next ())
+       {
+       val_t & item = w.item();
+
+       IMPLElementType * elem = 0;
+       if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first);
+       else if( item.second )
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+       assert( elem );
+
+       int level = elem->level();
+       if(level > testMaxLevel) testMaxLevel = level;
+       }
+
+       maxlevel_ = testMaxLevel;
+     */
+    // new method
+    maxlevel_ = myGrid().maxLevel();
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline bool ALU3dGrid<dim, dimworld, elType>::checkMaxLevel()
+  {
+#ifndef NDEBUG
+    // old fashioned way
+    int testMaxLevel = 0;
+    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
+    IteratorType w (*this, maxLevel(), nlinks() );
+
+    typedef typename IteratorType :: val_t val_t ;
+    typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
+
+    for (w.first () ; ! w.done () ; w.next ())
     {
-      if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
+      val_t & item = w.item();
+
+      IMPLElementType * elem = 0;
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first);
+      else if( item.second )
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+      assert( elem );
+
+      int level = elem->level();
+      if(level > testMaxLevel) testMaxLevel = level;
     }
+
+    //if( maxLevel() != testMaxLevel )
+    //  std::cout << "got maxLevel = " << maxLevel() << " and calculated " << testMaxLevel << "\n";
+    return ( testMaxLevel == maxLevel() );
+#else
+    return true;
+#endif
   }
 
   // --calcExtras
@@ -623,7 +682,7 @@ namespace Dune {
       LeafIteratorType endit  = leafend   ( maxLevel() );
       for(LeafIteratorType it = leafbegin ( maxLevel() ); it != endit; ++it)
       {
-        this->mark(1, (*it) );
+        this->mark(1 , (*it) );
       }
       ref = this->adapt();
       if(ref) this->postAdapt();
@@ -645,7 +704,6 @@ namespace Dune {
     bool ref = false;
 
     bool mightCoarse = preAdapt();
-
     // if prallel run, then adapt also global id set
     if(globalIdSet_)
     {
@@ -664,7 +722,7 @@ namespace Dune {
       ref = myGrid().adaptWithoutLoadBalancing();
     }
 
-    if(ref || mightCoarse )
+    if(ref || mightCoarse)
     {
       // calcs maxlevel and other extras
       updateStatus();
@@ -698,9 +756,10 @@ namespace Dune {
     // reserve memory
     dm.reserveMemory( newElements );
 
-    bool refined = false ;
+    // true if at least one element was marked for coarsening
     bool mightCoarse = preAdapt();
 
+    bool refined = false ;
     if(globalIdSet_)
     {
       // if global id set exists then include into
@@ -730,10 +789,14 @@ namespace Dune {
     // if new maxlevel was claculated
     assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
 
-    if(refined || mightCoarse )
+    if(refined || mightCoarse)
     {
+      // only calc extras and skip maxLevel calculation, because of
+      // refinement maxLevel was calculated already
       updateStatus();
     }
+
+    assert( checkMaxLevel () );
 
     // check whether we have balance
     dm.dofCompress();
@@ -742,65 +805,43 @@ namespace Dune {
     // reset of refinedTag is done in preCoarsening and postRefinement
     // methods of datahandle (see datahandle.hh)
 
+    // make sure maxLevel has the right value
+    assert( checkMaxLevel () );
+
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
     return refined;
   }
-
 
   // post process grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()
   {
-#if ALU3DGRID_PARALLEL
+    // reset all refined markers
     {
-      // we have to walk over all hierarchcy because during loadBalance
-      // we get newly refined elements, which have to be cleared
-      int fakeLevel = maxlevel_;
-      maxlevel_ = 0;
-      for(int l=0; l<= fakeLevel; l++)
-      {
-        {
-          typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper<0,Interior_Partition> IteratorType;
-          IteratorType w ( *this, l ,nlinks() ) ;
-          for (w.first () ; ! w.done () ; w.next ())
-          {
-            typedef typename IteratorType :: val_t val_t;
-            val_t & item = w.item();
-            if(item.first)
-            {
-              if(item.first->level() > maxlevel_ ) maxlevel_ = item.first->level();
-              item.first->resetRefinedTag();
-            }
-          }
-        }
-      }
+      // old fashioned way
+      typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
+      IteratorType w (*this, maxLevel(), nlinks() );
 
-      ALU3DSPACE BSLeafIteratorMaxLevel w ( myGrid() ) ;
-      for (w->first () ; ! w->done () ; w->next ())
-      {
-        if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
-        w->item ().resetRefinedTag();
+      typedef typename IteratorType :: val_t val_t ;
+      typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
 
-        // note, resetRefinementRequest sets the request to coarsen
-        //w->item ().resetRefinementRequest();
+      for (w.first () ; ! w.done () ; w.next ())
+      {
+        val_t & item = w.item();
+
+        IMPLElementType * elem = 0;
+        if( item.first )
+          elem = static_cast<IMPLElementType *> (item.first);
+        else if( item.second )
+          elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
+        assert( elem );
+        elem->resetRefinedTag();
       }
     }
-#else
-    //  if(mpAccess_.nlinks() < 1)
-    //#endif
-    {
-      maxlevel_ = 0;
-      ALU3DSPACE BSLeafIteratorMaxLevel w ( myGrid() ) ;
-      for (w->first () ; ! w->done () ; w->next ())
-      {
-        if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
-        w->item ().resetRefinedTag();
 
-        // note, resetRefinementRequest sets the request to coarsen
-        //w->item ().resetRefinementRequest();
-      }
-    }
-#endif
+    // check if max Level is consisten with calculated mxl
+    assert( checkMaxLevel () );
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -819,6 +860,8 @@ namespace Dune {
       // reset size and things
       updateStatus();
     }
+
+    assert( checkMaxLevel() );
     return changed;
 #else
     return false;
@@ -839,6 +882,9 @@ namespace Dune {
 
     typedef ALU3DSPACE LoadBalanceElementCount<ThisType,DataHandleType,
         Conversion<DataHandleType,IsDofManager>::exists > LDBElCountType;
+
+    // elCount is the adaption restPro operator used during the refinement
+    // cause be creating new elements on processors
     LDBElCountType elCount(*this,
                            father,this->getRealImplementation(father),
                            son,this->getRealImplementation(son),
@@ -866,6 +912,8 @@ namespace Dune {
       // compress data , wrapper for dof manager
       gs.dofCompress();
     }
+    postAdapt();
+    assert( checkMaxLevel() );
     return changed;
 #else
     return false;
@@ -1039,6 +1087,7 @@ namespace Dune {
       typedef typename ALU3dImplTraits<elType> :: BNDFaceType BNDFaceType;
       typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
       typedef typename ALU3dImplTraits<elType> :: HasFaceType HasFaceType;
+      typedef typename ALU3dImplTraits<elType> :: GEOVertexType GEOVertexType;
 
       file << "!" << elType2Name( elType ) << std::endl;
       {
@@ -1052,8 +1101,10 @@ namespace Dune {
 
         for( vx->first(); !vx->done() ; vx->next() )
         {
-          const double (&p)[3] = vx->item().Point();
-          int vxidx = vx->item().getIndex();
+          const GEOVertexType & vertex =
+            static_cast<GEOVertexType &> (vx->item());
+          const double (&p)[3] = vertex.Point();
+          int vxidx = vertex.getIndex();
           double (&v)[3] = vxvec[vxidx];
           for(int i=0; i<3; i++) v[i] = p[i];
         }

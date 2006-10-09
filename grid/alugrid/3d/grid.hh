@@ -565,7 +565,10 @@ namespace Dune {
     void calcExtras();
 
     //! calculate maxlevel
-    void calcMaxlevel();
+    void calcMaxLevel();
+
+    //! calculate maxlevel
+    bool checkMaxLevel();
 
     //! make grid walkthrough and calc global size
     void recalcGlobalSize();
@@ -590,8 +593,10 @@ namespace Dune {
     int nlinks () const {
 #if ALU3DGRID_PARALLEL
       return mpAccess_.nlinks();
+#else
+      // if no other processors exist then links is 0
+      return 0;
 #endif
-      return 1;
     }
 
   private:
