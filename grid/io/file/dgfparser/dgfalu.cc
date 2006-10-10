@@ -40,7 +40,6 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUSimplexGrid<2,2> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-
     return new ALUSimplexGrid<2,2>(str.c_str());
   }
 
@@ -63,7 +62,8 @@ namespace Dune {
                                   << " and connot be used to initialize an ALUGrid of dimension "
                                   << dimworld);
         }
-        mg.setOrientation(0);
+        mg.setOrientation(dimworld-1,dimworld);
+        // mg.setRefinement(dimworld-1,dimworld,-1,-1);
         str+=".ALUgrid";
         std::ofstream out(str.c_str());
         mg.writeAlu(out);
@@ -90,7 +90,6 @@ namespace Dune {
                                   << " and connot be used to initialize an ALUGrid of dimension "
                                   << dimworld);
         }
-        mg.setOrientation(0);
         str+=".ALUgrid";
         std::ofstream out(str.c_str());
         mg.writeAlu(out);

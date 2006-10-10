@@ -3,13 +3,7 @@
 #ifndef DUNE_MACROGRIDPARSERBLOCKS_HH
 #define DUNE_MACROGRIDPARSERBLOCKS_HH
 
-#include <dune/common/stdstreams.hh>
-#include "entitykey.hh"
-
 namespace Dune {
-
-  //! \brief exception class for IO errors in the DGF parser
-  class DGFException : public IOError {};
 
   // *************************************************************
   // Read one block with given identifier from disk
@@ -87,6 +81,10 @@ namespace Dune {
                               // for use in the derived classes
       // go back to beginning of block
       void reset() {
+        pos=-1;
+        block.clear();
+        block.seekg(0);
+        linecount=countlines();
         pos=-1;
         block.clear();
         block.seekg(0);
@@ -189,54 +187,80 @@ namespace Dune {
     // derived classes for each block in grid file
     // *************************************************************
     class VertexBlock : public BasicBlock {
-      static const char* ID;
       int dimworld;      // the dimesnsion of the verticies (is given from user)
       bool goodline;     // active line describes a vertex
       std::vector<double> p; // active vertex
+      int vtxoffset;
     public:
+      static const char* ID;
       // initialize vertex block and get first vertex
       VertexBlock(std::istream& in,int &pdimworld) :
         BasicBlock(in,ID),
         dimworld(pdimworld),
         goodline(true),
-        p(0)
+        p(0),
+        vtxoffset(0)
       {
-        if (dimworld==-1) {
-          assert(ok());
-          getnextline();
-          dimworld=0;
-          double x;
-          while (getnextentry(x))
+        /*
+           if (dimworld==-1) {
+           assert(ok());
+           getnextline();
+           dimworld=0;
+           double x;
+           while (getnextentry(x))
             dimworld++;
-          pdimworld=dimworld;
-          reset();
+           pdimworld=dimworld;
+           reset();
+           }
+           p.resize(dimworld);
+         */
+        if (dimworld<0)
+          dimworld=0;
+        {
+          int x;
+          if (findtoken("firstindex")) {
+            if (getnextentry(x)) {
+              vtxoffset=x;
+            }
+          }
         }
-        p.resize(dimworld);
+        reset();
         next();
+        pdimworld=dimworld;
       }
       ~VertexBlock() {}
+      int offset() {
+        return vtxoffset;
+      }
       int get(std::vector<std::vector<double> >& vtx) {
         size_t nofvtx;
         size_t old_size = vtx.size();
-        vtx.resize(old_size+nofvertex());
+        // vtx.resize(old_size+nofvertex());
         for (nofvtx=old_size; ok(); next(),nofvtx++) {
-          vtx[nofvtx].resize(dimworld);
-          for (int j=0; j<dimworld; j++) {
-            vtx[nofvtx][j] = p[j];
-          }
+          vtx.push_back(p);
+          /*
+             vtx[nofvtx].resize(dimworld);
+             for (int j=0;j<dimworld;j++) {
+             vtx[nofvtx][j] = p[j];
+             }
+           */
         }
-        if (nofvtx!=vtx.size()) {
-          DUNE_THROW(DGFException, "Wrong number of verticies read!");
-        }
-        return nofvertex();
+        /*
+           if (nofvtx!=vtx.size()) {
+           DUNE_THROW(DGFException, "Wrong number of verticies read!");
+           }
+         */
+        return nofvtx;
       }
       // some information
       bool ok() {
         return goodline;
       }
-      int nofvertex() {
-        return noflines();
-      }
+      /*
+         int nofvertex() {
+         return noflines();
+         }
+       */
     private:
       // get next vertex
       bool next() {
@@ -247,13 +271,27 @@ namespace Dune {
           goodline=false;
           return goodline;
         }
+        int olddimworld=dimworld;
         double x;
         while (getnextentry(x)) {
           if (n<dimworld)
             p[n]=x;
+          else {
+            p.push_back(x);
+            dimworld++;
+          }
           n++;
         }
-        goodline=(n==dimworld);
+        if (olddimworld>0 && dimworld!=olddimworld) {
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      wrong number of coordinates: "
+                                 << n << " read but expected " << dimworld);
+        }
+        if (n!=dimworld || dimworld<1) {
+          return next();
+        }
+        goodline=true;
         if (!goodline) {
           DUNE_THROW(DGFException,
                      "ERROR in " << *this
@@ -273,7 +311,6 @@ namespace Dune {
     const char *VertexBlock::ID = "Vertex";
     // *************************************************************
     class SimplexGenerationBlock : public BasicBlock {
-      const static char* ID;
       double area_;
       double angle_;
       bool display_;
@@ -285,6 +322,7 @@ namespace Dune {
       bool hasfile_;
       int dimension_;
     public:
+      const static char* ID;
       SimplexGenerationBlock(std::istream& in) :
         BasicBlock(in,ID),
         area_(-1),
@@ -306,9 +344,6 @@ namespace Dune {
         if (findtoken("min-angle"))
           if (getnextentry(x))
             angle_=x;
-        if (findtoken("display"))
-          if (getnextentry(b))
-            display_=b;
         if (findtoken("display"))
           if (getnextentry(b))
             display_=b;
@@ -366,12 +401,12 @@ namespace Dune {
     const char* SimplexGenerationBlock::ID = "Simplexgenerator";
     // *************************************************************
     class SimplexBlock : public BasicBlock {
-      const static char* ID;
       int nofvtx;
       int dimworld;
       bool goodline;  // active line describes a vertex
       std::vector<int> p; // active vertex
     public:
+      const static char* ID;
       SimplexBlock(std::istream& in,int pnofvtx, int adimworld) :
         BasicBlock(in,ID),
         nofvtx(pnofvtx),
@@ -383,7 +418,7 @@ namespace Dune {
         next();
       }
       ~SimplexBlock() {}
-      int get(std::vector<std::vector<int> >& simplex)
+      int get(std::vector<std::vector<int> >& simplex,int vtxoffset)
       {
         int nofsimpl;
         simplex.resize(nofsimplex());
@@ -411,14 +446,14 @@ namespace Dune {
                                                               << "        Read " << nofsimpl
                                                               << " elements, expected " << nofsimplex());
         }
-
         // make numbering starting from zero
         // not matter whether offset is positive or negative
+        offset = vtxoffset;
         if(offset != 0)
         {
           for (int i=0; i<nofsimpl; ++i)
           {
-            for (int j=0; j<dimworld+1; ++j)
+            for (size_t j=0; j<simplex[i].size(); ++j)
             {
               simplex[i][j] -= offset;
             }
@@ -427,8 +462,8 @@ namespace Dune {
         return nofsimpl;
       }
       // cubes -> simplex
-      int cube2simplex(std::vector<std::vector<double> >& vtx,
-                       std::vector<std::vector<int> >& elements) {
+      static int cube2simplex(std::vector<std::vector<double> >& vtx,
+                              std::vector<std::vector<int> >& elements) {
         static int offset3[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
                                        {{0,0,0},{1,1,1},{1,0,1},{1,0,0}},
                                        {{0,0,0},{1,1,1},{0,0,1},{1,0,1}},
@@ -437,6 +472,9 @@ namespace Dune {
                                        {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
         static int offset2[2][3][2] = {{{0,0},{1,0},{0,1}},
                                        {{1,1},{0,1},{1,0}}};
+        if (vtx.size()==0)
+          DUNE_THROW(DGFException, "Converting Cune- to Simplexgrid with no verticies given");
+        int dimworld = vtx[0].size();
         dverb << "generating simplices...";
         dverb.flush();
         std::vector<std::vector<int> > cubes = elements;
@@ -444,7 +482,6 @@ namespace Dune {
           elements.resize(6*cubes.size());
           for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
             elements[countsimpl].resize(4);
-
           for (size_t c=0; c<cubes.size(); c++)
           {
             for(int tetra=0; tetra < 6 ; tetra++)
@@ -549,40 +586,75 @@ namespace Dune {
     const char* SimplexBlock::ID = "Simplex";
     /// *************************************************************
     class CubeBlock : public BasicBlock {
-      const static char* ID;
       int nofvtx;
       int dimworld;
-      bool goodline;  // active line describes a vertex
+      bool goodline;    // active line describes a vertex
       std::vector<int> p; // active vertex
+      std::vector<int> map; // active vertex
     public:
+      static const char* ID;
       CubeBlock(std::istream& in,int pnofvtx, int adimworld) :
         BasicBlock(in,ID),
         nofvtx(pnofvtx),
         dimworld(adimworld),
         goodline(true),
-        p(1<<adimworld)
+        p(1<<adimworld),
+        map(1<<adimworld)
       {
         assert((dimworld+1)>0);
+        int x;
+        if (findtoken("map")) {
+          for (size_t i=0; i<map.size(); i++) {
+            if (getnextentry(x)) {
+              map[i]=x;
+            } else {
+              DUNE_THROW(DGFException,
+                         "ERROR in " << *this
+                                     << "      reference maping not complete "
+                                     << i
+                                     << " entries read but expected "
+                                     << map.size());
+            }
+          }
+        } else {
+          for (size_t i=0; i<map.size(); i++) {
+            map[i]=i;
+          }
+        }
+        reset();
         next();
       }
       ~CubeBlock() {}
-      int get(std::vector<std::vector<int> >& simplex) {
+      int get(std::vector<std::vector<int> >& simplex,int vtxoffset) {
         int nofsimpl;
-        simplex.resize(nofsimplex());
+        // simplex.resize(nofsimplex());
         for (nofsimpl=0; ok(); next(), nofsimpl++) {
-          simplex[nofsimpl].resize(p.size());
+          simplex.push_back(p);
           for (size_t j=0; j<p.size(); j++) {
-            simplex[nofsimpl][j] = p[j];
+            simplex[nofsimpl][map[j]] = p[j];
           }
         }
-        if (nofsimpl!=nofsimplex()) {
-          DUNE_THROW(DGFException,
+        int offset = vtxoffset;
+        if(offset != 0)
+        {
+          for (int i=0; i<nofsimpl; ++i)
+          {
+            for (size_t j=0; j<simplex[i].size(); ++j)
+            {
+              simplex[i][j] -= offset;
+            }
+          }
+        }
+        /*
+           if (nofsimpl!=nofsimplex()){
+           DUNE_THROW(DGFException,
                      "Error occured while reading element information!"
                      << std::endl
                      << "        expected " << nofsimplex()
                      << " element information "
                      << "        but only read " << nofsimpl << " elements.");
-        }
+           }
+         */
         return nofsimpl;
       }
       // some information
@@ -620,13 +692,16 @@ namespace Dune {
           n++;
         }
         // tests if the written block is ok in its size
-        goodline=(n==(int)p.size());
-        if (!goodline) {
-          DUNE_THROW(DGFException,
+        if (n!=(int)p.size()) {
+          return next();
+          /*
+             DUNE_THROW(DGFException,
                      "ERROR in " << *this
-                                 << "      wrong number of vertices: "
-                                 << "      read " << n << " but expected " << p.size());
+                     << "      wrong number of vertices: "
+                     << "      read " << n << " but expected " << p.size());
+           */
         }
+        goodline=(n==(int)p.size());
         return goodline;
       }
       // get coordinates of active simplex
@@ -641,7 +716,6 @@ namespace Dune {
     // *************************************************************
     // the block BoundaryDomBlock looks for a domain which is characterized by two points in R^dimworld
     class BoundaryDomBlock : public BasicBlock {
-      const static char* ID;
       int dimworld;    // the dimesnsion of the verticies (is given  from user)
       bool goodline;   // active line describes a vertex
       std::vector<double> p1,p2; // active vertex
@@ -649,6 +723,7 @@ namespace Dune {
       bool withdefault;
       int defaultvalue;
     public:
+      static const char* ID;
       // initialize vertex block and get first vertex
       BoundaryDomBlock(std::istream& in,int cdimworld ) :
         BasicBlock(in,ID),
@@ -660,6 +735,8 @@ namespace Dune {
         withdefault(false),
         defaultvalue(0)
       {
+        if (!isactive())
+          return;
         assert(cdimworld>0);
         {
           int x;
@@ -742,31 +819,101 @@ namespace Dune {
     // *************************************************************
     // the BoundarySegBlock looks for given boundary values unless they aren't given they got the value zero
     class BoundarySegBlock : public BasicBlock {
-      const static char* ID;
       int dimworld;      // the dimesnsion of the verticies (is given  from user)
       bool goodline;     // active line describes a vertex
       std::vector<int> p; // active vertex
       int bndid;
+      bool simplexgrid;
     public:
+      static const char* ID;
       // initialize vertex block and get first vertex
-      BoundarySegBlock(std::istream& in,int pnofvtx, int cdimworld ) :
+      BoundarySegBlock(std::istream& in,int pnofvtx,
+                       int pdimworld,bool psimplexgrid ) :
         BasicBlock(in,ID),
-        dimworld(cdimworld),
+        dimworld(pdimworld),
         goodline(true),
-        p(cdimworld+1)
+        p(),
+        bndid(-1),
+        simplexgrid(psimplexgrid)
       {
+        if (!isactive())
+          return;
         assert(dimworld>0);
         next();
       }
       ~BoundarySegBlock() {}
       // some information
+      int get(std::map<EntityKey<int>,int>& facemap,bool fixedsize,int vtxoffset) {
+        static int cube2simplex[3][3] = {
+          {0,1,3},
+          {0,2,3},
+          {1,2,3} };
+        int lnofbound;
+        int face=ElementFaceUtil::faceSize(dimworld,simplexgrid);
+        for (lnofbound=0; ok(); next()) {
+          for (size_t i=0; i<p.size(); i++) {
+            p[i] -= vtxoffset;
+          }
+          if (fixedsize) {
+            if ((dimworld==2 && size()<=2) ||
+                (dimworld==3 && simplexgrid && size()!=3 && size()!=4) ||
+                (dimworld==3 && !simplexgrid && size()!=4))
+              continue;
+            std::vector<int> bound(face);
+            for (int j=0; j<face; j++) {
+              bound[j] = p[j];
+            }
+            EntityKey<int> key(bound,false);
+            facemap[key] = bndid;
+            ++lnofbound;
+            if (size()>face) {
+              assert(dimworld==2 || face==3);
+              if (dimworld==3) {
+                for (int i=0; i<3; i++) {
+                  for (int j=0; j<face; j++) {
+                    bound[j] = p[cube2simplex[i][j]];
+                  }
+                  EntityKey<int> key(bound,false);
+                  facemap[key] = bndid;
+                  ++lnofbound;
+                }
+              } else {
+                for (int i=2; i<=size(); i++) {
+                  bound[0] = p[i-1];
+                  bound[1] = p[i%size()];
+                  EntityKey<int> key(bound,false);
+                  facemap[key] = bndid;
+                  ++lnofbound;
+                }
+              }
+            }
+          }
+          else {
+            if (dimworld==3) {
+              EntityKey<int> key(p,false);
+              facemap[key] = bndid;
+              ++lnofbound;
+            } else {
+              std::vector<int> k(2);
+              for (size_t i=0; i<p.size()-1; i++) {
+                k[0]=p[i];
+                k[1]=p[(i+1)%p.size()];
+                EntityKey<int> key(k,false);
+                facemap[key] = bndid;
+                ++lnofbound;
+              }
+            }
+          }
+        }
+        return lnofbound;
+      }
       bool ok() {
         return goodline;
       }
       int nofbound() {
         return noflines();
       }
-      // private:
+    private:
       bool next() {
         assert(ok());
         int n=0;
@@ -775,24 +922,24 @@ namespace Dune {
           goodline=false;
           return goodline;
         }
+        p.clear();
         int x;
-        while (getnextentry(x)) {
-          if (0<=n && n<dimworld+1)
-            p[n]=x;
-          n++;
-        }
-        goodline=(n==dimworld+1);
-        if (!goodline) {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      wrong number of coordinates: "
-                                 << n << " read but expected " << dimworld);
-        }
-        return goodline;
+        if (getnextentry(x)) {
+          bndid = x;
+          if (bndid<=0) {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      non-positive boundary id read!");
+          }
+          while (getnextentry(x)) {
+            p.push_back(x);
+            n++;
+          }
+          // goodline=(n==dimworld+1);
+          goodline=true;
+          return goodline;
+        } else return next();
       }
-
-
-
       // get coordinates of active vertex
       int operator[](int i) {
         assert(ok());
@@ -800,14 +947,17 @@ namespace Dune {
         assert(0<=i && i<dimworld+1);
         return p[i];
       }
+      int size() {
+        return p.size();
+      }
     };
     const char *BoundarySegBlock::ID = "boundarysegments";
     // *************************************************************
     class DimBlock : public BasicBlock {
-      const static char* ID;
       int _dimworld; // dimension of world
       int _dim;      // dimension of grid
     public:
+      const static char* ID;
       // initialize block and get dimension of world
       DimBlock(std::istream& in) :
         BasicBlock(in,ID)
@@ -851,82 +1001,53 @@ namespace Dune {
     const char* DimBlock::ID = "Dimensions";
     // *************************************************************
     class IntervalBlock : public BasicBlock {
-      const static char* ID;
       std::vector<double> p0_,p1_; //lower and upper boundary points
-      std::vector<double> h_;    // width of the cells in every direction
-      int nofcells_[3];                // number of cells in every direction
+      std::vector<double> h_;      // width of the cells in every direction
+      std::vector<int> nofcells_;  // number of cells in every direction
       bool good_;                  //data read correctly
       int dimw_;                   //dimension of world
     public:
+      const static char* ID;
       IntervalBlock(std::istream& in) :
         BasicBlock(in,ID),
         p0_(0),
         p1_(0),
         h_(0),
+        nofcells_(0),
         good_(false),
         dimw_(0)
       {
         if(isactive()) {
-          //read p0_
           getnextline();
           double x;
           while (getnextentry(x)) {
-            p0_.push_back(x);
             dimw_++;
           }
           if (dimw_==0) {
             DUNE_THROW(DGFException,
-                       "Too few coordinates for lower point p0");
+                       "Too few coordinates for point p0 in IntervalBlock");
           }
+          p0_.resize(dimw_);
           p1_.resize(dimw_);
           h_.resize(dimw_);
-          //read p1_
-          getnextline();
-          for(int i = 0; i<dimw_; i++)
-            if(getnextentry(x))
-              p1_[i] = x;
-            else  {
-              DUNE_THROW(DGFException,
-                         "Too few coordinates for lower point p1");
-            }
-          //assert((p0_[0] < p1_[0]) && (p0_[1] < p1_[1]) && (p0_[2] < p1_[2]));
-
-          //find real upper and lower edge
-          std::vector<double> p0h(dimw_),p1h(dimw_); //help variables
-          for(int i = 0; i<dimw_; i++) {
-            p0h[i] = p0_[i] < p1_[i] ? p0_[i] : p1_[i];
-            p1h[i] = p0_[i] > p1_[i] ? p0_[i] : p1_[i];
-          }
-          p0_ = p0h;
-          p1_ = p1h;
-          //get numbers of cells for every direction
-          getnextline();
-          int number;
-          for(int i = 0; i<dimw_; i++)
-            if(getnextentry(number))
-              nofcells_[i] = number;
-            else {
-              DUNE_THROW(DGFException,
-                         "Couldn't detect a number of cells for every direction");
-            }
-          good_ = true;
-          for(int i =0; i < dimw_; i++)
-            h_[i] = (p1_[i] - p0_[i])/nofcells_[i];
-          //Printing Data on screen
-          dverb << "p0 = (";
-          for(int i = 0; i<dimw_-1; i++)
-            dverb << p0_[i]  <<",";
-          dverb << p0_[dimw_-1] <<") \n";
-          dverb << "p1 = (";
-          for(int i = 0; i<dimw_-1; i++)
-            dverb << p1_[i]  <<",";
-          dverb << p1_[dimw_-1] <<") \n";
-          dverb << "n = (";
-          for(int i = 0; i<dimw_-1; i++)
-            dverb << nofcells_[i]  <<",";
-          dverb << nofcells_[dimw_-1] <<") \n";
-          dverb << std::endl;
+          nofcells_.resize(dimw_);
+          reset();
+          next();
         }
+      }
+      void get(std::vector<std::vector<double> >& vtx,int& nofvtx,
+               std::vector<std::vector<int> >& simplex,int& nofsimpl) {
+        do {
+          int oldvtx = nofvtx;
+          nofvtx  +=getVtx(vtx);
+          nofsimpl+=getHexa(simplex,oldvtx);
+        } while (next());
+      }
+      void get(std::vector<std::vector<double> >& vtx,int& nofvtx) {
+        do {
+          // int oldvtx = nofvtx;
+          nofvtx  +=getVtx(vtx);
+        } while (next());
       }
       int getVtx(std::vector<std::vector<double> >& vtx) {
         size_t countvtx;
@@ -958,182 +1079,49 @@ namespace Dune {
         dverb << "done" << std::endl;
         return nofvtx();
       }
-
-      int getSimplex(std::vector<std::vector<int> >& simplex) {
-        //fill simplex
-        size_t countsimpl;
-        int m=0;
-        //static int offset[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
-        //				  {{0,0,0},{1,1,1},{1,0,0},{1,0,1}},
-        //			  {{0,0,0},{1,1,1},{0,0,1},{1,0,1}},
-        //			  {{0,0,0},{1,1,1},{0,1,0},{1,1,0}},
-        //			  {{0,0,0},{1,1,1},{0,1,0},{0,1,1}},
-        //			  {{0,0,0},{1,1,1},{0,0,1},{0,1,1}}};
-        static int offset[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
-                                      {{0,0,0},{1,1,1},{1,0,1},{1,0,0}},
-                                      {{0,0,0},{1,1,1},{0,0,1},{1,0,1}},
-                                      {{0,0,0},{1,1,1},{1,1,0},{0,1,0}},
-                                      {{0,0,0},{1,1,1},{0,1,0},{0,1,1}},
-                                      {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
-        dverb << "generating simplices...";
-        dverb.flush();
-        if(dimw_ == 3) {
-          simplex.resize(6*nofhexa() );
-          for(countsimpl=0; countsimpl < simplex.size(); countsimpl++)
-            simplex[countsimpl].resize(4);
-          for(int i =0; i < nofcells_[0]; i++)
-            for(int j=0; j < nofcells_[1]; j++)
-              for(int k=0; k < nofcells_[2]; k++) {
-                for(int tetra=0; tetra < 6 ; tetra++)
-                  for(int vert = 0 ; vert < 4 ; vert++)
-                    simplex[m+tetra][vert] =
-                      getIndex(i+offset[tetra][vert][0],
-                               j+offset[tetra][vert][1],
-                               k+offset[tetra][vert][2]);
-                m+=6;
-              }
-        }
-        else {
-          simplex.resize(2*nofhexa() );
-          for(countsimpl=0; countsimpl < simplex.size(); countsimpl++)
-            simplex[countsimpl].resize(3);
-          for(int i =0; i < nofcells_[0]; i++)
-            for(int j=0; j < nofcells_[1]; j++) {
-              simplex[m][0] = getIndex(i+1,j);
-              simplex[m][1] = getIndex(i+1,j+1);
-              simplex[m][2] = getIndex(i,j);
-              simplex[m+1][0] = getIndex(i,j+1);
-              simplex[m+1][1] = getIndex(i,j);
-              simplex[m+1][2] = getIndex(i+1,j+1);
-              m+=2;
-            }
-        }
-
-        dverb << "done" << std::endl;
-        dverb.flush();
-        return simplex.size();
-      }
-      int getHexa(std::vector<std::vector<int> >& simplex) {
+      int getHexa(std::vector<std::vector<int> >& simplex,
+                  int offset=0) {
+        int oldsize=simplex.size();
         //fill simplex with Hexaeder
         size_t counthexa;
         int verticesPerCube;
-        int m=0;
+        int m=oldsize;
         if(dimw_ == 3)
           verticesPerCube = 8;
         else
           verticesPerCube = 4;
         dverb << "generating hexaeder...";
-        simplex.resize(nofhexa());
-        for (counthexa=0; counthexa < simplex.size(); counthexa++)
+        simplex.resize(oldsize+nofhexa());
+        for (counthexa=m; counthexa < simplex.size(); counthexa++)
           simplex[counthexa].resize(verticesPerCube);
         if(dimw_ == 3) {
           for(int i =0; i < nofcells_[0]; i++)
             for(int j=0; j < nofcells_[1]; j++)
               for(int k=0; k < nofcells_[2]; k++) {
-                simplex[m][0] = getIndex(i,j,k);
-                simplex[m][1] = getIndex(i+1,j,k);
-                simplex[m][2] = getIndex(i,j+1,k);
-                simplex[m][3] = getIndex(i+1,j+1,k);
-                simplex[m][4] = getIndex(i,j,k+1);
-                simplex[m][5] = getIndex(i+1,j,k+1);
-                simplex[m][6] = getIndex(i,j+1,k+1);
-                simplex[m][7] = getIndex(i+1,j+1,k+1);
+                simplex[m][0] = offset+getIndex(i,j,k);
+                simplex[m][1] = offset+getIndex(i+1,j,k);
+                simplex[m][2] = offset+getIndex(i,j+1,k);
+                simplex[m][3] = offset+getIndex(i+1,j+1,k);
+                simplex[m][4] = offset+getIndex(i,j,k+1);
+                simplex[m][5] = offset+getIndex(i+1,j,k+1);
+                simplex[m][6] = offset+getIndex(i,j+1,k+1);
+                simplex[m][7] = offset+getIndex(i+1,j+1,k+1);
                 m++;
               }
         }
         else {
           for(int i =0; i < nofcells_[0]; i++)
             for(int j=0; j < nofcells_[1]; j++) {
-              simplex[m][0] = getIndex(i,j);
-              simplex[m][1] = getIndex(i+1,j);
-              simplex[m][2] = getIndex(i,j+1);
-              simplex[m][3] = getIndex(i+1,j+1);
+              simplex[m][0] = offset+getIndex(i,j);
+              simplex[m][1] = offset+getIndex(i+1,j);
+              simplex[m][2] = offset+getIndex(i,j+1);
+              simplex[m][3] = offset+getIndex(i+1,j+1);
               m++;
             }
         }
         dverb << "done" << std::endl;
-        return simplex.size();
-      }
-
-      void getCubeBoundary(std::map<EntityKey<int>,int>& facemap) {
-
-        //fill facemap
-        dverb << "Filling boundary facemap of Hexagrid...";
-        if(dimw_ == 3) {
-          for(int j=0; j < nofcells_[1]; j++)
-            for(int k=0; k < nofcells_[2]; k++) {
-              std::vector<int> entity(4);
-              entity[0] = getIndex(0,j,k);
-              entity[1] = getIndex(0,j+1,k);
-              entity[2] = getIndex(0,j+1,k+1);
-              entity[3] = getIndex(0,j,k+1);
-              EntityKey<int> key3(entity);
-              facemap[key3] = 0;
-              entity[0] = getIndex(nofcells_[0],j,k);
-              entity[1] = getIndex(nofcells_[0],j,k+1);
-              entity[2] = getIndex(nofcells_[0],j+1,k+1);
-              entity[3] = getIndex(nofcells_[0],j+1,k);
-              EntityKey<int> key4(entity);
-              facemap[key4] = 0;
-            }
-          for(int i=0; i < nofcells_[0]; i++)
-            for(int k=0; k < nofcells_[2]; k++) {
-              std::vector<int> entity(4);
-              entity[0] = getIndex(i,0,k);
-              entity[1] = getIndex(i,0,k+1);
-              entity[2] = getIndex(i+1,0,k+1);
-              entity[3] = getIndex(i+1,0,k);
-              EntityKey<int> key3(entity);
-              facemap[key3] = 0;
-              entity[0] = getIndex(i,nofcells_[1],k);
-              entity[1] = getIndex(i+1,nofcells_[1],k);
-              entity[2] = getIndex(i+1,nofcells_[1],k+1);
-              entity[3] = getIndex(i,nofcells_[1],k+1);
-              EntityKey<int> key4(entity);
-              facemap[key4] = 0;
-            }
-          for(int i=0; i < nofcells_[0]; i++)
-            for(int j=0; j < nofcells_[1]; j++) {
-              std::vector<int> entity(4);
-              entity[0] = getIndex(i,j,0);
-              entity[1] = getIndex(i+1,j,0);
-              entity[2] = getIndex(i+1,j+1,0);
-              entity[3] = getIndex(i,j+1,0);
-              EntityKey<int> key3(entity);
-              facemap[key3] = 0;
-              entity[0] = getIndex(i,j,nofcells_[2]);
-              entity[1] = getIndex(i,j+1,nofcells_[2]);
-              entity[2] = getIndex(i+1,j+1,nofcells_[2]);
-              entity[3] = getIndex(i+1,j,nofcells_[2]);
-              EntityKey<int> key4(entity);
-              facemap[key4] = 0;
-            }
-        }
-        else {
-          for(int i=0; i < nofcells_[0]; i++) {
-            std::vector<int> entity(2);
-            entity[0] = getIndex(i,0);
-            entity[1] = getIndex(i+1,0);
-            EntityKey<int> key3(entity);
-            facemap[key3] = 0;
-            entity[0] = getIndex(i+1,nofcells_[1]);
-            entity[1] = getIndex(i,nofcells_[1]);
-            EntityKey<int> key4(entity);
-            facemap[key4] = 0;
-          }
-          for(int j=0; j < nofcells_[1]; j++) {
-            std::vector<int> entity(2);
-            entity[0] = getIndex(0,j);
-            entity[1] = getIndex(0,j+1);
-            EntityKey<int> key3(entity);
-            facemap[key3] = 0;
-            entity[0] = getIndex(nofcells_[0],j+1);
-            entity[1] = getIndex(nofcells_[0],j);
-            EntityKey<int> key4(entity);
-            facemap[key4] = 0;
-          }
-        }
-        dverb << "done" << std::endl;
+        assert((size_t)m==simplex.size());
+        return nofhexa();
       }
 
       int nofvtx() {
@@ -1166,11 +1154,11 @@ namespace Dune {
       double end(int i) {
         return p1_[i];
       }
-
-      bool ok() {
-        return good_;
-      }
-
+      /*
+         bool ok() {
+         return good_;
+         }
+       */
       int dimw() {
         return dimw_;
       }
@@ -1180,6 +1168,72 @@ namespace Dune {
           return i*(nofcells_[1]+1)*(nofcells_[2]+1) + j*(nofcells_[2]+1) + k;
         else
           return i*(nofcells_[1]+1) + j;
+      }
+    private:
+      bool next() {
+        if (linenumber()==noflines()-1) {
+          good_=false;
+          return good_;
+        }
+        //read p0_
+        getnextline();
+        double x;
+        for(int i = 0; i<dimw_; i++)
+          if(getnextentry(x))
+            p0_[i] = x;
+          else  {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "Too few coordinates for point p0");
+          }
+        //read p1_
+        getnextline();
+        for(int i = 0; i<dimw_; i++)
+          if(getnextentry(x))
+            p1_[i] = x;
+          else  {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "Too few coordinates for point p1");
+          }
+
+        //find real upper and lower edge
+        std::vector<double> p0h(dimw_),p1h(dimw_); //help variables
+        for(int i = 0; i<dimw_; i++) {
+          p0h[i] = p0_[i] < p1_[i] ? p0_[i] : p1_[i];
+          p1h[i] = p0_[i] > p1_[i] ? p0_[i] : p1_[i];
+        }
+        p0_ = p0h;
+        p1_ = p1h;
+        //get numbers of cells for every direction
+        getnextline();
+        int number;
+        for(int i = 0; i<dimw_; i++)
+          if(getnextentry(number))
+            nofcells_[i] = number;
+          else {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "Couldn't detect a number of cells for every direction");
+          }
+        good_ = true;
+        for(int i =0; i < dimw_; i++)
+          h_[i] = (p1_[i] - p0_[i])/double(nofcells_[i]);
+        //Printing Data on screen
+        dverb << "p0 = (";
+        for(int i = 0; i<dimw_-1; i++)
+          dverb << p0_[i]  <<",";
+        dverb << p0_[dimw_-1] <<") \n";
+        dverb << "p1 = (";
+        for(int i = 0; i<dimw_-1; i++)
+          dverb << p1_[i]  <<",";
+        dverb << p1_[dimw_-1] <<") \n";
+        dverb << "n = (";
+        for(int i = 0; i<dimw_-1; i++)
+          dverb << nofcells_[i]  <<",";
+        dverb << nofcells_[dimw_-1] <<") \n";
+        dverb << std::endl;
+        return good_;
       }
     };
     const char* IntervalBlock::ID = "Interval";

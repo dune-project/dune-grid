@@ -16,8 +16,16 @@
 
 //- Dune includes
 #include <dune/common/mpihelper.hh>
-
+#include <dune/grid/common/referenceelements.hh>
+#include <dune/common/stdstreams.hh>
 //- local includes
+
+namespace Dune {
+  //! \brief exception class for IO errors in the DGF parser
+  class DGFException : public IOError {};
+};
+
+#include "entitykey.hh"
 #include "dgfparserblocks.hh"
 
 /**
@@ -37,21 +45,24 @@
  */
 
 namespace Dune {
-
   //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
   //! build information in vector structures used by the MacroGrid class.
+  namespace {
+    class PrintInfo;
+  }
   class DuneGridFormatParser {
   public:
     //! default constructor which does nothing
     DuneGridFormatParser() :
       dimw(-1),
-      vtx(0), nofvtx(0),
+      vtx(0), nofvtx(0), vtxoffset(0),
       elements(0) , nofelements(0),
       bound(0) , nofbound(0),
       facemap(),
       element(General),
       simplexgrid(false),
-      isInterval(false)
+      cube2simplex(false),
+      info(0)
     {}
 
     typedef enum {Simplex,Cube,General} element_t;
@@ -61,6 +72,8 @@ namespace Dune {
     //! fills the vtx,element, and bound vectors
     //! returns true if reading succeded
     inline bool readDuneGrid(std::istream&);
+    //! method to write in Tetgen/Triangle Poly Format
+    inline void writeTetgenPoly(std::ostream&);
     //! method to write macrogridfiles in alu format (cam be used without dune)
     inline void writeAlu(std::ostream&);
     //! method to write macrogridfiles in alberta format (cam be used without dune)
@@ -71,6 +84,7 @@ namespace Dune {
     // vector of vertex coordinates
     std::vector < std::vector <double> > vtx;
     int nofvtx;
+    int vtxoffset;
     // vector of elements
     std::vector < std::vector <int> > elements;
     int nofelements;
@@ -78,21 +92,26 @@ namespace Dune {
     std::vector < std::vector <int> > bound;
     int nofbound;
     // map to generate and find boundary segments
-    std::map<EntityKey<int>,int> facemap;
+    typedef std::map<EntityKey<int>,int> facemap_t;
+    facemap_t facemap;
     // set by generator depending on element type wanted
     element_t element;
     // set by the readDuneGrid method depending
     // on what type the elements were generated
     bool simplexgrid;
     // true if grid is generated using the intervall Block
-    bool isInterval;
+    bool cube2simplex;
+    // write information about generation process
+    PrintInfo* info;
+    inline void generateBoundaries(std::istream&,bool);
     // call to tetgen/triangle
     inline void generateSimplexGrid(std::istream&);
     inline void readTetgenTriangle(std::string);
     // helper methods
-    inline void setOrientation(int fixvtx,orientation_t orientation=counterclockwise);
-    inline void setRefinement(int);
-    double testTriang(int snr);
+    inline void removeCopies();
+    inline void setOrientation(int use1,int use2,orientation_t orientation=counterclockwise);
+    inline void setRefinement(int use1,int use2,int is1=-1,int is2=-1);
+    inline double testTriang(int snr);
   };
 
   class MacroGrid : protected DuneGridFormatParser
@@ -244,14 +263,15 @@ namespace Dune {
      is selected in some way, the grid can be constructed either by calling
 
      @code
-       Dune::GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
+       Dune::GridPtr<GridType> gridptr(filename, mpiHelper.getCommunicator() );
      @endcode
       or
      @code
        Dune::GridPtr<GridType> gridptr(filename);
      @endcode
 
-     where in the second example \c MPI_COMM_WORLD is selected as default
+     where in the second example \c MPIHelper::getCommunicator()
+     is selected as default
      value. Here \c filename is the name of the dgf file. This creates an
      auto pointer like object \c GridPtr which holds a pointer to an instance
      of \c GridType whose macrogrid is described through the
@@ -273,8 +293,8 @@ namespace Dune {
      <!--=========-->
      We assume in the following that the type
      \c GridType  is suitably defined, denoting a dune grid type
-     in \c dimworld  space dimension. In the following
-     a point in dimworld space is called a vector.
+     in \c dimworld  space dimension.
+     A point in dimworld space is called a vector.
 
      In general dgf files consists of one or more blocks, each starting with a
      keyword and ending with a line starting with a # symbol.
@@ -310,24 +330,29 @@ namespace Dune {
        Each line consists of a positive integer denoting a boundary
        id and a set of vertex indices (see \b Vertex block)
        describing one boundary patch of the macrogrid.
-       \e Note: so far only simplex grid patches can be prescribed in this way.
      - \b Cube  \n
-       Each line consists of \c dimworld<SUP>2</SUP> vertex indices (see \b Vertex block)
-       describing one cube
-       of the macrogrid. \e Note that the ordering of the local vertices
-       has to follow the %Dune
-       @link GridReferenceElements reference elements@endlink.
+       Each line consists of \c dimworld<SUP>2</SUP> vertex indices
+       (see \b Vertex block) describing one cube
+       of the macrogrid.
+       - If the ordering of the local vertices of the cube elements
+         does not follow the %Dune
+         %@link GridReferenceElements reference element@endlink then
+         the mapping between the local numbering used and the dune reference
+         cube has to be prescribed by a line starting with the keyword \b map
+         followed by
+         \c dimworld<SUP>2</SUP> values describing the mapping between the
+         local vertex numbers.
      - \b Interval \n
-       The first two lines give the lower and upper vector of an interval,
+       Each interval is described by three lines in this block:
+       the first two lines give the lower and upper vector of an interval,
        the third line consists of \c dimworld integers. used to determine the
        initial partition of the interval into equal sized cubes.
-     - \b Simples \n
+       More than one interval can be described in this fashion.
+     - \b Simplex \n
        Each line consists of \c dimworld+1 vertex indices (see \b Vertex block)
        describing one simplex
        of the macrogrid.
-       \e Note that in 2d no ordering of local vertices is required, in
-       3d each should conform with the %Dune
-       @link GridReferenceElements reference elements@endlink.
+       \e Note that no ordering of local vertices is required.
      - \b Simplexgenerator \n
        Using this block a simplex grid can be automatically generated using
        one of the freely available grid generation tools
@@ -337,12 +362,22 @@ namespace Dune {
       .
      - \b Vertex \n
        Each line consists of a vector representing a vertex of the
-       macrogrid. The vertices are consecutively numbered starting from zero -
-       these numbers are called vertex indices and can be referenced in the
+       macrogrid. The vertices are consecutively numbered.
+       leading to vertex indices which can be referenced in the
        \b Simplex, \b Cube, and \b Boundarysegment blocks.
+       - By default the numbering starts from zero; to change this behaviour
+         the keyword
+         \b firstindex followed by a positive integer denoting the number
+         of the first vertex can be used.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->
+     For simplicity we first describe how the grid is manually constructed,
+     i.e., if no \b Simplexgenerator  block is found. Details on how
+     Tetgen/Triangle can be used is detailed below (see \ref Simplexgeneration).
+     The details of the construction are logged in the file
+     \b dgfparser.log.
+
      The construction of the grid depends on the type of elements the grid
      given by \c GridType can handle.
 
@@ -351,40 +386,42 @@ namespace Dune {
       Dune::YaspGrid )
 
      The grid is constructed using only the information from the
-     \b Interval  block.
+     first three lines of the \b Interval  block.
 
      @subsection CONSTRSIMPL Simplex grids
      (Dune::AlbertaGrid, or
       Dune::ALUSimplexGrid<3,3>, and
       Dune::ALUSimplexGrid<2,2>)
 
-     The verticies and elements of the grid are constructed in one of the
-     following four stages:
-     -# The parser firsts looks for the \b Simplex generation  block.
-        If this block is found, a grid is generated via Triangle/Tetgen
-        using as  verticies the union of the verticies defined by the
-        \b Interval  and the \b Vertex  block.
-     -# If no \b Simplexgeneration  block is present,
-        the file is parser for
-        an \b Interval  block; if present a Cartesian grid is build and
+     The verticies and elements of the grid are constructed in the
+     following three steps:
+     -# The file is parser for
+        an \b Interval  block; if present a Cartesian grid is build for each
+        interval defined in this block and
         each element is partitioned either into two triangles or into six
-        tetrahedron.
-     -# If neither a \b Simplexgeneration  nor a \b Interval
+        tetrahedron. The user has to make sure that this process leads to
+        a conforming grid.
+     -# If no \b Interval
         block is found, the grid is generated using the information
-        from the \b Vertex  and the \b Simplex  blocks.
+        from the \b Vertex and the \b Simplex or \b Cube  blocks.
+        If a non-empty \b Simplex block is found the element information is
+        only taken from there; in the case where no \b Simplex block is found
+        or in the case where it is empty, the \b Cube block is read and each
+        cube is partitioned into simplex elements - in 3d this process will
+        not always lead to a correct macro triangulation!
         Note that no specific ordering of the local numbering of each simplex
-   is required.
-     -# If so far no element information has been generated, the parser
-        tries to first generate a cube grid using information from
-   the \b Vertex and the \b Cube  blocks, If this is successful,
-   each cube is split into simplex elements.
+        is required but the cubes must either conform with the Dune reference
+        element or the mapping must be prescribed using the map keyword.
      .
      If the simplex generation process was successful, boundary ids are
      assigned to all boundary faces of the macrogrid.
      -# If the macrogrid was constructed in the third step of the generation
-        process detailed above, then the file is first parsed for
+        process detailed above (i.e. using the vertex block),
+        then the file is first parsed for
         \b Boundarysegment  block. Here boundary ids can be
-        individually assigned to each boundary segment of the macrogrid.
+        individually assigned to each boundary segment of the macrogrid
+        by specifying the vertex ids. Boundary segments can either be described
+        as simplex elements or as cube elements.
      -# All Boundary segments which have not
         yet been assigned an identifier and lie inside the
         interval defined by the first line of the \b Boundarydomain
@@ -397,16 +434,8 @@ namespace Dune {
         behavior of the parser is not well defined.
      .
      \b Remark:
-     -# Dune::Alberta with \c dimworld=3: \n
-        if Tetgen is used to construct a
-        tetrahedral grid for Dune::Alberta then the bisection routine does
-        not necessarily terminate. This problem does not occur
-        if the grid is constructed using the \b Interval block. If the
-        simplicies are defined through the \b Simplex block then the second
-        vertex of each element is taken as refinement vertex.
-     -# \c dimworld=2: \n
-        the refinement vertex is always chosen to be the vertex opposite the
-        longest edge in each triangle.
+     -# \c Bisection: \n
+        the refinement edge is always chosen to be the longest edge.
 
      @subsection CONSTRCUBE Cube grids
      (Dune::ALUCubeGrid<3,3>)
@@ -425,40 +454,101 @@ namespace Dune {
      constructed even if the implemented grid allows for mixed elements.
 
      The verticies and elements of the grid are constructed in one of the
-     following three stages:
-     -# The parsers firsts looks for the \b Simplexgeneration  block.
-        If this block is found, a simplex grid is generate via Triangle/Tetgen
-        using as verticies the union of the verticies defined by the
-        \b Interval  and the \b Vertex  block.
-     -# If no \b Simplexgeneration  block is present,
-        the file is parser for
+     following stages:
+     -# The file is first parser for
         an \b Interval  block; if present a Cartesian grid is build;
         a simplex grid is generated if a \c Simplex block is present
         otherwise a cube grid is constructed.
-     -# If neither a \b Simplexgeneration  nor a \b Interval
+     -# If no \b Interval
         block is found, the grid is generated using the information
         from the \b Vertex block; cube elements are constructed if the
-   \b Cube block is present otherwise the \b Simplex blocks is read.
-   If both a \b Cube and a \b Simplex block is found, then only
-   the element information from the \b Cube block is used and each
+        \b Cube block is present otherwise the \b Simplex blocks is read.
+        If both a \b Cube and a \b Simplex block is found, then only
+        the element information from the \b Cube block is used and each
         cube is split into simplex elements so that
-   a simplex grid is constructed.
+        a simplex grid is constructed.
      .
      Boundary ids are assigned in the same manner as described for
      simplex grids.
 
-   @section OPEN Still to be done
+    <!---------------------------------------------->
+   \section Simplexgeneration Using Tetgen/Triangle
+       The freely available simplex grid generators are direcltly
+       called via system
+       call through the dgfparser.
+       Therefore one should either add the path containing the executables of
+       Triangle and/or Tetgen to the environment variable PATH or use the path
+       option described below.
+       One can either use a file in Tetgen/Triangle format to directly generate
+       a macro grid or one can prescribe vertices and boundary faces
+       which will be used to generate the grid directly in th DGF file:
+       -# For the first approach use the token \b file to give a filemane
+          and the type of the file (e.g. node, mesh, ply...). Example:
+          \code
+            file name mesh
+          \endcode
+          If the filetype is givn, it will be appended to \b name and this will be
+          passed to Tetgen/Triangle. Additional parameters for the grid generators
+          can be given by the the \b parameter token.
+          If no file type is given it is assumed that in a previous run of
+          Tetgen/Triangle
+          files name.node and name.ele were generated and these will be used
+          to described the verticies and elements of the Dune grid.
+       -# For the second approach the \b vertex block and the \b interval blocks
+          (if present)
+          are used to generate the verticies of the grid - the resulting .node
+          file is passed directly to Tetgen/Triangle and a tessellation of
+          the convex hull of the points is generated. A more detailed
+          description of the domain is possible by using the \b
+          Boundarysegment block together with the \b vertex block.
+          Planar polyhedral boundary faces of the domain can be
+          prescribed in this way.
+          Note that in this case the whole
+          domain boundary has to be defined (see the description of
+          the .poly files in the Tetgen documentation).
+          In 3d each polyhedral face (p0,..,pn) is automatically closed by adding
+          the segment between p0 and pn. To define the whole boundary
+          of a 2d domain using only one polyhedron the closing
+          segment has to be added, i.e., (p0,..,pn,p0).
+       .
+
+       Some identifiers can be
+       used to influence the quality of the generated mesh:
+       -  \b max-area
+          followed by a positive real number used as an upper bound for the
+          area of all simplicies of the mesh.
+       -  \b min-angle
+          followed by a positive number. In 2d this limits the angles in
+          resulting mesh from below; in 3d this bounds the radius-edge ratio
+          from above.
+       .
+       In this case the grid is constructed using two calls to Tetgen/Triangle.           The details of the call are logged in the \b dgfparser.log file.
+
+       The remaining identifiers are
+       -  The identifier \b path
+          (followed by a path name) can be used
+          to give search path for Triangle/Tetgen.
+       -  The identifier \b display
+          followed by 1 can be used to get a first impression
+          of the resulting mesh using the visualization tools distributed with
+          Triangle/Tetgen.
+       .
+       Download
+       - Tetgen http://tetgen.berlios.de
+       - Triangle http://www.cs.cmu.edu/~quake/triangle.html
+
+
+     <!---------------------------------------------->
+
+   @section OPEN Work in progress
    -# There should be a mechanism to fix the desired refinement edge
-      for simplex grids. In 2d an automatic selection is performed using the
-      longest edge, a similar mechanism for 3d has to be implemented.
-      It should be possible to turn off this automatic selection.
-   -# For triangular elements it is not necessary to give the local
-      numbering of the node conform to the %Dune reference element. This
-      approach should be extended to tetrahedrons and to cube elements.
-   -# Boundary segments for cube grids are not yet implemented.
-   -# There is no possibility to single out individual boundary if
-      an automatic grid generation process is used, i.e., the
-      boundary segment block is ignored.
+      for simplex grids. An automatic selection is performed using the
+      longest edge, but
+      it should be possible to turn off this automatic selection.
+   -# A parameter block for vertex and element data (e.g. domain information...)
+   -# A callback to the user
+      between parsing the DGF file and the construction of the dune grid;
+      here e.g. a post-processing of the vertex coordinates could be included.
 
    @section EXAMPLES Examples
    <!--=========-->
@@ -480,14 +570,12 @@ namespace Dune {
    @include examplegrid1s.dgf
 
    \image html  examplegrid1s.png "The resulting grid"
-   \image latex examplegrid1s.eps "The resulting grid" width=\textwidth
 
    A tessellation into cubes using the same verticies as before,
 
    @include examplegrid1c.dgf
 
    \image html  examplegrid1c.png "The resulting grid"
-   \image latex examplegrid1c.eps "The resulting grid" width=\textwidth
 
    Using the last input file with a simplex grid or by adding an empty
    \c Simplex block
@@ -498,7 +586,6 @@ namespace Dune {
    leads to the following macro triangulation
 
    \image html  examplegrid1cs.png "The resulting grid"
-   \image latex examplegrid1cs.eps "The resulting grid" width=\textwidth
 
    \section dgfexample2 Automated Grid Construction
    Automatic tessellation using Triangle,
@@ -507,7 +594,6 @@ namespace Dune {
    @include examplegrid1gen.dgf
 
    \image html  examplegrid1gen.png "The resulting grid"
-   \image latex examplegrid1gen.eps "The resulting grid" width=\textwidth
 
    The quality of the grid can be enhanced by adding the line
    @code
@@ -516,7 +602,6 @@ namespace Dune {
    in the \c Simplexgenerator block
 
    \image html  examplegrid1genangle.png "The resulting grid"
-   \image latex examplegrid1genangle.eps "The resulting grid" width=\textwidth
 
    Automatic tessellation using Triangle,
    with verticies are defined on a Cartesian grid with two additional
@@ -524,28 +609,31 @@ namespace Dune {
 
    All boundary are given a default id.
 
-   @include examplegrid2.dgf
+   @include examplegrid2a.dgf
 
-   \image html  examplegrid2.png "The resulting grid"
-   \image latex examplegrid2.eps "The resulting grid" width=\textwidth
+   \image html  examplegrid2a.png "The resulting grid"
 
    Adding some quality enhancement.
    The boundaries are numbered counterclockwise starting at the left
    boundary from one to four.
 
-   @include examplegrid3.dgf
+   @include examplegrid2b.dgf
 
-   \image html  examplegrid3.png "The resulting grid"
-   \image latex examplegrid3.eps "The resulting grid" width=\textwidth
+   \image html  examplegrid2b.png "The resulting grid"
 
    Using both quality enhancement and a maximum area restriction.
    The bottom boundary is given the id 1 all other boundaries have
    id 2; here we do not use a default value.
 
-   @include examplegrid4.dgf
+   @include examplegrid2c.dgf
 
-   \image html  examplegrid4.png "The resulting grid"
-   \image latex examplegrid4.eps "The resulting grid" width=\textwidth
+   \image html  examplegrid2c.png "The resulting grid"
+
+   A similar grid is generated by prescribing the boundary of the domain:
+
+   @include examplegrid2d.dgf
+
+   \image html  examplegrid2d.png "The resulting grid"
 
    \section dgfexample3 Interval Domain
    A automatic tessellation of the unit square using
@@ -555,9 +643,7 @@ namespace Dune {
    @include examplegrid5.dgf
 
    \image html  examplegrid5c.png "The resulting grid using SGrid<2,2>"
-   \image latex examplegrid5c.eps "The resulting grid using SGrid<2,2>" width=\textwidth
    \image html  examplegrid5s.png "The resulting grid using AlbertaGrid<2,2>"
-   \image latex examplegrid5s.eps "The resulting grid using AlbertaGrid<2,2>" width=\textwidth
 
    If UGGrid<2,2> is used the result would be the same as for SGrid<2,2>.
    If an empty \c Simplex Block
@@ -568,7 +654,8 @@ namespace Dune {
    is added than the same simplex grid as for AlbertaGrid<2,2> would be
    constructed.
 
-   \section dgfexample4 Interval Domain and Automated Grid Generation
+     <!---------------------------------------------->
+   \section dgfexample4 Grid Generation in 3d
    An automatic tessellation of the unit square using
    a Cartesian Grid is shown.
    All boundaries have id 1 except boundary segment on the lower boundary
@@ -579,18 +666,15 @@ namespace Dune {
    @include examplegrid6.dgf
 
    \image html  examplegrid6c.png "The resulting grid using ALUCubeGrid<3,3>"
-   \image latex examplegrid6c.eps "The resulting grid using ALUCubeGrid<3,3>" width=\textwidth
    \image html  examplegrid6s.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid6s.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Now the verticies are still defined through the interval block; the simplicies
    are constructed using Tetgen (note the comment symbol \% in the
-   \b Simplexgeneration block):
+   \b Simplexgenerator block):
 
    @include examplegrid7.dgf
 
    \image html  examplegrid7.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid7.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Note that in the grid would be the same as in the above example if
    ALUCubeGrid<3,3> where used.
@@ -598,16 +682,55 @@ namespace Dune {
    Now we can also include some quality enhancement:
 
    First: \b min-angle = 1.2
-          (remove the first \% in the \b Simplexgeneration block)
+          (remove the first \% in the \b Simplexgenerator block)
    \image html  examplegrid7angle.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid7angle.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    Second: \b min-angle = 1.2 and \b max-area = 0.1
-           (remove both \% in the \b Simplexgeneration block)
+           (remove both \% in the \b Simplexgenerator block)
    \image html  examplegrid7area.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex examplegrid7area.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
+     <!---------------------------------------------->
 
-   \section dgfexample5 Importing Grids Generated by Tetgen/Triangle
+   This examples show different ways to define a grid for the following
+   domain and boundary ids:
+   \image html  examplegrid10.png "An example domain"
+
+   Manual grid construction. Note that the reference element used
+   to define the cube is not the one used in dune so that the
+   mapping has to be given; furthermore the vertex index are numbered
+   starting with 1.
+   If a simplex grid is to be constructed
+   some care must be taken in the numbering of the nodes so that a
+   conforming grid is constructed.
+
+   @include examplegrid10.dgf
+
+   \image html  examplegrid10a.png "The resulting cube grid"
+   \image html  examplegrid10b.png "The resulting simplex grid"
+
+   Using multiple intervale. Here the boundary ids are not set
+   correctly; this could be done using different boundarydomains.
+
+   @include examplegrid11.dgf
+
+   \image html  examplegrid11a.png "The resulting cube grid"
+   \image html  examplegrid11b.png "The resulting simplex grid"
+
+   By only defining the boundary faces and using Tetgen:
+
+   @include examplegrid12.dgf
+
+   Without the \b max-area and \b min-angle keywords the following
+   grid is constructed:
+
+   \image html  examplegrid12_1.png "The resulting grid"
+
+   With the quality enhancement active:
+
+   \image html  examplegrid12_2.png "The resulting grid"
+
+
+     <!---------------------------------------------->
+   \section dgfexample5 Importing Grids written in a Tetgen/Triangle format
 
    Here a .mesh file used to generate a 3d simplex grid through Tetgen. The
    mesh file is taken from
@@ -616,67 +739,18 @@ namespace Dune {
    @include examplegrid9.dgf
 
    \image html  BBEETH1M.d_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex BBEETH1M.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    \image html  Orb_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex Orb_cut.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
    \image html  bunny.p65.param_skin.png "The resulting grid using ALUSimplexGrid<3,3>"
-   \image latex bunny.p65.param_skin.eps "The resulting grid using ALUSimplexGrid<3,3>" width=\textwidth
 
-   \section Simplexgeneration Using Tetgen/Triangle
-       The freely available simplex grid generators are direcltly
-       called via system
-       call through the dgfparser.
-       Therefore one should either add the path containing the executables of Triangle
-       and/or Tetgen to the environment variable PATH or use the path
-       option described below. One can either use Tetgen/Triangle directly to generate
-       a .node and .ele file or one can prescribe vertices direcly in th DGF file which
-       will be used to generate the grid:
-       -# For the first approach use the token \b file to give a filemane
-          and the type of the file (e.g. node, mesh, ply...). Example:
-    \code
-          file name mesh
-    \endcode
-    If the filetype is givn, it will be appended to \b name and this will be
-    passed to Tetgen/Triangle. Additional parameters for the grid generators
-    can be given by the the \b parameter token.
-          If no file type is given it is assumed that in a previous run of Tetgen/Triangle
-    files name.node and name.ele were generated and these will be used
-          to described the verticies and elements of the Dune grid.
-       -# For the second approach the vertex block and the interval blocks (if present)
-          are used to generate a .node file which is passed to Tetgen/Triangle.
-       .
-
-       Some identifiers can be
-       used to influence the quality of the generated mesh:
-       -  \b max-area
-          followed by a positive real number used as an upper bound for the
-          area of all simplicies of the mesh.
-       -  \b min-angle
-          followed by a positive number. In 2d this limits the angles in
-          resulting mesh from below; in 3d this bounds the radius-edge ratio
-          from above.
-       .
-       If these identifiers are present then in 3d the grid is generated in two
-       steps: first tetgen is called with only a .node file and then
-      tetgen is run a second time including the -r switch and
-       the -a and -q switch with the parameters given in the dgf file. In 2d the
-       -a and -q switches are added directly in the first run.
-
-       The remaining identifiers are
-       -  The identifier \b path
-          (followed by a path name) can be used
-          to give search path for Triangle/Tetgen.
-       -  The identifier \b display
-          followed by 1 can be used to get a first impression
-          of the resulting mesh using the visualization tools distributed with
-          Triangle/Tetgen.
-       .
-       Download
-       - Tetgen http://tetgen.berlios.de
-       - Triangle http://www.cs.cmu.edu/~quake/triangle.html
  */
-
+/*
+      Dune::Alberta with \c dimworld=3: \n
+        if Tetgen is used to construct a
+        tetrahedral grid for Dune::Alberta then the bisection routine does
+        not necessarily terminate. This problem does not occur
+        if the grid is constructed using the \b Interval block.
+ */
 
 #endif

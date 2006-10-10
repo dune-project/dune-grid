@@ -9,7 +9,7 @@ namespace Dune {
     mg.element=Cube;
     std::ifstream gridin(filename);
     IntervalBlock interval(gridin);
-    if(!interval.ok()) {
+    if(!interval.isactive()) {
       DUNE_THROW(DGFException,
                  "Macrofile " << filename << " must have Intervall-Block "
                               << "to be used to initialize YaspGrid!\n"

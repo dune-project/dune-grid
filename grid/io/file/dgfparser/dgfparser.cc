@@ -1,7 +1,58 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune {
-
+  namespace {
+    class PrintInfo {
+    public:
+      PrintInfo(std::string name) : out((name+".log").c_str()) {
+        // out << "Grid generated from file " << name << std::endl;
+        out << "DGF parser started" << std::endl;
+      }
+      void finish() {
+        out << "Sucsessful" << std::endl;
+      }
+      template <class Block>
+      void block(const Block& block) {
+        out << "Using " << Block::ID << " block" << std::endl;
+      }
+      void print(std::string mesg) {
+        out << mesg << std::endl;
+      }
+      void step1(int dimw,int nofvtx,int nofel) {
+        out << "Step 1 finished: " << std::endl;
+        out << "                 " << dimw << "d" << std::endl;
+        out << "                 " << nofvtx << " verticies" << std::endl;
+        out << "                 " << nofel << " elements" << std::endl;
+      }
+      void step2(int bndseg,int totalbndseg,
+                 int bnddomain,int defsegs,int remaining) {
+        out << "Step 2 finished: " << std::endl;
+        out << "                 " << bndseg
+            << " bnd-segs read in BoundarySegment block" << std::endl;
+        out << "                 " << totalbndseg
+            << " bnd-segs in grid" << std::endl;
+        out << "                 " << bnddomain
+            << " bnd-segs a boundary domain" << std::endl;
+        out << "                 " << defsegs
+            << " bnd-seg assigned default value" << std::endl;
+        out << "                 " << remaining
+            << " bnd-segs have not been assigned an id!" << std::endl;
+      }
+      void cube2simplex(DuneGridFormatParser::element_t el) {
+        if (el == DuneGridFormatParser::General)
+          out << "Simplex block found, thus converting "
+              << "cube grid to simplex grid" << std::endl;
+        else
+          out << "Element type should be simplex, thus converting "
+              << "cube grid to simplex grid" << std::endl;
+      }
+      void automatic() {
+        out << "Automatic grid generation" << std::endl;
+      }
+    private:
+      std::ofstream out;
+    };
+  }
   // Output to Alberta macrogridfile (2d/3d)
   inline void DuneGridFormatParser::writeAlberta(std::ostream& out) {
     // writes an output file for in gird type Alberta
@@ -24,10 +75,13 @@ namespace Dune {
         // riesiger Hack! die make6 methode erzeugt nur jeden zweiten Tetraeder
         // richtig, bei den geraden Tetras muessen die letzten beide Knoten
         // vertauscht werden...
-        if (isInterval &&
-            dimw==3 && n%2==0 && j>=2)
+        if ( cube2simplex &&
+             dimw==3 && n%2==0) {
           if (j==2) out << " " << elements[n][3] << " ";
-          else out << " " << elements[n][2] << " ";
+          else if (j==3) out << " " << elements[n][2] << " ";
+          else if (j==1) out << " " << elements[n][1] << " ";
+          else if (j==0) out << " " << elements[n][0] << " ";
+        }
         else
           out << " " << elements[n][j] << " ";
       }
@@ -65,7 +119,7 @@ namespace Dune {
       if (!simplexgrid) {
         DUNE_THROW(IOError, "ALU can only handle simplex grids in 2d!");
       }
-      //out << "!Triangles" << std::endl;
+      out << "!Triangles" << std::endl;
     }
     dverb << "Writing vertices...";
     out << nofvtx << std::endl;
@@ -126,6 +180,42 @@ namespace Dune {
     dverb.flush();
   }
 
+  // Output to Tetgen/Triangle poly-file
+  inline void DuneGridFormatParser::writeTetgenPoly(std::ostream& out) {
+    int nr = 0;
+    dverb << "Writing vertices...";
+    out << nofvtx << " " << dimw << " 0 0" << std::endl;
+    for (int n=0; n<nofvtx; n++) {
+      out << nr++ << "   ";
+      for (int j=0; j<dimw; j++) {
+        out << vtx[n][j] << " ";
+      }
+      out << std::endl;
+    }
+    dverb << "done" << std::endl;
+    dverb.flush();
+    dverb << "Writing Boundary...";
+    out << facemap.size() << " 1 " << std::endl;
+    std::map<EntityKey<int>,int>::iterator pos;
+    nr = 0;
+    for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
+      if (dimw == 3) {
+        out << "1 0 " << pos->second << std::endl;
+        out << pos->first.size() << " ";
+      }
+      else out << nr << " ";
+      for (int i=0; i<pos->first.size(); i++)
+        out << pos->first.origKey(i) << " ";
+      if (dimw==2)
+        out << pos->second;
+      out << std::endl;
+    }
+    out << "0" << std::endl;
+    out << "0" << std::endl;
+    dverb << "done" << std::endl;
+    dverb.flush();
+  }
+
   // read the DGF file and store vertex/element/bound structure
   inline bool DuneGridFormatParser::readDuneGrid(std::istream& gridin)
   {
@@ -136,7 +226,7 @@ namespace Dune {
     std::stringstream idstream(idline);
     std::string id;
     idstream >> id;
-
+    cube2simplex = false;
     // compare id to DGF keyword
     if ( id != dgfid )
     {
@@ -144,116 +234,172 @@ namespace Dune {
       return false;
     } // not a DGF file, prehaps native file format
 
+    info = new PrintInfo("dgfparser");
+
     dimw=-1;
     IntervalBlock interval(gridin);
 
-    // first test for tetgen/triangle block (only if simplex-grid allowed)
-    if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
-      simplexgrid=true;
-      nofelements=0;
-      generateSimplexGrid(gridin);
-    }
-    else if(interval.ok()) { // generate cartesian grid?
-      isInterval = true;
+    vtxoffset=0;
+
+    if(interval.isactive()) { // generate cartesian grid?
+      info->automatic();
+      VertexBlock bvtx(gridin,dimw);
+      nofvtx=0;
+      if (bvtx.isactive()) {
+        nofvtx=bvtx.get(vtx);
+        info->block(bvtx);
+      }
+      info->block(interval);
+      cube2simplex = true;
       dimw = interval.dimw();
       simplexgrid = (element == Simplex);
       if (element == General) {
         SimplexBlock bsimplex(gridin,-1,dimw);
         simplexgrid = bsimplex.isactive();
+        info->cube2simplex(element);
       } else {
         simplexgrid = (element == Simplex);
       }
-      nofvtx=interval.getVtx(vtx);
-      if(simplexgrid)
-        nofelements=interval.getSimplex(elements);
-      else
-        nofelements=interval.getHexa(elements);
+      interval.get(vtx,nofvtx,elements,nofelements);
+      // nofelements=interval.getHexa(elements);
+      if(simplexgrid) {
+        nofelements=SimplexBlock::cube2simplex(vtx,elements);
+      }
     }
     else { // ok: grid generation by hand...
       VertexBlock bvtx(gridin,dimw);
       if (bvtx.isactive()) {
         nofvtx=bvtx.get(vtx);
-      }
-      else {
-        DUNE_THROW(DGFException, "Unknown Error in DGFParser");
+        info->block(bvtx);
+        vtxoffset=bvtx.offset();
       }
       nofelements=0;
-      SimplexBlock bsimplex(gridin,bvtx.nofvertex(),dimw);
-      CubeBlock bcube(gridin,bvtx.nofvertex(),dimw);
-      if (!bcube.isactive() && !bsimplex.isactive() ||
-          (element==Cube && !bcube.isactive()) ) {
-        DUNE_THROW(DGFException, "no element info found...");
-      }
+      SimplexBlock bsimplex(gridin,nofvtx,dimw);
+      CubeBlock bcube(gridin,nofvtx,dimw);
       if (bcube.isactive() && element!=Simplex) {
-        nofelements=bcube.get(elements);
-        if (bsimplex.isactive() || element==General) {
+        info->block(bcube);
+        nofelements=bcube.get(elements,vtxoffset);
+        if (bsimplex.isactive() && element==General) {
           // make simplex grid
-          nofelements=bsimplex.cube2simplex(vtx,elements);
+          info->cube2simplex(element);
+          nofelements=SimplexBlock::cube2simplex(vtx,elements);
           simplexgrid=true;
         }
         else
           simplexgrid=false;
       }
       else {
+        simplexgrid=true;
         if (bsimplex.isactive()) {
-          simplexgrid=true;
-          nofelements+=bsimplex.get(elements);
+          nofelements+=bsimplex.get(elements,vtxoffset);
           if (dimw == 2)
             for (size_t i=0; i<elements.size(); i++) {
               testTriang(i);
             }
-        } else {
-          nofelements=bcube.get(elements);
-          // make simplex grid
-          nofelements=bsimplex.cube2simplex(vtx,elements);
-          simplexgrid=true;
-          isInterval = true; // needed by AlbertaGrid to write correct simplex info
         }
-      }
-      if (nofelements<=0) {
-        DUNE_THROW(DGFException,
-                   "An Error occured while reading element information "
-                   << "from the DGF file!");
-      }
-      // now read macrogrid segments... (works at the moment only for simplex)
-      BoundarySegBlock segbound(gridin, nofvtx,dimw);
-      if (segbound.isactive())
-      {
-        std::vector<int> bound(dimw+1);
-        for (nofbound=0; segbound.ok(); segbound.next(), nofbound++)
-        {
-          for (int j=0; j<dimw+1; j++) {
-            bound[j] = segbound[j];
-          }
-          EntityKey<int> key(bound,dimw,1);
-          facemap[key] = segbound[0];
+        if (nofelements==0 && bcube.isactive()) {
+          info->block(bcube);
+          info->cube2simplex(element);
+          nofelements=bcube.get(elements,vtxoffset);
+          // make simplex grid
+          nofelements=SimplexBlock::cube2simplex(vtx,elements);
+          cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
+        }
+        else if (bsimplex.isactive()) {
+          info->block(bsimplex);
         }
       }
     }
-
+    removeCopies();
+    info->step1(dimw,vtx.size(),elements.size());
+    // test for tetgen/triangle block (only if simplex-grid allowed)
+    if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
+      if (!interval.isactive())
+        generateBoundaries(gridin,true);
+      info->automatic();
+      simplexgrid=true;
+      nofelements=0;
+      generateSimplexGrid(gridin);
+    }
+    generateBoundaries(gridin,!interval.isactive());
+    if (nofelements<=0) {
+      DUNE_THROW(DGFException,
+                 "An Error occured while reading element information"
+                 << "from the DGF file - no elements found!");
+    }
+    info->finish();
+    delete info;
+    info = 0;
+    // we made it -
+    // although prehaps a few boundary segments are still without id :-<
+    return true;
+  }
+  inline void DuneGridFormatParser::removeCopies() {
+    std::vector<int> map(vtx.size());
+    std::vector<int> shift(vtx.size());
+    for (size_t i=0; i<vtx.size(); i++) {
+      map[i]=i;
+      shift[i]=0;
+    }
+    nofvtx = vtx.size();
+    for (size_t i=0; i<vtx.size(); i++) {
+      if ((size_t)map[i]!=i) continue;
+      for (size_t j=i+1; j<vtx.size(); j++) {
+        double len=pow(vtx[i][0]-vtx[j][0],2.);
+        for (int p=1; p<dimw; p++)
+          len+=pow(vtx[i][p]-vtx[j][p],2.);
+        if (len<1e-10) {
+          map[j]=i;
+          for (size_t k=j+1; k<vtx.size(); k++)
+            shift[k]++;
+          nofvtx--;
+        }
+      }
+    }
+    for (size_t i=0; i<elements.size(); i++) {
+      for (size_t j=0; j<elements[i].size(); j++) {
+        elements[i][j]=map[elements[i][j]];
+        elements[i][j]-=shift[elements[i][j]];
+      }
+    }
+    for (size_t j=0; j<vtx.size(); j++) {
+      vtx[j-shift[j]]=vtx[j];
+    }
+    vtx.resize(nofvtx);
+    assert(vtx.size()==size_t(nofvtx));
+  }
+  inline void DuneGridFormatParser::
+  generateBoundaries(std::istream& gridin,bool bndseg) {
     // **************************************************
     // up to here:
     // filled vertex and element block, now look at boundaries...
     // **************************************************
-    // first generate a map with all macroboundary segments...
-    std::map<EntityKey<int>,int>::iterator pos;
-    if(isInterval && !simplexgrid) {
-      interval.getCubeBoundary(facemap);
+    // first read macrogrid segments...
+    if (bndseg)
+    {
+      BoundarySegBlock segbound(gridin, nofvtx,dimw,simplexgrid);
+      if (segbound.isactive())
+      {
+        info->block(segbound);
+        nofbound=segbound.get(facemap,(nofelements>0),vtxoffset);
+      }
     }
-    else {
-      // at the moment: automatic generation only for simplex grids
+    if (nofelements==0)
+      return;
+    std::map<EntityKey<int>,int>::iterator pos;
+    // now add all boundary faces
+    {
       for(int simpl=0; simpl < nofelements ; simpl++) {
-        for (int i =0 ; i< dimw+1 ; i++) {
-          EntityKey<int> key2(elements[simpl],dimw,i+1);
-          key2.orientation(elements[simpl][i],vtx);
+        for (int i =0 ; i<ElementFaceUtil::nofFaces(dimw,elements[simpl])  ; i++) {
+          EntityKey<int> key2=ElementFaceUtil::generateFace(dimw,elements[simpl],i);
           pos=facemap.find(key2);
-          if(pos== facemap.end()) {
+          if(pos == facemap.end()) {
             facemap[key2]=0;
           }
-          else if(pos->second==0 ) {
+          else if(pos->second==0 || pos->first.origKeySet()) { // face found twice
             facemap.erase(pos);
           }
-          else {
+          else { // use original key as given in key2
             int value = pos->second;
             facemap.erase(pos);
             facemap[key2]=value;
@@ -261,9 +407,26 @@ namespace Dune {
         }
       }
     }
+    // remove unused boundary faces added through boundaryseg block or cube2simplex conversion
+    {
+      std::map<EntityKey<int>,int>::iterator pos = facemap.begin();
+      while (pos!=facemap.end()) {
+        if (!pos->first.origKeySet()) {
+          std::map<EntityKey<int>,int>::iterator pos1 = pos;
+          ++pos;
+          facemap.erase(pos1);
+        }
+        else
+          ++pos;
+      }
+    }
     // now try to assign boundary ids...
+    int remainingBndSegs = 0;
+    int defaultBndSegs = 0;
+    int inbnddomain = 0;
     BoundaryDomBlock dombound(gridin, dimw);
     if (dombound.isactive()) {
+      info->block(dombound);
       for (; dombound.ok(); dombound.next()) {
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
           if(pos->second == 0) {
@@ -277,72 +440,100 @@ namespace Dune {
                 break;
               }
             }
-            if (isinside)
+            if (isinside) {
               pos->second = dombound.id();
+              inbnddomain++;
+            }
           }
         }
       }
       // now assign default value to remaining segments - if one was given:
       if (dombound.defaultValueGiven()) {
+        info->print("Default boundary ID found");
         for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
           if(pos->second == 0) {
             pos->second = dombound.defaultValue();
+            defaultBndSegs++;
+          }
+        }
+      } else {
+        for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
+          if(pos->second == 0) {
+            remainingBndSegs++;
           }
         }
       }
+    } else {
+      for(pos=facemap.begin(); pos!=facemap.end(); ++pos) {
+        if(pos->second == 0) {
+          remainingBndSegs++;
+        }
+      }
     }
-    // we made it -
-    // although prehaps a few boundary segments are still without id :-<
-    return true;
+    info->step2(nofbound,facemap.size(),inbnddomain,defaultBndSegs,remainingBndSegs);
   }
-
   /*************************************************************
      caller to tetgen/triangle
    ****************************************************/
   inline void DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
-    VertexBlock bvtx(gridin,dimw);
-    IntervalBlock interval(gridin);
+    /*
+       VertexBlock bvtx(gridin,dimw);
+       IntervalBlock interval(gridin);
+     */
     SimplexGenerationBlock para(gridin);
+    info->block(para);
 
-    std::string name = "gridparserfile.nodelists.tmp";
+    std::string name = "gridparserfile.polylists.tmp";
 
-    if(!para.hasfile())
-    {
-      if (!interval.isactive() && !bvtx.isactive()) {
-        DUNE_THROW(DGFException, "No vertex information found!");
-      }
-      nofvtx = 0;
-      if (interval.ok()) {
-        dverb << "Reading verticies from IntervalBlock" << std::flush;
-        dimw = interval.dimw();
-        nofvtx += interval.getVtx(vtx);
-        dverb << "Done." << std::endl;
-      }
-      if (bvtx.ok()) {
-        dverb << "Reading verticies from VertexBlock" << std::flush;
-        nofvtx += bvtx.get(vtx);
-        dverb << "Done." << std::endl;
-      }
-      if (dimw!=2 && dimw!=3) {
-        DUNE_THROW(DGFException,
+    if(!para.hasfile()) {
+      /*
+         if (!interval.isactive() && !bvtx.isactive()) {
+         DUNE_THROW(DGFException, "No vertex information found!");
+         }
+         nofvtx = 0;
+         info->print("Reading verticies");
+         if (interval.isactive()) {
+         dverb << "Reading verticies from IntervalBlock" << std::flush;
+         dimw = interval.dimw();
+         interval.get(vtx,nofvtx);
+         dverb << "Done." << std::endl;
+         info->block(interval);
+         }
+         if (bvtx.ok()) {
+         dverb << "Reading verticies from VertexBlock" << std::flush;
+         nofvtx += bvtx.get(vtx);
+         dverb << "Done." << std::endl;
+         info->block(interval);
+         }
+         if (dimw!=2 && dimw!=3) {
+         DUNE_THROW(DGFException,
                    "SimplexGen can only generate 2d or 3d meshes but not in "
                    << dimw << " dimensions!");
-      }
+         }
 
+         removeCopies();
+       */
       {
         std::string tmpname = name;
-        tmpname += ".node";
-        std::ofstream nodes(tmpname.c_str());
-        nodes << nofvtx << " " << dimw << " 0 1" << std::endl;
-        for (int n=0; n<nofvtx; n++)
-        {
-          nodes << n << " ";
-          for (int j=0; j<dimw; j++) {
-            nodes << vtx[n][j] << " ";
-          }
-          nodes << "1";
-          nodes << std::endl;
-        }
+        if (facemap.size()>0)
+          tmpname += ".poly";
+        else
+          tmpname += ".node";
+        info->print("writting poly file "+tmpname);
+        std::ofstream polys(tmpname.c_str());
+        /*
+           polys << nofvtx << " " << dimw << " 0 1" << std::endl;
+           for (int n=0;n<nofvtx;n++)
+           {
+           polys << n << " ";
+           for (int j=0;j<dimw;j++) {
+            polys << vtx[n][j] << " ";
+           }
+           polys << "1";
+           polys << std::endl;
+           }
+         */
+        writeTetgenPoly(polys);
       }
     }
     else {
@@ -369,7 +560,7 @@ namespace Dune {
 
       if (para.haspath())
         command << para.path() << "/";
-      command << "triangle -j ";
+      command << "triangle -ej ";
       if(para.hasfile())
       {
         name = para.filename();
@@ -378,7 +569,10 @@ namespace Dune {
       }
       else
       {
-        suffix = ".node";
+        if (facemap.size()>0)
+          suffix = ".poly";
+        else
+          suffix = ".node";
       }
 
       if (para.minAngle()>0)
@@ -387,6 +581,7 @@ namespace Dune {
         command << "-a" << para.maxArea() << " ";
       command << name << suffix;
       dverb << "Calling : " << command.str() << std::endl;
+      info->print("Calling : "+command.str());
       system(command.str().c_str());
       if (para.display()) {
         std::stringstream command;
@@ -414,14 +609,19 @@ namespace Dune {
         }
         else
         {
-          suffix = ".node";
+          if (facemap.size()>0)
+            suffix = ".poly";
+          else
+            suffix = ".node";
         }
         command << name << suffix;
         dverb << "Calling : " << command.str() << std::endl;
+        info->print("Calling : "+command.str());
         system(command.str().c_str());
       }
       if (para.minAngle()>0 || para.maxArea()>0)
       { // second call
+        info->print("Quality enhancement:");
         call_nr = 2;
         std::stringstream command;
         if (para.haspath())
@@ -434,8 +634,9 @@ namespace Dune {
         if (para.maxArea()>0)
           command << "a" << para.maxArea();
 
-        command << " " << name << ".1.node";
+        command << " " << name << ".1";
         dverb << "Calling : " << command.str() << std::endl;
+        info->print("Calling : "+command.str());
         system(command.str().c_str());
       }
       if (para.display())
@@ -449,15 +650,17 @@ namespace Dune {
         system(command.str().c_str());
       }
     }
-    std::stringstream nodename;
-    nodename << name << "." << call_nr;
-    readTetgenTriangle(nodename.str());
+    std::stringstream polyname;
+    polyname << name << "." << call_nr;
+    readTetgenTriangle(polyname.str());
+    info->print("Automatic grid generation finished");
   }
 
   inline void DuneGridFormatParser::readTetgenTriangle(std::string name) {
     int offset,tmp,params;
     std::string nodename = name + ".node";
     std::string elename = name + ".ele";
+    std::string polyname = name + ((dimw==2) ? ".edge" : ".face");
     dverb << "opening " << nodename << "\n";
     std::ifstream node(nodename.c_str());
     if (!node) {
@@ -513,82 +716,142 @@ namespace Dune {
         }
       }
     }
+    dverb << "opening " << polyname << "\n";
+    std::ifstream poly(polyname.c_str());
+    if (!poly) {
+      DUNE_THROW(DGFException,
+                 "could not find file " << polyname
+                                        << " prehaps something went wrong with Tetgen/Triangle?");
+    }
+    /*
+       if (dimw==2) {
+       poly >> tmp >> tmp >> tmp >> tmp;
+       }
+     */
+    {
+      int noffaces;
+      poly >> noffaces >> params;
+      if (params>0) {
+        assert(params==1);
+        facemap.clear();
+        for (int i=0; i<noffaces; i++) {
+          std::vector<int> p(dimw);
+          int nr;
+          poly >> nr;
+          for (size_t k=0; k<p.size(); k++)
+            poly >> p[k];
+          poly >> params;
+          if (params!=0) {
+            EntityKey<int> key(p,false);
+            facemap[key]=params;
+          }
+        }
+      }
+    }
   }
   /***************************
      Helper methods mostly only for simplex grids
   ***************************/
   inline void
-  DuneGridFormatParser::setOrientation(int fixvtx,
+  DuneGridFormatParser::setOrientation(int use1,int use2,
                                        orientation_t orientation) {
     if (element == Cube) {
-      std::cerr << "Reorientation is only implemented for 2d simplex grid!"
+      std::cerr << "Reorientation is only implemented for simplex grid!"
                 << std::endl;
       return;
     }
     if (dimw==2) {
       for (int i=0; i<nofelements; i++) {
+        if (elements[i].size()!=size_t(dimw+1))
+          continue;
         double o=testTriang(i);
         if (o*orientation<0) { // wrong orientation
           // dverb << "Reorientation of simplex " << i << std::endl;
-          int tmp=elements[i][(fixvtx+1)%3];
-          elements[i][(fixvtx+1)%3] = elements[i][(fixvtx+2)%3];
-          elements[i][(fixvtx+2)%3] = tmp;
+          int tmp=elements[i][use1];
+          elements[i][use1] = elements[i][use2];
+          elements[i][use2] = tmp;
         }
       }
     }
     else if (dimw==3) {
       for (int i=0; i<nofelements; i++) {
-        std::vector<double>& p0 = vtx[elements[i][(fixvtx+1)%4]];
-        std::vector<double>& p1 = vtx[elements[i][(fixvtx+2)%4]];
-        std::vector<double>& p2 = vtx[elements[i][(fixvtx+3)%4]];
-        std::vector<double>& q  = vtx[elements[i][fixvtx]];
+        if (elements[i].size()!=size_t(dimw+1))
+          continue;
+        std::vector<double>& p0 = vtx[elements[i][1]];
+        std::vector<double>& p1 = vtx[elements[i][2]];
+        std::vector<double>& p2 = vtx[elements[i][3]];
+        std::vector<double>& q  = vtx[elements[i][0]];
         double n[3];
-        n[0] = -((p1[1]-p0[1]) *(p2[2]-p1[2]) - (p2[1]-p1[1]) *(p1[2]-p0[2])) ;
-        n[1] = -((p1[2]-p0[2]) *(p2[0]-p1[0]) - (p2[2]-p1[2]) *(p1[0]-p0[0])) ;
-        n[2] = -((p1[0]-p0[0]) *(p2[1]-p1[1]) - (p2[0]-p1[0]) *(p1[1]-p0[1])) ;
+        n[0] = -((p1[1]-p0[1]) *(p2[2]-p0[2]) - (p2[1]-p0[1]) *(p1[2]-p0[2])) ;
+        n[1] = -((p1[2]-p0[2]) *(p2[0]-p0[0]) - (p2[2]-p0[2]) *(p1[0]-p0[0])) ;
+        n[2] = -((p1[0]-p0[0]) *(p2[1]-p0[1]) - (p2[0]-p0[0]) *(p1[1]-p0[1])) ;
         double test = n[0]*(q[0]-p0[0])+n[1]*(q[1]-p0[1])+n[2]*(q[2]-p0[2]);
         bool reorient = (test*orientation<0);
         if (reorient) {
-          int key1=elements[i][(fixvtx)%4];
-          elements[i][(fixvtx)%4]=elements[i][(fixvtx+3)%4];
-          elements[i][(fixvtx+3)%4]=key1;
+          int tmp=elements[i][use1];
+          elements[i][use1] = elements[i][use2];
+          elements[i][use2] = tmp;
         }
       }
     }
   }
   inline void
-  DuneGridFormatParser::setRefinement(int fce) {
-    if (dimw!=2 || element == Cube) {
+  DuneGridFormatParser::setRefinement(int use1,int use2,int is1,int is2) {
+    if (element == Cube) {
       std::cerr << "Computing refinement vertex is only implemented for 2d simplex grid!"
                 << std::endl;
       return;
     }
+    if (use1>use2) {
+      int tmp=use1;
+      use1=use2;
+      use2=tmp;
+    }
+    if (is1>is2) {
+      int tmp=is1;
+      is1=is2;
+      is2=tmp;
+    }
     for (int i=0; i<nofelements; i++) {
+      if (elements[i].size()!=size_t(dimw+1))
+        continue;
       double maxlen=0.0;
-      int maxface = -1;
-      int idx[3] = {elements[i][0],elements[i][1],elements[i][2]};
-
-      for (int k=0; k<dimw+1; k++)
-      {
-        double len=sqrt
-                      (pow(vtx[idx[(k+2)%3]][0]-vtx[idx[(k+1)%3]][0],2.)+
-                      pow(vtx[idx[(k+2)%3]][1]-vtx[idx[(k+1)%3]][1],2.)
-                      );
-        if (len>maxlen) {
-          maxface=k;
-          maxlen=len;
+      int vtx1 = is1;
+      int vtx2 = is2;
+      if (vtx1==-1 || vtx2==-1)
+        for (int l=0; l<dimw+1; l++) {
+          int idxl=elements[i][l];
+          for (int k=l+1; k<dimw+1; k++) {
+            int idxk=elements[i][k];
+            double len=pow(vtx[idxk][0]-vtx[idxl][0],2.);
+            for (int p=1; p<dimw; p++)
+              len+=pow(vtx[idxk][p]-vtx[idxl][p],2.);
+            if (len>maxlen) {
+              vtx1=l;
+              vtx2=k;
+              maxlen=len;
+            }
+          }
         }
+      int swapped=0;
+      if (vtx1!=use1) {
+        int tmp=elements[i][vtx1];
+        elements[i][vtx1]=elements[i][use1];
+        elements[i][use1]=tmp;
+        swapped++;
       }
-      assert(maxface >= 0);
-      if (maxface!=fce) {
-        // dverb << "Rearranging verticies of simplex " << i
-        //  << " since face " << maxface << " is largest" << std::endl;
-        elements[i][fce]=idx[maxface];
-        elements[i][(fce+1)%3]=idx[(maxface+1)%3];
-        elements[i][(fce+2)%3]=idx[(maxface+2)%3];
+      if (vtx2!=use2) {
+        int tmp=elements[i][vtx2];
+        elements[i][vtx2]=elements[i][use2];
+        elements[i][use2]=tmp;
+        swapped++;
+      }
+      if (swapped==1) {
+        int tmp=elements[i][use2];
+        elements[i][use2]=elements[i][use1];
+        elements[i][use1]=tmp;
       }
     }
-
   }
   inline double
   DuneGridFormatParser:: testTriang(int snr) {

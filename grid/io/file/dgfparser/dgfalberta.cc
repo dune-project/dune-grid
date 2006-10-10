@@ -19,10 +19,8 @@ namespace Dune {
                                 << "AlbertaGrid of dimension "
                                 << dimworld);
       }
-      if (mg.dimw == 2) {
-        mg.setRefinement(mg.dimw);
-        mg.setOrientation(mg.dimw);
-      }
+      mg.setOrientation(0,1);
+      mg.setRefinement(0,1,-1,-1);
       str+=".albertagrid";
       std::ofstream out(str.c_str());
       mg.writeAlberta(out);

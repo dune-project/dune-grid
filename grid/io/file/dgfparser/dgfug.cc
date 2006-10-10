@@ -19,7 +19,7 @@ namespace Dune {
                                 << "UGGrid of dimension "
                                 << dimworld);
       }
-      mg.setOrientation(0);
+      mg.setOrientation(0,1);
       UGGrid<dim,dimworld> *grid = new UGGrid<dim,dimworld>();
       grid->createBegin();
       for (int n=0; n<mg.nofvtx; n++) {
