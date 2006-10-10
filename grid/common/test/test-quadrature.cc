@@ -41,7 +41,7 @@ ctype analyticSolution (Dune::GeometryType t, int p, int x) {
       exact=1.0/((p+2)*(p+1));
       break;
     case 1 :
-      exact=1.0/(p+2);
+      exact=1.0/((p+2)*(p+1));
       break;
     case 2 :
       exact=1.0/(2*(p+1));
@@ -101,7 +101,10 @@ void checkQuadrature(Dune::GeometryType t)
           dir = d;
         }
       }
-      if (maxRelativeError > std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon()) {
+      ctype epsilon = std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon();
+      if (p==0)
+        epsilon = 2.0*std::numeric_limits<double>::epsilon();
+      if (maxRelativeError > epsilon) {
         std::cerr << "Error: Quadrature for " << t << " and order=" << p << " failed" << std::endl;
         for (int d=0; d<dim; d++)
         {
