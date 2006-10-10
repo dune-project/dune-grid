@@ -12,7 +12,7 @@ namespace Dune {
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
-  //: mesh_ (checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart)
+  //: mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart))
     : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
       , hIndexSet_(*this)
       , localIdSet_(*this)
@@ -24,12 +24,11 @@ namespace Dune {
       , coarsenMarked_ (0)
       , sizeCache_(0)
   {
-    //assert(mesh_ != 0);
+    assert(mygrid_);
     makeGeomTypes();
     updateStatus();
-
-    std::cout << "\nCreated ALU2dGrid<"<<dim<<","<<dimworld<<"> from macro grid file '"<< macroTriangFilename << "'. \n\n";
   }
+
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid()
@@ -44,10 +43,7 @@ namespace Dune {
       , coarsenMarked_ (0)
       , sizeCache_(0)
   {
-    //assert(mesh_ != 0);
     makeGeomTypes();
-    //updateStatus();
-    std::cout << "\nCreated empty ALU2dGrid<"<<dim<<","<<dimworld<<">\n\n";
   }
 
   //! Iterator to first entity of given codim on level
@@ -60,6 +56,20 @@ namespace Dune {
     {
       std::cerr << "Couldn't open file '" << filename <<"' !" << std::endl;
       DUNE_THROW(IOError,"Couldn't open file '" << filename <<"' !");
+    }
+
+    const std::string aluid("!Triangles");
+    std::string idline;
+    std::getline(file,idline);
+    std::stringstream idstream(idline);
+    std::string id;
+    idstream >> id;
+
+    if(id != aluid )
+    {
+      derr << "\nNon or wrong keyword '" << id << "' found! Expected keyword to be '" << aluid << "'! \n";
+      DUNE_THROW(IOError,"Wrong file format!");
+      return 0;
     }
     return filename.c_str();
   }
