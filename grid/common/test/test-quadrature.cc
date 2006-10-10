@@ -201,22 +201,22 @@ int main ()
     Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
     Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
 
-    //     checkWeights<double, 1>(cube1d);
-    //     checkWeights<double, 2>(cube2d);
-    //     checkWeights<double, 3>(cube3d);
+    checkWeights<double, 1>(cube1d);
+    checkWeights<double, 2>(cube2d);
+    checkWeights<double, 3>(cube3d);
 
-    //     checkWeights<double, 2>(simplex2d);
-    //     checkWeights<double, 3>(simplex3d);
+    checkWeights<double, 2>(simplex2d);
+    checkWeights<double, 3>(simplex3d);
 
-    //     checkWeights<double, 3>(prism3d);
-    //     checkWeights<double, 3>(pyramid3d);
+    checkWeights<double, 3>(prism3d);
+    checkWeights<double, 3>(pyramid3d);
 
-    //     checkQuadrature<double, 1>(cube1d);
-    //     checkQuadrature<double, 2>(cube2d);
-    //     checkQuadrature<double, 3>(cube3d);
-    //     checkQuadrature<double, 2>(simplex2d);
-    //     checkQuadrature<double, 3>(simplex3d);
-    //     checkQuadrature<double, 3>(prism3d);
+    checkQuadrature<double, 1>(cube1d);
+    checkQuadrature<double, 2>(cube2d);
+    checkQuadrature<double, 3>(cube3d);
+    checkQuadrature<double, 2>(simplex2d);
+    checkQuadrature<double, 3>(simplex3d);
+    checkQuadrature<double, 3>(prism3d);
     checkQuadrature<double, 3>(pyramid3d);
   }
   catch (Dune::Exception &e) {
