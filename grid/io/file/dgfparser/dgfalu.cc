@@ -40,12 +40,10 @@ namespace Dune {
     std::string str(filename);
     MacroGrid::Impl<ALUSimplexGrid<2,2> >().
     generateAlu3d(mg,filename,str,MPICOMM);
-  #if ALU3DGRID_PARALLEL
-    return new ALUSimplexGrid<2,2>(str.c_str(),MPICOMM);
-  #else
+
     return new ALUSimplexGrid<2,2>(str.c_str());
-  #endif
   }
+
   template <int dim,int dimworld>
   inline void
   MacroGrid :: Impl<ALUSimplexGrid<dim,dimworld> > :: generateAlu3d
