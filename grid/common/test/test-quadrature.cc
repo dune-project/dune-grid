@@ -10,33 +10,70 @@
 
 bool success = true;
 
-// This is a simple accuracy test on the unit triangle. It integrates
-// x^p and y^p with the quadrature rule of order p, which should give
-// an exact result (the exact value is easily computed analytically as
-// 1/((p+2)*(p+1))).
-template <class ct, int dim>
-struct exactHelper {
-  static ct sum(int p) { return (dim+p) * exactHelper<ct,dim-1>::sum(p); }
-};
-template <class ct>
-struct exactHelper<ct,0> { static ct sum(int p) { return 1; } };
+/*
+   This is a simple accuracy test on the reference element. It integrates
+   x^p and y^p with the quadrature rule of order p, which should give
+   an exact result.
+ */
+
+/*
+   Exact (analytical) solution on different reference elements.
+ */
+
 template <class ctype, int dim>
-void checkSimplexQuadrature()
+ctype analyticSolution (Dune::GeometryType t, int p, int x) {
+  using Dune::GeometryType;
+  ctype exact=0;
+  switch (t.basicType())
+  {
+  case GeometryType::cube :
+    exact=1.0/(p+1);
+    break;
+  case GeometryType::simplex :
+    /* 1/(prod(k=1..dim,(p+k)) */
+    exact = 1.0;
+    for (int k=1; k<=dim; k++) exact*=(p+k);
+    exact = 1.0/exact;
+    break;
+  case GeometryType::prism :
+    switch(x) {
+    case 0 :
+      exact=1.0/((p+2)*(p+1));
+      break;
+    case 1 :
+      exact=1.0/(p+2);
+      break;
+    case 2 :
+      exact=1.0/(2*(p+1));
+      break;
+    };
+    break;
+  case GeometryType::pyramid :
+    if (x=2) exact=1.0/(p+3);
+    else exact=1.0/((p+3)*(p+1));
+    break;
+  default :
+    DUNE_THROW(Dune::NotImplemented, __func__ << " for " << t);
+  };
+  return exact;
+};
+
+template <class ctype, int dim>
+void checkQuadrature(Dune::GeometryType t)
 {
   using namespace Dune;
 
   for (int p=0; ; ++p)
     try {
-      GeometryType simplex(GeometryType::simplex,dim);
       QuadratureRule<ctype,dim> const& qr =
-        QuadratureRules<ctype,dim>::rule(simplex,p);
+        QuadratureRules<ctype,dim>::rule(t,p);
       FieldVector<ctype,dim> integral(0);
       for (typename QuadratureRule<ctype,dim>::const_iterator
            qp=qr.begin(); qp!=qr.end(); ++qp)
       {
         // pos of integration point
         FieldVector<ctype,dim> const& x = qp->position();
-        double weight = qp->weight();
+        ctype weight = qp->weight();
 
         for (int d=0; d<dim; d++)
         {
@@ -44,29 +81,34 @@ void checkSimplexQuadrature()
         }
       }
 
-      double exact = 1.0/exactHelper<ctype,dim>::sum(p);
-      double relativeError = 0;
+      ctype maxRelativeError = 0;
+      int dir = -1;
       for (int d=0; d<dim; d++)
       {
-        relativeError =
-          std::max(relativeError,
-                   std::abs(integral[d]-exact) /
-                   (std::abs(integral[d])+std::abs(exact)));
+        ctype exact = analyticSolution<ctype,dim>(t,p,d);
+        ctype relativeError = std::abs(integral[d]-exact) /
+                              (std::abs(integral[d])+std::abs(exact));
+        if (relativeError > maxRelativeError)
+        {
+          maxRelativeError = relativeError;
+          dir = d;
+        }
       }
-      if (relativeError > std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon()) {
-        std::cerr << "Error: Quadrature for " << simplex
-                  << " and order=" << p
-                  << " has a relative error " << relativeError << std::endl;
+      if (maxRelativeError > std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon()) {
+        std::cerr << "Error: Quadrature for " << t << " and order=" << p
+                  << " has a maximal relative error " << maxRelativeError
+                  << " in Direction " << dir << std::endl;
         success = false;
       }
     }
     catch (Dune::QuadratureOrderOutOfRange & e) {
+      std::cout << "tested integration for " << t << std::endl;
       break;
     }
 }
 
 template<class ctype, int dim>
-void checkQuadrature(Dune::GeometryType t, int p)
+void checkWeights(Dune::GeometryType t, int p)
 {
   double volume = 0;
   // Quadratures
@@ -103,13 +145,13 @@ void checkQuadrature(Dune::GeometryType t, int p)
 }
 
 template<class ctype, int dim>
-void checkQuadrature(Dune::GeometryType t)
+void checkWeights(Dune::GeometryType t)
 {
   int maxorder;
   for (int i=1;; i++)
   {
     try {
-      checkQuadrature<ctype,dim>(t, i);
+      checkWeights<ctype,dim>(t, i);
     }
     catch (Dune::QuadratureOrderOutOfRange & e) {
       maxorder = i-1;
@@ -119,7 +161,7 @@ void checkQuadrature(Dune::GeometryType t)
   for (int i=maxorder+1;; i++)
   {
     try {
-      checkQuadrature<ctype,dim>(t, i);
+      checkWeights<ctype,dim>(t, i);
     }
     catch (Dune::QuadratureOrderOutOfRange & e) {
       if (i > maxorder+1)
@@ -128,7 +170,7 @@ void checkQuadrature(Dune::GeometryType t)
         std::cout << "       " << maxorder << " in the first run, "
                   << i-1 << " in the second run." << std::endl;
       }
-      std::cout << "tested " << t << " up to max order = " << maxorder << std::endl;
+      std::cout << "tested weights for " << t << " up to max order = " << maxorder << std::endl;
       break;
     }
   }
@@ -147,19 +189,23 @@ int main ()
     Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
     Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
 
+    checkWeights<double, 1>(cube1d);
+    checkWeights<double, 2>(cube2d);
+    checkWeights<double, 3>(cube3d);
+
+    checkWeights<double, 2>(simplex2d);
+    checkWeights<double, 3>(simplex3d);
+
+    checkWeights<double, 3>(prism3d);
+    checkWeights<double, 3>(pyramid3d);
+
     checkQuadrature<double, 1>(cube1d);
     checkQuadrature<double, 2>(cube2d);
     checkQuadrature<double, 3>(cube3d);
-
     checkQuadrature<double, 2>(simplex2d);
     checkQuadrature<double, 3>(simplex3d);
-
     checkQuadrature<double, 3>(prism3d);
     checkQuadrature<double, 3>(pyramid3d);
-
-    checkSimplexQuadrature<double, 1>();
-    checkSimplexQuadrature<double, 2>();
-    checkSimplexQuadrature<double, 3>();
   }
   catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
