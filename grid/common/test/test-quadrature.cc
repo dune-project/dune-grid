@@ -82,11 +82,6 @@ void checkQuadrature(Dune::GeometryType t)
         FieldVector<ctype,dim> const& x = qp->position();
         ctype weight = qp->weight();
 
-        std::cout << "[" << x[0];
-        for (int d=1; d<dim; d++)
-          std::cout << ", " << x[d];
-        std::cout << "]" << std::endl;
-
         for (int d=0; d<dim; d++)
         {
           integral[d] += weight*std::pow(x[d],p);
