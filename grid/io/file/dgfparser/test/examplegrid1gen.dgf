@@ -1,7 +1,7 @@
 DGF
 Simplexgenerator
 min-angle 30
-display 1
+display 0
 
 % to use Triangle from a certain path, uncomment this path line 
 %path $HOME/bin  % path to Triangle

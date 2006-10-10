@@ -10,7 +10,7 @@ Vertex       % some additional points
  1.25 1.25   % and one outside of the interval
 #
 Simplexgenerator
-display 1    % show result using Triangle viewer
+display 0    % show result using Triangle viewer
 
 % to use Triangle from a certain path, uncomment path line 
 %path $HOME/bin   % path to Triangle
@@ -19,4 +19,4 @@ display 1    % show result using Triangle viewer
 BOUNDARYDOMAIN
 default 1    % all boundaries have id 1
 #BOUNDARYDOMAIN
-# examplegrid2.dgf
+# examplegrid2a.dgf

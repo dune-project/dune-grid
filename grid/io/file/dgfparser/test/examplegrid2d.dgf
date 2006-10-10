@@ -1,0 +1,24 @@
+DGF
+Vertex       % some additional points
+ -1 -1
+  1 -1
+  1  1
+ -1  1
+ 0.75 0.75   % inside the interval
+ 0.9 0.9     % also inside the interval
+ 1.25 1.25   % and one outside of the interval
+#
+Simplexgenerator
+min-angle 30    % quality enhancment
+max-area 0.01   % area restriction
+display 0       % show result using Triangle viewer
+
+% to use Triangle from a certain path, uncomment this path line
+%path $HOME/bin      % path to Triangle
+#
+BOUNDARYSEGMENTS
+1 0 1
+2 1 6 3 0
+#
+# examplegrid2d.dgf
+

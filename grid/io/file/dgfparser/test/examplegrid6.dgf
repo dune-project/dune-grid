@@ -3,7 +3,9 @@ DGF
 Interval
 0 0 0          % first corner 
 10 10 10       % second corner
-5 2 10         % 5 cells in x, 2 in y, and 10 in z direction
+4 4 3         % 5 cells in x, 2 in y, and 10 in z direction
+#
+simplex 
 #
 BOUNDARYDOMAIN
 default 1      % default boundary id

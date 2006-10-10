@@ -1,7 +1,7 @@
 DGF
 Simplexgenerator
-% min-angle 1.1        % quality enhancment 
-% max-area 0.1         % maximum element area restriction
+%min-angle 1.1        % quality enhancment 
+%max-area 0.1         % maximum element area restriction
 display 0              % show result using the Tetgen viewer
 
 % to use TetGen from a certain path, uncomment this path line

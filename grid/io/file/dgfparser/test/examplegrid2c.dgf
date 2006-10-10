@@ -12,7 +12,7 @@ Vertex       % some additional points
 Simplexgenerator
 min-angle 30    % quality enhancment
 max-area 0.01   % area restriction
-display 1       % show result using Triangle viewer
+display 0       % show result using Triangle viewer
 
 % to use Triangle from a certain path, uncomment this path line
 %path $HOME/bin      % path to Triangle
@@ -22,5 +22,5 @@ BOUNDARYDOMAIN
 1  -1 -1    1 -1       % lower boundary has id 1
 2  -10 -10    10  10   % all others have id 2 (could use default keyword...)
 #BOUNDARYDOMAIN
-# examplegrid4.dgf
+# examplegrid2c.dgf
 

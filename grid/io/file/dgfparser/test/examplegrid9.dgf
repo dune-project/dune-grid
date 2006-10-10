@@ -6,7 +6,7 @@ Simplexgenerator
 % read information from file (uncomment each line seperatly)
 % file BBEETH1M.d_cut mesh
 % file Orb_cut mesh
-file bunny ply
+% file /usr/people/dedner/MORGOTH/bunny/bunny.p65.param_skin mesh
 % all grids are for dimension 3
 dimension 3
 #

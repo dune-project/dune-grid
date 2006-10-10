@@ -1,0 +1,41 @@
+DGF
+Simplexgenerator
+min-angle 1.1  % quality enhancment
+max-area 0.5   % maximum element area restriction
+display 0        % show result using the Tetgen viewer
+
+% to use TetGen from a certain path, uncomment this path line
+path $HOME/bin  % path to Tetgen
+#
+vertex 
+0   0  5
+0   0  0
+0 -10  0
+0 -10 10
+0  10 10
+0  10  5
+
+30  10  0
+30 -10  0 
+30 -10 10
+30  10 10
+
+25  10 0
+25   0 0
+25   0 5
+25  10 5
+#
+boundarysegments 
+% 2 out, 1 in, 3 slip, 4 reflect
+2  0 1 2 3 4 5       % ausgang
+1  6 7 8 9           % eingang
+3  10 11 12 13       % balken
+3  11 12 0 1         % balken
+3  13 12 0 5         % balken
+3  3 4 9 8           % seite
+3  2 3 8 7           % unten
+4  6 10 13 5 4 9     % sym. oben
+4  6 10 11 1 2 7     % sym. seite
+#
+# examplegrid12.dgf
+

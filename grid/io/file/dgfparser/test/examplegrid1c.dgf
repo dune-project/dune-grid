@@ -13,8 +13,6 @@ CUBE            % a cube grid
 1 2 6 3         % cube 1
 6 3 5 4         % cube 2
 #
-Simplex
-#
 BOUNDARYSEGMENTS
 2   1 2       % between vertex 1,2 use id 2
 2   2 3       % between vertex 2,3 use id 2

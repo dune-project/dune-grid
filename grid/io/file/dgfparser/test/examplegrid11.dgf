@@ -1,0 +1,21 @@
+DGF
+Interval
+% first interval
+0 0 5          % first corner 
+25 10 10       % second corner
+5 1 2          % 8 cells in x, 2 in y, and 2 in z direction
+% second interval
+25 -10 0         % first corner 
+30 10 10       % second corner
+3 2 4          % 2 cells in x, 2 in y, and 4 in z direction
+% third interval
+0   -0  0      % first corner 
+25 -10  10      % second corner
+5 1 4         % 2 cells in x, 2 in y, and 4 in z direction
+#
+BOUNDARYDOMAIN
+default 3      % default boundary id
+% ... further domain ...
+#
+# examplegrid11.dgf
+
