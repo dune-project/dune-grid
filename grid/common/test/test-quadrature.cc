@@ -49,8 +49,15 @@ ctype analyticSolution (Dune::GeometryType t, int p, int x) {
     };
     break;
   case GeometryType::pyramid :
-    if (x=2) exact=1.0/(p+3);
-    else exact=1.0/((p+3)*(p+1));
+    switch(x) {
+    case 0 :
+    case 1 :
+      exact=1.0/((p+3)*(p+1));
+      break;
+    case 2 :
+      exact=2.0/((p+1)*(p+2)*(p+3));
+      break;
+    };
     break;
   default :
     DUNE_THROW(Dune::NotImplemented, __func__ << " for " << t);
@@ -75,6 +82,11 @@ void checkQuadrature(Dune::GeometryType t)
         FieldVector<ctype,dim> const& x = qp->position();
         ctype weight = qp->weight();
 
+        std::cout << "[" << x[0];
+        for (int d=1; d<dim; d++)
+          std::cout << ", " << x[d];
+        std::cout << "]" << std::endl;
+
         for (int d=0; d<dim; d++)
         {
           integral[d] += weight*std::pow(x[d],p);
@@ -95,9 +107,14 @@ void checkQuadrature(Dune::GeometryType t)
         }
       }
       if (maxRelativeError > std::pow(2.0,p)*p*std::numeric_limits<double>::epsilon()) {
-        std::cerr << "Error: Quadrature for " << t << " and order=" << p
-                  << " has a maximal relative error " << maxRelativeError
-                  << " in Direction " << dir << std::endl;
+        std::cerr << "Error: Quadrature for " << t << " and order=" << p << " failed" << std::endl;
+        for (int d=0; d<dim; d++)
+        {
+          ctype exact = analyticSolution<ctype,dim>(t,p,d);
+          ctype relativeError = std::abs(integral[d]-exact) /
+                                (std::abs(integral[d])+std::abs(exact));
+          std::cerr << "       relative error " << relativeError << " in direction " << d << " (exact = " << exact << " numerical = " << integral[d] << ")" << std::endl;
+        }
         success = false;
       }
     }
@@ -189,22 +206,22 @@ int main ()
     Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
     Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
 
-    checkWeights<double, 1>(cube1d);
-    checkWeights<double, 2>(cube2d);
-    checkWeights<double, 3>(cube3d);
+    //     checkWeights<double, 1>(cube1d);
+    //     checkWeights<double, 2>(cube2d);
+    //     checkWeights<double, 3>(cube3d);
 
-    checkWeights<double, 2>(simplex2d);
-    checkWeights<double, 3>(simplex3d);
+    //     checkWeights<double, 2>(simplex2d);
+    //     checkWeights<double, 3>(simplex3d);
 
-    checkWeights<double, 3>(prism3d);
-    checkWeights<double, 3>(pyramid3d);
+    //     checkWeights<double, 3>(prism3d);
+    //     checkWeights<double, 3>(pyramid3d);
 
-    checkQuadrature<double, 1>(cube1d);
-    checkQuadrature<double, 2>(cube2d);
-    checkQuadrature<double, 3>(cube3d);
-    checkQuadrature<double, 2>(simplex2d);
-    checkQuadrature<double, 3>(simplex3d);
-    checkQuadrature<double, 3>(prism3d);
+    //     checkQuadrature<double, 1>(cube1d);
+    //     checkQuadrature<double, 2>(cube2d);
+    //     checkQuadrature<double, 3>(cube3d);
+    //     checkQuadrature<double, 2>(simplex2d);
+    //     checkQuadrature<double, 3>(simplex3d);
+    //     checkQuadrature<double, 3>(prism3d);
     checkQuadrature<double, 3>(pyramid3d);
   }
   catch (Dune::Exception &e) {
