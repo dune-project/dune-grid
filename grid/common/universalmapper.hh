@@ -41,7 +41,7 @@ namespace Dune
     /** @brief Construct mapper from grid and one of its id sets
 
        \param grid A Dune grid object.
-       \param indexset IndexSet object returned by grid.
+       \param idset An IndexSet object of the grid.
 
      */
     UniversalMapper (const G& grid, const IDS& idset)

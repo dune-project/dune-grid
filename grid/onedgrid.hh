@@ -372,8 +372,9 @@ namespace Dune {
     /** \brief Mark entity for refinement
      *
      * \param refCount if >0 mark for refinement, if <0 mark for coarsening
+     * \param e EntityPointer to the entity you want to mark
      *
-     * \return false, which is not compliant with the official specification!
+     * \return True, if marking was successfull
      */
     bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer& e );
 
