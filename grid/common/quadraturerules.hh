@@ -621,7 +621,7 @@ namespace Dune {
   {
   public:
     enum {d=3};
-    enum {highest_order=PyramidQuadraturePoints::highest_order};
+    enum {highest_order=CubeQuadratureRule<ct,1>::highest_order};
     typedef ct CoordType;
     typedef PyramidQuadratureRule<ct,3> value_type;
 
@@ -653,25 +653,29 @@ namespace Dune {
       }
       else
       {
-        return;
         // Define the quadrature rules...
         QuadratureRule<ct,3> simplex =
-          QuadratureRules<ct,3>::rule(GeometryType::simplex, p);
+          QuadratureRules<ct,3>::rule(GeometryType::simplex, (p<=5 ? p+1 : p));
 
         for (typename QuadratureRule<ct,3>::const_iterator
              it=simplex.begin(); it != simplex.end(); ++it)
         {
           FieldVector<ct,3> local = it->position();
           ct weight = it->weight();
-          // Simplex 1
-          // x:=x+y
-          local[0] = local[0]+local[1];
-          push_back(QuadraturePoint<ct,d>(local,weight));
-          // Simplex 2
-          // y:=x+y
-          local[0] = it->position()[0];
-          local[1] = local[0]+local[1];
-          push_back(QuadraturePoint<ct,d>(local,weight));
+          if (local[0] == local[1]) {
+            push_back(QuadraturePoint<ct,d>(local,2*weight));
+          }
+          else {
+            // Simplex 1
+            // x:=x+y
+            local[0] = local[0]+local[1];
+            push_back(QuadraturePoint<ct,d>(local,weight));
+            // Simplex 2
+            // y:=x+y
+            local[0] = it->position()[0];
+            local[1] = local[0]+local[1];
+            push_back(QuadraturePoint<ct,d>(local,weight));
+          }
         }
 
         this->delivered_order = simplex.order();
