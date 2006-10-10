@@ -47,17 +47,37 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
     //! constructor taking filename of macro grid and MPI_Comm
     ALUCubeGrid(const std::string macroName , MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(macroName,mpiComm) {}
+      BaseType(macroName,mpiComm)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated parallel ALUCubeGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
+    }
     //! constructor creating empty grid, empty string creates empty grid
     ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType("",mpiComm) {}
+      BaseType("",mpiComm)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
+      }
+    }
 #else
     //! constructor taking filename of macro grid
     ALUCubeGrid(const std::string macroName , int mpicomm = 0 ) :
-      BaseType(macroName) {}
+      BaseType(macroName)
+    {
+      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
     //! constructor creating empty grid
     ALUCubeGrid(int myrank = -1) :
-      BaseType("",myrank) {}
+      BaseType("",myrank)
+    {
+      std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
 #endif
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
@@ -164,17 +184,37 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
     //! constructor taking filename of macro grid and MPI_Comm
     ALUSimplexGrid(const std::string macroName, MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(macroName,mpiComm) {}
+      BaseType(macroName,mpiComm)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated parallel ALUSimplexGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
+    }
     //! constructor creating empty grid, empty string creates empty grid
     ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType("",mpiComm) {}
+      BaseType("",mpiComm)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
+      }
+    }
 #else
     //! constructor taking filename of macro grid
     ALUSimplexGrid(const std::string macroName , int mpicomm = 0) :
-      BaseType(macroName) {}
+      BaseType(macroName)
+    {
+      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
     //! constructor creating empty grid
     ALUSimplexGrid(int myrank = -1) :
-      BaseType("",myrank) {}
+      BaseType("",myrank)
+    {
+      std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
 #endif
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
