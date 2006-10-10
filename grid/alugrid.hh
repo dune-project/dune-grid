@@ -276,10 +276,17 @@ namespace Dune {
     enum { dim      = 2 };
     enum { dimworld = 2 };
   public:
-    ALUSimplexGrid(const std::string macroName ) :
-      BaseType(macroName) {}
-    ALUSimplexGrid( ) :
-      BaseType() {}
+    //! constructor creating grid from given macro grid file
+    ALUSimplexGrid(const std::string macroName )
+      : BaseType(macroName)
+    {
+      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
+    //! constructor creating empty grid
+    ALUSimplexGrid( ) : BaseType()
+    {
+      std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
