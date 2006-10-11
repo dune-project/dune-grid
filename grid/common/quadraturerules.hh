@@ -637,7 +637,8 @@ namespace Dune {
                    "QuadratureRule for order " << p << " and GeometryType "
                                                << this->type() << " not available");
 
-      if(p<=2) {
+      if(false) {
+        //        if(p<=2) {
         m=8;
         this->delivered_order = PyramidQuadraturePointsSingleton<3>::pyqp.order(m);
         FieldVector<ct, d> local;
@@ -655,7 +656,7 @@ namespace Dune {
       {
         // Define the quadrature rules...
         QuadratureRule<ct,3> simplex =
-          QuadratureRules<ct,3>::rule(GeometryType::simplex, (p<=5 ? p+1 : p));
+          QuadratureRules<ct,3>::rule(GeometryType::simplex,p);
 
         for (typename QuadratureRule<ct,3>::const_iterator
              it=simplex.begin(); it != simplex.end(); ++it)

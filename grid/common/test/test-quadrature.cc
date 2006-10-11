@@ -146,7 +146,7 @@ void checkWeights(Dune::GeometryType t, int p)
   }
   if (std::abs(volume -
                Dune::ReferenceElements<ctype, dim>::general(t).volume())
-      > 4*dim*p*std::numeric_limits<double>::epsilon())
+      > 4*dim*(p ? p : 1)*std::numeric_limits<double>::epsilon())
   {
     std::cerr << "Error: Quadrature for " << t << " and order=" << p
               << " does not sum to volume of RefElem" << std::endl;
@@ -163,7 +163,7 @@ template<class ctype, int dim>
 void checkWeights(Dune::GeometryType t)
 {
   int maxorder;
-  for (int i=1;; i++)
+  for (int i=0;; i++)
   {
     try {
       checkWeights<ctype,dim>(t, i);
