@@ -29,6 +29,7 @@ namespace Dune {
     updateStatus();
   }
 
+
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid()

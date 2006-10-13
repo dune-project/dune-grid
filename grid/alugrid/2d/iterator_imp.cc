@@ -533,9 +533,10 @@ namespace Dune {
 
     // non conform case and we still have neighbours
     if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty()) {
-      this->current.neigh_= static_cast<HElementType *>(nbStack_.top());
+      this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
+      //this->current.opposite_= this->current.item_->opposite(this->current.index_);
+      this->current.opposite_= nbStack_.top().second;
       nbStack_.pop();
-      this->current.opposite_= this->current.item_->opposite(this->current.index_);
       return;
     }
 
@@ -546,25 +547,30 @@ namespace Dune {
     }
 
 #if 0
-    //if (this->current.item_->hashvtx(this->current.index_)) {
+    // we have a hanging node
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
-      this->current.item_->getNbList(this->current.index_, nbStack_);
+      assert(nbStack_.empty());
+      std::pair<ALU2DSPACE Thinelement*, int> dummy;
+      dummy.first = this->current.item_->getLeftIntersection(this->current.index_);
+      dummy.second = this->current.item_->opposite(this->current.index_);
+      nbStack_.push(dummy);
+      dummy.first = this->current.item_->getRightIntersection(this->current.index_);
+      dummy.second = this->current.item_->opposite(this->current.index_);
+      nbStack_.push(dummy);
       //assert(!nbStack_.empty());
       if (nbStack_.empty()) {
-        //std::cout << "Stack empty at index: " << this->current.index_ << std::endl;
         //this->current.neigh_ = 0;
         //this->current.opposite_ = -1;
         increment();
         return;
       }
 
-      this->current.neigh_= static_cast<HElementType *>(nbStack_.top());
+      this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
+      this->current.opposite_= nbStack_.top().second;
       nbStack_.pop();
-      this->current.opposite_= this->current.item_->opposite(this->current.index_);
     }
 #endif
-
     //conform case
     else {
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
@@ -610,54 +616,6 @@ namespace Dune {
   }
 
 
-  //********* begin struct CheckElement ********************
-  //template<int cc, PartitionIteratorType, class GridImp>
-  //struct CheckElementType;
-  //
-  //********************************************************
-
-  template<int cc, PartitionIteratorType, class GridImp>
-  struct CheckElementType;
-
-  // specialisation for elements
-  template<PartitionIteratorType pitype, class GridImp>
-  struct CheckElementType<0,pitype,GridImp>{
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-    static inline int checkFace(HElementType & item, int & face, int level) {
-      return 1;
-    }
-  };
-
-  // specialisation for edges
-  template<PartitionIteratorType pitype, class GridImp>
-  struct CheckElementType<1,pitype,GridImp>{
-    typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
-
-    //static inline int checkFace(typename ALU2dGridLeafIterator<1,pitype,GridImp>::ElementType & item, int & face) {
-    static inline int checkFace(HElementType & item, int & face, int level) {
-      assert(face>=0);
-
-      while (face < 3) {
-        if(item.normaldir(face)==1) {
-          return 0;
-        }
-        else ;
-        ++face;
-      }
-      return 1;
-    }
-  };
-
-  // specialisation for vertices
-  template<PartitionIteratorType pitype, class GridImp>
-  struct CheckElementType<2,pitype,GridImp>{
-    static inline int checkFace(ALU2DSPACE Vertex & item, int & face, int level) {
-      return 1;
-    }
-  };
-  //********* end struct CheckElement ********************
-
-
   //********************************************************************
   //
   //  -- ALU2dGridLeafIterator
@@ -672,21 +630,18 @@ namespace Dune {
     EntityPointerType (grid),
     endIter_(end),
     level_(-1),
-    face_(0),
     elem_(0),
     iter_()
   {
     if(!end) {
 
       iter_ = IteratorType(grid.myGrid());
-
       iter_->first();
+
       if((!iter_->done()))
       {
         elem_ = &(iter_->getitem());
-        this->updateEntityPointer(elem_, face_, elem_->level());
-        if(cdim==1)
-          increment();
+        this->updateEntityPointer(elem_, -1, elem_->level());
       }
     }
     else
@@ -703,7 +658,6 @@ namespace Dune {
     : EntityPointerType (org)
       , endIter_( org.endIter_ )
       , level_( org.level_ )
-      , face_(org.face_)
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
   {}
@@ -717,7 +671,6 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ =  org.endIter_ ;
     level_   =  org.level_;
-    face_    =  org.face_;
     elem_    =  org.elem_;
     iter_    =  org.iter_;
     return *this;
@@ -727,47 +680,145 @@ namespace Dune {
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment () {
 
-    if(endIter_)
-      return ;
-
+    if(endIter_) return ;
     IteratorType & iter = iter_;
+    iter->next();
 
-    int goNext = CheckElementType<cdim,pitype,GridImp>::checkFace(*(this->item_), face_, level_);
-
-    if (goNext) {
-      if (cdim ==1) {
-        assert(face_==3);
-        iter->next();
-        if(iter->done()) {
-          endIter_ = true;
-          face_= 0;
-          this->done();
-          return ;
-        }
-        face_=0;
-        elem_ = &(iter->getitem());
-        this->updateEntityPointer(elem_, face_);
-        increment();
-        return;
-      }
-      else {
-        iter->next();
-        face_=0;
-      }
+    if(iter->done()) {
+      endIter_ = true;
+      this->done();
+      return ;
     }
 
-    if(!goNext || cdim!= 1) {
+    elem_ = &(iter->getitem());
+    this->updateEntityPointer(elem_, -1, elem_->level());
+  }
+
+  //********************************************************************
+  //
+  //  -- ALU2dGridLeafIterator
+  //  -- LeafIterator
+  //  -- specialized for codim=1
+  //
+  //********************************************************************
+
+  //! constructor
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLeafIterator<1, pitype, GridImp> ::
+  ALU2dGridLeafIterator(const GridImp & grid, bool end) :
+    EntityPointerType (grid),
+    endIter_(end),
+    level_(-1),
+    face_(0),
+    elem_(0),
+    iter_(),
+    marker_(grid.getLeafMarker())
+  {
+    if(!end) {
+      // update marker Vector
+      marker_.update(grid);
+      marker_.unsetUp2Date();
+
+      iter_ = IteratorType(grid.myGrid());
+      iter_->first();
+      if((!iter_->done()))
+      {
+        elem_ = &(iter_->getitem());
+        this->updateEntityPointer(elem_, face_, elem_->level());
+        increment();
+      }
+    }
+    else
+    {
+      endIter_ = true;
+      this->done();
+    }
+  }
+
+  //! copy constructor
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLeafIterator<1, pitype, GridImp> ::
+  ALU2dGridLeafIterator(const ALU2dGridLeafIterator<1,pitype,GridImp> & org)
+    : EntityPointerType (org)
+      , endIter_( org.endIter_ )
+      , level_( org.level_ )
+      , face_(org.face_)
+      , elem_(org.elem_)
+      , iter_ ( org.iter_ )
+      , marker_ (org.marker_)
+  {}
+
+  //! assignment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline ALU2dGridLeafIterator<1, pitype, GridImp> &
+  ALU2dGridLeafIterator<1, pitype, GridImp> ::
+  operator = (const ThisType & org)
+  {
+    EntityPointerType :: operator = (org);
+    endIter_ =  org.endIter_ ;
+    level_   =  org.level_;
+    face_    =  org.face_;
+    elem_    =  org.elem_;
+    iter_    =  org.iter_;
+
+    assert(&marker_ == &org.marker_);
+    return *this;
+  }
+
+
+  //! prefix increment
+  template<PartitionIteratorType pitype, class GridImp>
+  inline void ALU2dGridLeafIterator<1, pitype, GridImp> :: increment() {
+
+    IteratorType & iter = iter_;
+    if(iter->done()) {
+      face_= -1;
+      return ;
+    }
+
+    int goNext = goNextElement();
+    if (goNext) {
+      assert(face_==3);
+      iter->next();
       if(iter->done()) {
-        endIter_ = true;
-        face_= 0;
+        endIter_=true;
+        face_= -1;
         this->done();
         return ;
       }
-
+      face_=0;
       elem_ = &(iter->getitem());
-      this->updateEntityPointer(elem_, face_);
+      this->updateEntityPointer(elem_, face_, elem_->level());
+      increment();
+    }
+    else {
+      if(iter->done()) {
+        endIter_=true;
+        face_= -1;
+        this->done();
+        return ;
+      }
+      elem_ = &(iter->getitem());
+      this->updateEntityPointer(elem_, face_, elem_->level());
       ++face_;
     }
+    return;
+  }
+
+  template<PartitionIteratorType pitype, class GridImp>
+  inline int ALU2dGridLeafIterator<1, pitype, GridImp> :: goNextElement() {
+    assert(face_>=0);
+    int elIdx = this->item_->getIndex();
+
+    while (face_ < 3) {
+      int idx = this->item_->edge_idx(face_);
+      // check if face is visited on this element
+      if(marker_.isOnElement(elIdx,idx,1))
+        return 0;
+      else
+        ++face_;
+    }
+    return 1;
   }
 
 

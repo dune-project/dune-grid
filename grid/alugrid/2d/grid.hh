@@ -519,6 +519,9 @@ namespace Dune {
     mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
+    // always update this marker!!!
+    mutable ALU2dGridMarkerVector leafMarker_;
+
   public:
     ALU2dGridMarkerVector & getMarkerVector(int level) const
     {
@@ -526,6 +529,13 @@ namespace Dune {
       assert( level <= MAXL);
       return marker_[level];
     }
+
+    ALU2dGridMarkerVector & getLeafMarker() const
+    {
+      return leafMarker_;
+    }
+
+
 
     /** \brief write Grid to file in specified FileFormatType
      */

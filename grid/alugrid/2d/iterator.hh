@@ -323,7 +323,7 @@ namespace Dune {
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
 
-    std::stack<ALU2DSPACE Thinelement*> nbStack_;
+    std::stack<std::pair<ALU2DSPACE Thinelement*, int> > nbStack_;
 
 
   }; // end ALU2dGridLeafIntersectionIterator
@@ -333,6 +333,7 @@ namespace Dune {
   //********************************************************************
   //  --ALU2dGridLeafIterator
   //  --LeafIterator
+  //  --for codim = 0,2
   //
   //********************************************************************
 
@@ -377,6 +378,63 @@ namespace Dune {
     bool endIter_;
     //! actual level
     int level_;
+    ElementType * elem_;
+    typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
+    // Listwalkptr, behaves like a proxy for Leafwalk and Levelwalk Ptrs
+    IteratorType iter_;
+  }; // end ALU2dGridLeafIterator
+
+
+  //********************************************************************
+  //  --ALU2dGridLeafIterator
+  //  --LeafIterator
+  //  --specialized for codim = 1
+  //
+  //********************************************************************
+
+  template<PartitionIteratorType pitype, class GridImp>
+  class ALU2dGridLeafIterator<1,pitype,GridImp> :
+    public ALU2dGridEntityPointer<1,GridImp>,
+    public LeafIteratorDefaultImplementation<1, pitype, GridImp, ALU2dGridLeafIterator>
+  {
+    enum { dim = GridImp::dimension };
+    enum { dimworld  = GridImp::dimensionworld };
+    enum { codim = 1 };
+
+    friend class ALU2dGridEntity<0,dimworld,GridImp>;
+    friend class ALU2dGridEntity<1,dimworld,GridImp>;
+    friend class ALU2dGridEntity<dim,dimworld,GridImp>;
+    friend class ALU2dGrid < dim , dimworld >;
+
+    typedef ALU2dGridEntityPointer<1,GridImp> EntityPointerType;
+    typedef ALU2dGridEntity<1,dim,GridImp> EntityImp;
+
+    typedef ALU2dGridLeafIterator<1, pitype, GridImp> ThisType;
+
+  public:
+    //! type of entity we iterate (interface)
+    typedef typename GridImp::template Codim<1>::Entity Entity;
+    typedef typename Dune::ALU2dImplTraits::template Codim<1>::InterfaceType ElementType;
+
+    //! Constructor called by LeafIterator
+    ALU2dGridLeafIterator(const GridImp & grid, bool end);
+
+    //! copy Constructor
+    ALU2dGridLeafIterator(const ThisType & org);
+
+    //! prefix increment
+    void increment ();
+
+    //! assigment of iterator
+    ThisType & operator = (const ThisType & org);
+
+  private:
+    int goNextElement();
+
+    //! true if iterator is end iterator
+    bool endIter_;
+    //! actual level
+    int level_;
     //! information for edges
     int face_;
 
@@ -387,9 +445,10 @@ namespace Dune {
     // Listwalkptr, behaves like a proxy for Leafwalk and Levelwalk Ptrs
     IteratorType iter_;
 
+    // for the codim 1 case
+    ALU2dGridMarkerVector & marker_;
+
   }; // end ALU2dGridLeafIterator
-
-
 
   //**********************************************************************
   //
@@ -502,7 +561,6 @@ namespace Dune {
 
     // current item
     HElementType * item_;
-
     //! type of entity we iterate (interface)
     typedef typename Dune::ALU2dImplTraits::template Codim<1>::InterfaceType ElementType;
     ElementType * elem_;

@@ -84,6 +84,47 @@ namespace Dune {
       up2Date_ = true;
     }
 
+    // this is for the LeafIterator
+    template <class GridType>
+    void update (const GridType & grid)
+    {
+      typedef typename Dune::ALU2dImplTraits::template Codim<0>::InterfaceType ElementType;
+      typedef typename Dune::ALU2dImplTraits::template Codim<2>::InterfaceType VertexType;
+      typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
+
+      // resize
+      for(int i=0; i<2; ++i)
+      {
+        int s = grid.hierSetSize(i+1);
+        if((int) marker_[i].size() < s ) marker_[i].resize(s);
+
+        size_t markerSize = marker_[i].size();
+        // reset marker vector to default value
+        for(size_t k=0; k<markerSize; ++k) marker_[i][k] = -1;
+      }
+
+      enum { dim = GridType::dimension };
+      IteratorType iter(grid.myGrid());
+
+      for(iter->first(); !iter->done(); iter->next())
+      {
+        ElementType & elem = iter->getitem();
+
+        int elIdx = elem.getIndex();
+        for(int i=0; i<dim+1; ++i)
+        {
+          enum { vxCodim = 1 };
+          int vxIdx = elem.vertex(i)->getIndex();
+          if( marker_[vxCodim][vxIdx] < 0) marker_[vxCodim][vxIdx] = elIdx;
+
+          enum { edgeCodim = 0 };
+          int edgeIdx = elem.edge_idx(i);
+          if( marker_[edgeCodim][edgeIdx] < 0) marker_[edgeCodim][edgeIdx] = elIdx;
+        }
+      }
+      up2Date_ = true;
+    }
+
   private:
     VectorType marker_[2];
 
