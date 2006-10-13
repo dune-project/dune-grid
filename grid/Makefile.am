@@ -17,13 +17,9 @@ endif
 # in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
 
-if ALBERTA
-ALBERTALIB = albertagrid/libalberta.la
-endif
-
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(ALBERTALIB) \
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
   $(COMMONLIB) $(DUNE_COMMON_LIBS)
 
 # These libraries do not need other libraries besides lcommon
