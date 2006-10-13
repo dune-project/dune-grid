@@ -13,10 +13,9 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-if ALUGRID
-# also contains items independent of ALUGrid
+# the ALUGrid lib contains items that are needed
+# in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
-endif
 
 if ALBERTA
 ALBERTALIB = albertagrid/libalberta.la
