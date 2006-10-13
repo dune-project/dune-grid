@@ -757,8 +757,6 @@ namespace AlbertHelp
 
   struct MeshCallBack
   {
-    typedef void callBackPointer_t (void * , EL * );
-
     template <class HandlerImp>
     struct Refinement
     {
@@ -779,60 +777,56 @@ namespace AlbertHelp
       }
     };
 
-    typedef callBackPointer_t * callBackPointerReference_t;
-    static callBackPointerReference_t & postRefinementPtr ()
+    typedef void callBackPointer_t (void * , EL * );
+
+    // pointer to actual mesh, for checking only
+    MESH * mesh_;
+    // pointer to data handler
+    void * dataHandler_;
+    // method to cast back and call methods of data handler
+    callBackPointer_t * postRefinement_;
+    callBackPointer_t * preCoarsening_;
+
+    void reset ()
     {
-      static callBackPointer_t * ptr = 0;
-      return ptr;
+      mesh_           = 0;
+      dataHandler_    = 0;
+      postRefinement_ = 0;
+      preCoarsening_  = 0;
     }
 
-    static callBackPointerReference_t & preCoarseningPtr ()
-    {
-      static callBackPointer_t * ptr = 0;
-      return ptr;
-    }
-
-    typedef MESH * MeshPtrReference_t;
-    static MeshPtrReference_t & lockMeshPtr ()
-    {
-      static MESH * ptr = 0;
-      return ptr;
-    }
-
-    typedef void * DataHandlerReference_t;
-    static DataHandlerReference_t & dataHandler ()
-    {
-      static void * ptr = 0;
-      return ptr;
-    }
+    const MESH * lockMesh () const { return mesh_; }
+    const void * dataHandler () const { return dataHandler_; }
 
     template <class HandlerImp>
-    static void setPointers(MESH * mesh, HandlerImp & handler)
+    void setPointers(MESH * mesh, HandlerImp & handler)
     {
-      lockMeshPtr() = mesh; // set mesh pointer for checking
-      dataHandler() = (void *) &handler; // set pointer of data handler
+      mesh_ = mesh; // set mesh pointer for checking
+      dataHandler_ = (void *) &handler; // set pointer of data handler
 
-      postRefinementPtr() = & Refinement<HandlerImp>::apply;
-      preCoarseningPtr()  = & Coarsening<HandlerImp>::apply;
+      postRefinement_ = & Refinement<HandlerImp>::apply;
+      preCoarsening_  = & Coarsening<HandlerImp>::apply;
     }
 
-    static void reset()
+    void postRefinement( EL * el )
     {
-      postRefinementPtr() = 0;
-      preCoarseningPtr()  = 0;
-      lockMeshPtr()       = 0;
-      dataHandler()       = 0;
+      assert( preCoarsening_ != 0 );
+      postRefinement_(dataHandler_,el);
+    }
+    void preCoarsening( EL * el )
+    {
+      assert( preCoarsening_ != 0 );
+      preCoarsening_(dataHandler_,el);
     }
 
-    static void postRefinement(EL * el)
+  private:
+    MeshCallBack ()
+      : mesh_(0), dataHandler_(0), postRefinement_(0), preCoarsening_(0) {}
+  public:
+    static MeshCallBack & instance()
     {
-      assert( postRefinementPtr() != 0 );
-      postRefinementPtr() (dataHandler(),el);
-    }
-    static void preCoarsening(EL * el)
-    {
-      assert( preCoarseningPtr() != 0 );
-      preCoarseningPtr() (dataHandler(),el);
+      static MeshCallBack inst;
+      return inst;
     }
   };
 
@@ -841,6 +835,8 @@ namespace AlbertHelp
   template <int dim>
   inline static void refineCoordsAndRefineCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
   {
+    static MeshCallBack & callBack = MeshCallBack::instance();
+
     const int nv = drv->fe_space->admin->n0_dof[VERTEX];
     REAL_D* vec = 0;
     GET_DOF_VEC(vec,drv);
@@ -867,16 +863,16 @@ namespace AlbertHelp
     for(int j=0; j<dim; ++j)
       newCoord[j] = 0.5*(oldCoordZero[j] + oldCoordOne[j]);
 
-    if(MeshCallBack::dataHandler)
+    if(callBack.dataHandler())
     {
       // make sure that mesh is the same as in MeshCallBack
-      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr() );
+      assert( drv->fe_space->admin->mesh == callBack.lockMesh() );
       for(int i=0; i<ref; ++i)
       {
         EL * elem = list[i].el;
 
         //std::cout << "call refine for element " << elem << "\n";
-        MeshCallBack::postRefinement(elem);
+        callBack.postRefinement(elem);
       }
     }
   }
@@ -884,15 +880,17 @@ namespace AlbertHelp
   inline static void
   coarseCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
   {
-    if(MeshCallBack::dataHandler)
+    static MeshCallBack & callBack = MeshCallBack::instance();
+
+    if(callBack.dataHandler())
     {
-      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr() );
+      assert( drv->fe_space->admin->mesh == callBack.lockMesh() );
       assert(ref > 0);
       for(int i=0; i<ref; ++i)
       {
         EL * el = list[i].el;
         //std::cout << "call coarse for element " << el << "\n";
-        MeshCallBack::preCoarsening(el);
+        callBack.preCoarsening(el);
       }
     }
   }

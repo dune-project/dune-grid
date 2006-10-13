@@ -4333,11 +4333,15 @@ namespace Dune
               son   , this->getRealImplementation(son) ,
               tmprpop );
 
-    ALBERTA AlbertHelp::MeshCallBack::setPointers(mesh_,handler);
+    ALBERTA AlbertHelp::MeshCallBack & callBack = ALBERTA
+                                                  AlbertHelp::MeshCallBack::instance();
+
+    callBack.setPointers(mesh_,handler);
 
     bool refined = this->adapt();
 
-    ALBERTA AlbertHelp::MeshCallBack::reset();
+    callBack.reset();
+
     dm.dofCompress();
     postAdapt();
     return refined;
