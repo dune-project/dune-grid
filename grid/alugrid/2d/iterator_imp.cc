@@ -546,8 +546,8 @@ namespace Dune {
       return;
     }
 
-#if 0
-    // we have a hanging node
+#if IS_NON_CONFORM
+
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
       assert(nbStack_.empty());
@@ -571,6 +571,7 @@ namespace Dune {
       nbStack_.pop();
     }
 #endif
+
     //conform case
     else {
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);

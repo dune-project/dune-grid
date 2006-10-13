@@ -7,6 +7,8 @@
 #define ALU2DSPACE ALUGridSpace ::
 #define ALU2DSPACENAME ALUGridSpace
 
+#define IS_NON_CONFORM 0
+
 namespace Dune {
 
   struct ALU2dImplTraits {

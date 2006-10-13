@@ -12,8 +12,11 @@ namespace Dune {
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
-  //: mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart))
+#if IS_NON_CONFORM
+    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart))
+#else
     : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
+#endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
