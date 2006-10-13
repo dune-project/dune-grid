@@ -41,7 +41,7 @@ namespace Dune {
     //! \brief Type of the implementation
     typedef typename GridPartTraits::GridPartType GridPartType;
 
-    //! \biref type of Grid implementation
+    //! \brief type of Grid implementation
     typedef typename GridPartTraits::GridType GridType;
 
     //! \brief Index set implementation
