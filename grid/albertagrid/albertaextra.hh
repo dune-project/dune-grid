@@ -779,47 +779,62 @@ namespace AlbertHelp
       }
     };
 
-    static callBackPointer_t * postRefinementPtr;
-    static callBackPointer_t * preCoarseningPtr;
-    static MESH * lockMeshPtr;
-    static void * dataHandler;
+    typedef callBackPointer_t * callBackPointerReference_t;
+    static callBackPointerReference_t & postRefinementPtr ()
+    {
+      static callBackPointer_t * ptr = 0;
+      return ptr;
+    }
+
+    static callBackPointerReference_t & preCoarseningPtr ()
+    {
+      static callBackPointer_t * ptr = 0;
+      return ptr;
+    }
+
+    typedef MESH * MeshPtrReference_t;
+    static MeshPtrReference_t & lockMeshPtr ()
+    {
+      static MESH * ptr = 0;
+      return ptr;
+    }
+
+    typedef void * DataHandlerReference_t;
+    static DataHandlerReference_t & dataHandler ()
+    {
+      static void * ptr = 0;
+      return ptr;
+    }
 
     template <class HandlerImp>
     static void setPointers(MESH * mesh, HandlerImp & handler)
     {
-      lockMeshPtr = mesh; // set mesh pointer for checking
-      dataHandler = (void *) &handler; // set pointer of data handler
+      lockMeshPtr() = mesh; // set mesh pointer for checking
+      dataHandler() = (void *) &handler; // set pointer of data handler
 
-      postRefinementPtr = & Refinement<HandlerImp>::apply;
-      preCoarseningPtr  = & Coarsening<HandlerImp>::apply;
+      postRefinementPtr() = & Refinement<HandlerImp>::apply;
+      preCoarseningPtr()  = & Coarsening<HandlerImp>::apply;
     }
 
     static void reset()
     {
-      postRefinementPtr = 0;
-      preCoarseningPtr  = 0;
-      lockMeshPtr    = 0;
-      dataHandler    = 0;
+      postRefinementPtr() = 0;
+      preCoarseningPtr()  = 0;
+      lockMeshPtr()       = 0;
+      dataHandler()       = 0;
     }
 
     static void postRefinement(EL * el)
     {
-      assert( postRefinementPtr );
-      postRefinementPtr(dataHandler,el);
+      assert( postRefinementPtr() != 0 );
+      postRefinementPtr() (dataHandler(),el);
     }
     static void preCoarsening(EL * el)
     {
-      assert( preCoarseningPtr );
-      preCoarseningPtr(dataHandler,el);
+      assert( preCoarseningPtr() != 0 );
+      preCoarseningPtr() (dataHandler(),el);
     }
   };
-
-  // the following definitions are shifted to the non-inline file
-  // albertaextra.cc for inclusion in libdunegrid
-  //MeshCallBack::callBackPointer_t * MeshCallBack::postRefinementPtr = 0;
-  //MeshCallBack::callBackPointer_t * MeshCallBack::preCoarseningPtr  = 0;
-  //MESH * MeshCallBack::lockMeshPtr = 0;
-  //void * MeshCallBack::dataHandler = 0;
 
 #ifndef CALC_COORD
   // set entry for new elements to 1
@@ -855,7 +870,7 @@ namespace AlbertHelp
     if(MeshCallBack::dataHandler)
     {
       // make sure that mesh is the same as in MeshCallBack
-      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr );
+      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr() );
       for(int i=0; i<ref; ++i)
       {
         EL * elem = list[i].el;
@@ -871,7 +886,7 @@ namespace AlbertHelp
   {
     if(MeshCallBack::dataHandler)
     {
-      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr );
+      assert( drv->fe_space->admin->mesh == MeshCallBack::lockMeshPtr() );
       assert(ref > 0);
       for(int i=0; i<ref; ++i)
       {
