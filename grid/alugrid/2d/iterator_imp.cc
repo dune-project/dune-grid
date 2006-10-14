@@ -566,6 +566,8 @@ namespace Dune {
         return;
       }
 
+      this->current.isBoundary_ = false;
+      this->current.opposite_= this->current.item_->opposite(this->current.index_);
       this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
       this->current.opposite_= nbStack_.top().second;
       nbStack_.pop();
