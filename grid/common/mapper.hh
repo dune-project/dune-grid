@@ -11,7 +11,7 @@
 
 /** @file
  * @author Peter Bastian
- * @brief Provides classes with basic mappers which are used to attch data to a grid
+ * @brief Provides classes with basic mappers which are used to attach data to a grid
  *
  */
 
