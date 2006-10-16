@@ -353,15 +353,15 @@ namespace Dune {
     }
 
     this->current.neigh_ = neighbourStack_.top().first;
-    assert( this->current.neigh_ );
-    this->current.opposite_ = neighbourStack_.top().second;
+    //assert( this->current.neigh_ );
+    this->current.opposite_ = neighbourStack_.top().second.first;
+    this->current.isBoundary_ = neighbourStack_.top().second.second;
     this->current.isBoundary_ = false;
-    assert(this->current.opposite_ >= 0 && this->current.opposite_ < 3);
-
     neighbourStack_.pop();
 
     //if(this->current.neigh_!=0)
     //  assert(this->current.neigh_->level()==this->walkLevel_);
+
     return;
   }
 
@@ -369,51 +369,48 @@ namespace Dune {
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: addNeighboursToStack ()
   {
     assert (this->current.index_ < 3);
-    typename ALU2dGridLevelIntersectionIterator<GridImp>::HElementType* neighTmp = this->current.item_->nbel(this->current.index_);
+    IntersectionInfo dummy;
 
-    if(neighTmp==0) {
+    dummy.first = this->current.item_->nbel(this->current.index_);
+    if(dummy.first==0) {
       return ;
     }
 
-    int oppositeTmp = this->current.item_->opposite(this->current.index_);
-    assert(oppositeTmp >= 0 && oppositeTmp < 3);
+    dummy.second.first = this->current.item_->opposite(this->current.index_);
+    dummy.second.second = false;
 
-    if (neighTmp->level() == this->walkLevel_) {
-      std::pair<typename ALU2dGridLevelIntersectionIterator<GridImp>::HElementType*, int> dummy(neighTmp,oppositeTmp);
+    if (dummy.first->level() == this->walkLevel_) {
       neighbourStack_.push(dummy);
       return;
     }
-    else if (neighTmp->level() > this->walkLevel_) {
-      while (neighTmp->level() > this->walkLevel_) {
-        oppositeTmp = getOppositeInFather(oppositeTmp, neighTmp->childNr());
-        assert(oppositeTmp >= 0 && oppositeTmp < 3);
-        neighTmp = neighTmp->father();
+    else if (dummy.first->level() > this->walkLevel_) {
+      while (dummy.first->level() > this->walkLevel_) {
+        dummy.second.first = getOppositeInFather(dummy.second.first, dummy.first->childNr());
+        assert(dummy.second.first >= 0 && dummy.second.first < 3);
+        dummy.first = dummy.first->father();
       }
-      assert(neighTmp->level()==this->walkLevel_);
-      assert(oppositeTmp >= 0 && oppositeTmp < 3);
-      std::pair<HElementType *, int> dummy(neighTmp,oppositeTmp);
+      assert(dummy.first->level()==this->walkLevel_);
       neighbourStack_.push(dummy);
       return;
     }
     else {
-      while (neighTmp->level() < this->walkLevel_ - 1 && neighTmp != 0) {
-        oppositeTmp = getOppositeInChild(oppositeTmp, neighTmp->childNr());
-        assert(oppositeTmp >= 0 && oppositeTmp < 3);
-        neighTmp = neighTmp->down();
+      while (dummy.first->level() < this->walkLevel_ - 1 && dummy.first != 0) {
+        dummy.second.first = getOppositeInChild(dummy.second.first, dummy.first->childNr());
+        assert(dummy.second.first >= 0 && dummy.second.first < 3);
+        dummy.first = dummy.first->father();
       }
-      if (neighTmp == 0)
+      if (dummy.first == 0)
         return;
-      assert(neighTmp->level()==this->walkLevel_ - 1);
-      assert(oppositeTmp >= 0 && oppositeTmp < 3);
+      assert(dummy.first->level()==this->walkLevel_ - 1);
 
-      HElementType * tmp = neighTmp->down();
+      HElementType * tmp = dummy.first->down();
       if (tmp == 0)
         return;
       while (!tmp->next()) {
-        int tmpOpposite = getOppositeInChild(oppositeTmp, tmp->nchild());
+        int tmpOpposite = getOppositeInChild(dummy.second.first, tmp->nchild());
         if (tmpOpposite != -1) {
-          std::pair<HElementType *, int> dummy(tmp, tmpOpposite);
-          neighbourStack_.push(dummy);
+          IntersectionInfo dummy2(tmp, std::pair<int, bool> (tmpOpposite, false));
+          neighbourStack_.push(dummy2);
         }
       }
       return;
@@ -534,8 +531,8 @@ namespace Dune {
     // non conform case and we still have neighbours
     if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty()) {
       this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
-      //this->current.opposite_= this->current.item_->opposite(this->current.index_);
-      this->current.opposite_= nbStack_.top().second;
+      this->current.opposite_= nbStack_.top().second.first;
+      this->current.isBoundary_= nbStack_.top().second.second;
       nbStack_.pop();
       return;
     }
@@ -551,14 +548,19 @@ namespace Dune {
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
       assert(nbStack_.empty());
-      std::pair<ALU2DSPACE Thinelement*, int> dummy;
+      IntersectionInfo dummy;
+
       dummy.first = this->current.item_->getLeftIntersection(this->current.index_);
-      dummy.second = this->current.item_->opposite(this->current.index_);
+      dummy.second.first = this->current.item_->opposite(this->current.index_);
+      dummy.second.second = (dummy.first==0) ? true : false ;
       nbStack_.push(dummy);
+
       dummy.first = this->current.item_->getRightIntersection(this->current.index_);
-      dummy.second = this->current.item_->opposite(this->current.index_);
+      dummy.second.first = this->current.item_->opposite(this->current.index_);
+      dummy.second.second = (dummy.first==0) ? true : false ;
       nbStack_.push(dummy);
       //assert(!nbStack_.empty());
+
       if (nbStack_.empty()) {
         //this->current.neigh_ = 0;
         //this->current.opposite_ = -1;
@@ -566,10 +568,9 @@ namespace Dune {
         return;
       }
 
-      this->current.isBoundary_ = false;
-      this->current.opposite_= this->current.item_->opposite(this->current.index_);
       this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
-      this->current.opposite_= nbStack_.top().second;
+      this->current.opposite_= nbStack_.top().second.first;
+      this->current.isBoundary_= nbStack_.top().second.second;
       nbStack_.pop();
     }
 #endif
@@ -584,7 +585,6 @@ namespace Dune {
       else  {
         this->current.isBoundary_ = false;
         this->current.opposite_= this->current.item_->opposite(this->current.index_);
-        //assert(this->current.neigh_->leaf());
       }
     }
 

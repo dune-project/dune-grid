@@ -210,6 +210,9 @@ namespace Dune {
 
     typedef ALU2dGridLevelIntersectionIterator<GridImp> ThisType;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+
+    typedef std::pair<HElementType *, std::pair<int, bool> > IntersectionInfo;
+
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
 
@@ -261,7 +264,7 @@ namespace Dune {
     int getOppositeInFather(int nrInChild, int nrOfChild) const;
     int getOppositeInChild(int nrInFather, int nrOfChild) const;
 
-    mutable std::stack<std::pair<HElementType *, int> > neighbourStack_;
+    mutable std::stack<IntersectionInfo> neighbourStack_;
   }; // end ALU2dGridLevelIntersectionIterator
 
 
@@ -281,6 +284,8 @@ namespace Dune {
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
     friend class LeafIntersectionIteratorWrapper<GridImp>;
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
+
+    typedef std::pair<ALU2DSPACE Thinelement*, std::pair<int, bool> > IntersectionInfo;
 
   public:
     typedef ALUMemoryProvider< ThisType > StorageType;
@@ -323,7 +328,7 @@ namespace Dune {
     template <class EntityType>
     void first(const EntityType & en, int wLevel);
 
-    std::stack<std::pair<ALU2DSPACE Thinelement*, int> > nbStack_;
+    std::stack<IntersectionInfo> nbStack_;
 
 
   }; // end ALU2dGridLeafIntersectionIterator
