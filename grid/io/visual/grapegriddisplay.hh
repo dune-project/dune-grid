@@ -5,6 +5,7 @@
 
 //- system includes
 #include <list>
+#include <stack>
 
 //- Dune includes
 #include <dune/grid/common/grid.hh>
