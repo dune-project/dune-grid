@@ -121,17 +121,18 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
   UGGridHierarchicIterator<GridImp> it(maxlevel);
 
-  if (level()<=maxlevel) {
+  if (level()<maxlevel) {
 
-    // Put myself on the stack
-    typename UG_NS<dim>::Element* t = target_;
-    it.elementStack_.push(t);
+    typename UG_NS<dim>::Element* sonList[UG_NS<dim>::MAX_SONS];
+    UG_NS<dim>::GetSons(target_, sonList);
 
-    // Set intersection iterator to myself
-    it.virtualEntity_.setToTarget(target_);
+    // Load sons of old target onto the iterator stack
+    for (int i=0; i<UG_NS<dim>::nSons(target_); i++)
+      it.elementStack_.push(sonList[i]);
 
-    /** \todo Directly put all sons onto the stack */
-    it.increment();
+    it.virtualEntity_.setToTarget( (it.elementStack_.empty())
+                                   ? NULL
+                                   : it.elementStack_.top() );
 
   } else {
     it.virtualEntity_.setToTarget(0);
@@ -172,7 +173,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   // in the local coordinate system of the father.
 
   // Get the 'context' of the father element.  In UG-speak, the context is
-  // the set of all nodes of an elements' sons.  They appear in a fixed
+  // the set of all nodes of an element's sons.  They appear in a fixed
   // order, therefore we can infer the local positions in the father element.
   const int MAX_CORNERS_OF_ELEM = 8;  // this is two much in 2d, but UG is that way
   const int MAX_NEW_CORNERS_DIM = (dim==2) ? 5 : 19;
