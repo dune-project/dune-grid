@@ -136,17 +136,19 @@ namespace Dune
 
       {
         // set the vertex coordinates
-        double (* vpointer)[3] = he->vpointer;
+        double ** vpointer = he->vpointer;
 
         // number of corners and number of vertices schould be the same
         // grape visual does not work for other situations
         assert( en.template count<dim>() == geometry.corners() );
+        assert( geometry.corners() < MAX_EL_DOF );
 
         for(int i= 0 ; i<geometry.corners(); ++i)
         {
           const int grapeVx = mapDune2GrapeVertex(geomType,i);
           he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
 
+          assert( Entity::dimensionworld <= 3 );
           for(int j = 0; j < Entity::dimensionworld ; ++j)
           {
             // here the mapping from dune to grape elements is done

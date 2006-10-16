@@ -41,14 +41,9 @@ typedef struct stackentry
                   , ref_flag(0), hmax(-1.0) {}
 } STACKENTRY;
 
+
 /* definition of dune_dat in g_eldesc.h */
 /* stored as user_data in the mesh pointer */
-
-/*****************************************************************************
-* Statische Variablen                *                     **
-*****************************************************************************/
-
-//static STACKENTRY * stackfree = NULL;
 
 /**************************************************************************
 *
@@ -58,9 +53,6 @@ typedef struct stackentry
 
 /* switch from leaf to level iteration for mesh */
 int switchMethods( GENMESHnD *actHmesh);
-
-/* add Button which can switch between LevelIteration and LeafIteration */
-//void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
 
 /*****************************************************************************
 ******************************************************************************
@@ -117,14 +109,8 @@ inline static double calc_hmax(HELEMENT *el)
 // update helement pointers
 inline static void helementUpdate( DUNE_ELEM *elem, HELEMENT *grapeEl )
 {
-  // local pointer to vertices
-  static double  * vertex [MAX_EL_DOF] = {0,0,0,0,0,0,0,0};
-  for(int i = 0 ; i < MAX_EL_DOF; i++)
-    vertex[i] = (double *)elem->vpointer[i];
-
   // set pointers
-  grapeEl->vertex = (double G_CONST*G_CONST*)vertex;
-
+  grapeEl->vertex       = elem->vpointer;
   grapeEl->vindex       = elem->vindex ;
   grapeEl->eindex       = elem->eindex ;
   grapeEl->level        = elem->level;
@@ -638,7 +624,7 @@ inline static ELEMENT * copy_element(ELEMENT *el, MESH_ELEMENT_FLAGS flag)
 
   assert(chexa_elem) ;
   cel->mesh              = el->mesh ;
-  cel->vertex            = (double G_CONST*G_CONST*)chexa_elem->vpointer;
+  cel->vertex            = chexa_elem->vpointer;
   cel->vindex            = el->vindex ;
   cel->eindex            = el->eindex ;
   cel->descr             = el->descr ;
@@ -687,10 +673,43 @@ inline HMESH * get_partition_number (int * partition)
 **
 ******************************************************************************
 *****************************************************************************/
+
+// if parameter is not 0 ,then mesh is freed (i.e. pushed to stack)
+GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
+{
+  static std::stack< GRAPEMESH * > meshStack;
+
+  if(mesh)
+  {
+    // free mesh
+    meshStack.push(mesh);
+    return 0;
+  }
+  else
+  {
+    // get mesh
+    //if(meshStack.empty())
+    {
+      return (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance") ("Dune Mesh");
+    }
+    /*
+       // not working yet
+       else
+       {
+       GRAPEMESH * m = meshStack.top();
+       meshStack.pop();
+       return m;
+       }
+     */
+  }
+}
+
+
 inline void * setupHmesh(const int noe, const int nov,
                          const int maxlev, DUNE_DAT * dune)
 {
-  GRAPEMESH * mesh = (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance") ("Dune Mesh");
+  //GRAPEMESH * mesh = (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance")("Dune Mesh");
+  GRAPEMESH * mesh = getAndFreeMesh();
 
   assert(mesh != NULL);
 
@@ -742,19 +761,14 @@ inline void * setupHmesh(const int noe, const int nov,
 // delete Hmesh , not really working yet
 inline void deleteHmesh( void * hmesh )
 {
-  assert( hmesh );
-  GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
-  //assert( mesh->f_data == 0 );
-  mesh->f_data = 0;
-  mesh->user_data = 0;
-  GRAPE(mesh,"delete") ();
+  getAndFreeMesh( (GRAPEMESH *) hmesh);
 }
 
 // delete Hmesh , not really working yet
 inline void deleteFunctions( void * hmesh )
 {
-  assert( hmesh );
-  GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
+  //assert( hmesh );
+  //GRAPEMESH * mesh = (GRAPEMESH *) hmesh;
 
   /*
      GENMESH_FDATA * f_data = mesh->f_data;
@@ -770,8 +784,8 @@ inline void deleteFunctions( void * hmesh )
      }
    */
 
-  mesh->f_data = 0;
-  mesh->user_data = 0;
+  //mesh->f_data = 0;
+  //mesh->user_data = 0;
 }
 
 static inline void addProjectUIF()
@@ -832,8 +846,21 @@ inline void handleMesh(void *hmesh, bool gridMode )
   GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
   assert(mesh != NULL);
 
+  // static stack to keep scenes
+  static std::stack< SCENE *> sceneStack;
+
   MANAGER * mgr = (MANAGER *)GRAPE(Manager,"get-stdmgr") ();
-  SCENE  *sc = (SCENE *)GRAPE(Scene,"new-instance") ("dune hmesh");
+
+  SCENE * sc = 0 ;
+  if(sceneStack.empty())
+  {
+    sc = (SCENE *)GRAPE(Scene,"new-instance") ("dune hmesh");
+  }
+  else
+  {
+    sc = sceneStack.top();
+    sceneStack.pop();
+  }
 
   addProjectUIF();
 
@@ -858,8 +885,8 @@ inline void handleMesh(void *hmesh, bool gridMode )
   GRAPE(mgr,"handle") (sc);  // grape display call
 
   sc->object = 0;
-  GRAPE(sc,"delete") ();
-  GRAPE(mgr,"delete") ();
+  sceneStack.push(sc);
+
   return ;
 }
 

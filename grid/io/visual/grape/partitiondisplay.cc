@@ -17,9 +17,9 @@
 
 /*  ------------------------------------------------------------------  */
 
-static int hm3_partition_draw_element   (HELEMENT3D*, HM3_GENERAL*, void*, void*);
-static int hm3_simpl_projection      (HELEMENT3D*, HM3_GENERAL*, void*, void*);
-static int hm3_simpl_test_if_proceed (HELEMENT3D*, HM3_GENERAL*, void*);
+static inline int hm3_partition_draw_element   (HELEMENT3D*, HM3_GENERAL*, void*, void*);
+static inline int hm3_simpl_projection      (HELEMENT3D*, HM3_GENERAL*, void*, void*);
+static inline int hm3_simpl_test_if_proceed (HELEMENT3D*, HM3_GENERAL*, void*);
 
 /*  ------------------------------------------------------------------  */
 
@@ -123,7 +123,7 @@ static void (*patch_normal)(const double *),
 
 static int initColorBarDone = 0;
 
-static void set_colors (int currProcs);
+static inline void set_colors (int currProcs);
 
 inline static void get_graphicdevice()
 {
@@ -361,7 +361,7 @@ inline static void set_colors (int currProcs)
 }
 
 /* forward declaration */
-GENMESHnD* genmesh3d_partition_disp ();
+inline GENMESHnD* genmesh3d_partition_disp ();
 
 static int initialized = 0;
 /* init max_partition and declare partition methods */

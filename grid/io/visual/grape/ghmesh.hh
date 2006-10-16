@@ -35,6 +35,7 @@ typedef struct dune_elem
     for(int i=0; i<MAX_EL_DOF; ++i)
     {
       vindex [i] = -1;
+      vpointer[i] = (double *)coordinates[i];
       for(int j=0; j<3; ++j)
       {
         vpointer[i][j] = 0.0;
@@ -51,7 +52,8 @@ typedef struct dune_elem
    */
   int type;
 
-  double vpointer [MAX_EL_DOF][3];
+  double *        vpointer [MAX_EL_DOF];
+  double coordinates [MAX_EL_DOF][3];
   int vindex [MAX_EL_DOF] ;
   int bnd [MAX_EL_FACE] ;
   int eindex;
@@ -212,7 +214,6 @@ struct dune_dat
   /* free HELEMENT */
   void (*free_stackentry)(DUNE_DAT * , void *);
 };
-
 
 /* setup hmesh with given data */
 extern void *setupHmesh(const int noe, const int nov,
