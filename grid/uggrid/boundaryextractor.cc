@@ -52,7 +52,6 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
 }
 
-/** \todo This is quadratic --> very slow */
 void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                                      const std::vector<unsigned int>& elementVertices,
                                                      std::set<FieldVector<int, 4>, CompareBoundarySegments<3> >& boundarySegments)
