@@ -86,9 +86,9 @@ namespace Dune {
   protected:
     struct impl
     {
-      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false) { }
+      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false), isNotConform_(false) { }
       impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_),
-                               isBoundary_(org.isBoundary_) { }
+                               isBoundary_(org.isBoundary_), isNotConform_(org.isNotConform_) { }
 
       impl & operator = (const impl & org)
       {
@@ -97,6 +97,7 @@ namespace Dune {
         index_ = org.index_;
         opposite_ = org.opposite_;
         isBoundary_ = org.isBoundary_;
+        isNotConform_ = org.isNotConform_;
         return *this;
       }
       // current element from which we started the intersection iterator
@@ -105,6 +106,7 @@ namespace Dune {
       mutable int index_;
       mutable int opposite_;
       mutable bool isBoundary_;
+      mutable bool isNotConform_;
     } current;
 
   public:

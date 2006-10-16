@@ -251,8 +251,16 @@ namespace Dune {
   inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
   ALU2dGridIntersectionBase<GridImp> ::intersectionGlobal () const {
     assert(this->current.item_ != 0);
+#if IS_NON_CONFORM
+    if (this->current.isNotConform_)
+      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
+    else
+      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+    return intersectionGlobal_;
+#else
     this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
     return intersectionGlobal_;
+#endif
   }
 
 
@@ -343,6 +351,10 @@ namespace Dune {
         this->done();
         return ;
       }
+      if(this->current.item_->hasHangingNode(this->current.index_))
+        this->current.isNotConform_ = true;
+      else
+        this->current.isNotConform_ = false;
       addNeighboursToStack();
       if (neighbourStack_.empty()) {
         this->current.neigh_ = 0;
@@ -351,7 +363,6 @@ namespace Dune {
         return;
       }
     }
-
     this->current.neigh_ = neighbourStack_.top().first;
     //assert( this->current.neigh_ );
     this->current.opposite_ = neighbourStack_.top().second.first;
@@ -441,6 +452,11 @@ namespace Dune {
 
     this->walkLevel_ = wLevel;
     this->done_ = false;
+
+    if(this->current.item_->hasHangingNode(0))
+      this->current.isNotConform_ = true;
+    else
+      this->current.isNotConform_ = false;
 
     if(!this->current.neigh_ ) {
       this->current.isBoundary_ = true;
@@ -547,6 +563,7 @@ namespace Dune {
 
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
+      this->current.isNotConform_ = true;
       assert(nbStack_.empty());
       IntersectionInfo dummy;
 
@@ -577,6 +594,7 @@ namespace Dune {
 
     //conform case
     else {
+      this->current.isNotConform_ = false;
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
       if (this->current.neigh_ == 0) {
         this->current.isBoundary_ = true;
