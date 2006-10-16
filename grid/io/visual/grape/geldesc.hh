@@ -605,14 +605,14 @@ inline void setupReferenceElements()
 }
 
 //vector holding the descriptions enumerated after it's index
-static H_ELEMENT_DESCRIPTION *
+static void *
 elementDescriptions[numberOfUsedGrapeElementTypes] = {
-  (H_ELEMENT_DESCRIPTION *)&triangle_description,
-  (H_ELEMENT_DESCRIPTION *)&quadrilateral_description,
-  (H_ELEMENT_DESCRIPTION *)&tetra_description,
-  (H_ELEMENT_DESCRIPTION *)&pyra_description,
-  (H_ELEMENT_DESCRIPTION *)&prism_description,
-  (H_ELEMENT_DESCRIPTION *)&cube_description
+  (void *) &triangle_description,
+  (void *) &quadrilateral_description,
+  (void *) &tetra_description,
+  (void *) &pyra_description,
+  (void *) &prism_description,
+  (void *) &cube_description
 };
 
 // the mapping of the reference elements
@@ -642,6 +642,6 @@ static H_ELEMENT_DESCRIPTION * getElementDescription( int type )
 {
   assert( type >= 0 );
   assert( type <  numberOfUsedGrapeElementTypes );
-  return elementDescriptions[type];
+  return (H_ELEMENT_DESCRIPTION * )elementDescriptions[type];
 }
 #endif
