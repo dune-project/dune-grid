@@ -41,9 +41,79 @@ typedef struct stackentry
                   , ref_flag(0), hmax(-1.0) {}
 } STACKENTRY;
 
-
 /* definition of dune_dat in g_eldesc.h */
 /* stored as user_data in the mesh pointer */
+
+namespace FctSelector {
+
+  /* function list management */
+#define FCT_NONE "none"
+#define FCT_ZERO "zero"
+#define SLT_DEFAULT "default"
+
+#define SYMBOL_LENGTH 8
+
+  typedef enum {
+    fmtNone,
+    fmtLog,
+    fmtT_Fun
+  } function_modifier_index;
+
+  typedef struct function_modifier {
+    function_modifier_index type;
+    char name[MAX_STRLEN];
+    GENMESH_FDATA *orig_f_data, *new_f_data;
+    int new_f_size;
+    void (*origfun)(void *, int, double *, double *, void *);
+    void (*origbounds)(void *, double *, double *, void *);
+    int number_of_functions;
+    struct {
+      GENMESH_FDATA *fdata;
+      char name[MAX_STRLEN], symbol[SYMBOL_LENGTH];
+      void (*fun)(void *, int, double *, double *, void *);
+      int active;
+    } *functions;
+    ITEM *item;
+    void *data;
+    void (*modfun)(void *, int, double *, double *, void *);
+    void (*modbounds)(void *, double *, double *, void *);
+    GENMESH_FDATA *(*init)(struct function_modifier*);
+    char *(*info)(struct function_modifier*);
+    bool_t (*xdr)(XDR *, struct function_modifier*);
+    void (*deleteFct)(struct function_modifier*);
+  } function_modifier;
+
+  /* function list management */
+  typedef struct {
+    char *slot, *name;
+    function_modifier modifier;
+  } chosen_function;
+
+  typedef std::pair< const char * , const char * > DataFunctionName_t;
+
+  // returns slot and name of selected function
+  DataFunctionName_t getCurrentFunctionName(GRAPEMESH * mesh)
+  {
+    DataFunctionName_t fctName(0,0);
+
+    chosen_function * current = (chosen_function *)
+                                g_list_current (mesh->current_function);
+    if (current)
+    {
+      GENMESH_FDATA* fun = (GENMESH_FDATA *)
+                           GRAPE (mesh, "get-function") (NULL, current->slot,NULL);
+      fctName.first  = current->slot;
+      fctName.second = fun->name;
+    }
+    return fctName;
+  }
+
+#undef FCT_NONE
+#undef FCT_ZERO
+#undef SLT_DEFAULT
+#undef SYMBOL_LENGTH
+
+} // end namespace fct selector
 
 /**************************************************************************
 *
@@ -846,6 +916,10 @@ inline void handleMesh(void *hmesh, bool gridMode )
   GRAPEMESH *mesh = (GRAPEMESH *) hmesh;
   assert(mesh != NULL);
 
+  // remember last selected function
+  static std::string lastFunctionName;
+  static std::string lastSlotName;
+
   // static stack to keep scenes
   static std::stack< SCENE *> sceneStack;
 
@@ -882,9 +956,24 @@ inline void handleMesh(void *hmesh, bool gridMode )
 
   grape_add_remove_methods();
 
+  // if function name exists, this function is selected again
+  if(lastFunctionName != "")
+  {
+    GRAPE(mesh,"select-function") (lastSlotName.c_str(),lastFunctionName.c_str());
+  }
+
   GRAPE(mgr,"handle") (sc);  // grape display call
 
+  FctSelector :: DataFunctionName_t fctName =
+    FctSelector :: getCurrentFunctionName(mesh);
+
+  // remember last selected function
+  lastSlotName     = fctName.first;
+  lastFunctionName = fctName.second;
+
+  // remove obj
   sc->object = 0;
+  // preserve sc
   sceneStack.push(sc);
 
   return ;
