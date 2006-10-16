@@ -62,12 +62,6 @@ namespace Dune {
       this->realGeometry.setNumberOfCorners(n);
     }
 
-    // UG doesn't actually have Subfaces.  Therefore, this method should never be
-    // called.  It is only here to calm the compiler
-    void setToTarget(void* target) {
-      DUNE_THROW(NotImplemented, "You have called UGMakeableGeometry<2,3>::setToTarget");
-    }
-
   };
 
   template<class GridImp>
@@ -90,12 +84,6 @@ namespace Dune {
     }
     // Empty.  Boundary elements in a 2d grid have always two corners
     void setNumberOfCorners(int n) {}
-
-    // UG doesn't actually have Subfaces.  Therefore, this method should never be
-    // called.  It is only here to calm the compiler
-    void setToTarget(void* target) {
-      DUNE_THROW(NotImplemented, "You have called UGMakeableGeometry<1,2>::setToTarget");
-    }
 
   };
 
@@ -447,11 +435,6 @@ namespace Dune {
     const FieldMatrix<UGCtype,1,1>& jacobianInverseTransposed (const FieldVector<UGCtype, 1>& local) const;
 
   private:
-
-    // This method needs to be here to compile, but it should never be called
-    void setToTarget(UG_NS<2>::Entity<1>::T* target) {
-      DUNE_THROW(GridError, "UGGridElement<1,2>::setToTarget called!");
-    }
 
     // Do nothing: faces in a 2d grid always have 2 corners
     void setNumberOfCorners(int n) {}

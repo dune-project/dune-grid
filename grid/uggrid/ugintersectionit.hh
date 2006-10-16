@@ -63,20 +63,6 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
-#if 0
-      typename UG_NS<dim>::Element* p = UG_NS<dim>::NbElem(center_, neighborCount_);
-      bool secondnb=false;
-      if (subCount_==0 && p!=0)
-        if (UG_NS<dim>::isLeaf(p)==false && getLeafNeighbor()!=NULL)
-          secondnb=true;
-      if (secondnb)
-        subCount_++;
-      else
-      {
-        neighborCount_++;
-        subCount_=0;
-      }
-#endif
       neighborCount_++;
       if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
         neighborCount_ = -1;
@@ -207,20 +193,6 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
-#if 0
-      typename UG_NS<dim>::Element* p = getLevelNeighbor();
-      bool secondnb=false;
-      if (subCount_==0 && p!=0)
-        if (UG_NS<dim>::isLeaf(p)==false && getLeafNeighbor()!=NULL)
-          secondnb=true;
-      if (secondnb)
-        subCount_++;
-      else
-      {
-        neighborCount_++;
-        subCount_=0;
-      }
-#endif
       neighborCount_++;
       if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
         neighborCount_ = -1;
