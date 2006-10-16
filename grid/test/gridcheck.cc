@@ -682,8 +682,8 @@ void assertNeighbor (Grid &g)
   if (next != eend)
   {
     ++next;
-    if (1 || g.name()=="AlbertaGrid") {
-      std::cerr << "WARNING: skip indices test using LevelIntersectionIterator!\n";
+    if (g.name()=="AlbertaGrid") {
+      std::cerr << "WARNING: skip indices test using LevelIntersectionIterator for AlbertaGrid!\n";
     } else {
       for (; e != eend; ++e)
       {

@@ -475,7 +475,7 @@ namespace Dune {
             static bool called = false;
             if( !called )
             {
-              std::cerr << "WARNING: skip indices test using LevelIntersectionIterator!\n";
+              std::cerr << "WARNING: skip indices test using LevelIntersectionIterator for AlbertaGrid!\n";
               called = true;
             }
           }
