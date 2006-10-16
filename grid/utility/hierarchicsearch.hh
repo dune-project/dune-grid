@@ -5,7 +5,7 @@
 
 /**
    @file
-   @brief Utility class for hierarchicly searching for an Entity
+   @brief Utility class for hierarchically searching for an Entity
    containing a given point.
  */
 
@@ -16,7 +16,7 @@ namespace Dune
 {
 
   /**
-     @brief Search an IndexSet of for an Entity containing a given point.
+     @brief Search an IndexSet for an Entity containing a given point.
    */
   template<class Grid, class IS>
   class HierarchicSearch
