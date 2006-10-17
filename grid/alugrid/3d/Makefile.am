@@ -1,11 +1,10 @@
 libalu3d_la_CXXFLAGS = @AM_CPPFLAGS@ $(ALUGRID_CPPFLAGS)
 libalu3d_la_LIBADD =
 
+noinst_LTLIBRARIES = libalu3d.la
 if ALUGRID
-  noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = mappings.cc topology.cc faceutility.cc
 else
-  noinst_LTLIBRARIES = libalu3d.la
   libalu3d_la_SOURCES = topology.cc
 endif
 
