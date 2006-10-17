@@ -777,22 +777,12 @@ void iterate(Grid &g)
 
   for (; it != endit; ++it)
   {
-#ifdef ALUGRID_TESTING
-  #warning "ALU3dGrid does not support assignment of Level- or LeafIterators!"
-    static bool called = false;
-    if(!called)
-    {
-      Dune::derr << "WARNING: ALU3dGrid does not support assignment of Level- or LeafIterators! \n";
-      called = true;
-    }
-#else
     LevelIterator l1 = it;
     LevelIterator l2 = l1; ++l1;
     assert(l2 == it);
     assert(l1 != it);
     ++l2;
     assert(l1 == l2);
-#endif
 
     result = it->geometry().local(it->geometry().global(origin));
     typename Grid::ctype error = (result-origin).two_norm();
@@ -871,19 +861,8 @@ void iteratorEquals (Grid &g)
   EntityPointer e2 = h2;
 
   // assign
-#ifdef ALUGRID_TESTING
-  #warning "ALU3dGrid does not support assignment of Level- or LeafIterators!"
-  static bool called = false;
-  if(!called)
-  {
-    Dune::derr << "WARNING: ALU3dGrid does not support assignment of Level- or LeafIterators! \n";
-    called = true;
-  }
-#else
   l1 = l2;
   L1 = L2;
-#endif
-
   h1 = h2;
   i1 = i2;
   e1 = e2;
