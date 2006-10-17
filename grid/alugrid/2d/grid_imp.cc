@@ -354,7 +354,7 @@ namespace Dune {
          tmprpop);
 
       ref = myGrid().duneAdapt(rp); // adapt grid
-      if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
+      //if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
     }
     // if new maxlevel was claculated
     assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
