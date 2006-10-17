@@ -204,8 +204,21 @@ namespace Dune {
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
   ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const {
     assert(this->current.item_ != 0);
-
     double dummy[2];
+
+#if IS_NON_CONFORM
+    if(neighbor())
+    {
+      if(this->current.isNotConform_)
+      {
+        this->current.neigh_->outernormal(numberInNeighbor(), dummy);
+        outerNormal_[0] = -dummy[0];
+        outerNormal_[1] = -dummy[1];
+        return outerNormal_;
+      }
+    }
+#endif
+
     this->current.item_->outernormal(this->current.index_, dummy);
     outerNormal_[0] = dummy[0];
     outerNormal_[1] = dummy[1];
