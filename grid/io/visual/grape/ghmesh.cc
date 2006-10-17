@@ -917,8 +917,8 @@ inline void handleMesh(void *hmesh, bool gridMode )
   assert(mesh != NULL);
 
   // remember last selected function
-  static std::string lastFunctionName;
-  static std::string lastSlotName;
+  static std::string lastFunctionName("zero");
+  static std::string lastSlotName("default");
 
   // static stack to keep scenes
   static std::stack< SCENE *> sceneStack;
@@ -957,7 +957,7 @@ inline void handleMesh(void *hmesh, bool gridMode )
   grape_add_remove_methods();
 
   // if function name exists, this function is selected again
-  if(lastFunctionName != "")
+  if( (lastFunctionName != "") && (lastSlotName != "") )
   {
     GRAPE(mesh,"select-function") (lastSlotName.c_str(),lastFunctionName.c_str());
   }
