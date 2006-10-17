@@ -151,7 +151,7 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     const QuadratureRule<double, interDim>& quad
       = QuadratureRules<double, interDim>::rule(intersectionSelfLocal.type(), 2);
 
-    for (int i=0; i<quad.size(); i++) {
+    for (size_t i=0; i<quad.size(); i++) {
 
       FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
       FieldVector<double,GridType::dimension> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
@@ -180,7 +180,7 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
       const QuadratureRule<double, interDim>& quad
         = QuadratureRules<double, interDim>::rule(intersectionNeighborLocal.type(), 2);
 
-      for (int i=0; i<quad.size(); i++) {
+      for (size_t i=0; i<quad.size(); i++) {
 
         FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
         FieldVector<double,GridType::dimension> localPos  = iIt.outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
