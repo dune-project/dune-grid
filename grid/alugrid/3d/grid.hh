@@ -221,6 +221,8 @@ namespace Dune {
     // The Interface Methods
     //**********************************************************
   public:
+    enum { refineStepsForHalf = 1 };
+
     static const ALU3dGridElementType elementType = elType;
     typedef typename ALU3DSPACE GatherScatterType::ObjectStreamType ObjectStreamType;
 
