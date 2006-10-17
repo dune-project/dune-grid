@@ -65,7 +65,6 @@ template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {
   makeNonConfGrid(grid,gref,mxl);
-  //gridcheck(grid);
 
   // -1 stands for leaf check
   checkCommunication(grid, -1, Dune::dvverb);
@@ -76,10 +75,7 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 #else
 template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
-{
-  // only refine once
-  checkALUSerial(grid,1);
-}
+{}
 #endif
 
 int main (int argc , char **argv) {
@@ -108,13 +104,11 @@ int main (int argc , char **argv) {
         checkALUSerial(grid);
       }
 
-      /*
-         {
-         std::string filename("alu-testgrid.triang");
-         ALUSimplexGrid<2,2> grid(filename);
-         checkALUSerial(grid,2);
-         }
-       */
+      {
+        std::string filename("alu-testgrid.triang");
+        ALUSimplexGrid<2,2> grid(filename);
+        checkALUSerial(grid,2);
+      }
 
       {
         std::string filename;
@@ -124,6 +118,12 @@ int main (int argc , char **argv) {
           filename += "largegrid_alu.hexa";
 
         ALUCubeGrid<3,3> grid (filename);
+        if (myrank == 0)
+        {
+          std::cout << "Check serial grid" << std::endl;
+          if(mysize<=2)
+            checkALUSerial(grid,1);
+        }
 
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,1,0);
@@ -138,6 +138,12 @@ int main (int argc , char **argv) {
           filename += "examplegrid9.dgf.ALUgrid";
 
         ALUSimplexGrid<3,3> grid(filename);
+        if (myrank == 0)
+        {
+          std::cout << "Check serial grid" << std::endl;
+          if(mysize<=2)
+            checkALUSerial(grid,1);
+        }
 
         if (myrank == 0) std::cout << "Check conform grid" << std::endl;
         checkALUParallel(grid,0,0);  //1,3
