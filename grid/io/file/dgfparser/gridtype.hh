@@ -109,13 +109,12 @@ typedef Dune::OneDGrid<dimworld,dimworld> GridType;
   #else
     #if GRIDDIM == 2
       #error "ALUGRID_CUBE not implemented for dimension two!"
-// CompileTimeChecker<GRIDDIM==3>;
     #else
       #include "dgfalu.hh"
 typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
     #endif
   #endif
-const int refStepsForHalf = (GRIDDIM==3) ? 1 : 2;
+const int refStepsForHalf = GridType::refineStepsForHalf;
 #elif defined ALUGRID_SIMPLEX && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
@@ -124,7 +123,7 @@ typedef Dune::OneDGrid<dimworld,dimworld> GridType;
     #include "dgfalu.hh"
 typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
   #endif
-const int refStepsForHalf = (dimworld==3) ? 1 : 2;
+const int refStepsForHalf = GridType::refineStepsForHalf;
 #elif defined ONEDGRID
   #include "dgfoned.hh"
 typedef Dune::OneDGrid<dimworld,dimworld> GridType;
