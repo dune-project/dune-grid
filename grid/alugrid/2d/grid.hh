@@ -195,6 +195,15 @@ namespace Dune {
     friend class ALU2DLocalGeometryStorage<GeometryObject, 4 >;
 
   public:
+
+    enum { refineStepsForHalf =
+#if IS_NON_CONFORM
+             1
+#else
+             2
+#endif
+    };
+
     //! dummy object stream
     typedef ALU2dGridObjectStream ObjectStreamType;
 
