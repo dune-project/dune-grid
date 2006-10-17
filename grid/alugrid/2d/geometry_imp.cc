@@ -13,15 +13,6 @@ namespace Dune {
   // --Geometry
   //**********************************************************************
 
-  // default, do nothing
-  template <int mydim, int cdim, class GridImp>
-  inline int ALU2dGridGeometry<mydim,cdim,GridImp>::mapVertices (int i) const
-  {
-    // there is a specialisation for each combination of mydim and coorddim
-    //return ALBERTA AlbertHelp :: MapVertices<mydim,cdim>::mapVertices(i,face_,edge_,vertex_);
-    return 0;
-  }
-
 
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry() :
@@ -292,31 +283,27 @@ namespace Dune {
     return elDet_;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const {
-    //std::cerr << "volume with mydim = " << mydim << " "
-    //	    << "cdim = " << cdim << " " << std::flush;
-    if (mydim == 2) {
-      assert( calcedDet_ );
-      //std::cerr << elDet_ << std::endl;
-      return 0.5*elDet_;
-    }
-    else if(mydim == 1) {
-      assert( calcedDet_ );
-      return elDet_;
-      //tmpZ_[0] = coord_[0][0] - coord_[1][0];
-      //tmpZ_[1] = coord_[0][1] - coord_[1][1];
-      //return tmpZ_.two_norm();
-    }
-    else if (mydim == 0) {
-      return 1.;
-    }
-    else {
-      assert(0);
-      return 0.0;
-    }
+  template <>
+  inline alu2d_ctype ALU2dGridGeometry<2,2, const ALU2dGrid<2,2> >:: volume () const
+  {
+    assert( calcedDet_ );
+    return 0.5*elDet_;
   }
 
+  template <>
+  inline alu2d_ctype ALU2dGridGeometry<1,2, const ALU2dGrid<2,2> >:: volume () const
+  {
+    assert( calcedDet_ );
+    return elDet_;
+  }
+
+
+  template <int mydim, int cdim, class GridImp>
+  inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const
+  {
+    assert( mydim == 0 );
+    return 1.;
+  }
 
   template <int mydim, int cdim, class GridImp>
   inline const FieldMatrix<alu2d_ctype,mydim,mydim>& ALU2dGridGeometry<mydim,cdim,GridImp>::

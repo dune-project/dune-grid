@@ -125,10 +125,6 @@ namespace Dune {
     //! build the transposed of the jacobian inverse and store the volume
     void buildJacobianInverseTransposed () const;
 
-    //! template method for map the vertices of EL_INFO to the actual
-    //! coords with face_,edge_ and vertex_ , needes for operator []
-    int mapVertices (int i) const;
-
     //! calculates the element matrix for calculation of the jacobian inverse
     void calcElMatrix () const;
 
