@@ -3009,12 +3009,6 @@ namespace Dune {
   namespace Capabilities
   {
 
-    template<int dim,int dimw>
-    struct hasLeafIterator< YaspGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
     template<int dim, int dimw>
     struct hasEntity< YaspGrid<dim,dimw>, 0 >
     {
