@@ -739,8 +739,8 @@ void assertNeighbor (Grid &g)
             assert(globalid.id(*(it.outside())) !=
                    globalid.id(*e));
 
-            LevelIterator n    = g.template lbegin<0>(it.level());
-            LevelIterator nend = g.template lend<0>  (it.level());
+            LevelIterator n    = g.template lbegin<0>(e->level());
+            LevelIterator nend = g.template lend<0>  (e->level());
 
             while (n != it.outside() && n != nend)
             {

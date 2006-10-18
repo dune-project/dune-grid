@@ -48,7 +48,7 @@ void checkGeometry(const GeometryImp& geometry)
   center /= geometry.corners();
 
 #ifdef DUNE_UGGRID_HH
-#warning Test for quadrilateral intersections disabled!
+#warning Test for quadrilateral intersections in UGGrid disabled!
   if (!(geometry.type().isQuadrilateral() && dimworld==3)) {
 #endif
   // The geometry center in local coordinates
@@ -107,7 +107,6 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     // /////////////////////////////////////////////////////////////
     if ( isConforming && iIt.neighbor() )
     {
-      assert(iIt.level() >= 0);
       EntityPointer outside = iIt.outside();
       int numberInSelf     = iIt.numberInSelf();
       int numberInNeighbor = iIt.numberInNeighbor();

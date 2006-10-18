@@ -53,7 +53,7 @@ namespace Dune
      element
      that is not on the same level (but only if started at a leaf element).
 
-     Consider a situtation where two elements a and b have a common intersection.
+     Consider a situation where two elements a and b have a common intersection.
      %Element b has been refined into an element c (and others) while a has not
      been refined and elements a and c have a common intersection in the leaf grid.
      In one space dimension this situation is depicted in the figure below.
@@ -72,7 +72,7 @@ namespace Dune
 
      <h2>Methods neighbor and boundary </h2>
 
-     The %intersectioniterator is started on a codimension 0 entity of the grid.
+     The %intersection iterator is started on a codimension 0 entity of the grid.
      If this entity belongs to the interior or the overlap region
      (see. ???) then the union of all intersections is identical to the
      boundary of the entity. On ghost elements the iterator only stops
@@ -151,7 +151,7 @@ namespace Dune
        another element
        in the sequential grid but this element is only stored in other processors
        the intersection iterator stops but neither
-       neighbor(), leafNeighbor(), levelNeighbor(), nor boundary()
+       neighbor() nor boundary()
        are true.
      .
      @ingroup GIIntersectionIterator
@@ -191,8 +191,9 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef ct ctype;
 
-    /** @brief level of inside() entity */
-    int level () const
+    /** @brief level of inside() entity
+        \deprecated This method will be removed on 27.11.2006  */
+    int level () const DUNE_DEPRECATED
     {
       return realIterator.level();
     }
@@ -233,17 +234,6 @@ namespace Dune
     bool neighbor () const
     {
       return this->realIterator.neighbor();
-    }
-    //! @brief return true if intersection is shared with another element on the same level.
-    bool levelNeighbor () const DUNE_DEPRECATED
-    {
-      return this->realIterator.levelNeighbor();
-    }
-
-    //! @brief return true if intersection is shared with another leaf element.
-    bool leafNeighbor () const DUNE_DEPRECATED
-    {
-      return this->realIterator.leafNeighbor();
     }
 
     /*! @brief return EntityPointer to the Entity on the inside of this
@@ -431,20 +421,6 @@ namespace Dune
       FieldVector<ct, dimworld> n = asImp().outerNormal(local);
       n /= n.two_norm();
       return n;
-    }
-
-    //! default using old neighbor method
-    bool levelNeighbor () const
-    {
-      return (asImp().neighbor()) ?
-             (asImp().outside()->level() == asImp().inside()->level()) : false;
-    }
-
-    //! default using old neighbor method
-    bool leafNeighbor () const
-    {
-      return (asImp().neighbor()) ?
-             (asImp().outside()->isLeaf()) : false;
     }
 
   private:
