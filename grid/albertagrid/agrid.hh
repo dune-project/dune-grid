@@ -9,6 +9,12 @@
 #include <assert.h>
 #include <algorithm>
 
+/** @file
+   @author Robert Kloefkorn
+   @brief Provides base classes for AlbertaGrid
+ **/
+
+
 #if defined GRIDDIM
   #define DIM GRIDDIM
   #if defined GRIDDIMWORLD
@@ -1370,8 +1376,6 @@ namespace Dune
      \e Note: Although ALBERTA supports different combination of DIM <= DIMWORLD,
         so far only the combinations \c DIM=DIMWORLD=2 and \c DIM=DIMWORLD=3
         are supported.
-
-     @author Robert Kloefkorn
    */
   template <int dim, int dimworld>
   class AlbertaGrid :
