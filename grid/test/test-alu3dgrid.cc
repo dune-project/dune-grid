@@ -107,7 +107,7 @@ int main (int argc , char **argv) {
       {
         std::string filename("alu-testgrid.triang");
         ALUSimplexGrid<2,2> grid(filename);
-        checkALUSerial(grid,2);
+        checkALUSerial(grid,3);
       }
 
       {
@@ -125,10 +125,14 @@ int main (int argc , char **argv) {
             checkALUSerial(grid,1);
         }
 
-        if (myrank == 0) std::cout << "Check conform grid" << std::endl;
-        checkALUParallel(grid,1,0);
-        if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
-        checkALUParallel(grid,0,2);
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
       }
       {
         std::string filename;
@@ -145,10 +149,14 @@ int main (int argc , char **argv) {
             checkALUSerial(grid,1);
         }
 
-        if (myrank == 0) std::cout << "Check conform grid" << std::endl;
-        checkALUParallel(grid,0,0);  //1,3
-        if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
-        checkALUParallel(grid,0,2);  //1,3
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,0,0);  //1,3
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);  //1,3
+        }
       }
     };
 
