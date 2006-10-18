@@ -691,6 +691,14 @@ void assertNeighbor (Grid &g)
         //assert(globalid.id(*e) >= 0);
         assert(it != endit);
 
+        if(! e->isLeaf() )
+        {
+          if( e->ileafbegin() != e->ileafend())
+          {
+            DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
+          }
+        }
+
         // for all intersections
         for(; it != endit; ++it)
         {
