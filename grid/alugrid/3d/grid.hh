@@ -789,12 +789,6 @@ namespace Dune {
 
   namespace Capabilities {
 
-    template<int dim,int dimw, Dune::ALU3dGridElementType elType>
-    struct hasLeafIterator< Dune::ALU3dGrid<dim, dimw, elType> >
-    {
-      static const bool v = true;
-    };
-
     template<int dim, int dimw, Dune::ALU3dGridElementType elType, int cdim>
     struct hasEntity<Dune::ALU3dGrid<dim, dimw, elType>, cdim >
     {

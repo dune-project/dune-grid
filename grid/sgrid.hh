@@ -1600,20 +1600,8 @@ namespace Dune {
   namespace Capabilities
   {
 
-    template<int dim,int dimw>
-    struct hasLeafIterator< SGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
     template<int dim, int dimw, int cdim>
     struct hasEntity< SGrid<dim,dimw>, cdim>
-    {
-      static const bool v = true;
-    };
-
-    template<int dim,int dimw>
-    struct hasLeafIterator< const SGrid<dim,dimw> >
     {
       static const bool v = true;
     };

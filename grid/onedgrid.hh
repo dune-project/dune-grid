@@ -482,12 +482,6 @@ namespace Dune {
     };
 
     template<int dim,int dimw>
-    struct hasLeafIterator< OneDGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    template<int dim,int dimw>
     struct isParallel< OneDGrid<dim,dimw> >
     {
       static const bool v = false;

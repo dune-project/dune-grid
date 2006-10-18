@@ -432,7 +432,7 @@ struct EntityInterface<Grid, dim, dim, false>
   void (*c)(Entity&);
 };
 
-template<class Grid, bool hasLeaf>
+template<class Grid>
 struct LeafInterface
 {
   static void check(Grid &g)
@@ -440,16 +440,6 @@ struct LeafInterface
     g.template leafbegin<0>();
     g.template leafend<0>();
   }
-  LeafInterface()
-  {
-    c = check;
-  }
-  void (*c)(Grid&);
-};
-template<class Grid>
-struct LeafInterface<Grid, false>
-{
-  static void check(Grid &g) {}
   LeafInterface()
   {
     c = check;
@@ -491,7 +481,7 @@ struct GridInterface
     g.template lbegin<0>(0);
     g.template lend<0>(0);
 
-    LeafInterface< Grid, Dune::Capabilities::hasLeafIterator<Grid>::v >();
+    LeafInterface< Grid>();
 
     // Check for index sets
     typedef typename Grid::template Codim<0>::LevelIndexSet LevelIndexSet;

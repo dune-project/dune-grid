@@ -13,14 +13,6 @@ namespace Dune
   /** \brief Contains all capabilities classes */
   namespace Capabilities
   {
-
-    /** \brief Specialize with 'true' if the grid implements a leaf iterator. */
-    template<class Grid>
-    struct hasLeafIterator
-    {
-      static const bool v = false;
-    };
-
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. */
     template<class Grid, int codim>
     struct hasEntity
@@ -70,12 +62,6 @@ namespace Dune
        to
        Capabilities::Something<Grid>
      */
-
-    template<class Grid>
-    struct hasLeafIterator<const Grid>
-    {
-      static const bool v = Dune::Capabilities::hasLeafIterator<Grid>::v;
-    };
 
     template<class Grid, int codim>
     struct hasEntity<const Grid, codim>

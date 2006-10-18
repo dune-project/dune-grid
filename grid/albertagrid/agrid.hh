@@ -1932,12 +1932,6 @@ namespace Dune
 
   namespace Capabilities
   {
-    template<int dim,int dimw>
-    struct hasLeafIterator< AlbertaGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
     template<int dim, int dimw, int cdim>
     struct hasEntity<AlbertaGrid<dim,dimw>, cdim >
     {

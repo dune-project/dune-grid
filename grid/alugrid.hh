@@ -118,12 +118,6 @@ namespace Dune {
 
   namespace Capabilities {
 
-    template<int dim,int dimw>
-    struct hasLeafIterator< Dune::ALUCubeGrid<dim, dimw > >
-    {
-      static const bool v = true;
-    };
-
     template<int dim,int dimw, int cdim >
     struct hasEntity<Dune::ALUCubeGrid<dim, dimw>, cdim >
     {
@@ -304,12 +298,6 @@ namespace Dune {
   };
 
   namespace Capabilities {
-
-    template<int dim,int dimw>
-    struct hasLeafIterator< Dune::ALUSimplexGrid<dim, dimw > >
-    {
-      static const bool v = true;
-    };
 
     template<int dim,int dimw, int cdim >
     struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >

@@ -1313,15 +1313,6 @@ namespace Dune {
   namespace Capabilities
   {
     // capabilities for the interface class depend on the implementation
-    template< int dim, int dimworld, typename ct, class GridFamily >
-    struct hasLeafIterator< GridDefaultImplementation<dim,dimworld,ct,GridFamily> >
-    {
-      typedef GridDefaultImplementation<dim,dimworld,ct,GridFamily> GridType;
-      typedef typename GridType::Traits::Grid GridImp;
-      static const bool v = hasLeafIterator<GridImp>::v;
-    };
-
-    // capabilities for the interface class depend on the implementation
     template< int dim, int dimworld, typename ct, class GridFamily , int cdim >
     struct hasEntity< GridDefaultImplementation<dim,dimworld,ct,GridFamily>, cdim >
     {
