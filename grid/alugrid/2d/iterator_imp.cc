@@ -509,7 +509,6 @@ namespace Dune {
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const GridImp & grid, const HElementType* el, int wLevel, bool end) :
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, el, wLevel, end)
-    //, nbStack_(0)
   {
     if (!end)
     {
@@ -526,7 +525,6 @@ namespace Dune {
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const GridImp & grid, int wLevel) :
     ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(grid, wLevel)
-    //, nbStack_(0)
   {}
 
 
@@ -632,6 +630,13 @@ namespace Dune {
   inline void ALU2dGridLeafIntersectionIterator<GridImp> ::
   first(const EntityType & en, int wLevel)
   {
+    // if called on non-leaf, just return end iterator
+    if(! en.isLeaf())
+    {
+      this->done();
+      return ;
+    }
+
     setFirstItem(en.getItem(),wLevel);
   }
 
@@ -641,8 +646,6 @@ namespace Dune {
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = -1;
-    //this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-    //this->current.opposite_= this->current.item_->opposite(this->current.index_);
     assert(this->current.item_ );
     this->walkLevel_ = wLevel;
     this->done_ = false;
