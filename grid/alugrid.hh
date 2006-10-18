@@ -260,7 +260,8 @@ namespace Dune {
     ALUSimplexGrid(const std::string macroName )
       : BaseType(macroName)
     {
-      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
+      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
     //! constructor creating empty grid
     ALUSimplexGrid( ) : BaseType()
