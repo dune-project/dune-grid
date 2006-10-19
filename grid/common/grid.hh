@@ -6,31 +6,23 @@
 /** \file
     \brief Different resources needed by all grid implementations
  */
+// system includes
 #include <iostream>
 #include <string>
+
+// dune-common includes
 #include <dune/common/exceptions.hh>
+#include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/geometrytype.hh>
-#include <dune/grid/common/capabilities.hh>
 
+// local includes
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
 
 namespace Dune {
-
-  // compares a and b and if they are equal then throw and NotImplemented
-  // exception
-#if 0
-#ifndef NDEBUG
-#define CHECK_INTERFACE_IMPLEMENTATION(a,b) \
-  if((a) == (b)) \
-    DUNE_THROW(NotImplemented,"Interface method not implemented!");
-#else
-#define CHECK_INTERFACE_IMPLEMENTATION(a,b)
-#endif
-#endif
-#define CHECK_INTERFACE_IMPLEMENTATION(a,b)
 
   /**
          @addtogroup Grid Grid
@@ -627,9 +619,7 @@ namespace Dune {
     //! Return the id of the grid
     std::string name() const
     {
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((std::string (GridImp::*)() const) &(ThisType::name)),
-        ((std::string (GridImp::*)() const) &(GridImp::name)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().name());
       return asImp().name();
     }
 
@@ -652,55 +642,35 @@ namespace Dune {
      */
     int maxLevel() const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)() const) &(ThisType::maxLevel)),
-        ((int (GridImp::*)() const) &(GridImp::maxLevel)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().maxLevel());
       return asImp().maxLevel();
     }
 
     //! Return number of grid entities of a given codim on a given level in this process
     int size (int level, int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int,int) const) &(ThisType::size)),
-        ((int (GridImp::*)(int,int) const) &(GridImp::size )));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().size(level,codim));
       return asImp().size(level,codim);
     }
 
     //! Return number of leaf entities of a given codim in this process
     int size (int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int) const) &(ThisType::size)),
-        ((int (GridImp::*)(int) const) &(GridImp::size)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().size(codim));
       return asImp().size(codim);
     }
 
     //! Return number of entities per level and geometry type in this process
     int size (int level, GeometryType type) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int,GeometryType) const) &(ThisType::size)),
-        ((int (GridImp::*)(int,GeometryType) const) &(GridImp::size)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().size(level,type));
       return asImp().size(level,type);
     }
 
     //! Return number of leaf entities per geometry type in this process
     int size (GeometryType type) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(GeometryType) const) &(ThisType::size)),
-        ((int (GridImp::*)(GeometryType) const) &(GridImp::size)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().size(type));
       return asImp().size(type);
     }
     //@}
@@ -716,12 +686,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::LevelIterator lbegin (int level) const
     {
-      typedef typename Codim<cd>::template Partition<pitype>::LevelIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)(int) const) &(ThisType::template lbegin<cd,pitype>)),
-        ((ItType (GridImp::*)(int) const) &(GridImp ::template lbegin<cd,pitype>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template lbegin<cd,pitype>(level)));
       return asImp().template lbegin<cd,pitype>(level);
     }
 
@@ -729,12 +694,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::LevelIterator lend (int level) const
     {
-      typedef typename Codim<cd>::template Partition<pitype>::LevelIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)(int) const) &(ThisType::template lend<cd,pitype>)),
-        ((ItType (GridImp::*)(int) const) &(GridImp ::template lend<cd,pitype>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template lend<cd,pitype>(level)));
       return asImp().template lend<cd,pitype>(level);
     }
 
@@ -742,12 +702,7 @@ namespace Dune {
     template<int cd>
     typename Codim<cd>::template Partition<All_Partition>::LevelIterator lbegin (int level) const
     {
-      typedef typename Codim<cd>::LevelIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)(int) const) &(ThisType::template lbegin<cd>)),
-        ((ItType (GridImp::*)(int) const) &(GridImp ::template lbegin<cd>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template lbegin<cd>(level)));
       return asImp().template lbegin<cd>(level);
     }
 
@@ -755,12 +710,7 @@ namespace Dune {
     template<int cd>
     typename Codim<cd>::template Partition<All_Partition>::LevelIterator lend (int level) const
     {
-      typedef typename Codim<cd>::LevelIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)(int) const) &(ThisType::template lend<cd>)),
-        ((ItType (GridImp::*)(int) const) &(GridImp ::template lend<cd>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template lend<cd>(level)));
       return asImp().template lend<cd>(level);
     }
 
@@ -768,12 +718,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::LeafIterator leafbegin () const
     {
-      typedef typename Codim<cd>::template Partition<pitype>::LeafIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)() const) &(ThisType::template leafbegin<cd,pitype>)),
-        ((ItType (GridImp::*)() const) &(GridImp ::template leafbegin<cd,pitype>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafbegin<cd,pitype>()));
       return asImp().template leafbegin<cd,pitype>();
     }
 
@@ -781,12 +726,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::LeafIterator leafend () const
     {
-      typedef typename Codim<cd>::template Partition<pitype>::LeafIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)() const) &(ThisType::template leafend<cd,pitype>)),
-        ((ItType (GridImp::*)() const) &(GridImp ::template leafend<cd,pitype>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafend<cd,pitype>()));
       return asImp().template leafend<cd,pitype>();
     }
 
@@ -794,12 +734,7 @@ namespace Dune {
     template<int cd>
     typename Codim<cd>::template Partition<All_Partition>::LeafIterator leafbegin () const
     {
-      typedef typename Codim<cd>::LeafIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)() const) &(ThisType::template leafbegin<cd>)),
-        ((ItType (GridImp::*)() const) &(GridImp ::template leafbegin<cd>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafbegin<cd,All_Partition>()));
       return asImp().template leafbegin<cd,All_Partition>();
     }
 
@@ -807,12 +742,7 @@ namespace Dune {
     template<int cd>
     typename Codim<cd>::template Partition<All_Partition>::LeafIterator leafend () const
     {
-      typedef typename Codim<cd>::LeafIterator ItType;
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((ItType (GridImp::*)() const) &(ThisType::template leafend<cd>)),
-        ((ItType (GridImp::*)() const) &(GridImp ::template leafend<cd>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafend<cd,All_Partition>()));
       return asImp().template leafend<cd,All_Partition>();
     }
     //@}
@@ -827,44 +757,28 @@ namespace Dune {
     //! return const reference to the grids global id set
     const typename Codim<0>::GlobalIdSet& globalIdSet() const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::GlobalIdSet& (GridImp::*)() const) &ThisType::globalIdSet),
-        ((const typename Codim<0>::GlobalIdSet& (GridImp::*)() const) &GridImp::globalIdSet));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().globalIdSet());
       return asImp().globalIdSet();
     }
 
     //! return const reference to the grids local id set
     const typename Codim<0>::LocalIdSet& localIdSet() const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::LocalIdSet& (GridImp::*)() const) &ThisType::localIdSet),
-        ((const typename Codim<0>::LocalIdSet& (GridImp::*)() const) &GridImp::localIdSet));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().localIdSet());
       return asImp().localIdSet();
     }
 
     //! return const reference to the grids level index set for level level
     const typename Codim<0>::LevelIndexSet& levelIndexSet(int level) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::LevelIndexSet& (GridImp::*)(int) const) &ThisType::levelIndexSet),
-        ((const typename Codim<0>::LevelIndexSet& (GridImp::*)(int) const) &GridImp::levelIndexSet));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().levelIndexSet(level));
       return asImp().levelIndexSet(level);
     }
 
     //! return const reference to the grids leaf index set
     const typename Codim<0>::LeafIndexSet& leafIndexSet() const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::LeafIndexSet& (GridImp::*)() const) &ThisType::leafIndexSet),
-        ((const typename Codim<0>::LeafIndexSet& (GridImp::*)() const) &GridImp::leafIndexSet));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().leafIndexSet());
       return asImp().leafIndexSet();
     }
     //@}
@@ -879,11 +793,7 @@ namespace Dune {
     //! Refine the grid refCount times using the default refinement rule.
     void globalRefine (int refCount)
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((void (GridImp::*)() ) &ThisType::globalRefine),
-        ((void (GridImp::*)() ) &GridImp::globalRefine));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().globalRefine(refCount));
       asImp().globalRefine(refCount);
       return;
     }
@@ -899,7 +809,8 @@ namespace Dune {
     bool mark( int refCount, T & e )
     {
       IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
-      return asImp.template mark<T>(refCount,e);
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().template mark<T>(refCount,e));
+      return asImp().template mark<T>(refCount,e);
     }
 
     /*! \brief To be called after entities have been marked and before adapt() is called.
@@ -908,12 +819,8 @@ namespace Dune {
      */
     bool preAdapt ()
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((bool (GridImp::*)() ) &ThisType::preAdapt),
-        ((bool (GridImp::*)() ) &GridImp::preAdapt));
-      return asImp.preAdapt();
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().preAdapt());
+      return asImp().preAdapt();
     }
 
     /** \brief Refine all positive marked leaf entities,
@@ -932,23 +839,15 @@ namespace Dune {
      */
     bool adapt ()
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((bool (GridImp::*)() ) &ThisType::adapt),
-        ((bool (GridImp::*)() ) &GridImp::adapt));
-      return asImp.adapt();
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().adapt());
+      return asImp().adapt();
     }
 
     //! To be called after grid has been adapted and information left over by the adaptation has been processed.
     void postAdapt()
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((bool (GridImp::*)() ) &ThisType::postAdapt),
-        ((bool (GridImp::*)() ) &GridImp::postAdapt));
-      return asImp.postAdapt();
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().postAdapt());
+      return asImp().postAdapt();
     }
     //@}
 
@@ -962,44 +861,28 @@ namespace Dune {
     //! Return size of overlap for a given codim on a given level
     int overlapSize (int level, int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int,int) const) &(ThisType::overlapSize)),
-        ((int (GridImp::*)(int,int) const) &(GridImp::overlapSize )));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(level,codim));
       return asImp().overlapSize(level,codim);
     }
 
     //! Return size of overlap region for a given codim on the leaf grid
     int overlapSize (int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int) const) &(ThisType::overlapSize)),
-        ((int (GridImp::*)(int) const) &(GridImp::overlapSize )));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(codim));
       return asImp().overlapSize(codim);
     }
 
     //! Return size of ghost region for a given codim on a given level
     int ghostSize (int level, int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int,int) const) &(ThisType::ghostSize)),
-        ((int (GridImp::*)(int,int) const) &(GridImp:: ghostSize)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(level,codim));
       return asImp().ghostSize(level,codim);
     }
 
     //! Return size of ghost region for a given codim on the leaf grid
     int ghostSize (int codim) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((int (GridImp::*)(int) const) &(ThisType::ghostSize)),
-        ((int (GridImp::*)(int) const) &(GridImp:: ghostSize)));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(codim));
       return asImp().ghostSize(codim);
     }
 
@@ -1009,11 +892,7 @@ namespace Dune {
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      //     CHECK_INTERFACE_IMPLEMENTATION(
-      //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(ThisType::template communicate<DataHandle>)),
-      //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(GridImp ::template communicate<DataHandle>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level)));
       asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level);
       return;
     }
@@ -1024,11 +903,7 @@ namespace Dune {
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      //     CHECK_INTERFACE_IMPLEMENTATION(
-      //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(ThisType::template communicate<DataHandle>)),
-      //       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(GridImp ::template communicate<DataHandle>)));
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
       asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir);
       return;
     }
@@ -1036,11 +911,7 @@ namespace Dune {
     //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
     const typename Codim<0>::CollectiveCommunication& comm () const
     {
-      // compare addresses of the method, if they are equal then derived
-      // class has the method not overloaded which leads to a seg fault
-      CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &ThisType::comm),
-        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &GridImp::comm));
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().comm());
       return asImp().comm();
     }
     //@}
@@ -1050,6 +921,7 @@ namespace Dune {
      */
     bool loadBalance()
     {
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().loadBalance());
       return asImp().loadBalance();
     }
 
@@ -1060,6 +932,7 @@ namespace Dune {
     template<class DataHandle>
     bool loadBalance (DataHandle& data) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION(asImp().loadBalance(data));
       return asImp().loadBalance(data);
     }
   private:
