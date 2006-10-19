@@ -135,13 +135,13 @@ namespace Dune
       he->type = geomType;
 
       {
-        // set the vertex coordinates
+        // get pointer to coordinates and copy from geometry
         double ** vpointer = he->vpointer;
 
         // number of corners and number of vertices schould be the same
         // grape visual does not work for other situations
         assert( en.template count<dim>() == geometry.corners() );
-        assert( geometry.corners() < MAX_EL_DOF );
+        assert( geometry.corners() <= MAX_EL_DOF );
 
         for(int i= 0 ; i<geometry.corners(); ++i)
         {
