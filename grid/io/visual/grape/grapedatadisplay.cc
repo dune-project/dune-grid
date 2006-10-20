@@ -468,6 +468,11 @@ namespace Dune
       min = std::min(data[i],min);
       max = std::max(data[i],max);
     }
+    if(std::abs(max-min) < 1e-10)
+    {
+      max += 0.01*max;
+      min -= 0.01*min;
+    }
     setMinMaxValue(min,max);
 
     // display
@@ -524,7 +529,7 @@ namespace Dune
       {
         vecFdata_[n] = createDuneFunc();
         {
-          DUNE_FDATA * data = vecFdata_[n]->all;
+          DUNE_FDATA * data = vecFdata_[n];
           assert(data);
 
           // set the rigth evaluation functions
@@ -535,8 +540,7 @@ namespace Dune
             EvalVectorData<GridType,VectorType,IndexSetType>::evalCoord;
 
           data->mynum = n;
-          data->nameValue = name;
-          data->name = data->nameValue.c_str();
+
           data->allLevels = 0;
 
           data->discFunc = (void *) &func;
@@ -558,6 +562,16 @@ namespace Dune
             comp[0] = n-size;
             data->compName = n-size;
           }
+
+          if(data->compName >= 0)
+          {
+            std::stringstream str;
+            str << name << "[" << data->compName << "]";
+            data->name = str.str();
+          }
+          else
+            data->name = name;
+
           data->dimVal   = dimVal;
           data->dimRange = dimRange;
 
@@ -568,8 +582,6 @@ namespace Dune
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
     }
-
-    getFdataVec();
   }
 
   template<class GridType>
