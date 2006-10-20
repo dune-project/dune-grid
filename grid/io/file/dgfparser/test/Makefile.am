@@ -16,13 +16,10 @@ endif
 ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
 
 # programs just to build when "make check" is used
-check_PROGRAMS = $(ALLTESTS)
+check_PROGRAMS = $(ALLTESTS) tester
 
 # list of tests to run
 TESTS = $(ALLTESTS)
-
-# test program for all tpyes of grids
-noinst_PROGRAMS = tester
 
 tester_SOURCES = main.cc
 tester_CXXFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(UG_CPPFLAGS)
