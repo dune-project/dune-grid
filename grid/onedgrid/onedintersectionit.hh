@@ -55,41 +55,7 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
-
       neighbor_++;
-#if 0
-      if (neighbor_==2) {
-        if (!center_->isLeaf())
-          // Skip next leaf intersection, because inside is not a leaf element
-          neighbor_++;
-        else if (boundary())
-          // Skip next leaf intersection because it is a boundary intersection
-          // and therefore coincides with the level intersection
-          neighbor_++;
-        else if (center_->pred_!=NULL
-                 && center_->pred_->vertex_[1] == center_->vertex_[0]
-                 && center_->pred_->isLeaf())
-          // Skip next leaf intersection because it coincides with a level intersection
-          neighbor_++;
-
-      }
-
-      if (neighbor_==3) {
-        if (!center_->isLeaf())
-          // Skip next leaf intersection, because inside is not a leaf element
-          neighbor_++;
-        else if (boundary())
-          // Skip next leaf intersection because it is a boundary intersection
-          // and therefore coincides with the level intersection
-          neighbor_++;
-        else if (center_->succ_!=NULL
-                 && center_->succ_->vertex_[0] == center_->vertex_[1]
-                 && center_->succ_->isLeaf())
-          // Skip next leaf intersection because it coincides with a level intersection
-          neighbor_++;
-
-      }
-#endif
     }
 
     OneDEntityImp<1>* target() const {
@@ -99,63 +65,9 @@ namespace Dune {
         return center_;
       else if (neighbor_==0)
         return center_->pred_;
-      else   /*if (neighbor_==1) */
+      else
         return center_->succ_;
-#if 0
-      else if (neighbor_==2) {
 
-        // Get left leaf neighbor
-        if (center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0]) {
-
-          OneDEntityImp<1>* leftLeafNeighbor = center_->pred_;
-          while (!leftLeafNeighbor->isLeaf()) {
-            assert (leftLeafNeighbor->sons_[1] != NULL);
-            leftLeafNeighbor = leftLeafNeighbor->sons_[1];
-          }
-          return leftLeafNeighbor;
-
-        } else {
-
-          OneDEntityImp<1>* ancestor = center_;
-          while (ancestor->father_) {
-            ancestor = ancestor->father_;
-            if (ancestor->pred_ && ancestor->pred_->vertex_[1] == ancestor->vertex_[0]) {
-              assert(ancestor->pred_->isLeaf());
-              return ancestor->pred_;
-            }
-          }
-
-          DUNE_THROW(GridError, "Programming error, apparently we're on the left boundary, neighbor_==2 should not occur!");
-        }
-
-      } else {
-
-        // Get right leaf neighbor
-        if (center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1]) {
-
-          OneDEntityImp<1>* rightLeafNeighbor = center_->succ_;
-          while (!rightLeafNeighbor->isLeaf()) {
-            assert (rightLeafNeighbor->sons_[0] != NULL);
-            rightLeafNeighbor = rightLeafNeighbor->sons_[0];
-          }
-          return rightLeafNeighbor;
-
-        } else {
-
-          OneDEntityImp<1>* ancestor = center_;
-          while (ancestor->father_) {
-            ancestor = ancestor->father_;
-            if (ancestor->succ_ && ancestor->succ_->vertex_[0] == ancestor->vertex_[1]) {
-              assert(ancestor->succ_->isLeaf());
-              return ancestor->succ_;
-            }
-          }
-
-          DUNE_THROW(GridError, "Programming error, apparently we're on the right boundary, neighbor_==3 should not occur!");
-        }
-
-      }
-#endif
     }
 
     //! return true if intersection is with boundary.
@@ -231,9 +143,6 @@ namespace Dune {
     {
       return OneDGridEntityPointer<0,GridImp>(target());
     }
-
-    //! ask for level of entity
-    int level () const {return center_->level_;}
 
     //! return information about the Boundary
     int boundaryId () const {
@@ -481,9 +390,6 @@ namespace Dune {
     {
       return OneDGridEntityPointer<0,GridImp>(target());
     }
-
-    //! ask for level of entity
-    int level () const {return center_->level_;}
 
     //! return information about the Boundary
     int boundaryId () const {
