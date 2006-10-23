@@ -381,21 +381,24 @@ namespace Dune {
     template<int cc>
     typename GridImp::template Codim<cc>::EntityPointer entity (int i) const;
 
+    /** \todo It would be faster to not use -1 as the end marker but
+        number of sides instead */
     UGGridLeafIntersectionIterator<GridImp> ileafbegin () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, 0, level());
+      return UGGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : -1);
     }
 
     UGGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, 0, level());
+      return UGGridLevelIntersectionIterator<GridImp>(target_, 0);
     }
 
-    //! Reference to one past the last neighbor
+    //! Reference to one past the last leaf neighbor
     UGGridLeafIntersectionIterator<GridImp> ileafend () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, -1, -1);
+      return UGGridLeafIntersectionIterator<GridImp>(target_, -1);
     }
 
+    //! Reference to one past the last level neighbor
     UGGridLevelIntersectionIterator<GridImp> ilevelend () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, -1, -1);
+      return UGGridLevelIntersectionIterator<GridImp>(target_, -1);
     }
 
     //! returns true if Entity has NO children

@@ -45,16 +45,12 @@ namespace Dune {
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, int level)
-      : center_(center), level_(level), neighborCount_(nb)
+    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
+      : center_(center), neighborCount_(nb)
     {}
 
     //! The Destructor
     ~UGGridLevelIntersectionIterator() {};
-
-    int level() const {
-      return level_;
-    }
 
     //! equality
     bool equals(const UGGridLevelIntersectionIterator<GridImp>& i) const {
@@ -142,9 +138,6 @@ namespace Dune {
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
 
-    //! The level we're on
-    int level_;
-
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
@@ -175,16 +168,12 @@ namespace Dune {
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, int level)
-      : center_(center), level_(level), neighborCount_(nb)
+    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
+      : center_(center), neighborCount_(nb)
     {}
 
     //! The Destructor
     ~UGGridLeafIntersectionIterator() {};
-
-    int level() const {
-      return level_;
-    }
 
     //! equality
     bool equals(const UGGridLeafIntersectionIterator<GridImp>& i) const {
@@ -219,7 +208,7 @@ namespace Dune {
     //! boundary information, processor/outer boundary
     bool boundary () const;
 
-    //! return true if across the edge an neighbor on this level exists
+    //! return true if a neighbor element exists across this intersection
     bool neighbor () const;
 
     //! return information about the Boundary
@@ -256,7 +245,7 @@ namespace Dune {
     //  private methods
     //**********************************************************
 
-    //! returns a neighbor that is a leaf or nothing (neighbor might be on the same level)
+    //! returns a neighbor that is a leaf or nothing
     typename UG_NS<GridImp::dimension>::Element* getLeafNeighbor () const;
 
     //! vector storing the outer normal
@@ -273,9 +262,6 @@ namespace Dune {
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
-
-    //! The level we're on
-    int level_;
 
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
