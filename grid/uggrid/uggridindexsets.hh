@@ -50,14 +50,34 @@ namespace Dune {
     template<int cd>
     int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_->getRealImplementation(e).levelIndex();
+      return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
     }
 
     //! get index of subEntity of a codim 0 entity
     template<int cc>
     int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_->getRealImplementation(e).template subIndex<cc>(i);
+      if (cc==dim)
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+
+      if (cc==0)
+        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).target_);
+
+      if (cc==dim-1) {
+        int a=ReferenceElements<double,dim>::general(e.geometry().type()).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements<double,dim>::general(e.geometry().type()).subEntity(i,dim-1,1,dim);
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.geometry().type())),
+                                                          UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
+                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.geometry().type()))));
+      }
+
+      if (cc==1)
+        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).target_,
+                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,e.geometry().type())));
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for cc==" << cc );
     }
 
 
@@ -323,7 +343,7 @@ namespace Dune {
     template<int cd>
     int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_.getRealImplementation(e).leafIndex();
+      return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
     }
 
     //! get index of subEntity of a codim 0 entity
@@ -334,7 +354,28 @@ namespace Dune {
     template<int cc>
     int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_.getRealImplementation(e).template subLeafIndex<cc>(i);
+      if (cc==dim)
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+                                                        UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+
+      if (cc==0)
+        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
+
+      if (cc==dim-1) {
+
+        int a=ReferenceElements<double,dim>::general(e.geometry().type()).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements<double,dim>::general(e.geometry().type()).subEntity(i,dim-1,1,dim);
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.geometry().type())),
+                                                         UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
+                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.geometry().type()))));
+      }
+
+      if (cc==1)
+        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).target_,
+                                                            UGGridRenumberer<dim>::facesDUNEtoUG(i,e.geometry().type())));
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for cc==" << cc );
     }
 
     //! get number of entities of given codim and type
@@ -621,6 +662,7 @@ namespace Dune {
   template <class GridImp>
   class UGGridGlobalIdSet : public IdSet<GridImp,UGGridGlobalIdSet<GridImp>,unsigned int>
   {
+    enum {dim = RemoveConst<GridImp>::Type::dimension};
 
   public:
     //! constructor stores reference to a grid
@@ -637,7 +679,11 @@ namespace Dune {
     template<int cd>
     GlobalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_.getRealImplementation(e).globalId();
+#ifdef ModelP
+      return grid_.getRealImplementation(e).target_->ge.ddd.gid;
+#else
+      return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
+#endif
     }
 
     //! get id of subEntity
@@ -648,7 +694,23 @@ namespace Dune {
     template<int cc>
     GlobalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_.getRealImplementation(e).template subGlobalId<cc>(i);
+      if (cc==0) {
+#ifdef ModelP
+        return grid_.getRealImplementation(e).target_->ge.ddd.gid;
+#else
+        return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
+#endif
+      }
+
+      if (cc==dim) {
+#ifdef ModelP
+        return UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type()))->ddd.gid;
+#else
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+#endif
+      }
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subGlobalId isn't implemented for cc==" << cc );
     }
 
     //private:
@@ -663,8 +725,8 @@ namespace Dune {
   template<class GridImp>
   class UGGridLocalIdSet : public IdSet<GridImp,UGGridLocalIdSet<GridImp>,unsigned int>
   {
+    enum {dim = RemoveConst<GridImp>::Type::dimension};
   public:
-    //friend class UGGrid<dim,dim>;
 
     //! constructor stores reference to a grid
     UGGridLocalIdSet (const GridImp& g) : grid_(g) {}
@@ -676,12 +738,12 @@ namespace Dune {
     //! get id of an entity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cd>
     LocalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_.getRealImplementation(e).localId();
+      return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
     }
 
     //! get id of subEntity
@@ -692,7 +754,14 @@ namespace Dune {
     template<int cc>
     LocalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_.getRealImplementation(e).template subLocalId<cc>(i);
+      const typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(e).target_;
+      if (cc==dim)
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+      else if (cc==0)
+        return UG_NS<dim>::id(target_);
+      else
+        DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
+
     }
 
     //private:

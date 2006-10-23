@@ -86,6 +86,12 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridLeafIndexSet;
 
+    template <class GridImp_>
+    friend class UGGridGlobalIdSet;
+
+    template <class GridImp_>
+    friend class UGGridLocalIdSet;
+
     typedef typename GridImp::ctype UGCtype;
 
   public:
@@ -97,27 +103,6 @@ namespace Dune {
       return UG_NS<dim>::myLevel(target_);
     }
 
-    int levelIndex() const {
-      return UG_NS<dim>::levelIndex(target_);
-    }
-
-    int leafIndex() const {
-      return UG_NS<dim>::leafIndex(target_);
-    }
-
-    unsigned int localId() const {
-      return UG_NS<dim>::id(target_);
-    }
-
-    unsigned int globalId() const {
-#ifdef ModelP
-      return target_->ddd.gid;
-#else
-      return UG_NS<dim>::id(target_);
-#endif
-    }
-
-
     /** \brief The partition type for parallel computing
      * \todo So far it always returns InteriorEntity */
     PartitionType partitionType () const { return InteriorEntity; }
@@ -127,11 +112,6 @@ namespace Dune {
      */
     //!< Default codim 1 Faces and codim == dim Vertices
     template<int cc> int count () const;
-
-    //! return index of sub entity with codim = cc and local number i
-    //! i.e. return global number of vertex i
-    /** \todo So far only implemented for cc==dim */
-    template<int cc> int subIndex (int i) const;
 
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
@@ -236,26 +216,6 @@ namespace Dune {
       return UG_NS<dim>::myLevel(target_);
     }
 
-    int levelIndex() const {
-      return UG_NS<dim>::levelIndex(target_);
-    }
-
-    int leafIndex() const {
-      return UG_NS<dim>::leafIndex(target_);
-    }
-
-    unsigned int localId() const {
-      return UG_NS<dim>::id(target_);
-    }
-
-    unsigned int globalId() const {
-#ifdef ModelP
-      return target_->ge.ddd.gid;
-#else
-      return UG_NS<dim>::id(target_);
-#endif
-    }
-
     /** \brief The partition type for parallel computing */
     PartitionType partitionType () const {
 #ifndef ModelP
@@ -281,99 +241,6 @@ namespace Dune {
      */
     template<int cc>
     int count () const;
-
-    /** \brief Return level index of sub entity with codim = cc and local number i
-     */
-    template<int cc>
-    int subIndex (int i) const {
-      assert(i>=0 && i<count<cc>());
-
-      if (cc==dim)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
-      if (cc==0)
-        return UG_NS<dim>::levelIndex(target_);
-      if (cc==dim-1)
-      {
-        int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,geometry().type())),
-                                                          UG_NS<dim>::Corner(target_,
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,geometry().type()))));
-      }
-      if (cc==1)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,geometry().type())));
-
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for cc==" << cc );
-    }
-
-    /** \brief Return leaf index of sub entity with codim = cc and local number i
-     */
-    template<int cc>
-    int subLeafIndex (int i) const {
-      assert(i>=0 && i<count<cc>());
-
-      if (cc==dim)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
-      if (cc==0)
-        return UG_NS<dim>::leafIndex(target_);
-      if (cc==dim-1)
-      {
-        int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(a,geometry().type())),
-                                                         UG_NS<dim>::Corner(target_,
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(b,geometry().type()))));
-      }
-      if (cc==1)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,geometry().type())));
-
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for cc==" << cc );
-    }
-
-    /** \brief Return global id of sub entity with codim = cc and local number i
-     */
-    template<int cc>
-    unsigned int subGlobalId (int i) const {
-      assert(i>=0 && i<count<cc>());
-
-      if (cc==0)
-      {
-#ifdef ModelP
-        return target_->ge.ddd.gid;
-#else
-        return UG_NS<dim>::id(target_);
-#endif
-      }
-      if (cc==dim)
-      {
-#ifdef ModelP
-        return UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type()))->ddd.gid;
-#else
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
-#endif
-      }
-
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subGlobalId isn't implemented for cc==" << cc );
-      return 0;
-    }
-
-    /** \brief Return local id of sub entity with codim = cc and local number i
-        \todo Only called from the id set
-     */
-    template<int cc>
-    unsigned int subLocalId (int i) const {
-      assert(i>=0 && i<count<cc>());
-
-      if (cc==dim)
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
-      else if (cc==0)
-        return UG_NS<dim>::id(target_);
-      else
-        DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
-    }
-
 
     /** \brief Provide access to sub entity i of given codimension. Entities
      *  are numbered 0 ... count<cc>()-1

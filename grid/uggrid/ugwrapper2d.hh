@@ -469,7 +469,7 @@ namespace Dune {
     }
 
     //! Returns the i-th corner of a UG element
-    static UG_NS<2>::Node* Corner(UG_NS<2>::Element* theElement, int i) {
+    static UG_NS<2>::Node* Corner(const UG_NS<2>::Element* theElement, int i) {
       using UG::D2::NODE;
       using UG::D2::n_offset;
       using UG::UINT;
