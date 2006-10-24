@@ -107,7 +107,8 @@ namespace Dune {
   }
 
   // Output to ALU macrogridfile (3d tetra/hexa)
-  inline void DuneGridFormatParser::writeAlu(std::ostream& out) {
+  inline void DuneGridFormatParser::writeAlu(std::ostream& out)
+  {
     // wirtes an output file in grid type ALU
     if (dimw==3) {
       if (simplexgrid)
@@ -161,7 +162,8 @@ namespace Dune {
     dverb << "Writing Boundary...";
     out << facemap.size() << std::endl;
     std::map<EntityKey<int>,int>::iterator pos;
-    for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
+    for(pos= facemap.begin(); pos!=facemap.end(); ++pos)
+    {
       if (pos->second == 0)
         out << "E ";
       else
@@ -169,7 +171,9 @@ namespace Dune {
       if (dimw == 3)
         out << pos->first.size() << " ";
       for (int i=0; i<pos->first.size(); i++)
+      {
         out << pos->first.origKey(i) << " ";
+      }
       out << std::endl;
     }
     if (dimw == 3)
@@ -384,16 +388,22 @@ namespace Dune {
         nofbound=segbound.get(facemap,(nofelements>0),vtxoffset);
       }
     }
-    if (nofelements==0)
-      return;
+
+    // if no boundary elements, return
+    if (nofelements==0) return;
+
     std::map<EntityKey<int>,int>::iterator pos;
     // now add all boundary faces
     {
-      for(int simpl=0; simpl < nofelements ; simpl++) {
-        for (int i =0 ; i<ElementFaceUtil::nofFaces(dimw,elements[simpl])  ; i++) {
-          EntityKey<int> key2=ElementFaceUtil::generateFace(dimw,elements[simpl],i);
+      for(int simpl=0; simpl < nofelements ; simpl++)
+      {
+        for (int i =0 ; i<ElementFaceUtil::nofFaces(dimw,elements[simpl])  ; i++)
+        {
+          EntityKey<int> key2 = ElementFaceUtil::generateFace(dimw,elements[simpl],i);
+
           pos=facemap.find(key2);
-          if(pos == facemap.end()) {
+          if(pos == facemap.end())
+          {
             facemap[key2]=0;
           }
           else if(pos->second==0 || pos->first.origKeySet()) { // face found twice
@@ -402,7 +412,7 @@ namespace Dune {
           else { // use original key as given in key2
             int value = pos->second;
             facemap.erase(pos);
-            facemap[key2]=value;
+            facemap[key2] = value;
           }
         }
       }
@@ -420,6 +430,7 @@ namespace Dune {
           ++pos;
       }
     }
+
     // now try to assign boundary ids...
     int remainingBndSegs = 0;
     int defaultBndSegs = 0;
@@ -440,7 +451,8 @@ namespace Dune {
                 break;
               }
             }
-            if (isinside) {
+            if (isinside)
+            {
               pos->second = dombound.id();
               inbnddomain++;
             }
@@ -773,24 +785,61 @@ namespace Dune {
         }
       }
     }
-    else if (dimw==3) {
-      for (int i=0; i<nofelements; i++) {
+    else if (dimw==3)
+    {
+      const ReferenceSimplex<double,3> refElem;
+      for (int i=0; i<nofelements; i++)
+      {
         if (elements[i].size()!=size_t(dimw+1))
           continue;
+
         std::vector<double>& p0 = vtx[elements[i][1]];
         std::vector<double>& p1 = vtx[elements[i][2]];
         std::vector<double>& p2 = vtx[elements[i][3]];
         std::vector<double>& q  = vtx[elements[i][0]];
+
         double n[3];
         n[0] = -((p1[1]-p0[1]) *(p2[2]-p0[2]) - (p2[1]-p0[1]) *(p1[2]-p0[2])) ;
         n[1] = -((p1[2]-p0[2]) *(p2[0]-p0[0]) - (p2[2]-p0[2]) *(p1[0]-p0[0])) ;
         n[2] = -((p1[0]-p0[0]) *(p2[1]-p0[1]) - (p2[0]-p0[0]) *(p1[1]-p0[1])) ;
         double test = n[0]*(q[0]-p0[0])+n[1]*(q[1]-p0[1])+n[2]*(q[2]-p0[2]);
         bool reorient = (test*orientation<0);
-        if (reorient) {
+        if (reorient)
+        {
+          // reorient element first
           int tmp=elements[i][use1];
           elements[i][use1] = elements[i][use2];
           elements[i][use2] = tmp;
+
+          // for all faces, check reorient
+          for(int k=0; k<refElem.size(1); ++k)
+          {
+            int numVerts = refElem.size(k,1,dimw);
+            std::vector<int> face(numVerts);
+            // get face vertices
+            for(int j=0; j<numVerts; ++j)
+            {
+              int vx = refElem.subEntity(k,1,j,dimw);
+              face[j] = elements[i][vx];
+            }
+
+            {
+              // key is now right oriented
+              EntityKey<int> key(face);
+
+              typedef facemap_t :: iterator iterator;
+
+              iterator bndFace = facemap.find(key);
+              if(bndFace != facemap.end())
+              {
+                // delete old key, and store new key
+                int bndId = bndFace->second;
+                facemap.erase(bndFace);
+                facemap[key] = bndId;
+              }
+            }
+          }
+
         }
       }
     }

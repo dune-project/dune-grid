@@ -565,7 +565,6 @@ namespace Dune {
           n++;
         }
         // tests if the written block is ok in its size
-        int dimnew = dimworld +1 ;
         goodline=(n==(dimworld+1));
         if (!goodline) {
           DUNE_THROW(DGFException,
@@ -841,20 +840,28 @@ namespace Dune {
         assert(dimworld>0);
         next();
       }
+
       ~BoundarySegBlock() {}
+
       // some information
       int get(std::map<EntityKey<int>,int>& facemap,bool fixedsize,int vtxoffset) {
         static int cube2simplex[3][3] = {
           {0,1,3},
           {0,2,3},
-          {1,2,3} };
+          {1,2,3}
+        };
+
         int lnofbound;
-        int face=ElementFaceUtil::faceSize(dimworld,simplexgrid);
-        for (lnofbound=0; ok(); next()) {
-          for (size_t i=0; i<p.size(); i++) {
+        int face = ElementFaceUtil::faceSize(dimworld,simplexgrid);
+        for (lnofbound=0; ok(); next())
+        {
+          for (size_t i=0; i<p.size(); i++)
+          {
             p[i] -= vtxoffset;
           }
-          if (fixedsize) {
+
+          if (fixedsize)
+          {
             if ((dimworld==2 && size()<=2) ||
                 (dimworld==3 && simplexgrid && size()!=3 && size()!=4) ||
                 (dimworld==3 && !simplexgrid && size()!=4))
@@ -863,22 +870,32 @@ namespace Dune {
             for (int j=0; j<face; j++) {
               bound[j] = p[j];
             }
+
             EntityKey<int> key(bound,false);
+
             facemap[key] = bndid;
             ++lnofbound;
-            if (size()>face) {
+
+            if (size()>face)
+            {
               assert(dimworld==2 || face==3);
               if (dimworld==3) {
-                for (int i=0; i<3; i++) {
-                  for (int j=0; j<face; j++) {
+                for (int i=0; i<3; i++)
+                {
+                  for (int j=0; j<face; j++)
+                  {
                     bound[j] = p[cube2simplex[i][j]];
                   }
+
                   EntityKey<int> key(bound,false);
                   facemap[key] = bndid;
                   ++lnofbound;
                 }
-              } else {
-                for (int i=2; i<=size(); i++) {
+              }
+              else
+              {
+                for (int i=2; i<=size(); i++)
+                {
                   bound[0] = p[i-1];
                   bound[1] = p[i%size()];
                   EntityKey<int> key(bound,false);
@@ -931,7 +948,8 @@ namespace Dune {
                        "ERROR in " << *this
                                    << "      non-positive boundary id read!");
           }
-          while (getnextentry(x)) {
+          while (getnextentry(x))
+          {
             p.push_back(x);
             n++;
           }
