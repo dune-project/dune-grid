@@ -1,9 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// $Id: mcmgmappertest.cc 2793 2006-07-10 12:01:52Z mblatt $
-
 /** \file
     \brief A unit test for the ReferenceElements
+    \todo For several element types the subEntities() method is not tested yet!
  */
 
 #include <config.h>
@@ -168,14 +167,14 @@ int main () try
   testcmp(referenceQuad.subEntity(2,1,0,1),2);
   testcmp(referenceQuad.subEntity(3,1,0,1),3);
 
-  testcmp(referenceQuad.subEntity(0,1,0,2),2);
-  testcmp(referenceQuad.subEntity(0,1,1,2),0);
+  testcmp(referenceQuad.subEntity(0,1,0,2),0);
+  testcmp(referenceQuad.subEntity(0,1,1,2),2);
   testcmp(referenceQuad.subEntity(1,1,0,2),1);
   testcmp(referenceQuad.subEntity(1,1,1,2),3);
   testcmp(referenceQuad.subEntity(2,1,0,2),0);
   testcmp(referenceQuad.subEntity(2,1,1,2),1);
-  testcmp(referenceQuad.subEntity(3,1,0,2),3);
-  testcmp(referenceQuad.subEntity(3,1,1,2),2);
+  testcmp(referenceQuad.subEntity(3,1,0,2),2);
+  testcmp(referenceQuad.subEntity(3,1,1,2),3);
 
   testcmp(referenceQuad.subEntity(0,2,0,2),0);
   testcmp(referenceQuad.subEntity(1,2,0,2),1);
