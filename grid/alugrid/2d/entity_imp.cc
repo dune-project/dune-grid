@@ -565,6 +565,7 @@ namespace Dune {
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
+      return -1;
     }
     static inline bool isTheSame(const HElementType * elem, int face, const HElementType * org, int org_face) {
       if (elem == org) {
@@ -603,6 +604,7 @@ namespace Dune {
     }
     static inline int subBoundary(GridImp & grid, const HElementType &elem, int i) {
       DUNE_THROW(NotImplemented, "Not yet implemented this codim!");
+      return -1;
     }
     static inline bool isTheSame(const ALU2DSPACE Vertex * elem, int face, const ALU2DSPACE Vertex * org, int org_face) {
       return (elem == org);
