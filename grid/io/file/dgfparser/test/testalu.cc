@@ -29,6 +29,8 @@ try {
   std::cout << std::endl << "start ALUGrid test" << std::endl;
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
+
+#if HAVE_ALU
   {
     typedef ALUCubeGrid<3,3> GridType;
     // std::string filename("examplegrid6.dgf");
@@ -51,6 +53,9 @@ try {
 
     test(*gridptr);
   }
+#endif
+
+#if HAVE_ALBERTA
   {
     typedef AlbertaGrid<3,3> GridType;
     // std::string filename("examplegrid6.dgf");
@@ -62,6 +67,8 @@ try {
 
     test(*gridptr);
   }
+#endif
+#if HAVE_UG
   {
     typedef UGGrid<3,3> GridType;
     // std::string filename("examplegrid6.dgf");
@@ -93,6 +100,7 @@ try {
     // run grid check to check grid
     gridcheck(*gridptr);
   }
+#endif
   return 0;
 }
 catch (Dune::Exception &e) {
