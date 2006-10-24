@@ -99,15 +99,17 @@ int main (int argc , char **argv) {
         ALUCubeGrid<3,3> grid;
         checkALUSerial(grid);
       }
+
       {
         ALUSimplexGrid<3,3> grid;
         checkALUSerial(grid);
       }
 
       {
-        std::string filename("alu-testgrid.triang");
-        ALUSimplexGrid<2,2> grid(filename);
-        checkALUSerial(grid,3);
+        typedef ALUSimplexGrid<2,2> GridType;
+        std::string filename("simplex-testgrid-2-2.dgf");
+        GridPtr<GridType> gridPtr(filename);
+        checkALUSerial(*gridPtr,2);
       }
 
       {
@@ -117,7 +119,10 @@ int main (int argc , char **argv) {
         else
           filename += "largegrid_alu.hexa";
 
-        ALUCubeGrid<3,3> grid (filename);
+        typedef ALUCubeGrid<3,3> GridType;
+        GridPtr<GridType> gridPtr(filename);
+        GridType & grid = *gridPtr;
+
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
@@ -134,14 +139,18 @@ int main (int argc , char **argv) {
           checkALUParallel(grid,0,2);
         }
       }
+
       {
         std::string filename;
         if (mysize<=2)
-          filename += "alu-testgrid.tetra";
+          filename += "simplex-testgrid-3-3.dgf";
         else
-          filename += "examplegrid9.dgf.ALUgrid";
+          filename += "simplex-testgrid-3-3-large.dgf";
 
-        ALUSimplexGrid<3,3> grid(filename);
+        typedef ALUSimplexGrid<3,3> GridType;
+        GridPtr<GridType> gridPtr(filename);
+        GridType & grid = *gridPtr;
+
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;

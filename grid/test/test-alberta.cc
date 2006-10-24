@@ -15,11 +15,13 @@
 #include <sstream>
 
 #include <dune/grid/albertagrid.hh>
+#include <dune/grid/io/file/dgfparser/dgfalberta.hh>
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
+
 
 
 template <class GridType >
@@ -43,22 +45,29 @@ void markOne ( GridType & grid , int num , int ref )
 
 int main () {
   try {
-    const int dim      = ALBERTA_DIM;
-    const int dimworld = ALBERTA_WORLD_DIM;
+    const int dim = 3;
+    const int dimworld = 3;
+    //  const int dim      = ALBERTA_DIM;
+    //  const int dimworld = ALBERTA_WORLD_DIM;
+
     /* use grid-file appropriate for dimensions */
     std::ostringstream filename;
-    filename << "alberta-testgrid-" << dim
-             << "-" << dimworld << ".al";
+    filename << "simplex-testgrid-" << dim
+             << "-" << dimworld << ".dgf";
 
     std::cout << std::endl << "AlbertaGrid<" << dim
               << "," << dimworld
               << "> with grid file: " << filename.str()
               << std::endl << std::endl;
-
-    // extra-environment to check destruction
     {
       factorEpsilon = 5e2;
-      Dune::AlbertaGrid<dim,dimworld> grid(filename.str());
+
+      typedef Dune::AlbertaGrid<dim,dimworld> GridType;
+
+      Dune::GridPtr<GridType> gridPtr(filename.str());
+      GridType & grid = *gridPtr;
+
+      // extra-environment to check destruction
 
       gridcheck(grid); // check macro grid
       for(int i=0; i<2; i++)
@@ -78,7 +87,6 @@ int main () {
 
       checkCommunication(grid, -1, Dune::dvverb);
     };
-
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
