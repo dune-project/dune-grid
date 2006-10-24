@@ -1,5 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+
 #include <config.h>
 
 /*
@@ -45,15 +46,21 @@ void markOne ( GridType & grid , int num , int ref )
 
 int main () {
   try {
-    const int dim = 3;
-    const int dimworld = 3;
-    //  const int dim      = ALBERTA_DIM;
-    //  const int dimworld = ALBERTA_WORLD_DIM;
+    const int dim      = ALBERTA_DIM;
+    const int dimworld = ALBERTA_WORLD_DIM;
 
     /* use grid-file appropriate for dimensions */
     std::ostringstream filename;
-    filename << "simplex-testgrid-" << dim
-             << "-" << dimworld << ".dgf";
+
+    if((dim == 2) && (dimworld == 2) )
+    {
+      filename << "simplex-testgrid-" << dim
+               << "-" << dimworld << ".dgf";
+    }
+    else if((dim == 3) && (dimworld == 3) )
+    {
+      filename << "alberta-testgrid-3-3.al";
+    }
 
     std::cout << std::endl << "AlbertaGrid<" << dim
               << "," << dimworld
