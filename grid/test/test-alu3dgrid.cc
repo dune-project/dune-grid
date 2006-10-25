@@ -115,9 +115,9 @@ int main (int argc , char **argv) {
       {
         std::string filename;
         if (mysize<=2)
-          filename += "alu-testgrid.hexa";
+          filename += "cube-testgrid-3-3.dgf";
         else
-          filename += "largegrid_alu.hexa";
+          filename += "cube-testgrid-3-3-large.dgf";
 
         typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
@@ -126,8 +126,7 @@ int main (int argc , char **argv) {
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
-          if(mysize<=2)
-            checkALUSerial(grid,1);
+          checkALUSerial(grid,1);
         }
 
         // perform parallel check only when more then one proc
@@ -154,8 +153,7 @@ int main (int argc , char **argv) {
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
-          if(mysize<=2)
-            checkALUSerial(grid,1);
+          checkALUSerial(grid,1);
         }
 
         // perform parallel check only when more then one proc
