@@ -9,6 +9,8 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/helpertemplates.hh>
 
+#include <dune/common/bartonnackmanifcheck.hh>
+
 /** @file
  * @author Peter Bastian
  * @brief Provides classes with basic mappers which are used to attach data to a grid
@@ -118,6 +120,7 @@ namespace Dune
     template<class EntityType>
     int map (const EntityType& e) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e)));
       return asImp().map(e);
     }
 
@@ -130,6 +133,7 @@ namespace Dune
     template<int cc>     // this is now the subentity's codim
     int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template map<cc>(e,i)));
       return asImp().template map<cc>(e,i);
     }
 
@@ -143,6 +147,7 @@ namespace Dune
      */
     int size () const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size()));
       return asImp().size();
     }
 
@@ -157,6 +162,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, int& result) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,result )));
       return asImp().contains(e,result );
     }
 
@@ -171,6 +177,7 @@ namespace Dune
     template<int cc>     // this is now the subentity's codim
     bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template contains<cc>(e,i,result)))
       return asImp().template contains<cc>(e,i,result);
     }
 
@@ -178,7 +185,7 @@ namespace Dune
      */
     void update ()
     {
-      asImp().update();
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update()));
     }
 
   private:
@@ -189,6 +196,9 @@ namespace Dune
   };
 
   /** @} */
+
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
 }
 #endif
