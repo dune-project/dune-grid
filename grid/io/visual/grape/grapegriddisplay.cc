@@ -684,7 +684,8 @@ namespace Dune
 
       if(!validFunction)
       {
-        std::cerr << "No function or function data, therefore no GridPart! Defaulting Iterator to LeafIterator! \n";
+        std::string name = (func) ? func->name : "Null";
+        std::cerr << "No function for data '" <<name<<"' and therefore no GridPart! Defaulting Iterator to LeafIterator! \n";
         dune->first_macro = &IterationMethods<pitype>::fst_leaf;
         dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
 
@@ -699,6 +700,7 @@ namespace Dune
       assert( func );
       assert( func->setGridPartIterators );
 
+      //std::cout << "Select grid part of " << func->name << "\n";
       // set first and next methods due to grid part
       func->setGridPartIterators(dune,func->gridPart);
 

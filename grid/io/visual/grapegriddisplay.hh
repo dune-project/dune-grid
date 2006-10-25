@@ -33,6 +33,7 @@ namespace Dune
   };
 
   // the internal grape partition iterator types
+  // need to be this exact values to associate with combo button value
   enum GrapeIteratorType
   {
     g_LeafIterator       = 0,

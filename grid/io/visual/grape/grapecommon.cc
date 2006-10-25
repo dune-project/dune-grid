@@ -39,6 +39,14 @@ static BUTTON *button_set_current_data_item(int pnr)
   END_METHOD(lbutton);
 }
 
+/* set default iterator value */
+inline void setDefaultIteratorValue(int val)
+{
+  assert( val >= 0 );
+  assert( val < 4 );
+  defaultIteratorValue = val;
+}
+
 /* add Button which can switch between LevelIteration and LeafIteration */
 inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
 {
@@ -103,6 +111,8 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     GRAPE(iteratorButton,"set-instance") (iteratorButton);
     GRAPE(iteratorButton,"set-label") (clabel[0].label);
     GRAPE(iteratorButton,"set-pref-size") (12.0,1.0);
+
+    GRAPE(iteratorButton,"set-value") (defaultIteratorValue);
 
     GRAPE(mgr,"add-inter") (iteratorButton);
   }

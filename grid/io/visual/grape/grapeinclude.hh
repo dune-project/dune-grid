@@ -58,10 +58,16 @@ namespace Dune
     inline static void setThread(int t)
     {}
 
+    inline static void setDefaultIterator(int val)
+    {
+      setDefaultIteratorValue(val);
+    }
+
     inline static void handleMesh (void *hmesh, bool grdMode = false )
     {
       GrapeInterface_two_two::handleMesh(hmesh,grdMode);
     }
+
     inline static void addDataToHmesh(void  *hmesh, DUNE_FDATA * data)
     {
       GrapeInterface_two_two::addDataToHmesh(hmesh,data);
@@ -120,6 +126,11 @@ namespace Dune
     inline static void setThread(int t)
     {
       GrapeInterface_three_three::setThread(t);
+    }
+
+    inline static void setDefaultIterator(int val)
+    {
+      setDefaultIteratorValue(val);
     }
 
     inline static void handleMesh (void *hmesh, bool grdMode = false )

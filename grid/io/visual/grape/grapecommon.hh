@@ -11,6 +11,7 @@ static BUTTON * minMaxColorbar=0;
 
 /* global variables for iterator choice */
 static COMBOBUTTON  * iteratorButton = 0;
+static int defaultIteratorValue = 0 ;
 
 /* global variables for partition type choice */
 static COMBOBUTTON * partitionTypeButton = 0;
@@ -40,5 +41,6 @@ struct info
 };
 
 void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
+void setDefaultIteratorValue(int val);
 
 #endif

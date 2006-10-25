@@ -432,10 +432,14 @@ namespace Dune
           typedef typename FunctionSpaceType :: GridPartType GridPartType;
           data->gridPart = ((void *) &func.getFunctionSpace().gridPart());
           data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+
         }
 
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
+
+      // make grid part iterator default
+      GrapeInterface<dim,dimworld>::setDefaultIterator(g_GridPart);
     }
   }
 
