@@ -9,6 +9,8 @@
    MessageBuffers and DataHandles
  */
 
+#include <dune/common/bartonnackmanifcheck.hh>
+
 namespace Dune
 {
 
@@ -92,6 +94,7 @@ namespace Dune
      */
     bool contains (int dim, int codim) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(dim,codim)));
       return asImp().contains(dim,codim);
     }
 
@@ -102,6 +105,7 @@ namespace Dune
      */
     bool fixedsize (int dim, int codim) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedsize(dim,codim)));
       return asImp().fixedsize(dim,codim);
     }
 
@@ -112,6 +116,7 @@ namespace Dune
     template<class EntityType>
     size_t size (const EntityType& e) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size(e)));
       return asImp().size(e);
     }
 
@@ -123,7 +128,7 @@ namespace Dune
     void gather (MessageBufferImp& buff, const EntityType& e) const
     {
       MessageBufferIF<MessageBufferImp> buffIF(buff);
-      asImp().gather(buffIF,e);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().gather(buffIF,e)));
     }
 
     /*! unpack data from message buffer to user
@@ -136,7 +141,7 @@ namespace Dune
     void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
     {
       MessageBufferIF<MessageBufferImp> buffIF(buff);
-      asImp().scatter(buffIF,e,n);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().scatter(buffIF,e,n)));
     }
 
   private:
@@ -148,6 +153,9 @@ namespace Dune
       return static_cast<const DataHandleImp &>(*this);
     }
   }; // end class CommDataHandleIF
+
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
 } // end namespace Dune
 #endif

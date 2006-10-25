@@ -12,7 +12,6 @@
 
 // dune-common includes
 #include <dune/common/exceptions.hh>
-#include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/typetraits.hh>
@@ -21,6 +20,10 @@
 // local includes
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
+
+// inlcude this file after all other, because other files might undef the
+// macros that are defined in that file
+#include <dune/common/bartonnackmanifcheck.hh>
 
 namespace Dune {
 
@@ -793,8 +796,7 @@ namespace Dune {
     //! Refine the grid refCount times using the default refinement rule.
     void globalRefine (int refCount)
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().globalRefine(refCount));
-      asImp().globalRefine(refCount);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION(asImp().globalRefine(refCount));
       return;
     }
 
@@ -809,7 +811,6 @@ namespace Dune {
     bool mark( int refCount, T & e )
     {
       IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().template mark<T>(refCount,e));
       return asImp().template mark<T>(refCount,e);
     }
 
@@ -819,7 +820,6 @@ namespace Dune {
      */
     bool preAdapt ()
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().preAdapt());
       return asImp().preAdapt();
     }
 
@@ -839,14 +839,12 @@ namespace Dune {
      */
     bool adapt ()
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().adapt());
       return asImp().adapt();
     }
 
     //! To be called after grid has been adapted and information left over by the adaptation has been processed.
     void postAdapt()
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().postAdapt());
       return asImp().postAdapt();
     }
     //@}
@@ -892,8 +890,7 @@ namespace Dune {
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level)));
-      asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level)));
       return;
     }
 
@@ -903,8 +900,7 @@ namespace Dune {
     template<class DataHandleImp, class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
-      asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
       return;
     }
 
@@ -941,6 +937,9 @@ namespace Dune {
     //!  Barton-Nackman trick
     const GridImp& asImp () const {return static_cast<const GridImp &>(*this);}
   };
+
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
 
   //************************************************************************
@@ -1209,8 +1208,6 @@ namespace Dune {
     MakeableInterfaceObject(const ImplementationType & realImp) : InterfaceType(realImp) {}
   };
 }
-
-#undef CHECK_INTERFACE_IMPLEMENTATION
 
 #include "geometry.hh"
 #include "entity.hh"

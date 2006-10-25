@@ -10,6 +10,8 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/helpertemplates.hh>
 
+#include <dune/common/bartonnackmanifcheck.hh>
+
 /** @file
         @author Peter Bastian
         @brief Provides base classes for index and id sets
@@ -109,6 +111,7 @@ namespace Dune
     int index (const typename RemoveConst<GridImp>::Type::
                Traits::template Codim<cc>::Entity& e) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
     }
 
@@ -125,6 +128,7 @@ namespace Dune
     int index (const EntityType& e) const
     {
       enum { cc = EntityType::codimension };
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
     }
 
@@ -144,6 +148,7 @@ namespace Dune
     int subIndex (const typename RemoveConst<GridImp>::Type::
                   Traits::template Codim<0>::Entity& e, int i) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
       return asImp().template subIndex<cc>(e,i);
     }
     //@}
@@ -164,6 +169,7 @@ namespace Dune
      */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().geomTypes(codim)));
       return asImp().geomTypes(codim);
     }
 
@@ -174,6 +180,7 @@ namespace Dune
      */
     int size (GeometryType type) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size(type)));
       return asImp().size(type);
     }
 
@@ -185,6 +192,7 @@ namespace Dune
      */
     int size (int codim) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().size(codim)));
       return asImp().size(codim);
     }
 
@@ -193,6 +201,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e)));
       return asImp().contains(e);
     }
 
@@ -202,6 +211,7 @@ namespace Dune
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::Iterator begin () const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
       return asImp().begin<cd,pitype>();
     }
 
@@ -211,6 +221,7 @@ namespace Dune
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::Iterator end () const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().end<cd,pitype>()));
       return asImp().end<cd,pitype>();
     }
     //@}
@@ -230,6 +241,8 @@ namespace Dune
     const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
   /**\brief Provide default implementation of method if IndexSet
          @ingroup GridDevel
