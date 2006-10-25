@@ -570,7 +570,7 @@ namespace Dune {
           DUNE_THROW(DGFException,
                      "ERROR in " << *this
                                  << "      wrong number of vertices: "
-                                 << n << " read but expected " << dimnew);
+                                 << n << " read but expected " << (dimworld+1));
         }
         return goodline;
       }
