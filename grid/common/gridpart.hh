@@ -10,6 +10,8 @@
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/datahandleif.hh>
 
+#include <dune/common/bartonnackmanifcheck.hh>
+
 /** @file
    @author Robert Kloefkorn
    @brief Provides views of grid via grid parts, heavily used in the
@@ -54,37 +56,59 @@ namespace Dune {
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
   public:
     //! \brief Returns reference to the underlying grid
-    const GridType & grid () const { return asImp().grid(); }
+    const GridType & grid () const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().grid()));
+      return asImp().grid();
+    }
 
     //! \brief Returns reference to index set of the underlying grid
-    const IndexSetType& indexSet() const { return asImp().indexSet(); }
+    const IndexSetType& indexSet() const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().indexSet()));
+      return asImp().indexSet();
+    }
 
     /** \brief  Returns first iterator of the subset of the entities of codimension cd
         specified by this class
      */
     template <int cd>
     typename GridPartTraits::template Codim<cd>::IteratorType
-    begin() const { return asImp().begin(); }
+    begin() const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().begin()));
+      return asImp().begin();
+    }
 
     /** \brief Returns end iterator of the subset of the entities of codimension cd
         specified by this class
      */
     template <int cd>
     typename GridPartTraits::template Codim<cd>::IteratorType
-    end() const { return asImp().end(); }
+    end() const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().end()));
+      return asImp().end();
+    }
 
     //! \brief Level of the grid part
-    int level() const { return asImp().level(); }
+    int level() const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().level()));
+      return asImp().level();
+    }
 
     //! \brief ibegin of corresponding intersection iterator for given entity
     IntersectionIteratorType ibegin(const EntityCodim0Type & en) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().ibegin(en)));
       return asImp().ibegin(en);
     }
 
     //! \brief iend of corresponding intersection iterator for given entity
     IntersectionIteratorType iend(const EntityCodim0Type & en) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().iend(en)));
       return asImp().iend(en);
     }
 
@@ -93,7 +117,7 @@ namespace Dune {
     void communicate(CommDataHandleIF<DataHandleImp,DataType> & data,
                      InterfaceType iftype, CommunicationDirection dir) const
     {
-      asImp().communicate(data,iftype,dir);
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().communicate(data,iftype,dir)));
     }
 
   protected:
@@ -501,6 +525,8 @@ namespace Dune {
     };
   };
 
+#undef CHECK_INTERFACE_IMPLEMENTATION
+#undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
 } // end namespace Dune
 
