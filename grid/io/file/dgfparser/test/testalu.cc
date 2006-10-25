@@ -4,9 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "../dgfug.hh"
 #include "../dgfalu.hh"
-#include "../dgfalberta.hh"
 // use grid check
 #include <dune/grid/test/gridcheck.cc>
 
@@ -52,53 +50,6 @@ try {
     gridcheck(*gridptr);
 
     test(*gridptr);
-  }
-#endif
-
-#if HAVE_ALBERTA
-  {
-    typedef AlbertaGrid<3,3> GridType;
-    // std::string filename("examplegrid6.dgf");
-    std::string filename("forward3d_hexa.dgf");
-    GridPtr<GridType> gridptr(filename);
-
-    // run grid check to check grid
-    //gridcheck(*gridptr);
-
-    test(*gridptr);
-  }
-#endif
-#if HAVE_UG
-  {
-    typedef UGGrid<3,3> GridType;
-    // std::string filename("examplegrid6.dgf");
-    std::string filename("forward3d_tetra.dgf");
-    GridPtr<GridType> gridptr(filename);
-
-    // run grid check to check grid
-    gridcheck(*gridptr);
-
-    test(*gridptr);
-  }
-  {
-    typedef UGGrid<3,3> GridType;
-    // std::string filename("examplegrid6.dgf");
-    std::string filename("forward3d_hexa.dgf");
-    GridPtr<GridType> gridptr(filename);
-
-    // run grid check to check grid
-    gridcheck(*gridptr);
-
-    test(*gridptr);
-  }
-  {
-    typedef ALUSimplexGrid<2,2> GridType;
-    std::string filename("examplegrid5.dgf");
-    GridPtr<GridType> gridptr(filename);
-    test(*gridptr);
-
-    // run grid check to check grid
-    gridcheck(*gridptr);
   }
 #endif
   return 0;
