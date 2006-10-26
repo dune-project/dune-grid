@@ -70,9 +70,11 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     clabel[num].value = 0;
     clabel[num].label = NULL;
 
-    GRAPE(Button,"add-method") ("set-current-data-item",
-                                button_set_current_data_item);
-
+    if(! (GRAPE(Button,"find-method") ("set-current-data-item")) )
+    {
+      GRAPE(Button,"add-method") ("set-current-data-item",
+                                  button_set_current_data_item);
+    }
 
     partitionTypeButton = (COMBOBUTTON *)GRAPE(ComboButton,"new-instance")
                             ("set-current-data-item",NULL,"",clabel);
@@ -135,12 +137,38 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
                              I_FillMode, MENU_FILL_BOTTOM,
                              I_End);
 
+  minMaxColorbar = (BUTTON *)
+                   new_item (Button,
+                             I_Label, "set min/max to Colorbar",
+                             I_Instance, sc,
+                             I_Method, "set-min-max-values",
+                             I_Size, 12., 1.,
+                             I_FillMode, MENU_FILL_BOTTOM,
+                             I_End);
+
   GRAPE(mgr,"add-inter") (maxlevelButton);
   GRAPE(mgr,"add-inter") (minMaxColorbar);
 
   GRAPE(maxlevelButton,"set-state") (PRESSED);
   GRAPE(minMaxColorbar,"set-state") (UNPRESSED);
   maxlevelButton->on_off = OFF;
+}
+
+/* add Button which can switch between LevelIteration and LeafIteration */
+inline void removeLeafButton(MANAGER *mgr, void *sc)
+{
+  GRAPE(mgr,"remove-inter") (partitionTypeButton);
+  GRAPE(partitionTypeButton,"delete") ();
+  partitionTypeButton = 0;
+  GRAPE(mgr,"remove-inter") (iteratorButton);
+  GRAPE(iteratorButton,"delete") ();
+  iteratorButton = 0;
+  GRAPE(mgr,"remove-inter") (maxlevelButton);
+  GRAPE(maxlevelButton,"delete") ();
+  maxlevelButton = 0;
+  GRAPE(mgr,"remove-inter") (minMaxColorbar);
+  GRAPE(minMaxColorbar,"delete") ();
+  minMaxColorbar = 0;
 }
 
 inline void timeSceneInit(INFO *info, int n_info, int procs, int time_bar)

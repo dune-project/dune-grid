@@ -41,6 +41,7 @@ struct info
 };
 
 void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
+void removeLeafButton(MANAGER *mgr, void *sc);
 void setDefaultIteratorValue(int val);
 
 #endif
