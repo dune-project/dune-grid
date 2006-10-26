@@ -55,6 +55,8 @@ namespace Dune
     // evaluate at dof
     inline static void evalDof (DUNE_ELEM *he, DUNE_FDATA *df, int localNum, double * val);
 
+    // get min and max value for colorbar
+    inline static void getMinMaxValues(DUNE_FDATA *df, double* min, double* max );
   };
 
   template <class GridImp, class DiscreteFunctionType>
@@ -102,6 +104,9 @@ namespace Dune
     inline static void evalVector (EntityType &en, int geomType,
                                    DiscreteFunctionType & func, LocalFunctionType &lf,
                                    const int * comp, int vend, int localNum, double * val);
+
+    // calculate min and max value of function
+    inline static void calcMinMax(DUNE_FDATA * df);
   };
 
   template <class GridImp, class VectorType, class IndexSetImp >
@@ -143,6 +148,9 @@ namespace Dune
     inline static void evalVectorConst (EntityType &en, int geomType,
                                         VectorType & func, const IndexSetImp & set,
                                         const int * comp, int vend, int localNum, double * val);
+
+    // calculate min and max value of function
+    inline static void calcMinMax(DUNE_FDATA * df);
   };
 
 
@@ -193,6 +201,9 @@ namespace Dune
     template <class DiscFuncType>
     inline void dataDisplay(DiscFuncType &func, bool vector = false);
 
+    //! display grid and data without grid mode
+    inline void display();
+
     //! add discrete function to display
     template <class DiscFuncType>
     inline void addData(DiscFuncType &func, double time = 0.0);
@@ -210,9 +221,6 @@ namespace Dune
 
     // return vector for copying in combined display
     std::vector < DUNE_FDATA * > & getFdataVec () { return vecFdata_; }
-
-    //! set min and max value for colorbar
-    void setMinMaxValue(const double minValue, const double maxValue) const;
 
   private:
     /*! add vector to display

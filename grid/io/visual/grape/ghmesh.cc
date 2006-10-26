@@ -873,39 +873,76 @@ static inline void addProjectUIF()
   }
 }
 
-/*
-   inline void switchToHsvRedToBlue(COLORBAR *self)
-   {
-   CBMHSV *module;
+extern "C" {
+  extern MESH2D   * mesh2d_isoline_disp();
+  extern MESH2D   * mesh2d_isoline_select_disp();
+  extern HPMESH2D * hpmesh2d_isoline_disp();
+  extern GENMESH3D* genmesh3d_bnd_isoline_disp();
+  extern GENMESH3D* genmesh3d_clip_isoline_multi_disp ();
+}
 
-   module = (CBMHSV *)GRAPE(CbmHsv,"new-instance")("hsv redtoblue");
-   //self = (COLORBAR *) colorbar_get_module_inst (module);
+// methodName is set by scene set_min_max_value
+static std::string grapeMethodName;
+inline GRAPEMESH * setMinMaxValue()
+{
+  GRAPEMESH * mesh = 0;
+  mesh = (GRAPEMESH *) START_METHOD(G_INSTANCE);
+  ASSURE (mesh, "No HMESH in setMinMaxValue! \n", END_METHOD (0));
 
-   //GRAPE(self,"add-module")(module);
-   GRAPE(self->module_sel,"set-value")(5);
-   //GRAPE(module,"set-offset")(0.135);
-   return;
-   }
+  DUNE_DAT * dat = (DUNE_DAT *) mesh->user_data;
+  assert( dat );
 
-   extern "C" {
-   extern MESH2D * mesh2d_isoline_disp();
-   }
- */
+  F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
+                      ("scalar","scalar","vector","default", 0);
+  DUNE_FDATA * func = 0;
+  if(f_data) func = (DUNE_FDATA *) f_data->function_data;
 
-// set min and max value of colorbar
+  double min=0.0, max=1.0;
+  if(func)
+  {
+    assert(func->getMinMaxValues);
+    func->getMinMaxValues(func,&min,&max);
+  }
+
+  //std::cout << "Set min="<<min<<" and max="<<max <<" \n";
+  //std::cout << "MethodName = " << grapeMethodName << "\n";
+  COLORBAR * colorBar = 0;
+  if(grapeMethodName == "isoline-disp")
+  {
+    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_isoline_disp,grapeMethodName.c_str());
+  }
+  if(grapeMethodName == "isoline-select-disp")
+  {
+    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_select_disp,grapeMethodName.c_str());
+  }
+  if(grapeMethodName == "bnd-isoline-disp")
+  {
+    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,grapeMethodName.c_str());
+  }
+  if(grapeMethodName == "clip-isoline-multi-disp")
+  {
+    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_clip_isoline_multi_disp,grapeMethodName.c_str());
+  }
+
+  if(!colorBar)
+  {
+    std::cerr << "Could not determin method name: " << grapeMethodName << "in: " << __FILE__ << " line: " << __LINE__ << "\n";
+    END_METHOD(mesh);
+  }
+
+  //#if GRAPE_DIM == 2
+  //#else
+  //  COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar")(hpmesh2d_isoline_disp,"isoline-disp");
+  //#endif
+  colorBar->min = min;
+  colorBar->max = max;
+  //GRAPE(colorBar,"display")();
+  END_METHOD(mesh);
+}
+
 inline void colorBarMinMax(const double min, const double max)
 {
-  //GRAPE(mesh, "value-min-max")(min, max);
-
-  //g_colorbar_settings.disable_predefined_maps = 1;
-  GRAPE(Colorbar,"set-default-min-max") (min,max,0,0);
-
-  /*
-     COLORBAR * self = (COLORBAR*)GRAPE(Colorbar,"get-stdcolorbar")
-        (mesh2d_isoline_disp,"mesh2d-isoline") ;
-
-     switchToHsvRedToBlue(self);
-   */
+  GRAPE(Colorbar,"set-default-min-max") (min,max);
 }
 
 /* forward declaration */
@@ -963,6 +1000,8 @@ inline void handleMesh(void *hmesh, bool gridMode )
   }
 
   GRAPE(mgr,"handle") (sc);  // grape display call
+
+  removeLeafButton(mgr,sc);
 
   FctSelector :: DataFunctionName_t fctName =
     FctSelector :: getCurrentFunctionName(mesh);
@@ -1260,10 +1299,13 @@ inline SCENE* scene_set_min_max_values ()
   SCENE* sc = (SCENE*) START_METHOD (G_INSTANCE);
   ALERT( sc, "set-min-max-values: No hmesh!", END_METHOD(NULL));
 
-  double min = -1e37, max = 1e37;
-  GRAPE(sc, "value-min-max") (min, max);
-  colorBarMinMax(min,max);
-
+  // only if method different from display
+  if(sc->method_name)
+  {
+    // remember method name
+    grapeMethodName = sc->method_name;
+    GRAPE(sc, "universal") ("value-min-max");
+  }
   END_METHOD (sc);
 }
 
@@ -1274,6 +1316,12 @@ static int calledAddMethods = 0;
 /* add some usefull methods */
 inline static void grape_add_remove_methods(void)
 {
+  if( (GRAPE(Scene,"find-method") ("set-min-max-values")) )
+  {
+    GRAPE(Scene,"delete-method") ("set-min-max-values");
+  }
+  GRAPE(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
+
   if(!calledAddMethods)
   {
     printf("Add Method 'next-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
@@ -1282,6 +1330,9 @@ inline static void grape_add_remove_methods(void)
     GRAPE(HMesh,"add-method") ("prev-f-data-send",&prev_f_data_send);
     GRAPE(GrapeMesh,"add-method") ("interpol", &grape_mesh_interpol);
 
+    printf("add-method 'value-min-max' on HMesh%dd!\n",GRAPE_DIM);
+
+    GRAPE(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
 #if GRAPE_DIM == 3
     //printf("Remove Method  'clip' on GenMesh3d!\n");
     //GRAPE(GenMesh3d,"delete-method")("clip");
@@ -1295,12 +1346,11 @@ inline static void grape_add_remove_methods(void)
     printf("Remove Method 'clip-isoline-select-disp' on GenMesh3d!\n");
     GRAPE(GenMesh3d,"delete-method") ("clip-isoline-select-disp");
     printf("\n");
+#else
 #endif
     if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
       GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
 
-    if( ! (GRAPE(Scene,"find-method") ("set-min-max-values")) )
-      GRAPE(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
     {
       char p_name[32];
       sprintf(p_name,"uif-m%d",GRAPE_DIM);

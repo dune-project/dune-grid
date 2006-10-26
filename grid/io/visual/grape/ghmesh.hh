@@ -101,7 +101,12 @@ typedef struct dune_fdata
       , compName(0)
       , gridPart(0)
       , setGridPartIterators(0)
-      , f_data (0) {}
+      , f_data (0)
+      , minValue(0.0)
+      , maxValue(1.0)
+      , valuesSet(false)
+      , getMinMaxValues(0)
+  {}
 
   /* my number in the data vector */
   int mynum;
@@ -149,6 +154,16 @@ typedef struct dune_fdata
 
   /* pointer to f_data */
   void * f_data;
+
+  /* minValue of function, for colorbar */
+  double minValue;
+  /* maxValue of function, for colorbar */
+  double maxValue;
+
+  /* true if min and max values have been calculated */
+  bool valuesSet;
+
+  void (*getMinMaxValues)(DUNE_FDATA *, double * min, double * max );
 };
 
 /* dune_dat */

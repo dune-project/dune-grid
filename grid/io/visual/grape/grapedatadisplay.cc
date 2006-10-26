@@ -32,6 +32,19 @@ namespace Dune
     return ;
   }
 
+  template<class EvalImp>
+  inline void EvalFunctionData<EvalImp>::
+  getMinMaxValues(DUNE_FDATA *df, double* min, double *max)
+  {
+    if(!df->valuesSet)
+    {
+      EvalImp::calcMinMax(df);
+    }
+    *min = df->minValue;
+    *max = df->maxValue;
+    return ;
+  }
+
   //*******************************************************************
   //  --EvalDiscreteFunctions
   //*******************************************************************
@@ -171,6 +184,54 @@ namespace Dune
     return;
   }
 
+  template<class GridType, class DiscreteFunctionType>
+  inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
+  calcMinMax(DUNE_FDATA * df)
+  {
+    double minValue,maxValue;
+    typedef typename DiscreteFunctionType:: DofIteratorType DofIteratorType;
+    assert( df->discFunc );
+    DiscreteFunctionType & func = *((DiscreteFunctionType *) (df->discFunc));
+
+    int comp = df->comp[0];
+    int dimVal = df->dimVal;
+
+    DofIteratorType enddit = func.dend();
+    {
+      DofIteratorType dit = func.dbegin();
+      int count = 0;
+      while ( (dit != enddit) )
+      {
+        if((count%dimVal) == comp )
+        {
+          minValue = (*dit);
+          maxValue = (*dit);
+          break;
+        }
+        ++count;
+      }
+    }
+
+    int count = 0;
+    for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
+    {
+      if((count%dimVal) != comp) continue;
+      if( (*dit) < minValue) minValue = (*dit);
+      if( (*dit) > maxValue) maxValue = (*dit);
+    }
+
+    if((maxValue-minValue) < 1e-10)
+    {
+      std::cout << "WARNING: min="<<minValue << " and max="<<maxValue<<" values of function almost identical! \n";
+      maxValue += 0.01*maxValue;
+      minValue -= 0.01*minValue;
+    }
+
+    df->minValue = minValue;
+    df->maxValue = maxValue;
+    df->valuesSet= true;
+  }
+
 
   //*******************************************************************
   //  --EvalVectorData
@@ -233,6 +294,42 @@ namespace Dune
     assert( false );
     abort();
   }
+
+  template <class GridType, class VectorType,class IndexSetImp>
+  inline void EvalVectorData<GridType,VectorType,IndexSetImp>::
+  calcMinMax(DUNE_FDATA * df)
+  {
+    double minValue,maxValue;
+    assert( df->discFunc );
+    VectorType & vector = *((VectorType *) (df->discFunc));
+
+    int size = vector.size();
+    int comp = df->comp[0];
+    int dimVal = df->dimVal;
+
+    if(size < comp) return;
+    minValue = vector[comp];
+    maxValue = vector[comp];
+
+    for(int i=0; i<size; ++i)
+    {
+      if((i%dimVal) != comp) continue;
+      if( vector[i] < minValue) minValue = vector[i];
+      if( vector[i] > maxValue) maxValue = vector[i];
+    }
+
+    if((maxValue-minValue) < 1e-10)
+    {
+      std::cout << "WARNING: min="<<minValue << " and max="<<maxValue<<" values of function almost identical! \n";
+      maxValue += 0.01*maxValue;
+      minValue -= 0.01*minValue;
+    }
+
+    df->minValue = minValue;
+    df->maxValue = maxValue;
+    df->valuesSet= true;
+  }
+
 
   //****************************************************************
   //
@@ -329,6 +426,15 @@ namespace Dune
   }
 
   template<class GridType>
+  inline void GrapeDataDisplay<GridType>::
+  display()
+  {
+    /* display mesh without grid mode */
+    GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
+    return ;
+  }
+
+  template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
   addData(DiscFuncType &func, double time)
@@ -376,6 +482,32 @@ namespace Dune
       int num = (int) FunctionSpaceType::DimRange;
       if(vector) num = 1;
 
+      std::vector<double> minValue,maxValue;
+      {
+        minValue.resize(num);
+        maxValue.resize(num);
+        typedef typename DiscFuncType :: DofIteratorType DofIteratorType;
+        DofIteratorType enddit = func.dend();
+        {
+          DofIteratorType dit = func.dbegin();
+          int count = 0;
+          while ( (dit != enddit) && count < num )
+          {
+            minValue[count] = (*dit);
+            maxValue[count] = (*dit);
+            ++dit;
+            ++count;
+          }
+        }
+        int count = 0;
+        for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
+        {
+          int idx = (count%num);
+          if( (*dit) < minValue[idx]) minValue[idx] = (*dit);
+          if( (*dit) > maxValue[idx]) maxValue[idx] = (*dit);
+        }
+      }
+
       vecFdata_.resize(size+num);
       for(int n=size; n < size+num; n++)
       {
@@ -391,6 +523,9 @@ namespace Dune
 
           data->evalCoord =
             EvalDiscreteFunctions<GridType,DiscFuncType>::evalCoord;
+
+          data->getMinMaxValues =
+            EvalDiscreteFunctions<GridType,DiscFuncType>::getMinMaxValues;
 
           data->mynum = n;
 
@@ -433,6 +568,11 @@ namespace Dune
           data->gridPart = ((void *) &func.getFunctionSpace().gridPart());
           data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
 
+          if(!vector)
+          {
+            data->minValue = minValue[data->comp[0]];
+            data->maxValue = maxValue[data->comp[0]];
+          }
         }
 
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
@@ -477,7 +617,7 @@ namespace Dune
       max += 0.01*max;
       min -= 0.01*min;
     }
-    setMinMaxValue(min,max);
+    GrapeInterface<dim,dim>::colorBarMinMax(min,max);
 
     // display
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
@@ -543,6 +683,9 @@ namespace Dune
           data->evalCoord =
             EvalVectorData<GridType,VectorType,IndexSetType>::evalCoord;
 
+          data->getMinMaxValues =
+            EvalVectorData<GridType,VectorType,IndexSetType>::getMinMaxValues;
+
           data->mynum = n;
 
           data->allLevels = 0;
@@ -586,13 +729,6 @@ namespace Dune
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
       }
     }
-  }
-
-  template<class GridType>
-  inline void GrapeDataDisplay<GridType>::
-  setMinMaxValue(const double minValue, const double maxValue) const
-  {
-    GrapeInterface<dim,dimworld>::colorBarMinMax(minValue,maxValue);
   }
 
 } // end namespace Dune
