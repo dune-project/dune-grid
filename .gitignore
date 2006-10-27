@@ -18,3 +18,4 @@ dune-grid-?.?
 ltmain.sh
 dune
 am
+.libs

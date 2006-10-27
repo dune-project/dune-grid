@@ -8,3 +8,5 @@ referenceelementstest
 semantic.cache
 *.gcda
 *.gcno
+*.mw
+*_MAS.bak
