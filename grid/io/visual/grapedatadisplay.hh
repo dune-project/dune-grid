@@ -199,22 +199,22 @@ namespace Dune
     //! Calls the display of the grid and draws the discrete function
     //! if discretefunction is NULL, then only the grid is displayed
     template <class DiscFuncType>
-    inline void dataDisplay(DiscFuncType &func, bool vector = false);
+    inline void dataDisplay(const DiscFuncType &func, bool vector = false);
 
     //! display grid and data without grid mode
     inline void display();
 
     //! add discrete function to display
     template <class DiscFuncType>
-    inline void addData(DiscFuncType &func, double time = 0.0);
+    inline void addData(const DiscFuncType &func, double time = 0.0);
 
     //! add discrete function to display
     template <class DiscFuncType>
-    inline void addData(DiscFuncType &func, const DATAINFO * , double time );
+    inline void addData(const DiscFuncType &func, const DATAINFO * , double time );
 
     //! add discrete function to display
     template <class DiscFuncType>
-    inline void addData(DiscFuncType &func, std::string name , double time , bool vector = false );
+    inline void addData(const DiscFuncType &func, std::string name , double time , bool vector = false );
 
     // retrun whether we have data or not
     bool hasData () { return (vecFdata_.size() > 0); }

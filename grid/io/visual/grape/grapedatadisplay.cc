@@ -189,7 +189,7 @@ namespace Dune
   calcMinMax(DUNE_FDATA * df)
   {
     double minValue,maxValue;
-    typedef typename DiscreteFunctionType:: DofIteratorType DofIteratorType;
+    typedef typename DiscreteFunctionType:: ConstDofIteratorType DofIteratorType;
     assert( df->discFunc );
     DiscreteFunctionType & func = *((DiscreteFunctionType *) (df->discFunc));
 
@@ -415,10 +415,10 @@ namespace Dune
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
-  dataDisplay(DiscFuncType &func, bool vector)
+  dataDisplay(const DiscFuncType &func, bool vector)
   {
     /* add function data */
-    this->addData(func,func.name(),0.0,vector);
+    this->addData(const_cast<DiscFuncType &> (func),func.name(),0.0,vector);
 
     /* display mesh */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
@@ -437,7 +437,7 @@ namespace Dune
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
-  addData(DiscFuncType &func, double time)
+  addData(const DiscFuncType &func, double time)
   {
     typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
     enum { dimR = FunctionSpaceType::DimRange };
@@ -446,13 +446,14 @@ namespace Dune
     std::string name = func.name();
     // name, base_name, next, dimVal, comp
     DATAINFO dinf = { name.c_str() , name.c_str() , 0 , dimR , (int *) &comp };
+
     addData(func,&dinf,time);
   }
 
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
-  addData(DiscFuncType &func , std::string name , double time , bool vector)
+  addData(const DiscFuncType &func , std::string name , double time , bool vector)
   {
     int comp[dim];
     for(int i=0; i<dim; i++) comp[i] = i;
@@ -463,7 +464,7 @@ namespace Dune
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
-  addData(DiscFuncType &func , const DATAINFO * dinf, double time )
+  addData(const DiscFuncType &func , const DATAINFO * dinf, double time )
   {
     typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
     typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
@@ -481,32 +482,6 @@ namespace Dune
     {
       int num = (int) FunctionSpaceType::DimRange;
       if(vector) num = 1;
-
-      std::vector<double> minValue,maxValue;
-      {
-        minValue.resize(num);
-        maxValue.resize(num);
-        typedef typename DiscFuncType :: DofIteratorType DofIteratorType;
-        DofIteratorType enddit = func.dend();
-        {
-          DofIteratorType dit = func.dbegin();
-          int count = 0;
-          while ( (dit != enddit) && count < num )
-          {
-            minValue[count] = (*dit);
-            maxValue[count] = (*dit);
-            ++dit;
-            ++count;
-          }
-        }
-        int count = 0;
-        for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
-        {
-          int idx = (count%num);
-          if( (*dit) < minValue[idx]) minValue[idx] = (*dit);
-          if( (*dit) > maxValue[idx]) maxValue[idx] = (*dit);
-        }
-      }
 
       vecFdata_.resize(size+num);
       for(int n=size; n < size+num; n++)
@@ -567,12 +542,6 @@ namespace Dune
           typedef typename FunctionSpaceType :: GridPartType GridPartType;
           data->gridPart = ((void *) &func.getFunctionSpace().gridPart());
           data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
-
-          if(!vector)
-          {
-            data->minValue = minValue[data->comp[0]];
-            data->maxValue = maxValue[data->comp[0]];
-          }
         }
 
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);
