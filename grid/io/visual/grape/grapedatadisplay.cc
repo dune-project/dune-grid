@@ -189,35 +189,67 @@ namespace Dune
   calcMinMax(DUNE_FDATA * df)
   {
     double minValue,maxValue;
-    typedef typename DiscreteFunctionType:: ConstDofIteratorType DofIteratorType;
+    bool initialized = false;
+
     assert( df->discFunc );
     DiscreteFunctionType & func = *((DiscreteFunctionType *) (df->discFunc));
 
-    int comp = df->comp[0];
-    int dimVal = df->dimVal;
+    typedef typename DiscreteFunctionType :: DiscreteFunctionSpaceType DiscreteFunctionSpaceType ;
+    typedef typename DiscreteFunctionSpaceType :: IteratorType IteratorType;
+    typedef typename GridType :: template Codim<0> :: Entity EntityType;
+    enum { dimension = GridType :: dimension };
 
-    DofIteratorType enddit = func.dend();
+    if(df->dimVal == 1)
     {
-      DofIteratorType dit = func.dbegin();
-      int count = 0;
-      while ( (dit != enddit) )
+      const DiscreteFunctionSpaceType & space = func.getFunctionSpace();
+      IteratorType end = space.end();
+      for(IteratorType it = space.begin(); it != end; ++it)
       {
-        if((count%dimVal) == comp )
+        EntityType & en = *it;
+        int geomType = convertToGrapeType ( en.geometry().type() , dimension );
+        double val = 0.0;
+        for(int i=0; i<en.template count<dimension>(); ++i)
         {
-          minValue = (*dit);
-          maxValue = (*dit);
-          break;
+          evalDofNow ( en , geomType, df , i , &val );
+          if(!initialized)
+          {
+            minValue = maxValue = val;
+            initialized = true;
+          }
+          minValue = std::min(minValue,val);
+          maxValue = std::max(maxValue,val);
         }
-        ++count;
       }
     }
-
-    int count = 0;
-    for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
+    else
     {
-      if((count%dimVal) != comp) continue;
-      if( (*dit) < minValue) minValue = (*dit);
-      if( (*dit) > maxValue) maxValue = (*dit);
+      typedef typename DiscreteFunctionType:: ConstDofIteratorType DofIteratorType;
+      int comp = df->comp[0];
+      int dimVal = df->dimVal;
+
+      DofIteratorType enddit = func.dend();
+      {
+        DofIteratorType dit = func.dbegin();
+        int count = 0;
+        while ( (dit != enddit) )
+        {
+          if((count%dimVal) == comp )
+          {
+            minValue = (*dit);
+            maxValue = (*dit);
+            break;
+          }
+          ++count;
+        }
+      }
+
+      int count = 0;
+      for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
+      {
+        if((count%dimVal) != comp) continue;
+        if( (*dit) < minValue) minValue = (*dit);
+        if( (*dit) > maxValue) maxValue = (*dit);
+      }
     }
 
     if((maxValue-minValue) < 1e-10)
