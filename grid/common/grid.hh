@@ -626,12 +626,6 @@ namespace Dune {
       return asImp().name();
     }
 
-    //! Return the id of the grid
-    std::string type() const DUNE_DEPRECATED
-    {
-      return name();
-    }
-
     //@}
 
     //===========================================================
@@ -1229,12 +1223,6 @@ inline std::ostream& operator<< (std::ostream& s,
                                  const Dune::Grid<d,dw,ct,gf> & g)
 {
   s << g.name();
-  return s;
-}
-
-DUNE_DEPRECATED
-inline std::string transformToGridName(const std::string & s)
-{
   return s;
 }
 
