@@ -191,13 +191,6 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef ct ctype;
 
-    /** @brief level of inside() entity
-        \deprecated This method will be removed on 27.11.2006  */
-    int level () const DUNE_DEPRECATED
-    {
-      return realIterator.level();
-    }
-
     /** @brief Preincrement operator. Proceed to next intersection.*/
     IntersectionIterator& operator++()
     {

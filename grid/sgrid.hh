@@ -780,9 +780,6 @@ namespace Dune {
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    //! ask for level of intersection
-    int level () const;
-
     //! equality
     bool equals(const SIntersectionIterator<GridImp>& i) const;
     //! increment

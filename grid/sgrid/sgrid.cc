@@ -601,12 +601,6 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::level () const
-  {
-    return grid->getRealImplementation(ne).l;
-  }
-
-  template<class GridImp>
   inline typename SIntersectionIterator<GridImp>::EntityPointer SIntersectionIterator<GridImp>::inside () const
   {
     return self;
