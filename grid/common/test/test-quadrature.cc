@@ -194,29 +194,38 @@ void checkWeights(Dune::GeometryType t)
 int main ()
 {
   try {
+    Dune::GeometryType cube0d(Dune::GeometryType::cube,0);
     Dune::GeometryType cube1d(Dune::GeometryType::cube,1);
     Dune::GeometryType cube2d(Dune::GeometryType::cube,2);
     Dune::GeometryType cube3d(Dune::GeometryType::cube,3);
 
+    Dune::GeometryType simplex0d(Dune::GeometryType::simplex,0);
+    Dune::GeometryType simplex1d(Dune::GeometryType::simplex,1);
     Dune::GeometryType simplex2d(Dune::GeometryType::simplex,2);
     Dune::GeometryType simplex3d(Dune::GeometryType::simplex,3);
 
     Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
     Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
 
+    checkWeights<double, 0>(cube0d);
     checkWeights<double, 1>(cube1d);
     checkWeights<double, 2>(cube2d);
     checkWeights<double, 3>(cube3d);
 
+    checkWeights<double, 0>(simplex0d);
+    checkWeights<double, 1>(simplex1d);
     checkWeights<double, 2>(simplex2d);
     checkWeights<double, 3>(simplex3d);
 
     checkWeights<double, 3>(prism3d);
     checkWeights<double, 3>(pyramid3d);
 
+    checkQuadrature<double, 0>(cube0d);
     checkQuadrature<double, 1>(cube1d);
     checkQuadrature<double, 2>(cube2d);
     checkQuadrature<double, 3>(cube3d);
+    checkQuadrature<double, 0>(simplex0d);
+    checkQuadrature<double, 1>(simplex1d);
     checkQuadrature<double, 2>(simplex2d);
     checkQuadrature<double, 3>(simplex3d);
     checkQuadrature<double, 3>(prism3d);

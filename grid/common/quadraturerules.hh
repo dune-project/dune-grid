@@ -227,6 +227,36 @@ namespace Dune {
   //! @copydoc CubeQuadratureRule
   //! Specialization for 1D.
   template<typename ct>
+  class CubeQuadratureRule<ct,0> :
+    public QuadratureRule<ct,0>
+  {
+  public:
+    // compile time parameters
+    enum { d=0 };
+    enum { dim=0 };
+    enum { highest_order=1000 };
+    typedef ct CoordType;
+    typedef CubeQuadratureRule value_type;
+
+    ~CubeQuadratureRule(){}
+  private:
+    friend class QuadratureRuleFactory<ct,dim>;
+    CubeQuadratureRule (int p) :
+      QuadratureRule<ct,0>(GeometryType(GeometryType::cube, 0))
+    {
+      FieldVector<ct, dim> point(0.0);
+
+      if (p > highest_order)
+        DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << p << " not supported!");
+
+      this->delivered_order = highest_order;
+      this->push_back(QuadraturePoint<ct,dim>(point, 1.0));
+    }
+  };
+
+  //! @copydoc CubeQuadratureRule
+  //! Specialization for 1D.
+  template<typename ct>
   class CubeQuadratureRule<ct,1> :
     public QuadratureRule<ct,1>
   {
@@ -705,6 +735,21 @@ namespace Dune {
       if (t.isSimplex())
       {
         return SimplexQuadratureRule<ctype,dim>(p);
+      }
+      DUNE_THROW(Exception, "Unknown GeometryType");
+    }
+  };
+
+  template<typename ctype>
+  class QuadratureRuleFactory<ctype, 0> {
+  private:
+    enum { dim = 0 };
+    friend class QuadratureRules<ctype, dim>;
+    static QuadratureRule<ctype, dim> rule(const GeometryType& t, int p, QuadratureType::Enum qt)
+    {
+      if (t.isVertex())
+      {
+        return CubeQuadratureRule<ctype,dim>(p);
       }
       DUNE_THROW(Exception, "Unknown GeometryType");
     }
