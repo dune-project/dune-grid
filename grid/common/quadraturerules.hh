@@ -225,7 +225,7 @@ namespace Dune {
   };
 
   //! @copydoc CubeQuadratureRule
-  //! Specialization for 1D.
+  //! Specialization for 0D.
   template<typename ct>
   class CubeQuadratureRule<ct,0> :
     public QuadratureRule<ct,0>
@@ -273,7 +273,7 @@ namespace Dune {
     void init(int p,
               std::vector< FieldVector<ct, dim> > & _points,
               std::vector< double > & _weight,
-              int delivered_order);
+              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     CubeQuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
@@ -315,7 +315,7 @@ namespace Dune {
     void init(int p,
               std::vector< FieldVector<ct, dim> > & _points,
               std::vector< double > & _weight,
-              int delivered_order);
+              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     Jacobi1QuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))
@@ -327,7 +327,6 @@ namespace Dune {
       int delivered_order;
 
       init(p, _points, _weight, delivered_order);
-
       this->delivered_order = delivered_order;
       assert(_points.size() == _weight.size());
       for (size_t i = 0; i < _points.size(); i++)
@@ -357,7 +356,7 @@ namespace Dune {
     void init(int p,
               std::vector< FieldVector<ct, dim> > & _points,
               std::vector< double > & _weight,
-              int delivered_order);
+              int & delivered_order);
     friend class QuadratureRuleFactory<ct,dim>;
     Jacobi2QuadratureRule (int p)
       : QuadratureRule<ct,1>(GeometryType(GeometryType::cube, 1))

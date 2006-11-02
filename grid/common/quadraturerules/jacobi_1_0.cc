@@ -9,10 +9,10 @@
 namespace Dune {
 
   template<typename ct>
-  void CubeQuadratureRule<ct,1>::init(int p,
-                                      std::vector< FieldVector<ct, dim> > & _points,
-                                      std::vector< double > & _weight,
-                                      int delivered_order)
+  void Jacobi1QuadratureRule<ct,1>::init(int p,
+                                         std::vector< FieldVector<ct, dim> > & _points,
+                                         std::vector< double > & _weight,
+                                         int & delivered_order)
   {
     switch(p)
     {
