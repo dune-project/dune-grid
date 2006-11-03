@@ -794,12 +794,18 @@ namespace Dune {
       return;
     }
 
-    /** \brief Marks an entity to be refined in a subsequent adapt.
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
 
        \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
-       \param[in] e        Entity that should be refined
+       \param[in] e        EntityPointer to Entity that should be refined
 
-       \return true if entity was marked, false otherwise.
+       \return true if Entity was marked, false otherwise.
+
+       \note Markers for \b refinement (refCount > 0) outrank \b none markers (refCount == 0)
+            which outrank \b coarsen markers (refCount < 0).
+            If the entity is marked for refinement, then the marker is set in any case.
+            If the entity was marked for refinement before, then a coarsen marker
+            will have no effect when the mark method is called for the same entity again.
      */
     template <class T>
     bool mark( int refCount, T & e )
@@ -993,26 +999,32 @@ namespace Dune {
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
-    /** \brief marks an entity for refCount refines.
-     *
-     * If refCount is negative the entity is coarsened -refCount times
-     * \return true if entity was marked, false otherwise
-     *
-     *  - Note:
-     *    default implementation is: return false; for grids with no
-     *    adaptation.
-     *  - for the grid programmer:
-     *    this method is implemented as a template method, because the
-     *    Entity type is not defined when the class is instantiated
-     *
-     *    You won't need this trick in the implementation.
-     *    In your implementation you should use it as
-     *    \code
-     *    bool mark( int refCount,
-     *               typename Traits::template Codim<0>::EntityPointer & e ).
-     *    \endcode
-     *    This template method will vanish due to the inheritance
-     *    rules.
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+
+       \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
+       \param[in] e        EntityPointer to Entity that should be refined
+
+       \return true if Entity was marked, false otherwise.
+
+       \note
+          -  Markers for \b refinement (refCount > 0) outrank \b none markers (refCount == 0)
+             which outrank \b coarsen markers (refCount < 0).
+             If the entity is marked for refinement, then the marker is set in any case.
+             If the entity was marked for refinement before, then a coarsen marker
+             will have no effect when the mark method is called for the same entity again.
+          -  \b default \b implementation is: return false; for grids with no
+             adaptation.
+          -  for the grid programmer:
+             this method is implemented as a template method, because the
+             Entity type is not defined when the class is instantiated
+             You won't need this trick in the implementation.
+             In your implementation you should use it as
+             \code
+             bool mark( int refCount,
+                        typename Traits::template Codim<0>::EntityPointer & e ).
+             \endcode
+             This template method will vanish due to the inheritance
+             rules.
      */
     template <class T>
     bool mark( int refCount, T & e )
