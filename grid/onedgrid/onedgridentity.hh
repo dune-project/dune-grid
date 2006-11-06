@@ -330,7 +330,7 @@ namespace Dune {
     }
 
     LeafIntersectionIterator ileafbegin () const {
-      return OneDGridLeafIntersectionIterator<GridImp>(target_, 0);
+      return OneDGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : 2);
     }
 
     LevelIntersectionIterator ilevelbegin () const {
