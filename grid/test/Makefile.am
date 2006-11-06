@@ -101,8 +101,11 @@ test_dgfalu_uggrid_combination_DEPENDENCIES = $(LOCAL_LIBS)
 ## distribution tarball
 SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc
 
-GRIDFILES = alberta-testgrid-2-2.al alberta-testgrid-3-3.al \
-  ug-testgrid-2.am ug-testgrid-3.am
+GRIDFILES = alberta-testgrid-3-3.al \
+  ug-testgrid-2.am ug-testgrid-3.am \
+  simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
+  cube-testgrid-3-3-large.dgf cube-testgrid-3-3.dgf
+
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = gridcheck.cc $(GRIDFILES)
 
