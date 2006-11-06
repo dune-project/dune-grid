@@ -11,24 +11,6 @@
 
 namespace Dune {
 
-  /** \brief Helper class that gets the first entity of a given codim of the grid
-      with the codim as a compile time parameter
-      \todo Maybe this functionality should be centralized somewhere
-   */
-  template <class GridImp, int codim>
-  struct OneDGridFirstEntity {};
-
-  template <class GridImp>
-  struct OneDGridFirstEntity<GridImp,0> {
-    static OneDEntityImp<1>* get(const GridImp* grid, int level) {return grid->elements[level].begin;}
-  };
-
-  template <class GridImp>
-  struct OneDGridFirstEntity<GridImp,1> {
-    static OneDEntityImp<0>* get(const GridImp* grid, int level) {return grid->vertices[level].begin;}
-  };
-
-
   /** \brief Iterator over all entities of a given codimension and level of a grid.
    * \ingroup OneDGrid
    */
@@ -47,7 +29,10 @@ namespace Dune {
       /** \todo Can a make the fullRefineLevel work somehow? */
       const int fullRefineLevel = 0;
 
-      this->virtualEntity_.setToTarget(OneDGridFirstEntity<GridImp,codim>::get(grid_,fullRefineLevel));
+      if (codim==0)
+        this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->elements[fullRefineLevel].begin);
+      else
+        this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->vertices[fullRefineLevel].begin);
 
       if (!this->virtualEntity_.target()->isLeaf())
         increment();
@@ -80,8 +65,14 @@ namespace Dune {
       this->virtualEntity_.setToTarget(this->virtualEntity_.target()->succ_);
 
       // If beyond the end of this level set to first of next level
-      if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel())
-        this->virtualEntity_.setToTarget(OneDGridFirstEntity<GridImp,codim>::get(grid_,oldLevel+1));
+      if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel()) {
+
+        if (codim==0)
+          this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->elements[oldLevel+1].begin);
+        else
+          this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->vertices[oldLevel+1].begin);
+
+      }
 
     }
 
