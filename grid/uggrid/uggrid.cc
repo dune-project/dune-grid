@@ -1218,14 +1218,60 @@ void Dune::UGGrid < dim, dimworld >::setPosition(typename Traits::template Codim
 template < int dim, int dimworld >
 void Dune::UGGrid < dim, dimworld >::setIndices()
 {
-  /** \todo Does this leak memory when the hierarchy gets lower? */
-  for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
-  {
-    UGGridLevelIndexSet<const UGGrid<dim,dimworld> >* p = new UGGridLevelIndexSet<const UGGrid<dim,dimworld> >();
-    levelIndexSets_.push_back(p);
-  }
-  //    levelIndexSets_.resize(maxLevel()+1);
+  /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
+      (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
+      store the codim 1 subIndices of elements.  However the UG SideVector code is buggy
+      and SideVectors are not correctly created.  There are two reasons why I provide
+      a workaround instead of fixing UG directly:
+      - it is not trivial to fix in UG, and I'd probably screw up other things if I
+      started to mess around in the UG refinement routines
+      - AFAIK Stefan Lang is rewriting that part of UG anyways.
+      As soon as UGGrid does not rely on SideVectors anymore to store indices the following
+      if-clause can be deleted.
+   */
+  if (dim==3) {
 
+    for (int i=1; i<=maxLevel(); i++) {
+
+      typename Traits::template Codim<0>::LevelIterator eIt = lbegin<0>(i);
+      typename Traits::template Codim<0>::LevelIterator eEndIt = lend<0>(i);
+
+      for (; eIt!=eEndIt; ++eIt) {
+
+        typename UG_NS<dim>::Element* elem0 = getRealImplementation(*eIt).target_;
+
+        typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nIt = eIt->ilevelbegin();
+        typename Traits::template Codim<0>::Entity::LevelIntersectionIterator nEndIt = eIt->ilevelend();
+
+        for (; nIt!=nEndIt; ++nIt) {
+
+          if (!nIt.neighbor())
+            continue;
+
+          typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt.outside()).target_;
+
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInSelf(), eIt->geometry().type());
+          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInNeighbor(), nIt.outside()->geometry().type());
+
+          UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
+                                           (typename UG_NS<3>::Element*)elem0,
+                                           side0,
+                                           (typename UG_NS<3>::Element*)elem1,
+                                           side1);
+
+        }
+
+      }
+
+    }
+
+  }
+
+  // Create new level index sets if necessary
+  for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
+    levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim,dimworld> >());
+
+  // Update all LevelIndexSets
   for (int i=0; i<=maxLevel(); i++)
     if (levelIndexSets_[i])
       levelIndexSets_[i]->update(*this, i);
@@ -1243,8 +1289,8 @@ void Dune::UGGrid < dim, dimworld >::setIndices()
 //   g++-4.0 wants them to be _after_ the method implementations.
 // /////////////////////////////////////////////////////////////////////////////////
 
-template class Dune::UGGrid<2,2>;
-template class Dune::UGGrid<3,3>;
+template class Dune::UGGrid<2>;
+template class Dune::UGGrid<3>;
 
 // ////////////////////////////////////////////////////////////////////////////////////
 //   Explicitly instantiate the necessary member templates contained in UGGrid<2,2>
