@@ -60,8 +60,6 @@ namespace Dune {
     //! prefix increment
     void increment() {
       neighborCount_++;
-      if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
-        neighborCount_ = -1;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -183,8 +181,6 @@ namespace Dune {
     //! prefix increment
     void increment() {
       neighborCount_++;
-      if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
-        neighborCount_ = -1;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
