@@ -32,7 +32,27 @@ namespace Dune {
 
   /** \brief Utility to get twist from IntersectionIterator,
       if provided by grid (i.e. AlbertaGrid, ALUGrid)
-      otherwise return default values.
+      otherwise return default values (correct for YASP/SGRID).
+
+      The twist (t) of a face is defined in the following way:
+      - sign(t) gives information on the relationship between the
+        orientation of the intersection geometry and the geometry
+        of the corresponding codim 1 entity of the inside/outside
+        entity:
+        - sign(t)>=0: same orientation
+        - sign(t)<0:  opposite orientation
+
+      - The value of the twist gives information on the local numbering
+        of the corners of the corresponding geometries. This value
+        is only correctly defined for conforming grids, i.e.,
+        the intersection is identical to an codim 1 entity of inside/outside.
+        In this case we have the following definition:
+        - sign(t)>=0: corner[0] of inside/outside face is equal to
+                      corner[t] of intersection.
+        - sign(t)<0:  corner[0] of inside/outside face is equal to
+                      corner[t'] of intersection with t' = abs(t)+1.
+
+
    */
   template <class GridImp>
   class TwistUtility;
