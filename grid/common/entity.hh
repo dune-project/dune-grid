@@ -310,24 +310,6 @@ namespace Dune
       return realEntity.entity<cc>(i);
     }
 
-    /**\brief Intra-level access to intersections with neighboring elements.
-       A neighbor is an entity of codimension 0
-       which has an intersection of codimension 1 in common with this entity.
-       Access to those neighbors is provided using the IntersectionIterator.
-       This method returns an iterator refering to the first neighbor.
-     */
-    IntersectionIterator ibegin () const DUNE_DEPRECATED
-    {
-      return realEntity.ibegin();
-    }
-
-    /**\brief Reference to an IntersectionIterator one past the last intersection
-     */
-    IntersectionIterator iend () const DUNE_DEPRECATED
-    {
-      return realEntity.iend();
-    }
-
     /**\brief Access to intersections with neighboring leaf elements.
        A neighbor is an entity of codimension 0
        which has an intersection of codimension 1 in common with this entity.
