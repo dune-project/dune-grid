@@ -688,6 +688,18 @@ bool Dune::OneDGrid < dim, dimworld >::mark(int refCount,
   return true;
 }
 
+template <int dim, int dimworld>
+int Dune::OneDGrid < dim, dimworld >::getMark(const typename Traits::template Codim<0>::Entity & en )
+{
+  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::COARSEN) return -1;
+  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::REFINED) return 1;
+  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::NONE) return 0;
+  DUNE_THROW(GridError,"Entity has undefined adaptation marker!");
+  return 0;
+}
+
+
+
 // /////////////////////////////////////////////////////////////////////////
 //   Explicitly instantiate the OnedGrid for dim == dimworld == 1,
 //   which is the only valid instantiation

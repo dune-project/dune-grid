@@ -375,6 +375,14 @@ namespace Dune {
      */
     bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer& e );
 
+    /** \brief return current adaptation marker of given entity
+
+        \param e Entity to the entity you want to mark
+
+        \return int current adaptation marker of entity e
+     */
+    int getMark(const typename Traits::template Codim<0>::Entity& e );
+
     //! Does nothing except return true if some element has been marked for refinement
     bool preAdapt();
 
