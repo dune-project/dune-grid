@@ -12,15 +12,11 @@ fprintf(fd,"// WARNING
 namespace Dune {
   
   template&lt;typename ct&gt;
-  %sQuadratureRule&lt;ct,1&gt;::%sQuadratureRule (int p)
-    : QuadratureRule&lt;ct,1&gt;(GeometryType(GeometryType::cube, 1))
+  void %sQuadratureRule&lt;ct,1&gt;::init(int p,
+         std::vector&lt; FieldVector&lt;ct, dim&gt; &gt; &amp; _points,
+         std::vector&lt; double &gt; &amp; _weight,
+         int &amp; delivered_order)
   {
-    //! set up quadrature of given order in d dimensions
-    std::vector&lt; FieldVector&lt;ct, dim&gt; &gt; _points;
-    std::vector&lt; double &gt; _weight;
-
-    int delivered_order;
-    
     switch(p)
     {
 ",name,name);
@@ -49,11 +45,6 @@ end do:
 fprintf(fd,"    default:
       DUNE_THROW(QuadratureOrderOutOfRange, \"Quadrature rule \" &lt;&lt; p &lt;&lt; \" not supported!\");
     }
-
-    this-&gt;delivered_order = delivered_order;
-    assert(_points.size() == _weight.size());
-    for (size_t i = 0; i &lt; _points.size(); i++)
-      this-&gt;push_back(QuadraturePoint&lt;ct,dim&gt;(_points[i], _weight[i]));
   }
 
   template %sQuadratureRule&lt;float, 1&gt;::%sQuadratureRule(int);
@@ -62,4 +53,4 @@ fprintf(fd,"    default:
 } // namespace
 ",name,name,name,name);
 fclose(fd);
-end proc:</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("jacobi_1_0.cc","Jacobi1",1,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("jacobi_2_0.cc","Jacobi2",2,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("cube.cc","Cube",0,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input"/></Input></Group><Text-field/><Text-field/><Text-field/><Text-field/><Text-field/><Text-field/></Worksheet>
+end proc:</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("jacobi_1_0.cc","Jacobi1",1,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("jacobi_2_0.cc","Jacobi2",2,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input">quad("cube.cc","Cube",0,0,44);</Text-field></Input></Group><Group><Input><Text-field layout="Normal" prompt="&gt; " style="Maple Input"/></Input></Group><Text-field/><Text-field/><Text-field/><Text-field/><Text-field/><Text-field/><Text-field/></Worksheet>
