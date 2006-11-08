@@ -313,24 +313,39 @@ namespace Dune {
   template<int dim, class GridImp>
   inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
   {
-    //assert(item_ != 0);
-
+    if( !isLeaf() ) return false;
     // if this assertion is thrown then you try to mark a non leaf entity
     // which is leads to unpredictable results
-    assert( isLeaf() );
+    assert(item_ != 0);
 
     // mark for coarsening
-    if(refCount < 0) {
+    if(refCount < 0)
+    {
       if(level() <= 0) return false;
       item_->Refco_el::mark(ALU2DSPACE Refco::crs);
+      return true;
     }
+
     // mark for refinement
-    if(refCount > 0) {
+    if(refCount > 0)
+    {
       item_->Refco_el::mark(ALU2DSPACE Refco::ref);
+      return true;
     }
-    else
-      return false;
+
+    // mark with none
+    item_->Refco_el::mark(ALU2DSPACE Refco::none);
     return true;
+  }
+
+  template<int dim, class GridImp>
+  inline int ALU2dGridEntity<0,dim,GridImp> :: getMark() const
+  {
+    assert(item_ != 0);
+    if(item_->Refco_el::is(ALU2DSPACE Refco::ref)) return 1;
+    if(item_->Refco_el::is(ALU2DSPACE Refco::crs)) return -1;
+    assert( item_->Refco_el::is(ALU2DSPACE Refco::none) );
+    return 0;
   }
 
   /*! private methods, but public because of datahandle and template

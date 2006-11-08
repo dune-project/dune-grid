@@ -204,6 +204,8 @@ namespace Dune {
              ALU3dImplTraits<GridImp::elementType>::coarse_element_t };
     enum { nosplit_element_t = ALU3dImplTraits<GridImp::elementType>::nosplit_element_t };
 
+    typedef typename ALU3dImplTraits<GridImp::elementType>::MarkRuleType MarkRuleType;
+
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType>;
     friend class ALU3dGridIntersectionIterator < GridImp >;
     friend class ALU3dGridIntersectionIterator < const GridImp >;
@@ -344,6 +346,9 @@ namespace Dune {
     //! element is coarsend -refCount times
     //! mark returns true if element was marked, otherwise false
     bool mark( int refCount ) const;
+
+    //! \brief return current adaptation mark for this entity
+    int getMark() const;
 
     /*! private methods, but public because of datahandle and template
         arguments of these methods

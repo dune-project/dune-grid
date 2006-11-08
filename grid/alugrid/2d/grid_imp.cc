@@ -386,21 +386,22 @@ namespace Dune {
   }
 
   template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: mark( int refCount , const typename Traits::template Codim<0>::Entity & en ) {
-    //bool marked = (this->getRealImplementation(ep)).mark(ref);
-    bool marked = true;
-    if (refCount > 0)
-      this->getRealImplementation(en).mark(ALU2DSPACE Refco::ref);
-    else if (refCount < 0)
-      this->getRealImplementation(en).mark(ALU2DSPACE Refco::crs);
-    else marked = false;
-
+  inline bool ALU2dGrid<dim, dimworld> ::
+  mark( int refCount , const typename Traits::template Codim<0>::Entity & en )
+  {
+    bool marked = this->getRealImplementation(en).mark(refCount);
     if(marked)
     {
       if(refCount > 0) refineMarked_ ++ ;
       if(refCount < 0) coarsenMarked_ ++ ;
     }
     return marked;
+  }
+
+  template <int dim, int dimworld>
+  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::Entity & en ) const
+  {
+    return this->getRealImplementation(en).getMark();
   }
 
   template <int dim, int dimworld>

@@ -364,6 +364,9 @@ namespace Dune {
     //! mark returns true if element was marked, otherwise false
     bool mark(int refCount) const;
 
+    //! return current adaptation mark of element
+    int getMark() const;
+
     /*! private methods, but public because of datahandle and template
         arguments of these methods
      */

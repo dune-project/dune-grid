@@ -412,6 +412,9 @@ namespace Dune {
     //! refinement, one refinement will create 8 children per element
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
+    //! return current adaptation marker
+    int getMark(const typename Traits::template Codim<0>::Entity & en ) const;
+
     //! return dummy communication
     const CollectiveCommunicationType & comm() const;
   private:

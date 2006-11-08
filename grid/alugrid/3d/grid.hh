@@ -532,6 +532,9 @@ namespace Dune {
     //! the entity for one coarsen step and refCount > 0 will mark for one
     //! refinement, one refinement will create 8 children per element
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
+
+    //! \brief return current adaptation mark for given entity
+    int getMark( const typename Traits::template Codim<0>::Entity & ) const;
   private:
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 

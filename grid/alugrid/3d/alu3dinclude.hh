@@ -116,6 +116,8 @@ namespace Dune {
              ALU3DSPACE GitterType::Geometric::TetraRule::crs  };
     enum { nosplit_element_t = ALU3DSPACE GitterType::Geometric::TetraRule::nosplit };
 
+    typedef ALU3DSPACE GitterType::Geometric::TetraRule MarkRuleType;
+
     typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
     typedef std::pair<PLLBndFaceType*, int> GhostPairType;
@@ -171,6 +173,7 @@ namespace Dune {
     enum { coarse_element_t  = ALU3DSPACE GitterType::Geometric::HexaRule::crs  };
     enum { nosplit_element_t = ALU3DSPACE GitterType::Geometric::HexaRule::nosplit };
 
+    typedef ALU3DSPACE GitterType::Geometric::HexaRule MarkRuleType;
     typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
     typedef std::pair<PLLBndFaceType*, int> GhostPairType;

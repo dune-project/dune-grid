@@ -655,23 +655,17 @@ namespace Dune {
   template<int dim, class GridImp>
   inline bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
   {
-    // refine_element_t and coarse_element_t are defined in bsinclude.hh
-    //if(ghost_) return false;
-
     assert(item_ != 0);
 
     // if this assertion is thrown then you try to mark a non leaf entity
     // which is leads to unpredictable results
-    assert( isLeaf() );
+    if( !isLeaf() ) return false;
 
     // mark for coarsening
     if(ref < 0)
     {
+      // don't mark macro elements for coarsening ;)
       if(level() <= 0) return false;
-      if((*item_).requestrule() == refine_element_t)
-      {
-        return false;
-      }
 
       (*item_).request(coarse_element_t);
       return true;
@@ -684,8 +678,23 @@ namespace Dune {
       return true;
     }
 
+    // mark for none
     (*item_).request( nosplit_element_t );
-    return false;
+    return true;
+  }
+
+  // return mark of entity
+  template<int dim, class GridImp>
+  inline int ALU3dGridEntity<0,dim,GridImp> :: getMark () const
+  {
+    assert(item_ != 0);
+
+    const MarkRuleType rule = (*item_).requestrule();
+
+    if(rule == refine_element_t) return 1;
+    if(rule == coarse_element_t) return -1;
+    assert( rule == nosplit_element_t );
+    return 0;
   }
 
   // Adaptation methods
