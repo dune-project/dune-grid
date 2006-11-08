@@ -77,11 +77,13 @@ namespace Dune
               const int * comp, int vlength , int localNum, double * val)
   {
     enum { dim = EntityType::dimension };
+    typedef typename DiscreteFunctionType :: DiscreteFunctionSpaceType SpaceType;
+    enum { polOrd = SpaceType :: polOrd };
     assert( comp );
     // dimval == dimension here
     // in that case we have only one dof that has to be returned for all
     // corners , kind of hack, but works for the moment
-    if(func.getFunctionSpace().polynomOrder() == 0)
+    if(polOrd == 0)
     {
       enum { polynomialOrder = FunctionSpaceType :: polynomialOrder };
       static const GrapeLagrangePoints<ctype,dim,dimworld,polynomialOrder> lagrangePoints;
@@ -201,7 +203,7 @@ namespace Dune
 
     if(df->dimVal == 1)
     {
-      const DiscreteFunctionSpaceType & space = func.getFunctionSpace();
+      const DiscreteFunctionSpaceType & space = func.space();
       IteratorType end = space.end();
       for(IteratorType it = space.begin(); it != end; ++it)
       {
@@ -499,6 +501,7 @@ namespace Dune
   addData(const DiscFuncType &func , const DATAINFO * dinf, double time )
   {
     typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
+    enum { polynomialOrder = FunctionSpaceType :: polOrd };
     typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
@@ -540,8 +543,8 @@ namespace Dune
 
           data->discFunc = (void *) &func;
           data->indexSet = 0;
-          data->polyOrd = func.getFunctionSpace().polynomOrder();
-          data->continuous = (func.getFunctionSpace().continuous() == true ) ? 1 : 0;
+          data->polyOrd = (int) polynomialOrder;
+          data->continuous = (func.space().continuous() == true ) ? 1 : 0;
           if(data->polyOrd == 0) data->continuous = 0;
 
           int dimVal = dinf->dimVal;
@@ -572,7 +575,7 @@ namespace Dune
 
           // set grid part selection methods
           typedef typename FunctionSpaceType :: GridPartType GridPartType;
-          data->gridPart = ((void *) &func.getFunctionSpace().gridPart());
+          data->gridPart = ((void *) &func.space().gridPart());
           data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
         }
 
