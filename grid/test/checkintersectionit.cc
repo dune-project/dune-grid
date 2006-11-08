@@ -4,6 +4,7 @@
 #define DUNE_CHECK_INTERSECTIONITERATOR_CC
 
 #include <set>
+#include <cmath>
 
 #include <dune/grid/common/quadraturerules.hh>
 
@@ -150,7 +151,15 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     const QuadratureRule<double, interDim>& quad
       = QuadratureRules<double, interDim>::rule(intersectionSelfLocal.type(), 2);
 
-    for (size_t i=0; i<quad.size(); i++) {
+    for (size_t i=0; i<quad.size(); i++)
+    {
+      // check integrationOuterNormal
+      double det = intersectionGlobal.integrationElement(quad[i].position());
+      det -= iIt.integrationOuterNormal(quad[i].position()).two_norm();
+      if( std::abs( det ) > 1e-8 )
+      {
+        DUNE_THROW(GridError, "integrationElement and length of integrationOuterNormal do no match!");
+      }
 
       FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
       FieldVector<double,GridType::dimension> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
