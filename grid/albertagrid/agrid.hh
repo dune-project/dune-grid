@@ -1584,6 +1584,8 @@ namespace Dune
      *  mark returns true if element was marked, otherwise false */
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & en ) const;
 
+    //! \brief return current adaptation mark for given entity
+    int getMark( const typename Traits::template Codim<0>::Entity & en ) const;
   private:
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en ) const;
 

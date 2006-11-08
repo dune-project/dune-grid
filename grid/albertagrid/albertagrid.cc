@@ -3707,7 +3707,6 @@ namespace Dune
     return this->template lend<codim,All_Partition> (level);
   }
 
-
   template < int dim, int dimworld >
   template<int codim, PartitionIteratorType pitype>
   inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
@@ -4229,37 +4228,46 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::
   mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) const
   {
+    // if not leaf entity, leaf method
+    if( !ep.isLeaf() ) return false;
+
     ALBERTA EL_INFO * elInfo = (this->getRealImplementation(ep)).getElInfo();
     if(!elInfo) return false;
-    assert(elInfo);
+    ALBERTA EL * element = elInfo->el;
+    assert( element );
 
-    if( ep.isLeaf() )
+    // mark for refinement
+    if( refCount > 0)
     {
-      // we can not mark for coarsening if already marked for refinement
-      if((refCount < 0) && (elInfo->el->mark > 0))
-      {
-        //dverb << "WARNING:  AlbertaGrid::mark: Could not mark element for coarsening, it was marked for refinement before! in: " << __FILE__ << "  line: " << __LINE__ << "\n";
-        return false;
-      }
-
-      if( refCount > 0)
-      {
-        elInfo->el->mark = refCount;
-        int factor = 2;
-        for(int i=0; i<refCount; ++i) factor *= 2;
-        refineMarked_ += factor;
-        return true;
-      }
-      if( refCount < 0)
-      {
-        elInfo->el->mark = refCount;
-        ++coarsenMarked_;
-        return true;
-      }
+      element->mark = refCount;
+      int factor = 2;
+      for(int i=0; i<refCount; ++i) factor *= 2;
+      refineMarked_ += factor;
+      return true;
     }
-    //dwarn << "WARNING: in AlbertaGrid<"<<dim<<","<<dimworld<<">::mark("<<refCount<<",EP &) : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n";
-    elInfo->el->mark = 0;
-    return false;
+
+    // mark for coarsening
+    if( refCount < 0)
+    {
+      element->mark = refCount;
+      ++coarsenMarked_;
+      return true;
+    }
+
+    // mark for none
+    element->mark = 0;
+    return true;
+  }
+
+  // --getMark
+  template<int dim, int dimworld>
+  inline int AlbertaGrid < dim, dimworld >::
+  getMark( const typename Traits::template Codim<0>::Entity & en ) const
+  {
+    const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(en)).getElInfo();
+    assert( elInfo );
+    assert( elInfo->el );
+    return elInfo->el->mark;
   }
 
   // --adapt
