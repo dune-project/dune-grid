@@ -388,7 +388,16 @@ namespace Dune {
   {
     calcElMatrix();
 
-    detDF_ = A_.determinant();
+    // only can do this for mydim == dim, otherwise not defined
+    if(mydim == cdim)
+    {
+      detDF_ = A_.determinant();
+    }
+    else
+    {
+      // buildJacobianInverseTransposed() also calculates determinant
+      buildJacobianInverseTransposed();
+    }
     assert(detDF_ > 0.0);
 
     enum { factor = Factorial<mydim>::factorial };
