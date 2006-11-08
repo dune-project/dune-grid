@@ -800,18 +800,25 @@ namespace Dune {
        \param[in] e        EntityPointer to Entity that should be refined
 
        \return true if Entity was marked, false otherwise.
-
-       \note Markers for \b refinement (refCount > 0) outrank \b none markers (refCount == 0)
-            which outrank \b coarsen markers (refCount < 0).
-            If the entity is marked for refinement, then the marker is set in any case.
-            If the entity was marked for refinement before, then a coarsen marker
-            will have no effect when the mark method is called for the same entity again.
      */
     template <class T>
     bool mark( int refCount, T & e )
     {
       IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return asImp().template mark<T>(refCount,e);
+    }
+
+    /** \brief returns adaptation mark for given entity
+
+       \param[in] e    Entity for which adaptation mark should be determined
+
+       \return int adaptation mark currently set for Entity e
+     */
+    template <class T>
+    int getMark(T & e) const
+    {
+      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::Entity>::exists >::yes();
+      return asImp().getMark(e);
     }
 
     /*! \brief To be called after entities have been marked and before adapt() is called.
@@ -1007,11 +1014,6 @@ namespace Dune {
        \return true if Entity was marked, false otherwise.
 
        \note
-          -  Markers for \b refinement (refCount > 0) outrank \b none markers (refCount == 0)
-             which outrank \b coarsen markers (refCount < 0).
-             If the entity is marked for refinement, then the marker is set in any case.
-             If the entity was marked for refinement before, then a coarsen marker
-             will have no effect when the mark method is called for the same entity again.
           -  \b default \b implementation is: return false; for grids with no
              adaptation.
           -  for the grid programmer:
@@ -1031,6 +1033,19 @@ namespace Dune {
     {
       IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return false;
+    }
+
+    /** \brief returns adaptation mark for given entity, i.e. here the
+     * default implementation returns 0.
+
+       \param[in] e    Entity for which adaptation mark should be determined
+
+       \return int adaptation mark currently set for Entity e
+     */
+    template <class T>
+    int getMark(T &) const
+    {
+      return 0;
     }
 
     /** \brief Refine all positive marked leaf entities
