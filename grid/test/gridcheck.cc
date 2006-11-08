@@ -755,11 +755,42 @@ void assertNeighbor (Grid &g)
   }
 }
 
+template <class GridType, bool c>
+struct CheckMark
+{
+  template <class IteratorType>
+  static void check(GridType & grid, IteratorType & it)
+  {
+    // last marker is 0, so the grid is not changed after this check
+    const int refCount[4] = {1,0,-1,0};
+    for(int k=0; k<4; ++k)
+    {
+      // mark entity
+      bool marked = grid.mark( refCount[k] , it);
+      // if element was marked, check the the marker was set correctly
+      if(marked)
+      {
+        // now getMark should return the mark we just set, otherwise error
+        if( grid.getMark(*it) != refCount[k] )
+          DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
+      }
+    }
+  }
+};
+
+template <class GridType>
+struct CheckMark<GridType,false>
+{
+  template <class IteratorType>
+  static void check(const GridType & grid, IteratorType & it )
+  {}
+};
+
 /*
  * Iterate over the grid und do some runtime checks
  */
 
-template <class Grid>
+template <bool checkMark , class Grid>
 void iterate(Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
@@ -802,19 +833,25 @@ void iterate(Grid &g)
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   LeafIterator lit = g.template leafbegin<0>();
   const LeafIterator lend = g.template leafend<0>();
-  if(lit == lend)
-    // DUNE_THROW(CheckError, "leafbegin() == leafend()");
-    return;
+
+  // if empty grid, do nothing
+  if(lit == lend) return;
+
   for (; lit != lend; ++lit)
   {
-    //LeafIterator l1 = lit;
-    //LeafIterator l2 = l1++;
-    //LeafIterator l2 = l1; ++l1;
-    //assert(l2 == lit);
-    //assert(l1 != lit);
-    //l2++;
-    //++l2;
-    //assert(l1 == l2);
+    LeafIterator l1 = lit;
+    LeafIterator l2 = l1; ++l1;
+    assert(l2 == lit);
+    assert(l1 != lit);
+    ++l2;
+    assert(l1 == l2);
+
+    // leaf check
+    if( !lit->isLeaf() )
+      DUNE_THROW(CheckError,"LeafIterator gives non-leaf entity!");
+
+    // check adaptation mark for leaf entity mark
+    CheckMark<Grid,checkMark>::check(g,lit);
 
     result = lit->geometry().local(lit->geometry().global(origin));
     typename Grid::ctype error = (result-origin).two_norm();
@@ -883,7 +920,7 @@ void iteratorEquals (Grid &g)
 }
 
 template <class Grid>
-void gridcheck (const Grid &g)
+void gridcheck (Grid &g)
 {
   /*
    * first do the compile-test: this will not produce any code but
@@ -907,8 +944,8 @@ void gridcheck (const Grid &g)
   const Grid & cg = g;
   iteratorEquals(g);
   iteratorEquals(cg);
-  iterate(g);
-  iterate(cg);
+  iterate<true>(g);
+  iterate<false>(cg);
   zeroEntityConsistency(g);
   zeroEntityConsistency(cg);
   assertNeighbor(g);
