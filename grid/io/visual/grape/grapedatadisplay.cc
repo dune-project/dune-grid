@@ -78,7 +78,7 @@ namespace Dune
   {
     enum { dim = EntityType::dimension };
     typedef typename DiscreteFunctionType :: DiscreteFunctionSpaceType SpaceType;
-    enum { polOrd = SpaceType :: polOrd };
+    enum { polOrd = SpaceType :: polynomialOrder };
     assert( comp );
     // dimval == dimension here
     // in that case we have only one dof that has to be returned for all
@@ -501,7 +501,7 @@ namespace Dune
   addData(const DiscFuncType &func , const DATAINFO * dinf, double time )
   {
     typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
-    enum { polynomialOrder = FunctionSpaceType :: polOrd };
+    enum { polynomialOrder = FunctionSpaceType :: polynomialOrder };
     typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
