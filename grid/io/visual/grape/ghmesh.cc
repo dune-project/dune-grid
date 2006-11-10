@@ -889,9 +889,6 @@ inline GRAPEMESH * setMinMaxValue()
   mesh = (GRAPEMESH *) START_METHOD(G_INSTANCE);
   ASSURE (mesh, "No HMESH in setMinMaxValue! \n", END_METHOD (0));
 
-  DUNE_DAT * dat = (DUNE_DAT *) mesh->user_data;
-  assert( dat );
-
   F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
                       ("scalar","scalar","vector","default", 0);
   DUNE_FDATA * func = 0;
@@ -904,8 +901,6 @@ inline GRAPEMESH * setMinMaxValue()
     func->getMinMaxValues(func,&min,&max);
   }
 
-  //std::cout << "Set min="<<min<<" and max="<<max <<" \n";
-  //std::cout << "MethodName = " << grapeMethodName << "\n";
   COLORBAR * colorBar = 0;
   if(grapeMethodName == "isoline-disp")
   {
@@ -930,13 +925,9 @@ inline GRAPEMESH * setMinMaxValue()
     END_METHOD(mesh);
   }
 
-  //#if GRAPE_DIM == 2
-  //#else
-  //  COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar")(hpmesh2d_isoline_disp,"isoline-disp");
-  //#endif
   colorBar->min = min;
   colorBar->max = max;
-  //GRAPE(colorBar,"display")();
+
   END_METHOD(mesh);
 }
 
