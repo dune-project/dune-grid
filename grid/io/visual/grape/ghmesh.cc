@@ -20,7 +20,6 @@ static const double INFTY = 999999.;
 #define MINIMUM(a,b) (((a) > (b)) ? (b) : (a))
 #define MAXIMUM(a,b) (((a) < (b)) ? (b) : (a))
 
-
 GENMESHnD *genmesh3d_switch_part_light_model_on_off();
 GENMESHnD *genmesh3d_switch_part_displaybar_on_off();
 GENMESHnD *genmesh3d_partition_disp();

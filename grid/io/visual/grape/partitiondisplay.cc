@@ -46,7 +46,6 @@ static SUPROP_DEV suprop;
 
 /*  ------------------------------------------------------------------  */
 
-
 inline GENMESHnD* genmesh3d_switch_part_light_model_on_off ()
 {
   GENMESHnD*          hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
@@ -392,7 +391,6 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   F_HDATA3D*           fhdata;
 
   HM3_GENERAL*         general;
-  HM3_COORD_DATA**     hm3_partition_data;
 
   int i, max;
 
@@ -502,7 +500,9 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   general = (HM3_GENERAL*) GRAPE (hmesh, "general-alloc") (TRUE);
   general->f_data3d = fhdata;
 
-  G_MEM_ALLOC (hm3_partition_data, max);
+  //G_MEM_ALLOC(hm3_partition_data,max);
+  HM3_COORD_DATA** hm3_partition_data = (HM3_COORD_DATA**) std::malloc((max)*sizeof(*(hm3_partition_data)));
+
   for (i=0; i<max; i++) { G_MEM_ALLOC(hm3_partition_data[i],1); }
 
   save_color[0] = suprop.emission[0];
@@ -537,7 +537,8 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   else if (last_partition)
     for(i=0; i<max_partition; i++) globalNumberOfElements [i] = 0;
 
-  G_MEM_FREE (hm3_partition_data,max);
+  std::free(hm3_partition_data);
+  //G_MEM_FREE (hm3_partition_data,max);
   END_METHOD (hmesh);
 }
 
@@ -678,5 +679,4 @@ inline int hm3_simpl_test_if_proceed  (HELEMENT3D*  helement,
 
   return result;
 }
-
 #endif
