@@ -45,33 +45,40 @@ namespace Dune
 
      <h2>Intersections, leaf grid and level grid</h2>
 
-     Note that the intersections of an element accessible via the
-     %IntersectionIterator
-     are independent of whether the element results from a grid traversal with
-     a %LevelIterator or a %LeafIterator. For example, if the grid is traversed
-     with a %LevelIterator the %IntersectionIterator may provide access to an
-     element
-     that is not on the same level (but only if started at a leaf element).
+     On an entity \b e of codimension zero there are two ways to create
+     IntersectionIterators by either using ilevelbegin()/ilevelend() or
+     ileafbegin()/ileafend(). In the first case intersections with
+     neighboring entities having the same level as \b e are traversed; in
+     the second case  ileafbegin()==ileafend() if \b e is not a leaf otherwise
+     all intersections with neighboring leaf entities are traversed.
 
      Consider a situation where two elements a and b have a common intersection.
-     %Element b has been refined into an element c (and others) while a has not
-     been refined and elements a and c have a common intersection in the leaf grid.
+     %Element b has been refined into an element c and d, while a has not
+     been refined.
      In one space dimension this situation is depicted in the figure below.
 
      \image html  islocalref.png "IntersectionIterator in a locally refined mesh."
      \image latex islocalref.eps "IntersectionIterator in a locally refined mesh." width=\textwidth
 
-     Here the rule is the following: The %IntersectionIterator delivers all intersections
-     with elements on the same level and in addition intersections with all leaf elements
+     Here the rule is the following: The %LevelIntersectionIterator
+     delivers all intersections
+     with elements on the same level, the %LeafIntersectionIterator
+     the intersections with all leaf elements
      if it has been started on a leaf element.
-
-     According to this rule the intersection iterator started at element a in the example above
-     delivers an intersection
-     with b and c, the intersection itersection iterator started at c delivers intersections
-     with a and d and b has an intersection with a.
+     According to this rule the level intersection iterator started at element a
+     in the example above delivers an intersection only with b,
+     whereas the leaf intersection iterator returns c.
+     Starting on entity c the level intersection iterator return d
+     but the leaf intersection iterator return both d and a.
+     Finally starting on b the level intersection
+     iterator returns a but the leaf intersection iterator is empty since
+     b is not a leaf entity of the grid. Starting on d both the
+     level and the leaf intersection iterators will return the element c.
 
      <h2>Methods neighbor and boundary </h2>
 
+     The following holds for both the level and the leaf intersection
+     iterator:
      The %intersection iterator is started on a codimension 0 entity of the grid.
      If this entity belongs to the interior or the overlap region
      (see. ???) then the union of all intersections is identical to the
@@ -91,25 +98,18 @@ namespace Dune
 
      <table>
      <tr>
-     <td></td><td>intersection</td><td>neighbor()</td><td>boundary()</td><td>outside()</td>
-     </tr>
-
+     <td></td><td>intersection</td><td>neighbor()</td><td>boundary()</td><td>outside()</td></tr>
      <tr>
      <td>1</td><td>with inner, overlap <br>
                   or ghost entity</td>
      <td>true</td><td>false</td>
-     <td>the neighbor entity</td>
-     </tr>
-
+     <td>the neighbor entity</td></tr>
      <tr>
      <td>2</td><td>on domain boundary</td>
      <td>false</td><td>true</td><td><em>undefined</em></td></tr>
-
      <tr>
      <td>3</td><td>on periodic boundary</td>
-     <td>true</td><td>true</td><td>Ghost-/Overlap cell@br (with transformed geometry)</td>
-     </tr>
-
+     <td>true</td><td>true</td><td>Ghost-/Overlap cell@br (with transformed geometry)</td></tr>
      <tr>
      <td>4</td><td>on processor boundary</td>
      <td>false <em>if grid has no ghosts</em><br>true <em>otherwise</em></td><td>false </td>
@@ -120,22 +120,26 @@ namespace Dune
        The type of the neighboring entity can be determined through
        methods defined on the outside entity.
      -# <b>  Handling physical boundaries: </b>
+       Different types of physical boundaries can be modeled using either
+       the global coordinates of the intersection or by using the
+       boundaryID method. On some grids (AluGrid, AlbertaGrid) this
+       method returns an integer value which can be individually assigned
+       to each boundary intersection of the macro grid and which is
+       prolonged to higher levels during grid refinement. \br
+       A more general concept will be included in latter releases along the
+       following guidelines:
        - We require differently constructed geometries outside the domain
-       - The kind of construction depends on the problem ine is discretizing
+       - The kind of construction depends on the discrete problem
        - Therefor these constructions can't be part of the Grid interface
        - Utility classes are required to do this construction
-       - The utility classes must be parametrized with the intersection (in our
+       - The utility classes must be parameterized with the intersection (in our
          case the IntersectionIterator)
-       - The utility classen return a suitable transformation of of the inner()
-         entitys geometry (with respect to the intersection)
-       - reflection at the intersection
-       - point reflection
-       - reflection combined with translation
-       - ...
+       - The utility classes return a suitable transformation of the inner()
+         entitys geometry (with respect to the intersection), e.g.,
+         reflection at the intersection
+         point reflection
+         reflection combined with translation...
        .
-       At the moment we have no domain interface in Dune, therefore it
-       is only possible to identify physical boundaries using the
-       boundaryId() method.
      -# <b> Handling periodic boundaries: </b>
        - The IntersectionIterator stops at periodic boundaries
        - periodic grids are handled in correspondence to parallel grids
@@ -154,6 +158,19 @@ namespace Dune
        neighbor() nor boundary()
        are true.
      .
+
+
+     <h2>Geometry of an intersection</h2>
+
+     The method intersectionGlobal returns a geometry mapping the intersection
+     as a codim one structure to global coordinates. The methods
+     intersectionSelfLocal and intersectionNeighborLocal return geometries
+     mapping the intersection into the reference elements of the
+     originating entity and the neighboring entity, respectively.
+     The numberInSelf and numberInNeighbor methods return the codim one
+     subentities which contain the intersection.
+
+
      @ingroup GIIntersectionIterator
    */
   template<class GridImp, template<class> class IntersectionIteratorImp>
