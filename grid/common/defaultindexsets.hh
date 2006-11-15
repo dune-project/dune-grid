@@ -102,6 +102,10 @@ namespace Dune {
       return false;
     }
 
+    //! \brief returns true if index set can be used for adaptive
+    //! calculations
+    bool adaptive () const { return adaptive_; }
+
     //! returns true if index set gernally needs compress after adaptation
     bool needsCompress () const { return false; }
 
