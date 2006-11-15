@@ -395,15 +395,6 @@ namespace Dune
     //! return reference to the real implementation
     const ImplementationType & getRealImp() const { return realIterator; }
 
-    // private, so that nobody will use this method
-    /** @brief Postincrement operator. Deprecated, do not use it anymore.*/
-    IntersectionIterator operator++(int) DUNE_DEPRECATED
-    {
-      const IntersectionIterator tmp(*this);
-      this->realIterator.increment();
-      return tmp;
-    }
-
   };
 
   //**********************************************************************

@@ -33,21 +33,6 @@ namespace Dune
       return *this;
     }
 
-  private:
-    //! do not use this operator
-    /**
-       @brief Postincrement operator.
-
-       @note Forwarded to LevelIteratorImp.increment()
-     */
-    LevelIterator operator++(int) DUNE_DEPRECATED
-    {
-      const LevelIterator tmp(*this);
-      this->realIterator.increment();
-      return tmp;
-    }
-
-  public:
     //===========================================================
     /** @name Implementor interface
      */
