@@ -240,9 +240,6 @@ namespace Dune
     /** \brief The codim==0 EntityPointer type */
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    /** \brief The IntersectionIterator type*/
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
-
     /** \brief The LeafIntersectionIterator type*/
     typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
 
