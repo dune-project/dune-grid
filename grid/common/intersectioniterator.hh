@@ -52,8 +52,8 @@ namespace Dune
      the second case  ileafbegin()==ileafend() if \b e is not a leaf otherwise
      all intersections with neighboring leaf entities are traversed.
 
-     Consider a situation where two elements a and b have a common intersection.
-     %Element b has been refined into an element c and d, while a has not
+     Consider a situation where two elements \b a and \b b have a common intersection.
+     %Element \b b has been refined into an element \b c and \b d, while \b a has not
      been refined.
      In one space dimension this situation is depicted in the figure below.
 
@@ -64,16 +64,19 @@ namespace Dune
      delivers all intersections
      with elements on the same level, the %LeafIntersectionIterator
      the intersections with all leaf elements
-     if it has been started on a leaf element.
-     According to this rule the level intersection iterator started at element a
-     in the example above delivers an intersection only with b,
-     whereas the leaf intersection iterator returns c.
-     Starting on entity c the level intersection iterator return d
-     but the leaf intersection iterator return both d and a.
-     Finally starting on b the level intersection
-     iterator returns a but the leaf intersection iterator is empty since
-     b is not a leaf entity of the grid. Starting on d both the
-     level and the leaf intersection iterators will return the element c.
+     if it has been started on a leaf element.  Both iterators also stop at intersections
+     with the grid boundary.
+     According to this rule the level intersection iterator started at element \b a
+     in the example above delivers an intersection with \b b and the left grid boundary,
+     whereas the leaf intersection iterator returns \b c instead of \b b.
+     Starting on entity \b c the level intersection iterator returns \b d and the
+     intersection with the left boundary of the level 1 grid,
+     but the leaf intersection iterator returns both \b d and \b a.
+     Finally, starting on \b b the level intersection
+     iterator returns \b a and the right boundary, but the leaf intersection iterator is empty since
+     \b b is not a leaf entity of the grid. Starting on \b d both the
+     level and the leaf intersection iterators will return the element \b c
+     together with the right grid boundary.
 
      <h2>Methods neighbor and boundary </h2>
 
