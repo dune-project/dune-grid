@@ -162,9 +162,7 @@ namespace Dune {
     OneDGridEntity() : target_(NULL) {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
-    typedef typename GridImp::template Codim<cd>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
 
     //! level of this element
     int level () const {return target_->level_;}
