@@ -77,21 +77,18 @@ namespace Dune {
 
     enum {GM_REFINE_NOHEAPTEST = UG::D3::GM_REFINE_NOHEAPTEST};
 
-    enum {NEWEL_CE = UG::D3::NEWEL_CE};
+    /** \brief Control word entries */
+    enum {NEWEL_CE      = UG::D3::NEWEL_CE,
+          COARSEN_CE    = UG::D3::COARSEN_CE,
+          ECLASS_CE     = UG::D3::ECLASS_CE,
+          MARK_CE       = UG::D3::MARK_CE};
 
-    enum {COARSEN_CE = UG::D3::COARSEN_CE};
-
-    enum {REFINECLASS_CE = UG::D3::REFINECLASS_CE};
-
-    enum {ECLASS_CE = UG::D3::ECLASS_CE};
-
-    enum {RED = UG::D3::RED};
-
-    enum {YELLOW_CLASS = UG::D3::YELLOW_CLASS};
+    /** \brief Refinement rules */
+    enum {NO_REFINEMENT = UG::D3::NO_REFINEMENT,
+          RED           = UG::D3::RED,
+          COARSE        = UG::D3::COARSE};
 
     enum {RED_CLASS = UG::D3::RED_CLASS};
-
-    enum {COARSE = UG::D3::COARSE};
 
     enum {GM_OK = UG::D3::GM_OK};
 
@@ -175,6 +172,8 @@ namespace Dune {
       using UG::D3::ELEMENT;
       using UG::D3::control_entries;
       using UG::UINT;
+      using UG::D3::REFINECLASS_CE;
+      using UG::D3::YELLOW_CLASS;
       return REFINECLASS(theElement) == YELLOW_CLASS;
     }
 
@@ -249,13 +248,11 @@ namespace Dune {
     }
 
     static int myLevel (const UG_NS<3>::Element* theElement) {
-      using UG::D3::ELEMENT;
       using UG::UINT;
       return LEVEL(theElement);
     }
 
     static int myLevel (const UG_NS<3>::Node* theNode) {
-      using UG::D3::NODE;
       using UG::UINT;
       return LEVEL(theNode);
     }
