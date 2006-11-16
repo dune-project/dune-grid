@@ -70,7 +70,7 @@
 // 10000 is the size of the finite stack used by IndexStack
 typedef Dune::IndexStack<int,10000> IndexManagerType;
 
-#define CALC_COORD
+//#define CALC_COORD
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 
@@ -533,7 +533,7 @@ namespace Dune
     typedef AlbertaGridGeometry<dim,dimworld,GridImp> GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::Traits::IntersectionIterator IntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
