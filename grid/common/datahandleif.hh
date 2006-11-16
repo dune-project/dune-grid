@@ -81,10 +81,7 @@ namespace Dune
 
   protected:
     // one should not create an explicit instance of this inteface object
-    CommDataHandleIF() {};
-
-  private:
-    CommDataHandleIF(const CommDataHandleIF &);
+    CommDataHandleIF() {}
 
   public:
     /** @brief
