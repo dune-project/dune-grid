@@ -21,6 +21,12 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
+// Test parallel interface if a parallel UG is used
+#ifdef ModelP
+#include <mpi.h>
+#include "checkcommunicate.cc"
+#endif
+
 class ArcOfCircle : public Dune::BoundarySegment<2>
 {
 public:
@@ -133,8 +139,12 @@ void markOne ( GridType & grid , int num , int ref )
   grid.postAdapt();
 }
 
-int main () try
+int main (int argc , char **argv) try
 {
+#ifdef ModelP
+  // initialize MPI
+  MPI_Init(&argc,&argv);
+#endif
 
   // ////////////////////////////////////////////////////////////////////////
   //  Do the standard grid test for a 2d UGGrid
@@ -158,6 +168,7 @@ int main () try
     // create hybrid grid
     markOne(grid2d,0,1) ;
     markOne(grid3d,0,1) ;
+
     gridcheck(grid2d);
     gridcheck(grid3d);
 
@@ -174,6 +185,12 @@ int main () try
     checkIntersectionIterator(grid2d);
     checkIntersectionIterator(grid3d);
 
+#ifdef ModelP
+    // check communication interface
+    checkCommunication(grid2d,-1,Dune::dvverb);
+    for(int l=0; l<=grid2d.maxLevel(); ++l)
+      checkCommunication(grid2d,l,Dune::dvverb);
+#endif
   }
 
   // ////////////////////////////////////////////////////////////////////////
@@ -215,6 +232,11 @@ int main () try
     }
 
   }
+
+#ifdef ModelP
+  // Terminate MPI
+  MPI_Finalize();
+#endif
 
   return 0;
 }
