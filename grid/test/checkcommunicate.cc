@@ -209,9 +209,6 @@ class CheckCommunication {
     for(IteratorType it = set.template begin<0,Interior_Partition> ();
         it != endit ; ++it )
     {
-      GeometryType type = it->geometry().type();
-      const ReferenceElement<double, dimworld > & refElem =
-        ReferenceElements<double, dimworld >::general(type);
       if (cdim==0)
       {
         FieldVector<double,dimworld> mid(0.);
@@ -238,9 +235,13 @@ class CheckCommunication {
 
           if ((calc>-1e-8 || nit.boundary()) || proceedAnyways )
           {
-            for(int i=0; i<refElem.size(nit.numberInSelf(),1,cdim); ++i)
+
+            const ReferenceElement<double, dimworld > & insideRefElem =
+              ReferenceElements<double, dimworld >::general(it->geometry().type());
+
+            for(int i=0; i<insideRefElem.size(nit.numberInSelf(),1,cdim); ++i)
             {
-              int e = refElem.subEntity(nit.numberInSelf(),1,i,cdim);
+              int e = insideRefElem.subEntity(nit.numberInSelf(),1,i,cdim);
               int idx = set.template subIndex<cdim>(*it,e);
               FieldVector<double,dimworld> cmid(0.);
               int c = (it->template entity<cdim>(e))->geometry().corners();
@@ -257,7 +258,7 @@ class CheckCommunication {
             // on non-conforming grids the neighbor entities might not
             // be the same as those on *it, therefore set data on neighbor
             // as well
-            bool checkNeigh = nit.neighbor(); //(level_ < 0) ? nit.leafNeighbor() : ( nit.levelNeighbor() );
+            bool checkNeigh = nit.neighbor();
 
             if( checkNeigh )
             {
@@ -269,9 +270,12 @@ class CheckCommunication {
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
-              for(int i=0; i<refElem.size(nit.numberInNeighbor(),1,cdim); ++i)
+              const ReferenceElement<double, dimworld > & outsideRefElem =
+                ReferenceElements<double, dimworld >::general(ep->geometry().type());
+
+              for(int i=0; i<outsideRefElem.size(nit.numberInNeighbor(),1,cdim); ++i)
               {
-                int e = refElem.subEntity(nit.numberInNeighbor(),1,i,cdim);
+                int e = outsideRefElem.subEntity(nit.numberInNeighbor(),1,i,cdim);
                 int idx = set.template subIndex<cdim>(neigh, e);
                 FieldVector<double,dimworld> cmid(0.);
                 typedef typename GridType:: template Codim<cdim> :: EntityPointer SubEntityPointer;
