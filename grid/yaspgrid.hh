@@ -577,6 +577,8 @@ namespace Dune {
     };
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::LevelIntersectionIterator IntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     //! define the type used for persisitent indices
@@ -709,7 +711,7 @@ namespace Dune {
     }
 
     //! returns intersection iterator for first intersection
-    IntersectionIterator ileafbegin () const
+    LeafIntersectionIterator ileafbegin () const
     {
       // only if entity is leaf this iterator delivers intersections
       if (isLeaf())
@@ -719,7 +721,7 @@ namespace Dune {
     }
 
     //! returns intersection iterator for first intersection
-    IntersectionIterator ilevelbegin () const
+    LevelIntersectionIterator ilevelbegin () const
     {
       return ibegin();
     }
@@ -731,13 +733,13 @@ namespace Dune {
     }
 
     //! Reference to one past the last neighbor
-    IntersectionIterator ileafend () const
+    LeafIntersectionIterator ileafend () const
     {
       return iend();
     }
 
     //! Reference to one past the last neighbor
-    IntersectionIterator ilevelend () const
+    LevelIntersectionIterator ilevelend () const
     {
       return iend();
     }
@@ -2815,13 +2817,13 @@ namespace Dune {
 #endif
 
     YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
-    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+    getRealIntersectionIterator(typename Traits::LevelIntersectionIterator& it)
     {
       return this->getRealImplementation(it);
     }
 
     const YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
-    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
+    getRealIntersectionIterator(const typename Traits::LevelIntersectionIterator& it) const
     {
       return this->getRealImplementation(it);
     }
