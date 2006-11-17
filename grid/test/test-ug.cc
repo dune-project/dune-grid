@@ -10,8 +10,6 @@
 
    Instantiate UG-Grid and feed it to the generic gridcheck()
 
-   Currently UGGrid can only be initialized via the AmiraMeshReader
-
  */
 
 #include <dune/grid/uggrid.hh>
