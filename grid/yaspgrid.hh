@@ -26,7 +26,7 @@
 #endif
 
 /*! \file yaspgrid.hh
-   Yasppergrid stands for yet another structured parallel grid.
+   YaspGrid stands for yet another structured parallel grid.
    It will implement the dune grid interface for structured grids with codim 0
    and dim, with arbitrary overlap, parallel features with two overlap
    models, periodic boundaries and fast a implementation allowing on-the-fly computations.
