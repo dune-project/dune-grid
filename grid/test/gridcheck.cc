@@ -761,13 +761,16 @@ struct CheckMark
   template <class IteratorType>
   static void check(GridType & grid, IteratorType & it)
   {
+#ifdef HAVE_UG
+#warning Test for mark() / getMark() skipped for UGGrid
+#else
     // last marker is 0, so the grid is not changed after this check
     const int refCount[4] = {1,0,-1,0};
     for(int k=0; k<4; ++k)
     {
       // mark entity
       bool marked = grid.mark( refCount[k] , it);
-      // if element was marked, check the the marker was set correctly
+      // if element was marked, check that the marker was set correctly
       if(marked)
       {
         // now getMark should return the mark we just set, otherwise error
@@ -775,6 +778,7 @@ struct CheckMark
           DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
       }
     }
+#endif
   }
 };
 
