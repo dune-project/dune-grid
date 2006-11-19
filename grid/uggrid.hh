@@ -148,7 +148,6 @@ namespace Dune {
   template <int dim, int dimworld=dim>
   class UGGrid : public GridDefaultImplementation  <dim, dimworld, double, UGGridFamily<dim,dimworld> >
   {
-
     friend class UGGridEntity <0,dim,const UGGrid<dim,dimworld> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim,dimworld> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim,dimworld> >;
@@ -362,6 +361,12 @@ namespace Dune {
        \param maxlevel does currently get ignored
      */
     void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
+
+    typedef GridDefaultImplementation  <dim, dimworld, double,
+        UGGridFamily<dim,dimworld> > GridDefaultImplementationType;
+
+    //! also make default implementations of loadBalance useable
+    using GridDefaultImplementationType :: loadBalance;
 
     /** \brief The communication interface
        @param T: array class holding data associated with the entities
