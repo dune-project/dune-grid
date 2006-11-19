@@ -95,29 +95,6 @@ namespace Dune {
 
     const static int dune2aluFaceVertex_[numFaces][numVerticesPerFace];
     const static int alu2duneFaceVertex_[numFaces][numVerticesPerFace];
-
-    template<typename dummy, ALU3dGridElementType t>
-    struct Dune2AluVertexMapper
-    {
-      int get(const int* mapper, int index)
-      {
-        assert(index >= 0 && index < numEdges);
-        return mapper[index];
-      }
-    };
-
-    template<typename dummy>
-    struct Dune2AluVertexMapper<dummy,tetra>
-    {
-      int get(const int* mapper, int index)
-      {
-        assert(index >= 0 && index < numVertices);
-        // at the moment this mapping is represented by the id, if this changes
-        // just remove this specialisation
-        assert( mapper[index] == index );
-        return index;
-      }
-    };
   };
 
   //! Maps indices of the Dune reference face onto the indices of the
@@ -187,10 +164,11 @@ namespace Dune {
     return alu2duneEdge_[index];
   }
 
-
   template <ALU3dGridElementType type>
-  inline int ElementTopologyMapping<type>::dune2aluVertex(int index) {
-    return Dune2AluVertexMapper<int,type>::get(dune2aluVertex_, index);
+  inline int ElementTopologyMapping<type>::dune2aluVertex(int index)
+  {
+    assert(index >= 0 && index < numVertices);
+    return dune2aluVertex_[index];
   }
 
   template <ALU3dGridElementType type>

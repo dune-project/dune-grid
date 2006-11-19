@@ -171,15 +171,21 @@ namespace Dune {
 
 #ifndef NDEBUG
     builtDetDF_ = true ;
+
+    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
+    // of number when calling myvertex
+    for(int i=0; i<4; ++i)
+      assert( ElementTopo::dune2aluVertex(i) == i );
+
 #endif
     // get volume and calc elDet
     volume_ = item.volume();
     detDF_  = 6.0 * volume_;
 
-    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(0))->Point(), coord_[0]);
-    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(1))->Point(), coord_[1]);
-    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(2))->Point(), coord_[2]);
-    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(3))->Point(), coord_[3]);
+    copyCoordVec(item.myvertex(0)->Point(), coord_[0]);
+    copyCoordVec(item.myvertex(1)->Point(), coord_[1]);
+    copyCoordVec(item.myvertex(2)->Point(), coord_[2]);
+    copyCoordVec(item.myvertex(3)->Point(), coord_[3]);
     return true;
   }
 
