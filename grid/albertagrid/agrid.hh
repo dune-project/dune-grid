@@ -1428,19 +1428,29 @@ namespace Dune
     //! the Traits
     typedef typename AlbertaGridFamily<dim,dimworld> :: Traits Traits;
 
+    //! type of hierarchic index set
+    typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
+
+  private:
+    //! type of LeafIterator
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
-    typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
+    //! impl types of iterators
     typedef typename GridFamily:: LevelIndexSetImp LevelIndexSetImp;
     typedef typename GridFamily:: LeafIndexSetImp LeafIndexSetImp;
+
+    //! type of leaf index set
     typedef typename Traits :: LeafIndexSet LeafIndexSet;
 
+    //! id set impl
     typedef AlbertaGridIdSet<dim,dimworld> IdSetImp;
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
+    //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
+  public:
     typedef ObjectStream ObjectStreamType;
 
     enum {
