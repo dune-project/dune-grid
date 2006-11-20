@@ -246,6 +246,18 @@ namespace Dune {
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
 
+
+    //! Type of the level index set, needed by data handle
+    typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
+    //! Type of the leaf index set, needed by data handle
+    typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
+
+    //! reference element type
+    typedef typename SelectType<elType == tetra,
+        ReferenceSimplex<alu3d_ctype, dim>,
+        ReferenceCube   <alu3d_ctype, dim> >::Type ReferenceElementType;
+
+  protected:
     //! Type of the local id set
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;
 
@@ -257,15 +269,6 @@ namespace Dune {
 
     //! Type of the local id set
     typedef typename Traits :: LocalIdSet LocalIdSet;
-
-    //! Type of the level index set
-    typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
-    //! Type of the leaf index set
-    typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
-
-    typedef typename SelectType<elType == tetra,
-        ReferenceSimplex<alu3d_ctype, dim>,
-        ReferenceCube   <alu3d_ctype, dim> >::Type ReferenceElementType;
 
     //! a standard leaf iterator
     typedef ALU3dGridLeafIterator<0, All_Partition, MyType> LeafIteratorImp;
