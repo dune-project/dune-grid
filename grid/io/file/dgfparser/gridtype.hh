@@ -132,7 +132,7 @@ const int refStepsForHalf = 1;
   #include "dgfs.hh"
 typedef Dune::SGrid<dimworld,dimworld> GridType;
 const int refStepsForHalf = 1;
-#elif defined UGGRID
+#elif defined UGGRID && HAVE_UG
   #include "dgfug.hh"
 typedef Dune::UGGrid<dimworld,dimworld> GridType;
 const int refStepsForHalf = 1;
@@ -141,6 +141,17 @@ const int refStepsForHalf = 1;
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
 const int refStepsForHalf = 1;
 #else
+// warning if grid type defined but package not found
+  #if defined ALBERTAGRID
+    #warning "ALBERTAGRID defined but no ALBERTA version found!"
+  #endif
+  #if defined ALUGRID_SIMPLEX || defined ALUGRID_CUBE
+    #warning "ALUGRID_{SIMPLEX|CUBE} defined but no ALUGRID version found!"
+  #endif
+  #if defined UGGRID
+    #warning "UGGRID defined but no UG version found!"
+  #endif
+
 //#define YASPGRID
   #include "dgfyasp.hh"
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
