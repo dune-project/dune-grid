@@ -1447,10 +1447,10 @@ namespace Dune
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
+  public:
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
-  public:
     typedef ObjectStream ObjectStreamType;
 
     enum {
