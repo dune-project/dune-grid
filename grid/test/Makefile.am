@@ -6,7 +6,6 @@
 
 if MPI
   YPROG = test-yaspgrid
-  YRUN = run-yaspgrid
 endif
 
 if ALBERTA
@@ -42,7 +41,7 @@ endif
 NORMALTESTS = test-sgrid test-oned $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
 # list of tests to run (yaspgrid is special case)
-TESTS = $(NORMALTESTS) $(YRUN)
+TESTS = $(NORMALTESTS) $(YPROG)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(NORMALTESTS) $(YPROG)
