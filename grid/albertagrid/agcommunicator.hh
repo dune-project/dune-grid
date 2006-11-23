@@ -5,7 +5,10 @@
 
 // use this define to control if Albert should use the found MPI
 
-#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
+// do not use at the moment
+#undef ALBERTA_USES_MPI
+
+#if defined(HAVE_MPI) && defined(ALBERTA_USES_MPI)
 #include <mpi.h>
 #endif
 
@@ -13,7 +16,8 @@
 
 #define _ANSI_HEADER
 
-#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
+#if defined(HAVE_MPI) && defined(ALBERTA_USES_MPI)
+
 #include <dune/grid/bsgrid/systemincludes.hh>
 namespace BernhardSchuppGrid {
 #include <dune/grid/bsgrid/serialize.h>
@@ -58,7 +62,7 @@ namespace Dune {
     virtual bool consistencyGhosts () = 0;
   };
 
-#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
+#if defined(HAVE_MPI) && defined(ALBERTA_USES_MPI)
   typedef BernhardSchuppGrid :: ObjectStream ObjectStreamType;
   typedef BernhardSchuppGrid :: LoadBalancer LoadBalancer;
   typedef BernhardSchuppGrid :: MpAccessMPI MpAccessMPI;
@@ -1429,7 +1433,7 @@ namespace Dune {
   {
   public:
 
-#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
+#if defined(HAVE_MPI) && defined(ALBERTA_USES_MPI)
     AlbertGridCommunicator(MPI_Comm mpiComm, GridType &grid, int anzp) {}
 #else
     AlbertGridCommunicator(GridType &grid) {}
@@ -1497,6 +1501,4 @@ namespace Dune {
   }
 
 } // end namespace Dune
-
-
 #endif
