@@ -48,7 +48,13 @@
 #include <dune/common/array.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/common/stdstreams.hh>
+
+#if HAVE_MPI
+#include <dune/common/mpicollectivecommunication.hh>
+#else
 #include <dune/common/collectivecommunication.hh>
+#endif
+
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -1331,7 +1337,13 @@ namespace Dune
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
+      //#if HAVE_MPI
+      // use collective communciation with MPI
+      //      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
+      //#else
+      // use dummy collective communication
       typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+      //#endif
     };
   };
 
@@ -1432,6 +1444,9 @@ namespace Dune
     typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
 
   private:
+    //! type of communication class
+    typedef typename Traits:: CollectiveCommunication CollectiveCommunicationType;
+
     //! type of LeafIterator
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
@@ -1579,9 +1594,6 @@ namespace Dune
     //! number of leaf entities per geometry type in this process
     int size (GeometryType type) const;
 
-  private:
-    CollectiveCommunication<AlbertaGrid> ccobj_;
-
   public:
     //***************************************************************
     //  Interface for Adaptation
@@ -1618,10 +1630,11 @@ namespace Dune
     //! clean up some markers
     bool postAdapt();
 
-    /** dummy collective communication */
-    const CollectiveCommunication<AlbertaGrid>& comm () const
+    /** \brief return reference to collective communication, if MPI found
+     * this is specialisation for MPI */
+    const CollectiveCommunicationType & comm () const
     {
-      return ccobj_;
+      return comm_;
     }
 
     /** \brief return name of the grid */
@@ -1721,7 +1734,12 @@ namespace Dune
     bool isNoElement( const ALBERTA MACRO_EL * mel) const;
 
     //! returns geometry type vector for codimension
-    const std::vector < GeometryType > & geomTypes (int codim) const { return geomTypes_[codim]; }
+    const std::vector < GeometryType > & geomTypes (int codim) const
+    {
+      assert( codim >= 0 );
+      assert( codim < dim+1 );
+      return geomTypes_[codim];
+    }
 
   private:
     friend class Conversion<AlbertaGrid<dim, dimworld>, HasObjectStream>;
@@ -1759,6 +1777,9 @@ namespace Dune
 
     // pointer to an Albert Mesh, which contains the data
     ALBERTA MESH *mesh_;
+
+    // object of collective communication
+    CollectiveCommunicationType comm_;
 
     // number of maxlevel of the mesh
     int maxlevel_;
@@ -1931,6 +1952,9 @@ namespace Dune
 
     //! stores geometry types of this grid
     std::vector < std::vector< GeometryType > > geomTypes_;
+
+    // creates geomType_ vector
+    void makeGeomTypes();
 
     // stack for storing BOUNDARY objects created during mesh creation
     std::stack < BOUNDARY * > bndStack_;

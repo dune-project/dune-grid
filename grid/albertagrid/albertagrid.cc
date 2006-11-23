@@ -3457,23 +3457,29 @@ namespace Dune
   //
   //***********************************************************************
   template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::AlbertaGrid() :
-    mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , vertexMarkerLeaf_(false) // creates LeafMarkerVector
-    , nv_ (dim+1) , dof_ (0) , myRank_ (0)
-    , hIndexSet_(*this)
-    , globalIdSet_(*this)
-    , levelIndexVec_(MAXL,0)
-    , leafIndexSet_ (0)
-    , geomTypes_(dim+1,1)
-    , sizeCache_ (0)
-    , coarsenMarked_(0)
-    , refineMarked_(0)
-    , lockPostAdapt_(false)
+  inline AlbertaGrid < dim, dimworld >::AlbertaGrid()
+    : mesh_ (0)
+      //#if HAVE_MPI
+      //  , comm_(MPI_COMM_WORLD)
+      //#else
+      , comm_()
+      //#endif
+      , maxlevel_ (0) , wasChanged_ (false)
+      , vertexMarkerLeaf_(false) // creates LeafMarkerVector
+      , nv_ (dim+1) , dof_ (0)
+      , myRank_ (0)
+      , hIndexSet_(*this)
+      , globalIdSet_(*this)
+      , levelIndexVec_(MAXL,0)
+      , leafIndexSet_ (0)
+      , geomTypes_()
+      , sizeCache_ (0)
+      , coarsenMarked_(0)
+      , refineMarked_(0)
+      , lockPostAdapt_(false)
   {
-    // stored is the dim, where is the codim
-    for(int i=dim; i>= 0; i--)
-      geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
+    // create vector with geom types
+    makeGeomTypes();
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++) dofvecs_.elNumbers[i] = 0;
     dofvecs_.elNewCheck = 0;
@@ -3481,6 +3487,20 @@ namespace Dune
 #ifndef CALC_COORD
     dofvecs_.coords     = 0;
 #endif
+  }
+
+  template < int dim, int dimworld >
+  inline void AlbertaGrid < dim, dimworld >::makeGeomTypes()
+  {
+    // we have dim+1 codims
+    geomTypes_.resize( dim+1 );
+
+    // for each codim create geom type
+    for(int i=dim; i>= 0; i--)
+    {
+      // geometry type is always simplex, i is corresponding dim here
+      geomTypes_[dim-i].push_back( GeometryType(GeometryType::simplex,i) );
+    }
   }
 
   template < int dim, int dimworld >
@@ -3505,23 +3525,28 @@ namespace Dune
   }
 
   template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename) :
-    mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , vertexMarkerLeaf_(false) // creates LeafMarkerVector
-    , nv_ (dim+1) , dof_ (0) , myRank_ (-1)
-    , hIndexSet_(*this)
-    , globalIdSet_( *this )
-    , levelIndexVec_(MAXL,0)
-    , leafIndexSet_ (0)
-    , geomTypes_(dim+1,1)
-    , sizeCache_ (0)
-    , coarsenMarked_(0)
-    , refineMarked_(0)
-    , lockPostAdapt_(false)
+  inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename)
+    : mesh_ (0)
+      //#if HAVE_MPI
+      //  , comm_(MPI_COMM_WORLD)
+      //#else
+      , comm_()
+      //#endif
+      , maxlevel_ (0) , wasChanged_ (false)
+      , vertexMarkerLeaf_(false) // creates LeafMarkerVector
+      , nv_ (dim+1) , dof_ (0) , myRank_ (-1)
+      , hIndexSet_(*this)
+      , globalIdSet_( *this )
+      , levelIndexVec_(MAXL,0)
+      , leafIndexSet_ (0)
+      , geomTypes_()
+      , sizeCache_ (0)
+      , coarsenMarked_(0)
+      , refineMarked_(0)
+      , lockPostAdapt_(false)
   {
-    // stored is the dim, where is the codim
-    for(int i=dim; i>= 0; i--)
-      geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
+    // create vector with geom types
+    makeGeomTypes();
 
     if(dimworld != DIM_OF_WORLD)
     {
@@ -3570,36 +3595,6 @@ namespace Dune
     }
     std::cout << "AlbertaGrid<"<<dim<<","<<dimworld<<"> created from macro grid file '" << macroTriangFilename << "'. \n\n";
   }
-
-#if 0
-  template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::
-  AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
-    mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
-    , vertexMarkerLeaf_(false) // creates LeafMarkerVector
-    , nv_ (dim+1) , dof_ (0), myRank_ (proc)
-    , hIndexSet_(*this)
-    , globalIdSet_( *this )
-    , levelIndexVec_(MAXL,0)
-    , leafIndexSet_ (0)
-    , geomTypes_(dim+1,1)
-    , sizeCache_ (0)
-    , coarsenMarked_(0)
-    , refineMarked_(0)
-    , lockPostAdapt_(false)
-  {
-    for(int i=dim; i>= 0; i--)
-      geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
-
-    assert(dimworld == DIM_OF_WORLD);
-    assert(dim      == DIM);
-
-    //ALBERTA MESH * oldMesh = oldGrid.getMesh();
-    //ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
-
-    DUNE_THROW(AlbertaError,"To be revised!");
-  }
-#endif
 
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::
