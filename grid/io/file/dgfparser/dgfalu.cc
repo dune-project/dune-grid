@@ -12,7 +12,12 @@ namespace Dune {
     MacroGrid::Impl<ALUSimplexGrid<3,3> >().
     generateAlu3d(mg,filename,str,MPICOMM);
   #if ALU3DGRID_PARALLEL
-    return new ALUSimplexGrid<3,3>(str.c_str(),MPICOMM);
+    int myrank;
+    MPI_Comm_rank(MPICOMM,&myrank);
+    if (myrank<=0)
+      return new ALUSimplexGrid<3,3>(str.c_str(),MPICOMM);
+    else
+      return new ALUSimplexGrid<3,3>(MPICOMM);
   #else
     return new ALUSimplexGrid<3,3>(str.c_str());
   #endif
@@ -26,7 +31,12 @@ namespace Dune {
     MacroGrid::Impl<ALUCubeGrid<3,3> >().
     generateAlu3d(mg,filename,str,MPICOMM);
   #if ALU3DGRID_PARALLEL
-    return new ALUCubeGrid<3,3>(str.c_str(),MPICOMM);
+    int myrank;
+    MPI_Comm_rank(MPICOMM,&myrank);
+    if (myrank<=0)
+      return new ALUCubeGrid<3,3>(str.c_str(),MPICOMM);
+    else
+      return new ALUCubeGrid<3,3>(MPICOMM);
   #else
     return new ALUCubeGrid<3,3>(str.c_str());
   #endif
