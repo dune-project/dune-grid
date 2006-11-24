@@ -576,7 +576,8 @@ namespace Dune
           // set grid part selection methods
           typedef typename FunctionSpaceType :: GridPartType GridPartType;
           data->gridPart = ((void *) &func.space().gridPart());
-          data->setGridPartIterators = &SetIter<GridPartType>::setGPIterator;
+          data->setGridPartIterators =
+            &BaseType::template SetIter<GridPartType>::setGPIterator;
         }
 
         GrapeInterface<dim,dimworld>::addDataToHmesh(this->hmesh_,vecFdata_[n]);

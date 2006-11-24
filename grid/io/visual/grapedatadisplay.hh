@@ -159,6 +159,8 @@ namespace Dune
   {
     typedef GrapeDataDisplay < GridType > MyDisplayType;
 
+    typedef GrapeGridDisplay < GridType > BaseType;
+
     enum { dim = GridType::dimension };
     enum { dimworld = GridType::dimensionworld };
 
