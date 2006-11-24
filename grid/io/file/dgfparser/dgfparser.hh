@@ -165,9 +165,9 @@ namespace Dune {
   template <class GridType>
   class GridPtr : public MacroGrid {
     // make operator new and delete private, because this class is only a
-    // pointer
-    void * operator new (size_t);
-    void operator delete (void *);
+    // pointer (problem with icc 7.0)
+    // void * operator new (size_t);
+    // void operator delete (void *);
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     //! constructor given the name of a DGF file
@@ -245,9 +245,11 @@ namespace Dune {
         directory: \n
         by defining one of the symbols
         \c ALBERTAGRID ,
+        \c ALUGRID_CONFORM ,
         \c ALUGRID_CUBE ,
         \c ALUGRID_SIMPLEX ,
-        \c SGRID , or
+        \c SGRID ,
+        \c UGGRID , or
         \c YASPGRID
         and the integer
         \c GRIDDIM
@@ -269,10 +271,16 @@ namespace Dune {
      @code
        Dune::GridPtr<GridType> gridptr(filename);
      @endcode
+      or
+     @code
+       Dune::GridPtr<GridType> gridptr;
+       ...
+       gridptr=Dune::GridPtr<GridType>(filename);
+     @endcode
 
-     where in the second example \c MPIHelper::getCommunicator()
+     where in the second and third example \c MPIHelper::getCommunicator()
      is selected as default
-     value. Here \c filename is the name of the dgf file. This creates an
+     value; \c filename is the name of the dgf file. This creates an
      auto pointer like object \c GridPtr which holds a pointer to an instance
      of \c GridType whose macrogrid is described through the
      dgf file. Access to the grid is gained by calling the operator * of

@@ -93,6 +93,19 @@ const int dimworld = 2;
 const int dimworld = GRIDDIM;
 #endif
 
+/*! @brief Some simple static information for a given GridType
+ */
+namespace Dune {
+  template <class GridType>
+  struct DGFGridInfo {
+    //! number of globalRefine steps needed to refuce h by 0.5
+    static int refineStepsForHalf();
+    //! relation between volume of children to volume of father.
+    //! If this is not a constant the return value is -1
+    static double refineWeight();
+  };
+}
+
 #if defined ALBERTAGRID && HAVE_ALBERTA
   #if GRIDDIM == 1
     #include "dgfoned.hh"
@@ -101,7 +114,13 @@ typedef Dune::OneDGrid<dimworld,dimworld> GridType;
     #include "dgfalberta.hh"
 typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
   #endif
-const int refStepsForHalf = dimworld;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return dimworld;}
+    static double refineWeight() {return 0.5;}
+  };
+}
 #elif defined ALUGRID_CUBE && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
@@ -114,7 +133,13 @@ typedef Dune::OneDGrid<dimworld,dimworld> GridType;
 typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
     #endif
   #endif
-const int refStepsForHalf = GridType::refineStepsForHalf;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+}
 #elif defined ALUGRID_SIMPLEX && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
@@ -123,23 +148,68 @@ typedef Dune::OneDGrid<dimworld,dimworld> GridType;
     #include "dgfalu.hh"
 typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
   #endif
-const int refStepsForHalf = GridType::refineStepsForHalf;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+}
+#elif defined ALUGRID_CONFORM && HAVE_ALUGRID
+  #if GRIDDIM == 1
+    #include "dgfoned.hh"
+typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+  #else
+    #include "dgfalu.hh"
+typedef Dune::ALUConformGrid<dimworld,dimworld> GridType;
+  #endif
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return dimworld;}
+    static double refineWeight() {return 0.5;}
+  };
+}
 #elif defined ONEDGRID
   #include "dgfoned.hh"
 typedef Dune::OneDGrid<dimworld,dimworld> GridType;
-const int refStepsForHalf = 1;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return 0.5;}
+  };
+}
 #elif defined SGRID
   #include "dgfs.hh"
 typedef Dune::SGrid<dimworld,dimworld> GridType;
-const int refStepsForHalf = 1;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+}
 #elif defined UGGRID && HAVE_UG
   #include "dgfug.hh"
 typedef Dune::UGGrid<dimworld,dimworld> GridType;
-const int refStepsForHalf = 1;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return -1.;}
+  };
+}
 #elif defined YASPGRID
   #include "dgfyasp.hh"
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
-const int refStepsForHalf = 1;
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+}
 #else
 // warning if grid type defined but package not found
   #if defined ALBERTAGRID
@@ -155,9 +225,14 @@ const int refStepsForHalf = 1;
 //#define YASPGRID
   #include "dgfyasp.hh"
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
-const int refStepsForHalf = 1;
   #warning --- No GRIDTYPE defined, defaulting to YASPGRID
+namespace Dune {
+  template <>
+  struct DGFGridInfo<GridType> {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+}
 #endif
 #undef GRIDDIM
-
 #endif

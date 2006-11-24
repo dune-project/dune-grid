@@ -43,6 +43,25 @@ namespace Dune {
     return new ALUSimplexGrid<2,2>(str.c_str());
   }
 
+  /* needs newer version of alulib
+     template <>
+     inline ALUConformGrid<2,2>*
+     MacroGrid :: Impl<ALUConformGrid<2,2> >::generate
+     (MacroGrid& mg,const char* filename, MPICommunicatorType MPICOMM ) {
+     mg.element=Simplex;
+     std::string str(filename);
+     MacroGrid::Impl<ALUConfromGrid<2,2> >().
+      generateAlu3d(mg,filename,str,MPICOMM);
+     return new ALUConfromGrid<2,2>(str.c_str());
+     }
+     template <>
+     inline void
+     MacroGrid :: Impl<ALUConformGrid<2,2> > :: generateAlu3d
+     (MacroGrid& mg,const char* filename, std::string& str, MPICommunicatorType MPICOMM ) {
+     MacroGrid::Impl<ALUSimplexGrid<2,2> >().
+      generateAlu3d(mg,filename,str,MPICOMM);
+     }
+   */
   template <int dim,int dimworld>
   inline void
   MacroGrid :: Impl<ALUSimplexGrid<dim,dimworld> > :: generateAlu3d
