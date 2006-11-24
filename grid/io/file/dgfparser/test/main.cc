@@ -39,7 +39,7 @@ try {
   // if (myrank <= 0) test(*grid);
   // refine
   std::cout << "tester: refine grid" << std::endl;
-  grid->globalRefine(GridInfo<GridType>::refineStepsForHalf());
+  grid->globalRefine(DGFGridInfo<GridType>::refineStepsForHalf());
   // display
   if (myrank <= 0) test(*grid);
 
