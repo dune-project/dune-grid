@@ -14,6 +14,8 @@ namespace Dune
   GrapeGridDisplay(const GridType &grid, const int myrank )
     : grid_(grid)
       , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      , gridPart_(0)
+      , setGridPartIter_(0)
       , indexSet_( (void *)(&grid.leafIndexSet()) )
       , lid_(grid.localIdSet())
       , myRank_(myrank)
@@ -31,6 +33,8 @@ namespace Dune
   GrapeGridDisplay(const GridPartType &gridPart, const int myrank )
     : grid_(gridPart.grid())
       , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      , gridPart_((void *) &gridPart)
+      , setGridPartIter_(&SetIter<GridPartType>::setGPIterator)
       , indexSet_( (void *)(&gridPart.indexSet()) )
       , lid_(grid_.localIdSet())
       , myRank_(myrank)
@@ -639,7 +643,7 @@ namespace Dune
   template<class GridType>
   template<PartitionIteratorType pitype>
   inline void GrapeGridDisplay<GridType>::
-  selectIterators(DUNE_DAT * dune, DUNE_FDATA * func) const
+  selectIterators(DUNE_DAT * dune, void * gridPart, setGridPartIterators_t * func) const
   {
     if(dune->iteratorType == g_LeafIterator)
     {
@@ -680,11 +684,9 @@ namespace Dune
 
     if(dune->iteratorType == g_GridPart)
     {
-      bool validFunction = (func) ? (func->setGridPartIterators) ? true : false : false;
-
-      if(!validFunction)
+      if(!func)
       {
-        std::string name = (func) ? func->name : "Null";
+        std::string name("Null");
         std::cerr << "No function for data '" <<name<<"' and therefore no GridPart! Defaulting Iterator to LeafIterator! \n";
         dune->first_macro = &IterationMethods<pitype>::fst_leaf;
         dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
@@ -698,11 +700,9 @@ namespace Dune
       }
 
       assert( func );
-      assert( func->setGridPartIterators );
-
-      //std::cout << "Select grid part of " << func->name << "\n";
+      assert( gridPart );
       // set first and next methods due to grid part
-      func->setGridPartIterators(dune,func->gridPart);
+      func(dune,gridPart);
 
       return ;
     }
@@ -716,23 +716,37 @@ namespace Dune
   // setIterationsMethods
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  setIterationMethods(DUNE_DAT * dune, DUNE_FDATA * func ) const
+  setIterationMethods(DUNE_DAT * dune, DUNE_FDATA * data) const
   {
     if(dune->delete_iter) dune->delete_iter(dune->all);
 
+    void * gridPart = 0;
+    setGridPartIterators_t * func = 0;
+
+    if(data)
+    {
+      gridPart = data->gridPart;
+      func = data->setGridPartIterators;
+    }
+    else if(gridPart_ && setGridPartIter_)
+    {
+      gridPart = gridPart_;
+      func = setGridPartIter_;
+    }
+
     switch(dune->partitionIteratorType)
     {
-    case g_All_Partition :            selectIterators<All_Partition> (dune,func) ;
+    case g_All_Partition :            selectIterators<All_Partition> (dune,gridPart,func) ;
       return;
-    case g_Interior_Partition :       selectIterators<Interior_Partition> (dune,func) ;
+    case g_Interior_Partition :       selectIterators<Interior_Partition> (dune,gridPart,func) ;
       return;
-    case g_InteriorBorder_Partition : selectIterators<InteriorBorder_Partition> (dune,func) ;
+    case g_InteriorBorder_Partition : selectIterators<InteriorBorder_Partition> (dune,gridPart,func) ;
       return;
-    case g_Overlap_Partition :        selectIterators<Overlap_Partition> (dune,func) ;
+    case g_Overlap_Partition :        selectIterators<Overlap_Partition> (dune,gridPart,func) ;
       return;
-    case g_OverlapFront_Partition :   selectIterators<OverlapFront_Partition> (dune,func) ;
+    case g_OverlapFront_Partition :   selectIterators<OverlapFront_Partition> (dune,gridPart,func) ;
       return;
-    case g_Ghost_Partition :          selectIterators<Ghost_Partition> (dune,func) ;
+    case g_Ghost_Partition :          selectIterators<Ghost_Partition> (dune,gridPart,func) ;
       return;
     default : assert(false);
       abort();
@@ -743,11 +757,11 @@ namespace Dune
   // setIterationsMethods
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
-  changeIterationMethods(int iterType, int partType, DUNE_FDATA * func )
+  changeIterationMethods(int iterType, int partType, DUNE_FDATA * data )
   {
     dune_.iteratorType = iterType;
     dune_.partitionIteratorType = partType;
-    setIterationMethods(&dune_,func);
+    setIterationMethods(&dune_,data);
   }
 
 

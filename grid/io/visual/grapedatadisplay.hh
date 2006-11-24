@@ -263,50 +263,6 @@ namespace Dune
     typedef void evalCoord_t (EntityCodim0Type &, DUNE_FDATA *, const double *, double * );
     typedef void evalDof_t (EntityCodim0Type &,int , DUNE_FDATA * , int , double * );
 
-  protected:
-    template <class GridPartType>
-    struct IterationMethodsGP
-    {
-      // wrapper methods for first_item and next_item
-      inline static int fst_item (DUNE_ELEM * he)
-      {
-        assert( he->display );
-        MyDisplayType & disp = *((MyDisplayType *) he->display);
-        return disp.template first_item<GridPartType>(he);
-      }
-      inline static int nxt_item (DUNE_ELEM * he)
-      {
-        assert( he->display );
-        MyDisplayType & disp = *((MyDisplayType *) he->display);
-        return disp.template next_item<GridPartType>(he);
-      }
-
-      // delete iterators
-      inline static void del_iter (DUNE_ELEM * he)
-      {
-        assert( he->display );
-        MyDisplayType & disp = *((MyDisplayType *) he->display);
-        typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
-        disp.template delete_iterators<IteratorType> (he);
-      }
-    };
-
-    template <class GridPartImp>
-    struct SetIter
-    {
-      static void setGPIterator (DUNE_DAT * dune ,void * gridPart)
-      {
-        assert( gridPart );
-        dune->gridPart = gridPart;
-        dune->first_macro = &IterationMethodsGP<GridPartImp>::fst_item;
-        dune->next_macro  = &IterationMethodsGP<GridPartImp>::nxt_item;
-        dune->delete_iter = &IterationMethodsGP<GridPartImp>::del_iter;
-
-        dune->first_child = 0;
-        dune->next_child = 0;
-      }
-    };
-
   public:
     // create object DUNE_FDATA
     static DUNE_FDATA * createDuneFunc ();

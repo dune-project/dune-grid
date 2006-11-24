@@ -72,6 +72,11 @@ namespace Dune
     //! true if we can use LevelIntersectionIterator
     const bool hasLevelIntersections_;
 
+    typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
+    void * gridPart_;
+
+    setGridPartIterators_t * setGridPartIter_;
+
     //! leaf index set of the grid
     void * indexSet_;
 
@@ -273,9 +278,9 @@ namespace Dune
     inline void local_to_world(EntityType &en, const double * c, double * w);
 
     template <PartitionIteratorType pitype>
-    inline void selectIterators(DUNE_DAT *, DUNE_FDATA *) const;
+    inline void selectIterators(DUNE_DAT *, void *, setGridPartIterators_t *) const;
 
-    inline void setIterationMethods(DUNE_DAT *, DUNE_FDATA *) const;
+    inline void setIterationMethods(DUNE_DAT *, DUNE_FDATA * ) const;
 
     inline void changeIterationMethods(int iterType, int partType, DUNE_FDATA *);
 
@@ -347,6 +352,50 @@ namespace Dune
         disp.template delete_hier<pitype>(he);
       }
 
+    };
+
+  protected:
+    template <class GridPartType>
+    struct IterationMethodsGP
+    {
+      // wrapper methods for first_item and next_item
+      inline static int fst_item (DUNE_ELEM * he)
+      {
+        assert( he->display );
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        return disp.template first_item<GridPartType>(he);
+      }
+      inline static int nxt_item (DUNE_ELEM * he)
+      {
+        assert( he->display );
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        return disp.template next_item<GridPartType>(he);
+      }
+
+      // delete iterators
+      inline static void del_iter (DUNE_ELEM * he)
+      {
+        assert( he->display );
+        MyDisplayType & disp = *((MyDisplayType *) he->display);
+        typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
+        disp.template delete_iterators<IteratorType> (he);
+      }
+    };
+
+    template <class GridPartImp>
+    struct SetIter
+    {
+      static void setGPIterator (DUNE_DAT * dune ,void * gridPart)
+      {
+        assert( gridPart );
+        dune->gridPart = gridPart;
+        dune->first_macro = &IterationMethodsGP<GridPartImp>::fst_item;
+        dune->next_macro  = &IterationMethodsGP<GridPartImp>::nxt_item;
+        dune->delete_iter = &IterationMethodsGP<GridPartImp>::del_iter;
+
+        dune->first_child = 0;
+        dune->next_child = 0;
+      }
     };
 
     inline static void setIterationModus(DUNE_DAT * , DUNE_FDATA *);
