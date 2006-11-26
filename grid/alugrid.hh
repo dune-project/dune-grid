@@ -314,7 +314,7 @@ namespace Dune {
     template<int dim,int dimw>
     struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
     {
-      static const bool v = false;
+      static const bool v = true;
     };
 
     template<int dim,int dimw>
@@ -328,6 +328,21 @@ namespace Dune {
     {
       static const bool v = true;
     };
+
+#if IS_NON_CONFORM == 0
+    // for conform grid is just the opposite of above
+    template<>
+    struct isLevelwiseConforming< ALUSimplexGrid<2,2> >
+    {
+      static const bool v = false;
+    };
+
+    template<>
+    struct isLeafwiseConforming< ALUSimplexGrid<2,2> >
+    {
+      static const bool v = true;
+    };
+#endif
 
   } // end namespace Capabilities
 
