@@ -253,6 +253,17 @@ namespace Dune {
     //! increment iterator
     void increment ();
 
+    //! level is conforming when non-conform grid used
+    //! otherwise might not be conform
+    bool conforming () const {
+#if IS_NON_CONFORM
+      return true;
+#else
+      return (this->neighbor()) ?
+             (this->current.isNotConform_) : true;
+#endif
+    }
+
   private:
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
@@ -321,6 +332,17 @@ namespace Dune {
 
     //! increment iterator
     void increment ();
+
+    //! leaf is conforming, when conform grid version used
+    bool conforming () const {
+#if IS_NON_CONFORM
+      return (this->neighbor()) ?
+             (this->current.item_->level() == this->current.neigh_->level())
+             : true;
+#else
+      return true;
+#endif
+    }
 
   private:
     // reset IntersectionIterator to first neighbour

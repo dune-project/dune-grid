@@ -161,6 +161,7 @@ namespace Dune {
     CompileTimeChecker<(dimworld == 2)> ALU2dGrid_only_implemented_for_2dw;
 
     typedef ALU2dGrid<dim,dimworld> ThisType;
+    typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;
 
     friend class ALU2dGridEntity<0,dim,const ThisType>;
     friend class ALU2dGridEntity<1,dim,const ThisType>;
@@ -511,6 +512,15 @@ namespace Dune {
 
     typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
+
+  public:
+    template <class IntersectionInterfaceType>
+    const typename BaseType::
+    template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
+    getRealIntersectionIterator(const IntersectionInterfaceType & it) const
+    {
+      return this->getRealImplementation(it);
+    }
 
   private:
     // max level of grid
