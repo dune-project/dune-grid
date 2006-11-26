@@ -16,7 +16,6 @@ namespace Dune {
   //! internal object from a object stack hold by the grid
   template <class GridImp, class IntersectionIteratorImpl>
   class IntersectionIteratorWrapper
-  //: public IntersectionIteratorDefaultImplementation<GridImp,IntersectionIteratorWrapper>
   {
     enum { dim = GridImp :: dimension };
     enum { dimworld = GridImp :: dimensionworld };
@@ -158,6 +157,9 @@ namespace Dune {
 
     //! return level of iterator
     int level () const { return it().level(); }
+
+    //! return true if intersection is conform (i.e. only one neighbor)
+    bool conforming () const { return it().conforming(); }
 
   private:
     //! returns reference to underlying intersection iterator implementation
