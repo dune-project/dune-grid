@@ -820,7 +820,6 @@ namespace Dune {
 
       // polynomial degree 5
       // symmetric points
-      /**/ static const double vol = 6.0;
       /*X*/ static const double s_1=0.0893433330;   /* (7 - sqrt(15) ) / 34 */
       /*X*/ static const double s_2=0.3106566670;   /* (7 + sqrt(15) ) / 34 */
       /**/ static const double t_1=0.7240867659;   /* (13 + 3*sqrt(15) ) / 34 */
