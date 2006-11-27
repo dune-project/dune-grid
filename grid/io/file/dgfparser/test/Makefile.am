@@ -27,9 +27,9 @@ tester_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS) $(GRAPE_LIBS) $(
 tester_DEPENDENCIES = $(LOCAL_LIBS)
 
 if ALUGRID
-testalu_CXXFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
+testalu_CXXFLAGS = $(AM_CPPFLAGS)
 testalu_SOURCES = testalu.cc
-testalu_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS) $(MPILIBS)
+testalu_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
 testalu_DEPENDENCIES = $(LOCAL_LIBS)
 endif
 
@@ -61,5 +61,7 @@ testug_SOURCES = testug.cc
 testug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(UG_LDFLAGS) $(UG_LIBS)
 testug_DEPENDENCIES = $(LOCAL_LIBS)
 endif
+
+CLEANFILES = examplegrid*.dgf.* dgfparser.log
 
 include $(top_srcdir)/am/global-rules
