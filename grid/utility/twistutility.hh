@@ -51,23 +51,22 @@ namespace Dune {
                       corner[t] of intersection.
         - sign(t)<0:  corner[0] of inside/outside face is equal to
                       corner[t'] of intersection with t' = abs(t)+1.
-
-
    */
   template <class GridImp>
-  class TwistUtility;
-
-  /** \brief Specialization of TwistUtility for SGrid.
-      Provides default values.
-   */
-  template <int dim,int dimw>
-  class TwistUtility<SGrid<dim,dimw> >
+  class TwistUtility
   {
   public:
-    typedef SGrid<dim,dimw> GridType;
+    typedef GridImp GridType;
   public:
     //! \brief constructor taking grid reference
     TwistUtility(const GridType& grid) {}
+
+    //! \brief return 0 for inner face
+    template <class IntersectionIterator>
+    static int twistInSelf(const GridType &, const IntersectionIterator&)
+    {
+      return 0;
+    }
 
     //! \brief return 0 for inner face
     template <class IntersectionIterator>
@@ -81,38 +80,20 @@ namespace Dune {
       return 0;
     }
 
-    //! \brief return true if intersection is conform, default is true
-    template <class IntersectionIterator>
-    bool conforming (const IntersectionIterator& it) const { return true; }
-  };
-
-  /** \brief Specialization of TwistUtility for YaspGrid.
-      Provides default values.
-   */
-  template <int dim,int dimw>
-  class TwistUtility<YaspGrid<dim,dimw> >
-  {
-  public:
-    typedef YaspGrid<dim,dimw> GridType;
-  public:
-    //! \brief constructor taking grid reference
-    TwistUtility(const GridType& grid) {}
-
-    //! \brief return 0 for inner face
-    template <class IntersectionIterator>
-    int twistInSelf(const IntersectionIterator& it) const {
-      return 0;
-    }
-
     //! \brief return 0 for outer face
     template <class IntersectionIterator>
-    int twistInNeighbor(const IntersectionIterator& it) const {
+    static int twistInNeighbor(const GridType &, const IntersectionIterator&)
+    {
       return 0;
     }
 
     //! \brief return true if intersection is conform, default is true
     template <class IntersectionIterator>
     bool conforming (const IntersectionIterator& it) const { return true; }
+
+    //! \brief return true if intersection is conform, default is true
+    template <class IntersectionIterator>
+    static bool conforming (const GridType &, const IntersectionIterator&) { return true; }
   };
 
 #if HAVE_ALBERTA_FOUND
@@ -132,6 +113,12 @@ namespace Dune {
     {}
 
     //! \brief return twist for inner face
+    static int twistInSelf(const GridType & grid,
+                           const LeafIntersectionIterator& it) {
+      return grid.getRealIntersectionIterator(it).twistInSelf();
+    }
+
+    //! \brief return twist for inner face
     int twistInSelf(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
@@ -145,6 +132,13 @@ namespace Dune {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
 
+    //! \brief return twist for outer face
+    static int twistInNeighbor(const GridType & grid,
+                               const LeafIntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).twistInNeighbor();
+    }
+
     //int twistInNeighbor(const LevelIntersectionIterator& it) const {
     //  return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     //}
@@ -152,6 +146,11 @@ namespace Dune {
     //! \brief return true if intersection is conform, default is true
     template <class IntersectionIterator>
     bool conforming (const IntersectionIterator& it) const { return true; }
+
+    //! \brief return true if intersection is conform, default is true
+    template <class IntersectionIterator>
+    static bool conforming (const GridType & grid,
+                            const IntersectionIterator& it) { return true; }
   private:
     const GridType& grid_;
   };
@@ -174,6 +173,14 @@ namespace Dune {
     {}
 
     //! \brief return twist for inner face
+    template <class IntersectionIterator>
+    static int twistInSelf(const GridType & grid,
+                           const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).twistInSelf();
+    }
+
+    //! \brief return twist for inner face
     int twistInSelf(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
@@ -193,11 +200,27 @@ namespace Dune {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
 
+    //! \brief return twist for outer face
+    template <class IntersectionIterator>
+    static int twistInNeighbor(const GridType & grid,
+                               const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).twistInNeighbor();
+    }
+
     //! \brief return true if intersection is conform, default is true
     template <class IntersectionIterator>
     bool conforming (const IntersectionIterator& it) const
     {
       return grid_.getRealIntersectionIterator(it).conforming();
+    }
+
+    //! \brief return true if intersection is conform, default is true
+    template <class IntersectionIterator>
+    static bool conforming (const GridType & grid,
+                            const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).conforming();
     }
   private:
     TwistUtility(const TwistUtility&);
@@ -223,6 +246,14 @@ namespace Dune {
     {}
 
     //! \brief return twist for inner face
+    template <class IntersectionIterator>
+    static int twistInSelf(const GridType & grid,
+                           const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).twistInSelf();
+    }
+
+    //! \brief return twist for inner face
     int twistInSelf(const LeafIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInSelf();
     }
@@ -238,6 +269,14 @@ namespace Dune {
     }
 
     //! \brief return twist for outer face
+    template <class IntersectionIterator>
+    static int twistInNeighbor(const GridType & grid,
+                               const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).twistInNeighbor();
+    }
+
+    //! \brief return twist for outer face
     int twistInNeighbor(const LevelIntersectionIterator& it) const {
       return grid_.getRealIntersectionIterator(it).twistInNeighbor();
     }
@@ -247,6 +286,14 @@ namespace Dune {
     bool conforming (const IntersectionIterator& it) const
     {
       return grid_.getRealIntersectionIterator(it).conforming();
+    }
+
+    //! \brief return true if intersection is conform, default is true
+    template <class IntersectionIterator>
+    static bool conforming (const GridType & grid,
+                            const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).conforming();
     }
   private:
     TwistUtility(const TwistUtility&);
@@ -270,6 +317,12 @@ namespace Dune {
     TwistUtility(const GridType& grid) : grid_(grid) {}
 
     //! \brief return twist for inner face
+    static int twistInSelf(const GridType &, const LeafIntersectionIterator&)
+    {
+      return 0;
+    }
+
+    //! \brief return twist for inner face
     int twistInSelf(const LeafIntersectionIterator& it) const {
       return 0;
     }
@@ -277,6 +330,12 @@ namespace Dune {
     //! \brief return twist for inner face
     int twistInSelf(const LevelIntersectionIterator& it) const {
       return 0;
+    }
+
+    //! \brief return twist for outer face
+    static int twistInNeighbor(const GridType &, const LeafIntersectionIterator&)
+    {
+      return 1;
     }
 
     //! \brief return twist for outer face
@@ -294,6 +353,14 @@ namespace Dune {
     bool conforming (const IntersectionIterator& it) const
     {
       return grid_.getRealIntersectionIterator(it).conforming();
+    }
+
+    //! \brief return true if intersection is conform, default is true
+    template <class IntersectionIterator>
+    static bool conforming (const GridType & grid,
+                            const IntersectionIterator& it)
+    {
+      return grid.getRealIntersectionIterator(it).conforming();
     }
   private:
     TwistUtility(const TwistUtility&);
