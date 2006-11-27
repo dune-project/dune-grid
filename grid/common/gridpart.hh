@@ -54,6 +54,9 @@ namespace Dune {
 
     //! \brief type of Entity with codim=0
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
+
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = GridPartTraits :: conforming };
   public:
     //! \brief Returns reference to the underlying grid
     const GridType & grid () const
@@ -188,6 +191,9 @@ namespace Dune {
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Traits :: conforming };
   private:
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
 
@@ -259,6 +265,9 @@ namespace Dune {
     struct Codim {
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LevelIterator IteratorType;
     };
+
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Capabilities::isLevelwiseConforming<GridType>::v };
   };
 
   //! \brief Selects the leaf level of a grid
@@ -282,6 +291,9 @@ namespace Dune {
     struct Codim {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
+
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Traits :: conforming };
   private:
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
 
@@ -345,6 +357,9 @@ namespace Dune {
     struct Codim {
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator IteratorType;
     };
+
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Capabilities::isLeafwiseConforming<GridType>::v };
   };
 
 
@@ -371,6 +386,8 @@ namespace Dune {
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
 
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Traits :: conforming };
   private:
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
 
@@ -439,8 +456,10 @@ namespace Dune {
     struct Codim {
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator IteratorType;
     };
-  };
 
+    //! \brief is true if grid on this view only has conforming intersections
+    enum { conforming = Capabilities::isLeafwiseConforming<GridType>::v };
+  };
 
 
   //! quick hack, to be revised by me
