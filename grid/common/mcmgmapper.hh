@@ -140,7 +140,7 @@ namespace Dune
       // Note that mapper becomes invalid when the grid is modified.
       for (int c=0; c<=G::dimension; c++)
         for (size_t i=0; i<is.geomTypes(c).size(); i++)
-          if (layout.contains(c,is.geomTypes(c)[i]))
+          if (layout.contains(is.geomTypes(c)[i]))
           {
             //			  std::cout << "offset " << c << " " << is.geomTypes(c)[i] << " is " << n << std::endl;
             offset[is.geomTypes(c)[i]] = n;
