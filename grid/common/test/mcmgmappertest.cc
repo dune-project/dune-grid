@@ -21,18 +21,18 @@ using namespace Dune;
 template<int dim>
 struct ElementDataLayout
 {
-  bool contains (int codim, Dune::GeometryType gt)
+  bool contains (Dune::GeometryType gt)
   {
-    return codim==0;
+    return gt.dim()==dim;
   }
 };
 
 template<int dim>
 struct FaceDataLayout
 {
-  bool contains (int codim, Dune::GeometryType gt)
+  bool contains (Dune::GeometryType gt)
   {
-    return codim==1;
+    return gt.dim()==dim-1;
   }
 };
 
