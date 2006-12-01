@@ -231,6 +231,52 @@ int main (int argc , char **argv) try
 
   }
 
+  // ////////////////////////////////////////////////////////////////////////
+  //   Check whether copies of elements have the same global ID
+  // ////////////////////////////////////////////////////////////////////////
+
+  {
+    std::cout << "Testing if copies of elements have the same globalID." << std::endl;
+    Dune::UGGrid<2> locallyRefinedGrid;
+
+    locallyRefinedGrid.setRefinementType(Dune::UGGrid<2>::COPY);
+
+    typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
+    typedef Dune::UGGrid<2>::Codim<0>::HierarchicIterator HierarchicIterator;
+
+    // make grids
+    makeHalfCircleQuad(locallyRefinedGrid, false);
+
+    markOne(locallyRefinedGrid,0,1);
+    markOne(locallyRefinedGrid,0,1);
+
+    const Dune::UGGrid<2>::Traits::GlobalIdSet& globalIdSet = locallyRefinedGrid.globalIdSet();
+
+    for (int level=0; level<locallyRefinedGrid.maxLevel(); ++level)
+    {
+      ElementIterator eIt = locallyRefinedGrid.lbegin<0>(level);
+      ElementIterator eEnd = locallyRefinedGrid.lend<0>(level);
+      for(; eIt!=eEnd; ++eIt)
+      {
+        int children = 0;
+        int globalChildId;
+
+        HierarchicIterator hIt = eIt->hbegin(level+1);
+        HierarchicIterator hEnd = eIt->hend(level+1);
+
+
+        for( ; hIt!=hEnd; ++hIt)
+        {
+          globalChildId = globalIdSet.id<0>(*hIt);
+          ++children;
+        }
+        if ((children == 1) && (globalIdSet.id<0>(*eIt) != globalChildId))
+          DUNE_THROW(Dune::GridError, "Copy of element has different glogalId!");
+      }
+    }
+  }
+
+
 #ifdef ModelP
   // Terminate MPI
   MPI_Finalize();
