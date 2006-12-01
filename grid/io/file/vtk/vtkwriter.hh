@@ -135,20 +135,18 @@ namespace Dune
     template<int dim>
     struct P0Layout
     {
-      bool contains (int codim, Dune::GeometryType gt)
+      bool contains (Dune::GeometryType gt)
       {
-        if (codim==0) return true;
-        return false;
+        return gt.dim()==dim;
       }
     };
 
     template<int dim>
     struct P1Layout
     {
-      bool contains (int codim, Dune::GeometryType gt)
+      bool contains (Dune::GeometryType gt)
       {
-        if (codim==dim) return true;
-        return false;
+        return gt.dim()==0;
       }
     };
 
