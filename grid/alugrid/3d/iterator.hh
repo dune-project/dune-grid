@@ -190,6 +190,12 @@ namespace Dune {
     //! return level of iterator
     int level () const;
 
+    //! return true if intersection is conforming
+    bool conforming () const
+    {
+      return (connector_.conformanceState() == FaceInfoType::CONFORMING);
+    }
+
   protected:
     // set interator to end iterator
     void done () ;
