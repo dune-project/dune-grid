@@ -336,6 +336,12 @@ namespace Dune {
     //! return true if across the edge an neighbor on leaf level exists
     bool leafNeighbor () const;
 
+    //! return true if intersection is conforming
+    bool conforming () const
+    {
+      assert( this->connector_.conformanceState() == FaceInfoType::CONFORMING );
+      return true;
+    }
   private:
     // set new face
     void setNewFace(const GEOFaceType& newFace);
