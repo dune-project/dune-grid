@@ -116,7 +116,7 @@ namespace Dune {
     static void writeBlockVector(const GridType& grid,
                                  const VectorType& f,
                                  const std::string& filename) {
-      WriterType::template writeBlockVector<VectorType>(grid, f, filename, grid.leafIndexSet());
+      WriterType::template writeBlockVector<VectorType>(f, filename, grid.leafIndexSet());
     }
 
   };
