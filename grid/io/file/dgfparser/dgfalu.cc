@@ -54,7 +54,7 @@ MacroGrid :: Impl<ALUCubeGrid<3,3> >::generate
 }
 else
 {
-  return new ALUCubeGrid<3,3>(str.c_str());
+  return new ALUCubeGrid<3,3>(MPICOMM);
 }
 #else
   return new ALUCubeGrid<3,3>(str.c_str());
