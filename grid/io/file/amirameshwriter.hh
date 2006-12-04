@@ -11,26 +11,49 @@ namespace Dune {
    * \brief Provides file writing facilities in the AmiraMesh format.
    *
    */
-  template<class GridType>
+  template<class GridType, class IndexSetType>
   class AmiraMeshWriter {
 
     enum {dim = GridType::dimension};
 
-    typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-    typedef typename GridType::template Codim<dim>::LevelIterator VertexIterator;
-    typedef typename GridType::template Codim<0>::LeafIterator LeafIterator;
-
   public:
 
-    /** \brief Write the leaf level of a grid in AmiraMesh format
+    /** \brief Write a grid in AmiraMesh format
      *
      * @param grid The grid objects that is to be written
      * @param filename The filename
+     * @param indexSet The index set encodes whether the leaf grid or a level grid is written
      */
     static void writeGrid(const GridType& grid,
-                          const std::string& filename);
+                          const std::string& filename,
+                          const IndexSetType& indexSet);
 
-    /** \brief Write one level of a grid in AmiraMesh format
+    /** \brief Writes an ISTL block vector in AmiraMesh format
+        @param filename The filename
+        @param indexSet The index set encodes whether the vector lives of the
+        leaf grid or on a level grid
+     */
+    template <class VectorType>
+    static void writeBlockVector(const VectorType& f,
+                                 const std::string& filename,
+                                 const IndexSetType& indexSet);
+
+  };
+
+  /** @ingroup IO
+   * \brief Provides file writing facilities in the AmiraMesh format for level grids.
+   *
+   */
+  template<class GridType>
+  class LevelAmiraMeshWriter {
+
+    enum {dim = GridType::dimension};
+
+    typedef AmiraMeshWriter<GridType,typename GridType::Traits::LevelIndexSet> WriterType;
+
+  public:
+
+    /** \brief Write a grid in AmiraMesh format
      *
      * @param grid The grid objects that is to be written
      * @param filename The filename
@@ -38,23 +61,63 @@ namespace Dune {
      */
     static void writeGrid(const GridType& grid,
                           const std::string& filename,
-                          int level);
+                          int level) {
+      WriterType::writeGrid(grid,
+                            filename,
+                            grid.levelIndexSet(level));
+    }
 
-    /** \brief Writes a discrete function in AmiraMesh format
-     *
-     * @param f Function that should be written
-     * @param filename The filename
+    /** \brief Writes an ISTL block vector in AmiraMesh format
+        @param grid The grid objects that the vector lives on
+        @param f The vector to be written.  Has to comply with the ISTL conventions
+        @param filename The filename
+        @param level The level of the grid that the vector lives on
      */
-    template <class DiscFuncType>
-    static void writeFunction(const DiscFuncType& f,
-                              const std::string& filename);
-
-    /** \brief Writes an ISTL block vector in AmiraMesh format */
     template <class VectorType>
     static void writeBlockVector(const GridType& grid,
                                  const VectorType& f,
-                                 const std::string& filename);
-    AmiraMeshWriter() {}
+                                 const std::string& filename,
+                                 int level) {
+
+      WriterType::template writeBlockVector<VectorType>(f, filename, grid.levelIndexSet(level));
+    }
+
+  };
+
+  /** @ingroup IO
+   * \brief Provides file writing facilities in the AmiraMesh format for leaf grids.
+   *
+   */
+  template<class GridType>
+  class LeafAmiraMeshWriter {
+
+    enum {dim = GridType::dimension};
+
+    typedef AmiraMeshWriter<GridType,typename GridType::Traits::LeafIndexSet> WriterType;
+
+  public:
+
+    /** \brief Write a grid in AmiraMesh format
+     *
+     * @param grid The grid objects that is to be written
+     * @param filename The filename
+     */
+    static void writeGrid(const GridType& grid,
+                          const std::string& filename) {
+      WriterType::writeGrid(grid, filename, grid.leafIndexSet());
+    }
+
+    /** \brief Writes an ISTL block vector in AmiraMesh format
+        @param grid The grid objects that the vector lives on
+        @param f The vector to be written.  Has to comply with the ISTL conventions
+        @param filename The filename
+     */
+    template <class VectorType>
+    static void writeBlockVector(const GridType& grid,
+                                 const VectorType& f,
+                                 const std::string& filename) {
+      WriterType::template writeBlockVector<VectorType>(grid, f, filename, grid.leafIndexSet());
+    }
 
   };
 
@@ -64,6 +127,6 @@ namespace Dune {
 #include "amiramesh/amirameshwriter.cc"
 
 // the amiramesh writer for SGrid
-#include "amiramesh/amsgridwriter.cc"
+//#include "amiramesh/amsgridwriter.cc"
 
 #endif
