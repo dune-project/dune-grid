@@ -279,7 +279,7 @@ namespace Dune
     if(! set.contains(en) ) return ;
 
     int idx = vlength * set.template subIndex<dim> (en,localNum) ;
-    for(int i=0; i<vlength; ++i) val[i] = func[idx + comp[i]];
+    val[0] = func[idx + comp[0]];
     return ;
   }
 
@@ -337,10 +337,15 @@ namespace Dune
     assert( df->discFunc );
     VectorType & vector = *((VectorType *) (df->discFunc));
 
-    int size = vector.size();
+    IndexSetImp * set = ((IndexSetImp *) df->indexSet);
+    assert( set );
+
+    int size = (df->polyOrd > 0) ? set->size(dim) : set->size(0);
+
     int comp = df->comp[0];
     int dimVal = df->dimVal;
 
+    // get first value of vector to set min and max
     if(size < comp) return;
     minValue = vector[comp];
     maxValue = vector[comp];
@@ -640,14 +645,10 @@ namespace Dune
             const int dimRange,
             bool continuous )
   {
-    int * comp = new int [dimRange];
-    for(int i=0; i<dimRange; ++i) comp[i] = i;
-
-    DATAINFO dinf = { name.c_str() , name.c_str() , 0 , 1 , comp };
+    DATAINFO dinf = { name.c_str() , name.c_str() , 0 , 1 , 0 };
     /* add function data */
     this->addVector(data,indexSet,&dinf,time,polOrd,dimRange,continuous);
 
-    delete [] comp;
     return;
   }
 
@@ -660,9 +661,9 @@ namespace Dune
   {
     assert(dinf);
     const char * name = dinf->name;
-    assert( dinf->dimVal > 0);
 
-    bool vector = (dinf->dimVal > 1) ? true : false;
+    // only add data as scalar data
+    assert( dinf->dimVal == 1);
 
     bool already=false;
     int size = vecFdata_.size();
@@ -671,7 +672,6 @@ namespace Dune
     if(!already)
     {
       int num = dimRange;
-      if(vector) num = 1;
 
       vecFdata_.resize(size+num);
       for(int n=size; n < size+num; n++)
@@ -702,18 +702,11 @@ namespace Dune
           if(data->polyOrd == 0) data->continuous = 0;
 
           int dimVal = dinf->dimVal;
+          assert( dimVal == 1 );
           int * comp = new int [dimVal];
           data->comp = comp;
-          if(vector)
-          {
-            for(int j=0; j<dimVal; j++) comp[j] = dinf->comp[j];
-            data->compName = -1;
-          }
-          else
-          {
-            comp[0] = n-size;
-            data->compName = n-size;
-          }
+          comp[0] = n-size;
+          data->compName = n-size;
 
           if(data->compName >= 0)
           {
