@@ -400,11 +400,9 @@ namespace Dune
 
     inline static void setIterationModus(DUNE_DAT * , DUNE_FDATA *);
 
+  public:
     // create STACKENTRY or get from stack
     inline static void * getStackEntry(StackEntryType & stackEntry);
-
-    // push STACKENTRY to stack
-    inline static void freeStackEntry(StackEntryType & stackEntry, void * entry);
 
     // get StackEntry Wrapper
     inline static void * getStackEn(DUNE_DAT * dune);
@@ -413,6 +411,9 @@ namespace Dune
     inline static void freeStackEn(DUNE_DAT * dune, void * entry);
 
     inline static void deleteStackEntry(StackEntryType &);
+
+    // push STACKENTRY to stack
+    inline static void freeStackEntry(StackEntryType & stackEntry, void * entry);
 
   }; // end class GrapeGridDisplay
 
