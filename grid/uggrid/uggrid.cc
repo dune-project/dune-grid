@@ -188,8 +188,10 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
 
   std::string problemName = name_ + "_Problem";
 
+#ifndef UG_LGMDOMAIN
   if (UG_NS<dimworld>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned and error code!");
+#endif
 
   if (numOfUGGrids==0) {
 
@@ -804,6 +806,9 @@ void Dune::UGGrid < dim, dimworld >::createBegin()
 template < int dim, int dimworld >
 void Dune::UGGrid < dim, dimworld >::createEnd()
 {
+#ifdef UG_LGMDOMAIN
+  DUNE_THROW(GridError, "You cannot call createLGMGrid() when your UGGrid has been configured for LGM!");
+#else
 
   // ///////////////////////////////////////////
   //   Extract grid boundary segments
@@ -1022,6 +1027,72 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
   for (; eIt!=eEndIt; ++eIt)
     UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
+#endif
+}
+
+template < int dim, int dimworld >
+void Dune::UGGrid < dim, dimworld >::createLGMGrid(const std::string& name)
+{
+#ifndef UG_LGMDOMAIN
+  DUNE_THROW(GridError, "You cannot call createLGMGrid() when your UGGrid hasn't been configured for LGM!");
+#else
+  // ////////////////////////////////////////////////
+  //   Create a boundary value problem (BVP)
+  // ////////////////////////////////////////////////
+  if (dim==2) {
+    if (!UG::D2::CreateProblem(name.c_str(),NULL,NULL,NULL,0,NULL,0,NULL))
+      DUNE_THROW(GridError, "LGM::CreateProblem() returned error code!");
+  } else {
+    if (!UG::D3::CreateProblem(name.c_str(),NULL,NULL,NULL,0,NULL,0,NULL))
+      DUNE_THROW(GridError, "LGM::CreateProblem() returned error code!");
+  }
+
+  // ///////////////////////////////////////////
+  //   Call configureCommand and newCommand
+  // ///////////////////////////////////////////
+#if 0 // Do we need this?
+      //configure @PROBLEM $d @DOMAIN;
+  std::string configureArgs[2] = {"configure " + name_ + "_Problem", "d " + name_ + "_Domain"};
+  const char* configureArgs_c[2] = {configureArgs[0].c_str(), configureArgs[1].c_str()};
+
+  if (UG_NS<dim>::ConfigureCommand(2, configureArgs_c))
+    DUNE_THROW(GridError, "Calling UG" << dim << "d::ConfigureCommand failed!");
+#endif
+
+  //new @PROBLEM $b @PROBLEM $f @FORMAT $h @HEAP;
+  char* newArgs[4];
+  for (int i=0; i<4; i++)
+    newArgs[i] = (char*)::malloc(50*sizeof(char));
+
+  sprintf(newArgs[0], "new %s", name_.c_str());
+
+  sprintf(newArgs[1], "b %s", name.c_str());
+  sprintf(newArgs[2], "f DuneFormat%dd", dim);
+  sprintf(newArgs[3], "h %dM", heapsize);
+
+  if (UG_NS<dim>::NewCommand(4, newArgs))
+    DUNE_THROW(GridError, "UGGrid::makeNewMultigrid failed!");
+
+  for (int i=0; i<4; i++)
+    free(newArgs[i]);
+
+  // Get a direct pointer to the newly created multigrid
+  multigrid_ = UG_NS<dim>::GetMultigrid(name_.c_str());
+  if (!multigrid_)
+    DUNE_THROW(GridError, "UGGrid::makeNewMultigrid failed!");
+
+  // Complete the UG-internal grid data structure
+  if (CreateAlgebra(multigrid_) != UG_NS<dim>::GM_OK)
+    DUNE_THROW(IOError, "Call of 'UG::CreateAlgebra' failed!");
+
+  /* here all temp memory since CreateMultiGrid is released */
+  Release(multigrid_->theHeap, UG::FROM_TOP, multigrid_->MarkKey);
+  multigrid_->MarkKey = 0;
+
+  // Set the local indices
+  setIndices();
+
+#endif
 }
 
 template <int dim, int dimworld>
@@ -1030,6 +1101,7 @@ insertLinearSegment(const std::vector<int>& vertices,
                     const std::vector<FieldVector<double,dimworld> >& coordinates,
                     unsigned int segmentIndex)
 {
+#ifndef UG_LGMDOMAIN
   /** \todo Make sure this is the current multigrid, so that CreateBoundarySegment
       really inserts boundary segments into this grid.*/
 
@@ -1105,6 +1177,8 @@ insertLinearSegment(const std::vector<int>& vertices,
                                 paramCoords
                                 )==NULL)
     DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+
+#endif
 
 #endif
 

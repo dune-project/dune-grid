@@ -40,7 +40,11 @@
 
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
+#ifdef UG_LGMDOMAIN
+#include "uggrid/ug_undefs_lgm_seq.hh"
+#else
 #include "uggrid/ug_undefs.hh"
+#endif
 #undef _2
 
 /* Now we're done with 2d, and we can do the whole thing over again for 3d */
@@ -66,7 +70,11 @@
 #include "uggrid/ugwrapper3d.hh"
 
 // undef all macros defined by UG
+#ifdef UG_LGMDOMAIN
+#include "uggrid/ug_undefs_lgm_seq.hh"
+#else
 #include "uggrid/ug_undefs.hh"
+#endif
 
 #undef _3
 #undef FOR_DUNE
@@ -414,6 +422,11 @@ namespace Dune {
 
     /** \brief End the coarse grid creation process */
     void createEnd();
+
+    /** \brief When UGGrid has been configured to use the LGM domain manager,
+        this routine sets up a grid from an LGM and an NG file
+     */
+    void createLGMGrid(const std::string& name);
 
     /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
         \param vertices The indices of the vertices of the segment

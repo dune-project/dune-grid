@@ -38,7 +38,9 @@ namespace Dune {
 
     typedef UG::D2::UserProcPtr UserProcPtr;
 
+#ifndef UG_LGMDOMAIN
     typedef UG::D2::BndSegFuncPtr BndSegFuncPtr;
+#endif
 
     /** \todo This type becomes obsolete as soon as UG implements faces and edges */
     typedef UG::D2::vector Vector;
@@ -543,6 +545,7 @@ namespace Dune {
       UG::D2::DisposeMultiGrid(mg);
     }
 
+#ifndef UG_LGMDOMAIN
     //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                             int numOfCoeffFunc,
@@ -552,6 +555,7 @@ namespace Dune {
       return UG::D2::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
                                                 numOfUserFct, userfct);
     }
+#endif
 
     static void* BVP_GetByName(const char* bvpName) {
       return UG::D2::BVP_GetByName(bvpName);
@@ -592,15 +596,18 @@ namespace Dune {
       return UG::D2::CreateFormatCmd(argc, argv);
     }
 
+#ifndef UG_LGMDOMAIN
     static void* CreateDomain(const char* name, const double* midPoint, double radius,
                               int segments, int corners, int convex) {
       return UG::D2::CreateDomain(name, midPoint, radius, segments, corners, convex);
     }
+#endif
 
     static void* InsertInnerNode(UG::D2::grid* grid, const double* pos) {
       return UG::D2::InsertInnerNode(grid, pos);
     }
 
+#ifndef UG_LGMDOMAIN
     static void* CreateBoundarySegment(const char *name, int left, int right,
                                        int index, int res,
                                        int *point,
@@ -619,6 +626,7 @@ namespace Dune {
                                            boundarySegmentFunction,
                                            userData);
     }
+#endif
 
   };
 
