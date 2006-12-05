@@ -59,8 +59,8 @@ public:
 
 
 // Create the domain from an explicitly given boundary description
-void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::createDomain(UGGrid<3,3>& grid,
-                                                             const std::string& filename)
+void Dune::AmiraMeshReader<Dune::UGGrid<3> >::createDomain(UGGrid<3>& grid,
+                                                           const std::string& filename)
 {
 #ifdef HAVE_PSURFACE
   int point[3] = {-1, -1, -1};
@@ -111,9 +111,9 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::createDomain(UGGrid<3,3>& grid,
 }
 
 
-void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
-                                                     const std::string& filename,
-                                                     const std::string& domainFilename)
+void Dune::AmiraMeshReader<Dune::UGGrid<3> >::read(Dune::UGGrid<3>& grid,
+                                                   const std::string& filename,
+                                                   const std::string& domainFilename)
 {
 #ifndef HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -151,8 +151,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
 }
 
 
-void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
-                                                     const std::string& filename)
+void Dune::AmiraMeshReader<Dune::UGGrid<3> >::read(Dune::UGGrid<3>& grid,
+                                                   const std::string& filename)
 {
   dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
@@ -172,8 +172,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
 }
 
 
-void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid,
-                                                          AmiraMesh* am)
+void Dune::AmiraMeshReader<Dune::UGGrid<3> >::buildGrid(UGGrid<3>& grid,
+                                                        AmiraMesh* am)
 {
   bool isTetraGrid = am->findData("Tetrahedra", HxINT32, 4, "Nodes");
 
@@ -349,8 +349,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid,
 
 
 /** \todo Extend this such that it also reads double vertex positions */
-void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
-                                                     const std::string& filename)
+void Dune::AmiraMeshReader<Dune::UGGrid<2> >::read(Dune::UGGrid<2>& grid,
+                                                   const std::string& filename)
 {
   dverb << "Loading 2D Amira mesh " << filename << std::endl;
 

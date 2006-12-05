@@ -20,12 +20,12 @@ namespace Dune {
   /** \brief Read a 3d coarse grid from an AmiraMesh file into a UGGrid
    */
   template<>
-  class AmiraMeshReader<UGGrid<3,3> > {
+  class AmiraMeshReader<UGGrid<3> > {
 
   public:
 
     /** \brief Read a grid from an AmiraMesh file */
-    static void read(UGGrid<3,3>& grid,
+    static void read(UGGrid<3>& grid,
                      const std::string& filename);
 
     /** \brief Read a grid with a parametrized boundary
@@ -49,16 +49,16 @@ namespace Dune {
        \param gridFilename The AmiraMesh file containing the grid
        \param domainFilename The AmiraMesh file containing the boundary description
      */
-    static void read(UGGrid<3,3>& grid,
+    static void read(UGGrid<3>& grid,
                      const std::string& gridFilename,
                      const std::string& domainFilename);
 
   protected:
 
-    static void createDomain(UGGrid<3,3>& grid,
+    static void createDomain(UGGrid<3>& grid,
                              const std::string& filename);
 
-    static void buildGrid(UGGrid<3,3>& grid,
+    static void buildGrid(UGGrid<3>& grid,
                           AmiraMesh* am);
 
   };
@@ -73,12 +73,12 @@ namespace Dune {
      way, the reader will reorder your vertices!
    */
   template<>
-  class AmiraMeshReader<UGGrid<2,2> > {
+  class AmiraMeshReader<UGGrid<2> > {
 
   public:
 
     /** \brief Read a grid */
-    static void read(UGGrid<2,2>& grid,
+    static void read(UGGrid<2>& grid,
                      const std::string& filename);
 
     /** \brief Dummy method: read a grid together with a boundary parametrization
@@ -92,7 +92,7 @@ namespace Dune {
        \param gridFilename The AmiraMesh file containing the grid
        \param domainFilename The AmiraMesh file containing the boundary description
      */
-    static void read(UGGrid<2,2>& grid,
+    static void read(UGGrid<2>& grid,
                      const std::string& gridFilename,
                      const std::string& domainFilename) {
       DUNE_THROW(NotImplemented, "No AmiraMesh-reading for 2d parametrized boundaries!");
