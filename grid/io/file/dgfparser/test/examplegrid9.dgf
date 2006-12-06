@@ -1,12 +1,13 @@
 DGF
 Simplexgenerator
 % to use TetGen from a certain path, uncomment this path line
-% path $HOME/bin         % path to Tetgen
+path $HOME/dune/modules/tetgen1.4.0         % path to Tetgen
 
 % read information from file (uncomment each line seperatly)
 % file BBEETH1M.d_cut mesh
 % file Orb_cut mesh
-% file /usr/people/dedner/MORGOTH/bunny/bunny.p65.param_skin mesh
+% file bunny.p65.param_skin mesh
+% file pmdc.1 
 % all grids are for dimension 3
 dimension 3
 #

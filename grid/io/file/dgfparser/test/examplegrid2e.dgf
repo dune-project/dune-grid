@@ -1,0 +1,33 @@
+DGF
+vertex
+parameters 2
+       -1  -1  0  -1    
+       1  -1  1  1    
+       1  1  2  1    
+       -1  1  1  -1    
+       0.75  0.75  2  0.75    
+       0.90000000000000002  0.90000000000000002  2  0.90000000000000002    
+       1.25  1.25  -1  1.25    
+# 
+simplex
+parameters 1
+          0     4     3  1 
+          4     0     1  -1 
+          3     4     5  1 
+          5     1     2  1
+          1     5     4  -1
+          2     6     3   1
+          6     2     1  -1
+          5     2     3  -1 
+#
+boundarydomain
+default 1
+#
+Simplexgenerator
+min-angle 30    % quality enhancment
+max-area 0.01   % area restriction
+display 0       % show result using Triangle viewer
+% to use Triangle from a certain path, uncomment this path line
+path $HOME/bin      % path to Triangle
+#
+ 
