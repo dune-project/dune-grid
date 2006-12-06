@@ -17,8 +17,51 @@
    @brief Provides views of grid via grid parts, heavily used in the
    dune-fem module.
  */
+/*! @addtogroup GridPart Grid Parts
+   \ingroup Grid
+
+
+   @section GridPart1 What is a GridPart ?
+   <!--============================-->
+   A Dune::GridPart define a view for a given grid, which can basically be seen
+   as a container for entities of different co-dimensions. The most
+   prominent example of such views are Leafgrids and Levelgrids - but
+   also a set of entities satisfying a certain constraint, e.g., belonging
+   to a certain domain, can be accessed using the GridParts interface.
+
+   The Dune::Grid instance is passed to the GridPart which then
+   provides iterators over the entities in the view; also intersection iterators
+   suitable for element in the view can be obtained from the GridPart.
+   Finally the GridPart provides a Dune::IndexSet with indices for all
+   entities in the view. For parallel computations the GridPart interface
+   also provides the suitable communication method.
+
+   @section GridPart3 GridPart Interface and available Implementations
+   <!--==========================-->
+
+   This interface is implemented by the class template Dune::GridPartInterface.
+   For a full documentation see the description of this class.
+   A short list of the most important methods is:
+   - The pair of methods begin()/end() provide begin and end iterators
+    for the entities.
+   - The methods ibegin(entity)/iend(entity)
+    begin and end intersection iterators for a given entity.
+   - The index set is accessed via the method indexSet() and the underlying
+    grid using the method grid().
+   .
+
+   For a level or leaf view of the grid use the implementations
+   Dune::LevelGridPart and Dune::LeafGridPart, respectively. A first
+   implementation of a view using a general filter is available
+   in the dune-fem package (Dune::FilteredGridPart).
+ */
 
 namespace Dune {
+  /**
+   * @addtogroup GridPart
+   *
+   * @{
+   */
 
   // Forward declarations
   template <class GridImp, PartitionIteratorType pitype>
@@ -58,8 +101,14 @@ namespace Dune {
     //! \brief is true if grid on this view only has conforming intersections
     enum { conforming = GridPartTraits :: conforming };
   public:
-    //! \brief Returns reference to the underlying grid
+    //! \brief Returns const reference to the underlying grid
     const GridType & grid () const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().grid()));
+      return asImp().grid();
+    }
+    //! \brief Returns reference to the underlying grid
+    GridType & grid ()
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().grid()));
       return asImp().grid();
@@ -151,7 +200,7 @@ namespace Dune {
 
   protected:
     //! Constructor
-    GridPartDefault(const GridType& grid, const IndexSetType& iset) :
+    GridPartDefault(GridType& grid, const IndexSetType& iset) :
       GridPartInterface<GridPartTraits>(),
       grid_(grid),
       iset_(iset) {}
@@ -159,14 +208,17 @@ namespace Dune {
     ~GridPartDefault() {}
 
   public:
-    //! Returns reference to the underlying grid
+    //! Returns const reference to the underlying grid
     const GridType& grid() const { return grid_; }
+
+    //! Returns reference to the underlying grid
+    GridType& grid() { return grid_; }
 
     //! Returns reference to index set of the underlying grid
     const IndexSetType& indexSet() const { return iset_; }
 
   private:
-    const GridType& grid_;
+    GridType& grid_;
     const IndexSetType& iset_;
   };
 
@@ -200,7 +252,7 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    LevelGridPart(const GridType& grid, int level ) :
+    LevelGridPart(GridType& grid, int level ) :
       GridPartDefault<Traits>(grid,isetWrapper_),
       isetWrapper_(grid,level),
       level_(level) {}
@@ -300,7 +352,7 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    LeafGridPart(const GridType& grid) :
+    LeafGridPart(GridType& grid) :
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
 
@@ -394,12 +446,12 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    HierarchicGridPart(const GridType& grid) :
+    HierarchicGridPart(GridType& grid) :
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
 
     //! Constructor
-    HierarchicGridPart(const GridType& grid, const IndexSetType & ) :
+    HierarchicGridPart(GridType& grid, const IndexSetType & ) :
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
 
@@ -490,7 +542,7 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    DefaultGridPart(const GridType& grid, const IndexSetType & iset ) DUNE_DEPRECATED
+    DefaultGridPart(GridType& grid, const IndexSetType & iset ) DUNE_DEPRECATED
       : GridPartDefault<Traits>(grid, iset) {}
 
     //! Begin iterator on the leaf level
@@ -546,6 +598,7 @@ namespace Dune {
 
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
+  /** @} */
 
 } // end namespace Dune
 
