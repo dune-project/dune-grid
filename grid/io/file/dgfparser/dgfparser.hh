@@ -940,7 +940,7 @@ namespace Dune {
 
    The following example
 
-   @include examplegrid10a.dgf
+   @include examplegrid10b.dgf
 
    defines parameters for each vertex of the grid, leading to a piecewise linear
    function
