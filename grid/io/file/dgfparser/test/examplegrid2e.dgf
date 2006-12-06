@@ -30,4 +30,5 @@ display 0       % show result using Triangle viewer
 % to use Triangle from a certain path, uncomment this path line
 path $HOME/bin      % path to Triangle
 #
+# examplegrid2e.dgf
  
