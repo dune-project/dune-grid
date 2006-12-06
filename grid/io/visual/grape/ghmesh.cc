@@ -876,12 +876,121 @@ extern "C" {
   extern MESH2D   * mesh2d_isoline_disp();
   extern MESH2D   * mesh2d_isoline_select_disp();
   extern HPMESH2D * hpmesh2d_isoline_disp();
+  extern GENMESH2D* genmesh2d_isoline_disp();
+  extern GENMESH2D* genmesh2d_isoline_select_disp();
+  extern GENMESH2D* genmesh2d_geometry_graph_disp();
+  extern MESH2D *mesh2d_isoline_disp();
+  extern MESH2D *mesh2d_isoline_select_disp();
+  extern MESH2D *mesh2d_vect_disp();
+  extern HPMESH2D* hpmesh2d_pdegfine_disp();
+  extern GENMESH2D* genmesh2d_chess_disp();
+  extern MESH2D *mesh2d_flic_disp();
+
   extern GENMESH3D* genmesh3d_bnd_isoline_disp();
+  extern GENMESH3D* genmesh3d_bnd_isoline_select_disp();
   extern GENMESH3D* genmesh3d_clip_isoline_multi_disp ();
+  extern GENMESH3D* genmesh3d_volume_disp ();
+  extern MESH3D* mesh3d_bnd_isoline_select_disp();
+  extern MESH3D* mesh3d_bnd_isoline_disp();
 }
 
 // methodName is set by scene set_min_max_value
 static std::string grapeMethodName;
+
+static inline void setMinMaxValuesToColorbars(const double min, const double max)
+{
+  typedef std::list< COLORBAR * > ColorBarListType;
+  static bool firstCall = true;
+  static ColorBarListType colorBarList;
+
+  if( firstCall )
+  {
+    ///////////////////////////////
+    // all functions from mesh2d
+    ///////////////////////////////
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_disp,"isoline-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_select_disp,"isoline-select-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_isoline_disp,"isoline-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_geometry_graph_disp,"geometry-graph-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_select_disp,"mesh2d-isoline-select");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_disp,"mesh2d-isoline");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_vect_disp,"mesh2d-vect");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_pdegfine_disp,"pdegfine-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_chess_disp, "GenMesh2d::chess-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    //{
+    //  COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar")(mesh2d_flic_disp,"flic");
+    //  if ( colorBar ) colorBarList.push_back( colorBar );
+    //}
+    ///////////////////////////////
+    // all functions from mesh3d
+    ///////////////////////////////
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,"bnd-isoline-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_clip_isoline_multi_disp,"genmesh3d-clip-isoline-multi-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_volume_disp, "GenMesh3d-volume");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    {
+      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_disp,"bnd-isoline-disp");
+      if ( colorBar ) colorBarList.push_back( colorBar );
+    }
+    //////////////////////////////
+    //////////////////////////////
+    firstCall = false;
+  }
+
+  typedef ColorBarListType :: iterator iterator;
+
+  const iterator end = colorBarList.end();
+  for(iterator it = colorBarList.begin(); it != end; ++it)
+  {
+    COLORBAR * cb = (*it);
+    cb->min = min;
+    cb->max = max;
+  }
+}
+
 inline GRAPEMESH * setMinMaxValue()
 {
   GRAPEMESH * mesh = 0;
@@ -900,32 +1009,7 @@ inline GRAPEMESH * setMinMaxValue()
     func->getMinMaxValues(func,&min,&max);
   }
 
-  COLORBAR * colorBar = 0;
-  if(grapeMethodName == "isoline-disp")
-  {
-    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_isoline_disp,grapeMethodName.c_str());
-  }
-  if(grapeMethodName == "isoline-select-disp")
-  {
-    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_select_disp,grapeMethodName.c_str());
-  }
-  if(grapeMethodName == "bnd-isoline-disp")
-  {
-    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,grapeMethodName.c_str());
-  }
-  if(grapeMethodName == "clip-isoline-multi-disp")
-  {
-    colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_clip_isoline_multi_disp,grapeMethodName.c_str());
-  }
-
-  if(!colorBar)
-  {
-    std::cerr << "Could not determin method name: " << grapeMethodName << "in: " << __FILE__ << " line: " << __LINE__ << "\n";
-    END_METHOD(mesh);
-  }
-
-  colorBar->min = min;
-  colorBar->max = max;
+  setMinMaxValuesToColorbars(min,max);
 
   END_METHOD(mesh);
 }
@@ -1310,6 +1394,7 @@ inline static void grape_add_remove_methods(void)
   {
     GRAPE(Scene,"delete-method") ("set-min-max-values");
   }
+
   GRAPE(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
 
   if(!calledAddMethods)
@@ -1336,7 +1421,6 @@ inline static void grape_add_remove_methods(void)
     printf("Remove Method 'clip-isoline-select-disp' on GenMesh3d!\n");
     GRAPE(GenMesh3d,"delete-method") ("clip-isoline-select-disp");
     printf("\n");
-#else
 #endif
     if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
       GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
