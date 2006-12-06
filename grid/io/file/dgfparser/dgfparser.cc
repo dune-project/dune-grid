@@ -183,25 +183,116 @@ namespace Dune {
     dverb << "done" << std::endl;
     dverb.flush();
   }
-
+  // Output to Tetgen/Triangle poly-file
+  inline void DuneGridFormatParser::writeTetgenPoly(std::string& name,
+                                                    std::string& params) {
+    if (dimw==2) {
+      if (facemap.size()+elements.size()>0) {
+        name += ".poly";
+        params = " -Ap ";
+      }
+      else {
+        name += ".node";
+        params = "";
+      }
+      info->print("writting poly file "+name);
+      std::ofstream polys(name.c_str());
+      writeTetgenPoly(polys);
+    } else {
+      if (facemap.size()>0 && elements.size()==0) {
+        name += ".poly";
+        info->print("writting poly file "+name);
+        std::ofstream polys(name.c_str());
+        writeTetgenPoly(polys);
+        params = " -p ";
+      }
+      else {
+        {
+          std::string tmpname = name;
+          tmpname += ".node";
+          std::ofstream out(tmpname.c_str());
+          int nr = 0;
+          dverb << "Writing vertices...";
+          out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
+          for (int n=0; n<nofvtx; n++) {
+            out << nr++ << "   ";
+            for (int j=0; j<dimw; j++) {
+              out << vtx[n][j] << " ";
+            }
+            for (int j=0; j<nofvtxparams; ++j) {
+              out << vtxParams[n][j] << " ";
+            }
+            out << std::endl;
+          }
+        }
+        {
+          std::string tmpname = name;
+          tmpname += ".ele";
+          std::ofstream out(tmpname.c_str());
+          int nr = 0;
+          dverb << "Writing elements...";
+          out << elements.size() << " 4 " << nofelparams << std::endl;
+          for (int n=0; n<elements.size(); n++) {
+            out << nr++ << "   ";
+            for (int j=0; j<4; j++) {
+              out << elements[n][j] << " ";
+            }
+            for (int j=0; j<nofelparams; ++j) {
+              out << elParams[n][j] << " ";
+            }
+            out << std::endl;
+          }
+        }
+        {
+          std::string tmpname = name;
+          tmpname += ".face";
+          std::ofstream out(tmpname.c_str());
+          std::map<EntityKey<int>,int>::iterator pos;
+          int nr = 0;
+          dverb << "Writing boundary faces...";
+          out << facemap.size() << " 1 " << std::endl;
+          for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
+            out << nr++ << " ";
+            for (int i=0; i<pos->first.size(); i++)
+              out << pos->first.origKey(i) << " ";
+            out << pos->second;
+            out << std::endl;
+          }
+        }
+        name += ".node";
+        if (elements.size()>0)
+          params = " -r ";
+        else
+          params = "";
+      }
+    }
+  }
   // Output to Tetgen/Triangle poly-file
   inline void DuneGridFormatParser::writeTetgenPoly(std::ostream& out) {
     int nr = 0;
     dverb << "Writing vertices...";
-    out << nofvtx << " " << dimw << " 0 0" << std::endl;
+    out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
     for (int n=0; n<nofvtx; n++) {
       out << nr++ << "   ";
       for (int j=0; j<dimw; j++) {
         out << vtx[n][j] << " ";
       }
+      for (int j=0; j<nofvtxparams; ++j) {
+        out << vtxParams[n][j] << " ";
+      }
       out << std::endl;
     }
     dverb << "done" << std::endl;
     dverb.flush();
-    dverb << "Writing Boundary...";
-    out << facemap.size() << " 1 " << std::endl;
+    dverb << "Writing Segments...";
+    out << facemap.size()+elements.size()*3 << " 1 " << std::endl;
     std::map<EntityKey<int>,int>::iterator pos;
     nr = 0;
+    for(int i=0; i<elements.size(); ++i) {
+      for (int k=0; k<3; k++)
+        out << nr++ << " "
+            << elements[i][(k+1)%3] << " " << elements[i][(k+2)%3] << " 0\n";
+    }
     for(pos= facemap.begin(); pos!=facemap.end(); ++pos) {
       if (dimw == 3) {
         out << "1 0 " << pos->second << std::endl;
@@ -213,9 +304,27 @@ namespace Dune {
       if (dimw==2)
         out << pos->second;
       out << std::endl;
+      nr++;
     }
     out << "0" << std::endl;
-    out << "0" << std::endl;
+    if (nofelparams>0) {
+      assert(dimw==2);
+      out << elements.size()*nofelparams << std::endl;
+      int nr = 0;
+      for(int i=0; i<elements.size(); ++i) {
+        double coord[2] = {0,0};
+        for (int j=0; j<3; j++) {
+          coord[0] += vtx[elements[i][j]][0];
+          coord[1] += vtx[elements[i][j]][1];
+        }
+        coord[0] /= 3.;
+        coord[1] /= 3.;
+        for (int j=0; j<nofelparams; j++)
+          out << nr++ << " "
+              << coord[0] << " " << coord[1] << " " << elParams[i][j] << std::endl;
+      }
+    } else
+      out << 0 << std::endl;
     dverb << "done" << std::endl;
     dverb.flush();
   }
@@ -250,7 +359,7 @@ namespace Dune {
       VertexBlock bvtx(gridin,dimw);
       nofvtx=0;
       if (bvtx.isactive()) {
-        nofvtx=bvtx.get(vtx);
+        nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
         info->block(bvtx);
       }
       info->block(interval);
@@ -258,7 +367,7 @@ namespace Dune {
       dimw = interval.dimw();
       simplexgrid = (element == Simplex);
       if (element == General) {
-        SimplexBlock bsimplex(gridin,-1,dimw);
+        SimplexBlock bsimplex(gridin,-1,-1,dimw);
         simplexgrid = bsimplex.isactive();
         info->cube2simplex(element);
       } else {
@@ -267,26 +376,26 @@ namespace Dune {
       interval.get(vtx,nofvtx,elements,nofelements);
       // nofelements=interval.getHexa(elements);
       if(simplexgrid) {
-        nofelements=SimplexBlock::cube2simplex(vtx,elements);
+        nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
       }
     }
     else { // ok: grid generation by hand...
       VertexBlock bvtx(gridin,dimw);
       if (bvtx.isactive()) {
-        nofvtx=bvtx.get(vtx);
+        nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
         info->block(bvtx);
         vtxoffset=bvtx.offset();
       }
       nofelements=0;
-      SimplexBlock bsimplex(gridin,nofvtx,dimw);
-      CubeBlock bcube(gridin,nofvtx,dimw);
+      SimplexBlock bsimplex(gridin,nofvtx,vtxoffset,dimw);
+      CubeBlock bcube(gridin,nofvtx,vtxoffset,dimw);
       if (bcube.isactive() && element!=Simplex) {
         info->block(bcube);
-        nofelements=bcube.get(elements,vtxoffset);
+        nofelements=bcube.get(elements,elParams,nofelparams);
         if (bsimplex.isactive() && element==General) {
           // make simplex grid
           info->cube2simplex(element);
-          nofelements=SimplexBlock::cube2simplex(vtx,elements);
+          nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
           simplexgrid=true;
         }
         else
@@ -295,7 +404,7 @@ namespace Dune {
       else {
         simplexgrid=true;
         if (bsimplex.isactive()) {
-          nofelements+=bsimplex.get(elements,vtxoffset);
+          nofelements+=bsimplex.get(elements,elParams,nofelparams);
           if (dimw == 2)
             for (size_t i=0; i<elements.size(); i++) {
               testTriang(i);
@@ -304,9 +413,9 @@ namespace Dune {
         if (nofelements==0 && bcube.isactive()) {
           info->block(bcube);
           info->cube2simplex(element);
-          nofelements=bcube.get(elements,vtxoffset);
+          nofelements=bcube.get(elements,elParams,nofelparams);
           // make simplex grid
-          nofelements=SimplexBlock::cube2simplex(vtx,elements);
+          nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
           cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
         }
         else if (bsimplex.isactive()) {
@@ -488,69 +597,22 @@ namespace Dune {
      caller to tetgen/triangle
    ****************************************************/
   inline void DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
-    /*
-       VertexBlock bvtx(gridin,dimw);
-       IntervalBlock interval(gridin);
-     */
     SimplexGenerationBlock para(gridin);
     info->block(para);
 
     std::string name = "gridparserfile.polylists.tmp";
+    std::string inname = "gridparserfile.polylists.tmp";
+    std::string params;
 
     if(!para.hasfile()) {
-      /*
-         if (!interval.isactive() && !bvtx.isactive()) {
-         DUNE_THROW(DGFException, "No vertex information found!");
-         }
-         nofvtx = 0;
-         info->print("Reading verticies");
-         if (interval.isactive()) {
-         dverb << "Reading verticies from IntervalBlock" << std::flush;
-         dimw = interval.dimw();
-         interval.get(vtx,nofvtx);
-         dverb << "Done." << std::endl;
-         info->block(interval);
-         }
-         if (bvtx.ok()) {
-         dverb << "Reading verticies from VertexBlock" << std::flush;
-         nofvtx += bvtx.get(vtx);
-         dverb << "Done." << std::endl;
-         info->block(interval);
-         }
-         if (dimw!=2 && dimw!=3) {
-         DUNE_THROW(DGFException,
-                   "SimplexGen can only generate 2d or 3d meshes but not in "
-                   << dimw << " dimensions!");
-         }
-
-         removeCopies();
-       */
       {
-        std::string tmpname = name;
-        if (facemap.size()>0)
-          tmpname += ".poly";
-        else
-          tmpname += ".node";
-        info->print("writting poly file "+tmpname);
-        std::ofstream polys(tmpname.c_str());
-        /*
-           polys << nofvtx << " " << dimw << " 0 1" << std::endl;
-           for (int n=0;n<nofvtx;n++)
-           {
-           polys << n << " ";
-           for (int j=0;j<dimw;j++) {
-            polys << vtx[n][j] << " ";
-           }
-           polys << "1";
-           polys << std::endl;
-           }
-         */
-        writeTetgenPoly(polys);
+        writeTetgenPoly(name,params);
       }
     }
     else {
       if (para.filetype().size()==0) {
         readTetgenTriangle(para.filename());
+        return;
       }
       dimw = para.dimension();
       if (dimw!=2 && dimw!=3 && dimw!=-1) {
@@ -572,7 +634,7 @@ namespace Dune {
 
       if (para.haspath())
         command << para.path() << "/";
-      command << "triangle -ej ";
+      command << "triangle -ej " << params;
       if(para.hasfile())
       {
         name = para.filename();
@@ -581,12 +643,14 @@ namespace Dune {
       }
       else
       {
-        if (facemap.size()>0)
-          suffix = ".poly";
-        else
-          suffix = ".node";
+        suffix = "";
+        /*
+           if (facemap.size()>0)
+           suffix = ".poly";
+           else
+           suffix = ".node";
+         */
       }
-
       if (para.minAngle()>0)
         command << "-q" << para.minAngle() << " ";
       if (para.maxArea()>0)
@@ -612,7 +676,7 @@ namespace Dune {
 
         if (para.haspath())
           command << para.path() << "/";
-        command << "tetgen ";
+        command << "tetgen " << params;
         if(para.hasfile())
         {
           name = para.filename();
@@ -621,10 +685,13 @@ namespace Dune {
         }
         else
         {
-          if (facemap.size()>0)
-            suffix = ".poly";
-          else
-            suffix = ".node";
+          suffix = "";
+          /*
+             if (facemap.size()>0)
+             suffix = ".poly";
+             else
+             suffix = ".node";
+           */
         }
         command << name << suffix;
         dverb << "Calling : " << command.str() << std::endl;
@@ -646,7 +713,7 @@ namespace Dune {
         if (para.maxArea()>0)
           command << "a" << para.maxArea();
 
-        command << " " << name << ".1";
+        command << " " << inname << ".1";
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
         system(command.str().c_str());
@@ -663,13 +730,13 @@ namespace Dune {
       }
     }
     std::stringstream polyname;
-    polyname << name << "." << call_nr;
+    polyname << inname << "." << call_nr;
     readTetgenTriangle(polyname.str());
     info->print("Automatic grid generation finished");
   }
 
   inline void DuneGridFormatParser::readTetgenTriangle(std::string name) {
-    int offset,tmp,params;
+    int offset,bnd;
     std::string nodename = name + ".node";
     std::string elename = name + ".ele";
     std::string polyname = name + ((dimw==2) ? ".edge" : ".face");
@@ -689,7 +756,7 @@ namespace Dune {
     }
     {
       dverb << "calculating offset from " << name << " .... offset = ";
-      node >> nofvtx >> dimw >> tmp >> params;
+      node >> nofvtx >> dimw >> nofvtxparams >> bnd;
       // offset is 0 by default
       // the offset it the difference of the first vertex number to zero
       node >> offset;
@@ -697,9 +764,12 @@ namespace Dune {
       node.seekg(0);
     }
     {
+      int tmp;
       // first token is number of vertex which should equal i
-      node >> nofvtx >> tmp >> tmp >> params;
+      node >> nofvtx >> dimw >> nofvtxparams >> bnd;
       vtx.resize(nofvtx);
+      if (nofvtxparams>0)
+        vtxParams.resize(nofvtx);
       for (int i=0; i<nofvtx; i++) {
         vtx[i].resize(dimw);
         int nr;
@@ -708,14 +778,21 @@ namespace Dune {
         assert(nr-offset==i);
         for (int v=0; v<dimw; v++)
           node >> vtx[i][v];
-        for (int p=0; p<params; p++)
+        if (nofvtxparams>0) {
+          vtxParams[i].resize(nofvtxparams);
+          for (int p=0; p<nofvtxparams; p++)
+            node >> vtxParams[i][p];
+        }
+        for (int p=0; p<bnd; p++)
           node >> tmp;
       }
     }
     {
       int tmp;
-      ele >> nofelements >> tmp >> tmp;
+      ele >> nofelements >> tmp >> nofelparams;
       elements.resize(nofelements);
+      if (nofelparams>0)
+        elParams.resize(nofelements);
       for (int i=0; i<nofelements; i++) {
         elements[i].resize(dimw+1);
         int nr;
@@ -726,36 +803,38 @@ namespace Dune {
           ele >> elno;
           elements[i][v] = elno - offset;
         }
+        if (nofelparams>0) {
+          elParams[i].resize(nofelparams);
+          for (int p=0; p<nofelparams; p++)
+            ele >> elParams[i][p];
+        }
       }
     }
     dverb << "opening " << polyname << "\n";
     std::ifstream poly(polyname.c_str());
-    if (!poly) {
-      DUNE_THROW(DGFException,
-                 "could not find file " << polyname
-                                        << " prehaps something went wrong with Tetgen/Triangle?");
-    }
-    /*
-       if (dimw==2) {
-       poly >> tmp >> tmp >> tmp >> tmp;
-       }
-     */
-    {
-      int noffaces;
-      poly >> noffaces >> params;
-      if (params>0) {
-        assert(params==1);
-        facemap.clear();
-        for (int i=0; i<noffaces; i++) {
-          std::vector<int> p(dimw);
-          int nr;
-          poly >> nr;
-          for (size_t k=0; k<p.size(); k++)
-            poly >> p[k];
-          poly >> params;
-          if (params!=0) {
-            EntityKey<int> key(p,false);
-            facemap[key]=params;
+    if (poly) {
+      /*
+         if (dimw==2) {
+         poly >> tmp >> tmp >> tmp >> tmp;
+         }
+       */
+      {
+        int noffaces,params;
+        poly >> noffaces >> params;
+        if (params>0) {
+          assert(params==1);
+          facemap.clear();
+          for (int i=0; i<noffaces; i++) {
+            std::vector<int> p(dimw);
+            int nr;
+            poly >> nr;
+            for (size_t k=0; k<p.size(); k++)
+              poly >> p[k];
+            poly >> params;
+            if (params!=0) {
+              EntityKey<int> key(p,false);
+              facemap[key]=params;
+            }
           }
         }
       }

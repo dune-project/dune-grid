@@ -191,6 +191,8 @@ namespace Dune {
       bool goodline;     // active line describes a vertex
       std::vector<double> p; // active vertex
       int vtxoffset;
+      int nofParam;
+      std::vector<double> vtxparam;
     public:
       static const char* ID;
       // initialize vertex block and get first vertex
@@ -199,21 +201,12 @@ namespace Dune {
         dimworld(pdimworld),
         goodline(true),
         p(0),
-        vtxoffset(0)
+        vtxoffset(0),
+        nofParam(0),
+        vtxparam(0)
       {
-        /*
-           if (dimworld==-1) {
-           assert(ok());
-           getnextline();
-           dimworld=0;
-           double x;
-           while (getnextentry(x))
-            dimworld++;
-           pdimworld=dimworld;
-           reset();
-           }
-           p.resize(dimworld);
-         */
+        if (!isactive())
+          return;
         if (dimworld<0)
           dimworld=0;
         {
@@ -224,6 +217,23 @@ namespace Dune {
             }
           }
         }
+        {
+          int x;
+          if (findtoken("parameters")) {
+            if (getnextentry(x)) {
+              nofParam=x;
+              vtxparam.resize(nofParam);
+            }
+          }
+        }
+        dimworld=getDimW();
+        if (dimworld>0) {
+          p.resize(dimworld);
+        } else {
+          DUNE_THROW(DGFException,
+                     "ERROR in " << *this
+                                 << "      no line with enough entries found");
+        }
         reset();
         next();
         pdimworld=dimworld;
@@ -232,36 +242,40 @@ namespace Dune {
       int offset() {
         return vtxoffset;
       }
-      int get(std::vector<std::vector<double> >& vtx) {
+      int get(std::vector<std::vector<double> >& vtx,
+              std::vector<std::vector<double> >& param,int& nofp) {
+        nofp=nofParam;
         size_t nofvtx;
         size_t old_size = vtx.size();
         // vtx.resize(old_size+nofvertex());
         for (nofvtx=old_size; ok(); next(),nofvtx++) {
           vtx.push_back(p);
-          /*
-             vtx[nofvtx].resize(dimworld);
-             for (int j=0;j<dimworld;j++) {
-             vtx[nofvtx][j] = p[j];
-             }
-           */
+          if (nofParam>0)
+            param.push_back(vtxparam);
         }
-        /*
-           if (nofvtx!=vtx.size()) {
-           DUNE_THROW(DGFException, "Wrong number of verticies read!");
-           }
-         */
         return nofvtx;
       }
       // some information
       bool ok() {
         return goodline;
       }
-      /*
-         int nofvertex() {
-         return noflines();
-         }
-       */
     private:
+      // get dimworld
+      int getDimW() {
+        reset();
+        int dimworld=0;
+        getnextline();
+        while (dimworld<1 && linenumber()<noflines()) {
+          dimworld = 0;
+          double x;
+          while (getnextentry(x)) {
+            dimworld++;
+          }
+          dimworld-=nofParam;
+          getnextline();
+        }
+        return dimworld;
+      }
       // get next vertex
       bool next() {
         assert(ok());
@@ -271,24 +285,25 @@ namespace Dune {
           goodline=false;
           return goodline;
         }
-        int olddimworld=dimworld;
         double x;
         while (getnextentry(x)) {
           if (n<dimworld)
             p[n]=x;
-          else {
-            p.push_back(x);
-            dimworld++;
+          else if (n-dimworld<nofParam) {
+            vtxparam[n-dimworld]=x;
           }
           n++;
         }
-        if (olddimworld>0 && dimworld!=olddimworld) {
-          DUNE_THROW(DGFException,
+        if (n>0 && n!=dimworld+nofParam) {
+          return next();
+          /*
+             DUNE_THROW(DGFException,
                      "ERROR in " << *this
-                                 << "      wrong number of coordinates: "
-                                 << n << " read but expected " << dimworld);
+                     << "      wrong number of coordinates and parameters: "
+                     << n << " read but expected " << dimworld+nofParam);
+           */
         }
-        if (n!=dimworld || dimworld<1) {
+        if (n==0) {
           return next();
         }
         goodline=true;
@@ -402,68 +417,78 @@ namespace Dune {
     // *************************************************************
     class SimplexBlock : public BasicBlock {
       int nofvtx;
+      int vtxoffset;
       int dimworld;
       bool goodline;  // active line describes a vertex
       std::vector<int> p; // active vertex
+      int nofparams;  // nof parameters
+      std::vector<double> psimpl; // active parameters
     public:
       const static char* ID;
-      SimplexBlock(std::istream& in,int pnofvtx, int adimworld) :
+      SimplexBlock(std::istream& in,int pnofvtx, int pvtxoffset, int adimworld) :
         BasicBlock(in,ID),
         nofvtx(pnofvtx),
+        vtxoffset(pvtxoffset),
         dimworld(adimworld),
         goodline(true),
-        p(adimworld+1)
+        p(adimworld+1),
+        nofparams(0),
+        psimpl(0)
       {
+        if (!isactive()) return;
         assert((dimworld+1)>0);
+        int x;
+        if (findtoken("parameters")) {
+          int x=0;
+          if (getnextentry(x)) {
+            if (x>0) {
+              nofparams = x;
+              psimpl.resize(nofparams);
+            }
+          }
+          if (x<=0) {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      parameter key found with no or non-positive value "
+                                   << x);
+          }
+        }
+        reset();
         next();
       }
       ~SimplexBlock() {}
-      int get(std::vector<std::vector<int> >& simplex,int vtxoffset)
-      {
+      int get(std::vector<std::vector<int> >& simplex,
+              std::vector<std::vector<double> >&params,int& nofp) {
+        nofp=nofparams;
         int nofsimpl;
-        simplex.resize(nofsimplex());
         int offset = 0;
-        bool first = true;
-        for (nofsimpl=0; ok(); next(), nofsimpl++)
-        {
-          assert(nofsimpl<nofsimplex());
-          simplex[nofsimpl].resize(dimworld+1);
-          if(first)
-          {
-            offset = p[0];
-            first = false;
-          }
-          for (int j=0; j<dimworld+1; j++)
-          {
+        for (nofsimpl=0; ok(); next(), nofsimpl++) {
+          simplex.push_back(p);
+          for (size_t j=0; j<p.size(); j++) {
             simplex[nofsimpl][j] = p[j];
-            offset = std::min(p[j],offset);
+          }
+          if (nofparams>0) {
+            params.push_back(psimpl);
           }
         }
-
-        if (nofsimpl!=nofsimplex()) {
-          DUNE_THROW(DGFException,
-                     "Wrong number of simplex elements read!" << std::endl
-                                                              << "        Read " << nofsimpl
-                                                              << " elements, expected " << nofsimplex());
-        }
-        // make numbering starting from zero
-        // not matter whether offset is positive or negative
-        offset = vtxoffset;
-        if(offset != 0)
-        {
-          for (int i=0; i<nofsimpl; ++i)
-          {
-            for (size_t j=0; j<simplex[i].size(); ++j)
-            {
+        /*
+           // make numbering starting from zero
+           // not matter whether offset is positive or negative
+           offset = vtxoffset;
+           if(offset != 0) {
+           for (int i=0; i<nofsimpl; ++i) {
+            for (size_t j=0;j<simplex[i].size();++j) {
               simplex[i][j] -= offset;
             }
-          }
-        }
+           }
+           }
+         */
         return nofsimpl;
       }
       // cubes -> simplex
       static int cube2simplex(std::vector<std::vector<double> >& vtx,
-                              std::vector<std::vector<int> >& elements) {
+                              std::vector<std::vector<int> >& elements,
+                              std::vector<std::vector<double> >& params) {
         static int offset3[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
                                        {{0,0,0},{1,1,1},{1,0,1},{1,0,0}},
                                        {{0,0,0},{1,1,1},{0,0,1},{1,0,1}},
@@ -478,38 +503,40 @@ namespace Dune {
         dverb << "generating simplices...";
         dverb.flush();
         std::vector<std::vector<int> > cubes = elements;
+        std::vector<std::vector<double> > cubeparams = params;
         if(dimworld == 3) {
           elements.resize(6*cubes.size());
+          if (cubeparams.size()>0)
+            params.resize(6*cubes.size());
           for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
             elements[countsimpl].resize(4);
-          for (size_t c=0; c<cubes.size(); c++)
-          {
-            for(int tetra=0; tetra < 6 ; tetra++)
-            {
+          for (size_t c=0; c<cubes.size(); c++)  {
+            for(int tetra=0; tetra < 6 ; tetra++) {
               for (int v=0; v<4; v++) {
                 elements[c*6+tetra][v]=
                   cubes[c][offset3[tetra][v][0]+
                            offset3[tetra][v][1]*2+
                            offset3[tetra][v][2]*4];
               }
+              if (cubeparams.size()>0)
+                params[c*6+tetra] = cubeparams[c];
             }
           }
         }
         else {
           elements.resize(2*cubes.size() );
+          if (cubeparams.size()>0)
+            params.resize(2*cubes.size());
           for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
             elements[countsimpl].resize(3);
-          for (size_t c=0; c<cubes.size(); c++)
-          {
+          for (size_t c=0; c<cubes.size(); c++) {
             int diag = 0;
             double mind = 0;
-            for (int d=0; d<2; d++)
-            {
+            for (int d=0; d<2; d++) {
               double diaglen =
                 pow(vtx[cubes[c][d]][0]-vtx[cubes[c][2+((d+1)%2)]][0],2) +
                 pow(vtx[cubes[c][d]][1]-vtx[cubes[c][2+((d+1)%2)]][1],2);
-              if (diaglen<mind)
-              {
+              if (diaglen<mind) {
                 mind=diaglen;
                 diag = d;
               }
@@ -528,6 +555,8 @@ namespace Dune {
                   cubes[c][offset2[tetra][v][0]+
                            offset2[tetra][v][1]*2];
               }
+              if (cubeparams.size()>0)
+                params[c*2+tetra] = cubeparams[c];
             }
           }
         }
@@ -550,28 +579,30 @@ namespace Dune {
           goodline=false;
           return goodline;
         }
-        int x;
+        double x;
         while (getnextentry(x)) {
-          if (n<(dimworld+1)) {
-            p[n]=x;
-            if (n< 0 && x>= nofvtx) {
+          if (n<(int)p.size()) {
+            p[n]=int(x)-vtxoffset;
+            if (p[n]<0 || p[n]>=nofvtx) {
               DUNE_THROW(DGFException,
                          "ERROR in " << *this
                                      << "      wrong index of vertices: "
-                                     << x << " read but expected value between 0 and"
-                                     << nofvtx-1);
+                                     << x << " read but expected value between "
+                                     << vtxoffset << " and "
+                                     << nofvtx+vtxoffset);
             }
+          }
+          else if (n-p.size()<nofparams) {
+            psimpl[n-p.size()]=x;
           }
           n++;
         }
         // tests if the written block is ok in its size
-        goodline=(n==(dimworld+1));
-        if (!goodline) {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      wrong number of vertices: "
-                                 << n << " read but expected " << (dimworld+1));
+        if (n!=(int)p.size()+nofparams) {
+          return next();
         }
+        // tests if the written block is ok in its size
+        goodline=(n==(int)p.size()+nofparams);
         return goodline;
       }
       // get coordinates of active simplex
@@ -590,17 +621,26 @@ namespace Dune {
       bool goodline;    // active line describes a vertex
       std::vector<int> p; // active vertex
       std::vector<int> map; // active vertex
+      int nofparams;
+      int vtxoffset;
+      std::vector<double> psimpl; // active parameters
     public:
       static const char* ID;
-      CubeBlock(std::istream& in,int pnofvtx, int adimworld) :
+      CubeBlock(std::istream& in,int pnofvtx, int pvtxoffset, int adimworld) :
         BasicBlock(in,ID),
         nofvtx(pnofvtx),
         dimworld(adimworld),
         goodline(true),
-        p(1<<adimworld),
-        map(1<<adimworld)
+        p(0),
+        map(0),
+        nofparams(0),
+        vtxoffset(pvtxoffset),
+        psimpl(0)
       {
+        if (!isactive()) return;
         assert((dimworld+1)>0);
+        p.resize(1<<dimworld);
+        map.resize(1<<dimworld);
         int x;
         if (findtoken("map")) {
           for (size_t i=0; i<map.size(); i++) {
@@ -620,11 +660,28 @@ namespace Dune {
             map[i]=i;
           }
         }
+        if (findtoken("parameters")) {
+          int x=0;
+          if (getnextentry(x)) {
+            if (x>0) {
+              nofparams = x;
+              psimpl.resize(nofparams);
+            }
+          }
+          if (x<=0) {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      parameter key found with no or non-positive value "
+                                   << x);
+          }
+        }
         reset();
         next();
       }
       ~CubeBlock() {}
-      int get(std::vector<std::vector<int> >& simplex,int vtxoffset) {
+      int get(std::vector<std::vector<int> >& simplex,
+              std::vector<std::vector<double> >&params,int& nofp) {
+        nofp=nofparams;
         int nofsimpl;
         // simplex.resize(nofsimplex());
         for (nofsimpl=0; ok(); next(), nofsimpl++) {
@@ -632,26 +689,21 @@ namespace Dune {
           for (size_t j=0; j<p.size(); j++) {
             simplex[nofsimpl][map[j]] = p[j];
           }
-        }
-        int offset = vtxoffset;
-        if(offset != 0)
-        {
-          for (int i=0; i<nofsimpl; ++i)
-          {
-            for (size_t j=0; j<simplex[i].size(); ++j)
-            {
-              simplex[i][j] -= offset;
-            }
+          if (nofparams>0) {
+            params.push_back(psimpl);
           }
         }
         /*
-           if (nofsimpl!=nofsimplex()){
-           DUNE_THROW(DGFException,
-                     "Error occured while reading element information!"
-                     << std::endl
-                     << "        expected " << nofsimplex()
-                     << " element information "
-                     << "        but only read " << nofsimpl << " elements.");
+           int offset = vtxoffset;
+           if(offset != 0)
+           {
+           for (int i=0; i<nofsimpl; ++i)
+           {
+            for (size_t j=0;j<simplex[i].size();++j)
+            {
+              simplex[i][j] -= offset;
+            }
+           }
            }
          */
         return nofsimpl;
@@ -673,34 +725,31 @@ namespace Dune {
           goodline=false;
           return goodline;
         }
-        int x;
+        double x;
         while (getnextentry(x))
         {
           if (n<(int)p.size())
           {
-            p[n]=x;
-            if (x< 0 && x>= nofvtx)
+            p[n]=int(x)-vtxoffset;
+            if (p[n]<0 || p[n]>=nofvtx)
             {
               DUNE_THROW(DGFException,
                          "ERROR in " << *this
                                      << "      wrong index of vertices: "
-                                     << x << " read but expected value between 0 and "
-                                     << nofvtx-1);
+                                     << x << " read but expected value between "
+                                     << vtxoffset << " and "
+                                     << nofvtx+vtxoffset);
             }
+          } else if (n-p.size()<nofparams) {
+            psimpl[n-p.size()]=x;
           }
           n++;
         }
         // tests if the written block is ok in its size
-        if (n!=(int)p.size()) {
+        if (n!=(int)p.size()+nofparams) {
           return next();
-          /*
-             DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                     << "      wrong number of vertices: "
-                     << "      read " << n << " but expected " << p.size());
-           */
         }
-        goodline=(n==(int)p.size());
+        goodline=(n==(int)p.size()+nofparams);
         return goodline;
       }
       // get coordinates of active simplex

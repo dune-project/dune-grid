@@ -93,9 +93,9 @@ const int dimworld = 2;
 const int dimworld = GRIDDIM;
 #endif
 
-/*! @brief Some simple static information for a given GridType
- */
 namespace Dune {
+  /*! @brief Some simple static information for a given GridType
+   */
   template <class GridType>
   struct DGFGridInfo {
     //! number of globalRefine steps needed to refuce h by 0.5

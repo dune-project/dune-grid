@@ -62,6 +62,10 @@ namespace Dune {
       element(General),
       simplexgrid(false),
       cube2simplex(false),
+      nofvtxparams(0),
+      nofelparams(0),
+      vtxParams(),
+      elParams(),
       info(0)
     {}
 
@@ -73,6 +77,7 @@ namespace Dune {
     //! returns true if reading succeded
     inline bool readDuneGrid(std::istream&);
     //! method to write in Tetgen/Triangle Poly Format
+    inline void writeTetgenPoly(std::string&,std::string&);
     inline void writeTetgenPoly(std::ostream&);
     //! method to write macrogridfiles in alu format (cam be used without dune)
     inline void writeAlu(std::ostream&);
@@ -101,6 +106,9 @@ namespace Dune {
     bool simplexgrid;
     // true if grid is generated using the intervall Block
     bool cube2simplex;
+    // parameters on elements
+    int nofvtxparams,nofelparams;
+    std::vector<std::vector<double> > vtxParams,elParams;
     // write information about generation process
     PrintInfo* info;
     inline void generateBoundaries(std::istream&,bool);
@@ -112,6 +120,25 @@ namespace Dune {
     inline void setOrientation(int use1,int use2,orientation_t orientation=counterclockwise);
     inline void setRefinement(int use1,int use2,int is1=-1,int is2=-1);
     inline double testTriang(int snr);
+    inline std::vector<double>& getElParam(int i,std::vector<double>& coord) {
+      coord.resize(dimw);
+      for (int j=0; j<dimw; j++)
+        coord[j]=0.;
+      for (int j=0; j<dimw; j++) {
+        for (int k=0; k<elements[i].size(); ++k) {
+          coord[j]+=vtx[elements[i][k]][j];
+        }
+        coord[j]/=double(elements[i].size());
+      }
+      return elParams[i];
+    }
+    inline std::vector<double>& getVtxParam(int i,std::vector<double>& coord) {
+      coord.resize(dimw);
+      for (int j=0; j<dimw; j++)
+        coord[j]=0.;
+      coord = vtx[i];
+      return vtxParams[i];
+    }
   };
 
   class MacroGrid : protected DuneGridFormatParser
@@ -165,7 +192,7 @@ namespace Dune {
   template <class GridType>
   class GridPtr : public MacroGrid {
     // make operator new and delete private, because this class is only a
-    // pointer (problem with icc 7.0)
+    // pointer
     // void * operator new (size_t);
     // void operator delete (void *);
   public:
@@ -173,16 +200,48 @@ namespace Dune {
     //! constructor given the name of a DGF file
     GridPtr(const std::string filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
       MacroGrid(filename.c_str(),MPICOMM),
-      gridptr_(this->template createGrid<GridType>()) {}
+      gridptr_(this->template createGrid<GridType>()),
+      elParam(0), vtxParam(0), emptyParam(), nofVtxParam_(0), nofElParam_(0) {
+      if (nofelparams>0) {
+        nofElParam_ = nofelparams;
+        for (int i=0; i<elements.size(); i++) {
+          std::vector<double> coord;
+          DomainType p;
+          std::vector<double>& param = this->getElParam(i,coord);
+          for (int k=0; k<dimw; k++)
+            p[k] = coord[k];
+          elParam.push_back(make_pair(p,param));
+        }
+      }
+      if (nofvtxparams>0) {
+        nofVtxParam_ = nofvtxparams;
+        for (int i=0; i<vtx.size(); i++) {
+          std::vector<double> coord;
+          DomainType p;
+          std::vector<double>& param = getVtxParam(i,coord);
+          for (int k=0; k<dimw; k++)
+            p[k] = coord[k];
+          vtxParam.push_back(make_pair(p,param));
+        }
+      }
+    }
 
     //! Default constructor, creating empty GridPtr
-    GridPtr() : MacroGrid() , gridptr_() {}
+    GridPtr() : MacroGrid() , gridptr_() ,
+                elParam(0), vtxParam(0), emptyParam(),
+                nofVtxParam_(0), nofElParam_(0) {}
 
     //! Constructor storing given pointer to internal auto pointer
-    GridPtr(GridType * grd) : MacroGrid() , gridptr_(grd) {}
+    GridPtr(GridType * grd) : MacroGrid() , gridptr_(grd),
+                              elParam(0), vtxParam(0), emptyParam(),
+                              nofVtxParam_(0), nofElParam_(0) {}
 
     //! Copy constructor, copies internal auto pointer
-    GridPtr(const GridPtr & org) : gridptr_(org.gridptr_) {}
+    GridPtr(const GridPtr & org) : gridptr_(org.gridptr_),
+                                   elParam(org.elParam), vtxParam(org.vtxParam),
+                                   emptyParam(),
+                                   nofVtxParam_(org.nofVtxParam_),
+                                   nofElParam_(org.nofElParam_) {}
 
     //! return reference to GridType instance
     GridType& operator*() {
@@ -206,6 +265,10 @@ namespace Dune {
     GridPtr & operator = (const GridPtr & org)
     {
       gridptr_ = org.gridptr_;
+      elParam = org.elParam;
+      vtxParam = org.vtxParam;
+      nofVtxParam_ = org.nofVtxParam_;
+      nofElParam_ = org.nofElParam_;
       return *this;
     }
 
@@ -215,9 +278,81 @@ namespace Dune {
       gridptr_ = std::auto_ptr<GridType>(grd);
       return *this;
     }
+    //! get number of parameters defined for a given codimension
+    int nofParameters(int cdim) {
+      switch (cdim) {
+      case 0 : return nofElParam_; break;
+      case GridType::dimension : return nofVtxParam_; break;
+      }
+      return 0;
+    }
+    //! get parameters defined for each codim 0 und dim entity on the grid through the grid file
+    template <class Entity>
+    std::vector<double>& parameters(const Entity& en) {
+      if (Entity::codimension==0) {
+        if (elParam.size()==0)
+          return emptyParam;
+        DomainType coord(0);
+        typedef typename Entity::Geometry GeometryType;
+        const GeometryType& geo=en.geometry();
+        for (int i=0; i<geo.corners(); ++i)
+          coord += geo[i];
+        coord/=double(geo.corners());
+        return elementParams(coord);
+      } else if (int(Entity::codimension) == int(GridType::dimension)) {
+        if (vtxParam.size()==0)
+          return emptyParam;
+        DomainType coord;
+        typedef typename Entity::Geometry GeometryType;
+        const GeometryType& geo=en.geometry();
+        coord = geo[0];
+        return vertexParams(coord);
+      } else {
+        return emptyParam;
+      }
+    }
   private:
+    typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
+    inline std::vector<double>& elementParams(DomainType& coord) {
+      int idx=0;
+      double min=1e10;
+      for (int i=0; i<elParam.size(); ++i) {
+        DomainType p(coord);
+        p -= elParam[i].first;
+        double len=p.two_norm();
+        if (min>len) {
+          min=len;
+          idx=i;
+        }
+      }
+      if (idx<0)
+        return emptyParam;
+      else
+        return elParam[idx].second;
+    }
+    inline std::vector<double>& vertexParams(DomainType& coord) {
+      int idx=0;
+      double min=1e10;
+      for (int i=0; i<vtxParam.size(); ++i) {
+        DomainType p(coord);
+        p -= vtxParam[i].first;
+        double len=p.two_norm();
+        if (min>len) {
+          min=len;
+          idx=i;
+        }
+      }
+      if (idx<0)
+        return emptyParam;
+      else
+        return vtxParam[idx].second;
+    }
     // grid auto pointer
     mutable std::auto_ptr<GridType> gridptr_;
+    // element and vertex parameters
+    std::vector<std::pair<DomainType,std::vector<double> > > elParam,vtxParam;
+    int nofVtxParam_,nofElParam_;
+    std::vector<double> emptyParam;
   }; // end of class GridPtr
 }
 #include "dgfparser.cc"
@@ -245,9 +380,9 @@ namespace Dune {
         directory: \n
         by defining one of the symbols
         \c ALBERTAGRID ,
-        \c ALUGRID_CONFORM ,
         \c ALUGRID_CUBE ,
         \c ALUGRID_SIMPLEX ,
+        \c ALUGRID_CONFORM ,
         \c SGRID ,
         \c UGGRID , or
         \c YASPGRID
@@ -271,7 +406,7 @@ namespace Dune {
      @code
        Dune::GridPtr<GridType> gridptr(filename);
      @endcode
-      or
+     or
      @code
        Dune::GridPtr<GridType> gridptr;
        ...
@@ -281,11 +416,9 @@ namespace Dune {
      where in the second and third example \c MPIHelper::getCommunicator()
      is selected as default
      value; \c filename is the name of the dgf file. This creates an
-     auto pointer like object \c GridPtr which holds a pointer to an instance
-     of \c GridType whose macrogrid is described through the
-     dgf file. Access to the grid is gained by calling the operator * of
-     \c GridPtr.
-
+     auto pointer like object \c Dune::GridPtr<GridType> holding a pointer to a
+     the grid instance described through the dgf file.
+     Access to the grid is gained by calling the operator * of \c GridPtr.
      @code
        GridType & grid = *gridptr;
      @endcode
@@ -344,12 +477,16 @@ namespace Dune {
        of the macrogrid.
        - If the ordering of the local vertices of the cube elements
          does not follow the %Dune
-         %@link GridReferenceElements reference element@endlink then
+         @link GridReferenceElements reference element@endlink then
          the mapping between the local numbering used and the dune reference
          cube has to be prescribed by a line starting with the keyword \b map
          followed by
          \c dimworld<SUP>2</SUP> values describing the mapping between the
          local vertex numbers.
+       - By means of the special keyword \b parameters followed by a positive
+         integer \c n it is possible to add \c n parameters to each element of the
+         grid. These double valued parameters then have to be added to the definition
+         lines for the elementsi behind the vertex numbers.
      - \b Interval \n
        Each interval is described by three lines in this block:
        the first two lines give the lower and upper vector of an interval,
@@ -360,7 +497,9 @@ namespace Dune {
        Each line consists of \c dimworld+1 vertex indices (see \b Vertex block)
        describing one simplex
        of the macrogrid.
-       \e Note that no ordering of local vertices is required.
+       - Note that no ordering of local vertices is required.
+       - Parameters can be added to each element using the \b parameters keyword
+         as described for cube elements.
      - \b Simplexgenerator \n
        Using this block a simplex grid can be automatically generated using
        one of the freely available grid generation tools
@@ -377,12 +516,16 @@ namespace Dune {
          the keyword
          \b firstindex followed by a positive integer denoting the number
          of the first vertex can be used.
+       - Using the \b parameters keyword it is possible to add a set of parameters
+         to each vertex of the grid.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->
      For simplicity we first describe how the grid is manually constructed,
      i.e., if no \b Simplexgenerator  block is found. Details on how
      Tetgen/Triangle can be used is detailed below (see \ref Simplexgeneration).
+     How to access the element and vertex parameter is detailed in
+     Section \ref PARAMETERS.
      The details of the construction are logged in the file
      \b dgfparser.log.
 
@@ -479,6 +622,22 @@ namespace Dune {
      Boundary ids are assigned in the same manner as described for
      simplex grids.
 
+     @section PARAMETERS Accessing parameters
+     In addition to the element and vertex information it is possible to add
+     a set of parameters through the DGF file. Using the construction
+     mechanism via the Dune::GridPtr<GridType> class these parameters can be
+     accessed using the
+     Dune::GridPtr<GridType>::parameters(const Entity& en)
+     method. Depending on the codimentsion of \c en the method returns either
+     the element or vertex parameters of that entity in the DGF file which
+     has minimal distance from the midpoint of the entity \c en. Note that in this
+     implementation the search procedure requires is \c O(N) where N is the number
+     of entities defined in the DGF file - in future releases this will be replaced
+     by a nearest neighbor search.
+     The number of parameters for a given
+     codimension can be retrived using the method
+     Dune::GridPtr<GridType>::nofParameters.
+
     <!---------------------------------------------->
    \section Simplexgeneration Using Tetgen/Triangle
        The freely available simplex grid generators are direcltly
@@ -502,22 +661,32 @@ namespace Dune {
           Tetgen/Triangle
           files name.node and name.ele were generated and these will be used
           to described the verticies and elements of the Dune grid.
-       -# For the second approach the \b vertex block and the \b interval blocks
+       -# In the second approach the \b vertex and the \b interval blocks
           (if present)
-          are used to generate the verticies of the grid - the resulting .node
-          file is passed directly to Tetgen/Triangle and a tessellation of
-          the convex hull of the points is generated. A more detailed
-          description of the domain is possible by using the \b
-          Boundarysegment block together with the \b vertex block.
-          Planar polyhedral boundary faces of the domain can be
-          prescribed in this way.
-          Note that in this case the whole
-          domain boundary has to be defined (see the description of
-          the .poly files in the Tetgen documentation).
-          In 3d each polyhedral face (p0,..,pn) is automatically closed by adding
-          the segment between p0 and pn. To define the whole boundary
-          of a 2d domain using only one polyhedron the closing
-          segment has to be added, i.e., (p0,..,pn,p0).
+          are used to generate the verticies of the grid; the \b Cube and \b
+          Simplex blocks are used for element information in the interior and
+          the \b boundarysegment block is used for boundary information:
+          - If only a \b vertex and/or \b interval block is found
+            the resulting .node file is passed directly to Tetgen/Triangle and a
+            tessellation of
+            the convex hull of the points is generated.
+          - A more detailed
+            description of the domain is possible by using the \b
+            Boundarysegment block together with the \b vertex block.
+            Planar polyhedral boundary faces of the domain can be
+            prescribed in this way.
+            Note that in this case the whole
+            domain boundary has to be defined (see the description of
+            the .poly files in the Tetgen documentation).
+            In 3d each polyhedral face (p0,..,pn) is automatically closed by adding
+            the segment between p0 and pn. To define the whole boundary
+            of a 2d domain using only one polyhedron the closing
+            segment has to be added, i.e., (p0,..,pn,p0).
+          - If a \b cube or \b simplex block is found the element information
+            is also passed to tetgen/triangle together with the parameters - if
+            given. Note that triangle can only handle one region atribute in
+            its .poly files so that only the first parameter is the \b simplex
+            or \b cube block can be retrived.
        .
 
        Some identifiers can be
@@ -532,6 +701,13 @@ namespace Dune {
        .
        In this case the grid is constructed using two calls to Tetgen/Triangle.           The details of the call are logged in the \b dgfparser.log file.
 
+      \e Note: vertex parameters are interpolated in triangle but tetgen
+                assigns a zero to all newly inserted vertices; therfore quality
+                enhancement and vertex parameters should not be combined in 3d.
+                On the other hand element parameters and boundary ids can be
+                used together with quality enhancement.
+
+
        The remaining identifiers are
        -  The identifier \b path
           (followed by a path name) can be used
@@ -541,9 +717,14 @@ namespace Dune {
           of the resulting mesh using the visualization tools distributed with
           Triangle/Tetgen.
        .
+       \e Note that parameters can be attached to the verticies and elements of
+       the grid as described in the Triangle/Tetgen manual. Then can be
+       retrieved as described in Section \ref PARAMETERS.
+
        Download
        - Tetgen http://tetgen.berlios.de
        - Triangle http://www.cs.cmu.edu/~quake/triangle.html
+
 
 
      <!---------------------------------------------->
@@ -553,7 +734,6 @@ namespace Dune {
       for simplex grids. An automatic selection is performed using the
       longest edge, but
       it should be possible to turn off this automatic selection.
-   -# A parameter block for vertex and element data (e.g. domain information...)
    -# A callback to the user
       between parsing the DGF file and the construction of the dune grid;
       here e.g. a post-processing of the vertex coordinates could be included.
@@ -563,6 +743,7 @@ namespace Dune {
    In two space dimensions:
    - \ref dgfexample1
    - \ref dgfexample2
+   - \ref dgfexampleParam
    - \ref dgfexample3
 
    In three space dimensions:
@@ -643,6 +824,18 @@ namespace Dune {
 
    \image html  examplegrid2d.png "The resulting grid"
 
+   \section dgfexampleParam Using Parameters
+
+   We use the same domain as in the previous example but include vertex and
+   element parameters:
+
+   @include examplegrid2e.dgf
+
+   The results in piecewise constant data on the elements and piecewise linear
+   date using the vertex parameters:
+
+   \image html  examplegrid2e.png "The resulting grid with element and vertex parameters"
+
    \section dgfexample3 Interval Domain
    A automatic tessellation of the unit square using
    a Cartesian Grid.
@@ -702,7 +895,7 @@ namespace Dune {
    domain and boundary ids:
    \image html  examplegrid10.png "An example domain"
 
-   Manual grid construction. Note that the reference element used
+   \e Manual grid construction: Note that the reference element used
    to define the cube is not the one used in dune so that the
    mapping has to be given; furthermore the vertex index are numbered
    starting with 1.
@@ -712,10 +905,10 @@ namespace Dune {
 
    @include examplegrid10.dgf
 
-   \image html  examplegrid10a.png "The resulting cube grid"
-   \image html  examplegrid10b.png "The resulting simplex grid"
+   \image html  examplegrid10c.png "The resulting cube grid"
+   \image html  examplegrid10s.png "The resulting simplex grid"
 
-   Using multiple intervale. Here the boundary ids are not set
+   \e Using multiple intervale: Here the boundary ids are not set
    correctly; this could be done using different boundarydomains.
 
    @include examplegrid11.dgf
@@ -723,7 +916,7 @@ namespace Dune {
    \image html  examplegrid11a.png "The resulting cube grid"
    \image html  examplegrid11b.png "The resulting simplex grid"
 
-   By only defining the boundary faces and using Tetgen:
+   \e By only defining the boundary faces and using Tetgen:
 
    @include examplegrid12.dgf
 
@@ -736,8 +929,25 @@ namespace Dune {
 
    \image html  examplegrid12_2.png "The resulting grid"
 
+   Finally we demonstrate the use of parameters. With a simple modification
+   of the above example
 
-     <!---------------------------------------------->
+   @include examplegrid10a.dgf
+
+   we can define parameters on each element:
+
+   \image html  examplegrid10a.png "The resulting grid with element parameters"
+
+   The following example
+
+   @include examplegrid10a.dgf
+
+   defines parameters for each vertex of the grid, leading to a piecewise linear
+   function
+
+   \image html  examplegrid10b.png "The resulting grid with vertex parameters"
+
+   <!---------------------------------------------->
    \section dgfexample5 Importing Grids written in a Tetgen/Triangle format
 
    Here a .mesh file used to generate a 3d simplex grid through Tetgen. The
@@ -751,6 +961,8 @@ namespace Dune {
    \image html  Orb_cut.png "The resulting grid using ALUSimplexGrid<3,3>"
 
    \image html  bunny.p65.param_skin.png "The resulting grid using ALUSimplexGrid<3,3>"
+
+   \image html  pmdc.png "The resulting grid using ALUSimplexGrid<3,3>"
 
  */
 /*
