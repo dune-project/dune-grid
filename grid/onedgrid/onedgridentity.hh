@@ -16,7 +16,7 @@ namespace Dune {
   class OneDGridLeafIntersectionIterator;
   template <class GridImp>
   class OneDGridLevelIntersectionIterator;
-  template <int mydim, int coorddim, class GridImp>
+  template <int mydim, class GridImp>
   class OneDMakeableGeometry;
 
   template <int mydim>
@@ -152,7 +152,7 @@ namespace Dune {
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLevelIterator;
 
-    friend class OneDGrid<dim,GridImp::dimensionworld>;
+    friend class OneDGrid;
 
     //! Constructor with a given grid level
     OneDGridEntity(int level, double coord) : geo_(coord), target_(NULL) {}
@@ -210,7 +210,7 @@ namespace Dune {
     }
 
     //! the current geometry
-    OneDMakeableGeometry<dim-cd,dim,GridImp> geo_;
+    OneDMakeableGeometry<dim-cd,GridImp> geo_;
 
     OneDEntityImp<0>* target_;
 
@@ -238,7 +238,7 @@ namespace Dune {
   class OneDGridEntity<0,dim, GridImp> :
     public EntityDefaultImplementation<0,dim,GridImp, OneDGridEntity>
   {
-    friend class OneDGrid <dim, GridImp::dimensionworld>;
+    friend class OneDGrid;
     template <class GridImp_>
     friend class OneDGridLevelIntersectionIterator;
     template <class GridImp_>
@@ -432,9 +432,9 @@ namespace Dune {
 
 
     //! the current geometry
-    OneDMakeableGeometry<dim,dim,GridImp> geo_;
+    OneDMakeableGeometry<dim,GridImp> geo_;
 
-    mutable OneDMakeableGeometry<dim,dim,GridImp> geometryInFather_;
+    mutable OneDMakeableGeometry<dim,GridImp> geometryInFather_;
 
     OneDEntityImp<1>* target_;
 

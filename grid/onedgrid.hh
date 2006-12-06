@@ -23,10 +23,10 @@ namespace Dune
   template<int codim, class GridImp> class OneDGridEntityPointer;
   template<int codim, PartitionIteratorType pitype, class GridImp> class OneDGridLevelIterator;
 
-  template<int mydim, int coordworld, class GridImp>            class OneDGridGeometry;
+  template<int mydim, int coorddim, class GridImp>            class OneDGridGeometry;
   template<class GridImp>            class OneDGridHierarchicIterator;
   template<class GridImp, bool LeafIterator> class OneDGridIntersectionIterator;
-  template<int dim, int dimworld>            class OneDGrid;
+  class OneDGrid;
 
   template<int codim>                        class OneDGridLevelIteratorFactory;
 
@@ -153,7 +153,7 @@ namespace Dune {
   template<int dim, int dimw>
   struct OneDGridFamily
   {
-    typedef GridTraits<dim,dimw,Dune::OneDGrid<dim,dimw>,
+    typedef GridTraits<dim,dimw,Dune::OneDGrid,
         OneDGridGeometry,
         OneDGridEntity,
         OneDGridEntityPointer,
@@ -162,15 +162,15 @@ namespace Dune {
         OneDGridLevelIntersectionIterator,                // level intersection iter
         OneDGridHierarchicIterator,
         OneDGridLeafIterator,
-        OneDGridLevelIndexSet<const OneDGrid<dim,dimw> >,
-        OneDGridLevelIndexSetTypes<const OneDGrid<dim,dimw> >,
-        OneDGridLeafIndexSet<const OneDGrid<dim,dimw> >,
-        OneDGridLeafIndexSetTypes<const OneDGrid<dim,dimw> >,
-        OneDGridIdSet<const OneDGrid<dim,dimw> >,
+        OneDGridLevelIndexSet<const OneDGrid>,
+        OneDGridLevelIndexSetTypes<const OneDGrid>,
+        OneDGridLeafIndexSet<const OneDGrid>,
+        OneDGridLeafIndexSetTypes<const OneDGrid>,
+        OneDGridIdSet<const OneDGrid>,
         unsigned int,
-        OneDGridIdSet<const OneDGrid<dim,dimw> >,
+        OneDGridIdSet<const OneDGrid>,
         unsigned int,
-        CollectiveCommunication<Dune::OneDGrid<dim,dimw> > >
+        CollectiveCommunication<Dune::OneDGrid> >
     Traits;
   };
 
@@ -191,9 +191,11 @@ namespace Dune {
      which can also be instantiated in 1D, the OneDGrid is nonuniform
      and provides local mesh refinement and coarsening.
    */
-  template <int dim, int dimworld>
-  class OneDGrid : public GridDefaultImplementation <dim, dimworld,double,OneDGridFamily<dim,dimworld> >
+  class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily<1,1> >
   {
+    // Grid and world dimension are hardwired in this grid
+    enum {dim = 1};
+    enum {dimworld = 1};
 
     friend class OneDGridLevelIteratorFactory <0>;
     friend class OneDGridLevelIteratorFactory <1>;
@@ -203,19 +205,15 @@ namespace Dune {
     friend class OneDGridLeafIntersectionIterator<OneDGrid>;
     friend class OneDGridLevelIntersectionIterator<OneDGrid>;
 
-    friend class OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >;
-    friend class OneDGridLeafIndexSet<const OneDGrid<dim,dimworld> >;
-    friend class OneDGridIdSet<const OneDGrid<dim,dimworld> >;
+    friend class OneDGridLevelIndexSet<const OneDGrid>;
+    friend class OneDGridLeafIndexSet<const OneDGrid>;
+    friend class OneDGridIdSet<const OneDGrid>;
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
-
-    /** \brief OneDGrid is only implemented for 1d */
-    CompileTimeChecker< (dim==1 && dimworld==1) >   Use_OneDGrid_only_for_1d;
-
 
     /** \brief The type used by to store coordinates */
     typedef double OneDCType;
@@ -229,7 +227,7 @@ namespace Dune {
     typedef OneDGridFamily<dim,dimworld> GridFamily;
 
     /** \brief Provides the standard grid types */
-    typedef typename OneDGridFamily<dim,dimworld>::Traits Traits;
+    typedef OneDGridFamily<dim,dimworld>::Traits Traits;
 
     /** \brief Constructor with an explicit set of coordinates */
     OneDGrid(const std::vector<OneDCType>& coords);
@@ -336,23 +334,23 @@ namespace Dune {
     }
 
     /** \brief Get the set of global ids */
-    const typename Traits::GlobalIdSet& globalIdSet() const
+    const Traits::GlobalIdSet& globalIdSet() const
     {
       return idSet_;
     }
 
     /** \brief Get the set of local ids */
-    const typename Traits::LocalIdSet& localIdSet() const
+    const Traits::LocalIdSet& localIdSet() const
     {
       return idSet_;
     }
 
     /** \brief Get an index set for the given level */
-    const typename Traits::LevelIndexSet& levelIndexSet(int level) const
+    const Traits::LevelIndexSet& levelIndexSet(int level) const
     {
       if (! levelIndexSets_[level]) {
         levelIndexSets_[level] =
-          new OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >(*this, level);
+          new OneDGridLevelIndexSet<const OneDGrid>(*this, level);
         levelIndexSets_[level]->update();
       }
 
@@ -360,7 +358,7 @@ namespace Dune {
     }
 
     /** \brief Get an index set for the leaf level */
-    const typename Traits::LeafIndexSet& leafIndexSet() const
+    const Traits::LeafIndexSet& leafIndexSet() const
     {
       return leafIndexSet_;
     }
@@ -373,7 +371,7 @@ namespace Dune {
      *
      * \return True, if marking was successfull
      */
-    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer& e );
+    bool mark(int refCount, const Traits::Codim<0>::EntityPointer& e );
 
     /** \brief return current adaptation marker of given entity
 
@@ -381,7 +379,7 @@ namespace Dune {
 
         \return int current adaptation marker of entity e
      */
-    int getMark(const typename Traits::template Codim<0>::Entity& e );
+    int getMark(const Traits::Codim<0>::Entity& e );
 
     //! Does nothing except return true if some element has been marked for refinement
     bool preAdapt();
@@ -465,11 +463,11 @@ namespace Dune {
     std::vector<List<OneDEntityImp<1> > > elements;
 
     // Our set of level indices
-    mutable std::vector<OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >* > levelIndexSets_;
+    mutable std::vector<OneDGridLevelIndexSet<const OneDGrid>* > levelIndexSets_;
 
-    OneDGridLeafIndexSet<const OneDGrid<dim,dimworld> > leafIndexSet_;
+    OneDGridLeafIndexSet<const OneDGrid> leafIndexSet_;
 
-    OneDGridIdSet<const OneDGrid<dim,dimworld> > idSet_;
+    OneDGridIdSet<const OneDGrid> idSet_;
 
     unsigned int freeVertexIdCounter_;
 
@@ -480,32 +478,32 @@ namespace Dune {
   namespace Capabilities
   {
 
-    template<int dim, int dimw, int cdim>
-    struct hasEntity< OneDGrid<dim,dimw>, cdim >
+    template<int cdim>
+    struct hasEntity< OneDGrid, cdim >
     {
       static const bool v = true;
     };
 
-    template<int dim,int dimw>
-    struct isParallel< OneDGrid<dim,dimw> >
+    template<>
+    struct isParallel< OneDGrid >
     {
       static const bool v = false;
     };
 
-    template<int dim, int dimw>
-    struct isLevelwiseConforming< OneDGrid<dim,dimw> >
+    template<>
+    struct isLevelwiseConforming< OneDGrid >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct isLeafwiseConforming< OneDGrid<dim,dimw> >
+    template<>
+    struct isLeafwiseConforming< OneDGrid >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct hasHangingNodes< OneDGrid<dim,dimw> >
+    template<>
+    struct hasHangingNodes< OneDGrid >
     {
       static const bool v = false;
     };

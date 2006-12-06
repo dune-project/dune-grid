@@ -26,8 +26,8 @@ int main () try
 
   // extra-environment to check destruction
   {
-    std::cout << std::endl << "OneDGrid<1,1>" << std::endl << std::endl;
-    Dune::OneDGrid<1,1> grid(coords);
+    std::cout << std::endl << "OneDGrid" << std::endl << std::endl;
+    Dune::OneDGrid grid(coords);
 
     // check macro grid
     gridcheck(grid);

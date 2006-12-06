@@ -211,14 +211,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionSelfLocal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionNeighborLocal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionGlobal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionGlobal_;
 
   };
 
@@ -461,14 +461,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionSelfLocal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionNeighborLocal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable OneDMakeableGeometry<0,1,GridImp> intersectionGlobal_;
+    mutable OneDMakeableGeometry<0,GridImp> intersectionGlobal_;
 
   };
 

@@ -9,13 +9,13 @@
 
 namespace Dune {
 
-  template<int mydim, int coorddim, class GridImp>
-  class OneDMakeableGeometry : public Geometry<mydim, coorddim, GridImp, OneDGridGeometry>
+  template<int mydim, class GridImp>
+  class OneDMakeableGeometry : public Geometry<mydim, 1, GridImp, OneDGridGeometry>
   {
   public:
 
     OneDMakeableGeometry() :
-      Geometry<mydim, coorddim, GridImp, OneDGridGeometry>(OneDGridGeometry<mydim, coorddim, GridImp>())
+      Geometry<mydim, 1, GridImp, OneDGridGeometry>(OneDGridGeometry<mydim, 1, GridImp>())
     {};
 
     void setToTarget(OneDEntityImp<mydim>* target) {
@@ -29,7 +29,7 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class OneDMakeableGeometry<1,1,GridImp> : public Geometry<1, 1, GridImp, OneDGridGeometry>
+  class OneDMakeableGeometry<1,GridImp> : public Geometry<1, 1, GridImp, OneDGridGeometry>
   {
   public:
 
@@ -139,7 +139,7 @@ namespace Dune {
     template <int codim_, int dim_, class GridImp_>
     friend class OneDGridEntity;
 
-    friend class OneDGrid<GridImp::dimension, GridImp::dimensionworld>;
+    friend class OneDGrid;
 
     template <int cc_, int dim_, class GridImp_>
     friend class OneDGridSubEntityFactory;
