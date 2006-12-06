@@ -394,7 +394,7 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
     typedef typename GridImp::template Codim<codim>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     // disambiguate member functions with the same name in both bases
@@ -458,7 +458,7 @@ namespace Dune {
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
@@ -1526,13 +1526,13 @@ namespace Dune {
     }
 
     SIntersectionIterator<const SGrid<dim, dimworld> >&
-    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+    getRealIntersectionIterator(typename Traits::LeafIntersectionIterator& it)
     {
       return this->getRealImplementation(it);
     }
 
     const SIntersectionIterator<const SGrid<dim, dimworld> >&
-    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
+    getRealIntersectionIterator(const typename Traits::LeafIntersectionIterator& it) const
     {
       return this->getRealImplementation(it);
     }
