@@ -55,7 +55,7 @@ public:
 };
 
 
-void makeHalfCircleQuad(Dune::UGGrid<2,2>& grid, bool parametrization)
+void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
 {
   using namespace Dune;
 

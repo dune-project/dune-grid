@@ -346,8 +346,8 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
 
 // Explicit template instantiations to compile the stuff in this file
 
-template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<2,2> >;
-template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<3,3> >;
+template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<2> >;
+template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<3> >;
 
-template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<2,2> >;
-template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<3,3> >;
+template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<2> >;
+template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<3> >;

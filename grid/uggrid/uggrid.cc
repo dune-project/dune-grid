@@ -109,27 +109,27 @@ static int boundarySegmentWrapper3d(void *data, double *param, double *result)
 //
 //***********************************************************************
 
-template<> int Dune::UGGrid < 2, 2 >::numOfUGGrids = 0;
-template<> int Dune::UGGrid < 3, 3 >::numOfUGGrids = 0;
+template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
+template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
-template<> bool Dune::UGGrid < 2, 2 >::useExistingDefaultsFile = false;
-template<> bool Dune::UGGrid < 3, 3 >::useExistingDefaultsFile = false;
+template<> bool Dune::UGGrid<2>::useExistingDefaultsFile = false;
+template<> bool Dune::UGGrid<3>::useExistingDefaultsFile = false;
 
 
-template < int dim, int dimworld >
-inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL),
-                                                  leafIndexSet_(*this),
-                                                  globalIdSet_(*this),
-                                                  localIdSet_(*this),
-                                                  refinementType_(LOCAL),
-                                                  omitGreenClosure_(false),
-                                                  someElementHasBeenMarkedForRefinement_(false)
+template < int dim>
+inline Dune::UGGrid < dim >::UGGrid() : multigrid_(NULL),
+                                        leafIndexSet_(*this),
+                                        globalIdSet_(*this),
+                                        localIdSet_(*this),
+                                        refinementType_(LOCAL),
+                                        omitGreenClosure_(false),
+                                        someElementHasBeenMarkedForRefinement_(false)
 {
   init(500, 10);
 }
 
-template < int dim, int dimworld >
-inline Dune::UGGrid < dim, dimworld >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
+template <int dim>
+inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
   : multigrid_(NULL),
     leafIndexSet_(*this),
     globalIdSet_(*this),
@@ -141,8 +141,8 @@ inline Dune::UGGrid < dim, dimworld >::UGGrid(unsigned int heapSize, unsigned en
   init(heapSize, envHeapSize);
 }
 
-template < int dim, int dimworld >
-inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned envHeapSize)
+template < int dim >
+inline void Dune::UGGrid < dim >::init(unsigned int heapSize, unsigned envHeapSize)
 {
   heapsize = heapSize;
 
@@ -172,7 +172,7 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
     char** argv = &arg;
 
 
-    if (UG_NS<dimworld>::InitUg(&argc, &argv))
+    if (UG_NS<dim>::InitUg(&argc, &argv))
       DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
 
   }
@@ -189,7 +189,7 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
   std::string problemName = name_ + "_Problem";
 
 #ifndef UG_LGMDOMAIN
-  if (UG_NS<dimworld>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
+  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned and error code!");
 #endif
 
@@ -221,13 +221,12 @@ inline void Dune::UGGrid < dim, dimworld >::init(unsigned int heapSize, unsigned
 
   numOfUGGrids++;
 
-  dverb << "UGGrid<" << dim << "," << dimworld <<"> with name "
-        << name_ << " created!" << std::endl;
+  dverb << "UGGrid<" << dim << "> with name " << name_ << " created!" << std::endl;
 
 }
 
-template < int dim, int dimworld >
-inline Dune::UGGrid < dim, dimworld >::~UGGrid()
+template < int dim >
+inline Dune::UGGrid < dim >::~UGGrid()
 {
   for (unsigned int i=0; i<boundarySegments_.size(); i++)
     delete boundarySegments_[i];
@@ -249,7 +248,7 @@ inline Dune::UGGrid < dim, dimworld >::~UGGrid()
   numOfUGGrids--;
 
   // Shut down UG if this was the last existing UGGrid object
-  if (UGGrid<2,2>::numOfUGGrids + UGGrid<3,3>::numOfUGGrids == 0) {
+  if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0) {
 
     UG_NS<dim>::ExitUg();
 
@@ -265,8 +264,8 @@ inline Dune::UGGrid < dim, dimworld >::~UGGrid()
       delete levelIndexSets_[i];
 }
 
-template < int dim, int dimworld >
-inline int Dune::UGGrid < dim, dimworld >::maxLevel() const
+template < int dim >
+inline int Dune::UGGrid < dim >::maxLevel() const
 {
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
@@ -276,10 +275,10 @@ inline int Dune::UGGrid < dim, dimworld >::maxLevel() const
 
 
 
-template<int dim, int dimworld>
+template<int dim>
 template<int codim>
-typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::LevelIterator
-Dune::UGGrid<dim, dimworld>::lbegin (int level) const
+typename Dune::UGGrid<dim>::Traits::template Codim<codim>::LevelIterator
+Dune::UGGrid<dim>::lbegin (int level) const
 {
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
@@ -292,19 +291,19 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
   if (codim==0)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid));
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid));
   else if (codim==dim)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
 }
 
-template<int dim, int dimworld>
+template<int dim>
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
-Dune::UGGrid<dim, dimworld>::lbegin (int level) const
+inline typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
+Dune::UGGrid<dim>::lbegin (int level) const
 {
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
@@ -323,38 +322,38 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement);
 
   } else if (codim==dim) {
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
     /** \todo Parallel vertex level iterators not properly implemented yet! */
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim,dimworld> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   }
 
   DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
 }
 
-template < int dim, int dimworld >
+template < int dim >
 template<int codim>
-typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::LevelIterator
-Dune::UGGrid < dim, dimworld >::lend (int level) const
+typename Dune::UGGrid<dim>::Traits::template Codim<codim>::LevelIterator
+Dune::UGGrid < dim >::lend (int level) const
 {
-  return UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> >();
+  return UGGridLevelIterator<codim,All_Partition, const UGGrid<dim> >();
 }
 
-template < int dim, int dimworld >
+template < int dim >
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
-Dune::UGGrid < dim, dimworld >::lend (int level) const
+inline typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
+Dune::UGGrid < dim >::lend (int level) const
 {
-  return UGGridLevelIterator<codim,PiType, const UGGrid<dim,dimworld> >();
+  return UGGridLevelIterator<codim,PiType, const UGGrid<dim> >();
 }
 
-template < int dim, int dimworld >
-inline int Dune::UGGrid < dim, dimworld >::size (int level, int codim) const
+template < int dim >
+inline int Dune::UGGrid < dim >::size (int level, int codim) const
 {
 #ifndef ModelP
   if(codim == 0)
@@ -377,8 +376,7 @@ inline int Dune::UGGrid < dim, dimworld >::size (int level, int codim) const
     return levelIndexSet(level).size(GeometryType(GeometryType::cube,dim-1))
            + levelIndexSet(level).size(GeometryType(GeometryType::simplex,dim-1));
   }
-  DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dimworld
-                                  << ">::size(int level, int codim) is only implemented"
+  DUNE_THROW(GridError, "UGGrid<" << dim << ">::size(int level, int codim) is only implemented"
                                   << " for codim==0 and codim==dim!");
 #else
 
@@ -411,9 +409,9 @@ inline int Dune::UGGrid < dim, dimworld >::size (int level, int codim) const
 }
 
 
-template < int dim, int dimworld >
-bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
-                                          const typename Traits::template Codim<0>::EntityPointer & e )
+template < int dim >
+bool Dune::UGGrid < dim >::mark(int refCount,
+                                const typename Traits::template Codim<0>::EntityPointer & e )
 {
   // No refinement requested
   if (refCount==0)
@@ -447,10 +445,10 @@ bool Dune::UGGrid < dim, dimworld >::mark(int refCount,
 
 }
 
-template < int dim, int dimworld >
-bool Dune::UGGrid < dim, dimworld >::mark(const typename Traits::template Codim<0>::EntityPointer & e,
-                                          typename UG_NS<dim>::RefinementRule rule,
-                                          int side)
+template < int dim >
+bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::EntityPointer & e,
+                                typename UG_NS<dim>::RefinementRule rule,
+                                int side)
 {
   typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
 
@@ -463,14 +461,14 @@ bool Dune::UGGrid < dim, dimworld >::mark(const typename Traits::template Codim<
 
 }
 
-template < int dim, int dimworld >
-bool Dune::UGGrid < dim, dimworld >::preAdapt()
+template < int dim >
+bool Dune::UGGrid < dim >::preAdapt()
 {
   return someElementHasBeenMarkedForRefinement_;
 }
 
-template < int dim, int dimworld >
-bool Dune::UGGrid < dim, dimworld >::adapt()
+template < int dim >
+bool Dune::UGGrid < dim >::adapt()
 {
 
   int rv;
@@ -521,8 +519,8 @@ bool Dune::UGGrid < dim, dimworld >::adapt()
   return returnValue;
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid <dim, dimworld>::postAdapt()
+template <int dim>
+void Dune::UGGrid <dim>::postAdapt()
 {
   for (int i=0; i<=maxLevel(); i++) {
 
@@ -536,8 +534,8 @@ void Dune::UGGrid <dim, dimworld>::postAdapt()
 }
 
 
-template <int dim, int dimworld>
-void Dune::UGGrid <dim, dimworld>::adaptWithoutClosure()
+template <int dim>
+void Dune::UGGrid <dim>::adaptWithoutClosure()
 {
   bool omitClosureBackup = omitGreenClosure_;
   omitGreenClosure_ = true;
@@ -545,8 +543,8 @@ void Dune::UGGrid <dim, dimworld>::adaptWithoutClosure()
   omitGreenClosure_ = omitClosureBackup;
 }
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::globalRefine(int n)
+template < int dim >
+void Dune::UGGrid < dim >::globalRefine(int n)
 {
   for (int i=0; i<n; i++) {
 
@@ -565,12 +563,12 @@ void Dune::UGGrid < dim, dimworld >::globalRefine(int n)
 
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
-                                                      int elementSide,
-                                                      int maxl,
-                                                      std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                                                      std::vector<unsigned char>& childElementSides) const
+template <int dim>
+void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
+                                             int elementSide,
+                                             int maxl,
+                                             std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
+                                             std::vector<unsigned char>& childElementSides) const
 {
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
@@ -665,8 +663,8 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
 
 }
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
+template < int dim >
+void Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
 {
   /** \todo Test for valid arguments */
   std::string argStrings[4];
@@ -763,9 +761,9 @@ T* Dune::UGDataCollector<T,P,GridDim>::dataArray = 0;
 #endif
 
 /** \todo How do I incorporate the level argument? */
-template < int dim, int dimworld >
+template < int dim >
 template<class T, template<class> class P, int codim>
-void Dune::UGGrid < dim, dimworld >::communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
+void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
 {
 #ifdef ModelP
 
@@ -789,8 +787,8 @@ void Dune::UGGrid < dim, dimworld >::communicate (T& t, InterfaceType iftype, Co
 }
 
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::createBegin()
+template < int dim >
+void Dune::UGGrid < dim >::createBegin()
 {
   // //////////////////////////////////////////////////////////
   //   Clear all buffers used during coarse grid creation
@@ -803,8 +801,8 @@ void Dune::UGGrid < dim, dimworld >::createBegin()
 }
 
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::createEnd()
+template < int dim >
+void Dune::UGGrid < dim >::createEnd()
 {
 #ifdef UG_LGMDOMAIN
   DUNE_THROW(GridError, "You cannot call createLGMGrid() when your UGGrid has been configured for LGM!");
@@ -881,7 +879,7 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
                                           (dim==2)
                                           ? boundarySegmentWrapper2d
                                           : boundarySegmentWrapper3d,
-                                          const_cast<BoundarySegment<dimworld>*>(boundarySegments_[i]))==NULL) {
+                                          const_cast<BoundarySegment<dim>*>(boundarySegments_[i]))==NULL) {
       DUNE_THROW(GridError, "Calling UG" << dim << "d::CreateBoundarySegment failed!");
     }
 
@@ -910,7 +908,7 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
 
     int numVertices = (dim==2) ? 2 : ((thisSegment[3] == -1) ? 3 : 4);
 
-    std::vector<FieldVector<double,dimworld> > coordinates(numVertices);
+    std::vector<FieldVector<double,dim> > coordinates(numVertices);
     std::vector<int> vertices(numVertices);
 
     for (int j=0; j<numVertices; j++) {
@@ -1030,8 +1028,8 @@ void Dune::UGGrid < dim, dimworld >::createEnd()
 #endif
 }
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::createLGMGrid(const std::string& name)
+template < int dim >
+void Dune::UGGrid < dim >::createLGMGrid(const std::string& name)
 {
 #ifndef UG_LGMDOMAIN
   DUNE_THROW(GridError, "You cannot call createLGMGrid() when your UGGrid hasn't been configured for LGM!");
@@ -1095,10 +1093,10 @@ void Dune::UGGrid < dim, dimworld >::createLGMGrid(const std::string& name)
 #endif
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid<dim, dimworld>::
+template <int dim>
+void Dune::UGGrid<dim>::
 insertLinearSegment(const std::vector<int>& vertices,
-                    const std::vector<FieldVector<double,dimworld> >& coordinates,
+                    const std::vector<FieldVector<double,dim> >& coordinates,
                     unsigned int segmentIndex)
 {
 #ifndef UG_LGMDOMAIN
@@ -1130,23 +1128,23 @@ insertLinearSegment(const std::vector<int>& vertices,
     if (vertices.size()==3) {
       // Cast to a type which may be wrong, just to make the code compile.
       // But this code only gets executed when the cast is correct anyways.
-      boundarySegments_.push_back((BoundarySegment<dimworld>*) new LinearTriSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
-                                                                                      *(FieldVector<double,3>*)(&coordinates[1]),
-                                                                                      *(FieldVector<double,3>*)(&coordinates[2])));
+      boundarySegments_.push_back((BoundarySegment<dim>*) new LinearTriSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
+                                                                                 *(FieldVector<double,3>*)(&coordinates[1]),
+                                                                                 *(FieldVector<double,3>*)(&coordinates[2])));
     } else {
       // Cast to a type which may be wrong, just to make the code compile.
       // But this code only gets executed when the cast is correct anyways.
-      boundarySegments_.push_back((BoundarySegment<dimworld>*) new LinearQuadSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
-                                                                                       *(FieldVector<double,3>*)(&coordinates[1]),
-                                                                                       *(FieldVector<double,3>*)(&coordinates[2]),
-                                                                                       *(FieldVector<double,3>*)(&coordinates[3])));
+      boundarySegments_.push_back((BoundarySegment<dim>*) new LinearQuadSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
+                                                                                  *(FieldVector<double,3>*)(&coordinates[1]),
+                                                                                  *(FieldVector<double,3>*)(&coordinates[2]),
+                                                                                  *(FieldVector<double,3>*)(&coordinates[3])));
     }
   } else {
     boundarySegmentFunction = boundarySegmentWrapper2d;
     // Cast to a type which may be wrong, just to make the code compile.
     // But this code only gets executed when the cast is correct anyways.
-    boundarySegments_.push_back((BoundarySegment<dimworld>*) new LinearSegment2d(*(FieldVector<double,2>*)(&coordinates[0]),
-                                                                                 *(FieldVector<double,2>*)(&coordinates[1])));
+    boundarySegments_.push_back((BoundarySegment<dim>*) new LinearSegment2d(*(FieldVector<double,2>*)(&coordinates[0]),
+                                                                            *(FieldVector<double,2>*)(&coordinates[1])));
   }
 
   // Actually create the segment
@@ -1159,7 +1157,7 @@ insertLinearSegment(const std::vector<int>& vertices,
                                         alpha,                  // The local coordinates range
                                         beta,                   //    of the boundary segment
                                         boundarySegmentFunction,
-                                        const_cast<BoundarySegment<dimworld>*>(boundarySegments_.back()))==NULL) {
+                                        const_cast<BoundarySegment<dim>*>(boundarySegments_.back()))==NULL) {
     DUNE_THROW(GridError, "Calling UG" << dim << "d::CreateBoundarySegment failed!");
   }
 
@@ -1184,9 +1182,9 @@ insertLinearSegment(const std::vector<int>& vertices,
 
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid<dim, dimworld>::insertBoundarySegment(const std::vector<unsigned int> vertices,
-                                                        const BoundarySegment<dimworld>* boundarySegment)
+template <int dim>
+void Dune::UGGrid<dim>::insertBoundarySegment(const std::vector<unsigned int> vertices,
+                                              const BoundarySegment<dim>* boundarySegment)
 {
   FixedArray<unsigned int, dim*2-2> segmentVertices = -1;
   for (size_t i=0; i<vertices.size(); i++)
@@ -1206,19 +1204,19 @@ void Dune::UGGrid<dim, dimworld>::insertBoundarySegment(const std::vector<unsign
 
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid<dim, dimworld>::insertVertex(const FieldVector<double,dimworld>& pos)
+template <int dim>
+void Dune::UGGrid<dim>::insertVertex(const FieldVector<double,dim>& pos)
 {
   vertexPositions_.push_back(pos);
 }
 
-template <int dim, int dimworld>
-void Dune::UGGrid<dim, dimworld>::insertElement(GeometryType type,
-                                                const std::vector<unsigned int>& vertices)
+template <int dim>
+void Dune::UGGrid<dim>::insertElement(GeometryType type,
+                                      const std::vector<unsigned int>& vertices)
 {
   if (dim!=type.dim())
     DUNE_THROW(GridError, "You cannot insert a " << type
-                                                 << " into a UGGrid<" << dim << "," << dimworld << ">!");
+                                                 << " into a UGGrid<" << dim << ">!");
 
   int newIdx = elementVertices_.size();
 
@@ -1274,23 +1272,23 @@ void Dune::UGGrid<dim, dimworld>::insertElement(GeometryType type,
 
   } else {
     DUNE_THROW(GridError, "You cannot insert a " << type
-                                                 << " into a UGGrid<" << dim << "," << dimworld << ">!");
+                                                 << " into a UGGrid<" << dim << ">!");
   }
 
 }
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
-                                                 const FieldVector<double, dimworld>& pos)
+template < int dim >
+void Dune::UGGrid < dim >::setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
+                                       const FieldVector<double, dim>& pos)
 {
   typename UG_NS<dim>::Node* target = getRealImplementation(*e).target_;
 
-  for (int i=0; i<dimworld; i++)
+  for (int i=0; i<dim; i++)
     target->myvertex->iv.x[i] = pos[i];
 }
 
-template < int dim, int dimworld >
-void Dune::UGGrid < dim, dimworld >::setIndices()
+template < int dim >
+void Dune::UGGrid < dim >::setIndices()
 {
   /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
       (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
@@ -1343,7 +1341,7 @@ void Dune::UGGrid < dim, dimworld >::setIndices()
 
   // Create new level index sets if necessary
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
-    levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim,dimworld> >());
+    levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim> >());
 
   // Update all LevelIndexSets
   for (int i=0; i<=maxLevel(); i++)
@@ -1367,249 +1365,249 @@ template class Dune::UGGrid<2>;
 template class Dune::UGGrid<3>;
 
 // ////////////////////////////////////////////////////////////////////////////////////
-//   Explicitly instantiate the necessary member templates contained in UGGrid<2,2>
+//   Explicitly instantiate the necessary member templates contained in UGGrid<2>
 // ////////////////////////////////////////////////////////////////////////////////////
-template Dune::UGGrid<2,2>::Traits::Codim<0>::LevelIterator Dune::UGGrid<2,2>::lbegin<0>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::LevelIterator Dune::UGGrid<2,2>::lbegin<2>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::LevelIterator Dune::UGGrid<2>::lbegin<0>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::LevelIterator Dune::UGGrid<2>::lbegin<2>(int level) const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<0>::LevelIterator Dune::UGGrid<2,2>::lend<0>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::LevelIterator Dune::UGGrid<2,2>::lend<2>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::LevelIterator Dune::UGGrid<2>::lend<0>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::LevelIterator Dune::UGGrid<2>::lend<2>(int level) const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<0>::LeafIterator Dune::UGGrid<2,2>::leafbegin<0>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::LeafIterator Dune::UGGrid<2,2>::leafbegin<2>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::LeafIterator Dune::UGGrid<2>::leafbegin<0>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::LeafIterator Dune::UGGrid<2>::leafbegin<2>() const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<0>::LeafIterator Dune::UGGrid<2,2>::leafend<0>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::LeafIterator Dune::UGGrid<2,2>::leafend<2>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::LeafIterator Dune::UGGrid<2>::leafend<0>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::LeafIterator Dune::UGGrid<2>::leafend<2>() const;
 
 
 // Element level iterators
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<0,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<0,Dune::Ghost_Partition>(int level) const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<0,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<0,Dune::Ghost_Partition>(int level) const;
 
 // Vertex level iterators
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lbegin<2,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<2>::lbegin<2,Dune::Ghost_Partition>(int level) const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<2,2>::lend<2,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<2>::lend<2,Dune::Ghost_Partition>(int level) const;
 
 // Element leaf iterators
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::Interior_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::All_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<0,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::Interior_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::All_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<0,Dune::Ghost_Partition>() const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::Interior_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::All_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<0,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::Interior_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::All_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<0,Dune::Ghost_Partition>() const;
 
 // Vertex leaf iterators
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::Interior_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::All_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafbegin<2,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::Interior_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::All_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<2>::leafbegin<2,Dune::Ghost_Partition>() const;
 
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::Interior_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::All_Partition>() const;
-template Dune::UGGrid<2,2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<2,2>::leafend<2,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::Interior_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::All_Partition>() const;
+template Dune::UGGrid<2>::Traits::Codim<2>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<2>::leafend<2,Dune::Ghost_Partition>() const;
 
 
 // ////////////////////////////////////////////////////////////////////////////////////
-//   Explicitly instantiate the necessary member templates contained in UGGrid<3,3>
+//   Explicitly instantiate the necessary member templates contained in UGGrid<3>
 // ////////////////////////////////////////////////////////////////////////////////////
-template Dune::UGGrid<3,3>::Traits::Codim<0>::LevelIterator Dune::UGGrid<3,3>::lbegin<0>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::LevelIterator Dune::UGGrid<3,3>::lbegin<3>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::LevelIterator Dune::UGGrid<3>::lbegin<0>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::LevelIterator Dune::UGGrid<3>::lbegin<3>(int level) const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<0>::LevelIterator Dune::UGGrid<3,3>::lend<0>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::LevelIterator Dune::UGGrid<3,3>::lend<3>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::LevelIterator Dune::UGGrid<3>::lend<0>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::LevelIterator Dune::UGGrid<3>::lend<3>(int level) const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<0>::LeafIterator Dune::UGGrid<3,3>::leafbegin<0>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::LeafIterator Dune::UGGrid<3,3>::leafbegin<3>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::LeafIterator Dune::UGGrid<3>::leafbegin<0>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::LeafIterator Dune::UGGrid<3>::leafbegin<3>() const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<0>::LeafIterator Dune::UGGrid<3,3>::leafend<0>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::LeafIterator Dune::UGGrid<3,3>::leafend<3>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::LeafIterator Dune::UGGrid<3>::leafend<0>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::LeafIterator Dune::UGGrid<3>::leafend<3>() const;
 
 // element level iterators
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<0,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<0,Dune::Ghost_Partition>(int level) const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<0,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<0,Dune::Ghost_Partition>(int level) const;
 
 // Vertex level iterators
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lbegin<3,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<3>::lbegin<3,Dune::Ghost_Partition>(int level) const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::Interior_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::Overlap_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::OverlapFront_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::All_Partition>(int level) const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::UGGrid<3,3>::lend<3,Dune::Ghost_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::Interior_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::InteriorBorder_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::Overlap_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::OverlapFront_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::All_Partition>(int level) const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LevelIterator
+Dune::UGGrid<3>::lend<3,Dune::Ghost_Partition>(int level) const;
 
 // Element leaf iterators
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::Interior_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::All_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<0,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::Interior_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::All_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<0,Dune::Ghost_Partition>() const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::Interior_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::All_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<0,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::Interior_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::All_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<0,Dune::Ghost_Partition>() const;
 
 // Vertex leaf iterators
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::Interior_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::All_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafbegin<3,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::Interior_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::All_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<3>::leafbegin<3,Dune::Ghost_Partition>() const;
 
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::Interior_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::InteriorBorder_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::Overlap_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::OverlapFront_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::All_Partition>() const;
-template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::UGGrid<3,3>::leafend<3,Dune::Ghost_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Interior_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::Interior_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::InteriorBorder_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Overlap_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::Overlap_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::OverlapFront_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::OverlapFront_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::All_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::All_Partition>() const;
+template Dune::UGGrid<3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
+Dune::UGGrid<3>::leafend<3,Dune::Ghost_Partition>() const;

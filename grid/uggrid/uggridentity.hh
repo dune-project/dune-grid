@@ -17,7 +17,7 @@ namespace Dune {
   // Forward declarations
   template<int codim, int dim, class GridImp>
   class UGGridEntity;
-  template<int dim, int dimworld>
+  template<int dim>
   class UGGrid;
   template<int codim, class GridImp>
   class UGGridEntityPointer;
@@ -78,7 +78,7 @@ namespace Dune {
 
     friend class UGMakeableEntity<codim,dim,GridImp>;
 
-    friend class UGGrid<dim, dim>;
+    friend class UGGrid<dim>;
 
     template <class GridImp_>
     friend class UGGridLevelIndexSet;
@@ -187,7 +187,7 @@ namespace Dune {
   class UGGridEntity<0,dim,GridImp> :
     public EntityDefaultImplementation<0,dim,GridImp, UGGridEntity>
   {
-    friend class UGGrid < dim , dim>;
+    friend class UGGrid<dim>;
     friend class UGGridLeafIntersectionIterator <GridImp>;
     friend class UGGridHierarchicIterator <GridImp>;
 

@@ -94,7 +94,7 @@ namespace Dune {
   template<int dim, int dimworld>
   struct UGGridFamily
   {
-    typedef GridTraits<dim,dimworld,Dune::UGGrid<dim,dimworld>,
+    typedef GridTraits<dim,dimworld,Dune::UGGrid<dim>,
         UGGridGeometry,
         UGGridEntity,
         UGGridEntityPointer,
@@ -103,15 +103,15 @@ namespace Dune {
         UGGridLevelIntersectionIterator,              // level intersection iterartor
         UGGridHierarchicIterator,
         UGGridLeafIterator,
-        UGGridLevelIndexSet< const UGGrid<dim,dimworld> >,
-        UGGridLevelIndexSetTypes< const UGGrid<dim,dimworld> >,
-        UGGridLeafIndexSet< const UGGrid<dim,dimworld> >,
-        UGGridLeafIndexSetTypes< const UGGrid<dim,dimworld> >,
-        UGGridGlobalIdSet< const UGGrid<dim,dimworld> >,
+        UGGridLevelIndexSet< const UGGrid<dim> >,
+        UGGridLevelIndexSetTypes< const UGGrid<dim> >,
+        UGGridLeafIndexSet< const UGGrid<dim> >,
+        UGGridLeafIndexSetTypes< const UGGrid<dim> >,
+        UGGridGlobalIdSet< const UGGrid<dim> >,
         unsigned int,
-        UGGridLocalIdSet< const UGGrid<dim,dimworld> >,
+        UGGridLocalIdSet< const UGGrid<dim> >,
         unsigned int,
-        CollectiveCommunication<Dune::UGGrid<dim,dimworld> > >
+        CollectiveCommunication<Dune::UGGrid<dim> > >
     Traits;
   };
 
@@ -153,19 +153,19 @@ namespace Dune {
      Please send any questions, suggestions, or bug reports to
      sander@math.fu-berlin.de
    */
-  template <int dim, int dimworld=dim>
-  class UGGrid : public GridDefaultImplementation  <dim, dimworld, double, UGGridFamily<dim,dimworld> >
+  template <int dim>
+  class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim,dim> >
   {
-    friend class UGGridEntity <0,dim,const UGGrid<dim,dimworld> >;
-    friend class UGGridEntity <dim,dim,const UGGrid<dim,dimworld> >;
-    friend class UGGridHierarchicIterator<const UGGrid<dim,dimworld> >;
-    friend class UGGridLeafIntersectionIterator<const UGGrid<dim,dimworld> >;
-    friend class UGGridLevelIntersectionIterator<const UGGrid<dim,dimworld> >;
+    friend class UGGridEntity <0,dim,const UGGrid<dim> >;
+    friend class UGGridEntity <dim,dim,const UGGrid<dim> >;
+    friend class UGGridHierarchicIterator<const UGGrid<dim> >;
+    friend class UGGridLeafIntersectionIterator<const UGGrid<dim> >;
+    friend class UGGridLevelIntersectionIterator<const UGGrid<dim> >;
 
-    friend class UGGridLevelIndexSet<const UGGrid<dim,dimworld> >;
-    friend class UGGridLeafIndexSet<const UGGrid<dim,dimworld> >;
-    friend class UGGridGlobalIdSet<const UGGrid<dim,dimworld> >;
-    friend class UGGridLocalIdSet<const UGGrid<dim,dimworld> >;
+    friend class UGGridLevelIndexSet<const UGGrid<dim> >;
+    friend class UGGridLeafIndexSet<const UGGrid<dim> >;
+    friend class UGGridGlobalIdSet<const UGGrid<dim> >;
+    friend class UGGridLocalIdSet<const UGGrid<dim> >;
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
@@ -173,21 +173,21 @@ namespace Dune {
     friend class Entity;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
-    CompileTimeChecker< (dimworld==dim) && ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;
+    CompileTimeChecker< ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;
 
     // The different instantiations are mutual friends so they can access
     // each others numOfUGGrids field
-    friend class UGGrid<2,2>;
-    friend class UGGrid<3,3>;
+    friend class UGGrid<2>;
+    friend class UGGrid<3>;
     //**********************************************************
     // The Interface Methods
     //**********************************************************
   public:
     //! type of the used GridFamily for this grid
-    typedef UGGridFamily<dim,dimworld>  GridFamily;
+    typedef UGGridFamily<dim,dim>  GridFamily;
 
     //! the Traits
-    typedef typename UGGridFamily<dim,dimworld>::Traits Traits;
+    typedef typename UGGridFamily<dim,dim>::Traits Traits;
 
     //! The type used to store coordinates
     typedef double ctype;
@@ -240,7 +240,7 @@ namespace Dune {
     //! one past the end of the sequence of leaf entities
     template<int codim>
     typename Traits::template Codim<codim>::LeafIterator leafend() const {
-      return UGGridLeafIterator<codim,All_Partition, const UGGrid<dim,dimworld> >();
+      return UGGridLeafIterator<codim,All_Partition, const UGGrid<dim> >();
     }
 
     //! Iterator to first leaf entity of given codim
@@ -252,7 +252,7 @@ namespace Dune {
     //! one past the end of the sequence of leaf entities
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
-      return UGGridLeafIterator<codim,PiType, const UGGrid<dim,dimworld> >();
+      return UGGridLeafIterator<codim,PiType, const UGGrid<dim> >();
     }
 
     /** \brief Number of grid entities per level and codim
@@ -370,8 +370,8 @@ namespace Dune {
      */
     void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
-    typedef GridDefaultImplementation  <dim, dimworld, double,
-        UGGridFamily<dim,dimworld> > GridDefaultImplementationType;
+    typedef GridDefaultImplementation  <dim, dim, double,
+        UGGridFamily<dim,dim> > GridDefaultImplementationType;
 
     //! also make default implementations of loadBalance useable
     using GridDefaultImplementationType :: loadBalance;
@@ -434,10 +434,10 @@ namespace Dune {
         The grid object takes control of this object and deallocates it when destructing itself.
      */
     void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                               const BoundarySegment<dimworld>* boundarySegment);
+                               const BoundarySegment<dim>* boundarySegment);
 
     /** \brief Insert a vertex into the coarse grid */
-    void insertVertex(const FieldVector<double,dimworld>& pos);
+    void insertVertex(const FieldVector<double,dim>& pos);
 
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
@@ -494,7 +494,7 @@ namespace Dune {
 
        Changing a vertex' position changes its position on all grid levels!*/
     void setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
-                     const FieldVector<double, dimworld>& pos);
+                     const FieldVector<double, dim>& pos);
 
     /** \brief Does uniform refinement
      *
@@ -504,10 +504,10 @@ namespace Dune {
 
   private:
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
-    typename UG_NS<dimworld>::MultiGrid* multigrid_;
+    typename UG_NS<dim>::MultiGrid* multigrid_;
 
     /** \brief The classes implementing the geometry of the boundary segments */
-    std::vector<const BoundarySegment<dimworld>*> boundarySegments_;
+    std::vector<const BoundarySegment<dim>*> boundarySegments_;
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
     std::vector<FixedArray<unsigned int, dim*2-2> > boundarySegmentVertices_;
@@ -522,7 +522,7 @@ namespace Dune {
         \param coordinates The coordinates of the vertices of the segment
      */
     void insertLinearSegment(const std::vector<int>& vertices,
-                             const std::vector<FieldVector<double,dimworld> >& coordinates,
+                             const std::vector<FieldVector<double,dim> >& coordinates,
                              unsigned int segmentIndex);
 
     // Recomputes entity indices after the grid was changed
@@ -533,13 +533,13 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<UGGridLevelIndexSet<const UGGrid<dim,dimworld> >*> levelIndexSets_;
+    std::vector<UGGridLevelIndexSet<const UGGrid<dim> >*> levelIndexSets_;
 
-    UGGridLeafIndexSet<const UGGrid<dim,dimworld> > leafIndexSet_;
+    UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
-    UGGridGlobalIdSet<const UGGrid<dim,dimworld> > globalIdSet_;
+    UGGridGlobalIdSet<const UGGrid<dim> > globalIdSet_;
 
-    UGGridLocalIdSet<const UGGrid<dim,dimworld> > localIdSet_;
+    UGGridLocalIdSet<const UGGrid<dim> > localIdSet_;
 
     //! Marks whether the UG environment heap size is taken from
     //! an existing defaults file or whether the values from
@@ -561,7 +561,7 @@ namespace Dune {
     std::vector<unsigned int> elementVertices_;
 
     /** \brief Buffer the vertices until createend() is called */
-    std::vector<FieldVector<double, dimworld> > vertexPositions_;
+    std::vector<FieldVector<double, dim> > vertexPositions_;
 
     /** \brief Number of UGGrids currently in use.
      *
@@ -600,38 +600,38 @@ namespace Dune {
   namespace Capabilities
   {
 
-    template<int dim, int dimw>
-    struct hasEntity< UGGrid<dim,dimw>, 0>
+    template<int dim>
+    struct hasEntity< UGGrid<dim>, 0>
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct hasEntity< UGGrid<dim,dimw>, dim>
+    template<int dim>
+    struct hasEntity< UGGrid<dim>, dim>
     {
       static const bool v = true;
     };
 
-    template<int dim,int dimw>
-    struct isParallel< UGGrid<dim,dimw> >
+    template<int dim>
+    struct isParallel< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct isLevelwiseConforming< UGGrid<dim,dimw> >
+    template<int dim>
+    struct isLevelwiseConforming< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct isLeafwiseConforming< UGGrid<dim,dimw> >
+    template<int dim>
+    struct isLeafwiseConforming< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
-    template<int dim, int dimw>
-    struct hasHangingNodes< UGGrid<dim,dimw> >
+    template<int dim>
+    struct hasHangingNodes< UGGrid<dim> >
     {
       static const bool v = false;
     };
