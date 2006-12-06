@@ -62,7 +62,7 @@ namespace Dune
 
     static RangeType tmp_;
     // evaluate local function on local lagrange point
-    lf.evaluateLocal(en,localPoint,tmp_);
+    lf.evaluate(localPoint,tmp_);
 
     // dimval == 1 here
     // 0 because we only have one value (dimVal == 1)
@@ -92,7 +92,7 @@ namespace Dune
 
       static RangeType tmp_;
       // evaluate local function on local lagrange point
-      lf.evaluateLocal(en,localPoint,tmp_);
+      lf.evaluate(localPoint,tmp_);
 
       for(int i=0; i<vlength; i++)
       {
@@ -179,7 +179,7 @@ namespace Dune
     static RangeType tmp_;
     // evaluate local function on local (on reference element)
     // point == domTmp
-    lf.evaluateLocal( en , domTmp_ , tmp_);
+    lf.evaluate( domTmp_ , tmp_);
 
     const int dimVal = df->dimVal;
     for(int i=0; i<dimVal; ++i) val[i] = tmp_[comp[i]];
@@ -627,7 +627,7 @@ namespace Dune
       max += 0.01*max;
       min -= 0.01*min;
     }
-    GrapeInterface<dim,dim>::colorBarMinMax(min,max);
+    // GrapeInterface<dim,dim>::colorBarMinMax(min,max);
 
     // display
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
