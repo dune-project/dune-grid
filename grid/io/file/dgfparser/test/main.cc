@@ -69,7 +69,7 @@ try {
     for (IteratorType iter=gridPart.begin<0>(); iter!=endit; ++iter) {
       std::vector<double>& param = grid.parameters(*iter);
       assert(param.size() == grid.nofParameters(0));
-      for (int i=0; i<param.size(); i++) {
+      for (size_t i=0; i<param.size(); i++) {
         // std::cout << param[i] << " ";
         eldat[index.index(*iter)*param.size()+i] = param[i];
       }
@@ -87,7 +87,7 @@ try {
       std::vector<double>& param = grid.parameters(*iter);
       assert(param.size() == grid.nofParameters(GridType::dimension));
       // std::cout << (*iter).geometry()[0] << " -\t ";
-      for (int i=0; i<param.size(); i++) {
+      for (size_t i=0; i<param.size(); i++) {
         // std::cout << param[i] << " ";
         vtxdat[index.index(*iter)*param.size()+i] = param[i];
       }

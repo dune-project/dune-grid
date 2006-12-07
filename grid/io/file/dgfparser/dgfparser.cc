@@ -232,7 +232,7 @@ namespace Dune {
           int nr = 0;
           dverb << "Writing elements...";
           out << elements.size() << " 4 " << nofelparams << std::endl;
-          for (int n=0; n<elements.size(); n++) {
+          for (size_t n=0; n<elements.size(); n++) {
             out << nr++ << "   ";
             for (int j=0; j<4; j++) {
               out << elements[n][j] << " ";
@@ -288,7 +288,7 @@ namespace Dune {
     out << facemap.size()+elements.size()*3 << " 1 " << std::endl;
     std::map<EntityKey<int>,int>::iterator pos;
     nr = 0;
-    for(int i=0; i<elements.size(); ++i) {
+    for(size_t i=0; i<elements.size(); ++i) {
       for (int k=0; k<3; k++)
         out << nr++ << " "
             << elements[i][(k+1)%3] << " " << elements[i][(k+2)%3] << " 0\n";
@@ -311,7 +311,7 @@ namespace Dune {
       assert(dimw==2);
       out << elements.size()*nofelparams << std::endl;
       int nr = 0;
-      for(int i=0; i<elements.size(); ++i) {
+      for(size_t i=0; i<elements.size(); ++i) {
         double coord[2] = {0,0};
         for (int j=0; j<3; j++) {
           coord[0] += vtx[elements[i][j]][0];

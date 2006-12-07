@@ -437,7 +437,6 @@ namespace Dune {
       {
         if (!isactive()) return;
         assert((dimworld+1)>0);
-        int x;
         if (findtoken("parameters")) {
           int x=0;
           if (getnextentry(x)) {
@@ -461,7 +460,6 @@ namespace Dune {
               std::vector<std::vector<double> >&params,int& nofp) {
         nofp=nofparams;
         int nofsimpl;
-        int offset = 0;
         for (nofsimpl=0; ok(); next(), nofsimpl++) {
           simplex.push_back(p);
           for (size_t j=0; j<p.size(); j++) {
@@ -592,7 +590,7 @@ namespace Dune {
                                      << nofvtx+vtxoffset);
             }
           }
-          else if (n-p.size()<nofparams) {
+          else if (n-int(p.size())<nofparams) {
             psimpl[n-p.size()]=x;
           }
           n++;
@@ -740,7 +738,7 @@ namespace Dune {
                                      << vtxoffset << " and "
                                      << nofvtx+vtxoffset);
             }
-          } else if (n-p.size()<nofparams) {
+          } else if (n-int(p.size())<nofparams) {
             psimpl[n-p.size()]=x;
           }
           n++;

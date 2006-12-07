@@ -125,7 +125,7 @@ namespace Dune {
       for (int j=0; j<dimw; j++)
         coord[j]=0.;
       for (int j=0; j<dimw; j++) {
-        for (int k=0; k<elements[i].size(); ++k) {
+        for (size_t k=0; k<elements[i].size(); ++k) {
           coord[j]+=vtx[elements[i][k]][j];
         }
         coord[j]/=double(elements[i].size());
@@ -201,10 +201,11 @@ namespace Dune {
     GridPtr(const std::string filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
       MacroGrid(filename.c_str(),MPICOMM),
       gridptr_(this->template createGrid<GridType>()),
-      elParam(0), vtxParam(0), emptyParam(), nofVtxParam_(0), nofElParam_(0) {
+      emptyParam(),
+      elParam(0), vtxParam(0), nofElParam_(0), nofVtxParam_(0) {
       if (nofelparams>0) {
         nofElParam_ = nofelparams;
-        for (int i=0; i<elements.size(); i++) {
+        for (size_t i=0; i<elements.size(); i++) {
           std::vector<double> coord;
           DomainType p;
           std::vector<double>& param = this->getElParam(i,coord);
@@ -215,7 +216,7 @@ namespace Dune {
       }
       if (nofvtxparams>0) {
         nofVtxParam_ = nofvtxparams;
-        for (int i=0; i<vtx.size(); i++) {
+        for (size_t i=0; i<vtx.size(); i++) {
           std::vector<double> coord;
           DomainType p;
           std::vector<double>& param = getVtxParam(i,coord);
@@ -228,20 +229,20 @@ namespace Dune {
 
     //! Default constructor, creating empty GridPtr
     GridPtr() : MacroGrid() , gridptr_() ,
-                elParam(0), vtxParam(0), emptyParam(),
-                nofVtxParam_(0), nofElParam_(0) {}
+                emptyParam(), elParam(0), vtxParam(0),
+                nofElParam_(0), nofVtxParam_(0) {}
 
     //! Constructor storing given pointer to internal auto pointer
     GridPtr(GridType * grd) : MacroGrid() , gridptr_(grd),
-                              elParam(0), vtxParam(0), emptyParam(),
-                              nofVtxParam_(0), nofElParam_(0) {}
+                              emptyParam(), elParam(0), vtxParam(0),
+                              nofElParam_(0), nofVtxParam_(0) {}
 
     //! Copy constructor, copies internal auto pointer
     GridPtr(const GridPtr & org) : gridptr_(org.gridptr_),
-                                   elParam(org.elParam), vtxParam(org.vtxParam),
                                    emptyParam(),
-                                   nofVtxParam_(org.nofVtxParam_),
-                                   nofElParam_(org.nofElParam_) {}
+                                   elParam(org.elParam), vtxParam(org.vtxParam),
+                                   nofElParam_(org.nofElParam_),
+                                   nofVtxParam_(org.nofVtxParam_) {}
 
     //! return reference to GridType instance
     GridType& operator*() {
@@ -316,7 +317,7 @@ namespace Dune {
     inline std::vector<double>& elementParams(DomainType& coord) {
       int idx=0;
       double min=1e10;
-      for (int i=0; i<elParam.size(); ++i) {
+      for (size_t i=0; i<elParam.size(); ++i) {
         DomainType p(coord);
         p -= elParam[i].first;
         double len=p.two_norm();
@@ -333,7 +334,7 @@ namespace Dune {
     inline std::vector<double>& vertexParams(DomainType& coord) {
       int idx=0;
       double min=1e10;
-      for (int i=0; i<vtxParam.size(); ++i) {
+      for (size_t i=0; i<vtxParam.size(); ++i) {
         DomainType p(coord);
         p -= vtxParam[i].first;
         double len=p.two_norm();
@@ -349,10 +350,10 @@ namespace Dune {
     }
     // grid auto pointer
     mutable std::auto_ptr<GridType> gridptr_;
+    std::vector<double> emptyParam;
     // element and vertex parameters
     std::vector<std::pair<DomainType,std::vector<double> > > elParam,vtxParam;
-    int nofVtxParam_,nofElParam_;
-    std::vector<double> emptyParam;
+    int nofElParam_,nofVtxParam_;
   }; // end of class GridPtr
 }
 #include "dgfparser.cc"
