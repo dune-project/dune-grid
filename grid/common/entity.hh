@@ -158,11 +158,12 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {};
 
-    /**
+    /* not part of the interface but maybe in later versions
        \brief Id of the boundary which is associated with the entity,
        returns 0 for inner entities, arbitrary int otherwise
      */
-    int boundaryId () const { return realEntity.boundaryId(); }
+    //int boundaryId () const { return realEntity.boundaryId(); }
+
     //@}
 
     typedef typename RemoveConst<GridImp>::Type mutableGridImp;
@@ -420,19 +421,23 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};
 
-    //! @copydoc Dune::Entity::boundaryId()
-    int boundaryId () const { return realEntity.boundaryId(); }
+    // @copydoc Dune::Entity::boundaryId()
+    // maybe available in later versions
+    //int boundaryId () const { return realEntity.boundaryId(); }
 
-    /**
+    /* not part of the interface, mybe in later versions
        \brief The boundaryId of the i-th subentity of codimension <tt>cc</tt>
 
        This does the same as <code>entity<cc>(i).boundaryId()</code>, but it is
        usually a lot faster.
      */
-    template <int cc> int subBoundaryId  ( int i ) const
-    {
-      return realEntity.subBoundaryId<cc>(i);
-    }
+    /*
+       template <int cc> int subBoundaryId  ( int i ) const
+       {
+        return realEntity.subBoundaryId<cc>(i);
+       }
+     */
+
     //@}
 
 
@@ -575,9 +580,11 @@ namespace Dune
     //! Copy constructor from EntityImp
     explicit Entity(const EntityImp<dim,dim,GridImp> & e) : realEntity(e) {};
 
-    /** \brief Id of the boundary which is associated with
-          the entity, returns 0 for inner entities, arbitrary int otherwise */
-    int boundaryId () const { return realEntity.boundaryId(); }
+    /* maybe available in later versions
+       \brief Id of the boundary which is associated with
+        the entity, returns 0 for inner entities, arbitrary int otherwise */
+    //int boundaryId () const { return realEntity.boundaryId(); }
+
     //@}
 
 
@@ -696,16 +703,19 @@ namespace Dune
      */
     bool isRegular() const { return true; }
 
-    /** \brief Default implementation for access to boundaryId of sub entities
+    /* maybe in later versions
+     * \brief Default implementation for access to boundaryId of sub entities
      *
      * Default implementation for access to boundaryId via interface method
      * entity<codim>.boundaryId(), default is very slow, but works, can be
      * overloaded be the actual grid implementation.
      */
-    template <int cc> int subBoundaryId  ( int i ) const
-    {
-      return (asImp().template entity<cc>(i))->boundaryId();
-    }
+    /*
+       template <int cc> int subBoundaryId  ( int i ) const
+       {
+        return (asImp().template entity<cc>(i))->boundaryId();
+       }
+     */
 
     /**\brief Returns true, if entity was refined during last adaptation cycle
      */
