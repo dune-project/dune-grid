@@ -52,7 +52,7 @@ namespace Dune {
   }
   class DuneGridFormatParser {
   public:
-    //! default constructor which does nothing
+    //!  constructor which does nothing
     DuneGridFormatParser() :
       dimw(-1),
       vtx(0), nofvtx(0), vtxoffset(0),
@@ -359,8 +359,7 @@ namespace Dune {
 #include "dgfparser.cc"
 
 /*!
-     @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
-     @ingroup Grid
+     @ingroup DuneGridFormatParser
      @brief Classes for reading a macrogrid file in the dune
      macrogrid format (dgf)
 

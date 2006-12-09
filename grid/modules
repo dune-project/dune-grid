@@ -48,7 +48,17 @@
 	 @defgroup GridImplementations
 	 @ingroup Grid
   */
- 
+
+  /**
+     @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
+     @ingroup Grid
+  */
+
+  /**
+     @defgroup GridPart Grid Parts
+     @ingroup Grid
+  */
+  
   /**
 	 @defgroup GridDevel
 	 @ingroup Grid
