@@ -226,14 +226,8 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
     if(connector_.ghostBoundary())
     {
-      const BNDFaceType * ghost = &connector_.boundaryFace();
-
-      // if nonconformity occurs then go up one level
-      if( ghost->level () != ghost->ghostLevel() )
-        ghost = static_cast<const BNDFaceType *>(ghost->up());
-
-      // set bnd face as ghost
-      return EntityPointer(this->grid_, *ghost );
+      // create entity pointer with ghost boundary face
+      return EntityPointer(this->grid_, connector_.boundaryFace() );
     }
 #endif
     assert( &connector_.outerEntity() );

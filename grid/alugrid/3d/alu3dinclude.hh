@@ -120,7 +120,7 @@ namespace Dune {
 
     typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
-    typedef std::pair<PLLBndFaceType*, int> GhostPairType;
+    typedef ALU3DSPACE GhostPairType GhostPairType;
 
     template <int cdim>
     struct Codim;
@@ -176,7 +176,7 @@ namespace Dune {
     typedef ALU3DSPACE GitterType::Geometric::HexaRule MarkRuleType;
     typedef std::pair<GEOFaceType*, int> NeighbourFaceType;
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
-    typedef std::pair<PLLBndFaceType*, int> GhostPairType;
+    typedef ALU3DSPACE GhostPairType GhostPairType;
 
     template <int cdim>
     struct Codim;

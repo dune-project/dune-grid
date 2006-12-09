@@ -31,6 +31,7 @@ namespace Dune {
     typedef typename ALU3dImplTraits<type>::GEOFaceType GEOFaceType;
     typedef typename ALU3dImplTraits<type>::GEOElementType GEOElementType;
     typedef typename ALU3dImplTraits<type>::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits<type>::GhostPairType GhostPairType;
 #if ALU3DGRID_PARALLEL
     typedef typename ALU3dImplTraits<type>::PLLBndFaceType BndFaceType;
 #else
@@ -100,6 +101,9 @@ namespace Dune {
 
     int innerFaceNumber_;
     int outerFaceNumber_;
+
+    int innerTwist_;
+    int outerTwist_;
 
     bool outerBoundary_;
     bool ghostBoundary_;
