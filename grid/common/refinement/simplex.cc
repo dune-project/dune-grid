@@ -182,6 +182,10 @@
    @section PermutationIndexing Index of a permutation
    <!--============================================-->
 
+   [NOTE: There may be some interesting stuff in
+   http://en.wikipedia.org/wiki/Factoradic .  I was not aware of it
+   while writing this code, however.]
+
    We need to index the n! permutations of the integers from 0 to n-1
    and a way to calculate the permutation if given the index.
 
