@@ -146,7 +146,7 @@ int main () try
   //  Do the test for a 2d UGGrid
   // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<2,2> GridType;
+    typedef UGGrid<2> GridType;
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
@@ -171,7 +171,7 @@ int main () try
   //  Do the  test for a 3d UGGrid
   // ////////////////////////////////////////////////////////////////////////
   {
-    typedef UGGrid<3,3> GridType;
+    typedef UGGrid<3> GridType;
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
