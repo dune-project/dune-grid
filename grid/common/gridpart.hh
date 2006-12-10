@@ -17,8 +17,8 @@
    @brief Provides views of grid via grid parts, heavily used in the
    dune-fem module.
  */
-/*! @ingroup GridPart
-
+/*! @addtogroup GridPart
+    @ingroup Grid
 
    @section GridPart1 What is a GridPart ?
    <!--============================-->

@@ -28,22 +28,6 @@ namespace Dune {
 #include "entitykey.hh"
 #include "dgfparserblocks.hh"
 
-/**
- * @file
- * @brief  Classes for constructing macrogrids from files in the
- *         Dune Grid Format (DGF)
- *
- * Usage: the class Dune::MacroGrid returns a
- * pointer to a initialized grid. For details on the DGF file format
- * see the @link DuneGridFormatParser macro grid parser@endlink.
- * Note that the caller must explicitly delete the generated grid!
- *
- * The parsing of the DGF file is performed through the Dune::DuneGridFormatParser
- * class.
- *
- * @author Andreas Dedner
- */
-
 namespace Dune {
   //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
   //! build information in vector structures used by the MacroGrid class.
@@ -358,8 +342,9 @@ namespace Dune {
 }
 #include "dgfparser.cc"
 
-/*!
-     @ingroup DuneGridFormatParser
+/**  @addtogroup DuneGridFormatParser
+     @ingroup Grid
+
      @brief Classes for reading a macrogrid file in the dune
      macrogrid format (dgf)
 
@@ -964,7 +949,7 @@ namespace Dune {
 
    \image html  pmdc.png "The resulting grid using ALUSimplexGrid<3,3>"
 
- */
+ **/
 /*
       Dune::Alberta with \c dimworld=3: \n
         if Tetgen is used to construct a
