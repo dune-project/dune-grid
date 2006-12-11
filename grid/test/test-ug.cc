@@ -271,7 +271,7 @@ int main (int argc , char **argv) try
           ++children;
         }
         if ((children == 1) && (globalIdSet.id<0>(*eIt) != globalChildId))
-          DUNE_THROW(Dune::GridError, "Copy of element has different glogalId!");
+          DUNE_THROW(Dune::GridError, "Copy of element has different globalId!");
       }
     }
   }
