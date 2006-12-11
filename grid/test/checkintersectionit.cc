@@ -41,46 +41,40 @@ void checkGeometry(const GeometryImp& geometry)
       DUNE_THROW(GridError, "Methods operator[] and global() are inconsistent!");
   }
 
-  // Compute the element center just to have an argument for the following methods
-  FieldVector<ctype, dimworld> center(0);
-  for (int i=0; i<geometry.corners(); i++)
-    center += geometry[i];
+  // Use a quadrature rule to create a few test points for the following checks
+  const QuadratureRule<double, dim>& quad
+    = QuadratureRules<double, dim>::rule(geometry.type(), 2);
 
-  center /= geometry.corners();
+  for (size_t i=0; i<quad.size(); i++) {
 
-#ifdef DUNE_UGGRID_HH
-#warning Test for quadrilateral intersections in UGGrid disabled!
-  if (!(geometry.type().isQuadrilateral() && dimworld==3)) {
-#endif
-  // The geometry center in local coordinates
-  FieldVector<ctype, dim> localCenter = geometry.local(center);
+    const FieldVector<double,dim>& testPoint = quad[i].position();
 
-  // Check whether center is within the intersection
-  // This implicitly assumes convex intersections
-  if (!geometry.checkInside(localCenter))
-    DUNE_THROW(GridError, "Center of geometry is not within geometry!");
+    // Check whether point is within the intersection
+    if (!geometry.checkInside(testPoint))
+      DUNE_THROW(GridError, "Test point is not within geometry!");
 
-  // Back to global coordinates to check for correctness
-  FieldVector<ctype, dimworld> worldCenter = geometry.global(localCenter);
-  if ((center-worldCenter).infinity_norm() > 1e-6)
-    DUNE_THROW(GridError, "local() and global() are not inverse to each other!");
+    // Transform to global coordinates
+    FieldVector<ctype, dimworld> global = geometry.global(testPoint);
 
-  // The integration element at the element center
-  ctype intElement = geometry.integrationElement(localCenter);
-  if (intElement <=0)
-    DUNE_THROW(GridError, "nonpositive integration element found!");
+    // The back to local coordinates
+    FieldVector<ctype, dim> local = geometry.local(global);
+
+    // check for correctness
+    if ((testPoint-local).infinity_norm() > 1e-6)
+      DUNE_THROW(GridError, "local() and global() are not inverse to each other!");
+
+    // The integration element at the element center
+    ctype intElement = geometry.integrationElement(testPoint);
+    if (intElement <=0)
+      DUNE_THROW(GridError, "nonpositive integration element found!");
 
 #if 0
-  // This method exists in the interface, but it is not expected to work
-  // unless dim==dimworld
-  const FieldMatrix<ctype, Geometry::mydimension, Geometry::mydimension> jacobi
-    = intersectionGlobal.jacobianInverseTransposed(localCenter);
+    // This method exists in the interface, but it is not expected to work
+    // unless dim==dimworld
+    const FieldMatrix<ctype, dim, dim> jacobi
+      = intersectionGlobal.jacobianInverseTransposed(testPoint);
 #endif
-#ifdef DUNE_UGGRID_HH
-}
-#endif
-
-
+  }
 }
 
 /** \brief Test the IntersectionIterator
