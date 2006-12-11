@@ -6,12 +6,12 @@
 #include <dune/grid/uggrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
-  template <int dim,int dimworld>
-  class MacroGrid::Impl<UGGrid<dim,dimworld> > {
+  template <int dim>
+  class MacroGrid::Impl<UGGrid<dim> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
-    static UGGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                          const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+    static UGGrid<dim>* generate(MacroGrid& mg,
+                                 const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
 }
 #include "dgfug.cc"
