@@ -19,7 +19,7 @@ try
   MPIHelper::instance(argc,argv);
 
   {
-    typedef OneDGrid<1,1> GridType;
+    typedef OneDGrid GridType;
     std::string filename("examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
 
@@ -27,7 +27,7 @@ try
     gridcheck(*gridptr);
   }
   {
-    typedef OneDGrid<1,1> GridType;
+    typedef OneDGrid GridType;
     std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 

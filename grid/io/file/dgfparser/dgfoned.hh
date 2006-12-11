@@ -5,13 +5,13 @@
 #include <dune/grid/onedgrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
-  template <int dim,int dimworld>
-  class MacroGrid::Impl<OneDGrid<dim,dimworld> > {
+  template <>
+  class MacroGrid::Impl<OneDGrid> {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
-    static OneDGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                            const char* filename,
-                                            MPICommunicatorType MPICOMM = MPIHelper::getCommunicator());
+    static OneDGrid* generate(MacroGrid& mg,
+                              const char* filename,
+                              MPICommunicatorType MPICOMM = MPIHelper::getCommunicator());
   };
 }
 #include "dgfoned.cc"

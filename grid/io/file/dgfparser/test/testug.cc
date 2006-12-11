@@ -18,7 +18,7 @@ try {
   MPIHelper::instance(argc,argv);
 
   {
-    typedef UGGrid<2,2> GridType;
+    typedef UGGrid<2> GridType;
     std::string filename("examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
 
@@ -27,7 +27,7 @@ try {
   }
 
   {
-    typedef UGGrid<3,3> GridType;
+    typedef UGGrid<3> GridType;
     std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
