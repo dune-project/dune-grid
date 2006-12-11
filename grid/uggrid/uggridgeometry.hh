@@ -275,64 +275,9 @@ namespace Dune {
 
     //! Maps a global coordinate within the element to a
     //! local coordinate in its reference element
-    FieldVector<UGCtype, 2> local (const FieldVector<UGCtype, 3>& global) const {
+    FieldVector<UGCtype, 2> local (const FieldVector<UGCtype, 3>& global) const;
 
-      // The UG method UG_GlobalToLocalBnd pretends to do what this method does,
-      // but in reality it is buggy!
-      FieldVector<UGCtype,2> result;
 
-      FieldMatrix<UGCtype,2,2> M;
-      FieldVector<UGCtype,2> partialDiff;
-
-      FieldVector<UGCtype,3> diff = global;
-      diff -= coord_[0];
-
-      if (elementType_.isTriangle())
-      {
-        /* the simplex case */
-        FieldMatrix<UGCtype,3,2> matrix;
-        for (int i=0; i<3; i++) {
-          matrix[i][0] = coord_[1][i] - coord_[0][i];
-          matrix[i][1] = coord_[2][i] - coord_[0][i];
-        }
-
-        // Simply regard the projection onto the x-y plane
-        M[0] = matrix[0];
-        M[1] = matrix[1];
-        partialDiff[0] = diff[0];
-        partialDiff[1] = diff[1];
-
-        if (M.determinant()!=0) {
-          M.solve(result, partialDiff);
-          return result;
-        }
-
-        // The triangle is orthogonal to the x-y plane.  try the x-z plane
-        M[1]           = matrix[2];
-        partialDiff[1] = diff[2];
-
-        if (M.determinant()!=0) {
-          M.solve(result, partialDiff);
-          return result;
-        }
-
-        // Last attempt: the y-z plane
-        M[0]           = matrix[1];
-        partialDiff[0] = diff[1];
-
-        if (M.determinant()!=0) {
-          M.solve(result, partialDiff);
-          return result;
-        }
-
-        // There must be something wrong here
-        assert(false);
-      } else {
-        DUNE_THROW(NotImplemented, "local for quadrilateral boundary faces");
-      }
-
-      return result;
-    }
 
     //! Returns true if the point is in the current element
     bool checkInside(const FieldVector<UGCtype, 2> &local) const {
@@ -367,6 +312,116 @@ namespace Dune {
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,2,2> jacobianInverseTransposed_;
 
+    // /////////////////////////////////////////////////////
+    //   Temporary stuff
+    // /////////////////////////////////////////////////////
+
+    // the real constructor, this can be called fro FieldVectors
+    // and double[3], we dont have to convert one type
+    void buildMapping  (const Dune::FieldVector<double,3>& _p0, const Dune::FieldVector<double,3>& _p1,
+                        const Dune::FieldVector<double,3>& _p2, const Dune::FieldVector<double,3>& _p3,
+                        Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n) const
+    {
+      _b [0][0] = _p0 [0] ;
+      _b [0][1] = _p0 [1] ;
+      _b [0][2] = _p0 [2] ;
+      _b [1][0] = _p1 [0] - _p0 [0] ;
+      _b [1][1] = _p1 [1] - _p0 [1] ;
+      _b [1][2] = _p1 [2] - _p0 [2] ;
+      _b [2][0] = _p2 [0] - _p0 [0] ;
+      _b [2][1] = _p2 [1] - _p0 [1] ;
+      _b [2][2] = _p2 [2] - _p0 [2] ;
+      _b [3][0] = _p3 [0] - _p2 [0] - _b [1][0] ;
+      _b [3][1] = _p3 [1] - _p2 [1] - _b [1][1] ;
+      _b [3][2] = _p3 [2] - _p2 [2] - _b [1][2] ;
+
+      _n [0][0] = _b [1][1] * _b [2][2] - _b [1][2] * _b [2][1] ;
+      _n [0][1] = _b [1][2] * _b [2][0] - _b [1][0] * _b [2][2] ;
+      _n [0][2] = _b [1][0] * _b [2][1] - _b [1][1] * _b [2][0] ;
+      _n [1][0] = _b [1][1] * _b [3][2] - _b [1][2] * _b [3][1] ;
+      _n [1][1] = _b [1][2] * _b [3][0] - _b [1][0] * _b [3][2] ;
+      _n [1][2] = _b [1][0] * _b [3][1] - _b [1][1] * _b [3][0] ;
+      _n [2][0] = _b [3][1] * _b [2][2] - _b [3][2] * _b [2][1] ;
+      _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2] ;
+      _n [2][2] = _b [3][0] * _b [2][1] - _b [3][1] * _b [2][0] ;
+
+    }
+
+    void normal (const double x, const double y, Dune::FieldVector<double,3>& norm,
+                 Dune::FieldMatrix<double,3,3>& _n) const {
+
+      for (int i=0; i<3; i++)
+        norm [i] = -(_n [0][i] + _n [1][i] * x + _n [2][i] * y);
+
+    }
+
+    void map2worldnormal (double x, double y,double z, Dune::FieldVector<double,3>& w,
+                          Dune::FieldVector<double,3>& normal_,
+                          Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n) const
+    {
+      normal(x,y,normal_,_n);
+
+      double xy = x * y ;
+
+      for (int i=0; i<3; i++)
+        w[i] = _b [0][i] + x * _b [1][i] + y * _b [2][i] + xy * _b [3][i] + z*normal_[0];
+
+    }
+#if 0
+    void map2worldlinear(double x, double y,double z, Dune::FieldVector<double,3>& normal_,
+                         Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
+                         Dune::FieldMatrix<double,3,3>& Df) const
+    {
+      normal(x,y,normal_,_n);
+
+      Df[0][0] = _b [1][0] + y * _b [3][0]+ z*_n[1][0] ;
+      Df[1][0] = _b [1][1] + y * _b [3][1]+ z*_n[1][1] ;
+      Df[2][0] = _b [1][2] + y * _b [3][2]+ z*_n[1][2] ;
+
+      Df[0][1] = _b [2][0] + x * _b [3][0]+ z*_n[2][0] ;
+      Df[1][1] = _b [2][1] + x * _b [3][1]+ z*_n[2][1] ;
+      Df[2][1] = _b [2][2] + x * _b [3][2]+ z*_n[2][2] ;
+
+      Df[0][2] = normal_[0];
+      Df[1][2] = normal_[1];
+      Df[2][2] = normal_[2];
+
+    }
+#endif
+
+    double det(const Dune::FieldVector<double,3>& point, Dune::FieldVector<double,3>& normal_,
+               Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
+               Dune::FieldMatrix<double,3,3>& Df) const
+    {
+      //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
+      //map2worldlinear (point[0],point[1],point[2], normal_, _b, _n, Df) ;
+      normal(point[0],point[1],normal_,_n);
+
+      for (int i=0; i<3; i++) {
+        Df[i][0] = _b [1][i] + point[1] * _b [3][i]+ point[2]*_n[1][i] ;
+        Df[i][1] = _b [2][i] + point[0] * _b [3][i]+ point[2]*_n[2][i] ;
+        Df[i][2] = normal_[i];
+      }
+
+      return Df.determinant();
+    }
+
+    void inverse(const Dune::FieldVector<double,3>& p, Dune::FieldVector<double,3>& normal_,
+                 Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
+                 Dune::FieldMatrix<double,3,3>& Df,Dune::FieldMatrix<double,3,3>& Dfi ) const
+    {
+      //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
+      double val = 1.0 / det(p,normal_, _b, _n, Df) ;
+      Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
+      Dfi[0][1] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
+      Dfi[0][2] = ( Df[0][1] * Df[1][2] - Df[0][2] * Df[1][1] ) * val ;
+      Dfi[1][0] = ( Df[1][2] * Df[2][0] - Df[1][0] * Df[2][2] ) * val ;
+      Dfi[1][1] = ( Df[0][0] * Df[2][2] - Df[0][2] * Df[2][0] ) * val ;
+      Dfi[1][2] = ( Df[0][2] * Df[1][0] - Df[0][0] * Df[1][2] ) * val ;
+      Dfi[2][0] = ( Df[1][0] * Df[2][1] - Df[1][1] * Df[2][0] ) * val ;
+      Dfi[2][1] = ( Df[0][1] * Df[2][0] - Df[0][0] * Df[2][1] ) * val ;
+      Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[0][1] * Df[1][0] ) * val ;
+    }
   };
 
 

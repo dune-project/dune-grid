@@ -295,6 +295,107 @@ global(const FieldVector<typename GridImp::ctype, 2>& local) const
 
 }
 
+
+template <class GridImp>
+inline Dune::FieldVector<typename GridImp::ctype, 2> Dune::UGGridGeometry<2,3,GridImp>::
+local(const FieldVector<typename GridImp::ctype, 3>& global) const
+{
+  // The UG method UG_GlobalToLocalBnd pretends to do what this method does,
+  // but in reality it is buggy!
+  FieldVector<UGCtype,2> result;
+
+  FieldMatrix<UGCtype,2,2> M;
+  FieldVector<UGCtype,2> partialDiff;
+
+  FieldVector<UGCtype,3> diff = global;
+  diff -= coord_[0];
+
+  if (elementType_.isTriangle()) {
+
+    /* the simplex case */
+    FieldMatrix<UGCtype,3,2> matrix;
+    for (int i=0; i<3; i++) {
+      matrix[i][0] = coord_[1][i] - coord_[0][i];
+      matrix[i][1] = coord_[2][i] - coord_[0][i];
+    }
+
+    // Simply regard the projection onto the x-y plane
+    M[0] = matrix[0];
+    M[1] = matrix[1];
+    partialDiff[0] = diff[0];
+    partialDiff[1] = diff[1];
+
+    if (M.determinant()!=0) {
+      M.solve(result, partialDiff);
+      return result;
+    }
+
+    // The triangle is orthogonal to the x-y plane.  try the x-z plane
+    M[1]           = matrix[2];
+    partialDiff[1] = diff[2];
+
+    if (M.determinant()!=0) {
+      M.solve(result, partialDiff);
+      return result;
+    }
+
+    // Last attempt: the y-z plane
+    M[0]           = matrix[1];
+    partialDiff[0] = diff[1];
+
+    if (M.determinant()!=0) {
+      M.solve(result, partialDiff);
+      return result;
+    }
+
+    // There must be something wrong here
+    assert(false);
+  } else {
+    assert(elementType_.isQuadrilateral());
+
+    //inline void BilinearSurfaceMapping::world2map (const coord3_t& wld , coord2_t& map ) const
+
+    //  Newton - Iteration zum Invertieren der Abbildung f.
+    //double err = 10.0 * _epsilon ;
+    double err;
+    FieldVector<UGCtype,3> map_(0);
+    int count = 0 ;
+
+    FieldMatrix<double,3,3> Df;                // set in method map2worldlinear
+    FieldMatrix<double,3,3> Dfi;               // set in method inverse()
+    Dune::FieldVector<double,3> normal_;       // in method map2worldnormal
+    Dune::FieldMatrix<double,4,3> _b;
+    Dune::FieldMatrix<double,3,3> _n;
+
+    buildMapping(coord_[0], coord_[1], coord_[3], coord_[2], _b, _n);
+
+    do {
+      FieldVector<UGCtype,3> upd ;
+      map2worldnormal (map_[0],map_[1],map_[2], upd, normal_,_b, _n) ;
+      inverse (map_, normal_, _b, _n, Df,Dfi) ;
+      FieldVector<UGCtype,3> u = upd;
+      u -= global;
+
+      FieldVector<UGCtype,3> c(0);
+      Dfi.umv(u,c);
+
+      map_ -= c;
+
+      err = c.two_norm();
+
+      if (count++ > 100)
+        DUNE_THROW(NotImplemented, "Newton solver did not converge!");
+
+    } while (err > 1e-5) ;
+
+    result[0]=map_[0];
+    result[1]=map_[1];
+
+  }
+
+  return result;
+}
+
 template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<1,2,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
