@@ -12,6 +12,9 @@ using namespace Dune;
 
 int main(int argc, char ** argv, char ** envp)
 try {
+  std::cerr << "error: test-ug is broken! please fix me...\n";
+  exit(1);
+
   std::cout << std::endl << "start UGGrid test" << std::endl;
 
   // this method calls MPI_Init, if MPI is enabled

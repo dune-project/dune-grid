@@ -140,8 +140,6 @@ void markOne ( GridType & grid , int num , int ref )
 int main (int argc , char **argv) try
 {
 
-  std::cerr << "error: test-ug is broken! please fix me...\n";
-  exit(1);
 #ifdef ModelP
   // initialize MPI
   MPI_Init(&argc,&argv);
