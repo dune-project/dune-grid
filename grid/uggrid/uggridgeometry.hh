@@ -316,86 +316,24 @@ namespace Dune {
     //   Temporary stuff
     // /////////////////////////////////////////////////////
 
-    // the real constructor, this can be called fro FieldVectors
-    // and double[3], we dont have to convert one type
-    void buildMapping  (const Dune::FieldVector<double,3>& _p0, const Dune::FieldVector<double,3>& _p1,
-                        const Dune::FieldVector<double,3>& _p2, const Dune::FieldVector<double,3>& _p3,
-                        Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n) const
-    {
-      _b [0][0] = _p0 [0] ;
-      _b [0][1] = _p0 [1] ;
-      _b [0][2] = _p0 [2] ;
-      _b [1][0] = _p1 [0] - _p0 [0] ;
-      _b [1][1] = _p1 [1] - _p0 [1] ;
-      _b [1][2] = _p1 [2] - _p0 [2] ;
-      _b [2][0] = _p2 [0] - _p0 [0] ;
-      _b [2][1] = _p2 [1] - _p0 [1] ;
-      _b [2][2] = _p2 [2] - _p0 [2] ;
-      _b [3][0] = _p3 [0] - _p2 [0] - _b [1][0] ;
-      _b [3][1] = _p3 [1] - _p2 [1] - _b [1][1] ;
-      _b [3][2] = _p3 [2] - _p2 [2] - _b [1][2] ;
-
-      _n [0][0] = _b [1][1] * _b [2][2] - _b [1][2] * _b [2][1] ;
-      _n [0][1] = _b [1][2] * _b [2][0] - _b [1][0] * _b [2][2] ;
-      _n [0][2] = _b [1][0] * _b [2][1] - _b [1][1] * _b [2][0] ;
-      _n [1][0] = _b [1][1] * _b [3][2] - _b [1][2] * _b [3][1] ;
-      _n [1][1] = _b [1][2] * _b [3][0] - _b [1][0] * _b [3][2] ;
-      _n [1][2] = _b [1][0] * _b [3][1] - _b [1][1] * _b [3][0] ;
-      _n [2][0] = _b [3][1] * _b [2][2] - _b [3][2] * _b [2][1] ;
-      _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2] ;
-      _n [2][2] = _b [3][0] * _b [2][1] - _b [3][1] * _b [2][0] ;
-
-    }
-
-    void normal (const double x, const double y, Dune::FieldVector<double,3>& norm,
-                 Dune::FieldMatrix<double,3,3>& _n) const {
-
-      for (int i=0; i<3; i++)
-        norm [i] = -(_n [0][i] + _n [1][i] * x + _n [2][i] * y);
-
-    }
-
     void map2worldnormal (double x, double y,double z, Dune::FieldVector<double,3>& w,
                           Dune::FieldVector<double,3>& normal_,
                           Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n) const
     {
-      normal(x,y,normal_,_n);
+      for (int i=0; i<3; i++)
+        normal_ [i] = -(_n [0][i] + _n [1][i] * x + _n [2][i] * y);
 
-      double xy = x * y ;
 
       for (int i=0; i<3; i++)
-        w[i] = _b [0][i] + x * _b [1][i] + y * _b [2][i] + xy * _b [3][i] + z*normal_[0];
+        w[i] = _b [0][i] + x * _b [1][i] + y * _b [2][i] + x*y * _b [3][i] + z*normal_[0];
 
     }
-#if 0
-    void map2worldlinear(double x, double y,double z, Dune::FieldVector<double,3>& normal_,
-                         Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
-                         Dune::FieldMatrix<double,3,3>& Df) const
-    {
-      normal(x,y,normal_,_n);
-
-      Df[0][0] = _b [1][0] + y * _b [3][0]+ z*_n[1][0] ;
-      Df[1][0] = _b [1][1] + y * _b [3][1]+ z*_n[1][1] ;
-      Df[2][0] = _b [1][2] + y * _b [3][2]+ z*_n[1][2] ;
-
-      Df[0][1] = _b [2][0] + x * _b [3][0]+ z*_n[2][0] ;
-      Df[1][1] = _b [2][1] + x * _b [3][1]+ z*_n[2][1] ;
-      Df[2][1] = _b [2][2] + x * _b [3][2]+ z*_n[2][2] ;
-
-      Df[0][2] = normal_[0];
-      Df[1][2] = normal_[1];
-      Df[2][2] = normal_[2];
-
-    }
-#endif
 
     double det(const Dune::FieldVector<double,3>& point, Dune::FieldVector<double,3>& normal_,
                Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
                Dune::FieldMatrix<double,3,3>& Df) const
     {
       //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
-      //map2worldlinear (point[0],point[1],point[2], normal_, _b, _n, Df) ;
-      normal(point[0],point[1],normal_,_n);
 
       for (int i=0; i<3; i++) {
         Df[i][0] = _b [1][i] + point[1] * _b [3][i]+ point[2]*_n[1][i] ;
@@ -412,6 +350,7 @@ namespace Dune {
     {
       //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
       double val = 1.0 / det(p,normal_, _b, _n, Df) ;
+#if 1
       Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
       Dfi[0][1] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
       Dfi[0][2] = ( Df[0][1] * Df[1][2] - Df[0][2] * Df[1][1] ) * val ;
@@ -421,6 +360,10 @@ namespace Dune {
       Dfi[2][0] = ( Df[1][0] * Df[2][1] - Df[1][1] * Df[2][0] ) * val ;
       Dfi[2][1] = ( Df[0][1] * Df[2][0] - Df[0][0] * Df[2][1] ) * val ;
       Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[0][1] * Df[1][0] ) * val ;
+#else
+      Dfi = Df;
+      Dfi.invert();
+#endif
     }
   };
 

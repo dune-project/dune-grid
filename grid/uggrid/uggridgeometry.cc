@@ -356,7 +356,6 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
     //inline void BilinearSurfaceMapping::world2map (const coord3_t& wld , coord2_t& map ) const
 
     //  Newton - Iteration zum Invertieren der Abbildung f.
-    //double err = 10.0 * _epsilon ;
     double err;
     FieldVector<UGCtype,3> map_(0);
     int count = 0 ;
@@ -367,7 +366,25 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
     Dune::FieldMatrix<double,4,3> _b;
     Dune::FieldMatrix<double,3,3> _n;
 
-    buildMapping(coord_[0], coord_[1], coord_[3], coord_[2], _b, _n);
+    // buildmapping
+    for (int i=0; i<3; i++) {
+
+      _b [0][i] = coord_[0] [i] ;
+      _b [1][i] = coord_[1] [i] - coord_[0] [i] ;
+      _b [2][i] = coord_[3] [i] - coord_[0] [i] ;
+      _b [3][i] = coord_[2] [i] - coord_[3] [i] - _b [1][i] ;
+
+    }
+
+    _n [0][0] = _b [1][1] * _b [2][2] - _b [1][2] * _b [2][1] ;
+    _n [0][1] = _b [1][2] * _b [2][0] - _b [1][0] * _b [2][2] ;
+    _n [0][2] = _b [1][0] * _b [2][1] - _b [1][1] * _b [2][0] ;
+    _n [1][0] = _b [1][1] * _b [3][2] - _b [1][2] * _b [3][1] ;
+    _n [1][1] = _b [1][2] * _b [3][0] - _b [1][0] * _b [3][2] ;
+    _n [1][2] = _b [1][0] * _b [3][1] - _b [1][1] * _b [3][0] ;
+    _n [2][0] = _b [3][1] * _b [2][2] - _b [3][2] * _b [2][1] ;
+    _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2] ;
+    _n [2][2] = _b [3][0] * _b [2][1] - _b [3][1] * _b [2][0] ;
 
     do {
       FieldVector<UGCtype,3> upd ;
