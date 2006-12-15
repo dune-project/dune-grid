@@ -189,11 +189,22 @@ namespace Dune {
     // check macro grid file for keyword
     this->checkMacroGridFile (macroTriangFilename);
 
-    mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
-#if ALU3DGRID_PARALLEL
-                                             , mpAccess_
+#if ALU3DGRID_PARALLEL == 0
+    // in serial version call empty constructor when no file given
+    if( macroTriangFilename == "" )
+    {
+      mygrid_ = new ALU3DSPACE GitterImplType ();
+    }
+    else
 #endif
-                                             );
+    {
+      mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
+#if ALU3DGRID_PARALLEL
+                                               , mpAccess_
+#endif
+                                               );
+    }
+
     assert(mygrid_ != 0);
 
 #if ALU3DGRID_PARALLEL
