@@ -413,11 +413,16 @@ template < int dim >
 bool Dune::UGGrid < dim >::mark(int refCount,
                                 const typename Traits::template Codim<0>::EntityPointer & e )
 {
-  // No refinement requested
-  if (refCount==0)
-    return false;
-
   typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
+
+  // No refinement requested
+  if (refCount==0) {
+    if (UG_NS<dim>::MarkForRefinement(target,
+                                      UG_NS<dim>::NO_REFINEMENT,      // unset
+                                      0)      // Irrelevant if refinement rule is not BLUE
+        ) DUNE_THROW(GridError, "UG" << dim << "d::MarkForRefinement returned error code!");
+    return true;
+  }
 
   // Check whether element can be marked for refinement
   if (!EstimateHere(target))
@@ -461,8 +466,32 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
 
 }
 
-template < int dim >
-bool Dune::UGGrid < dim >::preAdapt()
+template <int dim>
+int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
+{
+  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
+
+  // Return -1 if element is marked for coarsening
+  if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::COARSEN_CE))
+    return -1;
+
+#if 1  // in rm.c
+  if (dim==2)
+    target = (typename UG_NS<dim>::Element*) UG::D2::ELEMENT_TO_MARK((UG::D2::element*)target);
+  else
+    target = (typename UG_NS<dim>::Element*) UG::D3::ELEMENT_TO_MARK((UG::D3::element*)target);
+#endif
+
+  // Return 0 if element is not marked at all
+  if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::MARK_CE)==UG_NS<dim>::NO_REFINEMENT)
+    return 0;
+
+  // Else return 1
+  return 1;
+}
+
+template <int dim>
+bool Dune::UGGrid <dim>::preAdapt()
 {
   return someElementHasBeenMarkedForRefinement_;
 }

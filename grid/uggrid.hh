@@ -329,6 +329,9 @@ namespace Dune {
               typename UG_NS<dim>::RefinementRule rule,
               int side=0);
 
+    /** \brief Query whether element is marked for refinement */
+    int getMark(const typename Traits::template Codim<0>::Entity& e) const;
+
     /** \brief returns true, if some elements might be coarsend during grid
        adaption, here always returns true */
     bool preAdapt();

@@ -26,5 +26,6 @@
 #include <algebra.h>
 #include <refine.h>
 #include <ugm.h>
+#include <rm.h>
 
 #endif
