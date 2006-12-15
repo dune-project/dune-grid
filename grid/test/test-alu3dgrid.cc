@@ -67,7 +67,7 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   makeNonConfGrid(grid,gref,mxl);
 
   // -1 stands for leaf check
-  checkCommunication(grid, -1, Dune::dvverb);
+  checkCommunication(grid, -1, std::cout);
 
   for(int l=0; l<= mxl; ++l)
     checkCommunication(grid, l , Dune::dvverb);
@@ -105,8 +105,17 @@ int main (int argc , char **argv) {
         checkALUSerial(grid);
       }
 
+      // check non-confrom ALUGrid for 2d
       {
         typedef ALUSimplexGrid<2,2> GridType;
+        std::string filename("simplex-testgrid-2-2.dgf");
+        GridPtr<GridType> gridPtr(filename);
+        checkALUSerial(*gridPtr,2);
+      }
+
+      // check confrom ALUGrid for 2d
+      {
+        typedef ALUConformGrid<2,2> GridType;
         std::string filename("simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr,2);
@@ -123,10 +132,10 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
 
-        if (myrank == 0)
+        if(myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
-          checkALUSerial(grid,1);
+          checkALUSerial(grid,(mysize == 1) ? 1 : 0);
         }
 
         // perform parallel check only when more then one proc
@@ -153,7 +162,7 @@ int main (int argc , char **argv) {
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
-          checkALUSerial(grid,1);
+          checkALUSerial(grid,(mysize == 1) ? 1 : 0);
         }
 
         // perform parallel check only when more then one proc
