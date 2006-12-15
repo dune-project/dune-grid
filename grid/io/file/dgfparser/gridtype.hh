@@ -86,16 +86,16 @@
  */
 
 #ifndef GRIDDIM
-  #warning --- No GRIDDIM defined, defaulting to 2
-const int dimworld = 2;
-  #define GRIDDIM 2
+  #warning --- No GRIDDIM defined, defaulting to 3
+const int dimworld = 3;
+  #define GRIDDIM 3
 #else
 const int dimworld = GRIDDIM;
 #endif
 
+/*! @brief Some simple static information for a given GridType
+ */
 namespace Dune {
-  /*! @brief Some simple static information for a given GridType
-   */
   template <class GridType>
   struct DGFGridInfo {
     //! number of globalRefine steps needed to refuce h by 0.5
@@ -161,7 +161,11 @@ namespace Dune {
 typedef Dune::OneDGrid<dimworld,dimworld> GridType;
   #else
     #include "dgfalu.hh"
+    #if GRIDDIM == 2
 typedef Dune::ALUConformGrid<dimworld,dimworld> GridType;
+    #else
+       #error "ALUGRID_CONFORM not implemented for dimension three!"
+    #endif
   #endif
 namespace Dune {
   template <>
