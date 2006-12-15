@@ -258,7 +258,7 @@ namespace Dune {
   public:
     //! constructor creating grid from given macro grid file
     ALUSimplexGrid(const std::string macroName )
-      : BaseType(macroName)
+      : BaseType(macroName, 1)
     {
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -269,6 +269,7 @@ namespace Dune {
       std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    enum { refineStepsForHalf = 1 };
     typedef BaseType::ctype ctype;
     typedef BaseType::GridFamily GridFamily;
     typedef GridFamily::Traits Traits;
@@ -308,7 +309,7 @@ namespace Dune {
 
     template<int dim,int dimw>
     struct isParallel<const ALUSimplexGrid<dim, dimw> > {
-      static const bool v = true;
+      static const bool v = false;
     };
 
     template<int dim,int dimw>
@@ -326,25 +327,97 @@ namespace Dune {
     template<int dim,int dimw>
     struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
     {
+      static const bool v = false;
+    };
+
+  } // end namespace Capabilities
+
+  template <int dim, int dimworld>
+  class ALUConformGrid;
+
+  template <>
+  class ALUConformGrid<2,2> :
+    public Dune::ALU2dGrid<2,2> {
+    typedef Dune::ALU2dGrid<2,2> BaseType;
+    enum { dim      = 2 };
+    enum { dimworld = 2 };
+  public:
+    //! constructor creating grid from given macro grid file
+    ALUConformGrid(const std::string macroName )
+      : BaseType(macroName)
+    {
+      std::cout << "\nCreated serial ALUConformGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+    //! constructor creating empty grid
+    ALUConformGrid( ) : BaseType()
+    {
+      std::cout << "\nCreated empty ALUConformGrid<"<<dim<<","<<dimworld <<">. \n\n";
+    }
+    enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
+    enum { refineStepsForHalf = 2 };
+    typedef BaseType::ctype ctype;
+    typedef BaseType::GridFamily GridFamily;
+    typedef GridFamily::Traits Traits;
+    typedef BaseType::LocalIdSetImp LocalIdSetImp;
+    typedef Traits :: GlobalIdSet GlobalIdSet;
+    typedef Traits :: LocalIdSet LocalIdSet;
+    typedef GridFamily :: LevelIndexSetImp LevelIndexSetImp;
+    typedef GridFamily :: LeafIndexSetImp LeafIndexSetImp;
+    typedef BaseType::LeafIteratorImp LeafIteratorImp;
+    typedef Traits::Codim<0>::LeafIterator LeafIteratorType;
+    typedef Traits::Codim<0>::LeafIterator LeafIterator;
+    typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
+
+    friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
+    friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
+
+    friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+    friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
+  private:
+
+    //! Copy constructor should not be used
+    ALUConformGrid( const ALUConformGrid & g ) ; // : BaseType(g) {}
+
+    //! assignment operator should not be used
+    ALUConformGrid<dim,dimworld>&
+    operator = (const ALUConformGrid& g);
+  };
+
+  namespace Capabilities {
+
+    template<int dim,int dimw, int cdim >
+    struct hasEntity<Dune::ALUConformGrid<dim, dimw>, cdim >
+    {
       static const bool v = true;
     };
 
-#if IS_NON_CONFORM == 0
-    // for conform grid is just the opposite of above
-    template<>
-    struct isLevelwiseConforming< ALUSimplexGrid<2,2> >
+    template<int dim,int dimw>
+    struct isParallel<const ALUConformGrid<dim, dimw> > {
+      static const bool v = false;
+    };
+
+    template<int dim,int dimw>
+    struct isLevelwiseConforming< ALUConformGrid<dim,dimw> >
     {
       static const bool v = false;
     };
 
-    template<>
-    struct isLeafwiseConforming< ALUSimplexGrid<2,2> >
+    template<int dim,int dimw>
+    struct hasHangingNodes< ALUConformGrid<dim,dimw> >
     {
-      static const bool v = true;
+      static const bool v = false;
     };
-#endif
+
+    template<int dim,int dimw>
+    struct hasBackupRestoreFacilities< ALUConformGrid<dim,dimw> >
+    {
+      static const bool v = false;
+    };
 
   } // end namespace Capabilities
+
 
 } //end  namespace Dune
 #endif
