@@ -194,16 +194,9 @@ namespace Dune {
     typedef MakeableInterfaceObject<typename Traits::template
         Codim<0>::Geometry> GeometryObject;
     friend class ALU2DLocalGeometryStorage<GeometryObject, 4 >;
+    friend class ALU2DLocalGeometryStorage<GeometryObject, 2 >;
 
   public:
-
-    enum { refineStepsForHalf =
-#if IS_NON_CONFORM
-             1
-#else
-             2
-#endif
-    };
 
     //! dummy object stream
     typedef ALU2dGridObjectStream ObjectStreamType;
@@ -268,6 +261,7 @@ namespace Dune {
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
     ALU2dGrid(std::string macroTriangFilename );
+    ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes );
     //! Constructor which constructs an empty ALU2dGrid
     ALU2dGrid();
 
@@ -497,6 +491,7 @@ namespace Dune {
 
     int maxLevel_;
     int refineMarked_ , coarsenMarked_;
+    const int nrOfHangingNodes_;
 
     //typedef ALU2dGridVertexList VertexListType;
     //mutable VertexListType vertexList_[MAXL];
@@ -557,8 +552,6 @@ namespace Dune {
       return leafMarker_;
     }
 
-
-
     /** \brief write Grid to file in specified FileFormatType
      */
     template <GrapeIOFileFormatType ftype>
@@ -572,7 +565,10 @@ namespace Dune {
     template <GrapeIOFileFormatType ftype>
     bool readGrid( const std::string filename, alu2d_ctype & time );
 
-
+  protected:
+    int getNrOfHangingNodes() const {
+      return nrOfHangingNodes_;
+    }
 
   }; // end class ALU2dGrid
 

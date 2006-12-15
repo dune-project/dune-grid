@@ -75,7 +75,8 @@ namespace Dune {
         for(int i=0; i<dim+1; ++i)
         {
           enum { vxCodim = 1 };
-          int vxIdx = elem.vertex(i)->getIndex();
+          int vxIdx = elem.getVertex(i)->getIndex();
+          //int vxIdx = elem.vertex(i)->getIndex();
           if( marker_[vxCodim][vxIdx] < 0) marker_[vxCodim][vxIdx] = elIdx;
 
           enum { edgeCodim = 0 };
@@ -116,7 +117,8 @@ namespace Dune {
         for(int i=0; i<dim+1; ++i)
         {
           enum { vxCodim = 1 };
-          int vxIdx = elem.vertex(i)->getIndex();
+          int vxIdx = elem.getVertex(i)->getIndex();
+          //int vxIdx = elem.vertex(i)->getIndex();
           if( marker_[vxCodim][vxIdx] < 0) marker_[vxCodim][vxIdx] = elIdx;
 
           enum { edgeCodim = 0 };

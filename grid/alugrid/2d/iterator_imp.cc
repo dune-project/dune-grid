@@ -33,7 +33,8 @@ namespace Dune {
     walkLevel_(wLevel),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(end)
+    done_(end),
+    nrOfHangingNodes_(grid_.getNrOfHangingNodes())
   {
     if (!end)
     {
@@ -58,7 +59,8 @@ namespace Dune {
     walkLevel_(wLevel),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(true)
+    done_(true),
+    nrOfHangingNodes_(0)
   {
     this->done();
   }
@@ -77,7 +79,8 @@ namespace Dune {
     walkLevel_(org.walkLevel_),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(org.done_)
+    done_(org.done_),
+    nrOfHangingNodes_(org.nrOfHangingNodes_)
   {}
 
   template<class GridImp>
@@ -91,6 +94,7 @@ namespace Dune {
     generatedGlobalGeometry_ = false;
     generatedLocalGeometries_ = false;
     done_ = org.done_;
+    nrOfHangingNodes_ = org.nrOfHangingNodes_;
     current = org.current;
   }
 
@@ -206,23 +210,23 @@ namespace Dune {
     assert(this->current.item_ != 0);
     double dummy[2];
 
-#if IS_NON_CONFORM
-    if(neighbor())
-    {
-      if(this->current.isNotConform_)
+    if (nrOfHangingNodes_) {
+      if(neighbor())
       {
-        this->current.neigh_->outernormal(numberInNeighbor(), dummy);
-        outerNormal_[0] = -dummy[0];
-        outerNormal_[1] = -dummy[1];
-        return outerNormal_;
+        if(this->current.isNotConform_)
+        {
+          this->current.neigh_->outernormal(numberInNeighbor(), dummy);
+          outerNormal_[0] = -dummy[0];
+          outerNormal_[1] = -dummy[1];
+          return outerNormal_;
+        }
       }
     }
-#endif
-
-    this->current.item_->outernormal(this->current.index_, dummy);
-    outerNormal_[0] = dummy[0];
-    outerNormal_[1] = dummy[1];
-
+    else {
+      this->current.item_->outernormal(this->current.index_, dummy);
+      outerNormal_[0] = dummy[0];
+      outerNormal_[1] = dummy[1];
+    }
     return outerNormal_;
   }
 
@@ -264,16 +268,17 @@ namespace Dune {
   inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
   ALU2dGridIntersectionBase<GridImp> ::intersectionGlobal () const {
     assert(this->current.item_ != 0);
-#if IS_NON_CONFORM
-    if (this->current.isNotConform_)
-      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
-    else
+
+    if (nrOfHangingNodes_) {
+      if (this->current.isNotConform_)
+        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
+      else
+        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+    }
+    else {
       this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+    }
     return intersectionGlobal_;
-#else
-    this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
-    return intersectionGlobal_;
-#endif
   }
 
 
@@ -570,8 +575,6 @@ namespace Dune {
       return;
     }
 
-#if IS_NON_CONFORM
-
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
       this->current.isNotConform_ = true;
@@ -601,7 +604,6 @@ namespace Dune {
       this->current.isBoundary_= nbStack_.top().second.second;
       nbStack_.pop();
     }
-#endif
 
     //conform case
     else {
@@ -1098,7 +1100,8 @@ namespace Dune {
       if((!iter_->done()))
       {
         item_ = &iter_->getitem();
-        vertex_ = item_->vertex(myFace_);
+        //vertex_ = item_->vertex(myFace_);
+        vertex_ = item_->getVertex(myFace_);
         this->updateEntityPointer(vertex_, myFace_, level_);
         increment();
       }
@@ -1164,7 +1167,8 @@ namespace Dune {
     int elIdx = item_->getIndex();
 
     while (myFace_ < 3) {
-      vertex_ = item_->vertex(myFace_);
+      //vertex_ = item_->vertex(myFace_);
+      vertex_ = item_->getVertex(myFace_);
       int idx = vertex_->getIndex();
 
       // check if face is visited on this element
@@ -1188,7 +1192,8 @@ namespace Dune {
 
       myFace_ = 0;
       item_ = &iter->getitem();
-      vertex_ = item_->vertex(myFace_);
+      //vertex_ = item_->vertex(myFace_);
+      vertex_ = item_->getVertex(myFace_);
       this->updateEntityPointer(vertex_, myFace_, level_);
       increment();
       return;
@@ -1201,7 +1206,8 @@ namespace Dune {
       return ;
     }
     item_ = &iter->getitem();
-    vertex_ = item_->vertex(myFace_);
+    //vertex_ = item_->vertex(myFace_);
+    vertex_ = item_->getVertex(myFace_);
     this->updateEntityPointer(vertex_, myFace_, level_);
     ++myFace_;
   }

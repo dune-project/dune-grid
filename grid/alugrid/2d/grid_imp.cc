@@ -12,11 +12,7 @@ namespace Dune {
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
-#if IS_NON_CONFORM
-    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), 1, ALU2DSPACE Refco::quart))
-#else
     : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
-#endif
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
@@ -25,6 +21,7 @@ namespace Dune {
       , maxLevel_(0)
       , refineMarked_ (0)
       , coarsenMarked_ (0)
+      , nrOfHangingNodes_(0)
       , sizeCache_(0)
   {
     assert(mygrid_);
@@ -32,6 +29,24 @@ namespace Dune {
     updateStatus();
   }
 
+  template<int dim, int dimworld>
+  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes )
+    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), nrOfHangingNodes, ALU2DSPACE Refco::quart))
+      , hIndexSet_(*this)
+      , localIdSet_(*this)
+      , levelIndexVec_(MAXL,0)
+      , geomTypes_(dim+1,1)
+      , leafIndexSet_(0)
+      , maxLevel_(0)
+      , refineMarked_ (0)
+      , coarsenMarked_ (0)
+      , nrOfHangingNodes_(nrOfHangingNodes)
+      , sizeCache_(0)
+  {
+    assert(mygrid_);
+    makeGeomTypes();
+    updateStatus();
+  }
 
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
@@ -45,6 +60,7 @@ namespace Dune {
       , maxLevel_(0)
       , refineMarked_ (0)
       , coarsenMarked_ (0)
+      , nrOfHangingNodes_(0)
       , sizeCache_(0)
   {
     makeGeomTypes();

@@ -190,6 +190,7 @@ namespace Dune {
 
     // true if end iterator
     bool done_;
+    int nrOfHangingNodes_;
   }; // end ALU2dGridIntersectionBase
 
 

@@ -400,7 +400,8 @@ namespace Dune {
       {
         int vx = (i+face_+1)%3;
         //std::cout << " set vertex " << vx << "\n";
-        const double (&p)[cdim] = item.vertex(vx)->coord();
+        //const double (&p)[cdim] = item.vertex(vx)->coord();
+        const double (&p)[cdim] = item.getVertex(vx)->coord();
         for(int j=0; j<cdim; ++j)
         {
           coord_[i][j] = p[j];
@@ -416,7 +417,8 @@ namespace Dune {
       for(int i=0; i<mydim+1; ++i)
       {
         // copy coordinates
-        const double (&p)[cdim] = item.vertex(i)->coord();
+        //const double (&p)[cdim] = item.vertex(i)->coord();
+        const double (&p)[cdim] = item.getVertex(i)->coord();
         for(int j=0; j<cdim; ++j)
           coord_[i][j] = p[j];
       }
