@@ -9,7 +9,6 @@
 
 //- Dune includes
 #include <dune/common/misc.hh>
-#include <dune/common/array.hh>
 #include <dune/common/interfaces.hh>
 #include <dune/grid/common/grid.hh>
 
@@ -509,6 +508,10 @@ namespace Dune {
   {
     typedef GridImp GridType;
     enum { dim = GridType :: dimension };
+
+    //! type of used arrays to store indices
+    typedef std::vector<int> IndexArrayType;
+
   public:
     enum { ncodim = GridType::dimension + 1 };
   private:
@@ -519,7 +522,7 @@ namespace Dune {
     template <class EntityType, int codim>
     struct InsertEntity
     {
-      template <class HierarchicIndexSet, class IndexArrayType>
+      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
                          const HierarchicIndexSet & hset,
                          IndexArrayType (&index)[ncodim],
@@ -542,7 +545,7 @@ namespace Dune {
     template <class EntityType>
     struct InsertEntity<EntityType,0>
     {
-      template <class HierarchicIndexSet, class IndexArrayType>
+      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
                          const HierarchicIndexSet & hset,
                          IndexArrayType (&index)[ncodim],
@@ -678,7 +681,7 @@ namespace Dune {
     template <int cd>
     void checkLevelIndexForCodim ()
     {
-      Array<int> & levIndex = levelIndex_[cd];
+      IndexArrayType & levIndex = levelIndex_[cd];
       // resize memory if necessary
       // walk grid and store index
       typedef typename DefaultLevelIteratorTypes<GridImp>:: template Codim<cd>::
@@ -744,19 +747,19 @@ namespace Dune {
     }
 
     // resize vectors of index set
-    void resizeVectors(Array<int> &a, int newNumberOfEntries)
+    void resizeVectors(IndexArrayType &a, int newNumberOfEntries)
     {
-      if(newNumberOfEntries > a.size())
+      if(newNumberOfEntries > 0)
       {
         a.resize(newNumberOfEntries);
       }
-      for(int i=0; i<a.size(); i++) a[i] = -1;
+      for(size_t i=0; i<a.size(); i++) a[i] = -1;
     }
 
     // method prints indices of given codim, for debugging
     void print (int codim) const
     {
-      for(int i=0; i<levelIndex_[codim].size(); i++)
+      for(size_t i=0; i<levelIndex_[codim].size(); i++)
       {
         std::cout << "levelind[" << i << "] = " << levelIndex_[codim][i] << "\n";
       }
@@ -772,11 +775,11 @@ namespace Dune {
     const HierarchicIndexSetType & hIndexSet_;
 
     // number of entitys of each level an codim
-    Array<int> size_;
+    IndexArrayType size_;
 
     //*********************************************************
     // Methods for mapping the hierarchic Index to index on Level
-    Array<int> levelIndex_[ncodim];
+    IndexArrayType levelIndex_[ncodim];
 
   };
 
@@ -809,6 +812,9 @@ namespace Dune {
   {
     typedef GridImp GridType;
     enum { dim = GridType :: dimension };
+
+    //! type of used arrays to store indices
+    typedef std::vector<int> IndexArrayType;
   public:
     enum { ncodim = dim + 1 };
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
@@ -819,7 +825,7 @@ namespace Dune {
     template <class EntityType, int codim>
     struct InsertEntity
     {
-      template <class HierarchicIndexSet, class IndexArrayType>
+      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
                          const HierarchicIndexSet & hset,
                          IndexArrayType (&index)[ncodim],
@@ -842,7 +848,7 @@ namespace Dune {
     template <class EntityType>
     struct InsertEntity<EntityType,0>
     {
-      template <class HierarchicIndexSet, class IndexArrayType>
+      template <class HierarchicIndexSet>
       static void insert(const EntityType & en,
                          const HierarchicIndexSet & hset,
                          IndexArrayType (&index)[ncodim],
@@ -958,7 +964,7 @@ namespace Dune {
         size_[cd] = num[cd];
         //if( size_[cd] != grid_.size(cd) )
         //  std::cout << size_[cd] << " calc | grid " << grid_.size(cd)  << "\n";
-        assert( size_[cd] == grid_.size(cd) );
+        //assert( size_[cd] == grid_.size(cd) );
       }
     }
 
@@ -1004,19 +1010,19 @@ namespace Dune {
     }
 
     // resize vectors of index set
-    void resizeVectors(Array<int> &a, int newNumberOfEntries)
+    void resizeVectors(IndexArrayType &a, int newNumberOfEntries)
     {
-      if(newNumberOfEntries > a.size())
+      if( newNumberOfEntries > 0 )
       {
         a.resize(newNumberOfEntries);
       }
-      for(int i=0; i<a.size(); ++i) a[i] = -1;
+      for(size_t i=0; i<a.size(); ++i) a[i] = -1;
     }
 
     // method prints indices of given codim, for debugging
     void print (int codim) const
     {
-      for(int i=0; i<index_[codim].size(); i++)
+      for(size_t i=0; i<index_[codim].size(); i++)
       {
         std::cout << "levelind[" << i << "] = " << index_[codim][i] << "\n";
       }
@@ -1029,11 +1035,11 @@ namespace Dune {
     const HierarchicIndexSetType & hIndexSet_;
 
     // number of entitys of each level an codim
-    Array<int> size_;
+    IndexArrayType size_;
 
     //*********************************************************
     // Methods for mapping the hierarchic Index to index on Level
-    Array<int> index_[ncodim];
+    IndexArrayType index_[ncodim];
   };
 
 
