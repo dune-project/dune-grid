@@ -23,7 +23,7 @@ void check_yasp() {
             << std::endl << std::endl;
 
   fTupel Len; Len = 1.0;
-  iTupel s; s = 5;
+  iTupel s; s = 3;
   bTupel p; p = false;
   int overlap = 1;
 
