@@ -577,8 +577,15 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const
   {
     assert(item_ != 0);
+#if ALU3DGRID_PARALLEL
+    // on ghost elements no intersection iterator available
+    if( isGhost_ )
+    {
+      assert( item_->isGhost() );
+      return ileafend();
+    }
+#endif
     assert(!item_->isGhost());
-
     // NOTE: normaly here false should be given, which means that we create a non
     // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
     // an end iterator is created,
@@ -591,7 +598,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
   {
     assert(item_ != 0);
-    assert(! item_->isGhost());
     return ALU3dGridLeafIntersectionIteratorType (grid_, *this ,walkLevel_,true);
   }
 
@@ -600,6 +606,14 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
   {
     assert(item_ != 0);
+#if ALU3DGRID_PARALLEL
+    // on ghost elements no intersection iterator available
+    if( isGhost_ )
+    {
+      assert( item_->isGhost() );
+      return ilevelend();
+    }
+#endif
     assert(!item_->isGhost());
 
     // NOTE: normaly here false should be given, which means that we create a non
@@ -614,7 +628,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
     assert(item_ != 0);
-    assert(!item_->isGhost());
     return ALU3dGridLevelIntersectionIteratorType (grid_, *this ,walkLevel_,true);
   }
 
