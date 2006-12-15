@@ -761,31 +761,18 @@ struct CheckMark
   template <class IteratorType>
   static void check(GridType & grid, IteratorType & it)
   {
-    // if grid is UGGrid skip test, because not working
-    if( grid.name() == "UGGrid" )
+    // last marker is 0, so the grid is not changed after this check
+    const int refCount[4] = {1,0,-1,0};
+    for(int k=0; k<4; ++k)
     {
-      static bool called = false;
-      if (! called )
+      // mark entity
+      bool marked = grid.mark( refCount[k] , it);
+      // if element was marked, check that the marker was set correctly
+      if(marked)
       {
-        Dune::derr << "WARNING: mark/getMark test skipped for UGGrid! \n";
-        called = true;
-      }
-    }
-    else
-    {
-      // last marker is 0, so the grid is not changed after this check
-      const int refCount[4] = {1,0,-1,0};
-      for(int k=0; k<4; ++k)
-      {
-        // mark entity
-        bool marked = grid.mark( refCount[k] , it);
-        // if element was marked, check that the marker was set correctly
-        if(marked)
-        {
-          // now getMark should return the mark we just set, otherwise error
-          if( grid.getMark(*it) != refCount[k] )
-            DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
-        }
+        // now getMark should return the mark we just set, otherwise error
+        if( grid.getMark(*it) != refCount[k] )
+          DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
       }
     }
   }
