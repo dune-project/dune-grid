@@ -726,7 +726,7 @@ namespace Dune {
       assert( cd < ncodim );
 
       assert( idx >= 0);
-      assert( idx < levelIndex_[cd].size());
+      assert( idx < (int) levelIndex_[cd].size());
       return (levelIndex_[cd][ idx ] >= 0);
     }
 
