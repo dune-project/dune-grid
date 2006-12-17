@@ -379,7 +379,15 @@ namespace Dune {
 
         \return int current adaptation marker of entity e
      */
-    int getMark(const Traits::Codim<0>::Entity& e );
+    int getMark(const Traits::Codim<0>::Entity& e ) const DUNE_DEPRECATED;
+
+    /** \brief return current adaptation marker of given entity
+
+        \param e Entity to the entity you want to mark
+
+        \return int current adaptation marker of entity pointer e
+     */
+    int getMark(const Traits::Codim<0>::EntityPointer & e ) const;
 
     //! Does nothing except return true if some element has been marked for refinement
     bool preAdapt();
