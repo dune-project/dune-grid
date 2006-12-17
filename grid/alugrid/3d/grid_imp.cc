@@ -689,6 +689,14 @@ namespace Dune {
     return this->getRealImplementation(en).getMark();
   }
 
+  // get Mark of given entity
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline int ALU3dGrid<dim,dimworld, elType>::
+  getMark(const typename Traits::template Codim<0>::EntityPointer & ep) const
+  {
+    return this->getRealImplementation(*ep).getMark();
+  }
+
   // global refine
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline bool ALU3dGrid<dim, dimworld, elType>::globalRefine(int numberOfRefines)

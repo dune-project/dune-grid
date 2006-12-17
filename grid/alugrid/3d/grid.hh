@@ -537,7 +537,10 @@ namespace Dune {
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
     //! \brief return current adaptation mark for given entity
-    int getMark( const typename Traits::template Codim<0>::Entity & ) const;
+    int getMark( const typename Traits::template Codim<0>::Entity & ) const DUNE_DEPRECATED;
+
+    //! \brief return current adaptation mark for given entity pointer
+    int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const;
   private:
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 

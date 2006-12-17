@@ -421,6 +421,12 @@ namespace Dune {
   }
 
   template <int dim, int dimworld>
+  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::EntityPointer & ep ) const
+  {
+    return this->getRealImplementation(*ep).getMark();
+  }
+
+  template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld>::makeGeomTypes() {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
