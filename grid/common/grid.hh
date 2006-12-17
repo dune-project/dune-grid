@@ -812,12 +812,12 @@ namespace Dune {
 
        \param[in] e    Entity for which adaptation mark should be determined
 
-       \return int adaptation mark currently set for Entity e
+       \return int adaptation mark currently set for given EntityPointer e
      */
     template <class T>
     int getMark(T & e) const
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::Entity>::exists >::yes();
+      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return asImp().getMark(e);
     }
 
@@ -1040,7 +1040,7 @@ namespace Dune {
 
        \param[in] e    Entity for which adaptation mark should be determined
 
-       \return int adaptation mark currently set for Entity e
+       \return int adaptation mark, here the default value 0 is returned
      */
     template <class T>
     int getMark(T &) const
