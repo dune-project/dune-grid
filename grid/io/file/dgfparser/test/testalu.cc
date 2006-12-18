@@ -13,7 +13,7 @@ using namespace Dune;
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 template <class GridType>
 void test(GridType& grid) {
-  //  GrapeGridDisplay<GridType> disp(grid);
+  //GrapeGridDisplay<GridType> disp(grid);
   //disp.display();
 }
 #else
@@ -28,11 +28,10 @@ try {
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
 
-#if HAVE_ALU
+#if HAVE_ALUGRID
   {
     typedef ALUCubeGrid<3,3> GridType;
-    // std::string filename("examplegrid6.dgf");
-    std::string filename("forward3d_hexa.dgf");
+    std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -42,8 +41,7 @@ try {
   }
   {
     typedef ALUSimplexGrid<3,3> GridType;
-    // std::string filename("examplegrid6.dgf");
-    std::string filename("forward3d_tetra.dgf");
+    std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
