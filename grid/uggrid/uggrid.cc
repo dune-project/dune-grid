@@ -1033,16 +1033,19 @@ void Dune::UGGrid < dim >::createEnd()
   //   Actually insert all the elements
   // ////////////////////////////////////////////////
 
+  std::vector<const typename UG_NS<dim>::Node*> nodePointers(isBoundaryNode.size());
+  for (typename UG_NS<dim>::Node* theNode=UG_NS<dim>::FirstNode(multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
+    nodePointers[theNode->id] = theNode;
+
   int idx = 0;
   for (size_t i=0; i<elementTypes_.size(); i++) {
 
-    int vertices_C_style[elementTypes_[i]];
+    const typename UG_NS<dim>::Node* vertices[elementTypes_[i]];
     for (size_t j=0; j<elementTypes_[i]; j++)
-      vertices_C_style[j] = isBoundaryNode[elementVertices_[idx++]];
+      vertices[j] = nodePointers[isBoundaryNode[elementVertices_[idx++]]];
 
-    if (InsertElementFromIDs(multigrid_->grids[0], elementTypes_[i], vertices_C_style, NULL)==NULL)
+    if (InsertElement(multigrid_->grids[0], elementTypes_[i],const_cast<typename UG_NS<dim>::Node**>(vertices),NULL,NULL,NULL)==NULL)
       DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
-
   }
 
   // Not needed any more
