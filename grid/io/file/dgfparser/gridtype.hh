@@ -15,7 +15,7 @@
  *#elif defined ALUGRID_SIMPLEX && HAVE_ALUGRID
    typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
  *#elif defined ONEDGRID
-   typedef Dune::OneDGrid<1,1> GridType;
+   typedef Dune::OneDGrid GridType;
  *#elif defined SGRID
    typedef Dune::SGrid<dimworld,dimworld> GridType;
  *#elif defined YASPGRID
@@ -109,7 +109,7 @@ namespace Dune {
 #if defined ALBERTAGRID && HAVE_ALBERTA
   #if GRIDDIM == 1
     #include "dgfoned.hh"
-typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+typedef Dune::OneDGrid GridType;
   #else
     #include "dgfalberta.hh"
 typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
@@ -124,7 +124,7 @@ namespace Dune {
 #elif defined ALUGRID_CUBE && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
-typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+typedef Dune::OneDGrid GridType;
   #else
     #if GRIDDIM == 2
       #error "ALUGRID_CUBE not implemented for dimension two!"
@@ -143,7 +143,7 @@ namespace Dune {
 #elif defined ALUGRID_SIMPLEX && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
-typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+typedef Dune::OneDGrid GridType;
   #else
     #include "dgfalu.hh"
 typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
@@ -158,7 +158,7 @@ namespace Dune {
 #elif defined ALUGRID_CONFORM && HAVE_ALUGRID
   #if GRIDDIM == 1
     #include "dgfoned.hh"
-typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+typedef Dune::OneDGrid GridType;
   #else
     #include "dgfalu.hh"
     #if GRIDDIM == 2
@@ -176,7 +176,7 @@ namespace Dune {
 }
 #elif defined ONEDGRID
   #include "dgfoned.hh"
-typedef Dune::OneDGrid<dimworld,dimworld> GridType;
+typedef Dune::OneDGrid GridType;
 namespace Dune {
   template <>
   struct DGFGridInfo<GridType> {
