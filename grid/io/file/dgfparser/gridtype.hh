@@ -196,7 +196,7 @@ namespace Dune {
 }
 #elif defined UGGRID && HAVE_UG
   #include "dgfug.hh"
-typedef Dune::UGGrid<dimworld,dimworld> GridType;
+typedef Dune::UGGrid<dimworld> GridType;
 namespace Dune {
   template <>
   struct DGFGridInfo<GridType> {
