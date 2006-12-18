@@ -4,7 +4,10 @@
 #include <iostream>
 #include <string>
 
+#if HAVE_UG
 #include "../dgfug.hh"
+#endif
+
 // use grid check
 #include <dune/grid/test/gridcheck.cc>
 
@@ -17,7 +20,9 @@ try {
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
 
+#if HAVE_UG
   {
+    std::cout << std::endl << "check UGGrid<2>" << std::endl;
     typedef UGGrid<2> GridType;
     std::string filename("examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
@@ -27,6 +32,7 @@ try {
   }
 
   {
+    std::cout << std::endl << "check UGGrid<3>" << std::endl;
     typedef UGGrid<3> GridType;
     std::string filename("examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
@@ -34,6 +40,9 @@ try {
     // run grid check to check grid
     gridcheck(*gridptr);
   }
+#else
+  std::cerr << "WARNING: HAVE_UG == 0, skipping test! " << std::endl;
+#endif
   return 0;
 }
 catch (Dune::Exception &e) {
