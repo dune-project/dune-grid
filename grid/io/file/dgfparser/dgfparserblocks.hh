@@ -92,6 +92,7 @@ namespace Dune {
       // get next line and store in string stream
       void getnextline() {
         line.clear();
+        oneline.clear();
         getline(block,oneline);
         if (oneline.size()>0) {
           std::size_t comment=oneline.find("%");
