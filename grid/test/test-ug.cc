@@ -244,6 +244,7 @@ int main (int argc , char **argv) try
 
     typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
     typedef Dune::UGGrid<2>::Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef Dune::UGGrid<2>::Traits::GlobalIdSet GlobalIdSet;
 
     // make grids
     makeHalfCircleQuad(locallyRefinedGrid, false);
@@ -251,7 +252,7 @@ int main (int argc , char **argv) try
     markOne(locallyRefinedGrid,0,1);
     markOne(locallyRefinedGrid,0,1);
 
-    const Dune::UGGrid<2>::Traits::GlobalIdSet& globalIdSet = locallyRefinedGrid.globalIdSet();
+    const GlobalIdSet& globalIdSet = locallyRefinedGrid.globalIdSet();
 
     for (int level=0; level<locallyRefinedGrid.maxLevel(); ++level)
     {
@@ -260,7 +261,7 @@ int main (int argc , char **argv) try
       for(; eIt!=eEnd; ++eIt)
       {
         int children = 0;
-        int globalChildId;
+        GlobalIdSet::IdType globalChildId;
 
         HierarchicIterator hIt = eIt->hbegin(level+1);
         HierarchicIterator hEnd = eIt->hend(level+1);
