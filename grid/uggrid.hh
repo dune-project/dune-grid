@@ -330,9 +330,6 @@ namespace Dune {
               int side=0);
 
     /** \brief Query whether element is marked for refinement */
-    int getMark(const typename Traits::template Codim<0>::Entity& e) const DUNE_DEPRECATED;
-
-    /** \brief Query whether element is marked for refinement */
     int getMark(const typename Traits::template Codim<0>::EntityPointer& e) const;
 
     /** \brief returns true, if some elements might be coarsend during grid
