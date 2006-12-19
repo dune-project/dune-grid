@@ -668,21 +668,12 @@ bool Dune::OneDGrid::mark(int refCount,
   return true;
 }
 
-int Dune::OneDGrid::getMark(const Codim<0>::Entity & en ) const
-{
-  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::COARSEN) return -1;
-  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::REFINED) return 1;
-  if(getRealImplementation(en).target_->markState_ == OneDEntityImp<1>::NONE) return 0;
-  DUNE_THROW(GridError,"Entity has undefined adaptation marker!");
-  return 0;
-}
-
 int Dune::OneDGrid::getMark(const Codim<0>::EntityPointer & ep ) const
 {
-  if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::COARSEN) return -1;
-  if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::REFINED) return 1;
-  if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::NONE) return 0;
-  DUNE_THROW(GridError,"Entity has undefined adaptation marker!");
+  if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::COARSEN)
+    return -1;
+  else if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::REFINED)
+    return 1;
   return 0;
 }
 
