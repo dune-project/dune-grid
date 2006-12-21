@@ -357,11 +357,10 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
 
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err;
-    FieldVector<UGCtype,3> map_(0);
+    FieldVector<UGCtype,3> map(0);
     int count = 0 ;
 
     FieldMatrix<double,3,3> Df;                // set in method map2worldlinear
-    FieldMatrix<double,3,3> Dfi;               // set in method inverse()
     Dune::FieldVector<double,3> normal_;       // in method map2worldnormal
     Dune::FieldMatrix<double,4,3> _b;
     Dune::FieldMatrix<double,3,3> _n;
@@ -388,15 +387,26 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
 
     do {
       FieldVector<UGCtype,3> upd ;
-      map2worldnormal (map_[0],map_[1],map_[2], upd, normal_,_b, _n) ;
-      inverse (map_, normal_, _b, _n, Df,Dfi) ;
-      FieldVector<UGCtype,3> u = upd;
-      u -= global;
+      //map2worldnormal (map_[0],map_[1],map_[2], upd, normal_,_b, _n) ;
+      for (int i=0; i<3; i++)
+        normal_ [i] = -(_n [0][i] + _n [1][i] * map[0] + _n [2][i] * map[1]);
+
+      for (int i=0; i<3; i++)
+        upd[i] = _b [0][i] + map[0] * _b [1][i] + map[1] * _b [2][i] + map[0]*map[1] * _b [3][i] + map[2]*normal_[0];
+
+      //inverse (map_, normal_, _b, _n, Df,Dfi) ;
+      for (int i=0; i<3; i++) {
+        Df[i][0] = _b [1][i] + map[1] * _b [3][i]+ map[2]*_n[1][i] ;
+        Df[i][1] = _b [2][i] + map[0] * _b [3][i]+ map[2]*_n[2][i] ;
+        Df[i][2] = normal_[i];
+      }
+
+      upd -= global;
 
       FieldVector<UGCtype,3> c(0);
-      Dfi.umv(u,c);
+      Df.solve(c,upd);
 
-      map_ -= c;
+      map -= c;
 
       err = c.two_norm();
 
@@ -405,8 +415,8 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
 
     } while (err > 1e-5) ;
 
-    result[0]=map_[0];
-    result[1]=map_[1];
+    result[0]=map[0];
+    result[1]=map[1];
 
   }
 

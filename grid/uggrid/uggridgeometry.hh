@@ -312,59 +312,6 @@ namespace Dune {
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,2,2> jacobianInverseTransposed_;
 
-    // /////////////////////////////////////////////////////
-    //   Temporary stuff
-    // /////////////////////////////////////////////////////
-
-    void map2worldnormal (double x, double y,double z, Dune::FieldVector<double,3>& w,
-                          Dune::FieldVector<double,3>& normal_,
-                          Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n) const
-    {
-      for (int i=0; i<3; i++)
-        normal_ [i] = -(_n [0][i] + _n [1][i] * x + _n [2][i] * y);
-
-
-      for (int i=0; i<3; i++)
-        w[i] = _b [0][i] + x * _b [1][i] + y * _b [2][i] + x*y * _b [3][i] + z*normal_[0];
-
-    }
-
-    double det(const Dune::FieldVector<double,3>& point, Dune::FieldVector<double,3>& normal_,
-               Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
-               Dune::FieldMatrix<double,3,3>& Df) const
-    {
-      //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
-
-      for (int i=0; i<3; i++) {
-        Df[i][0] = _b [1][i] + point[1] * _b [3][i]+ point[2]*_n[1][i] ;
-        Df[i][1] = _b [2][i] + point[0] * _b [3][i]+ point[2]*_n[2][i] ;
-        Df[i][2] = normal_[i];
-      }
-
-      return Df.determinant();
-    }
-
-    void inverse(const Dune::FieldVector<double,3>& p, Dune::FieldVector<double,3>& normal_,
-                 Dune::FieldMatrix<double,4,3>& _b, Dune::FieldMatrix<double,3,3>& _n,
-                 Dune::FieldMatrix<double,3,3>& Df,Dune::FieldMatrix<double,3,3>& Dfi ) const
-    {
-      //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
-      double val = 1.0 / det(p,normal_, _b, _n, Df) ;
-#if 1
-      Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
-      Dfi[0][1] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
-      Dfi[0][2] = ( Df[0][1] * Df[1][2] - Df[0][2] * Df[1][1] ) * val ;
-      Dfi[1][0] = ( Df[1][2] * Df[2][0] - Df[1][0] * Df[2][2] ) * val ;
-      Dfi[1][1] = ( Df[0][0] * Df[2][2] - Df[0][2] * Df[2][0] ) * val ;
-      Dfi[1][2] = ( Df[0][2] * Df[1][0] - Df[0][0] * Df[1][2] ) * val ;
-      Dfi[2][0] = ( Df[1][0] * Df[2][1] - Df[1][1] * Df[2][0] ) * val ;
-      Dfi[2][1] = ( Df[0][1] * Df[2][0] - Df[0][0] * Df[2][1] ) * val ;
-      Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[0][1] * Df[1][0] ) * val ;
-#else
-      Dfi = Df;
-      Dfi.invert();
-#endif
-    }
   };
 
 
