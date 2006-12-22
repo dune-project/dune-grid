@@ -3,8 +3,8 @@
 #ifndef DUNE_ALU3DUTILITY_HH
 #define DUNE_ALU3DUTILITY_HH
 
-//- Dune includes
-#include <dune/common/array.hh>
+//- system includes
+#include <vector>
 
 //- local includes
 #include "topology.hh"
@@ -16,18 +16,19 @@ namespace Dune {
   class LocalGeometryStorage
   {
     // array with pointers to the geometries
-    Array < GeometryImp * > geoms_;
+    std::vector < GeometryImp * > geoms_;
     // count local geometry creation
     int count_;
   public:
     // create empty storage
-    LocalGeometryStorage () : geoms_ (nChild) , count_ (0) {
-      for(int i=0 ; i<geoms_.size(); ++i) geoms_[i] = 0;
+    LocalGeometryStorage () : geoms_ (nChild) , count_ (0)
+    {
+      for(size_t i=0 ; i<geoms_.size(); ++i) geoms_[i] = 0;
     }
 
     // desctructor deleteing geometries
     ~LocalGeometryStorage () {
-      for(int i=0 ; i<geoms_.size(); ++i)
+      for(size_t i=0 ; i<geoms_.size(); ++i)
         if(geoms_[i]) delete geoms_[i];
     }
 

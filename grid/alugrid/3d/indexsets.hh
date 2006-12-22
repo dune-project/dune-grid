@@ -10,7 +10,6 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/common/bigunsignedint.hh>
 
-#include <dune/common/array.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
 

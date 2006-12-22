@@ -24,7 +24,7 @@ namespace Dune {
 
     unsigned int vxsize = grid.hierarchicIndexSet().size(codim);
     if( vxList.size() < vxsize ) vxList.reserve(vxsize);
-    Array<int> visited_(vxsize);
+    std::vector<int> visited_(vxsize);
 
     for(unsigned int i=0; i<vxsize; i++)
     {
@@ -1124,7 +1124,7 @@ namespace Dune {
         // write coordinates of the vertices
         int vxsize = vx->size();
         file << vxsize << std::endl;
-        Array < double[3] > vxvec ( vxsize );
+        std::vector < double[3] > vxvec ( vxsize );
 
         for( vx->first(); !vx->done() ; vx->next() )
         {
@@ -1133,10 +1133,10 @@ namespace Dune {
           const double (&p)[3] = vertex.Point();
           int vxidx = vertex.getIndex();
           double (&v)[3] = vxvec[vxidx];
-          for(int i=0; i<3; i++) v[i] = p[i];
+          for(int i=0; i<3; ++i) v[i] = p[i];
         }
 
-        for(int i=0; i<vxsize; i++)
+        for(size_t i=0; i<vxsize; i++)
         {
           file << vxvec[i][0] << " " << vxvec[i][1] << " " << vxvec[i][2] << std::endl;
         }
