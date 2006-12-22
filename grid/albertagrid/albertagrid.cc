@@ -3296,7 +3296,8 @@ namespace Dune
     template <class GridType>
     struct MarkFaces
     {
-      inline static void mark(GridType & grid , Array<int> & vec, const ALBERTA EL * el, int elindex)
+      template <class ArrayType>
+      inline static void mark(GridType & grid , ArrayType & vec, const ALBERTA EL * el, int elindex)
       {
         enum { dim = GridType :: dimension };
         // we have dim+1 faces
@@ -3312,7 +3313,8 @@ namespace Dune
     template <class GridType, int dim>
     struct MarkEdges
     {
-      inline static void mark(GridType & grid , Array<int> & vec, const ALBERTA EL * el, int elindex)
+      template <class ArrayType>
+      inline static void mark(GridType & grid , ArrayType & vec, const ALBERTA EL * el, int elindex)
       {}
     };
 
@@ -3320,7 +3322,8 @@ namespace Dune
     template <class GridType>
     struct MarkEdges<GridType,3>
     {
-      inline static void mark(GridType & grid , Array<int> & vec, const ALBERTA EL * el, int elindex)
+      template <class ArrayType>
+      inline static void mark(GridType & grid , ArrayType & vec, const ALBERTA EL * el, int elindex)
       {
         // in 3d 6 edges
         for(int i=0; i<6; ++i)
@@ -3348,20 +3351,23 @@ namespace Dune
     int fce = hset.size(1);
 
     {
-      Array<int> & vec     = vec_;
-      if(vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
-      for(int i=0; i<vec.size(); i++) vec[i] = -1;
+      ArrayType & vec     = vec_;
+      if((int) vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
+      const int vecSize = vec.size();
+      for(int i=0; i<vecSize; i++) vec[i] = -1;
 
-      Array<int> & facevec     = facevec_;
-      if(facevec.size() < fce) facevec.resize( fce + vxBufferSize_ );
-      for(int i=0; i<facevec.size(); i++) facevec[i] = -1;
+      ArrayType & facevec     = facevec_;
+      if((int) facevec.size() < fce) facevec.resize( fce + vxBufferSize_ );
+      const int facevecSize = facevec.size();
+      for(int i=0; i<facevecSize; i++) facevec[i] = -1;
 
-      Array<int> & edgevec = edgevec_;
+      ArrayType & edgevec = edgevec_;
       if(dim > 2)
       {
         int edg = hset.size(dim-1);
-        if(edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
-        for(int i=0; i<edgevec.size(); i++) edgevec[i] = -1;
+        if((int) edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
+        const int edgevecSize = edgevec.size();
+        for(int i=0; i<edgevecSize; i++) edgevec[i] = -1;
       }
 
       typedef typename GridType::template Codim<0>::LevelIterator LevelIteratorType;
@@ -3402,19 +3408,21 @@ namespace Dune
     int nvx = grid.hierarchicIndexSet().size(dim);
 
     {
-      Array<int> & vec = vec_;
-      if(vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
+      ArrayType & vec = vec_;
+      if((int) vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
 
       // the edge marking is only needed in 3d
-      Array<int> & edgevec = edgevec_;
+      ArrayType & edgevec = edgevec_;
       if( dim > 2 )
       {
         int edg = grid.hierarchicIndexSet().size(dim-1);
-        if(edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
-        for(int i=0; i<edgevec.size(); i++) edgevec[i] = -1;
+        if((int) edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
+        const int edgevecSize = edgevec.size();
+        for(int i=0; i<edgevecSize; i++) edgevec[i] = -1;
       }
 
-      for(int i=0; i<vec.size(); i++) vec[i] = -1;
+      const int vecSize = vec.size();
+      for(int i=0; i<vecSize; i++) vec[i] = -1;
 
       typedef typename GridType::template Codim<0>::LeafIterator IteratorType;
       IteratorType endit = grid.template leafend<0> ();
@@ -3443,9 +3451,12 @@ namespace Dune
     {
       if(vec_.size() > 0)
       {
-        printf("\nEntries %d \n",vec_.size());
-        for(int i=0; i<vec_.size(); i++)
-          printf("Vx %d visited on Element %d \n",i,vec_[i]);
+        std::cout << "\nEntries " << vec_.size() << std::endl;
+        const int size = vec_.size();
+        for(int i=0; i<size; ++i)
+        {
+          std::cout << "Vx " << i << " visited on Element " << vec_[i] << std::endl;
+        }
       }
     }
   }
@@ -3937,7 +3948,7 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::isNoElement(const ALBERTA MACRO_EL *mel) const
   {
     if(myRank() < 0) return false;
-    assert((mel->index >= 0) && (mel->index < ghostFlag_.size()));
+    assert((mel->index >= 0) && (mel->index < (int) ghostFlag_.size()));
     return ghostFlag_[mel->index] == -1;
   }
 

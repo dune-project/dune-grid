@@ -45,7 +45,6 @@
 #include <dune/common/interfaces.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/common/array.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/common/stdstreams.hh>
 
@@ -163,10 +162,12 @@ namespace Dune
     void print() const;
 
   private:
+    typedef std::vector<int> ArrayType;
+
     // built in array to mark on which element a vertex is reached
-    Array<int> vec_;
-    Array<int> edgevec_;
-    Array<int> facevec_;
+    ArrayType vec_;
+    ArrayType edgevec_;
+    ArrayType facevec_;
 
     // number of vertices
     int numVertex_;
@@ -1753,7 +1754,9 @@ namespace Dune
     MyType& operator=(const MyType& other);
 
   private:
-    Array<int> ghostFlag_; // store ghost information
+    typedef std::vector<int> ArrayType;
+
+    ArrayType ghostFlag_; // store ghost information
 
     // initialize of some members
     void initGrid(int proc);
@@ -1787,7 +1790,7 @@ namespace Dune
     bool wasChanged_;
 
     // help vector for setNewCoords
-    mutable Array<int> macroVertices_;
+    mutable ArrayType macroVertices_;
 
   public:
     // this method is new fill_elinfo from ALBERTA but here the neighbor
