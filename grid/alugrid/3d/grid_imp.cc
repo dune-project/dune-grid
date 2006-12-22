@@ -1124,7 +1124,10 @@ namespace Dune {
         // write coordinates of the vertices
         int vxsize = vx->size();
         file << vxsize << std::endl;
-        std::vector < double[3] > vxvec ( vxsize );
+
+        typedef double ShortVecType[3];
+        ShortVecType * vxvec = new ShortVecType [vxsize];
+        assert( vxvec );
 
         for( vx->first(); !vx->done() ; vx->next() )
         {
@@ -1136,10 +1139,12 @@ namespace Dune {
           for(int i=0; i<3; ++i) v[i] = p[i];
         }
 
-        for(size_t i=0; i<vxsize; i++)
+        for(int i=0; i<vxsize; ++i)
         {
           file << vxvec[i][0] << " " << vxvec[i][1] << " " << vxvec[i][2] << std::endl;
         }
+
+        delete [] vxvec;
       }
 
       file << std::endl;
