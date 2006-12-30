@@ -1063,7 +1063,6 @@ namespace Dune
 
                        volume of triangular prism =1/2
 
-                       http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
    */
 
 
@@ -1187,7 +1186,7 @@ namespace Dune
       subsizes[0][0][0]=1;
 
       // face indices according to that given in
-      //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
+      // http://dune-project.org/doc/appl/refelements.html
 
       // prism has one face on each face!
       for(int ii=0; ii<5; ++ii)
@@ -1417,13 +1416,6 @@ namespace Dune
   // Reference Pyramid
   //++++++++++++++++++++++++++++++++++++
 
-  /*
-
-     http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
-     volume of pyramid = 1/3;
-   */
-
-
   template<typename ctype, int dim>
   class ReferencePyramid;
 
@@ -1546,8 +1538,6 @@ namespace Dune
       // pyramid has one face on each face!
       for(int ii=0; ii<5; ++ii)
         subsizes[ii][1][1]=1;
-      // face indices according to that given in
-      //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
 
       //  pyramid has 4 vertices on bott rect. face
       subsizes[0][1][3]=4;

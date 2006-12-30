@@ -1,7 +1,7 @@
 #! /bin/bash
 # $Id$
 # Process this file with autoconf to produce a configure script.
-AC_INIT(dune-grid, 0.0, dune@hal.iwr.uni-heidelberg.de)
+AC_INIT(dune-grid, 0.0, dune@dune-project.org)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([grid/common/grid.hh])
 AM_CONFIG_HEADER([config.h])
