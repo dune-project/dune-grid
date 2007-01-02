@@ -672,8 +672,8 @@ namespace Dune {
     elem_(0),
     iter_()
   {
-    if(!end) {
-
+    if(!end)
+    {
       iter_ = IteratorType(grid.myGrid());
       iter_->first();
 
@@ -753,10 +753,10 @@ namespace Dune {
     iter_(),
     marker_(grid.getLeafMarker())
   {
-    if(!end) {
+    if(!end)
+    {
       // update marker Vector
-      marker_.update(grid);
-      marker_.unsetUp2Date();
+      if( ! marker_.up2Date() ) marker_.update(grid);
 
       iter_ = IteratorType(grid.myGrid());
       iter_->first();
@@ -800,6 +800,7 @@ namespace Dune {
     elem_    =  org.elem_;
     iter_    =  org.iter_;
 
+    // there is only one reference, so we don't copy
     assert(&marker_ == &org.marker_);
     return *this;
   }
@@ -955,12 +956,12 @@ namespace Dune {
     level_(level),
     myFace_(0),
     iter_(),
-    marker_(grid.getMarkerVector(level))
+    marker_(& grid.getMarkerVector(level))
   {
     if(!end)
     {
       // update marker Vector if necessary
-      if( ! marker_.up2Date() ) marker_.update(grid,level_);
+      if( ! marker().up2Date() ) marker().update(grid,level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
@@ -1000,14 +1001,15 @@ namespace Dune {
   operator = (const ThisType & org)
   {
     EntityPointerType :: operator = (org);
-    endIter_ =  org.endIter_ ;
-    level_   =  org.level_;
-    myFace_    =  org.myFace_;
+    endIter_ = org.endIter_ ;
+    level_   = org.level_;
+    myFace_  = org.myFace_;
     item_    = org.item_;
     elem_    = org.elem_;
-    iter_    =  org.iter_;
+    iter_    = org.iter_;
+    marker_  = org.marker_;
 
-    assert(&marker_ == &org.marker_);
+    assert(marker_ == org.marker_);
     return *this;
   }
 
@@ -1018,8 +1020,8 @@ namespace Dune {
 
   //! prefix increment
   template<PartitionIteratorType pitype, class GridImp>
-  inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment () {
-
+  inline void ALU2dGridLevelIterator<1, pitype, GridImp> :: increment ()
+  {
     // if already end iter, return
     if(endIter_) return ;
 
@@ -1033,7 +1035,7 @@ namespace Dune {
     while (myFace_ < 3) {
       int idx = item_->edge_idx(myFace_);
       // check if face is visited on this element
-      if( marker_.isOnElement(elIdx,idx,1) )
+      if( marker().isOnElement(elIdx,idx,1) )
       {
         goNext = 0;
         break;
@@ -1087,12 +1089,12 @@ namespace Dune {
     level_(level),
     myFace_(0),
     iter_(),
-    marker_(grid.getMarkerVector(level))
+    marker_(& grid.getMarkerVector(level))
   {
     if(!end)
     {
       // update marker Vector if necessary
-      if( ! marker_.up2Date() ) marker_.update(grid,level_);
+      if( ! marker().up2Date() ) marker().update(grid,level_);
 
       iter_ = IteratorType(grid.myGrid(), level_);
       iter_->first();
@@ -1136,13 +1138,13 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ = org.endIter_ ;
     level_   = org.level_;
-    myFace_    = org.face_;
+    myFace_  = org.face_;
     item_    = org.item_;
     vertex_  = org.vertex_;
     iter_    = org.iter_;
+    marker_  = org.marker_;
 
-    assert(&marker_ == &org.marker_);
-
+    assert(marker_ == org.marker_);
     return *this;
   }
 
@@ -1172,7 +1174,7 @@ namespace Dune {
       int idx = vertex_->getIndex();
 
       // check if face is visited on this element
-      if( marker_.isOnElement(elIdx,idx,2) )
+      if( marker().isOnElement(elIdx,idx,2) )
       {
         goNext = 0;
         break;
