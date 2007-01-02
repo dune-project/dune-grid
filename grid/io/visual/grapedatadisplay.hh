@@ -208,7 +208,7 @@ namespace Dune
 
     //! add discrete function to display
     template <class DiscFuncType>
-    inline void addData(const DiscFuncType &func, double time = 0.0);
+    inline void addData(const DiscFuncType &func, double time = 0.0, bool vector = false );
 
     //! add discrete function to display
     template <class DiscFuncType>
