@@ -457,7 +457,7 @@ namespace Dune
   dataDisplay(const DiscFuncType &func, bool vector)
   {
     /* add function data */
-    this->addData(const_cast<DiscFuncType &> (func),func.name(),0.0,vector);
+    this->addData(func,func.name(),0.0,vector);
 
     /* display mesh */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
@@ -476,17 +476,9 @@ namespace Dune
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
-  addData(const DiscFuncType &func, double time)
+  addData(const DiscFuncType &func, double time, bool vector )
   {
-    typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
-    enum { dimR = FunctionSpaceType::DimRange };
-    int comp[dimR];
-    for(int i=0; i<dimR; ++i) comp[i] = i;
-    std::string name = func.name();
-    // name, base_name, next, dimVal, comp
-    DATAINFO dinf = { name.c_str() , name.c_str() , 0 , dimR , (int *) &comp };
-
-    addData(func,&dinf,time);
+    this->addData(func,func.name(),time,vector);
   }
 
   template<class GridType>
