@@ -599,7 +599,13 @@ namespace Dune {
 
     IteratorType iter_;
 
-    ALU2dGridMarkerVector & marker_;
+    ALU2dGridMarkerVector * marker_;
+
+    ALU2dGridMarkerVector & marker()
+    {
+      assert( marker_ );
+      return *marker_;
+    }
   };
 
   //**********************************************************************
@@ -663,7 +669,14 @@ namespace Dune {
 
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     IteratorType iter_;
-    ALU2dGridMarkerVector & marker_;
+
+    // marker vector to tell on which element vertex is visited
+    ALU2dGridMarkerVector * marker_;
+    ALU2dGridMarkerVector & marker()
+    {
+      assert( marker_ );
+      return *marker_;
+    }
   };
 
   //***************************************************************
