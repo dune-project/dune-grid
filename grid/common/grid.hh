@@ -539,13 +539,6 @@ namespace Dune {
 
       /*! \brief A type that is a model of Dune::IntersectionIterator
          which is an iterator that allows to examine, but not to modify, the
-         intersections of codimension 1 of an element (entity of codimension 0)
-         with other elements.
-       */
-      typedef typename GridFamily::Traits::IntersectionIterator IntersectionIterator;
-
-      /*! \brief A type that is a model of Dune::IntersectionIterator
-         which is an iterator that allows to examine, but not to modify, the
          intersections of codimension 1 of an leaf element (entity of codimension 0)
          with other leaf elements.
        */
@@ -1164,7 +1157,6 @@ namespace Dune {
   {
     typedef GridImp Grid;
 
-    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp>  IntersectionIterator;
     typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp>  LeafIntersectionIterator;
     typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp> LevelIntersectionIterator;
 
