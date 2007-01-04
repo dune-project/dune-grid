@@ -1411,6 +1411,8 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
         if (ncomps>1)
           s << "NumberOfComponents=\"" << 3 << "\" ";
         s << "format=\"ascii\">" << std::endl;
@@ -1451,6 +1453,8 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
         if (ncomps>1)
           s << "NumberOfComponents=\"" << 3 << "\" ";
         s << "format=\"binary\">" << std::endl;
@@ -1517,6 +1521,8 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+        if (ncomps>3)
+          DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
         if (ncomps>1)
           s << "NumberOfComponents=\"" << 3 << "\" ";
         s << "format=\"appended\" offset=\""<< bytecount << "\" />" << std::endl;
