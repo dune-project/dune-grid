@@ -782,6 +782,14 @@ namespace Dune {
   {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
+    N = new FixedArray<int,dim>[MAXL];
+    h = new FieldVector<sgrid_ctype, dim>[MAXL];
+    mapper = new CubeMapper<dim>[MAXL];
+
+    indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
+    theleafindexset = new SGridLeafIndexSet<const SGrid<dim,dimworld> >(*this);
+    theglobalidset = new SGridGlobalIdSet<const SGrid<dim,dimworld> >(*this);
+
     L = 1;
     for (int i=0; i<dim; i++) low[i] = L_[i];
     for (int i=0; i<dim; i++) H[i] = H_[i];
@@ -799,7 +807,6 @@ namespace Dune {
 
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
-    : theleafindexset(*this), theglobalidset(*this)
   {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
@@ -808,23 +815,19 @@ namespace Dune {
       L_[i] = 0;
 
     makeSGrid(N_,L_, H_);
-    indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
   }
 
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)
-    : theleafindexset(*this), theglobalidset(*this)
   {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
     makeSGrid(N_, L_, H_);
-    indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
   }
 
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid (FieldVector<int,dim> N_, FieldVector<sgrid_ctype,dim> L_,
                                      FieldVector<sgrid_ctype,dim> H_)
-    : theleafindexset(*this), theglobalidset(*this)
   {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
@@ -837,14 +840,14 @@ namespace Dune {
     }
 
     makeSGrid(NN, LL, HH);
-    indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
   }
 
 
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid ()
-    : theleafindexset(*this), theglobalidset(*this)
   {
+    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+
     int N_[dim];
     sgrid_ctype L_[dim];
     sgrid_ctype H_[dim];
@@ -856,7 +859,21 @@ namespace Dune {
     }
 
     makeSGrid(N_, L_, H_);
-    indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
+  }
+
+  template<int dim, int dimworld>
+  inline SGrid<dim,dimworld>::~SGrid ()
+  {
+    for (size_t i=0; i<indexsets.size(); i++)
+      delete indexsets[i];
+
+    delete theleafindexset;
+    delete theglobalidset;
+
+
+    delete[] N;
+    delete[] h;
+    delete[] mapper;
   }
 
   template<int dim, int dimworld>
@@ -873,10 +890,6 @@ namespace Dune {
       for (int i=0; i<dim; i++)
         h[L][i] = (H[i]-low[i])/((sgrid_ctype)N[L][i]);
       L++;
-
-      //     std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
-      //     for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
-      //     std::cout << ")" << std::endl;
 
       indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,maxLevel()) );
     }
