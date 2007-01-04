@@ -11,3 +11,5 @@ vtktest_LDADD = $(LOCAL_LIBS)
 vtktest_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+CLEANFILES = *.vtu *.vtp
