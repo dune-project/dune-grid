@@ -1306,6 +1306,9 @@ namespace Dune {
     //! @brief empty constructor making grid of unit square discretized with one cell
     SGrid ();
 
+    //! @brief SGrid destructor
+    ~SGrid ();
+
     /*! Return maximum level defined in this grid. Levels are numbered
           0 ... maxLevel with 0 the coarsest level.   */
     int maxLevel() const;
@@ -1467,12 +1470,12 @@ namespace Dune {
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
-      return theglobalidset;
+      return *theglobalidset;
     }
 
     const typename Traits::LocalIdSet& localIdSet() const
     {
-      return theglobalidset;
+      return *theglobalidset;
     }
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
@@ -1483,7 +1486,7 @@ namespace Dune {
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
     {
-      return theleafindexset;
+      return *theleafindexset;
     }
 
     // dummy parallel functions
@@ -1539,14 +1542,9 @@ namespace Dune {
 
 
   private:
-
-    CollectiveCommunication<SGrid> ccobj;
-
-    std::vector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*> indexsets;
-    SGridLeafIndexSet<const SGrid<dim,dimworld> > theleafindexset;
-    SGridGlobalIdSet<const SGrid<dim,dimworld> > theglobalidset;
-
-    // Index classes need access to the real entity
+    /*
+       Make associated classes friends to grant access to the real entity
+     */
     friend class Dune::SGridLevelIndexSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridLeafIndexSet<Dune::SGrid<dim,dimworld> >;
     friend class Dune::SGridGlobalIdSet<Dune::SGrid<dim,dimworld> >;
@@ -1561,6 +1559,12 @@ namespace Dune {
     friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,const Dune::SGrid<dim,dimworld> >;
 
+    template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
+    friend class Entity;
+
+    /*
+       private methods
+     */
     template<int codim>
     SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(typename Traits::template Codim<codim>::Entity& e )
     {
@@ -1573,21 +1577,27 @@ namespace Dune {
       return this->getRealImplementation(e);
     }
 
-    template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
-    friend class Entity;
-
     // diasable copy and assign
     SGrid(const SGrid &) {};
     SGrid & operator = (const SGrid &) { return *this; };
     // generate SGrid
     void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
 
+    /*
+       internal data
+     */
+    CollectiveCommunication<SGrid> ccobj;
+
+    std::vector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*> indexsets;
+    SGridLeafIndexSet<const SGrid<dim,dimworld> > *theleafindexset;
+    SGridGlobalIdSet<const SGrid<dim,dimworld> > *theglobalidset;
+
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<sgrid_ctype, dim> low;   // lower left corner of the grid
     FieldVector<sgrid_ctype, dim> H;     // length of cube per direction
-    FixedArray<int,dim> N[MAXL];       // number of elements per direction
-    FieldVector<sgrid_ctype, dim> h[MAXL]; // mesh size per direction
-    mutable CubeMapper<dim> mapper[MAXL]; // a mapper for each level
+    FixedArray<int,dim> *N;              // number of elements per direction
+    FieldVector<sgrid_ctype, dim> *h;    // mesh size per direction
+    mutable CubeMapper<dim> *mapper;     // a mapper for each level
 
     // faster implemantation od subIndex
     mutable FixedArray <int,dim> zrefStatic;   // for subIndex of SEntity
