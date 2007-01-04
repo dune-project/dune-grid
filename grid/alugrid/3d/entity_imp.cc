@@ -937,10 +937,14 @@ namespace Dune {
   ALU3dGridEntityPointer<codim,GridImp>::
   operator = (const ALU3dGridEntityPointerType & org)
   {
-    clone(org);
+    // first copy level, twist and face, because this might be used in
+    // clone
     level_ = org.level_;
     twist_ = org.twist_;
     face_  = org.face_;
+
+    // copy item pointer
+    clone(org);
     return *this;
   }
 
