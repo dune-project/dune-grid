@@ -16,16 +16,8 @@ if ALUGRID
   ALUPROG = test-alu3dgrid
 endif
 
-# UGGrid needs AmiraMeshReader for now...
-# !!! trick around to beat automake
-if AMIRAMESH
-  DO_UGTEST = test-ug #test-ug-lgm
-else
-  DO_UGTEST =
-endif
-
 if UG
-  UPROG = $(DO_UGTEST)
+  UPROG = test-ug #test-ug-lgm
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
 else
@@ -87,8 +79,8 @@ test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # libdune contains both libug2 and libug3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
-test_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS) $(MPI_CPPFLAGS)
-test_ug_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
+test_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
+test_ug_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
 test_ug_DEPENDENCIES = $(LOCAL_LIBS)
 
 # libdune contains both libug2 and libug3, always test both dimensions
@@ -107,7 +99,6 @@ test_dgfalu_uggrid_combination_DEPENDENCIES = $(LOCAL_LIBS)
 SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc
 
 GRIDFILES = alberta-testgrid-3-3.al \
-  ug-testgrid-2.am ug-testgrid-3.am \
   simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
   cube-testgrid-3-3-large.dgf cube-testgrid-3-3.dgf
 
