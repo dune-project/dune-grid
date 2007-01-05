@@ -526,8 +526,8 @@ namespace Dune {
       return SVECTOR(theElement,i);
     }
 
-    //! \todo Please doc me!
-    static UG_NS<3>::Element* EFather(UG_NS<3>::Element* theElement) {
+    /** \brief Return a pointer to the father of the given element */
+    static UG_NS<3>::Element* EFather(const UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::father_offset;
       using UG::UINT;

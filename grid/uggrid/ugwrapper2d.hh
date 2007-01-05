@@ -487,8 +487,8 @@ namespace Dune {
       return NULL;
     }
 
-    //! \todo Please doc me!
-    static UG_NS<2>::Element* EFather(UG_NS<2>::Element* theElement) {
+    /** \brief Return a pointer to the father of the given element */
+    static UG_NS<2>::Element* EFather(const UG_NS<2>::Element* theElement) {
       using UG::D2::ELEMENT;
       using UG::D2::father_offset;
       using UG::UINT;

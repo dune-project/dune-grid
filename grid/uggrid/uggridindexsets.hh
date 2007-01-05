@@ -352,6 +352,17 @@ namespace Dune {
 #ifdef ModelP
       return grid_.getRealImplementation(e).target_->ge.ddd.gid;
 #else
+      if (cd==0) {
+        // If we're asked for the id of an element, and that element is a copy of its father, then
+        // we return the id of the lowest ancestor that the element is a copy from.  That way copies
+        // of elements have the same id
+        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)(grid_.getRealImplementation(e).target_);
+        /** \todo We should really be using an isCopy() method rather than hasCopy() */
+        while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
+          ancestor = UG_NS<dim>::EFather(ancestor);
+
+        return UG_NS<dim>::id(ancestor);
+      }
       return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
 #endif
     }
@@ -359,18 +370,13 @@ namespace Dune {
     //! get id of subEntity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     GlobalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      if (cc==0) {
-#ifdef ModelP
-        return grid_.getRealImplementation(e).target_->ge.ddd.gid;
-#else
-        return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
-#endif
-      }
+      if (cc==0)
+        return id(e);
 
       if (cc==dim) {
 #ifdef ModelP
@@ -413,13 +419,24 @@ namespace Dune {
     template<int cd>
     LocalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
     {
+      if (cd==0) {
+        // If we're asked for the id of an element, and that element is a copy of its father, then
+        // we return the id of the lowest ancestor that the element is a copy from.  That way copies
+        // of elements have the same id
+        const typename UG_NS<dim>::Element* ancestor = (typename UG_NS<dim>::Element* const)(grid_.getRealImplementation(e).target_);
+        /** \todo We should really be using an isCopy() method rather than hasCopy() */
+        while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
+          ancestor = UG_NS<dim>::EFather(ancestor);
+
+        return UG_NS<dim>::id(ancestor);
+      }
       return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
     }
 
     //! get id of subEntity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     LocalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
@@ -428,7 +445,7 @@ namespace Dune {
       if (cc==dim)
         return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
       else if (cc==0)
-        return UG_NS<dim>::id(target_);
+        return id(e);
       else
         DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
 
