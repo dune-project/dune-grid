@@ -1094,7 +1094,7 @@ namespace Dune {
     }
   protected:
     /**
-     * @brief Helper class to choose correct implemetation return type for getRealImplementation
+     * @brief Helper class to choose correct implementation return type for getRealImplementation
      *
      * If the template parameter is const, const typename T::ImplementationType is returned otherwise
      * just typename ::ImplementationType.
