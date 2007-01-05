@@ -528,7 +528,7 @@ int main (int argc , char **argv) try
   // ////////////////////////////////////////////////////////////////////////
 
   {
-    std::cout << "Testing if copies of elements have the same globalID." << std::endl;
+    std::cout << "Testing if copies of elements have the same id." << std::endl;
     Dune::UGGrid<2> locallyRefinedGrid;
 
     locallyRefinedGrid.setRefinementType(Dune::UGGrid<2>::COPY);
@@ -536,6 +536,7 @@ int main (int argc , char **argv) try
     typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
     typedef Dune::UGGrid<2>::Codim<0>::HierarchicIterator HierarchicIterator;
     typedef Dune::UGGrid<2>::Traits::GlobalIdSet GlobalIdSet;
+    typedef Dune::UGGrid<2>::Traits::LocalIdSet LocalIdSet;
 
     // make grids
     makeHalfCircleQuad(locallyRefinedGrid, false);
@@ -544,6 +545,7 @@ int main (int argc , char **argv) try
     markOne(locallyRefinedGrid,0,1);
 
     const GlobalIdSet& globalIdSet = locallyRefinedGrid.globalIdSet();
+    const LocalIdSet&  localIdSet  = locallyRefinedGrid.localIdSet();
 
     for (int level=0; level<locallyRefinedGrid.maxLevel(); ++level)
     {
@@ -553,6 +555,7 @@ int main (int argc , char **argv) try
       {
         int children = 0;
         GlobalIdSet::IdType globalChildId;
+        LocalIdSet::IdType localChildId;
 
         HierarchicIterator hIt = eIt->hbegin(level+1);
         HierarchicIterator hEnd = eIt->hend(level+1);
@@ -561,10 +564,17 @@ int main (int argc , char **argv) try
         for( ; hIt!=hEnd; ++hIt)
         {
           globalChildId = globalIdSet.id<0>(*hIt);
+          localChildId =  localIdSet.id<0>(*hIt);
           ++children;
         }
-        if ((children == 1) && (globalIdSet.id<0>(*eIt) != globalChildId))
+        if (children != 1)
+          continue;
+
+        if (globalIdSet.id<0>(*eIt) != globalChildId)
           DUNE_THROW(Dune::GridError, "Copy of element has different globalId!");
+
+        if (localIdSet.id<0>(*eIt) != localChildId)
+          DUNE_THROW(Dune::GridError, "Copy of element has different localId!");
       }
     }
   }
