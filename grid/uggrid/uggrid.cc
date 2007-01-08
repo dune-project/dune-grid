@@ -864,7 +864,7 @@ void Dune::UGGrid < dim >::createEnd()
   // ///////////////////////////////////////////
   unsigned int noOfBSegments = boundarySegments.size();
   std::string domainName = name_ + "_Domain";
-  const double midPoint[2] = {0, 0};
+  const double midPoint[3] = {0, 0, 0};
 
   if (UG_NS<dim>::CreateDomain(domainName.c_str(),     // The domain name
                                midPoint,               // Midpoint of a circle enclosing the grid, only needed for the UG graphics
