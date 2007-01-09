@@ -294,4 +294,4 @@ namespace Dune
 
 }
 
-#endif // DUNE_GRID_LEVELITERATOR_HH
+#endif // DUNE_GRID_ENTITYPOINTER_HH
