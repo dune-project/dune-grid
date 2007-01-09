@@ -376,7 +376,7 @@ namespace Dune {
     GlobalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
     {
       if (cc==0)
-        return id(e);
+        return id<0>(e);
 
       if (cc==dim) {
 #ifdef ModelP
@@ -445,7 +445,7 @@ namespace Dune {
       if (cc==dim)
         return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
       else if (cc==0)
-        return id(e);
+        return id<0>(e);
       else
         DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
 
