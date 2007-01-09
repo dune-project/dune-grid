@@ -234,7 +234,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
-        assert(idx!=10 && idx!=11 && idx!=12 && idx!=13);
+        assert(idx!=10 && idx!=11 && idx!=12 && idx!=13 && idx<15);
         const double coords[15][3] = {
           // The corners
           {0,0,0}, {1,0,0}, {0,1,0}, {0,0,1},
@@ -254,8 +254,8 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
-        assert(idx!=14 && idx!=15 && idx!=16 && idx!=17 && idx!=18);
-        const double coords[19][3] = {
+        assert( (idx>=0 && idx<14) || idx==23);
+        const double coords[24][3] = {
           // The corners
           {0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}, {0,0,1},
           // The edge midpoints
@@ -265,16 +265,19 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           {0.5,0.5,0},
           // Side midpoints of the four triangular faces
           {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
-          // Element midpoints
-          {0,0,0}
+          // Padding due to suboptimal implementation in UG
+          {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+          // Element midpoint
+          {0.4,0.4,0.2}
         };
+
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
       case UG::D3::PRISM : {
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
-        assert(idx!=15 && idx!=19);
+        assert(idx!=15 && idx!=19 && idx<20);
 
         const double coords[20][3] = {
           // The corners
@@ -296,6 +299,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
       }
       case UG::D3::HEXAHEDRON : {
 
+        assert(idx<27);
         const double coords[27][3] = {
           // The corners
           {0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}, {0,0,1}, {1,0,1}, {1,1,1}, {0,1,1},
