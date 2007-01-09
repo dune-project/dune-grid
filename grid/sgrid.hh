@@ -1287,7 +1287,7 @@ namespace Dune {
 
        \param[in] N_ number of cells in each direction on coarsest level
        \param[in] L_ position of origin of the cube
-       \param[in] H_ extend of the unit cube in each dimension
+       \param[in] H_ position of the upper right corner of the cube
 
      */
     SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
@@ -1296,7 +1296,7 @@ namespace Dune {
 
        \param[in] N_ number of cells in each direction on coarsest level
        \param[in] L_ position of origin of the cube
-       \param[in] H_ extend of the unit cube in each dimension
+       \param[in] H_ position of the upper right corner of the cube
 
        Note: This constructor uses FieldVectors instead of built-in arrays. This is compatible
           with the YaspGrid class.
