@@ -203,6 +203,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
       case UG::D2::TRIANGLE : {
 
+        assert(idx<6);
         const double coords[6][2] = {
           // The corners
           {0,0}, {1,0}, {0,1},
@@ -214,6 +215,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
       }
       case UG::D2::QUADRILATERAL : {
 
+        assert(idx<9);
         const double coords[9][2] = {
           // The corners
           {0,0}, {1,0}, {1,1}, {0,1},
@@ -254,7 +256,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
-        assert( (idx>=0 && idx<14) || idx==23);
+        assert( idx<14 || idx==23);
         const double coords[24][3] = {
           // The corners
           {0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}, {0,0,1},
@@ -277,9 +279,9 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
       case UG::D3::PRISM : {
         // If this assert fails a refinement rule has been appeared which inserts
         // side midpoints.  These have to be added then.
-        assert(idx!=15 && idx!=19 && idx<20);
+        assert(idx!=15 && !(idx>=19 && idx<24) && idx<25);
 
-        const double coords[20][3] = {
+        const double coords[25][3] = {
           // The corners
           {0,0,0}, {1,0,0}, {0,1,0}, {0,0,1}, {1,0,1}, {0,1,1},
           // The edge midpoints
@@ -291,9 +293,14 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           {0,0,0},
           // The midnodes of the three quadrilateral faces
           {0.5,0,0.5}, {0.5,0.5,0.5}, {0,0.5,0.5},
+          // Second triangular face
+          {0,0,0},
+          // Padding due to suboptimal implementation in UG
+          {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
           // Side midpoint for the second triangular face
-          {0,0,0}
+          {0.333333333333333333, 0.333333333333333333, 0.5}
         };
+
         geometryInFather_.setCoords(i,coords[idx]);
         break;
       }
