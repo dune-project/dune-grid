@@ -834,7 +834,7 @@ template < int dim >
 void Dune::UGGrid < dim >::createEnd()
 {
 #ifdef UG_LGMDOMAIN
-  DUNE_THROW(GridError, "You cannot call createLGMGrid() when your UGGrid has been configured for LGM!");
+  DUNE_THROW(GridError, "You cannot call createEnd() when your UGGrid has been configured for LGM!");
 #else
 
   // ///////////////////////////////////////////
@@ -945,7 +945,63 @@ void Dune::UGGrid < dim >::createEnd()
       vertices[j]    = isBoundaryNode[thisSegment[j]];
     }
 
+#if 1
     insertLinearSegment(vertices, coordinates, i);
+#else
+#ifndef UG_LGMDOMAIN
+    // It would be a lot smarter to use this way of describing
+    // boundary segments.  But as of yet, UG crashes when using
+    // linear segments.
+    // Create some boundary segment name
+    char segmentName[20];
+    if(sprintf(segmentName, "BS %d", i) < 0)
+      DUNE_THROW(GridError, "sprintf returned error code!");
+
+    // Copy the vertices into a C-style array
+    /** \todo Due to some UG weirdness, in 3d, CreateBoundarySegment always expects
+        this array to have four entries, even if only a triangular segment is
+        inserted.  If not, undefined values are will be introduced. */
+    int vertices_c_style[4] = {-1, -1, -1, -1};
+
+    for (size_t j=0; j<vertices.size(); j++)
+      vertices_c_style[j] = vertices[j];
+
+    if (dim==2) {
+
+      double segmentCoordinates[2][2];
+      for (int j=0; j<vertices.size(); j++)
+        for (int k=0; k<dim; k++)
+          segmentCoordinates[j][k] = coordinates[j][k];
+
+      if (UG::D2::CreateLinearSegment(segmentName,
+                                      1,               /*id of left subdomain */
+                                      2,              /*id of right subdomain*/
+                                      i,                  /*id of segment*/
+                                      vertices.size(),                  // Number of corners
+                                      vertices_c_style,
+                                      segmentCoordinates
+                                      )==NULL)
+        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+
+    } else {
+
+      double segmentCoordinates[4][3];
+      for (int j=0; j<vertices.size(); j++)
+        for (int k=0; k<dim; k++)
+          segmentCoordinates[j][k] = coordinates[j][k];
+
+      if (UG::D3::CreateLinearSegment(segmentName,
+                                      1,               /*id of left subdomain */
+                                      2,              /*id of right subdomain*/
+                                      i,                  /*id of segment*/
+                                      vertices.size(),                  // Number of corners
+                                      vertices_c_style,
+                                      segmentCoordinates
+                                      )==NULL)
+        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+    }
+#endif
+#endif
 
   }
 
@@ -973,7 +1029,7 @@ void Dune::UGGrid < dim >::createEnd()
   sprintf(newArgs[3], "h %dM", heapsize);
 
   if (UG_NS<dim>::NewCommand(4, newArgs))
-    DUNE_THROW(GridError, "UGGrid::makeNewMultigrid failed!");
+    DUNE_THROW(GridError, "UGGrid<" << dim << ">::makeNewMultigrid failed!");
 
   for (int i=0; i<4; i++)
     free(newArgs[i]);
@@ -981,7 +1037,7 @@ void Dune::UGGrid < dim >::createEnd()
   // Get a direct pointer to the newly created multigrid
   multigrid_ = UG_NS<dim>::GetMultigrid(name_.c_str());
   if (!multigrid_)
-    DUNE_THROW(GridError, "UGGrid::makeNewMultigrid failed!");
+    DUNE_THROW(GridError, "UGGrid<" << dim << ">::GetMultigrid failed!");
 
   // ///////////////////////////////////////////////////////////////
   // If we are in a parallel setting and we are _not_ the master
@@ -1041,7 +1097,7 @@ void Dune::UGGrid < dim >::createEnd()
 
   // Complete the UG-internal grid data structure
   if (CreateAlgebra(multigrid_) != UG_NS<dim>::GM_OK)
-    DUNE_THROW(IOError, "Call of 'UG::CreateAlgebra' failed!");
+    DUNE_THROW(IOError, "Call of 'UG::D" << dim << "::CreateAlgebra' failed!");
 
   /* here all temp memory since CreateMultiGrid is released */
   Release(multigrid_->theHeap, UG::FROM_TOP, multigrid_->MarkKey);
@@ -1185,31 +1241,13 @@ insertLinearSegment(const std::vector<int>& vertices,
                                         2,                      //  id of right subdomain
                                         segmentIndex,           // Index of the segment
                                         1,                      // Resolution, only for the UG graphics
-                                        vertices_c_style,       // Vertex indeces
+                                        vertices_c_style,       // Vertex indices
                                         alpha,                  // The local coordinates range
                                         beta,                   //    of the boundary segment
                                         boundarySegmentFunction,
                                         const_cast<BoundarySegment<dim>*>(boundarySegments_.back()))==NULL) {
     DUNE_THROW(GridError, "Calling UG" << dim << "d::CreateBoundarySegment failed!");
   }
-
-#if 0
-  // It would be a lot smarter to use this way of describing
-  // boundary segments.  But as of yet, UG crashes when using
-  // linear segments.
-  double paramCoords[3][2] = {{0,0}, {1,0}, {0,1}};
-  if (UG3d::CreateLinearSegment(segmentName,
-                                left,               /*id of left subdomain */
-                                right,              /*id of right subdomain*/
-                                i,                  /*id of segment*/
-                                4,                  // Number of corners
-                                point,
-                                paramCoords
-                                )==NULL)
-    DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
-#endif
-
 #endif
 
 }
