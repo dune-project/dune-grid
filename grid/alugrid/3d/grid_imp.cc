@@ -424,22 +424,14 @@ namespace Dune {
     bool isSimplex = (elType == tetra) ? true : false;
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
-    // unset up2date before recalculating the index sets , becasue they
-    // will use this feature
+    // unset up2date before recalculating the index sets,
+    // becasue they will use this feature
     leafVertexList_.unsetUp2Date();
-    // make sure all lists have been set to not up to date
-    for(size_t i=0; i<levelIndexVec_.size(); i++)
-    {
-      if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
-    }
-    if(leafIndexSet_) leafIndexSet_->calcNewIndex();
-
-    for(size_t i=0; i<MAXL; i++)
+    for(size_t i=0; i<MAXL; ++i)
     {
       vertexList_[i].unsetUp2Date();
       levelEdgeList_[i].unsetUp2Date();
     }
-
 #if ALU3DGRID_PARALLEL
     for(int i=0; i<dim; ++i)
     {
@@ -447,6 +439,13 @@ namespace Dune {
       for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();
     }
 #endif
+
+    // update all index set that are already in use
+    for(size_t i=0; i<levelIndexVec_.size(); ++i)
+    {
+      if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
+    }
+    if(leafIndexSet_) leafIndexSet_->calcNewIndex();
 
     coarsenMarked_ = 0;
     refineMarked_  = 0;
