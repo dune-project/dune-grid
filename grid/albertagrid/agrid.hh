@@ -540,7 +540,6 @@ namespace Dune
     typedef AlbertaGridGeometry<dim,dimworld,GridImp> GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::Traits::IntersectionIterator IntersectionIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -1299,7 +1298,6 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > IntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
 
