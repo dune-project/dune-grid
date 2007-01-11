@@ -45,6 +45,80 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
   }
 }
 
+template <class GridType>
+void checkIteratorAssignment(GridType & grid)
+{
+  // check Iterator assignment
+  {
+    enum { dim = GridType :: dimension };
+    typedef typename GridType :: template Codim<dim> :: LevelIterator
+    IteratorType;
+
+    IteratorType it = grid.template lbegin<dim>(0);
+    if( grid.maxLevel() > 0 ) it = grid.template lbegin<dim>(1);
+  }
+
+  {
+    enum { dim = GridType :: dimension };
+    typedef typename GridType :: template Codim<dim> :: LevelIterator
+    IteratorType;
+    typedef typename GridType::Traits::template Codim<dim>::EntityPointer EntityPointerType;
+
+    IteratorType it = grid.template lbegin<dim>(0);
+
+    if( it != grid.template lend<dim>(0) )
+    {
+      assert( it->level() == 0 );
+      EntityPointerType p = it;
+
+      assert( p.level()  == 0 );
+      assert( p->level() == 0 );
+
+      it = grid.template lbegin<dim>(1);
+      p = it;
+
+      assert( it->level() == 1 );
+      assert( p.level()   == 1 );
+      assert( p->level()  == 1 );
+    }
+  }
+}
+template <class GridType>
+void checkLevelIndexNonConform(GridType & grid)
+{
+  typedef typename GridType :: template Codim<0> :: LeafIterator
+  IteratorType;
+  {
+    IteratorType end = grid.template leafend<0>();
+    for(IteratorType it = grid.template leafbegin<0>(); it!=end; ++it)
+    {
+      // call index of level index set
+      grid.levelIndexSet(it->level()).index(*it);
+    }
+  }
+
+  {
+    IteratorType it = grid.template leafbegin<0>();
+    if( it != grid.template leafend<0>() )
+    {
+      // mark first entity
+      grid.mark(1, it);
+    }
+  }
+
+  grid.preAdapt();
+  grid.adapt();
+  grid.postAdapt();
+
+  {
+    IteratorType end = grid.template leafend<0>();
+    for(IteratorType it = grid.template leafbegin<0>(); it!=end; ++it)
+    {
+      // call index of level index set
+      grid.levelIndexSet(it->level()).index(*it);
+    }
+  }
+}
 
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
@@ -59,6 +133,11 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
+
+  // some checks for assignment of iterators
+  checkIteratorAssignment(grid);
+
+  checkLevelIndexNonConform(grid);
 }
 #if HAVE_MPI
 template <class GridType>
