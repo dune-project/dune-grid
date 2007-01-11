@@ -83,6 +83,42 @@ void checkIteratorAssignment(GridType & grid)
     }
   }
 }
+template <class GridType>
+void checkLevelIndexNonConform(GridType & grid)
+{
+  typedef typename GridType :: template Codim<0> :: LeafIterator
+  IteratorType;
+  {
+    IteratorType end = grid.template leafend<0>();
+    for(IteratorType it = grid.template leafbegin<0>(); it!=end; ++it)
+    {
+      // call index of level index set
+      grid.levelIndexSet(it->level()).index(*it);
+    }
+  }
+
+  {
+    IteratorType it = grid.template leafbegin<0>();
+    if( it != grid.template leafend<0>() )
+    {
+      // mark first entity
+      grid.mark(1, it);
+    }
+  }
+
+  grid.preAdapt();
+  grid.adapt();
+  grid.postAdapt();
+
+  {
+    IteratorType end = grid.template leafend<0>();
+    for(IteratorType it = grid.template leafbegin<0>(); it!=end; ++it)
+    {
+      // call index of level index set
+      grid.levelIndexSet(it->level()).index(*it);
+    }
+  }
+}
 
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
@@ -100,6 +136,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
 
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
+
+  checkLevelIndexNonConform(grid);
 }
 #if HAVE_MPI
 template <class GridType>
