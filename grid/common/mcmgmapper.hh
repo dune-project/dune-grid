@@ -37,10 +37,19 @@ namespace Dune
    * \par G
    *    A Dune grid type.
    * \par IS
-   *    LeafIndexSet or LevelIndexSet type of the given grid.
+   *    LeafIndexSet or LevelIndexSet type of the given grid
    * \par Layout
-   *    A class template with a method contains, that returns true for all codims and geometry
-   *    types that are in the map.
+   *  A helper class with a method contains(), that returns true for all geometry
+   *  types that are in the domain of the map.  The class should be of the following
+   *  shape
+     \code
+     template<int dim>
+     struct LayoutClass {
+        bool contains (Dune::GeometryType gt) {
+            // Return true if gt is in the domain of the map
+        }
+     };
+     \endcode
    */
   template <typename G, typename IS, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper : Mapper<G,MultipleCodimMultipleGeomTypeMapper<G,IS,Layout> > {
@@ -165,18 +174,27 @@ namespace Dune
      Template parameters are:
 
      \par G
-     A Dune grid type.
+     A %Dune grid type.
      \par Layout
-     A class template with a method contains, that returns true for all codims and geometry
-     types that are in the map.
+     A helper class with a method contains(), that returns true for all geometry
+     types that are in the domain of the map.  The class should be of the following
+     shape
+     \code
+     template<int dim>
+     struct LayoutClass {
+        bool contains (Dune::GeometryType gt) {
+            // Return true if gt is in the domain of the map
+        }
+     };
+     \endcode
    */
   template <typename G, template<int> class Layout>
   class LeafMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>
   {
   public:
-    /* @brief The constructor
-       @param grid A reference to a grid.
+    /** @brief The constructor
+         @param grid A reference to a grid.
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
       : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet())
@@ -191,18 +209,27 @@ namespace Dune
      Template parameters are:
 
      \par G
-     A Dune grid type.
+     A %Dune grid type.
      \par Layout
-     A class template with a method contains, that returns true for all codims and geometry
-     types that are in the map.
+     A helper class with a method contains(), that returns true for all geometry
+     types that are in the domain of the map.  The class should be of the following
+     shape
+     \code
+     template<int dim>
+     struct LayoutClass {
+        bool contains (Dune::GeometryType gt) {
+            // Return true if gt is in the domain of the map
+        }
+     };
+     \endcode
    */
   template <typename G, template<int> class Layout>
   class LevelMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,Layout> {
   public:
-    /* @brief The constructor
-       @param grid A reference to a grid.
-       @param level A valid level of the grid.
+    /** @brief The constructor
+         @param grid A reference to a grid.
+         @param level A valid level of the grid.
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
       : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,Layout>(grid,grid.levelIndexSet(level))
