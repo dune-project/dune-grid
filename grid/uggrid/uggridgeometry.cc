@@ -101,8 +101,7 @@ global(const FieldVector<UGCtype, mydim>& local) const
 
   if (mode_==element_mode)
   {
-    // coorddim*coorddim is an upper bound for the number of vertices
-    UGCtype* cornerCoords[coorddim*coorddim];
+    UGCtype* cornerCoords[corners()];
     UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
     // Actually do the computation
@@ -220,9 +219,8 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
 {
   if (mode_==element_mode)
   {
-    // coorddim*coorddim is an upper bound for the number of vertices
     // compile array of pointers to corner coordinates
-    UGCtype* cornerCoords[coorddim*coorddim];
+    UGCtype* cornerCoords[corners()];
     UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
     // compute the transformation onto the reference element (or vice versa?)
