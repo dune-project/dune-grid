@@ -194,7 +194,7 @@ namespace Dune
     bool initialized = false;
 
     assert( df->discFunc );
-    DiscreteFunctionType & func = *((DiscreteFunctionType *) (df->discFunc));
+    const DiscreteFunctionType & func = *((const DiscreteFunctionType *) (df->discFunc));
 
     typedef typename DiscreteFunctionType :: DiscreteFunctionSpaceType DiscreteFunctionSpaceType ;
     typedef typename DiscreteFunctionSpaceType :: IteratorType IteratorType;
