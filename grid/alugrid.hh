@@ -327,7 +327,7 @@ namespace Dune {
     template<int dim,int dimw>
     struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
     {
-      static const bool v = false;
+      static const bool v = true;
     };
 
   } // end namespace Capabilities
@@ -413,7 +413,7 @@ namespace Dune {
     template<int dim,int dimw>
     struct hasBackupRestoreFacilities< ALUConformGrid<dim,dimw> >
     {
-      static const bool v = false;
+      static const bool v = true;
     };
 
   } // end namespace Capabilities
