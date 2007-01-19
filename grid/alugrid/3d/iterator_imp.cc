@@ -303,7 +303,7 @@ namespace Dune {
   template<class GridImp>
   inline int ALU3dGridIntersectionIterator<GridImp>::twistInNeighbor () const
   {
-    int aluTwist = connector_.innerTwist();
+    int aluTwist = connector_.outerTwist();
     int mappedZero =
       FaceTopo::twist(ElementTopo::dune2aluFaceVertex(numberInNeighbor(), 0),
                       aluTwist);
