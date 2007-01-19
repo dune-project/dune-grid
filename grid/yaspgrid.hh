@@ -335,9 +335,15 @@ namespace Dune {
      */
     ctype integrationElement (const FieldVector<ctype, mydim>& local) const
     {
-      ctype volume=1.0;
-      for (int k=0; k<mydim; k++) volume *= extension[k];
-      return volume;
+      return volume();
+    }
+
+    //! return volume of geometry
+    ctype volume () const
+    {
+      ctype vol=1.0;
+      for (int k=0; k<mydim; k++) vol *= extension[k];
+      return vol;
     }
 
     //! can only be called for mydim=cdim!
