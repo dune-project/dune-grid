@@ -781,7 +781,7 @@ namespace Dune {
     inline static EntityObject *
     getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
     {
-      return ep.template getEntityObject( grid, level, (EntityImp *) 0);
+      return ep.getEntityObject( grid, level, (EntityImp *) 0);
     }
 
     template <class EntityProviderType>
