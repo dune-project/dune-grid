@@ -3,7 +3,7 @@
 #ifndef DUNE_SIZECACHE_HH
 #define DUNE_SIZECACHE_HH
 
-#include <dune/common/array.hh>
+#include <vector>
 
 /** @file
    @author Robert Kloefkorn
