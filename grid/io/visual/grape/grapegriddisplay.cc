@@ -645,15 +645,15 @@ namespace Dune
   inline void GrapeGridDisplay<GridType>::
   selectIterators(DUNE_DAT * dune, void * gridPart, setGridPartIterators_t * func) const
   {
+    // if pointer are 0, then no evaluation is done
+    dune->first_child = 0;
+    dune->next_child  = 0;
+
     if(dune->iteratorType == g_LeafIterator)
     {
       dune->first_macro = &IterationMethods<pitype>::fst_leaf;
       dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
       dune->delete_iter = &IterationMethods<pitype>::del_leaf;
-
-      // if pointer are 0, then nor evaluation is done
-      dune->first_child = 0;
-      dune->next_child  = 0;
 
       return ;
     }
@@ -663,9 +663,6 @@ namespace Dune
       dune->first_macro = &IterationMethods<pitype>::first_lev;
       dune->next_macro  = &IterationMethods<pitype>::next_lev;
       dune->delete_iter = &IterationMethods<pitype>::del_level;
-
-      dune->first_child = 0;
-      dune->next_child  = 0;
 
       return ;
     }
@@ -690,10 +687,6 @@ namespace Dune
         std::cerr << "No function for data '" <<name<<"' and therefore no GridPart! Defaulting Iterator to LeafIterator! \n";
         dune->first_macro = &IterationMethods<pitype>::fst_leaf;
         dune->next_macro  = &IterationMethods<pitype>::nxt_leaf;
-
-        // if pointer are 0, then nor evaluation is done
-        dune->first_child = 0;
-        dune->next_child  = 0;
 
         dune->gridPart = 0;
         return ;
