@@ -543,6 +543,8 @@ namespace Dune {
     mutable ALU2dGridMarkerVector leafMarker_;
 
   public:
+    //! return reference to vector telling on which element a face is
+    //! visted for this level
     ALU2dGridMarkerVector & getMarkerVector(int level) const
     {
       assert( level >= 0);
@@ -550,6 +552,8 @@ namespace Dune {
       return marker_[level];
     }
 
+    //! return reference to vector determing on which element a face is
+    //! visited
     ALU2dGridMarkerVector & getLeafMarker() const
     {
       return leafMarker_;
