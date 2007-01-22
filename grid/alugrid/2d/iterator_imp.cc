@@ -1102,7 +1102,6 @@ namespace Dune {
       if((!iter_->done()))
       {
         item_ = &iter_->getitem();
-        //vertex_ = item_->vertex(myFace_);
         vertex_ = item_->getVertex(myFace_);
         this->updateEntityPointer(vertex_, myFace_, level_);
         increment();
@@ -1138,7 +1137,7 @@ namespace Dune {
     EntityPointerType :: operator = (org);
     endIter_ = org.endIter_ ;
     level_   = org.level_;
-    myFace_  = org.face_;
+    myFace_  = org.myFace_;
     item_    = org.item_;
     vertex_  = org.vertex_;
     iter_    = org.iter_;
@@ -1169,7 +1168,6 @@ namespace Dune {
     int elIdx = item_->getIndex();
 
     while (myFace_ < 3) {
-      //vertex_ = item_->vertex(myFace_);
       vertex_ = item_->getVertex(myFace_);
       int idx = vertex_->getIndex();
 
@@ -1194,7 +1192,6 @@ namespace Dune {
 
       myFace_ = 0;
       item_ = &iter->getitem();
-      //vertex_ = item_->vertex(myFace_);
       vertex_ = item_->getVertex(myFace_);
       this->updateEntityPointer(vertex_, myFace_, level_);
       increment();
@@ -1208,7 +1205,6 @@ namespace Dune {
       return ;
     }
     item_ = &iter->getitem();
-    //vertex_ = item_->vertex(myFace_);
     vertex_ = item_->getVertex(myFace_);
     this->updateEntityPointer(vertex_, myFace_, level_);
     ++myFace_;
