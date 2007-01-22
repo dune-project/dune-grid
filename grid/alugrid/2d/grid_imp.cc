@@ -212,23 +212,33 @@ namespace Dune {
   template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld>::calcExtras()
   {
-    // Segmentation faults (!) beim SizeCache
+    ////////////////////////////////////
+    // reset size cache
+    ////////////////////////////////////
     if(sizeCache_) delete sizeCache_;
     bool isSimplex = true;
 
     sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
+    /////////////////////////////////////
 
     // place this before update of level index, because
     // marker vector is used by level index set
     for(int i=0; i<MAXL; ++i) marker_[i].unsetUp2Date();
+    leafMarker_.unsetUp2Date();
 
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++)
+    ///////////////////////////////////////////////
+    // update existing index sets
+    ///////////////////////////////////////////////
+    const int levelSize = levelIndexVec_.size();
+    for(int i=0; i<levelSize; ++i)
     {
       if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
     }
 
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
-    // update id set, i.e. insert new elements
+    ////////////////////////////////////////////////
+
+    // reset marked element counters
     coarsenMarked_ = 0;
     refineMarked_  = 0;
   }
