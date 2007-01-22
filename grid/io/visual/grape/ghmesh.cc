@@ -132,12 +132,11 @@ int switchMethods( GENMESHnD *actHmesh);
 *****************************************************************************/
 inline static void gFreeElement(ELEMENT *el)
 {
-  if(el)
-  {
-    DUNE_DAT * dat = (DUNE_DAT *) el->mesh->user_data;
-    assert(dat);
-    dat->free_stackentry(dat,(void *)el);
-  }
+  assert( el );
+  assert( el->mesh );
+  DUNE_DAT * dat = (DUNE_DAT *) el->mesh->user_data;
+  assert(dat);
+  dat->free_stackentry(dat,(void *)el);
   return ;
 }
 
@@ -269,7 +268,8 @@ inline static HELEMENT * next_macro(HELEMENT * el, MESH_ELEMENT_FLAGS flag)
     return(el) ;
   }
   else
-  { /*printf("next macro: bin draussen flag = %i \n",mflag);*/
+  {
+    /*printf("next macro: bin draussen flag = %i \n",mflag);*/
     gFreeElement((ELEMENT *)el) ;
     return NULL ;
   }
@@ -292,6 +292,8 @@ inline static HELEMENT * first_child (HELEMENT * ael, MESH_ELEMENT_FLAGS flag)
     {
       HELEMENT * el = (HELEMENT *) dat->get_stackentry(dat);
       assert(el);
+      // set mesh, needed for removal
+      el->mesh = ael->mesh;
 
       DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
       assert(elem);
@@ -330,7 +332,6 @@ inline static HELEMENT * first_child (HELEMENT * ael, MESH_ELEMENT_FLAGS flag)
       }
     }
   }
-
   return NULL ;
 }
 
@@ -353,7 +354,8 @@ inline static HELEMENT * next_child(HELEMENT * el, MESH_ELEMENT_FLAGS flag)
       ((STACKENTRY *)el)->ref_flag++;
       helementUpdate(elem,el);
 
-      if(elem->type == 3) // triangle ????
+      // only implemented on triangles
+      if(elem->type != gr_triangle)
       {
         el->vinh = NULL;
       }
@@ -732,17 +734,6 @@ inline HMESH * get_partition_number (int * partition)
   END_METHOD(hmesh);
 }
 
-/*****************************************************************************
-******************************************************************************
-**                      **
-**  Die Hautroutine zum Initialisieren und Aufrufen eines HMESH"      **
-**                      **
-**  --setupHmesh
-**  --hmesh
-**
-******************************************************************************
-*****************************************************************************/
-
 // if parameter is not 0 ,then mesh is freed (i.e. pushed to stack)
 GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
 {
@@ -773,7 +764,16 @@ GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
   }
 }
 
-
+/*****************************************************************************
+******************************************************************************
+**                      **
+**  Die Hautroutine zum Initialisieren und Aufrufen eines HMESH"      **
+**                      **
+**  --setupHmesh
+**  --hmesh
+**
+******************************************************************************
+*****************************************************************************/
 inline void * setupHmesh(const int noe, const int nov,
                          const int maxlev, DUNE_DAT * dune)
 {
