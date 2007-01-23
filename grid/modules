@@ -18,8 +18,6 @@
       @ingroup GridInterface */
   /** @defgroup GIEntity Entity 
       @ingroup GridInterface */
-  /** @defgroup GIGeometryType GeometryType
-      @ingroup GridInterface */
   /** @defgroup GIGeometry Geometry
       @ingroup GridInterface */
   /** @defgroup GIEntityPointer EntityPointer and Iterators
