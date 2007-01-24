@@ -603,8 +603,6 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FDATA * dfunc)
   return;
 }
 
-/***************************************************************************/
-
 /* generates the function to display the level of an element */
 inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
 {
@@ -1387,6 +1385,78 @@ GENMESH3D * genmesh3d_switch_iterateLeafs_on_off();
 
 static int calledAddMethods = 0;
 
+static int ruler_bnd_id = 0;
+inline static HELEMENT * bnd_next_macro (HELEMENT * prevEl, MESH_ELEMENT_FLAGS flag)
+{
+  HELEMENT * el = next_macro(prevEl,flag);
+  if(el)
+  {
+    DUNE_ELEM* elem = (DUNE_ELEM*) el->user_data;
+    assert( elem );
+    for(int i=0; i<MAX_EL_FACE; ++i)
+      if(ruler_bnd_id == elem->bnd[i]) return el;
+  }
+  else
+  {
+    return 0;
+  }
+  return bnd_next_macro(el,flag);
+}
+
+inline static HELEMENT * bnd_first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
+{
+  HELEMENT * el = first_macro(mesh,flag);
+
+  if(el)
+  {
+    DUNE_ELEM* elem = (DUNE_ELEM*) el->user_data;
+    assert( elem );
+    for(int i=0; i<MAX_EL_FACE; ++i)
+      if(ruler_bnd_id == elem->bnd[i]) return el;
+  }
+  else
+  {
+    return 0;
+  }
+  return bnd_next_macro(el,flag);
+}
+
+inline HMESH* genmesh_boundary_disp ()
+{
+  HMESH * hmesh = (HMESH*) START_METHOD (G_INSTANCE);
+  ALERT (hmesh, "genmesh-boundary-id: No hmesh!", END_METHOD(NULL));
+
+  MANAGER* mgr = (MANAGER *) GRAPE (Manager,"get-stdmgr") ();
+  assert( mgr );
+
+  hmesh->first_macro = bnd_first_macro ;
+  hmesh->next_macro  = bnd_next_macro ;
+
+  static RULER * bndIdRuler = 0;
+
+  if(!bndIdRuler)
+  {
+    bndIdRuler = (RULER *)
+                 new_item(Ruler, I_Name, "boundary id",
+                          I_Instance, hmesh,
+                          I_Var, &ruler_bnd_id, dfINT,
+                          I_ColorRGB,0.42,0.42,0.0,
+                          I_End);
+  }
+
+  // if called first time, add ruler
+  if(GRAPE (mgr,"new-handle") (genmesh_boundary_disp,1))
+  {
+    GRAPE(mgr,"add-inter") (bndIdRuler);
+  }
+
+  GRAPE(hmesh,"display") ();
+
+  hmesh->first_macro = first_macro ;
+  hmesh->next_macro  = next_macro ;
+
+  END_METHOD (hmesh);
+}
 /* add some usefull methods */
 inline static void grape_add_remove_methods(void)
 {
@@ -1408,20 +1478,12 @@ inline static void grape_add_remove_methods(void)
     printf("add-method 'value-min-max' on HMesh%dd!\n",GRAPE_DIM);
 
     GRAPE(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
-#if GRAPE_DIM == 3
-    //printf("Remove Method  'clip' on GenMesh3d!\n");
-    //GRAPE(GenMesh3d,"delete-method")("clip");
-    //printf("Add new Method 'clip' on GenMesh3d!\n");
-    //GRAPE(GenMesh3d,"add-method")("clip", & new_hmesh3d_clip);
-    //printf("\n");
-    GRAPE(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
 
-    printf("Remove Method 'clip-isoline-disp' on GenMesh3d!\n");
-    GRAPE(GenMesh3d,"delete-method") ("clip-isoline-disp");
-    printf("Remove Method 'clip-isoline-select-disp' on GenMesh3d!\n");
-    GRAPE(GenMesh3d,"delete-method") ("clip-isoline-select-disp");
-    printf("\n");
+#if GRAPE_DIM == 3
+    GRAPE(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
+    GRAPE(HMesh,"add-method") ("boundary-id-disp",genmesh_boundary_disp);
 #endif
+
     if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
       GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
 
@@ -1434,4 +1496,6 @@ inline static void grape_add_remove_methods(void)
     calledAddMethods = 1;
   }
 }
+
+
 #endif
