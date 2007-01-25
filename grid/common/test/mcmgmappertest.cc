@@ -12,7 +12,7 @@
 #include <set>
 
 #include <dune/grid/uggrid.hh>
-#include <dune/grid/io/file/amirameshreader.hh>
+#include <dune/doc/grids/ugascplusplus/ugtestgrids.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 using namespace Dune;
@@ -101,14 +101,6 @@ void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
 
     for (; iIt!=iEndIt; ++iIt) {
 
-#if 0
-      // The correctness of the pan-type index for codim 0 has been checked above.
-      // So now we can use it.
-      if (iIt.neighbor()
-          && panTypeIndexSet.template index<0>(*eIt) > panTypeIndexSet.template index<0>(*iIt.outside()))
-        continue;
-#endif
-
       int index = mapper.map(*eIt, iIt.numberInSelf());
 
       //             std::cout << hostIndexSet.template subIndex<1>(*eIt, iIt.numberInSelf())
@@ -151,7 +143,7 @@ int main () try
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
     GridType grid;
-    AmiraMeshReader<GridType>::read(grid, "../../test/ug-testgrid-2.am");
+    make2DTestGrid(grid);
 
     // create hybrid grid
     grid.mark(1,grid.leafbegin<0>());
@@ -176,7 +168,7 @@ int main () try
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
     GridType grid;
-    AmiraMeshReader<GridType>::read(grid, "../../test/ug-testgrid-3.am");
+    make3DTestGrid(grid);
 
     // create hybrid grid
     grid.mark(1,grid.leafbegin<0>());
