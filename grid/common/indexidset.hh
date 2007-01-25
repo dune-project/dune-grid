@@ -341,19 +341,21 @@ namespace Dune
 
      <H3>Overview</H3>
 
-     An id set provides a map \f[ m : E \to \mathbf{N}\f] where
-     \f$E\f$ is a subset of the entities of a grid and \f$\mathbf{N}\f$ is the set of
-     natural numbers (including 0).
+     An id set provides a map \f[ m : E \to \mathbf{I}\f] where
+     \f$E\f$ is a subset of the entities of a grid and \f$\mathbf{I}\f$ is a discrete
+     set of ids.  These ids need not be consecutive nor positive.  However, the C++ type
+     that implements them is required to provide <tt>operator<()</tt> and <tt>operator==()</tt>.
+     Hence they can be used as keys in an STL <tt>map</tt>.
 
      The index map \f$m\f$ has the following properties:
 
      - It is injective, i.e. for any \f$e,e^\prime\in E\f$
      we have \f$e\neq e^\prime \Rightarrow m(e)\neq m(e^\prime)\f$.
-     - It is persistent with respect to grid modification, i.e. if there exits an entity \f$e\f$ with
+     - It is persistent with respect to grid modification, i.e. if there exists an entity \f$e\f$ with
      id \f$i\f$ before grid modification and an entity \f$e^\prime\f$ with id \f$i\f$ after mesh
      modification it is guaranteed that \f$e=e^\prime\f$.
 
-     The set of ids \f$\{i\in\textbf{N}\ |\ \exists e\in E : m(e)=i\}\f$ used by the
+     The set of ids \f$ \mathbf{I} = \{i\ |\ \exists e\in E : m(e)=i\}\f$ used by the
      id set is not necessarily consecutive. In practice the numbers can be quite large, especially
      in a parallel implementation. Therefore the type used to represent the id can be chosen
      by the application.
