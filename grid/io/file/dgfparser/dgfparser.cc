@@ -185,28 +185,36 @@ namespace Dune {
   }
   // Output to Tetgen/Triangle poly-file
   inline void DuneGridFormatParser::writeTetgenPoly(std::string& name,
-                                                    std::string& params) {
-    if (dimw==2) {
-      if (facemap.size()+elements.size()>0) {
+                                                    std::string& params)
+  {
+    if (dimw==2)
+    {
+      if (facemap.size()+elements.size()>0)
+      {
         name += ".poly";
         params = " -Ap ";
       }
-      else {
+      else
+      {
         name += ".node";
         params = "";
       }
       info->print("writting poly file "+name);
       std::ofstream polys(name.c_str());
       writeTetgenPoly(polys);
-    } else {
-      if (facemap.size()>0 && elements.size()==0) {
+    }
+    else
+    {
+      if (facemap.size()>0 && elements.size()==0)
+      {
         name += ".poly";
         info->print("writting poly file "+name);
         std::ofstream polys(name.c_str());
         writeTetgenPoly(polys);
         params = " -p ";
       }
-      else {
+      else
+      {
         {
           std::string tmpname = name;
           tmpname += ".node";
@@ -214,12 +222,15 @@ namespace Dune {
           int nr = 0;
           dverb << "Writing vertices...";
           out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
-          for (int n=0; n<nofvtx; n++) {
+          for (int n=0; n<nofvtx; n++)
+          {
             out << nr++ << "   ";
-            for (int j=0; j<dimw; j++) {
+            for (int j=0; j<dimw; j++)
+            {
               out << vtx[n][j] << " ";
             }
-            for (int j=0; j<nofvtxparams; ++j) {
+            for (int j=0; j<nofvtxparams; ++j)
+            {
               out << vtxParams[n][j] << " ";
             }
             out << std::endl;
@@ -601,7 +612,8 @@ namespace Dune {
     info->block(para);
 
     std::string name = "gridparserfile.polylists.tmp";
-    std::string inname = "gridparserfile.polylists.tmp";
+    const std::string prefixname = name;
+    const std::string inname = "gridparserfile.polylists.tmp";
     std::string params;
 
     if(!para.hasfile()) {
@@ -644,13 +656,8 @@ namespace Dune {
       else
       {
         suffix = "";
-        /*
-           if (facemap.size()>0)
-           suffix = ".poly";
-           else
-           suffix = ".node";
-         */
       }
+
       if (para.minAngle()>0)
         command << "-q" << para.minAngle() << " ";
       if (para.maxArea()>0)
@@ -677,6 +684,7 @@ namespace Dune {
         if (para.haspath())
           command << para.path() << "/";
         command << "tetgen " << params;
+
         if(para.hasfile())
         {
           name = para.filename();
@@ -686,13 +694,8 @@ namespace Dune {
         else
         {
           suffix = "";
-          /*
-             if (facemap.size()>0)
-             suffix = ".poly";
-             else
-             suffix = ".node";
-           */
         }
+
         command << name << suffix;
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
@@ -724,7 +727,7 @@ namespace Dune {
         if (para.haspath())
           command << para.path() << "/";
 
-        command << "tetview-linux " << name << "." << call_nr << ".ele";
+        command << "tetview-linux " << prefixname << "." << call_nr << ".ele";
         dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
