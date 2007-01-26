@@ -165,7 +165,7 @@ namespace Dune {
       \ingroup Quadrature
    */
   template<typename ctype, int dim>
-  struct QuadratureRules {
+  class QuadratureRules {
 
     /** \todo Please doc me! */
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
