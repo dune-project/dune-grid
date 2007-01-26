@@ -1,4 +1,3 @@
 /**
-  @defgroup Grid
-  @defgroup Quadrature
+  @defgroup Grid dune-grid
 */

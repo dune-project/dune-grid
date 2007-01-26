@@ -328,24 +328,6 @@ namespace Dune {
 
    */
 
-  /**
-         @addtogroup GridInterface Abstract Grid Interface
-         @ingroup Grid
-         @brief Interfaces needed when working with a \ref Grid "Dune::Grid"
-   */
-
-  /**
-         @addtogroup GridDevel Grid Developer API
-         @ingroup Grid
-         @brief Interfaces needed to implement a new \ref Grid "Dune::Grid"
-   */
-
-  /**
-         @addtogroup GridImplementations Implementations of the Dune grid interface
-         @ingroup Grid
-         @brief A List of the different Implementations of the Dune Grid Interface.
-   */
-
   /*! \brief Attributes used in the generic overlap model
 
      The values are ordered intentionally in order to be able to

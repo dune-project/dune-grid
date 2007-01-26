@@ -9,8 +9,9 @@
 */
 
   /**
-	 @defgroup GridInterface 
+	 @defgroup GridInterface The Grid Interface
 	 @ingroup Grid
+        @brief Interfaces needed when working with a \ref Grid "Dune::Grid"
   */
   /** @defgroup GIRelatedTypes Enumerations 
       @ingroup GridInterface */
@@ -32,7 +33,7 @@
 	  @ingroup GridInterface */
   
   /**
-     @defgroup GridReferenceElements
+     @defgroup GridReferenceElements Reference Elements
      @ingroup Grid
   */
      
@@ -43,8 +44,9 @@
    */
 
   /**
-	 @defgroup GridImplementations
+	 @defgroup GridImplementations Grid Implementations
 	 @ingroup Grid
+        @brief A list of the different Implementations of the Dune Grid Interface
   */
 
   /**
@@ -58,11 +60,17 @@
   */
   
   /**
-	 @defgroup GridDevel
+	 @defgroup GridDevel Grid Developer API
 	 @ingroup Grid
+        @brief Interfaces needed to implement a new \ref Grid "Dune::Grid"
   */
 
   /**
      @defgroup Refinement Refinement
+     @ingroup Grid
+   */
+
+  /**
+     @defgroup Quadrature Quadrature
      @ingroup Grid
    */
