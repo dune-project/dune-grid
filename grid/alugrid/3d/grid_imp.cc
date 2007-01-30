@@ -1397,8 +1397,8 @@ namespace Dune {
   {
     switch( elType )
     {
-    case tetra  : return "Tetraeder";
-    case hexa   : return "Hexaeder";
+    case tetra  : return "Tetrahedra";
+    case hexa   : return "Hexahedra";
     case mixed  : return "Mixed";
     default     : return "Error";
     }
