@@ -62,7 +62,7 @@ namespace Dune
 
      Here the rule is the following: The %LevelIntersectionIterator
      delivers all intersections
-     with elements on the same level, the %LeafIntersectionIterator
+     with elements on the same level, the %LeafIntersectionIterator delivers
      the intersections with all leaf elements
      if it has been started on a leaf element.  Both iterators also stop at intersections
      with the grid boundary.
