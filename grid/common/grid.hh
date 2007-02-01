@@ -328,7 +328,7 @@ namespace Dune {
 
    */
 
-  /*! \brief Attributes used in the generic overlap model
+  /** \brief Attributes used in the generic overlap model
 
      The values are ordered intentionally in order to be able to
      define ranges of partition types.
@@ -338,12 +338,12 @@ namespace Dune {
   enum PartitionType {
     InteriorEntity=0,     //!< all interior entities
     BorderEntity=1  ,     //!< on boundary between interior and overlap
-    OverlapEntity=2 ,     //!< all entites lying in the overlap zone
+    OverlapEntity=2 ,     //!< all entities lying in the overlap zone
     FrontEntity=3  ,      //!< on boundary between overlap and ghost
     GhostEntity=4         //!< ghost entities
   };
 
-  /*! Provide names for the partition types
+  /** \brief Provide names for the partition types
      @ingroup GIRelatedTypes
    */
   inline std::string PartitionName(PartitionType type)
@@ -364,7 +364,7 @@ namespace Dune {
     }
   }
 
-  /*! Parameter to be used for the communication functions
+  /** \brief Parameter to be used for the communication functions
      @ingroup GIRelatedTypes
    */
   enum InterfaceType {
@@ -375,7 +375,7 @@ namespace Dune {
     All_All_Interface=4                            //!< send all and receive all entities
   };
 
-  /*! Parameter to be used for the parallel level iterators
+  /** \brief Parameter to be used for the parallel level- and leaf iterators
      @ingroup GIRelatedTypes
    */
   enum PartitionIteratorType {
@@ -388,7 +388,7 @@ namespace Dune {
   };
 
 
-  /*! Define a type for communication direction parameter
+  /** \brief Define a type for communication direction parameter
      @ingroup GIRelatedTypes
    */
   enum CommunicationDirection {
@@ -400,8 +400,7 @@ namespace Dune {
   // G R I D E R R O R
   //************************************************************************
 
-  /*!
-     exceptions in Dune grid modules.
+  /** \brief Base class for exceptions in Dune grid modules.
    */
 
   class GridError : public Exception {};
