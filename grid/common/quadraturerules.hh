@@ -62,7 +62,6 @@ namespace Dune {
 
   /** \brief Defines an \p enum for currently available quadrature rules.
       \ingroup Quadrature
-      \todo We don't we simply use a named enum here?
    */
   namespace QuadratureType {
     enum Enum {
