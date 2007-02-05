@@ -1084,17 +1084,6 @@ void Dune::UGGrid < dim >::createEnd()
   elementTypes_.resize(0);
   elementVertices_.resize(0);
 
-  // /////////////////////////////////////////
-  // set the subdomainIDs
-  // /////////////////////////////////////////
-  typename UG_NS<dim>::Element* theElement;
-  for (theElement=multigrid_->grids[0]->elements[0]; theElement!=NULL; theElement=theElement->ge.succ)
-    UG_NS<dim>::SetSubdomain(theElement, 1);
-
-  // Complete the subdomain structure
-  // From namespace UG?d
-  SetEdgeAndNodeSubdomainFromElements(multigrid_->grids[0]);
-
   // Complete the UG-internal grid data structure
   if (CreateAlgebra(multigrid_) != UG_NS<dim>::GM_OK)
     DUNE_THROW(IOError, "Call of 'UG::D" << dim << "::CreateAlgebra' failed!");

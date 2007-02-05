@@ -580,14 +580,6 @@ namespace Dune {
       return UG::D3::GetMultigrid(name);
     }
 
-    //! \todo Please doc me!
-    static void SetSubdomain(UG_NS<3>::Element* theElement, int id) {
-      using UG::D3::control_entries;
-      using UG::D3::SUBDOMAIN_CE;
-      using UG::UINT;
-      SETSUBDOMAIN(theElement, id);
-    }
-
     static int LBCommand(int argc, const char** argv) {
       /** \todo Can we remove the cast? */
       return UG::D3::LBCommand(argc, (char**)argv);
