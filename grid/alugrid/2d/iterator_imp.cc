@@ -657,8 +657,8 @@ namespace Dune {
 
   //********************************************************************
   //
-  //  -- ALU2dGridLeafIterator
-  //  -- LeafIterator
+  //  --ALU2dGridLeafIterator
+  //  --LeafIterator
   //
   //********************************************************************
 
@@ -670,17 +670,22 @@ namespace Dune {
     endIter_(end),
     level_(-1),
     elem_(0),
-    iter_()
+    iter_(),
+    marker_(grid.getLeafMarker())
   {
     if(!end)
     {
+      // update marker Vector
+      if( (cdim == 2) && (! marker_.up2Date()) ) marker_.update(grid);
+
       iter_ = IteratorType(grid.myGrid());
       iter_->first();
 
       if((!iter_->done()))
       {
         elem_ = &(iter_->getitem());
-        this->updateEntityPointer(elem_, -1, elem_->level());
+        this->updateEntityPointer(elem_, -1,
+                                  GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
       }
     }
     else
@@ -699,6 +704,7 @@ namespace Dune {
       , level_( org.level_ )
       , elem_(org.elem_)
       , iter_ ( org.iter_ )
+      , marker_(org.marker_)
   {}
 
   //! assignment
@@ -712,14 +718,19 @@ namespace Dune {
     level_   =  org.level_;
     elem_    =  org.elem_;
     iter_    =  org.iter_;
+
+    // there is only one reference, so we don't copy
+    assert(&marker_ == &org.marker_);
     return *this;
   }
 
+
   //! prefix increment
   template<int cdim, PartitionIteratorType pitype, class GridImp>
-  inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment () {
-
+  inline void ALU2dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
+  {
     if(endIter_) return ;
+
     IteratorType & iter = iter_;
     iter->next();
 
@@ -730,7 +741,8 @@ namespace Dune {
     }
 
     elem_ = &(iter->getitem());
-    this->updateEntityPointer(elem_, -1, elem_->level());
+    this->updateEntityPointer(elem_, -1,
+                              GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
   }
 
   //********************************************************************

@@ -539,8 +539,11 @@ namespace Dune {
     mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
+  public:
+    typedef ALU2dGridLeafMarkerVector ALU2dGridLeafMarkerVectorType;
+  private:
     // always update this marker!!!
-    mutable ALU2dGridMarkerVector leafMarker_;
+    mutable ALU2dGridLeafMarkerVectorType leafMarker_;
 
   public:
     //! return reference to vector telling on which element a face is
@@ -554,7 +557,7 @@ namespace Dune {
 
     //! return reference to vector determing on which element a face is
     //! visited
-    ALU2dGridMarkerVector & getLeafMarker() const
+    ALU2dGridLeafMarkerVectorType & getLeafMarker() const
     {
       return leafMarker_;
     }
