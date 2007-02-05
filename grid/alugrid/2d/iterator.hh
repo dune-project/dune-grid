@@ -386,6 +386,30 @@ namespace Dune {
 
     typedef ALU2dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
+    typedef typename GridImp :: ALU2dGridLeafMarkerVectorType LeafMarkerVectorType;
+
+    // default impl for elements
+    template <class ElementImp, class MarkerVectorImp, int codim>
+    struct GetLevel
+    {
+      // return level of element
+      static int level(const ElementImp & elem, const MarkerVectorImp& marker)
+      {
+        return elem.level();
+      }
+    };
+
+    // specialization for vertices
+    template <class ElementImp, class MarkerVectorImp>
+    struct GetLevel<ElementImp,MarkerVectorImp,2>
+    {
+      // return level of leaf vertex
+      static int level(const ElementImp & elem, const MarkerVectorImp& marker)
+      {
+        return marker.levelOfVertex(elem.getIndex());
+      }
+    };
+
   public:
     //! type of entity we iterate (interface)
     typedef typename GridImp::template Codim<cdim>::Entity Entity;
@@ -412,6 +436,9 @@ namespace Dune {
     typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
     // Listwalkptr, behaves like a proxy for Leafwalk and Levelwalk Ptrs
     IteratorType iter_;
+
+    // for the codim 2 case
+    LeafMarkerVectorType & marker_;
   }; // end ALU2dGridLeafIterator
 
 
@@ -440,6 +467,8 @@ namespace Dune {
     typedef ALU2dGridEntity<1,dim,GridImp> EntityImp;
 
     typedef ALU2dGridLeafIterator<1, pitype, GridImp> ThisType;
+
+    typedef typename GridImp :: ALU2dGridLeafMarkerVectorType LeafMarkerVectorType;
 
   public:
     //! type of entity we iterate (interface)
@@ -476,7 +505,7 @@ namespace Dune {
     IteratorType iter_;
 
     // for the codim 1 case
-    ALU2dGridMarkerVector & marker_;
+    LeafMarkerVectorType & marker_;
 
   }; // end ALU2dGridLeafIterator
 
