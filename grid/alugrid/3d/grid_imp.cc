@@ -880,11 +880,14 @@ namespace Dune {
     {
       // some exchanges on ALUGrid side
       myGrid().duneExchangeDynamicState();
-      // build new Id Set.
-      if(globalIdSet_) globalIdSet_->updateIdSet();
+
       // calculate new maxlevel
       // reset size and things
       updateStatus();
+
+      // build new Id Set. Only do that after updateStatus, because here
+      // the item lists are needed
+      if(globalIdSet_) globalIdSet_->updateIdSet();
     }
 
     assert( checkMaxLevel() );
@@ -928,12 +931,14 @@ namespace Dune {
     {
       // exchange some data for internal useage
       myGrid().duneExchangeDynamicState();
-      // build new id set
-      if(globalIdSet_) globalIdSet_->updateIdSet();
 
       // calculate new maxlevel
       // reset size and things
       updateStatus();
+
+      // build new Id Set. Only do that after updateStatus, because here
+      // the item lists are needed
+      if(globalIdSet_) globalIdSet_->updateIdSet();
 
       // compress data , wrapper for dof manager
       gs.dofCompress();
@@ -1009,7 +1014,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   template <class DataHandleImp, class DataType>
   inline void ALU3dGrid<dim, dimworld, elType>::
-  communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
+               InterfaceType iftype, CommunicationDirection dir) const
   {
     // if only one process, no communication needed
     if( comm().size() <= 1 ) return ;
