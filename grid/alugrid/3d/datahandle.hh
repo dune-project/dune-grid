@@ -238,6 +238,8 @@ namespace ALUGridSpace {
   class GatherScatterLeafData
     : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
   {
+    enum { dim = GridType :: dimension };
+
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
     typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
     typedef typename EntityType :: ImplementationType RealEntityType;
@@ -262,8 +264,16 @@ namespace ALUGridSpace {
     GatherScatterLeafData(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
       : BaseType(grid,en,realEntity,dc)
     {
-      // if leaf vertices are communicated, make sure that vertex list is up2date
-      if(codim == 3) grid.getLeafVertexList();
+      // if leaf vertices are communicated,
+      // make sure that vertex list is up2date
+      // but only do this, if vertex data contained,
+      // because the list update is expensive
+      if( (codim == 3) && dc.contains(dim,codim) )
+      {
+        // call of this method forces update of list,
+        // if list is not up to date
+        grid.getLeafVertexList();
+      }
     }
 
     // returns true, if element is contained in set of comm interface
