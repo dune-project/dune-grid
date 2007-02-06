@@ -1607,30 +1607,53 @@ namespace Dune {
   namespace Capabilities
   {
 
+    /** \struct isParallel
+       \ingroup SGrid
+     */
+
+    /** \struct hasBackupRestoreFacilities
+       \ingroup SGrid
+     */
+
+    /** \brief SGrid has entities for all codimension
+       \ingroup SGrid
+     */
     template<int dim, int dimw, int cdim>
     struct hasEntity< SGrid<dim,dimw>, cdim>
     {
       static const bool v = true;
     };
 
+    /** \brief SGrid is levelwise conforming
+       \ingroup SGrid
+     */
     template<int dim, int dimw>
     struct isLevelwiseConforming< SGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief SGrid is leafwise conforming
+       \ingroup SGrid
+     */
     template<int dim, int dimw>
     struct isLeafwiseConforming< SGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief SGrid does not support unstructured grids
+       \ingroup SGrid
+     */
     template<int dim, int dimw>
     struct IsUnstructured< SGrid<dim,dimw> >
     {
       static const bool v = false;
     };
 
+    /** \brief SGrid does not support hanging nodes
+       \ingroup SGrid
+     */
     template<int dim, int dimw>
     struct hasHangingNodes< SGrid<dim,dimw> >
     {
