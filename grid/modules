@@ -31,6 +31,8 @@
       @ingroup GridInterface */
   /** @defgroup GIMiscellaneous Miscellaneous
 	  @ingroup GridInterface */
+  /** @defgroup GICapabilities Capabilities
+	  @ingroup GridInterface */
   
   /**
      @defgroup GridReferenceElements Reference Elements
@@ -48,6 +50,27 @@
 	 @ingroup Grid
         @brief A list of the different Implementations of the Dune Grid Interface
   */
+  
+	/** @defgroup ALUCubeGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup ALUSimplexGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup OneDGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup SGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup UGGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup YaspGrid
+		@ingroup GridImplementations */
+
+	/** @defgroup AlbertaGrid
+		@ingroup GridImplementations */
 
   /**
      @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
