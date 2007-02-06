@@ -582,14 +582,6 @@ namespace Dune {
      */
     bool someElementHasBeenMarkedForRefinement_;
 
-    /** \brief The arguments to UG's newformat command
-     *
-     * They need to be allocated dynamically, because UG writes into
-     * some of them.  That causes the code to crash if it has been
-     * compiled with gcc.
-     */
-    char* newformatArgs[4];
-
     /** \brief The size of UG's internal heap in megabytes
      *
      * It is handed over to UG for each new multigrid.  I don't know
