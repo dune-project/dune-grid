@@ -175,6 +175,8 @@ namespace Dune {
 
     typedef ElementTopologyMapping<hexa> ElementTopo;
     typedef FaceTopologyMapping<hexa> FaceTopo;
+
+    enum { corners_ = Power_m_p<2,mydim>::power };
   public:
     typedef FieldMatrix<alu3d_ctype, 4, 3> FaceCoordinatesType;
 
@@ -239,18 +241,27 @@ namespace Dune {
     void print (std::ostream& ss) const;
 
   private:
+    // copies the values of point to the values of coord
+    inline void copyCoordVec (const alu3d_ctype (& point)[cdim] ,
+                              FieldVector<alu3d_ctype,cdim> & coord ) const;
+
     // create triMap from coordinates , deletes old mapping
-    void buildMapping();
+    void buildMapping() const;
+
+    // create biMap_ from coordinates , deletes old mapping
+    void buildBilinearMapping() const;
 
     //! the vertex coordinates
-    mutable FieldMatrix<alu3d_ctype, Power_m_p<2,mydim>::power, cdim> coord_;
+    mutable FieldMatrix<alu3d_ctype, corners_ , cdim> coord_;
+
     mutable FieldVector<alu3d_ctype, mydim> tmp1_;
     mutable FieldVector<alu3d_ctype, cdim> tmp2_;
 
     const GeometryType myGeomType_;
 
-    TrilinearMapping* triMap_;
-    BilinearSurfaceMapping* biMap_;
+    mutable TrilinearMapping* triMap_;
+    mutable BilinearSurfaceMapping biMap_;
+    mutable bool buildBiMap_;
 
     mutable FieldMatrix<alu3d_ctype, mydim, mydim> jInv_;
 

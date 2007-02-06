@@ -484,6 +484,7 @@ namespace Dune {
     myGeomType_(GeometryType::cube,mydim),
     triMap_(0),
     biMap_(0),
+    buildBiMap_(false),
     localBaryCenter_(0.5)
   {}
 
@@ -494,6 +495,7 @@ namespace Dune {
     myGeomType_(GeometryType::cube,3),
     triMap_(0),
     biMap_(0),
+    buildBiMap_(false),
     localBaryCenter_(0.5),
     volume_(-1.0)
   {}
@@ -505,6 +507,7 @@ namespace Dune {
       myGeomType_(GeometryType::cube,2),
       triMap_(0),
       biMap_(0),
+      buildBiMap_(false),
       localBaryCenter_(0.5)
   {}
 
@@ -515,6 +518,7 @@ namespace Dune {
       myGeomType_(GeometryType::cube,2),
       triMap_(0),
       biMap_(0),
+      buildBiMap_(false),
       localBaryCenter_(0.5)
   {}
 
@@ -523,13 +527,12 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   ~ALU3dGridGeometry() {
     delete triMap_;
-    delete biMap_;
   }
 
   template <int mydim, int cdim>
   inline int
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::corners() const {
-    return Power_m_p<2,mydim>::power;
+    return corners_;
   }
 
   template <int mydim, int cdim>
@@ -544,6 +547,7 @@ namespace Dune {
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   global (const FieldVector<alu3d_ctype, 3>& local) const {
+    buildMapping();
     assert(triMap_);
     triMap_->map2world(local, tmp2_);
     return tmp2_;
@@ -553,15 +557,17 @@ namespace Dune {
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   global (const FieldVector<alu3d_ctype, 2>& local) const {
-    assert(biMap_);
-    biMap_->map2world(local, tmp2_);
+    buildBilinearMapping();
+    biMap_.map2world(local, tmp2_);
     return tmp2_;
   }
 
   template <>
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  local (const FieldVector<alu3d_ctype, 3>& global) const {
+  local (const FieldVector<alu3d_ctype, 3>& global) const
+  {
+    buildMapping();
     assert(triMap_);
     triMap_->world2map(global, tmp2_);
     return tmp2_;
@@ -571,8 +577,8 @@ namespace Dune {
   inline FieldVector<alu3d_ctype, 2>
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   local (const FieldVector<alu3d_ctype, 3>& global) const {
-    assert( biMap_ );
-    biMap_->world2map(global, tmp1_);
+    buildBilinearMapping();
+    biMap_.world2map(global, tmp1_);
     return tmp1_;
   }
 
@@ -592,6 +598,7 @@ namespace Dune {
   inline alu3d_ctype
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   integrationElement (const FieldVector<alu3d_ctype, 3>& local) const {
+    buildMapping();
     assert(triMap_);
     return triMap_->det(local);
   }
@@ -599,9 +606,10 @@ namespace Dune {
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
-  integrationElement (const FieldVector<alu3d_ctype, 2>& local) const {
-    assert(biMap_);
-    biMap_->normal(local, tmp2_);
+  integrationElement (const FieldVector<alu3d_ctype, 2>& local) const
+  {
+    buildBilinearMapping();
+    biMap_.normal(local, tmp2_);
     return tmp2_.two_norm();
   }
 
@@ -632,7 +640,9 @@ namespace Dune {
   template <>
   inline const FieldMatrix<alu3d_ctype, 3, 3>&
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const {
+  jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
+  {
+    buildMapping();
     assert(triMap_);
     jInv_ = triMap_->jacobianInverse(local);
     return jInv_;
@@ -641,8 +651,9 @@ namespace Dune {
   template <>
   inline const FieldMatrix<alu3d_ctype, 2, 2>&
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
-  jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const {
-    assert( biMap_ );
+  jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
+  {
+    buildBilinearMapping();
 #ifndef NDEBUG
     static bool called = false;
     if(!called)
@@ -651,7 +662,7 @@ namespace Dune {
       called = true;
     }
 #endif
-    jInv_ = biMap_->jacobianInverse(local);
+    jInv_ = biMap_.jacobianInverse(local);
     return jInv_;
   }
 
@@ -668,17 +679,18 @@ namespace Dune {
     ss << "} \n";
   }
 
-
   template <int mydim, int cdim>
   inline void
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  buildMapping()
+  buildMapping() const
   {
     assert( mydim == 3 );
     assert( cdim  == 3 );
-    if(triMap_) delete triMap_;
-    triMap_ = new TrilinearMapping(coord_[0], coord_[1], coord_[2], coord_[3],
-                                   coord_[4], coord_[5], coord_[6], coord_[7]);
+    if(!triMap_)
+    {
+      triMap_ = new TrilinearMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
+                                     (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
+    }
   }
 
   // built Geometry
@@ -697,11 +709,28 @@ namespace Dune {
         if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
     }
 
+    if(triMap_)
+    {
+      delete triMap_;
+      triMap_ = 0;
+    }
     // delete old mapping and creats new mapping
     buildMapping();
     return true;
   }
 
+  template<int mydim, int cdim>
+  inline void ALU3dGridGeometry<mydim,cdim, const ALU3dGrid<3, 3, hexa> > ::
+  copyCoordVec(const alu3d_ctype (& point)[cdim] ,
+               FieldVector<alu3d_ctype,cdim> & coord ) const
+  {
+    assert( cdim == 3 );
+    coord[0] = point[0];
+    coord[1] = point[1];
+    coord[2] = point[2];
+  }
+
+  //--hexaBuildGeom
   template <>
   inline bool
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
@@ -710,19 +739,42 @@ namespace Dune {
     enum { dimworld = 3 };
 
     volume_ = item.volume();
-    for (int i = 0; i < corners(); ++i) {
-      const double (&p)[3] =
-        item.myvertex(ElementTopo::dune2aluVertex(i))->Point();
 
-      coord_[i][0] = p[0];
-      coord_[i][1] = p[1];
-      coord_[i][2] = p[2];
+    copyCoordVec(item.myvertex(0)->Point(), coord_[0]);
+    copyCoordVec(item.myvertex(1)->Point(), coord_[1]);
+    copyCoordVec(item.myvertex(3)->Point(), coord_[2]);
+    copyCoordVec(item.myvertex(2)->Point(), coord_[3]);
+
+    copyCoordVec(item.myvertex(4)->Point(), coord_[4]);
+    copyCoordVec(item.myvertex(5)->Point(), coord_[5]);
+    copyCoordVec(item.myvertex(6)->Point(), coord_[7]);
+    copyCoordVec(item.myvertex(7)->Point(), coord_[6]);
+
+    if(triMap_)
+    {
+      delete triMap_;
+      triMap_ = 0;
     }
 
     // delete old mapping and creats new mapping
-    buildMapping();
+    //buildMapping();
     return true;
   }
+
+  template <int mydim, int cdim>
+  inline void
+  ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+  buildBilinearMapping() const
+  {
+    assert( mydim == 2 );
+    assert( cdim  == 3 );
+    if(!buildBiMap_)
+    {
+      biMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3]);
+      buildBiMap_ = true;
+    }
+  }
+
 
   template <>
   inline bool
@@ -731,6 +783,7 @@ namespace Dune {
     enum { dim = 2 };
     enum { dimworld = 3 };
 
+    buildBiMap_ = false;
     const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
     //assert( duneFace >= 0 && duneFace < 6 );
@@ -750,10 +803,6 @@ namespace Dune {
       }
     }
 
-    delete biMap_;
-    biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
-                                        coord_[2], coord_[3]);
-
     return true;
   }
 
@@ -768,17 +817,15 @@ namespace Dune {
       coord_[i] = coords[i];
     }
 
-    delete biMap_;
-    biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
-                                        coord_[2], coord_[3]);
-
+    buildBiMap_ = false;
     return true;
   }
 
   template <> // for edges
   inline bool
   ALU3dGridGeometry<1,3, const ALU3dGrid<3, 3, hexa> >::
-  buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int) {
+  buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int)
+  {
     enum { dim = 1 };
     enum { dimworld = 3 };
 
@@ -789,14 +836,14 @@ namespace Dune {
         coord_[i][j] = p[j];
       }
     }
-
     return true;
   }
 
   template <> // for Vertices ,i.e. Points
   inline bool
   ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,hexa> >::
-  buildGeom(const ALU3DSPACE VertexType & item, int twist, int) {
+  buildGeom(const ALU3DSPACE VertexType & item, int twist, int)
+  {
     enum { dim = 0 };
     enum { dimworld = 3};
 
