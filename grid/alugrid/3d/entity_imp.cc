@@ -177,7 +177,7 @@ namespace Dune {
     assert(cd == dim); // this method only exists for codim == dim
     if( !father_ )
     {
-      dwarn << "No Father for given Entity! \n";
+      DUNE_THROW(GridError,"No father in ALU3dGridEntity::ownersFather()!");
       return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_));
     }
     return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_));
