@@ -386,6 +386,9 @@ namespace Dune {
     {
       return HSetChooser<GridImp,hasHierarchicIndexSet>::hierarchicIndexSet(grid);
     }
+
+    //! return true if index set can be used for adapitve calculations
+    static bool adaptive () { return hasHierarchicIndexSet; }
   };
 
   //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid
@@ -395,7 +398,6 @@ namespace Dune {
   {
     // my type, to be revised
     enum { myType = 0 };
-
 
     //! type of hset selector
     typedef HierarchicIndexSetSelector<GridType> SelectorType;
@@ -410,7 +412,8 @@ namespace Dune {
 
     //! constructor
     WrappedHierarchicIndexSet ( const GridType & grid , const int level =-1 )
-      : IndexSetWrapper< HSetType > ( SelectorType :: hierarchicIndexSet(grid) ,true) {}
+      : IndexSetWrapper< HSetType > ( SelectorType :: hierarchicIndexSet(grid)
+                                      , SelectorType :: adaptive() ) {}
 
     //! return type (for Grape In/Output)
     static int type() { return myType; }
