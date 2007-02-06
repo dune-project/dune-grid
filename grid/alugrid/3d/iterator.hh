@@ -245,8 +245,7 @@ namespace Dune {
     //! current element from which we started the intersection iterator
     const IMPLElementType* item_;
 
-    //mutable int nFaces_;
-    //mutable int walkLevel_;
+    mutable int innerLevel_;
     mutable int index_;
 
     mutable bool generatedGlobalGeometry_;
