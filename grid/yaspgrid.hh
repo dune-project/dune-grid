@@ -3017,42 +3017,71 @@ namespace Dune {
   namespace Capabilities
   {
 
+    /** \struct hasEntity
+       \ingroup YaspGrid
+     */
+
+    /** \struct hasBackupRestoreFacilities
+       \ingroup YaspGrid
+     */
+
+    /** \brief YaspGrid has codim=0 entities (elements)
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct hasEntity< YaspGrid<dim,dimw>, 0 >
     {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid has codim=dim entities (vertices)
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct hasEntity< YaspGrid<dim,dimw>, dim >
     {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid is parallel
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct isParallel< YaspGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid is levelwise conforming
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct isLevelwiseConforming< YaspGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid is leafwise conforming
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct isLeafwiseConforming< YaspGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid does not support unstructured grids
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct IsUnstructured< YaspGrid<dim,dimw> >
     {
       static const bool v = false;
     };
 
+    /** \brief YaspGrid does not support hanging nodes
+       \ingroup YaspGrid
+     */
     template<int dim, int dimw>
     struct hasHangingNodes< YaspGrid<dim,dimw> >
     {
