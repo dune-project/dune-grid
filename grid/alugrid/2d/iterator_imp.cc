@@ -258,18 +258,14 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
-  ALU2dGridIntersectionBase<GridImp> ::intersectionGlobal () const {
+  ALU2dGridIntersectionBase<GridImp> ::intersectionGlobal () const
+  {
     assert(this->current.item_ != 0);
 
-    if (nrOfHangingNodes_) {
-      if (this->current.isNotConform_)
-        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
-      else
-        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
-    }
-    else {
+    if (this->current.isNotConform_)
+      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
+    else
       this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
-    }
     return intersectionGlobal_;
   }
 
