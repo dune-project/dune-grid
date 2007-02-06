@@ -1972,29 +1972,54 @@ namespace Dune
 
   namespace Capabilities
   {
+
+    /** \struct isParallel
+       \ingroup AlbertaGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup AlbertaGrid
+     */
+
+    /** \brief AlbertaGrid has entities for all codimension
+       \ingroup AlbertaGrid
+     */
     template<int dim, int dimw, int cdim>
     struct hasEntity<AlbertaGrid<dim,dimw>, cdim >
     {
       static const bool v = true;
     };
 
+    /** \brief AlbertaGrid is not levelwise conforming (since it uses bisection)
+       \ingroup AlbertaGrid
+     */
     template<int dim, int dimw>
     struct isLevelwiseConforming< AlbertaGrid<dim,dimw> >
     {
       static const bool v = false;
     };
 
+    /** \brief AlbertaGrid is leafwise conforming
+       \ingroup AlbertaGrid
+     */
     template<int dim, int dimw>
     struct isLeafwiseConforming< AlbertaGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief AlbertaGrid does not support hanging nodes
+       \ingroup AlbertaGrid
+     */
     template<int dim, int dimw>
     struct hasHangingNodes< AlbertaGrid<dim,dimw> >
     {
       static const bool v = false;
     };
+
+    /** \brief AlbertaGrid has backup and restore facilities
+       \ingroup AlbertaGrid
+     */
     template<int dim, int dimw>
     struct hasBackupRestoreFacilities< AlbertaGrid<dim,dimw> >
     {
