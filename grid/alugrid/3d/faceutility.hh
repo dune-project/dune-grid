@@ -26,7 +26,7 @@ namespace Dune {
     //- private typedefs
     typedef typename ALU3dImplTraits<type>::HasFaceType HasFaceType;
   public:
-    enum ConformanceState {CONFORMING, REFINED_INNER, REFINED_OUTER};
+    enum ConformanceState {CONFORMING, REFINED_INNER, REFINED_OUTER, UNDEFINED };
     //- typedefs
     typedef typename ALU3dImplTraits<type>::GEOFaceType GEOFaceType;
     typedef typename ALU3dImplTraits<type>::GEOElementType GEOElementType;
@@ -41,7 +41,7 @@ namespace Dune {
   public:
     //! constructor creating empty face info
     ALU3dGridFaceInfo();
-    void updateFaceInfo(const GEOFaceType& face, int innerTwist);
+    void updateFaceInfo(const GEOFaceType& face, int innerLevel, int innerTwist);
 
     //- constructors and destructors
     //! Construct a connector from a face and the twist seen from the inner
@@ -89,6 +89,9 @@ namespace Dune {
     ConformanceState conformanceState() const;
 
   private:
+    //! Description of conformance on the face
+    ConformanceState getConformanceState(const int innerLevel) const;
+
     //- forbidden methods
     const ALU3dGridFaceInfo<type>&
     operator=(const ALU3dGridFaceInfo<type>& orig);
@@ -107,6 +110,8 @@ namespace Dune {
 
     bool outerBoundary_;
     bool ghostBoundary_;
+
+    ConformanceState conformanceState_;
   };
 
   //! Helper class which provides geometric face information for the

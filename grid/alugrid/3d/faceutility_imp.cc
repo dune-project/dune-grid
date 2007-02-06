@@ -16,13 +16,15 @@ namespace Dune {
     innerTwist_(-665),
     outerTwist_(-665),
     outerBoundary_  ( false ),
-    ghostBoundary_  ( false )
+    ghostBoundary_  ( false ),
+    conformanceState_(UNDEFINED)
   {}
 
   // points face from inner element away?
   template <ALU3dGridElementType type>
   inline void
   ALU3dGridFaceInfo<type>::updateFaceInfo(const GEOFaceType& face,
+                                          int innerLevel,
                                           int innerTwist)
   {
     face_ = &face;
@@ -98,6 +100,9 @@ namespace Dune {
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
     }
     assert(innerTwist == innerEntity().twist(innerFaceNumber_));
+
+    // set conformance information
+    conformanceState_ = getConformanceState(innerLevel);
   }
 
   // points face from inner element away?
@@ -122,7 +127,9 @@ namespace Dune {
     innerTwist_(orig.innerTwist_),
     outerTwist_(orig.outerTwist_),
     outerBoundary_(orig.outerBoundary_),
-    ghostBoundary_(orig.ghostBoundary_) {}
+    ghostBoundary_(orig.ghostBoundary_),
+    conformanceState_(orig.conformanceState_)
+  {}
 
   template <ALU3dGridElementType type>
   inline bool ALU3dGridFaceInfo<type>::outerBoundary() const {
@@ -194,19 +201,30 @@ namespace Dune {
 
   template <ALU3dGridElementType type>
   typename ALU3dGridFaceInfo<type>::ConformanceState
-  inline ALU3dGridFaceInfo<type>::conformanceState() const {
+  inline ALU3dGridFaceInfo<type>::conformanceState() const
+  {
+    assert( conformanceState_ != UNDEFINED );
+    return conformanceState_;
+  }
+
+  // calculate conformance state
+  template <ALU3dGridElementType type>
+  typename ALU3dGridFaceInfo<type>::ConformanceState
+  inline ALU3dGridFaceInfo<type>::getConformanceState(const int innerLevel) const
+  {
     ConformanceState result = CONFORMING;
 
     // A boundary is always unrefined
     int levelDifference = 0 ;
     if ( boundary() )
-      levelDifference = innerEntity().level() - boundaryFace().level();
+      levelDifference = innerLevel - boundaryFace().level();
     else
-      levelDifference = innerEntity().level() - outerEntity().level();
+      levelDifference = innerLevel - outerEntity().level();
 
     if (levelDifference < 0) {
       result = REFINED_OUTER;
-    } else if (levelDifference > 0) {
+    }
+    else if (levelDifference > 0) {
       result = REFINED_INNER;
     }
 
@@ -238,8 +256,8 @@ namespace Dune {
   ALU3dGridGeometricFaceInfoBase<type>::
   resetFaceGeom()
   {
-    generatedGlobal_      = false;
-    generatedLocal_       = false;
+    generatedGlobal_ = false;
+    generatedLocal_  = false;
   }
 
   template <ALU3dGridElementType type>
