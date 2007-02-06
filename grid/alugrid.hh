@@ -117,30 +117,52 @@ namespace Dune {
   };
 
   namespace Capabilities {
+    /** \struct isLeafwiseConforming
+       \ingroup ALUCubeGrid
+     */
 
+    /** \struct IsUnstructured
+       \ingroup ALUCubeGrid
+     */
+
+    /** \brief ALUCubeGrid has entities for all codimension
+       \ingroup ALUCubeGrid
+     */
     template<int dim,int dimw, int cdim >
     struct hasEntity<Dune::ALUCubeGrid<dim, dimw>, cdim >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUCubeGrid is parallel
+       \ingroup ALUCubeGrid
+     */
     template<int dim,int dimw>
     struct isParallel<const ALUCubeGrid<dim, dimw> > {
       static const bool v = true;
     };
 
+    /** \brief ALUCubeGrid has conforming level grids
+       \ingroup ALUCubeGrid
+     */
     template<int dim,int dimw>
     struct isLevelwiseConforming< ALUCubeGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUCubeGrid has supports hanging nodes
+       \ingroup ALUCubeGrid
+     */
     template<int dim,int dimw>
     struct hasHangingNodes< ALUCubeGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUCubeGrid has backup and restore facilities
+       \ingroup ALUCubeGrid
+     */
     template<int dim,int dimw>
     struct hasBackupRestoreFacilities< ALUCubeGrid<dim,dimw> >
     {
@@ -300,30 +322,52 @@ namespace Dune {
   };
 
   namespace Capabilities {
+    /** \struct isLeafwiseConforming
+       \ingroup ALUSimplexGrid
+     */
 
+    /** \struct IsUnstructured
+       \ingroup ALUSimplexGrid
+     */
+
+    /** \brief ALUSimplexGrid has entities for all codimension
+       \ingroup ALUSimplexGrid
+     */
     template<int dim,int dimw, int cdim >
     struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUSimplexGrid is parallel
+       \ingroup ALUSimplexGrid
+     */
     template<int dim,int dimw>
     struct isParallel<const ALUSimplexGrid<dim, dimw> > {
       static const bool v = false;
     };
 
+    /** \brief ALUSimplexGrid has conforming level grids
+       \ingroup ALUSimplexGrid
+     */
     template<int dim,int dimw>
     struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUSimplexGrid has supports hanging nodes
+       \ingroup ALUSimplexGrid
+     */
     template<int dim,int dimw>
     struct hasHangingNodes< ALUSimplexGrid<dim,dimw> >
     {
       static const bool v = true;
     };
 
+    /** \brief ALUSimplexGrid has backup and restore facilities
+       \ingroup ALUSimplexGrid
+     */
     template<int dim,int dimw>
     struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
     {
