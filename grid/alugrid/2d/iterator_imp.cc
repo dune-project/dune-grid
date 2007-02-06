@@ -206,27 +206,19 @@ namespace Dune {
 
   template<class GridImp>
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
-  ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const {
+  ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
+  {
     assert(this->current.item_ != 0);
-    double dummy[2];
+    typedef double (&normal_t)[2];
 
-    if (nrOfHangingNodes_) {
-      if(neighbor())
-      {
-        if(this->current.isNotConform_)
-        {
-          this->current.neigh_->outernormal(numberInNeighbor(), dummy);
-          outerNormal_[0] = -dummy[0];
-          outerNormal_[1] = -dummy[1];
-          return outerNormal_;
-        }
-      }
+    if (this->current.isNotConform_ )
+    {
+      this->current.neigh_->outernormal(numberInNeighbor(), ((normal_t) (&outerNormal_)[0]) );
+      outerNormal_ *= -1.0;
+      return outerNormal_;
     }
-    else {
-      this->current.item_->outernormal(this->current.index_, dummy);
-      outerNormal_[0] = dummy[0];
-      outerNormal_[1] = dummy[1];
-    }
+
+    this->current.item_->outernormal(this->current.index_,  ((normal_t) (&outerNormal_)[0]) );
     return outerNormal_;
   }
 
@@ -373,6 +365,7 @@ namespace Dune {
         this->current.isNotConform_ = true;
       else
         this->current.isNotConform_ = false;
+
       addNeighboursToStack();
       if (neighbourStack_.empty()) {
         this->current.neigh_ = 0;
