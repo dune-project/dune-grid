@@ -477,31 +477,53 @@ namespace Dune {
 
   namespace Capabilities
   {
+    /** \struct hasBackupRestoreFacilities
+       \ingroup OneDGrid
+     */
 
+    /** \struct IsUnstructured
+       \ingroup OneDGrid
+     */
+
+    /** \brief OneDGrid has entities for all codimension
+       \ingroup OneDGrid
+     */
     template<int cdim>
     struct hasEntity< OneDGrid, cdim >
     {
       static const bool v = true;
     };
 
+    /** \brief OneDGrid is not parallel
+       \ingroup OneDGrid
+     */
     template<>
     struct isParallel< OneDGrid >
     {
       static const bool v = false;
     };
 
+    /** \brief OneDGrid is levelwise conforming
+       \ingroup OneDGrid
+     */
     template<>
     struct isLevelwiseConforming< OneDGrid >
     {
       static const bool v = true;
     };
 
+    /** \brief OneDGrid is leafwise conforming
+       \ingroup OneDGrid
+     */
     template<>
     struct isLeafwiseConforming< OneDGrid >
     {
       static const bool v = true;
     };
 
+    /** \brief OneDGrid does not support hanging nodes
+       \ingroup OneDGrid
+     */
     template<>
     struct hasHangingNodes< OneDGrid >
     {
