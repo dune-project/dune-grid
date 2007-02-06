@@ -13,44 +13,64 @@ namespace Dune
   /** \brief Contains all capabilities classes */
   namespace Capabilities
   {
-    /** \brief Specialize with 'true' for all codims that a grid implements entities for. */
+
+    /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid, int codim>
     struct hasEntity
     {
       static const bool v = false;
     };
 
-    /** \todo Please doc me! */
+    /** \brief Specialize with 'true' if implementation supports parallelism. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid>
     struct isParallel
     {
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if implementation guarantees conforming level grids. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid>
     struct isLevelwiseConforming
     {
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if implementation guarantees a conforming leaf grid. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid>
     struct isLeafwiseConforming
     {
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if implementation provides grids with hanging nodes. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid>
     struct hasHangingNodes
     {
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if implementation provides backup and restore facilities. (default=false)
+       \ingroup GICapabilities
+     */
     template<class Grid>
     struct hasBackupRestoreFacilities
     {
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if implementation provides unstructered grids. (default=true)
+       \ingroup GICapabilities
+     */
     template <class Grid>
     struct IsUnstructured {
       static const bool v = true;
