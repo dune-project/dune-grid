@@ -89,8 +89,18 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
 
   typedef typename GridType::ctype ctype;
 
+  FieldVector<double,GridType::dimension> sumNormal(0.0);
+
   for (;iIt!=iEndIt; ++iIt)
   {
+    // add normal to sum of normals
+    {
+      const int interDim = IntersectionIterator::LocalGeometry::mydimension;
+      const QuadratureRule<double, interDim>& quad
+        = QuadratureRules<double, interDim>::rule(iIt.intersectionSelfLocal().type(), 0);
+      sumNormal += iIt.integrationOuterNormal(quad[0].position());
+    }
+
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
 
@@ -182,7 +192,8 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
       const QuadratureRule<double, interDim>& quad
         = QuadratureRules<double, interDim>::rule(intersectionNeighborLocal.type(), 2);
 
-      for (size_t i=0; i<quad.size(); i++) {
+      for (size_t i=0; i<quad.size(); i++)
+      {
 
         FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
         FieldVector<double,GridType::dimension> localPos  = iIt.outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
@@ -196,6 +207,13 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
 
   }
 
+  {
+    double sum = sumNormal.two_norm();
+    if( sumNormal.two_norm() > 1e-8 )
+    {
+      DUNE_THROW(GridError,"Sum of integrationOuterNormals is " << sum << " but it should be Zero!");
+    }
+  }
 }
 
 /** \brief Test both IntersectionIterators

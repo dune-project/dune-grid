@@ -129,6 +129,11 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     grid.globalRefine(1);
     gridcheck(grid);
   }
+
+  // check also non-conform grids
+  makeNonConfGrid(grid,0,1);
+  gridcheck(grid);
+
   // check the method geometryInFather()
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
