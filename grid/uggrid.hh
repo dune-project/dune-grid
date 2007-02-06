@@ -594,37 +594,66 @@ namespace Dune {
 
   namespace Capabilities
   {
+    /** \struct hasEntity
+       \ingroup UGGrid
+     */
 
+    /** \struct hasBackupRestoreFacilities
+       \ingroup UGGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup UGGrid
+     */
+
+    /** \brief UGGrid has codim=0 entities (elements)
+       \ingroup UGGrid
+     */
     template<int dim>
     struct hasEntity< UGGrid<dim>, 0>
     {
       static const bool v = true;
     };
 
+    /** \brief UGGrid has codim=dim entities (vertices)
+       \ingroup UGGrid
+     */
     template<int dim>
     struct hasEntity< UGGrid<dim>, dim>
     {
       static const bool v = true;
     };
 
+    /** \brief UGGrid is parallel
+       \ingroup UGGrid
+     */
     template<int dim>
     struct isParallel< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
+    /** \brief UGGrid is levelwise conforming
+       \ingroup UGGrid
+     */
     template<int dim>
     struct isLevelwiseConforming< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
+    /** \brief UGGrid is leafwise conforming (by green closures)
+       \ingroup UGGrid
+     */
     template<int dim>
     struct isLeafwiseConforming< UGGrid<dim> >
     {
       static const bool v = true;
     };
 
+    /** \brief UGGrid does not support hanging nodes
+       \ingroup UGGrid
+     */
     template<int dim>
     struct hasHangingNodes< UGGrid<dim> >
     {
