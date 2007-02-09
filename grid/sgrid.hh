@@ -632,19 +632,6 @@ namespace Dune {
     //! geometry of this entity
     const Geometry& geometry () const {return SEntityBase<dim,dim,GridImp>::geometry();}
 
-    /**
-       @brief Location of this vertex within a mesh entity of
-       codimension 0 on the coarse grid.
-
-       This can speed up on-the-fly interpolation for linear conforming
-       elements Possibly this is sufficient for all applications we want
-       on-the-fly.
-     */
-    EntityPointer ownersFather () const;
-
-    //! local coordinates within father
-    const FieldVector<sgrid_ctype, dim>& positionInOwnersFather () const;
-
     // members specific to SEntity
     //! constructor
     SEntity (GridImp* _grid, int _l, int _id) : SEntityBase<dim,dim,GridImp>::SEntityBase(_grid,_l,_id)

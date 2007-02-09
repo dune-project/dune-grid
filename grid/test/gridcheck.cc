@@ -401,10 +401,6 @@ struct EntityInterface<Grid, dim, dim, true>
 
     // run common test
     DoEntityInterfaceCheck(e);
-
-    // grid hierarchy
-    e.ownersFather();
-    e.positionInOwnersFather();
   }
 
   EntityInterface()

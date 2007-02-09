@@ -1206,65 +1206,6 @@ namespace Dune {
       return GhostEntity;
     }
 
-    /*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-          This can speed up on-the-fly interpolation for linear conforming elements
-          Possibly this is sufficient for all applications we want on-the-fly.
-     */
-    EntityPointer ownersFather () const
-    {
-      // check if coarse level exists
-      if (_g.level()<=0)
-        DUNE_THROW(GridError, "tried to call father on level 0");
-
-      // yes, get iterator to it
-      YGLI cg = _g.coarser();
-
-      // coordinates of the vertex == coordinates of upper right element
-      iTupel coord = _it.coord();
-
-      // get coordinates of cell on coarser level
-      for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
-
-      // check against boundary
-      for (int k=0; k<dim; k++)
-        coord[k] = std::min(coord[k],cg.cell_overlap().max(k));
-
-      // return level iterator
-      return YaspLevelIterator<0,All_Partition,GridImp>(cg,cg.cell_overlap().tsubbegin(coord));
-    }
-
-    //! local coordinates within father
-    const FieldVector<ctype, dim>& positionInOwnersFather () const
-    {
-      // check if coarse level exists
-      if (_g.level()<=0)
-        DUNE_THROW(GridError, "tried to call local on level 0");
-
-      // yes, get iterator to it
-      YGLI cg = _g.coarser();
-
-      // coordinates of the vertex == coordinates of upper right element
-      iTupel coord = _it.coord();
-
-      // get coordinates of cell on coarser level
-      for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
-
-      // check against boundary
-      for (int k=0; k<dim; k++)
-        coord[k] = std::min(coord[k],cg.cell_overlap().max(k));
-
-      // interpolate again, i.e. coord == lower left in 2**dim cells
-      for (int k=0; k<dim; k++)
-        coord[k] = 2*coord[k];
-
-      // now it is simple ...
-      for (int k=0; k<dim; k++)
-        loc[k] = 0.5*(_it.coord(k)-coord[k]);   // expr in brackets is in 0..2
-
-      // return result
-      return loc;
-    }
-
   private:
     // IndexSets needs access to the private index methods
     friend class Dune::YaspLevelIndexSet<GridImp>;
