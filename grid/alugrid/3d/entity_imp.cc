@@ -18,11 +18,9 @@ namespace Dune {
     twist_(0),
     face_(-1),
     item_(0),
-    father_(0),
     geo_( GeometryImp() ),
     geoImp_(grid.getRealImplementation(geo_)),
     builtgeometry_(false),
-    localFCoordCalced_ (false),
     partitionType_(InteriorEntity)
   {}
 
@@ -36,11 +34,9 @@ namespace Dune {
     twist_(org.twist_),
     face_(org.face_),
     item_(org.item_),
-    father_(org.father_),
     geo_( GeometryImp() ),
     geoImp_(grid_.getRealImplementation(geo_)),
     builtgeometry_(false),
-    localFCoordCalced_ (false),
     partitionType_(org.partitionType_)
   {}
 
@@ -58,7 +54,6 @@ namespace Dune {
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
   removeElement()
   {
-    father_ = 0;
     item_ = 0;
   }
 
@@ -78,9 +73,7 @@ namespace Dune {
     twist_  = org.twist_;
     level_  = org.level_;
     face_   = org.face_;
-    father_ = org.father_;
     builtgeometry_= false;
-    localFCoordCalced_ = false;
     partitionType_ = org.partitionType_;
   }
 
@@ -101,7 +94,6 @@ namespace Dune {
     level_  = level;
     face_   = face;
     builtgeometry_=false;
-    localFCoordCalced_ = false;
     partitionType_ = this->convertBndId( *item_ );
   }
 
@@ -112,9 +104,7 @@ namespace Dune {
     item_   = static_cast<const IMPLElementType *> (&vx);
     gIndex_ = (*item_).getIndex();
     level_  = (*item_).level();
-    father_ = (&el);
     builtgeometry_=false;
-    localFCoordCalced_ = false;
     partitionType_ = this->convertBndId( *item_ );
   }
 
@@ -126,9 +116,7 @@ namespace Dune {
     item_   = static_cast<const IMPLElementType *> (&vx);
     gIndex_ = (*item_).getIndex();
     level_  = (*item_).level();
-    father_ = (&el);
     builtgeometry_=false;
-    localFCoordCalced_ = false;
     partitionType_ = this->convertBndId( *item_ );
   }
 
@@ -168,33 +156,6 @@ namespace Dune {
     //assert( (cd == 1) ? (face_ >= 0) : 1 );
     if(!builtgeometry_) builtgeometry_ = geoImp_.buildGeom(*item_, twist_, face_ );
     return geo_;
-  }
-
-  template<int cd, int dim, class GridImp>
-  inline typename ALU3dGridEntity<cd,dim,GridImp>::EntityPointer
-  ALU3dGridEntity<cd,dim,GridImp>:: ownersFather() const
-  {
-    assert(cd == dim); // this method only exists for codim == dim
-    if( !father_ )
-    {
-      DUNE_THROW(GridError,"No father in ALU3dGridEntity::ownersFather()!");
-      return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_));
-    }
-    return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_));
-  }
-
-  template<int cd, int dim, class GridImp>
-  inline FieldVector<alu3d_ctype, dim> &
-  ALU3dGridEntity<cd,dim,GridImp>:: positionInOwnersFather() const
-  {
-    assert( cd == dim );
-    if(!localFCoordCalced_)
-    {
-      EntityPointer vati = this->ownersFather();
-      localFatherCoords_ = (*vati).geometry().local( this->geometry()[0] );
-      localFCoordCalced_ = true;
-    }
-    return localFatherCoords_;
   }
 
   template<int dim, class GridImp>
