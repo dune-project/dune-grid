@@ -559,13 +559,13 @@ namespace Dune
        vertex.  In that case it is not prescribed precisely which of those elements
        gets returned.
      */
-    EntityPointer ownersFather () const { return realEntity.ownersFather(); }
+    EntityPointer ownersFather () const DUNE_DEPRECATED { return realEntity.ownersFather(); }
 
     /** \brief This vertex' position in local coordinates of the element returned
        by the ownersFather() method. Thus both methods together allow
        the pointwise interpolation for conforming finite elements.
      */
-    const FieldVector<ct, dim>& positionInOwnersFather () const
+    const FieldVector<ct, dim>& positionInOwnersFather () const DUNE_DEPRECATED
     { return realEntity.positionInOwnersFather(); }
     //@}
 
