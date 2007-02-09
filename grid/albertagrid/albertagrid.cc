@@ -1018,18 +1018,20 @@ namespace Dune
     return geo_;
   }
 
-  template<int codim, int dim, class GridImp>
-  inline typename AlbertaGridEntity<codim,dim,GridImp>::EntityPointer
-  AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
-  {
-    ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-    std::cout << "got father " << grid_.getElementNumber(fatherInfo->el) <<"\n";
-    int fatherLevel = (level_ > 0) ? (level_-1) : 0;
+  /*
+     template<int codim, int dim, class GridImp>
+     inline typename AlbertaGridEntity<codim,dim,GridImp>::EntityPointer
+     AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
+     {
+     ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
+     //std::cout << "got father " << grid_.getElementNumber(fatherInfo->el) <<"\n";
+     int fatherLevel = (level_ > 0) ? (level_-1) : 0;
 
-    assert( fatherLevel == fatherInfo->level );
+     assert( fatherLevel == fatherInfo->level );
 
-    return AlbertaGridEntityPointer<0,GridImp> (grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
-  }
+     return AlbertaGridEntityPointer<0,GridImp> (grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
+     }
+   */
 
   /*
      // coords for 2d
@@ -1040,6 +1042,7 @@ namespace Dune
      };
    */
 
+#if 0
   template<int codim, int dim, class GridImp>
   inline const FieldVector<albertCtype, dim>&
   AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
@@ -1073,7 +1076,7 @@ namespace Dune
     }
     return localFatherCoords_;
   }
-
+#endif
 
   //************************************
   //
