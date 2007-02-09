@@ -116,38 +116,6 @@ namespace Dune {
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
 
-    UGGridEntityPointer<0,GridImp> ownersFather() const
-    {
-      UGGridEntityPointer<0,GridImp> myfather;
-      if (UG_NS<dim>::NFather(target_)!=0)
-        if (UG_NS<dim>::myLevel(UG_NS<dim>::NFather(target_)) == this->level()-1)
-        {
-          myfather.setToTarget(UG_NS<dim>::NFather(target_));
-          return myfather;
-        }
-      DUNE_THROW(NotImplemented, "ownersFather for anything else than new vertices");
-      return myfather;
-    }
-
-    /** \brief Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-     *
-       This can speed up on-the-fly interpolation for linear conforming elements
-       Possibly this is sufficient for all applications we want on-the-fly.
-     */
-    const FieldVector<UGCtype, dim>& positionInOwnersFather() const
-    {
-      if (UG_NS<dim>::NFather(target_)!=0)
-        if (UG_NS<dim>::myLevel(UG_NS<dim>::NFather(target_)) == this->level()-1)
-        {
-          UG_NS<dim>::PositionInFather(target_,pos_);
-          return pos_;
-        }
-      DUNE_THROW(NotImplemented, "positionInOwnersFather for anything else than new vertices");
-      return pos_;
-    }
-
-
-
   private:
 
 

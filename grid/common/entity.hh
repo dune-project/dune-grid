@@ -545,32 +545,6 @@ namespace Dune
     const Geometry& geometry () const { return realEntity.geometry(); }
     //@}
 
-
-    //===========================================================
-    /** @name Extended interface of entities of codimension dim
-     */
-    //@{
-    //===========================================================
-
-    /** \brief Returns EntityPointer to an element on the next-coarser level
-       that contains this vertex.
-       This method is for fast implementations of interpolation for linear conforming elements.
-       Of course, there may be more than one element on the coarser grid containing this
-       vertex.  In that case it is not prescribed precisely which of those elements
-       gets returned.
-     */
-    EntityPointer ownersFather () const DUNE_DEPRECATED { return realEntity.ownersFather(); }
-
-    /** \brief This vertex' position in local coordinates of the element returned
-       by the ownersFather() method. Thus both methods together allow
-       the pointwise interpolation for conforming finite elements.
-     */
-    const FieldVector<ct, dim>& positionInOwnersFather () const DUNE_DEPRECATED
-    { return realEntity.positionInOwnersFather(); }
-    //@}
-
-
-
     //===========================================================
     /** @name Interface for the implementor
      */

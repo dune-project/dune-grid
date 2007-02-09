@@ -470,23 +470,6 @@ namespace Dune {
     built_father = true;
   }
 
-  template<int dim, class GridImp>
-  inline typename SEntity<dim,dim,GridImp>::EntityPointer SEntity<dim,dim,GridImp>::ownersFather () const
-  {
-    if (!built_father) make_father();
-    if (this->l>0)
-      return EntityPointer(SLevelIterator<0,All_Partition,GridImp>((this->grid),(this->l)-1,father_id));
-    else
-      return EntityPointer(SLevelIterator<0,All_Partition,GridImp>((this->grid),this->l,this->id));
-  }
-
-  template<int dim, class GridImp>
-  inline const FieldVector<sgrid_ctype, dim>& SEntity<dim,dim,GridImp>::positionInOwnersFather () const
-  {
-    if (!built_father) make_father();
-    return in_father_local;
-  }
-
   //************************************************************************
   // inline methods for HierarchicIterator
 

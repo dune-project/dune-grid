@@ -190,20 +190,6 @@ namespace Dune {
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
 
-    OneDGridLevelIterator<0,All_Partition, GridImp> ownersFather () const {
-      DUNE_THROW(NotImplemented, "ownersFather");
-      //return OneDGridLevelIterator<cd,All_Partition,GridImp>();
-    }
-
-    /** \brief Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-     *
-       This can speed up on-the-fly interpolation for linear conforming elements
-       Possibly this is sufficient for all applications we want on-the-fly.
-     */
-    FieldVector<typename GridImp::ctype, dim>& positionInOwnersFather () const {
-      DUNE_THROW(NotImplemented, "positionInOwnersFather");
-    }
-
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
       geo_.setToTarget(target);
