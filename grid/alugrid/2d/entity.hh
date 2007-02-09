@@ -145,7 +145,6 @@ namespace Dune {
 
     //! corresponding ALU2dGridElement
     mutable ElementType * item_;
-    const HElementType * father_;
     //! the current geometry
 
     mutable GeometryObj geoObj_;
@@ -154,10 +153,6 @@ namespace Dune {
 
     mutable int level_;
     mutable int face_;
-
-    mutable bool localFCoordCalced_;
-    mutable FieldVector<alu2d_ctype, dim> localFatherCoords_; // coords of vertex in father
-
   };
 
   /*!
