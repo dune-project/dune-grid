@@ -93,13 +93,16 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
 
   for (;iIt!=iEndIt; ++iIt)
   {
-    // add normal to sum of normals
-    {
-      const int interDim = IntersectionIterator::LocalGeometry::mydimension;
-      const QuadratureRule<double, interDim>& quad
-        = QuadratureRules<double, interDim>::rule(iIt.intersectionSelfLocal().type(), 0);
-      sumNormal += iIt.integrationOuterNormal(quad[0].position());
-    }
+    // //////////////////////////////////////////////////////////////////////
+    //   Compute the integral of the outer normal over the whole element.
+    //   This has to be zero.
+    // //////////////////////////////////////////////////////////////////////
+    const int interDim = IntersectionIterator::LocalGeometry::mydimension;
+    const QuadratureRule<double, interDim>& quad
+      = QuadratureRules<double, interDim>::rule(iIt.intersectionSelfLocal().type(), interDim);
+
+    for (size_t i=0; i<quad.size(); i++)
+      sumNormal.axpy(quad[i].weight(), iIt.integrationOuterNormal(quad[i].position()));
 
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
@@ -151,10 +154,6 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
     // (Ab)use a quadrature rule as a set of test points
-    const int interDim = IntersectionIterator::LocalGeometry::mydimension;
-    const QuadratureRule<double, interDim>& quad
-      = QuadratureRules<double, interDim>::rule(intersectionSelfLocal.type(), 2);
-
     for (size_t i=0; i<quad.size(); i++)
     {
       // check integrationOuterNormal
