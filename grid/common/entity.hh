@@ -33,11 +33,10 @@ namespace Dune
      <H3>Specialization</H3>
 
      The Entity class template is specialized for <tt>cd=0</tt> (elements,
-     Dune::Entity<0,dim,GridImp,EntityImp>)
-     and <tt>cd=dim</tt> (vertices, Dune::Entity<dim,dim,GridImp,EntityImp>).
-     These two cases have an extended interface,
-     each adding different methods. The methods defined in the general template
-     are provided by the two specializations as well. We did not use inheritance
+     Dune::Entity<0,dim,GridImp,EntityImp>).
+     This case has an extended interface.
+     The methods defined in the general template
+     are provided by the specialization as well. We did not use inheritance
      because different implementations for different codimensions may be required
      and virtual functions had to be avoided.
 
@@ -470,128 +469,6 @@ namespace Dune
     //@}
   };
 
-  /**
-     @brief Interface Definition for EntityImp
-     \brief Template specialization of Dune::Entity for Vertices (codim==dim)
-
-     @see Dune::Entity (general version) for the full documentation
-
-
-     \ingroup GIEntity
-     \nosubgrouping
-   */
-  template<int dim, class GridImp, template<int,int,class> class EntityImp>
-  class Entity <dim,dim,GridImp,EntityImp>
-  {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
-
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
-
-  protected:
-    EntityImp<dim,dim,GridImp> realEntity;
-
-    // the type of the wrapped implementation, for internal use only
-    typedef EntityImp<dim,dim,GridImp> ImplementationType;
-  public:
-
-    //===========================================================
-    /** @name Exported types and constants
-     */
-    //@{
-    //===========================================================
-
-    /** \brief Geometry type of this entity */
-    typedef typename GridImp::template Codim<dim>::Geometry Geometry;
-
-    /** \brief Codim 0 EntityPointer type*/
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
-    enum {
-      //! Know your own codimension
-      codimension=dim
-    };
-    enum {
-      //! Know the grid's dimension
-      dimension=dim
-    };
-    enum {
-      /** \brief Know dimension of the entity */
-      mydimension=0
-    };
-    enum {
-      //! Know the world dimension
-      dimensionworld=dimworld
-    };
-    //! Type used for coordinates in grid module
-    typedef ct ctype;
-    //@}
-
-
-    //===========================================================
-    /** @name Methods shared by entities of all codimensions
-     */
-    //@{
-    //===========================================================
-
-
-    //!  @copydoc Dune::Entity::level()
-    int level () const { return realEntity.level(); }
-
-    //!  @copydoc Dune::Entity::partitionType()
-    PartitionType partitionType () const { return realEntity.partitionType(); }
-
-    //!  @copydoc Dune::Entity::geometry()
-    const Geometry& geometry () const { return realEntity.geometry(); }
-    //@}
-
-    //===========================================================
-    /** @name Interface for the implementor
-     */
-    //@{
-    //===========================================================
-
-    //! Copy constructor from EntityImp
-    explicit Entity(const EntityImp<dim,dim,GridImp> & e) : realEntity(e) {};
-
-    /* maybe available in later versions
-       \brief Id of the boundary which is associated with
-        the entity, returns 0 for inner entities, arbitrary int otherwise */
-    //int boundaryId () const { return realEntity.boundaryId(); }
-
-    //@}
-
-
-  protected:
-
-    //===========================================================
-    /** @name Protected methods
-     */
-    //@{
-    //===========================================================
-
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    //! return reference to the real implementation
-    EntityImp<dim,dim,GridImp> & getRealImp() { return realEntity; }
-    //! return reference to the real implementation
-    const EntityImp<dim,dim,GridImp> & getRealImp() const { return realEntity; }
-
-  protected:
-    /** hide copy constructor */
-    Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
-    /** hide assignment operator */
-    Entity & operator = (const Entity& rhs) {
-      realEntity = rhs.realEntity;
-      return *this;
-    }
-    //@}
-
-  };
 
   //********************************************************************
   /**
@@ -600,8 +477,7 @@ namespace Dune
      EntityDefaultImplementation provides default implementations for Entity which uses
      the implemented interface which has to be done by the user.
 
-     @note this is the general version, but there are specializations
-     for cd=0 and cd=dim
+     @note this is the general version, but there is a specialization for cd=0
 
      @ingroup GridDevel
    */
@@ -732,44 +608,6 @@ namespace Dune
     //  Barton-Nackman trick
     EntityImp<0,dim,GridImp>& asImp () { return static_cast<EntityImp<0,dim,GridImp>&>(*this); }
     const EntityImp<0,dim,GridImp>& asImp () const { return static_cast<const EntityImp<0,dim,GridImp>&>(*this); }
-  };
-
-  //********************************************************************
-  /**
-     @brief Default Implementations for EntityImp (Vertice [cd=dim])
-
-     EntityDefaultImplementation provides default implementations for Entity which uses
-     the implemented interface which has to be done by the user.
-
-     @note
-     this specialization has a reduced interface compared to the general case
-
-     @ingroup GridDevel
-   */
-  template<int dim, class GridImp, template<int,int,class> class EntityImp>
-  class EntityDefaultImplementation <dim,dim,GridImp,EntityImp>
-  {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
-  public:
-    //! know your own codimension
-    enum { codimension=dim };
-
-    //! know your own dimension
-    enum { dimension=dim };
-
-    /** \brief Know dimension of the entity */
-    enum { mydimension=0 };
-
-    //! know your own dimension of world
-    enum { dimensionworld=dimworld };
-
-    //! define type used for coordinates in grid module
-    typedef ct ctype;
-  private:
-    //  Barton-Nackman trick
-    EntityImp<dim,dim,GridImp>& asImp () {return static_cast<EntityImp<dim,dim,GridImp>&>(*this);}
-    const EntityImp<dim,dim,GridImp>& asImp () const { return static_cast<const EntityImp<dim,dim,GridImp>&>(*this); }
   };
 
 }
