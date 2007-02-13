@@ -165,7 +165,7 @@ namespace Dune
 
     //@}
 
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+    typedef typename remove_const<GridImp>::type mutableGridImp;
 
   protected:
     //===========================================================
@@ -207,7 +207,7 @@ namespace Dune
     enum { dimworld = GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
 
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+    typedef typename remove_const<GridImp>::type mutableGridImp;
 
   protected:
     EntityImp<0,dim,GridImp> realEntity;

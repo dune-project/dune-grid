@@ -193,10 +193,10 @@ namespace Dune {
   public:
 
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
-    enum {dim = RemoveConst<GridImp>::Type::dimension};
+    enum {dim = remove_const<GridImp>::type::dimension};
 
     //! constructor stores reference to a grid and level
     UGGridLeafIndexSet (const GridImp& g) : grid_(g)
@@ -204,22 +204,22 @@ namespace Dune {
 
     //! get index of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cd>
-    int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
     }
 
     //! get index of subEntity of a codim 0 entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       if (cc==dim)
         return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,
@@ -332,7 +332,7 @@ namespace Dune {
   template <class GridImp>
   class UGGridGlobalIdSet : public IdSet<GridImp,UGGridGlobalIdSet<GridImp>,unsigned int>
   {
-    enum {dim = RemoveConst<GridImp>::Type::dimension};
+    enum {dim = remove_const<GridImp>::type::dimension};
 
   public:
     //! constructor stores reference to a grid
@@ -343,11 +343,11 @@ namespace Dune {
 
     //! get id of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cd>
-    GlobalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
 #ifdef ModelP
       return grid_.getRealImplementation(e).target_->ge.ddd.gid;
@@ -369,11 +369,11 @@ namespace Dune {
 
     //! get id of subEntity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int cc>
-    GlobalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    GlobalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       if (cc==0)
         return id<0>(e);
@@ -401,7 +401,7 @@ namespace Dune {
   template<class GridImp>
   class UGGridLocalIdSet : public IdSet<GridImp,UGGridLocalIdSet<GridImp>,unsigned int>
   {
-    enum {dim = RemoveConst<GridImp>::Type::dimension};
+    enum {dim = remove_const<GridImp>::type::dimension};
   public:
 
     //! constructor stores reference to a grid
@@ -413,11 +413,11 @@ namespace Dune {
 
     //! get id of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int cd>
-    LocalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    LocalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -435,11 +435,11 @@ namespace Dune {
 
     //! get id of subEntity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int cc>
-    LocalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    LocalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       const typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(e).target_;
       if (cc==dim)

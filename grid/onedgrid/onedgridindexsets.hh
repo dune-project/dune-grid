@@ -159,22 +159,22 @@ namespace Dune {
 
     //! get index of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cd>
-    int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).leafIndex();
     }
 
     //! get index of subentity of a codim 0 entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid_.getRealImplementation(e).template subLeafIndex<cc>(i);
     }
@@ -299,22 +299,22 @@ namespace Dune {
 
     //! get id of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cd>
-    GlobalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).globalId();
     }
 
     //! get id of subentity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cd>
-    GlobalIdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    GlobalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid_.template getRealImplementation(e).template subId<cd>(i);
     }

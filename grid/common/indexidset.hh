@@ -104,11 +104,11 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int index (const typename RemoveConst<GridImp>::Type::
+    int index (const typename remove_const<GridImp>::type::
                Traits::template Codim<cc>::Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
@@ -141,11 +141,11 @@ namespace Dune
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int subIndex (const typename RemoveConst<GridImp>::Type::
+    int subIndex (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
@@ -281,7 +281,7 @@ namespace Dune
        then the index of this Entity is returned.
      */
     template<int cc>
-    int subIndex (const typename RemoveConst<GridImp>::Type::
+    int subIndex (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i) const
     {
       return this->index( *(e.template entity<cc>(i) ));
@@ -412,11 +412,11 @@ namespace Dune
 
     //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitely.
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    IdType id (const typename RemoveConst<GridImp>::Type::
+    IdType id (const typename remove_const<GridImp>::type::
                Traits::template Codim<cc>::Entity& e) const
     {
       return asImp().template id<cc>(e);
@@ -424,11 +424,11 @@ namespace Dune
 
     //! Get id of subentity i of codim cc of a codim 0 entity.
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
      */
     template<int cc>
-    IdType subId (const typename RemoveConst<GridImp>::Type::
+    IdType subId (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i) const
     {
       return asImp().template subId<cc>(e,i);
@@ -471,13 +471,13 @@ namespace Dune
 
     //! get id of subentity i of codim cc
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
+       We use the remove_const to extract the Type from the mutable class,
        because the const class is not instatiated yet.
-       This default implementation uses the entities entity method. This is
-       slow but works by default for ervery id set imeplementation.
+       This default implementation uses the entity's entity() method. This is
+       slow but works by default for ervery id set implementation.
      */
     template<int cc>
-    IdType subId (const typename RemoveConst<GridImp>::Type::
+    IdType subId (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i) const
     {
       return this->id( *(e.template entity<cc>(i)) );

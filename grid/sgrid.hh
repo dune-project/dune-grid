@@ -1037,7 +1037,7 @@ namespace Dune {
   class SGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
   {
     typedef IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
-    enum {dim = RemoveConst<GridImp>::Type::dimension};
+    enum {dim = remove_const<GridImp>::type::dimension};
   public:
 
     //! constructor stores reference to a grid and level
@@ -1050,22 +1050,22 @@ namespace Dune {
 
     //! get index of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
     template<int cd>
-    int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid.template getRealEntity<cd>(e).compressedLeafIndex();
     }
 
     //! get index of subentity of a codim 0 entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
     template<int cc>
-    int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subCompressedLeafIndex<cc>(i);
     }
@@ -1117,41 +1117,41 @@ namespace Dune {
 
   template<class GridImp>
   class SGridGlobalIdSet :
-    public IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename RemoveConst<GridImp>::Type::PersistentIndexType>
+    public IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>
     /*
-       We used the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We used the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
   {
   public:
     //! define the type used for persisitent indices
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
-    typedef typename RemoveConst<GridImp>::Type::PersistentIndexType IdType;
+    typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
 
     //! constructor stores reference to a grid
     SGridGlobalIdSet (const GridImp& g) : grid(g) {}
 
     //! get id of an entity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
     template<int cd>
-    IdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid.template getRealEntity<cd>(e).persistentIndex();
     }
 
     //! get id of subentity
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
     template<int cc>
-    IdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
     }

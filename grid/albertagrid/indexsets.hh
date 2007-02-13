@@ -14,7 +14,7 @@
 
 namespace Dune {
 
-  //! HierarchicIndexSet uses LeafIterator tpyes for all codims and partition types
+  //! HierarchicIndexSet uses LeafIterator types for all codims and partition types
   template <class GridImp>
   struct AlbertaGridHierarchicIteratorTypes
   {
@@ -26,10 +26,10 @@ namespace Dune {
       struct Partition
       {
         /*
-           We use the RemoveConst to extract the Type from the mutable class,
-           because the const class is not instatiated yet.
+           We use the remove_const to extract the Type from the mutable class,
+           because the const class is not instantiated yet.
          */
-        typedef typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
+        typedef typename remove_const<GridImp>::type::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
       };
     };
   };
@@ -48,10 +48,10 @@ namespace Dune {
   {
     typedef AlbertaGrid<dim,dimworld> GridType;
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
-    typedef typename RemoveConst<GridType>::Type::Traits::template Codim<0>::Entity EntityCodim0Type;
+    typedef typename remove_const<GridType>::type::Traits::template Codim<0>::Entity EntityCodim0Type;
     enum { numVecs  = AlbertHelp::numOfElNumVec };
     enum { numCodim = dim + 1 };
 
@@ -228,10 +228,10 @@ namespace Dune {
     // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
     /*
-       We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
      */
-    typedef typename RemoveConst<GridType>::Type::Traits::template Codim<0>::Entity EntityCodim0Type;
+    typedef typename remove_const<GridType>::type::Traits::template Codim<0>::Entity EntityCodim0Type;
 
     //! create id set, only allowed for AlbertaGrid
     AlbertaGridIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())

@@ -382,7 +382,7 @@ namespace Dune
       realIterator(i.realIterator) {}
     //@}
 
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+    typedef typename remove_const<GridImp>::type mutableGridImp;
   protected:
     // give the GridDefaultImplementation class access to the realImp
     friend class GridDefaultImplementation<
