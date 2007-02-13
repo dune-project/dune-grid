@@ -6,7 +6,10 @@
 
 if BUILD_DOCS
   DOXYGENTAG = doxygen-tag
+if WML
+  # only exists when WML is true
   WHAT = bestpractice.html
+endif
   DOXYGEN_HTML = html
   DOXYGEN_DIST = html-dist
 endif
