@@ -112,8 +112,7 @@ namespace Dune {
     //! local number of codim 1 entity in neighbor where intersection is contained
     int numberInNeighbor () const;
 
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
+    //! return outer normal
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
 
   private:
