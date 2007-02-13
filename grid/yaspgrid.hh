@@ -1946,7 +1946,7 @@ namespace Dune {
     //! get index of an entity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cd>
     int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
@@ -1958,7 +1958,7 @@ namespace Dune {
     //! get index of subentity of a codim 0 entity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
@@ -2019,7 +2019,7 @@ namespace Dune {
                               typename RemoveConst<GridImp>::Type::PersistentIndexType >
                           /*
                              We used the RemoveConst to extract the Type from the mutable class,
-                             because the const class is not instatiated yet.
+                             because the const class is not instantiated yet.
                            */
   {
   public:
@@ -2032,7 +2032,7 @@ namespace Dune {
     //! get id of an entity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cd>
     IdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const
@@ -2043,7 +2043,7 @@ namespace Dune {
     //! get id of subentity
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     IdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const

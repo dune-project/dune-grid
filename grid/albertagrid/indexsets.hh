@@ -27,7 +27,7 @@ namespace Dune {
       {
         /*
            We use the RemoveConst to extract the Type from the mutable class,
-           because the const class is not instatiated yet.
+           because the const class is not instantiated yet.
          */
         typedef typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
       };
@@ -49,7 +49,7 @@ namespace Dune {
     typedef AlbertaGrid<dim,dimworld> GridType;
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     typedef typename RemoveConst<GridType>::Type::Traits::template Codim<0>::Entity EntityCodim0Type;
     enum { numVecs  = AlbertHelp::numOfElNumVec };
@@ -229,7 +229,7 @@ namespace Dune {
     enum { codimMultiplier = 300000000 };
     /*
        We use the RemoveConst to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     typedef typename RemoveConst<GridType>::Type::Traits::template Codim<0>::Entity EntityCodim0Type;
 
