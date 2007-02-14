@@ -146,7 +146,10 @@ namespace Dune
     const Geometry& geometry () const { return realEntity.geometry(); }
     //@}
 
-
+    /** \brief Return the name of the reference element. The type can
+       be used to access the Dune::ReferenceElement.
+     */
+    GeometryType type () const { return realEntity.geometry().type(); };
 
     //===========================================================
     /** @name Interface for the implementor
@@ -286,6 +289,10 @@ namespace Dune
     const Geometry& geometry () const { return realEntity.geometry(); }
     //@}
 
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    GeometryType type () const { return realEntity.geometry().type(); };
 
     //===========================================================
     /** @name Extended interface of entities of codimension 0

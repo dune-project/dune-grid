@@ -221,8 +221,12 @@ namespace Dune {
 
     if (it == endit) return;
 
-    for (; it!=endit; ++it)
+    for (; it!=endit; ++it) {
+      // while we're here: check whether the GeometryTypes returned by the entity
+      // and the Geometry match
+      assert(it->type()==it->geometry().type());
       geometryTypes.insert(it->geometry().type());
+    }
 
     bool geomTypesError = false;
     // Check whether all entries in the official geometry types list are contained in our self-computed one
