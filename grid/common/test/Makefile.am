@@ -1,9 +1,7 @@
 # $Id$
 
 if UG
-if AMIRAMESH
 TESTPROGS = mcmgmappertest
-endif
 endif
 
 # which tests to run
