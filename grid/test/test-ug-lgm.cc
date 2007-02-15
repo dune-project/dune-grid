@@ -63,9 +63,9 @@ int main (int argc , char **argv) try
 
 #ifdef ModelP
     // check communication interface
-    checkCommunication(grid23,-1,Dune::dvverb);
-    for(int l=0; l<=grid23.maxLevel(); ++l)
-      checkCommunication(grid23,l,Dune::dvverb);
+    checkCommunication(grid3d,-1,Dune::dvverb);
+    for(int l=0; l<=grid3d.maxLevel(); ++l)
+      checkCommunication(grid3d,l,Dune::dvverb);
 #endif
   }
 

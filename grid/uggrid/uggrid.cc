@@ -399,7 +399,7 @@ inline int Dune::UGGrid < dim >::size (int level, int codim) const
   }
   else
   {
-    DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dimworld
+    DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dim
                                     << ">::size(int level, int codim) is only implemented"
                                     << " for codim==0 and codim==dim!");
   }
@@ -804,14 +804,14 @@ void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, Communicatio
 
   // Translate the communication direction from Dune-Speak to UG-Speak
   DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
-
+#if 0
   // Trigger communication
   DDD_IFOneway(UG::ElementVHIF,
                UGIfDir,
                sizeof(P<T>),
                &UGDataCollector<T,P,dim>::gather,
                &UGDataCollector<T,P,dim>::scatter);
-
+#endif
 #endif
 }
 

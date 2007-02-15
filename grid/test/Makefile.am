@@ -17,7 +17,11 @@ if ALUGRID
 endif
 
 if UG
-  UPROG = test-ug #test-ug-lgm
+if UG_LGMDOMAIN
+  UPROG = test-ug-lgm
+else
+  UPROG = test-ug
+endif
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
 else
@@ -77,17 +81,16 @@ test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
 test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
-# libdune contains both libug2 and libug3, always test both dimensions
+# libdune contains both libugX2 and libugX3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
 test_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
 test_ug_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
 test_ug_DEPENDENCIES = $(LOCAL_LIBS)
 
-# libdune contains both libug2 and libug3, always test both dimensions
-#test_ug_lgm_SOURCES = test-ug-lgm.cc
-#test_ug_lgm_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS) $(MPI_CPPFLAGS)
-#test_ug_lgm_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
-#test_ug_lgm_DEPENDENCIES = $(LOCAL_LIBS)
+test_ug_lgm_SOURCES = test-ug-lgm.cc
+test_ug_lgm_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS) $(MPI_CPPFLAGS)
+test_ug_lgm_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
+test_ug_lgm_DEPENDENCIES = $(LOCAL_LIBS)
 
 # Test whether you can combine the different implementations in one file
 test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
