@@ -520,14 +520,6 @@ namespace Dune {
     // Start up the UG system
     void init(unsigned int heapSize, unsigned int envHeapSize);
 
-    /** \brief Convenience method to insert a linear boundary segment into a UG coarse grid
-        \param vertices The indices of the vertices of the segment
-        \param coordinates The coordinates of the vertices of the segment
-     */
-    void insertLinearSegment(const std::vector<int>& vertices,
-                             const std::vector<FieldVector<double,dim> >& coordinates,
-                             unsigned int segmentIndex);
-
     // Recomputes entity indices after the grid was changed
     void setIndices();
 

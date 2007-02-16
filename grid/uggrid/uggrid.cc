@@ -14,69 +14,6 @@
 
 using namespace Dune;
 
-class LinearSegment2d : public BoundarySegment<2>
-{
-public:
-  LinearSegment2d(const FieldVector<double,2>& a, const FieldVector<double,2>& b)
-    : a_(a), b_(b)
-  {}
-
-  virtual FieldVector<double, 2> operator()(const FieldVector<double,1>& local) const {
-    /** \todo Rewrite this with expression templates */
-    FieldVector<double, 2> result;
-    result[0] = a_[0] + local[0]*(b_[0]-a_[0]);
-    result[1] = a_[1] + local[0]*(b_[1]-a_[1]);
-    return result;
-  }
-
-  FieldVector<double, 2> a_, b_;
-};
-
-/** \brief Class implementing a linear quadrilateral boundary segment */
-class LinearQuadSegment3d : public BoundarySegment<3>
-{
-public:
-  LinearQuadSegment3d(const FieldVector<double,3>& a,
-                      const FieldVector<double,3>& b,
-                      const FieldVector<double,3>& c,
-                      const FieldVector<double,3>& d)
-    : a_(a), b_(b), c_(c), d_(d)
-  {}
-
-  virtual FieldVector<double, 3> operator()(const FieldVector<double,2>& local) const {
-    /** \todo Rewrite this with expression templates */
-    FieldVector<double, 3> result;
-    for (int i=0; i<3; i++)
-      result[i] = a_[i] + local[0]*(b_[i]-a_[i]) + local[1]*(d_[i]-a_[i])
-                  + local[0]*local[1]*(a_[i]+c_[i]-b_[i]-d_[i]);
-    return result;
-  }
-
-  FieldVector<double, 3> a_, b_, c_, d_;
-};
-
-
-/** \brief Class implementing a linear triangular boundary segment */
-class LinearTriSegment3d : public BoundarySegment<3>
-{
-public:
-  LinearTriSegment3d(const FieldVector<double,3>& a,
-                     const FieldVector<double,3>& b,
-                     const FieldVector<double,3>& c)
-    : a_(a), b_(b), c_(c)
-  {}
-
-  virtual FieldVector<double, 3> operator()(const FieldVector<double,2>& local) const {
-    /** \todo Rewrite this with expression templates */
-    FieldVector<double, 3> result;
-    for (int i=0; i<3; i++)
-      result[i] = a_[i] + local[0]*(b_[i]-a_[i]) + local[1]*(c_[i]-b_[i]);
-    return result;
-  }
-
-  FieldVector<double, 3> a_, b_, c_;
-};
-
 static int boundarySegmentWrapper2d(void *data, double *param, double *result)
 {
   const BoundarySegment<2>* boundarySegment = static_cast<const BoundarySegment<2>*>(data);
@@ -937,47 +874,30 @@ void Dune::UGGrid < dim >::createEnd()
 
     int numVertices = (dim==2) ? 2 : ((thisSegment[3] == -1) ? 3 : 4);
 
-    std::vector<FieldVector<double,dim> > coordinates(numVertices);
-    std::vector<int> vertices(numVertices);
+    // Copy the vertices into a C-style array
+    int vertices_c_style[4];
 
-    for (int j=0; j<numVertices; j++) {
-      coordinates[j] = vertexPositions_[thisSegment[j]];
-      vertices[j]    = isBoundaryNode[thisSegment[j]];
-    }
+    for (int j=0; j<numVertices; j++)
+      vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
 
-#if 1
-    insertLinearSegment(vertices, coordinates, i);
-#else
 #ifndef UG_LGMDOMAIN
-    // It would be a lot smarter to use this way of describing
-    // boundary segments.  But as of yet, UG crashes when using
-    // linear segments.
     // Create some boundary segment name
     char segmentName[20];
     if(sprintf(segmentName, "BS %d", i) < 0)
       DUNE_THROW(GridError, "sprintf returned error code!");
 
-    // Copy the vertices into a C-style array
-    /** \todo Due to some UG weirdness, in 3d, CreateBoundarySegment always expects
-        this array to have four entries, even if only a triangular segment is
-        inserted.  If not, undefined values are will be introduced. */
-    int vertices_c_style[4] = {-1, -1, -1, -1};
-
-    for (size_t j=0; j<vertices.size(); j++)
-      vertices_c_style[j] = vertices[j];
-
     if (dim==2) {
 
       double segmentCoordinates[2][2];
-      for (int j=0; j<vertices.size(); j++)
+      for (int j=0; j<numVertices; j++)
         for (int k=0; k<dim; k++)
-          segmentCoordinates[j][k] = coordinates[j][k];
+          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
       if (UG::D2::CreateLinearSegment(segmentName,
                                       1,               /*id of left subdomain */
                                       2,              /*id of right subdomain*/
                                       i,                  /*id of segment*/
-                                      vertices.size(),                  // Number of corners
+                                      numVertices,                  // Number of corners
                                       vertices_c_style,
                                       segmentCoordinates
                                       )==NULL)
@@ -986,21 +906,20 @@ void Dune::UGGrid < dim >::createEnd()
     } else {
 
       double segmentCoordinates[4][3];
-      for (int j=0; j<vertices.size(); j++)
+      for (int j=0; j<numVertices; j++)
         for (int k=0; k<dim; k++)
-          segmentCoordinates[j][k] = coordinates[j][k];
+          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
       if (UG::D3::CreateLinearSegment(segmentName,
                                       1,               /*id of left subdomain */
                                       2,              /*id of right subdomain*/
                                       i,                  /*id of segment*/
-                                      vertices.size(),                  // Number of corners
+                                      numVertices,                  // Number of corners
                                       vertices_c_style,
                                       segmentCoordinates
                                       )==NULL)
         DUNE_THROW(IOError, "Error calling CreateLinearSegment");
     }
-#endif
 #endif
 
   }
@@ -1168,77 +1087,6 @@ void Dune::UGGrid < dim >::createLGMGrid(const std::string& name)
   setIndices();
 
 #endif
-}
-
-template <int dim>
-void Dune::UGGrid<dim>::
-insertLinearSegment(const std::vector<int>& vertices,
-                    const std::vector<FieldVector<double,dim> >& coordinates,
-                    unsigned int segmentIndex)
-{
-#ifndef UG_LGMDOMAIN
-  /** \todo Make sure this is the current multigrid, so that CreateBoundarySegment
-      really inserts boundary segments into this grid.*/
-
-  // Copy the vertices into a C-style array
-  /** \todo Due to some UG weirdness, in 3d, CreateBoundarySegment always expects
-      this array to have four entries, even if only a triangular segment is
-      inserted.  If not, undefined values are will be introduced. */
-  int vertices_c_style[4] = {-1, -1, -1, -1};
-  for (unsigned int i=0; i<vertices.size(); i++)
-    vertices_c_style[i] = vertices[i];
-
-  // Create dummy parameter ranges
-  const double alpha[2] = {0, 0};
-  const double beta[2]  = {1, 1};
-
-  // Create some boundary segment name
-  char segmentName[20];
-  if(sprintf(segmentName, "BS %d", segmentIndex) < 0)
-    DUNE_THROW(GridError, "sprintf returned error code!");
-
-  // Choose the method which implements the shape of the boundary segment
-  typename UG_NS<dim>::BndSegFuncPtr boundarySegmentFunction;
-
-  if (dim==3) {
-    boundarySegmentFunction = boundarySegmentWrapper3d;
-    if (vertices.size()==3) {
-      // Cast to a type which may be wrong, just to make the code compile.
-      // But this code only gets executed when the cast is correct anyways.
-      boundarySegments_.push_back((BoundarySegment<dim>*) new LinearTriSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
-                                                                                 *(FieldVector<double,3>*)(&coordinates[1]),
-                                                                                 *(FieldVector<double,3>*)(&coordinates[2])));
-    } else {
-      // Cast to a type which may be wrong, just to make the code compile.
-      // But this code only gets executed when the cast is correct anyways.
-      boundarySegments_.push_back((BoundarySegment<dim>*) new LinearQuadSegment3d(*(FieldVector<double,3>*)(&coordinates[0]),
-                                                                                  *(FieldVector<double,3>*)(&coordinates[1]),
-                                                                                  *(FieldVector<double,3>*)(&coordinates[2]),
-                                                                                  *(FieldVector<double,3>*)(&coordinates[3])));
-    }
-  } else {
-    boundarySegmentFunction = boundarySegmentWrapper2d;
-    // Cast to a type which may be wrong, just to make the code compile.
-    // But this code only gets executed when the cast is correct anyways.
-    boundarySegments_.push_back((BoundarySegment<dim>*) new LinearSegment2d(*(FieldVector<double,2>*)(&coordinates[0]),
-                                                                            *(FieldVector<double,2>*)(&coordinates[1])));
-  }
-
-  // Actually create the segment
-  if (UG_NS<dim>::CreateBoundarySegment(segmentName,            // internal name of the boundary segment
-                                        1,                      //  id of left subdomain
-                                        2,                      //  id of right subdomain
-                                        segmentIndex,           // Index of the segment
-                                        1,                      // Resolution, only for the UG graphics
-                                        vertices_c_style,       // Vertex indices
-                                        alpha,                  // The local coordinates range
-                                        beta,                   //    of the boundary segment
-                                        boundarySegmentFunction,
-                                        const_cast<BoundarySegment<dim>*>(boundarySegments_.back()))==NULL) {
-    DUNE_THROW(GridError, "Calling UG" << dim << "d::CreateBoundarySegment failed!");
-  }
-#endif
-
 }
 
 template <int dim>
