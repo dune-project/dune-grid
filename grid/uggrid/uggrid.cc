@@ -50,18 +50,6 @@ template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
 template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
 
-template < int dim>
-inline Dune::UGGrid < dim >::UGGrid() : multigrid_(NULL),
-                                        leafIndexSet_(*this),
-                                        globalIdSet_(*this),
-                                        localIdSet_(*this),
-                                        refinementType_(LOCAL),
-                                        omitGreenClosure_(false),
-                                        someElementHasBeenMarkedForRefinement_(false)
-{
-  init(500);
-}
-
 template <int dim>
 inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
   : multigrid_(NULL),
@@ -71,12 +59,6 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     refinementType_(LOCAL),
     omitGreenClosure_(false),
     someElementHasBeenMarkedForRefinement_(false)
-{
-  init(heapSize);
-}
-
-template < int dim >
-inline void Dune::UGGrid < dim >::init(unsigned int heapSize)
 {
   heapsize = heapSize;
 

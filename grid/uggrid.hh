@@ -198,14 +198,7 @@ namespace Dune {
      * memory only once.  I don't know what happens if you create UGGrids with
      * differing heap sizes.
      */
-    UGGrid(unsigned int heapSize);
-
-    /** \brief Constructor with default memory settings
-     *
-     * The default values are 500MB for the general heap and 10MB for
-     * the environment heap.
-     */
-    UGGrid();
+    UGGrid(unsigned int heapSize=500);
 
     //! Desctructor
     ~UGGrid();
@@ -515,9 +508,6 @@ namespace Dune {
     std::vector<FixedArray<unsigned int, dim*2-2> > boundarySegmentVertices_;
 
     CollectiveCommunication<UGGrid> ccobj;
-
-    // Start up the UG system
-    void init(unsigned int heapSize);
 
     // Recomputes entity indices after the grid was changed
     void setIndices();
