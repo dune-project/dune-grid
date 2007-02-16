@@ -378,15 +378,50 @@ namespace Dune {
       if (cc==0)
         return id<0>(e);
 
-      if (cc==dim) {
+      const typename UG_NS<dim>::Element* target = grid_.getRealImplementation(e).target_;
+
+      if (dim-cc==1) {
+        GeometryType type = e.geometry().type();
+        int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
+        const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
+                                                                    UG_NS<dim>::Corner(target,  UGGridRenumberer<dim>::verticesDUNEtoUG(b,type)));
+
+        // If this edge is the copy of an edge on a lower level we return the id of that lower
+        // edge, because Dune wants entities which are copies of each other to have the same id.
+        const typename UG_NS<dim>::Edge* fatherEdge;
+        fatherEdge = GetFatherEdge(edge);
+        while (fatherEdge) {
+          edge = fatherEdge;
+          fatherEdge = GetFatherEdge(edge);
+        }
+
 #ifdef ModelP
-        return UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type()))->ddd.gid;
+        return edge->ddd.gid;
 #else
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(grid_.getRealImplementation(e).target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+        return edge->id;
 #endif
       }
 
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subGlobalId isn't implemented for cc==" << cc );
+      if (cc==1) {  // Faces
+#ifdef ModelP
+        return UG_NS<dim>::SideVector(grid_.getRealImplementation(e).target_,
+                                      UGGridRenumberer<dim>::facesDUNEtoUG(i,e.geometry().type()))->ddd.gid;
+#else
+        return UG_NS<dim>::SideVector(grid_.getRealImplementation(e).target_,
+                                      UGGridRenumberer<dim>::facesDUNEtoUG(i,e.geometry().type()))->id;
+#endif
+      }
+
+      if (cc==dim) {
+#ifdef ModelP
+        return UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type()))->ddd.gid;
+#else
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+#endif
+      }
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << ">::subGlobalId isn't implemented for cc==" << cc );
     }
 
     //private:
@@ -441,13 +476,50 @@ namespace Dune {
     template<int cc>
     LocalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      const typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(e).target_;
+      const typename UG_NS<dim>::Element* target = grid_.getRealImplementation(e).target_;
       if (cc==dim)
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
-      else if (cc==0)
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.geometry().type())));
+      else if (dim-cc==1) {  // Edges
+        GeometryType type = e.geometry().type();
+        int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
+        int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
+        const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
+                                                                    UG_NS<dim>::Corner(target,  UGGridRenumberer<dim>::verticesDUNEtoUG(b,type)));
+
+        // If this edge is the copy of an edge on a lower level we return the id of that lower
+        // edge, because Dune wants entities which are copies of each other to have the same id.
+        const typename UG_NS<dim>::Edge* fatherEdge;
+        fatherEdge = GetFatherEdge(edge);
+        while (fatherEdge) {
+          edge = fatherEdge;
+          fatherEdge = GetFatherEdge(edge);
+        }
+
+        return edge->id;
+      } else if (cc==1) {  // Faces
+
+#if 0
+        // This outcommented code is deficient:  we need to find the lowest copy of this
+        // side vector.
+
+        // Find coarsest element which contains this face
+        typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(target);
+
+        while (father != 0) {
+
+          if (!UG_NS<dim>::hasCopy(father))
+            break;
+
+          target = father;
+          father = UG_NS<dim>::EFather(target);
+        }
+#endif
+        return UG_NS<dim>::SideVector(target, UGGridRenumberer<dim>::facesDUNEtoUG(i,e.geometry().type()))->id;
+
+      } else if (cc==0)
         return id<0>(e);
       else
-        DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
+        DUNE_THROW(GridError, "UGGrid<" << dim << ">::subLocalId isn't implemented for cc==" << cc );
 
     }
 

@@ -518,7 +518,7 @@ namespace Dune {
     }
 
     //! access side vector from element
-    static UG_NS<3>::Vector* SideVector (UG_NS<3>::Element* theElement, int i)
+    static UG_NS<3>::Vector* SideVector (const UG_NS<3>::Element* theElement, int i)
     {
       using UG::D3::VECTOR;
       using UG::D3::svector_offset;
