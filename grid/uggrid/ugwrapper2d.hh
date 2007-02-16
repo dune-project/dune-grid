@@ -481,7 +481,7 @@ namespace Dune {
     }
 
     //! access side vector from element (this is just a dummy to compile code also in 2d)
-    static Vector* SideVector (UG_NS<2>::Element* theElement, int i)
+    static Vector* SideVector (const UG_NS<2>::Element* theElement, int i)
     {
       DUNE_THROW(GridError, "side vector only in 3D!");
       return NULL;
