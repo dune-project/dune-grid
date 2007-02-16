@@ -197,9 +197,8 @@ namespace Dune {
      * \param heapSize The size of UG's internal memory in megabytes.  UG allocates
      * memory only once.  I don't know what happens if you create UGGrids with
      * differing heap sizes.
-     * \param envHeapSize The size of UG's environment heap, also in megabytes.
      */
-    UGGrid(unsigned int heapSize, unsigned int envHeapSize);
+    UGGrid(unsigned int heapSize);
 
     /** \brief Constructor with default memory settings
      *
@@ -518,7 +517,7 @@ namespace Dune {
     CollectiveCommunication<UGGrid> ccobj;
 
     // Start up the UG system
-    void init(unsigned int heapSize, unsigned int envHeapSize);
+    void init(unsigned int heapSize);
 
     // Recomputes entity indices after the grid was changed
     void setIndices();
@@ -535,11 +534,6 @@ namespace Dune {
     UGGridGlobalIdSet<const UGGrid<dim> > globalIdSet_;
 
     UGGridLocalIdSet<const UGGrid<dim> > localIdSet_;
-
-    //! Marks whether the UG environment heap size is taken from
-    //! an existing defaults file or whether the values from
-    //! the UGGrid constructor are taken
-    static bool useExistingDefaultsFile;
 
     //! The type of grid refinement currently in use
     RefinementType refinementType_;

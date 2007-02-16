@@ -49,9 +49,6 @@ static int boundarySegmentWrapper3d(void *data, double *param, double *result)
 template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
 template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
-template<> bool Dune::UGGrid<2>::useExistingDefaultsFile = false;
-template<> bool Dune::UGGrid<3>::useExistingDefaultsFile = false;
-
 
 template < int dim>
 inline Dune::UGGrid < dim >::UGGrid() : multigrid_(NULL),
@@ -62,11 +59,11 @@ inline Dune::UGGrid < dim >::UGGrid() : multigrid_(NULL),
                                         omitGreenClosure_(false),
                                         someElementHasBeenMarkedForRefinement_(false)
 {
-  init(500, 10);
+  init(500);
 }
 
 template <int dim>
-inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
+inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
   : multigrid_(NULL),
     leafIndexSet_(*this),
     globalIdSet_(*this),
@@ -75,39 +72,20 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
     omitGreenClosure_(false),
     someElementHasBeenMarkedForRefinement_(false)
 {
-  init(heapSize, envHeapSize);
+  init(heapSize);
 }
 
 template < int dim >
-inline void Dune::UGGrid < dim >::init(unsigned int heapSize, unsigned envHeapSize)
+inline void Dune::UGGrid < dim >::init(unsigned int heapSize)
 {
   heapsize = heapSize;
 
   if (numOfUGGrids==0) {
 
-    useExistingDefaultsFile = false;
-
-    if (access("defaults", F_OK) == 0) {
-
-      dverb << "Using existing UG defaults file" << std::endl;
-      useExistingDefaultsFile = true;
-
-    } else {
-
-      // Pass the explicitly given environment heap size
-      // This is only possible by passing a pseudo 'defaults'-file
-      FILE* fp = fopen("defaults", "w");
-      fprintf(fp, "envmemory %d000000\n", envHeapSize);
-      fprintf(fp, "mutelevel -1001\n");
-      fclose(fp);
-
-    }
-
     // Init the UG system
     int argc = 1;
     char* arg = {"dune.exe"};
     char** argv = &arg;
-
 
     if (UG_NS<dim>::InitUg(&argc, &argv))
       DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
@@ -185,15 +163,8 @@ inline Dune::UGGrid < dim >::~UGGrid()
   numOfUGGrids--;
 
   // Shut down UG if this was the last existing UGGrid object
-  if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0) {
-
+  if (UGGrid<2>::numOfUGGrids + UGGrid<3>::numOfUGGrids == 0)
     UG_NS<dim>::ExitUg();
-
-    // remove defaults file, if we wrote one on startup
-    if (!useExistingDefaultsFile)
-      system("rm defaults");
-
-  }
 
   // Delete levelIndexSets
   for (unsigned int i=0; i<levelIndexSets_.size(); i++)
