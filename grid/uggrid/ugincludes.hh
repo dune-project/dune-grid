@@ -13,11 +13,7 @@
  */
 
 #include <gm.h>
-#ifdef UG_LGMDOMAIN
-#include <lgm_domain.h>
-#else
 #include <std_domain.h>
-#endif
 #include <initug.h>
 #include <commands.h>
 #include <formats.h>
