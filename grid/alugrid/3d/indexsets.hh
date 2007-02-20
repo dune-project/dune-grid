@@ -119,6 +119,10 @@ namespace Dune {
       return grid_.template leafbegin<cd,pitype> ();
     }
 
+    //! return true because all entities are contained in this set
+    template <class EntityType>
+    bool contains (const EntityType &) const { return true; }
+
   private:
     // our Grid
     const GridType & grid_;
