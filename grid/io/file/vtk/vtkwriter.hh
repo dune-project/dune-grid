@@ -1217,32 +1217,6 @@ namespace Dune
           blocklength = nvertices * (3) * sizeof(float);
         stream.write(blocklength);
         std::vector<bool> visited(vertexmapper->size(), false);
-#if 0
-        for (CellIterator eit=is.template begin<0,vtkPartition>(); eit!=is.template end<0,vtkPartition>(); ++eit)
-          if (eit->partitionType()==InteriorEntity)
-            for (int i=0; i<eit->template count<n>(); ++i)
-              if (datamode == VTKOptions::conforming)
-              {
-                int alpha = vertexmapper->template map<n>(*eit,i);
-                if (!visited[alpha])
-                {
-                  for (int j=0; j<(*it)->ncomps(); j++)
-                  {
-                    float data = (*it)->evaluate(j,*eit,ReferenceElements<DT,n>::general(eit->geometry().type()).position(i,n));
-                    stream.write(data);
-                  }
-                  visited[alpha] = true;
-                }
-              }
-              else
-              {
-                for (int j=0; j<(*it)->ncomps(); j++)
-                {
-                  float data = (*it)->evaluate(j,*eit,ReferenceElements<DT,n>::general(eit->geometry().type()).position(i,n));
-                  stream.write(data);
-                }
-              }
-#else
         for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
         {
           for (int j=0; j<(*it)->ncomps(); j++)
@@ -1256,7 +1230,6 @@ namespace Dune
             stream.write(data);
           }
         }
-#endif
       }
 
       // cell data
@@ -1276,42 +1249,6 @@ namespace Dune
       blocklength = nvertices * 3 * sizeof(float);
       stream.write(blocklength);
       std::vector<bool> visited(vertexmapper->size(), false);
-#if 0
-      for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-        if (it->partitionType()==InteriorEntity)
-          for (int i=0; i<it->template count<n>(); ++i)
-            if (datamode == VTKOptions::conforming)
-            {
-              int alpha = vertexmapper->template map<n>(*it,i);
-              if (!visited[alpha])
-              {
-                int dimw=w;
-                float data;
-                for (int j=0; j<std::min(dimw,3); j++)
-                {
-                  data = it->geometry()[i][j];
-                  stream.write(data);
-                }
-                data = 0;
-                for (int j=std::min(dimw,3); j<3; j++)
-                  stream.write(data);
-                visited[alpha] = true;
-              }
-            }
-            else
-            {
-              int dimw=w;
-              float data;
-              for (int j=0; j<std::min(dimw,3); j++)
-              {
-                data = it->geometry()[i][j];
-                stream.write(data);
-              }
-              data = 0;
-              for (int j=std::min(dimw,3); j<3; j++)
-                stream.write(data);
-            }
-#else
       for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
       {
         int dimw=w;
@@ -1325,41 +1262,14 @@ namespace Dune
         for (int j=std::min(dimw,3); j<3; j++)
           stream.write(data);
       }
-#endif
 
       // connectivity
       blocklength = ncorners * sizeof(unsigned int);
       stream.write(blocklength);
-#if 0
-      if (datamode == VTKOptions::conforming)
-      {
-        for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-          if (it->partitionType()==InteriorEntity)
-            for (int i=0; i<it->template count<n>(); ++i)
-            {
-              int data = number[vertexmapper->template map<n>(*it,renumber(*it,i))];
-              stream.write(data);
-            }
-      }
-      else
-      {
-        int offset = 0;
-        for (CellIterator it=is.template begin<0,vtkPartition>(); it!=is.template end<0,vtkPartition>(); ++it)
-          if (it->partitionType()==InteriorEntity)
-          {
-            for (int i=0; i<it->template count<n>(); ++i)
-            {
-              stream.write(offset + renumber(*it,i));
-            }
-            offset += it->template count<n>();
-          }
-      }
-#else
       for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
       {
         stream.write(it.id());
       }
-#endif
 
       // offsets
       blocklength = ncells * sizeof(unsigned int);
