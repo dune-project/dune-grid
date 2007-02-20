@@ -539,7 +539,6 @@ struct GridInterface
   void (*c)(const Grid&);
 };
 
-#if 0
 // check
 // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0]
 // for codim=cd
@@ -601,7 +600,6 @@ struct subIndexCheck<-1, Grid, Entity, false>
     return;
   }
 };
-#endif
 
 // name says all
 template <class Grid>
@@ -641,9 +639,7 @@ void zeroEntityConsistency (Grid &g)
                    c1 << " - " << c2 << " || = " << (c2-c1).two_norm() << " [ with i = " << c << " ]");
       }
     }
-#if 0
     subIndexCheck<Grid::dimension, Grid, Entity, true> sick(g,*it);
-#endif
   }
 }
 
