@@ -101,18 +101,11 @@ namespace Dune {
     //! geometry of this entity
     const Geometry & geometry () const;
 
-    /*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-       This can speed up on-the-fly interpolation for linear conforming elements
-       Possibly this is sufficient for all applications we want on-the-fly.
-     */
-    EntityPointer ownersFather () const;
-
-    //! my position in local coordinates of the owners father
-    FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
-
     // set element as normal entity
     void setElement(const ElementType & item);
     void setElement(const ElementType & item, const int level, int twist=0, int face = -1);
+
+    // not needed anymore
     void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
 
     //! setGhost is not valid for this codim
@@ -156,16 +149,12 @@ namespace Dune {
 
     // corresponding ALU3dGridElement
     const IMPLElementType * item_;
-    const ALU3DSPACE HElementType * father_;
 
     //! the cuurent geometry
     mutable GeometryObject geo_;
     mutable GeometryImp & geoImp_;
 
     mutable bool builtgeometry_;       //!< true if geometry has been constructed
-
-    mutable bool localFCoordCalced_;
-    mutable FieldVector<alu3d_ctype, dim> localFatherCoords_; //! coords of vertex in father
 
     mutable PartitionType partitionType_;
   };
