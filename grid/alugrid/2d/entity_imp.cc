@@ -48,40 +48,35 @@ namespace Dune {
   ALU2dGridEntity(const GridImp &grid, int level)
     : grid_(grid),
       item_(0),
-      father_(0),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
       builtgeometry_(false),
       level_(level),
-      face_(-1),
-      localFCoordCalced_(false) {}
+      face_(-1)
+  {}
 
 
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp>:: setElement(const ElementType &element, int face, int level) const {
     item_= const_cast<ElementType *> (&element);
     builtgeometry_=false;
-    //level_ = item_->level();
     level_ = level;
     face_ = face;
-    localFCoordCalced_=false;
   }
 
 
   template<>
-  inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const ALU2DSPACE Vertex & vx) {
+  inline void ALU2dGridEntity<2,2,ALU2dGrid<2,2> > :: setElement(const HElementType & el, const ALU2DSPACE Vertex & vx)
+  {
     item_   = const_cast<ElementType *> (&vx);
     level_  = (*item_).level();
-    father_ = (&el);
     builtgeometry_=false;
-    localFCoordCalced_=false;
   }
 
   //! set item pointer to NULL
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp> :: removeElement() {
     item_ = 0;
-    father_=0;
   }
 
   //! Copy Constructor
@@ -90,14 +85,12 @@ namespace Dune {
   ALU2dGridEntity(const ALU2dGridEntity<cd,dim,GridImp> & org)
     : grid_(org.grid_),
       item_(org.item_),
-      father_(org.father_),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
       builtgeometry_(false),
       level_(org.level_),
-      face_(org.face_),
-      localFCoordCalced_(org.localFCoordCalced_),
-      localFatherCoords_() { }
+      face_(org.face_)
+  {}
 
   //! geometry of this entity
   template<int cd, int dim, class GridImp>
@@ -133,33 +126,6 @@ namespace Dune {
     }
     return isBoundary;
   }
-
-
-  template<int cd, int dim, class GridImp>
-  inline typename ALU2dGridEntity<cd,dim,GridImp>::EntityPointer
-  ALU2dGridEntity<cd,dim,GridImp>:: ownersFather() const {
-    assert(cd == dim); // this method only exists for codim == dim
-    if( !father_ )
-    {
-      dwarn << "No Father for given Entity! \n";
-      return ALU2dGridEntityPointer<0,GridImp> (grid_,(*father_));
-    }
-    return ALU2dGridEntityPointer<0,GridImp> (grid_,(*father_));
-  }
-
-  template<int cd, int dim, class GridImp>
-  inline FieldVector<alu2d_ctype, dim> &
-  ALU2dGridEntity<cd,dim,GridImp>:: positionInOwnersFather() const {
-    assert( cd == dim );
-    if(!localFCoordCalced_)
-    {
-      EntityPointer vati = this->ownersFather();
-      localFatherCoords_ = (*vati).geometry().local( this->geometry()[0] );
-      localFCoordCalced_ = true;
-    }
-    return localFatherCoords_;
-  }
-
 
   //**********************************************************************
   //
