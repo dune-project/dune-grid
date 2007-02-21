@@ -199,7 +199,7 @@ namespace Dune {
      */
     UGGrid();
 
-    //! Desctructor
+    //! Destructor
     ~UGGrid();
 
     //! Return maximum level defined in this grid. Levels are numbered
