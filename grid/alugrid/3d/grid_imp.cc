@@ -1262,8 +1262,7 @@ namespace Dune {
       std::ofstream out (extraName.c_str());
       if(out)
       {
-        out.precision (16);
-        out << time << " ";
+        out << std::scientific << time << " ";
         out << maxlevel_ << " ";
         out.close();
       }
@@ -1316,8 +1315,7 @@ namespace Dune {
       std::ifstream in (extraName.c_str());
       if(in)
       {
-        in.precision (16);
-        in  >> time;
+        in  >> std::scientific >> time;
         in  >> maxlevel_;
         in.close();
       }
