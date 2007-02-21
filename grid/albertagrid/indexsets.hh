@@ -65,6 +65,14 @@ namespace Dune {
   public:
     enum { ncodim = numCodim };
 
+    //! return true if entity is contained in set
+    template <class EntityType>
+    bool contains(const EntityType &) const
+    {
+      // always true for this set
+      return true;
+    }
+
     //! return index of entity
     template <class EntityType>
     int index (const EntityType & ep) const
