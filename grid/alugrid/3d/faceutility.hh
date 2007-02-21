@@ -124,19 +124,19 @@ namespace Dune {
     typedef FaceTopologyMapping<type> FaceTopo;
     typedef NonConformingFaceMapping<type> NonConformingMappingType;
     typedef typename SelectType<
-        SameType<Int2Type<tetra>,Int2Type<type> >::value,
+        is_same<Int2Type<tetra>,Int2Type<type> >::value,
         ALU3DSPACE LinearSurfaceMapping,
         BilinearSurfaceMapping
         >::Type SurfaceMappingType;
 
     typedef typename SelectType<
-        SameType<Int2Type<tetra>, Int2Type<type> >::value,
+        is_same<Int2Type<tetra>, Int2Type<type> >::value,
         ReferenceSimplex<alu3d_ctype, 3>,
         ReferenceCube<alu3d_ctype, 3>
         >::Type ReferenceElementType;
 
     typedef typename SelectType<
-        SameType<Int2Type<tetra>, Int2Type<type> >::value,
+        is_same<Int2Type<tetra>, Int2Type<type> >::value,
         ReferenceSimplex<alu3d_ctype, 2>,
         ReferenceCube<alu3d_ctype, 2>
         >::Type ReferenceFaceType;

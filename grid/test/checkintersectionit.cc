@@ -254,7 +254,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
         // /////////////////////////////////////////////////////////
         //   Check the types defined by the iterator
         // /////////////////////////////////////////////////////////
-        IsTrue< SameType<
+        IsTrue< is_same<
                 typename IntersectionIterator::ctype,
                 typename GridType::ctype>::value == true >::yes();
 
@@ -286,7 +286,7 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
       // /////////////////////////////////////////////////////////
       //   Check the types defined by the iterator
       // /////////////////////////////////////////////////////////
-      IsTrue< SameType<
+      IsTrue< is_same<
               typename IntersectionIterator::ctype,
               typename GridType::ctype>::value == true >::yes();
 

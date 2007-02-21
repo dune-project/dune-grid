@@ -69,7 +69,7 @@ namespace Dune {
     typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
 
     typedef typename SelectType<
-        SameType<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
+        is_same<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
         ALU3dGridGeometricFaceInfoTetra,
         ALU3dGridGeometricFaceInfoHexa
         >::Type GeometryInfoType;
@@ -284,7 +284,7 @@ namespace Dune {
     typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
 
     typedef typename SelectType<
-        SameType<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
+        is_same<Int2Type<tetra>, Int2Type<GridImp::elementType> >::value,
         ALU3dGridGeometricFaceInfoTetra,
         ALU3dGridGeometricFaceInfoHexa
         >::Type GeometryInfoType;

@@ -106,7 +106,7 @@ void checkGeometryInFather(const GridType& grid) {
       //   Check for types and constants
       // //////////////////////////////////////////////////////
 
-      IsTrue< SameType<
+      IsTrue< is_same<
               typename Geometry::ctype,
               typename GridType::ctype>::value == true >::yes();
 

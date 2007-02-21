@@ -66,7 +66,7 @@ namespace Dune
     inline static IntersectionIterator begin(T& iter)
     {
       // Trigger a compile error
-      IsTrue<SameType<TypeTag,LevelTag>::value||SameType<TypeTag,LevelTag>::value>::yes();
+      IsTrue<is_same<TypeTag,LevelTag>::value||is_same<TypeTag,LevelTag>::value>::yes();
       return iter.ileafbegin();
     }
     /**
@@ -77,7 +77,7 @@ namespace Dune
     inline static IntersectionIterator end(T& iter)
     {
       // Trigger a compile error
-      IsTrue<SameType<TypeTag,LevelTag>::value||SameType<TypeTag,LevelTag>::value>::yes();
+      IsTrue<is_same<TypeTag,LevelTag>::value||is_same<TypeTag,LevelTag>::value>::yes();
       return iter.ileafend();
     }
   };

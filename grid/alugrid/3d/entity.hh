@@ -223,7 +223,7 @@ namespace Dune {
     friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
     typedef typename SelectType<
-        SameType<GridImp,const ALU3dGrid<3, 3, tetra> >::value,
+        is_same<GridImp,const ALU3dGrid<3, 3, tetra> >::value,
         ReferenceSimplex<alu3d_ctype, 3>,
         ReferenceCube<alu3d_ctype, 3>
         >::Type ReferenceElementType;

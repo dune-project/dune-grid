@@ -2833,7 +2833,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        IsTrue< ( SameType<DT,Y>::value ) >::yes();
+        IsTrue< ( is_same<DT,Y>::value ) >::yes();
         a[i++] = data;
       }
 
@@ -2841,7 +2841,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        IsTrue< ( SameType<DT,Y>::value ) >::yes();
+        IsTrue< ( is_same<DT,Y>::value ) >::yes();
         data = a[j++];
       }
 
