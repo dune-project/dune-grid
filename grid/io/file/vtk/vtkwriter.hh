@@ -853,8 +853,7 @@ namespace Dune
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
         indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
-        if ((*it)->ncomps()>1)
-          s << "NumberOfComponents=\"" << (*it)->ncomps() << "\" ";
+        s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
         if (outputtype==VTKOptions::ascii)
           s << "format=\"ascii\"/>" << std::endl;
         if (outputtype==VTKOptions::binary)
@@ -884,8 +883,7 @@ namespace Dune
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
         indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
-        if ((*it)->ncomps()>1)
-          s << "NumberOfComponents=\"" << (*it)->ncomps() << "\" ";
+        s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
         if (outputtype==VTKOptions::ascii)
           s << "format=\"ascii\"/>" << std::endl;
         if (outputtype==VTKOptions::binary)
@@ -1211,7 +1209,7 @@ namespace Dune
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
 
-        blocklength = nvertices * ((*it)->ncomps()+1) * sizeof(float);
+        blocklength = nvertices * (*it)->ncomps() * sizeof(float);
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
         if((*it)->ncomps()==2)
           blocklength = nvertices * (3) * sizeof(float);
@@ -1411,8 +1409,7 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>1)
-          s << "NumberOfComponents=\"" << 3 << "\" ";
+        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
         s << "format=\"ascii\">" << std::endl;
       }
 
@@ -1451,8 +1448,7 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>1)
-          s << "NumberOfComponents=\"" << 3 << "\" ";
+        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
         s << "format=\"binary\">" << std::endl;
         buffer = new char[bufsize*sizeof(T)];
         code = new char[2*bufsize*sizeof(T)];
@@ -1517,8 +1513,7 @@ namespace Dune
         VTKTypeNameTraits<T> tn;
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-        if (ncomps>1)
-          s << "NumberOfComponents=\"" << 3 << "\" ";
+        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
         s << "format=\"appended\" offset=\""<< bytecount << "\" />" << std::endl;
         bytecount += 4;   // header
       }
