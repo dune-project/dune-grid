@@ -2739,6 +2739,7 @@ namespace Dune {
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
     {
+      if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       return *(indexsets[level]);
     }
 
