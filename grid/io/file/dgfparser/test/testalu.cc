@@ -28,10 +28,9 @@ try {
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
 
-#if HAVE_ALUGRID
   {
     typedef ALUCubeGrid<3,3> GridType;
-    std::string filename("examplegrid6.dgf");
+    std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -41,7 +40,7 @@ try {
   }
   {
     typedef ALUSimplexGrid<3,3> GridType;
-    std::string filename("examplegrid6.dgf");
+    std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -49,7 +48,7 @@ try {
 
     test(*gridptr);
   }
-#endif
+
   return 0;
 }
 catch (Dune::Exception &e) {
