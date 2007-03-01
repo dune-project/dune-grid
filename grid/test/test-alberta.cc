@@ -54,12 +54,12 @@ int main () {
 
     if((dim == 2) && (dimworld == 2) )
     {
-      filename << "simplex-testgrid-" << dim
+      filename << SRCDIR << "/simplex-testgrid-" << dim
                << "-" << dimworld << ".dgf";
     }
     else if((dim == 3) && (dimworld == 3) )
     {
-      filename << "alberta-testgrid-3-3.al";
+      filename << SRCDIR << "/alberta-testgrid-3-3.al";
     }
 
     std::cout << std::endl << "AlbertaGrid<" << dim

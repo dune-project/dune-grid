@@ -67,13 +67,13 @@ test_yaspgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
 # this implicitly checks the autoconf-test as well...
 test_alberta_SOURCES = test-alberta.cc
-test_alberta_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS) -DSRCDIR="\"$(srcdir)\""
 test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
 test_alberta_DEPENDENCIES = $(LOCAL_LIBS)
 
 # files for alu3dgrid
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
-test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
+test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS) -DSRCDIR=$(srcdir)
 test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
@@ -97,7 +97,7 @@ GRIDFILES = alberta-testgrid-3-3.al \
   cube-testgrid-3-3-large.dgf cube-testgrid-3-3.dgf
 
 # gridcheck not used explicitly, we should still ship it :)
-EXTRA_DIST = gridcheck.cc $(GRIDFILES)
+EXTRA_DIST = $(SOURCES) $(GRIDFILES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
 

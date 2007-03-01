@@ -187,7 +187,7 @@ int main (int argc , char **argv) {
       // check non-confrom ALUGrid for 2d
       {
         typedef ALUSimplexGrid<2,2> GridType;
-        std::string filename("simplex-testgrid-2-2.dgf");
+        std::string filename(SRCDIR "/simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr,2);
       }
@@ -195,13 +195,13 @@ int main (int argc , char **argv) {
       // check confrom ALUGrid for 2d
       {
         typedef ALUConformGrid<2,2> GridType;
-        std::string filename("simplex-testgrid-2-2.dgf");
+        std::string filename(SRCDIR "/simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr,2);
       }
 
       {
-        std::string filename;
+        std::string filename = SRCDIR "/";
         if (mysize<=2)
           filename += "cube-testgrid-3-3.dgf";
         else
@@ -228,7 +228,7 @@ int main (int argc , char **argv) {
       }
 
       {
-        std::string filename;
+        std::string filename = SRCDIR "/";
         if (mysize<=2)
           filename += "simplex-testgrid-3-3.dgf";
         else
