@@ -231,10 +231,11 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp>::
   setElement(ALU3DSPACE HElementType & element)
   {
-    // int argument (twist) is only a dummy parameter here,
-    // needed for consistency reasons
-
     item_= static_cast<IMPLElementType *> (&element);
+    assert( item_ );
+    // in parallel this depends
+    assert( ! item_->isGhost() );
+
     isGhost_ = false;
     builtgeometry_=false;
     level_   = (*item_).level();
@@ -510,6 +511,7 @@ namespace Dune {
   partitionType () const
   {
     assert( item_ );
+    // make sure we really got a ghost
     assert( isGhost_ == item_->isGhost() );
     return ((isGhost_) ?  GhostEntity : InteriorEntity);
   }
@@ -520,9 +522,14 @@ namespace Dune {
     return isLeaf_;
   }
   template<int dim, class GridImp>
-  inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
+  inline ALU3dGridHierarchicIterator<GridImp>
+  ALU3dGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
   {
     assert(item_ != 0);
+#if ALU3DGRID_PARALLEL
+    // hierarchic walk on ghost will deliver wrong results
+    if( isGhost_ ) return this->hend(maxlevel);
+#endif
     return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel);
   }
 
