@@ -842,7 +842,6 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()
   {
-    // reset all refined markers
     {
       // old fashioned way
       typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
@@ -888,6 +887,9 @@ namespace Dune {
       // build new Id Set. Only do that after updateStatus, because here
       // the item lists are needed
       if(globalIdSet_) globalIdSet_->updateIdSet();
+
+      // unset all leaf markers
+      postAdapt();
     }
 
     assert( checkMaxLevel() );
@@ -942,8 +944,9 @@ namespace Dune {
 
       // compress data , wrapper for dof manager
       gs.dofCompress();
+
+      postAdapt();
     }
-    postAdapt();
     assert( checkMaxLevel() );
     return changed;
 #else
