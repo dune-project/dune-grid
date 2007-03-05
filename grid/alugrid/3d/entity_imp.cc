@@ -233,9 +233,8 @@ namespace Dune {
   {
     item_= static_cast<IMPLElementType *> (&element);
     assert( item_ );
-    // in parallel this depends
+    // make sure this method is not called for ghosts
     assert( ! item_->isGhost() );
-
     isGhost_ = false;
     builtgeometry_=false;
     level_   = (*item_).level();
@@ -781,19 +780,40 @@ namespace Dune {
   clone (const ALU3dGridEntityPointerType & org)
   {
     assert( &grid_ == &org.grid_ );
+
     // set item
     item_ = org.item_;
 
-    // if entity exists, just remove item pointer
     if(item_)
     {
+      // if no entity check org entity
+      // if no org entity then nothing is done
       if( !entity_ )
+      {
         getEntity(org);
+      }
       else
-        this->entityImp().setElement( *item_ );
+      {
+#if ALU3DGRID_PARALLEL
+        // in case of ghost element use different set method
+        if( item_->isGhost() )
+        {
+          // on ghosts entity pointers entity always exists
+          assert( org.entity_ );
+          this->entityImp().setEntity( org.entityImp() );
+        }
+        else
+#endif
+        {
+          // otherwise item is set
+          this->entityImp().setElement( *item_ );
+        }
+      }
     }
     else
+    {
       this->done();
+    }
     return ;
   }
 
