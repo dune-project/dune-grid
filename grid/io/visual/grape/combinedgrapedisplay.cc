@@ -49,14 +49,33 @@ namespace Dune
     grditer_ = dispList_.begin();
     enditer_ = dispList_.end();
 
+    partEnd_  = gridPartList_.end();
+    partIter_ = gridPartList_.begin();
+
     disp_ = 0;
 
+    return callFirstMacro(he);
+  }
+
+  template<class DisplayType>
+  inline int CombinedGrapeDisplay<DisplayType>::
+  callFirstMacro(DUNE_ELEM * he)
+  {
     if(grditer_ != enditer_)
     {
       disp_ = *grditer_;
       GrapeInterface<dim,dimworld>::setThread( disp_->myRank() );
       he->display = (void *) disp_;
+      void * gridPart = he->gridPart;
+
+      // set appropriate grid part
+      if( partIter_ != partEnd_) he->gridPart = *partIter_;
+
+      // call first macro of current display
       int ret = disp_->firstMacro(he);
+
+      // set value from before
+      he->gridPart = gridPart;
       he->display = (void *) this;
       return ret;
     }
@@ -67,26 +86,28 @@ namespace Dune
   inline int CombinedGrapeDisplay<DisplayType>::
   next_macro (DUNE_ELEM * he)
   {
-    int ret = 0;
     if( disp_ )
     {
       he->display = (void *) disp_;
-      ret = disp_->nextMacro(he);
+      int ret = disp_->nextMacro(he);
       if(!ret)
       {
         ++grditer_;
+        if( partIter_ != partEnd_) ++partIter_;
         disp_ = 0;
-        if(grditer_ != enditer_)
-        {
-          disp_ = *grditer_;
-          GrapeInterface<dim,dimworld>::setThread( disp_->myRank() );
-          he->display = (void *) disp_;
-          ret = disp_->firstMacro(he);
-        }
+
+        return callFirstMacro(he);
       }
-      he->display = (void *)this;
+      else
+      {
+        he->display = (void *)this;
+        return ret;
+      }
     }
-    return ret;
+    else
+    {
+      return 0;
+    }
   }
 
   template<class DisplayType>
@@ -233,6 +254,8 @@ namespace Dune
     const int iteratorType = dat->iteratorType;
     const int partitionIteratorType = dat->partitionIteratorType;
 
+    gridPartList_.clear();
+
     for(grditer_ = dispList_.begin(); grditer_ != enditer_; ++grditer_)
     {
       DisplayType & disp = * (*grditer_);
@@ -242,6 +265,7 @@ namespace Dune
       {
         std::vector < DUNE_FDATA * > & vec = disp.getFdataVec();
         data = vec[func->mynum];
+        gridPartList_.push_back( data->gridPart );
       }
 
       disp.changeIterationMethods(iteratorType,partitionIteratorType,data);
