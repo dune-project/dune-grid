@@ -48,6 +48,13 @@ namespace Dune
     DisplayListIteratorType grditer_;
     DisplayListIteratorType enditer_;
 
+    typedef typename std::list< void * > GridPartListType;
+    GridPartListType gridPartList_;
+    typedef typename GridPartListType :: iterator GridPartListIteratorType;
+    GridPartListIteratorType partEnd_;
+    GridPartListIteratorType partIter_;
+
+
     // pointer to actual display
     DisplayType * disp_;
 
@@ -97,6 +104,7 @@ namespace Dune
     // --GrapeGridDisplay, Some Subroutines needed for display with GRAPE
     //
     //****************************************************************
+    inline int callFirstMacro(DUNE_ELEM * he) ;
     // first and next macro element via LevelIterator level 0
     inline int first_leaf (DUNE_ELEM * he) ;
     inline int next_leaf (DUNE_ELEM * he) ;
