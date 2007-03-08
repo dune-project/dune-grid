@@ -187,26 +187,24 @@ namespace ALUGridSpace {
       assert( this->containsItem(elem) );
       realEntity_.setElement( const_cast<HElementType &> (elem) );
 
-      if( variableSize_ )
-      {
-        size_t size = dc_.size( entity_ );
-        str.write( size );
-      }
+      // write size in case of variable size
+      writeSize( str, entity_);
+      // gather data
       dc_.gather(str, entity_);
     }
 
-    //! read Data of one element from stream
-    void recvData ( ObjectStreamType & str , HGhostType & ghost )
+    //! write Data of one ghost element to stream
+    void sendData ( ObjectStreamType & str , const HGhostType& ghost)
     {
       assert( this->containsItem( ghost ) );
-      // don't check containsElement here, because this
 
       // set ghost as entity
-      ImplGhostType & gh = static_cast <ImplGhostType &> (ghost);
-      realEntity_.setGhost( gh );
+      realEntity_.setGhost( const_cast <HGhostType &> (ghost) );
 
-      size_t size = getSize(str , entity_ );
-      dc_.scatter(str, entity_, size );
+      // write size in case of variable size
+      writeSize( str, entity_);
+      // gather data
+      dc_.gather(str, entity_);
     }
 
     //! read Data of one element from stream
@@ -218,6 +216,19 @@ namespace ALUGridSpace {
       size_t size = getSize(str, entity_);
       dc_.scatter(str, entity_, size);
     }
+
+    //! read Data of one element from stream
+    void recvData ( ObjectStreamType & str , HGhostType & ghost )
+    {
+      assert( this->containsItem( ghost ) );
+
+      // set ghost as entity
+      realEntity_.setGhost( ghost );
+
+      size_t size = getSize(str , entity_ );
+      dc_.scatter(str, entity_, size );
+    }
+
   protected:
     size_t getSize(ObjectStreamType & str, EntityType & en)
     {
@@ -229,6 +240,16 @@ namespace ALUGridSpace {
       }
       else
         return dc_.size(en);
+    }
+
+    // write variable size to stream
+    void writeSize(ObjectStreamType & str, EntityType & en)
+    {
+      if( variableSize_ )
+      {
+        size_t size = dc_.size( en );
+        str.write( size );
+      }
     }
   };
 
