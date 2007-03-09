@@ -241,9 +241,15 @@ namespace Dune {
     const GridType& operator*() const {
       return *gridptr_;
     }
+
     //! return const pointer to GridType instance
     const GridType* operator->() const {
       return gridptr_.operator -> ();
+    }
+
+    //! release pointer from internal ownership
+    GridType* release () {
+      return gridptr_.release();
     }
 
     //! assignment of grid pointer
@@ -296,7 +302,7 @@ namespace Dune {
         return emptyParam;
       }
     }
-  private:
+  protected:
     typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
     inline std::vector<double>& elementParams(DomainType& coord) {
       int idx=0;

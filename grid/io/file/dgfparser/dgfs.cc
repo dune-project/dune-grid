@@ -22,14 +22,20 @@ namespace Dune {
                               << " and connot be used to initialize an SGrid of dimension "
                               << dimworld);
     }
+
     FieldVector<double,dimworld> start;
-    FieldVector<double,dimworld> lang;
+    FieldVector<double,dimworld> upper;
     FieldVector<int,dimworld>    anz;
-    for (int i=0; i<dimworld; i++) {
+
+    for (int i=0; i<dimworld; ++i)
+    {
       start[i] = interval.start(i);
-      lang[i] = interval.length(i);
+      upper[i]  = start[i] + interval.length(i);
       anz[i]  = interval.segments(i);
     }
-    return new SGrid<dim,dimworld>(anz,start,lang);
+    // SGrid gets number of cells in each dircetion
+    // position of origin of the cube
+    // position of the upper right corner of the cube
+    return new SGrid<dim,dimworld>(anz,start,upper);
   }
 }
