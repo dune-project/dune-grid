@@ -2188,6 +2188,12 @@ namespace Dune {
       deallocatePointers(theglobalidset);
     }
 
+  private:
+    // do not copy this class
+    YaspGrid(const YaspGrid&);
+
+  public:
+
     /*! Return maximum level defined in this grid. Levels are numbered
           0 ... maxlevel with 0 the coarsest level.
      */
