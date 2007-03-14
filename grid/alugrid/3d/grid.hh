@@ -289,7 +289,7 @@ namespace Dune {
     //! element chunk for refinement
     enum {
       //! \brief normal default number of new elements for new adapt method
-      newElementsChunk_ = 100
+      newElementsChunk_ = 128
     };
 
     //! upper estimate on number of elements that could be created when a new element is created
@@ -297,7 +297,7 @@ namespace Dune {
       /** \brief if one element is refined then it
           causes apporximately not more than
           this number of new elements  */
-      refineEstimate_ = 40
+      refineEstimate_ = 8
     };
 
   protected:
