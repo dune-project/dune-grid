@@ -89,8 +89,7 @@ html-dist: $(DOXYGENHEADER)
 	  $(DOXYGEN) Doxyfile.tmp > doxygen.log 2>&1 <&- ; \
 	  rm -f Doxyfile.tmp; \
 	fi
-	rm -rf html-dist
-	if test -d html; then mv html html-dist; fi
+	if test -d html; then rm -rf html-dist; mv html html-dist; fi
 
 # how to install the doxygen documentation
 doxygen-install:
@@ -109,7 +108,8 @@ FORCE:
 include $(top_srcdir)/am/webstuff
 
 clean-local:
-	rm -rf html html-dist latex *~
+	if test -e DoxyDep; then rm -rf html html-dist; fi
+	rm -rf latex *~
 
 CLEANFILES = $(WHAT) $(DOXYGENTAG) $(DOXYGENHEADER)
 
