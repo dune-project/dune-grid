@@ -14,6 +14,6 @@ pkgconfig_DATA = dune-grid.pc
 
 # use configured compiler for "make distcheck"
 # doxygen is difficult to convince to build in a special directory...
-DISTCHECK_CONFIGURE_FLAGS = --with-dune-common="$(DUNE_COMMON_ROOT)" CXX="$(CXX)" CC="$(CC)" DOXYGEN="true"
+DISTCHECK_CONFIGURE_FLAGS = --with-dune-common="$(DUNE_COMMON_ROOT)" CXX="$(CXX)" CC="$(CC)" DOXYGEN="true" --enable-parallel=@ENABLE_PARALLEL@ MPICC="$(MPICC)"
 
 include $(top_srcdir)/am/global-rules
