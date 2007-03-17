@@ -8,6 +8,8 @@ test-sgrid
 test-oned
 test-ug
 test-yaspgrid
+test-dgfalu-uggrid-combination
+test-ug-lgm
 semantic.cache
 *.gcda
 *.gcno
