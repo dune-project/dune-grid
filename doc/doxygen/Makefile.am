@@ -109,7 +109,8 @@ FORCE:
 include $(top_srcdir)/am/webstuff
 
 clean-local:
-	rm -rf html html-dist latex *~
+	if test -e Doxydep; then rm -rf html html-dist; fi
+	rm -rf latex *~
 
 CLEANFILES = $(WHAT) $(DOXYGENTAG) $(DOXYGENHEADER)
 
