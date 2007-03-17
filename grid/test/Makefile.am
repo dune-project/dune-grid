@@ -108,6 +108,6 @@ GRIDFILES = alberta-testgrid-3-3.al \
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = gridcheck.cc $(GRIDFILES)
 
-CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
+CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log defaults
 
 include $(top_srcdir)/am/global-rules
