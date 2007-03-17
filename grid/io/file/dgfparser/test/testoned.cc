@@ -20,7 +20,7 @@ try
 
   {
     typedef OneDGrid GridType;
-    std::string filename("examplegrid5.dgf");
+    std::string filename(SRCDIR "/examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -28,7 +28,7 @@ try
   }
   {
     typedef OneDGrid GridType;
-    std::string filename("examplegrid6.dgf");
+    std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid

@@ -20,11 +20,10 @@ try {
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
 
-#if HAVE_UG
   {
     std::cout << std::endl << "check UGGrid<2>" << std::endl;
     typedef UGGrid<2> GridType;
-    std::string filename("examplegrid5.dgf");
+    std::string filename(SRCDIR "/examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
@@ -34,15 +33,13 @@ try {
   {
     std::cout << std::endl << "check UGGrid<3>" << std::endl;
     typedef UGGrid<3> GridType;
-    std::string filename("examplegrid6.dgf");
+    std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
     gridcheck(*gridptr);
   }
-#else
-  std::cerr << "WARNING: HAVE_UG == 0, skipping test! " << std::endl;
-#endif
+
   return 0;
 }
 catch (Dune::Exception &e) {
