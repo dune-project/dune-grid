@@ -578,9 +578,6 @@ namespace Dune {
     //! calculate maxlevel
     void calcMaxLevel();
 
-    //! calculate maxlevel
-    bool checkMaxLevel();
-
     //! make grid walkthrough and calc global size
     void recalcGlobalSize();
 

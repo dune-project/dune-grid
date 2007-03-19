@@ -349,41 +349,6 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::calcMaxLevel()
   {
-    /*
-       // old fashioned way
-       int testMaxLevel = 0;
-       typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
-       IteratorType w (*this, maxLevel(), nlinks() );
-
-       typedef typename IteratorType :: val_t val_t ;
-       typedef typename ALU3dImplTraits<elType> :: IMPLElementType IMPLElementType;
-
-       for (w.first () ; ! w.done () ; w.next ())
-       {
-       val_t & item = w.item();
-
-       IMPLElementType * elem = 0;
-       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
-       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
-
-       assert( elem );
-
-       int level = elem->level();
-       if(level > testMaxLevel) testMaxLevel = level;
-       }
-
-       maxlevel_ = testMaxLevel;
-     */
-    // new method
-    maxlevel_ = myGrid().maxLevel();
-  }
-
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::checkMaxLevel()
-  {
-#ifndef NDEBUG
     // old fashioned way
     int testMaxLevel = 0;
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper<0,All_Partition> IteratorType;
@@ -407,13 +372,7 @@ namespace Dune {
       int level = elem->level();
       if(level > testMaxLevel) testMaxLevel = level;
     }
-
-    //if( maxLevel() != testMaxLevel )
-    //  std::cout << "got maxLevel = " << maxLevel() << " and calculated " << testMaxLevel << "\n";
-    return ( testMaxLevel == maxLevel() );
-#else
-    return true;
-#endif
+    maxlevel_ = testMaxLevel;
   }
 
   // --calcExtras
@@ -822,17 +781,12 @@ namespace Dune {
       updateStatus();
     }
 
-    assert( checkMaxLevel () );
-
     // check whether we have balance
     dm.dofCompress();
 
     // here postAdapt is not called, because
     // reset of refinedTag is done in preCoarsening and postRefinement
     // methods of datahandle (see datahandle.hh)
-
-    // make sure maxLevel has the right value
-    assert( checkMaxLevel () );
 
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
     return refined;
@@ -864,9 +818,6 @@ namespace Dune {
         elem->resetRefinedTag();
       }
     }
-
-    // check if max Level is consisten with calculated mxl
-    assert( checkMaxLevel () );
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -892,7 +843,6 @@ namespace Dune {
       postAdapt();
     }
 
-    assert( checkMaxLevel() );
     return changed;
 #else
     return false;
@@ -947,7 +897,6 @@ namespace Dune {
 
       postAdapt();
     }
-    assert( checkMaxLevel() );
     return changed;
 #else
     return false;
