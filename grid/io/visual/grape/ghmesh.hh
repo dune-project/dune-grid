@@ -244,7 +244,7 @@ extern void handleMesh (void *hmesh, bool gridMode );
 extern DUNE_FDATA * extractData (void *hmesh , int num );
 
 /* setup TimeScene Tree  */
-extern void timeSceneInit(INFO *info, int n_info, int procs , int time_bar);
+extern void timeSceneInit(INFO *info, const int n_info, const int procs);
 extern void addDataToHmesh(void  *hmesh, DUNE_FDATA * data);
 
 extern void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc);

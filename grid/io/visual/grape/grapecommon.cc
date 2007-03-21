@@ -171,16 +171,15 @@ inline void removeLeafButton(MANAGER *mgr, void *sc)
   minMaxColorbar = 0;
 }
 
-inline void timeSceneInit(INFO *info, int n_info, int procs, int time_bar)
+inline void timeSceneInit(INFO *info, const int n_info,
+                          const int procs)
 {
-  int n,p;
-  int numProcs = (procs <= 1) ? 1 : (procs-1);
-
-  Dune :: __MaxPartition = numProcs;
+  // set global max partition number for partition display
+  Dune :: __MaxPartition = procs;
 
   printf("Warning: set proc to 1\n");
 
-  for (n = 0; n < MAXIMUM(1, n_info); n++)
+  for (int n = 0; n < MAXIMUM(1, n_info); n++)
   {
     printf("n = %d, make TimeScene \n",n);
     info[n].tsc = (TIMESCENE *)GRAPE(TimeScene,"new-instance") (info[n].name);
@@ -189,12 +188,12 @@ inline void timeSceneInit(INFO *info, int n_info, int procs, int time_bar)
       ((TIMESCENE *) info[n-1].tsc)->next_scene = (SCENE *) info[n].tsc;
   }
 
-  for (n = 0; n < MAXIMUM(1, n_info); n++)
+  for (int n = 0; n < MAXIMUM(1, n_info); n++)
   {
     {
       TIMESCENE * tsc = (TIMESCENE *) info[n].tsc;
       // > 0 because tsc for proc 0 already exists
-      for (p = numProcs-1; p > 0; p--)
+      for (int p = procs-1; p > 0; p--)
       {
         TIMESCENE * newSc = NULL;
         printf("add timescene for proc %d \n",p);
