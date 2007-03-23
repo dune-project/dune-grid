@@ -1051,7 +1051,6 @@ void Dune::UGGrid < dim >::createEnd()
   for (; eIt!=eEndIt; ++eIt)
     UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
-#endif
 }
 
 template <int dim>
