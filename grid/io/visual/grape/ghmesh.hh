@@ -84,6 +84,12 @@ typedef struct dune_elem
 
 typedef struct dune_fdata
 {
+  static std::set<DUNE_FDATA*>& dataList ()
+  {
+    static std::set<DUNE_FDATA*> dList;
+    return dList;
+  }
+
   // default constructor
   dune_fdata()
     : mynum (-1)
@@ -106,7 +112,10 @@ typedef struct dune_fdata
       , maxValue(1.0)
       , valuesSet(false)
       , getMinMaxValues(0)
-  {}
+  {
+    // add this data to list of dune data funcs
+    dataList().insert(this);
+  }
 
   /* my number in the data vector */
   int mynum;

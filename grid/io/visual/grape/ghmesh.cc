@@ -211,7 +211,15 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
 
   assert( dat->setIterationModus );
   DUNE_FDATA * func = 0;
-  if(f_data) func = (DUNE_FDATA *) f_data->function_data;
+  if(f_data)
+  {
+    DUNE_FDATA * data = (DUNE_FDATA *) f_data->function_data;
+    if( DUNE_FDATA::dataList().find(data) !=
+        DUNE_FDATA::dataList().end() )
+    {
+      func = data;
+    }
+  }
   dat->setIterationModus(dat,func);
 
   // note this pointer can be NULL
@@ -998,7 +1006,15 @@ inline GRAPEMESH * setMinMaxValue()
   F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
                       ("scalar","scalar","vector","default", 0);
   DUNE_FDATA * func = 0;
-  if(f_data) func = (DUNE_FDATA *) f_data->function_data;
+  if(f_data)
+  {
+    DUNE_FDATA * data = (DUNE_FDATA *) f_data->function_data;
+    if( DUNE_FDATA::dataList().find(data) !=
+        DUNE_FDATA::dataList().end() )
+    {
+      func = data;
+    }
+  }
 
   double min=0.0, max=1.0;
   if(func)
