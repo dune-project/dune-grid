@@ -117,6 +117,12 @@ typedef struct dune_fdata
     dataList().insert(this);
   }
 
+  // default destructor
+  ~dune_fdata()
+  {
+    dataList().erase(this);
+  }
+
   /* my number in the data vector */
   int mynum;
 
@@ -159,6 +165,7 @@ typedef struct dune_fdata
   /* the corresponding gridPart */
   void * gridPart;
 
+  /* function pointer to choose grid part iterators */
   void (*setGridPartIterators)(DUNE_DAT * , void * gridPart);
 
   /* pointer to f_data */
@@ -172,6 +179,7 @@ typedef struct dune_fdata
   /* true if min and max values have been calculated */
   bool valuesSet;
 
+  /* returns min and max values of function */
   void (*getMinMaxValues)(DUNE_FDATA *, double * min, double * max );
 };
 
