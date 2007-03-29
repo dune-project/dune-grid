@@ -5,6 +5,7 @@
 
 //- system includes
 #include <list>
+#include <set>
 #include <stack>
 
 //- Dune includes
