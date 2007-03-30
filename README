@@ -15,7 +15,7 @@ Differences. Through speration of data structures DUNE allows fast Linear
 Algebra like provided in the ISTL module, or usage of external libraries
 like blas.
 
-This package contains the basic DUNE common classes.
+This package contains the basic DUNE grid interface.
 
 Dependencies
 ------------
