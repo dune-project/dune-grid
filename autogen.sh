@@ -20,14 +20,14 @@ for OPT in "$@"; do
 
     case "$OPT" in
 	--ac=*|--acversion=*)
-			if test "x$arg" == "x"; then
+			if test "x$arg" = "x"; then
 				usage; 
 				exit 1;
 			fi
 			ACVERSION=$arg
 			;;
 	--am=*|--amversion=*)
-			if test "x$arg" == "x"; then
+			if test "x$arg" = "x"; then
 				usage; 
 				exit 1;
 			fi
@@ -41,12 +41,12 @@ for OPT in "$@"; do
             if test -d "$OPT/am"; then
               am_dir="$OPT/am"
             fi
-	    if test -d "$OPT/share/aclocal"; then
-	      ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $OPT/share/aclocal"
-	    fi
-	    if test -d "$OPT/share/dune-common/am"; then
-	      am_dir="$OPT/share/dune-common/am"
-	    fi
+            if test -d "$OPT/share/aclocal"; then
+              ACLOCAL_FLAGS="$ACLOCAL_FLAGS -I $OPT/share/aclocal"
+            fi
+            if test -d "$OPT/share/dune-common/am"; then
+              am_dir="$OPT/share/dune-common/am"
+            fi
             ;;
     esac
 done
