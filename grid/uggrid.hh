@@ -200,6 +200,17 @@ namespace Dune {
      */
     UGGrid(unsigned int heapSize=500);
 
+    /** \brief Constructor with control over UG's memory requirements
+     *
+     * \param heapSize The size of UG's internal memory in megabytes.  UG allocates
+     * memory only once.  I don't know what happens if you create UGGrids with
+     * differing heap sizes.
+     * \param envHeapSize The size of UG's environment heap, also in megabytes.
+       \deprecated This constructor will be removed in the next release, because
+       the second argument is not necessary anymore.
+     */
+    UGGrid(unsigned int heapSize, unsigned int envHeapSize) DUNE_DEPRECATED;
+
     //! Destructor
     ~UGGrid();
 
