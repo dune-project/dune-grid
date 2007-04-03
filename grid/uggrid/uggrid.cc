@@ -1221,6 +1221,68 @@ void Dune::UGGrid < dim >::setPosition(typename Traits::template Codim<dim>::Ent
     target->myvertex->iv.x[i] = pos[i];
 }
 
+template <int dim>
+void Dune::UGGrid<dim>::saveState(const std::string& filename) const
+{
+  const char* type = "asc";
+  const char* comment = "written by DUNE";
+
+  if (dim==2)
+    UG::D2::SaveMultiGrid((UG::D2::multigrid*)multigrid_,
+                          (char*)filename.c_str(),
+                          (char*)type,
+                          (char*)comment,
+                          0,      // autosave
+                          0       // rename
+                          );
+  else
+    UG::D3::SaveMultiGrid((UG::D3::multigrid*)multigrid_,
+                          (char*)filename.c_str(),
+                          (char*)type,
+                          (char*)comment,
+                          0,      // autosave
+                          0       // rename
+                          );
+}
+
+
+template <int dim>
+void Dune::UGGrid<dim>::loadState(const std::string& filename)
+{
+  const char* type = "asc";
+  std::string problemName = name_ + "_Problem";
+  std::string formatName = "DuneFormat2d";
+
+  if (dim==2) {
+    std::string formatName = "DuneFormat2d";
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid((char*)name_.c_str(),
+                                                                         (char*)filename.c_str(),
+                                                                         (char*)type,
+                                                                         (char*)problemName.c_str(),
+                                                                         (char*)formatName.c_str(),
+                                                                         heapsize,
+                                                                         true, //force,
+                                                                         true, //optimizedIO,
+                                                                         false //autosave
+                                                                         );
+  } else {
+    std::string formatName = "DuneFormat3d";
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid((char*)name_.c_str(),
+                                                                         (char*)filename.c_str(),
+                                                                         (char*)type,
+                                                                         (char*)problemName.c_str(),
+                                                                         (char*)formatName.c_str(),
+                                                                         heapsize,
+                                                                         true, //force,
+                                                                         true, //optimizedIO,
+                                                                         false //autosave
+                                                                         );
+  }
+
+  if (multigrid_==NULL)
+    DUNE_THROW(GridError, "In loadState()");
+}
+
 template < int dim >
 void Dune::UGGrid < dim >::setIndices()
 {

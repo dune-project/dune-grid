@@ -508,6 +508,10 @@ namespace Dune {
      */
     void globalRefine(int n);
 
+    void saveState(const std::string& filename) const;
+
+    void loadState(const std::string& filename);
+
   private:
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
     typename UG_NS<dim>::MultiGrid* multigrid_;
