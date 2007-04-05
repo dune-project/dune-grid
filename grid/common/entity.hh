@@ -168,9 +168,9 @@ namespace Dune
 
     //@}
 
+  protected:
     typedef typename remove_const<GridImp>::type mutableGridImp;
 
-  protected:
     //===========================================================
     /** @name Protected methods
      */
@@ -213,9 +213,9 @@ namespace Dune
     enum { dimworld = GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
 
+  protected:
     typedef typename remove_const<GridImp>::type mutableGridImp;
 
-  protected:
     EntityImp<0,dim,GridImp> realEntity;
 
     // The type of the wrapped implementation, for internal use only
