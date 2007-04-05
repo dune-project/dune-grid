@@ -149,7 +149,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::ReferenceElement.
      */
-    GeometryType type () const { return realEntity.geometry().type(); };
+    GeometryType type () const { return realEntity.type(); };
 
     //===========================================================
     /** @name Interface for the implementor
@@ -295,7 +295,7 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
      */
-    GeometryType type () const { return realEntity.geometry().type(); };
+    GeometryType type () const { return realEntity.type(); };
 
     //===========================================================
     /** @name Extended interface of entities of codimension 0
@@ -512,6 +512,11 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef ct ctype;
 
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    GeometryType type () const { return asImp().geometry().type(); };
+
   private:
     //!  Barton-Nackman trick
     EntityImp<cd,dim,GridImp>& asImp ()
@@ -562,6 +567,11 @@ namespace Dune
        In bisection or hanging node refinement this is always true.
      */
     bool isRegular() const { return true; }
+
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    GeometryType type () const { return asImp().geometry().type(); };
 
     /* maybe in later versions
      * \brief Default implementation for access to boundaryId of sub entities
