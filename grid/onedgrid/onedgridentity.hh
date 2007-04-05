@@ -176,6 +176,9 @@ namespace Dune {
 
     unsigned int globalId() const {return target_->id_;}
 
+    //! return the element type identifier (segment)
+    GeometryType type () const {return GeometryType(0);}
+
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
        with codimension cc.
      */
@@ -258,6 +261,9 @@ namespace Dune {
 
     //! Geometry of this entity
     const Geometry& geometry () const {return geo_;}
+
+    //! return the element type identifier (segment)
+    GeometryType type () const {return GeometryType(1);}
 
     /** \brief Return the number of subentities of codimension cc.
      */
