@@ -207,6 +207,7 @@ namespace Dune {
       using UG::D3::BNDS;
       using UG::D3::BEOBJ;
       using UG::D3::side_offset;
+      using UG::D3::GM_OBJECTS;
       using UG::UINT;
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
@@ -267,6 +268,7 @@ namespace Dune {
     //! get father node of vertex
     static UG_NS<3>::Node* NodeNodeFather(UG_NS<3>::Node* theNode) {
       using UG::D3::NDOBJ;
+      using UG::D3::GM_OBJECTS;
       using UG::UINT;
       if (theNode->father==0)
         return 0;         // no father at all
