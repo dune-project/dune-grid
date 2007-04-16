@@ -106,8 +106,8 @@ namespace Dune
     for (int i=0; i<grid.levelIndexSet(level).geomTypes(0).size(); i++)
     {
       if (!first) std::cout << ",";
-      std::cout << GeometryName(grid.levelIndexSet(level).geomTypes(0)[i])
-                << "=" << grid.levelIndexSet(level).size(0,grid.levelIndexSet(level).geomTypes(0)[i]);
+      std::cout << grid.levelIndexSet(level).geomTypes(0)[i]
+                << "=" << grid.levelIndexSet(level).size(grid.levelIndexSet(level).geomTypes(0)[i]);
       first=false;
     }
     std::cout << ")" << std::endl;
@@ -117,7 +117,7 @@ namespace Dune
     for (LevelIterator it = grid.template lbegin<0>(level); it!=eendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << GeometryName(it->geometry().type()) << "[" << dim << "]"
+                << " " << it->geometry().type() << "[" << dim << "]"
                 << " index=" << grid.levelIndexSet(level).index(*it)
                 << " gid=" << grid.globalIdSet().template id<0>(*it)
                 << " leaf=" << it->isLeaf()
@@ -176,9 +176,9 @@ namespace Dune
       for (int i=0; i<grid.leafIndexSet().geomTypes(c).size(); i++)
       {
         if (!first) std::cout << ",";
-        std::cout << GeometryName(grid.leafIndexSet().geomTypes(c)[i])
+        std::cout << grid.leafIndexSet().geomTypes(c)[i]
                   << "[" << c << "]"
-                  << "=" << grid.leafIndexSet().size(c,grid.leafIndexSet().geomTypes(c)[i]);
+                  << "=" << grid.leafIndexSet().size(grid.leafIndexSet().geomTypes(c)[i]);
         first=false;
       }
     }
@@ -189,7 +189,7 @@ namespace Dune
     for (VLeafIterator it = grid.template leafbegin<dim>(); it!=veendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << GeometryName(it->geometry().type()) << "[" << dim << "]"
+                << " " << it->geometry().type() << "[" << dim << "]"
                 << " index=" << grid.leafIndexSet().index(*it)
                 << " gid=" << grid.globalIdSet().template id<dim>(*it)
                 << " partition=" << PartitionName(it->partitionType())
@@ -202,7 +202,7 @@ namespace Dune
     for (LeafIterator it = grid.template leafbegin<0>(); it!=eendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << GeometryName(it->geometry().type()) << "[" << dim << "]"
+                << " " << it->geometry().type() << "[" << dim << "]"
                 << " index=" << grid.leafIndexSet().index(*it)
                 << " gid=" << grid.globalIdSet().template id<0>(*it)
                 << " leaf=" << it->isLeaf()
