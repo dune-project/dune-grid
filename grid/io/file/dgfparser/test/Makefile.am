@@ -1,5 +1,5 @@
 LDADD = $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS) $(MPI_LDFLAGS)
-AM_CPPFLAGS =  @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(UG_CPPFLAGS)
+AM_CPPFLAGS =  @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(UG_CPPFLAGS) -DSRCDIR="\"$(srcdir)\""
 
 if ALUGRID
   TESTALU = testalu
@@ -61,6 +61,18 @@ testug_SOURCES = testug.cc
 testug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(UG_LDFLAGS) $(UG_LIBS)
 testug_DEPENDENCIES = $(LOCAL_LIBS)
 endif
+
+GRIDFILES = alberta-testgrid-3-3.al \
+  simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
+  cube-testgrid-3-3-large.dgf cube-testgrid-3-3.dgf
+
+# gridcheck not used explicitly, we should still ship it :)
+EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
+	examplegrid11.dgf examplegrid12.dgf examplegrid1c.dgf					\
+	examplegrid1gen.dgf examplegrid1s.dgf examplegrid2a.dgf					\
+	examplegrid2b.dgf examplegrid2c.dgf examplegrid2d.dgf					\
+	examplegrid2e.dgf examplegrid5.dgf examplegrid6.dgf examplegrid7.dgf	\
+	examplegrid9.dgf
 
 CLEANFILES = examplegrid*.dgf.* dgfparser.log
 
