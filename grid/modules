@@ -57,6 +57,9 @@
 	/** @defgroup ALUSimplexGrid
 		@ingroup GridImplementations */
 
+	/** @defgroup ALUConformGrid
+		@ingroup GridImplementations */
+
 	/** @defgroup OneDGrid
 		@ingroup GridImplementations */
 
