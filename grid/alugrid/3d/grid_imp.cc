@@ -850,9 +850,10 @@ namespace Dune {
   }
 
   // load balance grid
-  template <int dim, int dimworld, ALU3dGridElementType elType> template <class DataHandleType>
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template <class DataHandle>
   inline bool ALU3dGrid<dim, dimworld, elType>::
-  loadBalance(DataHandleType & data)
+  loadBalance(DataHandle & data)
   {
     if( comm().size() <= 1 ) return false ;
 #if ALU3DGRID_PARALLEL
@@ -861,8 +862,7 @@ namespace Dune {
     EntityObject father ( EntityImp(*this, this->maxLevel()) );
     EntityObject son    ( EntityImp(*this, this->maxLevel()) );
 
-    typedef ALU3DSPACE LoadBalanceElementCount<ThisType,DataHandleType,
-        Conversion<DataHandleType,IsDofManager>::exists > LDBElCountType;
+    typedef ALU3DSPACE LoadBalanceElementCount<ThisType,DataHandle> LDBElCountType;
 
     // elCount is the adaption restPro operator used during the refinement
     // cause be creating new elements on processors
@@ -872,8 +872,7 @@ namespace Dune {
                            data);
 
     ALU3DSPACE GatherScatterLoadBalance< ALU3dGrid<dim, dimworld, elType>,
-        DataHandleType, LDBElCountType,
-        Conversion<DataHandleType,IsDofManager>::exists >
+        DataHandle, LDBElCountType >
     gs(*this,en,this->getRealImplementation(en),data,elCount);
 
     // call load Balance
@@ -893,7 +892,7 @@ namespace Dune {
       if(globalIdSet_) globalIdSet_->updateIdSet();
 
       // compress data , wrapper for dof manager
-      gs.dofCompress();
+      gs.compress();
 
       postAdapt();
     }
