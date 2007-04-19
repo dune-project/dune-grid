@@ -494,12 +494,11 @@ namespace Dune {
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int codim) const { return 0; }
 
-    /** @copydoc Dune::Grid::communicate */
+    /** \brief @copydoc Dune::Grid::communicate */
     template<class DataHandleImp,class DataTypeImp>
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const;
 
-    /** @copydoc Dune::Grid::communicate(t1,t2,t3)
-       Communicate information on distributed entities on the leaf grid.
+    /** \brief Communicate information on distributed entities on the leaf grid.
        Template parameter is a model of Dune::CommDataHandleIF.
      */
     template<class DataHandleImp,class DataTypeImp>
@@ -516,7 +515,7 @@ namespace Dune {
       InterfaceType iftype, CommunicationDirection dir) const;
 
   public:
-    /** collective communicate object */
+    /** \brief @copydoc Dune::Grid::comm() */
     const CollectiveCommunicationType & comm () const { return ccobj_; }
 
     //! returns if a least one entity was marked for coarsening
@@ -525,13 +524,17 @@ namespace Dune {
     //! clear all entity new markers
     void postAdapt ( );
 
-    /** Refine all positive marked leaf entities,
-       return true if a least one entity was refined */
+    /** \brief  @copydoc Dune::Grid::adapt() */
     bool adapt ( );
 
-    //! adapt with DofManager
+    /** \brief  @copydoc Dune::Grid::adapt()
+        \param dm DofManager for dune-fem package for using callback
+                  during adaptation
+        \param rp handler for restriction and prolongation operations
+        which is a Model of the dune-fem RestrictProlongInterface class.
+     */
     template <class DofManagerType, class RestrictProlongOperatorType>
-    bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
+    bool adapt (DofManagerType &dm, RestrictProlongOperatorType &rp, bool verbose=false );
 
     //! uses the interface, mark on entity and refineLocal
     bool globalRefine(int refCount);
