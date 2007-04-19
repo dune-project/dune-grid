@@ -907,7 +907,7 @@ namespace Dune {
      * methods. If grid has changed , true is returned.
      */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data) const
+    bool loadBalance (DataHandle& data)
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().loadBalance(data));
       return asImp().loadBalance(data);
@@ -1069,7 +1069,7 @@ namespace Dune {
 
     /*! \brief default implementation of load balance does nothing and returns false */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data) const
+    bool loadBalance (DataHandle& data)
     {
       return false;
     }
