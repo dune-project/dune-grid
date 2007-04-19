@@ -73,7 +73,7 @@ test_alberta_DEPENDENCIES = $(LOCAL_LIBS)
 
 # files for alu3dgrid
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
-test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS) -DSRCDIR=$(srcdir)
+test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS) -DSRCDIR="\"$(srcdir)\""
 test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 test_alu3dgrid_DEPENDENCIES = $(LOCAL_LIBS)
 
