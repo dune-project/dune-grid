@@ -431,7 +431,7 @@ namespace Dune {
     enum { dim      = 2 };
     enum { dimworld = 2 };
   public:
-    //! \brief constructor for creating ALUSimplexGrid from given macro grid file
+    //! \brief constructor for creating ALUConformGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
     ALUConformGrid(const std::string macroName )
       : BaseType(macroName)
