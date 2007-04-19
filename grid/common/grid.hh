@@ -907,7 +907,7 @@ namespace Dune {
      * methods. If grid has changed , true is returned.
      */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data) const
+    bool loadBalance (DataHandle& data)
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().loadBalance(data));
       return asImp().loadBalance(data);
