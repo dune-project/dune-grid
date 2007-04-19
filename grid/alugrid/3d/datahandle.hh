@@ -448,7 +448,7 @@ namespace ALUGridSpace {
 #endif
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType, class IndexOperatorType , bool isDofManager >
+  template <class GridType, class DataCollectorType, class IndexOperatorType>
   class GatherScatterLoadBalance : public GatherScatter
   {
   protected:
@@ -523,105 +523,18 @@ namespace ALUGridSpace {
       grid_.setMaxLevel(mxl);
 
       // reserve memory for new elements
-      int elChunk_ = idxOp_.newElements();
-      assert( elChunk_ > 0 );
-      dc_.reserveMemory( elChunk_ , true );
+      size_t elChunk = idxOp_.newElements();
+      assert( elChunk > 0 );
 
       realEntity_.setElement(elem);
-      dc_.xtractData(str,entity_);
+      dc_.xtractData(str,entity_, elChunk);
     }
 
-    void dofCompress ()
+    //! call compress on data
+    void compress ()
     {
-      dc_.dofCompress();
+      dc_.compress();
     }
-  };
-
-  //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType, class IndexOperatorType >
-  class GatherScatterLoadBalance<GridType,DataCollectorType,IndexOperatorType,false>
-    : public GatherScatter
-  {
-  protected:
-    enum { codim = 0 };
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
-
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::ImplementationType IMPLElementType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::InterfaceType HElementType;
-
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<1>::InterfaceType HFaceType;
-
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostInterfaceType HGhostType;
-    typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
-    template Codim<codim>::GhostImplementationType ImplGhostType;
-
-#if ALU3DGRID_PARALLEL
-    typedef ALU3DSPACE ElementPllXIF_t PllElementType;
-#else
-    typedef HElementType PllElementType;
-#endif
-    GridType & grid_;
-
-    EntityType     & entity_;
-    RealEntityType & realEntity_;
-
-    // data handle
-    DataCollectorType & dc_;
-
-    // used MessageBuffer
-    typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
-
-  public:
-    //! Constructor
-    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp )
-      : grid_(grid), entity_(en), realEntity_(realEntity)
-        , dc_(dc)
-    {}
-
-    // return true if dim,codim combination is contained in data set
-    bool contains(int dim, int codim) const
-    {
-      return true;
-    }
-
-    //! this method is called from the dunePackAll method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is written to the ObjectStream
-    void inlineData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // this method is only called for macro elements
-      assert( elem.level () == 0 );
-      str.write(grid_.maxLevel());
-      // set element and then start
-      realEntity_.setElement(elem);
-      dc_.inlineData(str,entity_);
-    }
-
-    //! this method is called from the duneUnpackSelf method of the corresponding
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is read from the ObjectStream
-    void xtractData ( ObjectStreamType & str , HElementType & elem )
-    {
-      // this method is only called for macro elements
-      assert( elem.level () == 0 );
-
-      int mxl;
-      str.read(mxl);
-      // set element and then start
-      grid_.setMaxLevel(mxl);
-
-      realEntity_.setElement(elem);
-      dc_.xtractData(str,entity_);
-    }
-
-    // empty because we do not know whether data handle has this method or not
-    void dofCompress ()
-    {}
   };
 
   /////////////////////////////////////////////////////////////////
@@ -779,7 +692,7 @@ namespace ALUGridSpace {
 
   // this class is for counting the tree depth of the
   // element when unpacking data from load balance
-  template <class GridType , class DofManagerType, bool isDofManager>
+  template <class GridType , class DofManagerType>
   class LoadBalanceElementCount : public AdaptRestrictProlongType
   {
     GridType & grid_;
@@ -836,19 +749,6 @@ namespace ALUGridSpace {
     //! this method is for ghost elements
     int preCoarsening ( HBndSegType & el )
     {
-      PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
-
-      realFather_.setGhost(elem);
-      dm_.insertNewIndex( reFather_ );
-
-      // set element and then start
-      PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-      while( son )
-      {
-        realSon_.setGhost(*son);
-        dm_.removeOldIndex( reSon_ );
-        son = static_cast<PLLBndFaceType *> (son->next());
-      }
       return 0;
     }
 
@@ -858,78 +758,10 @@ namespace ALUGridSpace {
     //! elements, but we have to arange the ghost indices
     int postRefinement ( HBndSegType & el )
     {
-      PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
-      PLLBndFaceType * vati = static_cast<PLLBndFaceType *> ( elem.up());
-      if( vati )
-      {
-        realFather_.setGhost(*vati);
-        dm_.removeOldIndex( reFather_ );
-      }
-
-      realFather_.setGhost(elem);
-      dm_.insertNewIndex( reFather_ );
-
-      // set element and then start
-      PLLBndFaceType * son = static_cast<PLLBndFaceType *> (elem.down());
-      while( son )
-      {
-        realSon_.setGhost(*son);
-        dm_.insertNewIndex( reSon_ );
-        son = static_cast<PLLBndFaceType *> (son->next());
-      }
       return 0;
     }
 
     int newElements () const { return newMemSize_; }
-  };
-
-  // this class is for counting the tree depth of the
-  // element when unpacking data from load balance
-  template <class GridType , class DofManagerType>
-  class LoadBalanceElementCount<GridType,DofManagerType,false> : public AdaptRestrictProlongType
-  {
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
-
-    typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
-
-  public:
-    //! Constructor
-    LoadBalanceElementCount (GridType & grid,
-                             EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs,DofManagerType & dm)
-    {}
-
-    virtual ~LoadBalanceElementCount () {};
-
-    //! restrict data , elem is always the father
-    int postRefinement ( HElementType & elem )
-    {
-      return 0;
-    }
-
-    //! prolong data, elem is the father
-    int preCoarsening ( HElementType & elem )
-    {
-      return 0;
-    }
-
-    //! restrict data , elem is always the father
-    //! this method is for ghost elements
-    int preCoarsening ( HBndSegType & el )
-    {
-      return 0;
-    }
-
-    //! restrict data , elem is always the father
-    //! this method is for ghost elements
-    //! we need the ghost method because data is only inlined for interior
-    //! elements, but we have to arange the ghost indices
-    int postRefinement ( HBndSegType & el )
-    {
-      return 0;
-    }
-
-    int newElements () const { return 0; }
   };
 
 } // end namespace

@@ -447,32 +447,63 @@ namespace Dune {
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
 
-    //! calculate load of each proc and repartition if neccessary
+    /** \brief Calculates load of each process and repartition the grid if neccessary.
+        For parameters of the load balancing process see the README file
+        of the ALUGrid package.
+     */
     bool loadBalance ();
 
-    //! calculate load of each proc and repartition if neccessary
-    template <class DataHandleType>
-    bool loadBalance (DataHandleType & data);
+    /** \brief Calculates load of each process and repartition the grid if neccessary.
+        For parameters of the load balancing process see the README file
+        of the ALUGrid package.
+       \param data the data handler class that must implement three methods:
+          \code
+          // calls data inline on macro element. From there the data of
+          // all children can be written to the message buffer.
+          // MessageBufferImp implements the MessageBufferIF interface.
+          template<class MessageBufferImp>
+          void inlineData ( MessageBufferImp& buff, Dune::Entity<0> & e);
 
-    /** \brief ghostSize is zero for this grid  */
+          // calls data xtract on macro element. From there the data of
+          // all children can be restored from the message buffer.
+          // numChildren is the number of all children underneath the
+          // macro element e.
+          // MessageBufferImp implements the MessageBufferIF interface.
+          template<class MessageBufferImp>
+          void xtractData ( MessageBufferImp& buff, Dune::Entity<0> & e, size_t numChildren );
+
+          // This method is called at the end of the load balancing process
+          // before adaptation markers are removed. Here the user can apply
+          // a data compression or other features. This method can be
+          // empty if nothing should be done.
+          void compress ();
+          \endcode
+     */
+    template <class DataHandle>
+    bool loadBalance (DataHandle & data);
+
+    /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int level, int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int level, int codim) const { return 0; }
 
-    /** \brief ghostSize is zero for this grid  */
+    /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
     int overlapSize (int codim) const { return 0; }
 
-    /** level communicate */
-    template<class DataHandleImp,class DataType>
-    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level) const;
+    /** @copydoc Dune::Grid::communicate */
+    template<class DataHandleImp,class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const;
 
-    /** leaf communicate  */
-    template<class DataHandleImp,class DataType>
-    void communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir) const;
+    /** @copydoc Dune::Grid::communicate(t1,t2,t3)
+       Communicate information on distributed entities on the leaf grid.
+       Template parameter is a model of Dune::CommDataHandleIF.
+     */
+    template<class DataHandleImp,class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const;
 
   private:
     typedef ALU3DSPACE GatherScatter GatherScatterType;
@@ -494,7 +525,7 @@ namespace Dune {
     //! clear all entity new markers
     void postAdapt ( );
 
-    /**! refine all positive marked leaf entities,
+    /** Refine all positive marked leaf entities,
        return true if a least one entity was refined */
     bool adapt ( );
 
@@ -531,15 +562,13 @@ namespace Dune {
     // no interface method, but has to be public
     void updateStatus ();
 
-    //! mark entities for refinement or coarsening, refCount < 0 will mark
-    //! the entity for one coarsen step and refCount > 0 will mark for one
-    //! refinement, one refinement will create 8 children per element
+    //! @copydoc Dune::Grid::mark
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
     //! \brief return current adaptation mark for given entity
     int getMark( const typename Traits::template Codim<0>::Entity & ) const DUNE_DEPRECATED;
 
-    //! \brief return current adaptation mark for given entity pointer
+    //! @copydoc Dune::Grid::getMark
     int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const;
   private:
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
