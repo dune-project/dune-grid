@@ -535,15 +535,10 @@ bool Dune::UGGrid < dim >::adapt()
   // Renumber everything
   setIndices();
 
-  // The Dune grid interface specifies that adapt() should return true iff the grid has
-  // been changed.  It is difficult to get that information from UG.  Therefore we
-  // return true iff some element had been marked for some form of refinement before.
-  // If this errs, it errs conservatively.
-  // What do you need that return value for anyways?
-  bool returnValue = someElementHasBeenMarkedForRefinement_;
   someElementHasBeenMarkedForRefinement_ = false;
 
-  return returnValue;
+  // Return true iff the grid hierarchy changed
+  return !(bool)multigrid_->status;
 }
 
 template <int dim>
