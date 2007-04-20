@@ -24,6 +24,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons.
      @ingroup GridImplementations
+     @ingroup ALUCubeGrid
      The ALUCubeGrid implements the Dune GridInterface for 3d hexahedral meshes.
      This grid can be locally adapted (non-conforming) and used in parallel
      computations using dynamcic load balancing.
@@ -44,7 +45,11 @@ namespace Dune {
    */
   template <int dim,int dimworld> class ALUCubeGrid {};
 
-  //! @copydoc Dune::ALUCubeGrid
+  /** @copydoc Dune::ALUCubeGrid
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief 3D grid with support for hexahedrons.
+     @ingroup ALUCubeGrid
+   */
   template <>
   class ALUCubeGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::hexa> {
@@ -185,6 +190,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 2d and 3d.
      @ingroup GridImplementations
+     @ingroup ALUSimplexGrid
      The ALUSimplexGrid implements the Dune GridInterface for 2d triangular and
      3d tetrahedral meshes.
      This grid can be locally adapted (non-conforming) and used in parallel
@@ -209,7 +215,11 @@ namespace Dune {
    */
   template <int dim,int dimworld> class ALUSimplexGrid {};
 
-  //! @copydoc Dune::ALUSimplexGrid
+  /**  @copydoc Dune::ALUSimplexGrid
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief grid with support for simplicial mesh in 3d.
+     \ingroup ALUSimplexGrid
+   */
   template <>
   class ALUSimplexGrid<3,3> :
     public Dune::ALU3dGrid<3,3,Dune::tetra> {
@@ -291,7 +301,11 @@ namespace Dune {
 
   };
 
-  //! @copydoc Dune::ALUSimplexGrid
+  /** @copydoc Dune::ALUSimplexGrid
+      \brief [<em> provides \ref Dune::Grid </em>]
+      \brief grid with support for simplicial mesh in 2d.
+      \ingroup ALUSimplexGrid
+   */
   template <>
   class ALUSimplexGrid<2,2> :
     public Dune::ALU2dGrid<2,2> {
@@ -402,7 +416,7 @@ namespace Dune {
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 2d and 3d.
      @ingroup GridImplementations
-     @ingroup
+     @ingroup ALUConformGrid
      The ALUConformGrid implements the Dune GridInterface for 2d triangular and
      3d tetrahedral meshes.
      This grid can be locally adapted (conforming) and used in parallel
@@ -423,7 +437,11 @@ namespace Dune {
   template <int dim, int dimworld>
   class ALUConformGrid {};
 
-  //! @copydoc Dune::ALUConformGrid
+  /** @copydoc Dune::ALUConformGrid
+     \brief [<em> provides \ref Dune::Grid </em>]
+     \brief grid with support for simplicial mesh in 2d.
+     \ingroup ALUConformGrid
+   */
   template <>
   class ALUConformGrid<2,2> :
     public Dune::ALU2dGrid<2,2> {
