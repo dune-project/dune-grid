@@ -943,7 +943,7 @@ namespace Dune {
   }
 
   template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::n (int level, const array<int,dim> z) const
+  inline int SGrid<dim,dimworld>::n (int level, const array<int,dim>& z) const
   {
     return mapper[level].n(z);
   }

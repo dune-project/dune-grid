@@ -1434,7 +1434,7 @@ namespace Dune {
     int calc_codim (int level, const array<int,dim>& z) const;
 
     //! compute number from expanded coordinate
-    int n (int level, const array<int,dim> z) const;
+    int n (int level, const array<int,dim>& z) const;
 
     //! compute coordinates from number and codimension
     array<int,dim> z (int level, int i, int codim) const;
