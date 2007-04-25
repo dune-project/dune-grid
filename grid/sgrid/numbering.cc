@@ -8,7 +8,7 @@
 namespace Dune {
 
   template<int dim>
-  inline void LexOrder<dim>::init (const FixedArray<int,dim>& _NN)
+  inline void LexOrder<dim>::init (const array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
@@ -25,7 +25,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int LexOrder<dim>::n (const FixedArray<int,dim>& z) const
+  inline int LexOrder<dim>::n (const array<int,dim>& z) const
   {
     int r=0;
     for (int i=0; i<dim; i++) r += z[i]*P[i];
@@ -33,9 +33,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline FixedArray<int,dim> LexOrder<dim>::z (int n) const
+  inline array<int,dim> LexOrder<dim>::z (int n) const
   {
-    FixedArray<int,dim> z;
+    array<int,dim> z;
     for (int i=0; i<dim; i++)
     {
       z[i] = n%N[i];
@@ -47,7 +47,7 @@ namespace Dune {
   //************************************************************************
 
   template<int dim>
-  inline void JoinOrder<dim>::init (const FixedArray<int,dim>& _NN)
+  inline void JoinOrder<dim>::init (const array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
@@ -96,7 +96,7 @@ namespace Dune {
   //************************************************************************
 
   template<int dim>
-  CubeMapper<dim>::CubeMapper (const FixedArray<int,dim>& _NN)
+  CubeMapper<dim>::CubeMapper (const array<int,dim>& _NN)
   {
     make(_NN);
   }
@@ -104,7 +104,7 @@ namespace Dune {
   template<int dim>
   CubeMapper<dim>::CubeMapper ()
   {
-    FixedArray<int,dim> M;
+    array<int,dim> M;
 
     // make mesh of single cube
     for (int i=0; i<dim; i++) M[i]=1;
@@ -113,7 +113,7 @@ namespace Dune {
   }
 
   template<int dim>
-  void CubeMapper<dim>::make (const FixedArray<int,dim>& _NN)
+  void CubeMapper<dim>::make (const array<int,dim>& _NN)
   {
     // store argument
     N=_NN;
@@ -123,7 +123,7 @@ namespace Dune {
     for (int b=0; b<power2(dim); b++)     // loop over all binary partitions
     {
       int mask=1;
-      FixedArray<int,dim> t;
+      array<int,dim> t;
       for (int i=0; i<dim; i++)
       {
         if (b&mask)
@@ -147,7 +147,7 @@ namespace Dune {
     // preprocess lex ordering for each codimension
     for (int c=0; c<=dim; c++)
     {
-      FixedArray<int,1<<dim> t;
+      array<int,1<<dim> t;
       for (int b=0; b<power2(dim); b++)           // loop over all binary partitions
         if (ones(b)==c)
         {
@@ -186,7 +186,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::codim (const FixedArray<int,dim>& z) const
+  inline int CubeMapper<dim>::codim (const array<int,dim>& z) const
   {
     int r=0;
     for (int i=0; i<dim; i++)
@@ -195,10 +195,10 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::n (const FixedArray<int,dim>& z) const
+  inline int CubeMapper<dim>::n (const array<int,dim>& z) const
   {
     int p = partition(z);            // get partition
-    FixedArray<int,dim> r=compress(z);     // get compressd coordinate
+    array<int,dim> r=compress(z);     // get compressd coordinate
 
     // treat easy cases first
     if (p==0 || p==power2(dim)-1)
@@ -212,9 +212,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline FixedArray<int,dim> CubeMapper<dim>::z (int i, int codim) const
+  inline array<int,dim> CubeMapper<dim>::z (int i, int codim) const
   {
-    FixedArray<int,dim> r;
+    array<int,dim> r;
 
     // easy cases first
     if (codim==0)
@@ -249,7 +249,7 @@ namespace Dune {
   }
 
   template<int dim>
-  inline int CubeMapper<dim>::partition (const FixedArray<int,dim>& z) const
+  inline int CubeMapper<dim>::partition (const array<int,dim>& z) const
   {
     int r = 0;
     int mask = 1;
@@ -262,9 +262,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline FixedArray<int,dim> CubeMapper<dim>::compress (const FixedArray<int,dim>& z) const
+  inline array<int,dim> CubeMapper<dim>::compress (const array<int,dim>& z) const
   {
-    FixedArray<int,dim> r;
+    array<int,dim> r;
     for (int i=0; i<dim; i++)
       if (z[i]%2==0)
         r[i] = z[i]/2;                     // even component
@@ -274,9 +274,9 @@ namespace Dune {
   }
 
   template<int dim>
-  inline FixedArray<int,dim> CubeMapper<dim>::expand (const FixedArray<int,dim>& r, int b) const
+  inline array<int,dim> CubeMapper<dim>::expand (const array<int,dim>& r, int b) const
   {
-    FixedArray<int,dim> z;
+    array<int,dim> z;
     for (int i=0; i<dim; i++)
       if (b&(1<<i))
         z[i] = r[i]*2;                     // even component

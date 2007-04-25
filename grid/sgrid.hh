@@ -140,7 +140,7 @@ namespace Dune {
   private:
     FieldVector<sgrid_ctype, cdim> s;             //!< position of element
     FieldMatrix<sgrid_ctype,mydim,cdim> A;         //!< direction vectors as matrix
-    FixedArray<FieldVector<sgrid_ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
+    array<FieldVector<sgrid_ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
     mutable FieldMatrix<sgrid_ctype,mydim,mydim> Jinv;           //!< storage for inverse of jacobian
     mutable bool builtinverse;
   };
@@ -360,7 +360,7 @@ namespace Dune {
 
       // this is a vertex which is not on the finest level
       // move coordinates up to maxlevel (multiply by 2 for each level
-      FixedArray<int,dim> coord;
+      array<int,dim> coord;
       for (int k=0; k<dim; k++)
         coord[k] = z[k]*(1<<(grid->maxLevel()-l));
 
@@ -373,7 +373,7 @@ namespace Dune {
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
     int l;               //!< level where element is on
     int id;              //!< my consecutive id
-    FixedArray<int,dim> z; //!< my coordinate, number of even components = codim
+    array<int,dim> z; //!< my coordinate, number of even components = codim
     mutable MakeableGeometry geo; //!< geometry, is only built on demand
     mutable bool builtgeometry; //!< true if geometry has been constructed
   };
@@ -432,8 +432,8 @@ namespace Dune {
      of an element!
    */
 
-  static FixedArray <int,2> zrefGlob;
-  static FixedArray <int,2> zentityGlob;
+  static array <int,2> zrefGlob;
+  static array <int,2> zentityGlob;
 
   /**
      A Grid is a container of grid entities. An entity is parametrized by
@@ -857,7 +857,7 @@ namespace Dune {
     mutable EntityPointer ne;                   //!< EntityPointer for neighbor
     const GridImp * grid;                       //!< Pointer to the grid
     const int partition;                        //!< partition number of self, needed for coordinate expansion
-    const FixedArray<int,dim> zred;               //!< reduced coordinates of myself, allows easy computation of neighbors
+    const array<int,dim> zred;               //!< reduced coordinates of myself, allows easy computation of neighbors
     mutable int count;                            //!< number of neighbor
     mutable bool valid_count;                     //!< true if count is in range
     mutable bool valid_nb;                        //!< true if nb is initialized
@@ -1405,7 +1405,7 @@ namespace Dune {
     void globalRefine (int refCount);
 
     /** \brief Get number of elements in each coordinate direction */
-    const FixedArray<int, dim>& dims(int level) const {
+    const array<int, dim>& dims(int level) const {
       return N[level];
     }
 
@@ -1428,30 +1428,30 @@ namespace Dune {
 
 
     //! map expanded coordinates to position
-    FieldVector<sgrid_ctype, dim> pos (int level, FixedArray<int,dim>& z) const;
+    FieldVector<sgrid_ctype, dim> pos (int level, array<int,dim>& z) const;
 
     //! compute codim from coordinate
-    int calc_codim (int level, const FixedArray<int,dim>& z) const;
+    int calc_codim (int level, const array<int,dim>& z) const;
 
     //! compute number from expanded coordinate
-    int n (int level, const FixedArray<int,dim> z) const;
+    int n (int level, const array<int,dim> z) const;
 
     //! compute coordinates from number and codimension
-    FixedArray<int,dim> z (int level, int i, int codim) const;
+    array<int,dim> z (int level, int i, int codim) const;
 
     //! compress from expanded coordinates to grid for a single partition number
-    FixedArray<int,dim> compress (int level, const FixedArray<int,dim>& z) const;
+    array<int,dim> compress (int level, const array<int,dim>& z) const;
 
     //! expand with respect to partition number
-    FixedArray<int,dim> expand (int level, const FixedArray<int,dim>& r, int b) const;
+    array<int,dim> expand (int level, const array<int,dim>& r, int b) const;
 
     /*! There are \f$2^d\f$ possibilities of having even/odd coordinates.
           The binary representation is called partition number.
      */
-    int partition (int level, const FixedArray<int,dim>& z) const;
+    int partition (int level, const array<int,dim>& z) const;
 
     //! given reduced coordinates of an element, determine if element is in the grid
-    bool exists (int level, const FixedArray<int,dim>& zred) const;
+    bool exists (int level, const array<int,dim>& zred) const;
 
 
     // The new index sets from DDM 11.07.2005
@@ -1582,13 +1582,13 @@ namespace Dune {
     int L;                        // number of levels in hierarchic mesh 0<=level<L
     FieldVector<sgrid_ctype, dim> low;   // lower left corner of the grid
     FieldVector<sgrid_ctype, dim> H;     // length of cube per direction
-    FixedArray<int,dim> *N;              // number of elements per direction
+    array<int,dim> *N;              // number of elements per direction
     FieldVector<sgrid_ctype, dim> *h;    // mesh size per direction
     mutable CubeMapper<dim> *mapper;     // a mapper for each level
 
     // faster implemantation od subIndex
-    mutable FixedArray <int,dim> zrefStatic;   // for subIndex of SEntity
-    mutable FixedArray <int,dim> zentityStatic; // for subIndex of SEntity
+    mutable array <int,dim> zrefStatic;   // for subIndex of SEntity
+    mutable array <int,dim> zentityStatic; // for subIndex of SEntity
   };
 
   namespace Capabilities

@@ -173,7 +173,7 @@ namespace Dune {
   // inline methods for SEntityBase
 
   template<int n>
-  static inline FixedArray<int,n>& coarsen (FixedArray<int,n>& in)
+  static inline array<int,n>& coarsen (array<int,n>& in)
   {
     for (int i=0; i<n; i++) in[i] = in[i]/2;
     return in;
@@ -234,7 +234,7 @@ namespace Dune {
     // count number of direction vectors found
     int dir=0;
     FieldVector<sgrid_ctype, dim> p1,p2;
-    FixedArray<int,dim> t=z;
+    array<int,dim> t=z;
 
     // check all directions
     for (int i=0; i<dim; i++)
@@ -274,7 +274,7 @@ namespace Dune {
 
   // initialize static variable with bool constructor (which makes reference elements)
   template<int dim>
-  CubeMapper<dim> SUnitCubeMapper<dim>::mapper(FixedArray<int,dim>(1));
+  CubeMapper<dim> SUnitCubeMapper<dim>::mapper(array<int,dim>(1));
 
 
   // codim 0
@@ -290,10 +290,10 @@ namespace Dune {
   {
     // find expanded coordinates of entity in reference cube
     // has components in {0,1,2}
-    FixedArray<int,dim> zref = SUnitCubeMapper<dim>::mapper.z(i,cc);
+    array<int,dim> zref = SUnitCubeMapper<dim>::mapper.z(i,cc);
 
     // compute expanded coordinates of entity in global coordinates
-    FixedArray<int,dim> zentity;
+    array<int,dim> zentity;
     for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
 
     // make Iterator
@@ -350,7 +350,7 @@ namespace Dune {
     }
 
     // reduced coordinates from expanded coordinates
-    FixedArray<int,dim> zz = this->grid->compress(this->l,this->z);
+    array<int,dim> zz = this->grid->compress(this->l,this->z);
 
     // look for odd coordinates
     FieldVector<sgrid_ctype, dim> delta;
@@ -435,7 +435,7 @@ namespace Dune {
     // reduced coordinates from expanded coordinates
     // reduced coordinates of a fine grid vertex can be interpreted as
     // expanded coordinates on the next coarser level !
-    FixedArray<int,dim> zz = this->grid->compress(this->l,this->z);
+    array<int,dim> zz = this->grid->compress(this->l,this->z);
 
     // to find father, make all coordinates odd
     FieldVector<sgrid_ctype, dim> delta;
@@ -480,9 +480,9 @@ namespace Dune {
     if (level+1>maxLevel) return;     // nothing to do
 
     // compute reduced coordinates of element
-    FixedArray<int,dim> z =
+    array<int,dim> z =
       this->grid->z(level,fatherid,0);      // expanded coordinates from id
-    FixedArray<int,dim> zred =
+    array<int,dim> zred =
       this->grid->compress(level,z);     // reduced coordinates from expaned coordinates
 
     // refine to first son
@@ -492,7 +492,7 @@ namespace Dune {
     int partition = this->grid->partition(level,z);
     for (int b=0; b<(1<<dim); b++)
     {
-      FixedArray<int,dim> zz = zred;
+      array<int,dim> zz = zred;
       for (int i=0; i<dim; i++)
         if (b&(1<<i)) zz[i] += 1;
       // zz is reduced coordinate of a son on level level+1
@@ -545,7 +545,7 @@ namespace Dune {
     valid_count = true;
 
     // and compute compressed coordinates of neighbor
-    FixedArray<int,dim> zrednb = zred;
+    array<int,dim> zrednb = zred;
     if (count%2)
       zrednb[count/2] += 1;           // odd
     else
@@ -625,7 +625,7 @@ namespace Dune {
     int c = count%2;
 
     // compute expanded coordinates of entity
-    FixedArray<int,dim> z1 =
+    array<int,dim> z1 =
       grid->getRealImplementation(grid->getRealImplementation(self).e).z;
     if (c==1)
       z1[dir] += 1;           // odd
@@ -765,7 +765,7 @@ namespace Dune {
   {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
-    N = new FixedArray<int,dim>[MAXL];
+    N = new array<int,dim>[MAXL];
     h = new FieldVector<sgrid_ctype, dim>[MAXL];
     mapper = new CubeMapper<dim>[MAXL];
 
@@ -928,7 +928,7 @@ namespace Dune {
   }
 
   template<int dim, int dimworld>
-  inline FieldVector<sgrid_ctype, dim> SGrid<dim,dimworld>::pos (int level, FixedArray<int,dim>& z) const
+  inline FieldVector<sgrid_ctype, dim> SGrid<dim,dimworld>::pos (int level, array<int,dim>& z) const
   {
     FieldVector<sgrid_ctype, dim> x;
     for (int k=0; k<dim; k++)
@@ -937,43 +937,43 @@ namespace Dune {
   }
 
   template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::calc_codim (int level, const FixedArray<int,dim>& z) const
+  inline int SGrid<dim,dimworld>::calc_codim (int level, const array<int,dim>& z) const
   {
     return mapper[level].codim(z);
   }
 
   template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::n (int level, const FixedArray<int,dim> z) const
+  inline int SGrid<dim,dimworld>::n (int level, const array<int,dim> z) const
   {
     return mapper[level].n(z);
   }
 
   template<int dim, int dimworld>
-  inline FixedArray<int,dim> SGrid<dim,dimworld>::z (int level, int i, int codim) const
+  inline array<int,dim> SGrid<dim,dimworld>::z (int level, int i, int codim) const
   {
     return mapper[level].z(i,codim);
   }
 
   template<int dim, int dimworld>
-  inline FixedArray<int,dim> SGrid<dim,dimworld>::compress (int level, const FixedArray<int,dim>& z) const
+  inline array<int,dim> SGrid<dim,dimworld>::compress (int level, const array<int,dim>& z) const
   {
     return mapper[level].compress(z);
   }
 
   template<int dim, int dimworld>
-  inline FixedArray<int,dim> SGrid<dim,dimworld>::expand (int level, const FixedArray<int,dim>& r, int b) const
+  inline array<int,dim> SGrid<dim,dimworld>::expand (int level, const array<int,dim>& r, int b) const
   {
     return mapper[level].expand(r,b);
   }
 
   template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::partition (int level, const FixedArray<int,dim>& z) const
+  inline int SGrid<dim,dimworld>::partition (int level, const array<int,dim>& z) const
   {
     return mapper[level].partition(z);
   }
 
   template<int dim, int dimworld>
-  inline bool SGrid<dim,dimworld>::exists (int level, const FixedArray<int,dim>& zred) const
+  inline bool SGrid<dim,dimworld>::exists (int level, const array<int,dim>& zred) const
   {
     for (int i=0; i<dim; i++)
     {
