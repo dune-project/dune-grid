@@ -55,6 +55,49 @@ namespace Dune {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
+    template <class GeomImp, int gdim>
+    struct CopyCoordinates;
+
+    template <class GeomImp>
+    struct CopyCoordinates<GeomImp,2>
+    {
+      // copy coordinates and return determinant
+      template<class CoordMatrixType>
+      static double copy(const HElementType& item, CoordMatrixType& coord, const int )
+      {
+        // copy coordinates
+        for(int i=0; i<3; ++i)
+        {
+          // copy coordinates
+          const double (&p)[cdim] = item.getVertex(i)->coord();
+          for(int j=0; j<cdim; ++j)
+            coord[i][j] = p[j];
+        }
+        return 2.0*item.area();
+      }
+    };
+
+    template <class GeomImp>
+    struct CopyCoordinates<GeomImp,1>
+    {
+      // copy coordinates and return determinant
+      template<class CoordMatrixType>
+      static double copy(const HElementType& item, CoordMatrixType& coord, const int face)
+      {
+        // copy coordinates
+        for(int i=0; i<2; ++i)
+        {
+          int vx = (i+face+1)%3;
+          const double (&p)[cdim] = item.getVertex(vx)->coord();
+          for(int j=0; j<cdim; ++j)
+          {
+            coord[i][j] = p[j];
+          }
+        }
+        return item.sidelength((face)%3);
+      }
+    };
+
   public:
     //! for makeRefGeometry == true a Geometry with the coordinates of the
     //! reference element is made
@@ -87,6 +130,7 @@ namespace Dune {
     //! A(l) , see grid.hh
     alu2d_ctype integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const;
 
+    //! return volume of geometry
     alu2d_ctype volume () const;
 
     //! can only be called for dim=dimworld!
@@ -101,16 +145,10 @@ namespace Dune {
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal
-    //template <class GeometryType, class LocalGeomType >
-    //bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg,
-    //                    ALBERTA EL_INFO *elInfo, int face);
     template <class GeometryType, class LocalGeomType >
     bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
-    //HElementType * item, int face);
 
-    // init geometry with zeros
-    //! no interface method
-    void initGeom();
+    //! return non-const reference to coord vecs
     FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
 
     //! print internal data
@@ -120,6 +158,8 @@ namespace Dune {
     //void buildGeomInFather(const int child, const int orientation);
     inline bool buildGeomInFather(const Geometry &fatherGeom , const Geometry & myGeom);
 
+    inline bool up2Date() const { return up2Date_; }
+    inline void unsetUp2Date() const { up2Date_ = false; }
   private:
 
     //! build the transposed of the jacobian inverse and store the volume
@@ -130,6 +170,9 @@ namespace Dune {
 
     //! calculates the volume of the element
     alu2d_ctype elDeterminant () const;
+
+    //! my geometry type
+    GeometryType myGeomType_;
 
     //! temporary need vector
     mutable FieldVector<alu2d_ctype, mydim+1> tmpVec_;
@@ -142,15 +185,6 @@ namespace Dune {
 
     //! storage for local coords
     mutable FieldVector<alu2d_ctype, mydim> localCoord_;
-
-    // make empty EL_INFO
-    //ALBERTA EL_INFO * makeEmptyElInfo();
-
-    //ALBERTA EL_INFO * elInfo_;
-
-    //! Which Face of the Geometry 0...dim+1
-    int face_;
-
 
     enum { matdim = (mydim > 0) ? mydim : 1 };
     mutable FieldMatrix<alu2d_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
@@ -167,13 +201,15 @@ namespace Dune {
     mutable bool calcedDet_; //! true if determinant was calculated
     mutable alu2d_ctype elDet_;                           //!< storage of integration_element
 
+    //! is true if geom is up2date
+    mutable bool up2Date_;
+
     // temporary mem for integrationElement with mydim < cdim
     mutable FieldVector<alu2d_ctype,cdim> tmpV_; //! temporary memory
     mutable FieldVector<alu2d_ctype,cdim> tmpU_; //! temporary memory
     mutable FieldVector<alu2d_ctype,cdim> tmpZ_;
 
     mutable FieldVector<alu2d_ctype,mydim> AT_x_;
-    GeometryType myGeomType_;
 
   };
 

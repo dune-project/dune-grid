@@ -96,6 +96,11 @@ namespace Dune {
     done_ = org.done_;
     nrOfHangingNodes_ = org.nrOfHangingNodes_;
     current = org.current;
+
+    // unset geometry information
+    this->grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
+    this->grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
+    this->grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
   }
 
   //! check whether entities are the same or whether iterator is done
@@ -110,7 +115,8 @@ namespace Dune {
 
   //! return level of inside() entitiy
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp> :: level () const {
+  inline int ALU2dGridIntersectionBase<GridImp> :: level () const
+  {
     assert( this->current.item_ );
     return this->current.item_->level();
   }
@@ -134,6 +140,10 @@ namespace Dune {
     done_ = false;
     this->current.index_ = 0;
     this->current.opposite_ = this->current.item_->opposite(this->current.index_);
+
+    this->grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
+    this->grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
+    this->grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
   }
 
 
@@ -174,13 +184,6 @@ namespace Dune {
     current.item_ = 0;
     current.neigh_ = 0;
     current.index_= nFaces_;
-
-    /*
-       #ifndef NDEBUG
-       static const ALU2dGridIntersectionBase<GridImp> end (this->grid_,current.item_,walkLevel_,true);
-       assert( this->equals(end) );
-       #endif
-     */
   }
 
   //! return EntityPointer to the Entity on the outside of this intersection.
@@ -239,20 +242,33 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
-  ALU2dGridIntersectionBase<GridImp> ::intersectionSelfLocal () const {
+  ALU2dGridIntersectionBase<GridImp> ::intersectionSelfLocal () const
+  {
     assert(this->current.item_ != 0);
-    EntityPointer ep = inside();
-    this->grid_.getRealImplementation(intersectionSelfLocal_).builtLocalGeom( ep->geometry() , intersectionGlobal() );
+
+    if( ! this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date() )
+    {
+      this->grid_.getRealImplementation(intersectionSelfLocal_).
+      builtLocalGeom( inside()->geometry() , intersectionGlobal() );
+    }
+
+    assert(this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date());
     return intersectionSelfLocal_;
   }
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
-  ALU2dGridIntersectionBase<GridImp> :: intersectionNeighborLocal () const {
+  ALU2dGridIntersectionBase<GridImp> :: intersectionNeighborLocal () const
+  {
     assert(this->current.item_ != 0);
     assert(this->current.neigh_ != 0);
-    EntityPointer ep = outside();
-    this->grid_.getRealImplementation(intersectionNeighborLocal_).builtLocalGeom( ep->geometry() , intersectionGlobal());
+
+    if( ! this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date() )
+    {
+      this->grid_.getRealImplementation(intersectionNeighborLocal_).
+      builtLocalGeom( outside()->geometry() , intersectionGlobal());
+    }
+    assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
     return intersectionNeighborLocal_;
   }
 
@@ -262,10 +278,15 @@ namespace Dune {
   {
     assert(this->current.item_ != 0);
 
-    if (this->current.isNotConform_)
-      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
-    else
-      this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+    if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
+    {
+      if( this->current.isNotConform_ )
+        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
+      else
+        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+    }
+
+    assert(this->grid_.getRealImplementation(intersectionGlobal_).up2Date());
     return intersectionGlobal_;
   }
 
@@ -351,6 +372,11 @@ namespace Dune {
       this->done();
       return;
     }
+
+    this->grid_.getRealImplementation(this->intersectionGlobal_).unsetUp2Date();
+    this->grid_.getRealImplementation(this->intersectionSelfLocal_).unsetUp2Date();
+    this->grid_.getRealImplementation(this->intersectionNeighborLocal_).unsetUp2Date();
+
     if (neighbourStack_.empty()) {
       ++this->current.index_;
       if (this->current.index_ >= this->nFaces_) {
@@ -548,6 +574,10 @@ namespace Dune {
       this->done();
       return ;
     }
+
+    this->grid_.getRealImplementation(this->intersectionGlobal_).unsetUp2Date();
+    this->grid_.getRealImplementation(this->intersectionSelfLocal_).unsetUp2Date();
+    this->grid_.getRealImplementation(this->intersectionNeighborLocal_).unsetUp2Date();
 
     // non conform case and we still have neighbours
     if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty()) {

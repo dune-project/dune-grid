@@ -15,30 +15,25 @@ namespace Dune {
 
 
   template <int mydim, int cdim, class GridImp>
-  inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry() :
-    myGeomType_(GeometryType::simplex,mydim)
-  {
-    // make empty element
-    initGeom();
-  }
+  inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry()
+    : myGeomType_(GeometryType::simplex,mydim)
+      , builtElMat_(false)
+      , builtinverse_(false)
+      , calcedDet_(false)
+      , up2Date_(false)
+  {}
 
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim,cdim,GridImp>::
-  ALU2dGridGeometry(const int child, const int orientation) : myGeomType_(GeometryType::simplex,mydim)
+  ALU2dGridGeometry(const int child, const int orientation)
+    : myGeomType_(GeometryType::simplex,mydim)
+      , builtElMat_(false)
+      , builtinverse_(false)
+      , calcedDet_(false)
+      , up2Date_(false)
   {
     // make empty element
     buildGeomInFather(child,orientation);
-  }
-
-  template <int mydim, int cdim, class GridImp>
-  inline void ALU2dGridGeometry<mydim,cdim,GridImp>::
-  initGeom()
-  {
-    //elInfo_ = 0;
-    face_ = -1;
-    builtinverse_ = false;
-    builtElMat_   = false;
-    calcedDet_    = false;
   }
 
   //! print the GeometryInformation
@@ -343,88 +338,23 @@ namespace Dune {
     return true;
   }
 
-  /*
-     //! built Geometry
-     template <int mydim, int cdim, class GridImp>
-     inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-     builtGeom(ALU2dGridGeometry::ElementType * item, int face,
-            int edge, int vertex)
-     {
-     //elInfo_ = elInfo;
-     face_ = face;
-     edge_ = edge;
-     vertex_ = vertex;
-     builtinverse_ = false;
-     builtElMat_   = false;
-
-     if(item)
-     {
-      // copy coordinates
-      for(int i=0; i<mydim+1; ++i)
-      {
-        // copy coordinates
-        for(int j=0; j<cdim; ++j) coord_[i][j] = item->vertex(i)->coord()[j];
-      }
-
-      elDet_     = elDeterminant();
-      calcedDet_ = true;
-      // geometry built
-      return true;
-     }
-     else
-     {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-     }
-     // geometry not built
-     return false;
-     }
-   */
-
   //! built Geometry
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   builtGeom(const HElementType & item, int face)
   {
-    //elInfo_ = elInfo;
-    face_ = face;
     builtinverse_ = false;
     builtElMat_   = false;
 
     assert( &item );
 
+    // defined in geometry.hh
+    elDet_ = CopyCoordinates<GeometryImp,mydim>::copy(item,coord_,face);
+    calcedDet_ = true;
 
-    if (mydim == 1) {
-      // copy coordinates
-      for(int i=0; i<mydim+1; ++i)
-      {
-        int vx = (i+face_+1)%3;
-        //std::cout << " set vertex " << vx << "\n";
-        //const double (&p)[cdim] = item.vertex(vx)->coord();
-        const double (&p)[cdim] = item.getVertex(vx)->coord();
-        for(int j=0; j<cdim; ++j)
-        {
-          coord_[i][j] = p[j];
-        }
-        //std::cout << coord_[i] << " c\n";
-      }
-      elDet_     = item.sidelength((face_)%3);
-      calcedDet_ = true;
-    }
-    else
-    {
-      // copy coordinates
-      for(int i=0; i<mydim+1; ++i)
-      {
-        // copy coordinates
-        //const double (&p)[cdim] = item.vertex(i)->coord();
-        const double (&p)[cdim] = item.getVertex(i)->coord();
-        for(int j=0; j<cdim; ++j)
-          coord_[i][j] = p[j];
-      }
-      elDet_ = 2.0*item.area();
-      calcedDet_ = true;
-    }
+    // geom is up2date
+    up2Date_ = true;
+
     // geometry built
     return true;
   }
@@ -435,32 +365,33 @@ namespace Dune {
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   builtGeom(const ALU2DSPACE Vertex & item, int )
   {
-    //elInfo_ = elInfo;
-    face_ = -1;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    coord_[0][0] = 0;
-    coord_[0][1] = 0;
-    coord_[1][0] = 0;
-    coord_[1][1] = 0;
-    coord_[2][0] = 0;
-    coord_[2][1] = 0;
+    // set coordinates to zero
+    coord_ = 0.0;
 
-    if(&item!=0) {
+    if(&item!=0)
+    {
       coord_[0][0] = item.coord()[0];
       coord_[0][1] = item.coord()[1];
 
       elDet_     = 1.0; // inant();
       calcedDet_ = true;
+      // geom is up2date
+      up2Date_ = true;
+
       // geometry built
       return true;
     }
-    else
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-    }
+
+    // default values
+    elDet_     = 0.0;
+    calcedDet_ = false;
+
+    // geom is not up2date
+    up2Date_ = false;
+
     // geometry not built
     return false;
   }
@@ -470,86 +401,29 @@ namespace Dune {
   template <class GeometryType, class LocalGeometryType >
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom)
-  //HElementType * item,int face)
   {
-    //elInfo_ = elInfo;
-    face_ = -1;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    //geo.realGeometry.print(std::cout);
     // just map the point of the global intersection to the local
     // coordinates , this is the default procedure
     // for simplices this is not so bad
-    for(int i=0; i<mydim+1; i++)
+    for(int i=0; i<mydim+1; ++i)
     {
       coord_[i] = geo.local( localGeom[i] );
     }
-    //std::cout << coord_ << " builkdLocal " <<endl;
 
-    elDet_     = elDeterminant();
+    elDet_  = elDeterminant();
+    //assert( std::abs(elDet_ - elDeterminant()) < 1e-10 );
+
     calcedDet_ = true;
+
+    // geom is up2date
+    up2Date_ = true;
 
     // geometry built
     return true;
   }
-
-  /*
-     // built Geometry
-     template <int mydim, int cdim, class GridImp>
-     inline void ALU2dGridGeometry<mydim,cdim,GridImp>::
-     buildGeomInFather(const int child, const int orientation )
-     {
-     initGeom();
-     // reset coordinate vectors
-     coord_ = 0.0;
-
-     assert( (child == 0) || (child == 1) );
-     if(mydim == 2)
-     {
-   */
-  /*
-     //////////////////////////////////////////////
-     //
-     //               (0,1)
-     //                /|\
-     //               /0|1\
-     //              /  |  \
-     //             /   |   \
-     //            /    |    \
-     //           /     |     \
-     //          /      |      \
-     //         / ch 0  | ch 1  \
-     //        /1      2|2      0\
-     //        -------------------
-     //    (0,0)     (0.5,0)    (1,0)
-     //
-     //
-     ///////////////////////////////////////////
-   */
-  /*
-      if( child == 0 )
-      {
-        coord_[0][1] = 1.0; // (0,1)
-        coord_[1]    = 0.0; // (0,0)
-        coord_[2][0] = 0.5; // (0.5,0)
-      }
-      if( child == 1 )
-      {
-        coord_[0][0] = 1.0; // (1,0)
-        coord_[1][1] = 1.0; // (0,1)
-        coord_[2][0] = 0.5; // (0.5,0)
-      }
-     }
-
-     // its a child of the reference element ==> det = 0.5
-     elDet_ = elDeterminant();
-     calcedDet_ = true;
-
-     if( elDet_ > 0.0 ) return;
-     DUNE_THROW(NotImplemented,"wrong dimension given!");
-     }
-   */
 
   // built Geometry
   template <int mydim, int cdim, class GridImp >
@@ -569,6 +443,10 @@ namespace Dune {
     }
 
     buildJacobianInverseTransposed();
+
+    // geom is up2date
+    up2Date_ = true;
+
     return true;
   }
 

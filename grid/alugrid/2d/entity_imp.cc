@@ -50,7 +50,6 @@ namespace Dune {
       item_(0),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
-      builtgeometry_(false),
       level_(level),
       face_(-1)
   {}
@@ -59,9 +58,10 @@ namespace Dune {
   template<int cd, int dim, class GridImp>
   inline void ALU2dGridEntity<cd,dim,GridImp>:: setElement(const ElementType &element, int face, int level) const {
     item_= const_cast<ElementType *> (&element);
-    builtgeometry_=false;
     level_ = level;
     face_ = face;
+
+    geoImp_.unsetUp2Date();
   }
 
 
@@ -70,7 +70,8 @@ namespace Dune {
   {
     item_   = const_cast<ElementType *> (&vx);
     level_  = (*item_).level();
-    builtgeometry_=false;
+
+    geoImp_.unsetUp2Date();
   }
 
   //! set item pointer to NULL
@@ -87,28 +88,27 @@ namespace Dune {
       item_(org.item_),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
-      builtgeometry_(false),
       level_(org.level_),
       face_(org.face_)
   {}
 
   //! geometry of this entity
   template<int cd, int dim, class GridImp>
-  inline const typename ALU2dGridEntity<cd, dim, GridImp> :: Geometry & ALU2dGridEntity<cd, dim, GridImp> ::
-  geometry () const {
-    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,face_);
-    assert(builtgeometry_ == true);
+  inline const typename ALU2dGridEntity<cd, dim, GridImp> :: Geometry &
+  ALU2dGridEntity<cd, dim, GridImp> :: geometry () const
+  {
+    if( !geoImp_.up2Date() )
+      geoImp_.builtGeom(*item_,face_);
+
+    assert( geoImp_.up2Date() );
     return geoObj_;
   }
 
   template<int cd, int dim, class GridImp>
-  inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const {
+  inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const
+  {
     assert(item_ != 0);
     return ElementWrapper<cd, dim, GridImp>::getElemIndex (grid_, *item_, face_);
-    //     if (cd != 1)
-    //       return item_->getIndex();
-    //     else
-    //       return item_->edge_idx(face_);
   }
 
   /**
@@ -142,10 +142,9 @@ namespace Dune {
     , item_(0)
     , geoObj_(GeometryImp())
     , geoImp_(grid_.getRealImplementation(geoObj_))
-    , builtgeometry_(false)
-    //, index_()
     , walkLevel_ (level)
-    , isLeaf_ (false) {}
+    , isLeaf_ (false)
+  {}
 
   //! Copy Constructor
   template<int dim, class GridImp>
@@ -155,9 +154,9 @@ namespace Dune {
       item_(org.item_),
       geoObj_(GeometryImp()),
       geoImp_(grid_.getRealImplementation(geoObj_)),
-      builtgeometry_(false),
       walkLevel_(org.walkLevel_),
-      isLeaf_(org.isLeaf_) { }
+      isLeaf_(org.isLeaf_)
+  {}
 
   //! level of this element
   template<int dim, class GridImp>
@@ -170,9 +169,10 @@ namespace Dune {
   template<int dim, class GridImp>
   inline const typename ALU2dGridEntity<0, dim, GridImp> :: Geometry & ALU2dGridEntity<0,dim,GridImp> :: geometry () const {
     assert(item_ != 0);
-    if(!builtgeometry_) builtgeometry_ = geoImp_.builtGeom(*item_,-1);
+    if(! geoImp_.up2Date() )
+      geoImp_.builtGeom(*item_,-1);
 
-    assert(builtgeometry_ == true);
+    assert( geoImp_.up2Date() );
     return geoObj_;
   }
 
@@ -195,26 +195,6 @@ namespace Dune {
   inline int ALU2dGridEntity<0, dim, GridImp> :: nChild() const {
     return item_->childNr();
   }
-
-  // singletons of geometry in father geometries
-  // GeometryType schould be of type Dune::Geometry
-  /*
-     template <class GeometryType>
-     static inline GeometryType &
-     getGeometryInFather(const int child, const int orientation = 1)
-     {
-     typedef typename GeometryType :: ImplementationType GeometryImp;
-     static GeometryType child0       (GeometryImp(0,1)); // child 0
-     static GeometryType child1_plus  (GeometryImp(1,1)); // child 1
-     static GeometryType child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
-
-     if(child == 0) return child0;
-     if(child == 1) return (orientation > 0) ? child1_plus : child1_minus;
-
-     DUNE_THROW(NotImplemented,"wrong number of child given!");
-     return child0;
-     }
-   */
 
   template<int dim, class GridImp>
   inline const typename ALU2dGridEntity<0, dim, GridImp>:: Geometry & ALU2dGridEntity<0,dim,GridImp> ::
@@ -332,26 +312,26 @@ namespace Dune {
       arguments of these methods
    */
   template<int dim, class GridImp>
-  inline void ALU2dGridEntity<0,dim,GridImp> :: setElement(const HElementType &element, int face, int level) const {
+  inline void ALU2dGridEntity<0,dim,GridImp> ::
+  setElement(const HElementType &element, int face, int level) const
+  {
     item_= const_cast<HElementType *> (&element);
-    builtgeometry_=false;
-    //index_   = -1;
-    //level_   = (*item_).level();
-    //glIndex_ = (*item_).getIndex();
     isLeaf_  = ((*item_).down() == 0);
+
+    geoImp_.unsetUp2Date();
   }
 
   //! set actual walk level
   template<int dim, class GridImp>
-  inline void ALU2dGridEntity<0,dim,GridImp> :: reset ( int l ){
+  inline void ALU2dGridEntity<0,dim,GridImp> :: reset ( int l )
+  {
     assert( walkLevel_ >= 0 );
 
     item_       = 0;
-    builtgeometry_ = false;
     walkLevel_     = l;
-    //glIndex_    = -1;
-    //level_      = -1;
     isLeaf_     = false;
+
+    geoImp_.unsetUp2Date();
   }
 
   //! set item pointer to NULL
