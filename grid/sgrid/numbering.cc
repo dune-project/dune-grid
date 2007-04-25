@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef __NUMBERING_CC__
-#define __NUMBERING_CC__
+#ifndef DUNE_NUMBERING_CC
+#define DUNE_NUMBERING_CC
 
 #include <iostream>
 
