@@ -61,18 +61,22 @@ namespace Dune {
     template <class GeomImp>
     struct CopyCoordinates<GeomImp,2>
     {
+      template <class VecType>
+      static void copyData(const double p[cdim], VecType& vec)
+      {
+        vec[0] = p[0];
+        vec[1] = p[1];
+      }
+
       // copy coordinates and return determinant
       template<class CoordMatrixType>
       static double copy(const HElementType& item, CoordMatrixType& coord, const int )
       {
+        assert( cdim == 2 );
         // copy coordinates
-        for(int i=0; i<3; ++i)
-        {
-          // copy coordinates
-          const double (&p)[cdim] = item.getVertex(i)->coord();
-          for(int j=0; j<cdim; ++j)
-            coord[i][j] = p[j];
-        }
+        copyData(item.getVertex(0)->coord(),coord[0]);
+        copyData(item.getVertex(1)->coord(),coord[1]);
+        copyData(item.getVertex(2)->coord(),coord[2]);
         return 2.0*item.area();
       }
     };
@@ -80,6 +84,13 @@ namespace Dune {
     template <class GeomImp>
     struct CopyCoordinates<GeomImp,1>
     {
+      template <class VecType>
+      static void copyData(const double p[cdim], VecType& vec)
+      {
+        vec[0] = p[0];
+        vec[1] = p[1];
+      }
+
       // copy coordinates and return determinant
       template<class CoordMatrixType>
       static double copy(const HElementType& item, CoordMatrixType& coord, const int face)
@@ -87,12 +98,8 @@ namespace Dune {
         // copy coordinates
         for(int i=0; i<2; ++i)
         {
-          int vx = (i+face+1)%3;
-          const double (&p)[cdim] = item.getVertex(vx)->coord();
-          for(int j=0; j<cdim; ++j)
-          {
-            coord[i][j] = p[j];
-          }
+          const int vx = (i+face+1)%3;
+          copyData(item.getVertex(vx)->coord(),coord[i]);
         }
         return item.sidelength((face)%3);
       }
@@ -148,6 +155,9 @@ namespace Dune {
     template <class GeometryType, class LocalGeomType >
     bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
 
+    //! build local geometry given local face number
+    bool builtLocalGeom(const int faceNumber, const int twist);
+
     //! return non-const reference to coord vecs
     FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
 
@@ -161,6 +171,8 @@ namespace Dune {
     inline bool up2Date() const { return up2Date_; }
     inline void unsetUp2Date() const { up2Date_ = false; }
   private:
+    // set ref coords
+    void setReferenceCoordinates();
 
     //! build the transposed of the jacobian inverse and store the volume
     void buildJacobianInverseTransposed () const;
@@ -180,6 +192,9 @@ namespace Dune {
     //! the vertex coordinates
     mutable FieldMatrix<alu2d_ctype, mydim+1, cdim> coord_;
 
+    //! the reference element coordinates, last is the length of face
+    FieldMatrix<alu2d_ctype, 3 , 3> refCoord_;
+
     //! storage for global coords
     mutable FieldVector<alu2d_ctype, cdim> globalCoord_;
 
@@ -198,7 +213,9 @@ namespace Dune {
     //! is true if Jinv_ and volume_ is calced
     mutable bool builtinverse_;
 
+#ifndef NDEBUG
     mutable bool calcedDet_; //! true if determinant was calculated
+#endif
     mutable alu2d_ctype elDet_;                           //!< storage of integration_element
 
     //! is true if geom is up2date

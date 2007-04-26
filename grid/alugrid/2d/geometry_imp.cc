@@ -17,23 +17,52 @@ namespace Dune {
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry()
     : myGeomType_(GeometryType::simplex,mydim)
+      , coord_(0.0)
+      , refCoord_(0.0)
       , builtElMat_(false)
       , builtinverse_(false)
+#ifndef NDEBUG
       , calcedDet_(false)
+#endif
       , up2Date_(false)
-  {}
+  {
+    setReferenceCoordinates();
+  }
 
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim,cdim,GridImp>::
   ALU2dGridGeometry(const int child, const int orientation)
     : myGeomType_(GeometryType::simplex,mydim)
+      , coord_(0.0)
+      , refCoord_(0.0)
       , builtElMat_(false)
       , builtinverse_(false)
+#ifndef NDEBUG
       , calcedDet_(false)
+#endif
       , up2Date_(false)
   {
+    setReferenceCoordinates();
+
     // make empty element
     buildGeomInFather(child,orientation);
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline void ALU2dGridGeometry<mydim, cdim, GridImp> :: setReferenceCoordinates()
+  {
+    // zero all entries
+    refCoord_ = 0.0;
+
+    // point 1
+    refCoord_[1][0] = 1;
+    // point 2
+    refCoord_[2][1] = 1;
+
+    // length of faces
+    refCoord_[0][2] = M_SQRT2;
+    refCoord_[1][2] = 1.0;
+    refCoord_[2][2] = 1.0;
   }
 
   //! print the GeometryInformation
@@ -84,7 +113,10 @@ namespace Dune {
     // matrix has to be calculated again , because coord might have changed
     builtinverse_ = false;
     builtElMat_   = false;
+
+#ifndef NDEBUG
     calcedDet_    = false;
+#endif
 
     return coord_[i];
   }
@@ -265,7 +297,10 @@ namespace Dune {
 
     assert(elDet_ > 1.0E-25 );
 
+#ifndef NDEBUG
     calcedDet_ = true;
+#endif
+
     builtinverse_ = true;
     return;
   }
@@ -350,7 +385,9 @@ namespace Dune {
 
     // defined in geometry.hh
     elDet_ = CopyCoordinates<GeometryImp,mydim>::copy(item,coord_,face);
+#ifndef NDEBUG
     calcedDet_ = true;
+#endif
 
     // geom is up2date
     up2Date_ = true;
@@ -377,7 +414,9 @@ namespace Dune {
       coord_[0][1] = item.coord()[1];
 
       elDet_     = 1.0; // inant();
+#ifndef NDEBUG
       calcedDet_ = true;
+#endif
       // geom is up2date
       up2Date_ = true;
 
@@ -387,7 +426,9 @@ namespace Dune {
 
     // default values
     elDet_     = 0.0;
+#ifndef NDEBUG
     calcedDet_ = false;
+#endif
 
     // geom is not up2date
     up2Date_ = false;
@@ -414,9 +455,44 @@ namespace Dune {
     }
 
     elDet_  = elDeterminant();
-    //assert( std::abs(elDet_ - elDeterminant()) < 1e-10 );
-
+#ifndef NDEBUG
     calcedDet_ = true;
+#endif
+
+    // geom is up2date
+    up2Date_ = true;
+
+    // geometry built
+    return true;
+  }
+
+  // built Geometry
+  template <int mydim, int cdim, class GridImp>
+  inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
+  builtLocalGeom(const int faceNumber, const int twist)
+  {
+    builtinverse_ = false;
+    builtElMat_   = false;
+
+    assert( twist == 0 || twist == 1 );
+    assert( mydim == 1 );
+
+    // just map the point of the global intersection to the local
+    // coordinates , this is the default procedure
+    // for simplices this is not so bad
+
+    CopyCoordinates<GeometryImp,mydim>::
+    copyData( &refCoord_[(faceNumber + (twist%2) + 1)%3][0] , coord_[0]);
+    CopyCoordinates<GeometryImp,mydim>::
+    copyData( &refCoord_[(faceNumber + ((twist+1)%2) + 1)%3][0] , coord_[1]);
+
+    // get length of faces
+    elDet_ = refCoord_[faceNumber][2];
+    assert( std::abs(elDet_ - elDeterminant()) < 1e-10 );
+
+#ifndef NDEBUG
+    calcedDet_ = true;
+#endif
 
     // geom is up2date
     up2Date_ = true;

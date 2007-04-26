@@ -248,8 +248,17 @@ namespace Dune {
 
     if( ! this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date() )
     {
-      this->grid_.getRealImplementation(intersectionSelfLocal_).
-      builtLocalGeom( inside()->geometry() , intersectionGlobal() );
+      // only in non-conform situation we use default method
+      if( this->current.isNotConform_ )
+      {
+        this->grid_.getRealImplementation(intersectionSelfLocal_).
+        builtLocalGeom( inside()->geometry() , intersectionGlobal() );
+      }
+      else
+      {
+        this->grid_.getRealImplementation(intersectionSelfLocal_).
+        builtLocalGeom( numberInSelf() , 0 );
+      }
     }
 
     assert(this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date());
@@ -265,6 +274,7 @@ namespace Dune {
 
     if( ! this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date() )
     {
+      // we don't know here wether we have non-conform or conform situation on the neighbor
       this->grid_.getRealImplementation(intersectionNeighborLocal_).
       builtLocalGeom( outside()->geometry() , intersectionGlobal());
     }
