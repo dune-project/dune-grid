@@ -626,7 +626,11 @@ namespace Dune {
     template<int dim>
     struct isParallel< UGGrid<dim> >
     {
+#ifdef ModelP
       static const bool v = true;
+#else
+      static const bool v = false;
+#endif
     };
 
     /** \brief UGGrid is levelwise conforming
