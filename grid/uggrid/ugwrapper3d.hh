@@ -7,7 +7,7 @@
  * \brief Encapsulates some UG macros and functions
  */
 
-/** \todo These macros have been copied from pargm.h to here, because currently there
+/** \todo This macro has been copied from pargm.h to here, because currently there
     are problems with the double inclusion. */
 #define PRIO2LISTPART(listtype,prio)                                         \
   ((listtype == ELEMENT_LIST) ? ((prio == PrioHGhost) ? 0 :                \
@@ -16,8 +16,6 @@
    ((prio == PrioHGhost) ? 0 : (prio ==PrioVGhost) ? 0 :            \
       (prio == PrioVHGhost) ? 0 :                                  \
       (prio == PrioBorder) ? 2 : (prio == PrioMaster) ? 2 : -1))
-
-#define GRID_ATTR(g) g->level+32
 
 namespace Dune {
 
@@ -655,6 +653,5 @@ namespace Dune {
 } // namespace Dune
 
 #undef PRIO2LISTPART
-#undef GRID_ATTR
 
 #endif
