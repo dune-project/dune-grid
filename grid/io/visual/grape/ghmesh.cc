@@ -91,7 +91,7 @@ namespace FctSelector {
   typedef std::pair< const char * , const char * > DataFunctionName_t;
 
   // returns slot and name of selected function
-  DataFunctionName_t getCurrentFunctionName(GRAPEMESH * mesh)
+  inline DataFunctionName_t getCurrentFunctionName(GRAPEMESH * mesh)
   {
     DataFunctionName_t fctName(0,0);
 
@@ -741,7 +741,7 @@ inline HMESH * get_partition_number (int * partition)
 }
 
 // if parameter is not 0 ,then mesh is freed (i.e. pushed to stack)
-GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
+inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
 {
   static std::stack< GRAPEMESH * > meshStack;
 
