@@ -309,15 +309,17 @@ namespace Dune {
     /** @name Grid Refinement Methods */
     /*@{*/
 
-    /** \brief Mark entity for refinement
-     *
-     * This only works for entities of codim 0.
-     * The parameter is currently ignored
-     *
-     * \return <ul>
-     * <li> true, if element was marked </li>
-     * <li> false, if nothing changed </li>
-     * </ul>
+    /** \brief Mark element for refinement
+        \param refCount <ul>
+        <li> 1: mark for red refinement </li>
+        <li> -1: mark for coarsening </li>
+        <li> 0: delete a possible refinement mark </li>
+        </ul>
+        \param e Element to be marked
+       \return <ul>
+        <li> true, if element was marked </li>
+        <li> false, if nothing changed </li>
+        </ul>
      */
     bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer & e );
 
@@ -454,16 +456,6 @@ namespace Dune {
 
     /*@}*/
 
-    /** \brief Adapt the grid without constructing the green closure
-
-       WARNING: This is a very special method.  Omitting the green closure does
-       not mean that UG creates correct nonconforming meshes.  For internal
-       reasons (bugs?) though, it allows you to do uniform refinement with
-       a few anisotropic refinement rules such as UG::D3::PRISM_QUADSECT or
-       UG::D3::HEX_QUADSECT_0.
-     */
-    void adaptWithoutClosure();
-
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
@@ -483,9 +475,22 @@ namespace Dune {
       COPY
     };
 
+    /** \brief Decide whether to add a green closure to locally refined grid sections or not */
+    enum ClosureType {
+      /** \brief Standard red/green refinement */
+      GREEN,
+      /** \brief No closure, results in nonconforming meshes */
+      NONE
+    };
+
     /** \brief Sets the type of grid refinement */
     void setRefinementType(RefinementType type) {
       refinementType_ = type;
+    }
+
+    /** \brief Sets the type of grid refinement closure */
+    void setClosureType(ClosureType type) {
+      closureType_ = type;
     }
 
     /** \brief Collapses the grid hierarchy into a single grid level*/
@@ -543,8 +548,8 @@ namespace Dune {
     //! The type of grid refinement currently in use
     RefinementType refinementType_;
 
-    //!
-    bool omitGreenClosure_;
+    //! The type of grid refinement closure currently in use
+    ClosureType closureType_;
 
     /** \brief While inserting the elements this array records the number of
         vertices of each element. */
@@ -569,7 +574,7 @@ namespace Dune {
     /** \brief Remember whether some element has been marked for refinement
         ever since the last call to adapt().
 
-        This is here to implement the return value of adapt().
+        This is here to implement the return value of preAdapt().
      */
     bool someElementHasBeenMarkedForRefinement_;
 

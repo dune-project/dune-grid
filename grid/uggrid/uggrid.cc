@@ -57,7 +57,7 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     globalIdSet_(*this),
     localIdSet_(*this),
     refinementType_(LOCAL),
-    omitGreenClosure_(false),
+    closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false)
 {
   heapsize = heapSize;
@@ -131,7 +131,7 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned int envHeapS
     globalIdSet_(*this),
     localIdSet_(*this),
     refinementType_(LOCAL),
-    omitGreenClosure_(false),
+    closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false)
 {
   heapsize = heapSize;
@@ -484,7 +484,7 @@ bool Dune::UGGrid < dim >::adapt()
   if (refinementType_==COPY)
     mode = mode | UG_NS<dim>::GM_COPY_ALL;
 
-  if (omitGreenClosure_)
+  if (closureType_==NONE)
     mode = mode | UG_NS<dim>::GM_REFINE_NOT_CLOSED;
 
   // I don't really know what this means
@@ -519,16 +519,6 @@ void Dune::UGGrid <dim>::postAdapt()
       UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
   }
-}
-
-
-template <int dim>
-void Dune::UGGrid <dim>::adaptWithoutClosure()
-{
-  bool omitClosureBackup = omitGreenClosure_;
-  omitGreenClosure_ = true;
-  adapt();
-  omitGreenClosure_ = omitClosureBackup;
 }
 
 template < int dim >
