@@ -1105,7 +1105,7 @@ template <int dim>
 void Dune::UGGrid<dim>::insertBoundarySegment(const std::vector<unsigned int> vertices,
                                               const BoundarySegment<dim>* boundarySegment)
 {
-  FixedArray<unsigned int, dim*2-2> segmentVertices = -1;
+  array<unsigned int, dim*2-2> segmentVertices = -1;
   for (size_t i=0; i<vertices.size(); i++)
     segmentVertices[i] = vertices[i];
 

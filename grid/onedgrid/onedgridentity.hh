@@ -81,7 +81,7 @@ namespace Dune {
       return sons_[0]==NULL && sons_[1]==NULL;
     }
 
-    FixedArray<OneDEntityImp<1>*, 2> sons_;
+    array<OneDEntityImp<1>*, 2> sons_;
 
     OneDEntityImp<1>* father_;
 

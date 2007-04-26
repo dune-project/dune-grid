@@ -443,7 +443,7 @@ template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<2,3,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
-  // The cast in the second argument works because a FixedArray<FieldVector<T,3>,4>
+  // The cast in the second argument works because a std::array<FieldVector<T,3>,4>
   // has the same memory layout as a T[4][3].
   /** \todo Maybe there should be a test for this */
   return UG_NS<3>::SurfaceElement(corners(), (const double(*)[3])&coord_,&local[0]);

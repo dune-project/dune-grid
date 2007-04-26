@@ -525,7 +525,7 @@ namespace Dune {
     std::vector<const BoundarySegment<dim>*> boundarySegments_;
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
-    std::vector<FixedArray<unsigned int, dim*2-2> > boundarySegmentVertices_;
+    std::vector<array<unsigned int, dim*2-2> > boundarySegmentVertices_;
 
     CollectiveCommunication<UGGrid> ccobj;
 

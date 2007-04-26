@@ -212,7 +212,7 @@ namespace Dune {
     }
 
     //! the vertex coordinates
-    mutable FixedArray<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
+    mutable array<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
@@ -307,7 +307,7 @@ namespace Dune {
     GeometryType elementType_;
 
     //! the vertex coordinates in UG numbering
-    mutable FixedArray<FieldVector<UGCtype, 3>, 4> coord_;
+    mutable array<FieldVector<UGCtype, 3>, 4> coord_;
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,2,2> jacobianInverseTransposed_;
@@ -385,7 +385,7 @@ namespace Dune {
     void setNumberOfCorners(int n) {}
 
     //! the vertex coordinates
-    FixedArray<FieldVector<UGCtype, 2>, 2> coord_;
+    array<FieldVector<UGCtype, 2>, 2> coord_;
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,1,1> jacobianInverseTransposed_;
