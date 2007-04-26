@@ -10,10 +10,13 @@ namespace Dune {
   // and allows the line-wise extraction from this block
   // *************************************************************
   namespace {
-    void makeupcase(std::string &s) {
+
+    inline void makeupcase(std::string &s)
+    {
       for (size_t i=0; i<s.size(); i++)
         s[i]=toupper(s[i]);
     }
+
     class BasicBlock {
       int pos;               // line number
       bool active;           // block was found
