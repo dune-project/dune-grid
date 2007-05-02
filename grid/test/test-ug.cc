@@ -25,6 +25,8 @@
 #include "checkcommunicate.cc"
 #endif
 
+using namespace Dune;
+
 class ArcOfCircle : public Dune::BoundarySegment<2>
 {
 public:
@@ -137,6 +139,53 @@ void markOne ( GridType & grid , int num , int ref )
   grid.postAdapt();
 }
 
+void generalTests(bool greenClosure)
+{
+  Dune::UGGrid<2> grid2d;
+  Dune::UGGrid<3> grid3d;
+
+  make2DTestGrid(grid2d);
+  make3DTestGrid(grid3d);
+
+  // Switch of the green closure, if requested
+  if (!greenClosure) {
+    grid2d.setClosureType(UGGrid<2>::NONE);
+    grid3d.setClosureType(UGGrid<3>::NONE);
+  }
+
+  // check macro grid
+  gridcheck(grid2d);
+  gridcheck(grid3d);
+
+  // create hybrid grid
+  markOne(grid2d,0,1) ;
+  markOne(grid3d,0,1) ;
+
+  gridcheck(grid2d);
+  gridcheck(grid3d);
+
+  grid2d.globalRefine(1);
+  grid3d.globalRefine(1);
+  gridcheck(grid2d);
+  gridcheck(grid3d);
+
+  // check the method geometryInFather()
+  checkGeometryInFather(grid2d);
+  checkGeometryInFather(grid3d);
+
+  // check the intersection iterator
+  checkIntersectionIterator(grid2d);
+  checkIntersectionIterator(grid3d);
+
+#ifdef ModelP
+  // check communication interface
+  checkCommunication(grid2d,-1,Dune::dvverb);
+  for(int l=0; l<=grid2d.maxLevel(); ++l)
+    checkCommunication(grid2d,l,Dune::dvverb);
+#endif
+
+}
+
 int main (int argc , char **argv) try
 {
 
@@ -146,50 +195,16 @@ int main (int argc , char **argv) try
 #endif
 
   // ////////////////////////////////////////////////////////////////////////
-  //  Do the standard grid test for a 2d UGGrid
+  //  Do the standard grid test for a 2d and a 3d UGGrid
   // ////////////////////////////////////////////////////////////////////////
-  // extra-environment to check destruction
-  {
 
-    std::cout << "Testing UGGrid<2> and UGGrid<3> simultaneously" << std::endl;
+  // Do the general tests for red/green refinement
+  std::cout << "Testing UGGrid<2> and UGGrid<3> with red/green refinement" << std::endl;
+  generalTests(true);
 
-    Dune::UGGrid<2> grid2d;
-    Dune::UGGrid<3> grid3d;
-
-    make2DTestGrid(grid2d);
-    make3DTestGrid(grid3d);
-
-    // check macro grid
-    gridcheck(grid2d);
-    gridcheck(grid3d);
-
-    // create hybrid grid
-    markOne(grid2d,0,1) ;
-    markOne(grid3d,0,1) ;
-
-    gridcheck(grid2d);
-    gridcheck(grid3d);
-
-    grid2d.globalRefine(1);
-    grid3d.globalRefine(1);
-    gridcheck(grid2d);
-    gridcheck(grid3d);
-
-    // check the method geometryInFather()
-    checkGeometryInFather(grid2d);
-    checkGeometryInFather(grid3d);
-
-    // check the intersection iterator
-    checkIntersectionIterator(grid2d);
-    checkIntersectionIterator(grid3d);
-
-#ifdef ModelP
-    // check communication interface
-    checkCommunication(grid2d,-1,Dune::dvverb);
-    for(int l=0; l<=grid2d.maxLevel(); ++l)
-      checkCommunication(grid2d,l,Dune::dvverb);
-#endif
-  }
+  // Do the general tests for nonconforming refinement
+  std::cout << "Testing UGGrid<2> and UGGrid<3> with nonconforming refinement" << std::endl;
+  generalTests(false);
 
   // ////////////////////////////////////////////////////////////////////////
   //   Check whether geometryInFather returns equal results with and
