@@ -59,6 +59,8 @@ namespace Dune {
 
     typedef UG::D3::element Element;
 
+    typedef UG::D3::vertex Vertex;
+
     /** \brief Types of the subentities parametrized by the codimension.  Gets specialized below */
     template <int codim>
     class Entity;
@@ -168,7 +170,7 @@ namespace Dune {
     }
 
     //! return true if element has an exact copy on the next level
-    static bool hasCopy (UG_NS<3>::Element* theElement) {
+    static bool hasCopy (const UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::control_entries;
       using UG::UINT;
@@ -178,7 +180,7 @@ namespace Dune {
     }
 
     //! return true if element has an exact copy on the next level
-    static bool isRegular (UG_NS<3>::Element* theElement) {
+    static bool isRegular (const UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
       using UG::D3::control_entries;
       using UG::UINT;
@@ -186,14 +188,14 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static int Sides_Of_Elem(UG_NS<3>::Element* theElement) {
+    static int Sides_Of_Elem(const UG_NS<3>::Element* theElement) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return SIDES_OF_ELEM(theElement);
     }
 
     //! Encapsulates the NBELEM macro
-    static UG_NS<3>::Element* NbElem(UG_NS<3>::Element* theElement, int nb) {
+    static UG_NS<3>::Element* NbElem(const UG_NS<3>::Element* theElement, int nb) {
       using UG::D3::ELEMENT;
       using UG::D3::nb_offset;
       using UG::UINT;
@@ -201,7 +203,7 @@ namespace Dune {
     }
 
     //! Returns true if the i-th side of the element is on the domain boundary
-    static bool Side_On_Bnd(UG_NS<3>::Element* theElement, int i) {
+    static bool Side_On_Bnd(const UG_NS<3>::Element* theElement, int i) {
       using UG::D3::BNDS;
       using UG::D3::BEOBJ;
       using UG::D3::side_offset;
@@ -274,20 +276,6 @@ namespace Dune {
         return (UG::D3::node*) theNode->father;
       else
         return 0;         // may be edge or element
-    }
-
-    //! get father element of vertex
-    static void PositionInFather(UG_NS<3>::Node* theNode, FieldVector<double, 3>& local) {
-      local[0] = theNode->myvertex->iv.xi[0];
-      local[1] = theNode->myvertex->iv.xi[1];
-      local[2] = theNode->myvertex->iv.xi[2];
-    }
-
-    //! get father element of vertex
-    static void NodePositionGlobal(UG_NS<3>::Node* theNode, FieldVector<double, 3>& global) {
-      global[0] = theNode->myvertex->iv.x[0];
-      global[1] = theNode->myvertex->iv.x[1];
-      global[2] = theNode->myvertex->iv.x[2];
     }
 
     static int GetSons(const UG::D3::element* element, UG::D3::element* sonList[MAX_SONS]) {

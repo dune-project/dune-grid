@@ -55,6 +55,8 @@ namespace Dune {
 
     typedef UG::D2::element Element;
 
+    typedef UG::D2::vertex Vertex;
+
     /** \brief Types of the subentities parametrized by the codimension.  Gets specialized below */
     template <int codim>
     class Entity;
@@ -190,14 +192,14 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static int Sides_Of_Elem(UG_NS<2>::Element* theElement) {
+    static int Sides_Of_Elem(const UG_NS<2>::Element* theElement) {
       using UG::D2::element_descriptors;
       using UG::UINT;
       return SIDES_OF_ELEM(theElement);
     }
 
     //! Encapsulates the NBELEM macro
-    static UG_NS<2>::Element* NbElem(UG_NS<2>::Element* theElement, int nb) {
+    static UG_NS<2>::Element* NbElem(const UG_NS<2>::Element* theElement, int nb) {
       using UG::D2::ELEMENT;
       using UG::D2::nb_offset;
       using UG::UINT;
@@ -512,18 +514,6 @@ namespace Dune {
         return (UG::D2::node*) theNode->father;
       else
         return 0;         // may be edge or element
-    }
-
-    //! get father element of vertex
-    static void PositionInFather(UG_NS<2>::Node* theNode, FieldVector<double, 2>& local) {
-      local[0] = theNode->myvertex->iv.xi[0];
-      local[1] = theNode->myvertex->iv.xi[1];
-    }
-
-    //! get father element of vertex
-    static void NodePositionGlobal(UG_NS<2>::Node* theNode, FieldVector<double, 2>& global) {
-      global[0] = theNode->myvertex->iv.x[0];
-      global[1] = theNode->myvertex->iv.x[1];
     }
 
     static unsigned int ReadCW(void* obj, int ce) {
