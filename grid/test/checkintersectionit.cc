@@ -122,12 +122,6 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
       assert(indexSet.template subIndex<1>(*eIt, numberInSelf)
              == indexSet.template subIndex<1>(*outside, numberInNeighbor));
 
-#ifdef DUNE_UGGRID_HH
-#warning Test for subId of UGGrid partially skipped.  See FlySpray #264
-      if (eIt->level() != outside->level())
-        continue;
-#endif
-
       assert(grid.localIdSet().template subId<1>(*eIt, numberInSelf)
              == grid.localIdSet().template subId<1>(*outside, numberInNeighbor));
 
