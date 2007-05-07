@@ -78,7 +78,7 @@ namespace Dune {
   //! and a begin/end iterator pair for accessing those entities, the
   //! corresponding intersection iterators and a appropriate communication
   //! method.
-  //! GridParts are used to parametrize spaces (see DiscreteFunctionSpaceDefault).
+  //! GridParts are used to parametrize spaces (see DiscreteFunctionSpaceDefault [in dune-fem]).
   template <class GridPartTraits>
   class GridPartInterface {
   public:
@@ -172,7 +172,7 @@ namespace Dune {
     }
 
   protected:
-    //! do not create explict instances of this class
+    //! do not create explicit instances of this class
     GridPartInterface () {}
 
   private:
@@ -256,19 +256,19 @@ namespace Dune {
       isetWrapper_(grid,level),
       level_(level) {}
 
-    //! Constructor, chosing maxLevel
+    //! Constructor, choosing maxLevel
     LevelGridPart(const GridType& grid) :
       GridPartDefault<Traits>(grid,isetWrapper_),
       isetWrapper_(grid,grid.maxLevel()),
       level_(grid.maxLevel()) {}
 
-    //! Returns first iterator on a given level
+    //! Returns first iterator on this level
     template <int cd>
     typename Traits::template Codim<cd>::IteratorType begin() const {
       return this->grid().template lbegin<cd,pitype>(level_);
     }
 
-    //! Returns end iterator on a given level
+    //! Returns end iterator on this level
     template <int cd>
     typename Traits::template Codim<cd>::IteratorType end() const {
       return this->grid().template lend<cd,pitype>(level_);
@@ -306,14 +306,24 @@ namespace Dune {
   //! Type definitions for the LevelGridPart class
   template <class GridImp, PartitionIteratorType pitype>
   struct LevelGridPartTraits {
+
+    /** \brief The type of the grid */
     typedef GridImp GridType;
+
+    /** \brief The type of the corresponding grid part class */
     typedef LevelGridPart<GridImp,pitype> GridPartType;
+
+    /** \brief The appropriate index set */
     typedef WrappedLevelIndexSet<GridType> IndexSetType;
+
+    /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::
     LevelIntersectionIterator IntersectionIteratorType;
 
+    /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>
     struct Codim {
+      /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LevelIterator IteratorType;
     };
 
@@ -340,6 +350,7 @@ namespace Dune {
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
     struct Codim {
+      //! Provide types of the leaf iterators on codimension cd
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
 
@@ -398,14 +409,24 @@ namespace Dune {
   //! Type definitions for the LeafGridPart class
   template <class GridImp,PartitionIteratorType pitype>
   struct LeafGridPartTraits {
+
+    /** \brief The type of the grid */
     typedef GridImp GridType;
+
+    /** \brief The type of the corresponding grid part class */
     typedef LeafGridPart<GridImp,pitype> GridPartType;
+
+    /** \brief The appropriate index set */
     typedef WrappedLeafIndexSet<GridType> IndexSetType;
+
+    /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::
     LeafIntersectionIterator IntersectionIteratorType;
 
+    /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>
     struct Codim {
+      /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator IteratorType;
     };
 
