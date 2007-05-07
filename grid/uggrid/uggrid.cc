@@ -593,11 +593,11 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
   typename SLList<ListEntryType>::iterator f = list.begin();
   for (; f!=list.end(); ++f) {
 
-    typename::UG_NS<dim>::Element* theElement = f->first;
+    typename UG_NS<dim>::Element* theElement = f->first;
     int side                                  = f->second;
 
     int Sons_of_Side = 0;
-    typename::UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
     int SonSides[UG_NS<dim>::MAX_SONS];
 
     if (UG_NS<dim>::myLevel(theElement) < maxl) {
