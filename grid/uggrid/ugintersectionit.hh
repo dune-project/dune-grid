@@ -83,10 +83,14 @@ namespace Dune {
 
     //! return true if intersection is with boundary. \todo connection with
     //! boundary information, processor/outer boundary
-    bool boundary () const;
+    bool boundary () const {
+      return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
+    }
 
     //! return true if across the edge an neighbor on this level exists
-    bool neighbor () const;
+    bool neighbor () const {
+      return UG_NS<dim>::NbElem(center_, neighborCount_) != NULL;
+    }
 
     //! return information about the Boundary
     int boundaryId () const {
@@ -104,7 +108,9 @@ namespace Dune {
     const Geometry& intersectionGlobal () const;
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const;
+    int numberInSelf () const {
+      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+    }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
@@ -217,10 +223,14 @@ namespace Dune {
 
     //! return true if intersection is with boundary. \todo connection with
     //! boundary information, processor/outer boundary
-    bool boundary () const;
+    bool boundary () const {
+      return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
+    }
 
     //! return true if a neighbor element exists across this intersection
-    bool neighbor () const;
+    bool neighbor () const {
+      return leafSubFaces_[subNeighborCount_].first != NULL;
+    }
 
     //! return information about the Boundary
     int boundaryId () const {
@@ -238,7 +248,9 @@ namespace Dune {
     const Geometry& intersectionGlobal () const;
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const;
+    int numberInSelf () const {
+      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+    }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor

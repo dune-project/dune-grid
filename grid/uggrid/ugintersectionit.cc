@@ -1,19 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 template<class GridImp>
-inline bool UGGridLevelIntersectionIterator< GridImp >::neighbor() const
-{
-  return UG_NS<dim>::NbElem(center_, neighborCount_) != NULL;
-}
-
-template<class GridImp>
-inline bool
-UGGridLevelIntersectionIterator<GridImp>::boundary() const
-{
-  return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
-}
-
-template<class GridImp>
 inline const FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
 UGGridLevelIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
 {
@@ -187,13 +174,6 @@ intersectionNeighborLocal() const
 
 template< class GridImp>
 inline int UGGridLevelIntersectionIterator<GridImp>::
-numberInSelf ()  const
-{
-  return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
-}
-
-template< class GridImp>
-inline int UGGridLevelIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
   typename UG_NS<dim>::Element *other, *self;
@@ -206,6 +186,7 @@ numberInNeighbor () const
   }
   else
   {
+    /** \todo Should we really go down here??? */
     // now go down the stack of copies to find a lower level leaf neighbor
     typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
     while (father_!=0)
@@ -241,20 +222,6 @@ numberInNeighbor () const
 // /////////////////////////////////////////////////////////////////////////////
 //   Implementations for the class UGGridLeafIntersectionIterator
 // /////////////////////////////////////////////////////////////////////////////
-
-
-template<class GridImp>
-inline bool UGGridLeafIntersectionIterator< GridImp >::neighbor() const
-{
-  return leafSubFaces_[subNeighborCount_].first != NULL;
-}
-
-template<class GridImp>
-inline bool
-UGGridLeafIntersectionIterator<GridImp>::boundary() const
-{
-  return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
-}
 
 /** \todo Needs to be checked for the nonconforming case */
 template<class GridImp>
@@ -457,13 +424,6 @@ intersectionNeighborLocal() const
   }
 
   return neighLocal_;
-}
-
-template< class GridImp>
-inline int UGGridLeafIntersectionIterator<GridImp>::
-numberInSelf ()  const
-{
-  return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
 }
 
 template< class GridImp>
