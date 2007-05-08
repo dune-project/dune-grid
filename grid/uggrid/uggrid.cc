@@ -801,6 +801,11 @@ void Dune::UGGrid < dim >::createEnd()
 
   dverb << boundarySegments.size() << " boundary segments were found!" << std::endl;
 
+  if (boundarySegments_.size() > boundarySegments.size())
+    DUNE_THROW(GridError, "You have supplied " << boundarySegments_.size()
+                                               << "parametrized boundary sements,  but the coarse grid has only "
+                                               << boundarySegments.size() << " boundary faces!");
+
   // Count number of nodes on the boundary
   int noOfBNodes = 0;
   for (unsigned int i=0; i<isBoundaryNode.size(); i++) {
