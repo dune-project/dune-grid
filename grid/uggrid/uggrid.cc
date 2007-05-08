@@ -1110,9 +1110,13 @@ template <int dim>
 void Dune::UGGrid<dim>::insertBoundarySegment(const std::vector<unsigned int> vertices,
                                               const BoundarySegment<dim>* boundarySegment)
 {
-  array<unsigned int, dim*2-2> segmentVertices = -1;
+  array<unsigned int, dim*2-2> segmentVertices;
+
   for (size_t i=0; i<vertices.size(); i++)
     segmentVertices[i] = vertices[i];
+
+  for (size_t i=vertices.size(); i<dim*2-2; i++)
+    segmentVertices[i] = -1;
 
   // DUNE --> UG vertex renumbering for quadrilateral boundary segments
   if (vertices.size()==4) {
