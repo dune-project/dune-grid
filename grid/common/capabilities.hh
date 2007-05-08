@@ -68,7 +68,7 @@ namespace Dune
       static const bool v = false;
     };
 
-    /** \brief Specialize with 'true' if implementation provides unstructered grids. (default=true)
+    /** \brief Specialize with 'true' if implementation provides unstructured grids. (default=true)
        \ingroup GICapabilities
      */
     template <class Grid>
