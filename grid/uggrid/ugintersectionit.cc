@@ -146,14 +146,11 @@ inline const typename UGGridLevelIntersectionIterator<GridImp>::LocalGeometry&
 UGGridLevelIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
-  typename UG_NS<dim>::Element *other,*self;
+  typename UG_NS<dim>::Element *other;
 
   // if we have a neighbor on this level, then return it
   if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
-  {
     other = UG_NS<dim>::NbElem(center_, neighborCount_);
-    self = center_;
-  }
   else
     DUNE_THROW(GridError,"no neighbor found");
 
@@ -245,57 +242,11 @@ numberInNeighbor () const
 //   Implementations for the class UGGridLeafIntersectionIterator
 // /////////////////////////////////////////////////////////////////////////////
 
-// returns a neighbor that is a leaf or nothing (neighbor might be on the same level)
-// works only on leaf elements!
-template<class GridImp>
-inline typename UG_NS<GridImp::dimension>::Element* UGGridLeafIntersectionIterator< GridImp >::getLeafNeighbor () const
-{
-  // if the level neighbor exists and is a leaf then return it
-  typename UG_NS<dim>::Element* p = UG_NS<dim>::NbElem(center_, neighborCount_);
-  if (p!=NULL)
-    if (UG_NS<dim>::isLeaf(p))
-      return p;
-
-  // now I must be a leaf to proceed
-  if (!UG_NS<dim>::isLeaf(center_))
-    return NULL;
-
-  // up or down ?
-  if (p==NULL)
-  {
-    // I am a leaf and the neighbor does not exist: go down
-    typename UG_NS<dim>::Element* father_ = UG_NS<GridImp::dimensionworld>::EFather(center_);
-    while (father_!=0)
-    {
-      if (!UG_NS<dim>::hasCopy(father_)) break;             // father must be a copy
-      if (UG_NS<dim>::NbElem(father_, neighborCount_)!=NULL)             // check existence of neighbor
-        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father_, neighborCount_)))                 // check leafness
-          return UG_NS<dim>::NbElem(father_, neighborCount_);
-      father_ = UG_NS<dim>::EFather(father_);
-    }
-  }
-  else
-  {
-    // I am a leaf and the neighbor exists and the neighbor is not a leaf: go up
-    while (p!=0)
-    {
-      if (!UG_NS<dim>::hasCopy(p)) break;             // element must be copy refined
-      typename UG_NS<dim>::Element *sons[32];
-      UG_NS<dim>::GetSons(p,sons);
-      p = sons[0];
-      if (UG_NS<dim>::isLeaf(p))
-        return p;
-    }
-  }
-
-  // nothing found, return 0 (might be a processor boundary)
-  return NULL;
-}
 
 template<class GridImp>
 inline bool UGGridLeafIntersectionIterator< GridImp >::neighbor() const
 {
-  return getLeafNeighbor() != NULL;
+  return leafSubFaces_[subNeighborCount_].first != NULL;
 }
 
 template<class GridImp>
@@ -305,6 +256,7 @@ UGGridLeafIntersectionIterator<GridImp>::boundary() const
   return UG_NS<dim>::Side_On_Bnd(center_, neighborCount_);
 }
 
+/** \todo Needs to be checked for the nonconforming case */
 template<class GridImp>
 inline const FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
 UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
@@ -385,116 +337,123 @@ UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype
   return outerNormal_;
 }
 
+/** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
 inline const typename UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
 UGGridLeafIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
-  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+  if (leafSubFaces_.size() == 1) {
 
-  selfLocal_.setNumberOfCorners(numCornersOfSide);
+    // //////////////////////////////////////////////////////
+    //   The easy case: a conforming intersection
+    // //////////////////////////////////////////////////////
 
-  for (int i=0; i<numCornersOfSide; i++)
-  {
-    // get number of corner in UG's numbering system
-    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
 
-    // we need a temporary to be filled
-    FieldVector<UGCtype, dim> tmp;
+    selfLocal_.setNumberOfCorners(numCornersOfSide);
 
-    // get the corners local coordinates
-    UG_NS<dim>::getCornerLocal(center_,cornerIdx,tmp);
+    for (int i=0; i<numCornersOfSide; i++)
+    {
+      // get number of corner in UG's numbering system
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-    // and poke them into the Geometry
-    selfLocal_.setCoords(i,tmp);
+      // we need a temporary to be filled
+      FieldVector<UGCtype, dim> tmp;
+
+      // get the corners local coordinates
+      UG_NS<dim>::getCornerLocal(center_,cornerIdx,tmp);
+
+      // and poke them into the Geometry
+      selfLocal_.setCoords(i,tmp);
+    }
+
+  } else {
+    DUNE_THROW(NotImplemented, "no intersectionSelfLocal() for nonconforming UGGrids");
   }
 
   return selfLocal_;
 }
 
+/** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
 inline const typename UGGridLeafIntersectionIterator<GridImp>::Geometry&
 UGGridLeafIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
-  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+  if (leafSubFaces_.size() == 1) {
 
-  neighGlob_.setNumberOfCorners(numCornersOfSide);
+    // //////////////////////////////////////////////////////
+    //   The easy case: a conforming intersection
+    // //////////////////////////////////////////////////////
 
-  for (int i=0; i<numCornersOfSide; i++) {
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
 
-    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-    typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+    neighGlob_.setNumberOfCorners(numCornersOfSide);
 
-    neighGlob_.setCoords(i, node->myvertex->iv.x);
+    for (int i=0; i<numCornersOfSide; i++) {
 
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+
+      neighGlob_.setCoords(i, node->myvertex->iv.x);
+
+    }
+
+  } else {
+    DUNE_THROW(NotImplemented, "no intersectionGlobal() for nonconforming UGGrids");
   }
 
   return neighGlob_;
 }
 
+/** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
 inline const typename UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
 UGGridLeafIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
-  typename UG_NS<dim>::Element *other,*self;
+  if (leafSubFaces_.size() == 1) {
 
-  // if we have a neighbor on this level, then return it
-  if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
-  {
-    other = UG_NS<dim>::NbElem(center_, neighborCount_);
-    self = center_;
-  }
-  else
-  {
-    // now go down the stack of copies to find a lower level leaf neighbor
-    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
-    while (father_!=0)
-    {
-      if (!UG_NS<dim>::hasCopy(father_))
-        DUNE_THROW(GridError,"no neighbor found");
-      if (UG_NS<dim>::NbElem(father_, neighborCount_)!=NULL)             // check existence of neighbor
-        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father_, neighborCount_)))
-        {
-          other = UG_NS<dim>::NbElem(father_, neighborCount_);
-          self = father_;
+    // //////////////////////////////////////////////////////
+    //   The easy case: a conforming intersection
+    // //////////////////////////////////////////////////////
+
+    const typename UG_NS<dim>::Element *other = leafSubFaces_[subNeighborCount_].first;
+
+    // ///////////////////////////////////////
+    // go on and get the local coordinates
+    // ///////////////////////////////////////
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
+    neighLocal_.setNumberOfCorners(numCornersOfSide);
+
+    for (int i=0; i<numCornersOfSide; i++) {
+
+      // get the node in this element
+      int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+      const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_,localCornerNumber);
+
+      // get this node's local index in the neighbor element
+      int j;
+      for (j=0; j<UG_NS<dim>::Corners_Of_Elem(other); j++)
+        // Compare vertices because the nodes may be on different levels, but the nodes are the same
+        if (UG_NS<dim>::Corner(other, j)->myvertex == node->myvertex)
           break;
-        }
-      // try father
-      father_ = UG_NS<dim>::EFather(father_);
+
+      assert(j<UG_NS<dim>::Corners_Of_Elem(other));
+
+      // get the local coordinate there
+      FieldVector<UGCtype, dim> tmp;
+      UG_NS<dim>::getCornerLocal(other,j,tmp);
+
+      // and poke them into the Geometry
+      neighLocal_.setCoords(i,tmp);
     }
-    if (father_==0)
-      DUNE_THROW(GridError,"no neighbor found");
-  }
 
-  // ///////////////////////////////////////
-  // go on and get the local coordinates
-  // ///////////////////////////////////////
-  int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
-  neighLocal_.setNumberOfCorners(numCornersOfSide);
+  } else {
 
-  for (int i=0; i<numCornersOfSide; i++) {
+    DUNE_THROW(NotImplemented, "no intersectionNeighborLocal for nonconforming UGGrids");
 
-    // get the node in this element
-    int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-    const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_,localCornerNumber);
-
-    // get this node's local index in the neighbor element
-    int j;
-    for (j=0; j<UG_NS<dim>::Corners_Of_Elem(other); j++)
-      // Compare vertices because the nodes may be on different levels, but the nodes are the same
-      if (UG_NS<dim>::Corner(other, j)->myvertex == node->myvertex)
-        break;
-
-    assert(j<UG_NS<dim>::Corners_Of_Elem(other));
-
-    // get the local coordinate there
-    FieldVector<UGCtype, dim> tmp;
-    UG_NS<dim>::getCornerLocal(other,j,tmp);
-
-    // and poke them into the Geometry
-    neighLocal_.setCoords(i,tmp);
   }
 
   return neighLocal_;
@@ -511,43 +470,127 @@ template< class GridImp>
 inline int UGGridLeafIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
-  typename UG_NS<dim>::Element *other, *self;
+  if (leafSubFaces_[subNeighborCount_].first == NULL)
+    DUNE_THROW(GridError,"There is no neighbor!");
 
-  // if we have a neighbor on this level, then return it
-  if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
-  {
-    other = UG_NS<dim>::NbElem(center_, neighborCount_);
-    self = center_;
+  const int nSides = UG_NS<dim>::Sides_Of_Elem(leafSubFaces_[subNeighborCount_].first);
+
+  assert(leafSubFaces_[subNeighborCount_].second < nSides);
+
+  // Renumber to DUNE numbering
+  return UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, nSides);
+}
+
+template< class GridImp>
+inline void UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces() {
+
+  // Do nothing if level neighbor doesn't exit
+  typename UG_NS<dim>::Element* levelNeighbor = UG_NS<dim>::NbElem(center_, neighborCount_);
+
+  if (levelNeighbor != NULL && UG_NS<dim>::isLeaf(levelNeighbor)) {
+    leafSubFaces_.resize(1);
+    leafSubFaces_[0] = Face(levelNeighbor, numberInNeighbor(center_, levelNeighbor));
+    return;
   }
-  else
-  {
-    // now go down the stack of copies to find a lower level leaf neighbor
-    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
-    while (father_!=0)
-    {
-      if (!UG_NS<dim>::hasCopy(father_))
-        DUNE_THROW(GridError,"no neighbor found");
-      if (UG_NS<dim>::NbElem(father_, neighborCount_)!=NULL)             // check existence of neighbor
-        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father_, neighborCount_)))
-        {
-          other = UG_NS<dim>::NbElem(father_, neighborCount_);
-          self = father_;
-          break;
+
+  // Go down
+  if (levelNeighbor == NULL) {
+
+    leafSubFaces_.resize(1);
+
+    // I am a leaf and the neighbor does not exist: go down
+    typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
+    while (father != NULL) {
+
+      /** \bug Does not work for nonconforming grids, because there the father is not a copy */
+      if (!UG_NS<dim>::hasCopy(father)) {
+        break;         // father must be a copy
+      }
+      if (UG_NS<dim>::NbElem(father, neighborCount_)!=NULL)       // check existence of neighbor
+        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father, neighborCount_))) {         // check leafness
+          leafSubFaces_[0] = Face(UG_NS<dim>::NbElem(father, neighborCount_),
+                                  numberInNeighbor(father, UG_NS<dim>::NbElem(father, neighborCount_)));
+          return;
         }
-      // try father
-      father_ = UG_NS<dim>::EFather(father_);
+
+      father = UG_NS<dim>::EFather(father);
+
     }
-    if (father_==0)
-      DUNE_THROW(GridError,"no neighbor found");
+
+    // Nothing found
+    leafSubFaces_[0] = Face(NULL, 0);
+    return;
   }
 
-  // we have other and self
-  const int nSides = UG_NS<dim>::Sides_Of_Elem(other);
-  int i;
-  for (i=0; i<nSides; i++)
-    if (UG_NS<dim>::NbElem(other,i) == self)
-      break;
 
-  // now we have to renumber the side i
-  return UGGridRenumberer<dim>::facesUGtoDUNE(i, nSides);
+  // ///////////////
+  //   init list
+  // ///////////////
+
+  SLList<Face> list;
+  int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
+
+  int Sons_of_Side = 0;
+  typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+  int SonSides[UG_NS<dim>::MAX_SONS];
+
+  int rv = Get_Sons_of_ElementSide(levelNeighbor,
+                                   levelNeighborSide,
+                                   &Sons_of_Side,
+                                   SonList,        // the output elements
+                                   SonSides,       // Output element side numbers
+                                   true,          // Element sons are not precomputed
+                                   false,          // ioflag: Obsolete debugging flag
+                                   true);
+
+  if (rv!=0)
+    DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
+
+  for (int i=0; i<Sons_of_Side; i++)
+    list.push_back(Face(SonList[i],SonSides[i]));
+
+  // //////////////////////////////////////////////////
+  //   Traverse and collect all children of the side
+  // //////////////////////////////////////////////////
+
+  typename SLList<Face>::iterator f = list.begin();
+  for (; f!=list.end(); ++f) {
+
+    typename UG_NS<dim>::Element* theElement = f->first;
+
+    int Sons_of_Side = 0;
+    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
+    int SonSides[UG_NS<dim>::MAX_SONS];
+
+    if (!UG_NS<dim>::isLeaf(theElement)) {
+
+      Get_Sons_of_ElementSide(theElement,
+                              f->second,        // Input element side number
+                              &Sons_of_Side,       // Number of topological sons of the element side
+                              SonList,            // Output elements
+                              SonSides,           // Output element side numbers
+                              true,
+                              false,
+                              true);
+
+      for (int i=0; i<Sons_of_Side; i++)
+        list.push_back(Face(SonList[i],SonSides[i]));
+
+    }
+
+  }
+
+  // //////////////////////////////
+  //   Extract result from stack
+  // //////////////////////////////
+  leafSubFaces_.resize(0);
+
+  for (f = list.begin(); f!=list.end(); ++f) {
+
+    // Set element
+    if (UG_NS<dim>::isLeaf(f->first))
+      leafSubFaces_.push_back(*f);
+
+  }
+
 }

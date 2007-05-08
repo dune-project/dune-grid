@@ -3,6 +3,7 @@
 #ifndef DUNE_UGINTERSECTIONIT_HH
 #define DUNE_UGINTERSECTIONIT_HH
 
+#include <dune/common/sllist.hh>
 /** \file
  * \brief The UGGridIntersectionIterator class
  */
@@ -155,6 +156,9 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype UGCtype;
 
+    // An element face identfied by an element and a face number
+    typedef std::pair<typename UG_NS<dim>::Element*, int> Face;
+
   public:
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
@@ -162,24 +166,35 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    /** The default Constructor makes empty Iterator
-        \todo Should be private
-     */
     UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : center_(center), neighborCount_(nb)
-    {}
-
-    //! The Destructor
-    ~UGGridLeafIntersectionIterator() {};
+      : center_(center), neighborCount_(nb), subNeighborCount_(0)
+    {
+      if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
+        constructLeafSubfaces();
+    }
 
     //! equality
-    bool equals(const UGGridLeafIntersectionIterator<GridImp>& i) const {
-      return center_==i.center_ && neighborCount_ == i.neighborCount_;
+    bool equals(const UGGridLeafIntersectionIterator<GridImp>& other) const {
+      return center_           == other.center_
+             && neighborCount_    == other.neighborCount_
+             && subNeighborCount_ == other.subNeighborCount_;
     }
 
     //! prefix increment
     void increment() {
-      neighborCount_++;
+
+      subNeighborCount_++;
+
+      if (subNeighborCount_++ >= leafSubFaces_.size()) {
+
+        neighborCount_++;
+        subNeighborCount_ = 0;
+
+        if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
+          constructLeafSubfaces();
+
+      }
+
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -192,7 +207,8 @@ namespace Dune {
     //! (that is the neighboring Entity)
     EntityPointer outside() const {
 
-      typename UG_NS<dim>::Element* otherelem = getLeafNeighbor();
+      typename UG_NS<dim>::Element* otherelem = leafSubFaces_[subNeighborCount_].first;
+
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
@@ -240,8 +256,17 @@ namespace Dune {
     //  private methods
     //**********************************************************
 
-    //! returns a neighbor that is a leaf or nothing
-    typename UG_NS<GridImp::dimension>::Element* getLeafNeighbor () const;
+    int numberInNeighbor(const typename UG_NS<dim>::Element* me, const typename UG_NS<dim>::Element* other) const {
+      const int nSides = UG_NS<dim>::Sides_Of_Elem(other);
+
+      for (int i=0; i<nSides; i++)
+        if (UG_NS<dim>::NbElem(other,i) == me)
+          return i;
+
+      assert(false);
+    }
+
+    void constructLeafSubfaces();
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
@@ -261,6 +286,11 @@ namespace Dune {
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
+    //! For nonconforming intersection: which intersection within the face given
+    //! by neighborCount_ are we looking at?
+    int subNeighborCount_;
+
+    std::vector<Face> leafSubFaces_;
   };
 
 #include "ugintersectionit.cc"
