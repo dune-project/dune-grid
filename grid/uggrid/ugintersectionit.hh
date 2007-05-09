@@ -191,7 +191,7 @@ namespace Dune {
 
       subNeighborCount_++;
 
-      if (subNeighborCount_++ >= leafSubFaces_.size()) {
+      if (subNeighborCount_ >= leafSubFaces_.size()) {
 
         neighborCount_++;
         subNeighborCount_ = 0;
