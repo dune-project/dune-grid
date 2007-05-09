@@ -434,21 +434,131 @@ inline void UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces() {
     leafSubFaces_.resize(1);
 
     // I am a leaf and the neighbor does not exist: go down
-    typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
+    const typename UG_NS<dim>::Element* me = center_;
+    const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
+
+    int side = neighborCount_;
+    int fatherSide;
+
     while (father != NULL) {
 
-      /** \bug Does not work for nonconforming grids, because there the father is not a copy */
-      if (!UG_NS<dim>::hasCopy(father)) {
-        break;         // father must be a copy
-      }
-      if (UG_NS<dim>::NbElem(father, neighborCount_)!=NULL)       // check existence of neighbor
-        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father, neighborCount_))) {         // check leafness
-          leafSubFaces_[0] = Face(UG_NS<dim>::NbElem(father, neighborCount_),
-                                  numberInNeighbor(father, UG_NS<dim>::NbElem(father, neighborCount_)));
+      // //////////////////////////////////////////////////////////////
+      //   Find the topological father face
+      // //////////////////////////////////////////////////////////////
+      if (dim==2) {
+
+        // Get the two nodes
+        const typename UG_NS<dim>::Node* n0 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 0));
+        const typename UG_NS<dim>::Node* n1 = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, 1));
+
+        const typename UG_NS<dim>::Node* fatherN0, *fatherN1;
+
+        if (UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::CORNER_NODE
+            && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::MID_NODE) {
+
+          // n0 exists on the coarser level, but n1 doesn't
+          const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n1->father;
+          fatherN0 = fatherEdge->links[0].nbnode;
+          fatherN1 = fatherEdge->links[1].nbnode;
+
+        } else if (UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::MID_NODE
+                   && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::CORNER_NODE) {
+
+          // n1 exists on the coarser level, but n0 doesn't
+          const typename UG_NS<dim>::Edge* fatherEdge = (const typename UG_NS<dim>::Edge*)n0->father;
+          fatherN0 = fatherEdge->links[0].nbnode;
+          fatherN1 = fatherEdge->links[1].nbnode;
+
+        } else if (UG::D2::ReadCW(n0, UG::D2::NTYPE_CE) == UG::D2::CORNER_NODE
+                   && UG::D2::ReadCW(n1, UG::D2::NTYPE_CE) == UG::D2::CORNER_NODE) {
+
+          // This edge is a copy
+          fatherN0 = (const typename UG_NS<dim>::Node*)n0->father;
+          fatherN1 = (const typename UG_NS<dim>::Node*)n1->father;
+
+        } else
+          DUNE_THROW(GridError, "2d edge with two MID_NODES found!");
+
+        // Find the corresponding side on the father element
+        int i;
+        for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+          if ( (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))
+                && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1)))
+               || (fatherN0 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 1))
+                   && fatherN1 == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, 0))))
+            break;
+        }
+
+        assert (i<UG_NS<dim>::Sides_Of_Elem(father));
+        fatherSide = i;
+
+      } else {
+
+        // Get the nodes
+        int nNodes = UG_NS<dim>::Corners_Of_Side(me,side);
+        const typename UG_NS<dim>::Node* n[nNodes];
+        for (int i=0; i<nNodes; i++)
+          n[i] = UG_NS<dim>::Corner(me,UG_NS<dim>::Corner_Of_Side(me, side, i));
+
+        const typename UG_NS<dim>::Node* fatherNode[4];          // No more than four father nodes
+
+        //                 printf("NodeTypes: %d %d %d %d\n",
+        //                        UG::D2::ReadCW(n[0], UG::D2::NTYPE_CE),
+        //                        UG::D2::ReadCW(n[1], UG::D2::NTYPE_CE),
+        //                        UG::D2::ReadCW(n[2], UG::D2::NTYPE_CE),
+        //                        (nNodes==4) ? UG::D2::ReadCW(n[3], UG::D2::NTYPE_CE) : -1);
+
+        /** \todo This is no good.  There are too many cases */
+        if (UG::D3::ReadCW(n[0], UG::D3::NTYPE_CE) == UG::D3::CORNER_NODE
+            && UG::D3::ReadCW(n[1], UG::D3::NTYPE_CE) == UG::D3::CORNER_NODE
+            && UG::D3::ReadCW(n[2], UG::D3::NTYPE_CE) == UG::D3::CORNER_NODE
+            && ((nNodes < 4) || UG::D3::ReadCW(n[3], UG::D3::NTYPE_CE) == UG::D3::CORNER_NODE)) {
+
+          for (int i=0; i<nNodes; i++)
+            fatherNode[i] = (const typename UG_NS<dim>::Node*)n[i]->father;
+        } else {
+          //DUNE_THROW(NotImplemented,"for 3d");
+          // For conforming grids we know that we're at a domain boundary
+          // when arriving here.
+          leafSubFaces_[0] = Face(NULL, 0);
           return;
         }
 
+        // Find the corresponding side on the father element
+        int i;
+        for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+          int found = 0;
+          for (int j=0; j<nNodes; j++)
+            for (int k=0; k<UG_NS<dim>::Corners_Of_Side(father,i); k++)
+              if (fatherNode[j] ==UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, k))) {
+                found++;
+                break;
+              }
+
+          if (found==nNodes) {
+            fatherSide = i;
+            break;
+          }
+
+        }
+      }
+
+      // Do we have a neighbor on across this side?
+      typename UG_NS<dim>::Element* otherElement = UG_NS<dim>::NbElem(father, fatherSide);
+      if (otherElement) {
+        const int nSides = UG_NS<dim>::Sides_Of_Elem(otherElement);
+        for (int i=0; i<nSides; i++)
+          if (UG_NS<dim>::NbElem(otherElement,i) == father) {
+            leafSubFaces_[0] = Face(otherElement, i);
+            return;
+          }
+
+      }
+
+      // Go further down
+      me     = father;
       father = UG_NS<dim>::EFather(father);
+      side   = fatherSide;
 
     }
 
