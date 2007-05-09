@@ -176,42 +176,17 @@ template< class GridImp>
 inline int UGGridLevelIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
-  typename UG_NS<dim>::Element *other, *self;
+  const typename UG_NS<dim>::Element *other;
 
-  // if we have a neighbor on this level, then return it
-  if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
-  {
-    other = UG_NS<dim>::NbElem(center_, neighborCount_);
-    self = center_;
-  }
-  else
-  {
-    /** \todo Should we really go down here??? */
-    // now go down the stack of copies to find a lower level leaf neighbor
-    typename UG_NS<dim>::Element* father_ = UG_NS<dim>::EFather(center_);
-    while (father_!=0)
-    {
-      if (!UG_NS<dim>::hasCopy(father_))
-        DUNE_THROW(GridError,"no neighbor found");
-      if (UG_NS<dim>::NbElem(father_, neighborCount_)!=NULL)             // check existence of neighbor
-        if (UG_NS<dim>::isLeaf(UG_NS<dim>::NbElem(father_, neighborCount_)))
-        {
-          other = UG_NS<dim>::NbElem(father_, neighborCount_);
-          self = father_;
-          break;
-        }
-      // try father
-      father_ = UG_NS<dim>::EFather(father_);
-    }
-    if (father_==0)
-      DUNE_THROW(GridError,"no neighbor found");
-  }
+  // Look for a neighbor on this level
+  if ((other = UG_NS<dim>::NbElem(center_, neighborCount_)) == NULL)
+    DUNE_THROW(GridError,"There is no neighbor element!");
 
-  // we have other and self
+  // Find the corresponding side in the neighbor element
   const int nSides = UG_NS<dim>::Sides_Of_Elem(other);
   int i;
   for (i=0; i<nSides; i++)
-    if (UG_NS<dim>::NbElem(other,i) == self)
+    if (UG_NS<dim>::NbElem(other,i) == center_)
       break;
 
   // now we have to renumber the side i
