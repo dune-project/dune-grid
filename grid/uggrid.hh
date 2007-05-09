@@ -642,22 +642,22 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief UGGrid is leafwise conforming (by green closures)
+    /** \brief UGGrid may not be leafwise conforming
        \ingroup UGGrid
      */
     template<int dim>
     struct isLeafwiseConforming< UGGrid<dim> >
     {
-      static const bool v = true;
+      static const bool v = false;
     };
 
-    /** \brief UGGrid does not support hanging nodes
+    /** \brief UGGrid does support hanging nodes
        \ingroup UGGrid
      */
     template<int dim>
     struct hasHangingNodes< UGGrid<dim> >
     {
-      static const bool v = false;
+      static const bool v = true;
     };
 
   }
