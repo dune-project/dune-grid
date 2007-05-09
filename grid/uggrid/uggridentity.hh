@@ -86,11 +86,8 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridLeafIndexSet;
 
-    template <class GridImp_>
-    friend class UGGridGlobalIdSet;
-
-    template <class GridImp_>
-    friend class UGGridLocalIdSet;
+    template <class GridImp_, bool Local>
+    friend class UGGridIdSet;
 
     typedef typename GridImp::ctype UGCtype;
 
