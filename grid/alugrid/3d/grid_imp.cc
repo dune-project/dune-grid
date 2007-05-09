@@ -1063,6 +1063,14 @@ namespace Dune {
   inline bool ALU3dGrid<dim, dimworld, elType>::
   writeGrid_Ascii(const std::string filename, alu3d_ctype time ) const
   {
+#if ALU3DGRID_PARALLEL
+    // write ascii only works for serial grids at the moment
+    if ( this->comm().size() > 1 )
+    {
+      DUNE_THROW(GridError,"ALU3dGrid::writeGrid_Ascii not implemented for parallel grids!");
+    }
+#endif
+
     ALU3DSPACE GitterImplType & mygrd = myGrid();
     std::fstream file ( filename.c_str() , std::ios::out);
     if(file)
