@@ -3,10 +3,10 @@
 #ifndef DUNE_CHECK_INTERSECTIONITERATOR_CC
 #define DUNE_CHECK_INTERSECTIONITERATOR_CC
 
-#include <set>
 #include <cmath>
 
 #include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/common/gridpart.hh>
 
 /** \file
     \brief Tests for the IntersectionIterator
@@ -79,17 +79,37 @@ void checkGeometry(const GeometryImp& geometry)
 
 /** \brief Test the IntersectionIterator
  */
-template <class GridType, class IndexSet, class ElementIterator, class IntersectionIterator>
-void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
-                           const ElementIterator & eIt,
-                           IntersectionIterator & iIt, const IntersectionIterator &iEndIt,
-                           bool isConforming)
+template <class GridPartType>
+void checkIntersectionIterator(const GridPartType& gridPart,
+                               const typename GridPartType::Traits::template Codim<0>::IteratorType& eIt)
 {
   using namespace Dune;
+
+  typedef typename GridPartType::GridType GridType;
+  typedef typename GridPartType::IntersectionIteratorType IntersectionIterator;
+
+  const GridType& grid = gridPart.grid();
+  const typename GridPartType::IndexSetType& indexSet = gridPart.indexSet();
 
   typedef typename GridType::ctype ctype;
 
   FieldVector<double,GridType::dimension> sumNormal(0.0);
+
+  // /////////////////////////////////////////////////////////
+  //   Check the types defined by the iterator
+  // /////////////////////////////////////////////////////////
+  IsTrue< is_same<
+            typename IntersectionIterator::ctype,
+            typename GridType::ctype>::value == true >::yes();
+
+  IsTrue<static_cast<int>(IntersectionIterator::dimension)
+         == static_cast<int>(GridType::dimension)>::yes();
+
+  IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
+         == static_cast<int>(GridType::dimensionworld)>::yes();
+
+  typename GridPartType::IntersectionIteratorType iIt    = gridPart.ibegin(*eIt);
+  typename GridPartType::IntersectionIteratorType iEndIt = gridPart.iend(*eIt);
 
   for (;iIt!=iEndIt; ++iIt)
   {
@@ -113,7 +133,7 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( isConforming && iIt.neighbor() )
+    if ( GridPartType::conforming && iIt.neighbor() )
     {
       EntityPointer outside = iIt.outside();
       int numberInSelf     = iIt.numberInSelf();
@@ -232,34 +252,15 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
     {
 
       typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
+
+      LevelGridPart<const GridType, All_Partition> levelGridPart(grid, i);
+
       ElementIterator eIt    = grid.template lbegin<0>(i);
       ElementIterator eEndIt = grid.template lend<0>(i);
 
       for (; eIt!=eEndIt; ++eIt)
-      {
-        // check Level IntersectionIterator
-        typedef typename GridType::template Codim<0>::Entity EntityType;
-        typedef typename EntityType::LevelIntersectionIterator IntersectionIterator;
+        checkIntersectionIterator(levelGridPart, eIt);
 
-        IntersectionIterator iIt    = eIt->ilevelbegin();
-        IntersectionIterator iEndIt = eIt->ilevelend();
-        bool isConforming = Dune::Capabilities::isLevelwiseConforming < GridType > :: v ;
-
-        // /////////////////////////////////////////////////////////
-        //   Check the types defined by the iterator
-        // /////////////////////////////////////////////////////////
-        IsTrue< is_same<
-                typename IntersectionIterator::ctype,
-                typename GridType::ctype>::value == true >::yes();
-
-        IsTrue<static_cast<int>(IntersectionIterator::dimension)
-            == static_cast<int>(GridType::dimension)>::yes();
-
-        IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
-            == static_cast<int>(GridType::dimensionworld)>::yes();
-
-        checkIntersectionIter(grid,grid.levelIndexSet(i),eIt,iIt,iEndIt,isConforming);
-      }
     }
   }
 
@@ -267,32 +268,14 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
   {
     typedef typename GridType::template Codim<0>::LeafIterator ElementIterator;
 
+    LeafGridPart<const GridType, All_Partition> leafGridPart(grid);
+
     ElementIterator eEndIt = grid.template leafend<0>();
     for (ElementIterator eIt = grid.template leafbegin<0>(); eIt!=eEndIt; ++eIt)
-    {
-      typedef typename GridType::template Codim<0>::Entity EntityType;
-      typedef typename EntityType::LeafIntersectionIterator IntersectionIterator;
+      checkIntersectionIterator(leafGridPart, eIt);
 
-      IntersectionIterator iIt    = eIt->ileafbegin();
-      IntersectionIterator iEndIt = eIt->ileafend();
-      bool isConforming = Dune :: Capabilities ::isLeafwiseConforming < GridType > :: v ;
-
-      // /////////////////////////////////////////////////////////
-      //   Check the types defined by the iterator
-      // /////////////////////////////////////////////////////////
-      IsTrue< is_same<
-              typename IntersectionIterator::ctype,
-              typename GridType::ctype>::value == true >::yes();
-
-      IsTrue<static_cast<int>(IntersectionIterator::dimension)
-          == static_cast<int>(GridType::dimension)>::yes();
-
-      IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
-          == static_cast<int>(GridType::dimensionworld)>::yes();
-
-      checkIntersectionIter(grid,grid.leafIndexSet(),eIt,iIt,iEndIt,isConforming);
-    }
   }
+
 }
 
 #endif
