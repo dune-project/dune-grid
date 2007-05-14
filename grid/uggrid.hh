@@ -190,7 +190,7 @@ namespace Dune {
     typedef typename UGGridFamily<dim,dim>::Traits Traits;
 
     //! The type used to store coordinates
-    typedef double ctype;
+    typedef UG::DOUBLE ctype;
 
     /** \brief Constructor with control over UG's memory requirements
      *
