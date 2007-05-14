@@ -91,8 +91,6 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   const GridType& grid = gridPart.grid();
   const typename GridPartType::IndexSetType& indexSet = gridPart.indexSet();
 
-  typedef typename GridType::ctype ctype;
-
   FieldVector<double,GridType::dimension> sumNormal(0.0);
 
   // /////////////////////////////////////////////////////////
@@ -108,8 +106,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
          == static_cast<int>(GridType::dimensionworld)>::yes();
 
-  typename GridPartType::IntersectionIteratorType iIt    = gridPart.ibegin(*eIt);
-  typename GridPartType::IntersectionIteratorType iEndIt = gridPart.iend(*eIt);
+  IntersectionIterator iIt    = gridPart.ibegin(*eIt);
+  IntersectionIterator iEndIt = gridPart.iend(*eIt);
 
   for (;iIt!=iEndIt; ++iIt)
   {
@@ -128,6 +126,36 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     typedef typename EntityType::EntityPointer EntityPointer;
 
     assert(eIt == iIt.inside());
+
+    // //////////////////////////////////////////////////////////////////////
+    //   Check whether the 'has-intersection-with'-relation is symmetric
+    // //////////////////////////////////////////////////////////////////////
+
+    if (iIt.neighbor()) {
+
+      EntityPointer outside = iIt.outside();
+      bool insideFound = false;
+
+      IntersectionIterator outsideIIt    = gridPart.ibegin(*outside);
+      IntersectionIterator outsideIEndIt = gridPart.iend(*outside);
+
+      for (; outsideIIt!=outsideIEndIt; ++outsideIIt) {
+
+        if (outsideIIt.neighbor() && outsideIIt.outside() == iIt.inside()) {
+
+          if (outsideIIt.numberInSelf() != iIt.numberInNeighbor())
+            DUNE_THROW(GridError, "outside()->outside() == inside(), but with incorrect numbering!");
+          else
+            insideFound = true;
+
+        }
+
+      }
+
+      if (!insideFound)
+        DUNE_THROW(GridError, "Could not find inside() through intersection iterator of outside()!");
+
+    }
 
     // /////////////////////////////////////////////////////////////
     //   Check the consistency of numberInSelf, numberInNeighbor
@@ -223,13 +251,12 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
   }
 
-  {
-    double sum = sumNormal.two_norm();
-    if( sumNormal.two_norm() > 1e-8 )
-    {
-      DUNE_THROW(GridError,"Sum of integrationOuterNormals is " << sum << " but it should be Zero!");
-    }
-  }
+  // ////////////////////////////////////////////////////////////////////////
+  //   Check whether the integral over the outer normal really is zero
+  // ////////////////////////////////////////////////////////////////////////
+  if( sumNormal.two_norm() > 1e-8 )
+    DUNE_THROW(GridError,"Sum of integrationOuterNormals is " << sumNormal.two_norm() << " but it should be Zero!");
+
 }
 
 /** \brief Test both IntersectionIterators
@@ -238,8 +265,6 @@ template <class GridType>
 void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionTest = false) {
 
   using namespace Dune;
-
-  typedef typename GridType::ctype ctype;
 
   // Loop over all levels
   if(skipLevelIntersectionTest)
