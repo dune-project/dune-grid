@@ -133,7 +133,8 @@ namespace Dune {
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
-  inline void ALU2dGridIntersectionBase<GridImp> :: setFirstItem(const HElementType & elem, int wLevel) {
+  inline void ALU2dGridIntersectionBase<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
+  {
     this->current.item_ = const_cast<HElementType *> (&elem);
     assert( this->current.item_ );
     walkLevel_ = wLevel;
@@ -358,6 +359,7 @@ namespace Dune {
   {
     int ret = (nrInChild==0) ? (2-nrOfChild) :
               ((nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0) ? -1 : 0);
+    //int ret = (nrInChild==0) ? (2-nrOfChild) : 0;
     //if (ret==0)
     //  if(nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0)
     //    ret = -1;
@@ -369,7 +371,9 @@ namespace Dune {
   inline int ALU2dGridLevelIntersectionIterator<GridImp> ::
   getOppositeInChild(const int nrInFather, const int nrOfChild) const
   {
-    int ret = (nrInFather==0) ? (nrOfChild+1) : ((nrInFather-nrOfChild==1) ? -1 : 0);
+    int ret = (nrInFather==0) ? (nrOfChild+1) :
+              ((nrInFather-nrOfChild==1) ? -1 : 0);
+    //int ret = (nrInFather==0) ? (nrOfChild+1) : 0;
     //if (ret==0)
     //  if(nrInFather-nrOfChild==1)
     //    ret = -1;
@@ -414,10 +418,11 @@ namespace Dune {
       }
     }
 
-    this->current.neigh_ = neighbourStack_.top().first;
-    this->current.opposite_   = neighbourStack_.top().second.first;
-    this->current.isBoundary_ = neighbourStack_.top().second.second;
-    this->current.isBoundary_ = false;
+    IntersectionInfo& info    = neighbourStack_.top();
+    this->current.neigh_      = info.first;
+    this->current.opposite_   = info.second.first;
+    this->current.isBoundary_ = info.second.second;
+    assert( this->current.isBoundary_ == false);
     neighbourStack_.pop();
 
     assert( (this->current.neigh_) ? (this->current.neigh_->level()==this->walkLevel_) : 1);
@@ -432,7 +437,8 @@ namespace Dune {
     IntersectionInfo dummy;
 
     dummy.first = this->current.item_->nbel(this->current.index_);
-    if(dummy.first==0) {
+    if(dummy.first == 0)
+    {
       return ;
     }
 
@@ -444,8 +450,10 @@ namespace Dune {
     }
     else if (dummy.first->level() > this->walkLevel_)
     {
-      while (dummy.first->level() > this->walkLevel_) {
-        dummy.second.first = getOppositeInFather(dummy.second.first, dummy.first->childNr());
+      while (dummy.first->level() > this->walkLevel_)
+      {
+        dummy.second.first =
+          getOppositeInFather(dummy.second.first, dummy.first->childNr());
         assert(dummy.second.first >= 0 && dummy.second.first < 3);
         dummy.first = dummy.first->father();
       }
@@ -454,15 +462,26 @@ namespace Dune {
     }
     else
     {
-      while (dummy.first->level() < this->walkLevel_ - 1 && dummy.first != 0) {
-        dummy.second.first = getOppositeInChild(dummy.second.first, dummy.first->childNr());
+      while ( dummy.first )
+      {
+        const int lev = dummy.first->level();
+        if(lev >= this->walkLevel_ - 1) break;
+
+        // this covers a bug in ALUGrid, childNr is undefined on macro
+        // levels, will be fixed in version of ALUGrid > 1.0
+        dummy.second.first =
+          getOppositeInFather(dummy.second.first, (lev == 0) ? 0 : dummy.first->childNr());
+        //dummy.second.first =
+        //  getOppositeInFather(dummy.second.first, dummy.first->childNr());
         assert(dummy.second.first >= 0 && dummy.second.first < 3);
+
+        // get next
         dummy.first = dummy.first->father();
       }
 
       if (dummy.first)
       {
-        assert(dummy.first->level()==this->walkLevel_ - 1);
+        assert(dummy.first->level() == this->walkLevel_ - 1);
 
         HElementType * tmp = dummy.first->down();
         while ( tmp )
@@ -477,6 +496,7 @@ namespace Dune {
         }
       }
     }
+    // if more then one element in stack we have non-conform intersection
     this->current.isNotConform_ = (neighbourStack_.size() > 1);
   }
 
@@ -491,7 +511,11 @@ namespace Dune {
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
-  inline void ALU2dGridLevelIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel) {
+  inline void ALU2dGridLevelIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
+  {
+    // empty stack
+    neighbourStack_ = std::stack<IntersectionInfo> ();
+    assert( neighbourStack_.empty ());
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = 0;
@@ -516,6 +540,7 @@ namespace Dune {
     else {
       this->current.isBoundary_ = false;
       if (this->current.neigh_->level() != this->walkLevel_) {
+        // index is increased in increment again
         this->current.index_ = -1;
         this->current.neigh_ = 0;
         increment();
@@ -570,9 +595,9 @@ namespace Dune {
   template<class GridImp>
   inline ALU2dGridLeafIntersectionIterator<GridImp> ::
   ALU2dGridLeafIntersectionIterator(const ALU2dGridLeafIntersectionIterator<GridImp> & org)
-    :  ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(org) {
-    nbStack_ = org.nbStack_;
-  }
+    :  ALU2dGridIntersectionBase<GridImp>::ALU2dGridIntersectionBase(org)
+      ,  nbStack_(org.nbStack_)
+  {}
 
   //! The copy constructor
   template<class GridImp>
@@ -598,10 +623,12 @@ namespace Dune {
     this->grid_.getRealImplementation(this->intersectionNeighborLocal_).unsetUp2Date();
 
     // non conform case and we still have neighbours
-    if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty()) {
-      this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
-      this->current.opposite_= nbStack_.top().second.first;
-      this->current.isBoundary_= nbStack_.top().second.second;
+    if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty())
+    {
+      IntersectionInfo& info = nbStack_.top();
+      this->current.neigh_      = static_cast<HElementType *>(info.first);
+      this->current.opposite_   = info.second.first;
+      this->current.isBoundary_ = info.second.second;
       nbStack_.pop();
       return;
     }
@@ -627,18 +654,16 @@ namespace Dune {
       dummy.second.first = this->current.item_->opposite(this->current.index_);
       dummy.second.second = (dummy.first==0) ? true : false ;
       nbStack_.push(dummy);
-      //assert(!nbStack_.empty());
 
       if (nbStack_.empty()) {
-        //this->current.neigh_ = 0;
-        //this->current.opposite_ = -1;
         increment();
         return;
       }
 
-      this->current.neigh_= static_cast<HElementType *>(nbStack_.top().first);
-      this->current.opposite_= nbStack_.top().second.first;
-      this->current.isBoundary_= nbStack_.top().second.second;
+      IntersectionInfo& info    = nbStack_.top();
+      this->current.neigh_      = static_cast<HElementType *>(info.first);
+      this->current.opposite_   = info.second.first;
+      this->current.isBoundary_ = info.second.second;
       nbStack_.pop();
     }
 
@@ -681,7 +706,11 @@ namespace Dune {
 
   //! reset IntersectionIterator to first neighbour
   template<class GridImp>
-  inline void ALU2dGridLeafIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel) {
+  inline void ALU2dGridLeafIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
+  {
+    // empty stack
+    nbStack_ = std::stack<IntersectionInfo> ();
+    assert( nbStack_.empty ());
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = -1;
