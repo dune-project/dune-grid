@@ -1,8 +1,13 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include <config.h>
+
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/uggrid/ugintersectionit.hh>
+
 template<class GridImp>
-inline const FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
-UGGridLevelIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+inline const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
+Dune::UGGridLevelIntersectionIterator <GridImp>::outerNormal (const Dune::FieldVector<UGCtype, GridImp::dimension-1>& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -81,8 +86,8 @@ UGGridLevelIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtyp
 }
 
 template< class GridImp>
-inline const typename UGGridLevelIntersectionIterator<GridImp>::LocalGeometry&
-UGGridLevelIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLevelIntersectionIterator<GridImp>::LocalGeometry&
+Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
@@ -108,8 +113,8 @@ intersectionSelfLocal() const
 }
 
 template< class GridImp>
-inline const typename UGGridLevelIntersectionIterator<GridImp>::Geometry&
-UGGridLevelIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLevelIntersectionIterator<GridImp>::Geometry&
+Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
@@ -129,8 +134,8 @@ intersectionGlobal() const
 }
 
 template< class GridImp>
-inline const typename UGGridLevelIntersectionIterator<GridImp>::LocalGeometry&
-UGGridLevelIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLevelIntersectionIterator<GridImp>::LocalGeometry&
+Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
   typename UG_NS<dim>::Element *other;
@@ -173,7 +178,7 @@ intersectionNeighborLocal() const
 }
 
 template< class GridImp>
-inline int UGGridLevelIntersectionIterator<GridImp>::
+inline int Dune::UGGridLevelIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
   const typename UG_NS<dim>::Element *other;
@@ -200,8 +205,8 @@ numberInNeighbor () const
 
 /** \todo Needs to be checked for the nonconforming case */
 template<class GridImp>
-inline const FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
-UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+inline const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
+Dune::UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -281,8 +286,8 @@ UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-inline const typename UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
-UGGridLeafIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
+Dune::UGGridLeafIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
   if (leafSubFaces_.size() == 1) {
@@ -319,8 +324,8 @@ intersectionSelfLocal() const
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-inline const typename UGGridLeafIntersectionIterator<GridImp>::Geometry&
-UGGridLeafIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::Geometry&
+Dune::UGGridLeafIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
   if (leafSubFaces_.size() == 1) {
@@ -351,8 +356,8 @@ intersectionGlobal() const
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-inline const typename UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
-UGGridLeafIntersectionIterator<GridImp>::
+inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
+Dune::UGGridLeafIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
   if (leafSubFaces_.size() == 1) {
@@ -402,7 +407,7 @@ intersectionNeighborLocal() const
 }
 
 template< class GridImp>
-inline int UGGridLeafIntersectionIterator<GridImp>::
+inline int Dune::UGGridLeafIntersectionIterator<GridImp>::
 numberInNeighbor () const
 {
   if (leafSubFaces_[subNeighborCount_].first == NULL)
@@ -417,7 +422,7 @@ numberInNeighbor () const
 }
 
 template< class GridImp>
-inline void UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces() {
+inline void Dune::UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces() {
 
   // Do nothing if level neighbor doesn't exit
   typename UG_NS<dim>::Element* levelNeighbor = UG_NS<dim>::NbElem(center_, neighborCount_);
@@ -639,3 +644,11 @@ inline void UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces() {
   }
 
 }
+
+// Explicit template instantiations to compile the stuff in this file
+
+template class Dune::UGGridLevelIntersectionIterator<const Dune::UGGrid<2> >;
+template class Dune::UGGridLevelIntersectionIterator<const Dune::UGGrid<3> >;
+
+template class Dune::UGGridLeafIntersectionIterator<const Dune::UGGrid<2> >;
+template class Dune::UGGridLeafIntersectionIterator<const Dune::UGGrid<3> >;

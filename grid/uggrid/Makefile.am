@@ -5,7 +5,7 @@ if UG
 noinst_LTLIBRARIES = libuggrid.la
 
 libuggrid_la_SOURCES  = uggrid.cc uggridentity.cc boundaryextractor.cc boundaryextractor.hh \
-                        uggridindexsets.cc
+                        uggridindexsets.cc ugintersectionit.cc
 libuggrid_la_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
 libuggrid_la_LIBADD   = $(UG_LDFLAGS) $(UG_LIBS) $(DUNE_COMMON_LIBS)
 
@@ -13,7 +13,7 @@ endif
 
 uggriddir = $(includedir)/dune/grid/uggrid/
 uggrid_HEADERS = uggridgeometry.cc \
-  uggridentitypointer.hh uggridhieriterator.cc ugintersectionit.cc \
+  uggridentitypointer.hh uggridhieriterator.cc \
   ugwrapper2d.hh ugwrapper3d.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
   ugintersectionit.hh uggridindexsets.hh \

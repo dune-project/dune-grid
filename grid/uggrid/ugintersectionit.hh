@@ -305,8 +305,6 @@ namespace Dune {
     std::vector<Face> leafSubFaces_;
   };
 
-#include "ugintersectionit.cc"
-
 }  // namespace Dune
 
 #endif
