@@ -1080,10 +1080,13 @@ namespace Dune {
       typedef typename ALU3dImplTraits<elType> :: HasFaceType HasFaceType;
       typedef typename ALU3dImplTraits<elType> :: GEOVertexType GEOVertexType;
 
-      file << "!" << elType2Name( elType ) << std::endl;
+      file << "!" << elType2Name( elType ) << " Elements = " << size(0) << std::endl;
       {
         ALU3DSPACE LeafIterator < ALU3DSPACE VertexType > vx (mygrd) ;
         file << std::endl;
+
+        // use scientific mode
+        file << std::scientific;
 
         // write coordinates of the vertices
         int vxsize = vx->size();
