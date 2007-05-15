@@ -1072,7 +1072,7 @@ namespace Dune {
 #endif
 
     ALU3DSPACE GitterImplType & mygrd = myGrid();
-    std::fstream file ( filename.c_str() , std::ios::out);
+    std::ofstream file ( filename.c_str() );
     if(file)
     {
       typedef typename ALU3dImplTraits<elType> :: BNDFaceType BNDFaceType;
@@ -1080,23 +1080,28 @@ namespace Dune {
       typedef typename ALU3dImplTraits<elType> :: HasFaceType HasFaceType;
       typedef typename ALU3dImplTraits<elType> :: GEOVertexType GEOVertexType;
 
-      file << "!" << elType2Name( elType ) << std::endl;
+      ALU3DSPACE LeafIterator < ALU3DSPACE HElementType > leafElements (mygrd) ;
+      file << "!" << elType2Name( elType ) << " Elements = " << leafElements->size() << std::endl;
+
+      ALU3DSPACE LeafIterator < ALU3DSPACE VertexType > leafVertices (mygrd) ;
       {
-        ALU3DSPACE LeafIterator < ALU3DSPACE VertexType > vx (mygrd) ;
         file << std::endl;
 
+        // use scientific mode
+        file << std::scientific;
+
         // write coordinates of the vertices
-        int vxsize = vx->size();
+        int vxsize = leafVertices->size();
         file << vxsize << std::endl;
 
         typedef double ShortVecType[3];
         ShortVecType * vxvec = new ShortVecType [vxsize];
         assert( vxvec );
 
-        for( vx->first(); !vx->done() ; vx->next() )
+        for( leafVertices->first(); !leafVertices->done() ; leafVertices->next() )
         {
           const GEOVertexType & vertex =
-            static_cast<GEOVertexType &> (vx->item());
+            static_cast<GEOVertexType &> (leafVertices->item());
           const double (&p)[3] = vertex.Point();
           int vxidx = vertex.getIndex();
           double (&v)[3] = vxvec[vxidx];
@@ -1115,12 +1120,11 @@ namespace Dune {
       // write element vertices
       {
         const int novx = (elType == tetra) ? 4 : 8;
-        ALU3DSPACE LeafIterator < ALU3DSPACE HElementType > el (mygrd) ;
-        file << el->size() << std::endl;
-        for( el->first(); !el->done() ; el->next() )
+        file << leafElements->size() << std::endl;
+        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
         {
-          IMPLElementType & item = static_cast<IMPLElementType &> (el->item());
-          for(int i=0; i<novx; i++)
+          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
+          for(int i=0; i<novx; ++i)
           {
             const int vxnum = item.myvertex(i)->getIndex();
             file << vxnum << " ";
@@ -1134,16 +1138,15 @@ namespace Dune {
         file << std::endl;
         const int nofaces  = (elType == tetra) ? 4 : 6;
         int bndfaces = 0;
-        ALU3DSPACE LeafIterator < ALU3DSPACE HElementType > el (mygrd) ;
-        for( el->first(); !el->done() ; el->next() )
+        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
         {
-          IMPLElementType & item = static_cast<IMPLElementType &> (el->item());
-          for(int i=0; i<nofaces; i++)
+          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
+          for(int i=0; i<nofaces; ++i)
           {
             std::pair < HasFaceType * , int > nbpair = item.myneighbour(i);
             if(nbpair.first->isboundary())
             {
-              bndfaces++;
+              ++bndfaces;
             }
           }
         }
@@ -1153,11 +1156,10 @@ namespace Dune {
       {
         const int bndvxnum = (elType == tetra) ? 3 : 4;
         const int nofaces  = (elType == tetra) ? 4 : 6;
-        ALU3DSPACE LeafIterator < ALU3DSPACE HElementType > el (mygrd) ;
-        for( el->first(); !el->done() ; el->next() )
+        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
         {
-          IMPLElementType & item = static_cast<IMPLElementType &> (el->item());
-          for(int i=0; i<nofaces; i++)
+          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
+          for(int i=0; i<nofaces; ++i)
           {
             std::pair < HasFaceType * , int > nbpair = item.myneighbour(i);
             if(nbpair.first->isboundary())
@@ -1176,15 +1178,14 @@ namespace Dune {
       }
 
       {
-        ALU3DSPACE LeafIterator < ALU3DSPACE VertexType > vx (mygrd) ;
         file << std::endl;
 
         // write coordinates of the vertices
         int vxnum = 0;
-        for( vx->first(); !vx->done() ; vx->next() )
+        for( leafVertices->first(); !leafVertices->done() ; leafVertices->next() )
         {
           file << vxnum << " -1" << std::endl;
-          vxnum++;
+          ++vxnum;
         }
       }
     }
