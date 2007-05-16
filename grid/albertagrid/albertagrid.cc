@@ -2307,6 +2307,18 @@ namespace Dune
 
     const int vx = elInfo_->opp_vertex[neighborCount_];
 
+    // reset neighbor information
+    for(int i=0; i<dim+1; ++i)
+    {
+      neighElInfo_.neigh[i] = 0;
+      neighElInfo_.opp_vertex[i] = 127;
+    }
+
+    // set origin
+    neighElInfo_.neigh[vx] = elInfo_->el;
+    neighElInfo_.opp_vertex[vx] = neighborCount_;
+
+
 #ifdef CALC_COORD
     // copy the one opposite vertex
     // the same for 2d and 3d
@@ -3256,6 +3268,15 @@ namespace Dune
   inline typename AlbertaGridEntity <0,dim,GridImp>::AlbertaGridLeafIntersectionIteratorType
   AlbertaGridEntity <0,dim,GridImp>::ileafbegin() const
   {
+#ifndef NDEBUG
+    for(int i=0; i<GridImp::dimension+1; ++i)
+    {
+      if(elInfo_->opp_vertex[i] == 127 )
+      {
+        DUNE_THROW(NotImplemented,"AlbertaGridIntersectionIterator::first: do not create IntersectionIterators on outside entities, not implemented yet!");
+      }
+    }
+#endif
     return AlbertaGridLeafIntersectionIteratorType(grid_,*this,level(),false);
   }
 
