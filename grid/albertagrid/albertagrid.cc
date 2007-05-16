@@ -1018,66 +1018,6 @@ namespace Dune
     return geo_;
   }
 
-  /*
-     template<int codim, int dim, class GridImp>
-     inline typename AlbertaGridEntity<codim,dim,GridImp>::EntityPointer
-     AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
-     {
-     ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-     //std::cout << "got father " << grid_.getElementNumber(fatherInfo->el) <<"\n";
-     int fatherLevel = (level_ > 0) ? (level_-1) : 0;
-
-     assert( fatherLevel == fatherInfo->level );
-
-     return AlbertaGridEntityPointer<0,GridImp> (grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
-     }
-   */
-
-  /*
-     // coords for 2d
-     static double fatherref [2][3][2] =
-     {
-      { {0.0,1.0},{0.0,0.0 }, {0.5,0.0 } }  ,
-      { {1.0,0.0},{0.0,1.0 }, {0.5,0.0 } }
-     };
-   */
-
-#if 0
-  template<int codim, int dim, class GridImp>
-  inline const FieldVector<albertCtype, dim>&
-  AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
-  {
-    assert( codim == dim );
-    if(!localFCoordCalced_)
-    {
-      EntityPointer vati = this->ownersFather();
-      localFatherCoords_ = (*vati).geometry().local( this->geometry()[0] );
-      localFCoordCalced_ = true;
-      /*
-          // check
-          if((level_ > 0) && (dim == 2))
-          {
-            ALBERTA EL_INFO * fatty = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-            int child = 0;
-            if(elInfo_->el == fatty->el->child[1])
-            {
-              child = 1;
-            }
-
-            FieldVector<double,2> tmp(0.0);
-            for(int j=0; j<2; j++) tmp[j] = fatherref[child][vertex_][j];
-            if( (localFatherCoords_ - tmp).two_norm() > 1.0E-10)
-            {
-              std::cout << localFatherCoords_ << " c|r " << tmp << " localF \n";
-              assert(false);
-            }
-          }
-       */
-    }
-    return localFatherCoords_;
-  }
-#endif
-
   //************************************
   //
   //  --AlbertaGridEntity codim = 0
@@ -2310,6 +2250,18 @@ namespace Dune
 
     const int vx = elInfo_->opp_vertex[neighborCount_];
 
+    // reset neighbor information
+    for(int i=0; i<dim+1; ++i)
+    {
+      neighElInfo_.neigh[i] = 0;
+      neighElInfo_.opp_vertex[i] = 127;
+    }
+
+    // set origin
+    neighElInfo_.neigh[vx] = elInfo_->el;
+    neighElInfo_.opp_vertex[vx] = neighborCount_;
+
+
 #ifdef CALC_COORD
     // copy the one opposite vertex
     // the same for 2d and 3d
@@ -3259,6 +3211,15 @@ namespace Dune
   inline typename AlbertaGridEntity <0,dim,GridImp>::AlbertaGridLeafIntersectionIteratorType
   AlbertaGridEntity <0,dim,GridImp>::ileafbegin() const
   {
+#ifndef NDEBUG
+    for(int i=0; i<GridImp::dimension+1; ++i)
+    {
+      if(elInfo_->opp_vertex[i] == 127 )
+      {
+        DUNE_THROW(NotImplemented,"AlbertaGridIntersectionIterator::first: do not create IntersectionIterators on outside entities, not implemented yet!");
+      }
+    }
+#endif
     return AlbertaGridLeafIntersectionIteratorType(grid_,*this,level(),false);
   }
 
