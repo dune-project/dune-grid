@@ -148,7 +148,7 @@ namespace Dune {
     }
 
     /** \brief Returns pointers to the coordinate arrays of an UG element */
-    static void Corner_Coordinates(UG_NS<2>::Element* theElement, double* x[]) {
+    static void Corner_Coordinates(const UG_NS<2>::Element* theElement, double* x[]) {
       using UG::D2::NODE;
       using UG::D2::TRIANGLE;
       using UG::D2::QUADRILATERAL;

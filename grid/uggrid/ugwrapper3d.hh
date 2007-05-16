@@ -151,7 +151,7 @@ namespace Dune {
     }
 
     /** \brief Returns pointers to the coordinate arrays of an UG element */
-    static void Corner_Coordinates(UG_NS<3>::Element* theElement, double* x[]) {
+    static void Corner_Coordinates(const UG_NS<3>::Element* theElement, double* x[]) {
 
       using UG::D3::TETRAHEDRON;
       using UG::D3::NODE;
