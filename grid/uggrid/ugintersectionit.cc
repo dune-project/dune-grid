@@ -403,7 +403,7 @@ intersectionGlobal() const
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(other, otherSide, i);
 
       // Get world coordinate of other element's vertex
-      const UGCtype* worldPos = UG_NS<dim>::Corner(other,UG_NS<dim>::Corner_Of_Side(other,otherSide,i))->myvertex->iv.x;
+      const UGCtype* worldPos = UG_NS<dim>::Corner(other,cornerIdx)->myvertex->iv.x;
 
       // and poke them into the Geometry
       neighGlob_.setCoords(i,worldPos);
@@ -424,44 +424,39 @@ intersectionNeighborLocal() const
     DUNE_THROW(GridError, "There is no neighbor!");
 
   if (  // if this face is the intersection
-    UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) >= UG_NS<dim>::myLevel(center_)
-    || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) < UG_NS<dim>::myLevel(center_)
+    UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
+    || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
         && leafSubFaces_.size()==1)
     ) {
 
-    // //////////////////////////////////////////////////////
-    //   The easy case: a conforming intersection
-    // //////////////////////////////////////////////////////
+    const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
 
-    const typename UG_NS<dim>::Element *other = leafSubFaces_[subNeighborCount_].first;
+    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
 
-    // ///////////////////////////////////////
-    // go on and get the local coordinates
-    // ///////////////////////////////////////
-    int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
     neighLocal_.setNumberOfCorners(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
-      // get the node in this element
-      int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-      const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_,localCornerNumber);
+      // get number of corner in UG's numbering system
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-      // get this node's local index in the neighbor element
-      int j;
-      for (j=0; j<UG_NS<dim>::Corners_Of_Elem(other); j++)
-        // Compare vertices because the nodes may be on different levels, but the nodes are the same
-        if (UG_NS<dim>::Corner(other, j)->myvertex == node->myvertex)
-          break;
+      // Get world coordinate of this element's vertex
+      const UGCtype* worldPos = UG_NS<dim>::Corner(center_,cornerIdx)->myvertex->iv.x;
 
-      assert(j<UG_NS<dim>::Corners_Of_Elem(other));
+      // Get the local coordinate with respect to the other element
+      // coorddim*coorddim is an upper bound for the number of vertices
+      UGCtype* cornerCoords[dim*dim];
+      UG_NS<dim>::Corner_Coordinates(other, cornerCoords);
 
-      // get the local coordinate there
-      FieldVector<UGCtype, dim> tmp;
-      UG_NS<dim>::getCornerLocal(other,j,tmp);
+      // Actually do the computation
+      /** \todo Why is this const_cast necessary? */
+      UGCtype localCoords[dim];
+      UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
+                                const_cast<const double**>(cornerCoords), worldPos, localCoords);
 
       // and poke them into the Geometry
-      neighLocal_.setCoords(i,tmp);
+      neighLocal_.setCoords(i,localCoords);
+
     }
 
   } else {
@@ -475,25 +470,13 @@ intersectionNeighborLocal() const
 
     for (int i=0; i<numCornersOfSide; i++) {
 
-      // get number of corner in UG's numbering system
-      int cornerIdx = UG_NS<dim>::Corner_Of_Side(other, otherSide, i);
-
-      // Get world coordinate of other element's vertex
-      const UGCtype* worldPos = UG_NS<dim>::Corner(other,UG_NS<dim>::Corner_Of_Side(other,otherSide,i))->myvertex->iv.x;
-
-      // Get the local coordinate with respect to this element
-      // coorddim*coorddim is an upper bound for the number of vertices
-      UGCtype* cornerCoords[dim*dim];
-      UG_NS<dim>::Corner_Coordinates(center_, cornerCoords);
-
-      // Actually do the computation
-      /** \todo Why is this const_cast necessary? */
-      UGCtype localCoords[dim];
-      UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
-                                const_cast<const double**>(cornerCoords), worldPos, localCoords);
+      // get the local coordinate of j-th corner
+      FieldVector<UGCtype, dim> tmp;
+      int v = UG_NS<dim>::Corner_Of_Side(other,otherSide,i);
+      UG_NS<dim>::getCornerLocal(other, v, tmp);
 
       // and poke them into the Geometry
-      selfLocal_.setCoords(i,localCoords);
+      neighLocal_.setCoords(i,tmp);
 
     }
 
