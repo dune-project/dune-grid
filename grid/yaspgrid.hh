@@ -2123,7 +2123,7 @@ namespace Dune {
   template<int dim, int dimworld>
   class YaspGrid :
     public GridDefaultImplementation<dim,dimworld,yaspgrid_ctype,YaspGridFamily<dim,dimworld> >,
-    public MultiYGrid<dim,yaspgrid_ctype>
+    MultiYGrid<dim,yaspgrid_ctype>
   {
     typedef const YaspGrid<dim,dimworld> GridImp;
   public:
