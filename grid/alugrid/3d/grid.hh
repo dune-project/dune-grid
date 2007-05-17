@@ -178,6 +178,7 @@ namespace Dune {
      \li Metis ( version 4.0 and higher, see http://www-users.cs.umn.edu/~karypis/metis/metis/ )
      \li Party Lib ( version 1.1 and higher, see http://wwwcs.upb.de/fachbereich/AG/monien/RESEARCH/PART/party.html)
 
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
      @author Robert Kloefkorn
    */
   template <int dim, int dimworld, ALU3dGridElementType elType>

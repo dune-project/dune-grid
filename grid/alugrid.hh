@@ -42,6 +42,8 @@ namespace Dune {
 
      \li Available Implementations
           - Dune::ALUCubeGrid<3,3>
+
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
    */
   template <int dim,int dimworld> class ALUCubeGrid {};
 
@@ -212,6 +214,7 @@ namespace Dune {
             - Dune::ALUSimplexGrid<3,3>
             - Dune::ALUSimplexGrid<2,2>
 
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
    */
   template <int dim,int dimworld> class ALUSimplexGrid {};
 
@@ -433,6 +436,7 @@ namespace Dune {
      \li Available Implementations
             - Dune::ALUConformGrid<2,2>
 
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
    */
   template <int dim, int dimworld>
   class ALUConformGrid {};

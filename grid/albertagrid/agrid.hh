@@ -1388,6 +1388,8 @@ namespace Dune
      \e Note: Although ALBERTA supports different combination of DIM <= DIMWORLD,
         so far only the combinations \c DIM=DIMWORLD=2 and \c DIM=DIMWORLD=3
         are supported.
+
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alberta .
    */
   template <int dim, int dimworld>
   class AlbertaGrid :

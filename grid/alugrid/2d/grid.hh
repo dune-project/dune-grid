@@ -149,6 +149,7 @@ namespace Dune {
 
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
+     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
    */
 
   template <int dim, int dimworld>
