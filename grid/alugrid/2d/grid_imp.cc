@@ -237,10 +237,6 @@ namespace Dune {
 
     if(leafIndexSet_) leafIndexSet_->calcNewIndex();
     ////////////////////////////////////////////////
-
-    // reset marked element counters
-    coarsenMarked_ = 0;
-    refineMarked_  = 0;
   }
 
   //! Every time the grid is refined, data should be updated
@@ -303,17 +299,18 @@ namespace Dune {
       }
       mesh().refine();
     }
-    postAdapt();
     //update data
     updateStatus();
     //hdl.refine() ist void!!!
+
+    postAdapt();
     return true;
   }
 
-  //! returns if a least one entity was marked for adaption
+  //! returns true if a least one entity was marked for coarseing
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: preAdapt () {
-    return (refineMarked_  || coarsenMarked_);
+    return (coarsenMarked_ > 0);
   }
 
   //! clear all entity new markers
@@ -326,6 +323,10 @@ namespace Dune {
       tr.ALU2DSPACE Refco_el::clear(ALU2DSPACE Refco::ref);
       tr.ALU2DSPACE Refco_el::clear(ALU2DSPACE Refco::crs);
     }
+
+    // reset marked element counters
+    coarsenMarked_ = 0;
+    refineMarked_  = 0;
   }
 
   /**! refine all positive marked leaf entities,
@@ -334,16 +335,20 @@ namespace Dune {
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: adapt ( )
   {
-    if (preAdapt()) {
+    if( (refineMarked_ > 0) || (coarsenMarked_ > 0) )
+    {
+      // refine only will be done if
+      // at least one element was marked for refinement
+      bool adapted = (refineMarked_) ? true : false;
       mesh().refine();
       mesh().coarse();
       updateStatus();
-      postAdapt();
-      return true;
+      return adapted;
     }
-    postAdapt();
-    updateStatus();
-    return false;
+    else
+    {
+      return false;
+    }
   }
 
   // --adapt
@@ -418,8 +423,8 @@ namespace Dune {
     bool marked = this->getRealImplementation(en).mark(refCount);
     if(marked)
     {
-      if(refCount > 0) refineMarked_ ++ ;
-      if(refCount < 0) coarsenMarked_ ++ ;
+      if(refCount > 0) ++refineMarked_;
+      if(refCount < 0) ++coarsenMarked_;
     }
     return marked;
   }
@@ -529,6 +534,7 @@ namespace Dune {
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
     delete leafIndexSet_; leafIndexSet_ = 0;
     delete sizeCache_; sizeCache_ = 0;
+    delete mygrid_;
   }
 
   // **************************************************************
