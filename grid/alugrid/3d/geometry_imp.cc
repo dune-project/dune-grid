@@ -10,7 +10,7 @@ namespace Dune {
   template<int mydim, int cdim>
   inline ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >::
   ALU3dGridGeometry()
-    : coord_()
+    : coord_(0.0)
       , Jinv_ ()
       , volume_(-1.0)
       , A_()
@@ -106,8 +106,6 @@ namespace Dune {
       // calc Jinv_ = (A^T*A)^-1
       FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
 
-      enum { dim = 3 };
-      //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
       // create vectors of face
       globalCoord_ = coord_[1] - coord_[0];
       detDF_ = std::abs ( globalCoord_.two_norm() );
@@ -120,7 +118,6 @@ namespace Dune {
   {
     if(!builtinverse_)
     {
-      enum { dim = 3 };
       detDF_ = 1.0;
       builtinverse_ = builtDetDF_ = true;
     }
@@ -198,7 +195,7 @@ namespace Dune {
 
     builtinverse_ = builtA_ = builtDetDF_ = false;
 
-    for (int i=0; i<(dim+1); i++)
+    for (int i=0; i<(dim+1); ++i)
     {
       // Transform Dune index to ALU index and apply twist
       int localALUIndex = FaceTopo::dune2aluVertex(i);
@@ -212,7 +209,6 @@ namespace Dune {
       }
     }
 
-    //buildJacobianInverseTransposed();
     return true;
   }
 
@@ -228,7 +224,6 @@ namespace Dune {
       coord_[i] = coords[i];
     }
 
-    //buildJacobianInverseTransposed();
     return true;
   }
 
@@ -241,11 +236,11 @@ namespace Dune {
 
     builtinverse_ = builtA_ = builtDetDF_ = false;
 
-    for (int i=0; i<(dim+1); i++)
+    for (int i=0; i<(dim+1); ++i)
     {
       const double (&p)[3] =
         static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point();
-      for (int j=0; j<dimworld; j++)
+      for (int j=0; j<dimworld; ++j)
       {
         coord_[i][j] = p[j];
       }
@@ -265,7 +260,7 @@ namespace Dune {
     builtinverse_ = builtA_ = builtDetDF_ = false;
 
     const double (&p)[3] = static_cast<const GEOVertexType &> (item).Point();
-    for (int j=0; j<dimworld; j++) coord_[0][j] = p[j];
+    for (int j=0; j<dimworld; ++j) coord_[0][j] = p[j];
 
     buildJacobianInverseTransposed();
     return true;
@@ -288,7 +283,7 @@ namespace Dune {
   template<int mydim, int cdim>
   inline int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::corners () const
   {
-    return dimbary;
+    return corners_;
   }
 
   template<int mydim, int cdim>
@@ -481,7 +476,9 @@ namespace Dune {
   inline ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   ALU3dGridGeometry() :
     coord_(0.0),
+    coordPtr_(0),
     myGeomType_(GeometryType::cube,mydim),
+    triMapMem_(),
     triMap_(0),
     biMap_(0),
     buildBiMap_(false),
@@ -492,7 +489,9 @@ namespace Dune {
   inline ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   ALU3dGridGeometry() :
     coord_(0.0),
+    coordPtr_(0),
     myGeomType_(GeometryType::cube,3),
+    triMapMem_(),
     triMap_(0),
     biMap_(0),
     buildBiMap_(false),
@@ -504,7 +503,9 @@ namespace Dune {
   inline ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   ALU3dGridGeometry()
     : coord_(0.0),
+      coordPtr_(0),
       myGeomType_(GeometryType::cube,2),
+      triMapMem_(),
       triMap_(0),
       biMap_(0),
       buildBiMap_(false),
@@ -515,7 +516,9 @@ namespace Dune {
   inline ALU3dGridGeometry<2, 2, const ALU3dGrid<3, 3, hexa> >::
   ALU3dGridGeometry()
     : coord_(0.0),
+      coordPtr_(0),
       myGeomType_(GeometryType::cube,2),
+      triMapMem_(),
       triMap_(0),
       biMap_(0),
       buildBiMap_(false),
@@ -525,9 +528,7 @@ namespace Dune {
 
   template <int mydim, int cdim>
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  ~ALU3dGridGeometry() {
-    delete triMap_;
-  }
+  ~ALU3dGridGeometry() {}
 
   template <int mydim, int cdim>
   inline int
@@ -541,6 +542,16 @@ namespace Dune {
   operator[] (int i) const {
     assert((i >= 0) && (i < corners()));
     return coord_[i];
+  }
+
+  // for 3d use coord pointers
+  template <>
+  const FieldVector<alu3d_ctype, 3>&
+  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
+  operator[] (int i) const
+  {
+    assert((i >= 0) && (i < corners()));
+    return reinterpret_cast<const FieldVector<alu3d_ctype, 3>&> (*(coordPtr_[i]));
   }
 
   template <>
@@ -686,10 +697,12 @@ namespace Dune {
   {
     assert( mydim == 3 );
     assert( cdim  == 3 );
-    if(!triMap_)
+    if( triMap_ == 0 )
     {
-      triMap_ = new TrilinearMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
-                                     (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
+      // calls constructor but memory of triMapMem is used
+      triMap_ = new ( &triMapMem_ )
+                TrilinearMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
+                                 (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
     }
   }
 
@@ -703,61 +716,57 @@ namespace Dune {
     // compute the local coordinates in father refelem
     for(int i=0; i < myGeom.corners() ; ++i)
     {
+      // calculate coordinate
       coord_[i] = fatherGeom.local( myGeom[i] );
+
+      // set pointer
+      coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord_[i][0]));
+
       // to avoid rounding errors
       for(int j=0; j<cdim; ++j)
         if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
     }
 
-    if(triMap_)
-    {
-      delete triMap_;
-      triMap_ = 0;
-    }
+    // reset triMap
+    triMap_ = 0;
+
     // delete old mapping and creats new mapping
     buildMapping();
     return true;
-  }
-
-  template<int mydim, int cdim>
-  inline void ALU3dGridGeometry<mydim,cdim, const ALU3dGrid<3, 3, hexa> > ::
-  copyCoordVec(const alu3d_ctype (& point)[cdim] ,
-               FieldVector<alu3d_ctype,cdim> & coord ) const
-  {
-    assert( cdim == 3 );
-    coord[0] = point[0];
-    coord[1] = point[1];
-    coord[2] = point[2];
   }
 
   //--hexaBuildGeom
   template <>
   inline bool
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  buildGeom(const IMPLElementType& item) {
-    enum { dim = 3 };
-    enum { dimworld = 3 };
-
+  buildGeom(const IMPLElementType& item)
+  {
+    // get volume of element
     volume_ = item.volume();
 
-    copyCoordVec(item.myvertex(0)->Point(), coord_[0]);
-    copyCoordVec(item.myvertex(1)->Point(), coord_[1]);
-    copyCoordVec(item.myvertex(3)->Point(), coord_[2]);
-    copyCoordVec(item.myvertex(2)->Point(), coord_[3]);
+    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
+    // of number when calling myvertex
+    assert( ElementTopo::dune2aluVertex(0) == 0 );
+    assert( ElementTopo::dune2aluVertex(1) == 1 );
+    assert( ElementTopo::dune2aluVertex(2) == 3 );
+    assert( ElementTopo::dune2aluVertex(3) == 2 );
+    assert( ElementTopo::dune2aluVertex(4) == 4 );
+    assert( ElementTopo::dune2aluVertex(5) == 5 );
+    assert( ElementTopo::dune2aluVertex(6) == 7 );
+    assert( ElementTopo::dune2aluVertex(7) == 6 );
 
-    copyCoordVec(item.myvertex(4)->Point(), coord_[4]);
-    copyCoordVec(item.myvertex(5)->Point(), coord_[5]);
-    copyCoordVec(item.myvertex(6)->Point(), coord_[7]);
-    copyCoordVec(item.myvertex(7)->Point(), coord_[6]);
+    coordPtr_[0] = &(item.myvertex(0)->Point());
+    coordPtr_[1] = &(item.myvertex(1)->Point());
+    coordPtr_[2] = &(item.myvertex(3)->Point());
+    coordPtr_[3] = &(item.myvertex(2)->Point());
+    coordPtr_[4] = &(item.myvertex(4)->Point());
+    coordPtr_[5] = &(item.myvertex(5)->Point());
+    coordPtr_[6] = &(item.myvertex(7)->Point());
+    coordPtr_[7] = &(item.myvertex(6)->Point());
 
-    if(triMap_)
-    {
-      delete triMap_;
-      triMap_ = 0;
-    }
+    // reset triMap
+    triMap_ = 0;
 
-    // delete old mapping and creats new mapping
-    //buildMapping();
     return true;
   }
 
@@ -802,7 +811,6 @@ namespace Dune {
         coord_[i][j] = p[j];
       }
     }
-
     return true;
   }
 

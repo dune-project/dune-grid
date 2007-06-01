@@ -62,8 +62,8 @@ namespace Dune {
 
     typedef ElementTopologyMapping<tetra> ElementTopo;
     typedef FaceTopologyMapping<tetra> FaceTopo;
-    //! know dimension of barycentric coordinates
-    enum { dimbary=mydim+1};
+    //! know number of vertices
+    enum { corners_ = mydim+1 };
   public:
     typedef FieldMatrix<alu3d_ctype, 3, 3> FaceCoordinatesType;
     //! for makeRefGeometry == true a Geometry with the coordinates of the
@@ -136,7 +136,7 @@ namespace Dune {
                               FieldVector<alu3d_ctype,cdim> & coord ) const;
 
     //! the vertex coordinates
-    mutable FieldMatrix<alu3d_ctype, mydim+1, cdim> coord_;
+    mutable FieldMatrix<alu3d_ctype, corners_, cdim> coord_;
 
     mutable FieldMatrix<alu3d_ctype,mydim,mydim> Jinv_; //!< storage for inverse of jacobian
     mutable alu3d_ctype detDF_;              //!< storage of integration_element
@@ -241,10 +241,6 @@ namespace Dune {
     void print (std::ostream& ss) const;
 
   private:
-    // copies the values of point to the values of coord
-    inline void copyCoordVec (const alu3d_ctype (& point)[cdim] ,
-                              FieldVector<alu3d_ctype,cdim> & coord ) const;
-
     // create triMap from coordinates , deletes old mapping
     void buildMapping() const;
 
@@ -254,11 +250,16 @@ namespace Dune {
     //! the vertex coordinates
     mutable FieldMatrix<alu3d_ctype, corners_ , cdim> coord_;
 
+    //! the vertex coordinates
+    typedef double CoordPtrType[cdim];
+    mutable FieldVector<const CoordPtrType*, corners_ > coordPtr_;
+
     mutable FieldVector<alu3d_ctype, mydim> tmp1_;
     mutable FieldVector<alu3d_ctype, cdim> tmp2_;
 
     const GeometryType myGeomType_;
 
+    mutable TrilinearMapping triMapMem_;
     mutable TrilinearMapping* triMap_;
     mutable BilinearSurfaceMapping biMap_;
     mutable bool buildBiMap_;
