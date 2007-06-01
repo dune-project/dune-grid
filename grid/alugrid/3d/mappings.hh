@@ -17,6 +17,12 @@ namespace Dune {
 
   static const alu3d_ctype ALUnumericEpsilon = 10.0 * std::numeric_limits< alu3d_ctype >::epsilon();
 
+  template<int mydim, int coorddim, class GridImp>
+  class ALU3dGridGeometry;
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  class ALU3dGrid;
+
   //! A trilinear mapping from the Dune reference hexahedron into the physical
   //! space (same as in mapp_cube_3d.h, but for a different reference hexahedron)
   class TrilinearMapping {
@@ -36,7 +42,12 @@ namespace Dune {
                       const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&);
+
+    // only to call from geometry class
+    TrilinearMapping () {}
+
     TrilinearMapping (const TrilinearMapping &) ;
+
     ~TrilinearMapping () {}
     double det (const coord_t&) ;
     mat_t jacobianInverse(const coord_t&);
@@ -44,6 +55,11 @@ namespace Dune {
     void map2world (const double , const double , const double ,
                     coord_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
+
+  private:
+    // new operator with memory from outside
+    void * operator new (size_t, void * p ) { return p; }
+    friend class ALU3dGridGeometry< 3, 3, const ALU3dGrid<3, 3, hexa> >;
   };
 
   //! A bilinear surface mapping
