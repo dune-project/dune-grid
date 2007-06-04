@@ -478,9 +478,9 @@ namespace Dune {
     coord_(0.0),
     coordPtr_(0),
     myGeomType_(GeometryType::cube,mydim),
-    triMapMem_(),
-    triMap_(0),
+    triMap_(),
     biMap_(0),
+    buildTriMap_(false),
     buildBiMap_(false),
     localBaryCenter_(0.5)
   {}
@@ -491,9 +491,9 @@ namespace Dune {
     coord_(0.0),
     coordPtr_(0),
     myGeomType_(GeometryType::cube,3),
-    triMapMem_(),
-    triMap_(0),
+    triMap_(),
     biMap_(0),
+    buildTriMap_(false),
     buildBiMap_(false),
     localBaryCenter_(0.5),
     volume_(-1.0)
@@ -505,26 +505,12 @@ namespace Dune {
     : coord_(0.0),
       coordPtr_(0),
       myGeomType_(GeometryType::cube,2),
-      triMapMem_(),
-      triMap_(0),
+      triMap_(),
       biMap_(0),
+      buildTriMap_(false),
       buildBiMap_(false),
       localBaryCenter_(0.5)
   {}
-
-  template <>
-  inline ALU3dGridGeometry<2, 2, const ALU3dGrid<3, 3, hexa> >::
-  ALU3dGridGeometry()
-    : coord_(0.0),
-      coordPtr_(0),
-      myGeomType_(GeometryType::cube,2),
-      triMapMem_(),
-      triMap_(0),
-      biMap_(0),
-      buildBiMap_(false),
-      localBaryCenter_(0.5)
-  {}
-
 
   template <int mydim, int cdim>
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
@@ -537,7 +523,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  const FieldVector<alu3d_ctype, cdim>&
+  inline const FieldVector<alu3d_ctype, cdim>&
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   operator[] (int i) const {
     assert((i >= 0) && (i < corners()));
@@ -546,7 +532,7 @@ namespace Dune {
 
   // for 3d use coord pointers
   template <>
-  const FieldVector<alu3d_ctype, 3>&
+  inline const FieldVector<alu3d_ctype, 3>&
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   operator[] (int i) const
   {
@@ -555,12 +541,38 @@ namespace Dune {
   }
 
   template <>
+  inline void
+  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
+  buildMapping() const
+  {
+    if( ! buildTriMap_ )
+    {
+      // calls constructor but memory of triMapMem is used
+      triMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
+                           (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
+      buildTriMap_ = true;
+    }
+  }
+
+  template <>
+  inline void
+  ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
+  buildBilinearMapping() const
+  {
+    if( !buildBiMap_ )
+    {
+      biMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3]);
+      buildBiMap_ = true;
+    }
+  }
+
+
+  template <>
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   global (const FieldVector<alu3d_ctype, 3>& local) const {
     buildMapping();
-    assert(triMap_);
-    triMap_->map2world(local, tmp2_);
+    triMap_.map2world(local, tmp2_);
     return tmp2_;
   }
 
@@ -579,8 +591,7 @@ namespace Dune {
   local (const FieldVector<alu3d_ctype, 3>& global) const
   {
     buildMapping();
-    assert(triMap_);
-    triMap_->world2map(global, tmp2_);
+    triMap_.world2map(global, tmp2_);
     return tmp2_;
   }
 
@@ -594,7 +605,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  bool
+  inline bool
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   checkInside(const FieldVector<alu3d_ctype, mydim>& local) const {
     bool result = true;
@@ -610,8 +621,7 @@ namespace Dune {
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   integrationElement (const FieldVector<alu3d_ctype, 3>& local) const {
     buildMapping();
-    assert(triMap_);
-    return triMap_->det(local);
+    return triMap_.det(local);
   }
 
   template<>
@@ -654,8 +664,7 @@ namespace Dune {
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
   {
     buildMapping();
-    assert(triMap_);
-    jInv_ = triMap_->jacobianInverse(local);
+    jInv_ = triMap_.jacobianInverse(local);
     return jInv_;
   }
 
@@ -678,7 +687,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  void
+  inline void
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   print (std::ostream& ss) const {
     ss << "ALU3dGridGeometry<" << mydim << "," << cdim << ", hexa> = {\n";
@@ -688,22 +697,6 @@ namespace Dune {
       ss << "{" << ((*this)[i]) << "}"; ss << std::endl;
     }
     ss << "} \n";
-  }
-
-  template <int mydim, int cdim>
-  inline void
-  ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  buildMapping() const
-  {
-    assert( mydim == 3 );
-    assert( cdim  == 3 );
-    if( triMap_ == 0 )
-    {
-      // calls constructor but memory of triMapMem is used
-      triMap_ = new ( &triMapMem_ )
-                TrilinearMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
-                                 (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
-    }
   }
 
   // built Geometry
@@ -728,7 +721,7 @@ namespace Dune {
     }
 
     // reset triMap
-    triMap_ = 0;
+    buildTriMap_ = false;
 
     // delete old mapping and creats new mapping
     buildMapping();
@@ -765,25 +758,10 @@ namespace Dune {
     coordPtr_[7] = &(item.myvertex(6)->Point());
 
     // reset triMap
-    triMap_ = 0;
+    buildTriMap_ = false;
 
     return true;
   }
-
-  template <int mydim, int cdim>
-  inline void
-  ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  buildBilinearMapping() const
-  {
-    assert( mydim == 2 );
-    assert( cdim  == 3 );
-    if(!buildBiMap_)
-    {
-      biMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3]);
-      buildBiMap_ = true;
-    }
-  }
-
 
   template <>
   inline bool

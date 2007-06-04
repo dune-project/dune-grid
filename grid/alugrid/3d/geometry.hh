@@ -176,6 +176,30 @@ namespace Dune {
     typedef ElementTopologyMapping<hexa> ElementTopo;
     typedef FaceTopologyMapping<hexa> FaceTopo;
 
+    template <int dummy, int dim>
+    struct MappingChooser
+    {
+      typedef bool TrilinearMappingType;
+      typedef bool BilinearSurfaceMappingType;
+    };
+
+    template <int dummy>
+    struct MappingChooser<dummy,2>
+    {
+      typedef bool TrilinearMappingType;
+      typedef BilinearSurfaceMapping BilinearSurfaceMappingType;
+    };
+
+    template <int dummy>
+    struct MappingChooser<dummy,3>
+    {
+      typedef TrilinearMapping TrilinearMappingType;
+      typedef bool BilinearSurfaceMappingType;
+    };
+
+    typedef typename MappingChooser<0,mydim> :: TrilinearMappingType TrilinearMappingType;
+    typedef typename MappingChooser<0,mydim> :: BilinearSurfaceMappingType BilinearSurfaceMappingType;
+
     enum { corners_ = Power_m_p<2,mydim>::power };
   public:
     typedef FieldMatrix<alu3d_ctype, 4, 3> FaceCoordinatesType;
@@ -259,9 +283,10 @@ namespace Dune {
 
     const GeometryType myGeomType_;
 
-    mutable TrilinearMapping triMapMem_;
-    mutable TrilinearMapping* triMap_;
-    mutable BilinearSurfaceMapping biMap_;
+    mutable TrilinearMappingType triMap_;
+    mutable BilinearSurfaceMappingType biMap_;
+
+    mutable bool buildTriMap_;
     mutable bool buildBiMap_;
 
     mutable FieldMatrix<alu3d_ctype, mydim, mydim> jInv_;
