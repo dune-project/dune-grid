@@ -673,23 +673,32 @@ namespace Dune {
     // the entity codim 0
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject;
   private:
     typedef ALUMemoryProvider< EntityObject > EntityProvider;
+    typedef ALUMemoryProvider< FaceObject >   FaceProvider;
+    typedef ALUMemoryProvider< EdgeObject >   EdgeProvider;
+    typedef ALUMemoryProvider< VertexObject > VertexProvider;
 
     template <int codim>
     inline MakeableInterfaceObject<typename Traits::template Codim<codim>::Entity> *
     getNewEntity ( int level = -1 ) const
     {
-      return ALU3dGridEntityFactory<MyType,codim>::getNewEntity(*this,entityProvider_,level);
+      return ALU3dGridEntityFactory<MyType,codim>::getNewEntity(*this,level);
     }
 
     template <int codim>
     inline void freeEntity (MakeableInterfaceObject<typename Traits::template Codim<codim>::Entity> * en) const
     {
-      ALU3dGridEntityFactory<MyType,codim>::freeEntity(entityProvider_, en);
+      ALU3dGridEntityFactory<MyType,codim>::freeEntity(*this, en);
     }
 
     mutable EntityProvider entityProvider_;
+    mutable FaceProvider faceProvider_;
+    mutable EdgeProvider edgeProvider_;
+    mutable VertexProvider vertexProvider_;
 
     // the reference element
     ReferenceElementType referenceElement_;
@@ -775,29 +784,11 @@ namespace Dune {
     LevelIntersectionIteratorProviderType & levelIntersetionIteratorProvider() const { return levelInterItProvider_; }
     mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
+    friend class ALU3dGridEntityFactory<MyType,0>;
+    friend class ALU3dGridEntityFactory<MyType,1>;
+    friend class ALU3dGridEntityFactory<MyType,2>;
+    friend class ALU3dGridEntityFactory<MyType,3>;
   }; // end class ALU3dGrid
-
-
-  template <class GridImp, int codim>
-  struct ALU3dGridEntityFactory
-  {
-    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-    typedef typename EntityObject :: ImplementationType EntityImp;
-
-    template <class EntityProviderType>
-    static EntityObject *
-    getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
-    {
-      return new EntityObject(EntityImp( grid, level ));
-    }
-
-    template <class EntityProviderType>
-    static void freeEntity( EntityProviderType & ep, EntityObject * e )
-    {
-      delete e;
-    }
-  };
 
   template <class GridImp>
   struct ALU3dGridEntityFactory<GridImp,0>
@@ -807,17 +798,75 @@ namespace Dune {
     typedef MakeableInterfaceObject<Entity> EntityObject;
     typedef typename EntityObject :: ImplementationType EntityImp;
 
-    template <class EntityProviderType>
     inline static EntityObject *
-    getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
+    getNewEntity (const GridImp& grid, int level)
     {
-      return ep.getEntityObject( grid, level, (EntityImp *) 0);
+      return grid.entityProvider_.getEntityObject( grid, level, (EntityImp *) 0);
     }
 
-    template <class EntityProviderType>
-    inline static void freeEntity( EntityProviderType & ep, EntityObject * e )
+    inline static void freeEntity(const GridImp& grid, EntityObject * e )
     {
-      ep.freeObject( e );
+      grid.entityProvider_.freeObject( e );
+    }
+  };
+
+  template <class GridImp>
+  struct ALU3dGridEntityFactory<GridImp,1>
+  {
+    enum { codim = 1 };
+    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObject;
+    typedef typename EntityObject :: ImplementationType EntityImp;
+
+    inline static EntityObject *
+    getNewEntity (const GridImp& grid, int level)
+    {
+      return grid.faceProvider_.getEntityObject( grid, level, (EntityImp *) 0);
+    }
+
+    inline static void freeEntity(const GridImp& grid, EntityObject * e )
+    {
+      grid.faceProvider_.freeObject( e );
+    }
+  };
+
+  template <class GridImp>
+  struct ALU3dGridEntityFactory<GridImp,2>
+  {
+    enum { codim = 2 };
+    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObject;
+    typedef typename EntityObject :: ImplementationType EntityImp;
+
+    inline static EntityObject *
+    getNewEntity (const GridImp& grid, int level)
+    {
+      return grid.edgeProvider_.getEntityObject( grid, level, (EntityImp *) 0);
+    }
+
+    inline static void freeEntity(const GridImp& grid, EntityObject * e )
+    {
+      grid.edgeProvider_.freeObject( e );
+    }
+  };
+
+  template <class GridImp>
+  struct ALU3dGridEntityFactory<GridImp,3>
+  {
+    enum { codim = 3 };
+    typedef typename GridImp :: template Codim<codim> :: Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObject;
+    typedef typename EntityObject :: ImplementationType EntityImp;
+
+    inline static EntityObject *
+    getNewEntity (const GridImp& grid, int level)
+    {
+      return grid.vertexProvider_.getEntityObject( grid, level, (EntityImp *) 0);
+    }
+
+    inline static void freeEntity(const GridImp& grid, EntityObject * e )
+    {
+      grid.vertexProvider_.freeObject( e );
     }
   };
 
