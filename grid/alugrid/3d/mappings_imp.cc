@@ -10,6 +10,17 @@ namespace Dune {
                     const coord_t& p4, const coord_t& p5,
                     const coord_t& p6, const coord_t& p7)
   {
+    buildMapping(p0,p1,p2,p3,p4,p5,p6,p7);
+    return ;
+  }
+
+  template <class vector_t>
+  inline void TrilinearMapping ::
+  buildMapping(const vector_t& p0, const vector_t& p1,
+               const vector_t& p2, const vector_t& p3,
+               const vector_t& p4, const vector_t& p5,
+               const vector_t& p6, const vector_t& p7)
+  {
     a [0][0] = p0 [0] ;
     a [0][1] = p0 [1] ;
     a [0][2] = p0 [2] ;

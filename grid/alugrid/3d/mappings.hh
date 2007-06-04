@@ -56,10 +56,11 @@ namespace Dune {
                     coord_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
 
-  private:
-    // new operator with memory from outside
-    void * operator new (size_t, void * p ) { return p; }
-    friend class ALU3dGridGeometry< 3, 3, const ALU3dGrid<3, 3, hexa> >;
+    template <class vector_t>
+    void buildMapping(const vector_t&, const vector_t&,
+                      const vector_t&, const vector_t&,
+                      const vector_t&, const vector_t&,
+                      const vector_t&, const vector_t&);
   };
 
   //! A bilinear surface mapping
