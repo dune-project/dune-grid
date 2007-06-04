@@ -520,7 +520,7 @@ namespace Dune {
 
 
   template <int mydim, int cdim>
-  ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+  inline ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   ~ALU3dGridGeometry() {
     delete triMap_;
     delete biMap_;
@@ -533,7 +533,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  const FieldVector<alu3d_ctype, cdim>&
+  inline const FieldVector<alu3d_ctype, cdim>&
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   operator[] (int i) const {
     assert((i >= 0) && (i < corners()));
@@ -577,7 +577,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  bool
+  inline bool
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   checkInside(const FieldVector<alu3d_ctype, mydim>& local) const {
     bool result = true;
@@ -656,7 +656,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim>
-  void
+  inline void
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   print (std::ostream& ss) const {
     ss << "ALU3dGridGeometry<" << mydim << "," << cdim << ", hexa> = {\n";
