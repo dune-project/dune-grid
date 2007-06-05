@@ -240,6 +240,8 @@ namespace Dune {
     //! Struct defining the iterator types for codimension cd
     template <int cd>
     struct Codim {
+      /** \brief Iterator iterating over the entities of codimension <tt>cd</tt>
+          in this grid part */
       typedef typename Traits::template Codim<cd>::IteratorType IteratorType;
     };
 
