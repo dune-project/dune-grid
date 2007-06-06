@@ -263,7 +263,7 @@ namespace Dune {
     ALU2dGrid(std::string macroTriangFilename );
     ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes );
     //! Constructor which constructs an empty ALU2dGrid
-    ALU2dGrid();
+    ALU2dGrid( int );
 
   public:
     //! Desctructor
