@@ -209,6 +209,7 @@ template< int mydim, int coorddim, class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
+  /** \todo No need to recompute the determinant every time on a simplex */
   return std::abs(1/jacobianInverseTransposed(local).determinant());
 }
 
@@ -217,6 +218,9 @@ template< int mydim, int coorddim, class GridImp>
 inline const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
+  if (jacobianInverseIsUpToDate_)
+    return jac_inverse_;
+
   if (mode_==element_mode)
   {
     // compile array of pointers to corner coordinates
@@ -231,6 +235,9 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
     // compute the transformation onto the reference element (or vice versa?)
     UG_NS<coorddim>::Transformation(corners(), cornerpointers_, local, jac_inverse_);
   }
+
+  if (type().isSimplex())
+    jacobianInverseIsUpToDate_ = true;
 
   return jac_inverse_;
 }

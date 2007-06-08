@@ -93,16 +93,10 @@ namespace Dune {
   /** \brief Defines the geometry part of a mesh entity.
    * \ingroup UGGrid
 
-     Works for all dimensions, element types and
-     world dimensions. Provides a reference element and mapping between local and
-     global coordinates.
-     The element may have different implementations because the mapping can be
-     done more efficiently for structured meshes than for unstructured meshes.
-
-     dim: An element is a polygon in a hyperplane of dimension dim. 0 <= dim <= 3 is typically
+     \param mydim An element is a polygon in a hyperplane of dimension dim. 0 <= dim <= 3 is typically
      dim=0 is a point.
 
-     dimworld: Each corner is a point with dimworld coordinates.
+     \param dimworld Each corner is a point with dimworld coordinates.
 
      This version is actually used only for mydim==coorddim. The manifold
      versions are in specializations below.
@@ -125,6 +119,7 @@ namespace Dune {
     UGGridGeometry()
     {
       mode_ = element_mode;
+      jacobianInverseIsUpToDate_ = false;
     }
 
     //! put object in coord_mode
@@ -136,6 +131,8 @@ namespace Dune {
       // initialize pointers to data
       for (int i=0; i<((mydim==2) ? 4 : 8); i++)
         cornerpointers_[i] = &(coord_[i][0]);
+
+      jacobianInverseIsUpToDate_ = false;
     }
 
     /** \brief Return the element type identifier
@@ -199,6 +196,7 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
+      jacobianInverseIsUpToDate_ = false;
     }
 
     //! \brief set a corner
@@ -209,6 +207,8 @@ namespace Dune {
 
       for (int j=0; j<coorddim; j++)
         coord_[i][j] = pos[j];
+
+      jacobianInverseIsUpToDate_ = false;
     }
 
     //! the vertex coordinates
@@ -216,6 +216,11 @@ namespace Dune {
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
+
+    /** \brief For simplices the Jacobian matrix is a constant, hence it needs
+        to be computed only once for each new element.  This can save some
+        assembly time. */
+    mutable bool jacobianInverseIsUpToDate_;
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
