@@ -278,8 +278,6 @@ inline void displayTimeScene(INFO * info, int numberOfProcs )
     GrapeInterface_three_three::grape_add_remove_methods();
     GrapeInterface_three_three::initPartitionDisp(numberOfProcs-1);
 
-    // only add this method for parallel vis
-    if( numberOfProcs > 1 )
     {
       /* add combine methods to send method of Scene and TimeScene */
       GRAPE(Scene,"add-method") ("combine-secnes-send",combine_scenes_send);
