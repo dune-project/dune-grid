@@ -1205,28 +1205,15 @@ inline void copyFdata(F_DATA *copy, F_DATA *org)
   copy->hp_maxlevel = org->hp_maxlevel;
 }
 
-/* interpol method for timescence, just constant interpolation */
-inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
-                                             double factor)
+inline static void copyHmeshes(GRAPEMESH *orgMesh, GRAPEMESH * self)
 {
-  GRAPEMESH *self=NULL;
-  GRAPEMESH *newMesh =NULL;
+  assert( self );
+  assert( orgMesh );
 
-  self = (GRAPEMESH *)START_METHOD(G_INSTANCE);
-  ASSURE (self, "No HMESH in method interpol! \n", END_METHOD (NULL));
-
-  if (factor < 0.5)
-    newMesh = mesh1;
-  else
-    newMesh = mesh2;
-
-  //GRAPE(newMesh, "copy-functions")(self);
-
-#if 1
-  if( (!self->f_data) && (newMesh->f_data) )
+  if( (!self->f_data) && (orgMesh->f_data) )
   {
-    self->level_of_interest = newMesh->level_of_interest;
-    F_DATA *next_data = (F_DATA *) newMesh->f_data;
+    self->level_of_interest = orgMesh->level_of_interest;
+    F_DATA *next_data = (F_DATA *) orgMesh->f_data;
     /* to keep the same order we have to go backward */
     while (next_data)
     {
@@ -1243,26 +1230,25 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
       next_data = (F_DATA *) next_data->last;
     }
   }
-#endif
 
-  self->max_dimension_of_coord = newMesh->max_dimension_of_coord;
-  self->max_eindex = newMesh->max_eindex;
-  self->max_vindex = newMesh->max_vindex;
-  self->max_dindex = newMesh->max_dindex;
-  self->max_number_of_vertices = newMesh->max_number_of_vertices;
+  self->max_dimension_of_coord = orgMesh->max_dimension_of_coord;
+  self->max_eindex = orgMesh->max_eindex;
+  self->max_vindex = orgMesh->max_vindex;
+  self->max_dindex = orgMesh->max_dindex;
+  self->max_number_of_vertices = orgMesh->max_number_of_vertices;
 
-  self->access_mode = newMesh->access_mode;
-  self->access_capability = newMesh->access_capability;
+  self->access_mode = orgMesh->access_mode;
+  self->access_capability = orgMesh->access_capability;
 
   /* we have to do that, GRAPE sucks  */
   /* set other function_data pointers */
-  if(newMesh->f_data)
+  if(orgMesh->f_data)
   {
     GENMESH_FDATA * sf = self->f_data;
     while(sf != NULL)
     {
       const char * sfname = sf->name;
-      GENMESH_FDATA * nf = newMesh->f_data;
+      GENMESH_FDATA * nf = orgMesh->f_data;
       int length = strlen(sfname);
       while( (nf != NULL) )
       {
@@ -1288,36 +1274,55 @@ inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
     }
   }
 
-  /* copy current function selections to newMesh */
-  self = (GRAPEMESH *) GRAPE(self, "copy-function-selector") (newMesh);
+  /* copy current function selections to orgMesh */
+  self = (GRAPEMESH *) GRAPE(self, "copy-function-selector") (orgMesh);
 
-  self->user_data = newMesh->user_data;
+  self->user_data = orgMesh->user_data;
 
-  self->copy_element = newMesh->copy_element;
-  self->free_element = newMesh->free_element;
+  self->copy_element = orgMesh->copy_element;
+  self->free_element = orgMesh->free_element;
 
-  self->complete_element = newMesh->complete_element;
-  self->set_time = newMesh->set_time;
-  self->get_time = newMesh->get_time;
+  self->complete_element = orgMesh->complete_element;
+  self->set_time = orgMesh->set_time;
+  self->get_time = orgMesh->get_time;
 
-  self->first_macro = newMesh->first_macro;
-  self->next_macro = newMesh->next_macro;
-  self->first_child = newMesh->first_child;
-  self->next_child = newMesh->next_child;
-  self->select_child = newMesh->select_child;
+  self->first_macro = orgMesh->first_macro;
+  self->next_macro = orgMesh->next_macro;
+  self->first_child = orgMesh->first_child;
+  self->next_child = orgMesh->next_child;
+  self->select_child = orgMesh->select_child;
 
-  self->max_level = newMesh->max_level;
-  self->level_of_interest = newMesh->level_of_interest;
+  self->max_level = orgMesh->max_level;
+  self->level_of_interest = orgMesh->level_of_interest;
   /* do not set level_of_interest, because is set by user during run time */
 
-  self->get_geometry_vertex_estimate  = newMesh->get_geometry_vertex_estimate;
-  self->get_geometry_element_estimate = newMesh->get_geometry_element_estimate;
-  self->get_lens_element_estimate     = newMesh->get_lens_element_estimate;
-  self->threshold                     = newMesh->threshold;
+  self->get_geometry_vertex_estimate  = orgMesh->get_geometry_vertex_estimate;
+  self->get_geometry_element_estimate = orgMesh->get_geometry_element_estimate;
+  self->get_lens_element_estimate     = orgMesh->get_lens_element_estimate;
+  self->threshold                     = orgMesh->threshold;
 
 #if GRAPE_DIM==2
-  self->dimension_of_world = newMesh->dimension_of_world;
+  self->dimension_of_world = orgMesh->dimension_of_world;
 #endif
+}
+
+/* interpol method for timescence, just constant interpolation */
+inline static GRAPEMESH *grape_mesh_interpol(GRAPEMESH *mesh1, GRAPEMESH *mesh2,
+                                             double factor)
+{
+  GRAPEMESH *self=NULL;
+  GRAPEMESH *org =NULL;
+
+  self = (GRAPEMESH *)START_METHOD(G_INSTANCE);
+  ASSURE (self, "No HMESH in method interpol! \n", END_METHOD (NULL));
+
+  if (factor < 0.5)
+    org = mesh1;
+  else
+    org = mesh2;
+
+  // copy meshes
+  copyHmeshes(org,self);
 
   END_METHOD(self);
 }
@@ -1399,8 +1404,6 @@ inline SCENE* scene_set_min_max_values ()
 
 GENMESH3D * genmesh3d_switch_iterateLeafs_on_off();
 
-static int calledAddMethods = 0;
-
 static int ruler_bnd_id = 0;
 inline static HELEMENT * bnd_next_macro (HELEMENT * prevEl, MESH_ELEMENT_FLAGS flag)
 {
@@ -1473,45 +1476,67 @@ inline HMESH* genmesh_boundary_disp ()
 
   END_METHOD (hmesh);
 }
+
+// make hard copy of hmesh, i.e. create new object and copy data
+inline HMESH* newHmeshHardCopy()
+{
+  HMESH * hmesh = (HMESH*) START_METHOD (G_INSTANCE);
+  ALERT (hmesh, "hmesh-hardcopy: No hmesh!", END_METHOD(NULL));
+
+  std::string newName("H: ");
+  newName += hmesh->name;
+
+  // get new hmesh
+  HMESH* copy = (HMESH *) GRAPE(HMesh,"new-instance") (newName.c_str());
+  ALERT (copy, "hmesh_hardcopy: No new instance!", END_METHOD(NULL));
+
+  // copy mesh
+  copyHmeshes(hmesh,copy);
+
+  END_METHOD (copy);
+}
+
 /* add some usefull methods */
 inline static void grape_add_remove_methods(void)
 {
+  // if true returned, then grape was already initialized
+  if( GRAPE(HMesh,"find-method") ("next-f-data-send") ) return ;
+
   if( (GRAPE(Scene,"find-method") ("set-min-max-values")) )
   {
     GRAPE(Scene,"delete-method") ("set-min-max-values");
   }
-
   GRAPE(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
 
-  if(!calledAddMethods)
+  printf("Add Method 'next-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
+  GRAPE(HMesh,"add-method") ("next-f-data-send",&next_f_data_send);
+  printf("Add Method 'prev-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
+  GRAPE(HMesh,"add-method") ("prev-f-data-send",&prev_f_data_send);
+  GRAPE(GrapeMesh,"add-method") ("interpol", &grape_mesh_interpol);
+
+  printf("add-method 'value-min-max' on HMesh%dd!\n",GRAPE_DIM);
+
+  GRAPE(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
+
+  // overload hardcopy
+  if( GRAPE(HMesh,"find-method") ("hardcopy"))
   {
-    printf("Add Method 'next-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
-    GRAPE(HMesh,"add-method") ("next-f-data-send",&next_f_data_send);
-    printf("Add Method 'prev-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
-    GRAPE(HMesh,"add-method") ("prev-f-data-send",&prev_f_data_send);
-    GRAPE(GrapeMesh,"add-method") ("interpol", &grape_mesh_interpol);
-
-    printf("add-method 'value-min-max' on HMesh%dd!\n",GRAPE_DIM);
-
-    GRAPE(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
+    GRAPE(HMesh,"delete-method") ("hardcopy");
+  }
+  GRAPE(HMesh,"add-method") ("hardcopy",&newHmeshHardCopy);
 
 #if GRAPE_DIM == 3
-    GRAPE(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
-    GRAPE(HMesh,"add-method") ("boundary-id-disp",genmesh_boundary_disp);
+  GRAPE(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
+  GRAPE(HMesh,"add-method") ("boundary-id-disp",genmesh_boundary_disp);
 #endif
 
-    if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
-      GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
+  if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
+    GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
 
-    {
-      char p_name[32];
-      sprintf(p_name,"uif-m%d",GRAPE_DIM);
-      g_project_add(p_name);
-    }
-
-    calledAddMethods = 1;
+  {
+    char p_name[32];
+    sprintf(p_name,"uif-m%d",GRAPE_DIM);
+    g_project_add(p_name);
   }
 }
-
-
 #endif
