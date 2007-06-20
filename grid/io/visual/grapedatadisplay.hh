@@ -81,10 +81,10 @@ namespace Dune
     typedef typename GridType :: ctype ctype;
 
     typedef typename DiscreteFunctionType :: LocalFunctionType LocalFunctionType;
-    typedef typename DiscreteFunctionType :: FunctionSpaceType FunctionSpaceType;
+    typedef typename DiscreteFunctionType :: DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
 
-    typedef typename FunctionSpaceType :: RangeType RangeType;
-    typedef typename FunctionSpaceType :: DomainType DomainType;
+    typedef typename DiscreteFunctionSpaceType :: RangeType RangeType;
+    typedef typename DiscreteFunctionSpaceType :: DomainType DomainType;
 
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
