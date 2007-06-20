@@ -55,7 +55,7 @@ namespace Dune
               DiscreteFunctionType & func, LocalFunctionType &lf,
               const int * comp, int localNum, double * val)
   {
-    enum { polynomialOrder = FunctionSpaceType :: polynomialOrder };
+    enum { polynomialOrder = DiscreteFunctionSpaceType :: polynomialOrder };
     static const GrapeLagrangePoints<ctype,dim,dimworld,polynomialOrder> lagrangePoints;
     const FieldVector<ctype,dim> & localPoint =
       lagrangePoints.getPoint(geomType,polynomialOrder,localNum);
@@ -85,7 +85,7 @@ namespace Dune
     // corners , kind of hack, but works for the moment
     if(polOrd == 0)
     {
-      enum { polynomialOrder = FunctionSpaceType :: polynomialOrder };
+      enum { polynomialOrder = SpaceType :: polynomialOrder };
       static const GrapeLagrangePoints<ctype,dim,dimworld,polynomialOrder> lagrangePoints;
       const FieldVector<ctype,dim> & localPoint =
         lagrangePoints.getPoint(geomType,polynomialOrder,localNum);
@@ -225,33 +225,9 @@ namespace Dune
     }
     else
     {
-      typedef typename DiscreteFunctionType:: ConstDofIteratorType DofIteratorType;
-      int comp = df->comp[0];
-      int dimVal = df->dimVal;
-
-      DofIteratorType enddit = func.dend();
-      {
-        DofIteratorType dit = func.dbegin();
-        int count = 0;
-        while ( (dit != enddit) )
-        {
-          if((count%dimVal) == comp )
-          {
-            minValue = (*dit);
-            maxValue = (*dit);
-            break;
-          }
-          ++count;
-        }
-      }
-
-      int count = 0;
-      for(DofIteratorType dit = func.dbegin(); dit != enddit; ++dit, ++count)
-      {
-        if((count%dimVal) != comp) continue;
-        if( (*dit) < minValue) minValue = (*dit);
-        if( (*dit) > maxValue) maxValue = (*dit);
-      }
+      derr << "EvalDiscreteFunctions::calcMinMax: method not implemented for vectorial data! \n";
+      minValue = 0.0;
+      maxValue = 1.0;
     }
 
     if((maxValue-minValue) < 1e-10)
@@ -497,8 +473,8 @@ namespace Dune
   inline void GrapeDataDisplay<GridType>::
   addData(const DiscFuncType &func , const DATAINFO * dinf, double time )
   {
-    typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
-    enum { polynomialOrder = FunctionSpaceType :: polynomialOrder };
+    typedef typename DiscFuncType::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
+    enum { polynomialOrder = DiscreteFunctionSpaceType :: polynomialOrder };
     typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
 
     assert(dinf);
@@ -512,7 +488,7 @@ namespace Dune
     // add function wether is exists or not
     if(!already)
     {
-      int num = (int) FunctionSpaceType::DimRange;
+      int num = (int) DiscreteFunctionSpaceType::DimRange;
       if(vector) num = 1;
 
       vecFdata_.resize(size+num);
@@ -568,10 +544,10 @@ namespace Dune
             data->name = name;
 
           data->dimVal   = dimVal;
-          data->dimRange = FunctionSpaceType::DimRange;
+          data->dimRange = DiscreteFunctionSpaceType::DimRange;
 
           // set grid part selection methods
-          typedef typename FunctionSpaceType :: GridPartType GridPartType;
+          typedef typename DiscreteFunctionSpaceType :: GridPartType GridPartType;
           data->gridPart = ((void *) &func.space().gridPart());
           data->setGridPartIterators =
             &BaseType::template SetIter<GridPartType>::setGPIterator;
