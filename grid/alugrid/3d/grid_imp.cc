@@ -1291,6 +1291,9 @@ namespace Dune {
     // calculate indices
     updateStatus();
 
+    // reset refinement markers
+    postAdapt();
+
     return true;
   }
 
