@@ -25,7 +25,16 @@ namespace Dune {
     FieldVector<double,dimworld> lang;
     FieldVector<int,dimworld>    anz;
     FieldVector<bool,dimworld>   per(false);
-    for (int i=0; i<dimworld; i++) {
+
+    for (int i=0; i<dimworld; i++)
+    {
+      // check that start point is > 0.0
+      if( interval.start(i) < 0.0 )
+      {
+        DUNE_THROW(DGFException,"YaspGrid cannot handle grids with left lower corner below zero!");
+      }
+
+      // set parameter for yaspgrid
       lang[i] = interval.length(i);
       anz[i]  = interval.segments(i);
     }
