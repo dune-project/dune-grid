@@ -788,6 +788,9 @@ namespace Dune {
     friend class ALU3dGridEntityFactory<MyType,1>;
     friend class ALU3dGridEntityFactory<MyType,2>;
     friend class ALU3dGridEntityFactory<MyType,3>;
+
+    // variable to ensure that postAdapt ist called after adapt
+    bool lockPostAdapt_;
   }; // end class ALU3dGrid
 
   template <class GridImp>

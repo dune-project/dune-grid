@@ -183,6 +183,7 @@ namespace Dune {
       , globalIdSet_(0), localIdSet_(*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
       , sizeCache_ (0)
+      , lockPostAdapt_(false)
   {
     makeGeomTypes();
 
@@ -688,6 +689,11 @@ namespace Dune {
   {
     bool ref = false;
 
+    if( lockPostAdapt_ == true )
+    {
+      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
+    }
+
     bool mightCoarse = preAdapt();
     // if prallel run, then adapt also global id set
     if(globalIdSet_)
@@ -711,6 +717,9 @@ namespace Dune {
     {
       // calcs maxlevel and other extras
       updateStatus();
+
+      // notify that postAdapt must be called
+      lockPostAdapt_ = true;
     }
     return ref;
   }
@@ -779,6 +788,9 @@ namespace Dune {
       // only calc extras and skip maxLevel calculation, because of
       // refinement maxLevel was calculated already
       updateStatus();
+
+      // no need to call postAdapt here, because markers
+      // are cleand during refinement callback
     }
 
     // check whether we have balance
@@ -818,6 +830,9 @@ namespace Dune {
         elem->resetRefinedTag();
       }
     }
+
+    // make that postAdapt has been called
+    lockPostAdapt_ = false;
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
