@@ -1,58 +1,57 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune {
-  namespace {
-    class PrintInfo {
-    public:
-      PrintInfo(std::string name) : out((name+".log").c_str()) {
-        // out << "Grid generated from file " << name << std::endl;
-        out << "DGF parser started" << std::endl;
-      }
-      void finish() {
-        out << "Sucsessful" << std::endl;
-      }
-      template <class Block>
-      void block(const Block& block) {
-        out << "Using " << Block::ID << " block" << std::endl;
-      }
-      void print(std::string mesg) {
-        out << mesg << std::endl;
-      }
-      void step1(int dimw,int nofvtx,int nofel) {
-        out << "Step 1 finished: " << std::endl;
-        out << "                 " << dimw << "d" << std::endl;
-        out << "                 " << nofvtx << " verticies" << std::endl;
-        out << "                 " << nofel << " elements" << std::endl;
-      }
-      void step2(int bndseg,int totalbndseg,
-                 int bnddomain,int defsegs,int remaining) {
-        out << "Step 2 finished: " << std::endl;
-        out << "                 " << bndseg
-            << " bnd-segs read in BoundarySegment block" << std::endl;
-        out << "                 " << totalbndseg
-            << " bnd-segs in grid" << std::endl;
-        out << "                 " << bnddomain
-            << " bnd-segs a boundary domain" << std::endl;
-        out << "                 " << defsegs
-            << " bnd-seg assigned default value" << std::endl;
-        out << "                 " << remaining
-            << " bnd-segs have not been assigned an id!" << std::endl;
-      }
-      void cube2simplex(DuneGridFormatParser::element_t el) {
-        if (el == DuneGridFormatParser::General)
-          out << "Simplex block found, thus converting "
-              << "cube grid to simplex grid" << std::endl;
-        else
-          out << "Element type should be simplex, thus converting "
-              << "cube grid to simplex grid" << std::endl;
-      }
-      void automatic() {
-        out << "Automatic grid generation" << std::endl;
-      }
-    private:
-      std::ofstream out;
-    };
-  }
+  class DGFPrintInfo {
+  public:
+    DGFPrintInfo(std::string name) : out((name+".log").c_str()) {
+      // out << "Grid generated from file " << name << std::endl;
+      out << "DGF parser started" << std::endl;
+    }
+    void finish() {
+      out << "Sucsessful" << std::endl;
+    }
+    template <class Block>
+    void block(const Block& block) {
+      out << "Using " << Block::ID << " block" << std::endl;
+    }
+    void print(std::string mesg) {
+      out << mesg << std::endl;
+    }
+    void step1(int dimw,int nofvtx,int nofel) {
+      out << "Step 1 finished: " << std::endl;
+      out << "                 " << dimw << "d" << std::endl;
+      out << "                 " << nofvtx << " verticies" << std::endl;
+      out << "                 " << nofel << " elements" << std::endl;
+    }
+    void step2(int bndseg,int totalbndseg,
+               int bnddomain,int defsegs,int remaining) {
+      out << "Step 2 finished: " << std::endl;
+      out << "                 " << bndseg
+          << " bnd-segs read in BoundarySegment block" << std::endl;
+      out << "                 " << totalbndseg
+          << " bnd-segs in grid" << std::endl;
+      out << "                 " << bnddomain
+          << " bnd-segs a boundary domain" << std::endl;
+      out << "                 " << defsegs
+          << " bnd-seg assigned default value" << std::endl;
+      out << "                 " << remaining
+          << " bnd-segs have not been assigned an id!" << std::endl;
+    }
+    void cube2simplex(DuneGridFormatParser::element_t el) {
+      if (el == DuneGridFormatParser::General)
+        out << "Simplex block found, thus converting "
+            << "cube grid to simplex grid" << std::endl;
+      else
+        out << "Element type should be simplex, thus converting "
+            << "cube grid to simplex grid" << std::endl;
+    }
+    void automatic() {
+      out << "Automatic grid generation" << std::endl;
+    }
+  private:
+    std::ofstream out;
+  };
+
   // Output to Alberta macrogridfile (2d/3d)
   inline void DuneGridFormatParser::writeAlberta(std::ostream& out) {
     // writes an output file for in gird type Alberta
@@ -88,10 +87,10 @@ namespace Dune {
       out << std::endl;
     }
     out << "\nelement boundaries: "  << std::endl;
-    std::map<EntityKey<int>,int>::iterator pos;
+    std::map<DGFEntityKey<int>,int>::iterator pos;
     for( int simpl=0; simpl < nofelements ; simpl++) {
       for (int i =0 ; i< dimw+1 ; i++) {
-        EntityKey<int> key2(elements[simpl],dimw,i+1);
+        DGFEntityKey<int> key2(elements[simpl],dimw,i+1);
         pos=facemap.find(key2);
         if (pos==facemap.end())
           out << "0 ";
@@ -161,7 +160,7 @@ namespace Dune {
     dverb.flush();
     dverb << "Writing Boundary...";
     out << facemap.size() << std::endl;
-    std::map<EntityKey<int>,int>::iterator pos;
+    std::map<DGFEntityKey<int>,int>::iterator pos;
     for(pos= facemap.begin(); pos!=facemap.end(); ++pos)
     {
       if (pos->second == 0)
@@ -258,7 +257,7 @@ namespace Dune {
           std::string tmpname = name;
           tmpname += ".face";
           std::ofstream out(tmpname.c_str());
-          std::map<EntityKey<int>,int>::iterator pos;
+          std::map<DGFEntityKey<int>,int>::iterator pos;
           int nr = 0;
           dverb << "Writing boundary faces...";
           out << facemap.size() << " 1 " << std::endl;
@@ -297,7 +296,7 @@ namespace Dune {
     dverb.flush();
     dverb << "Writing Segments...";
     out << facemap.size()+elements.size()*3 << " 1 " << std::endl;
-    std::map<EntityKey<int>,int>::iterator pos;
+    std::map<DGFEntityKey<int>,int>::iterator pos;
     nr = 0;
     for(size_t i=0; i<elements.size(); ++i) {
       for (int k=0; k<3; k++)
@@ -358,7 +357,7 @@ namespace Dune {
       return false;
     } // not a DGF file, prehaps native file format
 
-    info = new PrintInfo("dgfparser");
+    info = new DGFPrintInfo("dgfparser");
 
     dimw=-1;
     IntervalBlock interval(gridin);
@@ -512,14 +511,14 @@ namespace Dune {
     // if no boundary elements, return
     if (nofelements==0) return;
 
-    std::map<EntityKey<int>,int>::iterator pos;
+    std::map<DGFEntityKey<int>,int>::iterator pos;
     // now add all boundary faces
     {
       for(int simpl=0; simpl < nofelements ; simpl++)
       {
         for (int i =0 ; i<ElementFaceUtil::nofFaces(dimw,elements[simpl])  ; i++)
         {
-          EntityKey<int> key2 = ElementFaceUtil::generateFace(dimw,elements[simpl],i);
+          DGFEntityKey<int> key2 = ElementFaceUtil::generateFace(dimw,elements[simpl],i);
 
           pos=facemap.find(key2);
           if(pos == facemap.end())
@@ -539,10 +538,10 @@ namespace Dune {
     }
     // remove unused boundary faces added through boundaryseg block or cube2simplex conversion
     {
-      std::map<EntityKey<int>,int>::iterator pos = facemap.begin();
+      std::map<DGFEntityKey<int>,int>::iterator pos = facemap.begin();
       while (pos!=facemap.end()) {
         if (!pos->first.origKeySet()) {
-          std::map<EntityKey<int>,int>::iterator pos1 = pos;
+          std::map<DGFEntityKey<int>,int>::iterator pos1 = pos;
           ++pos;
           facemap.erase(pos1);
         }
@@ -835,7 +834,7 @@ namespace Dune {
               poly >> p[k];
             poly >> params;
             if (params!=0) {
-              EntityKey<int> key(p,false);
+              DGFEntityKey<int> key(p,false);
               facemap[key]=params;
             }
           }
@@ -907,7 +906,7 @@ namespace Dune {
 
             {
               // key is now right oriented
-              EntityKey<int> key(face);
+              DGFEntityKey<int> key(face);
 
               typedef facemap_t :: iterator iterator;
 

@@ -895,7 +895,7 @@ namespace Dune {
       ~BoundarySegBlock() {}
 
       // some information
-      int get(std::map<EntityKey<int>,int>& facemap,bool fixedsize,int vtxoffset) {
+      int get(std::map<DGFEntityKey<int>,int>& facemap,bool fixedsize,int vtxoffset) {
         static int cube2simplex[3][3] = {
           {0,1,3},
           {0,2,3},
@@ -922,7 +922,7 @@ namespace Dune {
               bound[j] = p[j];
             }
 
-            EntityKey<int> key(bound,false);
+            DGFEntityKey<int> key(bound,false);
 
             facemap[key] = bndid;
             ++lnofbound;
@@ -938,7 +938,7 @@ namespace Dune {
                     bound[j] = p[cube2simplex[i][j]];
                   }
 
-                  EntityKey<int> key(bound,false);
+                  DGFEntityKey<int> key(bound,false);
                   facemap[key] = bndid;
                   ++lnofbound;
                 }
@@ -949,7 +949,7 @@ namespace Dune {
                 {
                   bound[0] = p[i-1];
                   bound[1] = p[i%size()];
-                  EntityKey<int> key(bound,false);
+                  DGFEntityKey<int> key(bound,false);
                   facemap[key] = bndid;
                   ++lnofbound;
                 }
@@ -958,7 +958,7 @@ namespace Dune {
           }
           else {
             if (dimworld==3) {
-              EntityKey<int> key(p,false);
+              DGFEntityKey<int> key(p,false);
               facemap[key] = bndid;
               ++lnofbound;
             } else {
@@ -966,7 +966,7 @@ namespace Dune {
               for (size_t i=0; i<p.size()-1; i++) {
                 k[0]=p[i];
                 k[1]=p[(i+1)%p.size()];
-                EntityKey<int> key(k,false);
+                DGFEntityKey<int> key(k,false);
                 facemap[key] = bndid;
                 ++lnofbound;
               }

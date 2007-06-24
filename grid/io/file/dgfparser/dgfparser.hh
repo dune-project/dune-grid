@@ -31,9 +31,9 @@ namespace Dune {
 namespace Dune {
   //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
   //! build information in vector structures used by the MacroGrid class.
-  namespace {
-    class PrintInfo;
-  }
+
+  class DGFPrintInfo;
+
   class DuneGridFormatParser {
   public:
     //!  constructor which does nothing
@@ -81,7 +81,7 @@ namespace Dune {
     std::vector < std::vector <int> > bound;
     int nofbound;
     // map to generate and find boundary segments
-    typedef std::map<EntityKey<int>,int> facemap_t;
+    typedef std::map<DGFEntityKey<int>,int> facemap_t;
     facemap_t facemap;
     // set by generator depending on element type wanted
     element_t element;
@@ -94,7 +94,7 @@ namespace Dune {
     int nofvtxparams,nofelparams;
     std::vector<std::vector<double> > vtxParams,elParams;
     // write information about generation process
-    PrintInfo* info;
+    DGFPrintInfo* info;
     inline void generateBoundaries(std::istream&,bool);
     // call to tetgen/triangle
     inline void generateSimplexGrid(std::istream&);
