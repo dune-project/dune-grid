@@ -41,6 +41,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
       }
     }
     grid.adapt();
+    grid.postAdapt();
     grid.loadBalance();
   }
 }
