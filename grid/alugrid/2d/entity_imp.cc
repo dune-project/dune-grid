@@ -205,7 +205,7 @@ namespace Dune {
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
-    if(grid_.getNrOfHangingNodes() > 0)
+    if( grid_.nonConform() )
     {
       static ALU2DLocalGeometryStorage<GeometryObject,4> geoms;
       if(!geoms.geomCreated(child))
@@ -380,10 +380,26 @@ namespace Dune {
     assert(item != 0);
     item_ = item;
     assert(item_);
+
     face_= face;
     level_ = level;
-    if( item_ && entity_ ) {
+    if( entity_ )
+    {
       entityImp().setElement( *item_, face_, level_);
+    }
+  }
+
+  //! update underlying item pointer and set entity
+  //! specialization for codim 0
+  template<>
+  inline void ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> > :: updateEntityPointer(ElementType * item, int , int ) {
+    assert(item != 0);
+    item_ = item;
+    assert(item_);
+
+    if( entity_ )
+    {
+      entityImp().setElement( *item_, -1 , -1 );
     }
   }
 
@@ -391,7 +407,7 @@ namespace Dune {
   //! Constructor for EntityPointer that points to an element
   template<int cd, class GridImp>
   inline ALU2dGridEntityPointer<cd, GridImp>:: ALU2dGridEntityPointer(const GridImp & grid,
-                                                                      const ElementType & item, int face=-1, int level=-1)
+                                                                      const ElementType & item, int face, int level)
     : grid_(grid)
       , item_(const_cast<ElementType *>(&item))
       , level_(level)
@@ -434,7 +450,6 @@ namespace Dune {
     if( !entity_ )
     {
       entity_ = grid_.template getNewEntity<cd> (level());
-      //entity_ = new EntityObj(EntityImp(grid_, level()));
       entityImp().setElement(*item_, face_, level());
     }
     assert( entity_ );
@@ -468,8 +483,10 @@ namespace Dune {
   }
 
   template<int cd, class GridImp>
-  inline typename ALU2dGridEntityPointer<cd, GridImp>::EntityImp & ALU2dGridEntityPointer<cd, GridImp>::entityImp() {
-    assert( entity_ ); return grid_.getRealImplementation(*entity_);
+  inline typename ALU2dGridEntityPointer<cd, GridImp>::EntityImp & ALU2dGridEntityPointer<cd, GridImp>::entityImp()
+  {
+    assert( entity_ );
+    return grid_.getRealImplementation(*entity_);
   }
 
   template<int cd, class GridImp>
@@ -478,9 +495,6 @@ namespace Dune {
     assert( entity_ );
     return grid_.getRealImplementation(*entity_);
   }
-
-
-
 
   //********* begin struct ElementWrapper ********************
   //template <int codim, int dim, class GridImp>

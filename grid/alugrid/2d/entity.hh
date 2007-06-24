@@ -446,8 +446,8 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU2dGridEntityPointer(const GridImp & grid,
                            const ElementType & item,
-                           int face,
-                           int level
+                           int face = -1,
+                           int level = -1
                            );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
