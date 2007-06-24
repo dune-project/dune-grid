@@ -31,7 +31,8 @@ namespace Dune {
 
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes )
-    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename), nrOfHangingNodes, ALU2DSPACE Refco::quart))
+    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
+                                    nrOfHangingNodes, ALU2DSPACE Refco::quart))
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
@@ -50,7 +51,7 @@ namespace Dune {
 
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid()
+  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(int nrOfHangingNodes)
     : mygrid_ (0)
       , hIndexSet_(*this)
       , localIdSet_(*this)
@@ -60,7 +61,7 @@ namespace Dune {
       , maxLevel_(0)
       , refineMarked_ (0)
       , coarsenMarked_ (0)
-      , nrOfHangingNodes_(0)
+      , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
   {
     makeGeomTypes();
@@ -289,7 +290,9 @@ namespace Dune {
 
   //! refine grid refCount times
   template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: globalRefine(int refCount) {
+  inline bool ALU2dGrid<dim, dimworld> :: globalRefine(int refCount)
+  {
+    if( refCount <= 0 ) return false;
 
     for (int j = 0; j < refCount; ++j) {
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
@@ -301,8 +304,8 @@ namespace Dune {
     }
     //update data
     updateStatus();
-    //hdl.refine() ist void!!!
 
+    // cleanup markers
     postAdapt();
     return true;
   }
@@ -618,6 +621,8 @@ namespace Dune {
     // calculate indices
     updateStatus();
 
+    // cleanup markers
+    postAdapt();
     return true;
   }
 

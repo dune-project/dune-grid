@@ -319,13 +319,13 @@ namespace Dune {
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
     ALUSimplexGrid(const std::string macroName )
-      : BaseType(macroName, 1)
+      : BaseType(macroName,1)
     {
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
     //! constructor creating empty grid
-    ALUSimplexGrid( ) : BaseType()
+    ALUSimplexGrid( ) : BaseType(1)
     {
       std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
@@ -462,7 +462,7 @@ namespace Dune {
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
     //! constructor creating empty grid
-    ALUConformGrid( ) : BaseType()
+    ALUConformGrid( ) : BaseType(0)
     {
       std::cout << "\nCreated empty ALUConformGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }

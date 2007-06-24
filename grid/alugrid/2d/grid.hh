@@ -149,7 +149,6 @@ namespace Dune {
 
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
-     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alugrid .
    */
 
   template <int dim, int dimworld>
@@ -264,7 +263,7 @@ namespace Dune {
     ALU2dGrid(std::string macroTriangFilename );
     ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes );
     //! Constructor which constructs an empty ALU2dGrid
-    ALU2dGrid();
+    ALU2dGrid( int );
 
   public:
     //! Desctructor
@@ -429,22 +428,32 @@ namespace Dune {
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> VertexObject;
   private:
     typedef ALUMemoryProvider< EntityObject > EntityProviderType;
+    typedef ALUMemoryProvider< FaceObject >   FaceProviderType;
+    typedef ALUMemoryProvider< VertexObject > VertexProviderType;
 
     mutable EntityProviderType entityProvider_;
+    mutable FaceProviderType faceProvider_;
+    mutable VertexProviderType vertexProvider_;
+
+    friend class ALU2dGridEntityFactory<ThisType,0>;
+    friend class ALU2dGridEntityFactory<ThisType,1>;
+    friend class ALU2dGridEntityFactory<ThisType,2>;
 
     template <int codim>
     MakeableInterfaceObject<typename Traits::template Codim<codim>:: Entity> * getNewEntity ( int level ) const
     {
-      return ALU2dGridEntityFactory<ThisType,codim>::getNewEntity(*this,entityProvider_,level);
+      return ALU2dGridEntityFactory<ThisType,codim>::getNewEntity(*this,level);
     }
 
     template <class EntityType>
     void freeEntity (EntityType * en) const
     {
       enum { codim = EntityType::codimension };
-      return ALU2dGridEntityFactory<ThisType,codim>::freeEntity(entityProvider_, en);
+      return ALU2dGridEntityFactory<ThisType,codim>::freeEntity(*this, en);
     }
 
     // create GeomTypes
@@ -467,10 +476,8 @@ namespace Dune {
 
     //! the real grid
     mutable ALU2DSPACE Hmesh* mygrid_;
-    ALU2DSPACE Hmesh& mesh() {
-      assert(mygrid_);
-      return *mygrid_;
-    }
+
+    // return reference to grid
     ALU2DSPACE Hmesh& mesh() const {
       assert(mygrid_);
       return *mygrid_;
@@ -577,32 +584,13 @@ namespace Dune {
     bool readGrid( const std::string filename, alu2d_ctype & time );
 
   protected:
-    int getNrOfHangingNodes() const {
-      return nrOfHangingNodes_;
+    //! return true if grid allows hanging nodes on leaf level
+    //! i.e. returns true for ALUSimplexGrid and returns false for ALUConformGrid
+    bool nonConform () const
+    {
+      return (nrOfHangingNodes_ > 0);
     }
-
   }; // end class ALU2dGrid
-
-  template <class GridImp, int codim>
-  struct ALU2dGridEntityFactory
-  {
-    typedef typename GridImp:: template Codim<codim>::Entity Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObj;
-    typedef typename EntityObj::ImplementationType EntityImp;
-
-    template <class EntityProviderType>
-    static EntityObj *
-    getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
-    {
-      return new EntityObj(EntityImp(grid, level));
-    }
-
-    template <class EntityProviderType>
-    static void freeEntity( EntityProviderType & ep, EntityObj * e )
-    {
-      delete e;
-    }
-  };
 
   template <class GridImp>
   struct ALU2dGridEntityFactory<GridImp,0>
@@ -612,20 +600,57 @@ namespace Dune {
     typedef MakeableInterfaceObject<Entity> EntityObj;
     typedef typename EntityObj :: ImplementationType EntityImp;
 
-    template <class EntityProviderType>
     static EntityObj *
-    getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
+    getNewEntity (const GridImp& grid, int level)
     {
-      return ep.getEntityObject( grid, level, (EntityImp *) 0);
+      return grid.entityProvider_.getEntityObject( grid, level, (EntityImp *) 0);
     }
 
-    template <class EntityProviderType>
-    static void freeEntity( EntityProviderType & ep, EntityObj * e )
+    static void freeEntity( const GridImp& grid, EntityObj * e )
     {
-      ep.freeObject( e );
+      grid.entityProvider_.freeObject( e );
     }
   };
 
+  template <class GridImp>
+  struct ALU2dGridEntityFactory<GridImp,1>
+  {
+    enum {codim = 1};
+    typedef typename GridImp:: template Codim<codim>::Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObj;
+    typedef typename EntityObj :: ImplementationType EntityImp;
+
+    static EntityObj *
+    getNewEntity (const GridImp& grid, int level)
+    {
+      return grid.faceProvider_.getEntityObject( grid, level, (EntityImp *) 0);
+    }
+
+    static void freeEntity( const GridImp& grid, EntityObj * e )
+    {
+      grid.faceProvider_.freeObject( e );
+    }
+  };
+
+  template <class GridImp>
+  struct ALU2dGridEntityFactory<GridImp,2>
+  {
+    enum {codim = 2};
+    typedef typename GridImp:: template Codim<codim>::Entity Entity;
+    typedef MakeableInterfaceObject<Entity> EntityObj;
+    typedef typename EntityObj :: ImplementationType EntityImp;
+
+    static EntityObj *
+    getNewEntity (const GridImp& grid, int level)
+    {
+      return grid.vertexProvider_.getEntityObject( grid, level, (EntityImp *) 0);
+    }
+
+    static void freeEntity( const GridImp& grid, EntityObj * e )
+    {
+      grid.vertexProvider_.freeObject( e );
+    }
+  };
 
   namespace Capabilities
   {
