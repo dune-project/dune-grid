@@ -23,6 +23,7 @@ namespace Dune {
       , coarsenMarked_ (0)
       , nrOfHangingNodes_(0)
       , sizeCache_(0)
+      , lockPostAdapt_(false)
   {
     assert(mygrid_);
     makeGeomTypes();
@@ -43,6 +44,7 @@ namespace Dune {
       , coarsenMarked_ (0)
       , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
+      , lockPostAdapt_(false)
   {
     assert(mygrid_);
     makeGeomTypes();
@@ -63,6 +65,7 @@ namespace Dune {
       , coarsenMarked_ (0)
       , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
+      , lockPostAdapt_(false)
   {
     makeGeomTypes();
   }
@@ -294,9 +297,11 @@ namespace Dune {
   {
     if( refCount <= 0 ) return false;
 
-    for (int j = 0; j < refCount; ++j) {
+    for (int j = 0; j < refCount; ++j)
+    {
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
-      for( walk->first() ; ! walk->done() ; walk->next()) {
+      for( walk->first() ; ! walk->done() ; walk->next())
+      {
         ALU2DSPACE Element & tr = walk->getitem();
         tr.Refco_el::mark(ALU2DSPACE Refco::ref);
       }
@@ -330,6 +335,9 @@ namespace Dune {
     // reset marked element counters
     coarsenMarked_ = 0;
     refineMarked_  = 0;
+
+    // unmark postAdapt flag
+    lockPostAdapt_ = false;
   }
 
   /**! refine all positive marked leaf entities,
@@ -338,6 +346,11 @@ namespace Dune {
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: adapt ( )
   {
+    if( lockPostAdapt_ == true )
+    {
+      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
+    }
+
     if( (refineMarked_ > 0) || (coarsenMarked_ > 0) )
     {
       // refine only will be done if
@@ -346,6 +359,10 @@ namespace Dune {
       mesh().refine();
       mesh().coarse();
       updateStatus();
+
+      // notify that postAdapt must be called
+      lockPostAdapt_ = true;
+
       return adapted;
     }
     else

@@ -511,6 +511,9 @@ namespace Dune {
     typedef SingleTypeSizeCache<ThisType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
+    // flag to make sure postAdapt is called after adapt
+    bool lockPostAdapt_;
+
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
     typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
