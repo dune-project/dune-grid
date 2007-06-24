@@ -62,15 +62,16 @@ namespace Dune {
     struct CopyCoordinates<GeomImp,2>
     {
       template <class VecType>
-      static void copyData(const double p[cdim], VecType& vec)
+      static inline void copyData(const double p[cdim], VecType& vec)
       {
+        assert( cdim == 2 );
         vec[0] = p[0];
         vec[1] = p[1];
       }
 
       // copy coordinates and return determinant
       template<class CoordMatrixType>
-      static double copy(const HElementType& item, CoordMatrixType& coord, const int )
+      static inline double copy(const HElementType& item, CoordMatrixType& coord, const int )
       {
         assert( cdim == 2 );
         // copy coordinates
@@ -85,15 +86,16 @@ namespace Dune {
     struct CopyCoordinates<GeomImp,1>
     {
       template <class VecType>
-      static void copyData(const double p[cdim], VecType& vec)
+      static inline void copyData(const double p[cdim], VecType& vec)
       {
+        assert( cdim == 2 );
         vec[0] = p[0];
         vec[1] = p[1];
       }
 
       // copy coordinates and return determinant
       template<class CoordMatrixType>
-      static double copy(const HElementType& item, CoordMatrixType& coord, const int face)
+      static inline double copy(const HElementType& item, CoordMatrixType& coord, const int face)
       {
         // copy coordinates
         for(int i=0; i<2; ++i)

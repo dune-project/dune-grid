@@ -483,6 +483,7 @@ namespace Dune {
 
     CopyCoordinates<GeometryImp,mydim>::
     copyData( &refCoord_[(faceNumber + (twist%2) + 1)%3][0] , coord_[0]);
+
     CopyCoordinates<GeometryImp,mydim>::
     copyData( &refCoord_[(faceNumber + ((twist+1)%2) + 1)%3][0] , coord_[1]);
 
