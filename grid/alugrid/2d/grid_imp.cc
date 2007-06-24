@@ -302,8 +302,8 @@ namespace Dune {
     }
     //update data
     updateStatus();
-    //hdl.refine() ist void!!!
 
+    // cleanup markers
     postAdapt();
     return true;
   }
@@ -618,6 +618,9 @@ namespace Dune {
     // calculate new maxlevel
     // calculate indices
     updateStatus();
+
+    // cleanup markers
+    postAdapt();
 
     return true;
   }
