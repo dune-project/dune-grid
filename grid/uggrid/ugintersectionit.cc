@@ -332,7 +332,7 @@ intersectionSelfLocal() const
     for (int i=0; i<numCornersOfSide; i++) {
 
       // get number of corner in UG's numbering system
-      int cornerIdx = UG_NS<dim>::Corner_Of_Side(other, otherSide, i);
+      //int cornerIdx = UG_NS<dim>::Corner_Of_Side(other, otherSide, i);
 
       // Get world coordinate of other element's vertex
       const UGCtype* worldPos = UG_NS<dim>::Corner(other,UG_NS<dim>::Corner_Of_Side(other,otherSide,i))->myvertex->iv.x;

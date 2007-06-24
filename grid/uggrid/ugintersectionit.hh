@@ -275,7 +275,9 @@ namespace Dune {
         if (UG_NS<dim>::NbElem(other,i) == me)
           return i;
 
-      assert(false);
+      // this point should not be reached, otherwise throw exception
+      DUNE_THROW(InvalidStateException,"no consitency in numberInNeighbor");
+      return -1;
     }
 
     void constructLeafSubfaces();
