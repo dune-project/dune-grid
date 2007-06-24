@@ -33,8 +33,7 @@ namespace Dune {
     walkLevel_(wLevel),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(end),
-    nrOfHangingNodes_(grid_.getNrOfHangingNodes())
+    done_(end)
   {
     if (!end)
     {
@@ -59,8 +58,7 @@ namespace Dune {
     walkLevel_(wLevel),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(true),
-    nrOfHangingNodes_(0)
+    done_(true)
   {
     this->done();
   }
@@ -79,8 +77,7 @@ namespace Dune {
     walkLevel_(org.walkLevel_),
     generatedGlobalGeometry_(false),
     generatedLocalGeometries_(false),
-    done_(org.done_),
-    nrOfHangingNodes_(org.nrOfHangingNodes_)
+    done_(org.done_)
   {}
 
   template<class GridImp>
@@ -94,7 +91,6 @@ namespace Dune {
     generatedGlobalGeometry_ = false;
     generatedLocalGeometries_ = false;
     done_ = org.done_;
-    nrOfHangingNodes_ = org.nrOfHangingNodes_;
     current = org.current;
 
     // unset geometry information
@@ -513,9 +509,11 @@ namespace Dune {
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
   {
-    // empty stack
-    neighbourStack_ = std::stack<IntersectionInfo> ();
-    assert( neighbourStack_.empty ());
+    // empty stack first
+    while( ! neighbourStack_.empty() )
+    {
+      neighbourStack_.pop();
+    }
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = 0;
@@ -634,7 +632,8 @@ namespace Dune {
     }
 
     ++this->current.index_;
-    if (this->current.index_ >= this->nFaces_) {
+    if (this->current.index_ >= this->nFaces_)
+    {
       this->done();
       return;
     }
@@ -666,18 +665,19 @@ namespace Dune {
       this->current.isBoundary_ = info.second.second;
       nbStack_.pop();
     }
-
     //conform case
     else {
       this->current.isNotConform_ = false;
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
-      if (this->current.neigh_ == 0) {
+      if (this->current.neigh_ == 0)
+      {
         this->current.isBoundary_ = true;
         this->current.opposite_ = -1;
       }
-      else  {
+      else
+      {
         this->current.isBoundary_ = false;
-        this->current.opposite_= this->current.item_->opposite(this->current.index_);
+        this->current.opposite_ = this->current.item_->opposite(this->current.index_);
       }
     }
 
@@ -708,9 +708,11 @@ namespace Dune {
   template<class GridImp>
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: setFirstItem(const HElementType & elem, int wLevel)
   {
-    // empty stack
-    nbStack_ = std::stack<IntersectionInfo> ();
-    assert( nbStack_.empty ());
+    // empty stack first
+    while( ! nbStack_.empty() )
+    {
+      nbStack_.pop();
+    }
 
     this->current.item_ = const_cast<HElementType *> (&elem);
     this->current.index_ = -1;
@@ -797,16 +799,16 @@ namespace Dune {
   {
     if(endIter_) return ;
 
-    IteratorType & iter = iter_;
-    iter->next();
+    // go to next item
+    iter_->next();
 
-    if(iter->done()) {
+    if(iter_->done()) {
       endIter_ = true;
       this->done();
       return ;
     }
 
-    elem_ = &(iter->getitem());
+    elem_ = &(iter_->getitem());
     this->updateEntityPointer(elem_, -1,
                               GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
   }

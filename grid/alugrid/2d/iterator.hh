@@ -190,7 +190,6 @@ namespace Dune {
 
     // true if end iterator
     bool done_;
-    int nrOfHangingNodes_;
   }; // end ALU2dGridIntersectionBase
 
 
@@ -258,7 +257,7 @@ namespace Dune {
     //! otherwise might not be conform
     bool conforming () const
     {
-      return ( this->nrOfHangingNodes_) ?
+      return ( this->grid_.nonConform() ) ?
              true :
              ((this->neighbor()) ? (this->current.isNotConform_) : true);
     }
@@ -335,7 +334,7 @@ namespace Dune {
     //! leaf is conforming, when conform grid version used
     bool conforming () const
     {
-      return ( this->nrOfHangingNodes_ ) ?
+      return ( this->grid_.nonConform() ) ?
              ((this->neighbor()) ? (this->current.item_->level() == this->current.neigh_->level()) : true ) :
              true;
     }
