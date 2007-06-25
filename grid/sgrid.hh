@@ -432,9 +432,6 @@ namespace Dune {
      of an element!
    */
 
-  static array <int,2> zrefGlob;
-  static array <int,2> zentityGlob;
-
   /**
      A Grid is a container of grid entities. An entity is parametrized by
      the codimension.  An entity of codimension c in dimension d is a d-c
