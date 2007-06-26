@@ -191,7 +191,7 @@ namespace Dune {
 
       subNeighborCount_++;
 
-      if (subNeighborCount_ >= static_cast<int> (leafSubFaces_.size()) ) {
+      if (subNeighborCount_ >= leafSubFaces_.size() ) {
 
         neighborCount_++;
         subNeighborCount_ = 0;
@@ -302,7 +302,7 @@ namespace Dune {
 
     //! For nonconforming intersection: which intersection within the face given
     //! by neighborCount_ are we looking at?
-    int subNeighborCount_;
+    unsigned int subNeighborCount_;
 
     std::vector<Face> leafSubFaces_;
   };
