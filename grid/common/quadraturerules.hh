@@ -867,20 +867,15 @@ namespace Dune {
         {
           FieldVector<ct,3> local = it->position();
           ct weight = it->weight();
-          if (local[0] == local[1]) {
-            push_back(QuadraturePoint<ct,d>(local,2*weight));
-          }
-          else {
-            // Simplex 1
-            // x:=x+y
-            local[0] = local[0]+local[1];
-            push_back(QuadraturePoint<ct,d>(local,weight));
-            // Simplex 2
-            // y:=x+y
-            local[0] = it->position()[0];
-            local[1] = local[0]+local[1];
-            push_back(QuadraturePoint<ct,d>(local,weight));
-          }
+          // Simplex 1
+          // x:=x+y
+          local[0] = local[0]+local[1];
+          push_back(QuadraturePoint<ct,d>(local,weight));
+          // Simplex 2
+          // y:=x+y
+          local[0] = it->position()[0];
+          local[1] = local[0]+local[1];
+          push_back(QuadraturePoint<ct,d>(local,weight));
         }
 
         this->delivered_order = simplex.order();
