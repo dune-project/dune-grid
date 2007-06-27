@@ -761,18 +761,15 @@ namespace Dune {
       // polynom degree 2
       // symmetric
       m = 4;
-      G[m][0][0] = 0.58541020;
-      G[m][0][1] = 0.13819660;
-      G[m][0][2] = 0.13819660;
-      G[m][1][0] = 0.13819660;
-      G[m][1][1] = 0.58541020;
-      G[m][1][2] = 0.13819660;
-      G[m][2][0] = 0.13819660;
-      G[m][2][1] = 0.13819660;
-      G[m][2][2] = 0.58541020;
-      G[m][3][0] = 0.13819660;
-      G[m][3][1] = 0.13819660;
-      G[m][3][2] = 0.13819660;
+      static const double m_4_a = 0.585410196624968500;
+      static const double m_4_b = 0.138196601125010500;
+      G[m][0] = m_4_b;
+      G[m][1] = m_4_b;
+      G[m][2] = m_4_b;
+      G[m][3] = m_4_b;
+      G[m][0][0] = m_4_a;
+      G[m][1][1] = m_4_a;
+      G[m][2][2] = m_4_a;
 
       W[m][0] = 1.0/4.0/6.0;
       W[m][1] = 1.0/4.0/6.0;
@@ -820,16 +817,16 @@ namespace Dune {
 
       // polynomial degree 5
       // symmetric points
-      /*X*/ static const double s_1=0.0893433330;   /* (7 - sqrt(15) ) / 34 */
-      /*X*/ static const double s_2=0.3106566670;   /* (7 + sqrt(15) ) / 34 */
-      /**/ static const double t_1=0.7240867659;   /* (13 + 3*sqrt(15) ) / 34 */
-      /**/ static const double t_2=0.0406191165;   /* (13 - 3*sqrt(15) ) / 34 */
-      /**/ static const double u  =0.0563508327;   /* (10 - 2*sqrt(15) ) / 40 */
-      /**/ static const double v  =0.4436491673;   /* (10 + 2*sqrt(15) ) / 40 */
-      /**/ static const double A  =0.01975308642;  /* 16 / 135 / vol */
-      /**/ static const double B_1=0.01198951397;  /* (2665 + 14*sqrt(15) ) / 37800 / vol */
-      /**/ static const double B_2=0.01151136787;  /* (2665 - 14*sqrt(15) ) / 37800 / vol */
-      /**/ static const double C=0.008818342152;   /* 20 / 378 / vol */
+      static const double s_1=0.09197107805272303279;     /* (7 - sqrt(15) ) / 34 */
+      static const double s_2=0.31979362782962990839;     /* (7 + sqrt(15) ) / 34 */
+      static const double t_1=0.72408676584183090164;     /* (13 + 3*sqrt(15) ) / 34 */
+      static const double t_2=0.04061911651111027484;     /* (13 - 3*sqrt(15) ) / 34 */
+      static const double u  =0.05635083268962915574;     /* (10 - 2*sqrt(15) ) / 40 */
+      static const double v  =0.44364916731037084426;     /* (10 + 2*sqrt(15) ) / 40 */
+      static const double A  =0.019753086419753086420;    /* 16 / 135 / vol */
+      static const double B_1=0.011989513963169770001;    /* (2665 + 14*sqrt(15) ) / 37800 / vol */
+      static const double B_2=0.011511367871045397547;    /* (2665 - 14*sqrt(15) ) / 37800 / vol */
+      static const double C  =0.0088183421516754850088;   /* 20 / 378 / vol */
 
       m=15;
       G[m][0][0] = 0.25;
@@ -928,8 +925,7 @@ namespace Dune {
                                              << this->type() << " not available");
 
     // quadrature rules >= 3 are known to work.
-    if (p<3) p=3;
-    if (p>1) //p>SimplexQuadraturePoints<3>::highest_order)
+    if (p>SimplexQuadraturePoints<3>::highest_order)
     {
       // Define the quadrature rules...
       QuadratureRule<ct,1> gauss1D =
