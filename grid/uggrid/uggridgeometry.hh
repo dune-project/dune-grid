@@ -181,6 +181,19 @@ namespace Dune {
      */
     UGCtype integrationElement (const FieldVector<UGCtype, mydim>& local) const;
 
+    UGCtype volume() const {
+      if (mode_==element_mode) {
+        // coorddim*coorddim is an upper bound for the number of vertices
+        UGCtype* cornerCoords[coorddim*coorddim];
+        UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+        return UG_NS<coorddim>::Area_Of_Element(corners(),
+                                                const_cast<const double**>(cornerCoords));
+      } else {
+        return UG_NS<coorddim>::Area_Of_Element(corners(),
+                                                const_cast<const double**>(cornerpointers_));
+      }
+    }
+
     //! The Jacobian matrix of the mapping from the reference element to this element
     const FieldMatrix<UGCtype, mydim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
 

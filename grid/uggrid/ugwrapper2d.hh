@@ -163,6 +163,15 @@ namespace Dune {
       return UG::D2::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
+    /** \brief Computes the element volume */
+    static double Area_Of_Element(int n, const double** cornerCoords) {
+      double area;
+      using UG::DOUBLE;
+      using UG::D2::DOUBLE_VECTOR;
+      AREA_OF_ELEMENT_2D(n,cornerCoords,area);
+      return area;
+    }
+
     static int myLevel (const UG_NS<2>::Element* theElement) {
       using UG::UINT;
       return LEVEL(theElement);

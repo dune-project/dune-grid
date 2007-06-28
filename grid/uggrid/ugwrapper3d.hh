@@ -169,6 +169,15 @@ namespace Dune {
       return UG::D3::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
+    /** \brief Computes the element volume */
+    static double Area_Of_Element(int n, const double** cornerCoords) {
+      double area;
+      using UG::DOUBLE;
+      using UG::D3::DOUBLE_VECTOR;
+      AREA_OF_ELEMENT_3D(n,cornerCoords,area);
+      return area;
+    }
+
     //! return true if element has an exact copy on the next level
     static bool hasCopy (const UG_NS<3>::Element* theElement) {
       using UG::D3::ELEMENT;
