@@ -1262,7 +1262,11 @@ namespace Dune {
 
       { //check if file exists
         std::ifstream check ( macroName );
-        if( !check )
+        if( !check
+            // only abort on rank 0
+            // on all other ranks this can be empty
+            && comm().rank() == 0
+            )
           DUNE_THROW(GridError,"cannot read file " << macroName << "\n");
         check.close();
       }
@@ -1306,6 +1310,9 @@ namespace Dune {
 
     // reset refinement markers
     postAdapt();
+
+    // send time from proc 0 to all in case that some grids are empty
+    comm().broadcast(&time,1,0);
 
     return true;
   }
