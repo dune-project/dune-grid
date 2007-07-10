@@ -272,9 +272,9 @@ namespace Dune {
     static CubeMapper<dim> mapper;      // one cube per direction
   };
 
-  // initialize static variable with bool constructor (which makes reference elements)
+  // initialize static variable with default constructor (which makes reference elements)
   template<int dim>
-  CubeMapper<dim> SUnitCubeMapper<dim>::mapper(array<int,dim>(1));
+  CubeMapper<dim> SUnitCubeMapper<dim>::mapper;
 
 
   // codim 0
