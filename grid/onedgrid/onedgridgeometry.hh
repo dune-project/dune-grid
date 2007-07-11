@@ -22,7 +22,7 @@ namespace Dune {
       this->realGeometry.target_ = target;
     }
 
-    void setPosition(double p) {
+    void setPosition(const typename GridImp::ctype& p) {
       this->realGeometry.storeCoordsLocally_ = true;
       this->realGeometry.pos_[0] = p;
     }
@@ -41,7 +41,7 @@ namespace Dune {
       this->realGeometry.target_ = target;
     }
 
-    void setPositions(double p1, double p2) {
+    void setPositions(const typename GridImp::ctype& p1, const typename GridImp::ctype& p2) {
       this->realGeometry.storeCoordsLocally_ = true;
       this->realGeometry.pos_[0][0] = p1;
       this->realGeometry.pos_[1][0] = p2;
@@ -185,8 +185,8 @@ namespace Dune {
       if (storeCoordsLocally_) {
         l[0] = (global[0] - pos_[0][0]) / (pos_[1][0] - pos_[0][0]);
       } else {
-        const double& v0 = target_->vertex_[0]->pos_[0];
-        const double& v1 = target_->vertex_[1]->pos_[0];
+        const typename GridImp::ctype& v0 = target_->vertex_[0]->pos_[0];
+        const typename GridImp::ctype& v1 = target_->vertex_[1]->pos_[0];
         l[0] = (global[0] - v0) / (v1 - v0);
       }
       return l;

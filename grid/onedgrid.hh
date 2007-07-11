@@ -215,14 +215,20 @@ namespace Dune {
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
 
-    /** \brief The type used by to store coordinates */
-    typedef double OneDCType;
-
     // **********************************************************
     // The Interface Methods
     // **********************************************************
 
   public:
+
+    /** \brief The type used to store coordinates
+
+       If you ever want OneDGrid to use a different type for coordinates,
+       you need to change this type and the third template argument of
+       the base class.
+     */
+    typedef double ctype;
+
     /** \brief GridFamily of OneDGrid */
     typedef OneDGridFamily<dim,dimworld> GridFamily;
 
@@ -230,10 +236,10 @@ namespace Dune {
     typedef OneDGridFamily<dim,dimworld>::Traits Traits;
 
     /** \brief Constructor with an explicit set of coordinates */
-    OneDGrid(const std::vector<OneDCType>& coords);
+    OneDGrid(const std::vector<ctype>& coords);
 
     /** \brief Constructor for a uniform grid */
-    OneDGrid(int numElements, double leftBoundary, double rightBoundary);
+    OneDGrid(int numElements, const ctype& leftBoundary, const ctype& rightBoundary);
 
     //! Destructor
     ~OneDGrid();

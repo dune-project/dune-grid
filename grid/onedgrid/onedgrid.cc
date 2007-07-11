@@ -43,7 +43,7 @@ namespace Dune {
 }
 
 
-Dune::OneDGrid::OneDGrid(int numElements, double leftBoundary, double rightBoundary)
+Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype& rightBoundary)
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
     idSet_(*this),
@@ -61,7 +61,7 @@ Dune::OneDGrid::OneDGrid(int numElements, double leftBoundary, double rightBound
 
   // Init vertex set
   for (int i=0; i<numElements+1; i++) {
-    double newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
+    ctype newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
 
     OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, newCoord);
     newVertex->id_ = getNextFreeId(1);
@@ -85,7 +85,7 @@ Dune::OneDGrid::OneDGrid(int numElements, double leftBoundary, double rightBound
   setIndices();
 }
 
-Dune::OneDGrid::OneDGrid(const std::vector<OneDCType>& coords)
+Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
     idSet_(*this),
@@ -418,7 +418,7 @@ bool Dune::OneDGrid::adapt()
         eIt->vertex_[1]->son_ = rightUpperVertex;
 
         // Create center vertex
-        double p = 0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]);
+        ctype p = 0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]);
 
         OneDEntityImp<0>* centerVertex = new OneDEntityImp<0>(i+1, p, getNextFreeId(1));
 
