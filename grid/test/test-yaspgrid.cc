@@ -27,7 +27,11 @@ void check_yasp() {
   bTupel p; p = false;
   int overlap = 1;
 
+#if HAVE_MPI
   Dune::YaspGrid<dim,dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
+#else
+  Dune::YaspGrid<dim,dim> grid(Len,s,p,overlap);
+#endif
 
   grid.globalRefine(2);
 
@@ -41,12 +45,15 @@ void check_yasp() {
 
 int main (int argc , char **argv) {
   try {
+#if HAVE_MPI
     // initialize MPI
     MPI_Init(&argc,&argv);
 
     // get own rank
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
 
+    check_yasp<1>();
     check_yasp<2>();
     check_yasp<3>();
 
@@ -58,8 +65,10 @@ int main (int argc , char **argv) {
     return 2;
   }
 
+#if HAVE_MPI
   // Terminate MPI
   MPI_Finalize();
+#endif
 
   return 0;
 };
