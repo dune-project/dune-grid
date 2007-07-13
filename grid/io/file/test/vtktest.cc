@@ -85,7 +85,7 @@ void vtkCheck(int* n, double* h)
 {
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
   Dune::SGrid<dim,dim> g(n, h);
-  g.globalRefine(1);
+  g.globalRefine(2);
 
   doWrite(g,g.leafIndexSet(),Dune::VTKOptions::conforming);
   doWrite(g,g.leafIndexSet(),Dune::VTKOptions::nonconforming);

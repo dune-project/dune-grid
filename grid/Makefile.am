@@ -6,11 +6,17 @@ noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
 ONEDLIB = onedgrid/libonedgrid.la
-COMMONLIB = common/libgridcommon.la io/libio.la
+COMMONLIB = common/libgridcommon.la
 
 # conditional parts:
 if UG
   UGLIB = uggrid/libuggrid.la
+endif
+
+if AMIRAMESH
+if UG
+  AMIRALIB = amiramesh/libugamiramesh.la
+endif
 endif
 
 # the ALUGrid lib contains items that are needed
@@ -20,7 +26,7 @@ ALULIB = alugrid/libalu.la
 # construct only from sub-libraries
 libgrid_la_SOURCES =
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
-  $(COMMONLIB) $(DUNE_COMMON_LIBS)
+  $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB)
 
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid

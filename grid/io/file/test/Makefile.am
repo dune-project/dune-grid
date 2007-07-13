@@ -2,6 +2,7 @@ ALLTESTS = vtktest
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
+noinst_PROGRAMS = $(ALLTESTS)
 
 # list of tests to run
 TESTS = $(ALLTESTS)
