@@ -4,7 +4,8 @@
 // Specialization of the AmiraMesh reader for UGGrid<3,3> and UGGrid<2,2>
 // /////////////////////////////////////////////////////////////////////////
 
-#include <dune/config.h>
+#include "config.h"
+
 #include <dune/grid/io/file/amiramesh/amuggridreader.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/common/boundarysegment.hh>
