@@ -22,7 +22,7 @@
 namespace Dune
 {
 
-  // the internal grape partition iterator types
+  //! the internal grape partition iterator types
   enum GrapePartitionIteratorType
   {
     g_Interior_Partition       = Interior_Partition,
@@ -33,8 +33,8 @@ namespace Dune
     g_Ghost_Partition          = Ghost_Partition
   };
 
-  // the internal grape partition iterator types
-  // need to be this exact values to associate with combo button value
+  /** \brief the internal grape partition iterator types
+      need to be these exact values to associate with combo button value. */
   enum GrapeIteratorType
   {
     g_LeafIterator       = 0,
@@ -43,6 +43,9 @@ namespace Dune
     g_GridPart           = 3
   };
 
+  /** \todo Please doc me!
+      \ingroup Grape
+   */
   template<class GridType>
   class GrapeGridDisplay
   {
@@ -125,8 +128,10 @@ namespace Dune
     //! return pointer to Grape Hmesh
     inline void * getHmesh();
 
+    /** \todo Please doc me! */
     DUNE_DAT & getDuneDat () { return dune_; }
 
+    /** \todo Please doc me! */
     inline void addMyMeshToTimeScene(void * timescene, double time, int proc);
 
     //! return reference to Dune Grid

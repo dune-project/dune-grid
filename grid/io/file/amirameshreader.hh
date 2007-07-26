@@ -9,7 +9,7 @@
 
 namespace Dune {
 
-  /** @ingroup IO
+  /** @ingroup AmiraMesh
    * \brief Provides file reading facilities in the AmiraMesh format.
    *
    */

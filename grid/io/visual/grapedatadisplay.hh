@@ -154,6 +154,9 @@ namespace Dune
   };
 
 
+  /** \todo Please doc me!
+      \ingroup Grape
+   */
   template<class GridType>
   class GrapeDataDisplay : public GrapeGridDisplay < GridType >
   {
