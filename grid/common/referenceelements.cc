@@ -5,21 +5,44 @@
 
 namespace Dune {
 
+  /** \brief Singleton containing reference hypercubes.
+      \ingroup GridReferenceElements */
   template<typename ctype, int dim>
   ReferenceCubeContainer<ctype,dim> ReferenceElements<ctype,dim>::cube;
+
+  /** \brief Singleton containing reference simplices.
+      \ingroup GridReferenceElements */
   template<typename ctype, int dim>
   ReferenceSimplexContainer<ctype,dim> ReferenceElements<ctype,dim>::simplices;
+
+  /** \brief Singleton containing reference elements.
+      \ingroup GridReferenceElements */
   template<typename ctype, int dim>
   ReferenceElementContainer<ctype,dim> ReferenceElements<ctype,dim>::general;
 
+
+  /** \brief Singleton containing reference hexahedra.
+      \ingroup GridReferenceElements */
   template<typename ctype>
   ReferenceCubeContainer<ctype,3> ReferenceElements<ctype,3>::cube;
+
+  /** \brief Singleton containing reference tetrahedra.
+      \ingroup GridReferenceElements */
   template<typename ctype>
   ReferenceSimplexContainer<ctype,3> ReferenceElements<ctype,3>::simplices;
+
+  /** \brief Singleton containing 3d reference elements.
+      \ingroup GridReferenceElements */
   template<typename ctype>
   ReferenceElementContainer<ctype,3> ReferenceElements<ctype,3>::general;
+
+  /** \brief Singleton containing reference prisms.
+      \ingroup GridReferenceElements */
   template<typename ctype>
   ReferencePrismContainer<ctype,3> ReferenceElements<ctype,3>::prism;
+
+  /** \brief Singleton containing reference pyramids.
+      \ingroup GridReferenceElements */
   template<typename ctype>
   ReferencePyramidContainer<ctype,3> ReferenceElements<ctype,3>::pyramid;
 
