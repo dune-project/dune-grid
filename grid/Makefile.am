@@ -15,7 +15,7 @@ endif
 
 if AMIRAMESH
 if UG
-  AMIRALIB = amiramesh/libugamiramesh.la
+  AMIRALIB = io/file/amiramesh/libugamiramesh.la
 endif
 endif
 
