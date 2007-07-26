@@ -7,7 +7,7 @@
 
 namespace Dune {
 
-  /** @ingroup IO
+  /** @ingroup AmiraMesh
    * \brief Provides file writing facilities in the AmiraMesh format.
    *
    */
@@ -40,7 +40,7 @@ namespace Dune {
 
   };
 
-  /** @ingroup IO
+  /** @ingroup AmiraMesh
    * \brief Provides file writing facilities in the AmiraMesh format for level grids.
    *
    */
@@ -84,7 +84,7 @@ namespace Dune {
 
   };
 
-  /** @ingroup IO
+  /** @ingroup AmiraMesh
    * \brief Provides file writing facilities in the AmiraMesh format for leaf grids.
    *
    */

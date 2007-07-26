@@ -33,7 +33,8 @@
 
 namespace Dune
 {
-  //! options for VTK output
+  /** \brief options for VTK output
+      \ingroup VTK */
   struct VTKOptions
   {
     enum OutputType {
@@ -125,6 +126,7 @@ namespace Dune
 
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
+   * @ingroup VTK
    *
    * Writes arbitrary grid functions (living on cells or vertices of a grid)
    * to a file suitable for easy visualization with
@@ -163,8 +165,12 @@ namespace Dune
     typedef typename IS::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;
     typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P1Layout> VertexMapper;
   public:
-    // A base class for grid functions with any return type and dimension
-    // Trick : use double as return type
+
+    /** \brief A base class for grid functions with any return type and dimension
+        \ingroup VTK
+
+        Trick : use double as return type
+     */
     class VTKFunction
     {
     public:
@@ -180,10 +186,10 @@ namespace Dune
        */
       virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const = 0;
 
-      // get name
+      //! get name
       virtual std::string name () const = 0;
 
-      // virtual destructor
+      //! virtual destructor
       virtual ~VTKFunction () {}
     };
 
@@ -399,7 +405,9 @@ namespace Dune
                             datamode, *vertexmapper, number);
     }
 
-    // take a vector and interpret it as cell data
+    /** \brief take a vector and interpret it as cell data
+        \ingroup VTK
+     */
     template<class V>
     class P0VectorWrapper : public VTKFunction
     {
@@ -423,7 +431,7 @@ namespace Dune
         return s;
       }
 
-      // construct from a vector and a name
+      //! construct from a vector and a name
       P0VectorWrapper (const GridImp& g_, const IS& is_, const V& v_, std::string s_)
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
@@ -441,7 +449,9 @@ namespace Dune
       VM0 mapper;
     };
 
-    // take a vector and interpret it as vertex data
+    /** \brief take a vector and interpret it as vertex data
+        \ingroup VTK
+     */
     template<class V>
     class P1VectorWrapper : public VTKFunction
     {
@@ -479,7 +489,7 @@ namespace Dune
         return s;
       }
 
-      // construct from a vector and a name
+      //! construct from a vector and a name
       P1VectorWrapper (const GridImp& g_, const IS& is_, const V& v_, std::string s_)
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
@@ -1608,22 +1618,26 @@ namespace Dune
   };
 
   /** \brief VTKWriter on the leaf grid
+      \ingroup VTK
    */
   template<class G>
   class LeafVTKWriter : public VTKWriter<G,typename G::template Codim<0>::LeafIndexSet>
   {
   public:
+    /** \brief Construct a VTK writer for the leaf level of a given grid */
     LeafVTKWriter (const G& grid, VTKOptions::DataMode dm = VTKOptions::conforming)
       : VTKWriter<G,typename G::template Codim<0>::LeafIndexSet>(grid,grid.leafIndexSet(),dm)
     {}
   };
 
   /** \brief VTKWriter on a given level grid
+      \ingroup VTK
    */
   template<class G>
   class LevelVTKWriter : public VTKWriter<G, typename G::template Codim<0>::LevelIndexSet>
   {
   public:
+    /** \brief Construct a VTK writer for a certain level of a given grid */
     LevelVTKWriter (const G& grid, int level, VTKOptions::DataMode dm = VTKOptions::conforming)
       : VTKWriter<G,typename G::template Codim<0>::LevelIndexSet>(grid,grid.levelIndexSet(level),dm)
     {}

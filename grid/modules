@@ -75,10 +75,21 @@
 	/** @defgroup AlbertaGrid
 		@ingroup GridImplementations */
 
-  /**
-     @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
-     @ingroup Grid
+  /** @defgroup IO I/O
+      @ingroup Grid
   */
+
+        /** @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
+            @ingroup IO */
+
+        /** @defgroup AmiraMesh AmiraMesh
+            @ingroup IO */
+
+        /** @defgroup VTK Visualization ToolKit (VTK)
+            @ingroup IO */
+        
+        /** @defgroup Grape Grape
+            @ingroup IO */
 
   /**
      @defgroup GridPart Grid Parts
