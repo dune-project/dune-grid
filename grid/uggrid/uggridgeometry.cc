@@ -8,6 +8,8 @@
 
 #include <algorithm>
 
+#include "p2geometry.hh"
+
 ///////////////////////////////////////////////////////////////////////
 //
 // General implementation of UGGridGeometry mydim-> coorddim
@@ -54,13 +56,6 @@ inline Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() c
 
 }
 
-template< int mydim, int coorddim, class GridImp>
-inline int Dune::UGGridGeometry<mydim,coorddim,GridImp>::corners() const
-{
-  return UG_NS<coorddim>::Corners_Of_Elem(target_);
-}
-
-
 template<int mydim, int coorddim, class GridImp>
 inline const Dune::FieldVector<typename GridImp::ctype, coorddim>& Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 operator [](int i) const
@@ -71,6 +66,7 @@ operator [](int i) const
     // The cast onto typename UGTypes<coorddim>::Node*
     // is only correct if this geometry represents a vertex.  But this is so since
     // we are within an if (mydim==0) clause.
+    /** \todo Simply cast and do without this copying */
     for (int i=0; i<coorddim; i++)
       coord_[0][i] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[i];
 
@@ -86,6 +82,7 @@ operator [](int i) const
 
   if (mode_==element_mode) {
     typename UG_NS<coorddim>::Node* corner = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i);
+    /** \todo Simply cast and do without this copying */
     for (int j=0; j<coorddim; j++)
       coord_[i][j] = corner->myvertex->iv.x[j];
   }
@@ -99,15 +96,22 @@ global(const FieldVector<UGCtype, mydim>& local) const
 {
   FieldVector<UGCtype, coorddim> globalCoord;
 
-  if (mode_==element_mode)
-  {
-    UGCtype* cornerCoords[corners()];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  if (mode_==element_mode) {
 
-    // Actually do the computation
-    UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
-  }
-  else
+    if (myGrid_->isoparametricOrder_ == 1 || !UG_NS<coorddim>::isBoundaryElement(target_)) {
+      UGCtype* cornerCoords[corners()];
+      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+
+      // Actually do the computation
+      UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
+    } else {
+      /** \todo Don't recompute the nodes at every call */
+      computeIsoparametricNodes();
+      return PiecewiseQuadraticGeometry<mydim,coorddim,UGCtype>::global(local, isoparametricNodes_, type());
+
+    }
+
+  } else
   {
     UG_NS<coorddim>::Local_To_Global(corners(), cornerpointers_, local, globalCoord);
   }
@@ -122,10 +126,14 @@ template< int mydim, int coorddim, class GridImp>
 inline Dune::FieldVector<typename GridImp::ctype, mydim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry::local() for isoparametric geometry");
+
   FieldVector<UGCtype, mydim> result;
   UGCtype localCoords[mydim];
 
   // Copy input ADT into C-style array
+  /** \todo Do without this copying */
   UGCtype global_c[coorddim];
   for (int i=0; i<coorddim; i++)
     global_c[i] = global[i];
@@ -221,36 +229,128 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   if (jacobianInverseIsUpToDate_)
     return jac_inverse_;
 
-  if (mode_==element_mode)
-  {
-    // compile array of pointers to corner coordinates
-    UGCtype* cornerCoords[corners()];
-    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  if (mode_==element_mode) {
 
-    // compute the transformation onto the reference element (or vice versa?)
-    UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
-  }
-  else
+    if (myGrid_->isoparametricOrder_ == 1 || !UG_NS<coorddim>::isBoundaryElement(target_)) {
+
+      // compile array of pointers to corner coordinates
+      UGCtype* cornerCoords[corners()];
+      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+
+      // compute the transformation onto the reference element (or vice versa?)
+      UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
+
+    } else {
+      /** \todo Don't recompute the nodes at every call */
+      computeIsoparametricNodes();
+
+#if 0
+      // Debugging: compute the p1 matrix
+      // compile array of pointers to corner coordinates
+      UGCtype* cornerCoords[corners()];
+      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+
+      // compute the transformation onto the reference element (or vice versa?)
+      UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
+
+      std::cout << "P1:\n";
+      std::cout << jac_inverse_ << std::endl;
+#endif
+
+      PiecewiseQuadraticGeometry<mydim,coorddim,UGCtype>::jacobianInverseTransposed(local,
+                                                                                    isoparametricNodes_,
+                                                                                    type(),
+                                                                                    jac_inverse_);
+    }
+
+  } else
   {
     // compute the transformation onto the reference element (or vice versa?)
     UG_NS<coorddim>::Transformation(corners(), cornerpointers_, local, jac_inverse_);
   }
 
-  if (type().isSimplex())
+  if (type().isSimplex() && myGrid_->isoparametricOrder_ == 1)
     jacobianInverseIsUpToDate_ = true;
 
   return jac_inverse_;
 }
 
 
+template< int mydim, int coorddim, class GridImp>
+void Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+computeIsoparametricNodes () const
+{
+  if (!type().isSimplex())
+    DUNE_THROW(NotImplemented, "computeIsoparametricNodes() only for simplices");
+
+  assert(myGrid_);
+
+  // Set UG's currBVP variable to the BVP corresponding to this
+  // grid.  This is necessary if we have more than one UGGrid in use.
+  UG_NS<coorddim>::Set_Current_BVP(myGrid_->multigrid_->theBVP);
+
+  int numVertices = corners();
+  int numEdges    = UG_NS<coorddim>::Edges_Of_Elem(target_);
+
+  // First the nodes on the element corners
+  for (int i=0; i<numVertices; i++)
+    isoparametricNodes_[i] = operator[](i);
+
+  // Then the nodes on the element edges
+  for (int i=0; i<numEdges; i++) {
+
+    int ugEdgeNumber = UGGridRenumberer<coorddim>::edgesDUNEtoUG(i, type());
+
+    const typename UG_NS<coorddim>::Vertex* v0 = UG_NS<coorddim>::Corner(target_,UG_NS<coorddim>::Corner_Of_Edge(target_, ugEdgeNumber,0))->myvertex;
+    const typename UG_NS<coorddim>::Vertex* v1 = UG_NS<coorddim>::Corner(target_,UG_NS<coorddim>::Corner_Of_Edge(target_, ugEdgeNumber,1))->myvertex;
+
+    if (UG_NS<coorddim>::Edge_On_Bnd(target_,ugEdgeNumber)) {
+
+      if (coorddim==2) {         // triangle
+
+        UG::D2::BNDP* bndp = UG::D2::BNDP_CreateBndP(myGrid_->multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,0.5);
+        if (bndp == NULL)
+          DUNE_THROW(GridError, "UG::D" << coorddim << "::BNDP_CreateBndP() returned NULL!");
+
+        if (UG::D2::BNDP_Global(bndp,&isoparametricNodes_[i+numVertices][0]))
+          DUNE_THROW(GridError, "UG::D" << coorddim << "::BNDP_Global() returned nonzero error code!");
+
+        /** \bug The following line has to be there to avoid a memory leak,
+            but it makes the code crash! */
+        //UG::D2::BNDP_Dispose(myGrid_->multigrid_->theHeap, bndp);
+
+      } else {        // tetrahedron
+
+        UG::D3::BNDP* bndp = UG::D3::BNDP_CreateBndP(myGrid_->multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,0.5);
+        if (bndp == NULL)
+          DUNE_THROW(GridError, "UG::D3::BNDP_CreateBndP() returned NULL!");
+
+        if (UG::D3::BNDP_Global(bndp,&isoparametricNodes_[i+numVertices][0]))
+          DUNE_THROW(GridError, "UG::D3::BNDP_Global() returned nonzero error code!");
+
+        /** \bug The following line has to be there to avoid a memory leak,
+            but it makes the code crash! */
+        //UG::D3::BNDP_Dispose(myGrid_->multigrid_->theHeap, bndp);
+      }
+
+    } else {
+
+      // Not a boundary egde: extra node is the edge midpoint
+      for (int j=0; j<coorddim; j++)
+        isoparametricNodes_[i+numVertices][j] = (v0->iv.x[j] + v1->iv.x[j]) / 2;
+
+    }
+
+  }
+
+}
 
 ///////////////////////////////////////////////////////////////////////
 //
 // The specializations 1->2, 2->3
-// (only methods that are not yet defined in header file
+// (only methods that are not yet defined in header file)
 //
 ///////////////////////////////////////////////////////////////////////
-
 
 
 // Specialization for dim==1, coorddim==2.  This is necessary
@@ -261,9 +361,13 @@ global(const FieldVector<typename GridImp::ctype, 1>& local) const
 {
   FieldVector<UGCtype, 2> globalCoord;
 
-  /** \todo Rewrite this once there are expression templates */
-  globalCoord[0] = local[0]*coord_[1][0] + (1-local[0])*coord_[0][0];
-  globalCoord[1] = local[0]*coord_[1][1] + (1-local[0])*coord_[0][1];
+  if (isoparametricOrder_ == 1) {
+
+    globalCoord[0] = local[0]*coord_[1][0] + (1-local[0])*coord_[0][0];
+    globalCoord[1] = local[0]*coord_[1][1] + (1-local[0])*coord_[0][1];
+
+  } else
+    return PiecewiseQuadraticGeometry<1,2,typename GridImp::ctype>::global(local, coord_,type());
 
   return globalCoord;
 }
@@ -277,24 +381,28 @@ global(const FieldVector<typename GridImp::ctype, 2>& local) const
 
   FieldVector<UGCtype, 3> result;
 
-  if (elementType_.isSimplex()) {
+  if (isoparametricOrder_ == 1) {
 
-    for (int i=0; i<3; i++)
-      result[i] = (1.0-local[0]-local[1])*coord_[0][i]
-                  + local[0]*coord_[1][i]
-                  + local[1]*coord_[2][i];
+    if (elementType_.isSimplex()) {
 
-  } else {
+      for (int i=0; i<3; i++)
+        result[i] = (1.0-local[0]-local[1])*coord_[0][i]
+                    + local[0]*coord_[1][i]
+                    + local[1]*coord_[2][i];
 
-    // quadrilateral
+    } else {
 
-    for (int i=0; i<3; i++)
-      result[i] = (1.0-local[0])*(1.0-local[1])*coord_[0][i]
-                  + local[0]*(1.0-local[1])*coord_[1][i]
-                  + local[0]*local[1]*coord_[2][i]
-                  + (1.0-local[0])*local[1]*coord_[3][i];
+      // quadrilateral
+      for (int i=0; i<3; i++)
+        result[i] = (1.0-local[0])*(1.0-local[1])*coord_[0][i]
+                    + local[0]*(1.0-local[1])*coord_[1][i]
+                    + local[0]*local[1]*coord_[2][i]
+                    + (1.0-local[0])*local[1]*coord_[3][i];
 
-  }
+    }
+
+  } else
+    return PiecewiseQuadraticGeometry<2,3,typename GridImp::ctype>::global(local, coord_,type());
 
   return result;
 
@@ -305,6 +413,9 @@ template <class GridImp>
 inline Dune::FieldVector<typename GridImp::ctype, 2> Dune::UGGridGeometry<2,3,GridImp>::
 local(const FieldVector<typename GridImp::ctype, 3>& global) const
 {
+  if (isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry<2,3>::local() for isoparametric geometry");
+
   // The UG method UG_GlobalToLocalBnd pretends to do what this method does,
   // but in reality it is buggy!
   FieldVector<UGCtype,2> result;
@@ -357,8 +468,6 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
     assert(false);
   } else {
     assert(elementType_.isQuadrilateral());
-
-    //inline void BilinearSurfaceMapping::world2map (const coord3_t& wld , coord2_t& map ) const
 
     //  Newton - Iteration zum Invertieren der Abbildung f.
     double err;
@@ -432,6 +541,9 @@ template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<1,2,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
 {
+  if (isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry<1,2>::integrationElement() for isoparametric geometry");
+
   // We could call UG_NS<2>::SurfaceElement, but this is faster, and not more complicated
   FieldVector<UGCtype, 2> diff = coord_[0];
   diff -= coord_[1];
@@ -442,6 +554,9 @@ template <class GridImp>
 const Dune::FieldMatrix<typename GridImp::ctype,1,1>& Dune::UGGridGeometry<1,2,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
 {
+  if (isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry<1,2>::jacobianInverseTransposed() for isoparametric geometry");
+
   jacobianInverseTransposed_[0][0] = 1 / (coord_[0]-coord_[1]).two_norm();
   return jacobianInverseTransposed_;
 }
@@ -450,6 +565,9 @@ template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<2,3,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
+  if (isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry<2,3>::integrationElement() for isoparametric geometry");
+
   // The cast in the second argument works because a std::array<FieldVector<T,3>,4>
   // has the same memory layout as a T[4][3].
   /** \todo Maybe there should be a test for this */
@@ -460,6 +578,9 @@ template <class GridImp>
 const Dune::FieldMatrix<typename GridImp::ctype,2,2>& Dune::UGGridGeometry<2,3,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
+  if (isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "UGGridGeometry<2,3>::jacobianInverseTransposed() for isoparametric geometry");
+
   // I don't really know how to implement this for quadrilateral faces,
   // especially since they may be nonplanar.
   if (!type().isTriangle())
@@ -483,8 +604,8 @@ jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& l
   FieldVector<double,2> p2(0);    p2[0] = q0;   p2[1] = h;
 
   // Check that this was really an isometry
-  assert( fabs(p2.two_norm()      - l1)      < 1e-6 );
-  assert( fabs((p2-p1).two_norm() - l0) < 1e-6 );
+  assert( std::abs(p2.two_norm()      - l1) < 1e-6 );
+  assert( std::abs((p2-p1).two_norm() - l0) < 1e-6 );
 
   double* cornerCoords[3] = {&p0[0], &p1[0], &p2[0]};
 

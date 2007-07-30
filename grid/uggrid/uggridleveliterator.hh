@@ -39,9 +39,10 @@ namespace Dune {
     }
 
     //! Constructor
-    explicit UGGridLevelIterator(typename UG_NS<dim>::template Entity<codim>::T* target)
+    explicit UGGridLevelIterator(typename UG_NS<dim>::template Entity<codim>::T* target,
+                                 GridImp* myGrid)
     {
-      this->virtualEntity_.setToTarget(target);
+      this->virtualEntity_.setToTarget(target,myGrid);
     }
 
     //! prefix increment

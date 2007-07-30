@@ -158,6 +158,11 @@ namespace Dune {
   template <int dim>
   class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim,dim> >
   {
+    friend class UGGridGeometry<0,dim,const UGGrid<dim> >;
+    friend class UGGridGeometry<dim,dim,const UGGrid<dim> >;
+    friend class UGGridGeometry<1,2,const UGGrid<dim> >;
+    friend class UGGridGeometry<2,3,const UGGrid<dim> >;
+
     friend class UGGridEntity <0,dim,const UGGrid<dim> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim> >;
@@ -495,6 +500,11 @@ namespace Dune {
       closureType_ = type;
     }
 
+    /** \brief Sets the order for the isoparametric geometry approximation */
+    void setIsoparametricOrder(unsigned int order) {
+      isoparametricOrder_ = order;
+    }
+
     /** \brief Collapses the grid hierarchy into a single grid level*/
     void collapse() {
       if (Collapse(multigrid_))
@@ -552,6 +562,9 @@ namespace Dune {
 
     //! The type of grid refinement closure currently in use
     ClosureType closureType_;
+
+    //! The order of the isoparametric elements
+    unsigned int isoparametricOrder_;
 
     /** \brief While inserting the elements this array records the number of
         vertices of each element. */

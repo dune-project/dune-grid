@@ -29,6 +29,11 @@ namespace Dune {
       this->realGeometry.setToTarget(target);
     }
 
+    void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target,
+                     const GridImp* myGrid) {
+      this->realGeometry.setToTarget(target, myGrid);
+    }
+
     void setCoords (int n, const UGCtype* pos) {
       this->realGeometry.setCoords(n,pos);
     }
@@ -62,6 +67,10 @@ namespace Dune {
       this->realGeometry.setNumberOfCorners(n);
     }
 
+    void setIsoparametricOrder(unsigned int order) {
+      this->realGeometry.isoparametricOrder_ = order;
+    }
+
   };
 
   template<class GridImp>
@@ -84,6 +93,10 @@ namespace Dune {
     }
     // Empty.  Boundary elements in a 2d grid have always two corners
     void setNumberOfCorners(int n) {}
+
+    void setIsoparametricOrder(unsigned int order) {
+      this->realGeometry.isoparametricOrder_ = order;
+    }
 
   };
 
@@ -142,8 +155,10 @@ namespace Dune {
      */
     GeometryType type () const;
 
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const;
+    //! return the number of corners of this element.
+    int corners () const {
+      return UG_NS<coorddim>::Corners_Of_Elem(target_);
+    }
 
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<UGCtype, coorddim>& operator[] (int i) const;
@@ -182,6 +197,10 @@ namespace Dune {
     UGCtype integrationElement (const FieldVector<UGCtype, mydim>& local) const;
 
     UGCtype volume() const {
+
+      if (myGrid_->isoparametricOrder_ != 1)
+        DUNE_THROW(NotImplemented, "UGGridGeometry::volume() for isoparametric geometry");
+
       if (mode_==element_mode) {
         // coorddim*coorddim is an upper bound for the number of vertices
         UGCtype* cornerCoords[coorddim*coorddim];
@@ -212,6 +231,15 @@ namespace Dune {
       jacobianInverseIsUpToDate_ = false;
     }
 
+    /** \brief Init the element with a given UG element for a given multigrid */
+    void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target,
+                     GridImp* myGrid)
+    {
+      target_ = target;
+      jacobianInverseIsUpToDate_ = false;
+      myGrid_ = myGrid;
+    }
+
     //! \brief set a corner
     void setCoords (int i, const UGCtype* pos)
     {
@@ -223,6 +251,9 @@ namespace Dune {
 
       jacobianInverseIsUpToDate_ = false;
     }
+
+    //! Get all p2 nodes of this element
+    void computeIsoparametricNodes() const;
 
     //! the vertex coordinates
     mutable array<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
@@ -242,6 +273,16 @@ namespace Dune {
     // in coord_mode we explicitely store an array of coordinates
     // containing the position in the fathers reference element
     mutable UGCtype* cornerpointers_[(mydim==2) ? 4 : 8];
+
+    /** \brief The nodes for p2 isoparametric geometries
+
+       The nodes are stored following the Dune shape function ordering */
+    mutable array<FieldVector<UGCtype,coorddim>, (coorddim==2) ? 9 : 27> isoparametricNodes_;
+
+    /** \brief UG multigrid, which contains the actual grid hierarchy structure
+        We need this so computeIsoparametricNodes() can access the domain boundary */
+    const GridImp* myGrid_;
+
   };
 
 
@@ -270,7 +311,7 @@ namespace Dune {
   public:
 
     /** \brief Default constructor */
-    UGGridGeometry()
+    UGGridGeometry() : isoparametricOrder_(1)
     {elementType_=GeometryType(GeometryType::simplex,2);}
 
     //! return the element type identifier (triangle or quadrilateral)
@@ -325,11 +366,19 @@ namespace Dune {
     GeometryType elementType_;
 
     //! the vertex coordinates in UG numbering
-    mutable array<FieldVector<UGCtype, 3>, 4> coord_;
+    // This array has nine entries because this is the max number it may need to have
+    // (isoparametric quad face)
+    mutable array<FieldVector<UGCtype, 3>, 9> coord_;
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,2,2> jacobianInverseTransposed_;
 
+    /** \brief The isoparametric geometry order.
+
+       This may differ from the order stored in the grid, because we may be e.g., an intersectionInSelf(),
+       which is never isoparametric.
+     */
+    unsigned int isoparametricOrder_;
   };
 
 
@@ -357,7 +406,7 @@ namespace Dune {
   public:
 
     /** \brief Default constructor */
-    UGGridGeometry()
+    UGGridGeometry() : isoparametricOrder_(1)
     {}
 
     /** \brief Return the element type identifier.  */
@@ -379,6 +428,10 @@ namespace Dune {
     //! Maps a global coordinate within the element to a
     //! local coordinate in its reference element
     FieldVector<UGCtype, 1> local (const FieldVector<UGCtype, 2>& global) const {
+
+      if (isoparametricOrder_ != 1)
+        DUNE_THROW(NotImplemented, "UGGridGeometry<1,2>::local() for isoparametric geometry");
+
       FieldVector<UGCtype, 2> segment = coord_[1];
       segment -= coord_[0];
       FieldVector<UGCtype, 1> result;
@@ -403,11 +456,18 @@ namespace Dune {
     void setNumberOfCorners(int n) {}
 
     //! the vertex coordinates
-    array<FieldVector<UGCtype, 2>, 2> coord_;
+    // There are three (instead of two) array entries because this element may be quadratic
+    array<FieldVector<UGCtype, 2>, 3> coord_;
 
     //! The jacobian inverse
     mutable FieldMatrix<UGCtype,1,1> jacobianInverseTransposed_;
 
+    /** \brief The isoparametric geometry order.
+
+       This may differ from the order stored in the grid, because we may be e.g., an intersectionInSelf(),
+       which is never isoparametric.
+     */
+    unsigned int isoparametricOrder_;
   };
 
 }  // namespace Dune

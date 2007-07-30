@@ -9,6 +9,9 @@ template<class GridImp>
 inline const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
 Dune::UGGridLevelIntersectionIterator <GridImp>::outerNormal (const Dune::FieldVector<UGCtype, GridImp::dimension-1>& local) const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "LevelIntersectionIterator::outerNormal() for isoparametric elements");
+
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
   // //////////////////////////////////////////////////////
@@ -90,6 +93,9 @@ inline const typename Dune::UGGridLevelIntersectionIterator<GridImp>::LocalGeome
 Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "LevelIntersectionIterator::intersectionSelfLocal() for isoparametric elements");
+
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
 
   selfLocal_.setNumberOfCorners(numCornersOfSide);
@@ -121,12 +127,91 @@ intersectionGlobal() const
 
   neighGlob_.setNumberOfCorners(numCornersOfSide);
 
-  for (int i=0; i<numCornersOfSide; i++) {
+  if (myGrid_->isoparametricOrder_ == 1 || !UG_NS<dim>::Side_On_Bnd(center_, neighborCount_)) {
 
-    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-    typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+    for (int i=0; i<numCornersOfSide; i++) {
 
-    neighGlob_.setCoords(i, node->myvertex->iv.x);
+      int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+
+      neighGlob_.setCoords(i, node->myvertex->iv.x);
+
+    }
+
+    // A p1 intersection
+    neighGlob_.setIsoparametricOrder(1);
+
+  } else {    // isoparametric side
+
+    /** \todo This should be factored out into a separate routine! */
+    if (!inside()->type().isSimplex())
+      DUNE_THROW(NotImplemented, "isoparametric intersectionGlobal() only for simplicial grids!");
+
+    // Set UG's currBVP variable to the BVP corresponding to this
+    // grid.  This is necessary if we have more than one UGGrid in use.
+    UG_NS<dim>::Set_Current_BVP(myGrid_->multigrid_->theBVP);
+
+    if (dim==2) {      // a line intersection
+
+      // Corner nodes
+      const typename UG_NS<dim>::Vertex* v0 = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_,0))->myvertex;
+      const typename UG_NS<dim>::Vertex* v1 = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_,1))->myvertex;
+
+      neighGlob_.setCoords(1, v0->iv.x);
+      neighGlob_.setCoords(2, v1->iv.x);
+
+      UG::D2::BNDP* bndp = UG::D2::BNDP_CreateBndP(myGrid_->multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,0.5);
+      if (bndp == NULL)
+        DUNE_THROW(GridError, "UG::D2::BNDP_CreateBndP() returned NULL!");
+
+      /** \todo Remove this! */
+      UGCtype tmp[dim];
+      if (UG::D2::BNDP_Global(bndp,tmp))
+        DUNE_THROW(GridError, "UG::D2::BNDP_Global() returned nonzero error code!");
+
+      /** \bug The following line has to be there to avoid a memory leak,
+          but it makes the code crash! */
+      //UG::D2::BNDP_Dispose(myGrid_->multigrid_->theHeap, bndp);
+
+      neighGlob_.setCoords(0, tmp);
+
+    } else {      // a triangular intersection
+
+      // The corner nodes
+      for (int i=0; i<3; i++) {
+        const typename UG_NS<dim>::Vertex* v = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_,i))->myvertex;
+        neighGlob_.setCoords(i, v->iv.x);
+      }
+
+      // The edge nodes
+      for (int i=0; i<3; i++) {
+
+        const typename UG_NS<dim>::Vertex* v0 = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_,i))->myvertex;
+        const typename UG_NS<dim>::Vertex* v1 = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_,(i+1)%3))->myvertex;
+
+        UG::D3::BNDP* bndp = UG::D3::BNDP_CreateBndP(myGrid_->multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,0.5);
+        if (bndp == NULL)
+          DUNE_THROW(GridError, "UG::D3::BNDP_CreateBndP() returned NULL!");
+
+        /** \todo Remove this! */
+        UGCtype tmp[dim];
+        if (UG::D3::BNDP_Global(bndp,tmp))
+          DUNE_THROW(GridError, "UG::D3::BNDP_Global() returned nonzero error code!");
+
+        /** \bug The following line has to be there to avoid a memory leak,
+            but it makes the code crash! */
+        //UG::D3::BNDP_Dispose(myGrid_->multigrid_->theHeap, bndp);
+
+        /** \todo Move this renumbering to the UGGridRenumberer class */
+        const int renumbering[3] = {2, 0, 1};
+        neighGlob_.setCoords(renumbering[i]+3, tmp);
+
+      }
+
+    }
+
+    // A p2 intersection
+    neighGlob_.setIsoparametricOrder(2);
 
   }
 
@@ -141,9 +226,8 @@ intersectionNeighborLocal() const
   typename UG_NS<dim>::Element *other;
 
   // if we have a neighbor on this level, then return it
-  if (UG_NS<dim>::NbElem(center_, neighborCount_)!=NULL)
-    other = UG_NS<dim>::NbElem(center_, neighborCount_);
-  else
+  other = UG_NS<dim>::NbElem(center_, neighborCount_);
+  if (!other)
     DUNE_THROW(GridError,"no neighbor found");
 
   // ///////////////////////////////////////
@@ -203,11 +287,14 @@ numberInNeighbor () const
 //   Implementations for the class UGGridLeafIntersectionIterator
 // /////////////////////////////////////////////////////////////////////////////
 
-/** \todo Needs to be checked for the nonconforming case */
+/** \bug Doesn't work properly for nonplanar nonconforming quadrilateral faces */
 template<class GridImp>
 inline const Dune::FieldVector<typename GridImp::ctype, GridImp::dimensionworld>&
 Dune::UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "LeafIntersectionIterator::outerNormal() for isoparametric elements");
+
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
   // //////////////////////////////////////////////////////
@@ -361,6 +448,9 @@ inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::Geometry&
 Dune::UGGridLeafIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "LeafIntersectionIterator::intersectionGlobal() for isoparametric elements");
+
   if (leafSubFaces_[0].first == NULL         // boundary intersection
       // or if this face is the intersection
       || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
@@ -417,6 +507,9 @@ inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::LocalGeomet
 Dune::UGGridLeafIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
+  if (myGrid_->isoparametricOrder_ != 1)
+    DUNE_THROW(NotImplemented, "LeafIntersectionIterator::intersectionNeighborLocal() for isoparametric elements");
+
   if (leafSubFaces_[0].first == NULL)
     DUNE_THROW(GridError, "There is no neighbor!");
 

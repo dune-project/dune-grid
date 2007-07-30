@@ -96,13 +96,13 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
     typename UG_NS<dim>::Node* subEntity = UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i, geometry().type()));
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
-    return typename GridImp::template Codim<cc>::EntityPointer((typename UG_NS<dim>::template Entity<cc>::T*)subEntity);
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity,myGrid_));
 
   } else if (cc==0) {
     // The following cast is here to make the code compile for all cc.
     // When it gets actually called, cc==0, and the cast is nonexisting.
     typename UG_NS<dim>::template Entity<cc>::T* myself = (typename UG_NS<dim>::template Entity<cc>::T*)target_;
-    return typename GridImp::template Codim<cc>::EntityPointer(myself);
+    return typename GridImp::template Codim<cc>::EntityPointer(UGGridEntityPointer<cc,GridImp>(myself,myGrid_));
   } else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
 }
@@ -116,10 +116,20 @@ setToTarget(typename UG_NS<dim>::Element* target)
 }
 
 template<int dim, class GridImp>
+inline void Dune::UGGridEntity < 0, dim ,GridImp >::
+setToTarget(typename UG_NS<dim>::Element* target,
+            GridImp* myGrid)
+{
+  target_ = target;
+  myGrid_ = myGrid;
+  geo_.setToTarget(target,myGrid);
+}
+
+template<int dim, class GridImp>
 inline Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
-  UGGridHierarchicIterator<GridImp> it(maxlevel);
+  UGGridHierarchicIterator<GridImp> it(maxlevel,myGrid_);
 
   if (level()<maxlevel) {
 
@@ -146,15 +156,7 @@ template< int dim, class GridImp>
 inline Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 {
-  return UGGridHierarchicIterator<GridImp>(maxlevel);
-}
-
-template< int dim, class GridImp>
-inline const typename Dune::UGGridEntity<0,dim,GridImp>::Geometry&
-Dune::UGGridEntity < 0, dim ,GridImp >::
-geometry() const
-{
-  return geo_;
+  return UGGridHierarchicIterator<GridImp>(maxlevel,myGrid_);
 }
 
 template<int dim, class GridImp>
@@ -167,7 +169,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
     DUNE_THROW(GridError, "Called geometryInFather() for an entity which doesn't have a father!");
 
   geometryInFather_.coordmode(); // put in the new mode
-  geometryInFather_.setToTarget(target_);
+  geometryInFather_.setToTarget(target_, myGrid_);
 
   // The task is to find out the positions of the vertices of this element
   // in the local coordinate system of the father.
@@ -188,7 +190,6 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
     // Find out where in the father's context this node is
     int idx = -1;
-    /** \todo Speed this up by only looping over the relevant part of the context */
     for (int j=0; j<MAX_CORNERS_OF_ELEM + MAX_NEW_CORNERS_DIM; j++)
       if (context[j] == fnode) {
         idx = j;

@@ -33,16 +33,16 @@ namespace Dune {
       if (codim==dim) {
 
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
+          setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]),&grid);
         else
-          setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
+          setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]),&grid);
 
       } else if (codim==0) {
 
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
+          setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]),&grid);
         else
-          setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
+          setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]),&grid);
 
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);

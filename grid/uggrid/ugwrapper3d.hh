@@ -221,7 +221,24 @@ namespace Dune {
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
-    //! \todo Please doc me!
+    //! Returns true if the i-th edge of the element is on the domain boundary
+    static bool Edge_On_Bnd(const UG_NS<3>::Element* theElement, int i) {
+      using UG::D3::BNDS;
+      using UG::D3::side_offset;
+      using UG::D3::element_descriptors;
+      using UG::UINT;
+      return EDGE_ON_BND(theElement,i);
+    }
+
+    //! Returns true if the i-th side of the element is on the domain boundary
+    static bool isBoundaryElement(const UG_NS<3>::Element* theElement) {
+      using UG::D3::BEOBJ;
+      using UG::D3::GM_OBJECTS;
+      using UG::UINT;
+      return OBJT(theElement)==BEOBJ;
+    }
+
+    //! Return the number of edges of an element
     static int Edges_Of_Elem(const UG_NS<3>::Element* theElement) {
       using UG::D3::element_descriptors;
       using UG::UINT;
@@ -241,24 +258,33 @@ namespace Dune {
       return 1;
     }
 
-    //! \todo Please doc me!
+    //! Return number of corners of a given side
     static int Corners_Of_Side(const UG_NS<3>::Element* theElement, int side) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return CORNERS_OF_SIDE(theElement, side);
     }
 
-    //! \todo Please doc me!
+    //! Return local number of a given corner of a given element side
     static int Corner_Of_Side(const UG_NS<3>::Element* theElement, int side, int corner) {
       using UG::D3::element_descriptors;
       using UG::UINT;
       return CORNER_OF_SIDE(theElement, side, corner);
     }
 
+    //! Return local number of a given corner of a given element edge
+    static int Corner_Of_Edge(const UG_NS<3>::Element* theElement, int edge, int corner) {
+      using UG::D3::element_descriptors;
+      using UG::UINT;
+      return CORNER_OF_EDGE(theElement, edge, corner);
+    }
+
+    //! Return number of sons of an element
     static int nSons(const UG::D3::element* element) {
       return UG::D3::ReadCW(element, UG::D3::NSONS_CE);
     }
 
+    //! Return grid level of an element
     static int myLevel (const UG_NS<3>::Element* theElement) {
       using UG::UINT;
       return LEVEL(theElement);

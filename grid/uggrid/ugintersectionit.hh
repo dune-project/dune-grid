@@ -46,8 +46,8 @@ namespace Dune {
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : center_(center), neighborCount_(nb)
+    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* myGrid)
+      : center_(center), neighborCount_(nb), myGrid_(myGrid)
     {}
 
     //! The Destructor
@@ -66,7 +66,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_);
+      return UGGridEntityPointer<0,GridImp>(center_,myGrid_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -78,7 +78,7 @@ namespace Dune {
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem);
+      return UGGridEntityPointer<0,GridImp>(otherelem,myGrid_);
     }
 
     //! return true if intersection is with boundary. \todo connection with
@@ -107,14 +107,14 @@ namespace Dune {
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const;
 
+    //! intersection of codimension 1 of this neighbor with element where iteration started.
+    //! Here returned element is in LOCAL coordinates of neighbor
+    const LocalGeometry& intersectionNeighborLocal () const;
+
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const {
       return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
     }
-
-    //! intersection of codimension 1 of this neighbor with element where iteration started.
-    //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const;
 
     //! local number of codim 1 entity in neighbor where intersection is contained
     int numberInNeighbor () const;
@@ -145,6 +145,7 @@ namespace Dune {
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
+    GridImp* myGrid_;
   };
 
 
@@ -172,8 +173,8 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : center_(center), neighborCount_(nb), subNeighborCount_(0)
+    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb, const GridImp* myGrid)
+      : center_(center), neighborCount_(nb), subNeighborCount_(0), myGrid_(myGrid)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
@@ -206,7 +207,7 @@ namespace Dune {
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
-      return UGGridEntityPointer<0,GridImp>(center_);
+      return UGGridEntityPointer<0,GridImp>(center_,myGrid_);
     }
 
     //! return EntityPointer to the Entity on the outside of this intersection
@@ -218,7 +219,7 @@ namespace Dune {
       if (otherelem==0)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
-      return UGGridEntityPointer<0,GridImp>(otherelem);
+      return UGGridEntityPointer<0,GridImp>(otherelem,myGrid_);
     }
 
     //! return true if intersection is with boundary. \todo connection with
@@ -247,14 +248,14 @@ namespace Dune {
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const;
 
+    //! intersection of codimension 1 of this neighbor with element where iteration started.
+    //! Here returned element is in LOCAL coordinates of neighbor
+    const LocalGeometry& intersectionNeighborLocal () const;
+
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const {
       return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
     }
-
-    //! intersection of codimension 1 of this neighbor with element where iteration started.
-    //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const;
 
     //! local number of codim 1 entity in neighbor where intersection is contained
     int numberInNeighbor () const;
@@ -305,6 +306,8 @@ namespace Dune {
     unsigned int subNeighborCount_;
 
     std::vector<Face> leafSubFaces_;
+
+    GridImp* myGrid_;
   };
 
 }  // namespace Dune

@@ -24,7 +24,7 @@ namespace Dune {
        This is a dummy method which simply returns i.  The real work is done
        in the class specializations.
      */
-    static int verticesDUNEtoUG(int i, GeometryType type) {
+    static int verticesDUNEtoUG(int i, const GeometryType& type) {
       return i;
     }
 
@@ -42,7 +42,7 @@ namespace Dune {
   public:
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
-    static int verticesDUNEtoUG(int i, GeometryType type) {
+    static int verticesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
         // vertices of a quadrilateral
@@ -53,8 +53,8 @@ namespace Dune {
       return i;
     }
 
-    /** \brief Turn a local face number from DUNE numbering to UG numbering */
-    static int facesDUNEtoUG(int i, GeometryType type) {
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
 
@@ -74,8 +74,14 @@ namespace Dune {
       return i;
     }
 
+    /** \brief Turn a local face number from DUNE numbering to UG numbering */
+    static int facesDUNEtoUG(int i, const GeometryType& type) {
+      // faces are edges in 2d
+      return edgesDUNEtoUG(i,type);
+    }
+
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
-    static int facesUGtoDUNE(int i, GeometryType type) {
+    static int facesUGtoDUNE(int i, const GeometryType& type) {
 
       if (type.isCube()) {
 
@@ -126,7 +132,7 @@ namespace Dune {
   public:
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
-    static int verticesDUNEtoUG(int i, GeometryType type) {
+    static int verticesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
         const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
@@ -136,8 +142,29 @@ namespace Dune {
       return i;
     }
 
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUG(int i, const GeometryType& type) {
+
+      if (type.isCube()) {
+        DUNE_THROW(NotImplemented, "edgesDUNEtoUG for hexahedra");
+        // edges of a hexahedron
+        const int renumbering[6] = {4, 2, 1, 3, 0, 5};
+        return renumbering[i];
+
+      }
+
+      //             if (type.isSimplex()) {
+
+      //                 // edges of a tetrahedon
+      //                 const int renumbering[6] = {1, 2, 3, 0};
+      //                 return renumbering[i];
+      //             }
+
+      return i;
+    }
+
     /** \brief Turn a local face number from DUNE numbering to UG numbering */
-    static int facesDUNEtoUG(int i, GeometryType type) {
+    static int facesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
 
@@ -150,8 +177,7 @@ namespace Dune {
       if (type.isSimplex()) {
 
         // faces of a tetrahedon
-        //const int renumbering[4] = {1, 2, 0, 3};  // Peter
-        const int renumbering[4] = {1, 2, 3, 0};                // Oliver
+        const int renumbering[4] = {1, 2, 3, 0};
         return renumbering[i];
       }
 
@@ -159,7 +185,7 @@ namespace Dune {
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
-    static int facesUGtoDUNE(int i, GeometryType type) {
+    static int facesUGtoDUNE(int i, const GeometryType& type) {
 
       if (type.isCube()) {
 

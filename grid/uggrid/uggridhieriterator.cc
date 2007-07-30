@@ -6,14 +6,6 @@
 //  --HierarchicIterator
 //
 //***************************************************************
-template<class GridImp>
-inline
-UGGridHierarchicIterator<GridImp>::UGGridHierarchicIterator(int maxLevel)
-{
-  maxlevel_ = maxLevel;
-
-  this->virtualEntity_.setToTarget(NULL);
-}
 
 template<class GridImp>
 void UGGridHierarchicIterator<GridImp>::increment()

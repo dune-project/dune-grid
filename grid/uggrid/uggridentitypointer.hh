@@ -24,12 +24,18 @@ namespace Dune {
     }
 
     //! constructor
-    UGGridEntityPointer (typename UG_NS<dim>::template Entity<codim>::T* target)
-      : virtualEntity_(target)
+    UGGridEntityPointer (typename UG_NS<dim>::template Entity<codim>::T* target,
+                         GridImp* myGrid)
+      : virtualEntity_(target,myGrid)
     {}
 
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       virtualEntity_.setToTarget(target);
+    }
+
+    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,
+                     GridImp* myGrid) {
+      virtualEntity_.setToTarget(target,myGrid);
     }
 
     //! equality

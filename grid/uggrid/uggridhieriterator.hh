@@ -35,14 +35,16 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! the default Constructor
-    UGGridHierarchicIterator(int maxLevel);
+    UGGridHierarchicIterator(int maxLevel, const GridImp* myGrid)
+      : maxlevel_(maxLevel) {
+      this->setToTarget(NULL, myGrid);
+    }
 
     void increment();
 
     //! max level to go down
     int maxlevel_;
 
-    //Stack<StackEntry> elemStack;
     Stack<typename UG_NS<GridImp::dimension>::Element*> elementStack_;
 
   };
