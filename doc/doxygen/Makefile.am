@@ -107,10 +107,13 @@ FORCE:
 
 include $(top_srcdir)/am/webstuff
 
+# file to clean only in svn and not in tarball tree
+SVNCLEANFILES = html html-dist $(WHAT) $(DOXYGENHEADER)
+
 clean-local:
-	if test -e Doxydep; then rm -rf $(WHAT) html html-dist; fi
+	if test -e $(top_srcdir)/doc/doxygen/Doxydep; then rm -rf $(SVNCLEANFILES);fi
 	rm -rf latex *~
 
-CLEANFILES = $(DOXYGENTAG) $(DOXYGENHEADER)
+CLEANFILES = $(DOXYGENTAG)
 
 include $(top_srcdir)/am/global-rules
