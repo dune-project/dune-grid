@@ -24,7 +24,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level) 
     // codim dim-1
     for (int i=0; i<eIt->template count<dim-1>(); i++)
     {
-      GeometryType gt = eIt->geometry().type();
+      GeometryType gt = eIt->type();
       int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
       int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -59,7 +59,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level) 
     typename UG_NS<dim>::Element* target = grid_->getRealImplementation(*eIt).target_;
 
     // codim 0 (elements)
-    GeometryType eType = eIt->geometry().type();
+    GeometryType eType = eIt->type();
     if (eType.isSimplex()) {
       UG_NS<dim>::levelIndex(target) = numSimplices_++;
     } else if (eType.isPyramid()) {
@@ -69,7 +69,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level) 
     } else if (eType.isCube()) {
       UG_NS<dim>::levelIndex(target) = numCubes_++;
     } else {
-      DUNE_THROW(GridError, "Found the GeometryType " << eIt->geometry().type()
+      DUNE_THROW(GridError, "Found the GeometryType " << eIt->type()
                                                       << ", which should never occur in a UGGrid!");
     }
 
@@ -163,7 +163,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
       // codim dim-1
       for (int i=0; i<eIt->template count<dim-1>(); i++)
       {
-        GeometryType gt = eIt->geometry().type();
+        GeometryType gt = eIt->type();
         int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -177,7 +177,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
       if (dim==3)
         for (int i=0; i<eIt->template count<1>(); i++)
         {
-          GeometryType gt = eIt->geometry().type();
+          GeometryType gt = eIt->type();
           int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
           index = -1;
         }
@@ -213,7 +213,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
       // codim dim-1 (edges)
       for (int i=0; i<eIt->template count<dim-1>(); i++)
       {
-        GeometryType gt = eIt->geometry().type();
+        GeometryType gt = eIt->type();
         int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
         int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -242,7 +242,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
       if (dim==3)
         for (int i=0; i<eIt->template count<1>(); i++)
         {
-          GeometryType gt = eIt->geometry().type();
+          GeometryType gt = eIt->type();
           int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
           if (index<0)                       // not visited yet
           {
@@ -300,7 +300,7 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
 
   for (; eIt!=eEndIt; ++eIt) {
 
-    GeometryType eType = eIt->geometry().type();
+    GeometryType eType = eIt->type();
 
     if (eType.isSimplex())
       UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numSimplices_++;
