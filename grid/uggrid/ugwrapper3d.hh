@@ -590,10 +590,6 @@ namespace Dune {
     }
 #endif
 
-    static void* BVP_GetByName(const char* bvpName) {
-      return UG::D3::BVP_GetByName(bvpName);
-    }
-
     static void Set_Current_BVP(void** thisBVP) {
       UG::D3::Set_Current_BVP(thisBVP);
     }

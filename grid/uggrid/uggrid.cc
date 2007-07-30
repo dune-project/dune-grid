@@ -208,13 +208,7 @@ inline Dune::UGGrid < dim >::~UGGrid()
     // Set UG's currBVP variable to the BVP corresponding to this
     // grid.  This is necessary if we have more than one UGGrid in use.
     // DisposeMultiGrid will crash if we don't do this
-    std::string BVPName = name_ + "_Problem";
-    void* thisBVP = UG_NS<dim>::BVP_GetByName(BVPName.c_str());
-
-    if (thisBVP == NULL)
-      DUNE_THROW(GridError, "Couldn't find grid's own boundary value problem!");
-
-    UG_NS<dim>::Set_Current_BVP((void**)thisBVP);
+    UG_NS<dim>::Set_Current_BVP(multigrid_->theBVP);
     UG_NS<dim>::DisposeMultiGrid(multigrid_);
   }
 
@@ -465,23 +459,13 @@ bool Dune::UGGrid <dim>::preAdapt()
 template < int dim >
 bool Dune::UGGrid < dim >::adapt()
 {
-
-  int rv;
-  int mode;
-
   assert(multigrid_);
 
   // Set UG's currBVP variable to the BVP corresponding to this
   // grid.  This is necessary if we have more than one UGGrid in use.
-  std::string BVPName = name_ + "_Problem";
-  void* thisBVP = UG_NS<dim>::BVP_GetByName(BVPName.c_str());
+  UG_NS<dim>::Set_Current_BVP(multigrid_->theBVP);
 
-  if (thisBVP == NULL)
-    DUNE_THROW(GridError, "Couldn't find grid's own boundary value problem!");
-
-  UG_NS<dim>::Set_Current_BVP((void**)thisBVP);
-
-  mode = UG_NS<dim>::GM_REFINE_TRULY_LOCAL;
+  int mode = UG_NS<dim>::GM_REFINE_TRULY_LOCAL;
 
   if (refinementType_==COPY)
     mode = mode | UG_NS<dim>::GM_COPY_ALL;
@@ -495,7 +479,7 @@ bool Dune::UGGrid < dim >::adapt()
   // I don't really know what this means either
   int mgtest = UG_NS<dim>::GM_REFINE_NOHEAPTEST;
 
-  rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
+  int rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 
   if (rv!=0)
     DUNE_THROW(GridError, "UG::adapt() returned with error code " << rv);
