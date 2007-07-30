@@ -141,6 +141,23 @@ void markOne ( GridType & grid , int num , int ref )
 
 void generalTests(bool greenClosure)
 {
+  // /////////////////////////////////////////////////////////////////
+  //   Prelude: the UGGrid implementation relies on the face that std::array,
+  //   Dune::FieldVector, and C-arrays have the same memory layout.  Here
+  //   we make sure this is really so.
+  // /////////////////////////////////////////////////////////////////
+
+  double cArray[3] = {1,2,3};
+
+  for (int i=0; i<3; i++) {
+    assert(cArray[i] == (*((FieldVector<double,3>*)&cArray))[i]);
+    assert(cArray[i] == (*((array<double,3>*)&cArray))[i]);
+  }
+
+  // //////////////////////////////////////////////////////////
+  //   Make some grids for testing
+  // //////////////////////////////////////////////////////////
+
   Dune::UGGrid<2> grid2d;
   Dune::UGGrid<3> grid3d;
 
