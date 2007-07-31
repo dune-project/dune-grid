@@ -61,17 +61,8 @@ inline const Dune::FieldVector<typename GridImp::ctype, coorddim>& Dune::UGGridG
 operator [](int i) const
 {
   // This geometry is a vertex
-  if (mydim==0) {
-    assert(i==0);
-    // The cast onto typename UGTypes<coorddim>::Node*
-    // is only correct if this geometry represents a vertex.  But this is so since
-    // we are within an if (mydim==0) clause.
-    /** \todo Simply cast and do without this copying */
-    for (int i=0; i<coorddim; i++)
-      coord_[0][i] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[i];
-
-    return coord_[0];
-  }
+  if (mydim==0)
+    return reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim>&>(((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x);
 
   // ////////////////////////////////
   //  This geometry is an element
@@ -80,12 +71,8 @@ operator [](int i) const
 
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
-  if (mode_==element_mode) {
-    typename UG_NS<coorddim>::Node* corner = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i);
-    /** \todo Simply cast and do without this copying */
-    for (int j=0; j<coorddim; j++)
-      coord_[i][j] = corner->myvertex->iv.x[j];
-  }
+  if (mode_==element_mode)
+    return reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim>&>(UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x);
 
   return coord_[i];
 }
@@ -130,13 +117,6 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
     DUNE_THROW(NotImplemented, "UGGridGeometry::local() for isoparametric geometry");
 
   FieldVector<UGCtype, mydim> result;
-  UGCtype localCoords[mydim];
-
-  // Copy input ADT into C-style array
-  /** \todo Do without this copying */
-  UGCtype global_c[coorddim];
-  for (int i=0; i<coorddim; i++)
-    global_c[i] = global[i];
 
   if (mode_==element_mode)
   {
@@ -146,18 +126,14 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 
     // Actually do the computation
     /** \todo Why is this const_cast necessary? */
-    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerCoords), global_c, localCoords);
+    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerCoords), &global[0], &result[0]);
   }
   else
   {
     // Actually do the computation
     /** \todo Why is this const_cast necessary? */
-    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerpointers_), global_c, localCoords);
+    UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerpointers_), &global[0], &result[0]);
   }
-
-  // Copy result into array
-  for (int i=0; i<mydim; i++)
-    result[i] = localCoords[i];
 
   return result;
 }
@@ -243,19 +219,6 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
     } else {
       /** \todo Don't recompute the nodes at every call */
       computeIsoparametricNodes();
-
-#if 0
-      // Debugging: compute the p1 matrix
-      // compile array of pointers to corner coordinates
-      UGCtype* cornerCoords[corners()];
-      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-
-      // compute the transformation onto the reference element (or vice versa?)
-      UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jac_inverse_);
-
-      std::cout << "P1:\n";
-      std::cout << jac_inverse_ << std::endl;
-#endif
 
       PiecewiseQuadraticGeometry<mydim,coorddim,UGCtype>::jacobianInverseTransposed(local,
                                                                                     isoparametricNodes_,
@@ -570,7 +533,6 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) 
 
   // The cast in the second argument works because a std::array<FieldVector<T,3>,4>
   // has the same memory layout as a T[4][3].
-  /** \todo Maybe there should be a test for this */
   return UG_NS<3>::SurfaceElement(corners(), (const double(*)[3])&coord_,&local[0]);
 }
 
