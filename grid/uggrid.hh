@@ -185,9 +185,7 @@ namespace Dune {
 
     /** \brief Constructor with control over UG's memory requirements
      *
-     * \param heapSize The size of UG's internal memory in megabytes.  UG allocates
-     * memory only once.  I don't know what happens if you create UGGrids with
-     * differing heap sizes.
+     * \param heapSize The size of UG's internal memory in megabytes for this grid.
      * \param envHeapSize The size of UG's environment heap, also in megabytes.
      */
     UGGrid(unsigned int heapSize, unsigned int envHeapSize);
@@ -570,8 +568,7 @@ namespace Dune {
 
     /** \brief The size of UG's internal heap in megabytes
      *
-     * It is handed over to UG for each new multigrid.  I don't know
-     * what happens if you hand over differing values.
+     * It is handed over to UG for each new multigrid.
      */
     unsigned int heapsize;
 
