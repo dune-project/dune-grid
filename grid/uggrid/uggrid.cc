@@ -521,9 +521,10 @@ void Dune::UGGrid < dim >::globalRefine(int n)
 
     this->preAdapt();
     adapt();
-    this->postAdapt();
 
   }
+
+  this->postAdapt();
 
 }
 
