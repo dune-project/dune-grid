@@ -12,6 +12,7 @@
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/misc.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/deprecated.hh>
 
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:

@@ -11,6 +11,7 @@
 #include <dune/grid/common/datahandleif.hh>
 
 #include <dune/common/bartonnackmanifcheck.hh>
+#include <dune/common/deprecated.hh>
 
 /** @file
    @author Robert Kloefkorn

@@ -4,6 +4,7 @@
 #define DUNE_ALBERTAGRID_IMP_HH
 #include <iostream>
 #include <fstream>
+#include <dune/common/deprecated.hh>
 
 #include <vector>
 #include <assert.h>
