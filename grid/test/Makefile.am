@@ -1,12 +1,8 @@
 # $Id$
 
 #
-## estimate which tests can be built
+## Find out which tests can be built
 #
-
-if MPI
-  YPROG = test-yaspgrid
-endif
 
 if ALBERTA
   APROG = test-alberta
@@ -34,13 +30,13 @@ endif
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
+NORMALTESTS = test-sgrid test-oned test-yaspgrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
-# list of tests to run (yaspgrid is special case)
-TESTS = $(NORMALTESTS) $(YPROG)
+# list of tests to run
+TESTS = $(NORMALTESTS)
 
 # programs just to build when "make check" is used
-check_PROGRAMS = $(NORMALTESTS) $(YPROG)
+check_PROGRAMS = $(NORMALTESTS)
 
 #
 ## common flags
