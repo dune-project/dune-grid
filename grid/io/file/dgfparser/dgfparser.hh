@@ -349,7 +349,6 @@ namespace Dune {
 #include "dgfparser.cc"
 
 /**  @addtogroup DuneGridFormatParser
-     @ingroup Grid
 
      @brief Classes for reading a macrogrid file in the dune
      macrogrid format (dgf)
