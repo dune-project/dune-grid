@@ -28,7 +28,7 @@ namespace Dune
      <h2>Overview</h2>
 
      Intersections are codimension 1 objects. These
-     intersections are accessed via a IntersectionIterator. This allows
+     intersections are accessed via an IntersectionIterator. This allows
      the implementation of non-matching grids, as one face can now
      consist of several intersections.
      In a conforming mesh such an intersection corresponds to an entity of
@@ -46,7 +46,7 @@ namespace Dune
      <h2>Intersections, leaf grid and level grid</h2>
 
      On an entity \b e of codimension zero there are two ways to create
-     IntersectionIterators by either using ilevelbegin()/ilevelend() or
+     IntersectionIterators by either using ilevelbegin() / ilevelend() or
      ileafbegin()/ileafend(). In the first case intersections with
      neighboring entities having the same level as \b e are traversed; in
      the second case  ileafbegin()==ileafend() if \b e is not a leaf otherwise
@@ -183,7 +183,7 @@ namespace Dune
 
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
+
   public:
 
     // type of real implementation
@@ -209,7 +209,7 @@ namespace Dune
     enum { dimensionworld=dimworld /*!< dimension of world */ };
 
     //! define type used for coordinates in grid module
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
 
     /** @brief Preincrement operator. Proceed to next intersection.*/
     IntersectionIterator& operator++()
@@ -270,6 +270,7 @@ namespace Dune
 
     /*! @brief geometrical information about this intersection in local
        coordinates of the inside() entity.
+
        This method returns a Geometry object that provides a mapping from
        local coordinates of the intersection to local coordinates of the
        inside() entity.
@@ -280,6 +281,7 @@ namespace Dune
     }
     /*! @brief geometrical information about this intersection in local
        coordinates of the outside() entity.
+
        This method returns a Geometry object that provides a mapping from
        local coordinates of the intersection to local coordinates of the
        outside() entity.
@@ -290,6 +292,7 @@ namespace Dune
     }
 
     /*! @brief geometrical information about this intersection in global coordinates.
+
        This method returns a Geometry object that provides a mapping from
        local coordinates of the intersection to global (world) coordinates.
      */
@@ -311,12 +314,10 @@ namespace Dune
     }
 
     /*! @brief Return an outer normal (length not necessarily 1)
-       The returned Vector is copied to take advantage from the return
-       type optimization.  Usually one will use the normal in several
-       calculations, so that one stores it before using it. The
-       returned vector may depend on local position within the intersection.
+
+       The returned vector may depend on local position within the intersection.
      */
-    FieldVector<ct, dimworld> outerNormal (const FieldVector<ct, dim-1>& local) const
+    FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const
     {
       return this->realIterator.outerNormal(local);
     }
@@ -325,9 +326,9 @@ namespace Dune
           @copydoc outerNormal
        The normal is scaled with the integration element of the intersection. This
           method is redundant but it may be more efficent to use this function
-          rather than computing the integration element via intersectionGlobal.
+          rather than computing the integration element via intersectionGlobal().
      */
-    FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
+    FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
     {
       return this->realIterator.integrationOuterNormal(local);
     }
@@ -337,7 +338,7 @@ namespace Dune
        The returned vector may depend on the local position within the intersection.
        It is scaled to have unit length.
      */
-    FieldVector<ct, dimworld> unitOuterNormal (const FieldVector<ct, dim-1>& local) const
+    FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const
     {
       return this->realIterator.unitOuterNormal(local);
     }
@@ -353,7 +354,9 @@ namespace Dune
     }
 
     /** @brief Checks for inequality.
-            @copydoc operator==
+        Only Iterators pointing to the same intersection from the same Entity
+        are equal. Pointing to the same intersection from neighbor is
+        unequal as inside and outside are permuted.
      */
     bool operator!=(const IntersectionIterator& rhs) const
     {
