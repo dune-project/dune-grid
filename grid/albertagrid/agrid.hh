@@ -419,11 +419,6 @@ namespace Dune
     //! geometry of this entity
     const Geometry & geometry () const;
 
-    EntityPointer ownersFather () const;
-
-    //! my position in local coordinates of the owners father
-    const FieldVector<albertCtype, dim>& positionInOwnersFather () const;
-
     //***********************************************
     //  End of Interface methods
     //***********************************************

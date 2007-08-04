@@ -1018,63 +1018,6 @@ namespace Dune
     return geo_;
   }
 
-  template<int codim, int dim, class GridImp>
-  inline typename AlbertaGridEntity<codim,dim,GridImp>::EntityPointer
-  AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
-  {
-    ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-    std::cout << "got father " << grid_.getElementNumber(fatherInfo->el) <<"\n";
-    int fatherLevel = (level_ > 0) ? (level_-1) : 0;
-
-    assert( fatherLevel == fatherInfo->level );
-
-    return AlbertaGridEntityPointer<0,GridImp> (grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
-  }
-
-  /*
-     // coords for 2d
-     static double fatherref [2][3][2] =
-     {
-      { {0.0,1.0},{0.0,0.0 }, {0.5,0.0 } }  ,
-      { {1.0,0.0},{0.0,1.0 }, {0.5,0.0 } }
-     };
-   */
-
-  template<int codim, int dim, class GridImp>
-  inline const FieldVector<albertCtype, dim>&
-  AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
-  {
-    assert( codim == dim );
-    if(!localFCoordCalced_)
-    {
-      EntityPointer vati = this->ownersFather();
-      localFatherCoords_ = (*vati).geometry().local( this->geometry()[0] );
-      localFCoordCalced_ = true;
-      /*
-          // check
-          if((level_ > 0) && (dim == 2))
-          {
-            ALBERTA EL_INFO * fatty = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-            int child = 0;
-            if(elInfo_->el == fatty->el->child[1])
-            {
-              child = 1;
-            }
-
-            FieldVector<double,2> tmp(0.0);
-            for(int j=0; j<2; j++) tmp[j] = fatherref[child][vertex_][j];
-            if( (localFatherCoords_ - tmp).two_norm() > 1.0E-10)
-            {
-              std::cout << localFatherCoords_ << " c|r " << tmp << " localF \n";
-              assert(false);
-            }
-          }
-       */
-    }
-    return localFatherCoords_;
-  }
-
-
   //************************************
   //
   //  --AlbertaGridEntity codim = 0
@@ -3933,12 +3876,20 @@ namespace Dune
     //assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
     assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
 #endif
-    assert( lockPostAdapt_ );
+    // if lockPostAdapt == false, the user forgot to call adapt before postAdapt
+    if( lockPostAdapt_ == false )
+    {
+      DUNE_THROW(InvalidStateException,"AlbertaGrid::postAdapt called without previous adapt call!");
+    }
+
     // unlock post adapt
     lockPostAdapt_ = false;
 
     coarsenMarked_ = 0;
     refineMarked_  = 0;
+
+    // clear refined marker
+    ALBERTA AlbertHelp::set2positive(dofvecs_.elNewCheck);
 
     return wasChanged_;
   }
@@ -4309,7 +4260,12 @@ namespace Dune
     wasChanged_ = false;
 
     // if lockPostAdapt == true, the user forgot to call postAdapt
-    assert( ! lockPostAdapt_ );
+    // in previous cycles
+    if( lockPostAdapt_ == true )
+    {
+      DUNE_THROW(InvalidStateException,"AlbertaGrid::adapt called without previous postAdapt call!");
+    }
+    // lock for post Adapt
     lockPostAdapt_ = true;
 
     // set global pointer to index manager in elmem.cc
@@ -4341,6 +4297,7 @@ namespace Dune
     // remove global pointer in elmem.cc
     ALBERTA AlbertHelp::removeIndexManager_elmem_cc(AlbertHelp::numOfElNumVec);
 
+    // return true if elements were created
     return refined;
   }
 
