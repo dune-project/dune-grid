@@ -314,15 +314,38 @@ namespace Dune {
     return (coarsenMarked_ > 0);
   }
 
+  template <int dim, int dimworld>
+  inline void ALU2dGrid<dim, dimworld> ::
+  hierarchicClear (ALUElementType* el)
+  {
+    // clear actual tag
+    el->Refco_el::clear();
+    // clear refined tag
+    el->Refco_el::clearWas();
+    // go to children
+    for(ALUElementType* child = el->down(); child; child = child->next())
+    {
+      // clear marker for child
+      hierarchicClear(child);
+    }
+  }
+
+
   //! clear all entity new markers
   template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld> :: postAdapt ()
   {
-    ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
-    for( walk->first() ; ! walk->done() ; walk->next()) {
-      ALU2DSPACE Element & tr = walk->getitem();
-      tr.ALU2DSPACE Refco_el::clear(ALU2DSPACE Refco::ref);
-      tr.ALU2DSPACE Refco_el::clear(ALU2DSPACE Refco::crs);
+    // clear refinement markers throughout the grid
+    typedef ALU2DSPACE Macro < ALU2DSPACE Element > macro_t;
+
+    // get macro element iterator
+    ALU2DSPACE Listwalkptr <macro_t> walk(mesh());
+    for( walk->first() ; ! walk->done() ; walk->next())
+    {
+      // get element pointer
+      ALUElementType* el = walk->getitem().operator ->();
+      // hierarchically clear all markers
+      hierarchicClear(el);
     }
 
     // reset marked element counters

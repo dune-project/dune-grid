@@ -426,6 +426,9 @@ namespace Dune {
 
     void calcExtras();
 
+    typedef typename ALU2dImplTraits::template Codim<0>:: InterfaceType ALUElementType;
+    // clear refinement marker of element and all children
+    void hierarchicClear(ALUElementType* el);
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
   private:
