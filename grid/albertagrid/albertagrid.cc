@@ -3876,12 +3876,20 @@ namespace Dune
     //assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
     assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
 #endif
-    assert( lockPostAdapt_ );
+    // if lockPostAdapt == false, the user forgot to call adapt before postAdapt
+    if( lockPostAdapt_ == false )
+    {
+      DUNE_THROW(InvalidStateException,"AlbertaGrid::postAdapt called without previous adapt call!");
+    }
+
     // unlock post adapt
     lockPostAdapt_ = false;
 
     coarsenMarked_ = 0;
     refineMarked_  = 0;
+
+    // clear refined marker
+    ALBERTA AlbertHelp::set2positive(dofvecs_.elNewCheck);
 
     return wasChanged_;
   }
@@ -4252,7 +4260,12 @@ namespace Dune
     wasChanged_ = false;
 
     // if lockPostAdapt == true, the user forgot to call postAdapt
-    assert( ! lockPostAdapt_ );
+    // in previous cycles
+    if( lockPostAdapt_ == true )
+    {
+      DUNE_THROW(InvalidStateException,"AlbertaGrid::adapt called without previous postAdapt call!");
+    }
+    // lock for post Adapt
     lockPostAdapt_ = true;
 
     // set global pointer to index manager in elmem.cc
@@ -4284,6 +4297,7 @@ namespace Dune
     // remove global pointer in elmem.cc
     ALBERTA AlbertHelp::removeIndexManager_elmem_cc(AlbertHelp::numOfElNumVec);
 
+    // return true if elements were created
     return refined;
   }
 
