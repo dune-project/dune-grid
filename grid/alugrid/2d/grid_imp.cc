@@ -454,12 +454,6 @@ namespace Dune {
   }
 
   template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::Entity & en ) const
-  {
-    return this->getRealImplementation(en).getMark();
-  }
-
-  template <int dim, int dimworld>
   inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::EntityPointer & ep ) const
   {
     return this->getRealImplementation(*ep).getMark();

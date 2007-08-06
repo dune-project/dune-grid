@@ -568,9 +568,6 @@ namespace Dune {
     //! @copydoc Dune::Grid::mark
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
-    //! \brief return current adaptation mark for given entity
-    int getMark( const typename Traits::template Codim<0>::Entity & ) const DUNE_DEPRECATED;
-
     //! @copydoc Dune::Grid::getMark
     int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const;
   private:

@@ -407,9 +407,6 @@ namespace Dune {
     //! refinement, one refinement will create 8 children per element
     bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
 
-    //! return current adaptation marker
-    int getMark(const typename Traits::template Codim<0>::Entity & ) const DUNE_DEPRECATED;
-
     //! return current adaptation marker for entity pointer
     int getMark(const typename Traits::template Codim<0>::EntityPointer & ) const;
 

@@ -4232,17 +4232,6 @@ namespace Dune
   // --getMark
   template<int dim, int dimworld>
   inline int AlbertaGrid < dim, dimworld >::
-  getMark( const typename Traits::template Codim<0>::Entity & en ) const
-  {
-    const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(en)).getElInfo();
-    assert( elInfo );
-    assert( elInfo->el );
-    return elInfo->el->mark;
-  }
-
-  // --getMark
-  template<int dim, int dimworld>
-  inline int AlbertaGrid < dim, dimworld >::
   getMark( const typename Traits::template Codim<0>::EntityPointer & ep ) const
   {
     const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(*ep)).getElInfo();

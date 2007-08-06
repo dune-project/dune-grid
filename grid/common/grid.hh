@@ -784,7 +784,7 @@ namespace Dune {
 
     /** \brief returns adaptation mark for given entity
 
-       \param[in] e    Entity for which adaptation mark should be determined
+       \param[in] e EntityPointer for which adaptation mark should be determined
 
        \return int adaptation mark currently set for given EntityPointer e
      */
