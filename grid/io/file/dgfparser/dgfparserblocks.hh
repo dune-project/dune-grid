@@ -791,10 +791,19 @@ namespace Dune {
         {
           int x;
           if (findtoken("default"))
-            if (getnextentry(x)) {
+          {
+            if (getnextentry(x))
+            {
+              if( x <= 0 )
+              {
+                DUNE_THROW(DGFException,
+                           "ERROR in " << *this
+                                       << "      non-positive boundary id (" << x << ") read!");
+              }
               defaultvalue=x;
               withdefault = true;
             }
+          }
         }
         reset();
         next();
@@ -808,16 +817,26 @@ namespace Dune {
           return goodline;
         }
         int id;
-        if (getnextentry(id)) {
+        if (getnextentry(id))
+        {
+          if( id <= 0 )
+          {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      non-positive boundary id (" << id << ") read!");
+          }
           bndid = id;
           double x;
           int n=0;
-          while (getnextentry(x)) {
+          while (getnextentry(x))
+          {
             if (0<=n && n<dimworld)
               p1.at(n)=x;
-            else if (dimworld<=n && n<2*dimworld) {
+            else if (dimworld<=n && n<2*dimworld)
+            {
               p2.at(n-dimworld)=x;
-              if (p2.at(n-dimworld)<p1.at(n-dimworld)) {
+              if (p2.at(n-dimworld)<p1.at(n-dimworld))
+              {
                 DUNE_THROW(DGFException,
                            "ERROR in " << *this
                                        << "      second coordinate smaller than first coordinate: "
@@ -828,8 +847,10 @@ namespace Dune {
             }
             n++;
           }
+
           goodline=(n==dimworld*2);
-          if (!goodline) {
+          if (!goodline)
+          {
             DUNE_THROW(DGFException,
                        "ERROR in " << *this
                                    << "      wrong number of coordinates: "
@@ -994,10 +1015,11 @@ namespace Dune {
         int x;
         if (getnextentry(x)) {
           bndid = x;
-          if (bndid<=0) {
+          if (bndid<=0)
+          {
             DUNE_THROW(DGFException,
                        "ERROR in " << *this
-                                   << "      non-positive boundary id read!");
+                                   << "      non-positive boundary id (" << bndid << ") read!");
           }
           while (getnextentry(x))
           {
