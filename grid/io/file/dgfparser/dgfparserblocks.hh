@@ -793,6 +793,13 @@ namespace Dune {
           if (findtoken("default"))
             if (getnextentry(x)) {
               defaultvalue=x;
+              if( x <= 0 )
+              {
+                DUNE_THROW(DGFException,
+                           "ERROR in " << *this
+                                       << "      non-positive boundary id (" << x << ") read!");
+              }
+
               withdefault = true;
             }
         }
@@ -808,7 +815,14 @@ namespace Dune {
           return goodline;
         }
         int id;
-        if (getnextentry(id)) {
+        if (getnextentry(id))
+        {
+          if( id <= 0 )
+          {
+            DUNE_THROW(DGFException,
+                       "ERROR in " << *this
+                                   << "      non-positive boundary id (" << id << ") read!");
+          }
           bndid = id;
           double x;
           int n=0;
