@@ -135,14 +135,17 @@ namespace Dune {
     out << nofelements << std::endl;
     for (int n=0; n<nofelements; n++) {
       if (simplexgrid) {
-        for (size_t j=0; j<elements[n].size(); j++) {
+        for (size_t j=0; j<elements[n].size(); j++)
+        {
           out << " " << elements[n][j] << " ";
         }
-      } else {
+      } else
+      {
         std::vector<unsigned int> el;
         for (size_t j=0; j<elements[n].size(); j++)
           el.push_back((elements[n][j]));
-        if (el.size()==8) {
+        if (el.size()==8)
+        {
           unsigned int tmp = el[2];
           el[2] = el[3];
           el[3] = tmp;
