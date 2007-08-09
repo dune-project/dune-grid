@@ -128,6 +128,15 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
     assert(eIt == iIt.inside());
 
+    // check that boundary id has positive value
+    if( iIt.boundary() )
+    {
+      if( iIt.boundaryId() <= 0 )
+      {
+        DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt.boundaryId() << ") !");
+      }
+    }
+
     // //////////////////////////////////////////////////////////////////////
     //   Check whether the 'has-intersection-with'-relation is symmetric
     // //////////////////////////////////////////////////////////////////////
