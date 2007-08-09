@@ -146,9 +146,12 @@ namespace Dune {
 
   //! return true if intersection is with boundary
   template<class GridImp>
-  inline bool ALU2dGridIntersectionBase<GridImp> :: boundary() const {
+  inline bool ALU2dGridIntersectionBase<GridImp> :: boundary() const
+  {
+    assert( (this->current.isBoundary_) ? (this->current.neigh_ == 0 ) : 1);
+    // make sure that isBoundary is only true on physical boundary
+    assert( this->current.isBoundary_ == (this->current.item_->nbbnd(this->current.index_) != 0) );
     return this->current.isBoundary_;
-    //return (this->current.neigh_ == 0);
   }
 
   template<class GridImp>
@@ -156,8 +159,15 @@ namespace Dune {
   {
     int isBoundaryType=0;
     assert(this->current.item_);
-    if(this->current.item_->nbbnd(this->current.index_) != 0)
-      isBoundaryType = this->current.item_->nbbnd(this->current.index_)->type();
+    // return boundary id in case of boundary
+    // note ALUGrid stores negative values
+    if( this->boundary() )
+    {
+      assert( this->current.item_->nbbnd(this->current.index_) != 0 );
+      isBoundaryType = -(this->current.item_->nbbnd(this->current.index_)->type());
+    }
+
+    assert( isBoundaryType >= 0 );
     return isBoundaryType;
   }
 
@@ -409,7 +419,8 @@ namespace Dune {
       {
         this->current.neigh_ = 0;
         this->current.opposite_ = this->current.item_->opposite(this->current.index_);
-        this->current.isBoundary_ = true;
+        // we have only boundary if intersection is on domain boundary
+        this->current.isBoundary_  = (this->current.item_->nbbnd(this->current.index_) != 0);
         return;
       }
     }
@@ -531,8 +542,9 @@ namespace Dune {
     else
       this->current.isNotConform_ = false;
 
-    if(!this->current.neigh_ ) {
-      this->current.isBoundary_ = true;
+    if(!this->current.neigh_ )
+    {
+      this->current.isBoundary_ = true ;
       this->current.opposite_ = -1;
     }
     else {
