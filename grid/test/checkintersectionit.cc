@@ -167,6 +167,15 @@ void checkIntersectionIter(const GridType & grid, const IndexSet& indexSet,
     //   Check the geometry returned by intersectionNeighborLocal()
     // ////////////////////////////////////////////////////////////////
 
+    // check that boundary id has positive value
+    if( iIt.boundary() )
+    {
+      if( iIt.boundaryId() <= 0 )
+      {
+        DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt.boundaryId() << ") !");
+      }
+    }
+
     if (iIt.neighbor() )
     {
 
