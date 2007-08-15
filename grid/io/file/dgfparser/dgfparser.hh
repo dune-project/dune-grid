@@ -963,4 +963,17 @@ namespace Dune {
         if the grid is constructed using the \b Interval block.
  */
 
+/*! @brief Some simple static information for a given GridType
+ */
+namespace Dune {
+  template <class GridType>
+  struct DGFGridInfo {
+    //! number of globalRefine steps needed to refuce h by 0.5
+    static int refineStepsForHalf();
+    //! relation between volume of children to volume of father.
+    //! If this is not a constant the return value is -1
+    static double refineWeight();
+  };
+}
+
 #endif

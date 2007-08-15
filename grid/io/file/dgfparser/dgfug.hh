@@ -13,6 +13,11 @@ namespace Dune {
     static UGGrid<dim>* generate(MacroGrid& mg,
                                  const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
+  template <int dimw>
+  struct DGFGridInfo< UGGrid<dimw> > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return -1.;}
+  };
 }
 #include "dgfug.cc"
 #endif
