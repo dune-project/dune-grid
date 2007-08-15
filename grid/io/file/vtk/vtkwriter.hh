@@ -645,9 +645,9 @@ namespace Dune
         std::ofstream file;
         char fullname[128];
         if (n>1)
-          sprintf(fullname,"%s-%04d-%04d.vtu",name,grid.comm().size(),grid.comm().rank());
+          sprintf(fullname,"s%04d:p%04d:%s.vtu",grid.comm().size(),grid.comm().rank(),name);
         else
-          sprintf(fullname,"%s-%04d-%04d.vtp",name,grid.comm().size(),grid.comm().rank());
+          sprintf(fullname,"s%04d:p%04d:%s.vtp",grid.comm().size(),grid.comm().rank(),name);
         if (outputtype==VTKOptions::binaryappended)
           file.open(fullname,std::ios::binary);
         else
@@ -658,9 +658,9 @@ namespace Dune
         if (grid.comm().rank()==0)
         {
           if (n>1)
-            sprintf(fullname,"%s-%04d.pvtu",name,grid.comm().size());
+            sprintf(fullname,"s%04d:%s.pvtu",grid.comm().size(),name);
           else
-            sprintf(fullname,"%s-%04d.pvtp",name,grid.comm().size());
+            sprintf(fullname,"s%04d:%s.pvtp",grid.comm().size(),name);
           file.open(fullname);
           writeParallelHeader(file,name,"");
           file.close();
@@ -767,9 +767,9 @@ namespace Dune
       }
       char fullname[256];
       if (n>1)
-        sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,name,grid.comm().size(),grid.comm().rank());
+        sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),grid.comm().rank(),name);
       else
-        sprintf(fullname,"%s%s-%04d-%04d.vtp",piecepath,name,grid.comm().size(),grid.comm().rank());
+        sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),grid.comm().rank(),name);
       if (outputtype==VTKOptions::binaryappended)
         file.open(fullname,std::ios::binary);
       else
@@ -780,9 +780,9 @@ namespace Dune
       if (grid.comm().rank()==0)
       {
         if (n>1)
-          sprintf(fullname,"%s%s-%04d.pvtu",path,name,grid.comm().size());
+          sprintf(fullname,"%s/s%04d:%s.pvtu",path,grid.comm().size(),name);
         else
-          sprintf(fullname,"%s%s-%04d.pvtp",path,name,grid.comm().size());
+          sprintf(fullname,"%s/s%04d:%s.pvtp",path,grid.comm().size(),name);
         file.open(fullname);
         writeParallelHeader(file,name,relpiecepath);
         file.close();
@@ -922,9 +922,9 @@ namespace Dune
       {
         char fullname[128];
         if (n>1)
-          sprintf(fullname,"%s%s-%04d-%04d.vtu",piecepath,piecename,grid.comm().size(),i);
+          sprintf(fullname,"%s/s%04d:p%0d:%s.vtu",piecepath,grid.comm().size(),i,piecename);
         else
-          sprintf(fullname,"%s%s-%04d-%04d.vtp",piecepath,piecename,grid.comm().size(),i);
+          sprintf(fullname,"%s/s%04d:p%0d:%s.vtp",piecepath,grid.comm().size(),i,piecename);
         indent(s); s << "<Piece Source=\"" << fullname << "\"/>" << std::endl;
       }
 

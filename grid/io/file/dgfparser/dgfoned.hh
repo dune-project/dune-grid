@@ -13,8 +13,8 @@ namespace Dune {
                               const char* filename,
                               MPICommunicatorType MPICOMM = MPIHelper::getCommunicator());
   };
-  template <OneDGrid>
-  struct DGFGridInfo<GridType> {
+  template <>
+  struct DGFGridInfo<OneDGrid> {
     static int refineStepsForHalf() {return 1;}
     static double refineWeight() {return 0.5;}
   };
