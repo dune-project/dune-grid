@@ -93,6 +93,19 @@ const int dimworld = 3;
 const int dimworld = GRIDDIM;
 #endif
 
+#include <dune/grid/yaspgrid.hh>
+#include <dune/grid/onedgrid.hh>
+#include <dune/grid/sgrid.hh>
+#ifdef HAVE_UG
+#include <dune/grid/uggrid.hh>
+#endif
+#ifdef HAVE_ALUGRID
+#include <dune/grid/alugrid.hh>
+#endif
+#ifdef HAVE_ALBERTA
+#include <dune/grid/albertagrid.hh>
+#endif
+
 #if defined ALBERTAGRID
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
