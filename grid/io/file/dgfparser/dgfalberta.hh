@@ -14,6 +14,12 @@ namespace Dune {
                                                const char* filename,
                                                MPICommunicatorType MPICOMM = MPIHelper::getCommunicator());
   };
+
+  template <int dimworld>
+  struct DGFGridInfo< AlbertaGrid<dimworld,dimworld> > {
+    static int refineStepsForHalf() {return dimworld;}
+    static double refineWeight() {return 0.5;}
+  };
 }
 #include "dgfalberta.cc"
 #endif

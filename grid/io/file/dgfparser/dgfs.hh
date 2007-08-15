@@ -13,6 +13,11 @@ namespace Dune {
                                          const char* filename,
                                          MPICommunicatorType MPICOMM = MPIHelper::getCommunicator());
   };
+  template <int dim, int dimworld>
+  struct DGFGridInfo< SGrid<dim,dimworld> > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dim);}
+  };
 }
 #include "dgfs.cc"
 #endif

@@ -50,6 +50,21 @@ namespace Dune {
     generateAlu3d(MacroGrid& mg,
                   const char* filename, std::string& str, MPICommunicatorType MPICOMM );
   };
+  template <>
+  struct DGFGridInfo<ALUCubeGrid<3,3> > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+  template <int dimworld>
+  struct DGFGridInfo< ALUSimplexGrid<dimworld,dimworld> > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dimworld);}
+  };
+  template <>
+  struct DGFGridInfo< Dune::ALUConformGrid<3,3> > {
+    static int refineStepsForHalf() {return dimworld;}
+    static double refineWeight() {return 0.5;}
+  };
 }
 #include "dgfalu.cc"
 #endif
