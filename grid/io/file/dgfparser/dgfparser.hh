@@ -978,13 +978,13 @@ namespace Dune {
 
 /* include the implementations */
 #if HAVE_ALBERTA
-#include "dgalberta.hh"
+#include "dgfalberta.hh"
 #endif
 #if HAVE_ALUGRID
-#include "dgalu.hh"
+#include "dgfalu.hh"
 #endif
 #if HAVE_UG
-#include "dgug.hh"
+#include "dgfug.hh"
 #endif
 #include "dgfoned.hh"
 #include "dgfyasp.hh"
