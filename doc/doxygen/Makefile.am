@@ -1,15 +1,8 @@
 # $Id$
 
-# distribute these files:
-#EXTRA_DIST = Doxyfile Doxydep \
-#  doxy-footer.html doxy-header.html dune-doxy.css mainpage
-
 if BUILD_DOCS
   DOXYGENTAG = doxygen-tag
-if WML
-  # only exists when WML is true
   WHAT = bestpractice.html
-endif
   DOXYGEN_HTML = html
   DOXYGEN_DIST = html-dist
 endif
@@ -29,6 +22,7 @@ DOXYGENINSTALL = *.html *.css *.png *.gif
 if WML
 # themeing doxygen
 DOXYGENHEADER = doxy-header.html
+DOXYGENHEADERBUILD = $(DOXYGENHEADER).build
 DOXYGENFOOTER = doxy-footer.html
 DOXYGENSTYLESHEET = dune-doxy.css
 DOYXFILE_OVERWRITE = echo "HTML_HEADER = $(DOXYGENHEADER)"; \
@@ -40,7 +34,7 @@ endif
 
 
 #we need this in the distribution
-EXTRA_DIST = $(WHAT) html-dist $(DOXYGENHEADER) doxy-footer.html $(PAGES)
+EXTRA_DIST = $(WHAT) $(DOXYGEN_DIST) $(DOXYGENHEADER) doxy-footer.html $(PAGES)
 
 doxygendir = $(datadir)/doc/dune-grid/doxygen
 doxygen_DATA = $(WHAT)
@@ -53,23 +47,22 @@ install-data-local: html-dist
 	done
 
 uninstall-local:
-	rm -f $(DESTDIR)/$(doxygendir)/*.html
-	rm -f $(DESTDIR)/$(doxygendir)/*.css
-	rm -f $(DESTDIR)/$(doxygendir)/*.png
-	rm -f $(DESTDIR)/$(doxygendir)/*.gif
+	rm -f $(DESTDIR)/$(doxygendir)/*.html $(DESTDIR)/$(doxygendir)/*.css \
+	$(DESTDIR)/$(doxygendir)/*.png $(DESTDIR)/$(doxygendir)/*.gif
 
 # what files does the doxygen-generated stuff depend on (find-syntax)
 DEPENDON = -name \*.cc -o -name \*.hh -o -name \*.png
 
 # as all doxygen files fill be installed in the html subdirectory
 # the BASEDIR has to be adjusted
-doxy-header.html:BASEDIR=../../..
+%.build: FORCE
+	$(MAKE) $* BASEDIR=../../..
 
 # check dependency ourself to be robust
-doxygen-tag: FORCE $(DOXYGENHEADER)
+doxygen-tag: FORCE $(DOXYGENHEADERBUILD)
 	set -e; \
 	if test -e Doxyfile; then \
-	  if test ! -e doxygen-tag || test x"`find $(top_srcdir) \( $(DEPENDON) \) -a -cnewer doxygen-tag -print`" != x ; then \
+	  if test ! -e doxygen-tag || test x"`find $(top_srcdir) \( $(DEPENDON) \) -a -newer doxygen-tag -print`" != x ; then \
 	    echo Running doxygen. This may take a while... ; \
 	    ( cat Doxyfile; $(DOYXFILE_OVERWRITE) ) > Doxyfile.tmp; \
 	    $(DOXYGEN) Doxyfile.tmp > doxygen.log 2>&1 <&- ; \
@@ -80,7 +73,7 @@ doxygen-tag: FORCE $(DOXYGENHEADER)
 
 html: doxygen-tag
 
-html-dist: $(DOXYGENHEADER)
+html-dist: $(DOXYGENHEADERBUILD)
 	rm -rf html
 	set -e; \
 	if test -e Doxyfile; then \
@@ -89,8 +82,7 @@ html-dist: $(DOXYGENHEADER)
 	  $(DOXYGEN) Doxyfile.tmp > doxygen.log 2>&1 <&- ; \
 	  rm -f Doxyfile.tmp; \
 	fi
-	rm -rf html-dist
-	if test -d html; then mv html html-dist; fi
+	if test -d html; then rm -rf html-dist; mv html html-dist; fi
 
 # how to install the doxygen documentation
 doxygen-install:
