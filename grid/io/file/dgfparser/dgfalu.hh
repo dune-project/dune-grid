@@ -53,7 +53,7 @@ namespace Dune {
   template <>
   struct DGFGridInfo<ALUCubeGrid<3,3> > {
     static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return pow(0.5,dimworld);}
+    static double refineWeight() {return pow(0.5,3);}
   };
   template <int dimworld>
   struct DGFGridInfo< ALUSimplexGrid<dimworld,dimworld> > {
@@ -62,7 +62,7 @@ namespace Dune {
   };
   template <>
   struct DGFGridInfo< Dune::ALUConformGrid<3,3> > {
-    static int refineStepsForHalf() {return dimworld;}
+    static int refineStepsForHalf() {return 3;}
     static double refineWeight() {return 0.5;}
   };
 }
