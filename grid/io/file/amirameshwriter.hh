@@ -5,6 +5,9 @@
 
 #include <string>
 
+#include <amiramesh/AmiraMesh.h>
+
+
 namespace Dune {
 
   /** @ingroup AmiraMesh
@@ -38,6 +41,38 @@ namespace Dune {
                                  const std::string& filename,
                                  const IndexSetType& indexSet);
 
+    /** \brief Add grid with a given index set */
+    template <class GridType2, class IndexSetType2>
+    void addGrid(const GridType2& grid, const IndexSetType2& indexSet);
+
+    /** \brief Add level grid */
+    template <class GridType2>
+    void addLevelGrid(const GridType2& grid, int level);
+
+    /** \brief Add leaf grid */
+    template <class GridType2>
+    void addLeafGrid(const GridType2& grid);
+
+    /** \brief Add cell data */
+    template <class GridType2, class DataContainer>
+    void addCellData(const DataContainer& data, const GridType2& grid);
+
+    /** \brief Add vertex data
+        \param An ISTL compliant vector type
+        \param IndexSet of the grid that the data belongs to
+     */
+    template <class DataContainer>
+    void addVertexData(const DataContainer& data, const IndexSetType& indexSet);
+
+    /** \brief Write AmiraMesh object to disk
+        \param filename Name of the file to write to
+        \param ascii Set this if you want an ascii AmiraMesh file
+     */
+    void write(const std::string& filename, bool ascii=false) const;
+
+  protected:
+
+    AmiraMesh amiramesh_;
   };
 
   /** @ingroup AmiraMesh
@@ -45,13 +80,23 @@ namespace Dune {
    *
    */
   template<class GridType>
-  class LevelAmiraMeshWriter {
+  class LevelAmiraMeshWriter
+    : public AmiraMeshWriter<GridType,typename GridType::Traits::LevelIndexSet>
+  {
 
     enum {dim = GridType::dimension};
 
     typedef AmiraMeshWriter<GridType,typename GridType::Traits::LevelIndexSet> WriterType;
 
   public:
+
+    /** \brief Default constructor */
+    LevelAmiraMeshWriter() {}
+
+    /** \brief Constructor which initializes the AmiraMesh object with a given level grid */
+    LevelAmiraMeshWriter(const GridType& grid, int level) {
+      this->addLevelGrid(grid, level);
+    }
 
     /** \brief Write a grid in AmiraMesh format
      *
@@ -89,13 +134,23 @@ namespace Dune {
    *
    */
   template<class GridType>
-  class LeafAmiraMeshWriter {
+  class LeafAmiraMeshWriter
+    : public AmiraMeshWriter<GridType,typename GridType::Traits::LeafIndexSet>
+  {
 
     enum {dim = GridType::dimension};
 
     typedef AmiraMeshWriter<GridType,typename GridType::Traits::LeafIndexSet> WriterType;
 
   public:
+
+    /** \brief Default constructor */
+    LeafAmiraMeshWriter() {}
+
+    /** \brief Constructor which initializes the AmiraMesh object with a given leaf grid */
+    LeafAmiraMeshWriter(const GridType& grid) {
+      this->addLeafGrid(grid);
+    }
 
     /** \brief Write a grid in AmiraMesh format
      *
