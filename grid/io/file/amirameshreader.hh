@@ -4,7 +4,7 @@
 #define DUNE_AMIRAMESH_READER_HH
 
 #include <string>
-#include <dune/common/array.hh>
+
 #include <amiramesh/AmiraMesh.h>
 
 namespace Dune {
