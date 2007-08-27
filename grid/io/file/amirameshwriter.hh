@@ -21,16 +21,6 @@ namespace Dune {
 
   public:
 
-    /** \brief Write a grid in AmiraMesh format
-     *
-     * @param grid The grid objects that is to be written
-     * @param filename The filename
-     * @param indexSet The index set encodes whether the leaf grid or a level grid is written
-     */
-    static void writeGrid(const GridType& grid,
-                          const std::string& filename,
-                          const IndexSetType& indexSet);
-
     /** \brief Writes an ISTL block vector in AmiraMesh format
         @param filename The filename
         @param indexSet The index set encodes whether the vector lives of the
@@ -107,9 +97,8 @@ namespace Dune {
     static void writeGrid(const GridType& grid,
                           const std::string& filename,
                           int level) {
-      WriterType::writeGrid(grid,
-                            filename,
-                            grid.levelIndexSet(level));
+      LevelAmiraMeshWriter amiramesh(grid, level);
+      amiramesh.write(filename);
     }
 
     /** \brief Writes an ISTL block vector in AmiraMesh format
@@ -159,7 +148,8 @@ namespace Dune {
      */
     static void writeGrid(const GridType& grid,
                           const std::string& filename) {
-      WriterType::writeGrid(grid, filename, grid.leafIndexSet());
+      LeafAmiraMeshWriter amiramesh(grid);
+      amiramesh.write(filename);
     }
 
     /** \brief Writes an ISTL block vector in AmiraMesh format
