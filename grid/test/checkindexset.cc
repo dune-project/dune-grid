@@ -45,8 +45,9 @@ namespace Dune {
                         OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
                         MapType3 & vertexCoordsMap )
   {
-    GeometryType type = en.geometry().type();
+    GeometryType type = en.type();
     enum { dim = EntityType::dimension };
+    const int dimworld = GridType::dimensionworld;
     typedef typename EntityType :: ctype coordType;
 
     const ReferenceElement< coordType, dim > & refElem =
@@ -116,10 +117,10 @@ namespace Dune {
             typedef typename GridType :: template Codim<dim> :: EntityPointer VertexPointerType;
             VertexPointerType vxp = en.template entity<dim> (local[j]);
 
-            FieldVector<coordType,dim> vx ( vxp->geometry()[0]);
+            FieldVector<coordType,dimworld> vx ( vxp->geometry()[0]);
             if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
             {
-              FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[global[j]] );
+              FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
               if( ! compareVec( vxcheck, vx ) )
               {
                 std::cerr << "ERROR map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
@@ -135,10 +136,10 @@ namespace Dune {
           // otherwise one of the theoretical conditions is violated
           assert( subenp.level() == en.level() );
 
-          FieldVector<coordType,dim> vx ( subenp->geometry()[j]);
+          FieldVector<coordType,dimworld> vx ( subenp->geometry()[j]);
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
-            FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[global[j]] );
+            FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
             if( ! compareVec( vxcheck, vx ) )
             {
               std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
@@ -202,6 +203,7 @@ namespace Dune {
                                OutputStreamImp & sout , bool levelIndex )
   {
     enum { dim = GridType :: dimension };
+    enum { dimworld = GridType :: dimensionworld };
 
     sout <<"\n\nStart consistency check of index set \n\n";
     typedef typename IndexSetType :: template Codim<0>::template Partition<All_Partition> :: Iterator Iterator;
@@ -329,7 +331,7 @@ namespace Dune {
     std::map < SubEntityKeyType , std::vector<int> > subEntities;
     std::map < std::vector<int> , SubEntityKeyType > vertices;
 
-    std::map < int , FieldVector<coordType,dim> > vertexCoordsMap;
+    std::map < int , FieldVector<coordType,dimworld> > vertexCoordsMap;
     // setup vertex map , store vertex coords for vertex number
     {
       unsigned int count = 0;
@@ -340,7 +342,7 @@ namespace Dune {
       {
         count ++ ;
         // get coordinates of vertex
-        FieldVector<coordType,dim> vx ( it->geometry()[0] );
+        FieldVector<coordType,dimworld> vx ( it->geometry()[0] );
 
         // get index of vertex
         sout << "Vertex " << vx << "\n";
@@ -423,7 +425,7 @@ namespace Dune {
           VertexPointerType vxp = it->template entity<dim> (i);
 
           // get coordinates of entity pointer
-          FieldVector<coordType,dim> vx (vxp->geometry()[0]);
+          FieldVector<coordType,dimworld> vx (vxp->geometry()[0]);
 
           // output vertex coordinates
           if(i<svx-1) sout << vx << " , ";
@@ -437,7 +439,7 @@ namespace Dune {
 
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
-          FieldVector<coordType,dim> vxcheck ( vertexCoordsMap[vxidx] );
+          FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[vxidx] );
           if( ! compareVec( vxcheck, vx ) )
           {
             sout << "ERROR: map global vertex " << vxidx << " vx " << vxcheck << " is not " << vx << " type:" << it->partitionType() << "\n";
