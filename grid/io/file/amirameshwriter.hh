@@ -21,16 +21,6 @@ namespace Dune {
 
   public:
 
-    /** \brief Writes an ISTL block vector in AmiraMesh format
-        @param filename The filename
-        @param indexSet The index set encodes whether the vector lives of the
-        leaf grid or on a level grid
-     */
-    template <class VectorType>
-    static void writeBlockVector(const VectorType& f,
-                                 const std::string& filename,
-                                 const IndexSetType& indexSet);
-
     /** \brief Add grid with a given index set */
     template <class GridType2, class IndexSetType2>
     void addGrid(const GridType2& grid, const IndexSetType2& indexSet);
@@ -113,7 +103,9 @@ namespace Dune {
                                  const std::string& filename,
                                  int level) {
 
-      WriterType::template writeBlockVector<VectorType>(f, filename, grid.levelIndexSet(level));
+      LevelAmiraMeshWriter amiramesh;
+      amiramesh.addVertexData(f, grid.levelIndexSet(level));
+      amiramesh.write(filename);
     }
 
   };
@@ -161,7 +153,9 @@ namespace Dune {
     static void writeBlockVector(const GridType& grid,
                                  const VectorType& f,
                                  const std::string& filename) {
-      WriterType::template writeBlockVector<VectorType>(f, filename, grid.leafIndexSet());
+      LeafAmiraMeshWriter amiramesh;
+      amiramesh.addVertexData(f, grid.leafIndexSet());
+      amiramesh.write(filename);
     }
 
   };
