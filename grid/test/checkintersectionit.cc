@@ -92,7 +92,10 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   const bool checkOutside = (grid.name() != "AlbertaGrid");
   const typename GridPartType::IndexSetType& indexSet = gridPart.indexSet();
 
-  FieldVector<double,GridType::dimension> sumNormal(0.0);
+  const int dim      = GridType::dimension;
+  const int dimworld = GridType::dimensionworld;
+
+  FieldVector<double,dimworld> sumNormal(0.0);
 
   // /////////////////////////////////////////////////////////
   //   Check the types defined by the iterator
@@ -228,8 +231,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
         DUNE_THROW(GridError, "integrationElement and length of integrationOuterNormal do no match!");
       }
 
-      FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
-      FieldVector<double,GridType::dimension> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
+      FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
+      FieldVector<double,dimworld> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
 
       if ( (globalPos - localPos).infinity_norm() > 1e-6)
         DUNE_THROW(GridError, "global( intersectionSelfLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");
@@ -258,8 +261,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
       for (size_t i=0; i<quad.size(); i++)
       {
 
-        FieldVector<double,GridType::dimension> globalPos = intersectionGlobal.global(quad[i].position());
-        FieldVector<double,GridType::dimension> localPos  = iIt.outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
+        FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
+        FieldVector<double,dimworld> localPos  = iIt.outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
 
         if ( (globalPos - localPos).infinity_norm() > 1e-6)
           DUNE_THROW(GridError, "global( intersectionNeighborLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");
