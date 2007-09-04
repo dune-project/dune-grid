@@ -22,6 +22,7 @@ void checkGeometryInFather(const GridType& grid) {
   using namespace Dune;
 
   typedef typename GridType::ctype ctype;
+  const int dim      = GridType::dimension;
   const int dimworld = GridType::dimensionworld;
 
   // We need at least two levels to do any checking
@@ -99,8 +100,9 @@ void checkGeometryInFather(const GridType& grid) {
 
       // Get geometry in father
       typedef typename GridType::template Codim<0>::Entity::Geometry Geometry;
+      typedef typename GridType::template Codim<0>::Entity::LocalGeometry LocalGeometry;
 
-      const Geometry& geometryInFather = eIt->geometryInFather();
+      const LocalGeometry& geometryInFather = eIt->geometryInFather();
 
       // //////////////////////////////////////////////////////
       //   Check for types and constants
@@ -132,7 +134,7 @@ void checkGeometryInFather(const GridType& grid) {
         DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
 
       // Compute the element center just to have an argument for the following methods
-      FieldVector<ctype, Geometry::coorddimension> center(0);
+      FieldVector<ctype, dim> center(0);
       for (int j=0; j<geometryInFather.corners(); j++)
         center += geometryInFather[j];
 
@@ -150,7 +152,7 @@ void checkGeometryInFather(const GridType& grid) {
       // /////////////////////////////////////////////////////////////////////////////////////
       for (int j=0; j<geometryInFather.corners(); j++) {
 
-        FieldVector<ctype, dimworld> localPos = eIt->father()->geometry().local(eIt->geometry()[j]);
+        FieldVector<ctype, dim> localPos = eIt->father()->geometry().local(eIt->geometry()[j]);
 
         if ( (localPos-geometryInFather[j]).infinity_norm() > 1e-7)
         {
