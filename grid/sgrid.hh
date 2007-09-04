@@ -448,6 +448,7 @@ namespace Dune {
     enum { dimworld = GridImp::dimensionworld };
   public:
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
+    typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
     typedef SMakeableGeometry<dim, dimworld, const GridImp> MakeableGeometry;
     template <int cd>
     struct Codim
@@ -551,7 +552,7 @@ namespace Dune {
        on-the-fly implementation of numerical algorithms is only done for
        simple discretizations.  Assumes that meshes are nested.
      */
-    const Geometry& geometryInFather () const;
+    const LocalGeometry& geometryInFather () const;
 
     /**
        @brief Inter-level access to son elements on higher levels<=maxLevel.
@@ -594,7 +595,7 @@ namespace Dune {
 
     mutable bool built_father;
     mutable int father_id;
-    mutable MakeableGeometry in_father_local;
+    mutable SMakeableGeometry<dim,dim,const GridImp> in_father_local;
     void make_father() const;
   };
 
@@ -1184,10 +1185,10 @@ namespace Dune {
   //************************************************************************
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
-     \brief A structured mesh in d dimensions consisting of "cubes" (pilot implementation of the Dune grid interface, for debugging only).
+     \brief A structured mesh in d dimensions consisting of "cubes" (pilot implementation of the %Dune grid interface, for debugging only).
      \ingroup GridImplementations
 
-          This module describes the pilot implementation of the Dune grid interface.
+          This module describes the pilot implementation of the %Dune grid interface.
           It implements the grid interface for simple structured meshes.
 
           \warning SGrid is slow. It is intended for debugging only.
@@ -1228,10 +1229,12 @@ namespace Dune {
      The Grid is assumed to be hierachically refined and nested. It enables iteration over
      entities of a given level and codimension.
 
-     The grid can consist of several subdomains and it can be non-matching.
-
      All information is provided to allocate degrees of freedom in appropriate vector
-     data structures (which are not part of this module).
+     data structures.
+
+     \note When SGrid is instantiated with dimworld strictly greater than dim, the result is a
+     dim-dimensional structured grid which is embedded in the first dim components of
+     dimworld-dimensional Euclidean space.
    */
   template<int dim, int dimworld>
   class SGrid : public GridDefaultImplementation <dim,dimworld,sgrid_ctype,SGridFamily<dim,dimworld> >
@@ -1425,7 +1428,7 @@ namespace Dune {
 
 
     //! map expanded coordinates to position
-    FieldVector<sgrid_ctype, dim> pos (int level, array<int,dim>& z) const;
+    FieldVector<sgrid_ctype, dimworld> pos (int level, array<int,dim>& z) const;
 
     //! compute codim from coordinate
     int calc_codim (int level, const array<int,dim>& z) const;

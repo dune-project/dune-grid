@@ -233,7 +233,7 @@ namespace Dune {
 
     // count number of direction vectors found
     int dir=0;
-    FieldVector<sgrid_ctype, dim> p1,p2;
+    FieldVector<sgrid_ctype, dimworld> p1,p2;
     array<int,dim> t=z;
 
     // check all directions
@@ -374,7 +374,7 @@ namespace Dune {
     father_id = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
     // now make a subcube of size 1/2 in each direction
-    FieldMatrix<sgrid_ctype,dim+1,dimworld> __As;
+    FieldMatrix<sgrid_ctype,dim+1,dim> __As;
     FieldVector<sgrid_ctype, dim> v;
     for (int i=0; i<dim; i++)
     {
@@ -400,7 +400,7 @@ namespace Dune {
 
   template<int dim, class GridImp>
   inline
-  const typename GridImp::template Codim<0>::Geometry&
+  const typename GridImp::template Codim<0>::LocalGeometry&
   SEntity<0,dim,GridImp>::geometryInFather () const
   {
     if (!built_father) make_father();
@@ -633,43 +633,47 @@ namespace Dune {
       z1[dir] -= 1;           // even
 
     // z1 is even in direction dir, all others must be odd because it is codim 1
-    FieldMatrix<sgrid_ctype,dim,dim> __As;
-    FieldVector<sgrid_ctype, dim> p1,p2;
+    FieldMatrix<sgrid_ctype,dim,dim> __AsLocal;
+    FieldVector<sgrid_ctype, dim> p1Local,p2Local;
+
     int t;
 
     // local coordinates in self
-    p1 = 0.0;
-    p1[dir] = c;        // all points have p[dir]=c in entity
-    __As[dim-1] = p1;     // position vector
+    p1Local = 0.0;
+    p1Local[dir] = c;        // all points have p[dir]=c in entity
+    __AsLocal[dim-1] = p1Local;     // position vector
     t = 0;
     for (int i=0; i<dim; ++i)     // this loop makes dim-1 direction vectors
       if (i!=dir)
       {
         // each i!=dir gives one direction vector
-        p2 = p1;
-        p2[i] = 1.0;
-        __As[t] = p2-p1;                 // a direction vector
+        p2Local = p1Local;
+        p2Local[i] = 1.0;
+        __AsLocal[t] = p2Local-p1Local;                 // a direction vector
         ++t;
       }
-    is_self_local.make(__As);     // build geometry
+    is_self_local.make(__AsLocal);     // build geometry
 
     // local coordinates in neighbor
-    p1 = 0.0;
-    p1[dir] = 1-c;        // all points have p[dir]=1-c in entity
-    __As[dim-1] = p1;       // position vector
+    p1Local = 0.0;
+    p1Local[dir] = 1-c;        // all points have p[dir]=1-c in entity
+    __AsLocal[dim-1] = p1Local;       // position vector
     t = 0;
     for (int i=0; i<dim; ++i)     // this loop makes dim-1 direction vectors
       if (i!=dir)
       {
         // each i!=dir gives one direction vector
-        p2 = p1;
-        p2[i] = 1.0;
-        __As[t] = p2-p1;                 // a direction vector
+        p2Local = p1Local;
+        p2Local[i] = 1.0;
+        __AsLocal[t] = p2Local-p1Local;                 // a direction vector
         ++t;
       }
-    is_nb_local.make(__As);     // build geometry
+    is_nb_local.make(__AsLocal);     // build geometry
 
     // global coordinates
+
+    FieldMatrix<sgrid_ctype,dim,dimworld> __As;
+    FieldVector<sgrid_ctype, dimworld> p1,p2;
     t = 0;
     for (int i=0; i<dim; i++)
       if (i!=dir)
@@ -928,11 +932,16 @@ namespace Dune {
   }
 
   template<int dim, int dimworld>
-  inline FieldVector<sgrid_ctype, dim> SGrid<dim,dimworld>::pos (int level, array<int,dim>& z) const
+  inline FieldVector<sgrid_ctype, dimworld> SGrid<dim,dimworld>::pos (int level, array<int,dim>& z) const
   {
-    FieldVector<sgrid_ctype, dim> x;
+    FieldVector<sgrid_ctype, dimworld> x;
     for (int k=0; k<dim; k++)
       x[k] = (z[k]*h[level][k])*0.5 + low[k];
+
+    // Fill up additional coordinates with zero
+    for (int k=dim; k<dimworld; k++)
+      x[k] = 0;
+
     return x;
   }
 
