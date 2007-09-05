@@ -92,7 +92,6 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   const bool checkOutside = (grid.name() != "AlbertaGrid");
   const typename GridPartType::IndexSetType& indexSet = gridPart.indexSet();
 
-  const int dim      = GridType::dimension;
   const int dimworld = GridType::dimensionworld;
 
   FieldVector<double,dimworld> sumNormal(0.0);

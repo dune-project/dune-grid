@@ -23,7 +23,6 @@ void checkGeometryInFather(const GridType& grid) {
 
   typedef typename GridType::ctype ctype;
   const int dim      = GridType::dimension;
-  const int dimworld = GridType::dimensionworld;
 
   // We need at least two levels to do any checking
   if (grid.maxLevel()==0)
