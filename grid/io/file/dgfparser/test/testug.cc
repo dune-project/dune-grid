@@ -4,9 +4,7 @@
 #include <iostream>
 #include <string>
 
-#if HAVE_UG
-#include "../dgfug.hh"
-#endif
+#include <dune/grid/io/file/dgfparser/dgfparser.hh>
 
 // use grid check
 #include <dune/grid/test/gridcheck.cc>
