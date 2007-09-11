@@ -93,19 +93,6 @@ const int dimworld = 3;
 const int dimworld = GRIDDIM;
 #endif
 
-#include <dune/grid/yaspgrid.hh>
-#include <dune/grid/onedgrid.hh>
-#include <dune/grid/sgrid.hh>
-#ifdef HAVE_UG
-#include <dune/grid/uggrid.hh>
-#endif
-#ifdef HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
-#ifdef HAVE_ALBERTA
-#include <dune/grid/albertagrid.hh>
-#endif
-
 #if defined ALBERTAGRID
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
@@ -113,6 +100,7 @@ const int dimworld = GRIDDIM;
   #if GRIDDIM < 2 || GRIDDIM > 3
     #error "ALBERTAGRID is only available for GRIDDIM=2 and GRIDDIM=3"
   #endif
+  #include <dune/grid/albertagrid.hh>
 typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
 #elif defined ALUGRID_CUBE
   #if not HAVE_ALUGRID
@@ -121,6 +109,7 @@ typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
   #if GRIDDIM != 3
     #error ALUGRID_CUBE is only available for GRIDDIM=3
   #endif
+  #include <dune/grid/alugrid.hh>
 typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
 #elif defined ALUGRID_SIMPLEX
   #if not HAVE_ALUGRID
@@ -129,6 +118,7 @@ typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
   #if GRIDDIM < 2 || GRIDDIM > 3
     #error ALUGRID_SIMPLEX is only available for GRIDDIM=2 and GRIDDIM=3
   #endif
+  #include <dune/grid/alugrid.hh>
 typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
 #elif defined ALUGRID_CONFORM && HAVE_ALUGRID
   #if not HAVE_ALUGRID
@@ -137,13 +127,16 @@ typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
   #if GRIDDIM != 3
     #error ALUGRID_CONFORM is only available for GRIDDIM=3
   #endif
+  #include <dune/grid/alugrid.hh>
 typedef Dune::ALUConformGrid<dimworld,dimworld> GridType;
 #elif defined ONEDGRID
   #if GRIDDIM != 1
     #error ONEDGRID is only available for GRIDDIM=1
   #endif
+  #include <dune/grid/onedgrid.hh>
 typedef Dune::OneDGrid GridType;
 #elif defined SGRID
+  #include <dune/grid/sgrid.hh>
 typedef Dune::SGrid<dimworld,dimworld> GridType;
 #elif defined UGGRID
   #if not HAVE_UG
@@ -152,11 +145,14 @@ typedef Dune::SGrid<dimworld,dimworld> GridType;
   #if GRIDDIM < 2 || GRIDDIM > 3
     #error UGGRID is only available for GRIDDIM=2 and GRIDDIM=3
   #endif
+  #include <dune/grid/uggrid.hh>
 typedef Dune::UGGrid<dimworld> GridType;
 #elif defined YASPGRID
+  #include <dune/grid/yaspgrid.hh>
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
 #else
 // fallback
+  #include <dune/grid/yaspgrid.hh>
 typedef Dune::YaspGrid<dimworld,dimworld> GridType;
   #warning --- No GRIDTYPE defined, defaulting to YASPGRID
 #endif
