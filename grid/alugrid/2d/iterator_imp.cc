@@ -365,10 +365,6 @@ namespace Dune {
   {
     int ret = (nrInChild==0) ? (2-nrOfChild) :
               ((nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0) ? -1 : 0);
-    //int ret = (nrInChild==0) ? (2-nrOfChild) : 0;
-    //if (ret==0)
-    //  if(nrInChild-nrOfChild==2 || nrInChild-nrOfChild==0)
-    //    ret = -1;
     assert(ret >= -1 && ret < 3);
     return ret;
   }
@@ -379,10 +375,6 @@ namespace Dune {
   {
     int ret = (nrInFather==0) ? (nrOfChild+1) :
               ((nrInFather-nrOfChild==1) ? -1 : 0);
-    //int ret = (nrInFather==0) ? (nrOfChild+1) : 0;
-    //if (ret==0)
-    //  if(nrInFather-nrOfChild==1)
-    //    ret = -1;
     assert( ret >= -1 && ret < 3 );
     return ret;
   }
@@ -549,7 +541,8 @@ namespace Dune {
     }
     else {
       this->current.isBoundary_ = false;
-      if (this->current.neigh_->level() != this->walkLevel_) {
+      if (this->current.neigh_->level() != this->walkLevel_)
+      {
         // index is increased in increment again
         this->current.index_ = -1;
         this->current.neigh_ = 0;
@@ -623,7 +616,8 @@ namespace Dune {
   template<class GridImp>
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: increment ()
   {
-    if (this->current.index_ >= this->nFaces_) {
+    if (this->current.index_ >= this->nFaces_)
+    {
       this->done();
       return ;
     }
@@ -650,26 +644,29 @@ namespace Dune {
       return;
     }
 
+    // non-conform case
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
       this->current.isNotConform_ = true;
-      assert(nbStack_.empty());
+      // stack should be empty here
+      assert( nbStack_.empty() );
+
       IntersectionInfo dummy;
 
+      // insert left intersection
       dummy.first = this->current.item_->getLeftIntersection(this->current.index_);
       dummy.second.first = this->current.item_->opposite(this->current.index_);
       dummy.second.second = (dummy.first==0) ? true : false ;
       nbStack_.push(dummy);
 
+      // insert right intersection
       dummy.first = this->current.item_->getRightIntersection(this->current.index_);
       dummy.second.first = this->current.item_->opposite(this->current.index_);
       dummy.second.second = (dummy.first==0) ? true : false ;
       nbStack_.push(dummy);
 
-      if (nbStack_.empty()) {
-        increment();
-        return;
-      }
+      // nbStack should contain some elements here
+      assert( ! nbStack_.empty() );
 
       IntersectionInfo& info    = nbStack_.top();
       this->current.neigh_      = static_cast<HElementType *>(info.first);
@@ -678,7 +675,8 @@ namespace Dune {
       nbStack_.pop();
     }
     //conform case
-    else {
+    else
+    {
       this->current.isNotConform_ = false;
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
       if (this->current.neigh_ == 0)

@@ -128,9 +128,6 @@ namespace Dune {
     //! check whether entities are the same or whether iterator is done
     bool equals (const ThisType & i) const;
 
-    //! increment iterator
-    virtual void increment() { };
-
     //! return level of inside(entity)
     int level () const;
 
