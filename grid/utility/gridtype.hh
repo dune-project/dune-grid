@@ -124,8 +124,8 @@ typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
   #if not HAVE_ALUGRID
     #error "ALUGRID_CONFORM defined but no ALUGRID version found!"
   #endif
-  #if GRIDDIM != 3
-    #error ALUGRID_CONFORM is only available for GRIDDIM=3
+  #if GRIDDIM != 2
+    #error ALUGRID_CONFORM is only available for GRIDDIM=2
   #endif
   #include <dune/grid/alugrid.hh>
 typedef Dune::ALUConformGrid<dimworld,dimworld> GridType;
