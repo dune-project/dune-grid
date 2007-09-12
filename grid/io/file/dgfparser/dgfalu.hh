@@ -61,9 +61,9 @@ namespace Dune {
     static double refineWeight() {return pow(0.5,dimworld);}
   };
   template <>
-  struct DGFGridInfo< Dune::ALUConformGrid<3,3> > {
-    static int refineStepsForHalf() {return 3;}
-    static double refineWeight() {return 0.5;}
+  struct DGFGridInfo< Dune::ALUConformGrid<2,2> > {
+    static int refineStepsForHalf() { return 2; }
+    static double refineWeight() { return 0.5; }
   };
 }
 #include "dgfalu.cc"
