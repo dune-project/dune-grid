@@ -108,6 +108,9 @@ namespace Dune {
     YaspSpecialGeometry(const FieldVector<ctype, cdim>& p) :
       Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(p))
     {}
+    YaspSpecialGeometry(const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, int& m) :
+      Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(p))
+    {}
     YaspSpecialGeometry() :
       Geometry<0, cdim, GridImp, YaspGeometry>(YaspGeometry<0, cdim, GridImp>(false))
     {};
@@ -402,9 +405,6 @@ namespace Dune {
     operator = (const YaspGeometry<mydim,mydim,GridImp>& g);
   };
 
-
-
-
   //! specialization for dim=0, this is a vertex
   template<int cdim, class GridImp>
   class YaspGeometry<0,cdim,GridImp> : public GeometryDefaultImplementation<0,cdim,GridImp,YaspGeometry>
@@ -428,6 +428,13 @@ namespace Dune {
     const FieldVector<ctype, cdim>& operator[] (int i) const
     {
       return position;
+    }
+
+    /*! determinant of the jacobian of the mapping
+     */
+    ctype integrationElement (const FieldVector<ctype, 0>& local) const
+    {
+      return 1.0;
     }
 
     //! constructor
@@ -1149,7 +1156,7 @@ namespace Dune {
   };
 
 
-  // specialization for codim=dim
+  // specialization for codim=dim (vertex)
   template<int dim, class GridImp>
   class YaspEntity<dim,dim,GridImp>
     : public EntityDefaultImplementation <dim,dim,GridImp,YaspEntity>
