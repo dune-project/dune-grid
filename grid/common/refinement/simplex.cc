@@ -25,7 +25,7 @@
    This is mainly based on Jürgen Beys
    <http://www.igpm.rwth-aachen.de/bey/> dissertation.  The relevant
    part is available from
-   <http://www.igpm.rwth-aachen.de/bey/ftp/simplex.ps.gz>.
+   <http://www.igpm.rwth-aachen.de/Download/reports/bey/simplex.ps.gz>.
 
    @section Terminology
    <!--=============-->
