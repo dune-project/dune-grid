@@ -963,31 +963,19 @@ namespace Dune {
         if the grid is constructed using the \b Interval block.
  */
 
-/*! @brief Some simple static information for a given GridType
- */
 namespace Dune {
+
+  /*! @brief Some simple static information for a given GridType
+   */
   template <class GridType>
-  struct DGFGridInfo {
+  struct DGFGridInfo
+  {
     //! number of globalRefine steps needed to refuce h by 0.5
     static int refineStepsForHalf();
     //! relation between volume of children to volume of father.
     //! If this is not a constant the return value is -1
     static double refineWeight();
   };
-}
 
-/* include the implementations */
-#if HAVE_ALBERTA
-#include "dgfalberta.hh"
-#endif
-#if HAVE_ALUGRID
-#include "dgfalu.hh"
-#endif
-#if HAVE_UG
-#include "dgfug.hh"
-#endif
-#include "dgfoned.hh"
-#include "dgfyasp.hh"
-#include "dgfs.hh"
-
+} // end namespace Dune
 #endif

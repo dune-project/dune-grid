@@ -29,7 +29,6 @@ namespace Dune {
     generate(MacroGrid& mg,
              const char* filename,
              MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-    // private:
   protected:
     inline void
     generateAlu3d(MacroGrid& mg,
