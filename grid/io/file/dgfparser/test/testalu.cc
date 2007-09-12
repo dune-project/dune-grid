@@ -40,6 +40,17 @@ try {
   }
 
   {
+    typedef ALUConformGrid<2,2> GridType;
+    std::string filename(SRCDIR "/examplegrid5.dgf");
+    GridPtr<GridType> gridptr(filename);
+
+    // run grid check to check grid
+    gridcheck(*gridptr);
+
+    test(*gridptr);
+  }
+
+  {
     typedef ALUCubeGrid<3,3> GridType;
     std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
