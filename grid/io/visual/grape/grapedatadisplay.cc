@@ -127,25 +127,13 @@ namespace Dune
       LocalFuncType lf = func.localFunction( en );
 
       int dimVal = df->dimVal;
-      switch (dimVal)
-      {
-      case 1 :
-      {
+      if (dim==1 || dimVal==1) {
         evalScalar(en,geomType, func,lf,comp,localNum,val);
-        return;
-      }
-
-      case dim :
-      {
+      } else if (dim!=1 && dimVal==dim) {
         evalVector(en,geomType,func,lf,df->comp,dimVal,localNum,val);
-        return;
-      }
-      default :
-      {
+      } else {
         assert(false);
         evalVector(en,geomType,func,lf,df->comp,dimVal,localNum,val);
-        return;
-      }
       }
       return;
     }
