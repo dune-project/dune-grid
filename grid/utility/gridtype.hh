@@ -4,6 +4,7 @@
 #define DUNE_GRIDTYPE_HH
 /**
  * @file
+ * @author Andreas Dedner
  * @brief  A simple strategy for defining a grid type depending on
  * defines set during the make proecess:
  *
@@ -41,7 +42,7 @@
  * To use this feature, the following code should always be called at the beginning
  * of the function main:
  * @code
- *#include <dune/grid/io/file/dgfparser/gridtype.hh>
+ *#include <dune/grid/utility/gridtype.hh>
 
    ...
 
@@ -55,10 +56,8 @@
    int mysize = mpiHelper.size();
 
    ...
-   // construct the grid
-   GridPtr<GridType> grid(argv[1], mpiHelper.getCommunicator() );
-
-   GridType & grid = *gridptr;
+   // construct the grid, see documentation for constructors
+   GridType grid;
    ...
 
    // as the MPIHelper is a singleton, on it's destruction the
@@ -82,7 +81,6 @@
  * pre-processoer variables to gridtype.hh and are then used to define the \c typedef \c
  * GridType.
  *
- * @author Andreas Dedner
  */
 
 #ifndef GRIDDIM
