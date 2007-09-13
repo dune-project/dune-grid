@@ -2,7 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFPARSERALBERTA_HH
 #define DUNE_DGFPARSERALBERTA_HH
-#if HAVE_ALBERTA
+
+// only include if ALBERTA is used
+#if defined ENABLE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
@@ -23,4 +25,5 @@ namespace Dune {
 }
 #include "dgfalberta.cc"
 #endif
+
 #endif

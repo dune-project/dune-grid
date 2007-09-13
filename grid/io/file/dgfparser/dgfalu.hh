@@ -2,7 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFPARSERALU_HH
 #define DUNE_DGFPARSERALU_HH
-#if HAVE_ALUGRID
+
+// only include if ALUGrid is used
+#if defined ENABLE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
@@ -67,4 +69,5 @@ namespace Dune {
 }
 #include "dgfalu.cc"
 #endif
+
 #endif
