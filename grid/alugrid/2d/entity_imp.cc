@@ -356,7 +356,8 @@ namespace Dune {
 
   //! has to be called when iterator is finished
   template<int cd, class GridImp>
-  inline void ALU2dGridEntityPointer<cd, GridImp> :: done() {
+  inline void ALU2dGridEntityPointer<cd, GridImp> :: done()
+  {
     item_ = 0;
     face_ = -1; // set face to non-valid value
     // sets entity pointer in the status of an empty entity
@@ -437,7 +438,8 @@ namespace Dune {
 
   //! Destructor
   template<int cd, class GridImp>
-  inline ALU2dGridEntityPointer<cd, GridImp>::~ALU2dGridEntityPointer() {
+  inline ALU2dGridEntityPointer<cd, GridImp>::~ALU2dGridEntityPointer()
+  {
     this->done();
   }
 
@@ -461,14 +463,29 @@ namespace Dune {
   inline int ALU2dGridEntityPointer<cd, GridImp>:: level () const
   {
     assert( item_ );
-    if (level_ == -1) {
-      if (cd!=2)
-        level_ = item_->level();
-      else
+    if (level_ == -1)
+    {
+      if (cd == 2)
+      {
+        // ????
         level_ = item_->level()+1;
+      }
+      else
+      {
+        level_ = item_->level();
+      }
     }
     return level_;
   }
+
+  //! ask for level of entities
+  template<>
+  inline int ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> >:: level () const
+  {
+    assert( item_ );
+    return (level_ == -1) ? item_->level() : level_;
+  }
+
   template<int cd, class GridImp>
   inline typename ALU2dGridEntityPointer<cd, GridImp>:: ThisType &
   ALU2dGridEntityPointer<cd, GridImp>:: operator = (const typename ALU2dGridEntityPointer<cd, GridImp>::ThisType & org)
@@ -476,8 +493,8 @@ namespace Dune {
     this->done();
     entity_ = 0;
     assert(&grid_ == &org.grid_);
-    item_ = org.item_;
-    face_ = org.face_;
+    item_  = org.item_;
+    face_  = org.face_;
     level_ = org.level_;
     return *this;
   }
