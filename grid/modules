@@ -88,6 +88,9 @@
         /** @defgroup VTK Visualization ToolKit (VTK)
             @ingroup IO */
         
+        /** @defgroup Gnuplot
+            @ingroup IO */
+        
         /** @defgroup Grape Grape
             @ingroup IO */
 

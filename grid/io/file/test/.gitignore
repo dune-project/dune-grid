@@ -4,6 +4,8 @@ Makefile.in
 .libs
 test-albertawriter
 vtktest
+gnuplottest
+*.data
 *.vtp
 *.vtu
 semantic.cache
