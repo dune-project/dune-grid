@@ -3,7 +3,7 @@
 #include <config.h>
 #include <dune/grid/test/gridcheck.cc>
 #include <dune/grid/common/gridpart.hh>
-#include "../gridtype.hh"
+#include "../dgfgridtype.hh"
 #include <dune/grid/common/gridpart.hh>
 using namespace Dune;
 #if HAVE_GRAPE
