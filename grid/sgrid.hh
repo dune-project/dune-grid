@@ -1026,7 +1026,7 @@ namespace Dune {
       template<PartitionIteratorType pitype>
       struct Partition
       {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
+        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
       };
     };
   };
@@ -1090,14 +1090,14 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
     {
-      return grid.template lbegin<cd,pitype>(grid.maxLevel());
+      return grid.template leafbegin<cd,pitype>();
     }
 
     //! Iterator to one past the last entity of given codim on level for partition type
     template<int cd, PartitionIteratorType pitype>
     typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
     {
-      return grid.template lend<cd,pitype>(grid.maxLevel());
+      return grid.template leafend<cd,pitype>();
     }
 
   private:
