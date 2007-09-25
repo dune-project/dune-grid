@@ -79,7 +79,7 @@ int main () {
       gridcheck(grid); // check macro grid
       for(int i=0; i<2; i++)
       {
-        grid.globalRefine(1);
+        grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
         gridcheck(grid);
       }
 

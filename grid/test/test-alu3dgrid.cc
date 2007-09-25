@@ -130,7 +130,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // be careful, each global refine create 8 x maxlevel elements
   gridcheck(grid);
   for(int i=0; i<mxl; i++) {
-    grid.globalRefine(1);
+    grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
     gridcheck(grid);
   }
 
