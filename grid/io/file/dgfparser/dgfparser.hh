@@ -974,20 +974,6 @@ namespace Dune {
     //! If this is not a constant the return value is -1
     static double refineWeight();
   };
-}
 
-/* include the implementations */
-#if HAVE_ALBERTA
-#include "dgfalberta.hh"
-#endif
-#if HAVE_ALUGRID
-#include "dgfalu.hh"
-#endif
-#if HAVE_UG
-#include "dgfug.hh"
-#endif
-#include "dgfoned.hh"
-#include "dgfyasp.hh"
-#include "dgfs.hh"
-
+} // end namespace Dune
 #endif
