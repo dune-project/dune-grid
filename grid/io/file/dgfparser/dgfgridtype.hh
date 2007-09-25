@@ -91,7 +91,7 @@
   #include <dune/grid/io/file/dgfparser/dgfalberta.hh>
 #elif defined ALUGRID_CUBE || defined ALUGRID_SIMPLEX || defined ALUGRID_CONFORM
   #if not HAVE_ALUGRID
-    #error "ALUGRID_CUBE defined but no ALUGRID version found!"
+    #error "ALUGRID_{CUBE,SIMPLEX,CONFORM} defined but no ALUGRID version found!"
   #endif
   #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #elif defined ONEDGRID
