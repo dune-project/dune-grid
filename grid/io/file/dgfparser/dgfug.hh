@@ -2,7 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFPARSERUG_HH
 #define DUNE_DGFPARSERUG_HH
-#if HAVE_UG
+// only include if UG is used
+#if defined ENABLE_UG
 #include <dune/grid/uggrid.hh>
 #include "dgfparser.hh"
 namespace Dune {

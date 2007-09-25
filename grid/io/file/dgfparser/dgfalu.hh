@@ -2,7 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFPARSERALU_HH
 #define DUNE_DGFPARSERALU_HH
-#if HAVE_ALUGRID
+// only include if ALUGrid is used
+#if defined ENABLE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
@@ -61,8 +62,8 @@ namespace Dune {
     static double refineWeight() {return pow(0.5,dimworld);}
   };
   template <>
-  struct DGFGridInfo< Dune::ALUConformGrid<3,3> > {
-    static int refineStepsForHalf() {return 3;}
+  struct DGFGridInfo< Dune::ALUConformGrid<2,2> > {
+    static int refineStepsForHalf() {return 2;}
     static double refineWeight() {return 0.5;}
   };
 }
