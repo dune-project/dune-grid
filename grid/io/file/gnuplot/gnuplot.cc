@@ -19,7 +19,7 @@ namespace Dune {
     // open file
     std::ofstream file(filename.c_str());
     // write all column names
-    file << "coord\t";
+    file << "# coord\t";
     for (size_t i=0; i<_names.size(); i++)
       file << _names[i] << "\t";
     file << "\n";
