@@ -106,7 +106,6 @@
 #elif defined YASPGRID
   #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 #else
-  #error
 // default is yaspgrid (warning is printed when gridtype.hh is
 // included)
   #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
