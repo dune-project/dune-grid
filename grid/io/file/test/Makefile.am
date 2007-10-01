@@ -1,6 +1,6 @@
 ALLTESTS = vtktest gnuplottest
 
-CXXFLAGS= -g -Wall -O0
+AM_CXXFLAGS= -g -Wall -O0
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)
