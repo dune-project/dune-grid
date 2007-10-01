@@ -164,7 +164,7 @@ namespace Dune {
     if( this->boundary() )
     {
       assert( this->current.item_->nbbnd(this->current.index_) != 0 );
-      isBoundaryType = -(this->current.item_->nbbnd(this->current.index_)->type());
+      isBoundaryType = std::abs(this->current.item_->nbbnd(this->current.index_)->type());
     }
 
     assert( isBoundaryType >= 0 );
