@@ -3,7 +3,6 @@
 #ifndef DUNE_GRIDTYPE_HH_OLD
 #define DUNE_GRIDTYPE_HH_OLD
 #warning dune/grid/io/file/dgfparser/gridtype.hh: This header is deprecated!
-#warning Please use dune/grid/utility/gridtype.hh!
-#include <dune/grid/utility/gridtype.hh>
-#include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#warning Please use dune/grid/io/file/dgfparser/dgfgridtype.hh!
+#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 #endif
