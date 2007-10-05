@@ -1068,7 +1068,7 @@ namespace Dune {
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline bool ALU3dGrid<dim, dimworld, elType>::
-  writeGrid_Ascii(const std::string filename, alu3d_ctype time ) const
+  writeGrid_Ascii(const std::string filename, alu3d_ctype time , bool scientific  ) const
   {
 #if ALU3DGRID_PARALLEL
     // write ascii only works for serial grids at the moment
@@ -1094,8 +1094,11 @@ namespace Dune {
       {
         file << std::endl;
 
-        // use scientific mode
-        file << std::scientific;
+        if( scientific )
+        {
+          // use scientific mode
+          file << std::scientific;
+        }
 
         // write coordinates of the vertices
         int vxsize = leafVertices->size();
