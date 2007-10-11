@@ -931,10 +931,9 @@ namespace Dune {
           {
             p[i] -= vtxoffset;
           }
-
           if (fixedsize)
           {
-            if ((dimworld==2 && size()<=2) ||
+            if ((dimworld==2 && size()< 2) ||
                 (dimworld==3 && simplexgrid && size()!=3 && size()!=4) ||
                 (dimworld==3 && !simplexgrid && size()!=4))
               continue;
