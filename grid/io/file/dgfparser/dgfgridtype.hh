@@ -95,7 +95,7 @@
   #endif
   #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #elif defined ONEDGRID
-  #include <dune/grid/io/file/dgfparser/dgfone.hh>
+  #include <dune/grid/io/file/dgfparser/dgfoned.hh>
 #elif defined SGRID
   #include <dune/grid/io/file/dgfparser/dgfs.hh>
 #elif defined UGGRID

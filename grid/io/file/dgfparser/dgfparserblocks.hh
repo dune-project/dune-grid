@@ -1116,6 +1116,9 @@ namespace Dune {
           if (dimw_==0) {
             DUNE_THROW(DGFException,
                        "Too few coordinates for point p0 in IntervalBlock");
+          } else if (dimw_>3) {
+            DUNE_THROW(DGFException,
+                       "Interval block only implemented for dimension 1,2, and 3");
           }
           p0_.resize(dimw_);
           p1_.resize(dimw_);
@@ -1158,13 +1161,18 @@ namespace Dune {
                 m++;
               }
         }
-        else {
+        else if (dimw_==2) {
           for(int i =0; i < nofcells_[0]+1; i++)
             for(int j=0; j < nofcells_[1]+1; j++) {
               vtx[m][0] = p0_[0] + i*h_[0];
               vtx[m][1] = p0_[1] + j*h_[1];
               m++;
             }
+        } else {
+          for(int j=0; j < nofcells_[0]+1; j++) {
+            vtx[m][0] = p0_[0] + j*h_[0];
+            m++;
+          }
         }
         dverb << "done" << std::endl;
         return nofvtx();
@@ -1178,8 +1186,10 @@ namespace Dune {
         int m=oldsize;
         if(dimw_ == 3)
           verticesPerCube = 8;
-        else
+        else if (dimw_ == 2)
           verticesPerCube = 4;
+        else if (dimw_ == 1)
+          verticesPerCube = 2;
         dverb << "generating hexaeder...";
         simplex.resize(oldsize+nofhexa());
         for (counthexa=m; counthexa < simplex.size(); counthexa++)
@@ -1199,7 +1209,7 @@ namespace Dune {
                 m++;
               }
         }
-        else {
+        else if (dimw_==2) {
           for(int i =0; i < nofcells_[0]; i++)
             for(int j=0; j < nofcells_[1]; j++) {
               simplex[m][0] = offset+getIndex(i,j);
@@ -1208,6 +1218,12 @@ namespace Dune {
               simplex[m][3] = offset+getIndex(i+1,j+1);
               m++;
             }
+        } else {
+          for(int i =0; i < nofcells_[0]; i++) {
+            simplex[m][0] = offset+getIndex(i);
+            simplex[m][1] = offset+getIndex(i+1);
+            m++;
+          }
         }
         dverb << "done" << std::endl;
         assert((size_t)m==simplex.size());
@@ -1217,30 +1233,29 @@ namespace Dune {
       int nofvtx() {
         if(dimw_ == 3)
           return (nofcells_[0]+1)*(nofcells_[1]+1)*(nofcells_[2]+1);
-        else
+        else if (dimw_ == 2)
           return (nofcells_[0]+1)*(nofcells_[1]+1);
+        else
+          return nofcells_[0]+1;
       }
 
       int nofhexa() {
         if(dimw_ == 3)
           return (nofcells_[0])*(nofcells_[1])*(nofcells_[2]);
-        else
+        else if (dimw_ == 2)
           return (nofcells_[0])*(nofcells_[1]);
-
+        else
+          return nofcells_[0];
       }
-
       int segments(int i) {
         return nofcells_[i];
       }
-
       double length(int i) {
         return p1_[i]-p0_[i];
       }
-
       double start(int i) {
         return p0_[i];
       }
-
       double end(int i) {
         return p1_[i];
       }
@@ -1253,11 +1268,13 @@ namespace Dune {
         return dimw_;
       }
 
-      int getIndex(int i,int j, int k = 0) {
+      int getIndex(int i,int j = 0, int k = 0) {
         if(dimw_ == 3)
           return i*(nofcells_[1]+1)*(nofcells_[2]+1) + j*(nofcells_[2]+1) + k;
-        else
+        else if (dimw_ == 2)
           return i*(nofcells_[1]+1) + j;
+        else
+          return i;
       }
     private:
       bool next() {
