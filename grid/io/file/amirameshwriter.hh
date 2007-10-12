@@ -21,17 +21,34 @@ namespace Dune {
 
   public:
 
-    /** \brief Add grid with a given index set */
+    /** \brief Add grid with a given index set
+        \param grid Grid to be written
+        \param indexSet Index set of the grid section to be written
+        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
+        quadrilateral will be split in two triangles.  If not, the file is not
+        readable by standard Amira.
+     */
     template <class GridType2, class IndexSetType2>
-    void addGrid(const GridType2& grid, const IndexSetType2& indexSet);
+    void addGrid(const GridType2& grid, const IndexSetType2& indexSet, bool splitQuads=false);
 
-    /** \brief Add level grid */
+    /** \brief Add level grid
+        \param grid Grid to be written
+        \param indexSet Level of the level grid that is to be written
+        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
+        quadrilateral will be split in two triangles.  If not, the file is not
+        readable by standard Amira.
+     */
     template <class GridType2>
-    void addLevelGrid(const GridType2& grid, int level);
+    void addLevelGrid(const GridType2& grid, int level, bool splitQuads=false);
 
-    /** \brief Add leaf grid */
+    /** \brief Add leaf grid
+        \param grid Grid to be written
+        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
+        quadrilateral will be split in two triangles.  If not, the file is not
+        readable by standard Amira.
+     */
     template <class GridType2>
-    void addLeafGrid(const GridType2& grid);
+    void addLeafGrid(const GridType2& grid, bool splitQuads=false);
 
     /** \brief Add cell data */
     template <class GridType2, class DataContainer>

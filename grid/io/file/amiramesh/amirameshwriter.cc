@@ -7,31 +7,26 @@
 template<class GridType, class IndexSetType>
 template<class GridType2, class IndexSetType2>
 void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid,
-                                                           const IndexSetType2& indexSet)
+                                                           const IndexSetType2& indexSet,
+                                                           bool splitQuads)
 {
+  typedef typename IndexSetType::template Codim<dim>::template Partition<All_Partition>::Iterator VertexIterator;
+  typedef typename IndexSetType2::template Codim<0>::template Partition<All_Partition>::Iterator ElementIterator;
+
   if ((dim!=2 && dim!=3) || int(dim) != int(GridType::dimensionworld))
     DUNE_THROW(IOError, "You can only write grids as AmiraMesh if dim==dimworld==2"
                << " or dim==dimworld==3.");
-
-  // Find out whether the grid contains only tetrahedra.  If yes, then
-  // it is written in TetraGrid format.  If not, it is written in
-  // hexagrid format.
-  bool containsOnlySimplices =
-    (indexSet.geomTypes(0).size()==1)
-    && (indexSet.geomTypes(0)[0].isSimplex());
-
-  int maxVerticesPerElement = (dim==3)
-                              ? ((containsOnlySimplices) ? 4 : 8)
-                              : ((containsOnlySimplices) ? 3 : 4);
-
-  int noOfNodes = indexSet.size(dim);
-  int noOfElem  = indexSet.size(0);
 
   // Set the appropriate content type
   if (dim==2)
     amiramesh_.parameters.set("ContentType", "HxTriangularGrid");
 
-  // write grid vertex coordinates
+  // ///////////////////////////////////////////
+  //   Write grid vertices
+  // ///////////////////////////////////////////
+  int noOfNodes = indexSet.size(dim);
+  int noOfElements;
+
   AmiraMesh::Location* geo_nodes = new AmiraMesh::Location("Nodes", noOfNodes);
   amiramesh_.insert(geo_nodes);
 
@@ -39,13 +34,12 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
                                                        McPrimType::mc_float, dim);
   amiramesh_.insert(geo_node_data);
 
-  typedef typename IndexSetType2::template Codim<dim>::template Partition<All_Partition>::Iterator VertexIterator;
   VertexIterator vertex    = indexSet.template begin<dim,All_Partition>();
   VertexIterator endvertex = indexSet.template end<dim,All_Partition>();
 
   for (; vertex!=endvertex; ++vertex) {
 
-    int index = indexSet.index (*vertex);
+    int index = indexSet.template index<dim>(*vertex);
     const FieldVector<double, dim>& coords = vertex->geometry()[0];
 
     // Copy coordinates
@@ -55,48 +49,148 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
   }
 
   /* write element section to file */
-  AmiraMesh::Location* element_loc = NULL;
+  AmiraMesh::Location* elementLocation = NULL;
 
-  if (dim==3) {
+  // ////////////////////////////////////////////////////////////////////
+  //   Split up quadrilaterals into triangles, if requested, because
+  //   Amira doesn't support quad grids.
+  // ////////////////////////////////////////////////////////////////////
+  if (dim==2 && splitQuads) {
 
-    if (containsOnlySimplices)
-      element_loc = new AmiraMesh::Location("Tetrahedra", noOfElem);
-    else
-      element_loc = new AmiraMesh::Location("Hexahedra", noOfElem);
+    ReferenceSimplex<double,dim> referenceTriangle;
+    ReferenceCube<double,dim>    referenceCube;
+
+    int numTriangles = indexSet.size(referenceTriangle.type(0,0));
+    int numQuads     = indexSet.size(referenceCube.type(0,0));
+
+    noOfElements = numTriangles + 2*numQuads;
+
+    /* write element section to file */
+    elementLocation = new AmiraMesh::Location("Triangles", noOfElements);
+    amiramesh_.insert(elementLocation);
+
+    AmiraMesh::Data* element_data = new AmiraMesh::Data("Nodes", elementLocation, McPrimType::mc_int32, 3);
+    amiramesh_.insert(element_data);
+
+    int *dPtr = (int*)element_data->dataPtr();
+
+    ElementIterator eIt    = indexSet.template begin<0,All_Partition>();
+    ElementIterator eEndIt = indexSet.template end<0,All_Partition>();
+
+    for (int i=0; eIt!=eEndIt; ++eIt) {
+      if (eIt->type().isTriangle()) {
+
+        for (int j=0; j<3; j++)
+          dPtr[i++] = indexSet.template subIndex<dim>(*eIt,j)+1;
+
+      } else if (eIt->type().isQuadrilateral()) {
+
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,0)+1;
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,1)+1;
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,3)+1;
+
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,3)+1;
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,2)+1;
+        dPtr[i++] = indexSet.template subIndex<dim>(*eIt,0)+1;
+
+      } else {
+        DUNE_THROW(NotImplemented, "Can't write GeometryType " << eIt->type());
+      }
+
+    }
 
   } else {
 
-    if (containsOnlySimplices)
-      element_loc = new AmiraMesh::Location("Triangles", noOfElem);
-    else
-      element_loc = new AmiraMesh::Location("Quadrilaterals", noOfElem);
+    // Find out whether the grid contains only tetrahedra.  If yes, then
+    // it is written in TetraGrid format.  If not, it is written in
+    // hexagrid format.
+    bool containsOnlySimplices =
+      (indexSet.geomTypes(0).size()==1)
+      && (indexSet.geomTypes(0)[0].isSimplex());
 
-  }
+    int maxVerticesPerElement = (dim==3)
+                                ? ((containsOnlySimplices) ? 4 : 8)
+                                : ((containsOnlySimplices) ? 3 : 4);
 
-  amiramesh_.insert(element_loc);
+    noOfElements  = indexSet.size(0);
 
-  AmiraMesh::Data* element_data = new AmiraMesh::Data("Nodes", element_loc,
-                                                      McPrimType::mc_int32, maxVerticesPerElement);
-  amiramesh_.insert(element_data);
+    /* write element section to file */
+    if (dim==3) {
 
-  int *dPtr = (int*)element_data->dataPtr();
+      if (containsOnlySimplices)
+        elementLocation = new AmiraMesh::Location("Tetrahedra", noOfElements);
+      else
+        elementLocation = new AmiraMesh::Location("Hexahedra", noOfElements);
 
-  typedef typename IndexSetType2::template Codim<0>::template Partition<All_Partition>::Iterator ElementIterator;
-  ElementIterator eIt    = indexSet.template begin<0, All_Partition>();
-  ElementIterator eEndIt = indexSet.template end<0, All_Partition>();
+    } else {
 
-  if (dim==3) {
+      if (containsOnlySimplices)
+        elementLocation = new AmiraMesh::Location("Triangles", noOfElements);
+      else
+        elementLocation = new AmiraMesh::Location("Quadrilaterals", noOfElements);
 
-    // //////////////////////////////////////////////////
-    //   Write elements of a 3D-grid
-    // //////////////////////////////////////////////////
+    }
 
-    if (containsOnlySimplices) {
+    amiramesh_.insert(elementLocation);
 
-      for (int i=0; eIt!=eEndIt; ++eIt, i++) {
+    AmiraMesh::Data* element_data = new AmiraMesh::Data("Nodes", elementLocation,
+                                                        McPrimType::mc_int32, maxVerticesPerElement);
+    amiramesh_.insert(element_data);
 
-        for (int j=0; j<4; j++)
-          dPtr[i*4+j] = indexSet.template subIndex<dim>(*eIt,j)+1;
+    int *dPtr = (int*)element_data->dataPtr();
+
+    ElementIterator eIt    = indexSet.template begin<0, All_Partition>();
+    ElementIterator eEndIt = indexSet.template end<0, All_Partition>();
+
+    if (dim==3) {
+
+      // //////////////////////////////////////////////////
+      //   Write elements of a 3D-grid
+      // //////////////////////////////////////////////////
+
+      if (containsOnlySimplices) {
+
+        for (int i=0; eIt!=eEndIt; ++eIt, i++) {
+
+          for (int j=0; j<4; j++)
+            dPtr[i*4+j] = indexSet.template subIndex<dim>(*eIt,j)+1;
+
+        }
+
+      } else {
+
+        for (int i=0; eIt!=eEndIt; ++eIt, i++) {
+
+          GeometryType type = eIt->type();
+
+          if (type.isHexahedron()) {
+
+            const int hexaReordering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
+            for (int j=0; j<8; j++)
+              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, hexaReordering[j])+1;
+
+          } else if (type.isPrism()) {
+
+            const int prismReordering[8] = {0, 1, 1, 2, 3, 4, 4, 5};
+            for (int j=0; j<8; j++)
+              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, prismReordering[j])+1;
+
+          } else if (type.isPyramid()) {
+
+            const int pyramidReordering[8] = {0, 1, 2, 3, 4, 4, 4, 4};
+            for (int j=0; j<8; j++)
+              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, pyramidReordering[j])+1;
+
+          } else if (type.isTetrahedron()) {
+
+            const int tetraReordering[8] = {0, 1, 2, 2, 3, 3, 3, 3};
+            for (int j=0; j<8; j++)
+              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, tetraReordering[j])+1;
+
+          } else
+            DUNE_THROW(NotImplemented, "Unknown element type encountered");
+
+        }
 
       }
 
@@ -106,64 +200,29 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
 
         GeometryType type = eIt->type();
 
-        if (type.isHexahedron()) {
+        if (type.isQuadrilateral()) {
 
-          const int hexaReordering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
-          for (int j=0; j<8; j++)
-            dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, hexaReordering[j])+1;
+          dPtr[i*4+0] = indexSet.template subIndex<dim>(*eIt, 0)+1;
+          dPtr[i*4+1] = indexSet.template subIndex<dim>(*eIt, 1)+1;
+          dPtr[i*4+2] = indexSet.template subIndex<dim>(*eIt, 3)+1;
+          dPtr[i*4+3] = indexSet.template subIndex<dim>(*eIt, 2)+1;
 
-        } else if (type.isPrism()) {
+        } else if (type.isTriangle()) {
 
-          const int prismReordering[8] = {0, 1, 1, 2, 3, 4, 4, 5};
-          for (int j=0; j<8; j++)
-            dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, prismReordering[j])+1;
+          for (int j=0; j<3; j++)
+            dPtr[i*maxVerticesPerElement+j] = indexSet.template subIndex<dim>(*eIt, j)+1;
 
-        } else if (type.isPyramid()) {
+          // If 4 vertices are expected per element use the last value
+          // to fill up the remaining slots
+          if (maxVerticesPerElement==4)
+            dPtr[i*4+3] = dPtr[i*4+2];
 
-          const int pyramidReordering[8] = {0, 1, 2, 3, 4, 4, 4, 4};
-          for (int j=0; j<8; j++)
-            dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, pyramidReordering[j])+1;
+        } else {
 
-        } else if (type.isTetrahedron()) {
+          DUNE_THROW(IOError, "Elements of type " << type
+                                                  << " cannot be written to 2d AmiraMesh files!");
+        }
 
-          const int tetraReordering[8] = {0, 1, 2, 2, 3, 3, 3, 3};
-          for (int j=0; j<8; j++)
-            dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, tetraReordering[j])+1;
-
-        } else
-          DUNE_THROW(NotImplemented, "Unknown element type encountered");
-
-      }
-
-    }
-
-  } else {
-
-    for (int i=0; eIt!=eEndIt; ++eIt, i++) {
-
-      GeometryType type = eIt->type();
-
-      if (type.isQuadrilateral()) {
-
-        dPtr[i*4+0] = indexSet.template subIndex<dim>(*eIt, 0)+1;
-        dPtr[i*4+1] = indexSet.template subIndex<dim>(*eIt, 1)+1;
-        dPtr[i*4+2] = indexSet.template subIndex<dim>(*eIt, 3)+1;
-        dPtr[i*4+3] = indexSet.template subIndex<dim>(*eIt, 2)+1;
-
-      } else if (type.isTriangle()) {
-
-        for (int j=0; j<3; j++)
-          dPtr[i*maxVerticesPerElement+j] = indexSet.template subIndex<dim>(*eIt, j)+1;
-
-        // If 4 vertices are expected per element use the last value
-        // to fill up the remaining slots
-        if (maxVerticesPerElement==4)
-          dPtr[i*4+3] = dPtr[i*4+2];
-
-      } else {
-
-        DUNE_THROW(IOError, "Elements of type " << type
-                                                << " cannot be written to 2d AmiraMesh files!");
       }
 
     }
@@ -171,10 +230,10 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
   }
 
   // write material section to grid file
-  AmiraMesh::Data* element_materials = new AmiraMesh::Data("Materials", element_loc, McPrimType::mc_uint8, 1);
+  AmiraMesh::Data* element_materials = new AmiraMesh::Data("Materials", elementLocation, McPrimType::mc_uint8, 1);
   amiramesh_.insert(element_materials);
 
-  for(int i=0; i<noOfElem; i++)
+  for(int i=0; i<noOfElements; i++)
     ((unsigned char*)element_materials->dataPtr())[i] = 0;
 
 }
@@ -182,19 +241,21 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
 
 template<class GridType, class IndexSetType>
 template<class GridType2>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLevelGrid(const GridType2& grid, int level)
+void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLevelGrid(const GridType2& grid,
+                                                                int level,
+                                                                bool splitQuads)
 {
   const typename GridType2::Traits::LevelIndexSet& indexSet = grid.levelIndexSet(level);
-  addGrid(grid, indexSet);
+  addGrid(grid, indexSet, splitQuads);
 }
 
 
 template<class GridType, class IndexSetType>
 template<class GridType2>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLeafGrid(const GridType2& grid)
+void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLeafGrid(const GridType2& grid, bool splitQuads)
 {
   const typename GridType2::Traits::LeafIndexSet& indexSet = grid.leafIndexSet();
-  addGrid(grid, indexSet);
+  addGrid(grid, indexSet, splitQuads);
 }
 
 
