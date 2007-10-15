@@ -102,14 +102,13 @@ const int dimworld = GRIDDIM;
 #ifdef HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
-#ifdef HAVE_ALBERTA
-#include <dune/grid/albertagrid.hh>
-#endif
 
 #if defined ALBERTAGRID
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
   #endif
+// include albertagrid.h here to avoid conflicts when GRIDDIM 1 is choosen
+  #include <dune/grid/albertagrid.hh>
   #if GRIDDIM < 2 || GRIDDIM > 3
     #error "ALBERTAGRID is only available for GRIDDIM=2 and GRIDDIM=3"
   #endif
