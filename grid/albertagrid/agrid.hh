@@ -14,8 +14,8 @@
    @brief Provides base classes for AlbertaGrid
  **/
 
-
-#if defined GRIDDIM
+// only use GRIDDIM when 2 or 3
+#if defined GRIDDIM && GRIDDIM > 1 && GRIDDIM < 4
   #define DIM GRIDDIM
   #if defined GRIDDIMWORLD
     #define DIM_OF_WORLD GRIDDIMWORLD
