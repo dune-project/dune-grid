@@ -1182,7 +1182,7 @@ namespace Dune {
         int oldsize=simplex.size();
         //fill simplex with Hexaeder
         size_t counthexa;
-        int verticesPerCube;
+        int verticesPerCube = -1;
         int m=oldsize;
         if(dimw_ == 3)
           verticesPerCube = 8;
@@ -1190,6 +1190,10 @@ namespace Dune {
           verticesPerCube = 4;
         else if (dimw_ == 1)
           verticesPerCube = 2;
+        else
+          DUNE_THROW(DGFException,
+                     "Invalid dimension world "<< dimw_ << " in IntervalBlock::getHexa!");
+
         dverb << "generating hexaeder...";
         simplex.resize(oldsize+nofhexa());
         for (counthexa=m; counthexa < simplex.size(); counthexa++)
