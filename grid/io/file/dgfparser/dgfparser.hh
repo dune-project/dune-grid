@@ -191,7 +191,7 @@ namespace Dune {
         nofElParam_ = nofelparams;
         for (size_t i=0; i<elements.size(); i++) {
           std::vector<double> coord;
-          DomainType p;
+          DomainType p (0);
           std::vector<double>& param = this->getElParam(i,coord);
           for (int k=0; k<dimw; k++)
             p[k] = coord[k];
@@ -202,7 +202,7 @@ namespace Dune {
         nofVtxParam_ = nofvtxparams;
         for (size_t i=0; i<vtx.size(); i++) {
           std::vector<double> coord;
-          DomainType p;
+          DomainType p (0);
           std::vector<double>& param = getVtxParam(i,coord);
           for (int k=0; k<dimw; k++)
             p[k] = coord[k];
