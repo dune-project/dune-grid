@@ -198,15 +198,12 @@ namespace Dune {
     for (int i=0; i<(dim+1); ++i)
     {
       // Transform Dune index to ALU index and apply twist
-      int localALUIndex = FaceTopo::dune2aluVertex(i);
-      int rotatedALUIndex = FaceTopo::twist(localALUIndex, twist);
+      const int rotatedALUIndex = FaceTopo::twist(
+        FaceTopo::dune2aluVertex(i), twist);
 
-      const double (&p)[3] =
-        static_cast<const GEOFaceType &>(item).myvertex(rotatedALUIndex)->Point();
-      for (int j=0; j<dimworld; j++)
-      {
-        coord_[i][j] = p[j];
-      }
+      // copy coordinates
+      copyCoordVec(static_cast<const GEOFaceType
+                               &>(item).myvertex(rotatedALUIndex)->Point(), coord_[i]);
     }
 
     return true;
@@ -238,12 +235,9 @@ namespace Dune {
 
     for (int i=0; i<(dim+1); ++i)
     {
-      const double (&p)[3] =
-        static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point();
-      for (int j=0; j<dimworld; ++j)
-      {
-        coord_[i][j] = p[j];
-      }
+      // copy coordinates
+      copyCoordVec(static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point(),
+                   coord_[i]);
     }
 
     buildJacobianInverseTransposed();
