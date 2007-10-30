@@ -288,8 +288,8 @@ namespace Dune {
     return ElementTopo::alu2duneFace(connector_.outerALUFaceIndex());
   }
 
-  template<class GridImp>
-  inline int ALU3dGridIntersectionIterator<GridImp>::twistInSelf () const
+  template<>
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInSelf () const
   {
     int aluTwist = connector_.innerTwist();
     int mappedZero =
@@ -300,8 +300,14 @@ namespace Dune {
        -mappedZero-1 : mappedZero);
   }
 
-  template<class GridImp>
-  inline int ALU3dGridIntersectionIterator<GridImp>::twistInNeighbor () const
+  template<>
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,tetra> >::twistInSelf () const
+  {
+    return connector_.innerTwist();
+  }
+
+  template<>
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInNeighbor () const
   {
     int aluTwist = connector_.outerTwist();
     int mappedZero =
@@ -311,6 +317,12 @@ namespace Dune {
     return
       (ElementTopo::faceOrientation(numberInNeighbor())*sign(aluTwist) >= 0 ?
        -mappedZero-1 : mappedZero);
+  }
+
+  template<>
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,tetra> >::twistInNeighbor () const
+  {
+    return connector_.outerTwist();
   }
 
   template <class GridImp>
