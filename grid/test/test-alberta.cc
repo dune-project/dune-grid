@@ -15,6 +15,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef GRIDDIM
+#define ALBERTA_DIM GRIDDIM
+#endif
+
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfalberta.hh>
 
@@ -46,21 +50,14 @@ void markOne ( GridType & grid , int num , int ref )
 
 int main () {
   try {
-    const int dim      = ALBERTA_DIM;
-    const int dimworld = ALBERTA_WORLD_DIM;
+    const int dim      = GRIDDIM;
+    const int dimworld = GRIDDIM;
 
     /* use grid-file appropriate for dimensions */
     std::ostringstream filename;
 
-    if((dim == 2) && (dimworld == 2) )
-    {
-      filename << "simplex-testgrid-" << dim
-               << "-" << dimworld << ".dgf";
-    }
-    else if((dim == 3) && (dimworld == 3) )
-    {
-      filename << "alberta-testgrid-3-3.al";
-    }
+    filename << "simplex-testgrid-" << dim
+             << "-" << dimworld << ".dgf";
 
     std::cout << std::endl << "AlbertaGrid<" << dim
               << "," << dimworld
@@ -77,11 +74,18 @@ int main () {
       // extra-environment to check destruction
 
       gridcheck(grid); // check macro grid
-      for(int i=0; i<2; i++)
+      for(int i=0; i<1; i++)
       {
-        grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+        // check single refinement
+        grid.globalRefine( 1 );
         gridcheck(grid);
+        checkIntersectionIterator(grid,true);
       }
+
+      // check dgf grid width half refinement
+      grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+      gridcheck(grid);
+      checkIntersectionIterator(grid,true);
 
       for(int i=0; i<2; i++)
       {
