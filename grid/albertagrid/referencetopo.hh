@@ -31,8 +31,8 @@ namespace AlbertHelp {
   // see below that the vertex numbers for each face are the same
   // but in Dune reference element not clockwise ,but this we need for
   // calculation the outer normal, see calcOuterNormal in albertagrid.cc
-  static const int tetraFace_0[3] = {3,2,1};
-  static const int tetraFace_1[3] = {2,3,0};
+  static const int tetraFace_0[3] = {1,3,2};
+  static const int tetraFace_1[3] = {0,2,3};
   static const int tetraFace_2[3] = {0,3,1};
   static const int tetraFace_3[3] = {0,1,2};
 
