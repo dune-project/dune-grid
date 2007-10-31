@@ -212,7 +212,7 @@ int main (int argc , char **argv) {
       {
         std::string filename;
         if (mysize<=2)
-          filename += "cube-testgrid-3-3.dgf";
+          filename += "simplex-testgrid-3-3.dgf";
         else
           filename += "cube-testgrid-3-3-large.dgf";
 
