@@ -16,7 +16,7 @@
 #include <sstream>
 
 #ifndef GRIDDIM
-#define ALBERTA_DIM GRIDDIM
+#define GRIDDIM ALBERTA_DIM
 #endif
 
 #include <dune/grid/albertagrid.hh>
