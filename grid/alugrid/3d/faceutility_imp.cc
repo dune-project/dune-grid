@@ -402,13 +402,17 @@ namespace Dune {
   inline void ALU3dGridGeometricFaceInfoBase<type>::
   generateGlobalGeometry() const
   {
-    if (!generatedGlobal_) {
-      for (int i = 0; i < numVerticesPerFace; ++i) {
+    if ( !generatedGlobal_ )
+    {
+      for (int i = 0; i < numVerticesPerFace; ++i)
+      {
         const double (&p)[3] =
           connector_.face().myvertex(FaceTopo::dune2aluVertex(i))->Point();
-        for (int j = 0; j < 3; ++j) {
-          coordsGlobal_[i][j] = p[j];
-        }
+
+        // copy coordinates
+        coordsGlobal_[i][0] = p[0];
+        coordsGlobal_[i][1] = p[1];
+        coordsGlobal_[i][2] = p[2];
       }
 
       generatedGlobal_ = true;
