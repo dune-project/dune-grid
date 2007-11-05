@@ -81,8 +81,12 @@ namespace Dune {
   template <class GridPartTraits>
   class GridPartInterface {
   public:
+    //! \brief Type of the Traits
+    typedef GridPartTraits Traits;
+
     //! \brief Type of the implementation
     typedef typename GridPartTraits::GridPartType GridPartType;
+
 
     //! \brief type of Grid implementation
     typedef typename GridPartTraits::GridType GridType;
@@ -126,8 +130,8 @@ namespace Dune {
     typename GridPartTraits::template Codim<cd>::IteratorType
     begin() const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().begin()));
-      return asImp().begin();
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template begin<cd>()));
+      return asImp().template begin<cd>();
     }
 
     /** \brief Returns end iterator of the subset of the entities of codimension cd
@@ -137,8 +141,8 @@ namespace Dune {
     typename GridPartTraits::template Codim<cd>::IteratorType
     end() const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().end()));
-      return asImp().end();
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template end<cd>()));
+      return asImp().template end<cd>();
     }
 
     //! \brief Level of the grid part
