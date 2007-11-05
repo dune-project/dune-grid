@@ -1213,7 +1213,7 @@ namespace Dune
       SimpleStream stream(s);
 
       // write length before each data block
-      unsigned long blocklength;
+      float blocklength;
 
       // point data
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
