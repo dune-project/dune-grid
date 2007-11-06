@@ -77,6 +77,109 @@ void checkGeometry(const GeometryImp& geometry)
   }
 }
 
+template <class EntityType, class LocalGeometryType>
+static void checkLocalIntersectionConsistency(
+  const EntityType& en, const LocalGeometryType& localGeom,
+  const int face, const bool output = true)
+{
+  using namespace Dune;
+
+  enum { dim = EntityType :: dimension };
+  typedef typename EntityType :: ctype ctype;
+
+  // get reference element
+  const ReferenceElement< ctype , dim > & refElem =
+    ReferenceElements< ctype , dim >::general(en.geometry().type());
+
+  const int vxSize = refElem.size( face, 1, dim );
+  std::vector<int> vx( vxSize ,-1);
+  for(int i=0; i<vxSize; ++i)
+  {
+    // get face vertices of number in self face
+    vx[i] = refElem.subEntity( face, 1 , i, dim);
+  }
+
+  // debugging output
+  if( output )
+  {
+    std::cout << "Found face["<< face << "] vx = {";
+    for(size_t i=0; i<vx.size(); ++i)
+    {
+      std::cout << vx[i] << ",";
+    }
+    std::cout << "} \n";
+  }
+
+  bool allRight = true;
+  std::vector< int > faceMap ( vxSize , -1 );
+
+  typedef  FieldVector<ctype,dim> CoordinateVectorType;
+
+  for(int i=0; i<vxSize; ++i)
+  {
+    // standard face map is identity
+    faceMap[i] = i;
+
+    // get position in reference element of vertex i
+    CoordinateVectorType refPos = refElem.position( vx[i], dim );
+
+    // get position as we get it from intersectionSelfLocal
+    // in the best case this should be the same
+    // at least the orientatation should be the same
+    CoordinateVectorType localPos = localGeom[i];
+
+    if( (refPos - localPos).infinity_norm() > 1e-8 )
+    {
+      allRight = false;
+      if( output )
+        std::cout << "RefPos (" << refPos << ") != (" << localPos << ") localPos !\n";
+    }
+  }
+
+  if( !allRight )
+  {
+    for(int i=0; i<vxSize; ++i)
+    {
+      // get position in reference element of vertex i
+      CoordinateVectorType refPos = refElem.position( vx[i], dim );
+
+      for( int j=1; j<vxSize; ++j)
+      {
+        int newVx = (i+j)% vxSize;
+        CoordinateVectorType localPos = localGeom[newVx];
+        if( (refPos - localPos).infinity_norm() < 1e-8 )
+        {
+          faceMap[i] = newVx;
+        }
+      }
+    }
+
+    // calculate twist
+    const int twist = (faceMap[1] == (faceMap[0]+1)%vxSize) ? faceMap[0] : faceMap[1]- vxSize;
+    //std::cout << "Got twist = "<< twist << "\n";
+    // off set
+    const int offset = (2 * vxSize) + 1;
+
+    // now check mapping with twist
+    for(int i=0; i<vxSize; ++i)
+    {
+      // get position in reference element of vertex i
+      CoordinateVectorType refPos = refElem.position( vx[i], dim );
+
+      int newVx = (twist < 0) ? (offset - i + twist)% vxSize : (twist + i)%vxSize ;
+      CoordinateVectorType localPos = localGeom[newVx];
+      if( (refPos - localPos).infinity_norm() > 1e-8 )
+      {
+        std::cout << "RefPos (" << refPos << ") != (" << localPos << ") localPos !\n";
+        DUNE_THROW(GridError,"LocalGeometry has wrong mapping !");
+      }
+    }
+  }
+}
+
+
+
+
 /** \brief Test the IntersectionIterator
  */
 template <class GridPartType>
@@ -114,6 +217,22 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
   for (;iIt!=iEndIt; ++iIt)
   {
+    ////////////////////////////////////////////////////////////////////////
+    //   Check whether intersectionSelfLocal is mappable to reference
+    //   geometry for 3d
+    ////////////////////////////////////////////////////////////////////////
+    if( dimworld > 2 )
+    {
+      checkLocalIntersectionConsistency( *iIt.inside(),
+                                         iIt.intersectionSelfLocal(), iIt.numberInSelf(), false );
+      if( iIt.neighbor() )
+      {
+        checkLocalIntersectionConsistency( *iIt.outside(),
+                                           iIt.intersectionNeighborLocal(), iIt.numberInNeighbor(), false );
+      }
+    }
+
+
     // //////////////////////////////////////////////////////////////////////
     //   Compute the integral of the outer normal over the whole element.
     //   This has to be zero.
