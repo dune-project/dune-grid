@@ -67,8 +67,8 @@ namespace Dune {
   void
   GnuplotWriter<GridType,IndexSet>::addData(DataType t, const DataContainer& data, const std::string & name)
   {
-    assert((t == cellData && (size_t) _is.size(0) == data.size())
-           || (t == vertexData && (size_t) _is.size(0)+1 == data.size()) );
+    assert((t == cellData && _is.size(0) == (int) data.size())
+           || (t == vertexData && _is.size(0)+1 == (int) data.size()) );
     _names.push_back(name);
 
     // copy data to new container
