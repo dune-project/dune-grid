@@ -169,10 +169,10 @@ namespace Dune {
     void make (FieldMatrix<sgrid_ctype,1,cdim>& __As);
 
     //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<sgrid_ctype, 1> global (const FieldVector<sgrid_ctype, 0>& local) const { return this->operator[] (0); }
+    FieldVector<sgrid_ctype, cdim> global (const FieldVector<sgrid_ctype, 0>& local) const { return this->operator[] (0); }
 
     //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<sgrid_ctype, 0> local (const FieldVector<sgrid_ctype, 1>& global) const { return FieldVector<sgrid_ctype,0> (0.0); }
+    FieldVector<sgrid_ctype, 0> local (const FieldVector<sgrid_ctype, cdim>& global) const { return FieldVector<sgrid_ctype,0> (0.0); }
 
     /*! Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
