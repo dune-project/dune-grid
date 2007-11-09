@@ -139,6 +139,7 @@ namespace Dune {
     }
   };
 
+
   template <class GridImp>
   struct CalcElementMatrix<GridImp,1,2>
   {
@@ -190,7 +191,9 @@ namespace Dune {
   //! maps a local coordinate within reference element to
   //! global coordinate in element
   template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> :: global (const FieldVector<alu2d_ctype, mydim>& local) const {
+  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> ::
+  global (const FieldVector<alu2d_ctype, mydim>& local) const
+  {
     calcElMatrix();
 
     globalCoord_ = coord_[0];
@@ -198,10 +201,21 @@ namespace Dune {
     return globalCoord_;
   }
 
+  //! maps a local coordinate within reference element to
+  //! global coordinate in element
+  template <>
+  inline FieldVector<alu2d_ctype, 2> ALU2dGridGeometry<0, 2, const ALU2dGrid<2,2> > ::
+  global (const FieldVector<alu2d_ctype, 0>& local) const
+  {
+    return coord_[0];
+  }
+
   //! maps a global coordinate within the element to a
   //! local coordinate in its reference element
   template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype,  mydim> ALU2dGridGeometry <mydim, cdim, GridImp> :: local (const FieldVector<alu2d_ctype, cdim>& global) const {
+  inline FieldVector<alu2d_ctype,  mydim> ALU2dGridGeometry <mydim, cdim, GridImp> ::
+  local (const FieldVector<alu2d_ctype, cdim>& global) const
+  {
     if (!builtinverse_)
       buildJacobianInverseTransposed();
 
@@ -225,6 +239,13 @@ namespace Dune {
     FMatrixHelp::multAssignTransposed(Jinv_,globalCoord_,localCoord_);
 
     return localCoord_;
+  }
+
+  template <>
+  inline FieldVector<alu2d_ctype, 0> ALU2dGridGeometry<0,2,const ALU2dGrid<2,2> >::
+  local(const FieldVector<alu2d_ctype, 2>& global) const
+  {
+    return FieldVector<alu2d_ctype, 0> (1);
   }
 
   //! determinant of one Geometry, here line
