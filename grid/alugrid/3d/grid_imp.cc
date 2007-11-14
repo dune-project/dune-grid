@@ -913,7 +913,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   template <class DataHandleImp,class DataType>
   inline void ALU3dGrid<dim, dimworld, elType>::
-  communicate (CommDataHandleIF<DataHandleImp,DataType> & data, InterfaceType iftype, CommunicationDirection dir, int level ) const
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
+               InterfaceType iftype, CommunicationDirection dir, int level ) const
   {
     // if only one process, no communication needed
     if( comm().size() <= 1 ) return ;

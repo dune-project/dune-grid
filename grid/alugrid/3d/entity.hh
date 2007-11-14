@@ -101,6 +101,9 @@ namespace Dune {
     //! geometry of this entity
     const Geometry & geometry () const;
 
+    //! type of geometry of this entity
+    GeometryType type () const;
+
     // set element as normal entity
     void setElement(const ElementType & item);
     void setElement(const ElementType & item, const int level, int twist=0, int face = -1);
@@ -153,6 +156,9 @@ namespace Dune {
     //! the cuurent geometry
     mutable GeometryObject geo_;
     mutable GeometryImp & geoImp_;
+
+    //! type of geometry
+    const GeometryType geometryType_;
 
     mutable bool builtgeometry_;       //!< true if geometry has been constructed
 
@@ -247,6 +253,9 @@ namespace Dune {
 
     //! geometry of this entity
     const Geometry & geometry () const;
+
+    //! type of geometry of this entity
+    GeometryType type () const;
 
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const;
@@ -379,6 +388,9 @@ namespace Dune {
 
     mutable GeometryObject geoInFather_;
     mutable GeometryImp &  geoInFatherImp_;
+
+    //! type of geometry
+    const GeometryType geometryType_;
 
     // is true if entity is leaf entity
     bool isLeaf_;

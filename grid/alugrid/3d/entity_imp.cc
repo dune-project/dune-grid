@@ -20,6 +20,7 @@ namespace Dune {
     item_(0),
     geo_( GeometryImp() ),
     geoImp_(grid.getRealImplementation(geo_)),
+    geometryType_( geo_.type() ),
     builtgeometry_(false),
     partitionType_(InteriorEntity)
   {}
@@ -36,6 +37,7 @@ namespace Dune {
     item_(org.item_),
     geo_( GeometryImp() ),
     geoImp_(grid_.getRealImplementation(geo_)),
+    geometryType_( org.geometryType_ ),
     builtgeometry_(false),
     partitionType_(org.partitionType_)
   {}
@@ -158,6 +160,13 @@ namespace Dune {
     return geo_;
   }
 
+  template<int cd, int dim, class GridImp>
+  inline GeometryType
+  ALU3dGridEntity<cd,dim,GridImp>:: type () const
+  {
+    return geometryType_;
+  }
+
   template<int dim, class GridImp>
   inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const GridImp  &grid, int wLevel)
@@ -171,6 +180,7 @@ namespace Dune {
       , level_(-1)
       , geoInFather_ (GeometryImp())
       , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
+      , geometryType_( geo_.type() )
       , isLeaf_ (false)
       , refElem_(grid_.referenceElement())
   {  }
@@ -188,6 +198,7 @@ namespace Dune {
       , level_(org.level_)
       , geoInFather_ (GeometryImp())
       , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
+      , geometryType_( org.geometryType_ )
       , isLeaf_ (org.isLeaf_)
       , refElem_(grid_.referenceElement())
   {  }
@@ -294,6 +305,13 @@ namespace Dune {
     assert(item_ != 0);
     if(!builtgeometry_) builtgeometry_ = geoImp_.buildGeom(*item_);
     return geo_;
+  }
+
+  template<int dim, class GridImp>
+  inline GeometryType
+  ALU3dGridEntity<0,dim,GridImp> :: type () const
+  {
+    return geometryType_;
   }
 
   template<int dim, class GridImp>

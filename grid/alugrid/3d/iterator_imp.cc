@@ -383,8 +383,11 @@ namespace Dune {
 
   template <class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp>::buildGlobalGeometry() const {
-    intersectionGlobalImp_.buildGeom(geoProvider_.intersectionGlobal());
-    generatedGlobalGeometry_ = true;
+    //if( !generatedGlobalGeometry_)
+    {
+      intersectionGlobalImp_.buildGeom(geoProvider_.intersectionGlobal());
+      generatedGlobalGeometry_ = true;
+    }
   }
 
   template <class GridImp>

@@ -498,13 +498,15 @@ namespace Dune {
 
     /** \brief @copydoc Dune::Grid::communicate */
     template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const;
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir, int level) const;
 
     /** \brief Communicate information on distributed entities on the leaf grid.
        Template parameter is a model of Dune::CommDataHandleIF.
      */
     template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const;
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir) const;
 
   private:
     typedef ALU3DSPACE GatherScatter GatherScatterType;
