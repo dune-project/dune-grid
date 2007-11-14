@@ -544,7 +544,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
   //   Change the input face number from Dune numbering to UG numbering
   // //////////////////////////////////////////////////////////////////////
 
-  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->geometry().type());
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->type());
 
   // ///////////////
   //   init list
@@ -622,7 +622,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
-    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->geometry().type());
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->type());
 
   }
 
@@ -1299,8 +1299,8 @@ void Dune::UGGrid < dim >::setIndices()
 
           typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt.outside()).target_;
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInSelf(), eIt->geometry().type());
-          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInNeighbor(), nIt.outside()->geometry().type());
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInSelf(), eIt->type());
+          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInNeighbor(), nIt.outside()->type());
 
           UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
                                            (typename UG_NS<3>::Element*)elem0,

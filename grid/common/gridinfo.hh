@@ -117,13 +117,13 @@ namespace Dune
     for (LevelIterator it = grid.template lbegin<0>(level); it!=eendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << it->geometry().type() << "[" << dim << "]"
+                << " " << it->type() << "[" << dim << "]"
                 << " index=" << grid.levelIndexSet(level).index(*it)
                 << " gid=" << grid.globalIdSet().template id<0>(*it)
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->geometry().type()).position(0,0))
+                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
                 << " first=(" << it->geometry()[0] << ")"
                 << std::endl;
@@ -189,7 +189,7 @@ namespace Dune
     for (VLeafIterator it = grid.template leafbegin<dim>(); it!=veendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << it->geometry().type() << "[" << dim << "]"
+                << " " << it->type() << "[" << dim << "]"
                 << " index=" << grid.leafIndexSet().index(*it)
                 << " gid=" << grid.globalIdSet().template id<dim>(*it)
                 << " partition=" << PartitionName(it->partitionType())
@@ -202,13 +202,13 @@ namespace Dune
     for (LeafIterator it = grid.template leafbegin<0>(); it!=eendit; ++it)
     {
       std::cout << prefix << "level=" << it->level()
-                << " " << it->geometry().type() << "[" << dim << "]"
+                << " " << it->type() << "[" << dim << "]"
                 << " index=" << grid.leafIndexSet().index(*it)
                 << " gid=" << grid.globalIdSet().template id<0>(*it)
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->geometry().type()).position(0,0))
+                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
                 << " first=(" << it->geometry()[0] << ")"
                 << std::endl;

@@ -104,7 +104,7 @@ void checkFaceDataMapper(const Mapper& mapper, const IndexSet& indexSet)
       int index = mapper.map(*eIt, iIt.numberInSelf());
 
       //             std::cout << hostIndexSet.template subIndex<1>(*eIt, iIt.numberInSelf())
-      //                 << "  Index: " << index << "   type: " << eIt->geometry().type() << std::endl;
+      //                 << "  Index: " << index << "   type: " << eIt->type() << std::endl;
       min = std::min(min, index);
       max = std::max(max, index);
 

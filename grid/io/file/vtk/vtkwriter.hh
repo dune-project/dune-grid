@@ -218,7 +218,7 @@ namespace Dune
       }
       const FieldVector<DT,n> position() const
       {
-        return ReferenceElements<DT,n>::general(git->geometry().type()).position(0,0);
+        return ReferenceElements<DT,n>::general(git->type()).position(0,0);
       }
     };
     CellIterator cellBegin() const
@@ -312,7 +312,7 @@ namespace Dune
       }
       const FieldVector<DT,n> & position () const
       {
-        return ReferenceElements<DT,n>::general(git->geometry().type()).position(index,n);
+        return ReferenceElements<DT,n>::general(git->type()).position(index,n);
       }
     };
     VertexIterator vertexBegin() const
@@ -468,7 +468,7 @@ namespace Dune
       {
         double min=1E100;
         int imin=-1;
-        Dune::GeometryType gt = e.geometry().type();
+        Dune::GeometryType gt = e.type();
         for (int i=0; i<e.template count<n>(); ++i)
         {
           Dune::FieldVector<DT,n>
@@ -1189,7 +1189,7 @@ namespace Dune
           p3 = new VTKBinaryAppendedDataArrayWriter<unsigned char>(s,"types",1,bytecount);
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
-          int vtktype = vtkType(it->geometry().type());
+          int vtktype = vtkType(it->type());
           p3->write(vtktype);
         }
         delete p3;
@@ -1298,7 +1298,7 @@ namespace Dune
         stream.write(blocklength);
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {
-          unsigned char vtktype = vtkType(it->geometry().type());
+          unsigned char vtktype = vtkType(it->type());
           stream.write(vtktype);
         }
       }
@@ -1495,7 +1495,7 @@ namespace Dune
       static const int quadRenumbering[4] = {0,1,3,2};
       static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
       static const int prismRenumbering[6] = {0,2,1,3,5,4};
-      switch (vtkType(e.geometry().type()))
+      switch (vtkType(e.type()))
       {
       case vtkQuadrilateral :
         return quadRenumbering[i];

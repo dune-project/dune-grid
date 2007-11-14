@@ -196,7 +196,7 @@ namespace Dune
       for(IteratorType it = space.begin(); it != end; ++it)
       {
         EntityType & en = *it;
-        int geomType = convertToGrapeType ( en.geometry().type() , dimension );
+        int geomType = convertToGrapeType ( en.type() , dimension );
         double val = 0.0;
         for(int i=0; i<en.template count<dimension>(); ++i)
         {

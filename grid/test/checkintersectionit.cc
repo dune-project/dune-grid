@@ -89,7 +89,7 @@ static void checkLocalIntersectionConsistency(
 
   // get reference element
   const ReferenceElement< ctype , dim > & refElem =
-    ReferenceElements< ctype , dim >::general(en.geometry().type());
+    ReferenceElements< ctype , dim >::general(en.type());
 
   const int vxSize = refElem.size( face, 1, dim );
   std::vector<int> vx( vxSize ,-1);

@@ -99,7 +99,7 @@ namespace Dune {
 
         SubEntityKeyType globalSubEntity =
           SubEntityKeyType ( lset.template subIndex<codim>(en,subEntity),
-                             (en.template entity<codim> (subEntity))->geometry().type());
+                             (en.template entity<codim> (subEntity))->type());
         assert( globalSubEntity.first >= 0 );
         sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << "\n";
 
@@ -226,8 +226,8 @@ namespace Dune {
     for (; it!=endit; ++it) {
       // while we're here: check whether the GeometryTypes returned by the entity
       // and the Geometry match
-      assert(it->type()==it->geometry().type());
-      geometryTypes.insert(it->geometry().type());
+      assert(it->type()==it->type());
+      geometryTypes.insert(it->type());
     }
 
     bool geomTypesError = false;
@@ -377,7 +377,7 @@ namespace Dune {
       Iterator refit  = lset.template begin<0,All_Partition>();
       assert( refit != refend );
 
-      GeometryType type = refit->geometry().type();
+      GeometryType type = refit->type();
 
       const ReferenceElement< coordType, dim > & refElem =
         ReferenceElements< coordType, dim >::general(type);

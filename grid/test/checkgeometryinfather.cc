@@ -126,7 +126,7 @@ void checkGeometryInFather(const GridType& grid) {
       // ///////////////////////////////////////////////////////
       //   Check the different methods
       // ///////////////////////////////////////////////////////
-      if (geometryInFather.type() != eIt->geometry().type())
+      if (geometryInFather.type() != eIt->type())
         DUNE_THROW(GridError, "Type of geometry and geometryInFather differ!");
 
       if (geometryInFather.corners() != eIt->geometry().corners())

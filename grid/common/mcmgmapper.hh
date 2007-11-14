@@ -75,7 +75,7 @@ namespace Dune
     template<class EntityType>
     int map (const EntityType& e) const
     {
-      return is.index(e) + offset.find(e.geometry().type())->second;
+      return is.index(e) + offset.find(e.type())->second;
     }
 
 
@@ -88,7 +88,7 @@ namespace Dune
     template<int cc>
     int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
-      GeometryType gt=ReferenceElements<double,G::dimension>::general(e.geometry().type()).type(i,cc);
+      GeometryType gt=ReferenceElements<double,G::dimension>::general(e.type()).type(i,cc);
       //	  std::cout << "map: cc=" << cc << " gt=" << gt << " offset=" << offset.find(gt)->second << std::endl;
       return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
     }

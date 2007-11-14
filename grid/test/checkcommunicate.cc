@@ -237,7 +237,7 @@ class CheckCommunication {
           {
 
             const ReferenceElement<double, dimworld > & insideRefElem =
-              ReferenceElements<double, dimworld >::general(it->geometry().type());
+              ReferenceElements<double, dimworld >::general(it->type());
 
             for(int i=0; i<insideRefElem.size(nit.numberInSelf(),1,cdim); ++i)
             {
@@ -271,7 +271,7 @@ class CheckCommunication {
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
               const ReferenceElement<double, dimworld > & outsideRefElem =
-                ReferenceElements<double, dimworld >::general(ep->geometry().type());
+                ReferenceElements<double, dimworld >::general(ep->type());
 
               for(int i=0; i<outsideRefElem.size(nit.numberInNeighbor(),1,cdim); ++i)
               {
@@ -364,7 +364,7 @@ class CheckCommunication {
               int c = (it->template entity<cdim>(i))->geometry().corners();
               for (int j=0; j<c; j++)
               {
-                GeometryType type = it->geometry().type();
+                GeometryType type = it->type();
                 const ReferenceElement<double, dimworld > & refElem =
                   ReferenceElements<double, dimworld >::general(type);
                 int vx = refElem.subEntity(i,cdim,j,3);

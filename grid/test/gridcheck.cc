@@ -817,6 +817,7 @@ void iterate(Grid &g)
       it->geometry().jacobianInverseTransposed(origin);
 
     it->geometry().type();
+    it->type();
     it->geometry().corners();
     it->geometry()[0];
 
@@ -857,6 +858,7 @@ void iterate(Grid &g)
       lit->geometry().jacobianInverseTransposed(origin);
 
     lit->geometry().type();
+    lit->type();
     lit->geometry().corners();
     lit->geometry()[0];
   }

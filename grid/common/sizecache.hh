@@ -238,7 +238,7 @@ namespace Dune {
       {
         for( ; it != end; ++it )
         {
-          if(it->geometry().type() == type)
+          if(it->type() == type)
             ++ count ;
         }
       }
