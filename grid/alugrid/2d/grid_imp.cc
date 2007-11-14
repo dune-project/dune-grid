@@ -34,25 +34,8 @@ namespace Dune {
   {
 #if ALU2DGRID_PARALLEL
     abort();
-    // make partition for rank 0
-    {
-      // partition map
-      typename RankManagerType :: RankMapType part;
-
-      // clear refinement markers throughout the grid
-      typedef ALU2DSPACE Macro < ALU2DSPACE Element > macro_t;
-
-      // get macro element iterator
-      ALU2DSPACE Listwalkptr <macro_t> walk(mesh());
-      for( walk->first() ; ! walk->done() ; walk->next())
-      {
-        // get element pointer
-        int id = walk->getitem().operator ->()->getIndex();
-        part[id] = 0;
-      }
-
-      rankManager_.setPartition( part );
-    }
+    rankManager_.initialize();
+    //rankManager_.loadBalance();
 #endif
 
     assert(mygrid_);
