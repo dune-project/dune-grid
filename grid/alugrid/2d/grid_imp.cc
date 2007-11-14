@@ -478,7 +478,6 @@ namespace Dune {
   inline bool ALU2dGrid<dim, dimworld>::
   adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
   {
-    abort();
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
 
     typedef typename EntityObject :: ImplementationType EntityImp;
@@ -497,6 +496,12 @@ namespace Dune {
 
     // reserve memory
     dm.reserveMemory( newElements );
+
+#if ALU2DGRID_PARALLEL
+    // make marking of ghost elements
+    // needs one communication
+    rankManager_.notifyMarking();
+#endif
 
     bool ref = false ;
     {
