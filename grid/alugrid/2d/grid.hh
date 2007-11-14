@@ -16,13 +16,20 @@
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
+#include <dune/common/mpihelper.hh>
+#if ALU2DGRID_PARALLEL
+#include <dune/common/mpicollectivecommunication.hh>
+#include "communicator.hh"
+#else
 #include <dune/common/collectivecommunication.hh>
+#endif
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 //- Local includes
 #include "indexsets.hh"
 #include "../3d/memory.hh"
 #include "datahandle.hh"
+
 namespace Dune {
 
   typedef double alu2d_ctype;
@@ -133,7 +140,11 @@ namespace Dune {
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
+#if ALU2DGRID_PARALLEL
+      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
+#else
       typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+#endif
     };
   }; // end of ALU2dGridFamily
 
@@ -411,12 +422,15 @@ namespace Dune {
     //! return current adaptation marker for entity pointer
     int getMark(const typename Traits::template Codim<0>::EntityPointer & ) const;
 
+    //! return current adaptation marker for entity pointer
+    int getMark(const typename Traits::template Codim<0>::Entity & ) const;
+
     //! return dummy communication
     const CollectiveCommunicationType & comm() const;
-  private:
-    CollectiveCommunicationType comm_;
 
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
+  private:
+    CollectiveCommunicationType comm_;
 
     void updateStatus();
 
@@ -594,6 +608,43 @@ namespace Dune {
     {
       return (nrOfHangingNodes_ > 0);
     }
+
+#if ALU2DGRID_PARALLEL
+    typedef RankManager<ThisType> RankManagerType;
+    RankManagerType rankManager_;
+  public:
+    const RankManagerType& rankManager() const
+    {
+      return rankManager_;
+    }
+#endif
+
+  public:
+    /** \brief @copydoc Dune::Grid::communicate */
+    template<class DataHandleImp,class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir, int level) const;
+
+    /** \brief Communicate information on distributed entities on the leaf grid.
+       Template parameter is a model of Dune::CommDataHandleIF.
+     */
+    template<class DataHandleImp,class DataTypeImp>
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
+                      InterfaceType iftype, CommunicationDirection dir) const;
+
+    /** \brief @copydoc Dune::Grid::loadBalance */
+    bool loadBalance() ;
+
+    /** \brief @copydoc Dune::Grid::loadBalance */
+    template<class DataHandle>
+    bool loadBalance(DataHandle& data) ;
+
+    void checkManager() {
+#if ALU2DGRID_PARALLEL
+      rankManager_.notifyMarking () ;
+#endif
+    }
+
   }; // end class ALU2dGrid
 
   template <class GridImp>

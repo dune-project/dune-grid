@@ -125,6 +125,10 @@ namespace Dune {
   first(const EntityType & en, int wLevel)
   {
     this->setFirstItem(en.getItem(),wLevel);
+#if ALU2DGRID_PARALLEL
+    this->checkValid();
+#endif
+
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -146,11 +150,28 @@ namespace Dune {
 
   //! return true if intersection is with boundary
   template<class GridImp>
+  inline void ALU2dGridIntersectionBase<GridImp> :: checkValid ()
+  {
+    // in case of non-valid neighbor set boundary
+    if ( this->current.neigh_ &&
+         ! this->grid_.rankManager().isValid( this->current.neigh_->getIndex(), All_Partition) )
+    {
+      this->current.neigh_      = 0;
+      this->current.isBoundary_ = true ;
+      // this detects a ghost face
+      this->current.opposite_   = -222;
+    }
+  }
+
+  //! return true if intersection is with boundary
+  template<class GridImp>
   inline bool ALU2dGridIntersectionBase<GridImp> :: boundary() const
   {
     assert( (this->current.isBoundary_) ? (this->current.neigh_ == 0 ) : 1);
     // make sure that isBoundary is only true on physical boundary
-    assert( this->current.isBoundary_ == (this->current.item_->nbbnd(this->current.index_) != 0) );
+    // in parallel this is not true
+    assert( (this->current.opposite_ != -222) ?
+            (this->current.isBoundary_ == (this->current.item_->nbbnd(this->current.index_) != 0)) : 1 );
     return this->current.isBoundary_;
   }
 
@@ -163,8 +184,14 @@ namespace Dune {
     // note ALUGrid stores negative values
     if( this->boundary() )
     {
-      assert( this->current.item_->nbbnd(this->current.index_) != 0 );
-      isBoundaryType = std::abs(this->current.item_->nbbnd(this->current.index_)->type());
+      assert( (this->current.opposite_ != -222) ?
+              (this->current.item_->nbbnd(this->current.index_) != 0) : 1);
+      isBoundaryType =
+#if ALU2DGRID_PARALLEL
+        // if we have ghost face, return 222
+        (this->current.opposite_ == -222) ? 222 :
+#endif
+        std::abs(this->current.item_->nbbnd(this->current.index_)->type());
     }
 
     assert( isBoundaryType >= 0 );
@@ -383,6 +410,16 @@ namespace Dune {
   template<class GridImp>
   inline void ALU2dGridLevelIntersectionIterator<GridImp> :: increment ()
   {
+    doIncrement();
+#if ALU2DGRID_PARALLEL
+    this->checkValid();
+#endif
+  }
+
+  //! increment iterator
+  template<class GridImp>
+  inline void ALU2dGridLevelIntersectionIterator<GridImp> :: doIncrement ()
+  {
     if (this->current.index_ >= this->nFaces_) {
       this->done();
       return;
@@ -506,6 +543,9 @@ namespace Dune {
   first(const EntityType & en, int wLevel)
   {
     setFirstItem(en.getItem(),wLevel);
+#if ALU2DGRID_PARALLEL
+    this->checkValid();
+#endif
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -555,6 +595,7 @@ namespace Dune {
   template<class GridImp>
   inline typename ALU2dGridLevelIntersectionIterator<GridImp> :: EntityPointer
   ALU2dGridLevelIntersectionIterator<GridImp> :: outside() const {
+
     assert(!this->boundary());
     assert( this->current.neigh_ );
     assert(this->current.neigh_->level() == this->walkLevel_);
@@ -615,6 +656,16 @@ namespace Dune {
   //! increment iterator
   template<class GridImp>
   inline void ALU2dGridLeafIntersectionIterator<GridImp> :: increment ()
+  {
+    doIncrement();
+#if ALU2DGRID_PARALLEL
+    this->checkValid();
+#endif
+  }
+
+  //! increment iterator
+  template<class GridImp>
+  inline void ALU2dGridLeafIntersectionIterator<GridImp> :: doIncrement ()
   {
     if (this->current.index_ >= this->nFaces_)
     {
@@ -762,8 +813,25 @@ namespace Dune {
       if((!iter_->done()))
       {
         elem_ = &(iter_->getitem());
-        this->updateEntityPointer(elem_, -1,
-                                  GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
+
+#if ALU2DGRID_PARALLEL
+        bool valid = (cdim == 0) ?
+                     (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+                     marker_.isValidVertex( elem_->getIndex() );
+#else
+        bool valid = true;
+#endif
+
+        // if we found valid item, call update
+        if( valid )
+        {
+          this->updateEntityPointer(elem_, -1,
+                                    GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
+        }
+        else
+        {
+          increment();
+        }
       }
     }
     else
@@ -818,7 +886,34 @@ namespace Dune {
       return ;
     }
 
+    // get element pointer
     elem_ = &(iter_->getitem());
+
+#if ALU2DGRID_PARALLEL
+    bool valid = (cdim == 0) ?
+                 (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+                 marker_.isValidVertex( elem_->getIndex() );
+
+    while ( ! valid )
+    {
+      // go to next item
+      iter_->next();
+
+      if(iter_->done())
+      {
+        endIter_ = true;
+        this->done();
+        return ;
+      }
+
+      // get element pointer
+      elem_ = &(iter_->getitem());
+      valid = (cdim == 0) ?
+              (this->grid_.rankManager().isValid( elem_->getIndex(), pitype )) :
+              marker_.isValidVertex( elem_->getIndex() );
+    }
+#endif
+
     this->updateEntityPointer(elem_, -1,
                               GetLevel<ElementType,LeafMarkerVectorType,cdim>::level(*elem_,marker_));
   }
@@ -909,20 +1004,43 @@ namespace Dune {
     int goNext = goNextElement();
     if (goNext) {
       assert(face_==3);
+
+      // go next element
       iter->next();
-      if(iter->done()) {
+      if(iter->done())
+      {
         endIter_=true;
         face_= -1;
         this->done();
         return ;
       }
-      face_=0;
+      // get new element
       elem_ = &(iter->getitem());
+#if ALU2DGRID_PARALLEL
+      while ( ! this->grid_.rankManager().isValid( elem_->getIndex(), pitype ) )
+      {
+        // go to next item
+        iter->next();
+        if(iter->done())
+        {
+          endIter_=true;
+          face_= -1;
+          this->done();
+          return ;
+        }
+        elem_ = &(iter->getitem());
+      }
+#endif
+
+      face_=0;
+      // whatever this is good for
       this->updateEntityPointer(elem_, face_, elem_->level());
       increment();
     }
-    else {
-      if(iter->done()) {
+    else
+    {
+      if(iter->done())
+      {
         endIter_=true;
         face_= -1;
         this->done();
@@ -976,7 +1094,14 @@ namespace Dune {
       {
         item_ = &(iter_->getitem());
         this->updateEntityPointer(item_, -1 , level_);
+#if ALU2DGRID_PARALLEL
+        if ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+        {
+          increment();
+        }
+#endif
       }
+
     }
     else
     {
@@ -1025,6 +1150,24 @@ namespace Dune {
       return ;
     }
     item_ = &iter->getitem();
+
+#if ALU2DGRID_PARALLEL
+    while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+    {
+      // go to next item
+      iter_->next();
+
+      if(iter_->done()) {
+        endIter_ = true;
+        this->done();
+        return ;
+      }
+
+      // get element pointer
+      item_ = &(iter_->getitem());
+    }
+#endif
+
     this->updateEntityPointer(item_, -1 , level_);
     return;
   }
@@ -1133,18 +1276,38 @@ namespace Dune {
       ++myFace_;
     }
 
-    if (goNext) {
+    if (goNext)
+    {
       assert(myFace_==3);
+
       iter->next();
-      if(iter->done()) {
+      if(iter->done())
+      {
         endIter_ = true;
         myFace_= 0;
         this->done();
         return ;
       }
 
-      myFace_= 0;
+      // get new element
       item_ = &iter->getitem();
+#if ALU2DGRID_PARALLEL
+      while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+      {
+        iter->next();
+        if(iter->done())
+        {
+          endIter_ = true;
+          myFace_= 0;
+          this->done();
+          return ;
+        }
+        item_ = &iter->getitem();
+      }
+#endif
+
+      myFace_= 0;
+      // whatever this does
       this->updateEntityPointer(item_, myFace_, level_);
       increment();
       return;
@@ -1192,6 +1355,20 @@ namespace Dune {
       if((!iter_->done()))
       {
         item_ = &iter_->getitem();
+#if ALU2DGRID_PARALLEL
+        while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+        {
+          iter_->next();
+          if(iter_->done())
+          {
+            endIter_ = true;
+            myFace_= 0;
+            this->done();
+            return ;
+          }
+          item_ = &iter_->getitem();
+        }
+#endif
         vertex_ = item_->getVertex(myFace_);
         this->updateEntityPointer(vertex_, myFace_, level_);
         increment();
@@ -1272,16 +1449,33 @@ namespace Dune {
 
     if (goNext) {
       assert(myFace_==3);
+
       iter->next();
-      if(iter->done()) {
+      if(iter->done())
+      {
         endIter_ = true;
         myFace_= 0;
         this->done();
         return ;
       }
+      item_ = &iter->getitem();
+
+#if ALU2DGRID_PARALLEL
+      while ( ! this->grid_.rankManager().isValid( item_->getIndex(), pitype ) )
+      {
+        iter->next();
+        if(iter->done())
+        {
+          endIter_ = true;
+          myFace_= 0;
+          this->done();
+          return ;
+        }
+        item_ = &iter->getitem();
+      }
+#endif
 
       myFace_ = 0;
-      item_ = &iter->getitem();
       vertex_ = item_->getVertex(myFace_);
       this->updateEntityPointer(vertex_, myFace_, level_);
       increment();

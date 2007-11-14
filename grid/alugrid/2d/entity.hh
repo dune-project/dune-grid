@@ -100,6 +100,9 @@ namespace Dune {
     //! geometry of this entity
     const Geometry & geometry () const;
 
+    //! return type of geometry
+    GeometryType type() const ;
+
     //! set item pointer to NULL
     void removeElement();
 
@@ -236,6 +239,9 @@ namespace Dune {
     //! geometry of this entity
     const Geometry & geometry () const;
 
+    //! return type of geometry
+    GeometryType type() const ;
+
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
         with codimension cc.
      */
@@ -316,7 +322,14 @@ namespace Dune {
     typename Codim<cc>::EntityPointer entity (int i) const;
 
     //! return partition type of this entity ( see grid.hh )
-    PartitionType partitionType() const { return InteriorEntity; }
+    PartitionType partitionType() const
+    {
+#if ALU2DGRID_PARALLEL
+      return grid_.rankManager().partitionType( item_->getIndex() );
+#else
+      return InteriorEntity;
+#endif
+    }
 
     /**
        \brief The boundaryId of the i-th subentity of codimension <tt>cc</tt>

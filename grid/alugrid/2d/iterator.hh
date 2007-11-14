@@ -160,6 +160,9 @@ namespace Dune {
     const Geometry & intersectionGlobal () const;
 
   protected:
+    //! return true if intersection is with boundary
+    void checkValid () ;
+
     // set interator to end iterator
     void done () ;
 
@@ -250,6 +253,7 @@ namespace Dune {
     //! increment iterator
     void increment ();
 
+
     //! level is conforming when non-conform grid used
     //! otherwise might not be conform
     bool conforming () const
@@ -260,6 +264,8 @@ namespace Dune {
     }
 
   private:
+    void doIncrement ();
+
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
 
@@ -337,6 +343,7 @@ namespace Dune {
     }
 
   private:
+    void doIncrement ();
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
 

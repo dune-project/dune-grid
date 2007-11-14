@@ -12,7 +12,11 @@ namespace Dune {
   //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
-    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
+    :
+#if ALU2DGRID_PARALLEL
+      comm_( MPIHelper::getCommunicator() ),
+#endif
+      mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
@@ -24,7 +28,33 @@ namespace Dune {
       , nrOfHangingNodes_(0)
       , sizeCache_(0)
       , lockPostAdapt_(false)
+#if ALU2DGRID_PARALLEL
+      , rankManager_( *this )
+#endif
   {
+#if ALU2DGRID_PARALLEL
+    abort();
+    // make partition for rank 0
+    {
+      // partition map
+      typename RankManagerType :: RankMapType part;
+
+      // clear refinement markers throughout the grid
+      typedef ALU2DSPACE Macro < ALU2DSPACE Element > macro_t;
+
+      // get macro element iterator
+      ALU2DSPACE Listwalkptr <macro_t> walk(mesh());
+      for( walk->first() ; ! walk->done() ; walk->next())
+      {
+        // get element pointer
+        int id = walk->getitem().operator ->()->getIndex();
+        part[id] = 0;
+      }
+
+      rankManager_.setPartition( part );
+    }
+#endif
+
     assert(mygrid_);
     makeGeomTypes();
     updateStatus();
@@ -32,7 +62,11 @@ namespace Dune {
 
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes )
-    : mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
+    :
+#if ALU2DGRID_PARALLEL
+      comm_( MPIHelper::getCommunicator() ),
+#endif
+      mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
                                     nrOfHangingNodes, ALU2DSPACE Refco::quart))
       , hIndexSet_(*this)
       , localIdSet_(*this)
@@ -45,7 +79,15 @@ namespace Dune {
       , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
       , lockPostAdapt_(false)
+#if ALU2DGRID_PARALLEL
+      , rankManager_( *this )
+#endif
   {
+#if ALU2DGRID_PARALLEL
+    rankManager_.initialize();
+    //rankManager_.loadBalance();
+#endif
+
     assert(mygrid_);
     makeGeomTypes();
     updateStatus();
@@ -54,7 +96,11 @@ namespace Dune {
   //! Constructor which constructs an empty ALU2dGrid
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::ALU2dGrid(int nrOfHangingNodes)
-    : mygrid_ (0)
+    :
+#if ALU2DGRID_PARALLEL
+      comm_( MPIHelper::getCommunicator() ),
+#endif
+      mygrid_ (0)
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
@@ -66,6 +112,9 @@ namespace Dune {
       , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
       , lockPostAdapt_(false)
+#if ALU2DGRID_PARALLEL
+      , rankManager_( *this )
+#endif
   {
     makeGeomTypes();
   }
@@ -212,10 +261,15 @@ namespace Dune {
     }
   }
 
-
   template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld>::calcExtras()
   {
+    // only in truly parallel runs update this
+    //if( comm_.size() > 1 ) rankManager_.update();
+#if ALU2DGRID_PARALLEL
+    rankManager_.update();
+#endif
+
     ////////////////////////////////////
     // reset size cache
     ////////////////////////////////////
@@ -299,13 +353,43 @@ namespace Dune {
 
     for (int j = 0; j < refCount; ++j)
     {
+#if ALU2DGRID_PARALLEL
+      /*
+         {
+         typedef typename Traits :: template Codim<0> :: LeafIterator LeafIterator;
+         LeafIterator endit = this->template leafend<0> ();
+         for(LeafIterator it = this->template leafbegin<0> ();
+            it != endit; ++it )
+         {
+          this->mark( 1, it );
+         }
+         }
+       */
+      {
+        typedef typename Traits :: template Codim<0> :: template Partition<Interior_Partition> :: LeafIterator LeafIterator;
+        LeafIterator endit = this->template leafend<0,Interior_Partition> ();
+        for(LeafIterator it = this->template leafbegin<0,Interior_Partition> ();
+            it != endit; ++it )
+        {
+          this->mark( 1, it );
+        }
+      }
+
+      rankManager_.notifyMarking();
+#else
       ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
       for( walk->first() ; ! walk->done() ; walk->next())
       {
         ALU2DSPACE Element & tr = walk->getitem();
         tr.Refco_el::mark(ALU2DSPACE Refco::ref);
       }
+#endif
       mesh().refine();
+
+      // in parallel update rank information
+#if ALU2DGRID_PARALLEL
+      rankManager_.update();
+#endif
     }
     //update data
     updateStatus();
@@ -320,6 +404,7 @@ namespace Dune {
   inline bool ALU2dGrid<dim, dimworld> :: preAdapt () {
     return (coarsenMarked_ > 0);
   }
+
 
   template <int dim, int dimworld>
   inline void ALU2dGrid<dim, dimworld> ::
@@ -375,13 +460,20 @@ namespace Dune {
       DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
     }
 
+#if ALU2DGRID_PARALLEL
+    // make marking of ghost elements
+    // needs one communication
+    rankManager_.notifyMarking();
+#else
     if( (refineMarked_ > 0) || (coarsenMarked_ > 0) )
+#endif
     {
       // refine only will be done if
       // at least one element was marked for refinement
       bool adapted = (refineMarked_) ? true : false;
       mesh().refine();
       mesh().coarse();
+
       updateStatus();
 
       // notify that postAdapt must be called
@@ -389,10 +481,12 @@ namespace Dune {
 
       return adapted;
     }
+#if ALU2DGRID_PARALLEL == 0
     else
     {
       return false;
     }
+#endif
   }
 
   // --adapt
@@ -401,6 +495,7 @@ namespace Dune {
   inline bool ALU2dGrid<dim, dimworld>::
   adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
   {
+    abort();
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
 
     typedef typename EntityObject :: ImplementationType EntityImp;
@@ -477,6 +572,12 @@ namespace Dune {
   inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::EntityPointer & ep ) const
   {
     return this->getRealImplementation(*ep).getMark();
+  }
+
+  template <int dim, int dimworld>
+  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::Entity & e ) const
+  {
+    return this->getRealImplementation(e).getMark();
   }
 
   template <int dim, int dimworld>
@@ -662,7 +763,66 @@ namespace Dune {
   }
 
 
+  // communicate level data
+  template <int dim, int dimworld>
+  template <class DataHandleImp,class DataType>
+  inline void ALU2dGrid<dim, dimworld>::
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
+               InterfaceType iftype, CommunicationDirection dir, int level ) const
+  {
+    // only communicate, if number of processes is larger than 1
+#if ALU2DGRID_PARALLEL
+    if( comm_.size() > 1 )
+    {
+      rankManager_.communicate(data,iftype,dir,level);
+    }
+#endif
+  }
 
+  // communicate level data
+  template <int dim, int dimworld>
+  template <class DataHandleImp,class DataType>
+  inline void ALU2dGrid<dim, dimworld>::
+  communicate (CommDataHandleIF<DataHandleImp,DataType> & data,
+               InterfaceType iftype, CommunicationDirection dir) const
+  {
+#if ALU2DGRID_PARALLEL
+    // only communicate, if number of processes is larger than 1
+    if( comm_.size() > 1 )
+    {
+      rankManager_.communicate(data,iftype,dir);
+    }
+#endif
+  }
+
+  // re-balance load of grid
+  template <int dim, int dimworld>
+  inline bool ALU2dGrid<dim, dimworld> :: loadBalance ()
+  {
+#if ALU2DGRID_PARALLEL
+    if( comm_.size()  <= 1 ) return false;
+    bool changed = rankManager_.loadBalance();
+    if( changed ) updateStatus();
+    return changed;
+#else
+    return false;
+#endif
+  }
+
+  // re-balance load of grid
+  template <int dim, int dimworld>
+  template <class DataHandleImp>
+  inline bool ALU2dGrid<dim, dimworld> :: loadBalance (DataHandleImp& data)
+  {
+#if ALU2DGRID_PARALLEL
+    if( comm_.size()  <= 1 ) return false;
+    bool changed = rankManager_.loadBalance();
+    if( changed ) updateStatus();
+    return changed;
+#else
+    return false;
+#endif
+  }
 }
 
 #endif

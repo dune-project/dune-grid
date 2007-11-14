@@ -104,6 +104,14 @@ namespace Dune {
     return geoObj_;
   }
 
+  //! geometry type of geometry of this entity
+  template<int cd, int dim, class GridImp>
+  inline GeometryType
+  ALU2dGridEntity<cd, dim, GridImp> :: type () const
+  {
+    return geoObj_.type();
+  }
+
   template<int cd, int dim, class GridImp>
   inline int ALU2dGridEntity<cd,dim,GridImp > :: getIndex() const
   {
@@ -174,6 +182,14 @@ namespace Dune {
 
     assert( geoImp_.up2Date() );
     return geoObj_;
+  }
+
+  //! geometry type of geometry of this entity
+  template<int dim, class GridImp>
+  inline GeometryType
+  ALU2dGridEntity<0, dim, GridImp> :: type () const
+  {
+    return geoObj_.type();
   }
 
   //! returns true if Entity is leaf (i.e. has no children)
@@ -274,6 +290,7 @@ namespace Dune {
   inline bool ALU2dGridEntity<0,dim,GridImp> :: mark( int refCount ) const
   {
     if( !isLeaf() ) return false;
+
     // if this assertion is thrown then you try to mark a non leaf entity
     // which is leads to unpredictable results
     assert(item_ != 0);

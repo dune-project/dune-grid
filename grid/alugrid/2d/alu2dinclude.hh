@@ -7,6 +7,14 @@
 #define ALU2DSPACE ALUGridSpace ::
 #define ALU2DSPACENAME ALUGridSpace
 
+// use the ALU3dGrid Parallel detection
+//#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
+#define ALU2DGRID_PARALLEL 0
+
+#if ALU2DGRID_PARALLEL
+#warning "Using ALU2dGrid in parallel"
+#endif
+
 namespace Dune {
 
   struct ALU2dImplTraits {
@@ -68,13 +76,16 @@ namespace Dune {
       for(iter->first(); !iter->done(); iter->next())
       {
         ElementType & elem = iter->getitem();
-
         int elIdx = elem.getIndex();
+
+        // if element is not valid, go to next
+#if ALU2DGRID_PARALLEL
+        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
+#endif
         for(int i=0; i<dim+1; ++i)
         {
           enum { vxCodim = 1 };
           int vxIdx = elem.getVertex(i)->getIndex();
-          //int vxIdx = elem.vertex(i)->getIndex();
           if( marker_[vxCodim][vxIdx] < 0) marker_[vxCodim][vxIdx] = elIdx;
 
           enum { edgeCodim = 0 };
@@ -144,8 +155,12 @@ namespace Dune {
       for(iter->first(); !iter->done(); iter->next())
       {
         ElementType & elem = iter->getitem();
-
         int elIdx = elem.getIndex();
+
+#if ALU2DGRID_PARALLEL
+        // is element is not valid, go to next
+        if( ! grid.rankManager().isValid( elIdx , All_Partition ) ) continue;
+#endif
         int level = elem.level();
 
         for(int i=0; i<dim+1; ++i)
@@ -170,6 +185,14 @@ namespace Dune {
       // if this assertion is thrown, the level has not been initialized
       assert( vertexLevels_[vxIdx] >= 0 );
       return vertexLevels_[vxIdx];
+    }
+
+    //! return level of vertex
+    bool isValidVertex(const int vxIdx) const
+    {
+      assert( up2Date_ );
+      assert( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
+      return (vertexLevels_[vxIdx] >= 0);
     }
 
   private:
