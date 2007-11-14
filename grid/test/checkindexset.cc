@@ -46,6 +46,7 @@ namespace Dune {
                         MapType3 & vertexCoordsMap )
   {
     GeometryType type = en.type();
+    assert( type == en.geometry().type() );
     enum { dim = EntityType::dimension };
     const int dimworld = GridType::dimensionworld;
     typedef typename EntityType :: ctype coordType;
@@ -100,6 +101,9 @@ namespace Dune {
         SubEntityKeyType globalSubEntity =
           SubEntityKeyType ( lset.template subIndex<codim>(en,subEntity),
                              (en.template entity<codim> (subEntity))->type());
+        // check equality of geometry types
+        assert( en.template entity<codim> (subEntity)->type() ==
+                en.template entity<codim> (subEntity)->geometry().type() );
         assert( globalSubEntity.first >= 0 );
         sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << "\n";
 
