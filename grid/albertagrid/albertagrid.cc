@@ -1018,6 +1018,13 @@ namespace Dune
     return geo_;
   }
 
+  template<int cd, int dim, class GridImp>
+  inline GeometryType
+  AlbertaGridEntity<cd,dim,GridImp>:: type () const
+  {
+    return geo_.type();
+  }
+
   //************************************
   //
   //  --AlbertaGridEntity codim = 0
@@ -1286,6 +1293,12 @@ namespace Dune
     return geoObj_;
   }
 
+  template<int dim, class GridImp>
+  inline GeometryType
+  AlbertaGridEntity <0,dim,GridImp>:: type () const
+  {
+    return geoObj_.type();
+  }
 
   // --father
   template<int dim, class GridImp>

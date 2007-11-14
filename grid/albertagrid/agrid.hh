@@ -419,6 +419,9 @@ namespace Dune
     //! geometry of this entity
     const Geometry & geometry () const;
 
+    //! type of geometry of this entity
+    GeometryType type () const;
+
     //***********************************************
     //  End of Interface methods
     //***********************************************
@@ -563,6 +566,9 @@ namespace Dune
 
     //! geometry of this entity
     const Geometry & geometry () const;
+
+    //! type of geometry of this entity
+    GeometryType type () const;
 
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
        with codimension cc.
