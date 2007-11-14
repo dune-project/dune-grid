@@ -157,9 +157,6 @@ namespace Dune {
     mutable GeometryObject geo_;
     mutable GeometryImp & geoImp_;
 
-    //! type of geometry
-    const GeometryType geometryType_;
-
     mutable bool builtgeometry_;       //!< true if geometry has been constructed
 
     mutable PartitionType partitionType_;
@@ -388,9 +385,6 @@ namespace Dune {
 
     mutable GeometryObject geoInFather_;
     mutable GeometryImp &  geoInFatherImp_;
-
-    //! type of geometry
-    const GeometryType geometryType_;
 
     // is true if entity is leaf entity
     bool isLeaf_;
