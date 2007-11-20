@@ -180,7 +180,7 @@ namespace ALUGridSpace {
   {
     typedef VertexListType :: IteratorType IteratorType;
 
-    mutable VertexListType & vxList_;
+    VertexListType & vxList_;
 
     mutable int count_;
     const int size_;
@@ -379,7 +379,7 @@ namespace ALUGridSpace {
     typedef IteratorElType<3>::ElType ElType;
     typedef typename LeafStopRule< ElType, pitype > :: StopRule_t StopRule_t;
 
-    mutable LeafVertexListType & vxList_;
+    LeafVertexListType & vxList_;
     typedef typename LeafVertexListType :: IteratorType ListIteratorType;
 
     mutable int count_;
@@ -864,6 +864,82 @@ namespace ALUGridSpace {
       : ALU3dGridGhostIterator(org) , level_(org.level_) , mxl_(org.mxl_){}
   };
 
+  ///////////////////////////////////////////
+  //
+  //  Helper class to get item from Helement
+  //
+  //////////////////////////////////////////
+  template<class GridImp, int cd>
+  struct GetItem;
+
+  template<class GridImp>
+  struct GetItem<GridImp,1>
+  {
+    enum { cd = 1 };
+    enum { elType = GridImp::elementType };
+
+    typedef typename Dune::ALU3dImplTraits<GridImp::elementType>::GEOElementType GEOElementType;
+    typedef typename IteratorElType<1>::ElType ItemType;
+
+    static ItemType * getItemFromEl(GEOTetraElementType & el, int i)
+    {
+      return el.myhface3(i);
+    }
+
+    static ItemType * getItemFromEl(GEOHexaElementType & el, int i)
+    {
+      return el.myhface4(i);
+    }
+
+    static ItemType * getItem(HElementType & el, int i)
+    {
+      return getItemFromEl(static_cast<GEOElementType &> (el),i);
+    }
+
+    static int numItems()
+    {
+      return Dune :: EntityCount<elType>::numFaces;
+    }
+  };
+
+  template<class GridImp>
+  struct GetItem<GridImp,2>
+  {
+    enum { cd = 2 };
+    enum { elType = GridImp::elementType };
+    typedef typename Dune::ALU3dImplTraits<GridImp::elementType>::GEOElementType GEOElementType;
+    typedef typename IteratorElType<2>::ElType ItemType;
+    static ItemType * getItem(HElementType & el, int i)
+    {
+      return static_cast<GEOElementType &> (el).myhedge1(i);
+    }
+
+    static int numItems()
+    {
+      return Dune :: EntityCount<elType>::numEdges;
+    }
+  };
+
+  template<class GridImp>
+  struct GetItem<GridImp,3>
+  {
+    enum { cd = 3 };
+    enum { elType = GridImp::elementType };
+    typedef typename Dune::ALU3dImplTraits<GridImp::elementType>::GEOElementType GEOElementType;
+    typedef typename IteratorElType<3>::ElType ItemType;
+    static ItemType * getItem(HElementType & el, int i)
+    {
+      return static_cast<GEOElementType &> (el).myvertex(i);
+    }
+
+    static int numItems()
+    {
+      return Dune :: EntityCount<elType>::numVertices;
+    }
+  };
+
+
+  //! Ghost Iterator
   template <int codim>
   class ALU3dGridGhostIteratorHigherCodim
     : public IteratorWrapperInterface < typename IteratorElType<codim>::val_t >
@@ -908,77 +984,11 @@ namespace ALUGridSpace {
       }
     };
 
-    template<class GridImp, int cd>
-    struct GetItem;
-
-    template<class GridImp>
-    struct GetItem<GridImp,1>
-    {
-      static const Dune::ALU3dGridElementType elType = GridImp::elementType ;
-
-      typedef typename Dune::ALU3dImplTraits<elType>::GEOElementType GEOElementType;
-      typedef typename IteratorElType<1>::ElType ItemType;
-
-      static ItemType * getItemFromEl(GEOTetraElementType & el, int i)
-      {
-        return el.myhface3(i);
-      }
-
-      static ItemType * getItemFromEl(GEOHexaElementType & el, int i)
-      {
-        return el.myhface4(i);
-      }
-
-      static ItemType * getItem(HElementType & el, int i)
-      {
-        return getItemFromEl(static_cast<GEOElementType &> (el),i);
-      }
-
-      static int numItems()
-      {
-        return Dune :: EntityCount<elType>::numFaces;
-      }
-    };
-
-    template<class GridImp>
-    struct GetItem<GridImp,2>
-    {
-      static const Dune::ALU3dGridElementType elType = GridImp::elementType ;
-      typedef typename Dune::ALU3dImplTraits<elType>::GEOElementType GEOElementType;
-      typedef typename IteratorElType<2>::ElType ItemType;
-      static ItemType * getItem(HElementType & el, int i)
-      {
-        return static_cast<GEOElementType &> (el).myhedge1(i);
-      }
-
-      static int numItems()
-      {
-        return Dune :: EntityCount<elType>::numEdges;
-      }
-    };
-
-    template<class GridImp>
-    struct GetItem<GridImp,3>
-    {
-      static const Dune::ALU3dGridElementType elType = GridImp::elementType ;
-      typedef typename Dune::ALU3dImplTraits<elType>::GEOElementType GEOElementType;
-      typedef typename IteratorElType<3>::ElType ItemType;
-      static ItemType * getItem(HElementType & el, int i)
-      {
-        return static_cast<GEOElementType &> (el).myvertex(i);
-      }
-
-      static int numItems()
-      {
-        return Dune :: EntityCount<elType>::numVertices;
-      }
-    };
-
     typedef ElType * getItemFunc_t (HElementType & el, int i);
 
   private:
     typedef Dune :: ALU3dGridItemListType GhostItemListType;
-    mutable GhostItemListType & ghList_;
+    GhostItemListType & ghList_;
     typedef typename GhostItemListType :: IteratorType IteratorType;
     IteratorType curr_;
     IteratorType end_;
@@ -1332,7 +1342,7 @@ namespace ALUGridSpace {
     const int level_;
 
     typedef Dune :: ALU3dGridItemListType ItemListType;
-    mutable ItemListType & edgeList_;
+    ItemListType & edgeList_;
 
     size_t count_ ;
     bool maxLevel_;
