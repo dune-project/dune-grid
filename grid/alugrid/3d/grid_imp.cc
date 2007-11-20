@@ -786,7 +786,7 @@ namespace Dune {
     }
 
     // check whether we have balance
-    dm.dofCompress();
+    dm.compress();
 
     // here postAdapt is not called, because
     // reset of refinedTag is done in preCoarsening and postRefinement

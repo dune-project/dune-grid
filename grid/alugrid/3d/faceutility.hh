@@ -210,8 +210,20 @@ namespace Dune {
     mutable CoordinateType coordsSelfLocal_;
     mutable CoordinateType coordsNeighborLocal_;
 
-    static ReferenceElementType refElem_;
-    static ReferenceFaceType refFace_;
+    const ReferenceElementType& refElem_;
+    const ReferenceFaceType& refFace_;
+
+    inline static const ReferenceElementType& getReferenceElement()
+    {
+      static ReferenceElementType refElem;
+      return refElem;
+    }
+
+    inline static const ReferenceFaceType& getReferenceFace()
+    {
+      static ReferenceFaceType refFace;
+      return refFace;
+    }
 
   private:
     // convert FieldVectors to alu3dtypes
