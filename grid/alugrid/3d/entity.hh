@@ -155,7 +155,7 @@ namespace Dune {
 
     //! the cuurent geometry
     mutable GeometryObject geo_;
-    mutable GeometryImp & geoImp_;
+    GeometryImp & geoImp_;
 
     mutable bool builtgeometry_;       //!< true if geometry has been constructed
 
@@ -376,7 +376,7 @@ namespace Dune {
 
     //! the cuurent geometry
     mutable GeometryObject geo_;
-    mutable GeometryImp & geoImp_;
+    GeometryImp & geoImp_;
     mutable bool builtgeometry_; //!< true if geometry has been constructed
 
     int walkLevel_; //! tells the actual level of walk put to LevelIterator..
@@ -384,7 +384,7 @@ namespace Dune {
     int level_;  //!< level of element
 
     mutable GeometryObject geoInFather_;
-    mutable GeometryImp &  geoInFatherImp_;
+    GeometryImp &  geoInFatherImp_;
 
     // is true if entity is leaf entity
     bool isLeaf_;
