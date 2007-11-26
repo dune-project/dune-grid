@@ -34,9 +34,6 @@ namespace Dune {
     template<class DiscFuncType>
     static void readFunction(DiscFuncType& f, const std::string& filename);
 
-    /** \brief Dummy constructor */
-    AmiraMeshReader() {}
-
   };
 
 }
