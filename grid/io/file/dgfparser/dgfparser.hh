@@ -534,7 +534,7 @@ namespace Dune {
       Dune::ALUSimplexGrid<3,3>, and
       Dune::ALUSimplexGrid<2,2>)
 
-     The verticies and elements of the grid are constructed in the
+     The vertices and elements of the grid are constructed in the
      following three steps:
      -# The file is parser for
         an \b Interval  block; if present a Cartesian grid is build for each
@@ -594,7 +594,7 @@ namespace Dune {
      Note that in this version only grids consisting of one element type are
      constructed even if the implemented grid allows for mixed elements.
 
-     The verticies and elements of the grid are constructed in one of the
+     The vertices and elements of the grid are constructed in one of the
      following stages:
      -# The file is first parser for
         an \b Interval  block; if present a Cartesian grid is build;
@@ -650,10 +650,10 @@ namespace Dune {
           If no file type is given it is assumed that in a previous run of
           Tetgen/Triangle
           files name.node and name.ele were generated and these will be used
-          to described the verticies and elements of the Dune grid.
+          to described the vertices and elements of the Dune grid.
        -# In the second approach the \b vertex and the \b interval blocks
           (if present)
-          are used to generate the verticies of the grid; the \b Cube and \b
+          are used to generate the vertices of the grid; the \b Cube and \b
           Simplex blocks are used for element information in the interior and
           the \b boundarysegment block is used for boundary information:
           - If only a \b vertex and/or \b interval block is found
@@ -707,7 +707,7 @@ namespace Dune {
           of the resulting mesh using the visualization tools distributed with
           Triangle/Tetgen.
        .
-       \e Note that parameters can be attached to the verticies and elements of
+       \e Note that parameters can be attached to the vertices and elements of
        the grid as described in the Triangle/Tetgen manual. Then can be
        retrieved as described in Section \ref PARAMETERS.
 
@@ -750,7 +750,7 @@ namespace Dune {
 
    \image html  examplegrid1s.png "The resulting grid"
 
-   A tessellation into cubes using the same verticies as before,
+   A tessellation into cubes using the same vertices as before,
 
    @include examplegrid1c.dgf
 
@@ -768,7 +768,7 @@ namespace Dune {
 
    \section dgfexample2 Automated Grid Construction
    Automatic tessellation using Triangle,
-   with verticies defined as in the example \ref dgfexample1:
+   with vertices defined as in the example \ref dgfexample1:
 
    @include examplegrid1gen.dgf
 
@@ -783,8 +783,8 @@ namespace Dune {
    \image html  examplegrid1genangle.png "The resulting grid"
 
    Automatic tessellation using Triangle,
-   with verticies are defined on a Cartesian grid with two additional
-   verticies in the top right corner and one vertex outside the unit square.
+   with vertices are defined on a Cartesian grid with two additional
+   vertices in the top right corner and one vertex outside the unit square.
 
    All boundary are given a default id.
 
@@ -859,7 +859,7 @@ namespace Dune {
    \image html  examplegrid6c.png "The resulting grid using ALUCubeGrid<3,3>"
    \image html  examplegrid6s.png "The resulting grid using ALUSimplexGrid<3,3>"
 
-   Now the verticies are still defined through the interval block; the simplicies
+   Now the vertices are still defined through the interval block; the simplicies
    are constructed using Tetgen (note the comment symbol \% in the
    \b Simplexgenerator block):
 

@@ -191,7 +191,7 @@ namespace Dune {
     // derived classes for each block in grid file
     // *************************************************************
     class VertexBlock : public BasicBlock {
-      int dimworld;      // the dimesnsion of the verticies (is given from user)
+      int dimworld;      // the dimesnsion of the vertices (is given from user)
       bool goodline;     // active line describes a vertex
       std::vector<double> p; // active vertex
       int vtxoffset;
@@ -500,7 +500,7 @@ namespace Dune {
         static int offset2[2][3][2] = {{{0,0},{1,0},{0,1}},
                                        {{1,1},{0,1},{1,0}}};
         if (vtx.size()==0)
-          DUNE_THROW(DGFException, "Converting Cune- to Simplexgrid with no verticies given");
+          DUNE_THROW(DGFException, "Converting Cune- to Simplexgrid with no vertices given");
         int dimworld = vtx[0].size();
         dverb << "generating simplices...";
         dverb.flush();
@@ -766,7 +766,7 @@ namespace Dune {
     // *************************************************************
     // the block BoundaryDomBlock looks for a domain which is characterized by two points in R^dimworld
     class BoundaryDomBlock : public BasicBlock {
-      int dimworld;    // the dimesnsion of the verticies (is given  from user)
+      int dimworld;    // the dimesnsion of the vertices (is given  from user)
       bool goodline;   // active line describes a vertex
       std::vector<double> p1,p2; // active vertex
       int bndid;
@@ -890,7 +890,7 @@ namespace Dune {
     // *************************************************************
     // the BoundarySegBlock looks for given boundary values unless they aren't given they got the value zero
     class BoundarySegBlock : public BasicBlock {
-      int dimworld;      // the dimesnsion of the verticies (is given  from user)
+      int dimworld;      // the dimesnsion of the vertices (is given  from user)
       bool goodline;     // active line describes a vertex
       std::vector<int> p; // active vertex
       int bndid;

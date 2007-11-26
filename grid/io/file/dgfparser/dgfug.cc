@@ -37,7 +37,7 @@ namespace Dune {
         else if (el.size()==pow(2,mg.dimw))
           grid->insertElement(GeometryType(GeometryType::cube,dim),el);
         else
-          DUNE_THROW(DGFException, "Wrong number of verticies for element");
+          DUNE_THROW(DGFException, "Wrong number of vertices for element");
       }
       grid->createEnd();
       return grid;
