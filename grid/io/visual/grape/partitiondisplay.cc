@@ -53,10 +53,10 @@ inline GENMESHnD* genmesh3d_switch_part_light_model_on_off ()
 
   if( light_on )
   { light_on = FALSE;
-    GRAPE(light_ctl,"set-state") (PRESSED);}
+    GRAPE_CALL(light_ctl,"set-state") (PRESSED);}
   else
   { light_on = TRUE;
-    GRAPE(light_ctl,"set-state") (UNPRESSED);}
+    GRAPE_CALL(light_ctl,"set-state") (UNPRESSED);}
 
   END_METHOD (hmesh);
 }
@@ -68,10 +68,10 @@ inline GENMESHnD* genmesh3d_switch_part_diagnostic_on_off ()
 
   if( diag_on )
   { diag_on = FALSE;
-    GRAPE(diagnostic_ctl,"set-state") (PRESSED);}
+    GRAPE_CALL(diagnostic_ctl,"set-state") (PRESSED);}
   else
   { diag_on = TRUE;
-    GRAPE(diagnostic_ctl,"set-state") (UNPRESSED);}
+    GRAPE_CALL(diagnostic_ctl,"set-state") (UNPRESSED);}
   END_METHOD (hmesh);
 }
 
@@ -82,10 +82,10 @@ inline GENMESHnD* genmesh3d_switch_part_displaybar_on_off ()
 
   if( bar_on )
   { bar_on = FALSE;
-    GRAPE(bar_ctl,"set-state") (PRESSED);}
+    GRAPE_CALL(bar_ctl,"set-state") (PRESSED);}
   else
   { bar_on = TRUE;
-    GRAPE(bar_ctl,"set-state") (UNPRESSED);}
+    GRAPE_CALL(bar_ctl,"set-state") (UNPRESSED);}
   END_METHOD (hmesh);
 }
 
@@ -126,7 +126,7 @@ static inline void set_colors (int currProcs);
 
 inline static void get_graphicdevice()
 {
-  dev = (GRAPHICDEVICE *)GRAPE(GraphicDevice,"get-stddev") ();
+  dev = (GRAPHICDEVICE *)GRAPE_CALL(GraphicDevice,"get-stddev") ();
 
   patch_normal = dev->patch_normal;
   patch_color  = dev->patch_color;
@@ -371,13 +371,13 @@ inline void initPartitionDisp (int mp)
     max_partition = mp;
 
     printf("Add Method 'switch-part-light-model-on-off' on GenMesh3d!\n");
-    GRAPE(GenMesh3d,"add-method") ("switch-part-light-model-on-off",genmesh3d_switch_part_light_model_on_off);
+    GRAPE_CALL(GenMesh3d,"add-method") ("switch-part-light-model-on-off",genmesh3d_switch_part_light_model_on_off);
 
     printf("Add Method 'switch-part-displaybar-on-off' on GenMesh3d!\n");
-    GRAPE(GenMesh3d,"add-method") ("switch-part-displaybar-on-off",genmesh3d_switch_part_displaybar_on_off);
-    GRAPE(GenMesh3d,"add-method") ("switch-part-diagnostic-on-off",genmesh3d_switch_part_diagnostic_on_off);
+    GRAPE_CALL(GenMesh3d,"add-method") ("switch-part-displaybar-on-off",genmesh3d_switch_part_displaybar_on_off);
+    GRAPE_CALL(GenMesh3d,"add-method") ("switch-part-diagnostic-on-off",genmesh3d_switch_part_diagnostic_on_off);
     printf("Add Method 'partition-disp' on GenMesh3d!\n");
-    GRAPE(GenMesh3d,"add-method") ("partition-disp",genmesh3d_partition_disp);
+    GRAPE_CALL(GenMesh3d,"add-method") ("partition-disp",genmesh3d_partition_disp);
     printf("\n");
     initialized = 1;
   }
@@ -407,7 +407,7 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
   ALERT (hmesh, "genmesh3d-partition: No hmesh!", END_METHOD(NULL));
 
-  fhdata = (F_HDATA3D*)GRAPE(hmesh,"get-function")
+  fhdata = (F_HDATA3D*)GRAPE_CALL(hmesh,"get-function")
              ("scalar","scalar","vector","default", NULL);
 
   set_colors( max_partition );
@@ -488,7 +488,7 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   last_element = -1;
   last_partition = 0;
 
-  GRAPE(hmesh,"get-partition-number") (&thread);
+  GRAPE_CALL(hmesh,"get-partition-number") (&thread);
   if(thread == max_partition-1) last_partition = 1;
 
   /*  Surface-Properties holen  */

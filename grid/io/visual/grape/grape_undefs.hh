@@ -166,6 +166,10 @@
   #undef GRAPE
 #endif // GRAPE
 
+#ifdef GRAPE_CALL
+  #undef GRAPE_CALL
+#endif // GRAPE_CALL
+
 #ifdef GRAPE
   #undef GRAPE
 #endif // GRAPE

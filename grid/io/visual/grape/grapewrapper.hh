@@ -21,6 +21,10 @@ extern "C" {
 #undef friend
 #undef explicit
 
+// make cast from const char * to char *
+// otherwise wont work with gcc 4.2.x
+#define GRAPE_CALL(obj,meth) GRAPE(obj,((char *)meth))
+
 #ifdef __cplusplus
 }
 #endif

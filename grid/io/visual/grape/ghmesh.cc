@@ -203,10 +203,10 @@ inline static HELEMENT * first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS flag)
   assert(elem);
 
   // set iterator type depending on value of button
-  GRAPE(iteratorButton,      "get-value") (&(dat->iteratorType));
-  GRAPE(partitionTypeButton, "get-value") (&(dat->partitionIteratorType));
+  GRAPE_CALL(iteratorButton,      "get-value") (&(dat->iteratorType));
+  GRAPE_CALL(partitionTypeButton, "get-value") (&(dat->partitionIteratorType));
 
-  F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
+  F_DATA * f_data = (F_DATA*)GRAPE_CALL(mesh,"get-function")
                       ("scalar","scalar","vector","default", NULL);
 
   assert( dat->setIterationModus );
@@ -595,7 +595,7 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FDATA * dfunc)
       f_data->hp_threshold    = 0.0;
       f_data->hp_maxlevel     = grape_mesh->max_level;
 
-      grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
+      grape_mesh = (GRAPEMESH *) GRAPE_CALL(grape_mesh,"add-function") (f_data);
     }
     else if (grape_mesh->f_data != (GENMESH_FDATA *)f_data)
     {
@@ -654,7 +654,7 @@ inline void grapeAddLevelFunction(GRAPEMESH *grape_mesh)
   }
 
   assert( f_data );
-  grape_mesh = (GRAPEMESH *) GRAPE(grape_mesh,"add-function") (f_data);
+  grape_mesh = (GRAPEMESH *) GRAPE_CALL(grape_mesh,"add-function") (f_data);
   return;
 }
 
@@ -756,7 +756,7 @@ inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
     // get mesh
     //if(meshStack.empty())
     {
-      return (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance") ("Dune Mesh");
+      return (GRAPEMESH *) GRAPE_CALL(GrapeMesh,"new-instance") ("Dune Mesh");
     }
     /*
        // not working yet
@@ -783,7 +783,7 @@ inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
 inline void * setupHmesh(const int noe, const int nov,
                          const int maxlev, DUNE_DAT * dune)
 {
-  //GRAPEMESH * mesh = (GRAPEMESH *) GRAPE(GrapeMesh,"new-instance")("Dune Mesh");
+  //GRAPEMESH * mesh = (GRAPEMESH *) GRAPE_CALL(GrapeMesh,"new-instance")("Dune Mesh");
   GRAPEMESH * mesh = getAndFreeMesh();
 
   assert(mesh != NULL);
@@ -853,7 +853,7 @@ inline void deleteFunctions( void * hmesh )
      if(name)
      {
       std::cout << "Got " << name << " func \n";
-      mesh = (GRAPEMESH *) GRAPE(mesh,"remove-function")(name);
+      mesh = (GRAPEMESH *) GRAPE_CALL(mesh,"remove-function")(name);
      }
      f_data = mesh->f_data;
      }
@@ -915,70 +915,70 @@ static inline void setMinMaxValuesToColorbars(const double min, const double max
     // all functions from mesh2d
     ///////////////////////////////
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_disp,"isoline-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_disp,"isoline-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_select_disp,"isoline-select-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh2d_isoline_select_disp,"isoline-select-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_isoline_disp,"isoline-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (hpmesh2d_isoline_disp,"isoline-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_geometry_graph_disp,"geometry-graph-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh2d_geometry_graph_disp,"geometry-graph-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_select_disp,"mesh2d-isoline-select");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh2d_isoline_select_disp,"mesh2d-isoline-select");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_isoline_disp,"mesh2d-isoline");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh2d_isoline_disp,"mesh2d-isoline");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh2d_vect_disp,"mesh2d-vect");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh2d_vect_disp,"mesh2d-vect");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (hpmesh2d_pdegfine_disp,"pdegfine-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (hpmesh2d_pdegfine_disp,"pdegfine-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh2d_chess_disp, "GenMesh2d::chess-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh2d_chess_disp, "GenMesh2d::chess-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     //{
-    //  COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar")(mesh2d_flic_disp,"flic");
+    //  COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar")(mesh2d_flic_disp,"flic");
     //  if ( colorBar ) colorBarList.push_back( colorBar );
     //}
     ///////////////////////////////
     // all functions from mesh3d
     ///////////////////////////////
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,"bnd-isoline-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_disp,"bnd-isoline-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_clip_isoline_multi_disp,"genmesh3d-clip-isoline-multi-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh3d_clip_isoline_multi_disp,"genmesh3d-clip-isoline-multi-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (genmesh3d_volume_disp, "GenMesh3d-volume");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (genmesh3d_volume_disp, "GenMesh3d-volume");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_select_disp,"bnd-isoline-select-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     {
-      COLORBAR * colorBar = (COLORBAR *) GRAPE(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_disp,"bnd-isoline-disp");
+      COLORBAR * colorBar = (COLORBAR *) GRAPE_CALL(Colorbar,"get-stdcolorbar") (mesh3d_bnd_isoline_disp,"bnd-isoline-disp");
       if ( colorBar ) colorBarList.push_back( colorBar );
     }
     //////////////////////////////
@@ -1003,7 +1003,7 @@ inline GRAPEMESH * setMinMaxValue()
   mesh = (GRAPEMESH *) START_METHOD(G_INSTANCE);
   ASSURE (mesh, "No HMESH in setMinMaxValue! \n", END_METHOD (0));
 
-  F_DATA * f_data = (F_DATA*)GRAPE(mesh,"get-function")
+  F_DATA * f_data = (F_DATA*)GRAPE_CALL(mesh,"get-function")
                       ("scalar","scalar","vector","default", 0);
   DUNE_FDATA * func = 0;
   if(f_data)
@@ -1030,7 +1030,7 @@ inline GRAPEMESH * setMinMaxValue()
 
 inline void colorBarMinMax(const double min, const double max)
 {
-  GRAPE(Colorbar,"set-default-min-max") (min,max);
+  GRAPE_CALL(Colorbar,"set-default-min-max") (min,max);
 }
 
 /* forward declaration */
@@ -1048,12 +1048,12 @@ inline void handleMesh(void *hmesh, bool gridMode )
   // static stack to keep scenes
   static std::stack< SCENE *> sceneStack;
 
-  MANAGER * mgr = (MANAGER *)GRAPE(Manager,"get-stdmgr") ();
+  MANAGER * mgr = (MANAGER *)GRAPE_CALL(Manager,"get-stdmgr") ();
 
   SCENE * sc = 0 ;
   if(sceneStack.empty())
   {
-    sc = (SCENE *)GRAPE(Scene,"new-instance") ("dune hmesh");
+    sc = (SCENE *)GRAPE_CALL(Scene,"new-instance") ("dune hmesh");
   }
   else
   {
@@ -1068,10 +1068,10 @@ inline void handleMesh(void *hmesh, bool gridMode )
     /* if no data then switch to grid mode */
     GRAPHICDEVICE *grdev;
 
-    grdev = (GRAPHICDEVICE *)GRAPE(GraphicDevice,"get-stddev") ();
+    grdev = (GRAPHICDEVICE *)GRAPE_CALL(GraphicDevice,"get-stddev") ();
     grdev->clear();
     if (grdev && (grdev->grid_patch != G_GRID)) {
-      GRAPE(grdev,"grid-patch") (G_GRID);
+      GRAPE_CALL(grdev,"grid-patch") (G_GRID);
     }
   }
 
@@ -1084,10 +1084,10 @@ inline void handleMesh(void *hmesh, bool gridMode )
   // if function name exists, this function is selected again
   if( (lastFunctionName != "") && (lastSlotName != "") )
   {
-    GRAPE(mesh,"select-function") (lastSlotName.c_str(),lastFunctionName.c_str());
+    GRAPE_CALL(mesh,"select-function") (lastSlotName.c_str(),lastFunctionName.c_str());
   }
 
-  GRAPE(mgr,"handle") (sc);  // grape display call
+  GRAPE_CALL(mgr,"handle") (sc);  // grape display call
 
   removeLeafButton(mgr,sc);
 
@@ -1123,10 +1123,10 @@ inline void addHmeshToTimeScene(void * timescene, double time, void  *hmesh, int
 
   if(tsc->dynamic)
   {
-    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE(tsc->dynamic,"put") (mesh, mesh, time);
+    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE_CALL(tsc->dynamic,"put") (mesh, mesh, time);
   }
   else
-    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE(TimeStep,"put") (mesh, mesh, time);
+    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE_CALL(TimeStep,"put") (mesh, mesh, time);
 
   return;
 }
@@ -1142,10 +1142,10 @@ inline void addHmeshToGlobalTimeScene(double time, void  *hmesh, int proc)
 
   if(tsc->dynamic)
   {
-    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE(tsc->dynamic,"put") (mesh, mesh, time);
+    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE_CALL(tsc->dynamic,"put") (mesh, mesh, time);
   }
   else
-    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE(TimeStep,"put") (mesh, mesh, time);
+    tsc->dynamic = (G_SCENE_OBJECT *)GRAPE_CALL(TimeStep,"put") (mesh, mesh, time);
 
   return;
 }
@@ -1226,7 +1226,7 @@ inline static void copyHmeshes(GRAPEMESH *orgMesh, GRAPEMESH * self)
       assert(f_data != NULL);
       copyFdata(f_data,next_data);
 
-      self = (GRAPEMESH *) GRAPE(self,"add-function") (f_data);
+      self = (GRAPEMESH *) GRAPE_CALL(self,"add-function") (f_data);
       next_data = (F_DATA *) next_data->last;
     }
   }
@@ -1275,7 +1275,7 @@ inline static void copyHmeshes(GRAPEMESH *orgMesh, GRAPEMESH * self)
   }
 
   /* copy current function selections to orgMesh */
-  self = (GRAPEMESH *) GRAPE(self, "copy-function-selector") (orgMesh);
+  self = (GRAPEMESH *) GRAPE_CALL(self, "copy-function-selector") (orgMesh);
 
   self->user_data = orgMesh->user_data;
 
@@ -1376,12 +1376,12 @@ inline SCENE* scene_maxlevel_on_off ()
 
   if( maxlevelButton->on_off == ON )
   {
-    GRAPE(maxlevelButton,"set-state") (UNPRESSED);
+    GRAPE_CALL(maxlevelButton,"set-state") (UNPRESSED);
     maxlevelButton->on_off = OFF;
   }
   else
   {
-    GRAPE(maxlevelButton,"set-state") (PRESSED);
+    GRAPE_CALL(maxlevelButton,"set-state") (PRESSED);
     maxlevelButton->on_off = ON;
   }
   END_METHOD (sc);
@@ -1397,7 +1397,7 @@ inline SCENE* scene_set_min_max_values ()
   {
     // remember method name
     grapeMethodName = sc->method_name;
-    GRAPE(sc, "universal") ("value-min-max");
+    GRAPE_CALL(sc, "universal") ("value-min-max");
   }
   END_METHOD (sc);
 }
@@ -1466,10 +1466,10 @@ inline HMESH* genmesh_boundary_disp ()
   // if called first time, add ruler
   if(GRAPE (mgr,"new-handle") (genmesh_boundary_disp,1))
   {
-    GRAPE(mgr,"add-inter") (bndIdRuler);
+    GRAPE_CALL(mgr,"add-inter") (bndIdRuler);
   }
 
-  GRAPE(hmesh,"display") ();
+  GRAPE_CALL(hmesh,"display") ();
 
   hmesh->first_macro = first_macro ;
   hmesh->next_macro  = next_macro ;
@@ -1487,7 +1487,7 @@ inline HMESH* newHmeshHardCopy()
   newName += hmesh->name;
 
   // get new hmesh
-  HMESH* copy = (HMESH *) GRAPE(HMesh,"new-instance") (newName.c_str());
+  HMESH* copy = (HMESH *) GRAPE_CALL(HMesh,"new-instance") (newName.c_str());
   ALERT (copy, "hmesh_hardcopy: No new instance!", END_METHOD(NULL));
 
   // copy mesh
@@ -1500,35 +1500,35 @@ inline HMESH* newHmeshHardCopy()
 inline static void grape_add_remove_methods(void)
 {
   // if true returned, then grape was already initialized
-  if( GRAPE(HMesh,"find-method") ("next-f-data-send") ) return ;
+  if( GRAPE_CALL(HMesh,"find-method") ("next-f-data-send") ) return ;
 
-  if( (GRAPE(Scene,"find-method") ("set-min-max-values")) )
+  if( (GRAPE_CALL(Scene,"find-method") ("set-min-max-values")) )
   {
-    GRAPE(Scene,"delete-method") ("set-min-max-values");
+    GRAPE_CALL(Scene,"delete-method") ("set-min-max-values");
   }
-  GRAPE(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
+  GRAPE_CALL(Scene,"add-method") ("set-min-max-values",scene_set_min_max_values);
 
   printf("add-method 'next-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
-  GRAPE(HMesh,"add-method") ("next-f-data-send",&next_f_data_send);
+  GRAPE_CALL(HMesh,"add-method") ("next-f-data-send",&next_f_data_send);
   printf("add-method 'prev-f-data-send' on HMesh%dd!\n",GRAPE_DIM);
-  GRAPE(HMesh,"add-method") ("prev-f-data-send",&prev_f_data_send);
-  GRAPE(GrapeMesh,"add-method") ("interpol", &grape_mesh_interpol);
+  GRAPE_CALL(HMesh,"add-method") ("prev-f-data-send",&prev_f_data_send);
+  GRAPE_CALL(GrapeMesh,"add-method") ("interpol", &grape_mesh_interpol);
 
   printf("add-method 'value-min-max' on HMesh%dd!\n",GRAPE_DIM);
 
-  GRAPE(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
+  GRAPE_CALL(HMesh,"add-method") ("value-min-max", &setMinMaxValue);
 
   // overload hardcopy
   printf("add-method 'hardcopy' on HMesh%dd!\n",GRAPE_DIM);
-  GRAPE(HMesh,"add-method") ("hardcopy",&newHmeshHardCopy);
+  GRAPE_CALL(HMesh,"add-method") ("hardcopy",&newHmeshHardCopy);
 
 #if GRAPE_DIM == 3
-  GRAPE(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
-  GRAPE(HMesh,"add-method") ("boundary-id-disp",genmesh_boundary_disp);
+  GRAPE_CALL(GenMesh3d,"add-method") ("get-partition-number",get_partition_number);
+  GRAPE_CALL(HMesh,"add-method") ("boundary-id-disp",genmesh_boundary_disp);
 #endif
 
-  if( ! (GRAPE(Scene,"find-method") ("maxlevel-on-off")) )
-    GRAPE(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
+  if( ! (GRAPE_CALL(Scene,"find-method") ("maxlevel-on-off")) )
+    GRAPE_CALL(Scene,"add-method") ("maxlevel-on-off",scene_maxlevel_on_off);
 
   {
     char p_name[32];

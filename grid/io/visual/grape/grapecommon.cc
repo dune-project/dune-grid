@@ -70,21 +70,21 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     clabel[num].value = 0;
     clabel[num].label = NULL;
 
-    if(! (GRAPE(Button,"find-method") ("set-current-data-item")) )
+    if(! (GRAPE_CALL(Button,"find-method") ("set-current-data-item")) )
     {
-      GRAPE(Button,"add-method") ("set-current-data-item",
-                                  button_set_current_data_item);
+      GRAPE_CALL(Button,"add-method") ("set-current-data-item",
+                                       button_set_current_data_item);
     }
 
-    partitionTypeButton = (COMBOBUTTON *)GRAPE(ComboButton,"new-instance")
+    partitionTypeButton = (COMBOBUTTON *)GRAPE_CALL(ComboButton,"new-instance")
                             ("set-current-data-item",NULL,"",clabel);
-    GRAPE(partitionTypeButton, "set-fill-mode") (MENU_FILL_BOTTOM);
+    GRAPE_CALL(partitionTypeButton, "set-fill-mode") (MENU_FILL_BOTTOM);
 
-    GRAPE(partitionTypeButton,"set-instance") (partitionTypeButton);
-    GRAPE(partitionTypeButton,"set-label") (clabel[0].label);
-    GRAPE(partitionTypeButton,"set-pref-size") (12.0,1.0);
+    GRAPE_CALL(partitionTypeButton,"set-instance") (partitionTypeButton);
+    GRAPE_CALL(partitionTypeButton,"set-label") (clabel[0].label);
+    GRAPE_CALL(partitionTypeButton,"set-pref-size") (12.0,1.0);
 
-    GRAPE(mgr,"add-inter") (partitionTypeButton);
+    GRAPE_CALL(mgr,"add-inter") (partitionTypeButton);
   }
 
   // iterator types
@@ -103,20 +103,20 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     clabel[num].value = 0;
     clabel[num].label = NULL;
 
-    //GRAPE(Button,"add-method")("set-current-data-item",
+    //GRAPE_CALL(Button,"add-method")("set-current-data-item",
     //                           button_set_current_data_item);
 
-    iteratorButton = (COMBOBUTTON *)GRAPE(ComboButton,"new-instance")
+    iteratorButton = (COMBOBUTTON *)GRAPE_CALL(ComboButton,"new-instance")
                        ("set-current-data-item",NULL,"",clabel);
-    GRAPE(iteratorButton, "set-fill-mode") (MENU_FILL_BOTTOM);
+    GRAPE_CALL(iteratorButton, "set-fill-mode") (MENU_FILL_BOTTOM);
 
-    GRAPE(iteratorButton,"set-instance") (iteratorButton);
-    GRAPE(iteratorButton,"set-label") (clabel[0].label);
-    GRAPE(iteratorButton,"set-pref-size") (12.0,1.0);
+    GRAPE_CALL(iteratorButton,"set-instance") (iteratorButton);
+    GRAPE_CALL(iteratorButton,"set-label") (clabel[0].label);
+    GRAPE_CALL(iteratorButton,"set-pref-size") (12.0,1.0);
 
-    GRAPE(iteratorButton,"set-value") (defaultIteratorValue);
+    GRAPE_CALL(iteratorButton,"set-value") (defaultIteratorValue);
 
-    GRAPE(mgr,"add-inter") (iteratorButton);
+    GRAPE_CALL(mgr,"add-inter") (iteratorButton);
   }
 
   maxlevelButton = (BUTTON *)
@@ -146,28 +146,28 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
                              I_FillMode, MENU_FILL_BOTTOM,
                              I_End);
 
-  GRAPE(mgr,"add-inter") (maxlevelButton);
-  GRAPE(mgr,"add-inter") (minMaxColorbar);
+  GRAPE_CALL(mgr,"add-inter") (maxlevelButton);
+  GRAPE_CALL(mgr,"add-inter") (minMaxColorbar);
 
-  GRAPE(maxlevelButton,"set-state") (PRESSED);
-  GRAPE(minMaxColorbar,"set-state") (UNPRESSED);
+  GRAPE_CALL(maxlevelButton,"set-state") (PRESSED);
+  GRAPE_CALL(minMaxColorbar,"set-state") (UNPRESSED);
   maxlevelButton->on_off = OFF;
 }
 
 /* add Button which can switch between LevelIteration and LeafIteration */
 inline void removeLeafButton(MANAGER *mgr, void *sc)
 {
-  GRAPE(mgr,"remove-inter") (partitionTypeButton);
-  GRAPE(partitionTypeButton,"delete") ();
+  GRAPE_CALL(mgr,"remove-inter") (partitionTypeButton);
+  GRAPE_CALL(partitionTypeButton,"delete") ();
   partitionTypeButton = 0;
-  GRAPE(mgr,"remove-inter") (iteratorButton);
-  GRAPE(iteratorButton,"delete") ();
+  GRAPE_CALL(mgr,"remove-inter") (iteratorButton);
+  GRAPE_CALL(iteratorButton,"delete") ();
   iteratorButton = 0;
-  GRAPE(mgr,"remove-inter") (maxlevelButton);
-  GRAPE(maxlevelButton,"delete") ();
+  GRAPE_CALL(mgr,"remove-inter") (maxlevelButton);
+  GRAPE_CALL(maxlevelButton,"delete") ();
   maxlevelButton = 0;
-  GRAPE(mgr,"remove-inter") (minMaxColorbar);
-  GRAPE(minMaxColorbar,"delete") ();
+  GRAPE_CALL(mgr,"remove-inter") (minMaxColorbar);
+  GRAPE_CALL(minMaxColorbar,"delete") ();
   minMaxColorbar = 0;
 }
 
@@ -182,7 +182,7 @@ inline void timeSceneInit(INFO *info, const int n_info,
   for (int n = 0; n < MAXIMUM(1, n_info); n++)
   {
     printf("n = %d, make TimeScene \n",n);
-    info[n].tsc = (TIMESCENE *)GRAPE(TimeScene,"new-instance") (info[n].name);
+    info[n].tsc = (TIMESCENE *)GRAPE_CALL(TimeScene,"new-instance") (info[n].name);
     ((TIMESCENE *)info[n].tsc)->sync = 1;
     if (n > 0)
       ((TIMESCENE *) info[n-1].tsc)->next_scene = (SCENE *) info[n].tsc;
@@ -201,7 +201,7 @@ inline void timeSceneInit(INFO *info, const int n_info,
         char * newName = (char *) malloc(strlen(info[n].name) + 5 * sizeof(char));
         assert(newName);
         sprintf(newName,"%s_%d",info[n].name,p);
-        newSc = (TIMESCENE *)GRAPE(TimeScene,"new-instance") (newName);
+        newSc = (TIMESCENE *)GRAPE_CALL(TimeScene,"new-instance") (newName);
         assert(newSc);
 
         newSc->sync = 1;
@@ -218,7 +218,7 @@ inline void timeSceneInit(INFO *info, const int n_info,
     char * newName = (char *) malloc(12 * sizeof(char));
     assert(newName);
     sprintf(newName,"combo obj");
-    newSc = (TIMESCENE *)GRAPE(TimeScene,"new-instance") (newName);
+    newSc = (TIMESCENE *)GRAPE_CALL(TimeScene,"new-instance") (newName);
     assert(newSc);
 
     newSc->sync = 1;
@@ -236,7 +236,7 @@ inline SCENE * combine_scenes_send ()
   MANAGER * mgr = NULL;
   ALERT( sc, "combine-scenes: No hmesh!", END_METHOD(NULL));
 
-  newSc = (TIMESCENE *) GRAPE(TimeScene,"new-instance") ("combined Scene");
+  newSc = (TIMESCENE *) GRAPE_CALL(TimeScene,"new-instance") ("combined Scene");
   assert(newSc);
 
   while(sc)
@@ -247,12 +247,12 @@ inline SCENE * combine_scenes_send ()
       break;
   }
 
-  mgr = (MANAGER *)GRAPE(Manager,"get-stdmgr") ();
+  mgr = (MANAGER *)GRAPE_CALL(Manager,"get-stdmgr") ();
   assert(mgr);
   assert(globalTsc);
 
   sc->next_scene = (SCENE *) globalTsc;
-  GRAPE(mgr, "goto-instance") (globalTsc);
+  GRAPE_CALL(mgr, "goto-instance") (globalTsc);
 
   END_METHOD(sc);
 }
@@ -267,11 +267,11 @@ inline void displayTimeScene(INFO * info, int numberOfProcs )
 #ifdef GRID_MODE
     GRAPHICDEVICE *grdev;
 
-    grdev = (GRAPHICDEVICE *)GRAPE(GraphicDevice,"get-stddev") ();
+    grdev = (GRAPHICDEVICE *)GRAPE_CALL(GraphicDevice,"get-stddev") ();
     grdev->clear();
     if (grdev && (grdev->grid_patch != G_GRID))
     {
-      GRAPE(grdev,"grid-patch") (G_GRID);
+      GRAPE_CALL(grdev,"grid-patch") (G_GRID);
     }
 #endif
     GrapeInterface_two_two::grape_add_remove_methods();
@@ -280,15 +280,15 @@ inline void displayTimeScene(INFO * info, int numberOfProcs )
 
     {
       /* add combine methods to send method of Scene and TimeScene */
-      GRAPE(Scene,"add-method") ("combine-secnes-send",combine_scenes_send);
-      GRAPE(TimeScene,"add-method") ("combine-secnes-send",combine_scenes_send);
+      GRAPE_CALL(Scene,"add-method") ("combine-secnes-send",combine_scenes_send);
+      GRAPE_CALL(TimeScene,"add-method") ("combine-secnes-send",combine_scenes_send);
     }
 
-    mgr = (MANAGER *)GRAPE(Manager,"get-stdmgr") ();
+    mgr = (MANAGER *)GRAPE_CALL(Manager,"get-stdmgr") ();
 
     if(!maxlevelButton && !iteratorButton) setupLeafButton(mgr,tsc,1);
 
-    GRAPE(mgr,"handle") (tsc);
+    GRAPE_CALL(mgr,"handle") (tsc);
   }
 }
 
