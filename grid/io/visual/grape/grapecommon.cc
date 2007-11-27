@@ -9,7 +9,7 @@
 #include "grapecommon.hh"
 
 enum { numberOfPartitionTypes = 6 };
-static char *partitionNames[numberOfPartitionTypes] = {
+static const char *partitionNames[numberOfPartitionTypes] = {
   "Interior_Partition",
   "InteriorBorder_Partition",
   "Overlap_Partition",
@@ -19,7 +19,7 @@ static char *partitionNames[numberOfPartitionTypes] = {
 };
 
 enum { numberOfIterators = 4 };
-static char *iteratorNames[numberOfIterators] = {
+static const char *iteratorNames[numberOfIterators] = {
   "LeafIterator",
   "LevelIterator",
   "Macro + HierarchicIterator",
@@ -64,7 +64,7 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     for (int i=0; i<num; i++)
     {
       clabel[i].value = i;
-      clabel[i].label = partitionNames[i];
+      clabel[i].label = (char *) partitionNames[i];
     }
     // last of list is 0,and NULL
     clabel[num].value = 0;
@@ -97,7 +97,7 @@ inline void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene)
     for (int i=0; i<num; ++i)
     {
       clabel[i].value = i;
-      clabel[i].label = iteratorNames[i];
+      clabel[i].label = (char *) iteratorNames[i];
     }
     // last of list is 0,and NULL
     clabel[num].value = 0;
