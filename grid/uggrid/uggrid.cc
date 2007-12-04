@@ -184,7 +184,7 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned int envHeapS
       sprintf(newArgs[1], "V s1 : vt 1" );             // generates side vectors in 3D
 
       if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
+        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
 
       for (int i=0; i<2; i++)
         free(newArgs[i]);
@@ -204,6 +204,7 @@ inline Dune::UGGrid < dim >::~UGGrid()
   for (unsigned int i=0; i<boundarySegments_.size(); i++)
     delete boundarySegments_[i];
 
+  // Delete the UG multigrid if there is one (== createEnd() has been called)
   if (multigrid_) {
     // Set UG's currBVP variable to the BVP corresponding to this
     // grid.  This is necessary if we have more than one UGGrid in use.
@@ -211,6 +212,17 @@ inline Dune::UGGrid < dim >::~UGGrid()
     UG_NS<dim>::Set_Current_BVP(multigrid_->theBVP);
     UG_NS<dim>::DisposeMultiGrid(multigrid_);
   }
+
+  // DisposeMultiGrid cleans up the BVP as well.  But if there was no
+  // multigrid we have to take care of the BVP ourselves.
+  std::string problemName = name_ + "_Problem";
+  void** BVP = UG_NS<dim>::BVP_GetByName(problemName.c_str());
+
+  if (BVP)
+    if (UG_NS<dim>::BVP_Dispose(BVP))
+      DUNE_THROW(GridError, "Couldn't dispose of UG boundary value problem!");
+
+
 
   numOfUGGrids--;
 

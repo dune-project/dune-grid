@@ -609,11 +609,22 @@ namespace Dune {
     }
 #endif
 
+    //! Set the current boundary value problem
     static void Set_Current_BVP(void** thisBVP) {
       UG_NAMESPACE ::Set_Current_BVP(thisBVP);
     }
 
-    //! \todo Please doc me!
+    //! Get UG boundary value problem from its name
+    static void** BVP_GetByName(const char* name) {
+      return UG_NAMESPACE ::BVP_GetByName(name);
+    }
+
+    //! Dispose of a boundary value problem
+    static int BVP_Dispose(void** BVP) {
+      return UG_NAMESPACE ::BVP_Dispose(BVP);
+    }
+
+    //! Get UG multigrid object from its name
     static UG_NS< UG_DIM >::MultiGrid* GetMultigrid(const char* name) {
       return UG_NAMESPACE ::GetMultigrid(name);
     }
