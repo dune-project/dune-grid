@@ -802,7 +802,7 @@ void Dune::UGGrid < dim >::createEnd()
 
   if (boundarySegments_.size() > boundarySegments.size())
     DUNE_THROW(GridError, "You have supplied " << boundarySegments_.size()
-                                               << "parametrized boundary sements,  but the coarse grid has only "
+                                               << "parametrized boundary segments,  but the coarse grid has only "
                                                << boundarySegments.size() << " boundary faces!");
 
   // Count number of nodes on the boundary
