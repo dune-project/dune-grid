@@ -2,7 +2,10 @@
 
 if BUILD_DOCS
   DOXYGENTAG = doxygen-tag
+# only when wml is available
+if WML
   WHAT = bestpractice.html
+endif
   DOXYGEN_HTML = html
   DOXYGEN_DIST = html-dist
 endif
@@ -16,6 +19,7 @@ BASEDIR=../..
 CURDIR=doc/doxygen
 EXTRAINSTALL = doxygen.log
 
+if BUILD_DOCS
 # EXTRAINSTALL in the html subdirectory
 DOXYGENINSTALL = *.html *.css *.png *.gif
 
@@ -30,6 +34,7 @@ DOYXFILE_OVERWRITE = echo "HTML_HEADER = $(DOXYGENHEADER)"; \
   echo "HTML_STYLESHEET = $(DOXYGENSTYLESHEET)";
 DOXYFILESHORT_OVERWRITE = $(DOYXFILE_OVERWRITE) \
   echo "SHORT_NAMES = YES";
+# end WML
 endif
 
 
@@ -51,6 +56,8 @@ uninstall-local:
 	rm -f $(DESTDIR)/$(doxygendir)/*.css
 	rm -f $(DESTDIR)/$(doxygendir)/*.png
 	rm -f $(DESTDIR)/$(doxygendir)/*.gif
+# end BUILD_DOCS
+endif
 
 # what files does the doxygen-generated stuff depend on (find-syntax)
 DEPENDON = -name \*.cc -o -name \*.hh -o -name \*.png
