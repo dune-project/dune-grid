@@ -873,7 +873,10 @@ void Dune::UGGrid < dim >::createEnd()
     /** \todo Not nice: we need to copy because the array types are different */
     for (int j=0; j<2*dim-2; j++)
       thisSegment[j] = boundarySegmentVertices_[i][j];
-    boundarySegments.erase(thisSegment);
+
+    if (boundarySegments.erase(thisSegment)==0)
+      DUNE_THROW(GridError, "You have provided a boundary parametrization for"
+                 << " a segment which is not boundary segment in the grid!");
   }
 
 
