@@ -24,11 +24,15 @@ namespace Dune {
   template<class GridType, class IndexSet>
   class GnuplotWriter {
 
+    typedef typename GridType::ctype ctype;
+
+    enum {dimworld = GridType::dimensionworld};
+
   public:
     GnuplotWriter (const GridType & g, const IndexSet & is) : _grid(g), _is(is)
     {
       // Gnuplot Export only works for world dim == 1
-      IsTrue<GridType::dimensionworld == 1>::yes();
+      IsTrue<dimworld == 1 || dimworld == 2>::yes();
       // allocate _data buffer
       _data.resize(_is.size(0)*2);
     }
@@ -40,6 +44,8 @@ namespace Dune {
     template <class DataContainer>
     void addCellData(const DataContainer& data, const std::string & name)
     {
+      if (dimworld!=1)
+        DUNE_THROW(IOError, "Gnuplot cell data writing is only supported for grids in a 1d world!");
       addData(cellData, data, name);
     }
 
@@ -68,7 +74,9 @@ namespace Dune {
     template <class DataContainer>
     void addData(DataType t, const DataContainer& data, const std::string & name);
 
-    void writeRow(std::ostream & file, float position, const std::vector<float> & data) const;
+    void writeRow(std::ostream & file,
+                  const FieldVector<ctype, dimworld>& position,
+                  const std::vector<float> & data) const;
   };
 
   /** \brief GnuplotWriter on the leaf grid
