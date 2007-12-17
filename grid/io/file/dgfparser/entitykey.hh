@@ -18,13 +18,15 @@ namespace Dune {
         origKey_[i]=k.origKey_[i];
       }
     }
-    inline DGFEntityKey& operator=(const DGFEntityKey < A > &k) {
+    inline DGFEntityKey& operator=(const DGFEntityKey < A > &k)
+    {
       assert(key_.size()==k.key_.size());
       for (size_t i=0; i<key_.size(); i++) {
         key_[i]=k.key_[i];
         origKey_[i]=k.origKey_[i];
       }
       origKeySet_ = k.origKeySet_;
+      return *this;
     }
     inline DGFEntityKey (std::vector<A>& key,bool setOrigKey=true) : key_(key.size()), origKey_(key.size()), origKeySet_(setOrigKey) {
       for (size_t i=0; i<key_.size(); i++) {
