@@ -2,9 +2,10 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <config.h>
 
-#include <dune/common/array.hh>
+
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridpart.hh>
@@ -395,11 +396,11 @@ class CheckCommunication {
     std::cout << " Communication for codim: " << cdim << "\n";
 
     int dataSize = set.size(cdim);
-    typedef Dune::Array<double> ArrayType;
-    ArrayType data(dataSize);
-    data = 0.0;
-    ArrayType weight(dataSize);
-    weight = 0.0;
+
+    typedef std::vector<double> ArrayType;
+    ArrayType data(dataSize, 0.0);
+    ArrayType weight(dataSize, 0.0);
+
     project(grid,dataSize,data,weight, myrank);
     double preresult = test(grid,dataSize,data,weight,myrank,false);
     sout << "Test before Communication on <" << myrank << "> "
