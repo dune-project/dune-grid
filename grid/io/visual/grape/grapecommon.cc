@@ -234,7 +234,7 @@ inline SCENE * combine_scenes_send ()
   SCENE* sc = (SCENE*) START_METHOD (G_INSTANCE);
   TIMESCENE * newSc = NULL;
   MANAGER * mgr = NULL;
-  ALERT( sc, "combine-scenes: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT( sc, (char *) "combine-scenes: No hmesh!", END_METHOD(NULL));
 
   newSc = (TIMESCENE *) GRAPE_CALL(TimeScene,"new-instance") ("combined Scene");
   assert(newSc);

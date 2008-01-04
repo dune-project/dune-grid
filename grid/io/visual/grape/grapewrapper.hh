@@ -3,6 +3,8 @@
 #ifndef __GRAPEWRAPPER__
 #define __GRAPEWRAPPER__
 
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +26,20 @@ extern "C" {
 // make cast from const char * to char *
 // otherwise wont work with gcc 4.2.x
 #define GRAPE_CALL(obj,meth) GRAPE(obj,((char *)meth))
+
+// make cast from const char * to char *
+// otherwise wont work with gcc 4.2.x
+inline void g_newerrorbox (const char * a, const char * b, int c, const char * d)
+{
+  g_errorbox(((char *)a),((char *)b),c,((char *)d));
+}
+
+// define new allert macro that uses g_newerrorbox
+#define GRAPE_ALERT(condition,message,error_exit) \
+  do {if(!(condition)) { \
+        g_newerrorbox(message,__FILE__,__LINE__,# condition); \
+        error_exit; \
+      }} while(0)
 
 #ifdef __cplusplus
 }

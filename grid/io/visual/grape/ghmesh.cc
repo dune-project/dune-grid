@@ -100,7 +100,7 @@ namespace FctSelector {
     if (current)
     {
       GENMESH_FDATA* fun = (GENMESH_FDATA *)
-                           GRAPE (mesh, "get-function") (NULL, current->slot,NULL);
+                           GRAPE_CALL(mesh, "get-function") (NULL, current->slot,NULL);
       fctName.first  = current->slot;
       fctName.second = fun->name;
     }
@@ -1372,7 +1372,7 @@ inline static HMESH *prev_f_data_send(void)
 inline SCENE* scene_maxlevel_on_off ()
 {
   SCENE* sc = (SCENE*) START_METHOD (G_INSTANCE);
-  ALERT( sc, "maxlevel-on-off: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT(sc,"maxlevel-on-off: No hmesh!",END_METHOD(NULL));
 
   if( maxlevelButton->on_off == ON )
   {
@@ -1390,7 +1390,7 @@ inline SCENE* scene_maxlevel_on_off ()
 inline SCENE* scene_set_min_max_values ()
 {
   SCENE* sc = (SCENE*) START_METHOD (G_INSTANCE);
-  ALERT( sc, "set-min-max-values: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT( sc, "set-min-max-values: No hmesh!", END_METHOD(NULL));
 
   // only if method different from display
   if(sc->method_name)
@@ -1443,9 +1443,9 @@ inline static HELEMENT * bnd_first_macro (GENMESHnD *mesh, MESH_ELEMENT_FLAGS fl
 inline HMESH* genmesh_boundary_disp ()
 {
   HMESH * hmesh = (HMESH*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "genmesh-boundary-id: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT(hmesh, "genmesh-boundary-id: No hmesh!", END_METHOD(NULL));
 
-  MANAGER* mgr = (MANAGER *) GRAPE (Manager,"get-stdmgr") ();
+  MANAGER* mgr = (MANAGER *) GRAPE_CALL(Manager,"get-stdmgr") ();
   assert( mgr );
 
   hmesh->first_macro = bnd_first_macro ;
@@ -1464,7 +1464,7 @@ inline HMESH* genmesh_boundary_disp ()
   }
 
   // if called first time, add ruler
-  if(GRAPE (mgr,"new-handle") (genmesh_boundary_disp,1))
+  if(GRAPE_CALL(mgr,"new-handle") (genmesh_boundary_disp,1))
   {
     GRAPE_CALL(mgr,"add-inter") (bndIdRuler);
   }
@@ -1481,14 +1481,14 @@ inline HMESH* genmesh_boundary_disp ()
 inline HMESH* newHmeshHardCopy()
 {
   HMESH * hmesh = (HMESH*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "hmesh-hardcopy: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT(hmesh, "hmesh-hardcopy: No hmesh!", END_METHOD(NULL));
 
   std::string newName("H: ");
   newName += hmesh->name;
 
   // get new hmesh
   HMESH* copy = (HMESH *) GRAPE_CALL(HMesh,"new-instance") (newName.c_str());
-  ALERT (copy, "hmesh_hardcopy: No new instance!", END_METHOD(NULL));
+  GRAPE_ALERT(copy, "hmesh_hardcopy: No new instance!", END_METHOD(NULL));
 
   // copy mesh
   copyHmeshes(hmesh,copy);

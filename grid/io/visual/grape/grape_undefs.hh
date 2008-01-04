@@ -170,6 +170,10 @@
   #undef GRAPE_CALL
 #endif // GRAPE_CALL
 
+#ifdef GRAPE_ALERT
+  #undef GRAPE_ALERT
+#endif // GRAPE_ALERT
+
 #ifdef GRAPE
   #undef GRAPE
 #endif // GRAPE

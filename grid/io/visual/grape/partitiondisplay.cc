@@ -49,7 +49,7 @@ static SUPROP_DEV suprop;
 inline GENMESHnD* genmesh3d_switch_part_light_model_on_off ()
 {
   GENMESHnD*          hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "genmesh3d-switch-part-light-model-on-off: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT (hmesh, "genmesh3d-switch-part-light-model-on-off: No hmesh!", END_METHOD(NULL));
 
   if( light_on )
   { light_on = FALSE;
@@ -64,7 +64,7 @@ inline GENMESHnD* genmesh3d_switch_part_light_model_on_off ()
 inline GENMESHnD* genmesh3d_switch_part_diagnostic_on_off ()
 {
   GENMESHnD*   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "genmesh3d-switch-part-diagnostic-on-off: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT (hmesh, "genmesh3d-switch-part-diagnostic-on-off: No hmesh!", END_METHOD(NULL));
 
   if( diag_on )
   { diag_on = FALSE;
@@ -78,7 +78,7 @@ inline GENMESHnD* genmesh3d_switch_part_diagnostic_on_off ()
 inline GENMESHnD* genmesh3d_switch_part_displaybar_on_off ()
 {
   GENMESHnD*   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "genmesh3d-switch-part-displaybar-on-off: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT (hmesh, "genmesh3d-switch-part-displaybar-on-off: No hmesh!", END_METHOD(NULL));
 
   if( bar_on )
   { bar_on = FALSE;
@@ -405,7 +405,7 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   /* get hmesh */
 
   hmesh = (GENMESHnD*) START_METHOD (G_INSTANCE);
-  ALERT (hmesh, "genmesh3d-partition: No hmesh!", END_METHOD(NULL));
+  GRAPE_ALERT (hmesh, "genmesh3d-partition: No hmesh!", END_METHOD(NULL));
 
   fhdata = (F_HDATA3D*)GRAPE_CALL(hmesh,"get-function")
              ("scalar","scalar","vector","default", NULL);
@@ -413,8 +413,8 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   set_colors( max_partition );
 
   /* GRAPE preliminaries */
-  mgr = (MANAGER *)      GRAPE (Manager,       "get-stdmgr") ();
-  dev = (GRAPHICDEVICE*) GRAPE (GraphicDevice, "get-stddev") ();
+  mgr = (MANAGER *)      GRAPE_CALL(Manager,       "get-stdmgr") ();
+  dev = (GRAPHICDEVICE*) GRAPE_CALL(GraphicDevice, "get-stddev") ();
 
 
   /* get interactives */
@@ -481,8 +481,8 @@ inline GENMESHnD* genmesh3d_partition_disp ()
                                I_End);
   }
 
-  if (GRAPE (mgr,"new-handle") (genmesh3d_partition_disp,1)) {
-    GRAPE (mgr,"add-inter") (group);
+  if (GRAPE_CALL(mgr,"new-handle") (genmesh3d_partition_disp,1)) {
+    GRAPE_CALL(mgr,"add-inter") (group);
   }
 
   last_element = -1;
@@ -497,7 +497,7 @@ inline GENMESHnD* genmesh3d_partition_disp ()
   /* prepare mesh-traverse */
   max = hmesh->level_of_interest + 1;
 
-  general = (HM3_GENERAL*) GRAPE (hmesh, "general-alloc") (TRUE);
+  general = (HM3_GENERAL*) GRAPE_CALL(hmesh, "general-alloc") (TRUE);
   general->f_data3d = fhdata;
 
   //G_MEM_ALLOC(hm3_partition_data,max);
