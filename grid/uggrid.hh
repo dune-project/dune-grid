@@ -10,9 +10,9 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
-#include <dune/common/misc.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/common/deprecated.hh>
+#include <dune/common/static_assert.hh>
 
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
@@ -185,7 +185,7 @@ namespace Dune {
     friend class Entity;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
-    CompileTimeChecker< ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;
+    dune_static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
 
     // The different instantiations are mutual friends so they can access
     // each others numOfUGGrids field
