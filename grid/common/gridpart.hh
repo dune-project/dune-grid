@@ -441,7 +441,10 @@ namespace Dune {
 
 
   //**************************************************************
-  //! \brief Selects the leaf level of a grid
+  /** \brief Selects the leaf level of a grid together with the
+      HierarchicIndexSet available for ALUGrid and AlbertaGrid. For all
+      other grids the default LeafIndexSet is selected.
+   */
   template <class GridImp, PartitionIteratorType pitype = Interior_Partition>
   class HierarchicGridPart :
     public GridPartDefault< HierarchicGridPartTraits<GridImp,pitype> > {
@@ -520,17 +523,23 @@ namespace Dune {
     IndexSetType isetWrapper_;
   };
 
-  //! Type definitions for the LeafGridPart class
+  //! Type definitions for the HierarchicGridPart class
   template <class GridImp,PartitionIteratorType pitype>
   struct HierarchicGridPartTraits {
+    /** \brief The type of the grid */
     typedef GridImp GridType;
+    /** \brief The type of the corresponding grid part class */
     typedef HierarchicGridPart<GridImp,pitype> GridPartType;
+    /** \brief The appropriate index set */
     typedef WrappedHierarchicIndexSet<GridType> IndexSetType;
+    /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::
     LeafIntersectionIterator IntersectionIteratorType;
 
+    /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>
     struct Codim {
+      /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
       typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator IteratorType;
     };
 
