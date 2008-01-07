@@ -117,9 +117,12 @@ namespace Dune
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
     typedef typename Entity::Geometry DuneGeometryType;
+    typedef typename DuneGeometryType :: ctype ctype;
 
     enum { dim      = Entity::dimension };
     enum { dimworld = Entity::dimensionworld };
+
+    typedef FieldVector<ctype, dimworld> CoordinateType;
 
     Entity &en = (*it[0]);
 
@@ -153,11 +156,12 @@ namespace Dune
           he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
 
           assert( Entity::dimensionworld <= 3 );
+          const CoordinateType& coord = geometry[ grapeVx ];
           for(int j = 0; j < Entity::dimensionworld ; ++j)
           {
             // here the mapping from dune to grape elements is done
             // it's only different for quads and hexas
-            vpointer[i][j] = geometry[ grapeVx ][j] ;
+            vpointer[i][j] = coord[j] ;
           }
         }
       } // end set all vertex coordinates
