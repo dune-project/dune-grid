@@ -775,23 +775,19 @@ namespace Dune {
 
        \return true if Entity was marked, false otherwise.
      */
-    template <class T>
-    bool mark( int refCount, T & e )
+    bool mark( int refCount, const typename Codim<0>::EntityPointer & e )
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
-      return asImp().template mark<T>(refCount,e);
+      return asImp().mark(refCount,e);
     }
 
-    /** \brief returns adaptation mark for given entity
+    /** \brief returns adaptation mark for given entity pointer
 
-       \param[in] e    Entity for which adaptation mark should be determined
+       \param[in] e   EntityPointer for which adaptation mark should be determined
 
        \return int adaptation mark currently set for given EntityPointer e
      */
-    template <class T>
-    int getMark(T & e) const
+    int getMark(const typename Codim<0>::EntityPointer & e) const
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return asImp().getMark(e);
     }
 
@@ -1005,22 +1001,19 @@ namespace Dune {
              This template method will vanish due to the inheritance
              rules.
      */
-    template <class T>
-    bool mark( int refCount, T & e )
+    bool mark( int refCount, const typename Traits :: template Codim<0>::EntityPointer & e )
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return false;
     }
 
     /** \brief returns adaptation mark for given entity, i.e. here the
      * default implementation returns 0.
 
-       \param[in] e    Entity for which adaptation mark should be determined
+       \param[in] e   EntityPointer for which adaptation mark should be determined
 
        \return int adaptation mark, here the default value 0 is returned
      */
-    template <class T>
-    int getMark(T &) const
+    int getMark(const typename Traits :: template Codim<0>::EntityPointer &) const
     {
       return 0;
     }
