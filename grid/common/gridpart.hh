@@ -442,8 +442,10 @@ namespace Dune {
 
   //**************************************************************
   /** \brief Selects the leaf level of a grid together with the
-      HierarchicIndexSet available for ALUGrid and AlbertaGrid. For all
-      other grids the default LeafIndexSet is selected.
+      HierarchicIndexSet available for ALUGrid and AlbertaGrid.
+      The HierarchicIndexSet is basically the LocalIdSet of the grid
+      extended by a size method to implement the IndexSet interface.
+      For all other grids the default LeafIndexSet is selected.
    */
   template <class GridImp, PartitionIteratorType pitype = Interior_Partition>
   class HierarchicGridPart :
