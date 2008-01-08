@@ -9,6 +9,7 @@
 #include <stack>
 
 //- Dune includes
+#include <dune/common/stdstreams.hh>
 #include <dune/grid/common/grid.hh>
 
 //-local includes
