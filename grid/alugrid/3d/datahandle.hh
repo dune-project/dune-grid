@@ -21,15 +21,17 @@ namespace ALUGridSpace {
   {
   protected:
     const GridType & grid_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<codim>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType ImplElementType;
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::InterfaceType HElementType;
 
-    EntityType     & entity_;
+    EntityType  & entity_;
     RealEntityType & realEntity_;
 
     DataCollectorType & dc_;
@@ -41,7 +43,8 @@ namespace ALUGridSpace {
     typename DataCollectorType::DataType tmp_;
   public:
     //! Constructor
-    GatherScatterBaseImpl(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
+                          RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc)
         , variableSize_( ! dc_.fixedsize(EntityType::dimension,codim) )
     {}
@@ -126,8 +129,10 @@ namespace ALUGridSpace {
   protected:
     enum { codim = 0 };
     const GridType & grid_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<0>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType IMPLElementType;
@@ -148,7 +153,7 @@ namespace ALUGridSpace {
     typedef HElementType PllElementType;
 #endif
 
-    EntityType     & entity_;
+    EntityType& entity_;
     RealEntityType & realEntity_;
 
     // data handle
@@ -161,7 +166,8 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterBaseImpl(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
+                          RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity)
         , dc_(dc) , variableSize_ ( ! dc_.fixedsize( EntityType :: dimension, codim ))
     {}
@@ -262,8 +268,10 @@ namespace ALUGridSpace {
     enum { dim = GridType :: dimension };
 
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<codim>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType IMPLElementType;
@@ -282,7 +290,8 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterLeafData(const GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc)
+    GatherScatterLeafData(const GridType & grid, MakeableEntityType & en,
+                          RealEntityType & realEntity , DataCollectorType & dc)
       : BaseType(grid,en,realEntity,dc)
     {
       // if leaf vertices are communicated,
@@ -336,8 +345,10 @@ namespace ALUGridSpace {
     : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
   {
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<codim>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType IMPLElementType;
@@ -359,8 +370,9 @@ namespace ALUGridSpace {
     const int level_;
   public:
     //! Constructor
-    GatherScatterLevelData(const GridType & grid, EntityType & en, RealEntityType & realEntity ,
-                           DataCollectorType & dc, const LevelIndexSetImp & levelSet, const int level)
+    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
+                           RealEntityType & realEntity , DataCollectorType & dc,
+                           const LevelIndexSetImp & levelSet, const int level)
       : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) {}
 
     // returns true, if element is contained in set of comm interface
@@ -385,8 +397,10 @@ namespace ALUGridSpace {
   {
     enum { codim = 0 };
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<codim>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<codim>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType IMPLElementType;
@@ -408,8 +422,9 @@ namespace ALUGridSpace {
     const int level_;
   public:
     //! Constructor
-    GatherScatterLevelData(const GridType & grid, EntityType & en, RealEntityType & realEntity ,
-                           DataCollectorType & dc, const LevelIndexSetImp & levelSet, const int level)
+    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
+                           RealEntityType & realEntity , DataCollectorType & dc,
+                           const LevelIndexSetImp & levelSet, const int level)
       : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) {}
 
     // returns true, if element is contained in set of comm interface
@@ -453,8 +468,10 @@ namespace ALUGridSpace {
   {
   protected:
     enum { codim = 0 };
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<0>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::
     template Codim<codim>::ImplementationType IMPLElementType;
@@ -488,7 +505,8 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    GatherScatterLoadBalance(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp )
+    GatherScatterLoadBalance(GridType & grid, MakeableEntityType & en,
+                             RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp )
       : grid_(grid), entity_(en), realEntity_(realEntity)
         , dc_(dc) , idxOp_(idxOp)
     {}
@@ -546,8 +564,10 @@ namespace ALUGridSpace {
   class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<0>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     EntityType & reFather_;
     EntityType & reSon_;
@@ -562,7 +582,7 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     AdaptRestrictProlongImpl (GridType & grid,
-                              EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
+                              MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs
                               , RestrictProlongOperatorType & rp)
       : grid_(grid)
         , reFather_(f)
@@ -653,13 +673,15 @@ namespace ALUGridSpace {
   {
     typedef AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType> BaseType;
     GlobalIdSetImp & set_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<0>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
   public:
     //! Constructor
     AdaptRestrictProlongGlSet(GridType & grid,
-                              EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
+                              MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs
                               , RestrictProlongOperatorType & rp
                               , GlobalIdSetImp & set )
       : BaseType(grid,f,rf,s,rs,rp)
@@ -696,8 +718,10 @@ namespace ALUGridSpace {
   class LoadBalanceElementCount : public AdaptRestrictProlongType
   {
     GridType & grid_;
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+        typename GridType::template Codim<0>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
@@ -713,7 +737,7 @@ namespace ALUGridSpace {
   public:
     //! Constructor
     LoadBalanceElementCount (GridType & grid,
-                             EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs,DofManagerType & dm)
+                             MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs,DofManagerType & dm)
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
