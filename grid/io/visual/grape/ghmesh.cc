@@ -526,25 +526,6 @@ static inline void f_real(HELEMENT *el, int ind, double G_CONST *coord,
   return;
 }
 
-/* function calling data to evaluate for picewise constant data */
-static inline void f_real_polOrd_zero(HELEMENT *el, int ind, double G_CONST *coord,
-                                      double *val, void *function_data)
-{
-  assert(el);
-  DUNE_ELEM * elem = (DUNE_ELEM *)el->user_data;
-  assert(elem != NULL);
-  DUNE_FDATA *fem = (DUNE_FDATA *) function_data;
-
-  assert(fem != NULL);
-  assert(fem->discFunc != NULL);
-
-  // if polynomial order zero, then only evaluate for ind = 0
-  if(ind > 0) return;
-
-  evaluateFunction(elem,fem,ind,coord,val);
-  return;
-}
-
 /* function displaying the level of the element */
 inline void f_level(HELEMENT *el, int ind, double G_CONST *coord,
                     double *val, void *function_data)
@@ -576,7 +557,7 @@ inline void grapeInitScalarData(GRAPEMESH *grape_mesh, DUNE_FDATA * dfunc)
 
       f_data->continuous_data = dfunc->continuous;
 
-      f_data->f                   = (dfunc->polyOrd == 0) ? f_real_polOrd_zero : f_real;
+      f_data->f                   = f_real;
       f_data->f_el_info           = dune_function_info;
 
       f_data->function_data = (void *) dfunc;
