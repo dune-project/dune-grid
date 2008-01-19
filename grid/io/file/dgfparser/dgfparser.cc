@@ -436,7 +436,7 @@ namespace Dune {
         }
       }
     }
-    removeCopies();
+    // removeCopies();
     info->step1(dimw,vtx.size(),elements.size());
     // test for tetgen/triangle block (only if simplex-grid allowed)
     if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
@@ -528,7 +528,9 @@ namespace Dune {
           {
             facemap[key2]=0;
           }
-          else if(pos->second==0 || pos->first.origKeySet()) { // face found twice
+          else if (pos->second==0 ||
+                   pos->first.origKeySet())
+          { // face found twice
             facemap.erase(pos);
           }
           else { // use original key as given in key2
@@ -672,7 +674,7 @@ namespace Dune {
         std::stringstream command;
         if (para.haspath())
           command << para.path() << "/";
-        command << "showme " << name << ".1.ele";
+        command << "showme " << name; // << ".1.ele";
         dverb << "Calling : " << command.str() << std::endl;
         system(command.str().c_str());
       }
