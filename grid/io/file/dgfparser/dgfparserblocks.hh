@@ -3,6 +3,8 @@
 #ifndef DUNE_MACROGRIDPARSERBLOCKS_HH
 #define DUNE_MACROGRIDPARSERBLOCKS_HH
 
+#include <set>
+
 namespace Dune {
 
   // *************************************************************
@@ -1089,6 +1091,88 @@ namespace Dune {
       }
     };
     const char* DimBlock::ID = "Dimensions";
+
+    // *************************************************************
+    class GridParameterBlock : public BasicBlock
+    {
+    protected:
+      std::set<int> _periodic; // periodic grid
+      int _overlap; // overlap for YaspGrid
+      bool _noClosure; // no closure for UGGrid
+    private:
+      // copy not implemented
+      GridParameterBlock(const GridParameterBlock&);
+    public:
+      const static char* ID;
+      // initialize block and get dimension of world
+      GridParameterBlock(std::istream& in)
+        : BasicBlock(in,ID)
+          , _periodic()
+          , _overlap(0) // default value
+          , _noClosure(false) // default value
+      {
+        if (isempty()) {
+          derr << "WARNING: no grid parameters specified! Defaulting overlap to 1!\n";
+          derr << "         See documentation of GridParameterBlock to change this value. \n";
+        }
+        else
+        {
+          // check overlap
+          if (findtoken("overlap"))
+          {
+            int x;
+            if(getnextentry(x)) _overlap = x;
+
+            if (_overlap < 0)
+            {
+              DUNE_THROW(DGFException,"Negative overlap specified!");
+            }
+          }
+          // check periodic grid
+          if (findtoken("periodic"))
+          {
+            int x;
+            while (getnextentry(x))
+            {
+              _periodic.insert(x);
+            }
+          }
+          // check closure
+          if (findtoken("closure"))
+          {
+            std::string clo;
+            if(getnextentry(clo))
+            {
+              makeupcase(clo);
+              if(clo == "NONE")
+              {
+                _noClosure = true;
+              }
+            }
+          }
+        }
+      }
+
+      // get dimension of world found in block
+      int overlap() const { return _overlap;  }
+
+      // returns true if no closure should be used for UGGrid
+      bool noClosure() const { return _noClosure; }
+
+      // returns true if dimension is periodic
+      bool isPeriodic(const int dim) const
+      {
+        return (_periodic.find(dim) != _periodic.end());
+      }
+
+      // some information
+      bool ok()
+      {
+        return true;
+      }
+    };
+    const char* GridParameterBlock::ID = "GridParameter";
+
     // *************************************************************
     class IntervalBlock : public BasicBlock {
       std::vector<double> p0_,p1_; //lower and upper boundary points
