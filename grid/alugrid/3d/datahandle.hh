@@ -67,9 +67,8 @@ namespace ALUGridSpace {
       // set element and then start
       setElement(elem);
 
-      // contiansItem might fail for ghost elements, which is not a bug
-      // containsItem just returns right values for interior elements
-      assert( entity_.partitionType() == Dune :: GhostEntity );
+      // make sure partition type is set correct
+      assert( elem.isGhost() == (entity_.partitionType() == Dune :: GhostEntity) );
 
       size_t size = getSize(str, entity_);
       // use normal scatter method
@@ -79,6 +78,7 @@ namespace ALUGridSpace {
     //! write Data of one element to stream
     void sendData ( ObjectStreamType & str , HElementType & elem )
     {
+      // make sure element is contained in communication interface
       assert( this->containsItem( elem ) );
       setElement(elem);
 
@@ -373,7 +373,8 @@ namespace ALUGridSpace {
     GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
                            RealEntityType & realEntity , DataCollectorType & dc,
                            const LevelIndexSetImp & levelSet, const int level)
-      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) {}
+      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level)
+    {}
 
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HElementType & elem) const
@@ -443,12 +444,14 @@ namespace ALUGridSpace {
     // returns true, if interior element is contained in set of comm interface
     bool containsInterior (const HFaceType & face, PllElementType & pll) const
     {
+      // if face level is not level_ then interior cannot be contained
       if(face.level() != level_) return false;
 
       // check interior element here, might have a coarser level
       pair < Gitter::helement_STI * , Gitter::hbndseg_STI * > p (0,0);
       pll.getAttachedElement( p );
       assert( p.first );
+      // check inside level
       bool contained = (p.first->level() == level_);
       assert( contained == this->containsItem( *p.first ));
       return contained;
@@ -457,6 +460,9 @@ namespace ALUGridSpace {
     // returns true, if ghost is contianed in set of comm interface
     bool containsGhost (const HFaceType & face, PllElementType & pll) const
     {
+      // if face level is not level_ then ghost cannot be contained
+      if(face.level() != level_) return false;
+      // otherwise check ghost level
       return (pll.ghostLevel() == level_);
     }
   };
