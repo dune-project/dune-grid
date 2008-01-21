@@ -496,7 +496,6 @@ namespace Dune {
        Tetgen (http://tetgen.berlios.de) for \c dimworld=3 or
        Triangle (http://www.cs.cmu.edu/~quake/triangle.html) for \c dimworld=2.
        For more detail see \ref Simplexgeneration.
-      .
      - \b Vertex \n
        Each line consists of a vector representing a vertex of the
        macrogrid. The vertices are consecutively numbered.
@@ -508,6 +507,18 @@ namespace Dune {
          of the first vertex can be used.
        - Using the \b parameters keyword it is possible to add a set of parameters
          to each vertex of the grid.
+     - \b GridParameter \n
+       Using this block a grid specific parameters can be passed to certain grids.
+       The following options are implemented at the moment: \n
+       - For YaspGrid two options can be choosen: \n
+          1. \b overlap defining the overlap of the grid (default value is zero)
+          2. \b periodic defining which dimension should have periodic
+                boundaries, i.e. passing \b periodic 0 1 will set
+                periodic boundaries for x and y direction.
+       - For UGGrid one option can be choosen: \n
+          1. \b closure (valid values are none or green = default) will set the closure
+             type of the returned UGGrid.
+       See the examplegrid5.dgf file for an example.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->

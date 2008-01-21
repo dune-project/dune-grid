@@ -28,18 +28,32 @@ namespace Dune {
           v[j] = mg.vtx[n][j];
         grid->insertVertex(v);
       }
+
+      size_t two_power_dim = 1;
+      // eval 2^dim
+      for(int i=0; i<mg.dimw; ++i) two_power_dim *= 2;
+
       for (int n=0; n<mg.nofelements; n++) {
         std::vector<unsigned int> el;
         for (size_t j=0; j<mg.elements[n].size(); j++)
           el.push_back((mg.elements[n][j]));
         if ((int) el.size()==mg.dimw+1)
           grid->insertElement(GeometryType(GeometryType::simplex,dim),el);
-        else if (el.size()==pow(2,mg.dimw))
+        else if (el.size() == two_power_dim)
           grid->insertElement(GeometryType(GeometryType::cube,dim),el);
         else
           DUNE_THROW(DGFException, "Wrong number of vertices for element");
       }
       grid->createEnd();
+
+      // get grid parameter block
+      GridParameterBlock gridParam(gridin);
+
+      // set closure type to none if parameter say so
+      if( gridParam.noClosure() )
+      {
+        grid->setClosureType(UGGrid<dim> :: NONE);
+      }
       return grid;
     }
     DUNE_THROW(DGFException,"Macrofile " << filename << " is not a valid DGF file\n"
