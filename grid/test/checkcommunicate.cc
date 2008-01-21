@@ -414,6 +414,9 @@ class CheckCommunication {
     // call communication of grid
     // if level < 0 then check leaf level
     gridPart_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
+    // make sure backward communication does the same, this should change nothing
+    gridPart_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
+    //gridPart_.communicate(dh,All_All_Interface,ForwardCommunication);
 
     double result = test(grid,dataSize,data,weight,myrank,true);
     sout << "Test after Communication on <" << myrank << "> "  << std::flush
