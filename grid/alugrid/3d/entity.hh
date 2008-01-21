@@ -136,10 +136,19 @@ namespace Dune {
     //! convert ALUGrid partition type to dune partition type
     PartitionType convertBndId(const ElementType & item) const
     {
-      if(item.isGhost()) return GhostEntity;
-      if(item.isBorder()) return BorderEntity;
-      if(item.isInterior()) return InteriorEntity;
-      return InteriorEntity;
+      if(item.isGhost())
+      {
+        return GhostEntity;
+      }
+      else if(item.isBorder())
+      {
+        return BorderEntity;
+      }
+      else
+      {
+        assert( item.isInterior() );
+        return InteriorEntity;
+      }
     }
 
     // the grid this entity belongs to
