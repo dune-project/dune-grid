@@ -15,7 +15,7 @@ namespace Dune {
       if (mg.dimw != dim) {
         DUNE_THROW(DGFException,
                    "Macrofile " << filename << " is for dimension " << mg.dimw
-                                << " and connot be used to initialize an "
+                                << " and cannot be used to initialize an "
                                 << "UGGrid of dimension "
                                 << dim);
       }
