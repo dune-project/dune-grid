@@ -11,6 +11,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/common/interfaces.hh>
 #include <dune/common/deprecated.hh>
+#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/referenceelements.hh>
@@ -169,8 +170,8 @@ namespace Dune {
     public HasObjectStream,
     public HasHierarchicIndexSet
   {
-    CompileTimeChecker<(dim      == 2)> ALU2dGrid_only_implemented_for_2dp;
-    CompileTimeChecker<(dimworld == 2)> ALU2dGrid_only_implemented_for_2dw;
+    dune_static_assert(dim      == 2, "ALU2dGrid only implemented for 2dp");
+    dune_static_assert(dimworld == 2, "ALU2dGrid only implemented for 2dw");
 
     typedef ALU2dGrid<dim,dimworld> ThisType;
     typedef GridDefaultImplementation<dim,dimworld,alu2d_ctype,ALU2dGridFamily<dim,dimworld> > BaseType;

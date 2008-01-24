@@ -12,6 +12,7 @@
 #include <dune/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/deprecated.hh>
+#include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/referenceelements.hh>
@@ -191,8 +192,8 @@ namespace Dune {
     // type of base class
     typedef GridDefaultImplementation<dim, dimworld, alu3d_ctype, ALU3dGridFamily <dim,dimworld,elType> > BaseType;
 
-    CompileTimeChecker<(dim      == 3)> ALU3dGrid_only_implemented_for_3dp;
-    CompileTimeChecker<(dimworld == 3)> ALU3dGrid_only_implemented_for_3dw;
+    dune_static_assert(dim      == 3, "ALU3dGrid only implemented for 3dp");
+    dune_static_assert(dimworld == 3, "ALU3dGrid only implemented for 3dw");
 
     typedef ALU3dGrid<dim,dimworld,elType> MyType;
     typedef ALU3dGrid<dim,dimworld,elType> ThisType;
