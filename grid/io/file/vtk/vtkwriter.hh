@@ -1124,7 +1124,8 @@ namespace Dune
         p = new VTKBinaryDataArrayWriter<float>(s,"Coordinates",3,3*nvertices);
       if (outputtype==VTKOptions::binaryappended)
         p = new VTKBinaryAppendedDataArrayWriter<float>(s,"Coordinates",3,bytecount);
-      for (VertexIterator vit=vertexBegin(); vit!=vertexEnd(); ++vit)
+      VertexIterator vEnd = vertexEnd();
+      for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
       {
         int dimw=w;
         for (int j=0; j<std::min(dimw,3); j++)
