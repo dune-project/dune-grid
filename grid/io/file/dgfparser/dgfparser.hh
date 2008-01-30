@@ -518,7 +518,7 @@ namespace Dune {
        - For UGGrid one option can be choosen: \n
           1. \b closure (valid values are \b none or \b green, which is the default value) will set the closure
              type of the returned UGGrid. \n
-       See the @link examplegrid5.dgf file for an example.
+       See the \b examplegrid5.dgf file for an example.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->

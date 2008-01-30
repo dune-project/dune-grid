@@ -1111,11 +1111,7 @@ namespace Dune {
           , _overlap(0) // default value
           , _noClosure(false) // default value
       {
-        if (isempty()) {
-          derr << "WARNING: no grid parameters specified! Defaulting overlap to 1!\n";
-          derr << "         See documentation of GridParameterBlock to change this value. \n";
-        }
-        else
+        if (! isempty() )
         {
           // check overlap
           if (findtoken("overlap"))
@@ -1128,6 +1124,11 @@ namespace Dune {
               DUNE_THROW(DGFException,"Negative overlap specified!");
             }
           }
+          else
+          {
+            dwarn << "WARNING: could not find keyword `overlap', defaulting to `0' !\n";
+          }
+
           // check periodic grid
           if (findtoken("periodic"))
           {
@@ -1137,6 +1138,11 @@ namespace Dune {
               _periodic.insert(x);
             }
           }
+          else
+          {
+            dwarn << "WARNING: could not find keyword `periodic', defaulting no periodoc boundary! \n";
+          }
+
           // check closure
           if (findtoken("closure"))
           {
@@ -1149,6 +1155,10 @@ namespace Dune {
                 _noClosure = true;
               }
             }
+          }
+          else
+          {
+            dwarn << "WARNING: could not find keyword `closure', defaulting to `GREEN' !\n";
           }
         }
       }
