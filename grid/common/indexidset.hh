@@ -314,7 +314,7 @@ namespace Dune
       for (IteratorType it = asImp().template begin<cd,All_Partition>();
            it != iend; ++it)
       {
-        // this code is not really valid
+        /** \todo this code is not really valid */
         if (it->level() == e.level() && this->index(*it) == this->index(e)) return true;
       }
       return false;
