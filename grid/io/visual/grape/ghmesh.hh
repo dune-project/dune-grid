@@ -111,6 +111,7 @@ typedef struct dune_fdata
       , minValue(0.0)
       , maxValue(1.0)
       , valuesSet(false)
+      , valCache(0.0)
       , getMinMaxValues(0)
   {
     // add this data to list of dune data funcs
@@ -178,6 +179,9 @@ typedef struct dune_fdata
 
   /* true if min and max values have been calculated */
   bool valuesSet;
+
+  /* cache for polOrd zero functions */
+  double valCache;
 
   /* returns min and max values of function */
   void (*getMinMaxValues)(DUNE_FDATA *, double * min, double * max );
