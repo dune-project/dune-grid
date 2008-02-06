@@ -4,7 +4,9 @@ namespace Dune {
   template <int dim>
   inline UGGrid<dim>*
   MacroGrid::Impl<UGGrid<dim> >::generate(MacroGrid& mg,
-                                          const char* filename, MPICommunicatorType ) {
+                                          const char* filename,
+                                          MPICommunicatorType )
+  {
     mg.element=General;
     std::ifstream gridin(filename);
 
@@ -19,26 +21,36 @@ namespace Dune {
                                 << "UGGrid of dimension "
                                 << dim);
       }
+
       mg.setOrientation(0,1);
       UGGrid<dim> *grid = new UGGrid<dim>();
       grid->createBegin();
-      for (int n=0; n<mg.nofvtx; n++) {
+
+      for (int n=0; n<mg.nofvtx; n++)
+      {
         FieldVector<double,dim> v;
         for (int j=0; j<dim; j++)
           v[j] = mg.vtx[n][j];
+
         grid->insertVertex(v);
       }
 
-      size_t two_power_dim = 1;
       // eval 2^dim
+      size_t two_power_dim = 1;
       for(int i=0; i<mg.dimw; ++i) two_power_dim *= 2;
 
-      for (int n=0; n<mg.nofelements; n++) {
+      for (int n=0; n<mg.nofelements; n++)
+      {
         std::vector<unsigned int> el;
         for (size_t j=0; j<mg.elements[n].size(); j++)
+        {
           el.push_back((mg.elements[n][j]));
-        if ((int) el.size()==mg.dimw+1)
+        }
+
+        // simplices
+        if ((int) el.size()== mg.dimw+1)
           grid->insertElement(GeometryType(GeometryType::simplex,dim),el);
+        // cubes
         else if (el.size() == two_power_dim)
           grid->insertElement(GeometryType(GeometryType::cube,dim),el);
         else
@@ -47,7 +59,7 @@ namespace Dune {
       grid->createEnd();
 
       // get grid parameter block
-      GridParameterBlock gridParam(gridin);
+      GridParameterBlock gridParam(gridin, false);
 
       // set closure type to none if parameter say so
       if( gridParam.noClosure() )

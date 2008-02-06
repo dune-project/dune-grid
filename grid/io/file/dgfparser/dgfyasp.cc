@@ -24,7 +24,7 @@ namespace Dune {
                               << dimworld);
     }
     // get grid parameters
-    GridParameterBlock grdParam(gridin);
+    GridParameterBlock grdParam(gridin, true);
 
     FieldVector<double,dimworld> lang;
     FieldVector<int,dimworld>    anz;
