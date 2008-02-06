@@ -436,10 +436,9 @@ namespace Dune {
           else sout << vx << "]\n";
 
           int vxidx = lset.template subIndex<dim> (*it,i);
-          int realidx = lset.index( *vxp );
 
           // the subIndex and the index for subEntity must be the same
-          assert( vxidx == realidx );
+          assert( vxidx == lset.index( *vxp ));
 
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
