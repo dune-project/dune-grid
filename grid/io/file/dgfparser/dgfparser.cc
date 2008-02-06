@@ -436,7 +436,10 @@ namespace Dune {
         }
       }
     }
-    // removeCopies();
+
+    // remove copies of vertices
+    removeCopies();
+
     info->step1(dimw,vtx.size(),elements.size());
     // test for tetgen/triangle block (only if simplex-grid allowed)
     if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
