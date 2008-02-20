@@ -520,6 +520,10 @@ namespace Dune {
     void setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
                      const FieldVector<double, dim>& pos);
 
+    /** \brief For a point on the grid boundary return its position on the domain boundary */
+    FieldVector<ctype,dim> getBoundaryPosition(const IntersectionIterator<const UGGrid<dim>, UGGridLevelIntersectionIterator>& iIt,
+                                               const FieldVector<ctype,dim-1>& localPos) const;
+
     /** \brief Does uniform refinement
      *
      * \param n Number of uniform refinement steps
