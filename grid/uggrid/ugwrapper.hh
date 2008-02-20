@@ -237,23 +237,6 @@ namespace Dune {
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
-    //! Returns true if the i-th edge of the element is on the domain boundary
-    static bool Edge_On_Bnd(const UG_NS< UG_DIM >::Element* theElement, int i) {
-      using UG_NAMESPACE ::BNDS;
-      using UG_NAMESPACE ::side_offset;
-      using UG_NAMESPACE ::element_descriptors;
-      using UG::UINT;
-      return EDGE_ON_BND(theElement,i);
-    }
-
-    //! Returns true if the i-th side of the element is on the domain boundary
-    static bool isBoundaryElement(const UG_NS< UG_DIM >::Element* theElement) {
-      using UG_NAMESPACE ::BEOBJ;
-      using UG_NAMESPACE ::GM_OBJECTS;
-      using UG::UINT;
-      return OBJT(theElement)==BEOBJ;
-    }
-
     //! \todo Please doc me!
     static int Edges_Of_Elem(const UG_NS< UG_DIM >::Element* theElement) {
       using UG_NAMESPACE ::element_descriptors;

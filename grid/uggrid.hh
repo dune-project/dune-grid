@@ -501,11 +501,6 @@ namespace Dune {
       closureType_ = type;
     }
 
-    /** \brief Sets the order for the isoparametric geometry approximation */
-    void setIsoparametricOrder(unsigned int order) {
-      isoparametricOrder_ = order;
-    }
-
     /** \brief Collapses the grid hierarchy into a single grid level*/
     void collapse() {
       if (Collapse(multigrid_))
@@ -567,9 +562,6 @@ namespace Dune {
 
     //! The type of grid refinement closure currently in use
     ClosureType closureType_;
-
-    //! The order of the isoparametric elements
-    unsigned int isoparametricOrder_;
 
     /** \brief While inserting the elements this array records the number of
         vertices of each element. */

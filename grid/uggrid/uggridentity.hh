@@ -42,24 +42,12 @@ namespace Dune {
       this->realEntity.setToTarget(target);
     }
 
-    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target,
-                     GridImp* myGrid) :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
-    {
-      this->realEntity.setToTarget(target,myGrid);
-    }
-
     UGMakeableEntity() :
       GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
     {}
 
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       this->realEntity.setToTarget(target);
-    }
-
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,
-                     GridImp* myGrid) {
-      this->realEntity.setToTarget(target,myGrid);
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
@@ -133,13 +121,6 @@ namespace Dune {
       geo_.setToTarget(target);
     }
 
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,
-                     GridImp* myGrid) {
-      target_ = target;
-      myGrid_ = myGrid;
-      geo_.setToTarget(target, myGrid);
-    }
-
     //! the current geometry
     UGMakeableGeometry<dim-codim,dim,GridImp> geo_;
 
@@ -149,7 +130,6 @@ namespace Dune {
 
     mutable FieldVector<UGCtype, dim> pos_;
 
-    const GridImp* myGrid_;
   };
 
   //***********************
@@ -239,21 +219,21 @@ namespace Dune {
     /** \todo It would be faster to not use -1 as the end marker but
         number of sides instead */
     UGGridLeafIntersectionIterator<GridImp> ileafbegin () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : UG_NS<dim>::Sides_Of_Elem(target_), myGrid_);
+      return UGGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : UG_NS<dim>::Sides_Of_Elem(target_));
     }
 
     UGGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, 0, myGrid_);
+      return UGGridLevelIntersectionIterator<GridImp>(target_, 0);
     }
 
     //! Reference to one past the last leaf neighbor
     UGGridLeafIntersectionIterator<GridImp> ileafend () const {
-      return UGGridLeafIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_), myGrid_);
+      return UGGridLeafIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_));
     }
 
     //! Reference to one past the last level neighbor
     UGGridLevelIntersectionIterator<GridImp> ilevelend () const {
-      return UGGridLevelIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_), myGrid_);
+      return UGGridLevelIntersectionIterator<GridImp>(target_, UG_NS<dim>::Sides_Of_Elem(target_));
     }
 
     //! returns true if Entity has NO children
@@ -269,7 +249,7 @@ namespace Dune {
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
     typename GridImp::template Codim<0>::EntityPointer father () const {
-      return typename GridImp::template Codim<0>::EntityPointer (UGGridEntityPointer<0,GridImp>(UG_NS<dim>::EFather(target_),myGrid_));
+      return typename GridImp::template Codim<0>::EntityPointer (UG_NS<dim>::EFather(target_));
     }
 
     /*! Location of this element relative to the reference element element of the father.
@@ -309,10 +289,6 @@ namespace Dune {
     //!
     void setToTarget(typename UG_NS<dim>::Element* target);
 
-    //!
-    void setToTarget(typename UG_NS<dim>::Element* target,
-                     GridImp* myGrid);
-
     //! the current geometry
     UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geo_;
 
@@ -320,8 +296,6 @@ namespace Dune {
     mutable UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geometryInFather_;
 
     typename UG_NS<dim>::Element* target_;
-
-    GridImp* myGrid_;
 
   }; // end of UGGridEntity codim = 0
 

@@ -58,7 +58,6 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     localIdSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
-    isoparametricOrder_(1),
     someElementHasBeenMarkedForRefinement_(false)
 {
   heapsize = heapSize;
@@ -133,7 +132,6 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize, unsigned int envHeapS
     localIdSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
-    isoparametricOrder_(1),
     someElementHasBeenMarkedForRefinement_(false)
 {
   heapsize = heapSize;
@@ -263,11 +261,11 @@ Dune::UGGrid<dim>::lbegin (int level) const
   if (codim==0)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid),this);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid));
   else if (codim==dim)
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid),this);
+    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
 }
@@ -294,14 +292,14 @@ Dune::UGGrid<dim>::lbegin (int level) const
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement,this);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement);
 
   } else if (codim==dim) {
 
     // The seemingly pointless cast make the code compile in the cases where this if-clause
     // does _not_ get executed.
     /** \todo Parallel vertex level iterators not properly implemented yet! */
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid),this);
+    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
 
   }
 
