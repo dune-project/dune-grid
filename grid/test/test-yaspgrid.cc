@@ -19,7 +19,7 @@ void check_yasp() {
   typedef Dune::FieldVector<double,dim> fTupel;
   typedef Dune::FieldVector<bool,dim> bTupel;
 
-  std::cout << std::endl << "YaspGrid<" << dim << "," << dim << ">"
+  std::cout << std::endl << "YaspGrid<" << dim << ">"
             << std::endl << std::endl;
 
   fTupel Len; Len = 1.0;
@@ -28,9 +28,9 @@ void check_yasp() {
   int overlap = 1;
 
 #if HAVE_MPI
-  Dune::YaspGrid<dim,dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
+  Dune::YaspGrid<dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
 #else
-  Dune::YaspGrid<dim,dim> grid(Len,s,p,overlap);
+  Dune::YaspGrid<dim> grid(Len,s,p,overlap);
 #endif
 
   grid.globalRefine(2);
