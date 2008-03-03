@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune {
-  template <int dim,int dimworld>
+  template <int dim>
   inline YaspGrid<dim>*
   MacroGrid ::
   Impl<YaspGrid<dim> > ::
@@ -17,20 +17,15 @@ namespace Dune {
                               << "No alternative File-Format defined");
     }
     mg.dimw = interval.dimw();
-    if (mg.dimw != dimworld) {
-      DUNE_THROW(DGFException,
-                 "Macrofile " << filename << " is for dimension " << mg.dimw
-                              << " and connot be used to initialize an YaspGrid of dimension "
-                              << dimworld);
-    }
+
     // get grid parameters
     GridParameterBlock grdParam(gridin, true);
 
-    FieldVector<double,dimworld> lang;
-    FieldVector<int,dimworld>    anz;
-    FieldVector<bool,dimworld>   per(false);
+    FieldVector<double,dim> lang;
+    FieldVector<int,dim>    anz;
+    FieldVector<bool,dim>   per(false);
 
-    for (int i=0; i<dimworld; i++)
+    for (int i=0; i<dim; i++)
     {
       // check that start point is > 0.0
       if( interval.start(i) < 0.0 )

@@ -5,14 +5,14 @@
 #include <dune/grid/yaspgrid.hh>
 #include "dgfparser.hh"
 namespace Dune {
-  template <int dim,int dimworld>
+  template <int dim>
   class MacroGrid::Impl<YaspGrid<dim> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
     static YaspGrid<dim>* generate(MacroGrid& mg,
                                    const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
-  template <int dim, int dimw>
+  template <int dim>
   struct DGFGridInfo< YaspGrid<dim> > {
     static int refineStepsForHalf() {return 1;}
     static double refineWeight() {return pow(0.5,dim);}
