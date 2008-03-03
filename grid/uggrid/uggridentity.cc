@@ -30,6 +30,32 @@ inline int Dune::UGGridEntity<codim,dim,GridImp>::count () const
   return -1;
 }
 
+template< int codim, int dim, class GridImp>
+Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
+{
+  dune_static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
+
+  // Vertex
+  if (dim-codim == 0)
+    return GeometryType(0);
+
+  // Edge
+  if (dim-codim == 1)
+    return GeometryType(1);
+
+  // Face in 3d
+  switch (UG_NS<dim>::Tag(target_)) {
+  case UG::D2::TRIANGLE :
+    return GeometryType(GeometryType::simplex,2);
+  case UG::D2::QUADRILATERAL :
+    return GeometryType(GeometryType::cube,2);
+  default :
+    DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
+               << UG_NS<dim>::Tag(target_) << " found!");
+  }
+
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -106,6 +132,44 @@ Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
   } else
     DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::entity isn't implemented for cc==" << cc );
 }
+
+template<int dim, class GridImp>
+Dune::GeometryType Dune::UGGridEntity<0,dim,GridImp>::type() const
+{
+  if (dim==2) {
+
+    switch (UG_NS<dim>::Tag(target_)) {
+    case UG::D2::TRIANGLE :
+      return GeometryType(GeometryType::simplex,2);
+    case UG::D2::QUADRILATERAL :
+      return GeometryType(GeometryType::cube,2);
+    default :
+      DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
+                 << UG_NS<dim>::Tag(target_) << " found!");
+    }
+
+  } else {    // dim==3
+
+    switch (UG_NS<dim>::Tag(target_)) {
+
+    case UG::D3::TETRAHEDRON :
+      return GeometryType(GeometryType::simplex,3);
+    case UG::D3::PYRAMID :
+      return GeometryType(GeometryType::pyramid,3);
+    case UG::D3::PRISM :
+      return GeometryType(GeometryType::prism,3);
+    case UG::D3::HEXAHEDRON :
+      return GeometryType(GeometryType::cube,3);
+    default :
+      DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
+                 << UG_NS<dim>::Tag(target_) << " found!");
+
+    }
+
+  }
+
+}
+
 
 template<int dim, class GridImp>
 inline void Dune::UGGridEntity < 0, dim ,GridImp >::

@@ -69,8 +69,7 @@ namespace Dune {
 
    */
   template<int codim, int dim, class GridImp>
-  class UGGridEntity :
-    public EntityDefaultImplementation <codim,dim,GridImp,UGGridEntity>
+  class UGGridEntity
   {
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
@@ -99,6 +98,9 @@ namespace Dune {
     int level () const {
       return UG_NS<dim>::myLevel(target_);
     }
+
+    /** \brief Return the entity type identifier */
+    GeometryType type() const;
 
     /** \brief The partition type for parallel computing
      * \todo So far it always returns InteriorEntity */
@@ -149,8 +151,7 @@ namespace Dune {
    * UGGrid only implements the cases dim==dimworld==2 and dim=dimworld==3.
    */
   template<int dim, class GridImp>
-  class UGGridEntity<0,dim,GridImp> :
-    public EntityDefaultImplementation<0,dim,GridImp, UGGridEntity>
+  class UGGridEntity<0,dim,GridImp>
   {
     friend class UGGrid<dim>;
     friend class UGGridLeafIntersectionIterator <GridImp>;
@@ -180,6 +181,9 @@ namespace Dune {
     int level () const {
       return UG_NS<dim>::myLevel(target_);
     }
+
+    /** \brief Return the entity type identifier */
+    GeometryType type() const;
 
     /** \brief The partition type for parallel computing
         \todo Do not copy macro from UG */
