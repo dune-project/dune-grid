@@ -18,7 +18,7 @@ try {
   MPIHelper::instance(argc,argv);
 
   {
-    typedef YaspGrid<2,2> GridType;
+    typedef YaspGrid<2> GridType;
     std::string filename(SRCDIR "/examplegrid5.dgf");
     GridPtr<GridType> gridptr(filename);
 
@@ -27,7 +27,7 @@ try {
   }
 
   {
-    typedef YaspGrid<3,3> GridType;
+    typedef YaspGrid<3> GridType;
     std::string filename(SRCDIR "/examplegrid6.dgf");
     GridPtr<GridType> gridptr(filename);
 

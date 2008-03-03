@@ -20,10 +20,10 @@
  *#elif defined SGRID
    typedef Dune::SGrid<dimworld,dimworld> GridType;
  *#elif defined YASPGRID
-   typedef Dune::YaspGrid<dimworld,dimworld> GridType;
+   typedef Dune::YaspGrid<dimworld> GridType;
  *#else
    // default GridType is YaspGrid
-   typedef Dune::YaspGrid<dimworld,dimworld> GridType;
+   typedef Dune::YaspGrid<dimworld> GridType;
  *#endif
  * @endcode
  * The variable dimworld is determined by
@@ -32,7 +32,7 @@
    const int dimworld = GRIDDIM;
  * @endcode
  * Remark:
- * -# By defauly Dune::YaspGrid<2,2> is used.
+ * -# By defauly Dune::YaspGrid<2> is used.
  * -# For \c ALBERTAGRID or \c ALUGRID with \c dimworld=1 Dune::OneDGrid is used.
 
  * To reduce differences between seriell and parallel runs as much as possible
@@ -147,11 +147,11 @@ typedef Dune::SGrid<dimworld,dimworld> GridType;
 typedef Dune::UGGrid<dimworld> GridType;
 #elif defined YASPGRID
   #include <dune/grid/yaspgrid.hh>
-typedef Dune::YaspGrid<dimworld,dimworld> GridType;
+typedef Dune::YaspGrid<dimworld> GridType;
 #else
 // fallback
   #include <dune/grid/yaspgrid.hh>
-typedef Dune::YaspGrid<dimworld,dimworld> GridType;
+typedef Dune::YaspGrid<dimworld> GridType;
   #warning --- No GRIDTYPE defined, defaulting to YASPGRID
 #endif
 #undef GRIDDIM

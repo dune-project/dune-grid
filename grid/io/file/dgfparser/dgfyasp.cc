@@ -2,9 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune {
   template <int dim,int dimworld>
-  inline YaspGrid<dim,dimworld>*
+  inline YaspGrid<dim>*
   MacroGrid ::
-  Impl<YaspGrid<dim,dimworld> > ::
+  Impl<YaspGrid<dim> > ::
   generate(MacroGrid& mg,const char* filename, MPICommunicatorType MPICOMM)
   {
     mg.element=Cube;
@@ -45,9 +45,9 @@ namespace Dune {
     }
 
   #if HAVE_MPI
-    return new YaspGrid<dim,dimworld>(MPICOMM,lang, anz, per , grdParam.overlap() );
+    return new YaspGrid<dim>(MPICOMM,lang, anz, per , grdParam.overlap() );
   #else
-    return new YaspGrid<dim,dimworld>(lang, anz, per , grdParam.overlap() );
+    return new YaspGrid<dim>(lang, anz, per , grdParam.overlap() );
   #endif
   }
 }

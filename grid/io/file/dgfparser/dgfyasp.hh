@@ -6,14 +6,14 @@
 #include "dgfparser.hh"
 namespace Dune {
   template <int dim,int dimworld>
-  class MacroGrid::Impl<YaspGrid<dim,dimworld> > {
+  class MacroGrid::Impl<YaspGrid<dim> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
   public:
-    static YaspGrid<dim,dimworld>* generate(MacroGrid& mg,
-                                            const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+    static YaspGrid<dim>* generate(MacroGrid& mg,
+                                   const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
   };
   template <int dim, int dimw>
-  struct DGFGridInfo< YaspGrid<dim,dimw> > {
+  struct DGFGridInfo< YaspGrid<dim> > {
     static int refineStepsForHalf() {return 1;}
     static double refineWeight() {return pow(0.5,dim);}
   };
