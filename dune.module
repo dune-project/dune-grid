@@ -1,4 +1,4 @@
 Module: dune-grid
-Version: 1.1svn
+Version: 1.0.1
 Depends: dune-common
 Suggests: UG Alberta Alu3d
