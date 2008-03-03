@@ -2123,15 +2123,19 @@ namespace Dune {
      and dim, with arbitrary overlap (including zero),
      periodic boundaries and fast implementation allowing on-the-fly computations.
 
+     \deprecated The second template parameter is deprecated.
+
      \par History:
      \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim, int dimworld>
+  template<int dim, int deprecated_dimworld=dim>
   class YaspGrid :
-    public GridDefaultImplementation<dim,dimworld,yaspgrid_ctype,YaspGridFamily<dim,dimworld> >,
+    public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim,dim> >,
     public MultiYGrid<dim,yaspgrid_ctype>
   {
-    typedef const YaspGrid<dim,dimworld> GridImp;
+    typedef const YaspGrid<dim,dim> GridImp;
+
+    dune_static_assert(dim==deprecated_dimworld, "YaspGrid can only be instantiated with dim==dimworld");
   public:
     //! define type used for coordinates in grid module
     typedef yaspgrid_ctype ctype;
@@ -2140,14 +2144,14 @@ namespace Dune {
     typedef bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> PersistentIndexType;
 
     //! the GridFamily of this grid
-    typedef YaspGridFamily<dim,dimworld> GridFamily;
+    typedef YaspGridFamily<dim,dim> GridFamily;
     //! the Traits
-    typedef typename YaspGridFamily<dim,dimworld>::Traits Traits;
+    typedef typename YaspGridFamily<dim,dim>::Traits Traits;
 
     // need for friend declarations in entity
-    typedef YaspLevelIndexSet<YaspGrid<dim,dimworld> > LevelIndexSetType;
-    typedef YaspLeafIndexSet<YaspGrid<dim,dimworld> > LeafIndexSetType;
-    typedef YaspGlobalIdSet<YaspGrid<dim,dimworld> > GlobalIdSetType;
+    typedef YaspLevelIndexSet<YaspGrid<dim,dim> > LevelIndexSetType;
+    typedef YaspLeafIndexSet<YaspGrid<dim,dim> > LeafIndexSetType;
+    typedef YaspGlobalIdSet<YaspGrid<dim,dim> > GlobalIdSetType;
 
     //! maximum number of levels allowed
     enum { MAXL=64 };
@@ -2182,9 +2186,9 @@ namespace Dune {
 #endif
     {
       setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dimworld> >(*this,0) );
-      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dimworld> >(*this) );
-      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dimworld> >(*this) );
+      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,0) );
+      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dim> >(*this) );
+      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dim> >(*this) );
     }
 
     ~YaspGrid()
@@ -2213,7 +2217,7 @@ namespace Dune {
       {
         MultiYGrid<dim,ctype>::refine(b);
         setsizes();
-        indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dimworld> >(*this,maxLevel()) );
+        indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,maxLevel()) );
       }
     }
 
@@ -2228,7 +2232,7 @@ namespace Dune {
     {
       MultiYGrid<dim,ctype>::refine(b);
       setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dimworld> >(*this,maxLevel()) );
+      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,maxLevel()) );
     }
 
     //! map adapt to global refine
@@ -2776,13 +2780,13 @@ namespace Dune {
     }
 #endif
 
-    YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
+    YaspIntersectionIterator<const YaspGrid<dim, dim> >&
     getRealIntersectionIterator(typename Traits::LevelIntersectionIterator& it)
     {
       return this->getRealImplementation(it);
     }
 
-    const YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
+    const YaspIntersectionIterator<const YaspGrid<dim, dim> >&
     getRealIntersectionIterator(const typename Traits::LevelIntersectionIterator& it) const
     {
       return this->getRealImplementation(it);
@@ -2796,14 +2800,14 @@ namespace Dune {
     CollectiveCommunication<YaspGrid> ccobj;
 #endif
 
-    std::vector<YaspLevelIndexSet<const YaspGrid<dim,dimworld> >*> indexsets;
-    std::vector<YaspLeafIndexSet<const YaspGrid<dim,dimworld> >*> theleafindexset;
-    std::vector<YaspGlobalIdSet<const YaspGrid<dim,dimworld> >*> theglobalidset;
+    std::vector<YaspLevelIndexSet<const YaspGrid<dim,dim> >*> indexsets;
+    std::vector<YaspLeafIndexSet<const YaspGrid<dim,dim> >*> theleafindexset;
+    std::vector<YaspGlobalIdSet<const YaspGrid<dim,dim> >*> theglobalidset;
 
     // Index classes need access to the real entity
-    friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim,dimworld> >;
-    friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim,dimworld> >;
-    friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim,dimworld> >;
+    friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim,dim> >;
+    friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim,dim> >;
+    friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim,dim> >;
 
     template<class T>
     void deallocatePointers(T& container)
@@ -2815,14 +2819,14 @@ namespace Dune {
     }
 
     template<int codim>
-    YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >&
+    YaspEntity<codim,dim,const YaspGrid<dim,dim> >&
     getRealEntity(typename Traits::template Codim<codim>::Entity& e )
     {
       return this->getRealImplementation(e);
     }
 
     template<int codim>
-    const YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >&
+    const YaspEntity<codim,dim,const YaspGrid<dim,dim> >&
     getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
     {
       return this->getRealImplementation(e);
