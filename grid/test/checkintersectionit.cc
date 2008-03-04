@@ -113,6 +113,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   IntersectionIterator iIt    = gridPart.ibegin(*eIt);
   IntersectionIterator iEndIt = gridPart.iend(*eIt);
 
+  bool hasBoundaryIntersection = false;
+
   for (;iIt!=iEndIt; ++iIt)
   {
     // //////////////////////////////////////////////////////////////////////
@@ -134,6 +136,9 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     // check that boundary id has positive value
     if( iIt.boundary() )
     {
+      // entity has boundary intersections
+      hasBoundaryIntersection = true;
+
       if( iIt.boundaryId() <= 0 )
       {
         DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt.boundaryId() << ") !");
@@ -271,6 +276,12 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
     }
 
+  }
+
+  // check implementation of hasBoundaryIntersections
+  if( hasBoundaryIntersection != eIt->hasBoundaryIntersections() )
+  {
+    DUNE_THROW(GridError,"Entity::hasBoundaryIntersections implemented wrong! \n");
   }
 
   // ////////////////////////////////////////////////////////////////////////
