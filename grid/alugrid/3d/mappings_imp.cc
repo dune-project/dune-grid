@@ -45,6 +45,24 @@ namespace Dune {
     a [7][0] = p7 [0] - p5 [0] + p4 [0] - p6 [0] - p3 [0] + p1 [0] + a [2][0] ;
     a [7][1] = p7 [1] - p5 [1] + p4 [1] - p6 [1] - p3 [1] + p1 [1] + a [2][1] ;
     a [7][2] = p7 [2] - p5 [2] + p4 [2] - p6 [2] - p3 [2] + p1 [2] + a [2][2] ;
+
+    {
+      double sum = 0.0;
+      // sum all factor from non-linaer terms
+      for(int i=4; i<8; ++i)
+      {
+        for(int j=0; j<3; ++j)
+        {
+          sum += fabs(a[i][j]);
+        }
+      }
+      // mapping is affine when all higher terms are zero
+      affine_ = (sum < _epsilon);
+    }
+
+    // initialize flags
+    calcedDet_ = calcedInv_ = false;
+
     return ;
   }
 
@@ -56,9 +74,16 @@ namespace Dune {
     return ;
   }
 
-  inline FieldMatrix<double, 3, 3>
-  TrilinearMapping::jacobianInverse(const coord_t& p) {
+  inline const FieldMatrix<double, 3, 3>&
+  TrilinearMapping::jacobianInverse(const coord_t& p)
+  {
+    // return reference when already calculated
+    if( calcedInv_ ) return Dfi;
+
     inverse (p);
+    // set calcedInv to affine
+    calcedInv_ = affine_ ;
+
     return Dfi;
   }
 
@@ -107,11 +132,18 @@ namespace Dune {
 
   }
 
-  inline double TrilinearMapping :: det(const coord_t& point ) {
+  inline double TrilinearMapping :: det(const coord_t& point )
+  {
+    // use cached value of determinant
+    if( calcedDet_ ) return DetDf;
+
     //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
     linear (point) ;
-    return (DetDf = Df.determinant());
+    assert( Df.determinant() > 0 );
 
+    // set calced det to affine
+    calcedDet_ = affine_ ;
+    return (DetDf = Df.determinant());
   }
 
   inline void TrilinearMapping :: inverse(const coord_t& p ) {
@@ -154,6 +186,11 @@ namespace Dune {
       assert (count ++ < 1000) ;
     } while (err > _epsilon) ;
     return ;
+  }
+
+  inline bool TrilinearMapping :: affine () const
+  {
+    return affine_;
   }
 
   //- Bilinear surface mapping
@@ -212,6 +249,23 @@ namespace Dune {
     _n [2][0] = _b [3][1] * _b [2][2] - _b [3][2] * _b [2][1] ;
     _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2] ;
     _n [2][2] = _b [3][0] * _b [2][1] - _b [3][1] * _b [2][0] ;
+
+
+    {
+      double sum = 0.0;
+      // sum all factor from non-linaer terms
+      for(int j=0; j<3; ++j)
+      {
+        sum += fabs(_b[3][j]);
+      }
+
+      // mapping is affine when all higher terms are zero
+      _affine = (sum < _epsilon);
+    }
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+
     return ;
   }
 
@@ -281,8 +335,15 @@ namespace Dune {
 
   inline double BilinearSurfaceMapping :: det(const coord3_t& point ) const
   {
+    // return det if already calculated
+    if( _calcedDet ) return DetDf;
+
     //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
     map2worldlinear (point[0],point[1],point[2]) ;
+
+    // only true for affine mappings
+    _calcedDet = _affine ;
+
     return (DetDf = Df.determinant());
   }
 
@@ -302,11 +363,18 @@ namespace Dune {
     return ;
   }
 
-  inline FieldMatrix<double, 2, 2>
+  inline const FieldMatrix<double, 2, 2>&
   BilinearSurfaceMapping::jacobianInverse(const coord2_t & local) const
   {
+    // if calculated return
+    if( _calcedInv ) return inv_;
+
     map2worldnormal (local[0],local[1],0.0,tmp_);
     inverse (tmp_) ;
+
+    // only true for affine mappings
+    _calcedInv = _affine ;
+
     return inv_;
   }
 
