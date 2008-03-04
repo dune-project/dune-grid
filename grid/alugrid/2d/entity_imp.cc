@@ -377,6 +377,12 @@ namespace Dune {
   {
     item_ = 0;
     face_ = -1; // set face to non-valid value
+    releaseEntity();
+  }
+
+  template<int cd, class GridImp>
+  inline void ALU2dGridEntityPointer<cd, GridImp> :: releaseEntity()
+  {
     // sets entity pointer in the status of an empty entity
     if(entity_)
     {

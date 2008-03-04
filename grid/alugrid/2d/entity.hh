@@ -479,6 +479,9 @@ namespace Dune {
     //! dereferencing
     Entity & dereference() const ;
 
+    //! release entity
+    void releaseEntity();
+
     //! ask for level of entities
     int level () const;
 
