@@ -501,6 +501,9 @@ namespace Dune {
     //! dereference Entity, faster then the entity pointersmethod
     Entity & dereference () const;
 
+    //! release entity
+    void releaseEntity () {}
+
     //! assignment of iterators
     ThisType & operator = (const ThisType & org);
   private:
@@ -571,12 +574,18 @@ namespace Dune {
     //! dereference Entity, faster then the entity pointersmethod
     Entity & dereference () const;
 
+    //! release entity
+    void releaseEntity () {}
+
     //! assignment of iterators
     ThisType & operator = (const ThisType & org);
 
   private:
     // the internal iterator
     IteratorType * iter_;
+
+    // max level for iteration
+    int walkLevel_ ;
 
     //! do assignment
     void assign (const ThisType & org);
@@ -618,10 +627,16 @@ namespace Dune {
     //! dereference Entity, faster then the entity pointersmethod
     Entity & dereference () const;
 
+    //! release entity
+    void releaseEntity () {}
+
     //! the assignment operator
     ThisType & operator = (const ThisType & org);
 
   private:
+    // assign iterator
+    void assign(const ThisType & org);
+
     // go to next valid element
     ALU3DSPACE HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
 

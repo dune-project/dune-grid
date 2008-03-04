@@ -465,6 +465,9 @@ namespace Dune {
     //! ask for level of entities
     int level () const ;
 
+    //! release entity
+    void releaseEntity ();
+
   protected:
     // clones object
     void clone (const ALU3dGridEntityPointerType & org);
@@ -474,6 +477,9 @@ namespace Dune {
 
     //! has to be called when iterator is finished
     void done ();
+
+    //! put entity to entity stack
+    void freeEntity ();
 
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator
@@ -492,6 +498,10 @@ namespace Dune {
 
     // entity that this EntityPointer points to
     mutable EntityObject * entity_;
+
+    // is true if entity must not be released
+    const bool locked_;
+
     // return reference to internal entity implementation
     EntityImp & entityImp () const {
       assert( entity_ );

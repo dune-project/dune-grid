@@ -735,7 +735,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp >
   inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org )
-    : ALU3dGridEntityPointer<codim,GridImp> ( org )
+    : ALU3dGridEntityPointer<codim,GridImp> ( org.grid_ , org.level_ )
       , level_( org.level_ )
       , iter_(0)
   {
@@ -829,6 +829,7 @@ namespace Dune {
   ALU3dGridLeafIterator( const GridImp &grid, int level )
     : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
       , iter_ (0)
+      , walkLevel_(level)
   {
     this->done();
   }
@@ -839,6 +840,7 @@ namespace Dune {
                         bool isBegin)
     : ALU3dGridEntityPointer <cdim,GridImp> ( grid, level )
       , iter_ (0)
+      , walkLevel_(level)
   {
     // create interior iterator
     iter_ = new IteratorType ( this->grid_ , level , grid.nlinks() );
@@ -850,8 +852,9 @@ namespace Dune {
   template<int cdim, PartitionIteratorType pitype, class GridImp>
   inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
   ALU3dGridLeafIterator(const ThisType & org)
-    : ALU3dGridEntityPointer <cdim,GridImp> ( org )
+    : ALU3dGridEntityPointer <cdim,GridImp> ( org.grid_, org.walkLevel_ )
       , iter_(0)
+      , walkLevel_(org.walkLevel_)
   {
     // assign iterator without cloning entity pointer again
     assign(org);
@@ -912,6 +915,8 @@ namespace Dune {
     {
       this->done();
     }
+
+    walkLevel_ = org.walkLevel_;
   }
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -983,24 +988,31 @@ namespace Dune {
 
   template <class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ::
-  ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> & org)
-    : ALU3dGridEntityPointer<0,GridImp> (org)
-      , elem_ (org.elem_)
-      , maxlevel_(org.maxlevel_)
-  {}
+  ALU3dGridHierarchicIterator(const ThisType& org)
+    : ALU3dGridEntityPointer<0,GridImp> ( org.grid_, org.maxlevel_ )
+  {
+    assign( org );
+  }
 
   template <class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> &
   ALU3dGridHierarchicIterator<GridImp> ::
-  operator = (const ALU3dGridHierarchicIterator<GridImp> & org)
+  operator = (const ThisType& org)
+  {
+    assign( org );
+    return *this;
+  }
+
+  template <class GridImp>
+  inline void
+  ALU3dGridHierarchicIterator<GridImp> ::
+  assign(const ThisType& org)
   {
     elem_     = org.elem_;
     maxlevel_ = org.maxlevel_;
 
     // this method will free entity
-    this->clone(org);
-
-    return *this;
+    ALU3dGridEntityPointer<0,GridImp> :: clone(org);
   }
 
   template <class GridImp>

@@ -706,6 +706,7 @@ namespace Dune {
     : grid_(grid)
       , item_(const_cast<MyHElementType *> (&item))
       , entity_(0)
+      , locked_(false)
   {}
 
   template<int codim, class GridImp >
@@ -715,6 +716,7 @@ namespace Dune {
     : grid_(grid)
       , item_(0)
       , entity_ ( grid_.template getNewEntity<codim> ( ghostFace.level() ))
+      , locked_( true ) // entity should not be released
   {
     // sets entity and item pointer
     updateGhostPointer( const_cast<HBndSegType &> (ghostFace) );
@@ -727,6 +729,7 @@ namespace Dune {
     : grid_(grid)
       , item_(0)
       , entity_ ( grid_.template getNewEntity<codim> ( level ) )
+      , locked_(true) // entity should not be released
   {
     // this needs to be called
     // have to investigate why
@@ -739,6 +742,7 @@ namespace Dune {
     : grid_(org.grid_)
       , item_(org.item_)
       , entity_(0)
+      , locked_(org.locked_)
   {
     // if entity exists then copy entity
     getEntity( org );
@@ -823,12 +827,29 @@ namespace Dune {
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::done ()
   {
     item_ = 0;
+    // free entity
+    freeEntity();
+  }
+
+  template<int codim, class GridImp >
+  inline void ALU3dGridEntityPointerBase<codim,GridImp>::freeEntity ()
+  {
     // sets entity pointer in the status of an empty entity
-    if(entity_)
+    if( entity_ )
     {
       this->entityImp().removeElement();
       grid_.template freeEntity<codim> ( (EntityObject *) entity_ );
       entity_ = 0;
+    }
+  }
+
+  template<int codim, class GridImp >
+  inline void ALU3dGridEntityPointerBase<codim,GridImp>::releaseEntity ()
+  {
+    // sets entity pointer in the status of an empty entity
+    if( ! locked_ )
+    {
+      freeEntity ();
     }
   }
 
