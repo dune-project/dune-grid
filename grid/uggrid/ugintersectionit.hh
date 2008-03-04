@@ -23,8 +23,7 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class UGGridLevelIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,UGGridLevelIntersectionIterator>
+  class UGGridLevelIntersectionIterator
   {
 
     enum {dim=GridImp::dimension};
@@ -122,6 +121,21 @@ namespace Dune {
     //! return outer normal
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
 
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+      integrationOuterNormal_ = outerNormal(local);
+      integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= intersectionGlobal().integrationElement(local);
+      return integrationOuterNormal_;
+    }
+
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+      unitOuterNormal_ = outerNormal(local);
+      unitOuterNormal_ /= unitOuterNormal_.two_norm();
+      return unitOuterNormal_;
+    }
+
   private:
     //**********************************************************
     //  private methods
@@ -129,6 +143,8 @@ namespace Dune {
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
+    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
+    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
@@ -149,8 +165,7 @@ namespace Dune {
 
 
   template<class GridImp>
-  class UGGridLeafIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,UGGridLeafIntersectionIterator>
+  class UGGridLeafIntersectionIterator
   {
 
     enum {dim=GridImp::dimension};
@@ -262,6 +277,23 @@ namespace Dune {
     //! coordinates for higher order boundary
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
 
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+      integrationOuterNormal_ = outerNormal(local);
+      integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= intersectionGlobal().integrationElement(local);
+      return integrationOuterNormal_;
+    }
+
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+      unitOuterNormal_ = outerNormal(local);
+      unitOuterNormal_ /= unitOuterNormal_.two_norm();
+      return unitOuterNormal_;
+    }
+
+
+
   private:
     //**********************************************************
     //  private methods
@@ -283,6 +315,8 @@ namespace Dune {
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
+    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
+    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
