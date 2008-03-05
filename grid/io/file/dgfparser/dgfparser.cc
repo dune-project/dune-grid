@@ -367,11 +367,14 @@ namespace Dune {
 
     vtxoffset=0;
 
-    if(interval.isactive()) { // generate cartesian grid?
+    // generate cartesian grid?
+    if(interval.isactive())
+    {
       info->automatic();
       VertexBlock bvtx(gridin,dimw);
       nofvtx=0;
-      if (bvtx.isactive()) {
+      if (bvtx.isactive())
+      {
         nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
         info->block(bvtx);
       }
@@ -379,11 +382,14 @@ namespace Dune {
       cube2simplex = true;
       dimw = interval.dimw();
       simplexgrid = (element == Simplex);
-      if (element == General) {
+      if (element == General)
+      {
         SimplexBlock bsimplex(gridin,-1,-1,dimw);
         simplexgrid = bsimplex.isactive();
         info->cube2simplex(element);
-      } else {
+      }
+      else
+      {
         simplexgrid = (element == Simplex);
       }
       interval.get(vtx,nofvtx,elements,nofelements);
@@ -391,6 +397,9 @@ namespace Dune {
       if(simplexgrid) {
         nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
       }
+
+      // remove copies of vertices
+      removeCopies();
     }
     else { // ok: grid generation by hand...
       VertexBlock bvtx(gridin,dimw);
@@ -405,7 +414,8 @@ namespace Dune {
       if (bcube.isactive() && element!=Simplex) {
         info->block(bcube);
         nofelements=bcube.get(elements,elParams,nofelparams);
-        if (bsimplex.isactive() && element==General) {
+        if (bsimplex.isactive() && element==General)
+        {
           // make simplex grid
           info->cube2simplex(element);
           nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
@@ -436,9 +446,6 @@ namespace Dune {
         }
       }
     }
-
-    // remove copies of vertices
-    removeCopies();
 
     info->step1(dimw,vtx.size(),elements.size());
     // test for tetgen/triangle block (only if simplex-grid allowed)
