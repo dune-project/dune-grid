@@ -237,6 +237,14 @@ namespace Dune {
       return OBJT(theElement)==BEOBJ && SIDE_ON_BND(theElement, i);
     }
 
+    //! Returns true if at least one face of the element is a boundary face
+    static bool isBoundaryElement(const UG_NS< UG_DIM >::Element* theElement) {
+      using UG_NAMESPACE ::BEOBJ;
+      using UG_NAMESPACE ::GM_OBJECTS;
+      using UG::UINT;
+      return OBJT(theElement)==BEOBJ;
+    }
+
     //! \todo Please doc me!
     static int Edges_Of_Elem(const UG_NS< UG_DIM >::Element* theElement) {
       using UG_NAMESPACE ::element_descriptors;

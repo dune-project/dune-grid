@@ -246,6 +246,12 @@ namespace Dune {
       return UG_NS<dim>::isRegular(target_);
     }
 
+    /** \brief Returns true if the entity has intersections with the boundary
+     */
+    bool hasBoundaryIntersections() const {
+      return UG_NS<dim>::isBoundaryElement(target_);
+    }
+
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
     typename GridImp::template Codim<0>::EntityPointer father () const {
