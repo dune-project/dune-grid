@@ -262,6 +262,24 @@ namespace Dune
     // save typing
     typedef typename GridImp::ctype ctype;
 
+    //! return the only coordinate
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
+    {
+      return asImp()[0];
+    }
+
+    //! return empty vector
+    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& ) const
+    {
+      return FieldVector<ctype, mydim>();
+    }
+
+    //! checkInside here returns true
+    bool checkInside (const FieldVector<ctype, mydim>& ) const
+    {
+      return true;
+    }
+
     //! return volume of the geometry
     ctype volume () const { return 1.0; }
 
