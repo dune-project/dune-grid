@@ -10,6 +10,8 @@
 
 #include "gridcheck.cc"
 #include "checkcommunicate.cc"
+#include "checkgeometryinfather.cc"
+#include "checkintersectionit.cc"
 
 int rank;
 
@@ -41,6 +43,11 @@ void check_yasp() {
   checkCommunication(grid,-1,Dune::dvverb);
   for(int l=0; l<=grid.maxLevel(); ++l)
     checkCommunication(grid,l,Dune::dvverb);
+
+  // check the method geometryInFather()
+  checkGeometryInFather(grid);
+  // check the intersection iterator and the geometries it returns
+  checkIntersectionIterator(grid);
 };
 
 int main (int argc , char **argv) {
