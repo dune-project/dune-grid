@@ -639,6 +639,22 @@ void zeroEntityConsistency (Grid &g)
                    c1 << " - " << c2 << " || = " << (c2-c1).two_norm() << " [ with i = " << c << " ]");
       }
     }
+
+    // check that corner coordinates are distinct
+    const int corners= it->geometry().corners();
+    for (int c=0; c<corners; ++c)
+    {
+      typedef Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> CoordinateType;
+      for(int d=c+1; d<corners; ++d)
+      {
+        const CoordinateType& c1 = it->geometry()[c];
+        const CoordinateType& c2 = it->geometry()[d];
+        if( (c2-c1).two_norm() < 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
+        {
+          DUNE_THROW(CheckError, "geometry["<<c<<"] == geometry["<<d<<"]");
+        }
+      }
+    }
     subIndexCheck<Grid::dimension, Grid, Entity, true> sick(g,*it);
   }
 }
