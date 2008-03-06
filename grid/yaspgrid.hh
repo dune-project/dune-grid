@@ -12,6 +12,7 @@
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
 #include <dune/common/stack.hh> // the stack class
 #include <dune/grid/common/capabilities.hh> // the capabilities
+#include <dune/common/misc.hh>
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
@@ -172,6 +173,8 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<ctype, cdim>& operator[] (int i) const
     {
+      assert( i >= 0 && i < (int) coord_.N() );
+      FieldVector<ctype, cdim>& c = coord_[i];
       int bit=0;
       for (int k=0; k<cdim; k++)   // run over all directions in world
       {
@@ -221,14 +224,20 @@ namespace Dune {
       return l;
     }
 
-    /*! determinant of the jacobian of the mapping
-     */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
+    //! return volume of geometry
+    ctype volume () const
     {
       ctype volume=1.0;
       for (int k=0; k<cdim; k++)
         if (k!=missing) volume *= extension[k];
       return volume;
+    }
+
+    /*! determinant of the jacobian of the mapping
+     */
+    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
+    {
+      return volume();
     }
 
     //! check whether local is inside reference element
@@ -274,7 +283,7 @@ namespace Dune {
 
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
-    mutable FieldVector<ctype, cdim> c; // a point
+    mutable FieldMatrix<ctype,  Power_m_p<2,mydim>::power, cdim> coord_; // the coordinates
 
     const YaspGeometry<mydim,cdim,GridImp>&
     operator = (const YaspGeometry<mydim,cdim,GridImp>& g);
@@ -307,6 +316,8 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<ctype, mydim>& operator[] (int i) const
     {
+      assert( i >= 0 && i < (int) coord_.N() );
+      FieldVector<ctype, mydim>& c = coord_[i];
       for (int k=0; k<mydim; k++)
         if (i&(1<<k))
           c[k] = midpoint[k]+0.5*extension[k];       // kth bit is 1 in i
@@ -398,7 +409,7 @@ namespace Dune {
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
     mutable FieldMatrix<ctype,mydim,mydim> Jinv; // the jacobian inverse
-    mutable FieldVector<ctype, mydim> c; // a point
+    mutable FieldMatrix<ctype,  Power_m_p<2,mydim>::power, mydim> coord_; // the coordinates
 
     // disable copy
     const YaspGeometry<mydim,mydim,GridImp>&
