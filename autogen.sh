@@ -47,7 +47,7 @@ for OPT in "$@"; do
             if test -d "$OPT/share/dune-common/am"; then
               am_dir="$OPT/share/dune-common/am"
             fi
-			PATH=$PATH:$OPT/bin
+			      PATH=$OPT/bin:$PATH
             ;;
     esac
 done
