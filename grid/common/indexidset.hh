@@ -91,6 +91,9 @@ namespace Dune
       };
     };
 
+    /** \brief The type used for the indices */
+    typedef unsigned int IndexType;
+
     //===========================================================
     /** @name Index access from entity
      */
@@ -108,8 +111,8 @@ namespace Dune
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int index (const typename remove_const<GridImp>::type::
-               Traits::template Codim<cc>::Entity& e) const
+    IndexType index (const typename remove_const<GridImp>::type::
+                     Traits::template Codim<cc>::Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
@@ -125,7 +128,7 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
-    int index (const EntityType& e) const
+    IndexType index (const EntityType& e) const
     {
       enum { cc = EntityType::codimension };
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
@@ -145,8 +148,8 @@ namespace Dune
        because the const class is not instatiated yet.
      */
     template<int cc>
-    int subIndex (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i) const
+    IndexType subIndex (const typename remove_const<GridImp>::type::
+                        Traits::template Codim<0>::Entity& e, int i) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
       return asImp().template subIndex<cc>(e,i);
@@ -178,7 +181,7 @@ namespace Dune
        \param[in] type A valid geometry type.
        \return         number of entities.
      */
-    int size (GeometryType type) const
+    IndexType size (GeometryType type) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().size(type)));
       return asImp().size(type);
@@ -190,7 +193,7 @@ namespace Dune
        \param[in] codim A valid codimension
             \return    number of entities.
      */
-    int size (int codim) const
+    IndexType size (int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().size(codim)));
       return asImp().size(codim);
@@ -268,6 +271,8 @@ namespace Dune
       };
     };
 
+    typedef typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::IndexType IndexType;
+
     /** @brief Return total number of entities of given codim as a sum
           for all geometry types in this index set.
           \param codim A valid codimension
@@ -281,8 +286,8 @@ namespace Dune
        then the index of this Entity is returned.
      */
     template<int cc>
-    int subIndex (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i) const
+    IndexType subIndex (const typename remove_const<GridImp>::type::
+                        Traits::template Codim<0>::Entity& e, int i) const
     {
       return this->index( *(e.template entity<cc>(i) ));
     }
@@ -294,7 +299,7 @@ namespace Dune
                 \return    number of entities.
      */
 
-    int size (int codim) const
+    IndexType size (int codim) const
     {
       int s=0;
       const std::vector<GeometryType>& geomTs = asImp().geomTypes(codim);
