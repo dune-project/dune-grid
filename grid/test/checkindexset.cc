@@ -435,7 +435,7 @@ namespace Dune {
           if(i<svx-1) sout << vx << " , ";
           else sout << vx << "]\n";
 
-          int vxidx = lset.template subIndex<dim> (*it,i);
+          typename IndexSetType::IndexType vxidx = lset.template subIndex<dim> (*it,i);
 
           // the subIndex and the index for subEntity must be the same
           assert( vxidx == lset.index( *vxp ));

@@ -608,7 +608,7 @@ inline void Dune::UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces
         // Find the corresponding side on the father element
         int i;
         for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
-          int found = 0;
+          unsigned int found = 0;
           typename std::set<const typename UG_NS<dim>::Node*>::iterator fNIt = fatherNodes.begin();
           for (; fNIt != fatherNodes.end(); ++fNIt)
             for (int k=0; k<UG_NS<dim>::Corners_Of_Side(father,i); k++)
