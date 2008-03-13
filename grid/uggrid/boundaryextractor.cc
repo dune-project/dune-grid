@@ -8,7 +8,7 @@
 
 void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                                      const std::vector<unsigned int>& elementVertices,
-                                                     std::set<FieldVector<int, 2>, CompareBoundarySegments<2> >& boundarySegments)
+                                                     std::set<UGGridBoundarySegment<2> >& boundarySegments)
 {
   // The vertices that form the edges of a triangle -- in UG numbering
   static const int triIdx[][2] = {
@@ -29,7 +29,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
     for (int k=0; k<verticesPerElement; k++) {
 
-      FieldVector<int, 2> v;
+      UGGridBoundarySegment<2> v;
       if (verticesPerElement==3) {
         v[0] = elementVertices[currentBase+triIdx[k][0]];
         v[1] = elementVertices[currentBase+triIdx[k][1]];
@@ -40,7 +40,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
       // Check if new face exists already in the list
       // (then it is no boundary face)
-      std::pair<std::set<FieldVector<int, 2>, CompareBoundarySegments<2> >::iterator,bool> status = boundarySegments.insert(v);
+      std::pair<std::set<UGGridBoundarySegment<2> >::iterator,bool> status = boundarySegments.insert(v);
       if (!status.second)         //  Not inserted because already existing
         boundarySegments.erase(status.first);
 
@@ -54,7 +54,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
 void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                                      const std::vector<unsigned int>& elementVertices,
-                                                     std::set<FieldVector<int, 4>, CompareBoundarySegments<3> >& boundarySegments)
+                                                     std::set<UGGridBoundarySegment<3> >& boundarySegments)
 {
   int numElements = elementTypes.size();
 
@@ -91,7 +91,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
     for (int k=0; k<numFaces[elementTypes[i]]; k++) {
 
-      FieldVector<int, 4> v;
+      UGGridBoundarySegment<3> v;
 
       switch (elementTypes[i]) {
       case 4 :       // tetrahedron
@@ -121,7 +121,7 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
       // Check if new face exists already in the list
       // (then it is no boundary face)
 
-      std::pair<std::set<FieldVector<int, 4>, CompareBoundarySegments<3> >::iterator,bool> status = boundarySegments.insert(v);
+      std::pair<std::set<UGGridBoundarySegment<3> >::iterator,bool> status = boundarySegments.insert(v);
       if (!status.second)         //  Not inserted because already existing
         boundarySegments.erase(status.first);
 
@@ -133,8 +133,8 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
 }
 
-template<int NUM_VERTICES>
-int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set< Dune::FieldVector<int, NUM_VERTICES>, CompareBoundarySegments<(NUM_VERTICES+2)/2> >& boundarySegments,
+template<int dim>
+int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySegment<dim> >& boundarySegments,
                                                  int noOfNodes,
                                                  std::vector<int>& isBoundaryNode)
 {
@@ -145,11 +145,11 @@ int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set< Dune::FieldVect
   for (int i=0; i<noOfNodes; i++)
     isBoundaryNode[i] = -1;
 
-  typename std::set< Dune::FieldVector<int, NUM_VERTICES>, CompareBoundarySegments<(NUM_VERTICES+2)/2> >::iterator it = boundarySegments.begin();
+  typename std::set<UGGridBoundarySegment<dim> >::iterator it = boundarySegments.begin();
 
   for (; it!=boundarySegments.end(); ++it) {
 
-    for (int j=0; j<NUM_VERTICES; j++)
+    for (int j=0; j<(dim-1)*2; j++)
       if ((*it)[j]!=-1 && isBoundaryNode[(*it)[j]] == -1)
         isBoundaryNode[(*it)[j]] = 1;
 
@@ -169,10 +169,10 @@ int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set< Dune::FieldVect
 //   can have in 2d and 3d, respectively.
 // //////////////////////////////////////////////////////////////////////////////
 
-template int Dune::BoundaryExtractor::detectBoundaryNodes<2>(const std::set<FieldVector<int, 2>, CompareBoundarySegments<2> >& boundarySegments,
+template int Dune::BoundaryExtractor::detectBoundaryNodes<2>(const std::set<UGGridBoundarySegment<2> >& boundarySegments,
                                                              int noOfNodes,
                                                              std::vector<int>& isBoundaryNode);
 
-template int Dune::BoundaryExtractor::detectBoundaryNodes<4>(const std::set<FieldVector<int, 4>, CompareBoundarySegments<3> >& boundarySegments,
+template int Dune::BoundaryExtractor::detectBoundaryNodes<3>(const std::set<UGGridBoundarySegment<3> >& boundarySegments,
                                                              int noOfNodes,
                                                              std::vector<int>& isBoundaryNode);

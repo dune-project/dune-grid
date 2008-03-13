@@ -15,39 +15,39 @@
 
 namespace Dune {
 
-  /** \brief Function object comparing two boundary segments
+  /** \brief Boundary segments that can be compared
 
      This general implementation is empty.  Only specializations for dim==2 and dim==3 exist.
    */
   template <int dim>
-  class CompareBoundarySegments {};
+  class UGGridBoundarySegment {};
 
-  /** \brief Function object comparing two 2d boundary segments
-
-     This class implements a less-than operation on 2d boundary segments.  This way we can
-     insert them into a std::set.
-   */
+  /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  struct CompareBoundarySegments<2> {
-    bool operator()(const FieldVector<int,2>& s1, const FieldVector<int,2>& s2) const
-    {
+  class UGGridBoundarySegment<2> : public FieldVector<int,2> {
+
+  public:
+
+    /** \brief Compare the vertex lists modulo permutation */
+    bool operator<(const UGGridBoundarySegment<2>& other) const {
+
       FieldVector<int,2> sorted1, sorted2;
 
       // ////////////////////////////////////////////////////////////////////////////
       // Sort the two arrays to get rid of cyclic permutations in mirror symmetry
       // ////////////////////////////////////////////////////////////////////////////
-      if (s1[0] < s1[1])
-        sorted1 = s1;
+      if ((*this)[0] < (*this)[1])
+        sorted1 = (*this);
       else {
-        sorted1[0] = s1[1];
-        sorted1[1] = s1[0];
+        sorted1[0] = (*this)[1];
+        sorted1[1] = (*this)[0];
       }
 
-      if (s2[0] < s2[1])
-        sorted2 = s2;
+      if (other[0] < other[1])
+        sorted2 = other;
       else {
-        sorted2[0] = s2[1];
-        sorted2[1] = s2[0];
+        sorted2[0] = other[1];
+        sorted2[1] = other[0];
       }
 
       // ////////////////////////////////////////////////////////////////////////////
@@ -63,19 +63,19 @@ namespace Dune {
       // The sorted arrays are identical
       return false;
     }
+
   };
 
-  /** \brief Function object comparing two 3d boundary segments
-
-     This class implements a less-than operation on 3d boundary segments.  This way we can
-     insert them into a std::set.
-   */
+  /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  struct CompareBoundarySegments<3> {
-    bool operator()(const FieldVector<int,4>& s1, const FieldVector<int,4>& s2) const
-    {
-      FieldVector<int,4> sorted1 = s1;
-      FieldVector<int,4> sorted2 = s2;
+  class UGGridBoundarySegment<3> : public FieldVector<int,4> {
+
+  public:
+
+    /** \brief Compare the vertex lists modulo permutation */
+    bool operator<(const UGGridBoundarySegment<3>& other) const {
+      UGGridBoundarySegment<3> sorted1 = (*this);
+      UGGridBoundarySegment<3> sorted2 = other;
 
       // ////////////////////////////////////////////////////////////////////////////
       // Sort the two arrays to get rid of cyclic permutations in mirror symmetry
@@ -118,25 +118,23 @@ namespace Dune {
 
   };
 
-
-
   class BoundaryExtractor {
 
-    typedef std::set<FieldVector<int,2>, CompareBoundarySegments<2> >::iterator SetIterator2d;
-    typedef std::set<FieldVector<int,4>, CompareBoundarySegments<3> >::iterator SetIterator3d;
+    typedef std::set<UGGridBoundarySegment<2> >::iterator SetIterator2d;
+    typedef std::set<UGGridBoundarySegment<3> >::iterator SetIterator3d;
 
   public:
 
     static void detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                        const std::vector<unsigned int>& elementVertices,
-                                       std::set<FieldVector<int, 2>, CompareBoundarySegments<2> >& boundarySegments);
+                                       std::set<UGGridBoundarySegment<2> >& boundarySegments);
 
     static void detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                        const std::vector<unsigned int>& elementVertices,
-                                       std::set<FieldVector<int, 4>, CompareBoundarySegments<3> >& boundarySegments);
+                                       std::set<UGGridBoundarySegment<3> >& boundarySegments);
 
-    template <int NumVertices>
-    static int detectBoundaryNodes(const std::set<FieldVector<int, NumVertices>, CompareBoundarySegments<(NumVertices+2)/2> >& boundarySegments,
+    template <int dim>
+    static int detectBoundaryNodes(const std::set<UGGridBoundarySegment<dim> >& boundarySegments,
                                    int noOfNodes,
                                    std::vector<int>& isBoundaryNode);
 

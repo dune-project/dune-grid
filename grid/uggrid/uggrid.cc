@@ -786,8 +786,8 @@ void Dune::UGGrid < dim >::createEnd()
   // ///////////////////////////////////////////
   //   Extract grid boundary segments
   // ///////////////////////////////////////////
-  std::set<FieldVector<int,2*dim-2>, CompareBoundarySegments<dim> > boundarySegments;
-  typedef typename std::set<FieldVector<int,2*dim-2>, CompareBoundarySegments<dim> >::iterator SetIterator;
+  std::set<UGGridBoundarySegment<dim> > boundarySegments;
+  typedef typename std::set<UGGridBoundarySegment<dim> >::iterator SetIterator;
 
   BoundaryExtractor::detectBoundarySegments(elementTypes_, elementVertices_, boundarySegments);
   if (boundarySegments.size() == 0)
@@ -867,7 +867,7 @@ void Dune::UGGrid < dim >::createEnd()
     //   Remove this segment from the set of computed boundary segments.
     // /////////////////////////////////////////////////////////////////////
 
-    FieldVector<int, 2*dim-2> thisSegment;
+    UGGridBoundarySegment<dim> thisSegment;
     /** \todo Not nice: we need to copy because the array types are different */
     for (int j=0; j<2*dim-2; j++)
       thisSegment[j] = boundarySegmentVertices_[i][j];
