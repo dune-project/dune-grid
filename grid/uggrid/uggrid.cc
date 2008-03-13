@@ -800,7 +800,7 @@ void Dune::UGGrid < dim >::createEnd()
 
   if (boundarySegments_.size() > boundarySegments.size())
     DUNE_THROW(GridError, "You have supplied " << boundarySegments_.size()
-                                               << "parametrized boundary segments,  but the coarse grid has only "
+                                               << " parametrized boundary segments,  but the coarse grid has only "
                                                << boundarySegments.size() << " boundary faces!");
 
   // Count number of nodes on the boundary
@@ -887,14 +887,12 @@ void Dune::UGGrid < dim >::createEnd()
 
   for (; it != boundarySegments.end(); ++it, ++i) {
 
-    const FieldVector<int, 2*dim-2>& thisSegment = *it;
-
-    int numVertices = (dim==2) ? 2 : ((thisSegment[3] == -1) ? 3 : 4);
+    const UGGridBoundarySegment<dim>& thisSegment = *it;
 
     // Copy the vertices into a C-style array
     int vertices_c_style[4];
 
-    for (int j=0; j<numVertices; j++)
+    for (int j=0; j<thisSegment.numVertices(); j++)
       vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
 
 #ifndef UG_LGMDOMAIN
@@ -906,7 +904,7 @@ void Dune::UGGrid < dim >::createEnd()
     if (dim==2) {
 
       double segmentCoordinates[2][2];
-      for (int j=0; j<numVertices; j++)
+      for (int j=0; j<thisSegment.numVertices(); j++)
         for (int k=0; k<dim; k++)
           segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
@@ -914,7 +912,7 @@ void Dune::UGGrid < dim >::createEnd()
                                       1,               /*id of left subdomain */
                                       2,              /*id of right subdomain*/
                                       i,                  /*id of segment*/
-                                      numVertices,                  // Number of corners
+                                      thisSegment.numVertices(),          // Number of corners
                                       vertices_c_style,
                                       segmentCoordinates
                                       )==NULL)
@@ -923,7 +921,7 @@ void Dune::UGGrid < dim >::createEnd()
     } else {
 
       double segmentCoordinates[4][3];
-      for (int j=0; j<numVertices; j++)
+      for (int j=0; j<thisSegment.numVertices(); j++)
         for (int k=0; k<dim; k++)
           segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
@@ -931,7 +929,7 @@ void Dune::UGGrid < dim >::createEnd()
                                       1,               /*id of left subdomain */
                                       2,              /*id of right subdomain*/
                                       i,                  /*id of segment*/
-                                      numVertices,                  // Number of corners
+                                      thisSegment.numVertices(),                  // Number of corners
                                       vertices_c_style,
                                       segmentCoordinates
                                       )==NULL)

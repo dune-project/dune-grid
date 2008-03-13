@@ -28,6 +28,11 @@ namespace Dune {
 
   public:
 
+    /** \brief Always returns 2 */
+    int numVertices() const {
+      return 2;
+    }
+
     /** \brief Compare the vertex lists modulo permutation */
     bool operator<(const UGGridBoundarySegment<2>& other) const {
 
