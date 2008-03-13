@@ -93,7 +93,7 @@ namespace Dune {
       // ////////////////////////////////////////////////////////////////////////////
 
       // bubble sort
-      for (int i=numVertices()-1; i>=1; i--) {
+      for (int i=numVertices()-1; i>=0; i--) {
 
         for (int j=0; j<i; j++) {
 
