@@ -182,7 +182,7 @@ namespace Dune
        \note This function may only be called in the case \f$\textrm{cdim}=\textrm{mydim}\f$
        because otherwise the inverse is not defined.
      */
-    const FieldMatrix<ct,mydim,mydim>& jacobianInverseTransposed (const FieldVector<ct, mydim>& local) const
+    const FieldMatrix<ct,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ct, mydim>& local) const
     {
       return realGeometry.jacobianInverseTransposed(local);
     }

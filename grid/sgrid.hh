@@ -123,7 +123,7 @@ namespace Dune {
     sgrid_ctype integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const;
 
     //! can only be called for dim=dimworld!
-    const FieldMatrix<sgrid_ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
+    const FieldMatrix<sgrid_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
 
     //! print internal data
     void print (std::ostream& ss, int indent) const;
@@ -141,7 +141,7 @@ namespace Dune {
     FieldVector<sgrid_ctype, cdim> s;             //!< position of element
     FieldMatrix<sgrid_ctype,mydim,cdim> A;         //!< direction vectors as matrix
     array<FieldVector<sgrid_ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
-    mutable FieldMatrix<sgrid_ctype,mydim,mydim> Jinv;           //!< storage for inverse of jacobian
+    mutable FieldMatrix<sgrid_ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
     mutable bool builtinverse;
   };
 
