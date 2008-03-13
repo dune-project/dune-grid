@@ -72,17 +72,28 @@ namespace Dune {
 
   public:
 
+    /** \brief 3 or 4 */
+    int numVertices() const {
+      return ((*this)[3]==-1) ? 3 : 4;
+    }
+
     /** \brief Compare the vertex lists modulo permutation */
     bool operator<(const UGGridBoundarySegment<3>& other) const {
       UGGridBoundarySegment<3> sorted1 = (*this);
       UGGridBoundarySegment<3> sorted2 = other;
+
+      if (numVertices()<other.numVertices())
+        return true;
+
+      if (numVertices()>other.numVertices())
+        return false;
 
       // ////////////////////////////////////////////////////////////////////////////
       // Sort the two arrays to get rid of cyclic permutations in mirror symmetry
       // ////////////////////////////////////////////////////////////////////////////
 
       // bubble sort
-      for (int i=3; i>=1; i--) {
+      for (int i=numVertices()-1; i>=1; i--) {
 
         for (int j=0; j<i; j++) {
 
@@ -100,16 +111,12 @@ namespace Dune {
 
         }
 
-      }
-
-      // ////////////////////////////////////////////////////////////////////////////
-      //   Compare the two sorted arrays
-      // ////////////////////////////////////////////////////////////////////////////
-      for (int i=0; i<4; i++) {
+        //
         if (sorted1[i]<sorted2[i])
           return true;
         else if (sorted1[i]>sorted2[i])
           return false;
+
       }
 
       // The sorted arrays are identical
