@@ -34,7 +34,14 @@ namespace Dune {
     double a [8][3] ;
     mat_t Df;
     mat_t Dfi;
+    mat_t invTransposed_;
     double DetDf ;
+
+    bool calcedDet_;
+    bool calcedInv_;
+    bool affine_;
+
+    void linear (const double, const double, const double) ;
     void linear (const coord_t&) ;
     void inverse (const coord_t&) ;
   public:
@@ -50,7 +57,7 @@ namespace Dune {
 
     ~TrilinearMapping () {}
     double det (const coord_t&) ;
-    mat_t jacobianInverse(const coord_t&);
+    const mat_t& jacobianInverseTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
     void map2world (const double , const double , const double ,
                     coord_t&) const ;
@@ -61,6 +68,9 @@ namespace Dune {
                       const vector_t&, const vector_t&,
                       const vector_t&, const vector_t&,
                       const vector_t&, const vector_t&);
+
+    // returns true if mapping is affine
+    inline bool affine () const;
   };
 
   //! A bilinear surface mapping
@@ -81,7 +91,7 @@ namespace Dune {
     typedef FieldMatrix<double,2,2> mat2_t;
 
     mutable mat3_t Df,Dfi;
-    mutable mat2_t inv_;
+    mutable mat2_t invTransposed_;
     mutable double DetDf;
     double _b [4][3] ;
     double _n [3][3] ;
@@ -89,6 +99,10 @@ namespace Dune {
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
     static const double _epsilon ;
+
+    bool _affine;
+    mutable bool _calcedDet;
+    mutable bool _calcedInv;
 
   public:
     //! Constructor creating empty mapping with double , i.e. zero
@@ -104,7 +118,7 @@ namespace Dune {
     ~BilinearSurfaceMapping () {}
 
     void inverse (const coord3_t&) const;
-    mat2_t jacobianInverse(const coord2_t&) const ;
+    const mat2_t& jacobianInverseTransposed(const coord2_t&) const ;
 
     // calculates determinant of mapping
     double det(const coord3_t&) const;
