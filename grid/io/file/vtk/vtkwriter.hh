@@ -46,7 +46,10 @@ namespace Dune
       binaryappended
     };
     enum DataMode {
-      conforming, nonconforming
+      /** @brief Output conforming data. */
+      conforming,
+      /** @brief Output non conforming data. */
+      nonconforming
     };
   };
 
