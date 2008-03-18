@@ -677,7 +677,7 @@ namespace Dune {
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
   {
     buildMapping();
-    return triMap_.jacobianInverse(local);
+    return triMap_.jacobianInverseTransposed(local);
   }
 
   template <>
@@ -686,15 +686,7 @@ namespace Dune {
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
   {
     buildBilinearMapping();
-#ifndef NDEBUG
-    static bool called = false;
-    if(!called)
-    {
-      dwarn << "WARNING: ALU3dGridGeometry<2,3>::jacobianInverseTransposed: method not tested yet! \n";
-      called = true;
-    }
-#endif
-    return biMap_.jacobianInverse(local);
+    return biMap_.jacobianInverseTransposed(local);
   }
 
   template <int mydim, int cdim>
