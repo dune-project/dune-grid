@@ -154,12 +154,9 @@ namespace Dune {
 
     friend class OneDGrid;
 
-    //! Constructor with a given grid level
-    OneDGridEntity(int level, double coord) : geo_(coord), target_(NULL) {}
-
   public:
     //! Constructor with a given grid level
-    OneDGridEntity() : target_(NULL) {}
+    OneDGridEntity() : target_(NULL), geo_(OneDGridGeometry<dim-cd,1,GridImp>()) {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
@@ -195,11 +192,11 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
-      geo_.setToTarget(target);
+      GridImp::getRealImplementationStatic(geo_).target_ = target;
     }
 
     //! the current geometry
-    OneDMakeableGeometry<dim-cd,GridImp> geo_;
+    MakeableInterfaceObject<Geometry> geo_;
 
     OneDEntityImp<0>* target_;
 
@@ -243,7 +240,9 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     //! Default Constructor
-    OneDGridEntity() {};
+    OneDGridEntity() : target_(NULL), geo_(OneDGridGeometry<dim,1,GridImp>()),
+                       geometryInFather_(OneDGridGeometry<dim,1,GridImp>())
+    {}
 
 
     //! Level of this element
@@ -361,13 +360,13 @@ namespace Dune {
 
       if (target_->father_->sons_[0] == target_ && target_->father_->sons_[1] == target_) {
         // Copied element?
-        geometryInFather_.setPositions(0,1);
+        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0,1);
       } else if (target_->father_->sons_[0] == target_) {
         // Left son?
-        geometryInFather_.setPositions(0,0.5);
+        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0,0.5);
       } else {
         // Right son!
-        geometryInFather_.setPositions(0.5,1);
+        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0.5,1);
       }
 
       return geometryInFather_;
@@ -419,14 +418,14 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
-      geo_.setToTarget(target);
+      GridImp::getRealImplementationStatic(geo_).target_ = target;
     }
 
 
     //! the current geometry
-    OneDMakeableGeometry<dim,GridImp> geo_;
+    MakeableInterfaceObject<Geometry> geo_;
 
-    mutable OneDMakeableGeometry<dim,GridImp> geometryInFather_;
+    mutable MakeableInterfaceObject<Geometry> geometryInFather_;
 
     OneDEntityImp<1>* target_;
 

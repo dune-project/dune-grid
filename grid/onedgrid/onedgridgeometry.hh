@@ -9,45 +9,6 @@
 
 namespace Dune {
 
-  template<int mydim, class GridImp>
-  class OneDMakeableGeometry : public Geometry<mydim, 1, GridImp, OneDGridGeometry>
-  {
-  public:
-
-    OneDMakeableGeometry() :
-      Geometry<mydim, 1, GridImp, OneDGridGeometry>(OneDGridGeometry<mydim, 1, GridImp>())
-    {};
-
-    void setToTarget(OneDEntityImp<mydim>* target) {
-      this->realGeometry.target_ = target;
-    }
-
-    void setPosition(const typename GridImp::ctype& p) {
-      this->realGeometry.storeCoordsLocally_ = true;
-      this->realGeometry.pos_[0] = p;
-    }
-  };
-
-  template<class GridImp>
-  class OneDMakeableGeometry<1,GridImp> : public Geometry<1, 1, GridImp, OneDGridGeometry>
-  {
-  public:
-
-    OneDMakeableGeometry() :
-      Geometry<1, 1, GridImp, OneDGridGeometry>(OneDGridGeometry<1, 1, GridImp>())
-    {};
-
-    void setToTarget(OneDEntityImp<1>* target) {
-      this->realGeometry.target_ = target;
-    }
-
-    void setPositions(const typename GridImp::ctype& p1, const typename GridImp::ctype& p2) {
-      this->realGeometry.storeCoordsLocally_ = true;
-      this->realGeometry.pos_[0][0] = p1;
-      this->realGeometry.pos_[1][0] = p2;
-    }
-  };
-
   // forward declaration
   template <int codim, int dim, class GridImp>
   class OneDGridEntity;
@@ -113,6 +74,11 @@ namespace Dune {
     //! The Jacobian matrix of the mapping from the reference element to this element
     const FieldMatrix<typename GridImp::ctype,0,0>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, 0>& local) const {
       return jacInverse_;
+    }
+
+    void setPosition(const typename GridImp::ctype& p) {
+      storeCoordsLocally_ = true;
+      pos_[0] = p;
     }
 
     //private:
@@ -217,6 +183,11 @@ namespace Dune {
       return jacInverse_;
     }
 
+    void setPositions(const typename GridImp::ctype& p1, const typename GridImp::ctype& p2) {
+      storeCoordsLocally_ = true;
+      pos_[0][0] = p1;
+      pos_[1][0] = p2;
+    }
 
     //private:
     OneDEntityImp<1>* target_;

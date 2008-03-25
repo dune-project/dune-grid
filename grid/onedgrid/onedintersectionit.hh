@@ -31,11 +31,19 @@ namespace Dune {
     friend class OneDGridEntity<0,dim,GridImp>;
 
     //! Constructor for a given grid entity and a given neighbor
-    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center, int nb) : center_(center), neighbor_(nb)
+    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center, int nb)
+      : center_(center), neighbor_(nb),
+        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
-    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center) : center_(center), neighbor_(2)
+    OneDGridLevelIntersectionIterator(OneDEntityImp<1>* center)
+      : center_(center), neighbor_(2),
+        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
 
   public:
@@ -152,21 +160,21 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
     const LocalGeometry& intersectionSelfLocal () const {
-      intersectionSelfLocal_.setPosition( (numberInSelf() == 0) ? 0 : 1 );
+      GridImp::getRealImplementationStatic(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const {
-      intersectionNeighborLocal_.setPosition( (numberInSelf() == 0) ? 1 : 0 );
+      GridImp::getRealImplementationStatic(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const {
-      intersectionGlobal_.setToTarget(center_->vertex_[neighbor_]);
+      GridImp::getRealImplementationStatic(intersectionGlobal_).target_ = center_->vertex_[neighbor_];
       return intersectionGlobal_;
     }
 
@@ -211,14 +219,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable OneDMakeableGeometry<0,GridImp> intersectionSelfLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable OneDMakeableGeometry<0,GridImp> intersectionNeighborLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable OneDMakeableGeometry<0,GridImp> intersectionGlobal_;
+    mutable MakeableInterfaceObject<Geometry> intersectionGlobal_;
 
   };
 
@@ -233,11 +241,19 @@ namespace Dune {
     friend class OneDGridEntity<0,dim,GridImp>;
 
     //! Constructor for a given grid entity and a given neighbor
-    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center, int nb) : center_(center), neighbor_(nb)
+    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center, int nb)
+      : center_(center), neighbor_(nb),
+        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
 
     /** \brief Constructor creating the 'one-after-last'-iterator */
-    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center) : center_(center), neighbor_(2)
+    OneDGridLeafIntersectionIterator(OneDEntityImp<1>* center)
+      : center_(center), neighbor_(2),
+        intersectionSelfLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionNeighborLocal_(OneDGridGeometry<0,1,GridImp>()),
+        intersectionGlobal_(OneDGridGeometry<0,1,GridImp>())
     {}
 
   public:
@@ -399,21 +415,21 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
     const LocalGeometry& intersectionSelfLocal () const {
-      intersectionSelfLocal_.setPosition( (numberInSelf() == 0) ? 0 : 1 );
+      GridImp::getRealImplementationStatic(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const {
-      intersectionNeighborLocal_.setPosition( (numberInSelf() == 0) ? 1 : 0 );
+      GridImp::getRealImplementationStatic(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const {
-      intersectionGlobal_.setToTarget(center_->vertex_[neighbor_%2]);
+      GridImp::getRealImplementationStatic(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
       return intersectionGlobal_;
     }
 
@@ -461,14 +477,14 @@ namespace Dune {
 
     /** \brief The geometry that's being returned when intersectionSelfLocal() is called
      */
-    mutable OneDMakeableGeometry<0,GridImp> intersectionSelfLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> intersectionSelfLocal_;
 
     /** \brief The geometry that's being returned when intersectionNeighborLocal() is called
      */
-    mutable OneDMakeableGeometry<0,GridImp> intersectionNeighborLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> intersectionNeighborLocal_;
 
     //! The geometry that's being returned when intersectionSelfGlobal() is called
-    mutable OneDMakeableGeometry<0,GridImp> intersectionGlobal_;
+    mutable MakeableInterfaceObject<Geometry> intersectionGlobal_;
 
   };
 

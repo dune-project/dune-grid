@@ -199,11 +199,11 @@ namespace Dune {
 
     friend class OneDGridLevelIteratorFactory <0>;
     friend class OneDGridLevelIteratorFactory <1>;
-    friend class OneDGridEntity <0,dim,OneDGrid>;
-    friend class OneDGridEntity <dim,dim,OneDGrid>;
+    template <int codim_, int dim_, class GridImp_>
+    friend class OneDGridEntity;
     friend class OneDGridHierarchicIterator<OneDGrid>;
-    friend class OneDGridLeafIntersectionIterator<OneDGrid>;
-    friend class OneDGridLevelIntersectionIterator<OneDGrid>;
+    friend class OneDGridLeafIntersectionIterator<const OneDGrid>;
+    friend class OneDGridLevelIntersectionIterator<const OneDGrid>;
 
     friend class OneDGridLevelIndexSet<const OneDGrid>;
     friend class OneDGridLeafIndexSet<const OneDGrid>;
