@@ -1102,6 +1102,11 @@ namespace Dune {
     typename ReturnImplementationType<InterfaceType>::ImplementationType &
     getRealImplementation (InterfaceType &i) const { return i.getRealImp(); }
 
+    //! return real implementation of interface class
+    template <class InterfaceType>
+    static typename ReturnImplementationType<InterfaceType>::ImplementationType &
+    getRealImplementationStatic (InterfaceType &i) { return i.getRealImp(); }
+
   protected:
     //! Barton-Nackman trick
     GridImp& asImp () {return static_cast<GridImp &>(*this);}
