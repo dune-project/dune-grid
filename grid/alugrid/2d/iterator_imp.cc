@@ -503,12 +503,8 @@ namespace Dune {
         const int lev = dummy.first->level();
         if(lev >= this->walkLevel_ - 1) break;
 
-        // this covers a bug in ALUGrid, childNr is undefined on macro
-        // levels, will be fixed in version of ALUGrid > 1.0
         dummy.second.first =
-          getOppositeInFather(dummy.second.first, (lev == 0) ? 0 : dummy.first->childNr());
-        //dummy.second.first =
-        //  getOppositeInFather(dummy.second.first, dummy.first->childNr());
+          getOppositeInFather(dummy.second.first, dummy.first->childNr() );
         assert(dummy.second.first >= 0 && dummy.second.first < 3);
 
         // get next
