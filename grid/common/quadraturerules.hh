@@ -170,7 +170,7 @@ namespace Dune {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
 
     /** \todo Please doc me! */
-    typedef QuadratureRule<ctype, dim> QuadratureRule;
+    typedef Dune::QuadratureRule<ctype, dim> QuadratureRule;
 
     //! real rule creator
     const QuadratureRule& _rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
