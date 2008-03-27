@@ -184,7 +184,7 @@ namespace Dune
 
 
     //===========================================================
-    /** @name Dereferencing methods
+    /** @name Compare methods
      */
     //@{
     //===========================================================
@@ -290,7 +290,7 @@ namespace Dune
     const IteratorImp& asImp () const {
       return static_cast<const IteratorImp&>(*this);
     }
-  }; // end EntityPointerDefaultImplementation
+  } DUNE_DEPRECATED; // end EntityPointerDefaultImplementation
 
 }
 
