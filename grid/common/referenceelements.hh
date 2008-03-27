@@ -1168,7 +1168,7 @@ namespace Dune
     void prism_entities(int c)
     {
       // compile time error if dim is not equal to 3
-      IsTrue<dim == 3>::yes();
+      dune_static_assert(dim == 3, "prism required dim==3");
       // hard coding the size of entities
       sizes[0]=1; // element
       sizes[1]=5; // face
@@ -1519,7 +1519,7 @@ namespace Dune
 
     {
       // compile time error if dim is not 3
-      IsTrue<dim == 3>::yes();
+      dune_static_assert(dim == 3, "pyramid required dim==3");
       // hard coding the size of entities
       sizes[0]=1; // element
       sizes[1]=5; // face
