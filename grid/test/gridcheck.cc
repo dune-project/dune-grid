@@ -519,8 +519,8 @@ struct GridInterface
     }
     // recursively check entity-interface
     // ... we only allow grids with codim 0 zero entites
-    IsTrue<Dune::Capabilities::hasEntity<Grid, 0>::v>::yes();
-    IsTrue<Dune::Capabilities::hasEntity<const Grid, 0>::v>::yes();
+    dune_static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
+    dune_static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
 
     //EntityInterface<Grid, 0, Grid::dimension,
     //  Dune::Capabilities::hasEntity<Grid, 0>::v >();
