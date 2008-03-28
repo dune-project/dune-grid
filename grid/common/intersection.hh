@@ -293,6 +293,7 @@ namespace Dune
       return this->real.unitOuterNormal(local);
     }
 
+#if 0
     /** @brief Checks for equality.
         Only s pointing to the same intersection from the same Entity
         are equal. Pointing to the same intersection from neighbor is
@@ -312,7 +313,7 @@ namespace Dune
     {
       return ! rhs.equals(*this);
     }
-
+#endif
 
     //===========================================================
     /** @name Implementor interface
@@ -320,11 +321,13 @@ namespace Dune
     //@{
     //===========================================================
 
+#if 0
     /** @brief forward equality check to real */
     bool equals(const Intersection& rhs) const
     {
       return this->real.equals(rhs.real);
     }
+#endif
 
     /** Copy Constructor from IntersectionImp */
     Intersection(const IntersectionImp<const GridImp> & i) :
