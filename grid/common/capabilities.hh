@@ -15,7 +15,7 @@ namespace Dune
   {
 
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid, int codim>
     struct hasEntity
@@ -24,7 +24,7 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation supports parallelism. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct isParallel
@@ -33,7 +33,7 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation guarantees conforming level grids. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct isLevelwiseConforming
@@ -42,7 +42,7 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation guarantees a conforming leaf grid. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct isLeafwiseConforming
@@ -51,7 +51,7 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation provides grids with hanging nodes. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct hasHangingNodes
@@ -60,7 +60,7 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation provides backup and restore facilities. (default=false)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template<class Grid>
     struct hasBackupRestoreFacilities
@@ -69,11 +69,41 @@ namespace Dune
     };
 
     /** \brief Specialize with 'true' if implementation provides unstructured grids. (default=true)
-       \ingroup GICapabilities
+        \ingroup GICapabilities
      */
     template <class Grid>
     struct IsUnstructured {
       static const bool v = true;
+    };
+
+    /** \brief Specialize with 'true' if the grid implementation is thread safe. (default=false)
+
+        This capability is 'true' if the grid <b>always</b> thread safe.
+        This means especially that all grid modification, like load balancing and
+        grid adaption are also thread safe.
+
+        \sa viewThreadSafe
+
+        \ingroup GICapabilities
+     */
+    template <class Grid>
+    struct threadSafe {
+      static const bool v = false;
+    };
+
+    /** \brief Specialize with 'true' if the grid implementation is thread safe, while it is not modified. (default=false)
+
+        This capability is 'true' if the grid thread safe, <b>at least</b> while it is not modified.
+        This means especially that all grid modification, like load balancing and
+        grid adaption are not necessarily thread safe.
+
+        \sa threadSafe
+
+        \ingroup GICapabilities
+     */
+    template <class Grid>
+    struct viewThreadSafe {
+      static const bool v = false;
     };
 
     /*
@@ -122,6 +152,16 @@ namespace Dune
     template <class Grid>
     struct IsUnstructured<const Grid> {
       static const bool v = Dune::Capabilities::IsUnstructured<Grid>::v;
+    };
+
+    template <class Grid>
+    struct threadSafe<const Grid> {
+      static const bool v = Dune::Capabilities::threadSafe<Grid>::v;
+    };
+
+    template <class Grid>
+    struct viewThreadSafe<const Grid> {
+      static const bool v = Dune::Capabilities::viewThreadSafe<Grid>::v;
     };
 
   }
