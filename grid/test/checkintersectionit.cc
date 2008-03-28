@@ -100,15 +100,16 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   // /////////////////////////////////////////////////////////
   //   Check the types defined by the iterator
   // /////////////////////////////////////////////////////////
-  IsTrue< is_same<
-            typename IntersectionIterator::ctype,
-            typename GridType::ctype>::value == true >::yes();
+  dune_static_assert((is_same<
+                        typename IntersectionIterator::ctype,
+                        typename GridType::ctype>::value),
+                     "IntersectionIterator has wrong ctype");
 
-  IsTrue<static_cast<int>(IntersectionIterator::dimension)
-         == static_cast<int>(GridType::dimension)>::yes();
+  dune_static_assert((static_cast<int>(IntersectionIterator::dimension)
+                      == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
 
-  IsTrue<static_cast<int>(IntersectionIterator::dimensionworld)
-         == static_cast<int>(GridType::dimensionworld)>::yes();
+  dune_static_assert((static_cast<int>(IntersectionIterator::dimensionworld)
+                      == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
   IntersectionIterator iIt    = gridPart.ibegin(*eIt);
   IntersectionIterator iEndIt = gridPart.iend(*eIt);
