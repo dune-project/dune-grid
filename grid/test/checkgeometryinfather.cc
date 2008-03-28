@@ -107,21 +107,21 @@ void checkGeometryInFather(const GridType& grid) {
       //   Check for types and constants
       // //////////////////////////////////////////////////////
 
-      IsTrue< is_same<
-              typename Geometry::ctype,
-              typename GridType::ctype>::value == true >::yes();
+      dune_static_assert((is_same<
+                              typename Geometry::ctype,
+                              typename GridType::ctype>::value == true),"Geometry has wrong ctype");
 
-      IsTrue<static_cast<int>(Geometry::dimension)
-          == static_cast<int>(GridType::dimension)>::yes();
+      dune_static_assert((static_cast<int>(Geometry::dimension)
+                          == static_cast<int>(GridType::dimension)),"Geometry has wrong dimension");
 
-      IsTrue<static_cast<int>(Geometry::mydimension)
-          == static_cast<int>(GridType::dimension)>::yes();
+      dune_static_assert((static_cast<int>(Geometry::mydimension)
+                          == static_cast<int>(GridType::dimension)),"Geometry has wrong mydimension");
 
-      IsTrue<static_cast<int>(Geometry::coorddimension)
-          == static_cast<int>(GridType::dimensionworld)>::yes();
+      dune_static_assert((static_cast<int>(Geometry::coorddimension)
+                          == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong coorddimension");
 
-      IsTrue<static_cast<int>(Geometry::dimensionworld)
-          == static_cast<int>(GridType::dimensionworld)>::yes();
+      dune_static_assert((static_cast<int>(Geometry::dimensionworld)
+                          == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong dimensionworld");
 
       // ///////////////////////////////////////////////////////
       //   Check the different methods
