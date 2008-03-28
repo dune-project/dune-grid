@@ -653,7 +653,8 @@ namespace Dune {
     template<int cc>
     typename Codim<cc>::EntityPointer entity (int i) const
     {
-      IsTrue< ( cc == dim || cc == 0 ) >::yes();
+      dune_static_assert( cc == dim || cc == 0 ,
+                          "YaspGrid only supports Entities with codim=dim and codim=0");
       // coordinates of the cell == coordinates of lower left corner
       if (cc==dim)
       {
@@ -2213,8 +2214,6 @@ namespace Dune {
       : MultiYGrid<dim,ctype>(L,s,periodic,overlap)
 #endif
     {
-      for (int i=0; i<dim; i++)
-        if(periodic[i]) std::cout << "PeriodicYaspGrid " << i << "\n";
       setsizes();
       indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,0) );
       theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dim> >(*this) );
@@ -2880,7 +2879,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        IsTrue< ( is_same<DT,Y>::value ) >::yes();
+        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
         a[i++] = data;
       }
 
@@ -2888,7 +2887,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        IsTrue< ( is_same<DT,Y>::value ) >::yes();
+        dune_static_assert(( is_same<DT,Y>::value ), "DataType missmatch");
         data = a[j++];
       }
 
@@ -2946,7 +2945,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelbegin (int level) const
     {
-      IsTrue< ( cd == dim || cd == 0 ) >::yes();
+      dune_static_assert( cc == dim || cc == 0 ,
+                          "YaspGrid only supports Entities with codim=dim and codim=0");
       YGLI g = MultiYGrid<dim,ctype>::begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements
@@ -2974,7 +2974,8 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelend (int level) const
     {
-      IsTrue< ( cd == dim || cd == 0 ) >::yes();
+      dune_static_assert( cc == dim || cc == 0 ,
+                          "YaspGrid only supports Entities with codim=dim and codim=0");
       YGLI g = MultiYGrid<dim,ctype>::begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
       if (cd==0)   // the elements
