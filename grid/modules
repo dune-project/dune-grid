@@ -23,7 +23,7 @@
       @ingroup GridInterface */
   /** @defgroup GIEntityPointer EntityPointer and Iterators
       @ingroup GridInterface */
-  /** @defgroup GIIntersectionIterator IntersectionIterator
+  /** @defgroup GIIntersectionIterator Intersection and IntersectionIterator
       @ingroup GridInterface */
   /** @defgroup IndexIdSets IndexSet and IdSet
 	  @ingroup GridInterface */

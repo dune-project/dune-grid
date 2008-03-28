@@ -468,10 +468,10 @@ namespace Dune {
               IntersectionIterator endnit  = it->ilevelend();
               for(IntersectionIterator nit = it->ilevelbegin(); nit != endnit; ++nit)
               {
-                if(nit.neighbor())
+                if(nit->neighbor())
                 {
                   typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
-                  EnPointer ep = nit.outside();
+                  EnPointer ep = nit->outside();
 
                   checkSubEntity<codim> (grid, *ep, lset, sout,
                                          subEntities, vertices, vertexCoordsMap);
@@ -495,10 +495,10 @@ namespace Dune {
             IntersectionIterator endnit  = it->ileafend();
             for(IntersectionIterator nit = it->ileafbegin(); nit != endnit; ++nit)
             {
-              if(nit.neighbor())
+              if(nit->neighbor())
               {
                 typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
-                EnPointer ep = nit.outside();
+                EnPointer ep = nit->outside();
 
                 checkSubEntity<codim> (grid, *ep, lset, sout,
                                        subEntities, vertices, vertexCoordsMap);

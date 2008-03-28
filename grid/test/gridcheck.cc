@@ -691,10 +691,10 @@ void assertNeighbor (Grid &g)
         IntersectionIterator endit = e->ilevelend();
         IntersectionIterator it = e->ilevelbegin();
         // state
-        it.boundary();
-        it.neighbor();
+        it->boundary();
+        it->neighbor();
         // id of boundary segment
-        it.boundaryId();
+        it->boundaryId();
         // check id
         //assert(globalid.id(*e) >= 0);
         assert(it != endit);
@@ -714,46 +714,46 @@ void assertNeighbor (Grid &g)
         for(; it != endit; ++it)
         {
           // mark visited face
-          visited[it.numberInSelf()] = true;
+          visited[it->numberInSelf()] = true;
           // check id
-          assert(globalid.id(*(it.inside())) ==
+          assert(globalid.id(*(it->inside())) ==
                  globalid.id(*e));
 
           // numbering
-          int num = it.numberInSelf();
+          int num = it->numberInSelf();
           assert( num >= 0 && num < e->template count<1> () );
 
-          if(it.neighbor())
+          if(it->neighbor())
           {
             // geometry
-            it.intersectionNeighborLocal();
+            it->intersectionNeighborLocal();
             // numbering
-            num = it.numberInNeighbor();
-            assert( num >= 0 && num < it.outside()->template count<1> () );
+            num = it->numberInNeighbor();
+            assert( num >= 0 && num < it->outside()->template count<1> () );
           }
 
           // geometry
-          it.intersectionSelfLocal();
-          it.intersectionGlobal();
+          it->intersectionSelfLocal();
+          it->intersectionGlobal();
 
           // normal vectors
           Dune::FieldVector<ct, dim-1> v(0);
-          it.outerNormal(v);
-          it.integrationOuterNormal(v);
-          it.unitOuterNormal(v);
+          it->outerNormal(v);
+          it->integrationOuterNormal(v);
+          it->unitOuterNormal(v);
           // search neighbouring cell
-          if (it.neighbor())
+          if (it->neighbor() && it->outside()->partitionType() != Dune::InteriorEntity)
           {
-            //assert(globalid.id(*(it.outside())) >= 0);
-            assert(globalid.id(*(it.outside())) !=
+            //assert(globalid.id(*(it->outside())) >= 0);
+            assert(globalid.id(*(it->outside())) !=
                    globalid.id(*e));
 
             LevelIterator n    = g.template lbegin<0>(e->level());
             LevelIterator nend = g.template lend<0>  (e->level());
 
-            while (n != it.outside() && n != nend)
+            while (n != it->outside() && n != nend)
             {
-              assert(globalid.id(*(it.outside())) !=
+              assert(globalid.id(*(it->outside())) !=
                      globalid.id(*n));
               ++n;
             }
@@ -921,15 +921,15 @@ void iteratorEquals (Grid &g)
     i == l2; \
     i == h2; \
     i == L2; \
-    if (i2 != l2->ileafend()) i == i2.inside(); \
-    if (i2 != l2->ileafend() && i2.neighbor()) i == i2.outside(); \
+    if (i2 != l2->ileafend()) i == i2->inside(); \
+    if (i2 != l2->ileafend() && i2->neighbor()) i == i2->outside(); \
 }
   TestEquals(e1);
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
-  if (i1 != l1->ileafend()) TestEquals(i1.inside());
-  if (i1 != l1->ileafend() && i1.neighbor()) TestEquals(i1.outside());
+  if (i1 != l1->ileafend()) TestEquals(i1->inside());
+  if (i1 != l1->ileafend() && i1->neighbor()) TestEquals(i1->outside());
 }
 
 template <class Grid>

@@ -105,6 +105,11 @@ void checkIntersectionIterator(const GridPartType& gridPart,
                         typename GridType::ctype>::value),
                      "IntersectionIterator has wrong ctype");
 
+  dune_static_assert((is_same<
+                        typename IntersectionIterator::Intersection,
+                        typename GridPartType::IntersectionType>::value),
+                     "IntersectionIterator has wrong Intersection type");
+
   dune_static_assert((static_cast<int>(IntersectionIterator::dimension)
                       == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
 
@@ -124,25 +129,25 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     // //////////////////////////////////////////////////////////////////////
     const int interDim = IntersectionIterator::LocalGeometry::mydimension;
     const QuadratureRule<double, interDim>& quad
-      = QuadratureRules<double, interDim>::rule(iIt.intersectionSelfLocal().type(), interDim);
+      = QuadratureRules<double, interDim>::rule(iIt->intersectionSelfLocal().type(), interDim);
 
     for (size_t i=0; i<quad.size(); i++)
-      sumNormal.axpy(quad[i].weight(), iIt.integrationOuterNormal(quad[i].position()));
+      sumNormal.axpy(quad[i].weight(), iIt->integrationOuterNormal(quad[i].position()));
 
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
 
-    assert(eIt == iIt.inside());
+    assert(eIt == iIt->inside());
 
     // check that boundary id has positive value
-    if( iIt.boundary() )
+    if( iIt->boundary() )
     {
       // entity has boundary intersections
       hasBoundaryIntersection = true;
 
-      if( iIt.boundaryId() <= 0 )
+      if( iIt->boundaryId() <= 0 )
       {
-        DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt.boundaryId() << ") !");
+        DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt->boundaryId() << ") !");
       }
     }
 
@@ -150,9 +155,9 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check whether the 'has-intersection-with'-relation is symmetric
     // //////////////////////////////////////////////////////////////////////
 
-    if (iIt.neighbor() && checkOutside )
+    if (iIt->neighbor() && checkOutside )
     {
-      EntityPointer outside = iIt.outside();
+      EntityPointer outside = iIt->outside();
       bool insideFound = false;
 
       IntersectionIterator outsideIIt    = gridPart.ibegin(*outside);
@@ -160,9 +165,9 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
       for (; outsideIIt!=outsideIEndIt; ++outsideIIt) {
 
-        if (outsideIIt.neighbor() && outsideIIt.outside() == iIt.inside()) {
+        if (outsideIIt->neighbor() && outsideIIt->outside() == iIt->inside()) {
 
-          if (outsideIIt.numberInSelf() != iIt.numberInNeighbor())
+          if (outsideIIt->numberInSelf() != iIt->numberInNeighbor())
             DUNE_THROW(GridError, "outside()->outside() == inside(), but with incorrect numbering!");
           else
             insideFound = true;
@@ -189,11 +194,11 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( GridPartType::conforming && iIt.neighbor() )
+    if ( GridPartType::conforming && iIt->neighbor() )
     {
-      EntityPointer outside = iIt.outside();
-      int numberInSelf     = iIt.numberInSelf();
-      int numberInNeighbor = iIt.numberInNeighbor();
+      EntityPointer outside = iIt->outside();
+      int numberInSelf     = iIt->numberInSelf();
+      int numberInNeighbor = iIt->numberInNeighbor();
 
       assert(indexSet.template subIndex<1>(*eIt, numberInSelf)
              == indexSet.template subIndex<1>(*outside, numberInNeighbor));
@@ -210,7 +215,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check the geometry returned by intersectionGlobal()
     // //////////////////////////////////////////////////////////
     typedef typename IntersectionIterator::Geometry Geometry;
-    const Geometry& intersectionGlobal = iIt.intersectionGlobal();
+    const Geometry& intersectionGlobal = iIt->intersectionGlobal();
 
     checkGeometry(intersectionGlobal);
 
@@ -218,7 +223,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check the geometry returned by intersectionSelfLocal()
     // //////////////////////////////////////////////////////////
 
-    const typename IntersectionIterator::LocalGeometry& intersectionSelfLocal = iIt.intersectionSelfLocal();
+    const typename IntersectionIterator::LocalGeometry& intersectionSelfLocal = iIt->intersectionSelfLocal();
     checkGeometry(intersectionSelfLocal);
 
     //  Check the consistency of intersectionSelfLocal() and intersectionGlobal
@@ -231,7 +236,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     {
       // check integrationOuterNormal
       double det = intersectionGlobal.integrationElement(quad[i].position());
-      det -= iIt.integrationOuterNormal(quad[i].position()).two_norm();
+      det -= iIt->integrationOuterNormal(quad[i].position()).two_norm();
       if( std::abs( det ) > 1e-8 )
       {
         DUNE_THROW(GridError, "integrationElement and length of integrationOuterNormal do no match!");
@@ -249,10 +254,10 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check the geometry returned by intersectionNeighborLocal()
     // ////////////////////////////////////////////////////////////////
 
-    if (iIt.neighbor() )
+    if (iIt->neighbor() )
     {
 
-      const typename IntersectionIterator::LocalGeometry& intersectionNeighborLocal = iIt.intersectionNeighborLocal();
+      const typename IntersectionIterator::LocalGeometry& intersectionNeighborLocal = iIt->intersectionNeighborLocal();
 
       checkGeometry(intersectionNeighborLocal);
 
@@ -268,7 +273,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
       {
 
         FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
-        FieldVector<double,dimworld> localPos  = iIt.outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
+        FieldVector<double,dimworld> localPos  = iIt->outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
 
         if ( (globalPos - localPos).infinity_norm() > 1e-6)
           DUNE_THROW(GridError, "global( intersectionNeighborLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");

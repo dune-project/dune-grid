@@ -217,13 +217,16 @@ namespace Dune {
          of a given entity of codimension 0. %EntityPointer is copy-constructible from a
          %HierarchicIterator.
 
-         - %IntersectionIterator which is a model of Dune::IntersectionIterator
-         provides access to all entities of codimension 0 that have an intersection of
-         codimension 1 with a given entity of codimension 0. In a conforming mesh these
-         are the face neighbors of an element. For two entities with a common intersection
-         the %IntersectionIterator also provides information about the geometric location
+         - %Intersection which is a model of Dune::Intersection
+         provides access an intersection of codimension 1 of two entity of codimension 0
+     or one entity and the boundary. In a conforming mesh this
+         is a face of an element. For two entities with a common intersection
+         the %Intersection also provides information about the geometric location
          of the intersection. Furthermore it also provides information about intersections
          of an entity with the internal or external boundaries.
+
+         - %IntersectionIterator which is a model of Dune::IntersectionIterator
+         provides access to all intersections of a given entity of codimension 0.
 
          - %LevelIndexSet and %LeafIndexSet which are both models of Dune::IndexSet are
          used to attach any kind of user-defined data to (subsets of) entities of the grid.
@@ -296,6 +299,13 @@ namespace Dune {
          </TR>
          <TR>
          <TD>HierarchicIterator</TD>
+         <TD>yes</TD>
+         <TD>no</TD>
+         <TD>yes</TD>
+         <TD>no</TD>
+         </TR>
+         <TR>
+         <TD>Intersection</TD>
          <TD>yes</TD>
          <TD>no</TD>
          <TD>yes</TD>
@@ -413,7 +423,8 @@ namespace Dune {
   template<class GridImp, class EntityPointerImp> class EntityPointer;
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LevelIteratorImp> class LevelIterator;
-  template<class GridImp, template<class> class IntersectionIteratorImp> class IntersectionIterator;
+  template<class GridImp, template<class> class IntersectionImp> class Intersection;
+  template<class GridImp, template<class> class IntersectionIteratorImp, template<class> class IntersectionImp> class IntersectionIterator;
   template<class GridImp, template<class> class HierarchicIteratorImp> class HierarchicIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp> class LeafIterator;
@@ -517,6 +528,16 @@ namespace Dune {
          */
         typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
       };
+
+      /*! \brief A type that is a model of Dune::LeafIntersection, an
+         intersections of two codimension 1 of two codimension 0 entities in the leaf view.
+       */
+      typedef typename GridFamily::Traits::LeafIntersection LeafIntersection;
+
+      /*! \brief A type that is a model of Dune::Intersection, an
+         intersections of two codimension 1 of two codimension 0 entities in a level view.
+       */
+      typedef typename GridFamily::Traits::LevelIntersection LevelIntersection;
 
       /*! \brief A type that is a model of Dune::IntersectionIterator
          which is an iterator that allows to examine, but not to modify, the
@@ -1129,6 +1150,8 @@ namespace Dune {
       template<int,int,class> class EntityImp,
       template<int,class> class EntityPointerImp,
       template<int,PartitionIteratorType,class> class LevelIteratorImp,
+      template<class> class LeafIntersectionImp,
+      template<class> class LevelIntersectionImp,
       template<class> class LeafIntersectionIteratorImp,
       template<class> class LevelIntersectionIteratorImp,
       template<class> class HierarchicIteratorImp,
@@ -1139,8 +1162,10 @@ namespace Dune {
   {
     typedef GridImp Grid;
 
-    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp>  LeafIntersectionIterator;
-    typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp> LevelIntersectionIterator;
+    typedef Dune::Intersection<const GridImp, LeafIntersectionImp>  LeafIntersection;
+    typedef Dune::Intersection<const GridImp, LevelIntersectionImp> LevelIntersection;
+    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp, LeafIntersectionImp>   LeafIntersectionIterator;
+    typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp, LevelIntersectionImp> LevelIntersectionIterator;
 
     typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
 
@@ -1208,6 +1233,7 @@ namespace Dune {
 #include "entity.hh"
 #include "entitypointer.hh"
 #include "leveliterator.hh"
+#include "intersection.hh"
 #include "intersectioniterator.hh"
 #include "hierarchiciterator.hh"
 #include "leafiterator.hh"

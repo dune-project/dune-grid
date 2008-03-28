@@ -237,6 +237,9 @@ namespace Dune {
     //! Level index set that corresponds to the grid
     typedef typename Traits::IndexSetType IndexSetType;
 
+    //! The corresponding Intersection
+    typedef typename Traits::IntersectionType IntersectionType ;
+
     //! The corresponding IntersectionIterator
     typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
 
@@ -321,6 +324,10 @@ namespace Dune {
     /** \brief The appropriate index set */
     typedef WrappedLevelIndexSet<GridType> IndexSetType;
 
+    /** \brief The appropriate intersection */
+    typedef typename GridType::Traits::
+    LevelIntersection IntersectionType;
+
     /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::
     LevelIntersectionIterator IntersectionIteratorType;
@@ -348,6 +355,9 @@ namespace Dune {
     typedef typename Traits::GridType GridType;
     //! The leaf index set of the grid implementation
     typedef typename Traits::IndexSetType IndexSetType;
+
+    //! The corresponding Intersection
+    typedef typename Traits::IntersectionType IntersectionType ;
 
     //! The corresponding IntersectionIterator
     typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
@@ -423,6 +433,10 @@ namespace Dune {
 
     /** \brief The appropriate index set */
     typedef WrappedLeafIndexSet<GridType> IndexSetType;
+
+    /** \brief The appropriate intersection */
+    typedef typename GridType::Traits::
+    LeafIntersection IntersectionType;
 
     /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::

@@ -2103,6 +2103,8 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,YaspLevelIterator,
+        YaspIntersectionIterator,              // leaf  intersection
+        YaspIntersectionIterator,              // level intersection
         YaspIntersectionIterator,              // leaf  intersection iter
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,

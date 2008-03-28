@@ -607,7 +607,7 @@ namespace Dune
         IntersectionIterator end = asImp().ilevelend();
         for(IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
         {
-          if( it.boundary() ) return true;
+          if( it->boundary() ) return true;
         }
       }
 
@@ -617,7 +617,7 @@ namespace Dune
         IntersectionIterator end = asImp().ileafend();
         for(IntersectionIterator it = asImp().ileafbegin(); it != end; ++it)
         {
-          if( it.boundary() ) return true;
+          if( it->boundary() ) return true;
         }
       }
 

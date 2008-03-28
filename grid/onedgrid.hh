@@ -158,6 +158,8 @@ namespace Dune {
         OneDGridEntity,
         OneDGridEntityPointer,
         OneDGridLevelIterator,
+        OneDGridLeafIntersectionIterator,                // leaf  intersection
+        OneDGridLevelIntersectionIterator,                // level intersection
         OneDGridLeafIntersectionIterator,                // leaf  intersection iter
         OneDGridLevelIntersectionIterator,                // level intersection iter
         OneDGridHierarchicIterator,

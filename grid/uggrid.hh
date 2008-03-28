@@ -104,6 +104,8 @@ namespace Dune {
         UGGridEntity,
         UGGridEntityPointer,
         UGGridLevelIterator,
+        UGGridLeafIntersectionIterator,              // leaf  intersection
+        UGGridLevelIntersectionIterator,              // level intersection
         UGGridLeafIntersectionIterator,              // leaf  intersection iterartor
         UGGridLevelIntersectionIterator,              // level intersection iterartor
         UGGridHierarchicIterator,
@@ -516,7 +518,7 @@ namespace Dune {
                      const FieldVector<double, dim>& pos);
 
     /** \brief For a point on the grid boundary return its position on the domain boundary */
-    FieldVector<ctype,dim> getBoundaryPosition(const IntersectionIterator<const UGGrid<dim>, UGGridLevelIntersectionIterator>& iIt,
+    FieldVector<ctype,dim> getBoundaryPosition(const typename Traits::LevelIntersectionIterator& iIt,
                                                const FieldVector<ctype,dim-1>& localPos) const;
 
     /** \brief Does uniform refinement

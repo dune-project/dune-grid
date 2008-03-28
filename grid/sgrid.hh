@@ -805,6 +805,13 @@ namespace Dune {
 
       return normal;
     }
+    //! return integration outer normal
+    FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
+    {
+      FieldVector<sgrid_ctype, dimworld> n = unitOuterNormal(local);
+      n *= is_global.integrationElement(local);
+      return n;
+    }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -838,7 +845,6 @@ namespace Dune {
       if (partition != it.partition)
         DUNE_THROW(GridError, "assignment of SIntersectionIterator "
                    << "with different partition");
-      // (zred == it.zred) if (self == it.self)
 
       /* Assign current position and update ne */
       ne = it.ne;
@@ -1165,6 +1171,8 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
         SGeometry,SEntity,
         SEntityPointer,SLevelIterator,
+        SIntersectionIterator,              // leaf intersection
+        SIntersectionIterator,              // level intersection
         SIntersectionIterator,              // leaf  intersection iter
         SIntersectionIterator,              // level intersection iter
         SHierarchicIterator,
