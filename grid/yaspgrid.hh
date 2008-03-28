@@ -664,11 +664,11 @@ namespace Dune {
         for (int k=0; k<dim; k++)
           if (i&(1<<k)) (coord[k])++;
 
-        return YaspLevelIterator<cc,All_Partition,GridImp>(_g,_g.vertex_overlapfront().tsubbegin(coord));
+        return YaspEntityPointer<cc,GridImp>(_g,_g.vertex_overlapfront().tsubbegin(coord));
       }
       if (cc==0)
       {
-        return YaspLevelIterator<cc,All_Partition,GridImp>(_g,_it);
+        return YaspEntityPointer<cc,GridImp>(_g,_it);
       }
       DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
     }
@@ -689,7 +689,7 @@ namespace Dune {
       // get coordinates on next coarser level
       for (int k=0; k<dim; k++) coord[k] = coord[k]/2;
 
-      return YaspLevelIterator<0,All_Partition,GridImp>(cg,cg.cell_overlap().tsubbegin(coord));
+      return YaspEntityPointer<0,GridImp>(cg,cg.cell_overlap().tsubbegin(coord));
     }
 
     /*! Location of this element relative to the reference element element of the father.
