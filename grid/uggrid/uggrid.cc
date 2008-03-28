@@ -1214,7 +1214,7 @@ void Dune::UGGrid < dim >::setPosition(typename Traits::template Codim<dim>::Ent
 }
 
 template <int dim>
-Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundaryPosition(const IntersectionIterator<const UGGrid<dim>, UGGridLevelIntersectionIterator>& iIt,
+Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundaryPosition(const typename Traits::LevelIntersectionIterator& iIt,
                                                                                           const FieldVector<ctype,dim-1>& localPos) const
 {
   if (!iIt.boundary())
