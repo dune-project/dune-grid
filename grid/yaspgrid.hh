@@ -2945,7 +2945,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelbegin (int level) const
     {
-      dune_static_assert( cc == dim || cc == 0 ,
+      dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
       YGLI g = MultiYGrid<dim,ctype>::begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
@@ -2974,7 +2974,7 @@ namespace Dune {
     template<int cd, PartitionIteratorType pitype>
     YaspLevelIterator<cd,pitype,GridImp> levelend (int level) const
     {
-      dune_static_assert( cc == dim || cc == 0 ,
+      dune_static_assert( cd == dim || cd == 0 ,
                           "YaspGrid only supports Entities with codim=dim and codim=0");
       YGLI g = MultiYGrid<dim,ctype>::begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
