@@ -767,7 +767,7 @@ namespace Dune {
   inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
                                               const sgrid_ctype* L_, const sgrid_ctype* H_)
   {
-    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
     N = new array<int,dim>[MAXL];
     h = new FieldVector<sgrid_ctype, dim>[MAXL];
@@ -795,7 +795,7 @@ namespace Dune {
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
   {
-    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+    dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
     sgrid_ctype L_[dim];
     for (int i=0; i<dim; i++)
