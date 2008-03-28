@@ -293,41 +293,11 @@ namespace Dune
       return this->real.unitOuterNormal(local);
     }
 
-#if 0
-    /** @brief Checks for equality.
-        Only s pointing to the same intersection from the same Entity
-        are equal. Pointing to the same intersection from neighbor is
-        unequal as inside and outside are permuted.
-     */
-    bool operator==(const Intersection& rhs) const
-    {
-      return rhs.equals(*this);
-    }
-
-    /** @brief Checks for inequality.
-        Only s pointing to the same intersection from the same Entity
-        are equal. Pointing to the same intersection from neighbor is
-        unequal as inside and outside are permuted.
-     */
-    bool operator!=(const Intersection& rhs) const
-    {
-      return ! rhs.equals(*this);
-    }
-#endif
-
     //===========================================================
     /** @name Implementor interface
      */
     //@{
     //===========================================================
-
-#if 0
-    /** @brief forward equality check to real */
-    bool equals(const Intersection& rhs) const
-    {
-      return this->real.equals(rhs.real);
-    }
-#endif
 
     /** Copy Constructor from IntersectionImp */
     Intersection(const IntersectionImp<const GridImp> & i) :
