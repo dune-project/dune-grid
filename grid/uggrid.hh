@@ -212,15 +212,6 @@ namespace Dune {
      */
     UGGrid(unsigned int heapSize=500);
 
-    /** \brief Constructor with control over UG's memory requirements
-     *
-     * \param heapSize The size of UG's internal memory in megabytes for this grid.
-     * \param envHeapSize The size of UG's environment heap, also in megabytes.
-       \deprecated This constructor will be removed in the next release, because
-       the second argument is not necessary anymore.
-     */
-    UGGrid(unsigned int heapSize, unsigned int envHeapSize) DUNE_DEPRECATED;
-
     //! Destructor
     ~UGGrid();
 
