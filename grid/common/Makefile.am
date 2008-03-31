@@ -14,7 +14,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
   intersectioniteratorwrapper.hh quadraturerules.hh \
-  datahandleif.hh
+  datahandleif.hh gridfactory.hh
 
 SUBDIRS = refinement test quadraturerules
 
