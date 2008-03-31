@@ -1541,11 +1541,11 @@ namespace Dune {
 
     //! copy constructor
     YaspIntersectionIterator (const YaspIntersectionIterator& it)
-      :   _count(it._count),
+      :   _inside(it._inside),
+        _outside(it._outside),
+        _count(it._count),
         _dir(it._dir),
         _face(it._face),
-        _inside(it._inside),
-        _outside(it._outside),
         _pos_self_local(it._pos_self_local),
         _pos_nb_local(it._pos_nb_local),
         _pos_world(it._pos_world),
