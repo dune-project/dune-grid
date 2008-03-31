@@ -158,47 +158,44 @@ void generalTests(bool greenClosure)
   //   Make some grids for testing
   // //////////////////////////////////////////////////////////
 
-  Dune::UGGrid<2> grid2d;
-  Dune::UGGrid<3> grid3d;
-
-  make2DTestGrid(grid2d);
-  make3DTestGrid(grid3d);
+  std::auto_ptr<Dune::UGGrid<2> > grid2d(make2DTestGrid());
+  std::auto_ptr<Dune::UGGrid<3> > grid3d(make3DTestGrid());
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
-    grid2d.setClosureType(UGGrid<2>::NONE);
-    grid3d.setClosureType(UGGrid<3>::NONE);
+    grid2d->setClosureType(UGGrid<2>::NONE);
+    grid3d->setClosureType(UGGrid<3>::NONE);
   }
 
   // check macro grid
-  gridcheck(grid2d);
-  gridcheck(grid3d);
+  gridcheck(*grid2d);
+  gridcheck(*grid3d);
 
   // create hybrid grid
-  markOne(grid2d,0,1) ;
-  markOne(grid3d,0,1) ;
+  markOne(*grid2d,0,1) ;
+  markOne(*grid3d,0,1) ;
 
-  gridcheck(grid2d);
-  gridcheck(grid3d);
+  gridcheck(*grid2d);
+  gridcheck(*grid3d);
 
-  grid2d.globalRefine(1);
-  grid3d.globalRefine(1);
-  gridcheck(grid2d);
-  gridcheck(grid3d);
+  grid2d->globalRefine(1);
+  grid3d->globalRefine(1);
+  gridcheck(*grid2d);
+  gridcheck(*grid3d);
 
   // check the method geometryInFather()
-  checkGeometryInFather(grid2d);
-  checkGeometryInFather(grid3d);
+  checkGeometryInFather(*grid2d);
+  checkGeometryInFather(*grid3d);
 
   // check the intersection iterator
-  checkIntersectionIterator(grid2d);
-  checkIntersectionIterator(grid3d);
+  checkIntersectionIterator(*grid2d);
+  checkIntersectionIterator(*grid3d);
 
 #ifdef ModelP
   // check communication interface
-  checkCommunication(grid2d,-1,Dune::dvverb);
-  for(int l=0; l<=grid2d.maxLevel(); ++l)
-    checkCommunication(grid2d,l,Dune::dvverb);
+  checkCommunication(*grid2d,-1,Dune::dvverb);
+  for(int l=0; l<=grid2d->maxLevel(); ++l)
+    checkCommunication(*grid2d,l,Dune::dvverb);
 #endif
 
 }

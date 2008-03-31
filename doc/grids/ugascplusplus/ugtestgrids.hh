@@ -16,10 +16,10 @@
 
 namespace Dune {
 
-  void make2DTestGrid(Dune::UGGrid<2>& grid)
+  UGGrid<2>* make2DTestGrid()
   {
     // Start grid creation
-    grid.createBegin();
+    GridFactory<UGGrid<2> > factory;
 
     // The list of grid vertex positions
     int numVertices = 16;
@@ -46,7 +46,7 @@ namespace Dune {
       Dune::FieldVector<double,2> pos;
       pos[0] = vertices[i][0];
       pos[1] = vertices[i][1];
-      grid.insertVertex(pos);
+      factory.insertVertex(pos);
     }
 
     // Create the triangle elements
@@ -58,7 +58,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(3);
       for (int j=0; j<3; j++)
         cornerIDs[j] = triangles[i][j];
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,2),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,2),cornerIDs);
     }
 
     // Create the quadrilateral elements
@@ -77,18 +77,18 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(4);
       for (int j=0; j<4; j++)
         cornerIDs[j] = quadrilaterals[i][j];
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::cube,2),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,2),cornerIDs);
     }
 
     // Finish initialization
-    grid.createEnd();
+    return factory.createGrid();
   }
 
 
-  void make3DTestGrid(Dune::UGGrid<3>& grid)
+  UGGrid<3>* make3DTestGrid()
   {
     // Start grid creation
-    grid.createBegin();
+    GridFactory<UGGrid<3> > factory;
 
     // The list of grid vertex positions
     int numVertices = 61;
@@ -160,7 +160,7 @@ namespace Dune {
       Dune::FieldVector<double,3> pos;
       for (int j=0; j<3; j++)
         pos[j] = vertices[i][j];
-      grid.insertVertex(pos);
+      factory.insertVertex(pos);
     }
 
 
@@ -226,7 +226,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(4);
       for (int j=0; j<4; j++)
         cornerIDs[j] = tetrahedra[i][j]-1;
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,3),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,3),cornerIDs);
     }
 
     // Create the pyramid elements
@@ -263,7 +263,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(5);
       for (int j=0; j<5; j++)
         cornerIDs[j] = pyramids[i][j]-1;
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,3),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,3),cornerIDs);
     }
 
     // Create the prism elements
@@ -282,7 +282,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(6);
       for (int j=0; j<6; j++)
         cornerIDs[j] = prisms[i][j]-1;
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::prism,3),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,3),cornerIDs);
     }
 
     // Create the hexahedron elements
@@ -302,11 +302,11 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(8);
       for (int j=0; j<8; j++)
         cornerIDs[j] = hexahedra[i][j]-1;
-      grid.insertElement(Dune::GeometryType(Dune::GeometryType::cube,3),cornerIDs);
+      factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,3),cornerIDs);
     }
 
     // Finish initialization
-    grid.createEnd();
+    return factory.createGrid();
   }
 
 }
