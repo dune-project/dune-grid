@@ -94,6 +94,9 @@
 #include "uggrid/uggridhieriterator.hh"
 #include "uggrid/uggridindexsets.hh"
 
+// Not needed here, but included for user convenience
+#include "uggrid/uggridfactory.hh"
+
 namespace Dune {
 
   template<int dim, int dimworld>
