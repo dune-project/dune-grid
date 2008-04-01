@@ -72,12 +72,12 @@ namespace AlbertHelp {
   // faces in 3d  (dim = 3 , codim = 1 )
   template <> struct AlbertaDofType<3,1>
   {
-    enum { type  = FACE };
+    enum { type = FACE };
   }; // dofs located on faces
 
   // edges in 3d ( dim = 3 , codim = 2 )
   template <> struct AlbertaDofType<3,2> {
-    enum { type  = EDGE };
+    enum { type = EDGE };
   }; // dofs located on edges
 
   //****************************************************************************
@@ -147,12 +147,6 @@ namespace AlbertHelp {
   inline void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el, const int split_face )
   {
     enum { codim = 2 };
-
-    // to be revised, we need el type here other wise the edges of child 1
-    // might be swaped
-
-    // edge numbers that stays the same
-    // we have to don nothing about them
 
     // only adjust the new edges
     // see Alberta doc page 147
