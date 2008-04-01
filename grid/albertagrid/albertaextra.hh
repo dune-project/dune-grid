@@ -52,7 +52,7 @@ inline void fillMacroInfo(TRAVERSE_STACK *stack,
   // not now, dont have the time
   if(level == elinfo->level)
   {
-    for(int i=0 ; i<N_NEIGH; i++)
+    for(int i=0 ; i<N_VERTEX(stack->traverse_mesh); ++i)
     {
       if(mel->neigh[i])
       {
@@ -204,8 +204,9 @@ inline static TRAVERSE_STACK *getTraverseStack(void)
 {
   TRAVERSE_STACK * stack = get_traverse_stack();
 
-  //TRAVERSE_STACK * stack = new TRAVERSE_STACK();
-  //initTraverseStack(stack);
+#ifndef ALBERTA_VERSION_12
+  initTraverseStack(stack);
+#endif
 
   assert( stack );
   // if we use copyTraverseStack we should only create stacks with
@@ -219,7 +220,6 @@ inline static TRAVERSE_STACK *freeTraverseStack(TRAVERSE_STACK *stack)
   // reset stack, i.e set pointer to mesh to 0 ...
   resetTraverseStack(stack);
   free_traverse_stack(stack);
-  //delete stack;
   return 0;
 }
 
@@ -363,7 +363,7 @@ inline void printElInfo(const EL_INFO *elf)
 
   MSG("Element %d | level %d  | ",INDEX(elf->el),elf->level);
   printf("Neighs: ");
-  for(int i=0; i<N_VERTICES; i++)
+  for(int i=0; i<N_VERTEX(elf->mesh); i++)
   {
     ALBERTA EL* el = elf->neigh[i];
     printf(" %p |",el);
@@ -371,7 +371,7 @@ inline void printElInfo(const EL_INFO *elf)
   printf("\n");
 
 
-  for(int i=0; i<N_VERTICES; i++)
+  for(int i=0; i<N_VERTEX(elf->mesh); i++)
     printf("%d %f %f \n",i,elf->coord[i][0],elf->coord[i][1]);
 
 
@@ -432,7 +432,7 @@ namespace AlbertHelp
         elInfo->coord[i][j] = 0.0;
         elInfo->opp_coord[i][j] = 0.0;
       }
-      elInfo->bound[i] = 0;
+      VERTEX_BOUNDARY_ID(elInfo,i) = 0;
     }
   }
 
@@ -482,7 +482,7 @@ namespace AlbertHelp
     Albert_MaxLevel_help = -1;
 
     // see ALBERTA Doc page 72, traverse over all hierarchical elements
-    mesh_traverse(mesh,-1, CALL_LEAF_EL|FILL_NOTHING, calcmxl);
+    meshTraverse(mesh,-1, CALL_LEAF_EL|FILL_NOTHING, calcmxl);
 
     // check if ok
     assert(Albert_MaxLevel_help != -1);
@@ -586,6 +586,7 @@ namespace AlbertHelp
       }
     }
 
+#ifdef ALBERTA_VERSION_12
     // we dont need Leaf Data
     inline static void initLeafData(LEAF_DATA_INFO * linfo)
     {
@@ -594,6 +595,7 @@ namespace AlbertHelp
       linfo->coarsen_leaf_data = &AlbertLeafCoarsen;
       return;
     }
+#endif
 
     // function for mesh_traverse, is called on every element
     inline static void setLeafData(const EL_INFO * elf)
@@ -622,7 +624,7 @@ namespace AlbertHelp
       AlbertaLeafDataHelp_processor = proc;
 
       // see ALBERTA Doc page 72, traverse over all hierarchical elements
-      ALBERTA mesh_traverse(mesh,-1, CALL_LEAF_EL|FILL_COORDS,setLeafData);
+      ALBERTA meshTraverse(mesh,-1, CALL_LEAF_EL|FILL_COORDS,setLeafData);
 
       AlbertaLeafDataHelp_processor = -1;
     }
@@ -637,9 +639,6 @@ namespace AlbertHelp
     DOF_INT_VEC * elNumbers[numOfElNumVec];
     // contains information about refine status of element
     DOF_INT_VEC * elNewCheck;
-    // stores the processor number of proc where element is master
-    DOF_INT_VEC * owner;
-
 #ifndef CALC_COORD
     // vector that stores the coordinates
     DOF_REAL_D_VEC * coords;
@@ -648,18 +647,33 @@ namespace AlbertHelp
 
   static DOF_INT_VEC * elNumbers[numOfElNumVec];
   static DOF_INT_VEC * elNewCheck = 0;
-  static DOF_INT_VEC * elOwner    = 0;
 #ifndef CALC_COORD
   static DOF_REAL_D_VEC * coordVec = 0;
 #endif
 
   // return pointer to created elNumbers Vector to mesh
-  inline DOF_INT_VEC * getElNumbers(int i)
+  template <int codim>
+  inline DOF_INT_VEC * getElNumbersCodim()
   {
-    int * vec=0;
-    GET_DOF_VEC(vec,elNumbers[i]);
-    FOR_ALL_DOFS(elNumbers[i]->fe_space->admin, vec[dof] = getElementIndexForCodim(i) );
-    return elNumbers[i];
+    int * vec = 0;
+    GET_DOF_VEC(vec,elNumbers[codim]);
+    FOR_ALL_DOFS(elNumbers[codim]->fe_space->admin, vec[dof] = getElementIndexForCodim<codim>() );
+    return elNumbers[codim];
+  }
+  // return pointer to created elNumbers Vector to mesh
+  inline DOF_INT_VEC * getElNumbers(const int codim)
+  {
+    switch (codim)
+    {
+    case 0 : return getElNumbersCodim<0> ();
+    case 1 : return getElNumbersCodim<1> ();
+    case 2 : return getElNumbersCodim<2> ();
+    case 3 : return getElNumbersCodim<3> ();
+    }
+    // should not get here
+    assert( false );
+    abort();
+    return 0;
   }
 
   // return pointer to created elNumbers Vector to mesh
@@ -682,15 +696,6 @@ namespace AlbertHelp
     return elNewCheck;
   }
 
-  // return pointer to created elNewCheck Vector to mesh
-  inline DOF_INT_VEC * getOwner()
-  {
-    int * vec=0;
-    GET_DOF_VEC(vec,elOwner);
-    FOR_ALL_DOFS(elOwner->fe_space->admin, vec[dof] = 0 );
-    return elOwner;
-  }
-
 #ifndef CALC_COORD
   template <int dimworld>
   inline static void setLocalCoords(const EL_INFO * elf)
@@ -704,7 +709,7 @@ namespace AlbertHelp
     GET_DOF_VEC(vec,coordVec);
     assert(vec);
 
-    for(int i=0; i<N_VERTICES; ++i)
+    for(int i=0; i<N_VERTEX(admin->mesh); ++i)
     {
       int dof = element->dof[i][nv];
       REAL_D & vecCoord = vec[dof];
@@ -722,7 +727,7 @@ namespace AlbertHelp
   {
     MESH * mesh = coordVec->fe_space->admin->mesh;
     assert(mesh);
-    mesh_traverse(mesh,-1, CALL_EVERY_EL_PREORDER|FILL_COORDS,& setLocalCoords<dimworld>);
+    meshTraverse(mesh,-1, CALL_EVERY_EL_PREORDER|FILL_COORDS, & setLocalCoords<dimworld> );
 
     /*
        REAL_D * vec = 0;
@@ -749,7 +754,6 @@ namespace AlbertHelp
     }
 
     dofvecs->elNewCheck   = getElNewCheck();  elNewCheck = 0;
-    dofvecs->owner        = getOwner();       elOwner    = 0;
 #ifndef CALC_COORD
     dofvecs->coords       = getCoordVec<dimworld> ();    coordVec   = 0;
 #endif
@@ -799,7 +803,7 @@ namespace AlbertHelp
     const void * dataHandler () const { return dataHandler_; }
 
     template <class HandlerImp>
-    void setPointers(MESH * mesh, HandlerImp & handler)
+    inline void setPointers(MESH * mesh, HandlerImp & handler)
     {
       mesh_ = mesh; // set mesh pointer for checking
       dataHandler_ = (void *) &handler; // set pointer of data handler
@@ -808,12 +812,12 @@ namespace AlbertHelp
       preCoarsening_  = & Coarsening<HandlerImp>::apply;
     }
 
-    void postRefinement( EL * el )
+    inline void postRefinement( EL * el )
     {
       assert( preCoarsening_ != 0 );
       postRefinement_(dataHandler_,el);
     }
-    void preCoarsening( EL * el )
+    inline void preCoarsening( EL * el )
     {
       assert( preCoarsening_ != 0 );
       preCoarsening_(dataHandler_,el);
@@ -842,7 +846,7 @@ namespace AlbertHelp
     GET_DOF_VEC(vec,drv);
     assert(ref > 0);
 
-    const EL * el = list->el;
+    const EL * el = GET_EL_FROM_LIST(*list);
 
     // refinement edge is alwyas between vertex 0 and 1
     const int dof0 = el->dof[0][nv];
@@ -869,7 +873,7 @@ namespace AlbertHelp
       assert( drv->fe_space->admin->mesh == callBack.lockMesh() );
       for(int i=0; i<ref; ++i)
       {
-        EL * elem = list[i].el;
+        EL * elem = GET_EL_FROM_LIST(list[i]);
 
         //std::cout << "call refine for element " << elem << "\n";
         callBack.postRefinement(elem);
@@ -888,7 +892,7 @@ namespace AlbertHelp
       assert(ref > 0);
       for(int i=0; i<ref; ++i)
       {
-        EL * el = list[i].el;
+        EL * el = GET_EL_FROM_LIST(list[i]);
         //std::cout << "call coarse for element " << el << "\n";
         callBack.preCoarsening(el);
       }
@@ -909,7 +913,7 @@ namespace AlbertHelp
 
     for(int i=0; i<ref; i++)
     {
-      const EL * el = list[i].el;
+      const EL * el = GET_EL_FROM_LIST(list[i]);
       //std::cout << "refine elNewCheck for el = " << el << "\n";
 
       // get level of father which is the absolute value
@@ -923,34 +927,6 @@ namespace AlbertHelp
         // also this vector stores the level of the element which is needed
         // for the face iterator
         vec[el->child[ch]->dof[k][nv]] = -level;
-      }
-    }
-  }
-
-  // set entry for new elements to 1
-  inline static void refineElOwner( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
-  {
-    const DOF_ADMIN * admin = drv->fe_space->admin;
-    const int nv = admin->n0_dof[CENTER];
-    const int k  = admin->mesh->node[CENTER];
-
-    int *vec = 0;
-    int val = -1;
-
-    GET_DOF_VEC(vec,drv);
-
-    assert(ref > 0);
-
-    for(int i=0; i<ref; ++i)
-    {
-      const EL * el = list[i].el;
-
-      val = vec[el->dof[k][nv]];
-      // in case of ghosts
-      for(int ch=0; ch<2; ++ch)
-      {
-        // set processor
-        vec[el->child[ch]->dof[k][nv]] = val;
       }
     }
   }
@@ -998,55 +974,6 @@ namespace AlbertHelp
   }
 
 
-#define PROCRESTORE 66666666
-
-  // save processor number in owner vec
-  // to the value at the position with the processor number
-  // the significant value PROCRESTORE is added or if the value is smaller
-  // then zero substracted.
-  inline static int saveMyProcNum ( DOF_INT_VEC * drv , const int myProc,
-                                    int & entry)
-  {
-    int * vec=0;
-    int spot = -1;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin,
-                 if(dof == myProc)
-                 {
-                   spot = dof;
-                   entry = vec[dof];
-                   if(vec[dof] >= 0)
-                     vec[dof] += PROCRESTORE;
-                   else
-                     vec[dof] -= PROCRESTORE;
-                 }
-                 );
-    return spot;
-  }
-
-  // restore processor number for owner vec
-  inline static int restoreMyProcNum ( DOF_INT_VEC * drv)
-  {
-    int myProc = -1;
-    int * vec=0;
-
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin,
-                 if(vec[dof] >= PROCRESTORE)
-                 {
-                   vec[dof] -= PROCRESTORE;
-                   myProc = dof;
-                 }
-                 else if (vec[dof] <= -PROCRESTORE)
-                 {
-                   vec[dof] += PROCRESTORE;
-                   myProc = dof;
-                 }
-                 );
-
-    return myProc;
-  }
-
   inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
                                       const char * name)
   {
@@ -1064,10 +991,6 @@ namespace AlbertHelp
   inline void makeTheRest(DOFVEC_STACK * dofvecs)
   {
     dofvecs->elNewCheck = getDofNewCheck(dofvecs->elNumbers[0]->fe_space,"el_new_check");
-    // if owner vec not has been read
-    if(!dofvecs->owner) dofvecs->owner = getDofNewCheck(dofvecs->elNumbers[0]->fe_space,"el_owner");
-    dofvecs->owner->refine_interpol = &refineElOwner;
-
 #ifndef CALC_COORD
     {
       MESH * mesh = dofvecs->elNumbers[0]->fe_space->admin->mesh;
@@ -1097,29 +1020,61 @@ namespace AlbertHelp
 #endif
   }
 
+#ifdef ALBERTA_VERSION_12
+  template <int dim>
+  static inline const FE_SPACE* getFeSpace(MESH *mesh, const char *name,
+                                           const int(&ndof)[dim+1])
+  {
+    // dont delete dofs on higher levels
+    // needed for element numbering
+    mesh->preserve_coarse_dofs = 1;
+    return get_fe_space( mesh, name, ndof , 0 );
+  }
+#else
+  template <int dim>
+  static inline const FE_SPACE* getFeSpace(MESH *mesh, const char *name,
+                                           const int(&ndof)[4])
+  {
+    // the last 1 stands for preserve_coarse_dofs
+    return get_fe_space( mesh, name, ndof , 0 , 1);
+  }
+#endif
+
   // initialize dofAdmin for vertex and element numbering
   // and a given dim
   // --initDofAdmin
   template <int dim>
   static inline void initDofAdmin(MESH *mesh)
   {
-    int edof[dim+1]; // add one dof at element for element numbering
-    int vdof[dim+1]; // add at each vertex one dof for vertex numbering
-    int fdof[dim+1]; // add at each face one dof for face numbering
-    int edgedof[dim+1]; // add at each edge one dof for edge numbering
+#ifdef ALBERTA_VERSION_12
+    enum { nNodes = dim+1 };
+    enum { vertex = 0, center = dim, face = dim-1, edge = 1 };
+#else
+    enum { nNodes = N_NODE_TYPES };
+    enum { vertex = VERTEX, center = CENTER,
+           face = (dim == 3) ? FACE : EDGE, edge = EDGE };
+#endif
 
-    for(int i=0; i<dim+1; i++)
+    int edof[nNodes]; // add one dof at element for element numbering
+    int vdof[nNodes]; // add at each vertex one dof for vertex numbering
+    int fdof[nNodes]; // add at each face one dof for face numbering
+    int edgedof[nNodes]; // add at each edge one dof for edge numbering
+
+    for(int i=0; i<nNodes; ++i)
     {
       vdof[i] = 0; fdof[i]    = 0;
       edof[i] = 0; edgedof[i] = 0;
     }
 
-    vdof[0] = 1;
+    vdof[vertex] = 1;
 
-    if(dim == 3) edgedof[1] = 1; // edge dof only in 3d
+    if(dim == 3)
+    {
+      edgedof[1] = 1; // edge dof only in 3d
+    }
 
-    fdof[dim-1] = 1; // means edges in 2d and faces in 3d
-    edof[dim] = 1;
+    fdof[face] = 1; // means edges in 2d and faces in 3d
+    edof[center] = 1;
 
     {
       // !! NOTE:
@@ -1129,7 +1084,7 @@ namespace AlbertHelp
 #ifndef CALC_COORD
       const FE_SPACE * vSpace =
 #endif
-      get_fe_space(mesh, "vertex_dofs", vdof, 0);
+      getFeSpace<dim> (mesh, "vertex_dofs", vdof);
 
 #ifndef CALC_COORD
       coordVec = get_dof_real_d_vec("coordinates",vSpace);
@@ -1142,7 +1097,7 @@ namespace AlbertHelp
     // all the element vectors
     //**********************************************************************
     // space for center dofs , i.e. element numbers
-    const FE_SPACE * elemSpace = get_fe_space(mesh, "center_dofs", edof, 0);
+    const FE_SPACE * elemSpace = getFeSpace<dim> (mesh, "center_dofs", edof);
 
     // the first entry is called at last for refinement and coarsening
     // the methods for the adaptation call back are put to elNewCheck
@@ -1156,15 +1111,11 @@ namespace AlbertHelp
     elNumbers[0]->refine_interpol = &RefineNumbering<dim,0>::refineNumbers;
     elNumbers[0]->coarse_restrict = &RefineNumbering<dim,0>::coarseNumbers;
 
-    elOwner = get_dof_int_vec("el_owner",elemSpace);
-    elOwner->refine_interpol = &refineElOwner;
-    elOwner->coarse_restrict = 0; //&coarseCallBack;
-
     //**********************************************************************
 
     {
       // the face number space , i.e. codim == 1
-      const FE_SPACE * fSpace = get_fe_space(mesh, "face_dofs", fdof, 0);
+      const FE_SPACE * fSpace = getFeSpace<dim> (mesh, "face_dofs", fdof);
 
       // the face numbers, i.e. codim = 1
       elNumbers[1] = get_dof_int_vec("face_numbers",fSpace);
@@ -1175,7 +1126,7 @@ namespace AlbertHelp
     if(dim == 3)
     {
       // the edge number space , i.e. codim == 2
-      const FE_SPACE * eSpace = get_fe_space(mesh, "edge_dofs", edgedof, 0);
+      const FE_SPACE * eSpace = getFeSpace<dim> (mesh, "edge_dofs", edgedof);
 
       // the edge numbers, i.e. codim = 2
       elNumbers[2] = get_dof_int_vec("edge_numbers",eSpace);
@@ -1197,6 +1148,7 @@ namespace AlbertHelp
     Alberta_tmpBndStack = 0;
   }
 
+#ifdef ALBERTA_VERSION_12
   // initialize boundary for mesh
   inline const BOUNDARY *initBoundary(MESH * Spmesh, int bound)
   {
@@ -1220,90 +1172,39 @@ namespace AlbertHelp
 
     return b;
   }
-
-  //*******************************************************************
-  //*******************************************************************
-  //*******************************************************************
-  //
-  //  functions for making the partition on one processor
-  //
-  //*******************************************************************
-  //*******************************************************************
-  //*******************************************************************
-
-  struct Albert_Restore_Mesh {
-
-    MESH * mesh;
-    MACRO_EL ** mels;
-    int n_macro_el;
-    int n_elements;
-    int n_hier_elements;
-    int n_vertices;
-  };
-
-  typedef struct Albert_Restore_Mesh ALBERTA_RESTORE_MESH;
-
-
-  static ALBERTA_RESTORE_MESH ag_restore = { 0 , 0 ,-1 ,-1 ,-1 ,-1};
-
-  // backu the mesh before removing some macro elements
-  inline static void storeMacroElements(MESH * mesh)
+  // create Mesh fof Version 1.2
+  template <int dim>
+  static MESH* createMesh(const char * name, const char * filename)
   {
-    // if other mesh was stored before, then restore was forget
-    assert(ag_restore.mesh == 0);
-    int length = mesh->n_macro_el;
-    MACRO_EL ** mel = (MACRO_EL **) std::malloc(length * sizeof(MACRO_EL *));
-    assert(mel != 0);
-
-    int no=0;
-    for(MACRO_EL * el = mesh->first_macro_el; el; el = el->next)
-    {
-      mel[no] = el;
-      no++;
-    }
-
-    assert(no == length);
-
-    ag_restore.mesh = mesh;
-    ag_restore.mels = mel;
-    ag_restore.n_macro_el = mesh->n_macro_el;
-    ag_restore.n_elements = mesh->n_elements;
-    ag_restore.n_hier_elements = mesh->n_hier_elements;
-    ag_restore.n_vertices = mesh->n_vertices;
+    typedef AlbertLeafData<dim,dim+1> LeafDataType;
+    MESH * mesh = get_mesh(name,
+                           initDofAdmin<dim>,
+                           LeafDataType::initLeafData);
+    read_macro(mesh, filename, initBoundary);
+    return mesh;
   }
 
-  // restore the mesh, that ALBERTA can free it normaly
-  inline static void resetMacroElements(MESH * mesh)
+#else
+  typedef NODE_PROJECTION* initBoundary_t (MESH *,MACRO_EL *,int);
+  static initBoundary_t* initBoundary = 0;
+
+  // create Mesh fof Version 2.0
+  template <int dim>
+  static MESH* createMesh(const char * name, const char * filename)
   {
-    // if not the same mesh to restore ==> break
-    assert(ag_restore.mesh == mesh);
-    int length = ag_restore.n_macro_el;
-    MACRO_EL **mel = ag_restore.mels;
-    assert(mel != 0);
+    MESH* mesh = GET_MESH(dim, name, read_macro(filename), 0);
 
-    mesh->first_macro_el = mel[0];
-    mel[0]->last = 0;
+    initDofAdmin<dim> ( mesh );
 
-    for(int i=1; i<length; i++)
-    {
-      mel[i-1]->next = mel[i];
-      (mel[i])->last = mel[i-1];
-    }
+    //! type of leaf data
+    typedef AlbertLeafData<dim,dim+1> LeafDataType;
+    init_leaf_data(mesh, sizeof(typename LeafDataType :: Data),
+                   LeafDataType :: AlbertLeafRefine,
+                   LeafDataType :: AlbertLeafCoarsen);
 
-    mel[length-1]->next = 0;
-
-    mesh->n_macro_el = ag_restore.n_macro_el;
-    mesh->n_elements = ag_restore.n_elements;
-    mesh->n_hier_elements = ag_restore.n_hier_elements;
-    mesh->n_vertices = ag_restore.n_vertices;
-
-    ag_restore.mesh = 0;
-    std::free(ag_restore.mels); ag_restore.mels = 0;
-    ag_restore.n_macro_el = -1;
-    ag_restore.n_elements = -1;
-    ag_restore.n_hier_elements = -1;
-    ag_restore.n_vertices = -1;
+    return mesh;
   }
+#endif
 
   // mark elements that not belong to my processor
   inline void partitioning ( MACRO_EL * mel, int proc, int mynumber  )
@@ -1318,186 +1219,6 @@ namespace AlbertHelp
     }
   }
 
-  // unmark neighbours of not interior elements
-  inline void ghosts ( MACRO_EL * mel )
-  {
-    if(mel->el->mark == 0)
-    {
-      for(int i=0; i<N_NEIGH; i++)
-      {
-        if(mel->neigh[i])
-        {
-          if(mel->neigh[i]->el->mark != 0)
-          {
-            mel->neigh[i]->el->mark = -1;
-          }
-        }
-      }
-    }
-  }
-
-  // reset mark
-  inline void afterGhosts ( MACRO_EL * mel )
-  {
-    if(mel->el->mark < 0)
-    {
-      mel->el->mark = 0;
-    }
-  }
-
-  // remove macro elements that not belong to this processor or that are not ghost
-  inline void removeMacroEls ( MESH * mesh , int proc , int * ownvec )
-  {
-    MACRO_EL *mel = 0;
-
-    int length = mesh->n_macro_el;
-    int * dofNum = (int *) std::malloc(mesh->n_vertices * sizeof(int));
-    int * dofHier = (int *) std::malloc(mesh->n_vertices*sizeof(int));
-    assert(dofNum  != 0);
-    assert(dofHier != 0);
-
-    dof_compress(mesh);
-
-    for(int i=0; i<mesh->n_vertices; i++) dofNum[i] = -1;
-    for(int i=0; i<mesh->n_vertices; i++) dofHier[i] = -1;
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      partitioning( mel , proc, ownvec[mel->index] );
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      ghosts ( mel );
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      afterGhosts ( mel );
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      if(mel->el->mark == 1)
-      {
-        for(int i=0; i<N_NEIGH; i++)
-        {
-          MACRO_EL * neigh = mel->neigh[i];
-          if(neigh)
-          {
-            for(int k=0; k<N_NEIGH; k++)
-            {
-              if(neigh->neigh[k] == mel)
-                neigh->neigh[k] = 0;
-            }
-          }
-        }
-      }
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      // mark all dof that remain on mesh
-      if(mel->el->mark != 1)
-      {
-        EL * myEl = mel->el;
-        for(int l=0; l<N_VERTICES; l++)
-        {
-          dofNum[myEl->dof[l][0]] = 1;
-        }
-      }
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      // mark all dof that remain on mesh
-      if(mel->el->mark == 1)
-      {
-        EL * myEl = mel->el;
-        for(int l=0; l<N_VERTICES; l++)
-        {
-          int dof = myEl->dof[l][0];
-          if(dofNum[dof] == -1)
-          {
-            dofHier[dof] = mel->index;
-          }
-        }
-      }
-    }
-
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      if(mel->el->mark == 1)
-      {
-        DOF * dofs[N_VERTICES];
-        EL *myEl = mel->el;
-        for(int k=0; k<N_VERTICES; k++)
-        {
-          dofs[k] = myEl->dof[k];
-        }
-        assert(myEl != 0);
-
-        for(int k=0; k<N_VERTICES; k++)
-        {
-          if((dofNum[dofs[k][0]] == -1) && (dofHier[dofs[k][0]] == mel->index ) )
-          {
-            int dof = dofs[k][0];
-            dofNum[dof] = 1;
-            mesh->n_vertices--;
-          }
-        }
-      }
-    }
-
-    // remove the macro elements
-    mel = mesh->first_macro_el;
-    while(mel)
-    {
-      if(mel->el->mark == 1)
-      {
-        if(mel->last)
-        {
-          mel->last->next = mel->next;
-        }
-        else
-        {
-          // if no last exists that means we have the first and change the
-          // first macro el of the mesh
-          mesh->first_macro_el = mel->next;
-        }
-
-        if(mel->next)
-        {
-          mel->next->last = mel->last;
-        }
-
-        mesh->n_hier_elements--;
-        mesh->n_elements--;
-        mesh->n_macro_el--;
-
-      }
-      mel = mel->next;
-    }
-
-    dof_compress(mesh);
-
-    // remember old owner
-    int * fakeMem = (int *) std::malloc(length * sizeof(int));
-    std::memcpy(fakeMem,ownvec,length * sizeof(int));
-    for(int i=0; i<length; i++) ownvec[i] = -1;
-    int no = 0;
-    for(mel = mesh->first_macro_el; mel; mel = mel->next)
-    {
-      ownvec[no] = fakeMem[mel->index];
-      no++;
-    }
-
-    // free memory
-    if(fakeMem) std::free(fakeMem);fakeMem = 0;
-    if(dofNum) std::free(dofNum);dofNum  = 0;
-    if(dofHier) std::free(dofHier);dofHier = 0;
-  }
-
   inline void printMacroData(MACRO_DATA * mdata)
   {
     FUNCNAME("printMacroData");
@@ -1505,41 +1226,11 @@ namespace AlbertHelp
     for(int i=0; i<mdata->n_total_vertices; i++)
       MSG("coords [%f | %f ]\n",mdata->coords[i][0],mdata->coords[i][1]);
 
+#ifdef ALBERTA_VERSION_12
     for(int i=0; i<mdata->n_macro_elements; i++)
       MSG("bound [%d | %d | %d ]\n",mdata->boundary[i][0],mdata->boundary[i][1],mdata->boundary[i][2]);
+#endif
 
-
-  }
-
-  // function for mesh_traverse, is called on every element
-  inline static void setElOwner(const EL_INFO * elf)
-  {
-    const DOF_ADMIN * admin = elOwner->fe_space->admin;
-    const int nv = admin->n0_dof[CENTER];
-    const int k  = admin->mesh->node[CENTER];
-    int *vec = 0;
-    EL * el   = elf->el;
-    EL * papi = elf->parent;
-
-    if(elf->level <= 0) return;
-
-    assert(el && papi);
-    GET_DOF_VEC(vec,elOwner);
-
-    int papiProc = vec[papi->dof[k][nv]];
-    vec[el->dof[k][nv]] = papiProc;
-    return ;
-  }
-
-  // remember on which level an element realy lives
-  inline void setElOwnerNew( MESH * mesh, DOF_INT_VEC * elOwn )
-  {
-    elOwner = elOwn;
-    assert(elOwner != 0);
-    // see ALBERTA Doc page 72, traverse over all hierarchical elements
-    mesh_traverse(mesh,-1, CALL_EVERY_EL_PREORDER|FILL_NEIGH,setElOwner);
-    elOwner = 0;
-    return ;
   }
 
   // function for mesh_traverse, is called on every element
@@ -1568,7 +1259,7 @@ namespace AlbertHelp
     assert(elNewCheck != 0);
 
     // see ALBERTA Doc page 72, traverse over all hierarchical elements
-    mesh_traverse(mesh,-1,CALL_EVERY_EL_PREORDER|FILL_NEIGH,storeLevelOfElement);
+    meshTraverse(mesh,-1,CALL_EVERY_EL_PREORDER|FILL_NEIGH,storeLevelOfElement);
     elNewCheck = 0;
     return ;
   }

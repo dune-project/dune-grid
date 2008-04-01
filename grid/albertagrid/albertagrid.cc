@@ -73,7 +73,7 @@ namespace Dune
         elInfo->coord[i][j] = 0.0;
         elInfo->opp_coord[i][j] = 0.0;
       }
-      elInfo->bound[i] = 0;
+      VERTEX_BOUNDARY_ID(elInfo,i) = 0;
     }
     return elInfo;
   }
@@ -559,12 +559,13 @@ namespace Dune
       const ALBERTA EL * el = elInfo_->el;
       assert( el );
       // if leaf element, get determinant from leaf data
-      if(el->child[0] == 0)
+      if( IS_LEAF_EL(el) )
       {
         typedef GridImp :: LeafDataType::Data LeafDataType;
         LeafDataType * ldata = (LeafDataType *) el->child[1];
         assert( ldata );
         elDet_ = ldata->determinant;
+        assert( std::abs( elDet_ ) > 0.0 );
         calcedDet_ = true;
       }
       else
@@ -611,13 +612,14 @@ namespace Dune
       const ALBERTA EL * el = elInfo_->el;
       assert( el );
       // if leaf element, get determinant from leaf data
-      if(el->child[0] == 0)
+      if( IS_LEAF_EL(el) )
       {
         typedef GridImp :: LeafDataType::Data LeafDataType;
         LeafDataType * ldata = (LeafDataType *) el->child[1];
         assert( ldata );
 
         elDet_ = ldata->determinant;
+        assert( std::abs( elDet_ ) > 0.0 );
         calcedDet_ = true;
       }
       else
@@ -936,7 +938,7 @@ namespace Dune
   {
     static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
     {
-      return elInfo->boundary[face]->bound;
+      return EDGE_BOUNDARY_ID(elInfo,edge);
     }
   };
 
@@ -945,7 +947,7 @@ namespace Dune
   {
     static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
     {
-      return elInfo->boundary[face]->bound;
+      return EDGE_BOUNDARY_ID(elInfo,face);
     }
   };
 
@@ -955,7 +957,7 @@ namespace Dune
   {
     static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
     {
-      return elInfo->bound[vertex];
+      return VERTEX_BOUNDARY_ID(elInfo,vertex);
     }
   };
 
@@ -1091,7 +1093,7 @@ namespace Dune
     assert( elInfo_ );
     for(int i=0; i<dim+1; ++i)
     {
-      if( elInfo_->boundary[i] != 0 ) return true;
+      if( IS_BOUNDARY(elInfo_,i) ) return true;
     }
     return false;
   }
@@ -1100,7 +1102,7 @@ namespace Dune
   inline PartitionType AlbertaGridEntity <0,dim,GridImp>::
   partitionType () const
   {
-    return grid_.partitionType( elInfo_ );
+    return InteriorEntity;
   }
 
   template<int dim, class GridImp>
@@ -1110,7 +1112,7 @@ namespace Dune
     assert( element_ == elInfo_->el );
 
     // if no child exists, then this element is leaf element
-    return (element_->child[0] == 0);
+    return IS_LEAF_EL(element_);
   }
 
   //***************************
@@ -1923,17 +1925,17 @@ namespace Dune
   AlbertaGridIntersectionIterator<GridImp>::boundaryId () const
   {
     // id of interior intersections is 0
-    if(!boundary()) return 0;
+    if( ! boundary() ) return 0;
     assert(elInfo_);
-    assert(elInfo_->boundary[neighborCount_] != 0);
-    return elInfo_->boundary[neighborCount_]->bound;
+    assert( WALL_BOUND(elInfo_, dim, neighborCount_ ) != 0 );
+    return WALL_BOUND(elInfo_, dim, neighborCount_ );
   }
 
   template< class GridImp >
   inline bool AlbertaGridIntersectionIterator<GridImp>::boundary() const
   {
     assert( elInfo_ );
-    return (elInfo_->boundary[neighborCount_] != 0);
+    return IS_BOUNDARY(elInfo_,neighborCount_);
   }
 
   template< class GridImp >
@@ -2486,7 +2488,7 @@ namespace Dune
     {
       vertexMarker_ = vertexMark;
 
-      ALBERTA FLAGS travFlags = FILL_ANY; //FILL_COORDS | FILL_NEIGH;
+      ALBERTA FLAGS travFlags = FILL_ALL(mesh); //FILL_COORDS | FILL_NEIGH;
 
       // CALL_LEAF_EL is not used anymore
       travFlags = travFlags | CALL_LEAF_EL_LEVEL;
@@ -2664,7 +2666,7 @@ namespace Dune
       enlargeTraverseStack(stack);
 
     for (int i=0; i<stack->stack_size; i++)
-      stack->elinfo_stack[i].fill_flag = fill_flag & FILL_ANY;
+      stack->elinfo_stack[i].fill_flag = fill_flag & FILL_ALL(mesh);
 
     stack->elinfo_stack[0].mesh = stack->elinfo_stack[1].mesh = mesh;
 
@@ -2700,16 +2702,6 @@ namespace Dune
     assert( (stack->stack_used) ?
             (elinfo_old == stack->elinfo_stack+stack->stack_used) :
             (elinfo_old == 0) );
-
-    /*
-       PartitionIteratorType pt = pitype;
-       if(this->grid_.myRank() < 0) pt = All_Partition;
-
-       switch (pt)
-       {
-       // Walk over all macro_elements on this grid
-       case All_Partition:
-     */
     {
       // overloaded traverse_leaf_el_level, is not implemened in ALBERTA yet
       ALBERTA EL_INFO  * elinfo = traverseElLevel(stack);
@@ -2733,129 +2725,6 @@ namespace Dune
 
       return(elinfo);
     }
-#if 0
-  // walk only over macro_elements that belong to this processor
-  case Interior_Partition :
-  {
-    // overloaded traverse_leaf_el_level, is not implemened in ALBERTA yet
-    elinfo = traverseElLevelInteriorBorder(stack);
-
-    // if leafIt_ == false go to elements only on desired level
-    if((elinfo) && (! this->leafIt()) )
-    {
-      if(elinfo->level == stack->traverse_level)
-        okReturn_ = true;
-
-      while(!okReturn_)
-      {
-        elinfo = traverseElLevelInteriorBorder(stack);
-        if(!elinfo) okReturn_ = true;
-      }
-      ++(stack->el_count);
-    }
-
-    // set new level for Entity
-    if((elinfo) && (this->leafIt()) ) enLevel_ = elinfo->level;
-
-    return(elinfo);
-  }
-
-  // walk over ghost elements, if proc == -1 then over all ghosts
-  case Ghost_Partition :
-  {
-    // overloaded traverse_leaf_el_level, is not implemened in ALBERTA yet
-    elinfo = traverseElLevelGhosts(stack);
-
-    // if leafIt_ == false go to elements only on desired level
-    if((elinfo) && (! this->leafIt()) )
-    {
-      if(elinfo->level == stack->traverse_level)
-        okReturn_ = true;
-
-      while(!okReturn_)
-      {
-        elinfo = traverseElLevelGhosts(stack);
-        if(!elinfo) okReturn_ = true;
-      }
-      ++(stack->el_count);
-    }
-
-    // check neighbours
-    if(elinfo)
-    {
-      // here we have the interior element, now check the neighbours
-      for(int i=0; i<dim+1; i++)
-      {
-        const ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
-        if(neigh)
-        {
-          if(this->grid_.getOwner(neigh) == this->grid_.myRank())
-          {
-            return elinfo;
-          }
-        }
-      }
-      return goNextElInfo(stack,elinfo);
-    }
-
-    // set new level for Entity
-    if((elinfo) && (this->leafIt())) enLevel_ = elinfo->level;
-
-    return(elinfo);
-  }
-
-  // walk over interior elements which have ghosts as neighbour
-  case InteriorBorder_Partition :
-  {
-    // overloaded traverse_leaf_el_level, is not implemened in ALBERTA yet
-    elinfo = traverseElLevelInteriorBorder(stack);
-
-    // if leafIt_ == false go to elements only on desired level
-    if((elinfo) && (! this->leafIt()) )
-    {
-      if(elinfo->level == stack->traverse_level)
-        okReturn_ = true;
-
-      while(!okReturn_)
-      {
-        elinfo = traverseElLevelInteriorBorder(stack);
-        if(!elinfo) okReturn_ = true;
-      }
-      ++(stack->el_count);
-    }
-
-    if(elinfo)
-    {
-      // here we have the interior element, now check the neighbours
-      for(int i=0; i<dim+1; i++)
-      {
-        ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
-        if(neigh)
-        {
-          if(((proc_ == -1) && (this->grid_.getOwner(neigh) != this->grid_.myRank()))||
-             ((proc_ != -1) && (this->grid_.getOwner(neigh) == proc_) ))
-          {
-            return elinfo;
-          }
-        }
-      }
-      // we found not the one, so go next
-      return goNextElInfo(stack,elinfo);
-    }
-
-    // set new level for Entity
-    if((elinfo) && (this->leafIt()) ) enLevel_ = elinfo->level;
-
-    return elinfo;
-  }
-  // default iterator type no supported
-  default :
-  {
-    DUNE_THROW(AlbertaError, "AlbertaGridTreeIterator::goNextEntity: Unsupported IteratorType!");
-    return 0;
-  }
-  } // end switch
-#endif
   }
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -2869,21 +2738,7 @@ namespace Dune
 
     if (stack->stack_used == 0) /* first call */
     {
-      if(proc_ >= 0)
-      {
-        ALBERTA MACRO_EL * mel = stack->traverse_mesh->first_macro_el;
-        while((this->grid_.getOwner(mel->el) != this->grid_.myRank()
-               && this->grid_.isNoElement(mel)))
-        {
-          mel = mel->next;
-          if(!mel) break;
-        }
-        stack->traverse_mel = mel;
-      }
-      else
-      {
-        stack->traverse_mel = stack->traverse_mesh->first_macro_el;
-      }
+      stack->traverse_mel = FIRST_MACRO_EL(stack->traverse_mesh);
       if (stack->traverse_mel == nil) return(nil);
 
       stack->stack_used = 1;
@@ -2914,18 +2769,7 @@ namespace Dune
       /* goto next macro element */
       if (stack->stack_used < 1)
       {
-        ALBERTA MACRO_EL * mel = stack->traverse_mel->next;
-        if(mel && (proc_ >= 0))
-        {
-          while((this->grid_.getOwner(mel->el) != this->grid_.myRank()
-                 && this->grid_.isNoElement(mel)))
-          {
-            mel = mel->next;
-            if(!mel) break;
-          }
-          stack->traverse_mel = mel;
-        }
-        stack->traverse_mel = mel;
+        stack->traverse_mel = NEXT_MACRO_EL(stack->traverse_mesh,stack->traverse_mel);
         if (stack->traverse_mel == nil) return(nil);
 
         stack->stack_used = 1;
@@ -2972,229 +2816,6 @@ namespace Dune
     }
 
     return(stack->elinfo_stack+stack->stack_used);
-  }
-
-  // iterate over interior elements
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline ALBERTA EL_INFO * AlbertaGridTreeIterator<codim,pitype,GridImp>::
-  traverseElLevelInteriorBorder(ALBERTA TRAVERSE_STACK *stack)
-  {
-    FUNCNAME("traverseElLevelInteriorBorder");
-    ALBERTA EL *el;
-    int i;
-    okReturn_ = false;
-
-    if (stack->stack_used == 0) /* first call */
-    {
-      ALBERTA MACRO_EL * mel = stack->traverse_mesh->first_macro_el;
-      while(this->grid_.getOwner(mel->el) != this->grid_.myRank())
-      {
-        mel = mel->next;
-        if(!mel) break;
-      }
-      stack->traverse_mel = mel;
-      if (stack->traverse_mel == nil) return(nil);
-
-      stack->stack_used = 1;
-
-      ALBERTA fillMacroInfo(stack, stack->traverse_mel,
-                            stack->elinfo_stack+stack->stack_used, level_ );
-
-      stack->info_stack[stack->stack_used] = 0;
-
-      el = stack->elinfo_stack[stack->stack_used].el;
-      if ((el == nil) || (el->child[0] == nil)) {
-        return(stack->elinfo_stack+stack->stack_used);
-      }
-    }
-    else
-    {
-      el = stack->elinfo_stack[stack->stack_used].el;
-
-      /* go up in tree until we can go down again */
-      while((stack->stack_used > 0) &&
-            ((stack->info_stack[stack->stack_used] >= 2) || (el->child[0]==nil)
-             || ( stack->traverse_level <=
-                  (stack->elinfo_stack+stack->stack_used)->level)) )
-      {
-        stack->stack_used--;
-        el = stack->elinfo_stack[stack->stack_used].el;
-      }
-      /* goto next macro element */
-      if (stack->stack_used < 1)
-      {
-        ALBERTA MACRO_EL * mel = stack->traverse_mel->next;
-        if(mel)
-        {
-          while(this->grid_.getOwner(mel->el) != this->grid_.myRank())
-          {
-            mel = mel->next;
-            if(!mel) break;
-          }
-        }
-        stack->traverse_mel = mel;
-        if (stack->traverse_mel == nil) return(nil);
-
-        stack->stack_used = 1;
-
-        ALBERTA fillMacroInfo(stack, stack->traverse_mel,
-                              stack->elinfo_stack+stack->stack_used,level_);
-
-        stack->info_stack[stack->stack_used] = 0;
-
-        el = stack->elinfo_stack[stack->stack_used].el;
-        if ((el == nil) || (el->child[0] == nil))
-        {
-          return(stack->elinfo_stack+stack->stack_used);
-        }
-      }
-    }
-
-    /* go down tree until leaf or level reached */
-    while (el->child[0] &&
-           ( stack->traverse_level > (stack->elinfo_stack+stack->stack_used)->level))
-    {
-      if(stack->stack_used >= stack->stack_size-1)
-        enlargeTraverseStack(stack);
-
-      i = stack->info_stack[stack->stack_used];
-      el = el->child[i];
-      stack->info_stack[stack->stack_used]++;
-
-      this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                             stack->elinfo_stack+stack->stack_used+1, false, this->leafIt() );
-
-      stack->stack_used++;
-
-      ALBERTA_TEST_EXIT(stack->stack_used < stack->stack_size)
-        ("stack_size=%d too small, level=(%d,%d)\n",
-        stack->stack_size, stack->elinfo_stack[stack->stack_used].level);
-
-      stack->info_stack[stack->stack_used] = 0;
-      if(stack->traverse_level == (stack->elinfo_stack+stack->stack_used)->level)
-      {
-        okReturn_ = true;
-      }
-    }
-
-    return(stack->elinfo_stack+stack->stack_used);
-
-  }
-
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline ALBERTA MACRO_EL * AlbertaGridTreeIterator<codim,pitype,GridImp>::
-  nextGhostMacro(ALBERTA MACRO_EL * oldmel)
-  {
-    ALBERTA MACRO_EL * mel = oldmel;
-    if(mel)
-    {
-      while( (!this->grid_.isGhost(mel)) )
-      {
-        mel = mel->next;
-        if(!mel) break;
-      }
-    }
-    return mel;
-  }
-
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline ALBERTA EL_INFO * AlbertaGridTreeIterator<codim,pitype,GridImp>::
-  traverseElLevelGhosts(ALBERTA TRAVERSE_STACK *stack)
-  {
-    FUNCNAME("traverseElLevelGhosts");
-    ALBERTA EL *el;
-    int i;
-    okReturn_ = false;
-
-    if (stack->stack_used == 0) /* first call */
-    {
-      stack->traverse_mel = nextGhostMacro(stack->traverse_mesh->first_macro_el);
-      if (stack->traverse_mel == nil) return(nil);
-
-      stack->stack_used = 1;
-
-      ALBERTA fillMacroInfo(stack, stack->traverse_mel,
-                            stack->elinfo_stack+stack->stack_used,level_);
-
-      stack->info_stack[stack->stack_used] = 0;
-
-      el = stack->elinfo_stack[stack->stack_used].el;
-      if ((el == nil) || (el->child[0] == nil)) {
-        return(stack->elinfo_stack+stack->stack_used);
-      }
-    }
-    else
-    {
-      el = stack->elinfo_stack[stack->stack_used].el;
-
-      /* go up in tree until we can go down again */
-      while((stack->stack_used > 0) &&
-            ((stack->info_stack[stack->stack_used] >= 2) || (el->child[0]==nil)
-             || ( stack->traverse_level <=
-                  (stack->elinfo_stack+stack->stack_used)->level)) )
-      // Aenderung hier
-      {
-        stack->stack_used--;
-        el = stack->elinfo_stack[stack->stack_used].el;
-      }
-      /* goto next macro element */
-      if (stack->stack_used < 1) {
-
-        ALBERTA MACRO_EL * mel = nextGhostMacro(stack->traverse_mel->next);
-        if(!mel) return 0;
-
-        stack->traverse_mel = mel;
-
-        stack->stack_used = 1;
-
-        ALBERTA fillMacroInfo(stack, stack->traverse_mel,
-                              stack->elinfo_stack+stack->stack_used,level_);
-
-        stack->info_stack[stack->stack_used] = 0;
-
-        el = stack->elinfo_stack[stack->stack_used].el;
-        if ((el == nil) || (el->child[0] == nil))
-        {
-          return(stack->elinfo_stack+stack->stack_used);
-        }
-      }
-    }
-
-    /* go down tree until leaf oder level*/
-    while (el->child[0] && (this->grid_.getOwner(el) >= 0) &&
-           ( stack->traverse_level > (stack->elinfo_stack+stack->stack_used)->level))
-    {
-      if(stack->stack_used >= stack->stack_size-1)
-        enlargeTraverseStack(stack);
-
-      i = stack->info_stack[stack->stack_used];
-      el = el->child[i];
-
-      stack->info_stack[stack->stack_used]++;
-
-      // go next possible element, if not ghost
-      if( this->grid_.getOwner(el) < 0)
-        return traverseElLevelGhosts(stack);
-
-      this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                             stack->elinfo_stack+stack->stack_used+1, false);
-
-      stack->stack_used++;
-
-      ALBERTA_TEST_EXIT(stack->stack_used < stack->stack_size)
-        ("stack_size=%d too small, level=(%d,%d)\n",
-        stack->stack_size, stack->elinfo_stack[stack->stack_used].level);
-
-      stack->info_stack[stack->stack_used] = 0;
-
-      if(stack->traverse_level == (stack->elinfo_stack+stack->stack_used)->level)
-      {
-        okReturn_ = true;
-      }
-    }
-
-    return(stack->elinfo_stack+stack->stack_used);
-
   }
 
   //*************************************************************************
@@ -3447,11 +3068,7 @@ namespace Dune
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid()
     : mesh_ (0)
-      //#if HAVE_MPI
-      //  , comm_(MPI_COMM_WORLD)
-      //#else
       , comm_()
-      //#endif
       , maxlevel_ (0) , wasChanged_ (false)
       , vertexMarkerLeaf_(false) // creates LeafMarkerVector
       , nv_ (dim+1) , dof_ (0)
@@ -3471,7 +3088,6 @@ namespace Dune
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++) dofvecs_.elNumbers[i] = 0;
     dofvecs_.elNewCheck = 0;
-    dofvecs_.owner      = 0;
 #ifndef CALC_COORD
     dofvecs_.coords     = 0;
 #endif
@@ -3495,11 +3111,6 @@ namespace Dune
   inline void AlbertaGrid < dim, dimworld >::initGrid(int proc)
   {
     ALBERTA AlbertHelp::getDofVecs<dimworld> (&dofvecs_);
-    ALBERTA AlbertHelp::setDofVec ( dofvecs_.owner, -1 );
-
-    // dont delete dofs on higher levels
-    // needed for element numbering
-    mesh_->preserve_coarse_dofs = 1;
 
     calcExtras();
 
@@ -3515,11 +3126,7 @@ namespace Dune
   template < int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename)
     : mesh_ (0)
-      //#if HAVE_MPI
-      //  , comm_(MPI_COMM_WORLD)
-      //#else
       , comm_()
-      //#endif
       , maxlevel_ (0) , wasChanged_ (false)
       , vertexMarkerLeaf_(false) // creates LeafMarkerVector
       , nv_ (dim+1) , dof_ (0) , myRank_ (-1)
@@ -3568,10 +3175,9 @@ namespace Dune
     if(makeNew)
     {
       ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
-      mesh_ = ALBERTA get_mesh("AlbertaGrid",
-                               ALBERTA AlbertHelp::initDofAdmin<dim>,
-                               LeafDataType::initLeafData);
-      ALBERTA read_macro(mesh_, MacroTriangFilename, ALBERTA AlbertHelp::initBoundary);
+      // create mesh
+      mesh_ = ALBERTA AlbertHelp::createMesh<dim> ("AlbertaGrid", MacroTriangFilename);
+
       ALBERTA AlbertHelp :: removeBndStack ();
 
       initGrid(0);
@@ -3617,7 +3223,6 @@ namespace Dune
     }
 
     if(dofvecs_.elNewCheck) ALBERTA free_dof_int_vec(dofvecs_.elNewCheck);dofvecs_.elNewCheck = 0;
-    if(dofvecs_.owner ) ALBERTA free_dof_int_vec(dofvecs_.owner);dofvecs_.owner = 0;
 #ifndef CALC_COORD
     if(dofvecs_.coords ) ALBERTA free_dof_real_d_vec(dofvecs_.coords);dofvecs_.coords = 0;
 #endif
@@ -3907,298 +3512,6 @@ namespace Dune
     return wasChanged_;
   }
 
-
-  template < int dim, int dimworld >
-  template <class EntityType>
-  inline int AlbertaGrid < dim, dimworld >::owner(const EntityType & en) const
-  {
-    return this->getOwner( (this->getRealImplementation(en)).getElInfo()->el );
-  }
-
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getOwner (const ALBERTA EL *el) const
-  {
-    // if element is new then entry in dofVec is 1
-    return ownerVec_ [el->dof[dof_][nv_]];
-  }
-
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::isGhost(const ALBERTA MACRO_EL *mel) const
-  {
-    assert((mel->index >= 0) && (mel->index < ghostFlag_.size()));
-    return ghostFlag_[mel->index] == 1;
-  }
-
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::isNoElement(const ALBERTA MACRO_EL *mel) const
-  {
-    if(myRank() < 0) return false;
-    assert((mel->index >= 0) && (mel->index < (int) ghostFlag_.size()));
-    return ghostFlag_[mel->index] == -1;
-  }
-
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::createGhosts()
-  {
-    assert(myRank_ >= 0);
-    if(ghostFlag_.size() < mesh_->n_macro_el) ghostFlag_.resize(mesh_->n_macro_el);
-    for(ALBERTA MACRO_EL * mel = mesh_->first_macro_el; mel; mel = mel->next)
-    {
-      int own = getOwner(mel->el);
-      //assert(own >= 0);
-
-      int gh = 0;
-      if(own != myRank_)
-      {
-        gh = -1;
-        for(int i=0; i<dim+1; i++)
-        {
-          ALBERTA MACRO_EL * neigh = mel->neigh[i];
-          if(neigh)
-          {
-            if(getOwner(neigh->el) == myRank_)
-            {
-              gh = 1;
-              //std::cout << "Mark el " << mel->index << " as Ghost\n";
-            }
-          }
-        }
-      }
-      assert((mel->index >= 0) && (mel->index < ghostFlag_.size()));
-      ghostFlag_[mel->index] = gh;
-    }
-
-    /*
-       std::cout << "CreateGhost of proc " << myRank_ << "\n";
-       for(ALBERTA MACRO_EL * mel = mesh_->first_macro_el; mel; mel = mel->next)
-       {
-       std::cout << "Owner = " << getOwner(mel->el) << " flag = " << ghostFlag_[mel->index] << "\n";
-       }
-     */
-
-    calcExtras ();
-    //std::cout << "ende CreateGhost of proc " << myRank_ << "\n";
-  }
-
-
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::
-  unpackAll( ObjectStreamType & os )
-  {
-    //         global index, map to levels , for each level OS
-    std:: map < int , ObjectStreamType > elmap;
-
-    int buff;
-    int newmxl = 0;
-    os.readObject( buff );
-    //std::cout << buff << " Read buff \n";
-    if(buff == ENDOFSTREAM ) return ;
-    else
-    {
-      assert(buff == BEGINELEMENT );
-      while( buff == BEGINELEMENT )
-      {
-        os.readObject( buff ); // read elnum
-        int elnum = buff;
-        //std::cout << "Unpack el = " << elnum << "\n";
-        os.readObject(buff); // read refine info
-        if(buff == BEGINELEMENT ) continue;
-        if(buff == ENDOFSTREAM  ) break;
-        if(buff == 1) // means that macro element has children
-        {
-          //std::cout << "Read level info = " << buff << "\n";
-          if(elmap.find(elnum) == elmap.end())
-          {
-            ObjectStreamType elstr;
-            elmap[elnum] = elstr;
-          }
-          ObjectStreamType & elstr = elmap[elnum];
-
-          os.readObject(buff); // read level
-          while((buff != ENDOFSTREAM) && (buff != BEGINELEMENT ))
-          {
-            if(buff < 0) newmxl = std::max( newmxl, std::abs( buff ));
-            elstr.writeObject( buff );
-            os.readObject( buff );
-          }
-        }
-      }
-    }
-
-    const HierarchicIndexSet & hset = this->hierarchicIndexSet();
-
-    std:: map < int , std::map < int , int > > elmap2;
-    typedef std :: map < int , int > HierMap ;
-    {
-      {
-        // now refine grid
-        typedef typename Traits::template Codim<0>::LevelIterator LevelIteratorType;
-        LevelIteratorType endit = this->template lend<0> (0);
-        for(LevelIteratorType it = this->template lbegin<0> (0);
-            it != endit ; ++it )
-        {
-          int id = hset.index (*it);
-          if(elmap.find(id) != elmap.end())
-          {
-            std::map < int , int > hiertree;
-            elmap2[id] = hiertree;
-            if(it->isLeaf()) this->mark(1,(*it));
-          }
-        }
-      }
-
-      this->preAdapt();
-      this->adapt();
-      this->postAdapt();
-
-      typedef std :: map < int , int > HierMap ;
-
-      for(int l=1; l<=newmxl; l++)
-      {
-        //std::cout << "Begin on Level l = " << l << "\n";
-        // now refine grid
-        typedef typename Traits::template Codim<0>::LevelIterator LevelIteratorType;
-        LevelIteratorType endit  = this->template lend<0>   (0);
-        for(LevelIteratorType it = this->template lbegin<0> (0);
-            it != endit ; ++it )
-        {
-          int id = hset.index (*it);
-          //std::cout << "Begin LevelIter it = " << id << "\n";
-          if(elmap.find(id) != elmap.end())
-          {
-            int buff;
-            // build a new hier tree
-            ObjectStreamType & levstr = elmap[id];
-            try {
-              levstr.readObject( buff );
-            }
-            catch (ObjectStreamType :: EOFException)
-            {
-              continue;
-            }
-            assert( buff < 0);
-            assert( std::abs( buff ) == l );
-
-            HierMap  & hiertree = elmap2[id];
-            typedef typename Traits:: template Codim<0> :: Entity :: HierarchicIterator HierIt;
-
-            // Hier muss eine ineinandergeschateltes HierarchiIt kommen.
-
-            typedef typename Traits:: template Codim<0> :: Entity EntityType;
-            typedef typename Traits:: template Codim<0> :: EntityPointer EntityPointer;
-
-            hiertree[id] = 1;
-
-            HierIt hendit = it->hend(l);
-            for(HierIt hit = it->hbegin(l); hit != hendit; ++hit)
-            {
-              if(hit->level() != l) continue;
-              // if father isnt in tree then we dont do anything here
-              EntityPointer vati = hit->father();
-
-              if( hiertree.find( hset.index (*vati) ) == hiertree.end()) continue;
-
-              int mark;
-              //try {
-              levstr.readObject ( mark );
-              //}
-              //catch (ObjectStreamType :: EOFException) {}
-              if(mark == 1)
-              {
-                hiertree[ hset.index ( *hit ) ] = mark;
-                if(hit->isLeaf()) this->mark(1,(*hit));
-              }
-            }
-            //std::cout << "Hier it done \n";
-          }
-        }
-
-        //std::cout << "Begin Adapt \n";
-        this->preAdapt();
-        this->adapt();
-        this->postAdapt();
-      }
-    }
-
-
-  }
-
-  template < int dim, int dimworld >
-  template <class EntityType>
-  inline void AlbertaGrid < dim, dimworld >::
-  packAll( ObjectStreamType & os, EntityType & en  )
-  {
-    assert( en.level() == 0 ); // call only on macro elements
-    const HierarchicIndexSet & hset = hierarchicIndexSet();
-
-    os.writeObject( BEGINELEMENT );
-    os.writeObject( hset.index ( en ) );
-    //std::cout << "Pack el = " << hset.index ( en ) << "\n";
-    //std::cout << isLeaf() << " children? \n";
-
-    if(! (en.isLeaf()) )
-    {
-      int mxl = this->maxLevel();
-      os.writeObject( 1 ); // this element should be refined
-
-      for(int l=1; l<mxl; l++)
-      {
-        os.writeObject( -l ); // store level in negative form
-        // to distinguish between mark and level
-        // walk only over desired level
-        typedef typename EntityType :: HierarchicIterator HierIt;
-        HierIt endit  = en.hend(l);
-        for(HierIt it = en.hbegin(l); it != endit; ++it)
-        {
-          if(it->level() != l) continue;
-          os.writeObject( (it->isLeaf()) ? STOPHERE : REFINEEL );
-
-          // mark element for coarsening
-          this->mark( -1, (*it) ) ;
-        }
-      }
-    }
-    //std::cout << "Done with element !\n";
-    return ;
-  }
-
-  template < int dim, int dimworld >
-  template <class EntityType>
-  inline void AlbertaGrid < dim, dimworld >::
-  packBorder ( ObjectStreamType & os, EntityType & en  )
-  {
-    assert( en.level() == 0 ); // call only on macro elements
-    const HierarchicIndexSet & hset = hierarchicIndexSet();
-
-    os.writeObject( BEGINELEMENT );
-    os.writeObject( hset.index ( en ) );
-
-    if(! (en.isLeaf()) )
-    {
-      int mxl = this->maxLevel();
-      os.writeObject( 1 ); // this element should be refined
-
-      for(int l=1; l<mxl; l++)
-      {
-        os.writeObject( -l ); // store level in negative form
-        // to distinguish between mark and level
-        typedef typename EntityType :: HierarchicIterator HierIt;
-        HierIt endit  = en.hend(l);
-        for(HierIt it = en.hbegin(l); it != endit; ++it)
-        {
-          if(it->level() != l) continue;
-          if((en.partitionType() != BorderEntity) || (it->isLeaf()))
-          {
-            os.writeObject( STOPHERE );
-          }
-          else
-            os.writeObject( 1 );
-        }
-      }
-    }
-    return ;
-  }
-
   template<int dim, int dimworld>
   inline bool AlbertaGrid < dim, dimworld >::
   mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) const
@@ -4294,8 +3607,6 @@ namespace Dune
       calcExtras();
     }
 
-    ALBERTA AlbertHelp::setElOwnerNew(mesh_, dofvecs_.owner);
-
     // remove global pointer in elmem.cc
     ALBERTA AlbertHelp::removeIndexManager_elmem_cc(AlbertHelp::numOfElNumVec);
 
@@ -4353,58 +3664,6 @@ namespace Dune
   {
     // if element is new then entry in dofVec is 1
     return (elNewVec_[el->dof[dof_][nv_]] < 0);
-  }
-
-  template < int dim, int dimworld >
-  template <class EntityType>
-  inline bool AlbertaGrid < dim, dimworld >::
-  partition( int proc , EntityType & en )
-  {
-    return this->setOwner( (this->getRealImplementation(en)).getElInfo()->el , proc );
-  }
-
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::setOwner (const ALBERTA EL *el, int proc)
-  {
-    // if element is new then entry in dofVec is 1
-    int dof = el->dof[dof_][nv_];
-    if(ownerVec_ [dof] < 0)
-    {
-      ownerVec_ [dof] = proc;
-      return true;
-    }
-    return false;
-  }
-
-  template < int dim, int dimworld >
-  inline PartitionType AlbertaGrid < dim, dimworld >::
-  partitionType (ALBERTA EL_INFO *elinfo) const
-  {
-    int owner = getOwner(elinfo->el);
-
-    // if processor number == myRank ==> InteriorEntity or BorderEntity
-    if(owner == myRank())
-    {
-      for(int i=0; i<dim+1; i++)
-      {
-        const ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
-        if(neigh)
-        {
-          if(getOwner(neigh) != myRank())
-            return BorderEntity;
-        }
-      }
-
-      // if no GhostNeighbor, then we have real InteriorEntity
-      return InteriorEntity;
-    }
-
-    // if processor number != myProcossor ==> GhostEntity
-    if((owner >= 0) && (owner != myRank())) return GhostEntity;
-
-    DUNE_THROW(AlbertaError, "Unsupported PartitionType");
-
-    return OverlapEntity;
   }
 
   template < int dim, int dimworld >
@@ -4480,7 +3739,6 @@ namespace Dune
     coordsVec_ = (dofvecs_.coords)->vec;      assert(coordsVec_);
 #endif
     elNewVec_  = (dofvecs_.elNewCheck)->vec;  assert(elNewVec_);
-    ownerVec_  = (dofvecs_.owner)->vec;       assert(ownerVec_);
     elAdmin_   = dofvecs_.elNumbers[0]->fe_space->admin;
 
     // see Albert Doc. , should stay the same
@@ -4609,17 +3867,6 @@ namespace Dune
       ALBERTA write_dof_int_vec_xdr(dofvecs_.elNumbers[i],elnumfile.c_str());
     }
 
-    if(myRank() >= 0)
-    {
-      int val = -1;
-      int entry = ALBERTA AlbertHelp::saveMyProcNum(dofvecs_.owner,myRank(),val);
-
-      ALBERTA write_dof_int_vec_xdr(dofvecs_.owner,ownerfile.c_str());
-
-      // set old value of owner vec
-      dofvecs_.owner->vec[entry] = val;
-    }
-
     const char * fn = filename.c_str();
     int flag = ALBERTA write_mesh_xdr (mesh_ , fn , time);
     return (flag == 1) ? true : false;
@@ -4662,22 +3909,6 @@ namespace Dune
       dofvecs_.elNumbers[i] = ALBERTA read_dof_int_vec_xdr(elnumfn, mesh_ , 0 );
     }
 
-    // if owner file exists, read it
-    {
-      //dofvecs_.owner = 0;
-
-      FILE * file=0;
-      const char * ownfile = ownerfile.c_str();
-
-      file = fopen(ownfile,"r");
-      if(file)
-      {
-        fclose(file);
-        dofvecs_.owner = ALBERTA read_dof_int_vec_xdr(ownfile, mesh_ , 0 );
-        const_cast<int &> (myRank_) = ALBERTA AlbertHelp::restoreMyProcNum(dofvecs_.owner);
-      }
-    }
-
     // make the rest of the dofvecs
     ALBERTA AlbertHelp::makeTheRest<dimworld>(&dofvecs_);
 
@@ -4697,9 +3928,6 @@ namespace Dune
       indexStack_[i].setMaxIndex(maxIdx);
     }
 
-    // assertion here
-    // leafIndexSet();
-
     return true;
   }
 
@@ -4709,16 +3937,12 @@ namespace Dune
   {
     removeMesh(); // delete all objects
 
-    mesh_ = ALBERTA get_mesh("AlbertaGrid",
-                             ALBERTA AlbertHelp::initDofAdmin<dim>,
-                             LeafDataType::initLeafData
-                             );
-
     ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
-    ALBERTA read_macro(mesh_, filename.c_str(), ALBERTA AlbertHelp::initBoundary);
+    // create mesh
+    mesh_ = ALBERTA AlbertHelp::createMesh<dim> ("AlbertaGrid", filename.c_str());
+
     ALBERTA AlbertHelp :: removeBndStack ();
 
-    //if( !readParameter(filename,"Time",time) )
     time = 0.0;
 
     // unset up2Dat status, if lbegin is called then this status is updated
@@ -4914,7 +4138,7 @@ namespace Dune
   fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
              ALBERTA EL_INFO *elinfo, bool hierarchical, bool leaf) const
   {
-#if 0
+#ifndef ALBERTA_VERSION_12
     // the alberta version of filling an EL_INFO structure
     ALBERTA fill_elinfo(ichild,elinfo_old,elinfo);
 #else
@@ -5325,7 +4549,7 @@ namespace Dune
     for(int i=0; i<macroVertices_.size(); i++)
       macroVertices_[i] = 0;
 
-    for(ALBERTA MACRO_EL * mel = mesh_->first_macro_el; mel; mel=mel->next)
+    for(ALBERTA MACRO_EL * mel = FIRST_MACRO_EL(mesh_); mel; mel = NEXT_MACRO_EL(mesh_,mel) )
     {
       for(int i=0; i<dim+1; i++)
       {

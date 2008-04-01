@@ -74,7 +74,7 @@
 
 // IndexManager defined in indexstack.hh
 // 10000 is the size of the finite stack used by IndexStack
-typedef Dune::IndexStack<int,10000> IndexManagerType;
+typedef Dune::IndexStack<int,100000> IndexManagerType;
 
 //#define CALC_COORD
 // some extra functions for handling the Albert Mesh
@@ -91,9 +91,6 @@ namespace Dune {
 
 #include "referencetopo.hh"
 #include "indexsets.hh"
-
-// contains the communication for parallel computing for this grid
-#include "agcommunicator.hh"
 
 namespace Dune
 {
@@ -1470,6 +1467,25 @@ namespace Dune
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
+    class ObjectStream
+    {
+    public:
+      class EOFException {} ;
+      template <class T>
+      void readObject (T &) {}
+      void readObject (int) {}
+      void readObject (double) {}
+      template <class T>
+      void writeObject (T &) {}
+      void writeObject (int) {}
+      void writeObject (double) {}
+
+      template <class T>
+      void read (T &) const {}
+      template <class T>
+      void write (const T &) {}
+    };
+
     typedef ObjectStream ObjectStreamType;
 
     enum {
@@ -1704,35 +1720,6 @@ namespace Dune
     }
 
   public:
-    // create ghost cells
-    void createGhosts ();
-
-    // return processor number where entity is master
-    template <class EntityType>
-    int owner (const EntityType & ) const;
-
-    // AlbertaGrid internal method for partitioning
-    // set processor number of this entity
-    template <class EntityType>
-    bool partition( int proc , EntityType & );
-
-    // unpack recieved ObjectStream
-    void unpackAll ( ObjectStreamType & os );
-
-    // pack this entity and all chilcren to ObjectStream
-    template <class EntityType>
-    void packAll ( ObjectStreamType & os, EntityType & en );
-
-    // pack this entity and all chilcren to ObjectStream
-    template <class EntityType>
-    void packBorder ( ObjectStreamType & os, EntityType & en );
-
-    // return true if macro element is ghost
-    bool isGhost( const ALBERTA MACRO_EL * mel) const;
-
-    // return true if element is neihter interior nor ghost
-    bool isNoElement( const ALBERTA MACRO_EL * mel) const;
-
     //! returns geometry type vector for codimension
     const std::vector < GeometryType > & geomTypes (int codim) const
     {
@@ -1916,25 +1903,7 @@ namespace Dune
     // read global element number from elNumbers_
     int getVertexNumber ( const ALBERTA EL * el, int vx ) const;
 
-    //********************************************************************
-    //  organisation of the parallelisation
-    //********************************************************************
-
-    // set owner of element, for partioning
-    bool setOwner ( const ALBERTA EL * el , int proc );
-
-    // return the processor number of element
-    int getOwner ( const ALBERTA EL * el ) const;
-
-    // PartitionType (InteriorEntity , BorderEntity, GhostEntity )
-    PartitionType partitionType ( ALBERTA EL_INFO * elinfo) const;
-
   private:
-
-    // pointer to vec  with processor number for each element,
-    // access via setOwner and getOwner
-    int * ownerVec_;
-
     // rank of my thread, i.e. number of my processor
     const int myRank_;
 
