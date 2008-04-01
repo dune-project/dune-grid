@@ -1070,7 +1070,7 @@ namespace AlbertHelp
 
     if(dim == 3)
     {
-      edgedof[1] = 1; // edge dof only in 3d
+      edgedof[edge] = 1; // edge dof only in 3d
     }
 
     fdof[face] = 1; // means edges in 2d and faces in 3d
@@ -1192,8 +1192,16 @@ namespace AlbertHelp
   template <int dim>
   static MESH* createMesh(const char * name, const char * filename)
   {
-    MESH* mesh = GET_MESH(dim, name, read_macro(filename), 0);
+    // get macro data
+    MACRO_DATA* mdata = read_macro(filename);
 
+    // create mesh
+    MESH* mesh = GET_MESH(dim, name, mdata, 0);
+
+    // free macro data
+    free_macro_data(mdata);
+
+    // init dof admins
     initDofAdmin<dim> ( mesh );
 
     //! type of leaf data
