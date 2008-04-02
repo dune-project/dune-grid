@@ -616,7 +616,7 @@ namespace Dune {
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const GridImp &grid,
-                                const ALU3DSPACE HElementType & elem, int maxlevel, bool end=false);
+                                const ALU3DSPACE HElementType & elem, int maxlevel, bool end );
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
