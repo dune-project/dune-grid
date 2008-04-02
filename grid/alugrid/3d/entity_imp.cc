@@ -539,11 +539,8 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
   {
     assert(item_ != 0);
-#if ALU3DGRID_PARALLEL
-    // hierarchic walk on ghost will deliver wrong results
-    if( isGhost_ ) return this->hend(maxlevel);
-#endif
-    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel);
+    // if isGhost is true the end iterator will be returned
+    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost_ );
   }
 
   template<int dim, class GridImp>
