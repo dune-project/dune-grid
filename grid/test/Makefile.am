@@ -102,7 +102,7 @@ GRIDFILES = \
   cube-testgrid-3-3-large.dgf
 
 # gridcheck not used explicitly, we should still ship it :)
-EXTRA_DIST = gridcheck.cc $(GRIDFILES)
+EXTRA_DIST = gridcheck.cc $(GRIDFILES) $(SOURCES)
 
 CLEANFILES = *.gcda *.gcno semantic.cache simplex-testgrid*.dgf.* cube-testgrid*.dgf.* dgfparser.log
 
