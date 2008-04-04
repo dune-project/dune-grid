@@ -1144,17 +1144,17 @@ template <int dim>
 Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundaryPosition(const typename Traits::LevelIntersectionIterator& iIt,
                                                                                           const FieldVector<ctype,dim-1>& localPos) const
 {
-  if (!iIt.boundary())
+  if (!iIt->boundary())
     DUNE_THROW(GridError, "call getBoundaryPosition() only for boundary intersections!");
 
   FieldVector<ctype,dim> result;
 
   if (dim==2) {
 
-    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUG(iIt.numberInSelf(), iIt.inside()->type());
+    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUG(iIt->numberInSelf(), iIt->inside()->type());
 
     // Get UG element from which this intersection iterator is taken
-    const typename UG_NS<dim>::Element* target = getRealImplementation(*iIt.inside()).target_;
+    const typename UG_NS<dim>::Element* target = getRealImplementation(*iIt->inside()).target_;
 
     const typename UG_NS<dim>::Vertex* v0 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,0))->myvertex;
     const typename UG_NS<dim>::Vertex* v1 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,1))->myvertex;
@@ -1268,13 +1268,13 @@ void Dune::UGGrid < dim >::setIndices()
 
         for (; nIt!=nEndIt; ++nIt) {
 
-          if (!nIt.neighbor())
+          if (!nIt->neighbor())
             continue;
 
-          typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt.outside()).target_;
+          typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInSelf(), eIt->type());
-          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt.numberInNeighbor(), nIt.outside()->type());
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->numberInSelf(), eIt->type());
+          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->numberInNeighbor(), nIt->outside()->type());
 
           UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
                                            (typename UG_NS<3>::Element*)elem0,
