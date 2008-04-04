@@ -106,9 +106,12 @@ namespace Dune {
     {
       typedef ALU2dGrid<dim,dimworld> Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper> IntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper> LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper> LevelIntersectionIterator;
+      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
+      typedef Dune :: Intersection< const GridImp, LevelIntersectionIteratorWrapper > LevelIntersection;
+
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionIteratorWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU2dGridHierarchicIterator> HierarchicIterator;
 
@@ -539,12 +542,22 @@ namespace Dune {
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp > LevelIntersectionIteratorProviderType;
 
   public:
-    template <class IntersectionInterfaceType>
-    const typename BaseType::
-    template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
-    getRealIntersectionIterator(const IntersectionInterfaceType & it) const
+    template< class IntersectionInterfaceType >
+    const typename BaseType
+    :: template ReturnImplementationType< IntersectionInterfaceType>
+    :: ImplementationType & DUNE_DEPRECATED
+    getRealIntersectionIterator ( const IntersectionInterfaceType &it ) const
     {
       return this->getRealImplementation(it);
+    }
+
+    template< class IntersectionType >
+    const typename BaseType
+    :: template ReturnImplementationType< IntersectionType>
+    :: ImplementationType &
+    getRealIntersection ( const IntersectionType &intersection ) const
+    {
+      return this->getRealImplementation( intersection );
     }
 
   private:

@@ -179,6 +179,8 @@ namespace Dune {
     typedef LeafIntersectionIteratorWrapper<GridImp> ThisType;
     typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
   public:
+    typedef Intersection< const GridImp, Dune :: LeafIntersectionIteratorWrapper > Intersection;
+
     //! dimension
     enum { dimension      = GridImp :: dimension  };
     //! dimensionworld
@@ -217,6 +219,11 @@ namespace Dune {
       BaseType::operator = (org);
       return *this;
     }
+
+    const Intersection &dereference () const
+    {
+      return reinterpret_cast< const Intersection & >( *this );
+    }
   }; // end class IntersectionIteratorWrapper
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
@@ -228,6 +235,8 @@ namespace Dune {
     typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
     typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
   public:
+    typedef Intersection< const GridImp, Dune :: LevelIntersectionIteratorWrapper > Intersection;
+
     //! dimension
     enum { dimension      = GridImp :: dimension  };
     //! dimensionworld
@@ -265,6 +274,11 @@ namespace Dune {
     {
       BaseType::operator = (org);
       return *this;
+    }
+
+    const Intersection &dereference () const
+    {
+      return reinterpret_cast< const Intersection & >( *this );
     }
   }; // end class IntersectionIteratorWrapper
 

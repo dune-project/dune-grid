@@ -1297,8 +1297,10 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
+      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
+      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LevelIntersection;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 
@@ -1829,12 +1831,22 @@ namespace Dune
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
   public:
-    template <class IntersectionInterfaceType>
-    const typename BaseType::
-    template ReturnImplementationType<IntersectionInterfaceType> :: ImplementationType &
-    getRealIntersectionIterator(const IntersectionInterfaceType & it) const
+    template< class IntersectionInterfaceType >
+    const typename BaseType
+    :: template ReturnImplementationType< IntersectionInterfaceType >
+    :: ImplementationType & DUNE_DEPRECATED
+    getRealIntersectionIterator ( const IntersectionInterfaceType &iterator ) const
     {
-      return this->getRealImplementation(it);
+      return this->getRealImplementation( iterator );
+    }
+
+    template< class IntersectionType >
+    const typename BaseType
+    :: template ReturnImplementationType< IntersectionType >
+    :: ImplementationType &
+    getRealIntersection ( const IntersectionType &intersection ) const
+    {
+      return this->getRealImplementation( intersection );
     }
 
     // (for internal use only) return obj pointer to EntityImp
