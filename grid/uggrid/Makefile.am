@@ -13,7 +13,7 @@ libuggrid_la_LIBADD   = $(UG_LDFLAGS) $(UG_LIBS) $(DUNE_COMMON_LIBS)
 endif
 
 uggriddir = $(includedir)/dune/grid/uggrid/
-uggrid_HEADERS = uggridgeometry.cc \
+uggrid_HEADERS = uggridfactory.hh uggridgeometry.cc \
   uggridentitypointer.hh uggridhieriterator.cc \
   ugwrapper.hh uggridentity.hh uggridgeometry.hh \
   uggridhieriterator.hh uggridleveliterator.hh ugincludes.hh \
