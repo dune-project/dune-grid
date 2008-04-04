@@ -462,7 +462,17 @@ WARN_LOGFILE           =
 INPUT                  = mainpage \
                          modules \
                          ../../grid/modules \
-                         ../../grid
+                         ../../grid/albertagrid \
+                         ../../grid/albertagrid.hh \
+                         ../../grid/alugrid.hh \
+                         ../../grid/common \
+                         ../../grid/io \
+                         ../../grid/onedgrid.hh \
+                         ../../grid/sgrid.hh \
+                         ../../grid/uggrid.hh \
+                         ../../grid/uggrid/uggridfactory.hh \
+                         ../../grid/utility \
+                         ../../grid/yaspgrid.hh
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -484,7 +494,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ../../grid/test
+EXCLUDE                = 
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
