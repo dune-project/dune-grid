@@ -284,44 +284,34 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
 
   if (elementType_.isTriangle()) {
 
-    /* the simplex case */
-    FieldMatrix<UGCtype,3,2> matrix;
+    /* the simplex case:
+       Let $l \in R^2$ be the local coordinates and $g \in R^3$ the global ones.
+       Let $p_0, p_1, p_2$ be the three triangle corners.
+       Then $g = p_0 + D l$, where $D$ is a $3\times 2$-matrix with the first
+       column being $p_1 - p_0$ and the second one being $p_2 - p_0$.  In other
+       words $g - p_0 = D l$ or $l = D^+ (g - p_0)$, where $D^+$ is the
+       Moore-Penrose pseudo inverse $D^+ = (D^T D)^{-1} D^T$.  Using this
+       we get that $l$ is the solution of the linear system
+       $(D^T D)l = D^T (g-p_0)$ and that is what is implemented here.
+     */
+    FieldMatrix<UGCtype,2,3> matrixTransp;
     for (int i=0; i<3; i++) {
-      matrix[i][0] = coord_[1][i] - coord_[0][i];
-      matrix[i][1] = coord_[2][i] - coord_[0][i];
+      matrixTransp[0][i] = coord_[1][i] - coord_[0][i];
+      matrixTransp[1][i] = coord_[2][i] - coord_[0][i];
     }
 
-    // Simply regard the projection onto the x-y plane
-    M[0] = matrix[0];
-    M[1] = matrix[1];
-    partialDiff[0] = diff[0];
-    partialDiff[1] = diff[1];
+    FieldMatrix<UGCtype,2,2> matrixTranspTimesMatrix(0);
+    for (int i=0; i<2; i++)
+      for (int j=0; j<2; j++)
+        for (int k=0; k<3; k++)
+          matrixTranspTimesMatrix[i][j] += matrixTransp[i][k]*matrixTransp[j][k];
 
-    if (M.determinant()!=0) {
-      M.solve(result, partialDiff);
-      return result;
-    }
+    FieldVector<UGCtype,2> scaledDiff(0);
+    matrixTransp.umv(diff,scaledDiff);
+    matrixTranspTimesMatrix.solve(result, scaledDiff);
 
-    // The triangle is orthogonal to the x-y plane.  try the x-z plane
-    M[1]           = matrix[2];
-    partialDiff[1] = diff[2];
+    return result;
 
-    if (M.determinant()!=0) {
-      M.solve(result, partialDiff);
-      return result;
-    }
-
-    // Last attempt: the y-z plane
-    M[0]           = matrix[1];
-    partialDiff[0] = diff[1];
-
-    if (M.determinant()!=0) {
-      M.solve(result, partialDiff);
-      return result;
-    }
-
-    // There must be something wrong here
-    assert(false);
   } else {
     assert(elementType_.isQuadrilateral());
 
