@@ -50,7 +50,7 @@ namespace Dune {
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
      */
-    static void read(GridType& grid, const std::string& fileName, bool verbose = true)
+    static GridType* read(const std::string& fileName, bool verbose = true)
     {
       // extract the grid dimension
       const int dim = GridType::dimension;
@@ -60,8 +60,8 @@ namespace Dune {
         DUNE_THROW(Dune::NotImplemented,
                    "Reading Star-CD format is not implemented for dimension " << dim);
 
-      // set up the internal grid creation process
-      grid.createBegin();
+      // set up the grid factory
+      GridFactory<GridType> factory;
 
       // set the name of the vertex file
       std::string vertexFileName = fileName + ".vrt";
@@ -82,7 +82,7 @@ namespace Dune {
         for (int k = 0; k < dim; k++)
           vertexFile >> position[k];
 
-        grid.insertVertex(position);
+        factory.insertVertex(position);
       }
       if (verbose)
         std::cout << numberOfVertices << " vertices read." << std::endl;
@@ -124,7 +124,7 @@ namespace Dune {
               for (int k = 0; k < 3; k++)
                 simplexVertices[k] = vertices[k] - 1;
               simplexVertices[3] = vertices[4] - 1;
-              grid.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim), simplexVertices);
+              factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim), simplexVertices);
             }
             else {             // prism
               numberOfPrisms++;
@@ -133,7 +133,7 @@ namespace Dune {
                 prismVertices[k] = vertices[k] - 1;
               for (int k = 3; k < 6; k++)
                 prismVertices[k] = vertices[k+1] - 1;
-              grid.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim), prismVertices);
+              factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim), prismVertices);
             }
           }
           else {           // cube or pyramid
@@ -142,7 +142,7 @@ namespace Dune {
               std::vector<unsigned int> pyramidVertices(5);
               for (int k = 0; k < 5; k++)
                 pyramidVertices[k] = vertices[k] - 1;
-              grid.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim), pyramidVertices);
+              factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim), pyramidVertices);
             }
             else {             // cube
               numberOfCubes++;
@@ -151,7 +151,7 @@ namespace Dune {
                 cubeVertices[k] = vertices[k] - 1;
               std::swap(cubeVertices[2], cubeVertices[3]);
               std::swap(cubeVertices[6], cubeVertices[7]);
-              grid.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim), cubeVertices);
+              factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim), cubeVertices);
             }
           }
         }
@@ -163,10 +163,9 @@ namespace Dune {
 
       // finish off the construction of the grid object
       if (verbose)
-        std::cout << "Starting createEnd() ... " << std::flush;
-      grid.createEnd();
-      if (verbose)
-        std::cout << "finished." << std::endl;
+        std::cout << "Starting createGrid() ... " << std::flush;
+
+      return factory.createGrid();
 
     }
 

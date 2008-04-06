@@ -5,7 +5,7 @@ if UG
 ALLTESTS += starcdreadertest
 endif
 
-AM_CXXFLAGS= -g -Wall -O0
+AM_CPPFLAGS += -g -Wall -O0
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS)

@@ -11,15 +11,13 @@
 template <class GridType>
 void readGrid (const std::string& baseName)
 {
-  // define the grid
-  GridType grid;
-
-  Dune::StarCDReader<GridType>::read(grid, baseName);
+  // read the grid
+  std::auto_ptr<GridType> grid(Dune::StarCDReader<GridType>::read(baseName));
 
   std::cout << "Starting grid tests ." << std::flush;
 
   // check macro grid
-  gridcheck(grid);
+  gridcheck(*grid);
 
   std::cout << " passed." << std::endl;
 }
