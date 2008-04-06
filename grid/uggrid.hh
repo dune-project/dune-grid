@@ -109,8 +109,8 @@ namespace Dune {
         UGGridLevelIterator,
         UGGridLeafIntersectionIterator,              // leaf  intersection
         UGGridLevelIntersectionIterator,              // level intersection
-        UGGridLeafIntersectionIterator,              // leaf  intersection iterartor
-        UGGridLevelIntersectionIterator,              // level intersection iterartor
+        UGGridLeafIntersectionIterator,              // leaf  intersection iterator
+        UGGridLevelIntersectionIterator,              // level intersection iterator
         UGGridHierarchicIterator,
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
@@ -159,6 +159,9 @@ namespace Dune {
      you choose.  It is even possible to have 2d and 3d grids at the same
      time, even though the original UG system never intended to support
      this!
+
+     See the documentation for the factory class GridFactory<UGGrid<dimworld> >
+     to learn how to create UGGrid objects.
 
      Please send any questions, suggestions, or bug reports to
      sander@math.fu-berlin.de
