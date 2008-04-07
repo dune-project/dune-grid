@@ -256,7 +256,7 @@ namespace Dune {
     // compile time parameters
     enum { d=0 };
     enum { dim=0 };
-    enum { highest_order=1000 };
+    enum { highest_order=61 };
     typedef ct CoordType;
     typedef CubeQuadratureRule value_type;
 
@@ -286,7 +286,7 @@ namespace Dune {
     // compile time parameters
     enum { d=1 };
     enum { dim=1 };
-    enum { highest_order=44 };
+    enum { highest_order=61 };
     typedef ct CoordType;
     typedef CubeQuadratureRule value_type;
 
@@ -336,7 +336,7 @@ namespace Dune {
     enum { dim=1 };
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=44 };
+    enum { highest_order=61 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
@@ -390,7 +390,7 @@ namespace Dune {
     enum { dim=1 };
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=44 };
+    enum { highest_order=61 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
@@ -445,7 +445,7 @@ namespace Dune {
     enum {d=2};
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=44 };
+    enum { highest_order=61 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
@@ -470,7 +470,7 @@ namespace Dune {
     enum {d=3};
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=44 };
+    enum { highest_order=61 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
