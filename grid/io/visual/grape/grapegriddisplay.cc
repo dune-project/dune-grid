@@ -87,26 +87,27 @@ namespace Dune
                  const IntersectionIteratorType & endnit, DUNE_ELEM * he)
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
+    typedef typename IntersectionIteratorType :: Intersection IntersectionType;
     int lastElNum = -1;
 
     // check all faces for boundary or not
-    while ( nit != endnit )
+    for( ; nit != endnit; ++nit )
     {
-      int num = nit.numberInSelf();
-      assert( num >= 0 );
-      assert( num < MAX_EL_FACE );
+      const IntersectionType &intersection = *nit;
+      const int number = intersection.numberInSelf();
+      assert( (number >= 0) && (number < MAX_EL_FACE) );
 
-      if(num != lastElNum)
+      if( number != lastElNum )
       {
-        he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
-        if( nit.neighbor() )
+        he->bnd[ number ]
+          = (intersection.boundary() ? intersection.boundaryId() : 0);
+        if( intersection.neighbor() )
         {
-          if(nit.outside()->partitionType() != InteriorEntity )
-            he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
+          if( intersection.outside()->partitionType() != InteriorEntity )
+            he->bnd[ number ] = 2*(Entity :: dimensionworld) + (number+1);
         }
-        lastElNum = num;
+        lastElNum = number;
       }
-      ++nit;
     }
   }
 
