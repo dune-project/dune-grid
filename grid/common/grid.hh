@@ -524,6 +524,8 @@ namespace Dune {
          with other leaf elements.
        */
       typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersectionIterator;
+      /** \brief forward compatibility */
+      typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersection;
 
       /*! \brief A type that is a model of Dune::IntersectionIterator
          which is an iterator that allows to examine, but not to modify, the
@@ -531,6 +533,8 @@ namespace Dune {
          with other elements on the same level.
        */
       typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersectionIterator;
+      /** \brief forward compatibility */
+      typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersection;
 
       /*! \brief A type that is a model of Dune::HierarchicIterator
          A type of iterator that allows to examine, but not to modify, entities
@@ -1135,7 +1139,9 @@ namespace Dune {
     typedef GridImp Grid;
 
     typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp>  LeafIntersectionIterator;
+    typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp>  LeafIntersection;
     typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp> LevelIntersectionIterator;
+    typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp> LevelIntersection;
 
     typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
 

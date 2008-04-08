@@ -1301,7 +1301,11 @@ namespace Dune
       typedef GridImp Grid;
 
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      // only for froward compatiblity
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
+      // only for forward compatibility
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper > LevelIntersection;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 

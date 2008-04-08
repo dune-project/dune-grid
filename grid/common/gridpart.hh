@@ -97,6 +97,9 @@ namespace Dune {
     //! \brief type of IntersectionIterator
     typedef typename GridPartTraits::IntersectionIteratorType IntersectionIteratorType;
 
+    //! \brief forward compatilbility
+    typedef IntersectionIteratorType IntersectionType;
+
     //! \brief type of Entity with codim=0
     typedef typename GridType::template Codim<0>::Entity EntityCodim0Type;
 
@@ -240,6 +243,9 @@ namespace Dune {
     //! The corresponding IntersectionIterator
     typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
 
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
+
     //! Struct defining the iterator types for codimension cd
     template <int cd>
     struct Codim {
@@ -325,6 +331,9 @@ namespace Dune {
     typedef typename GridType::template Codim<0>::Entity::
     LevelIntersectionIterator IntersectionIteratorType;
 
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
+
     /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>
     struct Codim {
@@ -351,6 +360,9 @@ namespace Dune {
 
     //! The corresponding IntersectionIterator
     typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
 
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
@@ -428,6 +440,9 @@ namespace Dune {
     typedef typename GridType::template Codim<0>::Entity::
     LeafIntersectionIterator IntersectionIteratorType;
 
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
+
     /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>
     struct Codim {
@@ -461,6 +476,9 @@ namespace Dune {
 
     //! The corresponding IntersectionIterator
     typedef typename Traits::IntersectionIteratorType IntersectionIteratorType ;
+
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
 
     //! Struct providing types of the leaf iterators on codimension cd
     template <int cd>
@@ -537,6 +555,9 @@ namespace Dune {
     /** \brief The appropriate intersection iterator */
     typedef typename GridType::template Codim<0>::Entity::
     LeafIntersectionIterator IntersectionIteratorType;
+
+    /** forward compatibility */
+    typedef IntersectionIteratorType IntersectionType;
 
     /** \brief Iterators over the entities of codimension <tt>cd</tt> of this grid part */
     template <int cd>

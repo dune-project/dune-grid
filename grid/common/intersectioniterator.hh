@@ -202,6 +202,9 @@ namespace Dune
         and intersectionNeighborLocal() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
+    /** forward compatibility to new Dune Intersection's */
+    typedef IntersectionIterator<GridImp, IntersectionIteratorImp> Intersection;
+
     //! @brief Export grid dimension
     enum { dimension=dim /*!< grid dimension */ };
 
@@ -210,6 +213,18 @@ namespace Dune
 
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
+
+    //=============================================================
+    // Dereferencing to keep compatiblity with upcomming versions
+    //=============================================================
+
+    /** \brief Dereferencing operator. */
+    const Intersection & operator*() const { return *this; }
+
+    /** \brief Pointer operator. */
+    const Intersection * operator->() const { return this; }
+
+    //=============================================================
 
     /** @brief Preincrement operator. Proceed to next intersection.*/
     IntersectionIterator& operator++()
