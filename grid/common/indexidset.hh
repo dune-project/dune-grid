@@ -91,6 +91,9 @@ namespace Dune
       };
     };
 
+    /** \brief type of index (in upcomming version this is unsigned int) */
+    typedef int IndexType;
+
     //===========================================================
     /** @name Index access from entity
      */
