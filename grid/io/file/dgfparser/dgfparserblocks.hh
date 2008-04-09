@@ -422,12 +422,12 @@ namespace Dune {
     const char* SimplexGenerationBlock::ID = "Simplexgenerator";
     // *************************************************************
     class SimplexBlock : public BasicBlock {
-      int nofvtx;
+      unsigned int nofvtx;
       int vtxoffset;
       int dimworld;
-      bool goodline;  // active line describes a vertex
-      std::vector<int> p; // active vertex
-      int nofparams;  // nof parameters
+      bool goodline;             // active line describes a vertex
+      std::vector< unsigned int > p; // active vertex
+      int nofparams;             // nof parameters
       std::vector<double> psimpl; // active parameters
     public:
       const static char* ID;
@@ -462,8 +462,10 @@ namespace Dune {
         next();
       }
       ~SimplexBlock() {}
-      int get(std::vector<std::vector<int> >& simplex,
-              std::vector<std::vector<double> >&params,int& nofp) {
+      int get ( std :: vector< std :: vector< unsigned int > > &simplex,
+                std :: vector< std :: vector< double > > &params,
+                int &nofp)
+      {
         nofp=nofparams;
         int nofsimpl;
         for (nofsimpl=0; ok(); next(), nofsimpl++) {
@@ -489,10 +491,13 @@ namespace Dune {
          */
         return nofsimpl;
       }
+
       // cubes -> simplex
-      static int cube2simplex(std::vector<std::vector<double> >& vtx,
-                              std::vector<std::vector<int> >& elements,
-                              std::vector<std::vector<double> >& params) {
+      static int
+      cube2simplex ( std :: vector< std :: vector< double > > &vtx,
+                     std :: vector< std :: vector< unsigned int > > &elements,
+                     std :: vector< std :: vector< double> > &params )
+      {
         static int offset3[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
                                        {{0,0,0},{1,1,1},{1,0,1},{1,0,0}},
                                        {{0,0,0},{1,1,1},{0,0,1},{1,0,1}},
@@ -506,7 +511,7 @@ namespace Dune {
         int dimworld = vtx[0].size();
         dverb << "generating simplices...";
         dverb.flush();
-        std::vector<std::vector<int> > cubes = elements;
+        std :: vector< std :: vector< unsigned int > > cubes = elements;
         std::vector<std::vector<double> > cubeparams = params;
         if(dimworld == 3) {
           elements.resize(6*cubes.size());
@@ -619,12 +624,13 @@ namespace Dune {
     };
     const char* SimplexBlock::ID = "Simplex";
     /// *************************************************************
-    class CubeBlock : public BasicBlock {
-      int nofvtx;
+    class CubeBlock : public BasicBlock
+    {
+      unsigned int nofvtx;
       int dimworld;
       bool goodline;    // active line describes a vertex
-      std::vector<int> p; // active vertex
-      std::vector<int> map; // active vertex
+      std :: vector< unsigned int > p; // active vertex
+      std :: vector< unsigned int > map; // active vertex
       int nofparams;
       int vtxoffset;
       std::vector<double> psimpl; // active parameters
@@ -683,8 +689,11 @@ namespace Dune {
         next();
       }
       ~CubeBlock() {}
-      int get(std::vector<std::vector<int> >& simplex,
-              std::vector<std::vector<double> >&params,int& nofp) {
+
+      int get ( std :: vector< std :: vector< unsigned int> > &simplex,
+                std :: vector< std :: vector< double > > &params,
+                int &nofp )
+      {
         nofp=nofparams;
         int nofsimpl;
         // simplex.resize(nofsimplex());
@@ -892,9 +901,9 @@ namespace Dune {
     // *************************************************************
     // the BoundarySegBlock looks for given boundary values unless they aren't given they got the value zero
     class BoundarySegBlock : public BasicBlock {
-      int dimworld;      // the dimesnsion of the vertices (is given  from user)
-      bool goodline;     // active line describes a vertex
-      std::vector<int> p; // active vertex
+      int dimworld;                // the dimesnsion of the vertices (is given  from user)
+      bool goodline;               // active line describes a vertex
+      std :: vector< unsigned int > p; // active vertex
       int bndid;
       bool simplexgrid;
     public:
@@ -918,7 +927,10 @@ namespace Dune {
       ~BoundarySegBlock() {}
 
       // some information
-      int get(std::map<DGFEntityKey<int>,int>& facemap,bool fixedsize,int vtxoffset) {
+      int get( std :: map< DGFEntityKey< unsigned int>, int > &facemap,
+               bool fixedsize,
+               int vtxoffset )
+      {
         static int cube2simplex[3][3] = {
           {0,1,3},
           {0,2,3},
@@ -939,12 +951,12 @@ namespace Dune {
                 (dimworld==3 && simplexgrid && size()!=3 && size()!=4) ||
                 (dimworld==3 && !simplexgrid && size()!=4))
               continue;
-            std::vector<int> bound(face);
+            std :: vector< unsigned int > bound( face );
             for (int j=0; j<face; j++) {
               bound[j] = p[j];
             }
 
-            DGFEntityKey<int> key(bound,false);
+            DGFEntityKey< unsigned int > key( bound, false );
 
             facemap[key] = bndid;
             ++lnofbound;
@@ -960,7 +972,7 @@ namespace Dune {
                     bound[j] = p[cube2simplex[i][j]];
                   }
 
-                  DGFEntityKey<int> key(bound,false);
+                  DGFEntityKey< unsigned int > key( bound, false );
                   facemap[key] = bndid;
                   ++lnofbound;
                 }
@@ -971,7 +983,7 @@ namespace Dune {
                 {
                   bound[0] = p[i-1];
                   bound[1] = p[i%size()];
-                  DGFEntityKey<int> key(bound,false);
+                  DGFEntityKey< unsigned int > key( bound, false );
                   facemap[key] = bndid;
                   ++lnofbound;
                 }
@@ -980,15 +992,15 @@ namespace Dune {
           }
           else {
             if (dimworld==3) {
-              DGFEntityKey<int> key(p,false);
+              DGFEntityKey< unsigned int > key( p, false );
               facemap[key] = bndid;
               ++lnofbound;
             } else {
-              std::vector<int> k(2);
+              std :: vector< unsigned int > k( 2 );
               for (size_t i=0; i<p.size()-1; i++) {
                 k[0]=p[i];
                 k[1]=p[(i+1)%p.size()];
-                DGFEntityKey<int> key(k,false);
+                DGFEntityKey< unsigned int > key( k, false );
                 facemap[key] = bndid;
                 ++lnofbound;
               }
@@ -1233,7 +1245,7 @@ namespace Dune {
         }
       }
       void get(std::vector<std::vector<double> >& vtx,int& nofvtx,
-               std::vector<std::vector<int> >& simplex,int& nofsimpl) {
+               std::vector<std::vector<unsigned int> >& simplex,int& nofsimpl) {
         do {
           int oldvtx = nofvtx;
           nofvtx  +=getVtx(vtx);
@@ -1284,8 +1296,10 @@ namespace Dune {
         dverb << "done" << std::endl;
         return nofvtx();
       }
-      int getHexa(std::vector<std::vector<int> >& simplex,
-                  int offset=0) {
+
+      int getHexa ( std :: vector< std :: vector< unsigned int > > &simplex,
+                    int offset = 0 )
+      {
         int oldsize=simplex.size();
         //fill simplex with Hexaeder
         size_t counthexa;

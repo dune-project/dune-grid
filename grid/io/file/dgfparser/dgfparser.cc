@@ -87,10 +87,11 @@ namespace Dune {
       out << std::endl;
     }
     out << "\nelement boundaries: "  << std::endl;
-    std::map<DGFEntityKey<int>,int>::iterator pos;
+    facemap_t :: iterator pos;
     for( int simpl=0; simpl < nofelements ; simpl++) {
       for (int i =0 ; i< dimw+1 ; i++) {
-        DGFEntityKey<int> key2(elements[simpl],dimw,i+1);
+        facemap_t :: key_type key2( elements[ simpl ], dimw, i+1 );
+        // DGFEntityKey< unsigned int > key2( elements[ simpl ], dimw, i+1 );
         pos=facemap.find(key2);
         if (pos==facemap.end())
           out << "0 ";
@@ -163,7 +164,7 @@ namespace Dune {
     dverb.flush();
     dverb << "Writing Boundary...";
     out << facemap.size() << std::endl;
-    std::map<DGFEntityKey<int>,int>::iterator pos;
+    facemap_t :: iterator pos;
     for(pos= facemap.begin(); pos!=facemap.end(); ++pos)
     {
       if (pos->second == 0)
@@ -260,7 +261,7 @@ namespace Dune {
           std::string tmpname = name;
           tmpname += ".face";
           std::ofstream out(tmpname.c_str());
-          std::map<DGFEntityKey<int>,int>::iterator pos;
+          facemap_t :: iterator pos;
           int nr = 0;
           dverb << "Writing boundary faces...";
           out << facemap.size() << " 1 " << std::endl;
@@ -299,7 +300,7 @@ namespace Dune {
     dverb.flush();
     dverb << "Writing Segments...";
     out << facemap.size()+elements.size()*3 << " 1 " << std::endl;
-    std::map<DGFEntityKey<int>,int>::iterator pos;
+    facemap_t :: iterator pos;
     nr = 0;
     for(size_t i=0; i<elements.size(); ++i) {
       for (int k=0; k<3; k++)
@@ -524,14 +525,17 @@ namespace Dune {
     // if no boundary elements, return
     if (nofelements==0) return;
 
-    std::map<DGFEntityKey<int>,int>::iterator pos;
+    facemap_t :: iterator pos;
     // now add all boundary faces
     {
       for(int simpl=0; simpl < nofelements ; simpl++)
       {
-        for (int i =0 ; i<ElementFaceUtil::nofFaces(dimw,elements[simpl])  ; i++)
+        const int nFaces = ElementFaceUtil :: nofFaces( dimw, elements[ simpl ]);
+        for( int i =0 ; i < nFaces; ++i )
         {
-          DGFEntityKey<int> key2 = ElementFaceUtil::generateFace(dimw,elements[simpl],i);
+          //DGFEntityKey< unsigned int > key2
+          facemap_t :: key_type key2
+            = ElementFaceUtil :: generateFace( dimw, elements[ simpl ], i );
 
           pos=facemap.find(key2);
           if(pos == facemap.end())
@@ -553,12 +557,14 @@ namespace Dune {
     }
     // remove unused boundary faces added through boundaryseg block or cube2simplex conversion
     {
-      std::map<DGFEntityKey<int>,int>::iterator pos = facemap.begin();
-      while (pos!=facemap.end()) {
-        if (!pos->first.origKeySet()) {
-          std::map<DGFEntityKey<int>,int>::iterator pos1 = pos;
+      facemap_t :: iterator pos = facemap.begin();
+      while( pos != facemap.end() )
+      {
+        if( !pos->first.origKeySet() )
+        {
+          facemap_t :: iterator pos1 = pos;
           ++pos;
-          facemap.erase(pos1);
+          facemap.erase( pos1 );
         }
         else
           ++pos;
@@ -842,14 +848,16 @@ namespace Dune {
           assert(params==1);
           facemap.clear();
           for (int i=0; i<noffaces; i++) {
-            std::vector<int> p(dimw);
+            std :: vector< unsigned int > p( dimw );
             int nr;
             poly >> nr;
             for (size_t k=0; k<p.size(); k++)
               poly >> p[k];
             poly >> params;
-            if (params!=0) {
-              DGFEntityKey<int> key(p,false);
+            if (params!=0)
+            {
+              facemap_t :: key_type key( p, false );
+              //DGFEntityKey< unsigned int > key( p, false );
               facemap[key]=params;
             }
           }
@@ -911,7 +919,7 @@ namespace Dune {
           for(int k=0; k<refElem.size(1); ++k)
           {
             int numVerts = refElem.size(k,1,dimw);
-            std::vector<int> face(numVerts);
+            std :: vector< unsigned int > face( numVerts );
             // get face vertices
             for(int j=0; j<numVerts; ++j)
             {
@@ -921,12 +929,9 @@ namespace Dune {
 
             {
               // key is now right oriented
-              DGFEntityKey<int> key(face);
-
-              typedef facemap_t :: iterator iterator;
-
-              iterator bndFace = facemap.find(key);
-              if(bndFace != facemap.end())
+              facemap_t :: key_type key( face );
+              facemap_t :: iterator bndFace = facemap.find( key );
+              if( bndFace != facemap.end() )
               {
                 // delete old key, and store new key
                 int bndId = bndFace->second;

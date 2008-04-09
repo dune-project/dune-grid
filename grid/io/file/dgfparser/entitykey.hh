@@ -88,9 +88,12 @@ namespace Dune {
       return key_.size();
     }
   } ;
-  class ElementFaceUtil {
+
+  class ElementFaceUtil
+  {
   public:
-    inline static int nofFaces(int dimw,std::vector<int>& element) {
+    inline static int nofFaces( int dimw, std :: vector< unsigned int > &element )
+    {
       if (dimw==1)
         return 2;
       else if (dimw==2)
@@ -114,12 +117,14 @@ namespace Dune {
         return ((simpl) ? 3 : 4);
       return -1;
     }
-    template <int dimworld>
-    inline static DGFEntityKey<int>
-    generateCubeFace(std::vector<int>& element,int f) {
-      ReferenceCube<double,dimworld> ref;
-      int size=ref.size(f,1,dimworld);
-      std::vector<int> k(size);
+
+    template< int dimworld >
+    inline static DGFEntityKey< unsigned int >
+    generateCubeFace( const std :: vector< unsigned int > &element, int f )
+    {
+      ReferenceCube< double, dimworld > ref;
+      const unsigned int size = ref.size( f, 1, dimworld );
+      std :: vector< unsigned int > k( size );
       /*
          for (int i=0;i<size;i++) {
          k[i] = element[ref.subEntity(f,1,i,dimworld)];
@@ -137,28 +142,32 @@ namespace Dune {
          }
          }
        */
-      int face=ElementTopologyMapping<hexa>::dune2aluFace(f);
-      for (int i=0; i<size; i++) {
+      const int face = ElementTopologyMapping< hexa > :: dune2aluFace( f );
+      for( unsigned int i = 0; i < size; ++i )
+      {
         // int idxdune = ref.subEntity(f,1,i,dimworld);
-        int idx = ElementTopologyMapping<hexa>::alu2duneFaceVertex(face,i);
-        int idxdune = ref.subEntity(f,1,idx,dimworld);
-        k[size-1-i] = element[idxdune];
+        int idx = ElementTopologyMapping< hexa > :: alu2duneFaceVertex( face, i );
+        int idxdune = ref.subEntity( f, 1, idx, dimworld );
+        k[ size - (i+1) ] = element[ idxdune ];
       }
-      return DGFEntityKey<int> (k);
+      return DGFEntityKey< unsigned int >( k );
     }
-    template <int dimworld>
-    inline static DGFEntityKey<int>
-    generateSimplexFace(std::vector<int>& element,int f) {
-      ReferenceSimplex<double,dimworld> ref;
-      int size=ref.size(f,1,dimworld);
-      std::vector<int> k(size);
-      for (int i=0; i<size; i++) {
-        k[i] = element[ref.subEntity(f,1,i,dimworld)];
-      }
-      return DGFEntityKey<int> (k);
+
+    template< int dimworld >
+    inline static DGFEntityKey< unsigned int >
+    generateSimplexFace ( const std :: vector< unsigned int > &element, int f )
+    {
+      ReferenceSimplex< double, dimworld > ref;
+      const unsigned int size = ref.size( f, 1, dimworld );
+      std :: vector< unsigned int > k( size );
+      for( unsigned int i = 0; i < size; ++i )
+        k[ i ] = element[ ref.subEntity( f, 1, i, dimworld ) ];
+      return DGFEntityKey< unsigned int >( k );
     }
-    inline static DGFEntityKey<int>
-    generateFace(int dimw,std::vector<int>& element,int f) {
+
+    inline static DGFEntityKey< unsigned int >
+    generateFace ( int dimw, const std :: vector< unsigned int > &element, int f )
+    {
       if (element.size()==size_t(dimw+1)) { // Simplex element
         if (dimw==3)
           return generateSimplexFace<3>(element,f);

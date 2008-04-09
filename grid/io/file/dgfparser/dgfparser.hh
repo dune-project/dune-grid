@@ -75,13 +75,13 @@ namespace Dune {
     int nofvtx;
     int vtxoffset;
     // vector of elements
-    std::vector < std::vector <int> > elements;
+    std :: vector< std :: vector< unsigned int > > elements;
     int nofelements;
     // vector of boundary segments + identifier
     std::vector < std::vector <int> > bound;
     int nofbound;
     // map to generate and find boundary segments
-    typedef std::map<DGFEntityKey<int>,int> facemap_t;
+    typedef std :: map< DGFEntityKey< unsigned int >, int > facemap_t;
     facemap_t facemap;
     // set by generator depending on element type wanted
     element_t element;
