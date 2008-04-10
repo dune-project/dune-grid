@@ -34,6 +34,8 @@ namespace Dune {
     typedef typename GridType::ctype ctype;
 
   public:
+    virtual ~GridFactoryInterface ()
+    {}
 
     /** \brief Insert a vertex into the coarse grid */
     virtual void insertVertex(const FieldVector<ctype,dimworld>& pos) = 0;
