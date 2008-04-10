@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#if defined ENABLE_ALUGRID && !defined DUNE_ALUGRID_FACTORY_HH
-#define DUNE_ALUGRID_FACTORY_HH
+#if defined ENABLE_ALUGRID && !defined DUNE_ALU3DGRID_FACTORY_HH
+#define DUNE_ALU3DGRID_FACTORY_HH
 
 #include <dune/common/fixedarray.hh>
 
@@ -11,31 +11,37 @@
 namespace Dune
 {
 
-  /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<3,3>
-   */
-  template<>
-  class GridFactory< ALUSimplexGrid< 3, 3 > >
-    : public GridFactoryInterface< ALUSimplexGrid< 3, 3 > >
+  template< template< int, int > class ALUGrid >
+  class ALU3dGridFactory
+    : public GridFactoryInterface< ALUGrid< 3, 3 > >
   {
-    typedef GridFactory< ALUSimplexGrid< 3, 3 > > ThisType;
-    typedef GridFactoryInterface< ALUSimplexGrid< 3, 3 > > BaseType;
+    typedef ALU3dGridFactory< ALUGrid > ThisType;
+    typedef GridFactoryInterface< ALUGrid< 3, 3 > > BaseType;
 
   public:
-    typedef ALUSimplexGrid< 3, 3 > GridType;
+    typedef ALUGrid< 3, 3 > GridType;
 
     typedef MPIHelper :: MPICommunicator MPICommunicatorType;
 
   private:
-    typedef GridType :: ctype ctype;
+    typedef typename GridType :: ctype ctype;
 
-    enum { dimension = GridType :: dimension };
-    enum { dimensionworld = GridType :: dimensionworld };
+    static const ALU3dGridElementType elementType = GridType :: elementType;
 
-    enum { numCorners = EntityCount< tetra > :: numVertices };
-    enum { numFaceCorners = EntityCount< tetra > :: numVerticesPerFace };
+    dune_static_assert( (elementType == tetra || elementType == hexa),
+                        "ALU3dGridFactory supports only grids containing "
+                        "tetrahedrons or hexahedrons exclusively." );
 
-    typedef ElementTopologyMapping< tetra > ElementTopologyMappingType;
-    typedef FaceTopologyMapping< tetra > FaceTopologyMappingType;
+    static const unsigned int dimension = GridType :: dimension;
+    static const unsigned int dimensionworld = GridType :: dimensionworld;
+
+    static const unsigned int numCorners
+      = EntityCount< elementType > :: numVertices;
+    static const unsigned int numFaceCorners
+      = EntityCount< elementType > :: numVerticesPerFace;
+
+    typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
+    typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
     typedef FieldVector< ctype, dimensionworld > VertexType;
     typedef array< unsigned int, numCorners > ElementType;
@@ -51,38 +57,96 @@ namespace Dune
     std :: vector< std :: pair< FaceType, int > > boundaryIds_;
 
   public:
-    /** \brief Default constructor */
-    explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper :: getCommunicator() );
+    /** \brief default constructor */
+    explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
+                                  = MPIHelper :: getCommunicator() );
 
     /** \brief Destructor */
-    virtual ~GridFactory ();
+    virtual ~ALU3dGridFactory ();
 
-    /** \brief Insert a vertex into the coarse grid
+    /** \brief insert a vertex into the coarse grid
      *
      *  \param[in]  pos  position of the vertex
      */
     virtual void insertVertex ( const VertexType &pos );
 
-    /** \brief Insert an element into the coarse grid
+    /** \brief insert an element into the coarse grid
      *
-     *  \param[in]  type      GeometryType of the new element
-     *  \param[in]  vertices  vertices of the new element, using DUNE numbering
+     *  \note The order of the vertices must coincide with the vertex order in
+     *        the corresponding DUNE reference element.
+     *
+     *  \param[in]  geometry  GeometryType of the new element
+     *  \param[in]  vertices  vertices of the new element
      */
     virtual void
-    insertElement ( const GeometryType &type,
+    insertElement ( const GeometryType &geometry,
                     const std :: vector< unsigned int > &vertices );
 
+    /** \brief insert a boundary element into the coarse grid
+     *
+     *  \note The order of the vertices must coincide with the vertex order in
+     *        the corresponding DUNE reference element.
+     *
+     *  \param[in]  geometry    GeometryType of the boundary element
+     *  \param[in]  vertices    vertices of the boundary element
+     *  \param[in]  boundaryId  boundary identifier of the boundary element,
+     *                          the default value is 0 (invalid boundary id)
+     */
     virtual void
-    insertBoundaryId ( const GeometryType &faceType,
-                       const std :: vector< unsigned int > &faceVertices,
-                       int id );
+    insertBoundary ( const GeometryType &geometry,
+                     const std :: vector< unsigned int > &faceVertices,
+                     int id );
 
-    /** \brief Finalize the grid creation and hand over the grid
+    /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
      */
     virtual GridType *createGrid ();
+
+  private:
+    inline void assertGeometryType( const GeometryType &geometry );
+  };
+
+
+  template< template< int, int > class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
+  :: assertGeometryType( const GeometryType &geometry )
+  {
+    if( elementType == tetra )
+    {
+      if( !geometry.isSimplex() )
+        DUNE_THROW( GridError, "Only simplex geometries can be inserted into "
+                    "ALUSimplexGrid< 3, 3 >." );
+    }
+    else
+    {
+      if( !geometry.isCube() )
+        DUNE_THROW( GridError, "Only cube geometries can be inserted into "
+                    "ALUCubeGrid< 3, 3 >." );
+    }
+  }
+
+
+  /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<3,3>
+   */
+  template<>
+  class GridFactory< ALUSimplexGrid< 3, 3 > >
+    : public ALU3dGridFactory< ALUSimplexGrid >
+  {
+    typedef GridFactory< ALUSimplexGrid< 3, 3 > > ThisType;
+    typedef ALU3dGridFactory< ALUSimplexGrid > BaseType;
+
+  public:
+    typedef ALUSimplexGrid< 3, 3 > GridType;
+
+    typedef MPIHelper :: MPICommunicator MPICommunicatorType;
+
+  public:
+    /** \brief Default constructor */
+    explicit GridFactory ( const MPICommunicatorType &communicator
+                             = MPIHelper :: getCommunicator() )
+      : BaseType( communicator )
+    {}
   };
 
 
@@ -91,74 +155,22 @@ namespace Dune
    */
   template<>
   class GridFactory< ALUCubeGrid< 3, 3 > >
-    : public GridFactoryInterface< ALUCubeGrid< 3, 3 > >
+    : public ALU3dGridFactory< ALUCubeGrid >
   {
     typedef GridFactory< ALUCubeGrid< 3, 3 > > ThisType;
-    typedef GridFactoryInterface< ALUCubeGrid< 3, 3 > > BaseType;
+    typedef ALU3dGridFactory< ALUCubeGrid > BaseType;
 
   public:
     typedef ALUCubeGrid< 3, 3 > GridType;
 
     typedef MPIHelper :: MPICommunicator MPICommunicatorType;
 
-  private:
-    typedef GridType :: ctype ctype;
-
-    enum { dimension = GridType :: dimension };
-    enum { dimensionworld = GridType :: dimensionworld };
-
-    enum { numCorners = EntityCount< hexa > :: numVertices };
-    enum { numFaceCorners = EntityCount< hexa > :: numVerticesPerFace };
-
-    typedef ElementTopologyMapping< hexa > ElementTopologyMappingType;
-    typedef FaceTopologyMapping< hexa > FaceTopologyMappingType;
-
-    typedef FieldVector< ctype, dimensionworld > VertexType;
-    typedef array< unsigned int, numCorners > ElementType;
-    typedef array< unsigned int, numFaceCorners > FaceType;
-
-  private:
-    MPICommunicatorType communicator_;
-#if ALU3DGRID_PARALLEL
-    int rank_;
-#endif
-    std :: vector< VertexType > vertices_;
-    std :: vector< ElementType > elements_;
-    std :: vector< std :: pair< FaceType, int > > boundaryIds_;
-
   public:
     /** \brief Default constructor */
     explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper :: getCommunicator() );
-
-    /** \brief Destructor */
-    virtual ~GridFactory ();
-
-    /** \brief Insert a vertex into the coarse grid
-     *
-     *  \param[in]  pos  position of the vertex
-     */
-    virtual void insertVertex ( const VertexType &pos );
-
-    /** \brief Insert an element into the coarse grid
-     *
-     *  \param[in]  type      GeometryType of the new element
-     *  \param[in]  vertices  vertices of the new element, using DUNE numbering
-     */
-    virtual void
-    insertElement ( const GeometryType &type,
-                    const std :: vector< unsigned int > &vertices );
-
-    virtual void
-    insertBoundaryId ( const GeometryType &faceType,
-                       const std :: vector< unsigned int > &faceVertices,
-                       int id );
-
-    /** \brief Finalize the grid creation and hand over the grid
-     *
-     *  The called takes responsibility for deleing the grid.
-     */
-    virtual GridType *createGrid ();
+                             = MPIHelper :: getCommunicator() )
+      : BaseType( communicator )
+    {}
   };
 
 }

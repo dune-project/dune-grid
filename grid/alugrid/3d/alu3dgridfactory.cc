@@ -14,11 +14,9 @@
 namespace Dune
 {
 
-  // GridFactory for ALUCubeGrid< 3, 3 >
-  // -----------------------------------
-
-  GridFactory< ALUSimplexGrid< 3, 3 > >
-  :: GridFactory ( const MPICommunicatorType &communicator )
+  template< template< int, int > class ALUGrid >
+  ALU3dGridFactory< ALUGrid >
+  :: ALU3dGridFactory ( const MPICommunicatorType &communicator )
     : communicator_( communicator )
   {
 #if ALU3DGRID_PARALLEL
@@ -27,33 +25,37 @@ namespace Dune
   }
 
 
-  GridFactory< ALUSimplexGrid< 3, 3 > > :: ~GridFactory ()
+  template< template< int, int > class ALUGrid >
+  ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
   {}
 
 
-  void GridFactory< ALUSimplexGrid< 3, 3 > >
-  :: insertVertex ( const VertexType &pos )
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUSimplexGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
+      DUNE_THROW( GridError,
+                  "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
     vertices_.push_back( pos );
   }
 
 
-  void GridFactory< ALUSimplexGrid< 3, 3 > >
-  :: insertElement ( const GeometryType &type,
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid >
+  :: insertElement ( const GeometryType &geometry,
                      const std :: vector< unsigned int > &vertices )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUSimplexGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
+      DUNE_THROW( GridError,
+                  "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
-    if( !type.isSimplex() || (type.dim() != dimension) )
-      DUNE_THROW( GridError, "ALUSimplexGrid supports only simplices." );
+    assertGeometryType( geometry );
+    if( geometry.dim() != dimension )
+      DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
+                  "into a 3-dimensional ALUGrid." );
     if( vertices.size() != numCorners )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
@@ -67,33 +69,37 @@ namespace Dune
   }
 
 
-  void GridFactory< ALUSimplexGrid< 3, 3 > >
-  :: insertBoundaryId ( const GeometryType &faceType,
-                        const std :: vector< unsigned int > &faceVertices,
-                        int id )
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid >
+  :: insertBoundary ( const GeometryType &geometry,
+                      const std :: vector< unsigned int > &vertices,
+                      int id )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUSimplexGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
+      DUNE_THROW( GridError,
+                  "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
-    if( !faceType.isSimplex() || (faceType.dim() != dimension - 1) )
-      DUNE_THROW( GridError, "ALUSimplexGrid supports only simplices." );
-    if( faceVertices.size() != numFaceCorners )
+    assertGeometryType( geometry );
+    if( geometry.dim() != dimension-1 )
+      DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
+                  "into a 3-dimensional ALUGrid." );
+    if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
     std :: pair< FaceType, int > boundaryId;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
       const unsigned int j = FaceTopologyMappingType :: dune2aluVertex( i );
-      boundaryId.first[ j ] = faceVertices[ i ];
+      boundaryId.first[ j ] = vertices[ i ];
     }
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
   }
 
 
-  ALUSimplexGrid< 3, 3 > *GridFactory< ALUSimplexGrid< 3, 3 > > :: createGrid ()
+  template< template< int, int > class ALUGrid >
+  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid > :: createGrid ()
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
@@ -101,16 +107,19 @@ namespace Dune
 #endif
 
     char filename[ FILENAME_MAX ];
-    std :: strcpy( filename, "ALU3dSimplexGrid.XXXXXX" );
+    std :: strcpy( filename, "ALU3dGrid.XXXXXX" );
     mkstemp( filename );
 
     std :: ofstream out( filename );
-    out << "!Tetrahedra" << std :: endl;
+    if( elementType == tetra )
+      out << "!Tetrahedra" << std :: endl;
+    else
+      out << "!Hexahedra" << std :: endl;
 
     const unsigned int numVertices = vertices_.size();
 
     out << numVertices << std :: endl;
-    typedef std :: vector< VertexType > :: iterator VertexIteratorType;
+    typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
     const VertexIteratorType endV = vertices_.end();
     for( VertexIteratorType it = vertices_.begin(); it != endV; ++it )
     {
@@ -122,7 +131,7 @@ namespace Dune
     }
 
     out << elements_.size() << std :: endl;
-    typedef std :: vector< ElementType > :: iterator
+    typedef typename std :: vector< ElementType > :: iterator
     ElementIteratorType;
     const ElementIteratorType endE = elements_.end();
     for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
@@ -135,161 +144,7 @@ namespace Dune
     }
 
     out << boundaryIds_.size() << std :: endl;
-    typedef std :: vector< std :: pair< FaceType, int > > :: iterator
-    BoundaryIdIteratorType;
-    const BoundaryIdIteratorType endB = boundaryIds_.end();
-    for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
-    {
-      const std :: pair< FaceType, int > &boundaryId = *it;
-      out << "-" << boundaryId.second << "  " << numFaceCorners;
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
-        out << "  " << boundaryId.first[ i ];
-      out << std :: endl;
-    }
-
-    for( unsigned int i = 0; i < numVertices; ++i )
-      out << i << "  -1" << std :: endl;
-    out.close();
-
-    vertices_.clear();
-    elements_.clear();
-    boundaryIds_.clear();
-
-#if ALU3DGRID_PARALLEL
-    GridType *grid = new GridType( filename, communicator_ );
-#else
-    GridType *grid = new GridType( filename );
-#endif
-
-#ifdef NDEBUG
-    remove( filename );
-#endif
-    return grid;
-  }
-
-
-
-  // GridFactory for ALUCubeGrid< 3, 3 >
-  // -----------------------------------
-
-  GridFactory< ALUCubeGrid< 3, 3 > >
-  :: GridFactory ( const MPICommunicatorType &communicator )
-    : communicator_( communicator )
-  {
-#if ALU3DGRID_PARALLEL
-    MPI_Comm_rank( communicator, &rank_ );
-#endif
-  }
-
-
-  GridFactory< ALUCubeGrid< 3, 3 > > :: ~GridFactory ()
-  {}
-
-
-  void GridFactory< ALUCubeGrid< 3, 3 > >
-  :: insertVertex ( const VertexType &pos )
-  {
-#if ALU3DGRID_PARALLEL
-    if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUCubeGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
-#endif
-    vertices_.push_back( pos );
-  }
-
-
-  void GridFactory< ALUCubeGrid< 3, 3 > >
-  :: insertElement ( const GeometryType &type,
-                     const std :: vector< unsigned int > &vertices )
-  {
-#if ALU3DGRID_PARALLEL
-    if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUCubeGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
-#endif
-    if( !type.isCube() || (type.dim() != dimension) )
-      DUNE_THROW( GridError, "ALUCubeGrid supports only cubes." );
-    if( vertices.size() != numCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
-
-    ElementType element;
-    for( unsigned int i = 0; i < numCorners; ++i )
-    {
-      const unsigned int j = ElementTopologyMappingType :: dune2aluVertex( i );
-      element[ j ] = vertices[ i ];
-    }
-    elements_.push_back( element );
-  }
-
-
-  void GridFactory< ALUCubeGrid< 3, 3 > >
-  :: insertBoundaryId ( const GeometryType &faceType,
-                        const std :: vector< unsigned int > &faceVertices,
-                        int id )
-  {
-#if ALU3DGRID_PARALLEL
-    if( rank_ != 0 )
-      DUNE_THROW( GridError, "GridFactory< ALUCubeGrid< 3, 3 > > allows "
-                  "insertion only for rank 0." );
-#endif
-    if( !faceType.isCube() || (faceType.dim() != dimension - 1) )
-      DUNE_THROW( GridError, "ALUCubeGrid supports only cubes." );
-    if( faceVertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
-
-    std :: pair< FaceType, int > boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-    {
-      const unsigned int j = FaceTopologyMappingType :: dune2aluVertex( i );
-      boundaryId.first[ j ] = faceVertices[ i ];
-    }
-    boundaryId.second = id;
-    boundaryIds_.push_back( boundaryId );
-  }
-
-
-  ALUCubeGrid< 3, 3 > *GridFactory< ALUCubeGrid< 3, 3 > > :: createGrid ()
-  {
-#if ALU3DGRID_PARALLEL
-    if( rank_ != 0 )
-      return new GridType( communicator_ );
-#endif
-
-    char filename[ FILENAME_MAX ];
-    std :: strcpy( filename, "ALU3dCubeGrid.XXXXXX" );
-    mkstemp( filename );
-
-    std :: ofstream out( filename );
-    out << "!Hexahedra" << std :: endl;
-
-    const unsigned int numVertices = vertices_.size();
-
-    out << numVertices << std :: endl;
-    typedef std :: vector< VertexType > :: iterator VertexIteratorType;
-    const VertexIteratorType endV = vertices_.end();
-    for( VertexIteratorType it = vertices_.begin(); it != endV; ++it )
-    {
-      const VertexType &vertex = *it;
-      out << vertex[ 0 ];
-      for( unsigned int i = 1; i < dimensionworld; ++i )
-        out << " " << vertex[ i ];
-      out << std :: endl;
-    }
-
-    out << elements_.size() << std :: endl;
-    typedef std :: vector< ElementType > :: iterator ElementIteratorType;
-    const ElementIteratorType endE = elements_.end();
-    for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
-    {
-      const ElementType &element = *it;
-      out << element[ 0 ];
-      for( unsigned int i = 1; i < numCorners; ++i )
-        out << "  " << element[ i ];
-      out << std :: endl;
-    }
-
-    out << boundaryIds_.size() << std :: endl;
-    typedef std :: vector< std :: pair< FaceType, int > > :: iterator
+    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator
     BoundaryIdIteratorType;
     const BoundaryIdIteratorType endB = boundaryIds_.end();
     for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
