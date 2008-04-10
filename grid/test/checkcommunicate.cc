@@ -226,23 +226,25 @@ class CheckCommunication {
         IntersectionIterator endnit = gridPart_.iend(*it);
         for (IntersectionIterator nit = gridPart_.ibegin(*it); nit != endnit; ++nit)
         {
-          const FieldVector<double,dimworld> normal = nit.integrationOuterNormal(FieldVector<double,dim-1>(0));
+          const typename IntersectionIterator :: Intersection &intersection = *nit;
+
+          const FieldVector< double,dimworld > normal
+            = intersection.integrationOuterNormal( FieldVector< double, dim-1 >( 0 ) );
           double calc = normal*upwind;
 
           // if testing level, then on non-conform grid also set values on
           // intersections that are not boundary, but has no level
           // neighbor
-          bool proceedAnyways = (level_ < 0) ? false : (! nit.neighbor() );
-
-          if ((calc>-1e-8 || nit.boundary()) || proceedAnyways )
+          bool proceedAnyways = ((level_ < 0) ? false : !intersection.neighbor());
+          if( ((calc > -1e-8) || intersection.boundary()) || proceedAnyways )
           {
+            const ReferenceElement< double, dimworld > &insideRefElem
+              =  ReferenceElements< double, dimworld > :: general( it->type() );
 
-            const ReferenceElement<double, dimworld > & insideRefElem =
-              ReferenceElements<double, dimworld >::general(it->type());
-
-            for(int i=0; i<insideRefElem.size(nit.numberInSelf(),1,cdim); ++i)
+            const int numberInSelf = intersection.numberInSelf();
+            for( int i = 0; i < insideRefElem.size( numberInSelf, 1, cdim ); ++i )
             {
-              int e = insideRefElem.subEntity(nit.numberInSelf(),1,i,cdim);
+              int e = insideRefElem.subEntity( numberInSelf, 1, i, cdim );
               int idx = set.template subIndex<cdim>(*it,e);
               FieldVector<double,dimworld> cmid(0.);
               int c = (it->template entity<cdim>(e))->geometry().corners();
@@ -259,13 +261,11 @@ class CheckCommunication {
             // on non-conforming grids the neighbor entities might not
             // be the same as those on *it, therefore set data on neighbor
             // as well
-            bool checkNeigh = nit.neighbor();
-
-            if( checkNeigh )
+            if( intersection.neighbor() )
             {
               typedef typename GridType :: template Codim<0> :: EntityPointer EntityPointerType;
               typedef typename GridType :: template Codim<0> :: Entity EntityType;
-              EntityPointerType ep = nit.outside();
+              EntityPointerType ep = intersection.outside();
               const EntityType & neigh = *ep;
 
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
@@ -274,9 +274,10 @@ class CheckCommunication {
               const ReferenceElement<double, dimworld > & outsideRefElem =
                 ReferenceElements<double, dimworld >::general(ep->type());
 
-              for(int i=0; i<outsideRefElem.size(nit.numberInNeighbor(),1,cdim); ++i)
+              const int numberInNeighbor = intersection.numberInNeighbor();
+              for( int i = 0; i < outsideRefElem.size(numberInNeighbor, 1, cdim); ++i )
               {
-                int e = outsideRefElem.subEntity(nit.numberInNeighbor(),1,i,cdim);
+                int e = outsideRefElem.subEntity( numberInNeighbor, 1, i, cdim );
                 int idx = set.template subIndex<cdim>(neigh, e);
                 FieldVector<double,dimworld> cmid(0.);
                 typedef typename GridType:: template Codim<cdim> :: EntityPointer SubEntityPointer;
