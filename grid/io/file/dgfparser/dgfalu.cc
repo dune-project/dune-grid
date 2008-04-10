@@ -52,7 +52,7 @@ namespace Dune
             key[ FaceTopologyMapping< tetra > :: alu2duneVertex( i ) ]
               = it->first.origKey( i );
           }
-          factory.insertBoundaryId( faceType, key, it->second );
+          factory.insertBoundary( faceType, key, it->second );
         }
       }
 
@@ -128,7 +128,7 @@ namespace Dune
             key[ FaceTopologyMapping< hexa > :: alu2duneVertex( i ) ]
               = it->first.origKey( i );
           }
-          factory.insertBoundaryId( faceType, key, it->second );
+          factory.insertBoundary( faceType, key, it->second );
         }
       }
 
