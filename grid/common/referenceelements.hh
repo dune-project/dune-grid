@@ -1822,7 +1822,7 @@ namespace Dune
     ReferenceElementWrapper<ReferencePyramid<ctype,dim> > pyram;
   };
 
-  // singleton holding several reference element containers
+  //! singleton holding several reference element containers
   template<typename ctype, int dim>
   struct ReferenceElements {
     static ReferenceCubeContainer<ctype,dim> cube;
@@ -1830,7 +1830,7 @@ namespace Dune
     static ReferenceElementContainer<ctype,dim> general;
   };
 
-  // singleton holding several reference element containers dim==3
+  //! singleton holding several reference element containers dim==3
   template<typename ctype>
   struct ReferenceElements<ctype,3> {
     static ReferenceCubeContainer<ctype,3> cube;
