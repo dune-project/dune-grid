@@ -405,9 +405,27 @@ template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<2,3,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
-  // The cast in the second argument works because a std::array<FieldVector<T,3>,4>
-  // has the same memory layout as a T[4][3].
-  return UG_NS<3>::SurfaceElement(corners(), (const double(*)[3])&coord_,&local[0]);
+  // Check whether the memory layout of double[4][3] and std::array<FieldVector<double,3>,4>
+  // match.  This may not be the case because there are people who like to play
+  // with the alignment settings of FieldVector.  The conditional is static and
+  // does not cost run-time.
+  typedef typename GridImp::ctype ctype;
+  if (sizeof(FieldVector<ctype,3>)==3*sizeof(ctype)) {
+
+    // Memory layout matches.  Simply cast
+    return UG_NS<3>::SurfaceElement(corners(), (const ctype(*)[3])&coord_,&local[0]);
+
+  } else {
+
+    // Memory layout does not match.  We need to copy into a temporary object.
+    ctype tmp[4][3];
+    for (int i=0; i<4; i++)
+      for (int j=0; j<3; j++)
+        tmp[i][j] = coord_[i][j];
+
+    return UG_NS<3>::SurfaceElement(corners(), tmp, &local[0]);
+
+  }
 }
 
 template <class GridImp>
