@@ -15,8 +15,8 @@ void UGGridHierarchicIterator<GridImp>::increment()
 
   const int dim = GridImp::dimension;
 
-  //StackEntry old_target = elemStack.pop();
-  const typename UG_NS<dim>::Element* oldTarget = elementStack_.pop();
+  const typename UG_NS<dim>::Element* oldTarget = elementStack_.top();
+  elementStack_.pop();
 
   // Traverse the tree no deeper than maxlevel
   if (UG_NS<dim>::myLevel(oldTarget) < maxlevel_) {

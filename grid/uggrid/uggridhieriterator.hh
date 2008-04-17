@@ -7,7 +7,7 @@
  * \brief The UGGridHierarchicIterator class
  */
 
-#include <dune/common/stack.hh>
+#include <stack>
 
 namespace Dune {
 
@@ -44,7 +44,7 @@ namespace Dune {
     //! max level to go down
     int maxlevel_;
 
-    Stack<typename UG_NS<GridImp::dimension>::Element*> elementStack_;
+    std::stack<typename UG_NS<GridImp::dimension>::Element*> elementStack_;
 
   };
 
