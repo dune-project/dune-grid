@@ -67,6 +67,15 @@ namespace Dune {
      */
     void write(const std::string& filename, bool ascii=false) const;
 
+    /** \brief Write data on a uniform grid into an AmiraMesh file
+        \todo Currently only ascii is possible
+     */
+    template <class GridType2, class DataContainer>
+    static void writeUniformData(const GridType2& grid,
+                                 const array<unsigned int, GridType2::dimension>& n,
+                                 const DataContainer& data,
+                                 const std::string& filename);
+
   protected:
 
     AmiraMesh amiramesh_;
@@ -181,8 +190,5 @@ namespace Dune {
 
 // The default implementation
 #include "amiramesh/amirameshwriter.cc"
-
-// the amiramesh writer for SGrid
-//#include "amiramesh/amsgridwriter.cc"
 
 #endif

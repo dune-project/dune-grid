@@ -3,6 +3,7 @@
 #include <amiramesh/AmiraMesh.h>
 
 #include <algorithm>
+#include <fstream>
 
 template<class GridType, class IndexSetType>
 template<class GridType2, class IndexSetType2>
@@ -370,4 +371,62 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::write(const std::string& file
     DUNE_THROW(IOError, "Writing geometry file failed!");
 
   std::cout << "Grid written successfully to: " << filename << std::endl;
+}
+
+
+template<class GridType, class IndexSetType>
+template<class GridType2, class DataContainer>
+void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridType2& grid,
+                                                                    const array<unsigned int, GridType2::dimension>& n,
+                                                                    const DataContainer& data,
+                                                                    const std::string& filename)
+{
+
+  // determine current time
+  time_t time_val = time(NULL);
+  struct tm* localtime_val = localtime(&time_val);
+  const char* asctime_val = asctime(localtime_val);
+
+  // write the amiramesh header
+  std::ofstream outfile(filename.c_str());
+
+  outfile << "# AmiraMesh 3D ASCII 2.0" << std::endl;
+  outfile << "# CreationDate: " << asctime_val << std::endl << std::endl;
+
+  outfile << "define Lattice ";
+  for (size_t i=0; i<n.size(); i++)
+    outfile << n[i] << " ";
+  outfile << std::endl << std::endl;
+
+  outfile <<"Parameters {" << std::endl;
+  outfile <<"    BoundingBox ";
+  for (size_t i=0; i<n.size(); i++)
+    outfile << "0 1 ";
+  outfile << std::endl;
+
+  if (dim==2) {
+    outfile <<"TypeId \"HxRegScalarOrthoSlice2\"," << std::endl;
+    outfile <<"ContentType \"HxField2d\"," << std::endl;
+  }
+
+  outfile << "    CoordType \"uniform\"," << std::endl;
+  outfile << "    Content \"" << n[0] << "x" << n[1];
+  if (dim==3)
+    outfile << "x" << n[2];
+  outfile << " double, uniform coordinates\"" << std::endl;
+  outfile << "}" << std::endl << std::endl;
+
+  outfile << "Lattice { double Data } @1" << std::endl << std::endl;
+
+  outfile << "# Data section follows" << std::endl;
+  outfile << "@1" << std::endl;
+
+  //
+  typedef typename DataContainer::const_iterator iterator;
+  iterator it    = data.begin();
+  iterator endIt = data.end();
+
+  for (; it!=endIt; ++it)
+    outfile << *it << std::endl;
+
 }

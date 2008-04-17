@@ -18,7 +18,7 @@ endif
 endif
 
 amirameshdir = $(includedir)/dune/grid/io/file/amiramesh
-amiramesh_HEADERS = amirameshreader.cc amsgridwriter.cc \
+amiramesh_HEADERS = amirameshreader.cc  \
   amirameshwriter.cc amuggridreader.hh
 
 include $(top_srcdir)/am/global-rules
