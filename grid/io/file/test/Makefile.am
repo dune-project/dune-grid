@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest
+ALLTESTS = vtktest gnuplottest amirameshtest
 
 # Currently, Star-CD files can only be read into UGGrid objects
 if UG
@@ -20,6 +20,11 @@ vtktest_DEPENDENCIES = $(LOCAL_LIBS)
 gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
 gnuplottest_DEPENDENCIES = $(LOCAL_LIBS)
+
+amirameshtest_SOURCES = amirameshtest.cc
+amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS)
+amirameshtest_LDADD = $(LOCAL_LIBS)
+amirameshtest_DEPENDENCIES = $(LOCAL_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
