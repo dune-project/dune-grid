@@ -382,6 +382,21 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridTy
                                                                     const std::string& filename)
 {
 
+  // ///////////////////////////////////////////
+  //   Detect grid bounding box
+  // ///////////////////////////////////////////
+  FieldVector<double, dim> lowerLeftCorner(std::numeric_limits<double>::max());
+  FieldVector<double, dim> upperRightCorner(-std::numeric_limits<double>::max());
+
+  typename GridType2::template Codim<dim>::LeafIterator vIt    = grid.template leafbegin<dim>();
+  typename GridType2::template Codim<dim>::LeafIterator vEndIt = grid.template leafend<dim>();
+
+  for (; vIt!=vEndIt; ++vIt)
+    for (int i=0; i<dim; i++) {
+      lowerLeftCorner[i] = std::min(lowerLeftCorner[i],  vIt->geometry()[0][i]);
+      upperRightCorner[i] = std::max(upperRightCorner[i], vIt->geometry()[0][i]);
+    }
+
   // determine current time
   time_t time_val = time(NULL);
   struct tm* localtime_val = localtime(&time_val);
@@ -401,7 +416,7 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridTy
   outfile <<"Parameters {" << std::endl;
   outfile <<"    BoundingBox ";
   for (size_t i=0; i<n.size(); i++)
-    outfile << "0 1 ";
+    outfile << lowerLeftCorner[i] << " " << upperRightCorner[i] << " ";
   outfile << std::endl;
 
   if (dim==2) {
