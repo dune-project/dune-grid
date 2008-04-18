@@ -7,7 +7,7 @@
  * \brief The OneDGridHierarchicIterator class
  */
 
-#include <dune/common/stack.hh>
+#include <stack>
 
 namespace Dune {
 
@@ -54,7 +54,8 @@ namespace Dune {
       if (elemStack.empty())
         return;
 
-      StackEntry old_target = elemStack.pop();
+      StackEntry old_target = elemStack.top();
+      elemStack.pop();
 
       // Traverse the tree no deeper than maxlevel
       if (old_target.level < maxlevel_) {
@@ -86,7 +87,7 @@ namespace Dune {
     //! max level to go down
     int maxlevel_;
 
-    Stack<StackEntry> elemStack;
+    std::stack<StackEntry> elemStack;
 
   };
 
