@@ -52,6 +52,7 @@ namespace Dune
 
     /** \brief Specialize with 'true' if implementation provides grids with hanging nodes. (default=false)
         \ingroup GICapabilities
+        \deprecated
      */
     template<class Grid>
     struct hasHangingNodes
@@ -70,6 +71,7 @@ namespace Dune
 
     /** \brief Specialize with 'true' if implementation provides unstructured grids. (default=true)
         \ingroup GICapabilities
+        \deprecated
      */
     template <class Grid>
     struct IsUnstructured {
