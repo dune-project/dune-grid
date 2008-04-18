@@ -384,20 +384,15 @@ namespace Dune {
 
         // Load sons of old target onto the iterator stack
         if (!isLeaf()) {
-          typename OneDGridHierarchicIterator<GridImp>::StackEntry se0;
-          se0.element = target_->sons_[0];
-          se0.level   = level() + 1;
-          it.elemStack.push(se0);
 
-          typename OneDGridHierarchicIterator<GridImp>::StackEntry se1;
-          se1.element = target_->sons_[1];
-          se1.level   = level() + 1;
-          it.elemStack.push(se1);
+          it.elemStack.push(target_->sons_[0]);
+          it.elemStack.push(target_->sons_[1]);
+
         }
 
       }
 
-      it.virtualEntity_.setToTarget((it.elemStack.empty()) ? NULL : it.elemStack.top().element);
+      it.virtualEntity_.setToTarget((it.elemStack.empty()) ? NULL : it.elemStack.top());
 
       return it;
     }

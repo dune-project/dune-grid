@@ -33,11 +33,7 @@ namespace Dune {
     friend class OneDGridEntity<0,dim,GridImp>;
 
     // Stack entry
-    struct StackEntry {
-      OneDEntityImp<1>* element;
-      /** \todo Do we need the level ? */
-      int level;
-    };
+    typedef OneDEntityImp<1>* StackEntry;
 
   public:
 
@@ -58,28 +54,23 @@ namespace Dune {
       elemStack.pop();
 
       // Traverse the tree no deeper than maxlevel
-      if (old_target.level < maxlevel_) {
+      if (old_target->level_ < maxlevel_) {
 
         // Load sons of old target onto the iterator stack
-        if (!old_target.element->isLeaf()) {
-          StackEntry se0;
-          se0.element = old_target.element->sons_[0];
-          se0.level   = old_target.level + 1;
-          elemStack.push(se0);
+        if (!old_target->isLeaf()) {
+
+          elemStack.push(old_target->sons_[0]);
 
           // Add the second son only if it is different from the first one
           // i.e. the son is not just a copy of the father
-          if (old_target.element->sons_[0] != old_target.element->sons_[1]) {
-            StackEntry se1;
-            se1.element = old_target.element->sons_[1];
-            se1.level   = old_target.level + 1;
-            elemStack.push(se1);
-          }
+          if (old_target->sons_[0] != old_target->sons_[1])
+            elemStack.push(old_target->sons_[1]);
+
         }
 
       }
 
-      this->virtualEntity_.setToTarget((elemStack.empty()) ? NULL : elemStack.top().element);
+      this->virtualEntity_.setToTarget((elemStack.empty()) ? NULL : elemStack.top());
     }
 
   private:
