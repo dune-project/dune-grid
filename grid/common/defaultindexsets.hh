@@ -350,6 +350,7 @@ namespace Dune {
   };
 
   //! compile time chooser for hierarchic or leaf index set
+  /** \deprected */
   template <class GridImp>
   class HierarchicIndexSetSelector
   {
@@ -392,6 +393,7 @@ namespace Dune {
   };
 
   //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid
+  /** \deprected */
   template <class GridType>
   class WrappedHierarchicIndexSet
     : public IndexSetWrapper< typename HierarchicIndexSetSelector<GridType> :: HierarchicIndexSet >
