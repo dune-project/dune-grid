@@ -381,67 +381,69 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridTy
                                                                     const DataContainer& data,
                                                                     const std::string& filename)
 {
+  dune_static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");
+  dune_static_assert(Capabilities::IsUnstructured<GridType2>::v == false,
+                     "writeUniformData() only for structured grids!");
 
   // ///////////////////////////////////////////
   //   Detect grid bounding box
   // ///////////////////////////////////////////
-  FieldVector<double, dim> lowerLeftCorner(std::numeric_limits<double>::max());
-  FieldVector<double, dim> upperRightCorner(-std::numeric_limits<double>::max());
+  float bbox[2*dim];
+  for (int i=0; i<dim; i++) {
+    bbox[2*i  ] =  std::numeric_limits<double>::max();
+    bbox[2*i+1] = -std::numeric_limits<double>::max();
+  }
 
   typename GridType2::template Codim<dim>::LeafIterator vIt    = grid.template leafbegin<dim>();
   typename GridType2::template Codim<dim>::LeafIterator vEndIt = grid.template leafend<dim>();
 
   for (; vIt!=vEndIt; ++vIt)
     for (int i=0; i<dim; i++) {
-      lowerLeftCorner[i] = std::min(lowerLeftCorner[i],  vIt->geometry()[0][i]);
-      upperRightCorner[i] = std::max(upperRightCorner[i], vIt->geometry()[0][i]);
+      bbox[2*i]   = std::min((double)bbox[2*i],   vIt->geometry()[0][i]);
+      bbox[2*i+1] = std::max((double)bbox[2*i+1], vIt->geometry()[0][i]);
     }
 
-  // determine current time
-  time_t time_val = time(NULL);
-  struct tm* localtime_val = localtime(&time_val);
-  const char* asctime_val = asctime(localtime_val);
+  // ///////////////////////////////////////////
+  //   Set up new AmiraMesh object
+  // ///////////////////////////////////////////
 
-  // write the amiramesh header
-  std::ofstream outfile(filename.c_str());
+  AmiraMesh am;
 
-  outfile << "# AmiraMesh 3D ASCII 2.0" << std::endl;
-  outfile << "# CreationDate: " << asctime_val << std::endl << std::endl;
+  // Set the appropriate content type
+  if (dim==2)
+    am.parameters.set("ContentType", "HxField2d");
 
-  outfile << "define Lattice ";
-  for (size_t i=0; i<n.size(); i++)
-    outfile << n[i] << " ";
-  outfile << std::endl << std::endl;
+  am.parameters.set("BoundingBox", 2*dim, bbox);
+  am.parameters.set("CoordType", "uniform");
 
-  outfile <<"Parameters {" << std::endl;
-  outfile <<"    BoundingBox ";
-  for (size_t i=0; i<n.size(); i++)
-    outfile << lowerLeftCorner[i] << " " << upperRightCorner[i] << " ";
-  outfile << std::endl;
+  AmiraMesh::Location* loc = am.findLocation("Lattice");
+  int dims[dim];
+  for (int i=0; i<dim; i++)
+    dims[i] = n[i];
 
-  if (dim==2) {
-    outfile <<"TypeId \"HxRegScalarOrthoSlice2\"," << std::endl;
-    outfile <<"ContentType \"HxField2d\"," << std::endl;
+  if (!loc) {
+    loc = new AmiraMesh::Location("Lattice", dim, dims);
+    am.insert(loc);
   }
 
-  outfile << "    CoordType \"uniform\"," << std::endl;
-  outfile << "    Content \"" << n[0] << "x" << n[1];
-  if (dim==3)
-    outfile << "x" << n[2];
-  outfile << " double, uniform coordinates\"" << std::endl;
-  outfile << "}" << std::endl << std::endl;
+  AmiraMesh::Data* amData =
+    new AmiraMesh::Data("Data", loc, McPrimType::mc_double, 1);
+  am.insert(amData);
 
-  outfile << "Lattice { double Data } @1" << std::endl << std::endl;
-
-  outfile << "# Data section follows" << std::endl;
-  outfile << "@1" << std::endl;
-
-  //
+  // ////////////////////////////////////////////////////////
+  //   Write the data
+  // ////////////////////////////////////////////////////////
   typedef typename DataContainer::const_iterator iterator;
   iterator it    = data.begin();
   iterator endIt = data.end();
 
-  for (; it!=endIt; ++it)
-    outfile << *it << std::endl;
+  int i=0;
+  for (; it!=endIt; ++it, ++i)
+    ((double*)amData->dataPtr())[i] = *it;
 
+  // Actually write the file
+  if(!am.write(filename.c_str(), 1))
+    DUNE_THROW(IOError, "Writing geometry file failed!");
+
+  std::cout << "Grid written successfully to: " << filename << std::endl;
 }
