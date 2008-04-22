@@ -1,4 +1,9 @@
-ALLTESTS = vtktest gnuplottest amirameshtest
+ALLTESTS = vtktest gnuplottest
+
+# run amimesh test only if amimesh was found
+if AMIRAMESH
+ALLTESTS += amirameshtest
+endif
 
 # Currently, Star-CD files can only be read into UGGrid objects
 if UG
@@ -33,4 +38,4 @@ starcdreadertest_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
 
-CLEANFILES = *.vtu *.vtp
+CLEANFILES = *.vtu *.vtp *.data sgrid*.am
