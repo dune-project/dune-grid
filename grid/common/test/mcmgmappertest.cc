@@ -142,8 +142,8 @@ int main () try
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    GridType grid;
-    make2DTestGrid(grid);
+    std::auto_ptr< GridType > gridptr(make2DTestGrid());
+    GridType & grid = *gridptr;
 
     // create hybrid grid
     grid.mark(1,grid.leafbegin<0>());
@@ -167,8 +167,8 @@ int main () try
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    GridType grid;
-    make3DTestGrid(grid);
+    std::auto_ptr< GridType > gridptr(make3DTestGrid());
+    GridType & grid = *gridptr;
 
     // create hybrid grid
     grid.mark(1,grid.leafbegin<0>());
