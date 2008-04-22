@@ -17,13 +17,13 @@
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = dune-grid
+PROJECT_NAME           = @DUNE_MOD_NAME@
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = 
+PROJECT_NUMBER         = @DUNE_MOD_VERSION@
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 
@@ -130,7 +130,8 @@ STRIP_FROM_INC_PATH    =
 # (but less readable) file names. This can be useful is your file systems 
 # doesn't support long names like on DOS, Mac, or CD-ROM.
 
-SHORT_NAMES            = NO
+@DUNEWEB_TRUE@SHORT_NAMES            = NO
+@DUNEWEB_FALSE@SHORT_NAMES            = YES
 
 # If the JAVADOC_AUTOBRIEF tag is set to YES then Doxygen 
 # will interpret the first line (until the first dot) of a JavaDoc-style 
@@ -459,20 +460,20 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = mainpage \
-                         modules \
-                         ../../grid/modules \
-                         ../../grid/albertagrid \
-                         ../../grid/albertagrid.hh \
-                         ../../grid/alugrid.hh \
-                         ../../grid/common \
-                         ../../grid/io \
-                         ../../grid/onedgrid.hh \
-                         ../../grid/sgrid.hh \
-                         ../../grid/uggrid.hh \
-                         ../../grid/uggrid/uggridfactory.hh \
-                         ../../grid/utility \
-                         ../../grid/yaspgrid.hh
+INPUT                  = @srcdir@/mainpage \
+                         @srcdir@/modules \
+                         @top_srcir@/grid/modules \
+                         @top_srcir@/grid/albertagrid \
+                         @top_srcir@/grid/albertagrid.hh \
+                         @top_srcir@/grid/alugrid.hh \
+                         @top_srcir@/grid/common \
+                         @top_srcir@/grid/io \
+                         @top_srcir@/grid/onedgrid.hh \
+                         @top_srcir@/grid/sgrid.hh \
+                         @top_srcir@/grid/uggrid.hh \
+                         @top_srcir@/grid/uggrid/uggridfactory.hh \
+                         @top_srcir@/grid/utility \
+                         @top_srcir@/grid/yaspgrid.hh
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -494,7 +495,10 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = 
+EXCLUDE                = @top_srcdir@/grid/io/file/dgfparser/test \
+                         @top_srcdir@/grid/io/file/test \
+                         @top_srcdir@/grid/test \
+                         @top_srcdir@/grid/common/test
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -512,7 +516,7 @@ EXCLUDE_PATTERNS       = .svn/*
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = ../../grid/io/file/dgfparser/test 
+EXAMPLE_PATH           = @top_srcdir@/grid/io/file/dgfparser/test 
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -532,12 +536,12 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = ../../grid/sgrid \
-                         ../../grid/yaspgrid \
-                         ../../grid/common \
-                         ../../grid/io/file/dgfparser/test \
-                         ../appl/refelements \
-                         ../refinement
+IMAGE_PATH             = @top_srcdir@/grid/sgrid \
+                         @top_srcdir@/grid/yaspgrid \
+                         @top_srcdir@/grid/common \
+                         @top_srcdir@/grid/io/file/dgfparser/test \
+                         @top_srcdir@/doc/appl/refelements \
+                         @top_srcdir@/doc/refinement
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
@@ -657,13 +661,15 @@ HTML_FILE_EXTENSION    = .html
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard header.
 
-HTML_HEADER            =
+@DUNEWEB_TRUE@HTML_HEADER            = doxy-header.html
+@DUNEWEB_FALSE@HTML_HEADER            =
 
 # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            =
+@DUNEWEB_TRUE@HTML_FOOTER            = doxy-footer.html
+@DUNEWEB_FALSE@HTML_FOOTER            =
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -672,7 +678,8 @@ HTML_FOOTER            =
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
 
-HTML_STYLESHEET        =
+@DUNEWEB_TRUE@HTML_STYLESHEET        = dune-doxy.css
+@DUNEWEB_FALSE@HTML_STYLESHEET        =
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 
