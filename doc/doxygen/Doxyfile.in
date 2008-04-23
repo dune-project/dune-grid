@@ -462,18 +462,18 @@ WARN_LOGFILE           =
 
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
-                         @top_srcir@/grid/modules \
-                         @top_srcir@/grid/albertagrid \
-                         @top_srcir@/grid/albertagrid.hh \
-                         @top_srcir@/grid/alugrid.hh \
-                         @top_srcir@/grid/common \
-                         @top_srcir@/grid/io \
-                         @top_srcir@/grid/onedgrid.hh \
-                         @top_srcir@/grid/sgrid.hh \
-                         @top_srcir@/grid/uggrid.hh \
-                         @top_srcir@/grid/uggrid/uggridfactory.hh \
-                         @top_srcir@/grid/utility \
-                         @top_srcir@/grid/yaspgrid.hh
+                         @top_srcdir@/grid/modules \
+                         @top_srcdir@/grid/albertagrid \
+                         @top_srcdir@/grid/albertagrid.hh \
+                         @top_srcdir@/grid/alugrid.hh \
+                         @top_srcdir@/grid/common \
+                         @top_srcdir@/grid/io \
+                         @top_srcdir@/grid/onedgrid.hh \
+                         @top_srcdir@/grid/sgrid.hh \
+                         @top_srcdir@/grid/uggrid.hh \
+                         @top_srcdir@/grid/uggrid/uggridfactory.hh \
+                         @top_srcdir@/grid/utility \
+                         @top_srcdir@/grid/yaspgrid.hh
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
