@@ -16,15 +16,45 @@ namespace Dune {
   template<class GridType>
   class AmiraMeshReader {
 
+    /** \brief Create the boundary description from an explicitly given psurface file */
+    static void createDomain(GridType& grid, const std::string& filename);
+
+    /** \brief Create the actual grid */
+    static void buildGrid(GridType& grid, AmiraMesh* am);
   public:
 
     /** \brief The method that does the reading.
      *
-     * @param grid The grid objects that is to be written
+     * @param grid The grid objects that is to be read
      * @param filename The filename
      */
     static void read(GridType& grid,
                      const std::string& filename);
+
+    /** \brief Read a grid with a parametrized boundary
+
+       Several grid managers support parametrized boundary segment which carry
+       function describing the true shape of the boundary segment.
+       This information will the be considered when refining the grid.
+
+       In
+       <em>'Krause, Sander, Automatic Construction of Boundary Parametrizations
+       for Geometric Multigrid Solvers, CVS, 2005'</em>,
+       the authors describe a
+       way to automatically build such boundary descriptions.  Their
+       file format can be read by this routine.
+
+       To use this feature you
+       have to have the psurface library and build Dune with --with-psurface.
+       Ask Oliver sander@mi.fu-berlin.de for help.
+
+       @param grid The grid objects that is to be read
+       @param filename The name of the grid file
+       @param domainFilename The name of the psurface boundary file
+     */
+    static void read(GridType& grid,
+                     const std::string& filename,
+                     const std::string& domainFilename);
 
     /** \brief Read a block vector from an AmiraMesh file
      *
@@ -38,19 +68,6 @@ namespace Dune {
 
 }
 
-// Default implementation
-template<class GridType>
-void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
-                                           const std::string& filename)
-{
-  DUNE_THROW(IOError, "No AmiraMesh reading has been implemented for " << grid.name() << "!");
-}
-
 #include "amiramesh/amirameshreader.cc"
-
-// the amiramesh reader for UGGrid
-#ifdef HAVE_UG
-#include "amiramesh/amuggridreader.hh"
-#endif
 
 #endif

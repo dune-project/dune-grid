@@ -13,12 +13,6 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-if AMIRAMESH
-if UG
-  AMIRALIB = io/file/amiramesh/libugamiramesh.la
-endif
-endif
-
 # the ALUGrid lib contains items that are needed
 # in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
