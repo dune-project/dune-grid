@@ -13,6 +13,15 @@ GridFactory()
 
 template <int dimworld>
 Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory(UGGrid<dimworld>* grid)
+{
+  grid_ = grid;
+
+  grid_->createBegin();
+}
+
+template <int dimworld>
+Dune::GridFactory<Dune::UGGrid<dimworld> >::
 ~GridFactory()
 {
   if (grid_)

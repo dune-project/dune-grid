@@ -161,6 +161,18 @@ namespace Dune {
     /** \brief Default constructor */
     GridFactory();
 
+    /** \brief Constructor for a given grid object
+
+       If you already have your grid object constructed you can
+       hand it over using this constructor.  A reason may be that
+       you need a UGGrid object with a non-default heap size.
+
+       If you construct your factory class using this constructor
+       the pointer handed over to you by the method createGrid() is
+       the one you supplied here.
+     */
+    GridFactory(UGGrid<dimworld>* grid);
+
     /** \brief Destructor */
     ~GridFactory();
 
