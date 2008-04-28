@@ -160,7 +160,7 @@ public:
 
 // Create the domain from an explicitly given boundary description
 template <class GridType>
-void Dune::AmiraMeshReader<GridType>::createDomain(GridType& grid,
+void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
                                                    const std::string& filename)
 {
 #ifdef HAVE_PSURFACE
@@ -199,8 +199,8 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridType& grid,
     vertices[1] = point[1];
     vertices[2] = point[2];
 
-    grid.insertBoundarySegment(vertices,
-                               new PSurfaceBoundarySegment<GridType::dimension>(boundaryNumber,i));
+    factory.insertBoundarySegment(vertices,
+                                  new PSurfaceBoundarySegment<GridType::dimension>(boundaryNumber,i));
 
   }
   boundaryNumber++;
@@ -222,8 +222,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 #else
   dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
-  // Officially start grid creation
-  grid.createBegin();
+  // Create a grid factory
+  GridFactory<GridType> factory(&grid);
 
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
@@ -242,12 +242,12 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   } else {
 
     // Load domain from an AmiraMesh tetragrid file
-    createDomain(grid, domainFilename);
+    createDomain(factory, domainFilename);
 
   }
 
   // read and build the grid
-  buildGrid(grid, am);
+  buildGrid(factory, am);
 #endif // #define HAVE_PSURFACE
 }
 
@@ -262,8 +262,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   dverb << "This is the AmiraMesh reader for " << grid.name() << "!" << std::endl;
 
-  // Officially start grid creation
-  grid.createBegin();
+  // Create a grid factory
+  GridFactory<GridType> factory(&grid);
 
   // Load the AmiraMesh file
   AmiraMesh* am = AmiraMesh::read(filename.c_str());
@@ -276,7 +276,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   if (dim==3) {
 
     // Build the grid
-    buildGrid(grid, am);
+    buildGrid(factory, am);
 
     // and that's all
     return;
@@ -328,7 +328,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
     nodePos[0] = am_node_coordinates[2*i];
     nodePos[1] = am_node_coordinates[2*i+1];
 
-    grid.insertVertex(nodePos);
+    factory.insertVertex(nodePos);
 
   }
 
@@ -344,7 +344,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
       cornerIDs[1] = elemData[3*i+1]-1;
       cornerIDs[2] = elemData[3*i+2]-1;
 
-      grid.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
+      factory.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
 
     } else {
 
@@ -357,7 +357,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
         cornerIDs[1] = elemData[4*i+1]-1;
         cornerIDs[2] = elemData[4*i+2]-1;
 
-        grid.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
 
       } else {
 
@@ -369,7 +369,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
         cornerIDs[2] = elemData[4*i+3]-1;
         cornerIDs[3] = elemData[4*i+2]-1;
 
-        grid.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
 
       }
 
@@ -381,12 +381,12 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   std::cout << "amiraloadmesh: " << noOfCreatedElem << " elements created" << std::endl;
 
-  grid.createEnd();
+  factory.createGrid();
   delete(am);
 }
 
 template <class GridType>
-void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
+void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& factory,
                                                 AmiraMesh* am)
 {
   static const int dimworld = GridType::dimensionworld;
@@ -442,7 +442,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
       nodePos[2] = am_node_coordinates_double[3*i+2];
     }
 
-    grid.insertVertex(nodePos);
+    factory.insertVertex(nodePos);
 
   }
 
@@ -461,7 +461,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
       for (int j=0; j<numberOfCorners; j++)
         cornerIDs[j] = elemData[numberOfCorners*i+j]-1;
 
-      grid.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
+      factory.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
 
     } else {
 
@@ -478,7 +478,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
         cornerIDs[2] = thisElem[2]-1;
         cornerIDs[3] = thisElem[4]-1;
 
-        grid.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
 
       }else if (thisElem[4]==thisElem[5] && thisElem[5]==thisElem[6]
                 && thisElem[6]==thisElem[7]) {
@@ -492,7 +492,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
         cornerIDs[3] = thisElem[3]-1;
         cornerIDs[4] = thisElem[4]-1;
 
-        grid.insertElement(GeometryType(GeometryType::pyramid,3), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::pyramid,3), cornerIDs);
 
       } else if (thisElem[1]==thisElem[2] && thisElem[5]==thisElem[6]) {
 
@@ -506,7 +506,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
         cornerIDs[4] = thisElem[5]-1;
         cornerIDs[5] = thisElem[7]-1;
 
-        grid.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
 
       } else if (thisElem[2]==thisElem[3] && thisElem[6]==thisElem[7]) {
 
@@ -519,7 +519,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
         cornerIDs[4] = thisElem[5]-1;
         cornerIDs[5] = thisElem[6]-1;
 
-        grid.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
 
       } else {
 
@@ -535,7 +535,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
         cornerIDs[6] = elemData[numberOfCorners*i+7]-1;
         cornerIDs[7] = elemData[numberOfCorners*i+6]-1;
 
-        grid.insertElement(GeometryType(GeometryType::cube,3), cornerIDs);
+        factory.insertElement(GeometryType(GeometryType::cube,3), cornerIDs);
 
       }
 
@@ -551,6 +551,6 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(GridType& grid,
   std::cout << "AmiraMesh reader: " << noOfCreatedElem << " elements created.\n";
   delete am;
 
-  grid.createEnd();
+  factory.createGrid();
 
 }

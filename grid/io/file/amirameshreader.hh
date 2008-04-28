@@ -17,10 +17,10 @@ namespace Dune {
   class AmiraMeshReader {
 
     /** \brief Create the boundary description from an explicitly given psurface file */
-    static void createDomain(GridType& grid, const std::string& filename);
+    static void createDomain(GridFactory<GridType>& factory, const std::string& filename);
 
     /** \brief Create the actual grid */
-    static void buildGrid(GridType& grid, AmiraMesh* am);
+    static void buildGrid(GridFactory<GridType>& factory, AmiraMesh* am);
   public:
 
     /** \brief The method that does the reading.
