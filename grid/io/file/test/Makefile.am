@@ -28,7 +28,7 @@ gnuplottest_DEPENDENCIES = $(LOCAL_LIBS)
 
 amirameshtest_SOURCES = amirameshtest.cc
 amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS)
-amirameshtest_LDADD = $(LOCAL_LIBS)
+amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS)
 amirameshtest_DEPENDENCIES = $(LOCAL_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc

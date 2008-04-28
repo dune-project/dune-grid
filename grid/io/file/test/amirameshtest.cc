@@ -29,8 +29,11 @@ int main() try {
   array<unsigned int, 2> n2;
   n2[0] = n[0]+1;
   n2[1] = n[1]+1;
+
   // write data
-  AmiraMeshWriter<SGrid<2,2>,SGrid<2,2>::Traits::LeafIndexSet>::writeUniformData(sgrid2d, n2, vertexdata2d, "sgrid2d.am");
+  AmiraMeshWriter<SGrid<2,2>,SGrid<2,2>::Traits::LeafIndexSet> amiramesh2d;
+  amiramesh2d.addUniformData(sgrid2d, n2, vertexdata2d);
+  amiramesh2d.write("sgrid2d.am");
 
   // /////////////////////////////////////
   //   Test writing of 3d uniform grid
@@ -52,7 +55,9 @@ int main() try {
   n3[2] = n[2]+1;
 
   // write data
-  AmiraMeshWriter<SGrid<3,3>,SGrid<3,3>::Traits::LeafIndexSet>::writeUniformData(sgrid3d, n3, vertexdata3d, "sgrid3d.am");
+  AmiraMeshWriter<SGrid<3,3>,SGrid<3,3>::Traits::LeafIndexSet> amiramesh3d;
+  amiramesh3d.addUniformData(sgrid3d, n3, vertexdata3d);
+  amiramesh3d.write("sgrid3d.am");
 
   return 0;
 

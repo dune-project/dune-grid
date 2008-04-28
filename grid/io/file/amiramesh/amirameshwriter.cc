@@ -376,10 +376,9 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::write(const std::string& file
 
 template<class GridType, class IndexSetType>
 template<class GridType2, class DataContainer>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridType2& grid,
-                                                                    const array<unsigned int, GridType2::dimension>& n,
-                                                                    const DataContainer& data,
-                                                                    const std::string& filename)
+void Dune::AmiraMeshWriter<GridType,IndexSetType>::addUniformData(const GridType2& grid,
+                                                                  const array<unsigned int, GridType2::dimension>& n,
+                                                                  const DataContainer& data)
 {
   dune_static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");
   dune_static_assert(Capabilities::IsUnstructured<GridType2>::v == false,
@@ -403,32 +402,26 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridTy
       bbox[2*i+1] = std::max((double)bbox[2*i+1], vIt->geometry()[0][i]);
     }
 
-  // ///////////////////////////////////////////
-  //   Set up new AmiraMesh object
-  // ///////////////////////////////////////////
-
-  AmiraMesh am;
-
   // Set the appropriate content type
   if (dim==2)
-    am.parameters.set("ContentType", "HxField2d");
+    amiramesh_.parameters.set("ContentType", "HxField2d");
 
-  am.parameters.set("BoundingBox", 2*dim, bbox);
-  am.parameters.set("CoordType", "uniform");
+  amiramesh_.parameters.set("BoundingBox", 2*dim, bbox);
+  amiramesh_.parameters.set("CoordType", "uniform");
 
-  AmiraMesh::Location* loc = am.findLocation("Lattice");
+  AmiraMesh::Location* loc = amiramesh_.findLocation("Lattice");
   int dims[dim];
   for (int i=0; i<dim; i++)
     dims[i] = n[i];
 
   if (!loc) {
     loc = new AmiraMesh::Location("Lattice", dim, dims);
-    am.insert(loc);
+    amiramesh_.insert(loc);
   }
 
   AmiraMesh::Data* amData =
     new AmiraMesh::Data("Data", loc, McPrimType::mc_double, 1);
-  am.insert(amData);
+  amiramesh_.insert(amData);
 
   // ////////////////////////////////////////////////////////
   //   Write the data
@@ -441,9 +434,4 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::writeUniformData(const GridTy
   for (; it!=endIt; ++it, ++i)
     ((double*)amData->dataPtr())[i] = *it;
 
-  // Actually write the file
-  if(!am.write(filename.c_str(), 1))
-    DUNE_THROW(IOError, "Writing geometry file failed!");
-
-  std::cout << "Grid written successfully to: " << filename << std::endl;
 }
