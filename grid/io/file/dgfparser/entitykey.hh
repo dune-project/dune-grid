@@ -3,7 +3,10 @@
 #ifndef MACROGRIDENTITYKEY_HH
 #define MACROGRIDENTITYKEY_HH
 
+#include <iostream>
 #include <vector>
+
+#include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/alugrid/3d/topology.hh>
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 

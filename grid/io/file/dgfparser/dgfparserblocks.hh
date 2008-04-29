@@ -3,9 +3,16 @@
 #ifndef DUNE_MACROGRIDPARSERBLOCKS_HH
 #define DUNE_MACROGRIDPARSERBLOCKS_HH
 
+#include <cassert>
+#include <map>
 #include <set>
+#include <vector>
 
-namespace Dune {
+#include <dune/common/stdstreams.hh>
+#include <dune/grid/io/file/dgfparser/entitykey.hh>
+
+namespace Dune
+{
 
   // *************************************************************
   // Read one block with given identifier from disk
