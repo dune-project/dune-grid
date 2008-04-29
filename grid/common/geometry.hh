@@ -65,8 +65,7 @@ namespace Dune
    */
   template<int mydim, int cdim, class GridImp, template<int,int,class> class GeometryImp>
   class Geometry {
-    // save typing
-    typedef typename GridImp::ctype ct;
+
   protected:
     GeometryImp<mydim,cdim,GridImp> realGeometry;
 
@@ -83,7 +82,7 @@ namespace Dune
     //! @brief export dimension of world
     enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
     //! define type used for coordinates in grid module
-    typedef ct ctype;
+    typedef typename GridImp::ctype ctype;
 
 
     /** \brief Return the name of the reference element. The type can
@@ -103,7 +102,7 @@ namespace Dune
        \return const reference to a vector containing the position \f$g(c_i)\f$ where
        \f$c_i\f$ is the position of the i'th corner of the reference element.
      */
-    const FieldVector<ct, cdim>& operator[] (int i) const
+    const FieldVector<ctype, cdim>& operator[] (int i) const
     {
       return realGeometry[i];
     }
@@ -112,7 +111,7 @@ namespace Dune
        \param[in] local Position in the reference element \f$D\f$
        \return Position in \f$W\f$
      */
-    FieldVector<ct, cdim> global (const FieldVector<ct, mydim>& local) const
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
     {
       return realGeometry.global(local);
     }
@@ -121,13 +120,13 @@ namespace Dune
        \param[in] global Position in \f$W\f$
        \return Position in \f$D\f$ that maps to global
      */
-    FieldVector<ct, mydim> local (const FieldVector<ct, cdim>& global) const
+    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& global) const
     {
       return realGeometry.local(global);
     }
 
     //! Return true if the point is in the reference element \f$D\f$ of the map
-    bool checkInside (const FieldVector<ct, mydim>& local) const
+    bool checkInside (const FieldVector<ctype, mydim>& local) const
     {
       return realGeometry.checkInside(local);
     }
@@ -155,13 +154,13 @@ namespace Dune
        efficieny. For example in an equidistant structured mesh it may be as
        simple as \f$h^\textrm{mydim}\f$.
      */
-    ct integrationElement (const FieldVector<ct, mydim>& local) const
+    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
     {
       return realGeometry.integrationElement(local);
     }
 
     /** \brief return volume of geometry */
-    ct volume () const
+    ctype volume () const
     {
       return realGeometry.volume();
     }
@@ -182,7 +181,7 @@ namespace Dune
        \note This function may only be called in the case \f$\textrm{cdim}=\textrm{mydim}\f$
        because otherwise the inverse is not defined.
      */
-    const FieldMatrix<ct,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ct, mydim>& local) const
+    const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
     {
       return realGeometry.jacobianInverseTransposed(local);
     }
