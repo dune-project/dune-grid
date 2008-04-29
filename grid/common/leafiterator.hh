@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_LEAFITERATOR_HH
 #define DUNE_GRID_LEAFITERATOR_HH
 
+#include <dune/grid/common/entitypointer.hh>
+
 namespace Dune
 {
 
