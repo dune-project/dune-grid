@@ -9,8 +9,9 @@
 #include <vector>
 #include <dune/common/exceptions.hh>
 #include <dune/common/helpertemplates.hh>
-
 #include <dune/common/bartonnackmanifcheck.hh>
+
+#include <dune/grid/common/grid.hh>
 
 /** @file
         @author Peter Bastian
