@@ -4,6 +4,7 @@
 #define DUNE_GRID_ENTITYPOINTER_HH
 
 #include <dune/common/iteratorfacades.hh>
+#include <dune/grid/common/grid.hh>
 
 /** \file
     \brief Wrapper and interface classe for a static iterator (EntityPointer)
