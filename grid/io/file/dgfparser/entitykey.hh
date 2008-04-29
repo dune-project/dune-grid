@@ -5,6 +5,8 @@
 
 #include <vector>
 #include <dune/grid/alugrid/3d/topology.hh>
+#include <dune/grid/io/file/dgfparser/dgfexception.hh>
+
 namespace Dune {
 
   template < class A> class DGFEntityKey {

@@ -20,11 +20,7 @@
 #include <dune/common/stdstreams.hh>
 //- local includes
 
-namespace Dune {
-  //! \brief exception class for IO errors in the DGF parser
-  class DGFException : public IOError {};
-};
-
+#include "dgfexception.hh"
 #include "entitykey.hh"
 #include "dgfparserblocks.hh"
 
