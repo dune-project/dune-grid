@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_INTERSECTION_HH
 #define DUNE_GRID_INTERSECTION_HH
 
+#include <dune/grid/common/grid.hh>
+
 namespace Dune
 {
 
