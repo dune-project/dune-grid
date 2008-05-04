@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include <dune/common/fixedarray.hh>
 #include <amiramesh/AmiraMesh.h>
 
 
