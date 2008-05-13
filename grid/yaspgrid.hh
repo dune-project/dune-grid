@@ -7,10 +7,10 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <stack>
 
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/yaspgrid/grids.hh>  // the yaspgrid base classes
-#include <dune/common/stack.hh> // the stack class
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/misc.hh>
 #include <dune/common/helpertemplates.hh>
@@ -1690,7 +1690,7 @@ namespace Dune {
       iTupel coord;   // and the coordinates
       StackElem(YGLI gg) : g(gg) {}
     };
-    Stack<StackElem> stack;    //!< stack holding elements to be processed
+    std::stack<StackElem> stack;    //!< stack holding elements to be processed
 
     // push sons of current element on the stack
     void push_sons ()
@@ -1711,7 +1711,8 @@ namespace Dune {
     // make TOS the current element
     void pop_tos ()
     {
-      StackElem se = stack.pop();
+      StackElem se = stack.top();
+      stack.pop();
       this->_g = se.g;
       this->_it.reinit(this->_g.cell_overlap(),se.coord);
     }
