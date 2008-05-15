@@ -20,21 +20,17 @@ TESTS = $(ALLTESTS)
 
 vtktest_SOURCES = vtktest.cc
 vtktest_LDADD = $(LOCAL_LIBS)
-vtktest_DEPENDENCIES = $(LOCAL_LIBS)
 
 gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
-gnuplottest_DEPENDENCIES = $(LOCAL_LIBS)
 
 amirameshtest_SOURCES = amirameshtest.cc
 amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS)
 amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS)
-amirameshtest_DEPENDENCIES = $(LOCAL_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
 starcdreadertest_LDADD = $(LOCAL_LIBS)
-starcdreadertest_DEPENDENCIES = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
 
