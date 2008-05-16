@@ -20,6 +20,7 @@
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/defaultgridview.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -148,6 +149,15 @@ namespace Dune {
           typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU3dGridLeafIterator> LeafIterator;
         };
 
+      };
+
+      template <PartitionIteratorType pitype>
+      struct Partition
+      {
+        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
+        LevelGridView;
+        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
+        LeafGridView;
       };
 
       typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;

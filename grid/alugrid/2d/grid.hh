@@ -17,6 +17,7 @@
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
+#include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/mpihelper.hh>
 #if ALU2DGRID_PARALLEL
 #include <dune/common/mpicollectivecommunication.hh>
@@ -137,6 +138,15 @@ namespace Dune {
           typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU2dGridLeafIterator> LeafIterator;
         };
 
+      };
+
+      template <PartitionIteratorType pitype>
+      struct Partition
+      {
+        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
+        LevelGridView;
+        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
+        LeafGridView;
       };
 
       typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;

@@ -6,7 +6,6 @@
 #include <cmath>
 
 #include <dune/grid/common/quadraturerules.hh>
-#include <dune/grid/common/gridpart.hh>
 
 /** \file
     \brief Tests for the IntersectionIterator
@@ -80,18 +79,18 @@ void checkGeometry(const GeometryImp& geometry)
 
 /** \brief Test the IntersectionIterator
  */
-template <class GridPartType>
-void checkIntersectionIterator(const GridPartType& gridPart,
-                               const typename GridPartType::Traits::template Codim<0>::IteratorType& eIt)
+template <class GridViewType>
+void checkIntersectionIterator(const GridViewType& view,
+                               const typename GridViewType::template Codim<0>::Iterator& eIt)
 {
   using namespace Dune;
 
-  typedef typename GridPartType::GridType GridType;
-  typedef typename GridPartType::IntersectionIteratorType IntersectionIterator;
+  typedef typename GridViewType::Grid GridType;
+  typedef typename GridViewType::IntersectionIterator IntersectionIterator;
 
-  const GridType& grid = gridPart.grid();
+  const GridType& grid = view.grid();
   const bool checkOutside = (grid.name() != "AlbertaGrid");
-  const typename GridPartType::IndexSetType& indexSet = gridPart.indexSet();
+  const typename GridViewType::IndexSet& indexSet = view.indexSet();
 
   const int dimworld = GridType::dimensionworld;
 
@@ -107,7 +106,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
   dune_static_assert((is_same<
                         typename IntersectionIterator::Intersection,
-                        typename GridPartType::IntersectionType>::value),
+                        typename GridViewType::Intersection>::value),
                      "IntersectionIterator has wrong Intersection type");
 
   dune_static_assert((static_cast<int>(IntersectionIterator::dimension)
@@ -116,8 +115,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
   dune_static_assert((static_cast<int>(IntersectionIterator::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
-  IntersectionIterator iIt    = gridPart.ibegin(*eIt);
-  IntersectionIterator iEndIt = gridPart.iend(*eIt);
+  IntersectionIterator iIt    = view.ibegin(*eIt);
+  IntersectionIterator iEndIt = view.iend(*eIt);
 
   bool hasBoundaryIntersection = false;
 
@@ -160,8 +159,8 @@ void checkIntersectionIterator(const GridPartType& gridPart,
       EntityPointer outside = iIt->outside();
       bool insideFound = false;
 
-      IntersectionIterator outsideIIt    = gridPart.ibegin(*outside);
-      IntersectionIterator outsideIEndIt = gridPart.iend(*outside);
+      IntersectionIterator outsideIIt    = view.ibegin(*outside);
+      IntersectionIterator outsideIEndIt = view.iend(*outside);
 
       for (; outsideIIt!=outsideIEndIt; ++outsideIIt) {
 
@@ -194,7 +193,7 @@ void checkIntersectionIterator(const GridPartType& gridPart,
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( GridPartType::conforming && iIt->neighbor() )
+    if ( GridViewType::conforming && iIt->neighbor() )
     {
       EntityPointer outside = iIt->outside();
       int numberInSelf     = iIt->numberInSelf();
@@ -300,6 +299,21 @@ void checkIntersectionIterator(const GridPartType& gridPart,
 
 /** \brief Test both IntersectionIterators
  */
+template <class GridViewType>
+void checkViewIntersectionIterator(const GridViewType& view) {
+
+  using namespace Dune;
+
+  typedef typename GridViewType ::template Codim<0>::Iterator
+  ElementIterator;
+  ElementIterator eIt    = view.template begin<0>();
+  ElementIterator eEndIt = view.template end<0>();
+
+  for (; eIt!=eEndIt; ++eIt)
+    checkIntersectionIterator(view, eIt);
+
+}
+
 template <class GridType>
 void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionTest = false) {
 
@@ -313,31 +327,12 @@ void checkIntersectionIterator(const GridType& grid, bool skipLevelIntersectionT
   else
   {
     for (int i=0; i<=grid.maxLevel(); i++)
-    {
-
-      typedef typename GridType::template Codim<0>::LevelIterator ElementIterator;
-
-      LevelGridPart<const GridType, All_Partition> levelGridPart(grid, i);
-
-      ElementIterator eIt    = grid.template lbegin<0>(i);
-      ElementIterator eEndIt = grid.template lend<0>(i);
-
-      for (; eIt!=eEndIt; ++eIt)
-        checkIntersectionIterator(levelGridPart, eIt);
-
-    }
+      checkViewIntersectionIterator(grid.levelView(i));
   }
 
   // test leaf intersection iterator
   {
-    typedef typename GridType::template Codim<0>::LeafIterator ElementIterator;
-
-    LeafGridPart<const GridType, All_Partition> leafGridPart(grid);
-
-    ElementIterator eEndIt = grid.template leafend<0>();
-    for (ElementIterator eIt = grid.template leafbegin<0>(); eIt!=eEndIt; ++eIt)
-      checkIntersectionIterator(leafGridPart, eIt);
-
+    checkViewIntersectionIterator(grid.leafView());
   }
 
 }

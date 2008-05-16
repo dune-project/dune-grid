@@ -61,6 +61,7 @@
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
+#include <dune/grid/common/defaultgridview.hh>
 
 // stack for index management
 #include <dune/grid/common/indexstack.hh>
@@ -1330,6 +1331,15 @@ namespace Dune
           typedef Dune::LeafIterator<cd,pitype,const GridImp,AlbertaGridLeafIterator> LeafIterator;
         };
 
+      };
+
+      template <PartitionIteratorType pitype>
+      struct Partition
+      {
+        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
+        LevelGridView;
+        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
+        LeafGridView;
       };
 
       typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;

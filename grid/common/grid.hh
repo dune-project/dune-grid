@@ -18,8 +18,11 @@
 #include <dune/common/geometrytype.hh>
 
 // local includes
+#include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/gridview.hh>
+#include <dune/grid/common/defaultgridview.hh>
 
 // inlcude this file after all other, because other files might undef the
 // macros that are defined in that file
@@ -333,78 +336,7 @@ namespace Dune {
          <TD>no</TD>
          </TR>
          </TABLE>
-
-
-
    */
-
-  /** \brief Attributes used in the generic overlap model
-
-     The values are ordered intentionally in order to be able to
-     define ranges of partition types.
-
-     @ingroup GIRelatedTypes
-   */
-  enum PartitionType {
-    InteriorEntity=0,     //!< all interior entities
-    BorderEntity=1  ,     //!< on boundary between interior and overlap
-    OverlapEntity=2 ,     //!< all entities lying in the overlap zone
-    FrontEntity=3  ,      //!< on boundary between overlap and ghost
-    GhostEntity=4         //!< ghost entities
-  };
-
-  /** \brief Provide names for the partition types
-     @ingroup GIRelatedTypes
-   */
-  inline std::string PartitionName(PartitionType type)
-  {
-    switch(type) {
-    case InteriorEntity :
-      return "interior";
-    case BorderEntity :
-      return "border";
-    case OverlapEntity :
-      return "overlap";
-    case FrontEntity :
-      return "front";
-    case GhostEntity :
-      return "ghost";
-    default :
-      DUNE_THROW(NotImplemented, "name of unknown partition type requested");
-    }
-  }
-
-  /** \brief Parameter to be used for the communication functions
-     @ingroup GIRelatedTypes
-   */
-  enum InterfaceType {
-    InteriorBorder_InteriorBorder_Interface=0,     //!< send/receive interior and border entities
-    InteriorBorder_All_Interface=1,                //!< send interior and border, receive all entities
-    Overlap_OverlapFront_Interface=2,              //!< send overlap, receive overlap and front entities
-    Overlap_All_Interface=3,                       //!< send overlap, receive all entities
-    All_All_Interface=4                            //!< send all and receive all entities
-  };
-
-  /** \brief Parameter to be used for the parallel level- and leaf iterators
-     @ingroup GIRelatedTypes
-   */
-  enum PartitionIteratorType {
-    Interior_Partition=0,           //!< only interior entities
-    InteriorBorder_Partition=1,     //!< interior and border entities
-    Overlap_Partition=2,            //!< only overlap entities
-    OverlapFront_Partition=3,       //!< overlap and front entities
-    All_Partition=4,                //!< all entities
-    Ghost_Partition=5               //!< only ghost entities
-  };
-
-
-  /** \brief Define a type for communication direction parameter
-     @ingroup GIRelatedTypes
-   */
-  enum CommunicationDirection {
-    ForwardCommunication,         //!< communicate as given in InterfaceType
-    BackwardCommunication         //!< reverse communication direction
-  };
 
   //************************************************************************
   // G R I D E R R O R
@@ -487,6 +419,20 @@ namespace Dune {
      */
     //@{
     //===========================================================
+
+    /** \brief Types for GridView */
+    template <PartitionIteratorType pitype>
+    struct Partition
+    {
+      typedef typename GridFamily::Traits::template Partition<pitype>::LevelGridView
+      LevelGridView;
+      typedef typename GridFamily::Traits::template Partition<pitype>::LeafGridView
+      LeafGridView;
+    };
+    /** \brief View types for All_Partition */
+    typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef typename Partition< All_Partition > :: LeafGridView LeafGridView;
+
 
     /** \brief A Traits struct that collects all associated types of one implementation
 
@@ -665,6 +611,41 @@ namespace Dune {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().size(type));
       return asImp().size(type);
     }
+    //@}
+
+
+    //===========================================================
+    /** @name Views
+     */
+    //@{
+    //===========================================================
+
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LevelGridView levelView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template levelView<pitype>(level)));
+      return asImp().template levelView<pitype>(level);
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Partition<pitype>::LeafGridView leafView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().template leafView<pitype>()));
+      return asImp().template leafView<pitype>();
+    }
+
+    //! View for a grid level for All_Partition
+    LevelGridView levelView(int level) const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().levelView(level)));
+      return asImp().levelView(level);
+    }
+
+    //! View for the leaf grid for All_Partition
+    LeafGridView leafView() const {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().leafView()));
+      return asImp().leafView();
+    }
+
     //@}
 
 
@@ -997,6 +978,39 @@ namespace Dune {
     //! the traits of this class
     typedef typename GridFamily::Traits Traits;
 
+    //! View for a grid level
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LevelGridView
+    levelView(int level) const {
+      typedef typename Traits::template Partition<pitype>::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp(),level));
+    }
+
+    //! View for the leaf grid
+    template<PartitionIteratorType pitype>
+    typename Traits::template Partition<pitype>::LeafGridView leafView() const {
+      typedef typename Traits::template Partition<pitype>::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp()));
+    }
+
+    //! View for a grid level for All_Partition
+    typename Traits::template Partition<All_Partition>::LevelGridView
+    levelView(int level) const {
+      typedef typename Traits::template Partition<All_Partition>::LevelGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp(),level));
+    }
+
+    //! View for the leaf grid for All_Partition
+    typename Traits::template Partition<All_Partition>::LeafGridView
+    leafView() const {
+      typedef typename Traits::template Partition<All_Partition>::LeafGridView View;
+      typedef typename View::GridViewImp ViewImp;
+      return View(ViewImp(asImp()));
+    }
+
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
@@ -1136,6 +1150,7 @@ namespace Dune {
 
   /** @} */
 
+
   /**
      \brief A traits struct that collects all associated types of one grid model
      @ingroup GIMiscellaneous
@@ -1157,7 +1172,10 @@ namespace Dune {
       template<class> class HierarchicIteratorImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp,
       class LevelIndexSetImp, class LevelIndexSetTypes, class LeafIndexSetImp, class LeafIndexSetTypes,
-      class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType>
+      class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType,
+      template<class,PartitionIteratorType> class LevelGridViewTraits = DefaultLevelGridViewTraits,
+      template<class,PartitionIteratorType> class LeafGridViewTraits = DefaultLeafGridViewTraits
+      >
   struct GridTraits
   {
     typedef GridImp Grid;
@@ -1191,6 +1209,15 @@ namespace Dune {
         typedef Dune::LeafIterator<cd,pitype,const GridImp,LeafIteratorImp> LeafIterator;
       };
 
+    };
+
+    template <PartitionIteratorType pitype>
+    struct Partition
+    {
+      typedef Dune::GridView<LevelGridViewTraits<const GridImp,pitype> >
+      LevelGridView;
+      typedef Dune::GridView<LeafGridViewTraits<const GridImp,pitype> >
+      LeafGridView;
     };
 
     typedef IndexSet<const GridImp,LevelIndexSetImp,LevelIndexSetTypes> LevelIndexSet;
