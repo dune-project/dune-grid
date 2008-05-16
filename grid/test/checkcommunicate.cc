@@ -369,8 +369,8 @@ class CheckCommunication {
                 GeometryType type = it->type();
                 const ReferenceElement<double, dimworld > & refElem =
                   ReferenceElements<double, dimworld >::general(type);
-                int vx = refElem.subEntity(i,cdim,j,3);
-                sout << "index:" << set.template subIndex<3>(*it,vx) << " ";
+                int vx = refElem.subEntity(i,cdim,j,dim);
+                sout << "index:" << set.template subIndex<dim>(*it,vx) << " ";
                 sout << it->template entity<cdim>(i)->geometry()[j] << "/" ;
               }
               sout << "\n";
