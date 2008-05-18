@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <stack>
 
-#include <dune/common/stack.hh>
+#include <dune/common/finitestack.hh>
 
 /** @file
    @author Robert Kloefkorn
