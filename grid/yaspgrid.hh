@@ -1921,6 +1921,13 @@ namespace Dune {
       return Base::size(codim);
     }
 
+    //! return true if the given entity is contained in \f$E\f$.
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      return e.level() == level;
+    }
+
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
@@ -2012,6 +2019,13 @@ namespace Dune {
     int size (int codim) const
     {
       return Base::size(codim);
+    }
+
+    //! return true if the given entity is contained in \f$E\f$.
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      return e.isLeaf();
     }
 
     //! deliver all geometry types used in this grid
