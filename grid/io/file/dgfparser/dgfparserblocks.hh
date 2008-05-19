@@ -503,7 +503,7 @@ namespace Dune
       static int
       cube2simplex ( std :: vector< std :: vector< double > > &vtx,
                      std :: vector< std :: vector< unsigned int > > &elements,
-                     std :: vector< std :: vector< double> > &params )
+                     std :: vector< std :: vector< double > > &params )
       {
         static int offset3[6][4][3] = {{{0,0,0},{1,1,1},{1,0,0},{1,1,0}},
                                        {{0,0,0},{1,1,1},{1,0,1},{1,0,0}},
@@ -513,14 +513,23 @@ namespace Dune
                                        {{0,0,0},{1,1,1},{0,1,1},{0,0,1}} };
         static int offset2[2][3][2] = {{{0,0},{1,0},{0,1}},
                                        {{1,1},{0,1},{1,0}}};
-        if (vtx.size()==0)
-          DUNE_THROW(DGFException, "Converting Cune- to Simplexgrid with no vertices given");
-        int dimworld = vtx[0].size();
+        if( vtx.size()==0 )
+          DUNE_THROW( DGFException, "Cannot convert emty cube grid to simplex grid.");
+        const int dimworld = vtx[ 0 ].size();
+
         dverb << "generating simplices...";
         dverb.flush();
-        std :: vector< std :: vector< unsigned int > > cubes = elements;
-        std::vector<std::vector<double> > cubeparams = params;
-        if(dimworld == 3) {
+
+        if( dimworld == 1 )
+          return elements.size();
+
+        std :: vector< std :: vector< unsigned int > > cubes;
+        std :: vector< std :: vector< double > > cubeparams;
+        elements.swap( cubes );
+        params.swap( cubeparams );
+
+        if(dimworld == 3)
+        {
           elements.resize(6*cubes.size());
           if (cubeparams.size()>0)
             params.resize(6*cubes.size());
@@ -539,7 +548,7 @@ namespace Dune
             }
           }
         }
-        else {
+        else if (dimworld==2) {
           elements.resize(2*cubes.size() );
           if (cubeparams.size()>0)
             params.resize(2*cubes.size());
@@ -578,6 +587,7 @@ namespace Dune
         }
         return elements.size();
       }
+
       // some information
       bool ok() {
         return goodline;
