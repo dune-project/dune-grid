@@ -145,14 +145,20 @@ namespace Dune {
       return Impl<GridType>::generate(*this,filename_,MPICOMM_);
     }
   private:
-    //! class with one static member which has to be defined for each
-    //! grid implementation
-    template <class GT>
-    class Impl {
-      typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    public:
-      static GT* generate(MacroGrid& mg,const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-    };
+    /** \brief container for the actual grid generation method
+     *
+     *  For each grid implementation to be used with the DGF parser, this class
+     *  has to be specialized. It has to contain one static method of the
+     *  following prototype:
+     *  \code
+     *  static GridType *
+     *  generate ( MacroGrid &macroGrid, const char *filename,
+     *             MPIHelper :: MPICommunicator comm = MPIHelper :: getCommunicator() );
+     *  \endcode
+     */
+    template< class GridType >
+    class Impl;
+
     const char* filename_;
     MPICommunicatorType MPICOMM_;
   };
