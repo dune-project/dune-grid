@@ -192,7 +192,7 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<0>* target) {
       target_ = target;
-      GridImp::getRealImplementationStatic(geo_).target_ = target;
+      GridImp::getRealImplementation(geo_).target_ = target;
     }
 
     //! the current geometry
@@ -360,13 +360,13 @@ namespace Dune {
 
       if (target_->father_->sons_[0] == target_ && target_->father_->sons_[1] == target_) {
         // Copied element?
-        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0,1);
+        GridImp::getRealImplementation(geometryInFather_).setPositions(0,1);
       } else if (target_->father_->sons_[0] == target_) {
         // Left son?
-        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0,0.5);
+        GridImp::getRealImplementation(geometryInFather_).setPositions(0,0.5);
       } else {
         // Right son!
-        GridImp::getRealImplementationStatic(geometryInFather_).setPositions(0.5,1);
+        GridImp::getRealImplementation(geometryInFather_).setPositions(0.5,1);
       }
 
       return geometryInFather_;
@@ -413,7 +413,7 @@ namespace Dune {
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;
-      GridImp::getRealImplementationStatic(geo_).target_ = target;
+      GridImp::getRealImplementation(geo_).target_ = target;
     }
 
 

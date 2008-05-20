@@ -160,21 +160,21 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
     const LocalGeometry& intersectionSelfLocal () const {
-      GridImp::getRealImplementationStatic(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const {
-      GridImp::getRealImplementationStatic(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const {
-      GridImp::getRealImplementationStatic(intersectionGlobal_).target_ = center_->vertex_[neighbor_];
+      GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_];
       return intersectionGlobal_;
     }
 
@@ -415,21 +415,21 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
     const LocalGeometry& intersectionSelfLocal () const {
-      GridImp::getRealImplementationStatic(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const {
-      GridImp::getRealImplementationStatic(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const {
-      GridImp::getRealImplementationStatic(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
+      GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
       return intersectionGlobal_;
     }
 
