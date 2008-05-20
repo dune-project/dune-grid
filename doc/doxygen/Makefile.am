@@ -3,6 +3,7 @@
 # setting like in dune-web
 BASEDIR=../..
 CURDIR=doc/doxygen
+WHAT=
 
 doxygendir = $(datadir)/doc/dune-grid/doxygen
 doxygen_DATA = $(WHAT)
