@@ -185,7 +185,7 @@ namespace Dune
     //! return true if intersection is with interior or exterior boundary (see the cases above)
     bool boundary () const DUNE_DEPRECATED
     {
-      return this->realIterator.boundary();
+      return (*this)->boundary();
     }
 
     /**
@@ -204,13 +204,13 @@ namespace Dune
      */
     int boundaryId () const DUNE_DEPRECATED
     {
-      return this->realIterator.boundaryId();
+      return (*this)->boundaryId();
     }
 
     //! @brief return true if intersection is shared with another element.
     bool neighbor () const DUNE_DEPRECATED
     {
-      return this->realIterator.neighbor();
+      return (*this)->neighbor();
     }
 
     /*! @brief return EntityPointer to the Entity on the inside of this
@@ -218,7 +218,7 @@ namespace Dune
      */
     EntityPointer inside() const DUNE_DEPRECATED
     {
-      return this->realIterator.inside();
+      return (*this)->inside();
     }
 
     /*! @brief return EntityPointer to the Entity on the outside of this
@@ -229,7 +229,7 @@ namespace Dune
      */
     EntityPointer outside() const DUNE_DEPRECATED
     {
-      return this->realIterator.outside();
+      return (*this)->outside();
     }
 
     /*! @brief geometrical information about this intersection in local
@@ -241,7 +241,7 @@ namespace Dune
      */
     const LocalGeometry& intersectionSelfLocal () const DUNE_DEPRECATED
     {
-      return this->realIterator.intersectionSelfLocal();
+      return (*this)->intersectionSelfLocal();
     }
     /*! @brief geometrical information about this intersection in local
        coordinates of the outside() entity.
@@ -252,7 +252,7 @@ namespace Dune
      */
     const LocalGeometry& intersectionNeighborLocal () const DUNE_DEPRECATED
     {
-      return this->realIterator.intersectionNeighborLocal();
+      return (*this)->intersectionNeighborLocal();
     }
 
     /*! @brief geometrical information about this intersection in global coordinates.
@@ -262,19 +262,19 @@ namespace Dune
      */
     const Geometry& intersectionGlobal () const DUNE_DEPRECATED
     {
-      return this->realIterator.intersectionGlobal();
+      return (*this)->intersectionGlobal();
     }
 
     //! Local number of codim 1 entity in the inside() Entity where intersection is contained in
     int numberInSelf () const DUNE_DEPRECATED
     {
-      return this->realIterator.numberInSelf ();
+      return (*this)->numberInSelf();
     }
 
     //! Local number of codim 1 entity in outside() Entity where intersection is contained in
     int numberInNeighbor () const DUNE_DEPRECATED
     {
-      return this->realIterator.numberInNeighbor ();
+      return (*this)->numberInNeighbor();
     }
 
     /*! @brief Return an outer normal (length not necessarily 1)
@@ -283,7 +283,7 @@ namespace Dune
      */
     FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const DUNE_DEPRECATED
     {
-      return this->realIterator.outerNormal(local);
+      return (*this)->outerNormal( local );
     }
 
     /*! @brief return outer normal scaled with the integration element
@@ -294,7 +294,7 @@ namespace Dune
      */
     FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const DUNE_DEPRECATED
     {
-      return this->realIterator.integrationOuterNormal(local);
+      return (*this)->integrationOuterNormal( local );
     }
 
     /*! @brief Return unit outer normal (length == 1)
@@ -304,7 +304,7 @@ namespace Dune
      */
     FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const DUNE_DEPRECATED
     {
-      return this->realIterator.unitOuterNormal(local);
+      return (*this)->unitOuterNormal( local );
     }
     //@}
 
