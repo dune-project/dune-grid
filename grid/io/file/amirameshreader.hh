@@ -21,9 +21,19 @@ namespace Dune {
 
     /** \brief Create the actual grid */
     static void buildGrid(GridFactory<GridType>& factory, AmiraMesh* am);
+
+    /** \brief Create the actual grid */
+    static void build2dGrid(GridFactory<GridType>& factory, AmiraMesh* am);
+
   public:
 
     /** \brief The method that does the reading.
+     *
+     * @param filename The filename
+     */
+    static GridType* read(const std::string& filename);
+
+    /** \brief Read a grid from file into a given grid object
      *
      * @param grid The grid objects that is to be read
      * @param filename The filename
@@ -40,9 +50,8 @@ namespace Dune {
        In
        <em>'Krause, Sander, Automatic Construction of Boundary Parametrizations
        for Geometric Multigrid Solvers, CVS, 2005'</em>,
-       the authors describe a
-       way to automatically build such boundary descriptions.  Their
-       file format can be read by this routine.
+       the authors describe a way to automatically build such boundary
+       descriptions.  Their file format can be read by this routine.
 
        To use this feature you
        have to have the psurface library and build Dune with --with-psurface.
@@ -52,6 +61,10 @@ namespace Dune {
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
      */
+    static GridType* read(const std::string& filename,
+                          const std::string& domainFilename);
+
+    /** \brief Read a grid with a parametrized boundary into a given grid object */
     static void read(GridType& grid,
                      const std::string& filename,
                      const std::string& domainFilename);

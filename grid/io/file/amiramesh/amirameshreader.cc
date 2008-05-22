@@ -212,6 +212,47 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 }
 
 template <class GridType>
+GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
+                                                const std::string& domainFilename)
+{
+#ifndef HAVE_PSURFACE
+  DUNE_THROW(IOError, "Dune has not been built with support for the "
+             << " psurface library!");
+#else
+  dverb << "This is the AmiraMesh reader for ???" << std::endl;
+
+  // Create a grid factory
+  GridFactory<GridType> factory;
+
+  // /////////////////////////////////////////////////////
+  // Load the AmiraMesh file
+  // /////////////////////////////////////////////////////
+  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+
+  if(!am)
+    DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
+
+  if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
+
+    // Load a domain from an AmiraMesh hexagrid file
+    std::cout << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
+    std::cout << "I will therefore ignore the boundary parametrization." << std::endl;
+
+  } else {
+
+    // Load domain from an AmiraMesh tetragrid file
+    createDomain(factory, domainFilename);
+
+  }
+
+  // read and build the grid
+  buildGrid(factory, am);
+  return factory.createGrid();
+#endif // #define HAVE_PSURFACE
+}
+
+
+template <class GridType>
 void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename,
                                            const std::string& domainFilename)
@@ -248,7 +289,41 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   // read and build the grid
   buildGrid(factory, am);
+  factory.createGrid();
 #endif // #define HAVE_PSURFACE
+}
+
+template <class GridType>
+GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
+{
+  static const int dim      = GridType::dimension;
+  static const int dimworld = GridType::dimensionworld;
+
+  dune_static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
+
+  // Create a grid factory
+  GridFactory<GridType> factory;
+
+  // Load the AmiraMesh file
+  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  if(!am)
+    DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
+
+  // ////////////////////////////////////////////////////
+  //   Build the grids
+  // ////////////////////////////////////////////////////
+  if (dim==3) {
+
+    buildGrid(factory, am);
+
+  } else {
+
+    build2dGrid(factory, am);
+
+  }
+
+  delete(am);
+  return factory.createGrid();
 }
 
 template <class GridType>
@@ -271,16 +346,26 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
     DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
 
   // ////////////////////////////////////////////////////
-  //   Reading 3d grids happens in a separate method
+  //   Build the grids
   // ////////////////////////////////////////////////////
   if (dim==3) {
 
-    // Build the grid
     buildGrid(factory, am);
 
-    // and that's all
-    return;
+  } else {
+
+    build2dGrid(factory, am);
+
   }
+
+  delete(am);
+  factory.createGrid();
+}
+
+template <class GridType>
+void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory, AmiraMesh* am)
+{
+  static const int dimworld = GridType::dimensionworld;
 
   // ////////////////////////////////////////////////////
   //   Here we now the grid must be 2d
@@ -381,8 +466,6 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   std::cout << "amiraloadmesh: " << noOfCreatedElem << " elements created" << std::endl;
 
-  factory.createGrid();
-  delete(am);
 }
 
 template <class GridType>
@@ -549,8 +632,5 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
     DUNE_THROW(IOError, "Inserting element failed");
 
   std::cout << "AmiraMesh reader: " << noOfCreatedElem << " elements created.\n";
-  delete am;
-
-  factory.createGrid();
 
 }
