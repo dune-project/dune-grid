@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <limits>
 
 template<class GridType, class IndexSetType>
 template<class GridType2, class IndexSetType2>
