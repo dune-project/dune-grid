@@ -90,7 +90,7 @@ namespace Dune
             partition type of this index set */
         typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
       };
-    };
+    } DUNE_DEPRECATED;
 
     /** \brief The type used for the indices */
     typedef unsigned int IndexType;
@@ -213,21 +213,13 @@ namespace Dune
             The iterator type is available via the public Codim struct.
      */
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
-      return asImp().begin<cd,pitype>();
-    }
+    typename Codim<cd>::template Partition<pitype>::Iterator begin () const DUNE_DEPRECATED;
 
     /** @brief Iterator to one past the last entity of given codim and partition type in \f$E\f$.
             The iterator type is available via the public Codim struct.
      */
     template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().end<cd,pitype>()));
-      return asImp().end<cd,pitype>();
-    }
+    typename Codim<cd>::template Partition<pitype>::Iterator end () const DUNE_DEPRECATED;
     //@}
 
     // Must be explicitely defined although this class should get a default constructor.
@@ -244,6 +236,24 @@ namespace Dune
     //!  Barton-Nackman trick
     const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
+
+  template<class GridImp, class IndexSetImp, class IndexSetTypes>
+  template<int cd, PartitionIteratorType pitype>
+  typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
+  IndexSet<GridImp,IndexSetImp,IndexSetTypes>::begin() const
+  {
+    CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
+    return asImp().begin<cd,pitype>();
+  }
+
+  template<class GridImp, class IndexSetImp, class IndexSetTypes>
+  template<int cd, PartitionIteratorType pitype>
+  typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
+  IndexSet<GridImp,IndexSetImp,IndexSetTypes>::end() const
+  {
+    CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
+    return asImp().end<cd,pitype>();
+  }
 
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
@@ -270,7 +280,7 @@ namespace Dune
             partition type of this index set */
         typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
       };
-    };
+    } DUNE_DEPRECATED;
 
     typedef typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::IndexType IndexType;
 
