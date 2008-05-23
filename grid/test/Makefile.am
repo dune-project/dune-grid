@@ -53,8 +53,10 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ $(COVERAGE) $(DUNE_EXTRA_CHECKS)
 #
 
 test_sgrid_SOURCES = test-sgrid.cc
+test_sgrid_LDADD = $(LOCAL_LIBS)
 
 test_oned_SOURCES = test-oned.cc
+test_oned_LDADD = $(LOCAL_LIBS)
 
 test_yaspgrid_SOURCES = test-yaspgrid.cc
 test_yaspgrid_CXXFLAGS = $(AM_CPPFLAGS) $(MPI_CPPFLAGS)
