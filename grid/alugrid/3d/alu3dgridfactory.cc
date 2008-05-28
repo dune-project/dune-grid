@@ -17,7 +17,19 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator )
-    : communicator_( communicator )
+    : filename_("") , communicator_( communicator )
+  {
+#if ALU3DGRID_PARALLEL
+    MPI_Comm_rank( communicator, &rank_ );
+#endif
+  }
+
+
+  template< template< int, int > class ALUGrid >
+  ALU3dGridFactory< ALUGrid >
+  :: ALU3dGridFactory ( const std::string filename,
+                        const MPICommunicatorType &communicator )
+    : filename_(filename) , communicator_( communicator )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -106,11 +118,21 @@ namespace Dune
       return new GridType( communicator_ );
 #endif
 
-    char filename[ FILENAME_MAX ];
-    std :: strcpy( filename, "ALU3dGrid.XXXXXX" );
-    mkstemp( filename );
+    std::string filename(filename_);
+    if( filename == "" )
+    {
+      char filetemp[ FILENAME_MAX ];
+      std :: strcpy( filetemp, "ALU3dGrid.XXXXXX" );
+      mkstemp( filetemp );
+      filename = filetemp;
+    }
+    else
+    {
+      // append filename by alugrid
+      filename += ".ALU3dGrid";
+    }
 
-    std :: ofstream out( filename );
+    std :: ofstream out( filename.c_str() );
     if( elementType == tetra )
       out << "!Tetrahedra";
     else

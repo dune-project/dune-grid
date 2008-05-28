@@ -48,6 +48,7 @@ namespace Dune
     typedef array< unsigned int, numFaceCorners > FaceType;
 
   private:
+    const std::string filename_;
     MPICommunicatorType communicator_;
 #if ALU3DGRID_PARALLEL
     int rank_;
@@ -60,6 +61,11 @@ namespace Dune
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
                                   = MPIHelper :: getCommunicator() );
+
+    /** \brief constructor taking filename for temporary outfile */
+    ALU3dGridFactory ( const std::string filename,
+                       const MPICommunicatorType &communicator
+                         = MPIHelper :: getCommunicator() );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -147,6 +153,13 @@ namespace Dune
                              = MPIHelper :: getCommunicator() )
       : BaseType( communicator )
     {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string filename,
+                  const MPICommunicatorType &communicator
+                    = MPIHelper :: getCommunicator() )
+      : BaseType( filename, communicator )
+    {}
   };
 
 
@@ -170,6 +183,13 @@ namespace Dune
     explicit GridFactory ( const MPICommunicatorType &communicator
                              = MPIHelper :: getCommunicator() )
       : BaseType( communicator )
+    {}
+
+    /** \brief constructor taking filename */
+    GridFactory ( const std::string filename,
+                  const MPICommunicatorType &communicator
+                    = MPIHelper :: getCommunicator() )
+      : BaseType( filename, communicator )
     {}
   };
 
