@@ -112,12 +112,17 @@ namespace Dune
 
     std :: ofstream out( filename );
     if( elementType == tetra )
-      out << "!Tetrahedra" << std :: endl;
+      out << "!Tetrahedra";
     else
-      out << "!Hexahedra" << std :: endl;
+      out << "!Hexahedra";
 
     const unsigned int numVertices = vertices_.size();
+    // print information about vertices and elements
+    // to header to have an easy check
+    out << "  ( noVertices = " << numVertices;
+    out << " | noElements = " << elements_.size() << " )" << std :: endl;
 
+    // now start writing grid
     out << numVertices << std :: endl;
     typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
     const VertexIteratorType endV = vertices_.end();
