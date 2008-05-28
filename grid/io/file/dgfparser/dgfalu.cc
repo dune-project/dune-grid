@@ -26,7 +26,7 @@ namespace Dune
                                                << "ALUGrid of dimension 3." );
       macroGrid.setOrientation( 2, 3 );
 
-      GridFactory< ALUSimplexGrid< 3, 3 > > factory( communicator );
+      GridFactory< ALUSimplexGrid< 3, 3 > > factory( filename, communicator );
       if( rank == 0 )
       {
         for( int n = 0; n < macroGrid.nofvtx; ++n )
@@ -102,7 +102,7 @@ namespace Dune
                                                << " and cannot be used to initialize an "
                                                << "ALUGrid of dimension 3." );
 
-      GridFactory< ALUCubeGrid< 3, 3 > > factory( communicator );
+      GridFactory< ALUCubeGrid< 3, 3 > > factory( filename, communicator );
       if( rank == 0 )
       {
         for( int n = 0; n < macroGrid.nofvtx; ++n )
