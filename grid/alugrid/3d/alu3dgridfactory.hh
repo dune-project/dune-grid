@@ -63,9 +63,9 @@ namespace Dune
                                   = MPIHelper :: getCommunicator() );
 
     /** \brief constructor taking filename for temporary outfile */
-    ALU3dGridFactory ( const std::string filename,
-                       const MPICommunicatorType &communicator
-                         = MPIHelper :: getCommunicator() );
+    explicit ALU3dGridFactory ( const std::string &filename,
+                                const MPICommunicatorType &communicator
+                                  = MPIHelper :: getCommunicator() );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -111,6 +111,7 @@ namespace Dune
 
   private:
     inline void assertGeometryType( const GeometryType &geometry );
+    inline static std :: string temporaryFileName ();
   };
 
 

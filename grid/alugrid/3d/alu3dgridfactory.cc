@@ -17,7 +17,8 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator )
-    : filename_("") , communicator_( communicator )
+    : filename_( temporaryFileName() ),
+      communicator_( communicator )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -27,9 +28,10 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   ALU3dGridFactory< ALUGrid >
-  :: ALU3dGridFactory ( const std::string filename,
+  :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : filename_(filename) , communicator_( communicator )
+    : filename_( filename + ".ALU3dGrid" ),
+      communicator_( communicator )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -118,21 +120,7 @@ namespace Dune
       return new GridType( communicator_ );
 #endif
 
-    std::string filename(filename_);
-    if( filename == "" )
-    {
-      char filetemp[ FILENAME_MAX ];
-      std :: strcpy( filetemp, "ALU3dGrid.XXXXXX" );
-      mkstemp( filetemp );
-      filename = filetemp;
-    }
-    else
-    {
-      // append filename by alugrid
-      filename += ".ALU3dGrid";
-    }
-
-    std :: ofstream out( filename.c_str() );
+    std :: ofstream out( filename_.c_str() );
     if( elementType == tetra )
       out << "!Tetrahedra";
     else
@@ -192,15 +180,25 @@ namespace Dune
     boundaryIds_.clear();
 
 #if ALU3DGRID_PARALLEL
-    GridType *grid = new GridType( filename, communicator_ );
+    GridType *grid = new GridType( filename_, communicator_ );
 #else
-    GridType *grid = new GridType( filename );
+    GridType *grid = new GridType( filename_ );
 #endif
 
 #ifdef NDEBUG
-    remove( filename );
+    remove( filename_.c_str() );
 #endif
     return grid;
+  }
+
+
+  template< template< int, int > class ALUGrid >
+  std :: string ALU3dGridFactory< ALUGrid > :: temporaryFileName ()
+  {
+    char filetemp[ FILENAME_MAX ];
+    std :: strcpy( filetemp, "ALU3dGrid.XXXXXX" );
+    mkstemp( filetemp );
+    return std :: string( filetemp );
   }
 
 }
