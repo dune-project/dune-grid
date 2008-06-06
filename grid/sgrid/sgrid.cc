@@ -807,7 +807,7 @@ namespace Dune {
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)
   {
-    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     makeSGrid(N_, L_, H_);
   }
@@ -816,7 +816,7 @@ namespace Dune {
   inline SGrid<dim,dimworld>::SGrid (FieldVector<int,dim> N_, FieldVector<sgrid_ctype,dim> L_,
                                      FieldVector<sgrid_ctype,dim> H_)
   {
-    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     sgrid_ctype LL[dim], HH[dim];
     int NN[dim];
@@ -833,7 +833,7 @@ namespace Dune {
   template<int dim, int dimworld>
   inline SGrid<dim,dimworld>::SGrid ()
   {
-    IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
+    dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     int N_[dim];
     sgrid_ctype L_[dim];
