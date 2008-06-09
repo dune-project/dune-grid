@@ -530,8 +530,6 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
   }
 
   /* all inner nodes are inserted , now we insert the elements */
-  int noOfCreatedElem = 0;
-
   for(int i=0; i < noOfElem; i++) {
 
     const int* thisElem = elemData + (i* ((isTetraGrid) ? 4 : 8));
@@ -624,13 +622,8 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
 
     }
 
-    noOfCreatedElem++;
-
   }
 
-  if(noOfElem != noOfCreatedElem)
-    DUNE_THROW(IOError, "Inserting element failed");
-
-  std::cout << "AmiraMesh reader: " << noOfCreatedElem << " elements created.\n";
+  std::cout << "AmiraMesh reader: " << noOfElem << " elements created.\n";
 
 }
