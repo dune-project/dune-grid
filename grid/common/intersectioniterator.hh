@@ -19,7 +19,7 @@ namespace Dune
      Dune::IntersectionIterator
 
      @warning the IntersectionIterator used to be both, Intersection and IntersectionIterator,
-     at the same time. The two concepts are now properly seperated. The IntersectionIterator
+     at the same time. The two concepts are now properly separated. The IntersectionIterator
      still offers the old methods, but these are forwarded to the Intersection. All these methods
      are now marked deprecated.
 
