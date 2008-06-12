@@ -429,7 +429,7 @@ namespace Dune {
           : coords(), builtCoords(false), Jinv(), builtJinv(false),
             backend(backend_), kuhnIndex(0)
         {
-          IsTrue<mydimension == coorddimension>::yes();
+          dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
         }
 
         void make(int kuhnIndex_)

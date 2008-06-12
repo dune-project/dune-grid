@@ -124,7 +124,7 @@ namespace Dune
   int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
-    IsTrue< cc == c >::yes();
+    dune_static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
     return is.template index<cc>(e);
   }
 
@@ -132,7 +132,7 @@ namespace Dune
   template<int cc>
   int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
   {
-    IsTrue< cc == c >::yes();
+    dune_static_assert(cc == c, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
     return is.template subIndex<cc>(e,i);
   }
 
