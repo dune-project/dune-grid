@@ -859,7 +859,7 @@ namespace Dune {
           : coords(), builtCoords(false), Jinv(), builtJinv(false),
             level(level_), kuhnIndex(0), origin()
         {
-          IsTrue<mydimension == coorddimension>::yes();
+          dune_static_assert(mydimension == coorddimension, "mydimension != coorddimension");
         }
 
         void make(const FieldVector<int, coorddimension> &origin_, int kuhnIndex_)
