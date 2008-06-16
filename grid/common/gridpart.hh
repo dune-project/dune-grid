@@ -270,6 +270,12 @@ namespace Dune {
       isetWrapper_(grid,grid.maxLevel()),
       level_(grid.maxLevel()) {}
 
+    //! copy constructor
+    LevelGridPart(const LevelGridPart& other) :
+      GridPartDefault<Traits>(other.grid_,isetWrapper_),
+      isetWrapper_(other.grid_,other.level_),
+      level_(other.level_) {}
+
     //! Returns first iterator on this level
     template <int cd>
     typename Traits::template Codim<cd>::IteratorType begin() const {
@@ -380,6 +386,12 @@ namespace Dune {
     LeafGridPart(GridType& grid) :
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
+
+    //! copy constructor
+    LeafGridPart(const LeafGridPart& other) :
+      GridPartDefault<Traits>(other.grid_,isetWrapper_),
+      isetWrapper_(other.grid_)
+    {}
 
     //! Begin iterator on the leaf level
     template <int cd>
@@ -500,6 +512,11 @@ namespace Dune {
     HierarchicGridPart(GridType& grid, const IndexSetType & ) :
       GridPartDefault<Traits>(grid, isetWrapper_),
       isetWrapper_(grid) {}
+
+    //! copy constructor
+    HierarchicGridPart(const HierarchicGridPart& other) :
+      GridPartDefault<Traits>(other.grid_, isetWrapper_),
+      isetWrapper_(other.grid_) {}
 
     //! Begin iterator on the leaf level
     template <int cd>
