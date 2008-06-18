@@ -10,7 +10,7 @@ if ALBERTA
 endif
 
 if UG
-  TESTUG = testug
+  TESTUG = testug test2ug
 endif
 
 ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
@@ -53,6 +53,9 @@ if UG
 testug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
 testug_SOURCES = testug.cc
 testug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(UG_LDFLAGS) $(UG_LIBS)
+test2ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
+test2ug_SOURCES = test2ug.cc
+test2ug_LDADD = $(LOCAL_LIBS) $(GRAPE_LIBS) $(GRAPE_LDFLAGS) $(UG_LDFLAGS) $(UG_LIBS)
 endif
 
 GRIDFILES = alberta-testgrid-3-3.al \
@@ -70,3 +73,4 @@ EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
 CLEANFILES = examplegrid*.dgf.* dgfparser.log
 
 include $(top_srcdir)/am/global-rules
+
