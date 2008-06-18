@@ -106,6 +106,73 @@ namespace Dune
     }
   };
 
+  template <>
+  struct GrapeInterface<2,3>
+  {
+    static int called;
+    typedef GrapeInterface_two_three::DUNE_ELEM DUNE_ELEM;
+    typedef GrapeInterface_two_three::DUNE_FDATA DUNE_FDATA;
+    typedef GrapeInterface_two_three::DUNE_DAT DUNE_DAT;
+    typedef GrapeInterface_two_three::F_DATA F_DATA;
+    typedef GrapeInterface_two_three::HELEMENT HELEMENT;
+    typedef GrapeInterface_two_three::STACKENTRY STACKENTRY;
+
+    inline static void init()
+    {
+      GrapeInterface_two_three::grape_add_remove_methods();
+    }
+
+    inline static void setThread(int t)
+    {}
+
+    inline static void setDefaultIterator(int val)
+    {
+      setDefaultIteratorValue(val);
+    }
+
+    inline static void handleMesh (void *hmesh, bool grdMode = false )
+    {
+      GrapeInterface_two_three::handleMesh(hmesh,grdMode);
+    }
+
+    inline static void addDataToHmesh(void  *hmesh, DUNE_FDATA * data)
+    {
+      GrapeInterface_two_three::addDataToHmesh(hmesh,data);
+    }
+
+    inline static void *setupHmesh(const int noe,
+                                   const int nov, const int maxlev,DUNE_DAT * dune)
+    {
+      return GrapeInterface_two_three::setupHmesh(
+               noe,nov,maxlev,dune);
+    }
+
+    inline static void deleteHmesh( void * hmesh )
+    {
+      GrapeInterface_two_three::deleteHmesh( hmesh );
+    }
+
+    inline static void deleteFunctions( void * hmesh )
+    {
+      GrapeInterface_two_three::deleteFunctions( hmesh );
+    }
+
+    inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)
+    {
+      GrapeInterface_two_three::addHmeshToTimeScene(timescene,time,hmesh,proc);
+    }
+
+    inline static void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc)
+    {
+      GrapeInterface_two_three::addHmeshToGlobalTimeScene(time,hmesh,proc);
+    }
+
+    inline static void colorBarMinMax(const double min, const double max)
+    {
+      GrapeInterface_two_three::colorBarMinMax(min,max);
+    }
+  };
+
   // the interface to dune for dim = dimworld = 3
   template <>
   struct GrapeInterface<3,3>
