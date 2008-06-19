@@ -7,8 +7,9 @@
 
 
 #include <dune/common/fvector.hh>
+#include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/gridpart.hh>
+
 using namespace Dune;
 
 /*******
@@ -43,6 +44,8 @@ namespace {
     static const int calc = -1;
   };
 }
+
+
 template <class IndexSetImp,
     class GlobalIdSetImp,
     class DataVectorType >
@@ -167,32 +170,47 @@ public:
 
 };
 
+
 /*******************************************************************/
 /*******************************************************************/
-template <class GridPartType, int cdim, class OutputStreamImp>
-class CheckCommunication {
-  typedef typename GridPartType :: GridType GridType;
-  typedef typename GridPartType :: IndexSetType IndexSet;
+template< class GridView, int cdim, class OutputStream >
+class CheckCommunication
+{
+  typedef typename GridView :: Grid Grid;
+  typedef typename GridView :: IndexSet IndexSet;
+  typedef typename GridView :: IntersectionIterator IntersectionIterator;
 
-  enum {dimworld = GridType::dimensionworld,
-        dim = GridType::dimension};
-  FieldVector<double,dimworld> upwind;
+  typedef typename IntersectionIterator :: Intersection Intersection;
 
-  const IndexSet & set;
+  typedef typename GridView :: template Codim< 0 > :: EntityPointer EntityPointer;
+  typedef typename GridView :: template Codim< 0 > :: Entity Entity;
+  typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
+
+  typedef typename GridView :: template Codim< cdim > :: EntityPointer SubEntityPointer;
+
+  enum { dimworld = Grid :: dimensionworld };
+  enum { dim = Grid :: dimension };
+
+  typedef FieldVector< double, dimworld > CoordinateVector;
+  typedef std :: vector< double > ArrayType;
+
+  CoordinateVector upwind_;
+  OutputStream &sout_;
+
+  const GridView &gridView_;
+  const IndexSet &indexSet_;
   const int level_;
 
   // the function
-  double f(const FieldVector<double,dimworld>& x) {
-    FieldVector<double,dimworld> a(1.);
+  double f ( const CoordinateVector &x )
+  {
+    CoordinateVector a( 1.0 );
     a[0] = -0.5;
     return a*x+1.5; //+cos(x*x);
   }
+
   // compute the data on the upwind entities
-  template <class VectorType >
-  void project (const GridType & grid ,
-                int dataSize,
-                VectorType & data,
-                VectorType & weight, int rank)
+  void project ( int dataSize, ArrayType &data, ArrayType &weight, int rank )
   {
     // set initial data
     for(int i=0 ; i<dataSize; ++i)
@@ -201,59 +219,55 @@ class CheckCommunication {
       weight[i] = -1.0;
     }
 
-    enum { dim = GridType :: dimension };
-    typedef typename IndexSet :: template Codim<0> ::
-    template Partition<Interior_Partition> :: Iterator IteratorType;
-    typedef typename GridPartType::IntersectionIteratorType IntersectionIterator;
-
-    IteratorType endit = set.template end<0,Interior_Partition>   ();
-    for(IteratorType it = set.template begin<0,Interior_Partition> ();
-        it != endit ; ++it )
+    Iterator end = gridView_.template end< 0 >();
+    for( Iterator it = gridView_.template begin< 0 >(); it != end ; ++it )
     {
-      if (cdim==0)
+      const Entity &entity = *it;
+
+      if( cdim == 0 )
       {
-        FieldVector<double,dimworld> mid(0.);
-        for(int i=0; i<it->template count<dimworld>(); ++i) {
-          mid += it->geometry()[i];
-        }
-        mid /= double(it->template count<dimworld>());
-        int idx = set.index(*it);
-        data[idx]  = f(mid);
-        weight[idx] = 1.0;
+        CoordinateVector mid( 0.0 );
+        const int numVertices = entity.template count< dim >();
+        for( int i = 0; i < numVertices; ++i )
+          mid += entity.geometry()[ i ];
+        mid /= double( numVertices );
+
+        int index = indexSet_.index( entity );
+        data[ index ]  = f( mid );
+        weight[ index ] = 1.0;
       }
       else
       {
-        IntersectionIterator endnit = gridPart_.iend(*it);
-        for (IntersectionIterator nit = gridPart_.ibegin(*it); nit != endnit; ++nit)
+        IntersectionIterator endnit = gridView_.iend( entity );
+        for( IntersectionIterator nit = gridView_.ibegin( entity ); nit != endnit; ++nit )
         {
-          const typename IntersectionIterator :: Intersection &intersection = *nit;
+          const Intersection &intersection = *nit;
 
-          const FieldVector< double,dimworld > normal
+          const CoordinateVector normal
             = intersection.integrationOuterNormal( FieldVector< double, dim-1 >( 0 ) );
-          double calc = normal*upwind;
+          double calc = normal * upwind_;
 
           // if testing level, then on non-conform grid also set values on
           // intersections that are not boundary, but has no level
           // neighbor
-          bool proceedAnyways = ((level_ < 0) ? false : !intersection.neighbor());
-          if( ((calc > -1e-8) || intersection.boundary()) || proceedAnyways )
+          const bool proceedAnyway = (level_ < 0 ? false : !intersection.neighbor());
+          if( (calc > -1e-8) || intersection.boundary() || proceedAnyway )
           {
             const ReferenceElement< double, dimworld > &insideRefElem
-              =  ReferenceElements< double, dimworld > :: general( it->type() );
+              =  ReferenceElements< double, dimworld > :: general( entity.type() );
 
             const int numberInSelf = intersection.numberInSelf();
             for( int i = 0; i < insideRefElem.size( numberInSelf, 1, cdim ); ++i )
             {
               int e = insideRefElem.subEntity( numberInSelf, 1, i, cdim );
-              int idx = set.template subIndex<cdim>(*it,e);
-              FieldVector<double,dimworld> cmid(0.);
-              int c = (it->template entity<cdim>(e))->geometry().corners();
+              int idx = indexSet_.template subIndex< cdim >( entity, e );
+              CoordinateVector cmid( 0.0 );
+              SubEntityPointer subEp = entity.template entity< cdim >( e );
+              int c = subEp->geometry().corners();
               for (int j=0; j<c; j++)
-              {
-                cmid += it->template entity<cdim>(e)->geometry()[j];
-              }
-
+                cmid += subEp->geometry()[ j ];
               cmid /= double(c);
+
               data[idx] = f(cmid);
               weight[idx] = 1.0;
             }
@@ -263,31 +277,27 @@ class CheckCommunication {
             // as well
             if( intersection.neighbor() )
             {
-              typedef typename GridType :: template Codim<0> :: EntityPointer EntityPointerType;
-              typedef typename GridType :: template Codim<0> :: Entity EntityType;
-              EntityPointerType ep = intersection.outside();
-              const EntityType & neigh = *ep;
+              EntityPointer ep = intersection.outside();
+              const Entity &neigh = *ep;
 
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
               const ReferenceElement<double, dimworld > & outsideRefElem =
-                ReferenceElements<double, dimworld >::general(ep->type());
+                ReferenceElements<double, dimworld >::general( neigh.type() );
 
               const int numberInNeighbor = intersection.numberInNeighbor();
               for( int i = 0; i < outsideRefElem.size(numberInNeighbor, 1, cdim); ++i )
               {
                 int e = outsideRefElem.subEntity( numberInNeighbor, 1, i, cdim );
-                int idx = set.template subIndex<cdim>(neigh, e);
-                FieldVector<double,dimworld> cmid(0.);
-                typedef typename GridType:: template Codim<cdim> :: EntityPointer SubEntityPointer;
-                SubEntityPointer subEp = neigh. template entity<cdim>(e);
+                int idx = indexSet_.template subIndex<cdim>(neigh, e);
+                CoordinateVector cmid( 0.0 );
+                SubEntityPointer subEp = neigh.template entity< cdim >( e );
                 int c = subEp->geometry().corners();
                 for (int j=0; j<c; j++)
-                {
                   cmid += subEp->geometry()[j];
-                }
                 cmid /= double(c);
+
                 data[idx] = f(cmid);
                 weight[idx] = 1.0;
               }
@@ -297,180 +307,168 @@ class CheckCommunication {
       }
     }
   }
+
   // test if all flags are 1 and return the
   // difference in the function values.
   // if testweight is true an error is printed for each
   // flag not equal to 1
-  template <class VectorType  >
-  double test (const GridType & grid ,
-               int dataSize,
-               VectorType & data,
-               VectorType & weight, int rank,
-               bool testweight)
+  double test ( int dataSize, ArrayType &data, ArrayType &weight, bool testweight )
   {
-    enum { dim = GridType :: dimension };
+    const int rank = gridView_.comm().rank();
+
     //Variante MIT Geisterzellen
-    typedef typename IndexSet :: template Codim<0> :: template Partition<All_Partition> :: Iterator IteratorType;
-    double maxerr = 0.;
-    IteratorType endit  = set.template end<0,All_Partition>   ();
-    for(IteratorType it = set.template begin<0,All_Partition> ();
-        it != endit ; ++it )
+    //typedef typename IndexSet :: template Codim<0> :: template Partition<All_Partition> :: Iterator IteratorType;
+
+    double maxerr = 0.0;
+    Iterator end = gridView_.template end< 0 >();
+    for( Iterator it = gridView_.template begin< 0 >(); it != end ; ++it )
     {
-      FieldVector<double,dimworld> mid(0.);
-      for(int i=0; i<it->template count<dim>(); ++i)
+      const Entity &entity = *it;
+
+      CoordinateVector mid( 0.0 );
+      const int numVertices = entity.template count< dim >();
+      for( int i = 0; i < numVertices; ++i )
+        mid += entity.geometry()[ i ];
+      mid /= double(numVertices);
+
+      if( cdim == 0 )
       {
-        mid += it->geometry()[i];
-      }
-      mid /= double(it->template count<dim>());
-      if (cdim==0)
-      {
-        int idx = set.index(*it);
-        double lerr = fabs(f(mid)-data[idx]);
-        maxerr = std::max(maxerr,lerr);
-        if (testweight)
+        int index = indexSet_.index( entity );
+        double lerr = fabs( f( mid ) - data[ index ] );
+        maxerr = std :: max( maxerr, lerr );
+        if( testweight && (weight[ index ] < 0) )
         {
-          if (weight[idx] < 0)
-          {
-            sout << "<" << rank << "/test> ERROR in communication test. ";
-            sout << "weight:" << weight[idx] << " should be zero!";
-            sout << " value is : " << data[idx]
-                 << "  index is: ";
-            sout << idx << "  lvl:" << it->level() << "  " ;
-            sout << "\n";
-          }
+          sout_ << "<" << rank << "/test> Error in communication test.";
+          sout_ << " weight:" << weight[ index ] << " (should be 0)";
+          sout_ << " value is : " << data[ index ];
+          sout_ << " index is: " << index;
+          sout_ << " level:" << entity.level();
+          sout_ << std :: endl;
         }
       }
       else
       {
-        for(int i=0; i<it->template count<cdim>(); ++i)
+        const int numSubEntities = entity.template count< cdim >();
+        for( int i=0; i < numSubEntities; ++i )
         {
-          int idx = set.template subIndex<cdim>(*it,i);
-          FieldVector<double,dimworld> cmid(0.);
-          int c = (it->template entity<cdim>(i))->geometry().corners();
-          for (int j=0; j<c; j++)
-          {
-            cmid += it->template entity<cdim>(i)->geometry()[j];
-          }
+          SubEntityPointer subEp = entity.template entity< cdim >( i );
 
-          cmid /= double(c);
-          double lerr = fabs(f(cmid)-data[idx]);
-          if (testweight)
+          const int index = indexSet_.index( *subEp );
+          CoordinateVector cmid( 0.0 );
+
+          const int numVertices = subEp->geometry().corners();
+          for( int j = 0; j< numVertices; ++j )
+            cmid += subEp->geometry()[ j ];
+          cmid /= double( numVertices );
+
+          double lerr = fabs( f( cmid ) - data[ index ] );
+          maxerr = std::max( maxerr, lerr );
+          if( testweight && (weight[ index ] < 0) )
           {
-            if (weight[idx] < 0) {
-              sout << "<" << rank << "/test> ERROR in communication test. ";
-              sout << "weight:" << weight[idx] << " should be zero!";
-              sout << " value is : " << data[idx]
-                   << "  index is:";
-              sout << idx << "  lvl:" << it->level() << "  " ;
-              sout << "\n";
-              int c = (it->template entity<cdim>(i))->geometry().corners();
-              for (int j=0; j<c; j++)
-              {
-                GeometryType type = it->type();
-                const ReferenceElement<double, dimworld > & refElem =
-                  ReferenceElements<double, dimworld >::general(type);
-                int vx = refElem.subEntity(i,cdim,j,dim);
-                sout << "index:" << set.template subIndex<dim>(*it,vx) << " ";
-                sout << it->template entity<cdim>(i)->geometry()[j] << "/" ;
-              }
-              sout << "\n";
+            sout_ << "<" << rank << "/test> Error in communication test.";
+            sout_ << " weight:" << weight[ index ] << " should be zero!";
+            sout_ << " value is : " << data[ index ];
+            sout_ << " index is:" << index;
+            sout_ << " level: " << entity.level() ;
+            sout_ << std :: endl;
+
+            for( int j = 0; j < numVertices; )
+            {
+              const ReferenceElement< double, dim > &refElem
+                = ReferenceElements< double, dim > :: general( entity.type() );
+              const int vx = refElem.subEntity( i, cdim, j, dim );
+              sout_ << "index: " << indexSet_.template subIndex< dim >( entity, vx )
+                    << " " << subEp->geometry()[ j ];
+              (++j < numVertices ? sout_ <<  "/" : sout_ << std :: endl);
             }
           }
-          maxerr = std::max(maxerr,lerr);
         }
       }
     }
     return maxerr;
   }
+
   // The main ''algorithn''
-  bool checkCommunication(const GridType &grid)
+  bool checkCommunication ()
   {
-    upwind[0] = -0.1113;
-    int myrank = grid.comm().rank();
+    upwind_[ 0 ] = -0.1113;
+    int myrank = gridView_.comm().rank();
 
-    if (myrank == 0)
+    if( myrank == 0 )
+    {
       std::cout << "TEST ";
-    if( level_ < 0)
-      std::cout << "Leaf";
-    else
-      std::cout << "Level<" << level_ << ">";
-    std::cout << " Communication for codim: " << cdim << "\n";
+      (level_ < 0 ? std :: cout << "Leaf" : std :: cout << "Level<" << level_ << ">");
+      std :: cout << " communication for codim " << cdim << std :: endl;
+    }
 
-    int dataSize = set.size(cdim);
-
-    typedef std::vector<double> ArrayType;
+    const int dataSize = indexSet_.size( cdim );
     ArrayType data(dataSize, 0.0);
     ArrayType weight(dataSize, 0.0);
+    project( dataSize, data, weight, myrank );
 
-    project(grid,dataSize,data,weight, myrank);
-    double preresult = test(grid,dataSize,data,weight,myrank,false);
-    sout << "Test before Communication on <" << myrank << "> "
-         << preresult << std::endl;
+    double preresult = test( dataSize, data, weight, false );
+    sout_ << "Test before Communication on <" << myrank << "> " << preresult << std :: endl;
     // Communicate
-    typedef typename GridType :: Traits :: GlobalIdSet GlobalIdSetType;
-    ExampleDataHandle<IndexSet,GlobalIdSetType,ArrayType>
-    dh (set,grid.globalIdSet(),cdim,data,weight);
-    // std::cout << "STARTING COMMUNICATION ... " << std::flush;
+    typedef typename Grid :: Traits :: GlobalIdSet GlobalIdSet;
+    ExampleDataHandle< IndexSet, GlobalIdSet, ArrayType >
+    dh( indexSet_, gridView_.grid().globalIdSet(), cdim, data, weight );
 
     // call communication of grid
-    // if level < 0 then check leaf level
-    gridPart_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
+    gridView_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
     // make sure backward communication does the same, this should change nothing
-    gridPart_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
-    //gridPart_.communicate(dh,All_All_Interface,ForwardCommunication);
+    gridView_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
+    //gridView_.communicate(dh,All_All_Interface,ForwardCommunication);
 
-    double result = test(grid,dataSize,data,weight,myrank,true);
-    sout << "Test after Communication on <" << myrank << "> "  << std::flush
-         << result << std::endl;
-    return (fabs(result)<1e-8);
+    double result = test( dataSize, data, weight, true );
+    sout_ << "Test after Communication on <" << myrank << "> " << result << std :: endl;
+    return (fabs(result) < 1e-8);
   }
-  OutputStreamImp& sout;
-  const GridPartType & gridPart_;
-public:
-  // --constructor
-  CheckCommunication(const GridPartType &gridPart,
-                     OutputStreamImp & out,
-                     const int level
 
-                     ) : upwind(-1.)
-                         , set(gridPart.indexSet())
-                         , level_(level)
-                         , sout(out)
-                         , gridPart_(gridPart)
+public:
+  CheckCommunication ( const GridView &gridView, OutputStream &sout, int level )
+    : upwind_( -1.0 ),
+      sout_( sout ),
+      gridView_( gridView ),
+      indexSet_( gridView_.indexSet() ),
+      level_( level )
   {
-    if (!checkCommunication(gridPart.grid())) {
-      std::cerr << "ERROR in communication test for codim " << cdim << "!!!"
-                << std::endl;
+    if( !checkCommunication() )
+    {
+      std :: cerr << "Error in communication test for codim "
+                  << cdim << "!" << std :: endl;
     }
+
     // for automatic testing of all codims
-    CheckCommunication<GridPartType,NextCodim<GridType,cdim>::calc,
-        OutputStreamImp> test(gridPart_,sout,level_);
+    CheckCommunication< GridView, NextCodim< Grid, cdim > :: calc, OutputStream >
+    test( gridView_, sout_, level_ );
   }
 };
 
-template <class GridPartType, class OutputStreamImp>
-class CheckCommunication<GridPartType,-1,OutputStreamImp> {
+
+template< class GridView, class OutputStream >
+class CheckCommunication< GridView, -1, OutputStream >
+{
 public:
-  CheckCommunication(const GridPartType &grid,OutputStreamImp & out, const int level) {}
+  CheckCommunication ( const GridView &gridView, OutputStream &sout, int level )
+  {}
 };
 
-template <class GridType, class OutputStreamImp>
-void checkCommunication(GridType &grid, int level , OutputStreamImp & out)
+
+template< class Grid, class OutputStream >
+void checkCommunication( const Grid &grid, int level, OutputStream &sout )
 {
+  if( level < 0 )
   {
-    if(level < 0)
-    {
-      typedef LeafGridPart<GridType> GridPartType;
-      GridPartType gridPart(grid);
-      CheckCommunication<GridPartType,GridType::dimension,OutputStreamImp>
-      test(gridPart,out,level);
-    }
-    else
-    {
-      typedef LevelGridPart<GridType> GridPartType;
-      GridPartType gridPart(grid,level);
-      CheckCommunication<GridPartType,GridType::dimension,OutputStreamImp>
-      test(gridPart,out,level);
-    }
+    typedef typename Grid :: template Partition< All_Partition > :: LeafGridView GridView;
+    GridView gridView = grid.leafView();
+    CheckCommunication< GridView, GridView :: dimension, OutputStream >
+    test( gridView, sout, level );
+  }
+  else
+  {
+    typedef typename Grid :: template Partition< All_Partition > :: LevelGridView GridView;
+    GridView gridView = grid.levelView( level );
+    CheckCommunication< GridView, GridView :: dimension, OutputStream >
+    test( gridView, sout, level );
   }
 }
