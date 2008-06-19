@@ -25,14 +25,13 @@ namespace Dune
     typedef GridView< ViewTraits > ThisType;
 
   public:
-
     typedef typename ViewTraits :: GridViewImp GridViewImp;
 
     /** \brief Traits class */
     typedef ViewTraits Traits;
 
     /** \brief type of the grid */
-    typedef typename Traits::Grid Grid;
+    typedef typename Traits :: Grid Grid;
 
     /** \brief type of the index set */
     typedef typename Traits :: IndexSet IndexSet;
@@ -43,11 +42,17 @@ namespace Dune
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
 
+    /** \brief type of the collective communication */
+    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+
     /** \brief Codim Structure */
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
 
     enum { conforming = Traits :: conforming };
+
+    enum { dimension = Grid :: dimension };
+    enum { dimensionworld = Grid :: dimensionworld };
 
   public:
     GridView ( const GridViewImp& imp) : imp_(imp) {}
@@ -104,6 +109,12 @@ namespace Dune
       return asImp().level();
     }
 
+    /** \brief obtain collective communication object */
+    const CollectiveCommunication &comm () const
+    {
+      return asImp().comm();
+    }
+
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
@@ -124,7 +135,6 @@ namespace Dune
   private:
     GridViewImp imp_;
   };
-
 
 }
 

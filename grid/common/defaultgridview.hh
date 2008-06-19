@@ -29,6 +29,9 @@ namespace Dune {
     typedef typename Grid :: Traits :: LevelIntersectionIterator
     IntersectionIterator;
 
+    /** \brief type of the collective communication */
+    typedef typename Grid :: Traits :: CollectiveCommunication CollectiveCommunication;
+
     template< int cd >
     struct Codim
     {
@@ -67,6 +70,9 @@ namespace Dune {
 
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
+
+    /** \brief type of the collective communication */
+    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
@@ -143,6 +149,12 @@ namespace Dune {
       return level_;
     }
 
+    /** \brief obtain collective communication object */
+    const CollectiveCommunication &comm () const
+    {
+      return grid().comm();
+    }
+
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
@@ -170,6 +182,9 @@ namespace Dune {
     /** \brief type of the intersection iterator */
     typedef typename Grid :: Traits :: LeafIntersectionIterator
     IntersectionIterator;
+
+    /** \brief type of the collective communication */
+    typedef typename Grid :: Traits :: CollectiveCommunication CollectiveCommunication;
 
     template< int cd >
     struct Codim
@@ -209,6 +224,9 @@ namespace Dune {
 
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
+
+    /** \brief type of the collective communication */
+    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
@@ -280,6 +298,12 @@ namespace Dune {
     int level () const
     {
       return grid().maxLevel();
+    }
+
+    /** \brief obtain collective communication object */
+    const CollectiveCommunication &comm () const
+    {
+      return grid().comm();
     }
 
     /** communicate data on this view */
