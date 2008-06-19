@@ -3,6 +3,9 @@
 #ifndef DUNE_GRIDPART_HH
 #define DUNE_GRIDPART_HH
 
+#warning "GridParts are deprecated. Use GridViews instead."
+#warning "For more information see dune/grid/common/gridview.hh."
+
 //- System includes
 
 //- Dune includes
@@ -589,4 +592,14 @@ namespace Dune {
 
 } // end namespace Dune
 
+#endif
+
+
+// Error Message for dune-fem
+//
+// This message can only be triggered by users of dune-fem and tells them which
+// file to include in the future
+#ifdef DUNE_FEM_GRIDPART_HH
+#error "Including <dune/grid/common/gridpart.hh> is deprecated."
+#error "Include <dune/fem/gridpart/gridpart.hh> instead."
 #endif
