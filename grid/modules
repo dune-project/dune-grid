@@ -97,7 +97,7 @@
         /** @defgroup StarCD StarCD
             @ingroup IO */
 
-  /**
+  /*
      @defgroup GridPart Grid Parts
      @ingroup Grid
   */

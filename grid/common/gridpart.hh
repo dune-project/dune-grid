@@ -16,12 +16,12 @@
 #include <dune/common/bartonnackmanifcheck.hh>
 #include <dune/common/deprecated.hh>
 
-/** @file
+/*  @file
    @author Robert Kloefkorn
    @brief Provides views of grid via grid parts, heavily used in the
    dune-fem module.
  */
-/*! @addtogroup GridPart
+/*  @addtogroup GridPart
     @ingroup Grid
 
    @section GridPart1 What is a GridPart ?
@@ -60,7 +60,7 @@
  */
 
 namespace Dune {
-  /**
+  /*
    * @addtogroup GridPart
    *
    * @{
@@ -74,13 +74,13 @@ namespace Dune {
   template <class GridImp, PartitionIteratorType pitype>
   class HierarchicGridPartTraits;
 
-  //! \brief Interface for the GridPart classes
-  //! A GridPart class allows to access only a specific subset of a grid's
-  //! entities. A GridPart implementation provides the corresponding index set
-  //! and a begin/end iterator pair for accessing those entities, the
-  //! corresponding intersection iterators and a appropriate communication
-  //! method.
-  //! GridParts are used to parametrize spaces (see DiscreteFunctionSpaceDefault [in dune-fem]).
+  //  \brief Interface for the GridPart classes
+  //  A GridPart class allows to access only a specific subset of a grid's
+  //  entities. A GridPart implementation provides the corresponding index set
+  //  and a begin/end iterator pair for accessing those entities, the
+  //  corresponding intersection iterators and a appropriate communication
+  //  method.
+  //  GridParts are used to parametrize spaces (see DiscreteFunctionSpaceDefault [in dune-fem]).
   template <class GridPartTraits>
   class GridPartInterface {
   public:
@@ -193,7 +193,7 @@ namespace Dune {
     }
   };
 
-  //! \brief Default implementation for the GridPart classes
+  //  \brief Default implementation for the GridPart classes
   template <class GridPartTraits>
   class GridPartDefault :
     public GridPartInterface<GridPartTraits> {
@@ -227,7 +227,7 @@ namespace Dune {
     const IndexSetType& iset_;
   };
 
-  //! \brief Selects a specific level of a grid
+  //  \brief Selects a specific level of a grid
   template <class GridImp, PartitionIteratorType pitype = Interior_Partition>
   class LevelGridPart :
     public GridPartDefault<LevelGridPartTraits<GridImp,pitype> > {
@@ -320,7 +320,7 @@ namespace Dune {
     const int level_;
   };
 
-  //! Type definitions for the LevelGridPart class
+  //  Type definitions for the LevelGridPart class
   template <class GridImp, PartitionIteratorType pitype>
   struct LevelGridPartTraits {
 
@@ -352,7 +352,7 @@ namespace Dune {
     enum { conforming = Capabilities::isLevelwiseConforming<GridType>::v };
   };
 
-  //! \brief Selects the leaf level of a grid
+  //  \brief Selects the leaf level of a grid
   template <class GridImp, PartitionIteratorType pitype = Interior_Partition>
   class LeafGridPart :
     public GridPartDefault<LeafGridPartTraits<GridImp,pitype> > {
@@ -436,7 +436,7 @@ namespace Dune {
     IndexSetType isetWrapper_;
   };
 
-  //! Type definitions for the LeafGridPart class
+  //  Type definitions for the LeafGridPart class
   template <class GridImp,PartitionIteratorType pitype>
   struct LeafGridPartTraits {
 
@@ -470,13 +470,13 @@ namespace Dune {
 
 
   //**************************************************************
-  /** \brief Selects the leaf level of a grid together with the
+  /*  \brief Selects the leaf level of a grid together with the
       HierarchicIndexSet available for ALUGrid and AlbertaGrid.
       The HierarchicIndexSet is basically the LocalIdSet of the grid
       extended by a size method to implement the IndexSet interface.
       For all other grids the default LeafIndexSet is selected.
 
-      \deprected
+      \deprecated
    */
   template <class GridImp, PartitionIteratorType pitype = Interior_Partition>
   class HierarchicGridPart :
@@ -561,8 +561,8 @@ namespace Dune {
     IndexSetType isetWrapper_;
   };
 
-  //! Type definitions for the HierarchicGridPart class
-  /** \deprected */
+  //  Type definitions for the HierarchicGridPart class
+  /*  \deprecated */
   template <class GridImp,PartitionIteratorType pitype>
   struct HierarchicGridPartTraits {
     /** \brief The type of the grid */
@@ -588,7 +588,7 @@ namespace Dune {
 
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
-  /** @} */
+  /*  @} */
 
 } // end namespace Dune
 
