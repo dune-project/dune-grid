@@ -12,6 +12,7 @@
 #include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkallcomm.cc"
 
 int rank;
 
@@ -41,8 +42,12 @@ void check_yasp() {
 
   // check communication interface
   checkCommunication(grid,-1,Dune::dvverb);
+  checkAllToAllCommunication( grid.leafView() );
   for(int l=0; l<=grid.maxLevel(); ++l)
+  {
     checkCommunication(grid,l,Dune::dvverb);
+    checkAllToAllCommunication( grid.levelView( l ) );
+  }
 
   // check the method geometryInFather()
   checkGeometryInFather(grid);

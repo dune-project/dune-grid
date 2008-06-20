@@ -17,6 +17,8 @@
       @ingroup GridInterface */
   /** @defgroup GIGrid Grid Abstract Base Class
       @ingroup GridInterface */
+  /** @defgroup GIGridView GridView
+      @ingroup GridInterface */
   /** @defgroup GIEntity Entity 
       @ingroup GridInterface */
   /** @defgroup GIGeometry Geometry

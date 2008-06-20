@@ -8,16 +8,38 @@
 namespace Dune
 {
 
-  /**
-     \brief Grid view abstract base class
-     @ingroup GIGrid
+  /** \addtogroup GIGridView
+   *
+   *  Though a DUNE grid is hierarchic, one often only needs access to
+   *  a certain level of the grid. These views are provided by an
+   *  implementation of GridView. Each grid exports a LevelGridView and
+   *  a LeafGridView, corresponding to the two different types of levels.
+   *
+   *  A grid view provides the following functionality:
+   *  - The index set for the grid level can be accessed by the indexSet()
+   *    method.
+   *  - A pair of begin() / end() methods provide iterators for each
+   *    codimension.
+   *  - A pair of ibegin() / iend() methods return suitable intersection
+   *    iterators for a given entity of codimension 0.
+   *  - For parallel computations, a suitable communicate() method is provided.
+   *  - The underlying grid can be accessed through the grid() method.
+   *  .
+   *
+   *  A GridView is obtained from the grid by calling one of the levelView() or
+   *  leafView() methods.
+   */
 
-     Interface class for view on grids. Grids return two types of view,
-     a view of the leaf grid and of a level grid, which both satisfy
-     the same interface. Through the view the user has access to the
-     iterators, the intersections and the index set.
 
-     The interface is implemented using the engine concept.
+  /** \brief Grid view abstract base class
+   *  \ingroup GIGridView
+   *
+   *  Interface class for view on grids. Grids return two types of view,
+   *  a view of the leaf grid and of a level grid, which both satisfy
+   *  the same interface. Through the view the user has access to the
+   *  iterators, the intersections and the index set.
+   *
+   *  The interface is implemented using the engine concept.
    */
   template< class ViewTraits >
   class GridView

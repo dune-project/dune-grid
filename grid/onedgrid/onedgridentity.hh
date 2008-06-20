@@ -240,8 +240,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     //! Default Constructor
-    OneDGridEntity() : target_(NULL), geo_(OneDGridGeometry<dim,1,GridImp>()),
-                       geometryInFather_(OneDGridGeometry<dim,1,GridImp>())
+    OneDGridEntity ()
+      : geo_( OneDGridGeometry<dim,1,GridImp>() ),
+        geometryInFather_( OneDGridGeometry<dim,1,GridImp>() ),
+        target_( NULL )
     {}
 
 
