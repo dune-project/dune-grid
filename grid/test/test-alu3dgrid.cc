@@ -14,7 +14,6 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
-#include "checkallcomm.cc"
 
 using namespace Dune;
 
@@ -157,13 +156,9 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 
   // -1 stands for leaf check
   checkCommunication(grid, -1, std::cout);
-  //checkAllToAllCommunication( grid.leafView() );
 
   for(int l=0; l<= mxl; ++l)
-  {
     checkCommunication(grid, l , Dune::dvverb);
-    //checkAllToAllCommunication( grid.levelView( l ) );
-  }
 }
 #else
 template <class GridType>
@@ -198,7 +193,6 @@ int main (int argc , char **argv) {
         checkALUSerial(grid);
       }
 
-#if 0
       // check non-confrom ALUGrid for 2d
       {
         typedef ALUSimplexGrid<2,2> GridType;
@@ -214,7 +208,6 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr,2);
       }
-#endif
 
       {
         std::string filename;
@@ -227,17 +220,16 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
 
-#if 0
         if(myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
           checkALUSerial(grid,(mysize == 1) ? 1 : 0);
         }
-#endif
 
         // perform parallel check only when more then one proc
         if(mysize > 1)
         {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
           checkALUParallel(grid,1,0);
           if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
           checkALUParallel(grid,0,2);
@@ -255,13 +247,11 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
 
-#if 0
         if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
           checkALUSerial(grid,(mysize == 1) ? 1 : 0);
         }
-#endif
 
         // perform parallel check only when more then one proc
         if(mysize > 1)
