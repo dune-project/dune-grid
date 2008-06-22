@@ -10,6 +10,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <memory>
 #include <map>
 #include <assert.h>
 #include <cmath>

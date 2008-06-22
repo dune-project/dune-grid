@@ -7,6 +7,7 @@
 #define DUNE_ALBERTAEXTRA_HH
 
 #include <algorithm>
+#include <cstring>
 
 #ifdef __ALBERTApp__
 namespace Albert {

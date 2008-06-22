@@ -1352,7 +1352,8 @@ namespace Dune
       //      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
       //#else
       // use dummy collective communication
-      typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+      typedef Dune :: CollectiveCommunication< GridImp >
+      CollectiveCommunication;
       //#endif
     };
   };

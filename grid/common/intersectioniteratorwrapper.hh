@@ -179,7 +179,9 @@ namespace Dune {
     typedef LeafIntersectionIteratorWrapper<GridImp> ThisType;
     typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
   public:
-    typedef Intersection< const GridImp, Dune :: LeafIntersectionIteratorWrapper > Intersection;
+    typedef Dune :: Intersection
+    < const GridImp, Dune :: LeafIntersectionIteratorWrapper >
+    Intersection;
 
     //! dimension
     enum { dimension      = GridImp :: dimension  };
@@ -235,7 +237,9 @@ namespace Dune {
     typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
     typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
   public:
-    typedef Intersection< const GridImp, Dune :: LevelIntersectionIteratorWrapper > Intersection;
+    typedef Dune :: Intersection
+    < const GridImp, Dune :: LevelIntersectionIteratorWrapper >
+    Intersection;
 
     //! dimension
     enum { dimension      = GridImp :: dimension  };
