@@ -394,10 +394,11 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, 1>& local) 
 }
 
 template <class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype,1,1>& Dune::UGGridGeometry<1,2,GridImp>::
+const Dune::FieldMatrix<typename GridImp::ctype,2,1>& Dune::UGGridGeometry<1,2,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
 {
-  jacobianInverseTransposed_[0][0] = 1 / (coord_[0]-coord_[1]).two_norm();
+  jacobianInverseTransposed_[0][0] = 1 / (coord_[0][0]-coord_[1][0]);
+  jacobianInverseTransposed_[1][0] = 1 / (coord_[0][1]-coord_[1][1]);
   return jacobianInverseTransposed_;
 }
 
@@ -429,7 +430,7 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) 
 }
 
 template <class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype,2,2>& Dune::UGGridGeometry<2,3,GridImp>::
+const Dune::FieldMatrix<typename GridImp::ctype,3,2>& Dune::UGGridGeometry<2,3,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
   // I don't really know how to implement this for quadrilateral faces,
@@ -437,6 +438,11 @@ jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& l
   if (!type().isTriangle())
     DUNE_THROW(NotImplemented, "jacobianInverse only implemented for triangular faces!");
 
+  for (int i=0; i<3; i++)
+    for (int j=0; j<2; j++)
+      jacobianInverseTransposed_[i][j] = coord_[j+1][i] - coord_[0][i];
+
+#if 0
   // The spatial triangle is first mapped isometrically onto the plane.  We map
   // the first vertex onto the origin, the second one on the positive x-axis,
   // and the third one such that is has positive y-coordinate.  Then we call
@@ -461,5 +467,6 @@ jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& l
   double* cornerCoords[3] = {&p0[0], &p1[0], &p2[0]};
 
   UG_NS<2>::Transformation(3, cornerCoords, local, jacobianInverseTransposed_);
+#endif
   return jacobianInverseTransposed_;
 }
