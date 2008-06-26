@@ -241,9 +241,9 @@ namespace Dune {
       class RefinementIteratorSpecial<dimension, CoordType, 0>
       {
       public:
-        typedef RefinementImp<dimension, CoordType> RefinementImp;
-        typedef typename RefinementImp::IndexVector IndexVector;
-        typedef typename RefinementImp::template Codim<0>::Geometry Geometry;
+        typedef RefinementImp<dimension, CoordType> Refinement;
+        typedef typename Refinement::IndexVector IndexVector;
+        typedef typename Refinement::template Codim<0>::Geometry Geometry;
 
         RefinementIteratorSpecial(int level, bool end = false);
 
@@ -253,7 +253,7 @@ namespace Dune {
         int index() const;
         const Geometry &geometry() const;
       protected:
-        typedef typename RefinementImp::BackendRefinement BackendRefinement;
+        typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
         enum { nKuhnSimplices = Factorial<dimension>::value };
 
@@ -264,7 +264,7 @@ namespace Dune {
         const BackendIterator backendEnd;
       private:
         mutable bool builtGeometry;
-        mutable MakeableGeometry<dimension, RefinementImp> geometry_;
+        mutable MakeableGeometry<dimension, Refinement> geometry_;
       };
 
       template<int dimension, class CoordType>

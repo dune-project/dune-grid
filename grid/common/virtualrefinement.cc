@@ -26,6 +26,7 @@
 #include <dune/common/fvector.hh>
 #include "refinement.hh"
 #include <dune/common/exceptions.hh>
+#include <typeinfo>
 
 namespace Dune {
 
@@ -271,11 +272,11 @@ namespace Dune {
 
   template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
   class VirtualRefinementImp
-    : public VirtualRefinement<dimension, CoordType>
+    : public Dune::VirtualRefinement<dimension, CoordType>
   {
   public:
-    typedef Refinement<geometryType, CoordType, coerceTo, dimension> Refinement;
-    typedef VirtualRefinement<dimension, CoordType> VirtualRefinement;
+    typedef Dune::Refinement<geometryType, CoordType, coerceTo, dimension> Refinement;
+    typedef Dune::VirtualRefinement<dimension, CoordType> VirtualRefinement;
 
     template<int codimension>
     class SubEntityIteratorBack;
@@ -385,7 +386,7 @@ namespace Dune {
     : public VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<0>
   {
   public:
-    typedef VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> VirtualRefinementImp;
+    typedef Dune::VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension> VirtualRefinementImp;
     typedef typename VirtualRefinementImp::template SubEntityIteratorBack<0> Common;
     typedef typename VirtualRefinementImp::Refinement Refinement;
     typedef VirtualRefinement<dimension, CoordType> RefinementBase;

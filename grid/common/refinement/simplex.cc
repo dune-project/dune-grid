@@ -609,9 +609,9 @@ namespace Dune {
       class RefinementIteratorSpecial<dimension, CoordType, 0>
       {
       public:
-        typedef RefinementImp<dimension, CoordType> RefinementImp;
-        typedef typename RefinementImp::IndexVector IndexVector;
-        typedef typename RefinementImp::template Codim<0>::Geometry Geometry;
+        typedef RefinementImp<dimension, CoordType> Refinement;
+        typedef typename Refinement::IndexVector IndexVector;
+        typedef typename Refinement::template Codim<0>::Geometry Geometry;
         typedef RefinementIteratorSpecial<dimension, CoordType, 0> This;
 
         RefinementIteratorSpecial(int level, bool end = false);
@@ -632,7 +632,7 @@ namespace Dune {
         int index_;
       private:
         mutable bool builtGeometry;
-        mutable MakeableGeometry<dimension, RefinementImp> geometry_;
+        mutable MakeableGeometry<dimension, Refinement> geometry_;
       };
 
       template<int dimension, class CoordType>
@@ -644,7 +644,7 @@ namespace Dune {
         for(int i = 0; i < dimension; ++i)
           origin[i] = 0;
         if(end) {
-          index_ = RefinementImp::nElements(level);
+          index_ = Refinement::nElements(level);
           origin[0] = size;
         }
       }
