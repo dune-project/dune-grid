@@ -25,11 +25,6 @@ namespace Dune
     public:
       enum { dimension = 0 };
       enum { duneType = basicDuneType };
-
-      inline static GeometryType geometryType ()
-      {
-        return GeometryType( duneType, dimension );
-      }
     };
 
 
@@ -52,11 +47,6 @@ namespace Dune
                            || (BaseGeometry :: duneType == GeometryType :: cube))
                         ? GeometryType :: cube
                         : GeometryType :: prism };
-
-      inline static GeometryType geometryType ()
-      {
-        return GeometryType( duneType, dimension );
-      }
     };
 
 
@@ -78,11 +68,6 @@ namespace Dune
                            || (BaseGeometry :: duneType == GeometryType :: simplex))
                         ? GeometryType :: simplex
                         : GeometryType :: pyramid };
-
-      inline static GeometryType geometryType ()
-      {
-        return GeometryType( duneType, dimension );
-      }
     };
 
 
