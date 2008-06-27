@@ -25,9 +25,6 @@ namespace Dune
     // NumSubEntities
     // --------------
 
-    template< class Geometry, int codim >
-    struct NumSubEntities;
-
     template< int codim >
     struct NumSubEntities< Point, codim >
     {
@@ -92,12 +89,12 @@ namespace Dune
     template< class BaseGeometry, int dim, int codim, int i >
     struct PyramidSubGeometry
     {
-      enum { n = NumSubEntities< BaseGeometry, codim-1 > :: value };
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
 
       typedef typename TypeIf
-      < (i < n),
+      < (i < m),
       typename SubGeometry< BaseGeometry, codim-1, i > :: type,
-      Pyramid< typename SubGeometry< BaseGeometry, codim, i-n > :: type >
+      Pyramid< typename SubGeometry< BaseGeometry, codim, i-m > :: type >
       > :: type type;
     };
 
