@@ -15,38 +15,17 @@ namespace Dune
   {
 
     template< class Geometry >
-    class ReferenceElementBase
-    {
-    public:
-      enum { dimension = Geometry :: dimension };
-
-      inline static GeometryType geometryType ()
-      {
-        return GeometryType( Geometry :: duneType, dimension );
-      }
-    };
-
-
-
-    template< class Geometry >
     class ReferenceElement;
 
 
-    template< GeometryType :: BasicType basicType >
-    class ReferenceElement< Point< basicType > >
-      : public ReferenceElementBase< Point< basicType > >
+    template<>
+    class ReferenceElement< Point >
     {
-      typedef ReferenceElementBase< Point< basicType > > Base;
+      typedef Point Geometry;
 
     public:
-      enum { numCorners = 1 };
-      enum { dimension = Base :: dimension };
-
-      template< int codim >
-      struct Codim
-      {
-        enum { numSubEntities = (codim == 0) ? 1 : 0 };
-      };
+      enum { numCorners = Geometry :: numCorners };
+      enum { dimension = Geometry :: dimension };
 
       template< class ctype >
       inline static void corner ( unsigned int i,
@@ -72,20 +51,12 @@ namespace Dune
 
     template< class BaseGeometry >
     class ReferenceElement< Prism< BaseGeometry > >
-      : public ReferenceElementBase< Prism< BaseGeometry > >
     {
-      typedef ReferenceElementBase< Prism< BaseGeometry > > Base;
+      typedef Prism< BaseGeometry > Geometry;
 
     public:
-      enum { numCorners = 2 * ReferenceElement< BaseGeometry > :: numCorners };
-      enum { dimension = Base :: dimension };
-
-      template< int codim >
-      struct Codim
-      {
-        enum { numSubEntities = 2 * ReferenceElement< BaseGeometry > :: template Codim< codim - 1 > :: numSubEntities
-                                + ReferenceElement< BaseGeometry > :: template Codim< codim > :: numSubEntities };
-      };
+      enum { numCorners = Geometry :: numCorners };
+      enum { dimension = Geometry :: dimension };
 
       template< class ctype >
       inline static void corner ( unsigned int i,
@@ -116,20 +87,12 @@ namespace Dune
 
     template< class BaseGeometry >
     class ReferenceElement< Pyramid< BaseGeometry > >
-      : public ReferenceElementBase< Pyramid< BaseGeometry > >
     {
-      typedef ReferenceElementBase< Pyramid< BaseGeometry > > Base;
+      typedef Prism< BaseGeometry > Geometry;
 
     public:
-      enum { numCorners = ReferenceElement< BaseGeometry > :: numCorners + 1 };
-      enum { dimension = Base :: dimension };
-
-      template< int codim >
-      struct Codim
-      {
-        enum { numSubEntities = ReferenceElement< BaseGeometry > :: template Codim< codim - 1 > :: numSubEntities
-                                + ReferenceElement< BaseGeometry > :: template Codim< codim > :: numSubEntities };
-      };
+      enum { numCorners = Geometry :: numCorners };
+      enum { dimension = Geometry :: dimension };
 
       template< class ctype >
       inline static void corner ( unsigned int i,

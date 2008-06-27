@@ -21,6 +21,23 @@ namespace Dune
       enum { value = 1 };
     };
 
+
+
+    template< bool condition, class TypeTrue, class TypeFalse >
+    struct TypeIf;
+
+    template< class TypeTrue, class TypeFalse >
+    struct TypeIf< false, TypeTrue, TypeFalse >
+    {
+      typedef TypeFalse type;
+    };
+
+    template< class TypeTrue, class TypeFalse >
+    struct TypeIf< true, TypeTrue, TypeFalse >
+    {
+      typedef TypeTrue type;
+    };
+
   }
 
 }

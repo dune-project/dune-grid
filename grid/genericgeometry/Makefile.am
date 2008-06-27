@@ -1,4 +1,5 @@
 genericgeometrydir = $(includedir)/dune/grid/genericgeometry
-genericgeometry_HEADERS = geometrytypes.hh \
+genericgeometry_HEADERS = conversion.hh \
+                          geometrytypes.hh \
                           misc.hh \
                           referenceelements.hh
