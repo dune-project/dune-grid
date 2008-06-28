@@ -1,0 +1,10 @@
+testsubentities
+
+Makefile
+Makefile.in
+
+.deps
+.libs
+
+*.so.*
+*.swp

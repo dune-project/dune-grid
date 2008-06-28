@@ -15,10 +15,13 @@ namespace Dune
   {
 
     template< class Geometry, int codim >
-    struct NumSubEntities;
+    class NumSubEntities;
+
+    template< class Geometry, int codim, unsigned int i, int subcodim >
+    class NumSubSubEntities;
 
     template< class Geometry, int codim, unsigned int i >
-    struct SubGeometry;
+    class SubGeometry;
 
 
 
@@ -26,28 +29,91 @@ namespace Dune
     // --------------
 
     template< int codim >
-    struct NumSubEntities< Point, codim >
+    class NumSubEntities< Point, codim >
     {
       enum { value = (codim == 0) ? 1 : 0 };
     };
 
+
     template< class BaseGeometry, int codim >
-    struct NumSubEntities< Prism< BaseGeometry >, codim >
+    class NumSubEntities< Prism< BaseGeometry >, codim >
     {
-      enum
-      {
-        value = 2 * NumSubEntities< BaseGeometry, codim-1 > :: value
-                + NumSubEntities< BaseGeometry, codim > :: value
-      };
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
+
+    public:
+      enum { value = n + 2*m };
     };
 
     template< class BaseGeometry, int codim >
     struct NumSubEntities< Pyramid< BaseGeometry >, codim >
     {
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
+
+    public:
+      enum { value = m + n };
+    };
+
+
+
+    // NumSubSubEntities
+    // -----------------
+
+    template< int codim, unsigned int i, int subcodim >
+    class NumSubSubEntities< Point, codim, i, subcodim >
+    {
+      typedef Point Geometry;
+      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
+                          "Invalid subentity index." );
+
+    public:
+      enum { value = (codim+subcodim == 0) ? 1 : 0 };
+    };
+
+    template< class BaseGeometry, int codim, unsigned int i, int subcodim >
+    class NumSubSubEntities< Prism< BaseGeometry >, codim, i, subcodim >
+    {
+      typedef Prism< BaseGeometry > Geometry;
+      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
+                          "Invalid subentity index." );
+
+      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+
+    public:
       enum
       {
-        value = NumSubEntities< BaseGeometry, codim-1 > :: value
-                + NumSubEntities< BaseGeometry, codim > :: value
+        value = (i >= n)
+                ? NumSubSubEntities< BaseGeometry, codim-1, (i-n), subcodim >
+                :: value
+                : NumSubSubEntities< BaseGeometry, codim, i, subcodim >
+                :: value
+                + 2 * NumSubSubEntities< BaseGeometry, codim, i, subcodim-1 >
+                :: value
+      };
+    };
+
+    template< class BaseGeometry, int codim, unsigned int i, int subcodim >
+    class NumSubSubEntities< Pyramid< BaseGeometry >, codim, i, subcodim >
+    {
+      typedef Pyramid< BaseGeometry > Geometry;
+      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
+                          "Invalid subentity index." );
+
+      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+
+    public:
+      enum
+      {
+        value = (i < m)
+                ? NumSubSubEntities< BaseGeometry, codim-1, i, subcodim >
+                :: value
+                : NumSubSubEntities< BaseGeometry, codim, i-m, subcodim >
+                :: value
+                + NumSubSubEntities< BaseGeometry, codim, i-m, subcodim-1 >
+                :: value
       };
     };
 
@@ -137,7 +203,7 @@ namespace Dune
     };
 
     template< class BaseGeometry, int codim, unsigned int i >
-    struct SubGeometry< Pyramid< BaseGeometry >, codim, i >
+    class SubGeometry< Pyramid< BaseGeometry >, codim, i >
     {
       dune_static_assert( (i < NumSubEntities< Pyramid< BaseGeometry >, codim > :: value),
                           "Invalid subentity index." );
