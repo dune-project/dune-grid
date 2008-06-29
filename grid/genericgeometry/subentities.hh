@@ -31,6 +31,7 @@ namespace Dune
     template< int codim >
     class NumSubEntities< Point, codim >
     {
+    public:
       enum { value = (codim == 0) ? 1 : 0 };
     };
 
@@ -64,19 +65,17 @@ namespace Dune
     class NumSubSubEntities< Point, codim, i, subcodim >
     {
       typedef Point Geometry;
-      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
-                          "Invalid subentity index." );
+      enum { maxI = NumSubEntities< Geometry, codim > :: value };
 
     public:
-      enum { value = (codim+subcodim == 0) ? 1 : 0 };
+      enum { value = (subcodim == 0) && (i < maxI) ? 1 : 0 };
     };
 
     template< class BaseGeometry, int codim, unsigned int i, int subcodim >
     class NumSubSubEntities< Prism< BaseGeometry >, codim, i, subcodim >
     {
       typedef Prism< BaseGeometry > Geometry;
-      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
-                          "Invalid subentity index." );
+      enum { maxI = NumSubEntities< Geometry, codim > :: value };
 
       enum { n = NumSubEntities< BaseGeometry, codim > :: value };
       enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
@@ -84,13 +83,15 @@ namespace Dune
     public:
       enum
       {
-        value = (i >= n)
+        value = (i < maxI)
+                ? (i >= n)
                 ? NumSubSubEntities< BaseGeometry, codim-1, (i-n), subcodim >
                 :: value
                 : NumSubSubEntities< BaseGeometry, codim, i, subcodim >
                 :: value
-                + 2 * NumSubSubEntities< BaseGeometry, codim, i, subcodim-1 >
+                + 2*NumSubSubEntities< BaseGeometry, codim, i, subcodim-1 >
                 :: value
+                : 0
       };
     };
 
@@ -98,8 +99,7 @@ namespace Dune
     class NumSubSubEntities< Pyramid< BaseGeometry >, codim, i, subcodim >
     {
       typedef Pyramid< BaseGeometry > Geometry;
-      dune_static_assert( (i < NumSubEntities< Geometry, codim > :: value),
-                          "Invalid subentity index." );
+      enum { maxI = NumSubEntities< Geometry, codim > :: value };
 
       enum { n = NumSubEntities< BaseGeometry, codim > :: value };
       enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
@@ -107,13 +107,15 @@ namespace Dune
     public:
       enum
       {
-        value = (i < m)
+        value = (i < maxI)
+                ? (i < m)
                 ? NumSubSubEntities< BaseGeometry, codim-1, i, subcodim >
                 :: value
                 : NumSubSubEntities< BaseGeometry, codim, i-m, subcodim >
                 :: value
                 + NumSubSubEntities< BaseGeometry, codim, i-m, subcodim-1 >
                 :: value
+                : 0
       };
     };
 
@@ -199,7 +201,7 @@ namespace Dune
 
     public:
       typedef typename PrismSubGeometry
-      < BaseGeometry, codim, Prism< BaseGeometry > :: dimension, i > :: type type;
+      < BaseGeometry, Prism< BaseGeometry > :: dimension, codim, i > :: type type;
     };
 
     template< class BaseGeometry, int codim, unsigned int i >
@@ -210,7 +212,7 @@ namespace Dune
 
     public:
       typedef typename PyramidSubGeometry
-      < BaseGeometry, codim, Pyramid< BaseGeometry > :: dimension, i > :: type type;
+      < BaseGeometry, Pyramid< BaseGeometry > :: dimension, codim, i > :: type type;
     };
 
   }
