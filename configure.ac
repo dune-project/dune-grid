@@ -59,6 +59,7 @@ AC_CONFIG_FILES([Makefile
     grid/io/visual/Makefile
     grid/io/Makefile
     grid/genericgeometry/Makefile
+    grid/genericgeometry/test/Makefile
     m4/Makefile
     dune-grid.pc])
 AC_OUTPUT
