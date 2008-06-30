@@ -11,10 +11,11 @@
    id="svg1"
    sodipodi:version="0.32"
    inkscape:version="0.44.1"
-   width="210mm"
-   height="297mm"
+   width="413.66614"
+   height="565.52045"
    sodipodi:docbase="/hosts/disk1/asterix/nolte/numerics/dune/dune-grid/grid/genericgeometry/doc"
-   sodipodi:docname="prism.svg">
+   sodipodi:docname="prism.svg"
+   version="1.0">
   <defs
      id="defs3" />
   <sodipodi:namedview
@@ -47,19 +48,20 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="top-back">
+     id="top-back"
+     transform="translate(-95.29497,-182.7725)">
     <g
        id="c2">
       <text
          xml:space="preserve"
-         style="font-size:48.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:0.54901963;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:0.54901961;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          x="239.91991"
          y="594.42419"
          id="text1568"><tspan
            id="tspan1569">2</tspan></text>
       <text
          xml:space="preserve"
-         style="font-size:18.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:0.62745100;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:0.62745098;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          x="224.09634"
          y="619.10944"
          id="text1601"
@@ -68,17 +70,17 @@
     </g>
     <g
        id="c6"
-       transform="translate(5.000000,7.500000)">
+       transform="translate(5,7.5)">
       <text
          xml:space="preserve"
-         style="font-size:48.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1.0000000;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          x="238.23241"
          y="235.09348"
          id="text1580"><tspan
            id="tspan1581">5</tspan></text>
       <text
          xml:space="preserve"
-         style="font-size:18.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1.0000000;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          x="223.89113"
          y="188.94824"
          id="text1598"
@@ -88,7 +90,7 @@
   </g>
   <g
      id="top"
-     transform="matrix(1,0,0.15,0.4336,-106.095,45)">
+     transform="matrix(1,0,0.15,0.4336,-201.39,-137.7725)">
     <path
        sodipodi:type="star"
        style="fill:red;fill-opacity:0.31372549;fill-rule:evenodd;stroke:black;stroke-width:0.7415123pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -107,7 +109,8 @@
        transform="translate(92.81255,119.7997)" />
   </g>
   <g
-     id="g1971">
+     id="g1971"
+     transform="translate(-95.29497,-182.7725)">
     <g
        transform="matrix(1,0,0.15,0.4336,-106.095,400.6499)"
        id="bottom">
@@ -150,7 +153,8 @@
     </g>
   </g>
   <g
-     id="g1990">
+     id="g1990"
+     transform="translate(-95.29497,-182.7725)">
     <rect
        style="fill:lime;fill-opacity:0.135849;fill-rule:evenodd;stroke:black;stroke-width:0.74151163pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        id="left"
@@ -183,7 +187,7 @@
   </g>
   <g
      id="s2"
-     transform="matrix(0.626185,0.375,0,1,269.1769,235)">
+     transform="matrix(0.626185,0.375,0,1,173.8819,52.22754)">
     <rect
        y="0"
        ry="0"
@@ -215,7 +219,7 @@
     </g>
   </g>
   <g
-     transform="translate(-65,30)"
+     transform="translate(-160.295,-152.7725)"
      id="s4">
     <text
        transform="matrix(1,0,-0.71,0.71,0,0)"
@@ -237,7 +241,7 @@
   </g>
   <g
      id="g2086"
-     transform="translate(0,600)">
+     transform="translate(-95.29497,417.2275)">
     <g
        id="g2078">
       <g

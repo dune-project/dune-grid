@@ -10,11 +10,12 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="tetrahedron.svg"
    sodipodi:docbase="/hosts/disk1/asterix/nolte/numerics/dune/dune-grid/grid/genericgeometry/doc"
-   height="297mm"
-   width="210mm"
+   height="441.548"
+   width="413.66614"
    inkscape:version="0.44.1"
    sodipodi:version="0.32"
-   id="svg1">
+   id="svg1"
+   version="1.0">
   <defs
      id="defs3" />
   <sodipodi:namedview
@@ -47,14 +48,15 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="top-back">
+     id="top-back"
+     transform="translate(-95.29497,-306.7449)">
     <g
        id="c2">
       <text
          id="text1568"
          y="594.42419"
          x="239.91991"
-         style="font-size:48.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:0.54901963;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:0.54901961;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          xml:space="preserve"><tspan
            id="tspan1569">2</tspan></text>
       <text
@@ -62,13 +64,14 @@
          id="text1601"
          y="619.10944"
          x="224.09634"
-         style="font-size:18.000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:0.62745100;stroke:none;stroke-width:1.0000000pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1.0000000;font-family:Bitstream Vera Serif;text-anchor:start;writing-mode:lr;"
+         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:black;fill-opacity:0.62745098;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Serif"
          xml:space="preserve"><tspan
            id="tspan1602">(0,1,0)</tspan></text>
     </g>
   </g>
   <g
-     id="g1948">
+     id="g1948"
+     transform="translate(-95.29497,-306.7449)">
     <path
        transform="matrix(1,0,0.15,0.4336,4.687505,452.595)"
        d="M 380.87495,587.5 L 43.125046,587.5 L 212,295 L 380.87495,587.5 z "
@@ -107,7 +110,8 @@
     </g>
   </g>
   <g
-     id="g2029">
+     id="g2029"
+     transform="translate(-95.29497,-306.7449)">
     <path
        sodipodi:nodetypes="cccc"
        id="left"
@@ -135,7 +139,8 @@
     </g>
   </g>
   <g
-     id="g2053">
+     id="g2053"
+     transform="translate(-95.29497,-306.7449)">
     <path
        style="fill:lime;fill-opacity:0.31372549;fill-rule:evenodd;stroke:black;stroke-width:0.69525828pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 128.75595,349.33182 L 482.0798,702.5 L 269.1769,575 L 128.75595,349.33182 z "
@@ -165,7 +170,7 @@
   </g>
   <g
      id="g1995"
-     transform="translate(0,600)">
+     transform="translate(-95.29497,293.2551)">
     <g
        id="g1987">
       <g

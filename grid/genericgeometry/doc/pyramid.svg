@@ -11,10 +11,11 @@
    id="svg1"
    sodipodi:version="0.32"
    inkscape:version="0.44.1"
-   width="210mm"
-   height="297mm"
+   width="543.21002"
+   height="441.548"
    sodipodi:docbase="/hosts/disk1/asterix/nolte/numerics/dune/dune-grid/grid/genericgeometry/doc"
-   sodipodi:docname="pyramid.svg">
+   sodipodi:docname="pyramid.svg"
+   version="1.0">
   <defs
      id="defs3" />
   <sodipodi:namedview
@@ -26,7 +27,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.4664762"
      inkscape:cx="366.89999"
-     inkscape:cy="500.82407"
+     inkscape:cy="173.50884"
      inkscape:window-width="1269"
      inkscape:window-height="916"
      inkscape:window-x="0"
@@ -47,7 +48,8 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="g2050">
+     id="g2050"
+     transform="translate(-95.29497,-306.7449)">
     <g
        id="g2034">
       <text
@@ -115,7 +117,7 @@
   </g>
   <g
      id="g1973"
-     transform="translate(0,-600)">
+     transform="translate(-95.29497,-906.7449)">
     <g
        id="g1957">
       <rect
@@ -208,7 +210,7 @@
   </g>
   <g
      id="g2108"
-     transform="translate(0,600)">
+     transform="translate(-95.29497,293.2551)">
     <g
        id="g2100">
       <g
