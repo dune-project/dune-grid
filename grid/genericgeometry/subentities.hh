@@ -17,9 +17,6 @@ namespace Dune
     template< class Geometry, int codim >
     class NumSubEntities;
 
-    template< class Geometry, int codim, unsigned int i, int subcodim >
-    class NumSubSubEntities;
-
     template< class Geometry, int codim, unsigned int i >
     class SubGeometry;
 
@@ -52,130 +49,10 @@ namespace Dune
       enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
       enum { n = NumSubEntities< BaseGeometry, codim > :: value };
 
-    public:
-      enum { value = m + n };
-    };
-
-
-
-    // NumSubSubEntities
-    // -----------------
-
-    template< int codim, unsigned int i, int subcodim >
-    class NumSubSubEntities< Point, codim, i, subcodim >
-    {
-      typedef Point Geometry;
-      enum { maxI = NumSubEntities< Geometry, codim > :: value };
+      enum { dimension = Pyramid< BaseGeometry > :: dimension };
 
     public:
-      enum { value = (subcodim == 0) && (i < maxI) ? 1 : 0 };
-    };
-
-    template< class BaseGeometry, int codim, unsigned int i, int subcodim >
-    class NumSubSubEntities< Prism< BaseGeometry >, codim, i, subcodim >
-    {
-      typedef Prism< BaseGeometry > Geometry;
-      enum { maxI = NumSubEntities< Geometry, codim > :: value };
-
-      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
-      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
-
-    public:
-      enum
-      {
-        value = (i < maxI)
-                ? (i >= n)
-                ? NumSubSubEntities< BaseGeometry, codim-1, (i-n), subcodim >
-                :: value
-                : NumSubSubEntities< BaseGeometry, codim, i, subcodim >
-                :: value
-                + 2*NumSubSubEntities< BaseGeometry, codim, i, subcodim-1 >
-                :: value
-                : 0
-      };
-    };
-
-    template< class BaseGeometry, int codim, unsigned int i, int subcodim >
-    class NumSubSubEntities< Pyramid< BaseGeometry >, codim, i, subcodim >
-    {
-      typedef Pyramid< BaseGeometry > Geometry;
-      enum { maxI = NumSubEntities< Geometry, codim > :: value };
-
-      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
-      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
-
-    public:
-      enum
-      {
-        value = (i < maxI)
-                ? (i < m)
-                ? NumSubSubEntities< BaseGeometry, codim-1, i, subcodim >
-                :: value
-                : NumSubSubEntities< BaseGeometry, codim, i-m, subcodim >
-                :: value
-                + NumSubSubEntities< BaseGeometry, codim, i-m, subcodim-1 >
-                :: value
-                : 0
-      };
-    };
-
-
-
-    // PrismSubGeometry
-    // ----------------
-
-    template< class BaseGeometry, int dim, int codim, int i >
-    struct PrismSubGeometry
-    {
-      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
-      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
-
-      typedef typename TypeIf
-      < (i < n),
-      Prism< typename SubGeometry< BaseGeometry, codim, i > :: type >,
-      typename SubGeometry< BaseGeometry, codim-1, (i-n)%m > :: type
-      > :: type type;
-    };
-
-    template< class BaseGeometry, int dim, int i >
-    struct PrismSubGeometry< BaseGeometry, dim, 0, i >
-    {
-      typedef Prism< BaseGeometry > type;
-    };
-
-    template< class BaseGeometry, int dim, int i >
-    struct PrismSubGeometry< BaseGeometry, dim, dim, i >
-    {
-      typedef Point type;
-    };
-
-
-
-    // PyramidSubGeometry
-    // ------------------
-
-    template< class BaseGeometry, int dim, int codim, int i >
-    struct PyramidSubGeometry
-    {
-      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
-
-      typedef typename TypeIf
-      < (i < m),
-      typename SubGeometry< BaseGeometry, codim-1, i > :: type,
-      Pyramid< typename SubGeometry< BaseGeometry, codim, i-m > :: type >
-      > :: type type;
-    };
-
-    template< class BaseGeometry, int dim, int i >
-    struct PyramidSubGeometry< BaseGeometry, dim, 0, i >
-    {
-      typedef Pyramid< BaseGeometry > type;
-    };
-
-    template< class BaseGeometry, int dim, int i >
-    struct PyramidSubGeometry< BaseGeometry, dim, dim, i >
-    {
-      typedef Point type;
+      enum { value = (codim == dimension ? m+1 : m+n) };
     };
 
 
@@ -186,9 +63,13 @@ namespace Dune
     template< int codim, unsigned int i >
     class SubGeometry< Point, codim, i >
     {
-      dune_static_assert( (i < NumSubEntities< Point, codim > :: value),
-                          "Invalid subentity index." );
+    public:
+      typedef void type;
+    };
 
+    template<>
+    class SubGeometry< Point, 0, 0 >
+    {
     public:
       typedef Point type;
     };
@@ -196,23 +77,38 @@ namespace Dune
     template< class BaseGeometry, int codim, unsigned int i >
     class SubGeometry< Prism< BaseGeometry >, codim, i >
     {
-      dune_static_assert( (i < NumSubEntities< Prism< BaseGeometry >, codim > :: value),
-                          "Invalid subentity index." );
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+      enum { n = NumSubEntities< BaseGeometry, codim > :: value };
+
+      enum { j = (i < n+m ? i-n : i-(n+m)) };
 
     public:
-      typedef typename PrismSubGeometry
-      < BaseGeometry, Prism< BaseGeometry > :: dimension, codim, i > :: type type;
+      typedef typename TypeIf
+      < (i < n),
+      Prism< typename SubGeometry< BaseGeometry, codim, i > :: type >,
+      typename SubGeometry< BaseGeometry, codim-1, j > :: type
+      > :: type type;
     };
 
     template< class BaseGeometry, int codim, unsigned int i >
     class SubGeometry< Pyramid< BaseGeometry >, codim, i >
     {
-      dune_static_assert( (i < NumSubEntities< Pyramid< BaseGeometry >, codim > :: value),
-                          "Invalid subentity index." );
+      enum { m = NumSubEntities< BaseGeometry, codim-1 > :: value };
+
+      enum { dimension = Pyramid< BaseGeometry > :: dimension };
+
+      typedef typename TypeIf
+      < (codim == dimension),
+          Point,
+          Pyramid< typename SubGeometry< BaseGeometry, codim, i-m > :: type >
+      > :: type pyramid_type;
 
     public:
-      typedef typename PyramidSubGeometry
-      < BaseGeometry, Pyramid< BaseGeometry > :: dimension, codim, i > :: type type;
+      typedef typename TypeIf
+      < (i < m),
+      typename SubGeometry< BaseGeometry, codim-1, i > :: type,
+      pyramid_type
+      > :: type type;
     };
 
   }

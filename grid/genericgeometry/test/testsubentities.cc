@@ -18,46 +18,50 @@ typedef Dune :: GenericGeometry :: Convert
 < Dune :: GeometryType :: GEOMETRYTYPE, DIMENSION > :: type
 Geometry;
 
+bool verbose = false;
+unsigned int errors = 0;
+
 
 template< int codim, unsigned int i, int subcodim >
 struct CheckNumSubSubHelper
 {
-  typedef Dune :: GenericGeometry :: NumSubSubEntities
-  < Geometry, codim, i, subcodim >
-  NumSubSubs;
-
   typedef typename Dune :: GenericGeometry
   :: SubGeometry< Geometry, codim, i > :: type SubGeo;
   typedef Dune :: GenericGeometry :: NumSubEntities< SubGeo, subcodim >
-  NumSubGeoSubs;
+  NumSubSubs;
 
   static void check ()
   {
-    std :: cerr << "SubEntity< " << codim << " > " << i << ": "
-                << "size = " << NumSubSubs :: value
-                << ", (" << NumSubGeoSubs :: value << " )"
-                << std :: endl;
+    CheckNumSubSubHelper< codim, i, subcodim-1 > :: check();
+
+    if( verbose )
+    {
+      std :: cerr << "SubEntity< " << codim << " > " << i
+                  << " < " << subcodim << " >: "
+                  << "size = " << NumSubSubs :: value
+                  << ", type = " << SubGeo :: name()
+                  << std :: endl;
+    }
   }
 };
 
 template< int codim, unsigned int i >
 struct CheckNumSubSubHelper< codim, i, 0 >
 {
-  typedef Dune :: GenericGeometry :: NumSubSubEntities
-  < Geometry, codim, i, 0 >
-  NumSubSubs;
-
   typedef typename Dune :: GenericGeometry
   :: SubGeometry< Geometry, codim, i > :: type SubGeo;
   typedef Dune :: GenericGeometry :: NumSubEntities< SubGeo, 0 >
-  NumSubGeoSubs;
+  NumSubSubs;
 
   static void check ()
   {
-    std :: cerr << "SubEntity< " << codim << " > " << i << ": "
-                << "size = " << NumSubSubs :: value
-                << ", (" << NumSubGeoSubs :: value << " )"
-                << std :: endl;
+    if( verbose )
+    {
+      std :: cerr << "SubEntity< " << codim << " > " << i << " < 0 >: "
+                  << "size = " << NumSubSubs :: value
+                  << ", type = " << SubGeo :: name()
+                  << std :: endl;
+    }
   }
 };
 
@@ -105,9 +109,17 @@ struct CheckCodim< 0 >
   }
 };
 
-int main ()
+int main ( int argc, char **argv )
 {
-  std :: cout << "Generic geometry type: " << Geometry :: name() << std :: endl;
+  for( int i = 1; i < argc; ++i )
+  {
+    verbose |= (strcmp( argv[ i ], "-v" ) == 0);
+  }
+
+  std :: cerr << "Generic geometry type: " << Geometry :: name() << std :: endl;
 
   CheckCodim< Geometry :: dimension > :: check();
+
+  std :: cerr << "Number of errors: " << errors << std :: endl;
+  return (errors > 0 ? 1 : 0);
 }
