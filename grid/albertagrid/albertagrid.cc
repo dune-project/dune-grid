@@ -3825,9 +3825,21 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::
   writeGrid (const std::basic_string<char> filename, albertCtype time ) const
   {
-    // use only with xdr as filetype
-    assert(ftype == xdr);
-    return writeGridXdr (filename , time );
+    switch(ftype)
+    {
+    case xdr   : return writeGridXdr (filename , time );
+    case ascii :
+    {
+      // write leaf grid as macro triangulation
+      int ret = ALBERTA write_macro( mesh_ , filename.c_str() );
+      return (ret == 1) ? true : false;
+    }
+    default :
+    {
+      DUNE_THROW(AlbertaError,"wrong FileType in AlbertaGrid::writeGrid!");
+      return false;
+    }
+    }
   }
 
   template < int dim, int dimworld >  template <GrapeIOFileFormatType ftype>
