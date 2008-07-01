@@ -21,6 +21,10 @@ Geometry;
 bool verbose = false;
 unsigned int errors = 0;
 
+typedef Dune :: GenericGeometry :: SubEntityNumbering< Geometry > SubEntityNumbering;
+
+
+
 template< int codim, unsigned int i, int subcodim, unsigned int j >
 struct CheckSubSubNumbering
 {
@@ -33,10 +37,14 @@ struct CheckSubSubNumbering
   {
     CheckSubSubNumbering< codim, i, subcodim, j-1 > :: check();
 
+    const unsigned int subEntity
+      = SubEntityNumbering :: template subEntity< codim, subcodim >( i, j );
+
     bool error = false;
     error |= ((codim == 0) && (SubNumber :: value != j));
     error |= ((subcodim == 0) && (SubNumber :: value != i));
     error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
+    error |= (SubNumber :: value != subEntity);
 
     if( verbose || error )
     {
@@ -59,10 +67,14 @@ struct CheckSubSubNumbering< codim, i, subcodim, 0 >
 
   static void check ()
   {
+    const unsigned int subEntity
+      = SubEntityNumbering :: template subEntity< codim, subcodim >( i, 0 );
+
     bool error = false;
     error |= ((codim == 0) && (SubNumber :: value != 0));
     error |= ((subcodim == 0) && (SubNumber :: value != i));
     error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
+    error |= (SubNumber :: value != subEntity);
 
     if( verbose || error )
     {

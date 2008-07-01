@@ -3,10 +3,13 @@
 #ifndef DUNE_GENERICGEOMETRY_SUBENTITIES_HH
 #define DUNE_GENERICGEOMETRY_SUBENTITIES_HH
 
+#include <vector>
+
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/geometrytypes.hh>
+#include <dune/grid/genericgeometry/codimtable.hh>
 
 namespace Dune
 {
@@ -24,6 +27,8 @@ namespace Dune
         unsigned int subcodim, unsigned int j >
     class SubEntityNumber;
 
+    template< class Geometry >
+    class SubEntityNumbering;
 
 
 
@@ -518,6 +523,130 @@ namespace Dune
         value = ProtectedIf< (codim == 0) || (codim == Geometry :: dimension),
             Border, Interior > :: value
       };
+    };
+
+
+
+    // SubEntityNumbering
+    // ------------------
+
+    template< class Geometry >
+    class SubEntityNumbering
+    {
+      template< int codim >
+      class Numbering;
+
+      template< int codim >
+      class CodimNumbering
+        : public std :: vector< Numbering< codim > >
+      {};
+
+      template< int codim >
+      struct Builder;
+
+      CodimTable< CodimNumbering, Geometry :: dimension > codimNumbering_;
+
+    public:
+      template< unsigned int codim, unsigned int subcodim >
+      static unsigned int subEntity ( unsigned int i, unsigned int j )
+      {
+        Int2Type< codim > codimVariable;
+        const CodimNumbering< codim > &numbering = instance().codimNumbering_[ codimVariable ];
+        return numbering[ i ].template number< subcodim >( j );
+      }
+
+    private:
+      SubEntityNumbering ()
+      {
+        ForLoop< Builder, 0, Geometry :: dimension > :: apply( *this );
+      }
+
+      static const SubEntityNumbering &instance ()
+      {
+        static SubEntityNumbering inst;
+        return inst;
+      }
+    };
+
+
+
+    template< class Geometry >
+    template< int codim >
+    class SubEntityNumbering< Geometry > :: Numbering
+    {
+      std :: vector< unsigned int > numbering_[ Geometry :: dimension - codim + 1 ];
+
+    public:
+      template< int subcodim >
+      const unsigned int &number ( unsigned int j ) const
+      {
+        return numbering_[ subcodim ][ j ];
+      }
+
+      template< int subcodim >
+      unsigned int &number ( unsigned int j )
+      {
+        return numbering_[ subcodim ][ j ];
+      }
+
+      template< int subcodim >
+      void resize ( unsigned int size )
+      {
+        numbering_[ subcodim ].resize( size );
+      }
+    };
+
+
+
+    template< class Geometry >
+    template< int codim >
+    struct SubEntityNumbering< Geometry > :: Builder
+    {
+      typedef GenericGeometry :: SubEntityNumbering< Geometry > SubEntityNumbering;
+      typedef typename SubEntityNumbering :: template CodimNumbering< codim > CodimNumbering;
+      typedef typename SubEntityNumbering :: template Numbering< codim > Numbering;
+
+      template< int i >
+      struct Sub
+      {
+        typedef typename GenericGeometry :: SubGeometry< Geometry, codim, i > :: type
+        SubGeometry;
+
+        template< int subcodim >
+        struct SubCodim
+        {
+          template< int j >
+          struct SubSub
+          {
+            static void apply( Numbering &numbering )
+            {
+              numbering.template number< subcodim >( j )
+                = SubEntityNumber< Geometry, codim, i, subcodim, j > :: value;
+            }
+          };
+
+          static void apply ( Numbering &numbering )
+          {
+            enum { numSubSubs = NumSubEntities< SubGeometry, subcodim > :: value };
+            numbering.template resize< subcodim >( numSubSubs );
+            ForLoop< SubSub, 0, numSubSubs-1 > :: apply( numbering );
+          }
+        };
+
+        static void apply ( CodimNumbering &numbering )
+        {
+          ForLoop< SubCodim, 0, SubGeometry :: dimension > :: apply( numbering[ i ] );
+        }
+      };
+
+      static void apply ( SubEntityNumbering &numbering )
+      {
+        enum { numSubs = NumSubEntities< Geometry, codim > :: value };
+        Int2Type< codim > codimVariable;
+        CodimNumbering &codimNumbering = numbering.codimNumbering_[ codimVariable ];
+        codimNumbering.resize( numSubs );
+        ForLoop< Sub, 0, numSubs-1 > :: apply( codimNumbering );
+      }
     };
 
   }

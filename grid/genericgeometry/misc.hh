@@ -23,22 +23,6 @@ namespace Dune
 
 
 
-    template< bool condition, class TypeTrue, class TypeFalse >
-    struct TypeIf;
-
-    template< class TypeTrue, class TypeFalse >
-    struct TypeIf< false, TypeTrue, TypeFalse >
-    {
-      typedef TypeFalse type;
-    };
-
-    template< class TypeTrue, class TypeFalse >
-    struct TypeIf< true, TypeTrue, TypeFalse >
-    {
-      typedef TypeTrue type;
-    };
-
-
     template< bool condition, template< bool > class True, template< bool > class False >
     struct ProtectedIf;
 
@@ -51,6 +35,57 @@ namespace Dune
     struct ProtectedIf< false, True, False >
       : public False< false >
     {};
+
+
+
+    template< template< int > class Operation, int first, int last >
+    struct ForLoop
+    {
+      static void apply ()
+      {
+        Operation< first > :: apply();
+        ForLoop< Operation, first+1, last > :: apply();
+      }
+
+      template< class Type >
+      static void apply ( Type &param )
+      {
+        Operation< first > :: apply( param );
+        ForLoop< Operation, first+1, last > :: apply( param );
+      }
+
+      template< class Type1, class Type2 >
+      static void apply ( Type1 &param1, Type2 &param2 )
+      {
+        Operation< first > :: apply( param1, param2 );
+        ForLoop< Operation, first+1, last > :: apply( param1, param2 );
+      }
+
+    private:
+      dune_static_assert( (first <= last), "ForLoop: first > last" );
+    };
+
+    template< template< int > class Operation, int last >
+    struct ForLoop< Operation, last, last >
+    {
+      static void apply ()
+      {
+        Operation< last > :: apply();
+      }
+
+      template< class Type >
+      static void apply ( Type &param )
+      {
+        Operation< last > :: apply( param );
+      }
+
+      template< class Type1, class Type2 >
+      static void apply ( Type1 &param1, Type2 &param2 )
+      {
+        Operation< last > :: apply( param1, param2 );
+      }
+    };
+
 
 
 
