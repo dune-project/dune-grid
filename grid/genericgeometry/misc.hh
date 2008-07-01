@@ -38,6 +38,22 @@ namespace Dune
       typedef TypeTrue type;
     };
 
+
+    template< bool condition, template< bool > class True, template< bool > class False >
+    struct ProtectedIf;
+
+    template< template< bool > class True, template< bool > class False >
+    struct ProtectedIf< true, True, False >
+      : public True< true >
+    {};
+
+    template< template< bool > class True, template< bool > class False >
+    struct ProtectedIf< false, True, False >
+      : public False< false >
+    {};
+
+
+
     // *******************************
     // Helpers
     // *******************************

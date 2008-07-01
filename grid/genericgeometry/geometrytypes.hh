@@ -48,6 +48,23 @@ namespace Dune
       }
     };
 
+
+
+    template< class Geometry >
+    struct BaseGeometry;
+
+    template< class BaseGeo >
+    struct BaseGeometry< Prism< BaseGeo > >
+    {
+      typedef BaseGeo type;
+    };
+
+    template< class BaseGeo >
+    struct BaseGeometry< Pyramid< BaseGeo > >
+    {
+      typedef BaseGeo type;
+    };
+
   }
 
 }
