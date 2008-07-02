@@ -59,10 +59,41 @@ template< int codim >
 template< int i >
 template< int subcodim >
 template< int j >
-struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: CheckSubSub
+struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub
+{
+  template< int subsubcodim >
+  struct CheckSubSubCodim;
+
+  static void apply ();
+};
+
+template< int codim >
+template< int i >
+template< int subcodim >
+template< int j >
+template< int subsubcodim >
+struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub< j > :: CheckSubSubCodim
+{
+  template< int k >
+  struct CheckSubSubSub;
+
+  static void apply ();
+};
+
+template< int codim >
+template< int i >
+template< int subcodim >
+template< int j >
+template< int subsubcodim >
+template< int k >
+struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: CheckSubSubSub
 {
   static void apply ();
 };
+
 
 
 
@@ -107,14 +138,16 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: apply 
                 << std :: endl;
   }
 
-  Dune :: GenericGeometry :: ForLoop< CheckSubSub, 0, NumSubSubs :: value - 1 > :: apply();
+  Dune :: GenericGeometry :: ForLoop
+  < CheckSubSub, 0, NumSubSubs :: value - 1 > :: apply();
 }
 
 template< int codim >
 template< int i >
 template< int subcodim >
 template< int j >
-void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: CheckSubSub< j> :: apply ()
+void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub< j > :: apply ()
 {
   typedef Dune :: GenericGeometry
   :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
@@ -138,6 +171,63 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: CheckS
   }
   if( error )
     ++errors;
+
+  Dune :: GenericGeometry :: ForLoop
+  < CheckSubSubCodim, 0, Geometry :: dimension - codim - subcodim > :: apply();
+}
+
+template< int codim >
+template< int i >
+template< int subcodim >
+template< int j >
+template< int subsubcodim >
+void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: apply ()
+{
+  typedef Dune :: GenericGeometry
+  :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
+  typedef typename Dune :: GenericGeometry
+  :: SubGeometry< Geometry, codim + subcodim, SubNumber :: value > :: type
+  SubSubGeo;
+  typedef Dune :: GenericGeometry
+  :: NumSubEntities< SubSubGeo, subsubcodim > NumSubSubSubs;
+
+  Dune :: GenericGeometry :: ForLoop
+  < CheckSubSubSub, 0, NumSubSubSubs :: value-1 > :: apply();
+}
+
+template< int codim >
+template< int i >
+template< int subcodim >
+template< int j >
+template< int subsubcodim >
+template< int k >
+void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
+:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: CheckSubSubSub< k >
+:: apply ()
+{
+  typedef typename Dune :: GenericGeometry
+  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
+  typedef Dune :: GenericGeometry :: SubEntityNumber
+  < Geometry, codim, i, subcodim, j > Nij;
+  typedef Dune :: GenericGeometry :: SubEntityNumber
+  < SubGeo, subcodim, j, subsubcodim, k > Njk;
+
+  typedef Dune :: GenericGeometry :: SubEntityNumber
+  < Geometry, codim + subcodim, Nij :: value, subsubcodim, k > Nij_k;
+  typedef Dune :: GenericGeometry :: SubEntityNumber
+  < Geometry, codim, i, subcodim + subsubcodim, Njk :: value > Ni_jk;
+
+  if( (unsigned int)Nij_k :: value != (unsigned int)Ni_jk :: value )
+  {
+    std :: cerr << "Error< " << codim << ", " << subcodim << ", "
+                << subsubcodim << " >: "
+                << "Sub( Sub( " << i << ", " << j << "), " << k << " ) = "
+                << Nij_k :: value << " != " << Ni_jk :: value
+                << " = Sub( " << i << ", Sub( " << j << ", " << k << " ) )"
+                << std :: endl;
+    ++errors;
+  }
 }
 
 
