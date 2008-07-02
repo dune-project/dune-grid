@@ -25,177 +25,122 @@ typedef Dune :: GenericGeometry :: SubEntityNumbering< Geometry > SubEntityNumbe
 
 
 
-template< int codim, unsigned int i, int subcodim, unsigned int j >
-struct CheckSubSubNumbering
+template< int codim >
+struct CheckCodim
 {
-  typedef Dune :: GenericGeometry
-  :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
-  typedef Dune :: GenericGeometry
-  :: NumSubEntities< Geometry, codim + subcodim > NumSubs;
+  template< int i >
+  struct CheckSub;
 
-  static void check ()
-  {
-    CheckSubSubNumbering< codim, i, subcodim, j-1 > :: check();
-
-    const unsigned int subEntity
-      = SubEntityNumbering :: template subEntity< codim, subcodim >( i, j );
-
-    bool error = false;
-    error |= ((codim == 0) && (SubNumber :: value != j));
-    error |= ((subcodim == 0) && (SubNumber :: value != i));
-    error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
-    error |= (SubNumber :: value != subEntity);
-
-    if( verbose || error )
-    {
-      std :: cerr << "SubEntityNumber< " << codim << ", " << i
-                  << ", " << subcodim << ", " << j << " > = "
-                  << SubNumber :: value << std :: endl;
-    }
-    if( error )
-      ++errors;
-  }
+  static void apply();
 };
 
-template< int codim, unsigned int i, int subcodim >
-struct CheckSubSubNumbering< codim, i, subcodim, 0 >
+template< int codim >
+template< int i >
+struct CheckCodim< codim > :: CheckSub
 {
-  typedef Dune :: GenericGeometry
-  :: SubEntityNumber< Geometry, codim, i, subcodim, 0 > SubNumber;
-  typedef Dune :: GenericGeometry
-  :: NumSubEntities< Geometry, codim + subcodim > NumSubs;
+  template< int subcodim >
+  struct CheckSubCodim;
 
-  static void check ()
-  {
-    const unsigned int subEntity
-      = SubEntityNumbering :: template subEntity< codim, subcodim >( i, 0 );
+  static void apply ();
+};
 
-    bool error = false;
-    error |= ((codim == 0) && (SubNumber :: value != 0));
-    error |= ((subcodim == 0) && (SubNumber :: value != i));
-    error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
-    error |= (SubNumber :: value != subEntity);
+template< int codim >
+template< int i >
+template< int subcodim >
+struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim
+{
+  template< int j >
+  struct CheckSubSub;
 
-    if( verbose || error )
-    {
-      std :: cerr << "SubEntityNumber< " << codim << ", " << i
-                  << ", " << subcodim << ", " << 0 << " > = "
-                  << SubNumber :: value << std :: endl;
-    }
-    if( error )
-      ++errors;
-  }
+  static void apply ();
+};
+
+template< int codim >
+template< int i >
+template< int subcodim >
+template< int j >
+struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: CheckSubSub
+{
+  static void apply ();
 };
 
 
-template< int codim, unsigned int i, int subcodim >
-struct CheckNumSubSubHelper
+
+template< int codim >
+void CheckCodim< codim > :: apply ()
+{
+  typedef Dune :: GenericGeometry :: NumSubEntities< Geometry, codim > NumSubs;
+  Dune :: GenericGeometry :: ForLoop< CheckSub, 0, NumSubs :: value-1 > :: apply();
+}
+
+template< int codim >
+template< int i >
+void CheckCodim< codim > :: CheckSub< i > :: apply ()
+{
+  typedef typename Dune :: GenericGeometry
+  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
+
+  if( verbose )
+  {
+    std :: cerr << "SubEntity< " << codim << " > " << i
+                << ": type = " << SubGeo :: name()
+                << std :: endl;
+  }
+
+  Dune :: GenericGeometry :: ForLoop< CheckSubCodim, 0, SubGeo :: dimension > :: apply();
+}
+
+template< int codim >
+template< int i >
+template< int subcodim >
+void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: apply ()
 {
   typedef typename Dune :: GenericGeometry
   :: SubGeometry< Geometry, codim, i > :: type SubGeo;
   typedef Dune :: GenericGeometry :: NumSubEntities< SubGeo, subcodim >
   NumSubSubs;
 
-  static void check ()
+  if( verbose )
   {
-    CheckNumSubSubHelper< codim, i, subcodim-1 > :: check();
-
-    if( verbose )
-    {
-      std :: cerr << "SubEntity< " << codim << " > " << i
-                  << ": size< " << subcodim << " > = " << NumSubSubs :: value
-                  << std :: endl;
-    }
-
-    CheckSubSubNumbering< codim, i, subcodim, NumSubSubs :: value - 1 > :: check();
+    std :: cerr << "SubEntity< " << codim << " > " << i
+                << ": size< " << subcodim << " > = " << NumSubSubs :: value
+                << std :: endl;
   }
-};
 
-template< int codim, unsigned int i >
-struct CheckNumSubSubHelper< codim, i, 0 >
-{
-  typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
-  typedef Dune :: GenericGeometry :: NumSubEntities< SubGeo, 0 >
-  NumSubSubs;
-
-  static void check ()
-  {
-    if( verbose )
-    {
-      std :: cerr << "SubEntity< " << codim << " > " << i
-                  << ": size< 0 > = " << NumSubSubs :: value
-                  << std :: endl;
-    }
-
-    CheckSubSubNumbering< codim, i, 0, NumSubSubs :: value - 1 > :: check();
-  }
-};
-
-
-template< int codim, unsigned int i >
-struct CheckNumSubSubs
-{
-  typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
-
-  static void check()
-  {
-    CheckNumSubSubs< codim, i-1 > :: check();
-
-    if( verbose )
-    {
-      std :: cerr << "SubEntity< " << codim << " > " << i
-                  << ": type = " << SubGeo :: name()
-                  << std :: endl;
-    }
-
-    CheckNumSubSubHelper< codim, i, Geometry :: dimension - codim > :: check();
-  }
-};
+  Dune :: GenericGeometry :: ForLoop< CheckSubSub, 0, NumSubSubs :: value - 1 > :: apply();
+}
 
 template< int codim >
-struct CheckNumSubSubs< codim, 0 >
+template< int i >
+template< int subcodim >
+template< int j >
+void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: CheckSubSub< j> :: apply ()
 {
-  typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, 0 > :: type SubGeo;
+  typedef Dune :: GenericGeometry
+  :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
+  typedef Dune :: GenericGeometry
+  :: NumSubEntities< Geometry, codim + subcodim > NumSubs;
 
-  static void check()
+  const unsigned int subEntity
+    = SubEntityNumbering :: template subEntity< codim, subcodim >( i, j );
+
+  bool error = false;
+  error |= ((codim == 0) && (SubNumber :: value != j));
+  error |= ((subcodim == 0) && (SubNumber :: value != i));
+  error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
+  error |= (SubNumber :: value != subEntity);
+
+  if( verbose || error )
   {
-    if( verbose )
-    {
-      std :: cerr << "SubEntity< " << codim << " > 0"
-                  << ": type = " << SubGeo :: name()
-                  << std :: endl;
-    }
-
-    CheckNumSubSubHelper< codim, 0, Geometry :: dimension - codim > :: check();
+    std :: cerr << "SubEntityNumber< " << codim << ", " << i
+                << ", " << subcodim << ", " << j << " > = "
+                << SubNumber :: value << std :: endl;
   }
-};
+  if( error )
+    ++errors;
+}
 
 
-template< int codim >
-struct CheckCodim
-{
-  typedef Dune :: GenericGeometry :: NumSubEntities< Geometry, codim > NumSubs;
-
-  static void check()
-  {
-    CheckCodim< codim-1 > :: check();
-    CheckNumSubSubs< codim, NumSubs :: value-1 > :: check();
-  }
-};
-
-template<>
-struct CheckCodim< 0 >
-{
-  typedef Dune :: GenericGeometry :: NumSubEntities< Geometry, 0 > NumSubs;
-
-  static void check()
-  {
-    CheckNumSubSubs< 0, NumSubs :: value-1 > :: check();
-  }
-};
 
 int main ( int argc, char **argv )
 {
@@ -206,7 +151,7 @@ int main ( int argc, char **argv )
 
   std :: cerr << "Generic geometry type: " << Geometry :: name() << std :: endl;
 
-  CheckCodim< Geometry :: dimension > :: check();
+  Dune :: GenericGeometry :: ForLoop< CheckCodim, 0, Geometry :: dimension > :: apply();
 
   std :: cerr << "Number of errors: " << errors << std :: endl;
   return (errors > 0 ? 1 : 0);
