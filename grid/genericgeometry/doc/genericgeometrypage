@@ -3,28 +3,57 @@
 
 \section gg_introduction Introduction
 
-\section gg_refelements Generic Reference Elements
+...
 
-The generic geometries are based on generic reference elements. These are constructed
-recursively by the following definitions:
-- p denotes the 0-dimensional reference element consisting of a single point.
-- \f$E^\vert := E \times [0,1]\f$ denotes a prism over some reference element \f$E\f$.
-- \f$E^\circ := \lbrace ((1-y)x,y) \mid x \in E, y \in [0,1] \rbrace\f$ denotes
-  the pyramid over some reference element \f$E\f$.
+We define the set \f$\mathcal{T}\f$ of reference topologies by the following rules:
+- \f$\mathcal{T}\f$ contains an element \f$\mathbf{p}\f$ that we call the point
+  topology.
+- For \f$T \in \mathcal{T}\f$, \f$\mathcal{T}\f$ contains an element \f$T^\vert\f$
+  that we call the prism over \f$T\f$.
+- For \f$T \in \mathcal{T}\f$, \f$\mathcal{T}\f$ contains an element \f$T^\circ\f$
+  that we call the pyramid over \f$T\f$.
 .
-We will denote the dimension of a reference element \f$R\f$ by \f$\mathrm{dim}( R )\f$.
 
-Note that all of these reference elements are convex polytopes and we can therefore
-talk about their vertices. For a reference element \f$R\f$, denote by \f$n_r\f$ the
-number of vertices of \f$R\f$ and denote the vertices by
-\f$v^R_0, \ldots v^R_{n_r-1}\f$. We number the vertices of \f$R\f$ in the following
-way:
-- \f$R = p\f$: \f$n_R = 1\f$ and \f$v_0 = 0\f$,
-- \f$R = E^\vert\f$: \f$n_R = 2 * n_E\f$ and
-  \f$v^R_i = (v^E_{i \% n_E}, {i \over n_E})\f$,
-- \f$R = E^\circ\f$: \f$n_R = n_E + 1\f$, \f$v^R_i = v^E_i\f$ for \f$i < n_E\f$
-  and \f$v^R_{n_R-1} = (0,1)\f$ with \f$0 \in E\f$.
+
+\section gg_refmaps Reference Mappings
+
+For each topology \f$T \in \mathcal{T}\f$, we introduce a reference mapping, mapping
+a reference domain into \f$\mathbf{R}^n\f$.
+
+Let us start by assigning a reference domain \f$\mathrm{domain}( T )\f$ to each
+topology \f$T \in \mathcal{T}\f$ by the following rules:
+- \f$\mathrm{domain}( \mathbf{p} ) := \lbrace 0 \rbrace \subset \mathbf{R}^0\f$,
+- \f$\mathrm{domain}( T^\vert ) := \mathrm{domain}( T ) \times [0,1]\f$,
+- \f$\mathrm{domain}( T^\circ )
+  := \lbrace ((1-\alpha)x,\alpha) \mid x \in \mathrm{domain}( T ),
+             \alpha \in [0,1] \rbrace\f$.
 .
+We will briefly denote by \f$\dim( T ) := \dim( \mathrm{domain}( T ) )\f$. Moreover,
+the number of vertices of a topology \f$T \in \mathcal{T}\f$ will be denoted by
+\f$\mathcal{V}( T )\f$. We have:
+- \f$\mathcal{V}( \mathbf{p} ) = 1\f$,
+- \f$\mathcal{V}( T^\vert ) = 2 * \mathcal{V}( T )\f$,
+- \f$\mathcal{V}( T^\circ ) = \mathcal{V}( T ) + 1\f$.
+.
+
+Given a topology \f$T \in \mathcal{T}\f$ and points
+\f$y_1,\ldots,y_{\mathcal{V}( T )} \in \mathbf{R}^n\f$, we can now define the
+reference mapping \f$\Phi_T( y_1,\ldots,y_{\mathcal{V}( T )} ; \cdot ) :
+\mathrm{domain( T )} \to \mathrm{R}^n\f$ as follows:
+- \f$\Phi_{\mathbf{p}}( y_0 ; x ) := y_0\f$,
+- \f$\Phi_{T^\vert}( y_1,\ldots,y_{\mathcal{V}( T^\vert )} ; (x,\alpha) )
+  := (1 - \alpha) \Phi_T( y_1,\ldots,y_{\mathcal{V}(T)} ; x )
+  + \alpha \Phi_T( y_{\mathcal{V}( T )+1}, \ldots, y_{\mathcal{V}( T^\vert )} ; x )\f$,
+- \f$\Phi_{T^\circ}( y_1,\ldots,y_{\mathcal{V}( T^\circ )} ; (x,\alpha) )
+  := (1 - \alpha) \Phi_T( y_1,\ldots,y_{\mathcal{V}(T)} ; x )
+     + \alpha x_{\mathcal{V}( T^\circ )}\f$.
+.
+We define the vertices
+\f$v_i( T )\f$, \f$i=1,\ldots,\mathcal{V}( T ) \in \mathrm{domain}( T )\f$
+as the unique choice of points, such that
+\f$\Phi_T( v_1( T ), \ldots, v_{\mathcal{V}( T )}( T ) ; \cdot )\f$
+is the identity mapping.
+
 
 \section gg_numbering Numbering of Subentities
 
