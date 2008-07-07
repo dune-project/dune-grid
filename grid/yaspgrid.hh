@@ -2258,7 +2258,16 @@ namespace Dune {
     //! refine the grid refCount times. What about overlap?
     void globalRefine (int refCount)
     {
+      if (refCount < -maxLevel())
+        DUNE_THROW(GridError, "Only " << maxLevel() << " levels left. " <<
+                   "Coarsening " << -refCount << " levels requested!");
       bool b=true;
+      for (int k=refCount; k<0; k++)
+      {
+        MultiYGrid<dim,ctype>::coarsen();
+        setsizes();
+        indexsets.pop_back();
+      }
       for (int k=0; k<refCount; k++)
       {
         MultiYGrid<dim,ctype>::refine(b);

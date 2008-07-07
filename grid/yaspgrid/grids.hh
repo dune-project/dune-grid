@@ -1752,6 +1752,16 @@ namespace Dune {
       _levels[_maxlevel] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
     }
 
+    //! do a global mesh coarsening; delete _maxlevel level
+    void coarsen ()
+    {
+      // create an empty grid level
+      YGridLevel empty;
+      _levels[_maxlevel] = empty;
+      // reduce maxlevel
+      _maxlevel--;
+    }
+
     //! return reference to torus
     const Torus<d>& torus () const
     {
