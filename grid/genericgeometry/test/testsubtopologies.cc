@@ -131,13 +131,19 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: apply 
   typedef typename Dune :: GenericGeometry
   :: SubTopology< Topology, codim, i > :: type SubTopology;
   typedef Dune :: GenericGeometry :: Size< SubTopology, subcodim > NumSubSubs;
+  typedef Dune :: GenericGeometry :: SubTopologySize< Topology, codim, subcodim >
+  SubTopologySize;
 
-  if( verbose )
+  bool error = (NumSubSubs :: value != SubTopologySize :: size( i ));
+  if( verbose || error )
   {
     std :: cerr << "SubTopology< " << codim << " > " << i
                 << ": size< " << subcodim << " > = " << NumSubSubs :: value
+                << " (" << SubTopologySize :: size( i ) << ")"
                 << std :: endl;
   }
+  if( error )
+    ++errors;
 
   Dune :: GenericGeometry :: ForLoop
   < CheckSubSub, 0, NumSubSubs :: value - 1 > :: apply();

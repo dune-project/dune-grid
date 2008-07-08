@@ -23,6 +23,9 @@ namespace Dune
     template< class Topology, unsigned int codim, unsigned int i >
     struct SubTopology;
 
+    template< class Topology, unsigned int codim, unsigned int subcodim >
+    class SubTopologySize;
+
     template< class Topology, unsigned int codim, unsigned int i,
         unsigned int subcodim, unsigned int j >
     class SubTopologyNumber;
@@ -256,6 +259,55 @@ namespace Dune
     struct SubTopology
     {
       typedef typename SubTopologyImpl< Topology, Topology :: dimension, codim, i > :: type type;
+    };
+
+
+
+    // SubTopologySize
+    // ---------------
+
+    template< class Topology, unsigned int codim, unsigned int subcodim >
+    class SubTopologySize
+    {
+      template< int i >
+      struct Builder;
+
+      unsigned int size_[ Size< Topology, codim > :: value ];
+
+      SubTopologySize ()
+      {
+        ForLoop< Builder, 0, Size< Topology, codim > :: value-1 >
+        :: apply( *this );
+      }
+
+      SubTopologySize ( const SubTopologySize & );
+
+      static const SubTopologySize &instance ()
+      {
+        static SubTopologySize inst;
+        return inst;
+      }
+
+    public:
+      static unsigned int size ( unsigned int i )
+      {
+        return instance().size_[ i ];
+      }
+    };
+
+    template< class Topology, unsigned int codim, unsigned int subcodim >
+    template< int i >
+    struct SubTopologySize< Topology, codim, subcodim > :: Builder
+    {
+      typedef GenericGeometry :: SubTopologySize< Topology, codim, subcodim >
+      SubTopologySize;
+      typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type
+      SubTopology;
+
+      static void apply ( SubTopologySize &subTopologySize )
+      {
+        subTopologySize.size_[ i ] = Size< SubTopology, subcodim > :: value;
+      }
     };
 
 
@@ -570,8 +622,6 @@ namespace Dune
       }
     };
 
-
-
     template< class Topology >
     template< int codim >
     class SubTopologyNumbering< Topology > :: Numbering
@@ -597,8 +647,6 @@ namespace Dune
         numbering_[ subcodim ].resize( size );
       }
     };
-
-
 
     template< class Topology >
     template< int codim >
