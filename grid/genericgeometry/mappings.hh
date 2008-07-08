@@ -4,7 +4,7 @@
 #define DUNE_GENERICGEOMETRY_MAPPINGS_HH
 
 #include <dune/grid/genericgeometry/misc.hh>
-#include <dune/grid/genericgeometry/geometrytypes.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 namespace Dune
 {
@@ -14,7 +14,7 @@ namespace Dune
 
 
     /* Mapping have two template arguments:
-     * Geometry:    the generic geometry describing
+     * Topology:    the generic geometry describing
      *              the domain.
      * CoordTraits: a traits class describing the
      *              vector and derivative types needed
@@ -22,8 +22,8 @@ namespace Dune
      *              This class fixes the local (domain) vector type
      *              and the range (world) vector type. Note
      *              that the dimension of the local coordinates (dimG)
-     *              must be greater or equal to Geometry::dimension;
-     *              if dimG > Geometry::dimension then only the
+     *              must be greater or equal to Topology::dimension;
+     *              if dimG > Topology::dimension then only the
      *              first components are used.
      *              The dimension of the global coordinates (dimW)
      *              must be greater or equal to dimG.
@@ -34,21 +34,14 @@ namespace Dune
      *   enum {dimW = };              // world dimension
      *   enum {dimG = };              // grid dimension
      *   typedef ... field_type;
-     *   // Vector type of dimension dimG
-     *   typedef ... local_type;
-     *   // Vector type of dimension dimW
-     *   typedef ... global_type;
-     *   // Matrix type of dimension = w x g (for jacobian, w>g)
-     *   typedef ... derivative_type;
-     *   // Matrix type of dimension = g x g
-     *   typedef ... localmapping_type;
-     *   // Matrix type of dimension = g x w (for jacobian transposed)
-     *   typedef ... derivativeT_type;
+     *   // general vector and matrix types
+     *   template <int dim> struct Vector { typedef ... Type; };
+     *   template <int dimR,dimC> struct Matrix { typedef ... Type; };
      *
      *   // Vector of global vectors denoting the edges of the range
      *   // domain, used to construct a mapping together with an offset.
      *   // Corners used are
-     *   // p[offset],...,p[offset+Geometry::numCorners]
+     *   // p[offset],...,p[offset+Topology::numCorners]
      *   typedef ... coord_vector;
      *
      *   // mapping is of the form Ax+b (used untested)
@@ -64,37 +57,38 @@ namespace Dune
     // It seems not to be possible to make this part
     // of the computation more efficient through
     // the Prism/Pyramid construction !?
-    template< class Geometry, class CoordTraits >
+    template< class Topology, class CoordTraits >
     class Mapping;
-    // compute the normal to the codim 1 subentity
-    // with number face.
-    // Use the ansatz:
-    //
-    template< class Mapping, int face >
-    struct Normal;
 
     // *******************************************
     // *******************************************
     // *******************************************
 
-    template< class Geometry, class CoordTraits >
+    template< class Topology, class CoordTraits >
     struct GenericMapping;
 
     template<class CoordTraits>
     class GenericMapping < Point, CoordTraits >
     {
-      typedef Point Geometry;
+      typedef Point Topology;
     public:
       typedef CoordTraits Traits;
+      enum {dimG = Topology :: dimension};
       enum {dimW = CoordTraits :: dimW};
-      enum {dimG = CoordTraits :: dimG};
-      typedef typename CoordTraits :: field_type FieldType;
-      typedef typename CoordTraits :: local_type LocalCoordType;
-      typedef typename CoordTraits :: global_type GlobalCoordType;
-      typedef typename CoordTraits :: derivative_type JacobianType;
-      typedef typename CoordTraits :: localmapping_type SquareMappingType;
-      typedef typename CoordTraits :: derivativeT_type JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector CoordVector;
+      typedef typename CoordTraits :: field_type
+      FieldType;
+      typedef typename CoordTraits :: template Vector <dimG> :: Type
+      LocalCoordType;
+      typedef typename CoordTraits :: template Vector<dimW> :: Type
+      GlobalCoordType;
+      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
+      SquareMappingType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
+      JacobianTransposeType;
+      typedef typename CoordTraits :: coord_vector
+      CoordVector;
     private:
       GlobalCoordType p_;
       bool zero_;
@@ -155,24 +149,31 @@ namespace Dune
     };
 
 
-    template< class BaseGeometry, class CoordTraits >
-    class GenericMapping < Prism< BaseGeometry >, CoordTraits >
+    template< class BaseTopology, class CoordTraits >
+    class GenericMapping < Prism< BaseTopology >, CoordTraits >
     {
-      typedef Prism< BaseGeometry > Geometry;
+      typedef Prism< BaseTopology > Topology;
     public:
       typedef CoordTraits Traits;
+      enum {dimG = Topology :: dimension};
       enum {dimW = CoordTraits :: dimW};
-      enum {dimG = CoordTraits :: dimG};
-      typedef typename CoordTraits :: field_type FieldType;
-      typedef typename CoordTraits :: local_type LocalCoordType;
-      typedef typename CoordTraits :: global_type GlobalCoordType;
-      typedef typename CoordTraits :: derivative_type JacobianType;
-      typedef typename CoordTraits :: localmapping_type SquareMappingType;
-      typedef typename CoordTraits :: derivativeT_type JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector CoordVector;
+      typedef typename CoordTraits :: field_type
+      FieldType;
+      typedef typename CoordTraits :: template Vector<dimG> :: Type
+      LocalCoordType;
+      typedef typename CoordTraits :: template Vector<dimW> :: Type
+      GlobalCoordType;
+      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
+      SquareMappingType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
+      JacobianTransposeType;
+      typedef typename CoordTraits :: coord_vector
+      CoordVector;
     private:
-      GenericMapping<BaseGeometry,CoordTraits> bottom_;
-      GenericMapping<BaseGeometry,CoordTraits> top_;
+      GenericMapping<BaseTopology,CoordTraits> bottom_;
+      GenericMapping<BaseTopology,CoordTraits> top_;
       bool affine_,constant_,zero_;
       void setProperties() {
         affine_ = CoordVector::affine==1 ||
@@ -184,7 +185,7 @@ namespace Dune
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         bottom_(coords,offset),
-        top_(coords,offset+BaseGeometry::numCorners),
+        top_(coords,offset+BaseTopology::numCorners),
         affine_(CoordVector::affine==1),
         constant_(false),
         zero_(false)
@@ -244,23 +245,30 @@ namespace Dune
       }
     };
 
-    template< class BaseGeometry, class CoordTraits >
-    class GenericMapping < Pyramid< BaseGeometry >, CoordTraits >
+    template< class BaseTopology, class CoordTraits >
+    class GenericMapping < Pyramid< BaseTopology >, CoordTraits >
     {
-      typedef Pyramid< BaseGeometry > Geometry;
+      typedef Pyramid< BaseTopology > Topology;
     public:
       typedef CoordTraits Traits;
+      enum {dimG = Topology :: dimension};
       enum {dimW = CoordTraits :: dimW};
-      enum {dimG = CoordTraits :: dimG};
-      typedef typename CoordTraits :: field_type FieldType;
-      typedef typename CoordTraits :: local_type LocalCoordType;
-      typedef typename CoordTraits :: global_type GlobalCoordType;
-      typedef typename CoordTraits :: derivative_type JacobianType;
-      typedef typename CoordTraits :: localmapping_type SquareMappingType;
-      typedef typename CoordTraits :: derivativeT_type JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector CoordVector;
+      typedef typename CoordTraits :: field_type
+      FieldType;
+      typedef typename CoordTraits :: template Vector<dimG> :: Type
+      LocalCoordType;
+      typedef typename CoordTraits :: template Vector<dimW> :: Type
+      GlobalCoordType;
+      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
+      SquareMappingType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
+      JacobianTransposeType;
+      typedef typename CoordTraits :: coord_vector
+      CoordVector;
     private:
-      GenericMapping<BaseGeometry,CoordTraits> bottom_;
+      GenericMapping<BaseTopology,CoordTraits> bottom_;
       GlobalCoordType top_,pn_;
       bool affine_,constant_,zero_;
       void setProperties() {
@@ -273,8 +281,8 @@ namespace Dune
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         bottom_(coords,offset),
-        pn_(coords[offset+BaseGeometry::numCorners]),
-        top_(coords[offset+BaseGeometry::numCorners]),
+        pn_(coords[offset+BaseTopology::numCorners]),
+        top_(coords[offset+BaseTopology::numCorners]),
         affine_(CoordVector::affine==1),
         constant_(false),
         zero_(false)
@@ -394,75 +402,99 @@ namespace Dune
       }
     };
 
-    template< class Geometry, class CoordTraits >
+    template< class Topology, class CoordTraits >
     class Mapping {
-      typedef GenericMapping<Geometry,CoordTraits> GenericMappingType;
+      typedef Mapping<Topology,CoordTraits> ThisType;
+      typedef GenericMapping<Topology,CoordTraits> GenericMappingType;
     public:
       typedef CoordTraits Traits;
+      enum {dimG = Topology :: dimension};
       enum {dimW = CoordTraits :: dimW};
-      enum {dimG = CoordTraits :: dimG};
-      typedef typename CoordTraits :: field_type FieldType;
-      typedef typename CoordTraits :: local_type LocalCoordType;
-      typedef typename CoordTraits :: global_type GlobalCoordType;
-      typedef typename CoordTraits :: derivative_type JacobianType;
-      typedef typename CoordTraits :: localmapping_type SquareMappingType;
-      typedef typename CoordTraits :: derivativeT_type JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector CoordVector;
+      typedef typename CoordTraits :: field_type
+      FieldType;
+      typedef typename CoordTraits :: template Vector<dimG> :: Type
+      LocalCoordType;
+      typedef typename CoordTraits :: template Vector<dimW> :: Type
+      GlobalCoordType;
+      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
+      SquareMappingType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
+      JacobianTransposeType;
+      typedef typename CoordTraits :: coord_vector
+      CoordVector;
+      template< int c, int cc >
+      struct SubEntityCoordVector {
+        typedef GlobalCoordType Vector;
+        int i_,ii_;
+        const CoordVector& coord_;
+        SubEntityCoordVector(const CoordVector& coord,
+                             int i,int ii) :
+          i_(i), ii_(ii), coord_(coord)
+        {}
+        const Vector& operator[](int k) {
+          return coord_[k];
+        }
+      };
+      template< int c, int cc >
+      struct SubEntityTraits : public Traits {
+        typedef SubEntityCoordVector<c,cc> CoordVector;
+      };
     private:
-      GenericMappingType& map_;
+      GenericMappingType map_;
+      const CoordVector coords_;
+      JacobianTransposeType d;
+      SquareMappingType L;
+      JacobianType Q;
     public:
       explicit Mapping(const CoordVector& coords) :
-        map_(coords,0) {}
-      void phi_set(const LocalCoordType& x,
-                   GlobalCoordType& p) const {
+        map_(coords,0),
+        coords_(coords)
+      {}
+      void phi(const LocalCoordType& x,
+               GlobalCoordType& p) const {
         map_.phi_set(x,p);
       }
-      void phi_add(const LocalCoordType& x,
-                   const FieldType& fac,
-                   GlobalCoordType& p) const {
-        map_.phi_add(x,fac,p);
-      }
-      void deriv_set(const LocalCoordType& x,
+      void jacobianT(const LocalCoordType& x,
                      JacobianTransposeType& d) const {
         map_.deriv_set(x,d);
-      }
-      void deriv_add(const LocalCoordType& x,
-                     const FieldType& fac,
-                     JacobianTransposeType& d) const {
-        map_.deriv_add(x,fac,d);
       }
       bool affine() const {
         return map_.affine();
       }
       // additional methods
-      FieldType integrationElement(const LocalCoordType& x)
-      {
-        JacobianTransposeType d;
-        deriv_set(x,d);
-        if (dimW==dimG)
+      /*
+         FieldType integrationElement(const LocalCoordType& x)
+         {
+         jacobianT(x,d);
+         if (dimW==dimG)
           return std::abs(d.det());
-        else {
-          SquareMappingType R;
-          JacobianType dInv;
-          return QRDecompose<CoordTraits>::compute(d,R,dInv);
-        }
-      }
-      FieldType jacobianInverseTransposed(const LocalCoordType& x,
+         else {
+          return QRDecompose<CoordTraits>::compute(d,L,Q);
+         }
+         }
+         FieldType jacobianInverseTransposed(const LocalCoordType& x,
                                           JacobianType& dInv)
-      {
-        JacobianTransposeType d;
-        deriv_set(x,d);
-        if (dimW==dimG) {
-          dInv = d.inverse();
-          return std::abs(d.det());
-        }
-        else {
-          SquareMappingType R;
-          return QRDecompose<CoordTraits>::compute(d,R,dInv);
-        }
-      }
+         {
+         if (dimW==dimG) {
+          deriv(x,dInv);
+          dInv.invert();
+          return std::abs(dInv.det());
+         }
+         else {
+          double intEl = QRDecompose<CoordTraits>::compute(d,L,Q);
+          QRDecompose<CoordTraits>::invert(L,Q,dInv);
+          return intEl;
+         }
+         }
+         FieldType volume() {
+         return 0.;
+         }
+         void noraml(int face,GlobalCoordType& n) {
+         }
+       */
     };
-
   }
 }
 #endif
