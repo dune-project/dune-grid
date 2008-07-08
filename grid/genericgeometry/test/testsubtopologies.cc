@@ -21,9 +21,6 @@ Topology;
 bool verbose = false;
 unsigned int errors = 0;
 
-typedef Dune :: GenericGeometry :: SubTopologyNumbering< Topology >
-SubTopologyNumbering;
-
 
 
 template< int codim >
@@ -63,38 +60,8 @@ template< int j >
 struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 :: CheckSubSub
 {
-  template< int subsubcodim >
-  struct CheckSubSubCodim;
-
   static void apply ();
 };
-
-template< int codim >
-template< int i >
-template< int subcodim >
-template< int j >
-template< int subsubcodim >
-struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
-:: CheckSubSub< j > :: CheckSubSubCodim
-{
-  template< int k >
-  struct CheckSubSubSub;
-
-  static void apply ();
-};
-
-template< int codim >
-template< int i >
-template< int subcodim >
-template< int j >
-template< int subsubcodim >
-template< int k >
-struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
-:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: CheckSubSubSub
-{
-  static void apply ();
-};
-
 
 
 
@@ -156,85 +123,33 @@ template< int j >
 void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 :: CheckSubSub< j > :: apply ()
 {
-  typedef Dune :: GenericGeometry
-  :: SubTopologyNumber< Topology, codim, i, subcodim, j > SubNumber;
+  /*
+     typedef Dune :: GenericGeometry
+     :: SubTopologyNumber< Topology, codim, i, subcodim, j > SubNumber;
+   */
   typedef Dune :: GenericGeometry
   :: Size< Topology, codim + subcodim > NumSubs;
 
-  const unsigned int subEntity
-    = SubTopologyNumbering :: template subEntity< codim, subcodim >( i, j );
+  const unsigned int number = Dune :: GenericGeometry
+                              :: SubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
+  const unsigned int genericNumber = Dune :: GenericGeometry
+                                     :: GenericSubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
 
   bool error = false;
-  error |= ((codim == 0) && (SubNumber :: value != j));
-  error |= ((subcodim == 0) && (SubNumber :: value != i));
-  error |= ((unsigned int)SubNumber :: value >= (unsigned int)NumSubs :: value);
-  error |= (SubNumber :: value != subEntity);
+  error |= ((codim == 0) && (number != j));
+  error |= ((subcodim == 0) && (number != i));
+  error |= (number >= (unsigned int)NumSubs :: value);
+  //error |= (number != SubNumber :: value);
+  error |= (number != genericNumber);
 
   if( verbose || error )
   {
     std :: cerr << "SubTopologyNumber< " << codim << ", " << i
-                << ", " << subcodim << ", " << j << " > = "
-                << SubNumber :: value << std :: endl;
+                << ", " << subcodim << ", " << j << " > = " << number
+                << std :: endl;
   }
   if( error )
     ++errors;
-
-  Dune :: GenericGeometry :: ForLoop
-  < CheckSubSubCodim, 0, Topology :: dimension - codim - subcodim > :: apply();
-}
-
-template< int codim >
-template< int i >
-template< int subcodim >
-template< int j >
-template< int subsubcodim >
-void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
-:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: apply ()
-{
-  typedef Dune :: GenericGeometry
-  :: SubTopologyNumber< Topology, codim, i, subcodim, j > SubNumber;
-  typedef typename Dune :: GenericGeometry
-  :: SubTopology< Topology, codim + subcodim, SubNumber :: value > :: type
-  SubSubTopology;
-  typedef Dune :: GenericGeometry
-  :: Size< SubSubTopology, subsubcodim > NumSubSubSubs;
-
-  Dune :: GenericGeometry :: ForLoop
-  < CheckSubSubSub, 0, NumSubSubSubs :: value-1 > :: apply();
-}
-
-template< int codim >
-template< int i >
-template< int subcodim >
-template< int j >
-template< int subsubcodim >
-template< int k >
-void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
-:: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: CheckSubSubSub< k >
-:: apply ()
-{
-  typedef typename Dune :: GenericGeometry
-  :: SubTopology< Topology, codim, i > :: type SubTopology;
-  typedef Dune :: GenericGeometry :: SubTopologyNumber
-  < Topology, codim, i, subcodim, j > Nij;
-  typedef Dune :: GenericGeometry :: SubTopologyNumber
-  < SubTopology, subcodim, j, subsubcodim, k > Njk;
-
-  typedef Dune :: GenericGeometry :: SubTopologyNumber
-  < Topology, codim + subcodim, Nij :: value, subsubcodim, k > Nij_k;
-  typedef Dune :: GenericGeometry :: SubTopologyNumber
-  < Topology, codim, i, subcodim + subsubcodim, Njk :: value > Ni_jk;
-
-  if( (unsigned int)Nij_k :: value != (unsigned int)Ni_jk :: value )
-  {
-    std :: cerr << "Error< " << codim << ", " << subcodim << ", "
-                << subsubcodim << " >: "
-                << "Sub( Sub( " << i << ", " << j << "), " << k << " ) = "
-                << Nij_k :: value << " != " << Ni_jk :: value
-                << " = Sub( " << i << ", Sub( " << j << ", " << k << " ) )"
-                << std :: endl;
-    ++errors;
-  }
 }
 
 

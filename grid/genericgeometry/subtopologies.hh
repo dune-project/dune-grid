@@ -3,6 +3,7 @@
 #ifndef DUNE_GENERICGEOMETRY_SUBTOPOLOGIES_HH
 #define DUNE_GENERICGEOMETRY_SUBTOPOLOGIES_HH
 
+#include <cassert>
 #include <vector>
 
 #include <dune/common/static_assert.hh>
@@ -25,12 +26,15 @@ namespace Dune
 
     template< class Topology, unsigned int codim, unsigned int subcodim >
     class SubTopologySize;
+    /*
+        template< class Topology, unsigned int codim, unsigned int i,
+                  unsigned int subcodim, unsigned int j >
+        class SubTopologyNumber;
+     */
+    template< class Topology, unsigned int codim, unsigned int subcodim >
+    class GenericSubTopologyNumbering;
 
-    template< class Topology, unsigned int codim, unsigned int i,
-        unsigned int subcodim, unsigned int j >
-    class SubTopologyNumber;
-
-    template< class Topology >
+    template< class Topology, unsigned int codim, unsigned int subcodim >
     class SubTopologyNumbering;
 
 
@@ -291,6 +295,7 @@ namespace Dune
     public:
       static unsigned int size ( unsigned int i )
       {
+        assert( (i < Size< Topology, codim > :: value) );
         return instance().size_[ i ];
       }
     };
@@ -312,6 +317,7 @@ namespace Dune
 
 
 
+#if 0
     // SubTopologyNumber
     // -----------------
 
@@ -577,126 +583,231 @@ namespace Dune
             Border, Interior > :: value
       };
     };
+#endif
+
+
+
+    // GenericSubTopologyNumbering
+    // ---------------------------
+
+    template< class Topology, unsigned int codim,
+        unsigned int subdim, unsigned int subcodim >
+    struct GenericSubTopologyNumberingHelper;
+
+    template< class BaseTopology, unsigned int codim,
+        unsigned int subdim, unsigned int subcodim >
+    struct GenericSubTopologyNumberingHelper
+    < Prism< BaseTopology >, codim, subdim, subcodim >
+    {
+      typedef Prism< BaseTopology > Topology;
+
+      enum { m = Size< BaseTopology, codim-1 > :: value };
+      enum { n = Size< BaseTopology, codim > :: value };
+
+      enum { mb = Size< BaseTopology, codim+subcodim-1 > :: value };
+      enum { nb = Size< BaseTopology, codim+subcodim > :: value };
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        const unsigned int s = (i < n+m ? 0 : 1);
+        if( i < n )
+        {
+          const unsigned int ms = SubTopologySize< BaseTopology, codim, subcodim-1 > :: size( i );
+          const unsigned int ns = SubTopologySize< BaseTopology, codim, subcodim > :: size( i );
+          const unsigned int ss = (j < ns+ms ? 0 : 1);
+          if( j < ns )
+            return GenericSubTopologyNumbering< BaseTopology, codim, subcodim >
+                   :: number( i, j );
+          else
+            return GenericSubTopologyNumbering< BaseTopology, codim, subcodim-1 >
+                   :: number( i, j-(ns+ss*ms) ) + nb + ss*mb;
+        }
+        else
+          return GenericSubTopologyNumbering< BaseTopology, codim-1, subcodim >
+                 :: number( i-(n+s*m), j ) + nb + s*mb;
+      }
+    };
+
+    template< class BaseTopology, unsigned int codim, unsigned int subdim >
+    struct GenericSubTopologyNumberingHelper
+    < Prism< BaseTopology >, codim, subdim, 0 >
+    {
+      typedef Prism< BaseTopology > Topology;
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        return i;
+      }
+    };
+
+    template< class BaseTopology, unsigned int codim, unsigned int subdim >
+    struct GenericSubTopologyNumberingHelper
+    < Prism< BaseTopology >, codim, subdim, subdim >
+    {
+      typedef Prism< BaseTopology > Topology;
+
+      enum { m = Size< BaseTopology, codim-1 > :: value };
+      enum { n = Size< BaseTopology, codim > :: value };
+
+      enum { mb = Size< BaseTopology, codim+subdim-1 > :: value };
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        const unsigned int s = (i < n+m ? 0 : 1);
+        if( i < n )
+        {
+          const unsigned int ms = SubTopologySize< BaseTopology, codim, subdim-1 > :: size( i );
+          const unsigned int ss = (j < ms ? 0 : 1);
+          return GenericSubTopologyNumbering< BaseTopology, codim, subdim-1 >
+                 :: number( i, j-ss*ms ) + ss*mb;
+        }
+        else
+          return GenericSubTopologyNumbering< BaseTopology, codim-1, subdim >
+                 :: number( i-(n+s*m), j ) + s*mb;
+      }
+    };
+
+    template< class BaseTopology, unsigned int codim,
+        unsigned int subdim, unsigned int subcodim >
+    struct GenericSubTopologyNumberingHelper
+    < Pyramid< BaseTopology >, codim, subdim, subcodim >
+    {
+      typedef Pyramid< BaseTopology > Topology;
+
+      enum { m = Size< BaseTopology, codim-1 > :: value };
+
+      enum { mb = Size< BaseTopology, codim+subcodim-1 > :: value };
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        if( i < m )
+          return GenericSubTopologyNumbering< BaseTopology, codim-1, subcodim >
+                 :: number( i, j );
+        else
+        {
+          const unsigned int ms = SubTopologySize< BaseTopology, codim, subcodim-1 > :: size( i-m );
+          if( j < ms )
+            return GenericSubTopologyNumbering< BaseTopology, codim, subcodim-1 >
+                   :: number( i-m, j );
+          else
+            return GenericSubTopologyNumbering< BaseTopology, codim, subcodim >
+                   :: number( i-m, j-ms ) + mb;
+        }
+      }
+    };
+
+    template< class BaseTopology, unsigned int codim, unsigned int subdim >
+    struct GenericSubTopologyNumberingHelper
+    < Pyramid< BaseTopology >, codim, subdim, 0 >
+    {
+      typedef Pyramid< BaseTopology > Topology;
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        return i;
+      }
+    };
+
+    template< class BaseTopology, unsigned int codim, unsigned int subdim >
+    struct GenericSubTopologyNumberingHelper
+    < Pyramid< BaseTopology >, codim, subdim, subdim >
+    {
+      typedef Pyramid< BaseTopology > Topology;
+
+      enum { m = Size< BaseTopology, codim-1 > :: value };
+
+      enum { mb = Size< BaseTopology, codim+subdim-1 > :: value };
+
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        if( i < m )
+          return GenericSubTopologyNumbering< BaseTopology, codim-1, subdim >
+                 :: number( i, j );
+        else
+        {
+          const unsigned int ms = SubTopologySize< BaseTopology, codim, subdim-1 > :: size( i-m );
+          if( j < ms )
+            return GenericSubTopologyNumbering< BaseTopology, codim, subdim-1 >
+                   :: number( i-m, j );
+          else
+            return mb;
+        }
+      }
+    };
+
+    template< class Topology, unsigned int codim, unsigned int subcodim >
+    class GenericSubTopologyNumbering
+    {
+      dune_static_assert( (codim <= Topology :: dimension), "Invalid codimension" );
+      dune_static_assert( (codim + subcodim <= Topology :: dimension),
+                          "Invalid subcodimension" );
+
+      template< bool >
+      struct BorderCodim
+      {
+        static unsigned int number ( unsigned int i, unsigned int j )
+        {
+          return (codim == 0 ? j : i );
+        }
+      };
+
+      template< bool >
+      struct InnerCodim
+      {
+        static unsigned int number ( unsigned int i, unsigned int j )
+        {
+          return GenericSubTopologyNumberingHelper
+                 < Topology, codim, Topology :: dimension - codim, subcodim >
+                 :: number( i, j );
+        }
+      };
+
+    public:
+      static unsigned int number ( unsigned int i, unsigned int j )
+      {
+        assert( (j <= SubTopologySize< Topology, codim, subcodim > :: size( i )) );
+        return ProtectedIf
+               < (codim == 0) || (codim == Topology :: dimension), BorderCodim, InnerCodim >
+               :: number( i, j );
+      }
+    };
 
 
 
     // SubTopologyNumbering
     // --------------------
 
-    template< class Topology >
+    template< class Topology, unsigned int codim, unsigned int subcodim >
     class SubTopologyNumbering
     {
-      template< int codim >
-      class Numbering;
+      typedef GenericSubTopologyNumbering< Topology, codim, subcodim >
+      GenericNumbering;
 
-      template< int codim >
-      class CodimNumbering
-        : public std :: vector< Numbering< codim > >
-      {};
-
-      template< int codim >
-      struct Builder;
-
-      CodimTable< CodimNumbering, Topology :: dimension > codimNumbering_;
+      std :: vector< unsigned int > numbering_[ Size< Topology, codim > :: value ];
 
     public:
-      template< unsigned int codim, unsigned int subcodim >
-      static unsigned int subEntity ( unsigned int i, unsigned int j )
+      static unsigned int number ( unsigned int i, unsigned int j )
       {
-        Int2Type< codim > codimVariable;
-        const CodimNumbering< codim > &numbering
-          = instance().codimNumbering_[ codimVariable ];
-        return numbering[ i ].template number< subcodim >( j );
+        assert( (j <= SubTopologySize< Topology, codim, subcodim > :: size( i )) );
+        return instance().numbering_[ i ][ j ];
       }
 
     private:
       SubTopologyNumbering ()
       {
-        ForLoop< Builder, 0, Topology :: dimension > :: apply( *this );
+        for( unsigned int i = 0; i < Size< Topology, codim > :: value; ++i )
+        {
+          const unsigned int size = SubTopologySize< Topology, codim, subcodim > :: size( i );
+          numbering_[ i ].resize( size );
+          for( unsigned int j = 0; j < size; ++j )
+            numbering_[ i ][ j ] = GenericNumbering :: number( i, j );
+        }
       }
 
       static const SubTopologyNumbering &instance ()
       {
         static SubTopologyNumbering inst;
         return inst;
-      }
-    };
-
-    template< class Topology >
-    template< int codim >
-    class SubTopologyNumbering< Topology > :: Numbering
-    {
-      std :: vector< unsigned int > numbering_[ Topology :: dimension - codim + 1 ];
-
-    public:
-      template< int subcodim >
-      const unsigned int &number ( unsigned int j ) const
-      {
-        return numbering_[ subcodim ][ j ];
-      }
-
-      template< int subcodim >
-      unsigned int &number ( unsigned int j )
-      {
-        return numbering_[ subcodim ][ j ];
-      }
-
-      template< int subcodim >
-      void resize ( unsigned int size )
-      {
-        numbering_[ subcodim ].resize( size );
-      }
-    };
-
-    template< class Topology >
-    template< int codim >
-    struct SubTopologyNumbering< Topology > :: Builder
-    {
-      typedef GenericGeometry :: SubTopologyNumbering< Topology > SubTopologyNumbering;
-      typedef typename SubTopologyNumbering :: template CodimNumbering< codim >
-      CodimNumbering;
-      typedef typename SubTopologyNumbering :: template Numbering< codim > Numbering;
-
-      template< int i >
-      struct Sub
-      {
-        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type
-        SubTopology;
-
-        template< int subcodim >
-        struct SubCodim
-        {
-          template< int j >
-          struct SubSub
-          {
-            static void apply( Numbering &numbering )
-            {
-              numbering.template number< subcodim >( j )
-                = SubTopologyNumber< Topology, codim, i, subcodim, j > :: value;
-            }
-          };
-
-          static void apply ( Numbering &numbering )
-          {
-            enum { numSubSubs = Size< SubTopology, subcodim > :: value };
-            numbering.template resize< subcodim >( numSubSubs );
-            ForLoop< SubSub, 0, numSubSubs-1 > :: apply( numbering );
-          }
-        };
-
-        static void apply ( CodimNumbering &numbering )
-        {
-          ForLoop< SubCodim, 0, SubTopology :: dimension > :: apply( numbering[ i ] );
-        }
-      };
-
-      static void apply ( SubTopologyNumbering &numbering )
-      {
-        enum { numSubs = Size< Topology, codim > :: value };
-        Int2Type< codim > codimVariable;
-        CodimNumbering &codimNumbering = numbering.codimNumbering_[ codimVariable ];
-        codimNumbering.resize( numSubs );
-        ForLoop< Sub, 0, numSubs-1 > :: apply( codimNumbering );
       }
     };
 
