@@ -1,7 +1,7 @@
 /**
-\page gg Generic Geometries
+\page GridGenericGeometry Generic Geometries
 
-\section gg_introduction Introduction
+\section GridGenericGeometryIntroduction Introduction
 
 ...
 
@@ -15,7 +15,7 @@ We define the set \f$\mathcal{T}\f$ of reference topologies by the following rul
 .
 
 
-\section gg_refmaps Reference Mappings
+\section GridGenericGeometryReferenceMappings Reference Mappings
 
 For each topology \f$T \in \mathcal{T}\f$, we introduce a reference mapping, mapping
 a reference domain into \f$\mathbf{R}^n\f$.
@@ -55,7 +55,7 @@ as the unique choice of points, such that
 is the identity mapping.
 
 
-\section gg_numbering Numbering of Subentities
+\section GridGenericGeometryNumbering Numbering of Subentities
 
 Having numbered the vertices, we can number subentities of arbitrary codimension.
 Let R be a reference element. Since codimension \f$\mathrm{dim}( R )\f$ is already

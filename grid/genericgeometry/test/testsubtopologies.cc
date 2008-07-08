@@ -2,9 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/grid/genericgeometry/geometrytypes.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
-#include <dune/grid/genericgeometry/subentities.hh>
+#include <dune/grid/genericgeometry/subtopologies.hh>
 
 #ifndef GEOMETRYTYPE
 #error "GEOMETRYTYPE must be one of 'simplex', 'cube', 'prism', 'pyramid'"
@@ -16,12 +16,13 @@
 
 typedef Dune :: GenericGeometry :: Convert
 < Dune :: GeometryType :: GEOMETRYTYPE, DIMENSION > :: type
-Geometry;
+Topology;
 
 bool verbose = false;
 unsigned int errors = 0;
 
-typedef Dune :: GenericGeometry :: SubEntityNumbering< Geometry > SubEntityNumbering;
+typedef Dune :: GenericGeometry :: SubTopologyNumbering< Topology >
+SubTopologyNumbering;
 
 
 
@@ -100,7 +101,7 @@ struct CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 template< int codim >
 void CheckCodim< codim > :: apply ()
 {
-  typedef Dune :: GenericGeometry :: NumSubEntities< Geometry, codim > NumSubs;
+  typedef Dune :: GenericGeometry :: Size< Topology, codim > NumSubs;
   Dune :: GenericGeometry :: ForLoop< CheckSub, 0, NumSubs :: value-1 > :: apply();
 }
 
@@ -109,16 +110,17 @@ template< int i >
 void CheckCodim< codim > :: CheckSub< i > :: apply ()
 {
   typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
+  :: SubTopology< Topology, codim, i > :: type SubTopology;
 
   if( verbose )
   {
-    std :: cerr << "SubEntity< " << codim << " > " << i
-                << ": type = " << SubGeo :: name()
+    std :: cerr << "SubTopology< " << codim << " > " << i
+                << ": type = " << SubTopology :: name()
                 << std :: endl;
   }
 
-  Dune :: GenericGeometry :: ForLoop< CheckSubCodim, 0, SubGeo :: dimension > :: apply();
+  Dune :: GenericGeometry :: ForLoop
+  < CheckSubCodim, 0, SubTopology :: dimension > :: apply();
 }
 
 template< int codim >
@@ -127,13 +129,12 @@ template< int subcodim >
 void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: apply ()
 {
   typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
-  typedef Dune :: GenericGeometry :: NumSubEntities< SubGeo, subcodim >
-  NumSubSubs;
+  :: SubTopology< Topology, codim, i > :: type SubTopology;
+  typedef Dune :: GenericGeometry :: Size< SubTopology, subcodim > NumSubSubs;
 
   if( verbose )
   {
-    std :: cerr << "SubEntity< " << codim << " > " << i
+    std :: cerr << "SubTopology< " << codim << " > " << i
                 << ": size< " << subcodim << " > = " << NumSubSubs :: value
                 << std :: endl;
   }
@@ -150,12 +151,12 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 :: CheckSubSub< j > :: apply ()
 {
   typedef Dune :: GenericGeometry
-  :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
+  :: SubTopologyNumber< Topology, codim, i, subcodim, j > SubNumber;
   typedef Dune :: GenericGeometry
-  :: NumSubEntities< Geometry, codim + subcodim > NumSubs;
+  :: Size< Topology, codim + subcodim > NumSubs;
 
   const unsigned int subEntity
-    = SubEntityNumbering :: template subEntity< codim, subcodim >( i, j );
+    = SubTopologyNumbering :: template subEntity< codim, subcodim >( i, j );
 
   bool error = false;
   error |= ((codim == 0) && (SubNumber :: value != j));
@@ -165,7 +166,7 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 
   if( verbose || error )
   {
-    std :: cerr << "SubEntityNumber< " << codim << ", " << i
+    std :: cerr << "SubTopologyNumber< " << codim << ", " << i
                 << ", " << subcodim << ", " << j << " > = "
                 << SubNumber :: value << std :: endl;
   }
@@ -173,7 +174,7 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
     ++errors;
 
   Dune :: GenericGeometry :: ForLoop
-  < CheckSubSubCodim, 0, Geometry :: dimension - codim - subcodim > :: apply();
+  < CheckSubSubCodim, 0, Topology :: dimension - codim - subcodim > :: apply();
 }
 
 template< int codim >
@@ -185,12 +186,12 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 :: CheckSubSub< j > :: CheckSubSubCodim< subsubcodim > :: apply ()
 {
   typedef Dune :: GenericGeometry
-  :: SubEntityNumber< Geometry, codim, i, subcodim, j > SubNumber;
+  :: SubTopologyNumber< Topology, codim, i, subcodim, j > SubNumber;
   typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim + subcodim, SubNumber :: value > :: type
-  SubSubGeo;
+  :: SubTopology< Topology, codim + subcodim, SubNumber :: value > :: type
+  SubSubTopology;
   typedef Dune :: GenericGeometry
-  :: NumSubEntities< SubSubGeo, subsubcodim > NumSubSubSubs;
+  :: Size< SubSubTopology, subsubcodim > NumSubSubSubs;
 
   Dune :: GenericGeometry :: ForLoop
   < CheckSubSubSub, 0, NumSubSubSubs :: value-1 > :: apply();
@@ -207,16 +208,16 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
 :: apply ()
 {
   typedef typename Dune :: GenericGeometry
-  :: SubGeometry< Geometry, codim, i > :: type SubGeo;
-  typedef Dune :: GenericGeometry :: SubEntityNumber
-  < Geometry, codim, i, subcodim, j > Nij;
-  typedef Dune :: GenericGeometry :: SubEntityNumber
-  < SubGeo, subcodim, j, subsubcodim, k > Njk;
+  :: SubTopology< Topology, codim, i > :: type SubTopology;
+  typedef Dune :: GenericGeometry :: SubTopologyNumber
+  < Topology, codim, i, subcodim, j > Nij;
+  typedef Dune :: GenericGeometry :: SubTopologyNumber
+  < SubTopology, subcodim, j, subsubcodim, k > Njk;
 
-  typedef Dune :: GenericGeometry :: SubEntityNumber
-  < Geometry, codim + subcodim, Nij :: value, subsubcodim, k > Nij_k;
-  typedef Dune :: GenericGeometry :: SubEntityNumber
-  < Geometry, codim, i, subcodim + subsubcodim, Njk :: value > Ni_jk;
+  typedef Dune :: GenericGeometry :: SubTopologyNumber
+  < Topology, codim + subcodim, Nij :: value, subsubcodim, k > Nij_k;
+  typedef Dune :: GenericGeometry :: SubTopologyNumber
+  < Topology, codim, i, subcodim + subsubcodim, Njk :: value > Ni_jk;
 
   if( (unsigned int)Nij_k :: value != (unsigned int)Ni_jk :: value )
   {
@@ -239,9 +240,9 @@ int main ( int argc, char **argv )
     verbose |= (strcmp( argv[ i ], "-v" ) == 0);
   }
 
-  std :: cerr << "Generic geometry type: " << Geometry :: name() << std :: endl;
+  std :: cerr << "Generic geometry type: " << Topology :: name() << std :: endl;
 
-  Dune :: GenericGeometry :: ForLoop< CheckCodim, 0, Geometry :: dimension > :: apply();
+  Dune :: GenericGeometry :: ForLoop< CheckCodim, 0, Topology :: dimension > :: apply();
 
   std :: cerr << "Number of errors: " << errors << std :: endl;
   return (errors > 0 ? 1 : 0);

@@ -6,7 +6,7 @@
 #include <dune/common/static_assert.hh>
 #include <dune/common/geometrytype.hh>
 
-#include <dune/grid/genericgeometry/geometrytypes.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 namespace Dune
 {
@@ -14,7 +14,7 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class Geometry, GeometryType :: BasicType defaultType >
+    template< class Topology, GeometryType :: BasicType defaultType >
     class DuneGeometryType;
 
     template< GeometryType :: BasicType defaultType >
@@ -29,10 +29,10 @@ namespace Dune
       enum { basicType = defaultType };
     };
 
-    template< class BaseGeometry, GeometryType :: BasicType defaultType >
-    class DuneGeometryType< Prism< BaseGeometry >, defaultType >
+    template< class BaseTopology, GeometryType :: BasicType defaultType >
+    class DuneGeometryType< Prism< BaseTopology >, defaultType >
     {
-      typedef DuneGeometryType< BaseGeometry, defaultType > DuneBaseGeometryType;
+      typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
 
       dune_static_assert( (defaultType == GeometryType :: simplex)
                           || (defaultType == GeometryType :: cube),
@@ -55,10 +55,10 @@ namespace Dune
       };
     };
 
-    template< class BaseGeometry, GeometryType :: BasicType defaultType >
-    class DuneGeometryType< Pyramid< BaseGeometry >, defaultType >
+    template< class BaseTopology, GeometryType :: BasicType defaultType >
+    class DuneGeometryType< Pyramid< BaseTopology >, defaultType >
     {
-      typedef DuneGeometryType< BaseGeometry, defaultType > DuneBaseGeometryType;
+      typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
 
       dune_static_assert( (defaultType == GeometryType :: simplex)
                           || (defaultType == GeometryType :: cube),
@@ -89,7 +89,9 @@ namespace Dune
     template< unsigned int dim >
     struct Convert< GeometryType :: simplex, dim >
     {
-      typedef Pyramid< typename Convert< GeometryType :: simplex, dim-1 > :: type > type;
+      typedef Pyramid
+      < typename Convert< GeometryType :: simplex, dim-1 > :: type >
+      type;
     };
 
     template<>
@@ -101,7 +103,8 @@ namespace Dune
     template< unsigned int dim >
     struct Convert< GeometryType :: cube, dim >
     {
-      typedef Prism< typename Convert< GeometryType :: cube, dim-1 > :: type > type;
+      typedef Prism< typename Convert< GeometryType :: cube, dim-1 > :: type >
+      type;
     };
 
     template<>
@@ -113,7 +116,9 @@ namespace Dune
     template< unsigned int dim >
     struct Convert< GeometryType :: prism, dim >
     {
-      typedef Prism< typename Convert< GeometryType :: simplex, dim-1 > :: type > type;
+      typedef Prism
+      < typename Convert< GeometryType :: simplex, dim-1 > :: type >
+      type;
 
     private:
       dune_static_assert( dim >= 3, "Dune prisms must be at least 3-dimensional." );
@@ -122,7 +127,9 @@ namespace Dune
     template< unsigned int dim >
     struct Convert< GeometryType :: pyramid, dim >
     {
-      typedef Pyramid< typename Convert< GeometryType :: cube, dim-1 > :: type > type;
+      typedef Pyramid
+      < typename Convert< GeometryType :: cube, dim-1 > :: type >
+      type;
 
     private:
       dune_static_assert( dim >= 3, "Dune pyramids must be at least 3-dimensional." );

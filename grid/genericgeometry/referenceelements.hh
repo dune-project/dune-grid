@@ -6,7 +6,7 @@
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/genericgeometry/misc.hh>
-#include <dune/grid/genericgeometry/geometrytypes.hh>
+#include <dune/grid/genericgeometry/topologytypes.hh>
 
 namespace Dune
 {

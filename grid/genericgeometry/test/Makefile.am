@@ -1,7 +1,7 @@
 GEOMETRYTYPE = cube
 DIMENSION = 3
 
-check_PROGRAMS = testsubentities
+check_PROGRAMS = testsubtopologies
 
-testsubentities_SOURCES = testsubentities.cc
-testsubentities_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -DGEOMETRYTYPE=$(GEOMETRYTYPE) -DDIMENSION=$(DIMENSION)
+testsubtopologies_SOURCES = testsubtopologies.cc
+testsubtopologies_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -DGEOMETRYTYPE=$(GEOMETRYTYPE) -DDIMENSION=$(DIMENSION)
