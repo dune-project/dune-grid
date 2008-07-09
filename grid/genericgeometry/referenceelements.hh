@@ -14,7 +14,7 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class Topology >
+    template< class Topology, class ctype >
     class ReferenceElement;
 
 
@@ -285,6 +285,12 @@ namespace Dune
 
       typedef FieldVector< ctype, dimension > CoordinateType;
 
+      template< unsigned int codim, unsigned int subcodim >
+      static unsigned int subNumbering ( unsigned int i, unsigned int j )
+      {
+        return SubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
+      }
+
       static const CoordinateType &corner ( unsigned int i )
       {
         return instance().corners_[ i ];
@@ -332,6 +338,12 @@ namespace Dune
       enum { dimension = Topology :: dimension };
 
       typedef FieldVector< ctype, dimension > CoordinateType;
+
+      template< unsigned int codim, unsigned int subcodim >
+      static unsigned int subNumbering ( unsigned int i, unsigned int j )
+      {
+        return SubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
+      }
 
       static const CoordinateType &corner ( unsigned int i )
       {

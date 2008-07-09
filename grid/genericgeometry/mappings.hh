@@ -5,6 +5,7 @@
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/grid/genericgeometry/referenceelements.hh>
 
 namespace Dune
 {
@@ -424,7 +425,9 @@ namespace Dune
       JacobianTransposeType;
       typedef typename CoordTraits :: coord_vector
       CoordVector;
-      template< int c, int cc >
+      typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
+
+      template< unsigned int codim, unsigned int subcodim >
       struct SubEntityCoordVector {
         typedef GlobalCoordType Vector;
         int i_,ii_;
@@ -434,12 +437,13 @@ namespace Dune
           i_(i), ii_(ii), coord_(coord)
         {}
         const Vector& operator[](int k) {
-          return coord_[k];
+          const int l = ReferenceElementType :: template subNumbering<codim,subcodim>(i,ii);
+          return coord_[l];
         }
       };
-      template< int c, int cc >
+      template< unsigned int codim, unsigned int subcodim >
       struct SubEntityTraits : public Traits {
-        typedef SubEntityCoordVector<c,cc> CoordVector;
+        typedef SubEntityCoordVector<codim,subcodim> CoordVector;
       };
     private:
       GenericMappingType map_;
@@ -456,6 +460,8 @@ namespace Dune
                GlobalCoordType& p) const {
         map_.phi_set(x,p);
       }
+      void phiInvert(const GlobalCoordType& p,
+                     LocalCoordType& x) {}
       void jacobianT(const LocalCoordType& x,
                      JacobianTransposeType& d) const {
         map_.deriv_set(x,d);
@@ -464,36 +470,27 @@ namespace Dune
         return map_.affine();
       }
       // additional methods
-      /*
-         FieldType integrationElement(const LocalCoordType& x)
-         {
-         jacobianT(x,d);
-         if (dimW==dimG)
-          return std::abs(d.det());
-         else {
-          return QRDecompose<CoordTraits>::compute(d,L,Q);
-         }
-         }
-         FieldType jacobianInverseTransposed(const LocalCoordType& x,
+      FieldType integrationElement(const LocalCoordType& x)
+      {
+        jacobianT(x,d);
+        return MatrixHelper<CoordTraits>::det(d);
+      }
+      FieldType jacobianInverseTransposed(const LocalCoordType& x,
                                           JacobianType& dInv)
-         {
-         if (dimW==dimG) {
-          deriv(x,dInv);
-          dInv.invert();
-          return std::abs(dInv.det());
-         }
-         else {
-          double intEl = QRDecompose<CoordTraits>::compute(d,L,Q);
-          QRDecompose<CoordTraits>::invert(L,Q,dInv);
-          return intEl;
-         }
-         }
-         FieldType volume() {
-         return 0.;
-         }
-         void noraml(int face,GlobalCoordType& n) {
-         }
-       */
+      {
+        jacobianT(x,d);
+        return MatrixHelper<CoordTraits>::invert(d);
+      }
+      FieldType volume() {
+        const LocalCoordType& bary = ReferenceElementType::baryCenter();
+        return ReferenceElementType::volume() * integrationElement(bary);
+      }
+      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
+        jacobianT(x,d);
+        const LocalCoordType& refNormal =
+          ReferenceElementType::integrationOuterNormal(face);
+        MatrixHelper<CoordTraits>::solve(d,refNormal,n);
+      }
     };
   }
 }

@@ -3,6 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_MISC_HH
 #define DUNE_GENERICGEOMETRY_MISC_HH
 
+#include <dune/common/static_assert.hh>
+
 namespace Dune
 {
 
