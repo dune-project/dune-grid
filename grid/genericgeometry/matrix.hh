@@ -3,11 +3,35 @@
 #ifndef DUNE_GENERICGEOMETRY_MATRIXHELPER_HH
 #define DUNE_GENERICGEOMETRY_MATRIXHELPER_HH
 
+#include <dune/common/fvector.hh>
+#include <dune/common/fmatrix.hh>
+#include <dune/common/static_assert.hh>
+
 namespace Dune
 {
 
   namespace GenericGeometry
   {
+
+    template< class ctype >
+    struct DefaultMatrixVectorTraits
+    {
+      typedef ctype field_type;
+
+      template< int m, int n>
+      struct Matrix
+      {
+        typedef FieldMatrix< field_type, m, n > Type;
+      };
+
+      template< int n >
+      struct Vector
+      {
+        typedef FieldVector< field_type, n > Type;
+      };
+    };
+
+
 
     template< class Traits >
     struct MatrixHelper
@@ -42,11 +66,11 @@ namespace Dune
         }
       }
 
-      template< int m, int n, int p>
+      template< int m, int n, int p >
       static void
       AB ( const typename Traits :: template Matrix< m, n > :: Type &A,
            const typename Traits :: template Matrix< n, p > :: Type &B,
-           typename Traits :: template Matrix< m, p > :: Type &AB )
+           typename Traits :: template Matrix< m, p > :: Type &ret )
       {
         for( int i = 0; i < m; ++i )
         {
@@ -59,9 +83,42 @@ namespace Dune
         }
       }
 
+      template< int m, int n, int p >
+      static void
+      ATBT ( const typename Traits :: template Matrix< m, n > :: Type &A,
+             const typename Traits :: template Matrix< p, m > :: Type &B,
+             typename Traits :: template Matrix< n, p > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j < p; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = 0; k < m; ++k )
+              ret[ i ][ j ] += A[ k ][ i ] * B[ j ][ k ];
+          }
+        }
+      }
+
       template< int m, int n >
       static void
-      ATA ( const typename Traits :: typename Matrix< m, n > :: Type &A,
+      ATA_L ( const typename Traits :: template Matrix< m, n > :: Type &A,
+              typename Traits :: template Matrix< n, n > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j <= i; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = 0; k < m; ++k )
+              ret[ i ][ j ] += A[ k ][ i ] * A[ k ][ j ];
+          }
+        }
+      }
+
+      template< int m, int n >
+      static void
+      ATA ( const typename Traits :: template Matrix< m, n > :: Type &A,
             typename Traits :: template Matrix< n, n > :: Type &ret )
       {
         for( int i = 0; i < n; ++i )
@@ -70,85 +127,232 @@ namespace Dune
           {
             ret[ i ][ j ] = FieldType( 0 );
             for( int k = 0; k < m; ++k )
-              ret[ i ][ j ] += A[ i ][ k ] * A[ k ][ j ];
-          }
-          for( int j = 0; j < i; ++j )
+              ret[ i ][ j ] += A[ k ][ i ] * A[ k ][ j ];
             ret[ j ][ i ] = ret[ i ][ j ];
+          }
+
+          ret[ i ][ i ] = FieldType( 0 );
+          for( int k = 0; k < m; ++k )
+            ret[ i ][ i ] += A[ k ][ i ] * A[ k ][ i ];
         }
       }
 
       template< int m, int n >
-      static FieldType
-      invAT ( const typename Traits :: template Matrix< m, n > :: Type &A,
-              typename Traits :: template Matrix< m, n > :: Type &ret )
+      static void
+      AAT_L ( const typename Traits :: template Matrix< m, n > :: Type &A,
+              typename Traits :: template Matrix< m, m > :: Type &ret )
       {
-        typename Traits :: template Matrix< n, n > ATA;
-        MatrixHelper :: ATA< m, n >( A, ATA );
-        const FieldType det = MatrixHelper :: invP< n > ( ATA );
-        MatrixHelper :: AB< m, n, n >( A, ATA, ret );
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j <= i; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = 0; k < m; ++k )
+              ret[ i ][ j ] += A[ i ][ k ] * A[ j ][ k ];
+          }
+        }
+      }
+
+      template< int m, int n >
+      static void
+      AAT ( const typename Traits :: template Matrix< m, n > :: Type &A,
+            typename Traits :: template Matrix< m, m > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j < i; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = 0; k < m; ++k )
+              ret[ i ][ j ] += A[ i ][ k ] * A[ j ][ k ];
+            ret[ j ][ i ] = ret[ i ][ j ];
+          }
+          ret[ i ][ i ] = FieldType( 0 );
+          for( int k = 0; k < m; ++k )
+            ret[ i ][ i ] += A[ i ][ k ] * A[ i ][ k ];
+        }
+      }
+
+      template< int n >
+      static void
+      LTL ( const typename Traits :: template Matrix< n, n > :: Type &L,
+            typename Traits :: template Matrix< n, n > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j < i; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = i; k < n; ++k )
+              ret[ i ][ j ] += L[ k ][ i ] * L[ k ][ j ];
+            ret[ j ][ i ] = ret[ i ][ j ];
+          }
+          ret[ i ][ i ] = FieldType( 0 );
+          for( int k = i; k < n; ++k )
+            ret[ i ][ i ] += L[ k ][ i ] * L[ k ][ i ];
+        }
+      }
+
+      template< int n >
+      static void
+      LLT ( const typename Traits :: template Matrix< n, n > :: Type &L,
+            typename Traits :: template Matrix< n, n > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j < i; ++j )
+          {
+            ret[ i ][ j ] = FieldType( 0 );
+            for( int k = 0; k <= j; ++k )
+              ret[ i ][ j ] += L[ i ][ k ] * L[ j ][ k ];
+            ret[ j ][ i ] = ret[ i ][ j ];
+          }
+          ret[ i ][ i ] = FieldType( 0 );
+          for( int k = 0; k <= i; ++k )
+            ret[ i ][ i ] += L[ i ][ k ] * L[ i ][ k ];
+        }
+      }
+
+      template< int n >
+      static void
+      cholesky_L ( const typename Traits :: template Matrix< n, n > :: Type &A,
+                   typename Traits :: template Matrix< n, n > :: Type &ret )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          FieldType &rii = ret[ i ][ i ];
+
+          FieldType x = A[ i ][ i ];
+          for( int j = 0; j < i; ++j )
+            x -= ret[ i ][ j ] * ret[ i ][ j ];
+          assert( x > FieldType( 0 ) );
+          rii = sqrt( x );
+
+          FieldType invrii = FieldType( 1 ) / rii;
+          for( int k = i+1; k < n; ++k )
+          {
+            FieldType x = A[ k ][ i ];
+            for( int j = 0; j < i; ++j )
+              x -= ret[ i ][ j ] * ret[ k ][ j ];
+            ret[ k ][ i ] = invrii * x;
+          }
+        }
+      }
+
+      template< int n >
+      static FieldType
+      detL ( const typename Traits :: template Matrix< n, n > :: Type &L )
+      {
+        FieldType det = FieldType( 1 );
+        for( int i = 0; i < n; ++i )
+          det *= L[ i ][ i ];
         return det;
       }
 
       template< int n >
       static FieldType
-      invPD ( typename Traits :: typename Matrix< n, n > :: Type &A )
+      invL ( typename Traits :: template Matrix< n, n > :: Type &L )
       {
         FieldType det = FieldType( 1 );
-        // in place LU decomposition
-        for( int j = 0; j < n-1; ++j )
+        for( int i = 0; i < n; ++i )
         {
-          FieldType &ajj = A[ j ][ j ];
-          FieldType invajj = FieldType( 1 ) / ajj;
-          det *= ajj;
-          for( int i = j+1; i < n; ++i )
-          {
-            FieldType &aij = A[ i ][ j ];
-            aij *= invajj;
-            for( int k = j+1; k < n; ++k )
-              A[ i ][ k ] -= aij * A[ j ][ k ];
-          }
-        }
-        // invert L in place
-        for( int i = 1; i < n; ++i )
-        {
+          FieldType &lii = L[ i ][ i ];
+          det *= lii;
+          lii = FieldType( 1 ) / lii;
           for( int j = 0; j < i; ++j )
           {
-            FieldType &aij = A[ i ][ j ];
+            FieldType &lij = L[ i ][ j ];
+            FieldType x = lij * L[ j ][ j ];
             for( int k = j+1; k < i; ++k )
-              aij += A[ i ][ k ] * A[ k ][ j ];
-            aij *= -1;
+              x += L[ i ][ k ] * L[ k ][ j ];
+            lij = (-lii) * x;
           }
         }
-        // invert U in place
-        for( int j = 1; j < n; ++j )
-        {
-          FieldType &ajj = A[ j ][ j ];
-          FieldType ajj = FieldType( 1 ) / ajj;
-          for( int i = 0; i < j; ++i )
-          {
-            FieldType &aij = A[ i ][ j ];
-            for( int k = i+1; k < j; ++k )
-              aij += A[ i ][ k ] * A[ k ][ j ];
-            aij *= -ajj;
-          }
-        }
-        // in place multiplication
-        for( int j = n; j > 0; --j )
-        {
-          for( int i = n; i > 0; --i )
-          {
-            FieldType v = FieldType( 0 );
-            for( int k = 0; k < std :: min( i, j ); ++k )
-              v += A[ i-1 ][ k ] * A[ k ][ j-1 ];
-            A[ i-1 ][ j-1 ] = v;
-          }
-          return det;
-        }
+        return det;
+      }
 
-      };
+      template< int n >
+      static FieldType
+      spdDetA ( const typename Traits :: template Matrix< n, n > :: Type &A )
+      {
+        typename Traits :: template Matrix< n, n > :: Type L;
+        cholesky_L< n >( A, L );
+        return detL< n >( L );
+      }
 
-    }
+      template< int n >
+      static FieldType
+      spdInvA ( typename Traits :: template Matrix< n, n > :: Type &A )
+      {
+        typename Traits :: template Matrix< n, n > :: Type L;
+        cholesky_L< n >( A, L );
+        const FieldType det = invL< n >( L );
+        LTL< n >( L, A );
+        return det;
+      }
+
+      template< int m, int n >
+      static FieldType
+      detATA ( const typename Traits :: template Matrix< m, n > :: Type &A )
+      {
+        if( m >= n )
+        {
+          typename Traits :: template Matrix< n, n > :: Type ata;
+          ATA_L< m, n >( A, ata );
+          return spdDetA< n >( ata );
+        }
+        else
+          return FieldType( 0 );
+      }
+
+      template< int m, int n >
+      static FieldType
+      detAAT ( const typename Traits :: template Matrix< m, n > :: Type &A )
+      {
+        if( n >= m )
+        {
+          typename Traits :: template Matrix< m, m > :: Type aat;
+          AAT_L< m, n >( A, aat );
+          return spdDetA< m >( aat );
+        }
+        else
+          return FieldType( 0 );
+      }
+
+      // A^{-1}_L = (A^T A)^{-1} A^T
+      // => A^{-1}_L A = I
+      template< int m, int n >
+      static FieldType
+      leftInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
+                 typename Traits :: template Matrix< n, m > :: Type &ret )
+      {
+        dune_static_assert( (m >= n), "Matrix has no left inverse." );
+        typename Traits :: template Matrix< n, n > :: Type ata;
+        ATA_L< m, n >( A, ata );
+        const FieldType det = spdInvA< n >( ata );
+        ATBT< n, n, m >( ata, A, ret );
+        return det;
+      }
+
+      // A^{-1}_R = A^T (A A^T)^{-1}
+      // => A A^{-1}_R = I
+      template< int m, int n >
+      static FieldType
+      rightInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
+                  typename Traits :: template Matrix< n, m > :: Type &ret )
+      {
+        dune_static_assert( (n >= m), "Matrix has no right inverse." );
+        typename Traits :: template Matrix< m, m > :: Type aat;
+        AAT_L< m, n >( A, aat );
+        const FieldType det = spdInvA< m >( aat );
+        ATBT< m, m, n >( aat, A, ret );
+        return det;
+      }
+
+    };
 
   }
+
+}
 
 #endif
