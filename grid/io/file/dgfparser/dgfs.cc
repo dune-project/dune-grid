@@ -8,7 +8,7 @@ namespace Dune {
   generate(MacroGrid& mg,const char* filename, MPICommunicatorType ) {
     mg.element=Cube;
     std::ifstream gridin(filename);
-    IntervalBlock interval(gridin);
+    dgf :: IntervalBlock interval(gridin);
     if(!interval.isactive()) {
       DUNE_THROW(DGFException,
                  "Macrofile " << filename << " must have Intervall-Block "

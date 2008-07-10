@@ -25,45 +25,36 @@
 #include "entitykey.hh"
 #include "dgfparserblocks.hh"
 
-namespace Dune {
-  //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
-  //! build information in vector structures used by the MacroGrid class.
+namespace Dune
+{
 
   class DGFPrintInfo;
 
-  class DuneGridFormatParser {
+  //! \brief The %DuneGridFormatParser class: reads a DGF file and stores
+  //! build information in vector structures used by the MacroGrid class.
+  class DuneGridFormatParser
+  {
   public:
-    //!  constructor which does nothing
-    DuneGridFormatParser() :
-      dimw(-1),
-      vtx(0), nofvtx(0), vtxoffset(0),
-      elements(0) , nofelements(0),
-      bound(0) , nofbound(0),
-      facemap(),
-      element(General),
-      simplexgrid(false),
-      cube2simplex(false),
-      nofvtxparams(0),
-      nofelparams(0),
-      vtxParams(),
-      elParams(),
-      info(0)
-    {}
-
     typedef enum {Simplex,Cube,General} element_t;
     typedef enum {counterclockwise=1,clockwise=-1} orientation_t;
+
+    //!  constructor which does nothing
+    DuneGridFormatParser ();
+
     //! \brief method which reads the dgf file
     //!
     //! fills the vtx,element, and bound vectors
     //! returns true if reading succeded
-    inline bool readDuneGrid(std::istream&);
+    bool readDuneGrid( std :: istream & );
+
     //! method to write in Tetgen/Triangle Poly Format
-    inline void writeTetgenPoly(std::string&,std::string&);
-    inline void writeTetgenPoly(std::ostream&);
+    void writeTetgenPoly ( std :: string &, std :: string & );
+    void writeTetgenPoly ( std::ostream & );
     //! method to write macrogridfiles in alu format (cam be used without dune)
-    inline void writeAlu(std::ostream&);
+    void writeAlu ( std :: ostream & );
     //! method to write macrogridfiles in alberta format (cam be used without dune)
-    inline void writeAlberta(std::ostream&);
+    void writeAlberta ( std::ostream & );
+
   protected:
     // dimension of world and problem: set through the readDuneGrid() method
     int dimw;
@@ -92,35 +83,23 @@ namespace Dune {
     std::vector<std::vector<double> > vtxParams,elParams;
     // write information about generation process
     DGFPrintInfo* info;
-    inline void generateBoundaries(std::istream&,bool);
+
+    void generateBoundaries ( std::istream &, bool );
+
     // call to tetgen/triangle
-    inline void generateSimplexGrid(std::istream&);
-    inline void readTetgenTriangle(std::string);
+    void generateSimplexGrid ( std::istream & );
+    void readTetgenTriangle ( const std :: string & );
+
     // helper methods
-    inline void removeCopies();
-    inline void setOrientation(int use1,int use2,orientation_t orientation=counterclockwise);
-    inline void setRefinement(int use1,int use2,int is1=-1,int is2=-1);
-    inline double testTriang(int snr);
-    inline std::vector<double>& getElParam(int i,std::vector<double>& coord) {
-      coord.resize(dimw);
-      for (int j=0; j<dimw; j++)
-        coord[j]=0.;
-      for (int j=0; j<dimw; j++) {
-        for (size_t k=0; k<elements[i].size(); ++k) {
-          coord[j]+=vtx[elements[i][k]][j];
-        }
-        coord[j]/=double(elements[i].size());
-      }
-      return elParams[i];
-    }
-    inline std::vector<double>& getVtxParam(int i,std::vector<double>& coord) {
-      coord.resize(dimw);
-      for (int j=0; j<dimw; j++)
-        coord[j]=0.;
-      coord = vtx[i];
-      return vtxParams[i];
-    }
+    void removeCopies ();
+    void setOrientation ( int use1, int use2, orientation_t orientation=counterclockwise );
+    void setRefinement ( int use1, int use2, int is1=-1, int is2=-1 );
+    double testTriang ( int snr );
+
+    std :: vector< double > &getElParam ( int i, std::vector< double > &coord );
+    std :: vector< double > &getVtxParam ( int i, std::vector< double > &coord );
   };
+
 
   class MacroGrid : protected DuneGridFormatParser
   {
@@ -348,8 +327,8 @@ namespace Dune {
     std::vector<std::pair<DomainType,std::vector<double> > > elParam,vtxParam;
     int nofElParam_,nofVtxParam_;
   }; // end of class GridPtr
+
 }
-#include "dgfparser.cc"
 
 /**  @addtogroup DuneGridFormatParser
 

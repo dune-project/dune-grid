@@ -59,7 +59,7 @@ namespace Dune {
       grid->createEnd();
 
       // get grid parameter block
-      GridParameterBlock gridParam(gridin, false);
+      dgf :: GridParameterBlock gridParam(gridin, false);
 
       // set closure type to none if parameter say so
       if( gridParam.noClosure() )

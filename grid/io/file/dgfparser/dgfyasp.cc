@@ -9,7 +9,7 @@ namespace Dune {
   {
     mg.element=Cube;
     std::ifstream gridin(filename);
-    IntervalBlock interval(gridin);
+    dgf :: IntervalBlock interval(gridin);
     if(!interval.isactive()) {
       DUNE_THROW(DGFException,
                  "Macrofile " << filename << " must have Intervall-Block "
@@ -19,7 +19,7 @@ namespace Dune {
     mg.dimw = interval.dimw();
 
     // get grid parameters
-    GridParameterBlock grdParam(gridin, true);
+    dgf :: GridParameterBlock grdParam(gridin, true);
 
     FieldVector<double,dim> lang;
     FieldVector<int,dim>    anz;

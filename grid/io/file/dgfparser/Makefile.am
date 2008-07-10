@@ -1,5 +1,10 @@
 SUBDIRS = test
 
+noinst_LTLIBRARIES = libdgfparser.la
+
+libdgfparser_la_SOURCES = entitykey.cc dgfparserblocks.cc dgfparser.cc
+libdgfparser_la_LIBADD = $(DUNE_COMMON_LIBS)
+
 AM_LDFLAGS=
 
 dgfparserdir = $(includedir)/dune/grid/io/file/dgfparser

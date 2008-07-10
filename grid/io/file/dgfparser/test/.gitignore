@@ -10,5 +10,11 @@ testagrid
 testyasp
 testoned
 testug
+test2ug
 testsgrid
 dgfparser.log
+
+*.ALUgrid
+*.albertagrid
+*.so.*
+*.swp

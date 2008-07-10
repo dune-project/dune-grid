@@ -1,30 +1,49 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-namespace Dune {
-  class DGFPrintInfo {
+#include <dune/grid/io/file/dgfparser/dgfparser.hh>
+
+namespace Dune
+{
+
+  class DGFPrintInfo
+  {
+    std::ofstream out;
+
   public:
-    DGFPrintInfo(std::string name) : out((name+".log").c_str()) {
+    DGFPrintInfo( const std :: string &name )
+      : out( (name+".log").c_str() )
+    {
       // out << "Grid generated from file " << name << std::endl;
       out << "DGF parser started" << std::endl;
     }
-    void finish() {
+
+    void finish ()
+    {
       out << "Sucsessful" << std::endl;
     }
-    template <class Block>
-    void block(const Block& block) {
-      out << "Using " << Block::ID << " block" << std::endl;
+
+    template< class Block >
+    void block( const Block &block )
+    {
+      out << "Using " << Block :: ID << " block" << std::endl;
     }
-    void print(std::string mesg) {
-      out << mesg << std::endl;
+
+    void print( const std :: string &message )
+    {
+      out << message << std::endl;
     }
-    void step1(int dimw,int nofvtx,int nofel) {
+
+    void step1(int dimw,int nofvtx,int nofel)
+    {
       out << "Step 1 finished: " << std::endl;
       out << "                 " << dimw << "d" << std::endl;
       out << "                 " << nofvtx << " verticies" << std::endl;
       out << "                 " << nofel << " elements" << std::endl;
     }
+
     void step2(int bndseg,int totalbndseg,
-               int bnddomain,int defsegs,int remaining) {
+               int bnddomain,int defsegs,int remaining)
+    {
       out << "Step 2 finished: " << std::endl;
       out << "                 " << bndseg
           << " bnd-segs read in BoundarySegment block" << std::endl;
@@ -37,7 +56,9 @@ namespace Dune {
       out << "                 " << remaining
           << " bnd-segs have not been assigned an id!" << std::endl;
     }
-    void cube2simplex(DuneGridFormatParser::element_t el) {
+
+    void cube2simplex(DuneGridFormatParser::element_t el)
+    {
       if (el == DuneGridFormatParser::General)
         out << "Simplex block found, thus converting "
             << "cube grid to simplex grid" << std::endl;
@@ -45,15 +66,37 @@ namespace Dune {
         out << "Element type should be simplex, thus converting "
             << "cube grid to simplex grid" << std::endl;
     }
+
     void automatic() {
       out << "Automatic grid generation" << std::endl;
     }
-  private:
-    std::ofstream out;
   };
 
+
+
+  // DuneGridFormatParser
+  // --------------------
+
+  DuneGridFormatParser :: DuneGridFormatParser ()
+    : dimw(-1),
+      vtx(0), nofvtx(0), vtxoffset(0),
+      elements(0) , nofelements(0),
+      bound(0) , nofbound(0),
+      facemap(),
+      element(General),
+      simplexgrid(false),
+      cube2simplex(false),
+      nofvtxparams(0),
+      nofelparams(0),
+      vtxParams(),
+      elParams(),
+      info(0)
+  {}
+
+
   // Output to Alberta macrogridfile (2d/3d)
-  inline void DuneGridFormatParser::writeAlberta(std::ostream& out) {
+  void DuneGridFormatParser :: writeAlberta ( std::ostream &out )
+  {
     // writes an output file for in gird type Alberta
     out << "DIM: " << dimw
         << "\n" << "DIM_OF_WORLD: "
@@ -106,8 +149,9 @@ namespace Dune {
     }
   }
 
+
   // Output to ALU macrogridfile (3d tetra/hexa)
-  inline void DuneGridFormatParser::writeAlu(std::ostream& out)
+  void DuneGridFormatParser :: writeAlu ( std :: ostream &out )
   {
     // wirtes an output file in grid type ALU
     if (dimw==3) {
@@ -186,9 +230,11 @@ namespace Dune {
     dverb << "done" << std::endl;
     dverb.flush();
   }
+
+
   // Output to Tetgen/Triangle poly-file
-  inline void DuneGridFormatParser::writeTetgenPoly(std::string& name,
-                                                    std::string& params)
+  void DuneGridFormatParser
+  :: writeTetgenPoly ( std :: string &name, std::string &params )
   {
     if (dimw==2)
     {
@@ -281,8 +327,11 @@ namespace Dune {
       }
     }
   }
+
+
   // Output to Tetgen/Triangle poly-file
-  inline void DuneGridFormatParser::writeTetgenPoly(std::ostream& out) {
+  void DuneGridFormatParser :: writeTetgenPoly ( std::ostream &out )
+  {
     int nr = 0;
     dverb << "Writing vertices...";
     out << nofvtx << " " << dimw << " " << nofvtxparams << " 0" << std::endl;
@@ -343,13 +392,14 @@ namespace Dune {
     dverb.flush();
   }
 
+
   // read the DGF file and store vertex/element/bound structure
-  inline bool DuneGridFormatParser::readDuneGrid(std::istream& gridin)
+  bool DuneGridFormatParser :: readDuneGrid ( std :: istream &gridin )
   {
     static const std::string dgfid("DGF");
     std::string idline;
     std::getline(gridin,idline);
-    makeupcase(idline);
+    dgf :: makeupcase(idline);
     std::stringstream idstream(idline);
     std::string id;
     idstream >> id;
@@ -364,7 +414,7 @@ namespace Dune {
     info = new DGFPrintInfo("dgfparser");
 
     dimw=-1;
-    IntervalBlock interval(gridin);
+    dgf :: IntervalBlock interval(gridin);
 
     vtxoffset=0;
 
@@ -372,7 +422,7 @@ namespace Dune {
     if(interval.isactive())
     {
       info->automatic();
-      VertexBlock bvtx(gridin,dimw);
+      dgf :: VertexBlock bvtx(gridin,dimw);
       nofvtx=0;
       if (bvtx.isactive())
       {
@@ -385,7 +435,7 @@ namespace Dune {
       simplexgrid = (element == Simplex);
       if (element == General)
       {
-        SimplexBlock bsimplex(gridin,-1,-1,dimw);
+        dgf :: SimplexBlock bsimplex(gridin,-1,-1,dimw);
         simplexgrid = bsimplex.isactive();
         info->cube2simplex(element);
       }
@@ -396,22 +446,22 @@ namespace Dune {
       interval.get(vtx,nofvtx,elements,nofelements);
       // nofelements=interval.getHexa(elements);
       if(simplexgrid) {
-        nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
+        nofelements = dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
       }
 
       // remove copies of vertices
       removeCopies();
     }
     else { // ok: grid generation by hand...
-      VertexBlock bvtx(gridin,dimw);
+      dgf :: VertexBlock bvtx(gridin,dimw);
       if (bvtx.isactive()) {
         nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
         info->block(bvtx);
         vtxoffset=bvtx.offset();
       }
       nofelements=0;
-      SimplexBlock bsimplex(gridin,nofvtx,vtxoffset,dimw);
-      CubeBlock bcube(gridin,nofvtx,vtxoffset,dimw);
+      dgf :: SimplexBlock bsimplex(gridin,nofvtx,vtxoffset,dimw);
+      dgf :: CubeBlock bcube(gridin,nofvtx,vtxoffset,dimw);
       if (bcube.isactive() && element!=Simplex) {
         info->block(bcube);
         nofelements=bcube.get(elements,elParams,nofelparams);
@@ -419,7 +469,7 @@ namespace Dune {
         {
           // make simplex grid
           info->cube2simplex(element);
-          nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
+          nofelements=dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
           simplexgrid=true;
         }
         else
@@ -439,7 +489,7 @@ namespace Dune {
           info->cube2simplex(element);
           nofelements=bcube.get(elements,elParams,nofelparams);
           // make simplex grid
-          nofelements=SimplexBlock::cube2simplex(vtx,elements,elParams);
+          nofelements=dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
           cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
         }
         else if (bsimplex.isactive()) {
@@ -450,7 +500,7 @@ namespace Dune {
 
     info->step1(dimw,vtx.size(),elements.size());
     // test for tetgen/triangle block (only if simplex-grid allowed)
-    if (element!=Cube && SimplexGenerationBlock(gridin).isactive()) {
+    if (element!=Cube && dgf :: SimplexGenerationBlock(gridin).isactive()) {
       if (!interval.isactive())
         generateBoundaries(gridin,true);
       info->automatic();
@@ -471,7 +521,10 @@ namespace Dune {
     // although prehaps a few boundary segments are still without id :-<
     return true;
   }
-  inline void DuneGridFormatParser::removeCopies() {
+
+
+  void DuneGridFormatParser :: removeCopies ()
+  {
     std::vector<int> map(vtx.size());
     std::vector<int> shift(vtx.size());
     for (size_t i=0; i<vtx.size(); i++) {
@@ -505,8 +558,11 @@ namespace Dune {
     vtx.resize(nofvtx);
     assert(vtx.size()==size_t(nofvtx));
   }
-  inline void DuneGridFormatParser::
-  generateBoundaries(std::istream& gridin,bool bndseg) {
+
+
+  void DuneGridFormatParser
+  :: generateBoundaries ( std :: istream &gridin, bool bndseg )
+  {
     // **************************************************
     // up to here:
     // filled vertex and element block, now look at boundaries...
@@ -514,7 +570,7 @@ namespace Dune {
     // first read macrogrid segments...
     if (bndseg)
     {
-      BoundarySegBlock segbound(gridin, nofvtx,dimw,simplexgrid);
+      dgf :: BoundarySegBlock segbound(gridin, nofvtx,dimw,simplexgrid);
       if (segbound.isactive())
       {
         info->block(segbound);
@@ -575,7 +631,7 @@ namespace Dune {
     int remainingBndSegs = 0;
     int defaultBndSegs = 0;
     int inbnddomain = 0;
-    BoundaryDomBlock dombound(gridin, dimw);
+    dgf :: BoundaryDomBlock dombound(gridin, dimw);
     if (dombound.isactive()) {
       info->block(dombound);
       for (; dombound.ok(); dombound.next()) {
@@ -624,11 +680,14 @@ namespace Dune {
     }
     info->step2(nofbound,facemap.size(),inbnddomain,defaultBndSegs,remainingBndSegs);
   }
+
+
   /*************************************************************
      caller to tetgen/triangle
    ****************************************************/
-  inline void DuneGridFormatParser::generateSimplexGrid(std::istream& gridin) {
-    SimplexGenerationBlock para(gridin);
+  void DuneGridFormatParser :: generateSimplexGrid ( std :: istream &gridin )
+  {
+    dgf :: SimplexGenerationBlock para(gridin);
     info->block(para);
 
     std::string name = "gridparserfile.polylists.tmp";
@@ -758,7 +817,9 @@ namespace Dune {
     info->print("Automatic grid generation finished");
   }
 
-  inline void DuneGridFormatParser::readTetgenTriangle(std::string name) {
+
+  void DuneGridFormatParser :: readTetgenTriangle ( const std :: string &name )
+  {
     int offset,bnd;
     std::string nodename = name + ".node";
     std::string elename = name + ".ele";
@@ -865,12 +926,14 @@ namespace Dune {
       }
     }
   }
+
+
   /***************************
      Helper methods mostly only for simplex grids
   ***************************/
-  inline void
-  DuneGridFormatParser::setOrientation(int use1,int use2,
-                                       orientation_t orientation) {
+  void DuneGridFormatParser
+  :: setOrientation ( int use1, int use2, orientation_t orientation )
+  {
     if (element == Cube) {
       std::cerr << "Reorientation is only implemented for simplex grid!"
                 << std::endl;
@@ -945,8 +1008,10 @@ namespace Dune {
       }
     }
   }
-  inline void
-  DuneGridFormatParser::setRefinement(int use1,int use2,int is1,int is2) {
+
+
+  void DuneGridFormatParser :: setRefinement ( int use1, int use2, int is1, int is2 )
+  {
     if (element == Cube) {
       std::cerr << "Computing refinement vertex is only implemented for 2d simplex grid!"
                 << std::endl;
@@ -1003,8 +1068,10 @@ namespace Dune {
       }
     }
   }
-  inline double
-  DuneGridFormatParser:: testTriang(int snr) {
+
+
+  double DuneGridFormatParser :: testTriang ( int snr )
+  {
     double o =
       (vtx[elements[snr][1]][0]-vtx[elements[snr][0]][0])*
       (vtx[elements[snr][2]][1]-vtx[elements[snr][1]][1])-
@@ -1020,4 +1087,32 @@ namespace Dune {
     }
     return o;
   }
-}
+
+
+  std :: vector< double > &
+  DuneGridFormatParser :: getElParam ( int i, std::vector< double > &coord )
+  {
+    coord.resize(dimw);
+    for (int j=0; j<dimw; j++)
+      coord[j]=0.;
+    for (int j=0; j<dimw; j++) {
+      for (size_t k=0; k<elements[i].size(); ++k) {
+        coord[j]+=vtx[elements[i][k]][j];
+      }
+      coord[j]/=double(elements[i].size());
+    }
+    return elParams[i];
+  }
+
+
+  std :: vector< double > &
+  DuneGridFormatParser :: getVtxParam ( int i, std :: vector< double > &coord )
+  {
+    coord.resize(dimw);
+    for (int j=0; j<dimw; j++)
+      coord[j]=0.;
+    coord = vtx[i];
+    return vtxParams[i];
+  }
+
+} // end namespace Dune
