@@ -6,6 +6,7 @@
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
+#include <dune/grid/genericgeometry/matrix.hh>
 
 namespace Dune
 {
@@ -346,13 +347,12 @@ namespace Dune
           bottom_.deriv_set(x,d);
           d[dim-1] = top_;
         }
-        else
-        {
+        else {
           //   d[i]_j = db[i]_j*s/s (i=1,..,n-1, j=1,..,n)
           //   d[n]_j = x db(x/s)*s-b(x/s) + pn
           double h=1.-x[dim-1];
           double hinv = 1./h;
-          GlobalCoordType X(x);
+          LocalCoordType X(x);
           X[dim-1] = 0;
           X *= hinv;
 
@@ -369,13 +369,12 @@ namespace Dune
           bottom_.deriv_add(x,d);
           d[dim-1] += top_;
         }
-        else
-        {
+        else {
           //   d[i]_j = db[i]_j*s/s (i=1,..,n-1, j=1,..,n)
           //   d[n]_j = x db(x/s)*s-b(x/s) + pn
           double h=1.-x[dim-1];
           double hinv = 1./h;
-          GlobalCoordType X(x);
+          LocalCoordType X(x);
           X[dim-1] = 0;
           X *= hinv;
 
@@ -456,9 +455,6 @@ namespace Dune
     private:
       GenericMappingType map_;
       const CoordVector& coords_;
-      JacobianTransposeType d;
-      SquareMappingType L;
-      JacobianType Q;
     public:
       explicit Mapping(const CoordVector& coords) :
         map_(coords,0),
@@ -482,19 +478,26 @@ namespace Dune
          const LocalCoordType& bary = ReferenceElementType::baryCenter();
          return ReferenceElementType::volume() * integrationElement(bary);
          }
-         // additional methods
-         FieldType integrationElement(const LocalCoordType& x)
-         {
-         jacobianT(x,d);
-         return MatrixHelper<CoordTraits>::det(d);
-         }
-         FieldType jacobianInverseTransposed(const LocalCoordType& x,
+       */
+      // additional methods
+      FieldType integrationElement(const LocalCoordType& x)
+      {
+        JacobianTransposeType d;
+        jacobianT(x,d);
+        // double d12 = d[0]*d[1];
+        // return (d[0]*d[0])*(d[1]*d[1])-d12*d12;
+        return MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
+      }
+      FieldType jacobianInverseTransposed(const LocalCoordType& x,
                                           JacobianType& dInv)
-         {
-         jacobianT(x,d);
-         return MatrixHelper<CoordTraits>::invert(d);
-         }
+      {
+        JacobianTransposeType d;
+        jacobianT(x,d);
+        return MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,dInv);
+      }
+      /*
          void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
+         JacobianTransposeType d;
          jacobianT(x,d);
          const LocalCoordType& refNormal =
               ReferenceElementType::integrationOuterNormal(face);

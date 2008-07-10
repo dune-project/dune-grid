@@ -142,13 +142,22 @@ namespace Dune
       AAT_L ( const typename Traits :: template Matrix< m, n > :: Type &A,
               typename Traits :: template Matrix< m, m > :: Type &ret )
       {
-        for( int i = 0; i < n; ++i )
+        /*
+           if (m==2) {
+           ret[0][0] = A[0]*A[0];
+           ret[1][1] = A[1]*A[1];
+           ret[1][0] = A[0]*A[1];
+           }
+           else
+         */
+        for( int i = 0; i < m; ++i )
         {
           for( int j = 0; j <= i; ++j )
           {
-            ret[ i ][ j ] = FieldType( 0 );
-            for( int k = 0; k < m; ++k )
-              ret[ i ][ j ] += A[ i ][ k ] * A[ j ][ k ];
+            FieldType &retij = ret[ i ][ j ];
+            retij = A[ i ][ 0 ] * A[ j ][ 0 ];
+            for( int k = 1; k < n; ++k )
+              retij += A[ i ][ k ] * A[ j ][ k ];
           }
         }
       }
@@ -158,17 +167,17 @@ namespace Dune
       AAT ( const typename Traits :: template Matrix< m, n > :: Type &A,
             typename Traits :: template Matrix< m, m > :: Type &ret )
       {
-        for( int i = 0; i < n; ++i )
+        for( int i = 0; i < m; ++i )
         {
           for( int j = 0; j < i; ++j )
           {
             ret[ i ][ j ] = FieldType( 0 );
-            for( int k = 0; k < m; ++k )
+            for( int k = 0; k < n; ++k )
               ret[ i ][ j ] += A[ i ][ k ] * A[ j ][ k ];
             ret[ j ][ i ] = ret[ i ][ j ];
           }
           ret[ i ][ i ] = FieldType( 0 );
-          for( int k = 0; k < m; ++k )
+          for( int k = 0; k < n; ++k )
             ret[ i ][ i ] += A[ i ][ k ] * A[ i ][ k ];
         }
       }
@@ -275,6 +284,7 @@ namespace Dune
       static FieldType
       spdDetA ( const typename Traits :: template Matrix< n, n > :: Type &A )
       {
+        // return A[0][0]*A[1][1]-A[1][0]*A[1][0];
         typename Traits :: template Matrix< n, n > :: Type L;
         cholesky_L< n >( A, L );
         return detL< n >( L );
@@ -345,7 +355,7 @@ namespace Dune
         typename Traits :: template Matrix< m, m > :: Type aat;
         AAT_L< m, n >( A, aat );
         const FieldType det = spdInvA< m >( aat );
-        ATBT< m, m, n >( aat, A, ret );
+        ATBT< m, n, m >( A , aat , ret );
         return det;
       }
 

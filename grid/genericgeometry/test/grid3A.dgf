@@ -2,7 +2,7 @@ DGF
 Simplexgenerator
 min-angle 1.1  % quality enhancment
 max-area 0.5   % maximum element area restriction
-display 1       % show result using the Tetgen viewer
+display 0      % show result using the Tetgen viewer
 
 % to use TetGen from a certain path, uncomment this path line
 path $HOME/bin  % path to Tetgen

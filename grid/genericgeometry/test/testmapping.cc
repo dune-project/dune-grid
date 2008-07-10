@@ -2,10 +2,23 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <dune/common/exceptions.hh>
+// #define DUNE_THROW(E, m) assert(0)
+
 #include "../mappings.hh"
 #include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
-#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dune/common/mpihelper.hh>
+// #include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dune/grid/psg/dgfgridtype.hh>
+
+#if HAVE_MPI
+typedef Dune :: CollectiveCommunication< MPI_Comm > CollectiveCommunicationType;
+#else
+typedef Dune :: CollectiveCommunication< int > CollectiveCommunicationType;
+#endif
+
+
 
 using namespace Dune;
 using namespace GenericGeometry;
@@ -34,24 +47,30 @@ struct DuneCoordTraits {
 };
 
 namespace Dune {
-  template <int dim> class YaspGrid;
+  template <int d1,int d2> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
+  template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
 }
 
 template <class Grid>
 struct Topology;
 template <int d>
-struct Topology<YaspGrid<d> > {
+struct Topology<YaspGrid<d,d> > {
   typedef typename Convert< GeometryType :: cube , d >::type Type;
 };
 template <int d>
 struct Topology<AlbertaGrid<d,d> > {
   typedef typename Convert< GeometryType :: simplex , d >::type Type;
 };
+template <int d1,int d2,class CCOMM>
+struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
+  typedef typename Convert< GeometryType :: simplex , d1 >::type Type;
+};
 
 int phiErr;
 int jTinvJTErr;
 int volumeErr;
+int detErr;
 
 template <class GridViewType>
 void test(const GridViewType& view) {
@@ -67,19 +86,19 @@ void test(const GridViewType& view) {
   JacobianTType;
   typedef FieldMatrix<double, GeometryType::coorddimension, GeometryType::mydimension>
   JacobianType;
-  typedef FieldMatrix<double, GeometryType::coorddimension, GeometryType::coorddimension>
+  typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::mydimension>
   SquareType;
 
   phiErr = 0;
   jTinvJTErr = 0;
   volumeErr = 0;
+  detErr = 0;
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
     Mapping<TopologyType,
         DuneCoordTraits<GeometryType> > map(geo);
     LocalType x(0.1);
-
     // test phi
     GlobalType y=geo.global(x);
     GlobalType yy;
@@ -92,15 +111,23 @@ void test(const GridViewType& view) {
     // test jacobian
     JacobianType JTInv = geo.jacobianInverseTransposed(x);
     JacobianTType JT;
+    JacobianType JTInvM;
     map.jacobianT(x,JT);
+    map.jacobianInverseTransposed(x,JTInvM);
+    double det = geo.integrationElement(x);
+    double detM = map.integrationElement(x);
+    if (std::abs(det-detM)>1e-10) {
+      std::cout << " Error in det: G = " << det << " M = " << detM << std::endl;
+      detErr++;
+    }
     SquareType JTInvJT;
-    const int m = GeometryType::coorddimension;
-    const int n = GeometryType::mydimension;
+    const int n = GeometryType::coorddimension;
+    const int m = GeometryType::mydimension;
     for( int i = 0; i < m; ++i ) {
       for( int j = 0; j < m; ++j ) {
         JTInvJT[ i ][ j ] = 0;
         for( int k = 0; k < n; ++k )
-          JTInvJT[ i ][ j ] += JTInv[ i ][ k ] * JT[ k ][ j ];
+          JTInvJT[ i ][ j ] += JT[i][k] * JTInvM[k][j];
       }
     }
     if (std::abs(JTInvJT[0][0]-1.)+std::abs(JTInvJT[1][1]-1.)+
@@ -110,16 +137,25 @@ void test(const GridViewType& view) {
       // std::cout << "***\n" << JT << std::endl;
       // std::cout << "***\n" << JTInv << std::endl;
     }
-    // test volume
-    double vol = geo.volume();
-    //  double volvol = map.volume();
+    JTInv -= JTInvM;
+    if (JTInv.frobenius_norm2()>1e-10) {
+      jTinvJTErr++;
+      std::cout << "JTINVJT: \n" << JTInv << std::endl;
+    }
+    /*
+       double det;
+       JacobianType JTInvM;
+       for (int i=0;i<1000;i++)
+       // det += map.jacobianInverseTransposed(x,JTInvM);
+       det += map.integrationElement(x);
+     */
   }
 }
 
 int main(int argc, char ** argv, char ** envp)
 try {
   // this method calls MPI_Init, if MPI is enabled
-  // MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
+  MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
   // int myrank = mpiHelper.rank();
 
   if (argc<2) {
@@ -127,20 +163,32 @@ try {
     return 1;
   }
 
+
   // create Grid from DGF parser
   GridPtr<GridType> grid;
   {
     grid = GridPtr<GridType>(argv[1]); // , mpiHelper.getCommunicator() );
   }
+  /*
+     CollectiveCommunicationType comm( mpiHelper.getCommunicator() );
+     typedef Dune :: ParallelSimplexGrid
+     < double, 2, 3, CollectiveCommunicationType >
+     PSGGridType;
+     PSGGridType* grid = new PSGGridType ( comm, argv[ 1 ] );
+   */
 
   test(grid->leafView());
 
   if ( phiErr>0) {
-    std::cout << phiErr << " errors occured in mapping.phi!" << std::endl;
+    std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
   }
   else std::cout << "ZERO ERRORS in mapping.phi!!!!!!!" << std::endl;
+  if ( detErr>0) {
+    std::cout << detErr << " errors occured in mapping.det?" << std::endl;
+  }
+  else std::cout << "ZERO ERRORS in mapping.det!!!!!!!" << std::endl;
   if ( jTinvJTErr>0) {
-    std::cout << jTinvJTErr << " errors occured in mapping.jacobianT!" << std::endl;
+    std::cout << jTinvJTErr << " errors occured in mapping.jacobianT?" << std::endl;
   }
   else std::cout << "ZERO ERRORS in mapping.jacobianT!!!!!!!" << std::endl;
 
@@ -149,6 +197,11 @@ catch (Dune::Exception &e) {
   std::cerr << e << std::endl;
   return 1;
 }
+/*
+   catch( PSG :: Exception &e ) {
+   std :: cerr << e << std :: endl;
+   }
+ */
 catch (...) {
   std::cerr << "Generic exception!" << std::endl;
   return 1;
