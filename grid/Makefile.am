@@ -7,6 +7,7 @@ noinst_LTLIBRARIES = libgrid.la
 # always part of lib:
 ONEDLIB = onedgrid/libonedgrid.la
 COMMONLIB = common/libgridcommon.la
+DGFPARSERLIB = io/file/dgfparser/libdgfparser.la
 
 # conditional parts:
 if UG
@@ -20,7 +21,7 @@ ALULIB = alugrid/libalu.la
 # construct only from sub-libraries
 libgrid_la_SOURCES =
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
-  $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB)
+  $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB) $(DGFPARSERLIB)
 
 # These libraries do not need other libraries besides lcommon
 griddir = $(includedir)/dune/grid
