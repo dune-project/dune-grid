@@ -473,12 +473,10 @@ namespace Dune
       bool affine() const {
         return map_.affine();
       }
-      /*
-         FieldType volume() {
-         const LocalCoordType& bary = ReferenceElementType::baryCenter();
-         return ReferenceElementType::volume() * integrationElement(bary);
-         }
-       */
+      FieldType volume() {
+        const LocalCoordType& bary = ReferenceElementType::template baryCenter<0>(0);
+        return ReferenceElementType::volume() * integrationElement(bary);
+      }
       // additional methods
       FieldType integrationElement(const LocalCoordType& x)
       {

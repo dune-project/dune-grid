@@ -71,6 +71,7 @@ int phiErr;
 int jTinvJTErr;
 int volumeErr;
 int detErr;
+int volErr;
 
 template <class GridViewType>
 void test(const GridViewType& view) {
@@ -93,6 +94,7 @@ void test(const GridViewType& view) {
   jTinvJTErr = 0;
   volumeErr = 0;
   detErr = 0;
+  volErr = 0;
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
@@ -142,13 +144,13 @@ void test(const GridViewType& view) {
       jTinvJTErr++;
       std::cout << "JTINVJT: \n" << JTInv << std::endl;
     }
-    /*
-       double det;
-       JacobianType JTInvM;
-       for (int i=0;i<1000;i++)
-       // det += map.jacobianInverseTransposed(x,JTInvM);
-       det += map.integrationElement(x);
-     */
+    // test volume
+    double vol  = geo.volume();
+    double volM = map.volume();
+    if (std::abs(vol-volM)>1e-10) {
+      volErr++;
+      std::cout << "volume : " << vol << " " << volM << std::endl;
+    }
   }
 }
 
@@ -188,10 +190,15 @@ try {
   }
   else std::cout << "ZERO ERRORS in mapping.det!!!!!!!" << std::endl;
   if ( jTinvJTErr>0) {
-    std::cout << jTinvJTErr << " errors occured in mapping.jacobianT?" << std::endl;
+    std::cout << jTinvJTErr
+              << " errors occured in mapping.jacobianT?" << std::endl;
   }
   else std::cout << "ZERO ERRORS in mapping.jacobianT!!!!!!!" << std::endl;
-
+  if ( volErr>0) {
+    std::cout << volErr
+              << " errors occured in mapping.volume?" << std::endl;
+  }
+  else std::cout << "ZERO ERRORS in mapping.volume!!!!!!!" << std::endl;
 }
 catch (Dune::Exception &e) {
   std::cerr << e << std::endl;
