@@ -32,6 +32,7 @@ namespace Dune
       typedef Point Topology;
 
       template< class > friend class Corner;
+      template< class > friend class IntegrationOuterNormal;
 
       template< class ctype, int dim >
       static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &n )
@@ -57,6 +58,7 @@ namespace Dune
       typedef Prism< BaseTopology > Topology;
 
       template< class > friend class Corner;
+      template< class > friend class IntegrationOuterNormal;
 
       template< class ctype, int dim >
       static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &x )
@@ -86,6 +88,7 @@ namespace Dune
       typedef Prism< BaseTopology > Topology;
 
       template< class > friend class Corner;
+      template< class > friend class IntegrationOuterNormal;
 
       template< class ctype, int dim >
       static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &x )
@@ -319,7 +322,8 @@ namespace Dune
       }
 
       template< unsigned int codim >
-      static const CoordinateType &baryCenter ( unsigned int i )
+      static const FieldVector< ctype, dimension - codim > &
+      baryCenter ( unsigned int i )
       {
         Int2Type< codim > codimVariable;
         return instance().baryCenters_[ codimVariable ][ i ];
@@ -373,6 +377,10 @@ namespace Dune
     class ReferenceElement< Topology, ctype > :: BaryCenterArray
     {
       enum { Size = GenericGeometry :: Size< Topology, codim > :: value };
+
+      enum { dimension = Topology :: dimension - codim };
+
+      typedef FieldVector< ctype, dimension > CoordinateType;
 
       template< int i >
       struct Builder;
