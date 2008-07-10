@@ -7,6 +7,7 @@
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/grid/genericgeometry/subtopologies.hh>
 
 namespace Dune
 {
@@ -40,7 +41,7 @@ namespace Dune
 
     public:
       enum { numCorners = Topology :: numCorners };
-      enum { dimension = Topoloty :: dimension };
+      enum { dimension = Topology :: dimension };
 
       template< class ctype >
       static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &x )
@@ -182,12 +183,11 @@ namespace Dune
       template< class ctype, int dim >
       static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &n )
       {
-        typedef SubTopologyNumbering< BaseTopology > Numbering;
+        typedef SubTopologyNumbering< BaseTopology,1,dimension-2 > Numbering;
 
         if( i < Size< BaseTopology, 1 > :: value )
         {
-          const unsigned int j
-            = Numbering :: template subEntity< 1, dimension-2 >( i, 0 );
+          const unsigned int j = Numbering :: number( i, 0 );
           FieldVector< ctype, dim > x( ctype( 0 ) );
           Corner< BaseTopology > :: evaluate_( j, x );
 
@@ -262,13 +262,13 @@ namespace Dune
     template< class BaseTopology >
     struct Volume< Pyramid< BaseTopology > >
     {
+      typedef Pyramid< BaseTopology > Topology;
       template< class ctype >
       static ctype evaluate ()
       {
         const ctype baseVolume
           = Volume< BaseTopology > :: template evaluate< ctype >();
-
-        return baseVolume / ctype( Faculty< dimension > :: value );
+        return baseVolume / ctype( Topology::dimension );
       }
     };
 
@@ -296,7 +296,6 @@ namespace Dune
         return instance().corners_[ i ];
       }
 
-      template< class ctype >
       static const CoordinateType &
       integrationOuterNormal ( unsigned int i )
       {
@@ -314,7 +313,7 @@ namespace Dune
       ReferenceElement ()
       {
         for( unsigned int i = 0; i < numCorners; ++i )
-          Corners< Topology > :: evaluate( i, corners_[ i ] );
+          Corner< Topology > :: evaluate( i, corners_[ i ] );
         for( unsigned int i = 0; i < numFaces; ++i )
           IntegrationOuterNormal< Topology > :: evaluate( i, normals_[ i ] );
       }
@@ -350,7 +349,6 @@ namespace Dune
         return instance().corners_[ i ];
       }
 
-      template< class ctype >
       static const CoordinateType &
       integrationOuterNormal ( unsigned int i )
       {
@@ -366,7 +364,7 @@ namespace Dune
       ReferenceElement ()
       {
         for( unsigned int i = 0; i < numCorners; ++i )
-          Corners< Topology > :: evaluate( i, corners_[ i ] );
+          Corner< Topology > :: evaluate( i, corners_[ i ] );
       }
 
       static const ReferenceElement &instance ()

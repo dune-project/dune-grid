@@ -1,0 +1,17 @@
+DGF
+
+Interval
+0 0 0          % first corner 
+10 10 10       % second corner
+4 4 3         % 5 cells in x, 2 in y, and 10 in z direction
+#
+simplex 
+#
+BOUNDARYDOMAIN
+default 1      % default boundary id
+% all boundary segments in the interval [(-1,-1,-1),(11,11,0)]
+% have boundary id 2, i.e., the bottom boundary 
+2   -1 -1 -1    11 11 0  
+#
+# examplegrid6.dgf
+

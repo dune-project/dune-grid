@@ -74,7 +74,8 @@ namespace Dune
       typedef Point Topology;
     public:
       typedef CoordTraits Traits;
-      enum {dimG = Topology :: dimension};
+      enum {dim  = Topology::dimension};
+      enum {dimG = CoordTraits :: dimG};
       enum {dimW = CoordTraits :: dimW};
       typedef typename CoordTraits :: field_type
       FieldType;
@@ -156,7 +157,8 @@ namespace Dune
       typedef Prism< BaseTopology > Topology;
     public:
       typedef CoordTraits Traits;
-      enum {dimG = Topology :: dimension};
+      enum {dim  = Topology::dimension};
+      enum {dimG = CoordTraits :: dimG};
       enum {dimW = CoordTraits :: dimW};
       typedef typename CoordTraits :: field_type
       FieldType;
@@ -177,7 +179,7 @@ namespace Dune
       GenericMapping<BaseTopology,CoordTraits> top_;
       bool affine_,constant_,zero_;
       void setProperties() {
-        affine_ = CoordVector::affine==1 ||
+        affine_ = Traits::affine==1 ||
                   (top_.constant() && bottom_.affine() );
         constant_ = (top_.zero() && bottom_.constant());
         zero_ = (top_.zero() && bottom_.zero());
@@ -187,7 +189,7 @@ namespace Dune
                               int offset) :
         bottom_(coords,offset),
         top_(coords,offset+BaseTopology::numCorners),
-        affine_(CoordVector::affine==1),
+        affine_(Traits::affine==1),
         constant_(false),
         zero_(false)
       {
@@ -198,32 +200,32 @@ namespace Dune
       void phi_set(const LocalCoordType& x,
                    GlobalCoordType& p) const {
         bottom_.phi_set(x,p);
-        top_.phi_add(x,x[dimG-1],p);
+        top_.phi_add(x,x[dim-1],p);
       }
       void phi_add(const LocalCoordType& x,
                    const FieldType& fac,
                    GlobalCoordType& p) const {
         bottom_.phi_add(x,fac,p);
-        top_.phi_add(x,fac*x[dimG-1],p);
+        top_.phi_add(x,fac*x[dim-1],p);
       }
       // d[i]_j = db[i]_j + dt[i]_j * x_n (i=1,..,n-1, j=1,..,n)
       // d[n]_j = t(x)
       void deriv_set(const LocalCoordType& x,
                      JacobianTransposeType& d) const {
         bottom_.deriv_set(x,d);
-        top_.deriv_add(x,x[dimG-1],d);
-        top_.phi_set(x,d[dimG-1]);
+        top_.deriv_add(x,x[dim-1],d);
+        top_.phi_set(x,d[dim-1]);
       }
       void deriv_add(const LocalCoordType& x,
                      const FieldType& fac,
                      JacobianTransposeType& d) const {
         bottom_.deriv_add(x,fac,d);
-        top_.deriv_add(x,fac*x[dimG-1],d);
-        top_.phi_add(x,fac,d[dimG-1]);
+        top_.deriv_add(x,fac*x[dim-1],d);
+        top_.phi_add(x,fac,d[dim-1]);
       }
 
       bool affine() const {
-        return CoordVector::affine || affine_;
+        return Traits::affine || affine_;
       }
       bool constant() const {
         return constant_;
@@ -252,7 +254,8 @@ namespace Dune
       typedef Pyramid< BaseTopology > Topology;
     public:
       typedef CoordTraits Traits;
-      enum {dimG = Topology :: dimension};
+      enum {dim  = Topology::dimension};
+      enum {dimG = CoordTraits :: dimG};
       enum {dimW = CoordTraits :: dimW};
       typedef typename CoordTraits :: field_type
       FieldType;
@@ -273,18 +276,18 @@ namespace Dune
       GlobalCoordType top_,pn_;
       bool affine_,constant_,zero_;
       void setProperties() {
-        affine_ = CoordVector::affine==1 ||
+        affine_ = Traits::affine==1 ||
                   ( bottom_.affine() );
-        constant_ = (top_.zero() && bottom_.constant());
-        zero_ = (top_.zero() && bottom_.zero());
+        constant_ = ( (top_.two_norm2()<1e-12) && bottom_.constant());
+        zero_ = ( (top_.two_norm2()<1e-12) && bottom_.zero());
       }
     public:
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         bottom_(coords,offset),
-        pn_(coords[offset+BaseTopology::numCorners]),
         top_(coords[offset+BaseTopology::numCorners]),
-        affine_(CoordVector::affine==1),
+        pn_(coords[offset+BaseTopology::numCorners]),
+        affine_(Traits::affine==1),
         constant_(false),
         zero_(false)
       {
@@ -302,14 +305,16 @@ namespace Dune
                    GlobalCoordType& p) const {
         if (affine()) {
           bottom_.phi_set(x,p);
-          p.axpy(x[dimG-1],top_);
+          p.axpy(x[dim-1],top_);
         }
         else {
-          double h=1.-x[dimG-1];
+          double h=1.-x[dim-1];
           double hinv = 1./h;
-          bottom_.phi_set(x*hinv,p);
+          LocalCoordType xx(x);
+          xx *= hinv;
+          bottom_.phi_set(xx,p);
           p *= h;
-          p.axpy(x[dimG-1],pn_);
+          p.axpy(x[dim-1],pn_);
         }
       }
       void phi_add(const LocalCoordType& x,
@@ -317,14 +322,16 @@ namespace Dune
                    GlobalCoordType& p) const {
         if (affine()) {
           bottom_.phi_add(x,fac,p);
-          p.axpy(fac*x[dimG-1],top_);
+          p.axpy(fac*x[dim-1],top_);
         }
         else {
-          double h=1.-x[dimG-1];
+          double h=1.-x[dim-1];
           double hinv = 1./h;
-          bottom_.phi_add(x*hinv,fac,p);
+          LocalCoordType xx(x);
+          xx *= hinv;
+          bottom_.phi_add(xx,fac,p);
           p *= h;
-          p.axpy(fac*x[dimG-1],pn_);
+          p.axpy(fac*x[dim-1],pn_);
         }
       }
       // if affine:
@@ -337,22 +344,22 @@ namespace Dune
                      JacobianTransposeType& d) const {
         if (affine()) {
           bottom_.deriv_set(x,d);
-          d[dimG-1] = top_;
+          d[dim-1] = top_;
         }
         else
         {
           //   d[i]_j = db[i]_j*s/s (i=1,..,n-1, j=1,..,n)
           //   d[n]_j = x db(x/s)*s-b(x/s) + pn
-          double h=1.-x[dimG-1];
+          double h=1.-x[dim-1];
           double hinv = 1./h;
           GlobalCoordType X(x);
-          X[dimG-1] = 0;
+          X[dim-1] = 0;
           X *= hinv;
 
           bottom_.deriv_set(X,d);
-          d[dimG-1] = pn_;
-          bottom_.phi_add(X,-1.,d[dimG-1]);
-          d.umtv(X,d[dimG-1]);
+          d[dim-1] = pn_;
+          bottom_.phi_add(X,-1.,d[dim-1]);
+          d.umtv(X,d[dim-1]);
         }
       }
       void deriv_add(const LocalCoordType& x,
@@ -360,27 +367,27 @@ namespace Dune
                      JacobianTransposeType& d) const {
         if (affine()) {
           bottom_.deriv_add(x,d);
-          d[dimG-1] += top_;
+          d[dim-1] += top_;
         }
         else
         {
           //   d[i]_j = db[i]_j*s/s (i=1,..,n-1, j=1,..,n)
           //   d[n]_j = x db(x/s)*s-b(x/s) + pn
-          double h=1.-x[dimG-1];
+          double h=1.-x[dim-1];
           double hinv = 1./h;
           GlobalCoordType X(x);
-          X[dimG-1] = 0;
+          X[dim-1] = 0;
           X *= hinv;
 
           bottom_.deriv_add(X,d);
-          d[dimG-1] += pn_;
-          bottom_.phi_add(X,-1.,d[dimG-1]);
-          d.umtv(X,d[dimG-1]);
+          d[dim-1] += pn_;
+          bottom_.phi_add(X,-1.,d[dim-1]);
+          d.umtv(X,d[dim-1]);
         }
       }
 
       bool affine() const {
-        return CoordVector::affine || affine_;
+        return Traits::affine || affine_;
       }
       bool constant() const {
         return constant_;
@@ -409,7 +416,8 @@ namespace Dune
       typedef GenericMapping<Topology,CoordTraits> GenericMappingType;
     public:
       typedef CoordTraits Traits;
-      enum {dimG = Topology :: dimension};
+      enum {dim  = Topology::dimension};
+      enum {dimG = CoordTraits :: dimG};
       enum {dimW = CoordTraits :: dimW};
       typedef typename CoordTraits :: field_type
       FieldType;
@@ -437,7 +445,7 @@ namespace Dune
           i_(i), ii_(ii), coord_(coord)
         {}
         const Vector& operator[](int k) {
-          const int l = ReferenceElementType :: template subNumbering<codim,subcodim>(i,ii);
+          const int l = ReferenceElementType :: template subNumbering<codim,subcodim>(i_,ii_);
           return coord_[l];
         }
       };
@@ -447,7 +455,7 @@ namespace Dune
       };
     private:
       GenericMappingType map_;
-      const CoordVector coords_;
+      const CoordVector& coords_;
       JacobianTransposeType d;
       SquareMappingType L;
       JacobianType Q;
@@ -469,28 +477,30 @@ namespace Dune
       bool affine() const {
         return map_.affine();
       }
-      // additional methods
-      FieldType integrationElement(const LocalCoordType& x)
-      {
-        jacobianT(x,d);
-        return MatrixHelper<CoordTraits>::det(d);
-      }
-      FieldType jacobianInverseTransposed(const LocalCoordType& x,
+      /*
+         FieldType volume() {
+         const LocalCoordType& bary = ReferenceElementType::baryCenter();
+         return ReferenceElementType::volume() * integrationElement(bary);
+         }
+         // additional methods
+         FieldType integrationElement(const LocalCoordType& x)
+         {
+         jacobianT(x,d);
+         return MatrixHelper<CoordTraits>::det(d);
+         }
+         FieldType jacobianInverseTransposed(const LocalCoordType& x,
                                           JacobianType& dInv)
-      {
-        jacobianT(x,d);
-        return MatrixHelper<CoordTraits>::invert(d);
-      }
-      FieldType volume() {
-        const LocalCoordType& bary = ReferenceElementType::baryCenter();
-        return ReferenceElementType::volume() * integrationElement(bary);
-      }
-      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
-        jacobianT(x,d);
-        const LocalCoordType& refNormal =
-          ReferenceElementType::integrationOuterNormal(face);
-        MatrixHelper<CoordTraits>::solve(d,refNormal,n);
-      }
+         {
+         jacobianT(x,d);
+         return MatrixHelper<CoordTraits>::invert(d);
+         }
+         void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
+         jacobianT(x,d);
+         const LocalCoordType& refNormal =
+              ReferenceElementType::integrationOuterNormal(face);
+         MatrixHelper<CoordTraits>::solve(d,refNormal,n);
+         }
+       */
     };
   }
 }
