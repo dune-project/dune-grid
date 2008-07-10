@@ -117,6 +117,23 @@ namespace Dune
     template< class Topology >
     class IntegrationOuterNormal;
 
+    template<>
+    class IntegrationOuterNormal< Point >
+    {
+      typedef Point Topology;
+
+      enum { dimension = Topology :: dimension };
+
+    public:
+      enum { numNormals = 0 };
+
+      template< class ctype >
+      static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &n )
+      {
+        n = ctype( 0 );
+      }
+    };
+
     template< class BaseTopology >
     class IntegrationOuterNormal< Prism< BaseTopology > >
     {
@@ -139,6 +156,8 @@ namespace Dune
       }
 
     public:
+      enum { numNormals = Size< Topology, 1 > :: value };
+
       template< class ctype >
       static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &n )
       {
@@ -163,6 +182,8 @@ namespace Dune
       }
 
     public:
+      enum { numNormals = Size< Topology, 1 > :: value };
+
       template< class ctype >
       static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &n )
       {
@@ -199,6 +220,8 @@ namespace Dune
       }
 
     public:
+      enum { numNormals = Size< Topology, 1 > :: value };
+
       template< class ctype >
       static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &n )
       {
@@ -223,6 +246,8 @@ namespace Dune
       }
 
     public:
+      enum { numNormals = Size< Topology, 1 > :: value };
+
       template< class ctype >
       static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &n )
       {
@@ -280,8 +305,10 @@ namespace Dune
     template< class Topology, class ctype >
     struct ReferenceElement
     {
-      enum { numCorners = Topology :: numCorners };
       enum { dimension = Topology :: dimension };
+
+      enum { numCorners = Topology :: numCorners };
+      enum { numNormals = IntegrationOuterNormal< Topology > :: numNormals };
 
       typedef FieldVector< ctype, dimension > CoordinateType;
 
@@ -291,14 +318,23 @@ namespace Dune
         return SubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
       }
 
+      template< unsigned int codim >
+      static const CoordinateType &baryCenter ( unsigned int i )
+      {
+        Int2Type< codim > codimVariable;
+        return instance().baryCenters_[ codimVariable ][ i ];
+      }
+
       static const CoordinateType &corner ( unsigned int i )
       {
+        assert( i < numCorners );
         return instance().corners_[ i ];
       }
 
       static const CoordinateType &
       integrationOuterNormal ( unsigned int i )
       {
+        assert( i < numNormals );
         return instance().normals_[ i ];
       }
 
@@ -308,13 +344,14 @@ namespace Dune
       }
 
     private:
-      enum { numFaces = Size< Topology, 1 > :: value };
+      template< int codim >
+      class BaryCenterArray;
 
       ReferenceElement ()
       {
         for( unsigned int i = 0; i < numCorners; ++i )
           Corner< Topology > :: evaluate( i, corners_[ i ] );
-        for( unsigned int i = 0; i < numFaces; ++i )
+        for( unsigned int i = 0; i < numNormals; ++i )
           IntegrationOuterNormal< Topology > :: evaluate( i, normals_[ i ] );
       }
 
@@ -325,57 +362,61 @@ namespace Dune
       }
 
       CoordinateType corners_[ numCorners ];
-      CoordinateType normals_[ numFaces ];
+      CodimTable< BaryCenterArray, dimension > baryCenters_;
+      CoordinateType normals_[ numNormals ];
     };
 
-    template< class ctype >
-    struct ReferenceElement< Point, ctype >
+
+
+    template< class Topology, class ctype >
+    template< int codim >
+    class ReferenceElement< Topology, ctype > :: BaryCenterArray
     {
-      typedef Point Topology;
+      enum { Size = GenericGeometry :: Size< Topology, codim > :: value };
 
-      enum { numCorners = Topology :: numCorners };
-      enum { dimension = Topology :: dimension };
+      template< int i >
+      struct Builder;
 
-      typedef FieldVector< ctype, dimension > CoordinateType;
+      CoordinateType baryCenters_[ Size ];
 
-      template< unsigned int codim, unsigned int subcodim >
-      static unsigned int subNumbering ( unsigned int i, unsigned int j )
+    public:
+      BaryCenterArray ()
       {
-        return SubTopologyNumbering< Topology, codim, subcodim > :: number( i, j );
+        ForLoop< Builder, 0, Size-1 > :: apply( baryCenters_ );
       }
 
-      static const CoordinateType &corner ( unsigned int i )
+      const CoordinateType &operator[] ( unsigned int i ) const
       {
-        return instance().corners_[ i ];
+        assert( i < Size );
+        return baryCenters_[ i ];
       }
 
-      static const CoordinateType &
-      integrationOuterNormal ( unsigned int i )
+      static unsigned int size ()
       {
-        abort();
+        return Size;
       }
-
-      static ctype volume ()
-      {
-        return Volume< Topology > :: template evaluate< ctype >();
-      }
-
-    private:
-      ReferenceElement ()
-      {
-        for( unsigned int i = 0; i < numCorners; ++i )
-          Corner< Topology > :: evaluate( i, corners_[ i ] );
-      }
-
-      static const ReferenceElement &instance ()
-      {
-        static ReferenceElement inst;
-        return inst;
-      }
-
-      CoordinateType corners_[ numCorners ];
     };
 
+    template< class Topology, class ctype >
+    template< int codim >
+    template< int i >
+    struct ReferenceElement< Topology, ctype > :: BaryCenterArray< codim > :: Builder
+    {
+      static void apply ( CoordinateType (&baryCenters)[ Size ] )
+      {
+        typedef Corner< typename SubTopology< Topology, codim, i > :: type > C;
+
+        CoordinateType &x = baryCenters[ i ];
+        C :: evaluate( 0, x );
+        for( int k = 1; k < C :: numCorners; ++k )
+        {
+          CoordinateType y;
+          C :: evaluate( k, y );
+          x += y;
+        }
+        x *= ctype( 1 ) / ctype( C :: numCorners );
+      }
+    };
   }
 
 }
