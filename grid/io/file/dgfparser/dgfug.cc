@@ -23,7 +23,7 @@ namespace Dune {
       }
 
       mg.setOrientation(0,1);
-      UGGrid<dim> *grid = new UGGrid<dim>();
+      UGGrid<dim> *grid = new UGGrid<dim>;
       grid->createBegin();
 
       for (int n=0; n<mg.nofvtx; n++)

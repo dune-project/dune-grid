@@ -3,6 +3,7 @@
 #ifndef DUNE_DGFPARSERYASP_HH
 #define DUNE_DGFPARSERYASP_HH
 #include <dune/grid/yaspgrid.hh>
+#include "dgfparserblocks.hh"
 #include "dgfparser.hh"
 namespace Dune {
   template <int dim>
