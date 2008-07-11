@@ -9,6 +9,7 @@
 #include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
+
 // #include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 #include <dune/grid/psg/dgfgridtype.hh>
 
@@ -57,14 +58,23 @@ struct Topology;
 template <int d>
 struct Topology<YaspGrid<d,d> > {
   typedef typename Convert< GeometryType :: cube , d >::type Type;
+  static int faceNr(int duneFN) {
+    return duneFN;
+  }
 };
 template <int d>
 struct Topology<AlbertaGrid<d,d> > {
   typedef typename Convert< GeometryType :: simplex , d >::type Type;
+  static int faceNr(int duneFN) {
+    return d-duneFN;
+  }
 };
 template <int d1,int d2,class CCOMM>
 struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
   typedef typename Convert< GeometryType :: simplex , d1 >::type Type;
+  static int faceNr(int duneFN) {
+    return d1-duneFN;
+  }
 };
 
 int phiErr;
@@ -76,12 +86,17 @@ int volErr;
 template <class GridViewType>
 void test(const GridViewType& view) {
   typedef typename GridViewType::Grid GridType;
-  typedef typename Topology<GridType>::Type TopologyType;
+  typedef Topology<GridType> ConversionType;
+  typedef typename ConversionType::Type TopologyType;
   typedef typename GridViewType ::template Codim<0>::Iterator ElementIterator;
+  typedef typename GridViewType :: IntersectionIterator IIteratorType;
+  typedef typename GridViewType :: Intersection IntersectionType;
   ElementIterator eIt    = view.template begin<0>();
   ElementIterator eEndIt = view.template end<0>();
-  typedef typename ElementIterator::Entity::Geometry GeometryType;
+  typedef typename ElementIterator::Entity EntityType;
+  typedef typename EntityType::Geometry GeometryType;
   typedef FieldVector<double, GeometryType::mydimension> LocalType;
+  typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
   typedef FieldVector<double, GeometryType::coorddimension> GlobalType;
   typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::coorddimension>
   JacobianTType;
@@ -151,6 +166,21 @@ void test(const GridViewType& view) {
       volErr++;
       std::cout << "volume : " << vol << " " << volM << std::endl;
     }
+    // test normal
+    IIteratorType iiter = view.ibegin(*eIt);
+    for (; iiter != view.iend(*eIt); ++ iiter) {
+      LocalFaceType xf(0.1);
+      GlobalType n = iiter->integrationOuterNormal(xf);
+      LocalType xx(iiter->intersectionSelfLocal().global(xf));
+      GlobalType nM;
+      map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx,nM);
+      if ((n-nM).two_norm2()>1e-10) {
+        std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
+        std::cout << "( " << nM << " )   ( " << n << " )   "
+                  << n-nM
+                  << std::endl;
+      }
+    }
   }
 }
 
@@ -165,7 +195,6 @@ try {
     return 1;
   }
 
-
   // create Grid from DGF parser
   GridPtr<GridType> grid;
   {
@@ -174,7 +203,7 @@ try {
   /*
      CollectiveCommunicationType comm( mpiHelper.getCommunicator() );
      typedef Dune :: ParallelSimplexGrid
-     < double, 2, 3, CollectiveCommunicationType >
+     < double, 3, 3, CollectiveCommunicationType >
      PSGGridType;
      PSGGridType* grid = new PSGGridType ( comm, argv[ 1 ] );
    */

@@ -493,15 +493,14 @@ namespace Dune
         jacobianT(x,d);
         return MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,dInv);
       }
-      /*
-         void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
-         JacobianTransposeType d;
-         jacobianT(x,d);
-         const LocalCoordType& refNormal =
-              ReferenceElementType::integrationOuterNormal(face);
-         MatrixHelper<CoordTraits>::solve(d,refNormal,n);
-         }
-       */
+      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
+        JacobianType d;
+        FieldType det = jacobianInverseTransposed(x,d);
+        const LocalCoordType& refNormal =
+          ReferenceElementType::integrationOuterNormal(face);
+        MatrixHelper<CoordTraits>::template Ax<dimW,dimG>(d,refNormal,n);
+        n *= det;
+      }
     };
   }
 }

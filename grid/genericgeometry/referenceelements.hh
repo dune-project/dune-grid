@@ -208,18 +208,20 @@ namespace Dune
       static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &n )
       {
         typedef SubTopologyNumbering< BaseTopology,1,dimension-2 > Numbering;
-
-        if( i < Size< BaseTopology, 1 > :: value )
+        const unsigned int m = Size< BaseTopology, 0 > :: value;
+        if( i < m )
         {
-          const unsigned int j = Numbering :: number( i, 0 );
+          n[ dimension -1 ] = ctype( -1 );
+        }
+        else
+        {
+          const unsigned int j = Numbering :: number( i-m, 0 );
           FieldVector< ctype, dim > x( ctype( 0 ) );
           Corner< BaseTopology > :: evaluate_( j, x );
 
-          IntegrationOuterNormal< BaseTopology > :: evaluate_( i, n );
+          IntegrationOuterNormal< BaseTopology > :: evaluate_( i-m, n );
           n[ dimension - 1 ] = (x * n);
         }
-        else
-          n[ dimension - 1 ] = ctype( -1 );
       }
 
     public:
