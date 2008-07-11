@@ -78,7 +78,8 @@ namespace Dune
   // --------------------
 
   DuneGridFormatParser :: DuneGridFormatParser ()
-    : dimw(-1),
+    : dimw( -1 ),
+      dimgrid( -1 ),
       vtx(0), nofvtx(0), vtxoffset(0),
       elements(0) , nofelements(0),
       bound(0) , nofbound(0),
@@ -393,127 +394,152 @@ namespace Dune
   }
 
 
-  // read the DGF file and store vertex/element/bound structure
-  bool DuneGridFormatParser :: readDuneGrid ( std :: istream &gridin )
+  bool DuneGridFormatParser
+  :: readDuneGrid ( std :: istream &gridin, int dimG, int dimW )
   {
-    static const std::string dgfid("DGF");
-    std::string idline;
-    std::getline(gridin,idline);
-    dgf :: makeupcase(idline);
-    std::stringstream idstream(idline);
-    std::string id;
+    static const std :: string dgfid( "DGF" );
+    std :: string idline;
+    std :: getline( gridin, idline );
+    dgf :: makeupcase( idline );
+    std :: istringstream idstream( idline );
+    std :: string id;
     idstream >> id;
-    cube2simplex = false;
     // compare id to DGF keyword
     if ( id != dgfid )
     {
-      std::cerr << "Couldn't find 'DGF' keyword, file is not a DuneGridFormat file ... exiting parser! \n";
+      std :: cerr << "Couldn't find '" << dgfid << "' keyword."
+                  << "File is not in DuneGridFormat. Exiting parser..."
+                  << std :: endl;
       return false;
     } // not a DGF file, prehaps native file format
 
-    info = new DGFPrintInfo("dgfparser");
+    info = new DGFPrintInfo( "dgfparser" );
 
-    dimw=-1;
-    dgf :: IntervalBlock interval(gridin);
+    // initialize variables
+    cube2simplex = false;
+    simplexgrid = false;
+    dimgrid = dimG;
+    dimw = dimW;
+    vtxoffset = 0;
+    nofvtx=0;
+    nofelements=0;
 
-    vtxoffset=0;
+    dgf :: IntervalBlock interval( gridin );
+    dgf :: VertexBlock bvtx( gridin, dimw );
 
     // generate cartesian grid?
-    if(interval.isactive())
+    if ( interval.isactive() )
     {
       info->automatic();
-      dgf :: VertexBlock bvtx(gridin,dimw);
-      nofvtx=0;
-      if (bvtx.isactive())
+      if( bvtx.isactive() )
       {
-        nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
-        info->block(bvtx);
+        nofvtx = bvtx.get( vtx, vtxParams, nofvtxparams );
+        info->block( bvtx );
       }
-      info->block(interval);
-      cube2simplex = true;
-      dimw = interval.dimw();
-      simplexgrid = (element == Simplex);
-      if (element == General)
+
+      info->block( interval );
+      if( dimw < 0 )
       {
-        dgf :: SimplexBlock bsimplex(gridin,-1,-1,dimw);
-        simplexgrid = bsimplex.isactive();
-        info->cube2simplex(element);
+        if( dimw != interval.dimw() )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << interval << ": Wrong coordinate dimension "
+                                  << "(got " << interval.dimw() << ", expected " << dimw << ")" );
+        }
       }
       else
+        dimw = interval.dimw();
+      if( (dimgrid >= 0) && (dimgrid != dimw) )
       {
-        simplexgrid = (element == Simplex);
+        DUNE_THROW( DGFException,
+                    "Error in " << interval << ": Coordinate dimension differs "
+                                << "from grid dimension." );
       }
-      interval.get(vtx,nofvtx,elements,nofelements);
+      else
+        dimgrid = dimw;
+      cube2simplex = true;
+
+      simplexgrid = (element == Simplex);
+      if( element == General )
+      {
+        dgf :: SimplexBlock bsimplex( gridin, -1, -1, dimgrid );
+        simplexgrid = bsimplex.isactive();
+        info->cube2simplex( element );
+      }
+
+      interval.get( vtx, nofvtx, elements, nofelements );
       // nofelements=interval.getHexa(elements);
-      if(simplexgrid) {
-        nofelements = dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
-      }
+      if( simplexgrid )
+        nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
 
       // remove copies of vertices
       removeCopies();
     }
-    else { // ok: grid generation by hand...
-      dgf :: VertexBlock bvtx(gridin,dimw);
-      if (bvtx.isactive()) {
-        nofvtx=bvtx.get(vtx,vtxParams,nofvtxparams);
-        info->block(bvtx);
-        vtxoffset=bvtx.offset();
+    else
+    {
+      if( bvtx.isactive() )
+      {
+        nofvtx = bvtx.get( vtx, vtxParams, nofvtxparams );
+        info->block( bvtx );
+        vtxoffset = bvtx.offset();
       }
-      nofelements=0;
-      dgf :: SimplexBlock bsimplex(gridin,nofvtx,vtxoffset,dimw);
-      dgf :: CubeBlock bcube(gridin,nofvtx,vtxoffset,dimw);
-      if (bcube.isactive() && element!=Simplex) {
-        info->block(bcube);
-        nofelements=bcube.get(elements,elParams,nofelparams);
-        if (bsimplex.isactive() && element==General)
+
+      dgf :: SimplexBlock bsimplex( gridin, nofvtx, vtxoffset, dimgrid );
+      dgf :: CubeBlock bcube( gridin, nofvtx, vtxoffset, dimgrid );
+
+      if( bcube.isactive() && (element != Simplex) )
+      {
+        info->block( bcube );
+        nofelements = bcube.get( elements, elParams, nofelparams );
+        if( bsimplex.isactive() && (element == General) )
         {
           // make simplex grid
-          info->cube2simplex(element);
-          nofelements=dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
-          simplexgrid=true;
+          info->cube2simplex( element );
+          nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
+          simplexgrid = true;
         }
-        else
-          simplexgrid=false;
       }
-      else {
-        simplexgrid=true;
-        if (bsimplex.isactive()) {
-          nofelements+=bsimplex.get(elements,elParams,nofelparams);
-          if (dimw == 2)
-            for (size_t i=0; i<elements.size(); i++) {
-              testTriang(i);
-            }
+      else
+      {
+        simplexgrid = true;
+        if( bsimplex.isactive() )
+        {
+          nofelements += bsimplex.get( elements, elParams, nofelparams );
+          if( dimw == 2 )
+          {
+            for( size_t i = 0; i < elements.size(); ++i )
+              testTriang( i );
+          }
         }
-        if (nofelements==0 && bcube.isactive()) {
-          info->block(bcube);
-          info->cube2simplex(element);
-          nofelements=bcube.get(elements,elParams,nofelparams);
+        if( (nofelements == 0) && bcube.isactive() )
+        {
+          info->block( bcube );
+          info->cube2simplex( element );
+          nofelements = bcube.get( elements, elParams, nofelparams );
           // make simplex grid
-          nofelements=dgf :: SimplexBlock::cube2simplex(vtx,elements,elParams);
+          nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
           cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
         }
-        else if (bsimplex.isactive()) {
+        else if( bsimplex.isactive() )
           info->block(bsimplex);
-        }
       }
     }
 
-    info->step1(dimw,vtx.size(),elements.size());
+    info->step1( dimw, vtx.size(), elements.size() );
     // test for tetgen/triangle block (only if simplex-grid allowed)
-    if (element!=Cube && dgf :: SimplexGenerationBlock(gridin).isactive()) {
-      if (!interval.isactive())
-        generateBoundaries(gridin,true);
+    if( (element != Cube) && dgf :: SimplexGenerationBlock( gridin ).isactive() )
+    {
+      if( !interval.isactive() )
+        generateBoundaries( gridin, true );
       info->automatic();
-      simplexgrid=true;
-      nofelements=0;
-      generateSimplexGrid(gridin);
+      simplexgrid = true;
+      nofelements = 0;
+      generateSimplexGrid( gridin );
     }
-    generateBoundaries(gridin,!interval.isactive());
-    if (nofelements<=0) {
-      DUNE_THROW(DGFException,
-                 "An Error occured while reading element information"
-                 << "from the DGF file - no elements found!");
-    }
+    generateBoundaries( gridin, !interval.isactive() );
+    if( nofelements<=0 )
+      DUNE_THROW( DGFException, "Error: No elements found." );
+
     info->finish();
     delete info;
     info = 0;

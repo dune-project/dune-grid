@@ -38,14 +38,14 @@ namespace Dune
     typedef enum {Simplex,Cube,General} element_t;
     typedef enum {counterclockwise=1,clockwise=-1} orientation_t;
 
-    //!  constructor which does nothing
+    //! constructor
     DuneGridFormatParser ();
 
     //! \brief method which reads the dgf file
     //!
     //! fills the vtx,element, and bound vectors
     //! returns true if reading succeded
-    bool readDuneGrid( std :: istream & );
+    bool readDuneGrid( std :: istream &, int dimG = -1, int dimW = -1 );
 
     //! method to write in Tetgen/Triangle Poly Format
     void writeTetgenPoly ( std :: string &, std :: string & );
@@ -57,7 +57,7 @@ namespace Dune
 
   protected:
     // dimension of world and problem: set through the readDuneGrid() method
-    int dimw;
+    int dimw, dimgrid;
     // vector of vertex coordinates
     std::vector < std::vector <double> > vtx;
     int nofvtx;
@@ -92,7 +92,8 @@ namespace Dune
 
     // helper methods
     void removeCopies ();
-    void setOrientation ( int use1, int use2, orientation_t orientation=counterclockwise );
+    void setOrientation ( int use1, int use2,
+                          orientation_t orientation=counterclockwise );
     void setRefinement ( int use1, int use2, int is1=-1, int is2=-1 );
     double testTriang ( int snr );
 

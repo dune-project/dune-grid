@@ -40,16 +40,22 @@ namespace Dune
       // get the block (if it exists)
       void getblock ( std::istream &in );
       // count the number of lines in the block
-      int countlines ();
+      // int countlines ();
 
     protected:
       std::stringstream line; // the active line as string buffer
                               // for use in the derived classes
 
       // go back to beginning of block
-      void reset ();
+      void reset ()
+      {
+        pos = -1;
+        block.clear();
+        block.seekg( 0 );
+      }
+
       // get next line and store in string stream
-      void getnextline ();
+      bool getnextline ();
 
       // get next entry in line
       template< class ENTRY >
@@ -103,47 +109,38 @@ namespace Dune
     class VertexBlock
       : public BasicBlock
     {
-      int dimworld;      // the dimesnsion of the vertices (is given from user)
-      bool goodline;     // active line describes a vertex
-      std::vector<double> p; // active vertex
+      int dimworld;        // the dimesnsion of the vertices (is given from user)
+      bool goodline;       // active line describes a vertex
       int vtxoffset;
       int nofParam;
-      std::vector<double> vtxparam;
 
     public:
       static const char* ID;
-      // initialize vertex block and get first vertex
-      VertexBlock(std::istream& in,int &pdimworld);
 
-      int offset ()
-      {
-        return vtxoffset;
-      }
+      // initialize vertex block
+      VertexBlock ( std :: istream &in, int &pdimworld );
 
       int get ( std :: vector< std :: vector< double > > &vtx,
-                std :: vector< std :: vector< double > > &param, int &nofp );
+                std :: vector< std :: vector< double > > &param,
+                int &nofp );
 
       // some information
-      bool ok ()
+      bool ok () const
       {
         return goodline;
       }
 
+      int offset () const
+      {
+        return vtxoffset;
+      }
+
     private:
       // get dimworld
-      int getDimW ();
+      int getDimWorld ();
 
       // get next vertex
-      bool next ();
-
-      // get coordinates of active vertex
-      double operator[] ( int i )
-      {
-        assert(ok());
-        assert(linenumber()>=0);
-        assert(0<=i && i<dimworld);
-        return p[i];
-      }
+      bool next ( std :: vector< double > &point, std :: vector< double > &param );
     };
 
 
@@ -218,21 +215,26 @@ namespace Dune
     };
 
 
-    // *************************************************************
-    class SimplexBlock : public BasicBlock {
+    // SimplexBlock
+    // ------------
+
+    class SimplexBlock
+      : public BasicBlock
+    {
       unsigned int nofvtx;
       int vtxoffset;
-      int dimworld;
-      bool goodline;             // active line describes a vertex
-      std::vector< unsigned int > p; // active vertex
-      int nofparams;             // nof parameters
-      std::vector<double> psimpl; // active parameters
+      int dimgrid;
+      bool goodline;               // active line describes a vertex
+      int nofparams;               // nof parameters
+
     public:
       const static char* ID;
-      SimplexBlock(std::istream& in,int pnofvtx, int pvtxoffset, int adimworld);
+
+      SimplexBlock ( std :: istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid );
+
       int get ( std :: vector< std :: vector< unsigned int > > &simplex,
                 std :: vector< std :: vector< double > > &params,
-                int &nofp);
+                int &nofp );
 
       // cubes -> simplex
       static int
@@ -241,62 +243,65 @@ namespace Dune
                      std :: vector< std :: vector< double > > &params );
 
       // some information
-      bool ok() {
+      bool ok ()
+      {
         return goodline;
       }
-      int nofsimplex() {
+
+      int nofsimplex ()
+      {
         return noflines();
       }
 
     private:
+      // get the dimension of the grid
+      int getDimGrid ();
       // get next simplex
-      bool next ();
-
-      // get coordinates of active simplex
-      int operator[](int i) {
-        assert(ok());
-        assert(linenumber()>=0);
-        assert(0<=i && i<(dimworld+1));
-        return p[i];
-      }
+      bool next ( std :: vector< unsigned int > &simplex,
+                  std :: vector< double > &param );
     };
 
 
-    /// *************************************************************
-    class CubeBlock : public BasicBlock
+
+    // CubeBlock
+    // ---------
+
+    class CubeBlock
+      : public BasicBlock
     {
       unsigned int nofvtx;
-      int dimworld;
-      bool goodline;    // active line describes a vertex
-      std :: vector< unsigned int > p; // active vertex
+      int dimgrid;
+      bool goodline;      // active line describes a vertex
       std :: vector< unsigned int > map; // active vertex
       int nofparams;
       int vtxoffset;
-      std::vector<double> psimpl; // active parameters
+
     public:
       static const char* ID;
-      CubeBlock(std::istream& in,int pnofvtx, int pvtxoffset, int adimworld);
+
+      CubeBlock ( std :: istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid );
 
       int get ( std :: vector< std :: vector< unsigned int> > &simplex,
                 std :: vector< std :: vector< double > > &params,
                 int &nofp );
+
       // some information
-      bool ok() {
+      bool ok ()
+      {
         return goodline;
       }
-      int nofsimplex() {
+
+      int nofsimplex ()
+      {
         return noflines();
       }
+
     private:
+      // get the dimension of the grid
+      int getDimGrid ();
       // get next simplex
-      bool next();
-      // get coordinates of active simplex
-      int operator[](int i) {
-        assert(ok());
-        assert(linenumber()>=0);
-        assert(0<=i && i< (int)p.size());
-        return p[i];
-      }
+      bool next ( std :: vector< unsigned int > &simplex,
+                  std :: vector< double > &param );
     };
 
 

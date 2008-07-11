@@ -11,151 +11,122 @@ namespace Dune
     // BasicBlock
     // ----------
 
-    void BasicBlock :: getblock ( std :: istream &in )
-    {
-      std::string id;
-      getline(in,id);
-      while (in.good()) {
-        std::stringstream idstream(id);
-        std::string upcaseid;
-        idstream >> upcaseid;
-        makeupcase(upcaseid);
-        if (upcaseid==identifier)
-        {
-          active=true;
-          break;
-        }
-        getline(in,id);
-      }
-      if (active) {
-        bool blockend=false;
-        while (in.good()) {
-          getline(in,oneline);
-          if (oneline.size()==0)
-            continue;
-          std::stringstream onelinestream(oneline);
-          std::string test;
-          onelinestream >> test;
-          if (test[0] == '#') {
-            blockend=true;
-            break;
-          }
-          empty=false;
-          block << oneline << "\n";
-        }
-        if (!blockend) {
-          DUNE_THROW(DGFException,
-                     "Error: block must end with a #-line");
-        }
-      }
-      else {
-        // std::cerr << "Warning: Block " << identifier << " not found" << std::endl;
-      }
-    }
-
-
-    int BasicBlock :: countlines ()
-    {
-      if (empty)
-        return 0;
-      int ret=0;
-      while (1) {
-        getnextline();
-        if (oneline.size()==0)
-          break;
-        ret++;
-      }
-      return ret;
-    }
-
-
-    void BasicBlock :: reset ()
-    {
-      pos=-1;
-      block.clear();
-      block.seekg(0);
-      linecount=countlines();
-      pos=-1;
-      block.clear();
-      block.seekg(0);
-    }
-
-
-    // get next line and store in string stream
-    void BasicBlock :: getnextline ()
-    {
-      line.clear();
-      oneline.clear();
-      getline(block,oneline);
-      if (oneline.size()>0) {
-        std::size_t comment=oneline.find("%");
-        if (comment!=std::string::npos) {
-          oneline.erase(comment);
-          if (oneline.size()==0) {
-            getnextline();
-            return;
-          }
-        }
-      }
-      line.str(oneline);
-      pos++;
-    }
-
-
-    bool BasicBlock :: gettokenparam ( std :: string token, std :: string &entry )
-    {
-      makeupcase(token);
-      std::string ltoken;
-      reset();
-      do {
-        getnextline();
-        if (oneline.size()==0)
-          return false;
-        line >> ltoken;
-        makeupcase(ltoken);
-      } while (ltoken!=token);
-      getline(line,entry);
-      return true;
-    }
-
-
-    bool BasicBlock :: findtoken ( std :: string token )
-    {
-      makeupcase(token);
-      std::string ltoken;
-      reset();
-      do {
-        getnextline();
-        if (oneline.size()==0)
-          return false;
-        line >> ltoken;
-        makeupcase(ltoken);
-      } while (ltoken!=token);
-      return true;
-    }
-
-
-    BasicBlock :: BasicBlock ( std :: istream &in, const char* id )
+    BasicBlock :: BasicBlock ( std :: istream &in, const char *id )
       : pos(-1),
         active(false),
         empty(true),
         identifier(id),
         linecount(0)
     {
-      makeupcase(identifier);
+      makeupcase( identifier );
       in.clear();
       in.seekg(0);
       if (!in) {
         DUNE_THROW(DGFException,
                    "file not found in BasicBlock::BasicBlock");
       }
-      getblock(in);
+      getblock( in );
+      empty = (linecount > 0);
       if (active && !empty) {
-        linecount=countlines();
+        //linecount=countlines();
         reset();
       }
       in.clear();
       in.seekg(0);
+    }
+
+
+    void BasicBlock :: getblock ( std :: istream &in )
+    {
+      linecount = 0;
+      while( in.good() )
+      {
+        std :: string line;
+        getline( in, line );
+
+        std :: istringstream linestream( line );
+        std :: string id;
+        linestream >> id;
+
+        makeupcase( id );
+        if( id == identifier )
+          break;
+      }
+      if( in.eof() )
+        return;
+
+      active = true;
+      while( in.good() )
+      {
+        std :: string line;
+        getline( in, line );
+
+        // strip comments
+        if( !line.empty() )
+        {
+          std :: size_t comment = line.find( "%" );
+          if( comment != std :: string :: npos )
+            line.erase( comment );
+        }
+        if( line.empty() )
+          continue;
+
+        std :: istringstream linestream( line );
+        char test = 0;
+        linestream >> test;
+        if( test == '#' )
+          return;
+
+        ++linecount;
+        block << line << std :: endl;
+      }
+      DUNE_THROW( DGFException, "Error reading from stream." );
+    }
+
+
+    // get next line and store in string stream
+    bool BasicBlock :: getnextline ()
+    {
+      getline( block, oneline );
+      line.clear();
+      line.str( oneline );
+      ++pos;
+      return !oneline.empty();
+    }
+
+
+    bool BasicBlock :: gettokenparam ( std :: string token, std :: string &entry )
+    {
+      reset();
+      makeupcase( token );
+      while( getnextline() )
+      {
+        std :: string ltoken;
+        line >> ltoken;
+        makeupcase( ltoken );
+        if( ltoken == token )
+        {
+          getline( line, entry );
+          return true;
+        }
+      }
+      return false;
+    }
+
+
+    bool BasicBlock :: findtoken ( std :: string token )
+    {
+      reset();
+      makeupcase( token );
+      while( getnextline() )
+      {
+        std :: string ltoken;
+        line >> ltoken;
+        makeupcase( ltoken );
+        if( ltoken == token )
+          return true;
+      }
+      return false;
     }
 
 
@@ -167,122 +138,104 @@ namespace Dune
 
 
     VertexBlock :: VertexBlock ( std :: istream &in, int &pdimworld )
-      : BasicBlock(in,ID),
-        dimworld(pdimworld),
-        goodline(true),
-        p(0),
-        vtxoffset(0),
-        nofParam(0),
-        vtxparam(0)
+      : BasicBlock( in, ID ),
+        dimworld( pdimworld ),
+        goodline( true ),
+        vtxoffset( 0 ),
+        nofParam( 0 )
     {
       if (!isactive())
         return;
-      if (dimworld<0)
-        dimworld=0;
+
+      if( findtoken( "firstindex" ) )
       {
         int x;
-        if (findtoken("firstindex")) {
-          if (getnextentry(x)) {
-            vtxoffset=x;
-          }
-        }
+        if( getnextentry( x ) )
+          vtxoffset=x;
       }
+
+      if( findtoken( "parameters" ) )
       {
         int x;
-        if (findtoken("parameters")) {
-          if (getnextentry(x)) {
-            nofParam=x;
-            vtxparam.resize(nofParam);
-          }
-        }
+        if( getnextentry( x ) )
+          nofParam=x;
       }
-      dimworld=getDimW();
-      if (dimworld>0) {
-        p.resize(dimworld);
-      } else {
-        DUNE_THROW(DGFException,
-                   "ERROR in " << *this
-                               << "      no line with enough entries found");
-      }
-      reset();
-      next();
+
+      if( dimworld < 0 )
+        dimworld = getDimWorld();
       pdimworld=dimworld;
+
+      if( dimworld <= 0 )
+      {
+        DUNE_THROW( DGFException,
+                    "Error in " << *this << ": "
+                                << "Unable to determine dimension of vertices." );
+      }
     }
 
 
-    int VertexBlock :: get ( std :: vector< std :: vector< double > > &vtx,
-                             std :: vector< std :: vector< double > > &param,
+    int VertexBlock :: get ( std :: vector< std :: vector< double > > &points,
+                             std :: vector< std :: vector< double > > &params,
                              int &nofp )
     {
-      nofp=nofParam;
-      size_t nofvtx;
-      size_t old_size = vtx.size();
-      // vtx.resize(old_size+nofvertex());
-      for (nofvtx=old_size; ok(); next(),nofvtx++) {
-        vtx.push_back(p);
-        if (nofParam>0)
-          param.push_back(vtxparam);
+      nofp = nofParam;
+      reset();
+
+      std :: vector< double > point( dimworld );
+      std :: vector< double > param( nofParam );
+      while( next( point, param ) )
+      {
+        points.push_back( point );
+        if( nofParam > 0 )
+          params.push_back( param );
       }
-      return nofvtx;
+      return points.size();
     }
 
 
-    int VertexBlock :: getDimW ()
+    int VertexBlock :: getDimWorld ()
     {
       reset();
-      int dimworld=0;
-      getnextline();
-      while (dimworld<1 && linenumber()<noflines()) {
-        dimworld = 0;
+      while( getnextline() )
+      {
+        int dimworld = -nofParam;
         double x;
-        while (getnextentry(x)) {
-          dimworld++;
-        }
-        dimworld-=nofParam;
-        getnextline();
+        while( getnextentry( x ) )
+          ++dimworld;
+        if( dimworld > 0 )
+          return dimworld;
       }
-      return dimworld;
+      return 0;
     }
 
 
-    bool VertexBlock :: next ()
+    bool VertexBlock :: next ( std :: vector< double > &point,
+                               std :: vector< double > &param )
     {
-      assert(ok());
-      int n=0;
-      getnextline();
-      if (linenumber()==noflines()) {
-        goodline=false;
-        return goodline;
-      }
+      assert( ok() );
+      if( !getnextline() )
+        return (goodline = false);
+
+      int n = 0;
       double x;
-      while (getnextentry(x)) {
-        if (n<dimworld)
-          p[n]=x;
-        else if (n-dimworld<nofParam) {
-          vtxparam[n-dimworld]=x;
-        }
-        n++;
+      for( ; getnextentry( x ); ++n )
+      {
+        if( n < dimworld )
+          point[ n ] = x;
+        else if( n-dimworld < nofParam )
+          param[ n-dimworld ] = x;
       }
-      if (n>0 && n!=dimworld+nofParam) {
-        return next();
-        /*
-           DUNE_THROW(DGFException,
-                   "ERROR in " << *this
-                   << "      wrong number of coordinates and parameters: "
-                   << n << " read but expected " << dimworld+nofParam);
-         */
+      if( n == dimworld + nofParam )
+        return (goodline = true);
+
+      if( n > 0 )
+      {
+        DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                               << "Wrong number of coordinates and parameters "
+                                               << "(got " << n
+                                               << ", expected " << (dimworld + nofParam) << ")" );
       }
-      if (n==0) {
-        return next();
-      }
-      goodline=true;
-      if (!goodline) {
-        DUNE_THROW(DGFException,
-                   "ERROR in " << *this
-                               << "      wrong number of coordinates: "
-                               << n << " read but expected " << dimworld);
-      }
-      return goodline;
+      return next( point, param );
     }
 
 
@@ -345,67 +298,130 @@ namespace Dune
     const char *SimplexBlock :: ID = "Simplex";
 
 
-    SimplexBlock
-    :: SimplexBlock ( std :: istream &in, int pnofvtx, int pvtxoffset, int adimworld )
-      : BasicBlock(in,ID),
-        nofvtx(pnofvtx),
-        vtxoffset(pvtxoffset),
-        dimworld(adimworld),
-        goodline(true),
-        p(adimworld+1),
-        nofparams(0),
-        psimpl(0)
+    SimplexBlock :: SimplexBlock
+      ( std :: istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid )
+      : BasicBlock( in, ID ),
+        nofvtx( pnofvtx ),
+        vtxoffset( pvtxoffset ),
+        dimgrid( pdimgrid ),
+        goodline( true ),
+        nofparams( 0 )
     {
-      if (!isactive()) return;
-      assert((dimworld+1)>0);
-      if (findtoken("parameters")) {
-        int x=0;
-        if (getnextentry(x)) {
-          if (x>0) {
+      if( !isactive() )
+        return;
+
+      if( findtoken( "parameters" ) )
+      {
+        int x = 0;
+        if( getnextentry( x ) )
+        {
+          if( x > 0 )
             nofparams = x;
-            psimpl.resize(nofparams);
-          }
         }
-        if (x<=0) {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      parameter key found with no or non-positive value "
-                                 << x);
+        if( x <= 0 )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << *this << ": "
+                                  << "Key 'parameters' found with no or non-positive value." );
         }
       }
-      reset();
-      next();
+
+      if( dimgrid < 0 )
+        dimgrid = getDimGrid();
+      pdimgrid = dimgrid;
     }
 
 
-    int SimplexBlock :: get ( std :: vector< std :: vector< unsigned int > > &simplex,
-                              std :: vector< std :: vector< double > > &params,
-                              int &nofp)
+    int SimplexBlock :: getDimGrid ()
     {
-      nofp=nofparams;
-      int nofsimpl;
-      for (nofsimpl=0; ok(); next(), nofsimpl++) {
-        simplex.push_back(p);
-        for (size_t j=0; j<p.size(); j++) {
-          simplex[nofsimpl][j] = p[j];
-        }
-        if (nofparams>0) {
-          params.push_back(psimpl);
-        }
+      reset();
+      while( getnextline() )
+      {
+        int count = 0;
+        double x;
+        while( getnextentry( x ) )
+          ++count;
+        if( count > nofparams )
+          return (count - nofparams) - 1;
       }
-      /*
-         // make numbering starting from zero
-         // not matter whether offset is positive or negative
-         offset = vtxoffset;
-         if(offset != 0) {
-         for (int i=0; i<nofsimpl; ++i) {
-          for (size_t j=0;j<simplex[i].size();++j) {
-            simplex[i][j] -= offset;
-          }
-         }
-         }
-       */
+      return 0;
+    }
+
+
+    int SimplexBlock
+    :: get ( std :: vector< std :: vector< unsigned int > > &simplices,
+             std :: vector< std :: vector< double > > &params,
+             int &nofp)
+    {
+      nofp = nofparams;
+      reset();
+
+      std :: vector< unsigned int > simplex( dimgrid+1 );
+      std :: vector< double > param( nofparams );
+      int nofsimpl = 0;
+      for( ; next( simplex, param ); ++nofsimpl )
+      {
+        simplices.push_back( simplex );
+        /*
+           for( size_t j = 0; j < simplex.size(); ++j )
+           simplices[ nofsimpl ][ j ] = simplex[ j ];
+         */
+        if( nofparams > 0 )
+          params.push_back( param );
+      }
       return nofsimpl;
+    }
+
+
+    bool SimplexBlock :: next ( std :: vector< unsigned int > &simplex,
+                                std :: vector< double > &param )
+    {
+      assert( ok() );
+      if( !getnextline() )
+        return (goodline = false);
+
+      for( std :: size_t n = 0; n < simplex.size(); ++n )
+      {
+        int idx;
+        if( !getnextentry( idx ) )
+        {
+          if( n > 0 )
+          {
+            DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                                   << "Wrong number of vertex indices "
+                                                   << "(got " << idx
+                                                   << ", expected " << simplex.size() << ")" );
+          }
+          else
+            return next( simplex, param );
+        }
+        if( (vtxoffset < idx) || (idx >= int(nofvtx + vtxoffset)) )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << *this << ": "
+                                  << "Invalid vertex index "
+                                  << "(" << idx << " not in ["
+                                  << vtxoffset << ", " << (nofvtx + vtxoffset) << "[)" );
+        }
+        simplex[ n ] = idx - vtxoffset;
+      }
+
+      std :: size_t np = 0;
+      double x;
+      for( ; getnextentry( x ); ++np )
+      {
+        if( np < param.size() )
+          param[ np ] = x;
+      }
+
+      if( np != param.size() )
+      {
+        DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                               << "Wrong number of simplex parameters "
+                                               << "(got " << np
+                                               << ", expected " << param.size() << ")" );
+      }
+      return (goodline = true);
     }
 
 
@@ -498,170 +514,167 @@ namespace Dune
     }
 
 
-    bool SimplexBlock :: next ()
-    {
-      assert(ok());
-      int n=0;
-      getnextline();
-      if (linenumber()==noflines()) {
-        goodline=false;
-        return goodline;
-      }
-      double x;
-      while (getnextentry(x)) {
-        if (n<(int)p.size()) {
-          p[n]=int(x)-vtxoffset;
-          if (p[n]<0 || p[n]>=nofvtx) {
-            DUNE_THROW(DGFException,
-                       "ERROR in " << *this
-                                   << "      wrong index of vertices: "
-                                   << x << " read but expected value between "
-                                   << vtxoffset << " and "
-                                   << nofvtx+vtxoffset);
-          }
-        }
-        else if (n-int(p.size())<nofparams) {
-          psimpl[n-p.size()]=x;
-        }
-        n++;
-      }
-      // tests if the written block is ok in its size
-      if (n!=(int)p.size()+nofparams) {
-        return next();
-      }
-      // tests if the written block is ok in its size
-      goodline=(n==(int)p.size()+nofparams);
-      return goodline;
-    }
-
-
 
     // CubeBlock
     // ---------
 
     const char *CubeBlock :: ID = "Cube";
 
-    CubeBlock :: CubeBlock(std::istream& in,int pnofvtx, int pvtxoffset, int adimworld)
-      : BasicBlock(in,ID),
+    CubeBlock :: CubeBlock
+      ( std::istream &in, int pnofvtx, int pvtxoffset, int &pdimgrid )
+      : BasicBlock( in, ID ),
         nofvtx(pnofvtx),
-        dimworld(adimworld),
+        dimgrid( pdimgrid ),
         goodline(true),
-        p(0),
         map(0),
         nofparams(0),
-        vtxoffset(pvtxoffset),
-        psimpl(0)
+        vtxoffset(pvtxoffset)
     {
-      if (!isactive()) return;
-      assert((dimworld+1)>0);
-      p.resize(1<<dimworld);
-      map.resize(1<<dimworld);
-      int x;
-      if (findtoken("map")) {
-        for (size_t i=0; i<map.size(); i++) {
-          if (getnextentry(x)) {
-            map[i]=x;
-          } else {
-            DUNE_THROW(DGFException,
-                       "ERROR in " << *this
-                                   << "      reference maping not complete "
-                                   << i
-                                   << " entries read but expected "
-                                   << map.size());
-          }
-        }
-      } else {
-        for (size_t i=0; i<map.size(); i++) {
-          map[i]=i;
-        }
-      }
-      if (findtoken("parameters")) {
-        int x=0;
-        if (getnextentry(x)) {
-          if (x>0) {
+      if( !isactive() )
+        return;
+
+      if( findtoken( "parameters" ) )
+      {
+        int x = 0;
+        if( getnextentry( x ) )
+        {
+          if( x > 0 )
             nofparams = x;
-            psimpl.resize(nofparams);
-          }
         }
-        if (x<=0) {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "      parameter key found with no or non-positive value "
-                                 << x);
+        if( x <= 0 )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << *this << ": "
+                                  << "Key 'parameters' found with no or non-positive value." );
         }
       }
-      reset();
-      next();
+
+      if( dimgrid < 0 )
+        dimgrid = getDimGrid();
+      pdimgrid = dimgrid;
+
+      map.resize( 1 << dimgrid );
+      for( size_t i = 0; i < map.size(); ++i )
+        map[ i ] = i;
+
+      if( findtoken( "map" ) )
+      {
+        for( size_t i = 0; i < map.size(); ++i )
+        {
+          int x;
+          if( !getnextentry( x ) )
+          {
+            DUNE_THROW( DGFException,
+                        "Error in " << *this << ": "
+                                    << "Incomplete reference mapping "
+                                    << "(got " << i << " entries, "
+                                    << "expected " << map.size() << " entries." );
+          }
+          map[ i ] = x;
+        }
+      }
     }
 
-    int CubeBlock :: get ( std :: vector< std :: vector< unsigned int> > &simplex,
+
+    int CubeBlock :: getDimGrid ()
+    {
+      reset();
+      while( getnextline() )
+      {
+        int count = 0;
+        double x;
+        while( getnextentry( x ) )
+          ++count;
+        if( count > nofparams )
+        {
+          count -= nofparams;
+          int dim = (int)(log( count ) / M_LN2);
+          if( (dim < 0) || ((1 << dim) != count) )
+          {
+            DUNE_THROW( DGFException,
+                        "Error in " << *this << ": Number of vertex indices ("
+                                    << count << ") is not a power of 2." );
+          }
+          return dim;
+        }
+      }
+      return 0;
+    }
+
+
+    int CubeBlock :: get ( std :: vector< std :: vector< unsigned int> > &cubes,
                            std :: vector< std :: vector< double > > &params,
                            int &nofp )
     {
-      nofp=nofparams;
-      int nofsimpl;
-      // simplex.resize(nofsimplex());
-      for (nofsimpl=0; ok(); next(), nofsimpl++) {
-        simplex.push_back(p);
-        for (size_t j=0; j<p.size(); j++) {
-          simplex[nofsimpl][map[j]] = p[j];
-        }
-        if (nofparams>0) {
-          params.push_back(psimpl);
-        }
+      nofp = nofparams;
+      reset();
+
+      std :: vector< unsigned int > cube( 1 << dimgrid );
+      std :: vector< double > param( nofparams );
+      int nofcubes = 0;
+      for( ; next( cube, param ); ++nofcubes )
+      {
+        cubes.push_back( cube );
+        /*
+           for( size_t j = 0; j < cube.size(); ++j )
+           cubes[ nofcubes ][ j ] = cubes[ j ];
+         */
+        if( nofparams > 0 )
+          params.push_back( param );
       }
-      /*
-         int offset = vtxoffset;
-         if(offset != 0)
-         {
-         for (int i=0; i<nofsimpl; ++i)
-         {
-          for (size_t j=0;j<simplex[i].size();++j)
-          {
-            simplex[i][j] -= offset;
-          }
-         }
-         }
-       */
-      return nofsimpl;
+      return nofcubes;
     }
 
 
-    bool CubeBlock :: next ()
+    bool CubeBlock :: next ( std :: vector< unsigned int > &cube,
+                             std :: vector< double > &param )
     {
-      assert(ok());
-      int n=0;
-      getnextline();
-      if (linenumber()==noflines()) {
-        goodline=false;
-        return goodline;
-      }
-      double x;
-      while (getnextentry(x))
+      assert( ok() );
+      if( !getnextline() )
+        return (goodline = false);
+
+      for( std :: size_t n = 0; n < cube.size(); ++n )
       {
-        if (n<(int)p.size())
+        int idx;
+        if( !getnextentry( idx ) )
         {
-          p[n]=int(x)-vtxoffset;
-          if (p[n]<0 || p[n]>=nofvtx)
+          if( n > 0 )
           {
-            DUNE_THROW(DGFException,
-                       "ERROR in " << *this
-                                   << "      wrong index of vertices: "
-                                   << x << " read but expected value between "
-                                   << vtxoffset << " and "
-                                   << nofvtx+vtxoffset);
+            DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                                   << "Wrong number of vertex indices "
+                                                   << "(got " << idx
+                                                   << ", expected " << cube.size() << ")" );
           }
-        } else if (n-int(p.size())<nofparams) {
-          psimpl[n-p.size()]=x;
+          else
+            return next( cube, param );
         }
-        n++;
+        if( (vtxoffset < idx) || (idx >= int(nofvtx + vtxoffset)) )
+        {
+          DUNE_THROW( DGFException,
+                      "Error in " << *this << ": "
+                                  << "Invalid vertex index "
+                                  << "(" << idx << " not in ["
+                                  << vtxoffset << ", " << (nofvtx + vtxoffset) << "[)" );
+        }
+        cube[ map[ n ] ] = idx - vtxoffset;
       }
-      // tests if the written block is ok in its size
-      if (n!=(int)p.size()+nofparams) {
-        return next();
+
+      std :: size_t np = 0;
+      double x;
+      for( ; getnextentry( x ); ++np )
+      {
+        if( np < param.size() )
+          param[ np ] = x;
       }
-      goodline=(n==(int)p.size()+nofparams);
-      return goodline;
+
+      if( np != param.size() )
+      {
+        DUNE_THROW ( DGFException, "Error in " << *this << ": "
+                                               << "Wrong number of simplex parameters "
+                                               << "(got " << np
+                                               << ", expected " << param.size() << ")" );
+      }
+      return (goodline = true);
     }
 
 
