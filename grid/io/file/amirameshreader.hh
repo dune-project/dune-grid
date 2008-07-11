@@ -7,6 +7,8 @@
 
 #include <amiramesh/AmiraMesh.h>
 
+#include <dune/grid/common/gridfactory.hh>
+
 namespace Dune {
 
   /** @ingroup AmiraMesh
