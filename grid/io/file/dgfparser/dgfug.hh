@@ -6,7 +6,6 @@
 // only include if UG is used
 #if defined ENABLE_UG
 #include <dune/grid/uggrid.hh>
-#include "dgfparserblocks.hh"
 #include "dgfparser.hh"
 namespace Dune {
   template <int dim>
