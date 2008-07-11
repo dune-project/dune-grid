@@ -66,7 +66,7 @@ namespace Dune
         assert( i < Topology :: numCorners );
         const unsigned int j = i % BaseTopology :: numCorners;
         Corner< BaseTopology > :: evaluate_( j, x );
-        if( j >= BaseTopology :: numCorners )
+        if( i >= BaseTopology :: numCorners )
           x[ dimension - 1 ] = ctype( 1 );
       }
 
