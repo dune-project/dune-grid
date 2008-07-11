@@ -51,12 +51,20 @@ namespace Dune {
   template <int d1,int d2> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
   template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
+  template <int dim> class UGGrid;
 }
 
 template <class Grid>
 struct Topology;
 template <int d>
 struct Topology<YaspGrid<d,d> > {
+  typedef typename Convert< GeometryType :: cube , d >::type Type;
+  static int faceNr(int duneFN) {
+    return duneFN;
+  }
+};
+template <int d>
+struct Topology<UGGrid<d> > {
   typedef typename Convert< GeometryType :: cube , d >::type Type;
   static int faceNr(int duneFN) {
     return duneFN;
@@ -82,6 +90,7 @@ int jTinvJTErr;
 int volumeErr;
 int detErr;
 int volErr;
+int normalErr;
 
 template <class GridViewType>
 void test(const GridViewType& view) {
@@ -175,8 +184,10 @@ void test(const GridViewType& view) {
       GlobalType nM;
       map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx,nM);
       if ((n-nM).two_norm2()>1e-10) {
+        normalErr++;
         std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
-        std::cout << "( " << nM << " )   ( " << n << " )   "
+        std::cout << "normal: "
+                  << " ( " << nM << " )   ( " << n << " )   "
                   << n-nM
                   << std::endl;
       }
@@ -228,6 +239,11 @@ try {
               << " errors occured in mapping.volume?" << std::endl;
   }
   else std::cout << "ZERO ERRORS in mapping.volume!!!!!!!" << std::endl;
+  if ( normalErr>0) {
+    std::cout << normalErr
+              << " errors occured in mapping.normal?" << std::endl;
+  }
+  else std::cout << "ZERO ERRORS in mapping.normal!!!!!!!" << std::endl;
 }
 catch (Dune::Exception &e) {
   std::cerr << e << std::endl;
