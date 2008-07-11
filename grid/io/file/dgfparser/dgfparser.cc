@@ -438,7 +438,7 @@ namespace Dune
       }
 
       info->block( interval );
-      if( dimw < 0 )
+      if( dimw >= 0 )
       {
         if( dimw != interval.dimw() )
         {
