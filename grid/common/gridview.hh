@@ -125,12 +125,6 @@ namespace Dune
       return asImp().iend(entity);
     }
 
-    /** \brief level, this view belongs to */
-    int level () const
-    {
-      return asImp().level();
-    }
-
     /** \brief obtain collective communication object */
     const CollectiveCommunication &comm () const
     {

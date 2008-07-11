@@ -143,12 +143,6 @@ namespace Dune {
       return entity.ilevelend();
     }
 
-    /** \brief level, this view belongs to */
-    int level () const
-    {
-      return level_;
-    }
-
     /** \brief obtain collective communication object */
     const CollectiveCommunication &comm () const
     {
@@ -292,12 +286,6 @@ namespace Dune {
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
       return entity.ileafend();
-    }
-
-    /** \brief level, this view belongs to */
-    int level () const
-    {
-      return grid().maxLevel();
     }
 
     /** \brief obtain collective communication object */
