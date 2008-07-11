@@ -395,7 +395,7 @@ namespace Dune
           else
             return next( simplex, param );
         }
-        if( (vtxoffset < idx) || (idx >= int(nofvtx + vtxoffset)) )
+        if( (vtxoffset > idx) || (idx >= int(nofvtx + vtxoffset)) )
         {
           DUNE_THROW( DGFException,
                       "Error in " << *this << ": "
@@ -648,7 +648,7 @@ namespace Dune
           else
             return next( cube, param );
         }
-        if( (vtxoffset < idx) || (idx >= int(nofvtx + vtxoffset)) )
+        if( (vtxoffset > idx) || (idx >= int(nofvtx + vtxoffset)) )
         {
           DUNE_THROW( DGFException,
                       "Error in " << *this << ": "
