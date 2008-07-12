@@ -17,7 +17,7 @@ namespace Dune
 #endif
 
     std :: ifstream file( filename );
-    if( macroGrid.readDuneGrid( file ) )
+    if( macroGrid.readDuneGrid( file, 3, 3 ) )
     {
       if( macroGrid.dimw != 3 )
         DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
@@ -94,7 +94,7 @@ namespace Dune
 #endif
 
     std :: ifstream file( filename );
-    if( macroGrid.readDuneGrid( file ) )
+    if( macroGrid.readDuneGrid( file, 3, 3 ) )
     {
       if( macroGrid.dimw != 3 )
         DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
