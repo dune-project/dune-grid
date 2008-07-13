@@ -3,6 +3,8 @@
 #ifndef DUNE_GRIDENUMS_HH
 #define DUNE_GRIDENUMS_HH
 
+#include <dune/common/exceptions.hh>
+
 namespace Dune {
 
 
