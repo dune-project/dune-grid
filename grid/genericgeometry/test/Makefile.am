@@ -5,7 +5,7 @@ GRIDTYPE = ALBERTAGRID
 GRIDDIM = 3
 DIMENSION = 3
 
-PSGINC = -I../../../../dune-psg/
+#PSGINC = -I../../../../dune-psg/
 
 check_PROGRAMS = testsubtopologies testmapping
 

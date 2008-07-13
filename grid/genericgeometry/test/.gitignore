@@ -1,4 +1,5 @@
 testsubtopologies
+testmapping
 
 Makefile
 Makefile.in
@@ -6,5 +7,6 @@ Makefile.in
 .deps
 .libs
 
+*.log
 *.so.*
 *.swp

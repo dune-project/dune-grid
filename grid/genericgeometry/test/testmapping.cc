@@ -10,16 +10,8 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
 
-// #include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
-#include <dune/grid/psg/dgfgridtype.hh>
-
-#if HAVE_MPI
-typedef Dune :: CollectiveCommunication< MPI_Comm > CollectiveCommunicationType;
-#else
-typedef Dune :: CollectiveCommunication< int > CollectiveCommunicationType;
-#endif
-
-
+//#include <dune/grid/psg/dgfgridtype.hh>
+#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 
 using namespace Dune;
 using namespace GenericGeometry;
@@ -207,17 +199,7 @@ try {
   }
 
   // create Grid from DGF parser
-  GridPtr<GridType> grid;
-  {
-    grid = GridPtr<GridType>(argv[1]); // , mpiHelper.getCommunicator() );
-  }
-  /*
-     CollectiveCommunicationType comm( mpiHelper.getCommunicator() );
-     typedef Dune :: ParallelSimplexGrid
-     < double, 3, 3, CollectiveCommunicationType >
-     PSGGridType;
-     PSGGridType* grid = new PSGGridType ( comm, argv[ 1 ] );
-   */
+  GridPtr<GridType> grid( argv[ 1 ] );
 
   test(grid->leafView());
 
