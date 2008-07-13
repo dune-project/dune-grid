@@ -83,76 +83,27 @@
  *
  */
 
-#ifndef GRIDDIM
-  #warning --- No GRIDDIM defined, defaulting to 3
-const int dimworld = 3;
-  #define GRIDDIM 3
-#else
-const int dimworld = GRIDDIM;
+#include <dune/grid/utility/griddim.hh>
+
+#include <dune/grid/albertagrid/gridtype.hh>
+#include <dune/grid/alugrid/gridtype.hh>
+#include <dune/grid/onedgrid/gridtype.hh>
+#include <dune/grid/sgrid/gridtype.hh>
+#include <dune/grid/uggrid/gridtype.hh>
+#include <dune/grid/yaspgrid/gridtype.hh>
+
+// default grid type
+#ifndef HAVE_GRIDTYPE
+  #if (GRIDDIM != WORLDDIM)
+    #error "No default grid available for GRIDDIM<WORLDDIM."
+    #define HAVE_GRIDTYPE 0
+  #else
+    #warning "No GRIDTYPE defined, defaulting to YASPGRID."
+
+    #include <dune/grid/yaspgrid.hh>
+typedef Dune :: YaspGrid< dimgrid > GridType;
+    #define HAVE_GRIDTYPE 1
+  #endif
 #endif
 
-#if defined ALBERTAGRID
-  #if not HAVE_ALBERTA
-    #error "ALBERTAGRID defined but no ALBERTA version found!"
-  #endif
-  #if GRIDDIM < 2 || GRIDDIM > 3
-    #error "ALBERTAGRID is only available for GRIDDIM=2 and GRIDDIM=3"
-  #endif
-  #include <dune/grid/albertagrid.hh>
-typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
-#elif defined ALUGRID_CUBE
-  #if not HAVE_ALUGRID
-    #error "ALUGRID_CUBE defined but no ALUGRID version found!"
-  #endif
-  #if GRIDDIM != 3
-    #error ALUGRID_CUBE is only available for GRIDDIM=3
-  #endif
-  #include <dune/grid/alugrid.hh>
-typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
-#elif defined ALUGRID_SIMPLEX
-  #if not HAVE_ALUGRID
-    #error "ALUGRID_SIMPLEX defined but no ALUGRID version found!"
-  #endif
-  #if GRIDDIM < 2 || GRIDDIM > 3
-    #error ALUGRID_SIMPLEX is only available for GRIDDIM=2 and GRIDDIM=3
-  #endif
-  #include <dune/grid/alugrid.hh>
-typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
-#elif defined ALUGRID_CONFORM && HAVE_ALUGRID
-  #if not HAVE_ALUGRID
-    #error "ALUGRID_CONFORM defined but no ALUGRID version found!"
-  #endif
-  #if GRIDDIM != 2
-    #error ALUGRID_CONFORM is only available for GRIDDIM=2
-  #endif
-  #include <dune/grid/alugrid.hh>
-typedef Dune::ALUConformGrid<dimworld,dimworld> GridType;
-#elif defined ONEDGRID
-  #if GRIDDIM != 1
-    #error ONEDGRID is only available for GRIDDIM=1
-  #endif
-  #include <dune/grid/onedgrid.hh>
-typedef Dune::OneDGrid GridType;
-#elif defined SGRID
-  #include <dune/grid/sgrid.hh>
-typedef Dune::SGrid<dimworld,dimworld> GridType;
-#elif defined UGGRID
-  #if not HAVE_UG
-    #error "UGGRID defined but no UG version found!"
-  #endif
-  #if GRIDDIM < 2 || GRIDDIM > 3
-    #error UGGRID is only available for GRIDDIM=2 and GRIDDIM=3
-  #endif
-  #include <dune/grid/uggrid.hh>
-typedef Dune::UGGrid<dimworld> GridType;
-#elif defined YASPGRID
-  #include <dune/grid/yaspgrid.hh>
-typedef Dune::YaspGrid<dimworld> GridType;
-#else
-// fallback
-  #include <dune/grid/yaspgrid.hh>
-typedef Dune::YaspGrid<dimworld> GridType;
-  #warning --- No GRIDTYPE defined, defaulting to YASPGRID
-#endif
-#undef GRIDDIM
 #endif

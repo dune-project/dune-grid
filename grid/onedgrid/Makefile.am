@@ -9,6 +9,6 @@ onedgriddir = $(includedir)/dune/grid/onedgrid/
 onedgrid_HEADERS = \
    onedgridgeometry.hh onedgridentity.hh onedgridhieriterator.hh \
    onedgridleveliterator.hh onedintersectionit.hh onedgridentitypointer.hh \
-   onedgridindexsets.hh onedgridleafiterator.hh
+   onedgridindexsets.hh onedgridleafiterator.hh gridtype.hh
 
 include $(top_srcdir)/am/global-rules
