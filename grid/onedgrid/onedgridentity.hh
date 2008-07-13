@@ -156,7 +156,10 @@ namespace Dune {
 
   public:
     //! Constructor with a given grid level
-    OneDGridEntity() : target_(NULL), geo_(OneDGridGeometry<dim-cd,1,GridImp>()) {}
+    OneDGridEntity()
+      : geo_(OneDGridGeometry<dim-cd,1,GridImp>()),
+        target_(NULL)
+    {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
