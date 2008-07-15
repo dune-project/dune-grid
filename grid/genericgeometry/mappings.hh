@@ -92,11 +92,14 @@ namespace Dune
       JacobianTransposeType;
       typedef typename CoordTraits :: coord_vector
       CoordVector;
+      static bool isZero(const FieldType& a) {
+        return std::abs(a)<1e-12;
+      }
     private:
       GlobalCoordType p_;
       bool zero_;
       void setProperties() {
-        zero_ = (p_.two_norm2()<1e-12);
+        zero_ = isZero(p_.two_norm2());
       }
     public:
       explicit GenericMapping(const CoordVector& coords,
@@ -125,6 +128,10 @@ namespace Dune
       void deriv_add(const LocalCoordType&,
                      const FieldType& fac,
                      JacobianTransposeType& d) const {}
+      // check if x/fac is in domain of phi
+      bool inDomain(const LocalCoordType& x,FieldType fac) {
+        return (isZero(x[0]));
+      }
 
       // returns if mapping is affine
       bool affine() const {
@@ -223,6 +230,12 @@ namespace Dune
         bottom_.deriv_add(x,fac,d);
         top_.deriv_add(x,fac*x[dim-1],d);
         top_.phi_add(x,fac,d[dim-1]);
+      }
+      // check if x/fac is in domain of phi
+      bool inDomain(const LocalCoordType& x,FieldType fac) {
+        return (std::abs(x[dim-1])<1e-12 &&
+                std::abs(fac-x[dim-1])<1e-12 &&
+                bottom_.inDomain(x,fac));
       }
 
       bool affine() const {
@@ -384,6 +397,11 @@ namespace Dune
           d.umtv(X,d[dim-1]);
         }
       }
+      bool inDomain(const LocalCoordType& x,FieldType fac) {
+        return (std::abs(x[dim-1])<1e-12 &&
+                std::abs(fac-x[dim-1])<1e-12 &&
+                bottom_.inDomain(x,fac*(1.-x[dim-1])));
+      }
 
       bool affine() const {
         return Traits::affine || affine_;
@@ -407,6 +425,24 @@ namespace Dune
         setProperties();
         return *this;
       }
+    };
+
+    template< class CoordTraits >
+    struct MappingTraits {
+      enum {dimG = CoordTraits :: dimG};
+      enum {dimW = CoordTraits :: dimW};
+      typedef typename CoordTraits :: field_type
+      FieldType;
+      typedef typename CoordTraits :: template Vector<dimG> :: Type
+      LocalCoordType;
+      typedef typename CoordTraits :: template Vector<dimW> :: Type
+      GlobalCoordType;
+      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
+      SquareMappingType;
+      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
+      JacobianTransposeType;
     };
 
     template< class Topology, class CoordTraits >
@@ -435,12 +471,12 @@ namespace Dune
       typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
 
       template< unsigned int codim, unsigned int subcodim >
-      struct SubEntityCoordVector {
+      struct SubGeometryCoordVector {
         typedef GlobalCoordType Vector;
         int i_,ii_;
         const CoordVector& coord_;
-        SubEntityCoordVector(const CoordVector& coord,
-                             int i,int ii) :
+        SubGeometryCoordVector(const CoordVector& coord,
+                               int i,int ii) :
           i_(i), ii_(ii), coord_(coord)
         {}
         const Vector& operator[](int k) {
@@ -449,10 +485,10 @@ namespace Dune
         }
       };
       template< unsigned int codim, unsigned int subcodim >
-      struct SubEntityTraits : public Traits {
-        typedef SubEntityCoordVector<codim,subcodim> CoordVector;
+      struct SubGeometryTraits : public Traits {
+        typedef SubGeometryCoordVector<codim,subcodim> CoordVector;
       };
-    private:
+    protected:
       GenericMappingType map_;
       const CoordVector& coords_;
     public:
@@ -464,8 +500,6 @@ namespace Dune
                GlobalCoordType& p) const {
         map_.phi_set(x,p);
       }
-      void phiInvert(const GlobalCoordType& p,
-                     LocalCoordType& x) {}
       void jacobianT(const LocalCoordType& x,
                      JacobianTransposeType& d) const {
         map_.deriv_set(x,d);
@@ -473,27 +507,25 @@ namespace Dune
       bool affine() const {
         return map_.affine();
       }
-      FieldType volume() {
+      // additional methods
+      void phiInvert(const GlobalCoordType& p,
+                     LocalCoordType& x) {}
+      FieldType volume() const {
         const LocalCoordType& bary = ReferenceElementType::template baryCenter<0>(0);
         return ReferenceElementType::volume() * integrationElement(bary);
       }
-      // additional methods
-      FieldType integrationElement(const LocalCoordType& x)
-      {
+      FieldType integrationElement(const LocalCoordType& x) const {
         JacobianTransposeType d;
         jacobianT(x,d);
-        // double d12 = d[0]*d[1];
-        // return (d[0]*d[0])*(d[1]*d[1])-d12*d12;
         return MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
       }
       FieldType jacobianInverseTransposed(const LocalCoordType& x,
-                                          JacobianType& dInv)
-      {
+                                          JacobianType& dInv) const {
         JacobianTransposeType d;
         jacobianT(x,d);
         return MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,dInv);
       }
-      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) {
+      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) const {
         JacobianType d;
         FieldType det = jacobianInverseTransposed(x,d);
         const LocalCoordType& refNormal =
