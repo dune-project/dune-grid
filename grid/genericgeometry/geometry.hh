@@ -22,6 +22,7 @@ namespace Dune
     //   geoPreCompute: assign in constructor using barycenter
     //   geoIsComputed: assign in constructor using barycenter using callback
     enum {geoCompute=0,geoPreCompute=1,geoIsComputed=2};
+
     template <class Traits>
     struct ComputeAll {
       enum {jTCompute = geoCompute,
@@ -36,13 +37,11 @@ namespace Dune
 
     template<class Topology,
         class CoordTraits,
-        class CachingType
-          = ComputeAll<MappingTraits<Topology::dimension,CoordTraits> > >
+        template <class> class Caching = ComputeAll>
     class Geometry : public Mapping <Topology,CoordTraits> {
       typedef Mapping<Topology,CoordTraits> BaseType;
       typedef Geometry<Topology,CoordTraits> ThisType;
     public:
-      typedef CoordTraits Traits;
       enum {dimG = BaseType :: dimG};
       enum {dimW = BaseType :: dimW};
       typedef typename BaseType :: FieldType FieldType;
@@ -52,6 +51,7 @@ namespace Dune
       typedef typename BaseType :: JacobianTransposeType JacobianTransposeType;
       typedef typename BaseType :: CoordVector CoordVector;
 
+      typedef Caching<typename BaseType::Traits> CachingType;
       typedef typename BaseType::ReferenceElementType ReferenceElementType;
 
       JacobianTransposeType jT_;
@@ -182,11 +182,13 @@ namespace Dune
           return coord_[l];
         }
       };
-      template< unsigned int codim, unsigned int subcodim>
-      struct SubGeometryCoordTraits : public CoordTraits {
-        enum {dimG = Traits::dimG - codim - subcodim};
-        typedef SubGeometryCoordVector<codim,subcodim> CoordVector;
-      };
+      /*
+         template< unsigned int codim, unsigned int subcodim>
+         struct SubGeometryCoordTraits : public CoordTraits {
+         enum {dimG = Traits::dimG - codim - subcodim};
+         typedef SubGeometryCoordVector<codim,subcodim> CoordVector;
+         };
+       */
     public:
       /*
          template< unsigned int codim, unsigned int subcodim,

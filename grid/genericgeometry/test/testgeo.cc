@@ -37,6 +37,34 @@ struct DuneCoordTraits {
   enum {affine = false};
 };
 
+template <class Traits>
+struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
+  typedef typename Traits::CoordVector GeometryType;
+  DuneCache(const GeometryType&) {}
+};
+
+template <class CoordTraits>
+struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
+        CoordTraits> > {
+  enum {jTCompute = GenericGeometry::geoCompute,
+        jTInvCompute = GenericGeometry::geoCompute,
+        intElCompute = GenericGeometry::geoIsComputed,
+        normalCompute = GenericGeometry::geoCompute};
+  typedef typename CoordTraits::CoordVector GeometryType;
+  typedef GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
+      CoordTraits> Traits;
+  const GeometryType& geo_;
+  DuneCache(const GeometryType& geo) : geo_(geo) {}
+  void jacobianT(typename Traits::JacobianTransposeType& d) const {}
+  void integrationElement(typename Traits::FieldType& intEl) const {
+    FieldVector<double,GeometryType::mydimension> x(0);
+    intEl = geo_.integrationElement(x);
+  }
+  void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
+  void normal(int face, typename Traits::GlobalCoordType& n) const {}
+};
+
+
 namespace Dune {
   template <int d1,int d2> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
@@ -112,7 +140,11 @@ void test(const GridViewType& view) {
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
-    GenericGeometry::Geometry< TopologyType, DuneCoordTraits<GeometryType> > map(geo);
+    // GenericGeometry::Geometry< TopologyType, DuneCoordTraits<GeometryType> > map(geo);
+    typedef GenericGeometry::Geometry< TopologyType,
+        DuneCoordTraits<GeometryType>,
+        DuneCache > GenericGeometryType;
+    GenericGeometryType map(geo,typename GenericGeometryType::CachingType(geo) );
     LocalType x(0.1);
     for (int i=0; i<1; ++i) {
       // test phi
@@ -122,16 +154,16 @@ void test(const GridViewType& view) {
         phiErr++;
         std::cout << "Error in PHI: G = " << y << " M = " << yM << " " << std::endl;
       }
-      // test jacobian
-      const JacobianType&  JTInv  = geo.jacobianInverseTransposed(x);
-      const JacobianTType& JTM    = map.jacobianT(x);
-      const JacobianType&  JTInvM = map.jacobianInverseTransposed(x);
       double det = geo.integrationElement(x);
       double detM = map.integrationElement(x);
       if (std::abs(det-detM)>1e-10) {
         std::cout << " Error in det: G = " << det << " M = " << detM << std::endl;
         detErr++;
       }
+      // test jacobian
+      const JacobianType&  JTInv  = geo.jacobianInverseTransposed(x);
+      const JacobianTType& JTM    = map.jacobianT(x);
+      const JacobianType&  JTInvM = map.jacobianInverseTransposed(x);
       SquareType JTInvJT;
       const int n = GeometryType::coorddimension;
       const int m = GeometryType::mydimension;

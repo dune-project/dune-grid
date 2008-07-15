@@ -414,9 +414,9 @@ namespace Dune
     template< class Topology, class CoordTraits >
     class Mapping {
       typedef Mapping<Topology,CoordTraits> ThisType;
+    public:
       typedef MappingTraits<Topology::dimension,CoordTraits> Traits;
       typedef GenericMapping<Topology,Traits> GenericMappingType;
-    public:
       enum {dimG = Traits :: dimG};
       enum {dimW = Traits :: dimW};
       typedef typename Traits :: FieldType FieldType;
