@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_GRIDTYPE_HH
 #define DUNE_GRIDTYPE_HH
+
 /**
  * @file
  * @author Andreas Dedner
@@ -85,12 +86,144 @@
 
 #include <dune/grid/utility/griddim.hh>
 
-#include <dune/grid/albertagrid/gridtype.hh>
-#include <dune/grid/alugrid/gridtype.hh>
-#include <dune/grid/onedgrid/gridtype.hh>
-#include <dune/grid/sgrid/gridtype.hh>
-#include <dune/grid/uggrid/gridtype.hh>
-#include <dune/grid/yaspgrid/gridtype.hh>
+// Check for AlbertaGrid
+#if defined ALBERTAGRID
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if not HAVE_ALBERTA
+    #error "ALBERTAGRID defined but no ALBERTA version found!"
+  #endif
+  #if (GRIDDIM < 2) || (GRIDDIM > 3)
+    #error "ALBERTAGRID is only available for GRIDDIM=2 and GRIDDIM=3."
+  #endif
+  #if (WORLDDIM != GRIDDIM)
+    #error "ALBERTAGRID currently only supports WORLDDIM=GRIDDIM."
+  #endif
+
+  #include <dune/grid/albertagrid.hh>
+typedef Dune :: AlbertaGrid< dimgrid, dimworld > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+
+// Check ALUGrid
+#if defined ALUGRID_CUBE
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if not HAVE_ALUGRID
+    #error "ALUGRID_CUBE defined but no ALUGRID version found!"
+  #endif
+  #if (GRIDDIM != 3) || (WORLDDIM != GRIDDIM)
+    #error "ALUGRID_CUBE is only available for GRIDDIM=3 and WORLDDIM=GRIDDIM."
+  #endif
+
+  #include <dune/grid/alugrid.hh>
+typedef Dune :: ALUCubeGrid< dimgrid, dimworld > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+#if defined ALUGRID_SIMPLEX
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if not HAVE_ALUGRID
+    #error "ALUGRID_SIMPLEX defined but no ALUGRID version found!"
+  #endif
+  #if (GRIDDIM < 2) || (GRIDDIM > 3)
+    #error "ALUGRID_SIMPLEX is only available for GRIDDIM=2 and GRIDDIM=3."
+  #endif
+  #if (WORLDDIM != GRIDDIM)
+    #error "ALUGRID_SIMPLEX is only available for WORLDDIM=GRIDDIM."
+  #endif
+
+  #include <dune/grid/alugrid.hh>
+typedef Dune :: ALUSimplexGrid< dimgrid, dimworld > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+#if defined ALUGRID_CONFORM
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if not HAVE_ALUGRID
+    #error "ALUGRID_CONFORM defined but no ALUGRID version found!"
+  #endif
+  #if (GRIDDIM != 2) || (WORLDDIM != GRIDDIM)
+    #error "ALUGRID_CONFORM is only available for GRIDDIM=2 and WORLDDIM=GRIDDIM."
+  #endif
+  #include <dune/grid/alugrid.hh>
+typedef Dune :: ALUConformGrid< dimgrid, dimworld > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+
+// Check OneDGrid
+#if defined ONEDGRID
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if (GRIDDIM != 1) || (WORLDDIM != GRIDDIM)
+    #error "ONEDGRID is only available for GRIDDIM=1 and WORLDDIM=GRIDDIM."
+  #endif
+
+  #include <dune/grid/onedgrid.hh>
+typedef Dune :: OneDGrid GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+
+// Check SGrid
+#if defined SGRID
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if (GRIDDIM != WORLDDIM)
+    #error "SGRID is only available for GRIDDIM=WORLDDIM."
+  #endif
+
+  #include <dune/grid/sgrid.hh>
+typedef Dune :: SGrid< dimgrid, dimworld > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+
+// Check UGGrid
+#if defined UGGRID
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if not HAVE_UG
+    #error "UGGRID defined but no UG version found!"
+  #endif
+  #if (GRIDDIM < 2) || (GRIDDIM > 3)
+    #error "UGGRID is only available for GRIDDIM=2 and GRIDDIM=3."
+  #endif
+  #if (GRIDDIM != WORLDDIM)
+    #error "UGGRID only supports GRIDDIM=WORLDDIM."
+  #endif
+
+  #include <dune/grid/uggrid.hh>
+typedef Dune :: UGGrid< dimgrid > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
+
+// Check YASPGrid
+#if defined YASPGRID
+  #if HAVE_GRIDTYPE
+    #error "Ambiguous definition of GRIDTYPE."
+  #endif
+  #if (GRIDDIM != WORLDDIM)
+    #error "YASPGRID only supports GRIDDIM=WORLDDIM."
+  #endif
+
+  #include <dune/grid/yaspgrid.hh>
+typedef Dune :: YaspGrid< dimgrid > GridType;
+  #define HAVE_GRIDTYPE 1
+#endif
+
 
 // default grid type
 #ifndef HAVE_GRIDTYPE
@@ -100,6 +233,7 @@
   #else
     #warning "No GRIDTYPE defined, defaulting to YASPGRID."
 
+    #define YASPGRID
     #include <dune/grid/yaspgrid.hh>
 typedef Dune :: YaspGrid< dimgrid > GridType;
     #define HAVE_GRIDTYPE 1

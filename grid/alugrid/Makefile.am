@@ -1,7 +1,6 @@
 # $Id: Makefile.am 2549 2006-04-28 13:09:28Z christi $
 
 alugriddir = $(includedir)/dune/grid/alugrid/
-alugrid_HEADERS = gridtype.hh
 
 SUBDIRS = 2d 3d
 
