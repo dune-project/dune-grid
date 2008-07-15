@@ -5,6 +5,7 @@ genericgeometry_HEADERS = codimtable.hh \
 			  matrix.hh \
                           misc.hh \
                           referenceelements.hh \
+			  subgeometries.hh \
 			  subtopologies.hh \
                           topologytypes.hh
 
