@@ -392,7 +392,7 @@ namespace Dune
       {
         dune_static_assert( (m >= n), "Matrix has no left inverse." );
         typename Traits :: template Matrix< n, n > :: Type ata;
-        ATx( A, x, y );
+        ATx< m, n >( A, x, y );
         ATA_L< m, n >( A, ata );
         spdInvAx< n >( ata, y );
       }
@@ -414,16 +414,15 @@ namespace Dune
 
       template< int m, int n >
       static void
-      rightInvAx ( const typename Traits :: template Matrix< m, n > :: Type &A,
-                   const typename Traits :: template Vector< m > :: Type &x,
-                   typename Traits :: template Vector< n > :: Type &y )
+      xTRightInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
+                    const typename Traits :: template Vector< n > :: Type &x,
+                    typename Traits :: template Vector< m > :: Type &y )
       {
         dune_static_assert( (n >= m), "Matrix has no left inverse." );
         typename Traits :: template Matrix< m, m > :: Type aat;
-        typename Traits :: template Vector< n > :: Type z = x;
+        Ax< m, n >( A, x, y );
         AAT_L< m, n >( A, aat );
-        spdInvAx< m >( aat, z );
-        ATx( A, z, y );
+        spdInvAx< m >( aat, y );
       }
 
     };

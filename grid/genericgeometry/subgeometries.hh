@@ -3,6 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_SUBGEOMETRY_HH
 #define DUNE_GENERICGEOMETRY_SUBGEOMETRY_HH
 
+#include <dune/grid/genericgeometry/hybridgeometries.hh>
+
 namespace Dune
 {
 
