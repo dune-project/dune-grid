@@ -280,6 +280,34 @@ namespace Dune
         return det;
       }
 
+      // calculates x := L^{-1} x
+      template< int n >
+      static void
+      invLx ( typename Traits :: template Matrix< n, n > :: Type &L,
+              typename Traits :: template Vector< n > :: Type &x )
+      {
+        for( int i = 0; i < n; ++i )
+        {
+          for( int j = 0; j < i; ++j )
+            x[ i ] -= L[ i ][ j ] * x[ j ];
+          x[ i ] /= L[ i ][ i ];
+        }
+      }
+
+      // calculates x := L^{-T} x
+      template< int n >
+      static void
+      invLTx ( typename Traits :: template Matrix< n, n > :: Type &L,
+               typename Traits :: template Vector< n > :: Type &x )
+      {
+        for( int i = n; i > 0; --i )
+        {
+          for( int j = i; j < n; ++j )
+            x[ i-1 ] -= L[ j ][ i ] * x[ j ];
+          x[ i-1 ] /= L[ i-1 ][ i-1 ];
+        }
+      }
+
       template< int n >
       static FieldType
       spdDetA ( const typename Traits :: template Matrix< n, n > :: Type &A )
@@ -299,6 +327,18 @@ namespace Dune
         const FieldType det = invL< n >( L );
         LTL< n >( L, A );
         return det;
+      }
+
+      // calculate x := A^{-1} x
+      template< int n >
+      static void
+      spdInvAx ( typename Traits :: template Matrix< n, n > :: Type &A,
+                 typename Traits :: template Vector< n > :: Type &x )
+      {
+        typename Traits :: template Matrix< n, n > :: Type L;
+        cholesky_L< n >( A, L );
+        invLx( L, x );
+        invLTx( L, x );
       }
 
       template< int m, int n >
@@ -344,6 +384,19 @@ namespace Dune
         return det;
       }
 
+      template< int m, int n >
+      static void
+      leftInvAx ( const typename Traits :: template Matrix< m, n > :: Type &A,
+                  const typename Traits :: template Vector< m > :: Type &x,
+                  typename Traits :: template Vector< n > :: Type &y )
+      {
+        dune_static_assert( (m >= n), "Matrix has no left inverse." );
+        typename Traits :: template Matrix< n, n > :: Type ata;
+        ATx( A, x, y );
+        ATA_L< m, n >( A, ata );
+        spdInvAx< n >( ata, y );
+      }
+
       // A^{-1}_R = A^T (A A^T)^{-1}
       // => A A^{-1}_R = I
       template< int m, int n >
@@ -355,8 +408,22 @@ namespace Dune
         typename Traits :: template Matrix< m, m > :: Type aat;
         AAT_L< m, n >( A, aat );
         const FieldType det = spdInvA< m >( aat );
-        ATBT< m, n, m >( A , aat , ret );
+        ATBT< m, n, m >( A, aat, ret );
         return det;
+      }
+
+      template< int m, int n >
+      static void
+      rightInvAx ( const typename Traits :: template Matrix< m, n > :: Type &A,
+                   const typename Traits :: template Vector< m > :: Type &x,
+                   typename Traits :: template Vector< n > :: Type &y )
+      {
+        dune_static_assert( (n >= m), "Matrix has no left inverse." );
+        typename Traits :: template Matrix< m, m > :: Type aat;
+        typename Traits :: template Vector< n > :: Type z = x;
+        AAT_L< m, n >( A, aat );
+        spdInvAx< m >( aat, z );
+        ATx( A, z, y );
       }
 
     };
