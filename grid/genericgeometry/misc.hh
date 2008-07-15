@@ -101,7 +101,7 @@ namespace Dune
     {
       enum {dimW = CoordTraits :: dimW};
       enum {dimG = CoordTraits :: dimG};
-      typedef typename CoordTraits :: field_type FieldType;
+      typedef typename CoordTraits :: FieldType FieldType;
       typedef typename CoordTraits :: local_type LocalCoordType;
       typedef typename CoordTraits :: global_type GlobalCoordType;
       typedef typename CoordTraits :: derivative_type JacobianType;

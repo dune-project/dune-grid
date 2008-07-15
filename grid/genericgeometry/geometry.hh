@@ -22,9 +22,8 @@ namespace Dune
     //   geoPreCompute: assign in constructor using barycenter
     //   geoIsComputed: assign in constructor using barycenter using callback
     enum {geoCompute=0,geoPreCompute=1,geoIsComputed=2};
-    template <class CoordTraits>
+    template <class Traits>
     struct ComputeAll {
-      typedef MappingTraits<CoordTraits> Traits;
       enum {jTCompute = geoCompute,
             jTInvCompute = geoCompute,
             intElCompute = geoCompute,
@@ -37,30 +36,23 @@ namespace Dune
 
     template<class Topology,
         class CoordTraits,
-        class CachingType = ComputeAll<CoordTraits> >
+        class CachingType
+          = ComputeAll<MappingTraits<Topology::dimension,CoordTraits> > >
     class Geometry : public Mapping <Topology,CoordTraits> {
       typedef Mapping<Topology,CoordTraits> BaseType;
       typedef Geometry<Topology,CoordTraits> ThisType;
     public:
       typedef CoordTraits Traits;
-      enum {dim  = Topology::dimension};
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
-      FieldType;
-      typedef typename CoordTraits :: template Vector<dimG> :: Type
-      LocalCoordType;
-      typedef typename CoordTraits :: template Vector<dimW> :: Type
-      GlobalCoordType;
-      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
-      SquareMappingType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
-      JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector
-      CoordVector;
-      typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
+      enum {dimG = BaseType :: dimG};
+      enum {dimW = BaseType :: dimW};
+      typedef typename BaseType :: FieldType FieldType;
+      typedef typename BaseType :: LocalCoordType LocalCoordType;
+      typedef typename BaseType :: GlobalCoordType GlobalCoordType;
+      typedef typename BaseType :: JacobianType JacobianType;
+      typedef typename BaseType :: JacobianTransposeType JacobianTransposeType;
+      typedef typename BaseType :: CoordVector CoordVector;
+
+      typedef typename BaseType::ReferenceElementType ReferenceElementType;
 
       JacobianTransposeType jT_;
       JacobianType jTInv_;

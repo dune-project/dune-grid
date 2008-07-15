@@ -16,18 +16,18 @@ namespace Dune
     template< class ctype >
     struct DefaultMatrixVectorTraits
     {
-      typedef ctype field_type;
+      typedef ctype FieldType;
 
       template< int m, int n>
       struct Matrix
       {
-        typedef FieldMatrix< field_type, m, n > Type;
+        typedef FieldMatrix< FieldType, m, n > Type;
       };
 
       template< int n >
       struct Vector
       {
-        typedef FieldVector< field_type, n > Type;
+        typedef FieldVector< FieldType, n > Type;
       };
     };
 
@@ -36,7 +36,7 @@ namespace Dune
     template< class Traits >
     struct MatrixHelper
     {
-      typedef typename Traits :: field_type FieldType;
+      typedef typename Traits :: FieldType FieldType;
 
       template< int m, int n >
       static void

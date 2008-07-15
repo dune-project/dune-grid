@@ -35,7 +35,7 @@ namespace Dune
      * struct CoordTraits {
      *   enum {dimW = };              // world dimension
      *   enum {dimG = };              // grid dimension
-     *   typedef ... field_type;
+     *   typedef ... FieldType;
      *   // general vector and matrix types
      *   template <int dim> struct Vector { typedef ... Type; };
      *   template <int dimR,dimC> struct Matrix { typedef ... Type; };
@@ -65,22 +65,14 @@ namespace Dune
     // *******************************************
     // *******************************************
     // *******************************************
-
-    template< class Topology, class CoordTraits >
-    struct GenericMapping;
-
-    template<class CoordTraits>
-    class GenericMapping < Point, CoordTraits >
-    {
-      typedef Point Topology;
-    public:
-      typedef CoordTraits Traits;
-      enum {dim  = Topology::dimension};
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
+    template< int DimG, class CoordTraits >
+    struct MappingTraits {
+      enum {dimG = DimG};
+      enum {dimW = CoordTraits :: dimCoord};
+      enum {affine = CoordTraits :: affine};
+      typedef typename CoordTraits :: FieldType
       FieldType;
-      typedef typename CoordTraits :: template Vector <dimG> :: Type
+      typedef typename CoordTraits :: template Vector<dimG> :: Type
       LocalCoordType;
       typedef typename CoordTraits :: template Vector<dimW> :: Type
       GlobalCoordType;
@@ -90,8 +82,24 @@ namespace Dune
       SquareMappingType;
       typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
       JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector
-      CoordVector;
+      typedef typename CoordTraits :: CoordVector CoordVector;
+    };
+
+
+    template< class Topology, class Traits >
+    struct GenericMapping;
+
+    template<class Traits>
+    class GenericMapping < Point, Traits >
+    {
+      typedef Point Topology;
+    public:
+      enum {dim  = Topology::dimension};
+      typedef typename Traits :: FieldType FieldType;
+      typedef typename Traits :: LocalCoordType LocalCoordType;
+      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+      typedef typename Traits :: CoordVector CoordVector;
       static bool isZero(const FieldType& a) {
         return std::abs(a)<1e-12;
       }
@@ -159,32 +167,20 @@ namespace Dune
     };
 
 
-    template< class BaseTopology, class CoordTraits >
-    class GenericMapping < Prism< BaseTopology >, CoordTraits >
+    template< class BaseTopology, class Traits >
+    class GenericMapping < Prism< BaseTopology >, Traits >
     {
       typedef Prism< BaseTopology > Topology;
     public:
-      typedef CoordTraits Traits;
       enum {dim  = Topology::dimension};
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
-      FieldType;
-      typedef typename CoordTraits :: template Vector<dimG> :: Type
-      LocalCoordType;
-      typedef typename CoordTraits :: template Vector<dimW> :: Type
-      GlobalCoordType;
-      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
-      SquareMappingType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
-      JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector
-      CoordVector;
+      typedef typename Traits :: FieldType FieldType;
+      typedef typename Traits :: LocalCoordType LocalCoordType;
+      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+      typedef typename Traits :: CoordVector CoordVector;
     private:
-      GenericMapping<BaseTopology,CoordTraits> bottom_;
-      GenericMapping<BaseTopology,CoordTraits> top_;
+      GenericMapping<BaseTopology,Traits> bottom_;
+      GenericMapping<BaseTopology,Traits> top_;
       bool affine_,constant_,zero_;
       void setProperties() {
         affine_ = Traits::affine==1 ||
@@ -262,31 +258,19 @@ namespace Dune
       }
     };
 
-    template< class BaseTopology, class CoordTraits >
-    class GenericMapping < Pyramid< BaseTopology >, CoordTraits >
+    template< class BaseTopology, class Traits >
+    class GenericMapping < Pyramid< BaseTopology >, Traits >
     {
       typedef Pyramid< BaseTopology > Topology;
     public:
-      typedef CoordTraits Traits;
       enum {dim  = Topology::dimension};
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
-      FieldType;
-      typedef typename CoordTraits :: template Vector<dimG> :: Type
-      LocalCoordType;
-      typedef typename CoordTraits :: template Vector<dimW> :: Type
-      GlobalCoordType;
-      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
-      SquareMappingType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
-      JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector
-      CoordVector;
+      typedef typename Traits :: FieldType FieldType;
+      typedef typename Traits :: LocalCoordType LocalCoordType;
+      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+      typedef typename Traits :: CoordVector CoordVector;
     private:
-      GenericMapping<BaseTopology,CoordTraits> bottom_;
+      GenericMapping<BaseTopology,Traits> bottom_;
       GlobalCoordType top_,pn_;
       bool affine_,constant_,zero_;
       void setProperties() {
@@ -427,47 +411,21 @@ namespace Dune
       }
     };
 
-    template< class CoordTraits >
-    struct MappingTraits {
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
-      FieldType;
-      typedef typename CoordTraits :: template Vector<dimG> :: Type
-      LocalCoordType;
-      typedef typename CoordTraits :: template Vector<dimW> :: Type
-      GlobalCoordType;
-      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
-      SquareMappingType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
-      JacobianTransposeType;
-    };
-
     template< class Topology, class CoordTraits >
     class Mapping {
       typedef Mapping<Topology,CoordTraits> ThisType;
-      typedef GenericMapping<Topology,CoordTraits> GenericMappingType;
+      typedef MappingTraits<Topology::dimension,CoordTraits> Traits;
+      typedef GenericMapping<Topology,Traits> GenericMappingType;
     public:
-      typedef CoordTraits Traits;
-      enum {dim  = Topology::dimension};
-      enum {dimG = CoordTraits :: dimG};
-      enum {dimW = CoordTraits :: dimW};
-      typedef typename CoordTraits :: field_type
-      FieldType;
-      typedef typename CoordTraits :: template Vector<dimG> :: Type
-      LocalCoordType;
-      typedef typename CoordTraits :: template Vector<dimW> :: Type
-      GlobalCoordType;
-      typedef typename CoordTraits :: template Matrix<dimW,dimG> :: Type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimG> :: Type
-      SquareMappingType;
-      typedef typename CoordTraits :: template Matrix<dimG,dimW> :: Type
-      JacobianTransposeType;
-      typedef typename CoordTraits :: coord_vector
-      CoordVector;
+      enum {dimG = Traits :: dimG};
+      enum {dimW = Traits :: dimW};
+      typedef typename Traits :: FieldType FieldType;
+      typedef typename Traits :: LocalCoordType LocalCoordType;
+      typedef typename Traits :: GlobalCoordType GlobalCoordType;
+      typedef typename Traits :: JacobianType JacobianType;
+      typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+      typedef typename Traits :: CoordVector CoordVector;
+
       typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
 
       template< unsigned int codim, unsigned int subcodim >

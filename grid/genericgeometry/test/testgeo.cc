@@ -17,23 +17,22 @@ using namespace Dune;
 
 template <class DuneGeometry>
 struct DuneCoordTraits {
-  enum {dimW = DuneGeometry::coorddimension};  // world dimension
-  enum {dimG = DuneGeometry::mydimension};          // grid dimension
-  typedef typename DuneGeometry::ctype field_type;
+  enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
+  typedef typename DuneGeometry::ctype FieldType;
   // general vector and matrix types
   template <int dim>
   struct Vector {
-    typedef FieldVector<field_type,dim> Type;
+    typedef FieldVector<FieldType,dim> Type;
   };
   template <int dimR,int dimC>
   struct Matrix {
-    typedef FieldMatrix<field_type,dimR,dimC> Type;
+    typedef FieldMatrix<FieldType,dimR,dimC> Type;
   };
   // Vector of global vectors denoting the edges of the range
   // domain, used to construct a mapping together with an offset.
   // Corners used are
   // p[offset],...,p[offset+Topology::numCorners]
-  typedef DuneGeometry coord_vector;
+  typedef DuneGeometry CoordVector;
   // mapping is of the form Ax+b (used untested)
   enum {affine = false};
 };

@@ -15,7 +15,7 @@ namespace Dune
       enum { dimGrid = dimG };
       enum { dimWorld = Traits :: dimW };
 
-      typedef typename Traits :: field_type Field;
+      typedef typename Traits :: FieldType Field;
       typedef typename Traits :: template Vector< dimGrid > :: Type
       LocalCoordinate;
       typedef typename Traits :: template Vector< dimWorld > :: Type
