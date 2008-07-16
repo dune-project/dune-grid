@@ -54,150 +54,89 @@ namespace Dune
       typedef Caching<typename BaseType::Traits> CachingType;
       typedef typename BaseType::ReferenceElementType ReferenceElementType;
 
-      JacobianTransposeType jT_;
-      JacobianType jTInv_;
-      FieldType intEl_;
-      GlobalCoordType faceNormal_[Size<Topology,1>::value];
-      bool jTComputed, jTInvComputed, intElComputed;
-      FieldVector<bool,Size<Topology,1>::value> normalComputed;
       const LocalCoordType& bary_;
-      void jacobianT_() {
-        if (!jTComputed) {
-          BaseType::jacobianT(bary_,jT_);
-          jTComputed = true;
-        }
-      }
-      void integrationElement_()
-      {
-        if (!intElComputed) {
-          const JacobianTransposeType& d = jacobianT(bary_);
-          intEl_ = MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
-          intElComputed = true;
-        }
-      }
-      void jacobianInverseTransposed_() {
-        if (!jTInvComputed) {
-          const JacobianTransposeType& d = jacobianT(bary_);
-          intEl_ = MatrixHelper<CoordTraits>::template
-                   rightInvA<dimG,dimW>(d,jTInv_);
-          jTInvComputed = true;
-          intElComputed = true;
-        }
-      }
-      void normal_(int face) {
-        if (!normalComputed[face]) {
-          const JacobianType& d = jacobianInverseTransposed(bary_);
-          const LocalCoordType& refNormal =
-            ReferenceElementType::integrationOuterNormal(face);
-          MatrixHelper<CoordTraits>::template Ax<dimW,dimG>(d,refNormal,faceNormal_[face]);
-          faceNormal_[face] *= integrationElement(bary_);
-          normalComputed[face] = true;
-        }
-      }
+
     public:
       explicit Geometry(const CoordVector& coords,
                         const CachingType& cache = CachingType()) :
         BaseType(coords),
-        jTComputed(false),
-        jTInvComputed(false),
-        intElComputed(false),
-        normalComputed(false),
-        bary_(ReferenceElementType::template baryCenter<0>(0))
+        bary_(BaseType::bary_)
       {
         assert(dim==dimG);
         if (affine()) {
           if (int(CachingType::jTCompute)==geoIsComputed) {
-            cache.jacobianT(jT_);
-            jTComputed = true;
+            cache.jacobianT(this->jT_);
+            this->jTComputed = true;
           } else if (int(CachingType::jTCompute)==geoPreCompute) {
-            jacobianT_();
+            BaseType::jacobianT(bary_);
           }
           if (int(CachingType::jTInvCompute)==geoIsComputed) {
-            cache.jacobianInverseTransposed(jTInv_);
-            jTInvComputed = true;
+            cache.jacobianInverseTransposed(this->jTInv_);
+            this->jTInvComputed = true;
           } else if (int(CachingType::jTInvCompute)==geoPreCompute) {
-            jacobianInverseTransposed_();
+            BaseType::jacobianInverseTransposed(bary_);
           }
           if (int(CachingType::intElCompute)==geoIsComputed) {
-            cache.integrationElement(intEl_);
-            intElComputed = true;
+            cache.integrationElement(this->intEl_);
+            this->intElComputed = true;
           } else if (int(CachingType::intElCompute)==geoPreCompute) {
-            integrationElement_();
+            integrationElement(bary_);
           }
         }
       }
-      bool affine() const {
-        return BaseType::affine();
-      }
-      GlobalCoordType global(const LocalCoordType& x) const {
-        GlobalCoordType p;
-        BaseType::phi(x,p);
-        return p;
-      }
-      const JacobianTransposeType& jacobianT(const LocalCoordType& x) {
+      using BaseType::affine;
+      using BaseType::operator[];
+      using BaseType::global;
+      using BaseType::local;
+      using BaseType::volume;
+      using BaseType::normal;
+      const JacobianTransposeType& jacobianT(const LocalCoordType& x) const {
         if (int(CachingType::jTCompute) == geoCompute || !affine()) {
-          jacobianT_();
+          BaseType::jacobianT(x);
         }
-        return jT_;
+        return this->jT_;
       }
       // additional methods
-      FieldType integrationElement(const LocalCoordType& x)
+      FieldType integrationElement(const LocalCoordType& x) const
       {
         if (int(CachingType::intElCompute) == geoCompute || !affine()) {
-          integrationElement_();
+          BaseType::integrationElement(x);
         }
-        return intEl_;
+        return this->intEl_;
       }
-      const JacobianType& jacobianInverseTransposed(const LocalCoordType& x) {
+      const JacobianType& jacobianInverseTransposed(const LocalCoordType& x) const {
         if (int(CachingType::jTInvCompute) == geoCompute || !affine()) {
-          jacobianInverseTransposed_();
+          BaseType::jacobianInverseTransposed(x);
         }
-        return jTInv_;
-      }
-      const GlobalCoordType& normal(int face,const LocalCoordType& x) {
-        if (!normalComputed[face] || !affine()) {
-          normal_(face);
-          normalComputed[face] = true;
-        }
-        return faceNormal_[face];
-      }
-      FieldType volume() {
-        const LocalCoordType& bary = ReferenceElementType::template baryCenter<0>(0);
-        const FieldType& refVol = ReferenceElementType::volume();
-        return integrationElement(bary)*refVol;
+        return this->jTInv_;
       }
     private:
-      // tut subcodim=0 das was man moechte?
-      template< unsigned int codim, unsigned int subcodim >
+      template< unsigned int codim>
       struct SubGeometryCoordVector {
         typedef GlobalCoordType Vector;
-        int i_,ii_;
+        int i_;
         const CoordVector& coord_;
-        SubGeometryCoordVector(const CoordVector& coord,
-                               int i,int ii) :
-          i_(i), ii_(ii), coord_(coord)
+        SubGeometryCoordVector(const CoordVector& coord,int i) :
+          i_(i), coord_(coord)
         {}
         const Vector& operator[](int k) {
-          const int l = ReferenceElementType :: template subNumbering<codim,subcodim>(i_,ii_);
+          const int l = ReferenceElementType :: template subNumbering<codim,dimG-codim>(i_,k);
           return coord_[l];
         }
       };
-      /*
-         template< unsigned int codim, unsigned int subcodim>
-         struct SubGeometryCoordTraits : public CoordTraits {
-         enum {dimG = Traits::dimG - codim - subcodim};
-         typedef SubGeometryCoordVector<codim,subcodim> CoordVector;
-         };
-       */
+      template< unsigned int codim>
+      struct SubGeometryCoordTraits : public CoordTraits {
+        typedef SubGeometryCoordVector<codim> CoordVector;
+      };
     public:
       /*
-         template< unsigned int codim, unsigned int subcodim,
-                class SubCachingType = ComputeAll<SubGeometryCoordTraits<codim,subcodim> >
+         template< unsigned int codim,
+                template<class> class SubCaching = ComputeAll>
          struct SubGeometryType {
-         typedef SubGeometryCoordTraits<codim,subcodim> CoordTraits;
-         typedef SimplexGeometry< CoordTraits , SubCachingType > GeometryType;
-         GeometryType subGeometry(int i,int ii,
-                                 SubCachingType subCache = SubCachingType() ) {
+         typedef SubGeometryCoordTraits<codim> SubCoordTraits;
+         typedef Geometry< SubCoordTraits , SubCachingType > GeometryType;
+         GeometryType subGeometry(int i,
+                     SubCaching subCache = SubCachingType() ) {
           return GeometryType(SubGeometryCoordVector<codim,subcodim>(this->coords_,i,ii),subCache);
          }
          };

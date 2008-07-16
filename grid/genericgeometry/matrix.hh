@@ -405,11 +405,21 @@ namespace Dune
                   typename Traits :: template Matrix< n, m > :: Type &ret )
       {
         dune_static_assert( (n >= m), "Matrix has no right inverse." );
-        typename Traits :: template Matrix< m, m > :: Type aat;
-        AAT_L< m, n >( A, aat );
-        const FieldType det = spdInvA< m >( aat );
-        ATBT< m, n, m >( A, aat, ret );
-        return det;
+        if (n == 2 && m == 2) {
+          FieldType det = (A[0][0]*A[1][1]-A[1][0]*A[1][0]);
+          FieldType detInv = 1./det;
+          ret[0][0] = A[1][1]*detInv;
+          ret[1][1] = A[0][0]*detInv;
+          ret[1][0] = -A[1][0]*detInv;
+          ret[0][1] = -A[0][1]*detInv;
+          return det;
+        } else {
+          typename Traits :: template Matrix< n, n > :: Type ata;
+          ATA_L< m, n >( A, ata );
+          const FieldType det = spdInvA< n >( ata );
+          ATBT< n, n, m >( ata, A, ret );
+          return det;
+        }
       }
 
       template< int m, int n >

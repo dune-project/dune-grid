@@ -48,7 +48,7 @@ struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydim
         CoordTraits> > {
   enum {jTCompute = GenericGeometry::geoCompute,
         jTInvCompute = GenericGeometry::geoCompute,
-        intElCompute = GenericGeometry::geoIsComputed,
+        intElCompute = GenericGeometry::geoCompute,
         normalCompute = GenericGeometry::geoCompute};
   typedef typename CoordTraits::CoordVector GeometryType;
   typedef GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
@@ -118,8 +118,6 @@ void test(const GridViewType& view) {
   typedef typename GridViewType ::template Codim<0>::Iterator ElementIterator;
   typedef typename GridViewType :: IntersectionIterator IIteratorType;
   typedef typename GridViewType :: Intersection IntersectionType;
-  ElementIterator eIt    = view.template begin<0>();
-  ElementIterator eEndIt = view.template end<0>();
   typedef typename ElementIterator::Entity EntityType;
   typedef typename EntityType::Geometry GeometryType;
   typedef FieldVector<double, GeometryType::mydimension> LocalType;
@@ -131,6 +129,9 @@ void test(const GridViewType& view) {
   JacobianType;
   typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::mydimension>
   SquareType;
+  typedef GenericGeometry::Geometry< TopologyType,
+      DuneCoordTraits<GeometryType>,
+      DuneCache > GenericGeometryType;
 
   phiErr = 0;
   jTinvJTErr = 0;
@@ -138,76 +139,90 @@ void test(const GridViewType& view) {
   detErr = 0;
   volErr = 0;
 
-  for (; eIt!=eEndIt; ++eIt) {
-    const GeometryType& geo = eIt->geometry();
-    // GenericGeometry::Geometry< TopologyType, DuneCoordTraits<GeometryType> > map(geo);
-    typedef GenericGeometry::Geometry< TopologyType,
-        DuneCoordTraits<GeometryType>,
-        DuneCache > GenericGeometryType;
-    GenericGeometryType map(geo,typename GenericGeometryType::CachingType(geo) );
-    LocalType x(0.1);
-    for (int i=0; i<1; ++i) {
-      // test phi
-      GlobalType y=geo.global(x);
-      GlobalType yM=map.global(x);
-      if ((y-yM).two_norm2()>1e-10) {
-        phiErr++;
-        std::cout << "Error in PHI: G = " << y << " M = " << yM << " " << std::endl;
+  for (int j=0; j<1; ++j) {
+    ElementIterator eEndIt = view.template end<0>();
+    ElementIterator eIt    = view.template begin<0>();
+    for (; eIt!=eEndIt; ++eIt) {
+      const GeometryType& geoDune = eIt->geometry();
+      GenericGeometryType mapDune(geoDune,typename GenericGeometryType::CachingType(geoDune) );
+      {
+        LocalType x(0.1);
+        GlobalType y=geoDune.global(x);
+        GlobalType yM=mapDune.global(x);
       }
-      double det = geo.integrationElement(x);
-      double detM = map.integrationElement(x);
-      if (std::abs(det-detM)>1e-10) {
-        std::cout << " Error in det: G = " << det << " M = " << detM << std::endl;
-        detErr++;
-      }
-      // test jacobian
-      const JacobianType&  JTInv  = geo.jacobianInverseTransposed(x);
-      const JacobianTType& JTM    = map.jacobianT(x);
-      const JacobianType&  JTInvM = map.jacobianInverseTransposed(x);
-      SquareType JTInvJT;
-      const int n = GeometryType::coorddimension;
-      const int m = GeometryType::mydimension;
-      for( int i = 0; i < m; ++i ) {
-        for( int j = 0; j < m; ++j ) {
-          JTInvJT[ i ][ j ] = 0;
-          for( int k = 0; k < n; ++k )
-            JTInvJT[ i ][ j ] += JTM[i][k] * JTInvM[k][j];
+
+      for (int i=0; i<1; ++i) {
+        // const GenericGeometryType& geo = mapDune;        // 17.4 (24)
+        const GenericGeometryType& map = mapDune;
+        const GeometryType& geo = geoDune;            // 15.2
+        // const GeometryType& map = geoDune;
+        LocalType x(0.1);
+        // test phi
+        GlobalType y=geo.global(x);
+        GlobalType yM=map.global(x);
+        if ((y-yM).two_norm2()>1e-10) {
+          phiErr++;
+          std::cout << "Error in PHI: G = " << y << " M = " << yM << " " << std::endl;
         }
-      }
-      if (std::abs(JTInvJT[0][0]-1.)+std::abs(JTInvJT[1][1]-1.)+
-          std::abs(JTInvJT[1][0])+std::abs(JTInvJT[0][1])>1e-10) {
-        jTinvJTErr++;
-        std::cout << "JTINVJT: \n" << JTInvJT << std::endl;
-        // std::cout << "***\n" << JT << std::endl;
-        // std::cout << "***\n" << JTInv << std::endl;
-      }
-      JacobianType testJTInv(JTInv);
-      testJTInv -= JTInvM;
-      if (testJTInv.frobenius_norm2()>1e-10) {
-        jTinvJTErr++;
-        std::cout << "JTINVJT: \n" << JTInv << std::endl;
-      }
-      // test volume
-      double vol  = geo.volume();
-      double volM = map.volume();
-      if (std::abs(vol-volM)>1e-10) {
-        volErr++;
-        std::cout << "volume : " << vol << " " << volM << std::endl;
-      }
-      // test normal
-      IIteratorType iiter = view.ibegin(*eIt);
-      for (; iiter != view.iend(*eIt); ++ iiter) {
-        LocalFaceType xf(0.1);
-        LocalType xx(iiter->intersectionSelfLocal().global(xf));
-        const GlobalType& n  = iiter->integrationOuterNormal(xf);
-        const GlobalType& nM = map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx);
-        if ((n-nM).two_norm2()>1e-10) {
-          normalErr++;
-          std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
-          std::cout << "normal: "
-                    << " ( " << nM << " )   ( " << n << " )   "
-                    << n-nM
-                    << std::endl;
+
+        const JacobianType&  JTInv  = geo.jacobianInverseTransposed(x);
+        const JacobianType&  JTInvM = map.jacobianInverseTransposed(x);
+        JacobianType testJTInv(JTInv);
+        testJTInv -= JTInvM;
+        if (testJTInv.frobenius_norm2()>1e-10) {
+          jTinvJTErr++;
+          std::cout << "JTINVJT: \n" << JTInv << std::endl;
+        }
+        {
+          // test jacobian
+          const JacobianTType& JTM    = map.jacobianT(x);
+          SquareType JTInvJT;
+          const int n = GeometryType::coorddimension;
+          const int m = GeometryType::mydimension;
+          for( int i = 0; i < m; ++i ) {
+            for( int j = 0; j < m; ++j ) {
+              JTInvJT[ i ][ j ] = 0;
+              for( int k = 0; k < n; ++k )
+                JTInvJT[ i ][ j ] += JTM[i][k] * JTInvM[k][j];
+            }
+          }
+          if (std::abs(JTInvJT[0][0]-1.)+std::abs(JTInvJT[1][1]-1.)+
+              std::abs(JTInvJT[1][0])+std::abs(JTInvJT[0][1])>1e-10) {
+            jTinvJTErr++;
+            std::cout << "JTINVJT: \n" << JTInvJT << std::endl;
+            // std::cout << "***\n" << JT << std::endl;
+            // std::cout << "***\n" << JTInv << std::endl;
+          }
+        }
+        // test integration element
+        double det = geo.integrationElement(x);
+        double detM = map.integrationElement(x);
+        if (std::abs(det-detM)>1e-10) {
+          std::cout << " Error in det: G = " << det << " M = " << detM << std::endl;
+          detErr++;
+        }
+        // test volume
+        double vol  = geo.volume();
+        double volM = map.volume();
+        if (std::abs(vol-volM)>1e-10) {
+          volErr++;
+          std::cout << "volume : " << vol << " " << volM << std::endl;
+        }
+        // test normal
+        IIteratorType iiter = view.ibegin(*eIt);
+        for (; iiter != view.iend(*eIt); ++ iiter) {
+          LocalFaceType xf(0.1);
+          LocalType xx(iiter->intersectionSelfLocal().global(xf));
+          const GlobalType& n  = iiter->integrationOuterNormal(xf);
+          const GlobalType& nM = map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx);
+          if ((n-nM).two_norm2()>1e-10) {
+            normalErr++;
+            std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
+            std::cout << "normal: "
+                      << " ( " << nM << " )   ( " << n << " )   "
+                      << n-nM
+                      << std::endl;
+          }
         }
       }
     }

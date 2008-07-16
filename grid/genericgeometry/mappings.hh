@@ -44,6 +44,7 @@ namespace Dune
      *   // domain, used to construct a mapping together with an offset.
      *   // Corners used are
      *   // p[offset],...,p[offset+Topology::numCorners]
+     *   // Assumption: coord_vector[i] is of type const Vector<dimW>&
      *   typedef ... coord_vector;
      *
      *   // mapping is of the form Ax+b (used untested)
@@ -136,6 +137,10 @@ namespace Dune
       void deriv_add(const LocalCoordType&,
                      const FieldType& fac,
                      JacobianTransposeType& d) const {}
+      void origin_add(const FieldType& fac,
+                      GlobalCoordType& p) const {
+        p.axpy(fac,p_);
+      }
       // check if x/fac is in domain of phi
       bool inDomain(const LocalCoordType& x,FieldType fac) {
         return (isZero(x[0]));
@@ -227,6 +232,10 @@ namespace Dune
         top_.deriv_add(x,fac*x[dim-1],d);
         top_.phi_add(x,fac,d[dim-1]);
       }
+      void origin_add(const FieldType& fac,
+                      GlobalCoordType& p) const {
+        bottom_.origin_add(fac,p);
+      }
       // check if x/fac is in domain of phi
       bool inDomain(const LocalCoordType& x,FieldType fac) {
         return (std::abs(x[dim-1])<1e-12 &&
@@ -271,7 +280,7 @@ namespace Dune
       typedef typename Traits :: CoordVector CoordVector;
     private:
       GenericMapping<BaseTopology,Traits> bottom_;
-      GlobalCoordType top_,pn_;
+      GlobalCoordType top_;
       bool affine_,constant_,zero_;
       void setProperties() {
         affine_ = Traits::affine==1 ||
@@ -284,7 +293,6 @@ namespace Dune
                               int offset) :
         bottom_(coords,offset),
         top_(coords[offset+BaseTopology::numCorners]),
-        pn_(coords[offset+BaseTopology::numCorners]),
         affine_(Traits::affine==1),
         constant_(false),
         zero_(false)
@@ -295,10 +303,11 @@ namespace Dune
       // if affine:
       //   p = b(x/(1-y))*(1-y) + pn * y
       //     = db * x + b0*(1-y) + pn * y
-      //     = db * x + b0 + y * (pn - p0)
+      //     = db * x + b0 + y * (pn - b0)
       //     = b(x) + t * y
       // else
       //   p = b(x/(1-y))*(1-y) + pn * y
+      //     = b(x/(1-y))*(1-y) + t * y + b0 * y
       void phi_set(const LocalCoordType& x,
                    GlobalCoordType& p) const {
         if (affine()) {
@@ -312,7 +321,8 @@ namespace Dune
           xx *= hinv;
           bottom_.phi_set(xx,p);
           p *= h;
-          p.axpy(x[dim-1],pn_);
+          p.axpy(x[dim-1],top_);
+          bottom_.origin_add(x[dim-1],p);
         }
       }
       void phi_add(const LocalCoordType& x,
@@ -329,7 +339,8 @@ namespace Dune
           xx *= hinv;
           bottom_.phi_add(xx,fac,p);
           p *= h;
-          p.axpy(fac*x[dim-1],pn_);
+          p.axpy(fac*x[dim-1],top_);
+          bottom_.origin_add(fac*x[dim-1],p);
         }
       }
       // if affine:
@@ -337,7 +348,8 @@ namespace Dune
       //   d[n]_j = t_j
       // else (h=1-y)
       //   d[i]_j = db[i]_j*h/h (i=1,..,n-1, j=1,..,n)
-      //   d[n]_j = x db(x/h)*s-b(x/h) + pn
+      //   d[n]_j = x db(x/h)*h-b(x/h) + pn
+      //          = x db(x/h)*h-b(x/h) + t + b0
       void deriv_set(const LocalCoordType& x,
                      JacobianTransposeType& d) const {
         if (affine()) {
@@ -354,7 +366,8 @@ namespace Dune
           X *= hinv;
 
           bottom_.deriv_set(X,d);
-          d[dim-1] = pn_;
+          d[dim-1] = top_;
+          bottom_.origin_add(FieldType(1.),d[dim-1]);
           bottom_.phi_add(X,-1.,d[dim-1]);
           d.umtv(X,d[dim-1]);
         }
@@ -376,10 +389,15 @@ namespace Dune
           X *= hinv;
 
           bottom_.deriv_add(X,d);
-          d[dim-1] += pn_;
+          d[dim-1] += top_;
+          bottom_.origin_add(FieldType(1.),d[dim-1]);
           bottom_.phi_add(X,-1.,d[dim-1]);
           d.umtv(X,d[dim-1]);
         }
+      }
+      void origin_add(const FieldType& fac,
+                      GlobalCoordType& p) const {
+        bottom_.origin_add(fac,p);
       }
       bool inDomain(const LocalCoordType& x,FieldType fac) {
         return (std::abs(x[dim-1])<1e-12 &&
@@ -428,68 +446,98 @@ namespace Dune
 
       typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
 
-      template< unsigned int codim, unsigned int subcodim >
-      struct SubGeometryCoordVector {
-        typedef GlobalCoordType Vector;
-        int i_,ii_;
-        const CoordVector& coord_;
-        SubGeometryCoordVector(const CoordVector& coord,
-                               int i,int ii) :
-          i_(i), ii_(ii), coord_(coord)
-        {}
-        const Vector& operator[](int k) {
-          const int l = ReferenceElementType :: template subNumbering<codim,subcodim>(i_,ii_);
-          return coord_[l];
-        }
-      };
-      template< unsigned int codim, unsigned int subcodim >
-      struct SubGeometryTraits : public Traits {
-        typedef SubGeometryCoordVector<codim,subcodim> CoordVector;
-      };
     protected:
       GenericMappingType map_;
       const CoordVector& coords_;
+
+      mutable JacobianTransposeType jT_;
+      mutable JacobianType jTInv_;
+      mutable FieldType intEl_;
+      mutable GlobalCoordType faceNormal_[Size<Topology,1>::value];
+      mutable bool jTComputed, jTInvComputed, intElComputed;
+      mutable FieldVector<bool,Size<Topology,1>::value> normalComputed;
+
+      const LocalCoordType& bary_;
+
     public:
       explicit Mapping(const CoordVector& coords) :
         map_(coords,0),
-        coords_(coords)
+        coords_(coords),
+        jTComputed(false),
+        jTInvComputed(false),
+        intElComputed(false),
+        normalComputed(false),
+        bary_(ReferenceElementType::template baryCenter<0>(0))
       {}
-      void phi(const LocalCoordType& x,
-               GlobalCoordType& p) const {
-        map_.phi_set(x,p);
-      }
-      void jacobianT(const LocalCoordType& x,
-                     JacobianTransposeType& d) const {
-        map_.deriv_set(x,d);
-      }
       bool affine() const {
         return map_.affine();
       }
+      const GlobalCoordType& operator[](int i) {
+        return coords_[i];
+      }
+      GlobalCoordType global(const LocalCoordType& x) const {
+        GlobalCoordType p;
+        map_.phi_set(x,p);
+        return p;
+      }
       // additional methods
-      void phiInvert(const GlobalCoordType& p,
-                     LocalCoordType& x) {}
-      FieldType volume() const {
-        const LocalCoordType& bary = ReferenceElementType::template baryCenter<0>(0);
-        return ReferenceElementType::volume() * integrationElement(bary);
+      LocalCoordType local(const GlobalCoordType& p) const {
+        LocalCoordType x;
+        if (jTComputed) {
+          MatrixHelper<CoordTraits>::template ATx<dimW,dimG>(jTInv_,p,x);
+        } else if (affine()) {
+          const JacobianTransposeType& d = jacobianT(bary_);
+          MatrixHelper<CoordTraits>::template xTRightInvA<dimG,dimW>(d,p,x);
+        } else {
+          LocalCoordType q;
+          x = bary_;
+          do { // DF^n q^n = F^n, x^{n+1} -= q^n
+            GlobalCoordType y=global(x);
+            y -= p;
+            const JacobianTransposeType& d = jacobianT(x);
+            MatrixHelper<CoordTraits>::template xTRightInvA<dimG,dimW>(d,y,q);
+            x -= q;
+          } while (q.two_norm2()>1e-12);
+        }
+        return x;
+      }
+      const JacobianTransposeType& jacobianT(const LocalCoordType& x) const {
+        if (!jTComputed) {
+          map_.deriv_set(x,jT_);
+          jTComputed = affine();
+        }
+        return jT_;
+      }
+      const JacobianType& jacobianInverseTransposed(const LocalCoordType& x) const {
+        if (!jTInvComputed) {
+          const JacobianTransposeType& d = jacobianT(x);
+          intEl_ = MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,jTInv_);
+          jTInvComputed = affine();
+          intElComputed = affine();
+        }
+        return jTInv_;
       }
       FieldType integrationElement(const LocalCoordType& x) const {
-        JacobianTransposeType d;
-        jacobianT(x,d);
-        return MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
+        if (!intElComputed) {
+          const JacobianTransposeType& d = jacobianT(x);
+          intEl_ = MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
+          intElComputed = affine();
+        }
+        return intEl_;
       }
-      FieldType jacobianInverseTransposed(const LocalCoordType& x,
-                                          JacobianType& dInv) const {
-        JacobianTransposeType d;
-        jacobianT(x,d);
-        return MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,dInv);
+      const GlobalCoordType& normal(int face,const LocalCoordType& x) const {
+        if (!normalComputed[face]) {
+          const JacobianType& d = jacobianInverseTransposed(x);
+          const LocalCoordType& refNormal =
+            ReferenceElementType::integrationOuterNormal(face);
+          MatrixHelper<CoordTraits>::template Ax<dimW,dimG>(d,refNormal,faceNormal_[face]);
+          faceNormal_[face] *= intEl_;
+          normalComputed[face] = affine();
+        }
+        return faceNormal_[face];
       }
-      void normal(int face,const LocalCoordType& x, GlobalCoordType& n) const {
-        JacobianType d;
-        FieldType det = jacobianInverseTransposed(x,d);
-        const LocalCoordType& refNormal =
-          ReferenceElementType::integrationOuterNormal(face);
-        MatrixHelper<CoordTraits>::template Ax<dimW,dimG>(d,refNormal,n);
-        n *= det;
+      FieldType volume() const {
+        return ReferenceElementType::volume() * integrationElement(bary_);
       }
     };
   }
