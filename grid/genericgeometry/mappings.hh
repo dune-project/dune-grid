@@ -457,8 +457,6 @@ namespace Dune
       mutable bool jTComputed, jTInvComputed, intElComputed;
       mutable FieldVector<bool,Size<Topology,1>::value> normalComputed;
 
-      const LocalCoordType& bary_;
-
     public:
       explicit Mapping(const CoordVector& coords) :
         map_(coords,0),
@@ -466,9 +464,9 @@ namespace Dune
         jTComputed(false),
         jTInvComputed(false),
         intElComputed(false),
-        normalComputed(false),
-        bary_(ReferenceElementType::template baryCenter<0>(0))
+        normalComputed(false)
       {}
+
       bool affine() const {
         return map_.affine();
       }
@@ -486,11 +484,11 @@ namespace Dune
         if (jTComputed) {
           MatrixHelper<CoordTraits>::template ATx<dimW,dimG>(jTInv_,p,x);
         } else if (affine()) {
-          const JacobianTransposeType& d = jacobianT(bary_);
+          const JacobianTransposeType& d = jacobianT( baryCenter() );
           MatrixHelper<CoordTraits>::template xTRightInvA<dimG,dimW>(d,p,x);
         } else {
           LocalCoordType q;
-          x = bary_;
+          x = baryCenter();
           do { // DF^n q^n = F^n, x^{n+1} -= q^n
             GlobalCoordType y=global(x);
             y -= p;
@@ -536,8 +534,17 @@ namespace Dune
         }
         return faceNormal_[face];
       }
-      FieldType volume() const {
-        return ReferenceElementType::volume() * integrationElement(bary_);
+
+      FieldType volume () const
+      {
+        const FieldType refVolume = ReferenceElementType :: volume();
+        return refVolume * integrationElement( baryCenter() );
+      }
+
+    protected:
+      static const LocalCoordType &baryCenter ()
+      {
+        return ReferenceElementType :: template baryCenter< 0 >( 0 );
       }
     };
   }

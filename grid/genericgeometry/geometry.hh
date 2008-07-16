@@ -54,13 +54,12 @@ namespace Dune
       typedef Caching<typename BaseType::Traits> CachingType;
       typedef typename BaseType::ReferenceElementType ReferenceElementType;
 
-      const LocalCoordType& bary_;
+      using BaseType :: baryCenter;
 
     public:
       explicit Geometry(const CoordVector& coords,
                         const CachingType& cache = CachingType()) :
-        BaseType(coords),
-        bary_(BaseType::bary_)
+        BaseType(coords)
       {
         assert(dim==dimG);
         if (affine()) {
@@ -68,19 +67,19 @@ namespace Dune
             cache.jacobianT(this->jT_);
             this->jTComputed = true;
           } else if (int(CachingType::jTCompute)==geoPreCompute) {
-            BaseType::jacobianT(bary_);
+            BaseType :: jacobianT( baryCenter() );
           }
           if (int(CachingType::jTInvCompute)==geoIsComputed) {
             cache.jacobianInverseTransposed(this->jTInv_);
             this->jTInvComputed = true;
           } else if (int(CachingType::jTInvCompute)==geoPreCompute) {
-            BaseType::jacobianInverseTransposed(bary_);
+            BaseType :: jacobianInverseTransposed( baryCenter() );
           }
           if (int(CachingType::intElCompute)==geoIsComputed) {
             cache.integrationElement(this->intEl_);
             this->intElComputed = true;
           } else if (int(CachingType::intElCompute)==geoPreCompute) {
-            integrationElement(bary_);
+            integrationElement( baryCenter() );
           }
         }
       }

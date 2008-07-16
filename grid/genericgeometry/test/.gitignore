@@ -1,5 +1,6 @@
 testsubtopologies
 testmapping
+testgeo
 
 Makefile
 Makefile.in
@@ -7,6 +8,7 @@ Makefile.in
 .deps
 .libs
 
+*.dgf.*
 *.log
 *.so.*
 *.swp
