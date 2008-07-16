@@ -85,6 +85,36 @@ namespace Dune
       JacobianTransposeType;
       typedef typename CoordTraits :: CoordVector CoordVector;
     };
+    template< class Topology,class CoordTraits,
+        unsigned int codim>
+    struct SubGeometryCoordVector {
+      typedef MappingTraits<Topology::dimension,CoordTraits> Traits;
+      typedef ReferenceElement<Topology,typename Traits :: FieldType> ReferenceElementType;
+      typedef typename Traits :: GlobalCoordType Vector;
+      int i_;
+      const typename Traits :: CoordVector& coord_;
+      SubGeometryCoordVector(const typename Traits :: CoordVector& coord,int i) :
+        i_(i), coord_(coord)
+      {}
+      const Vector& operator[](int k) {
+        const int l = ReferenceElementType :: template subNumbering<codim,CoordTraits::dimGrid>(i_,k);
+        return coord_[l];
+      }
+    };
+    template< class Topology,class CoordTraits>
+    struct SubGeometryCoordVector<Topology,CoordTraits,0> {
+      typedef MappingTraits<Topology::dimension,CoordTraits> Traits;
+      typedef ReferenceElement<Topology,typename Traits :: FieldType> ReferenceElementType;
+      typedef typename Traits :: GlobalCoordType Vector;
+      int i_;
+      const typename Traits :: CoordVector& coord_;
+      SubGeometryCoordVector(const typename Traits :: CoordVector& coord,int i) :
+        i_(i), coord_(coord)
+      {}
+      const Vector& operator[](int k) {
+        return coord_[k];
+      }
+    };
 
 
     template< class Topology, class Traits >
@@ -100,7 +130,6 @@ namespace Dune
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
-      typedef typename Traits :: CoordVector CoordVector;
       static bool isZero(const FieldType& a) {
         return std::abs(a)<1e-12;
       }
@@ -111,6 +140,7 @@ namespace Dune
         zero_ = isZero(p_.two_norm2());
       }
     public:
+      template <class CoordVector>
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         p_(coords[offset]),
@@ -182,7 +212,6 @@ namespace Dune
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
-      typedef typename Traits :: CoordVector CoordVector;
     private:
       GenericMapping<BaseTopology,Traits> bottom_;
       GenericMapping<BaseTopology,Traits> top_;
@@ -194,6 +223,7 @@ namespace Dune
         zero_ = (top_.zero() && bottom_.zero());
       }
     public:
+      template <class CoordVector>
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         bottom_(coords,offset),
@@ -277,7 +307,6 @@ namespace Dune
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
-      typedef typename Traits :: CoordVector CoordVector;
     private:
       GenericMapping<BaseTopology,Traits> bottom_;
       GlobalCoordType top_;
@@ -289,6 +318,7 @@ namespace Dune
         zero_ = ( (top_.two_norm2()<1e-12) && bottom_.zero());
       }
     public:
+      template <class CoordVector>
       explicit GenericMapping(const CoordVector& coords,
                               int offset) :
         bottom_(coords,offset),
@@ -429,6 +459,7 @@ namespace Dune
       }
     };
 
+
     template< class Topology, class CoordTraits >
     class Mapping {
       typedef Mapping<Topology,CoordTraits> ThisType;
@@ -442,13 +473,15 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+
       typedef typename Traits :: CoordVector CoordVector;
 
       typedef ReferenceElement<Topology,FieldType> ReferenceElementType;
 
+      typedef SubGeometryCoordVector<Topology,CoordTraits,CoordTraits::dimGrid-Topology::dimension> SubCoordVector;
     protected:
+      const SubCoordVector coords_;
       GenericMappingType map_;
-      const CoordVector& coords_;
 
       mutable JacobianTransposeType jT_;
       mutable JacobianType jTInv_;
@@ -458,9 +491,10 @@ namespace Dune
       mutable FieldVector<bool,Size<Topology,1>::value> normalComputed;
 
     public:
-      explicit Mapping(const CoordVector& coords) :
+      template <class CoordVector>
+      explicit Mapping(const CoordVector& coords,int i=0) :
+        coords_(coords,i),
         map_(coords,0),
-        coords_(coords),
         jTComputed(false),
         jTInvComputed(false),
         intElComputed(false),
@@ -484,11 +518,11 @@ namespace Dune
         if (jTComputed) {
           MatrixHelper<CoordTraits>::template ATx<dimW,dimG>(jTInv_,p,x);
         } else if (affine()) {
-          const JacobianTransposeType& d = jacobianT( baryCenter() );
+          const JacobianTransposeType& d = jacobianT(bary_);
           MatrixHelper<CoordTraits>::template xTRightInvA<dimG,dimW>(d,p,x);
         } else {
           LocalCoordType q;
-          x = baryCenter();
+          x = bary_;
           do { // DF^n q^n = F^n, x^{n+1} -= q^n
             GlobalCoordType y=global(x);
             y -= p;

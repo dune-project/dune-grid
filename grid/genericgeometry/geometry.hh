@@ -49,7 +49,7 @@ namespace Dune
       typedef typename BaseType :: GlobalCoordType GlobalCoordType;
       typedef typename BaseType :: JacobianType JacobianType;
       typedef typename BaseType :: JacobianTransposeType JacobianTransposeType;
-      typedef typename BaseType :: CoordVector CoordVector;
+      // typedef typename BaseType :: CoordVector CoordVector;
 
       typedef Caching<typename BaseType::Traits> CachingType;
       typedef typename BaseType::ReferenceElementType ReferenceElementType;
@@ -57,6 +57,7 @@ namespace Dune
       using BaseType :: baryCenter;
 
     public:
+      template <class CoordVector>
       explicit Geometry(const CoordVector& coords,
                         const CachingType& cache = CachingType()) :
         BaseType(coords)
@@ -110,25 +111,12 @@ namespace Dune
         return this->jTInv_;
       }
     private:
-      template< unsigned int codim>
-      struct SubGeometryCoordVector {
-        typedef GlobalCoordType Vector;
-        int i_;
-        const CoordVector& coord_;
-        SubGeometryCoordVector(const CoordVector& coord,int i) :
-          i_(i), coord_(coord)
-        {}
-        const Vector& operator[](int k) {
-          const int l = ReferenceElementType :: template subNumbering<codim,dimG-codim>(i_,k);
-          return coord_[l];
-        }
-      };
-      template< unsigned int codim>
-      struct SubGeometryCoordTraits : public CoordTraits {
-        typedef SubGeometryCoordVector<codim> CoordVector;
-      };
-    public:
       /*
+         template< unsigned int codim>
+         struct SubGeometryCoordTraits : public CoordTraits {
+         typedef SubGeometryCoordVector<codim> CoordVector;
+         };
+         public:
          template< unsigned int codim,
                 template<class> class SubCaching = ComputeAll>
          struct SubGeometryType {
