@@ -18,6 +18,7 @@ using namespace Dune;
 template <class DuneGeometry>
 struct DuneCoordTraits {
   enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
+  enum {dimGrid  = DuneGeometry::dimension};       // grid dimension
   typedef typename DuneGeometry::ctype FieldType;
   // general vector and matrix types
   template <int dim>
