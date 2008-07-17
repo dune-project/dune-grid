@@ -218,9 +218,10 @@ namespace Dune
                       GlobalCoordType& p) const {
         p.axpy(fac,p_);
       }
-      // check if x/fac is in domain of phi
-      bool inDomain(const LocalCoordType& x,FieldType fac) {
-        return (isZero(x[0]));
+
+      static bool inDomain ( const LocalCoordType &x, FieldType factor )
+      {
+        return isZero( x[ 0 ] );
       }
 
       // returns if mapping is affine
@@ -354,11 +355,14 @@ namespace Dune
                       GlobalCoordType& p) const {
         bottom_.origin_add(fac,p);
       }
+
       // check if x/fac is in domain of phi
-      bool inDomain(const LocalCoordType& x,FieldType fac) {
-        return (std::abs(x[dim-1])<1e-12 &&
-                std::abs(fac-x[dim-1])<1e-12 &&
-                bottom_.inDomain(x,fac));
+      static bool inDomain ( const LocalCoordType &x, FieldType factor )
+      {
+        const FieldType xn = x[ dim-1 ];
+        const FieldType cxn = factor - xn;
+        return (xn > -1e-12) && (cxn > -1e-12)
+               && BottomMapping :: inDomain( x, factor );
       }
 
       bool affine() const {
@@ -415,6 +419,7 @@ namespace Dune
         constant_ = ( (top_.two_norm2()<1e-12) && bottom_.constant());
         zero_ = ( (top_.two_norm2()<1e-12) && bottom_.zero());
       }
+
     public:
       template< class CoordVector >
       explicit GenericMapping ( const CoordVector &coords )
@@ -600,10 +605,13 @@ namespace Dune
                       GlobalCoordType& p) const {
         bottom_.origin_add(fac,p);
       }
-      bool inDomain(const LocalCoordType& x,FieldType fac) {
-        return (std::abs(x[dim-1])<1e-12 &&
-                std::abs(fac-x[dim-1])<1e-12 &&
-                bottom_.inDomain(x,fac*(1.-x[dim-1])));
+
+      static bool inDomain ( const LocalCoordType &x, FieldType factor )
+      {
+        const FieldType xn = x[ dim-1 ];
+        const FieldType cxn = factor - xn;
+        return (xn > -1e-12) && (cxn > -1e-12)
+               && BottomMapping :: inDomain( x, factor * cxn );
       }
 
       bool affine() const {
@@ -723,6 +731,11 @@ namespace Dune
           } while( dx.two_norm2() > 1e-12 );
         }
         return x;
+      }
+
+      bool checkInside ( const LocalCoordType &x )
+      {
+        return GenericMapping :: inDomain( x, FieldType( 1 ) );
       }
 
       const JacobianTransposedType& jacobianT(const LocalCoordType& x) const {
