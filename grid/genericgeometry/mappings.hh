@@ -117,34 +117,38 @@ namespace Dune
     };
 
 
-    template< class Topology, class Traits >
+    template< class Topology, class Traits, unsigned int offset = 0 >
     struct GenericMapping;
 
-    template<class Traits>
-    class GenericMapping < Point, Traits >
+    template< class Traits, unsigned int offset >
+    class GenericMapping < Point, Traits, offset >
     {
       typedef Point Topology;
+
     public:
-      enum {dim  = Topology::dimension};
+      enum { dim = Topology :: dimension };
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+
       static bool isZero(const FieldType& a) {
         return std::abs(a)<1e-12;
       }
     private:
       GlobalCoordType p_;
       bool zero_;
-      void setProperties() {
+
+      void setProperties ()
+      {
         zero_ = isZero(p_.two_norm2());
       }
+
     public:
-      template <class CoordVector>
-      explicit GenericMapping(const CoordVector& coords,
-                              int offset) :
-        p_(coords[offset]),
-        zero_(false)
+      template< class CoordVector >
+      explicit GenericMapping ( const CoordVector &coords )
+        : p_( coords[ offset ] ),
+          zero_(false)
       {
         setProperties();
       }
@@ -202,19 +206,21 @@ namespace Dune
     };
 
 
-    template< class BaseTopology, class Traits >
-    class GenericMapping < Prism< BaseTopology >, Traits >
+    template< class BaseTopology, class Traits, unsigned int offset >
+    class GenericMapping< Prism< BaseTopology >, Traits, offset >
     {
       typedef Prism< BaseTopology > Topology;
+
     public:
-      enum {dim  = Topology::dimension};
+      enum { dim  = Topology :: dimension };
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
+
     private:
-      GenericMapping<BaseTopology,Traits> bottom_;
-      GenericMapping<BaseTopology,Traits> top_;
+      GenericMapping< BaseTopology, Traits, offset > bottom_;
+      GenericMapping< BaseTopology, Traits, offset + BaseTopology :: numCorners > top_;
       bool affine_,constant_,zero_;
       void setProperties() {
         affine_ = Traits::affine==1 ||
@@ -223,14 +229,13 @@ namespace Dune
         zero_ = (top_.zero() && bottom_.zero());
       }
     public:
-      template <class CoordVector>
-      explicit GenericMapping(const CoordVector& coords,
-                              int offset) :
-        bottom_(coords,offset),
-        top_(coords,offset+BaseTopology::numCorners),
-        affine_(Traits::affine==1),
-        constant_(false),
-        zero_(false)
+      template< class CoordVector >
+      explicit GenericMapping ( const CoordVector &coords )
+        : bottom_( coords ),
+          top_( coords ),
+          affine_(Traits::affine==1),
+          constant_(false),
+          zero_(false)
       {
         top_ -= bottom_;
         setProperties();
@@ -297,8 +302,8 @@ namespace Dune
       }
     };
 
-    template< class BaseTopology, class Traits >
-    class GenericMapping < Pyramid< BaseTopology >, Traits >
+    template< class BaseTopology, class Traits, unsigned int offset >
+    class GenericMapping < Pyramid< BaseTopology >, Traits, offset >
     {
       typedef Pyramid< BaseTopology > Topology;
     public:
@@ -308,7 +313,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposeType JacobianTransposeType;
     private:
-      GenericMapping<BaseTopology,Traits> bottom_;
+      GenericMapping< BaseTopology, Traits, offset > bottom_;
       GlobalCoordType top_;
       bool affine_,constant_,zero_;
       void setProperties() {
@@ -318,16 +323,15 @@ namespace Dune
         zero_ = ( (top_.two_norm2()<1e-12) && bottom_.zero());
       }
     public:
-      template <class CoordVector>
-      explicit GenericMapping(const CoordVector& coords,
-                              int offset) :
-        bottom_(coords,offset),
-        top_(coords[offset+BaseTopology::numCorners]),
-        affine_(Traits::affine==1),
-        constant_(false),
-        zero_(false)
+      template< class CoordVector >
+      explicit GenericMapping ( const CoordVector &coords )
+        : bottom_( coords ),
+          top_( coords[ offset + BaseTopology :: numCorners ] ),
+          affine_(Traits::affine==1),
+          constant_(false),
+          zero_(false)
       {
-        top_ -= coords[offset];
+        top_ -= coords[ offset ];
         setProperties();
       }
       // if affine:
@@ -491,14 +495,14 @@ namespace Dune
       mutable FieldVector<bool,Size<Topology,1>::value> normalComputed;
 
     public:
-      template <class CoordVector>
-      explicit Mapping(const CoordVector& coords,int i=0) :
-        coords_(coords,i),
-        map_(coords,0),
-        jTComputed(false),
-        jTInvComputed(false),
-        intElComputed(false),
-        normalComputed(false)
+      template< class CoordVector >
+      explicit Mapping ( const CoordVector &coords )
+        : coords_( coords, 0 ),
+          map_( coords ),
+          jTComputed(false),
+          jTInvComputed(false),
+          intElComputed(false),
+          normalComputed(false)
       {}
 
       bool affine() const {
@@ -518,11 +522,11 @@ namespace Dune
         if (jTComputed) {
           MatrixHelper<CoordTraits>::template ATx<dimW,dimG>(jTInv_,p,x);
         } else if (affine()) {
-          const JacobianTransposeType& d = jacobianT(bary_);
+          const JacobianTransposeType &d = jacobianT( baryCenter() );
           MatrixHelper<CoordTraits>::template xTRightInvA<dimG,dimW>(d,p,x);
         } else {
           LocalCoordType q;
-          x = bary_;
+          x = baryCenter();
           do { // DF^n q^n = F^n, x^{n+1} -= q^n
             GlobalCoordType y=global(x);
             y -= p;

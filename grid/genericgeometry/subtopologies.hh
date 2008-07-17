@@ -811,6 +811,17 @@ namespace Dune
       }
     };
 
+
+
+    // IsCodimHybrid
+    // -------------
+
+    template< class Topology, unsigned int codim >
+    struct IsCodimHybrid
+    {
+      enum { value = (codim != 0) && IsHybrid< Topology > :: value };
+    };
+
   }
 
 }

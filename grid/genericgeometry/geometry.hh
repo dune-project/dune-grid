@@ -57,10 +57,10 @@ namespace Dune
       using BaseType :: baryCenter;
 
     public:
-      template <class CoordVector>
-      explicit Geometry(const CoordVector& coords,
-                        const CachingType& cache = CachingType()) :
-        BaseType(coords)
+      template< class CoordVector >
+      explicit Geometry ( const CoordVector &coords,
+                          const CachingType &cache = CachingType() )
+        : BaseType( coords )
       {
         assert(dim==dimG);
         if (affine()) {
@@ -131,4 +131,5 @@ namespace Dune
     };
   }
 }
+
 #endif

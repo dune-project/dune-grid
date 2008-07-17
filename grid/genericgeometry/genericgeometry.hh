@@ -4,6 +4,7 @@
 #define DUNE_GENERICGEOMETRY_GENERICGEOMETRY_HH
 
 #include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/subgeometry.hh>
 
 namespace Dune
 {
@@ -84,12 +85,31 @@ namespace Dune
 
       typedef ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: GeometryType
       ElementGeometryType;
-      typedef typename SubGeometry< ElementGeometryType, codimension > :: type
-      GeometryType;
+      typedef GenericGeometry :: GeometryProvider< ElementGeometryType, codimension >
+      GeometryProvider;
+      typedef typename GeometryProvider :: Geometry GeometryType;
 
-      GeometryType *geometry_;
+      mutable GeometryType *geometry_;
 
     public:
+      template< class CoordVector >
+      explicit DuneGeometry ( const CoordVector &coords,
+                              const CachingType &cache = CachingType() )
+        : geometry_( GeometryProvider :: geometry( coords, cache ) )
+      {}
+
+      DuneGeometry ( const DuneGeometry &other )
+        : geometry_( other.geometry_ )
+      {
+        other.geometry_ = 0;
+      }
+
+      ~DuneGeometry ()
+      {
+        if( geometry_ != 0 )
+          delete geometry_;
+      }
+
       Dune :: GeometryType type () const
       {
         return geometry().type();

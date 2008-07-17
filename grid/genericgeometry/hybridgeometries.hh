@@ -38,6 +38,8 @@ namespace Dune
 
       virtual bool checkInside ( const LocalCoordinate &local ) const = 0;
 
+      virtual bool affine () const = 0;
+
       virtual Field integrationElement ( const LocalCoordinate &local ) const = 0;
 
       virtual Field volume () const = 0;
@@ -87,6 +89,11 @@ namespace Dune
       virtual bool checkInside ( const LocalCoordinate &local ) const
       {
         return geometry_.checkInside( local );
+      }
+
+      virtual vool affine () const
+      {
+        return geometry_.affine();
       }
 
       virtual Field integrationElement ( const LocalCoordinate &local ) const

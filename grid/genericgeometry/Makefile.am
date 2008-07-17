@@ -7,7 +7,7 @@ genericgeometry_HEADERS = codimtable.hh \
 			  matrix.hh \
                           misc.hh \
                           referenceelements.hh \
-			  subgeometries.hh \
+			  subgeometry.hh \
 			  subtopologies.hh \
                           topologytypes.hh
 
