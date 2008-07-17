@@ -199,18 +199,22 @@ namespace Dune
       }
 
       template< unsigned int numCorners >
-      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
-      {}
+      {
+        return true;
+      }
 
       template< unsigned int numCorners >
-      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
-      {}
+      {
+        return true;
+      }
 
       // returns Phi : G -> D, Phi_j(x)
       void phi_set(const LocalCoordType&,
@@ -367,31 +371,72 @@ namespace Dune
       }
 
       template< unsigned int numCorners >
-      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
         const FieldType xn = x[ dim-1 ];
-        const FieldType cxn = FieldType( 1 ) - xn;
-        BottomMapping :: Dphi_set( coords, x, factor * cxn, J );
-        TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        bool affine = true;
+        if( alwaysAffine )
+        {
+          const FieldType cxn = FieldType( 1 ) - xn;
+          BottomMapping :: Dphi_set( coords, x, factor * cxn, J );
+          TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        }
+        else
+        {
+          JacobianTransposedType Jtop;
+          affine &= BottomMapping :: Dphi_set( coords, x, factor, J );
+          affine &= TopMapping :: Dphi_set( coords, x, factor, Jtop );
+
+          FieldType norm = FieldType( 0 );
+          for( unsigned int i = 0; i < dim-1; ++i )
+          {
+            Jtop[ i ] -= J[ i ];
+            norm += Jtop[ i ].two_norm2();
+            J[ i ].axpy( xn, Jtop[ i ] );
+          }
+          affine &= (norm < 1e-12);
+        }
         BottomMapping :: phi_set( coords, x, -factor, J[ dim-1 ] );
         TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
+        return affine;
       }
 
       template< unsigned int numCorners >
-      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
         const FieldType xn = x[ dim-1 ];
-        const FieldType cxn = FieldType( 1 ) - xn;
-        BottomMapping :: Dphi_add( coords, x, factor * cxn, J );
-        TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        bool affine = true;
+        if( alwaysAffine )
+        {
+          const FieldType cxn = FieldType( 1 ) - xn;
+          BottomMapping :: Dphi_add( coords, x, factor * cxn, J );
+          TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        }
+        else
+        {
+          JacobianTransposedType Jbottom, Jtop;
+          affine &= BottomMapping :: Dphi_set( coords, x, FieldType( 1 ), Jbottom );
+          affine &= TopMapping :: Dphi_set( coords, x, FieldType( 1 ), Jtop );
+
+          FieldType norm = FieldType( 0 );
+          for( unsigned int i = 0; i < dim-1; ++i )
+          {
+            Jtop[ i ] -= Jbottom[ i ];
+            norm += Jtop[ i ].two_norm2();
+            J[ i ].axpy( factor, Jbottom[ i ] );
+            J[ i ].axpy( factor*xn, Jtop[ i ] );
+          }
+          affine &= (norm < 1e-12);
+        }
         BottomMapping :: phi_add( coords, x, -factor, J[ dim-1 ] );
         TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
+        return affine;
       }
 
       // p = b(x)+t(x)*x_n
@@ -601,18 +646,19 @@ namespace Dune
       }
 
       template< unsigned int numCorners >
-      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
         GlobalCoordType &q = J[ dim-1 ];
+        bool affine;
         if( alwaysAffine )
         {
           const GlobalCoordType &top = TopMapping :: origin( coords );
           const GlobalCoordType &bottom = BottomMapping :: origin( coords );
 
-          BottomMapping :: Dphi_set( coords, x, factor, J );
+          affine = BottomMapping :: Dphi_set( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
             q[ i ] = factor * (top[ i ] - bottom[ i ]);
         }
@@ -624,7 +670,7 @@ namespace Dune
           LocalCoordType xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
-          BottomMapping :: Dphi_set( coords, xb, factor, J );
+          affine = BottomMapping :: Dphi_set( coords, xb, factor, J );
 
           TopMapping :: phi_set( coords, x, factor, q );
           BottomMapping :: phi_add( coords, xb, -factor, q );
@@ -635,21 +681,23 @@ namespace Dune
               q[ i ] += J[ j ][ i ] * xb[ j ];
           }
         }
+        return affine;
       }
 
       template< unsigned int numCorners >
-      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+      static bool Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
                              const LocalCoordType &x,
                              const FieldType &factor,
                              JacobianTransposedType &J )
       {
         GlobalCoordType &q = J[ dim-1 ];
+        bool affine;
         if( alwaysAffine )
         {
           const GlobalCoordType &top = TopMapping :: origin( coords );
           const GlobalCoordType &bottom = BottomMapping :: origin( coords );
 
-          BottomMapping :: Dphi_add( coords, x, factor, J );
+          affine = BottomMapping :: Dphi_add( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
             q[ i ] = factor * (top[ i ] - bottom[ i ]);
         }
@@ -661,7 +709,7 @@ namespace Dune
           LocalCoordType xb;
           for( unsigned int i = 0; i < dim-1; ++i )
             xb[ i ] = icxn * x[ i ];
-          BottomMapping :: Dphi_add( coords, xb, factor, J );
+          affine = BottomMapping :: Dphi_add( coords, xb, factor, J );
 
           TopMapping :: phiaddd( coords, x, factor, q );
           BottomMapping :: phi_add( coords, xb, -factor, q );
@@ -672,6 +720,7 @@ namespace Dune
               q[ i ] += J[ j ][ i ] * xb[ j ];
           }
         }
+        return affine;
       }
 
       // if affine:
@@ -888,11 +937,18 @@ namespace Dune
           coords_[ i ] = &(coords[ i ]);
       }
 
-      bool affine() const {
-        return map_.affine();
+      bool affine () const
+      {
+        if( GenericMapping :: alwaysAffine )
+          return true;
+        jacobianT( baryCenter() );
+        return jTComputed;
+        //return map_.affine();
       }
-      const GlobalCoordType& operator[](int i) {
-        return coords_[i];
+
+      const GlobalCoordType &operator[]( int i )
+      {
+        return *(coords_[ i ]);
       }
 
       GlobalCoordType global( const LocalCoordType &x ) const
@@ -936,39 +992,49 @@ namespace Dune
         if( !jTComputed )
         {
           //map_.deriv_set(x,jT_);
-          GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), jT_ );
-          jTComputed = affine();
+          jTComputed = GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), jT_ );
+          //jTComputed = affine();
         }
         return jT_;
       }
 
-      const JacobianType& jacobianInverseTransposed(const LocalCoordType& x) const {
-        if (!jTInvComputed) {
-          const JacobianTransposedType& d = jacobianT(x);
-          intEl_ = MatrixHelper<CoordTraits>::template rightInvA<dimG,dimW>(d,jTInv_);
+      const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
+      {
+        if( !jTInvComputed )
+        {
+          const JacobianTransposedType &JT = jacobianT( x );
+          intEl_ = MatrixHelper< CoordTraits >
+                   :: template rightInvA< dimG, dimW >( JT, jTInv_ );
           jTInvComputed = affine();
           intElComputed = affine();
         }
         return jTInv_;
       }
-      FieldType integrationElement(const LocalCoordType& x) const {
-        if (!intElComputed) {
-          const JacobianTransposedType& d = jacobianT(x);
-          intEl_ = MatrixHelper<CoordTraits>::template detAAT<dimG,dimW>(d);
+
+      FieldType integrationElement ( const LocalCoordType &x ) const
+      {
+        if( !intElComputed )
+        {
+          const JacobianTransposedType &JT = jacobianT( x );
+          intEl_ = MatrixHelper< CoordTraits > :: template detAAT< dimG, dimW >( JT );
           intElComputed = affine();
         }
         return intEl_;
       }
-      const GlobalCoordType& normal(int face,const LocalCoordType& x) const {
-        if (!normalComputed[face]) {
-          const JacobianType& d = jacobianInverseTransposed(x);
-          const LocalCoordType& refNormal =
-            ReferenceElementType::integrationOuterNormal(face);
-          MatrixHelper<CoordTraits>::template Ax<dimW,dimG>(d,refNormal,faceNormal_[face]);
-          faceNormal_[face] *= intEl_;
-          normalComputed[face] = affine();
+
+      const GlobalCoordType &normal ( int face, const LocalCoordType &x ) const
+      {
+        if( !normalComputed[ face ] )
+        {
+          const JacobianType &JT = jacobianInverseTransposed( x );
+          const LocalCoordType &refNormal
+            =  ReferenceElementType :: integrationOuterNormal( face );
+          MatrixHelper< CoordTraits >
+          :: template Ax< dimW, dimG >( JT, refNormal, faceNormal_[ face ] );
+          faceNormal_[ face ] *= intEl_;
+          normalComputed[ face ] = affine();
         }
-        return faceNormal_[face];
+        return faceNormal_[ face ];
       }
 
       FieldType volume () const
