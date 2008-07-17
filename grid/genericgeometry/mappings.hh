@@ -126,12 +126,15 @@ namespace Dune
     // --------------
 
     template< class Topology, class Traits, unsigned int offset = 0 >
-    struct GenericMapping;
+    class GenericMapping;
 
     template< class Traits, unsigned int offset >
     class GenericMapping < Point, Traits, offset >
     {
       typedef Point Topology;
+
+      template< class, class, unsigned int >
+      friend class GenericMapping;
 
     public:
       enum { dim = Topology :: dimension };
@@ -195,6 +198,20 @@ namespace Dune
           p[ i ] += factor * y[ i ];
       }
 
+      template< unsigned int numCorners >
+      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {}
+
+      template< unsigned int numCorners >
+      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {}
+
       // returns Phi : G -> D, Phi_j(x)
       void phi_set(const LocalCoordType&,
                    GlobalCoordType& p) const {
@@ -237,12 +254,31 @@ namespace Dune
         return zero_;
       }
 
-      GenericMapping& operator-=(const GenericMapping& other) {
+      template< unsigned int ofs >
+      GenericMapping &operator-= ( const GenericMapping< Point, Traits, ofs > &other )
+      {
         p_ -= other.p_;
         setProperties();
         return *this;
       }
-      GenericMapping& operator+=(const GenericMapping& other) {
+
+      GenericMapping &operator-= ( const GenericMapping &other )
+      {
+        p_ -= other.p_;
+        setProperties();
+        return *this;
+      }
+
+      template< unsigned int ofs >
+      GenericMapping &operator+= ( const GenericMapping< Point, Traits, ofs > &other )
+      {
+        p_ += other.p_;
+        setProperties();
+        return *this;
+      }
+
+      GenericMapping &operator+= ( const GenericMapping &other )
+      {
         p_ += other.p_;
         setProperties();
         return *this;
@@ -259,6 +295,9 @@ namespace Dune
       typedef GenericMapping< BaseTopology, Traits, offset + BaseTopology :: numCorners >
       TopMapping;
 
+      template< class, class, unsigned int >
+      friend class GenericMapping;
+
     public:
       enum { dim  = Topology :: dimension };
 
@@ -268,26 +307,29 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { alwaysAffine = (dim < 2) };
+      enum { alwaysAffine = ((dim < 2) || Traits :: affine) };
 
     private:
       BottomMapping bottom_;
       TopMapping top_;
-      bool affine_,constant_,zero_;
-      void setProperties() {
-        affine_ = Traits::affine==1 ||
-                  (top_.constant() && bottom_.affine() );
+
+      bool affine_, constant_, zero_;
+
+      void setProperties ()
+      {
+        affine_ = (alwaysAffine || (top_.constant() && bottom_.affine()));
         constant_ = (top_.zero() && bottom_.constant());
         zero_ = (top_.zero() && bottom_.zero());
       }
+
     public:
       template< class CoordVector >
       explicit GenericMapping ( const CoordVector &coords )
         : bottom_( coords ),
           top_( coords ),
-          affine_(Traits::affine==1),
-          constant_(false),
-          zero_(false)
+          affine_( alwaysAffine ),
+          constant_( false ),
+          zero_( false )
       {
         top_ -= bottom_;
         setProperties();
@@ -322,6 +364,34 @@ namespace Dune
         const FieldType cxn = FieldType( 1 ) - xn;
         BottomMapping :: phi_add( coords, x, factor * cxn, p );
         TopMapping :: phi_add( coords, x, factor * xn, p );
+      }
+
+      template< unsigned int numCorners >
+      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {
+        const FieldType xn = x[ dim-1 ];
+        const FieldType cxn = FieldType( 1 ) - xn;
+        BottomMapping :: Dphi_set( coords, x, factor * cxn, J );
+        TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        BottomMapping :: phi_set( coords, x, -factor, J[ dim-1 ] );
+        TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
+      }
+
+      template< unsigned int numCorners >
+      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {
+        const FieldType xn = x[ dim-1 ];
+        const FieldType cxn = FieldType( 1 ) - xn;
+        BottomMapping :: Dphi_add( coords, x, factor * cxn, J );
+        TopMapping :: Dphi_add( coords, x, factor * xn, J );
+        BottomMapping :: phi_add( coords, x, -factor, J[ dim-1 ] );
+        TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
       }
 
       // p = b(x)+t(x)*x_n
@@ -375,13 +445,36 @@ namespace Dune
         return zero_;
       }
 
-      GenericMapping& operator-=(const GenericMapping& other) {
+      template< unsigned int ofs >
+      GenericMapping &
+      operator-= ( const GenericMapping< Prism< BaseTopology >, Traits, ofs > &other )
+      {
         top_ -= other.top_;
         bottom_ -= other.bottom_;
         setProperties();
         return *this;
       }
-      GenericMapping& operator+=(const GenericMapping& other) {
+
+      GenericMapping &operator-= ( const GenericMapping &other )
+      {
+        top_ -= other.top_;
+        bottom_ -= other.bottom_;
+        setProperties();
+        return *this;
+      }
+
+      template< unsigned int ofs >
+      GenericMapping &
+      operator+= ( const GenericMapping< Prism< BaseTopology >, Traits, ofs > &other )
+      {
+        top_ += other.top_;
+        bottom_ += other.bottom_;
+        setProperties();
+        return *this;
+      }
+
+      GenericMapping &operator+= ( const GenericMapping &other )
+      {
         top_ += other.top_;
         bottom_ += other.bottom_;
         setProperties();
@@ -398,6 +491,9 @@ namespace Dune
       typedef GenericMapping< Point, Traits, offset + BaseTopology :: numCorners >
       TopMapping;
 
+      template< class, class, unsigned int >
+      friend class GenericMapping;
+
     public:
       enum {dim  = Topology::dimension};
 
@@ -407,7 +503,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { alwaysAffine = BottomMapping :: alwaysAffine };
+      enum { alwaysAffine = (BottomMapping :: alwaysAffine || Traits :: affine) };
 
     private:
       BottomMapping bottom_;
@@ -500,6 +596,80 @@ namespace Dune
               xb[ i ] = icxn * x[ i ];
 
             BottomMapping :: phi_add( coords, xb, factor * cxn, p );
+          }
+        }
+      }
+
+      template< unsigned int numCorners >
+      static void Dphi_set ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {
+        GlobalCoordType &q = J[ dim-1 ];
+        if( alwaysAffine )
+        {
+          const GlobalCoordType &top = TopMapping :: origin( coords );
+          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+
+          BottomMapping :: Dphi_set( coords, x, factor, J );
+          for( unsigned int i = 0; i < dimW; ++i )
+            q[ i ] = factor * (top[ i ] - bottom[ i ]);
+        }
+        else
+        {
+          const FieldType xn = x[ dim-1 ];
+          const FieldType cxn = FieldType( 1 ) - xn;
+          const FieldType icxn = FieldType( 1 ) / cxn;
+          LocalCoordType xb;
+          for( unsigned int i = 0; i < dim-1; ++i )
+            xb[ i ] = icxn * x[ i ];
+          BottomMapping :: Dphi_set( coords, xb, factor, J );
+
+          TopMapping :: phi_set( coords, x, factor, q );
+          BottomMapping :: phi_add( coords, xb, -factor, q );
+          xb *= factor;
+          for( unsigned int j = 0; j < dim-1; ++j )
+          {
+            for( unsigned int i = 0; i < dimW; ++i )
+              q[ i ] += J[ j ][ i ] * xb[ j ];
+          }
+        }
+      }
+
+      template< unsigned int numCorners >
+      static void Dphi_add ( const GlobalCoordType *const (&coords)[ numCorners ],
+                             const LocalCoordType &x,
+                             const FieldType &factor,
+                             JacobianTransposedType &J )
+      {
+        GlobalCoordType &q = J[ dim-1 ];
+        if( alwaysAffine )
+        {
+          const GlobalCoordType &top = TopMapping :: origin( coords );
+          const GlobalCoordType &bottom = BottomMapping :: origin( coords );
+
+          BottomMapping :: Dphi_add( coords, x, factor, J );
+          for( unsigned int i = 0; i < dimW; ++i )
+            q[ i ] = factor * (top[ i ] - bottom[ i ]);
+        }
+        else
+        {
+          const FieldType xn = x[ dim-1 ];
+          const FieldType cxn = FieldType( 1 ) - xn;
+          const FieldType icxn = FieldType( 1 ) / cxn;
+          LocalCoordType xb;
+          for( unsigned int i = 0; i < dim-1; ++i )
+            xb[ i ] = icxn * x[ i ];
+          BottomMapping :: Dphi_add( coords, xb, factor, J );
+
+          TopMapping :: phiaddd( coords, x, factor, q );
+          BottomMapping :: phi_add( coords, xb, -factor, q );
+          xb *= factor;
+          for( unsigned int j = 0; j < dim-1; ++j )
+          {
+            for( unsigned int i = 0; i < dimW; ++i )
+              q[ i ] += J[ j ][ i ] * xb[ j ];
           }
         }
       }
@@ -624,13 +794,36 @@ namespace Dune
         return zero_;
       }
 
-      GenericMapping& operator-=(const GenericMapping& other) {
+      template< unsigned int ofs >
+      GenericMapping &
+      operator-= ( const GenericMapping< Pyramid< BaseTopology >, Traits, ofs > &other )
+      {
         top_ -= other.top_;
         bottom_ -= other.bottom_;
         setProperties();
         return *this;
       }
-      GenericMapping& operator+=(const GenericMapping& other) {
+
+      GenericMapping &operator-= ( const GenericMapping &other )
+      {
+        top_ -= other.top_;
+        bottom_ -= other.bottom_;
+        setProperties();
+        return *this;
+      }
+
+      template< unsigned int ofs >
+      GenericMapping &
+      operator+= ( const GenericMapping< Pyramid< BaseTopology >, Traits, ofs > &other )
+      {
+        top_ += other.top_;
+        bottom_ += other.bottom_;
+        setProperties();
+        return *this;
+      }
+
+      GenericMapping &operator+= ( const GenericMapping &other )
+      {
         top_ += other.top_;
         bottom_ += other.bottom_;
         setProperties();
@@ -738,13 +931,17 @@ namespace Dune
         return GenericMapping :: inDomain( x, FieldType( 1 ) );
       }
 
-      const JacobianTransposedType& jacobianT(const LocalCoordType& x) const {
-        if (!jTComputed) {
-          map_.deriv_set(x,jT_);
+      const JacobianTransposedType &jacobianT ( const LocalCoordType &x ) const
+      {
+        if( !jTComputed )
+        {
+          //map_.deriv_set(x,jT_);
+          GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), jT_ );
           jTComputed = affine();
         }
         return jT_;
       }
+
       const JacobianType& jacobianInverseTransposed(const LocalCoordType& x) const {
         if (!jTInvComputed) {
           const JacobianTransposedType& d = jacobianT(x);
