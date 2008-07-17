@@ -12,9 +12,9 @@ testoned
 testug
 test2ug
 testsgrid
-dgfparser.log
+viewdgf
 
-*.ALUgrid
-*.albertagrid
+*.dgf.*
+*.log
 *.so.*
 *.swp
