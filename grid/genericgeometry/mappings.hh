@@ -67,11 +67,10 @@ namespace Dune
       typedef typename CoordTraits :: FieldType FieldType;
       typedef typename CoordTraits :: template Vector< dimG > :: Type LocalCoordType;
       typedef typename CoordTraits :: template Vector< dimW > :: Type GlobalCoordType;
+
       typedef typename CoordTraits :: template Matrix< dimW, dimG > :: Type JacobianType;
-      //typedef typename CoordTraits :: template Matrix< dimG, dimG > :: Type SquareMappingType;
       typedef typename CoordTraits :: template Matrix< dimG, dimW > :: Type
       JacobianTransposedType;
-      typedef typename CoordTraits :: CoordVector CoordVector;
     };
 
 
@@ -133,8 +132,10 @@ namespace Dune
     {
       typedef Point Topology;
 
+#if 0
       template< class, class, unsigned int >
       friend class GenericMapping;
+#endif
 
     public:
       enum { dim = Topology :: dimension };
@@ -147,9 +148,12 @@ namespace Dune
 
       enum { alwaysAffine = true };
 
-      static bool isZero(const FieldType& a) {
+      static bool isZero ( const FieldType &a )
+      {
         return std::abs(a)<1e-12;
       }
+
+#if 0
     private:
       GlobalCoordType p_;
       bool zero_;
@@ -167,6 +171,7 @@ namespace Dune
       {
         setProperties();
       }
+#endif
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -216,6 +221,7 @@ namespace Dune
         return true;
       }
 
+#if 0
       // returns Phi : G -> D, Phi_j(x)
       void phi_set(const LocalCoordType&,
                    GlobalCoordType& p) const {
@@ -239,12 +245,14 @@ namespace Dune
                       GlobalCoordType& p) const {
         p.axpy(fac,p_);
       }
+#endif
 
       static bool inDomain ( const LocalCoordType &x, FieldType factor )
       {
         return isZero( x[ 0 ] );
       }
 
+#if 0
       // returns if mapping is affine
       bool affine() const {
         return true;
@@ -287,6 +295,7 @@ namespace Dune
         setProperties();
         return *this;
       }
+#endif
     };
 
 
@@ -299,8 +308,10 @@ namespace Dune
       typedef GenericMapping< BaseTopology, Traits, offset + BaseTopology :: numCorners >
       TopMapping;
 
+#if 0
       template< class, class, unsigned int >
       friend class GenericMapping;
+#endif
 
     public:
       enum { dim  = Topology :: dimension };
@@ -313,6 +324,7 @@ namespace Dune
 
       enum { alwaysAffine = ((dim < 2) || Traits :: affine) };
 
+#if 0
     private:
       BottomMapping bottom_;
       TopMapping top_;
@@ -338,6 +350,7 @@ namespace Dune
         top_ -= bottom_;
         setProperties();
       }
+#endif
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -439,6 +452,7 @@ namespace Dune
         return affine;
       }
 
+#if 0
       // p = b(x)+t(x)*x_n
       void phi_set(const LocalCoordType& x,
                    GlobalCoordType& p) const {
@@ -470,6 +484,7 @@ namespace Dune
                       GlobalCoordType& p) const {
         bottom_.origin_add(fac,p);
       }
+#endif
 
       // check if x/fac is in domain of phi
       static bool inDomain ( const LocalCoordType &x, FieldType factor )
@@ -480,6 +495,7 @@ namespace Dune
                && BottomMapping :: inDomain( x, factor );
       }
 
+#if 0
       bool affine() const {
         return Traits::affine || affine_;
       }
@@ -525,6 +541,7 @@ namespace Dune
         setProperties();
         return *this;
       }
+#endif
     };
 
     template< class BaseTopology, class Traits, unsigned int offset >
@@ -536,8 +553,10 @@ namespace Dune
       typedef GenericMapping< Point, Traits, offset + BaseTopology :: numCorners >
       TopMapping;
 
+#if 0
       template< class, class, unsigned int >
       friend class GenericMapping;
+#endif
 
     public:
       enum {dim  = Topology::dimension};
@@ -550,6 +569,7 @@ namespace Dune
 
       enum { alwaysAffine = (BottomMapping :: alwaysAffine || Traits :: affine) };
 
+#if 0
     private:
       BottomMapping bottom_;
       GlobalCoordType top_;
@@ -573,6 +593,7 @@ namespace Dune
         top_ -= coords[ offset ];
         setProperties();
       }
+#endif
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -723,6 +744,7 @@ namespace Dune
         return affine;
       }
 
+#if 0
       // if affine:
       //   p = b(x/(1-y))*(1-y) + pn * y
       //     = db * x + b0*(1-y) + pn * y
@@ -824,6 +846,7 @@ namespace Dune
                       GlobalCoordType& p) const {
         bottom_.origin_add(fac,p);
       }
+#endif
 
       static bool inDomain ( const LocalCoordType &x, FieldType factor )
       {
@@ -833,6 +856,7 @@ namespace Dune
                && BottomMapping :: inDomain( x, factor * cxn );
       }
 
+#if 0
       bool affine() const {
         return Traits::affine || affine_;
       }
@@ -878,6 +902,7 @@ namespace Dune
         setProperties();
         return *this;
       }
+#endif
     };
 
 
@@ -902,19 +927,14 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      //typedef typename Traits :: CoordVector CoordVector;
-
       enum { numCorners = Topology :: numCorners };
 
       typedef GenericGeometry :: GenericMapping< Topology, Traits > GenericMapping;
       typedef ReferenceElement< Topology, FieldType > ReferenceElementType;
 
-      //typedef SubGeometryCoordVector<Topology,CoordTraits,CoordTraits::dimGrid-Topology::dimension> SubCoordVector;
-
     protected:
       const GlobalCoordType *coords_[ numCorners ];
-      //const SubCoordVector coords_;
-      GenericMapping map_;
+      //GenericMapping map_;
 
       mutable JacobianTransposedType jT_;
       mutable JacobianType jTInv_;
@@ -927,11 +947,11 @@ namespace Dune
       template< class CoordVector >
       explicit Mapping ( const CoordVector &coords )
       //: coords_( coords, 0 ),
-        : map_( coords ),
-          jTComputed(false),
-          jTInvComputed(false),
-          intElComputed(false),
-          normalComputed(false)
+      //: map_( coords ),
+        : jTComputed( false ),
+          jTInvComputed( false ),
+          intElComputed( false ),
+          normalComputed( false )
       {
         for( int i = 0; i < numCorners; ++i )
           coords_[ i ] = &(coords[ i ]);
@@ -946,7 +966,7 @@ namespace Dune
         //return map_.affine();
       }
 
-      const GlobalCoordType &operator[]( int i )
+      const GlobalCoordType &operator[] ( int i ) const
       {
         return *(coords_[ i ]);
       }
@@ -955,7 +975,13 @@ namespace Dune
       {
         GlobalCoordType p;
         //map_.phi_set(x,p);
-        GenericMapping :: phi_set( coords_, x, FieldType( 1 ), p );
+        if( jTComputed )
+        {
+          MatrixHelper< CoordTraits > :: template ATx< dimG, dimW >( jT_, x, p );
+          p += (*this)[ 0 ];
+        }
+        else
+          GenericMapping :: phi_set( coords_, x, FieldType( 1 ), p );
         return p;
       }
 

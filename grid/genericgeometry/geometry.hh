@@ -49,7 +49,6 @@ namespace Dune
       typedef typename BaseType :: GlobalCoordType GlobalCoordType;
       typedef typename BaseType :: JacobianType JacobianType;
       typedef typename BaseType :: JacobianTransposedType JacobianTransposedType;
-      // typedef typename BaseType :: CoordVector CoordVector;
 
       typedef Caching<typename BaseType::Traits> CachingType;
       typedef typename BaseType::ReferenceElementType ReferenceElementType;

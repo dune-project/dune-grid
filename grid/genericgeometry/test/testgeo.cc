@@ -96,6 +96,15 @@ struct Topology<AlbertaGrid<d,d> > {
     return d-duneFN;
   }
 };
+template<>
+struct Topology< ALU3dGrid< 3, 3, tetra > >
+{
+  typedef GenericGeometry :: Convert< GeometryType :: simplex, 3 > :: type Type;
+  static int faceNr( int duneFN )
+  {
+    return 3 - duneFN;
+  }
+};
 template <int d1,int d2,class CCOMM>
 struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
   typedef typename GenericGeometry::Convert< GeometryType :: simplex , d1 >::type Type;
