@@ -56,7 +56,7 @@ struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydim
       CoordTraits> Traits;
   const GeometryType& geo_;
   DuneCache(const GeometryType& geo) : geo_(geo) {}
-  void jacobianT(typename Traits::JacobianTransposeType& d) const {}
+  void jacobianT(typename Traits::JacobianTransposedType& d) const {}
   void integrationElement(typename Traits::FieldType& intEl) const {
     FieldVector<double,GeometryType::mydimension> x(0);
     intEl = geo_.integrationElement(x);

@@ -29,7 +29,7 @@ namespace Dune
             jTInvCompute = geoCompute,
             intElCompute = geoCompute,
             normalCompute = geoCompute};
-      void jacobianT(typename Traits::JacobianTransposeType& d) const {}
+      void jacobianT(typename Traits::JacobianTransposedType& d) const {}
       void integrationElement(typename Traits::FieldType& intEl) const {}
       void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
       void normal(int face, typename Traits::GlobalCoordType& n) const {}
@@ -48,7 +48,7 @@ namespace Dune
       typedef typename BaseType :: LocalCoordType LocalCoordType;
       typedef typename BaseType :: GlobalCoordType GlobalCoordType;
       typedef typename BaseType :: JacobianType JacobianType;
-      typedef typename BaseType :: JacobianTransposeType JacobianTransposeType;
+      typedef typename BaseType :: JacobianTransposedType JacobianTransposedType;
       // typedef typename BaseType :: CoordVector CoordVector;
 
       typedef Caching<typename BaseType::Traits> CachingType;
@@ -90,7 +90,7 @@ namespace Dune
       using BaseType::local;
       using BaseType::volume;
       using BaseType::normal;
-      const JacobianTransposeType& jacobianT(const LocalCoordType& x) const {
+      const JacobianTransposedType& jacobianT(const LocalCoordType& x) const {
         if (int(CachingType::jTCompute) == geoCompute || !affine()) {
           BaseType::jacobianT(x);
         }
