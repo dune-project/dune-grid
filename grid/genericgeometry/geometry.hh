@@ -1,9 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GENERICGEOMETRY_GENERICGEOMETRY_HH
-#define DUNE_GENERICGEOMETRY_GENERICGEOMETRY_HH
+#ifndef DUNE_GENERICGEOMETRY_GEOMETRY_HH
+#define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
-#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/mappings.hh>
 #include <dune/grid/genericgeometry/subgeometry.hh>
 
 namespace Dune
@@ -46,7 +46,7 @@ namespace Dune
 
 
     template< int mydim, int cdim, class GridImp >
-    class DuneGeometry
+    class Geometry
     {
       typedef GeometryTraits< GridImp > Traits;
 
@@ -93,18 +93,18 @@ namespace Dune
 
     public:
       template< class CoordVector >
-      explicit DuneGeometry ( const CoordVector &coords,
-                              const CachingType &cache = CachingType() )
+      explicit Geometry ( const CoordVector &coords,
+                          const CachingType &cache = CachingType() )
         : geometry_( GeometryProvider :: geometry( coords, cache ) )
       {}
 
-      DuneGeometry ( const DuneGeometry &other )
+      Geometry ( const Geometry &other )
         : geometry_( other.geometry_ )
       {
         other.geometry_ = 0;
       }
 
-      ~DuneGeometry ()
+      ~Geometry ()
       {
         if( geometry_ != 0 )
           delete geometry_;

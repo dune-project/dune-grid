@@ -317,6 +317,12 @@ namespace Dune
 
       typedef FieldVector< ctype, dimension > CoordinateType;
 
+      template< unsigned int codim >
+      struct Codim
+      {
+        enum { size = Size< Topology, codim > :: value };
+      };
+
       template< unsigned int codim, unsigned int subcodim >
       static unsigned int subNumbering ( unsigned int i, unsigned int j )
       {

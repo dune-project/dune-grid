@@ -5,7 +5,9 @@
 #include <dune/common/exceptions.hh>
 // #define DUNE_THROW(E, m) assert(0)
 
-#include "../geometry.hh"
+#include <dune/grid/alugrid/3d/topology.hh>
+
+#include "../mappings.hh"
 #include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
@@ -40,10 +42,12 @@ struct DuneCoordTraits {
 
 template <class Traits>
 struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
-  typedef typename Traits::CoordVector GeometryType;
+  //typedef typename Traits::CoordVector GeometryType;
+  template< class GeometryType >
   DuneCache(const GeometryType&) {}
 };
 
+#if 0
 template <class CoordTraits>
 struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
         CoordTraits> > {
@@ -64,11 +68,13 @@ struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydim
   void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
   void normal(int face, typename Traits::GlobalCoordType& n) const {}
 };
+#endif
 
 
 namespace Dune {
   template <int d1,int d2> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
+  template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
   template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
   template <int dim> class UGGrid;
 }
@@ -139,9 +145,8 @@ void test(const GridViewType& view) {
   JacobianType;
   typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::mydimension>
   SquareType;
-  typedef GenericGeometry::Geometry< TopologyType,
-      DuneCoordTraits<GeometryType>,
-      DuneCache > GenericGeometryType;
+  typedef GenericGeometry :: CachedMapping
+  < TopologyType, DuneCoordTraits< GeometryType >, DuneCache > GenericGeometryType;
 
   phiErr = 0;
   jTinvJTErr = 0;
@@ -218,6 +223,13 @@ void test(const GridViewType& view) {
           volErr++;
           std::cout << "volume : " << vol << " " << volM << std::endl;
         }
+
+#if 0
+        typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
+        SubGeometryType;
+        SubGeometryType *subMap = map.template subMapping< 1 >( 0 );
+#endif
+
         // test normal
         IIteratorType iiter = view.ibegin(*eIt);
         for (; iiter != view.iend(*eIt); ++ iiter) {
