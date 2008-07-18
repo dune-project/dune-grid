@@ -243,6 +243,7 @@ namespace Dune
       virtual SubMapping *
       create ( const SubMappingCoords &coords,
                const typename SubMapping :: CachingType &cache ) const = 0;
+      virtual ~CreatorInterface() {}
     };
 
     template< class Mapping, unsigned int codim >

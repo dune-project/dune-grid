@@ -21,12 +21,16 @@ namespace Dune
     // Mapping
     // -------
 
+    template< class BaseMapping, class CoordTraits >
+    class Mapping;
 
     template< class Topology, class CoordTraits >
-    class Mapping
+    class Mapping<CornerMapping< Topology, CoordTraits >,CoordTraits>
       : public CornerMapping< Topology, CoordTraits >
     {
-      typedef Mapping< Topology, CoordTraits > ThisType;
+      typedef Mapping<CornerMapping< Topology, CoordTraits >,CoordTraits> ThisType;
+
+      // typedef Mapping< Topology, CoordTraits > ThisType;
       typedef CornerMapping< Topology, CoordTraits > BaseType;
 
     public:
@@ -71,7 +75,8 @@ namespace Dune
 
       GeometryType type () const
       {
-        return DuneGeometryType< Topology, GeometryType :: simplex > :: type();
+        return DuneGeometryType< Topology,
+            Dune::GeometryType::BasicType(CoordTraits::oneDType) > :: type();
       }
 
       int corners () const
@@ -90,7 +95,7 @@ namespace Dune
           local_affine( baryCenter(), y, x );
         else
         {
-          x = FieldType( baryCenter() );
+          x = baryCenter();
           LocalCoordType dx;
           do
           { // DF^n dx^n = -F^n, x^{n+1} += dx^n
@@ -170,9 +175,9 @@ namespace Dune
     template< class Topology, class CoordTraits,
         template< class > class Caching = ComputeAll >
     class CachedMapping
-      : public Mapping< Topology, CoordTraits >
+      : public Mapping< CornerMapping<Topology,CoordTraits>, CoordTraits >
     {
-      typedef Mapping< Topology, CoordTraits > BaseType;
+      typedef Mapping< CornerMapping<Topology,CoordTraits>, CoordTraits > BaseType;
       typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;
 
       typedef CachedMappingTraits< Topology :: dimension, CoordTraits, Caching > Traits;

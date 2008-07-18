@@ -12,8 +12,10 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class ctype, int cdim >
-    struct CoordTraitsBase
+    template< class ctype, int cdim,
+        bool alwaysAffine = false,
+        GeometryType::BasicType oneD = GeometryType:: simplex>
+    struct DefaultCoordTraits
     {
       typedef typename ctype FieldType;
       enum { dimCoord = cdim };
@@ -30,10 +32,11 @@ namespace Dune
         typedef FieldMatrix< FieldType, dimR, dimC > Type;
       };
 
-      typedef typename Vector< dimCoord > CoordinateType;
+      typedef typename Vector< dimCoord >::Type CoordinateType;
+
+      enum {affine = alwaysAffine};
+      enum {oneDType = oneD};
     };
-
-
 
     template< class GridImp >
     struct GeometryTraits;
@@ -43,7 +46,32 @@ namespace Dune
       : public GeometryTraits< GridImp >
     {};
 
+    template <class ctype,int gdim,int cdim>
+    struct DefaultGeometryTraits {
+      typedef DefaultCoordTaits<ctype,cdim> CoordTraits;
+      template <class Traits>
+      struct Caching {
+        enum {jTCompute = geoCompute,
+              jTInvCompute = geoCompute,
+              intElCompute = geoCompute,
+              normalCompute = geoCompute};
+        void jacobianT(typename Traits::JacobianTransposedType& d) const {}
+        void integrationElement(typename Traits::FieldType& intEl) const {}
+        void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
+        void normal(int face, typename Traits::GlobalCoordType& n) const {}
+      };
+      enum {dimGrid = gdim};
+      //   hybrid   [ true if Codim 0 is hybrid ]
+      enum {hybrid  = true};
+      //   dunetype [ for Codim 0, needed for (hybrid=false) ]
+      // enum {dunetype = GeometryType::simplex};
+    };
 
+    template <int dimGrid>
+    struct GeometryTraits<MyGrid<dimGrid> > :
+      public DefaultGeometryTraits<MyGrid<dimGrid>::ctype,
+          dimGrid, dimGrid>
+    {};
 
     template< int mydim, int cdim, class GridImp >
     class Geometry
@@ -83,11 +111,10 @@ namespace Dune
         GeometryType;
       };
 
-      typedef ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: GeometryType
+      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: GeometryType
       ElementGeometryType;
-      typedef GenericGeometry :: GeometryProvider< ElementGeometryType, codimension >
-      GeometryProvider;
-      typedef typename GeometryProvider :: Geometry GeometryType;
+      typedef typename ElementGeometryType :: template Codim <codimension> :: SubMapping
+      GeometryType;
 
       mutable GeometryType *geometry_;
 
@@ -95,7 +122,14 @@ namespace Dune
       template< class CoordVector >
       explicit Geometry ( const CoordVector &coords,
                           const CachingType &cache = CachingType() )
-        : geometry_( GeometryProvider :: geometry( coords, cache ) )
+        : geometry_( GeometryProvider :: geometry( coords, cache ) ) // ???
+      {}
+
+      template< int fatherdim >
+      explicit Geometry ( const Geometry<fatherdim,cdim,GridImp> &father,
+                          int i,
+                          const CachingType &cache = CachingType() )
+        : geometry_( father.geometry().subMapping<fatherdim-mydim>(i,cache) )
       {}
 
       Geometry ( const Geometry &other )
@@ -159,6 +193,9 @@ namespace Dune
       {
         return geometry().jacobianInverseTransposed( local );
       }
+
+      template <int,int,class>
+      friend Geometry;
 
     private:
       const GeometryType &geometry () const
