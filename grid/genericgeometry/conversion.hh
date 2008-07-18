@@ -27,6 +27,11 @@ namespace Dune
     public:
       enum { dimension = 0 };
       enum { basicType = defaultType };
+
+      static GeometryType type ()
+      {
+        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+      }
     };
 
     template< class BaseTopology, GeometryType :: BasicType defaultType >
@@ -34,8 +39,8 @@ namespace Dune
     {
       typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
 
-      dune_static_assert( (defaultType == GeometryType :: simplex)
-                          || (defaultType == GeometryType :: cube),
+      dune_static_assert( ((int)defaultType == (int)GeometryType :: simplex)
+                          || ((int)defaultType == (int)GeometryType :: cube),
                           "defaultType may only be a simplex or a cube." );
 
       dune_static_assert( (DuneBaseGeometryType :: basicType == GeometryType :: simplex)
@@ -53,6 +58,11 @@ namespace Dune
                     ? GeometryType :: cube
                     : GeometryType :: prism
       };
+
+      static GeometryType type ()
+      {
+        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+      }
     };
 
     template< class BaseTopology, GeometryType :: BasicType defaultType >
@@ -60,12 +70,12 @@ namespace Dune
     {
       typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
 
-      dune_static_assert( (defaultType == GeometryType :: simplex)
-                          || (defaultType == GeometryType :: cube),
+      dune_static_assert( ((int)defaultType == (int)GeometryType :: simplex)
+                          || ((int)defaultType == (int)GeometryType :: cube),
                           "defaultType may only be a simplex or a cube." );
 
-      dune_static_assert( (DuneBaseGeometryType :: basicType == GeometryType :: simplex)
-                          || (DuneBaseGeometryType :: basicType == GeometryType :: cube),
+      dune_static_assert( ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex)
+                          || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube),
                           "Only pyramids over simplices or cubes can be converted." );
 
     public:
@@ -75,10 +85,15 @@ namespace Dune
         basicType = (dimension == 1)
                     ? defaultType
                     : ((dimension == 2)
-                       || (DuneBaseGeometryType :: basicType == GeometryType :: simplex))
+                       || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex))
                     ? GeometryType :: simplex
                     : GeometryType :: pyramid
       };
+
+      static GeometryType type ()
+      {
+        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+      }
     };
 
 

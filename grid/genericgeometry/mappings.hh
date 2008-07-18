@@ -5,24 +5,18 @@
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
+#include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
+#include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
 {
 
   namespace GenericGeometry
   {
-
-    // External Forward Declatations
-    // -----------------------------
-
-    template< class Mapping, unsigned int codim >
-    class SubMappingProvider;
-
-
 
     // Mapping
     // -------
@@ -74,6 +68,16 @@ namespace Dune
       using BaseType :: affine;
       using BaseType :: global;
       using BaseType :: jacobianT;
+
+      GeometryType type () const
+      {
+        return DuneGeometryType< Topology, GeometryType :: simplex > :: type();
+      }
+
+      int corners () const
+      {
+        return numCorners;
+      }
 
       // additional methods
       LocalCoordType local ( const GlobalCoordType &p ) const
@@ -158,27 +162,6 @@ namespace Dune
         MatrixHelper< CoordTraits > :: template xTRightInvA< dimG, dimW >( JT, p, y );
       }
     };
-
-
-    // If not affine only volume is cached (based on intElCompute)
-    // otherwise all quantities can be cached using:
-    //   geoCompute:    assign if method called using barycenter
-    //   geoPreCompute: assign in constructor using barycenter
-    //   geoIsComputed: assign in constructor using barycenter using callback
-    enum {geoCompute=0,geoPreCompute=1,geoIsComputed=2};
-
-    template <class Traits>
-    struct ComputeAll {
-      enum {jTCompute = geoCompute,
-            jTInvCompute = geoCompute,
-            intElCompute = geoCompute,
-            normalCompute = geoCompute};
-      void jacobianT(typename Traits::JacobianTransposedType& d) const {}
-      void integrationElement(typename Traits::FieldType& intEl) const {}
-      void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
-      void normal(int face, typename Traits::GlobalCoordType& n) const {}
-    };
-
 
 
     // CachedMapping
@@ -288,35 +271,14 @@ namespace Dune
         return this->jTInv_;
       }
 
-      /*
-         template< unsigned int codim >
-         typename Codim< codim > :: SubMapping *
-         subMapping ( unsigned int i,
+      template< unsigned int codim >
+      typename Codim< codim > :: SubMapping *
+      subMapping ( unsigned int i,
                    const typename Codim< codim > :: CachingType &cache
                      = typename Codim< codim > :: CachingType() ) const
-         {
-         return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
-         }
-       */
-
-      /*
-         private:
-         template< unsigned int codim>
-         struct SubGeometryCoordTraits : public CoordTraits {
-         typedef SubGeometryCoordVector<codim> CoordVector;
-         };
-         public:
-         template< unsigned int codim,
-                template<class> class SubCaching = ComputeAll>
-         struct SubGeometryType {
-         typedef SubGeometryCoordTraits<codim> SubCoordTraits;
-         typedef Geometry< SubCoordTraits , SubCachingType > GeometryType;
-         GeometryType subGeometry(int i,
-                     SubCaching subCache = SubCachingType() ) {
-          return GeometryType(SubGeometryCoordVector<codim,subcodim>(this->coords_,i,ii),subCache);
-         }
-         };
-       */
+      {
+        return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
+      }
     };
 
   }

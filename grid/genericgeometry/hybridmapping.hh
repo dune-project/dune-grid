@@ -3,7 +3,9 @@
 #ifndef DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 #define DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 
-#include <dune/grid/genericgeometry/mappings.hh>
+#include <dune/common/geometrytype.hh>
+
+#include <dune/grid/genericgeometry/submapping.hh>
 
 namespace Dune
 {
@@ -11,9 +13,22 @@ namespace Dune
   namespace GenericGeometry
   {
 
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class Topology, class CoordTraits, template< class > class Caching >
+    class CachedMapping;
+
+
+    // HybridMapping
+    // -------------
+
     template< unsigned int DimG, class CoordTraits, template< class > class Caching >
     class HybridMapping
     {
+      typedef HybridMapping< DimG, CoordTraits, Caching > ThisType;
+
+    protected:
       typedef CachedMappingTraits< DimG, CoordTraits, Caching > Traits;
 
     public:
@@ -26,6 +41,13 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
 
       typedef typename Traits :: CachingType CachingType;
+
+      template< unsigned int codim >
+      struct Codim
+      {
+        typedef typename SubMappingTraits< ThisType, codim > :: SubMapping SubMapping;
+        typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
+      };
 
       virtual ~HybridMapping ()
       {}
@@ -44,9 +66,9 @@ namespace Dune
 
       virtual bool affine () const = 0;
 
-      virtual Field integrationElement ( const LocalCoordType &local ) const = 0;
+      virtual FieldType integrationElement ( const LocalCoordType &local ) const = 0;
 
-      virtual Field volume () const = 0;
+      virtual FieldType volume () const = 0;
 
       virtual const JacobianType &
       jacobianInverseTransposed ( const LocalCoordType &local ) const = 0;
@@ -59,10 +81,11 @@ namespace Dune
       : public HybridMapping< Topology :: dimension, CoordTraits, Caching >
     {
       typedef HybridMapping< Topology :: dimension, CoordTraits, Caching > BaseType;
+      typedef VirtualMapping< Topology, CoordTraits, Caching > ThisType;
 
       typedef typename BaseType :: Traits Traits;
 
-      typedef typename CachedMapping< Topology, Traits, Caching > Mapping;
+      typedef CachedMapping< Topology, CoordTraits, Caching > Mapping;
 
     public:
       enum { dimG = Traits :: dimG };
@@ -76,6 +99,13 @@ namespace Dune
       typedef typename Traits :: CachingType CachingType;
 
       typedef typename Mapping :: ReferenceElement ReferenceElement;
+
+      template< unsigned int codim >
+      struct Codim
+      {
+        typedef typename SubMappingTraits< ThisType, codim > :: SubMapping SubMapping;
+        typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
+      };
 
     private:
       Mapping mapping_;
@@ -127,7 +157,7 @@ namespace Dune
         return mapping_.integrationElement( local );
       }
 
-      virtual Field volume () const
+      virtual FieldType volume () const
       {
         return mapping_.volume();
       }
@@ -136,6 +166,15 @@ namespace Dune
       jacobianInverseTransposed ( const LocalCoordType &local ) const
       {
         return mapping_.jacobianInverseTransposed( local );
+      }
+
+      template< unsigned int codim >
+      typename Codim< codim > :: SubMapping *
+      subMapping ( unsigned int i,
+                   const typename Codim< codim > :: CachingType &cache
+                     = typename Codim< codim > :: CachingType() ) const
+      {
+        return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
       }
     };
 

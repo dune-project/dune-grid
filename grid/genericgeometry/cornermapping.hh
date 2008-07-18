@@ -910,7 +910,7 @@ namespace Dune
         return p;
       }
 
-      bool checkInside ( const LocalCoordType &x )
+      static bool checkInside ( const LocalCoordType &x )
       {
         return GenericMapping :: inDomain( x, FieldType( 1 ) );
       }

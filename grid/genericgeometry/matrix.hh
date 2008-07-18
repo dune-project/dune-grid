@@ -337,8 +337,8 @@ namespace Dune
       {
         typename Traits :: template Matrix< n, n > :: Type L;
         cholesky_L< n >( A, L );
-        invLx( L, x );
-        invLTx( L, x );
+        invLx< n >( L, x );
+        invLTx< n >( L, x );
       }
 
       template< int m, int n >

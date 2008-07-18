@@ -43,6 +43,7 @@ struct DuneCoordTraits {
 template <class Traits>
 struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
   //typedef typename Traits::CoordVector GeometryType;
+  DuneCache () {}
   template< class GeometryType >
   DuneCache(const GeometryType&) {}
 };
@@ -224,11 +225,9 @@ void test(const GridViewType& view) {
           std::cout << "volume : " << vol << " " << volM << std::endl;
         }
 
-#if 0
         typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
         SubGeometryType;
         SubGeometryType *subMap = map.template subMapping< 1 >( 0 );
-#endif
 
         // test normal
         IIteratorType iiter = view.ibegin(*eIt);
