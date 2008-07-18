@@ -925,9 +925,9 @@ namespace Dune
       {
         char fullname[128];
         if (n>1)
-          sprintf(fullname,"%s/s%04d:p%0d:%s.vtu",piecepath,grid.comm().size(),i,piecename);
+          sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),i,piecename);
         else
-          sprintf(fullname,"%s/s%04d:p%0d:%s.vtp",piecepath,grid.comm().size(),i,piecename);
+          sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),i,piecename);
         indent(s); s << "<Piece Source=\"" << fullname << "\"/>" << std::endl;
       }
 
