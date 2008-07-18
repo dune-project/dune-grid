@@ -89,7 +89,7 @@ namespace Dune
       {
         LocalCoordType x;
         GlobalCoordType y = p - (*this)[ 0 ];
-        if( jTComputed )
+        if( jTInvComputed )
           MatrixHelper< CoordTraits > :: template ATx< dimW, dimG >( jTInv_, y, x );
         else if( affine() )
           local_affine( baryCenter(), y, x );
@@ -216,7 +216,6 @@ namespace Dune
                                const CachingType &cache = CachingType() )
         : BaseType( coords )
       {
-        assert(dim==dimG);
         if( affine() )
         {
           if( (int)CachingType :: jTCompute == (int)geoIsComputed )

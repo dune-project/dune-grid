@@ -15,6 +15,8 @@
 #include <dune/grid/psg/dgfgridtype.hh>
 // #include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 
+#include "testgeo.hh"
+
 using namespace Dune;
 
 template <class DuneGeometry>
@@ -35,11 +37,11 @@ struct DuneCoordTraits {
   // domain, used to construct a mapping together with an offset.
   // Corners used are
   // p[offset],...,p[offset+Topology::numCorners]
-  typedef DuneGeometry CoordVector;
+  typedef DuneGeometry DuneGeometryType;
   // mapping is of the form Ax+b (used untested)
   enum {affine = false};
+  enum {oneDType = Dune::GeometryType::simplex};
 };
-
 template <class Traits>
 struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
   //typedef typename Traits::CoordVector GeometryType;
@@ -47,8 +49,6 @@ struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
   template< class GeometryType >
   DuneCache(const GeometryType&) {}
 };
-
-#if 0
 template <class CoordTraits>
 struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
         CoordTraits> > {
@@ -56,7 +56,7 @@ struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydim
         jTInvCompute = GenericGeometry::geoCompute,
         intElCompute = GenericGeometry::geoCompute,
         normalCompute = GenericGeometry::geoCompute};
-  typedef typename CoordTraits::CoordVector GeometryType;
+  typedef typename CoordTraits::DuneGeometryType GeometryType;
   typedef GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
       CoordTraits> Traits;
   const GeometryType& geo_;
@@ -69,57 +69,9 @@ struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydim
   void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
   void normal(int face, typename Traits::GlobalCoordType& n) const {}
 };
-#endif
 
-
-namespace Dune {
-  template <int d1,int d2> class YaspGrid;
-  template <int d1,int d2> class AlbertaGrid;
-  template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
-  template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
-  template <int dim> class UGGrid;
-}
-
-template <class Grid>
-struct Topology;
-template <int d>
-struct Topology<YaspGrid<d,d> > {
-  typedef typename GenericGeometry::Convert< GeometryType :: cube , d >::type Type;
-  static int faceNr(int duneFN) {
-    return duneFN;
-  }
-};
-template <int d>
-struct Topology<UGGrid<d> > {
-  typedef typename GenericGeometry::Convert< GeometryType :: cube , d >::type Type;
-  static int faceNr(int duneFN) {
-    return duneFN;
-  }
-};
-template <int d>
-struct Topology<AlbertaGrid<d,d> > {
-  typedef typename GenericGeometry::Convert< GeometryType :: simplex , d >::type Type;
-  static int faceNr(int duneFN) {
-    return d-duneFN;
-  }
-};
-template<>
-struct Topology< ALU3dGrid< 3, 3, tetra > >
-{
-  typedef GenericGeometry :: Convert< GeometryType :: simplex, 3 > :: type Type;
-  static int faceNr( int duneFN )
-  {
-    return 3 - duneFN;
-  }
-};
-template <int d1,int d2,class CCOMM>
-struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
-  typedef typename GenericGeometry::Convert< GeometryType :: simplex , d1 >::type Type;
-  static int faceNr(int duneFN) {
-    return d1-duneFN;
-  }
-};
-
+// ****************************************************************
+//
 int phiErr;
 int jTinvJTErr;
 int volumeErr;
@@ -127,27 +79,97 @@ int detErr;
 int volErr;
 int normalErr;
 
+typedef Topology<GridType> ConversionType;
+template <class Geo1,class Geo2>
+void testGeo(const Geo1& geo1, const Geo2& geo2) {
+  typedef FieldVector<double, Geo1::mydimension> LocalType;
+  typedef FieldVector<double, Geo1::coorddimension> GlobalType;
+  typedef FieldMatrix<double, Geo1::mydimension, Geo1::coorddimension> JacobianTType;
+  typedef FieldMatrix<double, Geo1::coorddimension, Geo1::mydimension> JacobianType;
+  typedef FieldMatrix<double, Geo1::mydimension, Geo1::mydimension> SquareType;
+
+  LocalType x1(0.1);
+  LocalType x2(geo2.local(geo1.global(x1)));  // avoid problems with twists
+  // LocalType x2(0.1);
+  // LocalType x1(geo1.local(geo2.global(x2)));  // avoid problems with twists
+
+  // test global
+  GlobalType y1=geo1.global(x1);
+  GlobalType y2=geo2.global(x2);
+  if ((y1-y2).two_norm2()>1e-10) {
+    phiErr++;
+    std::cout << "Error in PHI: "
+              << " G(" << x1 << ") = " << y1
+              << " M(" << x2 << ") = " << y2 << " "
+              << x1-x2 << " -> " << y1-y2
+              << std::endl;
+  }
+
+#if 0 // only if geometry also has jacobian method
+  // test jacobian inverse transpose
+  if (ConversionType::correctJacobian)
+  {
+    const JacobianType&  JTInv1  = geo1.jacobianInverseTransposed(x1);
+    const JacobianType&  JTInv2 =  geo2.jacobianInverseTransposed(x2);
+    JacobianType testJTInv(JTInv1);
+    testJTInv -= JTInv2;
+    if (testJTInv.frobenius_norm2()>1e-10) {
+      jTinvJTErr++;
+      std::cout << "JTINVJT: \n" << JTInv1 << " " << JTInv2 << std::endl;
+    }
+    {
+      // test jacobian
+      const JacobianTType& JTM    = map.jacobianT(x);
+      SquareType JTInvJT;
+      const int n = GeometryType::coorddimension;
+      const int m = GeometryType::mydimension;
+      for( int i = 0; i < m; ++i ) {
+        for( int j = 0; j < m; ++j ) {
+          JTInvJT[ i ][ j ] = 0;
+          for( int k = 0; k < n; ++k )
+            JTInvJT[ i ][ j ] += JTM[i][k] * JTInvM[k][j];
+        }
+      }
+      if (std::abs(JTInvJT[0][0]-1.)+std::abs(JTInvJT[1][1]-1.)+
+          std::abs(JTInvJT[1][0])+std::abs(JTInvJT[0][1])>1e-10) {
+        jTinvJTErr++;
+        std::cout << "JTINVJT: \n" << JTInvJT << std::endl;
+        // std::cout << "***\n" << JT << std::endl;
+        // std::cout << "***\n" << JTInv << std::endl;
+      }
+    }
+  }
+#endif
+  // test integration element
+  double det1 = geo1.integrationElement(x1);
+  double det2 = geo2.integrationElement(x2);
+  if (std::abs(det1-det2)>1e-10) {
+    std::cout << " Error in det: G = " << det1 << " M = " << det2 << std::endl;
+    detErr++;
+  }
+
+  // test volume
+  double vol1  = geo1.volume();
+  double vol2 =  geo2.volume();
+  if (std::abs(vol1-vol2)>1e-10) {
+    volErr++;
+    std::cout << "volume : G = " << vol1 << " M = " << vol2 << std::endl;
+  }
+}
+// ****************************************************************
+//
 template <class GridViewType>
 void test(const GridViewType& view) {
   typedef typename GridViewType::Grid GridType;
-  typedef Topology<GridType> ConversionType;
   typedef typename ConversionType::Type TopologyType;
   typedef typename GridViewType ::template Codim<0>::Iterator ElementIterator;
   typedef typename GridViewType :: IntersectionIterator IIteratorType;
   typedef typename GridViewType :: Intersection IntersectionType;
   typedef typename ElementIterator::Entity EntityType;
   typedef typename EntityType::Geometry GeometryType;
-  typedef FieldVector<double, GeometryType::mydimension> LocalType;
-  typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
-  typedef FieldVector<double, GeometryType::coorddimension> GlobalType;
-  typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::coorddimension>
-  JacobianTType;
-  typedef FieldMatrix<double, GeometryType::coorddimension, GeometryType::mydimension>
-  JacobianType;
-  typedef FieldMatrix<double, GeometryType::mydimension, GeometryType::mydimension>
-  SquareType;
   typedef GenericGeometry :: CachedMapping
   < TopologyType, DuneCoordTraits< GeometryType >, DuneCache > GenericGeometryType;
+  typedef FieldVector<double, GeometryType::coorddimension> GlobalType;
 
   phiErr = 0;
   jTinvJTErr = 0;
@@ -155,97 +177,34 @@ void test(const GridViewType& view) {
   detErr = 0;
   volErr = 0;
 
-  for (int j=0; j<1; ++j) {
-    ElementIterator eEndIt = view.template end<0>();
-    ElementIterator eIt    = view.template begin<0>();
-    for (; eIt!=eEndIt; ++eIt) {
-      const GeometryType& geoDune = eIt->geometry();
-      GenericGeometryType mapDune(geoDune,typename GenericGeometryType::CachingType(geoDune) );
-      {
-        LocalType x(0.1);
-        GlobalType y=geoDune.global(x);
-        GlobalType yM=mapDune.global(x);
+  ElementIterator eEndIt = view.template end<0>();
+  ElementIterator eIt    = view.template begin<0>();
+  for (; eIt!=eEndIt; ++eIt) {
+    const GeometryType& geoDune = eIt->geometry();
+    GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
+    testGeo(geoDune,genericMap);
+
+    typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
+    SubGeometryType;
+    IIteratorType iiter = view.ibegin(*eIt);
+    for (; iiter != view.iend(*eIt); ++ iiter) {
+      typedef FieldVector<double, GeometryType::mydimension> LocalType;
+      typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
+      LocalFaceType xf(0.1);
+      LocalType xx(iiter->intersectionSelfLocal().global(xf));
+      const GlobalType& n  = iiter->integrationOuterNormal(xf);
+      const int correctFaceNr = ConversionType::faceNr(iiter->numberInSelf());
+      const GlobalType& nM = genericMap.normal(correctFaceNr,xx);
+      if ((n-nM).two_norm2()>1e-10) {
+        normalErr++;
+        std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
+        std::cout << "normal: "
+                  << " ( " << nM << " )   ( " << n << " )   "
+                  << n-nM
+                  << std::endl;
       }
-
-      for (int i=0; i<1; ++i) {
-        // const GenericGeometryType& geo = mapDune;        // 17.4 (24)
-        const GenericGeometryType& map = mapDune;
-        const GeometryType& geo = geoDune;            // 15.2
-        // const GeometryType& map = geoDune;
-        LocalType x(0.1);
-        // test phi
-        GlobalType y=geo.global(x);
-        GlobalType yM=map.global(x);
-        if ((y-yM).two_norm2()>1e-10) {
-          phiErr++;
-          std::cout << "Error in PHI: G = " << y << " M = " << yM << " " << std::endl;
-        }
-
-        const JacobianType&  JTInv  = geo.jacobianInverseTransposed(x);
-        const JacobianType&  JTInvM = map.jacobianInverseTransposed(x);
-        JacobianType testJTInv(JTInv);
-        testJTInv -= JTInvM;
-        if (testJTInv.frobenius_norm2()>1e-10) {
-          jTinvJTErr++;
-          std::cout << "JTINVJT: \n" << JTInv << std::endl;
-        }
-        {
-          // test jacobian
-          const JacobianTType& JTM    = map.jacobianT(x);
-          SquareType JTInvJT;
-          const int n = GeometryType::coorddimension;
-          const int m = GeometryType::mydimension;
-          for( int i = 0; i < m; ++i ) {
-            for( int j = 0; j < m; ++j ) {
-              JTInvJT[ i ][ j ] = 0;
-              for( int k = 0; k < n; ++k )
-                JTInvJT[ i ][ j ] += JTM[i][k] * JTInvM[k][j];
-            }
-          }
-          if (std::abs(JTInvJT[0][0]-1.)+std::abs(JTInvJT[1][1]-1.)+
-              std::abs(JTInvJT[1][0])+std::abs(JTInvJT[0][1])>1e-10) {
-            jTinvJTErr++;
-            std::cout << "JTINVJT: \n" << JTInvJT << std::endl;
-            // std::cout << "***\n" << JT << std::endl;
-            // std::cout << "***\n" << JTInv << std::endl;
-          }
-        }
-        // test integration element
-        double det = geo.integrationElement(x);
-        double detM = map.integrationElement(x);
-        if (std::abs(det-detM)>1e-10) {
-          std::cout << " Error in det: G = " << det << " M = " << detM << std::endl;
-          detErr++;
-        }
-        // test volume
-        double vol  = geo.volume();
-        double volM = map.volume();
-        if (std::abs(vol-volM)>1e-10) {
-          volErr++;
-          std::cout << "volume : " << vol << " " << volM << std::endl;
-        }
-
-        typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
-        SubGeometryType;
-        SubGeometryType *subMap = map.template subMapping< 1 >( 0 );
-
-        // test normal
-        IIteratorType iiter = view.ibegin(*eIt);
-        for (; iiter != view.iend(*eIt); ++ iiter) {
-          LocalFaceType xf(0.1);
-          LocalType xx(iiter->intersectionSelfLocal().global(xf));
-          const GlobalType& n  = iiter->integrationOuterNormal(xf);
-          const GlobalType& nM = map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx);
-          if ((n-nM).two_norm2()>1e-10) {
-            normalErr++;
-            std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
-            std::cout << "normal: "
-                      << " ( " << nM << " )   ( " << n << " )   "
-                      << n-nM
-                      << std::endl;
-          }
-        }
-      }
+      SubGeometryType *subMap = genericMap.template subMapping< 1 >( correctFaceNr );
+      testGeo(iiter->intersectionGlobal(),*subMap);
     }
   }
 }
