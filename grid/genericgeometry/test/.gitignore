@@ -12,3 +12,4 @@ Makefile.in
 *.log
 *.so.*
 *.swp
+*.tmp*
