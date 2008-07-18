@@ -120,10 +120,17 @@ namespace Dune
 
     public:
       template< class CoordVector >
-      explicit Geometry ( const CoordVector &coords,
-                          const CachingType &cache = CachingType() )
-        : geometry_( GeometryProvider :: geometry( coords, cache ) ) // ???
+      explicit Geometry ( GeometryType& geometry)
+        : geometry_( &geometry )
       {}
+
+      /*
+         template< class CoordVector >
+         explicit Geometry ( const CoordVector &coords,
+                          const CachingType &cache = CachingType() )
+         : geometry_( GeometryProvider :: geometry( coords, cache ) ) // ???
+         {}
+       */
 
       template< int fatherdim >
       explicit Geometry ( const Geometry<fatherdim,cdim,GridImp> &father,
