@@ -397,8 +397,7 @@ template <class GridImp>
 const Dune::FieldMatrix<typename GridImp::ctype,2,1>& Dune::UGGridGeometry<1,2,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
 {
-  jacobianInverseTransposed_[0][0] = 1 / (coord_[0][0]-coord_[1][0]);
-  jacobianInverseTransposed_[1][0] = 1 / (coord_[0][1]-coord_[1][1]);
+  DUNE_THROW(NotImplemented, "Not implemented yet!");
   return jacobianInverseTransposed_;
 }
 
@@ -433,40 +432,6 @@ template <class GridImp>
 const Dune::FieldMatrix<typename GridImp::ctype,3,2>& Dune::UGGridGeometry<2,3,GridImp>::
 jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
-  // I don't really know how to implement this for quadrilateral faces,
-  // especially since they may be nonplanar.
-  if (!type().isTriangle())
-    DUNE_THROW(NotImplemented, "jacobianInverse only implemented for triangular faces!");
-
-  for (int i=0; i<3; i++)
-    for (int j=0; j<2; j++)
-      jacobianInverseTransposed_[i][j] = coord_[j+1][i] - coord_[0][i];
-
-#if 0
-  // The spatial triangle is first mapped isometrically onto the plane.  We map
-  // the first vertex onto the origin, the second one on the positive x-axis,
-  // and the third one such that is has positive y-coordinate.  Then we call
-  // the UG-routine for planar triangles.  This is certainly not the most elegant
-  // way, but the first one that comes to my mind.
-
-  double l0 = (coord_[2]-coord_[1]).two_norm();
-  double l1 = (coord_[2]-coord_[0]).two_norm();
-  double l2 = (coord_[1]-coord_[0]).two_norm();
-
-  double q0 = (l2*l2 - l0*l0 + l1*l1) / (2*l2);
-  double h  = sqrt(l1*l1 - q0*q0);
-
-  FieldVector<double,2> p0(0);
-  FieldVector<double,2> p1(0);    p1[0] = l2;
-  FieldVector<double,2> p2(0);    p2[0] = q0;   p2[1] = h;
-
-  // Check that this was really an isometry
-  assert( std::abs(p2.two_norm()      - l1) < 1e-6 );
-  assert( std::abs((p2-p1).two_norm() - l0) < 1e-6 );
-
-  double* cornerCoords[3] = {&p0[0], &p1[0], &p2[0]};
-
-  UG_NS<2>::Transformation(3, cornerCoords, local, jacobianInverseTransposed_);
-#endif
+  DUNE_THROW(NotImplemented, "Not implemented yet!");
   return jacobianInverseTransposed_;
 }
