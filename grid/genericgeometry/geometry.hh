@@ -4,7 +4,9 @@
 #define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
 #include <dune/grid/genericgeometry/mappings.hh>
-#include <dune/grid/genericgeometry/subgeometry.hh>
+#include <dune/grid/genericgeometry/submapping.hh>
+#include <dune/grid/genericgeometry/hybridmapping.hh>
+#include <dune/grid/common/geometry.hh>
 
 namespace Dune
 {
@@ -17,7 +19,7 @@ namespace Dune
         GeometryType::BasicType oneD = GeometryType:: simplex>
     struct DefaultCoordTraits
     {
-      typedef typename ctype FieldType;
+      typedef ctype FieldType;
       enum { dimCoord = cdim };
 
       template< int dim >
@@ -26,7 +28,7 @@ namespace Dune
         typedef FieldVector< FieldType, dim > Type;
       };
 
-      template< int dimR, int dim C >
+      template< int dimR, int dimC >
       struct Matrix
       {
         typedef FieldMatrix< FieldType, dimR, dimC > Type;
@@ -48,7 +50,7 @@ namespace Dune
 
     template <class ctype,int gdim,int cdim>
     struct DefaultGeometryTraits {
-      typedef DefaultCoordTaits<ctype,cdim> CoordTraits;
+      typedef DefaultCoordTraits<ctype,cdim> CoordTraits;
       template <class Traits>
       struct Caching {
         enum {jTCompute = geoCompute,
@@ -67,14 +69,17 @@ namespace Dune
       // enum {dunetype = GeometryType::simplex};
     };
 
-    template <int dimGrid>
-    struct GeometryTraits<MyGrid<dimGrid> > :
-      public DefaultGeometryTraits<MyGrid<dimGrid>::ctype,
-          dimGrid, dimGrid>
-    {};
+    /*
+       template <int dimGrid>
+       struct GeometryTraits<MyGrid<dimGrid> > :
+       public DefaultGeometryTraits<MyGrid<dimGrid>::ctype,
+                                   dimGrid, dimGrid>
+       {};
+     */
 
     template< int mydim, int cdim, class GridImp >
-    class Geometry
+    class Geometry :
+      public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
     {
       typedef GeometryTraits< GridImp > Traits;
 
@@ -88,6 +93,7 @@ namespace Dune
 
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+      typedef FieldMatrix< ctype, coorddimension,mydimension > Jacobian;
 
     private:
       dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
@@ -99,7 +105,7 @@ namespace Dune
       template< bool >
       struct Hybrid
       {
-        typedef HybridGeometry< dimGrid, CoordTraits, Traits :: template Caching >
+        typedef HybridMapping< dimGrid, CoordTraits, Traits :: template Caching >
         GeometryType;
       };
 
@@ -107,7 +113,7 @@ namespace Dune
       struct NonHybrid
       {
         typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef Geometry< Topology, CoordTraits, Traits :: template Caching >
+        typedef CachedMapping< Topology, CoordTraits, Traits :: template Caching >
         GeometryType;
       };
 
@@ -120,24 +126,30 @@ namespace Dune
 
     public:
       template< class CoordVector >
+      explicit Geometry ( const CoordVector& coord)
+        : geometry_( new GeometryType(coord) )
+      {}
       explicit Geometry ( GeometryType& geometry)
         : geometry_( &geometry )
       {}
 
       /*
-         template< class CoordVector >
-         explicit Geometry ( const CoordVector &coords,
+         template< class GeoClass >
+         explicit Geometry ( const GeoClass &geo,
                           const CachingType &cache = CachingType() )
-         : geometry_( GeometryProvider :: geometry( coords, cache ) ) // ???
+         : geometry_( GeometryProvider :: geometry( geo,geo.type(),cache ) ) // ???
          {}
        */
 
-      template< int fatherdim >
-      explicit Geometry ( const Geometry<fatherdim,cdim,GridImp> &father,
+      /*
+         typedef typename Traits::Caching Caching;
+         template< int fatherdim >
+         explicit Geometry ( const Geometry<fatherdim,cdim,GridImp> &father,
                           int i,
-                          const CachingType &cache = CachingType() )
-        : geometry_( father.geometry().subMapping<fatherdim-mydim>(i,cache) )
-      {}
+                          const Caching &cache = Caching() )
+         : geometry_( father.geometry().subMapping<fatherdim-mydim>(i,cache) )
+         {}
+       */
 
       Geometry ( const Geometry &other )
         : geometry_( other.geometry_ )
@@ -202,7 +214,7 @@ namespace Dune
       }
 
       template <int,int,class>
-      friend Geometry;
+      friend class Geometry;
 
     private:
       const GeometryType &geometry () const
