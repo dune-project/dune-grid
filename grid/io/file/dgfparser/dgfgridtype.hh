@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFGRIDTYPE_HH
 #define DUNE_DGFGRIDTYPE_HH
+
 /**
  * @file
  * @author Robert Kloefkorn
@@ -84,33 +85,44 @@
  * GridType.
  *
  */
+
+#include <dune/grid/utility/gridtype.hh>
+
+// Note that we do not provide a default here, since gridtype.hh already already
+// does this and sets the corresponding preprocessor flag. Since we only add
+// some include files, we also need not check whether multiple grids are defined.
+
 #if defined ALBERTAGRID
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
   #endif
   #include <dune/grid/io/file/dgfparser/dgfalberta.hh>
-#elif defined ALUGRID_CUBE || defined ALUGRID_SIMPLEX || defined ALUGRID_CONFORM
+#endif
+
+#if defined ALUGRID_CUBE || defined ALUGRID_SIMPLEX || defined ALUGRID_CONFORM
   #if not HAVE_ALUGRID
     #error "ALUGRID_{CUBE,SIMPLEX,CONFORM} defined but no ALUGRID version found!"
   #endif
   #include <dune/grid/io/file/dgfparser/dgfalu.hh>
-#elif defined ONEDGRID
+#endif
+
+#if defined ONEDGRID
   #include <dune/grid/io/file/dgfparser/dgfoned.hh>
-#elif defined SGRID
+#endif
+
+#if defined SGRID
   #include <dune/grid/io/file/dgfparser/dgfs.hh>
-#elif defined UGGRID
+#endif
+
+#if defined UGGRID
   #if not HAVE_UG
     #error "UGGRID defined but no UG version found!"
   #endif
   #include <dune/grid/io/file/dgfparser/dgfug.hh>
-#elif defined YASPGRID
-  #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
-#else
-// default is yaspgrid (warning is printed when gridtype.hh is
-// included)
+#endif
+
+#if defined YASPGRID
   #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 #endif
 
-// include definition of grid type
-#include <dune/grid/utility/gridtype.hh>
-#endif
+#endif // not defined DUNE_DGFGRIDTYPE_HH

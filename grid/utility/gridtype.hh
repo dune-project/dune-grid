@@ -36,10 +36,8 @@
  * -# By defauly Dune::YaspGrid<2> is used.
  * -# For \c ALBERTAGRID or \c ALUGRID with \c dimworld=1 Dune::OneDGrid is used.
 
- * To reduce differences between seriell and parallel runs as much as possible
- * additional the Dune::MPIHelper class is used to toggle between serial and parallel
- * runs via specialization of this class for runs using MPI und such that
- * doesn't.
+ * To reduce differences between serial and parallel runs as much as possible,
+ * the Dune::MPIHelper class is used to toggle these runs.
  * To use this feature, the following code should always be called at the beginning
  * of the function main:
  * @code
