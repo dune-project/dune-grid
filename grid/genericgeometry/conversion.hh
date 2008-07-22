@@ -43,8 +43,8 @@ namespace Dune
                           || ((int)defaultType == (int)GeometryType :: cube),
                           "defaultType may only be a simplex or a cube." );
 
-      dune_static_assert( (DuneBaseGeometryType :: basicType == GeometryType :: simplex)
-                          || (DuneBaseGeometryType :: basicType == GeometryType :: cube),
+      dune_static_assert( ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex)
+                          || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube),
                           "Only prisms over simplices or cubes can be converted." );
 
     public:
@@ -54,7 +54,7 @@ namespace Dune
         basicType = (dimension == 1)
                     ? defaultType
                     : ((dimension == 2)
-                       || (DuneBaseGeometryType :: basicType == GeometryType :: cube))
+                       || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube))
                     ? GeometryType :: cube
                     : GeometryType :: prism
       };
