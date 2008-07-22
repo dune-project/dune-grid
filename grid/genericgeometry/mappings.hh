@@ -3,6 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_MAPPINGS_HH
 #define DUNE_GENERICGEOMETRY_MAPPINGS_HH
 
+#include <dune/common/smallobject.hh>
+
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
@@ -166,7 +168,8 @@ namespace Dune
     template< class Topology, class CoordTraits,
         template< class > class Caching = ComputeAll >
     class CachedMapping
-      : public Mapping< CornerMapping< Topology, CoordTraits > >
+      : public Mapping< CornerMapping< Topology, CoordTraits > >,
+        public SmallObject
     {
       typedef Mapping< CornerMapping< Topology,CoordTraits > > BaseType;
       typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;

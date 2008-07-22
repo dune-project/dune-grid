@@ -4,6 +4,7 @@
 #define DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 
 #include <dune/common/geometrytype.hh>
+#include <dune/common/smallobject.hh>
 
 #include <dune/grid/genericgeometry/submapping.hh>
 
@@ -25,6 +26,7 @@ namespace Dune
 
     template< unsigned int DimG, class CoordTraits, template< class > class Caching >
     class HybridMapping
+      : public SmallObject
     {
       typedef HybridMapping< DimG, CoordTraits, Caching > ThisType;
 
