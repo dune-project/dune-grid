@@ -5,6 +5,7 @@
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
+#include <dune/grid/genericgeometry/conversion.hh>
 
 namespace Dune
 {
@@ -153,6 +154,13 @@ namespace Dune
         typedef VirtualMapping< SubTopology, CoordTraits, Caching > type;
       };
 
+      template< GeometryType :: BasicType btype >
+      struct VirtualMapping
+      {
+        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
+      };
+
       typedef HybridSubMapping SubMapping;
     };
 
@@ -174,6 +182,13 @@ namespace Dune
         typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type
         SubTopology;
         typedef VirtualMapping< SubTopology, CoordTraits, Caching > type;
+      };
+
+      template< GeometryType :: BasicType btype >
+      struct VirtualMapping
+      {
+        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
       };
 
       template< bool >

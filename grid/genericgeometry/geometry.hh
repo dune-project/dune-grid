@@ -77,6 +77,62 @@ namespace Dune
        {};
      */
 
+
+
+    // MappingProvider
+    // ---------------
+
+    template< class ElementMapping, unsigned int codim >
+    class MappingProvider
+    {
+      typedef GenericGeometry :: SubMappingTraits< ElementMapping, codim > SubMappingTraits;
+      typedef typename SubMappingTraits :: SubMapping Mapping;
+
+    public:
+      template< GeometryType :: BasicType type, class CoordVector >
+      static Mapping *mapping ( const CoordVector &coords,
+                                const CachingType &cache )
+      {
+        typedef typename SubMappingTraits :: template VirtualMapping< type > :: type
+        VirtualMapping;
+        return VirtualMapping( coords, cache );
+      }
+
+      template< class CoordVector >
+      static Mapping *mapping ( const GeometryType &type,
+                                const CoordVector &coords,
+                                const CachingType &cache )
+      {
+        assert( type.dim() == Mapping :: dimG );
+
+        if( SubMappingTraits :: isVirtual )
+        {
+          switch( type.basicType() )
+          {
+          case GeometryType :: simplex :
+            return virtualMapping< GeometryType :: simplex, CoordVector >( coords, cache );
+
+          case GeometryType :: cube :
+            return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
+
+          case GeometryType :: prism :
+            return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
+
+          case GeometryType :: pyramid :
+            return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
+          }
+        }
+        else
+          return new Mapping( coords, cache );
+      }
+
+    };
+
+
+
+    // Geometry
+    // --------
+
     template< int mydim, int cdim, class GridImp >
     class Geometry :
       public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
@@ -106,120 +162,114 @@ namespace Dune
       struct Hybrid
       {
         typedef HybridMapping< dimGrid, CoordTraits, Traits :: template Caching >
-        GeometryType;
+        Mapping;
       };
 
       template< bool >
       struct NonHybrid
       {
         typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef CachedMapping< Topology, CoordTraits, Traits :: template Caching >
-        GeometryType;
+        typedef GenericGeometry :: Mapping< Topology, CoordTraits, Traits :: template Caching >
+        Mapping;
       };
 
-      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: GeometryType
-      ElementGeometryType;
-      typedef typename ElementGeometryType :: template Codim <codimension> :: SubMapping
-      GeometryType;
+      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
+      ElementMapping;
+      typedef GenericGeometry :: MappingProvider< ElementMapping, codim > MappingProvider;
+      typedef typename MappingProvider :: Mapping Mapping;
 
-      mutable GeometryType *geometry_;
+      mutable Mapping *mapping_;
 
     public:
-      template< class CoordVector >
-      explicit Geometry ( const CoordVector& coord)
-        : geometry_( new GeometryType(coord) )
-      {}
-      explicit Geometry ( GeometryType& geometry)
-        : geometry_( &geometry )
+      explicit Geometry ( Mapping &mapping )
+        : mapping_( &mapping )
       {}
 
-      /*
-         template< class GeoClass >
-         explicit Geometry ( const GeoClass &geo,
-                          const CachingType &cache = CachingType() )
-         : geometry_( GeometryProvider :: geometry( geo,geo.type(),cache ) ) // ???
-         {}
-       */
+      template< class CoordVector >
+      Geometry ( const GeometryType &type,
+                 const CoordVector &coords,
+                 const CachingType &cache = CachingType() )
+        : mapping_( MappingProvider :: mapping( type, coords, cache ) )
+      {}
 
       /*
          typedef typename Traits::Caching Caching;
          template< int fatherdim >
-         explicit Geometry ( const Geometry<fatherdim,cdim,GridImp> &father,
-                          int i,
-                          const Caching &cache = Caching() )
-         : geometry_( father.geometry().subMapping<fatherdim-mydim>(i,cache) )
+         Geometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
+                 const CachingType &cache = CachingType() )
+         : mapping_( father.mapping().subMapping< fatherdim-mydim >( i, cache ) )
          {}
        */
 
       Geometry ( const Geometry &other )
-        : geometry_( other.geometry_ )
+        : mapping_( other.mapping_ )
       {
-        other.geometry_ = 0;
+        other.mapping_ = 0;
       }
 
       ~Geometry ()
       {
-        if( geometry_ != 0 )
-          delete geometry_;
+        if( mapping_ != 0 )
+          delete mapping_;
       }
 
-      Dune :: GeometryType type () const
+      GeometryType type () const
       {
-        return geometry().type();
+        return mapping().type();
       }
 
       int corners () const
       {
-        return geometry().corners();
+        return Mapping().corners();
       }
 
       const GlobalCoordinate &operator[] ( int i ) const
       {
-        return geometry()[ i ];
+        return mapping()[ i ];
       }
 
       GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
-        return geometry().global( local );
+        return mapping().global( local );
       }
 
       LocalCoordinate local ( const GlobalCoordinate &global ) const
       {
-        return geometry().local( global );
+        return mapping().local( global );
       }
 
       bool checkInside ( const LocalCoordinate &local ) const
       {
-        return geometry().checkInside( local );
+        return mapping().checkInside( local );
       }
 
       bool affine () const
       {
-        return geometry().affine();
+        return mapping().affine();
       }
 
       ctype integrationElement ( const LocalCoordinate &local ) const
       {
-        return geometry().integrationElement( local );
+        return mapping().integrationElement( local );
       }
 
       ctype volume () const
       {
-        return geometry().volume();
+        return mapping().volume();
       }
 
       const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
-        return geometry().jacobianInverseTransposed( local );
+        return mapping().jacobianInverseTransposed( local );
       }
 
       template <int,int,class>
       friend class Geometry;
 
     private:
-      const GeometryType &geometry () const
+      const Mapping &mapping () const
       {
-        return *geometry_;
+        return *mapping_;
       }
     };
   }
