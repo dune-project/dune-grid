@@ -502,6 +502,11 @@ namespace Dune
         return *(coords_[ i ]);
       }
 
+      int corners () const
+      {
+        return numCorners;
+      }
+
       GlobalCoordType global( const LocalCoordType &x ) const
       {
         GlobalCoordType p;

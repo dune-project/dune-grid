@@ -21,20 +21,18 @@ namespace Dune
     // Mapping
     // -------
 
-    template< class BaseMapping, class CoordTraits >
+    template< class BaseMapping >
     class Mapping;
 
     template< class Topology, class CoordTraits >
-    class Mapping<CornerMapping< Topology, CoordTraits >,CoordTraits>
+    class Mapping< CornerMapping< Topology, CoordTraits > >
       : public CornerMapping< Topology, CoordTraits >
     {
-      typedef Mapping<CornerMapping< Topology, CoordTraits >,CoordTraits> ThisType;
-
-      // typedef Mapping< Topology, CoordTraits > ThisType;
       typedef CornerMapping< Topology, CoordTraits > BaseType;
+      typedef Mapping< BaseType > ThisType;
 
     public:
-      typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
+      typedef typename BaseType :: Traits Traits;
 
       enum { dimG = Traits :: dimG };
       enum { dimW = Traits :: dimW };
@@ -44,10 +42,7 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { numCorners = Topology :: numCorners };
-
-      typedef GenericGeometry :: GenericMapping< Topology, Traits > GenericMapping;
-      typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
+      typedef typename BaseType :: ReferenceElement ReferenceElement;
 
     protected:
       mutable JacobianType jTInv_;
@@ -69,6 +64,7 @@ namespace Dune
       {}
 
       using BaseType :: operator[];
+      using BaseType :: corners;
       using BaseType :: affine;
       using BaseType :: global;
       using BaseType :: jacobianT;
@@ -77,11 +73,6 @@ namespace Dune
       {
         return DuneGeometryType< Topology,
             Dune::GeometryType::BasicType(CoordTraits::oneDType) > :: type();
-      }
-
-      int corners () const
-      {
-        return numCorners;
       }
 
       // additional methods
@@ -175,9 +166,9 @@ namespace Dune
     template< class Topology, class CoordTraits,
         template< class > class Caching = ComputeAll >
     class CachedMapping
-      : public Mapping< CornerMapping<Topology,CoordTraits>, CoordTraits >
+      : public Mapping< CornerMapping< Topology, CoordTraits > >
     {
-      typedef Mapping< CornerMapping<Topology,CoordTraits>, CoordTraits > BaseType;
+      typedef Mapping< CornerMapping< Topology,CoordTraits > > BaseType;
       typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;
 
       typedef CachedMappingTraits< Topology :: dimension, CoordTraits, Caching > Traits;
