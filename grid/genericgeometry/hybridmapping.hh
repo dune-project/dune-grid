@@ -72,6 +72,9 @@ namespace Dune
 
       virtual const JacobianType &
       jacobianInverseTransposed ( const LocalCoordType &local ) const = 0;
+
+      virtual GlobalCoordType
+      normal ( int face, const LocalCoordType &local ) const = 0;
     };
 
 
@@ -166,6 +169,12 @@ namespace Dune
       jacobianInverseTransposed ( const LocalCoordType &local ) const
       {
         return mapping_.jacobianInverseTransposed( local );
+      }
+
+      virtual GlobalCoordType
+      normal ( int face, const LocalCoordType &local ) const
+      {
+        return mapping_.normal( face , local );
       }
 
       template< unsigned int codim >

@@ -425,7 +425,7 @@ namespace Dune
             xb[ i ] = icxn * x[ i ];
           affine = BottomMapping :: Dphi_add( coords, xb, factor, J );
 
-          TopMapping :: phiaddd( coords, x, factor, q );
+          TopMapping :: phi_add( coords, x, factor, q );
           BottomMapping :: phi_add( coords, xb, -factor, q );
           xb *= factor;
           for( unsigned int j = 0; j < dim-1; ++j )

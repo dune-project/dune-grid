@@ -50,4 +50,13 @@ namespace Dune {
     }
     enum {correctJacobian=true};
   };
+  namespace GenericGeometry {
+    template <>
+    struct GeometryTraits<GridType> :
+      public DefaultGeometryTraits<
+          GridType::ctype,
+          GridType::dimension,
+          GridType::dimension>
+    {};
+  }
 }

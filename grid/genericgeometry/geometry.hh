@@ -64,9 +64,9 @@ namespace Dune
       };
       enum {dimGrid = gdim};
       //   hybrid   [ true if Codim 0 is hybrid ]
-      enum {hybrid  = true};
+      enum {hybrid  = false};
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      // enum {dunetype = GeometryType::simplex};
+      enum {dunetype = GeometryType::cube};
     };
 
     /*
@@ -83,30 +83,30 @@ namespace Dune
     // ---------------
 
     template< class ElementMapping, unsigned int codim >
-    class MappingProvider
+    struct MappingProvider
     {
       typedef GenericGeometry :: SubMappingTraits< ElementMapping, codim > SubMappingTraits;
       typedef typename SubMappingTraits :: SubMapping Mapping;
+      typedef typename SubMappingTraits :: CachingType CachingType;
 
-    public:
       template< GeometryType :: BasicType type, class CoordVector >
-      static Mapping *mapping ( const CoordVector &coords,
-                                const CachingType &cache )
+      static Mapping *virtualMapping ( const CoordVector &coords,
+                                       const CachingType &cache )
       {
         typedef typename SubMappingTraits :: template VirtualMapping< type > :: type
         VirtualMapping;
-        return VirtualMapping( coords, cache );
+        return new VirtualMapping( coords, cache );
       }
 
-      template< class CoordVector >
-      static Mapping *mapping ( const GeometryType &type,
-                                const CoordVector &coords,
-                                const CachingType &cache )
-      {
-        assert( type.dim() == Mapping :: dimG );
-
-        if( SubMappingTraits :: isVirtual )
+      template <bool>
+      struct Virtual {
+        template< class CoordVector >
+        static Mapping *mapping ( const GeometryType &type,
+                                  const CoordVector &coords,
+                                  const CachingType &cache )
         {
+          assert( type.dim() == Mapping :: dimG );
+
           switch( type.basicType() )
           {
           case GeometryType :: simplex :
@@ -122,8 +122,25 @@ namespace Dune
             return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
           }
         }
-        else
+      };
+
+      template <bool>
+      struct NonVirtual {
+        template< class CoordVector >
+        static Mapping *mapping ( const GeometryType &type,
+                                  const CoordVector &coords,
+                                  const CachingType &cache )
+        {
+          assert( type.dim() == Mapping :: dimG );
           return new Mapping( coords, cache );
+        }
+      };
+      template< class CoordVector >
+      static Mapping *mapping ( const GeometryType &type,
+                                const CoordVector &coords,
+                                const CachingType &cache )
+      {
+        return ProtectedIf<SubMappingTraits::isVirtual,Virtual,NonVirtual>::mapping(type,coords,cache);
       }
 
     };
@@ -152,7 +169,7 @@ namespace Dune
       typedef FieldMatrix< ctype, coorddimension,mydimension > Jacobian;
 
     private:
-      dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
+      dune_static_assert( (0 <= mydimension) && (mydimension <= int(dimGrid)),
                           "Invalid geometry dimension." );
       enum { codimension = dimGrid - mydimension };
 
@@ -168,15 +185,16 @@ namespace Dune
       template< bool >
       struct NonHybrid
       {
-        typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef GenericGeometry :: Mapping< Topology, CoordTraits, Traits :: template Caching >
+        typedef typename Convert< GeometryType::BasicType(Traits :: dunetype), dimGrid > :: type Topology;
+        typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
         Mapping;
       };
 
       typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
       ElementMapping;
-      typedef GenericGeometry :: MappingProvider< ElementMapping, codim > MappingProvider;
+      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
       typedef typename MappingProvider :: Mapping Mapping;
+      typedef typename MappingProvider :: CachingType CachingType;
 
       mutable Mapping *mapping_;
 
@@ -185,6 +203,11 @@ namespace Dune
         : mapping_( &mapping )
       {}
 
+      template< class GeoType >
+      Geometry ( const GeoType &coords,
+                 const CachingType &cache = CachingType() )
+        : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
+      {}
       template< class CoordVector >
       Geometry ( const GeometryType &type,
                  const CoordVector &coords,
@@ -192,14 +215,11 @@ namespace Dune
         : mapping_( MappingProvider :: mapping( type, coords, cache ) )
       {}
 
-      /*
-         typedef typename Traits::Caching Caching;
-         template< int fatherdim >
-         Geometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
+      template< int fatherdim >
+      Geometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
                  const CachingType &cache = CachingType() )
-         : mapping_( father.mapping().subMapping< fatherdim-mydim >( i, cache ) )
-         {}
-       */
+        : mapping_( father.mapping().template subMapping< fatherdim-mydim >( i, cache ) )
+      {}
 
       Geometry ( const Geometry &other )
         : mapping_( other.mapping_ )
@@ -220,7 +240,7 @@ namespace Dune
 
       int corners () const
       {
-        return Mapping().corners();
+        return mapping().corners();
       }
 
       const GlobalCoordinate &operator[] ( int i ) const
@@ -261,6 +281,11 @@ namespace Dune
       const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
         return mapping().jacobianInverseTransposed( local );
+      }
+
+      GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
+      {
+        return mapping().normal( face , local );
       }
 
       template <int,int,class>

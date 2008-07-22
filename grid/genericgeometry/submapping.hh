@@ -131,6 +131,13 @@ namespace Dune
 
       typedef HybridMapping< dimension - codim, CoordTraits, Caching > HybridSubMapping;
 
+      template< GeometryType :: BasicType btype >
+      struct VirtualMapping
+      {
+        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
+      };
+
       typedef HybridSubMapping SubMapping;
     };
 
