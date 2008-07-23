@@ -17,7 +17,7 @@
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
-#include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
+//#include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
 
 #include <dune/grid/psg/dgfgridtype.hh>
 //#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
@@ -234,10 +234,10 @@ try
 
   // create Grid from DGF parser
   GridPtr<GridType> grid( argv[ 1 ] );
-  // test(grid->leafView());
+  test(grid->leafView());
 
-  GeometryGrid<GridType> ggrid(*grid);
-  test(ggrid.leafView());
+  //GeometryGrid<GridType> ggrid(*grid);
+  //test(ggrid.leafView());
 
   if ( phiErr>0) {
     std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
@@ -266,8 +266,8 @@ try
 #if HAVE_GRAPE
   // GrapeGridDisplay<GridType> disp(*grid);
   // disp.display();
-  GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
-  disp.display();
+  //GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
+  //disp.display();
 #endif
 }
 catch( const Exception &e )
