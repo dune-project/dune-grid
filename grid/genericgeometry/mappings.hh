@@ -47,11 +47,13 @@ namespace Dune
       typedef typename BaseType :: ReferenceElement ReferenceElement;
 
     protected:
+      enum { numNormals = ReferenceElement :: numNormals };
+
       mutable JacobianType jTInv_;
       mutable FieldType intEl_;
-      mutable GlobalCoordType faceNormal_[Size<Topology,1>::value];
+      mutable GlobalCoordType faceNormal_[ numNormals ];
       mutable bool jTInvComputed, intElComputed;
-      mutable FieldVector<bool,Size<Topology,1>::value> normalComputed;
+      mutable FieldVector< bool, numNormals > normalComputed;
 
       using BaseType :: jT_;
       using BaseType :: jTComputed;
@@ -272,8 +274,7 @@ namespace Dune
       template< unsigned int codim >
       typename Codim< codim > :: SubMapping *
       subMapping ( unsigned int i,
-                   const typename Codim< codim > :: CachingType &cache
-                     = typename Codim< codim > :: CachingType() ) const
+                   const typename Codim< codim > :: CachingType &cache ) const
       {
         return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
       }

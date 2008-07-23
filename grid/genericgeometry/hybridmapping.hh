@@ -77,6 +77,19 @@ namespace Dune
 
       virtual GlobalCoordType
       normal ( int face, const LocalCoordType &local ) const = 0;
+
+      template< unsigned int codim >
+      typename Codim< codim > :: SubMapping *
+      subMapping ( unsigned int i,
+                   const typename Codim< codim > :: CachingType &cache ) const
+      {
+        typedef typename Codim< codim > :: SubMapping SubMapping;
+        return reinterpret_cast< SubMapping * >( subMapping( codim, i, &cache ) );
+      }
+
+    protected:
+      virtual void *
+      subMapping ( unsigned int codim, unsigned int i, const void *cache ) const = 0;
     };
 
 
@@ -182,10 +195,81 @@ namespace Dune
       template< unsigned int codim >
       typename Codim< codim > :: SubMapping *
       subMapping ( unsigned int i,
-                   const typename Codim< codim > :: CachingType &cache
-                     = typename Codim< codim > :: CachingType() ) const
+                   const typename Codim< codim > :: CachingType &cache ) const
       {
         return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
+      }
+
+    private:
+      class CodimCaller;
+
+    protected:
+      void *subMapping ( unsigned int codim, unsigned int i, const void *cache ) const
+      {
+        return CodimCaller :: subMapping ( *this, codim, i, cache );
+      }
+    };
+
+
+    template< class Topology, class CoordTraits, template< class > class Caching >
+    class VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller
+    {
+      typedef VirtualMapping< Topology, CoordTraits, Caching > Mapping;
+
+      struct CallerInterface;
+      template< int codim > struct CallerImplementation;
+
+      CallerInterface *caller_[ dimG ];
+
+      CodimCaller ()
+      {
+        ForLoop< CallerImplementation, 0, dimG > :: apply( caller_ );
+      }
+
+      static const CodimCaller &instance ()
+      {
+        static CodimCaller inst;
+        return inst;
+      }
+
+    public:
+      static void *
+      subMapping ( const Mapping &mapping, unsigned int codim, unsigned int i, const void *cache )
+      {
+        assert( codim <= dimG );
+        return instance().caller_[ codim ]->subMapping( mapping, i, cache );
+      }
+    };
+
+
+    template< class Topology, class CoordTraits, template< class > class Caching >
+    struct VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller :: CallerInterface
+    {
+      typedef VirtualMapping< Topology, CoordTraits, Caching > Mapping;
+
+      virtual ~CallerInterface ()
+      {}
+
+      virtual void *
+      subMapping ( const Mapping &mapping, unsigned int i, const void *cache ) const = 0;
+    };
+
+    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< int codim >
+    struct VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller :: CallerImplementation
+      : public CallerInterface
+    {
+      virtual void *
+      subMapping ( const Mapping &mapping, unsigned int i, const void *cache ) const
+      {
+        typedef typename Codim< (unsigned int) codim > :: CachingType CachingType;
+        const CachingType &caching = *reinterpret_cast< const CachingType * >( cache );
+        return mapping.template subMapping< codim >( i, caching );
+      }
+
+      static void apply ( CallerInterface *(&caller)[ dimG ] )
+      {
+        caller[ codim ] = new CallerImplementation< codim >;
       }
     };
 

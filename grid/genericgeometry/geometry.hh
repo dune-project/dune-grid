@@ -64,9 +64,9 @@ namespace Dune
       };
       enum {dimGrid = gdim};
       //   hybrid   [ true if Codim 0 is hybrid ]
-      enum {hybrid  = false};
+      enum {hybrid  = true};
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      enum {dunetype = GeometryType::cube};
+      //enum {dunetype = GeometryType::cube};
     };
 
     /*
@@ -98,51 +98,60 @@ namespace Dune
         return new VirtualMapping( coords, cache );
       }
 
-      template <bool>
-      struct Virtual {
-        template< class CoordVector >
-        static Mapping *mapping ( const GeometryType &type,
-                                  const CoordVector &coords,
-                                  const CachingType &cache )
-        {
-          assert( type.dim() == Mapping :: dimG );
+      template< bool > struct Virtual;
+      template< bool > struct NonVirtual;
 
-          switch( type.basicType() )
-          {
-          case GeometryType :: simplex :
-            return virtualMapping< GeometryType :: simplex, CoordVector >( coords, cache );
-
-          case GeometryType :: cube :
-            return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
-
-          case GeometryType :: prism :
-            return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
-
-          case GeometryType :: pyramid :
-            return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
-          }
-        }
-      };
-
-      template <bool>
-      struct NonVirtual {
-        template< class CoordVector >
-        static Mapping *mapping ( const GeometryType &type,
-                                  const CoordVector &coords,
-                                  const CachingType &cache )
-        {
-          assert( type.dim() == Mapping :: dimG );
-          return new Mapping( coords, cache );
-        }
-      };
       template< class CoordVector >
       static Mapping *mapping ( const GeometryType &type,
                                 const CoordVector &coords,
                                 const CachingType &cache )
       {
-        return ProtectedIf<SubMappingTraits::isVirtual,Virtual,NonVirtual>::mapping(type,coords,cache);
+        typedef ProtectedIf< SubMappingTraits :: isVirtual, Virtual, NonVirtual > Switch;
+        return Switch :: mapping( type, coords, cache );
       }
+    };
 
+    template< class ElementMapping, unsigned int codim >
+    template< bool >
+    struct MappingProvider< ElementMapping, codim > :: Virtual
+    {
+      template< class CoordVector >
+      static Mapping *
+      mapping ( const GeometryType &type, const CoordVector &coords, const CachingType &cache )
+      {
+        assert( type.dim() == Mapping :: dimG );
+
+        switch( type.basicType() )
+        {
+        case GeometryType :: simplex :
+          return virtualMapping< GeometryType :: simplex, CoordVector >( coords, cache );
+
+        case GeometryType :: cube :
+          return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
+
+        case GeometryType :: prism :
+          return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
+
+        case GeometryType :: pyramid :
+          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
+
+        default :
+          DUNE_THROW( RangeError, "Unknown basic geometry type: " << type.basicType() );
+        }
+      }
+    };
+
+    template< class ElementMapping, unsigned int codim >
+    template< bool >
+    struct MappingProvider< ElementMapping, codim > :: NonVirtual
+    {
+      template< class CoordVector >
+      static Mapping *
+      mapping ( const GeometryType &type, const CoordVector &coords, const CachingType &cache )
+      {
+        assert( type.dim() == Mapping :: dimG );
+        return new Mapping( coords, cache );
+      }
     };
 
 
