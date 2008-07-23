@@ -2,8 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+//#define DUNE_THROW(E, m) assert(0)
+
 #include <dune/common/exceptions.hh>
-#define DUNE_THROW(E, m) assert(0)
 
 #include <dune/grid/alugrid/3d/topology.hh>
 
@@ -12,11 +13,14 @@
 #include "../geometry.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
+
+#if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+#endif
 // #include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
 
-// #include <dune/grid/psg/dgfgridtype.hh>
-#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dune/grid/psg/dgfgridtype.hh>
+//#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 
 #include "testgeo.hh"
 
@@ -216,7 +220,8 @@ void test(const GridViewType& view) {
 }
 
 int main(int argc, char ** argv, char ** envp)
-try {
+try
+{
   // this method calls MPI_Init, if MPI is enabled
   // MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
   // int myrank = mpiHelper.rank();
@@ -257,21 +262,20 @@ try {
   }
   else std::cout << "ZERO ERRORS in mapping.normal!!!!!!!" << std::endl;
 
+#if HAVE_GRAPE
   // GrapeGridDisplay<GridType> disp(*grid);
   // disp.display();
   // GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
   // disp.display();
+#endif
 }
-catch (Dune::Exception &e) {
-  std::cerr << e << std::endl;
+catch( const Exception &e )
+{
+  std :: cerr << e << std :: endl;
   return 1;
 }
-/*
-   catch( PSG :: Exception &e ) {
-   std :: cerr << e << std :: endl;
-   }
- */
-catch (...) {
-  std::cerr << "Generic exception!" << std::endl;
+catch( ... )
+{
+  std :: cerr << "Unknown exception raised." << std :: endl;
   return 1;
 }
