@@ -3,11 +3,14 @@
 namespace Dune {
   template <int d1,int d2> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
+  template< int dim, int dimworld > class ALUSimplexGrid;
   template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
   template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
   template <int dim> class UGGrid;
+
   template <class Grid>
   struct Topology;
+
   template <int d>
   struct Topology<YaspGrid<d,d> > {
     typedef typename GenericGeometry::Convert< GeometryType :: cube , d >::type Type;
@@ -42,6 +45,16 @@ namespace Dune {
     }
     enum {correctJacobian=false};
   };
+  template<>
+  struct Topology< ALUSimplexGrid< 3, 3 > >
+  {
+    typedef GenericGeometry :: Convert< GeometryType :: simplex, 3 > :: type Type;
+    static int faceNr( int duneFN )
+    {
+      return 3 - duneFN;
+    }
+    enum {correctJacobian=false};
+  };
   template <int d1,int d2,class CCOMM>
   struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
     typedef typename GenericGeometry::Convert< GeometryType :: simplex , d1 >::type Type;
@@ -51,12 +64,12 @@ namespace Dune {
     enum {correctJacobian=true};
   };
   namespace GenericGeometry {
-    template <>
-    struct GeometryTraits<GridType> :
+    template <class Grid>
+    struct GeometryTraits :
       public DefaultGeometryTraits<
-          GridType::ctype,
-          GridType::dimension,
-          GridType::dimension>
+          typename Grid::ctype,
+          Grid::dimension,
+          Grid::dimensionworld>
     {};
   }
 }

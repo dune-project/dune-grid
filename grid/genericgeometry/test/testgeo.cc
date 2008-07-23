@@ -17,7 +17,7 @@
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
-// #include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
+#include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
 
 #include <dune/grid/psg/dgfgridtype.hh>
 //#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
@@ -189,18 +189,19 @@ void test(const GridViewType& view) {
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geoDune = eIt->geometry();
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
-    GenericGeometry::Geometry<3,3,GridType> genericMap(geoDune.type(),geoDune);
+    GenericGeometry::Geometry<GridType::dimension,GridType::dimensionworld,GridType> genericMap(geoDune.type(),geoDune);
     testGeo(geoDune,genericMap);
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
     //  SubGeometryType;
-    typedef typename GenericGeometry :: Geometry< 2,3,GridType > SubGeometryType;
+    typedef typename GenericGeometry :: Geometry< GridType::dimension-1,GridType::dimensionworld,GridType > SubGeometryType;
     IIteratorType iiter = view.ibegin(*eIt);
     for (; iiter != view.iend(*eIt); ++ iiter) {
       typedef FieldVector<double, GeometryType::mydimension> LocalType;
       typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
+      iiter->intersectionSelfLocal();
       LocalFaceType xf(0.1);
-      LocalType xx(iiter->intersectionSelfLocal().global(xf));
+      LocalType xx( iiter->intersectionSelfLocal().global(xf));
       const GlobalType& n  = iiter->integrationOuterNormal(xf);
       const int correctFaceNr = ConversionType::faceNr(iiter->numberInSelf());
       const GlobalType& nM = genericMap.normal(correctFaceNr,xx);
@@ -233,10 +234,10 @@ try
 
   // create Grid from DGF parser
   GridPtr<GridType> grid( argv[ 1 ] );
-  test(grid->leafView());
+  // test(grid->leafView());
 
-  // GeometryGrid<GridType> ggrid(*grid);
-  // test(ggrid.leafView());
+  GeometryGrid<GridType> ggrid(*grid);
+  test(ggrid.leafView());
 
   if ( phiErr>0) {
     std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
@@ -265,8 +266,8 @@ try
 #if HAVE_GRAPE
   // GrapeGridDisplay<GridType> disp(*grid);
   // disp.display();
-  // GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
-  // disp.display();
+  GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
+  disp.display();
 #endif
 }
 catch( const Exception &e )

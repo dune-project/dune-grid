@@ -51,6 +51,7 @@ namespace Dune
     template <class ctype,int gdim,int cdim>
     struct DefaultGeometryTraits {
       typedef DefaultCoordTraits<ctype,cdim> CoordTraits;
+      typedef DefaultCoordTraits<ctype,gdim> LocalCoordTraits;
       template <class Traits>
       struct Caching {
         enum {jTCompute = geoCompute,
@@ -66,7 +67,7 @@ namespace Dune
       //   hybrid   [ true if Codim 0 is hybrid ]
       enum {hybrid  = true};
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      //enum {dunetype = GeometryType::cube};
+      // enum {dunetype = GeometryType::simplex};
     };
 
     /*
@@ -128,13 +129,13 @@ namespace Dune
 
         case GeometryType :: cube :
           return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
+        /*
+           case GeometryType :: prism:
+           return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
 
-        case GeometryType :: prism :
-          return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
-
-        case GeometryType :: pyramid :
-          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
-
+           case GeometryType :: pyramid:
+           return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
+         */
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type.basicType() );
         }
@@ -213,8 +214,8 @@ namespace Dune
       {}
 
       template< class GeoType >
-      Geometry ( const GeoType &coords,
-                 const CachingType &cache = CachingType() )
+      explicit Geometry ( const GeoType &coords,
+                          const CachingType &cache = CachingType() )
         : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
       {}
       template< class CoordVector >
@@ -237,6 +238,153 @@ namespace Dune
       }
 
       ~Geometry ()
+      {
+        if( mapping_ != 0 )
+          delete mapping_;
+      }
+
+      GeometryType type () const
+      {
+        return mapping().type();
+      }
+
+      int corners () const
+      {
+        return mapping().corners();
+      }
+
+      const GlobalCoordinate &operator[] ( int i ) const
+      {
+        return mapping()[ i ];
+      }
+
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        return mapping().global( local );
+      }
+
+      LocalCoordinate local ( const GlobalCoordinate &global ) const
+      {
+        return mapping().local( global );
+      }
+
+      bool checkInside ( const LocalCoordinate &local ) const
+      {
+        return mapping().checkInside( local );
+      }
+
+      bool affine () const
+      {
+        return mapping().affine();
+      }
+
+      ctype integrationElement ( const LocalCoordinate &local ) const
+      {
+        return mapping().integrationElement( local );
+      }
+
+      ctype volume () const
+      {
+        return mapping().volume();
+      }
+
+      const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
+      {
+        return mapping().jacobianInverseTransposed( local );
+      }
+
+      GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
+      {
+        return mapping().normal( face , local );
+      }
+
+      template <int,int,class>
+      friend class Geometry;
+
+    private:
+      const Mapping &mapping () const
+      {
+        return *mapping_;
+      }
+    };
+    template< int mydim, int cdim, class GridImp >
+    class LocalGeometry :
+      public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
+    {
+      typedef GeometryTraits< GridImp > Traits;
+
+      enum { dimGrid = Traits :: dimGrid };
+
+    public:
+      enum { mydimension = mydim };
+      enum { coorddimension = cdim };
+
+      typedef typename GridImp :: ctype ctype;
+
+      typedef FieldVector< ctype, mydimension > LocalCoordinate;
+      typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+      typedef FieldMatrix< ctype, coorddimension,mydimension > Jacobian;
+
+    private:
+      dune_static_assert( (0 <= mydimension) && (mydimension <= int(dimGrid)),
+                          "Invalid geometry dimension." );
+      enum { codimension = dimGrid - mydimension };
+
+      typedef typename Traits :: LocalCoordTraits CoordTraits;
+
+      template< bool >
+      struct Hybrid
+      {
+        typedef HybridMapping< dimGrid, CoordTraits, Traits :: template Caching >
+        Mapping;
+      };
+
+      template< bool >
+      struct NonHybrid
+      {
+        typedef typename Convert< GeometryType::BasicType(Traits :: dunetype), dimGrid > :: type Topology;
+        typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
+        Mapping;
+      };
+
+      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
+      ElementMapping;
+      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
+      typedef typename MappingProvider :: Mapping Mapping;
+      typedef typename MappingProvider :: CachingType CachingType;
+
+      mutable Mapping *mapping_;
+
+    public:
+      explicit LocalGeometry ( Mapping &mapping )
+        : mapping_( &mapping )
+      {}
+
+      template< class GeoType >
+      explicit LocalGeometry ( const GeoType &coords,
+                               const CachingType &cache = CachingType() )
+        : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
+      {}
+      template< class CoordVector >
+      LocalGeometry ( const GeometryType &type,
+                      const CoordVector &coords,
+                      const CachingType &cache = CachingType() )
+        : mapping_( MappingProvider :: mapping( type, coords, cache ) )
+      {}
+
+      template< int fatherdim >
+      LocalGeometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
+                      const CachingType &cache = CachingType() )
+        : mapping_( father.mapping().template subMapping< fatherdim-mydim >( i, cache ) )
+      {}
+
+      LocalGeometry ( const LocalGeometry &other )
+        : mapping_( other.mapping_ )
+      {
+        other.mapping_ = 0;
+      }
+
+      ~LocalGeometry ()
       {
         if( mapping_ != 0 )
           delete mapping_;

@@ -170,8 +170,8 @@ namespace Dune
     template< class Topology, class CoordTraits,
         template< class > class Caching = ComputeAll >
     class CachedMapping
-      : public Mapping< CornerMapping< Topology, CoordTraits > >,
-        public SmallObject
+      : public Mapping< CornerMapping< Topology, CoordTraits > >
+        , public SmallObject
     {
       typedef Mapping< CornerMapping< Topology,CoordTraits > > BaseType;
       typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;
