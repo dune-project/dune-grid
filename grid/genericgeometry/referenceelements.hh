@@ -426,12 +426,12 @@ namespace Dune
       static void apply ( CoordinateType (&baryCenters)[ Size ] )
       {
         typedef SubTopologyNumbering< Topology, codim, dimension - codim > Numbering;
+        typedef SubTopologySize< Topology, codim, dimension - codim > Size;
 
         CoordinateType &x = baryCenters[ i ];
-        Corner< Topology > :: evaluate( 0, x );
-
-        const unsigned int numCorners = Corner< Topology > :: numCorners;
-        for( unsigned int k = 1; k < numCorners; ++k )
+        x = 0;
+        const unsigned int numCorners = Size :: size( i );
+        for( unsigned int k = 0; k < numCorners; ++k )
         {
           unsigned int j = Numbering :: number( i, k );
 
