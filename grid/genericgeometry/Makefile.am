@@ -2,6 +2,7 @@ genericgeometrydir = $(includedir)/dune/grid/genericgeometry
 genericgeometry_HEADERS = codimtable.hh \
                           conversion.hh \
 			  cornermapping.hh \
+			  genericreferenceelement.hh \
 			  geometry.hh \
 			  hybridmapping.hh \
 			  mappings.hh \

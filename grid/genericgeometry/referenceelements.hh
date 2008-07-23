@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GENERICGEOMETRY_REFERENCEELEMENT_HH
-#define DUNE_GENERICGEOMETRY_REFERENCEELEMENT_HH
+#ifndef DUNE_GENERICGEOMETRY_REFERENCEELEMENTS_HH
+#define DUNE_GENERICGEOMETRY_REFERENCEELEMENTS_HH
 
 #include <dune/common/fvector.hh>
 
@@ -362,6 +362,12 @@ namespace Dune
         return Volume< Topology > :: template evaluate< ctype >();
       }
 
+      static const ReferenceElement &instance ()
+      {
+        static ReferenceElement inst;
+        return inst;
+      }
+
     private:
       template< int codim >
       class BaryCenterArray;
@@ -372,12 +378,6 @@ namespace Dune
           Corner< Topology > :: evaluate( i, corners_[ i ] );
         for( unsigned int i = 0; i < numNormals; ++i )
           IntegrationOuterNormal< Topology > :: evaluate( i, normals_[ i ] );
-      }
-
-      static const ReferenceElement &instance ()
-      {
-        static ReferenceElement inst;
-        return inst;
       }
 
       CoordinateType corners_[ numCorners ];
@@ -444,154 +444,6 @@ namespace Dune
     };
 
   }
-
-
-
-  template< class ctype, int dim >
-  class GenericReferenceElement
-  {
-    class SubEntityInfo;
-    template< int codim > struct Initialize;
-
-    std :: vector< SubEntityInfo > info_[ dim+1 ];
-    double volume_;
-
-  public:
-    int size ( int c ) const
-    {
-      assert( (c >= 0) && (c <= dim) );
-      return info_[ c ].size();
-    }
-
-    int size ( int i, int c, int cc )
-    {
-      assert( (c >= 0) && (c <= dim) );
-      return info_[ c ][ i ].size( cc );
-    }
-
-    int subEntity ( int i, int c, int ii, int cc ) const
-    {
-      assert( (c >= 0) && (c <= dim) );
-      return info_[ c ][ i ].number( ii, cc );
-    }
-
-    const FieldVector< ctype, dim > &position( int i, int c ) const
-    {
-      assert( (c >= 0) && (c <= dim) );
-      return info_[ c ][ i ].position();
-    }
-
-    template< int codim >
-    FieldVector< ctype, dim >
-    global( const FieldVector< ctype, dim-codim > &local, int i, int c ) const
-    {
-      // todo: implement this function
-      return position( i, c );
-    }
-
-    GeometryType type ( int i, int c ) const
-    {
-      assert( (c >= 0) && (c <= dim) );
-      return info_[ c ][ i ].type();
-    }
-
-    double volume () const
-    {
-      return volume_;
-    }
-
-    template< class Topology >
-    void initialize ( const GenericGeometry :: ReferenceElement< Topology, ctype > &refElement )
-    {
-      GenericGeometry :: ForLoop< Initialize, 0, dim > :: apply( refElement, info_ );
-      volume_ = GenericGeometry :: Volume< Topology > :: template evaluate< double >();
-    }
-  };
-
-  template< class ctype, int dim >
-  class GenericReferenceElement< ctype, dim > :: SubEntityInfo
-  {
-    template< int codim > struct Initialize
-    {
-      template< int subcodim > struct SubCodim;
-    };
-
-    int codim_;
-    std :: vector< int > numbering_[ dim+1 ];
-    FieldVector< ctype, dim > baryCenter_;
-    GeometryType type_;
-
-  public:
-    int size ( int cc ) const
-    {
-      assert( (cc >= codim_) && (cc <= dim) );
-      return numbering_[ cc ].size();
-    }
-
-    int number ( int ii, int cc ) const
-    {
-      assert( (cc >= codim_) && (cc <= dim) );
-      return numbering_[ cc ][ ii ];
-    }
-
-    const FieldVector< ctype, dim > &position () const
-    {
-      return baryCenter_;
-    }
-
-    GeometryType type () const
-    {
-      return type_;
-    }
-
-    template< class Topology, int codim >
-    void
-    initialize ( const GenericGeometry :: ReferenceElement< Topology, ctype > &refElement,
-                 unsigned int i )
-    {
-      GenericGeometry :: ForLoop< Initialize< codim > :: template SubCodim, 0, dim-codim >
-      :: apply( refElement, i, numbering_ );
-      baryCenter_ = refElement.template baryCenter< codim >( i );
-      type_ = GenericGeometry :: DuneGeometryType< Topology, GeometryType :: simplex > :: type();
-    }
-  };
-
-  template< class ctype, int dim >
-  template< int codim >
-  template< int subcodim >
-  struct GenericReferenceElement< ctype, dim > :: SubEntityInfo :: Initialize< codim > :: SubCodim
-  {
-    template< class Topology >
-    static void
-    apply ( const GenericGeometry :: ReferenceElement< Topology, ctype > &refElement,
-            int i,
-            std :: vector< int > (&numbering)[ dim+1 ] )
-    {
-      const unsigned int size = refElement.template size< codim, subcodim >( i );
-      numbering[ codim+subcodim ].resize( size );
-      for( unsigned int j = 0; j < size; ++j )
-      {
-        numbering[ codim+subcodim ][ j ]
-          = refElement.template subNumbering< codim, subcodim >[ i ][ j ];
-      }
-    }
-  };
-
-  template< class ctype, int dim >
-  template< int codim >
-  struct GenericReferenceElement< ctype, dim > :: Initialize
-  {
-    template< class Topology >
-    static void
-    apply ( const GenericGeometry :: ReferenceElement< Topology, ctype > &refElement,
-            std :: vector< SubEntityInfo > (&info)[ dim+1 ] )
-    {
-      const unsigned int size = GenericGeometry :: Size< Topology, codim > :: value;
-      info[ codim ].resize( size );
-      for( unsigned int i = 0; i < size; ++i )
-        info[ codim ][ i ].template initialize< Topology, codim >( refElement, i );
-    }
-  };
 
 }
 
