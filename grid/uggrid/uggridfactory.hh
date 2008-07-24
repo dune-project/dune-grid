@@ -202,7 +202,12 @@ namespace Dune {
     virtual UGGrid<dimworld>* createGrid();
 
   private:
+    // Pointer to the grid being built
     UGGrid<dimworld>* grid_;
+
+    // True if the factory allocated the grid itself, false if the
+    // grid was handed over from the outside
+    bool factoryOwnsGrid_;
 
   };
 

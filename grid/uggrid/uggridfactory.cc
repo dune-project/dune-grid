@@ -8,6 +8,8 @@ GridFactory()
 {
   grid_ = new Dune::UGGrid<dimworld>;
 
+  factoryOwnsGrid_ = true;
+
   grid_->createBegin();
 }
 
@@ -17,6 +19,8 @@ GridFactory(UGGrid<dimworld>* grid)
 {
   grid_ = grid;
 
+  factoryOwnsGrid_ = false;
+
   grid_->createBegin();
 }
 
@@ -24,7 +28,7 @@ template <int dimworld>
 Dune::GridFactory<Dune::UGGrid<dimworld> >::
 ~GridFactory()
 {
-  if (grid_)
+  if (grid_ && factoryOwnsGrid_)
     delete grid_;
 }
 
@@ -55,6 +59,11 @@ template <int dimworld>
 Dune::UGGrid<dimworld>* Dune::GridFactory<Dune::UGGrid<dimworld> >::
 createGrid()
 {
+  // Prevent a crash when this method is called twice in a row
+  // You never know who may do this...
+  if (grid_==NULL)
+    return NULL;
+
   // finalize grid creation
   grid_->createEnd();
 
