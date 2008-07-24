@@ -1,13 +1,10 @@
 GEOMETRYTYPE = cube
 # GRIDTYPE = ALBERTAGRID
 GRIDTYPE = YASPGRID
-# GRIDTYPE = PARALLELSIMPLEXGRID
 # GRIDTYPE = UGGRID
 GRIDDIM = 3
 WORLDDIM = 3
 # DIMENSION = 3
-
-PSGINC = -I../../../../dune-psg/
 
 check_PROGRAMS = testsubtopologies testmapping testgeo
 

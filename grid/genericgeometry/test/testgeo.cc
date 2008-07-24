@@ -3,10 +3,7 @@
 #include <config.h>
 
 //#define DUNE_THROW(E, m) assert(0)
-
 #include <dune/common/exceptions.hh>
-
-#include <dune/grid/alugrid/3d/topology.hh>
 
 #include "../mappings.hh"
 #include "../conversion.hh"
@@ -17,10 +14,8 @@
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #endif
-//#include "../../../../dune-grid-dev-howto/grid/geometrygrid.hh"
 
-#include <dune/grid/psg/dgfgridtype.hh>
-//#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
 
 #include "testgeo.hh"
 
@@ -236,9 +231,6 @@ try
   GridPtr<GridType> grid( argv[ 1 ] );
   test(grid->leafView());
 
-  //GeometryGrid<GridType> ggrid(*grid);
-  //test(ggrid.leafView());
-
   if ( phiErr>0) {
     std::cout << phiErr << " errors occured in mapping.phi?" << std::endl;
   }
@@ -262,13 +254,6 @@ try
               << " errors occured in mapping.normal?" << std::endl;
   }
   else std::cout << "ZERO ERRORS in mapping.normal!!!!!!!" << std::endl;
-
-#if HAVE_GRAPE
-  // GrapeGridDisplay<GridType> disp(*grid);
-  // disp.display();
-  //GrapeGridDisplay<GeometryGrid<GridType> > disp(ggrid);
-  //disp.display();
-#endif
 }
 catch( const Exception &e )
 {
