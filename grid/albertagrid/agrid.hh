@@ -266,7 +266,7 @@ namespace Dune
     //! Note that if both methods are called on the same element, then
     //! call jacobianInverseTransposed first because integration element is calculated
     //! during calculation of the transposed of the jacobianInverse
-    const FieldMatrix<albertCtype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<albertCtype, mydim>& local) const;
+    const FieldMatrix<albertCtype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<albertCtype, mydim>& local) const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public
@@ -335,7 +335,7 @@ namespace Dune
     int vertex_;
 
     enum { matdim = (mydim > 0) ? mydim : 1 };
-    mutable FieldMatrix<albertCtype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
+    mutable FieldMatrix<albertCtype,cdim,matdim> Jinv_; //!< storage for inverse of jacobian
     mutable FieldMatrix<albertCtype,matdim,matdim> Mtmp_;    //!< storage for inverse of jacobian
 
     mutable FieldMatrix<albertCtype,cdim,mydim> elMat_; //!< storage for mapping matrix

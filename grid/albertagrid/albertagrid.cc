@@ -267,35 +267,6 @@ namespace Dune
 
     globalCoord_  = global;
     globalCoord_ -= coord_[0];
-
-    AT_x_ = FMatrixHelp::multTransposed(elMat_,globalCoord_);
-    localCoord_ = FMatrixHelp::mult(Jinv_,AT_x_);
-    return localCoord_;
-  }
-
-  template <>
-  inline FieldVector<albertCtype, 2> AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::
-  local(const FieldVector<albertCtype, 2>& global) const
-  {
-    if(!builtinverse_)
-      buildJacobianInverseTransposed();
-
-    globalCoord_  = global;
-    globalCoord_ -= coord_[0];
-    FMatrixHelp::multAssignTransposed(Jinv_,globalCoord_,localCoord_);
-
-    return localCoord_;
-  }
-
-  template <>
-  inline FieldVector<albertCtype, 3> AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::
-  local(const FieldVector<albertCtype, 3>& global) const
-  {
-    if(!builtinverse_)
-      buildJacobianInverseTransposed();
-
-    globalCoord_  = global;
-    globalCoord_ -= coord_[0];
     FMatrixHelp::multAssignTransposed(Jinv_,globalCoord_,localCoord_);
 
     return localCoord_;
@@ -369,10 +340,10 @@ namespace Dune
     return 1.0;
   }
 
-  // this method is for (dim==dimworld) = 2 and 3
-  template <>
-  inline void AlbertaGridGeometry<1,2,const AlbertaGrid<2,2> >::
-  buildJacobianInverseTransposed() const
+  // this method is for (mydim < cdim)
+  template< int mydim, int cdim, class GridImp >
+  inline void AlbertaGridGeometry< mydim, cdim, GridImp >
+  :: buildJacobianInverseTransposed () const
   {
     // calc A and stores it in elMat_
     calcElMatrix();
@@ -381,34 +352,18 @@ namespace Dune
     // calc ret = A^T*A
     FMatrixHelp::multTransposedMatrix(elMat_,elMatT_elMat_);
 
-    // calc Jinv_ = (A^T*A)^-1
-    std::abs( FMatrixHelp::invertMatrix(elMatT_elMat_,Jinv_) );
+    // calc Jinv_ = A (A^T*A)^-1
+    FieldMatrix< albertCtype, mydim, mydim > inv_elMatT_elMat;
+    FMatrixHelp :: invertMatrix( elMatT_elMat_, inv_elMatT_elMat );
+    FMatrixHelp :: multMatrix( elMat_, inv_elMatT_elMat, Jinv_ );
+
     builtinverse_ = true;
-    return;
   }
 
-  // this method is for (dim==dimworld) = 2 and 3
-  template <>
-  inline void AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::
-  buildJacobianInverseTransposed() const
-  {
-    // calc A and stores it in elMat_
-    calcElMatrix();
-    assert( builtElMat_ == true );
-
-    // calc ret = A^T*A
-    FMatrixHelp::multTransposedMatrix(elMat_,elMatT_elMat_);
-
-    // calc Jinv_ = (A^T*A)^-1
-    std::abs( FMatrixHelp::invertMatrix(elMatT_elMat_,Jinv_) );
-    builtinverse_ = true;
-    return;
-  }
-
-  // this method is for (dim==dimworld) = 2 and 3
-  template <int mydim, int cdim, class GridImp>
-  inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
-  buildJacobianInverseTransposed() const
+  // this method is for (mydim = cdim = 2)
+  template<>
+  inline void AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >
+  :: buildJacobianInverseTransposed () const
   {
     //******************************************************
     //
@@ -436,7 +391,39 @@ namespace Dune
 
     calcedDet_ = true;
     builtinverse_ = true;
-    return;
+  }
+
+  // this method is for (mydim = cdim = 2)
+  template<>
+  inline void AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >
+  :: buildJacobianInverseTransposed () const
+  {
+    //******************************************************
+    //
+    //  the mapping is:
+    //
+    //  F(T) = D where T is the reference element
+    //  and D the actual element
+    //
+    //  F(x) = A * x + b    with   A := ( P_0 , P_1 )
+    //
+    //  A consist of the column vectors P_0 and P_1 and
+    //  is calculated by the method calcElMatrix
+    //
+    //******************************************************
+
+    // calc A and stores it in elMat_
+    calcElMatrix();
+
+    // Jinv = A^-1^T
+    assert( builtElMat_ == true );
+    // here the transposed jacobian inverse is calculated
+    elDet_ = std::abs( FMatrixHelp::invertMatrix_retTransposed(elMat_,Jinv_) );
+
+    assert(elDet_ > 1.0E-25 );
+
+    calcedDet_ = true;
+    builtinverse_ = true;
   }
 
   template <int mydim, int cdim, class GridImp>
@@ -456,7 +443,7 @@ namespace Dune
   }
 
   template <int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<albertCtype,mydim,mydim>& AlbertaGridGeometry<mydim,cdim,GridImp>::
+  inline const FieldMatrix<albertCtype,cdim,mydim>& AlbertaGridGeometry<mydim,cdim,GridImp>::
   jacobianInverseTransposed (const FieldVector<albertCtype, mydim>& local) const
   {
     if(builtinverse_)
