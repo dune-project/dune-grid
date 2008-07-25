@@ -69,8 +69,11 @@ namespace Dune {
       // calc ret = A^T*A
       FMatrixHelp::multTransposedMatrix(A_,AT_A_);
 
-      // calc Jinv_ = (A^T*A)^-1
-      FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+      // calc Jinv_ = A (A^T*A)^-1
+      //FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+      FieldMatrix< alu3d_ctype, 2, 2 > inv_AT_A;
+      FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+      FMatrixHelp :: multMatrix( A_, inv_AT_A, Jinv_ );
 
       enum { dim = 3 };
 
@@ -103,8 +106,11 @@ namespace Dune {
       // calc ret = A^T*A
       FMatrixHelp::multTransposedMatrix(A_,AT_A_);
 
-      // calc Jinv_ = (A^T*A)^-1
-      FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+      // calc Jinv_ = A (A^T*A)^-1
+      //FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+      FieldMatrix< alu3d_ctype, 1, 1 > inv_AT_A;
+      FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+      FMatrixHelp :: multMatrix( A_, inv_AT_A, Jinv_ );
 
       // create vectors of face
       globalCoord_ = coord_[1] - coord_[0];
@@ -331,12 +337,15 @@ namespace Dune {
     globalCoord_  = global;
     globalCoord_ -= coord_[0];
 
+#if 0
     AT_x_ = 0.0;
     A_.umtv(globalCoord_,AT_x_);
 
     localCoord_ = 0.0;
     //multipy with transposed, because Jinv_ ist transposed
     Jinv_.umtv(AT_x_,localCoord_);
+#endif
+    FMatrixHelp :: multAssignTransposed( Jinv_, globalCoord_, localCoord_ );
     return localCoord_;
   }
 
@@ -444,7 +453,7 @@ namespace Dune {
   }
 
   template<> // dim = dimworld = 3
-  inline const FieldMatrix<alu3d_ctype,2,2> &
+  inline const FieldMatrix< alu3d_ctype, 3, 2 > &
   ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> >::
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
   {

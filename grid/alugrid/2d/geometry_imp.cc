@@ -222,8 +222,9 @@ namespace Dune {
     globalCoord_  = global;
     globalCoord_ -= coord_[0];
 
-    AT_x_ = FMatrixHelp::multTransposed(elMat_,globalCoord_);
-    localCoord_ = FMatrixHelp::mult(Jinv_,AT_x_);
+    //AT_x_ = FMatrixHelp::multTransposed(elMat_,globalCoord_);
+    //localCoord_ = FMatrixHelp::mult(Jinv_,AT_x_);
+    FMatrixHelp :: multAssignTransposed( Jinv_, globalCoord_, localCoord_ );
     return localCoord_;
   }
 
@@ -283,10 +284,12 @@ namespace Dune {
     // calc ret = A^T*A
     FMatrixHelp::multTransposedMatrix(elMat_,elMatT_elMat_);
 
-    // calc Jinv_ = (A^T*A)^-1
-    std::abs( FMatrixHelp::invertMatrix(elMatT_elMat_,Jinv_) );
+    // calc Jinv_ = A (A^T*A)^-1
+    FieldMatrix< alu2d_ctype, matdim, matdim > inv_elMatT_elMat;
+    FMatrixHelp::invertMatrix(elMatT_elMat_, inv_elMatT_elMat);
+    FMatrixHelp :: multMatrix( elMat_, inv_elMatT_elMat, Jinv_ );
+    //std::abs( FMatrixHelp::invertMatrix(elMatT_elMat_,Jinv_) );
     builtinverse_ = true;
-    return;
   }
 
   // this method is for (dim==dimworld) = 2
@@ -357,7 +360,7 @@ namespace Dune {
   }
 
   template <int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<alu2d_ctype,mydim,mydim>& ALU2dGridGeometry<mydim,cdim,GridImp>::
+  inline const FieldMatrix<alu2d_ctype,cdim,mydim>& ALU2dGridGeometry<mydim,cdim,GridImp>::
   jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const
   {
     if(builtinverse_)

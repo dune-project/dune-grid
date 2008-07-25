@@ -143,7 +143,7 @@ namespace Dune {
     alu2d_ctype volume () const;
 
     //! can only be called for dim=dimworld!
-    const FieldMatrix<alu2d_ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
+    const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public
@@ -204,7 +204,7 @@ namespace Dune {
     mutable FieldVector<alu2d_ctype, mydim> localCoord_;
 
     enum { matdim = (mydim > 0) ? mydim : 1 };
-    mutable FieldMatrix<alu2d_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
+    mutable FieldMatrix<alu2d_ctype,cdim,matdim> Jinv_; //!< storage for inverse of jacobian
     mutable FieldMatrix<alu2d_ctype,matdim,matdim> Mtmp_;    //!< storage for inverse of jacobian
 
     mutable FieldMatrix<alu2d_ctype,cdim,mydim> elMat_; //!< storage for mapping matrix

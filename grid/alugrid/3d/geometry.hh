@@ -95,7 +95,7 @@ namespace Dune {
     inline alu3d_ctype integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const;
 
     //! can only be called for dim=dimworld!
-    inline const FieldMatrix<alu3d_ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
+    inline const FieldMatrix<alu3d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
 
     //! returns true if mapping is affine
     inline bool affine () const;
@@ -141,7 +141,7 @@ namespace Dune {
     //! the vertex coordinates
     mutable FieldMatrix<alu3d_ctype, corners_, cdim> coord_;
 
-    mutable FieldMatrix<alu3d_ctype,mydim,mydim> Jinv_; //!< storage for inverse of jacobian
+    mutable FieldMatrix<alu3d_ctype,cdim,mydim> Jinv_; //!< storage for inverse of jacobian
     mutable alu3d_ctype detDF_;              //!< storage of integration_element
     mutable alu3d_ctype volume_;             //!< storage of volume
     mutable FieldMatrix<alu3d_ctype, cdim , mydim> A_;    //!< transformation matrix (transposed)
