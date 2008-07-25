@@ -11,9 +11,19 @@
     \brief Tests for the IntersectionIterator
  */
 
+struct CheckIntersectionIteratorErrorState
+{
+  unsigned int sumNormalsNonZero;
+
+  CheckIntersectionIteratorErrorState ()
+    : sumNormalsNonZero( 0 )
+  {}
+};
+
+
+
 /** \brief Helper routine: Test a general geometry
  */
-
 template <class GeometryImp>
 void checkGeometry(const GeometryImp& geometry)
 {
@@ -50,7 +60,11 @@ void checkGeometry(const GeometryImp& geometry)
 
     // Check whether point is within the intersection
     if (!geometry.checkInside(testPoint))
-      DUNE_THROW(GridError, "Test point is not within geometry!");
+    {
+      std :: cerr << "Test point (" << testPoint << ") not within geometry."
+                  << std :: endl;
+      //DUNE_THROW(GridError, "Test point is not within geometry!");
+    }
 
     // Transform to global coordinates
     FieldVector<ctype, dimworld> global = geometry.global(testPoint);
@@ -79,9 +93,10 @@ void checkGeometry(const GeometryImp& geometry)
 
 /** \brief Test the IntersectionIterator
  */
-template <class GridViewType>
+template <class GridViewType, class ErrorState >
 void checkIntersectionIterator(const GridViewType& view,
-                               const typename GridViewType::template Codim<0>::Iterator& eIt)
+                               const typename GridViewType::template Codim<0>::Iterator& eIt,
+                               ErrorState &errorState )
 {
   using namespace Dune;
 
@@ -92,9 +107,12 @@ void checkIntersectionIterator(const GridViewType& view,
   const bool checkOutside = (grid.name() != "AlbertaGrid");
   const typename GridViewType::IndexSet& indexSet = view.indexSet();
 
-  const int dimworld = GridType::dimensionworld;
+  typedef typename GridType :: ctype ctype;
 
-  FieldVector<double,dimworld> sumNormal(0.0);
+  const int dim      = GridType :: dimension;
+  const int dimworld = GridType :: dimensionworld;
+
+  FieldVector< ctype,dimworld > sumNormal( ctype( 0 ) );
 
   // /////////////////////////////////////////////////////////
   //   Check the types defined by the iterator
@@ -129,9 +147,6 @@ void checkIntersectionIterator(const GridViewType& view,
     const int interDim = IntersectionIterator::LocalGeometry::mydimension;
     const QuadratureRule<double, interDim>& quad
       = QuadratureRules<double, interDim>::rule(iIt->intersectionSelfLocal().type(), interDim);
-
-    for (size_t i=0; i<quad.size(); i++)
-      sumNormal.axpy(quad[i].weight(), iIt->integrationOuterNormal(quad[i].position()));
 
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
@@ -233,13 +248,38 @@ void checkIntersectionIterator(const GridViewType& view,
     // (Ab)use a quadrature rule as a set of test points
     for (size_t i=0; i<quad.size(); i++)
     {
-      // check integrationOuterNormal
-      double det = intersectionGlobal.integrationElement(quad[i].position());
-      det -= iIt->integrationOuterNormal(quad[i].position()).two_norm();
-      if( std::abs( det ) > 1e-8 )
+      const FieldVector< ctype, dim-1 > &pt = quad[ i ].position();
+      FieldVector< ctype, dimworld > normal = iIt->integrationOuterNormal( pt );
+
+      sumNormal.axpy( quad[ i ].weight(), normal );
+
+      ctype det = intersectionGlobal.integrationElement( pt );
+      if( std :: abs( det - normal.two_norm() ) > 1e-8 )
       {
-        DUNE_THROW(GridError, "integrationElement and length of integrationOuterNormal do no match!");
+        std :: cerr << "integrationOuterNormal yields wrong length: "
+                    << "|n| = " << normal.two_norm() << ", "
+                    << "integrationElement = " << det << std :: endl;
       }
+
+#if ENABLE_NORMAL_CHECK
+      // Check whether the normal is orthogonal to the intersection, i.e.,
+      // whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
+      // geometry (intersectionGlobal) and n is a normal.
+      //
+      // This check is disabled by default, since not all grid support the
+      // method jacobianInverseTransposed on a face geometry.
+      const FieldMatrix< ctype, dimworld, dim-1 > &jit
+        = intersectionGlobal.jacobianInverseTransposed( pt );
+      FieldVector< ctype, dim-1 > x( ctype( 0 ) );
+      jit.umtv( normal, x );
+      if( x.infinity_norm() > 1e-8 )
+      {
+        std :: cerr << "integrationOuterNormal is not orthogonal to intersection: "
+                    << "n = " << normal << std :: endl;
+      }
+#else
+      //#warning "Normals are not checked."
+#endif
 
       FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
       FieldVector<double,dimworld> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
@@ -289,12 +329,16 @@ void checkIntersectionIterator(const GridViewType& view,
     DUNE_THROW(GridError,"Entity::hasBoundaryIntersections implemented wrong! \n");
   }
 
-  // ////////////////////////////////////////////////////////////////////////
-  //   Check whether the integral over the outer normal really is zero
-  // ////////////////////////////////////////////////////////////////////////
+  // Chech whether integral over the outer normal is zero
+  //
+  // Note: This is wrong on curved surfaces (take, e.g., the upper half sphere).
+  //       Therefore we only issue a warning.
   if( sumNormal.two_norm() > 1e-8 )
-    DUNE_THROW(GridError,"Sum of integrationOuterNormals is " << sumNormal.two_norm() << " but it should be Zero!");
-
+  {
+    std :: cout << "Warning: Integral over outer normals is nonzero: "
+                << sumNormal << std :: endl;
+    ++errorState.sumNormalsNonZero;
+  }
 }
 
 /** \brief Test both IntersectionIterators
@@ -309,9 +353,17 @@ void checkViewIntersectionIterator(const GridViewType& view) {
   ElementIterator eIt    = view.template begin<0>();
   ElementIterator eEndIt = view.template end<0>();
 
+  CheckIntersectionIteratorErrorState errorState;
   for (; eIt!=eEndIt; ++eIt)
-    checkIntersectionIterator(view, eIt);
+    checkIntersectionIterator( view, eIt, errorState );
 
+  if( errorState.sumNormalsNonZero > 0 )
+  {
+    std :: cerr << "Warning: Integral over outer normals is not always zero."
+                << std :: endl;
+    std :: cerr << "         This behaviour may be correct for entities with"
+                << " nonzero curature." << std :: endl;;
+  }
 }
 
 template <class GridType>
