@@ -2025,7 +2025,8 @@ namespace Dune {
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
-      return e.isLeaf();
+      //return e.isLeaf();
+      return (e.level() == grid.maxLevel());
     }
 
     //! deliver all geometry types used in this grid
