@@ -17,12 +17,16 @@
    grids.  One exception is UGGrid with parametrized boundaries.
  */
 template <class GridType>
-void checkGeometryInFather(const GridType& grid) {
-
+void checkGeometryInFather(const GridType& grid)
+{
   using namespace Dune;
 
+  // count the number of different vertices
+  unsigned int differentVertexCoords = 0;
+
   typedef typename GridType::ctype ctype;
-  const int dim      = GridType::dimension;
+  const int dim      = GridType :: dimension;
+  const int dimworld = GridType :: dimensionworld;
 
   // We need at least two levels to do any checking
   if (grid.maxLevel()==0)
@@ -149,20 +153,30 @@ void checkGeometryInFather(const GridType& grid) {
       // Check whether the positions of the vertices of geometryInFather coincide
       // with the ones computed 'by hand'.  This only works if the grids really are nested!
       // /////////////////////////////////////////////////////////////////////////////////////
-      for (int j=0; j<geometryInFather.corners(); j++) {
+      for( int j=0; j < geometryInFather.corners(); ++j )
+      {
+        const FieldVector< ctype, dimworld > cornerInFather
+          = eIt->father()->geometry().global( geometryInFather[ j ] );
+        const FieldVector< ctype, dimworld > &cornerInSon = eIt->geometry()[ j ];
 
-        FieldVector<ctype, dim> localPos = eIt->father()->geometry().local(eIt->geometry()[j]);
-
-        if ( (localPos-geometryInFather[j]).infinity_norm() > 1e-7)
+        if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
         {
-          std::cerr << localPos << " lp[" << j << "] | gp " << geometryInFather[j] << "\n";
-          DUNE_THROW(GridError, "geometryInFather yields wrong vertex position!");
+          ++differentVertexCoords;
+          std :: cout << "geometryInFather yields different vertex position "
+                      << "(son: " << cornerInSon
+                      << ", father: " << cornerInFather << ")." << std :: endl;
         }
-
       }
 
     }
 
+  }
+
+  if( differentVertexCoords > 0 )
+  {
+    std :: cerr << "Warning: geometryInFather yields different vertex positions." << std :: endl;
+    std :: cerr << "         This behaviour may be correct if the grid is not"
+                << " nested geometrically." << std :: endl;
   }
 
 }
