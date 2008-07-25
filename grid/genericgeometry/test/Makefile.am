@@ -12,7 +12,7 @@ testsubtopologies_SOURCES = testsubtopologies.cc
 testsubtopologies_CPPFLAGS = $(ALL_PKG_CPPFLAGS) -DGEOMETRYTYPE=$(GEOMETRYTYPE) -DDIMENSION=$(DIMENSION)
 
 testmapping_SOURCES = testmapping.cc
-testmapping_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(PSGINC)
+testmapping_CPPFLAGS = $(ALL_PKG_CPPFLAGS)
 testmapping_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 testgeo_SOURCES = testgeo.cc

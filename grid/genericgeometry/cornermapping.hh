@@ -76,10 +76,12 @@ namespace Dune
 
       enum { alwaysAffine = true };
 
+#if 0
       static bool isZero ( const FieldType &a )
       {
         return std::abs(a)<1e-12;
       }
+#endif
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -132,7 +134,7 @@ namespace Dune
 
       static bool inDomain ( const LocalCoordType &x, FieldType factor )
       {
-        return isZero( x[ 0 ] );
+        return true;
       }
 
     };
