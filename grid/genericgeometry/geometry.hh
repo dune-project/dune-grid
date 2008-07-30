@@ -214,6 +214,7 @@ namespace Dune
       < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
 
+      typedef GenericGeometry :: MapNumberingProvider< mydimension > MapNumberingProvider;
 
       mutable Mapping *mapping_;
 
@@ -305,7 +306,10 @@ namespace Dune
 
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
-        return mapping().normal( face , local );
+        const unsigned int tid = mapping().topologyId();
+        const unsigned int i
+          = MapNumberingProvider :: template dune2generic< 1 >( tid, face );
+        return mapping().normal( i, local );
       }
 
     private:
@@ -371,6 +375,8 @@ namespace Dune
       typedef GenericGeometry :: DuneGeometryTypeProvider
       < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
+
+      typedef GenericGeometry :: MapNumberingProvider< mydimension > MapNumberingProvider;
 
       mutable Mapping *mapping_;
 
@@ -462,7 +468,10 @@ namespace Dune
 
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
-        return mapping().normal( face , local );
+        const unsigned int tid = mapping().topologyId();
+        const unsigned int i
+          = MapNumberingProvider :: template dune2generic< 1 >( tid, face );
+        return mapping().normal( i, local );
       }
 
     private:
