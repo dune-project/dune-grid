@@ -100,7 +100,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
   }
 
-  std::cout << "Data field " << filename << " loaded successfully!" << std::endl;
+  dverb << "Data field " << filename << " loaded successfully!" << std::endl;
 
 }
 
