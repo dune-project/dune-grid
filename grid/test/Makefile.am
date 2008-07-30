@@ -9,7 +9,7 @@ if ALBERTA
 endif
 
 if ALUGRID
-  ALUPROG = test-alu3dgrid
+  ALUPROG = test-alu3dgrid test-alu3dsimplex
 endif
 
 if UG
@@ -71,6 +71,10 @@ test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
 test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
 test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
+
+test_alu3dsimplex_SOURCES = test-alu3dsimplex.cc
+test_alu3dsimplex_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
+test_alu3dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
 test_ug_SOURCES = test-ug.cc

@@ -3,6 +3,7 @@ Makefile.in
 .deps
 .libs
 test-alu3dgrid
+test-alu3dsimplex
 test-alberta
 test-sgrid
 test-oned
@@ -13,3 +14,7 @@ test-ug-lgm
 semantic.cache
 *.gcda
 *.gcno
+
+*.dgf.*
+*.log
+*.swp

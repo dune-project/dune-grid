@@ -91,6 +91,19 @@ void checkGeometry(const GeometryImp& geometry)
 }
 
 
+// Check whether the normal is orthogonal to the intersection, i.e.,
+// whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
+// geometry (intersectionGlobal) and n is a normal.
+template< class ctype, int dimworld, int facedim >
+inline bool checkNormal ( const Dune :: FieldVector< ctype, dimworld > &normal,
+                          const Dune :: FieldMatrix< ctype, dimworld, facedim > &jit )
+{
+  Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
+  jit.umtv( normal, x );
+  return (x.infinity_norm() <= 1e-8);
+}
+
+
 /** \brief Test the IntersectionIterator
  */
 template <class GridViewType, class ErrorState >
@@ -211,18 +224,26 @@ void checkIntersectionIterator(const GridViewType& view,
     if ( GridViewType::conforming && iIt->neighbor() )
     {
       EntityPointer outside = iIt->outside();
-      int numberInSelf     = iIt->numberInSelf();
-      int numberInNeighbor = iIt->numberInNeighbor();
+      const int numberInSelf     = iIt->numberInSelf();
+      const int numberInNeighbor = iIt->numberInNeighbor();
 
-      assert(indexSet.template subIndex<1>(*eIt, numberInSelf)
-             == indexSet.template subIndex<1>(*outside, numberInNeighbor));
+      const unsigned int iIdx = indexSet.template subIndex< 1 >( *eIt, numberInSelf );
+      const unsigned int oIdx = indexSet.template subIndex< 1 >( *outside, numberInNeighbor );
+
+      if( iIdx != oIdx )
+      {
+        std :: cerr << "Error: index of conforming intersection differs when "
+                    << "obtained from inside and outside." << std :: endl;
+        std :: cerr << "       inside index = " << iIdx
+                    << ", outside index = " << oIdx << std :: endl;
+        assert( false );
+      }
 
       assert(grid.localIdSet().template subId<1>(*eIt, numberInSelf)
              == grid.localIdSet().template subId<1>(*outside, numberInNeighbor));
 
       assert(grid.globalIdSet().template subId<1>(*eIt, numberInSelf)
              == grid.globalIdSet().template subId<1>(*outside, numberInNeighbor));
-
     }
 
     // //////////////////////////////////////////////////////////
@@ -245,42 +266,85 @@ void checkIntersectionIterator(const GridViewType& view,
     if (intersectionSelfLocal.corners() != intersectionGlobal.corners())
       DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left hand side and global view!");
 
-    // (Ab)use a quadrature rule as a set of test points
+    // Use a quadrature rule as a set of test points
     for (size_t i=0; i<quad.size(); i++)
     {
       const FieldVector< ctype, dim-1 > &pt = quad[ i ].position();
-      FieldVector< ctype, dimworld > normal = iIt->integrationOuterNormal( pt );
-
-      sumNormal.axpy( quad[ i ].weight(), normal );
-
-      ctype det = intersectionGlobal.integrationElement( pt );
-      if( std :: abs( det - normal.two_norm() ) > 1e-8 )
-      {
-        std :: cerr << "integrationOuterNormal yields wrong length: "
-                    << "|n| = " << normal.two_norm() << ", "
-                    << "integrationElement = " << det << std :: endl;
-      }
-
-#if ENABLE_NORMAL_CHECK
-      // Check whether the normal is orthogonal to the intersection, i.e.,
-      // whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
-      // geometry (intersectionGlobal) and n is a normal.
-      //
-      // This check is disabled by default, since not all grid support the
-      // method jacobianInverseTransposed on a face geometry.
       const FieldMatrix< ctype, dimworld, dim-1 > &jit
         = intersectionGlobal.jacobianInverseTransposed( pt );
-      FieldVector< ctype, dim-1 > x( ctype( 0 ) );
-      jit.umtv( normal, x );
-      if( x.infinity_norm() > 1e-8 )
-      {
-        std :: cerr << "integrationOuterNormal is not orthogonal to intersection: "
-                    << "n = " << normal << std :: endl;
-      }
-#else
-      //#warning "Normals are not checked."
-#endif
 
+      // Check outer normal
+      const FieldVector< ctype, dimworld > normal = iIt->outerNormal( pt );
+
+      if( !checkNormal( normal, jit ) )
+      {
+        std :: cerr << "Error: outerNormal "
+                    << "is not orthogonal to the intersection." << std :: endl;
+        std :: cerr << "       outerNormal = " << normal << std :: endl;
+        assert( false );
+      }
+
+      // Check integration outer normal
+      const FieldVector< ctype, dimworld > intNormal = iIt->integrationOuterNormal( pt );
+      sumNormal.axpy( quad[ i ].weight(), intNormal );
+
+      const ctype det = intersectionGlobal.integrationElement( pt );
+      if( std :: abs( det - intNormal.two_norm() ) > 1e-8 )
+      {
+        std :: cerr << "Error: integrationOuterNormal yields wrong length."
+                    << "       |integrationOuterNormal| = " << intNormal.two_norm()
+                    << ", integrationElement = " << det << std :: endl;
+        assert( false );
+      }
+
+      if( !checkNormal( intNormal, jit ) )
+      {
+        std :: cerr << "Error: integrationOuterNormal "
+                    << "is not orthogonal to the intersection." << std :: endl;
+        std :: cerr << "       integrationOuterNormal = " << intNormal
+                    << std :: endl;
+        assert( false );
+      }
+
+      if( std :: abs( normal * intNormal - normal.two_norm() * intNormal.two_norm() ) > 1e-8 )
+      {
+        std :: cerr << "Error: integrationOuterNormal "
+                    << "does not point in the direction of outerNormal." << std :: endl;
+        std :: cerr << "       integrationOuterNormal = " << intNormal
+                    << ", normal = " << normal << std :: endl;
+        assert( false );
+      }
+
+      // Check unit outer normal
+      const FieldVector< ctype, dimworld > unitNormal = iIt->unitOuterNormal( pt );
+
+      if( std :: abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
+      {
+        std :: cerr << "Error: unitOuterNormal yields wrong length." << std :: endl;
+        std :: cerr << "       |unitOuterNormal| = " << unitNormal.two_norm()
+                    << std :: endl;
+        assert( false );
+      }
+
+      if( !checkNormal( unitNormal, jit ) )
+      {
+        std :: cerr << "Error: unitOuterNormal "
+                    << "is not orthogonal to the intersection." << std :: endl;
+        std :: cerr << "       unitOuterNormal = " << unitNormal
+                    << std :: endl;
+        assert( false );
+      }
+
+      if( std :: abs( normal * unitNormal - normal.two_norm() * unitNormal.two_norm() ) > 1e-8 )
+      {
+        std :: cerr << "Error: unitOuterNormal "
+                    << "does not point in the direction of outerNormal." << std :: endl;
+        std :: cerr << "       unitOuterNormal = " << unitNormal
+                    << ", normal = " << normal << std :: endl;
+        assert( false );
+      }
+
+      // check intersectionSelfLocal
       FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
       FieldVector<double,dimworld> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
 

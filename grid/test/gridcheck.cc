@@ -721,7 +721,12 @@ void assertNeighbor (Grid &g)
 
           // numbering
           int num = it->numberInSelf();
-          assert( num >= 0 && num < e->template count<1> () );
+          if( (num < 0) || (num >= e->template count< 1 >()) )
+          {
+            std :: cout << "Invalid numberInSelf: " << num
+                        << " (should be between 0 and "
+                        << (e->template count< 1 >()-1) << ")" << std :: endl;
+          }
 
           if(it->neighbor())
           {
@@ -729,7 +734,12 @@ void assertNeighbor (Grid &g)
             it->intersectionNeighborLocal();
             // numbering
             num = it->numberInNeighbor();
-            assert( num >= 0 && num < it->outside()->template count<1> () );
+            if( (num < 0) || (num >= it->outside()->template count< 1 >()) )
+            {
+              std :: cout << "Invalid numberInNeighbor: " << num
+                          << " (should be between 0 and "
+                          << (it->outside()->template count< 1 >()-1) << ")" << std :: endl;
+            }
           }
 
           // geometry

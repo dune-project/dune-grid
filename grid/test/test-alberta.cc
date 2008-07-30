@@ -2,8 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#define ENABLE_NORMAL_CHECK 1
-
 /*
 
    Instantiate Alberta-Grid and feed it to the generic gridcheck()
