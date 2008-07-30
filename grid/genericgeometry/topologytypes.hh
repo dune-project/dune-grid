@@ -81,6 +81,46 @@ namespace Dune
                      || ((Topology :: id >> 1) == 0) };
     };
 
+
+
+    template< unsigned int id, unsigned int dim >
+    class Topology
+    {
+      enum { dimension = dim };
+
+      dune_static_assert( (id < (1 << dimension)), "id too large." );
+
+      enum { isPrism = ((id >> (dimension-1)) != 0) };
+      typedef typename Topology< (id & ~(1 << (dimension-1))), dimension-1 > :: type
+      BaseTopology;
+
+      template< bool >
+      struct Prism
+      {
+        typedef GenericGeometry :: Prism< BaseTopology > type;
+      };
+
+      template< bool >
+      struct Pyramid
+      {
+        typedef GenericGeometry :: Pyramid< BaseTopology > type;
+      };
+
+    public:
+      typedef typename ProtectedIf< isPrism, Prism, Pyramid > :: type type;
+    };
+
+    template< unsigned int id >
+    class Topology< id, 0 >
+    {
+      enum { dimension = 0 };
+
+      dune_static_assert( (id < (1 << dimension)), "id too large." );
+
+    public:
+      typedef Point type;
+    };
+
   }
 
 }

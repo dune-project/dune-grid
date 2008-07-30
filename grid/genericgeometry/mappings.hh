@@ -7,7 +7,6 @@
 
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
-#include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
@@ -73,10 +72,9 @@ namespace Dune
       using BaseType :: global;
       using BaseType :: jacobianT;
 
-      GeometryType type () const
+      unsigned int topologyId () const
       {
-        return DuneGeometryType< Topology,
-            Dune::GeometryType::BasicType(CoordTraits::oneDType) > :: type();
+        return Topology :: id;
       }
 
       // additional methods

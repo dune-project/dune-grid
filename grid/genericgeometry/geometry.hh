@@ -168,6 +168,8 @@ namespace Dune
 
       enum { dimGrid = Traits :: dimGrid };
 
+      template< int, int, class > friend class Geometry;
+
     public:
       enum { mydimension = mydim };
       enum { coorddimension = cdim };
@@ -195,7 +197,9 @@ namespace Dune
       template< bool >
       struct NonHybrid
       {
-        typedef typename Convert< GeometryType::BasicType(Traits :: dunetype), dimGrid > :: type Topology;
+        typedef typename Convert
+        < (GeometryType :: BasicType) Traits :: dunetype, dimGrid > :: type
+        Topology;
         typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
         Mapping;
       };
@@ -205,6 +209,11 @@ namespace Dune
       typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
       typedef typename MappingProvider :: Mapping Mapping;
       typedef typename MappingProvider :: CachingType CachingType;
+
+      typedef GenericGeometry :: DuneGeometryTypeProvider
+      < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
+      DuneGeometryTypeProvider;
+
 
       mutable Mapping *mapping_;
 
@@ -218,6 +227,7 @@ namespace Dune
                           const CachingType &cache = CachingType() )
         : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
       {}
+
       template< class CoordVector >
       Geometry ( const GeometryType &type,
                  const CoordVector &coords,
@@ -245,7 +255,7 @@ namespace Dune
 
       GeometryType type () const
       {
-        return mapping().type();
+        return DuneGeometryTypeProvider :: type( mapping().topologyId() );
       }
 
       int corners () const
@@ -298,15 +308,18 @@ namespace Dune
         return mapping().normal( face , local );
       }
 
-      template <int,int,class>
-      friend class Geometry;
-
     private:
       const Mapping &mapping () const
       {
         return *mapping_;
       }
     };
+
+
+
+    // LocalGeometry
+    // -------------
+
     template< int mydim, int cdim, class GridImp >
     class LocalGeometry :
       public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
@@ -314,6 +327,8 @@ namespace Dune
       typedef GeometryTraits< GridImp > Traits;
 
       enum { dimGrid = Traits :: dimGrid };
+
+      template< int, int, class > friend class LocalGeometry;
 
     public:
       enum { mydimension = mydim };
@@ -353,6 +368,10 @@ namespace Dune
       typedef typename MappingProvider :: Mapping Mapping;
       typedef typename MappingProvider :: CachingType CachingType;
 
+      typedef GenericGeometry :: DuneGeometryTypeProvider
+      < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
+      DuneGeometryTypeProvider;
+
       mutable Mapping *mapping_;
 
     public:
@@ -365,6 +384,7 @@ namespace Dune
                                const CachingType &cache = CachingType() )
         : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
       {}
+
       template< class CoordVector >
       LocalGeometry ( const GeometryType &type,
                       const CoordVector &coords,
@@ -392,7 +412,7 @@ namespace Dune
 
       GeometryType type () const
       {
-        return mapping().type();
+        return DuneGeometryTypeProvider :: type( mapping().topologyId() );
       }
 
       int corners () const
@@ -444,9 +464,6 @@ namespace Dune
       {
         return mapping().normal( face , local );
       }
-
-      template <int,int,class>
-      friend class Geometry;
 
     private:
       const Mapping &mapping () const

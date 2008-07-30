@@ -3,7 +3,6 @@
 #ifndef DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 #define DUNE_GENERICGEOMTRY_HYBRIDMAPPING_HH
 
-#include <dune/common/geometrytype.hh>
 #include <dune/common/smallobject.hh>
 
 #include <dune/grid/genericgeometry/submapping.hh>
@@ -54,7 +53,7 @@ namespace Dune
       virtual ~HybridMapping ()
       {}
 
-      virtual GeometryType type () const = 0;
+      virtual unsigned int topologyId () const = 0;
 
       virtual int corners () const = 0;
 
@@ -135,9 +134,9 @@ namespace Dune
         : mapping_( coordVector, cache )
       {}
 
-      virtual GeometryType type () const
+      virtual unsigned int topologyId () const
       {
-        return mapping_.type();
+        return mapping_.topologyId();
       }
 
       virtual int corners () const

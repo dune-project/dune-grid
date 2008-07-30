@@ -101,6 +101,57 @@ namespace Dune
 
 
 
+    // DuneGeometryTypeProvider
+    // ------------------------
+
+    template< unsigned int dim, GeometryType :: BasicType defaultType >
+    struct DuneGeometryTypeProvider
+    {
+      enum { dimension = dim };
+      enum { numTopologies = (1 << dimension) };
+
+    private:
+      template< int i >
+      struct Builder;
+
+      GeometryType types_[ numTopologies ];
+
+      DuneGeometryTypeProvider ()
+      {
+        ForLoop< Builder, 0, (1 << dim)-1 > :: apply( types_ );
+      }
+
+      static const DuneGeometryTypeProvider &instance ()
+      {
+        static DuneGeometryTypeProvider inst;
+        return inst;
+      }
+
+    public:
+      static const GeometryType &type ( unsigned int topologyId )
+      {
+        assert( topologyId < numTopologies );
+        return instance().types_[ topologyId ];
+      }
+    };
+
+
+    template< unsigned int dim, GeometryType :: BasicType defaultType >
+    template< int i >
+    struct DuneGeometryTypeProvider< dim, defaultType > :: Builder
+    {
+      typedef typename GenericGeometry :: Topology< i, dimension > :: type Topology;
+      typedef GenericGeometry :: DuneGeometryType< Topology, defaultType >
+      DuneGeometryType;
+
+      static void apply ( GeometryType (&types)[ numTopologies ] )
+      {
+        types[ i ] = DuneGeometryType :: type();
+      }
+    };
+
+
+
     // Convert
     // -------
 
