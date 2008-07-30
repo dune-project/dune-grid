@@ -20,7 +20,7 @@ namespace Dune {
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_( dim+1 )
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -53,8 +53,8 @@ namespace Dune {
                                     nrOfHangingNodes, ALU2DSPACE Refco::quart))
       , hIndexSet_(*this)
       , localIdSet_(*this)
-      , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , levelIndexVec_( MAXL, 0 )
+      , geomTypes_( dim+1 )
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -87,7 +87,7 @@ namespace Dune {
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_( dim+1 )
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -569,11 +569,14 @@ namespace Dune {
   }
 
   template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::makeGeomTypes() {
+  inline void ALU2dGrid<dim, dimworld>::makeGeomTypes()
+  {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
-      geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
-    return;
+    {
+      geomTypes_[ dim-i ].resize( 1 );
+      geomTypes_[ dim-i ][ 0 ] = GeometryType( GeometryType :: simplex, i );
+    }
   }
 
   //! get global id set of grid
