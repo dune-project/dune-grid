@@ -694,7 +694,8 @@ void assertNeighbor (Grid &g)
         it->boundary();
         it->neighbor();
         // id of boundary segment
-        it->boundaryId();
+        if (it->boundary())
+          it->boundaryId();
         // check id
         //assert(globalid.id(*e) >= 0);
         assert(it != endit);
