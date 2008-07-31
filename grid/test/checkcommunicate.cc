@@ -12,21 +12,29 @@
 
 using namespace Dune;
 
-/*******
-   Tests the communication on a parallel grid.
-   The tests works as follows for a fixed codim c and
-   upwind direction:
-   1) In the center of all upwind codim c subentities of the interioir codim 0
-     leaf entites a function is stored. Also a flag is set to 1.
-     The computation is also performed on the subentities of the physical
-     boundary.
-   -> For all leaf subentities of codim c the flag should be set to 1
-     with the exception of the border subentities on the inflow
-     processor boundary and in the ghost elements - on these
-     subentities the flag is zero.
-   2) Exchange both the data and the flags.
-   3) Test if the flag for all leaf subentities of codim c is set to 1.
- ******/
+/*  Communication Test for Parallel Grids
+ *  -------------------------------------
+ *
+ *  For a fixed codimension c and a fixed upwind direction u, the test works
+ *  as follows:
+ *    1) In the center of all upwind codim c subentities of the interioir codim 0
+ *       leaf entites a function is stored. Also a flag is set to 1.
+ *       The computation is also performed on the subentities of the physical
+ *       boundary.
+ *    -> For all leaf subentities of codim c the flag should be set to 1
+ *       with the exception of the border subentities on the inflow
+ *       processor boundary and in the ghost elements - on these
+ *       subentities the flag is zero.
+ *    2) Exchange both the data and the flags.
+ *    3) Test if the flag for all leaf subentities of codim c is set to 1.
+ *
+ *  Note: This test requires the normals on both sides of an intersection to
+ *        sum up to zero, i.e., there is exactly one tangent plane to the grid
+ *        in every point of the intersection (actually, the barycenter would be
+ *        sufficient).
+ */
+
+
 /*****
    The exchange is done using the ExampleDataHandle given below.
    Together with the function value and the flag the coordinates
@@ -191,7 +199,9 @@ class CheckCommunication
   enum { dimworld = Grid :: dimensionworld };
   enum { dim = Grid :: dimension };
 
-  typedef FieldVector< double, dimworld > CoordinateVector;
+  typedef typename Grid :: ctype ctype;
+
+  typedef FieldVector< ctype, dimworld > CoordinateVector;
   typedef std :: vector< double > ArrayType;
 
   CoordinateVector upwind_;
@@ -238,13 +248,19 @@ class CheckCommunication
       }
       else
       {
-        IntersectionIterator endnit = gridView_.iend( entity );
-        for( IntersectionIterator nit = gridView_.ibegin( entity ); nit != endnit; ++nit )
+        const IntersectionIterator nend = gridView_.iend( entity );
+        for( IntersectionIterator nit = gridView_.ibegin( entity ); nit != nend; ++nit )
         {
           const Intersection &intersection = *nit;
 
-          const CoordinateVector normal
-            = intersection.integrationOuterNormal( FieldVector< double, dim-1 >( 0 ) );
+          const typename Intersection :: LocalGeometry &geoInSelf
+            = intersection.intersectionSelfLocal();
+
+          const ReferenceElement< ctype, dim-1 > &faceRefElement
+            = ReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
+          const FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
+
+          const CoordinateVector normal = intersection.integrationOuterNormal( bary );
           double calc = normal * upwind_;
 
           // if testing level, then on non-conform grid also set values on
@@ -253,8 +269,8 @@ class CheckCommunication
           const bool proceedAnyway = (level_ < 0 ? false : !intersection.neighbor());
           if( (calc > -1e-8) || intersection.boundary() || proceedAnyway )
           {
-            const ReferenceElement< double, dimworld > &insideRefElem
-              =  ReferenceElements< double, dimworld > :: general( entity.type() );
+            const ReferenceElement< ctype, dim > &insideRefElem
+              =  ReferenceElements< ctype, dim > :: general( entity.type() );
 
             const int numberInSelf = intersection.numberInSelf();
             for( int i = 0; i < insideRefElem.size( numberInSelf, 1, cdim ); ++i )
@@ -283,8 +299,8 @@ class CheckCommunication
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
-              const ReferenceElement<double, dimworld > & outsideRefElem =
-                ReferenceElements<double, dimworld >::general( neigh.type() );
+              const ReferenceElement< ctype, dim > &outsideRefElem
+                = ReferenceElements< ctype, dim > :: general( neigh.type() );
 
               const int numberInNeighbor = intersection.numberInNeighbor();
               for( int i = 0; i < outsideRefElem.size(numberInNeighbor, 1, cdim); ++i )
