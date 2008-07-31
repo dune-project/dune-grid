@@ -22,15 +22,14 @@ namespace Dune {
 
   public:
 
-    /** \brief Add grid with a given index set
-        \param grid Grid to be written
-        \param indexSet Index set of the grid section to be written
+    /** \brief Add a grid view to the file
+        \param grid GridView to be written
         \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
         quadrilateral will be split in two triangles.  If not, the file is not
         readable by standard Amira.
      */
-    template <class GridType2, class IndexSetType2>
-    void addGrid(const GridType2& grid, const IndexSetType2& indexSet, bool splitQuads=false);
+    template <class GridView>
+    void addGrid(const GridView& gridView, bool splitQuads=false);
 
     /** \brief Add level grid
         \param grid Grid to be written

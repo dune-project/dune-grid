@@ -7,13 +7,14 @@
 #include <limits>
 
 template<class GridType, class IndexSetType>
-template<class GridType2, class IndexSetType2>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid,
-                                                           const IndexSetType2& indexSet,
+template<class GridView>
+void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridView& gridView,
                                                            bool splitQuads)
 {
-  typedef typename IndexSetType::template Codim<dim>::template Partition<All_Partition>::Iterator VertexIterator;
-  typedef typename IndexSetType2::template Codim<0>::template Partition<All_Partition>::Iterator ElementIterator;
+  typedef typename GridView::template Codim<dim>::Iterator VertexIterator;
+  typedef typename GridView::template Codim<0>::Iterator ElementIterator;
+
+  const typename GridView::IndexSet& indexSet = gridView.indexSet();
 
   if ((dim!=2 && dim!=3) || int(dim) != int(GridType::dimensionworld))
     DUNE_THROW(IOError, "You can only write grids as AmiraMesh if dim==dimworld==2"
@@ -36,8 +37,8 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
                                                        McPrimType::mc_float, dim);
   amiramesh_.insert(geo_node_data);
 
-  VertexIterator vertex    = indexSet.template begin<dim,All_Partition>();
-  VertexIterator endvertex = indexSet.template end<dim,All_Partition>();
+  VertexIterator vertex    = gridView.template begin<dim>();
+  VertexIterator endvertex = gridView.template end<dim>();
 
   for (; vertex!=endvertex; ++vertex) {
 
@@ -76,8 +77,8 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
 
     int *dPtr = (int*)element_data->dataPtr();
 
-    ElementIterator eIt    = indexSet.template begin<0,All_Partition>();
-    ElementIterator eEndIt = indexSet.template end<0,All_Partition>();
+    ElementIterator eIt    = gridView.template begin<0>();
+    ElementIterator eEndIt = gridView.template end<0>();
 
     for (int i=0; eIt!=eEndIt; ++eIt) {
       if (eIt->type().isTriangle()) {
@@ -141,8 +142,8 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridType2& grid
 
     int *dPtr = (int*)element_data->dataPtr();
 
-    ElementIterator eIt    = indexSet.template begin<0, All_Partition>();
-    ElementIterator eEndIt = indexSet.template end<0, All_Partition>();
+    ElementIterator eIt    = gridView.template begin<0>();
+    ElementIterator eEndIt = gridView.template end<0>();
 
     if (dim==3) {
 
@@ -247,8 +248,7 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLevelGrid(const GridType2&
                                                                 int level,
                                                                 bool splitQuads)
 {
-  const typename GridType2::Traits::LevelIndexSet& indexSet = grid.levelIndexSet(level);
-  addGrid(grid, indexSet, splitQuads);
+  addGrid(grid.levelView(level), splitQuads);
 }
 
 
@@ -256,8 +256,7 @@ template<class GridType, class IndexSetType>
 template<class GridType2>
 void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLeafGrid(const GridType2& grid, bool splitQuads)
 {
-  const typename GridType2::Traits::LeafIndexSet& indexSet = grid.leafIndexSet();
-  addGrid(grid, indexSet, splitQuads);
+  addGrid(grid.leafView(), splitQuads);
 }
 
 
