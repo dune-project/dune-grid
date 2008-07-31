@@ -13,6 +13,7 @@
 
 #include <dune/grid/common/grid.hh>
 
+//#define INDEXSET_HAS_ITERATORS
 /** @file
         @author Peter Bastian
         @brief Provides base classes for index and id sets
@@ -76,6 +77,8 @@ namespace Dune
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   class IndexSet {
   public:
+#ifdef INDEXSET_HAS_ITERATORS
+#warning You are using deprecated code!  The code following this warning will be removed in the next version of DUNE!
     /** @brief Define types needed to iterate over the entities in the index set
      */
     template <int cd>
@@ -91,6 +94,7 @@ namespace Dune
         typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
       };
     } DUNE_DEPRECATED;
+#endif
 
     /** \brief The type used for the indices */
     typedef unsigned int IndexType;
@@ -209,6 +213,7 @@ namespace Dune
       return asImp().contains(e);
     }
 
+#ifdef INDEXSET_HAS_ITERATORS
     /** @brief Iterator to first entity of given codimension and partition type in \f$E\f$.
             The iterator type is available via the public Codim struct.
      */
@@ -221,7 +226,7 @@ namespace Dune
     template<int cd, PartitionIteratorType pitype>
     typename Codim<cd>::template Partition<pitype>::Iterator end () const DUNE_DEPRECATED;
     //@}
-
+#endif
     // Must be explicitely defined although this class should get a default constructor.
     IndexSet() {}
 
@@ -237,6 +242,7 @@ namespace Dune
     const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
+#ifdef INDEXSET_HAS_ITERATORS
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   template<int cd, PartitionIteratorType pitype>
   typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
@@ -254,6 +260,7 @@ namespace Dune
     CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
     return asImp().end<cd,pitype>();
   }
+#endif
 
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
