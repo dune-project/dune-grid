@@ -72,7 +72,7 @@ namespace Dune {
     }
 
     //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<typename GridImp::ctype,0,0>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, 0>& local) const {
+    const FieldMatrix<typename GridImp::ctype,1,0>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, 0>& local) const {
       return jacInverse_;
     }
 
@@ -89,7 +89,7 @@ namespace Dune {
 
     OneDEntityImp<0>* target_;
 
-    FieldMatrix<typename GridImp::ctype,0,0> jacInverse_;
+    FieldMatrix<typename GridImp::ctype,1,0> jacInverse_;
   };
 
   //**********************************************************************
