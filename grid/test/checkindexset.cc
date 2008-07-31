@@ -21,7 +21,8 @@
    @brief Provides a check of the grids index set.
  */
 
-namespace Dune {
+namespace Dune
+{
 
   // compare 2 FieldVectors
   template <typename ctype, int dim>
@@ -200,30 +201,33 @@ namespace Dune {
     sout << "end check sub entities\n";
   }
 
+
   // check some functionality of grid
-  template <int codim, class GridType,
-      class IndexSetType, class OutputStreamImp >
-  void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
-                               OutputStreamImp & sout , bool levelIndex )
+  template< int codim, class Grid, class GridView, class OutputStream >
+  void checkIndexSetForCodim ( const Grid &grid, const GridView &view,
+                               OutputStream &sout, bool levelIndex )
   {
-    enum { dim = GridType :: dimension };
-    enum { dimworld = GridType :: dimensionworld };
+    enum { dim = Grid :: dimension };
+    enum { dimworld = Grid :: dimensionworld };
+
+    typedef typename Grid :: ctype coordType;
+
+    //typedef typename GridView :: template Codim< 0 > :: Entity EntityCodim0Type;
+    typedef typename GridView :: IndexSet IndexSetType;
+    typedef typename GridView :: template Codim< codim > :: Iterator IteratorType;
+
+    const IndexSetType &lset = view.indexSet();
 
     sout <<"\n\nStart consistency check of index set \n\n";
-    typedef typename IndexSetType :: template Codim<0>::template Partition<All_Partition> :: Iterator Iterator;
-    typedef typename GridType :: ctype coordType;
-    typedef typename GridType :: template Codim<0>:: Entity EntityCodim0Type;
 
     // ////////////////////////////////////////////////////////////////
     //   Check whether geomTypes() returns correct result
     // ////////////////////////////////////////////////////////////////
-    typedef typename IndexSetType :: template Codim<codim>::
-    template Partition<All_Partition> :: Iterator IteratorType;
 
-    IteratorType endit  = lset.template end<codim,All_Partition>   ();
-    IteratorType it = lset.template begin<codim,All_Partition> ();
+    std :: set< GeometryType > geometryTypes;
 
-    std::set<GeometryType> geometryTypes;
+    const IteratorType endit = view.template end< codim >();
+    IteratorType it = view.template begin< codim >();
 
     if (it == endit) return;
 
@@ -273,16 +277,12 @@ namespace Dune {
     // check size of index set
     int gridsize = 0;
     {
-      typedef typename IndexSetType :: template Codim<codim>::
-      template Partition<All_Partition> :: Iterator IteratorType;
+      typedef typename GridView :: template Codim< codim > :: Iterator IteratorType;
 
       int count = 0;
-      IteratorType endit  = lset.template end<codim,All_Partition>   ();
-      for(IteratorType it = lset.template begin<codim,All_Partition> ();
-          it != endit ; ++it )
-      {
-        count ++ ;
-      }
+      const IteratorType endit = view.template end< codim >();
+      for( IteratorType it = view.template begin< codim >(); it != endit; ++it )
+        ++count;
 
       int lsetsize = lset.size(codim);
       if( count != lsetsize)
@@ -296,24 +296,32 @@ namespace Dune {
     }
 
     {
-      typedef typename GridType :: Traits :: LocalIdSet :: IdType IdType;
+      typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
+      typedef typename Grid :: Traits :: LocalIdSet LocalIdSetType;
+      typedef typename LocalIdSetType :: IdType IdType;
+
       std::map < IdType , bool > entityfound;
       int mycount = 0;
-      Iterator endit  = lset.template end  <0,All_Partition> ();
-      if (lset.template begin<0,All_Partition> () == endit)
+
+
+      const Iterator endit = view.template end< 0 >();
+      Iterator it = view.template begin< 0 >();
+      if( it == endit )
         return;
-      for(Iterator it = lset.template begin<0,All_Partition> ();
-          it != endit ; ++it )
+
+      const LocalIdSetType &localIdSet = grid.localIdSet();
+      for( ; it != endit; ++it )
       {
-        assert( lset.contains ( *it ) );
-        int suben = it->template count<codim> ();
-        for(int i=0 ; i<suben; i++)
+        const typename Iterator :: Entity &entity = *it;
+        assert( lset.contains( entity ) );
+        const int subcount = entity.template count< codim >();
+        for( int i = 0; i < subcount; ++i )
         {
-          IdType id = grid.localIdSet().id ( *(it->template entity<codim>(i) ) );
-          if( entityfound.find(id) == entityfound.end())
+          const IdType id = localIdSet.id( *(entity.template entity< codim >( i ) ) );
+          if( entityfound.find( id ) == entityfound.end() )
           {
-            mycount ++ ;
-            entityfound[id] = true;
+            ++mycount;
+            entityfound[ id ] = true;
           }
         }
       }
@@ -339,12 +347,11 @@ namespace Dune {
     // setup vertex map , store vertex coords for vertex number
     {
       unsigned int count = 0;
-      typedef typename IndexSetType :: template Codim<dim>::template Partition<All_Partition> :: Iterator VxIterator;
-      VxIterator end = lset.template end <dim,All_Partition>();
-      for(VxIterator it = lset.template begin <dim,All_Partition>();
-          it != end; ++it )
+      typedef typename GridView :: template Codim< dim > :: Iterator VxIterator;
+      const VxIterator end = view.template end< dim >();
+      for( VxIterator it = view.template begin< dim >(); it != end; ++it )
       {
-        count ++ ;
+        ++count;
         // get coordinates of vertex
         FieldVector<coordType,dimworld> vx ( it->geometry()[0] );
 
@@ -376,9 +383,10 @@ namespace Dune {
     }
 
     {
+      typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
       // choose the right reference element
-      Iterator refend = lset.template end  <0,All_Partition>();
-      Iterator refit  = lset.template begin<0,All_Partition>();
+      const Iterator refend = view.template end< 0 >();
+      Iterator refit = view.template begin< 0 >();
       assert( refit != refend );
 
       GeometryType type = refit->type();
@@ -402,9 +410,9 @@ namespace Dune {
     }
 
     {
-      Iterator endit  = lset.template end  <0,All_Partition>();
-      for(Iterator it = lset.template begin<0,All_Partition>();
-          it != endit; ++it)
+      typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
+      const Iterator endit = view.template end< 0 >();
+      for( Iterator it = view.template begin< 0 >(); it != endit; ++it )
       {
         // if (it->partitionType()==4) continue;
         sout << "****************************************\n";
@@ -425,7 +433,7 @@ namespace Dune {
         for(int i=0; i<svx; i++)
         {
           // get entity pointer of sub entity codim=dim (Vertex)
-          typedef typename GridType :: template Codim<dim> :: EntityPointer VertexPointerType;
+          typedef typename Grid :: template Codim< dim > :: EntityPointer VertexPointerType;
           VertexPointerType vxp = it->template entity<dim> (i);
 
           // get coordinates of entity pointer
@@ -453,30 +461,25 @@ namespace Dune {
         ////////////////////////////////////////////////////////////
         // check sub entities
         ////////////////////////////////////////////////////////////
-        checkSubEntity<codim> (grid, *it, lset, sout,
-                               subEntities, vertices, vertexCoordsMap);
+        checkSubEntity< codim >( grid, *it, lset, sout,
+                                 subEntities, vertices, vertexCoordsMap );
 
         // check neighbors
-        if(codim == 1)
+        if( codim == 1 )
         {
-          std::string name = grid.name();
-          if( name != "AlbertaGrid" )
-          {
-            if( levelIndex )
-            {
-              typedef typename EntityCodim0Type :: LevelIntersectionIterator IntersectionIterator;
-              IntersectionIterator endnit  = it->ilevelend();
-              for(IntersectionIterator nit = it->ilevelbegin(); nit != endnit; ++nit)
-              {
-                if(nit->neighbor())
-                {
-                  typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
-                  EnPointer ep = nit->outside();
+          typedef typename GridView :: IntersectionIterator IntersectionIterator;
 
-                  checkSubEntity<codim> (grid, *ep, lset, sout,
-                                         subEntities, vertices, vertexCoordsMap);
-                }
-              }
+          const std :: string name = grid.name();
+          if( !levelIndex || (name != "AlbertaGrid") )
+          {
+            const IntersectionIterator endnit = view.iend( *it );
+            for( IntersectionIterator nit = view.ibegin( *it ); nit != endnit; ++nit )
+            {
+              if( !nit->neighbor() )
+                continue;
+
+              checkSubEntity< codim >( grid, *(nit->outside()), lset, sout,
+                                       subEntities, vertices, vertexCoordsMap );
             }
           }
           else
@@ -488,76 +491,57 @@ namespace Dune {
               called = true;
             }
           }
-
-          if( !levelIndex )
-          {
-            typedef typename EntityCodim0Type :: LeafIntersectionIterator IntersectionIterator;
-            IntersectionIterator endnit  = it->ileafend();
-            for(IntersectionIterator nit = it->ileafbegin(); nit != endnit; ++nit)
-            {
-              if(nit->neighbor())
-              {
-                typedef typename GridType :: template Codim<0> :: EntityPointer EnPointer;
-                EnPointer ep = nit->outside();
-
-                checkSubEntity<codim> (grid, *ep, lset, sout,
-                                       subEntities, vertices, vertexCoordsMap);
-              }
-            }
-          }
         }
       }
     }
   }
 
 
-  template <class GridType, class IndexSetType, class OutputStreamImp,
-      int codim, bool hasCodim>
+  template< class Grid, class GridView, class OutputStream, int codim, bool hasCodim >
   struct CheckIndexSet
   {
-    static void checkIndexSet( const GridType &grid ,
-                               const IndexSetType & iset, OutputStreamImp & sout, bool levelIndex )
+    static void checkIndexSet ( const Grid &grid, const GridView &view,
+                                OutputStream &sout, bool levelIndex )
     {
-      checkIndexSetForCodim<codim> (grid,iset,sout,levelIndex);
-      CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
-          codim-1, Dune::Capabilities::hasEntity<GridType, codim-1>::v > ::
-      checkIndexSet( grid, iset, sout,levelIndex );
+      checkIndexSetForCodim< codim >( grid, view, sout, levelIndex );
+      typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
+      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim :: v >
+      :: checkIndexSet( grid, view, sout, levelIndex );
     }
   };
 
-  template <class GridType, class IndexSetType, class OutputStreamImp,
-      int codim>
-  struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,codim,false>
+  template< class Grid, class GridView, class OutputStream, int codim >
+  struct CheckIndexSet< Grid, GridView, OutputStream, codim, false >
   {
-    static void checkIndexSet( const GridType &grid ,
-                               const IndexSetType & iset, OutputStreamImp & sout , bool levelIndex )
+    static void checkIndexSet ( const Grid &grid, const GridView &view,
+                                OutputStream &sout, bool levelIndex )
     {
-      derr << "WARNING: entities for codim " << codim << " are not being tested!" << std::endl;
-      CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
-          codim-1, Dune::Capabilities::hasEntity<GridType, codim-1>::v > ::
-      checkIndexSet( grid, iset, sout , levelIndex );
+      derr << "WARNING: Entities for codim " << codim
+           << " are not being tested!" << std::endl;
+      typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
+      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim :: v >
+      :: checkIndexSet( grid, view, sout, levelIndex );
     }
   };
 
-  // end loop over codim by specialisation
-  template <class GridType, class IndexSetType, class OutputStreamImp>
-  struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,0,true>
+  template< class Grid, class GridView, class OutputStream >
+  struct CheckIndexSet< Grid, GridView, OutputStream, 0, true >
   {
-    static void checkIndexSet( const GridType &grid ,
-                               const IndexSetType & iset, OutputStreamImp & sout , bool levelIndex )
+    static void checkIndexSet ( const Grid &grid, const GridView &view,
+                                OutputStream &sout, bool levelIndex )
     {
-      checkIndexSetForCodim<0> (grid,iset,sout,levelIndex);
+      checkIndexSetForCodim< 0 >( grid, view, sout, levelIndex );
     }
   };
 
-  template <class GridType, class IndexSetType, class OutputStreamImp>
-  void checkIndexSet( const GridType &grid , const IndexSetType & iset,
-                      OutputStreamImp & sout ,  bool levelIndex = false )
+  template< class Grid, class GridView, class OutputStream >
+  void checkIndexSet ( const Grid &grid, const GridView &view,
+                       OutputStream &sout,  bool levelIndex = false )
   {
-    CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
-        GridType::dimension, true> ::
-    checkIndexSet (grid,iset,sout,levelIndex);
+    CheckIndexSet< Grid, GridView, OutputStream, Grid :: dimension, true >
+    :: checkIndexSet ( grid, view, sout, levelIndex );
   }
 
 } // end namespace Dune
+
 #endif

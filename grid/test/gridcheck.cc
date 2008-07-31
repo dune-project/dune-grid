@@ -976,7 +976,7 @@ void gridcheck (Grid &g)
   assertNeighbor(cg);
   // note that for some grid this might fail
   // then un comment this test
-  Dune::checkIndexSet (g,g.leafIndexSet(),Dune::dvverb);
-  for(int lvl = 0; lvl <= g.maxLevel () ; lvl ++ )
-    Dune::checkIndexSet (g,g.levelIndexSet(lvl), Dune::dvverb,true);
+  Dune :: checkIndexSet( g, g.leafView(), Dune :: dvverb );
+  for( int level = 0; level <= g.maxLevel(); ++level )
+    Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
 }

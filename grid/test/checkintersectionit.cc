@@ -292,7 +292,8 @@ void checkIntersectionIterator(const GridViewType& view,
       if( std :: abs( det - intNormal.two_norm() ) > 1e-8 )
       {
         std :: cerr << "Error: integrationOuterNormal yields wrong length."
-                    << "       |integrationOuterNormal| = " << intNormal.two_norm()
+                    << std :: endl;
+        std :: cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
                     << ", integrationElement = " << det << std :: endl;
         assert( false );
       }
