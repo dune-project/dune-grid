@@ -61,17 +61,19 @@ namespace Dune
     else
     {
 #if ALU3DGRID_PARALLEL
-      std :: ostringstream tmps;
+      std :: stringstream tmps;
       tmps << filename << "." << rank;
       const std :: string &tmp = tmps.str();
-#else
-      std :: string tmp( filename );
-#endif
-      std :: ifstream testfile( tmp.c_str() );
-      if( testfile )
-      {
-        testfile.close();
+
+      if( fileExists( tmp.c_str() ) )
         return new ALUSimplexGrid< 3, 3 >( tmp.c_str(), communicator );
+#endif
+      if( fileExists( filename ) )
+      {
+        if( rank == 0 )
+          return new ALUSimplexGrid< 3, 3 >( filename, communicator );
+        else
+          return new ALUSimplexGrid< 3, 3 >( communicator );
       }
     }
     DUNE_THROW( GridError, "Unable to create ALUSimplexGrid< 3, 3 > from '"
@@ -140,14 +142,16 @@ namespace Dune
       std :: stringstream tmps;
       tmps << filename << "." << rank;
       const std :: string &tmp = tmps.str();
-#else
-      std :: string tmp( filename );
-#endif
-      std :: ifstream testfile( tmp.c_str() );
-      if( testfile )
-      {
-        testfile.close();
+
+      if( fileExists( tmp.c_str() ) )
         return new ALUCubeGrid< 3, 3 >( tmp.c_str(), communicator );
+#endif
+      if( fileExists( filename ) )
+      {
+        if( rank == 0 )
+          return new ALUCubeGrid< 3, 3 >( filename, communicator );
+        else
+          return new ALUCubeGrid< 3, 3 >( communicator );
       }
     }
     DUNE_THROW( GridError, "Unable to create ALUSimplexGrid< 3, 3 > from '"

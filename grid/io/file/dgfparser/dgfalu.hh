@@ -8,8 +8,9 @@
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
 #include "dgfparser.hh"
-namespace Dune {
-  //*********************************
+namespace Dune
+{
+
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUCubeGrid<dim,dimworld> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -18,11 +19,23 @@ namespace Dune {
     generate(MacroGrid& mg,
              const char* filename,
              MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+
   private:
     inline void
     generateAlu3d(MacroGrid& mg,
                   const char* filename, std::string& str, MPICommunicatorType MPICOMM );
+
+    static bool fileExists ( const char *fileName )
+    {
+      std :: ifstream testfile( fileName );
+      if( !testfile )
+        return false;
+      testfile.close();
+      return true;
+    }
   };
+
+
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -32,12 +45,25 @@ namespace Dune {
     generate(MacroGrid& mg,
              const char* filename,
              MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-  protected:
+
+  private:
     inline void
     generateAlu3d(MacroGrid& mg,
                   const char* filename, std::string& str, MPICommunicatorType MPICOMM );
+
+    static bool fileExists ( const char *fileName )
+    {
+      std :: ifstream testfile( fileName );
+      if( !testfile )
+        return false;
+      testfile.close();
+      return true;
+    }
+
     // friend MacroGrid::Impl<ALUConformGrid<dim,dimworld> >;
   };
+
+
   /* needs new version of alulib */
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUConformGrid<dim,dimworld> > {
