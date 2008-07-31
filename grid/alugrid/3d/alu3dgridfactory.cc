@@ -16,9 +16,11 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   ALU3dGridFactory< ALUGrid >
-  :: ALU3dGridFactory ( const MPICommunicatorType &communicator )
+  :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
+                        bool removeGeneratedFile )
     : filename_( temporaryFileName() ),
-      communicator_( communicator )
+      communicator_( communicator ),
+      removeGeneratedFile_( removeGeneratedFile )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -31,7 +33,8 @@ namespace Dune
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
     : filename_( filename + ".ALU3dGrid" ),
-      communicator_( communicator )
+      communicator_( communicator ),
+      removeGeneratedFile_( false )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -184,10 +187,8 @@ namespace Dune
 #else
     GridType *grid = new GridType( filename_ );
 #endif
-
-#ifdef NDEBUG
-    remove( filename_.c_str() );
-#endif
+    if( removeGeneratedFile_ )
+      remove( filename_.c_str() );
     return grid;
   }
 

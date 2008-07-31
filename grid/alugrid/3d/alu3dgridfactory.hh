@@ -50,6 +50,7 @@ namespace Dune
   private:
     const std::string filename_;
     MPICommunicatorType communicator_;
+    bool removeGeneratedFile_;
 #if ALU3DGRID_PARALLEL
     int rank_;
 #endif
@@ -60,7 +61,8 @@ namespace Dune
   public:
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
-                                  = MPIHelper :: getCommunicator() );
+                                  = MPIHelper :: getCommunicator(),
+                                bool removeGeneratedFile = true );
 
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
