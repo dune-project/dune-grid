@@ -4,22 +4,22 @@
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/io/file/gnuplot.hh>
 
-template <class G, class IS>
-void testIO(const G & g, const IS & is, std::string fname)
+template <class GV>
+void testIO(const GV & gridView, std::string fname)
 {
   // create data buffer
   std::vector<double> celldata;
   std::vector<float> vertexdata;
 
-  for (int i=0; i<is.size(0); i++)
+  for (size_t i=0; i<gridView.indexSet().size(0); i++)
   {
     celldata.push_back(1+ 0.22*i);
     vertexdata.push_back(0.22*i);
   }
-  vertexdata.push_back(0.22*is.size(0));
+  vertexdata.push_back(0.22*gridView.indexSet().size(0));
 
   // create writer
-  Dune::GnuplotWriter<G,IS> gnuplot(g,is);
+  Dune::GnuplotWriter<typename GV::Grid,GV> gnuplot(gridView.grid(),gridView);
 
   // register data
   gnuplot.template addVertexData< std::vector<float> >(vertexdata, std::string("vertexdata"));
@@ -36,8 +36,8 @@ int main()
     double h[] = { 1.0 };
     Dune::SGrid<1,1> sgrid(n,h);
 
-    testIO(sgrid, sgrid.leafIndexSet(), "sgrid-leaf.data");
-    testIO(sgrid, sgrid.levelIndexSet(0), "sgrid-level.data");
+    testIO(sgrid.leafView<Dune::InteriorBorder_Partition>(), "sgrid-leaf.data");
+    testIO(sgrid.levelView<Dune::InteriorBorder_Partition>(0), "sgrid-level.data");
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;

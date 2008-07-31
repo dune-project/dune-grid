@@ -135,7 +135,7 @@ namespace Dune
    * to a file suitable for easy visualization with
    * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
    */
-  template<class GridImp, class IS=typename GridImp::template Codim<0>::LeafIndexSet>
+  template<class GridImp, class GV=typename GridImp::LeafGridView>
   class VTKWriter {
     template<int dim>
     struct P0Layout
@@ -162,7 +162,7 @@ namespace Dune
     typedef typename GridImp::Traits::template Codim<0>::Entity Entity;
     typedef typename GridImp::Traits::template Codim<0>::Entity Cell;
     typedef typename GridImp::Traits::template Codim<n>::Entity Vertex;
-    typedef IS IndexSet;
+    typedef GridView::IndexSet IndexSet;
     static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
     typedef typename IS::template Codim<0>::template Partition<vtkPartition>::Iterator GridCellIterator;
     typedef typename IS::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;

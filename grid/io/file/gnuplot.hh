@@ -22,10 +22,10 @@ namespace Dune {
 
   /** \brief Writer for 1D grids in gnuplot format
       \ingroup Gnuplot
-      \param GridType the grid
-      \param IndexSet Level- or LeafIndexSet
+      \tparam GridType the grid
+      \tparam GridView Level- or LeafGridView
    */
-  template<class GridType, class IndexSet>
+  template<class GridType, class GridView>
   class GnuplotWriter {
 
     typedef typename GridType::ctype ctype;
@@ -33,10 +33,9 @@ namespace Dune {
     enum {dimworld = GridType::dimensionworld};
 
   public:
-    GnuplotWriter (const GridType & g, const IndexSet & is) : _grid(g), _is(is)
+    GnuplotWriter (const GridType & g, const GridView & gv) : _grid(g), _is(gv.indexSet()), _gv(gv)
     {
-      // Gnuplot Export only works for world dim == 1
-      IsTrue<dimworld == 1 || dimworld == 2>::yes();
+      dune_static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
       // allocate _data buffer
       _data.resize(_is.size(0)*2);
     }
@@ -71,7 +70,8 @@ namespace Dune {
   private:
     enum DataType { vertexData, cellData };
     const GridType & _grid;
-    const IndexSet & _is;
+    const typename GridView::IndexSet & _is;
+    const GridView _gv;
     std::vector< std::vector< float > > _data;
     std::vector< std::string > _names;
 

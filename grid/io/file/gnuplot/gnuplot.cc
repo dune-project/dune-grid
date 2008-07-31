@@ -12,9 +12,9 @@ namespace Dune {
   /** \brief Write Gnuplot file to disk
       \param filename Name of the file to write to
    */
-  template<class GridType, class IndexSet>
+  template<class GridType, class GridView>
   void
-  GnuplotWriter<GridType,IndexSet>::write(const std::string& filename) const
+  GnuplotWriter<GridType,GridView>::write(const std::string& filename) const
   {
     // open file
     std::ofstream file(filename.c_str());
@@ -27,9 +27,9 @@ namespace Dune {
     if (dimworld==1) {
 
       int counter = 0;
-      typedef typename IndexSet::template Codim<0>::template Partition<InteriorBorder_Partition>::Iterator CellIterator;
-      CellIterator it = _is.template begin<0,InteriorBorder_Partition>();
-      CellIterator end = _is.template end<0,InteriorBorder_Partition>();
+      typedef typename GridView::template Codim<0>::Iterator CellIterator;
+      CellIterator it = _gv.template begin<0>();
+      CellIterator end = _gv.template end<0>();
       for (; it != end; ++it)
       {
         int i = _is.index(*it);
@@ -47,9 +47,9 @@ namespace Dune {
 
     } else {
 
-      typedef typename IndexSet::template Codim<dimworld>::template Partition<InteriorBorder_Partition>::Iterator VertexIterator;
-      VertexIterator it  = _is.template begin<dimworld,InteriorBorder_Partition>();
-      VertexIterator end = _is.template end<dimworld,InteriorBorder_Partition>();
+      typedef typename GridView::template Codim<dimworld>::Iterator VertexIterator;
+      VertexIterator it  = _gv.template begin<dimworld>();
+      VertexIterator end = _gv.template end<dimworld>();
       for (; it != end; ++it) {
 
         // write gnuplot rows for vertex
@@ -97,7 +97,7 @@ namespace Dune {
       // data is transformed to nonconforming vertex data
       int c = 0;
       int shift = (t==vertexData ? 1 : 0);
-      for (int i=0; i<_is.size(0); i++)
+      for (size_t i=0; i<_is.size(0); i++)
       {
         _data[c++].push_back(data[i]);
         _data[c++].push_back(data[i+shift]);
@@ -106,7 +106,7 @@ namespace Dune {
     } else {
 
       // 2d: only vertex data is allowed
-      for (int i=0; i<_is.size(dimworld); i++)
+      for (size_t i=0; i<_is.size(dimworld); i++)
         _data[i].push_back(data[i]);
 
     }
