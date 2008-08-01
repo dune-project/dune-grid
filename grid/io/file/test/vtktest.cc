@@ -23,14 +23,15 @@ const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
   return "";
 }
 
-template<class G, class IS>
-class VTKVectorFuction : public Dune::VTKWriter<G,IS>::VTKFunction
+template< class GridView >
+class VTKVectorFuction
+  : public Dune :: VTKWriter< typename GridView :: Grid, GridView > :: VTKFunction
 {
   // extract types
-  enum {n=G::dimension};
-  enum {w=G::dimensionworld};
-  typedef typename G::ctype DT;
-  typedef typename G::Traits::template Codim<0>::Entity Entity;
+  enum { n = GridView :: dimension };
+  enum { w = GridView :: dimensionworld };
+  typedef typename GridView :: Grid :: ctype DT;
+  typedef typename GridView :: template Codim< 0 > :: Entity Entity;
 public:
   //! return number of components
   virtual int ncomps () const { return n; };
@@ -58,18 +59,20 @@ public:
 
 };
 
-template<class G, class IS>
-void doWrite(G & g, IS & is, Dune::VTKOptions::DataMode dm)
+template< class GridView >
+void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
 {
-  enum { dim = G::dimension };
+  enum { dim = GridView :: dimension };
 
-  Dune::VTKWriter<G, IS> vtk(g,is,dm);
+  const typename GridView :: IndexSet &is = gridView.indexSet();
   std::vector<int> vertexdata(is.size(dim),dim);
   std::vector<int> celldata(is.size(0),0);
+
+  Dune :: VTKWriter< typename GridView :: Grid, GridView > vtk( gridView, dm );
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
-  VTKVectorFuction<G, IS> * vectordata = new VTKVectorFuction<G, IS>;
+  VTKVectorFuction< GridView > *vectordata = new VTKVectorFuction< GridView >;
   vtk.addVertexData(vectordata);
 
   char name[256];
@@ -83,16 +86,17 @@ void doWrite(G & g, IS & is, Dune::VTKOptions::DataMode dm)
 template<int dim>
 void vtkCheck(int* n, double* h)
 {
+  const Dune :: PartitionIteratorType VTK_Partition = Dune :: InteriorBorder_Partition;
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
   Dune::SGrid<dim,dim> g(n, h);
   g.globalRefine(1);
 
-  doWrite(g,g.leafIndexSet(),Dune::VTKOptions::conforming);
-  doWrite(g,g.leafIndexSet(),Dune::VTKOptions::nonconforming);
-  doWrite(g,g.levelIndexSet(0),Dune::VTKOptions::conforming);
-  doWrite(g,g.levelIndexSet(0),Dune::VTKOptions::nonconforming);
-  doWrite(g,g.levelIndexSet(g.maxLevel()),Dune::VTKOptions::conforming);
-  doWrite(g,g.levelIndexSet(g.maxLevel()),Dune::VTKOptions::nonconforming);
+  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: conforming );
+  doWrite( g.template leafView< VTK_Partition >(), Dune :: VTKOptions :: nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: conforming );
+  doWrite( g.template levelView< VTK_Partition >( 0 ), Dune :: VTKOptions :: nonconforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: conforming );
+  doWrite( g.template levelView< VTK_Partition >( g.maxLevel() ), Dune :: VTKOptions :: nonconforming );
 }
 
 int main(int argc, char **argv)

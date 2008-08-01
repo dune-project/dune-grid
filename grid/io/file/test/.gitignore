@@ -13,3 +13,6 @@ starcdreadertest
 semantic.cache
 *.gcda
 *.gcno
+
+*.so.*
+*.swp

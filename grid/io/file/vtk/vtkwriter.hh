@@ -135,7 +135,7 @@ namespace Dune
    * to a file suitable for easy visualization with
    * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
    */
-  template<class GridImp, class GV=typename GridImp::LeafGridView>
+  template< class GridImp, class GridView = typename GridImp :: LeafGridView >
   class VTKWriter {
     template<int dim>
     struct P0Layout
@@ -156,19 +156,26 @@ namespace Dune
     };
 
     // extract types
-    enum {n=GridImp::dimension};
-    enum {w=GridImp::dimensionworld};
-    typedef typename GridImp::ctype DT;
-    typedef typename GridImp::Traits::template Codim<0>::Entity Entity;
-    typedef typename GridImp::Traits::template Codim<0>::Entity Cell;
-    typedef typename GridImp::Traits::template Codim<n>::Entity Vertex;
-    typedef GridView::IndexSet IndexSet;
-    static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
-    typedef typename IS::template Codim<0>::template Partition<vtkPartition>::Iterator GridCellIterator;
-    typedef typename IS::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;
-    typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P1Layout> VertexMapper;
-  public:
+    typedef typename GridView :: Grid :: ctype DT;
+    enum { n = GridView :: dimension };
+    enum { w = GridView :: dimensionworld };
 
+    typedef typename GridView :: template Codim< 0 > :: Entity Cell;
+    typedef typename GridView :: template Codim< n > :: Entity Vertex;
+    typedef Cell Entity;
+
+    typedef typename GridView :: IndexSet IndexSet;
+
+    //static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
+    //typedef typename IndexSet::template Codim<0>::template Partition<vtkPartition>::Iterator GridCellIterator;
+    //typedef typename IndexSet::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;
+
+    typedef typename GridView :: template Codim< 0 > :: Iterator GridCellIterator;
+    typedef typename GridView :: template Codim< n > :: Iterator GridVertexIterator;
+
+    typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P1Layout > VertexMapper;
+
+  public:
     /** \brief A base class for grid functions with any return type and dimension
         \ingroup VTK
 
@@ -224,13 +231,17 @@ namespace Dune
         return ReferenceElements<DT,n>::general(git->type()).position(0,0);
       }
     };
+
     CellIterator cellBegin() const
     {
-      return CellIterator(is.template begin<0,vtkPartition>(), is.template end<0,vtkPartition>());
+      return CellIterator( gridView_.template begin< 0 >(), gridView_.template end< 0 >() );
+      //return CellIterator(is.template begin<0,vtkPartition>(), is.template end<0,vtkPartition>());
     }
+
     CellIterator cellEnd() const
     {
-      return CellIterator(is.template end<0,vtkPartition>(), is.template end<0,vtkPartition>());
+      return CellIterator( gridView_.template end< 0 >(), gridView_.template end< 0 >() );
+      //return CellIterator(is.template end<0,vtkPartition>(), is.template end<0,vtkPartition>());
     }
 
     class VertexIterator :
@@ -318,17 +329,25 @@ namespace Dune
         return ReferenceElements<DT,n>::general(git->type()).position(index,n);
       }
     };
-    VertexIterator vertexBegin() const
+
+    VertexIterator vertexBegin () const
     {
-      return VertexIterator(is.template begin<0,vtkPartition>(),
-                            is.template end<0,vtkPartition>(),
-                            datamode, *vertexmapper, number);
+      return VertexIterator( gridView_.template begin< 0 >(),
+                             gridView_.template end< 0 >(),
+                             datamode, *vertexmapper, number );
+      //return VertexIterator(is.template begin<0,vtkPartition>(),
+      //                      is.template end<0,vtkPartition>(),
+      //                      datamode, *vertexmapper, number);
     }
-    VertexIterator vertexEnd() const
+
+    VertexIterator vertexEnd () const
     {
-      return VertexIterator(is.template end<0,vtkPartition>(),
-                            is.template end<0,vtkPartition>(),
-                            datamode, *vertexmapper, number);
+      return VertexIterator( gridView_.template end< 0 >(),
+                             gridView_.template end< 0 >(),
+                             datamode, *vertexmapper, number );
+      //return VertexIterator(is.template end<0,vtkPartition>(),
+      //                      is.template end<0,vtkPartition>(),
+      //                      datamode, *vertexmapper, number);
     }
 
     class CornerIterator :
@@ -395,17 +414,25 @@ namespace Dune
         return index;
       }
     };
-    CornerIterator cornerBegin() const
+
+    CornerIterator cornerBegin () const
     {
-      return CornerIterator(is.template begin<0,vtkPartition>(),
-                            is.template end<0,vtkPartition>(),
-                            datamode, *vertexmapper, number);
+      return CornerIterator( gridView_.template begin< 0 >(),
+                             gridView_.template end< 0 >(),
+                             datamode, *vertexmapper, number );
+      //return CornerIterator(is.template begin<0,vtkPartition>(),
+      //                      is.template end<0,vtkPartition>(),
+      //                      datamode, *vertexmapper, number);
     }
-    CornerIterator cornerEnd() const
+
+    CornerIterator cornerEnd () const
     {
-      return CornerIterator(is.template end<0,vtkPartition>(),
-                            is.template end<0,vtkPartition>(),
-                            datamode, *vertexmapper, number);
+      return CornerIterator( gridView_.template begin< 0 >(),
+                             gridView_.template end< 0 >(),
+                             datamode, *vertexmapper, number );
+      //return CornerIterator(is.template end<0,vtkPartition>(),
+      //                      is.template end<0,vtkPartition>(),
+      //                      datamode, *vertexmapper, number);
     }
 
     /** \brief take a vector and interpret it as cell data
@@ -414,7 +441,7 @@ namespace Dune
     template<class V>
     class P0VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P0Layout> VM0;
+      typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P0Layout > VM0;
     public:
       //! return number of components
       virtual int ncomps () const
@@ -435,7 +462,7 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P0VectorWrapper (const GridImp& g_, const IS& is_, const V& v_, std::string s_)
+      P0VectorWrapper ( const GridImp &g_, const IndexSet &is_, const V &v_, std :: string s_)
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
         if (v.size()!=(unsigned int)mapper.size())
@@ -446,7 +473,7 @@ namespace Dune
 
     private:
       const GridImp& g;
-      const IS& is;
+      const IndexSet &is;
       const V& v;
       std::string s;
       VM0 mapper;
@@ -458,7 +485,8 @@ namespace Dune
     template<class V>
     class P1VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper<GridImp,IS,P1Layout> VM1;
+      typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P1Layout > VM1;
+
     public:
       //! return number of components
       virtual int ncomps () const
@@ -493,7 +521,7 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P1VectorWrapper (const GridImp& g_, const IS& is_, const V& v_, std::string s_)
+      P1VectorWrapper ( const GridImp &g_, const IndexSet &is_, const V &v_, std :: string s_ )
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
         if (v.size()!=(unsigned int)mapper.size())
@@ -504,7 +532,7 @@ namespace Dune
 
     private:
       const GridImp& g;
-      const IS& is;
+      const IndexSet &is;
       const V& v;
       std::string s;
       VM1 mapper;
@@ -520,11 +548,15 @@ namespace Dune
      * @param g The grid where the functions to be visualized live.
      * @param dm The data mode??
      */
-    VTKWriter (const GridImp& g, VTKOptions::DataMode dm = VTKOptions::conforming) :
-      grid(g), is(grid.leafIndexSet()), datamode(dm)
+    explicit VTKWriter ( const GridImp &g,
+                         VTKOptions :: DataMode dm = VTKOptions :: conforming )
+      : gridView_( grid.leafView() ),
+        grid( g ),
+        is( gridView_.indexSet() ),
+        datamode( dm )
     {
       indentCount = 0;
-      numPerLine = 4*3;   //should be a multiple of 3 !
+      numPerLine = 4*3; //should be a multiple of 3 !
     }
 
     /**
@@ -535,11 +567,15 @@ namespace Dune
      * @param i The index set the grid functions live on. (E. g. a level index set.)
      * @param dm The data mode.
      */
-    VTKWriter (const GridImp& g, const IndexSet& i, VTKOptions::DataMode dm = VTKOptions::conforming) :
-      grid(g), is(i), datamode(dm)
+    explicit VTKWriter ( const GridView &gridView,
+                         VTKOptions :: DataMode dm = VTKOptions :: conforming )
+      : gridView_( gridView ),
+        grid( gridView.grid() ),
+        is( gridView_.indexSet() ),
+        datamode( dm )
     {
       indentCount = 0;
-      numPerLine = 4*3;   //should be a multiple of 3 !
+      numPerLine = 4*3; //should be a multiple of 3 !
     }
 
     /**
@@ -1517,6 +1553,7 @@ namespace Dune
     std::list<VTKFunction*> vertexdata;
 
     // the grid
+    const GridView gridView_;
     const GridImp& grid;
 
     // the indexset
@@ -1540,27 +1577,37 @@ namespace Dune
   /** \brief VTKWriter on the leaf grid
       \ingroup VTK
    */
-  template<class G>
-  class LeafVTKWriter : public VTKWriter<G,typename G::template Codim<0>::LeafIndexSet>
+  template< class Grid >
+  class LeafVTKWriter
+    : public VTKWriter< Grid, typename Grid :: LeafGridView >
   {
+    typedef VTKWriter< Grid, typename Grid :: LeafGridView > Base;
+
   public:
     /** \brief Construct a VTK writer for the leaf level of a given grid */
-    LeafVTKWriter (const G& grid, VTKOptions::DataMode dm = VTKOptions::conforming)
-      : VTKWriter<G,typename G::template Codim<0>::LeafIndexSet>(grid,grid.leafIndexSet(),dm)
+    explicit LeafVTKWriter ( const Grid &grid,
+                             VTKOptions :: DataMode dm = VTKOptions :: conforming )
+      : Base( grid, grid.leafView(), dm )
     {}
   };
 
   /** \brief VTKWriter on a given level grid
       \ingroup VTK
    */
-  template<class G>
-  class LevelVTKWriter : public VTKWriter<G, typename G::template Codim<0>::LevelIndexSet>
+  template< class Grid >
+  class LevelVTKWriter
+    : public VTKWriter< Grid, typename Grid :: LevelGridView >
   {
+    typedef VTKWriter< Grid, typename Grid :: LevelGridVew > Base;
+
   public:
     /** \brief Construct a VTK writer for a certain level of a given grid */
-    LevelVTKWriter (const G& grid, int level, VTKOptions::DataMode dm = VTKOptions::conforming)
-      : VTKWriter<G,typename G::template Codim<0>::LevelIndexSet>(grid,grid.levelIndexSet(level),dm)
+    LevelVTKWriter ( const Grid &grid, int level,
+                     VTKOptions :: DataMode dm = VTKOptions :: conforming )
+      : Base( grid, grid.levelView( level ), dm )
     {}
   };
+
 }
+
 #endif
