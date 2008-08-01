@@ -123,7 +123,7 @@ namespace Dune
         < typename Grid :: ctype, Grid :: dimension, Grid :: dimensionworld >
     {
       enum { hybrid = true };
-      enum { duneType = Topology< Grid > :: basicType };
+      //enum { duneType = Topology< Grid > :: basicType };
     };
 
   }

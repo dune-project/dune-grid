@@ -161,8 +161,7 @@ namespace Dune
     // --------
 
     template< int mydim, int cdim, class GridImp >
-    class Geometry :
-      public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
+    class Geometry
     {
       typedef GeometryTraits< GridImp > Traits;
 
@@ -214,9 +213,7 @@ namespace Dune
       < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
 
-      typedef GenericGeometry :: MapNumberingProvider< mydimension > MapNumberingProvider;
-
-      mutable Mapping *mapping_;
+      mutable const Mapping *mapping_;
 
     public:
       explicit Geometry ( Mapping &mapping )
@@ -239,7 +236,7 @@ namespace Dune
       template< int fatherdim >
       Geometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
                  const CachingType &cache = CachingType() )
-        : mapping_( father.mapping().template subMapping< fatherdim-mydim >( i, cache ) )
+        : mapping_( subMapping( father, i, cache ) )
       {}
 
       Geometry ( const Geometry &other )
@@ -307,8 +304,8 @@ namespace Dune
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
         const unsigned int tid = mapping().topologyId();
-        const unsigned int i
-          = MapNumberingProvider :: template dune2generic< 1 >( tid, face );
+        const unsigned int i = MapNumberingProvider< mydimension >
+                               :: template dune2generic< 1 >( tid, face );
         return mapping().normal( i, local );
       }
 
@@ -316,6 +313,18 @@ namespace Dune
       const Mapping &mapping () const
       {
         return *mapping_;
+      }
+
+      template< int fatherdim >
+      const Mapping *
+      subMapping ( const Geometry< fatherdim, cdim, GridImp > &father,
+                   int i, const CachingType &cache )
+      {
+        const unsigned int codim = fatherdim - mydim;
+        const unsigned int ftid = father.mapping().topologyId();
+        const unsigned int j = MapNumberingProvider< fatherdim >
+                               :: template dune2generic< codim >( ftid, i );
+        return father.mapping().template subMapping< codim >( j, cache );
       }
     };
 
@@ -325,8 +334,7 @@ namespace Dune
     // -------------
 
     template< int mydim, int cdim, class GridImp >
-    class LocalGeometry :
-      public GeometryDefaultImplementation <mydim, cdim, GridImp, Geometry>
+    class LocalGeometry
     {
       typedef GeometryTraits< GridImp > Traits;
 
@@ -376,9 +384,7 @@ namespace Dune
       < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
 
-      typedef GenericGeometry :: MapNumberingProvider< mydimension > MapNumberingProvider;
-
-      mutable Mapping *mapping_;
+      mutable const Mapping *mapping_;
 
     public:
       explicit LocalGeometry ( Mapping &mapping )
@@ -401,7 +407,7 @@ namespace Dune
       template< int fatherdim >
       LocalGeometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
                       const CachingType &cache = CachingType() )
-        : mapping_( father.mapping().template subMapping< fatherdim-mydim >( i, cache ) )
+        : mapping_( subMapping( father, i, cache ) )
       {}
 
       LocalGeometry ( const LocalGeometry &other )
@@ -469,8 +475,8 @@ namespace Dune
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
         const unsigned int tid = mapping().topologyId();
-        const unsigned int i
-          = MapNumberingProvider :: template dune2generic< 1 >( tid, face );
+        const unsigned int i = MapNumberingProvider< mydimension >
+                               :: template dune2generic< 1 >( tid, face );
         return mapping().normal( i, local );
       }
 
@@ -479,6 +485,19 @@ namespace Dune
       {
         return *mapping_;
       }
+
+      template< int fatherdim >
+      const Mapping *
+      subMapping ( const LocalGeometry< fatherdim, cdim, GridImp > &father,
+                   int i, const CachingType &cache )
+      {
+        const unsigned int codim = fatherdim - mydim;
+        const unsigned int ftid = father.mapping().topologyId();
+        const unsigned int j = MapNumberingProvider< fatherdim >
+                               :: template dune2generic< codim >( ftid, i );
+        return father.mapping().template subMapping< codim >( j, cache );
+      }
+
     };
   }
 

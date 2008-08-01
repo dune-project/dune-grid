@@ -434,6 +434,16 @@ namespace Dune
       }
     };
 
+    template<>
+    struct MapNumbering< Prism< Pyramid< Pyramid< Point > > > >
+      : public MapNumberingPrism
+    {};
+
+    template<>
+    struct MapNumbering< Prism< Pyramid< Prism< Point > > > >
+      : public MapNumberingPrism
+    {};
+
 
 
     // MapNumberingProvider
