@@ -738,10 +738,7 @@ namespace Dune {
     LeafIntersectionIterator ileafbegin () const
     {
       // only if entity is leaf this iterator delivers intersections
-      if (isLeaf())
-        return ibegin();
-      else
-        return iend();
+      return YaspIntersectionIterator<GridImp>(*this, ! isLeaf() );
     }
 
     //! returns intersection iterator for first intersection
