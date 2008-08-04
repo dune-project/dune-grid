@@ -678,6 +678,12 @@ namespace Dune {
     for(int i=0; i<numFaces; ++i)
     {
       const GEOFaceType & face = *getFace(*item_,i);
+
+#if ALU3DGRID_PARALLEL
+      // don't count internal boundaries as boundary
+      if( face.isBorder() ) continue ;
+#endif
+
       // check both
       const HasFaceType * outerElement = face.nb.front().first;
       // if we got our own element, get other side
