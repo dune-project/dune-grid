@@ -221,6 +221,7 @@ namespace Dune {
     friend class ALU3dGridIntersectionIterator<MyType>;
 
     friend class ALU3dGridEntityPointerBase<0,const MyType >;
+    friend class ALU3dGridEntityPointer<0,const MyType >;
     friend class ALU3dGridEntityPointerBase<1,const MyType >;
     friend class ALU3dGridEntityPointer<1,const MyType >;
     friend class ALU3dGridEntityPointerBase<2,const MyType >;

@@ -421,8 +421,9 @@ namespace Dune {
             const int level,
             const EntityType & en,
             const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
-            int i) {
-      return ALU3dGridEntityPointer<0, GridImp>(grid, item);
+            int i)
+    {
+      return ALU3dGridEntityPointer<0, GridImp>(grid , en );
     }
   };
 
@@ -666,6 +667,9 @@ namespace Dune {
   template<int dim, class GridImp>
   inline bool ALU3dGridEntity<0,dim,GridImp> :: hasBoundaryIntersections () const
   {
+    // on ghost elements return false
+    if( isGhost_ ) return false;
+
     enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
     typedef typename ALU3dImplTraits<GridImp::elementType>::HasFaceType HasFaceType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::GEOFaceType GEOFaceType;

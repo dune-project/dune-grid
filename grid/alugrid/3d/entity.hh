@@ -529,6 +529,8 @@ namespace Dune {
 
     typedef ALU3DSPACE HBndSegType HBndSegType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
+
+    typedef ALU3dGridEntity< 0,dim,GridImp> ALU3dGridEntityType ;
   public:
     //! type of Entity
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -536,10 +538,25 @@ namespace Dune {
     //! typedef of my type
     typedef ThisType ALU3dGridEntityPointerType;
 
-    //! Constructor for EntityPointer that points to an element
+    //! Constructor for EntityPointer that points to an interior element
     ALU3dGridEntityPointer(const GridImp & grid,
                            const MyHElementType & item)
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1,item) {} // -1 is fake level here
+
+    //! Constructor for EntityPointer that points to an iterior or ghost element
+    ALU3dGridEntityPointer(const GridImp & grid,
+                           const ALU3dGridEntityType& entity)
+      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1, entity.getItem() ) // -1 is fake level here
+    {
+      // for ghost entities we have to copy right away
+      if( entity.partitionType() == GhostEntity )
+      {
+        assert( this->entity_ == 0 );
+        this->entity_ = this->grid_.template getNewEntity<0> ();
+        assert( this->entity_ );
+        this->entityImp().setEntity( entity );
+      }
+    }
 
     //! Constructor for EntityPointer that points to an ghost
     ALU3dGridEntityPointer(const GridImp & grid,
