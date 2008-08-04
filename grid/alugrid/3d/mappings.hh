@@ -88,6 +88,8 @@ namespace Dune {
 
     // type for helper matrices
     typedef FieldMatrix<double,3,3> mat3_t;
+
+    // type for inverse matrices
     typedef FieldMatrix<double,3,2> inv_t;
 
     mutable mat3_t Df,Dfi;
@@ -103,6 +105,7 @@ namespace Dune {
     bool _affine;
     mutable bool _calcedDet;
     mutable bool _calcedInv;
+    mutable bool _calcedTransposed;
 
   public:
     //! Constructor creating empty mapping with double , i.e. zero

@@ -307,7 +307,7 @@ namespace Dune {
     }
 
     // initialize flags
-    _calcedDet = _calcedInv = false ;
+    _calcedDet = _calcedInv = _calcedTransposed = false ;
 
     return ;
   }
@@ -327,7 +327,7 @@ namespace Dune {
     }
     _affine = m._affine;
     // initialize flags
-    _calcedDet = _calcedInv = false ;
+    _calcedDet = _calcedInv = _calcedTransposed = false ;
     return ;
   }
 
@@ -424,7 +424,7 @@ namespace Dune {
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
     // if calculated return
-    if( _calcedInv ) return invTransposed_;
+    if( _calcedTransposed ) return invTransposed_;
 
     map2worldnormal (local[0],local[1],0.0,tmp_);
     inverse (tmp_) ;
@@ -438,6 +438,9 @@ namespace Dune {
 
     invTransposed_[2][0] = Dfi[0][2];
     invTransposed_[2][1] = Dfi[1][2];
+
+    // only true for affine mappings
+    _calcedTransposed = _affine ;
 
     return invTransposed_;
   }
