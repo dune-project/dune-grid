@@ -690,7 +690,7 @@ namespace Dune {
   }
 
   template <>
-  inline const FieldMatrix<alu3d_ctype, 2, 2>&
+  inline const FieldMatrix<alu3d_ctype, 3, 2>&
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
   {

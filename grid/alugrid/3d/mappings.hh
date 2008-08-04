@@ -88,10 +88,10 @@ namespace Dune {
 
     // type for helper matrices
     typedef FieldMatrix<double,3,3> mat3_t;
-    typedef FieldMatrix<double,2,2> mat2_t;
+    typedef FieldMatrix<double,3,2> inv_t;
 
     mutable mat3_t Df,Dfi;
-    mutable mat2_t invTransposed_;
+    mutable inv_t invTransposed_;
     mutable double DetDf;
     double _b [4][3] ;
     double _n [3][3] ;
@@ -118,7 +118,7 @@ namespace Dune {
     ~BilinearSurfaceMapping () {}
 
     void inverse (const coord3_t&) const;
-    const mat2_t& jacobianInverseTransposed(const coord2_t&) const ;
+    const inv_t& jacobianInverseTransposed(const coord2_t&) const ;
 
     // calculates determinant of mapping
     double det(const coord3_t&) const;

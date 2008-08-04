@@ -241,7 +241,7 @@ namespace Dune {
 
     //! can only be called for dim=dimworld! (Trivially true, since there is no
     //! other specialization...)
-    const FieldMatrix<alu3d_ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
+    const FieldMatrix<alu3d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
 
     //! returns true if mapping is affine
     inline bool affine () const;

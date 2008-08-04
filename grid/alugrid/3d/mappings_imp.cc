@@ -420,7 +420,7 @@ namespace Dune {
     return ;
   }
 
-  inline const FieldMatrix<double, 2, 2>&
+  inline const FieldMatrix<double, 3, 2>&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
     // if calculated return
@@ -435,6 +435,9 @@ namespace Dune {
 
     invTransposed_[1][0] = Dfi[0][1];
     invTransposed_[1][1] = Dfi[1][1];
+
+    invTransposed_[2][0] = Dfi[0][2];
+    invTransposed_[2][1] = Dfi[1][2];
 
     return invTransposed_;
   }
