@@ -427,7 +427,7 @@ namespace Dune
 
     CornerIterator cornerEnd () const
     {
-      return CornerIterator( gridView_.template begin< 0 >(),
+      return CornerIterator( gridView_.template end< 0 >(),
                              gridView_.template end< 0 >(),
                              datamode, *vertexmapper, number );
       //return CornerIterator(is.template end<0,vtkPartition>(),
