@@ -182,9 +182,11 @@ namespace Dune {
   template <ALU3dGridElementType type>
   inline int ALU3dGridFaceInfo<type>::outerTwist() const
   {
-    assert( (boundary()) ?
+    // don't check ghost boundaries here
+    assert( (outerBoundary_) ?
             (outerTwist_ == boundaryFace().twist(0)) :
-            (outerTwist_ == outerEntity().twist(outerALUFaceIndex()))
+            (! ghostBoundary_) ?
+            (outerTwist_ == outerEntity().twist(outerALUFaceIndex())) : true
             );
     return outerTwist_;
   }
