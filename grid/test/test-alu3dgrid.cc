@@ -183,6 +183,7 @@ int main (int argc , char **argv) {
 
       if (myrank == 0)
         std::cout << "Check empty grids" << std::endl;
+
       {
         ALUCubeGrid<3,3> grid;
         checkALUSerial(grid);
@@ -220,7 +221,6 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
 
-        if(myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
           checkALUSerial(grid,(mysize == 1) ? 1 : 0);
@@ -247,7 +247,6 @@ int main (int argc , char **argv) {
         GridPtr<GridType> gridPtr(filename);
         GridType & grid = *gridPtr;
 
-        if (myrank == 0)
         {
           std::cout << "Check serial grid" << std::endl;
           checkALUSerial(grid,(mysize == 1) ? 1 : 0);
