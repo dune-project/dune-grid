@@ -550,7 +550,7 @@ namespace Dune
      */
     explicit VTKWriter ( const GridImp &g,
                          VTKOptions :: DataMode dm = VTKOptions :: conforming )
-      : gridView_( grid.leafView() ),
+      : gridView_( g.leafView() ),
         grid( g ),
         is( gridView_.indexSet() ),
         datamode( dm )
