@@ -430,10 +430,23 @@ class CheckCommunication
     dh( indexSet_, gridView_.grid().globalIdSet(), cdim, data, weight );
 
     // call communication of grid
-    gridView_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
-    // make sure backward communication does the same, this should change nothing
-    gridView_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
-    //gridView_.communicate(dh,All_All_Interface,ForwardCommunication);
+    try
+    {
+      gridView_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
+      // make sure backward communication does the same, this should change nothing
+      gridView_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
+      //gridView_.communicate(dh,All_All_Interface,ForwardCommunication);
+    }
+    catch( const Dune :: NotImplemented &exception )
+    {
+      if( myrank == 0 )
+      {
+        sout_ << "Error: Communication for codimension " << cdim
+              << " not implemented." << std :: endl;
+        sout_ << "       (" << exception << ")" << std :: endl;
+      }
+      return false;
+    }
 
     double result = test( dataSize, data, weight, true );
     sout_ << "Test after Communication on <" << myrank << "> " << result << std :: endl;
