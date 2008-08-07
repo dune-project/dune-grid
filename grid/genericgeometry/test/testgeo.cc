@@ -165,7 +165,8 @@ void test(const GridViewType& view) {
   typedef typename GridViewType::Grid GridType;
   typedef typename ConversionType::Type TopologyType;
   typedef typename GridViewType ::template Codim<0>::Iterator ElementIterator;
-  typedef typename GridViewType :: IntersectionIterator IIteratorType;
+
+  typedef typename GridViewType :: IntersectionIterator IntersectionIterator;
   typedef typename GridViewType :: Intersection IntersectionType;
   typedef typename ElementIterator::Entity EntityType;
   typedef typename EntityType::Geometry GeometryType;
@@ -189,28 +190,36 @@ void test(const GridViewType& view) {
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
     //  SubGeometryType;
-    typedef typename GenericGeometry :: Geometry< GridType::dimension-1,GridType::dimensionworld,GridType > SubGeometryType;
-    IIteratorType iiter = view.ibegin(*eIt);
-    for (; iiter != view.iend(*eIt); ++ iiter) {
+    typedef typename GenericGeometry :: Geometry
+    < GridType::dimension-1,GridType::dimensionworld,GridType >
+    SubGeometryType;
+
+    const IntersectionIterator iend = view.iend( *eIt );
+    for( IntersectionIterator iit = view.ibegin( *eIt ); iit != iend; ++ iit )
+    {
       typedef FieldVector<double, GeometryType::mydimension> LocalType;
       typedef FieldVector<double, GeometryType::mydimension-1> LocalFaceType;
-      iiter->intersectionSelfLocal();
-      LocalFaceType xf(0.1);
-      LocalType xx( iiter->intersectionSelfLocal().global(xf));
-      const GlobalType& n  = iiter->integrationOuterNormal(xf);
-      const int faceNr = iiter->numberInSelf();
-      const GlobalType& nM = genericMap.normal( faceNr, xx );
-      if ((n-nM).two_norm2()>1e-10) {
-        normalErr++;
-        std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
-        std::cout << "normal: "
-                  << " ( " << nM << " )   ( " << n << " )   "
-                  << n-nM
-                  << std::endl;
+
+      const int faceNr = iit->numberInSelf();
+
+      //iit->intersectionSelfLocal();
+      LocalFaceType xf( 0.1 );
+      LocalType xx( iit->intersectionSelfLocal().global( xf ) );
+      const GlobalType &nG = iit->integrationOuterNormal( xf );
+      const GlobalType &nM = genericMap.normal( faceNr, xx );
+      if( (nG - nM).two_norm2() > 1e-10 )
+      {
+        std :: cout << "Error in normal: "
+                    << "|nG| = " << nG.two_norm() << ", "
+                    << "|nM| = " << nM.two_norm() << std :: endl;
+        std :: cout << "                 "
+                    << "nG = ( " << nG << " ), nM = ( " << nM << " )"
+                    << std :: endl;
+        ++normalErr;
       }
-      // SubGeometryType *subMap = genericMap.template subMapping< 1 >( correctFaceNr );
-      SubGeometryType subMap(genericMap, faceNr );
-      testGeo(iiter->intersectionGlobal(),subMap);
+
+      SubGeometryType subMap( genericMap, faceNr );
+      testGeo( iit->intersectionGlobal(), subMap );
     }
   }
 }
