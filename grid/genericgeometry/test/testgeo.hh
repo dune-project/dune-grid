@@ -9,7 +9,6 @@ namespace Dune
   template <int d1,int d2> class AlbertaGrid;
   template< int dim, int dimworld > class ALUSimplexGrid;
   template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
-  template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
   template <int dim> class UGGrid;
 
 
@@ -29,10 +28,6 @@ namespace Dune
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
     typedef typename Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: template map< 1 >( duneFN );
-    }
   };
 
   template <int d>
@@ -44,10 +39,6 @@ namespace Dune
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
     typedef typename Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: template map< 1 >( duneFN );
-    }
   };
 
   template <int d>
@@ -59,10 +50,6 @@ namespace Dune
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
     typedef typename Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: template map< 1 >( duneFN );
-    }
   };
 
   template<>
@@ -74,10 +61,6 @@ namespace Dune
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
     typedef Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: map< 1 >( duneFN );
-    }
   };
 
   template<>
@@ -85,30 +68,23 @@ namespace Dune
   {
     enum { basicType = GeometryType :: simplex };
     enum { dimension = 3 };
-    enum {correctJacobian=false};
+    enum {correctJacobian=true};
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
     typedef Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: map< 1 >( duneFN );
-    }
   };
 
-  template< class ct, int dim, int dimworld, class CComm >
-  struct Topology< ParallelSimplexGrid< ct, dim, dimworld, CComm > >
+  template<>
+  struct Topology< ALUSimplexGrid< 2, 2 > >
   {
     enum { basicType = GeometryType :: simplex };
-    enum { dimension = dim };
-    enum { correctJacobian = true };
+    enum { dimension = 2 };
+    enum {correctJacobian=true};
 
     typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
-    typedef typename Convert :: type Type;
-    static int faceNr( int duneFN )
-    {
-      return Convert :: template map< 1 >( duneFN );
-    }
+    typedef Convert :: type Type;
   };
+
 
 
   // GeometryTraits

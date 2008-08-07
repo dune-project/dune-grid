@@ -198,8 +198,8 @@ void test(const GridViewType& view) {
       LocalFaceType xf(0.1);
       LocalType xx( iiter->intersectionSelfLocal().global(xf));
       const GlobalType& n  = iiter->integrationOuterNormal(xf);
-      const int correctFaceNr = ConversionType::faceNr(iiter->numberInSelf());
-      const GlobalType& nM = genericMap.normal(correctFaceNr,xx);
+      const int faceNr = iiter->numberInSelf();
+      const GlobalType& nM = genericMap.normal( faceNr, xx );
       if ((n-nM).two_norm2()>1e-10) {
         normalErr++;
         std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
@@ -209,7 +209,7 @@ void test(const GridViewType& view) {
                   << std::endl;
       }
       // SubGeometryType *subMap = genericMap.template subMapping< 1 >( correctFaceNr );
-      SubGeometryType subMap(genericMap, correctFaceNr );
+      SubGeometryType subMap(genericMap, faceNr );
       testGeo(iiter->intersectionGlobal(),subMap);
     }
   }
