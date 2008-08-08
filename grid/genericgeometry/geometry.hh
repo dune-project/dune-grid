@@ -218,6 +218,10 @@ namespace Dune
       mutable const Mapping *mapping_;
 
     public:
+      BasicGeometry ()
+        : mapping_( 0 )
+      {}
+
       explicit BasicGeometry ( Mapping &mapping )
         : mapping_( &mapping )
       {}
@@ -246,6 +250,21 @@ namespace Dune
       {
         if( mapping_ != 0 )
           delete mapping_;
+      }
+
+      BasicGeometry &operator= ( const BasicGeometry &other )
+      {
+        if( mapping_ != 0 )
+          delete mapping_;
+        mapping_ = other.mapping_;
+        other.mapping_ = 0;
+        return *this;
+      }
+
+    public:
+      bool operator! () const
+      {
+        return (mapping_ == 0);
       }
 
       GeometryType type () const
@@ -343,6 +362,10 @@ namespace Dune
       typedef typename Base :: Mapping Mapping;
 
     public:
+      Geometry ()
+        : Base()
+      {}
+
       explicit Geometry ( Mapping &mapping )
         : Base( mapping )
       {}
@@ -385,6 +408,10 @@ namespace Dune
       typedef typename Base :: Mapping Mapping;
 
     public:
+      LocalGeometry ()
+        : Base()
+      {}
+
       explicit LocalGeometry ( Mapping &mapping )
         : Base( mapping )
       {}
