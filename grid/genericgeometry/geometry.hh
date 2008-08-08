@@ -157,34 +157,33 @@ namespace Dune
 
 
 
-    // Geometry
-    // --------
+    // BasicGeometry
+    // -------------
 
-    template< int mydim, int cdim, class GridImp >
-    class Geometry
+    template< int mydim, int cdim, class Grid, class CoordTraits >
+    class BasicGeometry
     {
-      typedef GeometryTraits< GridImp > Traits;
+      typedef GeometryTraits< Grid > Traits;
 
-      enum { dimGrid = Traits :: dimGrid };
+      static const int dimGrid = Traits :: dimGrid;
 
-      template< int, int, class > friend class Geometry;
+      template< int, int, class, class > friend class BasicGeometry;
 
     public:
-      enum { mydimension = mydim };
-      enum { coorddimension = cdim };
+      static const int mydimension = mydim;
+      static const int coorddimension = cdim;
 
-      typedef typename GridImp :: ctype ctype;
+      typedef typename Grid :: ctype ctype;
 
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
-      typedef FieldMatrix< ctype, coorddimension,mydimension > Jacobian;
+      typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
 
     private:
-      dune_static_assert( (0 <= mydimension) && (mydimension <= int(dimGrid)),
+      dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
                           "Invalid geometry dimension." );
-      enum { codimension = dimGrid - mydimension };
 
-      typedef typename Traits :: CoordTraits CoordTraits;
+      static const int codimension = dimGrid - mydimension;
 
       template< bool >
       struct Hybrid
@@ -203,49 +202,47 @@ namespace Dune
         Mapping;
       };
 
-      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
-      ElementMapping;
-      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
-      typedef typename MappingProvider :: Mapping Mapping;
-      typedef typename MappingProvider :: CachingType CachingType;
-
       typedef GenericGeometry :: DuneGeometryTypeProvider
       < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
 
+      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
+      ElementMapping;
+      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
+
+    protected:
+      typedef typename MappingProvider :: Mapping Mapping;
+      typedef typename MappingProvider :: CachingType CachingType;
+
+    private:
       mutable const Mapping *mapping_;
 
     public:
-      explicit Geometry ( Mapping &mapping )
+      explicit BasicGeometry ( Mapping &mapping )
         : mapping_( &mapping )
       {}
 
-      template< class GeoType >
-      explicit Geometry ( const GeoType &coords,
-                          const CachingType &cache = CachingType() )
-        : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
-      {}
-
       template< class CoordVector >
-      Geometry ( const GeometryType &type,
-                 const CoordVector &coords,
-                 const CachingType &cache = CachingType() )
+      BasicGeometry ( const GeometryType &type,
+                      const CoordVector &coords,
+                      const CachingType &cache )
         : mapping_( MappingProvider :: mapping( type, coords, cache ) )
       {}
 
       template< int fatherdim >
-      Geometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
-                 const CachingType &cache = CachingType() )
+      BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits > &father,
+                      int i,
+                      const CachingType &cache )
         : mapping_( subMapping( father, i, cache ) )
       {}
 
-      Geometry ( const Geometry &other )
+      BasicGeometry ( const BasicGeometry &other )
         : mapping_( other.mapping_ )
       {
         other.mapping_ = 0;
       }
 
-      ~Geometry ()
+      ~BasicGeometry ()
       {
         if( mapping_ != 0 )
           delete mapping_;
@@ -317,7 +314,7 @@ namespace Dune
 
       template< int fatherdim >
       const Mapping *
-      subMapping ( const Geometry< fatherdim, cdim, GridImp > &father,
+      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits > &father,
                    int i, const CachingType &cache )
       {
         const unsigned int codim = fatherdim - mydim;
@@ -326,6 +323,48 @@ namespace Dune
                                :: template dune2generic< codim >( ftid, i );
         return father.mapping().template subMapping< codim >( j, cache );
       }
+    };
+
+
+
+    // Geometry
+    // --------
+
+    template< int mydim, int cdim, class Grid >
+    class Geometry
+      : public BasicGeometry
+        < mydim, cdim, Grid, typename GeometryTraits< Grid > :: CoordTraits >
+    {
+      typedef typename GeometryTraits< Grid > :: CoordTraits CoordTraits;
+      typedef BasicGeometry< mydim, cdim, Grid, CoordTraits > Base;
+
+    protected:
+      typedef typename Base :: CachingType CachingType;
+      typedef typename Base :: Mapping Mapping;
+
+    public:
+      explicit Geometry ( Mapping &mapping )
+        : Base( mapping )
+      {}
+
+      template< class Geo >
+      explicit Geometry ( const Geo &geo,
+                          const CachingType &cache = CachingType() )
+        : Base( geo.type(), geo, cache )
+      {}
+
+      template< class CoordVector >
+      Geometry ( const GeometryType &type,
+                 const CoordVector &coords,
+                 const CachingType &cache = CachingType() )
+        : Base( type, coords, cache )
+      {}
+
+      template< int fatherdim >
+      Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i,
+                 const CachingType &cache = CachingType() )
+        : Base( father, i, cache )
+      {}
     };
 
 
@@ -333,172 +372,43 @@ namespace Dune
     // LocalGeometry
     // -------------
 
-    template< int mydim, int cdim, class GridImp >
+    template< int mydim, int cdim, class Grid >
     class LocalGeometry
+      : public BasicGeometry
+        < mydim, cdim, Grid, typename GeometryTraits< Grid > :: LocalCoordTraits >
     {
-      typedef GeometryTraits< GridImp > Traits;
+      typedef typename GeometryTraits< Grid > :: LocalCoordTraits CoordTraits;
+      typedef BasicGeometry< mydim, cdim, Grid, CoordTraits > Base;
 
-      enum { dimGrid = Traits :: dimGrid };
-
-      template< int, int, class > friend class LocalGeometry;
-
-    public:
-      enum { mydimension = mydim };
-      enum { coorddimension = cdim };
-
-      typedef typename GridImp :: ctype ctype;
-
-      typedef FieldVector< ctype, mydimension > LocalCoordinate;
-      typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
-      typedef FieldMatrix< ctype, coorddimension,mydimension > Jacobian;
-
-    private:
-      dune_static_assert( (0 <= mydimension) && (mydimension <= int(dimGrid)),
-                          "Invalid geometry dimension." );
-      enum { codimension = dimGrid - mydimension };
-
-      typedef typename Traits :: LocalCoordTraits CoordTraits;
-
-      template< bool >
-      struct Hybrid
-      {
-        typedef HybridMapping< dimGrid, CoordTraits, Traits :: template Caching >
-        Mapping;
-      };
-
-      template< bool >
-      struct NonHybrid
-      {
-        typedef typename Convert< GeometryType::BasicType(Traits :: dunetype), dimGrid > :: type Topology;
-        typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
-        Mapping;
-      };
-
-      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
-      ElementMapping;
-      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
-      typedef typename MappingProvider :: Mapping Mapping;
-      typedef typename MappingProvider :: CachingType CachingType;
-
-      typedef GenericGeometry :: DuneGeometryTypeProvider
-      < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
-      DuneGeometryTypeProvider;
-
-      mutable const Mapping *mapping_;
+    protected:
+      typedef typename Base :: CachingType CachingType;
+      typedef typename Base :: Mapping Mapping;
 
     public:
       explicit LocalGeometry ( Mapping &mapping )
-        : mapping_( &mapping )
+        : Base( mapping )
       {}
 
-      template< class GeoType >
-      explicit LocalGeometry ( const GeoType &coords,
+      template< class Geo >
+      explicit LocalGeometry ( const Geo &geo,
                                const CachingType &cache = CachingType() )
-        : mapping_( MappingProvider :: mapping( coords.type(), coords, cache ) )
+        : Base( geo.type(), geo, cache )
       {}
 
       template< class CoordVector >
       LocalGeometry ( const GeometryType &type,
                       const CoordVector &coords,
                       const CachingType &cache = CachingType() )
-        : mapping_( MappingProvider :: mapping( type, coords, cache ) )
+        : Base( type, coords, cache )
       {}
 
       template< int fatherdim >
-      LocalGeometry ( const Geometry< fatherdim, cdim, GridImp > &father, int i,
+      LocalGeometry ( const Geometry< fatherdim, cdim, Grid > &father, int i,
                       const CachingType &cache = CachingType() )
-        : mapping_( subMapping( father, i, cache ) )
+        : Base( father, i, cache )
       {}
-
-      LocalGeometry ( const LocalGeometry &other )
-        : mapping_( other.mapping_ )
-      {
-        other.mapping_ = 0;
-      }
-
-      ~LocalGeometry ()
-      {
-        if( mapping_ != 0 )
-          delete mapping_;
-      }
-
-      GeometryType type () const
-      {
-        return DuneGeometryTypeProvider :: type( mapping().topologyId() );
-      }
-
-      int corners () const
-      {
-        return mapping().corners();
-      }
-
-      const GlobalCoordinate &operator[] ( int i ) const
-      {
-        return mapping()[ i ];
-      }
-
-      GlobalCoordinate global ( const LocalCoordinate &local ) const
-      {
-        return mapping().global( local );
-      }
-
-      LocalCoordinate local ( const GlobalCoordinate &global ) const
-      {
-        return mapping().local( global );
-      }
-
-      bool checkInside ( const LocalCoordinate &local ) const
-      {
-        return mapping().checkInside( local );
-      }
-
-      bool affine () const
-      {
-        return mapping().affine();
-      }
-
-      ctype integrationElement ( const LocalCoordinate &local ) const
-      {
-        return mapping().integrationElement( local );
-      }
-
-      ctype volume () const
-      {
-        return mapping().volume();
-      }
-
-      const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
-      {
-        return mapping().jacobianInverseTransposed( local );
-      }
-
-      GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
-      {
-        const unsigned int tid = mapping().topologyId();
-        const unsigned int i = MapNumberingProvider< mydimension >
-                               :: template dune2generic< 1 >( tid, face );
-        return mapping().normal( i, local );
-      }
-
-    private:
-      const Mapping &mapping () const
-      {
-        return *mapping_;
-      }
-
-      template< int fatherdim >
-      const Mapping *
-      subMapping ( const LocalGeometry< fatherdim, cdim, GridImp > &father,
-                   int i, const CachingType &cache )
-      {
-        const unsigned int codim = fatherdim - mydim;
-        const unsigned int ftid = father.mapping().topologyId();
-        const unsigned int j = MapNumberingProvider< fatherdim >
-                               :: template dune2generic< codim >( ftid, i );
-        return father.mapping().template subMapping< codim >( j, cache );
-      }
-
     };
+
   }
 
 }
