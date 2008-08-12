@@ -256,6 +256,13 @@ namespace Dune {
         DUNE_THROW(GridError, "general YaspGeometry assumes cdim=mydim+1");
     }
 
+    //! copy constructor (skipping temporary variables)
+    YaspGeometry (const YaspGeometry& other)
+      : midpoint(other.midpoint),
+        extension(other.extension),
+        missing(other.missing)
+    {}
+
     //! print function
     void print (std::ostream& s) const
     {
@@ -381,6 +388,12 @@ namespace Dune {
     //! constructor from (storage for) midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)
       : midpoint(p), extension(h)
+    {}
+
+    //! copy constructor (skipping temporary variables)
+    YaspGeometry (const YaspGeometry& other)
+      : midpoint(other.midpoint),
+        extension(other.extension)
     {}
 
     //! print function
