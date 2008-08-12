@@ -1598,7 +1598,7 @@ namespace Dune
   class LevelVTKWriter
     : public VTKWriter< Grid, typename Grid :: LevelGridView >
   {
-    typedef VTKWriter< Grid, typename Grid :: LevelGridVew > Base;
+    typedef VTKWriter< Grid, typename Grid :: LevelGridView > Base;
 
   public:
     /** \brief Construct a VTK writer for a certain level of a given grid */
