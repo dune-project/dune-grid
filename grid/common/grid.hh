@@ -1247,7 +1247,9 @@ namespace Dune {
   {
     typedef typename InterfaceType::ImplementationType ImplementationType;
     //! create interface object by calling the contructor of the base class
-    MakeableInterfaceObject(const ImplementationType & realImp) : InterfaceType(realImp) {}
+    explicit MakeableInterfaceObject ( const ImplementationType &realImp )
+      : InterfaceType( realImp )
+    {}
   };
 }
 
