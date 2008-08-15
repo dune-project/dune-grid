@@ -1553,7 +1553,7 @@ namespace Dune
     std::list<VTKFunction*> vertexdata;
 
     // the grid
-    const GridView gridView_;
+    GridView gridView_;
     const GridImp& grid;
 
     // the indexset
