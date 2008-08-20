@@ -1587,7 +1587,7 @@ namespace Dune
     /** \brief Construct a VTK writer for the leaf level of a given grid */
     explicit LeafVTKWriter ( const Grid &grid,
                              VTKOptions :: DataMode dm = VTKOptions :: conforming )
-      : Base( grid, grid.leafView(), dm )
+      : Base( grid.leafView(), dm )
     {}
   };
 
@@ -1604,7 +1604,7 @@ namespace Dune
     /** \brief Construct a VTK writer for a certain level of a given grid */
     LevelVTKWriter ( const Grid &grid, int level,
                      VTKOptions :: DataMode dm = VTKOptions :: conforming )
-      : Base( grid, grid.levelView( level ), dm )
+      : Base( grid.levelView( level ), dm )
     {}
   };
 
