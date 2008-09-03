@@ -16,7 +16,7 @@ namespace Dune
 
     template< class ctype, int cdim,
         bool alwaysAffine = false,
-        GeometryType::BasicType oneD = GeometryType:: simplex>
+        GeometryType::BasicType onedtype = GeometryType:: simplex>
     struct DefaultCoordTraits
     {
       typedef ctype FieldType;
@@ -36,8 +36,8 @@ namespace Dune
 
       typedef typename Vector< dimCoord >::Type CoordinateType;
 
-      enum {affine = alwaysAffine};
-      enum {oneDType = oneD};
+      static const bool affine = alwaysAffine;
+      static const GeometryType :: BasicType oneDType = onedtype;
     };
 
     template< class GridImp >
@@ -65,9 +65,9 @@ namespace Dune
       };
       enum {dimGrid = gdim};
       //   hybrid   [ true if Codim 0 is hybrid ]
-      enum {hybrid  = true};
+      static const bool hybrid = true;
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      // enum {dunetype = GeometryType::simplex};
+      // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
     };
 
     /*
@@ -195,15 +195,12 @@ namespace Dune
       template< bool >
       struct NonHybrid
       {
-        typedef typename Convert
-        < (GeometryType :: BasicType) Traits :: dunetype, dimGrid > :: type
-        Topology;
+        typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
         typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
         Mapping;
       };
 
-      typedef GenericGeometry :: DuneGeometryTypeProvider
-      < mydimension, (GeometryType :: BasicType) CoordTraits :: oneDType >
+      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, CoordTraits :: oneDType >
       DuneGeometryTypeProvider;
 
       typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping

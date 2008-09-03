@@ -45,6 +45,8 @@ namespace Dune
       JacobianType;
       typedef typename CoordTraits :: template Matrix< dimG, dimW > :: Type
       JacobianTransposedType;
+
+      typedef GenericGeometry :: MatrixHelper< CoordTraits > MatrixHelper;
     };
 
 

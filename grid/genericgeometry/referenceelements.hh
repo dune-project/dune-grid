@@ -311,10 +311,11 @@ namespace Dune
     template< class Topology, class ctype >
     struct ReferenceElement
     {
-      enum { dimension = Topology :: dimension };
+      static const unsigned int topologyId = Topology :: id;
+      static const unsigned int dimension = Topology :: dimension;
 
-      enum { numCorners = Topology :: numCorners };
-      enum { numNormals = IntegrationOuterNormal< Topology > :: numNormals };
+      static const unsigned int numCorners = Topology :: numCorners;
+      static const unsigned int numNormals = IntegrationOuterNormal< Topology > :: numNormals;
 
       typedef FieldVector< ctype, dimension > CoordinateType;
 
