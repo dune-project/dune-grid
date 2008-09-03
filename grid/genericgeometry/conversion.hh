@@ -3,8 +3,6 @@
 #ifndef DUNE_GENERICGEOMETRY_CONVERSION_HH
 #define DUNE_GENERICGEOMETRY_CONVERSION_HH
 
-#include <limits>
-
 #include <dune/common/static_assert.hh>
 #include <dune/common/geometrytype.hh>
 
@@ -430,7 +428,15 @@ namespace Dune
       template< unsigned int codim >
       static unsigned int dune2generic ( unsigned int i )
       {
-        return (codim == 0 ? i : std :: numeric_limits< unsigned int > :: max());
+        static unsigned int edge[ 9 ] = { 3, 5, 4, 0, 1, 2, 6, 8, 7 };
+        static unsigned int face[ 5 ] = { 3, 0, 2, 1, 4 };
+
+        if( codim == 2 )
+          return edge[ i ];
+        else if( codim == 1 )
+          return face[ i ];
+        else
+          return i;
       }
     };
 
