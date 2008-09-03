@@ -74,14 +74,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { alwaysAffine = true };
-
-#if 0
-      static bool isZero ( const FieldType &a )
-      {
-        return std::abs(a)<1e-12;
-      }
-#endif
+      static const bool alwaysAffine = true;
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -157,7 +150,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { alwaysAffine = ((dim < 2) || Traits :: affine) };
+      static const bool alwaysAffine = ((dim < 2) || Traits :: affine);
 
       template< unsigned int numCorners >
       static const GlobalCoordType &
@@ -288,7 +281,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      enum { alwaysAffine = (BottomMapping :: alwaysAffine || Traits :: affine) };
+      static const bool alwaysAffine = (BottomMapping :: alwaysAffine || Traits :: affine);
 
       template< unsigned int numCorners >
       static const GlobalCoordType &

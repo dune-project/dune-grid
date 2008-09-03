@@ -50,6 +50,8 @@ namespace Dune
       mutable JacobianType jTInv_;
       mutable FieldType intEl_;
       mutable GlobalCoordType faceNormal_[ numNormals ];
+
+      mutable bool affine_;
       mutable bool jTInvComputed, intElComputed;
       mutable FieldVector< bool, numNormals > normalComputed;
 
@@ -60,14 +62,19 @@ namespace Dune
       template< class CoordVector >
       explicit Mapping ( const CoordVector &coords )
         : BaseType( coords ),
+          affine_( BaseType :: affine() ),
           jTInvComputed( false ),
           intElComputed( false ),
           normalComputed( false )
       {}
 
+      bool affine () const
+      {
+        return affine_;
+      }
+
       using BaseType :: operator[];
       using BaseType :: corners;
-      using BaseType :: affine;
       using BaseType :: global;
       using BaseType :: jacobianT;
 
