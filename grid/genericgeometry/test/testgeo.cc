@@ -21,8 +21,9 @@
 
 using namespace Dune;
 
-template <class DuneGeometry>
-struct DuneCoordTraits {
+template< class DuneGeometry >
+struct DuneCoordTraits
+{
   enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
   enum {dimGrid  = DuneGeometry::dimension};       // grid dimension
   typedef typename DuneGeometry::ctype FieldType;
@@ -44,6 +45,9 @@ struct DuneCoordTraits {
   enum {affine = false};
   enum {oneDType = Dune::GeometryType::simplex};
 };
+
+
+
 template <class Traits>
 struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
   //typedef typename Traits::CoordVector GeometryType;
@@ -51,26 +55,50 @@ struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
   template< class GeometryType >
   DuneCache(const GeometryType&) {}
 };
-template <class CoordTraits>
-struct DuneCache< GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
-        CoordTraits> > {
-  enum {jTCompute = GenericGeometry::geoCompute,
-        jTInvCompute = GenericGeometry::geoCompute,
-        intElCompute = GenericGeometry::geoCompute,
-        normalCompute = GenericGeometry::geoCompute};
-  typedef typename CoordTraits::DuneGeometryType GeometryType;
-  typedef GenericGeometry::MappingTraits<CoordTraits::CoordVector::mydimension,
-      CoordTraits> Traits;
-  const GeometryType& geo_;
-  DuneCache(const GeometryType& geo) : geo_(geo) {}
-  void jacobianT(typename Traits::JacobianTransposedType& d) const {}
-  void integrationElement(typename Traits::FieldType& intEl) const {
-    FieldVector<double,GeometryType::mydimension> x(0);
-    intEl = geo_.integrationElement(x);
+
+template< class CoordTraits >
+struct DuneCache
+< GenericGeometry :: MappingTraits< CoordTraits :: CoordVector :: mydimension, CoordTraits > >
+{
+  typedef GenericGeometry :: MappingTraits
+  < CoordTraits :: CoordVector :: mydimension, CoordTraits >
+  Traits;
+  typedef typename CoordTraits :: DuneGeometryType GeometryType;
+
+  static const GenericGeometry :: EvaluationType evaluateJacobianTransposed
+    = GenericGeometry :: ComputeOnDemand;
+  static const GenericGeometry :: EvaluationType evaluateJacobianInverseTransposed
+    = GenericGeometry :: ComputeOnDemand;
+  static const GenericGeometry :: EvaluationType evaluateIntegrationElement
+    = GenericGeometry :: ComputeOnDemand;
+  static const GenericGeometry :: EvaluationType evaluateNormal
+    = GenericGeometry :: ComputeOnDemand;
+
+private:
+  const GeometryType &geo_;
+
+public:
+  DuneCache ( const GeometryType &geo )
+    : geo_( geo )
+  {}
+
+  void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+  {}
+
+  void integrationElement( typename Traits :: FieldType &intEl ) const
+  {
+    FieldVector< double, GeometryType :: mydimension > x( 0 );
+    intEl = geo_.integrationElement( x );
   }
-  void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
-  void normal(int face, typename Traits::GlobalCoordType& n) const {}
+
+  void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+  {}
+
+  void normal ( int face, typename Traits :: GlobalCoordType &normal ) const
+  {}
 };
+
+
 
 // ****************************************************************
 //

@@ -222,29 +222,50 @@ namespace Dune
       {
         if( affine() )
         {
-          if( (int)CachingType :: jTCompute == (int)geoIsComputed )
+          switch( CachingType :: evaluateJacobianTransposed )
           {
+          case IsComputed :
             cache.jacobianT( jT_ );
             jTComputed = true;
-          }
-          else if( (int)CachingType :: jTCompute == (int)geoPreCompute )
-            BaseType :: jacobianT( baryCenter() );
+            break;
 
-          if( (int)CachingType :: jTInvCompute == (int)geoIsComputed )
+          case PreCompute :
+            BaseType :: jacobianT( baryCenter() );
+            break;
+
+          case ComputeOnDemand :
+            break;
+          }
+
+          switch( CachingType :: evaluateJacobianInverseTransposed )
           {
+          case IsComputed :
             cache.jacobianInverseTransposed( jTInv_ );
             jTInvComputed = true;
-          }
-          else if( (int)CachingType :: jTInvCompute == (int)geoPreCompute )
-            BaseType :: jacobianInverseTransposed( baryCenter() );
+            break;
 
-          if( (int)CachingType :: intElCompute == (int)geoIsComputed )
+          case PreCompute :
+            BaseType :: jacobianInverseTransposed( baryCenter() );
+            break;
+
+          case ComputeOnDemand :
+            break;
+          }
+
+          switch( CachingType :: evaluateIntegrationElement )
           {
+          case IsComputed :
             cache.integrationElement( intEl_ );
             intElComputed = true;
-          }
-          else if( (int)CachingType :: intElCompute == (int)geoPreCompute )
+            break;
+
+          case PreCompute :
             integrationElement( baryCenter() );
+            break;
+
+          case ComputeOnDemand :
+            break;
+          }
         }
       }
 
@@ -258,7 +279,8 @@ namespace Dune
 
       const JacobianTransposedType &jacobianT ( const LocalCoordType &x ) const
       {
-        if( ((int)CachingType :: jTCompute == (int)geoCompute) || !affine() )
+        const EvaluationType evaluate = CachingType :: evaluateJacobianTransposed;
+        if( (evaluate == ComputeOnDemand) || !affine() )
           BaseType :: jacobianT( x );
         return jT_;
       }
@@ -266,17 +288,17 @@ namespace Dune
       // additional methods
       FieldType integrationElement ( const LocalCoordType &x ) const
       {
-        if( ((int)CachingType :: intElCompute == (int)geoCompute) || !affine() )
+        const EvaluationType evaluate = CachingType :: evaluateIntegrationElement;
+        if( (evaluate == ComputeOnDemand) || !affine() )
           BaseType :: integrationElement(x);
         return this->intEl_;
       }
 
       const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
       {
-        if( ((int)CachingType :: jTInvCompute == geoCompute) || !affine() )
-        {
-          BaseType::jacobianInverseTransposed(x);
-        }
+        const EvaluationType evaluate = CachingType :: evaluateJacobianInverseTransposed;
+        if( (evaluate == ComputeOnDemand) || !affine() )
+          BaseType :: jacobianInverseTransposed(x);
         return this->jTInv_;
       }
 

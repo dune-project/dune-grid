@@ -48,26 +48,23 @@ namespace Dune
       : public GeometryTraits< GridImp >
     {};
 
-    template <class ctype,int gdim,int cdim>
-    struct DefaultGeometryTraits {
-      typedef DefaultCoordTraits<ctype,cdim> CoordTraits;
-      typedef DefaultCoordTraits<ctype,gdim> LocalCoordTraits;
-      template <class Traits>
-      struct Caching {
-        enum {jTCompute = geoCompute,
-              jTInvCompute = geoCompute,
-              intElCompute = geoCompute,
-              normalCompute = geoCompute};
-        void jacobianT(typename Traits::JacobianTransposedType& d) const {}
-        void integrationElement(typename Traits::FieldType& intEl) const {}
-        void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
-        void normal(int face, typename Traits::GlobalCoordType& n) const {}
-      };
-      enum {dimGrid = gdim};
+    template< class ctype, int dimG, int dimW >
+    struct DefaultGeometryTraits
+    {
+      typedef DefaultCoordTraits< ctype, dimW > CoordTraits;
+      typedef DefaultCoordTraits< ctype, dimG > LocalCoordTraits;
+
+      static const int dimGrid = dimG;
+
       //   hybrid   [ true if Codim 0 is hybrid ]
       static const bool hybrid = true;
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
       // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+
+      template< class Traits >
+      struct Caching
+        : public ComputeAll< Traits >
+      {};
     };
 
     /*

@@ -33,9 +33,10 @@ namespace Dune
     template< unsigned int DimG, class CoordTraits >
     struct MappingTraits
     {
-      enum { dimG = DimG };
-      enum { dimW = CoordTraits :: dimCoord };
-      enum { affine = CoordTraits :: affine };
+      static const unsigned int dimG = DimG;
+      static const unsigned int dimW = CoordTraits :: dimCoord;
+
+      static const bool affine = CoordTraits :: affine;
 
       typedef typename CoordTraits :: FieldType FieldType;
       typedef typename CoordTraits :: template Vector< dimG > :: Type LocalCoordType;
@@ -56,18 +57,35 @@ namespace Dune
     //   geoCompute:    assign if method called using barycenter
     //   geoPreCompute: assign in constructor using barycenter
     //   geoIsComputed: assign in constructor using barycenter using callback
-    enum { geoCompute, geoPreCompute, geoIsComputed };
+    enum EvaluationType
+    {
+      //! compute on demand
+      ComputeOnDemand,
+      //! compute in constructor
+      PreCompute,
+      //! assign in constructor using callback
+      IsComputed
+    };
 
-    template <class Traits>
-    struct ComputeAll {
-      enum {jTCompute = geoCompute,
-            jTInvCompute = geoCompute,
-            intElCompute = geoCompute,
-            normalCompute = geoCompute};
-      void jacobianT(typename Traits::JacobianTransposedType& d) const {}
-      void integrationElement(typename Traits::FieldType& intEl) const {}
-      void jacobianInverseTransposed(typename Traits::JacobianType& dInv) const {}
-      void normal(int face, typename Traits::GlobalCoordType& n) const {}
+    template< class Traits >
+    struct ComputeAll
+    {
+      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+      static const EvaluationType evaluateNormal = ComputeOnDemand;
+
+      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+      {}
+
+      void integrationElement ( typename Traits :: FieldType &intEl ) const
+      {}
+
+      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+      {}
+
+      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
+      {}
     };
 
 

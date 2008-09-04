@@ -1,6 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #include <dune/grid/alugrid/3d/topology.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 namespace Dune
 {
@@ -16,72 +17,72 @@ namespace Dune
   // Topology
   // --------
 
-  template <class Grid>
+  template< class Grid >
   struct Topology;
 
   template< int d >
   struct Topology< YaspGrid< d, d > >
   {
-    enum { basicType = GeometryType :: cube };
-    enum { dimension = d };
-    enum {correctJacobian=false};
+    static const GeometryType :: BasicType basicType = GeometryType :: cube;
+    static const int dimension = d;
+    static const bool correctJacobian = false;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef typename Convert :: type Type;
   };
 
-  template <int d>
-  struct Topology<UGGrid<d> >
+  template< int d >
+  struct Topology< UGGrid< d > >
   {
-    enum { basicType = GeometryType :: cube };
-    enum { dimension = d };
-    enum {correctJacobian=false};
+    static const GeometryType :: BasicType basicType = GeometryType :: cube;
+    static const int dimension = d;
+    static const bool correctJacobian = false;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef typename Convert :: type Type;
   };
 
-  template <int d>
-  struct Topology<AlbertaGrid<d,d> >
+  template< int d >
+  struct Topology< AlbertaGrid< d, d > >
   {
-    enum { basicType = GeometryType :: simplex };
-    enum { dimension = d };
-    enum {correctJacobian=false};
+    static const GeometryType :: BasicType basicType = GeometryType :: simplex;
+    static const int dimension = d;
+    static const bool correctJacobian = false;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef typename Convert :: type Type;
   };
 
   template<>
   struct Topology< ALU3dGrid< 3, 3, tetra > >
   {
-    enum { basicType = GeometryType :: simplex };
-    enum { dimension = 3 };
-    enum {correctJacobian=false};
+    static const GeometryType :: BasicType basicType = GeometryType :: simplex;
+    static const int dimension = 3;
+    static const bool correctJacobian = true;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef Convert :: type Type;
   };
 
   template<>
   struct Topology< ALUSimplexGrid< 3, 3 > >
   {
-    enum { basicType = GeometryType :: simplex };
-    enum { dimension = 3 };
-    enum {correctJacobian=true};
+    static const GeometryType :: BasicType basicType = GeometryType :: simplex;
+    static const int dimension = 3;
+    static const bool correctJacobian = true;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef Convert :: type Type;
   };
 
   template<>
   struct Topology< ALUSimplexGrid< 2, 2 > >
   {
-    enum { basicType = GeometryType :: simplex };
-    enum { dimension = 2 };
-    enum {correctJacobian=true};
+    static const GeometryType :: BasicType basicType = GeometryType :: simplex;
+    static const int dimension = 2;
+    static const bool correctJacobian = true;
 
-    typedef GenericGeometry :: Convert< (GeometryType :: BasicType) basicType, dimension > Convert;
+    typedef GenericGeometry :: Convert< basicType, dimension > Convert;
     typedef Convert :: type Type;
   };
 
@@ -98,8 +99,8 @@ namespace Dune
       : public DefaultGeometryTraits
         < typename Grid :: ctype, Grid :: dimension, Grid :: dimensionworld >
     {
-      enum { hybrid = true };
-      //enum { duneType = Topology< Grid > :: basicType };
+      static const bool hybrid = true;
+      //static const GeometryType :: BasicType dunetype = Topology< Grid > :: basicType;
     };
 
   }

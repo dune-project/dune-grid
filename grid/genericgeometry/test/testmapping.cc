@@ -1,6 +1,5 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-// #define UsingGridType GridType
 #include <config.h>
 
 #include <dune/common/exceptions.hh>
@@ -17,19 +16,22 @@
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
 #include <dune/grid/io/file/dgfparser/dgfoned.hh>
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
-#include <dune/grid/psg/dgfpsg.hh>
 
-// #include <dune/grid/psg/dgfgridtype.hh>
-// #include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+#include <dune/grid/io/file/dgfparser/dgfgridtype.hh>
+
+#include "testgeo.hh"
 
 using namespace Dune;
 using namespace GenericGeometry;
 
 template <class DuneGeometry>
-struct DuneCoordTraits {
-  enum {dimW = DuneGeometry::coorddimension};  // world dimension
-  enum {dimG = DuneGeometry::mydimension};          // grid dimension
-  typedef typename DuneGeometry::ctype FieldType;
+struct DuneCoordTraits
+{
+  static const int dimCoord = DuneGeometry :: coorddimension;
+  static const int dimG = DuneGeometry :: mydimension;
+
+  typedef typename DuneGeometry :: ctype FieldType;
+
   // general vector and matrix types
   template <int dim>
   struct Vector {
@@ -44,46 +46,9 @@ struct DuneCoordTraits {
   // Corners used are
   // p[offset],...,p[offset+Topology::numCorners]
   typedef DuneGeometry coord_vector;
+
   // mapping is of the form Ax+b (used untested)
-  enum {affine = false};
-};
-
-namespace Dune {
-  template <int d1,int d2> class YaspGrid;
-  template <int d1,int d2> class AlbertaGrid;
-  template <class ct,int d1,int d2,class CCOMM> class ParallelSimplexGrid;
-  template <int dim> class UGGrid;
-}
-
-template <class Grid>
-struct Topology;
-template <int d>
-struct Topology<YaspGrid<d,d> > {
-  typedef typename Convert< GeometryType :: cube , d >::type Type;
-  static int faceNr(int duneFN) {
-    return duneFN;
-  }
-};
-template <int d>
-struct Topology<UGGrid<d> > {
-  typedef typename Convert< GeometryType :: cube , d >::type Type;
-  static int faceNr(int duneFN) {
-    return duneFN;
-  }
-};
-template <int d>
-struct Topology<AlbertaGrid<d,d> > {
-  typedef typename Convert< GeometryType :: simplex , d >::type Type;
-  static int faceNr(int duneFN) {
-    return d-duneFN;
-  }
-};
-template <int d1,int d2,class CCOMM>
-struct Topology<ParallelSimplexGrid<double,d1,d2,CCOMM> > {
-  typedef typename Convert< GeometryType :: simplex , d1 >::type Type;
-  static int faceNr(int duneFN) {
-    return d1-duneFN;
-  }
+  static const bool affine = false;
 };
 
 int phiErr;
@@ -93,11 +58,12 @@ int detErr;
 int volErr;
 int normalErr;
 
-template <class GridViewType>
-void test(const GridViewType& view) {
-  typedef typename GridViewType::Grid GridType;
-  typedef Topology<GridType> ConversionType;
-  typedef typename ConversionType::Type TopologyType;
+template< class GridViewType >
+void test ( const GridViewType &view )
+{
+  typedef typename GridViewType :: Grid GridType;
+  typedef Dune :: Topology< GridType > ConversionType;
+  typedef typename ConversionType :: Type TopologyType;
   typedef typename GridViewType ::template Codim<0>::Iterator ElementIterator;
   typedef typename GridViewType :: IntersectionIterator IIteratorType;
   typedef typename GridViewType :: Intersection IntersectionType;
@@ -123,14 +89,12 @@ void test(const GridViewType& view) {
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
-    Mapping<TopologyType,
-        DuneCoordTraits<GeometryType> > map(geo);
+    Mapping< CornerMapping< TopologyType, DuneCoordTraits< GeometryType > > > map( geo );
     LocalType x(0.1);
     for (int i=0; i<10000; ++i) {
       // test phi
-      GlobalType y=geo.global(x);
-      GlobalType yy;
-      map.phi(x,yy);
+      GlobalType y = geo.global(x);
+      GlobalType yy = map.global( x );
       y-=yy;
       if (y.two_norm2()>1e-10) {
         phiErr++;
@@ -138,10 +102,8 @@ void test(const GridViewType& view) {
       }
       // test jacobian
       JacobianType JTInv = geo.jacobianInverseTransposed(x);
-      JacobianTType JT;
-      JacobianType JTInvM;
-      map.jacobianT(x,JT);
-      map.jacobianInverseTransposed(x,JTInvM);
+      JacobianTType JT = map.jacobianT( x );
+      JacobianType JTInvM = map.jacobianInverseTransposed( x );
       double det = geo.integrationElement(x);
       double detM = map.integrationElement(x);
       if (std::abs(det-detM)>1e-10) {
@@ -183,8 +145,10 @@ void test(const GridViewType& view) {
         LocalFaceType xf(0.1);
         GlobalType n = iiter->integrationOuterNormal(xf);
         LocalType xx(iiter->intersectionSelfLocal().global(xf));
-        GlobalType nM;
-        map.normal(ConversionType::faceNr(iiter->numberInSelf()),xx,nM);
+        const unsigned int duneFaceNr = iiter->numberInSelf();
+        const unsigned int genericFaceNr
+          = MapNumbering< TopologyType > :: template dune2generic< 1 >( duneFaceNr );
+        GlobalType nM = map.normal( genericFaceNr, xx );
         if ((n-nM).two_norm2()>1e-10) {
           normalErr++;
           std::cout << nM.two_norm() << " " << n.two_norm() << std::endl;
@@ -198,10 +162,13 @@ void test(const GridViewType& view) {
   }
 }
 
-int main(int argc, char ** argv, char ** envp)
-try {
+
+int main ( int argc, char **argv )
+try
+{
   // this method calls MPI_Init, if MPI is enabled
-  MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
+  MPIHelper :: instance( argc, argv );
+  // MPIHelper &mpiHelper = MPIHelper :: instance( argc, argv );
   // int myrank = mpiHelper.rank();
 
   if (argc<2) {
@@ -210,7 +177,7 @@ try {
   }
 
   // create Grid from DGF parser
-  GridPtr<UsingGridType> grid( argv[ 1 ] );
+  GridPtr< GridType > grid( argv[ 1 ] );
 
   test(grid->leafView());
 
@@ -242,11 +209,6 @@ catch (Dune::Exception &e) {
   std::cerr << e << std::endl;
   return 1;
 }
-/*
-   catch( PSG :: Exception &e ) {
-   std :: cerr << e << std :: endl;
-   }
- */
 catch (...) {
   std::cerr << "Generic exception!" << std::endl;
   return 1;
