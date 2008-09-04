@@ -38,6 +38,12 @@ namespace Dune
 
       static const bool affine = alwaysAffine;
       static const GeometryType :: BasicType oneDType = onedtype;
+
+      template< class Topology >
+      struct CornerStorage
+      {
+        typedef CoordPointerStorage< Topology, CoordinateType > Type;
+      };
     };
 
     template< class GridImp >
