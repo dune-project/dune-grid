@@ -218,7 +218,7 @@ namespace Dune
       struct CallerInterface;
       template< int codim > struct CallerImplementation;
 
-      CallerInterface *caller_[ dimG ];
+      CallerInterface *caller_[ dimG+1 ];
 
       CodimCaller ()
       {
@@ -266,7 +266,7 @@ namespace Dune
         return mapping.template subMapping< codim >( i, caching );
       }
 
-      static void apply ( CallerInterface *(&caller)[ dimG ] )
+      static void apply ( CallerInterface *(&caller)[ dimG+1 ] )
       {
         caller[ codim ] = new CallerImplementation< codim >;
       }
