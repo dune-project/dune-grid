@@ -50,6 +50,8 @@ namespace Dune
         typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
       };
 
+      unsigned int referenceCount;
+
       virtual ~HybridMapping ()
       {}
 

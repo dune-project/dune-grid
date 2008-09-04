@@ -205,6 +205,9 @@ namespace Dune
         typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
       };
 
+    public:
+      unsigned int referenceCount;
+
     protected:
       using BaseType :: baryCenter;
       using BaseType :: jT_;

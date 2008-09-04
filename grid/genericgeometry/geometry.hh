@@ -215,49 +215,59 @@ namespace Dune
       typedef typename MappingProvider :: CachingType CachingType;
 
     private:
-      mutable const Mapping *mapping_;
+      Mapping *mapping_;
 
     public:
       BasicGeometry ()
         : mapping_( 0 )
       {}
 
+#if 0
       explicit BasicGeometry ( Mapping &mapping )
         : mapping_( &mapping )
-      {}
+      {
+        ++mapping_->referenceCount;
+      }
+#endif
 
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type,
                       const CoordVector &coords,
                       const CachingType &cache )
         : mapping_( MappingProvider :: mapping( type, coords, cache ) )
-      {}
+      {
+        mapping_->referenceCount = 1;
+      }
 
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits > &father,
                       int i,
                       const CachingType &cache )
         : mapping_( subMapping( father, i, cache ) )
-      {}
+      {
+        mapping_->referenceCount = 1;
+      }
 
       BasicGeometry ( const BasicGeometry &other )
         : mapping_( other.mapping_ )
       {
-        other.mapping_ = 0;
+        if( mapping_ != 0 )
+          ++(mapping_->referenceCount);
       }
 
       ~BasicGeometry ()
       {
-        if( mapping_ != 0 )
+        if( (mapping_ != 0) && ((--mapping_->referenceCount) == 0) )
           delete mapping_;
       }
 
       BasicGeometry &operator= ( const BasicGeometry &other )
       {
-        if( mapping_ != 0 )
+        if( other.mapping_ != 0 )
+          ++(other.mapping_->referenceCount);
+        if( (mapping_ != 0) && (--(mapping_->referenceCount) == 0) )
           delete mapping_;
         mapping_ = other.mapping_;
-        other.mapping_ = 0;
         return *this;
       }
 
@@ -328,6 +338,7 @@ namespace Dune
     private:
       const Mapping &mapping () const
       {
+        assert( mapping_ != 0 );
         return *mapping_;
       }
 
