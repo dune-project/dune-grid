@@ -430,21 +430,20 @@ namespace Dune {
     // refine grid
     bool refineGrid();
 
-    //! mark entities for refinement or coarsening, refCount < 0 will mark
-    //! the entity for one coarsen step and refCount > 0 will mark for one
-    //! refinement, one refinement will create 8 children per element
-    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep );
+    //! @copydoc Dune::Grid::mark
+    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) DUNE_DEPRECATED;
 
-    //! return current adaptation marker for entity pointer
-    int getMark(const typename Traits::template Codim<0>::EntityPointer & ) const;
+    //! @copydoc Dune::Grid::getMark
+    int getMark(const typename Traits::template Codim<0>::EntityPointer & ) const DUNE_DEPRECATED;
 
-    //! return current adaptation marker for entity pointer
+    //! @copydoc Dune::Grid::getMark
     int getMark(const typename Traits::template Codim<0>::Entity & ) const;
+
+    //! @copydoc Dune::Grid::mark
+    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
 
     //! return dummy communication
     const CollectiveCommunicationType & comm() const;
-
-    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
   private:
     CollectiveCommunicationType comm_;
 

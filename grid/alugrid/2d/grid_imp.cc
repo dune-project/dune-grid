@@ -337,24 +337,13 @@ namespace Dune {
     for (int j = 0; j < refCount; ++j)
     {
 #if ALU2DGRID_PARALLEL
-      /*
-         {
-         typedef typename Traits :: template Codim<0> :: LeafIterator LeafIterator;
-         LeafIterator endit = this->template leafend<0> ();
-         for(LeafIterator it = this->template leafbegin<0> ();
-            it != endit; ++it )
-         {
-          this->mark( 1, it );
-         }
-         }
-       */
       {
         typedef typename Traits :: template Codim<0> :: template Partition<Interior_Partition> :: LeafIterator LeafIterator;
         LeafIterator endit = this->template leafend<0,Interior_Partition> ();
         for(LeafIterator it = this->template leafbegin<0,Interior_Partition> ();
             it != endit; ++it )
         {
-          this->mark( 1, it );
+          this->mark( 1, *it );
         }
       }
 
