@@ -41,21 +41,21 @@ struct FaceDataLayout
 //   Check whether the index created for element data is unique, consecutive
 //   and starting from zero.
 // /////////////////////////////////////////////////////////////////////////////////
-template <class Mapper, class IndexSet>
-void checkElementDataMapper(const Mapper& mapper, const IndexSet& indexSet)
+template <class Mapper, class GridView>
+void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 {
-  typedef typename IndexSet::template Codim<0>::template Partition<All_Partition>::Iterator Iterator;
+  typedef typename GridView::template Codim<0>::Iterator Iterator;
 
-  Iterator eIt    = indexSet.template begin<0,All_Partition>();
-  Iterator eEndIt = indexSet.template end<0,All_Partition>();
+  Iterator eIt    = gridView.template begin<0>();
+  Iterator eEndIt = gridView.template end<0>();
 
-  int min = 1;
-  int max = 0;
+  size_t min = 1;
+  size_t max = 0;
   std::set<int> indices;
 
   for (; eIt!=eEndIt; ++eIt) {
 
-    int index = mapper.map(*eIt);
+    size_t index = mapper.map(*eIt);
 
     min = std::min(min, index);
     max = std::max(max, index);
@@ -69,7 +69,7 @@ void checkElementDataMapper(const Mapper& mapper, const IndexSet& indexSet)
   if (min!=0)
     DUNE_THROW(GridError, "Mapper element index is not starting from zero!");
 
-  if (max!=indexSet.size(0)-1)
+  if (max!=gridView.indexSet().size(0)-1)
     DUNE_THROW(GridError, "Mapper element index is not consecutive!");
 
 }
@@ -146,16 +146,16 @@ int main () try
     GridType & grid = *gridptr;
 
     // create hybrid grid
-    grid.mark(1,grid.leafbegin<0>());
+    grid.mark(1, * grid.leafbegin<0>());
     grid.adapt();
     grid.globalRefine(1);
 
     LeafMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafIndexSet());
+    checkElementDataMapper(leafMCMGMapper, grid.leafView());
 
     for (int i=2; i<=grid.maxLevel(); i++) {
       LevelMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelIndexSet(i));
+      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
     }
   }
 
@@ -171,16 +171,16 @@ int main () try
     GridType & grid = *gridptr;
 
     // create hybrid grid
-    grid.mark(1,grid.leafbegin<0>());
+    grid.mark(1, * grid.leafbegin<0>());
     grid.adapt();
     grid.globalRefine(1);
 
     LeafMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> leafMCMGMapper(grid);
-    checkElementDataMapper(leafMCMGMapper, grid.leafIndexSet());
+    checkElementDataMapper(leafMCMGMapper, grid.leafView());
 
     for (int i=2; i<=grid.maxLevel(); i++) {
       LevelMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout> levelMCMGMapper(grid, i);
-      checkElementDataMapper(levelMCMGMapper, grid.levelIndexSet(i));
+      checkElementDataMapper(levelMCMGMapper, grid.levelView(i));
     }
   }
 
