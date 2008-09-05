@@ -788,12 +788,12 @@ struct CheckMark
     for(int k=0; k<4; ++k)
     {
       // mark entity
-      bool marked = grid.mark( refCount[k] , it);
+      bool marked = grid.mark( refCount[k] , *it );
       // if element was marked, check that the marker was set correctly
       if(marked)
       {
         // now getMark should return the mark we just set, otherwise error
-        if( grid.getMark(it) != refCount[k] )
+        if( grid.getMark( *it ) != refCount[k] )
           DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
       }
     }
