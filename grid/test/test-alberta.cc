@@ -38,7 +38,7 @@ void markOne ( GridType & grid , int num , int ref )
   LeafIterator endit = grid.template leafend  <0> ();
   for(LeafIterator it = grid.template leafbegin<0> (); it != endit ; ++it )
   {
-    if(num == count) grid.mark( ref, it );
+    if(num == count) grid.mark( ref, *it );
     count++;
   }
 
