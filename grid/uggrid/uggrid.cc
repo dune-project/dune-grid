@@ -308,9 +308,16 @@ inline int Dune::UGGrid < dim >::size (int level, int codim) const
 
 template < int dim >
 bool Dune::UGGrid < dim >::mark(int refCount,
-                                const typename Traits::template Codim<0>::EntityPointer & e )
+                                const typename Traits::template Codim<0>::EntityPointer & ep )
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
+  return this->mark( refCount, *ep );
+}
+
+template < int dim >
+bool Dune::UGGrid < dim >::mark(int refCount,
+                                const typename Traits::template Codim<0>::Entity& e )
+{
+  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
 
   // No refinement requested
   if (refCount==0) {
@@ -348,11 +355,19 @@ bool Dune::UGGrid < dim >::mark(int refCount,
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::EntityPointer & e,
+bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::EntityPointer & ep,
                                 typename UG_NS<dim>::RefinementRule rule,
                                 int side)
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(*e).target_;
+  return this->mark( *ep, rule, side );
+}
+
+template < int dim >
+bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
+                                typename UG_NS<dim>::RefinementRule rule,
+                                int side)
+{
+  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
 
   if (!UG_NS<dim>::isLeaf(target))
     return false;
@@ -366,7 +381,13 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
 template <int dim>
 int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::EntityPointer & ep) const
 {
-  typename UG_NS<dim>::Element* target = getRealImplementation(*ep).target_;
+  return this->getMark( *ep );
+}
+
+template <int dim>
+int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
+{
+  typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
 
   // Return -1 if element is marked for coarsening
   if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::COARSEN_CE))
@@ -454,7 +475,7 @@ void Dune::UGGrid < dim >::globalRefine(int n)
     typename Traits::template Codim<0>::LeafIterator iEndIt = leafend<0>();
 
     for (; iIt!=iEndIt; ++iIt)
-      mark(1, iIt);
+      mark(1, *iIt);
 
     this->preAdapt();
     adapt();
