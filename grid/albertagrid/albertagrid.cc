@@ -3449,13 +3449,13 @@ namespace Dune
       // mark all interior elements
       for(LeafIt it = this->leafbegin(this->maxLevel()); it != endit; ++it)
       {
-        this->mark(1,it);
+        this->mark(1, *it );
       }
 
       // mark all ghosts
       for(LeafIt it = leafbegin(this->maxLevel(),Ghost_Partition); it != endit; ++it)
       {
-        this->mark(1,it);
+        this->mark(1, *it );
       }
 
       this->adapt();
@@ -3547,7 +3547,14 @@ namespace Dune
   inline int AlbertaGrid < dim, dimworld >::
   getMark( const typename Traits::template Codim<0>::EntityPointer & ep ) const
   {
-    const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(*ep)).getElInfo();
+    return this->getMark( *ep );
+  }
+
+  template<int dim, int dimworld>
+  inline int AlbertaGrid < dim, dimworld >::
+  getMark( const typename Traits::template Codim<0>::Entity & en ) const
+  {
+    const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(en)).getElInfo();
     assert( elInfo );
     assert( elInfo->el );
     return elInfo->el->mark;

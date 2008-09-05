@@ -1631,17 +1631,16 @@ namespace Dune
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
-    /*! \brief marks an element for refCount refines. if refCount is negative the
-     *  element is coarsend -refCount times
-     *  NOTE: if element was already marked for refinement then nothing
-     *  happens if element is again marked for coarsen, refinement always
-     *  counts more then coarsening
-     *  mark returns true if element was marked, otherwise false */
-    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & en ) const;
+    //! @copydoc Dune::Grid::mark
+    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & en ) const DUNE_DEPRECATED;
 
-    //! \brief return current adaptation mark for given entity
-    int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const;
-  private:
+    //! @copydoc Dune::Grid::getMark
+    int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const DUNE_DEPRECATED;
+
+    //! @copydoc Dune::Grid::getMark
+    int getMark( const typename Traits::template Codim<0>::Entity & ) const;
+
+    //! @copydoc Dune::Grid::mark
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en ) const;
 
   public:
