@@ -640,7 +640,7 @@ void Dune::OneDGrid::globalRefine(int refCount)
     Codim<0>::LeafIterator iEndIt = leafend<0>();
 
     for (; iIt!=iEndIt; ++iIt)
-      mark(1, iIt);
+      mark(1, *iIt);
 
     this->preAdapt();
     adapt();
@@ -649,30 +649,41 @@ void Dune::OneDGrid::globalRefine(int refCount)
 }
 
 bool Dune::OneDGrid::mark(int refCount,
-                          const Codim<0>::EntityPointer & e )
+                          const Codim<0>::EntityPointer & ep )
+{
+  return this->mark( refCount, *ep);
+}
+
+bool Dune::OneDGrid::mark(int refCount,
+                          const Codim<0>::Entity & e )
 {
   if (refCount < 0) {
 
-    if (getRealImplementation(*e).target_->level_ == 0)
+    if (getRealImplementation(e).target_->level_ == 0)
       return false;
     else {
-      getRealImplementation(*e).target_->markState_ = OneDEntityImp<1>::COARSEN;
+      getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::COARSEN;
       return true;
     }
 
   } else if (refCount > 0)
-    getRealImplementation(*e).target_->markState_ = OneDEntityImp<1>::REFINED;
+    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::REFINED;
   else
-    getRealImplementation(*e).target_->markState_ = OneDEntityImp<1>::NONE;
+    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::NONE;
 
   return true;
 }
 
 int Dune::OneDGrid::getMark(const Codim<0>::EntityPointer & ep ) const
 {
-  if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::COARSEN)
+  return this->getMark( *ep );
+}
+
+int Dune::OneDGrid::getMark(const Codim<0>::Entity & e ) const
+{
+  if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::COARSEN)
     return -1;
-  else if(getRealImplementation(*ep).target_->markState_ == OneDEntityImp<1>::REFINED)
+  else if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::REFINED)
     return 1;
   return 0;
 }
