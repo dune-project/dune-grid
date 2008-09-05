@@ -36,7 +36,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
       for(LeafIterator it    = grid.template leafbegin<0,Interior_Partition> ();
           it != endit ; ++it,nr++ )
       {
-        grid.mark(1,it);
+        grid.mark(1, *it );
         if (nr>size*0.8) break;
       }
     }
@@ -106,7 +106,7 @@ void checkLevelIndexNonConform(GridType & grid)
     if( it != grid.template leafend<0>() )
     {
       // mark first entity
-      grid.mark(1, it);
+      grid.mark(1, *it);
     }
   }
 
