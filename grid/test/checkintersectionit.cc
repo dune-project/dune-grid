@@ -90,17 +90,42 @@ void checkGeometry(const GeometryImp& geometry)
   }
 }
 
+// Check that normal and normal2 pointing in the same direction
+template< class ctype, int dimworld, class String >
+inline void checkParallel ( const Dune :: FieldVector< ctype, dimworld > &normal,
+                            const Dune :: FieldVector< ctype, dimworld > &normal2,
+                            const String & name )
+{
+  if( std :: abs( normal * normal2 - normal.two_norm() * normal2.two_norm() ) > 1e-8 )
+  {
+    std :: cerr << "Error: " << name
+                << " does not point in the direction of outerNormal."
+                << std :: endl;
+    std :: cerr << "       " << name << " = " << normal2
+                << ", normal = " << normal << std :: endl;
+    assert( false );
+  }
+}
+
 
 // Check whether the normal is orthogonal to the intersection, i.e.,
 // whether (J^-1 * n) = 0. Here J is the jacobian of the intersection
 // geometry (intersectionGlobal) and n is a normal.
-template< class ctype, int dimworld, int facedim >
-inline bool checkNormal ( const Dune :: FieldVector< ctype, dimworld > &normal,
-                          const Dune :: FieldMatrix< ctype, dimworld, facedim > &jit )
+template< class ctype, int dimworld, int facedim, class String >
+inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
+                       const Dune :: FieldMatrix< ctype, dimworld, facedim > &jit,
+                       const String & name )
 {
   Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
   jit.umtv( normal, x );
-  return (x.infinity_norm() <= 1e-8);
+  if (x.infinity_norm() > 1e-8)
+  {
+    std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
+    std :: cerr << "       " << name << " = " << normal
+                << std :: endl;
+    std :: cerr << "       J^-1^T = " << jit << std::endl;
+    assert( false );
+  }
 }
 
 
@@ -276,16 +301,23 @@ void checkIntersectionIterator(const GridViewType& view,
       // Check outer normal
       const FieldVector< ctype, dimworld > normal = iIt->outerNormal( pt );
 
-      if( !checkNormal( normal, jit ) )
+      // Check normal vector is orthogonal to all vectors connecting
+      // the vertices
+      for (int c=1; c<intersectionGlobal.corners(); c++)
       {
-        std :: cerr << "Error: outerNormal "
-                    << "is not orthogonal to the intersection." << std :: endl;
-        std :: cerr << "       outerNormal = " << normal << std :: endl;
-        assert( false );
+        Dune::FieldVector< ctype, dimworld > x = intersectionGlobal[c-1];
+        x -= intersectionGlobal[c];
+        assert(x*normal <= 1e-8);
       }
 
+      // Check JacobianInverseTransposed
+      // (J^-1 * n) = 0. Here J is the jacobian of the intersection
+      // geometry (intersectionGlobal) and n is a normal.
+      checkJIn( normal, jit, "outerNormal" );
+
       // Check integration outer normal
-      const FieldVector< ctype, dimworld > intNormal = iIt->integrationOuterNormal( pt );
+      const FieldVector< ctype, dimworld > intNormal =
+        iIt->integrationOuterNormal( pt );
       sumNormal.axpy( quad[ i ].weight(), intNormal );
 
       const ctype det = intersectionGlobal.integrationElement( pt );
@@ -298,23 +330,8 @@ void checkIntersectionIterator(const GridViewType& view,
         assert( false );
       }
 
-      if( !checkNormal( intNormal, jit ) )
-      {
-        std :: cerr << "Error: integrationOuterNormal "
-                    << "is not orthogonal to the intersection." << std :: endl;
-        std :: cerr << "       integrationOuterNormal = " << intNormal
-                    << std :: endl;
-        assert( false );
-      }
-
-      if( std :: abs( normal * intNormal - normal.two_norm() * intNormal.two_norm() ) > 1e-8 )
-      {
-        std :: cerr << "Error: integrationOuterNormal "
-                    << "does not point in the direction of outerNormal." << std :: endl;
-        std :: cerr << "       integrationOuterNormal = " << intNormal
-                    << ", normal = " << normal << std :: endl;
-        assert( false );
-      }
+      checkJIn( intNormal, jit, "integrationOuterNormal" );
+      checkParallel ( intNormal, normal, "integrationOuterNormal");
 
       // Check unit outer normal
       const FieldVector< ctype, dimworld > unitNormal = iIt->unitOuterNormal( pt );
@@ -327,23 +344,8 @@ void checkIntersectionIterator(const GridViewType& view,
         assert( false );
       }
 
-      if( !checkNormal( unitNormal, jit ) )
-      {
-        std :: cerr << "Error: unitOuterNormal "
-                    << "is not orthogonal to the intersection." << std :: endl;
-        std :: cerr << "       unitOuterNormal = " << unitNormal
-                    << std :: endl;
-        assert( false );
-      }
-
-      if( std :: abs( normal * unitNormal - normal.two_norm() * unitNormal.two_norm() ) > 1e-8 )
-      {
-        std :: cerr << "Error: unitOuterNormal "
-                    << "does not point in the direction of outerNormal." << std :: endl;
-        std :: cerr << "       unitOuterNormal = " << unitNormal
-                    << ", normal = " << normal << std :: endl;
-        assert( false );
-      }
+      checkJIn( unitNormal, jit, "unitOuterNormal" );
+      checkParallel ( unitNormal, normal, "unitOuterNormal");
 
       // check intersectionSelfLocal
       FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
