@@ -514,13 +514,18 @@ namespace Dune {
     typedef GridImp GridType;
     enum { dim = GridType :: dimension };
 
+  public:
+    enum { ncodim = GridType::dimension + 1 };
+
+    //! type of index
+    typedef unsigned int IndexType;
+
+    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+  private:
+
     //! type of used arrays to store indices
     typedef std::vector<int> IndexArrayType;
 
-  public:
-    enum { ncodim = GridType::dimension + 1 };
-  private:
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
     typedef DefaultLevelIndexSet<GridType> ThisType;
 
@@ -579,7 +584,7 @@ namespace Dune {
 
     //! return LevelIndex of given entity
     template<class EntityType>
-    int index (const EntityType & en) const
+    IndexType index (const EntityType & en) const
     {
       enum { cd = EntityType :: codimension };
       // this must not be true for vertices
@@ -594,7 +599,7 @@ namespace Dune {
 
     //! return LevelIndex of given entity
     template<int cd>
-    int index (const typename GridImp::template Codim<cd>::Entity& en) const
+    IndexType index (const typename GridImp::template Codim<cd>::Entity& en) const
     {
       // this must not be true for vertices
       // therefore only check other codims
@@ -609,7 +614,7 @@ namespace Dune {
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
     template <int cd>
-    int subIndex (const typename GridType::template Codim<0>::Entity & en, int i) const
+    IndexType subIndex (const typename GridType::template Codim<0>::Entity & en, int i) const
     {
       // this must not be true for vertices
       // therefore only check other codims
@@ -818,13 +823,16 @@ namespace Dune {
     typedef GridImp GridType;
     enum { dim = GridType :: dimension };
 
-    //! type of used arrays to store indices
-    typedef std::vector<int> IndexArrayType;
   public:
     enum { ncodim = dim + 1 };
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
+    //! type of index
+    typedef unsigned int IndexType;
   private:
+    //! type of used arrays to store indices
+    typedef std::vector<int> IndexArrayType;
+
     typedef DefaultLeafIndexSet<GridType> ThisType;
 
     template <class EntityType, int codim>
@@ -883,7 +891,7 @@ namespace Dune {
 
     //! return LeafIndex of given entity
     template<class EntityType>
-    int index (const EntityType & en) const
+    IndexType index (const EntityType & en) const
     {
       enum { cd = EntityType :: codimension };
       // this must not be true for vertices
@@ -893,7 +901,7 @@ namespace Dune {
     }
 
     template<int cd>
-    int index (const typename GridImp::template Codim<cd>::Entity& en) const
+    IndexType index (const typename GridImp::template Codim<cd>::Entity& en) const
     {
       // this must not be true for vertices
       // therefore only check other codims
@@ -904,7 +912,7 @@ namespace Dune {
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
     template <int cd>
-    int subIndex (const typename GridType::template Codim<0>::Entity & en, int i) const
+    IndexType subIndex (const typename GridType::template Codim<0>::Entity & en, int i) const
     {
       // this must not be true for vertices
       // therefore only check other codims
