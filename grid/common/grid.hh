@@ -770,25 +770,48 @@ namespace Dune {
       return;
     }
 
-    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt. (deprecated)
 
        \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
        \param[in] e        EntityPointer to Entity that should be refined
 
        \return true if Entity was marked, false otherwise.
      */
-    bool mark( int refCount, const typename Codim<0>::EntityPointer & e )
+    bool mark( int refCount, const typename Codim<0>::EntityPointer & e ) DUNE_DEPRECATED
     {
       return asImp().mark(refCount,e);
     }
 
-    /** \brief returns adaptation mark for given entity pointer
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+
+       \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
+       \param[in] e        Entity that should be marked
+
+       \return true if Entity was marked, false otherwise.
+     */
+    bool mark( int refCount, const typename Codim<0>::Entity & e )
+    {
+      return asImp().mark(refCount,e);
+    }
+
+    /** \brief returns adaptation mark for given entity pointer (deprecated)
 
        \param[in] e   EntityPointer for which adaptation mark should be determined
 
        \return int adaptation mark currently set for given EntityPointer e
      */
-    int getMark(const typename Codim<0>::EntityPointer & e) const
+    int getMark(const typename Codim<0>::EntityPointer & e) const DUNE_DEPRECATED
+    {
+      return asImp().getMark(e);
+    }
+
+    /** \brief returns adaptation mark for given entity
+
+       \param[in] e   Entity for which adaptation mark should be determined
+
+       \return int adaptation mark currently set for given Entity e
+     */
+    int getMark(const typename Codim<0>::Entity & e) const
     {
       return asImp().getMark(e);
     }
@@ -1014,7 +1037,7 @@ namespace Dune {
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
-    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt (deprecated).
 
        \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
        \param[in] e        EntityPointer to Entity that should be refined
@@ -1036,7 +1059,34 @@ namespace Dune {
              This template method will vanish due to the inheritance
              rules.
      */
-    bool mark( int refCount, const typename Traits :: template Codim<0>::EntityPointer & e )
+    bool mark( int refCount, const typename Traits :: template Codim<0>::EntityPointer & e ) DUNE_DEPRECATED
+    {
+      return false;
+    }
+
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+
+       \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
+       \param[in] e        Entity to Entity that should be refined
+
+       \return true if Entity was marked, false otherwise.
+
+       \note
+          -  \b default \b implementation is: return false; for grids with no
+             adaptation.
+          -  for the grid programmer:
+             this method is implemented as a template method, because the
+             Entity type is not defined when the class is instantiated
+             You won't need this trick in the implementation.
+             In your implementation you should use it as
+             \code
+             bool mark( int refCount,
+                        typename Traits::template Codim<0>::Entity & e ).
+             \endcode
+             This template method will vanish due to the inheritance
+             rules.
+     */
+    bool mark( int refCount, const typename Traits :: template Codim<0>::Entity & e )
     {
       return false;
     }
@@ -1048,7 +1098,19 @@ namespace Dune {
 
        \return int adaptation mark, here the default value 0 is returned
      */
-    int getMark(const typename Traits :: template Codim<0>::EntityPointer &) const
+    int getMark(const typename Traits :: template Codim<0>::EntityPointer &) const DUNE_DEPRECATED
+    {
+      return 0;
+    }
+
+    /** \brief returns adaptation mark for given entity, i.e. here the
+     * default implementation returns 0.
+
+       \param[in] e   Entity for which adaptation mark should be determined
+
+       \return int adaptation mark, here the default value 0 is returned
+     */
+    int getMark(const typename Traits :: template Codim<0>::Entity &) const
     {
       return 0;
     }
