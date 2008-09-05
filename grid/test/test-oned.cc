@@ -33,7 +33,7 @@ int main () try
     gridcheck(grid);
 
     // create hybrid grid
-    grid.mark(1, grid.leafbegin<0>());
+    grid.mark(1, * grid.leafbegin<0>());
     grid.preAdapt();
     grid.adapt();
     grid.postAdapt();
