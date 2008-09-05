@@ -214,9 +214,9 @@ namespace Dune {
     }
 
     //! can only be called for dim=dimworld!
-    const FieldMatrix<sgrid_ctype,0,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const
+    const FieldMatrix<sgrid_ctype,1,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const
     {
-      static FieldMatrix<sgrid_ctype,0,0> dummy;
+      static FieldMatrix<sgrid_ctype,1,0> dummy;
       return dummy;
     }
 
