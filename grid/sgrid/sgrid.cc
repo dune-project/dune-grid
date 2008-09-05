@@ -95,48 +95,27 @@ namespace Dune {
   {
     sgrid_ctype s = 1.0;
     for (int j=0; j<mydim; j++) s *= A[j].one_norm();
-
     return s;
   }
 
   template<int mydim, int cdim, class GridImp>
   inline const FieldMatrix<sgrid_ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const
   {
-    if ( builtinverse ) return Jinv;
-
-    // transpose A
-    for (int i=0; i<mydim; ++i)
+    if (!builtinverse)
     {
+      // transpose A and invert non-zero entries
       for (int j=0; j<cdim; ++j)
       {
-        Jinv[j][i] = A[i][j];
-      }
-    }
-
-    // invert matrix
-    if( cdim == mydim )
-    {
-      for (int i=0; i<cdim; ++i)
-      {
-        assert( std::abs( Jinv[i][i] ) > 0 );
-        Jinv[i][i] = 1.0/Jinv[i][i];
-      }
-    }
-    else
-    {
-      // invert non-zeros of matrix
-      for (int i=0; i<cdim; ++i)
-      {
-        for( int j=0; j<mydim; ++j )
+        for (int i=0; i<mydim; ++i)
         {
-          if( std::abs( Jinv[i][j] ) > 0 )
-            Jinv[i][j] = 1.0/Jinv[i][j];
+          if (j<i || A[i][j] == 0.0)
+            Jinv[j][i] = 0.0;
+          else
+            Jinv[j][i] = 1.0/A[i][j];
         }
       }
+      builtinverse = true;
     }
-
-    builtinverse = true;
-
     return Jinv;
   }
 
