@@ -304,11 +304,8 @@ namespace Dune {
       std::vector< FieldVector<ct, dim> > _points;
       std::vector< double > _weight;
 
-      int delivered_order;
+      init(p, _points, _weight, this->delivered_order);
 
-      init(p, _points, _weight, delivered_order);
-
-      this->delivered_order = delivered_order;
       assert(_points.size() == _weight.size());
       for (size_t i = 0; i < _points.size(); i++)
         this->push_back(QuadraturePoint<ct,dim>(_points[i], _weight[i]));
@@ -933,6 +930,7 @@ namespace Dune {
       {
         switch (qt) {
         case QuadratureType::Gauss :
+          std::cout << "gauss\n";
           return CubeQuadratureRule<ctype,dim>(p);
         case QuadratureType::Jacobian_1_0 :
           return Jacobi1QuadratureRule<ctype,dim>(p);

@@ -29,7 +29,7 @@ namespace Dune {
     // order 2,3
     case 2 :
     case 3 :
-      delivered_order = 2;
+      delivered_order = 3;
       _points.resize(2);
       _weight.resize(2);
       _points[0] = .2113248654051871177454256097490212721761991243649365619906988367580111638485333271531423022071252374;
@@ -41,7 +41,7 @@ namespace Dune {
     // order 4,5
     case 4 :
     case 5 :
-      delivered_order = 3;
+      delivered_order = 5;
       _points.resize(3);
       _weight.resize(3);
       _points[0] = .1127016653792583114820734600217600389167078294708409173412426233886516908063020966480712623141326482;
@@ -55,7 +55,7 @@ namespace Dune {
     // order 6,7
     case 6 :
     case 7 :
-      delivered_order = 4;
+      delivered_order = 7;
       _points.resize(4);
       _weight.resize(4);
       _points[0] = .694318442029737123880267555535952474521373101851411811921390395467352642524755671479188300577603474e-1;
@@ -71,7 +71,7 @@ namespace Dune {
     // order 8,9
     case 8 :
     case 9 :
-      delivered_order = 5;
+      delivered_order = 9;
       _points.resize(5);
       _weight.resize(5);
       _points[0] = .469100770306680036011865608503035174371740446187345685631188567281146025416565765294285052232288690e-1;
@@ -89,7 +89,7 @@ namespace Dune {
     // order 10,11
     case 10 :
     case 11 :
-      delivered_order = 6;
+      delivered_order = 11;
       _points.resize(6);
       _weight.resize(6);
       _points[0] = .337652428984239860938492227530026954326171311438550875637251917366932495778999018618556300390370075e-1;
@@ -109,7 +109,7 @@ namespace Dune {
     // order 12,13
     case 12 :
     case 13 :
-      delivered_order = 7;
+      delivered_order = 13;
       _points.resize(7);
       _weight.resize(7);
       _points[0] = .254460438286207377369051579760743687996145311646911082256154480434683348225799295971346149860371380e-1;
@@ -131,7 +131,7 @@ namespace Dune {
     // order 14,15
     case 14 :
     case 15 :
-      delivered_order = 8;
+      delivered_order = 15;
       _points.resize(8);
       _weight.resize(8);
       _points[0] = .198550717512318841582195657152635047858823828492739808641801113137875511282903577802805203683438658e-1;
@@ -155,7 +155,7 @@ namespace Dune {
     // order 16,17
     case 16 :
     case 17 :
-      delivered_order = 9;
+      delivered_order = 17;
       _points.resize(9);
       _weight.resize(9);
       _points[0] = .159198802461869550822118985481635649752975997540373352249883440754598128016996234690631253865529442e-1;
@@ -181,7 +181,7 @@ namespace Dune {
     // order 18,19
     case 18 :
     case 19 :
-      delivered_order = 10;
+      delivered_order = 19;
       _points.resize(10);
       _weight.resize(10);
       _points[0] = .130467357414141399610179939577739732858650266538089403843939666517023983826819201871382175218657218e-1;
@@ -209,7 +209,7 @@ namespace Dune {
     // order 20,21
     case 20 :
     case 21 :
-      delivered_order = 11;
+      delivered_order = 21;
       _points.resize(11);
       _weight.resize(11);
       _points[0] = .108856709269715035980309994385713046142887955401077922870994670081681003095550058998403009163276150e-1;
@@ -239,7 +239,7 @@ namespace Dune {
     // order 22,23
     case 22 :
     case 23 :
-      delivered_order = 12;
+      delivered_order = 23;
       _points.resize(12);
       _weight.resize(12);
       _points[0] = .92196828766403746547254549253595885199224000931342447686589390961033778408730088873713660547738821e-2;
@@ -271,7 +271,7 @@ namespace Dune {
     // order 24,25
     case 24 :
     case 25 :
-      delivered_order = 13;
+      delivered_order = 25;
       _points.resize(13);
       _weight.resize(13);
       _points[0] = .79084726407059252635852755964451944675047190370625456529963397857023810621865790697153563692907058e-2;
@@ -305,7 +305,7 @@ namespace Dune {
     // order 26,27
     case 26 :
     case 27 :
-      delivered_order = 14;
+      delivered_order = 27;
       _points.resize(14);
       _weight.resize(14);
       _points[0] = .68580956515938305792013666479735991619542963803870591779645941111252229337541810446768801674241236e-2;
@@ -341,7 +341,7 @@ namespace Dune {
     // order 28,29
     case 28 :
     case 29 :
-      delivered_order = 15;
+      delivered_order = 29;
       _points.resize(15);
       _weight.resize(15);
       _points[0] = .60037409897572857552171407066937094265135914381192550000012422063057813154902876436389748158404275e-2;
@@ -379,7 +379,7 @@ namespace Dune {
     // order 30,31
     case 30 :
     case 31 :
-      delivered_order = 16;
+      delivered_order = 31;
       _points.resize(16);
       _weight.resize(16);
       _points[0] = .52995325041750337019229132748336862868629641711774349743880476343379313920873015307317840466009095e-2;
@@ -419,7 +419,7 @@ namespace Dune {
     // order 32,33
     case 32 :
     case 33 :
-      delivered_order = 17;
+      delivered_order = 33;
       _points.resize(17);
       _weight.resize(17);
       _points[0] = .47122623427913321622829900296673617461050747702178486080456066288280712646889831443207796751290108e-2;
@@ -461,7 +461,7 @@ namespace Dune {
     // order 34,35
     case 34 :
     case 35 :
-      delivered_order = 18;
+      delivered_order = 35;
       _points.resize(18);
       _weight.resize(18);
       _points[0] = .42174157895345266349919976469246148737105315772801535401621848800714532041101951241182651936993864e-2;
@@ -505,7 +505,7 @@ namespace Dune {
     // order 36,37
     case 36 :
     case 37 :
-      delivered_order = 19;
+      delivered_order = 37;
       _points.resize(19);
       _weight.resize(19);
       _points[0] = .37965780782077984054911648733697532053417992983946066601602804543840485207385580981625395632905994e-2;
@@ -551,7 +551,7 @@ namespace Dune {
     // order 38,39
     case 38 :
     case 39 :
-      delivered_order = 20;
+      delivered_order = 39;
       _points.resize(20);
       _weight.resize(20);
       _points[0] = .34357004074525376069388057643398608886764345491720519259079343910076411861231095802752987517138954e-2;
@@ -599,7 +599,7 @@ namespace Dune {
     // order 40,41
     case 40 :
     case 41 :
-      delivered_order = 21;
+      delivered_order = 41;
       _points.resize(21);
       _weight.resize(21);
       _points[0] = .31239146898052498698789820310295354033307726088354072095630726434519454885035965009356264323804612e-2;
@@ -649,7 +649,7 @@ namespace Dune {
     // order 42,43
     case 42 :
     case 43 :
-      delivered_order = 22;
+      delivered_order = 43;
       _points.resize(22);
       _weight.resize(22);
       _points[0] = .28527072588003539634842894193505098034729008019842325114885375166717511479600440896140371118641978e-2;
@@ -701,7 +701,7 @@ namespace Dune {
     // order 44,45
     case 44 :
     case 45 :
-      delivered_order = 23;
+      delivered_order = 45;
       _points.resize(23);
       _weight.resize(23);
       _points[0] = .26153325012239382380371422772128197131863137705647895366030579164629601171073649080054278918099330e-2;
@@ -755,7 +755,7 @@ namespace Dune {
     // order 46,47
     case 46 :
     case 47 :
-      delivered_order = 24;
+      delivered_order = 47;
       _points.resize(24);
       _weight.resize(24);
       _points[0] = .24063900014893199100012951496315940627011537019985612791997274428580839652711310583013553314421456e-2;
@@ -811,7 +811,7 @@ namespace Dune {
     // order 48,49
     case 48 :
     case 49 :
-      delivered_order = 25;
+      delivered_order = 49;
       _points.resize(25);
       _weight.resize(25);
       _points[0] = .22215151047509510456075265530491913712186752975959143945975344335332593281360327563559868235264962e-2;
@@ -869,7 +869,7 @@ namespace Dune {
     // order 50,51
     case 50 :
     case 51 :
-      delivered_order = 26;
+      delivered_order = 51;
       _points.resize(26);
       _weight.resize(26);
       _points[0] = .20571494271915354983915203385469870215710724402201663017360952972168516833610967740467059715813190e-2;
@@ -929,7 +929,7 @@ namespace Dune {
     // order 52,53
     case 52 :
     case 53 :
-      delivered_order = 27;
+      delivered_order = 53;
       _points.resize(27);
       _weight.resize(27);
       _points[0] = .19103685555057165305563958093850048696559722170644061491817516058911272113370939556189766392126889e-2;
@@ -991,7 +991,7 @@ namespace Dune {
     // order 54,55
     case 54 :
     case 55 :
-      delivered_order = 28;
+      delivered_order = 55;
       _points.resize(28);
       _weight.resize(28);
       _points[0] = .17787512130227750247818047583445041249347839517870477071638352547578905194656373396422966957998046e-2;
@@ -1055,7 +1055,7 @@ namespace Dune {
     // order 56,57
     case 56 :
     case 57 :
-      delivered_order = 29;
+      delivered_order = 57;
       _points.resize(29);
       _weight.resize(29);
       _points[0] = .16602788697017069184042337253230571741132733745599989009213381216072070027901278312380182102923982e-2;
@@ -1121,7 +1121,7 @@ namespace Dune {
     // order 58,59
     case 58 :
     case 59 :
-      delivered_order = 30;
+      delivered_order = 59;
       _points.resize(30);
       _weight.resize(30);
       _points[0] = .15532579626752298641849745406523583295589809411246049459528510988061523949181295920589902209691413e-2;
@@ -1189,7 +1189,7 @@ namespace Dune {
     // order 60,61
     case 60 :
     case 61 :
-      delivered_order = 31;
+      delivered_order = 61;
       _points.resize(31);
       _weight.resize(31);
       _points[0] = .14562590902614629721867228884487458742773329414651846039381405366717276395697834888283143973765270e-2;
@@ -1255,7 +1255,6 @@ namespace Dune {
       _points[30] = .9985437409097385370278132771115512541257226670585348153960618594633282723604302165111716856026234730;
       _weight[30] = .3735415789624387929348437516106203511075426242024019849635485164339136550087160840977924201147052353e-2;
       break;
-
     default :
       DUNE_THROW(QuadratureOrderOutOfRange, "Quadrature rule " << p << " not supported!");
     }
