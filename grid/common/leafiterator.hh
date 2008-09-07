@@ -53,6 +53,7 @@ namespace Dune
       template<int,PartitionIteratorType,class> class LeafIteratorImp>
   class LeafIteratorDefaultImplementation
   {
+  public:
     //! make the constructor deprecated
     LeafIteratorDefaultImplementation() DUNE_DEPRECATED {}
 

@@ -60,6 +60,7 @@ namespace Dune {
   template<class GridImp, template<class> class HierarchicIteratorImp>
   class HierarchicIteratorDefaultImplementation
   {
+  public:
     //! make the constructor deprecated
     HierarchicIteratorDefaultImplementation() DUNE_DEPRECATED {}
 

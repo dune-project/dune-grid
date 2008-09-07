@@ -56,6 +56,7 @@ namespace Dune
       template<int,PartitionIteratorType,class> class LevelIteratorImp>
   class LevelIteratorDefaultImplementation
   {
+  public:
     //! make the constructor deprecated
     LevelIteratorDefaultImplementation() DUNE_DEPRECATED {}
 
