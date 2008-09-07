@@ -357,6 +357,9 @@ namespace Dune {
     enum { dimworld=GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
   public:
+    //! make the constructor deprecated
+    IntersectionIteratorDefaultImplementation() DUNE_DEPRECATED {}
+
     typedef Dune::Intersection<const GridImp, IntersectionAndIteratorImp> Intersection;
     typedef IntersectionAndIteratorImp<const GridImp> ImplementationType;
     //! return unit outer normal, this should be dependent on

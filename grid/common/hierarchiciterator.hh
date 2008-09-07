@@ -60,13 +60,16 @@ namespace Dune {
   template<class GridImp, template<class> class HierarchicIteratorImp>
   class HierarchicIteratorDefaultImplementation
   {
+    //! make the constructor deprecated
+    HierarchicIteratorDefaultImplementation() DUNE_DEPRECATED {}
+
   private:
     // Barton-Nackman trick
     HierarchicIteratorImp<GridImp>& asImp ()
     {return static_cast<HierarchicIteratorImp<GridImp>&>(*this);}
     const HierarchicIteratorImp<GridImp>& asImp () const
     {return static_cast<const HierarchicIteratorImp<GridImp>&>(*this);}
-  };
+  } DUNE_DEPRECATED;
 
 }
 

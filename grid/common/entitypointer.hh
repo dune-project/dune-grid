@@ -283,6 +283,9 @@ namespace Dune
     //! codimension of entity pointer
     enum { codimension = codim };
 
+    //! make the constructor deprecated
+    EntityPointerDefaultImplementation() DUNE_DEPRECATED {}
+
   private:
     //!  Barton-Nackman trick
     IteratorImp& asImp () {

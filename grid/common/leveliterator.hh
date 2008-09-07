@@ -56,6 +56,9 @@ namespace Dune
       template<int,PartitionIteratorType,class> class LevelIteratorImp>
   class LevelIteratorDefaultImplementation
   {
+    //! make the constructor deprecated
+    LevelIteratorDefaultImplementation() DUNE_DEPRECATED {}
+
   private:
     //  Barton-Nackman trick
     LevelIteratorImp<codim,pitype,GridImp>& asImp () {
@@ -64,7 +67,7 @@ namespace Dune
     const LevelIteratorImp<codim,pitype,GridImp>& asImp () const {
       return static_cast<const LevelIteratorImp<codim,pitype,GridImp>&>(*this);
     }
-  }; // end LevelIteratorDefault
+  } DUNE_DEPRECATED; // end LevelIteratorDefault
 
 }
 
