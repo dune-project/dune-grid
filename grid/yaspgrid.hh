@@ -1353,8 +1353,7 @@ namespace Dune {
   //========================================================================
 
   template<class GridImp>
-  class YaspIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation<GridImp,YaspIntersectionIterator>
+  class YaspIntersectionIterator
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
@@ -1371,6 +1370,7 @@ namespace Dune {
     typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
     typedef YaspSpecialGeometry<dim-1,dimworld,GridImp> SpecialGeometry;
     typedef YaspSpecialGeometry<dim-1,dim,GridImp> SpecialLocalGeometry;
+    typedef Dune::Intersection<const GridImp, Dune::YaspIntersectionIterator> Intersection;
 
     //! increment
     void increment()
@@ -1430,6 +1430,12 @@ namespace Dune {
     bool equals (const YaspIntersectionIterator& other) const
     {
       return _inside.equals(other._inside) && _outside.equals(other._outside);
+    }
+
+    //! \brief dereferencing
+    const Intersection & dereference() const
+    {
+      return reinterpret_cast<const Intersection&>(*this);
     }
 
     /*! return true if neighbor ist outside the domain. Still the neighbor might
@@ -1647,8 +1653,7 @@ namespace Dune {
 
   template<class GridImp>
   class YaspHierarchicIterator :
-    public YaspEntityPointer<0,GridImp>,
-    public HierarchicIteratorDefaultImplementation <GridImp,YaspHierarchicIterator>
+    public YaspEntityPointer<0,GridImp>
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
@@ -1764,9 +1769,7 @@ namespace Dune {
    */
   //========================================================================
   template<int codim, class GridImp>
-  class YaspEntityPointer :
-    public EntityPointerDefaultImplementation<codim,GridImp,
-        Dune::YaspEntityPointer<codim,GridImp> >
+  class YaspEntityPointer
   {
     //! know your own dimension
     enum { dim=GridImp::dimension };
@@ -1778,7 +1781,10 @@ namespace Dune {
     typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef YaspSpecialEntity<codim,dim,GridImp> SpecialEntity;
-    typedef YaspEntityPointer<codim,GridImp> Base;
+    typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
+
+    //! codimension of entity pointer
+    enum { codimension = codim };
 
     //! constructor
     YaspEntityPointer (const YGLI & g, const TSI & it) : _g(g), _it(it), _entity(_g,_it)
@@ -1863,8 +1869,7 @@ namespace Dune {
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class YaspLevelIterator :
-    public YaspEntityPointer<codim,GridImp>,
-    public LevelIteratorDefaultImplementation<codim,pitype,GridImp,YaspLevelIterator>
+    public YaspEntityPointer<codim,GridImp>
   {
     //! know your own dimension
     enum { dim=GridImp::dimension };

@@ -106,19 +106,19 @@ namespace Dune
     friend class Dune::GenericLeafIterator<GridImp>;
 
     // need to make copy constructor of EntityPointer work for any iterator
-    friend class EntityPointer<GridImp,typename IteratorImp::Base>;
+    friend class EntityPointer<GridImp,typename IteratorImp::EntityPointerImp>;
 
   protected:
     IteratorImp realIterator;
 
+    /// autocheck wether imp is convertable into imp::base
+    typedef typename
+    Dune::EnableIfInterOperable<typename IteratorImp::EntityPointerImp,IteratorImp,
+        typename IteratorImp::EntityPointerImp>::type base;
+
   public:
     //! type of real implementation
     typedef IteratorImp ImplementationType;
-
-    /// autocheck wether imp is convertable into imp::base
-    typedef typename
-    Dune::EnableIfInterOperable<typename IteratorImp::base,IteratorImp,
-        typename IteratorImp::base>::type base;
 
     /** \brief The Entity that this EntityPointer can point to */
     typedef typename IteratorImp::Entity Entity;
@@ -278,7 +278,9 @@ namespace Dune
   class EntityPointerDefaultImplementation
   {
   public:
-    typedef IteratorImp base;
+    //! export the type of the EntityPointer Implementation.
+    //! Necessary for the typeconversion between Iterators and EntityPointer
+    typedef IteratorImp EntityPointerImp;
 
     //! codimension of entity pointer
     enum { codimension = codim };

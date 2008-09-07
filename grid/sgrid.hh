@@ -685,8 +685,7 @@ namespace Dune {
 
   template<class GridImp>
   class SHierarchicIterator :
-    public Dune::SEntityPointer <0,GridImp>,
-    public HierarchicIteratorDefaultImplementation <GridImp,SHierarchicIterator>
+    public Dune::SEntityPointer <0,GridImp>
   {
     friend class SHierarchicIterator<const GridImp>;
     enum { dim = GridImp::dimension };
@@ -748,8 +747,7 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class SIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,SIntersectionIterator>
+  class SIntersectionIterator
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
@@ -758,6 +756,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+    typedef Dune::Intersection<const GridImp, Dune::SIntersectionIterator> Intersection;
     //! know your own dimension
     enum { dimension=dim };
     //! know your own dimension of world
@@ -769,6 +768,12 @@ namespace Dune {
     bool equals(const SIntersectionIterator<GridImp>& i) const;
     //! increment
     void increment();
+
+    //! \brief dereferencing
+    const Intersection & dereference() const
+    {
+      return reinterpret_cast<const Intersection&>(*this);
+    }
 
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
@@ -877,15 +882,15 @@ namespace Dune {
   /*! Acts as a pointer to an  entities of a given codimension.
    */
   template<int codim, class GridImp>
-  class SEntityPointer :
-    public EntityPointerDefaultImplementation <codim, GridImp,
-        Dune::SEntityPointer<codim,GridImp> >
+  class SEntityPointer
   {
     enum { dim = GridImp::dimension };
     friend class SIntersectionIterator<GridImp>;
   public:
-    typedef SEntityPointer<codim,GridImp> Base;
+    typedef SEntityPointer<codim,GridImp> EntityPointerImp;
     typedef typename GridImp::template Codim<codim>::Entity Entity;
+    //! codimension of entity pointer
+    enum { codimension = codim };
 
     //! equality
     bool equals(const SEntityPointer<codim,GridImp>& i) const;
@@ -915,8 +920,7 @@ namespace Dune {
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class SLevelIterator :
-    public Dune::SEntityPointer <codim,GridImp>,
-    public LevelIteratorDefaultImplementation <codim,pitype,GridImp,SLevelIterator>
+    public Dune::SEntityPointer <codim,GridImp>
   {
     friend class SLevelIterator<codim, pitype,const GridImp>;
     enum { dim = GridImp::dimension };
