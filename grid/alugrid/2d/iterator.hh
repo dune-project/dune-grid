@@ -366,9 +366,9 @@ namespace Dune {
   //********************************************************************
 
   template<int cdim, PartitionIteratorType pitype, class GridImp>
-  class ALU2dGridLeafIterator :
-    public ALU2dGridEntityPointer<cdim,GridImp>,
-    public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU2dGridLeafIterator>
+  class ALU2dGridLeafIterator
+    : public ALU2dGridEntityPointer<cdim,GridImp>
+      // public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU2dGridLeafIterator>
   {
     enum { dim = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -448,9 +448,9 @@ namespace Dune {
   //********************************************************************
 
   template<PartitionIteratorType pitype, class GridImp>
-  class ALU2dGridLeafIterator<1,pitype,GridImp> :
-    public ALU2dGridEntityPointer<1,GridImp>,
-    public LeafIteratorDefaultImplementation<1, pitype, GridImp, ALU2dGridLeafIterator>
+  class ALU2dGridLeafIterator<1,pitype,GridImp>
+    : public ALU2dGridEntityPointer<1,GridImp>
+      // public LeafIteratorDefaultImplementation<1, pitype, GridImp, ALU2dGridLeafIterator>
   {
     enum { dim = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -514,9 +514,9 @@ namespace Dune {
   //**********************************************************************
 
   template<PartitionIteratorType pitype, class GridImp>
-  class ALU2dGridLevelIterator<0, pitype, GridImp> :
-    public LevelIteratorDefaultImplementation <0, pitype, GridImp, ALU2dGridLevelIterator>,
-    public ALU2dGridEntityPointer<0,GridImp>
+  class ALU2dGridLevelIterator<0, pitype, GridImp>
+    : public ALU2dGridEntityPointer<0,GridImp>
+      // public LevelIteratorDefaultImplementation <0, pitype, GridImp, ALU2dGridLevelIterator>
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -571,9 +571,9 @@ namespace Dune {
   //**********************************************************************
 
   template<PartitionIteratorType pitype, class GridImp>
-  class ALU2dGridLevelIterator<1, pitype, GridImp> :
-    public LevelIteratorDefaultImplementation <1, pitype, GridImp, ALU2dGridLevelIterator>,
-    public ALU2dGridEntityPointer<1,GridImp>
+  class ALU2dGridLevelIterator<1, pitype, GridImp>
+    : public ALU2dGridEntityPointer<1,GridImp>
+      // public LevelIteratorDefaultImplementation <1, pitype, GridImp, ALU2dGridLevelIterator>
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -642,9 +642,9 @@ namespace Dune {
   //**********************************************************************
 
   template<PartitionIteratorType pitype, class GridImp>
-  class ALU2dGridLevelIterator<2, pitype, GridImp> :
-    public LevelIteratorDefaultImplementation <2, pitype, GridImp, ALU2dGridLevelIterator>,
-    public ALU2dGridEntityPointer<2,GridImp>
+  class ALU2dGridLevelIterator<2, pitype, GridImp>
+    : public ALU2dGridEntityPointer<2,GridImp>
+      // public LevelIteratorDefaultImplementation <2, pitype, GridImp, ALU2dGridLevelIterator>
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -714,9 +714,9 @@ namespace Dune {
 
   //! Hierarichic Iterator of ALU2dGrid
   template<class GridImp>
-  class ALU2dGridHierarchicIterator :
-    public ALU2dGridEntityPointer<0,GridImp> ,
-    public HierarchicIteratorDefaultImplementation <GridImp,ALU2dGridHierarchicIterator>
+  class ALU2dGridHierarchicIterator
+    : public ALU2dGridEntityPointer<0,GridImp>
+      // public HierarchicIteratorDefaultImplementation <GridImp,ALU2dGridHierarchicIterator>
   {
     enum { dim = GridImp::dimension };
     // my type

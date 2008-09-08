@@ -457,10 +457,10 @@ namespace Dune {
      Enables iteration over all entities of a given codimension and level of a grid.
    */
   template<int cd, PartitionIteratorType pitype, class GridImp>
-  class ALU3dGridLevelIterator :
-    public ALU3dGridEntityPointer <cd,GridImp> ,
-    public LevelIteratorDefaultImplementation <cd,pitype,GridImp,ALU3dGridLevelIterator> ,
-    public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> >
+  class ALU3dGridLevelIterator
+    : public ALU3dGridEntityPointer <cd,GridImp>,
+      // public LevelIteratorDefaultImplementation <cd,pitype,GridImp,ALU3dGridLevelIterator> ,
+      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd,pitype> >
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -534,10 +534,10 @@ namespace Dune {
   //********************************************************************
   //! Leaf iterator
   template<int cdim, PartitionIteratorType pitype, class GridImp>
-  class ALU3dGridLeafIterator :
-    public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU3dGridLeafIterator>,
-    public ALU3dGridEntityPointer<cdim,GridImp> ,
-    public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> >
+  class ALU3dGridLeafIterator
+    : public ALU3dGridEntityPointer<cdim,GridImp>,
+      // public LeafIteratorDefaultImplementation<cdim, pitype, GridImp, ALU3dGridLeafIterator>,
+      public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> >
   {
     enum { dim = GridImp :: dimension };
 
@@ -604,9 +604,9 @@ namespace Dune {
   // - HierarchicIteraor
   // --HierarchicIterator
   template<class GridImp>
-  class ALU3dGridHierarchicIterator :
-    public ALU3dGridEntityPointer<0,GridImp> ,
-    public HierarchicIteratorDefaultImplementation <GridImp,ALU3dGridHierarchicIterator>
+  class ALU3dGridHierarchicIterator
+    : public ALU3dGridEntityPointer<0,GridImp>
+      // public HierarchicIteratorDefaultImplementation <GridImp,ALU3dGridHierarchicIterator>
   {
     enum { dim = GridImp::dimension };
     typedef ALU3dGridHierarchicIterator<GridImp> ThisType;

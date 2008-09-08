@@ -18,7 +18,7 @@ namespace Dune {
   class ALU2dGridEntity;
   template<int cd, PartitionIteratorType pitype, class GridImp >
   class ALU2dGridLevelIterator;
-  template<int cd, class GridImp >
+  template< int codim, class GridImp >
   class ALU2dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridGeometry;
@@ -437,31 +437,32 @@ namespace Dune {
   /*!
      Enables iteration over all entities of a given codimension and level of a grid.
    */
-  template<int cd, class GridImp>
-  class ALU2dGridEntityPointer :
-    public EntityPointerDefaultImplementation <cd, GridImp, ALU2dGridEntityPointer<cd,GridImp> >
+  template< int codim, class GridImp >
+  class ALU2dGridEntityPointer
   {
     // type of this class
-    typedef ALU2dGridEntityPointer <cd,GridImp> ThisType;
+    typedef ALU2dGridEntityPointer< codim, GridImp > ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
-    typedef typename Dune::ALU2dImplTraits::template Codim<cd>::InterfaceType ElementType;
+    typedef typename Dune::ALU2dImplTraits::template Codim<codim>::InterfaceType ElementType;
 
   public:
+    enum { codimension = codim };
+
     //! type of stored entity (interface)
-    typedef typename GridImp::template Codim<cd>::Entity Entity;
+    typedef typename GridImp::template Codim<codimension>::Entity Entity;
     //! tpye of stored entity (implementation)
-    typedef ALU2dGridEntity<cd,dim,GridImp> EntityImp;
+    typedef ALU2dGridEntity<codimension,dim,GridImp> EntityImp;
     typedef MakeableInterfaceObject<Entity> EntityObj;
 
-    typedef ALU2dGridEntityPointer<cd,GridImp> Base;
+    typedef ALU2dGridEntityPointer<codimension,GridImp> EntityPointerImp;
 
     //! Constructor for EntityPointer that points to an element
-    ALU2dGridEntityPointer(const GridImp & grid,
-                           const ElementType & item,
-                           int face = -1,
-                           int level = -1
-                           );
+    ALU2dGridEntityPointer ( const GridImp &grid,
+                             const ElementType &item,
+                             int face = -1,
+                             int level = -1
+                             );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
     ALU2dGridEntityPointer(const GridImp & grid) ;

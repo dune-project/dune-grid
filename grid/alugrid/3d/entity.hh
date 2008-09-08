@@ -409,25 +409,27 @@ namespace Dune {
   /*!
      Enables iteration over all entities of a given codimension and level of a grid.
    */
-  template<int cd, class GridImp>
-  class ALU3dGridEntityPointerBase :
-    public EntityPointerDefaultImplementation <cd, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
+  template< int codim, class GridImp >
+  class ALU3dGridEntityPointerBase
+  //: public EntityPointerDefaultImplementation <codim, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
   {
-    typedef ALU3dGridEntityPointerBase <cd,GridImp> ThisType;
+    typedef ALU3dGridEntityPointerBase< codim, GridImp > ThisType;
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
-    friend class ALU3dGridEntity<cd,dim,GridImp>;
+    friend class ALU3dGridEntity<codim,dim,GridImp>;
     friend class ALU3dGridEntity< 0,dim,GridImp>;
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<codim>::InterfaceType MyHElementType;
 
     typedef ALU3DSPACE HBndSegType HBndSegType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
   public:
+    enum { codimension = codim };
+
     //! type of Entity
-    typedef typename GridImp::template Codim<cd>::Entity Entity;
+    typedef typename GridImp::template Codim<codimension>::Entity Entity;
     //! underlying EntityImplementation
     typedef MakeableInterfaceObject<Entity> EntityObject;
     typedef typename EntityObject :: ImplementationType EntityImp;
@@ -435,8 +437,8 @@ namespace Dune {
     //! typedef of my type
     typedef ThisType ALU3dGridEntityPointerType;
 
-    //! make base type available in derived types
-    typedef ALU3dGridEntityPointerBase<cd,GridImp> Base;
+    //! make type of entity pointer implementation available in derived classes
+    typedef ALU3dGridEntityPointer<codimension,GridImp> EntityPointerImp;
 
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointerBase(const GridImp & grid,
