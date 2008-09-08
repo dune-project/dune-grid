@@ -3,6 +3,8 @@
 #ifndef DUNE_BOUNDARY_SEGMENT_HH
 #define DUNE_BOUNDARY_SEGMENT_HH
 
+#include <dune/common/fvector.hh>
+
 /** \file
     \brief Base class for grid boundary segments of arbitrary geometry
  */

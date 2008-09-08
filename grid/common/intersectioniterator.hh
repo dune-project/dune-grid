@@ -5,6 +5,8 @@
 
 #include <dune/common/iteratorfacades.hh>
 
+#include <dune/grid/common/intersection.hh>
+
 namespace Dune
 {
 

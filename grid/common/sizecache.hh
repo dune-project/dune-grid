@@ -3,7 +3,12 @@
 #ifndef DUNE_SIZECACHE_HH
 #define DUNE_SIZECACHE_HH
 
+#include <cassert>
 #include <vector>
+
+#include <dune/common/geometrytype.hh>
+
+#include <dune/grid/common/gridenums.hh>
 
 /** @file
    @author Robert Kloefkorn

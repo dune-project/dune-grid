@@ -3,6 +3,9 @@
 #ifndef DUNE_DEFAULTGRIDVIEW_HH
 #define DUNE_DEFAULTGRIDVIEW_HH
 
+#include <dune/common/typetraits.hh>
+
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridview.hh>
 
 namespace Dune {

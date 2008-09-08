@@ -8,6 +8,8 @@
 #include <iostream>
 #include "mapper.hh"
 
+#include <dune/grid/common/grid.hh>
+
 /**
  * @file
  * @brief  Mapper classes are used to attach data to a grid
