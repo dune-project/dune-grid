@@ -930,7 +930,6 @@ namespace Dune {
       {
         switch (qt) {
         case QuadratureType::Gauss :
-          std::cout << "gauss\n";
           return CubeQuadratureRule<ctype,dim>(p);
         case QuadratureType::Jacobian_1_0 :
           return Jacobi1QuadratureRule<ctype,dim>(p);
