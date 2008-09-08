@@ -6,6 +6,7 @@
 #include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/grid/genericgeometry/matrix.hh>
 
 namespace Dune
 {

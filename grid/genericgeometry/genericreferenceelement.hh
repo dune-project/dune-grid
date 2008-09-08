@@ -3,6 +3,7 @@
 #ifndef DUNE_GENERICGEOMETRY_GENERICREFERENCEELEMENT_HH
 #define DUNE_GENERICGEOMETRY_GENERICREFERENCEELEMENT_HH
 
+#include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 
 namespace Dune
@@ -67,7 +68,7 @@ namespace Dune
     template< GeometryType :: BasicType type >
     void initialize ()
     {
-      typedef GenericGeometry :: Convert< type, dim > :: type Topology;
+      typedef typename GenericGeometry :: Convert< type, dim > :: type Topology;
       typedef Initialize< Topology > Init;
       GenericGeometry :: ForLoop< Init :: template Codim, 0, dim > :: apply( info_ );
       volume_ = GenericGeometry :: Volume< Topology > :: template evaluate< double >();
@@ -77,7 +78,7 @@ namespace Dune
   template< class ctype, int dim >
   class GenericReferenceElement< ctype, dim > :: SubEntityInfo
   {
-    template< int codim > struct Initialize
+    template< class Topology, int codim > struct Initialize
     {
       template< int subcodim > struct SubCodim;
     };
@@ -114,8 +115,10 @@ namespace Dune
     void initialize ( unsigned int i )
     {
       typedef Initialize< Topology, codim > Init;
+      typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
+
       GenericGeometry :: ForLoop< Init :: template SubCodim, 0, dim-codim > :: apply( i, numbering_ );
-      baryCenter_ = ReferenceElement< Topology > :: template baryCenter< codim >( i );
+      baryCenter_ = RefElement :: template baryCenter< codim >( i );
       type_ = GenericGeometry :: DuneGeometryType< Topology, GeometryType :: simplex > :: type();
     }
   };
@@ -123,18 +126,19 @@ namespace Dune
   template< class ctype, int dim >
   template< class Topology, int codim >
   template< int subcodim >
-  struct GenericReferenceElement< ctype, dim > :: SubEntityInfo :: Initialize< codim > :: SubCodim
+  struct GenericReferenceElement< ctype, dim >
+  :: SubEntityInfo :: Initialize< Topology, codim > :: SubCodim
   {
-    typedef GenericGeometry :: ReferenceElement< Topology > ReferenceElement;
+    typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
 
     static void apply ( unsigned int i, std :: vector< int > (&numbering)[ dim+1 ] )
     {
-      const unsigned int size = ReferenceElement :: template size< codim, subcodim >( i );
+      const unsigned int size = RefElement :: template size< codim, subcodim >( i );
       numbering[ codim+subcodim ].resize( size );
       for( unsigned int j = 0; j < size; ++j )
       {
         numbering[ codim+subcodim ][ j ]
-          = ReferenceElement ::  template subNumbering< codim, subcodim >[ i ][ j ];
+          = RefElement ::  template subNumbering< codim, subcodim >[ i ][ j ];
       }
     }
   };
