@@ -3,6 +3,10 @@
 #ifndef DUNE_ALBERTAGRID_REFERENCETOPO_HH
 #define DUNE_ALBERTAGRID_REFERENCETOPO_HH
 
+#include <cassert>
+
+#include <dune/grid/albertagrid/albertaheader.hh>
+
 #ifdef __ALBERTApp__
 namespace Albert {
 #endif

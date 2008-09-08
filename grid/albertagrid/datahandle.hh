@@ -6,6 +6,9 @@
 //- system includes
 #include <iostream>
 
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/albertagrid/albertaheader.hh>
+
 namespace AlbertHelp {
 
   /////////////////////////////////////////////////////////////////

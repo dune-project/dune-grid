@@ -5,6 +5,8 @@
 
 #include <stack>
 
+#include <dune/grid/albertagrid/albertaheader.hh>
+
 namespace Dune
 {
 
