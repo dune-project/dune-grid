@@ -4,6 +4,8 @@
 #ifndef DUNE_INTERSECTIONGETTER_HH
 #define DUNE_INTERSECTIONGETTER_HH
 
+#include <dune/common/deprecated.hh>
+
 /**
  * @file
  * @author Markus Blatt
@@ -11,6 +13,8 @@
  *
  * Depending on whether you work on a leaf or a level you you have to call
  * the methods ilevel{begin,end}() or ileaf{begin,end}() to get the correct iterator.
+ *
+ * @deprected This helper class is obsolete when using the new GridView interface
  */
 namespace Dune
 {
@@ -21,12 +25,12 @@ namespace Dune
   /**
    * @brief A tag to identify that we work on a level of a grid.
    */
-  struct LevelTag {};
+  struct LevelTag {} DUNE_DEPRECATED;
 
   /**
    * @brief A tag to identify that we work on the leaf of a grid.
    */
-  struct LeafTag {};
+  struct LeafTag {} DUNE_DEPRECATED;
 
   /**
    * @brief Utility class to get the Intersection Iterator the right way.
