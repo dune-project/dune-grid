@@ -2,6 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_ALBERTAGRID_IMP_HH
 #define DUNE_ALBERTAGRID_IMP_HH
+
+#if HAVE_ALBERTA
+
 #include <iostream>
 #include <fstream>
 #include <dune/common/deprecated.hh>
@@ -2001,4 +2004,7 @@ namespace Dune
 #undef DIM_OF_WORLD
 #undef CALC_COORD
 #include "alberta_undefs.hh"
+
+#endif // HAVE_ALBERTA
+
 #endif

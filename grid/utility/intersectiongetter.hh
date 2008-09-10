@@ -4,6 +4,8 @@
 #ifndef DUNE_INTERSECTIONGETTER_HH
 #define DUNE_INTERSECTIONGETTER_HH
 
+#include <dune/common/static_assert.hh>
+#include <dune/common/typetraits.hh>
 #include <dune/common/deprecated.hh>
 
 /**

@@ -6,6 +6,8 @@
 #ifndef DUNE_ALBERTAEXTRA_HH
 #define DUNE_ALBERTAEXTRA_HH
 
+#if HAVE_ALBERTA
+
 #include <algorithm>
 #include <cstring>
 
@@ -1278,5 +1280,7 @@ namespace AlbertHelp
 #ifdef __ALBERTApp__
 } // end namespace Albert
 #endif
+
+#endif // HAVE_ALBERTA
 
 #endif  /* !_ALBERTAEXTRA_H_ */

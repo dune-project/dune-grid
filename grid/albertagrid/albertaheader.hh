@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTAHEADER_HH
 #define DUNE_ALBERTAHEADER_HH
 
+#if HAVE_ALBERTA
+
 #include <dune/grid/albertagrid/griddim.hh>
 
 // if we have ALBERTA C++ lib define namespace for ALBERTA
@@ -163,5 +165,7 @@ static inline MACRO_EL* nextMacroEl(MESH* mesh, const MACRO_EL* oldmel)
 #ifndef __ALBERTApp__
 } // end extern "C"
 #endif
+
+#endif // HAVE_ALBERTA
 
 #endif

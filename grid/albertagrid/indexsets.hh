@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTAGRIDINDEXSETS_HH
 #define DUNE_ALBERTAGRIDINDEXSETS_HH
 
+#if HAVE_ALBERTA
+
 //- System includes
 
 //- Dune includes
@@ -291,5 +293,7 @@ namespace Dune {
     int codimStart_[dim+1];
   };
 } // namespace Dune
+
+#endif // HAVE_ALBERTA
 
 #endif

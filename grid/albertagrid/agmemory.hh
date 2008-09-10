@@ -3,6 +3,8 @@
 #ifndef DUNE_AGMEMORY_HH
 #define DUNE_AGMEMORY_HH
 
+#if HAVE_ALBERTA
+
 #include <stack>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
@@ -144,5 +146,7 @@ namespace Dune
   static ElInfoProvider elinfoProvider;
 
 } //end namespace
+
+#endif // HAVE_ALBERTA
 
 #endif

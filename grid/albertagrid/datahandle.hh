@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTAGRIDDATAHANDLE_HH
 #define DUNE_ALBERTAGRIDDATAHANDLE_HH
 
+#if HAVE_ALBERTA
+
 //- system includes
 #include <iostream>
 
@@ -123,4 +125,7 @@ namespace AlbertHelp {
   };
 
 } // end namespace
+
+#endif // HAVE_ALBERTA
+
 #endif
