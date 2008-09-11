@@ -611,7 +611,7 @@ void Dune::OneDGrid::setIndices()
   // Add space for new LevelIndexSets if the grid hierarchy got higher
   // They are not created until they are actually requested
   for (int i=levelIndexSets_.size(); i<maxLevel()+1; i++)
-    levelIndexSets_.push_back(0);
+    levelIndexSets_.push_back( (OneDGridLevelIndexSet< const OneDGrid > *) 0 );
 
   // Delete old LevelIndexSets if the grid hierarchy got lower
   int excess = levelIndexSets_.size() - (maxLevel() + 1);
