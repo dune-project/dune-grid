@@ -1503,6 +1503,15 @@ namespace Dune {
       return _normal;
     }
 
+    //! return unit outer normal, this should be dependent on
+    //! local coordinates for higher order boundary
+    //! the normal is scaled with the integration element of the intersection.
+    FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
+    {
+      FieldVector<ctype, dimworld> n = _normal;
+      n *= intersectionGlobal().volume();
+      return n;
+    }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
           Here returned element is in LOCAL coordinates of the element where iteration started.
