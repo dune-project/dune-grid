@@ -114,7 +114,7 @@ namespace ALUGridSpace {
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
       : it_( grid.myGrid(), level ),
-        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
     {}
 
     // copy constructor
@@ -149,10 +149,10 @@ namespace ALUGridSpace {
     mutable val_t elem_;
 
     // constructor creating iterator
-    template <class GridImp>
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : it_(grid.myGrid() , level )
-        , elem_(0,0)
+    template< class GridImp >
+    ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+      : it_( grid.myGrid(), level ),
+        elem_( (ElType *) 0, (HBndSegType*) 0 )
     {}
 
     // copy constructor
@@ -178,6 +178,7 @@ namespace ALUGridSpace {
   class ALU3dGridLevelIteratorWrapper<3,pitype>
     : public IteratorWrapperInterface< typename IteratorElType<3>::val_t >
   {
+    typedef typename IteratorElType< 3 > :: ElType ElType;
     typedef VertexListType :: IteratorType IteratorType;
 
     VertexListType & vxList_;
@@ -189,12 +190,12 @@ namespace ALUGridSpace {
     mutable val_t elem_;
 
     // constructor creating iterator
-    template <class GridImp>
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : vxList_ (grid.getVertexList(level))
-        , count_(0)
-        , size_(vxList_.size())
-        , elem_(0,0)
+    template< class GridImp >
+    ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+      : vxList_ ( grid.getVertexList( level ) ),
+        count_( 0 ),
+        size_( vxList_.size() ),
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
     {
       assert( vxList_.up2Date() );
     }
@@ -254,7 +255,7 @@ namespace ALUGridSpace {
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
       : it_( grid.myGrid() ),
-        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
     {}
 
     // constructor copying iterator
@@ -604,7 +605,7 @@ namespace ALUGridSpace {
         it_( 0 ),
         nl_( nlinks ),
         link_( nlinks ), // makes default status == done
-        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
@@ -1352,12 +1353,12 @@ namespace ALUGridSpace {
 
   public:
     // constructor creating iterator
-    template <class GridImp>
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : elem_(0,0)
-        , level_(level)
-        , edgeList_( grid.getEdgeList(level) )
-        , count_(0)
+    template< class GridImp >
+    ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+      : elem_( (ElType *) 0, (HBndSegType *) 0 ),
+        level_( level ),
+        edgeList_( grid.getEdgeList( level ) ),
+        count_( 0 )
     {
       if( ! edgeList_.up2Date() )
         updateEdgeList(grid,level,nlinks);
