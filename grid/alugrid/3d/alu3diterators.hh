@@ -111,10 +111,10 @@ namespace ALUGridSpace {
     mutable val_t elem_;
 
     // constructor creating iterator
-    template <class GridImp>
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : it_(grid.myGrid() , level )
-        , elem_(0,0)
+    template< class GridImp >
+    ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+      : it_( grid.myGrid(), level ),
+        elem_( (HElementType *) 0, (HBndSegType *) 0 )
     {}
 
     // copy constructor
@@ -251,9 +251,11 @@ namespace ALUGridSpace {
     mutable val_t elem_;
   public:
     // constructor creating Iterator
-    template <class GridImp>
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid()), elem_(0,0) {}
+    template< class GridImp >
+    ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
+      : it_( grid.myGrid() ),
+        elem_( (HElementType *) 0, (HBndSegType *) 0 )
+    {}
 
     // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
@@ -595,13 +597,14 @@ namespace ALUGridSpace {
   public:
     typedef ElementPllXIF_t ItemType;
 
-    template <class GridImp>
-    ALU3dGridGhostIterator (const GridImp & grid, int level , const int nlinks )
-      : gitter_(grid.myGrid())
-        , iterTT_(0) , it_(0)
-        , nl_(nlinks)
-        , link_(nlinks) // makes default status == done
-        , elem_(0,0)
+    template< class GridImp >
+    ALU3dGridGhostIterator ( const GridImp &grid, int level, const int nlinks )
+      : gitter_( grid.myGrid() ),
+        iterTT_( 0 ),
+        it_( 0 ),
+        nl_( nlinks ),
+        link_( nlinks ), // makes default status == done
+        elem_( (HElementType *) 0, (HBndSegType *) 0 )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
@@ -675,7 +678,7 @@ namespace ALUGridSpace {
         {
           usingInner_ = true;
           pair < ElementPllXIF_t *, int > p = it.item ().accessPllX ().accessOuterPllX () ;
-          pair < HElementType * , HBndSegType * > elems(0,0);
+          pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
           p.first->getAttachedElement(elems);
 
           assert( elems.first || elems.second );
@@ -693,7 +696,7 @@ namespace ALUGridSpace {
       if(!out.done())
       {
         pair < ElementPllXIF_t *, int > p = out.item ().accessPllX ().accessOuterPllX () ;
-        pair < HElementType * , HBndSegType * > elems(0,0);
+        pair< HElementType *, HBndSegType * > elems( (HElementType *)0, (HBndSegType *)0 );
         p.first->getAttachedElement(elems);
 
         assert( elems.second );
