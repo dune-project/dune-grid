@@ -132,13 +132,13 @@ namespace Dune
 
         case GeometryType :: cube :
           return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
-        /*
-           case GeometryType :: prism:
-           return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
 
-           case GeometryType :: pyramid:
-           return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
-         */
+        case GeometryType :: prism :
+          return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
+
+        case GeometryType :: pyramid :
+          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
+
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type.basicType() );
         }
@@ -343,7 +343,7 @@ namespace Dune
       }
 
       template< int fatherdim >
-      const Mapping *
+      Mapping *
       subMapping ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits > &father,
                    int i, const CachingType &cache )
       {

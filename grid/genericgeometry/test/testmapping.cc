@@ -24,14 +24,12 @@
 using namespace Dune;
 using namespace GenericGeometry;
 
-template <class DuneGeometry>
+template< class DuneGeometry >
 struct DuneCoordTraits
 {
-  static const int dimCoord = DuneGeometry :: coorddimension;
-  static const int dimG = DuneGeometry :: mydimension;
-
-  typedef typename DuneGeometry :: ctype FieldType;
-
+  enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
+  enum {dimGrid  = DuneGeometry::dimension};       // grid dimension
+  typedef typename DuneGeometry::ctype FieldType;
   // general vector and matrix types
   template <int dim>
   struct Vector {
@@ -45,11 +43,44 @@ struct DuneCoordTraits
   // domain, used to construct a mapping together with an offset.
   // Corners used are
   // p[offset],...,p[offset+Topology::numCorners]
-  typedef DuneGeometry coord_vector;
-
+  typedef DuneGeometry DuneGeometryType;
   // mapping is of the form Ax+b (used untested)
-  static const bool affine = false;
+  enum {affine = false};
+  enum {oneDType = Dune::GeometryType::simplex};
+  template <class Topology> struct CornerStorage {
+    typedef CoordPointerStorage<Topology,typename Vector<dimCoord>::Type> Type;
+  };
 };
+
+
+/*
+   template <class DuneGeometry>
+   struct DuneCoordTraits
+   {
+   static const int dimCoord = DuneGeometry :: coorddimension;
+   static const int dimG = DuneGeometry :: mydimension;
+
+   typedef typename DuneGeometry :: ctype FieldType;
+
+   // general vector and matrix types
+   template <int dim>
+   struct Vector {
+    typedef FieldVector<FieldType,dim> Type;
+   };
+   template <int dimR,int dimC>
+   struct Matrix {
+    typedef FieldMatrix<FieldType,dimR,dimC> Type;
+   };
+   // Vector of global vectors denoting the edges of the range
+   // domain, used to construct a mapping together with an offset.
+   // Corners used are
+   // p[offset],...,p[offset+Topology::numCorners]
+   typedef DuneGeometry coord_vector;
+
+   // mapping is of the form Ax+b (used untested)
+   static const bool affine = false;
+   };
+ */
 
 int phiErr;
 int jTinvJTErr;
