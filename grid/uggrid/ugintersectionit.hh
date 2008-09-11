@@ -23,8 +23,7 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class UGGridLevelIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation<GridImp,UGGridLevelIntersectionIterator>
+  class UGGridLevelIntersectionIterator
   {
 
     enum {dim=GridImp::dimension};
@@ -42,6 +41,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef Dune::Intersection<const GridImp, Dune::UGGridLevelIntersectionIterator> Intersection;
 
     /** The default Constructor makes empty Iterator
         \todo Should be private
@@ -63,6 +63,11 @@ namespace Dune {
       neighborCount_++;
     }
 
+    //! \brief dereferencing
+    const Intersection & dereference() const {
+      return reinterpret_cast<const Intersection&>(*this);
+    }
+
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const {
@@ -72,7 +77,6 @@ namespace Dune {
     //! return EntityPointer to the Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     EntityPointer outside() const {
-
       typename UG_NS<dim>::Element* otherelem = UG_NS<dim>::NbElem(center_, neighborCount_);
 
       if (otherelem==0)
@@ -166,8 +170,7 @@ namespace Dune {
 
 
   template<class GridImp>
-  class UGGridLeafIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation<GridImp,UGGridLeafIntersectionIterator>
+  class UGGridLeafIntersectionIterator
   {
 
     enum {dim=GridImp::dimension};
@@ -188,6 +191,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef Dune::Intersection<const GridImp, Dune::UGGridLeafIntersectionIterator> Intersection;
 
     UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
       : center_(center), neighborCount_(nb), subNeighborCount_(0)
@@ -218,6 +222,11 @@ namespace Dune {
 
       }
 
+    }
+
+    //! \brief dereferencing
+    const Intersection & dereference() const {
+      return reinterpret_cast<const Intersection&>(*this);
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection

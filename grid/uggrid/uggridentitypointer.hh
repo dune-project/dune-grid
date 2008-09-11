@@ -9,12 +9,17 @@ namespace Dune {
   /*! Acts as a pointer to an  entities of a given codimension.
    */
   template<int codim, class GridImp>
-  class UGGridEntityPointer :
-    public EntityPointerDefaultImplementation <codim, GridImp,
-        Dune::UGGridEntityPointer<codim,GridImp> >
+  class UGGridEntityPointer
   {
     enum { dim = GridImp::dimension };
   public:
+    //! export the type of the EntityPointer Implementation.
+    //! Necessary for the typeconversion between Iterators and EntityPointer
+    typedef UGGridEntityPointer EntityPointerImp;
+
+    //! codimension of entity pointer
+    enum { codimension = codim };
+
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef UGGridEntityPointer<codim,GridImp> Base;
 

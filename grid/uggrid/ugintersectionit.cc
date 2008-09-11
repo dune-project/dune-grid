@@ -645,7 +645,7 @@ inline void Dune::UGGridLeafIntersectionIterator<GridImp>::constructLeafSubfaces
     }
 
     // Nothing found
-    leafSubFaces_[0] = Face(NULL, 0);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
     return;
   }
 

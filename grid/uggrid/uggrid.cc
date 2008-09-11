@@ -66,12 +66,11 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
 
     // Init the UG system
     int argc = 1;
-    char* arg = {"dune.exe"};
+    char* arg = strdup("dune.exe");
     char** argv = &arg;
 
     if (UG_NS<dim>::InitUg(&argc, &argv))
       DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
-
   }
 
   // Create a dummy problem
@@ -94,9 +93,10 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
 
     if (dim==2)
     {
-      char* nfarg = "newformat DuneFormat2d";
+      char* nfarg = strdup("newformat DuneFormat2d");
       if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
+      free(nfarg);
     }
     if (dim==3)
     {
