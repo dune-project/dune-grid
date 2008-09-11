@@ -93,7 +93,7 @@ namespace FctSelector {
   // returns slot and name of selected function
   inline DataFunctionName_t getCurrentFunctionName(GRAPEMESH * mesh)
   {
-    DataFunctionName_t fctName(0,0);
+    DataFunctionName_t fctName( (const char *)0, (const char *)0 );
 
     chosen_function * current = (chosen_function *)
                                 g_list_current (mesh->current_function);
