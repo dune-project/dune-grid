@@ -18,3 +18,5 @@ testmapping_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 testgeo_SOURCES = testgeo.cc
 testgeo_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(PSGINC)
 testgeo_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
+
+include $(top_srcdir)/am/global-rules

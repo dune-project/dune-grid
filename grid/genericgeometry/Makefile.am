@@ -14,3 +14,5 @@ genericgeometry_HEADERS = codimtable.hh \
                           topologytypes.hh
 
 SUBDIRS = test
+
+include $(top_srcdir)/am/global-rules

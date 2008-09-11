@@ -5,6 +5,7 @@
 
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 namespace Dune
 {
@@ -16,10 +17,41 @@ namespace Dune
   class GenericReferenceElement
   {
     class SubEntityInfo;
+    template< class Topology > class CornerStorage;
     template< class Topology > struct Initialize;
+
+    struct CoordTraits
+      : public GenericGeometry :: DefaultCoordTraits< ctype, dim, true >
+    {
+      template< class Topology >
+      struct CornerStorage
+      {
+        typedef typename GenericReferenceElement< ctype, dim >
+        :: template CornerStorage< Topology >
+        Type;
+      };
+    };
+
+  public:
+    template< int codim >
+    class Codim
+    {
+      typedef GenericGeometry :: HybridMapping
+      < dim-codim, CoordTraits, GenericGeometry :: PreComputeAll >
+      Mapping;
+    };
+
+  private:
+    template< int codim >
+    class MappingArray
+      : public std :: vector< typename Codim< codim > :: Mapping * >
+    {};
+
+    typedef GenericGeometry :: CodimTable< MappingArray, dim > MappingsTable;
 
     std :: vector< SubEntityInfo > info_[ dim+1 ];
     double volume_;
+    MappingsTable mappings_;
 
   public:
     int size ( int c ) const
@@ -50,8 +82,24 @@ namespace Dune
     FieldVector< ctype, dim >
     global( const FieldVector< ctype, dim-codim > &local, int i, int c ) const
     {
-      // todo: implement this function
-      return position( i, c );
+      if( c != codim )
+        DUNE_THROW( Exception, "Local Coordinate Type does not correspond to codimension c." );
+      assert( c == codim );
+      return mapping< codim >( i ).global( local );
+    }
+
+    template< int codim >
+    FieldVector< ctype, dim >
+    global( const FieldVector< ctype, dim-codim > &local, int i ) const
+    {
+      return mapping< codim >( i ).global( local );
+    }
+
+    template< int codim >
+    typename Codim< codim > :: Mapping &mapping( int i ) const
+    {
+      Int2Type< codim > codimVariable;
+      return *(mappings_[ codimVariable ][ i ]);
     }
 
     GeometryType type ( int i, int c ) const
@@ -70,10 +118,21 @@ namespace Dune
     {
       typedef typename GenericGeometry :: Convert< type, dim > :: type Topology;
       typedef Initialize< Topology > Init;
-      GenericGeometry :: ForLoop< Init :: template Codim, 0, dim > :: apply( info_ );
+      typedef GenericGeometry :: VirtualMapping
+      < Topology, CoordTraits, GenericGeometry :: PreComputeAll >
+      VirtualMapping;
+      typedef typename VirtualMapping :: CachingType Caching;
+
+      Int2Type< 0 > codim0Variable;
+      mappings_[ codim0Variable ].resize( 1 );
+      mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable, Caching() );
+
+
+      GenericGeometry :: ForLoop< Init :: template Codim, 0, dim > :: apply( info_, mappings_ );
       volume_ = GenericGeometry :: Volume< Topology > :: template evaluate< double >();
     }
   };
+
 
   template< class ctype, int dim >
   class GenericReferenceElement< ctype, dim > :: SubEntityInfo
@@ -123,6 +182,41 @@ namespace Dune
     }
   };
 
+
+  template< class ctype, int dim >
+  template< class Topology >
+  class GenericReferenceElement< ctype, dim > :: CornerStorage
+  {
+    typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
+
+  public:
+    static const unsigned int size = Topology :: numCorners;
+
+  private:
+    FieldVector< ctype, dim > coords_[ size ];
+
+  public:
+    explicit CornerStorage ( const Int2Type< 0 > & )
+    {
+      for( unsigned int i = 0; i < size; ++i )
+        coords_[ i ] = RefElement :: corner( i );
+    }
+
+    template< class Mapping, unsigned int codim >
+    explicit
+    CornerStorage ( const GenericGeometry :: SubMappingCoords< Mapping, codim > &coords )
+    {
+      for( unsigned int i = 0; i < size; ++i )
+        coords_[ i ] = coords[ i ];
+    }
+
+    const FieldVector< ctype, dim > &operator[] ( unsigned int i ) const
+    {
+      return coords_[ i ];
+    }
+  };
+
+
   template< class ctype, int dim >
   template< class Topology, int codim >
   template< int subcodim >
@@ -143,19 +237,44 @@ namespace Dune
     }
   };
 
+
   template< class ctype, int dim >
   template< class Topology >
   struct GenericReferenceElement< ctype, dim > :: Initialize
   {
+    typedef Dune :: GenericReferenceElement< ctype, dim > GenericReferenceElement;
+
+    typedef typename GenericReferenceElement :: template Codim< 0 > :: Mapping
+    ReferenceMapping;
+
     template< int codim >
     struct Codim
     {
-      static void apply ( std :: vector< SubEntityInfo > (&info)[ dim+1 ] )
+      typedef typename GenericReferenceElement
+      :: template Codim< codim > :: Mapping :: CachingType
+      Caching;
+
+      static void apply ( std :: vector< SubEntityInfo > (&info)[ dim+1 ],
+                          MappingsTable &mappings )
       {
         const unsigned int size = GenericGeometry :: Size< Topology, codim > :: value;
         info[ codim ].resize( size );
         for( unsigned int i = 0; i < size; ++i )
           info[ codim ][ i ].template initialize< Topology, codim >( i );
+
+        if( codim > 0 )
+        {
+          const Int2Type< 0 > codim0Variable;
+          const ReferenceMapping &refMapping = *(mappings[ codim0Variable ][ 0 ]);
+
+          const Int2Type< codim > codimVariable;
+          mappings[ codimVariable ].resize( size );
+          for( unsigned int i = 0; i < size; ++i )
+          {
+            mappings[ codimVariable ][ i ]
+              = refMapping.template subMapping< codim >( i, Caching() );
+          }
+        }
       }
     };
   };

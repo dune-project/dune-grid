@@ -89,6 +89,27 @@ namespace Dune
       {}
     };
 
+    template< class Traits >
+    struct PreComputeAll
+    {
+      static const EvaluationType evaluateJacobianTransposed = PreCompute;
+      static const EvaluationType evaluateJacobianInverseTransposed = PreCompute;
+      static const EvaluationType evaluateIntegrationElement = PreCompute;
+      static const EvaluationType evaluateNormal = PreCompute;
+
+      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+      {}
+
+      void integrationElement ( typename Traits :: FieldType &intEl ) const
+      {}
+
+      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+      {}
+
+      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
+      {}
+    };
+
 
 
     // CachedMappingTraits
