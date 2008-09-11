@@ -605,7 +605,7 @@ namespace ALUGridSpace {
         it_( 0 ),
         nl_( nlinks ),
         link_( nlinks ), // makes default status == done
-        elem_( (ElType *) 0, (HBndSegType *) 0 )
+        elem_( (HElementType *) 0, (HBndSegType *) 0 )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
