@@ -5,11 +5,15 @@
 #ifndef DUNE_VTKWRITER_HH
 #define DUNE_VTKWRITER_HH
 
+#include <cstring>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
+
 #include <vector>
 #include <list>
-#include <string.h>
+
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
@@ -652,6 +656,67 @@ namespace Dune
       this->clear();
     }
 
+    /** \brief write output (interface might change later)
+     *
+     *  \param[in]  name  basic name to write (may not contain a path)
+     *  \param[in]  type  type of output (e.g,, ASCII) (optional)
+     */
+    std::string write ( const std::string &name,
+                        VTKOptions::OutputType type = VTKOptions::ascii )
+    {
+      // make data mode visible to private functions
+      outputtype = type;
+
+      // reset byte counter for binary appended output
+      bytecount = 0;
+
+      const int commSize = gridView_.comm().size();
+      const int commRank = gridView_.comm().rank();
+
+      // generate filename for process data
+      std::ostringstream pieceName;
+      if( commSize > 1 )
+      {
+        pieceName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
+        pieceName << "p" << std::setfill( '0' ) << std::setw( 4 ) << commRank << ":";
+      }
+      pieceName << name << (n > 1 ? ".vtu" : ".vtp");
+
+      // write process data
+      std::ofstream file;
+      if( outputtype == VTKOptions::binaryappended )
+        file.open( pieceName.str().c_str(), std::ios::binary );
+      else
+        file.open( pieceName.str().c_str() );
+      writeDataFile( file );
+      file.close();
+
+      // for serial jobs we're done here
+      if( commSize == 1 )
+        return pieceName.str();
+
+      // synchronize processes
+      gridView_.comm().barrier();
+
+      // generate name of parallel header
+      std::ostringstream parallelName;
+      parallelName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
+      arallelName << name << (n > 1 ? ".pvtu" : ".pvtp");
+
+      // on process 0: write out parallel header
+      if( commRank == 0 )
+      {
+        file.open( parallelName.str().c_str() );
+        writeParallelHeader( file, name.c_str(), "" );
+        file.close();
+      }
+
+      // synchronize processes
+      gridView_.comm().barrier();
+      return parallelName.str();
+    }
+
+#if 0
     /**
      * @brief write output; interface might change later
      * @param name The name of the file to write to.
@@ -708,6 +773,7 @@ namespace Dune
         grid.comm().barrier();
       }
     }
+#endif
 
     //! write output; interface might change later
     void pwrite (const char* name,  const char* path, const char* extendpath,
