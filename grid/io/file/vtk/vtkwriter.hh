@@ -701,7 +701,7 @@ namespace Dune
       // generate name of parallel header
       std::ostringstream parallelName;
       parallelName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
-      arallelName << name << (n > 1 ? ".pvtu" : ".pvtp");
+      parallelName << name << (n > 1 ? ".pvtu" : ".pvtp");
 
       // on process 0: write out parallel header
       if( commRank == 0 )
