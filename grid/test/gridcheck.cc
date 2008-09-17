@@ -547,9 +547,17 @@ struct subIndexCheck
 {
   subIndexCheck (const Grid & g, const Entity & e)
   {
+    typedef typename Grid :: template Codim<cd> :: EntityPointer EntityPointer;
     const int imax = e.template count<cd>();
     for (int i=0; i<imax; ++i)
     {
+      // check construction of entity pointers
+      EntityPointer ep ( *(e.template entity<cd>(i)) );
+      assert( ep == (e.template entity<cd>(i)));
+
+      // test compactify
+      ep.compactify();
+
       if( g.levelIndexSet(e.level()).index( *(e.template entity<cd>(i)) )
           != g.levelIndexSet(e.level()).template subIndex<cd>(e,i) )
       {
@@ -608,11 +616,20 @@ void zeroEntityConsistency (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   typedef typename Grid::template Codim<0>::Entity Entity;
+  typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
+
   LevelIterator it = g.template lbegin<0>(g.maxLevel());
   const LevelIterator endit = g.template lend<0>(g.maxLevel());
 
   for (; it!=endit; ++it)
   {
+    // check construction from entity
+    EntityPointer ep( *it ) ;
+    assert( ep == it );
+
+    // check compactify of entity pointer
+    ep.compactify();
+
     // Entity::entity<0>(0) == Entity
     assert( g.levelIndexSet(g.maxLevel()).index( *(it->template entity<0>(0)) )
             == g.levelIndexSet(g.maxLevel()).index( *it ) );
