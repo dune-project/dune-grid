@@ -310,9 +310,11 @@ namespace ALUGridSpace {
     mutable val_t elem_;
   public:
     // constructor creating Iterator
-    template <class GridImp>
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid(), StopRule_t() ) , elem_(0,0) {}
+    template< class GridImp >
+    ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
+      : it_( grid.myGrid(), StopRule_t() ),
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
+    {}
 
     // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
@@ -351,9 +353,11 @@ namespace ALUGridSpace {
     mutable val_t elem_;
   public:
     // constructor creating Iterator
-    template <class GridImp>
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
-      : it_(grid.myGrid(), StopRule_t() ), elem_(0,0) {}
+    template< class GridImp >
+    ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
+      : it_( grid.myGrid(), StopRule_t() ),
+        elem_( (ElType *) 0, (HBndSegType *) 0 )
+    {}
 
     // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
@@ -394,13 +398,13 @@ namespace ALUGridSpace {
     const StopRule_t rule_;
 
     // constructor creating iterator
-    template <class GridImp>
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
-      : vxList_ (grid.getLeafVertexList())
-        , count_(0)
-        , size_(vxList_.size())
-        , elem_(0,0)
-        , rule_()
+    template< class GridImp >
+    ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
+      : vxList_( grid.getLeafVertexList() ),
+        count_( 0 ),
+        size_( vxList_.size() ),
+        elem_( (ElType *) 0, (HBndSegType *) 0 ),
+        rule_()
     {
       assert( vxList_.up2Date() );
     }
@@ -992,19 +996,20 @@ namespace ALUGridSpace {
 
   private:
     typedef Dune :: ALU3dGridItemListType GhostItemListType;
-    GhostItemListType & ghList_;
+    GhostItemListType &ghList_;
     typedef typename GhostItemListType :: IteratorType IteratorType;
     IteratorType curr_;
     IteratorType end_;
     mutable val_t elem_;
     mutable int count_;
+
   public:
-    template <class GhostElementIteratorImp, class GridImp>
-    ALU3dGridGhostIteratorHigherCodim(GhostElementIteratorImp *, const GridImp & grid,
-                                      int level , const int nlinks, GhostItemListType & ghList)
-      : ghList_( ghList )
-        , elem_(0,0)
-        , count_(0)
+    template< class GhostElementIteratorImp, class GridImp >
+    ALU3dGridGhostIteratorHigherCodim ( GhostElementIteratorImp *, const GridImp &grid,
+                                        int level, const int nlinks, GhostItemListType &ghList )
+      : ghList_( ghList ),
+        elem_( (ElType *) 0, (HBndSegType *) 0 ),
+        count_( 0 )
     {
       if( ! ghList_.up2Date() )
       {
