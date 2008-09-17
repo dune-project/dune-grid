@@ -521,7 +521,7 @@ namespace Dune {
     SHierarchicStackElem newe = stack.pop();
     this->l = newe.l;
     this->id = newe.id;
-    this->e.make(this->l,this->id);     // here is our new element
+    this->entity().make(this->l,this->id);     // here is our new element
 
     // push all sons of this element if it is not the original element
     if (newe.l!=orig_l || newe.id!=orig_id)
@@ -543,7 +543,7 @@ namespace Dune {
     count = _count;
 
     // check if count is valid
-    if (count<0 || count>=grid->getRealImplementation(self).e.template count<1>())
+    if (count<0 || count>=grid->getRealImplementation(self).entity().template count<1>())
     {
       grid->getRealImplementation(ne).id = -1;
       return;     // done, this is end iterator
@@ -569,7 +569,7 @@ namespace Dune {
     // First compute its id
     grid->getRealImplementation(ne).id = grid->n(grid->getRealImplementation(self).l,
                                                  grid->expand(grid->getRealImplementation(self).l,zrednb,partition));
-    grid->getRealImplementation(ne).e.make(grid->getRealImplementation(ne).l,grid->getRealImplementation(ne).id);
+    grid->getRealImplementation(ne).entity().make(grid->getRealImplementation(ne).l,grid->getRealImplementation(ne).id);
   }
 
   template<class GridImp>
@@ -632,7 +632,7 @@ namespace Dune {
 
     // compute expanded coordinates of entity
     array<int,dim> z1 =
-      grid->getRealImplementation(grid->getRealImplementation(self).e).z;
+      grid->getRealImplementation(grid->getRealImplementation(self).entity()).z;
     if (c==1)
       z1[dir] += 1;           // odd
     else
@@ -741,8 +741,8 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   inline void SLevelIterator<codim,pitype,GridImp>::increment ()
   {
-    this->id++;
-    this->e.make(this->l,this->id);
+    ++this->id;
+    this->entity().make(this->l,this->id);
   }
 
   //************************************************************************
@@ -757,7 +757,7 @@ namespace Dune {
   template<int codim, class GridImp>
   inline typename SEntityPointer<codim,GridImp>::Entity& SEntityPointer<codim,GridImp>::dereference () const
   {
-    return e;
+    return entity();
   }
 
   template<int codim, class GridImp>

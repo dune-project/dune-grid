@@ -5,6 +5,7 @@
 
 #include <limits>
 #include <vector>
+#include <stack>
 
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
@@ -279,6 +280,8 @@ namespace Dune {
     //! constructor
     SEntityBase (GridImp* _grid, int _l, int _id);
     SEntityBase ();
+
+    //! Reinitialization
     void make (GridImp* _grid, int _l, int _id);
 
     //! Reinitialization
@@ -578,6 +581,7 @@ namespace Dune {
       built_father = false;
     }
 
+    //! Reinitialization
     void make (GridImp* _grid, int _l, int _id)
     {
       SEntityBase<0,dim,GridImp>::make(_grid,_l,_id);
@@ -638,6 +642,13 @@ namespace Dune {
     }
 
     //! Reinitialization
+    void make (GridImp* _grid, int _l, int _id)
+    {
+      SEntityBase<dim,dim,GridImp>::make(_grid, _l,_id);
+      built_father = false;
+    }
+
+    //! Reinitialization
     void make (int _l, int _id)
     {
       SEntityBase<dim,dim,GridImp>::make(_l,_id);
@@ -664,6 +675,7 @@ namespace Dune {
       GridImp::template Codim<codim>::Entity (e)
     {};
     void make (int _l, int _id) { this->realEntity.make(_l, _id); }
+    void make (GridImp* _grid, int _l, int _id) { this->realEntity.make(_grid, _l, _id); }
   };
 
   //************************************************************************
@@ -713,8 +725,8 @@ namespace Dune {
       if (makeend) return;
 
       // remember element where begin has been called
-      orig_l = this->e.level();
-      orig_id = _grid->template getRealEntity<0>(this->e).index();
+      orig_l = this->entity().level();
+      orig_id = _grid->template getRealEntity<0>(this->entity()).index();
 
       // push original element on stack
       SHierarchicStackElem originalElement(orig_l, orig_id);
@@ -901,20 +913,94 @@ namespace Dune {
 
     //! constructor
     SEntityPointer (GridImp * _grid, int _l, int _id) :
-      grid(_grid), l(_l), id(_id), e(_grid,_l,_id) { }
+      grid(_grid), l(_l), id(_id),
+      e(0)
+    {}
 
     //! constructor
     SEntityPointer (const SEntity<codim,dim,GridImp> & _e) :
-      grid(_e.grid), l(_e.l), id(_e.id), e(_e) { }
+      grid(_e.grid), l(_e.l), id(_e.id),
+      e(0)
+    {}
+
+    //! constructor
+    SEntityPointer (const SEntityPointer<codim,GridImp>& other) :
+      grid(other.grid), l(other.l), id(other.id),
+      e( 0 )
+    {}
+
+    //! destructor pointer
+    ~SEntityPointer()
+    {
+      compactify();
+#ifndef NDEBUG
+      id = -1;
+#endif
+    }
+
+    //! assignment operator
+    SEntityPointer& operator = (const SEntityPointer& other)
+    {
+      grid = other.grid;
+      l = other.l;
+      id = other.id;
+
+      compactify();
+      return *this;
+    }
+
+    /** \brief free all memory that is not necessarily needed */
+    void compactify()
+    {
+      if( e )
+      {
+        enStack().push( e );
+        e = 0;
+      }
+    }
 
   protected:
+    SMakeableEntity<codim,dim,GridImp>& entity() const
+    {
+      if( ! e )
+      {
+        e = getEntity( grid, l, id );
+      }
+      return *e;
+    }
+
+    typedef std::stack< SMakeableEntity<codim,dim,GridImp> * > EntityStackType;
+    static inline EntityStackType& enStack()
+    {
+      static EntityStackType eStack;
+      return eStack;
+    }
+
+    inline SMakeableEntity<codim,dim,GridImp>* getEntity(GridImp* _grid, int _l, int _id ) const
+    {
+      // get stack reference
+      EntityStackType& enSt = enStack();
+
+      if( enSt.empty() )
+      {
+        return (new SMakeableEntity<codim,dim,GridImp>(_grid, _l, _id));
+      }
+      else
+      {
+        SMakeableEntity<codim,dim,GridImp>* e = enSt.top();
+        enSt.pop();
+        e->make(_grid, _l,_id);
+        return e;
+      }
+    }
+
     GridImp* grid;               //!< my grid
     int l;                       //!< level where element is on
     mutable int id;              //!< my consecutive id
-    mutable SMakeableEntity<codim,dim,GridImp> e; //!< virtual entity
+    mutable SMakeableEntity<codim,dim,GridImp>* e; //!< virtual entity
   };
-
   //************************************************************************
+
 
   /*! Enables iteration over all entities of a given codimension and level of a grid.
    */
