@@ -35,6 +35,16 @@ namespace Dune {
     int level () const {return virtualEntity_.level();}
 
     OneDGridEntityPointer() {}
+
+    /** \brief Constructor from a given entity  */
+    OneDGridEntityPointer(const OneDGridEntity<codim, dim, GridImp> & entity)
+    {
+      virtualEntity_.setToTarget(entity.target_);
+    }
+
+    //! empty method since internal entity is not a pointer
+    void compactify () {}
+
   protected:
 
     /** \brief Constructor from a given iterator */
