@@ -88,6 +88,7 @@ namespace Dune {
     template <class GridImp_, bool Local>
     friend class UGGridIdSet;
 
+    friend class UGGridEntityPointer<codim, GridImp>;
     typedef typename GridImp::ctype UGCtype;
 
   public:
@@ -161,6 +162,8 @@ namespace Dune {
     friend class UGGridLevelIterator;
 
     friend class UGMakeableEntity<0,dim,GridImp>;
+
+    friend class UGGridEntityPointer<0, GridImp>;
 
     typedef typename GridImp::ctype UGCtype;
 

@@ -33,6 +33,11 @@ namespace Dune {
       : virtualEntity_(target)
     {}
 
+    //! construct entity pointer from given entity
+    UGGridEntityPointer (const UGGridEntity<codim,dim,GridImp>& entity)
+      : virtualEntity_(entity.target_)
+    {}
+
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       virtualEntity_.setToTarget(target);
     }
@@ -46,6 +51,9 @@ namespace Dune {
     Entity& dereference() const {
       return virtualEntity_;
     }
+
+    //! empty method since virtual entity is an object not a pointer
+    void compactify () {}
 
     //! ask for level of entity
     int level () const {return virtualEntity_.level();}
