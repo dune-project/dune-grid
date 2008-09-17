@@ -144,6 +144,15 @@ namespace Dune
     EntityPointer(const EntityPointer<GridImp,ItImp> & ep) :
       realIterator(ep.realIterator) {}
 
+    /** \brief Templatized constructor from type of entity that
+        this entity pointer points to. This constructor can be used to
+        create an entity pointer from an entity in order to store an
+        entity. The implementation of EntityPointer has to have a
+        constructor taking a Dune::Entity.
+     */
+    EntityPointer(const Entity& entity) :
+      realIterator( entity.getRealImp() ) {}
+
     /** \brief Cast to EntityPointer with base class of implementation as engine.
             This conversion ensures assignablity of LevelIterator, LeafIterator and
             HierarchicIterator to EntityPointer.
@@ -161,8 +170,16 @@ namespace Dune
     {
       return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
     };
-    //@}
 
+    /** \brief Reduce the entity pointers used
+        memory to a minimum necessary to store all needed information.
+     */
+    void compactify ()
+    {
+      realIterator.compactify();
+    }
+
+    //@}
 
     //===========================================================
     /** @name Dereferencing

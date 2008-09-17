@@ -183,6 +183,9 @@ namespace Dune
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
 
+    /* make entity pointer friend */
+    friend class GridImp::template Codim<cd>::EntityPointer;
+
     //! return reference to the real implementation
     EntityImp<cd,dim,GridImp> & getRealImp() { return realEntity; }
     //! return reference to the real implementation
@@ -254,6 +257,9 @@ namespace Dune
 
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+
+    /* make entity pointer friend */
+    friend class GridImp::template Codim<0>::EntityPointer;
 
     enum {
       //! Know your own codimension
