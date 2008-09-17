@@ -426,6 +426,8 @@ namespace Dune
     void setLevel ( int newLevel );
     void setNewLevel ( int newLevel , bool ) { setLevel(level); }
 
+    //! return reference to grid
+    const GridImp& grid() const { return grid_; }
   private:
     // the grid this entity belong to
     const GridImp &grid_;
@@ -662,6 +664,8 @@ namespace Dune
     // same as setElInfo just with a entity given
     void setEntity (const AlbertaGridEntity<0,dim,GridImp> & org);
 
+    //! return reference to grid
+    const GridImp& grid() const { return grid_; }
   private:
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
@@ -737,6 +741,9 @@ namespace Dune
     //! Constructor for EntityPointer init of Level- and LeafIterator
     AlbertaGridEntityPointer(const GridImp & grid, int level , bool isLeaf, bool done);
 
+    //! make entity pointer from entity
+    AlbertaGridEntityPointer(const EntityImp& entity);
+
     //! make empty entity pointer (to be revised)
     AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org);
 
@@ -760,6 +767,9 @@ namespace Dune
 
     //! has to be called when iterator is finished
     void done ();
+
+    //! reduce memory
+    void compactify() {}
 
   protected:
     //! returns true if entity comes from LeafIterator

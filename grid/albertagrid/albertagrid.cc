@@ -1412,7 +1412,17 @@ namespace Dune
 
   template<int codim, class GridImp >
   inline AlbertaGridEntityPointer<codim,GridImp> ::
-  //AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org)
+  AlbertaGridEntityPointer(const EntityImp& entity)
+    : grid_(entity.grid())
+      , isLeaf_ ( entity.leafIt() )
+      , entity_ ( grid_.template getNewEntity<codim> (entity.level(), isLeaf_ ))
+  {
+    // set up entity
+    entityImp().setEntity( entity );
+  }
+
+  template<int codim, class GridImp >
+  inline AlbertaGridEntityPointer<codim,GridImp> ::
   AlbertaGridEntityPointer(const AlbertaGridEntityPointer<codim,GridImp> & org)
     : grid_(org.grid_)
       , isLeaf_ ( org.isLeaf_ )
