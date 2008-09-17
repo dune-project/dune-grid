@@ -377,11 +377,11 @@ namespace Dune {
   {
     item_ = 0;
     face_ = -1; // set face to non-valid value
-    releaseEntity();
+    compactify();
   }
 
   template<int cd, class GridImp>
-  inline void ALU2dGridEntityPointer<cd, GridImp> :: releaseEntity()
+  inline void ALU2dGridEntityPointer<cd, GridImp> :: compactify()
   {
     // sets entity pointer in the status of an empty entity
     if(entity_)
@@ -436,6 +436,17 @@ namespace Dune {
       , item_(const_cast<ElementType *>(&item))
       , level_(level)
       , face_(face)
+      , entity_(0)
+  { }
+
+  //! Constructor for EntityPointer that points to an element
+  template<int cd, class GridImp>
+  inline ALU2dGridEntityPointer<cd, GridImp>::
+  ALU2dGridEntityPointer(const EntityImp& entity)
+    : grid_(entity.grid())
+      , item_(& entity.getItem() )
+      , level_(entity.level())
+      , face_(entity.getFace())
       , entity_(0)
   { }
 

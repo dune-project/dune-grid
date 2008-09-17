@@ -851,7 +851,7 @@ namespace Dune {
   }
 
   template<int codim, class GridImp >
-  inline void ALU3dGridEntityPointerBase<codim,GridImp>::releaseEntity ()
+  inline void ALU3dGridEntityPointerBase<codim,GridImp>::compactify()
   {
     // sets entity pointer in the status of an empty entity
     if( ! locked_ )

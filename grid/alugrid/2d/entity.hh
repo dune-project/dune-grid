@@ -138,6 +138,18 @@ namespace Dune {
     //! my position in local coordinates of the owners father
     FieldVector<alu2d_ctype, dim>& positionInOwnersFather () const;
 
+    //! return reference to grid
+    const GridImp& grid() const { return grid_; }
+
+    //! return reference to current item
+    ElementType& getItem() const
+    {
+      assert( item_ );
+      return *item_;
+    }
+
+    // return internal face
+    int getFace() const { return face_; }
 
   private:
     //! index is unique within the grid hierachie and per codim
@@ -399,6 +411,12 @@ namespace Dune {
       return *item_;
     }
 
+    //! return reference to grid
+    const GridImp& grid() const { return grid_; }
+
+    // return internal face
+    int getFace() const { return -1; }
+
   private:
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
@@ -465,6 +483,9 @@ namespace Dune {
                              );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
+    ALU2dGridEntityPointer(const EntityImp& entity) ;
+
+    //! Constructor for EntityPointer init of Level- and LeafIterator
     ALU2dGridEntityPointer(const GridImp & grid) ;
 
     //! Copy Constructor
@@ -480,8 +501,8 @@ namespace Dune {
     //! dereferencing
     Entity & dereference() const ;
 
-    //! release entity
-    void releaseEntity();
+    //! release entity in order to reduce memory allocation
+    void compactify();
 
     //! ask for level of entities
     int level () const;
