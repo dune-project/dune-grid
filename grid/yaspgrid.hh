@@ -1195,7 +1195,6 @@ namespace Dune {
       DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
     }
 
-
     const TSI& _it;         // position in the grid level
     const YGLI& _g;         // access to grid level
     SpecialGeometry _geometry; // the element geometry
@@ -1337,6 +1336,10 @@ namespace Dune {
       return index;
     }
 
+  public:
+    const TSI& transformingsubiterator() const { return _it; }
+    const YGLI& gridlevel() const { return _g; }
+  protected:
     const TSI& _it;              // position in the grid level
     const YGLI& _g;              // access to grid level
     SpecialGeometry _geometry;    // the element geometry
@@ -1791,7 +1794,10 @@ namespace Dune {
     typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
     typedef YaspSpecialEntity<codim,dim,GridImp> SpecialEntity;
     typedef YaspEntityPointer<codim,GridImp> EntityPointerImp;
+  protected:
+    typedef YaspEntity<codim, dim, GridImp> YaspEntityImp;
 
+  public:
     //! codimension of entity pointer
     enum { codimension = codim };
 
@@ -1800,7 +1806,19 @@ namespace Dune {
     {
       if (codim>0 && codim<dim)
       {
-        DUNE_THROW(GridError, "YaspLevelIterator: codim not implemented");
+        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
+      }
+    }
+
+    //! copy constructor
+    YaspEntityPointer (const YaspEntityImp& entity)
+      : _g(entity.gridlevel()),
+        _it(entity.transformingsubiterator()),
+        _entity(entity)
+    {
+      if (codim>0 && codim<dim)
+      {
+        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }
     }
 
@@ -1809,7 +1827,7 @@ namespace Dune {
     {
       if (codim>0 && codim<dim)
       {
-        DUNE_THROW(GridError, "YaspLevelIterator: codim not implemented");
+        DUNE_THROW(GridError, "YaspEntityPointer: codim not implemented");
       }
     }
 
@@ -1824,6 +1842,9 @@ namespace Dune {
     {
       return _entity;
     }
+
+    //! method compactify is empty for YaspEnttiyPointer
+    void compactify() {}
 
     //! ask for level of entity
     int level () const {return _g.level();}
