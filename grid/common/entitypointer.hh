@@ -117,6 +117,9 @@ namespace Dune
         typename IteratorImp::EntityPointerImp>::type base;
 
   public:
+    //! codimension of entity pointer
+    enum { codimension = IteratorImp::codimension };
+
     //! type of real implementation
     typedef IteratorImp ImplementationType;
 
