@@ -52,7 +52,7 @@ namespace Dune {
    */
   template<class GridImp>
   class ALU3dGridIntersectionIterator
-    : public IntersectionIteratorDefaultImplementation <GridImp,ALU3dGridIntersectionIterator>
+  //: public IntersectionIteratorDefaultImplementation <GridImp,ALU3dGridIntersectionIterator>
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -95,6 +95,10 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
+    typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
+    //! type of the intersection
+    typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator > Intersection;
+
     typedef ALU3dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
 
@@ -116,6 +120,11 @@ namespace Dune {
 
     //! assignment of iterators
     void assign(const ALU3dGridIntersectionIterator<GridImp> & org);
+
+    const Intersection &dereference () const
+    {
+      return reinterpret_cast< const Intersection & >( *this );
+    }
 
     //! The copy constructor
     bool equals (const ALU3dGridIntersectionIterator<GridImp> & i) const;
