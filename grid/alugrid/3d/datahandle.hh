@@ -6,6 +6,8 @@
 //- system includes
 #include <iostream>
 
+#include <dune/grid/common/grid.hh>
+
 //- local includes
 #include "alu3dinclude.hh"
 
@@ -447,8 +449,11 @@ namespace ALUGridSpace {
       // if face level is not level_ then interior cannot be contained
       if(face.level() != level_) return false;
 
+      typedef Gitter::helement_STI HElementType;
+      typedef Gitter::hbndseg_STI HBndSegType;
+
       // check interior element here, might have a coarser level
-      pair < Gitter::helement_STI * , Gitter::hbndseg_STI * > p (0,0);
+      pair< HElementType *, HBndSegType * > p( (HElementType *)0, (HBndSegType *)0 );
       pll.getAttachedElement( p );
       assert( p.first );
       // check inside level
