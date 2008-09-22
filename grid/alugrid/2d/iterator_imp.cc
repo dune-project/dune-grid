@@ -587,18 +587,6 @@ namespace Dune {
     }
   }
 
-  //! return EntityPointer to the Entity on the outside of this intersection.
-  template<class GridImp>
-  inline typename ALU2dGridLevelIntersectionIterator<GridImp> :: EntityPointer
-  ALU2dGridLevelIntersectionIterator<GridImp> :: outside() const {
-
-    assert(!this->boundary());
-    assert( this->current.neigh_ );
-    assert(this->current.neigh_->level() == this->walkLevel_);
-    return typename ALU2dGridIntersectionBase<GridImp>::EntityPointerImp(this->grid_, *(this->current.neigh_),-1, this->walkLevel_);
-  }
-
-
   //********************************************************************
   //
   //  --ALU2dGridLeafIntersectionIterator

@@ -53,9 +53,14 @@ namespace Dune {
    */
 
   template<class GridImp>
-  class ALU2dGridIntersectionBase : public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridLevelIntersectionIterator >
+  class ALU2dGridIntersectionBase
+  //: public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridIntersectionBase >
   {
   public:
+    typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
+    //! type of the intersection
+    typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase > Intersection;
+
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
 
@@ -124,6 +129,11 @@ namespace Dune {
 
     //! The copy constructor
     void assign (const ThisType & org);
+
+    const Intersection &dereference () const
+    {
+      return reinterpret_cast< const Intersection & >( *this );
+    }
 
     //! check whether entities are the same or whether iterator is done
     bool equals (const ThisType & i) const;
@@ -246,9 +256,6 @@ namespace Dune {
     ALU2dGridLevelIntersectionIterator(const ALU2dGridLevelIntersectionIterator<GridImp> & org);
 
     void assign (const ALU2dGridLevelIntersectionIterator<GridImp> & org);
-
-    //! return EntityPointer to the Entity on the outside of this intersection.
-    EntityPointer outside() const;
 
     //! increment iterator
     void increment ();
