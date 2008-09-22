@@ -112,6 +112,20 @@ namespace Dune
       return asImp().template end<cd>();
     }
 
+    /** \brief obtain begin iterator for this view */
+    template< int cd , PartitionIteratorType pitype >
+    typename Codim< cd > :: template Partition<pitype> :: Iterator begin () const
+    {
+      return asImp().template begin<cd,pitype>();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pitype >
+    typename Codim< cd > :: template Partition<pitype> :: Iterator end () const
+    {
+      return asImp().template end<cd,pitype>();
+    }
+
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
