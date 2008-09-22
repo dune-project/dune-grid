@@ -60,11 +60,17 @@ namespace Dune {
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
 
     //! return hierarchic index of given entity
-    template <class EntityType>
-    int index (const EntityType & ep) const
+    template< int codim >
+    int index ( const typename GridType::Traits::template Codim< codim >::Entity &entity ) const
     {
-      enum { cd = EntityType :: codimension };
-      return (grid_.getRealImplementation(ep)).getIndex();
+      return GridType::getRealImplementation( entity ).getIndex();
+    }
+
+    //! return hierarchic index of given entity
+    template< class Entity >
+    int index ( const Entity &entity ) const
+    {
+      return GridType::getRealImplementation( entity ).getIndex();
     }
 
     //! return subIndex of given entity
