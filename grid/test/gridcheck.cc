@@ -847,10 +847,10 @@ void iterate(Grid &g)
   {
     LevelIterator l1 = it;
     LevelIterator l2 = l1; ++l1;
-    assert(l2 == it);
-    assert(l1 != it);
+    assert( (l2 == it) && (it == l2) );
+    assert( (l1 != it) && (it != l1) );
     ++l2;
-    assert(l1 == l2);
+    assert( (l1 == l2) && (l2 == l1) );
 
     result = it->geometry().local(it->geometry().global(origin));
     typename Grid::ctype error = (result-origin).two_norm();
