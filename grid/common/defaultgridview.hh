@@ -8,15 +8,19 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridview.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   template< class GridImp, PartitionIteratorType pitype >
   class DefaultLevelGridView;
+
   template< class GridImp, PartitionIteratorType pitype >
   class DefaultLeafGridView;
 
+
   template< class GridImp, PartitionIteratorType pitype >
-  struct DefaultLevelGridViewTraits {
+  struct DefaultLevelGridViewTraits
+  {
     typedef DefaultLevelGridView< GridImp, pitype > GridViewImp;
 
     /** \brief type of the grid */
@@ -51,18 +55,19 @@ namespace Dune {
       LocalGeometry;
 
       /** \brief Define types needed to iterate over entities of a given partition type */
-      template <PartitionIteratorType pitype_>
+      template< PartitionIteratorType pit >
       struct Partition
       {
-        /** \brief The iterator needed to iterate over the entities of a given codim and
-            partition type of this index set */
-        typedef typename Grid :: template Codim<cd> :: template Partition<pitype_> :: LevelIterator Iterator;
+        /** \brief iterator over a given codim and partition type */
+        typedef typename Grid :: template Codim< cd >
+        :: template Partition< pit > :: LevelIterator
+        Iterator;
       };
-
     };
 
     enum { conforming = Capabilities :: isLevelwiseConforming< Grid > :: v };
   };
+
 
   template< class GridImp, PartitionIteratorType pitype >
   class DefaultLevelGridView
@@ -129,17 +134,31 @@ namespace Dune {
     }
 
     /** \brief obtain begin iterator for this view */
-    template< int cd, PartitionIteratorType pitype_=pitype >
-    typename Codim< cd > :: template Partition< pitype_ > :: Iterator begin () const
+    template< int cd >
+    typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pitype_ >( level_ );
+      return grid().template lbegin< cd, pitype >( level_ );
+    }
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
+    {
+      return grid().template lbegin< cd, pit >( level_ );
     }
 
     /** \brief obtain end iterator for this view */
-    template< int cd, PartitionIteratorType pitype_=pitype >
-    typename Codim< cd > :: template Partition< pitype_ > :: Iterator end () const
+    template< int cd >
+    typename Codim< cd > :: Iterator end () const
     {
-      return grid().template lend< cd, pitype_ >( level_ );
+      return grid().template lend< cd, pitype >( level_ );
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: Iterator end () const
+    {
+      return grid().template lend< cd, pit >( level_ );
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
@@ -209,18 +228,19 @@ namespace Dune {
       LocalGeometry;
 
       /** \brief Define types needed to iterate over entities of a given partition type */
-      template <PartitionIteratorType pitype_>
+      template <PartitionIteratorType pit >
       struct Partition
       {
-        /** \brief The iterator needed to iterate over the entities of a given codim and
-            partition type of this index set */
-        typedef typename Grid :: template Codim<cd> :: template Partition<pitype_> :: LeafIterator Iterator;
+        /** \brief iterator over a given codim and partition type */
+        typedef typename Grid :: template Codim< cd >
+        :: template Partition< pit > :: LeafIterator
+        Iterator;
       };
-
     };
 
     enum { conforming = Capabilities :: isLeafwiseConforming< Grid > :: v };
   };
+
 
   template< class GridImp, PartitionIteratorType pitype >
   class DefaultLeafGridView
@@ -284,17 +304,31 @@ namespace Dune {
     }
 
     /** \brief obtain begin iterator for this view */
-    template< int cd, PartitionIteratorType pitype_=pitype >
-    typename Codim< cd > :: template Partition< pitype_ > :: Iterator begin () const
+    template< int cd >
+    typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, pitype_ >();
+      return grid().template leafbegin< cd, pitype >();
+    }
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
+    {
+      return grid().template leafbegin< cd, pit >();
     }
 
     /** \brief obtain end iterator for this view */
-    template< int cd, PartitionIteratorType pitype_=pitype >
-    typename Codim< cd > :: template Partition< pitype_ > :: Iterator end () const
+    template< int cd >
+    typename Codim< cd > :: Iterator end () const
     {
-      return grid().template leafend< cd, pitype_ >();
+      return grid().template leafend< cd, pitype >();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: Iterator end () const
+    {
+      return grid().template leafend< cd, pit >();
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
