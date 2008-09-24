@@ -16,17 +16,19 @@
 int rank;
 
 template <int dim>
-void check_yasp() {
+void check_yasp(bool p0=false) {
   typedef Dune::FieldVector<int,dim> iTupel;
   typedef Dune::FieldVector<double,dim> fTupel;
   typedef Dune::FieldVector<bool,dim> bTupel;
 
-  std::cout << std::endl << "YaspGrid<" << dim << ">"
-            << std::endl << std::endl;
+  std::cout << std::endl << "YaspGrid<" << dim << ">";
+  if (p0) std::cout << " periodic\n";
+  std::cout << std::endl << std::endl;
 
   fTupel Len; Len = 1.0;
   iTupel s; s = 3;
   bTupel p; p = false;
+  p[0] = p0;
   int overlap = 1;
 
 #if HAVE_MPI
@@ -61,8 +63,11 @@ int main (int argc , char **argv) {
 #endif
 
     check_yasp<1>();
+    check_yasp<1>(true);
     check_yasp<2>();
+    check_yasp<2>(true);
     check_yasp<3>();
+    check_yasp<3>(true);
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
