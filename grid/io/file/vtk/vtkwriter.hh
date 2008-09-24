@@ -171,12 +171,14 @@ namespace Dune
 
     typedef typename GridView::IndexSet IndexSet;
 
-    //static const PartitionIteratorType vtkPartition = InteriorBorder_Partition;
-    //typedef typename IndexSet::template Codim<0>::template Partition<vtkPartition>::Iterator GridCellIterator;
-    //typedef typename IndexSet::template Codim<n>::template Partition<vtkPartition>::Iterator GridVertexIterator;
+    static const PartitionIteratorType VTK_Partition = InteriorBorder_Partition;
 
-    typedef typename GridView::template Codim< 0 >::Iterator GridCellIterator;
-    typedef typename GridView::template Codim< n >::Iterator GridVertexIterator;
+    typedef typename GridView::template Codim< 0 >
+    ::template Partition< VTK_Partition >::Iterator
+    GridCellIterator;
+    typedef typename GridView::template Codim< n >
+    ::template Partition< VTK_Partition >::Iterator
+    GridVertexIterator;
 
     typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P1Layout > VertexMapper;
 
@@ -239,14 +241,14 @@ namespace Dune
 
     CellIterator cellBegin() const
     {
-      return CellIterator( gridView_.template begin< 0 >(), gridView_.template end< 0 >() );
-      //return CellIterator(is.template begin<0,vtkPartition>(), is.template end<0,vtkPartition>());
+      return CellIterator( gridView_.template begin< 0, VTK_Partition >(),
+                           gridView_.template end< 0, VTK_Partition >() );
     }
 
     CellIterator cellEnd() const
     {
-      return CellIterator( gridView_.template end< 0 >(), gridView_.template end< 0 >() );
-      //return CellIterator(is.template end<0,vtkPartition>(), is.template end<0,vtkPartition>());
+      return CellIterator( gridView_.template end< 0, VTK_Partition >(),
+                           gridView_.template end< 0, VTK_Partition >() );
     }
 
     class VertexIterator :
@@ -337,22 +339,16 @@ namespace Dune
 
     VertexIterator vertexBegin () const
     {
-      return VertexIterator( gridView_.template begin< 0 >(),
-                             gridView_.template end< 0 >(),
+      return VertexIterator( gridView_.template begin< 0, VTK_Partition >(),
+                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
-      //return VertexIterator(is.template begin<0,vtkPartition>(),
-      //                      is.template end<0,vtkPartition>(),
-      //                      datamode, *vertexmapper, number);
     }
 
     VertexIterator vertexEnd () const
     {
-      return VertexIterator( gridView_.template end< 0 >(),
-                             gridView_.template end< 0 >(),
+      return VertexIterator( gridView_.template end< 0, VTK_Partition >(),
+                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
-      //return VertexIterator(is.template end<0,vtkPartition>(),
-      //                      is.template end<0,vtkPartition>(),
-      //                      datamode, *vertexmapper, number);
     }
 
     class CornerIterator :
@@ -422,22 +418,16 @@ namespace Dune
 
     CornerIterator cornerBegin () const
     {
-      return CornerIterator( gridView_.template begin< 0 >(),
-                             gridView_.template end< 0 >(),
+      return CornerIterator( gridView_.template begin< 0, VTK_Partition >(),
+                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
-      //return CornerIterator(is.template begin<0,vtkPartition>(),
-      //                      is.template end<0,vtkPartition>(),
-      //                      datamode, *vertexmapper, number);
     }
 
     CornerIterator cornerEnd () const
     {
-      return CornerIterator( gridView_.template end< 0 >(),
-                             gridView_.template end< 0 >(),
+      return CornerIterator( gridView_.template end< 0, VTK_Partition >(),
+                             gridView_.template end< 0, VTK_Partition >(),
                              datamode, *vertexmapper, number );
-      //return CornerIterator(is.template end<0,vtkPartition>(),
-      //                      is.template end<0,vtkPartition>(),
-      //                      datamode, *vertexmapper, number);
     }
 
     /** \brief take a vector and interpret it as cell data
