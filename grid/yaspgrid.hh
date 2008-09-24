@@ -1685,6 +1685,9 @@ namespace Dune {
       YaspEntityPointer<0,GridImp>(g,it)
     {
       // now iterator points to current cell
+      StackElem se(this->_g);
+      se.coord = this->_it.coord();
+      stack.push(se);
 
       // determine maximum level
       _maxlevel = std::min(maxlevel,this->_g.mg()->maxlevel());
@@ -1692,9 +1695,6 @@ namespace Dune {
       // if maxlevel not reached then push yourself and sons
       if (this->_g.level()<_maxlevel)
       {
-        StackElem se(this->_g);
-        se.coord = this->_it.coord();
-        stack.push(se);
         push_sons();
       }
 
@@ -1843,7 +1843,7 @@ namespace Dune {
       return _entity;
     }
 
-    //! method compactify is empty for YaspEnttiyPointer
+    //! method compactify is empty for YaspEntiyPointer
     void compactify() {}
 
     //! ask for level of entity
@@ -2754,7 +2754,11 @@ namespace Dune {
 
         // release send size buffers
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
           delete[] send_sizes[is->rank];
+#warning fixed double free, but the real problem is bigger
+          send_sizes[is->rank] = 0;
+        }
 
         // process receive size buffers
         for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
@@ -2827,7 +2831,11 @@ namespace Dune {
 
       // release send buffers
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
+      {
         delete[] sends[is->rank];
+#warning fixed double free, but the real problem is bigger
+        sends[is->rank] = 0;
+      }
 
       // process receive buffers and delete them
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
