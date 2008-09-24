@@ -991,6 +991,19 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
 
+  // check '==' consistency
+  EntityPointer a = g.template levelView<Dune::All_Partition>(0).template begin<0>();
+  EntityPointer i = g.template levelView<Dune::Interior_Partition>(0).template begin<0>();
+  assert(
+    (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
+    == (a != i) // entitpointer equal
+    );
+  assert(
+    (g.levelIndexSet(0).index(*a) == g.levelIndexSet(0).index(*i)) // index equal
+    == (a == i) // entitpointer equal
+    );
+
+  // assignment tests
   LevelIterator l1 = g.template lbegin<0>(0);
   LevelIterator l2 = g.template lbegin<0>(0);
   LeafIterator L1 = g.template leafbegin<0>();
