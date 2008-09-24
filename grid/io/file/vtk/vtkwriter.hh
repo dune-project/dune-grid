@@ -265,14 +265,18 @@ namespace Dune
     protected:
       void basicIncrement ()
       {
-        if (git == gend) return;
-        index++;
-        if (index == git->template count<n>()) {
-          offset += git->template count<n>();
+        if( git == gend )
+          return;
+        ++index;
+        const int numCorners = git->template count< n >();
+        if( index == numCorners )
+        {
+          offset += numCorners;
           index = 0;
+
           ++git;
-          if(git == gend) return;
-          while (git->partitionType()!=InteriorEntity) ++git;
+          while( (git != gend) && (git->partitionType() != InteriorEntity) )
+            ++git;
         }
       }
     public:
@@ -365,14 +369,18 @@ namespace Dune
     protected:
       void basicIncrement ()
       {
-        if (git == gend) return;
-        index++;
-        if (index == git->template count<n>()) {
-          offset += git->template count<n>();
+        if( git == gend )
+          return;
+        ++index;
+        const int numCorners = git->template count< n >();
+        if( index == numCorners )
+        {
+          offset += numCorners;
           index = 0;
+
           ++git;
-          if (git == gend) return;
-          while (git->partitionType()!=InteriorEntity) ++git;
+          while( (git != gend) && (git->partitionType() != InteriorEntity) )
+            ++git;
         }
       }
     public:
