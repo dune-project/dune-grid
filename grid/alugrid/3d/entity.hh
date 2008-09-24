@@ -377,6 +377,9 @@ namespace Dune {
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
 
+    //! returns true if entity is ghost
+    bool isGhost () const { return (ghost_ != 0); }
+
   private:
     //! index is unique within the grid hierachy and per codim
     int getIndex () const;
@@ -387,7 +390,8 @@ namespace Dune {
     // the current element of grid
     mutable IMPLElementType *item_;
 
-    mutable bool isGhost_; //! true if entity is ghost entity
+    //! not zero if entity is ghost entity
+    mutable PLLBndFaceType* ghost_;
 
     //! the cuurent geometry
     mutable GeometryObject geo_;

@@ -169,8 +169,8 @@ namespace Dune {
   inline ALU3dGridEntity<0,dim,GridImp> ::
   ALU3dGridEntity(const GridImp  &grid, int wLevel)
     : grid_(grid)
-      , item_(0)
-      , isGhost_(false)
+      , item_( 0 )
+      , ghost_( 0 )
       , geo_(GeometryImp())
       , geoImp_ (grid_.getRealImplementation(geo_))
       , builtgeometry_(false)
@@ -187,7 +187,7 @@ namespace Dune {
   ALU3dGridEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
     : grid_(org.grid_)
       , item_(org.item_)
-      , isGhost_(org.isGhost_)
+      , ghost_( org.ghost_ )
       , geo_(GeometryImp())
       , geoImp_ (grid_.getRealImplementation(geo_))
       , builtgeometry_(false)
@@ -213,7 +213,7 @@ namespace Dune {
     assert( walkLevel_ >= 0 );
 
     item_       = 0;
-    isGhost_    = false;
+    ghost_      = 0;
     builtgeometry_ = false;
     walkLevel_     = walkLevel;
     level_      = -1;
@@ -226,7 +226,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: setEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
   {
     item_          = org.item_;
-    isGhost_       = org.isGhost_;
+    ghost_         = org.ghost_;
     builtgeometry_ = false;
     level_         = org.level_;
     walkLevel_     = org.walkLevel_;
@@ -242,7 +242,7 @@ namespace Dune {
     assert( item_ );
     // make sure this method is not called for ghosts
     assert( ! item_->isGhost() );
-    isGhost_ = false;
+    ghost_   = 0;
     builtgeometry_=false;
     level_   = (*item_).level();
     isLeaf_  = ((*item_).down() == 0);
@@ -261,10 +261,12 @@ namespace Dune {
     assert(item_->isGhost());
 
     level_   = item_->level();
-    isGhost_ = true;
+    // remember pointer to ghost face
+    ghost_ = static_cast<PLLBndFaceType *> (&ghost);
+    assert( ghost_ );
     builtgeometry_ = false;
 
-    PLLBndFaceType * dwn =  static_cast<PLLBndFaceType *> (ghost.down());
+    PLLBndFaceType * dwn = static_cast<PLLBndFaceType *> (ghost.down());
     if ( ! dwn ) isLeaf_ = true;
     else
     {
@@ -526,8 +528,8 @@ namespace Dune {
   {
     assert( item_ );
     // make sure we really got a ghost
-    assert( isGhost_ == item_->isGhost() );
-    return ((isGhost_) ?  GhostEntity : InteriorEntity);
+    assert( (isGhost()) ? item_->isGhost() : true );
+    return (isGhost() ?  GhostEntity : InteriorEntity);
   }
 
   template<int dim, class GridImp>
@@ -541,7 +543,7 @@ namespace Dune {
   {
     assert(item_ != 0);
     // if isGhost is true the end iterator will be returned
-    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost_ );
+    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
   }
 
   template<int dim, class GridImp>
@@ -557,10 +559,10 @@ namespace Dune {
   {
     assert(item_ != 0);
     // NOTE: normaly here false should be given, which means that we create a non
-    // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
+    // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridIntersectionIteratorType (grid_,*this,walkLevel_, isGhost_ );
+    return ALU3dGridIntersectionIteratorType (grid_,*this,walkLevel_, isGhost() );
   }
 
   template<int dim, class GridImp>
@@ -577,10 +579,10 @@ namespace Dune {
   {
     assert(item_ != 0);
     // NOTE: normaly here false should be given, which means that we create a non
-    // end iterator, but isGhost_ is normaly false. If isGhost_ is true,
+    // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridLevelIntersectionIteratorType (grid_,*this,walkLevel_, isGhost_ );
+    return ALU3dGridLevelIntersectionIteratorType (grid_,*this,walkLevel_, isGhost() );
   }
 
   template<int dim, class GridImp>
@@ -668,7 +670,7 @@ namespace Dune {
   inline bool ALU3dGridEntity<0,dim,GridImp> :: hasBoundaryIntersections () const
   {
     // on ghost elements return false
-    if( isGhost_ ) return false;
+    if( isGhost() ) return false;
 
     enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
     typedef typename ALU3dImplTraits<GridImp::elementType>::HasFaceType HasFaceType;
