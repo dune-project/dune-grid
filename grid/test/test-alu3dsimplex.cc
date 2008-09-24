@@ -17,6 +17,7 @@
 
 using namespace Dune;
 
+#if 0
 template <class GridType>
 void makeNonConfGrid(GridType &grid,int level,int adapt) {
   int myrank = grid.comm().rank();
@@ -36,7 +37,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
       for(LeafIterator it    = grid.template leafbegin<0,Interior_Partition> ();
           it != endit ; ++it,nr++ )
       {
-        grid.mark(1,it);
+        grid.mark( 1, *it );
         if (nr>size*0.8) break;
       }
     }
@@ -45,7 +46,9 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
     grid.loadBalance();
   }
 }
+#endif
 
+#if 0
 template <class GridType>
 void checkIteratorAssignment(GridType & grid)
 {
@@ -87,6 +90,9 @@ void checkIteratorAssignment(GridType & grid)
     }
   }
 }
+#endif
+
+#if 0
 template <class GridType>
 void checkLevelIndexNonConform(GridType & grid)
 {
@@ -106,7 +112,7 @@ void checkLevelIndexNonConform(GridType & grid)
     if( it != grid.template leafend<0>() )
     {
       // mark first entity
-      grid.mark(1, it);
+      grid.mark( 1, *it );
     }
   }
 
@@ -123,31 +129,47 @@ void checkLevelIndexNonConform(GridType & grid)
     }
   }
 }
+#endif
 
-template <class GridType>
-void checkALUSerial(GridType & grid, int mxl = 2)
+template< class GridType >
+void checkALUSerial ( GridType &grid, int maxLevel = 2 )
 {
   // be careful, each global refine create 8 x maxlevel elements
-  gridcheck(grid);
-  for(int i=0; i<mxl; i++) {
+  if( grid.comm().rank() == 0 )
+    std::cout << ">>> Checking macro grid..." << std::endl;
+  gridcheck( grid );
+
+  for( int i = 0; i < maxLevel; ++i )
+  {
     grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
-    gridcheck(grid);
+    if( grid.comm().rank() == 0 )
+      std::cout << ">>> Checking grid refined " << (i+1) << " times..." << std::endl;
+    gridcheck( grid );
   }
 
+#if 0
   // check also non-conform grids
-  makeNonConfGrid(grid,0,1);
-  gridcheck(grid);
+  //makeNonConfGrid(grid,0,1);
+  //gridcheck(grid);
+#endif
 
   // check the method geometryInFather()
   checkGeometryInFather(grid);
+
+#if 0
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
+#endif
 
+#if 0
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
 
   checkLevelIndexNonConform(grid);
+#endif
 }
+
+#if 0
 #if HAVE_MPI
 template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
@@ -165,65 +187,59 @@ template <class GridType>
 void checkALUParallel(GridType & grid, int gref, int mxl = 3)
 {}
 #endif
+#endif
 
-int main (int argc , char **argv) {
-
+int main ( int argc, char **argv )
+try {
   // this method calls MPI_Init, if MPI is enabled
-  MPIHelper & mpihelper = MPIHelper::instance(argc,argv);
+  MPIHelper &mpihelper = MPIHelper::instance( argc, argv );
   int myrank = mpihelper.rank();
   int mysize = mpihelper.size();
 
-  try {
-    /* use grid-file appropriate for dimensions */
+  // extra-environment to check destruction
+  {
+    typedef ALUSimplexGrid< 3, 3 > GridType;
 
-    // extra-environment to check destruction
+    // check empty grid
     {
-      factorEpsilon = 5.e+5;
-      // check empty grid
+      if( myrank == 0 )
+        std::cout << "Check empty grid" << std::endl;
+      GridType grid;
+      checkALUSerial( grid );
+    }
+
+    {
+      std::string filename;
+      if( mysize <= 2 )
+        filename = "simplex-testgrid-3-3.dgf";
+      else
+        filename = "simplex-testgrid-3-3-large.dgf";
+
+      GridPtr< GridType > gridPtr( filename );
+      GridType &grid = *gridPtr;
+      grid.loadBalance();
 
       if (myrank == 0)
-        std::cout << "Check empty grid" << std::endl;
+        std::cout << "Check serial grid" << std::endl;
+      checkALUSerial( grid, 1 );
 
+#if 0
+      // perform parallel check only when more then one proc
+      if( mysize > 1 )
       {
-        ALUSimplexGrid<3,3> grid;
-        checkALUSerial(grid);
+        if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+        checkALUParallel(grid,0,0);  //1,3
+        if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+        checkALUParallel(grid,0,2);  //1,3
       }
-
-      {
-        std::string filename;
-        if (mysize<=2)
-          filename += "simplex-testgrid-3-3.dgf";
-        else
-          filename += "simplex-testgrid-3-3-large.dgf";
-
-        typedef ALUSimplexGrid<3,3> GridType;
-        GridPtr<GridType> gridPtr(filename);
-        GridType & grid = *gridPtr;
-
-        if (myrank == 0)
-        {
-          std::cout << "Check serial grid" << std::endl;
-          checkALUSerial(grid,(mysize == 1) ? 1 : 0);
-        }
-
-        // perform parallel check only when more then one proc
-        if(mysize > 1)
-        {
-          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
-          checkALUParallel(grid,0,0);  //1,3
-          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
-          checkALUParallel(grid,0,2);  //1,3
-        }
-      }
-    };
-
-  } catch (Dune::Exception &e) {
-    std::cerr << e << std::endl;
-    return 1;
-  } catch (...) {
-    std::cerr << "Generic exception!" << std::endl;
-    return 2;
-  }
+#endif
+    }
+  };
 
   return 0;
+}
+catch( const Dune::Exception &e )
+{
+  std::cerr << e << std::endl;
+  return 1;
 }

@@ -690,6 +690,9 @@ void assertNeighbor (Grid &g)
   typedef typename Grid::template Codim<0>::GlobalIdSet GlobalIdSet;
   const GlobalIdSet & globalid = g.globalIdSet();
 
+  typedef typename Grid::template Codim< 0 >::Entity Entity;
+  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+
   LevelIterator e = g.template lbegin<0>(0);
   const LevelIterator eend = g.template lend<0>(0);
 
@@ -697,98 +700,165 @@ void assertNeighbor (Grid &g)
   if (next != eend)
   {
     ++next;
-    if (g.name()=="AlbertaGrid") {
-      std::cerr << "WARNING: skip indices test using LevelIntersectionIterator for AlbertaGrid!\n";
-    } else {
-      for (; e != eend; ++e)
+
+    // do nothing for AlbertaGrid
+    if( g.name() == "AlbertaGrid" )
+    {
+      std::cerr << "WARNING: skip indices test using LevelIntersectionIterator "
+                << "for AlbertaGrid!" << std :: endl;
+      return;
+    }
+
+    // iterate over level
+    for (; e != eend; ++e)
+    {
+      const Entity &entity = *e;
+
+      const bool isGhost = (entity.partitionType() == Dune::GhostEntity);
+
+      // call global id
+      globalid.id( entity );
+
+      if( !entity.isLeaf() )
       {
-        // flag vector for elements faces
-        std::vector<bool> visited(e->template count<1>(), false);
-        // loop over intersections
-        IntersectionIterator endit = e->ilevelend();
-        IntersectionIterator it = e->ilevelbegin();
-        // state
-        it->boundary();
-        it->neighbor();
-        // id of boundary segment
-        if (it->boundary())
-          it->boundaryId();
-        // check id
-        //assert(globalid.id(*e) >= 0);
-        assert(it != endit);
-
-        // call global id
-        globalid.id( *e );
-
-        if(! e->isLeaf() )
+        if( entity.ileafbegin() != entity.ileafend() )
         {
-          if( e->ileafbegin() != e->ileafend())
-          {
-            DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
-          }
+          DUNE_THROW(CheckError, "On non-leaf entities ileafbegin should be equal to ileafend!");
+        }
+      }
+
+      const int numFaces = entity.template count< 1 >();
+      // flag vector for elements faces
+      std::vector< bool > visited( numFaces, false );
+
+      // loop over intersections
+      IntersectionIterator endit = entity.ilevelend();
+      IntersectionIterator it = entity.ilevelbegin();
+
+      if( it == endit )
+      {
+        // ALU has no intersection iterators on ghosts, so make this case non-fatal
+        if( !isGhost )
+        {
+          std::cerr << "Error: Entity without intersections encountered." << std::endl;
+          assert( false );
+        }
+        else
+          std::cerr << "Warning: Ghost Entity without intersections encountered." << std :: endl;
+      }
+
+      // for all intersections
+      for(; it != endit; ++it)
+      {
+        // numbering
+        const int numberInSelf = it->numberInSelf();
+        if( (numberInSelf < 0) || (numberInSelf >= numFaces) )
+        {
+          std :: cout << "Error: Invalid numberInSelf: " << numberInSelf
+                      << " (should be between 0 and " << (numFaces-1) << ")"
+                      << std :: endl;
+          assert( false );
+        }
+        else
+        {
+          // mark face visited
+          visited[ numberInSelf ] = true;
         }
 
-        // for all intersections
-        for(; it != endit; ++it)
+        // id of boundary segment
+        if( it->boundary() )
+          it->boundaryId();
+
+        // check id
+        assert( globalid.id(*(it->inside())) == globalid.id( entity ) );
+
+
+        // geometry
+        it->intersectionSelfLocal();
+        it->intersectionGlobal();
+
+        // normal vectors
+        Dune::FieldVector<ct, dim-1> v(0);
+        it->outerNormal(v);
+        it->integrationOuterNormal(v);
+        it->unitOuterNormal(v);
+
+        if( isGhost && !it->neighbor() )
         {
-          // mark visited face
-          visited[it->numberInSelf()] = true;
-          // check id
-          assert(globalid.id(*(it->inside())) ==
-                 globalid.id(*e));
+          std::cerr << "Error: On ghosts, all intersections must have neighbors." << std::endl;
+          assert( false );
+        }
 
-          // numbering
-          int num = it->numberInSelf();
-          if( (num < 0) || (num >= e->template count< 1 >()) )
-          {
-            std :: cout << "Invalid numberInSelf: " << num
-                        << " (should be between 0 and "
-                        << (e->template count< 1 >()-1) << ")" << std :: endl;
-          }
+        if( it->neighbor() )
+        {
+          const EntityPointer outsidePtr = it->outside();
+          const Entity &outside = *outsidePtr;
 
-          if(it->neighbor())
+          if( isGhost && (outside.partitionType() == Dune::GhostEntity) )
           {
-            // geometry
-            it->intersectionNeighborLocal();
-            // numbering
-            num = it->numberInNeighbor();
-            if( (num < 0) || (num >= it->outside()->template count< 1 >()) )
-            {
-              std :: cout << "Invalid numberInNeighbor: " << num
-                          << " (should be between 0 and "
-                          << (it->outside()->template count< 1 >()-1) << ")" << std :: endl;
-            }
+            std::cerr << "Error: Intersections between ghosts shall not be returned." << std::endl;
+            assert( false );
           }
 
           // geometry
-          it->intersectionSelfLocal();
-          it->intersectionGlobal();
+          it->intersectionNeighborLocal();
 
-          // normal vectors
-          Dune::FieldVector<ct, dim-1> v(0);
-          it->outerNormal(v);
-          it->integrationOuterNormal(v);
-          it->unitOuterNormal(v);
-          // search neighbouring cell
-          if (it->neighbor() && it->outside()->partitionType() != Dune::InteriorEntity)
+          // numbering
+          const int numberInNeighbor = it->numberInNeighbor();
+          const int numFaces = outside.template count< 1 >();
+          if( (numberInNeighbor < 0) || (numberInNeighbor >= numFaces) )
           {
-            //assert(globalid.id(*(it->outside())) >= 0);
-            assert(globalid.id(*(it->outside())) !=
-                   globalid.id(*e));
+            std :: cout << "Error: Invalid numberInNeighbor: " << numberInNeighbor
+                        << " (should be between 0 and " << (numFaces-1) << ")"
+                        << std :: endl;
+            assert( false );
+          }
 
-            LevelIterator n    = g.template lbegin<0>(e->level());
-            LevelIterator nend = g.template lend<0>  (e->level());
+          // search neighbouring cell
+          if( outsidePtr->partitionType() == Dune::InteriorEntity )
+          {
+            assert( globalid.id( outside ) != globalid.id( entity ) );
+            const Dune::PartitionIteratorType pitype = Dune::InteriorBorder_Partition;
 
-            while (n != it->outside() && n != nend)
+            typedef typename Grid::template Codim< 0 >
+            ::template Partition< pitype >::LevelIterator
+            LevelIterator;
+
+            const int level = entity.level();
+            bool foundNeighbor = false;
+            LevelIterator nit = g.template lbegin< 0, pitype >( level );
+            const LevelIterator nend = g.template lend< 0, pitype > ( level );
+            for( ; nit != nend; ++nit )
             {
-              assert(globalid.id(*(it->outside())) !=
-                     globalid.id(*n));
-              ++n;
+              if( nit->partitionType() != Dune::InteriorEntity )
+              {
+                std::cerr << "Error: LevelIterator for InteriorBorder_Partition "
+                          << "stops on non-interior entity." << std :: endl;
+                assert( false );
+              }
+
+              if( nit != outsidePtr )
+                assert( globalid.id( outside ) != globalid.id( *nit ) );
+              else
+                foundNeighbor = true;
+            }
+            if( !foundNeighbor )
+            {
+              std :: cerr << "Error: Interior neighbor returned by "
+                          << "LevelIntersectionIterator not found on that level."
+                          << std :: endl;
+              assert( false );
             }
           }
         }
-        // check that all faces were visited
-        for (size_t i=0; i<visited.size(); i++) assert(visited[i] == true);
+      }
+
+      // check that all faces were visited
+      // note: This check is wrong on ghosts, where only intersections with
+      //       the domain are allowed.
+      if( !isGhost )
+      {
+        for(size_t i=0; i<visited.size(); i++) assert(visited[i] == true);
       }
     }
   }
