@@ -400,7 +400,7 @@ void checkIntersectionIterator(const GridViewType& view,
   //
   // Note: This is wrong on curved surfaces (take, e.g., the upper half sphere).
   //       Therefore we only issue a warning.
-  if( sumNormal.two_norm() > 1e-8 )
+  if( (sumNormal.two_norm() > 1e-8) && (eIt->partitionType() != Dune::GhostEntity) )
   {
     std :: cout << "Warning: Integral over outer normals is nonzero: "
                 << sumNormal << std :: endl;
