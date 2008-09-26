@@ -29,8 +29,6 @@ namespace Dune {
     grid_(grid),
     item_(0),
     index_(0),
-    generatedGlobalGeometry_(false),
-    generatedLocalGeometries_(false),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
@@ -51,8 +49,6 @@ namespace Dune {
     grid_(grid),
     item_(0),
     index_(0),
-    generatedGlobalGeometry_(false),
-    generatedLocalGeometries_(false),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
@@ -110,8 +106,6 @@ namespace Dune {
     assert( numFaces == en.getItem().nFaces() );
     innerLevel_ = en.level();
     index_  = 0;
-    generatedGlobalGeometry_ = false;
-    generatedLocalGeometries_= false;
     setFirstItem(en.getItem(),wLevel);
   }
 
@@ -123,8 +117,6 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(org.grid_),
     item_(org.item_),
-    generatedGlobalGeometry_(false),
-    generatedLocalGeometries_(false),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
@@ -151,8 +143,6 @@ namespace Dune {
     if(org.item_)
     {
       // else it's a end iterator
-      generatedGlobalGeometry_ =false;
-      generatedLocalGeometries_=false;
       item_      = org.item_;
       innerLevel_ = org.innerLevel_;
       index_     = org.index_;
@@ -369,7 +359,7 @@ namespace Dune {
   inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
   ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
   {
-    buildGlobalGeometry();
+    geoProvider_.buildGlobalGeom(intersectionGlobalImp_);
     return intersectionGlobal_;
   }
 
@@ -382,22 +372,12 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline void ALU3dGridIntersectionIterator<GridImp>::buildGlobalGeometry() const {
-    //if( !generatedGlobalGeometry_)
-    {
-      intersectionGlobalImp_.buildGeom(geoProvider_.intersectionGlobal());
-      generatedGlobalGeometry_ = true;
-    }
-  }
-
-  template <class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
   {
     intersectionSelfLocalImp_.buildGeom(geoProvider_.intersectionSelfLocal());
     if (!connector_.outerBoundary()) {
       intersectionNeighborLocalImp_.buildGeom(geoProvider_.intersectionNeighborLocal());
     }
-    generatedLocalGeometries_ = true;
   }
 
   template <class GridImp>
@@ -591,8 +571,6 @@ namespace Dune {
     this->done_   = false;
     assert( numFaces == en.getItem().nFaces() );
     this->index_  = 0;
-    this->generatedGlobalGeometry_ = false;
-    this->generatedLocalGeometries_= false;
     isLeafItem_ = en.isLeaf();
     setFirstItem(en.getItem(),wLevel);
   }

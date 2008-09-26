@@ -239,7 +239,6 @@ namespace Dune {
     connector_(connector),
     generatedGlobal_(false),
     generatedLocal_(false),
-    coordsGlobal_(-1.0), // dummy value
     coordsSelfLocal_(-1.0),
     coordsNeighborLocal_(-1.0),
     refElem_( getReferenceElement() ),
@@ -261,20 +260,11 @@ namespace Dune {
     connector_(orig.connector_),
     generatedGlobal_(orig.generatedGlobal_),
     generatedLocal_(orig.generatedLocal_),
-    coordsGlobal_(orig.coordsGlobal_),
     coordsSelfLocal_(orig.coordsSelfLocal_),
     coordsNeighborLocal_(orig.coordsNeighborLocal_),
     refElem_( getReferenceElement() ),
     refFace_( getReferenceFace() )
   {}
-
-  template <ALU3dGridElementType type>
-  inline const typename ALU3dGridGeometricFaceInfoBase<type>::CoordinateType&
-  ALU3dGridGeometricFaceInfoBase<type>::intersectionGlobal() const {
-    generateGlobalGeometry();
-    assert(generatedGlobal_);
-    return coordsGlobal_;
-  }
 
   template <ALU3dGridElementType type>
   inline const typename ALU3dGridGeometricFaceInfoBase<type>::CoordinateType&
@@ -313,6 +303,23 @@ namespace Dune {
     : ALU3dGridGeometricFaceInfoBase<tetra>(orig)
       , normalUp2Date_(orig.normalUp2Date_)
   {}
+
+  template <class GeometryImp>
+  inline void
+  ALU3dGridGeometricFaceInfoTetra::
+  buildGlobalGeom(GeometryImp& geo) const
+  {
+    if ( ! this->generatedGlobal_ )
+    {
+      // set new geometry coordinates
+      const GEOFaceType & face = this->connector_.face();
+
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
+      this->generatedGlobal_ = true ;
+    }
+  }
 
   inline FieldVector<alu3d_ctype, 3> &
   ALU3dGridGeometricFaceInfoTetra::
@@ -364,6 +371,24 @@ namespace Dune {
       , mappingGlobalUp2Date_(orig.mappingGlobalUp2Date_)
   {}
 
+  template <class GeometryImp>
+  inline void
+  ALU3dGridGeometricFaceInfoHexa::
+  buildGlobalGeom(GeometryImp& geo) const
+  {
+    if ( ! this->generatedGlobal_ )
+    {
+      // set new geometry coordinates
+      const GEOFaceType & face = this->connector_.face();
+
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(3))->Point() );
+      this->generatedGlobal_ = true ;
+    }
+  }
+
   inline FieldVector<alu3d_ctype, 3> &
   ALU3dGridGeometricFaceInfoHexa::
   outerNormal(const FieldVector<alu3d_ctype, 2>& local) const
@@ -393,27 +418,6 @@ namespace Dune {
     } // end if
 
     return outerNormal_;
-  }
-
-  template <ALU3dGridElementType type>
-  inline void ALU3dGridGeometricFaceInfoBase<type>::
-  generateGlobalGeometry() const
-  {
-    if ( !generatedGlobal_ )
-    {
-      for (int i = 0; i < numVerticesPerFace; ++i)
-      {
-        const double (&p)[3] =
-          connector_.face().myvertex(FaceTopo::dune2aluVertex(i))->Point();
-
-        // copy coordinates
-        coordsGlobal_[i][0] = p[0];
-        coordsGlobal_[i][1] = p[1];
-        coordsGlobal_[i][2] = p[2];
-      }
-
-      generatedGlobal_ = true;
-    } // end if
   }
 
   template <ALU3dGridElementType type>

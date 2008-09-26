@@ -108,9 +108,16 @@ namespace Dune {
     //! generate the geometry for out of given ALU3dGridElement
     inline bool buildGeom(const IMPLElementType & item);
     inline bool buildGeom(const ALU3DSPACE HFaceType & item, int twist, int face );
-    inline bool buildGeom(const FaceCoordinatesType& coords);
     inline bool buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int );
     inline bool buildGeom(const ALU3DSPACE VertexType & item, int twist, int);
+
+    // this method is used by the intersection iterator
+    inline bool buildGeom(const FaceCoordinatesType& coords);
+    // this method is used by the intersection iterator
+    template <class coord_t>
+    bool buildGeom(const coord_t& p0,
+                   const coord_t& p1,
+                   const coord_t& p2);
 
     //! build geometry of local coordinates relative to father
     template <class GeometryImpType>
@@ -135,8 +142,9 @@ namespace Dune {
     inline void calcElMatrix () const;
 
     // copies the values of point to the values of coord
-    inline void copyCoordVec (const alu3d_ctype (& point)[cdim] ,
-                              FieldVector<alu3d_ctype,cdim> & coord ) const;
+    template <class coord_t>
+    inline void copyCoordVec(const coord_t& point,
+                             FieldVector<alu3d_ctype,cdim> & coord ) const;
 
     //! the vertex coordinates
     mutable FieldMatrix<alu3d_ctype, corners_, cdim> coord_;
@@ -255,9 +263,17 @@ namespace Dune {
     //! generate the geometry out of a given ALU3dGridElement
     bool buildGeom(const IMPLElementType & item);
     bool buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum);
-    bool buildGeom(const FaceCoordinatesType& coords);
     bool buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int);
     bool buildGeom(const ALU3DSPACE VertexType & item, int twist, int);
+
+    // this method is used by the intersection iterator
+    bool buildGeom(const FaceCoordinatesType& coords);
+    // this method is used by the intersection iterator
+    template <class coord_t>
+    bool buildGeom(const coord_t& p0,
+                   const coord_t& p1,
+                   const coord_t& p2,
+                   const coord_t& p3);
 
     //! build ghost out of internal boundary segment
     bool buildGhost(const PLLBndFaceType & ghost);
@@ -271,6 +287,11 @@ namespace Dune {
     void print (std::ostream& ss) const;
 
   private:
+    // copies the values of point to the values of coord
+    template <class coord_t>
+    inline void copyCoordVec(const coord_t& point,
+                             FieldVector<alu3d_ctype,cdim> & coord ) const;
+
     // create triMap from coordinates , deletes old mapping
     void buildMapping() const;
 

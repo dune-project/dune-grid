@@ -153,8 +153,9 @@ namespace Dune {
   }
 
   template<int mydim, int cdim>
+  template<class coord_t>
   inline void ALU3dGridGeometry<mydim,cdim, const ALU3dGrid<3, 3, tetra> > ::
-  copyCoordVec(const alu3d_ctype (& point)[cdim] ,
+  copyCoordVec(const coord_t& point,
                FieldVector<alu3d_ctype,cdim> & coord ) const
   {
     assert( cdim == 3 );
@@ -216,18 +217,30 @@ namespace Dune {
   }
 
   template <>
-  inline bool ALU3dGridGeometry<2, 3, const ALU3dGrid<3,3,tetra> > ::
-  buildGeom(const FaceCoordinatesType& coords) {
-    enum { dim = 2 };
-    enum { dimworld = 3};
+  template <class coord_t>
+  inline bool
+  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, tetra> > ::
+  buildGeom(const coord_t& p0,
+            const coord_t& p1,
+            const coord_t& p2)
+  {
 
+    // copy coordinates
+    copyCoordVec( p0, coord_[0] );
+    copyCoordVec( p1, coord_[1] );
+    copyCoordVec( p2, coord_[2] );
+
+    // reset flags
     builtinverse_ = builtA_ = builtDetDF_ = false;
-
-    for (int i = 0; i < (dim+1); ++i) {
-      coord_[i] = coords[i];
-    }
-
     return true;
+  }
+
+  template <>
+  inline bool
+  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, tetra> > ::
+  buildGeom(const FaceCoordinatesType& coords)
+  {
+    return buildGeom( coords[0], coords[1], coords[2] );
   }
 
   template <> // for edges
@@ -804,19 +817,43 @@ namespace Dune {
     return true;
   }
 
+  template<int mydim, int cdim>
+  template<class coord_t>
+  inline void ALU3dGridGeometry<mydim,cdim, const ALU3dGrid<3, 3, hexa> > ::
+  copyCoordVec(const coord_t& point,
+               FieldVector<alu3d_ctype,cdim> & coord ) const
+  {
+    assert( cdim == 3 );
+    coord[0] = point[0];
+    coord[1] = point[1];
+    coord[2] = point[2];
+  }
+
   template <>
+  template <class coord_t>
   inline bool
   ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
-  buildGeom(const FaceCoordinatesType& coords) {
-    enum { dim = 2 };
-    enum { dimworld = 3 };
-
-    for (int i = 0; i < 4; ++i) {
-      coord_[i] = coords[i];
-    }
+  buildGeom(const coord_t& p0,
+            const coord_t& p1,
+            const coord_t& p2,
+            const coord_t& p3)
+  {
+    copyCoordVec( p0, coord_[0] );
+    copyCoordVec( p1, coord_[1] );
+    copyCoordVec( p2, coord_[2] );
+    copyCoordVec( p3, coord_[3] );
 
     buildBiMap_ = false;
     return true;
+  }
+
+
+  template <>
+  inline bool
+  ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
+  buildGeom(const FaceCoordinatesType& coords)
+  {
+    return buildGeom( coords[0], coords[1], coords[2], coords[3] );
   }
 
   template <> // for edges

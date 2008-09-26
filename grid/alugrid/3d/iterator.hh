@@ -232,9 +232,8 @@ namespace Dune {
     // set new face
     void setNewFace(const GEOFaceType& newFace);
 
+    // generate local geometries
     void buildLocalGeometries() const;
-
-    void buildGlobalGeometry() const;
 
     // get the face corresponding to the index
     const typename ALU3dImplTraits<tetra>::GEOFaceType*
@@ -256,9 +255,6 @@ namespace Dune {
 
     mutable int innerLevel_;
     mutable int index_;
-
-    mutable bool generatedGlobalGeometry_;
-    mutable bool generatedLocalGeometries_;
 
     mutable GeometryObject intersectionGlobal_;
     mutable GeometryImp &  intersectionGlobalImp_;

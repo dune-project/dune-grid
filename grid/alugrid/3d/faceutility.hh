@@ -165,11 +165,8 @@ namespace Dune {
     void resetFaceGeom();
 
     //- functions
-    const CoordinateType& intersectionGlobal() const;
     const CoordinateType& intersectionSelfLocal() const;
     const CoordinateType& intersectionNeighborLocal() const;
-
-    //NormalType & outerNormal(const FieldVector<alu3d_ctype, 2>& local) const;
 
   private:
     //- forbidden methods
@@ -177,7 +174,6 @@ namespace Dune {
 
   private:
     //- private methods
-    void generateGlobalGeometry() const;
     void generateLocalGeometries() const;
 
     int globalVertexIndex(int duneFaceIndex,
@@ -206,7 +202,6 @@ namespace Dune {
     mutable bool generatedGlobal_;
     mutable bool generatedLocal_;
 
-    mutable CoordinateType coordsGlobal_;
     mutable CoordinateType coordsSelfLocal_;
     mutable CoordinateType coordsNeighborLocal_;
 
@@ -269,6 +264,10 @@ namespace Dune {
     //! reset status of faceGeomInfo
     void resetFaceGeom();
 
+    //! update geometry
+    template <class GeometryImp>
+    void buildGlobalGeom(GeometryImp& geo) const;
+
   private:
     //- forbidden methods
     const ALU3dGridGeometricFaceInfoTetra & operator=(const ALU3dGridGeometricFaceInfoTetra &);
@@ -305,6 +304,10 @@ namespace Dune {
 
     //! reset status of faceGeomInfo
     void resetFaceGeom();
+
+    //! update geometry
+    template <class GeometryImp>
+    void buildGlobalGeom(GeometryImp& geo) const;
 
   private:
     //- forbidden methods
