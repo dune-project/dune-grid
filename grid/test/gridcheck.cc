@@ -991,9 +991,20 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
 
+  // assignment tests
+  LevelIterator l1 = g.template lbegin<0>(0);
+  LevelIterator l2 = g.template lbegin<0>(0);
+  LeafIterator L1 = g.template leafbegin<0>();
+  LeafIterator L2 = g.template leafbegin<0>();
+
+  // if grid empty, leave
+  if (l1 == g.template lend<0>(0))
+    return;
+
   // check '==' consistency
   EntityPointer a = g.template levelView<Dune::All_Partition>(0).template begin<0>();
   EntityPointer i = g.template levelView<Dune::Interior_Partition>(0).template begin<0>();
+
   assert(
     (g.levelIndexSet(0).index(*a) != g.levelIndexSet(0).index(*i)) // index equal
     == (a != i) // entitpointer equal
@@ -1002,15 +1013,6 @@ void iteratorEquals (Grid &g)
     (g.levelIndexSet(0).index(*a) == g.levelIndexSet(0).index(*i)) // index equal
     == (a == i) // entitpointer equal
     );
-
-  // assignment tests
-  LevelIterator l1 = g.template lbegin<0>(0);
-  LevelIterator l2 = g.template lbegin<0>(0);
-  LeafIterator L1 = g.template leafbegin<0>();
-  LeafIterator L2 = g.template leafbegin<0>();
-
-  if (l1 == g.template lend<0>(0))
-    return;
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
