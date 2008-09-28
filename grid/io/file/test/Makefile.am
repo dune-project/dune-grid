@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest
+ALLTESTS = vtktest gnuplottest vtksequencetest
 
 # run amimesh test only if amimesh was found
 if AMIRAMESH
@@ -21,6 +21,9 @@ TESTS = $(ALLTESTS)
 vtktest_SOURCES = vtktest.cc
 vtktest_LDADD = $(LOCAL_LIBS)
 
+vtksequencetest_SOURCES = vtksequencetest.cc
+vtksequencetest_LDADD = $(LOCAL_LIBS)
+
 gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
 
@@ -34,4 +37,4 @@ starcdreadertest_LDADD = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
 
-CLEANFILES = *.vtu *.vtp *.data sgrid*.am
+CLEANFILES = *.vtu *.vtp *.data sgrid*.am *.pvtu *.pvtp *.pvd
