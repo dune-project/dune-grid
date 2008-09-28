@@ -774,8 +774,8 @@ namespace Dune
 #endif
 
     //! write output; interface might change later
-    void pwrite (const char* name,  const char* path, const char* extendpath,
-                 VTKOptions::OutputType ot = VTKOptions::ascii)
+    std::string pwrite (const char* name,  const char* path, const char* extendpath,
+                        VTKOptions::OutputType ot = VTKOptions::ascii)
     {
       // make data mode visible to private functions
       outputtype=ot;
@@ -892,6 +892,7 @@ namespace Dune
         file.close();
       }
       grid.comm().barrier();
+      return fullname;
     }
 
   private:
