@@ -678,7 +678,7 @@ namespace Dune
         pieceName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
         pieceName << "p" << std::setfill( '0' ) << std::setw( 4 ) << commRank << ":";
       }
-      pieceName << name << (n > 1 ? ".vtu" : ".vtp");
+      pieceName << name << (GridView::dimension > 1 ? ".vtu" : ".vtp");
 
       // write process data
       std::ofstream file;
@@ -699,7 +699,7 @@ namespace Dune
       // generate name of parallel header
       std::ostringstream parallelName;
       parallelName << "s" << std::setfill( '0' ) << std::setw( 4 ) << commSize << ":";
-      parallelName << name << (n > 1 ? ".pvtu" : ".pvtp");
+      parallelName << name << (GridView::dimension > 1 ? ".pvtu" : ".pvtp");
 
       // on process 0: write out parallel header
       if( commRank == 0 )
@@ -870,7 +870,7 @@ namespace Dune
         sprintf(relpiecepath,"%s",extendpath);
       }
       char fullname[256];
-      if (n>1)
+      if (GridView::dimension>1)
         sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),grid.comm().rank(),name);
       else
         sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),grid.comm().rank(),name);
@@ -1025,7 +1025,7 @@ namespace Dune
       for (int i=0; i<grid.comm().size(); i++)
       {
         char fullname[128];
-        if (n>1)
+        if (GridView::dimension>1)
           sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),i,piecename);
         else
           sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),i,piecename);
