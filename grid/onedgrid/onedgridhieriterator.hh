@@ -19,15 +19,12 @@ namespace Dune {
    * \ingroup OneDGrid
      Mesh entities of codimension 0 ("elements") allow to visit all entities of
      codimension 0 obtained through nested, hierarchic refinement of the entity.
-     Iteration over this set of entities is provided by the HIerarchicIterator,
+     Iteration over this set of entities is provided by the HierarchicIterator,
      starting from a given entity.
-     This is redundant but important for memory efficient implementations of unstru
-     hierarchically refined meshes.
    */
   template<class GridImp>
   class OneDGridHierarchicIterator :
-    public Dune::OneDGridEntityPointer <0,GridImp>,
-    public HierarchicIteratorDefaultImplementation <GridImp, OneDGridHierarchicIterator>
+    public Dune::OneDGridEntityPointer <0,GridImp>
   {
     enum { dim = GridImp::dimension };
     friend class OneDGridEntity<0,dim,GridImp>;

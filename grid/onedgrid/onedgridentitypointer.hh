@@ -10,7 +10,6 @@ namespace Dune {
    */
   template<int codim, class GridImp>
   class OneDGridEntityPointer
-    : public EntityPointerDefaultImplementation <codim, GridImp, OneDGridEntityPointer<codim,GridImp> >
   {
     enum { dim = GridImp::dimension };
     template <class GridImp_>
@@ -22,6 +21,14 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     typedef OneDGridEntityPointer<codim,GridImp> Base;
+
+    /** \brief The type of the class itself
+        Do we really need this?
+     */
+    typedef OneDGridEntityPointer<codim,GridImp> EntityPointerImp;
+
+    //! codimension of entity pointer
+    enum { codimension = codim };
 
     //! equality
     bool equals(const OneDGridEntityPointer<codim,GridImp>& other) const {
