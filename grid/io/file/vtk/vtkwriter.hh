@@ -883,7 +883,7 @@ namespace Dune
       grid.comm().barrier();
       if (grid.comm().rank()==0)
       {
-        if (n>1)
+        if (GridView::dimension>1)
           sprintf(fullname,"%s/s%04d:%s.pvtu",path,grid.comm().size(),name);
         else
           sprintf(fullname,"%s/s%04d:%s.pvtp",path,grid.comm().size(),name);
