@@ -61,7 +61,7 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
 {
   using namespace Dune;
 
-  grid.createBegin();
+  Dune::GridFactory<Dune::UGGrid<2> > factory(&grid);
 
   // /////////////////////////////
   //   Create boundary segments
@@ -74,13 +74,13 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
     std::vector<unsigned int> vertices(2);
 
     vertices[0] = 1;  vertices[1] = 2;
-    grid.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI, M_PI*4/3));
+    factory.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI, M_PI*4/3));
 
     vertices[0] = 2;  vertices[1] = 3;
-    grid.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3));
+    factory.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3));
 
     vertices[0] = 3;  vertices[1] = 0;
-    grid.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2));
+    factory.insertBoundarySegment(vertices, new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2));
 
   }
 
@@ -90,16 +90,17 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
   FieldVector<double,2> pos;
 
   pos[0] = 15;  pos[1] = 15;
-  grid.insertVertex(pos);
+  factory.insertVertex(pos);
 
   pos[0] = -15; pos[1] = 15;
-  grid.insertVertex(pos);
+  factory.insertVertex(pos);
 
   pos[0] = -7.5; pos[1] = 2.00962;
-  grid.insertVertex(pos);
+  factory.insertVertex(pos);
 
   pos[0] = 7.5; pos[1] = 2.00962;
-  grid.insertVertex(pos);
+  factory.insertVertex(pos);
+
   // /////////////////
   // Insert elements
   // /////////////////
@@ -110,12 +111,12 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool parametrization)
   cornerIDs[2] = 3;
   cornerIDs[3] = 2;
 
-  grid.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
+  factory.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
 
   // //////////////////////////////////////
   //   Finish initialization
   // //////////////////////////////////////
-  grid.createEnd();
+  factory.createGrid();
 
 }
 
