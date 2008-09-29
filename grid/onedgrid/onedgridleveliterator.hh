@@ -7,8 +7,6 @@
  * \brief The OneDGridLevelIterator class
  */
 
-#include <dune/common/dlist.hh>
-
 namespace Dune {
 
 
