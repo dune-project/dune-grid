@@ -461,10 +461,10 @@ namespace Dune {
     /** \brief Start the coarse grid creation process
         \todo This method should delete the grid!
      */
-    void createBegin();
+    void createBegin() DUNE_DEPRECATED;
 
     /** \brief End the coarse grid creation process */
-    void createEnd();
+    void createEnd() DUNE_DEPRECATED;
 
     /** \brief When UGGrid has been configured to use the LGM domain manager,
         this routine sets up a grid from an LGM and an NG file
@@ -477,17 +477,17 @@ namespace Dune {
         The grid object takes control of this object and deallocates it when destructing itself.
      */
     void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                               const BoundarySegment<dim>* boundarySegment);
+                               const BoundarySegment<dim>* boundarySegment) DUNE_DEPRECATED;
 
     /** \brief Insert a vertex into the coarse grid */
-    void insertVertex(const FieldVector<double,dim>& pos);
+    void insertVertex(const FieldVector<double,dim>& pos) DUNE_DEPRECATED;
 
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
      */
     void insertElement(GeometryType type,
-                       const std::vector<unsigned int>& vertices);
+                       const std::vector<unsigned int>& vertices) DUNE_DEPRECATED;
 
     /*@}*/
 
