@@ -23,7 +23,7 @@ namespace Dune {
     static Dune::OneDGridLevelIterator<1,PiType, const Dune::OneDGrid>
     lbegin(const Dune::OneDGrid* g, int level) {
 
-      return Dune::OneDGridLevelIterator<1,PiType, const Dune::OneDGrid>(g->vertices[level].begin);
+      return Dune::OneDGridLevelIterator<1,PiType, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<0>*>(g->vertices[level].begin()));
     }
 
   };
@@ -35,7 +35,7 @@ namespace Dune {
     static Dune::OneDGridLevelIterator<0,PiType, const Dune::OneDGrid>
     lbegin(const Dune::OneDGrid* g, int level) {
 
-      return Dune::OneDGridLevelIterator<0,PiType, const Dune::OneDGrid>(g->elements[level].begin);
+      return Dune::OneDGridLevelIterator<0,PiType, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1>*>(g->elements[level].begin()));
     }
 
   };
@@ -65,12 +65,12 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
 
     OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, newCoord);
     newVertex->id_ = getNextFreeId(1);
-    vertices[0].insert_after(vertices[0].rbegin, newVertex);
+    vertices[0].insert_after(vertices[0].rbegin(), newVertex);
 
   }
 
   // Init element set
-  OneDEntityImp<0>* it = vertices[0].begin;
+  OneDEntityImp<0>* it = vertices[0].begin();
   for (int i=0; i<numElements; i++) {
 
     OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
@@ -78,7 +78,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
     it = it->succ_;
     newElement->vertex_[1] = it;
 
-    elements[0].insert_after(elements[0].rbegin, newElement);
+    elements[0].insert_after(elements[0].rbegin(), newElement);
 
   }
 
@@ -102,11 +102,11 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   // Init vertex set
   for (size_t i=0; i<coords.size(); i++) {
     OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, coords[i], getNextFreeId(1));
-    vertices[0].insert_after(vertices[0].rbegin, newVertex);
+    vertices[0].insert_after(vertices[0].rbegin(), newVertex);
   }
 
   // Init element set
-  OneDEntityImp<0>* it = vertices[0].begin;
+  OneDEntityImp<0>* it = vertices[0].begin();
   for (size_t i=0; i<coords.size()-1; i++) {
 
     OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
@@ -117,7 +117,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
     if (newElement->vertex_[0]->pos_ >= newElement->vertex_[1]->pos_)
       DUNE_THROW(GridError, "The coordinates have to be in ascending order!");
 
-    elements[0].insert_after(elements[0].rbegin, newElement);
+    elements[0].insert_after(elements[0].rbegin(), newElement);
 
   }
 
@@ -130,7 +130,7 @@ Dune::OneDGrid::~OneDGrid()
   // Delete all vertices
   for (unsigned int i=0; i<vertices.size(); i++) {
 
-    OneDEntityImp<0>* v = vertices[i].begin;
+    OneDEntityImp<0>* v = vertices[i].begin();
 
     while (v) {
 
@@ -146,7 +146,7 @@ Dune::OneDGrid::~OneDGrid()
   // Delete all elements
   for (unsigned int i=0; i<elements.size(); i++) {
 
-    OneDEntityImp<1>* e = elements[i].begin;
+    OneDEntityImp<1>* e = elements[i].begin();
 
     while (e) {
 
@@ -202,7 +202,7 @@ Dune::OneDGrid::lend(int level) const
   if (level<0 || level>maxLevel())
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  return OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(0);
+  return OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(static_cast<Dune::OneDEntityImp<dim-codim>*>(0));
 }
 
 
@@ -299,7 +299,7 @@ bool Dune::OneDGrid::adapt()
   // remove all elements that have been marked for coarsening
   for (int i=1; i<=maxLevel(); i++) {
 
-    for (eIt = elements[i].begin; eIt!=NULL; ) {
+    for (eIt = elements[i].begin(); eIt!=NULL; ) {
 
       OneDEntityImp<1>* leftElementToBeDeleted  = eIt;
       OneDEntityImp<1>* rightElementToBeDeleted = eIt->succ_;
@@ -371,15 +371,15 @@ bool Dune::OneDGrid::adapt()
   //  In that case add another level
   // /////////////////////////////////////////////////////////////////////////
   bool toplevelRefinement = false;
-  for (eIt = elements[maxLevel()].begin; eIt!=NULL; eIt=eIt->succ_)
+  for (eIt = elements[maxLevel()].begin(); eIt!=NULL; eIt=eIt->succ_)
     if (eIt->markState_ == OneDEntityImp<1>::REFINED) {
       toplevelRefinement = true;
       break;
     }
 
   if (toplevelRefinement) {
-    List<OneDEntityImp<0> > newVertices;
-    List<OneDEntityImp<1> > newElements;
+    OneDGridList<OneDEntityImp<0> > newVertices;
+    OneDGridList<OneDEntityImp<1> > newElements;
     vertices.push_back(newVertices);
     elements.push_back(newElements);
   }
@@ -390,7 +390,7 @@ bool Dune::OneDGrid::adapt()
   int oldMaxlevel = (toplevelRefinement) ? maxLevel()-1 : maxLevel();
   for (int i=0; i<=oldMaxlevel; i++) {
 
-    for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
+    for (eIt = elements[i].begin(); eIt!=NULL; eIt = eIt->succ_) {
 
       if (eIt->markState_ == OneDEntityImp<1>::REFINED
           && eIt->isLeaf()) {
@@ -436,7 +436,7 @@ bool Dune::OneDGrid::adapt()
 
         } else {
           // leftNeighbor does not exist
-          vertices[i+1].insert_before(vertices[i+1].begin, leftUpperVertex);
+          vertices[i+1].insert_before(vertices[i+1].begin(), leftUpperVertex);
 
         }
 
@@ -469,7 +469,7 @@ bool Dune::OneDGrid::adapt()
           elements[i+1].insert_after(leftNeighbor->sons_[1], newElement0);
         else
           // leftNeighbor does not exist
-          elements[i+1].insert_before(elements[i+1].begin, newElement0);
+          elements[i+1].insert_before(elements[i+1].begin(), newElement0);
 
         elements[i+1].insert_after(newElement0, newElement1);
 
@@ -501,7 +501,7 @@ bool Dune::OneDGrid::adapt()
     for (int i=0; i<maxLevel(); i++) {
 
       OneDEntityImp<1>* eIt;
-      for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
+      for (eIt = elements[i].begin(); eIt!=NULL; eIt = eIt->succ_) {
 
         if (eIt->isLeaf()) {
 
@@ -537,7 +537,7 @@ bool Dune::OneDGrid::adapt()
 
           } else {
             // leftNeighbor does not exist
-            vertices[i+1].insert_before(vertices[i+1].begin, leftUpperVertex);
+            vertices[i+1].insert_before(vertices[i+1].begin(), leftUpperVertex);
 
           }
 
@@ -562,7 +562,7 @@ bool Dune::OneDGrid::adapt()
             elements[i+1].insert_after(leftNeighbor->sons_[1], newElement);
           else
             // leftNeighbor does not exist
-            elements[i+1].insert_before(elements[i+1].begin, newElement);
+            elements[i+1].insert_before(elements[i+1].begin(), newElement);
 
           // Mark the new element as the sons of the refined element
           eIt->sons_[0] = eIt->sons_[1] = newElement;
@@ -599,7 +599,7 @@ void Dune::OneDGrid::postAdapt()
 {
   for (int i=0; i<=maxLevel(); i++) {
     OneDEntityImp<1>* eIt;
-    for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_)
+    for (eIt = elements[i].begin(); eIt!=NULL; eIt = eIt->succ_)
       eIt->markState_ = OneDEntityImp<1>::NONE;
 
   }

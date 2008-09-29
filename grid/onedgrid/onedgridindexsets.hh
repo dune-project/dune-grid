@@ -92,18 +92,20 @@ namespace Dune {
       //   Init the element indices
       // ///////////////////////////////
       numElements_ = 0;
-      OneDEntityImp<1>* eIt;
-      for (eIt = grid_->elements[level_].begin; eIt!=NULL; eIt = eIt->succ_)
-        eIt->levelIndex_ = numElements_++;
+      OneDGridList<OneDEntityImp<1> >::const_iterator eIt;
+      for (eIt = grid_->elements[level_].begin(); eIt!=grid_->elements[level_].end(); eIt = eIt->succ_)
+        /** \todo Remove this const cast */
+        const_cast<OneDEntityImp<1>*>(eIt)->levelIndex_ = numElements_++;
 
       // //////////////////////////////
       //   Init the vertex indices
       // //////////////////////////////
 
       numVertices_ = 0;
-      OneDEntityImp<0>* vIt;
-      for (vIt = grid_->vertices[level_].begin; vIt!=NULL; vIt = vIt->succ_)
-        vIt->levelIndex_ = numVertices_++;
+      OneDGridList<OneDEntityImp<0> >::const_iterator vIt;
+      for (vIt = grid_->vertices[level_].begin(); vIt!=grid_->vertices[level_].end(); vIt = vIt->succ_)
+        /** \todo Remove this const cast */
+        const_cast<OneDEntityImp<0>*>(vIt)->levelIndex_ = numVertices_++;
 
       // ///////////////////////////////////////////////
       //   Update the list of geometry types present
@@ -245,13 +247,14 @@ namespace Dune {
 
       for (int i=grid_.maxLevel(); i>=0; i--) {
 
-        OneDEntityImp<0>* vIt;
-        for (vIt = grid_.vertices[i].begin; vIt!=NULL; vIt = vIt->succ_) {
+        const OneDEntityImp<0>* vIt;
+        for (vIt = grid_.vertices[i].begin(); vIt!=NULL; vIt = vIt->succ_) {
 
+          /** \todo Remove the const casts */
           if (vIt->isLeaf())
-            vIt->leafIndex_ = numVertices_++;
+            const_cast<OneDEntityImp<0>*>(vIt)->leafIndex_ = numVertices_++;
           else
-            vIt->leafIndex_ = vIt->son_->leafIndex_;
+            const_cast<OneDEntityImp<0>*>(vIt)->leafIndex_ = vIt->son_->leafIndex_;
 
         }
 

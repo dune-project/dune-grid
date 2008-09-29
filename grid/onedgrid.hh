@@ -4,6 +4,7 @@
 #define DUNE_ONE_D_GRID_HH
 
 #include <vector>
+#include <list>
 
 #include <dune/common/misc.hh>
 #include <dune/common/dlist.hh>
@@ -31,41 +32,39 @@ namespace Dune
 
   template<int codim>                        class OneDGridLevelIteratorFactory;
 
-}  // namespace Dune
-
-#include "onedgrid/onedgridentity.hh"
-#include "onedgrid/onedgridentitypointer.hh"
-#include "onedgrid/onedgridgeometry.hh"
-#include "onedgrid/onedintersectionit.hh"
-#include "onedgrid/onedgridleveliterator.hh"
-#include "onedgrid/onedgridleafiterator.hh"
-#include "onedgrid/onedgridhieriterator.hh"
-#include "onedgrid/onedgridindexsets.hh"
-
-namespace Dune {
+  /** \file
+      \brief A simple doubly-linked list needed in OneDGrid
+      \todo I'd love to get rid of this and use std::list instead.
+      Unfortunately, there are problems.  I need to store pointers/iterators
+      within one element which point to another element (e.g. the element father).
+      However, std::list iterators are not assignable, this makes live difficult...
+   */
 
   // A simple double linked list
   template<class T>
-  class List
+  class OneDGridList
   {
 
   public:
 
-    List() : numelements(0), begin(0), rbegin(0) {}
+    typedef T* iterator;
+    typedef const T* const_iterator;
+
+    OneDGridList() : numelements(0), begin_(0), rbegin_(0) {}
 
     int size() const {return numelements;}
 
     T* insert_after (T* i, T* t) {
 
       // Teste Eingabe
-      if (i==0 && begin!=0)
-        DUNE_THROW(DoubleLinkedListError, "invalid iterator for insert_after");
+      if (i==0 && begin_!=0)
+        DUNE_THROW(RangeError, "invalid iterator for insert_after");
 
       // einfuegen
-      if (begin==0) {
+      if (begin_==0) {
         // einfuegen in leere Liste
-        begin = t;
-        rbegin = t;
+        begin_ = t;
+        rbegin_ = t;
       }
       else
       {
@@ -78,8 +77,8 @@ namespace Dune {
           t->succ_->pred_ = t;
 
         // tail neu ?
-        if (rbegin==i)
-          rbegin = t;
+        if (rbegin_==i)
+          rbegin_ = t;
       }
 
       // Groesse und Rueckgabeiterator
@@ -91,16 +90,16 @@ namespace Dune {
     T* insert_before (T* i, T* t) {
 
       // Teste Eingabe
-      if (i==0 && begin!=0)
-        DUNE_THROW(DoubleLinkedListError,
+      if (i==0 && begin_!=0)
+        DUNE_THROW(RangeError,
                    "invalid iterator for insert_before");
 
       // einfuegen
-      if (begin==0)
+      if (begin_==0)
       {
         // einfuegen in leere Liste
-        begin=t;
-        rbegin=t;
+        begin_=t;
+        rbegin_=t;
       }
       else
       {
@@ -112,8 +111,8 @@ namespace Dune {
         if (t->pred_!=0)
           t->pred_->succ_ = t;
         // head neu ?
-        if (begin==i)
-          begin = t;
+        if (begin_==i)
+          begin_ = t;
       }
 
       // Groesse und Rueckgabeiterator
@@ -134,22 +133,60 @@ namespace Dune {
         i->pred_->succ_ = i->succ_;
 
       // head & tail
-      if (begin==i)
-        begin=i->succ_;
-      if (rbegin==i)
-        rbegin = i->pred_;
+      if (begin_==i)
+        begin_=i->succ_;
+      if (rbegin_==i)
+        rbegin_ = i->pred_;
 
       // Groesse
       numelements = numelements-1;
     }
 
+    iterator begin() {
+      return begin_;
+    }
+
+    const_iterator begin() const {
+      return begin_;
+    }
+
+    iterator end() {
+      return NULL;
+    }
+
+    const_iterator end() const {
+      return NULL;
+    }
+
+    iterator rbegin() {
+      return rbegin_;
+    }
+
+    const_iterator rbegin() const {
+      return rbegin_;
+    }
+
+  private:
 
     int numelements;
 
-    T* begin;
-    T* rbegin;
+    T* begin_;
+    T* rbegin_;
 
-  };
+  };   // end class OneDGridList
+
+} // namespace Dune
+
+#include "onedgrid/onedgridentity.hh"
+#include "onedgrid/onedgridentitypointer.hh"
+#include "onedgrid/onedgridgeometry.hh"
+#include "onedgrid/onedintersectionit.hh"
+#include "onedgrid/onedgridleveliterator.hh"
+#include "onedgrid/onedgridleafiterator.hh"
+#include "onedgrid/onedgridhieriterator.hh"
+#include "onedgrid/onedgridindexsets.hh"
+
+namespace Dune {
 
   template<int dim, int dimw>
   struct OneDGridFamily
@@ -483,10 +520,10 @@ namespace Dune {
     OneDEntityImp<1>* getLeftNeighborWithSon(OneDEntityImp<1>* eIt);
 
     // The vertices of the grid hierarchy
-    std::vector<List<OneDEntityImp<0> > > vertices;
+    std::vector<OneDGridList<OneDEntityImp<0> > > vertices;
 
     // The elements of the grid hierarchy
-    std::vector<List<OneDEntityImp<1> > > elements;
+    std::vector<OneDGridList<OneDEntityImp<1> > > elements;
 
     // Our set of level indices
     mutable std::vector<OneDGridLevelIndexSet<const OneDGrid>* > levelIndexSets_;
