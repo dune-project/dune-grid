@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <dune/common/misc.hh>
+#include <dune/common/dlist.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/grid/common/grid.hh>
