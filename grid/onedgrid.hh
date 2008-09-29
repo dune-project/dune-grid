@@ -7,7 +7,6 @@
 #include <list>
 
 #include <dune/common/misc.hh>
-#include <dune/common/dlist.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/grid/common/grid.hh>
@@ -54,7 +53,7 @@ namespace Dune
 
     int size() const {return numelements;}
 
-    T* insert_after (T* i, T* t) {
+    T* insert_after (T* i, T* t) DUNE_DEPRECATED {
 
       // Teste Eingabe
       if (i==0 && begin_!=0)
@@ -87,7 +86,38 @@ namespace Dune
       return t;
     }
 
-    T* insert_before (T* i, T* t) {
+    T* push_back (T* t) {
+
+      T* i = rbegin();
+
+      // einfuegen
+      if (begin_==0) {
+        // einfuegen in leere Liste
+        begin_ = t;
+        rbegin_ = t;
+      }
+      else
+      {
+        // nach Element i.p einsetzen
+        t->pred_ = i;
+        t->succ_ = i->succ_;
+        i->succ_ = t;
+
+        if (t->succ_!=0)
+          t->succ_->pred_ = t;
+
+        // tail neu ?
+        if (rbegin_==i)
+          rbegin_ = t;
+      }
+
+      // Groesse und Rueckgabeiterator
+      numelements = numelements+1;
+
+      return t;
+    }
+
+    T* insert (T* i, T* t) {
 
       // Teste Eingabe
       if (i==0 && begin_!=0)
@@ -521,6 +551,7 @@ namespace Dune {
 
     // The vertices of the grid hierarchy
     std::vector<OneDGridList<OneDEntityImp<0> > > vertices;
+    //std::vector<std::list<OneDEntityImp<0> > > vertices;
 
     // The elements of the grid hierarchy
     std::vector<OneDGridList<OneDEntityImp<1> > > elements;

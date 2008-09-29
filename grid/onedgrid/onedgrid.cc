@@ -65,7 +65,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
 
     OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, newCoord);
     newVertex->id_ = getNextFreeId(1);
-    vertices[0].insert_after(vertices[0].rbegin(), newVertex);
+    vertices[0].push_back(newVertex);
 
   }
 
@@ -78,7 +78,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
     it = it->succ_;
     newElement->vertex_[1] = it;
 
-    elements[0].insert_after(elements[0].rbegin(), newElement);
+    elements[0].push_back(newElement);
 
   }
 
@@ -102,7 +102,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   // Init vertex set
   for (size_t i=0; i<coords.size(); i++) {
     OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, coords[i], getNextFreeId(1));
-    vertices[0].insert_after(vertices[0].rbegin(), newVertex);
+    vertices[0].push_back(newVertex);
   }
 
   // Init element set
@@ -117,7 +117,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
     if (newElement->vertex_[0]->pos_ >= newElement->vertex_[1]->pos_)
       DUNE_THROW(GridError, "The coordinates have to be in ascending order!");
 
-    elements[0].insert_after(elements[0].rbegin(), newElement);
+    elements[0].push_back(newElement);
 
   }
 
@@ -436,7 +436,7 @@ bool Dune::OneDGrid::adapt()
 
         } else {
           // leftNeighbor does not exist
-          vertices[i+1].insert_before(vertices[i+1].begin(), leftUpperVertex);
+          vertices[i+1].insert(vertices[i+1].begin(), leftUpperVertex);
 
         }
 
@@ -469,7 +469,7 @@ bool Dune::OneDGrid::adapt()
           elements[i+1].insert_after(leftNeighbor->sons_[1], newElement0);
         else
           // leftNeighbor does not exist
-          elements[i+1].insert_before(elements[i+1].begin(), newElement0);
+          elements[i+1].insert(elements[i+1].begin(), newElement0);
 
         elements[i+1].insert_after(newElement0, newElement1);
 
@@ -537,7 +537,7 @@ bool Dune::OneDGrid::adapt()
 
           } else {
             // leftNeighbor does not exist
-            vertices[i+1].insert_before(vertices[i+1].begin(), leftUpperVertex);
+            vertices[i+1].insert(vertices[i+1].begin(), leftUpperVertex);
 
           }
 
@@ -562,7 +562,7 @@ bool Dune::OneDGrid::adapt()
             elements[i+1].insert_after(leftNeighbor->sons_[1], newElement);
           else
             // leftNeighbor does not exist
-            elements[i+1].insert_before(elements[i+1].begin(), newElement);
+            elements[i+1].insert(elements[i+1].begin(), newElement);
 
           // Mark the new element as the sons of the refined element
           eIt->sons_[0] = eIt->sons_[1] = newElement;
