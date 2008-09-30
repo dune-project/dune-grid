@@ -78,7 +78,67 @@ namespace Dune {
   // ALUGrid, for example the reference elements differ
   // here we have [0,1]^2 and in ALUGrid its [-1,1]^2
   // also the point numbering is different
-  class BilinearSurfaceMapping {
+  class SurfaceNormalCalculator
+  {
+  protected:
+    // our coordinate types
+    typedef FieldVector<double, 3> coord3_t;
+    typedef FieldVector<double, 2> coord2_t;
+
+    // type of coordinate vectors from elements
+    typedef double double3_t[3];
+
+    double _n [3][3] ;
+
+    static const double _epsilon ;
+
+    bool _affine;
+
+  public:
+    //! Constructor creating empty mapping with double , i.e. zero
+    SurfaceNormalCalculator();
+
+    SurfaceNormalCalculator (const SurfaceNormalCalculator &) ;
+    ~SurfaceNormalCalculator () {}
+
+    // returns true if mapping is affine
+    inline bool affine () const { return _affine ; }
+
+    // calcuates normal
+    void normal(const coord2_t&, coord3_t&) const ;
+    void normal(const double, const double, coord3_t&) const;
+
+    void negativeNormal(const coord2_t&, coord3_t&) const ;
+    void negativeNormal(const double, const double, coord3_t&) const;
+
+  public:
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
+    template <class vector_t>
+    void buildMapping (const vector_t & , const vector_t & ,
+                       const vector_t & , const vector_t & );
+  protected:
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
+    template <class vector_t>
+    void buildMapping (const vector_t & , const vector_t & ,
+                       const vector_t & , const vector_t & ,
+                       double (&_b)[4][3] );
+  } ;
+
+  //! A bilinear surface mapping
+  // NOTE: this class is different to the BilinearSurfaceMapping in
+  // ALUGrid, for example the reference elements differ
+  // here we have [0,1]^2 and in ALUGrid its [-1,1]^2
+  // also the point numbering is different
+  class BilinearSurfaceMapping : public SurfaceNormalCalculator
+  {
+  protected:
+    typedef SurfaceNormalCalculator BaseType;
+
+    using BaseType :: _n;
+    using BaseType :: _epsilon;
+
     // our coordinate types
     typedef FieldVector<double, 3> coord3_t;
     typedef FieldVector<double, 2> coord2_t;
@@ -92,24 +152,22 @@ namespace Dune {
     // type for inverse matrices
     typedef FieldMatrix<double,3,2> inv_t;
 
+    double _b [4][3] ;
+
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
     mutable double DetDf;
-    double _b [4][3] ;
-    double _n [3][3] ;
 
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
-    static const double _epsilon ;
 
-    bool _affine;
     mutable bool _calcedDet;
     mutable bool _calcedInv;
     mutable bool _calcedTransposed;
 
   public:
     //! Constructor creating empty mapping with double , i.e. zero
-    BilinearSurfaceMapping (double);
+    BilinearSurfaceMapping ();
 
     //! Constructor getting FieldVectors
     BilinearSurfaceMapping (const coord3_t&, const coord3_t&,
@@ -128,10 +186,6 @@ namespace Dune {
 
     // maps from local coordinates to global coordinates
     void world2map(const coord3_t &, coord2_t & ) const;
-
-    // calcuates normal
-    void normal(const coord2_t&, coord3_t&) const ;
-    void normal(const double, const double, coord3_t&) const;
 
     // maps form global coordinates to local (within reference element)
     // coordinates

@@ -238,38 +238,33 @@ namespace Dune {
 
   //- Bilinear surface mapping
   // Constructor for FieldVectors
-  inline BilinearSurfaceMapping ::
-  BilinearSurfaceMapping (double x)
+  inline SurfaceNormalCalculator :: SurfaceNormalCalculator()
   {
-    double p[3] = {x,x,x};
+    double p[3] = {0.0,0.0,0.0};
     //initialize with zero
     buildMapping(p,p,p,p);
-  }
-
-  //- Bilinear surface mapping
-  // Constructor for FieldVectors
-  inline BilinearSurfaceMapping ::
-  BilinearSurfaceMapping (const coord3_t& x0, const coord3_t& x1,
-                          const coord3_t& x2, const coord3_t& x3)
-  {
-    buildMapping(x0,x1,x2,x3);
-  }
-
-  // Constructor for double[3]
-  inline BilinearSurfaceMapping ::
-  BilinearSurfaceMapping (const double3_t & x0, const double3_t & x1,
-                          const double3_t & x2, const double3_t & x3)
-  {
-    buildMapping(x0,x1,x2,x3);
   }
 
   // the real constructor, this can be called fro FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
-  inline void BilinearSurfaceMapping ::
+  inline void SurfaceNormalCalculator ::
   buildMapping  (const vector_t & _p0, const vector_t & _p1,
                  const vector_t & _p2, const vector_t & _p3)
   {
+    double b[4][3];
+    buildMapping( _p0, _p1, _p2, _p3, b );
+  }
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <class vector_t>
+  inline void SurfaceNormalCalculator ::
+  buildMapping  (const vector_t & _p0, const vector_t & _p1,
+                 const vector_t & _p2, const vector_t & _p3,
+                 double (&_b)[4][3])
+  {
+
     _b [0][0] = _p0 [0] ;
     _b [0][1] = _p0 [1] ;
     _b [0][2] = _p0 [2] ;
@@ -306,6 +301,87 @@ namespace Dune {
       _affine = (sum < _epsilon);
     }
 
+    return ;
+  }
+
+  inline SurfaceNormalCalculator ::
+  SurfaceNormalCalculator(const SurfaceNormalCalculator & m)
+  {
+    // copy n
+    {
+      for (int i = 0 ; i < 3 ; i ++)
+        for (int j = 0 ; j < 3 ; j ++ )
+          _n [i][j] = m._n [i][j] ;
+    }
+    _affine = m._affine;
+    return ;
+  }
+
+  inline void SurfaceNormalCalculator::
+  normal (const coord2_t& map, coord3_t& norm) const
+  {
+    normal(map[0],map[1],norm);
+    return ;
+  }
+
+  inline void SurfaceNormalCalculator ::
+  normal (const double x, const double y, coord3_t& norm) const {
+    norm [0] = -(_n [0][0] + _n [1][0] * x + _n [2][0] * y);
+    norm [1] = -(_n [0][1] + _n [1][1] * x + _n [2][1] * y);
+    norm [2] = -(_n [0][2] + _n [1][2] * x + _n [2][2] * y);
+    return ;
+  }
+
+  inline void SurfaceNormalCalculator ::
+  negativeNormal (const coord2_t& map, coord3_t& norm) const
+  {
+    negativeNormal(map[0],map[1],norm);
+    return ;
+  }
+
+  inline void SurfaceNormalCalculator ::
+  negativeNormal(const double x, const double y, coord3_t& norm) const {
+    norm [0] = (_n [0][0] + _n [1][0] * x + _n [2][0] * y);
+    norm [1] = (_n [0][1] + _n [1][1] * x + _n [2][1] * y);
+    norm [2] = (_n [0][2] + _n [1][2] * x + _n [2][2] * y);
+    return ;
+  }
+
+  //- Bilinear surface mapping
+  // Constructor for FieldVectors
+  inline BilinearSurfaceMapping ::
+  BilinearSurfaceMapping ()
+  {
+    double p[3] = {0.0,0.0,0.0};
+    //initialize with zero
+    buildMapping(p,p,p,p);
+  }
+
+  //- Bilinear surface mapping
+  // Constructor for FieldVectors
+  inline BilinearSurfaceMapping ::
+  BilinearSurfaceMapping (const coord3_t& x0, const coord3_t& x1,
+                          const coord3_t& x2, const coord3_t& x3)
+  {
+    buildMapping(x0,x1,x2,x3);
+  }
+
+  // Constructor for double[3]
+  inline BilinearSurfaceMapping ::
+  BilinearSurfaceMapping (const double3_t & x0, const double3_t & x1,
+                          const double3_t & x2, const double3_t & x3)
+  {
+    buildMapping(x0,x1,x2,x3);
+  }
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <class vector_t>
+  inline void BilinearSurfaceMapping ::
+  buildMapping  (const vector_t & _p0, const vector_t & _p1,
+                 const vector_t & _p2, const vector_t & _p3)
+  {
+    BaseType :: buildMapping( _p0, _p1, _p2, _p3, _b );
     // initialize flags
     _calcedDet = _calcedInv = _calcedTransposed = false ;
 
@@ -314,18 +390,15 @@ namespace Dune {
 
   inline BilinearSurfaceMapping ::
   BilinearSurfaceMapping (const BilinearSurfaceMapping & m)
+    : BaseType(m)
   {
+    // copy _b
     {
       for (int i = 0 ; i < 4 ; i ++)
         for (int j = 0 ; j < 3 ; j ++ )
           _b [i][j] = m._b [i][j] ;
     }
-    {
-      for (int i = 0 ; i < 3 ; i ++)
-        for (int j = 0 ; j < 3 ; j ++ )
-          _n [i][j] = m._n [i][j] ;
-    }
-    _affine = m._affine;
+
     // initialize flags
     _calcedDet = _calcedInv = _calcedTransposed = false ;
     return ;
@@ -420,11 +493,11 @@ namespace Dune {
     return ;
   }
 
-  inline const FieldMatrix<double, 3, 2>&
+  inline const BilinearSurfaceMapping:: inv_t&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
     // if calculated return
-    if( _calcedTransposed ) return invTransposed_;
+    if( _calcedTransposed) return invTransposed_;
 
     map2worldnormal (local[0],local[1],0.0,tmp_);
     inverse (tmp_) ;
@@ -476,21 +549,6 @@ namespace Dune {
     // get local coordinates
     map[0] = map_[0];
     map[1] = map_[1];
-    return ;
-  }
-
-  inline void BilinearSurfaceMapping ::
-  normal (const coord2_t& map, coord3_t& norm) const
-  {
-    normal(map[0],map[1],norm);
-    return ;
-  }
-
-  inline void BilinearSurfaceMapping ::
-  normal (const double x, const double y, coord3_t& norm) const {
-    norm [0] = -(_n [0][0] + _n [1][0] * x + _n [2][0] * y);
-    norm [1] = -(_n [0][1] + _n [1][1] * x + _n [2][1] * y);
-    norm [2] = -(_n [0][2] + _n [1][2] * x + _n [2][2] * y);
     return ;
   }
 
