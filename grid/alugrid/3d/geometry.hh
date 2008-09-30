@@ -187,31 +187,248 @@ namespace Dune {
     typedef ElementTopologyMapping<hexa> ElementTopo;
     typedef FaceTopologyMapping<hexa> FaceTopo;
 
-    template <int dummy, int dim>
-    struct MappingChooser
-    {
-      typedef bool TrilinearMappingType;
-      typedef bool BilinearSurfaceMappingType;
-    };
-
-    template <int dummy>
-    struct MappingChooser<dummy,2>
-    {
-      typedef bool TrilinearMappingType;
-      typedef BilinearSurfaceMapping BilinearSurfaceMappingType;
-    };
-
-    template <int dummy>
-    struct MappingChooser<dummy,3>
-    {
-      typedef TrilinearMapping TrilinearMappingType;
-      typedef bool BilinearSurfaceMappingType;
-    };
-
-    typedef typename MappingChooser<0,mydim> :: TrilinearMappingType TrilinearMappingType;
-    typedef typename MappingChooser<0,mydim> :: BilinearSurfaceMappingType BilinearSurfaceMappingType;
-
     enum { corners_ = Power_m_p<2,mydim>::power };
+
+    // geometry implementation for edges and vertices
+    template <int dummy, int dim>
+    class GeometryImpl
+    {
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
+
+      CoordinateMatrixType coord_;
+
+    public:
+      GeometryImpl() : coord_() {}
+      GeometryImpl(const GeometryImpl& other) : coord_(other.coord_) {}
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      // update edge
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0,
+                         const CoordPtrType& p1)
+      {
+        assert( corners_ == 2 );
+        copyCoordVec( p0, coord_[0] );
+        copyCoordVec( p1, coord_[1] );
+      }
+
+      // update vertex
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0)
+      {
+        assert( corners_ == 1 );
+        copyCoordVec( p0, coord_[0] );
+      }
+
+    protected:
+      template <class CoordPtrType>
+      inline void copyCoordVec(const CoordPtrType& p,
+                               CoordinateVectorType& c)
+      {
+        assert( cdim == 3 );
+        c[0] = p[0];
+        c[1] = p[1];
+        c[2] = p[2];
+      }
+    };
+
+
+    // geom impl for faces
+    template <int dummy>
+    class GeometryImpl<dummy,2>
+    {
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
+      typedef BilinearSurfaceMapping MappingType;
+
+      //! the coordinates (for dim = 3 only a pointer)
+      CoordinateMatrixType coord_;
+
+      MappingType biMap_;
+      bool builtMapping_;
+
+    public:
+      GeometryImpl() : coord_(), biMap_(), builtMapping_(false) {}
+      GeometryImpl(const GeometryImpl& other) :
+        coord_(other.coord_),
+        biMap_(other.biMap_),
+        builtMapping_(other.builtMapping_)
+      {}
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      // update geometry coordinates
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0,
+                         const CoordPtrType& p1,
+                         const CoordPtrType& p2,
+                         const CoordPtrType& p3)
+      {
+        copyCoordVec(p0, coord_[0] );
+        copyCoordVec(p1, coord_[1] );
+        copyCoordVec(p2, coord_[2] );
+        copyCoordVec(p3, coord_[3] );
+        builtMapping_ = false;
+      }
+
+      // return mapping (always up2date)
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return biMap_;
+
+        biMap_.buildMapping( coord_[0], coord_[1], coord_[2], coord_[3] );
+        builtMapping_ = true ;
+        return biMap_;
+      }
+
+    protected:
+      template <class CoordPtrType>
+      inline void copyCoordVec(const CoordPtrType& p,
+                               CoordinateVectorType& c)
+      {
+        assert( cdim == 3 );
+        c[0] = p[0];
+        c[1] = p[1];
+        c[2] = p[2];
+      }
+
+    };
+
+    // geometry impl for elements
+    template <int dummy>
+    class GeometryImpl<dummy,3>
+    {
+      //! the vertex coordinates
+      typedef double CoordPtrType[cdim];
+
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
+
+      typedef TrilinearMapping MappingType;
+
+      // coordinate pointer vector
+      FieldVector<const CoordPtrType*, corners_ > coordPtr_;
+      MappingType triMap_;
+      CoordinateMatrixType* fatherCoord_;
+      bool builtMapping_;
+
+    public:
+      GeometryImpl() : coordPtr_((CoordPtrType*) 0), triMap_(),
+                       fatherCoord_(0),
+                       builtMapping_(false)
+      {}
+
+
+      GeometryImpl(const GeometryImpl& other) :
+        coordPtr_(other.coordPtr_),
+        triMap_(other.triMap_),
+        fatherCoord_(0),
+        builtMapping_(other.builtMapping_)
+      {
+        // if father coords are set, then reset coordPtr
+        if( other.fatherCoord_ )
+        {
+          fatherCoord_ = new CoordinateMatrixType(*other.fatherCoord_);
+          CoordinateMatrixType& coord = *fatherCoord_;
+          for(int i=0; i<corners_; ++i)
+          {
+            coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+          }
+        }
+      }
+
+      ~GeometryImpl()
+      {
+        if( fatherCoord_ ) delete fatherCoord_;
+      }
+
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return reinterpret_cast<const CoordinateVectorType&> (*(coordPtr_[i]));
+      }
+
+      // update geometry coordinates
+      inline void update(const CoordPtrType& p0,
+                         const CoordPtrType& p1,
+                         const CoordPtrType& p2,
+                         const CoordPtrType& p3,
+                         const CoordPtrType& p4,
+                         const CoordPtrType& p5,
+                         const CoordPtrType& p6,
+                         const CoordPtrType& p7)
+      {
+        coordPtr_[0] = &p0;
+        coordPtr_[1] = &p1;
+        coordPtr_[2] = &p2;
+        coordPtr_[3] = &p3;
+        coordPtr_[4] = &p4;
+        coordPtr_[5] = &p5;
+        coordPtr_[6] = &p6;
+        coordPtr_[7] = &p7;
+        builtMapping_ = false;
+      }
+
+      // update geometry in father coordinates
+      template <class GeometryImp>
+      inline void updateInFather(const GeometryImp &fatherGeom ,
+                                 const GeometryImp & myGeom)
+      {
+        if( fatherCoord_ == 0 )
+        {
+          fatherCoord_ = new CoordinateMatrixType();
+        }
+
+        CoordinateMatrixType& coord = *fatherCoord_;
+        // compute the local coordinates in father refelem
+        for(int i=0; i < myGeom.corners() ; ++i)
+        {
+          // calculate coordinate
+          coord[i] = fatherGeom.local( myGeom[i] );
+
+          // set pointer
+          coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
+
+          // to avoid rounding errors
+          for(int j=0; j<cdim; ++j)
+          {
+            if ( coord[i][j] < 1e-16) coord[i][j] = 0.0;
+          }
+        }
+
+        builtMapping_ = false ;
+      }
+
+      // return mapping (always up2date)
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return triMap_;
+
+        triMap_.buildMapping( (*this)[0], (*this)[1], (*this)[2], (*this)[3],
+                              (*this)[4], (*this)[5], (*this)[6], (*this)[7] );
+
+        builtMapping_ = true;
+        return triMap_;
+      }
+    };
+
+    // type of specialized geometry implementation
+    typedef GeometryImpl<0, mydim> GeometryImplType;
   public:
     typedef FieldMatrix<alu3d_ctype, 4, 3> FaceCoordinatesType;
 
@@ -275,9 +492,6 @@ namespace Dune {
                    const coord_t& p2,
                    const coord_t& p3);
 
-    //! build ghost out of internal boundary segment
-    bool buildGhost(const PLLBndFaceType & ghost);
-
     //! build geometry of local coordinates relative to father
     template <class GeometryType>
     bool buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom);
@@ -287,36 +501,9 @@ namespace Dune {
     void print (std::ostream& ss) const;
 
   private:
-    // copies the values of point to the values of coord
-    template <class coord_t>
-    inline void copyCoordVec(const coord_t& point,
-                             FieldVector<alu3d_ctype,cdim> & coord ) const;
-
-    // create triMap from coordinates , deletes old mapping
-    void buildMapping() const;
-
-    // create biMap_ from coordinates , deletes old mapping
-    void buildBilinearMapping() const;
-
-    //! the vertex coordinates
-    mutable FieldMatrix<alu3d_ctype, corners_ , cdim> coord_;
-
-    //! the vertex coordinates
-    typedef double CoordPtrType[cdim];
-    mutable FieldVector<const CoordPtrType*, corners_ > coordPtr_;
-
-    mutable FieldVector<alu3d_ctype, mydim> tmp1_;
-    mutable FieldVector<alu3d_ctype, cdim> tmp2_;
-
-    const GeometryType myGeomType_;
-
-    mutable TrilinearMappingType triMap_;
-    mutable BilinearSurfaceMappingType biMap_;
-
-    mutable bool buildTriMap_;
-    mutable bool buildBiMap_;
-
-    mutable FieldVector<alu3d_ctype, mydim> localBaryCenter_;
+    // implementation of coord and mapping
+    mutable GeometryImplType geoImpl_;
+    // volume
     mutable alu3d_ctype volume_;
   };
 

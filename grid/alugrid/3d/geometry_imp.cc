@@ -287,12 +287,6 @@ namespace Dune {
     return myGeomType_;
   }
 
-  template <int mydim, int cdim>
-  inline const GeometryType &
-  ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
-    return myGeomType_;
-  }
-
   template<int mydim, int cdim>
   inline int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::corners () const
   {
@@ -501,47 +495,34 @@ namespace Dune {
   /////////////////////////////////////////////////////////////////////////
   template <int mydim, int cdim>
   inline ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  ALU3dGridGeometry() :
-    coord_(0.0),
-    coordPtr_(0),
-    myGeomType_(GeometryType::cube,mydim),
-    triMap_(),
-    biMap_(),
-    buildTriMap_(false),
-    buildBiMap_(false),
-    localBaryCenter_(0.5)
+  ALU3dGridGeometry()
+    : geoImpl_(),
+      volume_(1.0)
   {}
 
   template <>
   inline ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  ALU3dGridGeometry() :
-    coord_(0.0),
-    coordPtr_(0),
-    myGeomType_(GeometryType::cube,3),
-    triMap_(),
-    biMap_(),
-    buildTriMap_(false),
-    buildBiMap_(false),
-    localBaryCenter_(0.5),
-    volume_(-1.0)
+  ALU3dGridGeometry()
+    : geoImpl_(),
+      volume_(-1.0)
   {}
 
   template <>
   inline ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   ALU3dGridGeometry()
-    : coord_(0.0),
-      coordPtr_(0),
-      myGeomType_(GeometryType::cube,2),
-      triMap_(),
-      biMap_(),
-      buildTriMap_(false),
-      buildBiMap_(false),
-      localBaryCenter_(0.5)
+    : geoImpl_(),
+      volume_(-1.0)
   {}
 
   template <int mydim, int cdim>
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   ~ALU3dGridGeometry() {}
+
+  template <int mydim, int cdim>
+  inline const GeometryType &
+  ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
+    return GeometryType( GeometryType :: cube, mydim );
+  }
 
   template <int mydim, int cdim>
   inline int
@@ -552,63 +533,29 @@ namespace Dune {
   template <int mydim, int cdim>
   inline const FieldVector<alu3d_ctype, cdim>&
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  operator[] (int i) const {
-    assert((i >= 0) && (i < corners()));
-    return coord_[i];
-  }
-
-  // for 3d use coord pointers
-  template <>
-  inline const FieldVector<alu3d_ctype, 3>&
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   operator[] (int i) const
   {
-    assert((i >= 0) && (i < corners()));
-    return reinterpret_cast<const FieldVector<alu3d_ctype, 3>&> (*(coordPtr_[i]));
-  }
-
-  template <>
-  inline void
-  ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  buildMapping() const
-  {
-    if( ! buildTriMap_ )
-    {
-      // calls constructor but memory of triMapMem is used
-      triMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3],
-                           (*this)[4], (*this)[5], (*this)[6], (*this)[7]);
-      buildTriMap_ = true;
-    }
-  }
-
-  template <>
-  inline void
-  ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
-  buildBilinearMapping() const
-  {
-    if( !buildBiMap_ )
-    {
-      biMap_.buildMapping((*this)[0], (*this)[1], (*this)[2], (*this)[3]);
-      buildBiMap_ = true;
-    }
+    return geoImpl_[i];
   }
 
 
   template <>
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  global (const FieldVector<alu3d_ctype, 3>& local) const {
-    buildMapping();
-    triMap_.map2world(local, tmp2_);
+  global (const FieldVector<alu3d_ctype, 3>& local) const
+  {
+    FieldVector<alu3d_ctype, 3> tmp2_;
+    geoImpl_.mapping().map2world(local, tmp2_);
     return tmp2_;
   }
 
   template <>
   inline FieldVector<alu3d_ctype, 3>
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
-  global (const FieldVector<alu3d_ctype, 2>& local) const {
-    buildBilinearMapping();
-    biMap_.map2world(local, tmp2_);
+  global (const FieldVector<alu3d_ctype, 2>& local) const
+  {
+    FieldVector<alu3d_ctype, 3> tmp2_;
+    geoImpl_.mapping().map2world(local, tmp2_);
     return tmp2_;
   }
 
@@ -617,24 +564,26 @@ namespace Dune {
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   local (const FieldVector<alu3d_ctype, 3>& global) const
   {
-    buildMapping();
-    triMap_.world2map(global, tmp2_);
+    FieldVector<alu3d_ctype, 3> tmp2_;
+    geoImpl_.mapping().world2map(global, tmp2_);
     return tmp2_;
   }
 
   template <>
   inline FieldVector<alu3d_ctype, 2>
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
-  local (const FieldVector<alu3d_ctype, 3>& global) const {
-    buildBilinearMapping();
-    biMap_.world2map(global, tmp1_);
+  local (const FieldVector<alu3d_ctype, 3>& global) const
+  {
+    FieldVector<alu3d_ctype, 2> tmp1_;
+    geoImpl_.mapping().world2map(global, tmp1_);
     return tmp1_;
   }
 
   template <int mydim, int cdim>
   inline bool
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
-  checkInside(const FieldVector<alu3d_ctype, mydim>& local) const {
+  checkInside(const FieldVector<alu3d_ctype, mydim>& local) const
+  {
     bool result = true;
     for (int i = 0; i < mydim; i++ ) {
       result &= (local[i] >= - ALUnumericEpsilon &&
@@ -646,9 +595,9 @@ namespace Dune {
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-  integrationElement (const FieldVector<alu3d_ctype, 3>& local) const {
-    buildMapping();
-    return triMap_.det(local);
+  integrationElement (const FieldVector<alu3d_ctype, 3>& local) const
+  {
+    return geoImpl_.mapping().det(local);
   }
 
   template<>
@@ -656,15 +605,16 @@ namespace Dune {
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   integrationElement (const FieldVector<alu3d_ctype, 2>& local) const
   {
-    buildBilinearMapping();
-    biMap_.normal(local, tmp2_);
+    FieldVector<alu3d_ctype, 3> tmp2_;
+    geoImpl_.mapping().normal(local, tmp2_);
     return tmp2_.two_norm();
   }
 
   template<>
   inline alu3d_ctype
   ALU3dGridGeometry<1, 3, const ALU3dGrid<3, 3, hexa> >::
-  integrationElement (const FieldVector<alu3d_ctype, 1>& local) const {
+  integrationElement (const FieldVector<alu3d_ctype, 1>& local) const
+  {
     return (this->operator[] (0) - this->operator[] (1)).two_norm();
   }
 
@@ -681,7 +631,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   volume () const
   {
-    return integrationElement(localBaryCenter_);
+    return integrationElement(FieldVector<alu3d_ctype, mydim> (0.5));
   }
 
   template <int mydim, int cdim>
@@ -689,8 +639,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   affine() const
   {
-    buildMapping();
-    return triMap_.affine();
+    return geoImpl_.mapping().affine();
   }
 
   template <>
@@ -698,8 +647,7 @@ namespace Dune {
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
   {
-    buildMapping();
-    return triMap_.jacobianInverseTransposed(local);
+    return geoImpl_.mapping().jacobianInverseTransposed(local);
   }
 
   template <>
@@ -707,8 +655,7 @@ namespace Dune {
   ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
   {
-    buildBilinearMapping();
-    return biMap_.jacobianInverseTransposed(local);
+    return geoImpl_.mapping().jacobianInverseTransposed(local);
   }
 
   template <int mydim, int cdim>
@@ -731,25 +678,12 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
   {
-    // compute the local coordinates in father refelem
-    for(int i=0; i < myGeom.corners() ; ++i)
-    {
-      // calculate coordinate
-      coord_[i] = fatherGeom.local( myGeom[i] );
+    // update geo impl
+    geoImpl_.updateInFather( fatherGeom, myGeom );
 
-      // set pointer
-      coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord_[i][0]));
+    // my volume is a part of 1
+    volume_ = myGeom.volume() / fatherGeom.volume();
 
-      // to avoid rounding errors
-      for(int j=0; j<cdim; ++j)
-        if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
-    }
-
-    // reset triMap
-    buildTriMap_ = false;
-
-    // delete old mapping and creats new mapping
-    buildMapping();
     return true;
   }
 
@@ -759,9 +693,6 @@ namespace Dune {
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   buildGeom(const IMPLElementType& item)
   {
-    // get volume of element
-    volume_ = item.volume();
-
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
     // of number when calling myvertex
     assert( ElementTopo::dune2aluVertex(0) == 0 );
@@ -773,17 +704,18 @@ namespace Dune {
     assert( ElementTopo::dune2aluVertex(6) == 7 );
     assert( ElementTopo::dune2aluVertex(7) == 6 );
 
-    coordPtr_[0] = &(item.myvertex(0)->Point());
-    coordPtr_[1] = &(item.myvertex(1)->Point());
-    coordPtr_[2] = &(item.myvertex(3)->Point());
-    coordPtr_[3] = &(item.myvertex(2)->Point());
-    coordPtr_[4] = &(item.myvertex(4)->Point());
-    coordPtr_[5] = &(item.myvertex(5)->Point());
-    coordPtr_[6] = &(item.myvertex(7)->Point());
-    coordPtr_[7] = &(item.myvertex(6)->Point());
+    // update geo impl
+    geoImpl_.update( item.myvertex(0)->Point(),
+                     item.myvertex(1)->Point(),
+                     item.myvertex(3)->Point(),
+                     item.myvertex(2)->Point(),
+                     item.myvertex(4)->Point(),
+                     item.myvertex(5)->Point(),
+                     item.myvertex(7)->Point(),
+                     item.myvertex(6)->Point() );
 
-    // reset triMap
-    buildTriMap_ = false;
+    // get volume of element
+    volume_ = item.volume();
 
     return true;
   }
@@ -791,42 +723,30 @@ namespace Dune {
   template <>
   inline bool
   ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > ::
-  buildGeom(const ALU3DSPACE HFaceType & item, int twist, int duneFace ) {
-    enum { dim = 2 };
-    enum { dimworld = 3 };
-
-    buildBiMap_ = false;
+  buildGeom(const ALU3DSPACE HFaceType & item, int twist, int duneFace )
+  {
+    // get geo face
     const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
     //assert( duneFace >= 0 && duneFace < 6 );
     if(duneFace < 0 ) duneFace = 0;
-    // for all vertices of this face
+
+    // for all vertices of this face get rotatedIndex
+    int rotatedALUIndex[4];
     for (int i = 0; i < 4; ++i)
     {
       // Transform Dune index to ALU index and apply twist
       int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-      int rotatedALUIndex = FaceTopo::twist(localALUIndex, twist);
-
-      const double (&p)[3] =
-        face.myvertex(rotatedALUIndex)->Point();
-      for (int j = 0; j < dimworld; ++j)
-      {
-        coord_[i][j] = p[j];
-      }
+      rotatedALUIndex[i] = FaceTopo::twist(localALUIndex, twist);
     }
-    return true;
-  }
 
-  template<int mydim, int cdim>
-  template<class coord_t>
-  inline void ALU3dGridGeometry<mydim,cdim, const ALU3dGrid<3, 3, hexa> > ::
-  copyCoordVec(const coord_t& point,
-               FieldVector<alu3d_ctype,cdim> & coord ) const
-  {
-    assert( cdim == 3 );
-    coord[0] = point[0];
-    coord[1] = point[1];
-    coord[2] = point[2];
+    // update geometry implementation
+    geoImpl_.update( face.myvertex(rotatedALUIndex[0])->Point(),
+                     face.myvertex(rotatedALUIndex[1])->Point(),
+                     face.myvertex(rotatedALUIndex[2])->Point(),
+                     face.myvertex(rotatedALUIndex[3])->Point() );
+
+    return true;
   }
 
   template <>
@@ -838,12 +758,8 @@ namespace Dune {
             const coord_t& p2,
             const coord_t& p3)
   {
-    copyCoordVec( p0, coord_[0] );
-    copyCoordVec( p1, coord_[1] );
-    copyCoordVec( p2, coord_[2] );
-    copyCoordVec( p3, coord_[3] );
-
-    buildBiMap_ = false;
+    // update geometry implementation
+    geoImpl_.update( p0, p1, p2, p3 );
     return true;
   }
 
@@ -861,16 +777,10 @@ namespace Dune {
   ALU3dGridGeometry<1,3, const ALU3dGrid<3, 3, hexa> >::
   buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int)
   {
-    enum { dim = 1 };
-    enum { dimworld = 3 };
-
-    for (int i = 0; i < 2; ++i) {
-      const double (&p)[3] =
-        static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point();
-      for (int j = 0; j < dimworld; ++j) {
-        coord_[i][j] = p[j];
-      }
-    }
+    const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
+    // update geometry implementation
+    geoImpl_.update( edge.myvertex((twist)  %2)->Point(),
+                     edge.myvertex((1+twist)%2)->Point() );
     return true;
   }
 
@@ -879,12 +789,8 @@ namespace Dune {
   ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,hexa> >::
   buildGeom(const ALU3DSPACE VertexType & item, int twist, int)
   {
-    enum { dim = 0 };
-    enum { dimworld = 3};
-
-    const double (&p)[3] = static_cast<const GEOVertexType &> (item).Point();
-    for (int j=0; j<dimworld; j++) coord_[0][j] = p[j];
-
+    // update geometry implementation
+    geoImpl_.update( static_cast<const GEOVertexType &> (item).Point() );
     return true;
   }
 
