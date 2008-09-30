@@ -417,11 +417,19 @@ namespace Dune
 
     /**\brief Returns true, if entity was refined during last adaptation cycle
      */
-    bool wasRefined () const { return realEntity.wasRefined(); }
+    bool wasRefined () const DUNE_DEPRECATED { return realEntity.wasRefined(); }
 
     /**\brief Returns true, if entity might be coarsened during next adaption cycle
      */
-    bool mightBeCoarsened () const { return realEntity.mightBeCoarsened (); }
+    bool mightBeCoarsened () const DUNE_DEPRECATED { return realEntity.mightBeCoarsened (); }
+
+    /**\brief Returns true, if the entity has been created during the last call to adapt()
+     */
+    bool isNew () const { return realEntity.wasRefined(); }
+
+    /**\brief Returns true, if entity might disappear during the next call to adapt()
+     */
+    bool mightVanish () const { return realEntity.mightBeCoarsened (); }
 
     //===========================================================
     /** @name Interface for the implementor
@@ -595,11 +603,19 @@ namespace Dune
 
     /**\brief Returns true, if entity was refined during last adaptation cycle
      */
-    bool wasRefined () const { return false; }
+    bool wasRefined () const DUNE_DEPRECATED { return false; }
 
     /**\brief Returns true, if entity might be coarsened during next adaption cycle
      */
-    bool mightBeCoarsened () const { return false; }
+    bool mightBeCoarsened () const DUNE_DEPRECATED { return false; }
+
+    /**\brief Returns true, if the entity has been created during the last call to adapt()
+     */
+    bool isNew () const { return false; }
+
+    /**\brief Returns true, if entity might disappear during the next call to adapt()
+     */
+    bool mightVanish () const { return false; }
 
     /**\brief Returns true, if entity has intersections with boundary,
        this implementation uses the Level- and LeafIntersectionIterator to
