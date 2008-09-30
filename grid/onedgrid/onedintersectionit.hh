@@ -22,8 +22,7 @@ namespace Dune {
      of an element!
    */
   template<class GridImp>
-  class OneDGridLevelIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp, OneDGridLevelIntersectionIterator>
+  class OneDGridLevelIntersectionIterator
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
@@ -52,6 +51,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef Dune::Intersection<const GridImp, Dune::OneDGridLevelIntersectionIterator> Intersection;
 
     //! The Destructor
     ~OneDGridLevelIntersectionIterator() {};
@@ -64,6 +64,12 @@ namespace Dune {
     //! prefix increment
     void increment() {
       neighbor_++;
+    }
+
+    //! \brief dereferencing
+    const Intersection & dereference() const
+    {
+      return reinterpret_cast<const Intersection&>(*this);
     }
 
     OneDEntityImp<1>* target() const {
@@ -232,8 +238,7 @@ namespace Dune {
 
 
   template<class GridImp>
-  class OneDGridLeafIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp, OneDGridLeafIntersectionIterator>
+  class OneDGridLeafIntersectionIterator
   {
     enum { dim=GridImp::dimension };
     enum { dimworld=GridImp::dimensionworld };
@@ -262,6 +267,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef Dune::Intersection<const GridImp, Dune::OneDGridLeafIntersectionIterator> Intersection;
 
     //! The Destructor
     ~OneDGridLeafIntersectionIterator() {};
@@ -274,6 +280,12 @@ namespace Dune {
     //! prefix increment
     void increment() {
       neighbor_++;
+    }
+
+    //! \brief dereferencing
+    const Intersection & dereference() const
+    {
+      return reinterpret_cast<const Intersection&>(*this);
     }
 
     OneDEntityImp<1>* target() const {
