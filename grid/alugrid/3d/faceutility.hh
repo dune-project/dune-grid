@@ -247,10 +247,6 @@ namespace Dune {
   public:
     //- public typedefs
     typedef FieldVector<alu3d_ctype, 3> NormalType;
-    typedef FieldMatrix<alu3d_ctype,
-        numVerticesPerFace,
-        dimworld> CoordinateType;
-
     typedef ALU3dGridFaceInfo<tetra>::GEOFaceType GEOFaceType;
   public:
     typedef ALU3dGridFaceInfo<tetra> ConnectorType;
@@ -264,7 +260,7 @@ namespace Dune {
     //! reset status of faceGeomInfo
     void resetFaceGeom();
 
-    //! update geometry
+    //! update global geometry
     template <class GeometryImp>
     void buildGlobalGeom(GeometryImp& geo) const;
 
@@ -287,12 +283,8 @@ namespace Dune {
   public:
     //- public typedefs
     typedef FieldVector<alu3d_ctype, 3> NormalType;
-    typedef FieldMatrix<alu3d_ctype,
-        numVerticesPerFace,
-        dimworld> CoordinateType;
-
     typedef ALU3dGridFaceInfo<hexa>::GEOFaceType GEOFaceType;
-    typedef BilinearSurfaceMapping SurfaceMappingType;
+    typedef SurfaceNormalCalculator SurfaceMappingType;
   public:
     typedef ALU3dGridFaceInfo<hexa> ConnectorType;
 
@@ -305,7 +297,7 @@ namespace Dune {
     //! reset status of faceGeomInfo
     void resetFaceGeom();
 
-    //! update geometry
+    //! update global geometry
     template <class GeometryImp>
     void buildGlobalGeom(GeometryImp& geo) const;
 
@@ -319,6 +311,7 @@ namespace Dune {
 
     // surface mapping for calculating the outer normal
     mutable SurfaceMappingType mappingGlobal_;
+
     // false if surface mapping needs a update
     mutable bool mappingGlobalUp2Date_;
   };

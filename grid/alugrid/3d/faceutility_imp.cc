@@ -309,9 +309,9 @@ namespace Dune {
   ALU3dGridGeometricFaceInfoTetra::
   buildGlobalGeom(GeometryImp& geo) const
   {
-    if ( ! this->generatedGlobal_ )
+    if (! this->generatedGlobal_)
     {
-      // set new geometry coordinates
+      // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
       geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
@@ -353,7 +353,7 @@ namespace Dune {
   inline ALU3dGridGeometricFaceInfoHexa::
   ALU3dGridGeometricFaceInfoHexa(const ConnectorType& connector)
     : ALU3dGridGeometricFaceInfoBase<hexa>(connector)
-      , mappingGlobal_(0.0)
+      , mappingGlobal_()
       , mappingGlobalUp2Date_(false)
   {}
 
@@ -376,9 +376,9 @@ namespace Dune {
   ALU3dGridGeometricFaceInfoHexa::
   buildGlobalGeom(GeometryImp& geo) const
   {
-    if ( ! this->generatedGlobal_ )
+    if (! this->generatedGlobal_)
     {
-      // set new geometry coordinates
+      // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
       geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
@@ -393,8 +393,12 @@ namespace Dune {
   ALU3dGridGeometricFaceInfoHexa::
   outerNormal(const FieldVector<alu3d_ctype, 2>& local) const
   {
+    // if mapping calculated and affine, nothing more to do
+    if ( mappingGlobal_.affine () && mappingGlobalUp2Date_ )
+      return outerNormal_ ;
+
     // update surface mapping
-    if(!mappingGlobalUp2Date_)
+    if(! mappingGlobalUp2Date_ )
     {
       const GEOFaceType & face = connector_.face();
       // update mapping to actual face
@@ -410,13 +414,12 @@ namespace Dune {
     // calculate the normal
     // has to be calculated every time normal called, because
     // depends on local
-    mappingGlobal_.normal(local,outerNormal_);
+    if (connector_.innerTwist() < 0)
+      mappingGlobal_.negativeNormal(local,outerNormal_);
+    else
+      mappingGlobal_.normal(local,outerNormal_);
 
-    // change sign if face normal points into inner element
-    if (connector_.innerTwist() < 0) {
-      outerNormal_ *= -1.0;
-    } // end if
-
+    // end if
     return outerNormal_;
   }
 

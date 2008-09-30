@@ -506,7 +506,7 @@ namespace Dune {
     coordPtr_(0),
     myGeomType_(GeometryType::cube,mydim),
     triMap_(),
-    biMap_(0),
+    biMap_(),
     buildTriMap_(false),
     buildBiMap_(false),
     localBaryCenter_(0.5)
@@ -519,7 +519,7 @@ namespace Dune {
     coordPtr_(0),
     myGeomType_(GeometryType::cube,3),
     triMap_(),
-    biMap_(0),
+    biMap_(),
     buildTriMap_(false),
     buildBiMap_(false),
     localBaryCenter_(0.5),
@@ -533,7 +533,7 @@ namespace Dune {
       coordPtr_(0),
       myGeomType_(GeometryType::cube,2),
       triMap_(),
-      biMap_(0),
+      biMap_(),
       buildTriMap_(false),
       buildBiMap_(false),
       localBaryCenter_(0.5)
