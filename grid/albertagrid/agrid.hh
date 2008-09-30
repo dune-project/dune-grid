@@ -613,11 +613,19 @@ namespace Dune
 
     /**\brief Returns true, if entity was refined during last adaptation
         cycle */
-    bool wasRefined () const ;
+    bool wasRefined () const DUNE_DEPRECATED {return isNew();}
 
     /**\brief Returns true, if entity might be coarsened during next
         adaption cycle */
-    bool mightBeCoarsened () const ;
+    bool mightBeCoarsened () const DUNE_DEPRECATED {return mightVanish()};
+
+    /**\brief Returns true, if entity was refined during last adaptation
+        cycle */
+    bool isNew () const ;
+
+    /**\brief Returns true, if entity might be coarsened during next
+        adaption cycle */
+    bool mightVanish () const ;
 
     /**\brief Returns true, if entity has intersections with boundary
      */

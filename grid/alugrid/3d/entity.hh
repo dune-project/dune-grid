@@ -330,10 +330,16 @@ namespace Dune {
     //  Interface for Adaptation
     //***************************************************************
     //! returns true, if entity was created during last adaptation cycle
-    bool wasRefined () const;
+    bool wasRefined () const DUNE_DEPRECATED {return isNew();}
 
     //! returns true, if entity might be coarsened during next adaptation cycle
-    bool mightBeCoarsened () const;
+    bool mightBeCoarsened () const DUNE_DEPRECATED {return mightVanish();}
+
+    //! returns true, if entity was created during last adaptation cycle
+    bool isNew () const;
+
+    //! returns true, if entity might be coarsened during next adaptation cycle
+    bool mightVanish () const;
 
     //! returns true, if entity has intersections with boundary
     bool hasBoundaryIntersections () const;

@@ -653,14 +653,14 @@ namespace Dune {
 
   // Adaptation methods
   template<int dim, class GridImp>
-  inline bool ALU3dGridEntity<0,dim,GridImp> :: wasRefined () const
+  inline bool ALU3dGridEntity<0,dim,GridImp> :: isNew () const
   {
     assert( item_ );
     return item_->hasBeenRefined();
   }
 
   template<int dim, class GridImp>
-  inline bool ALU3dGridEntity<0,dim,GridImp> :: mightBeCoarsened () const
+  inline bool ALU3dGridEntity<0,dim,GridImp> :: mightVanish () const
   {
     assert( item_ );
     return ((*item_).requestrule() == coarse_element_t);

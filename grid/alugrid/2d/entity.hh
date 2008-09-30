@@ -366,10 +366,18 @@ namespace Dune {
     const Geometry & geometryInFather () const;
 
     //! The former state() method has been replaced by:
-    bool mightBeCoarsened () const {
+    bool mightBeCoarsened () const DUNE_DEPRECATED {
       return ((item_->is(ALU2DSPACE Refco::crs))==1);
     }
-    bool wasRefined () const {
+    bool wasRefined () const DUNE_DEPRECATED {
+      return ((item_->wasRefined())==1);
+    }
+
+    //! The former state() method has been replaced by:
+    bool mightVanish () const {
+      return ((item_->is(ALU2DSPACE Refco::crs))==1);
+    }
+    bool isNew () const {
       return ((item_->wasRefined())==1);
     }
 

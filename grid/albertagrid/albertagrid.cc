@@ -1057,7 +1057,7 @@ namespace Dune
 
   template<int dim, class GridImp>
   inline bool AlbertaGridEntity <0,dim,GridImp>::
-  wasRefined () const
+  isNew () const
   {
     assert( element_ && elInfo_ );
     assert( element_ == elInfo_->el );
@@ -1066,7 +1066,7 @@ namespace Dune
 
   template<int dim, class GridImp>
   inline bool AlbertaGridEntity <0,dim,GridImp>::
-  mightBeCoarsened () const
+  mightVanish () const
   {
     assert( element_ && elInfo_ );
     assert( element_ == elInfo_->el );
