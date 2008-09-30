@@ -412,9 +412,14 @@ namespace Dune {
     // ***************************************************************
 
     /** returns true, if entity might be coarsened during next adaptation cycle */
-    bool mightBeCoarsened () const { return target_->adaptationState_ == OneDEntityImp<1> :: COARSEN; }
+    bool mightBeCoarsened () const DUNE_DEPRECATED { return mightVanish(); }
     /** returns true, if entity was refined during last adaptation cycle */
-    bool wasRefined () const { return target_->adaptationState_ == OneDEntityImp<1> :: REFINED; }
+    bool wasRefined () const DUNE_DEPRECATED { return isNew(); }
+
+    /** returns true, if entity might be coarsened during next adaptation cycle */
+    bool mightVanish () const { return target_->adaptationState_ == OneDEntityImp<1> :: COARSEN; }
+    /** returns true, if entity was refined during last adaptation cycle */
+    bool isNew () const { return target_->adaptationState_ == OneDEntityImp<1> :: REFINED; }
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;

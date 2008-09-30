@@ -64,13 +64,13 @@ Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
 ////////////////////////////////////////////////////////////////////////////
 
 template< int dim, class GridImp>
-inline bool Dune::UGGridEntity < 0, dim ,GridImp >::wasRefined () const
+inline bool Dune::UGGridEntity < 0, dim ,GridImp >::isNew () const
 {
   return UG_NS<dim>::ReadCW(target_, UG_NS<dim>::NEWEL_CE);
 }
 
 template< int dim, class GridImp>
-inline bool Dune::UGGridEntity < 0, dim ,GridImp >::mightBeCoarsened () const
+inline bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 {
   return ((!isRegular()) || (UG_NS<dim>::ReadCW(target_, UG_NS<dim>::COARSEN_CE)));
 }
