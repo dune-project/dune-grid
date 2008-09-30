@@ -51,6 +51,22 @@ namespace Dune
 
     OneDGridList() : numelements(0), begin_(0), rbegin_(0) {}
 
+#if 0
+    ~OneDGridList() {
+      // Delete all elements
+      iterator e = begin();
+
+      while (e) {
+
+        iterator eSucc = e->succ_;
+        erase(e);
+        e = eSucc;
+        return;
+      }
+
+    }
+#endif
+
     int size() const {return numelements;}
 
     T* insert_after (T* i, T* t) DUNE_DEPRECATED {
@@ -150,7 +166,7 @@ namespace Dune
       return t;
     }
 
-    void remove (T* i)
+    void erase (T* i)
     {
       // Teste Eingabe
       if (i==0)
@@ -170,6 +186,9 @@ namespace Dune
 
       // Groesse
       numelements = numelements-1;
+
+      // Actually delete the object
+      delete(i);
     }
 
     iterator begin() {
@@ -555,6 +574,9 @@ namespace Dune {
 
     // The elements of the grid hierarchy
     std::vector<OneDGridList<OneDEntityImp<1> > > elements;
+
+    typedef OneDGridList<OneDEntityImp<0> >::iterator VertexIterator;
+    typedef OneDGridList<OneDEntityImp<1> >::iterator ElementIterator;
 
     // Our set of level indices
     mutable std::vector<OneDGridLevelIndexSet<const OneDGrid>* > levelIndexSets_;

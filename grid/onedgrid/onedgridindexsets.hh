@@ -248,7 +248,7 @@ namespace Dune {
       for (int i=grid_.maxLevel(); i>=0; i--) {
 
         const OneDEntityImp<0>* vIt;
-        for (vIt = grid_.vertices[i].begin(); vIt!=NULL; vIt = vIt->succ_) {
+        for (vIt = grid_.vertices[i].begin(); vIt!=grid_.vertices[i].end(); vIt = vIt->succ_) {
 
           /** \todo Remove the const casts */
           if (vIt->isLeaf())
