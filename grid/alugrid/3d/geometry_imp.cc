@@ -281,9 +281,10 @@ namespace Dune {
 
 
   /* Comment in for adaptation to new GeometryType */
-  template <int mydim, int cdim>
-  inline const GeometryType &
-  ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const {
+  template< int mydim, int cdim >
+  inline GeometryType
+  ALU3dGridGeometry< mydim, cdim, const ALU3dGrid< 3, 3, tetra > > :: type () const
+  {
     return myGeomType_;
   }
 
@@ -518,9 +519,10 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   ~ALU3dGridGeometry() {}
 
-  template <int mydim, int cdim>
-  inline const GeometryType &
-  ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
+  template< int mydim, int cdim >
+  inline GeometryType
+  ALU3dGridGeometry< mydim, cdim, const ALU3dGrid< 3, 3, hexa > > :: type () const
+  {
     return GeometryType( GeometryType :: cube, mydim );
   }
 

@@ -72,7 +72,7 @@ namespace Dune {
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    inline const GeometryType & type () const;
+    inline GeometryType type () const;
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     inline int corners () const;
@@ -441,7 +441,7 @@ namespace Dune {
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    const GeometryType & type () const;
+    GeometryType type () const;
 
     //! return the number of corners of this element. Corners are numbered 0..n-1
     int corners () const;
