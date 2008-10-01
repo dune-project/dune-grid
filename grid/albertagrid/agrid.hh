@@ -617,7 +617,7 @@ namespace Dune
 
     /**\brief Returns true, if entity might be coarsened during next
         adaption cycle */
-    bool mightBeCoarsened () const DUNE_DEPRECATED {return mightVanish()};
+    bool mightBeCoarsened () const DUNE_DEPRECATED { return mightVanish(); }
 
     /**\brief Returns true, if entity was refined during last adaptation
         cycle */
