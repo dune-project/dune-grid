@@ -473,7 +473,8 @@ INPUT                  = @srcdir@/mainpage \
                          @top_srcdir@/grid/uggrid.hh \
                          @top_srcdir@/grid/uggrid/uggridfactory.hh \
                          @top_srcdir@/grid/utility \
-                         @top_srcdir@/grid/yaspgrid.hh
+                         @top_srcdir@/grid/yaspgrid.hh \
+                         @top_srcdir@/grid/genericgeometry
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
