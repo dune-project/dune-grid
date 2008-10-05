@@ -37,7 +37,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! Constructor
-    OneDGridHierarchicIterator(int maxlevel) : OneDGridEntityPointer<0,GridImp>(NULL),
+    OneDGridHierarchicIterator(int maxlevel) : OneDGridEntityPointer<0,GridImp>(OneDGridNullIteratorFactory<1>::null()),
                                                maxlevel_(maxlevel), elemStack()
     {}
 
@@ -67,7 +67,8 @@ namespace Dune {
 
       }
 
-      this->virtualEntity_.setToTarget((elemStack.empty()) ? NULL : elemStack.top());
+      this->virtualEntity_.setToTarget((elemStack.empty())
+                                       ? OneDGridNullIteratorFactory<1>::null() : elemStack.top());
     }
 
   private:

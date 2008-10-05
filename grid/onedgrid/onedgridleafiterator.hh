@@ -41,7 +41,7 @@ namespace Dune {
     //! Constructor
     OneDGridLeafIterator()
     {
-      this->virtualEntity_.setToTarget(NULL);
+      this->virtualEntity_.setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
     }
 
     //! prefix increment

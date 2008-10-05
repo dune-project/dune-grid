@@ -27,15 +27,23 @@ namespace Dune {
   {
   public:
 
-    OneDEntityImp(int level, double pos) : pos_(pos), level_(level), son_(NULL), pred_(NULL), succ_(NULL)
+    OneDEntityImp(int level, double pos)
+      : pos_(pos), level_(level),
+        son_(OneDGridNullIteratorFactory<0>::null()),
+        pred_(OneDGridNullIteratorFactory<0>::null()),
+        succ_(OneDGridNullIteratorFactory<0>::null())
     {}
 
     OneDEntityImp(int level, const FieldVector<double, 1>& pos, unsigned int id)
-      : pos_(pos), id_(id), level_(level), son_(NULL), pred_(NULL), succ_(NULL)
+      : pos_(pos), id_(id), level_(level),
+        son_(OneDGridNullIteratorFactory<0>::null()),
+        pred_(OneDGridNullIteratorFactory<0>::null()),
+        succ_(OneDGridNullIteratorFactory<0>::null())
     {}
+
     //private:
     bool isLeaf() const {
-      return son_==NULL;
+      return son_==OneDGridNullIteratorFactory<0>::null();
     }
 
     FieldVector<double, 1> pos_;
@@ -71,14 +79,16 @@ namespace Dune {
     OneDEntityImp(int level, unsigned int id)
       : id_(id), level_(level),
         markState_(NONE), adaptationState_(NONE),
-        pred_(NULL), succ_(NULL)
+        pred_(OneDGridNullIteratorFactory<1>::null()),
+        succ_(OneDGridNullIteratorFactory<1>::null())
     {
-      sons_[0] = sons_[1] = NULL;
+      sons_[0] = sons_[1] = OneDGridNullIteratorFactory<1>::null();
     }
 
     bool isLeaf() const {
-      assert( (sons_[0]==NULL && sons_[1]==NULL) || (sons_[0]!=NULL && sons_[1]!=NULL) );
-      return sons_[0]==NULL && sons_[1]==NULL;
+      assert( (sons_[0]==OneDGridNullIteratorFactory<1>::null() && sons_[1]==OneDGridNullIteratorFactory<1>::null())
+              || (sons_[0]!=OneDGridNullIteratorFactory<1>::null() && sons_[1]!=OneDGridNullIteratorFactory<1>::null()) );
+      return sons_[0]==OneDGridNullIteratorFactory<1>::null() && sons_[1]==OneDGridNullIteratorFactory<1>::null();
     }
 
     array<OneDEntityImp<1>*, 2> sons_;
@@ -158,7 +168,7 @@ namespace Dune {
     //! Constructor with a given grid level
     OneDGridEntity()
       : geo_(OneDGridGeometry<dim-cd,1,GridImp>()),
-        target_(NULL)
+        target_(OneDGridNullIteratorFactory<0>::null())
     {}
 
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
@@ -246,7 +256,7 @@ namespace Dune {
     OneDGridEntity ()
       : geo_( OneDGridGeometry<dim,1,GridImp>() ),
         geometryInFather_( OneDGridGeometry<dim,1,GridImp>() ),
-        target_( NULL )
+        target_( OneDGridNullIteratorFactory<1>::null() )
     {}
 
 
@@ -341,7 +351,8 @@ namespace Dune {
 
     //! returns true if Entity has no children
     bool isLeaf () const {
-      return (target_->sons_[0]==NULL) && (target_->sons_[1]==NULL);
+      return (target_->sons_[0]==OneDGridNullIteratorFactory<1>::null())
+             && (target_->sons_[1]==OneDGridNullIteratorFactory<1>::null());
     }
 
     //! Inter-level access to father element on coarser grid.
@@ -397,7 +408,8 @@ namespace Dune {
 
       }
 
-      it.virtualEntity_.setToTarget((it.elemStack.empty()) ? NULL : it.elemStack.top());
+      it.virtualEntity_.setToTarget((it.elemStack.empty())
+                                    ? OneDGridNullIteratorFactory<1>::null() : it.elemStack.top());
 
       return it;
     }
