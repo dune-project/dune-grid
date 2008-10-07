@@ -13,7 +13,7 @@ typedef void evalDof_t (DUNE_ELEM *, DUNE_FDATA *, int , double *);
 typedef void evalCoord_t (DUNE_ELEM *, DUNE_FDATA *, const double *, double * );
 
 /* interface element */
-typedef struct dune_elem
+struct dune_elem
 {
 
   // default constructor
@@ -35,7 +35,7 @@ typedef struct dune_elem
     for(int i=0; i<MAX_EL_DOF; ++i)
     {
       vindex [i] = -1;
-      vpointer[i] = (double *)coordinates[i];
+      vpointer[i] = (double *) coordinates[i];
       for(int j=0; j<3; ++j)
       {
         vpointer[i][j] = 0.0;
@@ -82,7 +82,7 @@ typedef struct dune_elem
   void          * mesh;
 };
 
-typedef struct dune_fdata
+struct dune_fdata
 {
   static std::set<DUNE_FDATA*>& dataList ()
   {
