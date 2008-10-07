@@ -140,7 +140,7 @@ namespace Dune
    * to a file suitable for easy visualization with
    * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
    */
-  template< class GridImp, class GridView = typename GridImp::LeafGridView >
+  template< class GridView >
   class VTKWriter {
     template<int dim>
     struct P0Layout
@@ -161,7 +161,8 @@ namespace Dune
     };
 
     // extract types
-    typedef typename GridView::Grid::ctype DT;
+    typedef typename GridView::Grid Grid;
+    typedef typename Grid::ctype DT;
     enum { n = GridView::dimension };
     enum { w = GridView::dimensionworld };
 
@@ -180,7 +181,7 @@ namespace Dune
     ::template Partition< VTK_Partition >::Iterator
     GridVertexIterator;
 
-    typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P1Layout > VertexMapper;
+    typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P1Layout > VertexMapper;
 
   public:
     /** \brief A base class for grid functions with any return type and dimension
@@ -444,7 +445,7 @@ namespace Dune
     template<class V>
     class P0VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P0Layout > VM0;
+      typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P0Layout > VM0;
     public:
       //! return number of components
       virtual int ncomps () const
@@ -465,7 +466,7 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P0VectorWrapper ( const GridImp &g_, const IndexSet &is_, const V &v_, std::string s_)
+      P0VectorWrapper ( const Grid &g_, const IndexSet &is_, const V &v_, std::string s_)
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
         if (v.size()!=(unsigned int)mapper.size())
@@ -475,7 +476,7 @@ namespace Dune
       virtual ~P0VectorWrapper() {}
 
     private:
-      const GridImp& g;
+      const Grid& g;
       const IndexSet &is;
       const V& v;
       std::string s;
@@ -488,7 +489,7 @@ namespace Dune
     template<class V>
     class P1VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< GridImp, IndexSet, P1Layout > VM1;
+      typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P1Layout > VM1;
 
     public:
       //! return number of components
@@ -524,7 +525,7 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P1VectorWrapper ( const GridImp &g_, const IndexSet &is_, const V &v_, std::string s_ )
+      P1VectorWrapper ( const Grid &g_, const IndexSet &is_, const V &v_, std::string s_ )
         : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
       {
         if (v.size()!=(unsigned int)mapper.size())
@@ -534,7 +535,7 @@ namespace Dune
       virtual ~P1VectorWrapper() {}
 
     private:
-      const GridImp& g;
+      const Grid& g;
       const IndexSet &is;
       const V& v;
       std::string s;
@@ -542,26 +543,6 @@ namespace Dune
     };
 
   public:
-    /**
-     * @brief Constructs a VTKWriter working on the leaf index set of a grid.
-     *
-     * All functions are supposed to live on the leaf elements of the grid.
-     * E. g. you could use a VTKWriter constructed like this for the
-     * visualization of the solution.
-     * @param g The grid where the functions to be visualized live.
-     * @param dm The data mode??
-     */
-    explicit VTKWriter ( const GridImp &g,
-                         VTKOptions::DataMode dm = VTKOptions::conforming )
-      : gridView_( g.leafView() ),
-        grid( g ),
-        is( gridView_.indexSet() ),
-        datamode( dm )
-    {
-      indentCount = 0;
-      numPerLine = 4*3; //should be a multiple of 3 !
-    }
-
     /**
      * @brief Construct a VTKWriter working on a specific index set of a grid.
      *
@@ -1620,7 +1601,7 @@ namespace Dune
 
     // the grid
     GridView gridView_;
-    const GridImp& grid;
+    const Grid& grid;
 
     // the indexset
     const IndexSet& is;
@@ -1645,9 +1626,9 @@ namespace Dune
    */
   template< class Grid >
   class LeafVTKWriter
-    : public VTKWriter< Grid, typename Grid::LeafGridView >
+    : public VTKWriter< typename Grid::LeafGridView >
   {
-    typedef VTKWriter< Grid, typename Grid::LeafGridView > Base;
+    typedef VTKWriter< typename Grid::LeafGridView > Base;
 
   public:
     /** \brief Construct a VTK writer for the leaf level of a given grid */
@@ -1662,9 +1643,9 @@ namespace Dune
    */
   template< class Grid >
   class LevelVTKWriter
-    : public VTKWriter< Grid, typename Grid::LevelGridView >
+    : public VTKWriter< typename Grid::LevelGridView >
   {
-    typedef VTKWriter< Grid, typename Grid::LevelGridView > Base;
+    typedef VTKWriter< typename Grid::LevelGridView > Base;
 
   public:
     /** \brief Construct a VTK writer for a certain level of a given grid */

@@ -25,7 +25,7 @@ const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
 
 template< class GridView >
 class VTKVectorFuction
-  : public Dune :: VTKWriter< typename GridView :: Grid, GridView > :: VTKFunction
+  : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
   enum { n = GridView :: dimension };
@@ -68,7 +68,7 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
   std::vector<int> vertexdata(is.size(dim),dim);
   std::vector<int> celldata(is.size(0),0);
 
-  Dune :: VTKWriter< typename GridView :: Grid, GridView > vtk( gridView, dm );
+  Dune :: VTKWriter< GridView > vtk( gridView, dm );
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
