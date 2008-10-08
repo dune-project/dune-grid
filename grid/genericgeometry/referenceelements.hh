@@ -21,95 +21,118 @@ namespace Dune
 
 
 
-    // Corner
-    // ------
+    // ReferenceDomain
+    // ---------------
 
     template< class Topology >
-    class Corner;
+    class ReferenceDomainBase;
 
     template<>
-    class Corner< Point >
+    class ReferenceDomainBase< Point >
     {
       typedef Point Topology;
 
-      template< class > friend class Corner;
+      template< class > friend class ReferenceDomain;
+      template< class > friend class ReferenceDomainBase;
       template< class > friend class IntegrationOuterNormal;
 
       template< class ctype, int dim >
-      static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &n )
+      static void corner ( unsigned int i, FieldVector< ctype, dim > &n )
       {
         assert( i < Topology :: numCorners );
       }
 
-    public:
-      enum { numCorners = Topology :: numCorners };
-      enum { dimension = Topology :: dimension };
-
-      template< class ctype >
-      static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &x )
+      template< class ctype, int dim >
+      static bool
+      checkInside ( const FieldVector< ctype, dim > &x, ctype factor )
       {
-        x = ctype( 0 );
-        evaluate_( i, x );
+        return true;
       }
     };
 
     template< class BaseTopology >
-    class Corner< Prism< BaseTopology > >
+    class ReferenceDomainBase< Prism< BaseTopology > >
     {
       typedef Prism< BaseTopology > Topology;
 
-      template< class > friend class Corner;
+      template< class > friend class ReferenceDomain;
+      template< class > friend class ReferenceDomainBase;
       template< class > friend class IntegrationOuterNormal;
 
+      static const int myindex = Topology :: dimension - 1;
+
       template< class ctype, int dim >
-      static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &x )
+      static void corner ( unsigned int i, FieldVector< ctype, dim > &x )
       {
         assert( i < Topology :: numCorners );
         const unsigned int j = i % BaseTopology :: numCorners;
-        Corner< BaseTopology > :: evaluate_( j, x );
+        ReferenceDomainBase< BaseTopology > :: corner( j, x );
         if( i >= BaseTopology :: numCorners )
-          x[ dimension - 1 ] = ctype( 1 );
+          x[ myindex ] = ctype( 1 );
       }
 
-    public:
-      enum { numCorners = Topology :: numCorners };
-      enum { dimension = Topology :: dimension };
-
-      template< class ctype >
-      static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &x )
+      template< class ctype, int dim >
+      static bool
+      checkInside ( const FieldVector< ctype, dim > &x, ctype factor )
       {
-        x = ctype( 0 );
-        evaluate_( i, x );
+        const ctype xn = x[ myindex ];
+        const ctype cxn = factor - xn;
+        return (xn > -1e-12) && (cxn > -1e-12)
+               && ReferenceDomainBase< BaseTopology > :: checkInside( x, factor );
       }
     };
 
     template< class BaseTopology >
-    class Corner< Pyramid< BaseTopology > >
+    class ReferenceDomainBase< Pyramid< BaseTopology > >
     {
       typedef Prism< BaseTopology > Topology;
 
-      template< class > friend class Corner;
+      template< class > friend class ReferenceDomain;
+      template< class > friend class ReferenceDomainBase;
       template< class > friend class IntegrationOuterNormal;
 
+      static const int myindex = Topology :: dimension - 1;
+
       template< class ctype, int dim >
-      static void evaluate_ ( unsigned int i, FieldVector< ctype, dim > &x )
+      static void corner ( unsigned int i, FieldVector< ctype, dim > &x )
       {
         assert( i < Topology :: numCorners );
         if( i < BaseTopology :: numCorners )
-          Corner< BaseTopology > :: evaluate_( i, x );
+          ReferenceDomainBase< BaseTopology > :: corner( i, x );
         else
-          x[ dimension - 1 ] = ctype( 1 );
+          x[ myindex ] = ctype( 1 );
       }
 
-    public:
+      template< class ctype, int dim >
+      static bool
+      checkInside ( const FieldVector< ctype, dim > &x, ctype factor )
+      {
+        const ctype xn = x[ myindex ];
+        const ctype cxn = factor - xn;
+        return (xn > -1e-12) && (cxn > -1e-12)
+               && ReferenceDomainBase< BaseTopology > :: checkInside( x, factor * cxn );
+      }
+    };
+
+
+
+    template< class Topology >
+    struct ReferenceDomain
+    {
       enum { numCorners = Topology :: numCorners };
       enum { dimension = Topology :: dimension };
 
       template< class ctype >
-      static void evaluate ( unsigned int i, FieldVector< ctype, dimension > &x )
+      static void corner ( unsigned int i, FieldVector< ctype, dimension > &x )
       {
         x = ctype( 0 );
-        evaluate_( i, x );
+        ReferenceDomainBase< Topology > :: corner( i, x );
+      }
+
+      template< class ctype >
+      static bool checkInside ( const FieldVector< ctype, dimension > &x )
+      {
+        return ReferenceDomainBase< Topology > :: checkInside( x, ctype( 1 ) );
       }
     };
 
@@ -218,7 +241,7 @@ namespace Dune
         {
           const unsigned int j = Numbering :: number( i-m, 0 );
           FieldVector< ctype, dim > x( ctype( 0 ) );
-          Corner< BaseTopology > :: evaluate_( j, x );
+          ReferenceDomainBase< BaseTopology > :: corner( j, x );
 
           IntegrationOuterNormal< BaseTopology > :: evaluate_( i-m, n );
           n[ dimension - 1 ] = (x * n);
@@ -351,6 +374,11 @@ namespace Dune
         return instance().corners_[ i ];
       }
 
+      static bool checkInside ( const CoordinateType &x )
+      {
+        return ReferenceDomain< Topology > :: checkInside( x );
+      }
+
       static const CoordinateType &
       integrationOuterNormal ( unsigned int i )
       {
@@ -376,7 +404,7 @@ namespace Dune
       ReferenceElement ()
       {
         for( unsigned int i = 0; i < numCorners; ++i )
-          Corner< Topology > :: evaluate( i, corners_[ i ] );
+          ReferenceDomain< Topology > :: corner( i, corners_[ i ] );
         for( unsigned int i = 0; i < numNormals; ++i )
           IntegrationOuterNormal< Topology > :: evaluate( i, normals_[ i ] );
       }
@@ -437,7 +465,7 @@ namespace Dune
           unsigned int j = Numbering :: number( i, k );
 
           CoordinateType y;
-          Corner< Topology > :: evaluate( j, y );
+          ReferenceDomain< Topology > :: corner( j, y );
           x += y;
         }
         x *= ctype( 1 ) / ctype( numCorners );
