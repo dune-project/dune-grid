@@ -27,7 +27,10 @@ namespace Dune
       struct Mapping
       {
         typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
-        typedef CornerMapping< Topology, CoordTraits > Type;
+
+        typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
+        CornerStorage;
+        typedef CornerMapping< Topology, CoordTraits, CornerStorage > Type;
       };
     };
 

@@ -22,6 +22,40 @@ namespace Dune
     // GeometricMapping
     // ----------------
 
+    /** \class GeometricMapping
+     *  \ingroup GenericGeometry
+     *  \brief add geometric functionality to a mapping
+     *
+     *  \tparam  Topology                topology of the reference domain
+     *  \tparam  GeometricMappingTraits  structure containing required types
+     *
+     *  The GeometricMappingTraits for a mapping named <tt>MyMapping</tt> could
+     *  look as follows:
+     *  \code
+     *  struct MyMappingTraits
+     *  {
+     *    template< class Topology >
+     *    struct Mapping
+     *    {
+     *      typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
+     *      typedef MyMapping< Toplogy, CoordTraits > Type;
+     *    };
+     *  };
+     *  \endcode
+     *
+     *  The mapping (called <tt>MyMapping</tt> here) must provide the following
+     *  methods:
+     *  \code
+     *  template< class CoordVector >
+     *  explicit MyMapping ( const CoordVector &coords );
+     *
+     *  const GlobalCoordType &corner ( int i ) const;
+     *  int numCorners () const
+     *
+     *  void global ( const LocalCoordType &x, GlobalCoordType &ret ) const;
+     *  bool jacobianTransposed ( const LocalCoordType &x, JcaobianTransposedType &ret ) const;
+     *  \endcode
+     */
     template< class Topology, class GeometricMappingTraits >
     class GeometricMapping
     {

@@ -448,11 +448,10 @@ namespace Dune
     // CornerMapping
     // -------------
 
-
-    template< class Topology, class CoordTraits >
+    template< class Topology, class CoordTraits, class CornerStorage >
     class CornerMapping
     {
-      typedef CornerMapping< Topology, CoordTraits > ThisType;
+      typedef CornerMapping< Topology, CoordTraits, CornerStorage > This;
 
     public:
       typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
@@ -467,9 +466,6 @@ namespace Dune
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
     private:
-      typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
-      CornerStorage;
-
       typedef GenericGeometry :: GenericCornerMapping< Topology, Traits > GenericMapping;
 
     public:
@@ -494,7 +490,7 @@ namespace Dune
         return CornerStorage :: size;
       }
 
-      void global( const LocalCoordType &x, GlobalCoordType &ret ) const
+      void global ( const LocalCoordType &x, GlobalCoordType &ret ) const
       {
         GenericMapping :: phi_set( coords_, x, FieldType( 1 ), ret );
       }
