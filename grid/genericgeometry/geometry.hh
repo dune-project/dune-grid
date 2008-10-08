@@ -81,6 +81,29 @@ namespace Dune
 
 
 
+    template< class CoordTraits, template< class > class Caching >
+    struct CornerMappingTraits
+    {
+      typedef CoordTraits CoordinateTraits;
+
+      template< unsigned int dimension >
+      struct Traits
+        : public MappingTraits< dimension, CoordTraits >
+      {
+        typedef Caching< MappingTraits< dimension, CoordTraits > > CachingType;
+      };
+
+      template< class Topology >
+      struct Mapping
+      {
+        typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
+        CornerStorage;
+        typedef CornerMapping< Topology, CoordTraits, CornerStorage > Type;
+      };
+    };
+
+
+
     // BasicGeometry
     // -------------
 
@@ -109,18 +132,20 @@ namespace Dune
 
       static const int codimension = dimGrid - mydimension;
 
+      typedef CornerMappingTraits< CoordTraits, Traits :: template Caching >
+      GeometricMappingTraits;
+
       template< bool >
       struct Hybrid
       {
-        typedef HybridMapping< dimGrid, CoordTraits, Traits :: template Caching >
-        Mapping;
+        typedef HybridMapping< dimGrid, GeometricMappingTraits > Mapping;
       };
 
       template< bool >
       struct NonHybrid
       {
         typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef GenericGeometry :: CachedMapping< Topology, CoordTraits, Traits :: template Caching >
+        typedef GenericGeometry :: CachedMapping< Topology, GeometricMappingTraits >
         Mapping;
       };
 

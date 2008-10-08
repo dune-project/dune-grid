@@ -61,11 +61,12 @@ namespace Dune
     {
       typedef GeometricMapping< Topology, GeometricMappingTraits > This;
 
+      static const unsigned int dimension = Topology :: dimension;
+
     public:
       typedef typename GeometricMappingTraits :: template Mapping< Topology > :: Type
       Mapping;
-      typedef typename GeometricMappingTraits :: template Mapping< Topology > :: Traits
-      Traits;
+      typedef typename GeometricMappingTraits :: template Traits< dimension > Traits;
 
       static const unsigned int dimG = Traits :: dimG;
       static const unsigned int dimW = Traits :: dimW;

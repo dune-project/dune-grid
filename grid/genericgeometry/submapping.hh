@@ -17,13 +17,13 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     class CachedMapping;
 
-    template< unsigned int DimG, class CoordTraits, template< class > class Caching >
+    template< unsigned int DimG, class GeometricMappingTraits >
     class HybridMapping;
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     class VirtualMapping;
 
 
@@ -112,20 +112,6 @@ namespace Dune
 
 
 
-    // CachedMappingTraits
-    // -------------------
-
-    template< unsigned int DimG, class CoordTraits, template< class > class Caching >
-    struct CachedMappingTraits
-      : public GenericGeometry :: MappingTraits< DimG, CoordTraits >
-    {
-      typedef MappingTraits< DimG, CoordTraits > BaseType;
-
-      typedef Caching< BaseType > CachingType;
-    };
-
-
-
     // SubMappingCoords
     // ----------------
 
@@ -161,83 +147,86 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     struct SubMappingTraits;
 
-    template< unsigned int DimG, class CoordTraits, template< class > class Caching,
-        unsigned int codim >
-    struct SubMappingTraits< HybridMapping< DimG, CoordTraits, Caching >, codim >
+    template< unsigned int DimG, class GeometricMappingTraits, unsigned int codim >
+    struct SubMappingTraits< HybridMapping< DimG, GeometricMappingTraits >, codim >
     {
       enum { dimension = DimG };
       enum { isVirtual = true };
 
-      typedef CachedMappingTraits< dimension - codim, CoordTraits, Caching > MappingTraits;
+      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      MappingTraits;
       typedef typename MappingTraits :: CachingType CachingType;
 
-      typedef HybridMapping< dimension - codim, CoordTraits, Caching > HybridSubMapping;
+      typedef HybridMapping< dimension - codim, GeometricMappingTraits >
+      HybridSubMapping;
 
       template< GeometryType :: BasicType btype >
       struct VirtualMapping
       {
         typedef typename Convert< btype, dimension - codim > :: type SubTopology;
-        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
       typedef HybridSubMapping SubMapping;
     };
 
-    template< class Topology, class CoordTraits, template< class > class Caching,
-        unsigned int codim >
-    struct SubMappingTraits< VirtualMapping< Topology, CoordTraits, Caching >, codim >
+    template< class Topology, class GeometricMappingTraits, unsigned int codim >
+    struct SubMappingTraits< VirtualMapping< Topology, GeometricMappingTraits >, codim >
     {
       enum { dimension = Topology :: dimension };
       enum { isVirtual = true };
 
-      typedef CachedMappingTraits< dimension - codim, CoordTraits, Caching > MappingTraits;
+      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      MappingTraits;
       typedef typename MappingTraits :: CachingType CachingType;
 
-      typedef HybridMapping< dimension - codim, CoordTraits, Caching > HybridSubMapping;
+      typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
 
       template< unsigned int i >
       struct VirtualSubMapping
       {
         typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type
         SubTopology;
-        typedef VirtualMapping< SubTopology, CoordTraits, Caching > type;
+        typedef VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
       template< GeometryType :: BasicType btype >
       struct VirtualMapping
       {
         typedef typename Convert< btype, dimension - codim > :: type SubTopology;
-        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
       typedef HybridSubMapping SubMapping;
     };
 
-    template< class Topology, class CoordTraits, template< class > class Caching,
-        unsigned int codim >
-    struct SubMappingTraits< CachedMapping< Topology, CoordTraits, Caching >, codim >
+    template< class Topology, class GeometricMappingTraits, unsigned int codim >
+    struct SubMappingTraits< CachedMapping< Topology, GeometricMappingTraits >, codim >
     {
       enum { dimension = Topology :: dimension };
       enum { isVirtual = IsCodimHybrid< Topology, codim > :: value };
 
-      typedef CachedMappingTraits< dimension - codim, CoordTraits, Caching > MappingTraits;
+      typedef typename GeometricMappingTraits :: CoordinateTraits CoordTraits;
+
+      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      MappingTraits;
       typedef typename MappingTraits :: CachingType CachingType;
 
-      typedef HybridMapping< dimension - codim, CoordTraits, Caching > HybridSubMapping;
+      typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
 
       template< unsigned int i >
       struct VirtualSubMapping
       {
         typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type
         SubTopology;
-        typedef VirtualMapping< SubTopology, CoordTraits, Caching > type;
+        typedef VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
       template< GeometryType :: BasicType btype >
       struct VirtualMapping
       {
         typedef typename Convert< btype, dimension - codim > :: type SubTopology;
-        typedef GenericGeometry :: VirtualMapping< SubTopology, CoordTraits, Caching > type;
+        typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
       template< bool >
@@ -250,7 +239,7 @@ namespace Dune
       struct NonHybrid
       {
         typedef typename VirtualSubMapping< 0 > :: SubTopology SubTopology;
-        typedef CachedMapping< SubTopology, CoordTraits, Caching > SubMapping;
+        typedef CachedMapping< SubTopology, GeometricMappingTraits > SubMapping;
       };
 
       typedef typename ProtectedIf< isVirtual, Hybrid, NonHybrid > :: SubMapping

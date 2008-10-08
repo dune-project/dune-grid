@@ -20,36 +20,20 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class CoordTraits >
-    struct CornerMappingTraits
-    {
-      template< class Topology >
-      struct Mapping
-      {
-        typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
-
-        typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
-        CornerStorage;
-        typedef CornerMapping< Topology, CoordTraits, CornerStorage > Type;
-      };
-    };
-
-
-
     // CachedMapping
     // -------------
 
-    template< class Topology, class CoordTraits,
-        template< class > class Caching = ComputeAll >
+    template< class Topology, class GeometricMappingTraits >
     class CachedMapping
-      : public GeometricMapping< Topology, CornerMappingTraits< CoordTraits > >,
+      : public GeometricMapping< Topology, GeometricMappingTraits >,
         public SmallObject
     {
-      typedef GeometricMapping< Topology, CornerMappingTraits< CoordTraits > >
-      BaseType;
-      typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;
+      typedef GeometricMapping< Topology, GeometricMappingTraits > Base;
+      typedef CachedMapping< Topology, GeometricMappingTraits > This;
 
-      typedef CachedMappingTraits< Topology :: dimension, CoordTraits, Caching > Traits;
+      static const unsigned int dimension = Topology :: dimension;
+
+      typedef typename GeometricMappingTraits :: template Traits< dimension > Traits;
 
     public:
       enum { dimG = Traits :: dimG };
@@ -61,45 +45,45 @@ namespace Dune
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
       typedef typename Traits :: CachingType CachingType;
-      typedef typename BaseType :: ReferenceElement ReferenceElement;
+      typedef typename Base :: ReferenceElement ReferenceElement;
 
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< ThisType, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
       };
 
     public:
       unsigned int referenceCount;
 
     protected:
-      using BaseType :: baryCenter;
-      using BaseType :: jacobianTransposed_;
-      using BaseType :: jTInv_;
-      using BaseType :: intEl_;
-      using BaseType :: jacobianTransposedComputed_;
-      using BaseType :: jTInvComputed;
-      using BaseType :: intElComputed;
+      using Base :: baryCenter;
+      using Base :: jacobianTransposed_;
+      using Base :: jTInv_;
+      using Base :: intEl_;
+      using Base :: jacobianTransposedComputed_;
+      using Base :: jTInvComputed;
+      using Base :: intElComputed;
 
     public:
       template< class CoordVector >
       inline explicit CachedMapping ( const CoordVector &coords,
                                       const CachingType &cache = CachingType() );
 
-      using BaseType :: affine;
-      using BaseType :: operator[];
-      using BaseType :: global;
-      using BaseType :: local;
-      using BaseType :: volume;
-      using BaseType :: normal;
-      using BaseType :: jacobianInverseTransposed;
+      using Base :: affine;
+      using Base :: operator[];
+      using Base :: global;
+      using Base :: local;
+      using Base :: volume;
+      using Base :: normal;
+      using Base :: jacobianInverseTransposed;
 
       const JacobianTransposedType &jacobianT ( const LocalCoordType &x ) const
       {
         const EvaluationType evaluate = CachingType :: evaluateJacobianTransposed;
         if( (evaluate == ComputeOnDemand) || !affine() )
-          BaseType :: jacobianT( x );
+          Base :: jacobianT( x );
         return jacobianTransposed_;
       }
 
@@ -108,7 +92,7 @@ namespace Dune
       {
         const EvaluationType evaluate = CachingType :: evaluateIntegrationElement;
         if( (evaluate == ComputeOnDemand) || !affine() )
-          BaseType :: integrationElement(x);
+          Base :: integrationElement(x);
         return this->intEl_;
       }
 
@@ -116,7 +100,7 @@ namespace Dune
       {
         const EvaluationType evaluate = CachingType :: evaluateJacobianInverseTransposed;
         if( (evaluate == ComputeOnDemand) || !affine() )
-          BaseType :: jacobianInverseTransposed(x);
+          Base :: jacobianInverseTransposed(x);
         return this->jTInv_;
       }
 
@@ -125,17 +109,17 @@ namespace Dune
       subMapping ( unsigned int i,
                    const typename Codim< codim > :: CachingType &cache ) const
       {
-        return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
+        return SubMappingProvider< This, codim > :: subMapping( *this, i, cache );
       }
     };
 
 
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     template< class CoordVector >
-    inline CachedMapping< Topology, CoordTraits, Caching >
+    inline CachedMapping< Topology, GeometricMappingTraits >
     :: CachedMapping ( const CoordVector &coords, const CachingType &cache )
-      : BaseType( coords )
+      : Base( coords )
     {
       if( affine() )
       {
@@ -147,7 +131,7 @@ namespace Dune
           break;
 
         case PreCompute :
-          BaseType :: jacobianT( baryCenter() );
+          Base :: jacobianT( baryCenter() );
           break;
 
         case ComputeOnDemand :
@@ -162,7 +146,7 @@ namespace Dune
           break;
 
         case PreCompute :
-          BaseType :: jacobianInverseTransposed( baryCenter() );
+          Base :: jacobianInverseTransposed( baryCenter() );
           break;
 
         case ComputeOnDemand :

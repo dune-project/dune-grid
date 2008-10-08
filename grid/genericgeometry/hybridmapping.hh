@@ -16,25 +16,25 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     class CachedMapping;
 
 
     // HybridMapping
     // -------------
 
-    template< unsigned int DimG, class CoordTraits, template< class > class Caching >
+    template< unsigned int dim, class GeometricMappingTraits >
     class HybridMapping
       : public SmallObject
     {
-      typedef HybridMapping< DimG, CoordTraits, Caching > ThisType;
+      typedef HybridMapping< dim, GeometricMappingTraits > This;
 
     protected:
-      typedef CachedMappingTraits< DimG, CoordTraits, Caching > Traits;
+      typedef typename GeometricMappingTraits :: template Traits< dim > Traits;
 
     public:
-      enum { dimG = Traits :: dimG };
-      enum { dimW = Traits :: dimW };
+      static const unsigned int dimG = Traits :: dimG;
+      static const unsigned int dimW = Traits :: dimW;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
@@ -46,8 +46,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< ThisType, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
       };
 
       unsigned int referenceCount;
@@ -95,16 +95,16 @@ namespace Dune
 
 
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     class VirtualMapping
-      : public HybridMapping< Topology :: dimension, CoordTraits, Caching >
+      : public HybridMapping< Topology :: dimension, GeometricMappingTraits >
     {
-      typedef HybridMapping< Topology :: dimension, CoordTraits, Caching > BaseType;
-      typedef VirtualMapping< Topology, CoordTraits, Caching > ThisType;
+      typedef HybridMapping< Topology :: dimension, GeometricMappingTraits > Base;
+      typedef VirtualMapping< Topology, GeometricMappingTraits > This;
 
-      typedef typename BaseType :: Traits Traits;
+      typedef typename Base :: Traits Traits;
 
-      typedef CachedMapping< Topology, CoordTraits, Caching > Mapping;
+      typedef CachedMapping< Topology, GeometricMappingTraits > Mapping;
 
     public:
       enum { dimG = Traits :: dimG };
@@ -122,8 +122,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< ThisType, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< ThisType, codim > :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
       };
 
     private:
@@ -198,7 +198,7 @@ namespace Dune
       subMapping ( unsigned int i,
                    const typename Codim< codim > :: CachingType &cache ) const
       {
-        return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
+        return SubMappingProvider< This, codim > :: subMapping( *this, i, cache );
       }
 
     private:
@@ -212,10 +212,10 @@ namespace Dune
     };
 
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
-    class VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller
+    template< class Topology, class GeometricMappingTraits >
+    class VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller
     {
-      typedef VirtualMapping< Topology, CoordTraits, Caching > Mapping;
+      typedef VirtualMapping< Topology, GeometricMappingTraits > Mapping;
 
       struct CallerInterface;
       template< int codim > struct CallerImplementation;
@@ -243,10 +243,10 @@ namespace Dune
     };
 
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
-    struct VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller :: CallerInterface
+    template< class Topology, class GeometricMappingTraits >
+    struct VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller :: CallerInterface
     {
-      typedef VirtualMapping< Topology, CoordTraits, Caching > Mapping;
+      typedef VirtualMapping< Topology, GeometricMappingTraits > Mapping;
 
       virtual ~CallerInterface ()
       {}
@@ -255,9 +255,9 @@ namespace Dune
       subMapping ( const Mapping &mapping, unsigned int i, const void *cache ) const = 0;
     };
 
-    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class Topology, class GeometricMappingTraits >
     template< int codim >
-    struct VirtualMapping< Topology, CoordTraits, Caching > :: CodimCaller :: CallerImplementation
+    struct VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller :: CallerImplementation
       : public CallerInterface
     {
       virtual void *
