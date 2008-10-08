@@ -76,7 +76,7 @@ namespace Dune
       {
         const unsigned int k
           = ReferenceElement :: template subNumbering< codim, dimension - codim >( i_, j );
-        return mapping_[ k ];
+        return mapping_.corner( k );
       }
     };
 
