@@ -57,9 +57,9 @@ namespace Dune
 
       virtual unsigned int topologyId () const = 0;
 
-      virtual int corners () const = 0;
+      virtual const GlobalCoordType &corner ( int i ) const = 0;
 
-      virtual const GlobalCoordType &operator[] ( int i ) const = 0;
+      virtual int numCorners () const = 0;
 
       virtual GlobalCoordType global ( const LocalCoordType &local ) const = 0;
 
@@ -141,14 +141,14 @@ namespace Dune
         return mapping_.topologyId();
       }
 
-      virtual int corners () const
+      virtual const GlobalCoordType &corner ( int i ) const
       {
-        return mapping_.corners();
+        return mapping_.corner( i );
       }
 
-      virtual const GlobalCoordType &operator[] ( int i ) const
+      virtual int numCorners () const
       {
-        return mapping_[ i ];
+        return mapping_.numCorners();
       }
 
       virtual GlobalCoordType global ( const LocalCoordType &local ) const

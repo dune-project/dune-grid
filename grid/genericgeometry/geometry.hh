@@ -230,12 +230,12 @@ namespace Dune
 
       int corners () const
       {
-        return mapping().corners();
+        return mapping().numCorners();
       }
 
       const GlobalCoordinate &operator[] ( int i ) const
       {
-        return mapping()[ i ];
+        return mapping().corner( i );
       }
 
       GlobalCoordinate global ( const LocalCoordinate &local ) const

@@ -485,11 +485,6 @@ namespace Dune
         return coords_[ i ];
       }
 
-      int numCorners () const
-      {
-        return CornerStorage :: size;
-      }
-
       void global ( const LocalCoordType &x, GlobalCoordType &ret ) const
       {
         GenericMapping :: phi_set( coords_, x, FieldType( 1 ), ret );

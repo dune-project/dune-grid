@@ -136,7 +136,7 @@ namespace Dune
                                       const CachingType &cache = CachingType() );
 
       using Base :: affine;
-      using Base :: operator[];
+      using Base :: corner;
       using Base :: global;
       using Base :: local;
       using Base :: volume;

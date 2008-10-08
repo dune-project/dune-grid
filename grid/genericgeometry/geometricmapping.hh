@@ -34,10 +34,18 @@ namespace Dune
      *  \code
      *  struct MyMappingTraits
      *  {
+     *    typedef MyCoordTraits CoordTraits;
+     *
+     *    template< unsigned int dimension >
+     *    struct Traits
+     *    : public MappingTraits< dimension, CoordTraits >
+     *    {
+     *      typedef MyCaching< dimension, CoordTraits > CachingType;
+     *    };
+     *
      *    template< class Topology >
      *    struct Mapping
      *    {
-     *      typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
      *      typedef MyMapping< Toplogy, CoordTraits > Type;
      *    };
      *  };
@@ -50,10 +58,9 @@ namespace Dune
      *  explicit MyMapping ( const CoordVector &coords );
      *
      *  const GlobalCoordType &corner ( int i ) const;
-     *  int numCorners () const
      *
      *  void global ( const LocalCoordType &x, GlobalCoordType &ret ) const;
-     *  bool jacobianTransposed ( const LocalCoordType &x, JcaobianTransposedType &ret ) const;
+     *  bool jacobianTransposed ( const LocalCoordType &x, JacobianTransposedType &ret ) const;
      *  \endcode
      */
     template< class Topology, class GeometricMappingTraits >
@@ -124,14 +131,14 @@ namespace Dune
         return ReferenceElement :: topologyId;
       }
 
-      const GlobalCoordType &operator[] ( int i ) const
+      const GlobalCoordType &corner ( int i ) const
       {
         return mapping_.corner( i );
       }
 
-      int corners () const
+      int numCorners () const
       {
-        return mapping_.numCorners();
+        return ReferenceElement :: numCorners;
       }
 
       GlobalCoordType global ( const LocalCoordType &x ) const
@@ -140,7 +147,7 @@ namespace Dune
         if( jacobianTransposedComputed_ )
         {
           MatrixHelper :: template ATx< dimG, dimW >( jacobianTransposed_, x, p );
-          p += (*this)[ 0 ];
+          p += corner( 0 );
         }
         else
           mapping_.global( x, p );
@@ -166,7 +173,7 @@ namespace Dune
       LocalCoordType local ( const GlobalCoordType &p ) const
       {
         LocalCoordType x;
-        GlobalCoordType y = p - (*this)[ 0 ];
+        GlobalCoordType y = p - corner( 0 );
         if( jTInvComputed )
           MatrixHelper :: template ATx< dimW, dimG >( jTInv_, y, x );
         else if( affine() )
