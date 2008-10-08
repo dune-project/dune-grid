@@ -122,11 +122,6 @@ namespace Dune
       {
         return true;
       }
-
-      static bool inDomain ( const LocalCoordType &x, FieldType factor )
-      {
-        return true;
-      }
     };
 
 
@@ -247,15 +242,6 @@ namespace Dune
         BottomMapping :: phi_add( coords, x, -factor, J[ dim-1 ] );
         TopMapping :: phi_add( coords, x, factor, J[ dim-1 ] );
         return affine;
-      }
-
-      // check if x/fac is in domain of phi
-      static bool inDomain ( const LocalCoordType &x, FieldType factor )
-      {
-        const FieldType xn = x[ dim-1 ];
-        const FieldType cxn = factor - xn;
-        return (xn > -1e-12) && (cxn > -1e-12)
-               && BottomMapping :: inDomain( x, factor );
       }
     };
 
@@ -427,14 +413,6 @@ namespace Dune
         }
         return affine;
       }
-
-      static bool inDomain ( const LocalCoordType &x, FieldType factor )
-      {
-        const FieldType xn = x[ dim-1 ];
-        const FieldType cxn = factor - xn;
-        return (xn > -1e-12) && (cxn > -1e-12)
-               && BottomMapping :: inDomain( x, factor * cxn );
-      }
     };
 
 
@@ -488,74 +466,43 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
+    private:
       typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
       CornerStorage;
 
       typedef GenericGeometry :: GenericCornerMapping< Topology, Traits > GenericMapping;
-      typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
+
+    public:
+      static const bool alwaysAffine = GenericMapping :: alwaysAffine;
 
     protected:
       CornerStorage coords_;
 
-      mutable JacobianTransposedType jT_;
-      mutable bool jTComputed;
-
     public:
       template< class CoordVector >
       explicit CornerMapping ( const CoordVector &coords )
-        : coords_( coords ),
-          jTComputed( false )
+        : coords_( coords )
       {}
 
-      bool affine () const
-      {
-        if( GenericMapping :: alwaysAffine )
-          return true;
-        jacobianT( baryCenter() );
-        return jTComputed;
-      }
-
-      const GlobalCoordType &operator[] ( int i ) const
+      const GlobalCoordType &corner ( int i ) const
       {
         return coords_[ i ];
       }
 
-      int corners () const
+      int numCorners () const
       {
         return CornerStorage :: size;
       }
 
-      GlobalCoordType global( const LocalCoordType &x ) const
+      void global( const LocalCoordType &x, GlobalCoordType &ret ) const
       {
-        GlobalCoordType p;
-        if( jTComputed )
-        {
-          MatrixHelper< CoordTraits > :: template ATx< dimG, dimW >( jT_, x, p );
-          p += (*this)[ 0 ];
-        }
-        else
-          GenericMapping :: phi_set( coords_, x, FieldType( 1 ), p );
-        return p;
+        GenericMapping :: phi_set( coords_, x, FieldType( 1 ), ret );
       }
 
-      static bool checkInside ( const LocalCoordType &x )
+      bool jacobianTransposed ( const LocalCoordType &x,
+                                JacobianTransposedType &ret ) const
       {
-        return GenericMapping :: inDomain( x, FieldType( 1 ) );
-      }
-
-      const JacobianTransposedType &jacobianT ( const LocalCoordType &x ) const
-      {
-        if( !jTComputed )
-        {
-          jTComputed = GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), jT_ );
-        }
-        return jT_;
-      }
-
-    protected:
-      static const LocalCoordType &baryCenter ()
-      {
-        return ReferenceElement :: template baryCenter< 0 >( 0 );
+        return GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), ret );
       }
     };
 

@@ -11,6 +11,7 @@
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/cornermapping.hh>
+#include <dune/grid/genericgeometry/geometricmapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
@@ -19,157 +20,17 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    // Mapping
-    // -------
-
-    template< class BaseMapping >
-    class Mapping
-      : public BaseMapping
+    template< class CoordTraits >
+    struct CornerMappingTraits
     {
-      typedef BaseMapping BaseType;
-      typedef Mapping< BaseType > ThisType;
-
-    public:
-      typedef typename BaseType :: Traits Traits;
-
-      enum { dimG = Traits :: dimG };
-      enum { dimW = Traits :: dimW };
-      typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
-      typedef typename Traits :: JacobianType JacobianType;
-      typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
-
-      typedef typename Traits :: MatrixHelper MatrixHelper;
-
-      typedef typename BaseType :: ReferenceElement ReferenceElement;
-
-    protected:
-      static const unsigned int numNormals = ReferenceElement :: numNormals;
-
-      mutable JacobianType jTInv_;
-      mutable FieldType intEl_;
-      mutable GlobalCoordType faceNormal_[ numNormals ];
-
-      mutable bool affine_;
-      mutable bool jTInvComputed, intElComputed;
-      mutable FieldVector< bool, numNormals > normalComputed;
-
-      using BaseType :: jT_;
-      using BaseType :: jTComputed;
-
-    public:
-      template< class CoordVector >
-      explicit Mapping ( const CoordVector &coords )
-        : BaseType( coords ),
-          affine_( BaseType :: affine() ),
-          jTInvComputed( false ),
-          intElComputed( false ),
-          normalComputed( false )
-      {}
-
-      bool affine () const
+      template< class Topology >
+      struct Mapping
       {
-        return affine_;
-      }
-
-      using BaseType :: operator[];
-      using BaseType :: corners;
-      using BaseType :: global;
-      using BaseType :: jacobianT;
-
-      unsigned int topologyId () const
-      {
-        return ReferenceElement :: topologyId;
-      }
-
-      // additional methods
-      LocalCoordType local ( const GlobalCoordType &p ) const
-      {
-        LocalCoordType x;
-        GlobalCoordType y = p - (*this)[ 0 ];
-        if( jTInvComputed )
-          MatrixHelper :: template ATx< dimW, dimG >( jTInv_, y, x );
-        else if( affine() )
-          local_affine( baryCenter(), y, x );
-        else
-        {
-          x = baryCenter();
-          LocalCoordType dx;
-          do
-          { // DF^n dx^n = -F^n, x^{n+1} += dx^n
-            y = p - global( x );
-            local_affine( x, y, dx );
-            x += dx;
-          } while( dx.two_norm2() > 1e-12 );
-        }
-        return x;
-      }
-
-      FieldType
-      jacobianInverseTransposed ( const LocalCoordType &x, JacobianType &jTInv ) const
-      {
-        const JacobianTransposedType &jT = jacobianT( x );
-        return MatrixHelper :: template rightInvA< dimG, dimW >( jT, jTInv );
-      }
-
-      const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
-      {
-        if( !jTInvComputed )
-        {
-          intEl_ = jacobianInverseTransposed( x, jTInv_ );
-          jTInvComputed = affine();
-          intElComputed = affine();
-        }
-        return jTInv_;
-      }
-
-      FieldType integrationElement ( const LocalCoordType &x ) const
-      {
-        if( !intElComputed )
-        {
-          const JacobianTransposedType &JT = jacobianT( x );
-          intEl_ = MatrixHelper :: template detAAT< dimG, dimW >( JT );
-          intElComputed = affine();
-        }
-        return intEl_;
-      }
-
-      const GlobalCoordType &normal ( int face, const LocalCoordType &x ) const
-      {
-        if( !normalComputed[ face ] )
-        {
-          const JacobianType &JT = jacobianInverseTransposed( x );
-          const LocalCoordType &refNormal
-            =  ReferenceElement :: integrationOuterNormal( face );
-          MatrixHelper :: template Ax< dimW, dimG >( JT, refNormal, faceNormal_[ face ] );
-          faceNormal_[ face ] *= intEl_;
-          normalComputed[ face ] = affine();
-        }
-        return faceNormal_[ face ];
-      }
-
-      FieldType volume () const
-      {
-        const FieldType refVolume = ReferenceElement :: volume();
-        return refVolume * integrationElement( baryCenter() );
-      }
-
-    protected:
-      static const LocalCoordType &baryCenter ()
-      {
-        return ReferenceElement :: template baryCenter< 0 >( 0 );
-      }
-
-      // affine local to global mapping
-      void local_affine ( const LocalCoordType &x,
-                          const GlobalCoordType &p,
-                          LocalCoordType &y ) const
-      {
-        const JacobianTransposedType &JT = jacobianT( x );
-        MatrixHelper :: template xTRightInvA< dimG, dimW >( JT, p, y );
-      }
+        typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
+        typedef CornerMapping< Topology, CoordTraits > Type;
+      };
     };
+
 
 
     // CachedMapping
@@ -178,10 +39,11 @@ namespace Dune
     template< class Topology, class CoordTraits,
         template< class > class Caching = ComputeAll >
     class CachedMapping
-      : public Mapping< CornerMapping< Topology, CoordTraits > >,
+      : public GeometricMapping< Topology, CornerMappingTraits< CoordTraits > >,
         public SmallObject
     {
-      typedef Mapping< CornerMapping< Topology,CoordTraits > > BaseType;
+      typedef GeometricMapping< Topology, CornerMappingTraits< CoordTraits > >
+      BaseType;
       typedef CachedMapping< Topology, CoordTraits, Caching > ThisType;
 
       typedef CachedMappingTraits< Topology :: dimension, CoordTraits, Caching > Traits;
@@ -210,67 +72,17 @@ namespace Dune
 
     protected:
       using BaseType :: baryCenter;
-      using BaseType :: jT_;
+      using BaseType :: jacobianTransposed_;
       using BaseType :: jTInv_;
       using BaseType :: intEl_;
-      using BaseType :: jTComputed;
+      using BaseType :: jacobianTransposedComputed_;
       using BaseType :: jTInvComputed;
       using BaseType :: intElComputed;
 
     public:
       template< class CoordVector >
-      explicit CachedMapping ( const CoordVector &coords,
-                               const CachingType &cache = CachingType() )
-        : BaseType( coords )
-      {
-        if( affine() )
-        {
-          switch( CachingType :: evaluateJacobianTransposed )
-          {
-          case IsComputed :
-            cache.jacobianT( jT_ );
-            jTComputed = true;
-            break;
-
-          case PreCompute :
-            BaseType :: jacobianT( baryCenter() );
-            break;
-
-          case ComputeOnDemand :
-            break;
-          }
-
-          switch( CachingType :: evaluateJacobianInverseTransposed )
-          {
-          case IsComputed :
-            cache.jacobianInverseTransposed( jTInv_ );
-            jTInvComputed = true;
-            break;
-
-          case PreCompute :
-            BaseType :: jacobianInverseTransposed( baryCenter() );
-            break;
-
-          case ComputeOnDemand :
-            break;
-          }
-
-          switch( CachingType :: evaluateIntegrationElement )
-          {
-          case IsComputed :
-            cache.integrationElement( intEl_ );
-            intElComputed = true;
-            break;
-
-          case PreCompute :
-            integrationElement( baryCenter() );
-            break;
-
-          case ComputeOnDemand :
-            break;
-          }
-        }
-      }
+      inline explicit CachedMapping ( const CoordVector &coords,
+                                      const CachingType &cache = CachingType() );
 
       using BaseType :: affine;
       using BaseType :: operator[];
@@ -285,7 +97,7 @@ namespace Dune
         const EvaluationType evaluate = CachingType :: evaluateJacobianTransposed;
         if( (evaluate == ComputeOnDemand) || !affine() )
           BaseType :: jacobianT( x );
-        return jT_;
+        return jacobianTransposed_;
       }
 
       // additional methods
@@ -313,6 +125,63 @@ namespace Dune
         return SubMappingProvider< ThisType, codim > :: subMapping( *this, i, cache );
       }
     };
+
+
+
+    template< class Topology, class CoordTraits, template< class > class Caching >
+    template< class CoordVector >
+    inline CachedMapping< Topology, CoordTraits, Caching >
+    :: CachedMapping ( const CoordVector &coords, const CachingType &cache )
+      : BaseType( coords )
+    {
+      if( affine() )
+      {
+        switch( CachingType :: evaluateJacobianTransposed )
+        {
+        case IsComputed :
+          cache.jacobianT( jacobianTransposed_ );
+          jacobianTransposedComputed_ = true;
+          break;
+
+        case PreCompute :
+          BaseType :: jacobianT( baryCenter() );
+          break;
+
+        case ComputeOnDemand :
+          break;
+        }
+
+        switch( CachingType :: evaluateJacobianInverseTransposed )
+        {
+        case IsComputed :
+          cache.jacobianInverseTransposed( jTInv_ );
+          jTInvComputed = true;
+          break;
+
+        case PreCompute :
+          BaseType :: jacobianInverseTransposed( baryCenter() );
+          break;
+
+        case ComputeOnDemand :
+          break;
+        }
+
+        switch( CachingType :: evaluateIntegrationElement )
+        {
+        case IsComputed :
+          cache.integrationElement( intEl_ );
+          intElComputed = true;
+          break;
+
+        case PreCompute :
+          integrationElement( baryCenter() );
+          break;
+
+        case ComputeOnDemand :
+          break;
+        }
+      }
+    }
 
   }
 
