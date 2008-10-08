@@ -3,8 +3,8 @@
 #ifndef DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 #define DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 
-#include <dune/grid/genericgeometry/mappings.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
+#include <dune/grid/genericgeometry/cachedmapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
