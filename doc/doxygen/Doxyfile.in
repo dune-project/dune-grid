@@ -466,6 +466,7 @@ INPUT                  = @srcdir@/mainpage \
                          @top_srcdir@/grid/albertagrid \
                          @top_srcdir@/grid/albertagrid.hh \
                          @top_srcdir@/grid/alugrid.hh \
+                         @top_srcdir@/grid/alugrid/3d/alu3dgridfactory.hh \
                          @top_srcdir@/grid/common \
                          @top_srcdir@/grid/io \
                          @top_srcdir@/grid/onedgrid.hh \
