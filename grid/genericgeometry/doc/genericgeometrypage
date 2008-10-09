@@ -63,30 +63,30 @@ numbering the reference element corresponding to
 
 	 Here is a graphical representation of the reference elements:
      -# <b>One-dimensional reference element. For d=1 the simplex and cube are identical</b>
-       \image html line.png
+       \image html gg_line.png
      -# <b>Two-dimensional reference simplex (a.k.a. triangle)</b>
-	   \image html triangle.png
+	   \image html gg_triangle.png
      -# <b>Three-dimensional reference simplex (a.k.a. tetrahedron)</b>
        <table class="imagelist"><tr>
-	   <td>\image html tetrahedron.png "Face Numbering"</td>
-	   <td>\image html tetrahedron_edges.png "Edge Numbering"</td>
+	   <td>\image html gg_tetrahedron.png "Face Numbering"</td>
+	   <td>\image html gg_tetrahedron_edges.png "Edge Numbering"</td>
        </tr></table>
      -# <b>Two-dimensional reference cube (a.k.a. quadrilateral)</b>
-	   \image html quadrilateral.png
+	   \image html gg_quadrilateral.png
      -# <b>Three-dimensional reference cube (a.k.a. hexahedron)</b>
        <table class="imagelist"><tr>
-       <td>\image html hexahedron.png "Face Numbering"</td>
-	   <td>\image html hexahedron_edges.png "Edge Numbering"</td>
+       <td>\image html gg_hexahedron.png "Face Numbering"</td>
+	   <td>\image html gg_hexahedron_edges.png "Edge Numbering"</td>
        </tr></table>
      -# <b>Prism reference element</b>
        <table class="imagelist"><tr>
-	   <td>\image html prism.png "Face Numbering"</td>
-	   <td>\image html prism_edges.png "Edge Numbering"</td>
+	   <td>\image html gg_prism.png "Face Numbering"</td>
+	   <td>\image html gg_prism_edges.png "Edge Numbering"</td>
        </tr></table>
      -# <b>Pyramid reference element</b>
        <table class="imagelist"><tr>
-	   <td>\image html pyramid.png "Face Numbering"</td>
-	   <td>\image html pyramid_edges.png "Edge Numbering"</td>
+	   <td>\image html gg_pyramid.png "Face Numbering"</td>
+	   <td>\image html gg_pyramid_edges.png "Edge Numbering"</td>
        </tr></table>
        
 In addition to the numbering and the corner coordinates
