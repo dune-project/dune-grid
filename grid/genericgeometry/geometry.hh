@@ -52,18 +52,12 @@ namespace Dune
       };
     };
 
-    template< class GridImp >
-    struct GeometryTraits;
 
-    template< class GridImp >
-    struct GeometryTraits< const GridImp >
-      : public GeometryTraits< GridImp >
-    {};
 
     template< class ctype, int dimG, int dimW >
     struct DefaultGeometryTraits
     {
-      typedef DefaultCoordTraits< ctype, dimW > CoordTraits;
+      typedef DefaultCoordTraits< ctype, dimW > GlobalCoordTraits;
       typedef DefaultCoordTraits< ctype, dimG > LocalCoordTraits;
 
       // are all global geometries affine?
@@ -87,13 +81,61 @@ namespace Dune
       {};
     };
 
-    /*
-       template <int dimGrid>
-       struct GeometryTraits<MyGrid<dimGrid> > :
-       public DefaultGeometryTraits<MyGrid<dimGrid>::ctype,
-                                   dimGrid, dimGrid>
-       {};
+
+
+    /** \struct  GeometryTraits
+     *  \ingroup GenericGeometry
+     *  \brief   grid specific information required by the generic geometries
+     *
+     *  Every implementation of a DUNE Geometry is required to have the same
+     *  template parameter list:
+     *  \code
+     *  template< int mydim, int cdim, class Grid >
+     *  \endcode
+     *  Consequently, there is no direct way to pass compile time static
+     *  information to a unified implementation such as the generic geometries.
+     *  The structure GeometryTraits realizes an indirect way to do this.
+     *
+     *  For every grid implementation using the generic geometries, this
+     *  structure must be specialized. The following default implementation
+     *  can be used (via derivation) to provide the necessary information. It
+     *  contains exactly the fields that are necessary:
+     *  \code
+     *  template< class ctype, int dimG, int dimW >
+     *  struct DefaultGeometryTraits
+     *  {
+     *    typedef DefaultCoordTraits< ctype, dimW > GlobalCoordTraits;
+     *    typedef DefaultCoordTraits< ctype, dimG > LocalCoordTraits;
+     *
+     *    // are all global geometries affine?
+     *    static const bool globallyAffine = false;
+     *    // are all local geometries affine?
+     *    static const bool locallyAffine = false;
+     *
+     *    static const int dimGrid = dimG;
+     *
+     *    // hybrid   [ true if Codim 0 is hybrid ]
+     *    static const bool hybrid = true;
+     *    // dunetype [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *
+     *    // what basic geometry type shall the line be considered?
+     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+     *
+     *    template< class Traits >
+     *    struct Caching
+     *    : public ComputeAll< Traits >
+     *    {};
+     *  };
+     *  \endcode
      */
+    template< class Grid >
+    struct GeometryTraits;
+
+    template< class Grid >
+    struct GeometryTraits< const Grid >
+      : public GeometryTraits< Grid >
+    {};
 
 
 
@@ -328,11 +370,11 @@ namespace Dune
     class Geometry
       : public BasicGeometry
         < mydim, cdim, Grid,
-            typename GeometryTraits< Grid > :: CoordTraits,
+            typename GeometryTraits< Grid > :: GlobalCoordTraits,
             //GeometryTraits< Grid > :: globallyAffine,
             GeometryTraits< Grid > :: linetype >
     {
-      typedef typename GeometryTraits< Grid > :: CoordTraits CoordTraits;
+      typedef typename GeometryTraits< Grid > :: GlobalCoordTraits CoordTraits;
       typedef BasicGeometry
       < mydim, cdim, Grid, CoordTraits, GeometryTraits< Grid > :: linetype >
       Base;
