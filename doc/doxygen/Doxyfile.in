@@ -462,6 +462,7 @@ WARN_LOGFILE           =
 
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
+                         @top_srcdir@/grid/genericgeometry/doc/genericgeometrypage \
                          @top_srcdir@/grid/modules \
                          @top_srcdir@/grid/albertagrid \
                          @top_srcdir@/grid/albertagrid.hh \
@@ -543,7 +544,8 @@ IMAGE_PATH             = @top_srcdir@/grid/sgrid \
                          @top_srcdir@/grid/common \
                          @top_srcdir@/grid/io/file/dgfparser/test \
                          @top_srcdir@/doc/appl/refelements \
-                         @top_srcdir@/doc/refinement
+                         @top_srcdir@/doc/refinement \
+                         @top_srcdir@/grid/genericgeometry/doc
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
