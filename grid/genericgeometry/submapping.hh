@@ -75,7 +75,7 @@ namespace Dune
       typedef GenericGeometry :: MappingTraits
       < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
       CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits >
@@ -104,7 +104,7 @@ namespace Dune
       typedef GenericGeometry :: MappingTraits
       < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
       CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
@@ -140,7 +140,7 @@ namespace Dune
       typedef GenericGeometry :: MappingTraits
       < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
       CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;

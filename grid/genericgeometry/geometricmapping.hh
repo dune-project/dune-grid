@@ -80,7 +80,7 @@ namespace Dune
       static const unsigned int dimension = Topology :: dimension;
 
     public:
-      typedef typename GeometricMappingTraits :: template Mapping< Topology > :: Type
+      typedef typename GeometricMappingTraits :: template Mapping< Topology > :: type
       Mapping;
       typedef typename Mapping :: Traits Traits;
 

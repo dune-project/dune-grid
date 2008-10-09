@@ -14,30 +14,6 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class GeometryTraits >
-    struct CornerMappingTraits
-    {
-      typedef typename GeometryTraits :: CoordTraits CoordTraits;
-
-      static const int dimWorld = GeometryTraits :: dimWorld;
-
-      template< unsigned int dim >
-      struct Caching
-      {
-        typedef typename GeometryTraits :: template Caching
-        < MappingTraits< CoordTraits, dim, dimWorld > >
-        type;
-      };
-
-      template< class Topology >
-      struct Mapping
-      {
-        typedef typename GeometryTraits :: template Mapping< Topology > :: type Type;
-      };
-    };
-
-
-
     // BasicGeometry
     // -------------
 
@@ -66,20 +42,17 @@ namespace Dune
 
       static const int codimension = dimGrid - mydimension;
 
-      typedef CornerMappingTraits< Traits > GeometricMappingTraits;
-
       template< bool >
       struct Hybrid
       {
-        typedef HybridMapping< dimGrid, GeometricMappingTraits > Mapping;
+        typedef HybridMapping< dimGrid, Traits > Mapping;
       };
 
       template< bool >
       struct NonHybrid
       {
         typedef typename Convert< Traits :: dunetype, dimGrid > :: type Topology;
-        typedef GenericGeometry :: CachedMapping< Topology, GeometricMappingTraits >
-        Mapping;
+        typedef GenericGeometry :: CachedMapping< Topology, Traits > Mapping;
       };
 
       typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, Traits :: linetype >

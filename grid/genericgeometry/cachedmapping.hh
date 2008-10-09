@@ -111,8 +111,7 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
-      CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
       typedef typename Base :: ReferenceElement ReferenceElement;
 
       template< unsigned int codim >

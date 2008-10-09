@@ -45,8 +45,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
-      CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
 
       template< unsigned int codim >
       struct Codim
@@ -120,8 +119,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
-      CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
 
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
