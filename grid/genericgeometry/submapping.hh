@@ -34,13 +34,13 @@ namespace Dune
     // MappingTraits
     // -------------
 
-    template< unsigned int DimG, class CoordTraits, bool alwaysAffine = false >
+    template< class CT, unsigned int DimG, unsigned int DimW >
     struct MappingTraits
     {
-      static const unsigned int dimG = DimG;
-      static const unsigned int dimW = CoordTraits :: dimWorld;
+      typedef CT CoordTraits;
 
-      static const bool affine = alwaysAffine;
+      static const unsigned int dimG = DimG;
+      static const unsigned int dimW = DimW;
 
       typedef typename CoordTraits :: ctype FieldType;
       typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
@@ -65,12 +65,18 @@ namespace Dune
     template< unsigned int DimG, class GeometricMappingTraits, unsigned int codim >
     struct SubMappingTraits< HybridMapping< DimG, GeometricMappingTraits >, codim >
     {
-      enum { dimension = DimG };
-      enum { isVirtual = true };
+      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
 
-      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      static const unsigned int dimension = DimG;
+      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
+
+      static const bool isVirtual = true;
+
+      typedef GenericGeometry :: MappingTraits
+      < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename MappingTraits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits >
       HybridSubMapping;
@@ -88,12 +94,18 @@ namespace Dune
     template< class Topology, class GeometricMappingTraits, unsigned int codim >
     struct SubMappingTraits< VirtualMapping< Topology, GeometricMappingTraits >, codim >
     {
-      enum { dimension = Topology :: dimension };
-      enum { isVirtual = true };
+      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
 
-      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      static const unsigned int dimension = Topology :: dimension;
+      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
+
+      static const bool isVirtual = true;
+
+      typedef GenericGeometry :: MappingTraits
+      < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename MappingTraits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
 
@@ -118,14 +130,18 @@ namespace Dune
     template< class Topology, class GeometricMappingTraits, unsigned int codim >
     struct SubMappingTraits< CachedMapping< Topology, GeometricMappingTraits >, codim >
     {
-      enum { dimension = Topology :: dimension };
-      enum { isVirtual = IsCodimHybrid< Topology, codim > :: value };
+      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
 
-      typedef typename GeometricMappingTraits :: CoordinateTraits CoordTraits;
+      static const unsigned int dimension = Topology :: dimension;
+      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
 
-      typedef typename GeometricMappingTraits :: template Traits< dimension - codim >
+      static const bool isVirtual = IsCodimHybrid< Topology, codim > :: value;
+
+      typedef GenericGeometry :: MappingTraits
+      < CoordTraits, dimension - codim, dimWorld >
       MappingTraits;
-      typedef typename MappingTraits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimension - codim > :: type
+      CachingType;
 
       typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
 

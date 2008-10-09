@@ -14,7 +14,7 @@ namespace Dune
   {
 
     template< class ct >
-    struct DefaultMatrixVectorTraits
+    struct DuneCoordTraits
     {
       typedef ct ctype;
 

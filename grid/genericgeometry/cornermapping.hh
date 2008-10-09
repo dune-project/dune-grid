@@ -57,11 +57,11 @@ namespace Dune
     // GenericCornerMapping
     // --------------------
 
-    template< class Topology, class Traits, unsigned int offset = 0 >
+    template< class Topology, class Traits, bool affine, unsigned int offset = 0 >
     class GenericCornerMapping;
 
-    template< class Traits, unsigned int offset >
-    class GenericCornerMapping < Point, Traits, offset >
+    template< class Traits, bool affine, unsigned int offset >
+    class GenericCornerMapping < Point, Traits, affine, offset >
     {
       typedef Point Topology;
 
@@ -125,13 +125,15 @@ namespace Dune
     };
 
 
-    template< class BaseTopology, class Traits, unsigned int offset >
-    class GenericCornerMapping< Prism< BaseTopology >, Traits, offset >
+    template< class BaseTopology, class Traits, bool affine, unsigned int offset >
+    class GenericCornerMapping< Prism< BaseTopology >, Traits, affine, offset >
     {
       typedef Prism< BaseTopology > Topology;
 
-      typedef GenericCornerMapping< BaseTopology, Traits, offset > BottomMapping;
-      typedef GenericCornerMapping< BaseTopology, Traits, offset + BaseTopology :: numCorners >
+      typedef GenericCornerMapping< BaseTopology, Traits, affine, offset >
+      BottomMapping;
+      typedef GenericCornerMapping
+      < BaseTopology, Traits, affine, offset + BaseTopology :: numCorners >
       TopMapping;
 
     public:
@@ -143,7 +145,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      static const bool alwaysAffine = ((dim < 2) || Traits :: affine);
+      static const bool alwaysAffine = ((dim < 2) || affine);
 
       template< class CoordStorage >
       static const GlobalCoordType &origin ( const CoordStorage &coords )
@@ -246,13 +248,15 @@ namespace Dune
     };
 
 
-    template< class BaseTopology, class Traits, unsigned int offset >
-    class GenericCornerMapping < Pyramid< BaseTopology >, Traits, offset >
+    template< class BaseTopology, class Traits, bool affine, unsigned int offset >
+    class GenericCornerMapping < Pyramid< BaseTopology >, Traits, affine, offset >
     {
       typedef Pyramid< BaseTopology > Topology;
 
-      typedef GenericCornerMapping< BaseTopology, Traits, offset > BottomMapping;
-      typedef GenericCornerMapping< Point, Traits, offset + BaseTopology :: numCorners >
+      typedef GenericCornerMapping< BaseTopology, Traits, affine, offset >
+      BottomMapping;
+      typedef GenericCornerMapping
+      < Point, Traits, affine, offset + BaseTopology :: numCorners >
       TopMapping;
 
     public:
@@ -264,7 +268,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      static const bool alwaysAffine = (BottomMapping :: alwaysAffine || Traits :: affine);
+      static const bool alwaysAffine = (BottomMapping :: alwaysAffine || affine);
 
       template< class CoordStorage >
       static const GlobalCoordType &origin ( const CoordStorage &coords )
@@ -486,13 +490,14 @@ namespace Dune
     // CornerMapping
     // -------------
 
-    template< class Topology, class CoordTraits, class CornerStorage >
+    template< class Topology, class MappingTraits, class CornerStorage,
+        bool affine = false >
     class CornerMapping
     {
-      typedef CornerMapping< Topology, CoordTraits, CornerStorage > This;
+      typedef CornerMapping< Topology, MappingTraits, CornerStorage, affine > This;
 
     public:
-      typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
+      typedef MappingTraits Traits;
 
       typedef CornerStorage CornerStorageType;
 
@@ -513,13 +518,17 @@ namespace Dune
         typedef typename CornerStorage :: template SubTopology< codim, i > :: CornerStorage
         CornerStorageType;
 
-        typedef CornerMapping< type, CoordTraits, CornerStorageType > Trace;
+        typedef GenericGeometry :: MappingTraits
+        < typename Traits :: CoordTraits, dimG - codim, dimW >
+        SubMappingTraits;
+
+        typedef CornerMapping< type, SubMappingTraits, CornerStorageType > Trace;
 
         typedef SubMappingCoords< This, codim > TraceCoordVector;
       };
 
     private:
-      typedef GenericGeometry :: GenericCornerMapping< Topology, Traits > GenericMapping;
+      typedef GenericGeometry :: GenericCornerMapping< Topology, Traits, affine > GenericMapping;
 
     public:
       static const bool alwaysAffine = GenericMapping :: alwaysAffine;

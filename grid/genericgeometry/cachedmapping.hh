@@ -97,7 +97,10 @@ namespace Dune
 
       static const unsigned int dimension = Topology :: dimension;
 
-      typedef typename GeometricMappingTraits :: template Traits< dimension > Traits;
+      typedef MappingTraits
+      < typename GeometricMappingTraits :: CoordTraits,
+          dimension, GeometricMappingTraits :: dimWorld >
+      Traits;
 
     public:
       enum { dimG = Traits :: dimG };
@@ -108,7 +111,8 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      typedef typename Traits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
+      CachingType;
       typedef typename Base :: ReferenceElement ReferenceElement;
 
       template< unsigned int codim >

@@ -31,7 +31,10 @@ namespace Dune
       typedef HybridMapping< dim, GeometricMappingTraits > This;
 
     protected:
-      typedef typename GeometricMappingTraits :: template Traits< dim > Traits;
+      typedef MappingTraits
+      < typename GeometricMappingTraits :: CoordTraits,
+          dim, GeometricMappingTraits :: dimWorld >
+      Traits;
 
     public:
       static const unsigned int dimG = Traits :: dimG;
@@ -42,7 +45,8 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename Traits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
+      CachingType;
 
       template< unsigned int codim >
       struct Codim
@@ -116,7 +120,8 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename Traits :: CachingType CachingType;
+      typedef typename GeometricMappingTraits :: template Caching< dimG > :: type
+      CachingType;
 
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 

@@ -3,8 +3,10 @@
 #ifndef DUNE_GENERICGEOMETRY_GEOMETRY_HH
 #define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
-#include <dune/grid/genericgeometry/mappingprovider.hh>
 #include <dune/grid/common/geometry.hh>
+
+#include <dune/grid/genericgeometry/mappingprovider.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
 
 namespace Dune
 {
@@ -12,151 +14,25 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class ct, int dimW >
-    struct DuneCoordTraits
-    {
-      typedef ct ctype;
-
-      static const int dimWorld = dimW;
-
-      template< int dim >
-      struct Vector
-      {
-        typedef FieldVector< ctype, dim > type;
-      };
-
-      template< int rows, int cols >
-      struct Matrix
-      {
-        typedef FieldMatrix< ctype, rows, cols > type;
-      };
-
-      typedef typename Vector< dimWorld > :: type GlobalCoordinate;
-    };
-
-
-
-    template< class ct, int dimW, bool alwaysAffine = false >
-    struct DefaultCoordTraits
-      : public DuneCoordTraits< ct, dimW >
-    {
-      static const bool affine = alwaysAffine;
-
-      typedef typename DuneCoordTraits< ct, dimW > :: GlobalCoordinate
-      GlobalCoordinate;
-
-      template< class Topology >
-      struct CornerStorage
-      {
-        typedef CoordPointerStorage< Topology, GlobalCoordinate > Type;
-      };
-    };
-
-
-
-    template< class ctype, int dimG, int dimW >
-    struct DefaultGeometryTraits
-    {
-      typedef DefaultCoordTraits< ctype, dimW > GlobalCoordTraits;
-      typedef DefaultCoordTraits< ctype, dimG > LocalCoordTraits;
-
-      // are all global geometries affine?
-      static const bool globallyAffine = false;
-      // are all local geometries affine?
-      static const bool locallyAffine = false;
-
-      static const int dimGrid = dimG;
-
-      //   hybrid   [ true if Codim 0 is hybrid ]
-      static const bool hybrid = true;
-      //   dunetype [ for Codim 0, needed for (hybrid=false) ]
-      // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
-
-      // what basic geometry type shall the line be considered?
-      static const GeometryType :: BasicType linetype = GeometryType :: simplex;
-
-      template< class Traits >
-      struct Caching
-        : public ComputeAll< Traits >
-      {};
-    };
-
-
-
-    /** \struct  GeometryTraits
-     *  \ingroup GenericGeometry
-     *  \brief   grid specific information required by the generic geometries
-     *
-     *  Every implementation of a DUNE Geometry is required to have the same
-     *  template parameter list:
-     *  \code
-     *  template< int mydim, int cdim, class Grid >
-     *  \endcode
-     *  Consequently, there is no direct way to pass compile time static
-     *  information to a unified implementation such as the generic geometries.
-     *  The structure GeometryTraits realizes an indirect way to do this.
-     *
-     *  For every grid implementation using the generic geometries, this
-     *  structure must be specialized. The following default implementation
-     *  can be used (via derivation) to provide the necessary information. It
-     *  contains exactly the fields that are necessary:
-     *  \code
-     *  template< class ctype, int dimG, int dimW >
-     *  struct DefaultGeometryTraits
-     *  {
-     *    typedef DefaultCoordTraits< ctype, dimW > GlobalCoordTraits;
-     *    typedef DefaultCoordTraits< ctype, dimG > LocalCoordTraits;
-     *
-     *    // are all global geometries affine?
-     *    static const bool globallyAffine = false;
-     *    // are all local geometries affine?
-     *    static const bool locallyAffine = false;
-     *
-     *    static const int dimGrid = dimG;
-     *
-     *    // hybrid   [ true if Codim 0 is hybrid ]
-     *    static const bool hybrid = true;
-     *    // dunetype [ for Codim 0, needed for (hybrid=false) ]
-     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
-     *
-     *    // what basic geometry type shall the line be considered?
-     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
-     *
-     *    template< class Traits >
-     *    struct Caching
-     *    : public ComputeAll< Traits >
-     *    {};
-     *  };
-     *  \endcode
-     */
-    template< class Grid >
-    struct GeometryTraits;
-
-    template< class Grid >
-    struct GeometryTraits< const Grid >
-      : public GeometryTraits< Grid >
-    {};
-
-
-
-    template< class CoordTraits, template< class > class Caching >
+    template< class GeometryTraits >
     struct CornerMappingTraits
     {
-      typedef CoordTraits CoordinateTraits;
+      typedef typename GeometryTraits :: CoordTraits CoordTraits;
 
-      template< unsigned int dimension >
-      struct Traits
-        : public MappingTraits< dimension, CoordTraits >
+      static const int dimWorld = GeometryTraits :: dimWorld;
+
+      template< unsigned int dim >
+      struct Caching
       {
-        typedef Caching< MappingTraits< dimension, CoordTraits > > CachingType;
+        typedef typename GeometryTraits :: template Caching
+        < MappingTraits< CoordTraits, dim, dimWorld > >
+        type;
       };
 
       template< class Topology >
       struct Mapping
       {
-        typedef typename CoordTraits :: template CornerStorage< Topology > :: Type
-        CornerStorage;
-        typedef CornerMapping< Topology, CoordTraits, CornerStorage > Type;
+        typedef typename GeometryTraits :: template Mapping< Topology > :: type Type;
       };
     };
 
@@ -165,22 +41,20 @@ namespace Dune
     // BasicGeometry
     // -------------
 
-    template< int mydim, int cdim, class Grid, class CoordTraits,
-        GeometryType :: BasicType linetype >
+    template< int mydim, int cdim, class Grid, class Traits >
     class BasicGeometry
     {
-      typedef GeometryTraits< Grid > Traits;
+      typedef typename Traits :: CoordTraits CoordTraits;
 
       static const int dimGrid = Traits :: dimGrid;
 
-      template< int, int, class, class, GeometryType :: BasicType >
-      friend class BasicGeometry;
+      template< int, int, class, class > friend class BasicGeometry;
 
     public:
       static const int mydimension = mydim;
       static const int coorddimension = cdim;
 
-      typedef typename Grid :: ctype ctype;
+      typedef typename CoordTraits :: ctype ctype;
 
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
@@ -192,8 +66,7 @@ namespace Dune
 
       static const int codimension = dimGrid - mydimension;
 
-      typedef CornerMappingTraits< CoordTraits, Traits :: template Caching >
-      GeometricMappingTraits;
+      typedef CornerMappingTraits< Traits > GeometricMappingTraits;
 
       template< bool >
       struct Hybrid
@@ -209,12 +82,13 @@ namespace Dune
         Mapping;
       };
 
-      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, linetype >
+      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, Traits :: linetype >
       DuneGeometryTypeProvider;
 
       typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
       ElementMapping;
-      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension > MappingProvider;
+      typedef GenericGeometry :: MappingProvider< ElementMapping, codimension >
+      MappingProvider;
 
     protected:
       typedef typename MappingProvider :: Mapping Mapping;
@@ -246,7 +120,7 @@ namespace Dune
       }
 
       template< int fatherdim >
-      BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits, linetype > &father,
+      BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father,
                       int i,
                       const CachingType &cache )
         : mapping_( subMapping( father, i, cache ) )
@@ -350,7 +224,7 @@ namespace Dune
 
       template< int fatherdim >
       Mapping *
-      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, CoordTraits, linetype > &father,
+      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father,
                    int i, const CachingType &cache )
       {
         const unsigned int codim = fatherdim - mydim;
@@ -368,16 +242,9 @@ namespace Dune
 
     template< int mydim, int cdim, class Grid >
     class Geometry
-      : public BasicGeometry
-        < mydim, cdim, Grid,
-            typename GeometryTraits< Grid > :: GlobalCoordTraits,
-            //GeometryTraits< Grid > :: globallyAffine,
-            GeometryTraits< Grid > :: linetype >
+      : public BasicGeometry< mydim, cdim, Grid, GlobalGeometryTraits< Grid > >
     {
-      typedef typename GeometryTraits< Grid > :: GlobalCoordTraits CoordTraits;
-      typedef BasicGeometry
-      < mydim, cdim, Grid, CoordTraits, GeometryTraits< Grid > :: linetype >
-      Base;
+      typedef BasicGeometry< mydim, cdim, Grid, GlobalGeometryTraits< Grid > > Base;
 
     protected:
       typedef typename Base :: CachingType CachingType;
@@ -419,15 +286,9 @@ namespace Dune
 
     template< int mydim, int cdim, class Grid >
     class LocalGeometry
-      : public BasicGeometry
-        < mydim, cdim, Grid, typename GeometryTraits< Grid > :: LocalCoordTraits,
-            // GeometryTraits< Grid > :: locallyAffine,
-            GeometryTraits< Grid > :: linetype >
+      : public BasicGeometry< mydim, cdim, Grid, LocalGeometryTraits< Grid > >
     {
-      typedef typename GeometryTraits< Grid > :: LocalCoordTraits CoordTraits;
-      typedef BasicGeometry
-      < mydim, cdim, Grid, CoordTraits, GeometryTraits< Grid > :: linetype >
-      Base;
+      typedef BasicGeometry< mydim, cdim, Grid, LocalGeometryTraits< Grid > > Base;
 
     protected:
       typedef typename Base :: CachingType CachingType;
