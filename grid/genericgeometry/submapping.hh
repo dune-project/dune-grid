@@ -34,13 +34,13 @@ namespace Dune
     // MappingTraits
     // -------------
 
-    template< unsigned int DimG, class CoordTraits >
+    template< unsigned int DimG, class CoordTraits, bool alwaysAffine = false >
     struct MappingTraits
     {
       static const unsigned int dimG = DimG;
       static const unsigned int dimW = CoordTraits :: dimWorld;
 
-      static const bool affine = CoordTraits :: affine;
+      static const bool affine = alwaysAffine;
 
       typedef typename CoordTraits :: ctype FieldType;
       typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
