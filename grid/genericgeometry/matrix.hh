@@ -13,21 +13,21 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class ctype >
+    template< class ct >
     struct DefaultMatrixVectorTraits
     {
-      typedef ctype FieldType;
+      typedef ct ctype;
 
-      template< int m, int n>
-      struct Matrix
-      {
-        typedef FieldMatrix< FieldType, m, n > Type;
-      };
-
-      template< int n >
+      template< int dim >
       struct Vector
       {
-        typedef FieldVector< FieldType, n > Type;
+        typedef FieldVector< ctype, dim > type;
+      };
+
+      template< int rows, int cols >
+      struct Matrix
+      {
+        typedef FieldMatrix< ctype, rows, cols > type;
       };
     };
 
@@ -36,13 +36,13 @@ namespace Dune
     template< class Traits >
     struct MatrixHelper
     {
-      typedef typename Traits :: FieldType FieldType;
+      typedef typename Traits :: ctype FieldType;
 
       template< int m, int n >
       static void
-      Ax ( const typename Traits :: template Matrix< m, n > :: Type &A,
-           const typename Traits :: template Vector< n > :: Type &x,
-           typename Traits :: template Vector< m > :: Type &ret )
+      Ax ( const typename Traits :: template Matrix< m, n > :: type &A,
+           const typename Traits :: template Vector< n > :: type &x,
+           typename Traits :: template Vector< m > :: type &ret )
       {
         for( int i = 0; i < m; ++i )
         {
@@ -54,9 +54,9 @@ namespace Dune
 
       template< int m, int n >
       static void
-      ATx ( const typename Traits :: template Matrix< m, n > :: Type &A,
-            const typename Traits :: template Vector< m > :: Type &x,
-            typename Traits :: template Vector< n > :: Type &ret )
+      ATx ( const typename Traits :: template Matrix< m, n > :: type &A,
+            const typename Traits :: template Vector< m > :: type &x,
+            typename Traits :: template Vector< n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -68,9 +68,9 @@ namespace Dune
 
       template< int m, int n, int p >
       static void
-      AB ( const typename Traits :: template Matrix< m, n > :: Type &A,
-           const typename Traits :: template Matrix< n, p > :: Type &B,
-           typename Traits :: template Matrix< m, p > :: Type &ret )
+      AB ( const typename Traits :: template Matrix< m, n > :: type &A,
+           const typename Traits :: template Matrix< n, p > :: type &B,
+           typename Traits :: template Matrix< m, p > :: type &ret )
       {
         for( int i = 0; i < m; ++i )
         {
@@ -85,9 +85,9 @@ namespace Dune
 
       template< int m, int n, int p >
       static void
-      ATBT ( const typename Traits :: template Matrix< m, n > :: Type &A,
-             const typename Traits :: template Matrix< p, m > :: Type &B,
-             typename Traits :: template Matrix< n, p > :: Type &ret )
+      ATBT ( const typename Traits :: template Matrix< m, n > :: type &A,
+             const typename Traits :: template Matrix< p, m > :: type &B,
+             typename Traits :: template Matrix< n, p > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -102,8 +102,8 @@ namespace Dune
 
       template< int m, int n >
       static void
-      ATA_L ( const typename Traits :: template Matrix< m, n > :: Type &A,
-              typename Traits :: template Matrix< n, n > :: Type &ret )
+      ATA_L ( const typename Traits :: template Matrix< m, n > :: type &A,
+              typename Traits :: template Matrix< n, n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -118,8 +118,8 @@ namespace Dune
 
       template< int m, int n >
       static void
-      ATA ( const typename Traits :: template Matrix< m, n > :: Type &A,
-            typename Traits :: template Matrix< n, n > :: Type &ret )
+      ATA ( const typename Traits :: template Matrix< m, n > :: type &A,
+            typename Traits :: template Matrix< n, n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -139,8 +139,8 @@ namespace Dune
 
       template< int m, int n >
       static void
-      AAT_L ( const typename Traits :: template Matrix< m, n > :: Type &A,
-              typename Traits :: template Matrix< m, m > :: Type &ret )
+      AAT_L ( const typename Traits :: template Matrix< m, n > :: type &A,
+              typename Traits :: template Matrix< m, m > :: type &ret )
       {
         /*
            if (m==2) {
@@ -164,8 +164,8 @@ namespace Dune
 
       template< int m, int n >
       static void
-      AAT ( const typename Traits :: template Matrix< m, n > :: Type &A,
-            typename Traits :: template Matrix< m, m > :: Type &ret )
+      AAT ( const typename Traits :: template Matrix< m, n > :: type &A,
+            typename Traits :: template Matrix< m, m > :: type &ret )
       {
         for( int i = 0; i < m; ++i )
         {
@@ -184,9 +184,9 @@ namespace Dune
 
       template< int n >
       static void
-      Lx ( const typename Traits :: template Matrix< n, n > :: Type &L,
-           const typename Traits :: template Vector< n > :: Type &x,
-           typename Traits :: template Vector< n > :: Type &ret )
+      Lx ( const typename Traits :: template Matrix< n, n > :: type &L,
+           const typename Traits :: template Vector< n > :: type &x,
+           typename Traits :: template Vector< n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -198,9 +198,9 @@ namespace Dune
 
       template< int n >
       static void
-      LTx ( const typename Traits :: template Matrix< n, n > :: Type &L,
-            const typename Traits :: template Vector< n > :: Type &x,
-            typename Traits :: template Vector< n > :: Type &ret )
+      LTx ( const typename Traits :: template Matrix< n, n > :: type &L,
+            const typename Traits :: template Vector< n > :: type &x,
+            typename Traits :: template Vector< n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -212,8 +212,8 @@ namespace Dune
 
       template< int n >
       static void
-      LTL ( const typename Traits :: template Matrix< n, n > :: Type &L,
-            typename Traits :: template Matrix< n, n > :: Type &ret )
+      LTL ( const typename Traits :: template Matrix< n, n > :: type &L,
+            typename Traits :: template Matrix< n, n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -232,8 +232,8 @@ namespace Dune
 
       template< int n >
       static void
-      LLT ( const typename Traits :: template Matrix< n, n > :: Type &L,
-            typename Traits :: template Matrix< n, n > :: Type &ret )
+      LLT ( const typename Traits :: template Matrix< n, n > :: type &L,
+            typename Traits :: template Matrix< n, n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -252,8 +252,8 @@ namespace Dune
 
       template< int n >
       static void
-      cholesky_L ( const typename Traits :: template Matrix< n, n > :: Type &A,
-                   typename Traits :: template Matrix< n, n > :: Type &ret )
+      cholesky_L ( const typename Traits :: template Matrix< n, n > :: type &A,
+                   typename Traits :: template Matrix< n, n > :: type &ret )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -278,7 +278,7 @@ namespace Dune
 
       template< int n >
       static FieldType
-      detL ( const typename Traits :: template Matrix< n, n > :: Type &L )
+      detL ( const typename Traits :: template Matrix< n, n > :: type &L )
       {
         FieldType det = FieldType( 1 );
         for( int i = 0; i < n; ++i )
@@ -288,7 +288,7 @@ namespace Dune
 
       template< int n >
       static FieldType
-      invL ( typename Traits :: template Matrix< n, n > :: Type &L )
+      invL ( typename Traits :: template Matrix< n, n > :: type &L )
       {
         FieldType det = FieldType( 1 );
         for( int i = 0; i < n; ++i )
@@ -311,8 +311,8 @@ namespace Dune
       // calculates x := L^{-1} x
       template< int n >
       static void
-      invLx ( typename Traits :: template Matrix< n, n > :: Type &L,
-              typename Traits :: template Vector< n > :: Type &x )
+      invLx ( typename Traits :: template Matrix< n, n > :: type &L,
+              typename Traits :: template Vector< n > :: type &x )
       {
         for( int i = 0; i < n; ++i )
         {
@@ -325,8 +325,8 @@ namespace Dune
       // calculates x := L^{-T} x
       template< int n >
       static void
-      invLTx ( typename Traits :: template Matrix< n, n > :: Type &L,
-               typename Traits :: template Vector< n > :: Type &x )
+      invLTx ( typename Traits :: template Matrix< n, n > :: type &L,
+               typename Traits :: template Vector< n > :: type &x )
       {
         for( int i = n; i > 0; --i )
         {
@@ -338,19 +338,19 @@ namespace Dune
 
       template< int n >
       static FieldType
-      spdDetA ( const typename Traits :: template Matrix< n, n > :: Type &A )
+      spdDetA ( const typename Traits :: template Matrix< n, n > :: type &A )
       {
         // return A[0][0]*A[1][1]-A[1][0]*A[1][0];
-        typename Traits :: template Matrix< n, n > :: Type L;
+        typename Traits :: template Matrix< n, n > :: type L;
         cholesky_L< n >( A, L );
         return detL< n >( L );
       }
 
       template< int n >
       static FieldType
-      spdInvA ( typename Traits :: template Matrix< n, n > :: Type &A )
+      spdInvA ( typename Traits :: template Matrix< n, n > :: type &A )
       {
-        typename Traits :: template Matrix< n, n > :: Type L;
+        typename Traits :: template Matrix< n, n > :: type L;
         cholesky_L< n >( A, L );
         const FieldType det = invL< n >( L );
         LTL< n >( L, A );
@@ -360,10 +360,10 @@ namespace Dune
       // calculate x := A^{-1} x
       template< int n >
       static void
-      spdInvAx ( typename Traits :: template Matrix< n, n > :: Type &A,
-                 typename Traits :: template Vector< n > :: Type &x )
+      spdInvAx ( typename Traits :: template Matrix< n, n > :: type &A,
+                 typename Traits :: template Vector< n > :: type &x )
       {
-        typename Traits :: template Matrix< n, n > :: Type L;
+        typename Traits :: template Matrix< n, n > :: type L;
         cholesky_L< n >( A, L );
         invLx< n >( L, x );
         invLTx< n >( L, x );
@@ -371,11 +371,11 @@ namespace Dune
 
       template< int m, int n >
       static FieldType
-      detATA ( const typename Traits :: template Matrix< m, n > :: Type &A )
+      detATA ( const typename Traits :: template Matrix< m, n > :: type &A )
       {
         if( m >= n )
         {
-          typename Traits :: template Matrix< n, n > :: Type ata;
+          typename Traits :: template Matrix< n, n > :: type ata;
           ATA_L< m, n >( A, ata );
           return spdDetA< n >( ata );
         }
@@ -385,11 +385,11 @@ namespace Dune
 
       template< int m, int n >
       static FieldType
-      detAAT ( const typename Traits :: template Matrix< m, n > :: Type &A )
+      detAAT ( const typename Traits :: template Matrix< m, n > :: type &A )
       {
         if( n >= m )
         {
-          typename Traits :: template Matrix< m, m > :: Type aat;
+          typename Traits :: template Matrix< m, m > :: type aat;
           AAT_L< m, n >( A, aat );
           return spdDetA< m >( aat );
         }
@@ -401,11 +401,11 @@ namespace Dune
       // => A^{-1}_L A = I
       template< int m, int n >
       static FieldType
-      leftInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
-                 typename Traits :: template Matrix< n, m > :: Type &ret )
+      leftInvA ( const typename Traits :: template Matrix< m, n > :: type &A,
+                 typename Traits :: template Matrix< n, m > :: type &ret )
       {
         dune_static_assert( (m >= n), "Matrix has no left inverse." );
-        typename Traits :: template Matrix< n, n > :: Type ata;
+        typename Traits :: template Matrix< n, n > :: type ata;
         ATA_L< m, n >( A, ata );
         const FieldType det = spdInvA< n >( ata );
         ATBT< n, n, m >( ata, A, ret );
@@ -414,12 +414,12 @@ namespace Dune
 
       template< int m, int n >
       static void
-      leftInvAx ( const typename Traits :: template Matrix< m, n > :: Type &A,
-                  const typename Traits :: template Vector< m > :: Type &x,
-                  typename Traits :: template Vector< n > :: Type &y )
+      leftInvAx ( const typename Traits :: template Matrix< m, n > :: type &A,
+                  const typename Traits :: template Vector< m > :: type &x,
+                  typename Traits :: template Vector< n > :: type &y )
       {
         dune_static_assert( (m >= n), "Matrix has no left inverse." );
-        typename Traits :: template Matrix< n, n > :: Type ata;
+        typename Traits :: template Matrix< n, n > :: type ata;
         ATx< m, n >( A, x, y );
         ATA_L< m, n >( A, ata );
         spdInvAx< n >( ata, y );
@@ -429,8 +429,8 @@ namespace Dune
       // => A A^{-1}_R = I
       template< int m, int n >
       static FieldType
-      rightInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
-                  typename Traits :: template Matrix< n, m > :: Type &ret )
+      rightInvA ( const typename Traits :: template Matrix< m, n > :: type &A,
+                  typename Traits :: template Matrix< n, m > :: type &ret )
       {
         dune_static_assert( (n >= m), "Matrix has no right inverse." );
         if( (n == 2) && (m == 2) )
@@ -445,7 +445,7 @@ namespace Dune
         }
         else
         {
-          typename Traits :: template Matrix< m , m > :: Type aat;
+          typename Traits :: template Matrix< m , m > :: type aat;
           AAT_L< m, n >( A, aat );
           const FieldType det = spdInvA< m >( aat );
           ATBT< m, n, m >( A , aat , ret );
@@ -455,12 +455,12 @@ namespace Dune
 
       template< int m, int n >
       static void
-      xTRightInvA ( const typename Traits :: template Matrix< m, n > :: Type &A,
-                    const typename Traits :: template Vector< n > :: Type &x,
-                    typename Traits :: template Vector< m > :: Type &y )
+      xTRightInvA ( const typename Traits :: template Matrix< m, n > :: type &A,
+                    const typename Traits :: template Vector< n > :: type &x,
+                    typename Traits :: template Vector< m > :: type &y )
       {
         dune_static_assert( (n >= m), "Matrix has no right inverse." );
-        typename Traits :: template Matrix< m, m > :: Type aat;
+        typename Traits :: template Matrix< m, m > :: type aat;
         Ax< m, n >( A, x, y );
         AAT_L< m, n >( A, aat );
         spdInvAx< m >( aat, y );

@@ -17,6 +17,9 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
+    template< class Mapping, unsigned int codim >
+    class SubMappingCoords;
+
     template< class Topology, class GeometricMappingTraits >
     class CachedMapping;
 
@@ -35,49 +38,20 @@ namespace Dune
     struct MappingTraits
     {
       static const unsigned int dimG = DimG;
-      static const unsigned int dimW = CoordTraits :: dimCoord;
+      static const unsigned int dimW = CoordTraits :: dimWorld;
 
       static const bool affine = CoordTraits :: affine;
 
-      typedef typename CoordTraits :: FieldType FieldType;
-      typedef typename CoordTraits :: template Vector< dimG > :: Type LocalCoordType;
-      typedef typename CoordTraits :: template Vector< dimW > :: Type GlobalCoordType;
+      typedef typename CoordTraits :: ctype FieldType;
+      typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
+      typedef typename CoordTraits :: template Vector< dimW > :: type GlobalCoordType;
 
-      typedef typename CoordTraits :: template Matrix< dimW, dimG > :: Type
+      typedef typename CoordTraits :: template Matrix< dimW, dimG > :: type
       JacobianType;
-      typedef typename CoordTraits :: template Matrix< dimG, dimW > :: Type
+      typedef typename CoordTraits :: template Matrix< dimG, dimW > :: type
       JacobianTransposedType;
 
       typedef GenericGeometry :: MatrixHelper< CoordTraits > MatrixHelper;
-    };
-
-
-
-    // SubMappingCoords
-    // ----------------
-
-    template< class Mapping, unsigned int codim >
-    class SubMappingCoords
-    {
-      typedef typename Mapping :: GlobalCoordType GlobalCoordType;
-      typedef typename Mapping :: ReferenceElement ReferenceElement;
-
-      enum { dimension = ReferenceElement :: dimension };
-
-      const Mapping &mapping_;
-      const unsigned int i_;
-
-    public:
-      SubMappingCoords ( const Mapping &mapping, unsigned int i )
-        : mapping_( mapping ), i_( i )
-      {}
-
-      const GlobalCoordType &operator[] ( unsigned int j ) const
-      {
-        const unsigned int k
-          = ReferenceElement :: template subNumbering< codim, dimension - codim >( i_, j );
-        return mapping_.corner( k );
-      }
     };
 
 
@@ -189,7 +163,7 @@ namespace Dune
 
 
 
-    // HYbridSubMappingProvider
+    // HybridSubMappingProvider
     // ------------------------
 
     template< class Mapping, unsigned int codim >
@@ -273,11 +247,10 @@ namespace Dune
       typedef typename Mapping :: ReferenceElement ReferenceElement;
       enum { numSubMappings = ReferenceElement :: template Codim< codim > :: size };
 
-      enum { isVirtual = SubMappingTraits< Mapping, codim > :: isVirtual };
+      static const bool isVirtual = SubMappingTraits< Mapping, codim > :: isVirtual;
 
       typedef GenericGeometry :: HybridSubMappingProvider< Mapping, codim >
       HybridSubMappingProvider;
-
 
     public:
       typedef typename SubMappingTraits< Mapping, codim > :: SubMapping SubMapping;

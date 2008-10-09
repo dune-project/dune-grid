@@ -118,10 +118,18 @@ namespace Dune
         typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
       };
 
+      template< unsigned int codim, unsigned int i >
+      struct SubTopology
+      {
+        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
+        typedef CachedMapping< type, GeometricMappingTraits > Trace;
+      };
+
     public:
       unsigned int referenceCount;
 
     protected:
+      using Base :: mapping_;
       using Base :: baryCenter;
       using Base :: jacobianTransposed_;
       using Base :: jTInv_;
@@ -174,6 +182,14 @@ namespace Dune
                    const typename Codim< codim > :: CachingType &cache ) const
       {
         return SubMappingProvider< This, codim > :: subMapping( *this, i, cache );
+      }
+
+      template< unsigned int codim, unsigned int i >
+      typename SubTopology< codim, i > :: Trace
+      trace ( const typename Codim< codim > :: CachingType &cache ) const
+      {
+        typedef typename SubTopology< codim, i > :: Trace Trace;
+        return Trace( mapping_.trace(), cache );
       }
     };
 

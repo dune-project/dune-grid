@@ -417,14 +417,52 @@ namespace Dune
 
 
 
+    // SubMappingCoords
+    // ----------------
+
+    template< class Mapping, unsigned int codim >
+    class SubMappingCoords
+    {
+      typedef typename Mapping :: GlobalCoordType GlobalCoordType;
+      typedef typename Mapping :: ReferenceElement ReferenceElement;
+
+      enum { dimension = ReferenceElement :: dimension };
+
+      const Mapping &mapping_;
+      const unsigned int i_;
+
+    public:
+      SubMappingCoords ( const Mapping &mapping, unsigned int i )
+        : mapping_( mapping ), i_( i )
+      {}
+
+      const GlobalCoordType &operator[] ( unsigned int j ) const
+      {
+        const unsigned int k
+          = ReferenceElement :: template subNumbering< codim, dimension - codim >( i_, j );
+        return mapping_.corner( k );
+      }
+    };
+
+
+
     // CoordPointerStorage
     // -------------------
 
     template< class Topology, class Coordinate >
     class CoordPointerStorage
     {
+      typedef CoordPointerStorage< Topology, Coordinate > This;
+
     public:
       static const unsigned int size = Topology :: numCorners;
+
+      template< unsigned int codim, unsigned int i >
+      struct SubTopology
+      {
+        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
+        typedef CoordPointerStorage< type, Coordinate > CornerStorage;
+      };
 
     private:
       const Coordinate *coords_[ size ];
@@ -456,6 +494,8 @@ namespace Dune
     public:
       typedef MappingTraits< Topology :: dimension, CoordTraits > Traits;
 
+      typedef CornerStorage CornerStorageType;
+
       static const unsigned int dimG = Traits :: dimG;
       static const unsigned int dimW = Traits :: dimW;
 
@@ -465,6 +505,19 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
+      template< unsigned int codim, unsigned int i >
+      struct SubTopology
+      {
+        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
+
+        typedef typename CornerStorage :: template SubTopology< codim, i > :: CornerStorage
+        CornerStorageType;
+
+        typedef CornerMapping< type, CoordTraits, CornerStorageType > Trace;
+
+        typedef SubMappingCoords< This, codim > TraceCoordVector;
+      };
+
     private:
       typedef GenericGeometry :: GenericCornerMapping< Topology, Traits > GenericMapping;
 
@@ -472,7 +525,7 @@ namespace Dune
       static const bool alwaysAffine = GenericMapping :: alwaysAffine;
 
     protected:
-      CornerStorage coords_;
+      CornerStorageType coords_;
 
     public:
       template< class CoordVector >
@@ -494,6 +547,14 @@ namespace Dune
                                 JacobianTransposedType &ret ) const
       {
         return GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), ret );
+      }
+
+      template< unsigned int codim, unsigned int i >
+      typename SubTopology< codim, i > :: Trace trace () const
+      {
+        typedef typename SubTopology< codim, i > :: Trace Trace;
+        typedef typename SubTopology< codim, i > :: TraceCoordVector CoordVector;
+        return Trace( CoordVector( *this, i ) );
       }
     };
 

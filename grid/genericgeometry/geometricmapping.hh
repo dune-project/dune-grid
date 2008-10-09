@@ -46,14 +46,20 @@ namespace Dune
      *    template< class Topology >
      *    struct Mapping
      *    {
-     *      typedef MyMapping< Toplogy, CoordTraits > Type;
+     *      typedef MyMapping< Topology, CoordTraits > Type;
      *    };
      *  };
      *  \endcode
      *
      *  The mapping (called <tt>MyMapping</tt> here) must provide the following
-     *  methods:
+     *  types and methods:
      *  \code
+     *  template< unsigned int codim, unsigned int i >
+     *  struct SubTopology
+     *  {
+     *    typedef MyTrace< MyMapping, codim, i > Trace;
+     *  };
+     *
      *  template< class CoordVector >
      *  explicit MyMapping ( const CoordVector &coords );
      *
@@ -61,6 +67,9 @@ namespace Dune
      *
      *  void global ( const LocalCoordType &x, GlobalCoordType &ret ) const;
      *  bool jacobianTransposed ( const LocalCoordType &x, JacobianTransposedType &ret ) const;
+     *
+     *  template< unsigned int codim, unsigned int i >
+     *  typename SubTopology< codim, i > :: Trace trace () const;
      *  \endcode
      */
     template< class Topology, class GeometricMappingTraits >
@@ -73,7 +82,7 @@ namespace Dune
     public:
       typedef typename GeometricMappingTraits :: template Mapping< Topology > :: Type
       Mapping;
-      typedef typename GeometricMappingTraits :: template Traits< dimension > Traits;
+      typedef typename Mapping :: Traits Traits;
 
       static const unsigned int dimG = Traits :: dimG;
       static const unsigned int dimW = Traits :: dimW;

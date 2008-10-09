@@ -12,35 +12,48 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class ctype, int cdim,
-        bool alwaysAffine = false,
-        GeometryType::BasicType onedtype = GeometryType:: simplex>
-    struct DefaultCoordTraits
+    template< class ct, int dimW,
+        GeometryType :: BasicType linetype = GeometryType :: simplex >
+    struct DuneCoordTraits
     {
-      typedef ctype FieldType;
-      enum { dimCoord = cdim };
+      typedef ct ctype;
+
+      static const int dimWorld = dimW;
+
+      static const GeometryType :: BasicType lineType = linetype;
 
       template< int dim >
       struct Vector
       {
-        typedef FieldVector< FieldType, dim > Type;
+        typedef FieldVector< ctype, dim > type;
       };
 
-      template< int dimR, int dimC >
+      template< int rows, int cols >
       struct Matrix
       {
-        typedef FieldMatrix< FieldType, dimR, dimC > Type;
+        typedef FieldMatrix< ctype, rows, cols > type;
       };
 
-      typedef typename Vector< dimCoord >::Type CoordinateType;
+      typedef typename Vector< dimWorld > :: type GlobalCoordinate;
+    };
 
+
+
+    template< class ct, int dimW,
+        bool alwaysAffine = false,
+        GeometryType::BasicType linetype = GeometryType:: simplex>
+    struct DefaultCoordTraits
+      : public DuneCoordTraits< ct, dimW, linetype >
+    {
       static const bool affine = alwaysAffine;
-      static const GeometryType :: BasicType oneDType = onedtype;
+
+      typedef typename DuneCoordTraits< ct, dimW, linetype > :: GlobalCoordinate
+      GlobalCoordinate;
 
       template< class Topology >
       struct CornerStorage
       {
-        typedef CoordPointerStorage< Topology, CoordinateType > Type;
+        typedef CoordPointerStorage< Topology, GlobalCoordinate > Type;
       };
     };
 
@@ -149,7 +162,7 @@ namespace Dune
         Mapping;
       };
 
-      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, CoordTraits :: oneDType >
+      typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, CoordTraits :: lineType >
       DuneGeometryTypeProvider;
 
       typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
