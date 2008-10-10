@@ -67,9 +67,39 @@ namespace Dune
      *  template< class ctype, int dimG, int dimW >
      *  struct DefaultGeometryTraits
      *  {
-     *    ...
+     *    typedef DuneCoordTraits< ctype > CoordTraits;
+     *
+     *    static const int dimGrid = dimG;
+     *    static const int dimWorld = dimW;
+     *
+     *    //   hybrid   [ true if Codim 0 is hybrid ]
+     *    static const bool hybrid = true;
+     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *
+     *    // what basic geometry type shall the line be considered?
+     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+     *
+     *    template< class Topology >
+     *    struct Mapping
+     *    {
+     *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
+     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *        CornerStorage;
+     *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
+     *    };
+     *
+     *    template< class Traits >
+     *    struct Caching
+     *    : public ComputeAll< Traits >
+     *    {};
      *  };
      *  \endcode
+     *
+     *  This implementation specifies the information used by
+     *  GenericGeometry::Geometry.
+     *
+     *  \tparam  Grid  type of the grid, this traits class applies to
      */
     template< class Grid >
     struct GlobalGeometryTraits;
@@ -102,9 +132,39 @@ namespace Dune
      *  template< class ctype, int dimG, int dimW >
      *  struct DefaultGeometryTraits
      *  {
-     *    ...
+     *    typedef DuneCoordTraits< ctype > CoordTraits;
+     *
+     *    static const int dimGrid = dimG;
+     *    static const int dimWorld = dimW;
+     *
+     *    //   hybrid   [ true if Codim 0 is hybrid ]
+     *    static const bool hybrid = true;
+     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *
+     *    // what basic geometry type shall the line be considered?
+     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+     *
+     *    template< class Topology >
+     *    struct Mapping
+     *    {
+     *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
+     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *        CornerStorage;
+     *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
+     *    };
+     *
+     *    template< class Traits >
+     *    struct Caching
+     *    : public ComputeAll< Traits >
+     *    {};
      *  };
      *  \endcode
+     *
+     *  This implementation specifies the information used by
+     *  GenericGeometry::LocalGeometry.
+     *
+     *  \tparam  Grid  type of the grid, this traits class applies to
      */
     template< class Grid >
     struct LocalGeometryTraits;
