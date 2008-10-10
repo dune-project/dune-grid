@@ -518,11 +518,9 @@ namespace Dune
         typedef typename CornerStorage :: template SubTopology< codim, i > :: CornerStorage
         CornerStorageType;
 
-        typedef GenericGeometry :: MappingTraits
-        < typename Traits :: CoordTraits, dimG - codim, dimW >
-        SubMappingTraits;
+        typedef typename Traits :: template Codim< codim > :: MappingTraits SubTraits;
 
-        typedef CornerMapping< type, SubMappingTraits, CornerStorageType > Trace;
+        typedef CornerMapping< type, SubTraits, CornerStorageType > Trace;
 
         typedef SubMappingCoords< This, codim > TraceCoordVector;
       };

@@ -50,8 +50,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
+        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMapping :: CachingType CachingType;
       };
 
       unsigned int referenceCount;
@@ -126,8 +126,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
+        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMapping :: CachingType CachingType;
       };
 
     private:

@@ -13,26 +13,6 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class ct >
-    struct DuneCoordTraits
-    {
-      typedef ct ctype;
-
-      template< int dim >
-      struct Vector
-      {
-        typedef FieldVector< ctype, dim > type;
-      };
-
-      template< int rows, int cols >
-      struct Matrix
-      {
-        typedef FieldMatrix< ctype, rows, cols > type;
-      };
-    };
-
-
-
     template< class Traits >
     struct MatrixHelper
     {

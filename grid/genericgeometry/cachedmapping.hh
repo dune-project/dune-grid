@@ -25,65 +25,6 @@ namespace Dune
 
 
 
-    // If not affine only volume is cached (based on intElCompute)
-    // otherwise all quantities can be cached using:
-    //   geoCompute:    assign if method called using barycenter
-    //   geoPreCompute: assign in constructor using barycenter
-    //   geoIsComputed: assign in constructor using barycenter using callback
-    enum EvaluationType
-    {
-      //! compute on demand
-      ComputeOnDemand,
-      //! compute in constructor
-      PreCompute,
-      //! assign in constructor using callback
-      IsComputed
-    };
-
-    template< class Traits >
-    struct ComputeAll
-    {
-      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
-      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
-      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-      static const EvaluationType evaluateNormal = ComputeOnDemand;
-
-      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
-      {}
-
-      void integrationElement ( typename Traits :: FieldType &intEl ) const
-      {}
-
-      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
-      {}
-
-      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
-      {}
-    };
-
-    template< class Traits >
-    struct PreComputeAll
-    {
-      static const EvaluationType evaluateJacobianTransposed = PreCompute;
-      static const EvaluationType evaluateJacobianInverseTransposed = PreCompute;
-      static const EvaluationType evaluateIntegrationElement = PreCompute;
-      static const EvaluationType evaluateNormal = PreCompute;
-
-      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
-      {}
-
-      void integrationElement ( typename Traits :: FieldType &intEl ) const
-      {}
-
-      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
-      {}
-
-      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
-      {}
-    };
-
-
-
     // CachedMapping
     // -------------
 
@@ -117,8 +58,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMappingTraits< This, codim > :: CachingType CachingType;
+        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
+        typedef typename SubMapping :: CachingType CachingType;
       };
 
       template< unsigned int codim, unsigned int i >

@@ -6,12 +6,130 @@
 #include <dune/common/geometrytype.hh>
 
 #include <dune/grid/genericgeometry/matrix.hh>
+#include <dune/grid/genericgeometry/cornermapping.hh>
 
 namespace Dune
 {
 
   namespace GenericGeometry
   {
+
+    // DuneCoordTraits
+    // ---------------
+
+    template< class ct >
+    struct DuneCoordTraits
+    {
+      typedef ct ctype;
+
+      template< int dim >
+      struct Vector
+      {
+        typedef FieldVector< ctype, dim > type;
+      };
+
+      template< int rows, int cols >
+      struct Matrix
+      {
+        typedef FieldMatrix< ctype, rows, cols > type;
+      };
+    };
+
+
+
+    // MappingTraits
+    // -------------
+
+    template< class CT, unsigned int DimG, unsigned int DimW >
+    struct MappingTraits
+    {
+      typedef CT CoordTraits;
+
+      static const unsigned int dimG = DimG;
+      static const unsigned int dimW = DimW;
+
+      typedef typename CoordTraits :: ctype FieldType;
+      typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
+      typedef typename CoordTraits :: template Vector< dimW > :: type GlobalCoordType;
+
+      typedef typename CoordTraits :: template Matrix< dimW, dimG > :: type
+      JacobianType;
+      typedef typename CoordTraits :: template Matrix< dimG, dimW > :: type
+      JacobianTransposedType;
+
+      typedef GenericGeometry :: MatrixHelper< CoordTraits > MatrixHelper;
+
+      template< unsigned int codim >
+      struct Codim
+      {
+        typedef GenericGeometry :: MappingTraits< CoordTraits, dimG - codim, dimW >
+        MappingTraits;
+      };
+    };
+
+
+
+    // If not affine only volume is cached (based on intElCompute)
+    // otherwise all quantities can be cached using:
+    //   geoCompute:    assign if method called using barycenter
+    //   geoPreCompute: assign in constructor using barycenter
+    //   geoIsComputed: assign in constructor using barycenter using callback
+    enum EvaluationType
+    {
+      //! compute on demand
+      ComputeOnDemand,
+      //! compute in constructor
+      PreCompute,
+      //! assign in constructor using callback
+      IsComputed
+    };
+
+    template< class Traits >
+    struct ComputeAll
+    {
+      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+      static const EvaluationType evaluateNormal = ComputeOnDemand;
+
+      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+      {}
+
+      void integrationElement ( typename Traits :: FieldType &intEl ) const
+      {}
+
+      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+      {}
+
+      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
+      {}
+    };
+
+    template< class Traits >
+    struct PreComputeAll
+    {
+      static const EvaluationType evaluateJacobianTransposed = PreCompute;
+      static const EvaluationType evaluateJacobianInverseTransposed = PreCompute;
+      static const EvaluationType evaluateIntegrationElement = PreCompute;
+      static const EvaluationType evaluateNormal = PreCompute;
+
+      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+      {}
+
+      void integrationElement ( typename Traits :: FieldType &intEl ) const
+      {}
+
+      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+      {}
+
+      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
+      {}
+    };
+
+
+
+    // DefaultGeometryTraits
+    // ---------------------
 
     template< class ctype, int dimG, int dimW >
     struct DefaultGeometryTraits

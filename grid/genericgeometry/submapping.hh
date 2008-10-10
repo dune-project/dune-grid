@@ -7,6 +7,7 @@
 #include <dune/grid/genericgeometry/subtopologies.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
 
 namespace Dune
 {
@@ -28,31 +29,6 @@ namespace Dune
 
     template< class Topology, class GeometricMappingTraits >
     class VirtualMapping;
-
-
-
-    // MappingTraits
-    // -------------
-
-    template< class CT, unsigned int DimG, unsigned int DimW >
-    struct MappingTraits
-    {
-      typedef CT CoordTraits;
-
-      static const unsigned int dimG = DimG;
-      static const unsigned int dimW = DimW;
-
-      typedef typename CoordTraits :: ctype FieldType;
-      typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
-      typedef typename CoordTraits :: template Vector< dimW > :: type GlobalCoordType;
-
-      typedef typename CoordTraits :: template Matrix< dimW, dimG > :: type
-      JacobianType;
-      typedef typename CoordTraits :: template Matrix< dimG, dimW > :: type
-      JacobianTransposedType;
-
-      typedef GenericGeometry :: MatrixHelper< CoordTraits > MatrixHelper;
-    };
 
 
 
