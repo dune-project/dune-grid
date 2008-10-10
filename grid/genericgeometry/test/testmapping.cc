@@ -5,7 +5,7 @@
 #include <dune/common/exceptions.hh>
 // #define DUNE_THROW(E, m) assert(0)
 
-#include "../mappings.hh"
+#include "../geometricmapping.hh"
 #include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
@@ -25,62 +25,25 @@ using namespace Dune;
 using namespace GenericGeometry;
 
 template< class DuneGeometry >
-struct DuneCoordTraits
+struct MyGeometryTraits
 {
-  enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
-  enum {dimGrid  = DuneGeometry::dimension};       // grid dimension
-  typedef typename DuneGeometry::ctype FieldType;
-  // general vector and matrix types
-  template <int dim>
-  struct Vector {
-    typedef FieldVector<FieldType,dim> Type;
-  };
-  template <int dimR,int dimC>
-  struct Matrix {
-    typedef FieldMatrix<FieldType,dimR,dimC> Type;
-  };
-  // Vector of global vectors denoting the edges of the range
-  // domain, used to construct a mapping together with an offset.
-  // Corners used are
-  // p[offset],...,p[offset+Topology::numCorners]
   typedef DuneGeometry DuneGeometryType;
-  // mapping is of the form Ax+b (used untested)
-  enum {affine = false};
-  enum {oneDType = Dune::GeometryType::simplex};
-  template <class Topology> struct CornerStorage {
-    typedef CoordPointerStorage<Topology,typename Vector<dimCoord>::Type> Type;
+
+  typedef DuneCoordTraits< typename DuneGeometryType :: ctype > CoordTraits;
+
+  static const int dimGrid = DuneGeometryType :: dimension;
+  static const int dimWorld = DuneGeometryType :: coorddimension;
+
+  template< class Topology >
+  struct Mapping
+  {
+    typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
+    typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+    CornerStorage;
+    typedef CornerMapping< Topology, Traits, CornerStorage > type;
   };
 };
 
-
-/*
-   template <class DuneGeometry>
-   struct DuneCoordTraits
-   {
-   static const int dimCoord = DuneGeometry :: coorddimension;
-   static const int dimG = DuneGeometry :: mydimension;
-
-   typedef typename DuneGeometry :: ctype FieldType;
-
-   // general vector and matrix types
-   template <int dim>
-   struct Vector {
-    typedef FieldVector<FieldType,dim> Type;
-   };
-   template <int dimR,int dimC>
-   struct Matrix {
-    typedef FieldMatrix<FieldType,dimR,dimC> Type;
-   };
-   // Vector of global vectors denoting the edges of the range
-   // domain, used to construct a mapping together with an offset.
-   // Corners used are
-   // p[offset],...,p[offset+Topology::numCorners]
-   typedef DuneGeometry coord_vector;
-
-   // mapping is of the form Ax+b (used untested)
-   static const bool affine = false;
-   };
- */
 
 int phiErr;
 int jTinvJTErr;
@@ -120,7 +83,7 @@ void test ( const GridViewType &view )
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
-    Mapping< CornerMapping< TopologyType, DuneCoordTraits< GeometryType > > > map( geo );
+    GeometricMapping< TopologyType, MyGeometryTraits< GeometryType > > map( geo );
     LocalType x(0.1);
     for (int i=0; i<10000; ++i) {
       // test phi

@@ -97,13 +97,82 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class Grid >
-    struct GeometryTraits
-      : public DefaultGeometryTraits
-        < typename Grid :: ctype, Grid :: dimension, Grid :: dimensionworld >
+    template< class Traits, class DuneGeometry >
+    struct DuneCache
+      : public GenericGeometry :: ComputeAll< Traits >
     {
+      DuneCache ()
+      {}
+
+      template< class GeometryType >
+      DuneCache( const GeometryType & )
+      {}
+    };
+
+    template< class CoordTraits, int dimG, int dimW, class DuneGeometry >
+    struct DuneCache< MappingTraits< CoordTraits, dimG, dimW >, DuneGeometry >
+    {
+      typedef MappingTraits< CoordTraits, dimG, dimW > Traits;
+      typedef DuneGeometry DuneGeometryType;
+
+      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+      static const EvaluationType evaluateNormal = ComputeOnDemand;
+
+    private:
+      const DuneGeometryType &geo_;
+
+    public:
+      DuneCache ( const DuneGeometryType &geo )
+        : geo_( geo )
+      {}
+
+      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
+      {}
+
+      void integrationElement( typename Traits :: FieldType &intEl ) const
+      {
+        FieldVector< double, DuneGeometryType :: mydimension > x( 0 );
+        intEl = geo_.integrationElement( x );
+      }
+
+      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
+      {}
+
+      void normal ( int face, typename Traits :: GlobalCoordType &normal ) const
+      {}
+    };
+
+
+
+    template< class Grid >
+    struct GlobalGeometryTraits
+    {
+      typedef typename Grid :: template Codim< 0 > :: Geometry DuneGeometryType;
+
+      typedef DuneCoordTraits< typename DuneGeometryType :: ctype > CoordTraits;
+
+      static const int dimGrid = DuneGeometryType :: dimension;
+      static const int dimWorld = DuneGeometryType :: coorddimension;
+
       static const bool hybrid = true;
-      //static const GeometryType :: BasicType dunetype = Topology< Grid > :: basicType;
+
+      static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+
+      template< class Topology >
+      struct Mapping
+      {
+        typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
+        typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+        CornerStorage;
+        typedef CornerMapping< Topology, Traits, CornerStorage > type;
+      };
+
+      template< class Traits >
+      struct Caching
+        : public DuneCache< Traits, DuneGeometryType >
+      {};
     };
 
   }

@@ -5,7 +5,7 @@
 //#define DUNE_THROW(E, m) assert(0)
 #include <dune/common/exceptions.hh>
 
-#include "../mappings.hh"
+#include "../geometricmapping.hh"
 #include "../conversion.hh"
 #include "../geometry.hh"
 #include <dune/common/fmatrix.hh>
@@ -21,82 +21,7 @@
 
 using namespace Dune;
 
-template< class DuneGeometry >
-struct DuneCoordTraits
-{
-  enum {dimCoord = DuneGeometry::coorddimension};  // world dimension
-  enum {dimGrid  = DuneGeometry::dimension};       // grid dimension
-  typedef typename DuneGeometry::ctype FieldType;
-  // general vector and matrix types
-  template <int dim>
-  struct Vector {
-    typedef FieldVector<FieldType,dim> Type;
-  };
-  template <int dimR,int dimC>
-  struct Matrix {
-    typedef FieldMatrix<FieldType,dimR,dimC> Type;
-  };
-  // Vector of global vectors denoting the edges of the range
-  // domain, used to construct a mapping together with an offset.
-  // Corners used are
-  // p[offset],...,p[offset+Topology::numCorners]
-  typedef DuneGeometry DuneGeometryType;
-  // mapping is of the form Ax+b (used untested)
-  enum {affine = false};
-  enum {oneDType = Dune::GeometryType::simplex};
-};
 
-
-
-template <class Traits>
-struct DuneCache : public GenericGeometry::ComputeAll<Traits> {
-  //typedef typename Traits::CoordVector GeometryType;
-  DuneCache () {}
-  template< class GeometryType >
-  DuneCache(const GeometryType&) {}
-};
-
-template< class CoordTraits >
-struct DuneCache
-< GenericGeometry :: MappingTraits< CoordTraits :: CoordVector :: mydimension, CoordTraits > >
-{
-  typedef GenericGeometry :: MappingTraits
-  < CoordTraits :: CoordVector :: mydimension, CoordTraits >
-  Traits;
-  typedef typename CoordTraits :: DuneGeometryType GeometryType;
-
-  static const GenericGeometry :: EvaluationType evaluateJacobianTransposed
-    = GenericGeometry :: ComputeOnDemand;
-  static const GenericGeometry :: EvaluationType evaluateJacobianInverseTransposed
-    = GenericGeometry :: ComputeOnDemand;
-  static const GenericGeometry :: EvaluationType evaluateIntegrationElement
-    = GenericGeometry :: ComputeOnDemand;
-  static const GenericGeometry :: EvaluationType evaluateNormal
-    = GenericGeometry :: ComputeOnDemand;
-
-private:
-  const GeometryType &geo_;
-
-public:
-  DuneCache ( const GeometryType &geo )
-    : geo_( geo )
-  {}
-
-  void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
-  {}
-
-  void integrationElement( typename Traits :: FieldType &intEl ) const
-  {
-    FieldVector< double, GeometryType :: mydimension > x( 0 );
-    intEl = geo_.integrationElement( x );
-  }
-
-  void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
-  {}
-
-  void normal ( int face, typename Traits :: GlobalCoordType &normal ) const
-  {}
-};
 
 
 
@@ -198,8 +123,6 @@ void test(const GridViewType& view) {
   typedef typename GridViewType :: Intersection IntersectionType;
   typedef typename ElementIterator::Entity EntityType;
   typedef typename EntityType::Geometry GeometryType;
-  typedef GenericGeometry :: CachedMapping
-  < TopologyType, DuneCoordTraits< GeometryType >, DuneCache > GenericGeometryType;
   typedef FieldVector<double, GeometryType::coorddimension> GlobalType;
 
   phiErr = 0;
@@ -213,7 +136,8 @@ void test(const GridViewType& view) {
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geoDune = eIt->geometry();
     // GenericGeometryType genericMap(geoDune,typename GenericGeometryType::CachingType(geoDune) );
-    GenericGeometry::Geometry<GridType::dimension,GridType::dimensionworld,GridType> genericMap(geoDune.type(),geoDune);
+    GenericGeometry::Geometry< GridType::dimension, GridType::dimensionworld, GridType >
+    genericMap( geoDune.type(),geoDune );
     testGeo(geoDune,genericMap);
 
     // typedef typename GenericGeometryType :: template Codim< 1 > :: SubMapping
