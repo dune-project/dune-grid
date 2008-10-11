@@ -26,10 +26,10 @@ namespace Dune
     // ---------------
 
     template< class Topology >
-    class ReferenceDomainBase;
+    struct ReferenceDomainBase;
 
     template<>
-    class ReferenceDomainBase< Point >
+    struct ReferenceDomainBase< Point >
     {
       typedef Point Topology;
 
@@ -66,7 +66,7 @@ namespace Dune
     };
 
     template< class BaseTopology >
-    class ReferenceDomainBase< Prism< BaseTopology > >
+    struct ReferenceDomainBase< Prism< BaseTopology > >
     {
       typedef Prism< BaseTopology > Topology;
 
@@ -143,7 +143,7 @@ namespace Dune
     };
 
     template< class BaseTopology >
-    class ReferenceDomainBase< Pyramid< BaseTopology > >
+    struct ReferenceDomainBase< Pyramid< BaseTopology > >
     {
       typedef Prism< BaseTopology > Topology;
 
