@@ -137,7 +137,7 @@ namespace Dune {
     typedef SurfaceNormalCalculator BaseType;
 
     using BaseType :: _n;
-    using BaseType :: _epsilon;
+    static const double _epsilon;
 
     // our coordinate types
     typedef FieldVector<double, 3> coord3_t;
