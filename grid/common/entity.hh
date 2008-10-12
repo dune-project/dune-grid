@@ -425,11 +425,11 @@ namespace Dune
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
-    bool isNew () const { return realEntity.wasRefined(); }
+    bool isNew () const { return realEntity.isNew(); }
 
     /**\brief Returns true, if entity might disappear during the next call to adapt()
      */
-    bool mightVanish () const { return realEntity.mightBeCoarsened (); }
+    bool mightVanish () const { return realEntity.mightVanish(); }
 
     //===========================================================
     /** @name Interface for the implementor
