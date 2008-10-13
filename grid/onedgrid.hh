@@ -368,14 +368,14 @@ namespace Dune {
     //! The type of grid refinement currently in use
     RefinementType refinementType_;
 
-    OneDEntityImp<0>* getLeftUpperVertex(const OneDEntityImp<1>* eIt);
+    OneDGridList<OneDEntityImp<0> >::iterator getLeftUpperVertex(const OneDEntityImp<1>* eIt);
 
-    OneDEntityImp<0>* getRightUpperVertex(const OneDEntityImp<1>* eIt);
+    OneDGridList<OneDEntityImp<0> >::iterator getRightUpperVertex(const OneDEntityImp<1>* eIt);
 
-    /** \brief Returns an iterator the the first element on the left of
+    /** \brief Returns an iterator to the first element on the left of
         the input element which has sons.
      */
-    OneDEntityImp<1>* getLeftNeighborWithSon(OneDEntityImp<1>* eIt);
+    OneDGridList<OneDEntityImp<1> >::iterator getLeftNeighborWithSon(OneDGridList<OneDEntityImp<1> >::iterator eIt);
 
     // The vertices of the grid hierarchy
     std::vector<OneDGridList<OneDEntityImp<0> > > vertices;
@@ -383,9 +383,6 @@ namespace Dune {
 
     // The elements of the grid hierarchy
     std::vector<OneDGridList<OneDEntityImp<1> > > elements;
-
-    typedef OneDGridList<OneDEntityImp<0> >::iterator VertexIterator;
-    typedef OneDGridList<OneDEntityImp<1> >::iterator ElementIterator;
 
     // Our set of level indices
     mutable std::vector<OneDGridLevelIndexSet<const OneDGrid>* > levelIndexSets_;

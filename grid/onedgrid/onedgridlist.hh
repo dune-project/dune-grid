@@ -5,6 +5,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/iteratorfacades.hh>
 
 namespace Dune {
   /** \file
@@ -13,6 +14,42 @@ namespace Dune {
       Unfortunately, there are problems.  I need to store pointers/iterators
       within one element which point to another element (e.g. the element father).
    */
+  template<class T>
+  class OneDGridListIterator
+    : public BidirectionalIteratorFacade<OneDGridListIterator<T>,T>
+  {
+  public:
+    bool equals(const OneDGridListIterator& other) const {
+      return pointer_ == other.pointer_;
+    }
+
+    T& dereference() {
+      return *pointer_;
+    }
+
+    void increment() {
+      pointer_ = pointer_->succ_;
+    }
+
+    void decrement() {
+      pointer_ = pointer_->pred_;
+    }
+
+    OneDGridListIterator() {}
+
+    OneDGridListIterator(T* pointer) {
+      pointer_ = pointer;
+    }
+
+    OneDGridListIterator operator=(T* pointer) {
+      pointer_ = pointer;
+    }
+
+    operator T*() {return pointer_;}
+
+  private:
+    T* pointer_;
+  };
 
   template<class T>
   class OneDGridList
@@ -20,6 +57,7 @@ namespace Dune {
 
   public:
 
+    //typedef OneDGridListIterator<T> iterator;
     typedef T* iterator;
     typedef const T* const_iterator;
 
@@ -42,16 +80,6 @@ namespace Dune {
 #endif
 
     int size() const {return numelements;}
-
-    T* insert_after (T* i, T* t) DUNE_DEPRECATED {
-
-      // Teste Eingabe
-      if (i==0 && begin_!=0)
-        DUNE_THROW(RangeError, "invalid iterator for insert_after");
-
-      T* tmp = i->succ_;
-      return insert(tmp, t);
-    }
 
     T* push_back (T* t) {
 

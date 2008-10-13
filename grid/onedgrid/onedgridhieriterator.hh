@@ -30,7 +30,7 @@ namespace Dune {
     friend class OneDGridEntity<0,dim,GridImp>;
 
     // Stack entry
-    typedef OneDEntityImp<1>* StackEntry;
+    typedef OneDGridList<OneDEntityImp<1> >::iterator StackEntry;
 
   public:
 
