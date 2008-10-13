@@ -8,6 +8,7 @@
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
 
 namespace Dune
 {
@@ -453,23 +454,27 @@ namespace Dune
     // CoordPointerStorage
     // -------------------
 
-    template< class Topology, class Coordinate >
+    template< class CoordTraits, class Topology, unsigned int dimW >
     class CoordPointerStorage
     {
-      typedef CoordPointerStorage< Topology, Coordinate > This;
+      typedef CoordPointerStorage< CoordTraits, Topology, dimW > This;
 
     public:
       static const unsigned int size = Topology :: numCorners;
+
+      static const unsigned int dimWorld = dimW;
+
+      typedef typename CoordTraits :: template Vector< dimWorld > GlobalCoordinate;
 
       template< unsigned int codim, unsigned int i >
       struct SubTopology
       {
         typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
-        typedef CoordPointerStorage< type, Coordinate > CornerStorage;
+        typedef CoordPointerStorage< CoordTraits, type, dimWorld > CornerStorage;
       };
 
     private:
-      const Coordinate *coords_[ size ];
+      const GlobalCoordinate *coords_[ size ];
 
     public:
       template< class CoordVector >
@@ -479,7 +484,7 @@ namespace Dune
           coords_[ i ] = &(coords[ i ]);
       }
 
-      const Coordinate &operator[] ( unsigned int i ) const
+      const GlobalCoordinate &operator[] ( unsigned int i ) const
       {
         return *(coords_[ i ]);
       }
@@ -490,19 +495,19 @@ namespace Dune
     // CornerMapping
     // -------------
 
-    template< class Topology, class MappingTraits, class CornerStorage,
-        bool affine = false >
+    template< class CoordTraits, class Topology, unsigned int dimW,
+        class CornerStorage, bool affine = false >
     class CornerMapping
     {
-      typedef CornerMapping< Topology, MappingTraits, CornerStorage, affine > This;
+      typedef CornerMapping< CoordTraits, Topology, dimW, CornerStorage, affine > This;
 
     public:
-      typedef MappingTraits Traits;
+      typedef MappingTraits< CoordTraits, Topology :: dimension, dimW > Traits;
 
       typedef CornerStorage CornerStorageType;
 
-      static const unsigned int dimG = Traits :: dimG;
-      static const unsigned int dimW = Traits :: dimW;
+      static const unsigned int dimension = Traits :: dimension;
+      static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
@@ -518,11 +523,8 @@ namespace Dune
         typedef typename CornerStorage :: template SubTopology< codim, i > :: CornerStorage
         CornerStorageType;
 
-        typedef typename Traits :: template Codim< codim > :: MappingTraits SubTraits;
-
-        typedef CornerMapping< type, SubTraits, CornerStorageType > Trace;
-
-        typedef SubMappingCoords< This, codim > TraceCoordVector;
+        typedef CornerMapping< CoordTraits, type, dimWorld, CornerStorageType, affine >
+        Trace;
       };
 
     private:
@@ -560,7 +562,7 @@ namespace Dune
       typename SubTopology< codim, i > :: Trace trace () const
       {
         typedef typename SubTopology< codim, i > :: Trace Trace;
-        typedef typename SubTopology< codim, i > :: TraceCoordVector CoordVector;
+        typedef SubMappingCoords< This, codim > CoordVector;
         return Trace( CoordVector( *this, i ) );
       }
     };

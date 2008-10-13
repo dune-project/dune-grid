@@ -6,13 +6,24 @@
 #include <dune/common/geometrytype.hh>
 
 #include <dune/grid/genericgeometry/matrix.hh>
-#include <dune/grid/genericgeometry/cornermapping.hh>
 
 namespace Dune
 {
 
   namespace GenericGeometry
   {
+
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class CoordTraits, class Topology, unsigned int dimW >
+    class CoordPointerStorage;
+
+    template< class CoordTraits, class Topology, unsigned int dimW,
+        class CornerStorage, bool affine >
+    class CornerMapping;
+
+
 
     // DuneCoordTraits
     // ---------------
@@ -105,10 +116,8 @@ namespace Dune
       template< class Topology >
       struct Mapping
       {
-        typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-        typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
-        CornerStorage;
-        typedef CornerMapping< Topology, Traits, CornerStorage > type;
+        typedef CoordPointerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
+        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, false > type;
       };
 
       struct Caching
