@@ -21,7 +21,8 @@ namespace Dune
     {
       typedef GenericGeometry :: SubMappingTraits< ElementMapping, codim > SubMappingTraits;
       typedef typename SubMappingTraits :: SubMapping Mapping;
-      typedef typename SubMappingTraits :: CachingType CachingType;
+
+      typedef typename Mapping :: CachingType CachingType;
 
       template< bool > struct NonVirtual;
       template< bool > struct Virtual;

@@ -38,29 +38,19 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     struct SubMappingTraits;
 
-    template< unsigned int DimG, class GeometricMappingTraits, unsigned int codim >
-    struct SubMappingTraits< HybridMapping< DimG, GeometricMappingTraits >, codim >
+    template< unsigned int dim, class GeometricMappingTraits, unsigned int codim >
+    struct SubMappingTraits< HybridMapping< dim, GeometricMappingTraits >, codim >
     {
-      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
-
-      static const unsigned int dimension = DimG;
-      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
+      static const unsigned int mydimension = dim - codim;
 
       static const bool isVirtual = true;
 
-      typedef GenericGeometry :: MappingTraits
-      < CoordTraits, dimension - codim, dimWorld >
-      MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
-      CachingType;
-
-      typedef HybridMapping< dimension - codim, GeometricMappingTraits >
-      HybridSubMapping;
+      typedef HybridMapping< mydimension, GeometricMappingTraits > HybridSubMapping;
 
       template< GeometryType :: BasicType btype >
       struct VirtualMapping
       {
-        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef typename Convert< btype, mydimension > :: type SubTopology;
         typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
@@ -70,20 +60,11 @@ namespace Dune
     template< class Topology, class GeometricMappingTraits, unsigned int codim >
     struct SubMappingTraits< VirtualMapping< Topology, GeometricMappingTraits >, codim >
     {
-      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
-
-      static const unsigned int dimension = Topology :: dimension;
-      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
+      static const unsigned int mydimension = Topology :: dimension - codim;
 
       static const bool isVirtual = true;
 
-      typedef GenericGeometry :: MappingTraits
-      < CoordTraits, dimension - codim, dimWorld >
-      MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
-      CachingType;
-
-      typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
+      typedef HybridMapping< mydimension, GeometricMappingTraits > HybridSubMapping;
 
       template< unsigned int i >
       struct VirtualSubMapping
@@ -93,10 +74,10 @@ namespace Dune
         typedef VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
-      template< GeometryType :: BasicType btype >
+      template< GeometryType :: BasicType dunetype >
       struct VirtualMapping
       {
-        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef typename Convert< dunetype, mydimension > :: type SubTopology;
         typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
@@ -106,20 +87,11 @@ namespace Dune
     template< class Topology, class GeometricMappingTraits, unsigned int codim >
     struct SubMappingTraits< CachedMapping< Topology, GeometricMappingTraits >, codim >
     {
-      typedef typename GeometricMappingTraits :: CoordTraits CoordTraits;
-
-      static const unsigned int dimension = Topology :: dimension;
-      static const unsigned int dimWorld = GeometricMappingTraits :: dimWorld;
+      static const unsigned int mydimension = Topology :: dimension - codim;
 
       static const bool isVirtual = IsCodimHybrid< Topology, codim > :: value;
 
-      typedef GenericGeometry :: MappingTraits
-      < CoordTraits, dimension - codim, dimWorld >
-      MappingTraits;
-      typedef typename GeometricMappingTraits :: template Caching< MappingTraits >
-      CachingType;
-
-      typedef HybridMapping< dimension - codim, GeometricMappingTraits > HybridSubMapping;
+      typedef HybridMapping< mydimension, GeometricMappingTraits > HybridSubMapping;
 
       template< unsigned int i >
       struct VirtualSubMapping
@@ -129,10 +101,10 @@ namespace Dune
         typedef VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
-      template< GeometryType :: BasicType btype >
+      template< GeometryType :: BasicType dunetype >
       struct VirtualMapping
       {
-        typedef typename Convert< btype, dimension - codim > :: type SubTopology;
+        typedef typename Convert< dunetype, mydimension > :: type SubTopology;
         typedef GenericGeometry :: VirtualMapping< SubTopology, GeometricMappingTraits > type;
       };
 
@@ -161,8 +133,13 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     class HybridSubMappingProvider
     {
+      typedef HybridSubMappingProvider< Mapping, codim > This;
+
+      typedef SubMappingTraits< Mapping, codim > Traits;
+
       typedef typename Mapping :: ReferenceElement ReferenceElement;
-      enum { numSubMappings = ReferenceElement :: template Codim< codim > :: size };
+      static const unsigned int numSubMappings
+        = ReferenceElement :: template Codim< codim > :: size;
 
       struct CreatorInterface;
       template< int i > struct CreatorImplementation;
@@ -173,7 +150,7 @@ namespace Dune
       typedef GenericGeometry :: SubMappingCoords< Mapping, codim > SubMappingCoords;
 
     public:
-      typedef typename SubMappingTraits< Mapping, codim > :: HybridSubMapping SubMapping;
+      typedef typename Traits :: HybridSubMapping SubMapping;
 
       static SubMapping *
       subMapping ( const Mapping &mapping, unsigned int i,
@@ -190,9 +167,9 @@ namespace Dune
         ForLoop< CreatorImplementation, 0, numSubMappings-1 > :: apply( creator_ );
       }
 
-      static const HybridSubMappingProvider &instance ()
+      static const This &instance ()
       {
-        static HybridSubMappingProvider inst;
+        static This inst;
         return inst;
       }
     };
@@ -211,8 +188,7 @@ namespace Dune
     struct HybridSubMappingProvider< Mapping, codim > :: CreatorImplementation
       : public CreatorInterface
     {
-      typedef typename SubMappingTraits< Mapping, codim >
-      :: template VirtualSubMapping< (unsigned int) i > :: type
+      typedef typename Traits :: template VirtualSubMapping< (unsigned int) i > :: type
       VirtualSubMapping;
 
       virtual SubMapping *
@@ -236,16 +212,19 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     class SubMappingProvider
     {
-      typedef typename Mapping :: ReferenceElement ReferenceElement;
-      enum { numSubMappings = ReferenceElement :: template Codim< codim > :: size };
+      typedef SubMappingTraits< Mapping, codim > Traits;
 
-      static const bool isVirtual = SubMappingTraits< Mapping, codim > :: isVirtual;
+      typedef typename Mapping :: ReferenceElement ReferenceElement;
+      static const unsigned int numSubMappings
+        = ReferenceElement :: template Codim< codim > :: size;
+
+      static const bool isVirtual = Traits :: isVirtual;
 
       typedef GenericGeometry :: HybridSubMappingProvider< Mapping, codim >
       HybridSubMappingProvider;
 
     public:
-      typedef typename SubMappingTraits< Mapping, codim > :: SubMapping SubMapping;
+      typedef typename Traits :: SubMapping SubMapping;
 
     private:
       template< bool >
