@@ -37,8 +37,8 @@ namespace Dune
       Traits;
 
     public:
-      static const unsigned int dimG = Traits :: dimG;
-      static const unsigned int dimW = Traits :: dimW;
+      static const unsigned int dimension = Traits :: dimension;
+      static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
@@ -107,8 +107,8 @@ namespace Dune
       typedef CachedMapping< Topology, GeometricMappingTraits > Mapping;
 
     public:
-      enum { dimG = Traits :: dimG };
-      enum { dimW = Traits :: dimW };
+      static const unsigned int dimension = Traits :: dimension;
+      static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
@@ -215,11 +215,11 @@ namespace Dune
       struct CallerInterface;
       template< int codim > struct CallerImplementation;
 
-      CallerInterface *caller_[ dimG+1 ];
+      CallerInterface *caller_[ dimension+1 ];
 
       CodimCaller ()
       {
-        ForLoop< CallerImplementation, 0, dimG > :: apply( caller_ );
+        ForLoop< CallerImplementation, 0, dimension > :: apply( caller_ );
       }
 
       static const CodimCaller &instance ()
@@ -232,7 +232,7 @@ namespace Dune
       static void *
       subMapping ( const Mapping &mapping, unsigned int codim, unsigned int i )
       {
-        assert( codim <= dimG );
+        assert( codim <= dimension );
         return instance().caller_[ codim ]->subMapping( mapping, i );
       }
     };
@@ -260,7 +260,7 @@ namespace Dune
         return mapping.template subMapping< codim >( i );
       }
 
-      static void apply ( CallerInterface *(&caller)[ dimG+1 ] )
+      static void apply ( CallerInterface *(&caller)[ dimension+1 ] )
       {
         caller[ codim ] = new CallerImplementation< codim >;
       }

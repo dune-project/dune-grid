@@ -67,8 +67,8 @@ namespace Dune
 
     public:
       static const unsigned int dim = Topology :: dimension;
+      static const unsigned int dimW = Traits :: dimWorld;
 
-      static const unsigned int dimW = Traits :: dimW;
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
@@ -138,8 +138,8 @@ namespace Dune
 
     public:
       static const unsigned int dim = Topology :: dimension;
+      static const unsigned int dimW = Traits :: dimWorld;
 
-      static const unsigned int dimW = Traits :: dimW;
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
@@ -261,8 +261,8 @@ namespace Dune
 
     public:
       static const unsigned int dim = Topology :: dimension;
+      static const unsigned int dimW = Traits :: dimWorld;
 
-      static const unsigned int dimW = Traits :: dimW;
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;

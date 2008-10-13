@@ -84,8 +84,8 @@ namespace Dune
       Mapping;
       typedef typename Mapping :: Traits Traits;
 
-      static const unsigned int dimG = Traits :: dimG;
-      static const unsigned int dimW = Traits :: dimW;
+      static const unsigned int dimG = Traits :: dimension;
+      static const unsigned int dimW = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;

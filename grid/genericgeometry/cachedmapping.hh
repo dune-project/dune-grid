@@ -36,16 +36,15 @@ namespace Dune
       typedef GeometricMapping< Topology, GeometricMappingTraits > Base;
       typedef CachedMapping< Topology, GeometricMappingTraits > This;
 
-      static const unsigned int dimension = Topology :: dimension;
-
       typedef MappingTraits
       < typename GeometricMappingTraits :: CoordTraits,
-          dimension, GeometricMappingTraits :: dimWorld >
+          Topology :: dimension, GeometricMappingTraits :: dimWorld >
       Traits;
 
     public:
-      enum { dimG = Traits :: dimG };
-      enum { dimW = Traits :: dimW };
+      static const unsigned int dimension = Traits :: dimension;
+      static const unsigned int dimWorld = Traits :: dimWorld;
+
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
       typedef typename Traits :: GlobalCoordType GlobalCoordType;

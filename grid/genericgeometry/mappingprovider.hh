@@ -50,7 +50,7 @@ namespace Dune
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords )
       {
-        assert( type.dim() == Mapping :: dimG );
+        assert( type.dim() == Mapping :: dimension );
         return new Mapping( coords );
       }
     };
@@ -67,8 +67,8 @@ namespace Dune
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords )
       {
-        assert( type.dim() == Mapping :: dimG );
-        typedef ProtectedIf< (Mapping :: dimG >= 3), AllTypes, OnlySimplexCube > Switch;
+        assert( type.dim() == Mapping :: dimension );
+        typedef ProtectedIf< (Mapping :: dimension >= 3), AllTypes, OnlySimplexCube > Switch;
         return Switch :: mapping( type.basicType(), coords );
       }
     };

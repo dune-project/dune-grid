@@ -40,21 +40,21 @@ namespace Dune
     // MappingTraits
     // -------------
 
-    template< class CT, unsigned int DimG, unsigned int DimW >
+    template< class CT, unsigned int dim, unsigned int dimW >
     struct MappingTraits
     {
       typedef CT CoordTraits;
 
-      static const unsigned int dimG = DimG;
-      static const unsigned int dimW = DimW;
+      static const unsigned int dimension = dim;
+      static const unsigned int dimWorld = dimW;
 
       typedef typename CoordTraits :: ctype FieldType;
-      typedef typename CoordTraits :: template Vector< dimG > :: type LocalCoordType;
-      typedef typename CoordTraits :: template Vector< dimW > :: type GlobalCoordType;
+      typedef typename CoordTraits :: template Vector< dimension > :: type LocalCoordType;
+      typedef typename CoordTraits :: template Vector< dimWorld > :: type GlobalCoordType;
 
-      typedef typename CoordTraits :: template Matrix< dimW, dimG > :: type
+      typedef typename CoordTraits :: template Matrix< dimWorld, dimension > :: type
       JacobianType;
-      typedef typename CoordTraits :: template Matrix< dimG, dimW > :: type
+      typedef typename CoordTraits :: template Matrix< dimension, dimWorld > :: type
       JacobianTransposedType;
 
       typedef GenericGeometry :: MatrixHelper< CoordTraits > MatrixHelper;
@@ -62,7 +62,7 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef GenericGeometry :: MappingTraits< CoordTraits, dimG - codim, dimW >
+        typedef GenericGeometry :: MappingTraits< CoordTraits, dimension - codim, dimWorld >
         MappingTraits;
       };
     };
