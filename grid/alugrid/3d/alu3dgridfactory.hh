@@ -11,6 +11,7 @@
 namespace Dune
 {
 
+  /** \brief Factory class for 3d ALUGrids */
   template< template< int, int > class ALUGrid >
   class ALU3dGridFactory
     : public GridFactoryInterface< ALUGrid< 3, 3 > >
