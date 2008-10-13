@@ -52,14 +52,13 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
+      typedef typename GeometricMappingTraits :: Caching CachingType;
       typedef typename Base :: ReferenceElement ReferenceElement;
 
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMapping :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
       };
 
       template< unsigned int codim, unsigned int i >
@@ -84,8 +83,21 @@ namespace Dune
 
     public:
       template< class CoordVector >
-      inline explicit CachedMapping ( const CoordVector &coords,
-                                      const CachingType &cache = CachingType() );
+      explicit CachedMapping ( const CoordVector &coords )
+        : Base( coords )
+      {
+        if( affine() )
+        {
+          if( CachingType :: evaluateJacobianTransposed == PreCompute )
+            Base :: jacobianT( baryCenter() );
+
+          if( CachingType :: evaluateJacobianInverseTransposed == PreCompute )
+            Base :: jacobianInverseTransposed( baryCenter() );
+
+          if( CachingType :: evaluateIntegrationElement == PreCompute )
+            integrationElement( baryCenter() );
+        }
+      }
 
       using Base :: affine;
       using Base :: corner;
@@ -121,78 +133,19 @@ namespace Dune
       }
 
       template< unsigned int codim >
-      typename Codim< codim > :: SubMapping *
-      subMapping ( unsigned int i,
-                   const typename Codim< codim > :: CachingType &cache ) const
+      typename Codim< codim > :: SubMapping *subMapping ( unsigned int i ) const
       {
-        return SubMappingProvider< This, codim > :: subMapping( *this, i, cache );
+        return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
       template< unsigned int codim, unsigned int i >
       typename SubTopology< codim, i > :: Trace
-      trace ( const typename Codim< codim > :: CachingType &cache ) const
+      trace () const
       {
         typedef typename SubTopology< codim, i > :: Trace Trace;
-        return Trace( mapping_.trace(), cache );
+        return Trace( mapping_.trace() );
       }
     };
-
-
-
-    template< class Topology, class GeometricMappingTraits >
-    template< class CoordVector >
-    inline CachedMapping< Topology, GeometricMappingTraits >
-    :: CachedMapping ( const CoordVector &coords, const CachingType &cache )
-      : Base( coords )
-    {
-      if( affine() )
-      {
-        switch( CachingType :: evaluateJacobianTransposed )
-        {
-        case IsComputed :
-          cache.jacobianT( jacobianTransposed_ );
-          jacobianTransposedComputed_ = true;
-          break;
-
-        case PreCompute :
-          Base :: jacobianT( baryCenter() );
-          break;
-
-        case ComputeOnDemand :
-          break;
-        }
-
-        switch( CachingType :: evaluateJacobianInverseTransposed )
-        {
-        case IsComputed :
-          cache.jacobianInverseTransposed( jTInv_ );
-          jTInvComputed = true;
-          break;
-
-        case PreCompute :
-          Base :: jacobianInverseTransposed( baryCenter() );
-          break;
-
-        case ComputeOnDemand :
-          break;
-        }
-
-        switch( CachingType :: evaluateIntegrationElement )
-        {
-        case IsComputed :
-          cache.integrationElement( intEl_ );
-          intElComputed = true;
-          break;
-
-        case PreCompute :
-          integrationElement( baryCenter() );
-          break;
-
-        case ComputeOnDemand :
-          break;
-        }
-      }
-    }
 
   }
 

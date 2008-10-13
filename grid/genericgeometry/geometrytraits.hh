@@ -71,59 +71,14 @@ namespace Dune
 
     // If not affine only volume is cached (based on intElCompute)
     // otherwise all quantities can be cached using:
-    //   geoCompute:    assign if method called using barycenter
-    //   geoPreCompute: assign in constructor using barycenter
-    //   geoIsComputed: assign in constructor using barycenter using callback
+    //   ComputeOnDemand:    assign if method called using barycenter
+    //   PreCompute:         assign in constructor using barycenter
     enum EvaluationType
     {
       //! compute on demand
       ComputeOnDemand,
       //! compute in constructor
       PreCompute,
-      //! assign in constructor using callback
-      IsComputed
-    };
-
-    template< class Traits >
-    struct ComputeAll
-    {
-      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
-      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
-      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
-      static const EvaluationType evaluateNormal = ComputeOnDemand;
-
-      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
-      {}
-
-      void integrationElement ( typename Traits :: FieldType &intEl ) const
-      {}
-
-      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
-      {}
-
-      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
-      {}
-    };
-
-    template< class Traits >
-    struct PreComputeAll
-    {
-      static const EvaluationType evaluateJacobianTransposed = PreCompute;
-      static const EvaluationType evaluateJacobianInverseTransposed = PreCompute;
-      static const EvaluationType evaluateIntegrationElement = PreCompute;
-      static const EvaluationType evaluateNormal = PreCompute;
-
-      void jacobianT ( typename Traits :: JacobianTransposedType &jT ) const
-      {}
-
-      void integrationElement ( typename Traits :: FieldType &intEl ) const
-      {}
-
-      void jacobianInverseTransposed ( typename Traits :: JacobianType &jTInv ) const
-      {}
-
-      void normal ( int face, typename Traits :: GlobalCoordType &n ) const
-      {}
     };
 
 
@@ -156,10 +111,13 @@ namespace Dune
         typedef CornerMapping< Topology, Traits, CornerStorage > type;
       };
 
-      template< class Traits >
       struct Caching
-        : public ComputeAll< Traits >
-      {};
+      {
+        static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+        static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+        static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+        static const EvaluationType evaluateNormal = ComputeOnDemand;
+      };
     };
 
 
@@ -205,6 +163,14 @@ namespace Dune
      *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
      *        CornerStorage;
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
+     *    };
+     *
+     *    struct Caching
+     *    {
+     *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+     *      static const EvaluationType evaluateNormal = ComputeOnDemand;
      *    };
      *
      *    template< class Traits >
@@ -272,10 +238,13 @@ namespace Dune
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
      *    };
      *
-     *    template< class Traits >
      *    struct Caching
-     *    : public ComputeAll< Traits >
-     *    {};
+     *    {
+     *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+     *      static const EvaluationType evaluateNormal = ComputeOnDemand;
+     *    };
      *  };
      *  \endcode
      *

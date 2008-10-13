@@ -22,27 +22,22 @@ namespace Dune
       typedef GenericGeometry :: SubMappingTraits< ElementMapping, codim > SubMappingTraits;
       typedef typename SubMappingTraits :: SubMapping Mapping;
 
-      typedef typename Mapping :: CachingType CachingType;
-
       template< bool > struct NonVirtual;
       template< bool > struct Virtual;
 
       template< GeometryType :: BasicType type, class CoordVector >
-      static Mapping *virtualMapping ( const CoordVector &coords,
-                                       const CachingType &cache )
+      static Mapping *virtualMapping ( const CoordVector &coords )
       {
         typedef typename SubMappingTraits :: template VirtualMapping< type > :: type
         VirtualMapping;
-        return new VirtualMapping( coords, cache );
+        return new VirtualMapping( coords );
       }
 
       template< class CoordVector >
-      static Mapping *mapping ( const GeometryType &type,
-                                const CoordVector &coords,
-                                const CachingType &cache )
+      static Mapping *mapping ( const GeometryType &type, const CoordVector &coords )
       {
         typedef ProtectedIf< SubMappingTraits :: isVirtual, Virtual, NonVirtual > Switch;
-        return Switch :: mapping( type, coords, cache );
+        return Switch :: mapping( type, coords );
       }
     };
 
@@ -53,10 +48,10 @@ namespace Dune
     {
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, const CachingType &cache )
+      mapping ( const GeometryType &type, const CoordVector &coords )
       {
         assert( type.dim() == Mapping :: dimG );
-        return new Mapping( coords, cache );
+        return new Mapping( coords );
       }
     };
 
@@ -70,11 +65,11 @@ namespace Dune
 
       template< class CoordVector >
       static Mapping *
-      mapping ( const GeometryType &type, const CoordVector &coords, const CachingType &cache )
+      mapping ( const GeometryType &type, const CoordVector &coords )
       {
         assert( type.dim() == Mapping :: dimG );
         typedef ProtectedIf< (Mapping :: dimG >= 3), AllTypes, OnlySimplexCube > Switch;
-        return Switch :: mapping( type.basicType(), coords, cache );
+        return Switch :: mapping( type.basicType(), coords );
       }
     };
 
@@ -86,21 +81,21 @@ namespace Dune
     {
       template< class CoordVector >
       static Mapping *
-      mapping ( GeometryType :: BasicType type, const CoordVector &coords, const CachingType &cache )
+      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
       {
         switch( type )
         {
         case GeometryType :: simplex :
-          return virtualMapping< GeometryType :: simplex, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
 
         case GeometryType :: cube :
-          return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: cube, CoordVector >( coords );
 
         case GeometryType :: prism :
-          return virtualMapping< GeometryType :: prism, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: prism, CoordVector >( coords );
 
         case GeometryType :: pyramid :
-          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: pyramid, CoordVector >( coords );
 
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
@@ -116,15 +111,15 @@ namespace Dune
     {
       template< class CoordVector >
       static Mapping *
-      mapping ( GeometryType :: BasicType type, const CoordVector &coords, const CachingType &cache )
+      mapping ( GeometryType :: BasicType type, const CoordVector &coords )
       {
         switch( type )
         {
         case GeometryType :: simplex :
-          return virtualMapping< GeometryType :: simplex, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: simplex, CoordVector >( coords );
 
         case GeometryType :: cube :
-          return virtualMapping< GeometryType :: cube, CoordVector >( coords, cache );
+          return virtualMapping< GeometryType :: cube, CoordVector >( coords );
 
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );

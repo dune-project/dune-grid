@@ -65,7 +65,6 @@ namespace Dune
 
     protected:
       typedef typename MappingProvider :: Mapping Mapping;
-      typedef typename MappingProvider :: CachingType CachingType;
 
     private:
       Mapping *mapping_;
@@ -84,19 +83,16 @@ namespace Dune
 #endif
 
       template< class CoordVector >
-      BasicGeometry ( const GeometryType &type,
-                      const CoordVector &coords,
-                      const CachingType &cache )
-        : mapping_( MappingProvider :: mapping( type, coords, cache ) )
+      BasicGeometry ( const GeometryType &type, const CoordVector &coords )
+        : mapping_( MappingProvider :: mapping( type, coords ) )
       {
         mapping_->referenceCount = 1;
       }
 
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father,
-                      int i,
-                      const CachingType &cache )
-        : mapping_( subMapping( father, i, cache ) )
+                      int i )
+        : mapping_( subMapping( father, i ) )
       {
         mapping_->referenceCount = 1;
       }
@@ -197,14 +193,13 @@ namespace Dune
 
       template< int fatherdim >
       Mapping *
-      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father,
-                   int i, const CachingType &cache )
+      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
         const unsigned int ftid = father.mapping().topologyId();
         const unsigned int j = MapNumberingProvider< fatherdim >
                                :: template dune2generic< codim >( ftid, i );
-        return father.mapping().template subMapping< codim >( j, cache );
+        return father.mapping().template subMapping< codim >( j );
       }
     };
 
@@ -220,7 +215,6 @@ namespace Dune
       typedef BasicGeometry< mydim, cdim, Grid, GlobalGeometryTraits< Grid > > Base;
 
     protected:
-      typedef typename Base :: CachingType CachingType;
       typedef typename Base :: Mapping Mapping;
 
     public:
@@ -233,22 +227,19 @@ namespace Dune
       {}
 
       template< class Geo >
-      explicit Geometry ( const Geo &geo,
-                          const CachingType &cache = CachingType() )
-        : Base( geo.type(), geo, cache )
+      explicit Geometry ( const Geo &geo )
+        : Base( geo.type(), geo )
       {}
 
       template< class CoordVector >
       Geometry ( const GeometryType &type,
-                 const CoordVector &coords,
-                 const CachingType &cache = CachingType() )
-        : Base( type, coords, cache )
+                 const CoordVector &coords )
+        : Base( type, coords )
       {}
 
       template< int fatherdim >
-      Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i,
-                 const CachingType &cache = CachingType() )
-        : Base( father, i, cache )
+      Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
+        : Base( father, i )
       {}
     };
 
@@ -264,7 +255,6 @@ namespace Dune
       typedef BasicGeometry< mydim, cdim, Grid, LocalGeometryTraits< Grid > > Base;
 
     protected:
-      typedef typename Base :: CachingType CachingType;
       typedef typename Base :: Mapping Mapping;
 
     public:
@@ -277,22 +267,18 @@ namespace Dune
       {}
 
       template< class Geo >
-      explicit LocalGeometry ( const Geo &geo,
-                               const CachingType &cache = CachingType() )
-        : Base( geo.type(), geo, cache )
+      explicit LocalGeometry ( const Geo &geo )
+        : Base( geo.type(), geo )
       {}
 
       template< class CoordVector >
-      LocalGeometry ( const GeometryType &type,
-                      const CoordVector &coords,
-                      const CachingType &cache = CachingType() )
-        : Base( type, coords, cache )
+      LocalGeometry ( const GeometryType &type, const CoordVector &coords )
+        : Base( type, coords )
       {}
 
       template< int fatherdim >
-      LocalGeometry ( const Geometry< fatherdim, cdim, Grid > &father, int i,
-                      const CachingType &cache = CachingType() )
-        : Base( father, i, cache )
+      LocalGeometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
+        : Base( father, i )
       {}
     };
 

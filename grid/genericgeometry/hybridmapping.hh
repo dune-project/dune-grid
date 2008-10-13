@@ -45,13 +45,10 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
-
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMapping :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
       };
 
       unsigned int referenceCount;
@@ -85,16 +82,15 @@ namespace Dune
 
       template< unsigned int codim >
       typename Codim< codim > :: SubMapping *
-      subMapping ( unsigned int i,
-                   const typename Codim< codim > :: CachingType &cache ) const
+      subMapping ( unsigned int i ) const
       {
         typedef typename Codim< codim > :: SubMapping SubMapping;
-        return reinterpret_cast< SubMapping * >( subMapping( codim, i, &cache ) );
+        return reinterpret_cast< SubMapping * >( subMapping( codim, i ) );
       }
 
     protected:
       virtual void *
-      subMapping ( unsigned int codim, unsigned int i, const void *cache ) const = 0;
+      subMapping ( unsigned int codim, unsigned int i ) const = 0;
     };
 
 
@@ -119,15 +115,12 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      typedef typename GeometricMappingTraits :: template Caching< Traits > CachingType;
-
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingProvider< This, codim > :: SubMapping SubMapping;
-        typedef typename SubMapping :: CachingType CachingType;
+        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
       };
 
     private:
@@ -135,9 +128,8 @@ namespace Dune
 
     public:
       template< class CoordVector >
-      explicit VirtualMapping ( const CoordVector &coordVector,
-                                const CachingType &cache )
-        : mapping_( coordVector, cache )
+      explicit VirtualMapping ( const CoordVector &coordVector )
+        : mapping_( coordVector )
       {}
 
       virtual unsigned int topologyId () const
@@ -199,19 +191,18 @@ namespace Dune
 
       template< unsigned int codim >
       typename Codim< codim > :: SubMapping *
-      subMapping ( unsigned int i,
-                   const typename Codim< codim > :: CachingType &cache ) const
+      subMapping ( unsigned int i ) const
       {
-        return SubMappingProvider< This, codim > :: subMapping( *this, i, cache );
+        return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
     private:
       class CodimCaller;
 
     protected:
-      void *subMapping ( unsigned int codim, unsigned int i, const void *cache ) const
+      void *subMapping ( unsigned int codim, unsigned int i ) const
       {
-        return CodimCaller :: subMapping ( *this, codim, i, cache );
+        return CodimCaller :: subMapping ( *this, codim, i );
       }
     };
 
@@ -239,10 +230,10 @@ namespace Dune
 
     public:
       static void *
-      subMapping ( const Mapping &mapping, unsigned int codim, unsigned int i, const void *cache )
+      subMapping ( const Mapping &mapping, unsigned int codim, unsigned int i )
       {
         assert( codim <= dimG );
-        return instance().caller_[ codim ]->subMapping( mapping, i, cache );
+        return instance().caller_[ codim ]->subMapping( mapping, i );
       }
     };
 
@@ -255,8 +246,7 @@ namespace Dune
       virtual ~CallerInterface ()
       {}
 
-      virtual void *
-      subMapping ( const Mapping &mapping, unsigned int i, const void *cache ) const = 0;
+      virtual void *subMapping ( const Mapping &mapping, unsigned int i ) const = 0;
     };
 
     template< class Topology, class GeometricMappingTraits >
@@ -265,11 +255,9 @@ namespace Dune
       : public CallerInterface
     {
       virtual void *
-      subMapping ( const Mapping &mapping, unsigned int i, const void *cache ) const
+      subMapping ( const Mapping &mapping, unsigned int i ) const
       {
-        typedef typename Codim< (unsigned int) codim > :: CachingType CachingType;
-        const CachingType &caching = *reinterpret_cast< const CachingType * >( cache );
-        return mapping.template subMapping< codim >( i, caching );
+        return mapping.template subMapping< codim >( i );
       }
 
       static void apply ( CallerInterface *(&caller)[ dimG+1 ] )

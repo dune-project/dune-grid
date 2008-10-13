@@ -153,12 +153,11 @@ namespace Dune
       typedef typename Traits :: HybridSubMapping SubMapping;
 
       static SubMapping *
-      subMapping ( const Mapping &mapping, unsigned int i,
-                   const typename SubMapping :: CachingType &cache )
+      subMapping ( const Mapping &mapping, unsigned int i )
       {
         assert( i < numSubMappings );
         SubMappingCoords coords( mapping, i );
-        return instance().creator_[ i ]->create( coords, cache );
+        return instance().creator_[ i ]->create( coords );
       }
 
     private:
@@ -177,9 +176,7 @@ namespace Dune
     template< class Mapping, unsigned int codim >
     struct HybridSubMappingProvider< Mapping, codim > :: CreatorInterface
     {
-      virtual SubMapping *
-      create ( const SubMappingCoords &coords,
-               const typename SubMapping :: CachingType &cache ) const = 0;
+      virtual SubMapping *create ( const SubMappingCoords &coords ) const = 0;
       virtual ~CreatorInterface() {}
     };
 
@@ -192,10 +189,9 @@ namespace Dune
       VirtualSubMapping;
 
       virtual SubMapping *
-      create ( const SubMappingCoords &coords,
-               const typename SubMapping :: CachingType &cache ) const
+      create ( const SubMappingCoords &coords ) const
       {
-        return new VirtualSubMapping( coords, cache );
+        return new VirtualSubMapping( coords );
       }
 
       static void apply ( CreatorPtr (&creator)[ numSubMappings ] )
@@ -230,33 +226,28 @@ namespace Dune
       template< bool >
       struct Virtual
       {
-        static SubMapping *
-        subMapping ( const Mapping &mapping, unsigned int i,
-                     const typename SubMapping :: CachingType &cache )
+        static SubMapping *subMapping ( const Mapping &mapping, unsigned int i )
         {
-          return HybridSubMappingProvider :: subMapping( mapping, i, cache );
+          return HybridSubMappingProvider :: subMapping( mapping, i );
         }
       };
 
       template< bool >
       struct NonVirtual
       {
-        static SubMapping *
-        subMapping ( const Mapping &mapping, unsigned int i,
-                     const typename SubMapping :: CachingType &cache )
+        static SubMapping *subMapping ( const Mapping &mapping, unsigned int i )
         {
           assert( i < numSubMappings );
           SubMappingCoords< Mapping, codim > coords( mapping, i );
-          return new SubMapping( coords, cache );
+          return new SubMapping( coords );
         }
       };
 
     public:
       static SubMapping *
-      subMapping ( const Mapping &mapping, unsigned int i,
-                   const typename SubMapping :: CachingType &cache )
+      subMapping ( const Mapping &mapping, unsigned int i )
       {
-        return ProtectedIf< isVirtual, Virtual, NonVirtual > :: subMapping( mapping, i, cache );
+        return ProtectedIf< isVirtual, Virtual, NonVirtual > :: subMapping( mapping, i );
       }
     };
 
