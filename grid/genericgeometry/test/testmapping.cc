@@ -5,7 +5,7 @@
 #include <dune/common/exceptions.hh>
 // #define DUNE_THROW(E, m) assert(0)
 
-#include "../geometricmapping.hh"
+#include "../cachedmapping.hh"
 #include "../conversion.hh"
 #include <dune/common/fmatrix.hh>
 #include <dune/common/mpihelper.hh>
@@ -37,10 +37,15 @@ struct MyGeometryTraits
   template< class Topology >
   struct Mapping
   {
-    typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-    typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
-    CornerStorage;
-    typedef CornerMapping< Topology, Traits, CornerStorage > type;
+    typedef CornerMapping< CoordTraits, Topology, dimWorld > type;
+  };
+
+  struct Caching
+  {
+    static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+    static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+    static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+    static const EvaluationType evaluateNormal = ComputeOnDemand;
   };
 };
 
@@ -83,7 +88,7 @@ void test ( const GridViewType &view )
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
-    GeometricMapping< TopologyType, MyGeometryTraits< GeometryType > > map( geo );
+    CachedMapping< TopologyType, MyGeometryTraits< GeometryType > > map( geo );
     LocalType x(0.1);
     for (int i=0; i<10000; ++i) {
       // test phi
@@ -96,7 +101,7 @@ void test ( const GridViewType &view )
       }
       // test jacobian
       JacobianType JTInv = geo.jacobianInverseTransposed(x);
-      JacobianTType JT = map.jacobianT( x );
+      JacobianTType JT = map.jacobianTransposed( x );
       JacobianType JTInvM = map.jacobianInverseTransposed( x );
       double det = geo.integrationElement(x);
       double detM = map.integrationElement(x);

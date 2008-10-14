@@ -77,15 +77,13 @@ namespace Dune
     {
       typedef GeometricMapping< Topology, GeometricMappingTraits > This;
 
-      static const unsigned int dimension = Topology :: dimension;
-
     public:
       typedef typename GeometricMappingTraits :: template Mapping< Topology > :: type
       Mapping;
       typedef typename Mapping :: Traits Traits;
 
-      static const unsigned int dimG = Traits :: dimension;
-      static const unsigned int dimW = Traits :: dimWorld;
+      static const unsigned int dimension = Traits :: dimension;
+      static const unsigned int dimWorld = Traits :: dimWorld;
 
       typedef typename Traits :: FieldType FieldType;
       typedef typename Traits :: LocalCoordType LocalCoordType;
@@ -97,172 +95,68 @@ namespace Dune
 
       typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
 
+      static const bool alwaysAffine = Mapping :: alwaysAffine;
+
     protected:
-      static const unsigned int numNormals = ReferenceElement :: numNormals;
-
       Mapping mapping_;
-
-      mutable JacobianTransposedType jacobianTransposed_;
-      mutable JacobianType jTInv_;
-      mutable FieldType intEl_;
-      mutable GlobalCoordType faceNormal_[ numNormals ];
-
-      mutable bool affine_;
-      mutable bool jacobianTransposedComputed_;
-      mutable bool jTInvComputed, intElComputed;
-      mutable FieldVector< bool, numNormals > normalComputed;
 
     public:
       template< class CoordVector >
       explicit GeometricMapping ( const CoordVector &coords )
-        : mapping_( coords ),
-          jacobianTransposedComputed_( false ),
-          jTInvComputed( false ),
-          intElComputed( false ),
-          normalComputed( false )
-      {
-        if( !Mapping :: alwaysAffine )
-        {
-          jacobianT( baryCenter() );
-          affine_ = jacobianTransposedComputed_;
-        }
-        else
-          affine_ = true;
-      }
-
-      bool affine () const
-      {
-        return affine_;
-      }
-
-      unsigned int topologyId () const
-      {
-        return ReferenceElement :: topologyId;
-      }
+        : mapping_( coords )
+      {}
 
       const GlobalCoordType &corner ( int i ) const
       {
         return mapping_.corner( i );
       }
 
-      int numCorners () const
+      void global ( const LocalCoordType &x, GlobalCoordType &y ) const
       {
-        return ReferenceElement :: numCorners;
+        mapping_.global( x, y );
       }
 
-      GlobalCoordType global ( const LocalCoordType &x ) const
+      bool jacobianTransposed ( const LocalCoordType &x,
+                                JacobianTransposedType &JT ) const
       {
-        GlobalCoordType p;
-        if( jacobianTransposedComputed_ )
-        {
-          MatrixHelper :: template ATx< dimG, dimW >( jacobianTransposed_, x, p );
-          p += corner( 0 );
-        }
-        else
-          mapping_.global( x, p );
-        return p;
+        return mapping_.jacobianTransposed( x, JT );
       }
 
-      static bool checkInside ( const LocalCoordType &x )
+      void local ( const GlobalCoordType &y, LocalCoordType &x ) const
       {
-        return ReferenceElement :: checkInside( x );
-      }
-
-      const JacobianTransposedType &jacobianT ( const LocalCoordType &x ) const
-      {
-        if( !jacobianTransposedComputed_ )
-        {
-          jacobianTransposedComputed_
-            = mapping_.jacobianTransposed( x, jacobianTransposed_ );
-        }
-        return jacobianTransposed_;
-      }
-
-      // additional methods
-      LocalCoordType local ( const GlobalCoordType &p ) const
-      {
-        LocalCoordType x;
-        GlobalCoordType y = p - corner( 0 );
-        if( jTInvComputed )
-          MatrixHelper :: template ATx< dimW, dimG >( jTInv_, y, x );
-        else if( affine() )
-          local_affine( baryCenter(), y, x );
-        else
-        {
-          x = baryCenter();
-          LocalCoordType dx;
-          do
-          { // DF^n dx^n = -F^n, x^{n+1} += dx^n
-            y = p - global( x );
-            local_affine( x, y, dx );
-            x += dx;
-          } while( dx.two_norm2() > 1e-12 );
-        }
-        return x;
+        x = baryCenter();
+        LocalCoordType dx;
+        do
+        { // DF^n dx^n = F^n, x^{n+1} -= dx^n
+          JacobianTransposedType JT;
+          jacobianTransposed( x, JT );
+          GlobalCoordType z;
+          global( x, z );
+          z -= y;
+          MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, dx );
+          x -= dx;
+        } while( dx.two_norm2() > 1e-12 );
       }
 
       FieldType
-      jacobianInverseTransposed ( const LocalCoordType &x, JacobianType &jTInv ) const
+      jacobianInverseTransposed ( const LocalCoordType &x, JacobianType &JTInv ) const
       {
-        const JacobianTransposedType &jT = jacobianT( x );
-        return MatrixHelper :: template rightInvA< dimG, dimW >( jT, jTInv );
-      }
-
-      const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
-      {
-        if( !jTInvComputed )
-        {
-          intEl_ = jacobianInverseTransposed( x, jTInv_ );
-          jTInvComputed = affine();
-          intElComputed = affine();
-        }
-        return jTInv_;
+        JacobianTransposedType JT;
+        jacobianTransposed( x, JT );
+        return MatrixHelper :: template rightInvA< dimension, dimWorld >( JT, JTInv );
       }
 
       FieldType integrationElement ( const LocalCoordType &x ) const
       {
-        if( !intElComputed )
-        {
-          const JacobianTransposedType &JT = jacobianT( x );
-          intEl_ = MatrixHelper :: template detAAT< dimG, dimW >( JT );
-          intElComputed = affine();
-        }
-        return intEl_;
-      }
-
-      const GlobalCoordType &normal ( int face, const LocalCoordType &x ) const
-      {
-        if( !normalComputed[ face ] )
-        {
-          const JacobianType &JT = jacobianInverseTransposed( x );
-          const LocalCoordType &refNormal
-            =  ReferenceElement :: integrationOuterNormal( face );
-          MatrixHelper :: template Ax< dimW, dimG >( JT, refNormal, faceNormal_[ face ] );
-          faceNormal_[ face ] *= intEl_;
-          normalComputed[ face ] = affine();
-        }
-        return faceNormal_[ face ];
-      }
-
-      FieldType volume () const
-      {
-        const FieldType refVolume = ReferenceElement :: volume();
-        return refVolume * integrationElement( baryCenter() );
+        JacobianTransposedType JT;
+        jacobianTransposed( x, JT );
+        return MatrixHelper :: template detAAT< dimension, dimWorld >( JT );
       }
 
     protected:
       static const LocalCoordType &baryCenter ()
       {
         return ReferenceElement :: template baryCenter< 0 >( 0 );
-      }
-
-      // affine local to global mapping
-      void local_affine ( const LocalCoordType &x,
-                          const GlobalCoordType &p,
-                          LocalCoordType &y ) const
-      {
-        const JacobianTransposedType &JT = jacobianT( x );
-        MatrixHelper :: template xTRightInvA< dimG, dimW >( JT, p, y );
       }
     };
 

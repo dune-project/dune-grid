@@ -464,7 +464,8 @@ namespace Dune
 
       static const unsigned int dimWorld = dimW;
 
-      typedef typename CoordTraits :: template Vector< dimWorld > GlobalCoordinate;
+      typedef typename CoordTraits :: template Vector< dimWorld > :: type
+      GlobalCoordinate;
 
       template< class SubTopology >
       struct SubStorage
@@ -543,15 +544,15 @@ namespace Dune
         return coords_[ i ];
       }
 
-      void global ( const LocalCoordType &x, GlobalCoordType &ret ) const
+      void global ( const LocalCoordType &x, GlobalCoordType &y ) const
       {
-        GenericMapping :: phi_set( coords_, x, FieldType( 1 ), ret );
+        GenericMapping :: phi_set( coords_, x, FieldType( 1 ), y );
       }
 
       bool jacobianTransposed ( const LocalCoordType &x,
-                                JacobianTransposedType &ret ) const
+                                JacobianTransposedType &JT ) const
       {
-        return GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), ret );
+        return GenericMapping :: Dphi_set( coords_, x, FieldType( 1 ), JT );
       }
 
       template< unsigned int codim, unsigned int i >

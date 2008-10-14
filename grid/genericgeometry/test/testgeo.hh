@@ -114,10 +114,7 @@ namespace Dune
       template< class Topology >
       struct Mapping
       {
-        typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-        typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
-        CornerStorage;
-        typedef CornerMapping< Topology, Traits, CornerStorage > type;
+        typedef CornerMapping< CoordTraits, Topology, dimWorld > type;
       };
 
       struct Caching
