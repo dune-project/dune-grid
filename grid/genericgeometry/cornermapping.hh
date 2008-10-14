@@ -466,11 +466,10 @@ namespace Dune
 
       typedef typename CoordTraits :: template Vector< dimWorld > GlobalCoordinate;
 
-      template< unsigned int codim, unsigned int i >
-      struct SubTopology
+      template< class SubTopology >
+      struct SubStorage
       {
-        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
-        typedef CoordPointerStorage< CoordTraits, type, dimWorld > CornerStorage;
+        typedef CoordPointerStorage< CoordTraits, SubTopology, dimWorld > type;
       };
 
     private:
@@ -495,16 +494,16 @@ namespace Dune
     // CornerMapping
     // -------------
 
-    template< class CoordTraits, class Topology, unsigned int dimW,
-        class CornerStorage, bool affine = false >
+    template< class CoordTraits, class Topo, unsigned int dimW,
+        class CStorage, bool affine = false >
     class CornerMapping
     {
-      typedef CornerMapping< CoordTraits, Topology, dimW, CornerStorage, affine > This;
+      typedef CornerMapping< CoordTraits, Topo, dimW, CStorage, affine > This;
 
     public:
+      typedef Topo Topology;
+      typedef CStorage CornerStorage;
       typedef MappingTraits< CoordTraits, Topology :: dimension, dimW > Traits;
-
-      typedef CornerStorage CornerStorageType;
 
       static const unsigned int dimension = Traits :: dimension;
       static const unsigned int dimWorld = Traits :: dimWorld;
@@ -518,13 +517,9 @@ namespace Dune
       template< unsigned int codim, unsigned int i >
       struct SubTopology
       {
-        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
-
-        typedef typename CornerStorage :: template SubTopology< codim, i > :: CornerStorage
-        CornerStorageType;
-
-        typedef CornerMapping< CoordTraits, type, dimWorld, CornerStorageType, affine >
-        Trace;
+        typedef typename GenericGeometry :: SubTopology< Topo, codim, i > :: type Topology;
+        typedef typename CStorage :: template SubStorage< Topology > :: type CornerStorage;
+        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, affine > Trace;
       };
 
     private:
@@ -534,7 +529,7 @@ namespace Dune
       static const bool alwaysAffine = GenericMapping :: alwaysAffine;
 
     protected:
-      CornerStorageType coords_;
+      CornerStorage coords_;
 
     public:
       template< class CoordVector >
