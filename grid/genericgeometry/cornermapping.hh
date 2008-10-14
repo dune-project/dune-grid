@@ -8,7 +8,6 @@
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
-#include <dune/grid/genericgeometry/geometrytraits.hh>
 
 namespace Dune
 {
@@ -16,42 +15,12 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    /* Mapping have two template arguments:
-     * Topology:    the generic geometry describing
-     *              the domain.
-     * CoordTraits: a traits class describing the
-     *              vector and derivative types needed
-     *              to describe the range of the mapping.
-     *              This class fixes the local (domain) vector type
-     *              and the range (world) vector type. Note
-     *              that the dimension of the local coordinates (dimG)
-     *              must be greater or equal to Topology::dimension;
-     *              if dimG > Topology::dimension then only the
-     *              first components are used.
-     *              The dimension of the global coordinates (dimW)
-     *              must be greater or equal to dimG.
-     *              Matrix types both for the jacobian (dimW x dimG)
-     *              its transpose (dimG x dimW) and
-     *              a square matrix of dimension (dimG x dimG).
-     * struct CoordTraits {
-     *   enum {dimW = };              // world dimension
-     *   enum {dimG = };              // grid dimension
-     *   typedef ... FieldType;
-     *   // general vector and matrix types
-     *   template <int dim> struct Vector { typedef ... Type; };
-     *   template <int dimR,dimC> struct Matrix { typedef ... Type; };
-     *
-     *   // Vector of global vectors denoting the edges of the range
-     *   // domain, used to construct a mapping together with an offset.
-     *   // Corners used are
-     *   // p[offset],...,p[offset+Topology::numCorners]
-     *   // Assumption: coord_vector[i] is of type const Vector<dimW>&
-     *   typedef ... coord_vector;
-     *
-     *   // mapping is of the form Ax+b (used untested)
-     *   enum {affine = 0|1};
-     * };
-     */
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class CT, unsigned int dim, unsigned int dimW >
+    struct MappingTraits;
+
 
 
 

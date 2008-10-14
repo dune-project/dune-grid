@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GENERICGEOMETRY_GEOMETRICMAPPING_HH
-#define DUNE_GENERICGEOMETRY_GEOMETRICMAPPING_HH
+#ifndef DUNE_GENERICGEOMETRY_MAPPING_HH
+#define DUNE_GENERICGEOMETRY_MAPPING_HH
 
 #include <dune/common/smallobject.hh>
 
@@ -10,7 +10,6 @@
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
-#include <dune/grid/genericgeometry/cornermapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
@@ -19,68 +18,27 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    // GeometricMapping
-    // ----------------
+    // Mapping
+    // -------
 
-    /** \class GeometricMapping
+    /** \class Mapping
      *  \ingroup GenericGeometry
-     *  \brief add geometric functionality to a mapping
+     *  \brief interface for a mapping
      *
-     *  \tparam  Topology                topology of the reference domain
-     *  \tparam  GeometricMappingTraits  structure containing required types
-     *
-     *  The GeometricMappingTraits for a mapping named <tt>MyMapping</tt> could
-     *  look as follows:
-     *  \code
-     *  struct MyMappingTraits
-     *  {
-     *    typedef MyCoordTraits CoordTraits;
-     *
-     *    template< unsigned int dimension >
-     *    struct Traits
-     *    : public MappingTraits< dimension, CoordTraits >
-     *    {
-     *      typedef MyCaching< dimension, CoordTraits > CachingType;
-     *    };
-     *
-     *    template< class Topology >
-     *    struct Mapping
-     *    {
-     *      typedef MyMapping< Topology, CoordTraits > Type;
-     *    };
-     *  };
-     *  \endcode
-     *
-     *  The mapping (called <tt>MyMapping</tt> here) must provide the following
-     *  types and methods:
-     *  \code
-     *  template< unsigned int codim, unsigned int i >
-     *  struct SubTopology
-     *  {
-     *    typedef MyTrace< MyMapping, codim, i > Trace;
-     *  };
-     *
-     *  template< class CoordVector >
-     *  explicit MyMapping ( const CoordVector &coords );
-     *
-     *  const GlobalCoordType &corner ( int i ) const;
-     *
-     *  void global ( const LocalCoordType &x, GlobalCoordType &ret ) const;
-     *  bool jacobianTransposed ( const LocalCoordType &x, JacobianTransposedType &ret ) const;
-     *
-     *  template< unsigned int codim, unsigned int i >
-     *  typename SubTopology< codim, i > :: Trace trace () const;
-     *  \endcode
+     *  \tparam  CoordTraits  coordinate traits
+     *  \tparam  Topology     topology of the reference domain
+     *  \tparam  dimW         dimension of the world
+     *  \tparam  Impl         implementation of the mapping
      */
-    template< class Topology, class GeometricMappingTraits >
-    class GeometricMapping
+    template< class CoordTraits, class Topology, int dimW, class Impl >
+    class Mapping
     {
-      typedef GeometricMapping< Topology, GeometricMappingTraits > This;
+      typedef Mapping< CoordTraits, Topology, dimW, Impl > This;
+
+      typedef Impl Implementation;
 
     public:
-      typedef typename GeometricMappingTraits :: template Mapping< Topology > :: type
-      Mapping;
-      typedef typename Mapping :: Traits Traits;
+      typedef MappingTraits< CoordTraits, Topology :: dimension, dimW > Traits;
 
       static const unsigned int dimension = Traits :: dimension;
       static const unsigned int dimWorld = Traits :: dimWorld;
@@ -95,31 +53,31 @@ namespace Dune
 
       typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
 
-      static const bool alwaysAffine = Mapping :: alwaysAffine;
+      static const bool alwaysAffine = Implementation :: alwaysAffine;
 
     protected:
-      Mapping mapping_;
+      Implementation impl_;
 
     public:
       template< class CoordVector >
-      explicit GeometricMapping ( const CoordVector &coords )
-        : mapping_( coords )
+      explicit Mapping ( const CoordVector &coords )
+        : impl_( coords )
       {}
 
       const GlobalCoordType &corner ( int i ) const
       {
-        return mapping_.corner( i );
+        return implementation().corner( i );
       }
 
       void global ( const LocalCoordType &x, GlobalCoordType &y ) const
       {
-        mapping_.global( x, y );
+        implementation().global( x, y );
       }
 
       bool jacobianTransposed ( const LocalCoordType &x,
                                 JacobianTransposedType &JT ) const
       {
-        return mapping_.jacobianTransposed( x, JT );
+        return implementation().jacobianTransposed( x, JT );
       }
 
       void local ( const GlobalCoordType &y, LocalCoordType &x ) const
@@ -151,6 +109,11 @@ namespace Dune
         JacobianTransposedType JT;
         jacobianTransposed( x, JT );
         return MatrixHelper :: template detAAT< dimension, dimWorld >( JT );
+      }
+
+      const Implementation &implementation () const
+      {
+        return impl_;
       }
 
     protected:

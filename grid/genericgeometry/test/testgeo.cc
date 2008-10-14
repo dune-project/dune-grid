@@ -5,7 +5,6 @@
 //#define DUNE_THROW(E, m) assert(0)
 #include <dune/common/exceptions.hh>
 
-#include "../geometricmapping.hh"
 #include "../conversion.hh"
 #include "../geometry.hh"
 #include <dune/common/fmatrix.hh>

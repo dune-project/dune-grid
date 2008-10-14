@@ -10,8 +10,7 @@
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/submapping.hh>
-#include <dune/grid/genericgeometry/cornermapping.hh>
-#include <dune/grid/genericgeometry/geometricmapping.hh>
+#include <dune/grid/genericgeometry/mapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
@@ -28,24 +27,26 @@ namespace Dune
     // CachedMapping
     // -------------
 
-    template< class Topology, class GeometricMappingTraits >
+    template< class Topology, class GeometryTraits >
     class CachedMapping
-      : public GeometricMapping< Topology, GeometricMappingTraits >,
-        public SmallObject
+      : public SmallObject
     {
-      typedef GeometricMapping< Topology, GeometricMappingTraits > Base;
-      typedef CachedMapping< Topology, GeometricMappingTraits > This;
+      typedef CachedMapping< Topology, GeometryTraits > This;
 
-      typedef MappingTraits
-      < typename GeometricMappingTraits :: CoordTraits,
-          Topology :: dimension, GeometricMappingTraits :: dimWorld >
-      Traits;
-
-      typedef typename Traits :: MatrixHelper MatrixHelper;
-
-      static const bool alwaysAffine = Base :: alwaysAffine;
+      typedef typename GeometryTraits :: template Mapping< Topology > :: type
+      MappingImpl;
 
     public:
+      typedef MappingTraits
+      < typename GeometryTraits :: CoordTraits,
+          Topology :: dimension, GeometryTraits :: dimWorld >
+      Traits;
+
+      typedef GenericGeometry :: Mapping
+      < typename GeometryTraits :: CoordTraits,
+          Topology, GeometryTraits :: dimWorld, MappingImpl >
+      Mapping;
+
       static const unsigned int dimension = Traits :: dimension;
       static const unsigned int dimWorld = Traits :: dimWorld;
 
@@ -55,8 +56,9 @@ namespace Dune
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
 
-      typedef typename GeometricMappingTraits :: Caching CachingType;
-      typedef typename Base :: ReferenceElement ReferenceElement;
+      typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
+
+      static const bool alwaysAffine = Mapping :: alwaysAffine;
 
       template< unsigned int codim >
       struct Codim
@@ -64,21 +66,17 @@ namespace Dune
         typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
       };
 
-      template< unsigned int codim, unsigned int i >
-      struct SubTopology
-      {
-        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
-        typedef CachedMapping< type, GeometricMappingTraits > Trace;
-      };
+    private:
+      typedef typename GeometryTraits :: Caching Caching;
+      typedef typename Traits :: MatrixHelper MatrixHelper;
 
     public:
       unsigned int referenceCount;
 
-    protected:
-      using Base :: mapping_;
-
     private:
       static const unsigned int numNormals = ReferenceElement :: numNormals;
+
+      Mapping mapping_;
 
       mutable JacobianTransposedType jacobianTransposed_;
       mutable JacobianType jacobianInverseTransposed_;
@@ -95,7 +93,7 @@ namespace Dune
     public:
       template< class CoordVector >
       explicit CachedMapping ( const CoordVector &coords )
-        : Base( coords ),
+        : mapping_( coords ),
           jacobianTransposedComputed_( false ),
           jacobianInverseTransposedComputed_( false ),
           integrationElementComputed_( false )
@@ -110,12 +108,12 @@ namespace Dune
 
         if( affine_ )
         {
-          if( (CachingType :: evaluateJacobianTransposed == PreCompute) && !jacobianTransposedComputed_ )
+          if( (Caching :: evaluateJacobianTransposed == PreCompute) && !jacobianTransposedComputed_ )
             computeJacobianTransposed( baryCenter() );
 
-          if( CachingType :: evaluateJacobianInverseTransposed == PreCompute )
+          if( Caching :: evaluateJacobianInverseTransposed == PreCompute )
             computeJacobianInverseTransposed( baryCenter() );
-          else if( CachingType :: evaluateIntegrationElement == PreCompute )
+          else if( Caching :: evaluateIntegrationElement == PreCompute )
             computeIntegrationElement( baryCenter() );
         }
       }
@@ -125,7 +123,10 @@ namespace Dune
         return ReferenceElement :: topologyId;
       }
 
-      using Base :: corner;
+      const GlobalCoordType &corner ( int i ) const
+      {
+        return mapping_.corner( i );
+      }
 
       int numCorners () const
       {
@@ -151,7 +152,7 @@ namespace Dune
           y += corner( 0 );
         }
         else
-          Base :: global( x, y );
+          mapping_.global( x, y );
         return y;
       }
 
@@ -170,13 +171,13 @@ namespace Dune
           MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, x );
         }
         else
-          Base :: local( y, x );
+          mapping_.local( y, x );
         return x;
       }
 
       const JacobianTransposedType &jacobianTransposed ( const LocalCoordType &x ) const
       {
-        const EvaluationType evaluate = CachingType :: evaluateJacobianTransposed;
+        const EvaluationType evaluate = Caching :: evaluateJacobianTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
           return jacobianTransposed_;
 
@@ -188,8 +189,8 @@ namespace Dune
       // additional methods
       FieldType integrationElement ( const LocalCoordType &x ) const
       {
-        const EvaluationType evaluateI = CachingType :: evaluateIntegrationElement;
-        const EvaluationType evaluateJ = CachingType :: evaluateJacobianInverseTransposed;
+        const EvaluationType evaluateI = Caching :: evaluateIntegrationElement;
+        const EvaluationType evaluateJ = Caching :: evaluateJacobianInverseTransposed;
         if( ((evaluateI == PreCompute) || (evaluateJ == PreCompute)) && alwaysAffine )
           return integrationElement_;
 
@@ -200,7 +201,7 @@ namespace Dune
 
       const JacobianType &jacobianInverseTransposed ( const LocalCoordType &x ) const
       {
-        const EvaluationType evaluate = CachingType :: evaluateJacobianInverseTransposed;
+        const EvaluationType evaluate = Caching :: evaluateJacobianInverseTransposed;
         if( (evaluate == PreCompute) && alwaysAffine )
           return jacobianInverseTransposed_;
 
@@ -235,14 +236,6 @@ namespace Dune
         return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
-      template< unsigned int codim, unsigned int i >
-      typename SubTopology< codim, i > :: Trace
-      trace () const
-      {
-        typedef typename SubTopology< codim, i > :: Trace Trace;
-        return Trace( mapping_.trace() );
-      }
-
     private:
       static const LocalCoordType &baryCenter ()
       {
@@ -251,19 +244,19 @@ namespace Dune
 
       void computeJacobianTransposed ( const LocalCoordType &x ) const
       {
-        affine_ = Base :: jacobianTransposed( x, jacobianTransposed_ );
+        affine_ = mapping_.jacobianTransposed( x, jacobianTransposed_ );
         jacobianTransposedComputed_ = affine_;
       }
 
       void computeJacobianInverseTransposed ( const LocalCoordType &x ) const
       {
-        integrationElement_ = Base :: jacobianInverseTransposed( x, jacobianInverseTransposed_ );
+        integrationElement_ = mapping_.jacobianInverseTransposed( x, jacobianInverseTransposed_ );
         integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine_;
       }
 
       void computeIntegrationElement ( const LocalCoordType &x ) const
       {
-        integrationElement_ = Base :: integrationElement( x );
+        integrationElement_ = mapping_.integrationElement( x );
         integrationElementComputed_ = affine_;
       }
     };
