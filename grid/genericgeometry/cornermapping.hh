@@ -495,7 +495,8 @@ namespace Dune
     // -------------
 
     template< class CoordTraits, class Topo, unsigned int dimW,
-        class CStorage, bool affine = false >
+        class CStorage = CoordPointerStorage< CoordTraits, Topo, dimW >,
+        bool affine = false >
     class CornerMapping
     {
       typedef CornerMapping< CoordTraits, Topo, dimW, CStorage, affine > This;
