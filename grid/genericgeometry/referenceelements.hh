@@ -145,7 +145,7 @@ namespace Dune
     template< class BaseTopology >
     struct ReferenceDomainBase< Pyramid< BaseTopology > >
     {
-      typedef Prism< BaseTopology > Topology;
+      typedef Pyramid< BaseTopology > Topology;
 
       template< class > friend class ReferenceDomain;
       template< class > friend class ReferenceDomainBase;
