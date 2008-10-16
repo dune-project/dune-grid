@@ -6,7 +6,7 @@
 #include <dune/grid/uggrid/uggridindexsets.hh>
 
 template <class GridImp>
-void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level) {
+void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation) {
 
   // Commit the index set to a specific level of a specific grid
   grid_ = &grid;
@@ -135,15 +135,27 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level) 
   typename GridImp::Traits::template Codim<dim>::LevelIterator vEndIt = grid_->template lend<dim>(level_);
 
   numVertices_ = 0;
-  for (; vIt!=vEndIt; ++vIt)
-    UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;
+
+  if (nodePermutation!=0 and level==0)
+  {
+    for (; vIt!=vEndIt; ++vIt)
+      UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = (*nodePermutation)[numVertices_++];
+  }
+  else
+  {
+    for (; vIt!=vEndIt; ++vIt)
+      UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;
+  }
+
+  /*    for (; vIt!=vEndIt; ++vIt)
+          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;*/
 
   myTypes_[dim].resize(0);
   myTypes_[dim].push_back(GeometryType(GeometryType::cube,0));
 }
 
 template <class GridImp>
-void Dune::UGGridLeafIndexSet<GridImp>::update() {
+void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutation) {
 
   // //////////////////////////////////////////////////////
   // Handle codim 1 and dim-1: levelwise from top to bottom
@@ -336,8 +348,17 @@ void Dune::UGGridLeafIndexSet<GridImp>::update() {
 
   // leaf index in node writes through to vertex !
   numVertices_ = 0;
-  for (; vIt!=vEndIt; ++vIt)
-    UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = numVertices_++;
+
+  if (nodePermutation!=0 and grid_.maxLevel()==0)
+  {
+    for (; vIt!=vEndIt; ++vIt)
+      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = (*nodePermutation)[numVertices_++];
+  }
+  else
+  {
+    for (; vIt!=vEndIt; ++vIt)
+      UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = numVertices_++;
+  }
 
   myTypes_[dim].resize(0);
   myTypes_[dim].push_back(GeometryType(0));

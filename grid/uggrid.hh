@@ -569,7 +569,7 @@ namespace Dune {
     CollectiveCommunication<UGGrid> ccobj;
 
     // Recomputes entity indices after the grid was changed
-    void setIndices();
+    void setIndices(std::vector<unsigned int>* nodePermutation=0);
 
     // Each UGGrid object has a unique name to identify it in the
     // UG environment structure

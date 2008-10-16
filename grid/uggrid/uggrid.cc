@@ -71,6 +71,8 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
 
     if (UG_NS<dim>::InitUg(&argc, &argv))
       DUNE_THROW(GridError, "UG" << dim << "d::InitUg() returned an error code!");
+
+    free(arg);
   }
 
   // Create a dummy problem
@@ -758,6 +760,22 @@ void Dune::UGGrid < dim >::createEnd()
       noOfBNodes++;
   }
 
+  // ///////////////////////////////////////////////////////
+  //   UG needs all boundary vertices first.  We set up
+  //   up an array to keep track of the reordering.
+  // ///////////////////////////////////////////////////////
+  std::vector<unsigned int> nodePermutation;
+
+  for (unsigned int i=0; i<isBoundaryNode.size(); ++i) {
+    if (isBoundaryNode[i]!=-1)
+      nodePermutation.push_back(i);
+  }
+
+  for (unsigned int i=0; i<isBoundaryNode.size(); ++i) {
+    if (isBoundaryNode[i]==-1)
+      nodePermutation.push_back(i);
+  }
+
   // ///////////////////////////////////////////
   //   Create the domain data structure
   // ///////////////////////////////////////////
@@ -975,7 +993,7 @@ void Dune::UGGrid < dim >::createEnd()
   multigrid_->MarkKey = 0;
 
   // Set the local indices
-  setIndices();
+  setIndices(&nodePermutation);
 
   // Clear refinement flags
   typename Traits::template Codim<0>::LevelIterator eIt    = lbegin<0>(0);
@@ -1260,7 +1278,7 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setIndices()
+void Dune::UGGrid < dim >::setIndices(std::vector<unsigned int>* nodePermutation)
 {
   /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
       (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
@@ -1316,11 +1334,12 @@ void Dune::UGGrid < dim >::setIndices()
     levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim> >());
 
   // Update all LevelIndexSets
-  for (int i=0; i<=maxLevel(); i++)
+  levelIndexSets_[0]->update(*this, 0, nodePermutation);
+  for (int i=1; i<=maxLevel(); i++)
     if (levelIndexSets_[i])
       levelIndexSets_[i]->update(*this, i);
 
-  leafIndexSet_.update();
+  leafIndexSet_.update(nodePermutation);
 
   localIdSet_.update();
 

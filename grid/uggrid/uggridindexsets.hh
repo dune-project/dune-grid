@@ -154,7 +154,7 @@ namespace Dune {
     }
 
     /** \brief Update the level indices.  This method is called after each grid change */
-    void update(const GridImp& grid, int level);
+    void update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation=0);
 
     const GridImp* grid_;
     int level_;
@@ -304,7 +304,7 @@ namespace Dune {
     }
 
     /** \brief Update the leaf indices.  This method is called after each grid change. */
-    void update();
+    void update(std::vector<unsigned int>* nodePermutation=0);
 
     const GridImp& grid_;
 
