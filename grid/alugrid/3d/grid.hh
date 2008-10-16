@@ -30,6 +30,8 @@
 #include "datahandle.hh"
 #include "alu3dutility.hh"
 
+#include <dune/grid/alugrid/3d/lbdatahandle.hh>
+
 #if ALU3DGRID_PARALLEL
 #include <dune/common/mpicollectivecommunication.hh>
 #else
@@ -500,6 +502,14 @@ namespace Dune {
      */
     template <class DataHandle>
     bool loadBalance (DataHandle & data);
+
+    template< class DataHandleImpl, class Data >
+    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandle )
+    {
+      typedef ALUGridLoadBalanceDataHandle< ThisType, DataHandleImpl, Data > LBHandle;
+      LBHandle lbHandle( *this, dataHandle );
+      return loadBalance( lbHandle );
+    }
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int level, int codim) const;
