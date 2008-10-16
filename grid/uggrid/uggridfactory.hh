@@ -30,7 +30,7 @@ namespace Dune {
      </p>
 
      <pre>
-     UGGrid&lt;3&gt;&* readMyFileFormat(const std::string& filename)
+     UGGrid&lt;3&gt;* readMyFileFormat(const std::string& filename)
      </pre>
 
      Now, in order to create a valid UGGrid object do the
@@ -39,7 +39,6 @@ namespace Dune {
      <h2> 1) Create a GridFactory Object </h2>
      <p>
      Get a new GridFactory object by calling
-     First of all you have to call
      <pre>
      GridFactory<UGGrid<dim> > factory;
      </pre>
@@ -47,12 +46,18 @@ namespace Dune {
      <h2> 2)  Enter the Vertices </h2>
 
      <p>
-     Now you have to enter the grid vertices.  Create a vertex by calling
+     Insert the grid vertices by calling
      </p>
 
      <pre>
      factory.insertVertex(const FieldVector&lt;double,dimworld&gt;& position);
      </pre>
+
+     <p>
+     for each vertex.  The order of insertion determines the level- and leaf indices
+     of your level 0 vertices.
+     </p>
+
 
      <h2> 3) Enter the elements </h2>
 
@@ -136,14 +141,6 @@ namespace Dune {
      parallel grid, proceed as described on all processes.  This will
      create the grid on the master process and set up UG correctly on all
      other process.  Call <tt>loadBalance()</tt> to actually distribute the grid.
-     </p>
-
-     <p>
-     <b>WARNING:</b> UG internally requests that all boundary vertices be
-     inserted before the inner ones.  That means that if your input grid
-     doesn't comply with this, it will have its vertices reordered by
-     <tt>createGrid()</tt>.  So don't be surprised if you just read a grid and write
-     it back to disk to find your vertex numberings changed.
      </p>
 
    */
