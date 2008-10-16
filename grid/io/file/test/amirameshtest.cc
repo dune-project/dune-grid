@@ -3,11 +3,37 @@
 #include "config.h"
 
 #include <dune/grid/sgrid.hh>
+#ifdef HAVE_UG
+#include <dune/grid/uggrid.hh>
+#endif
+#ifdef HAVE_ALBERTA
+#include <dune/grid/albertagrid.hh>
+#endif
+#ifdef HAVE_ALU
+#include <dune/grid/alugrid.hh>
+#endif
+
+#include <dune/grid/io/file/amirameshreader.hh>
 #include <dune/grid/io/file/amirameshwriter.hh>
 
 using namespace Dune;
 
-int main() try {
+template <class GridType>
+void testReadingUnstructuredGrid(const std::string& filename) {
+
+  // Read the grid
+  std::auto_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
+
+  // Write the grid into a tmp file
+  LeafAmiraMeshWriter<GridType> amiramesh(*grid);
+  amiramesh.write("tmp.grid", true);
+
+  /** \todo Ideally we should check here whether the two files differ.
+      However this is not easy as DUNE may permute the vertices of each element */
+
+}
+
+void testWritingUniformData() {
 
   int n[3] = { 10, 10, 10 };
   double h[3] = {3.0, 2.0, 1.0 };
@@ -58,6 +84,30 @@ int main() try {
   AmiraMeshWriter<SGrid<3,3>,SGrid<3,3>::Traits::LeafIndexSet> amiramesh3d;
   amiramesh3d.addUniformData(sgrid3d, n3, vertexdata3d);
   amiramesh3d.write("sgrid3d.am");
+
+}
+
+int main() try {
+
+  // Test whether unstructured grids can be read and written
+#ifdef HAVE_UG
+  testReadingUnstructuredGrid<UGGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
+  testReadingUnstructuredGrid<UGGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+#endif
+
+  /** \todo Testing of AlbertaGrid and ALUGrid currently not possible as we lack suitable test grids. */
+#ifdef HAVE_ALBERTA
+  //     testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
+  //     testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+#endif
+
+#ifdef HAVE_ALU
+  //     testReadingUnstructuredGrid<AluGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
+  //     testReadingUnstructuredGrid<AluGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+#endif
+
+  // Test whether writing uniform data works
+  testWritingUniformData();
 
   return 0;
 
