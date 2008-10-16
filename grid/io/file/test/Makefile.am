@@ -1,6 +1,6 @@
 ALLTESTS = vtktest gnuplottest vtksequencetest
 
-# run amimesh test only if amimesh was found
+# run amiramesh test only if amiramesh was found
 if AMIRAMESH
 ALLTESTS += amirameshtest
 endif
@@ -28,7 +28,7 @@ gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
 
 amirameshtest_SOURCES = amirameshtest.cc
-amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS)
+amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS) $(UG_CPPFLAGS) $(PSURFACE_CPPFLAGS)
 amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
