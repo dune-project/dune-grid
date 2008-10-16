@@ -19,11 +19,6 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< class Topology, class GeometricMappingTraits >
-    class CachedMapping;
-
-
-
     // CachedMapping
     // -------------
 

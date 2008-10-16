@@ -30,14 +30,15 @@ namespace Dune
      *  \tparam  dimW         dimension of the world
      *  \tparam  Impl         implementation of the mapping
      */
-    template< class CoordTraits, class Topology, int dimW, class Impl >
+    template< class CoordTraits, class Topo, int dimW, class Impl >
     class Mapping
     {
-      typedef Mapping< CoordTraits, Topology, dimW, Impl > This;
+      typedef Mapping< CoordTraits, Topo, dimW, Impl > This;
 
       typedef Impl Implementation;
 
     public:
+      typedef Topo Topology;
       typedef MappingTraits< CoordTraits, Topology :: dimension, dimW > Traits;
 
       static const unsigned int dimension = Traits :: dimension;
@@ -53,6 +54,14 @@ namespace Dune
 
       typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
 
+      template< unsigned int codim, unsigned int i >
+      struct SubTopology
+      {
+        typedef typename GenericGeometry :: SubTopology< Topo, codim, i > :: type Topology;
+        typedef typename Implementation :: template SubTopology< codim, i > :: Trace TraceImpl;
+        typedef Mapping< CoordTraits, Topology, dimWorld, TraceImpl > Trace;
+      };
+
       static const bool alwaysAffine = Implementation :: alwaysAffine;
 
     protected:
@@ -62,6 +71,10 @@ namespace Dune
       template< class CoordVector >
       explicit Mapping ( const CoordVector &coords )
         : impl_( coords )
+      {}
+
+      Mapping ( const Implementation &implementation )
+        : impl_( implementation )
       {}
 
       const GlobalCoordType &corner ( int i ) const
@@ -74,15 +87,9 @@ namespace Dune
         implementation().global( x, y );
       }
 
-      bool jacobianTransposed ( const LocalCoordType &x,
-                                JacobianTransposedType &JT ) const
-      {
-        return implementation().jacobianTransposed( x, JT );
-      }
-
       void local ( const GlobalCoordType &y, LocalCoordType &x ) const
       {
-        x = baryCenter();
+        x = ReferenceElement :: template baryCenter< 0 >( 0 );
         LocalCoordType dx;
         do
         { // DF^n dx^n = F^n, x^{n+1} -= dx^n
@@ -94,6 +101,12 @@ namespace Dune
           MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, dx );
           x -= dx;
         } while( dx.two_norm2() > 1e-12 );
+      }
+
+      bool jacobianTransposed ( const LocalCoordType &x,
+                                JacobianTransposedType &JT ) const
+      {
+        return implementation().jacobianTransposed( x, JT );
       }
 
       FieldType
@@ -116,10 +129,10 @@ namespace Dune
         return impl_;
       }
 
-    protected:
-      static const LocalCoordType &baryCenter ()
+      template< unsigned int codim, unsigned int i >
+      typename SubTopology< codim, i > :: Trace trace () const
       {
-        return ReferenceElement :: template baryCenter< 0 >( 0 );
+        return impl_.template trace< codim, i >();
       }
     };
 
