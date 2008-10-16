@@ -101,7 +101,7 @@ namespace Dune
         else
           computeJacobianTransposed( baryCenter() );
 
-        if( affine_ )
+        if( affine() )
         {
           if( (Caching :: evaluateJacobianTransposed == PreCompute) && !jacobianTransposedComputed_ )
             computeJacobianTransposed( baryCenter() );
@@ -135,7 +135,7 @@ namespace Dune
 
       bool affine () const
       {
-        return affine_;
+        return (alwaysAffine || affine_);
       }
 
       GlobalCoordType global ( const LocalCoordType &x ) const
@@ -159,7 +159,7 @@ namespace Dune
           GlobalCoordType z = y - corner( 0 );
           MatrixHelper :: template ATx< dimWorld, dimension >( jacobianInverseTransposed_, z, x );
         }
-        else if( affine_ )
+        else if( affine() )
         {
           const JacobianTransposedType &JT = jacobianTransposed( baryCenter() );
           GlobalCoordType z = y - corner( 0 );
@@ -181,7 +181,6 @@ namespace Dune
         return jacobianTransposed_;
       }
 
-      // additional methods
       FieldType integrationElement ( const LocalCoordType &x ) const
       {
         const EvaluationType evaluateI = Caching :: evaluateIntegrationElement;
@@ -220,7 +219,7 @@ namespace Dune
           const LocalCoordType &refNormal =  ReferenceElement :: integrationOuterNormal( face );
           MatrixHelper :: template Ax< dimWorld, dimension >( JT, refNormal, normal_[ face ] );
           normal_[ face ] *= integrationElement_;
-          normalComputed_[ face ] = affine_;
+          normalComputed_[ face ] = affine();
         }
         return normal_[ face ];
       }
@@ -246,13 +245,13 @@ namespace Dune
       void computeJacobianInverseTransposed ( const LocalCoordType &x ) const
       {
         integrationElement_ = mapping_.jacobianInverseTransposed( x, jacobianInverseTransposed_ );
-        integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine_;
+        integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine();
       }
 
       void computeIntegrationElement ( const LocalCoordType &x ) const
       {
         integrationElement_ = mapping_.integrationElement( x );
-        integrationElementComputed_ = affine_;
+        integrationElementComputed_ = affine();
       }
     };
 
