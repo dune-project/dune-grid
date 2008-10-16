@@ -2756,7 +2756,6 @@ namespace Dune {
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           delete[] send_sizes[is->rank];
-#warning fixed double free, but the real problem is bigger
           send_sizes[is->rank] = 0;
         }
 
@@ -2833,7 +2832,6 @@ namespace Dune {
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
         delete[] sends[is->rank];
-#warning fixed double free, but the real problem is bigger
         sends[is->rank] = 0;
       }
 
