@@ -97,13 +97,13 @@ int main() try {
 
   /** \todo Testing of AlbertaGrid and ALUGrid currently not possible as we lack suitable test grids. */
 #ifdef HAVE_ALBERTA
-  //     testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
-  //     testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2.am");
+  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3.am");
 #endif
 
 #ifdef HAVE_ALU
-  //     testReadingUnstructuredGrid<AluGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
-  //     testReadingUnstructuredGrid<AluGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+  testReadingUnstructuredGrid<AluGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2.am");
+  testReadingUnstructuredGrid<AluGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3.am");
 #endif
 
   // Test whether writing uniform data works
