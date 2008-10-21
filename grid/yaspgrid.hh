@@ -2252,6 +2252,14 @@ namespace Dune {
     typedef const YaspGrid<dim,dim> GridImp;
 
     dune_static_assert(dim==deprecated_dimworld, "YaspGrid can only be instantiated with dim==dimworld");
+
+    void init()
+    {
+      setsizes();
+      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,0) );
+      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dim> >(*this) );
+      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dim> >(*this) );
+    }
   public:
     //! define type used for coordinates in grid module
     typedef yaspgrid_ctype ctype;
@@ -2294,17 +2302,21 @@ namespace Dune {
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap)
       : MultiYGrid<dim,ctype>(comm,L,s,periodic,overlap), ccobj(comm)
-#else
+    {
+      init();
+    }
+#endif
+
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap)
+#if HAVE_MPI
+      : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap), ccobj(MPI_COMM_SELF)
+#else
       : MultiYGrid<dim,ctype>(L,s,periodic,overlap)
 #endif
     {
-      setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,0) );
-      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dim> >(*this) );
-      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dim> >(*this) );
+      init();
     }
 
     ~YaspGrid()
