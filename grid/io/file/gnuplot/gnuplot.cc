@@ -12,9 +12,9 @@ namespace Dune {
   /** \brief Write Gnuplot file to disk
       \param filename Name of the file to write to
    */
-  template<class GridType, class GridView>
+  template<class GridView>
   void
-  GnuplotWriter<GridType,GridView>::write(const std::string& filename) const
+  GnuplotWriter<GridView>::write(const std::string& filename) const
   {
     // open file
     std::ofstream file(filename.c_str());
@@ -37,8 +37,8 @@ namespace Dune {
         assert (i == counter++);
         // calc positions
         assert(it->geometry().corners() == 2);
-        const FieldVector<ctype,GridType::dimension>& left = it->geometry()[0];
-        const FieldVector<ctype,GridType::dimension>& right = it->geometry()[1];
+        const FieldVector<ctype,dimworld>& left = it->geometry()[0];
+        const FieldVector<ctype,dimworld>& right = it->geometry()[1];
         assert(left[0] < right[0]);
         // write gnuplot rows for left & right vertex
         writeRow(file, left, _data[2*i]);
@@ -61,11 +61,11 @@ namespace Dune {
 
   }
 
-  template<class GridType, class IndexSet>
+  template<class GridView>
   void
-  GnuplotWriter<GridType,IndexSet>::writeRow(std::ostream & file,
-                                             const FieldVector<ctype,dimworld>& position,
-                                             const std::vector<float> & data) const
+  GnuplotWriter<GridView>::writeRow(std::ostream & file,
+                                    const FieldVector<ctype,dimworld>& position,
+                                    const std::vector<float> & data) const
   {
     assert (data.size() == _names.size());
     // write position
@@ -81,13 +81,13 @@ namespace Dune {
       \param data An ISTL compliant vector type
       \param name associated with the data
    */
-  template<class GridType, class IndexSet>
+  template<class GridView>
   template<class DataContainer>
   void
-  GnuplotWriter<GridType,IndexSet>::addData(DataType t, const DataContainer& data, const std::string & name)
+  GnuplotWriter<GridView>::addData(DataType t, const DataContainer& data, const std::string & name)
   {
     assert((t == cellData && _is.size(0) == (int) data.size())
-           || (t == vertexData && _is.size(GridType::dimension) == (int) data.size()) );
+           || (t == vertexData && _is.size(GridView::dimension) == (int) data.size()) );
     _names.push_back(name);
 
     // copy data to new container

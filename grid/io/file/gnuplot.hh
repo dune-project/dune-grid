@@ -25,15 +25,15 @@ namespace Dune {
       \tparam GridType the grid
       \tparam GridView Level- or LeafGridView
    */
-  template<class GridType, class GridView>
+  template<class GridView>
   class GnuplotWriter {
 
-    typedef typename GridType::ctype ctype;
+    typedef typename GridView::Grid::ctype ctype;
 
-    enum {dimworld = GridType::dimensionworld};
+    enum {dimworld = GridView::dimensionworld};
 
   public:
-    GnuplotWriter (const GridType & g, const GridView & gv) : _grid(g), _is(gv.indexSet()), _gv(gv)
+    GnuplotWriter (const GridView & gv) : _is(gv.indexSet()), _gv(gv)
     {
       dune_static_assert(dimworld==1 || dimworld==2, "GnuPlot export only works for worlddim==1 and worlddim==2");
       // allocate _data buffer
@@ -69,7 +69,6 @@ namespace Dune {
 
   private:
     enum DataType { vertexData, cellData };
-    const GridType & _grid;
     const typename GridView::IndexSet & _is;
     const GridView _gv;
     std::vector< std::vector< float > > _data;
@@ -87,12 +86,12 @@ namespace Dune {
       \ingroup Gnuplot
    */
   template<class G>
-  class LeafGnuplotWriter : public GnuplotWriter<G,typename G::template Codim<0>::LeafIndexSet>
+  class LeafGnuplotWriter : public GnuplotWriter<typename G::LeafGridView>
   {
   public:
     /** \brief Construct a Gnuplot writer for the leaf level of a given grid */
     LeafGnuplotWriter (const G& grid)
-      : GnuplotWriter<G,typename G::template Codim<0>::LeafIndexSet>(grid,grid.leafIndexSet())
+      : GnuplotWriter<typename G::LeafGridView>(grid.leafView())
     {}
   };
 
@@ -100,12 +99,12 @@ namespace Dune {
       \ingroup Gnuplot
    */
   template<class G>
-  class LevelGnuplotWriter : public GnuplotWriter<G, typename G::template Codim<0>::LevelIndexSet>
+  class LevelGnuplotWriter : public GnuplotWriter<typename G::LevelGridView>
   {
   public:
     /** \brief Construct a Gnuplot writer for a certain level of a given grid */
     LevelGnuplotWriter (const G& grid, int level)
-      : GnuplotWriter<G,typename G::template Codim<0>::LevelIndexSet>(grid,grid.levelIndexSet(level))
+      : GnuplotWriter<typename G::LevelGridView>(grid.levelView(level))
     {}
   };
 
