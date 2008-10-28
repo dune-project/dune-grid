@@ -12,6 +12,7 @@
 #include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/mapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
+#include <dune/grid/genericgeometry/traceprovider.hh>
 
 namespace Dune
 {
@@ -228,6 +229,20 @@ namespace Dune
       typename Codim< codim > :: SubMapping *subMapping ( unsigned int i ) const
       {
         return SubMappingProvider< This, codim > :: subMapping( *this, i );
+      }
+
+      template< unsigned int codim, bool hybrid >
+      typename TraceProvider< Topology, GeometryTraits, codim, hybrid > :: Trace *
+      trace ( unsigned int i ) const
+      {
+        typedef TraceProvider< Topology, GeometryTraits, codim, hybrid > Provider;
+        return Provider :: trace( mapping_, i );
+      }
+
+      template< unsigned int codim >
+      typename Codim< codim > :: Trace *trace ( unsigned int i ) const
+      {
+        return trace< codim, false >( i );
       }
 
     private:

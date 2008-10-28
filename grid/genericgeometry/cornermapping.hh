@@ -400,7 +400,7 @@ namespace Dune
       typedef typename Mapping :: GlobalCoordType GlobalCoordType;
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
-      enum { dimension = ReferenceElement :: dimension };
+      static const unsigned int dimension = ReferenceElement :: dimension;
 
       const Mapping &mapping_;
       const unsigned int i_;
@@ -484,6 +484,8 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
       typedef typename Traits :: JacobianTransposedType JacobianTransposedType;
+
+      typedef GenericGeometry :: ReferenceElement< Topology, FieldType > ReferenceElement;
 
       template< unsigned int codim, unsigned int i >
       struct SubTopology

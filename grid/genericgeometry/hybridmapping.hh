@@ -42,23 +42,31 @@ namespace Dune
     class HybridMappingBase
       : public virtual HybridMappingBase< dim, GeometryTraits, codim-1 >
     {
-      typedef GenericGeometry :: HybridMapping< dim, GeometryTraits > HybridMapping;
+      typedef HybridMapping< dim, GeometryTraits > Mapping;
 
     protected:
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: subMapping;
 
-      virtual typename SubMappingTraits< HybridMapping, codim > :: SubMapping *
+      virtual typename SubMappingTraits< Mapping, codim > :: SubMapping *
       subMapping ( Int2Type< codim >, unsigned int i ) const = 0;
+
+      using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
+
+      virtual HybridMapping< dim - codim, GeometryTraits > *
+      trace ( Int2Type< codim >, unsigned int i ) const = 0;
     };
 
     template< unsigned int dim, class GeometryTraits >
     class HybridMappingBase< dim, GeometryTraits, 0 >
     {
-      typedef GenericGeometry :: HybridMapping< dim, GeometryTraits > HybridMapping;
+      typedef HybridMapping< dim, GeometryTraits > Mapping;
 
     protected:
-      virtual typename SubMappingTraits< HybridMapping, 0 > :: SubMapping *
+      virtual typename SubMappingTraits< Mapping, 0 > :: SubMapping *
       subMapping ( Int2Type< 0 >, unsigned int i ) const = 0;
+
+      virtual HybridMapping< dim, GeometryTraits > *
+      trace ( Int2Type< 0 >, unsigned int i ) const = 0;
     };
 
 
@@ -91,6 +99,7 @@ namespace Dune
       struct Codim
       {
         typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
 
       unsigned int referenceCount;
@@ -130,8 +139,16 @@ namespace Dune
         return subMapping( codimVariable, i );
       }
 
+      template< int codim >
+      typename Codim< codim > :: Trace *trace ( unsigned int i ) const
+      {
+        Int2Type< codim > codimVariable;
+        return trace( codimVariable, i );
+      }
+
     protected:
       using HybridMappingBase< dim, GeometryTraits > :: subMapping;
+      using HybridMappingBase< dim, GeometryTraits > :: trace;
     };
 
 
@@ -159,6 +176,15 @@ namespace Dune
         const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
         return impl.template subMapping< codim >( i );
       }
+
+      using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: trace;
+
+      virtual HybridMapping< Topology :: dimension - codim, GeometryTraits > *
+      trace ( Int2Type< codim >, unsigned int i ) const
+      {
+        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
+        return impl.template trace< codim >( i );
+      }
     };
 
     template< class Topology, class GeometryTraits >
@@ -174,6 +200,13 @@ namespace Dune
       {
         const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
         return impl.template subMapping< 0 >( i );
+      }
+
+      virtual HybridMapping< Topology :: dimension, GeometryTraits > *
+      trace ( Int2Type< 0 >, unsigned int i ) const
+      {
+        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
+        return impl.template trace< 0 >( i );
       }
     };
 
@@ -206,6 +239,7 @@ namespace Dune
       struct Codim
       {
         typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
 
     private:
@@ -281,8 +315,15 @@ namespace Dune
         return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
+      template< int codim >
+      typename Codim< codim > :: Trace *trace ( unsigned int i ) const
+      {
+        return mapping_.template trace< codim, true >( i );
+      }
+
     protected:
       using VirtualMappingBase< Topology, GeometryTraits > :: subMapping;
+      using VirtualMappingBase< Topology, GeometryTraits > :: trace;
     };
 
   }

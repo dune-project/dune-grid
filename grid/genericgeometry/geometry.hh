@@ -199,7 +199,8 @@ namespace Dune
         const unsigned int ftid = father.mapping().topologyId();
         const unsigned int j = MapNumberingProvider< fatherdim >
                                :: template dune2generic< codim >( ftid, i );
-        return father.mapping().template subMapping< codim >( j );
+        return father.mapping().template trace< codim >( j );
+        //return father.mapping().template subMapping< codim >( j );
       }
     };
 
