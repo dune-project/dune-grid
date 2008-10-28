@@ -144,9 +144,9 @@ namespace Dune {
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
 #if ALU2DGRID_PARALLEL
-      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
+      typedef Dune :: CollectiveCommunication<MPI_Comm> CollectiveCommunication;
 #else
-      typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+      typedef Dune :: CollectiveCommunication<GridImp> CollectiveCommunication;
 #endif
     };
   }; // end of ALU2dGridFamily

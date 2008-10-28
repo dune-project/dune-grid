@@ -20,7 +20,7 @@ namespace Dune {
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_(dim+1)
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -54,7 +54,7 @@ namespace Dune {
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_(dim+1)
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -87,7 +87,7 @@ namespace Dune {
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_(MAXL,0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_(dim+1)
       , leafIndexSet_(0)
       , maxLevel_(0)
       , refineMarked_ (0)
@@ -572,7 +572,9 @@ namespace Dune {
   inline void ALU2dGrid<dim, dimworld>::makeGeomTypes() {
     // stored is the dim, where is the codim
     for(int i=dim; i>= 0; i--)
-      geomTypes_[dim-i][0] = GeometryType(GeometryType::simplex,i);
+    {
+      geomTypes_[dim-i].push_back(GeometryType(GeometryType::simplex,i));
+    }
     return;
   }
 
@@ -647,7 +649,7 @@ namespace Dune {
     : mygrid_ (0)
       , maxLevel_(0)
       , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1,1)
+      , geomTypes_(dim+1)
       , hIndexSet_(*this)
       , localIdSet_ (*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
