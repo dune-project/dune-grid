@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser.hh>
 
 // use grid check
 #include <dune/grid/test/gridcheck.cc>
