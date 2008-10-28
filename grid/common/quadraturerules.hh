@@ -170,12 +170,12 @@ namespace Dune {
     typedef std::pair<GeometryType,int> QuadratureRuleKey;
 
     /** \todo Please doc me! */
-    typedef QuadratureRule<ctype, dim> QuadratureRuleType;
+    typedef Dune::QuadratureRule<ctype, dim> QuadratureRule;
 
     //! real rule creator
-    const QuadratureRuleType& _rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
+    const QuadratureRule& _rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
-      static std::map<QuadratureRuleKey, QuadratureRuleType> _quadratureMap;
+      static std::map<QuadratureRuleKey, QuadratureRule> _quadratureMap;
       QuadratureRuleKey key(t,p);
       if (_quadratureMap.find(key) == _quadratureMap.end()) {
         /*
@@ -183,7 +183,7 @@ namespace Dune {
            If we write this in one command, an invalid rule
            would get stored in case of an exception.
          */
-        QuadratureRuleType rule =
+        QuadratureRule rule =
           QuadratureRuleFactory<ctype,dim>::rule(t,p,qt);
         _quadratureMap[key] = rule;
       }
@@ -199,12 +199,12 @@ namespace Dune {
     QuadratureRules () {};
   public:
     //! select the appropriate QuadratureRule for GeometryType t and order p
-    static const QuadratureRuleType& rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
+    static const QuadratureRule& rule(const GeometryType& t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
       return instance()._rule(t,p,qt);
     }
     //! @copydoc rule
-    static const QuadratureRuleType& rule(const GeometryType::BasicType t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
+    static const QuadratureRule& rule(const GeometryType::BasicType t, int p, QuadratureType::Enum qt=QuadratureType::Gauss)
     {
       GeometryType gt(t,dim);
       return instance()._rule(gt,p,qt);
