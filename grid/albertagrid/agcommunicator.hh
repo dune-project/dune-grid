@@ -3,6 +3,8 @@
 #ifndef DUNE_AGCOMMUNICATOR_HH
 #define DUNE_AGCOMMUNICATOR_HH
 
+#include <cstring>
+
 // use this define to control if Albert should use the found MPI
 
 // do not use at the moment
