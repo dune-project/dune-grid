@@ -193,8 +193,16 @@ namespace Dune
                                const IntersectionIteratorType&, DUNE_ELEM *) ;
 
     // update element from entity
+    template <class Entity>
+    inline void el_update_base (Entity& en , DUNE_ELEM *) ;
+
+    // update element from entity
     template <class EntityPointerType>
     inline int el_update (EntityPointerType *, DUNE_ELEM *) ;
+
+    // update element from entity
+    template <class EntityPointerType, class GridPartType>
+    inline int el_update (EntityPointerType *, DUNE_ELEM *, GridPartType& );
 
     // update child element
     template <class EntityPointerType>

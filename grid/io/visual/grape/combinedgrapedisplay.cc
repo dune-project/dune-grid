@@ -88,8 +88,14 @@ namespace Dune
   {
     if( disp_ )
     {
+      void * gridPart = he->gridPart;
       he->display = (void *) disp_;
+
+      // set appropriate grid part
+      if( partIter_ != partEnd_) he->gridPart = *partIter_;
+
       int ret = disp_->nextMacro(he);
+
       if(!ret)
       {
         ++grditer_;
@@ -100,7 +106,8 @@ namespace Dune
       }
       else
       {
-        he->display = (void *)this;
+        he->display  = (void *)this;
+        he->gridPart = gridPart;
         return ret;
       }
     }
@@ -265,11 +272,14 @@ namespace Dune
       {
         std::vector < DUNE_FDATA * > & vec = disp.getFdataVec();
         data = vec[func->mynum];
+        assert( data->gridPart );
         gridPartList_.push_back( data->gridPart );
       }
 
       disp.changeIterationMethods(iteratorType,partitionIteratorType,data);
     }
+
+    assert( (func) ? (gridPartList_.size() == dispList_.size()) : true );
   }
 
   template<class DisplayType>
@@ -418,8 +428,8 @@ namespace Dune
     {
       const GridType & grid = (*grditer_)->getGrid();
       maxlevel = std::max( maxlevel, grid.maxLevel());
-      noe += grid.leafIndexSet().size(0);
-      nov += grid.leafIndexSet().size(dim);
+      noe += grid.size(0);
+      nov += grid.size(dim);
     }
 
     // set display pointer

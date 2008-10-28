@@ -87,26 +87,76 @@ namespace Dune
                  const IntersectionIteratorType & endnit, DUNE_ELEM * he)
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
+    typedef typename IntersectionIteratorType :: Intersection IntersectionType;
     int lastElNum = -1;
 
     // check all faces for boundary or not
-    while ( nit != endnit )
+    for( ; nit != endnit; ++nit )
     {
-      int num = nit.numberInSelf();
-      assert( num >= 0 );
-      assert( num < MAX_EL_FACE );
+      const IntersectionType &intersection = *nit;
+      const int number = intersection.numberInSelf();
+      assert( (number >= 0) && (number < MAX_EL_FACE) );
 
-      if(num != lastElNum)
+      if( number != lastElNum )
       {
-        he->bnd[num] = ( nit.boundary() ) ? nit.boundaryId() : 0;
-        if( nit.neighbor() )
+        he->bnd[ number ]
+          = (intersection.boundary() ? intersection.boundaryId() : 0);
+        if( intersection.neighbor() )
         {
-          if(nit.outside()->partitionType() != InteriorEntity )
-            he->bnd[num] = 2*(Entity::dimensionworld) + (nit.numberInSelf()+1);
+          if( intersection.outside()->partitionType() != InteriorEntity )
+            he->bnd[ number ] = 2*(Entity :: dimensionworld) + (number+1);
         }
-        lastElNum = num;
+        lastElNum = number;
       }
-      ++nit;
+    }
+  }
+
+  template<class GridType>
+  template <class Entity>
+  inline void GrapeGridDisplay<GridType>::
+  el_update_base (Entity& en, DUNE_ELEM * he)
+  {
+    typedef typename Entity::Geometry DuneGeometryType;
+    typedef typename DuneGeometryType :: ctype ctype;
+
+    enum { dim      = Entity::dimension };
+    enum { dimworld = Entity::dimensionworld };
+
+    typedef FieldVector<ctype, dimworld> CoordinateType;
+
+    const DuneGeometryType &geometry = en.geometry();
+
+    he->eindex = this->entityIndex(indexSet_,en);
+    he->level  = en.level();
+
+    // if not true, only the macro level is drawn
+    he->has_children = 1;
+
+    // know the type
+    int geomType = convertToGrapeType ( geometry.type() , dim );
+    he->type = geomType;
+
+    // get pointer to coordinates and copy from geometry
+    double ** vpointer = he->vpointer;
+
+    // number of corners and number of vertices schould be the same
+    // grape visual does not work for other situations
+    assert( en.template count<dim>() == geometry.corners() );
+    assert( geometry.corners() <= MAX_EL_DOF );
+
+    for(int i= 0 ; i<geometry.corners(); ++i)
+    {
+      const int grapeVx = mapDune2GrapeVertex(geomType,i);
+      he->vindex[i] = -1; //this->vertexIndex(indexSet_, en, grapeVx);
+
+      assert( Entity::dimensionworld <= 3 );
+      const CoordinateType& coord = geometry[ grapeVx ];
+      for(int j = 0; j < Entity::dimensionworld ; ++j)
+      {
+        // here the mapping from dune to grape elements is done
+        // it's only different for quads and hexas
+        vpointer[i][j] = coord[j] ;
+      }
     }
   }
 
@@ -129,42 +179,7 @@ namespace Dune
     // only for debuging, becsaue normaly references are != NULL
     if(&en)
     {
-      const DuneGeometryType &geometry = en.geometry();
-
-      he->eindex = this->entityIndex(indexSet_,en);
-      he->level  = en.level();
-
-      // if not true, only the macro level is drawn
-      he->has_children = 1;
-
-      // know the type
-      int geomType = convertToGrapeType ( geometry.type() , dim );
-      he->type = geomType;
-
-      {
-        // get pointer to coordinates and copy from geometry
-        double ** vpointer = he->vpointer;
-
-        // number of corners and number of vertices schould be the same
-        // grape visual does not work for other situations
-        assert( en.template count<dim>() == geometry.corners() );
-        assert( geometry.corners() <= MAX_EL_DOF );
-
-        for(int i= 0 ; i<geometry.corners(); ++i)
-        {
-          const int grapeVx = mapDune2GrapeVertex(geomType,i);
-          he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
-
-          assert( Entity::dimensionworld <= 3 );
-          const CoordinateType& coord = geometry[ grapeVx ];
-          for(int j = 0; j < Entity::dimensionworld ; ++j)
-          {
-            // here the mapping from dune to grape elements is done
-            // it's only different for quads and hexas
-            vpointer[i][j] = coord[j] ;
-          }
-        }
-      } // end set all vertex coordinates
+      el_update_base( en, he );
 
       {
         if( en.hasBoundaryIntersections() )
@@ -208,6 +223,65 @@ namespace Dune
         {
           // if no boundary intersections, then all faces are interior
           for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = 0;
+        }
+      }
+
+      // for data displaying
+      he->actElement = it;
+      return 1;
+
+    } // end if(&en)
+    else
+    {
+      he->actElement = 0;
+      return 0;
+    }
+  }
+
+  template<class GridType>
+  template <class EntityPointerType, class GridPartType>
+  inline int GrapeGridDisplay<GridType>::
+  el_update (EntityPointerType * it, DUNE_ELEM * he, GridPartType& gridPart)
+  {
+    typedef typename GridType::Traits::template Codim<0>::Entity Entity;
+    typedef typename Entity::Geometry DuneGeometryType;
+    typedef typename DuneGeometryType :: ctype ctype;
+
+    enum { dim      = Entity::dimension };
+    enum { dimworld = Entity::dimensionworld };
+
+    typedef FieldVector<ctype, dimworld> CoordinateType;
+
+    Entity &en = (*it[0]);
+
+    // only for debuging, becsaue normaly references are != NULL
+    if(&en)
+    {
+      el_update_base ( en , he );
+
+      {
+        typedef typename GridPartType :: IntersectionIteratorType IntersectionIteratorType;
+        // reset the boundary information
+        for(int i=0; i < MAX_EL_FACE; ++i) he->bnd[i] = -1;
+
+        IntersectionIteratorType endnit = gridPart.iend(en);
+        IntersectionIteratorType nit = gridPart.ibegin(en);
+
+        checkNeighbors(nit,endnit,he);
+
+        // for this type of element we have to swap the faces
+        if(he->type == g_hexahedron)
+        {
+          int help_bnd [MAX_EL_FACE];
+          for(int i=0; i < MAX_EL_FACE; ++i) help_bnd[i] = he->bnd[i] ;
+
+          assert( MAX_EL_FACE == 6 );
+          // do the mapping from dune to grape hexa
+          he->bnd[0] = help_bnd[4];
+          he->bnd[1] = help_bnd[5];
+          he->bnd[3] = help_bnd[1];
+          he->bnd[4] = help_bnd[3];
+          he->bnd[5] = help_bnd[0];
         }
       }
 
@@ -302,7 +376,7 @@ namespace Dune
       return 0;
     }
 
-    return el_update(it,he);
+    return el_update(it,he,gridPart);
   }
 
   template<class GridType>
@@ -312,6 +386,9 @@ namespace Dune
   {
     typedef typename GridPartType :: template Codim<0> :: IteratorType IteratorType;
 
+    assert( he->gridPart );
+    GridPartType & gridPart = *((GridPartType *) he->gridPart);
+
     IteratorType * it    = (IteratorType *) he->liter;
     IteratorType * endit = (IteratorType *) he->enditer;
     assert( it );
@@ -319,7 +396,7 @@ namespace Dune
 
     if( ++it[0] != endit[0] )
     {
-      return el_update(it,he);
+      return el_update(it,he,gridPart);
     }
     else
     {
