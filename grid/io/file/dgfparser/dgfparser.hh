@@ -11,7 +11,8 @@
 #include <cstring>
 #include <vector>
 #include <map>
-#include <assert.h>
+#include <cassert>
+#include <memory>
 #include <cmath>
 
 //- Dune includes
