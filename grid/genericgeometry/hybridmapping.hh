@@ -16,24 +16,66 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
-    template< class Topology, class GeometricMappingTraits >
+    template< class Topology, class GeometryTraits >
     class CachedMapping;
+
+
+
+    // Internal Forward Declarations
+    // -----------------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    class HybridMapping;
+
+    template< class Topology, class GeometryTraits >
+    class VirtualMapping;
+
+
+
+    // HybridMappingBase
+    // -----------------
+
+    template< unsigned int dim, class GeometryTraits, unsigned int codim = dim >
+    class HybridMappingBase;
+
+    template< unsigned int dim, class GeometryTraits, unsigned int codim >
+    class HybridMappingBase
+      : public virtual HybridMappingBase< dim, GeometryTraits, codim-1 >
+    {
+      typedef GenericGeometry :: HybridMapping< dim, GeometryTraits > HybridMapping;
+
+    protected:
+      using HybridMappingBase< dim, GeometryTraits, codim-1 > :: subMapping;
+
+      virtual typename SubMappingTraits< HybridMapping, codim > :: SubMapping *
+      subMapping ( Int2Type< codim >, unsigned int i ) const = 0;
+    };
+
+    template< unsigned int dim, class GeometryTraits >
+    class HybridMappingBase< dim, GeometryTraits, 0 >
+    {
+      typedef GenericGeometry :: HybridMapping< dim, GeometryTraits > HybridMapping;
+
+    protected:
+      virtual typename SubMappingTraits< HybridMapping, 0 > :: SubMapping *
+      subMapping ( Int2Type< 0 >, unsigned int i ) const = 0;
+    };
 
 
 
     // HybridMapping
     // -------------
 
-    template< unsigned int dim, class GeometricMappingTraits >
+    template< unsigned int dim, class GeometryTraits >
     class HybridMapping
-      : public SmallObject
+      : public virtual HybridMappingBase< dim, GeometryTraits >,
+        public SmallObject
     {
-      typedef HybridMapping< dim, GeometricMappingTraits > This;
+      typedef HybridMapping< dim, GeometryTraits > This;
 
     protected:
       typedef MappingTraits
-      < typename GeometricMappingTraits :: CoordTraits,
-          dim, GeometricMappingTraits :: dimWorld >
+      < typename GeometryTraits :: CoordTraits, dim, GeometryTraits :: dimWorld >
       Traits;
 
     public:
@@ -45,7 +87,7 @@ namespace Dune
       typedef typename Traits :: GlobalCoordType GlobalCoordType;
       typedef typename Traits :: JacobianType JacobianType;
 
-      template< unsigned int codim >
+      template< int codim >
       struct Codim
       {
         typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
@@ -80,31 +122,74 @@ namespace Dune
       virtual GlobalCoordType
       normal ( int face, const LocalCoordType &local ) const = 0;
 
-      template< unsigned int codim >
+      template< int codim >
       typename Codim< codim > :: SubMapping *
       subMapping ( unsigned int i ) const
       {
-        typedef typename Codim< codim > :: SubMapping SubMapping;
-        return reinterpret_cast< SubMapping * >( subMapping( codim, i ) );
+        Int2Type< codim > codimVariable;
+        return subMapping( codimVariable, i );
       }
 
     protected:
-      virtual void *
-      subMapping ( unsigned int codim, unsigned int i ) const = 0;
+      using HybridMappingBase< dim, GeometryTraits > :: subMapping;
     };
 
 
 
-    template< class Topology, class GeometricMappingTraits >
-    class VirtualMapping
-      : public HybridMapping< Topology :: dimension, GeometricMappingTraits >
+    // VirtualMappingBase
+    // ------------------
+
+    template< class Topology, class GeometryTraits, unsigned int codim = Topology :: dimension >
+    class VirtualMappingBase;
+
+    template< class Topology, class GeometryTraits, unsigned int codim >
+    class VirtualMappingBase
+      : public VirtualMappingBase< Topology, GeometryTraits, codim-1 >,
+        public virtual HybridMappingBase< Topology :: dimension, GeometryTraits, codim >
     {
-      typedef HybridMapping< Topology :: dimension, GeometricMappingTraits > Base;
-      typedef VirtualMapping< Topology, GeometricMappingTraits > This;
+      typedef GenericGeometry :: VirtualMapping< Topology, GeometryTraits >
+      VirtualMapping;
+
+    protected:
+      using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: subMapping;
+
+      virtual typename SubMappingTraits< VirtualMapping, codim > :: SubMapping *
+      subMapping ( Int2Type< codim >, unsigned int i ) const
+      {
+        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
+        return impl.template subMapping< codim >( i );
+      }
+    };
+
+    template< class Topology, class GeometryTraits >
+    class VirtualMappingBase< Topology, GeometryTraits, 0 >
+      : public virtual HybridMappingBase< Topology :: dimension, GeometryTraits, 0 >
+    {
+      typedef GenericGeometry :: VirtualMapping< Topology, GeometryTraits >
+      VirtualMapping;
+
+    protected:
+      virtual typename SubMappingTraits< VirtualMapping, 0 > :: SubMapping *
+      subMapping ( Int2Type< 0 >, unsigned int i ) const
+      {
+        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
+        return impl.template subMapping< 0 >( i );
+      }
+    };
+
+
+
+    template< class Topology, class GeometryTraits >
+    class VirtualMapping
+      : public HybridMapping< Topology :: dimension, GeometryTraits >,
+        public VirtualMappingBase< Topology, GeometryTraits >
+    {
+      typedef HybridMapping< Topology :: dimension, GeometryTraits > Base;
+      typedef VirtualMapping< Topology, GeometryTraits > This;
 
       typedef typename Base :: Traits Traits;
 
-      typedef CachedMapping< Topology, GeometricMappingTraits > Mapping;
+      typedef CachedMapping< Topology, GeometryTraits > Mapping;
 
     public:
       static const unsigned int dimension = Traits :: dimension;
@@ -117,7 +202,7 @@ namespace Dune
 
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
-      template< unsigned int codim >
+      template< int codim >
       struct Codim
       {
         typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
@@ -189,81 +274,15 @@ namespace Dune
         return mapping_.normal( face , local );
       }
 
-      template< unsigned int codim >
+      template< int codim >
       typename Codim< codim > :: SubMapping *
       subMapping ( unsigned int i ) const
       {
         return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
-    private:
-      class CodimCaller;
-
     protected:
-      void *subMapping ( unsigned int codim, unsigned int i ) const
-      {
-        return CodimCaller :: subMapping ( *this, codim, i );
-      }
-    };
-
-
-    template< class Topology, class GeometricMappingTraits >
-    class VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller
-    {
-      typedef VirtualMapping< Topology, GeometricMappingTraits > Mapping;
-
-      struct CallerInterface;
-      template< int codim > struct CallerImplementation;
-
-      CallerInterface *caller_[ dimension+1 ];
-
-      CodimCaller ()
-      {
-        ForLoop< CallerImplementation, 0, dimension > :: apply( caller_ );
-      }
-
-      static const CodimCaller &instance ()
-      {
-        static CodimCaller inst;
-        return inst;
-      }
-
-    public:
-      static void *
-      subMapping ( const Mapping &mapping, unsigned int codim, unsigned int i )
-      {
-        assert( codim <= dimension );
-        return instance().caller_[ codim ]->subMapping( mapping, i );
-      }
-    };
-
-
-    template< class Topology, class GeometricMappingTraits >
-    struct VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller :: CallerInterface
-    {
-      typedef VirtualMapping< Topology, GeometricMappingTraits > Mapping;
-
-      virtual ~CallerInterface ()
-      {}
-
-      virtual void *subMapping ( const Mapping &mapping, unsigned int i ) const = 0;
-    };
-
-    template< class Topology, class GeometricMappingTraits >
-    template< int codim >
-    struct VirtualMapping< Topology, GeometricMappingTraits > :: CodimCaller :: CallerImplementation
-      : public CallerInterface
-    {
-      virtual void *
-      subMapping ( const Mapping &mapping, unsigned int i ) const
-      {
-        return mapping.template subMapping< codim >( i );
-      }
-
-      static void apply ( CallerInterface *(&caller)[ dimension+1 ] )
-      {
-        caller[ codim ] = new CallerImplementation< codim >;
-      }
+      using VirtualMappingBase< Topology, GeometryTraits > :: subMapping;
     };
 
   }
