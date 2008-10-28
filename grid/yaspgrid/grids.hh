@@ -1957,7 +1957,7 @@ namespace Dune {
     //! return iterator pointing to given level
     YGridLevelIterator begin (int i) const
     {
-      if (i<0 << i>maxlevel())
+      if (i<0 || i>maxlevel())
         DUNE_THROW(GridError, "level not existing");
       return YGridLevelIterator(_levels+i,i);
     }
