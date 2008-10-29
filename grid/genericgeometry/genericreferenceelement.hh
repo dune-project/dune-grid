@@ -16,19 +16,37 @@ namespace Dune
   template< class ctype, int dim >
   class GenericReferenceElement
   {
+    typedef GenericReferenceElement< ctype, dim > This;
+
     class SubEntityInfo;
     template< class Topology > class CornerStorage;
     template< class Topology > struct Initialize;
 
-    struct CoordTraits
-      : public GenericGeometry :: DefaultCoordTraits< ctype, dim, true >
+    struct GeometryTraits
+      : public GenericGeometry :: DefaultGeometryTraits< ctype, dim, dim >
     {
+      typedef GenericGeometry :: DefaultGeometryTraits< ctype, dim, dim > Base;
+
+      typedef typename Base :: CoordTraits CoordTraits;
+
       template< class Topology >
-      struct CornerStorage
+      struct Mapping
       {
-        typedef typename GenericReferenceElement< ctype, dim >
-        :: template CornerStorage< Topology >
-        Type;
+        typedef GenericGeometry :: CornerMapping
+        < CoordTraits, Topology, dim, CornerStorage< Topology >, true >
+        type;
+      };
+
+      struct Caching
+      {
+        static const GenericGeometry :: EvaluationType evaluateJacobianTransposed
+          = GenericGeometry :: PreCompute;
+        static const GenericGeometry :: EvaluationType evaluateJacobianInverseTransposed
+          = GenericGeometry :: PreCompute;
+        static const GenericGeometry :: EvaluationType evaluateIntegrationElement
+          = GenericGeometry :: PreCompute;
+        static const GenericGeometry :: EvaluationType evaluateNormal
+          = GenericGeometry :: PreCompute;
       };
     };
 
@@ -36,9 +54,7 @@ namespace Dune
     template< int codim >
     class Codim
     {
-      typedef GenericGeometry :: HybridMapping
-      < dim-codim, CoordTraits, GenericGeometry :: PreComputeAll >
-      Mapping;
+      typedef GenericGeometry :: HybridMapping< dim-codim, GeometryTraits > Mapping;
     };
 
   private:
@@ -118,18 +134,15 @@ namespace Dune
     {
       typedef typename GenericGeometry :: Convert< type, dim > :: type Topology;
       typedef Initialize< Topology > Init;
-      typedef GenericGeometry :: VirtualMapping
-      < Topology, CoordTraits, GenericGeometry :: PreComputeAll >
-      VirtualMapping;
-      typedef typename VirtualMapping :: CachingType Caching;
+      typedef GenericGeometry :: VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
       Int2Type< 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
-      mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable, Caching() );
+      mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable );
 
 
       GenericGeometry :: ForLoop< Init :: template Codim, 0, dim > :: apply( info_, mappings_ );
-      volume_ = GenericGeometry :: Volume< Topology > :: template evaluate< double >();
+      volume_ = GenericGeometry :: ReferenceDomain< Topology > :: template volume< double >();
     }
   };
 
