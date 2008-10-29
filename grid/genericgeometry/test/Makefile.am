@@ -5,7 +5,7 @@ GRIDTYPE = YASPGRID
 # GRIDTYPE = UGGRID
 GRIDDIM = 3
 #WORLDDIM = 3
-# DIMENSION = 3
+DIMENSION = 3
 
 check_PROGRAMS = testsubtopologies testmapping testgeo
 
