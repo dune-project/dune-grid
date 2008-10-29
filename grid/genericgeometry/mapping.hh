@@ -9,7 +9,6 @@
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
-#include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune

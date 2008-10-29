@@ -9,7 +9,6 @@
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
-#include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/mapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 #include <dune/grid/genericgeometry/traceprovider.hh>
@@ -59,7 +58,8 @@ namespace Dune
       template< unsigned int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
+        typedef typename TraceProvider< Topology, GeometryTraits, codim, false > :: Trace
+        Trace;
       };
 
     private:
@@ -223,12 +223,6 @@ namespace Dune
           normalComputed_[ face ] = affine();
         }
         return normal_[ face ];
-      }
-
-      template< unsigned int codim >
-      typename Codim< codim > :: SubMapping *subMapping ( unsigned int i ) const
-      {
-        return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
       template< unsigned int codim, bool hybrid >

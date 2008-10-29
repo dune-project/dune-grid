@@ -3,11 +3,27 @@
 #ifndef DUNE_GENERICGEOMETRY_TRACEPROVIDER_HH
 #define DUNE_GENERICGEOMETRY_TRACEPROVIDER_HH
 
+#include <dune/grid/genericgeometry/subtopologies.hh>
+
 namespace Dune
 {
 
   namespace GenericGeometry
   {
+
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class Topology, class GeometryTraits >
+    class CachedMapping;
+
+    template< unsigned int dim, class GeometryTraits >
+    class HybridMapping;
+
+    template< class Topology, class GeometryTraits >
+    class VirtualMapping;
+
+
 
     // TraceProvider
     // -------------

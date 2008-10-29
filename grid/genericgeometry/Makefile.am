@@ -5,9 +5,8 @@ genericgeometry_HEADERS = cachedmapping.hh              codimtable.hh \
 			  geometrytraits.hh             hybridmapping.hh \
 			  mapping.hh                    mappingprovider.hh \
 			  matrix.hh                     misc.hh \
-			  referenceelements.hh          submapping.hh \
-			  subtopologies.hh              topologytypes.hh \
-			  traceprovider.hh
+			  referenceelements.hh          subtopologies.hh \
+			  topologytypes.hh              traceprovider.hh
 
 SUBDIRS = test
 

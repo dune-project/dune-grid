@@ -3,7 +3,6 @@
 #ifndef DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 #define DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 
-#include <dune/grid/genericgeometry/submapping.hh>
 #include <dune/grid/genericgeometry/cachedmapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>
 
@@ -13,39 +12,17 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    // MappingProvider
-    // ---------------
+    // CachedMappingFactory
+    // --------------------
 
-    template< class ElementMapping, unsigned int codim >
-    struct MappingProvider
+    template< class Topology, class GeometryTraits >
+    class CachedMappingFactory
     {
-      typedef GenericGeometry :: SubMappingTraits< ElementMapping, codim > SubMappingTraits;
-      typedef typename SubMappingTraits :: SubMapping Mapping;
+      typedef CachedMappingFactory< Topology, GeometryTraits > This;
 
-      template< bool > struct NonVirtual;
-      template< bool > struct Virtual;
+    public:
+      typedef CachedMapping< Topology, GeometryTraits > Mapping;
 
-      template< GeometryType :: BasicType type, class CoordVector >
-      static Mapping *virtualMapping ( const CoordVector &coords )
-      {
-        typedef typename SubMappingTraits :: template VirtualMapping< type > :: type
-        VirtualMapping;
-        return new VirtualMapping( coords );
-      }
-
-      template< class CoordVector >
-      static Mapping *mapping ( const GeometryType &type, const CoordVector &coords )
-      {
-        typedef ProtectedIf< SubMappingTraits :: isVirtual, Virtual, NonVirtual > Switch;
-        return Switch :: mapping( type, coords );
-      }
-    };
-
-
-    template< class ElementMapping, unsigned int codim >
-    template< bool >
-    struct MappingProvider< ElementMapping, codim > :: NonVirtual
-    {
       template< class CoordVector >
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords )
@@ -56,13 +33,30 @@ namespace Dune
     };
 
 
-    template< class ElementMapping, unsigned int codim >
-    template< bool >
-    struct MappingProvider< ElementMapping, codim > :: Virtual
+
+    // VirtualMappingFactory
+    // ---------------------
+
+    template< unsigned int dim, class GeometryTraits >
+    class VirtualMappingFactory
     {
+      typedef VirtualMappingFactory< dim, GeometryTraits > This;
+
+    public:
+      typedef HybridMapping< dim, GeometryTraits > Mapping;
+
+    private:
       template< bool > struct AllTypes;
       template< bool > struct OnlySimplexCube;
 
+      template< GeometryType :: BasicType type, class CoordVector >
+      static Mapping *virtualMapping ( const CoordVector &coords )
+      {
+        typedef typename Convert< type, dim > :: type Topology;
+        return new VirtualMapping< Topology, GeometryTraits >( coords );
+      }
+
+    public:
       template< class CoordVector >
       static Mapping *
       mapping ( const GeometryType &type, const CoordVector &coords )
@@ -74,10 +68,9 @@ namespace Dune
     };
 
 
-    template< class ElementMapping, unsigned int codim >
-    template< bool b >
+    template< unsigned int dim, class GeometryTraits >
     template< bool >
-    struct MappingProvider< ElementMapping, codim > :: Virtual< b > :: AllTypes
+    struct VirtualMappingFactory< dim, GeometryTraits > :: AllTypes
     {
       template< class CoordVector >
       static Mapping *
@@ -104,10 +97,9 @@ namespace Dune
     };
 
 
-    template< class ElementMapping, unsigned int codim >
-    template< bool b >
+    template< unsigned int dim, class GeometryTraits >
     template< bool >
-    struct MappingProvider< ElementMapping, codim > :: Virtual< b > :: OnlySimplexCube
+    struct VirtualMappingFactory< dim, GeometryTraits > :: OnlySimplexCube
     {
       template< class CoordVector >
       static Mapping *
@@ -124,6 +116,78 @@ namespace Dune
         default :
           DUNE_THROW( RangeError, "Unknown basic geometry type: " << type );
         }
+      }
+    };
+
+
+
+
+    // MappingProvider
+    // ---------------
+
+    template< class ElementMapping, unsigned int codim >
+    class MappingProvider;
+
+
+    template< unsigned int dim, class GeometryTraits, unsigned int codim >
+    class MappingProvider< HybridMapping< dim, GeometryTraits >, codim >
+    {
+      typedef MappingProvider< HybridMapping< dim, GeometryTraits >, codim > This;
+
+    public:
+      static const unsigned int dimension = dim;
+      static const unsigned int codimension = codim;
+      static const unsigned int mydimension = dimension - codimension;
+
+    private:
+      typedef VirtualMappingFactory< mydimension, GeometryTraits > Factory;
+
+    public:
+      typedef typename Factory :: Mapping Mapping;
+
+      template< class CoordVector >
+      static Mapping *
+      mapping ( const GeometryType &type, const CoordVector &coords )
+      {
+        return Factory :: mapping( type, coords );
+      }
+    };
+
+
+    template< class Topology, class GeometryTraits, unsigned int codim >
+    class MappingProvider< CachedMapping< Topology, GeometryTraits >, codim >
+    {
+      typedef MappingProvider< CachedMapping< Topology, GeometryTraits >, codim > This;
+
+    public:
+      static const unsigned int dimension = Topology :: dimension;
+      static const unsigned int codimension = codim;
+      static const unsigned int mydimension = dimension - codimension;
+
+      static const bool hybrid = IsCodimHybrid< Topology, codim > :: value;
+
+    private:
+      template< bool >
+      struct HybridFactory
+        : public VirtualMappingFactory< mydimension, GeometryTraits >
+      {};
+
+      template< bool >
+      struct NonHybridFactory
+        : public CachedMappingFactory
+          < typename SubTopology< Topology, codim, 0 > :: type, GeometryTraits >
+      {};
+
+      typedef ProtectedIf< hybrid, HybridFactory, NonHybridFactory > Factory;
+
+    public:
+      typedef typename Factory :: Mapping Mapping;
+
+      template< class CoordVector >
+      static Mapping *
+      mapping ( const GeometryType &type, const CoordVector &coords )
+      {
+        return Factory :: mapping( type, coords );
       }
     };
 

@@ -5,7 +5,7 @@
 
 #include <dune/common/smallobject.hh>
 
-#include <dune/grid/genericgeometry/submapping.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
 
 namespace Dune
 {
@@ -45,11 +45,6 @@ namespace Dune
       typedef HybridMapping< dim, GeometryTraits > Mapping;
 
     protected:
-      using HybridMappingBase< dim, GeometryTraits, codim-1 > :: subMapping;
-
-      virtual typename SubMappingTraits< Mapping, codim > :: SubMapping *
-      subMapping ( Int2Type< codim >, unsigned int i ) const = 0;
-
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
 
       virtual HybridMapping< dim - codim, GeometryTraits > *
@@ -62,9 +57,6 @@ namespace Dune
       typedef HybridMapping< dim, GeometryTraits > Mapping;
 
     protected:
-      virtual typename SubMappingTraits< Mapping, 0 > :: SubMapping *
-      subMapping ( Int2Type< 0 >, unsigned int i ) const = 0;
-
       virtual HybridMapping< dim, GeometryTraits > *
       trace ( Int2Type< 0 >, unsigned int i ) const = 0;
     };
@@ -98,7 +90,6 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
         typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
 
@@ -132,14 +123,6 @@ namespace Dune
       normal ( int face, const LocalCoordType &local ) const = 0;
 
       template< int codim >
-      typename Codim< codim > :: SubMapping *
-      subMapping ( unsigned int i ) const
-      {
-        Int2Type< codim > codimVariable;
-        return subMapping( codimVariable, i );
-      }
-
-      template< int codim >
       typename Codim< codim > :: Trace *trace ( unsigned int i ) const
       {
         Int2Type< codim > codimVariable;
@@ -147,7 +130,6 @@ namespace Dune
       }
 
     protected:
-      using HybridMappingBase< dim, GeometryTraits > :: subMapping;
       using HybridMappingBase< dim, GeometryTraits > :: trace;
     };
 
@@ -168,15 +150,6 @@ namespace Dune
       VirtualMapping;
 
     protected:
-      using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: subMapping;
-
-      virtual typename SubMappingTraits< VirtualMapping, codim > :: SubMapping *
-      subMapping ( Int2Type< codim >, unsigned int i ) const
-      {
-        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
-        return impl.template subMapping< codim >( i );
-      }
-
       using VirtualMappingBase< Topology, GeometryTraits, codim-1 > :: trace;
 
       virtual HybridMapping< Topology :: dimension - codim, GeometryTraits > *
@@ -195,13 +168,6 @@ namespace Dune
       VirtualMapping;
 
     protected:
-      virtual typename SubMappingTraits< VirtualMapping, 0 > :: SubMapping *
-      subMapping ( Int2Type< 0 >, unsigned int i ) const
-      {
-        const VirtualMapping &impl = static_cast< const VirtualMapping & >( *this );
-        return impl.template subMapping< 0 >( i );
-      }
-
       virtual HybridMapping< Topology :: dimension, GeometryTraits > *
       trace ( Int2Type< 0 >, unsigned int i ) const
       {
@@ -238,7 +204,6 @@ namespace Dune
       template< int codim >
       struct Codim
       {
-        typedef typename SubMappingTraits< This, codim > :: SubMapping SubMapping;
         typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
 
@@ -302,17 +267,9 @@ namespace Dune
         return mapping_.jacobianInverseTransposed( local );
       }
 
-      virtual GlobalCoordType
-      normal ( int face, const LocalCoordType &local ) const
+      virtual GlobalCoordType normal ( int face, const LocalCoordType &local ) const
       {
         return mapping_.normal( face , local );
-      }
-
-      template< int codim >
-      typename Codim< codim > :: SubMapping *
-      subMapping ( unsigned int i ) const
-      {
-        return SubMappingProvider< This, codim > :: subMapping( *this, i );
       }
 
       template< int codim >
@@ -322,7 +279,6 @@ namespace Dune
       }
 
     protected:
-      using VirtualMappingBase< Topology, GeometryTraits > :: subMapping;
       using VirtualMappingBase< Topology, GeometryTraits > :: trace;
     };
 
