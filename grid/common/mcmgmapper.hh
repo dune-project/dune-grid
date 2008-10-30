@@ -115,6 +115,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, int& result) const
     {
+      if(!is.contains(e) || !layout.contains(e.type())) return false;
       result = map(e);
       return true;
     }
@@ -138,9 +139,6 @@ namespace Dune
      */
     void update ()
     {
-      // get layout object;
-      Layout<G::dimension> layout;
-
       n=0;     // zero data elements
       for (int c=0; c<=G::dimension; c++)
         offset.clear();         // clear all maps
@@ -162,10 +160,12 @@ namespace Dune
     const G& g;
     const IS& is;
     std::map<GeometryType,int> offset;     // provide a map with all geometry types
+    static Layout<G::dimension> layout;     // get layout object
   };
 
-
-
+  // C++ requires definition of static data members outside the class
+  template <typename G, typename IS, template<int> class Layout>
+  Layout<G::dimension> MultipleCodimMultipleGeomTypeMapper<G, IS, Layout>::layout;
 
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
 
