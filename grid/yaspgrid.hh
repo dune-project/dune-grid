@@ -2700,6 +2700,8 @@ namespace Dune {
       if (dir==BackwardCommunication)
         std::swap(sendlist,recvlist);
 
+      int cnt;
+
       // Size computation (requires communication if variable size)
       std::map<int,int> send_size;    // map rank to total number of objects (of type DataType) to be sent
       std::map<int,int> recv_size;    // map rank to total number of objects (of type DataType) to be recvd
@@ -2708,27 +2710,32 @@ namespace Dune {
       if (data.fixedsize(dim,codim))
       {
         // fixed size: just take a dummy entity, size can be computed without communication
+        cnt=0;
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g,is->grid.tsubbegin()));
-          send_size[is->rank] = is->grid.totalsize() * data.size(*it);
+          send_size[cnt] = is->grid.totalsize() * data.size(*it);
+          cnt++;
         }
+        cnt=0;
         for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g,is->grid.tsubbegin()));
-          recv_size[is->rank] = is->grid.totalsize() * data.size(*it);
+          recv_size[cnt] = is->grid.totalsize() * data.size(*it);
+          cnt++;
         }
       }
       else
       {
         // variable size case: sender side determines the size
+        cnt=0;
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
           // allocate send buffer for sizes per entitiy
           size_t *buf = new size_t[is->grid.totalsize()];
-          send_sizes[is->rank] = buf;
+          send_sizes[cnt] = buf;
 
           // loop over entities and ask for size
           int i=0; size_t n=0;
@@ -2744,38 +2751,44 @@ namespace Dune {
           }
 
           // now we know the size for this rank
-          send_size[is->rank] = n;
+          send_size[cnt] = n;
 
           // hand over send request to torus class
           MultiYGrid<dim,ctype>::torus().send(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
         }
 
         // allocate recv buffers for sizes and store receive request
+        cnt=0;
         for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
         {
           // allocate recv buffer
           size_t *buf = new size_t[is->grid.totalsize()];
-          recv_sizes[is->rank] = buf;
+          recv_sizes[cnt] = buf;
 
           // hand over recv request to torus class
           MultiYGrid<dim,ctype>::torus().recv(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
         }
 
         // exchange all size buffers now
         MultiYGrid<dim,ctype>::torus().exchange();
 
         // release send size buffers
+        cnt=0;
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
-          delete[] send_sizes[is->rank];
-          send_sizes[is->rank] = 0;
+          delete[] send_sizes[cnt];
+          send_sizes[cnt] = 0;
+          cnt++;
         }
 
         // process receive size buffers
+        cnt=0;
         for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
         {
           // get recv buffer
-          size_t *buf = recv_sizes[is->rank];
+          size_t *buf = recv_sizes[cnt];
 
           // compute total size
           size_t n=0;
@@ -2783,25 +2796,26 @@ namespace Dune {
             n += buf[i];
 
           // ... and store it
-          recv_size[is->rank] = n;
+          recv_size[cnt] = n;
         }
       }
 
 
       // allocate & fill the send buffers & store send request
       std::map<int,DataType*> sends; // store pointers to send buffers
+      cnt=0;
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
         //      std::cout << "[" << this->comm().rank() << "] "
         //                << " send " << " dest=" << is->rank
-        //                << " size=" << send_size[is->rank]
+        //                << " size=" << send_size[cnt]
         //                << std::endl;
 
         // allocate send buffer
-        DataType *buf = new DataType[send_size[is->rank]];
+        DataType *buf = new DataType[send_size[cnt]];
 
         // remember send buffer
-        sends[is->rank] = buf;
+        sends[cnt] = buf;
 
         // make a message buffer
         MessageBuffer<DataType> mb(buf);
@@ -2815,43 +2829,48 @@ namespace Dune {
           data.gather(mb,*it);
 
         // hand over send request to torus class
-        MultiYGrid<dim,ctype>::torus().send(is->rank,buf,send_size[is->rank]*sizeof(DataType));
+        MultiYGrid<dim,ctype>::torus().send(is->rank,buf,send_size[cnt]*sizeof(DataType));
+        cnt++;
       }
 
       // allocate recv buffers and store receive request
       std::map<int,DataType*> recvs; // store pointers to send buffers
+      cnt=0;
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
       {
         //      std::cout << "[" << this->comm().rank() << "] "
         //                << " recv " << "  src=" << is->rank
-        //                << " size=" << recv_size[is->rank]
+        //                << " size=" << recv_size[cnt]
         //                << std::endl;
 
         // allocate recv buffer
-        DataType *buf = new DataType[recv_size[is->rank]];
+        DataType *buf = new DataType[recv_size[cnt]];
 
         // remember recv buffer
-        recvs[is->rank] = buf;
+        recvs[cnt] = buf;
 
         // hand over recv request to torus class
-        MultiYGrid<dim,ctype>::torus().recv(is->rank,buf,recv_size[is->rank]*sizeof(DataType));
+        MultiYGrid<dim,ctype>::torus().recv(is->rank,buf,recv_size[cnt]*sizeof(DataType));
+        cnt++;
       }
 
       // exchange all buffers now
       MultiYGrid<dim,ctype>::torus().exchange();
 
       // release send buffers
+      cnt=0;
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
-        delete[] sends[is->rank];
-        sends[is->rank] = 0;
+        delete[] sends[cnt];
+        sends[cnt] = 0;
       }
 
       // process receive buffers and delete them
+      cnt=0;
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
       {
         // get recv buffer
-        DataType *buf = recvs[is->rank];
+        DataType *buf = recvs[cnt];
 
         // make a message buffer
         MessageBuffer<DataType> mb(buf);
@@ -2870,7 +2889,7 @@ namespace Dune {
         else
         {
           int i=0;
-          size_t *sbuf = recv_sizes[is->rank];
+          size_t *sbuf = recv_sizes[cnt];
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g,is->grid.tsubbegin()));
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
@@ -2881,7 +2900,8 @@ namespace Dune {
         }
 
         // delete buffer
-        delete[] buf;
+        delete[] buf; // hier krachts !
+        cnt++;
       }
     }
 
