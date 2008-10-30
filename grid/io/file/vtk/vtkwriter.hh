@@ -643,14 +643,33 @@ namespace Dune
     std::string write ( const std::string &name,
                         VTKOptions::OutputType type = VTKOptions::ascii )
     {
+      return write( name, type, gridView_.comm().rank(), gridView_.comm().size() );
+    }
+
+    /** \brief write output (interface might change later)
+     *
+     *  \param[in]  name        basic name to write (may not contain a path)
+     *  \param[in]  path        path to data output
+     *  \param[in]  extendpath  path keyword for each process
+     *  \param[in]  type        type of output (e.g,, ASCII) (optional)
+     */
+    std::string pwrite ( const char* name,  const char* path, const char* extendpath,
+                         VTKOptions::OutputType type = VTKOptions::ascii )
+    {
+      return pwrite( name, path, extendpath, type, gridView_.comm().rank(), gridView_.comm().size() );
+    }
+
+  protected:
+    std::string write ( const std::string &name,
+                        VTKOptions::OutputType type,
+                        const int commRank,
+                        const int commSize )
+    {
       // make data mode visible to private functions
       outputtype = type;
 
       // reset byte counter for binary appended output
       bytecount = 0;
-
-      const int commSize = gridView_.comm().size();
-      const int commRank = gridView_.comm().rank();
 
       // generate filename for process data
       std::ostringstream pieceName;
@@ -686,7 +705,7 @@ namespace Dune
       if( commRank == 0 )
       {
         file.open( parallelName.str().c_str() );
-        writeParallelHeader( file, name.c_str(), "" );
+        writeParallelHeader( file, name.c_str(), "", commSize );
         file.close();
       }
 
@@ -695,68 +714,11 @@ namespace Dune
       return parallelName.str();
     }
 
-#if 0
-    /**
-     * @brief write output; interface might change later
-     * @param name The name of the file to write to.
-     * @param ot The output type for the file.
-     */
-    void write (const char* name, VTKOptions::OutputType ot = VTKOptions::ascii)
-    {
-      // make data mode visible to private functions
-      outputtype=ot;
-
-      // reset byte counter for binary appended output
-      bytecount = 0;
-
-      if (grid.comm().size()==1)
-      {
-        std::ofstream file;
-        char fullname[128];
-        if (n>1)
-          sprintf(fullname,"%s.vtu",name);
-        else
-          sprintf(fullname,"%s.vtp",name);
-        if (outputtype==VTKOptions::binaryappended)
-          file.open(fullname,std::ios::binary);
-        else
-          file.open(fullname);
-        writeDataFile(file);
-        file.close();
-      }
-      else
-      {
-        std::ofstream file;
-        char fullname[128];
-        if (n>1)
-          sprintf(fullname,"s%04d:p%04d:%s.vtu",grid.comm().size(),grid.comm().rank(),name);
-        else
-          sprintf(fullname,"s%04d:p%04d:%s.vtp",grid.comm().size(),grid.comm().rank(),name);
-        if (outputtype==VTKOptions::binaryappended)
-          file.open(fullname,std::ios::binary);
-        else
-          file.open(fullname);
-        writeDataFile(file);
-        file.close();
-        grid.comm().barrier();
-        if (grid.comm().rank()==0)
-        {
-          if (n>1)
-            sprintf(fullname,"s%04d:%s.pvtu",grid.comm().size(),name);
-          else
-            sprintf(fullname,"s%04d:%s.pvtp",grid.comm().size(),name);
-          file.open(fullname);
-          writeParallelHeader(file,name,"");
-          file.close();
-        }
-        grid.comm().barrier();
-      }
-    }
-#endif
-
     //! write output; interface might change later
-    std::string pwrite (const char* name,  const char* path, const char* extendpath,
-                        VTKOptions::OutputType ot = VTKOptions::ascii)
+    std::string pwrite ( const char* name,  const char* path, const char* extendpath,
+                         VTKOptions::OutputType ot,
+                         const int commRank,
+                         const int commSize )
     {
       // make data mode visible to private functions
       outputtype=ot;
@@ -766,8 +728,8 @@ namespace Dune
 
       // do some magic because paraview can only cope with relative pathes to piece files
       std::ofstream file;
-      char piecepath[256];
-      char relpiecepath[256];
+      char piecepath[ 4096 ];
+      char relpiecepath[ 4096 ];
       int n=strlen(path);
       int m=strlen(extendpath);
       if (n>0 && path[0]=='/' && path[n-1]=='/')
@@ -850,34 +812,33 @@ namespace Dune
         // the pieces are relative to the pvtu files
         sprintf(relpiecepath,"%s",extendpath);
       }
-      char fullname[256];
+      char fullname[ 8192 ];
       if (GridView::dimension>1)
-        sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),grid.comm().rank(),name);
+        sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, commRank, name);
       else
-        sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),grid.comm().rank(),name);
+        sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, commRank, name);
       if (outputtype==VTKOptions::binaryappended)
         file.open(fullname,std::ios::binary);
       else
         file.open(fullname);
       writeDataFile(file);
       file.close();
-      grid.comm().barrier();
-      if (grid.comm().rank()==0)
+      gridView_.comm().barrier();
+      if( commRank  ==0 )
       {
         if (GridView::dimension>1)
-          sprintf(fullname,"%s/s%04d:%s.pvtu",path,grid.comm().size(),name);
+          sprintf(fullname,"%s/s%04d:%s.pvtu",path, commSize, name);
         else
-          sprintf(fullname,"%s/s%04d:%s.pvtp",path,grid.comm().size(),name);
+          sprintf(fullname,"%s/s%04d:%s.pvtp",path, commSize, name);
         file.open(fullname);
-        writeParallelHeader(file,name,relpiecepath);
+        writeParallelHeader(file,name,relpiecepath, commSize );
         file.close();
       }
-      grid.comm().barrier();
+      gridView_.comm().barrier();
       return fullname;
     }
 
   private:
-
     enum VTKGeometryType
     {
       vtkLine = 3,
@@ -910,7 +871,8 @@ namespace Dune
     }
 
     //! write header file in parallel case to stream
-    void writeParallelHeader (std::ostream& s, const char* piecename, const char* piecepath)
+    void writeParallelHeader ( std::ostream& s, const char* piecename, const char* piecepath,
+                               const int commSize )
     {
       // xml header
       s << "<?xml version=\"1.0\"?>" << std::endl;
@@ -1004,13 +966,13 @@ namespace Dune
       indent(s); s << "</PPoints>" << std::endl;
 
       // Pieces
-      for (int i=0; i<grid.comm().size(); i++)
+      for( int i = 0; i < commSize; ++i )
       {
-        char fullname[128];
+        char fullname[ 4096 ];
         if (GridView::dimension>1)
-          sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath,grid.comm().size(),i,piecename);
+          sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, i,piecename);
         else
-          sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath,grid.comm().size(),i,piecename);
+          sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, i,piecename);
         indent(s); s << "<Piece Source=\"" << fullname << "\"/>" << std::endl;
       }
 
