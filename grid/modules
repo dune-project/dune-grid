@@ -110,6 +110,10 @@
         @brief Interfaces needed to implement a new \ref Grid "Dune::Grid"
   */
 
+        /** \defgroup GenericGeometry Generic Geometry Implementations
+         *  \ingroup  GridDevel
+         */
+
   /**
      @defgroup Refinement Refinement
      @ingroup Grid
