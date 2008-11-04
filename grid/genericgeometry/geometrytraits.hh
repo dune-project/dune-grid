@@ -170,11 +170,6 @@ namespace Dune
      *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
      *      static const EvaluationType evaluateNormal = ComputeOnDemand;
      *    };
-     *
-     *    template< class Traits >
-     *    struct Caching
-     *    : public ComputeAll< Traits >
-     *    {};
      *  };
      *  \endcode
      *

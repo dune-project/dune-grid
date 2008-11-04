@@ -17,18 +17,72 @@ namespace Dune
     // BasicGeometry
     // -------------
 
-    template< int mydim, int cdim, class Grid, class Traits >
+    /** \class   BasicGeometry
+     *  \ingroup GenericGeometry
+     *  \brief   generic implementation of DUNE geometries
+     *
+     *  This class is provides a generic implementation of a DUNE geometry.
+     *
+     *  Parameters shared by all codimensions are summarized into one class
+     *  parameter called Traits. The following default implementation can be
+     *  used (via derivation) to provide the necessary information. It contains
+     *  exactly the required fields:
+     *  \code
+     *  template< class ctype, int dimG, int dimW >
+     *  struct DefaultGeometryTraits
+     *  {
+     *    typedef DuneCoordTraits< ctype > CoordTraits;
+     *
+     *    static const int dimGrid = dimG;
+     *    static const int dimWorld = dimW;
+     *
+     *    //   hybrid   [ true if Codim 0 is hybrid ]
+     *    static const bool hybrid = true;
+     *    //   dunetype [ for Codim 0, needed for (hybrid=false) ]
+     *    // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+     *
+     *    // what basic geometry type shall the line be considered?
+     *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
+     *
+     *    template< class Topology >
+     *    struct Mapping
+     *    {
+     *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
+     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *        CornerStorage;
+     *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
+     *    };
+     *
+     *    struct Caching
+     *    {
+     *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+     *      static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+     *      static const EvaluationType evaluateNormal = ComputeOnDemand;
+     *    };
+     *  };
+     *  \endcode
+     *
+     *  \note This class cannot be used directly a an implementation of
+     *        Dune::Geometry. Its template parameter list differs from what
+     *        is expected there. Use one of the following derived classes
+     *        instead:
+     *        - Dune::GenericGeometry::Geometry
+     *        - Dune::GenericGeometry::LocalGemetry
+     *        .
+     */
+    template< int mydim, class Traits >
     class BasicGeometry
     {
       typedef typename Traits :: CoordTraits CoordTraits;
 
       static const int dimGrid = Traits :: dimGrid;
 
-      template< int, int, class, class > friend class BasicGeometry;
+      template< int, class > friend class BasicGeometry;
 
     public:
       static const int mydimension = mydim;
-      static const int coorddimension = cdim;
+      static const int coorddimension = Traits :: dimWorld;
 
       typedef typename CoordTraits :: ctype ctype;
 
@@ -90,8 +144,7 @@ namespace Dune
       }
 
       template< int fatherdim >
-      BasicGeometry ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father,
-                      int i )
+      BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
         : mapping_( subMapping( father, i ) )
       {
         mapping_->referenceCount = 1;
@@ -193,14 +246,13 @@ namespace Dune
 
       template< int fatherdim >
       Mapping *
-      subMapping ( const BasicGeometry< fatherdim, cdim, Grid, Traits > &father, int i )
+      subMapping ( const BasicGeometry< fatherdim, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
         const unsigned int ftid = father.mapping().topologyId();
         const unsigned int j = MapNumberingProvider< fatherdim >
                                :: template dune2generic< codim >( ftid, i );
         return father.mapping().template trace< codim >( j );
-        //return father.mapping().template subMapping< codim >( j );
       }
     };
 
@@ -209,11 +261,19 @@ namespace Dune
     // Geometry
     // --------
 
+    /** \class   Geometry
+     *  \ingroup GenericGeometry
+     *  \brief   generic implementation of a DUNE (global) geometry
+     *
+     *  Geometry inherits all its features from Geometry. It only add
+     *  GlobalGeometryTraits< Grid > as Traits parameter to the template
+     *  parameter list.
+     */
     template< int mydim, int cdim, class Grid >
     class Geometry
-      : public BasicGeometry< mydim, cdim, Grid, GlobalGeometryTraits< Grid > >
+      : public BasicGeometry< mydim, GlobalGeometryTraits< Grid > >
     {
-      typedef BasicGeometry< mydim, cdim, Grid, GlobalGeometryTraits< Grid > > Base;
+      typedef BasicGeometry< mydim, GlobalGeometryTraits< Grid > > Base;
 
     protected:
       typedef typename Base :: Mapping Mapping;
@@ -249,11 +309,19 @@ namespace Dune
     // LocalGeometry
     // -------------
 
+    /** \class   LocalGeometry
+     *  \ingroup GenericGeometry
+     *  \brief   generic implementation of a DUNE (local) geometry
+     *
+     *  Geometry inherits all its features from Geometry. It only add
+     *  LocalGeometryTraits< Grid > as Traits parameter to the template
+     *  parameter list.
+     */
     template< int mydim, int cdim, class Grid >
     class LocalGeometry
-      : public BasicGeometry< mydim, cdim, Grid, LocalGeometryTraits< Grid > >
+      : public BasicGeometry< mydim, LocalGeometryTraits< Grid > >
     {
-      typedef BasicGeometry< mydim, cdim, Grid, LocalGeometryTraits< Grid > > Base;
+      typedef BasicGeometry< mydim, LocalGeometryTraits< Grid > > Base;
 
     protected:
       typedef typename Base :: Mapping Mapping;
