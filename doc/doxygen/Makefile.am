@@ -19,7 +19,6 @@ if BUILD_DOCS
 # EXTRAINSTALL in the html subdirectory
 DOXYGENINSTALL = *.html *.css *.png *.gif ../doxygen.log
 
-if WML
 # themeing doxygen
 DOXYGENHEADER = doxy-header.html
 DOXYGENHEADERBUILD = $(DOXYGENHEADER).build
@@ -30,8 +29,6 @@ DOYXFILE_OVERWRITE = echo "HTML_HEADER = $(DOXYGENHEADER)"; \
   echo "HTML_STYLESHEET = $(DOXYGENSTYLESHEET)";
 DOXYFILESHORT_OVERWRITE = $(DOYXFILE_OVERWRITE) \
   echo "SHORT_NAMES = YES";
-# end WML
-endif
 
 
 #we need this in the distribution
