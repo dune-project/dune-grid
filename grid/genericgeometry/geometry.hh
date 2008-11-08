@@ -13,50 +13,53 @@ namespace Dune
 
   namespace GenericGeometry
   {
-    /** @addtogroup GenericGeometry
-     *
-       @section General
-       <!--=========-->
-       Based on a recursive definition of the reference
-       elements, a generic implementation of Dune::Geometry
-       is provided. The class used for the implementation of the
-       Dune::Geometry engine, is the GenericGeometry::BasicGeometry.
-       This class takes a template argument Traits where the
-       details of the reference mapping and performance issues can
-       be fixed for a specific implementation.
-       A default implementation for this class
-       is GenericGeometry::DefaultGeometryTraits.
-       To conform with the Dune::Geometry engine
-       two further classes GenericGeometry::Geometry
-       and GenericGeometry::LocalGeometry are provided.
-       If these classes are to be used instead of using
-       GenericGeometry::BasicGeometry directly, classes
-       @code
-       template <class Grid> GenericGeometry::GlobalGeometryTraits<Grid>
-       template <class Grid> GenericGeometry::LocalGeometryTraits<Grid>
-       @endcode
-       have to be specialized, and must contain the same
-       types as GenericGeometry::DefaultGeometryTraits.
 
-       The class defining the reference mapping itself for
-       a given topology type is given by
-       Mapping<Topology>::type in the traits class.
-       Here Topology is one of the generic topology
-       classes GenericGeometry::Point, GenericGeometry::Prism, GenericGeometry::Pyramid.
-       An interface for this class is provided by
-       GenericGeometry::Mapping.
-       The implementation of this interface must have
-       a constructure taking a single argument. The
-       class GenericGeometry::BasicGeometry has a
-       constructure with a single template argument, which
-       is directly passed down to the GenericGeometry::Mapping
-       implementation. An example implementation for the case
-       of a first order finite-element type geometry is provided
-       by the class GenericGeometry::CornerMapping.
-       This class only requires the coordinates of the corners
-       of the entities.
+    /** \addtogroup GenericGeometry
      *
-     **/
+     *  \section General
+     *
+     *  Based on a recursive definition of the reference elements, a generic
+     *  implementation of Dune::Geometry is provided. The class used for the
+     *  implementation of the Dune::Geometry engine, is
+     *  GenericGeometry::BasicGeometry.
+     *
+     *  The BasicGeometry class takes a template argument Traits specifying
+     *  details of the reference mapping implementation and some performance
+     *  settings. A default implementation for this class is
+     *  GenericGeometry::DefaultGeometryTraits. The traits class must contain
+     *  the same types as this default implementation.
+     *
+     *  To conform with the Dune::Geometry engine, two further classes are
+     *  provided: GenericGeometry::Geometry and GenericGeometry::LocalGeometry.
+     *  To use these classes instead of GenericGeometry::BasicGeometry, the
+     *  traits classes
+     *  \code
+     *  template< class Grid> GenericGeometry::GlobalGeometryTraits<Grid>
+     *  template< class Grid> GenericGeometry::LocalGeometryTraits<Grid>
+     *  \endcode
+     *  have to be specialized. These classes are simply passed as Traits
+     *  argument to GenericGeometry::BasicGeometry.
+     *
+     *  The reference mapping for a given topology type is given by
+     *  Mapping<Topology>::type in the traits class. Here, Topology is one of
+     *  the generic topology classes GenericGeometry::Point,
+     *  GenericGeometry::Prism, GenericGeometry::Pyramid.
+     *  An interface for the mapping is provided by GenericGeometry::Mapping.
+     *  The implementation of this interface must have constructors taking a
+     *  single argument. The constructor of GenericGeometry::BasicGeometry
+     *  looks as follows:
+     *  \code
+     *  template< class CoordVector >
+     *  BasicGeometry ( const GeometryType &type, const CoordVector &coords );
+     *  \endcode
+     *  Its first argument, <em>type</em>, specifies the type of the reference
+     *  element (as a Dune::GeometryType). The second argument, <em>coords</em>
+     *  is passed directly to the constructor of the mapping implementation.
+     *  The most prominent implementation of GenericGeometry::Mapping is
+     *  GenericGeometry::CornerMapping. It provides a polynomial interpolation
+     *  of the entity's corners with minimal degree. In this case,
+     *  <em>coords</em> represents the entity's corners.
+     */
 
     // BasicGeometry
     // -------------
