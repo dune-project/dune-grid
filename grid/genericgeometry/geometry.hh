@@ -13,6 +13,50 @@ namespace Dune
 
   namespace GenericGeometry
   {
+    /** @addtogroup GenericGeometry
+     *
+       @section General
+       <!--=========-->
+       Based on a recursive definition of the reference
+       elements, a generic implementation of Dune::Geometry
+       is provided. The class used for the implementation of the
+       Dune::Geometry engine, is the GenericGeometry::BasicGeometry.
+       This class takes a template argument Traits where the
+       details of the reference mapping and performace issues can
+       be fixed for a specific implementation.
+       A default implementation for this class
+       is GenericGeometry::DefaultGeometryTraits.
+       To conform with the Dune::Geometry engine
+       two further classes GenericGeometry::Geometry
+       and GenericGeometry::LocalGeometry are provieded.
+       If these classes are to be used instead of using
+       GenericGeometry::BasicGeometry directly, classes
+       @code
+       template <class Grid> GenericGeometry::GlobalGeometryTraits<Grid>
+       template <class Grid> GenericGeometry::LocalGeometryTraits<Grid>
+       @endcode
+       have to be specialized, and must containe the same
+       types as GenericGeometry::DefaultGeometryTraits.
+
+       The class defining the reference mapping itself for
+       a given topology type is given by
+       Mapping<Topology>::type in the traits class.
+       Here Topology is one of the generic topology
+       classes GenericGeometry::Point, GenericGeometry::Prism, GenericGeometry::Pyramid.
+       An interface for this class is provied by
+       GenericGeometry::Mapping.
+       The implementation of this interface must have
+       a constructure taking a single argument. The
+       class GenericGeometry::BasicGeometry has a
+       constructure with a single template argument, which
+       is directly passed down to the GenericGeometry::Mapping
+       implementation. An example implementation for the case
+       of a first order finite-element type geometry is provided
+       by the class GenericGeometry::CornerMapping.
+       This class only requires the coordinates of the corners
+       of the entities.
+     *
+     **/
 
     // BasicGeometry
     // -------------
@@ -44,6 +88,7 @@ namespace Dune
      *    // what basic geometry type shall the line be considered?
      *    static const GeometryType :: BasicType linetype = GeometryType :: simplex;
      *
+     *    // explained below
      *    template< class Topology >
      *    struct Mapping
      *    {
@@ -53,6 +98,7 @@ namespace Dune
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
      *    };
      *
+     *    // explained below
      *    struct Caching
      *    {
      *      static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
@@ -63,10 +109,44 @@ namespace Dune
      *  };
      *  \endcode
      *
-     *  \note This class cannot be used directly a an implementation of
+     *  The structure specifing the reference mapping is
+     *  Traits::Mapping::type. An example implementation
+     *  is the GenericGeometry::CornerMapping which defines
+     *  the simple mapping taking corners of the reference
+     *  elements to corner of the entity in space.
+     *  The class given by Traits::Mapping::CornerStorage
+     *  (an example is given by GenericGeometry::CoordPointerStorage).
+     *  is a container for the coordinates of the corners
+     *  returned by the Dune::Geometry (also required for
+     *  non-linear reference mappings).
+     *  The third type in Traits::Mapping is a traits class
+     *  for the reference mapping, following the structure of
+     *  GenericGeometry::MappingTraits.
+     *
+     *  The central reference mapping specified by Traits::Mapping::type
+     *  requires
+     *  a constructure taking a single argument. The
+     *  GenericGeometry::BasicGeometry has a constructure
+     *  with one template argument which is passed on to
+     *  the constructure of the used provided reference mapping.
+     *  The interface for the this class is
+     *  GenericGeometry::Mapping.
+     *
+     *  To increase the efficiency of the geometry
+     *  implementation, different strategies for
+     *  the caching of parts of the geometry data
+     *  is provided. The specifics are given
+     *  by the structure Traits::Caching. Possible
+     *  values are:
+     *  - ComputeOnDemand:    use caching if method called using barycenter
+     *  - PreCompute:         use caching in constructor using barycenter
+     *  .
+     *
+     *  \note This class cannot be used directly as an implementation of
      *        Dune::Geometry. Its template parameter list differs from what
-     *        is expected there. Use one of the following derived classes
-     *        instead:
+     *        is expected there from the engine.
+     *        One of the following derived classes
+     *        can be used instead:
      *        - Dune::GenericGeometry::Geometry
      *        - Dune::GenericGeometry::LocalGemetry
      *        .

@@ -421,8 +421,11 @@ namespace Dune
 
     // CoordPointerStorage
     // -------------------
-
-    template< class CoordTraits, class Topology, unsigned int dimW >
+    /** \class CoordPointerStorage
+     *  \ingroup GenericGeometry
+     *  \brief
+     */
+    < class CoordTraits, class Topology, unsigned int dimW >
     class CoordPointerStorage
     {
       typedef CoordPointerStorage< CoordTraits, Topology, dimW > This;
@@ -463,6 +466,11 @@ namespace Dune
     // CornerMapping
     // -------------
 
+    /** \class CornerMapping
+     *  \ingroup GenericGeometry
+     *  \brief implementation of GenericGeometry::Mapping for first order
+     *  lagrange type reference mappings.
+     */
     template< class CoordTraits, class Topo, unsigned int dimW,
         class CStorage = CoordPointerStorage< CoordTraits, Topo, dimW >,
         bool affine = false >

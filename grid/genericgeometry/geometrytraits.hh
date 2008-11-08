@@ -39,7 +39,11 @@ namespace Dune
 
     // MappingTraits
     // -------------
-
+    /** \class MappingTraits
+     *  \ingroup GenericGeometry
+     *  \brief Default mapping traits using Dune::FieldVector and
+     *  Dune::FieldMatrix
+     */
     template< class CT, unsigned int dim, unsigned int dimW >
     struct MappingTraits
     {
