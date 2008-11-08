@@ -90,22 +90,71 @@ namespace Dune
     // DefaultGeometryTraits
     // ---------------------
 
+    /** \class   DefaultGeometryTraits
+     *  \ingroup GenericGeometry
+     *  \brief   default settings for BasicGeometry
+     *
+     *  The class BasicGeometry requires a template argument <em>Traits</em>.
+     *  These traits specify which reference mapping shall be used by the
+     *  geometry and tweaks some performance settings.
+     *
+     *  This default implementation serves two purposed. Firstly, it documents
+     *  the exprected parameters. Secondly, the user of BasicGeometry can
+     *  derive his traits class from DefaultGeometryTraits. Then, only the
+     *  non-default settings have to be specified. Moreover, deriving from
+     *  DefaultGeometryTraits makes the user code more robust to changes in
+     *  the generic geometries.
+     *
+     *  \note DefaultGeometryTraits can directly be used for the
+     *        <em>Traits</em> argument of BasicGeometry.
+     */
     template< class ctype, int dimG, int dimW >
     struct DefaultGeometryTraits
     {
+      //! types needed in matrix-vector operations
       typedef DuneCoordTraits< ctype > CoordTraits;
 
+      //! dimension of the grid
       static const int dimGrid = dimG;
+      //! dimension of the world
       static const int dimWorld = dimW;
 
-      //   hybrid   [ true if Codim 0 is hybrid ]
+      /** \brief may the grid contain elements of different type?
+       *
+       *  If the elements (entities of codimension 0) may differ in topology
+       *  type, the grid is called hybrid (and this parameter must be set
+       *  to true). In this case, all methods of the geometry implementation
+       *  are virtual (but no other branching for topology type is used).
+       *
+       *  If the grid is non-hybrid, <em>hybrid</em> can be set to false.
+       *  In this case, virtual methods are not necessary and, hence, the
+       *  geometries are a little faster.
+       *
+       *  If <em>hybrid</em> is set to false, an additional paramter
+       *  <em>dunetype</em> is needed. It specifies the topological type of
+       *  all elements in the grid. Here's an example:
+       *  \code
+       *  static const GeometryType::BasicType dunetype = GeometryType::simplex;
+       *  \endcode
+       */
       static const bool hybrid = true;
       //   dunetype [ for Codim 0, needed for (hybrid=false) ]
       // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
 
-      // what basic geometry type shall the line be considered?
+      //! what basic geometry type shall the line be considered?
       static const GeometryType :: BasicType linetype = GeometryType :: simplex;
 
+      /** \brief specifies the reference mapping to be used
+       *
+       *  \tparam  Topology  type of topology for which the mapping
+       *                     implementation is specified
+       *
+       *  This sturcture contains a single tydedef <em>type</em> specifying
+       *  the implementation of the reference mapping. Basically, it looks like
+       *  \code
+       *  typedef CornerMapping< ... > type;
+       *  \endcode
+       */
       template< class Topology >
       struct Mapping
       {
@@ -113,6 +162,18 @@ namespace Dune
         typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, false > type;
       };
 
+      /** \brief specifies how constant values are to be cached
+       *
+       *  This structure contains 4 parameters of type
+       *  GenericGeometry::EvaluationType:
+       *  - evaluateJacobianTransposed
+       *  - evaluateJacobianInverseTransposed
+       *  - evaluateIntegrationElement
+       *  - evaluateNormal
+       *  .
+       *  These parameters control how eager these evaluations shall be
+       *  performed in the case of an affine mapping.
+       */
       struct Caching
       {
         static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
