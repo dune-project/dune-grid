@@ -22,20 +22,20 @@ namespace Dune
        is provided. The class used for the implementation of the
        Dune::Geometry engine, is the GenericGeometry::BasicGeometry.
        This class takes a template argument Traits where the
-       details of the reference mapping and performace issues can
+       details of the reference mapping and performance issues can
        be fixed for a specific implementation.
        A default implementation for this class
        is GenericGeometry::DefaultGeometryTraits.
        To conform with the Dune::Geometry engine
        two further classes GenericGeometry::Geometry
-       and GenericGeometry::LocalGeometry are provieded.
+       and GenericGeometry::LocalGeometry are provided.
        If these classes are to be used instead of using
        GenericGeometry::BasicGeometry directly, classes
        @code
        template <class Grid> GenericGeometry::GlobalGeometryTraits<Grid>
        template <class Grid> GenericGeometry::LocalGeometryTraits<Grid>
        @endcode
-       have to be specialized, and must containe the same
+       have to be specialized, and must contain the same
        types as GenericGeometry::DefaultGeometryTraits.
 
        The class defining the reference mapping itself for
@@ -43,7 +43,7 @@ namespace Dune
        Mapping<Topology>::type in the traits class.
        Here Topology is one of the generic topology
        classes GenericGeometry::Point, GenericGeometry::Prism, GenericGeometry::Pyramid.
-       An interface for this class is provied by
+       An interface for this class is provided by
        GenericGeometry::Mapping.
        The implementation of this interface must have
        a constructure taking a single argument. The
@@ -109,7 +109,7 @@ namespace Dune
      *  };
      *  \endcode
      *
-     *  The structure specifing the reference mapping is
+     *  The structure specifying the reference mapping is
      *  Traits::Mapping::type. An example implementation
      *  is the GenericGeometry::CornerMapping which defines
      *  the simple mapping taking corners of the reference
