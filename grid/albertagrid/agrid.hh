@@ -719,8 +719,7 @@ namespace Dune
      Enables iteration over all entities of a given codimension and level of a grid.
    */
   template<int cd, class GridImp>
-  class AlbertaGridEntityPointer :
-    public EntityPointerDefaultImplementation <cd, GridImp, AlbertaGridEntityPointer<cd,GridImp> >
+  class AlbertaGridEntityPointer
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -730,10 +729,12 @@ namespace Dune
     friend class AlbertaGrid < dim , dimworld >;
 
   public:
+    enum { codimension = cd };
+
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
     typedef typename SelectEntityImp<cd,dim,GridImp>::EntityObject EntityObject;
-    typedef AlbertaGridEntityPointer<cd,GridImp> Base;
+    typedef AlbertaGridEntityPointer<cd,GridImp> EntityPointerImp;
 
     //! typedef of my type
     typedef AlbertaGridEntityPointer<cd,GridImp> AlbertaGridEntityPointerType;
@@ -814,9 +815,8 @@ namespace Dune
    */
 
   template<class GridImp>
-  class AlbertaGridHierarchicIterator :
-    public AlbertaGridEntityPointer<0,GridImp> ,
-    public HierarchicIteratorDefaultImplementation <GridImp,AlbertaGridHierarchicIterator>
+  class AlbertaGridHierarchicIterator
+    : public AlbertaGridEntityPointer<0,GridImp>
   {
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -885,16 +885,19 @@ namespace Dune
      of an element!
    */
   template<class GridImp>
-  class AlbertaGridIntersectionIterator :
-    //public AlbertaGridEntityPointer<0,GridImp> ,
-    public IntersectionIteratorDefaultImplementation <GridImp,AlbertaGridIntersectionIterator>
+  class AlbertaGridIntersectionIterator
   {
     enum { dim      = GridImp::dimension };
     enum { dimworld = GridImp::dimensionworld };
 
     friend class AlbertaGridEntity<0,dim,GridImp>;
     typedef AlbertaGridIntersectionIterator<GridImp> ThisType;
+
   public:
+    typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersectionIterator >
+    Intersection;
+    typedef ThisType ImplementationType;
+
     typedef AGMemoryProvider< ThisType > StorageType;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -912,6 +915,11 @@ namespace Dune
     enum { dimensionworld=dimworld };
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
+
+    const Intersection &dereference () const
+    {
+      return reinterpret_cast< const Intersection & >( *this );
+    }
 
     //! equality
     bool equals (const AlbertaGridIntersectionIterator<GridImp> & i) const;
@@ -1209,9 +1217,8 @@ namespace Dune
   //! --LevelIterator
   //! the same as TreeIterator
   template<int cd, PartitionIteratorType pitype, class GridImp>
-  class AlbertaGridLevelIterator :
-    public AlbertaGridTreeIterator<cd,pitype,GridImp> ,
-    public LevelIteratorDefaultImplementation <cd,pitype,GridImp,AlbertaGridLevelIterator>
+  class AlbertaGridLevelIterator
+    : public AlbertaGridTreeIterator<cd,pitype,GridImp>
   {
   public:
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -1242,9 +1249,8 @@ namespace Dune
   //**********************************************************************
   //! LeafIterator which is just a hull for the LevelIterator
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class AlbertaGridLeafIterator :
-    public AlbertaGridTreeIterator<codim, pitype, GridImp>,
-    public LeafIteratorDefaultImplementation<codim, pitype, GridImp, AlbertaGridLeafIterator>
+  class AlbertaGridLeafIterator
+    : public AlbertaGridTreeIterator<codim, pitype, GridImp>
   {
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
