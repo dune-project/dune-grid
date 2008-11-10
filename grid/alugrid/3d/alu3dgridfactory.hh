@@ -1,6 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#if defined ENABLE_ALUGRID && !defined DUNE_ALU3DGRID_FACTORY_HH
+#ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
 #include <dune/common/fixedarray.hh>
