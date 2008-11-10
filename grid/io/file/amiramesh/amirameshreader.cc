@@ -247,6 +247,8 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 
   // read and build the grid
   buildGrid(factory, am);
+  delete(am);
+
   return factory.createGrid();
 #endif // #define HAVE_PSURFACE
 }
@@ -289,6 +291,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   // read and build the grid
   buildGrid(factory, am);
+  delete am;
+
   factory.createGrid();
 #endif // #define HAVE_PSURFACE
 }
