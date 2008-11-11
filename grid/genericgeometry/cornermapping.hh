@@ -425,7 +425,7 @@ namespace Dune
      *  \ingroup GenericGeometry
      *  \brief
      */
-    < class CoordTraits, class Topology, unsigned int dimW >
+    template< class CoordTraits, class Topology, unsigned int dimW >
     class CoordPointerStorage
     {
       typedef CoordPointerStorage< CoordTraits, Topology, dimW > This;
