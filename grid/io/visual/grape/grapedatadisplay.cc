@@ -178,8 +178,8 @@ namespace Dune
   inline void EvalDiscreteFunctions<GridType,DiscreteFunctionType>::
   calcMinMax(DUNE_FDATA * df)
   {
-    double minValue,maxValue;
-    bool initialized = false;
+    double minValue = 0.0;
+    double maxValue = 1.0;
 
     assert( df->discFunc );
     const DiscreteFunctionType & func = *((const DiscreteFunctionType *) (df->discFunc));
@@ -192,7 +192,8 @@ namespace Dune
     if(df->dimVal == 1)
     {
       const DiscreteFunctionSpaceType & space = func.space();
-      IteratorType end = space.end();
+      bool initialized = false;
+      const IteratorType end = space.end();
       for(IteratorType it = space.begin(); it != end; ++it)
       {
         EntityType & en = *it;
@@ -214,8 +215,6 @@ namespace Dune
     else
     {
       derr << "EvalDiscreteFunctions::calcMinMax: method not implemented for vectorial data! \n";
-      minValue = 0.0;
-      maxValue = 1.0;
     }
 
     if((maxValue-minValue) < 1e-10)
