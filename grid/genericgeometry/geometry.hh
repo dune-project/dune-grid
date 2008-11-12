@@ -151,7 +151,7 @@ namespace Dune
      *        One of the following derived classes
      *        can be used instead:
      *        - Dune::GenericGeometry::Geometry
-     *        - Dune::GenericGeometry::LocalGemetry
+     *        - Dune::GenericGeometry::LocalGeometry
      *        .
      */
     template< int mydim, class Traits >
@@ -362,25 +362,30 @@ namespace Dune
       typedef typename Base :: Mapping Mapping;
 
     public:
+      /** \brief Default constructor */
       Geometry ()
         : Base()
       {}
 
+      /** \brief Constructor accepting a mapping */
       explicit Geometry ( Mapping &mapping )
         : Base( mapping )
       {}
 
+      /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit Geometry ( const Geo &geo )
         : Base( geo.type(), geo )
       {}
 
+      /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       Geometry ( const GeometryType &type,
                  const CoordVector &coords )
         : Base( type, coords )
       {}
 
+      /** \todo Please doc me! */
       template< int fatherdim >
       Geometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
         : Base( father, i )
@@ -396,7 +401,7 @@ namespace Dune
      *  \ingroup GenericGeometry
      *  \brief   generic implementation of a DUNE (local) geometry
      *
-     *  Geometry inherits all its features from Geometry. It only add
+     *  Geometry inherits all its features from Geometry. It only adds
      *  LocalGeometryTraits< Grid > as Traits parameter to the template
      *  parameter list.
      */
@@ -410,24 +415,29 @@ namespace Dune
       typedef typename Base :: Mapping Mapping;
 
     public:
+      /** \brief Default constructor */
       LocalGeometry ()
         : Base()
       {}
 
+      /** \brief Constructor accepting a mapping */
       explicit LocalGeometry ( Mapping &mapping )
         : Base( mapping )
       {}
 
+      /** \brief Copy constructor from another geometry */
       template< class Geo >
       explicit LocalGeometry ( const Geo &geo )
         : Base( geo.type(), geo )
       {}
 
+      /** \brief Constructor with a GeometryType and a set of coordinates */
       template< class CoordVector >
       LocalGeometry ( const GeometryType &type, const CoordVector &coords )
         : Base( type, coords )
       {}
 
+      /** \todo Please doc me! */
       template< int fatherdim >
       LocalGeometry ( const Geometry< fatherdim, cdim, Grid > &father, int i )
         : Base( father, i )
