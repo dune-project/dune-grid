@@ -621,6 +621,12 @@ namespace Dune {
   }
 
   template<class GridImp>
+  inline bool SIntersectionIterator<GridImp>::conforming () const
+  {
+    return true;
+  }
+
+  template<class GridImp>
   inline void SIntersectionIterator<GridImp>::makeintersections () const
   {
     if (built_intersections) return;     // already done

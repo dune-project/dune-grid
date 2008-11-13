@@ -123,7 +123,7 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
     std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
     std :: cerr << "       " << name << " = " << normal
                 << std :: endl;
-    std :: cerr << "       J^-1^T = " << jit << std::endl;
+    std :: cerr << "       J^-1^T = \n" << jit << std::endl;
     assert( false );
   }
 }
@@ -191,7 +191,8 @@ void checkIntersectionIterator(const GridViewType& view,
 
     assert(eIt == iIt->inside());
 
-    // check that boundary id has positive value
+    // check that boundary id has positive value and that intersection is
+    // conform
     if( iIt->boundary() )
     {
       // entity has boundary intersections
@@ -200,6 +201,10 @@ void checkIntersectionIterator(const GridViewType& view,
       if( iIt->boundaryId() <= 0 )
       {
         DUNE_THROW(GridError, "boundary id has non-positive value (" << iIt->boundaryId() << ") !");
+      }
+      if( ! iIt->conforming() )
+      {
+        DUNE_THROW(GridError, "intersection should be conform at boundary !");
       }
     }
 
@@ -242,11 +247,18 @@ void checkIntersectionIterator(const GridViewType& view,
       }
     }
 
+    // Check if conforming() methods is compatible with static
+    // information on GridView
+    if ( GridViewType::conforming && !iIt->conforming())
+    {
+      DUNE_THROW(GridError, "GridView says conforming but intersection is not conforming!");
+    }
+
     // /////////////////////////////////////////////////////////////
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( GridViewType::conforming && iIt->neighbor() )
+    if ( iIt->conforming() && iIt->neighbor() )
     {
       EntityPointer outside = iIt->outside();
       const int numberInSelf     = iIt->numberInSelf();

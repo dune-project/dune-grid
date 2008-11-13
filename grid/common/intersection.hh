@@ -220,6 +220,21 @@ namespace Dune
       return this->real.outside();
     }
 
+    /*! @brief return true if intersection is conform.
+
+        This method returns true, if
+        @code
+        inside()->entity<1>(numberInSelf()) ==
+            outside()->entity<1>(numberInNeighbor()) ||
+        boundary()
+        @endcode
+        holds.
+     */
+    bool conforming () const
+    {
+      return this->real.conforming();
+    }
+
     /*! @brief geometrical information about this intersection in local
        coordinates of the inside() entity.
 

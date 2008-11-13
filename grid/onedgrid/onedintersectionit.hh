@@ -144,6 +144,11 @@ namespace Dune {
 
     }
 
+    //! return true if intersection is conform.
+    bool conforming () const {
+      return true;
+    }
+
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const
@@ -403,6 +408,11 @@ namespace Dune {
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
       return !boundary();
+    }
+
+    //! return true if intersection is conform.
+    bool conforming () const {
+      return true;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection

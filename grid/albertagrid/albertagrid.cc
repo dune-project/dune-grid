@@ -1929,6 +1929,12 @@ namespace Dune
   }
 
   template< class GridImp >
+  inline bool AlbertaGridIntersectionIterator<GridImp>::conforming() const
+  {
+    return true;
+  }
+
+  template< class GridImp >
   inline bool AlbertaGridIntersectionIterator<GridImp>::boundary() const
   {
     assert( elInfo_ );

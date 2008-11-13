@@ -798,6 +798,9 @@ namespace Dune {
     //! return true if intersection is with boundary.
     bool boundary () const;
 
+    //! return true if intersection is conform.
+    bool conforming () const;
+
     int boundaryId () const {
       if (boundary()) return count + 1;
       return 0;

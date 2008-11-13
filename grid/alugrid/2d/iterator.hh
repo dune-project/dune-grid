@@ -169,7 +169,19 @@ namespace Dune {
     const LocalGeometry & intersectionNeighborLocal () const;
     const Geometry & intersectionGlobal () const;
 
-  protected:
+    /*
+       protected:
+       //! return true if either inside or outside have hanging nodes at this
+       //! intersection
+       bool hasHangingNodes () const {
+        assert(current.item_);
+        return this->current.item_->hasHangingNode(this->current.index_)
+     || (current.neigh_) ?
+                   current.neigh_->hasHangingNode(this->current.opposite_):
+                   false;
+       }
+     */
+
     //! return true if intersection is with boundary
     void checkValid () ;
 
@@ -260,15 +272,22 @@ namespace Dune {
     //! increment iterator
     void increment ();
 
-
+  protected:
+    bool isConform() const {
+      return this->neighbor() ?
+             this->current.neigh_ == this->current.item_->neighbour(this->current.index_) :
+             true;
+    }
+  public:
     //! level is conforming when non-conform grid used
     //! otherwise might not be conform
     bool conforming () const
     {
       return ( this->grid_.nonConform() ) ?
-             true :
-             ((this->neighbor()) ? (this->current.isNotConform_) : true);
+             true : isConform();
+      // ((this->neighbor()) ? (this->current.isNotConform_) : true);
     }
+
 
   private:
     void doIncrement ();

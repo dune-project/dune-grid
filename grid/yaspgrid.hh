@@ -1471,6 +1471,12 @@ namespace Dune {
       return true;
     }
 
+    //! Yasp is always conform
+    bool conforming () const
+    {
+      return true;
+    }
+
     //! return EntityPointer to the Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     EntityPointer inside() const
