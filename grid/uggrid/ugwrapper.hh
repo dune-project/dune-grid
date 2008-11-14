@@ -227,6 +227,16 @@ namespace Dune {
       return NBELEM(theElement, nb);
     }
 
+    static int boundaryId(const UG_NS< UG_DIM >::Element* theElement, int nb) {
+      using UG_NAMESPACE ::BNDS;
+      using UG::UINT;
+      using UG_NAMESPACE ::side_offset;
+
+      BNDS* bnds = ELEM_BNDS(theElement,nb);
+      int id = UG_NAMESPACE ::GetBoundarySegmentId(bnds);
+      return id;
+    }
+
     //! Returns true if the i-th side of the element is on the domain boundary
     static bool Side_On_Bnd(const UG_NS< UG_DIM >::Element* theElement, int i) {
       using UG_NAMESPACE ::BNDS;

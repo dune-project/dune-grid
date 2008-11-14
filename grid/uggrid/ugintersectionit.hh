@@ -98,7 +98,11 @@ namespace Dune {
 
     //! return information about the Boundary
     int boundaryId () const {
-      return 1;
+#ifndef NDEBUG
+      if (!boundary())
+        DUNE_THROW(GridError, "Calling boundaryId() for a non-boundary intersection!");
+#endif
+      return UG_NS<dim>::boundaryId(center_, neighborCount_);
     }
 
     //! intersection of codimension 1 of this neighbor with element where
@@ -259,7 +263,11 @@ namespace Dune {
 
     //! return information about the Boundary
     int boundaryId () const {
-      return 1;
+#ifndef NDEBUG
+      if (!boundary())
+        DUNE_THROW(GridError, "Calling boundaryId() for a non-boundary intersection!");
+#endif
+      return UG_NS<dim>::boundaryId(center_, neighborCount_);
     }
 
     //! intersection of codimension 1 of this neighbor with element where
