@@ -78,8 +78,13 @@ namespace Dune
     enum { dimensionworld = Grid :: dimensionworld };
 
   public:
-    GridView ( const GridViewImp& imp) : imp_(imp) {}
-    GridView ( const ThisType &other ) : imp_(other.imp_) {}
+    GridView ( const GridViewImp& imp)
+      : imp_( imp )
+    {}
+
+    GridView ( const ThisType &other )
+      : imp_( other.imp_ )
+    {}
 
   private:
     // prohibit assignment
@@ -98,6 +103,18 @@ namespace Dune
       return asImp().indexSet();
     }
 
+    /** \brief obtain numer of entities in a given codimension */
+    int size ( int codim ) const
+    {
+      return asImp().size( codim );
+    }
+
+    /** \brief obtain number of entities with a given geometry type */
+    int size ( const GeometryType &type ) const
+    {
+      return asImp().size( type );
+    }
+
     /** \brief obtain begin iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
@@ -114,14 +131,16 @@ namespace Dune
 
     /** \brief obtain begin iterator for this view */
     template< int cd , PartitionIteratorType pitype >
-    typename Codim< cd > :: template Partition<pitype> :: Iterator begin () const
+    typename Codim< cd > :: template Partition< pitype > :: Iterator
+    begin () const
     {
       return asImp().template begin<cd,pitype>();
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pitype >
-    typename Codim< cd > :: template Partition<pitype> :: Iterator end () const
+    typename Codim< cd > :: template Partition< pitype > :: Iterator
+    end () const
     {
       return asImp().template end<cd,pitype>();
     }
@@ -156,10 +175,13 @@ namespace Dune
     }
 
   protected:
-    GridViewImp& asImp () {
+    GridViewImp& asImp ()
+    {
       return imp_;
     }
-    const GridViewImp& asImp () const {
+
+    const GridViewImp& asImp () const
+    {
       return imp_;
     }
 

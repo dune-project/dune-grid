@@ -133,6 +133,18 @@ namespace Dune
       return indexSet_;
     }
 
+    /** \brief obtain numer of entities in a given codimension */
+    int size ( int codim ) const
+    {
+      return grid().size( level_, codim );
+    }
+
+    /** \brief obtain number of entities with a given geometry type */
+    int size ( const GeometryType &type ) const
+    {
+      return grid().size( level_, type );
+    }
+
     /** \brief obtain begin iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
@@ -301,6 +313,18 @@ namespace Dune
     const IndexSet &indexSet () const
     {
       return indexSet_;
+    }
+
+    /** \brief obtain numer of entities in a given codimension */
+    int size ( int codim ) const
+    {
+      return grid().size( codim );
+    }
+
+    /** \brief obtain number of entities with a given geometry type */
+    int size ( const GeometryType &type ) const
+    {
+      return grid().size( type );
     }
 
     /** \brief obtain begin iterator for this view */
