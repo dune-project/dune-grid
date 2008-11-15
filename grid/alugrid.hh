@@ -53,9 +53,12 @@ namespace Dune {
      \brief 3D grid with support for hexahedrons.
      @ingroup ALUCubeGrid
    */
-  template <>
-  class ALUCubeGrid<3,3> :
-    public Dune::ALU3dGrid<3,3,Dune::hexa> {
+  template<>
+  class ALUCubeGrid< 3, 3 >
+    : public Dune::ALU3dGrid< 3, 3, Dune::hexa >
+  {
+    typedef ALUCubeGrid< 3, 3 > This;
+
     typedef Dune::ALU3dGrid<3,3,Dune::hexa> BaseType;
     enum { dim      = 3 };
     enum { dimworld = 3 };
@@ -118,13 +121,53 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
     typedef BaseType::ObjectStreamType ObjectStreamType;
 
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      LevelGridView;
+      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      LeafGridView;
+    };
+
+    typedef Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef Partition< All_Partition > :: LeafGridView LeafGridView;
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelView ( int level ) const
+    {
+      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafView () const
+    {
+      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+  private:
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasObjectStream > ;
 
     friend class Conversion< ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUCubeGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-  private:
     //! Copy constructor should not be used
     ALUCubeGrid( const ALUCubeGrid & g ) ; // : BaseType(g) {}
 
@@ -225,9 +268,12 @@ namespace Dune {
      \brief grid with support for simplicial mesh in 3d.
      \ingroup ALUSimplexGrid
    */
-  template <>
-  class ALUSimplexGrid<3,3> :
-    public Dune::ALU3dGrid<3,3,Dune::tetra> {
+  template<>
+  class ALUSimplexGrid< 3, 3 >
+    : public Dune::ALU3dGrid< 3, 3,Dune::tetra >
+  {
+    typedef ALUSimplexGrid< 3, 3 > This;
+
     typedef Dune::ALU3dGrid<3,3,Dune::tetra> BaseType;
     enum { dim      = 3 };
     enum { dimworld = 3 };
@@ -290,13 +336,53 @@ namespace Dune {
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
     typedef BaseType::ObjectStreamType ObjectStreamType;
 
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      LevelGridView;
+      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      LeafGridView;
+    };
+
+    typedef Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef Partition< All_Partition > :: LeafGridView LeafGridView;
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelView ( int level ) const
+    {
+      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafView () const
+    {
+      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+  private:
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasObjectStream > ;
 
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-  private:
     //! Copy constructor should not be used
     ALUSimplexGrid( const ALUSimplexGrid & g ); //  : BaseType(g) {}
 
@@ -491,9 +577,12 @@ namespace Dune {
      \brief grid with support for simplicial mesh in 2d.
      \ingroup ALUConformGrid
    */
-  template <>
-  class ALUConformGrid<2,2> :
-    public Dune::ALU2dGrid<2,2> {
+  template<>
+  class ALUConformGrid< 2, 2 >
+    : public Dune::ALU2dGrid< 2, 2 >
+  {
+    typedef ALUConformGrid< 2, 2 > This;
+
     typedef Dune::ALU2dGrid<2,2> BaseType;
     enum { dim      = 2 };
     enum { dimworld = 2 };
@@ -526,13 +615,53 @@ namespace Dune {
     typedef Traits::Codim<0>::LeafIterator LeafIterator;
     typedef BaseType::HierarchicIteratorImp HierarchicIteratorImp;
 
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
+      LevelGridView;
+      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
+      LeafGridView;
+    };
+
+    typedef Partition< All_Partition > :: LevelGridView LevelGridView;
+    typedef Partition< All_Partition > :: LeafGridView LeafGridView;
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelView ( int level ) const
+    {
+      typedef typename Partition< pitype >::LevelGridView LevelGridView;
+      typedef typename LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafView () const
+    {
+      typedef typename Partition< pitype >::LeafGridView LeafGridView;
+      typedef typename LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+    LevelGridView levelView ( int level ) const
+    {
+      typedef LevelGridView::GridViewImp LevelGridViewImp;
+      return LevelGridView( LevelGridViewImp( *this, level ) );
+    }
+
+    LeafGridView leafView () const
+    {
+      typedef LeafGridView::GridViewImp LeafGridViewImp;
+      return LeafGridView( LeafGridViewImp( *this ) );
+    }
+
+  private:
     friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
     friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasObjectStream > ;
 
     friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
-  private:
     //! Copy constructor should not be used
     ALUConformGrid( const ALUConformGrid & g ) ; // : BaseType(g) {}
 
