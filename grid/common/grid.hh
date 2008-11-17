@@ -378,13 +378,11 @@ namespace Dune {
      methods do not contain an implementation but forward to the methods of
      the derived class via the Barton-Nackman trick.
 
-     Template parameters:
-
-     - <tt>dim</tt> specifies the dimension of the grid.
-     - <tt>dimworld</tt> specifies the dimension of the surrounding space, this can be
+     \tparam dim specifies the dimension of the grid.
+     \tparam dimworld specifies the dimension of the surrounding space, this can be
        different from dim, if the grid is defined on a manifold .
-     - <tt>ct</tt> field type of the world vector space.
-     - <tt>GridFamily</tt> traits class providing all types
+     \tparam ct field type of the world vector space.
+     \tparam GridFamily traits class providing all types
        associated with the grid implementation.
 
      \nosubgrouping
