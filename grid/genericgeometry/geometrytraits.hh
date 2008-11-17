@@ -108,7 +108,7 @@ namespace Dune
      *  \note DefaultGeometryTraits can directly be used for the
      *        <em>Traits</em> argument of BasicGeometry.
      */
-    template< class ctype, int dimG, int dimW >
+    template< class ctype, int dimG, int dimW, bool alwaysAffine = false >
     struct DefaultGeometryTraits
     {
       //! types needed in matrix-vector operations
@@ -159,7 +159,7 @@ namespace Dune
       struct Mapping
       {
         typedef CoordPointerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
-        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, false > type;
+        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, alwaysAffine > type;
       };
 
       /** \brief specifies how constant values are to be cached
