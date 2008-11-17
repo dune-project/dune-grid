@@ -171,6 +171,8 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
+    typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
+
     //! The Iterator over neighbors on this level
     typedef UGGridLevelIntersectionIterator<GridImp> LevelIntersectionIterator;
 
@@ -274,7 +276,7 @@ namespace Dune {
        implementation of numerical algorithms is only done for simple discretizations.
        Assumes that meshes are nested.
      */
-    const Geometry& geometryInFather () const;
+    const LocalGeometry& geometryInFather () const;
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.

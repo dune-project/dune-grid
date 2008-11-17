@@ -214,7 +214,7 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 }
 
 template<int dim, class GridImp>
-inline const typename Dune::UGGridEntity<0,dim,GridImp>::Geometry&
+inline const typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry&
 Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 {
   // we need to have a father element
