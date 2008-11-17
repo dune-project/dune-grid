@@ -164,13 +164,23 @@ namespace Dune
       template< int, class > friend class BasicGeometry;
 
     public:
+
+      /** \brief The dimension of the parameter space of this geometry */
       static const int mydimension = mydim;
+
+      /** \brief The dimension of the world space of this geometry */
       static const int coorddimension = Traits :: dimWorld;
 
+      /** \brief Type used for coordinate components */
       typedef typename CoordTraits :: ctype ctype;
 
+      /** \brief Type used for parameter coordinates */
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
+
+      /** \brief Type used for world coordinates */
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+
+      /** \brief Type used for Jacobian matrices */
       typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
 
     private:
@@ -207,11 +217,14 @@ namespace Dune
       Mapping *mapping_;
 
     public:
+
+      /** \brief Default constructor */
       BasicGeometry ()
         : mapping_( 0 )
       {}
 
 #if 0
+      /** \brief Constructor taking a mapping */
       explicit BasicGeometry ( Mapping &mapping )
         : mapping_( &mapping )
       {
@@ -219,6 +232,7 @@ namespace Dune
       }
 #endif
 
+      /** \brief Constructor using a GeometryType and a list of corner coordinates */
       template< class CoordVector >
       BasicGeometry ( const GeometryType &type, const CoordVector &coords )
         : mapping_( MappingProvider :: mapping( type, coords ) )
@@ -226,6 +240,8 @@ namespace Dune
         mapping_->referenceCount = 1;
       }
 
+      /** \brief I don't understand what this is supposed to do
+          \todo Please doc me */
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
         : mapping_( subMapping( father, i ) )
@@ -233,6 +249,7 @@ namespace Dune
         mapping_->referenceCount = 1;
       }
 
+      /** \brief Copy constructor */
       BasicGeometry ( const BasicGeometry &other )
         : mapping_( other.mapping_ )
       {
@@ -240,12 +257,14 @@ namespace Dune
           ++(mapping_->referenceCount);
       }
 
+      /** \brief Destructor */
       ~BasicGeometry ()
       {
         if( (mapping_ != 0) && ((--mapping_->referenceCount) == 0) )
           delete mapping_;
       }
 
+      /** \brief Assignment from other BasicGeometry */
       BasicGeometry &operator= ( const BasicGeometry &other )
       {
         if( other.mapping_ != 0 )
@@ -256,62 +275,78 @@ namespace Dune
         return *this;
       }
 
-    public:
+      /** \brief Test whether this BasicGeometry is properly set up
+          \todo Please doc me better!
+       */
       bool operator! () const
       {
         return (mapping_ == 0);
       }
 
+      /** \brief Return the topological type of this geometry */
       GeometryType type () const
       {
         return DuneGeometryTypeProvider :: type( mapping().topologyId() );
       }
 
+      /** \brief Return the number of corners */
       int corners () const
       {
         return mapping().numCorners();
       }
 
+      /** \brief Return the world coordinates of the i-th corner */
       const GlobalCoordinate &operator[] ( int i ) const
       {
         return mapping().corner( i );
       }
 
+      /** \brief Map local to global coordinates */
       GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
         return mapping().global( local );
       }
 
+      /** \brief Map global to local coordinates */
       LocalCoordinate local ( const GlobalCoordinate &global ) const
       {
         return mapping().local( global );
       }
 
+      /** \brief Return true if a given point is within the parameter domain */
       bool checkInside ( const LocalCoordinate &local ) const
       {
         return mapping().checkInside( local );
       }
 
+      /** \brief Return true if this is an affine geometry */
       bool affine () const
       {
         return mapping().affine();
       }
 
+      /** \brief Return the factor \$|det F|\$ that appears in the integral transformation formula */
       ctype integrationElement ( const LocalCoordinate &local ) const
       {
         return mapping().integrationElement( local );
       }
 
+      /** \brief Return the volume of the element */
       ctype volume () const
       {
         return mapping().volume();
       }
 
+      /** \brief Compute the transpose of the inverse Jacobian matrix of the transformation
+          from the reference element into the world space */
       const Jacobian &jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
         return mapping().jacobianInverseTransposed( local );
       }
 
+      /** \brief Compute a normal
+          \todo Doc me properly.  How are the coordinates interpreted?
+       */
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
         const unsigned int tid = mapping().topologyId();
@@ -351,6 +386,10 @@ namespace Dune
      *  Geometry inherits all its features from Geometry. It only add
      *  GlobalGeometryTraits< Grid > as Traits parameter to the template
      *  parameter list.
+     *
+     * \tparam mydim Dimension of the entity
+     * \tparam cdom Dimension of the coordinate space
+     * \tparam Grid The grid this geometry will be used in
      */
     template< int mydim, int cdim, class Grid >
     class Geometry
@@ -404,6 +443,10 @@ namespace Dune
      *  Geometry inherits all its features from Geometry. It only adds
      *  LocalGeometryTraits< Grid > as Traits parameter to the template
      *  parameter list.
+     *
+     * \tparam mydim Dimension of the entity
+     * \tparam cdom Dimension of the coordinate space
+     * \tparam Grid The grid this geometry will be used in
      */
     template< int mydim, int cdim, class Grid >
     class LocalGeometry
