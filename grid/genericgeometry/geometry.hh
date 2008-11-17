@@ -83,7 +83,9 @@ namespace Dune
      *    in efficiency can be achieved for grids with a fixed element type
      *    (set hyprid to false and set the dunetype variable)
      *    or for grids with only affine transformations - which in the case of
-     *    the local geometries is often true the variable.
+     *    the local geometries is often true the variable; the last template
+     *    argument (default false) can be used to switch to mappings which are
+     *    assumed to always be affined (no checking done).
      *  - Add to the GridFamily::Traits::Codim<codim> structure:
      *    \code
             typedef Dune :: Geometry
