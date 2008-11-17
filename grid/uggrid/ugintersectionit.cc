@@ -91,23 +91,19 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
-  selfLocal_.setNumberOfCorners(numCornersOfSide);
+  for (int i=0; i<numCornersOfSide; i++) {
 
-  for (int i=0; i<numCornersOfSide; i++)
-  {
     // get number of corner in UG's numbering system
     int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-    // we need a temporary to be filled
-    FieldVector<UGCtype, dim> tmp;
-
     // get the corners local coordinates
-    UG_NS<dim>::getCornerLocal(center_,cornerIdx,tmp);
+    UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
 
-    // and poke them into the Geometry
-    selfLocal_.setCoords(i,tmp);
   }
+
+  selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   return selfLocal_;
 }
@@ -118,17 +114,19 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-
-  neighGlob_.setNumberOfCorners(numCornersOfSide);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
   for (int i=0; i<numCornersOfSide; i++) {
 
     int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
     typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-    neighGlob_.setCoords(i, node->myvertex->iv.x);
+    for (int j=0; j<dim; j++)
+      coordinates[i][j] = node->myvertex->iv.x[j];
 
   }
+
+  neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   return neighGlob_;
 }
@@ -149,7 +147,7 @@ intersectionNeighborLocal() const
   // go on and get the local coordinates
   // ///////////////////////////////////////
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
-  neighLocal_.setNumberOfCorners(numCornersOfSide);
+  std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
   for (int i=0; i<numCornersOfSide; i++) {
 
@@ -166,12 +164,11 @@ intersectionNeighborLocal() const
     assert(j<UG_NS<dim>::Corners_Of_Elem(other));
 
     // get the local coordinate there
-    FieldVector<UGCtype, dim> tmp;
-    UG_NS<dim>::getCornerLocal(other,j,tmp);
+    UG_NS<dim>::getCornerLocal(other,j,coordinates[i]);
 
-    // and poke them into the Geometry
-    neighLocal_.setCoords(i,tmp);
   }
+
+  neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   return neighLocal_;
 }
@@ -301,23 +298,19 @@ intersectionSelfLocal() const
     // //////////////////////////////////////////////////////
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-
-    selfLocal_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++)
     {
       // get number of corner in UG's numbering system
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
-      // we need a temporary to be filled
-      FieldVector<UGCtype, dim> tmp;
-
       // get the corners local coordinates
-      UG_NS<dim>::getCornerLocal(center_,cornerIdx,tmp);
+      UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
 
-      // and poke them into the Geometry
-      selfLocal_.setCoords(i,tmp);
     }
+
+    selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   } else {
 
@@ -325,8 +318,7 @@ intersectionSelfLocal() const
     int otherSide                             = leafSubFaces_[subNeighborCount_].second;
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
-
-    selfLocal_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -340,15 +332,13 @@ intersectionSelfLocal() const
 
       // Actually do the computation
       /** \todo Why is this const_cast necessary? */
-      UGCtype localCoords[dim];
       UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
-                                const_cast<const double**>(cornerCoords), worldPos, localCoords);
-
-      // and poke them into the Geometry
-      selfLocal_.setCoords(i,localCoords);
+                                const_cast<const double**>(cornerCoords), worldPos,
+                                &coordinates[i][0]);
 
     }
 
+    selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
   }
 
   return selfLocal_;
@@ -372,17 +362,20 @@ intersectionGlobal() const
     // //////////////////////////////////////////////////////
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-
-    neighGlob_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
-      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
+      const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-      neighGlob_.setCoords(i, node->myvertex->iv.x);
+      for (int j=0; j<dim; j++)
+        coordinates[i][j] = node->myvertex->iv.x[j];
 
     }
+
+    neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+
 
   } else {
 
@@ -390,8 +383,7 @@ intersectionGlobal() const
     int otherSide                             = leafSubFaces_[subNeighborCount_].second;
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
-
-    selfLocal_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -402,9 +394,13 @@ intersectionGlobal() const
       const UGCtype* worldPos = UG_NS<dim>::Corner(other,cornerIdx)->myvertex->iv.x;
 
       // and poke them into the Geometry
-      neighGlob_.setCoords(i,worldPos);
+      for (int j=0; j<dim; j++)
+        coordinates[i][j] = worldPos[j];
 
     }
+
+    neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+
   }
 
   return neighGlob_;
@@ -428,8 +424,7 @@ intersectionNeighborLocal() const
     const typename UG_NS<dim>::Element* other = leafSubFaces_[subNeighborCount_].first;
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-
-    neighLocal_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -448,12 +443,12 @@ intersectionNeighborLocal() const
       /** \todo Why is this const_cast necessary? */
       UGCtype localCoords[dim];
       UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
-                                const_cast<const double**>(cornerCoords), worldPos, localCoords);
-
-      // and poke them into the Geometry
-      neighLocal_.setCoords(i,localCoords);
+                                const_cast<const double**>(cornerCoords), worldPos,
+                                &coordinates[i][0]);
 
     }
+
+    neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   } else {
 
@@ -461,20 +456,17 @@ intersectionNeighborLocal() const
     int otherSide                             = leafSubFaces_[subNeighborCount_].second;
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
-
-    selfLocal_.setNumberOfCorners(numCornersOfSide);
+    std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
       // get the local coordinate of j-th corner
-      FieldVector<UGCtype, dim> tmp;
       int v = UG_NS<dim>::Corner_Of_Side(other,otherSide,i);
-      UG_NS<dim>::getCornerLocal(other, v, tmp);
-
-      // and poke them into the Geometry
-      neighLocal_.setCoords(i,tmp);
+      UG_NS<dim>::getCornerLocal(other, v, coordinates[i]);
 
     }
+
+    neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
 
   }
 

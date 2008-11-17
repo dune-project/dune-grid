@@ -10,6 +10,7 @@
 #include "uggridrenumberer.hh"
 #include <dune/common/fixedarray.hh>
 #include <dune/common/fmatrix.hh>
+#include <dune/grid/genericgeometry/geometry.hh>
 
 namespace Dune {
 
@@ -49,17 +50,10 @@ namespace Dune {
       Geometry<2, 3, GridImp, UGGridGeometry>(UGGridGeometry<2,3,GridImp>())
     {};
 
-    void setCoords(int n, const UGCtype* pos) {
-      for (int i=0; i<3; i++)
-        this->realGeometry.coord_[n][i] = pos[i];
-    }
-
-    void setCoords(int n, const FieldVector<UGCtype,3>& pos) {
-      this->realGeometry.coord_[n] = pos;
-    }
-
-    void setNumberOfCorners(int n) {
-      this->realGeometry.setNumberOfCorners(n);
+    void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates) {
+      this->realGeometry.setNumberOfCorners( (type.isSimplex()) ? 3 : 4);
+      for (size_t i=0; i<coordinates.size(); i++)
+        this->realGeometry.coord_[i] = coordinates[i];
     }
 
   };
@@ -74,16 +68,10 @@ namespace Dune {
       Geometry<1, 2, GridImp, UGGridGeometry>(UGGridGeometry<1,2,GridImp>())
     {};
 
-    void setCoords(int n, const UGCtype* pos) {
-      for (int i=0; i<2; i++)
-        this->realGeometry.coord_[n][i] = pos[i];
+    void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates) {
+      for (size_t i=0; i<coordinates.size(); i++)
+        this->realGeometry.coord_[i] = coordinates[i];
     }
-
-    void setCoords(int n, const FieldVector<UGCtype,2>& pos) {
-      this->realGeometry.coord_[n] = pos;
-    }
-    // Empty.  Boundary elements in a 2d grid have always two corners
-    void setNumberOfCorners(int n) {}
 
   };
 
@@ -257,7 +245,7 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<2, 3, GridImp> :
-    public GeometryDefaultImplementation <2, 3, GridImp, UGGridGeometry>
+    public GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> >
   {
 
     template <int codim_, int dim_, class GridImp_>
@@ -275,6 +263,15 @@ namespace Dune {
     /** \brief Default constructor */
     UGGridGeometry()
     {elementType_=GeometryType(GeometryType::simplex,2);}
+
+    /** \brief Constructor with a geometry type and a set of corners */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates)
+      : GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > (type, coordinates)
+    {
+      elementType_ = type;
+      for (size_t i=0; i<coordinates.size(); i++)
+        coord_[i] = coordinates[i];
+    }
 
     //! return the element type identifier (triangle or quadrilateral)
     GeometryType type () const {
@@ -344,7 +341,7 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry <1, 2, GridImp> :
-    public GeometryDefaultImplementation <1, 2, GridImp, UGGridGeometry>
+    public GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> >
   {
 
     template <int codim_, int dim_, class GridImp_>
@@ -362,6 +359,14 @@ namespace Dune {
     /** \brief Default constructor */
     UGGridGeometry()
     {}
+
+    /** \brief Constructor with a geometry type and a set of corners */
+    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates)
+      : GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > (type, coordinates)
+    {
+      for (size_t i=0; i<coordinates.size(); i++)
+        coord_[i] = coordinates[i];
+    }
 
     /** \brief Return the element type identifier.  */
     GeometryType type () const {return GeometryType(GeometryType::simplex,1);}
