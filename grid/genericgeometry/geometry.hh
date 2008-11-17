@@ -59,6 +59,109 @@ namespace Dune
      *  GenericGeometry::CornerMapping. It provides a polynomial interpolation
      *  of the entity's corners with minimal degree. In this case,
      *  <em>coords</em> represents the entity's corners.
+     *
+     *  \section Simple Usage
+     *  To add first order Lagrange type geometries to a grid implementation
+     *  the following steps suffice:
+     *  - Overload the traits classes
+     *    \code
+            template<>
+            struct GenericGeometry::GlobalGeometryTraits< MyGrid >
+            : public GenericGeometry::DefaultGeometryTraits
+                     <MyGrid::cytpe,MyGrid::dimension,MyGrid::dimworld>
+            {};
+            template<>
+            struct GenericGeometry::LocalGeometryTraits< MyGrid >
+            : public GenericGeometry::DefaultGeometryTraits
+                     <MyGrid::cytpe,MyGrid::dimension,MyGrid::dimworld>
+            {};
+     *    \endcode
+     *    Note that these classes are default implementation which should cover all
+     *    cases but
+     *    are in a specific situation far from the optimal choice.
+     *    For example, an increase
+     *    in efficiency can be achieved for grids with a fixed element type
+     *    (set hyprid to false and set the dunetype variable)
+     *    or for grids with only affine transformations - which in the case of
+     *    the local geometries is often true the variable.
+     *  - Add to the GridFamily::Traits::Codim<codim> structure:
+     *    \code
+            typedef Dune :: Geometry
+              < dimension-codim, dimensionworld, const MyGrid,
+                Dune :: GenericGeometry :: Geometry > Geometry;
+            typedef Dune :: Geometry
+              < dimension-codim, dimension, const MyGrid,
+                Dune :: GenericGeometry :: LocalGeometry > LocalGeometry;
+     *    \endcode
+     *  - Both geometries can be build by calling the constructor taking
+     *    a DUNE grid type and an instance of an arbitrary class with a method
+            \code
+              const FieldVector<  ctype, dimensionworld >& operator[](unsigned int i);
+            \endcode
+     *    The references returned must remain valid during the whole life span
+     *    of the geometry.
+     *  - In MyGrid::Entity<0> the following methods can then be easily implemented:
+     *    - geometry(): this requires the knowledge of the dune geometry type of the entity
+     *      and the coordinates of the corner points.
+     *    - geometryInFather(): The corner points for each child in the
+     *      reference element of the father can be used to construct the local geometry -
+     *      note that this geometry is mostly affine and these geometries can be
+     *      precomputed and stored.
+     *    .
+     *  - For the Dune::Intersection class the geometries the following implementations for the geometries can be used:
+     *    - intersectionGlobal(): can be implemented in the same way as the geometry of the
+     *      entity using the coordinates of the corners of the intersection.
+     *      Alternatively, in the case of a conform intersection,
+     *      the class GenericGeometry::Geometry provides a possibility
+     *      to construct traces of a given geometry, e.g., a reference mapping
+     *      restricted to a codimension one subentities of the reference
+     *      element. This is achieved by calling the constructor on the
+     *      GenericGeometry::Geometry class (with the codim template equal to
+     *      one) passing a codimension zero geometry implementation and the number of the
+     *      codimension one subentity (in DUNE numbering).
+     *      \code
+            GenericGeometry::Geometry<myGridDim-1,myWorldDim,MyGrid>
+                             (inside->geometry(),numberInSelf());
+     *      \endcode
+     *    - intersectionInSelf()/intersectionInNeighbor():
+     *      A similar strategy as described above for the intersectionGlobal
+     *      can also be used for the geometry mapping to the codimension zero
+     *      reference element. Either the corners of the intersection in
+     *      local coordinates can be used in the construction of the local
+     *      geometries, or (for conform intersections) the traces can be used,
+     *      passing an identity mapping as codimension zero geometry.
+     *      The GenericGeometry::GenericReferenceElement provides these
+     *      mappings directly via the template method
+     *      GenericGeometry::GenericReferenceElement::mapping.
+     *      The return value of this method can be directly used to construct
+     *      a GenericGeometry::Geometry instance:
+     *      \code
+            typedef GenericReferenceElementContainer<ctype,myGridDim> RefElementContType;
+            RefElementContType refElemCont;
+            const RefElementContType::value_type& refElem=refElemCont(insideGeometryType);
+            GenericGeometry::Geometry<myGridDim-1,myGridDim,MyGrid>(refElem.mapping(numberInSelf()));
+     *      \endcode
+     *    - integrationOuterNormal(): the generic geometry implementation provides a method
+     *      to compute the integration outer normals, so that the following code
+     *      fragment can be used:
+            \code
+               typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
+               const Geometry &geo = inside()->geometry();
+               FieldVector< ctype, dimension > x( intersectionSelfLocal().global( local ) );
+               return Grid :: getRealImplementation( geo ).normal( numberInSelf(), x );
+            \endcode
+     *    .
+     *  - To add geometries for subentitiies of codim>0
+     *    given a entity en of codimension zero and the subentity number subNr
+     *    in DUNE numbering:
+     *    - geometry: the geometry can be constructed by the following line of code
+            \code
+            GenericGeometry::Geometry<myGridDim-codim,myWorldDim,MyGrid>
+                             (en.geometry(),subNr);
+            \endcode
+     *    .
+     *  .
+     *
      */
 
     // BasicGeometry
@@ -361,7 +464,6 @@ namespace Dune
         assert( mapping_ != 0 );
         return *mapping_;
       }
-
       template< int fatherdim >
       Mapping *
       subMapping ( const BasicGeometry< fatherdim, Traits > &father, int i )
@@ -372,6 +474,7 @@ namespace Dune
                                :: template dune2generic< codim >( ftid, i );
         return father.mapping().template trace< codim >( j );
       }
+
     };
 
 
