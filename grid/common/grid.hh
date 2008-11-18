@@ -1172,7 +1172,7 @@ namespace Dune {
      * just typename ::ImplementationType.
      */
     template<class T>
-    class ReturnImplementationType : public T // implement friendship via derivation
+    class ReturnImplementationType : public T // implement friendship via subclassing
     {
     public:
       /** @brief The correct type of the implementation to return. */
@@ -1183,7 +1183,7 @@ namespace Dune {
     };
 
     template<class T>
-    class ReturnImplementationType<const T> : public T // implement friendship via derivation
+    class ReturnImplementationType<const T> : public T // implement friendship via subclassing
     {
     public:
       typedef const typename T::ImplementationType ImplementationType;
@@ -1263,7 +1263,9 @@ namespace Dune {
         typedef Dune::LevelIterator<cd,pitype,const GridImp,LevelIteratorImp> LevelIterator;
         typedef Dune::LeafIterator<cd,pitype,const GridImp,LeafIteratorImp> LeafIterator;
       };
-
+    private:
+      friend class Dune::Entity<cd, dim, const GridImp, EntityImp>;
+      typedef EntityPointerImp<cd,const GridImp> EntityPointerImpl;
     };
 
     template <PartitionIteratorType pitype>

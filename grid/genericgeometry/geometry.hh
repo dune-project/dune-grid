@@ -177,7 +177,7 @@ namespace Dune
      *
      *  Parameters shared by all codimensions are summarized into one class
      *  parameter called Traits. The following default implementation can be
-     *  used (via derivation) to provide the necessary information. It contains
+     *  used (via subclassing) to provide the necessary information. It contains
      *  exactly the required fields:
      *  \code
      *  template< class ctype, int dimG, int dimW >

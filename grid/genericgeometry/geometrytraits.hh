@@ -200,7 +200,7 @@ namespace Dune
      *
      *  For every grid implementation using the generic geometries, this
      *  structure must be specialized. The following default implementation
-     *  can be used (via derivation) to provide the necessary information. It
+     *  can be used (via subclassing) to provide the necessary information. It
      *  contains exactly the fields that are necessary:
      *  \code
      *  template< class ctype, int dimG, int dimW >
@@ -268,7 +268,7 @@ namespace Dune
      *
      *  For every grid implementation using the generic geometries, this
      *  structure must be specialized. The following default implementation
-     *  can be used (via derivation) to provide the necessary information. It
+     *  can be used (via subclassing) to provide the necessary information. It
      *  contains exactly the fields that are necessary:
      *  \code
      *  template< class ctype, int dimG, int dimW >

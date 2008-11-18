@@ -5,6 +5,7 @@
 
 #include <dune/common/typetraits.hh>
 #include "grid.hh"
+#include "entitypointer.hh"
 
 namespace Dune
 {
@@ -184,7 +185,8 @@ namespace Dune
         typename GridImp::GridFamily> ;
 
     /* make entity pointer friend */
-    friend class GridImp::template Codim<cd>::EntityPointer;
+    friend class Dune::EntityPointer<GridImp,
+        typename GridImp::GridFamily::Traits::template Codim<cd>::EntityPointerImpl>;
 
     //! return reference to the real implementation
     EntityImp<cd,dim,GridImp> & getRealImp() { return realEntity; }
@@ -257,9 +259,6 @@ namespace Dune
 
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
-
-    /* make entity pointer friend */
-    friend class GridImp::template Codim<0>::EntityPointer;
 
     enum {
       //! Know your own codimension
@@ -476,6 +475,10 @@ namespace Dune
         GridImp::dimension, GridImp::dimensionworld,
         typename GridImp::ctype,
         typename GridImp::GridFamily> ;
+
+    /* make entity pointer friend */
+    friend class Dune::EntityPointer<GridImp,
+        typename GridImp::GridFamily::Traits::template Codim<0>::EntityPointerImpl>;
 
     //! return reference to the real implementation
     EntityImp<0,dim,GridImp> & getRealImp() { return realEntity; }
