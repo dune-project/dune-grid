@@ -196,10 +196,13 @@ namespace Dune
        at the momnent
        @ param continuous continuous or not (i.e polOrd = 0 ==> discontinuous) default is discontinuous
      */
-    template<class VectorType, class IndexSetType >
-    inline void displayVector(const std::string name,
-                              const VectorType & data, const IndexSetType & indexSet,
-                              const int polOrd , int dimRange, bool continuous = false);
+    template< class VectorType, class IndexSetType >
+    inline void displayVector ( const std::string name,
+                                const VectorType &data,
+                                const IndexSetType &indexSet,
+                                const int polOrd,
+                                const unsigned int dimRange,
+                                bool continuous = false );
 
     //! Calls the display of the grid and draws the discrete function
     //! if discretefunction is NULL, then only the grid is displayed

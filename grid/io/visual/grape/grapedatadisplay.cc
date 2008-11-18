@@ -555,9 +555,11 @@ namespace Dune
                 const VectorType & data,
                 const IndexSetType & indexSet,
                 const int polOrd,
-                const int dimRange,
+                const unsigned int dimRange,
                 bool continuous )
   {
+    typedef typename IndexSetType::IndexType IndexType;
+
     // polOrd < 0 makes no sense
     assert( polOrd >= 0 );
 
@@ -570,9 +572,9 @@ namespace Dune
     double min = data[0];
     double max = data[0];
 
-    int cd = (polOrd == 0) ? 0 : dim ;
-
-    for(int i=0; i<indexSet.size(cd)*dimRange; ++i)
+    const int codim = (polOrd == 0) ? 0 : dim;
+    const IndexType dataSize = indexSet.size( codim ) * dimRange;
+    for( IndexType i = 0; i < dataSize; ++i )
     {
       min = std::min(data[i],min);
       max = std::max(data[i],max);
