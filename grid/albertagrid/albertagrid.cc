@@ -774,7 +774,6 @@ namespace Dune
       , travStack_(travStack)
       , level_ ( level )
       , geo_ (GeometryImp())
-      , geoImp_( grid_.getRealImplementation(geo_) )
       , builtgeometry_    (false)
       , localFatherCoords_()
       , localFCoordCalced_(false)
@@ -793,7 +792,6 @@ namespace Dune
       , travStack_(org.travStack_)
       , level_    (org.level_ )
       , geo_      (org.geo_)
-      , geoImp_   ( grid_.getRealImplementation(geo_) )
       , builtgeometry_    (false)
       , localFatherCoords_()
       , localFCoordCalced_(false)
@@ -819,7 +817,6 @@ namespace Dune
       , travStack_(0)
       , level_ (level)
       , geo_ (GeometryImp())
-      , geoImp_( grid_.getRealImplementation(geo_) )
       , builtgeometry_(false)
       , localFatherCoords_()
       , localFCoordCalced_(false)
@@ -827,6 +824,7 @@ namespace Dune
       , edge_             (-1)
       , vertex_           (-1)
   {}
+
 
   template<int codim, int dim, class GridImp>
   inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
@@ -883,7 +881,7 @@ namespace Dune
       element_ = elInfo_->el;
     else
       element_ = 0;
-    builtgeometry_ = geoImp_.builtGeom(grid_,elInfo_,face,edge,vertex);
+    builtgeometry_ = geoImp().buildGeom( grid_, elInfo_, face, edge, vertex );
     localFCoordCalced_ = false;
   }
 

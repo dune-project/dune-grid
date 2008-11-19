@@ -73,7 +73,6 @@ namespace Dune
   typedef ALBERTA REAL albertCtype;
 
   template<int codim, int dim, class GridImp> class AlbertaGridEntity;
-  template<int codim, int dim, class GridImp> class AlbertaGridMakeableEntity;
   template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridTreeIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridLeafIterator;
   template<int cd, class GridImp> class AlbertaGridEntityPointer;
@@ -352,7 +351,6 @@ namespace Dune
     friend class AlbertaGrid < dim , dimworld >;
     friend class AlbertaGridEntity < 0, dim, GridImp>;
     friend class AlbertaGridTreeIterator < cd, All_Partition,GridImp>;
-    friend class AlbertaGridMakeableEntity<cd,dim,GridImp>;
     friend class AlbertaGridEntityPointer<cd,GridImp>;
 
     typedef AlbertaGridGeometry<dim-cd,dimworld,GridImp> GeometryImp;
@@ -428,6 +426,18 @@ namespace Dune
 
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
+
+  private:
+    const GeometryImp &geoImp () const
+    {
+      return GridImp :: getRealImplementation( geo_ );
+    }
+
+    GeometryImp &geoImp ()
+    {
+      return GridImp :: getRealImplementation( geo_ );
+    }
+
   private:
     // the grid this entity belong to
     const GridImp &grid_;
@@ -449,8 +459,6 @@ namespace Dune
 
     //! the current geometry
     GeometryObject geo_;
-    //! the reference to the real imp object inside of GeometryObject
-    mutable GeometryImp & geoImp_;
 
     //! true if geometry has been constructed
     mutable bool builtgeometry_;
@@ -498,7 +506,6 @@ namespace Dune
     friend class AlbertaGridIntersectionIterator <GridImp>;
     friend class AlbertaGridHierarchicIterator <GridImp>;
     friend class AlbertaGridTreeIterator <0,All_Partition,GridImp>;
-    friend class AlbertaGridMakeableEntity<0,dim,GridImp>;
     friend class AlbertaGridEntityPointer<0,GridImp>;
   public:
     template <int cd>
@@ -822,7 +829,6 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
 
-    //typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
     typedef typename SelectEntityImp<0,GridImp::dimension,GridImp>::EntityImp EntityImp;
 
     //! the normal Constructor
@@ -1138,7 +1144,6 @@ namespace Dune
 
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
-    //typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
 
     //! Constructor making end iterator
     AlbertaGridTreeIterator(const AlbertaGridTreeIterator<cd,pitype,GridImp> & org );
