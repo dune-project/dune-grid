@@ -142,7 +142,8 @@ namespace Dune {
 
         typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU3dGridLeafIterator> LeafIterator;
 
-        typedef Dune::EntityPointer<const GridImp,ALU3dGridEntityPointer<cd,const GridImp> > EntityPointer;
+        typedef ALU3dGridEntityPointer< cd, const GridImp > EntityPointerImpl;
+        typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
 
         template <PartitionIteratorType pitype>
         struct Partition
