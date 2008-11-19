@@ -881,7 +881,7 @@ namespace Dune
       element_ = elInfo_->el;
     else
       element_ = 0;
-    builtgeometry_ = geoImp().buildGeom( grid_, elInfo_, face, edge, vertex );
+    builtgeometry_ = geoImp().builtGeom( grid_, elInfo_, face, edge, vertex );
     localFCoordCalced_ = false;
   }
 
