@@ -64,7 +64,7 @@ extern "C"
 #include <alberta.h>
 
 // for version 1.2 thing are different
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
 
 // face is not defined but should be the value of edge
 #ifndef FACE

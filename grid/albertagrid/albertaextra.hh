@@ -48,7 +48,7 @@ inline void fillMacroInfo(TRAVERSE_STACK *stack,
   /* Alberta version */
   fill_macro_info(stack->traverse_mesh,mel,elinfo);
 
-#if defined ALBERTA_VERSION_12 && (DIM == 2)
+#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 2)
   // only works for dim 2 at the moment
   // because there we have a different fill_elinfo method
   // quick solution, the method fill_macro_info has to be rewritten
@@ -207,7 +207,7 @@ inline static TRAVERSE_STACK *getTraverseStack(void)
 {
   TRAVERSE_STACK * stack = get_traverse_stack();
 
-#ifndef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION >= 0x200
   initTraverseStack(stack);
 #endif
 
@@ -589,7 +589,7 @@ namespace AlbertHelp
       }
     }
 
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
     // we dont need Leaf Data
     inline static void initLeafData(LEAF_DATA_INFO * linfo)
     {
@@ -1023,7 +1023,7 @@ namespace AlbertHelp
 #endif
   }
 
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
   template <int dim>
   static inline const FE_SPACE* getFeSpace(MESH *mesh, const char *name,
                                            const int(&ndof)[dim+1])
@@ -1049,7 +1049,7 @@ namespace AlbertHelp
   template <int dim>
   static inline void initDofAdmin(MESH *mesh)
   {
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
     enum { nNodes = dim+1 };
     enum { vertex = 0, center = dim, face = dim-1, edge = 1 };
 #else
@@ -1151,7 +1151,7 @@ namespace AlbertHelp
     Alberta_tmpBndStack = 0;
   }
 
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
   // initialize boundary for mesh
   inline const BOUNDARY *initBoundary(MESH * Spmesh, int bound)
   {
@@ -1237,7 +1237,7 @@ namespace AlbertHelp
     for(int i=0; i<mdata->n_total_vertices; i++)
       MSG("coords [%f | %f ]\n",mdata->coords[i][0],mdata->coords[i][1]);
 
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
     for(int i=0; i<mdata->n_macro_elements; i++)
       MSG("bound [%d | %d | %d ]\n",mdata->boundary[i][0],mdata->boundary[i][1],mdata->boundary[i][2]);
 #endif

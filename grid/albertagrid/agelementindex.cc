@@ -3,11 +3,12 @@
 #ifndef __ALBERTGRID_ELMEM_CC__
 #define __ALBERTGRID_ELMEM_CC__
 
-namespace AlbertHelp {
+namespace AlbertHelp
+{
 
   // for vertices not needed now
   // dim = 2 means, we have a vector for element and edge numbering
-#ifdef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION < 0x200
   enum { numOfElNumVec = DIM };
 #else
   enum { numOfElNumVec = DIM_OF_WORLD };

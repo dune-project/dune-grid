@@ -4158,7 +4158,7 @@ namespace Dune
   fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
              ALBERTA EL_INFO *elinfo, bool hierarchical, bool leaf) const
   {
-#ifndef ALBERTA_VERSION_12
+#if DUNE_ALBERTA_VERSION >= 0x200
     // the alberta version of filling an EL_INFO structure
     ALBERTA fill_elinfo(ichild,elinfo_old,elinfo);
 #else
