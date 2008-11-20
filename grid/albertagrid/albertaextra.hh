@@ -6,10 +6,12 @@
 #ifndef DUNE_ALBERTAEXTRA_HH
 #define DUNE_ALBERTAEXTRA_HH
 
-#if HAVE_ALBERTA
-
 #include <algorithm>
 #include <cstring>
+
+#include <dune/grid/albertagrid/albertaheader.hh>
+
+#if HAVE_ALBERTA
 
 #ifdef __ALBERTApp__
 namespace Albert {
@@ -25,6 +27,7 @@ namespace Albert {
 #define getDofVec( vec, drv ) \
   (assert(drv != 0); (vec = (drv)->vec); assert(vec != 0));
 
+#if DUNE_ALBERTA_VERSION < 0x200
 //! recompute setting of neighbours, because macro_el_info of ALBERTA does
 //! that wrong for the Dune context.
 inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
@@ -40,6 +43,7 @@ inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
   const REAL * const * neighcoord  = mel->neigh[neigh]->coord;
   std::memcpy(coord[neigh],neighcoord[oppvx],sizeof(REAL_D));
 }
+#endif
 
 //! if level iterator is used macro_el_info does not the right thing
 inline void fillMacroInfo(TRAVERSE_STACK *stack,
@@ -1199,7 +1203,11 @@ namespace AlbertHelp
     MACRO_DATA* mdata = read_macro(filename);
 
     // create mesh
-    MESH* mesh = GET_MESH(dim, name, mdata, 0);
+#if DUNE_ALBERTA_VERSION >= 0x201
+    MESH* mesh = GET_MESH(dim, name, mdata, NULL, NULL );
+#else
+    MESH* mesh = GET_MESH(dim, name, mdata, NULL );
+#endif
 
     // free macro data
     free_macro_data(mdata);
