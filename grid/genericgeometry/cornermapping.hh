@@ -446,7 +446,7 @@ namespace Dune
       };
 
     private:
-      const GlobalCoordinate coords_[ size ];
+      GlobalCoordinate coords_[ size ];
 
     public:
       template< class CoordVector >
