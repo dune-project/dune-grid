@@ -105,6 +105,11 @@ namespace Dune {
       return UG_NS<dim>::boundaryId(center_, neighborCount_);
     }
 
+    /** \brief Returns true, because UG level intersections are always conforming */
+    bool conforming() const {
+      return true;
+    }
+
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
@@ -268,6 +273,13 @@ namespace Dune {
         DUNE_THROW(GridError, "Calling boundaryId() for a non-boundary intersection!");
 #endif
       return UG_NS<dim>::boundaryId(center_, neighborCount_);
+    }
+
+    /** \brief Returns false, because UG leaf intersections may be nonconforming
+        \todo A better implementation should be easily possible!
+     */
+    bool conforming() const {
+      return false;
     }
 
     //! intersection of codimension 1 of this neighbor with element where
