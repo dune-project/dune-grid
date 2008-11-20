@@ -48,7 +48,7 @@ inline void fillMacroInfo(TRAVERSE_STACK *stack,
   /* Alberta version */
   fill_macro_info(stack->traverse_mesh,mel,elinfo);
 
-#if DIM == 2
+#if defined ALBERTA_VERSION_12 && (DIM == 2)
   // only works for dim 2 at the moment
   // because there we have a different fill_elinfo method
   // quick solution, the method fill_macro_info has to be rewritten
