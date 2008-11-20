@@ -419,8 +419,54 @@ namespace Dune
 
 
 
+    // CoordStorage
+    // ------------
+
+    /** \class CoordStorage
+     *  \ingroup GenericGeometry
+     *  \brief
+     */
+    template< class CoordTraits, class Topology, unsigned int dimW >
+    class CoordStorage
+    {
+      typedef CoordStorage< CoordTraits, Topology, dimW > This;
+
+    public:
+      static const unsigned int size = Topology :: numCorners;
+
+      static const unsigned int dimWorld = dimW;
+
+      typedef typename CoordTraits :: template Vector< dimWorld > :: type
+      GlobalCoordinate;
+
+      template< class SubTopology >
+      struct SubStorage
+      {
+        typedef CoordStorage< CoordTraits, SubTopology, dimWorld > type;
+      };
+
+    private:
+      const GlobalCoordinate coords_[ size ];
+
+    public:
+      template< class CoordVector >
+      explicit CoordStorage ( const CoordVector &coords )
+      {
+        for( unsigned int i = 0; i < size; ++i )
+          coords_[ i ] = coords[ i ];
+      }
+
+      const GlobalCoordinate &operator[] ( unsigned int i ) const
+      {
+        return coords_[ i ];
+      }
+    };
+
+
+
     // CoordPointerStorage
     // -------------------
+
     /** \class CoordPointerStorage
      *  \ingroup GenericGeometry
      *  \brief

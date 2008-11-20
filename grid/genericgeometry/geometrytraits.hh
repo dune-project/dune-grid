@@ -158,7 +158,7 @@ namespace Dune
       template< class Topology >
       struct Mapping
       {
-        typedef CoordPointerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
+        typedef CoordStorage< CoordTraits, Topology, dimWorld > CornerStorage;
         typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, alwaysAffine > type;
       };
 
