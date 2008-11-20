@@ -57,6 +57,12 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       HAVE_ALBERTA="1"],
       AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_PATH]))
 
+    if test "x$HAVE_ALBERTA" = "x1" ; then
+      if test "$ALBERTA_VERSION" = "2.0" ; then
+        AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="2.1"],[],[#include <alberta.h>])
+      fi
+    fi
+
     CPPFLAGS="$REM_CPPFLAGS -I$ALBERTA_INCLUDE_PATH"
     REM_CPPFLAGS=
 
@@ -68,7 +74,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     ac_save_CC="$CC"
     CC="${SHELL} libtool $CC"
     # if header is found...
-    if test x$HAVE_ALBERTA = x1 ; then
+    if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_LIB(alberta_util,[alberta_calloc],
         [ALBERTA_LIBS="-lalberta_util"
          ALBERTA_LDFLAGS="-L$ALBERTA_LIB_PATH"
@@ -78,7 +84,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     fi
 
     # still everything found?
-    if test x$HAVE_ALBERTA = x1 ; then
+    if test "x$HAVE_ALBERTA" = "x1" ; then
       # construct libname
       # the zero is the sign of the no-debug-lib
       # define varaible lib name depending on problem and world dim, to change
@@ -113,6 +119,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x102], [Alberta version found by configure])
     elif test "$ALBERTA_VERSION" = "2.0" ; then
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure])
+    elif test "$ALBERTA_VERSION" = "2.1" ; then
+      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x201], [Alberta version found by configure])
     else
       AC_MSG_ERROR([Internal Inconsistency: Invalid Alberta version reported: $ALBERTA_VERSION.])
     fi
@@ -142,7 +150,6 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   LDFLAGS="$ac_save_LDFLAGS"
 
   DUNE_ADD_SUMMARY_ENTRY([ALBERTA],[$with_alberta])
-
 ])
 
 # asks for problem-dimension and world-dimension to pass on to Alberta
