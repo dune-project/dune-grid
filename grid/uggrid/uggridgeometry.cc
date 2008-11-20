@@ -213,7 +213,6 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   return jac_inverse_;
 }
 
-
 ///////////////////////////////////////////////////////////////////////
 //
 // The specializations 1->2, 2->3
@@ -394,14 +393,6 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, 1>& local) 
 }
 
 template <class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype,2,1>& Dune::UGGridGeometry<1,2,GridImp>::
-jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
-{
-  DUNE_THROW(NotImplemented, "Not implemented yet!");
-  return jacobianInverseTransposed_;
-}
-
-template <class GridImp>
 inline typename GridImp::ctype Dune::UGGridGeometry<2,3,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
 {
@@ -426,12 +417,4 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, 2>& local) 
     return UG_NS<3>::SurfaceElement(corners(), tmp, &local[0]);
 
   }
-}
-
-template <class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype,3,2>& Dune::UGGridGeometry<2,3,GridImp>::
-jacobianInverseTransposed(const Dune::FieldVector<typename GridImp::ctype, 2>& local) const
-{
-  DUNE_THROW(NotImplemented, "Not implemented yet!");
-  return jacobianInverseTransposed_;
 }

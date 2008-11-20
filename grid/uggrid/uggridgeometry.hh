@@ -51,9 +51,7 @@ namespace Dune {
     {};
 
     void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates) {
-      this->realGeometry.setNumberOfCorners( (type.isSimplex()) ? 3 : 4);
-      for (size_t i=0; i<coordinates.size(); i++)
-        this->realGeometry.coord_[i] = coordinates[i];
+      this->realGeometry.setup(type, coordinates);
     }
 
   };
@@ -69,8 +67,7 @@ namespace Dune {
     {};
 
     void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates) {
-      for (size_t i=0; i<coordinates.size(); i++)
-        this->realGeometry.coord_[i] = coordinates[i];
+      this->realGeometry.setup(type, coordinates);
     }
 
   };
@@ -254,7 +251,7 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridIntersectionIterator;
 
-    friend class UGMakeableGeometry<2,3,GridImp>;
+    typedef typename GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > Base;
 
     typedef typename GridImp::ctype UGCtype;
 
@@ -265,16 +262,25 @@ namespace Dune {
     {elementType_=GeometryType(GeometryType::simplex,2);}
 
     /** \brief Constructor with a geometry type and a set of corners */
-    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates)
-      : GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > (type, coordinates)
+    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates)
     {
       elementType_ = type;
       for (size_t i=0; i<coordinates.size(); i++)
         coord_[i] = coordinates[i];
+
+      // Temporary: reorder coordinates to DUNE ordering
+      std::vector<FieldVector<UGCtype,3> > duneCoordinates(coordinates.size());
+      for (size_t i=0; i<coordinates.size(); i++)
+        duneCoordinates[i] = coordinates[UGGridRenumberer<2>::verticesDUNEtoUG(i, elementType_)];
+
+      // set up base class
+      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
+      Base::operator=(Base(type,coordinates));
     }
 
     //! return the element type identifier (triangle or quadrilateral)
     GeometryType type () const {
+      assert(elementType_==Base::type());
       return elementType_;
     }
 
@@ -311,15 +317,7 @@ namespace Dune {
     // A(l)
     UGCtype integrationElement (const FieldVector<UGCtype, 2>& local) const;
 
-    //! !
-    const FieldMatrix<UGCtype,3,2>& jacobianInverseTransposed (const FieldVector<UGCtype, 2>& local) const;
-
   private:
-
-    void setNumberOfCorners(int n) {
-      assert(n==3 || n==4);
-      elementType_ = GeometryType( (n==3) ? GeometryType::simplex : GeometryType::cube,2);
-    }
 
     //! The element type, either triangle or quadrilateral
     GeometryType elementType_;
@@ -350,7 +348,7 @@ namespace Dune {
     template <class GridImp_>
     friend class UGGridIntersectionIterator;
 
-    friend class UGMakeableGeometry<1,2,GridImp>;
+    typedef typename GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > Base;
 
     typedef typename GridImp::ctype UGCtype;
 
@@ -361,11 +359,15 @@ namespace Dune {
     {}
 
     /** \brief Constructor with a geometry type and a set of corners */
-    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates)
-      : GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > (type, coordinates)
+    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates)
     {
+      //elementType_ = type;
       for (size_t i=0; i<coordinates.size(); i++)
         coord_[i] = coordinates[i];
+
+      // set up base class
+      // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
+      Base::operator=(Base(type,coordinates));
     }
 
     /** \brief Return the element type identifier.  */
@@ -401,9 +403,6 @@ namespace Dune {
 
     // A(l)
     UGCtype integrationElement (const FieldVector<UGCtype, 1>& local) const;
-
-    //! can only be called for dim=dimworld!
-    const FieldMatrix<UGCtype,2,1>& jacobianInverseTransposed (const FieldVector<UGCtype, 1>& local) const;
 
   private:
 
