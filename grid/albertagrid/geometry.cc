@@ -206,30 +206,33 @@ namespace Dune
     }
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<albertCtype, cdim> AlbertaGridGeometry<mydim,cdim,GridImp>::
-  global(const FieldVector<albertCtype, mydim>& local) const
+  template< int mydim, int cdim, class GridImp >
+  inline FieldVector< albertCtype, cdim >
+  AlbertaGridGeometry< mydim, cdim, GridImp>
+  :: global ( const FieldVector< albertCtype, mydim > &local ) const
   {
     calcElMatrix();
 
-    globalCoord_ = coord_[0];
-    elMat_.umv(local,globalCoord_);
-    return globalCoord_;
+    FieldVector< albertCtype, cdim > y = coord_[ 0 ];
+    elMat_.umv( local, y );
+    return y;
   }
 
   //local implementation for mydim < cdim
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<albertCtype, mydim> AlbertaGridGeometry<mydim,cdim,GridImp>::
-  local(const FieldVector<albertCtype, cdim>& global) const
+  template< int mydim, int cdim, class GridImp >
+  inline FieldVector< albertCtype, mydim >
+  AlbertaGridGeometry<mydim,cdim,GridImp>
+  :: local ( const FieldVector< albertCtype, cdim > &global ) const
   {
-    if(!builtinverse_)
+    if( !builtinverse_ )
       buildJacobianInverseTransposed();
 
-    globalCoord_  = global;
-    globalCoord_ -= coord_[0];
-    FMatrixHelp::multAssignTransposed(Jinv_,globalCoord_,localCoord_);
+    FieldVector< albertCtype, cdim > y = global;
+    y -= coord_[ 0 ];
 
-    return localCoord_;
+    FieldVector< albertCtype, mydim > x;
+    FMatrixHelp::multAssignTransposed( Jinv_, y, x );
+    return x;
   }
 
   // determinant of one Geometry, here line

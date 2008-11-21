@@ -9,6 +9,8 @@ namespace Dune
 {
 
   // AlbertaGridGeometry
+  // -------------------
+
   /*!
      Defines the geometry part of a mesh entity. Works for all dimensions, element types and dime
      of world. Provides reference element and mapping between local and global coordinates.
@@ -132,17 +134,8 @@ namespace Dune
     // calculates the volume of the element
     albertCtype elDeterminant () const;
 
-    // temporary need vector
-    mutable FieldVector<albertCtype, mydim+1> tmpVec_;
-
     //! the vertex coordinates
     mutable FieldMatrix<albertCtype,mydim+1,cdim> coord_;
-
-    //! storage for global coords
-    mutable FieldVector<albertCtype, cdim> globalCoord_;
-
-    //! storage for local coords
-    mutable FieldVector<albertCtype, mydim> localCoord_;
 
     //! Which Face of the Geometry 0...dim+1
     int face_;
