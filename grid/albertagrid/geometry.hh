@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_GEOMETRY
 #define DUNE_ALBERTA_GEOMETRY
 
+#include <dune/grid/common/geometry.hh>
+
 namespace Dune
 {
 
@@ -36,7 +38,7 @@ namespace Dune
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    const GeometryType & type () const;
+    GeometryType type () const;
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const;
@@ -178,7 +180,6 @@ namespace Dune
     mutable FieldVector<albertCtype,cdim> tmpZ_;
 
     mutable FieldVector<albertCtype,mydim> AT_x_;
-    const GeometryType myGeomType_;
     const albertCtype detFactor_;
   };
 

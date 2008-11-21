@@ -23,8 +23,7 @@ namespace Dune
   template <int mydim, int cdim, class GridImp>
   inline AlbertaGridGeometry<mydim,cdim,GridImp>::
   AlbertaGridGeometry()
-    : myGeomType_(GeometryType::simplex,mydim)
-      , detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
+    : detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
   {
     // make empty element
     initGeom();
@@ -33,8 +32,7 @@ namespace Dune
   template <int mydim, int cdim, class GridImp>
   inline AlbertaGridGeometry<mydim,cdim,GridImp>::
   AlbertaGridGeometry(const int child, const int orientation)
-    : myGeomType_(GeometryType::simplex,mydim)
-      , detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
+    : detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
   {
     // make empty element
     buildGeomInFather(child,orientation);
@@ -94,10 +92,11 @@ namespace Dune
     ss << "} \n";
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline const GeometryType & AlbertaGridGeometry<mydim,cdim,GridImp>::type() const
+  template< int mydim, int cdim, class GridImp >
+  inline GeometryType
+  AlbertaGridGeometry< mydim, cdim, GridImp > :: type () const
   {
-    return myGeomType_;
+    return GeometryType( GeometryType :: simplex, mydim );
   }
 
   template <int mydim, int cdim, class GridImp>
