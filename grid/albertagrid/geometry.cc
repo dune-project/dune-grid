@@ -8,7 +8,7 @@
 namespace Dune
 {
 
-  static ALBERTA EL_INFO statElInfo[DIM+1];
+  //static ALBERTA EL_INFO statElInfo[DIM+1];
 
   // AlbertaGridGeometry
   // -------------------
@@ -23,7 +23,6 @@ namespace Dune
   template <int mydim, int cdim, class GridImp>
   inline AlbertaGridGeometry<mydim,cdim,GridImp>::
   AlbertaGridGeometry()
-    : detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
   {
     // make empty element
     initGeom();
@@ -32,7 +31,6 @@ namespace Dune
   template <int mydim, int cdim, class GridImp>
   inline AlbertaGridGeometry<mydim,cdim,GridImp>::
   AlbertaGridGeometry(const int child, const int orientation)
-    : detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial )
   {
     // make empty element
     buildGeomInFather(child,orientation);
@@ -390,11 +388,13 @@ namespace Dune
   }
 
   template <int mydim, int cdim, class GridImp>
-  inline albertCtype AlbertaGridGeometry<mydim,cdim,GridImp>::
-  volume () const
+  inline albertCtype
+  AlbertaGridGeometry<mydim,cdim,GridImp> :: volume () const
   {
     assert( calcedDet_ );
-    return detFactor_ * elDet_;
+    const albertCtype refVolume
+      = albertCtype( 1 ) / albertCtype( Factorial< mydim > :: factorial );
+    return refVolume * elDet_;
   }
 
   template <int mydim, int cdim, class GridImp>

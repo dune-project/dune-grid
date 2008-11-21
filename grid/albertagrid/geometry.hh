@@ -168,7 +168,6 @@ namespace Dune
     mutable FieldVector<albertCtype,cdim> tmpZ_;
 
     mutable FieldVector<albertCtype,mydim> AT_x_;
-    const albertCtype detFactor_;
   };
 
 }
