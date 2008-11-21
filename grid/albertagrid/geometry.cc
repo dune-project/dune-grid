@@ -39,38 +39,9 @@ namespace Dune
   }
 
   template <int mydim, int cdim, class GridImp>
-  inline ALBERTA EL_INFO * AlbertaGridGeometry<mydim,cdim,GridImp>::
-  makeEmptyElInfo()
-  {
-    ALBERTA EL_INFO * elInfo = &statElInfo[mydim];
-
-    elInfo->mesh = 0;
-    elInfo->el = 0;
-    elInfo->parent = 0;
-    elInfo->macro_el = 0;
-    elInfo->level = 0;
-  #if DIM > 2
-    elInfo->orientation = 0;
-    elInfo->el_type = 0;
-  #endif
-
-    for(int i =0; i<mydim+1; i++)
-    {
-      for(int j =0; j< cdim; j++)
-      {
-        elInfo->coord[i][j] = 0.0;
-        elInfo->opp_coord[i][j] = 0.0;
-      }
-      VERTEX_BOUNDARY_ID(elInfo,i) = 0;
-    }
-    return elInfo;
-  }
-
-  template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
   initGeom()
   {
-    elInfo_ = 0;
     face_ = 0;
     edge_ = 0;
     vertex_ = 0;
@@ -476,19 +447,18 @@ namespace Dune
   builtGeom(const GridImp & grid, ALBERTA EL_INFO *elInfo, int face,
             int edge, int vertex)
   {
-    elInfo_ = elInfo;
     face_ = face;
     edge_ = edge;
     vertex_ = vertex;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(elInfo_)
+    if( elInfo != NULL )
     {
       // copy coordinates
       for(int i=0; i<mydim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
+        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
         // copy coordinates
         for(int j=0; j<cdim; ++j) coord_[i][j] = elcoord[j];
       }
@@ -518,21 +488,20 @@ namespace Dune
     enum { dim = 2 };
     enum { dimworld = 2 };
 
-    elInfo_ = elInfo;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(elInfo_)
+    if( elInfo != NULL )
     {
       // copy coordinates
       for(int i=0; i<dim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
+        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
         for(int j=0; j<dimworld; ++j)
           coord_[i][j] = elcoord[j];
       }
 
-      const ALBERTA EL * el = elInfo_->el;
+      const ALBERTA EL *el = elInfo->el;
       assert( el );
       // if leaf element, get determinant from leaf data
       if( IS_LEAF_EL(el) )
@@ -571,21 +540,20 @@ namespace Dune
     enum { dim = 3 };
     enum { dimworld = 3 };
 
-    elInfo_ = elInfo;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(elInfo_)
+    if( elInfo != NULL )
     {
       // copy coordinates
       for(int i=0; i<dim+1; ++i)
       {
-        const ALBERTA REAL_D & elcoord = grid.getCoord(elInfo_, mapVertices(i));
+        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
         for(int j=0; j<dimworld; ++j)
           coord_[i][j] = elcoord[j];
       }
 
-      const ALBERTA EL * el = elInfo_->el;
+      const ALBERTA EL *el = elInfo->el;
       assert( el );
       // if leaf element, get determinant from leaf data
       if( IS_LEAF_EL(el) )
@@ -624,14 +592,13 @@ namespace Dune
   builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom,
                  ALBERTA EL_INFO *elInfo,int face)
   {
-    elInfo_ = elInfo;
     face_ = face;
     edge_   = 0;
     vertex_ = 0;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if(elInfo_)
+    if( elInfo != NULL )
     {
       // just map the point of the global intersection to the local
       // coordinates , this is the default procedure

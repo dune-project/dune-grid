@@ -144,11 +144,6 @@ namespace Dune
     //! storage for local coords
     mutable FieldVector<albertCtype, mydim> localCoord_;
 
-    // make empty EL_INFO
-    ALBERTA EL_INFO * makeEmptyElInfo();
-
-    ALBERTA EL_INFO * elInfo_;
-
     //! Which Face of the Geometry 0...dim+1
     int face_;
 
