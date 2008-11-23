@@ -78,7 +78,7 @@ namespace Dune {
 
       Invalid_Rule = 127
     };
-  };
+  }
 
   /** \brief Abstract base class for quadrature rules
       \ingroup Quadrature

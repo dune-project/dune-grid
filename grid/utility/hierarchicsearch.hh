@@ -107,6 +107,6 @@ namespace Dune
     const IS& is;
   };
 
-}; // end namespace Dune
+} // end namespace Dune
 
 #endif // DUNE_GRID_HIERARCHICSEARCH_HH

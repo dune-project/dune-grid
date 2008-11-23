@@ -82,7 +82,7 @@ namespace Dune
       //! compute on demand
       ComputeOnDemand,
       //! compute in constructor
-      PreCompute,
+      PreCompute
     };
 
 

@@ -2432,7 +2432,7 @@ namespace Dune {
     typename Traits::template Codim<cd>::template Partition<All_Partition>::LeafIterator leafbegin () const
     {
       return levelbegin<cd,All_Partition>(maxLevel());
-    };
+    }
 
     //! return LeafIterator which points behind the last entity in maxLevel
     template<int cd>
