@@ -73,9 +73,13 @@ namespace Dune
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
 
+    /** \brief Export if this grid view is conforming */
     enum { conforming = Traits :: conforming };
 
+    /** \brief Dimension of the grid */
     enum { dimension = Grid :: dimension };
+
+    /** \brief Dimension of the world */
     enum { dimensionworld = Grid :: dimensionworld };
 
   public:
@@ -83,6 +87,7 @@ namespace Dune
       : imp_( imp )
     {}
 
+    /** \brief Copy constructor */
     GridView ( const ThisType &other )
       : imp_( other.imp_ )
     {}
