@@ -2313,6 +2313,17 @@ namespace Dune {
     }
 #endif
 
+    /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
+
+       Sequential here means that the whole grid is living on one process even if your program is running
+       in parallel.
+       @see YaspGrid(MPI_Comm comm, Dune::FieldVector<ctype, dim>, Dune::FieldVector<int, dim> s,  Dune::FieldVector<bool, dim> periodic, int overlap)
+       for constructing one parallel grid decomposed between the processors.
+       @param L extension of the domain
+       @param s number of cells on coarse mesh in each direction
+       @param periodic tells if direction is periodic or not
+       @param size of overlap on coarsest grid (same in all directions)
+     */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
               Dune::FieldVector<bool, dim> periodic, int overlap)
