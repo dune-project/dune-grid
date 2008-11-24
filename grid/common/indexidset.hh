@@ -113,7 +113,7 @@ namespace Dune
      */
     /*
        We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     IndexType index (const typename remove_const<GridImp>::type::
@@ -150,7 +150,7 @@ namespace Dune
      */
     /*
        We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     IndexType subIndex (const typename remove_const<GridImp>::type::
@@ -436,7 +436,7 @@ namespace Dune
     //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitely.
     /*
        We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     IdType id (const typename remove_const<GridImp>::type::
@@ -448,7 +448,7 @@ namespace Dune
     //! Get id of subentity i of codim cc of a codim 0 entity.
     /*
        We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
      */
     template<int cc>
     IdType subId (const typename remove_const<GridImp>::type::
@@ -495,7 +495,7 @@ namespace Dune
     //! get id of subentity i of codim cc
     /*
        We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
+       because the const class is not instantiated yet.
        This default implementation uses the entity's entity() method. This is
        slow but works by default for ervery id set implementation.
      */
