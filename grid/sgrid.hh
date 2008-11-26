@@ -1665,7 +1665,7 @@ namespace Dune {
       return this->getRealImplementation(e);
     }
 
-    // diasable copy and assign
+    // disable copy and assign
     SGrid(const SGrid &) {};
     SGrid & operator = (const SGrid &) { return *this; };
     // generate SGrid
@@ -1687,7 +1687,7 @@ namespace Dune {
     FieldVector<sgrid_ctype, dim> *h;    // mesh size per direction
     mutable CubeMapper<dim> *mapper;     // a mapper for each level
 
-    // faster implemantation od subIndex
+    // faster implementation of subIndex
     mutable array <int,dim> zrefStatic;   // for subIndex of SEntity
     mutable array <int,dim> zentityStatic; // for subIndex of SEntity
   };
