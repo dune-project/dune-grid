@@ -93,8 +93,9 @@ namespace AlbertHelp {
   template <int md, int cd>
   struct MapVertices
   {
-    static int mapVertices (int i, int face, int edge, int vertex)
+    static int mapVertices ( int subEntity, int i )
     {
+      assert( subEntity == 0 );
       return i;
     }
   };
@@ -103,13 +104,11 @@ namespace AlbertHelp {
   template <>
   struct MapVertices<1,2>
   {
-    static int mapVertices (int i, int face, int edge, int vertex)
+    static int mapVertices ( int subEntity, int i )
     {
-      assert( i >= 0);
-      assert( i < 2 );
-      assert( face >= 0 );
-      assert( face <  3 );
-      return ALBERTA AlbertHelp::localTriangleFaceNumber[face][i];
+      assert( (subEntity >= 0) && (subEntity < 3) );
+      assert( (i >= 0) && (i < 2) );
+      return ALBERTA AlbertHelp :: localTriangleFaceNumber[ subEntity ][ i ];
     }
   };
 
@@ -117,14 +116,11 @@ namespace AlbertHelp {
   template <>
   struct MapVertices<2,3>
   {
-    static int mapVertices (int i, int face, int edge, int vertex)
+    static int mapVertices ( int subEntity, int i )
     {
-      // we have 3 vertices each of the 4 faces
-      assert( i >= 0);
-      assert( i < 3 );
-      assert( face >= 0 );
-      assert( face <  4 );
-      return ALBERTA AlbertHelp::localDuneTetraFaceNumber[face][i];
+      assert( (subEntity >= 0) && (subEntity < 4) );
+      assert( (i >= 0) && (i < 3) );
+      return ALBERTA AlbertHelp :: localDuneTetraFaceNumber[ subEntity ][ i ];
     }
   };
 
@@ -132,14 +128,12 @@ namespace AlbertHelp {
   template <>
   struct MapVertices<1,3>
   {
-    static int mapVertices (int i, int face, int edge, int vertex)
+    static int mapVertices ( int subEntity, int i )
     {
-      assert( i >= 0 );
-      assert( i < 2  );
-      assert( edge >= 0 );
-      assert( edge < 6 );
-      return ALBERTA AlbertHelp :: localEdgeNumber[
-               ALBERTA AlbertHelp :: dune2AlbertaEdgeMap [edge] ][i];
+      assert( (subEntity >= 0) && (subEntity < 6) );
+      assert( (i >= 0) && (i < 2) );
+      const int edge = ALBERTA AlbertHelp :: dune2AlbertaEdgeMap[ subEntity ];
+      return ALBERTA AlbertHelp :: localEdgeNumber[ edge ][ i ];
     }
   };
 
@@ -147,10 +141,10 @@ namespace AlbertHelp {
   template <int cd>
   struct MapVertices<0,cd>
   {
-    static int mapVertices (int i, int face, int edge, int vertex)
+    static int mapVertices ( int subEntity, int i )
     {
-      // just return number of vertex
-      return vertex;
+      assert( i == 0 );
+      return subEntity;
     }
   };
 

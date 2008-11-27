@@ -8,21 +8,62 @@
 namespace Dune
 {
 
-  //static ALBERTA EL_INFO statElInfo[DIM+1];
+  namespace Alberta
+  {
+
+    template< class ctype, int cdim, int mydim >
+    struct MatrixOps
+    {
+      static ctype invert ( const FieldMatrix< ctype, cdim, mydim > &A,
+                            FieldMatrix< ctype, cdim, mydim > &invAT )
+      {
+        // calc A^T*A
+        FieldMatrix< ctype, mydim, mydim > ATA;
+        FMatrixHelp::multTransposedMatrix( A, ATA );
+
+        // calc invA = A (A^T*A)^-1
+        FieldMatrix< ctype, mydim, mydim > invATA;
+        const ctype det = FMatrixHelp::invertMatrix( ATA, invATA );
+        FMatrixHelp::multMatrix( A, invATA, invAT );
+        return sqrt( det );
+      }
+    };
+
+    template< class ctype, int cdim >
+    struct MatrixOps< ctype, cdim, cdim >
+    {
+      static ctype invert ( const FieldMatrix< ctype, cdim, cdim > &A,
+                            FieldMatrix< ctype, cdim, cdim > &invAT )
+      {
+        const ctype det = FMatrixHelp::invertMatrix_retTransposed( A, invAT );
+        return std::abs( det );
+      }
+    };
+
+  }
+
+
 
   // AlbertaGridGeometry
   // -------------------
 
-  template <int mydim, int cdim, class GridImp>
-  inline int AlbertaGridGeometry<mydim,cdim,GridImp>::mapVertices (int i) const
+  template< int mydim, int cdim, class GridImp >
+  inline int AlbertaGridGeometry< mydim, cdim, GridImp >
+  :: mapVertices( int i, int face, int edge, int vertex )
   {
     // there is a specialisation for each combination of mydim and coorddim
-    return ALBERTA AlbertHelp :: MapVertices<mydim,cdim>::mapVertices(i,face_,edge_,vertex_);
+    return ALBERTA AlbertHelp :: MapVertices< mydim, cdim > :: mapVertices( i, face, edge, vertex );
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline AlbertaGridGeometry<mydim,cdim,GridImp>::
-  AlbertaGridGeometry()
+  template< int mydim, int cdim, class GridImp >
+  inline int AlbertaGridGeometry< mydim, cdim, GridImp >
+  :: mapVertices ( int subEntity, int i )
+  {
+    return ALBERTA AlbertHelp :: MapVertices< mydim, cdim > :: mapVertices( subEntity, i );
+  }
+
+  template< int mydim, int cdim, class GridImp >
+  inline AlbertaGridGeometry< mydim, cdim, GridImp > :: AlbertaGridGeometry ()
   {
     // make empty element
     initGeom();
@@ -40,9 +81,6 @@ namespace Dune
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
   initGeom()
   {
-    face_ = 0;
-    edge_ = 0;
-    vertex_ = 0;
     builtinverse_ = false;
     builtElMat_   = false;
     calcedDet_    = false;
@@ -75,30 +113,14 @@ namespace Dune
   }
 
   ///////////////////////////////////////////////////////////////////////
-  template <int mydim, int cdim, class GridImp>
-  inline const FieldVector<albertCtype, cdim>& AlbertaGridGeometry<mydim,cdim,GridImp>::
-  operator [](int i) const
+  template< int mydim, int cdim, class GridImp >
+  inline const FieldVector< albertCtype, cdim > &
+  AlbertaGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
   {
-    return coord_[i];
+    return coord_[ i ];
   }
 
   ///////////////////////////////////////////////////////////////////////
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<albertCtype, cdim>& AlbertaGridGeometry<mydim,cdim,GridImp>::
-  getCoordVec (int i)
-  {
-    assert( i >= 0 );
-    assert( i < mydim+1 );
-
-    // if global, or jacobianInverse is called then
-    // matrix has to be calculated again , because coord might have changed
-    builtinverse_ = false;
-    builtElMat_   = false;
-    calcedDet_    = false;
-
-    return coord_[i];
-  }
-
   template <class GridImp, int mydim, int cdim>
   struct AlbertaCalcElementMatrix
   {
@@ -234,12 +256,13 @@ namespace Dune
   }
 
   // determinant of one Geometry, here line
-  template <>
-  inline albertCtype AlbertaGridGeometry<1,2,const AlbertaGrid<2,2> >::elDeterminant () const
+  template<>
+  inline albertCtype
+  AlbertaGridGeometry< 1, 2, const AlbertaGrid< 2, 2 > >::elDeterminant () const
   {
     // volume is length of edge
-    tmpZ_ = coord_[0] - coord_[1];
-    return std::abs ( tmpZ_.two_norm() );
+    FieldVector< ctype, coorddimension > z = coord_[ 0 ] - coord_[ 1 ];
+    return z.two_norm();
   }
 
   // determinant of one Geometry, here line
@@ -247,8 +270,8 @@ namespace Dune
   inline albertCtype AlbertaGridGeometry<1,3,const AlbertaGrid<3,3> >::elDeterminant () const
   {
     // volume is length of edge
-    tmpZ_ = coord_[0] - coord_[1];
-    return std::abs ( tmpZ_.two_norm() );
+    FieldVector< ctype, coorddimension > z = coord_[0] - coord_[1];
+    return z.two_norm();
   }
 
   // determinant of one Geometry, here triangle
@@ -266,18 +289,16 @@ namespace Dune
     enum { dim = 3 };
 
     // create vectors of face
-    tmpV_ = coord_[1] - coord_[0];
-    tmpU_ = coord_[2] - coord_[1];
+    FieldVector< ctype, coorddimension > v = coord_[1] - coord_[0];
+    FieldVector< ctype, coorddimension > u = coord_[2] - coord_[1];
 
     // calculate scaled outer normal
-    for(int i=0; i<dim; i++)
-    {
-      tmpZ_[i] = (  tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim]
-                    - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim] );
-    }
+    FieldVector< ctype, coorddimension > z;
+    for( int i = 0; i < dim; ++i )
+      z[i] = u[(i+1)%dim] * v[(i+2)%dim] - u[(i+2)%dim] * v[(i+1)%dim];
 
-    // tmpZ is the same as 2.0 * the outer normal
-    return std::abs( tmpZ_.two_norm() );
+    // z is the same as 2.0 * the outer normal
+    return z.two_norm();
   }
 
   // volume of one Geometry, here therahedron
@@ -301,87 +322,19 @@ namespace Dune
     return 1.0;
   }
 
-  // this method is for (mydim < cdim)
+  // build jacboianInverseTransposed for (mydim < cdim)
   template< int mydim, int cdim, class GridImp >
-  inline void AlbertaGridGeometry< mydim, cdim, GridImp >
+  inline void
+  AlbertaGridGeometry< mydim, cdim, GridImp >
   :: buildJacobianInverseTransposed () const
   {
     // calc A and stores it in elMat_
     calcElMatrix();
     assert( builtElMat_ == true );
-
-    // calc ret = A^T*A
-    FMatrixHelp::multTransposedMatrix(elMat_,elMatT_elMat_);
-
-    // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< albertCtype, mydim, mydim > inv_elMatT_elMat;
-    FMatrixHelp :: invertMatrix( elMatT_elMat_, inv_elMatT_elMat );
-    FMatrixHelp :: multMatrix( elMat_, inv_elMatT_elMat, Jinv_ );
-
-    builtinverse_ = true;
-  }
-
-  // this method is for (mydim = cdim = 2)
-  template<>
-  inline void AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >
-  :: buildJacobianInverseTransposed () const
-  {
-    //******************************************************
-    //
-    //  the mapping is:
-    //
-    //  F(T) = D where T is the reference element
-    //  and D the actual element
-    //
-    //  F(x) = A * x + b    with   A := ( P_0 , P_1 )
-    //
-    //  A consist of the column vectors P_0 and P_1 and
-    //  is calculated by the method calcElMatrix
-    //
-    //******************************************************
-
-    // calc A and stores it in elMat_
-    calcElMatrix();
 
     // Jinv = A^-1^T
-    assert( builtElMat_ == true );
-    // here the transposed jacobian inverse is calculated
-    elDet_ = std::abs( FMatrixHelp::invertMatrix_retTransposed(elMat_,Jinv_) );
-
-    assert(elDet_ > 1.0E-25 );
-
-    calcedDet_ = true;
-    builtinverse_ = true;
-  }
-
-  // this method is for (mydim = cdim = 2)
-  template<>
-  inline void AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >
-  :: buildJacobianInverseTransposed () const
-  {
-    //******************************************************
-    //
-    //  the mapping is:
-    //
-    //  F(T) = D where T is the reference element
-    //  and D the actual element
-    //
-    //  F(x) = A * x + b    with   A := ( P_0 , P_1 )
-    //
-    //  A consist of the column vectors P_0 and P_1 and
-    //  is calculated by the method calcElMatrix
-    //
-    //******************************************************
-
-    // calc A and stores it in elMat_
-    calcElMatrix();
-
-    // Jinv = A^-1^T
-    assert( builtElMat_ == true );
-    // here the transposed jacobian inverse is calculated
-    elDet_ = std::abs( FMatrixHelp::invertMatrix_retTransposed(elMat_,Jinv_) );
-
-    assert(elDet_ > 1.0E-25 );
+    elDet_ = Alberta::MatrixOps< ctype, cdim, mydim >::invert( elMat_, Jinv_ );
+    assert( elDet_ > 1.0e-25 );
 
     calcedDet_ = true;
     builtinverse_ = true;
@@ -445,47 +398,41 @@ namespace Dune
   }
 
   // built Geometry
-  template <int mydim, int cdim, class GridImp>
-  inline bool AlbertaGridGeometry<mydim,cdim,GridImp>::
-  builtGeom(const GridImp & grid, ALBERTA EL_INFO *elInfo, int face,
-            int edge, int vertex)
+  template< int mydim, int cdim, class GridImp >
+  inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
+  :: builtGeom ( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
   {
-    face_ = face;
-    edge_ = edge;
-    vertex_ = vertex;
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if( elInfo != NULL )
-    {
-      // copy coordinates
-      for(int i=0; i<mydim+1; ++i)
-      {
-        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
-        // copy coordinates
-        for(int j=0; j<cdim; ++j) coord_[i][j] = elcoord[j];
-      }
 
-      elDet_     = elDeterminant();
-      calcedDet_ = true;
-      // geometry built
-      return true;
-    }
-    else
+    if( elInfo == NULL )
     {
       elDet_     = 0.0;
       calcedDet_ = false;
+      // geometry not built
+      return false;
     }
-    // geometry not built
-    return false;
+
+    // copy coordinates
+    for( int i = 0; i < mydimension+1; ++i )
+    {
+      const int k = mapVertices( subEntity, i );
+      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
+      for( int j = 0; j < coorddimension; ++j )
+        coord_[ i ][ j ] = elcoord[ j ];
+    }
+
+    elDet_     = elDeterminant();
+    calcedDet_ = true;
+    // geometry built
+    return true;
   }
 
-
-  // specialization yields speed up, because vertex_ .. is not copied
-  template <>
-  inline bool AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::
-  builtGeom(const GridType & grid, ALBERTA EL_INFO *elInfo, int face,
-            int edge, int vertex)
+  // specialization yields speed up, because vertex .. is not copied
+  template<>
+  inline bool AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >
+  :: builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
   {
     typedef AlbertaGrid<2,2> GridImp;
     enum { dim = 2 };
@@ -494,98 +441,83 @@ namespace Dune
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if( elInfo != NULL )
-    {
-      // copy coordinates
-      for(int i=0; i<dim+1; ++i)
-      {
-        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
-        for(int j=0; j<dimworld; ++j)
-          coord_[i][j] = elcoord[j];
-      }
-
-      const ALBERTA EL *el = elInfo->el;
-      assert( el );
-      // if leaf element, get determinant from leaf data
-      if( IS_LEAF_EL(el) )
-      {
-        typedef GridImp :: LeafDataType::Data LeafDataType;
-        LeafDataType * ldata = (LeafDataType *) el->child[1];
-        assert( ldata );
-        elDet_ = ldata->determinant;
-        assert( std::abs( elDet_ ) > 0.0 );
-        calcedDet_ = true;
-      }
-      else
-      {
-        elDet_     = elDeterminant();
-        calcedDet_ = true;
-      }
-
-      // geometry built
-      return true;
-    }
-    else
+    if( elInfo == NULL )
     {
       elDet_     = 0.0;
       calcedDet_ = false;
+      // geometry not built
+      return false;
     }
-    // geometry not built
-    return false;
+
+    // copy coordinates
+    for( int i = 0; i < mydimension+1; ++i )
+    {
+      const int k = mapVertices( subEntity, i );
+      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
+      for( int j = 0; j < coorddimension; ++j )
+        coord_[ i ][ j ] = elcoord[ j ];
+    }
+
+    const ALBERTA EL *el = elInfo->el;
+    assert( el );
+    // if leaf element, get determinant from leaf data
+    if( IS_LEAF_EL( el ) )
+    {
+      typedef Grid::LeafDataType::Data LeafData;
+      LeafData *leafdata = (LeafData *)el->child[ 1 ];
+      assert( leafdata != NULL );
+      elDet_ = leafdata->determinant;
+    }
+    else
+      elDet_ = elDeterminant();
+    assert( std::abs( elDet_ ) > 0.0 );
+    calcedDet_ = true;
+
+    // geometry built
+    return true;
   }
 
-  template <>
-  inline bool AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::
-  builtGeom(const GridType & grid, ALBERTA EL_INFO *elInfo, int face,
-            int edge, int vertex)
+  template<>
+  inline bool AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >
+  :: builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
   {
-    typedef AlbertaGrid<3,3> GridImp;
-    enum { dim = 3 };
-    enum { dimworld = 3 };
-
     builtinverse_ = false;
-    builtElMat_   = false;
+    builtElMat_ = false;
 
-    if( elInfo != NULL )
-    {
-      // copy coordinates
-      for(int i=0; i<dim+1; ++i)
-      {
-        const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, mapVertices( i ) );
-        for(int j=0; j<dimworld; ++j)
-          coord_[i][j] = elcoord[j];
-      }
-
-      const ALBERTA EL *el = elInfo->el;
-      assert( el );
-      // if leaf element, get determinant from leaf data
-      if( IS_LEAF_EL(el) )
-      {
-        typedef GridImp :: LeafDataType::Data LeafDataType;
-        LeafDataType * ldata = (LeafDataType *) el->child[1];
-        assert( ldata );
-
-        elDet_ = ldata->determinant;
-        assert( std::abs( elDet_ ) > 0.0 );
-        calcedDet_ = true;
-      }
-      else
-      {
-        elDet_     = elDeterminant();
-        calcedDet_ = true;
-      }
-
-      //assert(elDeterminant() > 0.0);
-      // geometry built
-      return true;
-    }
-    else
+    if( elInfo == NULL )
     {
       elDet_     = 0.0;
       calcedDet_ = false;
+      // geometry not built
+      return false;
     }
-    // geometry not built
-    return false;
+
+    // copy coordinates
+    for( int i = 0; i < mydimension+1; ++i )
+    {
+      const int k = mapVertices( subEntity, i );
+      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
+      for( int j = 0; j < coorddimension; ++j )
+        coord_[ i ][ j ] = elcoord[ j ];
+    }
+
+    const ALBERTA EL *el = elInfo->el;
+    assert( el );
+    // if leaf element, get determinant from leaf data
+    if( IS_LEAF_EL( el ) )
+    {
+      typedef Grid::LeafDataType::Data LeafData;
+      LeafData *leafdata = (LeafData *)el->child[ 1 ];
+      assert( leafdata != NULL );
+      elDet_ = leafdata->determinant;
+    }
+    else
+      elDet_ = elDeterminant();
+    assert( std::abs( elDet_ ) > 0.0 );
+    calcedDet_ = true;
+
+    // geometry built
+    return true;
   }
 
   // built Geometry
@@ -595,9 +527,6 @@ namespace Dune
   builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom,
                  ALBERTA EL_INFO *elInfo,int face)
   {
-    face_ = face;
-    edge_   = 0;
-    vertex_ = 0;
     builtinverse_ = false;
     builtElMat_   = false;
 

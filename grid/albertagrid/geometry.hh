@@ -8,56 +8,78 @@
 namespace Dune
 {
 
+  // Forward Declarations
+  // --------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+
+
   // AlbertaGridGeometry
   // -------------------
 
-  /*!
-     Defines the geometry part of a mesh entity. Works for all dimensions, element types and dime
-     of world. Provides reference element and mapping between local and global coordinates.
-     The element may have different implementations because the mapping can be
-     done more efficient for structured meshes than for unstructured meshes.
-
-     dim: An element is a polygonal in a hyperplane of dimension dim. 0 <= dim <= 3 is typically
-     dim=0 is a point.
-
-     dimworld: Each corner is a point with dimworld coordinates.
+  /** \class AlbertaGridGeometry
+   *  \brief geometry implementation for AlbertaGrid
+   *
+   *  Defines the geometry part of a mesh entity. Works for all dimensions,
+   *  element types and dim of world. Provides reference element and mapping
+   *  between local and global coordinates.
+   *
+   *  \tparam  mydim    dimension of the element (0 <= dim <= 3)
+   *  \tparam  cdim     dimension of global coordinates
+   *  \tparam  GridImp  grid implementation
+   *                    (always const AlbertaGrid< dim, dimworld >)
    */
-  template <int mydim, int cdim, class GridImp>
+  template< int mydim, int cdim, class GridImp >
   class AlbertaGridGeometry
-    : public GeometryDefaultImplementation<mydim,cdim,GridImp,AlbertaGridGeometry>
+  //: public GeometryDefaultImplementation<mydim,cdim,GridImp,AlbertaGridGeometry>
   {
+    typedef AlbertaGridGeometry< mydim, cdim, GridImp > This;
 
-    typedef AlbertaGridGeometry<mydim,cdim,GridImp> ThisType;
+    // remember type of the grid
+    typedef GridImp Grid;
 
-    //! know dimension of barycentric coordinates
-    enum { dimbary=mydim+1};
+    // dimension of barycentric coordinates
+    static const int dimbary = mydim + 1;
+
   public:
+    //! type of coordinates
+    typedef albertCtype ctype;
+
+    static const int dimension = Grid :: dimension;
+    static const int mydimension = mydim;
+    static const int codimension = dimension - mydimension;
+    static const int coorddimension = cdim;
+
     //! Default constructor
     AlbertaGridGeometry();
 
     //! constructor building geometry in father
-    AlbertaGridGeometry(const int child, const int orientation );
+    AlbertaGridGeometry( const int child, const int orientation );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
     GeometryType type () const;
 
-    //! return the number of corners of this element. Corners are numbered 0...n-1
+    /** \brief obtain the number of corners of this element */
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<albertCtype, cdim> & operator[] (int i) const;
+    const FieldVector< ctype, cdim > &operator[] (int i) const;
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
-    FieldVector<albertCtype, cdim> global (const FieldVector<albertCtype, mydim>& local) const;
+    FieldVector< ctype, cdim >
+    global ( const FieldVector< ctype, mydim> &local ) const;
 
     //! maps a global coordinate within the element to a
     //! local coordinate in its reference element
-    FieldVector<albertCtype, mydim> local (const FieldVector<albertCtype, cdim>& global) const;
+    FieldVector< ctype, mydim >
+    local ( const FieldVector< ctype, cdim  > &global ) const;
 
     //! returns true if the point in local coordinates is inside reference element
-    bool checkInside(const FieldVector<albertCtype, mydim>& local) const;
+    bool checkInside( const FieldVector< ctype, mydim > &local ) const;
 
     /*!
        Copy from sgrid.hh:
@@ -83,24 +105,24 @@ namespace Dune
      */
 
     // A(l)
-    albertCtype integrationElement (const FieldVector<albertCtype, mydim>& local) const;
+    ctype integrationElement ( const FieldVector< ctype, mydim > &local ) const;
 
     // volume if geometry
-    albertCtype volume () const;
+    ctype volume () const;
 
     //! can only be called for dim=dimworld!
     //! Note that if both methods are called on the same element, then
     //! call jacobianInverseTransposed first because integration element is calculated
     //! during calculation of the transposed of the jacobianInverse
-    const FieldMatrix<albertCtype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<albertCtype, mydim>& local) const;
+    const FieldMatrix< ctype, cdim, mydim > &
+    jacobianInverseTransposed ( const FieldVector< ctype, mydim > &local ) const;
 
     //***********************************************************************
-    //!  Methods that not belong to the Interface, but have to be public
+    //  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry for the ALBERTA EL_INFO
     //! no interface method
-    typedef GridImp GridType;
-    bool builtGeom(const GridImp & grid, ALBERTA EL_INFO *elInfo, int face, int edge, int vertex);
+    bool builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity );
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal
@@ -111,7 +133,6 @@ namespace Dune
     // init geometry with zeros
     //! no interface method
     void initGeom();
-    FieldVector<albertCtype, cdim>& getCoordVec (int i);
 
     //! print internal data
     //! no interface method
@@ -128,30 +149,19 @@ namespace Dune
     void buildJacobianInverseTransposed () const;
 
     // template method for map the vertices of EL_INFO to the actual
-    // coords with face_,edge_ and vertex_ , needes for operator []
-    int mapVertices (int i) const;
+    // coords needed for operator []
+    static int mapVertices ( int i, int face, int edge, int vertex );
+    static int mapVertices ( int subEntity, int i );
 
     // calculates the volume of the element
-    albertCtype elDeterminant () const;
+    ctype elDeterminant () const;
 
     //! the vertex coordinates
-    mutable FieldMatrix<albertCtype,mydim+1,cdim> coord_;
+    FieldMatrix< ctype, mydim+1, cdim > coord_;
 
-    //! Which Face of the Geometry 0...dim+1
-    int face_;
+    mutable FieldMatrix< ctype, cdim, mydim > Jinv_; //!< storage for inverse of jacobian
 
-    //! Which Edge of the Face of the Geometry 0...dim
-    int edge_;
-
-    //! Which Edge of the Face of the Geometry 0...dim-1
-    int vertex_;
-
-    enum { matdim = (mydim > 0) ? mydim : 1 };
-    mutable FieldMatrix<albertCtype,cdim,matdim> Jinv_; //!< storage for inverse of jacobian
-    mutable FieldMatrix<albertCtype,matdim,matdim> Mtmp_;    //!< storage for inverse of jacobian
-
-    mutable FieldMatrix<albertCtype,cdim,mydim> elMat_; //!< storage for mapping matrix
-    mutable FieldMatrix<albertCtype,matdim,matdim> elMatT_elMat_; //!< storage for mapping matrix
+    mutable FieldMatrix< ctype, cdim, mydim > elMat_; //!< storage for mapping matrix
 
     //! is true if elMat_ was calced
     mutable bool builtElMat_;
@@ -160,14 +170,73 @@ namespace Dune
 
 
     mutable bool calcedDet_; //! true if determinant was calculated
-    mutable albertCtype elDet_; //!< storage of element determinant
+    mutable ctype elDet_; //!< storage of element determinant
+  };
 
-    // temporary mem for integrationElement with mydim < cdim
-    mutable FieldVector<albertCtype,cdim> tmpV_;
-    mutable FieldVector<albertCtype,cdim> tmpU_;
-    mutable FieldVector<albertCtype,cdim> tmpZ_;
 
-    mutable FieldVector<albertCtype,mydim> AT_x_;
+
+  // AlbertaGridLocalGeometryProvider
+  // --------------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGridLocalGeometryProvider
+  {
+    typedef AlbertaGridLocalGeometryProvider< dim, dimworld > This;
+
+    typedef AlbertaGrid< dim, dimworld > Grid;
+
+  public:
+    template< int codim >
+    struct Codim
+    {
+      typedef Geometry< dim-codim, dim, const Grid, AlbertaGridGeometry >
+      LocalGeometry;
+    };
+
+    typedef typename Codim< 0 > :: LocalGeometry LocalElementGeometry;
+
+    static const int numChildren = 2;
+
+  private:
+    const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
+
+    AlbertaGridLocalGeometryProvider ()
+    {
+      typedef MakeableInterfaceObject< LocalElementGeometry > LocalGeoObject;
+      typedef typename LocalGeoObject :: ImplementationType LocalGeoImp;
+
+      for( int child = 0; child < numChildren; ++child )
+      {
+        geometryInFather_[ child ][ 0 ]
+          = new LocalGeoObject( LocalGeoImp( child, -1 ) );
+        geometryInFather_[ child ][ 1 ]
+          = new LocalGeoObject( LocalGeoImp( child, 1 ) );
+      }
+    }
+
+    ~AlbertaGridLocalGeometryProvider ()
+    {
+      for( int child = 0; child < numChildren; ++child )
+      {
+        delete geometryInFather_[ child ][ 0 ];
+        delete geometryInFather_[ child ][ 1 ];
+      }
+    }
+
+  public:
+    const LocalElementGeometry &
+    geometryInFather ( int child, const int orientation = 1 ) const
+    {
+      assert( (child >= 0) && (child < numChildren) );
+      assert( (orientation == 1) || (orientation == -1) );
+      return *geometryInFather_[ child ][ (orientation + 1) / 2 ];
+    }
+
+    static const This &instance ()
+    {
+      static This theInstance;
+      return theInstance;
+    }
   };
 
 }

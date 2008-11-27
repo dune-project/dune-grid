@@ -13,623 +13,10 @@
 #include "datahandle.hh"
 
 #include "geometry.cc"
+#include "entity.cc"
 
 namespace Dune
 {
-
-  //*************************************************************************
-  //
-  //  --AlbertaGridEntity
-  //  --Entity
-  //
-  //*************************************************************************
-  //
-  //  codim > 0
-  //
-  // The Geometry is prescribed by the EL_INFO struct of ALBERTA MESH
-  // the pointer to this struct is set and get by setElInfo and
-  // getElInfo.
-  //*********************************************************************8
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity<codim,dim,GridImp>::
-  AlbertaGridEntity(const GridImp &grid, int level,
-                    ALBERTA TRAVERSE_STACK * travStack)
-    : grid_(grid)
-      , elInfo_(0)
-      , element_(0)
-      , travStack_(travStack)
-      , level_ ( level )
-      , geo_ (GeometryImp())
-      , builtgeometry_    (false)
-      , localFatherCoords_()
-      , localFCoordCalced_(false)
-      , face_             (-1)
-      , edge_             (-1)
-      , vertex_           (-1)
-  {}
-
-
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity<codim,dim,GridImp>::
-  AlbertaGridEntity(const AlbertaGridEntity<codim,dim,GridImp> & org)
-    : grid_     (org.grid_)
-      , elInfo_   (org.elInfo_)
-      , element_  ( (elInfo_) ? (elInfo_->el) : 0 )
-      , travStack_(org.travStack_)
-      , level_    (org.level_ )
-      , geo_      (org.geo_)
-      , builtgeometry_    (false)
-      , localFatherCoords_()
-      , localFCoordCalced_(false)
-      , face_             (org.face_)
-      , edge_             (org.edge_)
-      , vertex_           (org.vertex_)
-  {}
-
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
-  {
-    travStack_ = travStack;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity<codim,dim,GridImp>::
-  AlbertaGridEntity(const GridImp &grid, int level, bool)
-    : grid_(grid)
-      , elInfo_(0)
-      , element_(0)
-      , travStack_(0)
-      , level_ (level)
-      , geo_ (GeometryImp())
-      , builtgeometry_(false)
-      , localFatherCoords_()
-      , localFCoordCalced_(false)
-      , face_             (-1)
-      , edge_             (-1)
-      , vertex_           (-1)
-  {}
-
-
-  template<int codim, int dim, class GridImp>
-  inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
-  partitionType () const
-  {
-    return InteriorEntity;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline bool AlbertaGridEntity<codim,dim,GridImp>::
-  equals (const AlbertaGridEntity<codim,dim,GridImp> & i) const
-  {
-    const ALBERTA EL * e2 = i.getElement();
-
-    // if both element null then they are equal
-    if( (!e2) && (!element_) ) return true;
-
-    return ((element_ == e2) && (getFEVnum() == i.getFEVnum()));
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline ALBERTA EL_INFO* AlbertaGridEntity<codim,dim,GridImp>::
-  getElInfo() const
-  {
-    return elInfo_;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline ALBERTA EL * AlbertaGridEntity<codim,dim,GridImp>::
-  getElement() const
-  {
-    return element_;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  removeElInfo()
-  {
-    elInfo_  = 0;
-    element_ = 0;
-    builtgeometry_ = false;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  setElInfo(ALBERTA EL_INFO * elInfo, int face,
-            int edge, int vertex )
-  {
-    face_ = face;
-    edge_ = edge;
-    vertex_ = vertex;
-    elInfo_ = elInfo;
-    if(elInfo_)
-      element_ = elInfo_->el;
-    else
-      element_ = 0;
-    builtgeometry_ = geoImp().builtGeom( grid_, elInfo_, face, edge, vertex );
-    localFCoordCalced_ = false;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  setEntity(const AlbertaGridEntity<codim,dim,GridImp> & org)
-  {
-    setElInfo(org.elInfo_,org.face_,org.edge_,org.vertex_);
-    setLevel(org.level_);
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  setLevel(int level)
-  {
-    level_  = level;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline int AlbertaGridEntity<codim,dim,GridImp>::
-  level() const
-  {
-    return level_;
-  }
-
-  // default
-  template <class GridImp, int codim, int cdim>
-  struct AlbertaGridBoundaryId
-  {
-    static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
-    {
-      return 0;
-    }
-  };
-
-  // faces in 2d and 3d
-  template <class GridImp>
-  struct AlbertaGridBoundaryId<GridImp,1,3>
-  {
-    static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
-    {
-      return EDGE_BOUNDARY_ID(elInfo,edge);
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaGridBoundaryId<GridImp,1,2>
-  {
-    static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
-    {
-      return EDGE_BOUNDARY_ID(elInfo,face);
-    }
-  };
-
-  // vertices in 2d and 3d
-  template <class GridImp, int dim>
-  struct AlbertaGridBoundaryId<GridImp,dim,dim>
-  {
-    static int boundaryId (const ALBERTA EL_INFO * elInfo, int face, int edge, int vertex)
-    {
-      return VERTEX_BOUNDARY_ID(elInfo,vertex);
-    }
-  };
-
-  template <int codim, int dim, class GridImp>
-  inline int AlbertaGridEntity<codim,dim,GridImp>::boundaryId() const
-  {
-    return AlbertaGridBoundaryId<GridImp,codim,dim>::boundaryId(elInfo_,face_,edge_,vertex_);
-  }
-
-
-  // vertices in 2d and 3d
-  template <class GridImp, int codim, int cdim>
-  struct AlbertaGridFEVnum
-  {
-    static int getFEVnum (int face, int edge, int vertex)
-    {
-      return face;
-    }
-  };
-
-  template <class GridImp, int cdim>
-  struct AlbertaGridFEVnum<GridImp,1,cdim>
-  {
-    static int getFEVnum (int face, int edge, int vertex)
-    {
-      return face;
-    }
-  };
-
-  template <class GridImp, int cdim>
-  struct AlbertaGridFEVnum<GridImp,cdim,cdim>
-  {
-    static int getFEVnum (int face, int edge, int vertex)
-    {
-      return vertex;
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaGridFEVnum<GridImp,2,3>
-  {
-    static int getFEVnum (int face, int edge, int vertex)
-    {
-      return edge;
-    }
-  };
-
-  template<int codim, int dim, class GridImp>
-  inline int AlbertaGridEntity<codim,dim,GridImp>::
-  getFEVnum() const
-  {
-    return AlbertaGridFEVnum<GridImp,codim,GridImp::dimensionworld>::getFEVnum(face_,edge_,vertex_);
-  }
-
-  template<int cd, int dim, class GridImp>
-  inline const typename AlbertaGridEntity<cd,dim,GridImp>::Geometry &
-  AlbertaGridEntity<cd,dim,GridImp>::geometry() const
-  {
-    assert(builtgeometry_ == true);
-    return geo_;
-  }
-
-  template<int cd, int dim, class GridImp>
-  inline GeometryType
-  AlbertaGridEntity<cd,dim,GridImp>:: type () const
-  {
-    return geo_.type();
-  }
-
-  //************************************
-  //
-  //  --AlbertaGridEntity codim = 0
-  //  --0Entity codim = 0
-  //
-  template<int dim, class GridImp>
-  inline AlbertaGridEntity <0,dim,GridImp>::
-  AlbertaGridEntity(const GridImp &grid, int level, bool leafIt )
-    : grid_(grid)
-      , level_ (level)
-      , travStack_ (0)
-      , elInfo_ (0)
-      , element_(0)
-      , geoObj_( GeometryImp() )
-      , geo_( grid_.getRealImplementation(geoObj_) )
-      , builtgeometry_ (false)
-      , leafIt_ ( leafIt )
-  {}
-
-  template<int dim, class GridImp>
-  inline AlbertaGridEntity <0,dim,GridImp>::
-  AlbertaGridEntity(const AlbertaGridEntity & org)
-    : grid_(org.grid_)
-      , level_ (org.level_)
-      , travStack_ (org.travStack_)
-      , elInfo_ (org.elInfo_)
-      , element_( (elInfo_) ? (elInfo_->el) : 0)
-      , geoObj_( org.geoObj_ )
-      , geo_( grid_.getRealImplementation(geoObj_) )
-      , builtgeometry_ (false)
-      , leafIt_ ( org.leafIt_ )
-  {}
-
-  template<int dim, class GridImp>
-  inline int AlbertaGridEntity <0,dim,GridImp>::
-  boundaryId() const
-  {
-    // elements are always inside of our Domain
-    return 0;
-  }
-
-  template<int dim, class GridImp>
-  inline bool AlbertaGridEntity <0,dim,GridImp>::
-  isNew () const
-  {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-    return grid_.checkElNew( element_ );
-  }
-
-  template<int dim, class GridImp>
-  inline bool AlbertaGridEntity <0,dim,GridImp>::
-  mightVanish () const
-  {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-    return ( element_->mark < 0 );
-  }
-
-  template<int dim, class GridImp>
-  inline bool AlbertaGridEntity <0,dim,GridImp>::
-  hasBoundaryIntersections () const
-  {
-    assert( elInfo_ );
-    for(int i=0; i<dim+1; ++i)
-    {
-      if( IS_BOUNDARY(elInfo_,i) ) return true;
-    }
-    return false;
-  }
-
-  template<int dim, class GridImp>
-  inline PartitionType AlbertaGridEntity <0,dim,GridImp>::
-  partitionType () const
-  {
-    return InteriorEntity;
-  }
-
-  template<int dim, class GridImp>
-  inline bool AlbertaGridEntity <0,dim,GridImp>::isLeaf() const
-  {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-
-    // if no child exists, then this element is leaf element
-    return IS_LEAF_EL(element_);
-  }
-
-  //***************************
-
-  template<int dim, class GridImp>
-  inline void AlbertaGridEntity <0,dim,GridImp>::
-  makeDescription()
-  {
-    elInfo_  = 0;
-    element_ = 0;
-    builtgeometry_ = false;
-  }
-
-  template<int dim, class GridImp>
-  inline bool AlbertaGridEntity<0,dim,GridImp>::
-  equals (const AlbertaGridEntity<0,dim,GridImp> & i) const
-  {
-    // compare element pointer which are unique
-    return (element_ == i.getElement());
-  }
-
-  template<int dim, class GridImp>
-  inline void AlbertaGridEntity <0,dim,GridImp>::
-  setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
-  {
-    travStack_ = travStack;
-  }
-
-  //*****************************************************************
-  // count
-  template <class GridImp, int dim, int cc> struct AlbertaGridCount {
-    static int count () { return dim+1; }
-  };
-
-  // specialisation for codim 0
-  template <class GridImp, int dim> struct AlbertaGridCount<GridImp,dim,0> {
-    static int count () { return 1; }
-  };
-
-  // specialisation for edges in 3d
-  template <class GridImp> struct AlbertaGridCount<GridImp,3,2> {
-    static int count () { return 6; }
-  };
-
-  template<int dim, class GridImp> template <int cc>
-  inline int AlbertaGridEntity <0,dim,GridImp>::count () const
-  {
-    return AlbertaGridCount<GridImp,dim,cc>::count();
-  }
-
-  //*****************************************************************
-  template <class GridImp, int dim, int cd> struct SubEntity;
-
-  // specialisation for elements
-  template <class GridImp, int dim>
-  struct SubEntity<GridImp,dim,0>
-  {
-    typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<0>::EntityPointer EntityPointerType;
-    static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack,
-                                    int level, ALBERTA EL_INFO * elInfo, int i )
-    {
-      return AlbertaGridEntityPointer<0,GridImp> (grid, stack , level ,elInfo, 0,0,0);
-    }
-  };
-
-
-  // specialisation for faces
-  template <class GridImp, int dim>
-  struct SubEntity<GridImp,dim,1>
-  {
-    typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<1>::EntityPointer EntityPointerType;
-    static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack,
-                                    int level, ALBERTA EL_INFO * elInfo, int i )
-    {
-      return AlbertaGridEntityPointer<1,GridImp> (grid, stack , level ,elInfo, i,0,0);
-    }
-  };
-
-  // specialisation for edges , only when dim == 3
-  template <class GridImp>
-  struct SubEntity<GridImp,3,2>
-  {
-    enum { dim = 3 };
-    typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<2>::EntityPointer EntityPointerType;
-    static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack,
-                                    int level, ALBERTA EL_INFO * elInfo, int edge )
-    {
-      return AlbertaGridEntityPointer<2,GridImp> (grid, stack , level ,elInfo, 0, edge ,0);
-    }
-  };
-
-  // specialisation for vertices
-  template <class GridImp, int dim>
-  struct SubEntity<GridImp,dim,dim>
-  {
-    typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<dim>::EntityPointer EntityPointerType;
-    static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack,
-                                    int level, ALBERTA EL_INFO * elInfo, int i )
-    {
-      return AlbertaGridEntityPointer<dim,GridImp> (grid, stack , level ,elInfo, 0,0,i);
-    }
-  };
-
-  // default is faces
-  template <int dim, class GridImp>
-  template <int cc>
-  inline typename AlbertaGridEntity <0,dim,GridImp>::template Codim<cc>::EntityPointer
-  AlbertaGridEntity <0,dim,GridImp>::entity ( int i ) const
-  {
-    return SubEntity<GridImp,dim,cc> :: entity(grid_,travStack_,level(),elInfo_,i);
-  }
-
-  template<int dim, class GridImp>
-  inline ALBERTA EL_INFO* AlbertaGridEntity <0,dim,GridImp>::
-  getElInfo() const
-  {
-    return elInfo_;
-  }
-
-  template<int dim, class GridImp>
-  inline ALBERTA EL * AlbertaGridEntity <0,dim,GridImp>::
-  getElement() const
-  {
-    return element_;
-  }
-
-  template<int dim, class GridImp>
-  inline int AlbertaGridEntity <0,dim,GridImp>::
-  level() const
-  {
-    return level_;
-  }
-
-  template<int dim, class GridImp>
-  inline void AlbertaGridEntity<0,dim,GridImp>::
-  removeElInfo()
-  {
-    elInfo_  = 0;
-    element_ = 0;
-    builtgeometry_ = false;
-    level_ = -1;
-  }
-
-  template<int dim, class GridImp>
-  inline void AlbertaGridEntity <0,dim,GridImp>::
-  setElInfo(ALBERTA EL_INFO * elInfo, int , int , int )
-  {
-    // just set elInfo and element
-    elInfo_ = elInfo;
-    if(elInfo_)
-    {
-      element_ = elInfo_->el;
-      level_ = grid_.getLevelOfElement( element_ );
-    }
-    else
-    {
-      level_ = -1;
-      element_ = 0;
-    }
-    builtgeometry_ = false;
-  }
-
-  template<int dim, class GridImp>
-  inline void AlbertaGridEntity<0,dim,GridImp>::
-  setEntity(const AlbertaGridEntity<0,dim,GridImp> & org)
-  {
-    setElInfo(org.elInfo_);
-    setTraverseStack(org.travStack_);
-  }
-
-  template<int dim, class GridImp>
-  inline const typename AlbertaGridEntity <0,dim,GridImp>::Geometry &
-  AlbertaGridEntity <0,dim,GridImp>::geometry() const
-  {
-    assert( elInfo_ && element_ );
-    // geometry is only build on demand
-    if(!builtgeometry_) builtgeometry_ = geo_.builtGeom(grid_,elInfo_,0,0,0);
-
-    assert(builtgeometry_ == true);
-    return geoObj_;
-  }
-
-  template<int dim, class GridImp>
-  inline GeometryType
-  AlbertaGridEntity <0,dim,GridImp>:: type () const
-  {
-    return geoObj_.type();
-  }
-
-  // --father
-  template<int dim, class GridImp>
-  inline typename AlbertaGridEntity <0,dim,GridImp>::EntityPointer
-  AlbertaGridEntity <0,dim,GridImp>::father() const
-  {
-    //std::cout << "level_ = " << level_ << "\n";
-    ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
-
-    assert( fatherInfo );
-    // check father element pointer
-    assert( elInfo_->parent == fatherInfo->el );
-
-    //std::cout << "Father of el[" << grid_.getElementNumber(element_) << "] is father[" << grid_.getElementNumber(fatherInfo->el) << "]\n";
-
-    int fatherLevel = level_-1;
-    assert( fatherLevel >= 0 );
-
-    //std::cout << "set father with level " << fatherLevel << " | stack used = " << travStack_->stack_used << "\n";
-
-    assert( (fatherLevel == fatherInfo->level) );
-
-    return AlbertaGridEntityPointer<0,GridImp> (grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
-  }
-
-  template<int dim, class GridImp>
-  inline int AlbertaGridEntity <0,dim,GridImp>::nChild() const
-  {
-    // get father and check which child we have
-    const ALBERTA EL * father = elInfo_->parent;
-    assert( father );
-
-    int child = 0;
-    if(father->child[1] == element_) child = 1;
-
-    assert( father->child[child] == element_ );
-    return child;
-  }
-
-  // singletons of geometry in father geometries
-  // GeometryType schould be of type Dune::Geometry
-  template <class Geometry>
-  static inline Geometry &
-  getAlbertaGeometryInFather(const int child, const int orientation = 1)
-  {
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
-    typedef typename GeometryObject :: ImplementationType GeometryImp;
-    static GeometryObject child0       (GeometryImp(0,1)); // child 0
-    static GeometryObject child1_plus  (GeometryImp(1,1)); // child 1
-    static GeometryObject child1_minus (GeometryImp(1,-1)); // child 1, orientation < 0
-
-    if(child == 0) return child0;
-    if(child == 1) return (orientation > 0) ? child1_plus : child1_minus;
-
-    DUNE_THROW(NotImplemented,"wrong number of child given!");
-    return child0;
-  }
-
-  template<>
-  inline const AlbertaGridEntity <0,2,const AlbertaGrid<2,2> >::Geometry &
-  AlbertaGridEntity <0,2,const AlbertaGrid<2,2> >::geometryInFather() const
-  {
-    return getAlbertaGeometryInFather<Geometry> (this->nChild());
-  }
-
-  template<>
-  inline const AlbertaGridEntity <0,3,const AlbertaGrid<3,3> >::Geometry &
-  AlbertaGridEntity <0,3,const AlbertaGrid<3,3> >::geometryInFather() const
-  {
-    // see Alberta Docu for definition  of el_type, values are 0,1,2
-    const int orientation =
-#if DIM == 3
-      (elInfo_->el_type == 1) ? -1 :
-#endif
-      1;
-    return getAlbertaGeometryInFather<Geometry> (this->nChild(),orientation);
-  }
-  // end AlbertaGridEntity
 
   //*******************************************************************
   //
@@ -637,31 +24,36 @@ namespace Dune
   //  --EnPointer
   //
   //*******************************************************************
-  template<int codim, class GridImp >
-  inline AlbertaGridEntityPointer<codim,GridImp> ::
-  AlbertaGridEntityPointer(const GridImp & grid,
-                           int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex)
-    : grid_(grid)
-      , isLeaf_ (true)
-      , entity_ ( grid_.template getNewEntity<codim> ( level , isLeaf_ ))
+  template< int codim, class GridImp >
+  inline AlbertaGridEntityPointer< codim, GridImp >
+  ::AlbertaGridEntityPointer ( const GridImp &grid,
+                               int level,
+                               ALBERTA EL_INFO *elInfo,
+                               int subEntity )
+    : grid_( grid ),
+      isLeaf_( true ),
+      entity_( grid_.template getNewEntity< codim >( level , isLeaf_ ) )
   {
     assert( entity_ );
     // set elinfo and level
-    entityImp().setElInfo(elInfo,face,edge,vertex);
-    entityImp().setTraverseStack(0);
+    entityImp().setElInfo( elInfo, subEntity );
+    entityImp().setTraverseStack( 0 );
   }
 
-  template<int codim, class GridImp >
-  inline AlbertaGridEntityPointer<codim,GridImp> ::
-  AlbertaGridEntityPointer(const GridImp & grid, ALBERTA TRAVERSE_STACK * stack ,
-                           int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex)
-    : grid_(grid)
-      , isLeaf_ (true)
-      , entity_ ( grid_.template getNewEntity<codim> ( level , isLeaf_ ))
+  template< int codim, class GridImp >
+  inline AlbertaGridEntityPointer< codim, GridImp >
+  ::AlbertaGridEntityPointer( const GridImp &grid,
+                              ALBERTA TRAVERSE_STACK * stack ,
+                              int level,
+                              ALBERTA EL_INFO *elInfo,
+                              int subEntity )
+    : grid_( grid ),
+      isLeaf_( true ),
+      entity_( grid_.template getNewEntity< codim >( level, isLeaf_ ) )
   {
     // set elinfo and level
-    entityImp().setElInfo(elInfo,face,edge,vertex);
-    entityImp().setTraverseStack(stack);
+    entityImp().setElInfo( elInfo, subEntity );
+    entityImp().setTraverseStack( stack );
   }
 
   template<int codim, class GridImp >
@@ -1153,6 +545,8 @@ namespace Dune
   inline typename AlbertaGridIntersectionIterator<GridImp>::EntityPointer
   AlbertaGridIntersectionIterator<GridImp>::outside () const
   {
+    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
+
     if(!builtNeigh_)
     {
       assert( elInfo_ );
@@ -1164,21 +558,20 @@ namespace Dune
       assert( level_ == elInfo_->level );
       assert( (this->leafIt() ) ? (1) : (elInfo_->level == neighElInfo_.level) );
     }
+
     assert( builtNeigh_ );
     assert( neighElInfo_.el );
-    return AlbertaGridEntityPointer<0, GridImp>( this->grid_ ,
-                                                 this->grid_.getLevelOfElement(neighElInfo_.el),
-                                                 &neighElInfo_,0,0,0);
+    const int neighborLevel = this->grid_.getLevelOfElement( neighElInfo_.el );
+    return EntityPointerImpl( this->grid_, neighborLevel, &neighElInfo_, 0 );
   }
 
   template< class GridImp >
   inline typename AlbertaGridIntersectionIterator<GridImp>::EntityPointer
-  AlbertaGridIntersectionIterator<GridImp>::inside () const {
-    assert(elInfo_);
-    return AlbertaGridEntityPointer<0, GridImp>(this->grid_,
-                                                (int) elInfo_->level,
-                                                elInfo_,
-                                                0, 0, 0);
+  AlbertaGridIntersectionIterator<GridImp>::inside () const
+  {
+    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
+    assert( elInfo_ );
+    return EntityPointerImpl( this->grid_, (int)elInfo_->level, elInfo_, 0 );
   }
 
   template< class GridImp >
@@ -1199,10 +592,10 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator<GridImp>::boundary() const
+  inline bool AlbertaGridIntersectionIterator< GridImp >::boundary() const
   {
-    assert( elInfo_ );
-    return IS_BOUNDARY(elInfo_,neighborCount_);
+    assert( elInfo_ != NULL );
+    return Alberta::isBoundary( elInfo_, neighborCount_ );
   }
 
   template< class GridImp >
@@ -1334,12 +727,8 @@ namespace Dune
   {
     assert( elInfo_ );
 
-    if(neighGlob_.builtGeom(grid_,elInfo_,neighborCount_,0,0))
-      return neighGlobObj_;
-    else
-    {
-      DUNE_THROW(AlbertaError, "intersection_self_global: error occured!");
-    }
+    if( !neighGlob_.builtGeom( grid_, elInfo_, neighborCount_ ) )
+      DUNE_THROW( AlbertaError, "intersectionGlobal: Could not build geometry" );
     return neighGlobObj_;
   }
 
@@ -1638,13 +1027,11 @@ namespace Dune
   {
     level_ = 0;
     enLevel_ = 0;
-    vertex_ = -1;
-    face_ = -1;
-    edge_ = -1;
+    subEntity_ = -1;
     vertexMarker_ = 0;
 
     virtualEntity_.setTraverseStack(0);
-    virtualEntity_.setElInfo(0,0,0,0);
+    virtualEntity_.setElInfo( 0, 0 );
   }
 
   // Make LevelIterator with point to element from previous iterations
@@ -1655,9 +1042,7 @@ namespace Dune
       , level_   (travLevel)
       , enLevel_ (travLevel)
       , virtualEntity_( this->entityImp() )
-      , face_(-1)
-      , edge_ (-1)
-      , vertex_ (-1)
+      , subEntity_( -1 )
       , vertexMarker_(0)
       , okReturn_(false)
       , proc_(proc)
@@ -1673,9 +1058,7 @@ namespace Dune
       , virtualEntity_( this->entityImp() )
       , manageStack_ ()
       //, manageStack_ ( org.manageStack_ )
-      , face_(org.face_)
-      , edge_ (org.edge_)
-      , vertex_ ( org.vertex_)
+      , subEntity_( org.subEntity_ )
       , vertexMarker_(org.vertexMarker_)
       , okReturn_ (org.okReturn_ )
       , proc_(org.proc_)
@@ -1691,7 +1074,7 @@ namespace Dune
       /// get the actual used enInfo
       ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
 
-      virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
+      virtualEntity_.setElInfo( elInfo, subEntity_ );
 
       assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) )
               == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
@@ -1707,9 +1090,7 @@ namespace Dune
     level_ = org.level_;
     enLevel_ = org.enLevel_;
     //manageStack_ = org.manageStack_;
-    face_ = (org.face_);
-    edge_  = (org.edge_);
-    vertex_  = ( org.vertex_);
+    subEntity_ =  org.subEntity_;
     vertexMarker_ = (org.vertexMarker_);
     okReturn_ = (org.okReturn_ );
 
@@ -1725,7 +1106,7 @@ namespace Dune
       /// get the actual used enInfo
       ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
 
-      virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
+      virtualEntity_.setElInfo( elInfo, subEntity_ );
 
       assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) )
               == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
@@ -1742,9 +1123,7 @@ namespace Dune
     : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,leafIt,false)
       , level_ (travLevel) , enLevel_(travLevel)
       , virtualEntity_( this->entityImp() )
-      , face_(-1)
-      , edge_ (-1)
-      , vertex_ (-1)
+      , subEntity_( -1 )
       , vertexMarker_(0)
       , okReturn_ (false)
       , proc_(proc)
@@ -1770,7 +1149,7 @@ namespace Dune
       ALBERTA EL_INFO* elInfo =
         goFirstElement(manageStack_.getStack(), mesh, travLevel,travFlags);
 
-      virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
+      virtualEntity_.setElInfo(elInfo, subEntity_ );
     }
     else
     {
@@ -1791,7 +1170,7 @@ namespace Dune
       return ;
     }
 
-    virtualEntity_.setElInfo( nextinfo , face_, edge_, vertex_);
+    virtualEntity_.setElInfo( nextinfo , subEntity_ );
 
     return ;
   }
@@ -1802,25 +1181,25 @@ namespace Dune
   {
     // go next Element, if face_ > numberOfVertices, then go to next elInfo
     // face_ is set to -1 by constructor
-    ++face_;
-    if(face_ >= (dim+1)) // dim+1 Faces
+    ++subEntity_;
+    if( subEntity_ >= (dim+1)) // dim+1 Faces
     {
       // we have checked all faces on this element,
       // therefore go to next element
       elInfo = goNextElInfo(stack, elInfo);
-      face_ = 0;
+      subEntity_ = 0;
       if(!elInfo) return 0; // if no more Faces, return 0 which leads to end
     }
 
     // check elInfo pointer before we start anything
     assert(elInfo);
 
-    if(!this->leafIt())
+    if( !this->leafIt() )
     {
       // go next, if Vertex is not treated on this Element
       if(vertexMarker_->faceNotOnElement(
            this->grid_.getElementNumber(elInfo->el),
-           this->grid_.getFaceNumber(elInfo->el,face_)))
+           this->grid_.getFaceNumber(elInfo->el,subEntity_)))
       {
         elInfo = goNextFace(stack,elInfo);
       }
@@ -1828,7 +1207,7 @@ namespace Dune
     else
     {
       // get neighbour of this element
-      const ALBERTA EL * neighbour = NEIGH(elInfo->el,elInfo)[face_];
+      const ALBERTA EL * neighbour = NEIGH(elInfo->el,elInfo)[ subEntity_ ];
       if( neighbour )
       {
         // get element
@@ -1863,11 +1242,11 @@ namespace Dune
     // go next Element, Edge 0
     // treat Edge like Faces
     // edge_ is set to -1 by constructor
-    ++edge_;
-    if(edge_ >= 6) // in 3d only 6 Edges
+    ++subEntity_;
+    if( subEntity_ >= 6 ) // in 3d only 6 Edges
     {
       elInfo = goNextElInfo(stack, elInfo);
-      edge_ = 0;
+      subEntity_ = 0;
       if(!elInfo) return 0; // if no more Edges, return
     }
 
@@ -1876,7 +1255,7 @@ namespace Dune
     // go next, if Vertex is not treated on this Element
     if(vertexMarker_->edgeNotOnElement(
          this->grid_.getElementNumber(elInfo->el),
-         this->grid_.getEdgeNumber(elInfo->el,edge_)))
+         this->grid_.getEdgeNumber(elInfo->el,subEntity_)))
     {
       elInfo = goNextEdge(stack,elInfo);
     }
@@ -1891,11 +1270,11 @@ namespace Dune
     // go next Element, Vertex 0
     // treat Vertices like Faces
     // vertex_ is set to -1 by constructor
-    ++vertex_;
-    if(vertex_ >= (dim+1)) // dim+1 Vertices
+    ++subEntity_;
+    if( subEntity_ >= (dim+1)) // dim+1 Vertices
     {
       elInfo = goNextElInfo(stack, elInfo);
-      vertex_ = 0;
+      subEntity_ = 0;
       if(!elInfo) return 0; // if no more Vertices, return
     }
 
@@ -1904,7 +1283,7 @@ namespace Dune
     // go next, if Vertex is not treated on this Element
     if(vertexMarker_->vertexNotOnElement(
          this->grid_.getElementNumber(elInfo->el),
-         this->grid_.getVertexNumber(elInfo->el,vertex_)))
+         this->grid_.getVertexNumber(elInfo->el,subEntity_)))
     {
       elInfo = goNextVertex(stack,elInfo);
     }
@@ -2360,17 +1739,17 @@ namespace Dune
 #endif
   }
 
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::makeGeomTypes()
+  template< int dim, int dimworld >
+  inline void AlbertaGrid< dim, dimworld > :: makeGeomTypes ()
   {
     // we have dim+1 codims
     geomTypes_.resize( dim+1 );
 
     // for each codim create geom type
-    for(int i=dim; i>= 0; i--)
+    for( int codim = 0; codim <= dim; ++codim )
     {
-      // geometry type is always simplex, i is corresponding dim here
-      geomTypes_[dim-i].push_back( GeometryType(GeometryType::simplex,i) );
+      const GeometryType type( GeometryType :: simplex, dim - codim );
+      geomTypes_[ codim ].push_back( type );
     }
   }
 
@@ -2391,21 +1770,25 @@ namespace Dune
   }
 
   template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename)
-    : mesh_ (0)
-      , comm_()
-      , maxlevel_ (0) , wasChanged_ (false)
-      , vertexMarkerLeaf_(false) // creates LeafMarkerVector
-      , nv_ (dim+1) , dof_ (0) , myRank_ (-1)
-      , hIndexSet_(*this)
-      , globalIdSet_( *this )
-      , levelIndexVec_(MAXL,0)
-      , leafIndexSet_ (0)
-      , geomTypes_()
-      , sizeCache_ (0)
-      , coarsenMarked_(0)
-      , refineMarked_(0)
-      , lockPostAdapt_(false)
+  inline AlbertaGrid< dim, dimworld >
+  :: AlbertaGrid( const std::string macroTriangFilename )
+    : mesh_( 0 ),
+      comm_(),
+      maxlevel_( 0 ),
+      wasChanged_( false ),
+      vertexMarkerLeaf_( false ), // creates LeafMarkerVector
+      nv_( dim+1 ),
+      dof_( 0 ),
+      myRank_( -1 ),
+      hIndexSet_( *this ),
+      globalIdSet_( *this ),
+      levelIndexVec_( MAXL, 0 ),
+      leafIndexSet_ ( 0 ),
+      geomTypes_(),
+      sizeCache_( 0 ),
+      coarsenMarked_( 0 ),
+      refineMarked_( 0 ),
+      lockPostAdapt_( false )
   {
     // create vector with geom types
     makeGeomTypes();

@@ -73,11 +73,6 @@ extern "C"
 
 #define N_VERTEX(mesh) N_VERTICES
 
-#define VERTEX_BOUNDARY_ID(elinfo,vertex) (elinfo)->bound[(vertex)]
-#define EDGE_BOUNDARY_ID(elinfo,edge) 0
-#define FACE_BOUNDARY_ID(elinfo,face) (elinfo)->boundary[(face)]->bound
-#define IS_BOUNDARY(elinfo,face) ((elinfo)->boundary[(face)] != 0)
-
 #define WALL_BOUND(elinfo,dim,face) (elinfo)->boundary[(face)]->bound
 
 #define FIRST_MACRO_EL(mesh) (mesh)->first_macro_el
@@ -124,11 +119,6 @@ static inline void meshTraverse(MESH *mesh,
 {
   mesh_traverse(mesh, level, fill_flag, wrapped_el_fct, (void*)el_fct );
 }
-
-#define VERTEX_BOUNDARY_ID(elinfo,vertex) (elinfo)->vertex_bound[(vertex)]
-#define EDGE_BOUNDARY_ID(elinfo,edge) (elinfo)->edge_bound[(edge)]
-#define FACE_BOUNDARY_ID(elinfo,face) (elinfo)->face_bound[(face)]
-#define IS_BOUNDARY(elinfo,face) ((elinfo)->neigh[(face)] == 0)
 
 static inline MACRO_EL* nextMacroEl(MESH* mesh, const MACRO_EL* oldmel)
 {

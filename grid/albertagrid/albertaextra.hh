@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/grid/albertagrid/boundary.hh>
 
 #if HAVE_ALBERTA
 
@@ -439,8 +440,8 @@ namespace AlbertHelp
         elInfo->coord[i][j] = 0.0;
         elInfo->opp_coord[i][j] = 0.0;
       }
-      VERTEX_BOUNDARY_ID(elInfo,i) = 0;
     }
+    Dune::Alberta::BoundaryId< mydim, mydim >::clear( elInfo );
   }
 
   static EL_INFO * getFatherInfo(TRAVERSE_STACK * stack, EL_INFO * elInfo, int level)
