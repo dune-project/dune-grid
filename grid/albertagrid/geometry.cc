@@ -405,7 +405,6 @@ namespace Dune
     builtinverse_ = false;
     builtElMat_   = false;
 
-
     if( elInfo == NULL )
     {
       elDet_     = 0.0;
@@ -423,93 +422,20 @@ namespace Dune
         coord_[ i ][ j ] = elcoord[ j ];
     }
 
-    elDet_     = elDeterminant();
-    calcedDet_ = true;
-    // geometry built
-    return true;
-  }
-
-  // specialization yields speed up, because vertex .. is not copied
-  template<>
-  inline bool AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >
-  :: builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
-  {
-    typedef AlbertaGrid<2,2> GridImp;
-    enum { dim = 2 };
-    enum { dimworld = 2 };
-
-    builtinverse_ = false;
-    builtElMat_   = false;
-
-    if( elInfo == NULL )
+    if( codimension == 0 )
     {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-      // geometry not built
-      return false;
-    }
-
-    // copy coordinates
-    for( int i = 0; i < mydimension+1; ++i )
-    {
-      const int k = mapVertices( subEntity, i );
-      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
-      for( int j = 0; j < coorddimension; ++j )
-        coord_[ i ][ j ] = elcoord[ j ];
-    }
-
-    const ALBERTA EL *el = elInfo->el;
-    assert( el );
-    // if leaf element, get determinant from leaf data
-    if( IS_LEAF_EL( el ) )
-    {
-      typedef Grid::LeafDataType::Data LeafData;
-      LeafData *leafdata = (LeafData *)el->child[ 1 ];
-      assert( leafdata != NULL );
-      elDet_ = leafdata->determinant;
-    }
-    else
-      elDet_ = elDeterminant();
-    assert( std::abs( elDet_ ) > 0.0 );
-    calcedDet_ = true;
-
-    // geometry built
-    return true;
-  }
-
-  template<>
-  inline bool AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >
-  :: builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
-  {
-    builtinverse_ = false;
-    builtElMat_ = false;
-
-    if( elInfo == NULL )
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-      // geometry not built
-      return false;
-    }
-
-    // copy coordinates
-    for( int i = 0; i < mydimension+1; ++i )
-    {
-      const int k = mapVertices( subEntity, i );
-      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
-      for( int j = 0; j < coorddimension; ++j )
-        coord_[ i ][ j ] = elcoord[ j ];
-    }
-
-    const ALBERTA EL *el = elInfo->el;
-    assert( el );
-    // if leaf element, get determinant from leaf data
-    if( IS_LEAF_EL( el ) )
-    {
-      typedef Grid::LeafDataType::Data LeafData;
-      LeafData *leafdata = (LeafData *)el->child[ 1 ];
-      assert( leafdata != NULL );
-      elDet_ = leafdata->determinant;
+      const ALBERTA EL *el = elInfo->el;
+      assert( el );
+      // if leaf element, get determinant from leaf data
+      if( IS_LEAF_EL( el ) )
+      {
+        typedef typename Grid::LeafDataType::Data LeafData;
+        LeafData *leafdata = (LeafData *)el->child[ 1 ];
+        assert( leafdata != NULL );
+        elDet_ = leafdata->determinant;
+      }
+      else
+        elDet_ = elDeterminant();
     }
     else
       elDet_ = elDeterminant();
