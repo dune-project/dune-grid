@@ -183,7 +183,19 @@ namespace Dune
       }
     };
 
-#if DIM >= 2
+#if DIM == 2
+    template<>
+    struct BoundaryId< DIM, 1 >
+    {
+      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
+      {
+        assert( (subEntity >= 0) && (subEntity < N_EDGES) );
+        return elInfo->boundary[ subEntity ]->bound;
+      }
+    };
+#endif // #if DIM == 2
+
+#if DIM == 3
     template<>
     struct BoundaryId< DIM, 1 >
     {
@@ -193,9 +205,7 @@ namespace Dune
         return elInfo->boundary[ subEntity ]->bound;
       }
     };
-#endif // #if DIM >= 2
 
-#if DIM >= 3
     template<>
     struct BoundaryId< DIM, 2 >
     {
@@ -205,7 +215,7 @@ namespace Dune
         return elInfo->boundary[ N_FACES + subEntity ]->bound;
       }
     };
-#endif // #if DIM >= 3
+#endif // #if DIM == 3
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
