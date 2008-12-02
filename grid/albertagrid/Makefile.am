@@ -6,6 +6,6 @@ alberta_HEADERS = agrid.hh agelementindex.cc albertagrid.cc \
   alberta_undefs.hh indexsets.hh referencetopo.hh datahandle.hh \
   exceptions.hh  griddim.hh \
   boundary.hh  entity.hh  entity.cc  entitypointer.hh  entitypointer.cc \
-  geometry.hh  geometry.cc
+  geometry.hh  geometry.cc  treeiterator.hh  treeiterator.cc
 
 include $(top_srcdir)/am/global-rules
