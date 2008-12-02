@@ -281,40 +281,44 @@ namespace Dune
   }
 
   // Make LevelIterator with point to element from previous iterations
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
-  AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafIt )
-    : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,leafIt,true) // true means end iterator
-      , level_   (travLevel)
-      , enLevel_ (travLevel)
-      , virtualEntity_( this->entityImp() )
-      , subEntity_( -1 )
-      , vertexMarker_(0)
-      , okReturn_(false)
-      , proc_(proc)
+  template< int codim, PartitionIteratorType pitype, class GridImp >
+  inline AlbertaGridTreeIterator< codim, pitype, GridImp >
+  ::AlbertaGridTreeIterator( const GridImp &grid,
+                             int travLevel,
+                             int proc,
+                             bool leafIt )
+    : Base( grid, travLevel, leafIt, true ), // true means end iterator
+      level_   (travLevel),
+      enLevel_ (travLevel),
+      virtualEntity_( this->entityImp() ),
+      subEntity_( -1 ),
+      vertexMarker_(0),
+      okReturn_(false),
+      proc_(proc)
   {}
 
+
   // Make LevelIterator with point to element from previous iterations
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
-  AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & org)
-    : AlbertaGridEntityPointer<codim,GridImp> (org.grid_,org.level_, org.leafIt() , (org.vertexMarker_) ? false : true)
-      , level_   (org.level_)
-      , enLevel_ (org.enLevel_)
-      , virtualEntity_( this->entityImp() )
-      , manageStack_ ()
-      //, manageStack_ ( org.manageStack_ )
-      , subEntity_( org.subEntity_ )
-      , vertexMarker_(org.vertexMarker_)
-      , okReturn_ (org.okReturn_ )
-      , proc_(org.proc_)
+  template< int codim, PartitionIteratorType pitype, class GridImp >
+  inline AlbertaGridTreeIterator< codim, pitype, GridImp >
+  ::AlbertaGridTreeIterator( const This &other )
+    : Base( other.grid_, other.level_, other.leafIt(), (other.vertexMarker_) ? false : true ),
+      level_( other.level_ ),
+      enLevel_( other.enLevel_ ),
+      virtualEntity_( this->entityImp() ),
+      manageStack_ (),
+      //manageStack_ ( other.manageStack_ ),
+      subEntity_( other.subEntity_ ),
+      vertexMarker_(other.vertexMarker_),
+      okReturn_ (other.okReturn_ ),
+      proc_( other.proc_ )
   {
     if(vertexMarker_)
     {
       // if vertexMarker is not NULL then we have a real iterator
       manageStack_.create();
       ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
-      ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
+      ALBERTA copyTraverseStack( stack , other.manageStack_.getStack() );
 
       virtualEntity_.setTraverseStack( stack );
       /// get the actual used enInfo
@@ -323,30 +327,29 @@ namespace Dune
       virtualEntity_.setElInfo( elInfo, subEntity_ );
 
       assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) )
-              == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
+              == this->grid_.hierarchicIndexSet().index ( *(other.entity_) ) );
     }
   }
 
   // Make LevelIterator with point to element from previous iterations
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  inline AlbertaGridTreeIterator<codim,pitype,GridImp> &
-  AlbertaGridTreeIterator<codim,pitype,GridImp>::operator =
-    (const AlbertaGridTreeIterator<codim,pitype,GridImp> & org)
+  template< int codim, PartitionIteratorType pitype, class GridImp >
+  inline typename AlbertaGridTreeIterator< codim, pitype, GridImp >::This &
+  AlbertaGridTreeIterator<codim,pitype,GridImp>::operator= ( const This &other )
   {
-    level_ = org.level_;
-    enLevel_ = org.enLevel_;
+    level_ = other.level_;
+    enLevel_ = other.enLevel_;
     //manageStack_ = org.manageStack_;
-    subEntity_ =  org.subEntity_;
-    vertexMarker_ = (org.vertexMarker_);
-    okReturn_ = (org.okReturn_ );
+    subEntity_ =  other.subEntity_;
+    vertexMarker_ = (other.vertexMarker_);
+    okReturn_ = (other.okReturn_ );
 
-    assert( proc_ == org.proc_ );
+    assert( proc_ == other.proc_ );
     if(vertexMarker_)
     {
       // if vertexMarker is not NULL then we have a real iterator
       manageStack_.create();
       ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
-      ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
+      ALBERTA copyTraverseStack( stack , other.manageStack_.getStack() );
 
       virtualEntity_.setTraverseStack( stack );
       /// get the actual used enInfo
@@ -355,7 +358,7 @@ namespace Dune
       virtualEntity_.setElInfo( elInfo, subEntity_ );
 
       assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) )
-              == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
+              == this->grid_.hierarchicIndexSet().index ( *(other.entity_) ) );
     }
 
     return *this;

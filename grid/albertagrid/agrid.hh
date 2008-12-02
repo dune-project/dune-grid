@@ -74,6 +74,7 @@ namespace Dune
 #include "geometry.hh"
 #include "entity.hh"
 #include "entitypointer.hh"
+#include "hierarchiciterator.hh"
 #include "treeiterator.hh"
 
 namespace Dune
@@ -95,78 +96,6 @@ namespace Dune
     typedef Dune::Entity<codim, dim, const GridImp, AlbertaGridEntity> Entity;
     typedef MakeableInterfaceObject<Entity> EntityObject;
   };
-
-
-  //**********************************************************************
-  //
-  // --AlbertaGridHierarchicIterator
-  // --HierarchicIterator
-  /*!
-     Mesh entities of codimension 0 ("elements") allow to visit all entities of
-     codimension 0 obtained through nested, hierarchic refinement of the entity.
-     Iteration over this set of entities is provided by the HIerarchicIterator,
-     starting from a given entity.
-     This is redundant but important for memory efficient implementations of unstru
-     hierarchically refined meshes.
-   */
-
-  template<class GridImp>
-  class AlbertaGridHierarchicIterator
-    : public AlbertaGridEntityPointer<0,GridImp>
-  {
-  public:
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef typename GridImp::ctype ctype;
-
-    typedef typename SelectEntityImp<0,GridImp::dimension,GridImp>::EntityImp EntityImp;
-
-    //! the normal Constructor
-    AlbertaGridHierarchicIterator(const GridImp &grid,
-                                  ALBERTA TRAVERSE_STACK *travStack,
-                                  int actLevel, int maxLevel, bool leafIt );
-
-    //! the default Constructor
-    AlbertaGridHierarchicIterator(const GridImp &grid,
-                                  int actLevel,int maxLevel);
-
-    //! the default Constructor
-    AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> &org);
-
-    //! the default Constructor
-    AlbertaGridHierarchicIterator<GridImp> & operator = (const AlbertaGridHierarchicIterator<GridImp> &org);
-
-    //! increment
-    void increment();
-
-  private:
-    const int startLevel_;
-
-    //! the actual Level of this Hierarichic Iterator
-    int level_;
-
-    //! max level to go down
-    int maxlevel_;
-
-    //! reference to entity of entity pointer class
-    EntityImp & virtualEntity_;
-
-    //! we need this for Albert traversal, and we need ManageTravStack, which
-    //! does count References when copied
-    ALBERTA ManageTravStack manageStack_;
-
-    //! true if iterator is end iterator
-    bool end_;
-
-    //! The nessesary things for Albert
-    ALBERTA EL_INFO * recursiveTraverse(ALBERTA TRAVERSE_STACK * stack);
-
-    //! The nessesary things for Albert
-    ALBERTA EL_INFO * firstChild(ALBERTA TRAVERSE_STACK * stack);
-
-    //! make empty HierarchicIterator
-    void makeIterator();
-  };
-
 
   //**********************************************************************
   //
@@ -395,9 +324,6 @@ namespace Dune
     //! is true when iterator finished
     bool done_;
   };
-
-
-
 
 
   //**********************************************************************
