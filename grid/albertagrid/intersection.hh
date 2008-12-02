@@ -20,21 +20,22 @@ namespace Dune
      non-matching meshes. The number of neigbors may be different from the number of faces
      of an element!
    */
-  template<class GridImp>
+  template< class GridImp >
   class AlbertaGridIntersectionIterator
   {
+    typedef AlbertaGridIntersectionIterator This;
+
     enum { dim      = GridImp::dimension };
     enum { dimworld = GridImp::dimensionworld };
 
     friend class AlbertaGridEntity<0,dim,GridImp>;
-    typedef AlbertaGridIntersectionIterator<GridImp> ThisType;
 
   public:
     typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersectionIterator >
     Intersection;
-    typedef ThisType ImplementationType;
+    typedef This ImplementationType;
 
-    typedef AGMemoryProvider< ThisType > StorageType;
+    typedef AGMemoryProvider< This > StorageType;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -59,13 +60,10 @@ namespace Dune
     }
 
     //! equality
-    bool equals (const AlbertaGridIntersectionIterator<GridImp> & i) const;
+    bool equals ( const This &other ) const;
 
     //! increment
     void increment();
-
-    //! equality
-    bool operator==(const AlbertaGridIntersectionIterator<GridImp>& i) const;
 
     //! access neighbor
     EntityPointer outside() const;
@@ -83,10 +81,10 @@ namespace Dune
                                     ALBERTA EL_INFO *elInfo,
                                     bool leafIt );
     //! The copy constructor
-    AlbertaGridIntersectionIterator(const AlbertaGridIntersectionIterator<GridImp> & org);
+    AlbertaGridIntersectionIterator( const This &other );
 
     //! assignment operator, implemented because default does not the right thing
-    void assign (const AlbertaGridIntersectionIterator<GridImp> & org);
+    void assign ( const This &other );
 
     //! The Destructor
     //~AlbertaGridIntersectionIterator();
@@ -130,18 +128,18 @@ namespace Dune
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    typedef FieldVector<albertCtype, GridImp::dimensionworld> NormalVecType;
-    typedef FieldVector<albertCtype, GridImp::dimension-1> LocalCoordType;
+    typedef FieldVector< albertCtype, GridImp::dimensionworld > NormalVector;
+    typedef FieldVector< albertCtype, GridImp::dimension-1 > LocalCoordType;
 
-    const NormalVecType & unitOuterNormal (const LocalCoordType & local) const;
-
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    const NormalVecType & outerNormal (const LocalCoordType & local) const;
+    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const NormalVecType & integrationOuterNormal (const LocalCoordType & local) const;
+    const NormalVector outerNormal ( const LocalCoordType &local ) const;
+
+    //! return outer normal, this should be dependent on local
+    //! coordinates for higher order boundary
+    const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
 
     //! return level of inside entity
     int level () const;
@@ -151,8 +149,7 @@ namespace Dune
     //**********************************************************
 
     // reset IntersectionIterator
-    template <class EntityType>
-    void first(const EntityType & en, int level );
+    void first ( const EntityImp &entity, int level );
 
     // calls EntityPointer done and sets done_ to true
     void done ();
@@ -176,7 +173,7 @@ namespace Dune
     void setupVirtEn () const;
 
     //! calculate normal to current face
-    void calcOuterNormal () const;
+    void calcOuterNormal ( NormalVector &n ) const;
 
     // return whether the iterator was called from a LeafIterator entity or
     // LevelIterator entity
@@ -223,13 +220,6 @@ namespace Dune
 
     //! EL_INFO th store the information of the neighbor if needed
     mutable ALBERTA EL_INFO neighElInfo_;
-
-    mutable NormalVecType outNormal_;
-    mutable NormalVecType unitNormal_;
-
-    // tmp memory for normal calculation
-    mutable FieldVector<albertCtype, dimworld> tmpU_;
-    mutable FieldVector<albertCtype, dimworld> tmpV_;
 
     // twist seen from the neighbor
     mutable int twist_;

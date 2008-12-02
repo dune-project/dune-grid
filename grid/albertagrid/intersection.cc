@@ -26,76 +26,76 @@ namespace Dune
   {}
 
   template< class GridImp >
-  template< class EntityType >
-  inline void AlbertaGridIntersectionIterator<GridImp>::
-  first(const EntityType & en ,int level)
+  inline void
+  AlbertaGridIntersectionIterator< GridImp >
+  ::first ( const EntityImp &entity, int level )
   {
     level_ = level;
     neighborCount_ = 0;
     builtNeigh_    = false;
-    elInfo_        = en.getElInfo();
+    elInfo_        = entity.getElInfo();
     done_          = false;
-    this->leafIt_  = en.leafIt();
+    this->leafIt_  = entity.leafIt();
     assert( elInfo_ );
   }
 
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator<GridImp>::
-  done ()
+  inline void
+  AlbertaGridIntersectionIterator< GridImp >::done ()
   {
     level_ = -1;
     neighborCount_ = dim+1;
     builtNeigh_    = false;
-    elInfo_        = 0;
+    elInfo_        = NULL;
     done_          = true;
   }
 
+
   // copy constructor
   template< class GridImp >
-  inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
-    (const AlbertaGridIntersectionIterator<GridImp> & org)
-    : grid_(org.grid_)
-      , level_(org.level_)
-      , neighborCount_(org.neighborCount_)
-      , builtNeigh_ (false)
-      , leafIt_( org.leafIt_ )
-      , elInfo_ ( org.elInfo_ )
-      , fakeNeighObj_(LocalGeometryImp())
-      , fakeSelfObj_ (LocalGeometryImp())
-      , neighGlobObj_(LocalGeometryImp())
-      , fakeNeigh_ (grid_.getRealImplementation(fakeNeighObj_))
-      , fakeSelf_  (grid_.getRealImplementation(fakeSelfObj_ ))
-      , neighGlob_ (grid_.getRealImplementation(neighGlobObj_))
-      , neighElInfo_()
-      , done_ ( org.done_ )
+  inline AlbertaGridIntersectionIterator< GridImp >
+  ::AlbertaGridIntersectionIterator ( const This &other )
+    : grid_( other.grid_ ),
+      level_( other.level_ ),
+      neighborCount_( other.neighborCount_ ),
+      builtNeigh_( false ),
+      leafIt_( other.leafIt_ ),
+      elInfo_ ( other.elInfo_ ),
+      fakeNeighObj_( LocalGeometryImp() ),
+      fakeSelfObj_ ( LocalGeometryImp() ),
+      neighGlobObj_( LocalGeometryImp() ),
+      fakeNeigh_( grid_.getRealImplementation( fakeNeighObj_ ) ),
+      fakeSelf_( grid_.getRealImplementation( fakeSelfObj_ ) ),
+      neighGlob_( grid_.getRealImplementation( neighGlobObj_ ) ),
+      neighElInfo_(),
+      done_( other.done_ )
   {}
+
 
   // assignment operator
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator<GridImp>::
-  assign (const AlbertaGridIntersectionIterator<GridImp> & org)
+  inline void
+  AlbertaGridIntersectionIterator< GridImp >::assign ( const This &other )
   {
     // only assign iterators from the same grid
-    assert( &this->grid_ == &(org.grid_));
-    level_ =  org.level_;
-    neighborCount_ = org.neighborCount_;
-    elInfo_ = org.elInfo_;
+    assert( &(this->grid_) == &(other.grid_) );
+
+    level_ = other.level_;
+    neighborCount_ = other.neighborCount_;
+    elInfo_ = other.elInfo_;
     builtNeigh_ = false;
-    leafIt_ = org.leafIt_;
-    done_ = org.done_;
+    leafIt_ = other.leafIt_;
+    done_ = other.done_;
   }
 
 
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator<GridImp>::
-  equals (const AlbertaGridIntersectionIterator<GridImp> & i) const
+  inline bool
+  AlbertaGridIntersectionIterator< GridImp >::equals ( const This &other ) const
   {
-    const ALBERTA EL * e1 = (elInfo_)   ? (elInfo_->el)   : 0;
-    const ALBERTA EL * e2 = (i.elInfo_) ? (i.elInfo_->el) : 0;
-
-    return
-      ( (e1 == e2)   // check equality of entities which can be both zero
-        && (done_ == i.done_)); /// and then also check done status
+    const ALBERTA EL *e1 = (elInfo_ != NULL ? elInfo_->el : NULL);
+    const ALBERTA EL *e2 = (other.elInfo_ != NULL ? other.elInfo_->el : NULL);
+    return (e1 == e2) && (done_ == other.done_);
   }
 
   template< class GridImp >
@@ -190,91 +190,96 @@ namespace Dune
   }
 
   template<class GridImp>
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::NormalVecType &
-  AlbertaGridIntersectionIterator<GridImp>::unitOuterNormal (const LocalCoordType & local) const
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
+  AlbertaGridIntersectionIterator< GridImp >
+  ::unitOuterNormal ( const LocalCoordType &local ) const
   {
-    // calculates the outer_normal
-    unitNormal_  = this->outerNormal(local);
-    unitNormal_ *= (1.0/unitNormal_.two_norm());
-
-    return unitNormal_;
-  }
-
-  template<class GridImp>
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::NormalVecType &
-  AlbertaGridIntersectionIterator<GridImp>::integrationOuterNormal (const LocalCoordType & local) const
-  {
-    return this->outerNormal(local);
-  }
-
-
-  template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::NormalVecType &
-  AlbertaGridIntersectionIterator<GridImp>::outerNormal(const LocalCoordType & local) const
-  {
-    calcOuterNormal();
-    return outNormal_;
+    NormalVector normal;
+    calcOuterNormal( normal );
+    normal *= (1.0 / normal.two_norm());
+    return normal;
   }
 
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator<GridImp>:: calcOuterNormal() const
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
+  AlbertaGridIntersectionIterator< GridImp >
+  ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
-    std::cout << "outer_normal() not correctly implemented yet! \n";
-    assert(false);
-    for(int i=0; i<dimworld; i++)
-      outNormal_[i] = 0.0;
-
-    return ;
+    NormalVector normal;
+    calcOuterNormal( normal );
+    return normal;
   }
 
-  template <>
+  template< class GridImp >
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
+  AlbertaGridIntersectionIterator< GridImp >
+  ::outerNormal( const LocalCoordType &local ) const
+  {
+    return integrationOuterNormal( local );
+  }
+
+  template< class GridImp >
   inline void
-  AlbertaGridIntersectionIterator<const AlbertaGrid<2,2> >::calcOuterNormal () const
+  AlbertaGridIntersectionIterator<GridImp>::calcOuterNormal( NormalVector &n ) const
+  {
+    DUNE_THROW( NotImplemented, "AlbertaGrid: outer normal for dim != dimworld "
+                "has not been implemented, yet." );
+  }
+
+
+  template<>
+  inline void
+  AlbertaGridIntersectionIterator< const AlbertaGrid< 2, 2 > >
+  ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( elInfo_ );
     const ALBERTA REAL_D & coordOne = grid_.getCoord(elInfo_,(neighborCount_+1)%3);
     const ALBERTA REAL_D & coordTwo = grid_.getCoord(elInfo_,(neighborCount_+2)%3);
 
-    outNormal_[0] = -(coordOne[1] - coordTwo[1]);
-    outNormal_[1] =   coordOne[0] - coordTwo[0];
-    return ;
+    n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
+    n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
   }
 
-  template <>
-  inline void AlbertaGridIntersectionIterator<const AlbertaGrid<3,3> >::
-  calcOuterNormal () const
-  {
-    assert( elInfo_ );
-    enum { dim = 3 };
 
-    // in this case the orientation is negative, therefore multiply with -1
-  #if DIM == 3
+  template<>
+  inline void
+  AlbertaGridIntersectionIterator< const AlbertaGrid< 3, 3 > >
+  ::calcOuterNormal ( NormalVector &n ) const
+  {
+    assert( elInfo_ != NULL );
+    const int dim = 3;
+
+    // in this case the orientation is negative, multiply by -1
+#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     const albertCtype val = (elInfo_->orientation > 0) ? 1.0 : -1.0;
-  #else
+#else
     const albertCtype val = 1.0;
-  #endif
+#endif
 
     // neighborCount_ is the local face number
-    const int * localFaces = ALBERTA AlbertHelp::localAlbertaFaceNumber[neighborCount_];
+    const int *localFaces = ALBERTA AlbertHelp::localAlbertaFaceNumber[ neighborCount_ ];
 
-    const ALBERTA REAL_D & coordZero = grid_.getCoord(elInfo_, localFaces[0] );
-    const ALBERTA REAL_D & coordOne  = grid_.getCoord(elInfo_, localFaces[1] );
-    const ALBERTA REAL_D & coordTwo  = grid_.getCoord(elInfo_, localFaces[2] );
+    const ALBERTA REAL_D &coordZero = grid_.getCoord( elInfo_, localFaces[0] );
+    const ALBERTA REAL_D &coordOne  = grid_.getCoord( elInfo_, localFaces[1] );
+    const ALBERTA REAL_D &coordTwo  = grid_.getCoord( elInfo_, localFaces[2] );
 
-    for(int i=0; i<dim; ++i)
+    FieldVector< albertCtype, dimworld > u;
+    FieldVector< albertCtype, dimworld > v;
+    for( int i = 0; i < dim; ++i )
     {
-      tmpV_[i] = coordOne[i] - coordZero[i];
-      tmpU_[i] = coordTwo[i] - coordOne[i];
+      v[ i ] = coordOne[ i ] - coordZero[ i ];
+      u[ i ] = coordTwo[ i ] - coordOne[ i ];
     }
 
     // outNormal_ has length 3
-    for(int i=0; i<dim; ++i)
-      outNormal_[i] = tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim]
-                      - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim];
-
-    outNormal_ *= val;
-    return ;
+    for( int i = 0; i < dim; ++i )
+    {
+      const int j = (i+1)%dim;
+      const int k = (i+2)%dim;
+      n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
+    }
   }
+
 
   template< class GridImp >
   inline const typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry &

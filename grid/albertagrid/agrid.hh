@@ -203,12 +203,10 @@ namespace Dune
         // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
         typedef Dune::Geometry<dim-cd, dimworld, const GridImp, AlbertaGridGeometry> Geometry;
         typedef Dune::Geometry<dim-cd, dim, const GridImp, AlbertaGridGeometry> LocalGeometry;
-        // we could - if needed - introduce an other struct for dimglobal of Geometry
 
         typedef typename SelectEntityImp<cd,dim,GridImp>::Entity Entity;
 
         typedef Dune::LevelIterator<cd,All_Partition,const GridImp,AlbertaGridLevelIterator> LevelIterator;
-
         typedef Dune::LeafIterator<cd,All_Partition,const GridImp,AlbertaGridLeafIterator> LeafIterator;
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
@@ -220,7 +218,6 @@ namespace Dune
           typedef Dune::LevelIterator<cd,pitype,const GridImp,AlbertaGridLevelIterator> LevelIterator;
           typedef Dune::LeafIterator<cd,pitype,const GridImp,AlbertaGridLeafIterator> LeafIterator;
         };
-
       };
 
       template <PartitionIteratorType pitype>
