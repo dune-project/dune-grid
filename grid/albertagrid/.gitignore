@@ -3,3 +3,5 @@ Makefile.in
 .libs
 .deps
 semantic.cache
+
+*.swp
