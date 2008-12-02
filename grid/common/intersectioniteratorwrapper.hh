@@ -136,23 +136,23 @@ namespace Dune {
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const NormalType & unitOuterNormal (const FieldVector<ctype, dim-1>& local) const
+    const NormalType unitOuterNormal ( const FieldVector< ctype, dim-1 > &local ) const
     {
-      return it().unitOuterNormal(local);
+      return it().unitOuterNormal( local );
     }
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const NormalType & outerNormal (const FieldVector<ctype, dim-1>& local) const
+    const NormalType outerNormal ( const FieldVector< ctype, dim-1 > &local ) const
     {
-      return it().outerNormal(local);
+      return it().outerNormal( local );
     }
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    const NormalType & integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
+    const NormalType integrationOuterNormal ( const FieldVector< ctype, dim-1 > &local ) const
     {
-      return it().integrationOuterNormal(local);
+      return it().integrationOuterNormal( local );
     }
 
     //! return level of iterator
