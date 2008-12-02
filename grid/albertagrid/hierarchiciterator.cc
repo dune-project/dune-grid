@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_HIERARCHICITERATOR_CC
 #define DUNE_ALBERTA_HIERARCHICITERATOR_CC
 
+#include <dune/grid/albertagrid/hierarchiciterator.hh>
+
 namespace Dune
 {
 

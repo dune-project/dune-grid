@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_CC
 #define DUNE_ALBERTA_TREEITERATOR_CC
 
+#include <dune/grid/albertagrid/treeiterator.cc>
+
 namespace Dune
 {
 
