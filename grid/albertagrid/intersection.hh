@@ -69,14 +69,11 @@ namespace Dune
     EntityPointer inside() const;
 
     //! The default Constructor
-    AlbertaGridIntersectionIterator(const GridImp & grid,
-                                    int level);
+    AlbertaGridIntersectionIterator ( const GridImp &grid, int level );
 
     //! The Constructor
-    AlbertaGridIntersectionIterator(const GridImp & grid,
-                                    int level,
-                                    ALBERTA EL_INFO *elInfo,
-                                    bool leafIt );
+    AlbertaGridIntersectionIterator ( const GridImp & grid, int level,
+                                      ALBERTA EL_INFO *elInfo, bool leafIt );
     //! The copy constructor
     AlbertaGridIntersectionIterator( const This &other );
 
@@ -208,9 +205,6 @@ namespace Dune
 
     // twist seen from the neighbor
     mutable int twist_;
-
-    //! is true when iterator finished
-    bool done_;
   };
 
 }

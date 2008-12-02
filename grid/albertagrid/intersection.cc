@@ -18,8 +18,7 @@ namespace Dune
       fakeNeighObj_(LocalGeometryImp()),
       fakeSelfObj_ (LocalGeometryImp()),
       neighGlobObj_(LocalGeometryImp()),
-      neighElInfo_ () ,
-      done_(true)
+      neighElInfo_ ()
   {}
 
   template< class GridImp >
@@ -31,7 +30,6 @@ namespace Dune
     neighborCount_ = 0;
     builtNeigh_    = false;
     elInfo_        = entity.getElInfo();
-    done_          = false;
     this->leafIt_  = entity.leafIt();
     assert( elInfo_ );
   }
@@ -44,7 +42,6 @@ namespace Dune
     neighborCount_ = dimension+1;
     builtNeigh_    = false;
     elInfo_        = NULL;
-    done_          = true;
   }
 
 
@@ -61,8 +58,7 @@ namespace Dune
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
       neighGlobObj_( LocalGeometryImp() ),
-      neighElInfo_(),
-      done_( other.done_ )
+      neighElInfo_()
   {}
 
 
@@ -79,7 +75,6 @@ namespace Dune
     elInfo_ = other.elInfo_;
     builtNeigh_ = false;
     leafIt_ = other.leafIt_;
-    done_ = other.done_;
   }
 
 
@@ -89,7 +84,7 @@ namespace Dune
   {
     const ALBERTA EL *e1 = (elInfo_ != NULL ? elInfo_->el : NULL);
     const ALBERTA EL *e2 = (other.elInfo_ != NULL ? other.elInfo_->el : NULL);
-    return (e1 == e2) && (done_ == other.done_);
+    return (e1 == e2) && (neighborCount_ == other.neighborCount_);
   }
 
   template< class GridImp >
