@@ -162,10 +162,6 @@ namespace Dune
     //! true if geometry has been constructed
     mutable bool builtgeometry_;
 
-    //! local coord within father
-    mutable FieldVector<albertCtype, dim> localFatherCoords_;
-    mutable bool localFCoordCalced_;
-
     //! Number of the subentity within the element
     int subEntity_;
   };

@@ -125,36 +125,36 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersectionIterator<GridImp>::EntityPointer
-  AlbertaGridIntersectionIterator<GridImp>::outside () const
+  inline typename AlbertaGridIntersectionIterator< GridImp >::EntityPointer
+  AlbertaGridIntersectionIterator< GridImp >::outside () const
   {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
+    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
 
-    if(!builtNeigh_)
+    if( !builtNeigh_ )
     {
       assert( elInfo_ );
       // just copy elInfo and then set some values
-      std::memcpy(&neighElInfo_,elInfo_,sizeof(ALBERTA EL_INFO));
+      std::memcpy( &neighElInfo_, elInfo_, sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
 
       assert( level_ == elInfo_->level );
-      assert( (this->leafIt() ) ? (1) : (elInfo_->level == neighElInfo_.level) );
+      assert( leafIt() || (elInfo_->level == neighElInfo_.level) );
     }
 
     assert( builtNeigh_ );
     assert( neighElInfo_.el );
-    const int neighborLevel = this->grid_.getLevelOfElement( neighElInfo_.el );
-    return EntityPointerImpl( this->grid_, neighborLevel, &neighElInfo_, 0 );
+    const int neighborLevel = grid_.getLevelOfElement( neighElInfo_.el );
+    return EntityPointerImp( grid_, neighborLevel, &neighElInfo_, 0 );
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersectionIterator<GridImp>::EntityPointer
-  AlbertaGridIntersectionIterator<GridImp>::inside () const
+  inline typename AlbertaGridIntersectionIterator< GridImp >::EntityPointer
+  AlbertaGridIntersectionIterator< GridImp >::inside () const
   {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
-    assert( elInfo_ );
-    return EntityPointerImpl( this->grid_, (int)elInfo_->level, elInfo_, 0 );
+    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
+    assert( elInfo_ != NULL );
+    return EntityPointerImp( grid_, (int)elInfo_->level, elInfo_, 0 );
   }
 
   template< class GridImp >

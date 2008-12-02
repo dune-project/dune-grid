@@ -32,8 +32,6 @@ namespace Dune
       level_ ( level ),
       geo_ (GeometryImp()),
       builtgeometry_    (false),
-      localFatherCoords_(),
-      localFCoordCalced_(false),
       subEntity_( -1 )
   {}
 
@@ -48,8 +46,6 @@ namespace Dune
       level_( other.level_ ),
       geo_( other.geo_ ),
       builtgeometry_( false ),
-      localFatherCoords_(),
-      localFCoordCalced_( false ),
       subEntity_( other.subEntity_ )
   {}
 
@@ -71,8 +67,6 @@ namespace Dune
       level_ (level),
       geo_ (GeometryImp()),
       builtgeometry_(false),
-      localFatherCoords_(),
-      localFCoordCalced_(false),
       subEntity_( -1 )
   {}
 
@@ -127,7 +121,6 @@ namespace Dune
     subEntity_ = subEntity;
     element_ = (elInfo_ != NULL ? elInfo_->el : NULL );
     builtgeometry_ = geoImp().builtGeom( grid_, elInfo_, subEntity );
-    localFCoordCalced_ = false;
   }
 
   template< int codim, int dim, class GridImp >
