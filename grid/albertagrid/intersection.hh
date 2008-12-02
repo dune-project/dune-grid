@@ -25,34 +25,31 @@ namespace Dune
   {
     typedef AlbertaGridIntersectionIterator This;
 
-    enum { dim      = GridImp::dimension };
-    enum { dimworld = GridImp::dimensionworld };
-
-    friend class AlbertaGridEntity<0,dim,GridImp>;
+    friend class AlbertaGridEntity< 0, GridImp::dimension, GridImp >;
 
   public:
+    //! define type used for coordinates in grid module
+    typedef typename GridImp::ctype ctype;
+
+    //! know your own dimension
+    static const int dimension = GridImp::dimension;
+    //! know your own dimension of world
+    static const int dimensionworld = GridImp::dimensionworld;
+
     typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersectionIterator >
     Intersection;
     typedef This ImplementationType;
 
     typedef AGMemoryProvider< This > StorageType;
     typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    typedef MakeableInterfaceObject< Entity > EntityObject;
-    typedef typename EntityObject::ImplementationType EntityImp;
-
-    //typedef AlbertaGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
-    typedef AlbertaGridGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
-    //! know your own dimension
-    enum { dimension=dim };
-    //! know your own dimension of world
-    enum { dimensionworld=dimworld };
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef AlbertaGridEntity< 0, dimension, GridImp > EntityImp;
+    typedef AlbertaGridGeometry< dimension-1, dimensionworld, GridImp > GeometryImp;
+    typedef AlbertaGridGeometry< dimension-1, dimension, GridImp > LocalGeometryImp;
 
     const Intersection &dereference () const
     {
@@ -128,8 +125,8 @@ namespace Dune
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    typedef FieldVector< albertCtype, GridImp::dimensionworld > NormalVector;
-    typedef FieldVector< albertCtype, GridImp::dimension-1 > LocalCoordType;
+    typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
+    typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
 
     const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
@@ -201,22 +198,10 @@ namespace Dune
     //! pointer to the EL_INFO struct storing the real element information
     mutable ALBERTA EL_INFO * elInfo_;
 
-    typedef MakeableInterfaceObject<LocalGeometry> LocalGeometryObject;
-
     // the objects holding the real implementations
-    mutable LocalGeometryObject fakeNeighObj_;
-    mutable LocalGeometryObject fakeSelfObj_;
-    mutable LocalGeometryObject neighGlobObj_;
-
-    //! pointer to element holding the intersectionNeighbourLocal information.
-    //! This element is created on demand.
-    mutable LocalGeometryImp & fakeNeigh_;
-    //! pointer to element holding the intersectionSelfLocal information.
-    //! This element is created on demand.
-    mutable LocalGeometryImp & fakeSelf_;
-    //! pointer to element holding the neighbor_global and neighbor_local
-    //! information. This element is created on demand.
-    mutable LocalGeometryImp & neighGlob_;
+    mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
+    mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
+    mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
 
     //! EL_INFO th store the information of the neighbor if needed
     mutable ALBERTA EL_INFO neighElInfo_;

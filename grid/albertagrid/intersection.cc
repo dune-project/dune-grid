@@ -9,20 +9,17 @@ namespace Dune
 {
 
   template< class GridImp >
-  inline AlbertaGridIntersectionIterator<GridImp>::
-  AlbertaGridIntersectionIterator(const GridImp & grid,int level) :
-    grid_(grid),
-    level_ (level),
-    neighborCount_ (dim+1),
-    elInfo_ (0),
-    fakeNeighObj_(LocalGeometryImp()),
-    fakeSelfObj_ (LocalGeometryImp()),
-    neighGlobObj_(LocalGeometryImp()),
-    fakeNeigh_ (grid_.getRealImplementation(fakeNeighObj_) ),
-    fakeSelf_  (grid_.getRealImplementation(fakeSelfObj_)  ),
-    neighGlob_ (grid_.getRealImplementation(neighGlobObj_)),
-    neighElInfo_ () ,
-    done_(true)
+  inline AlbertaGridIntersectionIterator< GridImp >
+  ::AlbertaGridIntersectionIterator ( const GridImp &grid, int level )
+    : grid_(grid),
+      level_ (level),
+      neighborCount_( dimension+1 ),
+      elInfo_ (0),
+      fakeNeighObj_(LocalGeometryImp()),
+      fakeSelfObj_ (LocalGeometryImp()),
+      neighGlobObj_(LocalGeometryImp()),
+      neighElInfo_ () ,
+      done_(true)
   {}
 
   template< class GridImp >
@@ -44,7 +41,7 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >::done ()
   {
     level_ = -1;
-    neighborCount_ = dim+1;
+    neighborCount_ = dimension+1;
     builtNeigh_    = false;
     elInfo_        = NULL;
     done_          = true;
@@ -64,9 +61,6 @@ namespace Dune
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
       neighGlobObj_( LocalGeometryImp() ),
-      fakeNeigh_( grid_.getRealImplementation( fakeNeighObj_ ) ),
-      fakeSelf_( grid_.getRealImplementation( fakeSelfObj_ ) ),
-      neighGlob_( grid_.getRealImplementation( neighGlobObj_ ) ),
       neighElInfo_(),
       done_( other.done_ )
   {}
@@ -106,10 +100,10 @@ namespace Dune
     ++neighborCount_;
 
     // (dim+1) is neigbourCount for end iterators
-    if(neighborCount_ > dim)
+    if( neighborCount_ > dimension )
     {
       this->done();
-      return ;
+      return;
     }
 
     /*
@@ -120,8 +114,6 @@ namespace Dune
        if( !neighborHasSameLevel () ) increment ();
        }
      */
-
-    return ;
   }
 
   template< class GridImp >
@@ -164,8 +156,8 @@ namespace Dune
     // id of interior intersections is 0
     if( ! boundary() ) return 0;
     assert(elInfo_);
-    assert( WALL_BOUND(elInfo_, dim, neighborCount_ ) != 0 );
-    return WALL_BOUND(elInfo_, dim, neighborCount_ );
+    assert( WALL_BOUND(elInfo_, dimension, neighborCount_ ) != 0 );
+    return WALL_BOUND(elInfo_, dimension, neighborCount_ );
   }
 
   template< class GridImp >
@@ -247,7 +239,6 @@ namespace Dune
   ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( elInfo_ != NULL );
-    const int dim = 3;
 
     // in this case the orientation is negative, multiply by -1
 #if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
@@ -263,60 +254,56 @@ namespace Dune
     const ALBERTA REAL_D &coordOne  = grid_.getCoord( elInfo_, localFaces[1] );
     const ALBERTA REAL_D &coordTwo  = grid_.getCoord( elInfo_, localFaces[2] );
 
-    FieldVector< albertCtype, dimworld > u;
-    FieldVector< albertCtype, dimworld > v;
-    for( int i = 0; i < dim; ++i )
+    FieldVector< ctype, dimensionworld > u;
+    FieldVector< ctype, dimensionworld > v;
+    for( int i = 0; i < dimension; ++i )
     {
       v[ i ] = coordOne[ i ] - coordZero[ i ];
       u[ i ] = coordTwo[ i ] - coordOne[ i ];
     }
 
     // outNormal_ has length 3
-    for( int i = 0; i < dim; ++i )
+    for( int i = 0; i < dimension; ++i )
     {
-      const int j = (i+1)%dim;
-      const int k = (i+2)%dim;
+      const int j = (i+1)%dimension;
+      const int k = (i+2)%dimension;
       n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
     }
   }
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry &
-  AlbertaGridIntersectionIterator<GridImp>::
-  intersectionSelfLocal () const
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
+  AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
   {
-    fakeSelf_.builtLocalGeom(inside()->geometry(),intersectionGlobal(),
-                             elInfo_,neighborCount_);
+    LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
+    if( !geo.builtLocalGeom( inside()->geometry(), intersectionGlobal(), elInfo_, neighborCount_ ) )
+      DUNE_THROW( AlbertaError, "internal error in intersectionSelfLocal." );
     return fakeSelfObj_;
   }
 
-  template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry &
-  AlbertaGridIntersectionIterator<GridImp>::intersectionNeighborLocal () const
-  {
-    assert(neighbor());
 
-    if(fakeNeigh_.builtLocalGeom(outside()->geometry(),intersectionGlobal(),
-                                 &neighElInfo_,neighborCount_)
-       )
-      return fakeNeighObj_;
-    else
-    {
-      DUNE_THROW(AlbertaError, "intersection_neighbor_local: error occured!");
-    }
+  template< class GridImp >
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
+  AlbertaGridIntersectionIterator< GridImp >::intersectionNeighborLocal () const
+  {
+    assert( neighbor() );
+    LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
+    if( !geo.builtLocalGeom( outside()->geometry(), intersectionGlobal(), &neighElInfo_, neighborCount_ ) )
+      DUNE_THROW( AlbertaError, "internal error in intersectionNeighborLocal." );
     return fakeNeighObj_;
   }
 
-  template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator<GridImp>::Geometry &
-  AlbertaGridIntersectionIterator<GridImp>::
-  intersectionGlobal () const
-  {
-    assert( elInfo_ );
 
-    if( !neighGlob_.builtGeom( grid_, elInfo_, neighborCount_ ) )
-      DUNE_THROW( AlbertaError, "intersectionGlobal: Could not build geometry" );
+  template< class GridImp >
+  inline const typename AlbertaGridIntersectionIterator< GridImp >::Geometry &
+  AlbertaGridIntersectionIterator< GridImp >::intersectionGlobal () const
+  {
+    assert( elInfo_ != NULL );
+
+    GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
+    if( !geo.builtGeom( grid_, elInfo_, neighborCount_ ) )
+      DUNE_THROW( AlbertaError, "internal error in intersectionGlobal." );
     return neighGlobObj_;
   }
 
@@ -502,7 +489,7 @@ namespace Dune
     // neighbor first
     assert(neighbor());
 
-    assert( neighborCount_ < dim+1 );
+    assert( neighborCount_ < dimension+1 );
     // set the neighbor element as element
     // use ALBERTA macro to get neighbour
     neighElInfo_.el = NEIGH(elInfo_->el,elInfo_)[neighborCount_];
@@ -510,10 +497,10 @@ namespace Dune
     const int vx = elInfo_->opp_vertex[neighborCount_];
 
     // reset neighbor information
-    for(int i=0; i<dim+1; ++i)
+    for( int i = 0; i <= dimension; ++i )
     {
-      neighElInfo_.neigh[i] = 0;
-      neighElInfo_.opp_vertex[i] = 127;
+      neighElInfo_.neigh[ i ] = 0;
+      neighElInfo_.opp_vertex[ i ] = 127;
     }
 
     // set origin
@@ -527,12 +514,13 @@ namespace Dune
     {
       const ALBERTA REAL_D & coord = elInfo_->opp_coord[neighborCount_];
       ALBERTA REAL_D & newcoord    = neighElInfo_.coord[vx];
-      for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
+      for( int j = 0; j < dimensionworld; ++j )
+        newcoord[ j ] = coord[ j ];
     }
   #endif
 
     // setup coordinates of neighbour elInfo
-    twist_ = SetupVirtualNeighbour<GridImp,dimworld,dim>::
+    twist_ = SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
              setupNeighInfo(this->grid_,elInfo_,vx,neighborCount_,&neighElInfo_);
 
     builtNeigh_ = true;
