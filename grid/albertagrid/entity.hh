@@ -144,9 +144,6 @@ namespace Dune
     // Alberta element info
     ALBERTA EL_INFO *elInfo_;
 
-    // Alberta element
-    ALBERTA EL * element_;
-
     // current traverse stack this entity belongs too
     ALBERTA TRAVERSE_STACK * travStack_;
 
@@ -185,10 +182,12 @@ namespace Dune
   //  --0Entity
   //
   //***********************
-  template<int dim, class GridImp>
-  class AlbertaGridEntity<0,dim,GridImp> :
-    public EntityDefaultImplementation <0,dim,GridImp,AlbertaGridEntity>
+  template< int dim, class GridImp >
+  class AlbertaGridEntity< 0, dim, GridImp >
+    : public EntityDefaultImplementation< 0, dim, GridImp, AlbertaGridEntity >
   {
+    typedef AlbertaGridEntity< 0, dim, GridImp > This;
+
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid < dim , GridImp::dimensionworld >;
     friend class AlbertaMarkerVector;
@@ -205,7 +204,7 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      typedef typename GridImp :: template Codim< codim > :: EntityPointer
+      typedef typename GridImp::template Codim< codim >::EntityPointer
       EntityPointer;
     };
 
@@ -392,9 +391,6 @@ namespace Dune
 
     //! pointer to the real Albert element data
     ALBERTA EL_INFO *elInfo_;
-
-    //! pointer to the real Albert element
-    ALBERTA EL *element_;
 
     // local coordinates within father
     typedef MakeableInterfaceObject<Geometry> GeometryObject;

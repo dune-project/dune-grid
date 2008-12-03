@@ -27,7 +27,6 @@ namespace Dune
                     ALBERTA TRAVERSE_STACK * travStack)
     : grid_( grid ),
       elInfo_(0),
-      element_(0),
       travStack_(travStack),
       level_ ( level ),
       geo_ (GeometryImp()),
@@ -41,7 +40,6 @@ namespace Dune
   :: AlbertaGridEntity ( const This &other )
     : grid_( other.grid_ ),
       elInfo_( other.elInfo_ ),
-      element_( elInfo_ != NULL ? elInfo_->el : NULL ),
       travStack_( other.travStack_ ),
       level_( other.level_ ),
       geo_( other.geo_ ),
@@ -62,7 +60,6 @@ namespace Dune
   AlbertaGridEntity(const GridImp &grid, int level, bool)
     : grid_(grid),
       elInfo_(0),
-      element_(0),
       travStack_(0),
       level_ (level),
       geo_ (GeometryImp()),
@@ -81,13 +78,13 @@ namespace Dune
   inline bool AlbertaGridEntity< codim, dim, GridImp >
   :: equals ( const This &other ) const
   {
+    const ALBERTA EL *e1 = getElement();
     const ALBERTA EL *e2 = other.getElement();
 
     // if both element null then they are equal
-    if( (!e2) && (!element_) )
+    if( (e1 == NULL) && (e2 == NULL) )
       return true;
-
-    return ((element_ == e2) && (subEntity_ == other.subEntity_));
+    return ((e1 == e2) && (subEntity_ == other.subEntity_));
   }
 
   template<int codim, int dim, class GridImp>
@@ -97,19 +94,18 @@ namespace Dune
     return elInfo_;
   }
 
-  template<int codim, int dim, class GridImp>
-  inline ALBERTA EL * AlbertaGridEntity<codim,dim,GridImp>::
-  getElement() const
+  template< int codim, int dim, class GridImp >
+  inline ALBERTA EL *
+  AlbertaGridEntity< codim, dim, GridImp >::getElement() const
   {
-    return element_;
+    return (elInfo_ != NULL ? elInfo_->el : NULL);
   }
 
   template<int codim, int dim, class GridImp>
   inline void AlbertaGridEntity<codim,dim,GridImp>::
   removeElInfo()
   {
-    elInfo_  = 0;
-    element_ = 0;
+    elInfo_  = NULL;
     builtgeometry_ = false;
   }
 
@@ -119,7 +115,6 @@ namespace Dune
   {
     elInfo_ = elInfo;
     subEntity_ = subEntity;
-    element_ = (elInfo_ != NULL ? elInfo_->el : NULL );
     builtgeometry_ = geoImp().builtGeom( grid_, elInfo_, subEntity );
   }
 
@@ -226,7 +221,6 @@ namespace Dune
       , level_ (level)
       , travStack_ (0)
       , elInfo_ (0)
-      , element_(0)
       , geoObj_( GeometryImp() )
       , geo_( grid_.getRealImplementation(geoObj_) )
       , builtgeometry_ (false)
@@ -240,7 +234,6 @@ namespace Dune
       , level_ (org.level_)
       , travStack_ (org.travStack_)
       , elInfo_ (org.elInfo_)
-      , element_( (elInfo_) ? (elInfo_->el) : 0)
       , geoObj_( org.geoObj_ )
       , geo_( grid_.getRealImplementation(geoObj_) )
       , builtgeometry_ (false)
@@ -259,18 +252,16 @@ namespace Dune
   inline bool AlbertaGridEntity <0,dim,GridImp>::
   isNew () const
   {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-    return grid_.checkElNew( element_ );
+    assert( elInfo_ != NULL );
+    return grid_.checkElNew( getElement() );
   }
 
   template<int dim, class GridImp>
   inline bool AlbertaGridEntity <0,dim,GridImp>::
   mightVanish () const
   {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-    return ( element_->mark < 0 );
+    assert( elInfo_ != NULL );
+    return ( getElement()->mark < 0 );
   }
 
   template< int dim, class GridImp >
@@ -294,11 +285,9 @@ namespace Dune
   template<int dim, class GridImp>
   inline bool AlbertaGridEntity <0,dim,GridImp>::isLeaf() const
   {
-    assert( element_ && elInfo_ );
-    assert( element_ == elInfo_->el );
-
+    assert( elInfo_ != NULL );
     // if no child exists, then this element is leaf element
-    return IS_LEAF_EL(element_);
+    return IS_LEAF_EL( getElement() );
   }
 
   //***************************
@@ -308,16 +297,15 @@ namespace Dune
   makeDescription()
   {
     elInfo_  = 0;
-    element_ = 0;
     builtgeometry_ = false;
   }
 
   template<int dim, class GridImp>
-  inline bool AlbertaGridEntity<0,dim,GridImp>::
-  equals (const AlbertaGridEntity<0,dim,GridImp> & i) const
+  inline bool
+  AlbertaGridEntity< 0, dim, GridImp >::equals ( const This &other ) const
   {
-    // compare element pointer which are unique
-    return (element_ == i.getElement());
+    // element pointers are unique
+    return (getElement() == other.getElement());
   }
 
   template<int dim, class GridImp>
@@ -371,7 +359,7 @@ namespace Dune
   inline ALBERTA EL * AlbertaGridEntity <0,dim,GridImp>::
   getElement() const
   {
-    return element_;
+    return (elInfo_ != NULL ? elInfo_->el : NULL);
   }
 
   template<int dim, class GridImp>
@@ -386,7 +374,6 @@ namespace Dune
   removeElInfo()
   {
     elInfo_  = 0;
-    element_ = 0;
     builtgeometry_ = false;
     level_ = -1;
   }
@@ -397,16 +384,7 @@ namespace Dune
   {
     // just set elInfo and element
     elInfo_ = elInfo;
-    if(elInfo_)
-    {
-      element_ = elInfo_->el;
-      level_ = grid_.getLevelOfElement( element_ );
-    }
-    else
-    {
-      level_ = -1;
-      element_ = 0;
-    }
+    level_ = (elInfo_ != NULL ? grid_.getLevelOfElement( getElement() ) : -1);
     builtgeometry_ = false;
   }
 
@@ -422,7 +400,7 @@ namespace Dune
   inline const typename AlbertaGridEntity <0,dim,GridImp>::Geometry &
   AlbertaGridEntity <0,dim,GridImp>::geometry() const
   {
-    assert( elInfo_ && element_ );
+    assert( elInfo_ != NULL );
     // geometry is only build on demand
     if( !builtgeometry_ )
       builtgeometry_ = geo_.builtGeom( grid_, elInfo_, 0 );
@@ -462,17 +440,19 @@ namespace Dune
     return EntityPointerImpl( grid_, travStack_, fatherLevel, fatherInfo, 0 );
   }
 
-  template< int dim, class GridImp >
-  inline int AlbertaGridEntity< 0, dim, GridImp > :: nChild () const
-  {
-    // get father and check which child we have
-    const ALBERTA EL *father = elInfo_->parent;
-    assert( father );
 
-    const int child = (father->child[ 0 ] == element_ ? 0 : 1);
-    assert( father->child[ child ] == element_ );
+  template< int dim, class GridImp >
+  inline int AlbertaGridEntity< 0, dim, GridImp >::nChild () const
+  {
+    const ALBERTA EL *element = elInfo_->el;
+    const ALBERTA EL *father = elInfo_->parent;
+    assert( father != NULL );
+
+    const int child = (father->child[ 0 ] == element ? 0 : 1);
+    assert( father->child[ child ] == element );
     return child;
   }
+
 
   template<>
   inline const AlbertaGridEntity <0,2,const AlbertaGrid<2,2> >::Geometry &
