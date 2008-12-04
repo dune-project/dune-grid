@@ -275,11 +275,52 @@ namespace Dune {
       return UG_NS<dim>::boundaryId(center_, neighborCount_);
     }
 
-    /** \brief Returns false, because UG leaf intersections may be nonconforming
-        \todo A better implementation should be easily possible!
-     */
+    /** \brief Returns false, because UG leaf intersections may be nonconforming */
     bool conforming() const {
-      return false;
+
+      const typename UG_NS<dim>::Element* outside = leafSubFaces_[subNeighborCount_].first;
+
+      if (outside == NULL         // boundary intersection
+          // inside and outside are on the same level
+          || UG_NS<dim>::myLevel(outside) == UG_NS<dim>::myLevel(center_)
+          // outside is on a higher level, but there is only one intersection
+          || (UG_NS<dim>::myLevel(outside) > UG_NS<dim>::myLevel(center_)
+              && leafSubFaces_.size()==1))
+        return true;
+
+      // outside is on a lower level.  we have to check whether vertices match
+      int numInsideIntersectionVertices  = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
+      int numOutsideIntersectionVertices = UG_NS<dim>::Corners_Of_Side(outside, leafSubFaces_[subNeighborCount_].second);
+      if (numInsideIntersectionVertices != numOutsideIntersectionVertices)
+        return false;
+
+      // Loop over all vertices of the face of this element that corresponds to this intersection
+      for (int i=0; i<numInsideIntersectionVertices; i++) {
+
+        const typename UG_NS<dim>::Vertex* insideVertex = UG_NS<dim>::Corner(center_, UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i))->myvertex;
+
+        // Loop over all vertices of the corresponding element side of the outside element
+        bool vertexFound = false;
+        for (int j=0; j<numOutsideIntersectionVertices; j++) {
+
+          // get vertex
+          const typename UG_NS<dim>::Vertex* outsideVertex = UG_NS<dim>::Corner(outside, UG_NS<dim>::Corner_Of_Side(outside, leafSubFaces_[subNeighborCount_].second, j))->myvertex;
+
+          // Stop if we have found corresponding vertices
+          if (insideVertex==outsideVertex) {
+            vertexFound = true;
+            break;
+          }
+
+        }
+
+        // One of this face's vertices has not been found in the face of the outside element
+        if (vertexFound == false)
+          return false;
+
+      }
+
+      return true;
     }
 
     //! intersection of codimension 1 of this neighbor with element where
