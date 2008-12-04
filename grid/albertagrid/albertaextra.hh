@@ -46,324 +46,9 @@ inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
 }
 #endif
 
-//! if level iterator is used macro_el_info does not the right thing
-inline void fillMacroInfo(TRAVERSE_STACK *stack,
-                          const MACRO_EL *mel, EL_INFO *elinfo, int level)
-{
-  /* Alberta version */
-  fill_macro_info(stack->traverse_mesh,mel,elinfo);
-
-#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 2)
-  // only works for dim 2 at the moment
-  // because there we have a different fill_elinfo method
-  // quick solution, the method fill_macro_info has to be rewritten
-  // not now, dont have the time
-  if(level == elinfo->level)
-  {
-    for(int i=0 ; i<N_VERTEX(stack->traverse_mesh); ++i)
-    {
-      if(mel->neigh[i])
-      {
-        computeNeigh(mel,elinfo,i);
-      }
-      else
-      {
-        elinfo->neigh[i] = 0;
-        elinfo->opp_vertex[i] = 0;
-      }
-    }
-  }
-#endif
-}
-
-
 // provides the element number generation and management
 #include "agelementindex.cc"
 
-// This three function are used by albertgrid.hh ~.cc
-// but not defined in the regular albert.h
-//extern void free_leaf_data(void *leaf_data, MESH *mesh);
-//extern void free_dof(DOF *dof, MESH *mesh, int position);
-
-inline void enlargeTraverseStack(TRAVERSE_STACK *stack);
-inline static TRAVERSE_STACK *getTraverseStack(void);
-inline static TRAVERSE_STACK *freeTraverseStack(TRAVERSE_STACK *stack);
-inline void printTraverseStack(const TRAVERSE_STACK *stack);
-
-//! organize the TRAVERSE_STACK Management, so we can use the nice Albert
-//! functions get_traverse_stack and free_traverse_stack
-//! this count the copy made of this class and call free_traverse_stack
-//! only if no more copies left
-class ManageTravStack
-{
-  //! traverse stack for mesh traverse, see Albert Docu
-  TRAVERSE_STACK * stack_;
-
-  //! number of copies that exist from this stack_
-  mutable int *refCount_;
-
-  mutable bool owner_;
-
-public:
-  //! initialize the member variables
-  ManageTravStack() : stack_ (0) , refCount_ (0) , owner_(false) {}
-
-  //! if a copy is made, the refcout is increased
-  ManageTravStack(const ManageTravStack & copy)
-  {
-    stack_ = 0;
-    refCount_ = 0;
-    if(copy.stackExists())
-    {
-      stack_ = copy.stack_;
-      refCount_ = copy.refCount_;
-      ++(*refCount_);
-      copy.owner_ = false;
-      owner_ = true;
-    }
-  }
-
-  //! get new TRAVERSE_STACK using the original Albert Routine
-  //! get_traverse_stack, which get an new or free stack
-  void create ()
-  {
-    // remove existing stack, does nothing if no stack exists
-    remove();
-
-    assert( stack_ == 0 );
-    assert( refCount_ ==  0 );
-    stack_ = getTraverseStack();
-    refCount_ = new int (1);
-    owner_ = true;
-  }
-
-  //! set Stack free, if no more refences exist
-  ~ManageTravStack()
-  {
-    remove();
-  }
-
-  bool stackExists() const
-  {
-    return stack_ != 0;
-  }
-
-  //! return the TRAVERSE_STACK pointer for use
-  TRAVERSE_STACK * getStack() const
-  {
-    // if this assertion is thrown then either the stack = 0
-    // or we want to uese the pointer but are not the owner
-    assert( stack_ );
-    assert( (!owner_) ? (std::cerr << "\nERROR:The feature of copying iterators is not supported by AlbertaGrid at the moment! \n\n", 0) : 1);
-    return stack_;
-  }
-
-private:
-  //! if copy is made than one more Reference exists
-  ManageTravStack & operator = (const ManageTravStack & copy)
-  {
-    remove();
-    // do not use this method
-    if(copy.stack_ != 0)
-    {
-      stack_ = copy.stack_;
-      refCount_ = copy.refCount_;
-      ++(*refCount_);
-      copy.owner_ = false;
-      owner_ = true;
-    }
-    assert(false);
-    return (*this);
-  }
-
-  void remove()
-  {
-    if(refCount_ && stack_)
-    {
-      (*refCount_)--;
-      if((*refCount_) <= 0)
-      {
-        // in free_traverse_stack stack != 0 is checked
-        if(stack_)
-        {
-          stack_ = freeTraverseStack(stack_);
-          owner_ = false;
-        }
-        if(refCount_)
-        {
-          delete refCount_;
-          refCount_ = 0;
-        }
-      }
-    }
-    stack_ = 0;
-    refCount_ = 0;
-  }
-};
-
-
-//***********************************************************
-// Traverse Stacks
-//***********************************************************
-static inline void initTraverseStack(TRAVERSE_STACK *stack);
-static inline void resetTraverseStack(TRAVERSE_STACK *stack);
-
-inline static TRAVERSE_STACK *getTraverseStack(void)
-{
-  TRAVERSE_STACK * stack = get_traverse_stack();
-
-#if DUNE_ALBERTA_VERSION >= 0x200
-  initTraverseStack(stack);
-#endif
-
-  assert( stack );
-  // if we use copyTraverseStack we should only create stacks with
-  // stack_size > 0 otherwise we get errors in TreeIterator
-  if(stack->stack_size <= 0) enlargeTraverseStack( stack );
-  return stack;
-}
-
-inline static TRAVERSE_STACK *freeTraverseStack(TRAVERSE_STACK *stack)
-{
-  // reset stack, i.e set pointer to mesh to 0 ...
-  resetTraverseStack(stack);
-  free_traverse_stack(stack);
-  return 0;
-}
-
-inline void copyTraverseStack( TRAVERSE_STACK* stack, const TRAVERSE_STACK* org )
-{
-  const int & used = stack->stack_size;
-  // we have problems to copy stack of length 0
-  assert( used > 0 );
-
-  if(stack->elinfo_stack) MEM_FREE(stack->elinfo_stack,used, EL_INFO);
-  if(stack->info_stack) MEM_FREE(stack->info_stack,used, U_CHAR );
-  if(stack->save_elinfo_stack) MEM_FREE(stack->save_elinfo_stack,used,EL_INFO );
-  if(stack->save_info_stack) MEM_FREE(stack->save_info_stack,used,U_CHAR);
-
-  // NOTE: at this point also the used value changes
-  // because stack->stack_size is changed
-  memcpy( stack, org, sizeof(TRAVERSE_STACK));
-
-  stack->elinfo_stack = 0;
-  stack->elinfo_stack = MEM_ALLOC(used, EL_INFO);
-
-  // here we have to copy all EL_INFOs seperately, the normal way does not
-  // work, unfortunately
-  if (used > 0)
-  {
-    for (int i=0; i<used; i++)
-    {
-      memcpy(&(stack->elinfo_stack[i]),&(org->elinfo_stack[i]),sizeof(EL_INFO));
-    }
-  }
-
-  assert( used == org->stack_size );
-
-  // the pointer have to be created new
-  stack->info_stack        = 0;
-  stack->info_stack        = MEM_ALLOC(used, U_CHAR);
-  stack->save_elinfo_stack = 0;
-  stack->save_elinfo_stack = MEM_ALLOC(used, EL_INFO);
-  stack->save_info_stack   = 0;
-  stack->save_info_stack   = MEM_ALLOC(used, U_CHAR);
-
-  memcpy(stack->elinfo_stack     ,org->elinfo_stack,     used * sizeof(EL_INFO));
-  memcpy(stack->info_stack       ,org->info_stack,       used * sizeof(U_CHAR));
-  memcpy(stack->save_elinfo_stack,org->save_elinfo_stack,used * sizeof(EL_INFO));
-  memcpy(stack->save_info_stack  ,org->save_info_stack,  used * sizeof(U_CHAR));
-
-  /*
-     std::cout << "Print original\n";
-     printTraverseStack(org);
-     std::cout << "Print copy \n";
-     printTraverseStack(stack);
-   */
-  return;
-}
-
-static inline void resetTraverseStack(TRAVERSE_STACK *stack)
-{
-  stack->traverse_mesh = 0;
-  stack->traverse_level = 0;
-  stack->traverse_mel = 0;
-  stack->stack_used = 0;
-  stack->save_stack_used = 0;
-  stack->el_count = 0;
-  return;
-}
-
-static inline void initTraverseStack(TRAVERSE_STACK *stack)
-{
-  // integers and pointers
-  stack->traverse_mesh = 0;
-  stack->traverse_level = 0;
-  stack->traverse_mel = 0;
-  stack->el_count = 0;
-  stack->stack_used = 0;
-  stack->save_stack_used = 0;
-
-  // pointers to stacks and sizes
-  stack->elinfo_stack = 0;
-  stack->stack_size = 0;
-  stack->info_stack = 0;
-  stack->save_elinfo_stack = 0;
-  stack->save_info_stack = 0;
-
-  // pointer to next stack
-  stack->next = 0;
-  return;
-}
-
-inline void enlargeTraverseStack(TRAVERSE_STACK *stack)
-{
-  int i;
-  int new_stack_size = stack->stack_size + 10;
-
-  stack->elinfo_stack = MEM_REALLOC(stack->elinfo_stack, stack->stack_size,
-                                    new_stack_size, EL_INFO);
-
-  if (stack->stack_size > 0)
-    for (i=stack->stack_size; i<new_stack_size; i++)
-      stack->elinfo_stack[i].fill_flag = stack->elinfo_stack[0].fill_flag;
-
-  stack->info_stack = MEM_REALLOC(stack->info_stack, stack->stack_size,
-                                  new_stack_size, U_CHAR);
-  stack->save_elinfo_stack = MEM_REALLOC(stack->save_elinfo_stack,
-                                         stack->stack_size,
-                                         new_stack_size, EL_INFO);
-  stack->save_info_stack   = MEM_REALLOC(stack->save_info_stack,
-                                         stack->stack_size,
-                                         new_stack_size, U_CHAR);
-
-  stack->stack_size = new_stack_size;
-}
-
-inline void printTraverseStack(const TRAVERSE_STACK *stack)
-{
-  FUNCNAME("printTraverseStack");
-  MSG("****************************************************\n");
-  MSG("current stack %8X | size %d \n", stack,stack->stack_size);
-  MSG("traverse_level %d \n",stack->traverse_level);
-  MSG("traverse_mesh  %8X \n",stack->traverse_mesh);
-  MSG("elinfo_stack      = %8X\n",stack->elinfo_stack);
-  MSG("info_stack        = %8X\n",stack->info_stack);
-  MSG("save_elinfo_stack = %8X\n",stack->save_elinfo_stack);
-  MSG("save_info_stack   = %8X\n\n",stack->save_info_stack);
-
-  MSG("stack_used        = %d\n",stack->stack_used);
-  MSG("save_stack_used   = %d\n",stack->save_stack_used);
-
-  MSG("Current elements :\n");
-  for(int i=0; i<stack->stack_used+1; ++i)
-  {
-    //int no = stack->elinfo_stack[i].el->dof[6][0];
-    MSG("have element %p \n",stack->elinfo_stack[i].el);
-  }
-
-  MSG("****************************************************\n");
-}
 
 inline void printElInfo(const EL_INFO *elf)
 {
@@ -441,37 +126,8 @@ namespace AlbertHelp
         elInfo->opp_coord[i][j] = 0.0;
       }
     }
-    Dune::Alberta::BoundaryId< mydim, mydim >::clear( elInfo );
   }
 
-#if 0
-  static EL_INFO * getFatherInfo(TRAVERSE_STACK * stack, EL_INFO * elInfo, int level)
-  {
-    //assert( level == elInfo->level );
-    EL_INFO * fatherInfo = 0;
-
-    //std::cout << elInfo->el << " element \n";
-
-    // if this level > 0 return father = elInfoStack -1,
-    // else return father = this
-    assert(stack != 0);
-
-    //std::cout << "get father of level "<< level << "\n";
-
-    if(level > 0)
-    {
-      fatherInfo = stack->elinfo_stack + level;
-      //std::cout << fatherInfo->el << " father \n";
-      //std::cout << fatherInfo->el->child[0] << " ch 0 | ch 1 " << fatherInfo->el->child[1] << "\n";
-    }
-    else
-    {
-      assert( (true) ? (printf("No Father for macro element, return macro element\n"),1) : 1);
-      return elInfo;
-    }
-    return fatherInfo;
-  }
-#endif
 
   //**************************************************************************
   //  calc Maxlevel of AlbertGrid and remember on wich level an element lives
@@ -1030,25 +686,34 @@ namespace AlbertHelp
 #endif
   }
 
-#if DUNE_ALBERTA_VERSION < 0x200
+#if DUNE_ALBERTA_VERSION > 0x200
+  template< int dim >
+  static inline const ALBERTA FE_SPACE *
+  getFeSpace( MESH *mesh, const char *name, const int (&ndof)[ 4 ] )
+  {
+    // the last 1 stands for preserve_coarse_dofs
+    return get_dof_space( mesh, name, ndof, 1 );
+  }
+#elif DUNE_ALBERTA_VERSION == 0x200
+  template< int dim >
+  static inline const ALBERTA FE_SPACE *
+  getFeSpace( MESH *mesh, const char *name, const int (&ndof)[ 4 ] )
+  {
+    // the last 1 stands for preserve_coarse_dofs
+    return get_fe_space( mesh, name, ndof, 0, 1 );
+  }
+#else
   template <int dim>
-  static inline const FE_SPACE* getFeSpace(MESH *mesh, const char *name,
-                                           const int(&ndof)[dim+1])
+  static inline const ALBERTA FE_SPACE *
+  getFeSpace ( MESH *mesh, const char *name, const int (&ndof)[ dim+1 ] )
   {
     // dont delete dofs on higher levels
     // needed for element numbering
     mesh->preserve_coarse_dofs = 1;
     return get_fe_space( mesh, name, ndof , 0 );
   }
-#else
-  template <int dim>
-  static inline const FE_SPACE* getFeSpace(MESH *mesh, const char *name,
-                                           const int(&ndof)[4])
-  {
-    // the last 1 stands for preserve_coarse_dofs
-    return get_fe_space( mesh, name, ndof , 0 , 1);
-  }
 #endif
+
 
   // initialize dofAdmin for vertex and element numbering
   // and a given dim

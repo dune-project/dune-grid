@@ -221,7 +221,11 @@ namespace Dune
     inline int ElementInfo::indexInFather () const
     {
       const ALBERTA EL *element = elInfo().el;
+#if DUNE_ALBERTA_VERSION >= 0x201
+      const ALBERTA EL *father = elInfo().parent->el;
+#else
       const ALBERTA EL *father = elInfo().parent;
+#endif
       assert( father != NULL );
 
       const int index = (father->child[ 0 ] == element ? 0 : 1);

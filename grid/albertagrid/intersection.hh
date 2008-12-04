@@ -6,6 +6,8 @@
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 
+#include <dune/grid/albertagrid/boundary.hh>
+
 namespace Dune
 {
 

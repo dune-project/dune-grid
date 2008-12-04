@@ -13,206 +13,92 @@ namespace Dune
   namespace Alberta
   {
 
-    template< int dim, int codim >
-    struct BoundaryId;
-
     template< int dim >
-    struct BoundaryId< dim, 0 >
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( subEntity == 0 );
-        return 0;
-      }
-    };
+    struct BoundaryId;
 
 
 
 #if DUNE_ALBERTA_VERSION >= 0x201
-    struct VertexBoundaryId
+    template< int dim >
+    struct BoundaryId
     {
-      static void clear ( ALBERTA EL_INFO *elInfo )
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
       {
-        for( int i = 0; i < N_VERTICES_MAX; ++i )
-          elInfo->vertex_bound[ i ] = 0;
-      }
-
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_VERTICES_MAX) );
-        return elInfo->vertex_bound[ subEntity ];
+        assert( (face >= 0) && (face < N_WALLS_MAX) );
+        return elInfo->wall_bound[ face ];
       }
     };
-
-#if DIM_MAX > 2
-    struct EdgeBoundaryId
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_EDGES_MAX) );
-        return elInfo->edge_bound[ subEntity ];
-      }
-    };
-#endif // #if DIM_MAX > 2
-
-    struct WallBoundaryId
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_WALLS_MAX) );
-        return elInfo->wall_bound[ subEntity ];
-      }
-    };
-
-    template<>
-    struct BoundaryId< 1, 1 >
-      : public VertexBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 2, 1 >
-      : public WallBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 2, 2 >
-      : public VertexBoundaryId
-    {};
-
-#if DIM_MAX > 2
-    template<>
-    struct BoundaryId< 3, 1 >
-      : public WallBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 3, 2 >
-      : public EdgeBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 3, 3 >
-      : public VertexBoundaryId
-    {};
-#endif // #if DIM_MAX > 2
 #endif // #if DUNE_ALBERTA_VERSION >= 0x201
 
 
 
 #if DUNE_ALBERTA_VERSION == 0x200
-    struct VertexBoundaryId
+    template<>
+    struct BoundaryId< 1 >
     {
-      static void clear ( ALBERTA EL_INFO *elInfo )
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
       {
-        for( int i = 0; i < N_VERTICES_MAX; ++i )
-          elInfo->vertex_bound[ i ] = 0;
-      }
-
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_VERTICES_MAX) );
-        return elInfo->vertex_bound[ subEntity ];
-      }
-    };
-
-    struct EdgeBoundaryId
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_EDGES_MAX) );
-        return elInfo->edge_bound[ subEntity ];
-      }
-    };
-
-    struct FaceBoundaryId
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_FACES_MAX) );
-        return elInfo->face_bound[ subEntity ];
+        assert( (face >= 0) && (face < N_VERTICES_MAX) );
+        return elInfo->vertex_bound[ face ];
       }
     };
 
     template<>
-    struct BoundaryId< 1, 1 >
-      : public VertexBoundaryId
-    {};
+    struct BoundaryId< 2 >
+    {
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
+      {
+        assert( (face >= 0) && (face < N_EDGES_MAX) );
+        return elInfo->edge_bound[ face ];
+      }
+    };
 
     template<>
-    struct BoundaryId< 2, 1 >
-      : public EdgeBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 2, 2 >
-      : public VertexBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 3, 1 >
-      : public FaceBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 3, 2 >
-      : public EdgeBoundaryId
-    {};
-
-    template<>
-    struct BoundaryId< 3, 3 >
-      : public VertexBoundaryId
-    {};
+    struct BoundaryId< 3 >
+    {
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
+      {
+        assert( (face >= 0) && (face < N_FACES_MAX) );
+        return elInfo->face_bound[ face ];
+      }
+    };
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
 
 #if DUNE_ALBERTA_VERSION < 0x200
+#if DIM == 1
     template<>
-    struct BoundaryId< DIM, DIM >
+    struct BoundaryId< 1 >
     {
-      static void clear ( ALBERTA EL_INFO *elInfo )
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
       {
-        for( int i = 0; i < N_VERTICES; ++i )
-          elInfo->bound[ i ] = 0;
-      }
-
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_VERTICES) );
-        return elInfo->bound[ subEntity ];
+        assert( (face >= 0) && (face < N_VERTICES) );
+        return elInfo->bound[ face ];
       }
     };
+#endif // #if DIM == 1
 
 #if DIM == 2
     template<>
-    struct BoundaryId< DIM, 1 >
+    struct BoundaryId< 2 >
     {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
       {
-        assert( (subEntity >= 0) && (subEntity < N_EDGES) );
-        return elInfo->boundary[ subEntity ]->bound;
+        assert( (face >= 0) && (face < N_EDGES) );
+        return elInfo->boundary[ face ]->bound;
       }
     };
 #endif // #if DIM == 2
 
 #if DIM == 3
     template<>
-    struct BoundaryId< DIM, 1 >
+    struct BoundaryId< 3 >
     {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
+      static int get ( ALBERTA EL_INFO *elInfo, int face )
       {
-        assert( (subEntity >= 0) && (subEntity < N_FACES) );
-        return elInfo->boundary[ subEntity ]->bound;
-      }
-    };
-
-    template<>
-    struct BoundaryId< DIM, 2 >
-    {
-      static int get ( ALBERTA EL_INFO *elInfo, int subEntity )
-      {
-        assert( (subEntity >= 0) && (subEntity < N_EDGES) );
-        return elInfo->boundary[ N_FACES + subEntity ]->bound;
+        assert( (face >= 0) && (face < N_FACES) );
+        return elInfo->boundary[ face ]->bound;
       }
     };
 #endif // #if DIM == 3
@@ -220,10 +106,10 @@ namespace Dune
 
 
 
-    template< int dim, int codim >
-    inline int boundaryId ( ALBERTA EL_INFO *elInfo, int subEntity )
+    template< int dim >
+    inline int boundaryId ( ALBERTA EL_INFO *elInfo, int face )
     {
-      return BoundaryId< dim, codim >::get( elInfo, subEntity );
+      return BoundaryId< dim >::get( elInfo, face );
     }
 
     inline bool isBoundary ( ALBERTA EL_INFO *elInfo, int face )

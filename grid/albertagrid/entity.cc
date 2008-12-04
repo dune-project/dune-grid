@@ -131,13 +131,6 @@ namespace Dune
   }
 
 
-  template< int codim, int dim, class GridImp >
-  inline int AlbertaGridEntity< codim, dim, GridImp >::boundaryId () const
-  {
-    return Alberta::template boundaryId< dim, codim >( getElInfo(), subEntity_ );
-  }
-
-
   template<int codim, int dim, class GridImp>
   inline int AlbertaGridEntity<codim,dim,GridImp>::getFEVnum() const
   {
@@ -379,7 +372,6 @@ namespace Dune
 
     assert( !elementInfo_ == false );
     const Alberta::ElementInfo fatherInfo = elementInfo_.father();
-    assert( elementInfo_.elInfo().parent == fatherInfo.elInfo().el );
 
     const int fatherLevel = level_ - 1;
     assert( fatherLevel >= 0 );

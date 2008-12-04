@@ -71,9 +71,6 @@ namespace Dune
     //! level of this element
     int level () const;
 
-    //! index of the boundary which is associated with the entity, 0 for inner entities
-    int boundaryId () const;
-
     //! contructor takeing traverse stack
     AlbertaGridEntity( const GridImp &grid, int level );
 

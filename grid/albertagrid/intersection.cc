@@ -90,24 +90,9 @@ namespace Dune
   inline void AlbertaGridIntersectionIterator<GridImp>::increment()
   {
     neighborInfo_ = Alberta::ElementInfo();
-    // is like go to the next neighbour
     ++neighborCount_;
-
-    // (dim+1) is neigbourCount for end iterators
     if( neighborCount_ > dimension )
-    {
       this->done();
-      return;
-    }
-
-    /*
-       // check whether neighbor has same level
-       if( (this->neighbor()) && (!this->leafIt()) )
-       {
-       // if levels are not equal go next
-       if( !neighborHasSameLevel () ) increment ();
-       }
-     */
   }
 
   template< class GridImp >
@@ -153,8 +138,8 @@ namespace Dune
     if( !boundary() )
       return 0;
 
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const int id = WALL_BOUND( &elInfo, dimension, neighborCount_ );
+    ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
+    const int id = Alberta::boundaryId< dimension >( &elInfo, neighborCount_ );
     assert( id != 0 );
     return id;
   }
