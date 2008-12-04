@@ -75,7 +75,11 @@ namespace Dune
 
         realFather_.setElement( fatherInfo_, 0 );
 
+#if DUNE_ALBERTA_VERSION >= 0x201
+        childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
+#else
         childInfo_.elInfo().parent = elem;
+#endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
@@ -108,7 +112,11 @@ namespace Dune
 
         realFather_.setElement( fatherInfo_, 0 );
 
+#if DUNE_ALBERTA_VERSION >= 0x201
+        childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
+#else
         childInfo_.elInfo().parent = elem;
+#endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
