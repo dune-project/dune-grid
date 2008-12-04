@@ -447,7 +447,7 @@ namespace Dune
     else
     {
       // get neighbour of this element
-      const ALBERTA EL *neighbor = NEIGH( el, &elementInfo.elInfo() )[ subEntity_ ];
+      const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ subEntity_ ];
       if( neighbor != NULL )
       {
         const int elIndex = this->grid_.getElementNumber( el );

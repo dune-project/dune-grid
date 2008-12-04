@@ -73,13 +73,6 @@ extern "C"
 
 #define N_VERTEX(mesh) N_VERTICES
 
-#define WALL_BOUND(elinfo,dim,face) (elinfo)->boundary[(face)]->bound
-
-#define FIRST_MACRO_EL(mesh) (mesh)->first_macro_el
-#define NEXT_MACRO_EL(mesh,mel) (mel)->next
-
-#define FILL_ALL(mesh) FILL_ANY
-
 static inline void meshTraverse(MESH *mesh,
                                 int level, FLAGS fill_flag,
                                 void (*el_fct)(const EL_INFO *))
@@ -92,17 +85,6 @@ static inline void meshTraverse(MESH *mesh,
 //////////////////////////////////////////////////
 #else // version 2.0
 //////////////////////////////////////////////////
-
-
-#define FILL_ALL(mesh) FILL_ANY((mesh))
-
-#ifndef NEIGH
-#define NEIGH(el,el_info) (el_info)->neigh
-#endif
-
-#ifndef OPP_VERTEX
-#define OPP_VERTEX(el,el_info) (el_info)->opp_vertex
-#endif
 
 struct boundary
 {
@@ -129,9 +111,6 @@ static inline MACRO_EL* nextMacroEl(MESH* mesh, const MACRO_EL* oldmel)
   int newIndex = oldmel->index + 1;
   return (newIndex < mesh->n_macro_el) ? (&(mesh->macro_els[newIndex])) : 0;
 }
-
-#define FIRST_MACRO_EL(mesh) (&(mesh)->macro_els[0])
-#define NEXT_MACRO_EL(mesh,mel) nextMacroEl((mesh),(mel))
 
 #define N_VERTEX(mesh) N_VERTICES((mesh)->dim)
 

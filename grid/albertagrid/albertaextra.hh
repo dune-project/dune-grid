@@ -50,29 +50,6 @@ inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
 #include "agelementindex.cc"
 
 
-inline void printElInfo(const EL_INFO *elf)
-{
-  FUNCNAME("printElInfo");
-
-  MSG("Element %d | level %d  | ",INDEX(elf->el),elf->level);
-  printf("Neighs: ");
-  for(int i=0; i<N_VERTEX(elf->mesh); i++)
-  {
-    ALBERTA EL* el = elf->neigh[i];
-    printf(" %p |",el);
-  }
-  printf("\n");
-
-
-  for(int i=0; i<N_VERTEX(elf->mesh); i++)
-    printf("%d %f %f \n",i,elf->coord[i][0],elf->coord[i][1]);
-
-
-  printf("\n******************************************\n");
-
-}
-
-
 //****************************************************************
 //
 //  Wrapper for ALBERTA refine and coarsen routines.
@@ -363,27 +340,26 @@ namespace AlbertHelp
   }
 
 #ifndef CALC_COORD
-  template <int dimworld>
-  inline static void setLocalCoords(const EL_INFO * elf)
+  template< int dimworld >
+  inline static void setLocalCoords( const EL_INFO *elInfo )
   {
-    const EL * element = elf->el;
-    assert(element);
-    const DOF_ADMIN  * admin = coordVec->fe_space->admin;
-    REAL_D * vec = 0;
-    const int nv = admin->n0_dof[VERTEX];
+    const EL *element = elInfo->el;
+    assert( element != NULL );
 
-    GET_DOF_VEC(vec,coordVec);
-    assert(vec);
+    const DOF_ADMIN *admin = coordVec->fe_space->admin;
+    const int nv = admin->n0_dof[ VERTEX ];
 
-    for(int i=0; i<N_VERTEX(admin->mesh); ++i)
+    REAL_D *vec = NULL;
+    GET_DOF_VEC( vec, coordVec );
+    assert( vec != NULL );
+
+    for( int i = 0; i < N_VERTEX(admin->mesh); ++i )
     {
-      int dof = element->dof[i][nv];
-      REAL_D & vecCoord = vec[dof];
-      const REAL_D & coord = elf->coord[i];
-      for(int j=0; j<dimworld; ++j)
-      {
-        vecCoord[j] = coord[j];
-      }
+      int dof = element->dof[ i ][ nv ];
+      REAL_D &vecCoord = vec[ dof ];
+      const REAL_D &coord = elInfo->coord[ i ];
+      for( int j = 0; j < dimworld; ++j )
+        vecCoord[ j ] = coord[ j ];
     }
   }
 
