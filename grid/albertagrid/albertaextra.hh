@@ -686,13 +686,12 @@ namespace AlbertHelp
 #endif
   }
 
-#if DUNE_ALBERTA_VERSION > 0x200
+#if DUNE_ALBERTA_VERSION >= 0x201
   template< int dim >
   static inline const ALBERTA FE_SPACE *
   getFeSpace( MESH *mesh, const char *name, const int (&ndof)[ 4 ] )
   {
-    // the last 1 stands for preserve_coarse_dofs
-    return get_dof_space( mesh, name, ndof, 1 );
+    return get_dof_space( mesh, name, ndof, ADM_PRESERVE_COARSE_DOFS );
   }
 #elif DUNE_ALBERTA_VERSION == 0x200
   template< int dim >
@@ -707,10 +706,9 @@ namespace AlbertHelp
   static inline const ALBERTA FE_SPACE *
   getFeSpace ( MESH *mesh, const char *name, const int (&ndof)[ dim+1 ] )
   {
-    // dont delete dofs on higher levels
-    // needed for element numbering
+    // don't delete dofs above the leaf level
     mesh->preserve_coarse_dofs = 1;
-    return get_fe_space( mesh, name, ndof , 0 );
+    return get_fe_space( mesh, name, ndof, 0 );
   }
 #endif
 
