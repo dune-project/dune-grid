@@ -133,7 +133,9 @@ namespace Dune
 
     //! increment
     void increment();
-    //! equality
+
+  protected:
+    using Base::entityImp;
 
   private:
     // private Methods
@@ -156,9 +158,6 @@ namespace Dune
 
     //! level :)
     int enLevel_;
-
-    //! reference to entity of entity pointer class
-    EntityImp & virtualEntity_;
 
     //! Number of the subentity within the element
     int subEntity_;

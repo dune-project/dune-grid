@@ -274,7 +274,7 @@ namespace Dune
     subEntity_ = -1;
     vertexMarker_ = 0;
 
-    virtualEntity_.setElement( Alberta::ElementInfo(), 0 );
+    entityImp().setElement( Alberta::ElementInfo(), 0 );
   }
 
 
@@ -286,7 +286,6 @@ namespace Dune
     : Base( grid, travLevel, leafIt, false ),
       level_( travLevel ),
       enLevel_( travLevel ),
-      virtualEntity_( this->entityImp() ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( *(grid.getMesh()), false ),
       vertexMarker_( vertexMark ),
@@ -301,7 +300,7 @@ namespace Dune
     if( !elementInfo )
       this->done();
     else
-      virtualEntity_.setElement( elementInfo, subEntity_ );
+      entityImp().setElement( elementInfo, subEntity_ );
   }
 
 
@@ -315,7 +314,6 @@ namespace Dune
     : Base( grid, travLevel, leafIt, true ), // true means end iterator
       level_( travLevel ),
       enLevel_( travLevel ),
-      virtualEntity_( this->entityImp() ),
       subEntity_( -1 ),
       macroIterator_( *(grid.getMesh()), true ),
       vertexMarker_( 0 ),
@@ -331,7 +329,6 @@ namespace Dune
     : Base( other ),
       level_( other.level_ ),
       enLevel_( other.enLevel_ ),
-      virtualEntity_( this->entityImp() ),
       subEntity_( other.subEntity_ ),
       macroIterator_( other.macroIterator_ ),
       vertexMarker_( other.vertexMarker_ ),
@@ -362,12 +359,12 @@ namespace Dune
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator<codim,pitype,GridImp>::increment ()
   {
-    Alberta::ElementInfo elementInfo = virtualEntity_.elementInfo_;
+    Alberta::ElementInfo elementInfo = entityImp().elementInfo_;
     goNextEntity ( elementInfo );
     if( !elementInfo )
       this->done();
     else
-      virtualEntity_.setElement( elementInfo, subEntity_ );
+      entityImp().setElement( elementInfo, subEntity_ );
   }
 
 

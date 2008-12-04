@@ -37,6 +37,7 @@ namespace Dune
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
 
+  public:
     //! the normal Constructor
     AlbertaGridHierarchicIterator ( const GridImp &grid,
                                     const Alberta::ElementInfo &elementInfo,
@@ -53,8 +54,14 @@ namespace Dune
     //! increment
     void increment();
 
+  protected:
+    using Base::entityImp;
+
   private:
     void increment ( Alberta::ElementInfo elementInfo );
+
+    //! make empty HierarchicIterator
+    void makeIterator();
 
     int startLevel_;
 
@@ -63,12 +70,6 @@ namespace Dune
 
     //! max level to go down
     int maxlevel_;
-
-    //! reference to entity of entity pointer class
-    EntityImp &virtualEntity_;
-
-    //! make empty HierarchicIterator
-    void makeIterator();
   };
 
 }

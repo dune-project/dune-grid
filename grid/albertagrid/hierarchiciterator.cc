@@ -11,7 +11,7 @@ namespace Dune
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >::makeIterator()
   {
-    virtualEntity_.setElement( Alberta::ElementInfo(), 0 );
+    entityImp().setElement( Alberta::ElementInfo(), 0 );
   }
 
 
@@ -21,8 +21,7 @@ namespace Dune
     : Base( grid, actLevel, true, true ),
       startLevel_( actLevel ),
       level_( actLevel ),
-      maxlevel_( maxLevel ),
-      virtualEntity_( this->entityImp() )
+      maxlevel_( maxLevel )
   {
     makeIterator();
   }
@@ -36,8 +35,7 @@ namespace Dune
     : Base( grid, actLevel, leafIt, false ),
       startLevel_( actLevel ),
       level_( actLevel ),
-      maxlevel_( maxLevel ),
-      virtualEntity_( this->entityImp() )
+      maxlevel_( maxLevel )
   {
     increment( elementInfo );
   }
@@ -49,8 +47,7 @@ namespace Dune
     : Base( other ),
       startLevel_( other.startLevel_ ),
       level_( other.level_ ),
-      maxlevel_( other.maxlevel_ ),
-      virtualEntity_( this->entityImp() )
+      maxlevel_( other.maxlevel_ )
   {}
 
 
@@ -71,7 +68,7 @@ namespace Dune
   inline void AlbertaGridHierarchicIterator< GridImp >::increment ()
   {
     // note: since we are not the end iterator, we point to a valid entity
-    increment( virtualEntity_.elementInfo_ );
+    increment( entityImp().elementInfo_ );
   }
 
   template< class GridImp >
@@ -86,14 +83,14 @@ namespace Dune
         --level_;
       }
       if( level_ > startLevel_ )
-        virtualEntity_.setElement( elementInfo.father().child( 1 ), 0 );
+        entityImp().setElement( elementInfo.father().child( 1 ), 0 );
       else
         this->done();
     }
     else
     {
       ++level_;
-      virtualEntity_.setElement( elementInfo.child( 0 ), 0 );
+      entityImp().setElement( elementInfo.child( 0 ), 0 );
     }
   }
 
