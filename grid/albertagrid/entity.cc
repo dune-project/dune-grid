@@ -111,16 +111,8 @@ namespace Dune
   inline void
   AlbertaGridEntity< codim, dim, GridImp >::setEntity( const This &other )
   {
+    level_ = other.level_;
     setElement( other.elementInfo_, other.subEntity_ );
-    setLevel( other.level_ );
-  }
-
-
-  template<int codim, int dim, class GridImp>
-  inline void AlbertaGridEntity<codim,dim,GridImp>::
-  setLevel(int level)
-  {
-    level_  = level;
   }
 
 

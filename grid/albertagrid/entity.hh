@@ -113,10 +113,6 @@ namespace Dune
     // same as setElInfo just with a entity given
     void setEntity ( const This &other );
 
-    // set level of entity
-    void setLevel ( int newLevel );
-    void setNewLevel ( int newLevel , bool ) { setLevel(level); }
-
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
 
