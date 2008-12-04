@@ -100,6 +100,10 @@ static inline void meshTraverse(MESH *mesh,
 #define NEIGH(el,el_info) (el_info)->neigh
 #endif
 
+#ifndef OPP_VERTEX
+#define OPP_VERTEX(el,el_info) (el_info)->opp_vertex
+#endif
+
 struct boundary
 {
   void (*param_bound)(REAL_D  );

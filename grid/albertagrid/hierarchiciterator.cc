@@ -9,254 +9,93 @@ namespace Dune
 {
 
   template< class GridImp >
-  inline void AlbertaGridHierarchicIterator<GridImp>::
-  makeIterator()
+  inline void AlbertaGridHierarchicIterator< GridImp >::makeIterator()
   {
-    virtualEntity_.setTraverseStack(0);
-    virtualEntity_.setElInfo(0,0,0,0);
+    virtualEntity_.setElement( Alberta::ElementInfo(), 0 );
   }
 
+
   template< class GridImp >
-  inline AlbertaGridHierarchicIterator<GridImp>::
-  AlbertaGridHierarchicIterator(const GridImp & grid,
-                                int actLevel,
-                                int maxLevel)
-    : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,true,true)
-      , startLevel_(actLevel)
-      , level_ (actLevel)
-      , maxlevel_ (maxLevel)
-      , virtualEntity_( this->entityImp() )
-      , end_ (true)
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator( const GridImp &grid, int actLevel, int maxLevel )
+    : Base( grid, actLevel, true, true ),
+      startLevel_( actLevel ),
+      level_( actLevel ),
+      maxlevel_( maxLevel ),
+      virtualEntity_( this->entityImp() )
   {
     makeIterator();
   }
 
+
   template< class GridImp >
-  inline AlbertaGridHierarchicIterator<GridImp>::
-  AlbertaGridHierarchicIterator(const GridImp & grid,
-                                ALBERTA TRAVERSE_STACK *travStack,int actLevel, int maxLevel, bool leafIt )
-    : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,leafIt,false)
-      , startLevel_(actLevel)
-      , level_ (actLevel)
-      , maxlevel_ ( maxLevel)
-      , virtualEntity_( this->entityImp() )
-      , end_ (false)
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator ( const GridImp &grid,
+                                    const Alberta::ElementInfo &elementInfo,
+                                    int actLevel, int maxLevel, bool leafIt )
+    : Base( grid, actLevel, leafIt, false ),
+      startLevel_( actLevel ),
+      level_( actLevel ),
+      maxlevel_( maxLevel ),
+      virtualEntity_( this->entityImp() )
   {
-    if(travStack)
-    {
-      // get new ALBERTA TRAVERSE STACK
-      manageStack_.create();
-
-      ALBERTA TRAVERSE_STACK *stack = manageStack_.getStack();
-
-      // cut old traverse stack, kepp only actual element
-      ALBERTA copyTraverseStack(stack, travStack );
-
-      // set new traverse level
-      if(maxlevel_ < 0)
-      {
-        std::cout << "WARNING: maxlevel < 0 in AlbertaGridHierarchicIterator! \n";
-        // this means, we go until leaf level
-        stack->traverse_fill_flag = CALL_LEAF_EL | stack->traverse_fill_flag;
-        // exact here has to stand Grid->maxlevel, but is ok anyway
-        maxlevel_ = this->grid_.maxLevel();
-      }
-
-      // set new traverse level
-      stack->traverse_level = maxlevel_;
-
-      virtualEntity_.setTraverseStack(stack);
-
-      // Hier kann ein beliebiges Geometry uebergeben werden,
-      // da jedes AlbertGeometry einen Zeiger auf das Macroelement
-      // enthaelt.
-      ALBERTA EL_INFO * elInfo = firstChild(stack);
-
-      virtualEntity_.setElInfo(elInfo);
-    }
-    else
-    {
-      std::cout << "Warning: travStack == NULL in HierarchicIterator(travStack,travLevel) \n";
-      makeIterator();
-    }
+    increment( elementInfo );
   }
 
-  template< class GridImp >
-  inline AlbertaGridHierarchicIterator<GridImp>::
-  AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org)
-    : AlbertaGridEntityPointer<0,GridImp> (org.grid_,org.level(),true, org.end_ )
-      , startLevel_( org.startLevel_ )
-      , level_ ( org.level_ )
-      , maxlevel_ ( org.maxlevel_ )
-      , virtualEntity_( this->entityImp() )
-  {
-    if( org.virtualEntity_.getElInfo() )
-    {
-      // get new ALBERTA TRAVERSE STACK
-      manageStack_.create();
-      ALBERTA TRAVERSE_STACK *stack = manageStack_.getStack();
-      // cut old traverse stack, kepp only actual element
-      ALBERTA copyTraverseStack(stack, org.manageStack_.getStack() );
-
-      virtualEntity_.setTraverseStack( stack );
-      /// get the actual used enInfo
-      ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
-
-      virtualEntity_.setElInfo( elInfo );
-    }
-    else
-      this->done();
-  }
 
   template< class GridImp >
-  inline AlbertaGridHierarchicIterator<GridImp> &
-  AlbertaGridHierarchicIterator<GridImp>::
-  operator = (const AlbertaGridHierarchicIterator<GridImp> & org)
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator( const This &other )
+    : Base( other ),
+      startLevel_( other.startLevel_ ),
+      level_( other.level_ ),
+      maxlevel_( other.maxlevel_ ),
+      virtualEntity_( this->entityImp() )
+  {}
+
+
+  template< class GridImp >
+  inline typename AlbertaGridHierarchicIterator< GridImp >::This &
+  AlbertaGridHierarchicIterator< GridImp >::operator= ( const This &other )
   {
-    const_cast<int &> (startLevel_) = org.startLevel_;
-    level_    = org.level_;
-    maxlevel_ = org.maxlevel_;
+    Base::operator=( other );
 
-    if(org.manageStack_.stackExists())
-    {
-      // full copy of stack
-      manageStack_.create();
-      ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
-      const ALBERTA TRAVERSE_STACK * orgStack = org.manageStack_.getStack();
-      ALBERTA copyTraverseStack( stack , orgStack );
-    }
-
-    if( org.virtualEntity_.getElInfo() )
-      virtualEntity_.setEntity( org.virtualEntity_ );
-    else
-      this->done();
+    startLevel_ = other.startLevel_;
+    level_    = other.level_;
+    maxlevel_ = other.maxlevel_;
     return *this;
   }
 
+
   template< class GridImp >
-  inline void AlbertaGridHierarchicIterator< GridImp >::increment()
+  inline void AlbertaGridHierarchicIterator< GridImp >::increment ()
   {
-    ALBERTA EL_INFO * nextinfo = recursiveTraverse(manageStack_.getStack());
-
-    if(!nextinfo)
-    {
-      this->done();
-      return;
-    }
-
-    virtualEntity_.setElInfo( nextinfo );
-    return ;
+    // note: since we are not the end iterator, we point to a valid entity
+    increment( virtualEntity_.elementInfo_ );
   }
 
   template< class GridImp >
-  inline ALBERTA EL_INFO *
-  AlbertaGridHierarchicIterator<GridImp>::
-  firstChild (ALBERTA TRAVERSE_STACK * stack)
+  inline void AlbertaGridHierarchicIterator< GridImp >
+  ::increment ( Alberta::ElementInfo elementInfo )
   {
-    assert(stack);
-    assert(stack->elinfo_stack);
-
-    // stack_used ist the actual element
-    stack->stack_used = startLevel_+1;
-
-    // info_stack is 0, we want to visit both children
-    stack->info_stack[stack->stack_used] = 0;
-
-    ALBERTA EL * el = stack->elinfo_stack[stack->stack_used].el;
-
-    // go down next child
-    if(el->child[0] && (stack->traverse_level >
-                        (stack->elinfo_stack+stack->stack_used)->level) )
+    if( (level_ >= maxlevel_) || elementInfo.isLeaf() )
     {
-      if(stack->stack_used >= stack->stack_size - 1)
-        ALBERTA enlargeTraverseStack(stack);
-
-      int i = stack->info_stack[stack->stack_used];
-      el = el->child[i];
-      stack->info_stack[stack->stack_used]++;
-
-      // new: go down maxlevel, but fake the elements
-      level_++;
-      this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                             stack->elinfo_stack+stack->stack_used+1 ,true);
-
-      stack->stack_used++;
-      stack->info_stack[stack->stack_used] = 0;
-      return (stack->elinfo_stack + stack->stack_used);
+      while( (level_ > startLevel_) && (elementInfo.indexInFather() == 1) )
+      {
+        elementInfo = elementInfo.father();
+        --level_;
+      }
+      if( level_ > startLevel_ )
+        virtualEntity_.setElement( elementInfo.father().child( 1 ), 0 );
+      else
+        this->done();
     }
     else
     {
-      return 0;
+      ++level_;
+      virtualEntity_.setElement( elementInfo.child( 0 ), 0 );
     }
   }
-
-  template< class GridImp >
-  inline ALBERTA EL_INFO *
-  AlbertaGridHierarchicIterator<GridImp>::
-  recursiveTraverse(ALBERTA TRAVERSE_STACK * stack)
-  {
-    // see function
-    // static EL_INFO *traverse_leaf_el(TRAVERSE_STACK *stack)
-    // Common/traverse_nr_common.cc, line 392
-    ALBERTA EL * el=0;
-
-    if(!stack->elinfo_stack)
-    {
-      /* somethin' wrong */
-      return 0;
-    }
-    else
-    {
-      // go up until we can go down again
-      el = stack->elinfo_stack[stack->stack_used].el;
-
-      // stack->stack_used is actual element in stack
-      // stack->info_stack[stack->stack_used] >= 2
-      //    means the two children has been visited
-      while((stack->stack_used-startLevel_ > 0) &&
-            ((stack->info_stack[stack->stack_used] >= 2)
-             || (el->child[0] == 0)
-             || ( stack->traverse_level <=
-                  (stack->elinfo_stack+stack->stack_used)->level)) )
-      {
-        stack->stack_used--;
-        el = stack->elinfo_stack[stack->stack_used].el;
-        level_ = stack->elinfo_stack[stack->stack_used].level;
-      }
-
-      // goto next father is done by other iterator and not our problem
-      if(stack->stack_used-startLevel_ < 1)
-      {
-        return 0;
-      }
-    }
-
-    // go down next child
-    if(el->child[0] && (stack->traverse_level >
-                        (stack->elinfo_stack+stack->stack_used)->level) )
-    {
-      if(stack->stack_used >= stack->stack_size - 1)
-        ALBERTA enlargeTraverseStack(stack);
-
-      int i = stack->info_stack[stack->stack_used];
-      el = el->child[i];
-      stack->info_stack[stack->stack_used]++;
-
-      // new: go down maxlevel, but fake the elements
-      level_++;
-      this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                             stack->elinfo_stack+stack->stack_used+1 ,true);
-
-      stack->stack_used++;
-      stack->info_stack[stack->stack_used] = 0;
-    }
-    else
-    {
-      return 0;
-    }
-
-    return (stack->elinfo_stack + stack->stack_used);
-  }  // recursive traverse over all childs
 
 }
 

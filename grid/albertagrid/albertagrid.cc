@@ -22,48 +22,6 @@
 namespace Dune
 {
 
-  template <int dim, class GridImp>
-  inline AlbertaGridHierarchicIterator<GridImp>
-  AlbertaGridEntity <0,dim,GridImp>::hbegin(int maxlevel) const
-  {
-    // Kopiere alle Eintraege des stack, da man im Stack weiterlaeuft und
-    // sich deshalb die Werte anedern koennen, der elinfo_stack bleibt jedoch
-    // der gleiche, deshalb kann man auch nur nach unten, d.h. zu den Kindern
-    // laufen
-    return AlbertaGridHierarchicIterator<GridImp> (grid_,travStack_,level(),maxlevel, this->leafIt() );
-  }
-
-  template <int dim, class GridImp>
-  inline AlbertaGridHierarchicIterator<GridImp>
-  AlbertaGridEntity <0,dim,GridImp>::hend(int maxlevel) const
-  {
-    AlbertaGridHierarchicIterator<GridImp> it(grid_,level(),maxlevel);
-    return it;
-  }
-
-  template <int dim, class GridImp>
-  inline typename AlbertaGridEntity <0,dim,GridImp>::AlbertaGridLeafIntersectionIteratorType
-  AlbertaGridEntity <0,dim,GridImp>::ileafbegin() const
-  {
-#ifndef NDEBUG
-    for(int i=0; i<GridImp::dimension+1; ++i)
-    {
-      if(elInfo_->opp_vertex[i] == 127 )
-      {
-        DUNE_THROW(NotImplemented,"AlbertaGridIntersectionIterator::first: do not create IntersectionIterators on outside entities, not implemented yet!");
-      }
-    }
-#endif
-    return AlbertaGridLeafIntersectionIteratorType(grid_,*this,level(),false);
-  }
-
-  template <int dim, class GridImp>
-  inline typename AlbertaGridEntity <0,dim,GridImp>::AlbertaGridLeafIntersectionIteratorType
-  AlbertaGridEntity <0,dim,GridImp>::ileafend() const
-  {
-    return AlbertaGridLeafIntersectionIteratorType(grid_,*this,level(),true);
-  }
-
   //***********************************************************************
   //
   // --AlbertaGrid
@@ -651,16 +609,14 @@ namespace Dune
     // reserve memory
     dm.reserveMemory( newElementChunk_ );
 
-    ALBERTA AlbertHelp::AdaptRestrictProlongHandler < MyType , COType >
-    handler ( *this,
-              father, this->getRealImplementation(father) ,
-              son   , this->getRealImplementation(son) ,
-              tmprpop );
+    Alberta::AdaptRestrictProlongHandler< MyType , COType >
+    handler ( *this, father, this->getRealImplementation( father ),
+              son, this->getRealImplementation( son ), tmprpop );
 
-    ALBERTA AlbertHelp::MeshCallBack & callBack = ALBERTA
-                                                  AlbertHelp::MeshCallBack::instance();
+    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA
+                                                 AlbertHelp::MeshCallBack::instance();
 
-    callBack.setPointers(mesh_,handler);
+    callBack.setPointers( mesh_, handler );
 
     bool refined = this->adapt();
 

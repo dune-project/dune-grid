@@ -5,6 +5,7 @@
 
 #include <dune/grid/common/entity.hh>
 
+#include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 
 namespace Dune
@@ -45,7 +46,8 @@ namespace Dune
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid < dim , dimworld >;
     friend class AlbertaGridEntity < 0, dim, GridImp>;
-    friend class AlbertaGridTreeIterator < cd, All_Partition,GridImp>;
+
+    template< int, PartitionIteratorType, class > friend class AlbertaGridTreeIterator;
     friend class AlbertaGridEntityPointer<cd,GridImp>;
 
     typedef AlbertaGridGeometry<dim-cd,dimworld,GridImp> GeometryImp;
@@ -73,8 +75,7 @@ namespace Dune
     int boundaryId () const;
 
     //! contructor takeing traverse stack
-    AlbertaGridEntity(const GridImp &grid, int level,
-                      ALBERTA TRAVERSE_STACK * travStack);
+    AlbertaGridEntity( const GridImp &grid, int level );
 
     //! cosntructor
     AlbertaGridEntity(const GridImp &grid, int level, bool);
@@ -99,9 +100,6 @@ namespace Dune
     //! return element for equaltiy in EntityPointer
     ALBERTA EL *getElement () const;
 
-    //! set elInfo and Element and builtgeometry to zero
-    void removeElInfo();
-
     //! return the current face/edge or vertex number
     //! no interface method
     int getFEVnum () const;
@@ -112,9 +110,8 @@ namespace Dune
     // dummy function, only needed for codim 0
     bool leafIt () const { return false; }
 
-    // methods for setting the infos from the albert mesh
-    void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
-    void setElInfo ( ALBERTA EL_INFO *elInfo, int subEntity );
+    void clearElement ();
+    void setElement ( const Alberta::ElementInfo &elementInfo, int subEntity );
 
     // same as setElInfo just with a entity given
     void setEntity ( const This &other );
@@ -142,10 +139,10 @@ namespace Dune
     const GridImp &grid_;
 
     // Alberta element info
-    ALBERTA EL_INFO *elInfo_;
+    Alberta::ElementInfo elementInfo_;
 
-    // current traverse stack this entity belongs too
-    ALBERTA TRAVERSE_STACK * travStack_;
+    //! Number of the subentity within the element
+    int subEntity_;
 
     //! level
     int level_;
@@ -158,10 +155,9 @@ namespace Dune
 
     //! true if geometry has been constructed
     mutable bool builtgeometry_;
-
-    //! Number of the subentity within the element
-    int subEntity_;
   };
+
+
 
   /*!
      A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -192,8 +188,8 @@ namespace Dune
     friend class AlbertaGrid < dim , GridImp::dimensionworld >;
     friend class AlbertaMarkerVector;
     friend class AlbertaGridIntersectionIterator <GridImp>;
-    friend class AlbertaGridHierarchicIterator <GridImp>;
-    friend class AlbertaGridTreeIterator <0,All_Partition,GridImp>;
+    friend class AlbertaGridHierarchicIterator< GridImp >;
+    template< int, PartitionIteratorType, class > friend class AlbertaGridTreeIterator;
     friend class AlbertaGridEntityPointer<0,GridImp>;
 
   public:
@@ -283,7 +279,7 @@ namespace Dune
     }
 
     //! returns true if entity is leaf entity, i.e. has no children
-    bool isLeaf () const ;
+    bool isLeaf () const;
 
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
@@ -305,10 +301,10 @@ namespace Dune
        This is provided for sparsely stored nested unstructured meshes.
        Returns iterator to first son.
      */
-    AlbertaGridHierarchicIterator<GridImp> hbegin (int maxlevel) const;
+    HierarchicIterator hbegin (int maxlevel) const;
 
     //! Returns iterator to one past the last son
-    AlbertaGridHierarchicIterator<GridImp> hend (int maxlevel) const;
+    HierarchicIterator hend (int maxlevel) const;
 
     /**\brief Returns true, if entity was refined during last adaptation
         cycle */
@@ -354,22 +350,14 @@ namespace Dune
     // return element for equaltiy in EntityPointer
     ALBERTA EL *getElement () const;
 
-    // set elInfo and Element to nil
-    void removeElInfo();
-
     // returns true if entity comes from LeafIterator
     bool leafIt () const { return leafIt_; }
 
-    // face, edge and vertex only for codim > 0, in this
-    // case just to supply the same interface
-    void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
-    void setElInfo (ALBERTA EL_INFO *elInfo,
-                    int face = 0,
-                    int edge = 0,
-                    int vertex = 0 );
+    void clearElement ();
+    void setElement ( const Alberta::ElementInfo &elementInfo, int subEntity );
 
     // same as setElInfo just with a entity given
-    void setEntity (const AlbertaGridEntity<0,dim,GridImp> & org);
+    void setEntity ( const This &other);
 
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
@@ -383,14 +371,11 @@ namespace Dune
     //! the corresponding grid
     const GridImp & grid_;
 
+    // Alberta element info
+    Alberta::ElementInfo elementInfo_;
+
     //! the level of the entity
     int level_;
-
-    //! pointer to the Albert TRAVERSE_STACK data
-    ALBERTA TRAVERSE_STACK * travStack_;
-
-    //! pointer to the real Albert element data
-    ALBERTA EL_INFO *elInfo_;
 
     // local coordinates within father
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
@@ -402,7 +387,6 @@ namespace Dune
 
     // is true if entity comes from leaf iterator
     bool leafIt_;
-
   }; // end of AlbertaGridEntity codim = 0
 
 }

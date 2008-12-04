@@ -3,6 +3,7 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_HH
 #define DUNE_ALBERTA_TREEITERATOR_HH
 
+#include <dune/grid/albertagrid/nativeiterator.hh>
 #include <dune/grid/albertagrid/entitypointer.hh>
 
 namespace Dune
@@ -53,12 +54,10 @@ namespace Dune
     void print() const;
 
   private:
-    typedef std::vector<int> ArrayType;
-
     // built in array to mark on which element a vertex is reached
-    ArrayType vec_;
-    ArrayType edgevec_;
-    ArrayType facevec_;
+    std::vector< int > vec_;
+    std::vector< int > edgevec_;
+    std::vector< int > facevec_;
 
     // number of vertices
     int numVertex_;
@@ -72,7 +71,7 @@ namespace Dune
 
   namespace AlbertaTreeIteratorHelp
   {
-    template <class IteratorImp, int dim, int codim>
+    template< class IteratorImp, int dim, int codim >
     struct GoNextEntity;
   }
 
@@ -99,6 +98,14 @@ namespace Dune
 
     typedef AlbertaGridTreeIterator< codim, pitype, GridImp > AlbertaGridTreeIteratorType;
     friend class AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim >;
+
+  public:
+    static const int dimension = GridImp::dimension;
+    static const int codimension = codim;
+
+  private:
+    static const int numSubEntities
+      = Alberta::NumSubEntities< dimension, codimension >::value;
 
   public:
     typedef typename GridImp::template Codim< codim >::Entity Entity;
@@ -132,28 +139,17 @@ namespace Dune
     // private Methods
     void makeIterator();
 
-    ALBERTA EL_INFO * goFirstElement(ALBERTA TRAVERSE_STACK *stack,
-                                     ALBERTA MESH *mesh,
-                                     int level, ALBERTA FLAGS fill_flag);
-    ALBERTA EL_INFO * traverseElLevel(ALBERTA TRAVERSE_STACK * stack);
-    ALBERTA EL_INFO * traverseElLevelInteriorBorder(ALBERTA TRAVERSE_STACK * stack);
-    ALBERTA EL_INFO * traverseElLevelGhosts(ALBERTA TRAVERSE_STACK * stack);
+    void nextElement ( Alberta::ElementInfo &elementInfo );
+    void nextElementStop ( Alberta::ElementInfo &elementInfo );
+    bool stopAtElement ( const Alberta::ElementInfo &elementInfo );
 
-    // the default is, go to next elInfo
-    //template <int cc>
-    ALBERTA EL_INFO * goNextEntity(ALBERTA TRAVERSE_STACK *stack,ALBERTA EL_INFO *elinfo_old);
+    void goNextEntity ( Alberta::ElementInfo &elementInfo );
 
     // the real go next methods
-    ALBERTA EL_INFO * goNextElInfo(ALBERTA TRAVERSE_STACK *stack,ALBERTA EL_INFO *elinfo_old);
-    ALBERTA EL_INFO * goNextFace(ALBERTA TRAVERSE_STACK *stack,
-                                 ALBERTA EL_INFO *elInfo);
-    ALBERTA EL_INFO * goNextEdge(ALBERTA TRAVERSE_STACK *stack,
-                                 ALBERTA EL_INFO *elInfo);
-    ALBERTA EL_INFO * goNextVertex(ALBERTA TRAVERSE_STACK *stack,
-                                   ALBERTA EL_INFO *elInfo);
-
-    // search next macro el
-    ALBERTA MACRO_EL * nextGhostMacro(ALBERTA MACRO_EL *mel);
+    void goNextElement ( Alberta::ElementInfo &elementInfo );
+    void goNextFace ( Alberta::ElementInfo &elementInfo );
+    void goNextEdge ( Alberta::ElementInfo &elementInfo );
+    void goNextVertex ( Alberta::ElementInfo &elementInfo );
 
     //! level :)
     int level_;
@@ -164,11 +160,10 @@ namespace Dune
     //! reference to entity of entity pointer class
     EntityImp & virtualEntity_;
 
-    // contains ALBERTA traversal stack
-    ALBERTA ManageTravStack manageStack_;
-
     //! Number of the subentity within the element
     int subEntity_;
+
+    Alberta::MacroIterator macroIterator_;
 
     // knows on which element a point,edge,face is viewed
     const AlbertaMarkerVector * vertexMarker_;

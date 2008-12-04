@@ -5,6 +5,8 @@
 
 #include <dune/grid/common/entitypointer.hh>
 
+#include <dune/grid/albertagrid/elementinfo.hh>
+
 namespace Dune
 {
 
@@ -24,26 +26,21 @@ namespace Dune
     friend class AlbertaGrid< dim, dimworld >;
 
   public:
+    static const int dimension = GridImp::dimension;
     static const int codimension = codim;
+    static const int mydimension = dimension - codimension;
+    static const int dimensionworld = GridImp::dimensionworld;
 
     typedef typename GridImp::template Codim< codimension >::Entity Entity;
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
-    //typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
-    //typedef typename SelectEntityImp<cd,dim,GridImp>::EntityObject EntityObject;
+
     typedef AlbertaGridEntityPointer< codimension, GridImp > EntityPointerImp;
 
     //! Constructor for EntityPointer that points to an element
     AlbertaGridEntityPointer ( const GridImp &grid,
                                int level,
-                               ALBERTA EL_INFO *elInfo,
-                               int subEntity );
-
-    //! Constructor for EntityPointer that points to an element
-    AlbertaGridEntityPointer ( const GridImp &grid,
-                               ALBERTA TRAVERSE_STACK * stack,
-                               int level,
-                               ALBERTA EL_INFO *elInfo,
+                               const Alberta::ElementInfo &elementInfo,
                                int subEntity );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator

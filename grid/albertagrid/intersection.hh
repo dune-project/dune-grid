@@ -185,23 +185,17 @@ namespace Dune
     //! count on which neighbor we are lookin' at
     mutable int neighborCount_;
 
-    //! implement with virtual element
-    //! Most of the information can be generated from the ALBERTA EL_INFO
-    //! therefore this element is only created on demand.
-    mutable bool builtNeigh_;
-
     bool leafIt_;
 
-    //! pointer to the EL_INFO struct storing the real element information
-    mutable ALBERTA EL_INFO * elInfo_;
+    Alberta::ElementInfo elementInfo_;
 
     // the objects holding the real implementations
     mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
     mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
     mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
 
-    //! EL_INFO th store the information of the neighbor if needed
-    mutable ALBERTA EL_INFO neighElInfo_;
+    //! ElementInfo to store the information of the neighbor if needed
+    mutable Alberta::ElementInfo neighborInfo_;
 
     // twist seen from the neighbor
     mutable int twist_;

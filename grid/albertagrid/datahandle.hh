@@ -10,122 +10,133 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/grid/albertagrid/elementinfo.hh>
 
-namespace AlbertHelp {
+namespace Dune
+{
 
-  /////////////////////////////////////////////////////////////////
-  //
-  //  --AdaptRestrictProlong
-  //
-  /////////////////////////////////////////////////////////////////
-  template <class GridType , class RestrictProlongOperatorType >
-  class AdaptRestrictProlongHandler
+  namespace Alberta
   {
-    GridType & grid_;
-    enum { dim = GridType :: dimension };
-    typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-    typedef typename EntityType :: ImplementationType RealEntityType;
 
-    EntityType & reFather_;
-    EntityType & reSon_;
-    RealEntityType & realFather_;
-    RealEntityType & realSon_;
-
-    RestrictProlongOperatorType & rp_;
-
-    ALBERTA EL_INFO vati_;
-    ALBERTA EL_INFO sohn_;
-
-    int maxlevel_;
-
-  public:
-    //! Constructor
-    AdaptRestrictProlongHandler (GridType & grid,
-                                 EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
-                                 , RestrictProlongOperatorType & rp)
-      : grid_(grid)
-        , reFather_(f)
-        , reSon_(s)
-        , realFather_(rf)
-        , realSon_(rs)
-        , rp_(rp)
-        , vati_()
-        , sohn_()
-        , maxlevel_(-1)
+    template <class GridType , class RestrictProlongOperatorType >
+    class AdaptRestrictProlongHandler
     {
-      makeEmptyElInfo<dim,dim>(&vati_);
-      makeEmptyElInfo<dim,dim>(&sohn_);
+      GridType & grid_;
+      enum { dim = GridType :: dimension };
+      typedef Dune::MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
+      typedef typename EntityType :: ImplementationType RealEntityType;
 
-      vati_.mesh = grid.getMesh();
-      sohn_.mesh = grid.getMesh();
-    }
+      EntityType & reFather_;
+      EntityType & reSon_;
+      RealEntityType & realFather_;
+      RealEntityType & realSon_;
 
-    //! restrict data , elem is always the father
-    void preCoarsening ( EL * elem )
-    {
-      // check pointers of mesh internal dof vecs
-      // this call has to be done before all other things
-      grid_.arrangeDofVec();
+      RestrictProlongOperatorType &rp_;
 
-      vati_.el    = elem;
-      int level   = grid_.getLevelOfElement( elem );
-      vati_.level = level;
-      ++level; // children level now
+      ElementInfo fatherInfo_;
+      ElementInfo childInfo_;
 
-      realFather_.setElInfo(&vati_);
-      sohn_.parent = elem;
+      int maxlevel_;
 
-      for(int ch=0; ch<2; ++ch)
+    public:
+      //! Constructor
+      AdaptRestrictProlongHandler ( GridType &grid,
+                                    EntityType &f, RealEntityType &rf,
+                                    EntityType &s, RealEntityType &rs,
+                                    RestrictProlongOperatorType &rp )
+        : grid_( grid ),
+          reFather_( f ),
+          reSon_( s ),
+          realFather_( rf ),
+          realSon_( rs ),
+          rp_( rp ),
+          fatherInfo_( ElementInfo::createFake() ),
+          childInfo_( ElementInfo::createFake() ),
+          maxlevel_( -1 )
       {
-        EL * son = elem->child[ch];
-        assert( son );
+        AlbertHelp::makeEmptyElInfo< dim, dim >( &(fatherInfo_.elInfo()) );
+        AlbertHelp::makeEmptyElInfo< dim, dim >( &(childInfo_.elInfo()) );
 
-        sohn_.el    = son;
-        sohn_.level = level;
-
-        realSon_.setElInfo(&sohn_);
-
-        rp_.restrictLocal(reFather_,reSon_,(ch == 0));
+        fatherInfo_.elInfo().mesh = grid.getMesh();
+        childInfo_.elInfo().mesh = grid.getMesh();
       }
 
-      if(level > maxlevel_) maxlevel_ = level;
-    }
-
-    //! prolong data, elem is the father
-    void postRefinement ( EL * elem )
-    {
-      // check pointers of mesh internal dof vecs
-      // this call has to be done before all other things
-      grid_.arrangeDofVec();
-
-      vati_.el    = elem;
-      int level   = grid_.getLevelOfElement( elem );
-      vati_.level = level;
-      ++level;
-      realFather_.setElInfo(&vati_);
-      sohn_.parent = elem;
-
-      for(int ch=0; ch<2; ++ch)
+      //! restrict data , elem is always the father
+      void preCoarsening ( EL * elem )
       {
-        EL * son = elem->child[ch];
-        assert( son );
+        // check pointers of mesh internal dof vecs
+        // this call has to be done before all other things
+        grid_.arrangeDofVec();
 
-        sohn_.el    = son;
-        sohn_.level = level;
+        int level   = grid_.getLevelOfElement( elem );
 
-        realSon_.setElInfo(&sohn_);
+        fatherInfo_.elInfo().el = elem;
+        fatherInfo_.elInfo().level = level;
 
-        rp_.prolongLocal(reFather_,reSon_,(ch == 0));
+        realFather_.setElement( fatherInfo_, 0 );
+
+        childInfo_.elInfo().parent = elem;
+        childInfo_.elInfo().level = level+1;
+
+        for( int i = 0; i < 2; ++i )
+        {
+          EL *child = elem->child[ i ];
+          assert( child != NULL );
+
+          childInfo_.elInfo().el = child;
+
+          realSon_.setElement( childInfo_, 0 );
+
+          rp_.restrictLocal( reFather_, reSon_, (i == 0) );
+        }
+
+        if( level+1 > maxlevel_ )
+          maxlevel_ = level;
       }
 
-      if(level > maxlevel_) maxlevel_ = level;
-    }
+      //! prolong data, elem is the father
+      void postRefinement ( EL * elem )
+      {
+        // check pointers of mesh internal dof vecs
+        // this call has to be done before all other things
+        grid_.arrangeDofVec();
 
-    int maxLevel () const { return maxlevel_; }
-  };
+        int level   = grid_.getLevelOfElement( elem );
 
-} // end namespace
+        fatherInfo_.elInfo().el = elem;
+        fatherInfo_.elInfo().level = level;
 
-#endif // HAVE_ALBERTA
+        realFather_.setElement( fatherInfo_, 0 );
+
+        childInfo_.elInfo().parent = elem;
+        childInfo_.elInfo().level = level+1;
+
+        for( int i = 0; i < 2; ++i )
+        {
+          EL *child = elem->child[ i ];
+          assert( child );
+
+          childInfo_.elInfo().el = child;
+
+          realSon_.setElement( childInfo_, 0 );
+
+          rp_.prolongLocal( reFather_, reSon_, (i == 0) );
+        }
+
+        if( level+1 > maxlevel_ )
+          maxlevel_ = level;
+      }
+
+      int maxLevel () const
+      {
+        return maxlevel_;
+      }
+    };
+
+  }
+
+}
+
+#endif // #if HAVE_ALBERTA
 
 #endif

@@ -444,6 +444,7 @@ namespace AlbertHelp
     Dune::Alberta::BoundaryId< mydim, mydim >::clear( elInfo );
   }
 
+#if 0
   static EL_INFO * getFatherInfo(TRAVERSE_STACK * stack, EL_INFO * elInfo, int level)
   {
     //assert( level == elInfo->level );
@@ -470,6 +471,7 @@ namespace AlbertHelp
     }
     return fatherInfo;
   }
+#endif
 
   //**************************************************************************
   //  calc Maxlevel of AlbertGrid and remember on wich level an element lives
