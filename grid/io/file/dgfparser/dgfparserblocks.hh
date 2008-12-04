@@ -407,6 +407,7 @@ namespace Dune
       std::set<int> _periodic; // periodic grid
       int _overlap; // overlap for YaspGrid
       bool _noClosure; // no closure for UGGrid
+      bool _noCopy; // no copies for UGGrid
     private:
       // copy not implemented
       GridParameterBlock(const GridParameterBlock&);
@@ -420,6 +421,9 @@ namespace Dune
 
       // returns true if no closure should be used for UGGrid
       bool noClosure() const { return _noClosure; }
+
+      // returns true if no closure should be used for UGGrid
+      bool noCopy() const { return _noCopy; }
 
       // returns true if dimension is periodic
       bool isPeriodic(const int dim) const

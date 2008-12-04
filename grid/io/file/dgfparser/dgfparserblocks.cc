@@ -969,11 +969,12 @@ namespace Dune
 
 
     GridParameterBlock :: GridParameterBlock ( std :: istream &in,
-                                               const bool readOverlapAndBnd )
+                                               const bool readOverlapAndBnd)
       : BasicBlock(in,ID),
         _periodic(),
         _overlap(0), // default value
-        _noClosure(false) // default value
+        _noClosure(false), // default value
+        _noCopy(true)    // default value
     {
       if (! isempty() )
       {
@@ -1033,6 +1034,26 @@ namespace Dune
             dwarn << "GridParameterBlock: could not find keyword `closure' in DGF file, defaulting to `GREEN' !\n";
           }
         }
+      }
+      // check closure
+      if (findtoken("copies"))
+      {
+        std::string clop;
+        if(getnextentry(clop))
+        {
+          makeupcase(clop);
+          if(clop == "NONE")
+          {
+            _noCopy = true;
+          }
+          else {
+            _noCopy = false;
+          }
+        }
+      }
+      else
+      {
+        dwarn << "GridParameterBlock: could not find keyword `closure' in DGF file, defaulting to `GREEN' !\n";
       }
     }
 

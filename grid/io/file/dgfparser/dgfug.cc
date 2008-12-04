@@ -66,6 +66,10 @@ namespace Dune {
       {
         grid->setClosureType(UGGrid<dim> :: NONE);
       }
+      if ( !gridParam.noCopy() )
+      {
+        grid->setRefinementType(UGGrid<dim>::COPY);
+      }
       return grid;
     }
     DUNE_THROW(DGFException,"Macrofile " << filename << " is not a valid DGF file\n"
