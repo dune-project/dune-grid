@@ -11,10 +11,9 @@
 namespace Dune
 {
 
-  //**********************************************************************
-  //
-  // --AlbertaGridIntersectionIterator
-  // --IntersectionIterator
+  // AlbertaGridIntersectionIterator
+  // -------------------------------
+
   /*!
      Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
      a neighbor is an entity of codimension 0 which has a common entity of codimension 1
@@ -38,6 +37,11 @@ namespace Dune
     //! know your own dimension of world
     static const int dimensionworld = GridImp::dimensionworld;
 
+    //! return unit outer normal, this should be dependent on local
+    //! coordinates for higher order boundary
+    typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
+    typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
+
     typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersectionIterator >
     Intersection;
     typedef This ImplementationType;
@@ -49,9 +53,17 @@ namespace Dune
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
+  private:
     typedef AlbertaGridEntity< 0, dimension, GridImp > EntityImp;
     typedef AlbertaGridGeometry< dimension-1, dimensionworld, GridImp > GeometryImp;
     typedef AlbertaGridGeometry< dimension-1, dimension, GridImp > LocalGeometryImp;
+
+  public:
+    //! The default Constructor
+    AlbertaGridIntersectionIterator ( const GridImp &grid, int level );
+
+    //! The copy constructor
+    AlbertaGridIntersectionIterator( const This &other );
 
     const Intersection &dereference () const
     {
@@ -70,20 +82,8 @@ namespace Dune
     //! access element where IntersectionIterator started
     EntityPointer inside() const;
 
-    //! The default Constructor
-    AlbertaGridIntersectionIterator ( const GridImp &grid, int level );
-
-    //! The Constructor
-    AlbertaGridIntersectionIterator ( const GridImp & grid, int level,
-                                      ALBERTA EL_INFO *elInfo, bool leafIt );
-    //! The copy constructor
-    AlbertaGridIntersectionIterator( const This &other );
-
     //! assignment operator, implemented because default does not the right thing
     void assign ( const This &other );
-
-    //! The Destructor
-    //~AlbertaGridIntersectionIterator();
 
     //! return true if intersection is with boundary.
     bool boundary () const;
@@ -101,31 +101,29 @@ namespace Dune
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const;
+    const LocalGeometry &intersectionSelfLocal () const;
+
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in LOCAL coordinates of neighbor
      */
-    const LocalGeometry& intersectionNeighborLocal () const;
+    const LocalGeometry &intersectionNeighborLocal () const;
+
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
        Here returned element is in GLOBAL coordinates of the element where iteration started.
      */
-    const Geometry& intersectionGlobal () const;
+    const Geometry &intersectionGlobal () const;
 
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const;
+
     //! local number of codim 1 entity in neighbor where intersection is contained in
     int numberInNeighbor () const;
 
     //! twist of the face seen from the inner element
-    int twistInSelf() const;
+    int twistInSelf () const;
 
     //! twist of the face seen from the outer element
-    int twistInNeighbor() const;
-
-    //! return unit outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
-    typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
+    int twistInNeighbor () const;
 
     const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
@@ -136,9 +134,6 @@ namespace Dune
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
     const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
-
-    //! return level of inside entity
-    int level () const;
 
     //**********************************************************
     //  private methods
@@ -154,17 +149,6 @@ namespace Dune
     // returns true if actual neighbor has same level
     bool neighborHasSameLevel () const;
 
-    //! make Iterator set to begin of actual entitys intersection Iterator
-    void makeBegin (const GridImp & grid,
-                    int level,
-                    ALBERTA EL_INFO * elInfo ) const;
-
-    //! set Iterator to end of actual entitys intersection Iterator
-    void makeEnd (const GridImp & grid,int level ) const;
-
-    // put objects on stack
-    void freeObjects () const;
-
     //! setup the virtual neighbor
     void setupVirtEn () const;
 
@@ -179,10 +163,7 @@ namespace Dune
     ////////////////////////////////////////////////
 
     //! know the grid were im coming from
-    const GridImp& grid_;
-
-    //! the actual level
-    mutable int level_;
+    const GridImp &grid_;
 
     //! count on which neighbor we are lookin' at
     mutable int neighborCount_;

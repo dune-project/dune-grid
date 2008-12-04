@@ -11,8 +11,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridIntersectionIterator< GridImp >
   ::AlbertaGridIntersectionIterator ( const GridImp &grid, int level )
-    : grid_(grid),
-      level_ (level),
+    : grid_( grid ),
       neighborCount_( dimension+1 ),
       elementInfo_(),
       fakeNeighObj_(LocalGeometryImp()),
@@ -26,19 +25,18 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >
   ::first ( const EntityImp &entity, int level )
   {
-    level_ = level;
     neighborCount_ = 0;
     neighborInfo_ = Alberta::ElementInfo();
     elementInfo_ = entity.elementInfo_;
     this->leafIt_  = entity.leafIt();
+
     assert( !elementInfo_ == false );
+    assert( elementInfo_.level() == level );
   }
 
   template< class GridImp >
-  inline void
-  AlbertaGridIntersectionIterator< GridImp >::done ()
+  inline void AlbertaGridIntersectionIterator< GridImp >::done ()
   {
-    level_ = -1;
     neighborCount_ = dimension+1;
     neighborInfo_ = Alberta::ElementInfo();
     elementInfo_ = Alberta::ElementInfo();
@@ -50,7 +48,6 @@ namespace Dune
   inline AlbertaGridIntersectionIterator< GridImp >
   ::AlbertaGridIntersectionIterator ( const This &other )
     : grid_( other.grid_ ),
-      level_( other.level_ ),
       neighborCount_( other.neighborCount_ ),
       leafIt_( other.leafIt_ ),
       elementInfo_( other.elementInfo_ ),
@@ -69,7 +66,6 @@ namespace Dune
     // only assign iterators from the same grid
     assert( &(this->grid_) == &(other.grid_) );
 
-    level_ = other.level_;
     neighborCount_ = other.neighborCount_;
     elementInfo_ = other.elementInfo_;
     neighborInfo_ = Alberta::ElementInfo();
@@ -109,7 +105,6 @@ namespace Dune
 
       setupVirtEn();
 
-      assert( level_ == elementInfo_.level() );
       assert( leafIt() || (elementInfo_.level() == neighborInfo_.level()) );
     }
 
@@ -304,14 +299,6 @@ namespace Dune
 
   template< class GridImp >
   inline int AlbertaGridIntersectionIterator<GridImp>::
-  level () const
-  {
-    assert( level_ >= 0 );
-    return level_;
-  }
-
-  template< class GridImp >
-  inline int AlbertaGridIntersectionIterator<GridImp>::
   numberInSelf () const
   {
     return neighborCount_;
@@ -326,20 +313,23 @@ namespace Dune
     return elInfo.opp_vertex[ neighborCount_ ];
   }
 
-  template <class GridImp>
-  inline int AlbertaGridIntersectionIterator<GridImp>::
-  twistInSelf() const
+
+  template< class GridImp >
+  inline int
+  AlbertaGridIntersectionIterator< GridImp >::twistInSelf () const
   {
     // always 0 for indside
     return 0;
   }
 
-  template <class GridImp>
-  inline int AlbertaGridIntersectionIterator<GridImp>::
-  twistInNeighbor() const
+
+  template< class GridImp >
+  inline int
+  AlbertaGridIntersectionIterator< GridImp >::twistInNeighbor () const
   {
     return twist_;
   }
+
 
   // setup neighbor element with the information of elInfo_
   template< class GridImp >
