@@ -26,7 +26,7 @@ namespace Dune
   ::first ( const EntityImp &entity, int level )
   {
     neighborCount_ = 0;
-    neighborInfo_ = Alberta::ElementInfo();
+    neighborInfo_ = ElementInfo();
     elementInfo_ = entity.elementInfo_;
     this->leafIt_  = entity.leafIt();
 
@@ -38,8 +38,8 @@ namespace Dune
   inline void AlbertaGridIntersectionIterator< GridImp >::done ()
   {
     neighborCount_ = dimension+1;
-    neighborInfo_ = Alberta::ElementInfo();
-    elementInfo_ = Alberta::ElementInfo();
+    neighborInfo_ = ElementInfo();
+    elementInfo_ = ElementInfo();
   }
 
 
@@ -68,7 +68,7 @@ namespace Dune
 
     neighborCount_ = other.neighborCount_;
     elementInfo_ = other.elementInfo_;
-    neighborInfo_ = Alberta::ElementInfo();
+    neighborInfo_ = ElementInfo();
     leafIt_ = other.leafIt_;
   }
 
@@ -85,7 +85,7 @@ namespace Dune
   template< class GridImp >
   inline void AlbertaGridIntersectionIterator<GridImp>::increment()
   {
-    neighborInfo_ = Alberta::ElementInfo();
+    neighborInfo_ = ElementInfo();
     ++neighborCount_;
     if( neighborCount_ > dimension )
       this->done();
@@ -100,7 +100,7 @@ namespace Dune
     if( !neighborInfo_ )
     {
       assert( !elementInfo_ == false );
-      neighborInfo_ = Alberta::ElementInfo::createFake();
+      neighborInfo_ = ElementInfo::createFake();
       std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo_.elInfo()), sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
@@ -133,8 +133,7 @@ namespace Dune
     if( !boundary() )
       return 0;
 
-    ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const int id = Alberta::boundaryId< dimension >( &elInfo, neighborCount_ );
+    const int id = elementInfo_.boundaryId( neighborCount_ );
     assert( id != 0 );
     return id;
   }
@@ -149,8 +148,7 @@ namespace Dune
   inline bool AlbertaGridIntersectionIterator< GridImp >::boundary() const
   {
     assert( !elementInfo_ == false );
-    ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    return Alberta::isBoundary( &elInfo, neighborCount_ );
+    return elementInfo_.isBoundary( neighborCount_ );
   }
 
   template< class GridImp >
@@ -490,7 +488,7 @@ namespace Dune
     assert( nbInfo.el != NULL );
 
     const int vx = elInfo.opp_vertex[ neighborCount_ ];
-    assert( (vx >= 0) && (vx < Alberta::ElementInfo::maxNeighbors) );
+    assert( (vx >= 0) && (vx < ElementInfo::maxNeighbors) );
 
     // reset neighbor information
     for( int i = 0; i <= dimension; ++i )

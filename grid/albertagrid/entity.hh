@@ -68,6 +68,8 @@ namespace Dune
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
     typedef typename GridImp::template Codim<cd>::LevelIterator LevelIterator;
 
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+
     //! level of this element
     int level () const;
 
@@ -108,7 +110,7 @@ namespace Dune
     bool leafIt () const { return false; }
 
     void clearElement ();
-    void setElement ( const Alberta::ElementInfo &elementInfo, int subEntity );
+    void setElement ( const ElementInfo &elementInfo, int subEntity );
 
     // same as setElInfo just with a entity given
     void setEntity ( const This &other );
@@ -132,7 +134,7 @@ namespace Dune
     const GridImp &grid_;
 
     // Alberta element info
-    Alberta::ElementInfo elementInfo_;
+    ElementInfo elementInfo_;
 
     //! Number of the subentity within the element
     int subEntity_;
@@ -208,6 +210,8 @@ namespace Dune
     typedef LeafIntersectionIteratorWrapper<GridImp> AlbertaGridLeafIntersectionIteratorType;
     typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridIntersectionIteratorType;
     typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridLevelIntersectionIteratorType;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     //! Destructor, needed perhaps needed for deleteing faceEntity_ and
     //! edgeEntity_ , see below
@@ -347,7 +351,7 @@ namespace Dune
     bool leafIt () const { return leafIt_; }
 
     void clearElement ();
-    void setElement ( const Alberta::ElementInfo &elementInfo, int subEntity );
+    void setElement ( const ElementInfo &elementInfo, int subEntity );
 
     // same as setElInfo just with a entity given
     void setEntity ( const This &other);
@@ -365,7 +369,7 @@ namespace Dune
     const GridImp & grid_;
 
     // Alberta element info
-    Alberta::ElementInfo elementInfo_;
+    ElementInfo elementInfo_;
 
     // local coordinates within father
     typedef MakeableInterfaceObject<Geometry> GeometryObject;

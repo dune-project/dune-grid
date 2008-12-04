@@ -37,10 +37,12 @@ namespace Dune
 
     typedef AlbertaGridEntityPointer< codimension, GridImp > EntityPointerImp;
 
+    typedef Alberta::ElementInfo< dim > ElementInfo;
+
     //! Constructor for EntityPointer that points to an element
     AlbertaGridEntityPointer ( const GridImp &grid,
                                int level,
-                               const Alberta::ElementInfo &elementInfo,
+                               const ElementInfo &elementInfo,
                                int subEntity );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator

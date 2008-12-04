@@ -103,6 +103,9 @@ namespace Dune
     static const int dimension = GridImp::dimension;
     static const int codimension = codim;
 
+    typedef typename Base::ElementInfo ElementInfo;
+    typedef Alberta::MacroIterator< dimension > MacroIterator;
+
   private:
     static const int numSubEntities
       = Alberta::NumSubEntities< dimension, codimension >::value;
@@ -141,17 +144,17 @@ namespace Dune
     // private Methods
     void makeIterator();
 
-    void nextElement ( Alberta::ElementInfo &elementInfo );
-    void nextElementStop ( Alberta::ElementInfo &elementInfo );
-    bool stopAtElement ( const Alberta::ElementInfo &elementInfo );
+    void nextElement ( ElementInfo &elementInfo );
+    void nextElementStop (ElementInfo &elementInfo );
+    bool stopAtElement ( const ElementInfo &elementInfo );
 
-    void goNextEntity ( Alberta::ElementInfo &elementInfo );
+    void goNextEntity ( ElementInfo &elementInfo );
 
     // the real go next methods
-    void goNextElement ( Alberta::ElementInfo &elementInfo );
-    void goNextFace ( Alberta::ElementInfo &elementInfo );
-    void goNextEdge ( Alberta::ElementInfo &elementInfo );
-    void goNextVertex ( Alberta::ElementInfo &elementInfo );
+    void goNextElement ( ElementInfo &elementInfo );
+    void goNextFace ( ElementInfo &elementInfo );
+    void goNextEdge ( ElementInfo &elementInfo );
+    void goNextVertex ( ElementInfo &elementInfo );
 
     //! current level
     int level_;
@@ -159,7 +162,7 @@ namespace Dune
     //! Number of the subentity within the element
     int subEntity_;
 
-    Alberta::MacroIterator macroIterator_;
+    MacroIterator macroIterator_;
 
     // knows on which element a point,edge,face is viewed
     const AlbertaMarkerVector *vertexMarker_;

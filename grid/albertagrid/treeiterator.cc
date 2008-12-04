@@ -214,7 +214,9 @@ namespace Dune
     template< class IteratorImp, int dim >
     struct GoNextEntity< IteratorImp, dim, 0 >
     {
-      static void goNext ( IteratorImp &it, Alberta::ElementInfo &elementInfo )
+      typedef typename IteratorImp::ElementInfo ElementInfo;
+
+      static void goNext ( IteratorImp &it, ElementInfo &elementInfo )
       {
         it.goNextElement( elementInfo );
       }
@@ -224,7 +226,9 @@ namespace Dune
     template <class IteratorImp, int dim>
     struct GoNextEntity<IteratorImp,dim,1>
     {
-      static void goNext ( IteratorImp &it, Alberta::ElementInfo &elementInfo )
+      typedef typename IteratorImp::ElementInfo ElementInfo;
+
+      static void goNext ( IteratorImp &it, ElementInfo &elementInfo )
       {
         it.goNextFace( elementInfo );
       }
@@ -234,7 +238,9 @@ namespace Dune
     template <class IteratorImp, int dim>
     struct GoNextEntity<IteratorImp,dim,dim>
     {
-      static void goNext ( IteratorImp &it, Alberta::ElementInfo &elementInfo )
+      typedef typename IteratorImp::ElementInfo ElementInfo;
+
+      static void goNext ( IteratorImp &it, ElementInfo &elementInfo )
       {
         it.goNextVertex( elementInfo );
       }
@@ -244,7 +250,9 @@ namespace Dune
     template <class IteratorImp>
     struct GoNextEntity<IteratorImp,3,2>
     {
-      static void goNext ( IteratorImp &it, Alberta::ElementInfo &elementInfo )
+      typedef typename IteratorImp::ElementInfo ElementInfo;
+
+      static void goNext ( IteratorImp &it, ElementInfo &elementInfo )
       {
         it.goNextEdge( elementInfo );
       }
@@ -259,7 +267,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::goNextEntity ( Alberta::ElementInfo &elementInfo )
+  ::goNextEntity ( ElementInfo &elementInfo )
   {
     return AlbertaTreeIteratorHelp::GoNextEntity< This, GridImp::dimension, codim >
            ::goNext( *this, elementInfo );
@@ -273,7 +281,7 @@ namespace Dune
     subEntity_ = -1;
     vertexMarker_ = 0;
 
-    entityImp().setElement( Alberta::ElementInfo(), 0 );
+    entityImp().setElement( ElementInfo(), 0 );
   }
 
 
@@ -289,7 +297,7 @@ namespace Dune
       vertexMarker_( vertexMark ),
       proc_( proc )
   {
-    Alberta::ElementInfo elementInfo = *macroIterator_;
+    ElementInfo elementInfo = *macroIterator_;
     if( codim == 0 )
       nextElementStop( elementInfo );
     else
@@ -350,7 +358,7 @@ namespace Dune
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator<codim,pitype,GridImp>::increment ()
   {
-    Alberta::ElementInfo elementInfo = entityImp().elementInfo_;
+    ElementInfo elementInfo = entityImp().elementInfo_;
     goNextEntity ( elementInfo );
     if( !elementInfo )
       this->done();
@@ -361,7 +369,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::nextElement ( Alberta::ElementInfo &elementInfo )
+  ::nextElement ( ElementInfo &elementInfo )
   {
     if( elementInfo.isLeaf() )
     {
@@ -382,7 +390,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::nextElementStop ( Alberta::ElementInfo &elementInfo )
+  ::nextElementStop ( ElementInfo &elementInfo )
   {
     while( !(!elementInfo || stopAtElement( elementInfo )) )
       nextElement( elementInfo );
@@ -391,7 +399,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline bool AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::stopAtElement ( const Alberta::ElementInfo &elementInfo )
+  ::stopAtElement ( const ElementInfo &elementInfo )
   {
     if( !elementInfo )
       return true;
@@ -401,7 +409,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::goNextElement ( Alberta::ElementInfo &elementInfo )
+  ::goNextElement ( ElementInfo &elementInfo )
   {
     nextElement( elementInfo );
     nextElementStop( elementInfo );
@@ -410,7 +418,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::goNextFace ( Alberta::ElementInfo &elementInfo )
+  ::goNextFace ( ElementInfo &elementInfo )
   {
     ++subEntity_;
     if( subEntity_ >= numSubEntities )
@@ -452,7 +460,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::goNextEdge ( Alberta::ElementInfo &elementInfo )
+  ::goNextEdge ( ElementInfo &elementInfo )
   {
     ++subEntity_;
     if( subEntity_ >= numSubEntities )
@@ -476,7 +484,7 @@ namespace Dune
 
   template< int codim, PartitionIteratorType pitype, class GridImp >
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
-  ::goNextVertex ( Alberta::ElementInfo &elementInfo )
+  ::goNextVertex ( ElementInfo &elementInfo )
   {
     ++subEntity_;
     if( subEntity_ >= numSubEntities )

@@ -10,7 +10,6 @@
 #include <cstring>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
-#include <dune/grid/albertagrid/boundary.hh>
 
 #if HAVE_ALBERTA
 

@@ -21,10 +21,14 @@ namespace Dune
     template <class GridType , class RestrictProlongOperatorType >
     class AdaptRestrictProlongHandler
     {
+      static const int dimension = GridType::dimension;
+
       GridType & grid_;
-      enum { dim = GridType :: dimension };
+
       typedef Dune::MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
       typedef typename EntityType :: ImplementationType RealEntityType;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
 
       EntityType & reFather_;
       EntityType & reSon_;
@@ -54,8 +58,8 @@ namespace Dune
           childInfo_( ElementInfo::createFake() ),
           maxlevel_( -1 )
       {
-        AlbertHelp::makeEmptyElInfo< dim, dim >( &(fatherInfo_.elInfo()) );
-        AlbertHelp::makeEmptyElInfo< dim, dim >( &(childInfo_.elInfo()) );
+        AlbertHelp::makeEmptyElInfo< dimension, dimension >( &(fatherInfo_.elInfo()) );
+        AlbertHelp::makeEmptyElInfo< dimension, dimension >( &(childInfo_.elInfo()) );
 
         fatherInfo_.elInfo().mesh = grid.getMesh();
         childInfo_.elInfo().mesh = grid.getMesh();

@@ -55,6 +55,7 @@ namespace Dune
     // ElementInfo
     // -----------
 
+    template< int dim >
     class ElementInfo
     {
       class Instance;
@@ -67,6 +68,8 @@ namespace Dune
       explicit ElementInfo ( const InstancePtr &instance );
 
     public:
+      static const int dimension = dim;
+
 #if DUNE_ALBERTA_VERSION >= 0x200
       static const int maxNeighbors = N_NEIGH_MAX;
 #else
@@ -90,6 +93,9 @@ namespace Dune
 
       int level () const;
 
+      bool isBoundary ( int face ) const;
+      int boundaryId ( int face ) const;
+
       ALBERTA EL *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
@@ -108,7 +114,8 @@ namespace Dune
     // ElementInfo::Instance
     // ---------------------
 
-    struct ElementInfo::Instance
+    template< int dim >
+    struct ElementInfo< dim >::Instance
     {
       ALBERTA EL_INFO elInfo;
       unsigned int refCount;
@@ -128,7 +135,8 @@ namespace Dune
     // ElementInfo::Stack
     // ------------------
 
-    class ElementInfo::Stack
+    template< int dim >
+    class ElementInfo< dim >::Stack
     {
       InstancePtr top_;
       Instance null_;
@@ -147,21 +155,24 @@ namespace Dune
     // Implementation of ElementInfo
     // -----------------------------
 
-    inline ElementInfo::ElementInfo ( const InstancePtr &instance )
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ( const InstancePtr &instance )
       : instance_( instance )
     {
       addReference();
     }
 
 
-    inline ElementInfo::ElementInfo ()
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ()
       : instance_( null() )
     {
       addReference();
     }
 
 
-    inline ElementInfo::ElementInfo ( Mesh &mesh, MacroElement &macroElement )
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ( Mesh &mesh, MacroElement &macroElement )
     {
       instance_ = stack().allocate();
       instance_->parent() = null();
@@ -183,20 +194,24 @@ namespace Dune
     }
 
 
-    inline ElementInfo::ElementInfo ( const ElementInfo &other )
+    template< int dim >
+    inline ElementInfo< dim >::ElementInfo ( const ElementInfo &other )
       : instance_( other.instance_ )
     {
       addReference();
     }
 
 
-    inline ElementInfo::~ElementInfo ()
+    template< int dim >
+    inline ElementInfo< dim >::~ElementInfo ()
     {
       removeReference();
     }
 
 
-    inline ElementInfo &ElementInfo::operator= ( const ElementInfo &other )
+    template< int dim >
+    inline ElementInfo< dim > &
+    ElementInfo< dim >::operator= ( const ElementInfo< dim > &other )
     {
       other.addReference();
       removeReference();
@@ -205,20 +220,23 @@ namespace Dune
     }
 
 
-    inline bool ElementInfo::operator! () const
+    template< int dim >
+    inline bool ElementInfo< dim >::operator! () const
     {
       return (instance_ == null());
     }
 
 
-    inline ElementInfo ElementInfo::father () const
+    template< int dim >
+    inline ElementInfo< dim > ElementInfo< dim >::father () const
     {
       assert( !(*this) == false );
-      return ElementInfo( instance_->parent() );
+      return ElementInfo< dim >( instance_->parent() );
     }
 
 
-    inline int ElementInfo::indexInFather () const
+    template< int dim >
+    inline int ElementInfo< dim >::indexInFather () const
     {
       const ALBERTA EL *element = elInfo().el;
 #if DUNE_ALBERTA_VERSION >= 0x201
@@ -234,7 +252,8 @@ namespace Dune
     }
 
 
-    inline ElementInfo ElementInfo::child ( int i ) const
+    template< int dim >
+    inline ElementInfo< dim > ElementInfo< dim >::child ( int i ) const
     {
       assert( !isLeaf() );
 
@@ -252,56 +271,139 @@ namespace Dune
       ALBERTA fill_elinfo( i, &elInfo(), &(child->elInfo) );
 #endif
 
-      return ElementInfo( child );
+      return ElementInfo< dim >( child );
     }
 
 
-    inline bool ElementInfo::isLeaf () const
+    template< int dim >
+    inline bool ElementInfo< dim >::isLeaf () const
     {
       assert( !(*this) == false );
       return IS_LEAF_EL( el() );
     }
 
 
-    inline int ElementInfo::level () const
+    template< int dim >
+    inline int ElementInfo< dim >::level () const
     {
       return instance_->elInfo.level;
     }
 
 
-    inline ALBERTA EL *ElementInfo::el () const
+    template< int dim >
+    inline bool ElementInfo< dim >::isBoundary ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < maxNeighbors) );
+      return (elInfo().neigh[ face ] == 0);
+    }
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline int ElementInfo< dim >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_WALLS_MAX) );
+      return elInfo().wall_bound[ face ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+
+#if DUNE_ALBERTA_VERSION == 0x200
+    template<>
+    inline int ElementInfo< 1 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_VERTICES_MAX) );
+      eturn elInfo().vertex_bound[ face ];
+    }
+
+    template<>
+    inline int ElementInfo< 2 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_EDGES_MAX) );
+      return elInfo().edge_bound[ face ];
+    }
+
+    template<>
+    inline int ElementInfo< 3 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_FACES_MAX) );
+      return elInfo().face_bound[ face ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION == 0x200
+
+
+#if DUNE_ALBERTA_VERSION < 0x200
+#if DIM == 1
+    template<>
+    inline int ElementInfo< 1 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_VERTICES) );
+      return elInfo().bound[ face ];
+    }
+#endif // #if DIM == 1
+
+#if DIM == 2
+    template<>
+    inline int ElementInfo< 2 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_EDGES) );
+      return elInfo().boundary[ face ]->bound;
+    }
+#endif // #if DIM == 2
+
+#if DIM == 3
+    template<>
+    inline int ElementInfo< 3 >::boundaryId ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < N_FACES) );
+      return elInfo().boundary[ face ]->bound;
+    }
+#endif // #if DIM == 3
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+    template< int dim >
+    inline ALBERTA EL *ElementInfo< dim >::el () const
     {
       return elInfo().el;
     }
 
 
-    inline ALBERTA EL_INFO &ElementInfo::elInfo () const
+    template< int dim >
+    inline ALBERTA EL_INFO &ElementInfo< dim >::elInfo () const
     {
       return (instance_->elInfo);
     }
 
 
-    inline ElementInfo ElementInfo::createFake ()
+    template< int dim >
+    inline ElementInfo< dim > ElementInfo< dim >::createFake ()
     {
       InstancePtr instance = stack().allocate();
       instance->parent() = null();
       ++(instance->parent()->refCount);
-      return ElementInfo( instance );
+      return ElementInfo< dim >( instance );
     }
 
 
-    inline void ElementInfo::addReference () const
+    template< int dim >
+    inline void ElementInfo< dim >::addReference () const
     {
       ++(instance_->refCount);
     }
 
 
-    inline void ElementInfo::removeReference () const
+    template< int dim >
+    inline void ElementInfo< dim >::removeReference () const
     {
-      // std::cerr << "Destructing " << (instance_ == null() ? "null" : "element")
-      //           << " info (references = " << instance_->refCount << ")..."
-      //           << std::flush;
-
       // this loop breaks when instance becomes null()
       for( InstancePtr instance = instance_; --(instance->refCount) == 0; )
       {
@@ -309,18 +411,20 @@ namespace Dune
         stack().release( instance );
         instance = parent;
       }
-
-      // std::cerr << "[done]" << std::endl;
     }
 
 
-    inline ElementInfo::InstancePtr ElementInfo::null ()
+    template< int dim >
+    inline typename ElementInfo< dim >::InstancePtr
+    ElementInfo< dim >::null ()
     {
       return stack().null();
     }
 
 
-    inline ElementInfo::Stack &ElementInfo::stack ()
+    template< int dim >
+    inline typename ElementInfo< dim >::Stack &
+    ElementInfo< dim >::stack ()
     {
       static Stack s;
       return s;
@@ -331,7 +435,8 @@ namespace Dune
     // Implementation of ElementInfo::Stack
     // ------------------------------------
 
-    inline ElementInfo::Stack::Stack ()
+    template< int dim >
+    inline ElementInfo< dim >::Stack::Stack ()
       : top_( 0 )
     {
       null_.elInfo.el = NULL;
@@ -340,7 +445,8 @@ namespace Dune
     }
 
 
-    inline ElementInfo::Stack::~Stack ()
+    template< int dim >
+    inline ElementInfo< dim >::Stack::~Stack ()
     {
       while( top_ != 0 )
       {
@@ -351,7 +457,9 @@ namespace Dune
     }
 
 
-    inline ElementInfo::InstancePtr ElementInfo::Stack::allocate ()
+    template< int dim >
+    inline typename ElementInfo< dim >::InstancePtr
+    ElementInfo< dim >::Stack::allocate ()
     {
       InstancePtr p = top_;
       if( p != 0 )
@@ -363,7 +471,8 @@ namespace Dune
     }
 
 
-    inline void ElementInfo::Stack::release ( InstancePtr &p )
+    template< int dim >
+    inline void ElementInfo< dim >::Stack::release ( InstancePtr &p )
     {
       assert( (p != null()) && (p->refCount == 0) );
       p->parent() = top_;
@@ -371,7 +480,9 @@ namespace Dune
     }
 
 
-    inline ElementInfo::InstancePtr ElementInfo::Stack::null ()
+    template< int dim >
+    inline typename ElementInfo< dim >::InstancePtr
+    ElementInfo< dim >::Stack::null ()
     {
       return &null_;
     }

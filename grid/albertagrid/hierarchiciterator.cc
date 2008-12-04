@@ -11,7 +11,7 @@ namespace Dune
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >::makeIterator()
   {
-    entityImp().setElement( Alberta::ElementInfo(), 0 );
+    entityImp().setElement( ElementInfo(), 0 );
   }
 
 
@@ -30,7 +30,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridHierarchicIterator< GridImp >
   ::AlbertaGridHierarchicIterator ( const GridImp &grid,
-                                    const Alberta::ElementInfo &elementInfo,
+                                    const ElementInfo &elementInfo,
                                     int actLevel, int maxLevel, bool leafIt )
     : Base( grid, actLevel, leafIt, false ),
       startLevel_( actLevel ),
@@ -73,7 +73,7 @@ namespace Dune
 
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >
-  ::increment ( Alberta::ElementInfo elementInfo )
+  ::increment ( ElementInfo elementInfo )
   {
     if( (level_ >= maxlevel_) || elementInfo.isLeaf() )
     {

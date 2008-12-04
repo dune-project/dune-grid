@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTA_ENTITY_CC
 #define DUNE_ALBERTA_ENTITY_CC
 
-#include <dune/grid/albertagrid/boundary.hh>
-
 namespace Dune
 {
 
@@ -89,14 +87,14 @@ namespace Dune
   inline void
   AlbertaGridEntity< codim, dim, GridImp >::clearElement ()
   {
-    elementInfo_ = Alberta::ElementInfo();
+    elementInfo_ = ElementInfo();
     builtgeometry_ = false;
   }
 
 
   template< int codim, int dim, class GridImp >
   inline void AlbertaGridEntity< codim, dim, GridImp >
-  ::setElement ( const Alberta::ElementInfo &elementInfo, int subEntity )
+  ::setElement ( const ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
     subEntity_ = subEntity;
@@ -207,7 +205,7 @@ namespace Dune
     assert( !elementInfo_ == false );
     bool isBoundary = false;
     for( int i = 0; i < dim+1; ++i )
-      isBoundary |= Alberta::isBoundary( getElInfo(), i );
+      isBoundary |= elementInfo_.isBoundary( i );
     return isBoundary;
   }
 
@@ -231,7 +229,7 @@ namespace Dune
   template< int dim, class GridImp >
   inline void AlbertaGridEntity< 0, dim, GridImp >::makeDescription ()
   {
-    elementInfo_ = Alberta::ElementInfo();
+    elementInfo_ = ElementInfo();
     builtgeometry_ = false;
   }
 
@@ -307,14 +305,14 @@ namespace Dune
   inline void
   AlbertaGridEntity< 0, dim, GridImp >::clearElement ()
   {
-    elementInfo_ = Alberta::ElementInfo();
+    elementInfo_ = ElementInfo();
     builtgeometry_ = false;
   }
 
 
   template< int dim, class GridImp >
   inline void AlbertaGridEntity< 0, dim, GridImp >
-  ::setElement ( const Alberta::ElementInfo &elementInfo, int subEntity )
+  ::setElement ( const ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
     builtgeometry_ = false;
@@ -356,7 +354,7 @@ namespace Dune
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImpl;
 
     assert( !elementInfo_ == false );
-    const Alberta::ElementInfo fatherInfo = elementInfo_.father();
+    const ElementInfo fatherInfo = elementInfo_.father();
 
     return EntityPointerImpl( grid_, fatherInfo.level(), fatherInfo, 0 );
   }

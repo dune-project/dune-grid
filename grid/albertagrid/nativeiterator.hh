@@ -15,12 +15,15 @@ namespace Dune
     // -------------
 
 #if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
     class MacroIterator
     {
       Mesh *mesh_;
       int index_;
 
     public:
+      typedef Alberta::ElementInfo< dim > ElementInfo;
+
       explicit MacroIterator ( Mesh &mesh, bool end = false )
         : mesh_( &mesh ),
           index_( end ? mesh.n_macro_el : 0 )
@@ -65,12 +68,15 @@ namespace Dune
       }
     };
 #else
+    template< int dim >
     class MacroIterator
     {
       Mesh *mesh_;
       MacroElement *element_;
 
     public:
+      typedef Alberta::ElementInfo< dim > ElementInfo;
+
       explicit MacroIterator ( Mesh &mesh, bool end = false )
         : mesh_( &mesh ),
           element_( end ? NULL : mesh.first_macro_el )

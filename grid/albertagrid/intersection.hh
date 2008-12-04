@@ -6,8 +6,6 @@
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 
-#include <dune/grid/albertagrid/boundary.hh>
-
 namespace Dune
 {
 
@@ -52,6 +50,8 @@ namespace Dune
 
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
 
   private:
     typedef AlbertaGridEntity< 0, dimension, GridImp > EntityImp;
@@ -170,7 +170,7 @@ namespace Dune
 
     bool leafIt_;
 
-    Alberta::ElementInfo elementInfo_;
+    ElementInfo elementInfo_;
 
     // the objects holding the real implementations
     mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
@@ -178,7 +178,7 @@ namespace Dune
     mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
 
     //! ElementInfo to store the information of the neighbor if needed
-    mutable Alberta::ElementInfo neighborInfo_;
+    mutable ElementInfo neighborInfo_;
 
     // twist seen from the neighbor
     mutable int twist_;

@@ -12,7 +12,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid,
                                int level,
-                               const Alberta::ElementInfo &elementInfo,
+                               const ElementInfo &elementInfo,
                                int subEntity )
     : grid_( grid ),
       isLeaf_( true ),
