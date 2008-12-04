@@ -367,9 +367,6 @@ namespace Dune
     // Alberta element info
     Alberta::ElementInfo elementInfo_;
 
-    //! the level of the entity
-    int level_;
-
     // local coordinates within father
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
 

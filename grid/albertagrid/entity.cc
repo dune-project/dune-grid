@@ -155,7 +155,6 @@ namespace Dune
   ::AlbertaGridEntity( const GridImp &grid, int level, bool leafIt )
     : grid_(grid),
       elementInfo_(),
-      level_ (level),
       geoObj_( GeometryImp() ),
       geo_( grid_.getRealImplementation(geoObj_) ),
       builtgeometry_ (false),
@@ -168,7 +167,6 @@ namespace Dune
   ::AlbertaGridEntity ( const This &other )
     : grid_( other.grid_ ),
       elementInfo_( other.elementInfo_ ),
-      level_( other.level_ ),
       geoObj_( other.geoObj_ ),
       geo_( grid_.getRealImplementation(geoObj_) ),
       builtgeometry_ ( false ),
@@ -301,7 +299,7 @@ namespace Dune
   template< int dim, class GridImp >
   inline int AlbertaGridEntity< 0, dim, GridImp >::level () const
   {
-    return level_;
+    return elementInfo_.level();
   }
 
 
@@ -311,7 +309,6 @@ namespace Dune
   {
     elementInfo_ = Alberta::ElementInfo();
     builtgeometry_ = false;
-    level_ = -1;
   }
 
 
@@ -320,10 +317,6 @@ namespace Dune
   ::setElement ( const Alberta::ElementInfo &elementInfo, int subEntity )
   {
     elementInfo_ = elementInfo;
-
-    const ALBERTA EL *element = getElement();
-    level_ = (element != NULL ? grid_.getLevelOfElement( element ) : -1);
-
     builtgeometry_ = false;
   }
 
@@ -365,11 +358,7 @@ namespace Dune
     assert( !elementInfo_ == false );
     const Alberta::ElementInfo fatherInfo = elementInfo_.father();
 
-    const int fatherLevel = level_ - 1;
-    assert( fatherLevel >= 0 );
-    assert( fatherLevel == fatherInfo.level() );
-
-    return EntityPointerImpl( grid_, fatherLevel, fatherInfo, 0 );
+    return EntityPointerImpl( grid_, fatherInfo.level(), fatherInfo, 0 );
   }
 
 
