@@ -7,41 +7,21 @@
  * This file is created automatically by the perl script <tt>undefAllMacros.pl</tt>.
  */
 
+#ifdef _ALBERTA_H_
+  #undef _ALBERTA_H_
+#endif // _ALBERTA_H_
+
 #ifdef ALBERTA_VERSION
   #undef ALBERTA_VERSION
 #endif // ALBERTA_VERSION
 
-#ifdef NEIGH_IN_EL
-  #undef NEIGH_IN_EL
-#endif // NEIGH_IN_EL
+#ifdef ALBERTA_DEBUG
+  #undef ALBERTA_DEBUG
+#endif // ALBERTA_DEBUG
 
-#ifdef N_VERTICES_1D
-  #undef N_VERTICES_1D
-#endif // N_VERTICES_1D
-
-#ifdef N_NEIGH_1D
-  #undef N_NEIGH_1D
-#endif // N_NEIGH_1D
-
-#ifdef N_VERTICES
-  #undef N_VERTICES
-#endif // N_VERTICES
-
-#ifdef N_NEIGH
-  #undef N_NEIGH
-#endif // N_NEIGH
-
-#ifdef N_VERTICES_2D
-  #undef N_VERTICES_2D
-#endif // N_VERTICES_2D
-
-#ifdef N_EDGES_2D
-  #undef N_EDGES_2D
-#endif // N_EDGES_2D
-
-#ifdef N_NEIGH_2D
-  #undef N_NEIGH_2D
-#endif // N_NEIGH_2D
+#ifdef DIM_MAX
+  #undef DIM_MAX
+#endif // DIM_MAX
 
 #ifdef N_VERTICES
   #undef N_VERTICES
@@ -51,9 +31,81 @@
   #undef N_EDGES
 #endif // N_EDGES
 
+#ifdef N_WALLS
+  #undef N_WALLS
+#endif // N_WALLS
+
+#ifdef N_FACES
+  #undef N_FACES
+#endif // N_FACES
+
 #ifdef N_NEIGH
   #undef N_NEIGH
 #endif // N_NEIGH
+
+#ifdef DIM_FAC
+  #undef DIM_FAC
+#endif // DIM_FAC
+
+#ifdef N_VERTICES_0D
+  #undef N_VERTICES_0D
+#endif // N_VERTICES_0D
+
+#ifdef N_EDGES_0D
+  #undef N_EDGES_0D
+#endif // N_EDGES_0D
+
+#ifdef N_FACES_0D
+  #undef N_FACES_0D
+#endif // N_FACES_0D
+
+#ifdef N_NEIGH_0D
+  #undef N_NEIGH_0D
+#endif // N_NEIGH_0D
+
+#ifdef N_WALLS_0D
+  #undef N_WALLS_0D
+#endif // N_WALLS_0D
+
+#ifdef N_VERTICES_1D
+  #undef N_VERTICES_1D
+#endif // N_VERTICES_1D
+
+#ifdef N_EDGES_1D
+  #undef N_EDGES_1D
+#endif // N_EDGES_1D
+
+#ifdef N_FACES_1D
+  #undef N_FACES_1D
+#endif // N_FACES_1D
+
+#ifdef N_NEIGH_1D
+  #undef N_NEIGH_1D
+#endif // N_NEIGH_1D
+
+#ifdef N_WALLS_1D
+  #undef N_WALLS_1D
+#endif // N_WALLS_1D
+
+#ifdef N_VERTICES_2D
+  #undef N_VERTICES_2D
+#endif // N_VERTICES_2D
+
+#ifdef N_EDGES_2D
+  #undef N_EDGES_2D
+#endif // N_EDGES_2D
+
+#ifdef N_FACES_2D
+  #undef N_FACES_2D
+#endif // N_FACES_2D
+
+#ifdef N_NEIGH_2D
+  #undef N_NEIGH_2D
+#endif // N_NEIGH_2D
+
+#ifdef N_WALLS_2D
+  #undef N_WALLS_2D
+#endif // N_WALLS_2D
 
 #ifdef N_VERTICES_3D
   #undef N_VERTICES_3D
@@ -71,109 +123,37 @@
   #undef N_NEIGH_3D
 #endif // N_NEIGH_3D
 
-#ifdef N_VERTICES
-  #undef N_VERTICES
-#endif // N_VERTICES
+#ifdef N_WALLS_3D
+  #undef N_WALLS_3D
+#endif // N_WALLS_3D
 
-#ifdef N_EDGES
-  #undef N_EDGES
-#endif // N_EDGES
+#ifdef N_VERTICES_MAX
+  #undef N_VERTICES_MAX
+#endif // N_VERTICES_MAX
 
-#ifdef N_FACES
-  #undef N_FACES
-#endif // N_FACES
+#ifdef N_EDGES_MAX
+  #undef N_EDGES_MAX
+#endif // N_EDGES_MAX
 
-#ifdef N_NEIGH
-  #undef N_NEIGH
-#endif // N_NEIGH
+#ifdef N_FACES_MAX
+  #undef N_FACES_MAX
+#endif // N_FACES_MAX
 
-#ifdef COPY_DOW
-  #undef COPY_DOW
-#endif // COPY_DOW
+#ifdef N_NEIGH_MAX
+  #undef N_NEIGH_MAX
+#endif // N_NEIGH_MAX
 
-#ifdef SCP_DOW
-  #undef SCP_DOW
-#endif // SCP_DOW
+#ifdef N_WALLS_MAX
+  #undef N_WALLS_MAX
+#endif // N_WALLS_MAX
 
-#ifdef SET_DOW
-  #undef SET_DOW
-#endif // SET_DOW
+#ifdef N_LAMBDA
+  #undef N_LAMBDA
+#endif // N_LAMBDA
 
-#ifdef SCAL_DOW
-  #undef SCAL_DOW
-#endif // SCAL_DOW
-
-#ifdef DIST_DOW
-  #undef DIST_DOW
-#endif // DIST_DOW
-
-#ifdef COPY_DOW
-  #undef COPY_DOW
-#endif // COPY_DOW
-
-#ifdef SCP_DOW
-  #undef SCP_DOW
-#endif // SCP_DOW
-
-#ifdef SET_DOW
-  #undef SET_DOW
-#endif // SET_DOW
-
-#ifdef SCAL_DOW
-  #undef SCAL_DOW
-#endif // SCAL_DOW
-
-#ifdef DIST_DOW
-  #undef DIST_DOW
-#endif // DIST_DOW
-
-#ifdef COPY_DOW
-  #undef COPY_DOW
-#endif // COPY_DOW
-
-#ifdef SCP_DOW
-  #undef SCP_DOW
-#endif // SCP_DOW
-
-#ifdef SET_DOW
-  #undef SET_DOW
-#endif // SET_DOW
-
-#ifdef SCAL_DOW
-  #undef SCAL_DOW
-#endif // SCAL_DOW
-
-#ifdef DIST_DOW
-  #undef DIST_DOW
-#endif // DIST_DOW
-
-#ifdef NORM_DOW
-  #undef NORM_DOW
-#endif // NORM_DOW
-
-#ifdef NEIGH
-  #undef NEIGH
-#endif // NEIGH
-
-#ifdef OPP_VERTEX
-  #undef OPP_VERTEX
-#endif // OPP_VERTEX
-
-#ifdef EL_TYPE
-  #undef EL_TYPE
-#endif // EL_TYPE
-
-#ifdef NEIGH
-  #undef NEIGH
-#endif // NEIGH
-
-#ifdef OPP_VERTEX
-  #undef OPP_VERTEX
-#endif // OPP_VERTEX
-
-#ifdef EL_TYPE
-  #undef EL_TYPE
-#endif // EL_TYPE
+#ifdef LAMBDA_MAX
+  #undef LAMBDA_MAX
+#endif // LAMBDA_MAX
 
 #ifdef INDEX
   #undef INDEX
@@ -203,6 +183,22 @@
   #undef NEUMANN
 #endif // NEUMANN
 
+#ifdef IS_NEUMANN
+  #undef IS_NEUMANN
+#endif // IS_NEUMANN
+
+#ifdef IS_DIRICHLET
+  #undef IS_DIRICHLET
+#endif // IS_DIRICHLET
+
+#ifdef IS_INTERIOR
+  #undef IS_INTERIOR
+#endif // IS_INTERIOR
+
+#ifdef N_NODE_TYPES
+  #undef N_NODE_TYPES
+#endif // N_NODE_TYPES
+
 #ifdef VERTEX
   #undef VERTEX
 #endif // VERTEX
@@ -210,22 +206,6 @@
 #ifdef CENTER
   #undef CENTER
 #endif // CENTER
-
-#ifdef VERTEX
-  #undef VERTEX
-#endif // VERTEX
-
-#ifdef EDGE
-  #undef EDGE
-#endif // EDGE
-
-#ifdef CENTER
-  #undef CENTER
-#endif // CENTER
-
-#ifdef VERTEX
-  #undef VERTEX
-#endif // VERTEX
 
 #ifdef EDGE
   #undef EDGE
@@ -235,25 +215,13 @@
   #undef FACE
 #endif // FACE
 
-#ifdef CENTER
-  #undef CENTER
-#endif // CENTER
+#ifdef LIST_ENTRY
+  #undef LIST_ENTRY
+#endif // LIST_ENTRY
 
-#ifdef IS_INTERIOR
-  #undef IS_INTERIOR
-#endif // IS_INTERIOR
-
-#ifdef IS_DIRICHLET
-  #undef IS_DIRICHLET
-#endif // IS_DIRICHLET
-
-#ifdef IS_NEUMANN
-  #undef IS_NEUMANN
-#endif // IS_NEUMANN
-
-#ifdef GET_BOUND
-  #undef GET_BOUND
-#endif // GET_BOUND
+#ifdef WALL_BOUND
+  #undef WALL_BOUND
+#endif // WALL_BOUND
 
 #ifdef FILL_NOTHING
   #undef FILL_NOTHING
@@ -283,21 +251,53 @@
   #undef FILL_EL_TYPE
 #endif // FILL_EL_TYPE
 
-#ifdef FILL_ANY_2D
-  #undef FILL_ANY_2D
-#endif // FILL_ANY_2D
+#ifdef FILL_PROJECTION
+  #undef FILL_PROJECTION
+#endif // FILL_PROJECTION
 
 #ifdef FILL_ANY
   #undef FILL_ANY
 #endif // FILL_ANY
 
-#ifdef FILL_ANY_3D
-  #undef FILL_ANY_3D
-#endif // FILL_ANY_3D
+#ifdef HOOK_QUEUE_OFFSET
+  #undef HOOK_QUEUE_OFFSET
+#endif // HOOK_QUEUE_OFFSET
 
-#ifdef FILL_ANY
-  #undef FILL_ANY
-#endif // FILL_ANY
+#ifdef RUN_HOOKS_0
+  #undef RUN_HOOKS_0
+#endif // RUN_HOOKS_0
+
+#ifdef RUN_BAS_FCTS_HOOKS
+  #undef RUN_BAS_FCTS_HOOKS
+#endif // RUN_BAS_FCTS_HOOKS
+
+#ifdef RUN_HOOKS_1
+  #undef RUN_HOOKS_1
+#endif // RUN_HOOKS_1
+
+#ifdef RUN_HOOKS_2
+  #undef RUN_HOOKS_2
+#endif // RUN_HOOKS_2
+
+#ifdef RUN_HOOKS_3
+  #undef RUN_HOOKS_3
+#endif // RUN_HOOKS_3
+
+#ifdef RUN_HOOKS_4
+  #undef RUN_HOOKS_4
+#endif // RUN_HOOKS_4
+
+#ifdef RUN_HOOKS_5
+  #undef RUN_HOOKS_5
+#endif // RUN_HOOKS_5
+
+#ifdef RUN_HOOKS_6
+  #undef RUN_HOOKS_6
+#endif // RUN_HOOKS_6
+
+#ifdef RUN_HOOKS_7
+  #undef RUN_HOOKS_7
+#endif // RUN_HOOKS_7
 
 #ifdef CALL_EVERY_EL_PREORDER
   #undef CALL_EVERY_EL_PREORDER
@@ -351,6 +351,18 @@
   #undef FOR_ALL_FREE_DOFS
 #endif // FOR_ALL_FREE_DOFS
 
+#ifdef DOWBM_FULL
+  #undef DOWBM_FULL
+#endif // DOWBM_FULL
+
+#ifdef DOWBM_SYMM
+  #undef DOWBM_SYMM
+#endif // DOWBM_SYMM
+
+#ifdef DOWBM_DIAG
+  #undef DOWBM_DIAG
+#endif // DOWBM_DIAG
+
 #ifdef ROW_LENGTH
   #undef ROW_LENGTH
 #endif // ROW_LENGTH
@@ -371,13 +383,9 @@
   #undef NO_MORE_ENTRIES
 #endif // NO_MORE_ENTRIES
 
-#ifdef MAX_N_QUAD_POINTS
-  #undef MAX_N_QUAD_POINTS
-#endif // MAX_N_QUAD_POINTS
-
-#ifdef MAX_N_QUAD_POINTS
-  #undef MAX_N_QUAD_POINTS
-#endif // MAX_N_QUAD_POINTS
+#ifdef LAGRANGE_NODES
+  #undef LAGRANGE_NODES
+#endif // LAGRANGE_NODES
 
 #ifdef MAX_N_QUAD_POINTS
   #undef MAX_N_QUAD_POINTS
@@ -435,6 +443,10 @@
   #undef GET_DOF_VEC
 #endif // GET_DOF_VEC
 
+#ifdef CARD_SN_MAX
+  #undef CARD_SN_MAX
+#endif // CARD_SN_MAX
+
 #ifdef INIT_UH
   #undef INIT_UH
 #endif // INIT_UH
@@ -443,6 +455,10 @@
   #undef INIT_GRD_UH
 #endif // INIT_GRD_UH
 
-#ifdef nil
-  #undef nil
-#endif
+#ifdef TRAVERSE_START
+  #undef TRAVERSE_START
+#endif // TRAVERSE_START
+
+#ifdef TRAVERSE_STOP
+  #undef TRAVERSE_STOP
+#endif // TRAVERSE_STOP

@@ -123,18 +123,6 @@ static inline MACRO_EL* nextMacroEl(MESH* mesh, const MACRO_EL* oldmel)
 #error "Couldn't find alberta.h for include! "
 #endif
 
-#ifdef _ABS_NOT_DEFINED_
-#undef ABS
-#endif
-
-#ifdef _MIN_NOT_DEFINED_
-#undef MIN
-#endif
-
-#ifdef _MAX_NOT_DEFINED_
-#undef MAX
-#endif
-
 #ifndef __ALBERTApp__
 } // end extern "C"
 #endif

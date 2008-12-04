@@ -917,7 +917,28 @@ namespace Dune
 #undef DIM
 #undef DIM_OF_WORLD
 #undef CALC_COORD
-#include "alberta_undefs.hh"
+
+#ifdef _ABS_NOT_DEFINED_
+#undef ABS
+#endif
+
+#ifdef _MIN_NOT_DEFINED_
+#undef MIN
+#endif
+
+#ifdef _MAX_NOT_DEFINED_
+#undef MAX
+#endif
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+#include <dune/grid/albertagrid/undefine-2.1.hh>
+#elif DUNE_ALBERTA_VERSION == 0x200
+#include <dune/grid/albertagrid/undefine-2.0.hh>
+#else
+#include <dune/grid/albertagrid/undefine-1.2.hh>
+#endif
+
+#define _ALBERTA_H_
 
 #endif // HAVE_ALBERTA
 
