@@ -199,7 +199,10 @@ namespace Dune
   {
     char filetemp[ FILENAME_MAX ];
     std :: strcpy( filetemp, "ALU3dGrid.XXXXXX" );
-    mkstemp( filetemp );
+    const int fd = mkstemp( filetemp );
+    if( fd < 0 )
+      DUNE_THROW( IOError, "Unable to create temporary file." );
+    close( fd );
     return std :: string( filetemp );
   }
 
