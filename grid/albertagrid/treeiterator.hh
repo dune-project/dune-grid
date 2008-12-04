@@ -153,11 +153,8 @@ namespace Dune
     void goNextEdge ( Alberta::ElementInfo &elementInfo );
     void goNextVertex ( Alberta::ElementInfo &elementInfo );
 
-    //! level :)
+    //! current level
     int level_;
-
-    //! level :)
-    int enLevel_;
 
     //! Number of the subentity within the element
     int subEntity_;
@@ -165,10 +162,7 @@ namespace Dune
     Alberta::MacroIterator macroIterator_;
 
     // knows on which element a point,edge,face is viewed
-    const AlbertaMarkerVector * vertexMarker_;
-
-    // variable for operator++
-    bool okReturn_;
+    const AlbertaMarkerVector *vertexMarker_;
 
     // store processor number of elements
     // for ghost walktrough, i.e. walk over ghosts which belong

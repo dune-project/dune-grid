@@ -270,7 +270,6 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, pitype, GridImp >::makeIterator ()
   {
     level_ = 0;
-    enLevel_ = 0;
     subEntity_ = -1;
     vertexMarker_ = 0;
 
@@ -285,11 +284,9 @@ namespace Dune
                               int travLevel, int proc, bool leafIt )
     : Base( grid, travLevel, leafIt, false ),
       level_( travLevel ),
-      enLevel_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( *(grid.getMesh()), false ),
       vertexMarker_( vertexMark ),
-      okReturn_ ( false ),
       proc_( proc )
   {
     Alberta::ElementInfo elementInfo = *macroIterator_;
@@ -313,11 +310,9 @@ namespace Dune
                               bool leafIt )
     : Base( grid, travLevel, leafIt, true ), // true means end iterator
       level_( travLevel ),
-      enLevel_( travLevel ),
       subEntity_( -1 ),
       macroIterator_( *(grid.getMesh()), true ),
       vertexMarker_( 0 ),
-      okReturn_( false ),
       proc_( proc )
   {}
 
@@ -328,11 +323,9 @@ namespace Dune
   ::AlbertaGridTreeIterator( const This &other )
     : Base( other ),
       level_( other.level_ ),
-      enLevel_( other.enLevel_ ),
       subEntity_( other.subEntity_ ),
       macroIterator_( other.macroIterator_ ),
       vertexMarker_( other.vertexMarker_ ),
-      okReturn_( other.okReturn_ ),
       proc_( other.proc_ )
   {}
 
@@ -345,11 +338,9 @@ namespace Dune
     Base::operator=( other );
 
     level_ = other.level_;
-    enLevel_ = other.enLevel_;
     subEntity_ =  other.subEntity_;
     macroIterator_ = other.macroIterator_;
     vertexMarker_ = other.vertexMarker_;
-    okReturn_ = other.okReturn_;
 
     assert( proc_ == other.proc_ );
     return *this;
