@@ -180,7 +180,11 @@ namespace Dune
 
       addReference();
 
-#if DUNE_ALBERTA_VERSION == 0x200
+#if DUNE_ALBERTA_VERSION >= 0x201
+      elInfo().fill_flag = FILL_COORDS | FILL_NEIGH | FILL_OPP_COORDS
+                           | FILL_ORIENTATION | FILL_MACRO_WALLS
+                           | FILL_NON_PERIODIC;
+#elif DUNE_ALBERTA_VERSION == 0x200
       elInfo().fill_flag = FILL_ANY(&mesh);
 #else
       elInfo().fill_flag = FILL_ANY;
@@ -305,7 +309,12 @@ namespace Dune
     {
       assert( !(*this) == false );
       assert( (face >= 0) && (face < N_WALLS_MAX) );
-      return elInfo().wall_bound[ face ];
+
+      const int macroFace = elInfo().macro_wall[ face ];
+      const int id = elInfo().macro_el->wall_bound[ macroFace ];
+      // this assertion is only allowed, if FILL_BOUND is set
+      // assert( id == elInfo().wall_bound[ face ] );
+      return id;
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x201
 
