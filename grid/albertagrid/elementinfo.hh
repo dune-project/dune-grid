@@ -85,6 +85,8 @@ namespace Dune
       ElementInfo &operator= ( const ElementInfo &other );
 
       bool operator! () const;
+      bool operator== ( const ElementInfo &other ) const;
+      bool operator!= ( const ElementInfo &other ) const;
 
       ElementInfo father () const;
       int indexInFather () const;
@@ -231,6 +233,22 @@ namespace Dune
     inline bool ElementInfo< dim >::operator! () const
     {
       return (instance_ == null());
+    }
+
+
+    template< int dim >
+    inline bool
+    ElementInfo< dim >::operator== ( const ElementInfo< dim > &other ) const
+    {
+      return (instance_->elInfo.el == other.instance_->elInfo.el);
+    }
+
+
+    template< int dim >
+    inline bool
+    ElementInfo< dim >::operator!= ( const ElementInfo< dim > &other ) const
+    {
+      return (instance_->elInfo.el != other.instance_->elInfo.el);
     }
 
 
