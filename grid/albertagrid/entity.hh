@@ -199,8 +199,9 @@ namespace Dune
       EntityPointer;
     };
 
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef typename GridImp::template Codim<0>::Geometry Geometry;
+    typedef typename GridImp::template Codim< 0 >::Entity Entity;
+    typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
+    typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
     typedef AlbertaGridGeometry<dim,dimworld,GridImp> GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
@@ -282,17 +283,15 @@ namespace Dune
     //! Assumes that meshes are nested.
     EntityPointer father () const;
 
-    /*! Location of this element relative to the reference element
-       of the father. This is sufficient to interpolate all
-       dofs in conforming case. Nonconforming may require access to
-       neighbors of father and computations with local coordinates.
-       On the fly case is somewhat inefficient since dofs  are visited
-       several times. If we store interpolation matrices, this is tolerable.
-       We assume that on-the-fly implementation of numerical algorithms
-       is only done for simple discretizations. Assumes that meshes are nested.
-       NOTE: the imeplementation at the moment is very inefficient.
+    /** \brief Location of this element relative to the father's reference element
+     *
+     *  This information is sufficient to interpolate all dofs in conforming case.
+     *  Nonconforming may require access to neighbors of father and computations
+     *  with local coordinates.
+     *  On the fly case is somewhat inefficient since dofs  are visited several
+     *  times. If we store interpolation matrices, this is tolerable.
      */
-    const Geometry & geometryInFather () const;
+    const LocalGeometry &geometryInFather () const;
 
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.

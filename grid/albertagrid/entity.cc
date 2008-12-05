@@ -367,27 +367,14 @@ namespace Dune
   }
 
 
-  template<>
-  inline const AlbertaGridEntity< 0, 2, const AlbertaGrid< 2, 2 > >::Geometry &
-  AlbertaGridEntity< 0, 2, const AlbertaGrid< 2, 2 > >::geometryInFather() const
+  template< int dim, class GridImp >
+  inline const typename AlbertaGridEntity< 0, dim, GridImp >::LocalGeometry &
+  AlbertaGridEntity< 0, dim, GridImp >::geometryInFather() const
   {
-    typedef AlbertaGridLocalGeometryProvider< 2, 2 > LocalGeoProvider;
-    return LocalGeoProvider::instance().geometryInFather( nChild() );
-  }
-
-
-  template<>
-  inline const AlbertaGridEntity< 0, 3, const AlbertaGrid< 3, 3 > >::Geometry &
-  AlbertaGridEntity< 0, 3, const AlbertaGrid< 3, 3 > >::geometryInFather() const
-  {
-    // see Alberta Docu for definition  of el_type, values are 0,1,2
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
-    const int orientation = (getElInfo()->el_type == 1 ? -1 : 1);
-#else
-    const int orientation = 1;
-#endif
-    typedef AlbertaGridLocalGeometryProvider< 3, 3 > LocalGeoProvider;
-    return LocalGeoProvider::instance().geometryInFather( nChild(), orientation );
+    typedef AlbertaGridLocalGeometryProvider< dim, dim > LocalGeoProvider;
+    const int indexInFather = elementInfo_.indexInFather();
+    const int orientation = (elementInfo_.type() == 1 ? -1 : 1);
+    return LocalGeoProvider::instance().geometryInFather( indexInFather, orientation );
   }
 
 

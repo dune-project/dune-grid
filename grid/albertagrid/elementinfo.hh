@@ -92,6 +92,9 @@ namespace Dune
       bool isLeaf () const;
 
       int level () const;
+      // see ALBERTA documentation for definition of element type
+      // values are 0, 1, 2
+      int type () const;
 
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
@@ -292,6 +295,21 @@ namespace Dune
     {
       return instance_->elInfo.level;
     }
+
+
+    template< int dim >
+    inline int ElementInfo< dim >::type () const
+    {
+      return 0;
+    }
+
+
+#if (DUNE_ABLERTA_VERSION >= 0x200) || (DIM == 3)
+    inline int ElementInfo< 3 >::type () const
+    {
+      return instance_->elInfo.type;
+    }
+#endif
 
 
     template< int dim >
