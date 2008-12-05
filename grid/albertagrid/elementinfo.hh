@@ -316,7 +316,7 @@ namespace Dune
     {
       assert( !(*this) == false );
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
-      eturn elInfo().vertex_bound[ face ];
+      return elInfo().vertex_bound[ face ];
     }
 
     template<>
