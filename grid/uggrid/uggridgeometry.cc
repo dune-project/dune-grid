@@ -220,21 +220,6 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
 //
 ///////////////////////////////////////////////////////////////////////
 
-
-// Specialization for dim==1, coorddim==2.  This is necessary
-// because we specialized the whole class
-template <class GridImp>
-inline Dune::FieldVector<typename GridImp::ctype, 2> Dune::UGGridGeometry<1,2,GridImp>::
-global(const FieldVector<typename GridImp::ctype, 1>& local) const
-{
-  FieldVector<UGCtype, 2> globalCoord;
-
-  globalCoord[0] = local[0]*coord_[1][0] + (1-local[0])*coord_[0][0];
-  globalCoord[1] = local[0]*coord_[1][1] + (1-local[0])*coord_[0][1];
-
-  return globalCoord;
-}
-
 // Specialization for dim==2, coorddim==3.  This is necessary
 // because we specialized the whole class
 template <class GridImp>
@@ -380,16 +365,6 @@ local(const FieldVector<typename GridImp::ctype, 3>& global) const
   }
 
   return result;
-}
-
-template <class GridImp>
-inline typename GridImp::ctype Dune::UGGridGeometry<1,2,GridImp>::
-integrationElement (const Dune::FieldVector<typename GridImp::ctype, 1>& local) const
-{
-  // We could call UG_NS<2>::SurfaceElement, but this is faster, and not more complicated
-  FieldVector<UGCtype, 2> diff = coord_[0];
-  diff -= coord_[1];
-  return diff.two_norm();
 }
 
 template <class GridImp>

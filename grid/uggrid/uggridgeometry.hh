@@ -361,59 +361,10 @@ namespace Dune {
     /** \brief Constructor with a geometry type and a set of corners */
     void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates)
     {
-      //elementType_ = type;
-      for (size_t i=0; i<coordinates.size(); i++)
-        coord_[i] = coordinates[i];
-
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
       Base::operator=(Base(type,coordinates));
     }
-
-    /** \brief Return the element type identifier.  */
-    GeometryType type () const {return GeometryType(GeometryType::simplex,1);}
-
-    //! return the number of corners of this element. This class always returns 2
-    int corners () const {return 2;}
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<UGCtype, 2>& operator[] (int i) const {
-      // 1D -> 2D, nothing to renumber
-      return coord_[i];
-    }
-
-    //! maps a local coordinate within reference element to
-    //! global coordinate in element
-    FieldVector<UGCtype, 2> global (const FieldVector<UGCtype, 1>& local) const;
-
-    //! Maps a global coordinate within the element to a
-    //! local coordinate in its reference element
-    FieldVector<UGCtype, 1> local (const FieldVector<UGCtype, 2>& global) const {
-      FieldVector<UGCtype, 2> segment = coord_[1];
-      segment -= coord_[0];
-      FieldVector<UGCtype, 1> result;
-      result[0] = (global-coord_[0]) * segment / segment.two_norm() / segment.two_norm();
-      return result;
-    }
-
-    //! Returns true if the point is in the reference element
-    bool checkInside(const FieldVector<UGCtype, 1>& local) const {
-      return local[0]>=0 && local[0]<=1;
-    }
-
-    // A(l)
-    UGCtype integrationElement (const FieldVector<UGCtype, 1>& local) const;
-
-  private:
-
-    // Do nothing: faces in a 2d grid always have 2 corners
-    void setNumberOfCorners(int n) {}
-
-    //! the vertex coordinates
-    array<FieldVector<UGCtype, 2>, 2> coord_;
-
-    //! The jacobian inverse
-    mutable FieldMatrix<UGCtype,2,1> jacobianInverseTransposed_;
 
   };
 
