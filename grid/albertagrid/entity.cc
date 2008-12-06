@@ -371,7 +371,7 @@ namespace Dune
   inline const typename AlbertaGridEntity< 0, dim, GridImp >::LocalGeometry &
   AlbertaGridEntity< 0, dim, GridImp >::geometryInFather() const
   {
-    typedef AlbertaGridLocalGeometryProvider< dim, dim > LocalGeoProvider;
+    typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
     const int indexInFather = elementInfo_.indexInFather();
     const int orientation = (elementInfo_.type() == 1 ? -1 : 1);
     return LocalGeoProvider::instance().geometryInFather( indexInFather, orientation );

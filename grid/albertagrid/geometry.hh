@@ -52,11 +52,19 @@ namespace Dune
     static const int codimension = dimension - mydimension;
     static const int coorddimension = cdim;
 
+  private:
+    static const int numCorners = mydimension + 1;
+
+    typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
+
+  public:
     //! Default constructor
     AlbertaGridGeometry();
 
     //! constructor building geometry in father
-    AlbertaGridGeometry( const int child, const int orientation );
+    AlbertaGridGeometry ( const int child, const int orientation );
+
+    AlbertaGridGeometry ( const CoordMatrix &coords );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
@@ -157,7 +165,7 @@ namespace Dune
     ctype elDeterminant () const;
 
     //! the vertex coordinates
-    FieldMatrix< ctype, mydim+1, cdim > coord_;
+    CoordMatrix coord_;
 
     mutable FieldMatrix< ctype, cdim, mydim > Jinv_; //!< storage for inverse of jacobian
 
@@ -178,40 +186,37 @@ namespace Dune
   // AlbertaGridLocalGeometryProvider
   // --------------------------------
 
-  template< int dim, int dimworld >
+  template< class Grid >
   class AlbertaGridLocalGeometryProvider
   {
-    typedef AlbertaGridLocalGeometryProvider< dim, dimworld > This;
-
-    typedef AlbertaGrid< dim, dimworld > Grid;
+    typedef AlbertaGridLocalGeometryProvider< Grid > This;
 
   public:
+    typedef typename Grid::ctype ctype;
+
+    static const int dimension = Grid::dimension;
+
     template< int codim >
     struct Codim
     {
-      typedef Geometry< dim-codim, dim, const Grid, AlbertaGridGeometry >
+      typedef Geometry< dimension-codim, dimension, Grid, AlbertaGridGeometry >
       LocalGeometry;
     };
 
-    typedef typename Codim< 0 > :: LocalGeometry LocalElementGeometry;
+    typedef typename Codim< 0 >::LocalGeometry LocalElementGeometry;
+    typedef typename Codim< 1 >::LocalGeometry LocalFaceGeometry;
 
     static const int numChildren = 2;
+    static const int numFaces = dimension + 1;
 
   private:
     const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
+    const LocalFaceGeometry *faceGeometry_[ numFaces ];
 
     AlbertaGridLocalGeometryProvider ()
     {
-      typedef MakeableInterfaceObject< LocalElementGeometry > LocalGeoObject;
-      typedef typename LocalGeoObject :: ImplementationType LocalGeoImp;
-
-      for( int child = 0; child < numChildren; ++child )
-      {
-        geometryInFather_[ child ][ 0 ]
-          = new LocalGeoObject( LocalGeoImp( child, -1 ) );
-        geometryInFather_[ child ][ 1 ]
-          = new LocalGeoObject( LocalGeoImp( child, 1 ) );
-      }
+      buildGeometryInFather();
+      buildFaceGeometry();
     }
 
     ~AlbertaGridLocalGeometryProvider ()
@@ -221,7 +226,13 @@ namespace Dune
         delete geometryInFather_[ child ][ 0 ];
         delete geometryInFather_[ child ][ 1 ];
       }
+
+      for( int i = 0; i < numFaces; ++i )
+        delete faceGeometry_[ i ];
     }
+
+    void buildGeometryInFather();
+    void buildFaceGeometry();
 
   public:
     const LocalElementGeometry &
@@ -230,6 +241,13 @@ namespace Dune
       assert( (child >= 0) && (child < numChildren) );
       assert( (orientation == 1) || (orientation == -1) );
       return *geometryInFather_[ child ][ (orientation + 1) / 2 ];
+    }
+
+    const LocalFaceGeometry &
+    faceGeometry ( int face ) const
+    {
+      assert( (face >= 0) && (face < numFaces) );
+      return *faceGeometry_[ face ];
     }
 
     static const This &instance ()

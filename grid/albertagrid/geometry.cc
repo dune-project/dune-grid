@@ -77,6 +77,22 @@ namespace Dune
     buildGeomInFather(child,orientation);
   }
 
+
+  template< int mydim, int cdim, class GridImp >
+  inline AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::AlbertaGridGeometry ( const CoordMatrix &coords )
+    : coord_( coords ),
+      builtElMat_( false ),
+      builtinverse_( false )
+  {
+    elDet_ = elDeterminant ();
+    calcedDet_ = true;
+
+    if( !(elDet_ > 0.0) )
+      DUNE_THROW( AlbertaError, "Degenerate Geometry.");
+  }
+
+
   template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
   initGeom()
@@ -85,6 +101,7 @@ namespace Dune
     builtElMat_   = false;
     calcedDet_    = false;
   }
+
 
   // print the GeometryInformation
   template <int mydim, int cdim, class GridImp>
@@ -106,10 +123,10 @@ namespace Dune
     return GeometryType( GeometryType :: simplex, mydim );
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline int AlbertaGridGeometry<mydim,cdim,GridImp>::corners() const
+  template< int mydim, int cdim, class GridImp >
+  inline int AlbertaGridGeometry< mydim, cdim, GridImp >::corners () const
   {
-    return (mydim+1);
+    return numCorners;
   }
 
   ///////////////////////////////////////////////////////////////////////
@@ -563,6 +580,49 @@ namespace Dune
 
     if( elDet_ > 0.0 ) return;
     DUNE_THROW(NotImplemented,"wrong dimension given!");
+  }
+
+
+
+  // AlbertaGridLocalGeometryProvider
+  // --------------------------------
+
+  template< class Grid >
+  void AlbertaGridLocalGeometryProvider< Grid >::buildGeometryInFather ()
+  {
+    typedef MakeableInterfaceObject< LocalElementGeometry > LocalGeoObject;
+    typedef typename LocalGeoObject::ImplementationType LocalGeoImp;
+
+    for( int child = 0; child < numChildren; ++child )
+    {
+      geometryInFather_[ child ][ 0 ]
+        = new LocalGeoObject( LocalGeoImp( child, -1 ) );
+      geometryInFather_[ child ][ 1 ]
+        = new LocalGeoObject( LocalGeoImp( child, 1 ) );
+    }
+  }
+
+
+  template< class Grid >
+  void AlbertaGridLocalGeometryProvider< Grid >::buildFaceGeometry ()
+  {
+    typedef MakeableInterfaceObject< LocalFaceGeometry > LocalGeoObject;
+    typedef typename LocalGeoObject::ImplementationType LocalGeoImp;
+
+    FieldMatrix< ctype, dimension+1, dimension > refCorners = 0.0;
+    for( int i = 0; i < dimension; ++i )
+      refCorners[ i+1 ][ i ] = 1.0;
+
+    for( int face = 0; face < numFaces; ++face )
+    {
+      // use reference element here!
+      FieldMatrix< ctype, dimension, dimension > faceCorners;
+      for( int i = 0; i < face; ++i )
+        faceCorners[ i ] = refCorners[ i ];
+      for( int i = face; i < dimension; ++i )
+        faceCorners[ i ] = refCorners[ i+1 ];
+      faceGeometry_[ face ] = new LocalGeoObject( LocalGeoImp( faceCorners ) );
+    }
   }
 
 }
