@@ -323,6 +323,7 @@ namespace Dune
 
 
 #if (DUNE_ABLERTA_VERSION >= 0x200) || (DIM == 3)
+    template<>
     inline int ElementInfo< 3 >::type () const
     {
       return instance_->elInfo.type;
