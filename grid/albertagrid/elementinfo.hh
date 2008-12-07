@@ -326,7 +326,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 3 >::type () const
     {
-      return instance_->elInfo.type;
+      return instance_->elInfo.el_type;
     }
 #endif
 
