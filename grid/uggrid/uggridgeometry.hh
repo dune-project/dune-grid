@@ -253,80 +253,20 @@ namespace Dune {
 
     typedef typename GenericGeometry::BasicGeometry<2, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,2,3> > Base;
 
-    typedef typename GridImp::ctype UGCtype;
-
   public:
 
-    /** \brief Default constructor */
-    UGGridGeometry()
-    {elementType_=GeometryType(GeometryType::simplex,2);}
-
     /** \brief Constructor with a geometry type and a set of corners */
-    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates)
+    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
     {
-      elementType_ = type;
+      /** \todo This reordering should happen when setting up the argument for this method */
+      std::vector<FieldVector<typename GridImp::ctype,3> > duneCoordinates(coordinates.size());
       for (size_t i=0; i<coordinates.size(); i++)
-        coord_[i] = coordinates[i];
-
-      // Temporary: reorder coordinates to DUNE ordering
-      std::vector<FieldVector<UGCtype,3> > duneCoordinates(coordinates.size());
-      for (size_t i=0; i<coordinates.size(); i++)
-        duneCoordinates[i] = coordinates[UGGridRenumberer<2>::verticesDUNEtoUG(i, elementType_)];
+        duneCoordinates[i] = coordinates[UGGridRenumberer<2>::verticesDUNEtoUG(i, type)];
 
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      Base::operator=(Base(type,coordinates));
+      Base::operator=(Base(type,duneCoordinates));
     }
-
-    //! return the element type identifier (triangle or quadrilateral)
-    GeometryType type () const {
-      assert(elementType_==Base::type());
-      return elementType_;
-    }
-
-    //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const {return (elementType_.isSimplex()) ? 3 : 4;}
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<UGCtype, 3>& operator[] (int i) const
-    {
-      return coord_[UGGridRenumberer<2>::verticesDUNEtoUG(i, elementType_)];
-    }
-
-    //! maps a local coordinate within reference element to
-    //! global coordinate in element
-    FieldVector<UGCtype, 3> global (const FieldVector<UGCtype, 2>& local) const;
-
-    //! Maps a global coordinate within the element to a
-    //! local coordinate in its reference element
-    FieldVector<UGCtype, 2> local (const FieldVector<UGCtype, 3>& global) const;
-
-
-
-    //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<UGCtype, 2> &local) const {
-
-      // These two conditions must be fulfilled for triangles and quadrilaterals
-      if (local[0] < 0 || local[1] < 0)
-        return false;
-
-      // Now distinguish between the element types
-      return (corners()==3) ? (local[0]+local[1] <= 1) : (local[0] <= 1 && local[1] <= 1);
-    }
-
-    // A(l)
-    UGCtype integrationElement (const FieldVector<UGCtype, 2>& local) const;
-
-  private:
-
-    //! The element type, either triangle or quadrilateral
-    GeometryType elementType_;
-
-    //! the vertex coordinates in UG numbering
-    mutable array<FieldVector<UGCtype, 3>, 4> coord_;
-
-    //! The jacobian inverse
-    mutable FieldMatrix<UGCtype,3,2> jacobianInverseTransposed_;
 
   };
 
@@ -350,16 +290,10 @@ namespace Dune {
 
     typedef typename GenericGeometry::BasicGeometry<1, GenericGeometry::DefaultGeometryTraits<typename GridImp::ctype,1,2> > Base;
 
-    typedef typename GridImp::ctype UGCtype;
-
   public:
 
-    /** \brief Default constructor */
-    UGGridGeometry()
-    {}
-
     /** \brief Constructor with a geometry type and a set of corners */
-    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates)
+    void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
     {
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
