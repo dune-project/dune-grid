@@ -381,7 +381,7 @@ namespace Dune {
 
     //! Return true if the node is a leaf node
     static bool isLeaf(const UG_NS< UG_DIM >::Node* theNode) {
-#ifndef ModelP
+#ifdef ModelP
 #warning Method isLeaf() for nodes will not work properly in case of vertical load balancing
 #endif
       return !theNode->son;
