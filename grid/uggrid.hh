@@ -406,6 +406,25 @@ namespace Dune {
       return (codim==0) ? 1 : 0;
     }
 
+    /** \brief Default load balancing.
+        \bug The return value is always 'true'
+        \return true if the grid has changed
+     */
+    bool loadBalance() {
+      return loadBalance(0,1,2,32,1);
+    }
+
+    /** \brief Re-balances the load each process has to handle for a parallel grid,
+        the DataHandle data works like the data handle for the communicate
+        methods. If grid has changed , true is returned.
+        \bug Not implemented yet!
+     */
+    template<class DataHandle>
+    bool loadBalance (DataHandle& data)
+    {
+      DUNE_THROW(NotImplemented, "load balancing with data attached");
+    }
+
     /** \brief Distributes this grid over the available nodes in a distributed machine
 
        If you want the UG default for the parameters pick
@@ -417,16 +436,13 @@ namespace Dune {
        <li>minelement = 1</li>
        </ul>
 
+       \bug The return value is always 'true'
+
        \param minlevel The coarsest grid level that gets distributed
        \param maxlevel does currently get ignored
      */
-    void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
+    bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
-    typedef GridDefaultImplementation  <dim, dim, double,
-        UGGridFamily<dim,dim> > GridDefaultImplementationType;
-
-    //! also make default implementations of loadBalance useable
-    using GridDefaultImplementationType :: loadBalance;
 #if 0
     /** \brief The communication interface
 

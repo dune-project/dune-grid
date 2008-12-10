@@ -589,7 +589,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
+bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, int maxLevel, int minelement)
 {
   /** \todo Test for valid arguments */
   std::string argStrings[4];
@@ -620,6 +620,7 @@ void Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   // Renumber everything
   setIndices();
 
+  return true;
 }
 
 #ifdef ModelP
