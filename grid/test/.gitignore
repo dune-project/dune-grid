@@ -8,6 +8,7 @@ test-alberta
 test-sgrid
 test-oned
 test-ug
+test-parallel-ug
 test-yaspgrid
 test-dgfalu-uggrid-combination
 test-ug-lgm

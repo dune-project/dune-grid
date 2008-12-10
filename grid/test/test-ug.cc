@@ -19,12 +19,6 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
-// Test parallel interface if a parallel UG is used
-#ifdef ModelP
-#include <mpi.h>
-#include "checkcommunicate.cc"
-#endif
-
 using namespace Dune;
 
 class ArcOfCircle : public Dune::BoundarySegment<2>
@@ -191,13 +185,6 @@ void generalTests(bool greenClosure)
   // check the intersection iterator
   checkIntersectionIterator(*grid2d);
   checkIntersectionIterator(*grid3d);
-
-#ifdef ModelP
-  // check communication interface
-  checkCommunication(*grid2d,-1,Dune::dvverb);
-  for(int l=0; l<=grid2d->maxLevel(); ++l)
-    checkCommunication(*grid2d,l,Dune::dvverb);
-#endif
 
 }
 
