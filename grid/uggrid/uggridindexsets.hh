@@ -407,7 +407,10 @@ namespace Dune {
     GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
 #ifdef ModelP
-      return grid_.getRealImplementation(e).target_->ge.ddd.gid;
+      //       if (cd==0)
+      //           return grid_.getRealImplementation(e).target_->ge.ddd.gid;
+      //       else
+      DUNE_THROW(NotImplemented, "!");
 #else
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -455,7 +458,8 @@ namespace Dune {
         }
 
 #ifdef ModelP
-        return (Local) ? edge->id : edge->ddd.gid;
+        //return (Local) ? edge->id : edge->ddd.gid;
+        DUNE_THROW(NotImplemented, "!");
 #else
         return edge->id;
 #endif
