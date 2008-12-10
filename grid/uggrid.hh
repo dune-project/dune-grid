@@ -407,7 +407,16 @@ namespace Dune {
     }
 
     /** \brief Distributes this grid over the available nodes in a distributed machine
-     *
+
+       If you want the UG default for the parameters pick
+       <ul>
+       <li>strategy = 0</li>
+       <li>minlevel = 1</li>
+       <li>depth = 2</li>
+       <li>maxlevel = 32 </li>
+       <li>minelement = 1</li>
+       </ul>
+
        \param minlevel The coarsest grid level that gets distributed
        \param maxlevel does currently get ignored
      */
@@ -418,8 +427,13 @@ namespace Dune {
 
     //! also make default implementations of loadBalance useable
     using GridDefaultImplementationType :: loadBalance;
-
+#if 0
     /** \brief The communication interface
+
+       This used to work at least partially for an old version of the communication interface.
+       This interface is obsolete, but the method is still there as a hint of how communicate
+       might be implementable today.
+
        @param T: array class holding data associated with the entities
        @param P: type used to gather/scatter data in and out of the message buffer
        @param codim: communicate entites of given codim
@@ -432,18 +446,38 @@ namespace Dune {
      */
     template<class T, template<class> class P, int codim>
     void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level);
+#endif
 
-    /*! The new communication interface
+    /** \brief The communication interface for all codims on a given level
+       @param T array class holding data associated with the entities
+       @param DataHandle type used to gather/scatter data in and out of the message buffer
+       @param iftype one of the predifined interface types, throws error if it is not implemented
+       @param level communicate for entities on the given level
 
-       communicate objects for all codims on a given level
+       Implements a generic communication function sending an object of type P for each entity
+       in the intersection of two processors. P has two methods gather and scatter that implement
+       the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
+    {
+      DUNE_THROW(NotImplemented, "Level communication has not been implemented yet!");
+    }
 
+    /** \brief The communication interface for all codims on the leaf level
+       @param T array class holding data associated with the entities
+       @param DataHandle type used to gather/scatter data in and out of the message buffer
+       @param iftype one of the predifined interface types, throws error if it is not implemented
+
+       Implements a generic communication function sending an object of type P for each entity
+       in the intersection of two processors. P has two methods gather and scatter that implement
+       the protocol. Therefore P is called the "protocol class".
+     */
     template<class DataHandle>
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
-    {}
+    {
+      DUNE_THROW(NotImplemented, "Leaf communication has not been implemented yet!");
+    }
 
     /** dummy collective communication */
     const CollectiveCommunication<UGGrid>& comm () const

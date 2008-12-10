@@ -685,7 +685,9 @@ template <class T, template<class> class P, int GridDim>
 T* Dune::UGDataCollector<T,P,GridDim>::dataArray = 0;
 #endif
 
-/** \todo How do I incorporate the level argument? */
+#if 0
+/** This used to work at least partially for an old version of the communication interface
+   \todo How do I incorporate the level argument? */
 template < int dim >
 template<class T, template<class> class P, int codim>
 void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
@@ -700,7 +702,7 @@ void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, Communicatio
 
   // Translate the communication direction from Dune-Speak to UG-Speak
   DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
-#if 0
+
   // Trigger communication
   DDD_IFOneway(UG::ElementVHIF,
                UGIfDir,
@@ -708,9 +710,8 @@ void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, Communicatio
                &UGDataCollector<T,P,dim>::gather,
                &UGDataCollector<T,P,dim>::scatter);
 #endif
-#endif
 }
-
+#endif
 
 template < int dim >
 void Dune::UGGrid < dim >::createBegin()
