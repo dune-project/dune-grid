@@ -87,8 +87,8 @@ test_parallel_ug_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
 test_parallel_ug_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
 
 test_ug_lgm_SOURCES = test-ug-lgm.cc
-test_ug_lgm_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(AMIRAMESH_CPPFLAGS) $(MPI_CPPFLAGS)
-test_ug_lgm_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
+test_ug_lgm_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
+test_ug_lgm_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(MPI_LDFLAGS)
 
 # Test whether you can combine the different implementations in one file
 test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
