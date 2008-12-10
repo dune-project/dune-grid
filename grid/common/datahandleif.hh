@@ -63,13 +63,11 @@ namespace Dune
   /** @brief CommDataHandleIF describes the features of a data handle for
      communication in parallel runs using the Grid::communicate methods.
      Here the Barton-Nackman trick is used to interprete data handle objects
-     as it's interface. Therefore usable data handle classes need to be
+     as its interface. Therefore usable data handle classes need to be
      derived from this class.
 
-     Template parameters:
-
-     - <tt>DataHandleImp</tt> implementation of the users data handle
-     - <tt>DataTypeImp</tt> type of data that are going to be communicated which is exported as \c DataType (for example double)
+     \tparam DataHandleImp implementation of the users data handle
+     \tparam DataTypeImp type of data that are going to be communicated which is exported as \c DataType (for example double)
      \ingroup GICollectiveCommunication
    */
   template <class DataHandleImp, class DataTypeImp>
