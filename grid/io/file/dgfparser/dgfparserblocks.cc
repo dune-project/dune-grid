@@ -590,7 +590,10 @@ namespace Dune
         if( count > nofparams )
         {
           count -= nofparams;
-          int dim = (int)(log( count ) / M_LN2);
+          // int dim = (int)(log( count ) / M_LN2);
+          int dim = 1;
+          while (1<<dim < count)
+            dim++;
           if( (dim < 0) || ((1 << dim) != count) )
           {
             DUNE_THROW( DGFException,
@@ -1053,7 +1056,7 @@ namespace Dune
       }
       else
       {
-        dwarn << "GridParameterBlock: could not find keyword `closure' in DGF file, defaulting to `GREEN' !\n";
+        dwarn << "GridParameterBlock: could not find keyword `copies' in DGF file, no copies will be generated !\n";
       }
     }
 
