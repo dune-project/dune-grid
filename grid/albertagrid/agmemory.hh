@@ -142,9 +142,6 @@ namespace Dune
     objStack_.push( obj );
   }
 
-  typedef AGMemoryProvider < ALBERTA EL_INFO > ElInfoProvider;
-  static ElInfoProvider elinfoProvider;
-
 } //end namespace
 
 #endif // HAVE_ALBERTA

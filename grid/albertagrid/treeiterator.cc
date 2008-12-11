@@ -265,8 +265,8 @@ namespace Dune
   // AlbertaGridTreeIterator
   // -----------------------
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextEntity ( ElementInfo &elementInfo )
   {
     return AlbertaTreeIteratorHelp::GoNextEntity< This, GridImp::dimension, codim >
@@ -274,28 +274,27 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >::makeIterator ()
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >::makeIterator ()
   {
     level_ = 0;
     subEntity_ = -1;
     vertexMarker_ = 0;
 
-    entityImp().setElement( ElementInfo(), 0 );
+    entityImp().clearElement();
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               const AlbertaMarkerVector *vertexMark,
-                              int travLevel, int proc, bool leafIt )
-    : Base( grid, travLevel, leafIt, false ),
+                              int travLevel )
+    : Base( grid, travLevel, leafIterator, false ),
       level_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( *(grid.getMesh()), false ),
-      vertexMarker_( vertexMark ),
-      proc_( proc )
+      vertexMarker_( vertexMark )
   {
     ElementInfo elementInfo = *macroIterator_;
     if( codim == 0 )
@@ -310,38 +309,34 @@ namespace Dune
 
 
   // Make LevelIterator with point to element from previous iterations
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
-                              int travLevel,
-                              int proc,
-                              bool leafIt )
-    : Base( grid, travLevel, leafIt, true ), // true means end iterator
+                              int travLevel )
+    : Base( grid, travLevel, leafIterator, true ), // true means end iterator
       level_( travLevel ),
       subEntity_( -1 ),
       macroIterator_( *(grid.getMesh()), true ),
-      vertexMarker_( 0 ),
-      proc_( proc )
+      vertexMarker_( 0 )
   {}
 
 
   // Make LevelIterator with point to element from previous iterations
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator( const This &other )
     : Base( other ),
       level_( other.level_ ),
       subEntity_( other.subEntity_ ),
       macroIterator_( other.macroIterator_ ),
-      vertexMarker_( other.vertexMarker_ ),
-      proc_( other.proc_ )
+      vertexMarker_( other.vertexMarker_ )
   {}
 
 
   // Make LevelIterator with point to element from previous iterations
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline typename AlbertaGridTreeIterator< codim, pitype, GridImp >::This &
-  AlbertaGridTreeIterator<codim,pitype,GridImp>::operator= ( const This &other )
+  template< int codim, class GridImp, bool leafIterator >
+  inline typename AlbertaGridTreeIterator< codim, GridImp, leafIterator >::This &
+  AlbertaGridTreeIterator< codim, GridImp, leafIterator >::operator= ( const This &other )
   {
     Base::operator=( other );
 
@@ -350,13 +345,12 @@ namespace Dune
     macroIterator_ = other.macroIterator_;
     vertexMarker_ = other.vertexMarker_;
 
-    assert( proc_ == other.proc_ );
     return *this;
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator<codim,pitype,GridImp>::increment ()
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >::increment ()
   {
     ElementInfo elementInfo = entityImp().elementInfo_;
     goNextEntity ( elementInfo );
@@ -367,8 +361,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::nextElement ( ElementInfo &elementInfo )
   {
     if( elementInfo.isLeaf() )
@@ -388,8 +382,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::nextElementStop ( ElementInfo &elementInfo )
   {
     while( !(!elementInfo || stopAtElement( elementInfo )) )
@@ -397,8 +391,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline bool AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline bool AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::stopAtElement ( const ElementInfo &elementInfo )
   {
     if( !elementInfo )
@@ -407,8 +401,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextElement ( ElementInfo &elementInfo )
   {
     nextElement( elementInfo );
@@ -416,8 +410,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextFace ( ElementInfo &elementInfo )
   {
     ++subEntity_;
@@ -458,8 +452,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextEdge ( ElementInfo &elementInfo )
   {
     ++subEntity_;
@@ -482,8 +476,8 @@ namespace Dune
   }
 
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
-  inline void AlbertaGridTreeIterator< codim, pitype, GridImp >
+  template< int codim, class GridImp, bool leafIterator >
+  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextVertex ( ElementInfo &elementInfo )
   {
     ++subEntity_;

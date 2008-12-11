@@ -17,7 +17,7 @@ namespace Dune
   template< int codim, class GridImp >
   class AlbertaGridEntityPointer;
 
-  template< int codim, PartitionIteratorType pitype, class GridImp >
+  template< int codim, class GridImp, bool leafIterator >
   class AlbertaGridTreeIterator;
 
   template< class GridImp >
@@ -44,10 +44,10 @@ namespace Dune
     typedef AlbertaGridEntity< cd, dim, GridImp > This;
 
     enum { dimworld = GridImp::dimensionworld };
-    friend class AlbertaGrid < dim , dimworld >;
-    friend class AlbertaGridEntity < 0, dim, GridImp>;
+    friend class AlbertaGrid< dim , dimworld >;
+    friend class AlbertaGridEntity< 0, dim, GridImp>;
 
-    template< int, PartitionIteratorType, class > friend class AlbertaGridTreeIterator;
+    template< int, class, bool > friend class AlbertaGridTreeIterator;
     friend class AlbertaGridEntityPointer<cd,GridImp>;
 
     typedef AlbertaGridGeometry<dim-cd,dimworld,GridImp> GeometryImp;
@@ -98,6 +98,11 @@ namespace Dune
     ALBERTA EL_INFO *getElInfo () const;
     //! return element for equaltiy in EntityPointer
     ALBERTA EL *getElement () const;
+
+    const ElementInfo &elementInfo () const
+    {
+      return elementInfo_;
+    }
 
     //! return the current face/edge or vertex number
     //! no interface method
@@ -184,7 +189,7 @@ namespace Dune
     friend class AlbertaMarkerVector;
     friend class AlbertaGridIntersectionIterator <GridImp>;
     friend class AlbertaGridHierarchicIterator< GridImp >;
-    template< int, PartitionIteratorType, class > friend class AlbertaGridTreeIterator;
+    template< int, class, bool > friend class AlbertaGridTreeIterator;
     friend class AlbertaGridEntityPointer<0,GridImp>;
 
   public:
@@ -342,6 +347,11 @@ namespace Dune
 
     // needed for LevelIterator to compare
     ALBERTA EL_INFO *getElInfo () const;
+
+    const ElementInfo &elementInfo () const
+    {
+      return elementInfo_;
+    }
 
     // return element for equaltiy in EntityPointer
     ALBERTA EL *getElement () const;

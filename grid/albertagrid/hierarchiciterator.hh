@@ -10,10 +10,9 @@
 namespace Dune
 {
 
-  //**********************************************************************
-  //
-  // --AlbertaGridHierarchicIterator
-  // --HierarchicIterator
+  // AlbertaGridHierarchicIterator
+  // -----------------------------
+
   /*!
      Mesh entities of codimension 0 ("elements") allow to visit all entities of
      codimension 0 obtained through nested, hierarchic refinement of the entity.
@@ -22,8 +21,7 @@ namespace Dune
      This is redundant but important for memory efficient implementations of unstru
      hierarchically refined meshes.
    */
-
-  template<class GridImp>
+  template< class GridImp >
   class AlbertaGridHierarchicIterator
     : public AlbertaGridEntityPointer< 0, GridImp >
   {
@@ -55,19 +53,15 @@ namespace Dune
     //! increment
     void increment();
 
+    using Base::level;
+
   protected:
     using Base::entityImp;
 
   private:
     void increment ( ElementInfo elementInfo );
 
-    //! make empty HierarchicIterator
-    void makeIterator();
-
     int startLevel_;
-
-    //! the actual Level of this Hierarichic Iterator
-    int level_;
 
     //! max level to go down
     int maxlevel_;

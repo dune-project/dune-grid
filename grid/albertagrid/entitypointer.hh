@@ -67,16 +67,17 @@ namespace Dune
     bool equals ( const This &other ) const;
 
     //! dereferencing
-    Entity & dereference () const ;
+    Entity &dereference () const;
 
     //! ask for level of entities
-    int level () const ;
+    int level () const;
 
     //! has to be called when iterator is finished
     void done ();
 
     //! reduce memory
-    void compactify() {}
+    void compactify ()
+    {}
 
   protected:
     //! returns true if entity comes from LeafIterator

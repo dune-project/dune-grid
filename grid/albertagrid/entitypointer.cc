@@ -127,7 +127,7 @@ namespace Dune
   }
 
 
-  template <int codim, class GridImp >
+  template< int codim, class GridImp >
   inline int AlbertaGridEntityPointer< codim, GridImp >::level () const
   {
     return entityImp().level();

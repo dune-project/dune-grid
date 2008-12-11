@@ -59,6 +59,7 @@ typedef Dune::IndexStack<int,100000> IndexManagerType;
 #include "albertaextra.hh"
 
 #include <dune/grid/albertagrid/exceptions.hh>
+#include <dune/grid/albertagrid/capabilities.hh>
 
 // contains a simple memory management for some componds of this grid
 #include "agmemory.hh"
@@ -76,16 +77,12 @@ namespace Dune
 #include "entitypointer.hh"
 #include "hierarchiciterator.hh"
 #include "treeiterator.hh"
+#include "leveliterator.hh"
+#include "leafiterator.hh"
 #include "intersection.hh"
 
 namespace Dune
 {
-  template<int codim, int dim, class GridImp> class AlbertaGridEntity;
-  template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridTreeIterator;
-  template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridLeafIterator;
-  template<int cd, class GridImp> class AlbertaGridEntityPointer;
-
-  template<class GridImp>         class AlbertaGridHierarchicIterator;
   template<class GridImp>         class AlbertaGridIntersectionIterator;
   template<int dim, int dimworld> class AlbertaGrid;
   template<int dim, int dimworld> class AlbertaGridHierarchicIndexSet;
@@ -96,73 +93,6 @@ namespace Dune
     typedef AlbertaGridEntity<codim,dim,GridImp> EntityImp;
     typedef Dune::Entity<codim, dim, const GridImp, AlbertaGridEntity> Entity;
     typedef MakeableInterfaceObject<Entity> EntityObject;
-  };
-
-  //**********************************************************************
-  //
-  // --AlbertaGridTreeIterator
-  // --LevelIterator
-  // --TreeIterator
-  //
-
-
-  //! --LevelIterator
-  //! the same as TreeIterator
-  template<int cd, PartitionIteratorType pitype, class GridImp>
-  class AlbertaGridLevelIterator
-    : public AlbertaGridTreeIterator<cd,pitype,GridImp>
-  {
-  public:
-    typedef typename GridImp::template Codim<cd>::Entity Entity;
-
-    //! Constructor making end iterator
-    AlbertaGridLevelIterator(const GridImp & grid, int level, int proc) :
-      AlbertaGridTreeIterator<cd,pitype,GridImp> (grid,level,proc)
-    {}
-
-    //! Constructor making begin iterator
-    AlbertaGridLevelIterator(const GridImp & grid,
-                             const AlbertaMarkerVector * vec, int level, int proc) :
-      AlbertaGridTreeIterator<cd,pitype,GridImp> (grid,vec,level,proc)
-    {}
-
-    //! increment the iterator
-    void increment ()
-    {
-      AlbertaGridTreeIterator<cd,pitype,GridImp>::increment();
-    }
-  };
-
-  //**********************************************************************
-  //
-  //  AlbertaGridLeafIterator
-  //  --LeafIterator
-  //
-  //**********************************************************************
-  //! LeafIterator which is just a hull for the LevelIterator
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  class AlbertaGridLeafIterator
-    : public AlbertaGridTreeIterator<codim, pitype, GridImp>
-  {
-  public:
-    typedef typename GridImp::template Codim<codim>::Entity Entity;
-
-    //! Constructor making end iterator
-    AlbertaGridLeafIterator(const GridImp & grid, int level, int proc) :
-      AlbertaGridTreeIterator<codim,pitype,GridImp> (grid,level,proc,true)
-    {}
-
-    //! Constructor making begin iterator
-    AlbertaGridLeafIterator(const GridImp & grid,
-                            const AlbertaMarkerVector * vec, int level, int proc) :
-      AlbertaGridTreeIterator<codim, pitype, GridImp> (grid,vec,level,proc,true)
-    {}
-
-    //! increment the iterator
-    void increment ()
-    {
-      AlbertaGridTreeIterator<codim, pitype, GridImp>::increment();
-    }
   };
 
   //**********************************************************************
@@ -296,6 +226,8 @@ namespace Dune
     public HasObjectStream ,
     public HasHierarchicIndexSet
   {
+    typedef AlbertaGrid< dim, dimworld > This;
+
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntity <1,dim,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntity <2,dim,const AlbertaGrid<dim,dimworld> >;
@@ -306,11 +238,13 @@ namespace Dune
     friend class AlbertaGridEntityPointer <2,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntityPointer <3,const AlbertaGrid<dim,dimworld> >;
 
+#if 0
     // friends because of fillElInfo
     friend class AlbertaGridTreeIterator<0,All_Partition,AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridTreeIterator<1,All_Partition,AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridTreeIterator<2,All_Partition,AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridTreeIterator<3,All_Partition,AlbertaGrid<dim,dimworld> >;
+#endif
 
     friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
 
@@ -628,16 +562,11 @@ namespace Dune
     }
 
   private:
-    friend class Conversion<AlbertaGrid<dim, dimworld>, HasObjectStream>;
-    friend class Conversion<const AlbertaGrid<dim, dimworld>, HasObjectStream>;
+    template< class, class > friend class Conversion;
 
-    friend class Conversion<AlbertaGrid<dim, dimworld>, HasHierarchicIndexSet >;
-    friend class Conversion<const AlbertaGrid<dim, dimworld>, HasHierarchicIndexSet>;
-
-    // do not use copy constructor
-    AlbertaGrid(const MyType& other);
-    // do not use assigment
-    MyType& operator=(const MyType& other);
+    // forbid copying and assignment
+    AlbertaGrid ( const This & );
+    This &operator= ( const This & );
 
   private:
     typedef std::vector<int> ArrayType;
@@ -678,27 +607,6 @@ namespace Dune
     // help vector for setNewCoords
     mutable ArrayType macroVertices_;
 
-  public:
-    // this method is new fill_elinfo from ALBERTA but here the neighbor
-    // relations are calced diffrent, on ervery level there are neighbor
-    // realtions ( in ALBERTA only on leaf level ), so we needed a new
-    // fill_elinfo.
-    void fillElInfo(int ichild, int actLevel ,const ALBERTA EL_INFO *elinfo_old,
-                    ALBERTA EL_INFO *elinfo, bool hierachical, bool leaf=false ) const;
-
-    // calc the neigh[0]
-    void firstNeigh(const int ichild,const ALBERTA EL_INFO *elinfo_old,
-                    ALBERTA EL_INFO *elinfo, const bool leafLevel) const;
-
-    // calc the neigh[1]
-    void secondNeigh(const int ichild, const ALBERTA EL_INFO *elinfo_old,
-                     ALBERTA EL_INFO *elinfo, const bool leafLevel) const;
-
-    // calc the neigh[2]
-    void thirdNeigh(const int ichild, const ALBERTA EL_INFO *elinfo_old,
-                    ALBERTA EL_INFO *elinfo, const bool leafLevel) const;
-
-  private:
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable AlbertaMarkerVector vertexMarkerLeaf_;
 
@@ -848,65 +756,6 @@ namespace Dune
 
     mutable bool lockPostAdapt_;
   }; // end class AlbertaGrid
-
-
-  namespace Capabilities
-  {
-
-    /** \struct isParallel
-       \ingroup AlbertaGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup AlbertaGrid
-     */
-
-    /** \brief AlbertaGrid has entities for all codimension
-       \ingroup AlbertaGrid
-     */
-    template<int dim, int dimw, int cdim>
-    struct hasEntity<AlbertaGrid<dim,dimw>, cdim >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief AlbertaGrid is not levelwise conforming (since it uses bisection)
-       \ingroup AlbertaGrid
-     */
-    template<int dim, int dimw>
-    struct isLevelwiseConforming< AlbertaGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief AlbertaGrid is leafwise conforming
-       \ingroup AlbertaGrid
-     */
-    template<int dim, int dimw>
-    struct isLeafwiseConforming< AlbertaGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief AlbertaGrid does not support hanging nodes
-       \ingroup AlbertaGrid
-     */
-    template<int dim, int dimw>
-    struct hasHangingNodes< AlbertaGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief AlbertaGrid has backup and restore facilities
-       \ingroup AlbertaGrid
-     */
-    template<int dim, int dimw>
-    struct hasBackupRestoreFacilities< AlbertaGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-  } // end namespace Capabilities
 
 } // namespace Dune
 

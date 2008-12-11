@@ -82,21 +82,19 @@ namespace Dune
   /*!
      Enables iteration over all entities of a given codimension and level of a grid.
    */
-  template< int codim, PartitionIteratorType pitype, class GridImp >
+  template< int codim, class GridImp, bool leafIterator >
   class AlbertaGridTreeIterator
     : public AlbertaGridEntityPointer< codim, GridImp >
   {
-    typedef AlbertaGridTreeIterator< codim, pitype, GridImp > This;
+    typedef AlbertaGridTreeIterator< codim, GridImp, leafIterator > This;
     typedef AlbertaGridEntityPointer< codim, GridImp > Base;
 
     enum { dim = GridImp::dimension };
     friend class AlbertaGridEntity<2,dim,GridImp>;
     friend class AlbertaGridEntity<1,dim,GridImp>;
     friend class AlbertaGridEntity<0,dim,GridImp>;
-    friend class AlbertaGrid < dim , GridImp::dimensionworld >;
+    friend class AlbertaGrid< dim , GridImp::dimensionworld >;
 
-
-    typedef AlbertaGridTreeIterator< codim, pitype, GridImp > AlbertaGridTreeIteratorType;
     friend class AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim >;
 
   public:
@@ -122,17 +120,12 @@ namespace Dune
     This &operator= ( const This &other );
 
     //! Constructor making end iterator
-    AlbertaGridTreeIterator ( const GridImp &grid,
-                              int travLevel,
-                              int proc,
-                              bool leafIt=false );
+    AlbertaGridTreeIterator ( const GridImp &grid, int travLevel );
 
     //! Constructor making begin iterator
-    AlbertaGridTreeIterator ( const GridImp & grid,
-                              const AlbertaMarkerVector * vec,
-                              int travLevel,
-                              int proc,
-                              bool leafIt=false);
+    AlbertaGridTreeIterator ( const GridImp &grid,
+                              const AlbertaMarkerVector *vec,
+                              int travLevel );
 
     //! increment
     void increment();
@@ -166,11 +159,6 @@ namespace Dune
 
     // knows on which element a point,edge,face is viewed
     const AlbertaMarkerVector *vertexMarker_;
-
-    // store processor number of elements
-    // for ghost walktrough, i.e. walk over ghosts which belong
-    // tp processor 2
-    const int proc_;
   };
 
 }

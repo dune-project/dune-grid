@@ -5,20 +5,32 @@
 
 #if HAVE_ALBERTA
 
-//- System includes
-
-//- Dune includes
 #include <dune/common/stdstreams.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
+
 #include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/exceptions.hh>
 #include <dune/grid/albertagrid/referencetopo.hh>
+#include <dune/grid/albertagrid/elementinfo.hh>
 
-//- Local includes
+namespace Dune
+{
 
-namespace Dune {
+  // External Forward Declarations
+  // -----------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+  template< int codim, int dim, class GridImp >
+  class AlbertaGridEntity;
+
+  template< class GridType, int dim >
+  struct MarkEdges;
+
+
 
   //! HierarchicIndexSet uses LeafIterator types for all codims and partition types
   template <class GridImp>
@@ -40,34 +52,32 @@ namespace Dune {
     };
   };
 
-  // Forward declarations
-  template <int dim, int dimworld> class AlbertaGrid;
-  template<int cd, int dim, class GridImp> class AlbertaGridEntity;
-  template <class GridType, int dim> struct MarkEdges;
 
-  template <int dim, int dimworld>
-  class AlbertaGridHierarchicIndexSet :
-    public IndexSetDefaultImplementation<AlbertaGrid<dim,dimworld>,
-        AlbertaGridHierarchicIndexSet<dim,dimworld>,
-        AlbertaGridHierarchicIteratorTypes<AlbertaGrid<dim,dimworld> > >
-
+  template< int dim, int dimworld >
+  class AlbertaGridHierarchicIndexSet
+    : public IndexSetDefaultImplementation
+      < AlbertaGrid< dim, dimworld >,
+          AlbertaGridHierarchicIndexSet< dim,dimworld >,
+          AlbertaGridHierarchicIteratorTypes< AlbertaGrid< dim, dimworld > > >
   {
-    typedef AlbertaGrid<dim,dimworld> GridType;
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    typedef typename remove_const<GridType>::type::Traits::template Codim<0>::Entity EntityCodim0Type;
+    typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
+
+    typedef AlbertaGrid< dim, dimworld > Grid;
+
+    typedef typename remove_const< Grid >::type::Traits Traits;
+
+    typedef typename Traits::template Codim< 0 >::Entity EntityCodim0Type;
     enum { numVecs  = AlbertHelp::numOfElNumVec };
     enum { numCodim = dim + 1 };
 
-    // all classes that are allowed to call private functions
-    friend class AlbertaGrid<dim,dimworld>;
-    friend class MarkEdges<GridType,3>;
-    friend class MarkEdges<const GridType,3>;
+    friend class AlbertaGrid< dim, dimworld >;
+    friend class MarkEdges< Grid, 3 >;
+    friend class MarkEdges< const Grid, 3 >;
 
-    // only  AlbertaGrid is allowed to create this class
-    AlbertaGridHierarchicIndexSet(const GridType & grid) : grid_( grid ) {}
+    AlbertaGridHierarchicIndexSet ( const Grid &grid )
+      : grid_( grid )
+    {}
+
   public:
     enum { ncodim = numCodim };
 
@@ -80,28 +90,31 @@ namespace Dune {
     }
 
     //! return index of entity
-    template <class EntityType>
-    int index (const EntityType & ep) const
+    template< class Entity >
+    int index ( const Entity &entity ) const
     {
-      enum { cd = EntityType :: codimension };
-      // get real entity
-      const AlbertaGridEntity<cd,dim,const GridType> & en = (grid_.template getRealEntity<cd>(ep));
-      return getIndex(en.getElInfo()->el, en.getFEVnum(),Int2Type<dim-cd>());
+      const int codim = Entity::codimension;
+      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
+        = Grid::getRealImplementation( entity );
+      Int2Type< dim-codim > dimVariable;
+      return getIndex( entityImp.elementInfo().el(), entityImp.getFEVnum(), dimVariable );
     }
 
-    //! return subIndex of given enitiy's sub entity with codim=cd and number i
-    template <int cd>
-    int subIndex (const EntityCodim0Type & en, int i) const
+    //! return subIndex of given enitiy's sub entity
+    template< int codim >
+    int subIndex ( const EntityCodim0Type &entity, int i ) const
     {
-      return getIndex((grid_.template getRealEntity<0>(en)).getElInfo()->el
-                      ,i,Int2Type<dim-cd>());
+      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
+        = Grid::getRealImplementation( entity );
+      Int2Type< dim-codim > dimVariable;
+      return getIndex( entityImp.elementInfo().el(), i, dimVariable );
     }
 
     //! return size of set for given GeometryType
     int size (GeometryType type) const
     {
       if( !type.isSimplex() ) return 0;
-      return this->size(GridType::dimension-type.dim());
+      return this->size(Grid::dimension-type.dim());
     }
 
     //! return size of set
@@ -117,10 +130,11 @@ namespace Dune {
       return grid_.geomTypes(codim);
     }
 
+#ifdef INDEXSET_HAS_ITERATORS
     /** @brief Iterator to one past the last entity of given codim for partition type
      */
     template<int cd, PartitionIteratorType pitype>
-    typename AlbertaGridHierarchicIteratorTypes<GridType>::template Codim<cd>::
+    typename AlbertaGridHierarchicIteratorTypes<Grid>::template Codim<cd>::
     template Partition<pitype>::Iterator end () const
     {
       return grid_.template leafend<cd,pitype> ();
@@ -129,15 +143,16 @@ namespace Dune {
     /** @brief Iterator to first entity of given codimension and partition type.
      */
     template<int cd, PartitionIteratorType pitype>
-    typename AlbertaGridHierarchicIteratorTypes<GridType>::template Codim<cd>::
+    typename AlbertaGridHierarchicIteratorTypes<Grid>::template Codim<cd>::
     template Partition<pitype>::Iterator begin () const
     {
       return grid_.template leafbegin<cd,pitype> ();
     }
+#endif
 
   private:
     // out grid
-    const GridType & grid_;
+    const Grid &grid_;
     // constains the mapping from dune to alberta numbers
     const ALBERTA AlbertHelp :: AlbertaGridReferenceTopology<dim> refTopo_;
     // the vectors containing the numbers

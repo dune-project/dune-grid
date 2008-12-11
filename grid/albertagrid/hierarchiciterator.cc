@@ -9,22 +9,12 @@ namespace Dune
 {
 
   template< class GridImp >
-  inline void AlbertaGridHierarchicIterator< GridImp >::makeIterator()
-  {
-    entityImp().setElement( ElementInfo(), 0 );
-  }
-
-
-  template< class GridImp >
   inline AlbertaGridHierarchicIterator< GridImp >
   ::AlbertaGridHierarchicIterator( const GridImp &grid, int actLevel, int maxLevel )
     : Base( grid, actLevel, true, true ),
       startLevel_( actLevel ),
-      level_( actLevel ),
       maxlevel_( maxLevel )
-  {
-    makeIterator();
-  }
+  {}
 
 
   template< class GridImp >
@@ -32,9 +22,8 @@ namespace Dune
   ::AlbertaGridHierarchicIterator ( const GridImp &grid,
                                     const ElementInfo &elementInfo,
                                     int actLevel, int maxLevel, bool leafIt )
-    : Base( grid, actLevel, leafIt, false ),
-      startLevel_( actLevel ),
-      level_( actLevel ),
+    : Base( grid, elementInfo.level(), leafIt, false ),
+      startLevel_( elementInfo.level() ),
       maxlevel_( maxLevel )
   {
     increment( elementInfo );
@@ -46,7 +35,6 @@ namespace Dune
   ::AlbertaGridHierarchicIterator( const This &other )
     : Base( other ),
       startLevel_( other.startLevel_ ),
-      level_( other.level_ ),
       maxlevel_( other.maxlevel_ )
   {}
 
@@ -58,7 +46,6 @@ namespace Dune
     Base::operator=( other );
 
     startLevel_ = other.startLevel_;
-    level_    = other.level_;
     maxlevel_ = other.maxlevel_;
     return *this;
   }
@@ -75,23 +62,17 @@ namespace Dune
   inline void AlbertaGridHierarchicIterator< GridImp >
   ::increment ( ElementInfo elementInfo )
   {
-    if( (level_ >= maxlevel_) || elementInfo.isLeaf() )
+    if( (elementInfo.level() >= maxlevel_) || elementInfo.isLeaf() )
     {
-      while( (level_ > startLevel_) && (elementInfo.indexInFather() == 1) )
-      {
+      while( (elementInfo.level() > startLevel_) && (elementInfo.indexInFather() == 1) )
         elementInfo = elementInfo.father();
-        --level_;
-      }
-      if( level_ > startLevel_ )
+      if( elementInfo.level() > startLevel_ )
         entityImp().setElement( elementInfo.father().child( 1 ), 0 );
       else
         this->done();
     }
     else
-    {
-      ++level_;
       entityImp().setElement( elementInfo.child( 0 ), 0 );
-    }
   }
 
 }
