@@ -64,10 +64,12 @@ typedef Dune::IndexStack<int,100000> IndexManagerType;
 // contains a simple memory management for some componds of this grid
 #include "agmemory.hh"
 
+#include "elementinfo.hh"
+
 namespace Dune
 {
   // i.e. double or float
-  typedef ALBERTA REAL albertCtype;
+  typedef Alberta::Real albertCtype;
 }
 
 #include "referencetopo.hh"
@@ -262,6 +264,8 @@ namespace Dune
 
     //! the Traits
     typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
+
+    typedef Alberta::Real ctype;
 
     static const int dimension = dim;
     static const int dimensionworld = dimworld;
@@ -492,12 +496,12 @@ namespace Dune
     // End of Interface Methods
     //**********************************************************
     /** \brief write Grid to file in specified GrapeIOFileFormatType */
-    template <GrapeIOFileFormatType ftype>
-    bool writeGrid( const std::basic_string<char> filename, albertCtype time ) const;
+    template< GrapeIOFileFormatType ftype >
+    bool writeGrid( const std::string &filename, ctype time ) const;
 
     /** \brief read Grid from file filename and store time of mesh in time */
-    template <GrapeIOFileFormatType ftype>
-    bool readGrid( const std::basic_string<char> filename, albertCtype & time );
+    template< GrapeIOFileFormatType ftype >
+    bool readGrid( const std::string &filename, ctype &time );
 
     /* returns size of mesh include all levels
        max Index of grid entities with given codim
@@ -506,11 +510,13 @@ namespace Dune
      */
     int global_size (int codim) const;
 
+#if 0
     // return number of my processor
     int myRank () const
     {
       return 0;
     }
+#endif
 
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
@@ -541,6 +547,7 @@ namespace Dune
       return mesh_;
     }
 
+#if 0
     // return real entity implementation
     template <int cd>
     AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
@@ -557,10 +564,11 @@ namespace Dune
     {
       return this->getRealImplementation(entity);
     }
+#endif
 
   public:
     //! returns geometry type vector for codimension
-    const std::vector < GeometryType > & geomTypes (int codim) const
+    const std::vector< GeometryType > &geomTypes ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return geomTypes_[ codim ];
@@ -586,13 +594,15 @@ namespace Dune
     void calcExtras();
 
     // write ALBERTA mesh file
-    bool writeGridXdr  ( const std::basic_string<char> filename, albertCtype time ) const;
+    bool writeGridXdr ( const std::string &filename, ctype time ) const;
 
     //! reads ALBERTA mesh file
-    bool readGridXdr   ( const std::basic_string<char> filename, albertCtype & time );
+    bool readGridXdr ( const std::string &filename, ctype &time );
 
+#if 0
     //! reads ALBERTA macro file
     bool readGridAscii ( const std::basic_string<char> filename, albertCtype & time );
+#endif
 
     // delete mesh and all vectors
     void removeMesh();

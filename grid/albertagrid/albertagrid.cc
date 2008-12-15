@@ -775,53 +775,62 @@ namespace Dune
     wasChanged_ = true;
   }
 
-  template < int dim, int dimworld >  template <GrapeIOFileFormatType ftype>
-  inline bool AlbertaGrid < dim, dimworld >::
-  writeGrid (const std::basic_string<char> filename, albertCtype time ) const
+
+  template< int dim, int dimworld >
+  template< GrapeIOFileFormatType format >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::writeGrid ( const std::string &filename, ctype time ) const
   {
-    switch(ftype)
+    switch( format )
     {
-    case xdr   : return writeGridXdr (filename , time );
+    case xdr :
+      return writeGridXdr( filename, time );
+
     case ascii :
-    {
-      // write leaf grid as macro triangulation
-      int ret = ALBERTA write_macro( mesh_ , filename.c_str() );
-      return (ret == 1) ? true : false;
-    }
+      DUNE_THROW( NotImplemented, "AlbertaGrid does not support writeGrid< ascii >." );
+
+    // write leaf grid as macro triangulation
+    //int ret = ALBERTA write_macro( mesh_ , filename.c_str() );
+    //return (ret == 1) ? true : false;
+
     default :
-    {
-      DUNE_THROW(AlbertaError,"wrong FileType in AlbertaGrid::writeGrid!");
-      return false;
+      DUNE_THROW( NotImplemented, "AlbertaGrid: Unknown output format: " << format << "." );
     }
-    }
+    return false;
   }
 
-  template < int dim, int dimworld >  template <GrapeIOFileFormatType ftype>
-  inline bool AlbertaGrid < dim, dimworld >::
-  readGrid (const std::basic_string<char> filename, albertCtype &time )
+
+  template< int dim, int dimworld >
+  template< GrapeIOFileFormatType format >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::readGrid ( const std::string &filename, ctype &time )
   {
-    switch(ftype)
+    switch( format )
     {
-    case xdr   : return readGridXdr   (filename , time );
-    case ascii : return readGridAscii (filename , time );
-    default : {
-      DUNE_THROW(AlbertaError,"wrong FileType in AlbertaGrid::readGrid!");
-      return false;
+    case xdr :
+      return readGridXdr( filename, time );
+
+    case ascii :
+      DUNE_THROW( NotImplemented, "AlbertaGrid does not support readGrid< ascii >." );
+
+    //return readGridAscii (filename , time );
+
+    default :
+      DUNE_THROW( NotImplemented, "AlbertaGrid: Unknown output format: " << format << "." );
     }
-    }
+    return false;
   }
 
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::
-  writeGridXdr (const std::basic_string<char> filename, albertCtype time ) const
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::writeGridXdr ( const std::string &filename, ctype time ) const
   {
-    std::string ownerfile(filename);
-    if(filename.size() > 0)
-    {
-      ownerfile += "_own";
-    }
-    else
-      DUNE_THROW(AlbertaIOError, "no filename given in writeGridXdr ");
+    if( filename.size() <= 0 )
+      DUNE_THROW( AlbertaIOError, "No filename given to writeGridXdr." );
+
+    std::string ownerfile( filename );
+    ownerfile += "_own";
 
     // strore element numbering to file
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
@@ -833,38 +842,28 @@ namespace Dune
       ALBERTA write_dof_int_vec_xdr(dofvecs_.elNumbers[i],elnumfile.c_str());
     }
 
-    const char * fn = filename.c_str();
-    int flag = ALBERTA write_mesh_xdr (mesh_ , fn , time);
-    return (flag == 1) ? true : false;
+    return mesh_.write( filename, time );
   }
 
 
-#if DUNE_ALBERTA_VERSION < 0x200
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::
-  readGridXdr (const std::basic_string<char> filename, albertCtype & time )
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::readGridXdr ( const std::string &filename, ctype &time )
   {
     // remove all old stuff
     // to be reivised
     //removeMesh();
 
-    const char * fn = filename.c_str();
+    if( filename.size() <= 0 )
+      return false;
 
-    (Alberta::Mesh *&)mesh_
-      = ALBERTA read_mesh_xdr( fn, &time, LeafDataType::initLeafData,
-                               Alberta::BoundaryProvider::initBoundary );
-
+    mesh_.read( filename, time );
     if( !mesh_ )
-      DUNE_THROW(AlbertaIOError, "could not open grid file " << filename);
+      DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
     // read element numbering from file
-    std::string ownerfile (filename);
-    if(filename.size() > 0)
-    {
-      ownerfile += "_own";
-    }
-    else
-      return false;
+    std::string ownerfile( filename );
+    ownerfile += "_own";
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
     {
@@ -896,9 +895,9 @@ namespace Dune
 
     return true;
   }
-#endif
 
 
+#if 0
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::readGridAscii
     (const std::basic_string<char> filename, albertCtype & time )
@@ -920,6 +919,7 @@ namespace Dune
     initGrid();
     return true;
   }
+#endif
 
 } // namespace Dune
 

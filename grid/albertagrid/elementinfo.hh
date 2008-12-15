@@ -9,6 +9,7 @@ namespace Dune
   namespace Alberta
   {
 
+    typedef ALBERTA REAL Real;
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
 #if DUNE_ALBERTA_VERSION < 0x200

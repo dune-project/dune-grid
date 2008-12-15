@@ -37,6 +37,11 @@ namespace Dune
         return mesh_;
       }
 
+      bool operator! () const
+      {
+        return (mesh_ == NULL);
+      }
+
       MacroIterator begin () const
       {
         return MacroIterator( *this, false );
@@ -48,6 +53,10 @@ namespace Dune
       }
 
       void create ( const std::string &name, const std::string &filename );
+
+      void read ( const std::string &filename, Real &time );
+
+      bool write ( const std::string &filename, Real time );
 
       void release ()
       {
@@ -80,16 +89,17 @@ namespace Dune
 
       free_macro_data( macro );
 
-      AlbertHelp::initDofAdmin< dim >( mesh_ );
+      if( mesh_ != NULL )
+      {
+        AlbertHelp::initDofAdmin< dim >( mesh_ );
 
-      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
-                      LeafData::AlbertLeafRefine,
-                      LeafData::AlbertLeafCoarsen );
+        typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
+        init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
+                        LeafData::AlbertLeafRefine,
+                        LeafData::AlbertLeafCoarsen );
+      }
     }
 #endif // #if DUNE_ABLERTA_VERSION >= 0x200
-
-
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
@@ -100,9 +110,53 @@ namespace Dune
 
       typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
       mesh_ = get_mesh( name.c_str(), AlbertHelp::initDofAdmin< dim >, LeafData::initLeafData );
-      read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
+      if( mesh_ != NULL )
+        read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
     }
 #endif // #if DUNE_ABLERTA_VERSION < 0x200
+
+
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
+    {
+      release();
+
+      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
+      mesh_ = read_mesh_xdr( filename.c_str(), &time, LeafData::initLeafData, BoundaryProvider::initBoundary );
+    }
+#endif // #if DUNE_ABLERTA_VERSION < 0x200
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
+    {
+      release();
+#if DUNE_ALBERTA_VERSION >= 0x201
+      mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL, NULL );
+#else
+      mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL );
+#endif
+
+      if( mesh_ != NULL )
+      {
+        typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
+        init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
+                        LeafData::AlbertLeafRefine,
+                        LeafData::AlbertLeafCoarsen );
+      }
+    }
+#endif // #if DUNE_ABLERTA_VERSION >= 0x200
+
+
+
+    template< int dim >
+    inline bool MeshPointer< dim >::write ( const std::string &filename, Real time )
+    {
+      int success = ALBERTA write_mesh_xdr( mesh_, filename.c_str(), time );
+      return (success == 0);
+    }
 
 
 
