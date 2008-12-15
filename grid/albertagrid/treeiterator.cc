@@ -293,7 +293,7 @@ namespace Dune
     : Base( grid, travLevel, leafIterator, false ),
       level_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
-      macroIterator_( *(grid.getMesh()), false ),
+      macroIterator_( grid.meshPointer().begin() ),
       vertexMarker_( vertexMark )
   {
     ElementInfo elementInfo = *macroIterator_;
@@ -316,7 +316,7 @@ namespace Dune
     : Base( grid, travLevel, leafIterator, true ), // true means end iterator
       level_( travLevel ),
       subEntity_( -1 ),
-      macroIterator_( *(grid.getMesh()), true ),
+      macroIterator_( grid.meshPointer().end() ),
       vertexMarker_( 0 )
   {}
 

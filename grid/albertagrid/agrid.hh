@@ -175,56 +175,52 @@ namespace Dune
     };
   };
 
-  /**
-     \class AlbertaGrid
-
-     \brief [<em> provides \ref Dune::Grid </em>]
-     \brief Provides the simplicial meshes of the finite element tool box
-     \brief ALBERTA (http://www.alberta-fem.de/)
-     \brief written by Kunibert Siebert and Alfred Schmidt.
-     \ingroup GridImplementations
-     \ingroup AlbertaGrid
-
-     This is one implementation of the grid interface using the
-     the finite elemente tool box ALBERTA ( ALBERTA was written
-     by Alfred Schmidt and Kunibert G. Siebert, see http://www.alberta-fem.de/).
-     ALBERTA provides simplex meshes in 1d, 2d, and 3d space dimensions.
-     Also the ALBERTA meshes can be dynamically adapted using
-     bisection algorithms.
-
-     The actual version of ALBERTA 1.2 can be
-     downloaded at http://www.alberta-fem.de/.
-     After installing the lib to a path of your choise (the PATH_TO_ALBERTA)
-     you can use %Dune with this package and you have only to deliver
-     the path with the --with-alberta option to %Dune.
-
-     For using %Dune with ALBERTA you must tell %Dune where to find ALBERTA,
-     which dimension to use and which dimension your world should have, i.e:
-
-     <tt> ./autogen.sh [OPTIONS]
-     --with-alberta=PATH_TO_ALBERTA and
-     --with-alberta-dim=DIM --with-alberta-world-dim=DIMWORLD
-     </tt>
-
-     Now you must use the AlbertaGrid with DIM and DIMWORLD, otherwise
-     unpredictable results may occur. The alberta-dim value is defaulted to 2
-     if --with-alberta-dim is not provided and --with-alberta-world-dim is
-     defaulted to alberta-dim if not provided. If the --with-grid-dim (see
-     DGF Parser's gridtype.hh) is provided the alberta-dim,
-     if not provided, is defaulted to the value of grid-dim.
-
-
-     \e Note: Although ALBERTA supports different combination of DIM <= DIMWORLD,
-        so far only the combinations \c DIM=DIMWORLD=2 and \c DIM=DIMWORLD=3
-        are supported.
-
-     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#alberta .
+  /** \class AlbertaGrid
+   *  \brief [<em> provides \ref Dune::Grid </em>]
+   *  \brief simplicial grid imlementation from the ALBERTA finite element
+   *         toolbox
+   *  \ingroup GridImplementations
+   *  \ingroup AlbertaGrid
+   *
+   *  AlbertaGrid provides access to the grid from the ALBERTA finite element
+   *  toolbox through the %Dune interface.
+   *
+   *  ALBERTA is a finite element toolbox written by Alfred Schmidt and
+   *  Kunibert G. Siebert (see http://www.alberta-fem.de). It contains a
+   *  simplicial mesh in 1, 2 and 3 space dimensions that can be dynamically
+   *  adapted by a bisection algorithm.
+   *
+   *  Supported ALBERTA versions include 1.2 and 2.0. Both versions can be
+   *  downloaded from the ALBERTA website (www.alberta-fem.de). After
+   *  installing ALBERTA, just configure DUNE with the --with-alberta option
+   *  and provide the path to ALBERTA. You also have to specify which
+   *  dimensions of grid and world to use. For example, your %Dune configure
+   *  options could contain the following settings
+   *  \code
+   *  --with-alberta=ALBERTAPATH
+   *  --with-alberta-dim=DIMGRID
+   *  --with-alberta-world-dim=DIMWORLD
+   *  \endcode
+   *  The default values are <tt>DIMGRID</tt>=2 and
+   *  <tt>DIMWORLD</tt>=<tt>DIMGRID</tt>.
+   *  If the <tt>--with-grid-dim</tt> (see DGF Parser's gridtype.hh) is
+   *  provided, <tt>DIMGRID</tt> will default to this value.
+   *  You can then use <tt>AlbertaGrid< DIMGRID, DIMWORLD ></tt>.
+   *  Using other template parameters might result in unpredictable behavior.
+   *
+   *  Further installation instructions can be found here:
+   *  http://www.dune-project.org/doc/contrib-software.html#alberta
+   *
+   *  \note Although ALBERTA supports different combinations of
+   *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the
+   *        case <tt>DIMGRID</tt>=<tt>DIMWORLD</tt> is supported.
    */
-  template <int dim, int dimworld>
-  class AlbertaGrid :
-    public GridDefaultImplementation <dim,dimworld,albertCtype, AlbertaGridFamily<dim,dimworld> >,
-    public HasObjectStream ,
-    public HasHierarchicIndexSet
+  template< int dim, int dimworld >
+  class AlbertaGrid
+    : public GridDefaultImplementation
+      < dim, dimworld, albertCtype, AlbertaGridFamily< dim, dimworld > >,
+      public HasObjectStream,
+      public HasHierarchicIndexSet
   {
     typedef AlbertaGrid< dim, dimworld > This;
 
@@ -237,14 +233,6 @@ namespace Dune
     friend class AlbertaGridEntityPointer <1,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntityPointer <2,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntityPointer <3,const AlbertaGrid<dim,dimworld> >;
-
-#if 0
-    // friends because of fillElInfo
-    friend class AlbertaGridTreeIterator<0,All_Partition,AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridTreeIterator<1,All_Partition,AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridTreeIterator<2,All_Partition,AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridTreeIterator<3,All_Partition,AlbertaGrid<dim,dimworld> >;
-#endif
 
     friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
 
@@ -273,7 +261,10 @@ namespace Dune
         AlbertaGridFamily<dim,dimworld> > BaseType;
 
     //! the Traits
-    typedef typename AlbertaGridFamily<dim,dimworld> :: Traits Traits;
+    typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
+
+    static const int dimension = dim;
+    static const int dimensionworld = dimworld;
 
     //! type of hierarchic index set
     typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
@@ -332,6 +323,10 @@ namespace Dune
       MAXL = 64
     };
 
+  private:
+    typedef Alberta::MeshPointer< dimension > MeshPointer;
+
+  public:
     /*
        levInd = true means that a consecutive level index is generated
        if levInd == true the the element number of first macro element is
@@ -512,7 +507,10 @@ namespace Dune
     int global_size (int codim) const;
 
     // return number of my processor
-    int myRank () const { return myRank_; };
+    int myRank () const
+    {
+      return 0;
+    }
 
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
@@ -533,7 +531,15 @@ namespace Dune
     const LocalIdSet & localIdSet () const { return globalIdSet_; }
 
     // access to mesh pointer, needed by some methods
-    ALBERTA MESH* getMesh () const { return mesh_; };
+    ALBERTA MESH* getMesh () const
+    {
+      return mesh_;
+    };
+
+    const MeshPointer &meshPointer () const
+    {
+      return mesh_;
+    }
 
     // return real entity implementation
     template <int cd>
@@ -556,9 +562,8 @@ namespace Dune
     //! returns geometry type vector for codimension
     const std::vector < GeometryType > & geomTypes (int codim) const
     {
-      assert( codim >= 0 );
-      assert( codim < dim+1 );
-      return geomTypes_[codim];
+      assert( (codim >= 0) && (codim <= dimension) );
+      return geomTypes_[ codim ];
     }
 
   private:
@@ -574,7 +579,7 @@ namespace Dune
     ArrayType ghostFlag_; // store ghost information
 
     // initialize of some members
-    void initGrid(int proc);
+    void initGrid ();
 
     // make the calculation of indexOnLevel and so on.
     // extra method because of Reihenfolge
@@ -593,7 +598,7 @@ namespace Dune
     void removeMesh();
 
     // pointer to an Albert Mesh, which contains the data
-    ALBERTA MESH *mesh_;
+    MeshPointer mesh_;
 
     // object of collective communication
     CollectiveCommunicationType comm_;
@@ -721,9 +726,6 @@ namespace Dune
     int getVertexNumber ( const ALBERTA EL * el, int vx ) const;
 
   private:
-    // rank of my thread, i.e. number of my processor
-    const int myRank_;
-
     // the hierarchical numbering of AlbertaGrid, unique per codim and processor
     AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
 
@@ -732,20 +734,17 @@ namespace Dune
 
     // the level index set, is generated from the HierarchicIndexSet
     // is generated, when accessed
-    mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
+    mutable std::vector< LevelIndexSetImp * > levelIndexVec_;
 
     // the leaf index set, is generated from the HierarchicIndexSet
     // is generated, when accessed
     mutable LeafIndexSetImp* leafIndexSet_;
 
     //! stores geometry types of this grid
-    std::vector < std::vector< GeometryType > > geomTypes_;
+    std::vector< GeometryType > geomTypes_[ dimension+1 ];
 
-    // creates geomType_ vector
-    void makeGeomTypes();
-
-    // stack for storing BOUNDARY objects created during mesh creation
-    std::stack < BOUNDARY * > bndStack_;
+    // creates geomTypes_ vector
+    void makeGeomTypes ();
 
     typedef SingleTypeSizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;

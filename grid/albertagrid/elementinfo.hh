@@ -11,6 +11,17 @@ namespace Dune
 
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
+#if DUNE_ALBERTA_VERSION < 0x200
+    typedef ALBERTA BOUNDARY Boundary;
+#endif
+
+
+
+    // External Forward Declarations
+    // -----------------------------
+
+    template< int dim >
+    class MeshPointer;
 
 
 
@@ -52,6 +63,70 @@ namespace Dune
 
 
 
+#if DUNE_ALBERTA_VERSION < 0x200
+    // BoundaryProvider
+    // ----------------
+
+    class BoundaryProvider
+    {
+      static const int interior = ALBERTA INTERIOR;
+
+#if DIM > 1
+      static const int numTypes = 256;
+      static const int firstType = -127;
+
+      Boundary boundaries[ numTypes ];
+#endif
+
+      BoundaryProvider ();
+
+      // prohibit copying and assignment
+      BoundaryProvider ( const BoundaryProvider & );
+      BoundaryProvider &operator= ( const BoundaryProvider & );
+
+    public:
+      const Boundary *operator[] ( int type ) const;
+
+      static const BoundaryProvider &instance ()
+      {
+        static BoundaryProvider provider;
+        return provider;
+      }
+
+      static const Boundary *initBoundary ( Mesh *mesh, int type )
+      {
+        return instance()[ type ];
+      }
+    };
+
+
+    inline BoundaryProvider::BoundaryProvider ()
+    {
+#if DIM > 1
+      for( int i = 0; i < numTypes; ++i )
+      {
+        boundaries[ i ].param_bound = NULL;
+        boundaries[ i ].bound = i+firstType;
+      }
+#endif
+    }
+
+
+    inline const Boundary *BoundaryProvider::operator[] ( int type ) const
+    {
+      int index = type-firstType;
+      if( (type == interior) || (index < 0) || (index >= numTypes) )
+        DUNE_THROW( AlbertaError, "Invalid boundary type: " << type << "." );
+#if DIM > 1
+      return &(boundaries[ index ]);
+#else
+      return NULL;
+#endif
+    }
+#endif
+
+
+
     // ElementInfo
     // -----------
 
@@ -70,6 +145,8 @@ namespace Dune
     public:
       static const int dimension = dim;
 
+      typedef Alberta::MeshPointer< dimension > MeshPointer;
+
 #if DUNE_ALBERTA_VERSION >= 0x200
       static const int maxNeighbors = N_NEIGH_MAX;
 #else
@@ -77,7 +154,7 @@ namespace Dune
 #endif
 
       ElementInfo ();
-      ElementInfo ( Mesh &mesh, MacroElement &macroElement );
+      ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement );
       ElementInfo ( const ElementInfo &other );
 
       ~ElementInfo ();
@@ -177,7 +254,8 @@ namespace Dune
 
 
     template< int dim >
-    inline ElementInfo< dim >::ElementInfo ( Mesh &mesh, MacroElement &macroElement )
+    inline ElementInfo< dim >
+    ::ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement )
     {
       instance_ = stack().allocate();
       instance_->parent() = null();
@@ -190,7 +268,7 @@ namespace Dune
                            | FILL_ORIENTATION | FILL_MACRO_WALLS
                            | FILL_NON_PERIODIC;
 #elif DUNE_ALBERTA_VERSION == 0x200
-      elInfo().fill_flag = FILL_ANY(&mesh);
+      elInfo().fill_flag = FILL_ANY( (Mesh *)mesh );
 #else
       elInfo().fill_flag = FILL_ANY;
 #endif
@@ -199,7 +277,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         elInfo().opp_vertex[ k ] = -1;
 
-      fill_macro_info( &mesh, &macroElement, &elInfo() );
+      fill_macro_info( mesh, &macroElement, &elInfo() );
     }
 
 

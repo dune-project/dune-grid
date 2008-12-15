@@ -3,7 +3,7 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_HH
 #define DUNE_ALBERTA_TREEITERATOR_HH
 
-#include <dune/grid/albertagrid/nativeiterator.hh>
+#include <dune/grid/albertagrid/meshpointer.hh>
 #include <dune/grid/albertagrid/entitypointer.hh>
 
 namespace Dune
@@ -102,7 +102,8 @@ namespace Dune
     static const int codimension = codim;
 
     typedef typename Base::ElementInfo ElementInfo;
-    typedef Alberta::MacroIterator< dimension > MacroIterator;
+    typedef Alberta::MeshPointer< dimension > MeshPointer;
+    typedef typename MeshPointer::MacroIterator MacroIterator;
 
   private:
     static const int numSubEntities

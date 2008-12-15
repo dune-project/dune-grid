@@ -35,12 +35,10 @@ namespace Dune
       , maxlevel_ (0) , wasChanged_ (false)
       , vertexMarkerLeaf_(false) // creates LeafMarkerVector
       , nv_ (dim+1) , dof_ (0)
-      , myRank_ (0)
       , hIndexSet_(*this)
       , globalIdSet_(*this)
       , levelIndexVec_(MAXL,0)
       , leafIndexSet_ (0)
-      , geomTypes_()
       , sizeCache_ (0)
       , coarsenMarked_(0)
       , refineMarked_(0)
@@ -56,22 +54,20 @@ namespace Dune
 #endif
   }
 
-  template< int dim, int dimworld >
-  inline void AlbertaGrid< dim, dimworld > :: makeGeomTypes ()
-  {
-    // we have dim+1 codims
-    geomTypes_.resize( dim+1 );
 
-    // for each codim create geom type
+  template< int dim, int dimworld >
+  inline void AlbertaGrid< dim, dimworld >::makeGeomTypes ()
+  {
     for( int codim = 0; codim <= dim; ++codim )
     {
-      const GeometryType type( GeometryType :: simplex, dim - codim );
+      const GeometryType type( GeometryType::simplex, dim - codim );
       geomTypes_[ codim ].push_back( type );
     }
   }
 
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::initGrid(int proc)
+
+  template< int dim, int dimworld >
+  inline void AlbertaGrid< dim, dimworld >::initGrid ()
   {
     ALBERTA AlbertHelp::getDofVecs<dimworld> (&dofvecs_);
 
@@ -79,9 +75,9 @@ namespace Dune
 
     wasChanged_ = true;
 
-    macroVertices_.resize( mesh_->n_vertices );
+    macroVertices_.resize( getMesh()->n_vertices );
 
-    LeafDataType::initLeafDataValues(mesh_,proc);
+    LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
   }
@@ -96,12 +92,10 @@ namespace Dune
       vertexMarkerLeaf_( false ), // creates LeafMarkerVector
       nv_( dim+1 ),
       dof_( 0 ),
-      myRank_( -1 ),
       hIndexSet_( *this ),
       globalIdSet_( *this ),
       levelIndexVec_( MAXL, 0 ),
       leafIndexSet_ ( 0 ),
-      geomTypes_(),
       sizeCache_( 0 ),
       coarsenMarked_( 0 ),
       refineMarked_( 0 ),
@@ -141,13 +135,8 @@ namespace Dune
 
     if(makeNew)
     {
-      ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
-      // create mesh
-      mesh_ = ALBERTA AlbertHelp::createMesh<dim> ("AlbertaGrid", MacroTriangFilename);
-
-      ALBERTA AlbertHelp :: removeBndStack ();
-
-      initGrid(0);
+      mesh_.create( "AlbertaGrid", macroTriangFilename );
+      initGrid();
     }
     else
     {
@@ -204,15 +193,7 @@ namespace Dune
       rclist = 0;
     }
 #endif
-    if(mesh_) ALBERTA free_mesh(mesh_);mesh_ = 0;
-
-    // delete all created boundary structures
-    while ( !bndStack_.empty() )
-    {
-      ALBERTA BOUNDARY * obj = bndStack_.top();
-      bndStack_.pop();
-      if( obj ) delete obj;
-    }
+    mesh_.release();
   }
 
   // Desctructor
@@ -455,11 +436,12 @@ namespace Dune
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::postAdapt()
   {
-    assert( (leafIndexSet_) ? (mesh_->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
-    assert( (leafIndexSet_) ? (mesh_->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
+    Alberta::Mesh *const mesh = mesh_;
+    assert( (leafIndexSet_) ? (mesh->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
+    assert( (leafIndexSet_) ? (mesh->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
 #if DIM == 3
-    //assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
-    assert( (leafIndexSet_ && dim == 3) ? (mesh_->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
+    //assert( (leafIndexSet_ && dim == 3) ? (mesh->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
+    assert( (leafIndexSet_ && dim == 3) ? (mesh->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
 #endif
     // if lockPostAdapt == false, the user forgot to call adapt before postAdapt
     if( lockPostAdapt_ == false )
@@ -647,7 +629,7 @@ namespace Dune
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
   {
-    if(codim == dim) return mesh_->n_vertices;
+    if(codim == dim) return getMesh()->n_vertices;
     // for higher codims we have the index stack
     return indexStack_[codim].size();
   }
@@ -856,6 +838,8 @@ namespace Dune
     return (flag == 1) ? true : false;
   }
 
+
+#if DUNE_ALBERTA_VERSION < 0x200
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::
   readGridXdr (const std::basic_string<char> filename, albertCtype & time )
@@ -866,13 +850,11 @@ namespace Dune
 
     const char * fn = filename.c_str();
 
-    ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
-    mesh_ = (ALBERTA read_mesh_xdr (fn , &time ,
-                                    LeafDataType::initLeafData,
-                                    ALBERTA AlbertHelp::initBoundary) );
-    ALBERTA AlbertHelp :: removeBndStack ();
+    (Alberta::Mesh *&)mesh_
+      = ALBERTA read_mesh_xdr( fn, &time, LeafDataType::initLeafData,
+                               Alberta::BoundaryProvider::initBoundary );
 
-    if (mesh_ == 0)
+    if( !mesh_ )
       DUNE_THROW(AlbertaIOError, "could not open grid file " << filename);
 
     // read element numbering from file
@@ -914,6 +896,8 @@ namespace Dune
 
     return true;
   }
+#endif
+
 
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::readGridAscii
@@ -921,11 +905,7 @@ namespace Dune
   {
     removeMesh(); // delete all objects
 
-    ALBERTA AlbertHelp :: initBndStack( &bndStack_ );
-    // create mesh
-    mesh_ = ALBERTA AlbertHelp::createMesh<dim> ("AlbertaGrid", filename.c_str());
-
-    ALBERTA AlbertHelp :: removeBndStack ();
+    mesh_.create( "AlbertaGrid", filename.c_str() );
 
     time = 0.0;
 
@@ -937,7 +917,7 @@ namespace Dune
 
     ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
-    initGrid(myRank_);
+    initGrid();
     return true;
   }
 

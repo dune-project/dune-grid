@@ -10,9 +10,12 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
 
+#include <dune/grid/genericgeometry/misc.hh>
+
 #include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/exceptions.hh>
 #include <dune/grid/albertagrid/referencetopo.hh>
+#include <dune/grid/albertagrid/dofadmin.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 namespace Dune
@@ -162,6 +165,26 @@ namespace Dune
     int nv_[numVecs];
     int dof_[numVecs];
 
+    template< int codim >
+    struct SetDofIdentifier
+    {
+      static void apply ( This &indexSet,
+                          ALBERTA AlbertHelp::DOFVEC_STACK &dofvecs )
+      {
+        if( codim < numVecs )
+        {
+          const ALBERTA DOF_ADMIN *elAdmin_
+            = dofvecs.elNumbers[ codim ]->fe_space->admin;
+          // see Albert Doc. , should stay the same
+
+          const int codimtype = Alberta::CodimType< dim, codim >::value;
+          indexSet.nv_[ codim ] = elAdmin_->n0_dof[ codimtype ];
+          assert( indexSet.nv_[ codim ] == 0 );
+          indexSet.dof_[ codim ] = elAdmin_->mesh->node[ codimtype ];
+        }
+      }
+    };
+
     // update vec pointer of the DOF_INT_VECs, which can change during resize
     void updatePointers(ALBERTA AlbertHelp::DOFVEC_STACK & dofvecs)
     {
@@ -170,22 +193,7 @@ namespace Dune
         elNumVec_[i] = (dofvecs.elNumbers[i])->vec;
         assert(elNumVec_[i]);
       }
-
-      setDofIdentifier<0> (dofvecs);
-      if(numVecs > 1) setDofIdentifier<1> (dofvecs);
-      if(numVecs > 2) setDofIdentifier<2> (dofvecs);
-      if(numVecs > 3) setDofIdentifier<3> (dofvecs);
-    }
-
-    template <int cd>
-    void setDofIdentifier (ALBERTA AlbertHelp::DOFVEC_STACK & dofvecs)
-    {
-      const ALBERTA DOF_ADMIN * elAdmin_ = dofvecs.elNumbers[cd]->fe_space->admin;
-      // see Albert Doc. , should stay the same
-
-      nv_ [cd] = elAdmin_->n0_dof    [ALBERTA AlbertHelp::AlbertaDofType<dim,cd>::type];
-      assert( nv_ [cd] == 0);
-      dof_[cd] = elAdmin_->mesh->node[ALBERTA AlbertHelp::AlbertaDofType<dim,cd>::type];
+      GenericGeometry::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, dofvecs );
     }
 
     // codim = 0 means we get from dim-cd = dim

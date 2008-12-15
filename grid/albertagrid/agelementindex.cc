@@ -3,6 +3,8 @@
 #ifndef __ALBERTGRID_ELMEM_CC__
 #define __ALBERTGRID_ELMEM_CC__
 
+#include "dofadmin.hh"
+
 namespace AlbertHelp
 {
 
@@ -52,34 +54,6 @@ namespace AlbertHelp
     assert(tmpIndexStack[codim] != 0);
     (*tmpIndexStack[codim]).freeIndex(idx);
   }
-
-  // codim to ALBERTA Dof Type translator
-  template <int dim, int codim> struct AlbertaDofType {
-    enum { type  = VERTEX };
-  }; // dof located on vertices
-
-  // element dofs
-  template <int dim> struct AlbertaDofType<dim,0>
-  {
-    enum { type  = CENTER };
-  }; // dofs located inside an element
-
-  // dim = 2 here, codim = 1
-  template <> struct AlbertaDofType<2,1>
-  {
-    enum { type = EDGE };
-  }; // dofs located on edges
-
-  // faces in 3d  (dim = 3 , codim = 1 )
-  template <> struct AlbertaDofType<3,1>
-  {
-    enum { type = FACE };
-  }; // dofs located on faces
-
-  // edges in 3d ( dim = 3 , codim = 2 )
-  template <> struct AlbertaDofType<3,2> {
-    enum { type = EDGE };
-  }; // dofs located on edges
 
   //****************************************************************************
   //
@@ -167,7 +141,7 @@ namespace AlbertHelp
     }
   }
 
-  template <int dim , int codim>
+  template< int dim , int codim >
   struct RefineNumbering
   {
     // get element index form stack or new number
@@ -177,13 +151,13 @@ namespace AlbertHelp
       // nv is the number of dofs at one dof locate , i.e. the number of dofs
       // strored at one face , here nv= is always 0
 
-      enum { dtype = AlbertaDofType<dim,codim>::type };
-      assert( admin->n0_dof[dtype] == 0 );
+      const int codimtype = Dune::Alberta::CodimType< dim, codim >::value;
+      assert( admin->n0_dof[ codimtype ] == 0 );
       const int nv = 0;
 
       // k is the off set for the dofs, for example at which point we have
       // face dofs, the offset of vertex dofs is always 0
-      const int k = admin->mesh->node[dtype];
+      const int k = admin->mesh->node[ codimtype ];
 
       int *vec = 0;
       GET_DOF_VEC(vec,drv);
@@ -206,8 +180,10 @@ namespace AlbertHelp
     inline static void coarseNumbers ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
     {
       const DOF_ADMIN * admin = drv->fe_space->admin;
-      const int nv = admin->n0_dof    [AlbertaDofType<dim,codim>::type];
-      const int k  = admin->mesh->node[AlbertaDofType<dim,codim>::type];
+      const int codimtype = Dune::Alberta::CodimType< dim, codim >::value;
+
+      const int nv = admin->n0_dof[ codimtype ];
+      const int k  = admin->mesh->node[ codimtype ];
       int *vec = 0;
       GET_DOF_VEC(vec,drv);
 

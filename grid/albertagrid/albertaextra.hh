@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/grid/albertagrid/dofadmin.hh>
 
 #if HAVE_ALBERTA
 
@@ -147,7 +148,6 @@ namespace AlbertHelp
 
   //*********************************************************************
 
-  static int AlbertaLeafDataHelp_processor = -1;
   // Leaf Data for Albert, only the leaf elements have this data set
   template <int cdim, int vertices>
   struct AlbertLeafData
@@ -157,19 +157,19 @@ namespace AlbertHelp
     typedef Dune::FieldVector<double,cdim> CoordinateVectorType;
 #endif
     // type of stored data
-    typedef struct {
+    typedef struct
+    {
 #ifdef LEAFDATACOORDS
       CoordinateMatrixType coord;
 #endif
       double determinant;
-      int processor;
     } Data;
 
     // keep element numbers
-    inline static void AlbertLeafRefine(EL *parent, EL *child[2])
+    inline static void AlbertLeafRefine( EL *parent, EL *child[2] )
     {
       Data * ldata;
-      int i, processor=-1;
+      int i;
 
       ldata = (Data *) parent->child[1];
       assert(ldata != 0);
@@ -177,7 +177,6 @@ namespace AlbertHelp
       //std::cout << "Leaf refine for el = " << parent << "\n";
 
       double childDet = 0.5 * ldata->determinant;
-      processor = ldata->processor;
 
       /* bisection ==> 2 children */
       for(i=0; i<2; i++)
@@ -185,7 +184,6 @@ namespace AlbertHelp
         Data *ldataChi = (Data *) child[i]->child[1];
         assert(ldataChi != 0);
         ldataChi->determinant = childDet;
-        ldataChi->processor = processor;
 
 #ifdef LEAFDATACOORDS
         // calculate the coordinates
@@ -211,7 +209,6 @@ namespace AlbertHelp
 
       ldata = (Data *) parent->child[1];
       assert(ldata != 0);
-      ldata->processor = -1;
       double & det = ldata->determinant;
       det = 0.0;
 
@@ -223,8 +220,6 @@ namespace AlbertHelp
         Data *ldataChi = (Data *) child[i]->child[1];
         assert(ldataChi != 0);
         det += ldataChi->determinant;
-        if(ldataChi->processor >= 0)
-          ldata->processor = ldataChi->processor;
       }
     }
 
@@ -235,7 +230,6 @@ namespace AlbertHelp
       linfo->leaf_data_size = sizeof(Data);
       linfo->refine_leaf_data  = &AlbertLeafRefine;
       linfo->coarsen_leaf_data = &AlbertLeafCoarsen;
-      return;
     }
 #endif
 
@@ -257,18 +251,13 @@ namespace AlbertHelp
 #endif
 
       ldata->determinant = ALBERTA el_det(elf);
-      ldata->processor   = AlbertaLeafDataHelp_processor;
     }
 
     // remember on which level an element realy lives
     inline static void initLeafDataValues( MESH * mesh, int proc )
     {
-      AlbertaLeafDataHelp_processor = proc;
-
       // see ALBERTA Doc page 72, traverse over all hierarchical elements
       ALBERTA meshTraverse(mesh,-1, CALL_LEAF_EL|FILL_COORDS,setLeafData);
-
-      AlbertaLeafDataHelp_processor = -1;
     }
 
   }; // end of AlbertLeafData
@@ -785,113 +774,6 @@ namespace AlbertHelp
     return;
   }
 
-  static std::stack < BOUNDARY * > * Alberta_tmpBndStack = 0;
-
-  inline static void initBndStack( std::stack < BOUNDARY * > * bndStack )
-  {
-    Alberta_tmpBndStack = bndStack;
-  }
-  inline static void removeBndStack ()
-  {
-    Alberta_tmpBndStack = 0;
-  }
-
-#if DUNE_ALBERTA_VERSION < 0x200
-  // initialize boundary for mesh
-  inline const BOUNDARY *initBoundary(MESH * Spmesh, int bound)
-  {
-    BOUNDARY *b = (BOUNDARY *) new BOUNDARY ();
-    assert(b != 0);
-
-    assert(Alberta_tmpBndStack);
-    Alberta_tmpBndStack->push( b );
-
-    // bound is of type signed char which goes from -127 to 128
-    if((bound < -127) && (bound > 128))
-    {
-      std::cerr << "Got boundary id = " << bound << "\n";
-      std::cerr << "Wrong boundary id: range is only from -127 to 128 !\n";
-      std::cerr << "Correct your macro grid file!\n";
-      abort();
-    }
-
-    b->param_bound = 0;
-    b->bound = bound;
-
-    return b;
-  }
-  // create Mesh fof Version 1.2
-  template <int dim>
-  static MESH* createMesh(const char * name, const char * filename)
-  {
-    typedef AlbertLeafData<dim,dim+1> LeafDataType;
-    MESH * mesh = get_mesh(name,
-                           initDofAdmin<dim>,
-                           LeafDataType::initLeafData);
-    read_macro(mesh, filename, initBoundary);
-    return mesh;
-  }
-
-#else
-  typedef NODE_PROJECTION* initBoundary_t (MESH *,MACRO_EL *,int);
-  static initBoundary_t* initBoundary = 0;
-
-  // create Mesh fof Version 2.0
-  template <int dim>
-  static MESH* createMesh(const char * name, const char * filename)
-  {
-    // get macro data
-    MACRO_DATA* mdata = read_macro(filename);
-
-    // create mesh
-#if DUNE_ALBERTA_VERSION >= 0x201
-    MESH* mesh = GET_MESH(dim, name, mdata, NULL, NULL );
-#else
-    MESH* mesh = GET_MESH(dim, name, mdata, NULL );
-#endif
-
-    // free macro data
-    free_macro_data(mdata);
-
-    // init dof admins
-    initDofAdmin<dim> ( mesh );
-
-    //! type of leaf data
-    typedef AlbertLeafData<dim,dim+1> LeafDataType;
-    init_leaf_data(mesh, sizeof(typename LeafDataType :: Data),
-                   LeafDataType :: AlbertLeafRefine,
-                   LeafDataType :: AlbertLeafCoarsen);
-
-    return mesh;
-  }
-#endif
-
-  // mark elements that not belong to my processor
-  inline void partitioning ( MACRO_EL * mel, int proc, int mynumber  )
-  {
-    if(proc == mynumber)
-    {
-      mel->el->mark = 0;
-    }
-    else
-    {
-      mel->el->mark = 1;
-    }
-  }
-
-  inline void printMacroData(MACRO_DATA * mdata)
-  {
-    FUNCNAME("printMacroData");
-    MSG("noe %d , nvx %d \n",mdata->n_macro_elements,mdata->n_total_vertices);
-    for(int i=0; i<mdata->n_total_vertices; i++)
-      MSG("coords [%f | %f ]\n",mdata->coords[i][0],mdata->coords[i][1]);
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    for(int i=0; i<mdata->n_macro_elements; i++)
-      MSG("bound [%d | %d | %d ]\n",mdata->boundary[i][0],mdata->boundary[i][1],mdata->boundary[i][2]);
-#endif
-
-  }
 
   // function for mesh_traverse, is called on every element
   inline static void storeLevelOfElement(const EL_INFO * elf)
