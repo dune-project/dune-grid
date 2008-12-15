@@ -3,6 +3,10 @@
 #ifndef DUNE_ALBERTA_ELEMENTINFO_HH
 #define DUNE_ALBERTA_ELEMENTINFO_HH
 
+#include <dune/grid/albertagrid/exceptions.hh>
+
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -12,6 +16,7 @@ namespace Dune
     typedef ALBERTA REAL Real;
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
+    typedef ALBERTA EL Element;
 #if DUNE_ALBERTA_VERSION < 0x200
     typedef ALBERTA BOUNDARY Boundary;
 #endif
@@ -179,7 +184,7 @@ namespace Dune
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
 
-      ALBERTA EL *el () const;
+      Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
       static ElementInfo createFake ();
@@ -342,11 +347,11 @@ namespace Dune
     template< int dim >
     inline int ElementInfo< dim >::indexInFather () const
     {
-      const ALBERTA EL *element = elInfo().el;
+      const Element *element = elInfo().el;
 #if DUNE_ALBERTA_VERSION >= 0x201
-      const ALBERTA EL *father = elInfo().parent->el;
+      const Element *father = elInfo().parent->el;
 #else
-      const ALBERTA EL *father = elInfo().parent;
+      const Element *father = elInfo().parent;
 #endif
       assert( father != NULL );
 
@@ -496,7 +501,7 @@ namespace Dune
 
 
     template< int dim >
-    inline ALBERTA EL *ElementInfo< dim >::el () const
+    inline Element *ElementInfo< dim >::el () const
     {
       return elInfo().el;
     }
@@ -615,5 +620,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif

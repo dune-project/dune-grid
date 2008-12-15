@@ -7,6 +7,8 @@
 
 #include <dune/grid/albertagrid/elementinfo.hh>
 
+#if HAVE_ALBERTA
+
 namespace Dune
 {
 
@@ -293,5 +295,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif
