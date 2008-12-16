@@ -54,7 +54,15 @@ namespace Dune
         return MacroIterator( *this, true );
       }
 
-      void create ( const std::string &name, const std::string &filename );
+      std::string name () const
+      {
+        if( mesh_ != NULL )
+          return mesh_->name;
+        else
+          return std::string();
+      }
+
+      void create ( const std::string &filename, const std::string &name );
 
       void read ( const std::string &filename, Real &time );
 
@@ -77,7 +85,7 @@ namespace Dune
 
     template< int dim >
     inline void MeshPointer< dim >
-    ::create ( const std::string &name, const std::string &filename )
+    ::create ( const std::string &filename, const std::string &name )
     {
       release();
 
@@ -106,7 +114,7 @@ namespace Dune
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
     inline void MeshPointer< dim >
-    ::create ( const std::string &name, const std::string &filename )
+    ::create ( const std::string &filename, const std::string &name )
     {
       release();
 

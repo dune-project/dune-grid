@@ -340,7 +340,8 @@ namespace Dune
        set to 1 so hasLevelIndex_ can be identified we grid is read from
        file */
     /** \brief Constructor which reads an ALBERTA macro triangulation file.*/
-    AlbertaGrid(const std::string macroTriangFilename);
+    AlbertaGrid ( const std::string &macroGridFileName,
+                  const std::string &gridName = "AlbertaGrid" );
 
     /* (for internal use only)
        Constructor which reads an ALBERTA macro triangulation file
@@ -486,8 +487,18 @@ namespace Dune
       return comm_;
     }
 
+    static std::string typeName ()
+    {
+      std::ostringstream s;
+      s << "AlbertaGrid< " << dim << ", " << dimworld << " >";
+      return s.str();
+    }
+
     /** \brief return name of the grid */
-    std::string name () const { return "AlbertaGrid"; };
+    std::string name () const
+    {
+      return mesh_.name();
+    };
 
     //**********************************************************
     // End of Interface Methods

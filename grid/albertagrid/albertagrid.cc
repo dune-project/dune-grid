@@ -84,7 +84,7 @@ namespace Dune
 
   template < int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
-  :: AlbertaGrid( const std::string macroTriangFilename )
+  ::AlbertaGrid ( const std::string &macroGridFileName, const std::string &gridName )
     : mesh_( 0 ),
       comm_(),
       maxlevel_( 0 ),
@@ -116,13 +116,11 @@ namespace Dune
                  dim << ". Reconfigure with the --with-problem-dim="<<dim<<" option!");
     }
 
-    const char * MacroTriangFilename = macroTriangFilename.c_str();
-    assert( MacroTriangFilename );
-
     bool makeNew = true;
     {
-      std::fstream file (MacroTriangFilename,std::ios::in);
-      if(!file) DUNE_THROW(AlbertaIOError,"could not open grid file " << MacroTriangFilename);
+      std::fstream file( macroGridFileName.c_str(), std::ios::in );
+      if( !file )
+        DUNE_THROW( AlbertaIOError, "Could not open macro grid file '" << macroGridFileName << "'." );
 
       std::basic_string <char> str,str1;
       file >> str1; str = str1.assign(str1,0,3);
@@ -133,17 +131,18 @@ namespace Dune
 
     ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
-    if(makeNew)
+    if( makeNew )
     {
-      mesh_.create( "AlbertaGrid", macroTriangFilename );
+      mesh_.create( macroGridFileName, gridName );
       initGrid();
+      std::cout << typeName() << " created from macro grid file '"
+                << macroGridFileName << "'." << std::endl;
     }
     else
     {
-      derr<<"Couldn't read grid file '"<<macroTriangFilename<<"' because it's not in ALBERTA macro triangulation format! \n";
+      derr<<"Couldn't read grid file '"<< macroGridFileName<<"' because it's not in ALBERTA macro triangulation format! \n";
       DUNE_THROW(NotImplemented,"Constructor reading backup file not implemented!");
     }
-    std::cout << "AlbertaGrid<"<<dim<<","<<dimworld<<"> created from macro grid file '" << macroTriangFilename << "'. \n\n";
   }
 
   template < int dim, int dimworld >
