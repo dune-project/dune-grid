@@ -12,9 +12,9 @@
 /* This is a hack.  The following define is from the UG header pargm.h.  We can include that
    header only once, because it contains dimension-independent stuff.  However, when we get
    here for the second time for the 3d stuff, the macro PRIO2LISTPART has been undefined.
-   Hence we define it again here
+   Hence we define it again here */
 
-   /* define mapping from object priority to position in linked list */
+/* define mapping from object priority to position in linked list */
 #define PRIO2LISTPART(listtype,prio)                                         \
   ((listtype == ELEMENT_LIST) ? ((prio == PrioHGhost) ? 0 :                \
                                  (prio == PrioVGhost) ? 0 : (prio == PrioVHGhost) ? 0 :               \
