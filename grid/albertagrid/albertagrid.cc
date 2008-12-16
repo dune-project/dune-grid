@@ -427,11 +427,13 @@ namespace Dune
     return wasChanged_;
   }
 
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::preAdapt()
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >::preAdapt ()
   {
     return (coarsenMarked_ > 0);
   }
+
 
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::postAdapt()
@@ -471,7 +473,7 @@ namespace Dune
       return false;
 
     // take back previous marking
-    int mark = getRealImplementation( e ).elementInfo().getMark();
+    int mark = getMark( e );
     if( mark < 0 )
       --coarsenMarked_;
     if( mark > 0 )
@@ -493,7 +495,7 @@ namespace Dune
   inline int AlbertaGrid< dim, dimworld >
   ::getMark( const typename Traits::template Codim< 0 >::Entity &e ) const
   {
-    return getRealImplementation( e ).getMark();
+    return getRealImplementation( e ).elementInfo().getMark();
   }
 
   // --adapt
