@@ -176,16 +176,18 @@ namespace Dune
       ElementInfo child ( int i ) const;
       bool isLeaf () const;
 
+      bool mightVanish () const;
+
       int level () const;
       // see ALBERTA documentation for definition of element type
       // values are 0, 1, 2
       int type () const;
 
-      bool isBoundary ( int face ) const;
-      int boundaryId ( int face ) const;
-
       int getMark () const;
       void setMark ( int refCount ) const;
+
+      bool isBoundary ( int face ) const;
+      int boundaryId ( int face ) const;
 
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
@@ -193,6 +195,9 @@ namespace Dune
       static ElementInfo createFake ();
 
     private:
+      static bool isLeaf ( Element *element );
+      static bool mightVanish ( Element *element, int depth );
+
       void addReference () const;
       void removeReference () const;
 
@@ -391,7 +396,14 @@ namespace Dune
     inline bool ElementInfo< dim >::isLeaf () const
     {
       assert( !(*this) == false );
-      return IS_LEAF_EL( el() );
+      return isLeaf( el() );
+    }
+
+
+    template< int dim >
+    inline bool ElementInfo< dim >::mightVanish () const
+    {
+      return mightVanish( el(), 0 );
     }
 
 
@@ -416,6 +428,22 @@ namespace Dune
       return instance_->elInfo.el_type;
     }
 #endif
+
+
+    template< int dim >
+    inline int ElementInfo< dim >::getMark () const
+    {
+      return el()->mark;
+    }
+
+
+    template< int dim >
+    inline void ElementInfo< dim >::setMark ( int refCount ) const
+    {
+      assert( isLeaf() );
+      assert( (refCount >= -128) && (refCount < 127) );
+      el()->mark = refCount;
+    }
 
 
     template< int dim >
@@ -504,20 +532,6 @@ namespace Dune
 
 
     template< int dim >
-    inline int ElementInfo< dim >::getMark () const
-    {
-      return el()->mark;
-    }
-
-    template< int dim >
-    inline void ElementInfo< dim >::setMark ( int refCount ) const
-    {
-      assert( isLeaf() );
-      assert( (refCount >= -128) && (refCount < 127) );
-      el()->mark = refCount;
-    }
-
-    template< int dim >
     inline Element *ElementInfo< dim >::el () const
     {
       return elInfo().el;
@@ -538,6 +552,23 @@ namespace Dune
       instance->parent() = null();
       ++(instance->parent()->refCount);
       return ElementInfo< dim >( instance );
+    }
+
+
+    template< int dim >
+    inline bool ElementInfo< dim >::isLeaf ( Element *element )
+    {
+      return IS_LEAF_EL( element );
+    }
+
+
+    template< int dim >
+    inline bool ElementInfo< dim >::mightVanish ( Alberta::Element *element, int depth )
+    {
+      if( isLeaf( element ) )
+        return (element->mark < depth);
+      else
+        return (mightVanish( element->child[ 0 ], depth-1 ) && mightVanish( element->child[ 1 ], depth-1 ));
     }
 
 

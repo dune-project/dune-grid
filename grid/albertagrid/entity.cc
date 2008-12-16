@@ -192,9 +192,7 @@ namespace Dune
   template< int dim, class GridImp >
   inline bool AlbertaGridEntity< 0, dim, GridImp>::mightVanish () const
   {
-    const ALBERTA EL *element = getElement();
-    assert( element != NULL );
-    return (element->mark < 0);
+    return elementInfo_.mightVanish();
   }
 
 
@@ -222,15 +220,6 @@ namespace Dune
   inline bool AlbertaGridEntity< 0, dim,GridImp >::isLeaf () const
   {
     return elementInfo_.isLeaf();
-  }
-
-  //***************************
-
-  template< int dim, class GridImp >
-  inline void AlbertaGridEntity< 0, dim, GridImp >::makeDescription ()
-  {
-    elementInfo_ = ElementInfo();
-    builtgeometry_ = false;
   }
 
 

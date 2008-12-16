@@ -220,7 +220,7 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaGrid
     : public GridDefaultImplementation
-      < dim, dimworld, albertCtype, AlbertaGridFamily< dim, dimworld > >,
+      < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
       public HasObjectStream,
       public HasHierarchicIndexSet
   {

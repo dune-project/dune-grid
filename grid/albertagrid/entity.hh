@@ -317,11 +317,11 @@ namespace Dune
 
     /**\brief Returns true, if entity was refined during last adaptation
         cycle */
-    bool isNew () const ;
+    bool isNew () const;
 
     /**\brief Returns true, if entity might be coarsened during next
         adaption cycle */
-    bool mightVanish () const ;
+    bool mightVanish () const;
 
     /**\brief Returns true, if entity has intersections with boundary
      */
@@ -370,9 +370,6 @@ namespace Dune
   private:
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
-
-    //! make a new AlbertaGridEntity
-    void makeDescription();
 
     //! the corresponding grid
     const GridImp & grid_;
