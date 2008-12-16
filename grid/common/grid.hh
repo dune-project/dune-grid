@@ -931,7 +931,8 @@ namespace Dune {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().loadBalance(data));
       return asImp().loadBalance(data);
     }
-  private:
+
+  protected:
     //!  Barton-Nackman trick
     GridImp& asImp () {return static_cast<GridImp &> (*this);}
     //!  Barton-Nackman trick
@@ -1057,9 +1058,9 @@ namespace Dune {
              This template method will vanish due to the inheritance
              rules.
      */
-    bool mark( int refCount, const typename Traits :: template Codim<0>::EntityPointer & e ) DUNE_DEPRECATED
+    bool mark( int refCount, const typename Traits::template Codim< 0 >::EntityPointer &e ) DUNE_DEPRECATED
     {
-      return false;
+      return asImp().mark( refCount, *e );
     }
 
     /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
@@ -1096,9 +1097,9 @@ namespace Dune {
 
        \return int adaptation mark, here the default value 0 is returned
      */
-    int getMark(const typename Traits :: template Codim<0>::EntityPointer &) const DUNE_DEPRECATED
+    int getMark ( const typename Traits::template Codim< 0 >::EntityPointer &e ) const DUNE_DEPRECATED
     {
-      return 0;
+      return asImp().getMark( *e );
     }
 
     /** \brief returns adaptation mark for given entity, i.e. here the
@@ -1198,9 +1199,7 @@ namespace Dune {
     getRealImplementation (InterfaceType &i) { return i.getRealImp(); }
 
   protected:
-    //! Barton-Nackman trick
-    GridImp& asImp () {return static_cast<GridImp &>(*this);}
-    const GridImp& asImp () const {return static_cast<const GridImp &>(*this);}
+    using Grid< dim, dimworld, ct, GridFamily >::asImp;
   };
 
   /** @} */
