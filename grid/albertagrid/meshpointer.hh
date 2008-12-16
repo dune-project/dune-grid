@@ -58,7 +58,7 @@ namespace Dune
 
       void read ( const std::string &filename, Real &time );
 
-      bool write ( const std::string &filename, Real time );
+      bool write ( const std::string &filename, Real time ) const;
 
       void release ()
       {
@@ -154,7 +154,7 @@ namespace Dune
 
 
     template< int dim >
-    inline bool MeshPointer< dim >::write ( const std::string &filename, Real time )
+    inline bool MeshPointer< dim >::write ( const std::string &filename, Real time ) const
     {
       int success = ALBERTA write_mesh_xdr( mesh_, filename.c_str(), time );
       return (success == 0);
