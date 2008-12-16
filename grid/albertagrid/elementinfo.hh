@@ -184,6 +184,9 @@ namespace Dune
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
 
+      int getMark () const;
+      void setMark ( int refCount ) const;
+
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
@@ -499,6 +502,20 @@ namespace Dune
 #endif // #if DIM == 3
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
+
+    template< int dim >
+    inline int ElementInfo< dim >::getMark () const
+    {
+      return el()->mark;
+    }
+
+    template< int dim >
+    inline void ElementInfo< dim >::setMark ( int refCount ) const
+    {
+      assert( isLeaf() );
+      assert( (refCount >= -128) && (refCount < 127) );
+      el()->mark = refCount;
+    }
 
     template< int dim >
     inline Element *ElementInfo< dim >::el () const

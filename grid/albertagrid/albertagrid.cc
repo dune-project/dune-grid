@@ -436,12 +436,12 @@ namespace Dune
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::postAdapt()
   {
-    Alberta::Mesh *const mesh = mesh_;
-    assert( (leafIndexSet_) ? (mesh->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
-    assert( (leafIndexSet_) ? (mesh->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
+    typedef Alberta::Mesh Mesh;
+    assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
+    assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
 #if DIM == 3
     //assert( (leafIndexSet_ && dim == 3) ? (mesh->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
-    assert( (leafIndexSet_ && dim == 3) ? (mesh->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
+    assert( (leafIndexSet_ && dim == 3) ? (((Mesh *)mesh_)->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
 #endif
     // if lockPostAdapt == false, the user forgot to call adapt before postAdapt
     if( lockPostAdapt_ == false )
@@ -461,65 +461,39 @@ namespace Dune
     return wasChanged_;
   }
 
-  template<int dim, int dimworld>
-  inline bool AlbertaGrid < dim, dimworld >::
-  mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) const
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::mark( int refCount, const typename Traits::template Codim< 0 >::Entity &e ) const
   {
-    return this->mark(refCount,*ep);
-  }
+    // if not leaf entity, leave method
+    if( !e.isLeaf() )
+      return false;
 
-  //--mark
-  template<int dim, int dimworld>
-  inline bool AlbertaGrid < dim, dimworld >::
-  mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) const
-  {
-    // if not leaf entity, leaf method
-    if( !ep.isLeaf() ) return false;
+    // take back previous marking
+    int mark = getRealImplementation( e ).elementInfo().getMark();
+    if( mark < 0 )
+      --coarsenMarked_;
+    if( mark > 0 )
+      refineMarked_ -= (2 << mark);
 
-    ALBERTA EL_INFO * elInfo = (this->getRealImplementation(ep)).getElInfo();
-    if(!elInfo) return false;
-    ALBERTA EL * element = elInfo->el;
-    assert( element );
-
-    // mark for refinement
-    if( refCount > 0)
-    {
-      element->mark = refCount;
-      int factor = 2;
-      for(int i=0; i<refCount; ++i) factor *= 2;
-      refineMarked_ += factor;
-      return true;
-    }
-
-    // mark for coarsening
-    if( refCount < 0)
-    {
-      element->mark = refCount;
+    // set new marking (max( previous, refCount ))
+    mark = std::max( mark, refCount );
+    if( mark < 0 )
       ++coarsenMarked_;
-      return true;
-    }
+    if( mark > 0 )
+      refineMarked_ += (2 << mark);
+    getRealImplementation( e ).elementInfo().setMark( mark );
 
-    // mark for none
-    element->mark = 0;
     return true;
   }
 
-  // --getMark
-  template<int dim, int dimworld>
-  inline int AlbertaGrid < dim, dimworld >::
-  getMark( const typename Traits::template Codim<0>::EntityPointer & ep ) const
-  {
-    return this->getMark( *ep );
-  }
 
-  template<int dim, int dimworld>
-  inline int AlbertaGrid < dim, dimworld >::
-  getMark( const typename Traits::template Codim<0>::Entity & en ) const
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >
+  ::getMark( const typename Traits::template Codim< 0 >::Entity &e ) const
   {
-    const ALBERTA EL_INFO * elInfo = (this->getRealImplementation(en)).getElInfo();
-    assert( elInfo );
-    assert( elInfo->el );
-    return elInfo->el->mark;
+    return getRealImplementation( e ).getMark();
   }
 
   // --adapt

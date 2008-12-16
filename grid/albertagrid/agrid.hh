@@ -225,6 +225,9 @@ namespace Dune
       public HasHierarchicIndexSet
   {
     typedef AlbertaGrid< dim, dimworld > This;
+    typedef GridDefaultImplementation
+    < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >
+    Base;
 
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntity <1,dim,const AlbertaGrid<dim,dimworld> >;
@@ -451,26 +454,20 @@ namespace Dune
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************
-    //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & en ) const DUNE_DEPRECATED;
+    using Base::getMark;
+    using Base::mark;
 
-    //! @copydoc Dune::Grid::getMark
-    int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const DUNE_DEPRECATED;
+    /** \copydoc Dune::Grid::getMark(const typename Codim<0>::Entity &e) const */
+    int getMark ( const typename Traits::template Codim< 0 >::Entity &e ) const;
 
-    //! @copydoc Dune::Grid::getMark
-    int getMark( const typename Traits::template Codim<0>::Entity & ) const;
+    /** \copydoc Dune::Grid::mark(int refCount,const typename Codim<0>::Entity &e) */
+    bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &e ) const;
 
-    //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en ) const;
-
-  public:
     //! uses the interface, mark on entity and refineLocal
-    bool globalRefine(int refCount);
+    bool globalRefine ( int refCount );
 
-    /*! \brief refine all positive marked leaf entities,
-    *  coarsen all negative marked entities if possible,
-    *  return true if a least one element was refined */
-    bool adapt ( );
+    /** \copydoc Dune::Grid::adapt() */
+    bool adapt ();
 
     //! adapt method with DofManager
     template <class DofManagerType, class RestrictProlongOperatorType>
@@ -580,6 +577,8 @@ namespace Dune
     // forbid copying and assignment
     AlbertaGrid ( const This & );
     This &operator= ( const This & );
+
+    using Base::getRealImplementation;
 
   private:
     typedef std::vector<int> ArrayType;
