@@ -69,7 +69,19 @@ namespace Dune
   template< int dim, int dimworld >
   inline void AlbertaGrid< dim, dimworld >::initGrid ()
   {
-    ALBERTA AlbertHelp::getDofVecs<dimworld> (&dofvecs_);
+    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
+    {
+      dofvecs_.elNumbers[ i ] = AlbertHelp::getElNumbers( i );
+      AlbertHelp::elNumbers[ i ] = NULL;
+    }
+
+    dofvecs_.elNewCheck = AlbertHelp::getElNewCheck();
+    AlbertHelp::elNewCheck = NULL;
+
+#ifndef CALC_COORD
+    dofvecs_.coords = AlbertHelp::getCoordVec< dimworld >();
+    AlbertHelp::coordVec = NULL;
+#endif
 
     calcExtras();
 

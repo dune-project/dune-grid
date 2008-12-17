@@ -373,20 +373,6 @@ namespace AlbertHelp
   }
 #endif
 
-  template <int dimworld>
-  inline void getDofVecs(DOFVEC_STACK * dofvecs)
-  {
-    for(int i=0; i<numOfElNumVec; i++)
-    {
-      dofvecs->elNumbers[i]  = getElNumbers(i);
-      elNumbers[i]  = 0;
-    }
-
-    dofvecs->elNewCheck   = getElNewCheck();  elNewCheck = 0;
-#ifndef CALC_COORD
-    dofvecs->coords       = getCoordVec<dimworld> ();    coordVec   = 0;
-#endif
-  }
 
   struct MeshCallBack
   {
