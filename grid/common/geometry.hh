@@ -13,6 +13,7 @@
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/exceptions.hh>
 
+#include <dune/grid/genericgeometry/conversion.hh>
 #include "referenceelements.hh"
 
 namespace Dune
@@ -102,9 +103,34 @@ namespace Dune
        \return const reference to a vector containing the position \f$g(c_i)\f$ where
        \f$c_i\f$ is the position of the i'th corner of the reference element.
      */
-    const FieldVector<ctype, cdim>& operator[] (int i) const
+    const FieldVector< ctype, cdim > &operator[] ( int i ) const DUNE_DEPRECATED
     {
       return realGeometry[i];
+    }
+
+    /** Obtain a corner of the geometry
+     *
+     *  This method is for convenient access to the corners of the geometry. The
+     *  same result could be achieved by by calling
+     *  \code
+     *  global( genericReferenceElement.position( i, mydimension )
+     *  \endcode
+     *
+     *  \note This method replaces the deprecated operator[]. Yet, there are two
+     *        differences:
+     *        - operator[] returns a reference instead of an object
+     *        - operator[] uses the old sub entity numbering
+     *
+     *  \param[in]  i  number of the corner (with respect to the generic reference
+     *                 element)
+     *  \returns position of the i'th corner
+     */
+    FieldVector< ctype, cdim > corner ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< mydimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template generic2dune< mydimension >( tid, i );
+      return realGeometry[ j ];
     }
 
     /** \brief Evaluate the map \f$ g\f$.
