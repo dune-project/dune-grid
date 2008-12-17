@@ -648,8 +648,10 @@ void zeroEntityConsistency (Grid &g)
     const int cmax = it->template count<Grid::dimension>();
     for (int c=0; c<cmax; ++c)
     {
-      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c1(it->geometry()[c]);
-      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c2(it->template entity<Grid::dimension>(c)->geometry()[0]);
+      const int tid = Dune::GenericGeometry::topologyId( it->type() );
+      const int gc = Dune::GenericGeometry::MapNumberingProvider< Grid::dimension >::template dune2generic< Grid::dimension >( tid, c );
+      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c1(it->geometry().corner( gc ));
+      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c2(it->template entity<Grid::dimension>(c)->geometry().corner( 0 ));
       if( (c2-c1).two_norm() > 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
       {
         DUNE_THROW(CheckError, "geometry[i] == entity<dim>(i) failed: || c1-c2 || = || " <<
@@ -664,8 +666,8 @@ void zeroEntityConsistency (Grid &g)
       typedef Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> CoordinateType;
       for(int d=c+1; d<corners; ++d)
       {
-        const CoordinateType& c1 = it->geometry()[c];
-        const CoordinateType& c2 = it->geometry()[d];
+        const CoordinateType c1 = it->geometry().corner( c );
+        const CoordinateType c2 = it->geometry().corner( d );
         if( (c2-c1).two_norm() < 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
         {
           DUNE_THROW(CheckError, "geometry["<<c<<"] == geometry["<<d<<"]");
@@ -936,7 +938,7 @@ void iterate(Grid &g)
     it->geometry().type();
     it->type();
     it->geometry().corners();
-    it->geometry()[0];
+    it->geometry().corner( 0 );
 
   }
 
@@ -977,7 +979,7 @@ void iterate(Grid &g)
     lit->geometry().type();
     lit->type();
     lit->geometry().corners();
-    lit->geometry()[0];
+    lit->geometry().corner( 0 );
   }
 
 }

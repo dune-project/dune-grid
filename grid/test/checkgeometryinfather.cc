@@ -24,9 +24,12 @@ void checkGeometryInFather(const GridType& grid)
   // count the number of different vertices
   unsigned int differentVertexCoords = 0;
 
+  typedef typename GridType::Traits::LocalIdSet IdSet;
   typedef typename GridType::ctype ctype;
-  const int dim      = GridType :: dimension;
-  const int dimworld = GridType :: dimensionworld;
+  const int dim = GridType::dimension;
+  const int dimworld = GridType::dimensionworld;
+
+  const IdSet &idSet = grid.localIdSet();
 
   // We need at least two levels to do any checking
   if (grid.maxLevel()==0)
@@ -56,17 +59,22 @@ void checkGeometryInFather(const GridType& grid)
           typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
 
           const int mxl = grandPa->level() + 1;
-          bool foundChild = false;
 
-          HierarchicIterator end = grandPa->hend(mxl);
-          for(HierarchicIterator sons = grandPa->hbegin(mxl);
-              sons != end; ++sons)
+          bool foundChild = false;
+          const HierarchicIterator end = grandPa->hend( mxl );
+          for( HierarchicIterator sons = grandPa->hbegin( mxl ); sons != end; ++sons )
           {
-            if(father == sons) foundChild = true;
+            if( father != sons )
+            {
+              if( idSet.id( *father ) == idSet.id( *sons ) )
+                DUNE_THROW( GridError, "Two different entities have the same id." );
+            }
+            else
+              foundChild = true;
           }
 
-          if(!foundChild)
-            DUNE_THROW(GridError, "father-child error while iterating over childs of father!");
+          if( !foundChild )
+            DUNE_THROW( GridError, "Cannot find child in its own father." );
           father = grandPa;
         }
       }
@@ -139,7 +147,7 @@ void checkGeometryInFather(const GridType& grid)
       // Compute the element center just to have an argument for the following methods
       FieldVector<ctype, dim> center(0);
       for (int j=0; j<geometryInFather.corners(); j++)
-        center += geometryInFather[j];
+        center += geometryInFather.corner( j );
 
       if (geometryInFather.integrationElement(center) <=0)
         DUNE_THROW(GridError, "nonpositive integration element found!");
@@ -156,8 +164,8 @@ void checkGeometryInFather(const GridType& grid)
       for( int j=0; j < geometryInFather.corners(); ++j )
       {
         const FieldVector< ctype, dimworld > cornerInFather
-          = eIt->father()->geometry().global( geometryInFather[ j ] );
-        const FieldVector< ctype, dimworld > &cornerInSon = eIt->geometry()[ j ];
+          = eIt->father()->geometry().global( geometryInFather.corner( j ) );
+        const FieldVector< ctype, dimworld > &cornerInSon = eIt->geometry().corner( j );
 
         if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
         {

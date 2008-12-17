@@ -109,14 +109,18 @@ public:
 
     //typename GlobalIdSetImp :: IdType id = ids_.id( e );
     //buff.write( id );
-
     buff.write(data2_[idx]);   // flag
     buff.write(data1_[idx]);   // data
+
     // all corner coordinates
-    for (int i=0; i<e.geometry().corners(); ++i)
+    typedef typename EntityType::Geometry Geometry;
+    const Geometry &geometry = e.geometry();
+    for( int i = 0; i < geometry.corners(); ++i )
     {
-      for (int j=0; j<e.geometry().dimensionworld; ++j)
-        buff.write(e.geometry()[i][j]);
+      typedef FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      const Vector corner = geometry.corner( i );
+      for( int j = 0; j < Geometry::dimensionworld; ++j )
+        buff.write( corner[ j ] );
     }
   }
 
@@ -160,15 +164,19 @@ public:
     }
 
     // test if the sending/receving entities are geometrically the same
-    for (int i=0; i<e.geometry().corners(); ++i)
+    typedef typename EntityType::Geometry Geometry;
+    const Geometry &geometry = e.geometry();
+    for( int i = 0; i < geometry.corners(); ++i )
     {
-      for (int j=0; j<e.geometry().dimensionworld; ++j)
+      typedef FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      const Vector corner = geometry.corner( i );
+      for( int j = 0; j < Geometry::dimensionworld; ++j )
       {
         buff.read(x);
-        if (fabs(e.geometry()[i][j]-x)>1e-8)
+        if( fabs( corner[ j ] - x ) > 1e-8 )
         {
           std::cerr << "ERROR in scatter: Vertex <" << i << "," << j << ">: "
-                    << " this : (" << e.geometry()[i][j] << ")"
+                    << " this : (" << corner[ j ] << ")"
                     << " other : (" << x << ")"
                     << std::endl;
         }
@@ -239,7 +247,7 @@ class CheckCommunication
         CoordinateVector mid( 0.0 );
         const int numVertices = entity.template count< dim >();
         for( int i = 0; i < numVertices; ++i )
-          mid += entity.geometry()[ i ];
+          mid += entity.geometry().corner( i );
         mid /= double( numVertices );
 
         int index = indexSet_.index( entity );
@@ -281,7 +289,7 @@ class CheckCommunication
               SubEntityPointer subEp = entity.template entity< cdim >( e );
               int c = subEp->geometry().corners();
               for (int j=0; j<c; j++)
-                cmid += subEp->geometry()[ j ];
+                cmid += subEp->geometry().corner( j );
               cmid /= double(c);
 
               data[idx] = f(cmid);
@@ -311,7 +319,7 @@ class CheckCommunication
                 SubEntityPointer subEp = neigh.template entity< cdim >( e );
                 int c = subEp->geometry().corners();
                 for (int j=0; j<c; j++)
-                  cmid += subEp->geometry()[j];
+                  cmid += subEp->geometry().corner( j );
                 cmid /= double(c);
 
                 data[idx] = f(cmid);
@@ -344,7 +352,7 @@ class CheckCommunication
       CoordinateVector mid( 0.0 );
       const int numVertices = entity.template count< dim >();
       for( int i = 0; i < numVertices; ++i )
-        mid += entity.geometry()[ i ];
+        mid += entity.geometry().corner( i );
       mid /= double(numVertices);
 
       if( cdim == 0 )
@@ -374,7 +382,7 @@ class CheckCommunication
 
           const int numVertices = subEp->geometry().corners();
           for( int j = 0; j< numVertices; ++j )
-            cmid += subEp->geometry()[ j ];
+            cmid += subEp->geometry().corner( j );
           cmid /= double( numVertices );
 
           double lerr = fabs( f( cmid ) - data[ index ] );
@@ -393,8 +401,12 @@ class CheckCommunication
               const ReferenceElement< double, dim > &refElem
                 = ReferenceElements< double, dim > :: general( entity.type() );
               const int vx = refElem.subEntity( i, cdim, j, dim );
+
+              const int tid = Dune::GenericGeometry::topologyId( subEp->type() );
+              const int gj = Dune::GenericGeometry::MapNumberingProvider< dim-cdim >::template dune2generic< dim-cdim >( tid, j );
+
               sout_ << "index: " << indexSet_.template subIndex< dim >( entity, vx )
-                    << " " << subEp->geometry()[ j ];
+                    << " " << subEp->geometry().corner( gj );
               (++j < numVertices ? sout_ <<  "/" : sout_ << std :: endl);
             }
           }

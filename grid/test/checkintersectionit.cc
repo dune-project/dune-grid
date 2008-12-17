@@ -44,10 +44,14 @@ void checkGeometry(const GeometryImp& geometry)
     DUNE_THROW(GridError, "Geometry has wrong number of corners!");
 
   // check consistency between operator[] and global()
-  for (int i=0; i<refElement.size(dim); i++) {
-    FieldVector<double,dim> localPos = refElement.position(i,dim);
-    if ( (geometry[i] - geometry.global(localPos)).infinity_norm() > 1e-6)
-      DUNE_THROW(GridError, "Methods operator[] and global() are inconsistent!");
+  for( int i = 0; i < refElement.size( dim ); ++i )
+  {
+    const int tid = Dune::GenericGeometry::topologyId( geometry.type() );
+    const int gi = Dune::GenericGeometry::MapNumberingProvider< dim >::template dune2generic< dim >( tid, i );
+
+    FieldVector< double, dim > localPos = refElement.position( i, dim );
+    if( (geometry.corner( gi ) - geometry.global( localPos )).infinity_norm() > 1e-6 )
+      DUNE_THROW( GridError, "Methods operator[] and global() are inconsistent." );
   }
 
   // Use a quadrature rule to create a few test points for the following checks
@@ -317,9 +321,15 @@ void checkIntersectionIterator(const GridViewType& view,
       // the vertices
       for (int c=1; c<intersectionGlobal.corners(); c++)
       {
-        Dune::FieldVector< ctype, dimworld > x = intersectionGlobal[c-1];
-        x -= intersectionGlobal[c];
-        assert(x*normal <= 1e-8);
+        Dune::FieldVector< ctype, dimworld > x = intersectionGlobal.corner( c-1 );
+        x -= intersectionGlobal.corner( c );
+        if( x*normal >= 10*std::numeric_limits< ctype >::epsilon() )
+        {
+          std::cerr << "outerNormal not orthogonal to line between corner "
+                    << (c-1) << " and corner " << c << "." << std::endl;
+          std::cerr << "Note: This is ok for curved faces, though." << std::endl;
+          assert( false );
+        }
       }
 
       // Check JacobianInverseTransposed

@@ -117,12 +117,15 @@ namespace Dune
 
         for(int j=0; j<numSubEntities; j++)
         {
+          const int tid = Dune::GenericGeometry::topologyId( refElem.type( subEntity, codim ) );
+          const int gj = Dune::GenericGeometry::MapNumberingProvider< dim-codim >::template dune2generic< dim-codim >( tid, j );
+
           {
             // get entity pointer of sub entity codim=dim (Vertex)
             typedef typename GridType :: template Codim<dim> :: EntityPointer VertexPointerType;
             VertexPointerType vxp = en.template entity<dim> (local[j]);
 
-            FieldVector<coordType,dimworld> vx ( vxp->geometry()[0]);
+            FieldVector< coordType, dimworld > vx = vxp->geometry().corner( 0 );
             if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
             {
               FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
@@ -141,7 +144,7 @@ namespace Dune
           // otherwise one of the theoretical conditions is violated
           assert( subenp.level() == en.level() );
 
-          FieldVector<coordType,dimworld> vx ( subenp->geometry()[j]);
+          FieldVector< coordType, dimworld > vx = subenp->geometry().corner( gj );
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
             FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
@@ -353,7 +356,7 @@ namespace Dune
       {
         ++count;
         // get coordinates of vertex
-        FieldVector<coordType,dimworld> vx ( it->geometry()[0] );
+        FieldVector< coordType, dimworld > vx ( it->geometry().corner( 0 ) );
 
         // get index of vertex
         sout << "Vertex " << vx << "\n";
@@ -437,7 +440,7 @@ namespace Dune
           VertexPointerType vxp = it->template entity<dim> (i);
 
           // get coordinates of entity pointer
-          FieldVector<coordType,dimworld> vx (vxp->geometry()[0]);
+          FieldVector<coordType,dimworld> vx (vxp->geometry().corner( 0 ));
 
           // output vertex coordinates
           if(i<svx-1) sout << vx << " , ";
