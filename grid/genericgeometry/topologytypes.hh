@@ -77,12 +77,22 @@ namespace Dune
 
 
     template< class Topology >
+    struct IsSimplex
+    {
+      static const bool value = ((Topology::id >> 1) == 0);
+    };
+
+    template< class Topology >
+    struct IsCube
+    {
+      static const bool value = ((Topology::id | 1) == (1 << Topology::dimension) - 1);
+    };
+
+    template< class Topology >
     struct IsHybrid
     {
-      // Only cubes and simplices are nonhybrid
       static const bool value
-        = ((Topology :: id | 1) == (1 << Topology :: dimension) - 1)
-          || ((Topology :: id >> 1) == 0);
+        = !(IsSimplex< Topology >::value || IsCube< Topology >::value);
     };
 
 

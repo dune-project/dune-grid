@@ -169,6 +169,12 @@ namespace Dune
       {
         return i;
       }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        return i;
+      }
     };
 
     // MapNumbering for Point
@@ -195,6 +201,12 @@ namespace Dune
       static unsigned int dune2generic ( unsigned int i )
       {
         return (codim == 1 ? 2 - i : i);
+      }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        return dune2generic< codim >( i );
       }
     };
 
@@ -229,6 +241,12 @@ namespace Dune
         static unsigned int edge[ 6 ] = { 0, 2, 1, 3, 4, 5 };
         return (codim == 1 ? 3 - i : (codim == 2 ? edge[ i ] : i));
       }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        return dune2generic< codim >( i );
+      }
     };
 
     template<>
@@ -249,6 +267,12 @@ namespace Dune
       {
         static unsigned int edge[ 12 ] = { 0, 1, 2, 3, 4, 5, 8, 9, 6, 7, 10, 11 };
         return (codim == 2 ? edge[ i ] : i);
+      }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        return dune2generic< codim >( i );
       }
     };
 
@@ -271,6 +295,23 @@ namespace Dune
         static unsigned int vertex[ 5 ] = { 0, 1, 3, 2, 4 };
         static unsigned int edge[ 8 ] = { 2, 1, 3, 0, 4, 5, 7, 6 };
         static unsigned int face[ 5 ] = { 0, 3, 2, 4, 1 };
+
+        if( codim == 3 )
+          return vertex[ i ];
+        else if( codim == 2 )
+          return edge[ i ];
+        else if( codim == 1 )
+          return face[ i ];
+        else
+          return i;
+      }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        static unsigned int vertex[ 5 ] = { 0, 1, 3, 2, 4 };
+        static unsigned int edge[ 8 ] = { 3, 1, 0, 2, 4, 5, 7, 6 };
+        static unsigned int face[ 5 ] = { 0, 4, 2, 1, 3 };
 
         if( codim == 3 )
           return vertex[ i ];
@@ -309,6 +350,20 @@ namespace Dune
         else
           return i;
       }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        static unsigned int edge[ 9 ] = { 3, 4, 5, 0, 2, 1, 6, 8, 7 };
+        static unsigned int face[ 5 ] = { 1, 3, 2, 0, 4 };
+
+        if( codim == 2 )
+          return edge[ i ];
+        else if( codim == 1 )
+          return face[ i ];
+        else
+          return i;
+      }
     };
 
     template<>
@@ -339,10 +394,11 @@ namespace Dune
       typedef std :: vector< unsigned int > Map;
 
       Map dune2generic_[ numTopologies ][ dimension+1 ];
+      Map generic2dune_[ numTopologies ][ dimension+1 ];
 
       MapNumberingProvider ()
       {
-        ForLoop< Builder, 0, (1 << dim)-1 > :: apply( dune2generic_ );
+        ForLoop< Builder, 0, (1 << dim)-1 > :: apply( dune2generic_, generic2dune_ );
       }
 
       static const MapNumberingProvider &instance ()
@@ -359,6 +415,14 @@ namespace Dune
         assert( topologyId < numTopologies );
         return instance().dune2generic_[ topologyId ][ codim ][ i ];
       }
+
+      template< unsigned int codim >
+      static unsigned int
+      generic2dune ( unsigned int topologyId, unsigned int i )
+      {
+        assert( topologyId < numTopologies );
+        return instance().generic2dune_[ topologyId ][ codim ][ i ];
+      }
     };
 
 
@@ -372,9 +436,10 @@ namespace Dune
       template< int codim >
       struct Codim;
 
-      static void apply ( Map (&dune2generic)[ numTopologies ][ dimension+1 ] )
+      static void apply ( Map (&dune2generic)[ numTopologies ][ dimension+1 ],
+                          Map (&generic2dune)[ numTopologies ][ dimension+1 ] )
       {
-        ForLoop< Codim, 0, dimension > :: apply( dune2generic[ i ] );
+        ForLoop< Codim, 0, dimension > :: apply( dune2generic[ i ], generic2dune[ i ] );
       }
     };
 
@@ -383,19 +448,28 @@ namespace Dune
     template< int codim >
     struct MapNumberingProvider< dim > :: Builder< i > :: Codim
     {
-      static void apply ( Map (&dune2generic)[ dimension+1 ] )
+      static void apply ( Map (&dune2generic)[ dimension+1 ],
+                          Map (&generic2dune)[ dimension+1 ] )
       {
         const unsigned int size = Size< Topology, codim > :: value;
-        Map &d2g = dune2generic[ codim ];
 
+        Map &d2g = dune2generic[ codim ];
         d2g.resize( size );
         for( unsigned int j = 0; j < size; ++j )
-          d2g[ j ] = MapNumbering :: template dune2generic< codim >( j );
+          d2g[ j ] = MapNumbering::template dune2generic< codim >( j );
+
+        Map &g2d = generic2dune[ codim ];
+        g2d.resize( size );
+        for( unsigned int j = 0; j < size; ++j )
+          g2d[ j ] = MapNumbering::template generic2dune< codim >( j );
       }
     };
 
+
+
     // Convert
     // -------
+
     template< GeometryType :: BasicType type, unsigned int dim >
     struct Convert;
 
@@ -485,6 +559,37 @@ namespace Dune
     private:
       // dune_static_assert( dim >= 3, "Dune pyramids must be at least 3-dimensional." );
     };
+
+
+
+
+    // topologyId
+    // ----------
+
+    inline unsigned int topologyId ( const GeometryType &type )
+    {
+      const unsigned int dim = type.dim();
+
+      switch( type.basicType() )
+      {
+      case GeometryType::simplex :
+        return 0;
+
+      case GeometryType::cube :
+        return (1 << dim) - 1;
+
+      case GeometryType::pyramid :
+        return (1 << (dim-1)) - 1;
+
+      case GeometryType::prism :
+        return 1 << (dim-1);
+
+      default :
+        DUNE_THROW( RangeError,
+                    "Invalid basic geometry type: " << type.basicType() << "." );
+      }
+
+    }
 
   }
 
