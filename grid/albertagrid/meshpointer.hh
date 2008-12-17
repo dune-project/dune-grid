@@ -99,11 +99,6 @@ namespace Dune
 
 
 #if DUNE_ALBERTA_VERSION >= 0x200
-#if 0
-    typedef NODE_PROJECTION *InitBoundary ( Mesh *, MacroElement *, int );
-    static InitBoundary *initBoundary = 0;
-#endif
-
     template< int dim >
     inline void MeshPointer< dim >
     ::create ( const std::string &filename, const std::string &name )
