@@ -32,8 +32,6 @@
 #include <dune/common/collectivecommunication.hh>
 #endif
 
-#include <dune/common/exceptions.hh>
-
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
@@ -58,7 +56,7 @@ typedef Dune::IndexStack<int,100000> IndexManagerType;
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 
-#include <dune/grid/albertagrid/exceptions.hh>
+#include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
 
 // contains a simple memory management for some componds of this grid
@@ -799,6 +797,12 @@ namespace Dune
 #endif
 
 #if DUNE_ALBERTA_VERSION >= 0x201
+#ifdef obstack_chunk_alloc
+#undef obstack_chunk_alloc
+#endif
+#ifdef obstack_chunk_free
+#undef obstack_chunk_free
+#endif
 #include <dune/grid/albertagrid/undefine-2.1.hh>
 #elif DUNE_ALBERTA_VERSION == 0x200
 #include <dune/grid/albertagrid/undefine-2.0.hh>

@@ -3,12 +3,26 @@
 #ifndef DUNE_ALBERTA_MISC_HH
 #define DUNE_ALBERTA_MISC_HH
 
+#include <dune/common/exceptions.hh>
 #include <dune/grid/genericgeometry/misc.hh>
 
 #if HAVE_ALBERTA
 
 namespace Dune
 {
+
+  // Exceptions
+  // ----------
+
+  class AlbertaError
+    : public Exception
+  {};
+
+  class AlbertaIOError
+    : public IOError
+  {};
+
+
 
   namespace Alberta
   {

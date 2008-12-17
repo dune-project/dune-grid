@@ -10,10 +10,8 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/grid/genericgeometry/misc.hh>
-
 #include <dune/grid/albertagrid/albertaheader.hh>
-#include <dune/grid/albertagrid/exceptions.hh>
+#include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/referencetopo.hh>
 #include <dune/grid/albertagrid/dofadmin.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
@@ -193,7 +191,7 @@ namespace Dune
         elNumVec_[i] = (dofvecs.elNumbers[i])->vec;
         assert(elNumVec_[i]);
       }
-      GenericGeometry::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, dofvecs );
+      Alberta::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, dofvecs );
     }
 
     // codim = 0 means we get from dim-cd = dim
