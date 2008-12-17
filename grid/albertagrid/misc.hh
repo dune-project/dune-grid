@@ -33,12 +33,16 @@ namespace Dune
     using GenericGeometry::ForLoop;
 
     typedef ALBERTA REAL Real;
+    typedef ALBERTA REAL_D GlobalVector;
+
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
 #if DUNE_ALBERTA_VERSION < 0x200
     typedef ALBERTA BOUNDARY Boundary;
 #endif
+
+    typedef ALBERTA FE_SPACE DofSpace;
 
 
 

@@ -31,8 +31,10 @@ namespace Dune
       typedef HierarchyDofNumbering< dim > This;
 
     public:
-      typedef Alberta::MeshPointer< dim > MeshPointer;
-      typedef Alberta::ElementInfo< dim > ElementInfo;
+      static const int dimension = dim;
+
+      typedef Alberta::MeshPointer< dimension > MeshPointer;
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     private:
       template< int codim >
@@ -41,19 +43,18 @@ namespace Dune
       template< int codim >
       struct CacheDofSpace;
 
-      typedef ALBERTA FE_SPACE DofSpace;
       typedef std::pair< int, int > Cache;
 
       MeshPointer mesh_;
-      const DofSpace *dofSpace_[ dim+1 ];
-      Cache cache_[ dim+1 ];
+      const DofSpace *dofSpace_[ dimension+1 ];
+      Cache cache_[ dimension+1 ];
 
     public:
       HierarchyDofNumbering ( const MeshPointer &mesh )
         : mesh_( mesh )
       {
-        ForLoop< CreateDofSpace, 0, dim >::apply( mesh_, dofSpace_ );
-        ForLoop< CacheDofSpace, 0, dim >::apply( dofSpace_, cache_ );
+        ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
+        ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
       }
 
     private:
@@ -63,12 +64,13 @@ namespace Dune
     public:
       ~HierarchyDofNumbering ()
       {
-        for( int codim = 0; codim <= dim; ++codim )
+        for( int codim = 0; codim <= dimension; ++codim )
           freeDofSpace( dofSpace_[ codim ] );
       }
 
       int operator() ( Element *element, int codim, unsigned int subEntity )
       {
+        assert( (codim >= 0) && (codim <= dimension) );
         Cache &cache = cache_[ codim ];
         return element->dof[ cache.first + subEntity ][ cache.second ];
       }
@@ -76,6 +78,12 @@ namespace Dune
       int operator() ( const ElementInfo &element, int codim, unsigned int subEntity )
       {
         return number( element.el(), codim, subEntity );
+      }
+
+      const DofSpace *dofSpace ( int codim ) const
+      {
+        assert( (codim >= 0) && (codim <= dimension) );
+        return dofSpace_[ codim ];
       }
 
     private:
@@ -170,6 +178,149 @@ namespace Dune
         const int codimtype = CodimType< dim, codim >::value;
         cache[ codim ].first = dofSpace[ codim ]->mesh->node[ codimtype ];
         cache[ codim ].second = dofSpace[ codim ]->admin->n0_dof[ codimtype ];
+      }
+    };
+
+
+
+    // DofVectorProvider
+    // -----------------
+
+    template< class Dof >
+    struct DofVectorProvider;
+
+    template<>
+    struct DofVectorProvider< int >
+    {
+      typedef ALBERTA DOF_INT_VEC DofVector;
+
+      static DofVector *get ( const DofSpace *dofSpace, const std::string &name )
+      {
+        return ALBERTA get_dof_int_vec( name.c_str(), dofSpace );
+      }
+
+      static void free ( DofVector *dofVector )
+      {
+        ALBERTA free_dof_int_vec( dofVector );
+      }
+    };
+
+    template<>
+    struct DofVectorProvider< signed char >
+    {
+      typedef ALBERTA DOF_SCHAR_VEC DofVector;
+
+      static DofVector *get ( const DofSpace *dofSpace, const std::string &name )
+      {
+        return ALBERTA get_dof_schar_vec( name.c_str(), dofSpace );
+      }
+
+      static void free ( DofVector *dofVector )
+      {
+        ALBERTA free_dof_schar_vec( dofVector );
+      }
+    };
+
+    template<>
+    struct DofVectorProvider< unsigned char >
+    {
+      typedef ALBERTA DOF_UCHAR_VEC DofVector;
+
+      static DofVector *get ( const DofSpace *dofSpace, const std::string &name )
+      {
+        return ALBERTA get_dof_uchar_vec( name.c_str(), dofSpace );
+      }
+
+      static void free ( DofVector *dofVector )
+      {
+        ALBERTA free_dof_uchar_vec( dofVector );
+      }
+    };
+
+    template<>
+    struct DofVectorProvider< Real >
+    {
+      typedef ALBERTA DOF_REAL_VEC DofVector;
+
+      static DofVector *get ( const DofSpace *dofSpace, const std::string &name )
+      {
+        return ALBERTA get_dof_real_vec( name.c_str(), dofSpace );
+      }
+
+      static void free ( DofVector *dofVector )
+      {
+        ALBERTA free_dof_real_vec( dofVector );
+      }
+    };
+
+    template<>
+    struct DofVectorProvider< GlobalVector >
+    {
+      typedef ALBERTA DOF_REAL_D_VEC DofVector;
+
+      static DofVector *get ( const DofSpace *dofSpace, const std::string &name )
+      {
+        return ALBERTA get_dof_real_d_vec( name.c_str(), dofSpace );
+      }
+
+      static void free ( DofVector *dofVector )
+      {
+        ALBERTA free_dof_real_d_vec( dofVector );
+      }
+    };
+
+
+
+    // DofVector
+    // ---------
+
+    template< class Dof >
+    class DofVectorPointer
+    {
+      typedef DofVectorPointer< Dof > This;
+
+      typedef Alberta::DofVectorProvider< Dof > DofVectorProvider;
+
+    public:
+      typedef typename DofVectorProvider::DofVector DofVector;
+
+    private:
+      DofVector *dofVector_;
+
+    public:
+      explicit DofVectorPointer ( const DofSpace *dofSpace,
+                                  const std::string &name = "" )
+        : dofVector_( DofVectorProvider::get( dofSpace, name ) )
+      {
+        assert( dofVector_ != NULL );
+      }
+
+    private:
+      // prohibit copying and assignment
+      DofVectorPointer ( const This & );
+      This &operator= ( const This & );
+
+    public:
+      ~DofVectorPointer ()
+      {
+        DofVectorProvider::free( dofVector_ );
+      }
+
+      operator DofVector * () const
+      {
+        return dofVector_;
+      }
+
+      void initialize ( const Dof &value )
+      {
+        Dof *array = NULL;
+        GET_DOF_VEC( array, dofVector_ );
+        FOR_ALL_DOFS( dofSpace()->admin, array[ dof ] = value );
+      }
+
+      const DofSpace *dofSpace () const
+      {
+        return dofVector_->fe_space;
       }
     };
 
