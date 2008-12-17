@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_ELEMENTINFO_HH
 
 #include <dune/grid/albertagrid/exceptions.hh>
+#include <dune/grid/albertagrid/misc.hh>
 
 #if HAVE_ALBERTA
 
@@ -12,16 +13,6 @@ namespace Dune
 
   namespace Alberta
   {
-
-    typedef ALBERTA REAL Real;
-    typedef ALBERTA MESH Mesh;
-    typedef ALBERTA MACRO_EL MacroElement;
-    typedef ALBERTA EL Element;
-#if DUNE_ALBERTA_VERSION < 0x200
-    typedef ALBERTA BOUNDARY Boundary;
-#endif
-
-
 
     // External Forward Declarations
     // -----------------------------

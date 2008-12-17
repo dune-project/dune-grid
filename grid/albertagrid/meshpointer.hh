@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 #if HAVE_ALBERTA
@@ -14,6 +15,14 @@ namespace Dune
 
   namespace Alberta
   {
+
+    // External Forward Declarations
+    // -----------------------------
+
+    template< int dim >
+    class HierarchyDofNumbering;
+
+
 
     // MeshPointer
     // -----------
@@ -76,12 +85,24 @@ namespace Dune
           mesh_ = NULL;
         }
       }
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    private:
+      static void initDofAdmins ( Mesh *mesh )
+      {
+        typedef HierarchyDofNumbering< dim > DofNumbering;
+        DofNumbering *dofNumbering = new DofNumbering( MeshPointer< dim >( mesh ) );
+        delete dofNumbering;
+      }
+#endif
     };
 
 
 #if DUNE_ALBERTA_VERSION >= 0x200
+#if 0
     typedef NODE_PROJECTION *InitBoundary ( Mesh *, MacroElement *, int );
     static InitBoundary *initBoundary = 0;
+#endif
 
     template< int dim >
     inline void MeshPointer< dim >
@@ -119,9 +140,13 @@ namespace Dune
       release();
 
       typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      mesh_ = get_mesh( name.c_str(), AlbertHelp::initDofAdmin< dim >, LeafData::initLeafData );
+      //mesh_ = get_mesh( name.c_str(), AlbertHelp::initDofAdmin< dim >, LeafData::initLeafData );
+      mesh_ = get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
       if( mesh_ != NULL )
+      {
+        AlbertHelp::initDofAdmin< dim >( mesh_ );
         read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
+      }
     }
 #endif // #if DUNE_ABLERTA_VERSION < 0x200
 

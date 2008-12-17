@@ -3,8 +3,7 @@
 #ifndef DUNE_ALBERTA_DOFADMIN_HH
 #define DUNE_ALBERTA_DOFADMIN_HH
 
-#include <dune/grid/genericgeometry/misc.hh>
-
+#include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 #if HAVE_ALBERTA
@@ -20,44 +19,6 @@ namespace Dune
 
     template< int dim >
     class MeshPointer;
-
-
-
-    // CodimType
-    // ---------
-
-    template< int dim, int codim >
-    struct CodimType;
-
-    template< int dim >
-    struct CodimType< dim, 0 >
-    {
-      static const int value = CENTER;
-    };
-
-    template< int dim >
-    struct CodimType< dim, dim >
-    {
-      static const int value = VERTEX;
-    };
-
-    template<>
-    struct CodimType< 2, 1 >
-    {
-      static const int value = EDGE;
-    };
-
-    template<>
-    struct CodimType< 3, 1 >
-    {
-      static const int value = FACE;
-    };
-
-    template<>
-    struct CodimType< 3, 2 >
-    {
-      static const int value = EDGE;
-    };
 
 
 
@@ -84,15 +45,15 @@ namespace Dune
       typedef std::pair< int, int > Cache;
 
       MeshPointer mesh_;
-      DofSpace *dofSpace_[ dim+1 ];
+      const DofSpace *dofSpace_[ dim+1 ];
       Cache cache_[ dim+1 ];
 
     public:
       HierarchyDofNumbering ( const MeshPointer &mesh )
         : mesh_( mesh )
       {
-        GenericGeometry::ForLoop< CreateDofSpace, 0, dim >::apply( mesh_, dofSpace_ );
-        GenericGeometry::ForLoop< CacheDofSpace, 0, dim >::apply( dofSpace_, cache_ );
+        ForLoop< CreateDofSpace, 0, dim >::apply( mesh_, dofSpace_ );
+        ForLoop< CacheDofSpace, 0, dim >::apply( dofSpace_, cache_ );
       }
 
     private:
@@ -103,7 +64,7 @@ namespace Dune
       ~HierarchyDofNumbering ()
       {
         for( int codim = 0; codim <= dim; ++codim )
-          ALBERTA free_fe_space( dofSpace_[ codim ] );
+          freeDofSpace( dofSpace_[ codim ] );
       }
 
       int operator() ( Element *element, int codim, unsigned int subEntity )
@@ -116,7 +77,32 @@ namespace Dune
       {
         return number( element.el(), codim, subEntity );
       }
+
+    private:
+      static void freeDofSpace ( const DofSpace *dofSpace );
     };
+
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline void
+    HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
+    {
+      ALBERTA free_fe_space( dofSpace );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline void
+    HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
+    {
+      if( dofSpace->name != NULL )
+        free( (char *)(dofSpace->name) );
+      ALBERTA MEM_FREE( dofSpace, 1, DofSpace );
+    }
+#endif
 
 
 
@@ -128,7 +114,7 @@ namespace Dune
     template< int codim >
     struct HierarchyDofNumbering< dim >::CreateDofSpace
     {
-      void apply ( const MeshPointer &mesh, DofSpace *(&dofSpace)[ dim+1 ] )
+      static void apply ( const MeshPointer &mesh, const DofSpace *(&dofSpace)[ dim+1 ] )
       {
         int ndof[ N_NODE_TYPES ];
         for( int i = 0; i < N_NODE_TYPES; ++i )
@@ -139,7 +125,7 @@ namespace Dune
         name += (char)(codim + '0');
 
 #if DUNE_ALBERTA_VERSION >= 0x201
-        const ALBERTA FLAGS = ADM_PRESERVE_COARSE_DOFS;
+        const ALBERTA FLAGS flags = ADM_PRESERVE_COARSE_DOFS;
         dofSpace[ codim ] = ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
 #else
         dofSpace[ codim ] = ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL, 1 );
@@ -154,7 +140,7 @@ namespace Dune
     template< int codim >
     struct HierarchyDofNumbering< dim >::CreateDofSpace
     {
-      void apply ( const MeshPointer &mesh, DofSpace *(&dofSpace)[ dim+1 ] )
+      static void apply ( const MeshPointer &mesh, const DofSpace *(&dofSpace)[ dim+1 ] )
       {
         int ndof[ DIM+1 ];
         for( int i = 0; i <= DIM; ++i )
@@ -164,7 +150,7 @@ namespace Dune
         std::string name = "Codimension ";
         name += (char)(codim + '0');
 
-        dofSpace[ codim ] = get_fe_space ( mesh, name.c_str(), ndof, NULL );
+        dofSpace[ codim ] = ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL );
         assert( dofSpace[ codim ] != NULL );
       }
     };
@@ -179,7 +165,7 @@ namespace Dune
     template< int codim >
     struct HierarchyDofNumbering< dim >::CacheDofSpace
     {
-      void apply ( DofSpace *(&dofSpace)[ dim+1 ], Cache (&cache)[ dim+1 ] )
+      static void apply ( const DofSpace *(&dofSpace)[ dim+1 ], Cache (&cache)[ dim+1 ] )
       {
         const int codimtype = CodimType< dim, codim >::value;
         cache[ codim ].first = dofSpace[ codim ]->mesh->node[ codimtype ];

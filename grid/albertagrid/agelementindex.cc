@@ -3,7 +3,7 @@
 #ifndef __ALBERTGRID_ELMEM_CC__
 #define __ALBERTGRID_ELMEM_CC__
 
-#include "dofadmin.hh"
+#include "misc.hh"
 
 namespace AlbertHelp
 {
