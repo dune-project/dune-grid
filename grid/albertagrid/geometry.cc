@@ -480,7 +480,8 @@ namespace Dune
       // for simplices this is not so bad
       for(int i=0; i<mydim+1; i++)
       {
-        coord_[i] = geo.local( localGeom[i] );
+        // for simplicies there is no difference in corner numberings
+        coord_[i] = geo.local( localGeom.corner( i ) );
       }
 
       elDet_     = elDeterminant();
