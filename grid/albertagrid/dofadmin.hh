@@ -203,6 +203,17 @@ namespace Dune
       {
         ALBERTA free_dof_int_vec( dofVector );
       }
+
+      static DofVector *read ( const std::string &filename, Mesh *mesh, DofSpace *dofSpace )
+      {
+        return ALBERTA read_dof_int_vec_xdr( filename.c_str(), mesh, dofSpace );
+      }
+
+      static bool write ( const DofVector *dofVector, const std::string &filename )
+      {
+        int success = ALBERTA write_dof_int_vec_xdr( dofVector, filename.c_str() );
+        return (success == 0);
+      }
     };
 
     template<>
@@ -218,6 +229,17 @@ namespace Dune
       static void free ( DofVector *dofVector )
       {
         ALBERTA free_dof_schar_vec( dofVector );
+      }
+
+      static DofVector *read ( const std::string &filename, Mesh *mesh, DofSpace *dofSpace )
+      {
+        return ALBERTA read_dof_schar_vec_xdr( filename.c_str(), mesh, dofSpace );
+      }
+
+      static bool write ( const DofVector *dofVector, const std::string &filename )
+      {
+        int success = ALBERTA write_dof_schar_vec_xdr( dofVector, filename.c_str() );
+        return (success == 0);
       }
     };
 
@@ -235,6 +257,17 @@ namespace Dune
       {
         ALBERTA free_dof_uchar_vec( dofVector );
       }
+
+      static DofVector *read ( const std::string &filename, Mesh *mesh, DofSpace *dofSpace )
+      {
+        return ALBERTA read_dof_uchar_vec_xdr( filename.c_str(), mesh, dofSpace );
+      }
+
+      static bool write ( const DofVector *dofVector, const std::string &filename )
+      {
+        int success = ALBERTA write_dof_uchar_vec_xdr( dofVector, filename.c_str() );
+        return (success == 0);
+      }
     };
 
     template<>
@@ -251,6 +284,17 @@ namespace Dune
       {
         ALBERTA free_dof_real_vec( dofVector );
       }
+
+      static DofVector *read ( const std::string &filename, Mesh *mesh, DofSpace *dofSpace )
+      {
+        return ALBERTA read_dof_real_vec_xdr( filename.c_str(), mesh, dofSpace );
+      }
+
+      static bool write ( const DofVector *dofVector, const std::string &filename )
+      {
+        int success = ALBERTA write_dof_real_vec_xdr( dofVector, filename.c_str() );
+        return (success == 0);
+      }
     };
 
     template<>
@@ -266,6 +310,17 @@ namespace Dune
       static void free ( DofVector *dofVector )
       {
         ALBERTA free_dof_real_d_vec( dofVector );
+      }
+
+      static DofVector *read ( const std::string &filename, Mesh *mesh, DofSpace *dofSpace )
+      {
+        return ALBERTA read_dof_real_d_vec_xdr( filename.c_str(), mesh, dofSpace );
+      }
+
+      static bool write ( const DofVector *dofVector, const std::string &filename )
+      {
+        int success = ALBERTA write_dof_real_d_vec_xdr( dofVector, filename.c_str() );
+        return (success == 0);
       }
     };
 
@@ -288,27 +343,62 @@ namespace Dune
       DofVector *dofVector_;
 
     public:
-      explicit DofVectorPointer ( const DofSpace *dofSpace,
-                                  const std::string &name = "" )
-        : dofVector_( DofVectorProvider::get( dofSpace, name ) )
-      {
-        assert( dofVector_ != NULL );
-      }
+      DofVectorPointer ()
+        : dofVector_( NULL )
+      {}
 
-    private:
-      // prohibit copying and assignment
-      DofVectorPointer ( const This & );
-      This &operator= ( const This & );
-
-    public:
-      ~DofVectorPointer ()
-      {
-        DofVectorProvider::free( dofVector_ );
-      }
+      explicit DofVectorPointer ( DofVector *dofVector )
+        : dofVector_( dofVector )
+      {}
 
       operator DofVector * () const
       {
         return dofVector_;
+      }
+
+      bool operator! () const
+      {
+        return (dofVector_ == NULL);
+      }
+
+      const DofSpace *dofSpace () const
+      {
+        return dofVector_->fe_space;
+      }
+
+      std::string name () const
+      {
+        if( dofVector_ != NULL )
+          return dofVector_->name;
+        else
+          return std::string();
+      }
+
+      void create ( const DofSpace *dofSpace, const std::string &name = "" )
+      {
+        release();
+        dofVector_ = DofVectorProvider::get( dofSpace, name );
+      }
+
+      template< int dim >
+      void read ( const std::string &filename, const MeshPointer< dim > &meshPointer )
+      {
+        release();
+        dofVector_ = DofVectorProvider::read( filename, meshPointer, NULL );
+      }
+
+      bool write ( const std::string &filename ) const
+      {
+        return DofVectorProvider::write( dofVector_, filename );
+      }
+
+      void release ()
+      {
+        if( dofVector_ != NULL )
+        {
+          DofVectorProvider::free( dofVector_ );
+          dofVector_ = NULL;
+        }
       }
 
       void initialize ( const Dof &value )
@@ -318,10 +408,6 @@ namespace Dune
         FOR_ALL_DOFS( dofSpace()->admin, array[ dof ] = value );
       }
 
-      const DofSpace *dofSpace () const
-      {
-        return dofVector_->fe_space;
-      }
     };
 
   }
