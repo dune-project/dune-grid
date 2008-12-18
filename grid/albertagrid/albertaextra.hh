@@ -27,24 +27,6 @@ namespace Albert {
 #define getDofVec( vec, drv ) \
   (assert(drv != 0); (vec = (drv)->vec); assert(vec != 0));
 
-#if DUNE_ALBERTA_VERSION < 0x200
-//! recompute setting of neighbours, because macro_el_info of ALBERTA does
-//! that wrong for the Dune context.
-inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
-{
-  // set right neighbour element
-  elinfo->neigh[neigh]      = mel->neigh[neigh]->el;
-  // get vertex of opposite coord
-  int oppvx = mel->opp_vertex[neigh];
-  elinfo->opp_vertex[neigh] = oppvx;
-
-  // copy to opp_coord
-  REAL_D *coord  = elinfo->opp_coord;
-  const REAL * const * neighcoord  = mel->neigh[neigh]->coord;
-  std::memcpy(coord[neigh],neighcoord[oppvx],sizeof(REAL_D));
-}
-#endif
-
 // provides the element number generation and management
 #include "agelementindex.cc"
 
