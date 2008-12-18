@@ -130,7 +130,7 @@ namespace Dune {
     /** \brief GridFamily of OneDGrid */
     typedef OneDGridFamily<dim,dimworld> GridFamily;
 
-    /** \brief Provides the standard grid types */
+    //Provides the standard grid types
     typedef OneDGridFamily<dim,dimworld>::Traits Traits;
 
     /** \brief Constructor with an explicit set of coordinates */

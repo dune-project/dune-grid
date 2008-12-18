@@ -263,7 +263,7 @@ namespace Dune
     typedef GridDefaultImplementation <dim,dimworld,albertCtype,
         AlbertaGridFamily<dim,dimworld> > BaseType;
 
-    //! the Traits
+    // the Traits
     typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
 
     typedef Alberta::Real ctype;

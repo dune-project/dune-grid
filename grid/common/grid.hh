@@ -997,7 +997,11 @@ namespace Dune {
     typedef typename GridFamily::Traits::Grid GridImp;
 
   public:
-    //! the traits of this class
+    /**
+     * \brief The traits of this class.
+     *
+     * Presents the typedefs as described in GridTraits.
+     */
     typedef typename GridFamily::Traits Traits;
 
     //! View for a grid level
@@ -1232,34 +1236,56 @@ namespace Dune {
       >
   struct GridTraits
   {
+    /** \brief The type that implementing the grid. */
     typedef GridImp Grid;
 
+    /** \brief The type of the intersection at the leafs of the grid. */
     typedef Dune::Intersection<const GridImp, LeafIntersectionImp>  LeafIntersection;
+    /** \brief The type of the intersection at the levels of the grid. */
     typedef Dune::Intersection<const GridImp, LevelIntersectionImp> LevelIntersection;
+    /** \brief The type of the intersection iterator at the leafs of the grid. */
     typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorImp, LeafIntersectionImp>   LeafIntersectionIterator;
+    /** \brief The type of the intersection iterator at the levels of the grid. */
     typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorImp, LevelIntersectionImp> LevelIntersectionIterator;
 
+    /** \brief The type of the  hierarchic iterator. */
     typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
 
+    /**
+     * \brief Traits associated with a specific codim.
+     * \tparam cd The codimension.
+     */
     template <int cd>
     struct Codim
     {
       //! IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
+      /** \brief The type of the geometry associated with the entity.*/
       typedef Dune::Geometry<dim-cd, dimw, const GridImp, GeometryImp> Geometry;
+      /** \brief The type of the local geometry associated with the entity.*/
       typedef Dune::Geometry<dim-cd, dim, const GridImp, GeometryImp> LocalGeometry;
+      /** \brief The type of the entity. */
       // we could - if needed - introduce another struct for dimglobal of Geometry
       typedef Dune::Entity<cd, dim, const GridImp, EntityImp> Entity;
 
+      /** \brief The type of the iterator over all level entities of this codim. */
       typedef Dune::LevelIterator<cd,All_Partition,const GridImp,LevelIteratorImp> LevelIterator;
 
+      /** \brief The type of the iterator over all leaf entities of this codim. */
       typedef Dune::LeafIterator<cd,All_Partition,const GridImp,LeafIteratorImp> LeafIterator;
 
+      /** \brief The type of the entity pointer for entities of this codim.*/
       typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
+      /**
+       * \brief Traits associated with a specific grid partition type.
+       * \tparam pitype The type of the grid partition.
+       */
       template <PartitionIteratorType pitype>
       struct Partition
       {
+        /** \brief The type of the iterator over the level entities of this codim on this partition. */
         typedef Dune::LevelIterator<cd,pitype,const GridImp,LevelIteratorImp> LevelIterator;
+        /** \brief The type of the iterator over the leaf entities of this codim on this partition. */
         typedef Dune::LeafIterator<cd,pitype,const GridImp,LeafIteratorImp> LeafIterator;
       };
     private:
@@ -1267,20 +1293,32 @@ namespace Dune {
       typedef EntityPointerImp<cd,const GridImp> EntityPointerImpl;
     };
 
+    /**
+     * \brief Traits associated with a specific grid partition type.
+     * \tparam pitype The type of the grid partition.
+     */
     template <PartitionIteratorType pitype>
     struct Partition
     {
+      /** \brief The type of the level grid view associated with this partition type. */
       typedef Dune::GridView<LevelGridViewTraits<const GridImp,pitype> >
       LevelGridView;
+
+      /** \brief The type of the leaf grid view associated with this partition type. */
       typedef Dune::GridView<LeafGridViewTraits<const GridImp,pitype> >
       LeafGridView;
     };
 
+    /** \brief The type of the level index set. */
     typedef IndexSet<const GridImp,LevelIndexSetImp,LevelIndexSetTypes> LevelIndexSet;
+    /** \brief The type of the leaf index set. */
     typedef IndexSet<const GridImp,LeafIndexSetImp,LeafIndexSetTypes> LeafIndexSet;
+    /** \brief The type of the global id set. */
     typedef IdSet<const GridImp,GlobalIdSetImp,GIDType> GlobalIdSet;
+    /** \brief The type of the local id set. */
     typedef IdSet<const GridImp,LocalIdSetImp,LIDType> LocalIdSet;
 
+    /** \brief The type of the collective communication. */
     typedef CCType CollectiveCommunication;
   };
 

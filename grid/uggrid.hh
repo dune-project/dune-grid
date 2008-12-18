@@ -206,7 +206,7 @@ namespace Dune {
     //! type of the used GridFamily for this grid
     typedef UGGridFamily<dim,dim>  GridFamily;
 
-    //! the Traits
+    // the Traits
     typedef typename UGGridFamily<dim,dim>::Traits Traits;
 
     //! The type used to store coordinates

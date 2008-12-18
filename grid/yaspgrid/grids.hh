@@ -978,6 +978,27 @@ namespace Dune {
     return s;
   }
 
+  namespace
+  {
+    template<int dim>
+    struct power
+    {
+      static int eval(int s)
+      {
+        return s*power<dim-1>::eval(s);
+      }
+    };
+
+    template<>
+    struct power<0>
+    {
+      static int eval(int s)
+      {
+        return 1;
+      }
+    };
+  }
+
 
   /*! Torus provides all the functionality to handle a toroidal communication structure:
 
@@ -1044,10 +1065,18 @@ namespace Dune {
       // determine dimensions
       iTupel dims;
       double opt=1E100;
-      optimize_dims(d-1,size,_procs,dims,opt);
-      //          if (_rank==0) std::cout << "Torus<" << d
-      //                                                          << ">: mapping " << _procs << " processes onto "
-      //                                                          << _dims << " torus." << std::endl;
+      bool found=false;
+      for(int i=1; i<_procs; ++i)
+        if(power<d>::eval(i)==_procs) {
+          for(int j=0; j<d; ++j)
+            _dims[j]=i;
+          found=true;
+        }
+      if(!found)
+        optimize_dims(d-1,size,_procs,dims,opt);
+      //	  if (_rank==0) std::cout << "Torus<" << d
+      //							  << ">: mapping " << _procs << " processes onto "
+      //							  << _dims << " torus." << std::endl;
 
       // compute increments for lexicographic ordering
       int inc = 1;

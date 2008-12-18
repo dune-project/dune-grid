@@ -2275,7 +2275,7 @@ namespace Dune {
 
     //! the GridFamily of this grid
     typedef YaspGridFamily<dim,dim> GridFamily;
-    //! the Traits
+    // the Traits
     typedef typename YaspGridFamily<dim,dim>::Traits Traits;
 
     // need for friend declarations in entity
