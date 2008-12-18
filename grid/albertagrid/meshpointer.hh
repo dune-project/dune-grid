@@ -86,6 +86,19 @@ namespace Dune
         }
       }
 
+      bool coarsen ()
+      {
+        const bool coarsened = (ALBERTA coarsen( mesh_ ) == MESH_COARSENED);
+        if( coarsened )
+          ALBERTA dof_compress( mesh_ );
+        return coarsened;
+      }
+
+      bool refine ()
+      {
+        return (ALBERTA refine( mesh_ ) == MESH_REFINED);
+      }
+
 #if DUNE_ALBERTA_VERSION < 0x200
     private:
       static void initDofAdmins ( Mesh *mesh )

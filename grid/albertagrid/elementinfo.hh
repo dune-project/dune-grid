@@ -373,7 +373,7 @@ namespace Dune
         child->elInfo.opp_vertex[ k ] = -2;
 
 #if DUNE_ALBERTA_VERSION >= 0x201
-      ALBERTA fill_elinfo( i, ALBERTA FILL_ANY, &elInfo(), &(child->elInfo) );
+      ALBERTA fill_elinfo( i, FILL_ANY, &elInfo(), &(child->elInfo) );
 #else
       ALBERTA fill_elinfo( i, &elInfo(), &(child->elInfo) );
 #endif

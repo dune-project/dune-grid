@@ -11,7 +11,7 @@
 #ifdef __ALBERTApp__
 #define ALBERTA Alberta::
 #else
-#define ALBERTA
+#define ALBERTA ::
 #endif
 
 // the keyword ALBERTA stands for ALBERTA routines

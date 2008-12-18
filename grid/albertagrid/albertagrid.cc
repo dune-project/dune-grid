@@ -514,8 +514,6 @@ namespace Dune
   template < int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::adapt()
   {
-    unsigned char flag;
-    bool refined = false;
     wasChanged_ = false;
 
     // if lockPostAdapt == true, the user forgot to call postAdapt
@@ -533,23 +531,12 @@ namespace Dune
     // set all values of elNewCheck positive which means old
     ALBERTA AlbertHelp::set2positive ( dofvecs_.elNewCheck );
 
-    flag = ALBERTA AlbertRefine ( mesh_ );
-    refined = (flag == 0) ? false : true;
+    const bool refined = mesh_.refine();
+    const bool coarsened = (preAdapt() ? mesh_.coarsen() : false);
+    wasChanged_ = (refined || coarsened);
 
-    if(preAdapt()) // true if a least on element is marked for coarseing
-      flag = ALBERTA AlbertCoarsen( mesh_ );
-
-    if(!refined)
-    {
-      wasChanged_ = (flag == 0) ? false : true;
-    }
-    else
-      wasChanged_ = true;
-
-    if(wasChanged_)
-    {
+    if( wasChanged_ )
       calcExtras();
-    }
 
     // remove global pointer in elmem.cc
     ALBERTA AlbertHelp::removeIndexManager_elmem_cc(AlbertHelp::numOfElNumVec);

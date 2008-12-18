@@ -48,31 +48,6 @@ inline void computeNeigh(const MACRO_EL *mel, EL_INFO *elinfo, int neigh)
 // provides the element number generation and management
 #include "agelementindex.cc"
 
-
-//****************************************************************
-//
-//  Wrapper for ALBERTA refine and coarsen routines.
-//  Calling direct refine in the grid.refine() method leads to
-//  infinite loop. Donno wy?
-//  This wrappers solved the problem.
-//
-//****************************************************************
-
-// wrapper for Albert refine routine
-inline static U_CHAR AlbertRefine ( MESH * mesh )
-{
-  return refine ( mesh );
-}
-
-// wrapper for Albert coarsen routine
-inline static U_CHAR AlbertCoarsen ( MESH * mesh )
-{
-  U_CHAR flag = coarsen ( mesh );
-  // is mesh was really coarsend, then make dof_compress
-  if(flag == MESH_COARSENED) dof_compress ( mesh );
-  return flag;
-}
-
 //*********************************************************************
 //
 //  Help Routines for the ALBERTA Mesh
