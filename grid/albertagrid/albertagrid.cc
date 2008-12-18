@@ -146,6 +146,7 @@ namespace Dune
     if( makeNew )
     {
       mesh_.create( macroGridFileName, gridName );
+      AlbertHelp::initDofAdmin< dim >( mesh_ );
       initGrid();
       std::cout << typeName() << " created from macro grid file '"
                 << macroGridFileName << "'." << std::endl;
@@ -892,6 +893,7 @@ namespace Dune
     removeMesh(); // delete all objects
 
     mesh_.create( "AlbertaGrid", filename.c_str() );
+    AlbertHelp::initDofAdmin< dim >( mesh_ );
 
     time = 0.0;
 

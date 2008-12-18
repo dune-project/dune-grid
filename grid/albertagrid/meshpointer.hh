@@ -105,7 +105,7 @@ namespace Dune
     {
       release();
 
-      MACRO_DATA *macro = read_macro( filename.c_str() );
+      ALBERTA MACRO_DATA *macro = ALBERTA read_macro( filename.c_str() );
 
 #if DUNE_ALBERTA_VERSION >= 0x201
       mesh_ = GET_MESH( dim, name.c_str(), macro, NULL, NULL );
@@ -117,12 +117,10 @@ namespace Dune
 
       if( mesh_ != NULL )
       {
-        AlbertHelp::initDofAdmin< dim >( mesh_ );
-
         typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-        init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
-                        LeafData::AlbertLeafRefine,
-                        LeafData::AlbertLeafCoarsen );
+        ALBERTA init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
+                                LeafData::AlbertLeafRefine,
+                                LeafData::AlbertLeafCoarsen );
       }
     }
 #endif // #if DUNE_ABLERTA_VERSION >= 0x200
@@ -135,12 +133,10 @@ namespace Dune
       release();
 
       typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      //mesh_ = get_mesh( name.c_str(), AlbertHelp::initDofAdmin< dim >, LeafData::initLeafData );
-      mesh_ = get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
+      mesh_ = ALBERTA get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
       if( mesh_ != NULL )
       {
-        AlbertHelp::initDofAdmin< dim >( mesh_ );
-        read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
+        ALBERTA read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
       }
     }
 #endif // #if DUNE_ABLERTA_VERSION < 0x200
@@ -154,7 +150,7 @@ namespace Dune
       release();
 
       typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      mesh_ = read_mesh_xdr( filename.c_str(), &time, LeafData::initLeafData, BoundaryProvider::initBoundary );
+      mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, LeafData::initLeafData, BoundaryProvider::initBoundary );
     }
 #endif // #if DUNE_ABLERTA_VERSION < 0x200
 
@@ -172,9 +168,9 @@ namespace Dune
       if( mesh_ != NULL )
       {
         typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-        init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
-                        LeafData::AlbertLeafRefine,
-                        LeafData::AlbertLeafCoarsen );
+        ALBERTA init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
+                                LeafData::AlbertLeafRefine,
+                                LeafData::AlbertLeafCoarsen );
       }
     }
 #endif // #if DUNE_ABLERTA_VERSION >= 0x200
