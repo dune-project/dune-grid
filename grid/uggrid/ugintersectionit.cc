@@ -97,19 +97,15 @@ intersectionSelfLocal() const
   for (int i=0; i<numCornersOfSide; i++) {
 
     // get number of corner in UG's numbering system
-    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+    int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
+    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
 
     // get the corners local coordinates
     UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
 
   }
 
-  /** \todo Reorder this without copying */
-  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-  for (size_t i=0; i<coordinates.size(); i++)
-    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-  selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+  selfLocal_.setCoordinates(coordinates, intersectionGeometryType);
 
   return selfLocal_;
 }
@@ -125,7 +121,8 @@ intersectionGlobal() const
 
   for (int i=0; i<numCornersOfSide; i++) {
 
-    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
+    int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
+    int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
     typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
     for (int j=0; j<dim; j++)
@@ -133,12 +130,7 @@ intersectionGlobal() const
 
   }
 
-  /** \todo Reorder this without copying */
-  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-  for (size_t i=0; i<coordinates.size(); i++)
-    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-  neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
+  neighGlob_.setCoordinates(coordinates, intersectionGeometryType);
 
   return neighGlob_;
 }
