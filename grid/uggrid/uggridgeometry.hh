@@ -50,7 +50,7 @@ namespace Dune {
       Geometry<2, 3, GridImp, UGGridGeometry>(UGGridGeometry<2,3,GridImp>())
     {};
 
-    void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates) {
+    void setCoordinates(const std::vector<FieldVector<UGCtype,3> >& coordinates, const GeometryType& type) {
       this->realGeometry.setup(type, coordinates);
     }
 
@@ -66,7 +66,7 @@ namespace Dune {
       Geometry<1, 2, GridImp, UGGridGeometry>(UGGridGeometry<1,2,GridImp>())
     {};
 
-    void setCoordinates(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates) {
+    void setCoordinates(const std::vector<FieldVector<UGCtype,2> >& coordinates, const GeometryType& type) {
       this->realGeometry.setup(type, coordinates);
     }
 
@@ -255,17 +255,14 @@ namespace Dune {
 
   public:
 
-    /** \brief Constructor with a geometry type and a set of corners */
+    /** \brief Setup method with a geometry type and a set of corners
+        \param coordinates The corner coordinates in DUNE numbering
+     */
     void setup(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
     {
-      /** \todo This reordering should happen when setting up the argument for this method */
-      std::vector<FieldVector<typename GridImp::ctype,3> > duneCoordinates(coordinates.size());
-      for (size_t i=0; i<coordinates.size(); i++)
-        duneCoordinates[i] = coordinates[UGGridRenumberer<2>::verticesDUNEtoUG(i, type)];
-
       // set up base class
       // Yes, a strange way, but the only way, as BasicGeometry doesn't have a setup method
-      Base::operator=(Base(type,duneCoordinates));
+      Base::operator=(Base(type,coordinates));
     }
 
   };

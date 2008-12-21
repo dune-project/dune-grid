@@ -92,6 +92,7 @@ intersectionSelfLocal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
   std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
   for (int i=0; i<numCornersOfSide; i++) {
 
@@ -103,7 +104,12 @@ intersectionSelfLocal() const
 
   }
 
-  selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+  /** \todo Reorder this without copying */
+  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+  for (size_t i=0; i<coordinates.size(); i++)
+    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+  selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   return selfLocal_;
 }
@@ -115,6 +121,7 @@ intersectionGlobal() const
 {
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
   std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
   for (int i=0; i<numCornersOfSide; i++) {
 
@@ -126,7 +133,12 @@ intersectionGlobal() const
 
   }
 
-  neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+  /** \todo Reorder this without copying */
+  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+  for (size_t i=0; i<coordinates.size(); i++)
+    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+  neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   return neighGlob_;
 }
@@ -148,6 +160,7 @@ intersectionNeighborLocal() const
   // ///////////////////////////////////////
   int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
   std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+  GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
   for (int i=0; i<numCornersOfSide; i++) {
 
@@ -168,7 +181,12 @@ intersectionNeighborLocal() const
 
   }
 
-  neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+  /** \todo Reorder this without copying */
+  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+  for (size_t i=0; i<coordinates.size(); i++)
+    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+  neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   return neighLocal_;
 }
@@ -299,6 +317,7 @@ intersectionSelfLocal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++)
     {
@@ -310,7 +329,12 @@ intersectionSelfLocal() const
 
     }
 
-    selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+    selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   } else {
 
@@ -319,6 +343,7 @@ intersectionSelfLocal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -338,7 +363,12 @@ intersectionSelfLocal() const
 
     }
 
-    selfLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+    selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
   }
 
   return selfLocal_;
@@ -363,6 +393,7 @@ intersectionGlobal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -374,8 +405,12 @@ intersectionGlobal() const
 
     }
 
-    neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
 
+    neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   } else {
 
@@ -384,6 +419,7 @@ intersectionGlobal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -399,7 +435,12 @@ intersectionGlobal() const
 
     }
 
-    neighGlob_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+    neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   }
 
@@ -425,6 +466,7 @@ intersectionNeighborLocal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -448,7 +490,12 @@ intersectionNeighborLocal() const
 
     }
 
-    neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+    neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   } else {
 
@@ -457,6 +504,7 @@ intersectionNeighborLocal() const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(other, otherSide);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
+    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -466,7 +514,12 @@ intersectionNeighborLocal() const
 
     }
 
-    neighLocal_.setCoordinates(GeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1), coordinates);
+    /** \todo Reorder this without copying */
+    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
+    for (size_t i=0; i<coordinates.size(); i++)
+      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
+
+    neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
 
   }
 
