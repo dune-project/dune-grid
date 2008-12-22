@@ -15,8 +15,7 @@ namespace Dune
                                const ElementInfo &elementInfo,
                                int subEntity )
     : grid_( grid ),
-      isLeaf_( true ),
-      entity_( grid_.template getNewEntity< codim >( level, isLeaf_ ) )
+      entity_( grid_.template getNewEntity< codim >( level, true ) )
   {
     assert( entity_ );
     entityImp().setElement( elementInfo, subEntity );
@@ -27,8 +26,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid, int level, bool isLeaf, bool end )
     : grid_( grid ),
-      isLeaf_( isLeaf ),
-      entity_( grid_.template getNewEntity< codim >( level, isLeaf_) )
+      entity_( grid_.template getNewEntity< codim >( level, true ) )
   {
     if( end )
       done();
@@ -38,8 +36,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const EntityImp &entity )
     : grid_( entity.grid() ),
-      isLeaf_( entity.leafIt() ),
-      entity_( grid_.template getNewEntity< codim >( entity.level(), isLeaf_ ) )
+      entity_( grid_.template getNewEntity< codim >( entity.level(), true ) )
   {
     entityImp().setEntity( entity );
   }
@@ -49,8 +46,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid, const EntityImp  &entity )
     : grid_( grid ),
-      isLeaf_( entity.leafIt() ),
-      entity_( grid_.template getNewEntity< codim >( entity.level(), isLeaf_ ) )
+      entity_( grid_.template getNewEntity< codim >( entity.level(), true ) )
   {
     entityImp().setEntity( entity );
   }
@@ -60,8 +56,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const This &other )
     : grid_( other.grid_ ),
-      isLeaf_( other.isLeaf_ ),
-      entity_( grid_.template getNewEntity< codim >( other.level(), isLeaf_ ) )
+      entity_( grid_.template getNewEntity< codim >( other.level(), true ) )
   {
     entityImp().setEntity( other.entityImp() );
   }
@@ -72,7 +67,6 @@ namespace Dune
   AlbertaGridEntityPointer< codim, GridImp >::operator= ( const This &other )
   {
     assert( &grid_ == &other.grid_ );
-    isLeaf_ = other.isLeaf_;
     entityImp().setEntity( other.entityImp() );
     return *this;
   }

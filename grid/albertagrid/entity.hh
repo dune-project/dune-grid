@@ -114,7 +114,7 @@ namespace Dune
     bool equals ( const This &other ) const;
 
     // dummy function, only needed for codim 0
-    bool leafIt () const { return false; }
+    //bool leafIt () const { return false; }
 
     void clearElement ();
     void setElement ( const ElementInfo &elementInfo, int subEntity );
@@ -352,9 +352,6 @@ namespace Dune
     // return element for equaltiy in EntityPointer
     ALBERTA EL *getElement () const;
 
-    // returns true if entity comes from LeafIterator
-    bool leafIt () const { return leafIt_; }
-
     void clearElement ();
     void setElement ( const ElementInfo &elementInfo, int subEntity );
 
@@ -380,9 +377,6 @@ namespace Dune
     mutable GeometryObject geoObj_;
     mutable GeometryImp & geo_;
     mutable bool builtgeometry_;  //!< true if geometry has been constructed
-
-    // is true if entity comes from leaf iterator
-    bool leafIt_;
   }; // end of AlbertaGridEntity codim = 0
 
 }

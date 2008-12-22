@@ -397,7 +397,7 @@ namespace Dune
   {
     if( !elementInfo )
       return true;
-    return (this->leafIt() ? elementInfo.isLeaf() : (level_ == elementInfo.level()));
+    return (leafIterator ? elementInfo.isLeaf() : (level_ == elementInfo.level()));
   }
 
 
@@ -426,7 +426,7 @@ namespace Dune
 
     ALBERTA EL *el = elementInfo.el();
     assert( el );
-    if( !this->leafIt() )
+    if( !leafIterator )
     {
       const int elIndex = this->grid_.getElementNumber( el );
       const int faceIndex = this->grid_.getFaceNumber( el, subEntity_ );

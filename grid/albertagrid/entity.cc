@@ -151,8 +151,7 @@ namespace Dune
       elementInfo_(),
       geoObj_( GeometryImp() ),
       geo_( grid_.getRealImplementation(geoObj_) ),
-      builtgeometry_ (false),
-      leafIt_ ( leafIt )
+      builtgeometry_ (false)
   {}
 
 
@@ -163,8 +162,7 @@ namespace Dune
       elementInfo_( other.elementInfo_ ),
       geoObj_( other.geoObj_ ),
       geo_( grid_.getRealImplementation(geoObj_) ),
-      builtgeometry_ ( false ),
-      leafIt_ ( other.leafIt_ )
+      builtgeometry_ ( false )
   {}
 
 
@@ -369,7 +367,7 @@ namespace Dune
   {
     assert( !elementInfo_ == false );
     typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
-    return IteratorImp( grid_, elementInfo_, level(), maxlevel, leafIt() );
+    return IteratorImp( grid_, elementInfo_, level(), maxlevel, true );
   }
 
 

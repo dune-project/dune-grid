@@ -155,9 +155,6 @@ namespace Dune
     //! calculate normal to current face
     void calcOuterNormal ( NormalVector &n ) const;
 
-    // return whether the iterator was called from a LeafIterator entity or
-    // LevelIterator entity
-    bool leafIt () const { return leafIt_; }
     ////////////////////////////////////////////////
     // private member variables
     ////////////////////////////////////////////////
@@ -167,8 +164,6 @@ namespace Dune
 
     //! count on which neighbor we are lookin' at
     mutable int neighborCount_;
-
-    bool leafIt_;
 
     ElementInfo elementInfo_;
 

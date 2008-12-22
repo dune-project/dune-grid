@@ -28,7 +28,6 @@ namespace Dune
     neighborCount_ = 0;
     neighborInfo_ = ElementInfo();
     elementInfo_ = entity.elementInfo_;
-    this->leafIt_  = entity.leafIt();
 
     assert( !elementInfo_ == false );
     assert( elementInfo_.level() == level );
@@ -49,7 +48,6 @@ namespace Dune
   ::AlbertaGridIntersectionIterator ( const This &other )
     : grid_( other.grid_ ),
       neighborCount_( other.neighborCount_ ),
-      leafIt_( other.leafIt_ ),
       elementInfo_( other.elementInfo_ ),
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
@@ -69,7 +67,6 @@ namespace Dune
     neighborCount_ = other.neighborCount_;
     elementInfo_ = other.elementInfo_;
     neighborInfo_ = ElementInfo();
-    leafIt_ = other.leafIt_;
   }
 
 
@@ -104,8 +101,6 @@ namespace Dune
       std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo_.elInfo()), sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
-
-      assert( leafIt() || (elementInfo_.level() == neighborInfo_.level()) );
     }
 
     assert( !neighborInfo_ == false );

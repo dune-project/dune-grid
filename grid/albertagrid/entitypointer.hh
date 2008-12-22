@@ -80,9 +80,6 @@ namespace Dune
     {}
 
   protected:
-    //! returns true if entity comes from LeafIterator
-    bool leafIt () const { return isLeaf_; }
-
     //! return reference to internal entity imp
     EntityImp & entityImp ();
 
@@ -91,9 +88,6 @@ namespace Dune
 
     // reference to grid
     const GridImp & grid_;
-
-    //! flag for leaf iterators
-    bool isLeaf_;
 
     // entity that this EntityPointer points to
     EntityObject * entity_;
