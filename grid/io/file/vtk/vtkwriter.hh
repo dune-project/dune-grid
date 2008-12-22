@@ -544,11 +544,10 @@ namespace Dune
 
   public:
     /**
-     * @brief Construct a VTKWriter working on a specific index set of a grid.
+     * @brief Construct a VTKWriter working on a specific GridView.
      *
      *
-     * @param g The grid where the functions to be visualized live.
-     * @param i The index set the grid functions live on. (E. g. a level index set.)
+     * @param gridView The gridView the grid functions live on. (E. g. a LevelGridView.)
      * @param dm The data mode.
      */
     explicit VTKWriter ( const GridView &gridView,
