@@ -167,11 +167,11 @@ namespace Dune
     struct SetDofIdentifier
     {
       static void apply ( This &indexSet,
-                          ALBERTA DOF_INT_VEC *(&elNumbers)[ numVecs ] )
+                          Alberta::DofVectorPointer< int > (&elNumbers)[ numVecs ] )
       {
         if( codim < numVecs )
         {
-          const ALBERTA DOF_ADMIN *elAdmin = elNumbers[ codim ]->fe_space->admin;
+          const ALBERTA DOF_ADMIN *elAdmin = elNumbers[ codim ].dofSpace()->admin;
           // see Albert Doc. , should stay the same
 
           const int codimtype = Alberta::CodimType< dim, codim >::value;
@@ -183,12 +183,12 @@ namespace Dune
     };
 
     // update vec pointer of the DOF_INT_VECs, which can change during resize
-    void updatePointers( ALBERTA DOF_INT_VEC *(&elNumbers)[ numVecs ] )
+    void updatePointers( Alberta::DofVectorPointer< int > (&elNumbers)[ numVecs ] )
     {
       for(int i=0; i<numVecs; i++)
       {
-        elNumVec_[i] = (elNumbers[i])->vec;
-        assert(elNumVec_[i]);
+        elNumVec_[i] = ((ALBERTA DOF_INT_VEC *)elNumbers[ i ])->vec;
+        assert( elNumVec_[ i ] );
       }
       Alberta::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, elNumbers );
     }

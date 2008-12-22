@@ -42,9 +42,6 @@ namespace Dune
   {
     // create vector with geom types
     makeGeomTypes();
-
-    for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
-      elNumbers[i] = 0;
   }
 
 
@@ -64,7 +61,7 @@ namespace Dune
   {
     for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
     {
-      elNumbers[ i ] = AlbertHelp::getElNumbers( i );
+      elNumbers_[ i ] = Alberta::DofVectorPointer< int >( AlbertHelp::getElNumbers( i ) );
       AlbertHelp::elNumbers[ i ] = NULL;
     }
 
@@ -177,15 +174,10 @@ namespace Dune
       leafIndexSet_ = 0;
     }
 
-    for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
-    {
-      if( elNumbers[i] )
-        ALBERTA free_dof_int_vec( elNumbers[i] );
-      elNumbers[i] = 0;
-    }
-
+    // release dof vectors
+    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
+      elNumbers_[ i ].release();
     elNewCheck_.release();
-
 #ifndef CALC_COORD
     coords_.release();
 #endif
@@ -663,7 +655,7 @@ namespace Dune
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
   {
-    hIndexSet_.updatePointers( elNumbers );
+    hIndexSet_.updatePointers( elNumbers_ );
 
 #ifndef CALC_COORD
     coordsVec_ = ((ALBERTA DOF_REAL_D_VEC *)coords_)->vec;
@@ -671,7 +663,7 @@ namespace Dune
 #endif
     elNewVec_ = ((ALBERTA DOF_INT_VEC *)elNewCheck_)->vec;
     assert(elNewVec_);
-    elAdmin_   = elNumbers[0]->fe_space->admin;
+    elAdmin_ = elNumbers_[ 0 ].dofSpace()->admin;
 
     // see Albert Doc. , should stay the same
     const_cast<int &> (nv_)  = elAdmin_->n0_dof[CENTER];
@@ -807,20 +799,17 @@ namespace Dune
     if( filename.size() <= 0 )
       DUNE_THROW( AlbertaIOError, "No filename given to writeGridXdr." );
 
-    std::string ownerfile( filename );
-    ownerfile += "_own";
+    bool success = mesh_.write( filename, time );
 
     // strore element numbering to file
-    for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
+    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
     {
-      std::string elnumfile(filename);
-      elnumfile += "_num_c";
-      char tmpchar[16]; sprintf(tmpchar,"%d",i);
-      elnumfile += tmpchar;
-      ALBERTA write_dof_int_vec_xdr(elNumbers[i],elnumfile.c_str());
+      std::ostringstream namestream;
+      namestream << filename << "_num_c" << i;
+      success &= elNumbers_[ i ].write( namestream.str() );
     }
 
-    return mesh_.write( filename, time );
+    return success;
   }
 
 
@@ -839,20 +828,14 @@ namespace Dune
     if( !mesh_ )
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
-    // read element numbering from file
-    std::string ownerfile( filename );
-    ownerfile += "_own";
-
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
     {
-      std::string elnumfile( filename );
-      char tmpchar[16]; sprintf(tmpchar,"%d",i);
-      elnumfile += "_num_c"; elnumfile += tmpchar;
-      const char * elnumfn = elnumfile.c_str();
-      elNumbers[i] = ALBERTA read_dof_int_vec_xdr(elnumfn, mesh_ , 0 );
+      std::ostringstream namestream;
+      namestream << filename << "_num_c" << i;
+      elNumbers_[ i ].read( namestream.str(), mesh_ );
     }
 
-    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( elNumbers[ 0 ]->fe_space, "el_new_check" ) );
+    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( elNumbers_[ 0 ].dofSpace(), "el_new_check" ) );
 
 #ifndef CALC_COORD
     assert( !coords_ );
@@ -871,7 +854,7 @@ namespace Dune
     // set el_index of index manager to max element index
     for(int i=0; i<ALBERTA AlbertHelp::numOfElNumVec; i++)
     {
-      int maxIdx = ALBERTA AlbertHelp::calcMaxIndex( elNumbers[i] );
+      int maxIdx = ALBERTA AlbertHelp::calcMaxIndex( elNumbers_[ i ] );
       indexStack_[i].setMaxIndex(maxIdx);
     }
 

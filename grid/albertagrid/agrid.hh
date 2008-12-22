@@ -693,7 +693,8 @@ namespace Dune
     // provides the indices for the elements
     IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
 
-    ALBERTA DOF_INT_VEC *elNumbers[ AlbertHelp::numOfElNumVec ];
+    //ALBERTA DOF_INT_VEC *elNumbers[ AlbertHelp::numOfElNumVec ];
+    Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
 
     Alberta::DofVectorPointer< int > elNewCheck_;
 
