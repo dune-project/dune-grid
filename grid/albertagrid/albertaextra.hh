@@ -17,16 +17,6 @@
 namespace Albert {
 #endif
 
-#define ALBERTA_ERROR          ALBERTA print_error_funcname(funcName, __FILE__, __LINE__),\
-  ALBERTA print_error_msg
-#define ALBERTA_ERROR_EXIT     ALBERTA print_error_funcname(funcName, __FILE__, __LINE__),\
-  ALBERTA print_error_msg_exit
-
-#define ALBERTA_TEST_EXIT(test) if ((test)) ;else ALBERTA_ERROR_EXIT
-
-#define getDofVec( vec, drv ) \
-  (assert(drv != 0); (vec = (drv)->vec); assert(vec != 0));
-
 // provides the element number generation and management
 #include "agelementindex.cc"
 
