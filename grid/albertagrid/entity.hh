@@ -37,39 +37,41 @@ namespace Dune
 
      Here: the general template
    */
-  template< int cd, int dim, class GridImp >
+  template< int codim, int dim, class GridImp >
   class AlbertaGridEntity
-    : public EntityDefaultImplementation< cd, dim, GridImp, AlbertaGridEntity >
+    : public EntityDefaultImplementation< codim, dim, GridImp, AlbertaGridEntity >
   {
-    typedef AlbertaGridEntity< cd, dim, GridImp > This;
+    typedef AlbertaGridEntity< codim, dim, GridImp > This;
 
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid< dim , dimworld >;
     friend class AlbertaGridEntity< 0, dim, GridImp>;
 
     template< int, class, bool > friend class AlbertaGridTreeIterator;
-    friend class AlbertaGridEntityPointer<cd,GridImp>;
-
-    typedef AlbertaGridGeometry<dim-cd,dimworld,GridImp> GeometryImp;
+    friend class AlbertaGridEntityPointer< codim, GridImp >;
 
   public:
     static const int dimension = dim;
-    static const int codimension = cd;
+    static const int codimension = codim;
     static const int mydimension = dimension - codimension;
 
-    template <int cc>
+    template< int cd >
     struct Codim
     {
-      typedef typename GridImp::template Codim<cc>::EntityPointer EntityPointer;
+      typedef typename GridImp::template Codim< cd >::EntityPointer EntityPointer;
     };
 
-    typedef typename GridImp::template Codim<cd>::Entity Entity;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<cd>::Geometry Geometry;
-    typedef typename GridImp::template Codim<cd>::LevelIterator LevelIterator;
+    typedef typename GridImp::template Codim< codim >::Entity Entity;
+    typedef typename GridImp::template Codim< codim >::Geometry Geometry;
+    typedef typename GridImp::template Codim< codim >::LevelIterator LevelIterator;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
+  private:
+    typedef MakeableInterfaceObject< Geometry > GeometryObject;
+    typedef typename GeometryObject::ImplementationType GeometryImp;
+
+  public:
     //! level of this element
     int level () const;
 
@@ -143,12 +145,6 @@ namespace Dune
 
     //! Number of the subentity within the element
     int subEntity_;
-
-    //! level
-    int level_;
-
-    // type of createable object, just derived from Geometry class
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
 
     //! the current geometry
     GeometryObject geo_;

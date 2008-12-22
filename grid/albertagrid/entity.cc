@@ -15,7 +15,6 @@ namespace Dune
     : grid_( grid ),
       elementInfo_(),
       subEntity_( -1 ),
-      level_ ( level ),
       geo_ (GeometryImp()),
       builtgeometry_( false )
   {}
@@ -27,7 +26,6 @@ namespace Dune
     : grid_( other.grid_ ),
       elementInfo_( other.elementInfo_ ),
       subEntity_( other.subEntity_ ),
-      level_( other.level_ ),
       geo_( other.geo_ ),
       builtgeometry_( false )
   {}
@@ -39,7 +37,6 @@ namespace Dune
     : grid_(grid),
       elementInfo_(),
       subEntity_( -1 ),
-      level_ (level),
       geo_ (GeometryImp()),
       builtgeometry_(false)
   {}
@@ -109,7 +106,6 @@ namespace Dune
   inline void
   AlbertaGridEntity< codim, dim, GridImp >::setEntity( const This &other )
   {
-    level_ = other.level_;
     setElement( other.elementInfo_, other.subEntity_ );
   }
 
@@ -117,7 +113,7 @@ namespace Dune
   template<int codim, int dim, class GridImp>
   inline int AlbertaGridEntity<codim,dim,GridImp>::level() const
   {
-    return level_;
+    return elementInfo_.level();
   }
 
 
