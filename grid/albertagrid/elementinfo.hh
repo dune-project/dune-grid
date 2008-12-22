@@ -65,7 +65,7 @@ namespace Dune
 
     class BoundaryProvider
     {
-      static const int interior = ALBERTA INTERIOR;
+      static const int interior = INTERIOR;
 
 #if DIM > 1
       static const int numTypes = 256;
