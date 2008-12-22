@@ -356,7 +356,7 @@ namespace Dune
   {
     assert( !elementInfo_ == false );
     typedef AlbertaGridHierarchicIterator< GridImp > IteratorImp;
-    return IteratorImp( grid_, elementInfo_, level(), maxlevel, true );
+    return IteratorImp( grid_, elementInfo_, maxlevel );
   }
 
 

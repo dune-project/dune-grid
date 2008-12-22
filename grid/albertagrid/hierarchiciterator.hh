@@ -40,13 +40,14 @@ namespace Dune
     //! the normal Constructor
     AlbertaGridHierarchicIterator ( const GridImp &grid,
                                     const ElementInfo &elementInfo,
-                                    int actLevel, int maxLevel, bool leafIt );
+                                    int maxLevel );
 
     //! the default Constructor
     AlbertaGridHierarchicIterator ( const GridImp &grid, int actLevel, int maxLevel );
 
     //! copy onstructor
     AlbertaGridHierarchicIterator ( const This &other );
+
     //! assignment operator
     This &operator= ( const This &other );
 
@@ -61,9 +62,10 @@ namespace Dune
   private:
     void increment ( ElementInfo elementInfo );
 
+    // level on which the iterator was started
     int startLevel_;
 
-    //! max level to go down
+    // maximal level to go down to
     int maxlevel_;
   };
 
