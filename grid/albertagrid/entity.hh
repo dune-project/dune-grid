@@ -72,17 +72,14 @@ namespace Dune
     typedef typename GeometryObject::ImplementationType GeometryImp;
 
   public:
-    //! level of this element
-    int level () const;
-
-    //! contructor takeing traverse stack
-    AlbertaGridEntity( const GridImp &grid, int level );
-
-    //! cosntructor
-    AlbertaGridEntity(const GridImp &grid, int level, bool);
+    //! contructor
+    AlbertaGridEntity ( const GridImp &grid );
 
     //! copy constructor
     AlbertaGridEntity ( const This &other );
+
+    //! level of this element
+    int level () const;
 
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const;
@@ -221,7 +218,7 @@ namespace Dune
     ~AlbertaGridEntity() {};
 
     //! Constructor, real information is set via setElInfo method
-    AlbertaGridEntity(const GridImp &grid, int level, bool leafIt );
+    AlbertaGridEntity ( const GridImp &grid );
 
     AlbertaGridEntity(const AlbertaGridEntity & org);
 

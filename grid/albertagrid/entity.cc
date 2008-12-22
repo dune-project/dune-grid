@@ -10,8 +10,8 @@ namespace Dune
   // ---------------------------------
 
   template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity<codim,dim,GridImp>::
-  AlbertaGridEntity( const GridImp &grid, int level )
+  inline AlbertaGridEntity< codim, dim, GridImp >
+  ::AlbertaGridEntity ( const GridImp &grid )
     : grid_( grid ),
       elementInfo_(),
       subEntity_( -1 ),
@@ -28,17 +28,6 @@ namespace Dune
       subEntity_( other.subEntity_ ),
       geo_( other.geo_ ),
       builtgeometry_( false )
-  {}
-
-
-  template<int codim, int dim, class GridImp>
-  inline AlbertaGridEntity<codim,dim,GridImp>::
-  AlbertaGridEntity(const GridImp &grid, int level, bool)
-    : grid_(grid),
-      elementInfo_(),
-      subEntity_( -1 ),
-      geo_ (GeometryImp()),
-      builtgeometry_(false)
   {}
 
 
@@ -146,12 +135,12 @@ namespace Dune
 
   template< int dim, class GridImp >
   inline AlbertaGridEntity< 0, dim, GridImp >
-  ::AlbertaGridEntity( const GridImp &grid, int level, bool leafIt )
+  ::AlbertaGridEntity( const GridImp &grid )
     : grid_(grid),
       elementInfo_(),
       geoObj_( GeometryImp() ),
       geo_( grid_.getRealImplementation(geoObj_) ),
-      builtgeometry_ (false)
+      builtgeometry_( false )
   {}
 
 

@@ -350,20 +350,22 @@ namespace Dune
   //***************************************
 
   // default implementation used new and delete
-  template <class GridImp, class EntityProvider, int dim , int codim >
+  template< class GridImp, class EntityProvider, int dim , int codim >
   struct GetNewEntity
   {
     typedef typename SelectEntityImp<codim,dim,GridImp>::EntityObject EntityObject;
     typedef typename SelectEntityImp<codim,dim,GridImp>::EntityImp EntityImp;
+
     static EntityObject *
-    getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt )
+    getNewEntity ( GridImp &grid, EntityProvider &enp )
     {
-      return new EntityObject (EntityImp(grid,level,leafIt));
+      return new EntityObject( EntityImp( grid ) );
     }
 
-    static void freeEntity (EntityProvider &enp , EntityObject * en)
+    static void freeEntity ( EntityProvider &enp , EntityObject *en )
     {
-      if(en) delete en;
+      if( en )
+        delete en;
     }
   };
 
@@ -373,33 +375,37 @@ namespace Dune
   {
     typedef typename SelectEntityImp<0,dim,GridImp>::EntityObject EntityObject;
     typedef typename SelectEntityImp<0,dim,GridImp>::EntityImp EntityImp;
+
     static EntityObject *
-    getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt )
+    getNewEntity ( GridImp &grid, EntityProvider &enp )
     {
       // return object from stack
-      return enp.getNewObjectEntity(grid,(EntityImp *)0,level,leafIt);
+      return enp.getNewObjectEntity( grid, (EntityImp *)0 );
     }
 
-    static void freeEntity (EntityProvider &enp , EntityObject * en)
+    static void freeEntity ( EntityProvider &enp , EntityObject *en )
     {
-      enp.freeObjectEntity(en);
+      enp.freeObjectEntity( en );
     }
   };
 
-  template < int dim   , int dimworld >
-  template < int codim >
-  inline typename SelectEntityImp<codim,dim,const AlbertaGrid<dim,dimworld> >::EntityObject *
-  AlbertaGrid < dim, dimworld >::getNewEntity (int level, bool leafIt ) const
+  template< int dim, int dimworld >
+  template< int codim >
+  inline typename
+  SelectEntityImp< codim, dim, const AlbertaGrid< dim, dimworld > >::EntityObject *
+  AlbertaGrid< dim, dimworld >::getNewEntity () const
   {
-    return GetNewEntity<const MyType, EntityProvider, dim, codim > :: getNewEntity(*this,entityProvider_,level,leafIt);
+    typedef GetNewEntity< const MyType, EntityProvider, dim, codim > Helper;
+    return Helper::getNewEntity( *this, entityProvider_ );
   }
 
-  template < int dim   , int dimworld >
-  template < int codim >
-  inline void AlbertaGrid < dim, dimworld >::
-  freeEntity (typename SelectEntityImp<codim,dim,const MyType>::EntityObject * en) const
+  template< int dim, int dimworld >
+  template< int codim >
+  inline void AlbertaGrid< dim, dimworld >
+  ::freeEntity ( typename SelectEntityImp< codim, dim, const MyType >::EntityObject * en ) const
   {
-    GetNewEntity<const MyType, EntityProvider, dim, codim > :: freeEntity(entityProvider_,en);
+    typedef GetNewEntity< const MyType, EntityProvider, dim, codim > Helper;
+    Helper::freeEntity( entityProvider_, en );
   }
 
   //**************************************

@@ -290,7 +290,7 @@ namespace Dune
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               const AlbertaMarkerVector *vertexMark,
                               int travLevel )
-    : Base( grid, travLevel, leafIterator, false ),
+    : Base( grid, travLevel, false ),
       level_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( grid.meshPointer().begin() ),
@@ -313,7 +313,7 @@ namespace Dune
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               int travLevel )
-    : Base( grid, travLevel, leafIterator, true ), // true means end iterator
+    : Base( grid, travLevel, true ), // true means end iterator
       level_( travLevel ),
       subEntity_( -1 ),
       macroIterator_( grid.meshPointer().end() ),

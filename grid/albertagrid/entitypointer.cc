@@ -15,7 +15,7 @@ namespace Dune
                                const ElementInfo &elementInfo,
                                int subEntity )
     : grid_( grid ),
-      entity_( grid_.template getNewEntity< codim >( level, true ) )
+      entity_( grid_.template getNewEntity< codim >() )
   {
     assert( entity_ );
     entityImp().setElement( elementInfo, subEntity );
@@ -24,9 +24,9 @@ namespace Dune
 
   template<int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >
-  ::AlbertaGridEntityPointer ( const GridImp &grid, int level, bool isLeaf, bool end )
+  ::AlbertaGridEntityPointer ( const GridImp &grid, int level, bool end )
     : grid_( grid ),
-      entity_( grid_.template getNewEntity< codim >( level, true ) )
+      entity_( grid_.template getNewEntity< codim >() )
   {
     if( end )
       done();
@@ -36,7 +36,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const EntityImp &entity )
     : grid_( entity.grid() ),
-      entity_( grid_.template getNewEntity< codim >( entity.level(), true ) )
+      entity_( grid_.template getNewEntity< codim >() )
   {
     entityImp().setEntity( entity );
   }
@@ -46,7 +46,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid, const EntityImp  &entity )
     : grid_( grid ),
-      entity_( grid_.template getNewEntity< codim >( entity.level(), true ) )
+      entity_( grid_.template getNewEntity< codim >() )
   {
     entityImp().setEntity( entity );
   }
@@ -56,7 +56,7 @@ namespace Dune
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const This &other )
     : grid_( other.grid_ ),
-      entity_( grid_.template getNewEntity< codim >( other.level(), true ) )
+      entity_( grid_.template getNewEntity< codim >() )
   {
     entityImp().setEntity( other.entityImp() );
   }

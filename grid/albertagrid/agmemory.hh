@@ -48,7 +48,7 @@ namespace Dune
     //! i.e. return pointer to Entity
     template <class GridType, class ObjectImp>
     ObjectType * getNewObjectEntity(const GridType &grid,
-                                    const ObjectImp * fakePointer, int level, bool leafIt);
+                                    const ObjectImp * fakePointer );
 
     //! i.e. return pointer to Entity
     template <class GridType>
@@ -76,12 +76,12 @@ namespace Dune
   //************************************************************************
   template <class Object> template <class GridType, class ObjectImp>
   inline typename AGMemoryProvider<Object>::ObjectType *
-  AGMemoryProvider<Object>::getNewObjectEntity
-    (const GridType &grid, const ObjectImp *fakePointer , int level , bool leafIt )
+  AGMemoryProvider< Object >
+  ::getNewObjectEntity ( const GridType &grid, const ObjectImp *fakePointer )
   {
     if( objStack_.empty() )
     {
-      return ( new Object (ObjectImp(grid,level,leafIt)) );
+      return new Object( ObjectImp( grid ) );
     }
     else
     {

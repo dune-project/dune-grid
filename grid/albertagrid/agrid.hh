@@ -678,9 +678,9 @@ namespace Dune
     }
 
     // (for internal use only) return obj pointer to EntityImp
-    template <int codim>
+    template< int codim >
     typename SelectEntityImp<codim,dim,const MyType>::EntityObject *
-    getNewEntity (int level, bool leafIt ) const;
+    getNewEntity () const;
 
     // (for internal use only) free obj pointer of EntityImp
     template <int codim>
