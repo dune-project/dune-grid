@@ -22,37 +22,29 @@
 namespace Dune
 {
 
-  //***********************************************************************
-  //
-  // --AlbertaGrid
-  // --Grid
-  //
-  //***********************************************************************
-  template < int dim, int dimworld >
+  template< int dim, int dimworld >
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid()
-    : mesh_ (0)
-      , comm_()
-      , maxlevel_ (0) , wasChanged_ (false)
-      , vertexMarkerLeaf_(false) // creates LeafMarkerVector
-      , nv_ (dim+1) , dof_ (0)
-      , hIndexSet_(*this)
-      , globalIdSet_(*this)
-      , levelIndexVec_(MAXL,0)
-      , leafIndexSet_ (0)
-      , sizeCache_ (0)
-      , coarsenMarked_(0)
-      , refineMarked_(0)
-      , lockPostAdapt_(false)
+    : mesh_(),
+      comm_(),
+      maxlevel_( 0 ),
+      wasChanged_( false ),
+      vertexMarkerLeaf_( false ), // creates LeafMarkerVector
+      nv_( dim+1 ),
+      dof_( 0 ),
+      hIndexSet_( *this ),
+      globalIdSet_( *this ),
+      levelIndexVec_( MAXL, 0 ),
+      leafIndexSet_ ( 0 ),
+      sizeCache_ ( 0 ),
+      coarsenMarked_( 0 ),
+      refineMarked_( 0 ),
+      lockPostAdapt_( false )
   {
     // create vector with geom types
     makeGeomTypes();
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
       elNumbers[i] = 0;
-    elNewCheck = 0;
-#ifndef CALC_COORD
-    coords     = 0;
-#endif
   }
 
 
@@ -76,11 +68,11 @@ namespace Dune
       AlbertHelp::elNumbers[ i ] = NULL;
     }
 
-    elNewCheck = AlbertHelp::getElNewCheck();
+    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getElNewCheck() );
     AlbertHelp::elNewCheck = NULL;
 
 #ifndef CALC_COORD
-    coords = AlbertHelp::getCoordVec< dimworld >();
+    coords_ = Alberta::DofVectorPointer< Alberta::GlobalVector >( AlbertHelp::getCoordVec< dimworld >() );
     AlbertHelp::coordVec = NULL;
 #endif
 
@@ -192,13 +184,10 @@ namespace Dune
       elNumbers[i] = 0;
     }
 
-    if( elNewCheck )
-      ALBERTA free_dof_int_vec( elNewCheck );
-    elNewCheck = 0;
+    elNewCheck_.release();
+
 #ifndef CALC_COORD
-    if( coords )
-      ALBERTA free_dof_real_d_vec( coords );
-    coords = 0;
+    coords_.release();
 #endif
 
     if(sizeCache_) delete sizeCache_;sizeCache_ = 0;
@@ -482,7 +471,7 @@ namespace Dune
     refineMarked_  = 0;
 
     // clear refined marker
-    ALBERTA AlbertHelp::set2positive( elNewCheck );
+    ALBERTA AlbertHelp::set2positive( elNewCheck_ );
 
     return wasChanged_;
   }
@@ -541,7 +530,7 @@ namespace Dune
     ALBERTA AlbertHelp::initIndexManager_elmem_cc( indexStack_ );
 
     // set all values of elNewCheck positive which means old
-    ALBERTA AlbertHelp::set2positive ( elNewCheck );
+    ALBERTA AlbertHelp::set2positive ( elNewCheck_ );
 
     const bool refined = mesh_.refine();
     const bool coarsened = (preAdapt() ? mesh_.coarsen() : false);
@@ -677,10 +666,10 @@ namespace Dune
     hIndexSet_.updatePointers( elNumbers );
 
 #ifndef CALC_COORD
-    coordsVec_ = coords->vec;
+    coordsVec_ = ((ALBERTA DOF_REAL_D_VEC *)coords_)->vec;
     assert(coordsVec_);
 #endif
-    elNewVec_  = elNewCheck->vec;
+    elNewVec_ = ((ALBERTA DOF_INT_VEC *)elNewCheck_)->vec;
     assert(elNewVec_);
     elAdmin_   = elNumbers[0]->fe_space->admin;
 
@@ -734,12 +723,12 @@ namespace Dune
     arrangeDofVec ();
 
     // determine new maxlevel
-    maxlevel_ = ALBERTA AlbertHelp::calcMaxAbsoluteValueOfVector( elNewCheck );
+    maxlevel_ = ALBERTA AlbertHelp::calcMaxAbsoluteValueOfVector( elNewCheck_ );
     assert( maxlevel_ >= 0);
     assert( maxlevel_ < MAXL);
 
 #ifndef NDEBUG
-    int mlvl = ALBERTA AlbertHelp::calcMaxLevel(mesh_,elNewCheck);
+    int mlvl = ALBERTA AlbertHelp::calcMaxLevel( mesh_, elNewCheck_ );
     assert( mlvl == maxlevel_ );
 #endif
 
@@ -863,15 +852,15 @@ namespace Dune
       elNumbers[i] = ALBERTA read_dof_int_vec_xdr(elnumfn, mesh_ , 0 );
     }
 
-    elNewCheck = AlbertHelp::getDofNewCheck( elNumbers[ 0 ]->fe_space, "el_new_check" );
+    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( elNumbers[ 0 ]->fe_space, "el_new_check" ) );
 
 #ifndef CALC_COORD
-    assert( !coords );
-    coords = AlbertHelp::makeTheRest< dim, dimworld >( mesh_ );
+    assert( !coords_ );
+    coords_ = Alberta::DofVectorPointer< int >( AlbertHelp::makeTheRest< dim, dimworld >( mesh_ ) );
 #endif
 
     // restore level information for each element by traversing the mesh
-    ALBERTA AlbertHelp::restoreElNewCheck( mesh_ , elNewCheck );
+    ALBERTA AlbertHelp::restoreElNewCheck( mesh_ , elNewCheck_ );
 
     // make vectors know in grid and hSet
     arrangeDofVec();
