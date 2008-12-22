@@ -424,12 +424,14 @@ namespace Dune
         return;
     }
 
+    const GridImp &grid = this->grid();
+
     ALBERTA EL *el = elementInfo.el();
     assert( el );
     if( !leafIterator )
     {
-      const int elIndex = this->grid_.getElementNumber( el );
-      const int faceIndex = this->grid_.getFaceNumber( el, subEntity_ );
+      const int elIndex = grid.getElementNumber( el );
+      const int faceIndex = grid.getFaceNumber( el, subEntity_ );
       assert( vertexMarker_ != 0 );
       if( vertexMarker_->faceNotOnElement( elIndex, faceIndex ) )
         goNextFace( elementInfo );
@@ -440,8 +442,8 @@ namespace Dune
       const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ subEntity_ ];
       if( neighbor != NULL )
       {
-        const int elIndex = this->grid_.getElementNumber( el );
-        const int nbIndex = this->grid_.getElementNumber( neighbor );
+        const int elIndex = grid.getElementNumber( el );
+        const int nbIndex = grid.getElementNumber( neighbor );
 
         // when element number is small then go next because now the face is
         // reached on the element with the largest number
@@ -466,10 +468,12 @@ namespace Dune
         return;
     }
 
+    const GridImp &grid = this->grid();
+
     ALBERTA EL *el = elementInfo.el();
     assert( el );
-    const int elIndex = this->grid_.getElementNumber( el );
-    const int edgeIndex = this->grid_.getEdgeNumber( el, subEntity_ );
+    const int elIndex = grid.getElementNumber( el );
+    const int edgeIndex = grid.getEdgeNumber( el, subEntity_ );
     assert( vertexMarker_ != 0 );
     if( vertexMarker_->edgeNotOnElement( elIndex, edgeIndex ) )
       goNextEdge( elementInfo );
@@ -490,10 +494,12 @@ namespace Dune
         return;
     }
 
+    const GridImp &grid = this->grid();
+
     ALBERTA EL *el = elementInfo.el();
     assert( el );
-    const int elIndex = this->grid_.getElementNumber( el );
-    const int vertexIndex = this->grid_.getVertexNumber( el, subEntity_ );
+    const int elIndex = grid.getElementNumber( el );
+    const int vertexIndex = grid.getVertexNumber( el, subEntity_ );
     assert( vertexMarker_ != 0 );
     if( vertexMarker_->vertexNotOnElement( elIndex, vertexIndex ) )
       goNextVertex( elementInfo );

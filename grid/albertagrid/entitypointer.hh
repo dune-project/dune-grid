@@ -49,7 +49,7 @@ namespace Dune
     AlbertaGridEntityPointer( const GridImp &grid, int level, bool done );
 
     //! make entity pointer from entity
-    AlbertaGridEntityPointer(const EntityImp& entity);
+    AlbertaGridEntityPointer ( const EntityImp &entity );
 
     //! make empty entity pointer (to be revised)
     AlbertaGridEntityPointer ( const This &other );
@@ -57,11 +57,11 @@ namespace Dune
     //! make empty entity pointer (to be revised)
     AlbertaGridEntityPointer(const GridImp & , const EntityImp & en);
 
-    //! assignment operator
-    This &operator= ( const This &other );
-
     //! Destructor
     ~AlbertaGridEntityPointer();
+
+    //! assignment operator
+    This &operator= ( const This &other );
 
     //! equality
     bool equals ( const This &other ) const;
@@ -81,16 +81,17 @@ namespace Dune
 
   protected:
     //! return reference to internal entity imp
-    EntityImp & entityImp ();
+    EntityImp &entityImp ();
 
     //! return const reference to internal entity imp
-    const EntityImp & entityImp () const;
+    const EntityImp &entityImp () const;
 
-    // reference to grid
-    const GridImp & grid_;
+    //! obtain a reference to the grid
+    const GridImp &grid () const;
 
+  private:
     // entity that this EntityPointer points to
-    EntityObject * entity_;
+    EntityObject *entity_;
   };
 
 }

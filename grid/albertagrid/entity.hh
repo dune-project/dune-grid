@@ -119,8 +119,11 @@ namespace Dune
     // same as setElInfo just with a entity given
     void setEntity ( const This &other );
 
-    //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    //! obtain a reference to the grid
+    const GridImp &grid () const
+    {
+      return grid_;
+    }
 
   private:
     const GeometryImp &geoImp () const
@@ -355,8 +358,12 @@ namespace Dune
     // same as setElInfo just with a entity given
     void setEntity ( const This &other);
 
-    //! return reference to grid
-    const GridImp& grid() const { return grid_; }
+    //! obtain a reference to the grid
+    const GridImp &grid () const
+    {
+      return grid_;
+    }
+
   private:
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
