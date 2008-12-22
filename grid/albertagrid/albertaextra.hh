@@ -208,19 +208,6 @@ namespace AlbertHelp
 
   }; // end of AlbertLeafData
 
-  // struct holding the needed DOF_INT_VEC for AlbertGrid
-  typedef struct dofvec_stack DOFVEC_STACK;
-  struct dofvec_stack
-  {
-    // storage of unique element numbers
-    DOF_INT_VEC * elNumbers[numOfElNumVec];
-    // contains information about refine status of element
-    DOF_INT_VEC * elNewCheck;
-#ifndef CALC_COORD
-    // vector that stores the coordinates
-    DOF_REAL_D_VEC * coords;
-#endif
-  };
 
   static DOF_INT_VEC * elNumbers[numOfElNumVec];
   static DOF_INT_VEC * elNewCheck = 0;
@@ -264,14 +251,6 @@ namespace AlbertHelp
     return maxindex+1;
   }
 
-  // return pointer to created elNewCheck Vector to mesh
-  inline DOF_INT_VEC * getElNewCheck()
-  {
-    int * vec=0;
-    GET_DOF_VEC(vec,elNewCheck);
-    FOR_ALL_DOFS(elNewCheck->fe_space->admin, vec[dof] = 0 );
-    return elNewCheck;
-  }
 
 #ifndef CALC_COORD
   template< int dimworld >
@@ -493,13 +472,34 @@ namespace AlbertHelp
     }
   }
 
+
   // clear Dof Vec
   inline static void clearDofVec ( DOF_INT_VEC * drv )
   {
-    int * vec=0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, vec[dof] = 0 );
+    int *vec = NULL;
+    GET_DOF_VEC( vec, drv );
+    FOR_ALL_DOFS( drv->fe_space->admin, vec[ dof ] = 0 );
   }
+
+
+  // return pointer to created elNewCheck Vector to mesh
+  inline DOF_INT_VEC * getElNewCheck ()
+  {
+    clearDofVec( elNewCheck );
+    return elNewCheck;
+  }
+
+
+  inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
+                                      const char * name)
+  {
+    DOF_INT_VEC * drv = get_dof_int_vec(name,espace);
+    drv->refine_interpol = &refineElNewCheck;
+    drv->coarse_restrict = 0;
+    clearDofVec( drv );
+    return drv;
+  }
+
 
   // calculate max absolute value of given vector
   inline int calcMaxAbsoluteValueOfVector ( const DOF_INT_VEC * drv )
@@ -536,52 +536,6 @@ namespace AlbertHelp
   }
 
 
-  inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
-                                      const char * name)
-  {
-    DOF_INT_VEC * drv = get_dof_int_vec(name,espace);
-    int * vec=0;
-    drv->refine_interpol = &refineElNewCheck;
-    drv->coarse_restrict = 0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, vec[dof] = 0 );
-    return drv;
-  }
-
-  // setup of DOF_INT_VEC for reading
-  template <int dimworld>
-  inline void makeTheRest(DOFVEC_STACK * dofvecs)
-  {
-    dofvecs->elNewCheck = getDofNewCheck(dofvecs->elNumbers[0]->fe_space,"el_new_check");
-#ifndef CALC_COORD
-    {
-      MESH * mesh = dofvecs->elNumbers[0]->fe_space->admin->mesh;
-      assert( mesh );
-
-      enum { dim = dimworld };
-      int vdof[dim+1]; // add at each vertex one dof for vertex numbering
-
-      for(int i=0; i<dim+1; i++)
-      {
-        vdof[i] = 0;
-      }
-      vdof[0] = 1;
-
-      const FE_SPACE * vSpace = get_fe_space(mesh, "vertex_dofs", vdof, 0);
-
-      // coords should not exist at this point
-      assert( !dofvecs->coords );
-
-      coordVec = get_dof_real_d_vec("coordinates",vSpace);
-      coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dimworld>;
-      coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
-
-      dofvecs->coords = getCoordVec<dimworld> ();
-      coordVec = 0;
-    }
-#endif
-  }
-
 #if DUNE_ALBERTA_VERSION >= 0x201
   template< int dim >
   static inline const ALBERTA FE_SPACE *
@@ -605,6 +559,39 @@ namespace AlbertHelp
     // don't delete dofs above the leaf level
     mesh->preserve_coarse_dofs = 1;
     return get_fe_space( mesh, name, ndof, 0 );
+  }
+#endif
+
+
+#ifndef CALC_COORD
+  // setup of DOF_INT_VEC for reading
+  template< int dim, int dimworld >
+  inline DOF_REAL_D_VEC *makeTheRest ( MESH *mesh )
+  {
+    assert( mesh != NULL );
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    enum { nNodes = dim+1 };
+    enum { vertex = 0, center = dim, face = dim-1, edge = 1 };
+#else
+    enum { nNodes = N_NODE_TYPES };
+    enum { vertex = VERTEX, center = CENTER,
+           face = (dim == 3) ? FACE : EDGE, edge = EDGE };
+#endif
+
+    int vdof[ nNodes ]; // add at each vertex one dof for vertex numbering
+    for( int i = 0; i < nNodes; ++i )
+      vdof[ i ] = 0;
+    vdof[ vertex ] = 1;
+
+    const FE_SPACE *vSpace = getFeSpace< dim >( mesh, "vertex_dofs", vdof );
+
+    coordVec = get_dof_real_d_vec("coordinates",vSpace);
+    coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dimworld>;
+    coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
+    DOF_REAL_D_VEC *coords = getCoordVec< dimworld >();
+    coordVec = 0;
+    return coords;
   }
 #endif
 

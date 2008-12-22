@@ -693,9 +693,13 @@ namespace Dune
     // provides the indices for the elements
     IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
 
-    // the DOF_INT_VECs we need
-    // * change to mutable here
-    mutable ALBERTA AlbertHelp::DOFVEC_STACK dofvecs_;
+    mutable ALBERTA DOF_INT_VEC *elNumbers[ AlbertHelp::numOfElNumVec ];
+
+    mutable ALBERTA DOF_INT_VEC *elNewCheck;
+
+#ifndef CALC_COORD
+    mutable ALBERTA DOF_REAL_D_VEC *coords;
+#endif
 
     const ALBERTA DOF_ADMIN * elAdmin_;
 
