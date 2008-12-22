@@ -84,10 +84,7 @@ namespace Dune
   {
     elementInfo_ = elementInfo;
     subEntity_ = subEntity;
-    if( !elementInfo )
-      builtgeometry_ = false;
-    else
-      builtgeometry_ = geoImp().builtGeom( grid_, getElInfo(), subEntity_ );
+    builtgeometry_ = (!elementInfo_ ? false : geoImp().builtGeom( grid_, elementInfo_, subEntity_ ));
   }
 
 
@@ -306,7 +303,7 @@ namespace Dune
     assert( !elementInfo_ == false );
     // geometry is only build on demand
     if( !builtgeometry_ )
-      builtgeometry_ = geo_.builtGeom( grid_, getElInfo(), 0 );
+      builtgeometry_ = geo_.builtGeom( grid_, elementInfo_, 0 );
     assert( builtgeometry_ );
     return geoObj_;
   }

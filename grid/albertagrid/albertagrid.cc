@@ -581,12 +581,33 @@ namespace Dune
 #endif
   }
 
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::checkElNew (const ALBERTA EL *el) const
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::checkElNew ( const Alberta::Element *element ) const
   {
     // if element is new then entry in dofVec is 1
-    return (elNewVec_[el->dof[dof_][nv_]] < 0);
+    const int *elNewVec = (int *)elNewCheck_;
+    return (elNewVec[ element->dof[ dof_ ][ nv_ ] ] < 0);
   }
+
+
+  template< int dim, int dimworld >
+  inline const Alberta::GlobalVector &
+  AlbertaGrid< dim, dimworld >
+  ::getCoord ( const Alberta::ElementInfo< dimension > &elementInfo,
+               int vertex ) const
+  {
+    assert( (vertex >= 0) && (vertex <= dim) );
+#ifdef CALC_COORD
+    return elementInfo.coordinate( vx );
+#else
+    assert( !(!coords_) );
+    Alberta::GlobalVector *coordsVec = (Alberta::GlobalVector *)coords_;
+    return coordsVec[ elementInfo.el()->dof[ vertex ][ 0 ] ];
+#endif
+  }
+
 
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::maxLevel() const
@@ -657,12 +678,6 @@ namespace Dune
   {
     hIndexSet_.updatePointers( elNumbers_ );
 
-#ifndef CALC_COORD
-    coordsVec_ = ((ALBERTA DOF_REAL_D_VEC *)coords_)->vec;
-    assert(coordsVec_);
-#endif
-    elNewVec_ = ((ALBERTA DOF_INT_VEC *)elNewCheck_)->vec;
-    assert(elNewVec_);
     elAdmin_ = elNumbers_[ 0 ].dofSpace()->admin;
 
     // see Albert Doc. , should stay the same
@@ -671,13 +686,16 @@ namespace Dune
   }
 
 
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getLevelOfElement (const ALBERTA EL *el) const
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >
+  ::getLevelOfElement ( const Alberta::Element *element ) const
   {
-    assert( el );
+    assert( element != NULL );
+    const int *elNewVec = (int *)elNewCheck_;
     // return the elements level which is the absolute value of the entry
-    return std::abs( elNewVec_ [el->dof[dof_][nv_]] );
+    return std::abs( elNewVec[ element->dof[ dof_ ][ nv_ ] ] );
   }
+
 
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::getElementNumber ( const ALBERTA EL * el ) const

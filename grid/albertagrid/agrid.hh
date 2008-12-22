@@ -693,7 +693,6 @@ namespace Dune
     // provides the indices for the elements
     IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
 
-    //ALBERTA DOF_INT_VEC *elNumbers[ AlbertHelp::numOfElNumVec ];
     Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
 
     Alberta::DofVectorPointer< int > elNewCheck_;
@@ -704,11 +703,6 @@ namespace Dune
 
     const ALBERTA DOF_ADMIN * elAdmin_;
 
-    const ALBERTA REAL_D * coordsVec_;
-
-    // pointer to vec of elNumbers_
-    const int * elNewVec_;
-
     // for access in the elNewVec and ownerVec
     const int nv_;
     const int dof_;
@@ -718,23 +712,15 @@ namespace Dune
     void arrangeDofVec();
 
     // return true if el is new
-    bool checkElNew ( const ALBERTA EL * el ) const;
+    bool checkElNew ( const Alberta::Element *element ) const;
 
     // read global element number from elNumbers_
-    const ALBERTA REAL_D & getCoord ( const ALBERTA EL_INFO * elInfo, int vx ) const
-    {
-      assert( vx>= 0);
-      assert( vx < dim+1 );
-#ifndef CALC_COORD
-      assert(coordsVec_);
-      return coordsVec_[elInfo->el->dof[vx][0]];
-#else
-      return elInfo->coord[vx];
-#endif
-    }
+    const Alberta::GlobalVector &
+    getCoord ( const Alberta::ElementInfo< dimension > &elementInfo,
+               int vertex ) const;
 
     // read level from elNewCehck vector
-    int getLevelOfElement ( const ALBERTA EL * el ) const;
+    int getLevelOfElement ( const Alberta::Element *element ) const;
 
     // read global element number from elNumbers_
     int getElementNumber ( const ALBERTA EL * el ) const;

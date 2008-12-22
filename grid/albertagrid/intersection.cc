@@ -197,9 +197,8 @@ namespace Dune
   ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( !elementInfo_ == false );
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const ALBERTA REAL_D & coordOne = grid_.getCoord( &elInfo, (neighborCount_+1)%3 );
-    const ALBERTA REAL_D & coordTwo = grid_.getCoord( &elInfo, (neighborCount_+2)%3 );
+    const Alberta::GlobalVector &coordOne = grid_.getCoord( elementInfo_, (neighborCount_+1)%3 );
+    const Alberta::GlobalVector &coordTwo = grid_.getCoord( elementInfo_, (neighborCount_+2)%3 );
 
     n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
     n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
@@ -224,16 +223,16 @@ namespace Dune
     // neighborCount_ is the local face number
     const int *localFaces = ALBERTA AlbertHelp::localAlbertaFaceNumber[ neighborCount_ ];
 
-    const ALBERTA REAL_D &coordZero = grid_.getCoord( &elInfo, localFaces[0] );
-    const ALBERTA REAL_D &coordOne  = grid_.getCoord( &elInfo, localFaces[1] );
-    const ALBERTA REAL_D &coordTwo  = grid_.getCoord( &elInfo, localFaces[2] );
+    const Alberta::GlobalVector &coord0 = grid_.getCoord( elementInfo_, localFaces[ 0 ] );
+    const Alberta::GlobalVector &coord1 = grid_.getCoord( elementInfo_, localFaces[ 1 ] );
+    const Alberta::GlobalVector &coord2 = grid_.getCoord( elementInfo_, localFaces[ 2 ] );
 
     FieldVector< ctype, dimensionworld > u;
     FieldVector< ctype, dimensionworld > v;
     for( int i = 0; i < dimension; ++i )
     {
-      v[ i ] = coordOne[ i ] - coordZero[ i ];
-      u[ i ] = coordTwo[ i ] - coordOne[ i ];
+      v[ i ] = coord1[ i ] - coord0[ i ];
+      u[ i ] = coord2[ i ] - coord1[ i ];
     }
 
     // outNormal_ has length 3
@@ -280,10 +279,9 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >::intersectionGlobal () const
   {
     assert( !elementInfo_ == false );
-    ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
 
     GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
-    if( !geo.builtGeom( grid_, &elInfo, neighborCount_ ) )
+    if( !geo.builtGeom( grid_, elementInfo_, neighborCount_ ) )
       DUNE_THROW( AlbertaError, "internal error in intersectionGlobal." );
     return neighGlobObj_;
   }

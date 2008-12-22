@@ -185,11 +185,8 @@ namespace Dune
     // update vec pointer of the DOF_INT_VECs, which can change during resize
     void updatePointers( Alberta::DofVectorPointer< int > (&elNumbers)[ numVecs ] )
     {
-      for(int i=0; i<numVecs; i++)
-      {
-        elNumVec_[i] = ((ALBERTA DOF_INT_VEC *)elNumbers[ i ])->vec;
-        assert( elNumVec_[ i ] );
-      }
+      for( int i = 0; i < numVecs; ++i )
+        elNumVec_[ i ] = (int *)elNumbers[ i ];
       Alberta::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, elNumbers );
     }
 

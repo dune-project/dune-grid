@@ -356,6 +356,13 @@ namespace Dune
         return dofVector_;
       }
 
+      operator Dof * () const
+      {
+        Dof *ptr = NULL;
+        GET_DOF_VEC( ptr, dofVector_ );
+        return ptr;
+      }
+
       bool operator! () const
       {
         return (dofVector_ == NULL);

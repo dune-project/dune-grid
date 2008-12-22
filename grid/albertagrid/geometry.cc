@@ -417,12 +417,14 @@ namespace Dune
   // built Geometry
   template< int mydim, int cdim, class GridImp >
   inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
-  :: builtGeom ( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity )
+  :: builtGeom ( const Grid &grid,
+                 const Alberta::ElementInfo< dimension > &elementInfo,
+                 int subEntity )
   {
     builtinverse_ = false;
     builtElMat_   = false;
 
-    if( elInfo == NULL )
+    if( !elementInfo )
     {
       elDet_     = 0.0;
       calcedDet_ = false;
@@ -431,28 +433,22 @@ namespace Dune
     }
 
     // copy coordinates
-    for( int i = 0; i < mydimension+1; ++i )
+    for( int i = 0; i <= mydimension; ++i )
     {
       const int k = mapVertices( subEntity, i );
-      const ALBERTA REAL_D &elcoord = grid.getCoord( elInfo, k );
+      const Alberta::GlobalVector &coord = grid.getCoord( elementInfo, k );
       for( int j = 0; j < coorddimension; ++j )
-        coord_[ i ][ j ] = elcoord[ j ];
+        coord_[ i ][ j ] = coord[ j ];
     }
 
-    if( codimension == 0 )
+    // if leaf element, get determinant from leaf data
+    if( (codimension == 0) && elementInfo.isLeaf() )
     {
-      const ALBERTA EL *el = elInfo->el;
-      assert( el );
-      // if leaf element, get determinant from leaf data
-      if( IS_LEAF_EL( el ) )
-      {
-        typedef typename Grid::LeafDataType::Data LeafData;
-        LeafData *leafdata = (LeafData *)el->child[ 1 ];
-        assert( leafdata != NULL );
-        elDet_ = leafdata->determinant;
-      }
-      else
-        elDet_ = elDeterminant();
+      const Alberta::Element *el = elementInfo.el();
+      typedef typename Grid::LeafDataType::Data LeafData;
+      LeafData *leafdata = (LeafData *)el->child[ 1 ];
+      assert( leafdata != NULL );
+      elDet_ = leafdata->determinant;
     }
     else
       elDet_ = elDeterminant();

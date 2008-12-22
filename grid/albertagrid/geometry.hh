@@ -130,7 +130,9 @@ namespace Dune
     //***********************************************************************
     //! generate the geometry for the ALBERTA EL_INFO
     //! no interface method
-    bool builtGeom( const Grid &grid, ALBERTA EL_INFO *elInfo, int subEntity );
+    bool builtGeom ( const Grid &grid,
+                     const Alberta::ElementInfo< dimension > &elementInfo,
+                     int subEntity );
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal

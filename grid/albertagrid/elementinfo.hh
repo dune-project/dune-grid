@@ -141,6 +141,8 @@ namespace Dune
     public:
       static const int dimension = dim;
 
+      static const int numVertices = NumSubEntities< dimension, dimension >::value;
+
       typedef Alberta::MeshPointer< dimension > MeshPointer;
 
 #if DUNE_ALBERTA_VERSION >= 0x200
@@ -178,6 +180,8 @@ namespace Dune
 
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
+
+      const GlobalVector &coordinate ( int vertex ) const;
 
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
@@ -519,6 +523,14 @@ namespace Dune
     }
 #endif // #if DIM == 3
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+    template< int dim >
+    inline const GlobalVector &ElementInfo< dim >::coordinate ( int vertex ) const
+    {
+      assert( (vertex >= 0) && (vertex < numVertices) );
+      return elInfo().coord[ vertex ];
+    }
 
 
     template< int dim >
