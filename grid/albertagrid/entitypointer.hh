@@ -41,12 +41,11 @@ namespace Dune
 
     //! Constructor for EntityPointer that points to an element
     AlbertaGridEntityPointer ( const GridImp &grid,
-                               int level,
                                const ElementInfo &elementInfo,
                                int subEntity );
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
-    AlbertaGridEntityPointer( const GridImp &grid, int level, bool done );
+    AlbertaGridEntityPointer( const GridImp &grid );
 
     //! make entity pointer from entity
     AlbertaGridEntityPointer ( const EntityImp &entity );

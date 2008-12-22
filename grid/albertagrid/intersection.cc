@@ -105,8 +105,7 @@ namespace Dune
 
     assert( !neighborInfo_ == false );
     assert( neighborInfo_.el() != NULL );
-    const int neighborLevel = grid_.getLevelOfElement( neighborInfo_.el() );
-    return EntityPointerImp( grid_, neighborLevel, neighborInfo_, 0 );
+    return EntityPointerImp( grid_, neighborInfo_, 0 );
   }
 
   template< class GridImp >
@@ -115,7 +114,7 @@ namespace Dune
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
     assert( !elementInfo_ == false );
-    return EntityPointerImp( grid_, elementInfo_.level(), elementInfo_, 0 );
+    return EntityPointerImp( grid_, elementInfo_, 0 );
   }
 
   template< class GridImp >
@@ -481,6 +480,7 @@ namespace Dune
 
     nbInfo.el = elInfo.neigh[ neighborCount_ ];
     assert( nbInfo.el != NULL );
+    nbInfo.level = grid_.getLevelOfElement( nbInfo.el );
 
     const int vx = elInfo.opp_vertex[ neighborCount_ ];
     assert( (vx >= 0) && (vx < ElementInfo::maxNeighbors) );

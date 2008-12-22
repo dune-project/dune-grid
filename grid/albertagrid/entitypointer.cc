@@ -11,7 +11,6 @@ namespace Dune
   template< int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >
   ::AlbertaGridEntityPointer ( const GridImp &grid,
-                               int level,
                                const ElementInfo &elementInfo,
                                int subEntity )
     : entity_( grid.template getNewEntity< codim >() )
@@ -23,11 +22,10 @@ namespace Dune
 
   template<int codim, class GridImp >
   inline AlbertaGridEntityPointer< codim, GridImp >
-  ::AlbertaGridEntityPointer ( const GridImp &grid, int level, bool end )
+  ::AlbertaGridEntityPointer ( const GridImp &grid )
     : entity_( grid.template getNewEntity< codim >() )
   {
-    if( end )
-      done();
+    done();
   }
 
   template< int codim, class GridImp >

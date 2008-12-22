@@ -246,7 +246,7 @@ namespace Dune
   AlbertaGridEntity< 0, dim, GridImp >::entity ( int i ) const
   {
     typedef AlbertaGridEntityPointer< codim, GridImp > EntityPointerImpl;
-    return EntityPointerImpl( grid_, level(), elementInfo_, i );
+    return EntityPointerImpl( grid_, elementInfo_, i );
   }
 
 
@@ -328,7 +328,7 @@ namespace Dune
     assert( !elementInfo_ == false );
     const ElementInfo fatherInfo = elementInfo_.father();
 
-    return EntityPointerImpl( grid_, fatherInfo.level(), fatherInfo, 0 );
+    return EntityPointerImpl( grid_, fatherInfo, 0 );
   }
 
 
