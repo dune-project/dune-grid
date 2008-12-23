@@ -248,67 +248,60 @@ namespace Dune
 
 
   //! hierarchic index set of AlbertaGrid
-  template <int dim, int dimworld>
-  class AlbertaGridIdSet :
-    public IdSetDefaultImplementation < AlbertaGrid<dim,dimworld> ,
-        AlbertaGridIdSet<dim,dimworld> , int >
+  template< int dim, int dimworld >
+  class AlbertaGridIdSet
+    : public IdSetDefaultImplementation
+      < AlbertaGrid< dim, dimworld >, AlbertaGridIdSet< dim, dimworld >, unsigned int >
   {
-    typedef AlbertaGrid<dim,dimworld> GridType;
-    typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
+    typedef AlbertaGridIdSet< dim, dimworld > This;
+    typedef AlbertaGrid< dim, dimworld > Grid;
+    typedef IdSetDefaultImplementation< Grid, This, unsigned int > Base;
 
-    // this means that only up to 300000000 entities are allowed
-    enum { codimMultiplier = 300000000 };
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    typedef typename remove_const<GridType>::type::Traits::template Codim<0>::Entity EntityCodim0Type;
+    friend class AlbertaGrid< dim, dimworld >;
+
+    static const int codimShift = 30;
+    static const int maxCodimSize = (1 << codimShift);
+
+    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+
+    const HierarchicIndexSet &hset_;
 
     //! create id set, only allowed for AlbertaGrid
-    AlbertaGridIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())
-    {
-      for(int i=0; i<dim+1; i++)
-        codimStart_[i] = i*codimMultiplier;
-    }
+    AlbertaGridIdSet ( const Grid &grid )
+      : hset_( grid.hierarchicIndexSet() )
+    {}
 
-    friend class AlbertaGrid<dim,dimworld>;
   public:
     //! export type of id
-    typedef int IdType;
+    typedef typename Base::IdType IdType;
 
-    //! return global id of given entity
-    template <class EntityType>
-    int id (const EntityType & ep) const
+    /** \copydoc IdSet::id(const EntityType &e) const */
+    template< class Entity >
+    IdType id ( const Entity &e ) const
     {
-      enum { cd = EntityType :: codimension };
-      assert( hset_.size(cd) < codimMultiplier );
-      return codimStart_[cd] + hset_.index(ep);
+      const int codim = Entity::codimension;
+      return id< codim >( e );
     }
 
-    //! return global id of given entity
-    template <int codim>
-    int id (const typename GridType::template Codim<codim>::Entity& ep) const
+    /** \copydoc IdSet::id(const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity &e) const */
+    template< int codim >
+    IdType id ( const typename Grid::template Codim< codim >::Entity &e ) const
     {
-      //enum { cd = EntityType :: codimension };
-      assert( hset_.size(codim) < codimMultiplier );
-      return codimStart_[codim] + hset_.index(ep);
+      assert( hset_.size( codim ) < maxCodimSize );
+      const IdType index = hset_.index( e );
+      return ((IdType)codim << codimShift) + index;
     }
 
-    //! return subId of given entity
-    template <int cd>
-    int subId (const EntityCodim0Type & ep, int i) const
+    /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i) const */
+    template< int codim >
+    IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i ) const
     {
-      assert( hset_.size(cd) < codimMultiplier );
-      return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
+      assert( hset_.size( codim ) < maxCodimSize );
+      const IdType index = hset_.template subIndex< codim >( e, i );
+      return ((IdType)codim << codimShift) + index;
     }
-
-  private:
-    // our Grid
-    const HierarchicIndexSetType & hset_;
-
-    // store start of each codim numbers
-    int codimStart_[dim+1];
   };
+
 } // namespace Dune
 
 #endif // HAVE_ALBERTA

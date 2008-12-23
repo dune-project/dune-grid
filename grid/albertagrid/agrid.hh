@@ -110,8 +110,8 @@ namespace Dune
     typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetImp;
     typedef DefaultLeafIndexSet< AlbertaGrid<dim,dimworld> > LeafIndexSetImp;
 
-    typedef AlbertaGridIdSet<dim,dimworld> IdSetImp;
-    typedef int IdType;
+    typedef AlbertaGridIdSet< dim, dimworld > IdSetImp;
+    typedef unsigned int IdType;
 
     struct Traits
     {
@@ -537,10 +537,16 @@ namespace Dune
     const typename Traits :: LeafIndexSet & leafIndexSet () const;
 
     //! return global IdSet
-    const GlobalIdSet & globalIdSet () const { return globalIdSet_; }
+    const GlobalIdSet &globalIdSet () const
+    {
+      return idSet_;
+    }
 
     //! return local IdSet
-    const LocalIdSet & localIdSet () const { return globalIdSet_; }
+    const LocalIdSet &localIdSet () const
+    {
+      return idSet_;
+    }
 
     // access to mesh pointer, needed by some methods
     ALBERTA MESH* getMesh () const
@@ -739,7 +745,7 @@ namespace Dune
     AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
 
     // the id set of this grid
-    IdSetImp globalIdSet_;
+    IdSetImp idSet_;
 
     // the level index set, is generated from the HierarchicIndexSet
     // is generated, when accessed
