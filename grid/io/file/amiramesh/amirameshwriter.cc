@@ -43,7 +43,7 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridView& gridV
   for (; vertex!=endvertex; ++vertex) {
 
     int index = indexSet.template index<dim>(*vertex);
-    const FieldVector<double, dim>& coords = vertex->geometry()[0];
+    FieldVector<double, dim> coords = vertex->geometry().corner(0);
 
     // Copy coordinates
     for (int i=0; i<dim; i++)
