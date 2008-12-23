@@ -65,8 +65,9 @@ namespace Dune
       AlbertHelp::elNumbers[ i ] = NULL;
     }
 
-    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getElNewCheck() );
+    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::elNewCheck );
     AlbertHelp::elNewCheck = NULL;
+    elNewCheck_.initialize( 0 );
 
 #ifndef CALC_COORD
     coords_ = Alberta::DofVectorPointer< Alberta::GlobalVector >( AlbertHelp::getCoordVec< dimworld >() );
@@ -451,7 +452,7 @@ namespace Dune
     refineMarked_  = 0;
 
     // clear refined marker
-    ALBERTA AlbertHelp::set2positive( elNewCheck_ );
+    Alberta::abs( elNewCheck_ );
 
     return wasChanged_;
   }
@@ -509,7 +510,7 @@ namespace Dune
     ALBERTA AlbertHelp::initIndexManager_elmem_cc( indexStack_ );
 
     // set all values of elNewCheck positive which means old
-    ALBERTA AlbertHelp::set2positive ( elNewCheck_ );
+    Alberta::abs( elNewCheck_ );
 
     const bool refined = mesh_.refine();
     const bool coarsened = (preAdapt() ? mesh_.coarsen() : false);
@@ -720,9 +721,8 @@ namespace Dune
     arrangeDofVec ();
 
     // determine new maxlevel
-    maxlevel_ = ALBERTA AlbertHelp::calcMaxAbsoluteValueOfVector( elNewCheck_ );
-    assert( maxlevel_ >= 0);
-    assert( maxlevel_ < MAXL);
+    maxlevel_ = Alberta::maxAbs( elNewCheck_ );
+    assert( (maxlevel_ >= 0) && (maxlevel_ < MAXL) );
 
 #ifndef NDEBUG
     int mlvl = ALBERTA AlbertHelp::calcMaxLevel( mesh_, elNewCheck_ );

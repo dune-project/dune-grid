@@ -68,16 +68,16 @@ namespace Dune
           freeDofSpace( dofSpace_[ codim ] );
       }
 
-      int operator() ( Element *element, int codim, unsigned int subEntity )
+      int operator() ( Element *element, int codim, unsigned int subEntity ) const
       {
         assert( (codim >= 0) && (codim <= dimension) );
         Cache &cache = cache_[ codim ];
         return element->dof[ cache.first + subEntity ][ cache.second ];
       }
 
-      int operator() ( const ElementInfo &element, int codim, unsigned int subEntity )
+      int operator() ( const ElementInfo &element, int codim, unsigned int subEntity ) const
       {
-        return number( element.el(), codim, subEntity );
+        return (*this)( element.el(), codim, subEntity );
       }
 
       const DofSpace *dofSpace ( int codim ) const
@@ -410,12 +410,30 @@ namespace Dune
 
       void initialize ( const Dof &value )
       {
-        Dof *array = NULL;
-        GET_DOF_VEC( array, dofVector_ );
+        Dof *array = (Dof *)(*this);
         FOR_ALL_DOFS( dofSpace()->admin, array[ dof ] = value );
       }
 
     };
+
+
+
+    inline void abs ( const DofVectorPointer< int > &dofVector )
+    {
+      int *array = (int *)dofVector;
+      FOR_ALL_DOFS( dofVector.dofSpace()->admin,
+                    array[ dof ] = std::abs( array[ dof ] ) );
+    }
+
+
+    inline int maxAbs ( const DofVectorPointer< int > &dofVector )
+    {
+      int *array = (int *)dofVector;
+      int result = 0;
+      FOR_ALL_DOFS( dofVector.dofSpace()->admin,
+                    result = std::max( result, std::abs( array[ dof ] ) ) );
+      return result;
+    }
 
   }
 

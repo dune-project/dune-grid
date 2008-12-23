@@ -482,14 +482,6 @@ namespace AlbertHelp
   }
 
 
-  // return pointer to created elNewCheck Vector to mesh
-  inline DOF_INT_VEC * getElNewCheck ()
-  {
-    clearDofVec( elNewCheck );
-    return elNewCheck;
-  }
-
-
   inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
                                       const char * name)
   {
@@ -498,41 +490,6 @@ namespace AlbertHelp
     drv->coarse_restrict = 0;
     clearDofVec( drv );
     return drv;
-  }
-
-
-  // calculate max absolute value of given vector
-  inline int calcMaxAbsoluteValueOfVector ( const DOF_INT_VEC * drv )
-  {
-    const int * vec = 0;
-    int maxi = 0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, maxi = std::max( maxi , std::abs(vec[dof]) ) );
-    return maxi;
-  }
-
-  // set all values of vector to its positive value
-  inline static void set2positive ( DOF_INT_VEC * drv )
-  {
-    int * vec=0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, vec[dof] = std::abs( vec[dof] ) );
-  }
-
-  // clear Dof Vec
-  inline static void setDofVec ( DOF_INT_VEC * drv , int val )
-  {
-    int * vec=0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, vec[dof] = val );
-  }
-
-  // clear Dof Vec
-  inline static void copyOwner ( DOF_INT_VEC * drv , int * ownvec )
-  {
-    int * vec=0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, vec[dof] = ownvec[dof] );
   }
 
 
