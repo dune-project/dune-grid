@@ -59,6 +59,43 @@ namespace Dune
 
 
 
+    template< int dim >
+    struct FillFlags
+    {
+      typedef ALBERTA FLAGS Flags;
+
+      static const Flags nothing = FILL_NOTHING;
+
+      static const Flags coords = FILL_COORDS;
+
+      static const Flags neighbor = FILL_NEIGH;
+
+      static const Flags orientation = (dim == 3 ? FILL_ORIENTATION : FILL_NOTHING);
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags elementType = FILL_NOTHING;
+#else
+      static const Flags elementType = (dim == 3 ? FILL_EL_TYPE : FILL_NOTHING);
+#endif
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags boundaryId = FILL_MACRO_WALLS;
+#else
+      static const Flags boundaryId = FILL_BOUND;
+#endif
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags nonPeriodic = FILL_NON_PERIODIC;
+#else
+      static const Flags nonPeriodic = FILL_NOTHING;
+#endif
+
+      static const Flags all = coords | neighbor | boundaryId | nonPeriodic
+                               | orientation | elementType;
+    };
+
+
+
 #if DUNE_ALBERTA_VERSION < 0x200
     // BoundaryProvider
     // ----------------
@@ -181,6 +218,7 @@ namespace Dune
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
 
+      bool hasCoordinates () const;
       const GlobalVector &coordinate ( int vertex ) const;
 
       Element *el () const;
@@ -271,14 +309,10 @@ namespace Dune
 
       addReference();
 
-#if DUNE_ALBERTA_VERSION >= 0x201
-      elInfo().fill_flag = FILL_COORDS | FILL_NEIGH | FILL_OPP_COORDS
-                           | FILL_ORIENTATION | FILL_MACRO_WALLS
-                           | FILL_NON_PERIODIC;
-#elif DUNE_ALBERTA_VERSION == 0x200
-      elInfo().fill_flag = FILL_ANY( (Mesh *)mesh );
+#if CALC_COORD
+      elInfo().fill_flag = FillFlags< dim >::all;
 #else
-      elInfo().fill_flag = FILL_ANY;
+      elInfo().fill_flag = FillFlags< dim >::all & ~FillFlags< dim >::coords;
 #endif
 
       // Alberta fills opp_vertex only if there is a neighbor
@@ -526,8 +560,15 @@ namespace Dune
 
 
     template< int dim >
+    inline bool ElementInfo< dim >::hasCoordinates () const
+    {
+      return ((elInfo().flags & FILL_COORDS) != 0);
+    }
+
+    template< int dim >
     inline const GlobalVector &ElementInfo< dim >::coordinate ( int vertex ) const
     {
+      assert( hasCoordinates() );
       assert( (vertex >= 0) && (vertex < numVertices) );
       return elInfo().coord[ vertex ];
     }
