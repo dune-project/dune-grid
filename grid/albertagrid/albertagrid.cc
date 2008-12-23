@@ -546,8 +546,8 @@ namespace Dune
 #ifndef CALC_COORD
     typedef typename SelectEntityImp<0,dim,const MyType>::EntityImp EntityImp;
 
-    EntityObject father(EntityImp(*this,maxLevel(),true));
-    EntityObject son(EntityImp(*this,maxLevel(),true));
+    EntityObject father( EntityImp( *this ) );
+    EntityObject son( EntityImp( *this ) );
 
     typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
     typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
