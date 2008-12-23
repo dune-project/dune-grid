@@ -1176,7 +1176,7 @@ namespace Dune
       {
         int dimw=w;
         for (int j=0; j<std::min(dimw,3); j++)
-          p->write(vit->geometry()[vit.localindex()][j]);
+          p->write(vit->geometry().corner(vit.localindex())[j]);
         for (int j=std::min(dimw,3); j<3; j++)
           p->write(0.0);
       }
@@ -1311,7 +1311,7 @@ namespace Dune
         float data;
         for (int j=0; j<std::min(dimw,3); j++)
         {
-          data = vit->geometry()[vit.localindex()][j];
+          data = vit->geometry().corner(vit.localindex())[j];
           stream.write(data);
         }
         data = 0;
