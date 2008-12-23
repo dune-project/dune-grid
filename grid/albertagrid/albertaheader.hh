@@ -86,14 +86,6 @@ static inline void meshTraverse(MESH *mesh,
 #else // version 2.0
 //////////////////////////////////////////////////
 
-struct boundary
-{
-  void (*param_bound)(REAL_D  );
-  S_CHAR bound;
-};
-
-typedef struct boundary BOUNDARY;
-
 static inline void wrapped_el_fct(const EL_INFO* elinfo, void * data)
 {
   ((void (*)(const EL_INFO *))data)(elinfo);
@@ -104,12 +96,6 @@ static inline void meshTraverse(MESH *mesh,
                                 void (*el_fct)(const EL_INFO *))
 {
   mesh_traverse(mesh, level, fill_flag, wrapped_el_fct, (void*)el_fct );
-}
-
-static inline MACRO_EL* nextMacroEl(MESH* mesh, const MACRO_EL* oldmel)
-{
-  int newIndex = oldmel->index + 1;
-  return (newIndex < mesh->n_macro_el) ? (&(mesh->macro_els[newIndex])) : 0;
 }
 
 #define N_VERTEX(mesh) N_VERTICES((mesh)->dim)
