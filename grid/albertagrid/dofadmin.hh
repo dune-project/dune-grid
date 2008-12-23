@@ -414,6 +414,52 @@ namespace Dune
         FOR_ALL_DOFS( dofSpace()->admin, array[ dof ] = value );
       }
 
+      template< class Interpolation >
+      void setupInterpolation ()
+      {
+        dofVector_->refine_interpol = &refineInterpolate< Interpolation >;
+      }
+
+      /*
+         template< class Restriction >
+         void setupRestriction ()
+         {
+         dofVector_->coarse_restrict = &coarsenRestrict< Restriction >;
+         }
+       */
+
+    private:
+      template< class Interpolation >
+      static void refineInterpolate ( DofVector *dofVector, RC_LIST_EL *list, int n )
+      {
+        const This dofVectorPointer( dofVector );
+        Interpolation interpolation( dofVectorPointer );
+        for( int i = 0; i < n; ++i )
+        {
+#if DUNE_ALBERTA_VERSION < 0x200
+          const Element *element = list[ i ].el;
+#else
+          const Element *element = list[ i ].el_info.el;
+#endif
+          interpolation.operator()( element );
+        }
+      }
+
+      template< class Restriction >
+      static void coarsenRestrict ( DofVector *dofVector, RC_LIST_EL *list, int n )
+      {
+        const This dofVectorPointer( dofVector );
+        Restriction restriction( dofVectorPointer );
+        for( int i = 0; i < n; ++i )
+        {
+#if DUNE_ALBERTA_VERSION < 0x200
+          const Element *element = list[ i ].el;
+#else
+          const Element *element = list[ i ].el_info.el;
+#endif
+          restriction( element );
+        }
+      }
     };
 
 

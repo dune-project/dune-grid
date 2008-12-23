@@ -441,37 +441,6 @@ namespace AlbertHelp
   }
 #endif
 
-  // set entry for new elements to 1
-  inline static void refineElNewCheck ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
-  {
-    const DOF_ADMIN * admin = drv->fe_space->admin;
-    const int nv = admin->n0_dof[CENTER];
-    const int k  = admin->mesh->node[CENTER];
-    int *vec = 0;
-
-    GET_DOF_VEC(vec,drv);
-    assert(ref > 0);
-
-    for(int i=0; i<ref; i++)
-    {
-      const EL * el = GET_EL_FROM_LIST(list[i]);
-      //std::cout << "refine elNewCheck for el = " << el << "\n";
-
-      // get level of father which is the absolute value
-      // if value is < 0 then this just means that element
-      // was refined
-      int level = std::abs( vec[el->dof[k][nv]] ) + 1;
-      for(int ch=0; ch<2; ch++)
-      {
-        // set new to negative level of the element
-        // which then can be used to check whether an element is new on not
-        // also this vector stores the level of the element which is needed
-        // for the face iterator
-        vec[el->child[ch]->dof[k][nv]] = -level;
-      }
-    }
-  }
-
 
   // clear Dof Vec
   inline static void clearDofVec ( DOF_INT_VEC * drv )
@@ -486,8 +455,6 @@ namespace AlbertHelp
                                       const char * name)
   {
     DOF_INT_VEC * drv = get_dof_int_vec(name,espace);
-    drv->refine_interpol = &refineElNewCheck;
-    drv->coarse_restrict = 0;
     clearDofVec( drv );
     return drv;
   }
@@ -616,8 +583,6 @@ namespace AlbertHelp
     // the methods for the adaptation call back are put to elNewCheck
     // refine and coarsening procedures
     elNewCheck = get_dof_int_vec("el_new_check",elemSpace);
-    elNewCheck->refine_interpol = &refineElNewCheck;
-    elNewCheck->coarse_restrict = 0;
 
     // the element numbers, ie. codim = 0
     elNumbers[0] = get_dof_int_vec("element_numbers",elemSpace);

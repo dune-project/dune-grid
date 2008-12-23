@@ -99,6 +99,7 @@ namespace Dune
   template<int codim, int dim, class GridImp>
   inline int AlbertaGridEntity<codim,dim,GridImp>::level() const
   {
+    assert( elementInfo_.level() == grid_.getLevelOfElement( elementInfo_.el() ) );
     return elementInfo_.level();
   }
 
@@ -266,6 +267,7 @@ namespace Dune
   template< int dim, class GridImp >
   inline int AlbertaGridEntity< 0, dim, GridImp >::level () const
   {
+    assert( elementInfo_.level() == grid_.getLevelOfElement( elementInfo_.el() ) );
     return elementInfo_.level();
   }
 

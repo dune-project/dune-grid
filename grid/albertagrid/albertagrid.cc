@@ -67,6 +67,7 @@ namespace Dune
 
     elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::elNewCheck );
     AlbertHelp::elNewCheck = NULL;
+    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
     elNewCheck_.initialize( 0 );
 
 #ifndef CALC_COORD
@@ -841,6 +842,7 @@ namespace Dune
     }
 
     elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( elNumbers_[ 0 ].dofSpace(), "el_new_check" ) );
+    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
     assert( !coords_ );
@@ -891,6 +893,40 @@ namespace Dune
     return true;
   }
 #endif
+
+
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
+  {
+    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+
+    static const int codim = 0;
+    static const int codimType = Alberta::CodimType< dim, codim >::value;
+
+    DofVectorPointer dofVector_;
+    const int codimIdx_;
+    const int idx_;
+
+  public:
+    explicit ElNewCheckInterpolation ( const DofVectorPointer &dofVector )
+      : dofVector_( dofVector ),
+        codimIdx_( dofVector.dofSpace()->admin->mesh->node[ codimType ] ),
+        idx_( dofVector.dofSpace()->admin->n0_dof[ codimType ] )
+    {}
+
+    void operator() ( const Alberta::Element *father )
+    {
+      int *array = (int *)dofVector_;
+      const int fatherDof = father->dof[ codimIdx_ ][ idx_ ];
+      const int fatherLevel = std::abs( array[ fatherDof ] );
+      for( int i = 0; i < 2; ++i )
+      {
+        const Alberta::Element *child = father->child[ i ];
+        const int childDof = child->dof[ codimIdx_ ][ idx_ ];
+        array[ childDof ] = -(fatherLevel+1);
+      }
+    }
+  };
 
 } // namespace Dune
 

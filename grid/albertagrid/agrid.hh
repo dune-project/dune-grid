@@ -702,6 +702,7 @@ namespace Dune
     Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
 
     Alberta::DofVectorPointer< int > elNewCheck_;
+    class ElNewCheckInterpolation;
 
 #ifndef CALC_COORD
     Alberta::DofVectorPointer< Alberta::GlobalVector > coords_;
