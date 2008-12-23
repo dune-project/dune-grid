@@ -460,7 +460,7 @@ namespace Dune
     int getMark ( const typename Traits::template Codim< 0 >::Entity &e ) const;
 
     /** \copydoc Dune::Grid::mark(int refCount,const typename Codim<0>::Entity &e) */
-    bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &e ) const;
+    bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &e );
 
     //! uses the interface, mark on entity and refineLocal
     bool globalRefine ( int refCount );

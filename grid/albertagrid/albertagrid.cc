@@ -398,37 +398,25 @@ namespace Dune
   //**************************************
   //  refine and coarsen methods
   //**************************************
-  //  --Adaptation
+
   template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::
-  globalRefine(int refCount)
+  inline bool AlbertaGrid < dim, dimworld >::globalRefine ( int refCount )
   {
     // only MAXL level allowed
     assert( (refCount + maxlevel_) < MAXL );
 
-    typedef LeafIterator LeafIt;
-    LeafIt endit = this->leafend(this->maxLevel());
-
-    assert(refCount >= 0);
-    for(int i=0; i<refCount; i++)
+    assert( refCount >= 0 );
+    for( int i = 0; i < refCount; ++i )
     {
       // mark all interior elements
-      for(LeafIt it = this->leafbegin(this->maxLevel()); it != endit; ++it)
-      {
-        this->mark(1, *it );
-      }
+      const LeafIterator endit = leafend();
+      for( LeafIterator it = leafbegin(); it != endit; ++it )
+        mark( 1, *it );
 
-      // mark all ghosts
-      for(LeafIt it = leafbegin(this->maxLevel(),Ghost_Partition); it != endit; ++it)
-      {
-        this->mark(1, *it );
-      }
-
-      this->adapt();
-      this->postAdapt();
+      adapt();
+      postAdapt();
     }
 
-    //std::cout << "Grid was global refined !\n";
     return wasChanged_;
   }
 
@@ -471,7 +459,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >
-  ::mark( int refCount, const typename Traits::template Codim< 0 >::Entity &e ) const
+  ::mark( int refCount, const typename Traits::template Codim< 0 >::Entity &e )
   {
     // if not leaf entity, leave method
     if( !e.isLeaf() )
@@ -484,8 +472,7 @@ namespace Dune
     if( mark > 0 )
       refineMarked_ -= (2 << mark);
 
-    // set new marking (max( previous, refCount ))
-    mark = std::max( mark, refCount );
+    mark = refCount;
     if( mark < 0 )
       ++coarsenMarked_;
     if( mark > 0 )
@@ -503,9 +490,9 @@ namespace Dune
     return getRealImplementation( e ).elementInfo().getMark();
   }
 
-  // --adapt
-  template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::adapt()
+
+  template< int dim, int dimworld >
+  inline bool AlbertaGrid< dim, dimworld >::adapt ()
   {
     wasChanged_ = false;
 
