@@ -169,16 +169,11 @@ intersectionNeighborLocal() const
     assert(j<UG_NS<dim>::Corners_Of_Elem(other));
 
     // get the local coordinate there
-    UG_NS<dim>::getCornerLocal(other,j,coordinates[i]);
+    UG_NS<dim>::getCornerLocal(other,j,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
   }
 
-  /** \todo Reorder this without copying */
-  std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-  for (size_t i=0; i<coordinates.size(); i++)
-    duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-  neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+  neighLocal_.setCoordinates(coordinates, intersectionGeometryType);
 
   return neighLocal_;
 }
@@ -290,7 +285,6 @@ Dune::UGGridLeafIntersectionIterator <GridImp>::outerNormal (const FieldVector<U
   return outerNormal_;
 }
 
-/** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
 inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::LocalGeometry&
 Dune::UGGridLeafIntersectionIterator<GridImp>::
@@ -317,16 +311,11 @@ intersectionSelfLocal() const
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
       // get the corners local coordinates
-      UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[i]);
+      UG_NS<dim>::getCornerLocal(center_,cornerIdx,coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    selfLocal_.setCoordinates(coordinates, intersectionGeometryType);
 
   } else {
 
@@ -351,22 +340,16 @@ intersectionSelfLocal() const
       /** \todo Why is this const_cast necessary? */
       UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
                                 const_cast<const double**>(cornerCoords), worldPos,
-                                &coordinates[i][0]);
+                                &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    selfLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    selfLocal_.setCoordinates(coordinates, intersectionGeometryType);
   }
 
   return selfLocal_;
 }
 
-/** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
 inline const typename Dune::UGGridLeafIntersectionIterator<GridImp>::Geometry&
 Dune::UGGridLeafIntersectionIterator<GridImp>::
@@ -393,16 +376,11 @@ intersectionGlobal() const
       const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
       for (int j=0; j<dim; j++)
-        coordinates[i][j] = node->myvertex->iv.x[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = node->myvertex->iv.x[j];
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    neighGlob_.setCoordinates(coordinates, intersectionGeometryType);
 
   } else {
 
@@ -423,16 +401,11 @@ intersectionGlobal() const
 
       // and poke them into the Geometry
       for (int j=0; j<dim; j++)
-        coordinates[i][j] = worldPos[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = worldPos[j];
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    neighGlob_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    neighGlob_.setCoordinates(coordinates, intersectionGeometryType);
 
   }
 
@@ -478,16 +451,11 @@ intersectionNeighborLocal() const
       UGCtype localCoords[dim];
       UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
                                 const_cast<const double**>(cornerCoords), worldPos,
-                                &coordinates[i][0]);
+                                &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    neighLocal_.setCoordinates(coordinates, intersectionGeometryType);
 
   } else {
 
@@ -502,16 +470,11 @@ intersectionNeighborLocal() const
 
       // get the local coordinate of j-th corner
       int v = UG_NS<dim>::Corner_Of_Side(other,otherSide,i);
-      UG_NS<dim>::getCornerLocal(other, v, coordinates[i]);
+      UG_NS<dim>::getCornerLocal(other, v, coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
     }
 
-    /** \todo Reorder this without copying */
-    std::vector<FieldVector<typename GridImp::ctype,dim> > duneCoordinates(coordinates.size());
-    for (size_t i=0; i<coordinates.size(); i++)
-      duneCoordinates[i] = coordinates[UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType)];
-
-    neighLocal_.setCoordinates(duneCoordinates, intersectionGeometryType);
+    neighLocal_.setCoordinates(coordinates, intersectionGeometryType);
 
   }
 
