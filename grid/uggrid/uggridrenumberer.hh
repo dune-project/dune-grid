@@ -28,6 +28,15 @@ namespace Dune {
       return i;
     }
 
+    /** \brief Turn a local vertex number from UG numbering to DUNE numbering
+
+       This is a dummy method which simply returns i.  The real work is done
+       in the class specializations.
+     */
+    static int verticesUGtoDUNE(int i, const GeometryType& type) {
+      return i;
+    }
+
   };
 
   /** \brief DUNE and UG use different local numberings for the subentities of elements.
@@ -43,6 +52,18 @@ namespace Dune {
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
+
+      if (type.isCube()) {
+        // vertices of a quadrilateral
+        const int renumbering[4] = {0, 1, 3, 2};
+        return renumbering[i];
+      }
+
+      return i;
+    }
+
+    /** \brief Turn a local vertex number from UG numbering to DUNE numbering */
+    static int verticesUGtoDUNE(int i, const GeometryType& type) {
 
       if (type.isCube()) {
         // vertices of a quadrilateral
@@ -133,6 +154,17 @@ namespace Dune {
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
+
+      if (type.isCube()) {
+        const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
+        return renumbering[i];
+      }
+
+      return i;
+    }
+
+    /** \brief Turn a local vertex number from UG numbering to DUNE numbering */
+    static int verticesUGtoDUNE(int i, const GeometryType& type) {
 
       if (type.isCube()) {
         const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
