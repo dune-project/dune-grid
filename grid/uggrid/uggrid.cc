@@ -1335,8 +1335,12 @@ void Dune::UGGrid < dim >::setIndices(std::vector<unsigned int>* nodePermutation
   for (int i=levelIndexSets_.size(); i<=maxLevel(); i++)
     levelIndexSets_.push_back(new UGGridLevelIndexSet<const UGGrid<dim> >());
 
-  // Update all LevelIndexSets
-  levelIndexSets_[0]->update(*this, 0, nodePermutation);
+  // Update the zero level LevelIndexSet.  It is updated only once, at the time
+  // of creation of the coarse grid.  After that it is not touched anymore.
+  if (nodePermutation != NULL)
+    levelIndexSets_[0]->update(*this, 0, nodePermutation);
+
+  // Update the remaining level index sets
   for (int i=1; i<=maxLevel(); i++)
     if (levelIndexSets_[i])
       levelIndexSets_[i]->update(*this, i);
