@@ -708,7 +708,7 @@ namespace Dune {
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
-      return grid_.geomTypes(codim);
+      return hIndexSet_.geomTypes( codim );
     }
 
     /** @brief Iterator to first entity of given codimension and partition type.
@@ -984,7 +984,7 @@ namespace Dune {
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
-      return grid_.geomTypes(codim);
+      return hIndexSet_.geomTypes( codim );
     }
 
 
