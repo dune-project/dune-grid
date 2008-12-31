@@ -69,6 +69,74 @@ namespace Dune
     int maxlevel_;
   };
 
+
+  template< class GridImp >
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator( const GridImp &grid, int actLevel, int maxLevel )
+    : Base( grid ),
+      startLevel_( actLevel ),
+      maxlevel_( maxLevel )
+  {}
+
+
+  template< class GridImp >
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator ( const GridImp &grid,
+                                    const ElementInfo &elementInfo,
+                                    int maxLevel )
+    : Base( grid ),
+      startLevel_( elementInfo.level() ),
+      maxlevel_( maxLevel )
+  {
+    increment( elementInfo );
+  }
+
+
+  template< class GridImp >
+  inline AlbertaGridHierarchicIterator< GridImp >
+  ::AlbertaGridHierarchicIterator( const This &other )
+    : Base( other ),
+      startLevel_( other.startLevel_ ),
+      maxlevel_( other.maxlevel_ )
+  {}
+
+
+  template< class GridImp >
+  inline typename AlbertaGridHierarchicIterator< GridImp >::This &
+  AlbertaGridHierarchicIterator< GridImp >::operator= ( const This &other )
+  {
+    Base::operator=( other );
+
+    startLevel_ = other.startLevel_;
+    maxlevel_ = other.maxlevel_;
+    return *this;
+  }
+
+
+  template< class GridImp >
+  inline void AlbertaGridHierarchicIterator< GridImp >::increment ()
+  {
+    // note: since we are not the end iterator, we point to a valid entity
+    increment( entityImp().elementInfo_ );
+  }
+
+  template< class GridImp >
+  inline void AlbertaGridHierarchicIterator< GridImp >
+  ::increment ( ElementInfo elementInfo )
+  {
+    if( (elementInfo.level() >= maxlevel_) || elementInfo.isLeaf() )
+    {
+      while( (elementInfo.level() > startLevel_) && (elementInfo.indexInFather() == 1) )
+        elementInfo = elementInfo.father();
+      if( elementInfo.level() > startLevel_ )
+        entityImp().setElement( elementInfo.father().child( 1 ), 0 );
+      else
+        this->done();
+    }
+    else
+      entityImp().setElement( elementInfo.child( 0 ), 0 );
+  }
+
 }
 
 #endif

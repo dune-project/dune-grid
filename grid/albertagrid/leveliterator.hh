@@ -25,15 +25,14 @@ namespace Dune
     typedef typename GridImp::template Codim< codim >::Entity Entity;
 
     //! Constructor making end iterator
-    AlbertaGridLevelIterator ( const GridImp &grid, int level, int proc )
+    AlbertaGridLevelIterator ( const GridImp &grid, int level )
       : Base( grid, level )
     {}
 
     //! Constructor making begin iterator
     AlbertaGridLevelIterator ( const GridImp &grid,
                                const AlbertaMarkerVector *vec,
-                               int level,
-                               int proc )
+                               int level )
       : Base( grid, vec, level )
     {}
 

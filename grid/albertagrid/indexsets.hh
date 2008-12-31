@@ -54,6 +54,10 @@ namespace Dune
   };
 
 
+
+  // AlbertaGridHierarchicIndexSet
+  // -----------------------------
+
   template< int dim, int dimworld >
   class AlbertaGridHierarchicIndexSet
     : public IndexSetDefaultImplementation
@@ -67,26 +71,23 @@ namespace Dune
 
     typedef typename remove_const< Grid >::type::Traits Traits;
 
-    typedef typename Traits::template Codim< 0 >::Entity EntityCodim0Type;
+    static const int dimension = dim;
+
     enum { numVecs  = AlbertHelp::numOfElNumVec };
-    enum { numCodim = dim + 1 };
 
     friend class AlbertaGrid< dim, dimworld >;
     friend class MarkEdges< Grid, 3 >;
     friend class MarkEdges< const Grid, 3 >;
 
-    AlbertaGridHierarchicIndexSet ( const Grid &grid )
-      : grid_( grid )
-    {}
+    explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
 
   public:
-    enum { ncodim = numCodim };
+    enum { ncodim = dimension + 1 };
 
     //! return true if entity is contained in set
-    template <class EntityType>
-    bool contains(const EntityType &) const
+    template< class Entity >
+    bool contains ( const Entity & ) const
     {
-      // always true for this set
       return true;
     }
 
@@ -103,7 +104,7 @@ namespace Dune
 
     //! return subIndex of given enitiy's sub entity
     template< int codim >
-    int subIndex ( const EntityCodim0Type &entity, int i ) const
+    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
@@ -125,10 +126,10 @@ namespace Dune
     }
 
     //! return geometry types this set has indices for
-    const std::vector< GeometryType > & geomTypes(int codim) const
+    const std::vector< GeometryType > &geomTypes( int codim ) const
     {
-      // returns all simplex
-      return grid_.geomTypes(codim);
+      assert( (codim >= 0) && (codim <= dimension) );
+      return geomTypes_[ codim ];
     }
 
 #ifdef INDEXSET_HAS_ITERATORS
@@ -156,6 +157,10 @@ namespace Dune
     const Grid &grid_;
     // constains the mapping from dune to alberta numbers
     const ALBERTA AlbertHelp :: AlbertaGridReferenceTopology<dim> refTopo_;
+
+    // all geometry types contained in the grid
+    std::vector< GeometryType > geomTypes_[ dimension+1 ];
+
     // the vectors containing the numbers
     const int * elNumVec_[numVecs];
 
@@ -246,6 +251,24 @@ namespace Dune
     }
   }; // end class AlbertaGridHierarchicIndexSet
 
+
+
+  template< int dim, int dimworld >
+  inline AlbertaGridHierarchicIndexSet< dim, dimworld >
+  ::AlbertaGridHierarchicIndexSet ( const Grid &grid )
+    : grid_( grid )
+  {
+    for( int codim = 0; codim <= dimension; ++codim )
+    {
+      const GeometryType type( GeometryType::simplex, dimension - codim );
+      geomTypes_[ codim ].push_back( type );
+    }
+  }
+
+
+
+  // AlbertaGridIdSet
+  // ----------------
 
   //! hierarchic index set of AlbertaGrid
   template< int dim, int dimworld >

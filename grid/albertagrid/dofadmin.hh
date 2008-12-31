@@ -50,12 +50,8 @@ namespace Dune
       Cache cache_[ dimension+1 ];
 
     public:
-      HierarchyDofNumbering ( const MeshPointer &mesh )
-        : mesh_( mesh )
-      {
-        ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
-        ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
-      }
+      HierarchyDofNumbering ()
+      {}
 
     private:
       HierarchyDofNumbering ( const This & );
@@ -64,12 +60,12 @@ namespace Dune
     public:
       ~HierarchyDofNumbering ()
       {
-        for( int codim = 0; codim <= dimension; ++codim )
-          freeDofSpace( dofSpace_[ codim ] );
+        release();
       }
 
-      int operator() ( Element *element, int codim, unsigned int subEntity ) const
+      int operator() ( const Element *element, int codim, unsigned int subEntity ) const
       {
+        assert( !(*this) == false );
         assert( (codim >= 0) && (codim <= dimension) );
         Cache &cache = cache_[ codim ];
         return element->dof[ cache.first + subEntity ][ cache.second ];
@@ -80,10 +76,38 @@ namespace Dune
         return (*this)( element.el(), codim, subEntity );
       }
 
+      bool operator! () const
+      {
+        return !mesh_;
+      }
+
       const DofSpace *dofSpace ( int codim ) const
       {
+        assert( !(*this) == false );
         assert( (codim >= 0) && (codim <= dimension) );
         return dofSpace_[ codim ];
+      }
+
+      void create ( const MeshPointer &mesh )
+      {
+        release();
+
+        if( !mesh )
+          return;
+
+        mesh_ = mesh;
+        ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
+        ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
+      }
+
+      void release ()
+      {
+        if( !(*this) )
+          return;
+
+        for( int codim = 0; codim <= dimension; ++codim )
+          freeDofSpace( dofSpace_[ codim ] );
+        mesh_ = MeshPointer();
       }
 
     private:
@@ -420,13 +444,11 @@ namespace Dune
         dofVector_->refine_interpol = &refineInterpolate< Interpolation >;
       }
 
-      /*
-         template< class Restriction >
-         void setupRestriction ()
-         {
-         dofVector_->coarse_restrict = &coarsenRestrict< Restriction >;
-         }
-       */
+      template< class Restriction >
+      void setupRestriction ()
+      {
+        dofVector_->coarse_restrict = &coarsenRestrict< Restriction >;
+      }
 
     private:
       template< class Interpolation >
@@ -441,7 +463,7 @@ namespace Dune
 #else
           const Element *element = list[ i ].el_info.el;
 #endif
-          interpolation.operator()( element );
+          interpolation( element );
         }
       }
 

@@ -15,17 +15,57 @@
 #include "geometry.cc"
 #include "entity.cc"
 #include "entitypointer.cc"
-#include "hierarchiciterator.cc"
 #include "treeiterator.cc"
 #include "intersection.cc"
 
 namespace Dune
 {
 
+  // AlbertaGrid::SetLocalCoords
+  // ---------------------------
+
+#ifndef CALC_COORD
   template< int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::AlbertaGrid()
+  class AlbertaGrid< dim, dimworld >::SetLocalCoords
+  {
+    static const int codim = dim;
+    static const int codimtype = Alberta::CodimType< dim, codim >::value;
+    static const int numVertices = Alberta::NumSubEntities< dim, dim >::value;
+
+    CoordVectorPointer coords_;
+    const int codimIdx_;
+    const int idx_;
+
+  public:
+    explicit SetLocalCoords ( const CoordVectorPointer &coords )
+      : coords_( coords ),
+        codimIdx_( coords.dofSpace()->admin->mesh->node[ codimtype ] ),
+        idx_( coords.dofSpace()->admin->n0_dof[ codimtype ] )
+    {}
+
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
+    {
+      Alberta::GlobalVector *array = (Alberta::GlobalVector *)coords_;
+      for( int i = 0; i < numVertices; ++i )
+      {
+        const Alberta::GlobalVector &x = elementInfo.coordinate( i );
+        const int dof = elementInfo.el()->dof[ codimIdx_+i ][ idx_ ];
+        Alberta::GlobalVector &y = array[ dof ];
+        for( int i = 0; i < dimworld; ++i )
+          y[ i ] = x[ i ];
+      }
+    }
+  };
+#endif
+
+
+
+  // AlbertaGrid
+  // -----------
+
+  template< int dim, int dimworld >
+  inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
     : mesh_(),
-      comm_(),
       maxlevel_( 0 ),
       wasChanged_( false ),
       vertexMarkerLeaf_( false ), // creates LeafMarkerVector
@@ -40,42 +80,58 @@ namespace Dune
       refineMarked_( 0 ),
       lockPostAdapt_( false )
   {
-    // create vector with geom types
-    makeGeomTypes();
-  }
+    // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
+    dune_static_assert( (dimworld == DIM_OF_WORLD),
+                        "Template Parameter dimworld does not match "
+                        "ALBERTA's DIM_OF_WORLD setting." );
 
-
-  template< int dim, int dimworld >
-  inline void AlbertaGrid< dim, dimworld >::makeGeomTypes ()
-  {
-    for( int codim = 0; codim <= dim; ++codim )
-    {
-      const GeometryType type( GeometryType::simplex, dim - codim );
-      geomTypes_[ codim ].push_back( type );
-    }
+#if DUNE_ALBERTA_VERSION < 0x200
+    // ALBERTA 1.2 supports only one grid dimension
+    // If this check fails, reconfigure with --with-alberta-dim=dim
+    dune_static_assert( (dim == DIM),
+                        "Template Parameter dim does not match "
+                        "ALBERTA's DIM setting." );
+#endif
   }
 
 
   template< int dim, int dimworld >
   inline void AlbertaGrid< dim, dimworld >::initGrid ()
   {
-    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
-    {
-      elNumbers_[ i ] = Alberta::DofVectorPointer< int >( AlbertHelp::getElNumbers( i ) );
-      AlbertHelp::elNumbers[ i ] = NULL;
-    }
+    typedef Alberta::FillFlags< dim > FillFlags;
 
-    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::elNewCheck );
-    AlbertHelp::elNewCheck = NULL;
+    dofNumbering_.create( mesh_ );
+
+#ifndef CALC_COORD
+    coords_.create( dofNumbering_.dofSpace( dimension ), "Coordinates" );
+    SetLocalCoords setLocalCoords( coords_ );
+    mesh_.hierarchicTraverse( setLocalCoords, FillFlags::coords );
+    ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
+    ((ALBERTA DOF_REAL_D_VEC *)coords_)->coarse_restrict = &AlbertHelp::coarseCallBack;
+#endif
+
+    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
+    assert( !elNewCheck_ == false );
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
     elNewCheck_.initialize( 0 );
 
-#ifndef CALC_COORD
-    coords_ = Alberta::DofVectorPointer< Alberta::GlobalVector >( AlbertHelp::getCoordVec< dimworld >() );
-    AlbertHelp::coordVec = NULL;
-#endif
+    elNumbers_[ 0 ].create( dofNumbering_.dofSpace( 0 ), "element_numbers" );
+    AlbertHelp::initElNumbersCodim< 0 >( elNumbers_[ 0 ] );
+    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 0 >::refineNumbers;
+    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 0 >::coarseNumbers;
 
-    calcExtras();
+    elNumbers_[ 1 ].create( dofNumbering_.dofSpace( 1 ), "face_numbers" );
+    AlbertHelp::initElNumbersCodim< 1 >( elNumbers_[ 1 ] );
+    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 1 >::refineNumbers;
+    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 1 >::coarseNumbers;
+
+    if( dim == 3 )
+    {
+      elNumbers_[ 2 ].create( dofNumbering_.dofSpace( 2 ), "edge_numbers"  );
+      AlbertHelp::initElNumbersCodim< 2 >( elNumbers_[ 2 ] );
+      ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 2 >::refineNumbers;
+      ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 2 >::coarseNumbers;
+    }
 
     wasChanged_ = true;
 
@@ -88,9 +144,9 @@ namespace Dune
 
   template < int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
-  ::AlbertaGrid ( const std::string &macroGridFileName, const std::string &gridName )
+  ::AlbertaGrid ( const std::string &macroGridFileName,
+                  const std::string &gridName )
     : mesh_( 0 ),
-      comm_(),
       maxlevel_( 0 ),
       wasChanged_( false ),
       vertexMarkerLeaf_( false ), // creates LeafMarkerVector
@@ -105,20 +161,18 @@ namespace Dune
       refineMarked_( 0 ),
       lockPostAdapt_( false )
   {
-    // create vector with geom types
-    makeGeomTypes();
+    // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
+    dune_static_assert( (dimworld == DIM_OF_WORLD),
+                        "Template Parameter dimworld does not match "
+                        "ALBERTA's DIM_OF_WORLD setting." );
 
-    if(dimworld != DIM_OF_WORLD)
-    {
-      DUNE_THROW(AlbertaError,"DUNE wasn't configured for dimworld = " <<
-                 dimworld << ". Reconfigure with the --with-world-dim="<<dimworld<<" option!");
-    }
-
-    if(dim      != DIM)
-    {
-      DUNE_THROW(AlbertaError,"DUNE wasn't configured for dim = " <<
-                 dim << ". Reconfigure with the --with-problem-dim="<<dim<<" option!");
-    }
+#if DUNE_ALBERTA_VERSION < 0x200
+    // ALBERTA 1.2 supports only one grid dimension
+    // If this check fails, reconfigure with --with-alberta-dim=dim
+    dune_static_assert( (dim == DIM),
+                        "Template Parameter dim does not match "
+                        "ALBERTA's DIM setting." );
+#endif
 
     bool makeNew = true;
     {
@@ -138,7 +192,6 @@ namespace Dune
     if( makeNew )
     {
       mesh_.create( macroGridFileName, gridName );
-      AlbertHelp::initDofAdmin< dim >( mesh_ );
       initGrid();
       std::cout << typeName() << " created from macro grid file '"
                 << macroGridFileName << "'." << std::endl;
@@ -150,31 +203,20 @@ namespace Dune
     }
   }
 
-  template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::
-  AlbertaGrid(const AlbertaGrid<dim,dimworld> & copy )
-  {
-    DUNE_THROW(AlbertaError,"do not use grid copy constructor! ");
-  }
 
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::removeMesh()
+  template< int dim, int dimworld >
+  inline void AlbertaGrid< dim, dimworld >::removeMesh ()
   {
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++)
+    for( size_t i = 0; i < levelIndexVec_.size(); ++i )
     {
-      if(levelIndexVec_[i])
-      {
-        delete levelIndexVec_[i];
-        levelIndexVec_[i] = 0;
-      }
-
+      if( levelIndexVec_[ i ] != 0 )
+        delete levelIndexVec_[ i ];
+      levelIndexVec_[ i ] = 0;
     }
 
-    if(leafIndexSet_)
-    {
+    if( leafIndexSet_ != 0 )
       delete leafIndexSet_;
-      leafIndexSet_ = 0;
-    }
+    leafIndexSet_ = 0;
 
     // release dof vectors
     for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
@@ -183,156 +225,118 @@ namespace Dune
 #ifndef CALC_COORD
     coords_.release();
 #endif
+    dofNumbering_.release();
 
-    if(sizeCache_) delete sizeCache_;sizeCache_ = 0;
+    if( sizeCache_ != 0 )
+      delete sizeCache_;
+    sizeCache_ = 0;
 
-#if DIM == 3
-    if(mesh_)
-    {
-      // because of bug in Alberta 1.2 , here until bug fixed
-      ALBERTA RC_LIST_EL * rclist = ALBERTA get_rc_list(mesh_);
-      rclist = 0;
-    }
-#endif
     mesh_.release();
   }
 
-  // Desctructor
-  template < int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::~AlbertaGrid()
+
+  template< int dim, int dimworld >
+  inline AlbertaGrid< dim, dimworld >::~AlbertaGrid ()
   {
     removeMesh();
   }
 
-  template < int dim, int dimworld >
-  template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
-  //AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
-  AlbertaGrid < dim, dimworld >::lbegin (int level) const
+
+  template< int dim, int dimworld >
+  template< int codim, PartitionIteratorType pitype >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::template Partition<pitype>::LevelIterator
+  AlbertaGrid< dim, dimworld >::lbegin ( int level ) const
   {
     assert( level >= 0 );
-    // if we dont have this level return empty iterator
-    if(level > maxlevel_) return this->template lend<codim,pitype> (level);
 
-    if( codim > 0 ) //(dim == codim) || ((dim == 3) && (codim == 2)) )
+    if( level > maxlevel_ )
+      return lend< codim, pitype >( level );
+
+    if( codim > 0 )
     {
-      if( ! (vertexMarkerLevel_[level].up2Date() ) )
-        vertexMarkerLevel_[level].markNewVertices(*this,level);
+      if( !(vertexMarkerLevel_[ level ].up2Date() ) )
+        vertexMarkerLevel_[ level ].markNewVertices( *this, level );
     }
-    return AlbertaGridLevelIterator<codim,pitype,const MyType> (*this,&vertexMarkerLevel_[level],level,-1);
+    return AlbertaGridLevelIterator< codim, pitype, const This >( *this, &vertexMarkerLevel_[ level ], level );
   }
 
-  template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
-  //AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
-  AlbertaGrid < dim, dimworld >::lend (int level) const
+
+  template< int dim, int dimworld >
+  template< int codim, PartitionIteratorType pitype >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::template Partition< pitype >::LevelIterator
+  AlbertaGrid < dim, dimworld >::lend ( int level ) const
   {
-    return AlbertaGridLevelIterator<codim,pitype,const MyType> ((*this),level,-1);
+    assert( level >= 0 );
+    return AlbertaGridLevelIterator< codim, pitype, const This >( *this, level );
   }
 
-  template < int dim, int dimworld > template<int codim>
-  inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-  AlbertaGrid < dim, dimworld >::lbegin (int level) const
+
+  template< int dim, int dimworld >
+  template< int codim >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::LevelIterator
+  AlbertaGrid < dim, dimworld >::lbegin ( int level ) const
   {
-    return this->template lbegin<codim,All_Partition> (level);
+    return lbegin< codim, All_Partition >( level );
   }
 
-  template < int dim, int dimworld > template<int codim>
-  inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-  AlbertaGrid < dim, dimworld >::lend (int level) const
+
+  template< int dim, int dimworld >
+  template< int codim >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::LevelIterator
+  AlbertaGrid< dim, dimworld >::lend ( int level ) const
   {
-    return this->template lend<codim,All_Partition> (level);
+    return lend< codim, All_Partition >( level );
   }
 
-  template < int dim, int dimworld >
-  template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
+
+  template< int dim, int dimworld >
+  template< int codim, PartitionIteratorType pitype >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::template Partition< pitype >::LeafIterator
+  AlbertaGrid< dim, dimworld >::leafbegin () const
   {
-    if((dim == codim) || ((dim == 3) && (codim == 2)) )
+    if( codim > 1 )
     {
-      if( ! (vertexMarkerLeaf_.up2Date()) ) vertexMarkerLeaf_.markNewLeafVertices(*this);
+      if( !vertexMarkerLeaf_.up2Date() )
+        vertexMarkerLeaf_.markNewLeafVertices( *this );
     }
-    return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,&vertexMarkerLeaf_,level,proc);
-  }
-
-  template < int dim, int dimworld >
-  template<int codim>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const {
-    return leafbegin<codim, All_Partition>(level, proc);
+    return AlbertaGridLeafIterator< codim, pitype, const This >( *this, &vertexMarkerLeaf_, maxlevel_ );
   }
 
 
-  template < int dim, int dimworld >
-  template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin () const {
-    return leafbegin<codim, pitype>(maxlevel_, -1);
-  }
-
-  template < int dim, int dimworld >
-  template<int codim>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin () const {
-    return leafbegin<codim, All_Partition>(maxlevel_, -1);
-  }
-
-
-  template < int dim, int dimworld >
-  template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
+  template< int dim, int dimworld >
+  template< int codim, PartitionIteratorType pitype >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::template Partition< pitype >::LeafIterator
+  AlbertaGrid< dim, dimworld >::leafend () const
   {
-    return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,level,proc);
+    return AlbertaGridLeafIterator< codim, pitype, const This >( *this, maxlevel_ );
   }
 
-  template < int dim, int dimworld >
-  template<int codim>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const {
-    return leafend<codim, All_Partition>(level, proc);
-  }
 
-  template < int dim, int dimworld >
-  template<int codim, PartitionIteratorType pitype>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend () const {
-    return leafend<codim, pitype>(maxlevel_, -1);
-  }
-
-  template < int dim, int dimworld >
-  template<int codim>
-  inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend () const {
-    return leafend<codim, All_Partition>(maxlevel_, -1);
-  }
-
-  template < int dim, int dimworld >
-  inline typename AlbertaGrid<dim,dimworld>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
+  template< int dim, int dimworld >
+  template< int codim >
+  inline typename AlbertaGrid<dim,dimworld>::Traits
+  ::template Codim< codim >::LeafIterator
+  AlbertaGrid< dim, dimworld >::leafbegin () const
   {
-    return leafbegin<0, All_Partition> (level,proc);
+    return leafbegin< codim, All_Partition >();
   }
 
-  template < int dim, int dimworld >
-  inline typename AlbertaGrid<dim,dimworld>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafbegin () const {
-    return leafbegin<0, All_Partition>(maxlevel_, -1);
-  }
 
-  template < int dim, int dimworld >
-  inline typename AlbertaGrid<dim,dimworld>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
+  template< int dim, int dimworld >
+  template< int codim >
+  inline typename AlbertaGrid< dim, dimworld >::Traits
+  ::template Codim< codim >::LeafIterator
+  AlbertaGrid < dim, dimworld >::leafend () const
   {
-    return leafend<0,All_Partition> (level,proc);
+    return leafend< codim, All_Partition >();
   }
 
-  template < int dim, int dimworld >
-  inline typename AlbertaGrid<dim,dimworld>::LeafIterator
-  AlbertaGrid < dim, dimworld >::leafend () const {
-    return leafend<0, All_Partition>(maxlevel_, -1);
-  }
 
   //****************************************
   // getNewEntity methods
@@ -384,16 +388,16 @@ namespace Dune
   SelectEntityImp< codim, dim, const AlbertaGrid< dim, dimworld > >::EntityObject *
   AlbertaGrid< dim, dimworld >::getNewEntity () const
   {
-    typedef GetNewEntity< const MyType, EntityProvider, dim, codim > Helper;
+    typedef GetNewEntity< const This, EntityProvider, dim, codim > Helper;
     return Helper::getNewEntity( *this, entityProvider_ );
   }
 
   template< int dim, int dimworld >
   template< int codim >
   inline void AlbertaGrid< dim, dimworld >
-  ::freeEntity ( typename SelectEntityImp< codim, dim, const MyType >::EntityObject * en ) const
+  ::freeEntity ( typename SelectEntityImp< codim, dim, const This >::EntityObject * en ) const
   {
-    typedef GetNewEntity< const MyType, EntityProvider, dim, codim > Helper;
+    typedef GetNewEntity< const This, EntityProvider, dim, codim > Helper;
     Helper::freeEntity( entityProvider_, en );
   }
 
@@ -401,9 +405,11 @@ namespace Dune
   //  refine and coarsen methods
   //**************************************
 
-  template < int dim, int dimworld >
+  template< int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::globalRefine ( int refCount )
   {
+    typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
+
     // only MAXL level allowed
     assert( (refCount + maxlevel_) < MAXL );
 
@@ -411,8 +417,8 @@ namespace Dune
     for( int i = 0; i < refCount; ++i )
     {
       // mark all interior elements
-      const LeafIterator endit = leafend();
-      for( LeafIterator it = leafbegin(); it != endit; ++it )
+      const LeafIterator endit = leafend< 0 >();
+      for( LeafIterator it = leafbegin< 0 >(); it != endit; ++it )
         mark( 1, *it );
 
       adapt();
@@ -533,7 +539,7 @@ namespace Dune
   adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
   {
 #ifndef CALC_COORD
-    typedef typename SelectEntityImp<0,dim,const MyType>::EntityImp EntityImp;
+    typedef typename SelectEntityImp< 0, dim, const This >::EntityImp EntityImp;
 
     EntityObject father( EntityImp( *this ) );
     EntityObject son( EntityImp( *this ) );
@@ -548,7 +554,7 @@ namespace Dune
     // reserve memory
     dm.reserveMemory( newElementChunk_ );
 
-    Alberta::AdaptRestrictProlongHandler< MyType , COType >
+    Alberta::AdaptRestrictProlongHandler< This, COType >
     handler ( *this, father, this->getRealImplementation( father ),
               son, this->getRealImplementation( son ), tmprpop );
 
@@ -823,8 +829,8 @@ namespace Dune
   inline bool AlbertaGrid< dim, dimworld >
   ::readGridXdr ( const std::string &filename, ctype &time )
   {
-    // remove all old stuff
-    // to be reivised
+    typedef Alberta::FillFlags< dim > FillFlags;
+
     //removeMesh();
 
     if( filename.size() <= 0 )
@@ -833,6 +839,8 @@ namespace Dune
     mesh_.read( filename, time );
     if( !mesh_ )
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
+
+    dofNumbering_.create( mesh_ );
 
     for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
     {
@@ -845,8 +853,11 @@ namespace Dune
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
-    assert( !coords_ );
-    coords_ = Alberta::DofVectorPointer< int >( AlbertHelp::makeTheRest< dim, dimworld >( mesh_ ) );
+    coords_.create( dofNumbering_.dofSpace( dimension ), "Coordinates" );
+    SetLocalCoords setLocalCoords( coords_ );
+    mesh_.hierarchicTraverse( setLocalCoords, FillFlags::coords );
+    ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
+    ((ALBERTA DOF_REAL_D_VEC *)coords_)->coarse_restrict = &AlbertHelp::coarseCallBack;
 #endif
 
     // restore level information for each element by traversing the mesh
@@ -877,7 +888,6 @@ namespace Dune
     removeMesh(); // delete all objects
 
     mesh_.create( "AlbertaGrid", filename.c_str() );
-    AlbertHelp::initDofAdmin< dim >( mesh_ );
 
     time = 0.0;
 
@@ -901,7 +911,7 @@ namespace Dune
     typedef Alberta::DofVectorPointer< int > DofVectorPointer;
 
     static const int codim = 0;
-    static const int codimType = Alberta::CodimType< dim, codim >::value;
+    static const int codimtype = Alberta::CodimType< dim, codim >::value;
 
     DofVectorPointer dofVector_;
     const int codimIdx_;
@@ -910,8 +920,8 @@ namespace Dune
   public:
     explicit ElNewCheckInterpolation ( const DofVectorPointer &dofVector )
       : dofVector_( dofVector ),
-        codimIdx_( dofVector.dofSpace()->admin->mesh->node[ codimType ] ),
-        idx_( dofVector.dofSpace()->admin->n0_dof[ codimType ] )
+        codimIdx_( dofVector.dofSpace()->admin->mesh->node[ codimtype ] ),
+        idx_( dofVector.dofSpace()->admin->n0_dof[ codimtype ] )
     {}
 
     void operator() ( const Alberta::Element *father )

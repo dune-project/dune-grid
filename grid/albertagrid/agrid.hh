@@ -136,9 +136,6 @@ namespace Dune
 
         typedef typename SelectEntityImp<cd,dim,GridImp>::Entity Entity;
 
-        typedef Dune::LevelIterator<cd,All_Partition,const GridImp,AlbertaGridLevelIterator> LevelIterator;
-        typedef Dune::LeafIterator<cd,All_Partition,const GridImp,AlbertaGridLeafIterator> LeafIterator;
-
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
 
@@ -148,6 +145,9 @@ namespace Dune
           typedef Dune::LevelIterator<cd,pitype,const GridImp,AlbertaGridLevelIterator> LevelIterator;
           typedef Dune::LeafIterator<cd,pitype,const GridImp,AlbertaGridLeafIterator> LeafIterator;
         };
+
+        typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+        typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
       };
 
       template <PartitionIteratorType pitype>
@@ -164,14 +164,7 @@ namespace Dune
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
-      //#if HAVE_MPI
-      // use collective communciation with MPI
-      //      typedef CollectiveCommunication<MPI_Comm> CollectiveCommunication;
-      //#else
-      // use dummy collective communication
-      typedef Dune :: CollectiveCommunication< GridImp >
-      CollectiveCommunication;
-      //#endif
+      typedef Dune::CollectiveCommunication< int > CollectiveCommunication;
     };
   };
 
@@ -215,7 +208,7 @@ namespace Dune
    *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the
    *        case <tt>DIMGRID</tt>=<tt>DIMWORLD</tt> is supported.
    */
-  template< int dim, int dimworld >
+  template< int dim, int dimworld = DIM_OF_WORLD >
   class AlbertaGrid
     : public GridDefaultImplementation
       < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
@@ -226,6 +219,9 @@ namespace Dune
     typedef GridDefaultImplementation
     < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >
     Base;
+
+    // make Conversion a friend
+    template< class, class > friend class Conversion;
 
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridEntity <1,dim,const AlbertaGrid<dim,dimworld> >;
@@ -246,8 +242,6 @@ namespace Dune
     //! for 1d use SGrid or SimpleGrid
     //CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertaGrid_for_1d_Grids;
 
-    typedef AlbertaGrid<dim,dimworld> MyType;
-
     friend class AlbertaMarkerVector;
     friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
 
@@ -260,8 +254,6 @@ namespace Dune
   public:
     //! the grid family of AlbertaGrid
     typedef AlbertaGridFamily<dim,dimworld> GridFamily;
-    typedef GridDefaultImplementation <dim,dimworld,albertCtype,
-        AlbertaGridFamily<dim,dimworld> > BaseType;
 
     // the Traits
     typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
@@ -274,10 +266,10 @@ namespace Dune
     //! type of hierarchic index set
     typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
 
-  private:
-    //! type of communication class
-    typedef typename Traits:: CollectiveCommunication CollectiveCommunicationType;
+    //! type of collective communication
+    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
+  private:
     //! type of LeafIterator
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
@@ -331,6 +323,10 @@ namespace Dune
   private:
     typedef Alberta::MeshPointer< dimension > MeshPointer;
 
+    // forbid copying and assignment
+    AlbertaGrid ( const This & );
+    This &operator= ( const This & );
+
   public:
     /*
        levInd = true means that a consecutive level index is generated
@@ -371,69 +367,37 @@ namespace Dune
     lend (int level) const;
 
     //! Iterator to first entity of given codim on level
-    template<int cd>  typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator
-    lbegin (int level) const;
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator
+    lbegin ( int level ) const;
 
     //! one past the end on this level
-    template<int cd>  typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator
-    lend (int level) const;
+    template< int codim >
+    typename Traits::template Codim< codim >::LevelIterator
+    lend ( int level ) const;
 
     //! return LeafIterator which points to first leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin () const;
-
-    //! return LeafIterator which points to first leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits
+    ::template Codim< codim >::template Partition< pitype >::LeafIterator
     leafbegin () const;
 
     //! return LeafIterator which points behind last leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend   () const;
-
-    //! return LeafIterator which points behind last leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend   () const;
-
-  private:
-    //! return LeafIterator which points to first leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin ( int maxlevel, int proc = -1 ) const;
+    template< int codim, PartitionIteratorType pitype >
+    typename Traits
+    ::template Codim< codim >::template Partition< pitype >::LeafIterator
+    leafend () const;
 
     //! return LeafIterator which points to first leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafbegin ( int maxlevel, int proc = -1 ) const;
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator
+    leafbegin () const;
 
     //! return LeafIterator which points behind last leaf entity
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend   ( int maxlevel, int proc = -1 ) const;
+    template< int codim >
+    typename Traits::template Codim< codim >::LeafIterator
+    leafend () const;
 
-    //! return LeafIterator which points behind last leaf entity
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend   ( int maxlevel, int proc = -1 ) const;
-
-    //! return LeafIterator which points to first leaf entity
-    LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
-
-    //! return LeafIterator which points behind last leaf entity
-    LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
-
-    //! return LeafIterator which points to first leaf entity
-    LeafIterator leafbegin () const;
-
-    //! return LeafIterator which points behind last leaf entity
-    LeafIterator leafend   () const;
-
-  public:
     /** \brief Number of grid entities per level and codim
      * because lbegin and lend are none const, and we need this methods
      * counting the entities on each level, you know.
@@ -480,7 +444,7 @@ namespace Dune
 
     /** \brief return reference to collective communication, if MPI found
      * this is specialisation for MPI */
-    const CollectiveCommunicationType & comm () const
+    const CollectiveCommunication &comm () const
     {
       return comm_;
     }
@@ -515,14 +479,6 @@ namespace Dune
        the grid which is of minor cost
      */
     int global_size (int codim) const;
-
-#if 0
-    // return number of my processor
-    int myRank () const
-    {
-      return 0;
-    }
-#endif
 
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
@@ -559,46 +515,10 @@ namespace Dune
       return mesh_;
     }
 
-#if 0
-    // return real entity implementation
-    template <int cd>
-    AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
-    getRealEntity(typename Traits::template Codim<cd>::Entity& entity)
-    {
-      return this->getRealImplementation(entity);
-    }
-
   private:
-    //! return real entity implementation
-    template <int cd>
-    const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
-    getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const
-    {
-      return this->getRealImplementation(entity);
-    }
-#endif
-
-  public:
-    //! returns geometry type vector for codimension
-    const std::vector< GeometryType > &geomTypes ( int codim ) const
-    {
-      assert( (codim >= 0) && (codim <= dimension) );
-      return geomTypes_[ codim ];
-    }
-
-  private:
-    template< class, class > friend class Conversion;
-
-    // forbid copying and assignment
-    AlbertaGrid ( const This & );
-    This &operator= ( const This & );
-
     using Base::getRealImplementation;
 
-  private:
     typedef std::vector<int> ArrayType;
-
-    ArrayType ghostFlag_; // store ghost information
 
     // initialize of some members
     void initGrid ();
@@ -624,8 +544,8 @@ namespace Dune
     // pointer to an Albert Mesh, which contains the data
     MeshPointer mesh_;
 
-    // object of collective communication
-    CollectiveCommunicationType comm_;
+    // collective communication
+    CollectiveCommunication comm_;
 
     // number of maxlevel of the mesh
     int maxlevel_;
@@ -645,17 +565,18 @@ namespace Dune
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
     //**********************************************************************
-    typedef typename SelectEntityImp<0,dim,const MyType>::EntityObject EntityObject;
+    typedef typename SelectEntityImp< 0, dim, const This >::EntityObject
+    EntityObject;
 
   public:
     typedef AGMemoryProvider< EntityObject > EntityProvider;
 
-    typedef AlbertaGridIntersectionIterator< const MyType > IntersectionIteratorImp;
+    typedef AlbertaGridIntersectionIterator< const This > IntersectionIteratorImp;
     typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
     typedef AGMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
-    friend class LeafIntersectionIteratorWrapper< const MyType > ;
+    friend class LeafIntersectionIteratorWrapper< const This >;
 
-    typedef LeafIntersectionIteratorWrapper<const MyType >
+    typedef LeafIntersectionIteratorWrapper< const This >
     AlbertaGridIntersectionIteratorType;
 
     LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
@@ -666,7 +587,7 @@ namespace Dune
 
   public:
     template< class IntersectionInterfaceType >
-    const typename BaseType
+    const typename Base
     :: template ReturnImplementationType< IntersectionInterfaceType >
     :: ImplementationType & DUNE_DEPRECATED
     getRealIntersectionIterator ( const IntersectionInterfaceType &iterator ) const
@@ -675,7 +596,7 @@ namespace Dune
     }
 
     template< class IntersectionType >
-    const typename BaseType
+    const typename Base
     :: template ReturnImplementationType< IntersectionType >
     :: ImplementationType &
     getRealIntersection ( const IntersectionType &intersection ) const
@@ -685,34 +606,12 @@ namespace Dune
 
     // (for internal use only) return obj pointer to EntityImp
     template< int codim >
-    typename SelectEntityImp<codim,dim,const MyType>::EntityObject *
+    typename SelectEntityImp< codim, dim, const This >::EntityObject *
     getNewEntity () const;
 
     // (for internal use only) free obj pointer of EntityImp
     template <int codim>
-    void freeEntity (typename SelectEntityImp<codim,dim,const MyType>::EntityObject * en) const;
-
-  private:
-    //*********************************************************************
-    // organisation of the global index
-    //*********************************************************************
-    // provides the indices for the elements
-    IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
-
-    Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
-
-    Alberta::DofVectorPointer< int > elNewCheck_;
-    class ElNewCheckInterpolation;
-
-#ifndef CALC_COORD
-    Alberta::DofVectorPointer< Alberta::GlobalVector > coords_;
-#endif
-
-    const ALBERTA DOF_ADMIN * elAdmin_;
-
-    // for access in the elNewVec and ownerVec
-    const int nv_;
-    const int dof_;
+    void freeEntity ( typename SelectEntityImp< codim, dim, const This >::EntityObject *en ) const;
 
   public:
     // make some shortcuts
@@ -742,7 +641,28 @@ namespace Dune
     int getVertexNumber ( const ALBERTA EL * el, int vx ) const;
 
   private:
-    // the hierarchical numbering of AlbertaGrid, unique per codim and processor
+    Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
+
+    IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
+
+    Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
+
+    Alberta::DofVectorPointer< int > elNewCheck_;
+    class ElNewCheckInterpolation;
+
+#ifndef CALC_COORD
+    typedef Alberta::DofVectorPointer< Alberta::GlobalVector > CoordVectorPointer;
+    CoordVectorPointer coords_;
+    class SetLocalCoords;
+#endif
+
+    const ALBERTA DOF_ADMIN * elAdmin_;
+
+    // for access in the elNewVec and ownerVec
+    const int nv_;
+    const int dof_;
+
+    // hierarchical numbering of AlbertaGrid, unique per codim
     AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
 
     // the id set of this grid
@@ -756,18 +676,12 @@ namespace Dune
     // is generated, when accessed
     mutable LeafIndexSetImp* leafIndexSet_;
 
-    //! stores geometry types of this grid
-    std::vector< GeometryType > geomTypes_[ dimension+1 ];
-
-    // creates geomTypes_ vector
-    void makeGeomTypes ();
-
-    typedef SingleTypeSizeCache<MyType> SizeCacheType;
+    typedef SingleTypeSizeCache< This > SizeCacheType;
     SizeCacheType * sizeCache_;
 
     // count how much elements where marked
-    mutable int coarsenMarked_;
-    mutable int refineMarked_;
+    int coarsenMarked_;
+    int refineMarked_;
 
     mutable bool lockPostAdapt_;
   }; // end class AlbertaGrid

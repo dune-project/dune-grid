@@ -92,6 +92,12 @@ namespace Dune
 
       static const Flags all = coords | neighbor | boundaryId | nonPeriodic
                                | orientation | elementType;
+
+#if CALC_COORD
+      static const Flags standard = all;
+#else
+      static const Flags standard = all & ~coords;
+#endif
     };
 
 
@@ -181,6 +187,7 @@ namespace Dune
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
 
       typedef Alberta::MeshPointer< dimension > MeshPointer;
+      typedef Alberta::FillFlags< dimension > FillFlags;
 
 #if DUNE_ALBERTA_VERSION >= 0x200
       static const int maxNeighbors = N_NEIGH_MAX;
@@ -189,7 +196,8 @@ namespace Dune
 #endif
 
       ElementInfo ();
-      ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement );
+      ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement,
+                    typename FillFlags::Flags fillFlags = FillFlags::standard );
       ElementInfo ( const ElementInfo &other );
 
       ~ElementInfo ();
@@ -221,6 +229,12 @@ namespace Dune
       bool hasCoordinates () const;
       const GlobalVector &coordinate ( int vertex ) const;
 
+      template< class Functor >
+      void hierarchicTraverse ( Functor &functor ) const;
+
+      template< class Functor >
+      void leafTraverse ( Functor &functor ) const;
+
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
@@ -251,7 +265,6 @@ namespace Dune
       InstancePtr &parent ()
       {
         return parent_;
-        //return reinterpret_cast< InstancePtr & >( elInfo.parent );
       }
 
     private:
@@ -301,7 +314,8 @@ namespace Dune
 
     template< int dim >
     inline ElementInfo< dim >
-    ::ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement )
+    ::ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement,
+                    typename FillFlags::Flags fillFlags )
     {
       instance_ = stack().allocate();
       instance_->parent() = null();
@@ -309,11 +323,7 @@ namespace Dune
 
       addReference();
 
-#if CALC_COORD
-      elInfo().fill_flag = FillFlags< dim >::all;
-#else
-      elInfo().fill_flag = FillFlags< dim >::all & ~FillFlags< dim >::coords;
-#endif
+      elInfo().fill_flag = fillFlags;
 
       // Alberta fills opp_vertex only if there is a neighbor
       for( int k = 0; k < maxNeighbors; ++k )
@@ -562,7 +572,7 @@ namespace Dune
     template< int dim >
     inline bool ElementInfo< dim >::hasCoordinates () const
     {
-      return ((elInfo().flags & FILL_COORDS) != 0);
+      return ((elInfo().fill_flag & FILL_COORDS) != 0);
     }
 
     template< int dim >
@@ -571,6 +581,33 @@ namespace Dune
       assert( hasCoordinates() );
       assert( (vertex >= 0) && (vertex < numVertices) );
       return elInfo().coord[ vertex ];
+    }
+
+
+    template< int dim >
+    template< class Functor >
+    void ElementInfo< dim >::hierarchicTraverse ( Functor &functor ) const
+    {
+      functor( *this );
+      if( !isLeaf() )
+      {
+        child( 0 ).hierarchicTraverse( functor );
+        child( 1 ).hierarchicTraverse( functor );
+      }
+    }
+
+
+    template< int dim >
+    template< class Functor >
+    void ElementInfo< dim >::leafTraverse ( Functor &functor ) const
+    {
+      if( !isLeaf() )
+      {
+        child( 0 ).leafTraverse( functor );
+        child( 1 ).leafTraverse( functor );
+      }
+      else
+        functor( *this );
     }
 
 

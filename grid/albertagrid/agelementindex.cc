@@ -58,7 +58,7 @@ namespace AlbertHelp
   //****************************************************************************
   //
   //  if the grid is refined then the two methods on this class
-  //  organize new element numbers for all codima and set them free if an
+  //  organize new element numbers for all codims and set them free if an
   //  element is removed
   //
   //****************************************************************************

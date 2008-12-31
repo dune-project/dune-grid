@@ -209,36 +209,18 @@ namespace AlbertHelp
   }; // end of AlbertLeafData
 
 
-  static DOF_INT_VEC * elNumbers[numOfElNumVec];
   static DOF_INT_VEC * elNewCheck = 0;
-#ifndef CALC_COORD
-  static DOF_REAL_D_VEC * coordVec = 0;
-#endif
+
 
   // return pointer to created elNumbers Vector to mesh
-  template <int codim>
-  inline DOF_INT_VEC * getElNumbersCodim()
+  template< int codim >
+  inline void initElNumbersCodim ( DOF_INT_VEC *elNumbersCodim )
   {
-    int * vec = 0;
-    GET_DOF_VEC(vec,elNumbers[codim]);
-    FOR_ALL_DOFS(elNumbers[codim]->fe_space->admin, vec[dof] = getElementIndexForCodim<codim>() );
-    return elNumbers[codim];
+    int *vec = 0;
+    GET_DOF_VEC( vec, elNumbersCodim );
+    FOR_ALL_DOFS( elNumbersCodim->fe_space->admin, vec[ dof ] = getElementIndexForCodim< codim >() );
   }
-  // return pointer to created elNumbers Vector to mesh
-  inline DOF_INT_VEC * getElNumbers(const int codim)
-  {
-    switch (codim)
-    {
-    case 0 : return getElNumbersCodim<0> ();
-    case 1 : return getElNumbersCodim<1> ();
-    case 2 : return getElNumbersCodim<2> ();
-    case 3 : return getElNumbersCodim<3> ();
-    }
-    // should not get here
-    assert( false );
-    abort();
-    return 0;
-  }
+
 
   // return pointer to created elNumbers Vector to mesh
   inline static int calcMaxIndex(DOF_INT_VEC * drv)
@@ -250,54 +232,6 @@ namespace AlbertHelp
     // we return +1 because this means a size
     return maxindex+1;
   }
-
-
-#ifndef CALC_COORD
-  template< int dimworld >
-  inline static void setLocalCoords( const EL_INFO *elInfo )
-  {
-    const EL *element = elInfo->el;
-    assert( element != NULL );
-
-    const DOF_ADMIN *admin = coordVec->fe_space->admin;
-    const int nv = admin->n0_dof[ VERTEX ];
-
-    REAL_D *vec = NULL;
-    GET_DOF_VEC( vec, coordVec );
-    assert( vec != NULL );
-
-    for( int i = 0; i < N_VERTEX(admin->mesh); ++i )
-    {
-      int dof = element->dof[ i ][ nv ];
-      REAL_D &vecCoord = vec[ dof ];
-      const REAL_D &coord = elInfo->coord[ i ];
-      for( int j = 0; j < dimworld; ++j )
-        vecCoord[ j ] = coord[ j ];
-    }
-  }
-
-  // return pointer to created elNewCheck Vector to mesh
-  template <int dimworld>
-  inline DOF_REAL_D_VEC * getCoordVec()
-  {
-    MESH * mesh = coordVec->fe_space->admin->mesh;
-    assert(mesh);
-    meshTraverse(mesh,-1, CALL_EVERY_EL_PREORDER|FILL_COORDS, & setLocalCoords<dimworld> );
-
-    /*
-       REAL_D * vec = 0;
-       GET_DOF_VEC(vec,coordVec);
-       FOR_ALL_DOFS(coordVec->fe_space->admin,
-        std::cout << "vec["<<dof<<"] = {";
-        for(int i=0; i<dimworld; ++i)
-          std::cout << vec[dof][i] << ",";
-        std::cout << "}\n";
-       );
-     */
-
-    return coordVec;
-  }
-#endif
 
 
   struct MeshCallBack
@@ -460,162 +394,6 @@ namespace AlbertHelp
   }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
-  template< int dim >
-  static inline const ALBERTA FE_SPACE *
-  getFeSpace( MESH *mesh, const char *name, const int (&ndof)[ 4 ] )
-  {
-    return get_dof_space( mesh, name, ndof, ADM_PRESERVE_COARSE_DOFS );
-  }
-#elif DUNE_ALBERTA_VERSION == 0x200
-  template< int dim >
-  static inline const ALBERTA FE_SPACE *
-  getFeSpace( MESH *mesh, const char *name, const int (&ndof)[ 4 ] )
-  {
-    // the last 1 stands for preserve_coarse_dofs
-    return get_fe_space( mesh, name, ndof, 0, 1 );
-  }
-#else
-  template <int dim>
-  static inline const ALBERTA FE_SPACE *
-  getFeSpace ( MESH *mesh, const char *name, const int (&ndof)[ dim+1 ] )
-  {
-    // don't delete dofs above the leaf level
-    mesh->preserve_coarse_dofs = 1;
-    return get_fe_space( mesh, name, ndof, 0 );
-  }
-#endif
-
-
-#ifndef CALC_COORD
-  // setup of DOF_INT_VEC for reading
-  template< int dim, int dimworld >
-  inline DOF_REAL_D_VEC *makeTheRest ( MESH *mesh )
-  {
-    assert( mesh != NULL );
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    enum { nNodes = dim+1 };
-    enum { vertex = 0, center = dim, face = dim-1, edge = 1 };
-#else
-    enum { nNodes = N_NODE_TYPES };
-    enum { vertex = VERTEX, center = CENTER,
-           face = (dim == 3) ? FACE : EDGE, edge = EDGE };
-#endif
-
-    int vdof[ nNodes ]; // add at each vertex one dof for vertex numbering
-    for( int i = 0; i < nNodes; ++i )
-      vdof[ i ] = 0;
-    vdof[ vertex ] = 1;
-
-    const FE_SPACE *vSpace = getFeSpace< dim >( mesh, "vertex_dofs", vdof );
-
-    coordVec = get_dof_real_d_vec("coordinates",vSpace);
-    coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dimworld>;
-    coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
-    DOF_REAL_D_VEC *coords = getCoordVec< dimworld >();
-    coordVec = 0;
-    return coords;
-  }
-#endif
-
-
-  // initialize dofAdmin for vertex and element numbering
-  // and a given dim
-  // --initDofAdmin
-  template <int dim>
-  static inline void initDofAdmin(MESH *mesh)
-  {
-#if DUNE_ALBERTA_VERSION < 0x200
-    enum { nNodes = dim+1 };
-    enum { vertex = 0, center = dim, face = dim-1, edge = 1 };
-#else
-    enum { nNodes = N_NODE_TYPES };
-    enum { vertex = VERTEX, center = CENTER,
-           face = (dim == 3) ? FACE : EDGE, edge = EDGE };
-#endif
-
-    int edof[nNodes]; // add one dof at element for element numbering
-    int vdof[nNodes]; // add at each vertex one dof for vertex numbering
-    int fdof[nNodes]; // add at each face one dof for face numbering
-    int edgedof[nNodes]; // add at each edge one dof for edge numbering
-
-    for(int i=0; i<nNodes; ++i)
-    {
-      vdof[i] = 0; fdof[i]    = 0;
-      edof[i] = 0; edgedof[i] = 0;
-    }
-
-    vdof[vertex] = 1;
-
-    if(dim == 3)
-    {
-      edgedof[edge] = 1; // edge dof only in 3d
-    }
-
-    fdof[face] = 1; // means edges in 2d and faces in 3d
-    edof[center] = 1;
-
-    {
-      // !! NOTE:
-      // the order in which the refine routines are called is jsut turned
-      // arround, which mean that actual the coordinates are refined at last
-      // and therefore the element call back is done in this function
-#ifndef CALC_COORD
-      const FE_SPACE * vSpace =
-#endif
-      getFeSpace<dim> (mesh, "vertex_dofs", vdof);
-
-#ifndef CALC_COORD
-      coordVec = get_dof_real_d_vec("coordinates",vSpace);
-      coordVec->refine_interpol = &refineCoordsAndRefineCallBack<dim>;
-      coordVec->coarse_restrict = &coarseCallBack; // coords don't need to be coarsened
-#endif
-    }
-
-    //**********************************************************************
-    // all the element vectors
-    //**********************************************************************
-    // space for center dofs , i.e. element numbers
-    const FE_SPACE * elemSpace = getFeSpace<dim> (mesh, "center_dofs", edof);
-
-    // the first entry is called at last for refinement and coarsening
-    // the methods for the adaptation call back are put to elNewCheck
-    // refine and coarsening procedures
-    elNewCheck = get_dof_int_vec("el_new_check",elemSpace);
-
-    // the element numbers, ie. codim = 0
-    elNumbers[0] = get_dof_int_vec("element_numbers",elemSpace);
-    elNumbers[0]->refine_interpol = &RefineNumbering<dim,0>::refineNumbers;
-    elNumbers[0]->coarse_restrict = &RefineNumbering<dim,0>::coarseNumbers;
-
-    //**********************************************************************
-
-    {
-      // the face number space , i.e. codim == 1
-      const FE_SPACE * fSpace = getFeSpace<dim> (mesh, "face_dofs", fdof);
-
-      // the face numbers, i.e. codim = 1
-      elNumbers[1] = get_dof_int_vec("face_numbers",fSpace);
-      elNumbers[1]->refine_interpol = &RefineNumbering<dim,1>::refineNumbers;
-      elNumbers[1]->coarse_restrict = &RefineNumbering<dim,1>::coarseNumbers;
-    }
-
-    if(dim == 3)
-    {
-      // the edge number space , i.e. codim == 2
-      const FE_SPACE * eSpace = getFeSpace<dim> (mesh, "edge_dofs", edgedof);
-
-      // the edge numbers, i.e. codim = 2
-      elNumbers[2] = get_dof_int_vec("edge_numbers",eSpace);
-      elNumbers[2]->refine_interpol = &RefineNumbering<dim,2>::refineNumbers;
-      elNumbers[2]->coarse_restrict = &RefineNumbering<dim,2>::coarseNumbers;
-    }
-
-    return;
-  }
-
-
   // function for mesh_traverse, is called on every element
   inline static void storeLevelOfElement(const EL_INFO * elf)
   {
@@ -643,8 +421,7 @@ namespace AlbertHelp
 
     // see ALBERTA Doc page 72, traverse over all hierarchical elements
     meshTraverse(mesh,-1,CALL_EVERY_EL_PREORDER|FILL_NEIGH,storeLevelOfElement);
-    elNewCheck = 0;
-    return ;
+    elNewCheck = NULL;
   }
 
 } // end namespace AlbertHelp

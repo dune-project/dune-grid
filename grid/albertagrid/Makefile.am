@@ -8,7 +8,7 @@ alberta_HEADERS = agrid.hh agelementindex.cc albertagrid.cc \
   dofadmin.hh  elementinfo.hh  meshpointer.hh \
   undefine-1.2.hh  undefine-2.0.hh  undefine-2.1.hh \
   entity.hh  entity.cc  entitypointer.hh  entitypointer.cc \
-  geometry.hh  geometry.cc  hierarchiciterator.hh  hierarchiciterator.cc \
+  geometry.hh  geometry.cc  hierarchiciterator.hh \
   leveliterator.hh  leafiterator.hh  treeiterator.hh  treeiterator.cc \
   intersection.hh  intersection.cc  capabilities.hh
 

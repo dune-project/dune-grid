@@ -32,6 +32,9 @@ namespace Dune
     {
       Mesh *mesh_;
 
+      typedef Alberta::ElementInfo< dim > ElementInfo;
+      typedef typename ElementInfo::FillFlags FillFlags;
+
     public:
       class MacroIterator;
 
@@ -81,10 +84,23 @@ namespace Dune
       {
         if( mesh_ != NULL )
         {
+#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 3)
+          // circumvent memory bug in ALBERTA 1.2
+          ALBERTA RC_LIST_EL *list = ALBERTA get_rc_list( mesh_ );
+          list = 0;
+#endif
           ALBERTA free_mesh( mesh_ );
           mesh_ = NULL;
         }
       }
+
+      template< class Functor >
+      void hierarchicTraverse ( Functor &functor,
+                                typename FillFlags::Flags fillFlags = FillFlags::standard ) const;
+
+      template< class Functor >
+      void leafTraverse ( Functor &functor,
+                          typename FillFlags::Flags fillFlags = FillFlags::standard ) const;
 
       bool coarsen ()
       {
@@ -103,9 +119,8 @@ namespace Dune
     private:
       static void initDofAdmins ( Mesh *mesh )
       {
-        typedef HierarchyDofNumbering< dim > DofNumbering;
-        DofNumbering *dofNumbering = new DofNumbering( MeshPointer< dim >( mesh ) );
-        delete dofNumbering;
+        HierarchyDofNumbering< dim > dofNumbering;
+        dofNumbering.create( MeshPointer< dim >( mesh ) );
       }
 #endif
     };
@@ -189,12 +204,41 @@ namespace Dune
 #endif // #if DUNE_ABLERTA_VERSION >= 0x200
 
 
-
     template< int dim >
     inline bool MeshPointer< dim >::write ( const std::string &filename, Real time ) const
     {
       int success = ALBERTA write_mesh_xdr( mesh_, filename.c_str(), time );
       return (success == 0);
+    }
+
+
+    template< int dim >
+    template< class Functor >
+    inline void MeshPointer< dim >
+    ::hierarchicTraverse ( Functor &functor,
+                           typename FillFlags::Flags fillFlags ) const
+    {
+      const MacroIterator eit = end();
+      for( MacroIterator it = begin(); it != eit; ++it )
+      {
+        const ElementInfo info = it.elementInfo( fillFlags );
+        info.hierarchicTraverse( functor );
+      }
+    }
+
+
+    template< int dim >
+    template< class Functor >
+    inline void MeshPointer< dim >
+    ::leafTraverse ( Functor &functor,
+                     typename FillFlags::Flags fillFlags ) const
+    {
+      const MacroIterator eit = end();
+      for( MacroIterator it = begin(); it != eit; ++it )
+      {
+        const ElementInfo info = it.elementInfo( fillFlags );
+        info.leafTraverse( functor );
+      }
     }
 
 
@@ -231,7 +275,7 @@ namespace Dune
 
       ElementInfo operator* () const
       {
-        return (done() ? ElementInfo() : ElementInfo( mesh(), macroElement() ));
+        return elementInfo();
       }
 
       bool operator== ( const MacroIterator &other ) const
@@ -247,6 +291,15 @@ namespace Dune
       bool done () const
       {
         return (index_ >= numMacroElements());
+      }
+
+      ElementInfo
+      elementInfo ( typename FillFlags::Flags fillFlags = FillFlags::standard ) const
+      {
+        if( done() )
+          return ElementInfo();
+        else
+          return ElementInfo( mesh(), macroElement(), fillFlags );
       }
 
       MacroElement &macroElement () const
@@ -279,6 +332,8 @@ namespace Dune
       typedef Alberta::MeshPointer< dim > MeshPointer;
       typedef Alberta::ElementInfo< dim > ElementInfo;
 
+      typedef typename ElementInfo::FillFlags FillFlags;
+
     private:
       MeshPointer mesh_;
       MacroElement *element_;
@@ -298,7 +353,7 @@ namespace Dune
 
       ElementInfo operator* () const
       {
-        return (done() ? ElementInfo() : ElementInfo( mesh(), macroElement() ));
+        return elementInfo();
       }
 
       bool operator== ( const MacroIterator &other ) const
