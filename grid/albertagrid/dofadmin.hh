@@ -116,14 +116,23 @@ namespace Dune
 
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
+#if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
     inline void
     HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
     {
       ALBERTA free_fe_space( dofSpace );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION == 0x200
+    template< int dim >
+    inline void
+    HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
+    {
+      ALBERTA free_fe_space( const_cast< DofSpace * >( dofSpace ) );
+    }
+#endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
