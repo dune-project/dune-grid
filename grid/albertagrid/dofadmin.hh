@@ -88,17 +88,7 @@ namespace Dune
         return dofSpace_[ codim ];
       }
 
-      void create ( const MeshPointer &mesh )
-      {
-        release();
-
-        if( !mesh )
-          return;
-
-        mesh_ = mesh;
-        ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
-        ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
-      }
+      void create ( const MeshPointer &mesh );
 
       void release ()
       {
@@ -114,6 +104,21 @@ namespace Dune
       static void freeDofSpace ( const DofSpace *dofSpace );
     };
 
+
+
+    template< int dim >
+    inline void
+    HierarchyDofNumbering< dim >::create ( const MeshPointer &mesh )
+    {
+      release();
+
+      if( !mesh )
+        return;
+
+      mesh_ = mesh;
+      ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
+      ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
+    }
 
 
 #if DUNE_ALBERTA_VERSION >= 0x201

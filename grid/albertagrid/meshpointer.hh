@@ -121,6 +121,7 @@ namespace Dune
     private:
       static void initDofAdmins ( Mesh *mesh )
       {
+        mesh->preserve_coarse_dofs = 1;
         HierarchyDofNumbering< dim > dofNumbering;
         dofNumbering.create( MeshPointer< dim >( mesh ) );
       }
