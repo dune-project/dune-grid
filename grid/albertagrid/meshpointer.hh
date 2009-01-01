@@ -35,6 +35,8 @@ namespace Dune
       typedef Alberta::ElementInfo< dim > ElementInfo;
       typedef typename ElementInfo::FillFlags FillFlags;
 
+      class MacroIteratorBase;
+
     public:
       class MacroIterator;
 
@@ -248,9 +250,9 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
-    class MeshPointer< dim >::MacroIterator
+    class MeshPointer< dim >::MacroIteratorBase
     {
-      friend class MeshPointer< dim >;
+      friend class MacroIterator;
 
     public:
       typedef Alberta::MeshPointer< dim > MeshPointer;
@@ -260,46 +262,26 @@ namespace Dune
       MeshPointer mesh_;
       int index_;
 
-      explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
+      explicit MacroIteratorBase ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
           index_( end ? numMacroElements() : 0 )
       {}
 
     public:
-      MacroIterator &operator++ ()
-      {
-        assert( !done() );
-        ++index_;
-        return *this;
-      }
-
-      ElementInfo operator* () const
-      {
-        return elementInfo();
-      }
-
-      bool operator== ( const MacroIterator &other ) const
-      {
-        return (index_ == other.index_);
-      }
-
-      bool operator!= ( const MacroIterator &other ) const
-      {
-        return (index_ != other.index_);
-      }
-
       bool done () const
       {
         return (index_ >= numMacroElements());
       }
 
-      ElementInfo
-      elementInfo ( typename FillFlags::Flags fillFlags = FillFlags::standard ) const
+      bool equals ( const MacroIterator &other ) const
       {
-        if( done() )
-          return ElementInfo();
-        else
-          return ElementInfo( mesh(), macroElement(), fillFlags );
+        return (index_ == other.index_);
+      }
+
+      void increment ()
+      {
+        assert( !done() );
+        ++index_;
       }
 
       MacroElement &macroElement () const
@@ -324,7 +306,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    class MeshPointer< dim >::MacroIterator
+    class MeshPointer< dim >::MacroIteratorBase
     {
       friend class MeshPointer< dim >;
 
@@ -338,37 +320,26 @@ namespace Dune
       MeshPointer mesh_;
       MacroElement *element_;
 
-      explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
+      explicit MacroIteratorBase ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
           element_( end ? NULL : mesh.mesh_->first_macro_el )
       {}
 
     public:
-      MacroIterator &operator++ ()
+      bool done () const
       {
-        assert( !done() );
-        element_ = element_->next;
-        return *this;
+        return (element_ == NULL);
       }
 
-      ElementInfo operator* () const
-      {
-        return elementInfo();
-      }
-
-      bool operator== ( const MacroIterator &other ) const
+      bool equals ( const MacroIterator &other ) const
       {
         return (element_ == other.element_);
       }
 
-      bool operator!= ( const MacroIterator &other ) const
+      void increment ()
       {
-        return (element_ != other.element_);
-      }
-
-      bool done () const
-      {
-        return (element_ == NULL);
+        assert( !done() );
+        element_ = element_->next;
       }
 
       MacroElement &macroElement () const
@@ -383,6 +354,67 @@ namespace Dune
       }
     };
 #endif // #if DUNE_ABLERTA_VERSION < 0x200
+
+
+
+    // MeshPointer::MacroIterator
+    // --------------------------
+
+    template< int dim >
+    class MeshPointer< dim >::MacroIterator
+      : public MeshPointer< dim >::MacroIteratorBase
+    {
+      typedef MacroIterator This;
+      typedef MacroIteratorBase Base;
+
+      friend class MeshPointer< dim >;
+
+    public:
+      typedef Alberta::MeshPointer< dim > MeshPointer;
+      typedef Alberta::ElementInfo< dim > ElementInfo;
+
+    private:
+      explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
+        : Base( mesh, end )
+      {}
+
+    public:
+      using Base::done;
+      using Base::equals;
+      using Base::increment;
+      using Base::macroElement;
+      using Base::mesh;
+
+      This &operator++ ()
+      {
+        increment();
+        return *this;
+      }
+
+      ElementInfo operator* () const
+      {
+        return elementInfo();
+      }
+
+      bool operator== ( const MacroIterator &other ) const
+      {
+        return equals( other );
+      }
+
+      bool operator!= ( const MacroIterator &other ) const
+      {
+        return !equals( other );
+      }
+
+      ElementInfo
+      elementInfo ( typename FillFlags::Flags fillFlags = FillFlags::standard ) const
+      {
+        if( done() )
+          return ElementInfo();
+        else
+          return ElementInfo( mesh(), macroElement(), fillFlags );
+      }
+    };
 
   }
 
