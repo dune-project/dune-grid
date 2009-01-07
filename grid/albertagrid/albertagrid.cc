@@ -908,32 +908,28 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
   {
-    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
-
     static const int codim = 0;
-    static const int codimtype = Alberta::CodimType< dim, codim >::value;
+
+    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+    typedef Alberta::DofAccess< dim, codim > DofAccess;
 
     DofVectorPointer dofVector_;
-    const int codimIdx_;
-    const int idx_;
+    DofAccess dofAccess_;
 
   public:
     explicit ElNewCheckInterpolation ( const DofVectorPointer &dofVector )
       : dofVector_( dofVector ),
-        codimIdx_( dofVector.dofSpace()->admin->mesh->node[ codimtype ] ),
-        idx_( dofVector.dofSpace()->admin->n0_dof[ codimtype ] )
+        dofAccess_( dofVector.dofSpace() )
     {}
 
     void operator() ( const Alberta::Element *father )
     {
       int *array = (int *)dofVector_;
-      const int fatherDof = father->dof[ codimIdx_ ][ idx_ ];
-      const int fatherLevel = std::abs( array[ fatherDof ] );
+      const int fatherLevel = std::abs( array[ dofAccess_( father, 0 ) ] );
       for( int i = 0; i < 2; ++i )
       {
         const Alberta::Element *child = father->child[ i ];
-        const int childDof = child->dof[ codimIdx_ ][ idx_ ];
-        array[ childDof ] = -(fatherLevel+1);
+        array[ dofAccess_( child, 0 ) ] = -(fatherLevel+1);
       }
     }
   };

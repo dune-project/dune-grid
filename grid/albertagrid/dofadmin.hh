@@ -221,6 +221,52 @@ namespace Dune
 
 
 
+    // DofAccess
+    // ---------
+
+    template< int dim, int codim >
+    class DofAccess
+    {
+      static const int codimtype = CodimType< dim, codim >::value;
+      static const int numSubEntities = NumSubEntities< dim, codim >::value;
+
+    public:
+      static const int dimension = dim;
+      static const int codimension = codim;
+
+    private:
+      int node_;
+#ifndef NDEBUG
+      int count_;
+#endif
+      int index_;
+
+    public:
+      explicit DofAccess ( const DofSpace *dofSpace )
+        : node_( dofSpace->admin->mesh->node[ codimtype ] ),
+#ifndef NDEBUG
+          count_( dofSpace->admin->n_dof[ codimtype ] ),
+#endif
+          index_( dofSpace->admin->n0_dof[ codimtype ] )
+      {}
+
+      int operator() ( const Element *element, int subEntity, int i ) const
+      {
+        assert( subEntity < numSubEntities );
+#ifndef NDEBUG
+        assert( i < count_ );
+#endif
+        return element->dof[ node_ + subEntity ][ index_ + i ];
+      }
+
+      int operator() ( const Element *element, int subEntity ) const
+      {
+        return (*this)( element, subEntity, 0 );
+      }
+    };
+
+
+
     // DofVectorProvider
     // -----------------
 
