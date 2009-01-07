@@ -446,6 +446,13 @@ namespace Dune
         }
       }
 
+      template< class Functor >
+      void forEach ( Functor &functor )
+      {
+        Dof *array = (Dof *)(*this);
+        FOR_ALL_DOFS( dofSpace()->admin, functor( array[ dof ] ) );
+      }
+
       void initialize ( const Dof &value )
       {
         Dof *array = (Dof *)(*this);

@@ -69,9 +69,10 @@ namespace Dune
 
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    typedef typename remove_const< Grid >::type::Traits Traits;
+    typedef typename Grid::Traits Traits;
+    //typedef typename remove_const< Grid >::type::Traits Traits;
 
-    static const int dimension = dim;
+    static const int dimension = Grid::dimension;
 
     enum { numVecs  = AlbertHelp::numOfElNumVec };
 
@@ -80,6 +81,8 @@ namespace Dune
     friend class MarkEdges< const Grid, 3 >;
 
     explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
+
+    class InitEntityNumber;
 
   public:
     enum { ncodim = dimension + 1 };
@@ -153,6 +156,16 @@ namespace Dune
 #endif
 
   private:
+    void initEntityNumbers ( int codim, Alberta::DofVectorPointer< int > &entityNumbers )
+    {
+      assert( (codim >= 0) && (codim < AlbertHelp::numOfElNumVec) );
+      InitEntityNumber init( indexStack_[ codim ] );
+      entityNumbers.forEach( init );
+    }
+
+  private:
+    IndexManagerType indexStack_[ AlbertHelp::numOfElNumVec ];
+
     // out grid
     const Grid &grid_;
     // constains the mapping from dune to alberta numbers
@@ -249,7 +262,7 @@ namespace Dune
       DUNE_THROW(AlbertaError,"Error, wrong codimension!\n");
       return -1;
     }
-  }; // end class AlbertaGridHierarchicIndexSet
+  };
 
 
 
@@ -264,6 +277,27 @@ namespace Dune
       geomTypes_[ codim ].push_back( type );
     }
   }
+
+
+
+  // AlbertaGridHierarchicIndexSet::InitEntityNumber
+  // -----------------------------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGridHierarchicIndexSet< dim, dimworld >::InitEntityNumber
+  {
+    IndexManagerType &indexStack_;
+
+  public:
+    InitEntityNumber ( IndexManagerType &indexStack )
+      : indexStack_( indexStack )
+    {}
+
+    void operator() ( int &dof )
+    {
+      dof = indexStack_.getIndex();
+    }
+  };
 
 
 

@@ -91,6 +91,7 @@ namespace AlbertHelp
   {
     enum { codim = 1 };
 
+#ifndef NDEBUG
     // face number stays the same
     for(int i=0; i<2; ++i)
     {
@@ -99,8 +100,10 @@ namespace AlbertHelp
       assert( el->child[i] );
       const int newdof  = el->child[i]->dof[k + split_face][nv];
       const int olddof  = el->dof[k + (1-i)][nv];
+      assert( newdof == olddof );
       vec[newdof] = vec[olddof];
     }
+#endif
 
     // codim == 1 here
     // create two new face number for face 2 in every element

@@ -116,19 +116,19 @@ namespace Dune
     elNewCheck_.initialize( 0 );
 
     elNumbers_[ 0 ].create( dofNumbering_.dofSpace( 0 ), "element_numbers" );
-    AlbertHelp::initElNumbersCodim< 0 >( elNumbers_[ 0 ] );
+    hIndexSet_.initEntityNumbers( 0, elNumbers_[ 0 ] );
     ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 0 >::refineNumbers;
     ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 0 >::coarseNumbers;
 
     elNumbers_[ 1 ].create( dofNumbering_.dofSpace( 1 ), "face_numbers" );
-    AlbertHelp::initElNumbersCodim< 1 >( elNumbers_[ 1 ] );
+    hIndexSet_.initEntityNumbers( 1, elNumbers_[ 1 ] );
     ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 1 >::refineNumbers;
     ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 1 >::coarseNumbers;
 
     if( dim == 3 )
     {
       elNumbers_[ 2 ].create( dofNumbering_.dofSpace( 2 ), "edge_numbers"  );
-      AlbertHelp::initElNumbersCodim< 2 >( elNumbers_[ 2 ] );
+      hIndexSet_.initEntityNumbers( 2, elNumbers_[ 2 ] );
       ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 2 >::refineNumbers;
       ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 2 >::coarseNumbers;
     }
@@ -187,7 +187,7 @@ namespace Dune
       file.close();
     }
 
-    ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
+    //ALBERTA AlbertHelp::initIndexManager_elmem_cc( hIndexSet_.indexStack_ );
 
     if( makeNew )
     {
@@ -514,7 +514,7 @@ namespace Dune
     lockPostAdapt_ = true;
 
     // set global pointer to index manager in elmem.cc
-    ALBERTA AlbertHelp::initIndexManager_elmem_cc( indexStack_ );
+    ALBERTA AlbertHelp::initIndexManager_elmem_cc( hIndexSet_.indexStack_ );
 
     // set all values of elNewCheck positive which means old
     Alberta::abs( elNewCheck_ );
@@ -615,7 +615,7 @@ namespace Dune
   {
     if(codim == dim) return getMesh()->n_vertices;
     // for higher codims we have the index stack
-    return indexStack_[codim].size();
+    return hIndexSet_.indexStack_[codim].size();
   }
 
   // --size
@@ -873,7 +873,7 @@ namespace Dune
     for(int i=0; i<ALBERTA AlbertHelp::numOfElNumVec; i++)
     {
       int maxIdx = ALBERTA AlbertHelp::calcMaxIndex( elNumbers_[ i ] );
-      indexStack_[i].setMaxIndex(maxIdx);
+      hIndexSet_.indexStack_[i].setMaxIndex(maxIdx);
     }
 
     return true;

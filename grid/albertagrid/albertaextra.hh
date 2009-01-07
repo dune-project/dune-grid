@@ -213,16 +213,6 @@ namespace AlbertHelp
 
 
   // return pointer to created elNumbers Vector to mesh
-  template< int codim >
-  inline void initElNumbersCodim ( DOF_INT_VEC *elNumbersCodim )
-  {
-    int *vec = 0;
-    GET_DOF_VEC( vec, elNumbersCodim );
-    FOR_ALL_DOFS( elNumbersCodim->fe_space->admin, vec[ dof ] = getElementIndexForCodim< codim >() );
-  }
-
-
-  // return pointer to created elNumbers Vector to mesh
   inline static int calcMaxIndex(DOF_INT_VEC * drv)
   {
     int maxindex = 0;

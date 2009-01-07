@@ -643,8 +643,6 @@ namespace Dune
   private:
     Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
 
-    IndexManagerType indexStack_[AlbertHelp::numOfElNumVec];
-
     Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
 
     Alberta::DofVectorPointer< int > elNewCheck_;
