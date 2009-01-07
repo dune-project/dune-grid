@@ -10,20 +10,16 @@
 namespace Dune
 {
 
-  /*!
-     Enables iteration over all entities of a given codimension and level of a grid.
+  /** \class   AlbertaGridEntityPointer
+   *  \ingroup AlbertaGrid
+   *  \brief   EntityPointer implementation for AlbertaGrid
    */
   template< int codim, class GridImp >
   class AlbertaGridEntityPointer
   {
     typedef AlbertaGridEntityPointer< codim, GridImp > This;
 
-    enum { dim       = GridImp::dimension };
-    enum { dimworld  = GridImp::dimensionworld };
-
-    friend class AlbertaGridEntity< codim, dim, GridImp >;
-    friend class AlbertaGridEntity< 0, dim, GridImp >;
-    friend class AlbertaGrid< dim, dimworld >;
+    friend class AlbertaGrid< GridImp::dimension, GridImp::dimensionworld >;
 
   public:
     static const int dimension = GridImp::dimension;
@@ -32,29 +28,29 @@ namespace Dune
     static const int dimensionworld = GridImp::dimensionworld;
 
     typedef typename GridImp::template Codim< codimension >::Entity Entity;
+
+  protected:
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
 
+  public:
     typedef AlbertaGridEntityPointer< codimension, GridImp > EntityPointerImp;
 
-    typedef Alberta::ElementInfo< dim > ElementInfo;
+    typedef typename EntityImp::ElementInfo ElementInfo;
 
-    //! Constructor for EntityPointer that points to an element
+    //! make an EntityPointer that points to an element
     AlbertaGridEntityPointer ( const GridImp &grid,
                                const ElementInfo &elementInfo,
                                int subEntity );
 
-    //! Constructor for EntityPointer init of Level- and LeafIterator
-    AlbertaGridEntityPointer( const GridImp &grid );
+    //! constructor for invalid EntityPointer
+    AlbertaGridEntityPointer ( const GridImp &grid );
 
     //! make entity pointer from entity
     AlbertaGridEntityPointer ( const EntityImp &entity );
 
-    //! make empty entity pointer (to be revised)
+    //! copy constructor
     AlbertaGridEntityPointer ( const This &other );
-
-    //! make empty entity pointer (to be revised)
-    AlbertaGridEntityPointer(const GridImp & , const EntityImp & en);
 
     //! Destructor
     ~AlbertaGridEntityPointer();
@@ -71,25 +67,20 @@ namespace Dune
     //! ask for level of entities
     int level () const;
 
-    //! has to be called when iterator is finished
-    void done ();
-
     //! reduce memory
-    void compactify ()
-    {}
+    void compactify ();
 
   protected:
-    //! return reference to internal entity imp
+    //! obtain reference to internal entity implementation
     EntityImp &entityImp ();
 
-    //! return const reference to internal entity imp
+    //! obtain const reference to internal entity implementation
     const EntityImp &entityImp () const;
 
     //! obtain a reference to the grid
     const GridImp &grid () const;
 
   private:
-    // entity that this EntityPointer points to
     EntityObject *entity_;
   };
 

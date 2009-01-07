@@ -110,9 +110,6 @@ namespace Dune
     //! equality of entities
     bool equals ( const This &other ) const;
 
-    // dummy function, only needed for codim 0
-    //bool leafIt () const { return false; }
-
     void clearElement ();
     void setElement ( const ElementInfo &elementInfo, int subEntity );
 

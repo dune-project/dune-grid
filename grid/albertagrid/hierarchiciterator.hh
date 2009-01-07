@@ -116,14 +116,14 @@ namespace Dune
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >::increment ()
   {
-    // note: since we are not the end iterator, we point to a valid entity
-    increment( entityImp().elementInfo_ );
+    increment( entityImp().elementInfo() );
   }
 
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >
   ::increment ( ElementInfo elementInfo )
   {
+    assert( !elementInfo == false );
     if( (elementInfo.level() >= maxlevel_) || elementInfo.isLeaf() )
     {
       while( (elementInfo.level() > startLevel_) && (elementInfo.indexInFather() == 1) )
@@ -131,7 +131,7 @@ namespace Dune
       if( elementInfo.level() > startLevel_ )
         entityImp().setElement( elementInfo.father().child( 1 ), 0 );
       else
-        this->done();
+        entityImp().clearElement();
     }
     else
       entityImp().setElement( elementInfo.child( 0 ), 0 );

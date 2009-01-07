@@ -301,10 +301,8 @@ namespace Dune
       nextElementStop( elementInfo );
     else
       goNextEntity( elementInfo );
-    if( !elementInfo )
-      this->done();
-    else
-      entityImp().setElement( elementInfo, subEntity_ );
+    // it is ok to set the invalid ElementInfo
+    entityImp().setElement( elementInfo, subEntity_ );
   }
 
 
@@ -354,10 +352,8 @@ namespace Dune
   {
     ElementInfo elementInfo = entityImp().elementInfo_;
     goNextEntity ( elementInfo );
-    if( !elementInfo )
-      this->done();
-    else
-      entityImp().setElement( elementInfo, subEntity_ );
+    // it is ok to set the invalid ElementInfo
+    entityImp().setElement( elementInfo, subEntity_ );
   }
 
 
