@@ -228,9 +228,10 @@ namespace Dune
     class DofAccess
     {
       static const int codimtype = CodimType< dim, codim >::value;
-      static const int numSubEntities = NumSubEntities< dim, codim >::value;
 
     public:
+      static const int numSubEntities = NumSubEntities< dim, codim >::value;
+
       static const int dimension = dim;
       static const int codimension = codim;
 

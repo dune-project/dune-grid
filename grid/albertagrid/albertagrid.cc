@@ -28,29 +28,24 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaGrid< dim, dimworld >::SetLocalCoords
   {
-    static const int codim = dim;
-    static const int codimtype = Alberta::CodimType< dim, codim >::value;
-    static const int numVertices = Alberta::NumSubEntities< dim, dim >::value;
+    typedef Alberta::DofAccess< dim, dim > DofAccess;
 
     CoordVectorPointer coords_;
-    const int codimIdx_;
-    const int idx_;
+    DofAccess dofAccess_;
 
   public:
     explicit SetLocalCoords ( const CoordVectorPointer &coords )
       : coords_( coords ),
-        codimIdx_( coords.dofSpace()->admin->mesh->node[ codimtype ] ),
-        idx_( coords.dofSpace()->admin->n0_dof[ codimtype ] )
+        dofAccess_( coords.dofSpace() )
     {}
 
     void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
     {
       Alberta::GlobalVector *array = (Alberta::GlobalVector *)coords_;
-      for( int i = 0; i < numVertices; ++i )
+      for( int i = 0; i < DofAccess::numSubEntities; ++i )
       {
         const Alberta::GlobalVector &x = elementInfo.coordinate( i );
-        const int dof = elementInfo.el()->dof[ codimIdx_+i ][ idx_ ];
-        Alberta::GlobalVector &y = array[ dof ];
+        Alberta::GlobalVector &y = array[ dofAccess_( elementInfo.el(), i ) ];
         for( int i = 0; i < dimworld; ++i )
           y[ i ] = x[ i ];
       }
@@ -906,12 +901,14 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
+  struct AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
   {
-    static const int codim = 0;
+    static const int dimension = dim;
+    static const int codimension = 0;
 
+  private:
     typedef Alberta::DofVectorPointer< int > DofVectorPointer;
-    typedef Alberta::DofAccess< dim, codim > DofAccess;
+    typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
     DofVectorPointer dofVector_;
     DofAccess dofAccess_;

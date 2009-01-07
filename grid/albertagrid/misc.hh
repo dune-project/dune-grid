@@ -46,6 +46,44 @@ namespace Dune
 
 
 
+    // NumSubEntities
+    // --------------
+
+    template< int dim, int codim >
+    struct NumSubEntities;
+
+    template< int dim >
+    struct NumSubEntities< dim, 0 >
+    {
+      static const int value = 1;
+    };
+
+    template< int dim >
+    struct NumSubEntities< dim, dim >
+    {
+      static const int value = dim+1;
+    };
+
+    template<>
+    struct NumSubEntities< 2, 1 >
+    {
+      static const int value = 3;
+    };
+
+    template<>
+    struct NumSubEntities< 3, 1 >
+    {
+      static const int value = 4;
+    };
+
+    template<>
+    struct NumSubEntities< 3, 2 >
+    {
+      static const int value = 6;
+    };
+
+
+
     // CodimType
     // ---------
 
