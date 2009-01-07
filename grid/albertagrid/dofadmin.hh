@@ -411,6 +411,56 @@ namespace Dune
 
 
 
+    // Patch
+    // -----
+
+    class Patch
+    {
+      typedef ALBERTA RC_LIST_EL ElementList;
+
+      ElementList *list_;
+      int count_;
+
+    public:
+      Patch ( ElementList *list, int count )
+        : list_( list ),
+          count_( count )
+      {}
+
+      Element *operator[] ( int i ) const;
+
+      int count () const
+      {
+        return count_;
+      }
+
+      template< class Functor >
+      void forEach ( Functor &functor ) const
+      {
+        for( int i = 0; i < count(); ++i )
+          functor( (*this)[ i ] );
+      }
+    };
+
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    Element *Patch::operator[] ( int i ) const
+    {
+      assert( (i >= 0) && (i < count()) );
+      return list_[ i ].el;
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    Element *Patch::operator[] ( int i ) const
+    {
+      assert( (i >= 0) && (i < count()) );
+      return list_[ i ].el_info.el;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+
+
     // DofVector
     // ---------
 
@@ -524,15 +574,9 @@ namespace Dune
       {
         const This dofVectorPointer( dofVector );
         Interpolation interpolation( dofVectorPointer );
-        for( int i = 0; i < n; ++i )
-        {
-#if DUNE_ALBERTA_VERSION < 0x200
-          const Element *element = list[ i ].el;
-#else
-          const Element *element = list[ i ].el_info.el;
-#endif
-          interpolation( element );
-        }
+
+        const Patch patch( list, n );
+        patch.forEach( interpolation );
       }
 
       template< class Restriction >
@@ -540,15 +584,9 @@ namespace Dune
       {
         const This dofVectorPointer( dofVector );
         Restriction restriction( dofVectorPointer );
-        for( int i = 0; i < n; ++i )
-        {
-#if DUNE_ALBERTA_VERSION < 0x200
-          const Element *element = list[ i ].el;
-#else
-          const Element *element = list[ i ].el_info.el;
-#endif
-          restriction( element );
-        }
+
+        const Patch patch( list, n );
+        patch.forEach( restriction );
       }
     };
 
