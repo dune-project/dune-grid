@@ -668,11 +668,11 @@ namespace Dune
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
   {
-    elAdmin_ = dofNumbering_.dofSpace( 0 )->admin;
+    const ALBERTA DOF_ADMIN *elAdmin = dofNumbering_.dofSpace( 0 )->admin;
 
     // see Albert Doc. , should stay the same
-    const_cast<int &> (nv_)  = elAdmin_->n0_dof[CENTER];
-    const_cast<int &> (dof_) = elAdmin_->mesh->node[CENTER];
+    const_cast<int &> (nv_)  = elAdmin->n0_dof[CENTER];
+    const_cast<int &> (dof_) = elAdmin->mesh->node[CENTER];
   }
 
 

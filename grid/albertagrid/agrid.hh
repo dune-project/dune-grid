@@ -646,8 +646,6 @@ namespace Dune
     class SetLocalCoords;
 #endif
 
-    const ALBERTA DOF_ADMIN * elAdmin_;
-
     // for access in the elNewVec and ownerVec
     const int nv_;
     const int dof_;
