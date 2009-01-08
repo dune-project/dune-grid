@@ -133,4 +133,6 @@ namespace Dune
 
 } //end namespace Dune
 
+// inlcude inline implementation
+#include "entitykey_inline.hh"
 #endif

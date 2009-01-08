@@ -2,7 +2,7 @@ SUBDIRS = test
 
 noinst_LTLIBRARIES = libdgfparser.la
 
-libdgfparser_la_SOURCES = entitykey.cc dgfparserblocks.cc dgfparser.cc
+libdgfparser_la_SOURCES = dgfparserblocks.cc dgfparser.cc
 libdgfparser_la_LIBADD = $(DUNE_COMMON_LIBS)
 
 AM_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS)

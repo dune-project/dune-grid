@@ -1,9 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include <config.h>
+#ifndef DUNE_ENTITYKEY_INLINE_HH
+#define DUNE_ENTITYKEY_INLINE_HH
 
 #include <algorithm>
-
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
 
 namespace Dune
@@ -13,7 +13,7 @@ namespace Dune
   // ------------
 
   template< class A >
-  DGFEntityKey< A > :: DGFEntityKey ( const std :: vector< A > &key, bool setOrigKey )
+  inline DGFEntityKey< A > :: DGFEntityKey ( const std :: vector< A > &key, bool setOrigKey )
     : key_( key.size() ),
       origKey_( key.size() ),
       origKeySet_( setOrigKey )
@@ -28,8 +28,8 @@ namespace Dune
 
 
   template< class A >
-  DGFEntityKey< A > :: DGFEntityKey ( const std :: vector< A > &key,
-                                      int N, int offset, bool setOrigKey )
+  inline DGFEntityKey< A > :: DGFEntityKey ( const std :: vector< A > &key,
+                                             int N, int offset, bool setOrigKey )
     : key_( N ),
       origKey_( N ),
       origKeySet_( setOrigKey )
@@ -44,7 +44,7 @@ namespace Dune
 
 
   template< class A >
-  DGFEntityKey< A > :: DGFEntityKey ( const DGFEntityKey< A > &k )
+  inline DGFEntityKey< A > :: DGFEntityKey ( const DGFEntityKey< A > &k )
     : key_( k.key_.size() ),
       origKey_( k.key_.size() ),
       origKeySet_( k. origKeySet_ )
@@ -58,7 +58,7 @@ namespace Dune
 
 
   template< class A >
-  DGFEntityKey< A > &DGFEntityKey< A > :: operator= ( const DGFEntityKey< A > &k )
+  inline DGFEntityKey< A > &DGFEntityKey< A > :: operator= ( const DGFEntityKey< A > &k )
   {
     assert(key_.size()==k.key_.size());
     for (size_t i=0; i<key_.size(); i++) {
@@ -71,7 +71,7 @@ namespace Dune
 
 
   template< class A >
-  void DGFEntityKey< A >
+  inline void DGFEntityKey< A >
   :: orientation ( int base, std::vector< std :: vector< double > > &vtx )
   {
     if (key_.size()==3)  {
@@ -99,7 +99,7 @@ namespace Dune
 
 
   template< class A >
-  void DGFEntityKey< A > :: print ( std :: ostream &out ) const
+  inline void DGFEntityKey< A > :: print ( std :: ostream &out ) const
   {
     for( size_t i = 0; i < key_.size(); ++i )
       out << key_[ i ] << " ";
@@ -107,12 +107,11 @@ namespace Dune
   }
 
 
-
   // ElementFaceUtil
   // ---------------
 
   template< int dimworld >
-  DGFEntityKey< unsigned int >
+  inline DGFEntityKey< unsigned int >
   ElementFaceUtil :: generateCubeFace
     ( const std :: vector< unsigned int > &element, int f )
   {
@@ -149,7 +148,7 @@ namespace Dune
 
 
   template< int dimworld >
-  DGFEntityKey< unsigned int >
+  inline DGFEntityKey< unsigned int >
   ElementFaceUtil :: generateSimplexFace
     ( const std :: vector< unsigned int > &element, int f )
   {
@@ -162,7 +161,7 @@ namespace Dune
   }
 
 
-  DGFEntityKey< unsigned int >
+  inline DGFEntityKey< unsigned int >
   ElementFaceUtil :: generateFace
     ( int dimw, const std :: vector< unsigned int > &element, int f )
   {
@@ -186,11 +185,6 @@ namespace Dune
     return generateCubeFace<1>(element,f);
   }
 
-
-
-  // Instantiations
-  // --------------
-
-  template class DGFEntityKey< unsigned int >;
-
 } // end namespace Dune
+
+#endif // DUNE_ENTITYKEY_INLINE_HH
