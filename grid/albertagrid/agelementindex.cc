@@ -34,6 +34,7 @@ namespace AlbertHelp
     for(int i=0; i<numOfVec; i++) tmpIndexStack[i] = 0;
   }
 
+#if 0
   template <int codim>
   inline static int getElementIndex()
   {
@@ -54,6 +55,7 @@ namespace AlbertHelp
     assert(tmpIndexStack[codim] != 0);
     (*tmpIndexStack[codim]).freeIndex(idx);
   }
+
 
   //****************************************************************************
   //
@@ -205,6 +207,7 @@ namespace AlbertHelp
       }
     }
   };
+#endif
 
 } // end namespace AlbertHelp
 

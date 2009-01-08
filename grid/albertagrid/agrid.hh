@@ -473,13 +473,6 @@ namespace Dune
     template< GrapeIOFileFormatType ftype >
     bool readGrid( const std::string &filename, ctype &time );
 
-    /* returns size of mesh include all levels
-       max Index of grid entities with given codim
-       for outside the min index is 0, the shift has to done inside
-       the grid which is of minor cost
-     */
-    int global_size (int codim) const;
-
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
 

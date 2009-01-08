@@ -110,23 +110,10 @@ namespace Dune
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
     elNewCheck_.initialize( 0 );
 
-    elNumbers_[ 0 ].create( dofNumbering_.dofSpace( 0 ), "element_numbers" );
-    hIndexSet_.initEntityNumbers( 0, elNumbers_[ 0 ] );
-    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 0 >::refineNumbers;
-    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 0 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 0 >::coarseNumbers;
-
-    elNumbers_[ 1 ].create( dofNumbering_.dofSpace( 1 ), "face_numbers" );
-    hIndexSet_.initEntityNumbers( 1, elNumbers_[ 1 ] );
-    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 1 >::refineNumbers;
-    ((ALBERTA DOF_INT_VEC *)elNumbers_[ 1 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 1 >::coarseNumbers;
-
+    hIndexSet_.template initEntityNumbers< 0 >( dofNumbering_, elNumbers_[ 0 ] );
+    hIndexSet_.template initEntityNumbers< 1 >( dofNumbering_, elNumbers_[ 1 ] );
     if( dim == 3 )
-    {
-      elNumbers_[ 2 ].create( dofNumbering_.dofSpace( 2 ), "edge_numbers"  );
-      hIndexSet_.initEntityNumbers( 2, elNumbers_[ 2 ] );
-      ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->refine_interpol = &AlbertHelp::RefineNumbering< dimension, 2 >::refineNumbers;
-      ((ALBERTA DOF_INT_VEC *)elNumbers_[ 2 ])->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, 2 >::coarseNumbers;
-    }
+      hIndexSet_.template initEntityNumbers< 2 >( dofNumbering_, elNumbers_[ 2 ] );
 
     wasChanged_ = true;
 
@@ -605,14 +592,6 @@ namespace Dune
     return maxlevel_;
   }
 
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
-  {
-    if(codim == dim) return getMesh()->n_vertices;
-    // for higher codims we have the index stack
-    return hIndexSet_.indexStack_[codim].size();
-  }
-
   // --size
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
@@ -913,12 +892,12 @@ namespace Dune
     DofVectorPointer dofVector_;
     DofAccess dofAccess_;
 
-  public:
     explicit ElNewCheckInterpolation ( const DofVectorPointer &dofVector )
       : dofVector_( dofVector ),
         dofAccess_( dofVector.dofSpace() )
     {}
 
+  public:
     void operator() ( const Alberta::Element *father )
     {
       int *array = (int *)dofVector_;
@@ -928,6 +907,13 @@ namespace Dune
         const Alberta::Element *child = father->child[ i ];
         array[ dofAccess_( child, 0 ) ] = -(fatherLevel+1);
       }
+    }
+
+    static void interpolateVector ( const DofVectorPointer &dofVector,
+                                    const Alberta::Patch &patch )
+    {
+      ElNewCheckInterpolation interpolation( dofVector );
+      patch.forEach( interpolation );
     }
   };
 

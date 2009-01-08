@@ -84,6 +84,12 @@ namespace Dune
 
     class InitEntityNumber;
 
+    template< int codim >
+    class RefineNumbering;
+
+    template< int codim >
+    class CoarsenNumbering;
+
   public:
     enum { ncodim = dimension + 1 };
 
@@ -116,16 +122,19 @@ namespace Dune
     }
 
     //! return size of set for given GeometryType
-    int size (GeometryType type) const
+    int size ( GeometryType type ) const
     {
-      if( !type.isSimplex() ) return 0;
-      return this->size(Grid::dimension-type.dim());
+      return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
     }
 
     //! return size of set
-    int size (int codim) const
+    int size ( int codim ) const
     {
-      return grid_.global_size(codim);
+      assert( (codim >= 0) && (codim <= dimension) );
+      if( codim == dimension )
+        return grid_.getMesh()->n_vertices;
+      else
+        return indexStack_[ codim ].size();
     }
 
     //! return geometry types this set has indices for
@@ -156,11 +165,26 @@ namespace Dune
 #endif
 
   private:
-    void initEntityNumbers ( int codim, Alberta::DofVectorPointer< int > &entityNumbers )
+    template< int codim >
+    void initEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering,
+                             Alberta::DofVectorPointer< int > &entityNumbers )
     {
       assert( (codim >= 0) && (codim < AlbertHelp::numOfElNumVec) );
+
+      std::ostringstream s;
+      s << "Numbering for codimension " << codim;
+      entityNumbers.create( dofNumbering.dofSpace( codim ), s.str() );
+
       InitEntityNumber init( indexStack_[ codim ] );
       entityNumbers.forEach( init );
+
+#if 0
+      ALBERTA DOF_INT_VEC *enNumVec = entityNumbers;
+      enNumVec->refine_interpol = &AlbertHelp::RefineNumbering< dimension, codim >::refineNumbers;
+      enNumVec->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, codim >::coarseNumbers;
+#endif
+      entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
+      entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
     }
 
   private:
@@ -296,6 +320,99 @@ namespace Dune
     void operator() ( int &dof )
     {
       dof = indexStack_.getIndex();
+    }
+  };
+
+
+
+  // AlbertaGridHierarchicIndexSet::RefineNumbering
+  // ----------------------------------------------
+
+  template< int dim, int dimworld >
+  template< int codim >
+  struct AlbertaGridHierarchicIndexSet< dim, dimworld >::RefineNumbering
+  {
+    static const int dimension = dim;
+    static const int codimension = codim;
+
+  private:
+    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+    typedef Alberta::DofAccess< dimension, codimension > DofAccess;
+
+    IndexManagerType &indexStack_;
+    DofVectorPointer dofVector_;
+    DofAccess dofAccess_;
+
+    RefineNumbering ( IndexManagerType &indexStack,
+                      const DofVectorPointer &dofVector )
+      : indexStack_( indexStack ),
+        dofVector_( dofVector ),
+        dofAccess_( dofVector.dofSpace() )
+    {}
+
+  public:
+    void operator() ( const Alberta::Element *child, int subEntity )
+    {
+      int *const array = (int *)dofVector_;
+      const int dof = dofAccess_( child, subEntity );
+      array[ dof ] = indexStack_.getIndex();
+    }
+
+    static void interpolateVector ( const DofVectorPointer &dofVector,
+                                    const Alberta::Patch &patch )
+    {
+      IndexManagerType *indexStackPtr = AlbertHelp::tmpIndexStack[ codim ];
+      assert( indexStackPtr != 0 );
+      RefineNumbering refineNumbering( *indexStackPtr, dofVector );
+      patch.forEachInternalSubChild( refineNumbering );
+    }
+  };
+
+
+
+  // AlbertaGridHierarchicIndexSet::CoarsenNumbering
+  // -----------------------------------------------
+
+  template< int dim, int dimworld >
+  template< int codim >
+  struct AlbertaGridHierarchicIndexSet< dim, dimworld >::CoarsenNumbering
+  {
+    static const int dimension = dim;
+    static const int codimension = codim;
+
+  private:
+    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+    typedef Alberta::DofAccess< dimension, codimension > DofAccess;
+
+    IndexManagerType &indexStack_;
+    DofVectorPointer dofVector_;
+    DofAccess dofAccess_;
+
+    CoarsenNumbering ( IndexManagerType &indexStack,
+                       const DofVectorPointer &dofVector )
+      : indexStack_( indexStack ),
+        dofVector_( dofVector ),
+        dofAccess_( dofVector.dofSpace() )
+    {}
+
+  public:
+    void operator() ( const Alberta::Element *child, int subEntity )
+    {
+      int *const array = (int *)dofVector_;
+      const int dof = dofAccess_( child, subEntity );
+      indexStack_.freeIndex( array[ dof ] );
+#ifndef NDEBUG
+      array[ dof ] = -1;
+#endif
+    }
+
+    static void restrictVector ( const DofVectorPointer &dofVector,
+                                 const Alberta::Patch &patch )
+    {
+      IndexManagerType *indexStackPtr = AlbertHelp::tmpIndexStack[ codim ];
+      assert( indexStackPtr != 0 );
+      CoarsenNumbering coarsenNumbering( *indexStackPtr, dofVector );
+      patch.forEachInternalSubChild( coarsenNumbering );
     }
   };
 
