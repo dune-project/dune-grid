@@ -178,11 +178,6 @@ namespace Dune
       InitEntityNumber init( indexStack_[ codim ] );
       entityNumbers.forEach( init );
 
-#if 0
-      ALBERTA DOF_INT_VEC *enNumVec = entityNumbers;
-      enNumVec->refine_interpol = &AlbertHelp::RefineNumbering< dimension, codim >::refineNumbers;
-      enNumVec->coarse_restrict = &AlbertHelp::RefineNumbering< dimension, codim >::coarseNumbers;
-#endif
       entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
       entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
     }
