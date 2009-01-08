@@ -641,8 +641,6 @@ namespace Dune
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
   {
-    hIndexSet_.updatePointers( hIndexSet_.entityNumbers_ );
-
     elAdmin_ = dofNumbering_.dofSpace( 0 )->admin;
 
     // see Albert Doc. , should stay the same
@@ -665,30 +663,30 @@ namespace Dune
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::getElementNumber ( const ALBERTA EL * el ) const
   {
-    return hIndexSet_.getIndex(el,0,Int2Type<dim>());
+    Int2Type< 0 > codimVariable;
+    return hIndexSet_.subIndex( codimVariable, el, 0 );
   }
 
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::getFaceNumber ( const ALBERTA EL * el , int face ) const
   {
-    // codim of faces is 2 therefore dim-1
-    assert( face >= 0 );
-    assert( face < dim+1 );
-    return hIndexSet_.getIndex(el,face,Int2Type<dim-1>());
+    Int2Type< 1 > codimVariable;
+    return hIndexSet_.subIndex( codimVariable, el, face );
   }
 
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::getEdgeNumber ( const ALBERTA EL * el , int edge ) const
   {
-    assert(dim == 3);
-    // codim of edges is 2 therefore dim-2
-    return hIndexSet_.getIndex(el,edge,Int2Type<dim-2>());
+    assert( dim == 3 );
+    Int2Type< 2 > codimVariable;
+    return hIndexSet_.subIndex( codimVariable, el, edge );
   }
 
   template < int dim, int dimworld >
   inline int AlbertaGrid < dim, dimworld >::getVertexNumber ( const ALBERTA EL * el , int vx ) const
   {
-    return hIndexSet_.getIndex(el,vx,Int2Type<0>());
+    Int2Type< dim > codimVariable;
+    return hIndexSet_.subIndex( codimVariable, el, vx );
   }
 
   template < int dim, int dimworld >

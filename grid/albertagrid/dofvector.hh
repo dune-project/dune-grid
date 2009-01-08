@@ -431,6 +431,11 @@ namespace Dune
         : dofVector_( NULL )
       {}
 
+      explicit DofVectorPointer ( const DofSpace *dofSpace,
+                                  const std::string &name = "" )
+        : dofVector_ ( DofVectorProvider::get( dofSpace, name ) )
+      {}
+
       explicit DofVectorPointer ( DofVector *dofVector )
         : dofVector_( dofVector )
       {}

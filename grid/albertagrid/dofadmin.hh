@@ -237,24 +237,30 @@ namespace Dune
 
     private:
       int node_;
+      int index_;
 #ifndef NDEBUG
       int count_;
 #endif
-      int index_;
 
     public:
-      explicit DofAccess ( const DofSpace *dofSpace )
-        : node_( dofSpace->admin->mesh->node[ codimtype ] ),
-#ifndef NDEBUG
-          count_( dofSpace->admin->n_dof[ codimtype ] ),
-#endif
-          index_( dofSpace->admin->n0_dof[ codimtype ] )
+      DofAccess ()
+        : node_( -1 )
       {}
+
+      explicit DofAccess ( const DofSpace *dofSpace )
+      {
+        node_ = dofSpace->admin->mesh->node[ codimtype ];
+        index_ = dofSpace->admin->n0_dof[ codimtype ];
+#ifndef NDEBUG
+        count_ = dofSpace->admin->n_dof[ codimtype ];
+#endif
+      }
 
       int operator() ( const Element *element, int subEntity, int i ) const
       {
-        assert( subEntity < numSubEntities );
 #ifndef NDEBUG
+        assert( node_ != -1 );
+        assert( subEntity < numSubEntities );
         assert( i < count_ );
 #endif
         return element->dof[ node_ + subEntity ][ index_ + i ];

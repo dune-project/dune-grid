@@ -31,6 +31,7 @@ namespace Dune
     // ------------
 
     using GenericGeometry::ForLoop;
+    using GenericGeometry::CodimTable;
 
     typedef ALBERTA REAL Real;
     typedef ALBERTA REAL_D GlobalVector;

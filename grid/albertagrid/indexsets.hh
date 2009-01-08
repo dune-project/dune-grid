@@ -71,7 +71,6 @@ namespace Dune
     typedef AlbertaGrid< dim, dimworld > Grid;
 
     typedef typename Grid::Traits Traits;
-    //typedef typename remove_const< Grid >::type::Traits Traits;
 
     static const int dimension = Grid::dimension;
 
@@ -82,6 +81,9 @@ namespace Dune
     friend class MarkEdges< const Grid, 3 >;
 
     explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
+
+    template< int codim >
+    class DofAccess;
 
     class InitEntityNumber;
 
@@ -108,8 +110,9 @@ namespace Dune
       const int codim = Entity::codimension;
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      Int2Type< dim-codim > dimVariable;
-      return getIndex( entityImp.elementInfo().el(), entityImp.getFEVnum(), dimVariable );
+
+      Int2Type< codim > codimVariable;
+      return subIndex( codimVariable, entityImp.elementInfo().el(), entityImp.getFEVnum() );
     }
 
     //! return subIndex of given enitiy's sub entity
@@ -118,8 +121,9 @@ namespace Dune
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      Int2Type< dim-codim > dimVariable;
-      return getIndex( entityImp.elementInfo().el(), i, dimVariable );
+
+      Int2Type< codim > codimVariable;
+      return subIndex( codimVariable, entityImp.elementInfo().el(), i );
     }
 
     //! return size of set for given GeometryType
@@ -165,12 +169,32 @@ namespace Dune
     }
 #endif
 
+    template< int codim >
+    int subIndex ( Int2Type< codim > codimVariable,
+                   const Alberta::Element *element, int i ) const
+    {
+      if( (codim < dimension) && (codim == 2) )
+        i = refTopo_.dune2albertaEdge( i );
+
+      int dof = dofAccess_[ codimVariable ]( element, i );
+      if( codim < dimension )
+      {
+        int *array = (int *)entityNumbers_[ codim ];
+        return array[ dof ];
+      }
+      else
+        return dof;
+    }
+
     void create ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
     {
-      entityNumbers_[ 0 ] = createEntityNumbers< 0 >( dofNumbering );
-      entityNumbers_[ 1 ] = createEntityNumbers< 1 >( dofNumbering );
+      createEntityNumbers< 0 >( dofNumbering );
+      createEntityNumbers< 1 >( dofNumbering );
       if( dimension == 3 )
-        entityNumbers_[ 2 ] = createEntityNumbers< 2 >( dofNumbering );
+        createEntityNumbers< 2 >( dofNumbering );
+
+      Int2Type< dimension > dimVariable;
+      dofAccess_[ dimVariable ] = DofAccess< dimension >( dofNumbering.dofSpace( dimension ) );
     }
 
     void read ( const std::string &filename,
@@ -185,9 +209,11 @@ namespace Dune
         const int maxIdx = AlbertHelp::calcMaxIndex( entityNumbers_[ i ] );
         indexStack_[ i ].setMaxIndex( maxIdx );
       }
+
+      DUNE_THROW( AlbertaIOError, "We need to set dofAccess_ here, too" );
     }
 
-    bool write ( const std::string &filename )
+    bool write ( const std::string &filename ) const
     {
       bool success = true;
       for( int i = 0; i < dimension; ++i )
@@ -207,124 +233,44 @@ namespace Dune
 
   private:
     template< int codim >
-    Alberta::DofVectorPointer< int >
-    createEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
+    void createEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
     {
       assert( (codim >= 0) && (codim < AlbertHelp::numOfElNumVec) );
+      Int2Type< codim > codimVariable;
+
+      const Alberta::DofSpace *dofSpace = dofNumbering.dofSpace( codim );
+      dofAccess_[ codimVariable ] = DofAccess< codim >( dofSpace );
 
       std::ostringstream s;
       s << "Numbering for codimension " << codim;
-      Alberta::DofVectorPointer< int > entityNumbers;
-      entityNumbers.create( dofNumbering.dofSpace( codim ), s.str() );
+      Alberta::DofVectorPointer< int > &entityNumbers = entityNumbers_[ codim ];
+      entityNumbers.create( dofSpace, s.str() );
 
       InitEntityNumber init( indexStack_[ codim ] );
       entityNumbers.forEach( init );
 
       entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
       entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
-      return entityNumbers;
     }
 
   private:
+    // the grid this index set belongs to
+    const Grid &grid_;
+
+    // index stacks providing new numbers during adaptation
     IndexManagerType indexStack_[ AlbertHelp::numOfElNumVec ];
+
+    // dof vectors storing the (persistent) numbering
     Alberta::DofVectorPointer< int > entityNumbers_[ AlbertHelp::numOfElNumVec ];
 
-    // out grid
-    const Grid &grid_;
+    // access to the dof vectors
+    Alberta::CodimTable< DofAccess, dim > dofAccess_;
+
     // constains the mapping from dune to alberta numbers
     const ALBERTA AlbertHelp :: AlbertaGridReferenceTopology<dim> refTopo_;
 
     // all geometry types contained in the grid
     std::vector< GeometryType > geomTypes_[ dimension+1 ];
-
-    // the vectors containing the numbers
-    const int * elNumVec_[numVecs];
-
-    // stores offset of dof numbers on given elements
-    int nv_[numVecs];
-    int dof_[numVecs];
-
-    template< int codim >
-    struct SetDofIdentifier
-    {
-      static void apply ( This &indexSet,
-                          Alberta::DofVectorPointer< int > (&elNumbers)[ numVecs ] )
-      {
-        if( codim < numVecs )
-        {
-          const ALBERTA DOF_ADMIN *elAdmin = elNumbers[ codim ].dofSpace()->admin;
-          // see Albert Doc. , should stay the same
-
-          const int codimtype = Alberta::CodimType< dim, codim >::value;
-          indexSet.nv_[ codim ] = elAdmin->n0_dof[ codimtype ];
-          assert( indexSet.nv_[ codim ] == 0 );
-          indexSet.dof_[ codim ] = elAdmin->mesh->node[ codimtype ];
-        }
-      }
-    };
-
-    // update vec pointer of the DOF_INT_VECs, which can change during resize
-    void updatePointers( Alberta::DofVectorPointer< int > (&elNumbers)[ numVecs ] )
-    {
-      for( int i = 0; i < numVecs; ++i )
-        elNumVec_[ i ] = (int *)elNumbers[ i ];
-      Alberta::ForLoop< SetDofIdentifier, 0, dim >::apply( *this, elNumbers );
-    }
-
-    // codim = 0 means we get from dim-cd = dim
-    // this is the method for the element numbers
-    // --element
-    int getIndex ( const ALBERTA EL * el, int i , Int2Type<dim> fake ) const
-    {
-      enum { cd = 0 };
-      assert(el);
-      return elNumVec_[cd][ el->dof[ dof_[cd] ][nv_[cd]] ];
-    }
-
-    enum { cd1 = (dim == 2) ? 1 : 2 };
-    // method for face numbers
-    // codim = 0 means we get from dim-cd = dim
-    // --face
-    int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd1> fake ) const
-    {
-      enum { cd = 1 };
-      assert(el);
-      assert( (dim == 2) || (dim == 3));
-      // dof_[cd] marks the insertion point form which this dofs start
-      // then i is the i-th dof
-      return elNumVec_[cd][ el->dof[ dof_[cd] + i ][ nv_[cd] ] ];
-    }
-
-    enum { cd2 = (dim > 2) ? 1 : 6 };
-    // codim = 0 means we get from dim-cd = dim
-    // this method we have only in 3d, for edges
-    // --edges
-    int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd2> fake ) const
-    {
-      enum { cd = 2 };
-      assert(el);
-
-      // dof_[cd] marks the insertion point form which this dofs start
-      // then i is the i-th dof, here we addionally have to use the edge
-      // mapping
-      return elNumVec_[cd][ el->dof[ dof_[cd] + refTopo_.dune2albertaEdge(i) ][ nv_[cd] ] ];
-    }
-
-    // codim = dim  means we get from dim-cd = 0
-    // return index of vertices
-    // --vertex
-    int getIndex ( const ALBERTA EL * el, int i , Int2Type<0> fake ) const
-    {
-      assert(el);
-      return (el->dof[i][0]);
-    }
-
-    int getIndex ( const ALBERTA EL * el, int i , Int2Type<-1> fake ) const
-    {
-      assert(false);
-      DUNE_THROW(AlbertaError,"Error, wrong codimension!\n");
-      return -1;
-    }
   };
 
 
@@ -340,6 +286,27 @@ namespace Dune
       geomTypes_[ codim ].push_back( type );
     }
   }
+
+
+
+  // AlbertaGridHierarchicIndexSet::DofAccess
+  // ----------------------------------------
+
+  template< int dim, int dimworld >
+  template< int codim >
+  class AlbertaGridHierarchicIndexSet< dim, dimworld >::DofAccess
+    : public Alberta::DofAccess< dim, codim >
+  {
+    typedef Alberta::DofAccess< dim, codim > Base;
+
+  public:
+    DofAccess ()
+    {}
+
+    explicit DofAccess ( const Alberta::DofSpace *dofSpace )
+      : Base( dofSpace )
+    {}
+  };
 
 
 
