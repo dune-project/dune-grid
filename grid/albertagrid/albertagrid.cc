@@ -141,8 +141,6 @@ namespace Dune
 
     wasChanged_ = true;
 
-    macroVertices_.resize( getMesh()->n_vertices );
-
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();

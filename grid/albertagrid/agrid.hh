@@ -473,9 +473,6 @@ namespace Dune
     template< GrapeIOFileFormatType ftype >
     bool readGrid( const std::string &filename, ctype &time );
 
-    //! transform grid N = scalar * x + trans
-    void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
-
     // return hierarchic index set
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
@@ -545,9 +542,6 @@ namespace Dune
 
     // true if grid was refined or coarsend
     bool wasChanged_;
-
-    // help vector for setNewCoords
-    mutable ArrayType macroVertices_;
 
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable AlbertaMarkerVector vertexMarkerLeaf_;
