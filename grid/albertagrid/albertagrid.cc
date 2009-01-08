@@ -110,10 +110,7 @@ namespace Dune
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
     elNewCheck_.initialize( 0 );
 
-    elNumbers_[ 0 ] = hIndexSet_.template createEntityNumbers< 0 >( dofNumbering_ );
-    elNumbers_[ 1 ] = hIndexSet_.template createEntityNumbers< 1 >( dofNumbering_ );
-    if( dim == 3 )
-      elNumbers_[ 2 ] = hIndexSet_.template createEntityNumbers< 2 >( dofNumbering_ );
+    hIndexSet_.create( dofNumbering_ );
 
     wasChanged_ = true;
 
@@ -201,8 +198,7 @@ namespace Dune
     leafIndexSet_ = 0;
 
     // release dof vectors
-    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
-      elNumbers_[ i ].release();
+    hIndexSet_.release();
     elNewCheck_.release();
 #ifndef CALC_COORD
     coords_.release();
@@ -645,9 +641,9 @@ namespace Dune
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
   {
-    hIndexSet_.updatePointers( elNumbers_ );
+    hIndexSet_.updatePointers( hIndexSet_.entityNumbers_ );
 
-    elAdmin_ = elNumbers_[ 0 ].dofSpace()->admin;
+    elAdmin_ = dofNumbering_.dofSpace( 0 )->admin;
 
     // see Albert Doc. , should stay the same
     const_cast<int &> (nv_)  = elAdmin_->n0_dof[CENTER];
@@ -784,18 +780,7 @@ namespace Dune
   {
     if( filename.size() <= 0 )
       DUNE_THROW( AlbertaIOError, "No filename given to writeGridXdr." );
-
-    bool success = mesh_.write( filename, time );
-
-    // strore element numbering to file
-    for( int i = 0; i < AlbertHelp::numOfElNumVec; ++i )
-    {
-      std::ostringstream namestream;
-      namestream << filename << "_num_c" << i;
-      success &= elNumbers_[ i ].write( namestream.str() );
-    }
-
-    return success;
+    return (mesh_.write( filename, time ) && hIndexSet_.write( filename ));
   }
 
 
@@ -815,15 +800,9 @@ namespace Dune
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
     dofNumbering_.create( mesh_ );
+    hIndexSet_.read( filename, mesh_ );
 
-    for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
-    {
-      std::ostringstream namestream;
-      namestream << filename << "_num_c" << i;
-      elNumbers_[ i ].read( namestream.str(), mesh_ );
-    }
-
-    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( elNumbers_[ 0 ].dofSpace(), "el_new_check" ) );
+    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( dofNumbering_.dofSpace( 0 ), "el_new_check" ) );
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
@@ -842,13 +821,6 @@ namespace Dune
 
     // calc maxlevel and indexOnLevel and so on
     calcExtras();
-
-    // set el_index of index manager to max element index
-    for(int i=0; i<ALBERTA AlbertHelp::numOfElNumVec; i++)
-    {
-      int maxIdx = ALBERTA AlbertHelp::calcMaxIndex( elNumbers_[ i ] );
-      hIndexSet_.indexStack_[i].setMaxIndex(maxIdx);
-    }
 
     return true;
   }

@@ -14,6 +14,7 @@
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/referencetopo.hh>
 #include <dune/grid/albertagrid/dofadmin.hh>
+#include <dune/grid/albertagrid/dofvector.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 namespace Dune
@@ -164,6 +165,46 @@ namespace Dune
     }
 #endif
 
+    void create ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
+    {
+      entityNumbers_[ 0 ] = createEntityNumbers< 0 >( dofNumbering );
+      entityNumbers_[ 1 ] = createEntityNumbers< 1 >( dofNumbering );
+      if( dimension == 3 )
+        entityNumbers_[ 2 ] = createEntityNumbers< 2 >( dofNumbering );
+    }
+
+    void read ( const std::string &filename,
+                const Alberta::MeshPointer< dimension > &mesh )
+    {
+      for( int i = 0; i < dimension; ++i )
+      {
+        std::ostringstream s;
+        s << filename << ".cd" << i;
+        entityNumbers_[ i ].read( s.str(), mesh );
+
+        const int maxIdx = AlbertHelp::calcMaxIndex( entityNumbers_[ i ] );
+        indexStack_[ i ].setMaxIndex( maxIdx );
+      }
+    }
+
+    bool write ( const std::string &filename )
+    {
+      bool success = true;
+      for( int i = 0; i < dimension; ++i )
+      {
+        std::ostringstream s;
+        s << filename << ".cd" << i;
+        success &= entityNumbers_[ i ].write( s.str() );
+      }
+      return success;
+    }
+
+    void release ()
+    {
+      for( int i = 0; i < dimension; ++i )
+        entityNumbers_[ i ].release();
+    }
+
   private:
     template< int codim >
     Alberta::DofVectorPointer< int >
@@ -186,6 +227,7 @@ namespace Dune
 
   private:
     IndexManagerType indexStack_[ AlbertHelp::numOfElNumVec ];
+    Alberta::DofVectorPointer< int > entityNumbers_[ AlbertHelp::numOfElNumVec ];
 
     // out grid
     const Grid &grid_;

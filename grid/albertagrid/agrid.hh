@@ -636,8 +636,6 @@ namespace Dune
   private:
     Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
 
-    Alberta::DofVectorPointer< int > elNumbers_[ AlbertHelp::numOfElNumVec ];
-
     Alberta::DofVectorPointer< int > elNewCheck_;
     struct ElNewCheckInterpolation;
 
