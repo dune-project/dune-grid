@@ -110,10 +110,10 @@ namespace Dune
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
     elNewCheck_.initialize( 0 );
 
-    hIndexSet_.template initEntityNumbers< 0 >( dofNumbering_, elNumbers_[ 0 ] );
-    hIndexSet_.template initEntityNumbers< 1 >( dofNumbering_, elNumbers_[ 1 ] );
+    elNumbers_[ 0 ] = hIndexSet_.template createEntityNumbers< 0 >( dofNumbering_ );
+    elNumbers_[ 1 ] = hIndexSet_.template createEntityNumbers< 1 >( dofNumbering_ );
     if( dim == 3 )
-      hIndexSet_.template initEntityNumbers< 2 >( dofNumbering_, elNumbers_[ 2 ] );
+      elNumbers_[ 2 ] = hIndexSet_.template createEntityNumbers< 2 >( dofNumbering_ );
 
     wasChanged_ = true;
 

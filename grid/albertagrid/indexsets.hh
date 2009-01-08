@@ -166,13 +166,14 @@ namespace Dune
 
   private:
     template< int codim >
-    void initEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering,
-                             Alberta::DofVectorPointer< int > &entityNumbers )
+    Alberta::DofVectorPointer< int >
+    createEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
     {
       assert( (codim >= 0) && (codim < AlbertHelp::numOfElNumVec) );
 
       std::ostringstream s;
       s << "Numbering for codimension " << codim;
+      Alberta::DofVectorPointer< int > entityNumbers;
       entityNumbers.create( dofNumbering.dofSpace( codim ), s.str() );
 
       InitEntityNumber init( indexStack_[ codim ] );
@@ -180,6 +181,7 @@ namespace Dune
 
       entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
       entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
+      return entityNumbers;
     }
 
   private:
