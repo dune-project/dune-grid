@@ -55,6 +55,33 @@ namespace Dune
 
 
 
+  // AlbertaGrid::SetLocalElementLevel
+  // ---------------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::SetLocalElementLevel
+  {
+    typedef Alberta::DofAccess< dim, 0 > DofAccess;
+
+    Alberta::DofVectorPointer< int > levels_;
+    DofAccess dofAccess_;
+
+  public:
+    explicit SetLocalElementLevel ( const Alberta::DofVectorPointer< int > &levels )
+      : levels_( levels ),
+        dofAccess_( levels.dofSpace() )
+    {}
+
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
+    {
+      int *const array = (int *)levels_;
+      const int dof = dofAccess_( elementInfo.el(), 0 );
+      array[ dof ] = elementInfo.level();
+    }
+  };
+
+
+
   // AlbertaGrid
   // -----------
 
@@ -800,7 +827,9 @@ namespace Dune
     dofNumbering_.create( mesh_ );
     hIndexSet_.read( filename, mesh_ );
 
-    elNewCheck_ = Alberta::DofVectorPointer< int >( AlbertHelp::getDofNewCheck( dofNumbering_.dofSpace( 0 ), "el_new_check" ) );
+    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
+    SetLocalElementLevel setLocalElementLevel( elNewCheck_ );
+    mesh_.hierarchicTraverse( setLocalElementLevel, FillFlags::nothing );
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
@@ -810,9 +839,6 @@ namespace Dune
     ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
     ((ALBERTA DOF_REAL_D_VEC *)coords_)->coarse_restrict = &AlbertHelp::coarseCallBack;
 #endif
-
-    // restore level information for each element by traversing the mesh
-    ALBERTA AlbertHelp::restoreElNewCheck( mesh_ , elNewCheck_ );
 
     // make vectors know in grid and hSet
     arrangeDofVec();

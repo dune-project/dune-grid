@@ -638,6 +638,7 @@ namespace Dune
 
     Alberta::DofVectorPointer< int > elNewCheck_;
     struct ElNewCheckInterpolation;
+    class SetLocalElementLevel;
 
 #ifndef CALC_COORD
     typedef Alberta::DofVectorPointer< Alberta::GlobalVector > CoordVectorPointer;

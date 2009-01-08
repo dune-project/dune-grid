@@ -209,9 +209,6 @@ namespace AlbertHelp
   }; // end of AlbertLeafData
 
 
-  static DOF_INT_VEC * elNewCheck = 0;
-
-
   // return pointer to created elNumbers Vector to mesh
   inline static int calcMaxIndex(DOF_INT_VEC * drv)
   {
@@ -364,55 +361,6 @@ namespace AlbertHelp
     }
   }
 #endif
-
-
-  // clear Dof Vec
-  inline static void clearDofVec ( DOF_INT_VEC * drv )
-  {
-    int *vec = NULL;
-    GET_DOF_VEC( vec, drv );
-    FOR_ALL_DOFS( drv->fe_space->admin, vec[ dof ] = 0 );
-  }
-
-
-  inline DOF_INT_VEC * getDofNewCheck(const FE_SPACE * espace,
-                                      const char * name)
-  {
-    DOF_INT_VEC * drv = get_dof_int_vec(name,espace);
-    clearDofVec( drv );
-    return drv;
-  }
-
-
-  // function for mesh_traverse, is called on every element
-  inline static void storeLevelOfElement(const EL_INFO * elf)
-  {
-    const DOF_ADMIN * admin = elNewCheck->fe_space->admin;
-    const int nv = admin->n0_dof[CENTER];
-    const int k  = admin->mesh->node[CENTER];
-    int *vec = 0;
-    const EL * el   = elf->el;
-
-    int level = elf->level;
-    if( level <= 0 ) return;
-
-    assert(el);
-    GET_DOF_VEC(vec,elNewCheck);
-
-    vec[el->dof[k][nv]] = level;
-    return ;
-  }
-
-  // remember on which level an element realy lives
-  inline void restoreElNewCheck( MESH * mesh, DOF_INT_VEC * elNChk )
-  {
-    elNewCheck = elNChk;
-    assert(elNewCheck != 0);
-
-    // see ALBERTA Doc page 72, traverse over all hierarchical elements
-    meshTraverse(mesh,-1,CALL_EVERY_EL_PREORDER|FILL_NEIGH,storeLevelOfElement);
-    elNewCheck = NULL;
-  }
 
 } // end namespace AlbertHelp
 
