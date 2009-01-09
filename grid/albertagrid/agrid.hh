@@ -161,6 +161,7 @@ namespace Dune
 
       typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
       typedef IndexSet<GridImp,LeafIndexSetImp,DefaultLeafIteratorTypes<GridImp> > LeafIndexSet;
+      typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
@@ -242,7 +243,7 @@ namespace Dune
     //! for 1d use SGrid or SimpleGrid
     //CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertaGrid_for_1d_Grids;
 
-    friend class AlbertaMarkerVector;
+    friend class AlbertaMarkerVector< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
 
     // minimum number of elements assumed to be created during adaption
@@ -264,7 +265,7 @@ namespace Dune
     static const int dimensionworld = dimworld;
 
     //! type of hierarchic index set
-    typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSet;
+    typedef typename Traits::HierarchicIndexSet HierarchicIndexSet;
 
     //! type of collective communication
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
@@ -544,10 +545,10 @@ namespace Dune
     bool wasChanged_;
 
     // needed for VertexIterator, mark on which element a vertex is treated
-    mutable AlbertaMarkerVector vertexMarkerLeaf_;
+    mutable AlbertaMarkerVector< dim, dimworld > vertexMarkerLeaf_;
 
     // needed for VertexIterator, mark on which element a vertex is treated
-    mutable AlbertaMarkerVector vertexMarkerLevel_[MAXL];
+    mutable AlbertaMarkerVector< dim, dimworld > vertexMarkerLevel_[MAXL];
 
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys

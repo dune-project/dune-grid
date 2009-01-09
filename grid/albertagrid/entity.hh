@@ -179,7 +179,6 @@ namespace Dune
 
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid < dim , GridImp::dimensionworld >;
-    friend class AlbertaMarkerVector;
     friend class AlbertaGridIntersectionIterator <GridImp>;
     friend class AlbertaGridHierarchicIterator< GridImp >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;

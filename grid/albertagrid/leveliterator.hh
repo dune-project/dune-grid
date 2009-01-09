@@ -22,7 +22,8 @@ namespace Dune
     typedef AlbertaGridTreeIterator< codim, GridImp, false > Base;
 
   public:
-    typedef typename GridImp::template Codim< codim >::Entity Entity;
+    typedef typename Base::Entity Entity;
+    typedef typename Base::MarkerVector MarkerVector;
 
     //! Constructor making end iterator
     AlbertaGridLevelIterator ( const GridImp &grid, int level )
@@ -31,7 +32,7 @@ namespace Dune
 
     //! Constructor making begin iterator
     AlbertaGridLevelIterator ( const GridImp &grid,
-                               const AlbertaMarkerVector *vec,
+                               const MarkerVector *vec,
                                int level )
       : Base( grid, vec, level )
     {}

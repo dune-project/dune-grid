@@ -15,13 +15,22 @@ namespace Dune
   //! Class to mark the Vertices on the leaf level
   //! to visit every vertex only once
   //! for the LevelIterator codim == dim
+  template< int dim, int dimworld >
   class AlbertaMarkerVector
   {
-    friend class AlbertaGrid<2,2>;
-    friend class AlbertaGrid<2,3>;
-    friend class AlbertaGrid<3,3>;
+    typedef AlbertaGrid< dim, dimworld > Grid;
+
+    friend class AlbertaGrid< dim, dimworld >;
 
     enum { vxBufferSize_ = 10000 };
+
+    static const int dimension = Grid::dimension;
+
+    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+
+    template< int codim >
+    class MarkSubEntities;
+
   public:
     //! create AlbertaMarkerVector for Level or Leaf Iterator, true == LevelIterator
     //! the vectors stored inside are empty first
@@ -37,11 +46,9 @@ namespace Dune
     bool faceNotOnElement(const int elIndex, const int face) const;
 
     //! mark vertices for LevelIterator and given level
-    template< class Grid >
     void markNewVertices ( const Grid &grid, int level );
 
     //! mark vertices for LeafIterator , uses leaf level
-    template< class Grid >
     void markNewLeafVertices ( const Grid &grid );
 
     //! return true if marking is up to date
@@ -54,13 +61,10 @@ namespace Dune
     void unsetUp2Date () { up2Date_ = false; }
 
     //! print for debugin' only
-    void print() const;
+    void print ( std::ostream &out = std::cout ) const;
 
   private:
-    // built in array to mark on which element a vertex is reached
-    std::vector< int > vec_;
-    std::vector< int > edgevec_;
-    std::vector< int > facevec_;
+    std::vector< int > marker_[ dimension+1 ];
 
     // number of vertices
     int numVertex_;
@@ -92,32 +96,35 @@ namespace Dune
     typedef AlbertaGridTreeIterator< codim, GridImp, leafIterator > This;
     typedef AlbertaGridEntityPointer< codim, GridImp > Base;
 
-    enum { dim = GridImp::dimension };
-    friend class AlbertaGridEntity<2,dim,GridImp>;
-    friend class AlbertaGridEntity<1,dim,GridImp>;
-    friend class AlbertaGridEntity<0,dim,GridImp>;
-    friend class AlbertaGrid< dim , GridImp::dimensionworld >;
-
-    friend class AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim >;
-
   public:
     static const int dimension = GridImp::dimension;
     static const int codimension = codim;
-
-    typedef typename Base::ElementInfo ElementInfo;
-    typedef Alberta::MeshPointer< dimension > MeshPointer;
-    typedef typename MeshPointer::MacroIterator MacroIterator;
+    static const int dimensionworld = GridImp::dimensionworld;
 
   private:
+    enum { dim = GridImp::dimension };
+    friend class AlbertaGridEntity< 2, dimension, GridImp >;
+    friend class AlbertaGridEntity< 1, dimension, GridImp >;
+    friend class AlbertaGridEntity< 0, dimension, GridImp >;
+    friend class AlbertaGrid< dimension, dimensionworld >;
+
+    friend class AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim >;
+
     static const int numSubEntities
       = Alberta::NumSubEntities< dimension, codimension >::value;
 
     typedef typename GridImp::HierarchicIndexSet HierarchicIndexSet;
 
   public:
+    typedef typename Base::ElementInfo ElementInfo;
+    typedef Alberta::MeshPointer< dimension > MeshPointer;
+    typedef typename MeshPointer::MacroIterator MacroIterator;
+
     typedef typename GridImp::template Codim< codim >::Entity Entity;
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
+
+    typedef AlbertaMarkerVector< dimension, dimensionworld > MarkerVector;
 
     //! Constructor making end iterator
     AlbertaGridTreeIterator ( const This &other );
@@ -130,7 +137,7 @@ namespace Dune
 
     //! Constructor making begin iterator
     AlbertaGridTreeIterator ( const GridImp &grid,
-                              const AlbertaMarkerVector *vec,
+                              const MarkerVector *vec,
                               int travLevel );
 
     //! increment
@@ -165,7 +172,7 @@ namespace Dune
     MacroIterator macroIterator_;
 
     // knows on which element a point,edge,face is viewed
-    const AlbertaMarkerVector *vertexMarker_;
+    const MarkerVector *vertexMarker_;
   };
 
 }
