@@ -31,6 +31,13 @@ namespace Dune
 
 
 
+  namespace Alberta
+  {
+    static IndexManagerType *currentIndexStack = 0;
+  }
+
+
+
   //! HierarchicIndexSet uses LeafIterator types for all codims and partition types
   template <class GridImp>
   struct AlbertaGridHierarchicIteratorTypes
@@ -71,11 +78,7 @@ namespace Dune
 
     static const int dimension = Grid::dimension;
 
-    enum { numVecs  = AlbertHelp::numOfElNumVec };
-
     friend class AlbertaGrid< dim, dimworld >;
-
-    explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
 
     template< int codim >
     class DofAccess;
@@ -83,14 +86,17 @@ namespace Dune
     class InitEntityNumber;
 
     template< int codim >
+    struct CreateEntityNumbers;
+
+    template< int codim >
     class RefineNumbering;
 
     template< int codim >
     class CoarsenNumbering;
 
-  public:
-    enum { ncodim = dimension + 1 };
+    explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
 
+  public:
     //! return true if entity is contained in set
     template< class Entity >
     bool contains ( const Entity & ) const
@@ -129,10 +135,7 @@ namespace Dune
     int size ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
-      if( codim == dimension )
-        return grid_.getMesh()->n_vertices;
-      else
-        return indexStack_[ codim ].size();
+      return indexStack_[ codim ].size();
     }
 
     //! return geometry types this set has indices for
@@ -174,50 +177,28 @@ namespace Dune
     {
       Int2Type< codim > codimVariable;
 
-      if( (codim < dimension) && (codim == 2) )
+      if( (dimension == 3) && (codim == 2) )
         i = refTopo_.dune2albertaEdge( i );
 
-      int dof = dofAccess_[ codimVariable ]( element, i );
-      if( codim < dimension )
-      {
-        int *array = (int *)entityNumbers_[ codim ];
-        return array[ dof ];
-      }
-      else
-        return dof;
+      int *array = (int *)entityNumbers_[ codim ];
+      return array[ dofAccess_[ codimVariable ]( element, i ) ];
     }
 
     void create ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
     {
-      createEntityNumbers< 0 >( dofNumbering );
-      createEntityNumbers< 1 >( dofNumbering );
-      if( dimension == 3 )
-        createEntityNumbers< 2 >( dofNumbering );
-
-      Int2Type< dimension > dimVariable;
-      dofAccess_[ dimVariable ] = DofAccess< dimension >( dofNumbering.dofSpace( dimension ) );
+      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >::apply( dofNumbering, *this );
     }
 
     void read ( const std::string &filename,
                 const Alberta::MeshPointer< dimension > &mesh )
     {
-      for( int i = 0; i < dimension; ++i )
-      {
-        std::ostringstream s;
-        s << filename << ".cd" << i;
-        entityNumbers_[ i ].read( s.str(), mesh );
-
-        const int maxIdx = AlbertHelp::calcMaxIndex( entityNumbers_[ i ] );
-        indexStack_[ i ].setMaxIndex( maxIdx );
-      }
-
-      DUNE_THROW( AlbertaIOError, "We need to set dofAccess_ here, too" );
+      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >::apply( filename, mesh, *this );
     }
 
     bool write ( const std::string &filename ) const
     {
       bool success = true;
-      for( int i = 0; i < dimension; ++i )
+      for( int i = 0; i <= dimension; ++i )
       {
         std::ostringstream s;
         s << filename << ".cd" << i;
@@ -228,30 +209,8 @@ namespace Dune
 
     void release ()
     {
-      for( int i = 0; i < dimension; ++i )
+      for( int i = 0; i <= dimension; ++i )
         entityNumbers_[ i ].release();
-    }
-
-  private:
-    template< int codim >
-    void createEntityNumbers ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
-    {
-      assert( (codim >= 0) && (codim < AlbertHelp::numOfElNumVec) );
-      Int2Type< codim > codimVariable;
-
-      const Alberta::DofSpace *dofSpace = dofNumbering.dofSpace( codim );
-      dofAccess_[ codimVariable ] = DofAccess< codim >( dofSpace );
-
-      std::ostringstream s;
-      s << "Numbering for codimension " << codim;
-      Alberta::DofVectorPointer< int > &entityNumbers = entityNumbers_[ codim ];
-      entityNumbers.create( dofSpace, s.str() );
-
-      InitEntityNumber init( indexStack_[ codim ] );
-      entityNumbers.forEach( init );
-
-      entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
-      entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
     }
 
   private:
@@ -259,10 +218,10 @@ namespace Dune
     const Grid &grid_;
 
     // index stacks providing new numbers during adaptation
-    IndexManagerType indexStack_[ AlbertHelp::numOfElNumVec ];
+    IndexManagerType indexStack_[ dimension+1 ];
 
     // dof vectors storing the (persistent) numbering
-    Alberta::DofVectorPointer< int > entityNumbers_[ AlbertHelp::numOfElNumVec ];
+    Alberta::DofVectorPointer< int > entityNumbers_[ dimension+1 ];
 
     // access to the dof vectors
     Alberta::CodimTable< DofAccess, dim > dofAccess_;
@@ -332,6 +291,56 @@ namespace Dune
 
 
 
+  // AlbertaGridHierarchicIndexSet::CreateEntityNumbers
+  // --------------------------------------------------
+
+  template< int dim, int dimworld >
+  template< int codim >
+  struct AlbertaGridHierarchicIndexSet< dim, dimworld >::CreateEntityNumbers
+  {
+    static void setup ( AlbertaGridHierarchicIndexSet< dim, dimworld > &indexSet )
+    {
+      Alberta::DofVectorPointer< int > &entityNumbers = indexSet.entityNumbers_[ codim ];
+
+      Int2Type< codim > codimVariable;
+      indexSet.dofAccess_[ codimVariable ] = DofAccess< codim >( entityNumbers.dofSpace() );
+
+      entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
+      entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
+    }
+
+    static void apply ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering,
+                        AlbertaGridHierarchicIndexSet< dim, dimworld > &indexSet )
+    {
+      const Alberta::DofSpace *dofSpace = dofNumbering.dofSpace( codim );
+
+      std::ostringstream s;
+      s << "Numbering for codimension " << codim;
+      indexSet.entityNumbers_[ codim ].create( dofSpace, s.str() );
+
+      InitEntityNumber init( indexSet.indexStack_[ codim ] );
+      indexSet.entityNumbers_[ codim ].forEach( init );
+
+      setup( indexSet );
+    }
+
+    static void apply ( const std::string &filename,
+                        const Alberta::MeshPointer< dimension > &mesh,
+                        AlbertaGridHierarchicIndexSet< dim, dimworld > &indexSet )
+    {
+      std::ostringstream s;
+      s << filename << ".cd" << codim;
+      indexSet.entityNumbers_[ codim ].read( s.str(), mesh );
+
+      const int maxIdx = AlbertHelp::calcMaxIndex( indexSet.entityNumbers_[ codim ] );
+      indexSet.indexStack_[ codim ].setMaxIndex( maxIdx );
+
+      setup( indexSet );
+    }
+  };
+
+
+
   // AlbertaGridHierarchicIndexSet::RefineNumbering
   // ----------------------------------------------
 
@@ -368,9 +377,9 @@ namespace Dune
     static void interpolateVector ( const DofVectorPointer &dofVector,
                                     const Alberta::Patch &patch )
     {
-      IndexManagerType *indexStackPtr = AlbertHelp::tmpIndexStack[ codim ];
-      assert( indexStackPtr != 0 );
-      RefineNumbering refineNumbering( *indexStackPtr, dofVector );
+      assert( Alberta::currentIndexStack != 0 );
+      IndexManagerType &indexStack = Alberta::currentIndexStack[ codim ];
+      RefineNumbering refineNumbering( indexStack, dofVector );
       patch.forEachInternalSubChild( refineNumbering );
     }
   };
@@ -416,9 +425,9 @@ namespace Dune
     static void restrictVector ( const DofVectorPointer &dofVector,
                                  const Alberta::Patch &patch )
     {
-      IndexManagerType *indexStackPtr = AlbertHelp::tmpIndexStack[ codim ];
-      assert( indexStackPtr != 0 );
-      CoarsenNumbering coarsenNumbering( *indexStackPtr, dofVector );
+      assert( Alberta::currentIndexStack != 0 );
+      IndexManagerType &indexStack = Alberta::currentIndexStack[ codim ];
+      CoarsenNumbering coarsenNumbering( indexStack, dofVector );
       patch.forEachInternalSubChild( coarsenNumbering );
     }
   };

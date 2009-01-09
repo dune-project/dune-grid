@@ -17,9 +17,6 @@
 namespace Albert {
 #endif
 
-// provides the element number generation and management
-#include "agelementindex.cc"
-
 //*********************************************************************
 //
 //  Help Routines for the ALBERTA Mesh

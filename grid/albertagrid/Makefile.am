@@ -1,7 +1,7 @@
 # $Id$
 
 albertadir = $(includedir)/dune/grid/albertagrid/
-alberta_HEADERS = agrid.hh agelementindex.cc albertagrid.cc \
+alberta_HEADERS = agrid.hh albertagrid.cc \
   agmemory.hh albertaextra.hh albertaheader.hh \
   indexsets.hh referencetopo.hh datahandle.hh \
   griddim.hh  misc.hh \

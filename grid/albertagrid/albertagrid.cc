@@ -193,8 +193,6 @@ namespace Dune
       file.close();
     }
 
-    //ALBERTA AlbertHelp::initIndexManager_elmem_cc( hIndexSet_.indexStack_ );
-
     if( makeNew )
     {
       mesh_.create( macroGridFileName, gridName );
@@ -522,21 +520,23 @@ namespace Dune
     // lock for post Adapt
     lockPostAdapt_ = true;
 
-    // set global pointer to index manager in elmem.cc
-    ALBERTA AlbertHelp::initIndexManager_elmem_cc( hIndexSet_.indexStack_ );
-
     // set all values of elNewCheck positive which means old
     Alberta::abs( elNewCheck_ );
 
+    // set global pointer to index stack
+    assert( Alberta::currentIndexStack == 0 );
+    Alberta::currentIndexStack = hIndexSet_.indexStack_;
+
+    // adapt mesh
     const bool refined = mesh_.refine();
     const bool coarsened = (preAdapt() ? mesh_.coarsen() : false);
     wasChanged_ = (refined || coarsened);
 
+    // remove global pointer to index stack
+    Alberta::currentIndexStack = 0;
+
     if( wasChanged_ )
       calcExtras();
-
-    // remove global pointer in elmem.cc
-    ALBERTA AlbertHelp::removeIndexManager_elmem_cc(AlbertHelp::numOfElNumVec);
 
     // return true if elements were created
     return refined;
@@ -843,8 +843,6 @@ namespace Dune
 
     // unset up2Dat status, if leafbegin is called then this status is updated
     leafMarkerVector_.unsetUp2Date();
-
-    ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
     initGrid();
     return true;
