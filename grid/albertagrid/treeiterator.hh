@@ -12,17 +12,20 @@ namespace Dune
   // AlbertaMarkerVector
   // -------------------
 
-  //! Class to mark the Vertices on the leaf level
-  //! to visit every vertex only once
-  //! for the LevelIterator codim == dim
+  /** \class   AlbertaMarkerVector
+   *  \ingroup AlbertaGrid
+   *  \brief   marker assigning subentities to one element containing them
+   *
+   *  This Helper class is used for the level and leaf iterators of higher
+   *  codimension to visit each entity only once (on the element assigned to
+   *  it by this marker)
+   */
   template< int dim, int dimworld >
   class AlbertaMarkerVector
   {
     typedef AlbertaGrid< dim, dimworld > Grid;
 
     friend class AlbertaGrid< dim, dimworld >;
-
-    enum { vxBufferSize_ = 10000 };
 
     static const int dimension = Grid::dimension;
 
@@ -34,17 +37,17 @@ namespace Dune
   public:
     //! create AlbertaMarkerVector for Level or Leaf Iterator, true == LevelIterator
     //! the vectors stored inside are empty first
-    AlbertaMarkerVector (bool meLevel=true) : up2Date_(false), meLevel_(meLevel) {} ;
+    explicit AlbertaMarkerVector ( const HierarchicIndexSet &hIndexSet )
+      : hIndexSet_( &hIndexSet ),
+        up2Date_( false )
+    {}
 
     //! visit subentity on this element?
     template< int codim >
     bool subEntityOnElement ( const int index, const int subIndex ) const;
 
-    //! mark vertices for LevelIterator and given level
-    void markNewVertices ( const Grid &grid, int level );
-
-    //! mark vertices for LeafIterator , uses leaf level
-    void markNewLeafVertices ( const Grid &grid );
+    template< int firstCodim, class Iterator >
+    void markSubEntities ( const Iterator &begin, const Iterator &end );
 
     //! return true if marking is up to date
     bool up2Date () const
@@ -59,11 +62,11 @@ namespace Dune
     void print ( std::ostream &out = std::cout ) const;
 
   private:
+    const HierarchicIndexSet *hIndexSet_;
     std::vector< int > marker_[ dimension+1 ];
 
     // true is vertex marker is up to date
     bool up2Date_;
-    bool meLevel_;
   };
 
 

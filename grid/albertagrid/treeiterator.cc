@@ -22,88 +22,30 @@ namespace Dune
 
 
   template< int dim, int dimworld >
+  template< int firstCodim, class Iterator >
   inline void AlbertaMarkerVector< dim, dimworld >
-  ::markNewVertices ( const Grid &grid, int level )
+  ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
-    typedef typename Grid::template Codim< 0 >::LevelIterator LevelIterator;
-
-    assert( meLevel_ == true );
-
-    const HierarchicIndexSet &hIndexSet = grid.hierarchicIndexSet();
-
-    size_t nvx = hIndexSet.size( dimension );
-    int fce = hIndexSet.size( 1 );
-
-    std::vector< int > &vec = marker_[ dimension ];
-    if( vec.size() < nvx )
-      vec.resize( nvx + vxBufferSize_ );
-
-    const int vecSize = vec.size();
-    for(int i=0; i<vecSize; i++) vec[i] = -1;
-
-    std::vector< int > &facevec = marker_[ 1 ];
-    if((int) facevec.size() < fce) facevec.resize( fce + vxBufferSize_ );
-    const int facevecSize = facevec.size();
-    for(int i=0; i<facevecSize; i++) facevec[i] = -1;
-
-    std::vector< int > &edgevec = marker_[ 2 ];
-    if( dimension > 2 )
+    for( int codim = firstCodim; codim <= dimension; ++codim )
     {
-      int edg = hIndexSet.size( dimension - 1 );
-      if((int) edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
-      const int edgevecSize = edgevec.size();
-      for(int i=0; i<edgevecSize; i++) edgevec[i] = -1;
+      const size_t size = hIndexSet_->size( codim );
+      std::vector< int > &vec = marker_[ codim ];
+      vec.resize( size );
+      for( size_t i = 0; i < size; ++i )
+        vec[ i ] = -1;
     }
 
-    const LevelIterator endit = grid.template lend< 0 >( level );
-    for( LevelIterator it = grid.template lbegin< 0 >( level ); it != endit; ++it )
+    for( Iterator it = begin; it != end; ++it )
     {
       const Alberta::ElementInfo< dimension > &elementInfo
         = Grid::getRealImplementation( *it ).elementInfo();
-      Alberta::ForLoop< MarkSubEntities, 1, dimension >::apply( hIndexSet, marker_, elementInfo );
+      Alberta::ForLoop< MarkSubEntities, firstCodim, dimension >
+      ::apply( *hIndexSet_, marker_, elementInfo );
     }
 
     up2Date_ = true;
   }
 
-
-  // mark vertices and edges using leaf iterator
-  template< int dim, int dimworld >
-  inline void AlbertaMarkerVector< dim, dimworld >
-  ::markNewLeafVertices ( const Grid &grid )
-  {
-    typedef typename Grid::template Codim< 0 >::LeafIterator LeafIterator;
-
-    assert( meLevel_ == false );
-
-    const HierarchicIndexSet &hIndexSet = grid.hierarchicIndexSet();
-    int nvx = hIndexSet.size( dimension );
-
-    std::vector< int > &vec = marker_[ dimension ];
-    if((int) vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
-
-    // the edge marking is only needed in 3d
-    std::vector< int > &edgevec = marker_[ 2 ];
-    if( dimension > 2 )
-    {
-      int edg = hIndexSet.size( dimension-1 );
-      if((int) edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
-      const int edgevecSize = edgevec.size();
-      for(int i=0; i<edgevecSize; i++) edgevec[i] = -1;
-    }
-
-    const int vecSize = vec.size();
-    for(int i=0; i<vecSize; i++) vec[i] = -1;
-
-    const LeafIterator endit = grid.template leafend< 0 >();
-    for( LeafIterator it = grid.template leafbegin< 0 >(); it != endit; ++it )
-    {
-      const Alberta::ElementInfo< dimension > &elementInfo
-        = Grid::getRealImplementation( *it ).elementInfo();
-      Alberta::ForLoop< MarkSubEntities, 2, dimension >::apply( hIndexSet, marker_, elementInfo );
-    }
-    up2Date_ = true;
-  }
 
 
   template< int dim, int dimworld >

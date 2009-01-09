@@ -450,11 +450,11 @@ namespace Dune
 
     typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
 
-    const HierarchicIndexSet &hset_;
+    const HierarchicIndexSet &hIndexSet_;
 
     //! create id set, only allowed for AlbertaGrid
-    AlbertaGridIdSet ( const Grid &grid )
-      : hset_( grid.hierarchicIndexSet() )
+    AlbertaGridIdSet ( const HierarchicIndexSet &hIndexSet )
+      : hIndexSet_( hIndexSet )
     {}
 
   public:
@@ -473,8 +473,8 @@ namespace Dune
     template< int codim >
     IdType id ( const typename Grid::template Codim< codim >::Entity &e ) const
     {
-      assert( hset_.size( codim ) < maxCodimSize );
-      const IdType index = hset_.index( e );
+      assert( hIndexSet_.size( codim ) < maxCodimSize );
+      const IdType index = hIndexSet_.index( e );
       return ((IdType)codim << codimShift) + index;
     }
 
@@ -482,8 +482,8 @@ namespace Dune
     template< int codim >
     IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i ) const
     {
-      assert( hset_.size( codim ) < maxCodimSize );
-      const IdType index = hset_.template subIndex< codim >( e, i );
+      assert( hIndexSet_.size( codim ) < maxCodimSize );
+      const IdType index = hIndexSet_.template subIndex< codim >( e, i );
       return ((IdType)codim << codimShift) + index;
     }
   };

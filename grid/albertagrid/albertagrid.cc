@@ -90,14 +90,15 @@ namespace Dune
     : mesh_(),
       maxlevel_( 0 ),
       wasChanged_( false ),
-      vertexMarkerLeaf_( false ), // creates LeafMarkerVector
       nv_( dim+1 ),
       dof_( 0 ),
       hIndexSet_( *this ),
-      idSet_( *this ),
+      idSet_( hIndexSet_ ),
       levelIndexVec_( MAXL, 0 ),
       leafIndexSet_ ( 0 ),
       sizeCache_ ( 0 ),
+      leafMarkerVector_( hIndexSet_ ),
+      levelMarkerVector_( MAXL, MarkerVector( hIndexSet_ ) ),
       coarsenMarked_( 0 ),
       refineMarked_( 0 ),
       lockPostAdapt_( false )
@@ -153,14 +154,15 @@ namespace Dune
     : mesh_( 0 ),
       maxlevel_( 0 ),
       wasChanged_( false ),
-      vertexMarkerLeaf_( false ), // creates LeafMarkerVector
       nv_( dim+1 ),
       dof_( 0 ),
       hIndexSet_( *this ),
-      idSet_( *this ),
+      idSet_( hIndexSet_ ),
       levelIndexVec_( MAXL, 0 ),
       leafIndexSet_ ( 0 ),
       sizeCache_( 0 ),
+      leafMarkerVector_( hIndexSet_ ),
+      levelMarkerVector_( MAXL, MarkerVector( hIndexSet_ ) ),
       coarsenMarked_( 0 ),
       refineMarked_( 0 ),
       lockPostAdapt_( false )
@@ -251,17 +253,17 @@ namespace Dune
   ::template Codim< codim >::template Partition<pitype>::LevelIterator
   AlbertaGrid< dim, dimworld >::lbegin ( int level ) const
   {
+    typedef AlbertaGridLevelIterator< codim, pitype, const This > LevelIteratorImp;
     assert( level >= 0 );
 
     if( level > maxlevel_ )
       return lend< codim, pitype >( level );
+    MarkerVector &markerVector = levelMarkerVector_[ level ];
 
-    if( codim > 0 )
-    {
-      if( !(vertexMarkerLevel_[ level ].up2Date() ) )
-        vertexMarkerLevel_[ level ].markNewVertices( *this, level );
-    }
-    return AlbertaGridLevelIterator< codim, pitype, const This >( *this, &vertexMarkerLevel_[ level ], level );
+    if( (codim > 0) && !markerVector.up2Date() )
+      markerVector.template markSubEntities< 1 >( lbegin< 0 >( level ), lend< 0 >( level ) );
+
+    return LevelIteratorImp( *this, &markerVector, level );
   }
 
 
@@ -271,8 +273,10 @@ namespace Dune
   ::template Codim< codim >::template Partition< pitype >::LevelIterator
   AlbertaGrid < dim, dimworld >::lend ( int level ) const
   {
+    typedef AlbertaGridLevelIterator< codim, pitype, const This > LevelIteratorImp;
     assert( level >= 0 );
-    return AlbertaGridLevelIterator< codim, pitype, const This >( *this, level );
+
+    return LevelIteratorImp( *this, level );
   }
 
 
@@ -302,12 +306,13 @@ namespace Dune
   ::template Codim< codim >::template Partition< pitype >::LeafIterator
   AlbertaGrid< dim, dimworld >::leafbegin () const
   {
-    if( codim > 1 )
-    {
-      if( !vertexMarkerLeaf_.up2Date() )
-        vertexMarkerLeaf_.markNewLeafVertices( *this );
-    }
-    return AlbertaGridLeafIterator< codim, pitype, const This >( *this, &vertexMarkerLeaf_, maxlevel_ );
+    typedef AlbertaGridLeafIterator< codim, pitype, const This > LeafIteratorImp;
+
+    MarkerVector &markerVector = leafMarkerVector_;
+    if( (codim > 1) && !markerVector.up2Date() )
+      markerVector.template markSubEntities< 2 >( leafbegin< 0 >(), leafend< 0 >() );
+
+    return LeafIteratorImp( *this, &markerVector, maxlevel_ );
   }
 
 
@@ -317,7 +322,8 @@ namespace Dune
   ::template Codim< codim >::template Partition< pitype >::LeafIterator
   AlbertaGrid< dim, dimworld >::leafend () const
   {
-    return AlbertaGridLeafIterator< codim, pitype, const This >( *this, maxlevel_ );
+    typedef AlbertaGridLeafIterator< codim, pitype, const This > LeafIteratorImp;
+    return LeafIteratorImp( *this, maxlevel_ );
   }
 
 
@@ -701,10 +707,11 @@ namespace Dune
 #endif
 
     // unset up2Dat status, if lbegin is called then this status is updated
-    for(int l=0; l<MAXL; ++l) vertexMarkerLevel_[l].unsetUp2Date();
+    for( int l = 0; l < MAXL; ++l )
+      levelMarkerVector_[ l ].unsetUp2Date();
 
     // unset up2Dat status, if leafbegin is called then this status is updated
-    vertexMarkerLeaf_.unsetUp2Date();
+    leafMarkerVector_.unsetUp2Date();
 
     if(sizeCache_) delete sizeCache_;
     // first bool says we have simplex, second not cube, third, worryabout
@@ -831,10 +838,11 @@ namespace Dune
     time = 0.0;
 
     // unset up2Dat status, if lbegin is called then this status is updated
-    for(int l=0; l<MAXL; l++) vertexMarkerLevel_[l].unsetUp2Date();
+    for( int l = 0; l < MAXL; l++ )
+      levelMarkerVector_[ l ].unsetUp2Date();
 
     // unset up2Dat status, if leafbegin is called then this status is updated
-    vertexMarkerLeaf_.unsetUp2Date();
+    leafMarkerVector_.unsetUp2Date();
 
     ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 

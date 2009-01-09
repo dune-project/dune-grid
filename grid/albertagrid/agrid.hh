@@ -544,12 +544,6 @@ namespace Dune
     // true if grid was refined or coarsend
     bool wasChanged_;
 
-    // needed for VertexIterator, mark on which element a vertex is treated
-    mutable AlbertaMarkerVector< dim, dimworld > vertexMarkerLeaf_;
-
-    // needed for VertexIterator, mark on which element a vertex is treated
-    mutable AlbertaMarkerVector< dim, dimworld > vertexMarkerLevel_[MAXL];
-
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
     //**********************************************************************
@@ -649,6 +643,14 @@ namespace Dune
 
     typedef SingleTypeSizeCache< This > SizeCacheType;
     SizeCacheType * sizeCache_;
+
+    typedef AlbertaMarkerVector< dim, dimworld > MarkerVector;
+
+    // needed for VertexIterator, mark on which element a vertex is treated
+    mutable MarkerVector leafMarkerVector_;
+
+    // needed for VertexIterator, mark on which element a vertex is treated
+    mutable std::vector< MarkerVector > levelMarkerVector_;
 
     // count how much elements where marked
     int coarsenMarked_;
