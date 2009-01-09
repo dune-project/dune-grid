@@ -336,8 +336,8 @@ namespace Dune
       s << filename << ".cd" << codim;
       indexSet.entityNumbers_[ codim ].read( s.str(), mesh );
 
-      const int maxIdx = AlbertHelp::calcMaxIndex( indexSet.entityNumbers_[ codim ] );
-      indexSet.indexStack_[ codim ].setMaxIndex( maxIdx );
+      const int maxIndex = max( indexSet.entityNumbers_[ codim ] );
+      indexSet.indexStack_[ codim ].setMaxIndex( maxIndex + 1 );
 
       setup( indexSet );
     }

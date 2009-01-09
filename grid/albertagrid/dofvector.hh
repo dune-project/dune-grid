@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_DOFVECTOR_HH
 #define DUNE_ALBERTA_DOFVECTOR_HH
 
+#include <limits>
+
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
@@ -548,6 +550,28 @@ namespace Dune
       int *array = (int *)dofVector;
       FOR_ALL_DOFS( dofVector.dofSpace()->admin,
                     array[ dof ] = std::abs( array[ dof ] ) );
+    }
+
+
+    inline int max ( const DofVectorPointer< int > &dofVector )
+    {
+      assert( !dofVector == false );
+      int *array = (int *)dofVector;
+      int result = std::numeric_limits< int >::min();
+      FOR_ALL_DOFS( dofVector.dofSpace()->admin,
+                    result = std::max( result, array[ dof ] ) );
+      return result;
+    }
+
+
+    inline int min ( const DofVectorPointer< int > &dofVector )
+    {
+      assert( !dofVector == false );
+      int *array = (int *)dofVector;
+      int result = std::numeric_limits< int >::max();
+      FOR_ALL_DOFS( dofVector.dofSpace()->admin,
+                    result = std::min( result, array[ dof ] ) );
+      return result;
     }
 
 

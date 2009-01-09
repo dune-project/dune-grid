@@ -165,18 +165,6 @@ namespace AlbertHelp
   }; // end of AlbertLeafData
 
 
-  // return pointer to created elNumbers Vector to mesh
-  inline static int calcMaxIndex(DOF_INT_VEC * drv)
-  {
-    int maxindex = 0;
-    int * vec=0;
-    GET_DOF_VEC(vec,drv);
-    FOR_ALL_DOFS(drv->fe_space->admin, if(vec[dof] > maxindex) { maxindex = vec[dof] } );
-    // we return +1 because this means a size
-    return maxindex+1;
-  }
-
-
   struct MeshCallBack
   {
     template <class HandlerImp>
