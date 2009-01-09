@@ -109,6 +109,7 @@ namespace Dune
       static const int value = EDGE;
     };
 
+#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template<>
     struct CodimType< 3, 1 >
     {
@@ -120,6 +121,7 @@ namespace Dune
     {
       static const int value = EDGE;
     };
+#endif
 
   }
 

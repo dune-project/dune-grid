@@ -67,11 +67,9 @@ extern "C"
 #if DUNE_ALBERTA_VERSION < 0x200
 
 // face is not defined but should be the value of edge
-#ifndef FACE
-#define FACE EDGE
-#endif
-
-#define N_VERTEX(mesh) N_VERTICES
+//#ifndef FACE
+//#define FACE EDGE
+//#endif
 
 static inline void meshTraverse(MESH *mesh,
                                 int level, FLAGS fill_flag,
@@ -97,8 +95,6 @@ static inline void meshTraverse(MESH *mesh,
 {
   mesh_traverse(mesh, level, fill_flag, wrapped_el_fct, (void*)el_fct );
 }
-
-#define N_VERTEX(mesh) N_VERTICES((mesh)->dim)
 
 #define GET_EL_FROM_LIST(rc_list_el) (rc_list_el).el_info.el
 
