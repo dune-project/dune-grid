@@ -145,9 +145,6 @@ namespace Dune
 
     //! the current geometry
     GeometryObject geo_;
-
-    //! true if geometry has been constructed
-    mutable bool builtgeometry_;
   };
 
 
@@ -364,6 +361,11 @@ namespace Dune
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
 
+    GeometryImp &geoImp () const
+    {
+      return GridImp :: getRealImplementation( geo_ );
+    }
+
     //! the corresponding grid
     const GridImp & grid_;
 
@@ -374,8 +376,7 @@ namespace Dune
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
 
     //! the cuurent geometry
-    mutable GeometryObject geoObj_;
-    mutable GeometryImp & geo_;
+    mutable GeometryObject geo_;
     mutable bool builtgeometry_;  //!< true if geometry has been constructed
   }; // end of AlbertaGridEntity codim = 0
 

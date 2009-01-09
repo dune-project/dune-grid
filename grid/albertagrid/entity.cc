@@ -15,8 +15,7 @@ namespace Dune
     : grid_( grid ),
       elementInfo_(),
       subEntity_( -1 ),
-      geo_ (GeometryImp()),
-      builtgeometry_( false )
+      geo_( GeometryImp() )
   {}
 
 
@@ -26,8 +25,7 @@ namespace Dune
     : grid_( other.grid_ ),
       elementInfo_( other.elementInfo_ ),
       subEntity_( other.subEntity_ ),
-      geo_( other.geo_ ),
-      builtgeometry_( false )
+      geo_( other.geo_ )
   {}
 
 
@@ -74,7 +72,6 @@ namespace Dune
   AlbertaGridEntity< codim, dim, GridImp >::clearElement ()
   {
     elementInfo_ = ElementInfo();
-    builtgeometry_ = false;
   }
 
 
@@ -84,7 +81,12 @@ namespace Dune
   {
     elementInfo_ = elementInfo;
     subEntity_ = subEntity;
-    builtgeometry_ = (!elementInfo_ ? false : geoImp().builtGeom( grid_, elementInfo_, subEntity_ ));
+    if( !elementInfo_ == false )
+    {
+      typedef AlbertaGridCoordinateReader< codim, GridImp > CoordReader;
+      const CoordReader coordReader( grid_, elementInfo_, subEntity_ );
+      geoImp().build( coordReader );
+    }
   }
 
 
@@ -115,7 +117,7 @@ namespace Dune
   inline const typename AlbertaGridEntity<cd,dim,GridImp>::Geometry &
   AlbertaGridEntity<cd,dim,GridImp>::geometry() const
   {
-    assert(builtgeometry_ == true);
+    assert( !elementInfo_ == false);
     return geo_;
   }
 
@@ -136,8 +138,7 @@ namespace Dune
   ::AlbertaGridEntity( const GridImp &grid )
     : grid_(grid),
       elementInfo_(),
-      geoObj_( GeometryImp() ),
-      geo_( grid_.getRealImplementation(geoObj_) ),
+      geo_( GeometryImp() ),
       builtgeometry_( false )
   {}
 
@@ -147,8 +148,7 @@ namespace Dune
   ::AlbertaGridEntity ( const This &other )
     : grid_( other.grid_ ),
       elementInfo_( other.elementInfo_ ),
-      geoObj_( other.geoObj_ ),
-      geo_( grid_.getRealImplementation(geoObj_) ),
+      geo_( other.geo_ ),
       builtgeometry_ ( false )
   {}
 
@@ -305,9 +305,14 @@ namespace Dune
     assert( !elementInfo_ == false );
     // geometry is only build on demand
     if( !builtgeometry_ )
-      builtgeometry_ = geo_.builtGeom( grid_, elementInfo_, 0 );
+    {
+      typedef AlbertaGridCoordinateReader< 0, GridImp > CoordReader;
+      const CoordReader coordReader( grid_, elementInfo_, 0 );
+      geoImp().build( coordReader );
+      builtgeometry_ = true;
+    }
     assert( builtgeometry_ );
-    return geoObj_;
+    return geo_;
   }
 
 

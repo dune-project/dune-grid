@@ -16,6 +16,75 @@ namespace Dune
 
 
 
+  // AlbertaGridCoordinateReader
+  // ---------------------------
+
+  template< int codim, class GridImp >
+  struct AlbertaGridCoordinateReader
+  {
+    typedef typename remove_const< GridImp >::type Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int codimension = codim;
+    static const int mydimension = dimension - codimension;
+    static const int coorddimension = Grid::dimensionworld;
+
+    typedef Alberta::Real ctype;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+    typedef FieldVector< ctype, coorddimension > Coordinate;
+
+  private:
+    const Grid &grid_;
+    const ElementInfo &elementInfo_;
+    const int subEntity_;
+
+  public:
+    AlbertaGridCoordinateReader ( const GridImp &grid,
+                                  const ElementInfo &elementInfo,
+                                  int subEntity )
+      : grid_( grid ),
+        elementInfo_( elementInfo ),
+        subEntity_( subEntity )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      assert( !elementInfo_ == false );
+      assert( (i >= 0) && (i <= mydimension) );
+
+      const int k = mapVertices( subEntity_, i );
+      const Alberta::GlobalVector &coord = grid_.getCoord( elementInfo_, k );
+      for( int j = 0; j < coorddimension; ++j )
+        x[ j ] = coord[ j ];
+    }
+
+    bool hasDeterminant () const
+    {
+      return ((codimension == 0) && elementInfo_.isLeaf());
+    }
+
+    ctype determinant () const
+    {
+      assert( hasDeterminant() );
+
+      const Alberta::Element *el = elementInfo_.el();
+      typedef typename Grid::LeafDataType::Data LeafData;
+      LeafData *leafdata = (LeafData *)el->child[ 1 ];
+      assert( leafdata != NULL );
+      return leafdata->determinant;
+    }
+
+  private:
+    static int mapVertices ( int subEntity, int i )
+    {
+      typedef AlbertHelp::MapVertices< mydimension, dimension > Mapper;
+      return Mapper::mapVertices( subEntity, i );
+    }
+  };
+
+
+
   // AlbertaGridGeometry
   // -------------------
 
@@ -128,21 +197,11 @@ namespace Dune
     //***********************************************************************
     //  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
-    //! generate the geometry for the ALBERTA EL_INFO
-    //! no interface method
-    bool builtGeom ( const Grid &grid,
-                     const Alberta::ElementInfo< dimension > &elementInfo,
-                     int subEntity );
 
-    //! build geometry for intersectionSelfLocal and
-    //! intersectionNeighborLocal
-    template <class GeometryType, class LocalGeomType >
-    bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg,
-                        ALBERTA EL_INFO *elInfo, int face);
+    void invalidate ();
 
-    // init geometry with zeros
-    //! no interface method
-    void initGeom();
+    template< class CoordReader >
+    void build ( const CoordReader &coordReader );
 
     //! print internal data
     //! no interface method
@@ -157,11 +216,6 @@ namespace Dune
 
     //! build the transposed of the jacobian inverse and store the volume
     void buildJacobianInverseTransposed () const;
-
-    // template method for map the vertices of EL_INFO to the actual
-    // coords needed for operator []
-    static int mapVertices ( int i, int face, int edge, int vertex );
-    static int mapVertices ( int subEntity, int i );
 
     // calculates the volume of the element
     ctype elDeterminant () const;
@@ -178,8 +232,7 @@ namespace Dune
     //! is true if Jinv_ and volume_ is calced
     mutable bool builtinverse_;
 
-
-    mutable bool calcedDet_; //! true if determinant was calculated
+    mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant
   };
 

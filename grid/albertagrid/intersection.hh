@@ -58,6 +58,8 @@ namespace Dune
     typedef AlbertaGridGeometry< dimension-1, dimensionworld, GridImp > GeometryImp;
     typedef AlbertaGridGeometry< dimension-1, dimension, GridImp > LocalGeometryImp;
 
+    struct LocalCoordReader;
+
   public:
     //! The default Constructor
     AlbertaGridIntersectionIterator ( const GridImp &grid, int level );

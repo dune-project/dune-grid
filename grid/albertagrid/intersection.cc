@@ -8,6 +8,9 @@
 namespace Dune
 {
 
+  // AlbertaGridIntersectionIterator
+  // -------------------------------
+
   template< class GridImp >
   inline AlbertaGridIntersectionIterator< GridImp >
   ::AlbertaGridIntersectionIterator ( const GridImp &grid, int level )
@@ -250,11 +253,10 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
   {
     assert( !elementInfo_ == false );
-    ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
-    if( !geo.builtLocalGeom( inside()->geometry(), intersectionGlobal(), &elInfo, neighborCount_ ) )
-      DUNE_THROW( AlbertaError, "internal error in intersectionSelfLocal." );
+    const LocalCoordReader coordReader( inside()->geometry(), intersectionGlobal() );
+    geo.build( coordReader );
     return fakeSelfObj_;
   }
 
@@ -265,11 +267,10 @@ namespace Dune
   {
     assert( neighbor() );
     assert( !neighborInfo_ == false );
-    ALBERTA EL_INFO &nbInfo = neighborInfo_.elInfo();
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
-    if( !geo.builtLocalGeom( outside()->geometry(), intersectionGlobal(), &nbInfo, neighborCount_ ) )
-      DUNE_THROW( AlbertaError, "internal error in intersectionNeighborLocal." );
+    const LocalCoordReader coordReader( outside()->geometry(), intersectionGlobal() );
+    geo.build( coordReader );
     return fakeNeighObj_;
   }
 
@@ -278,11 +279,12 @@ namespace Dune
   inline const typename AlbertaGridIntersectionIterator< GridImp >::Geometry &
   AlbertaGridIntersectionIterator< GridImp >::intersectionGlobal () const
   {
+    typedef AlbertaGridCoordinateReader< 1, GridImp > CoordReader;
     assert( !elementInfo_ == false );
 
     GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
-    if( !geo.builtGeom( grid_, elementInfo_, neighborCount_ ) )
-      DUNE_THROW( AlbertaError, "internal error in intersectionGlobal." );
+    const CoordReader coordReader( grid_, elementInfo_, neighborCount_ );
+    geo.build( coordReader );
     return neighGlobObj_;
   }
 
@@ -513,6 +515,55 @@ namespace Dune
     twist_ = SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
              setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
   }
+
+
+
+  // AlbertaGridIntersectionIterator::LocalCoordReader
+  // -------------------------------------------------
+
+  template< class GridImp >
+  struct AlbertaGridIntersectionIterator< GridImp >::LocalCoordReader
+  {
+    typedef typename remove_const< GridImp >::type Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int codimension = 1;
+    static const int mydimension = dimension - codimension;
+    static const int coorddimension = dimension;
+
+    typedef Alberta::Real ctype;
+
+    typedef FieldVector< ctype, coorddimension > Coordinate;
+
+    typedef typename Grid::template Codim< 0 >::Geometry ElementGeometry;
+    typedef typename Grid::template Codim< 1 >::Geometry FaceGeometry;
+
+  private:
+    const ElementGeometry &elementGeometry_;
+    const FaceGeometry &faceGeometry_;
+
+  public:
+    LocalCoordReader ( const ElementGeometry &elementGeometry,
+                       const FaceGeometry &faceGeometry )
+      : elementGeometry_( elementGeometry ),
+        faceGeometry_( faceGeometry )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      x = elementGeometry_.local( faceGeometry_.corner( i ) );
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      return ctype( 0 );
+    }
+  };
 
 }
 

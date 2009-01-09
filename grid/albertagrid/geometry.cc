@@ -48,25 +48,9 @@ namespace Dune
   // -------------------
 
   template< int mydim, int cdim, class GridImp >
-  inline int AlbertaGridGeometry< mydim, cdim, GridImp >
-  :: mapVertices( int i, int face, int edge, int vertex )
-  {
-    // there is a specialisation for each combination of mydim and coorddim
-    return ALBERTA AlbertHelp :: MapVertices< mydim, cdim > :: mapVertices( i, face, edge, vertex );
-  }
-
-  template< int mydim, int cdim, class GridImp >
-  inline int AlbertaGridGeometry< mydim, cdim, GridImp >
-  :: mapVertices ( int subEntity, int i )
-  {
-    return ALBERTA AlbertHelp :: MapVertices< mydim, cdim > :: mapVertices( subEntity, i );
-  }
-
-  template< int mydim, int cdim, class GridImp >
   inline AlbertaGridGeometry< mydim, cdim, GridImp > :: AlbertaGridGeometry ()
   {
-    // make empty element
-    initGeom();
+    invalidate();
   }
 
   template <int mydim, int cdim, class GridImp>
@@ -90,16 +74,6 @@ namespace Dune
 
     if( !(elDet_ > 0.0) )
       DUNE_THROW( AlbertaError, "Degenerate Geometry.");
-  }
-
-
-  template <int mydim, int cdim, class GridImp>
-  inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
-  initGeom()
-  {
-    builtinverse_ = false;
-    builtElMat_   = false;
-    calcedDet_    = false;
   }
 
 
@@ -414,94 +388,40 @@ namespace Dune
     return true;
   }
 
+
+  template< int mydim, int cdim, class GridImp >
+  inline void AlbertaGridGeometry< mydim, cdim, GridImp >::invalidate ()
+  {
+    builtinverse_ = false;
+    builtElMat_ = false;
+    calcedDet_ = false;
+  }
+
+
   // built Geometry
   template< int mydim, int cdim, class GridImp >
-  inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
-  :: builtGeom ( const Grid &grid,
-                 const Alberta::ElementInfo< dimension > &elementInfo,
-                 int subEntity )
+  template< class CoordReader >
+  inline void AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::build ( const CoordReader &coordReader )
   {
     builtinverse_ = false;
-    builtElMat_   = false;
+    builtElMat_ = false;
 
-    if( !elementInfo )
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-      // geometry not built
-      return false;
-    }
-
-    // copy coordinates
     for( int i = 0; i <= mydimension; ++i )
-    {
-      const int k = mapVertices( subEntity, i );
-      const Alberta::GlobalVector &coord = grid.getCoord( elementInfo, k );
-      for( int j = 0; j < coorddimension; ++j )
-        coord_[ i ][ j ] = coord[ j ];
-    }
+      coordReader.coordinate( i, coord_[ i ] );
 
-    // if leaf element, get determinant from leaf data
-    if( (codimension == 0) && elementInfo.isLeaf() )
-    {
-      const Alberta::Element *el = elementInfo.el();
-      typedef typename Grid::LeafDataType::Data LeafData;
-      LeafData *leafdata = (LeafData *)el->child[ 1 ];
-      assert( leafdata != NULL );
-      elDet_ = leafdata->determinant;
-    }
-    else
-      elDet_ = elDeterminant();
+    elDet_ = (coordReader.hasDeterminant() ? coordReader.determinant() : elDeterminant());
     assert( std::abs( elDet_ ) > 0.0 );
     calcedDet_ = true;
-
-    // geometry built
-    return true;
   }
 
-  // built Geometry
-  template <int mydim, int cdim, class GridImp>
-  template <class GeometryType, class LocalGeometryType >
-  inline bool AlbertaGridGeometry<mydim,cdim,GridImp>::
-  builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom,
-                 ALBERTA EL_INFO *elInfo,int face)
-  {
-    builtinverse_ = false;
-    builtElMat_   = false;
-
-    if( elInfo != NULL )
-    {
-      // just map the point of the global intersection to the local
-      // coordinates , this is the default procedure
-      // for simplices this is not so bad
-      for(int i=0; i<mydim+1; i++)
-      {
-        // for simplicies there is no difference in corner numberings
-        coord_[i] = geo.local( localGeom.corner( i ) );
-      }
-
-      elDet_     = elDeterminant();
-      calcedDet_ = true;
-
-      // geometry built
-      return true;
-    }
-    else
-    {
-      elDet_     = 0.0;
-      calcedDet_ = false;
-    }
-
-    // geometry not built
-    return false;
-  }
 
   // built Geometry
   template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
   buildGeomInFather(const int child, const int orientation )
   {
-    initGeom();
+    invalidate();
     // reset coordinate vectors
     coord_ = 0.0;
 
