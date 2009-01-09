@@ -540,6 +540,7 @@ namespace Dune
 
     // number of maxlevel of the mesh
     int maxlevel_;
+    struct CalcMaxLevel;
 
     // true if grid was refined or coarsend
     bool wasChanged_;

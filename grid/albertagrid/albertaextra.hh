@@ -48,47 +48,6 @@ namespace AlbertHelp
     }
   }
 
-
-  //**************************************************************************
-  //  calc Maxlevel of AlbertGrid and remember on wich level an element lives
-  //**************************************************************************
-
-  static int Albert_MaxLevel_help=-1;
-
-  // function for mesh_traverse, is called on every element
-  inline static void calcmxl (const EL_INFO * elf)
-  {
-    int level = elf->level;
-    if(Albert_MaxLevel_help < level) Albert_MaxLevel_help = level;
-  }
-
-  // remember on which level an element realy lives
-  inline int calcMaxLevel ( MESH * mesh , DOF_INT_VEC * levelVec )
-  {
-    Albert_MaxLevel_help = -1;
-
-    // see ALBERTA Doc page 72, traverse over all hierarchical elements
-    meshTraverse(mesh,-1, CALL_LEAF_EL|FILL_NOTHING, calcmxl);
-
-    // check if ok
-    assert(Albert_MaxLevel_help != -1);
-    return Albert_MaxLevel_help;
-  }
-
-
-
-  //**************************************************************************
-  inline static void printNeighbour (const EL_INFO * elf)
-  {
-    int i;
-    printf("%d EL \n",INDEX(elf->el));
-    for(i=0; i<3; i++)
-      if(elf->neigh[i])
-        printf("%d Neigh \n",INDEX(elf->neigh[i]));
-      else printf("%d Neigh \n",-1);
-    printf("----------------------------------\n");
-  }
-
   //*********************************************************************
 
   // Leaf Data for Albert, only the leaf elements have this data set

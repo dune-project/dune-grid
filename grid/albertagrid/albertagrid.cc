@@ -20,67 +20,6 @@
 namespace Dune
 {
 
-  // AlbertaGrid::SetLocalCoords
-  // ---------------------------
-
-#ifndef CALC_COORD
-  template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::SetLocalCoords
-  {
-    typedef Alberta::DofAccess< dim, dim > DofAccess;
-
-    CoordVectorPointer coords_;
-    DofAccess dofAccess_;
-
-  public:
-    explicit SetLocalCoords ( const CoordVectorPointer &coords )
-      : coords_( coords ),
-        dofAccess_( coords.dofSpace() )
-    {}
-
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
-    {
-      Alberta::GlobalVector *array = (Alberta::GlobalVector *)coords_;
-      for( int i = 0; i < DofAccess::numSubEntities; ++i )
-      {
-        const Alberta::GlobalVector &x = elementInfo.coordinate( i );
-        Alberta::GlobalVector &y = array[ dofAccess_( elementInfo.el(), i ) ];
-        for( int i = 0; i < dimworld; ++i )
-          y[ i ] = x[ i ];
-      }
-    }
-  };
-#endif
-
-
-
-  // AlbertaGrid::SetLocalElementLevel
-  // ---------------------------------
-
-  template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::SetLocalElementLevel
-  {
-    typedef Alberta::DofAccess< dim, 0 > DofAccess;
-
-    Alberta::DofVectorPointer< int > levels_;
-    DofAccess dofAccess_;
-
-  public:
-    explicit SetLocalElementLevel ( const Alberta::DofVectorPointer< int > &levels )
-      : levels_( levels ),
-        dofAccess_( levels.dofSpace() )
-    {}
-
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
-    {
-      int *const array = (int *)levels_;
-      const int dof = dofAccess_( elementInfo.el(), 0 );
-      array[ dof ] = elementInfo.level();
-    }
-  };
-
-
-
   // AlbertaGrid
   // -----------
 
@@ -701,8 +640,10 @@ namespace Dune
     assert( (maxlevel_ >= 0) && (maxlevel_ < MAXL) );
 
 #ifndef NDEBUG
-    int mlvl = ALBERTA AlbertHelp::calcMaxLevel( mesh_, elNewCheck_ );
-    assert( mlvl == maxlevel_ );
+    typedef Alberta::FillFlags< dim > FillFlags;
+    CalcMaxLevel calcMaxLevel;
+    mesh_.leafTraverse( calcMaxLevel, FillFlags::nothing );
+    assert( maxlevel_ == calcMaxLevel.maxLevel() );
 #endif
 
     // unset up2Dat status, if lbegin is called then this status is updated
@@ -848,6 +789,97 @@ namespace Dune
   }
 #endif
 
+
+
+  // AlbertaGrid::SetLocalCoords
+  // ---------------------------
+
+#ifndef CALC_COORD
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::SetLocalCoords
+  {
+    typedef Alberta::DofAccess< dim, dim > DofAccess;
+
+    CoordVectorPointer coords_;
+    DofAccess dofAccess_;
+
+  public:
+    explicit SetLocalCoords ( const CoordVectorPointer &coords )
+      : coords_( coords ),
+        dofAccess_( coords.dofSpace() )
+    {}
+
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
+    {
+      Alberta::GlobalVector *array = (Alberta::GlobalVector *)coords_;
+      for( int i = 0; i < DofAccess::numSubEntities; ++i )
+      {
+        const Alberta::GlobalVector &x = elementInfo.coordinate( i );
+        Alberta::GlobalVector &y = array[ dofAccess_( elementInfo.el(), i ) ];
+        for( int i = 0; i < dimworld; ++i )
+          y[ i ] = x[ i ];
+      }
+    }
+  };
+#endif
+
+
+
+  // AlbertaGrid::CalcMaxLevel
+  // -------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::CalcMaxLevel
+  {
+    int maxLevel_;
+
+  public:
+    CalcMaxLevel ()
+      : maxLevel_( 0 )
+    {}
+
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo )
+    {
+      maxLevel_ = std::max( maxLevel_, elementInfo.level() );
+    }
+
+    int maxLevel () const
+    {
+      return maxLevel_;
+    }
+  };
+
+
+
+  // AlbertaGrid::SetLocalElementLevel
+  // ---------------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::SetLocalElementLevel
+  {
+    typedef Alberta::DofAccess< dim, 0 > DofAccess;
+
+    Alberta::DofVectorPointer< int > levels_;
+    DofAccess dofAccess_;
+
+  public:
+    explicit SetLocalElementLevel ( const Alberta::DofVectorPointer< int > &levels )
+      : levels_( levels ),
+        dofAccess_( levels.dofSpace() )
+    {}
+
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
+    {
+      int *const array = (int *)levels_;
+      const int dof = dofAccess_( elementInfo.el(), 0 );
+      array[ dof ] = elementInfo.level();
+    }
+  };
+
+
+
+  // AlbertaGrid::ElNewCheckInterpolation
+  // ------------------------------------
 
   template< int dim, int dimworld >
   struct AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
