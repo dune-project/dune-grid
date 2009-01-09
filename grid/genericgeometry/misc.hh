@@ -63,6 +63,13 @@ namespace Dune
         ForLoop< Operation, first+1, last > :: apply( param1, param2 );
       }
 
+      template< class Type1, class Type2, class Type3 >
+      static void apply ( Type1 &param1, Type2 &param2, Type3 &param3 )
+      {
+        Operation< first > :: apply( param1, param2, param3 );
+        ForLoop< Operation, first+1, last > :: apply( param1, param2, param3 );
+      }
+
     private:
       dune_static_assert( (first <= last), "ForLoop: first > last" );
     };
@@ -85,6 +92,12 @@ namespace Dune
       static void apply ( Type1 &param1, Type2 &param2 )
       {
         Operation< last > :: apply( param1, param2 );
+      }
+
+      template< class Type1, class Type2, class Type3 >
+      static void apply ( Type1 &param1, Type2 &param2, Type3 &param3 )
+      {
+        Operation< last > :: apply( param1, param2, param3 );
       }
     };
 
