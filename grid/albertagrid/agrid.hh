@@ -615,18 +615,6 @@ namespace Dune
     // read level from elNewCehck vector
     int getLevelOfElement ( const Alberta::Element *element ) const;
 
-    // read global element number from elNumbers_
-    int getElementNumber ( const ALBERTA EL * el ) const;
-
-    // read global element number from elNumbers_
-    int getEdgeNumber ( const ALBERTA EL * el, int edge ) const;
-
-    // read global element number from elNumbers_
-    int getFaceNumber ( const ALBERTA EL * el, int face ) const;
-
-    // read global element number from elNumbers_
-    int getVertexNumber ( const ALBERTA EL * el, int vx ) const;
-
   private:
     Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
 

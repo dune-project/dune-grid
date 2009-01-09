@@ -686,35 +686,6 @@ namespace Dune
 
 
   template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getElementNumber ( const ALBERTA EL * el ) const
-  {
-    Int2Type< 0 > codimVariable;
-    return hIndexSet_.subIndex( codimVariable, el, 0 );
-  }
-
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getFaceNumber ( const ALBERTA EL * el , int face ) const
-  {
-    Int2Type< 1 > codimVariable;
-    return hIndexSet_.subIndex( codimVariable, el, face );
-  }
-
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getEdgeNumber ( const ALBERTA EL * el , int edge ) const
-  {
-    assert( dim == 3 );
-    Int2Type< 2 > codimVariable;
-    return hIndexSet_.subIndex( codimVariable, el, edge );
-  }
-
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::getVertexNumber ( const ALBERTA EL * el , int vx ) const
-  {
-    Int2Type< dim > codimVariable;
-    return hIndexSet_.subIndex( codimVariable, el, vx );
-  }
-
-  template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   {
     // store pointer to numbering vectors and so on

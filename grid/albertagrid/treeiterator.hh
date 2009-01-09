@@ -37,15 +37,18 @@ namespace Dune
     bool faceNotOnElement(const int elIndex, const int face) const;
 
     //! mark vertices for LevelIterator and given level
-    template <class GridType>
-    void markNewVertices(GridType &grid, int level);
+    template< class Grid >
+    void markNewVertices ( const Grid &grid, int level );
 
     //! mark vertices for LeafIterator , uses leaf level
-    template <class GridType>
-    void markNewLeafVertices(GridType &grid);
+    template< class Grid >
+    void markNewLeafVertices ( const Grid &grid );
 
     //! return true if marking is up to date
-    bool up2Date () const { return up2Date_; }
+    bool up2Date () const
+    {
+      return up2Date_;
+    }
 
     //! unset up2date flag
     void unsetUp2Date () { up2Date_ = false; }
@@ -109,6 +112,8 @@ namespace Dune
     static const int numSubEntities
       = Alberta::NumSubEntities< dimension, codimension >::value;
 
+    typedef typename GridImp::HierarchicIndexSet HierarchicIndexSet;
+
   public:
     typedef typename GridImp::template Codim< codim >::Entity Entity;
     typedef MakeableInterfaceObject< Entity > EntityObject;
@@ -133,6 +138,7 @@ namespace Dune
 
   protected:
     using Base::entityImp;
+    using Base::grid;
 
   private:
     // private Methods

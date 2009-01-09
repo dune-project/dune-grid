@@ -393,18 +393,21 @@ namespace Dune
       int facemap[dim]   = {0,1,2};
       bool rightOriented = false;
       {
+        const typename GridImp::HierarchicIndexSet &hIndexSet = grid.hierarchicIndexSet();
+
         int myvx[dim];
         int neighvx[dim];
 
-        const int * vxmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
-        const int * nbmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[nb];
+        const int * vxmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[ vx ];
+        const int * nbmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[ nb ];
 
         bool allRight = true;
         for(int i=0; i<dim; i++)
         {
-          myvx[i]    = grid.getVertexNumber(elInfo->el   , nbmap[i] );
-          neighvx[i] = grid.getVertexNumber(neighInfo->el, vxmap[i] );
-          if( myvx[i] != neighvx[i] ) allRight = false;
+          myvx[ i ] = hIndexSet.template subIndex< dim >( elInfo->el, nbmap[ i ] );
+          neighvx[ i ] = hIndexSet.template subIndex< dim >( neighInfo->el, vxmap[ i ] );
+          if( myvx[ i ] != neighvx[ i ] )
+            allRight = false;
         }
 
         // note: if the vertices are equal then the face in the neighbor

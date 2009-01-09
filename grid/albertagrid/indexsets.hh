@@ -111,8 +111,7 @@ namespace Dune
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
 
-      Int2Type< codim > codimVariable;
-      return subIndex( codimVariable, entityImp.elementInfo().el(), entityImp.getFEVnum() );
+      return subIndex< codim >( entityImp.elementInfo().el(), entityImp.getFEVnum() );
     }
 
     //! return subIndex of given enitiy's sub entity
@@ -122,8 +121,7 @@ namespace Dune
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
 
-      Int2Type< codim > codimVariable;
-      return subIndex( codimVariable, entityImp.elementInfo().el(), i );
+      return subIndex< codim >( entityImp.elementInfo().el(), i );
     }
 
     //! return size of set for given GeometryType
@@ -170,9 +168,17 @@ namespace Dune
 #endif
 
     template< int codim >
-    int subIndex ( Int2Type< codim > codimVariable,
-                   const Alberta::Element *element, int i ) const
+    int subIndex ( const Alberta::ElementInfo< dimension > &elementInfo, int i ) const
     {
+      assert( !elementInfo == false );
+      return subIndex< codim >( elementInfo.el(), i );
+    }
+
+    template< int codim >
+    int subIndex ( const Alberta::Element *element, int i ) const
+    {
+      Int2Type< codim > codimVariable;
+
       if( (codim < dimension) && (codim == 2) )
         i = refTopo_.dune2albertaEdge( i );
 
