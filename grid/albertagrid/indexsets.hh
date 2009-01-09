@@ -214,8 +214,10 @@ namespace Dune
     }
 
   private:
+#ifdef INDEXSET_HAS_ITERATORS
     // the grid this index set belongs to
     const Grid &grid_;
+#endif
 
     // index stacks providing new numbers during adaptation
     IndexManagerType indexStack_[ dimension+1 ];
@@ -238,7 +240,9 @@ namespace Dune
   template< int dim, int dimworld >
   inline AlbertaGridHierarchicIndexSet< dim, dimworld >
   ::AlbertaGridHierarchicIndexSet ( const Grid &grid )
+#ifdef INDEXSET_HAS_ITERATORS
     : grid_( grid )
+#endif
   {
     for( int codim = 0; codim <= dimension; ++codim )
     {
