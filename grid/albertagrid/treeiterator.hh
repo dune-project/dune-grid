@@ -36,14 +36,9 @@ namespace Dune
     //! the vectors stored inside are empty first
     AlbertaMarkerVector (bool meLevel=true) : up2Date_(false), meLevel_(meLevel) {} ;
 
-    //! return true if vertex is not watched on this element
-    bool vertexNotOnElement(const int elIndex, const int vertex) const;
-
-    //! return true if edge is not watched on this element
-    bool edgeNotOnElement(const int elIndex, const int edge) const;
-
-    //! return true if edge is not watched on this element
-    bool faceNotOnElement(const int elIndex, const int face) const;
+    //! visit subentity on this element?
+    template< int codim >
+    bool subEntityOnElement ( const int index, const int subIndex ) const;
 
     //! mark vertices for LevelIterator and given level
     void markNewVertices ( const Grid &grid, int level );
@@ -65,9 +60,6 @@ namespace Dune
 
   private:
     std::vector< int > marker_[ dimension+1 ];
-
-    // number of vertices
-    int numVertex_;
 
     // true is vertex marker is up to date
     bool up2Date_;

@@ -12,59 +12,13 @@ namespace Dune
   // -------------------
 
   template< int dim, int dimworld >
-  inline bool AlbertaMarkerVector< dim, dimworld >
-  ::vertexNotOnElement(const int elIndex, const int vertex) const
-  {
-    const int codim = dimension;
-    assert( marker_[ codim ].size() > 0 );
-    return (marker_[ codim ][ vertex ] != elIndex);
-  }
-
-  template< int dim, int dimworld >
-  inline bool AlbertaMarkerVector< dim, dimworld >
-  ::edgeNotOnElement(const int elIndex, const int edge) const
-  {
-    const int codim = 2;
-    assert( marker_[ codim ].size() > 0 );
-    return (marker_[ codim ][ edge ] != elIndex);
-  }
-
-  template< int dim, int dimworld >
-  inline bool AlbertaMarkerVector< dim, dimworld >
-  ::faceNotOnElement(const int elIndex, const int face) const
-  {
-    const int codim = 1;
-    assert( marker_[ codim ].size() > 0 );
-    return (marker_[ codim ][ face ] != elIndex);
-  }
-
-
-
-  template< int dim, int dimworld >
   template< int codim >
-  class AlbertaMarkerVector< dim, dimworld >::MarkSubEntities
+  inline bool AlbertaMarkerVector< dim, dimworld >
+  ::subEntityOnElement ( const int index, const int subindex ) const
   {
-    static const int numSubEntities = Alberta::NumSubEntities< dimension, codim >::value;
-
-    typedef Alberta::ElementInfo< dimension > ElementInfo;
-
-  public:
-    template< class Array >
-    static void apply ( const HierarchicIndexSet &hIndexSet,
-                        Array (&marker)[ dimension + 1],
-                        const ElementInfo &elementInfo )
-    {
-      Array &vec = marker[ codim ];
-
-      const int index = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
-      for( int i = 0; i < numSubEntities; ++i )
-      {
-        const int subIndex = hIndexSet.template subIndex< codim >( elementInfo, i );
-        if( vec[ subIndex ] < 0 )
-          vec[ subIndex ] = index;
-      }
-    }
-  };
+    assert( marker_[ codim ].size() > 0 );
+    return (marker_[ codim ][ subindex ] == index);
+  }
 
 
   template< int dim, int dimworld >
@@ -168,6 +122,37 @@ namespace Dune
       }
     }
   }
+
+
+
+  // AlbertaMarkerVector::MarkSubEntities
+  // ------------------------------------
+
+  template< int dim, int dimworld >
+  template< int codim >
+  class AlbertaMarkerVector< dim, dimworld >::MarkSubEntities
+  {
+    static const int numSubEntities = Alberta::NumSubEntities< dimension, codim >::value;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+  public:
+    template< class Array >
+    static void apply ( const HierarchicIndexSet &hIndexSet,
+                        Array (&marker)[ dimension + 1],
+                        const ElementInfo &elementInfo )
+    {
+      Array &vec = marker[ codim ];
+
+      const int index = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
+      for( int i = 0; i < numSubEntities; ++i )
+      {
+        const int subIndex = hIndexSet.template subIndex< codim >( elementInfo, i );
+        if( vec[ subIndex ] < 0 )
+          vec[ subIndex ] = index;
+      }
+    }
+  };
 
 
 
@@ -405,7 +390,8 @@ namespace Dune
       const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
       const int faceIndex = hIndexSet.template subIndex< 1 >( elementInfo, subEntity_ );
       assert( vertexMarker_ != 0 );
-      if( vertexMarker_->faceNotOnElement( elIndex, faceIndex ) )
+      //if( vertexMarker_->faceNotOnElement( elIndex, faceIndex ) )
+      if( !vertexMarker_->template subEntityOnElement< 1 >( elIndex, faceIndex ) )
         goNextFace( elementInfo );
     }
   }
@@ -429,7 +415,8 @@ namespace Dune
     const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
     const int edgeIndex = hIndexSet.template subIndex< 2 >( elementInfo, subEntity_ );
     assert( vertexMarker_ != 0 );
-    if( vertexMarker_->edgeNotOnElement( elIndex, edgeIndex ) )
+    //if( vertexMarker_->edgeNotOnElement( elIndex, edgeIndex ) )
+    if( !vertexMarker_->template subEntityOnElement< 2 >( elIndex, edgeIndex ) )
       goNextEdge( elementInfo );
   }
 
@@ -452,7 +439,8 @@ namespace Dune
     const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
     const int vertexIndex = hIndexSet.template subIndex< dimension >( elementInfo, subEntity_ );
     assert( vertexMarker_ != 0 );
-    if( vertexMarker_->vertexNotOnElement( elIndex, vertexIndex ) )
+    //if( vertexMarker_->vertexNotOnElement( elIndex, vertexIndex ) )
+    if( !vertexMarker_->template subEntityOnElement< dimension >( elIndex, vertexIndex ) )
       goNextVertex( elementInfo );
   }
 
