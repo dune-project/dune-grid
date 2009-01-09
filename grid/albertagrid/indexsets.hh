@@ -29,9 +29,6 @@ namespace Dune
   template< int codim, int dim, class GridImp >
   class AlbertaGridEntity;
 
-  template< class GridType, int dim >
-  struct MarkEdges;
-
 
 
   //! HierarchicIndexSet uses LeafIterator types for all codims and partition types
@@ -77,8 +74,6 @@ namespace Dune
     enum { numVecs  = AlbertHelp::numOfElNumVec };
 
     friend class AlbertaGrid< dim, dimworld >;
-    friend class MarkEdges< Grid, 3 >;
-    friend class MarkEdges< const Grid, 3 >;
 
     explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
 
