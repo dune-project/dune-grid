@@ -30,6 +30,7 @@ namespace Dune
     static const int dimension = Grid::dimension;
 
     typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     template< int codim >
     class MarkSubEntities;
@@ -44,7 +45,7 @@ namespace Dune
 
     //! visit subentity on this element?
     template< int codim >
-    bool subEntityOnElement ( const int index, const int subIndex ) const;
+    bool subEntityOnElement ( const ElementInfo &elementInfo, int subEntity ) const;
 
     template< int firstCodim, class Iterator >
     void markSubEntities ( const Iterator &begin, const Iterator &end );

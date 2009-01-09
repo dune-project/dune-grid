@@ -14,10 +14,13 @@ namespace Dune
   template< int dim, int dimworld >
   template< int codim >
   inline bool AlbertaMarkerVector< dim, dimworld >
-  ::subEntityOnElement ( const int index, const int subindex ) const
+  ::subEntityOnElement ( const ElementInfo &elementInfo, int subEntity ) const
   {
     assert( marker_[ codim ].size() > 0 );
-    return (marker_[ codim ][ subindex ] == index);
+
+    const int index = hIndexSet_->template subIndex< 0 >( elementInfo, 0 );
+    const int subIndex = hIndexSet_->template subIndex< codim >( elementInfo, subEntity );
+    return (marker_[ codim ][ subIndex ] == index);
   }
 
 
@@ -37,8 +40,7 @@ namespace Dune
 
     for( Iterator it = begin; it != end; ++it )
     {
-      const Alberta::ElementInfo< dimension > &elementInfo
-        = Grid::getRealImplementation( *it ).elementInfo();
+      const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
       Alberta::ForLoop< MarkSubEntities, firstCodim, dimension >
       ::apply( *hIndexSet_, marker_, elementInfo );
     }
@@ -314,13 +316,13 @@ namespace Dune
         return;
     }
 
-    const HierarchicIndexSet &hIndexSet = grid().hierarchicIndexSet();
     if( leafIterator )
     {
       const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ subEntity_ ];
       if( neighbor != NULL )
       {
         // face is reached from element with largest number
+        const HierarchicIndexSet &hIndexSet = grid().hierarchicIndexSet();
         const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
         const int nbIndex = hIndexSet.template subIndex< 0 >( neighbor, 0 );
         if( elIndex < nbIndex )
@@ -329,11 +331,8 @@ namespace Dune
     }
     else
     {
-      const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
-      const int faceIndex = hIndexSet.template subIndex< 1 >( elementInfo, subEntity_ );
       assert( vertexMarker_ != 0 );
-      //if( vertexMarker_->faceNotOnElement( elIndex, faceIndex ) )
-      if( !vertexMarker_->template subEntityOnElement< 1 >( elIndex, faceIndex ) )
+      if( !vertexMarker_->template subEntityOnElement< 1 >( elementInfo, subEntity_ ) )
         goNextFace( elementInfo );
     }
   }
@@ -353,12 +352,8 @@ namespace Dune
         return;
     }
 
-    const HierarchicIndexSet &hIndexSet = grid().hierarchicIndexSet();
-    const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
-    const int edgeIndex = hIndexSet.template subIndex< 2 >( elementInfo, subEntity_ );
     assert( vertexMarker_ != 0 );
-    //if( vertexMarker_->edgeNotOnElement( elIndex, edgeIndex ) )
-    if( !vertexMarker_->template subEntityOnElement< 2 >( elIndex, edgeIndex ) )
+    if( !vertexMarker_->template subEntityOnElement< 2 >( elementInfo, subEntity_ ) )
       goNextEdge( elementInfo );
   }
 
@@ -377,12 +372,8 @@ namespace Dune
         return;
     }
 
-    const HierarchicIndexSet &hIndexSet = grid().hierarchicIndexSet();
-    const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
-    const int vertexIndex = hIndexSet.template subIndex< dimension >( elementInfo, subEntity_ );
     assert( vertexMarker_ != 0 );
-    //if( vertexMarker_->vertexNotOnElement( elIndex, vertexIndex ) )
-    if( !vertexMarker_->template subEntityOnElement< dimension >( elIndex, vertexIndex ) )
+    if( !vertexMarker_->template subEntityOnElement< dimension >( elementInfo, subEntity_ ) )
       goNextVertex( elementInfo );
   }
 
