@@ -3,7 +3,7 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_CC
 #define DUNE_ALBERTA_TREEITERATOR_CC
 
-#include <dune/grid/albertagrid/treeiterator.cc>
+#include <dune/grid/albertagrid/treeiterator.hh>
 
 namespace Dune
 {
@@ -18,9 +18,12 @@ namespace Dune
   {
     assert( marker_[ codim ].size() > 0 );
 
-    const int index = hIndexSet_->template subIndex< 0 >( elementInfo, 0 );
     const int subIndex = hIndexSet_->template subIndex< codim >( elementInfo, subEntity );
-    return (marker_[ codim ][ subIndex ] == index);
+    const int markIndex = marker_[ codim ][ subIndex ];
+    assert( (markIndex >= 0) );
+
+    const int index = hIndexSet_->template subIndex< 0 >( elementInfo, 0 );
+    return (markIndex == index);
   }
 
 
@@ -83,7 +86,7 @@ namespace Dune
   public:
     template< class Array >
     static void apply ( const HierarchicIndexSet &hIndexSet,
-                        Array (&marker)[ dimension + 1],
+                        Array (&marker)[ dimension + 1 ],
                         const ElementInfo &elementInfo )
     {
       Array &vec = marker[ codim ];
@@ -92,8 +95,7 @@ namespace Dune
       for( int i = 0; i < numSubEntities; ++i )
       {
         const int subIndex = hIndexSet.template subIndex< codim >( elementInfo, i );
-        if( vec[ subIndex ] < 0 )
-          vec[ subIndex ] = index;
+        vec[ subIndex ] = std::max( index, vec[ subIndex ] );
       }
     }
   };
@@ -119,8 +121,8 @@ namespace Dune
     };
 
     // for faces
-    template <class IteratorImp, int dim>
-    struct GoNextEntity<IteratorImp,dim,1>
+    template< class IteratorImp, int dim >
+    struct GoNextEntity< IteratorImp, dim, 1 >
     {
       typedef typename IteratorImp::ElementInfo ElementInfo;
 
@@ -131,8 +133,8 @@ namespace Dune
     };
 
     // for vertices
-    template <class IteratorImp, int dim>
-    struct GoNextEntity<IteratorImp,dim,dim>
+    template< class IteratorImp, int dim >
+    struct GoNextEntity< IteratorImp, dim, dim >
     {
       typedef typename IteratorImp::ElementInfo ElementInfo;
 
@@ -143,8 +145,8 @@ namespace Dune
     };
 
     // for edges in 3d
-    template <class IteratorImp>
-    struct GoNextEntity<IteratorImp,3,2>
+    template< class IteratorImp >
+    struct GoNextEntity< IteratorImp, 3, 2 >
     {
       typedef typename IteratorImp::ElementInfo ElementInfo;
 
@@ -165,8 +167,9 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextEntity ( ElementInfo &elementInfo )
   {
-    return AlbertaTreeIteratorHelp::GoNextEntity< This, GridImp::dimension, codim >
-           ::goNext( *this, elementInfo );
+    const int dim = GridImp::dimension;
+    typedef AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim > Helper;
+    Helper::goNext( *this, elementInfo );
   }
 
 
@@ -175,7 +178,7 @@ namespace Dune
   {
     level_ = 0;
     subEntity_ = -1;
-    vertexMarker_ = 0;
+    marker_ = 0;
 
     entityImp().clearElement();
   }
@@ -184,18 +187,17 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
-                              const MarkerVector *vertexMark,
+                              const MarkerVector *marker,
                               int travLevel )
     : Base( grid ),
       level_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( grid.meshPointer().begin() ),
-      vertexMarker_( vertexMark )
+      marker_( marker )
   {
     ElementInfo elementInfo = *macroIterator_;
-    if( codim == 0 )
-      nextElementStop( elementInfo );
-    else
+    nextElementStop( elementInfo );
+    if( codim > 0 )
       goNextEntity( elementInfo );
     // it is ok to set the invalid ElementInfo
     entityImp().setElement( elementInfo, subEntity_ );
@@ -211,7 +213,7 @@ namespace Dune
       level_( travLevel ),
       subEntity_( -1 ),
       macroIterator_( grid.meshPointer().end() ),
-      vertexMarker_( 0 )
+      marker_( 0 )
   {}
 
 
@@ -223,7 +225,7 @@ namespace Dune
       level_( other.level_ ),
       subEntity_( other.subEntity_ ),
       macroIterator_( other.macroIterator_ ),
-      vertexMarker_( other.vertexMarker_ )
+      marker_( other.marker_ )
   {}
 
 
@@ -237,7 +239,7 @@ namespace Dune
     level_ = other.level_;
     subEntity_ =  other.subEntity_;
     macroIterator_ = other.macroIterator_;
-    vertexMarker_ = other.vertexMarker_;
+    marker_ = other.marker_;
 
     return *this;
   }
@@ -285,7 +287,7 @@ namespace Dune
 
   template< int codim, class GridImp, bool leafIterator >
   inline bool AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::stopAtElement ( const ElementInfo &elementInfo )
+  ::stopAtElement ( const ElementInfo &elementInfo ) const
   {
     if( !elementInfo )
       return true;
@@ -297,6 +299,8 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextElement ( ElementInfo &elementInfo )
   {
+    assert( stopAtElement( elementInfo ) );
+
     nextElement( elementInfo );
     nextElementStop( elementInfo );
   }
@@ -306,6 +310,8 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextFace ( ElementInfo &elementInfo )
   {
+    assert( stopAtElement( elementInfo ) );
+
     ++subEntity_;
     if( subEntity_ >= numSubEntities )
     {
@@ -328,11 +334,13 @@ namespace Dune
         if( elIndex < nbIndex )
           goNextFace( elementInfo );
       }
+      // uncomment this assertion only if codimension 1 entities are marked
+      // assert( marker_->template subEntityOnElement< 1 >( elementInfo, subEntity_ ) );
     }
     else
     {
-      assert( vertexMarker_ != 0 );
-      if( !vertexMarker_->template subEntityOnElement< 1 >( elementInfo, subEntity_ ) )
+      assert( marker_ != 0 );
+      if( !marker_->template subEntityOnElement< 1 >( elementInfo, subEntity_ ) )
         goNextFace( elementInfo );
     }
   }
@@ -342,6 +350,8 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextEdge ( ElementInfo &elementInfo )
   {
+    assert( stopAtElement( elementInfo ) );
+
     ++subEntity_;
     if( subEntity_ >= numSubEntities )
     {
@@ -352,8 +362,8 @@ namespace Dune
         return;
     }
 
-    assert( vertexMarker_ != 0 );
-    if( !vertexMarker_->template subEntityOnElement< 2 >( elementInfo, subEntity_ ) )
+    assert( marker_ != 0 );
+    if( !marker_->template subEntityOnElement< 2 >( elementInfo, subEntity_ ) )
       goNextEdge( elementInfo );
   }
 
@@ -362,6 +372,8 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::goNextVertex ( ElementInfo &elementInfo )
   {
+    assert( stopAtElement( elementInfo ) );
+
     ++subEntity_;
     if( subEntity_ >= numSubEntities )
     {
@@ -372,8 +384,8 @@ namespace Dune
         return;
     }
 
-    assert( vertexMarker_ != 0 );
-    if( !vertexMarker_->template subEntityOnElement< dimension >( elementInfo, subEntity_ ) )
+    assert( marker_ != 0 );
+    if( !marker_->template subEntityOnElement< dimension >( elementInfo, subEntity_ ) )
       goNextVertex( elementInfo );
   }
 

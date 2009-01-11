@@ -133,7 +133,7 @@ namespace Dune
 
     //! Constructor making begin iterator
     AlbertaGridTreeIterator ( const GridImp &grid,
-                              const MarkerVector *vec,
+                              const MarkerVector *marker,
                               int travLevel );
 
     //! increment
@@ -149,7 +149,7 @@ namespace Dune
 
     void nextElement ( ElementInfo &elementInfo );
     void nextElementStop (ElementInfo &elementInfo );
-    bool stopAtElement ( const ElementInfo &elementInfo );
+    bool stopAtElement ( const ElementInfo &elementInfo ) const;
 
     void goNextEntity ( ElementInfo &elementInfo );
 
@@ -168,7 +168,7 @@ namespace Dune
     MacroIterator macroIterator_;
 
     // knows on which element a point,edge,face is viewed
-    const MarkerVector *vertexMarker_;
+    const MarkerVector *marker_;
   };
 
 }

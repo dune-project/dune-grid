@@ -245,8 +245,9 @@ namespace Dune
     typedef AlbertaGridLeafIterator< codim, pitype, const This > LeafIteratorImp;
 
     MarkerVector &markerVector = leafMarkerVector_;
-    if( (codim > 1) && !markerVector.up2Date() )
-      markerVector.template markSubEntities< 2 >( leafbegin< 0 >(), leafend< 0 >() );
+    const int firstMarkedCodim = 2;
+    if( (codim >= firstMarkedCodim) && !markerVector.up2Date() )
+      markerVector.template markSubEntities< firstMarkedCodim >( leafbegin< 0 >(), leafend< 0 >() );
 
     return LeafIteratorImp( *this, &markerVector, maxlevel_ );
   }

@@ -181,7 +181,9 @@ namespace Dune
         i = refTopo_.dune2albertaEdge( i );
 
       int *array = (int *)entityNumbers_[ codim ];
-      return array[ dofAccess_[ codimVariable ]( element, i ) ];
+      const int subIndex = array[ dofAccess_[ codimVariable ]( element, i ) ];
+      assert( (subIndex >= 0) && (subIndex < size( codim )) );
+      return subIndex;
     }
 
     void create ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
