@@ -42,6 +42,8 @@ check_PROGRAMS = $(NORMALTESTS)
 ## common flags
 #
 
+GRIDDIM=2
+
 # paranoia
 DUNE_EXTRA_CHECKS = -DDUNE_DEVEL_MODE
 # output coverage
@@ -64,7 +66,7 @@ test_yaspgrid_LDADD = $(LOCAL_LIBS) $(MPI_LDFLAGS)
 
 # this implicitly checks the autoconf-test as well...
 test_alberta_SOURCES = test-alberta.cc
-test_alberta_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS)
+test_alberta_CXXFLAGS = $(ALBERTA_CPPFLAGS) $(AM_CPPFLAGS) -DGRIDDIM=$(GRIDDIM)
 test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS)
 
 # files for alu3dgrid

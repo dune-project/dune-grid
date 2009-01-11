@@ -52,6 +52,10 @@ int main () {
     const int dim      = GRIDDIM;
     const int dimworld = GRIDDIM;
 
+    typedef Dune::AlbertaGrid<dim,dimworld> GridType;
+
+    std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
+
     /* use grid-file appropriate for dimensions */
     std::ostringstream filename;
 
@@ -65,17 +69,17 @@ int main () {
     {
       factorEpsilon = 5e2;
 
-      typedef Dune::AlbertaGrid<dim,dimworld> GridType;
-
       Dune::GridPtr<GridType> gridPtr(filename.str());
       GridType & grid = *gridPtr;
 
       // extra-environment to check destruction
 
+      std::cout << ">>> Checking macro grid..." << std::endl;
       gridcheck(grid); // check macro grid
+      checkIntersectionIterator(grid,true);
       for(int i=0; i<1; i++)
       {
-        // check single refinement
+        std::cout << ">>> Refining grid and checking again..." << std::endl;
         grid.globalRefine( 1 );
         gridcheck(grid);
         checkIntersectionIterator(grid,true);
