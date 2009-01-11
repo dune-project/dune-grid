@@ -53,14 +53,6 @@ namespace Dune
     invalidate();
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline AlbertaGridGeometry<mydim,cdim,GridImp>::
-  AlbertaGridGeometry(const int child, const int orientation)
-  {
-    // make empty element
-    buildGeomInFather(child,orientation);
-  }
-
 
   template< int mydim, int cdim, class GridImp >
   inline AlbertaGridGeometry< mydim, cdim, GridImp >
@@ -74,6 +66,15 @@ namespace Dune
 
     if( !(elDet_ > 0.0) )
       DUNE_THROW( AlbertaError, "Degenerate Geometry.");
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  template< class CoordReader >
+  inline AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::AlbertaGridGeometry ( const CoordReader &coordReader )
+  {
+    build( coordReader );
   }
 
 
@@ -416,87 +417,72 @@ namespace Dune
   }
 
 
-  // built Geometry
-  template <int mydim, int cdim, class GridImp>
-  inline void AlbertaGridGeometry<mydim,cdim,GridImp>::
-  buildGeomInFather(const int child, const int orientation )
+
+  namespace Alberta
   {
-    invalidate();
-    // reset coordinate vectors
-    coord_ = 0.0;
 
-    assert( (child == 0) || (child == 1) );
-    if(mydim == 2)
+    // GeometryInFather
+    // ----------------
+
+    template< int dim >
+    struct GeometryInFather;
+
+    template<>
+    struct GeometryInFather< 1 >
     {
-      /*
-         //////////////////////////////////////////////
-         //
-         //               (0,1)
-         //                /|\
-         //               /0|1\
-         //              /  |  \
-         //             /   |   \
-         //            /    |    \
-         //           /     |     \
-         //          /      |      \
-         //         / ch 0  | ch 1  \
-         //        /1      2|2      0\
-         //        -------------------
-         //    (0,0)     (0.5,0)    (1,0)
-         //
-         //
-         ///////////////////////////////////////////
-       */
+      static const int dim = 1;
 
-      if( child == 0 )
-      {
-        coord_[0][1] = 1.0; // (0,1)
-        coord_[1]    = 0.0; // (0,0)
-        coord_[2][0] = 0.5; // (0.5,0)
-      }
-      if( child == 1 )
-      {
-        coord_[0][0] = 1.0; // (1,0)
-        coord_[1][1] = 1.0; // (0,1)
-        coord_[2][0] = 0.5; // (0.5,0)
-      }
-    }
+      typedef Real LocalVector[ dim ];
 
-    if(mydim == 3)
+      static const LocalVector &
+      coordinate ( int child, int orientation, int i )
+      {
+        static const Real coords[ 2 ][ dim+1 ][ dim ]
+          = { { {0.0}, {0.5} }, { {0.5}, {1.0} } };
+        assert( (i >= 0) && (i <= dim) );
+        return coords[ child ][ i ];
+      }
+    };
+
+    template<>
+    struct GeometryInFather< 2 >
     {
-      if( child == 0 )
+      static const int dim = 2;
+
+      typedef Real LocalVector[ dim ];
+
+      static const LocalVector &
+      coordinate ( int child, int orientation, int i )
       {
-        coord_[0] = 0.0; // (0,0,0)
-        coord_[1][1] = 1.0; // (0,1,0)
-        coord_[2][2] = 1.0; // (0,0,1)
-        coord_[3][0] = 0.5; // (0.5,0,0)
+        static const Real coords[ 2 ][ dim+1 ][ dim ]
+          = { { {0.0, 1.0}, {0.0, 0.0}, {0.5, 0.0} },
+              { {1.0, 0.0}, {0.0, 1.0}, {0.5, 0.0} } };
+        assert( (i >= 0) && (i <= dim) );
+        return coords[ child ][ i ];
       }
-      if( child == 1 )
+    };
+
+    template<>
+    struct GeometryInFather< 3 >
+    {
+      static const int dim = 3;
+
+      typedef Real LocalVector[ dim ];
+
+      static const LocalVector &
+      coordinate ( int child, int orientation, int i )
       {
-        coord_[0][0] = 1.0; // (1,0,0)
-
-        // depending on orientation the coood 1 and 2 are swaped
-        // see Alberta Docu page 5
-        if(orientation > 0)
-        {
-          coord_[1][1] = 1.0; // (0,1,0)
-          coord_[2][2] = 1.0; // (0,0,1)
-        }
-        else
-        {
-          coord_[1][2] = 1.0; // (0,1,0)
-          coord_[2][1] = 1.0; // (0,0,1)
-        }
-        coord_[3][0] = 0.5; // (0.5,0,0)
+        static const Real coords[ 2 ][ dim+1 ][ dim ]
+          = { { {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.5, 0.0, 0.0} },
+              { {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.5, 0.0, 0.0} } };
+        static const int flip[ 2 ][ 2 ][ dim+1 ]
+          = { { {0, 1, 2, 3}, {0, 1, 2, 3} }, { {0, 2, 1, 3}, {0, 1, 2, 3} } };
+        assert( (i >= 0) && (i <= dim) );
+        i = flip[ child ][ orientation ][ i ];
+        return coords[ child ][ i ];
       }
-    }
+    };
 
-    // its a child of the reference element ==> det = 0.5
-    elDet_ = elDeterminant();
-    calcedDet_ = true;
-
-    if( elDet_ > 0.0 ) return;
-    DUNE_THROW(NotImplemented,"wrong dimension given!");
   }
 
 
@@ -512,10 +498,12 @@ namespace Dune
 
     for( int child = 0; child < numChildren; ++child )
     {
-      geometryInFather_[ child ][ 0 ]
-        = new LocalGeoObject( LocalGeoImp( child, -1 ) );
-      geometryInFather_[ child ][ 1 ]
-        = new LocalGeoObject( LocalGeoImp( child, 1 ) );
+      for( int orientation = 0; orientation < 2; ++orientation )
+      {
+        const GeoInFatherCoordReader coordReader( child, orientation );
+        geometryInFather_[ child ][ orientation ]
+          = new LocalGeoObject( LocalGeoImp( coordReader ) );
+      }
     }
   }
 
@@ -541,6 +529,50 @@ namespace Dune
       faceGeometry_[ face ] = new LocalGeoObject( LocalGeoImp( faceCorners ) );
     }
   }
+
+
+
+  // AlbertaGridLocalGeometryProvider::GeoInFatherCoordReader
+  // --------------------------------------------------------
+
+  template< class Grid >
+  struct AlbertaGridLocalGeometryProvider< Grid >::GeoInFatherCoordReader
+  {
+    typedef Alberta::Real ctype;
+
+    typedef FieldVector< ctype, dimension > Coordinate;
+
+  private:
+    typedef Alberta::GeometryInFather< dimension > GeoInFather;
+
+    const int child_;
+    const int orientation_;
+
+  public:
+    GeoInFatherCoordReader ( int child, int orientation )
+      : child_( child ),
+        orientation_( orientation )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      const typename GeoInFather::LocalVector &coord
+        = GeoInFather::coordinate( child_, orientation_, i );
+      for( int j = 0; j < dimension; ++j )
+        x[ j ] = coord[ j ];
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      return ctype( 0 );
+    }
+  };
+
 
 }
 

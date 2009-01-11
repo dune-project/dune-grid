@@ -102,7 +102,6 @@ namespace Dune
    */
   template< int mydim, int cdim, class GridImp >
   class AlbertaGridGeometry
-  //: public GeometryDefaultImplementation<mydim,cdim,GridImp,AlbertaGridGeometry>
   {
     typedef AlbertaGridGeometry< mydim, cdim, GridImp > This;
 
@@ -130,10 +129,10 @@ namespace Dune
     //! Default constructor
     AlbertaGridGeometry();
 
-    //! constructor building geometry in father
-    AlbertaGridGeometry ( const int child, const int orientation );
-
     AlbertaGridGeometry ( const CoordMatrix &coords );
+
+    template< class CoordReader >
+    AlbertaGridGeometry ( const CoordReader &coordReader );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
@@ -208,9 +207,6 @@ namespace Dune
     void print (std::ostream& ss) const;
 
   private:
-    // build geometry with local coords of child in reference element
-    void buildGeomInFather(const int child, const int orientation);
-
     // calculate Matrix for Mapping from reference element to actual element
     void calcElMatrix () const;
 
@@ -265,6 +261,8 @@ namespace Dune
     static const int numFaces = dimension + 1;
 
   private:
+    struct GeoInFatherCoordReader;
+
     const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
     const LocalFaceGeometry *faceGeometry_[ numFaces ];
 
