@@ -36,8 +36,7 @@ namespace Dune
     class MarkSubEntities;
 
   public:
-    //! create AlbertaMarkerVector for Level or Leaf Iterator, true == LevelIterator
-    //! the vectors stored inside are empty first
+    //! create AlbertaMarkerVector with empty vectors
     explicit AlbertaMarkerVector ( const HierarchicIndexSet &hIndexSet )
       : hIndexSet_( &hIndexSet ),
         up2Date_( false )
@@ -72,13 +71,6 @@ namespace Dune
 
 
 
-  namespace AlbertaTreeIteratorHelp
-  {
-    template< class IteratorImp, int dim, int codim >
-    struct GoNextEntity;
-  }
-
-
   // AlbertaGridTreeIterator
   // -----------------------
 
@@ -103,8 +95,6 @@ namespace Dune
     friend class AlbertaGridEntity< 1, dimension, GridImp >;
     friend class AlbertaGridEntity< 0, dimension, GridImp >;
     friend class AlbertaGrid< dimension, dimensionworld >;
-
-    friend class AlbertaTreeIteratorHelp::GoNextEntity< This, dim, codim >;
 
     static const int numSubEntities
       = Alberta::NumSubEntities< dimension, codimension >::value;
@@ -151,13 +141,11 @@ namespace Dune
     void nextElementStop (ElementInfo &elementInfo );
     bool stopAtElement ( const ElementInfo &elementInfo ) const;
 
-    void goNextEntity ( ElementInfo &elementInfo );
-
-    // the real go next methods
-    void goNextElement ( ElementInfo &elementInfo );
-    void goNextFace ( ElementInfo &elementInfo );
-    void goNextEdge ( ElementInfo &elementInfo );
-    void goNextVertex ( ElementInfo &elementInfo );
+    void goNext ( ElementInfo &elementInfo );
+    void goNext ( const Int2Type< 0 > cdVariable, ElementInfo &elementInfo );
+    void goNext ( const Int2Type< 1 > cdVariable, ElementInfo &elementInfo );
+    template< int cd >
+    void goNext ( const Int2Type< cd > cdVariable, ElementInfo &elementInfo );
 
     //! current level
     int level_;
