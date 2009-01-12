@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_GEOMETRY_CC
 
 #include <dune/grid/albertagrid/geometry.hh>
+#include <dune/grid/albertagrid/refinement.hh>
 
 namespace Dune
 {
@@ -414,75 +415,6 @@ namespace Dune
     elDet_ = (coordReader.hasDeterminant() ? coordReader.determinant() : elDeterminant());
     assert( std::abs( elDet_ ) > 0.0 );
     calcedDet_ = true;
-  }
-
-
-
-  namespace Alberta
-  {
-
-    // GeometryInFather
-    // ----------------
-
-    template< int dim >
-    struct GeometryInFather;
-
-    template<>
-    struct GeometryInFather< 1 >
-    {
-      static const int dim = 1;
-
-      typedef Real LocalVector[ dim ];
-
-      static const LocalVector &
-      coordinate ( int child, int orientation, int i )
-      {
-        static const Real coords[ 2 ][ dim+1 ][ dim ]
-          = { { {0.0}, {0.5} }, { {0.5}, {1.0} } };
-        assert( (i >= 0) && (i <= dim) );
-        return coords[ child ][ i ];
-      }
-    };
-
-    template<>
-    struct GeometryInFather< 2 >
-    {
-      static const int dim = 2;
-
-      typedef Real LocalVector[ dim ];
-
-      static const LocalVector &
-      coordinate ( int child, int orientation, int i )
-      {
-        static const Real coords[ 2 ][ dim+1 ][ dim ]
-          = { { {0.0, 1.0}, {0.0, 0.0}, {0.5, 0.0} },
-              { {1.0, 0.0}, {0.0, 1.0}, {0.5, 0.0} } };
-        assert( (i >= 0) && (i <= dim) );
-        return coords[ child ][ i ];
-      }
-    };
-
-    template<>
-    struct GeometryInFather< 3 >
-    {
-      static const int dim = 3;
-
-      typedef Real LocalVector[ dim ];
-
-      static const LocalVector &
-      coordinate ( int child, int orientation, int i )
-      {
-        static const Real coords[ 2 ][ dim+1 ][ dim ]
-          = { { {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.5, 0.0, 0.0} },
-              { {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.5, 0.0, 0.0} } };
-        static const int flip[ 2 ][ 2 ][ dim+1 ]
-          = { { {0, 1, 2, 3}, {0, 1, 2, 3} }, { {0, 2, 1, 3}, {0, 1, 2, 3} } };
-        assert( (i >= 0) && (i <= dim) );
-        i = flip[ child ][ orientation ][ i ];
-        return coords[ child ][ i ];
-      }
-    };
-
   }
 
 
