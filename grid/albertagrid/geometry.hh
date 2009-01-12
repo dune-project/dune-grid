@@ -5,6 +5,11 @@
 
 #include <dune/grid/common/geometry.hh>
 
+#include <dune/grid/genericgeometry/geometry.hh>
+
+// set to 1 to use generic geometries in AlbertaGrid
+#define USE_GENERICGEOMETRY 0
+
 namespace Dune
 {
 
@@ -85,9 +90,122 @@ namespace Dune
 
 
 
+  // AlbertaGridCoordStorage
+  // -----------------------
+
+  template< class CoordTraits, class Topology, unsigned int dimW >
+  class AlbertaGridCornerStorage
+  {
+    typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimW > This;
+
+  public:
+    static const unsigned int size = Topology::numCorners;
+
+    static const unsigned int dimWorld = dimW;
+
+    typedef typename CoordTraits::template Vector< dimWorld >::type
+    GlobalCoordinate;
+
+    template< class SubTopology >
+    struct SubStorage
+    {
+      typedef AlbertaGridCornerStorage< CoordTraits, SubTopology, dimWorld > type;
+    };
+
+  private:
+    GlobalCoordinate coords_[ size ];
+
+  public:
+    template< class CoordReader >
+    explicit AlbertaGridCornerStorage ( const CoordReader &coordReader )
+    {
+      for( unsigned int i = 0; i < size; ++i )
+        coordReader.coordinate( i, coords_[ i ] );
+    }
+
+    template< class Mapping, unsigned int codim >
+    explicit AlbertaGridCornerStorage ( const GenericGeometry::SubMappingCoords< Mapping, codim > &coords )
+    {
+      for( unsigned int i = 0; i < size; ++i )
+        coords_[ i ] = coords[ i ];
+    }
+
+    const GlobalCoordinate &operator[] ( unsigned int i ) const
+    {
+      return coords_[ i ];
+    }
+  };
+
+
+
+  // template< int dim, int dimworld, int cdim >
+  template <class GridImp,int cdim>
+  struct AlbertaGridGeometryTraits
+  {
+    // typedef AlbertaGrid< dim, dimworld > Grid;
+    typedef typename remove_const<GridImp>::type Grid;
+
+    typedef GenericGeometry::DuneCoordTraits< Alberta::Real > CoordTraits;
+
+    static const int dimGrid = Grid::dimension;
+    static const int dimWorld = cdim;
+
+    static const bool hybrid = false;
+    static const GeometryType::BasicType dunetype = GeometryType::simplex;
+
+    static const GeometryType::BasicType linetype = GeometryType::simplex;
+
+    template< class Topology >
+    struct Mapping
+    {
+      typedef AlbertaGridCornerStorage< CoordTraits, Topology, dimWorld > CornerStorage;
+      typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
+    };
+
+    struct Caching
+    {
+      static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::ComputeOnDemand;
+      static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::ComputeOnDemand;
+      static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::ComputeOnDemand;
+      static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::ComputeOnDemand;
+    };
+  };
+
+
+
   // AlbertaGridGeometry
   // -------------------
 
+#if USE_GENERICGEOMETRY
+  template< int mydim, int cdim, class GridImp >
+  class AlbertaGridGeometry
+    : public GenericGeometry::BasicGeometry
+      < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
+  {
+    typedef GenericGeometry::BasicGeometry
+    < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
+    Base;
+
+  public:
+    //! Default constructor
+    AlbertaGridGeometry ()
+      : Base ()
+    {}
+
+    template< class CoordReader >
+    AlbertaGridGeometry ( const CoordReader &coordReader )
+      : Base( GeometryType( GeometryType::simplex, mydim ), coordReader )
+    {}
+
+    template< class CoordReader >
+    void build ( const CoordReader &coordReader )
+    {
+      *this = AlbertaGridGeometry( coordReader );
+    }
+  };
+#endif // #if USE_GENERICGEOMETRY
+
+#if !USE_GENERICGEOMETRY
   /** \class AlbertaGridGeometry
    *  \brief geometry implementation for AlbertaGrid
    *
@@ -131,8 +249,6 @@ namespace Dune
   public:
     //! Default constructor
     AlbertaGridGeometry();
-
-    AlbertaGridGeometry ( const CoordMatrix &coords );
 
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader );
@@ -232,6 +348,7 @@ namespace Dune
     mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant
   };
+#endif // #if !USE_GENERICGEOMETRY
 
 
 
@@ -263,6 +380,7 @@ namespace Dune
 
   private:
     struct GeoInFatherCoordReader;
+    struct FaceCoordReader;
 
     const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
     const LocalFaceGeometry *faceGeometry_[ numFaces ];

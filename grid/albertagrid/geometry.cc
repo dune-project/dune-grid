@@ -48,25 +48,11 @@ namespace Dune
   // AlbertaGridGeometry
   // -------------------
 
+#if !USE_GENERICGEOMETRY
   template< int mydim, int cdim, class GridImp >
   inline AlbertaGridGeometry< mydim, cdim, GridImp > :: AlbertaGridGeometry ()
   {
     invalidate();
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::AlbertaGridGeometry ( const CoordMatrix &coords )
-    : coord_( coords ),
-      builtElMat_( false ),
-      builtinverse_( false )
-  {
-    elDet_ = elDeterminant ();
-    calcedDet_ = true;
-
-    if( !(elDet_ > 0.0) )
-      DUNE_THROW( AlbertaError, "Degenerate Geometry.");
   }
 
 
@@ -336,6 +322,7 @@ namespace Dune
     assert( std::abs( elDet_ ) > 0.0 );
     calcedDet_ = true;
   }
+#endif // #if !USE_GENERICGEOMETRY
 
 
 
@@ -366,19 +353,10 @@ namespace Dune
     typedef MakeableInterfaceObject< LocalFaceGeometry > LocalGeoObject;
     typedef typename LocalGeoObject::ImplementationType LocalGeoImp;
 
-    FieldMatrix< ctype, dimension+1, dimension > refCorners = 0.0;
-    for( int i = 0; i < dimension; ++i )
-      refCorners[ i+1 ][ i ] = 1.0;
-
     for( int face = 0; face < numFaces; ++face )
     {
-      // use reference element here!
-      FieldMatrix< ctype, dimension, dimension > faceCorners;
-      for( int i = 0; i < face; ++i )
-        faceCorners[ i ] = refCorners[ i ];
-      for( int i = face; i < dimension; ++i )
-        faceCorners[ i ] = refCorners[ i+1 ];
-      faceGeometry_[ face ] = new LocalGeoObject( LocalGeoImp( faceCorners ) );
+      const FaceCoordReader coordReader( face );
+      faceGeometry_[ face ] = new LocalGeoObject( LocalGeoImp( coordReader ) );
     }
   }
 
@@ -425,6 +403,50 @@ namespace Dune
     }
   };
 
+
+
+  // AlbertaGridLocalGeometryProvider::FaceCoordReader
+  // --------------------------------------------------------
+
+  template< class Grid >
+  struct AlbertaGridLocalGeometryProvider< Grid >::FaceCoordReader
+  {
+    typedef Alberta::Real ctype;
+
+    typedef FieldVector< ctype, dimension > Coordinate;
+
+  private:
+    int face_;
+
+  public:
+    FaceCoordReader ( int face )
+      : face_( face )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      // here, the reference element should be used
+      refCorner( (i < face_ ? i : i+1), x );
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      return ctype( 0 );
+    }
+
+  private:
+    static void refCorner ( int i, Coordinate &x )
+    {
+      x = ctype( 0 );
+      if( i > 0 )
+        x[ i-1 ] = ctype( 1 );
+    }
+  };
 
 }
 
