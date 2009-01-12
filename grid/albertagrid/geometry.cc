@@ -93,10 +93,9 @@ namespace Dune
   }
 
   template< int mydim, int cdim, class GridImp >
-  inline GeometryType
-  AlbertaGridGeometry< mydim, cdim, GridImp > :: type () const
+  inline GeometryType AlbertaGridGeometry< mydim, cdim, GridImp >::type () const
   {
-    return GeometryType( GeometryType :: simplex, mydim );
+    return GeometryType( GeometryType::simplex, mydimension );
   }
 
   template< int mydim, int cdim, class GridImp >
@@ -105,152 +104,61 @@ namespace Dune
     return numCorners;
   }
 
-  ///////////////////////////////////////////////////////////////////////
+
   template< int mydim, int cdim, class GridImp >
-  inline const FieldVector< albertCtype, cdim > &
+  inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector &
   AlbertaGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
   {
+    assert( (i >= 0) && (i < numCorners) );
     return coord_[ i ];
   }
 
-  ///////////////////////////////////////////////////////////////////////
-  template <class GridImp, int mydim, int cdim>
-  struct AlbertaCalcElementMatrix
-  {
-    enum { matdim = (mydim > 0) ? mydim : 1 };
-    static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
-                             FieldMatrix<albertCtype,matdim,matdim> & elMat)
-    {
-      std::string text;
-      text += "AlbertaGridGeometry<";
-      char fake[128];
-      sprintf(fake,"%d",mydim);
-      text += fake; text += ",";
-      sprintf(fake,"%d",cdim); text += ">::calcElMatrix: No default implementation!";
-      DUNE_THROW(AlbertaError, text);
-      return false;
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaCalcElementMatrix<GridImp,1,2>
-  {
-    enum { mydim  = 1 };
-    enum { cdim   = 2 };
-    static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
-                             FieldMatrix<albertCtype,cdim,mydim> & elMat)
-    {
-      //      column 0
-      // A = ( P1 - P0 )
-      for (int i=0; i<cdim; ++i)
-      {
-        elMat[i][0] = coord[1][i] - coord[0][i];
-      }
-      return true;
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaCalcElementMatrix<GridImp,2,2>
-  {
-    enum { mydim  = 2 };
-    enum { cdim   = 2 };
-    enum { matdim = 2 };
-    static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
-                             FieldMatrix<albertCtype,matdim,matdim> & elMat)
-    {
-      //       column 0 , column 1
-      // A = ( P1 - P0  , P2 - P0 )
-      for (int i=0; i<cdim; ++i)
-      {
-        elMat[i][0] = coord[1][i] - coord[0][i];
-        elMat[i][1] = coord[2][i] - coord[0][i];
-      }
-      return true;
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaCalcElementMatrix<GridImp,2,3>
-  {
-    enum { mydim  = 2 };
-    enum { cdim   = 3 };
-    static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
-                             FieldMatrix<albertCtype,cdim,mydim> & elMat)
-    {
-      //       column 0 , column 1
-      // A = ( P1 - P0  , P2 - P0 )
-      for (int i=0; i<cdim; ++i)
-      {
-        elMat[i][0] = coord[1][i] - coord[0][i];
-        elMat[i][1] = coord[2][i] - coord[0][i];
-      }
-      return true;
-    }
-  };
-
-  template <class GridImp>
-  struct AlbertaCalcElementMatrix<GridImp,3,3>
-  {
-    enum { mydim  = 3 };
-    enum { cdim   = 3 };
-    enum { matdim = 3 };
-    static bool calcElMatrix(const FieldMatrix<albertCtype,mydim+1,cdim> & coord,
-                             FieldMatrix<albertCtype,matdim,matdim> & elMat)
-    {
-      const FieldVector<albertCtype, cdim> & coord0 = coord[0];
-      for(int i=0 ; i<cdim; ++i)
-      {
-        elMat[i][0] = coord[1][i] - coord0[i];
-        elMat[i][1] = coord[2][i] - coord0[i];
-        elMat[i][2] = coord[3][i] - coord0[i];
-      }
-      return true;
-    }
-  };
 
   template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::calcElMatrix () const
   {
-    if(!builtElMat_)
+    if( (mydimension == 0) || builtElMat_ )
+      return;
+
+    for( int i = 0; i < coorddimension; ++i )
     {
-      // build mapping from reference element to actual element
-      builtElMat_ = AlbertaCalcElementMatrix<GridImp,mydim,cdim>::calcElMatrix(coord_,elMat_);
+      for( int j = 0; j < mydimension; ++j )
+        elMat_[ i ][ j ] = coord_[ j+1 ][ i ] - coord_[ 0 ][ i ];
     }
+    builtElMat_ = true;
   }
 
+
   template< int mydim, int cdim, class GridImp >
-  inline FieldVector< albertCtype, cdim >
-  AlbertaGridGeometry< mydim, cdim, GridImp>
-  :: global ( const FieldVector< albertCtype, mydim > &local ) const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector
+  AlbertaGridGeometry< mydim, cdim, GridImp >::global ( const LocalVector &local ) const
   {
     calcElMatrix();
 
-    FieldVector< albertCtype, cdim > y = coord_[ 0 ];
+    GlobalVector y = coord_[ 0 ];
     elMat_.umv( local, y );
     return y;
   }
 
   //local implementation for mydim < cdim
   template< int mydim, int cdim, class GridImp >
-  inline FieldVector< albertCtype, mydim >
-  AlbertaGridGeometry<mydim,cdim,GridImp>
-  :: local ( const FieldVector< albertCtype, cdim > &global ) const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::LocalVector
+  AlbertaGridGeometry< mydim, cdim, GridImp>::local ( const GlobalVector &global ) const
   {
     if( !builtinverse_ )
       buildJacobianInverseTransposed();
 
-    FieldVector< albertCtype, cdim > y = global;
+    FieldVector< ctype, coorddimension > y = global;
     y -= coord_[ 0 ];
 
-    FieldVector< albertCtype, mydim > x;
+    FieldVector< ctype, mydimension > x;
     FMatrixHelp::multAssignTransposed( Jinv_, y, x );
     return x;
   }
 
   // determinant of one Geometry, here line
   template<>
-  inline albertCtype
+  inline AlbertaGridGeometry< 1, 2, const AlbertaGrid< 2, 2 > >::ctype
   AlbertaGridGeometry< 1, 2, const AlbertaGrid< 2, 2 > >::elDeterminant () const
   {
     // volume is length of edge
@@ -260,7 +168,8 @@ namespace Dune
 
   // determinant of one Geometry, here line
   template <>
-  inline albertCtype AlbertaGridGeometry<1,3,const AlbertaGrid<3,3> >::elDeterminant () const
+  inline AlbertaGridGeometry< 1, 3, const AlbertaGrid< 3, 3 > >::ctype
+  AlbertaGridGeometry<1,3,const AlbertaGrid<3,3> >::elDeterminant () const
   {
     // volume is length of edge
     FieldVector< ctype, coorddimension > z = coord_[0] - coord_[1];
@@ -269,7 +178,8 @@ namespace Dune
 
   // determinant of one Geometry, here triangle
   template <>
-  inline albertCtype AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::elDeterminant () const
+  inline AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >::ctype
+  AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::elDeterminant () const
   {
     calcElMatrix();
     return std::abs ( elMat_.determinant () );
@@ -277,7 +187,8 @@ namespace Dune
 
   // determinant of one Geometry, here triangle in 3d
   template <>
-  inline albertCtype AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::elDeterminant () const
+  inline AlbertaGridGeometry< 2, 3, const AlbertaGrid< 3, 3 > >::ctype
+  AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::elDeterminant () const
   {
     enum { dim = 3 };
 
@@ -296,7 +207,8 @@ namespace Dune
 
   // volume of one Geometry, here therahedron
   template <>
-  inline albertCtype AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::elDeterminant () const
+  inline AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >::ctype
+  AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::elDeterminant () const
   {
     calcElMatrix();
     return std::abs(elMat_.determinant ());
@@ -304,13 +216,15 @@ namespace Dune
 
   // volume of one Geometry, here point
   template <>
-  inline albertCtype AlbertaGridGeometry<0,2,const AlbertaGrid<2,2> >::elDeterminant () const
+  inline AlbertaGridGeometry< 0, 2, const AlbertaGrid< 2, 2 > >::ctype
+  AlbertaGridGeometry<0,2,const AlbertaGrid<2,2> >::elDeterminant () const
   {
     return 1.0;
   }
   // volume of one Geometry, here point
   template <>
-  inline albertCtype AlbertaGridGeometry<0,3,const AlbertaGrid<3,3> >::elDeterminant () const
+  inline AlbertaGridGeometry< 0, 3, const AlbertaGrid< 3, 3 > >::ctype
+  AlbertaGridGeometry<0,3,const AlbertaGrid<3,3> >::elDeterminant () const
   {
     return 1.0;
   }
@@ -333,27 +247,32 @@ namespace Dune
     builtinverse_ = true;
   }
 
+
   template <int mydim, int cdim, class GridImp>
-  inline albertCtype
-  AlbertaGridGeometry<mydim,cdim,GridImp> :: volume () const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
+  AlbertaGridGeometry<mydim,cdim,GridImp>::volume () const
   {
     assert( calcedDet_ );
-    const albertCtype refVolume
-      = albertCtype( 1 ) / albertCtype( Factorial< mydim > :: factorial );
+    const ctype refVolume
+      = ctype( 1 ) / ctype( Factorial< mydimension > :: factorial );
     return refVolume * elDet_;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline albertCtype AlbertaGridGeometry<mydim,cdim,GridImp>::
-  integrationElement (const FieldVector<albertCtype, mydim>& local) const
+
+  template <int mydim, int cdim, class GridImp >
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
+  AlbertaGridGeometry< mydim, cdim, GridImp>
+  ::integrationElement ( const LocalVector &local ) const
   {
     assert( calcedDet_ );
     return elDet_;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<albertCtype,cdim,mydim>& AlbertaGridGeometry<mydim,cdim,GridImp>::
-  jacobianInverseTransposed (const FieldVector<albertCtype, mydim>& local) const
+
+  template< int mydim, int cdim, class GridImp >
+  inline const FieldMatrix< Alberta::Real, cdim, mydim > &
+  AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::jacobianInverseTransposed ( const LocalVector &local ) const
   {
     if(builtinverse_)
       return Jinv_;
@@ -363,9 +282,10 @@ namespace Dune
     return Jinv_;
   }
 
-  template <int mydim, int cdim, class GridImp>
-  inline bool AlbertaGridGeometry<mydim,cdim,GridImp>::
-  checkInside(const FieldVector<albertCtype, mydim> &local) const
+
+  template< int mydim, int cdim, class GridImp >
+  inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::checkInside ( const LocalVector &local ) const
   {
     albertCtype sum = 0.0;
 

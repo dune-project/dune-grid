@@ -113,12 +113,15 @@ namespace Dune
 
   public:
     //! type of coordinates
-    typedef albertCtype ctype;
+    typedef Alberta::Real ctype;
 
     static const int dimension = Grid :: dimension;
     static const int mydimension = mydim;
     static const int codimension = dimension - mydimension;
     static const int coorddimension = cdim;
+
+    typedef FieldVector< ctype, mydimension > LocalVector;
+    typedef FieldVector< ctype, coorddimension > GlobalVector;
 
   private:
     static const int numCorners = mydimension + 1;
@@ -142,20 +145,18 @@ namespace Dune
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector< ctype, cdim > &operator[] (int i) const;
+    const GlobalVector &operator[] (int i) const;
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
-    FieldVector< ctype, cdim >
-    global ( const FieldVector< ctype, mydim> &local ) const;
+    GlobalVector global ( const LocalVector &local ) const;
 
     //! maps a global coordinate within the element to a
     //! local coordinate in its reference element
-    FieldVector< ctype, mydim >
-    local ( const FieldVector< ctype, cdim  > &global ) const;
+    LocalVector local ( const GlobalVector &global ) const;
 
     //! returns true if the point in local coordinates is inside reference element
-    bool checkInside( const FieldVector< ctype, mydim > &local ) const;
+    bool checkInside( const LocalVector &local ) const;
 
     /*!
        Copy from sgrid.hh:
@@ -181,7 +182,7 @@ namespace Dune
      */
 
     // A(l)
-    ctype integrationElement ( const FieldVector< ctype, mydim > &local ) const;
+    ctype integrationElement ( const LocalVector &local ) const;
 
     // volume if geometry
     ctype volume () const;
@@ -191,7 +192,7 @@ namespace Dune
     //! call jacobianInverseTransposed first because integration element is calculated
     //! during calculation of the transposed of the jacobianInverse
     const FieldMatrix< ctype, cdim, mydim > &
-    jacobianInverseTransposed ( const FieldVector< ctype, mydim > &local ) const;
+    jacobianInverseTransposed ( const LocalVector &local ) const;
 
     //***********************************************************************
     //  Methods that not belong to the Interface, but have to be public
