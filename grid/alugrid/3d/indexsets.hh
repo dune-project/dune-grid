@@ -67,7 +67,14 @@ namespace Dune {
     int index (const EntityType & ep) const
     {
       enum { cd = EntityType :: codimension };
-      return (grid_.getRealImplementation(ep)).getIndex();
+      return index<cd>(ep);
+    }
+
+    //! return hierarchic index of given entity
+    template< int codim >
+    int index ( const typename GridType::Traits::template Codim< codim >::Entity &entity ) const
+    {
+      return GridType::getRealImplementation( entity ).getIndex();
     }
 
     //! return subIndex of given entity

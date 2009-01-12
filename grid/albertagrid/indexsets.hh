@@ -109,9 +109,15 @@ namespace Dune
     int index ( const Entity &entity ) const
     {
       const int codim = Entity::codimension;
+      return index<codim>(entity);
+    }
+
+    //! return hierarchic index of given entity
+    template< int codim >
+    int index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
+    {
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-
       return subIndex< codim >( entityImp.elementInfo().el(), entityImp.getFEVnum() );
     }
 
