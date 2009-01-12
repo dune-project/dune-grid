@@ -749,6 +749,7 @@ namespace Dune
     if (dimw==2)
     {
       std::stringstream command;
+      command << std::fixed;
       std::string suffix;
 
       if (para.haspath())
@@ -786,6 +787,7 @@ namespace Dune
     {
       { // first call
         std::stringstream command;
+        command << std::fixed;
         std::string suffix;
 
         if (para.haspath())
@@ -813,6 +815,7 @@ namespace Dune
         info->print("Quality enhancement:");
         call_nr = 2;
         std::stringstream command;
+        command << std::fixed;
         if (para.haspath())
           command << para.path() << "/";
 
