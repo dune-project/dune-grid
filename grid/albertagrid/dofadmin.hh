@@ -37,6 +37,13 @@ namespace Dune
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     private:
+#if DUNE_ALBERTA_VERSION >= 0x200
+      static const int nNodeTypes = N_NODE_TYPES;
+#else
+      static const int nNodeTypes = DIM+1;
+#endif
+
+
       template< int codim >
       struct CreateDofSpace;
 
@@ -46,6 +53,7 @@ namespace Dune
       typedef std::pair< int, int > Cache;
 
       MeshPointer mesh_;
+      const DofSpace *emptySpace_;
       const DofSpace *dofSpace_[ dimension+1 ];
       Cache cache_[ dimension+1 ];
 
@@ -101,6 +109,10 @@ namespace Dune
       }
 
     private:
+      static const DofSpace *emptyDofSpace ( const MeshPointer &mesh );
+      static const DofSpace *createDofSpace ( const MeshPointer &mesh,
+                                              const std::string &name,
+                                              const int (&ndof)[ nNodeTypes ] );
       static void freeDofSpace ( const DofSpace *dofSpace );
     };
 
@@ -116,9 +128,60 @@ namespace Dune
         return;
 
       mesh_ = mesh;
+      emptySpace_ = emptyDofSpace( mesh_ );
+      for( int i = 0; i < nNodeTypes; ++i )
+        assert( emptySpace_->admin->n_dof[ i ] == 0 );
       ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
       ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
     }
+
+
+
+    template< int dim >
+    inline const DofSpace *
+    HierarchyDofNumbering< dim >::emptyDofSpace ( const MeshPointer &mesh )
+    {
+      int ndof[ nNodeTypes ];
+      for( int i = 0; i < nNodeTypes; ++i )
+        ndof[ i ] = 0;
+      std::string name = "Empty";
+      return createDofSpace( mesh, name, ndof );
+    }
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline const DofSpace *
+    HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
+                                                   const std::string &name,
+                                                   const int (&ndof)[ nNodeTypes ] )
+    {
+      const ALBERTA FLAGS flags = ADM_PRESERVE_COARSE_DOFS;
+      return ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION == 0x200
+    template< int dim >
+    inline const DofSpace *
+    HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
+                                                   const std::string &name,
+                                                   const int (&ndof)[ nNodeTypes ] )
+    {
+      return ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL, 1 );
+    }
+#endif // #if DUNE_ALBERTA_VERSION == 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline const DofSpace *
+    HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
+                                                   const std::string &name,
+                                                   const int (&ndof)[ nNodeTypes ] )
+    {
+      return ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL );
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 #if DUNE_ALBERTA_VERSION >= 0x201
@@ -155,52 +218,24 @@ namespace Dune
     // HierarchyDofNumbering::CreateDofSpace
     // -------------------------------------
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     template< int codim >
     struct HierarchyDofNumbering< dim >::CreateDofSpace
     {
       static void apply ( const MeshPointer &mesh, const DofSpace *(&dofSpace)[ dim+1 ] )
       {
-        int ndof[ N_NODE_TYPES ];
-        for( int i = 0; i < N_NODE_TYPES; ++i )
+        int ndof[ nNodeTypes ];
+        for( int i = 0; i < nNodeTypes; ++i )
           ndof[ i ] = 0;
         ndof[ CodimType< dim, codim >::value ] = 1;
 
         std::string name = "Codimension ";
         name += (char)(codim + '0');
 
-#if DUNE_ALBERTA_VERSION >= 0x201
-        const ALBERTA FLAGS flags = ADM_PRESERVE_COARSE_DOFS;
-        dofSpace[ codim ] = ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
-#else
-        dofSpace[ codim ] = ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL, 1 );
-#endif
+        dofSpace[ codim ] = createDofSpace( mesh, name, ndof );
         assert( dofSpace[ codim ] != NULL );
       }
     };
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    template< int codim >
-    struct HierarchyDofNumbering< dim >::CreateDofSpace
-    {
-      static void apply ( const MeshPointer &mesh, const DofSpace *(&dofSpace)[ dim+1 ] )
-      {
-        int ndof[ DIM+1 ];
-        for( int i = 0; i <= DIM; ++i )
-          ndof[ i ] = 0;
-        ndof[ CodimType< dim, codim >::value ] = 1;
-
-        std::string name = "Codimension ";
-        name += (char)(codim + '0');
-
-        dofSpace[ codim ] = ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL );
-        assert( dofSpace[ codim ] != NULL );
-      }
-    };
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 
