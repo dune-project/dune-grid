@@ -55,16 +55,9 @@ namespace AlbertHelp
   template <int cdim, int vertices>
   struct AlbertLeafData
   {
-#ifdef LEAFDATACOORDS
-    typedef Dune::FieldMatrix<double,vertices,cdim> CoordinateMatrixType;
-    typedef Dune::FieldVector<double,cdim> CoordinateVectorType;
-#endif
     // type of stored data
     typedef struct
     {
-#ifdef LEAFDATACOORDS
-      CoordinateMatrixType coord;
-#endif
       double determinant;
     } Data;
 
@@ -87,21 +80,6 @@ namespace AlbertHelp
         Data *ldataChi = (Data *) child[i]->child[1];
         assert(ldataChi != 0);
         ldataChi->determinant = childDet;
-
-#ifdef LEAFDATACOORDS
-        // calculate the coordinates
-        {
-          const CoordinateMatrixType &oldCoord = ldata->coord;
-          CoordinateMatrixType &coord = ldataChi->coord;
-          for (int j = 0; j < cdim; ++j)
-          {
-            coord[2][j] = 0.5 * (oldCoord[0][j] + oldCoord[1][j]);
-            coord[i  ][j] = oldCoord[2][j];
-            coord[1-i][j] = oldCoord[i][j];
-          }
-          //    std::cout << coord[0] << " " << coord[1] << " " << coord[2] << "\n";
-        }
-#endif
       }
     }
 
@@ -142,16 +120,6 @@ namespace AlbertHelp
       assert( elf->el->child[0] == 0 );
       Data *ldata = (Data *) elf->el->child[1];
       assert(ldata != 0);
-
-#ifdef LEAFDATACOORDS
-      for(int i=0; i<vertices; ++i)
-      {
-        CoordinateVectorType & c = ldata->coord[i];
-        const ALBERTA REAL_D & coord = elf->coord[i];
-        for(int j=0; j<cdim; ++j) c[j] = coord[j];
-        //      std::cout << c << " coord \n";
-      }
-#endif
 
       ldata->determinant = ALBERTA el_det(elf);
     }
