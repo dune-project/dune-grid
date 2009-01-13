@@ -7,6 +7,10 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
+#include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/elementinfo.hh>
+#include <dune/grid/albertagrid/referencetopo.hh>
+
 // set to 1 to use generic geometries in AlbertaGrid
 #define USE_GENERICGEOMETRY 0
 

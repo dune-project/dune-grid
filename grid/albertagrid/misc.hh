@@ -4,7 +4,11 @@
 #define DUNE_ALBERTA_MISC_HH
 
 #include <dune/common/exceptions.hh>
+
+#include <dune/grid/genericgeometry/codimtable.hh>
 #include <dune/grid/genericgeometry/misc.hh>
+
+#include <dune/grid/albertagrid/albertaheader.hh>
 
 #if HAVE_ALBERTA
 

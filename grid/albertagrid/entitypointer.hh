@@ -10,6 +10,14 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+
+
   /** \class   AlbertaGridEntityPointer
    *  \ingroup AlbertaGrid
    *  \brief   EntityPointer implementation for AlbertaGrid

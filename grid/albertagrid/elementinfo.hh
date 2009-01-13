@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_ELEMENTINFO_HH
 #define DUNE_ALBERTA_ELEMENTINFO_HH
 
+#include <cassert>
+
 #include <dune/grid/albertagrid/misc.hh>
 
 #if HAVE_ALBERTA

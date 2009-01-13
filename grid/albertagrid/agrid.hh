@@ -51,7 +51,6 @@
 
 #include "elementinfo.hh"
 
-#include "referencetopo.hh"
 #include "indexsets.hh"
 #include "geometry.hh"
 #include "entity.hh"
@@ -65,8 +64,8 @@
 namespace Dune
 {
 
-  // Forward Declarations
-  // --------------------
+  // InternalForward Declarations
+  // ----------------------------
 
   template< int dim, int dimworld >
   class AlbertaGrid;

@@ -3,6 +3,7 @@
 #ifndef DUNE_ALBERTA_DOFVECTOR_HH
 #define DUNE_ALBERTA_DOFVECTOR_HH
 
+#include <cstdlib>
 #include <limits>
 
 #include <dune/grid/albertagrid/misc.hh>

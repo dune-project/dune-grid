@@ -5,11 +5,13 @@
 
 #if HAVE_ALBERTA
 
-//- system includes
 #include <iostream>
 
 #include <dune/grid/common/grid.hh>
+
+#include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/grid/albertagrid/albertaextra.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 namespace Dune

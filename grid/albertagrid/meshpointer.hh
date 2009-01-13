@@ -3,10 +3,12 @@
 #ifndef DUNE_ALBERTA_MESHPOINTER_HH
 #define DUNE_ALBERTA_MESHPOINTER_HH
 
+#include <cassert>
 #include <string>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
+#include <dune/grid/albertagrid/albertaextra.hh>
 
 #if HAVE_ALBERTA
 

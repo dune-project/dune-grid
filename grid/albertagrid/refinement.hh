@@ -3,6 +3,10 @@
 #ifndef DUNE_ALBERTA_REFINEMENT_HH
 #define DUNE_ALBERTA_REFINEMENT_HH
 
+#include <cassert>
+
+#include <dune/grid/albertagrid/misc.hh>
+
 namespace Dune
 {
 

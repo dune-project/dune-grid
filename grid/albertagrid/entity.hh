@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_ENTITY_HH
 
 #include <dune/grid/common/entity.hh>
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
@@ -250,24 +251,20 @@ namespace Dune
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
     AlbertaGridLeafIntersectionIteratorType ileafbegin () const;
-    AlbertaGridIntersectionIteratorType ibegin () const
-    {
-      return ileafbegin();
-    }
-
-    AlbertaGridLevelIntersectionIteratorType ilevelbegin () const
-    {
-      DUNE_THROW(NotImplemented,"method ilevelbegin not implemented!");
-      return ileafbegin();
-    }
 
     //! Reference to one past the last intersection with neighbor
     AlbertaGridIntersectionIteratorType ileafend () const;
-    AlbertaGridIntersectionIteratorType iend () const { return ileafend();}
+
+    AlbertaGridLevelIntersectionIteratorType ilevelbegin () const
+    {
+      DUNE_THROW( NotImplemented, "method ilevelbegin not implemented for AlbertaGrid." );
+      return ileafend();
+    }
+
     AlbertaGridLeafIntersectionIteratorType ilevelend () const
     {
-      DUNE_THROW(NotImplemented,"method ilevelend not implemented!");
-      return ibegin();
+      DUNE_THROW( NotImplemented, "method ilevelend not implemented for AlbertaGrid." );
+      return ileafend();
     }
 
     //! returns true if entity is leaf entity, i.e. has no children

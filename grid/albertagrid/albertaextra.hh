@@ -7,6 +7,7 @@
 #define DUNE_ALBERTAEXTRA_HH
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 
 #include <dune/grid/albertagrid/albertaheader.hh>

@@ -90,10 +90,6 @@ namespace Dune
     static const int dimensionworld = GridImp::dimensionworld;
 
   private:
-    enum { dim = GridImp::dimension };
-    friend class AlbertaGridEntity< 2, dimension, GridImp >;
-    friend class AlbertaGridEntity< 1, dimension, GridImp >;
-    friend class AlbertaGridEntity< 0, dimension, GridImp >;
     friend class AlbertaGrid< dimension, dimensionworld >;
 
     static const int numSubEntities
