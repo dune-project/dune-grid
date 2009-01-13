@@ -289,11 +289,13 @@ namespace Dune
   //***************************************
 
   // default implementation used new and delete
-  template< class GridImp, class EntityProvider, int dim , int codim >
+  template< class GridImp, class EntityProvider, int codim >
   struct GetNewEntity
   {
-    typedef typename SelectEntityImp<codim,dim,GridImp>::EntityObject EntityObject;
-    typedef typename SelectEntityImp<codim,dim,GridImp>::EntityImp EntityImp;
+    typedef typename remove_const< GridImp >::type::Traits Traits;
+    typedef MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity >
+    EntityObject;
+    typedef typename EntityObject::ImplementationType EntityImp;
 
     static EntityObject *
     getNewEntity ( GridImp &grid, EntityProvider &enp )
@@ -301,55 +303,53 @@ namespace Dune
       return new EntityObject( EntityImp( grid ) );
     }
 
-    static void freeEntity ( EntityProvider &enp , EntityObject *en )
+    static void freeEntity ( EntityProvider &enp, EntityObject *entity )
     {
-      if( en )
-        delete en;
+      delete entity;
     }
   };
 
   // specialisation for codim 0 uses stack
-  template <class GridImp, class EntityProvider, int dim>
-  struct GetNewEntity<GridImp,EntityProvider,dim,0>
+  template< class GridImp, class EntityProvider >
+  struct GetNewEntity< GridImp, EntityProvider, 0 >
   {
-    typedef typename SelectEntityImp<0,dim,GridImp>::EntityObject EntityObject;
-    typedef typename SelectEntityImp<0,dim,GridImp>::EntityImp EntityImp;
+    typedef typename remove_const< GridImp >::type::Traits Traits;
+    typedef MakeableInterfaceObject< typename Traits::template Codim< 0 >::Entity >
+    EntityObject;
+    typedef typename EntityObject::ImplementationType EntityImp;
 
     static EntityObject *
     getNewEntity ( GridImp &grid, EntityProvider &enp )
     {
-      // return object from stack
       return enp.getNewObjectEntity( grid, (EntityImp *)0 );
     }
 
-    static void freeEntity ( EntityProvider &enp , EntityObject *en )
+    static void freeEntity ( EntityProvider &enp , EntityObject *entity )
     {
-      enp.freeObjectEntity( en );
+      enp.freeObjectEntity( entity );
     }
   };
 
+
   template< int dim, int dimworld >
   template< int codim >
-  inline typename
-  SelectEntityImp< codim, dim, const AlbertaGrid< dim, dimworld > >::EntityObject *
+  inline MakeableInterfaceObject< typename AlbertaGrid< dim, dimworld >::Traits::template Codim< codim >::Entity > *
   AlbertaGrid< dim, dimworld >::getNewEntity () const
   {
-    typedef GetNewEntity< const This, EntityProvider, dim, codim > Helper;
+    typedef GetNewEntity< const This, EntityProvider, codim > Helper;
     return Helper::getNewEntity( *this, entityProvider_ );
   }
 
   template< int dim, int dimworld >
   template< int codim >
   inline void AlbertaGrid< dim, dimworld >
-  ::freeEntity ( typename SelectEntityImp< codim, dim, const This >::EntityObject * en ) const
+  ::freeEntity ( MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *entity ) const
   {
-    typedef GetNewEntity< const This, EntityProvider, dim, codim > Helper;
-    Helper::freeEntity( entityProvider_, en );
+    typedef GetNewEntity< const This, EntityProvider, codim > Helper;
+    Helper::freeEntity( entityProvider_, entity );
   }
 
-  //**************************************
-  //  refine and coarsen methods
-  //**************************************
+
 
   template< int dim, int dimworld >
   inline bool AlbertaGrid < dim, dimworld >::globalRefine ( int refCount )
@@ -487,7 +487,7 @@ namespace Dune
   adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
   {
 #ifndef CALC_COORD
-    typedef typename SelectEntityImp< 0, dim, const This >::EntityImp EntityImp;
+    typedef typename EntityObject::ImplementationType EntityImp;
 
     EntityObject father( EntityImp( *this ) );
     EntityObject son( EntityImp( *this ) );
@@ -769,8 +769,8 @@ namespace Dune
 
 #if 0
   template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::readGridAscii
-    (const std::basic_string<char> filename, albertCtype & time )
+  inline bool AlbertaGrid< dim, dimworld >
+  ::readGridAscii ( const std::string &filename, ctype &time )
   {
     removeMesh(); // delete all objects
 

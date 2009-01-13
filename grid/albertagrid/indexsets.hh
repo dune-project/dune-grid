@@ -9,6 +9,7 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/common/indexstack.hh>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/misc.hh>
@@ -33,7 +34,9 @@ namespace Dune
 
   namespace Alberta
   {
-    static IndexManagerType *currentIndexStack = 0;
+    typedef Dune::IndexStack< int, 100000 > IndexStack;
+
+    static IndexStack *currentIndexStack = 0;
   }
 
 
@@ -97,6 +100,8 @@ namespace Dune
     explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
 
   public:
+    typedef Alberta::IndexStack IndexStack;
+
     //! return true if entity is contained in set
     template< class Entity >
     bool contains ( const Entity & ) const
@@ -109,7 +114,7 @@ namespace Dune
     int index ( const Entity &entity ) const
     {
       const int codim = Entity::codimension;
-      return index<codim>(entity);
+      return index< codim >( entity );
     }
 
     //! return hierarchic index of given entity
@@ -228,7 +233,7 @@ namespace Dune
 #endif
 
     // index stacks providing new numbers during adaptation
-    IndexManagerType indexStack_[ dimension+1 ];
+    IndexStack indexStack_[ dimension+1 ];
 
     // dof vectors storing the (persistent) numbering
     Alberta::DofVectorPointer< int > entityNumbers_[ dimension+1 ];
@@ -288,10 +293,10 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaGridHierarchicIndexSet< dim, dimworld >::InitEntityNumber
   {
-    IndexManagerType &indexStack_;
+    IndexStack &indexStack_;
 
   public:
-    InitEntityNumber ( IndexManagerType &indexStack )
+    InitEntityNumber ( IndexStack &indexStack )
       : indexStack_( indexStack )
     {}
 
@@ -367,12 +372,11 @@ namespace Dune
     typedef Alberta::DofVectorPointer< int > DofVectorPointer;
     typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
-    IndexManagerType &indexStack_;
+    IndexStack &indexStack_;
     DofVectorPointer dofVector_;
     DofAccess dofAccess_;
 
-    RefineNumbering ( IndexManagerType &indexStack,
-                      const DofVectorPointer &dofVector )
+    RefineNumbering ( IndexStack &indexStack, const DofVectorPointer &dofVector )
       : indexStack_( indexStack ),
         dofVector_( dofVector ),
         dofAccess_( dofVector.dofSpace() )
@@ -390,7 +394,7 @@ namespace Dune
                                     const Alberta::Patch &patch )
     {
       assert( Alberta::currentIndexStack != 0 );
-      IndexManagerType &indexStack = Alberta::currentIndexStack[ codim ];
+      IndexStack &indexStack = Alberta::currentIndexStack[ codim ];
       RefineNumbering refineNumbering( indexStack, dofVector );
       patch.forEachInternalSubChild( refineNumbering );
     }
@@ -412,12 +416,11 @@ namespace Dune
     typedef Alberta::DofVectorPointer< int > DofVectorPointer;
     typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
-    IndexManagerType &indexStack_;
+    IndexStack &indexStack_;
     DofVectorPointer dofVector_;
     DofAccess dofAccess_;
 
-    CoarsenNumbering ( IndexManagerType &indexStack,
-                       const DofVectorPointer &dofVector )
+    CoarsenNumbering ( IndexStack &indexStack, const DofVectorPointer &dofVector )
       : indexStack_( indexStack ),
         dofVector_( dofVector ),
         dofAccess_( dofVector.dofSpace() )
@@ -438,7 +441,7 @@ namespace Dune
                                  const Alberta::Patch &patch )
     {
       assert( Alberta::currentIndexStack != 0 );
-      IndexManagerType &indexStack = Alberta::currentIndexStack[ codim ];
+      IndexStack &indexStack = Alberta::currentIndexStack[ codim ];
       CoarsenNumbering coarsenNumbering( indexStack, dofVector );
       patch.forEachInternalSubChild( coarsenNumbering );
     }

@@ -273,7 +273,7 @@ namespace Dune
   inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
   ::checkInside ( const LocalVector &local ) const
   {
-    albertCtype sum = 0.0;
+    ctype sum = 0.0;
 
     for(int i=0; i<mydim; i++)
     {

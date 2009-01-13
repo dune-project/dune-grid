@@ -23,14 +23,8 @@
 #include <dune/common/interfaces.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
-#include <dune/grid/common/capabilities.hh>
 #include <dune/common/stdstreams.hh>
-
-#if HAVE_MPI
-#include <dune/common/mpicollectivecommunication.hh>
-#else
 #include <dune/common/collectivecommunication.hh>
-#endif
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/defaultindexsets.hh>
@@ -38,19 +32,12 @@
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
-// stack for index management
-#include <dune/grid/common/indexstack.hh>
-
 //- Local includes
 // some cpp defines and include of alberta.h
 #include "albertaheader.hh"
 
 // grape data io
 #include <dune/grid/utility/grapedataioformattypes.hh>
-
-// IndexManager defined in indexstack.hh
-// 10000 is the size of the finite stack used by IndexStack
-typedef Dune::IndexStack<int,100000> IndexManagerType;
 
 //#define CALC_COORD
 // some extra functions for handling the Albert Mesh
@@ -63,12 +50,6 @@ typedef Dune::IndexStack<int,100000> IndexManagerType;
 #include "agmemory.hh"
 
 #include "elementinfo.hh"
-
-namespace Dune
-{
-  // i.e. double or float
-  typedef Alberta::Real albertCtype;
-}
 
 #include "referencetopo.hh"
 #include "indexsets.hh"
@@ -83,24 +64,17 @@ namespace Dune
 
 namespace Dune
 {
-  template<class GridImp>         class AlbertaGridIntersectionIterator;
-  template<int dim, int dimworld> class AlbertaGrid;
-  template<int dim, int dimworld> class AlbertaGridHierarchicIndexSet;
 
-  template <int codim, int dim, class GridImp>
-  struct SelectEntityImp
-  {
-    typedef AlbertaGridEntity<codim,dim,GridImp> EntityImp;
-    typedef Dune::Entity<codim, dim, const GridImp, AlbertaGridEntity> Entity;
-    typedef MakeableInterfaceObject<Entity> EntityObject;
-  };
+  // Forward Declarations
+  // --------------------
 
-  //**********************************************************************
-  //
-  // --AlbertaGrid
-  // --Grid
-  //
-  //**********************************************************************
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+
+
+  // AlbertaGridFamily
+  // -----------------
 
   template <int dim, int dimworld>
   struct AlbertaGridFamily
@@ -134,7 +108,7 @@ namespace Dune
         typedef Dune::Geometry<dim-cd, dimworld, const GridImp, AlbertaGridGeometry> Geometry;
         typedef Dune::Geometry<dim-cd, dim, const GridImp, AlbertaGridGeometry> LocalGeometry;
 
-        typedef typename SelectEntityImp<cd,dim,GridImp>::Entity Entity;
+        typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
         typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
         typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
@@ -168,6 +142,11 @@ namespace Dune
       typedef Dune::CollectiveCommunication< int > CollectiveCommunication;
     };
   };
+
+
+
+  // AlbertaGrid
+  // -----------
 
   /** \class AlbertaGrid
    *  \brief [<em> provides \ref Dune::Grid </em>]
@@ -526,7 +505,7 @@ namespace Dune
 
 #if 0
     //! reads ALBERTA macro file
-    bool readGridAscii ( const std::basic_string<char> filename, albertCtype & time );
+    bool readGridAscii ( const std::string &filename, ctype &time );
 #endif
 
     // delete mesh and all vectors
@@ -548,7 +527,7 @@ namespace Dune
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
     //**********************************************************************
-    typedef typename SelectEntityImp< 0, dim, const This >::EntityObject
+    typedef MakeableInterfaceObject< typename Traits::template Codim< 0 >::Entity >
     EntityObject;
 
   public:
@@ -589,12 +568,12 @@ namespace Dune
 
     // (for internal use only) return obj pointer to EntityImp
     template< int codim >
-    typename SelectEntityImp< codim, dim, const This >::EntityObject *
+    MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *
     getNewEntity () const;
 
     // (for internal use only) free obj pointer of EntityImp
     template <int codim>
-    void freeEntity ( typename SelectEntityImp< codim, dim, const This >::EntityObject *en ) const;
+    void freeEntity ( MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *entity ) const;
 
   public:
     // make some shortcuts
