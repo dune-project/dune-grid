@@ -135,11 +135,12 @@ namespace Dune
         return;
 
       mesh_ = mesh;
+      ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
+      ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
+
       emptySpace_ = createEmptyDofSpace( mesh_ );
       for( int i = 0; i < nNodeTypes; ++i )
         assert( emptySpace_->admin->n_dof[ i ] == 0 );
-      ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
-      ForLoop< CacheDofSpace, 0, dimension >::apply( dofSpace_, cache_ );
     }
 
 

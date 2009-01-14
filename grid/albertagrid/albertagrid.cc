@@ -60,31 +60,39 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  inline void AlbertaGrid< dim, dimworld >::initGrid ()
+  inline void AlbertaGrid< dim, dimworld >::setup ()
   {
     typedef Alberta::FillFlags< dim > FillFlags;
 
     dofNumbering_.create( mesh_ );
+
+    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
+    assert( !elNewCheck_ == false );
+    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
     coords_.create( dofNumbering_.dofSpace( dimension ), "Coordinates" );
     SetLocalCoords setLocalCoords( coords_ );
     mesh_.hierarchicTraverse( setLocalCoords, FillFlags::coords );
     ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
-    ((ALBERTA DOF_REAL_D_VEC *)coords_)->coarse_restrict = &AlbertHelp::coarseCallBack;
 #endif
+  }
 
-    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
-    assert( !elNewCheck_ == false );
-    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
-    elNewCheck_.initialize( 0 );
+
+  template< int dim, int dimworld >
+  inline void AlbertaGrid< dim, dimworld >::initGrid ()
+  {
+    setup();
 
     hIndexSet_.create( dofNumbering_ );
+
+    elNewCheck_.initialize( 0 );
 
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
   }
+
 
   template < int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
@@ -441,45 +449,48 @@ namespace Dune
     return refined;
   }
 
-  template < int dim, int dimworld >
-  template <class DofManagerType, class RestrictProlongOperatorType>
-  inline bool AlbertaGrid < dim, dimworld >::
-  adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
+
+  template< int dim, int dimworld >
+  template< class DofManager, class RestrictProlongOperator >
+  inline bool AlbertaGrid < dim, dimworld >
+  ::adapt( DofManager &dofManager, RestrictProlongOperator &rPOp, bool verbose )
   {
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
 
-#ifndef CALC_COORD
-    typedef typename EntityObject::ImplementationType EntityImp;
+    typedef CombinedAdaptProlongRestrict
+    < typename DofManager::IndexSetRestrictProlongType, RestrictProlongOperator >
+    CombinedRestrictProlongOperator;
+    CombinedRestrictProlongOperator cmbRPOp ( dofManager.indexSetRPop(), rPOp );
 
+#ifndef CALC_COORD
+    preAdapt();
+
+    typedef typename EntityObject::ImplementationType EntityImp;
     EntityObject father( EntityImp( *this ) );
     EntityObject son( EntityImp( *this ) );
 
-    typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
-    typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
-    COType tmprpop ( dm.indexSetRPop() , data );
-
-    const int refineMarked = adaptationState_.refineMarked();
-    int newElementChunk_ = std::max( defaultElementChunk, 4*refineMarked );
-
     // reserve memory
-    dm.reserveMemory( newElementChunk_ );
+    const int refineMarked = adaptationState_.refineMarked();
+    dofManager.reserveMemory( std::max( defaultElementChunk, 4*refineMarked ) );
 
-    Alberta::AdaptRestrictProlongHandler< This, COType >
-    handler ( *this, father, this->getRealImplementation( father ),
-              son, this->getRealImplementation( son ), tmprpop );
+    Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
+    callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
+    callbackVector.template setupInterpolation< AdaptationCallback >();
+    callbackVector.template setupRestriction< AdaptationCallback >();
 
-    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA
-                                                 AlbertHelp::MeshCallBack::instance();
+    typedef Alberta::AdaptRestrictProlongHandler< This, CombinedRestrictProlongOperator > Handler;
+    Handler handler ( *this, father, getRealImplementation( father ), son, getRealImplementation( son ), cmbRPOp );
 
+    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA AlbertHelp::MeshCallBack::instance();
     callBack.setPointers( mesh_, handler );
 
-    preAdapt();
     bool refined = adapt();
 
     callBack.reset();
+    callbackVector.release();
 
-    dm.dofCompress();
+    dofManager.dofCompress();
     postAdapt();
     return refined;
 #else
@@ -702,21 +713,12 @@ namespace Dune
     if( !mesh_ )
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
-    dofNumbering_.create( mesh_ );
-    hIndexSet_.read( filename, mesh_ );
+    setup();
 
-    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
     SetLocalElementLevel setLocalElementLevel( elNewCheck_ );
     mesh_.hierarchicTraverse( setLocalElementLevel, FillFlags::nothing );
-    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
-#ifndef CALC_COORD
-    coords_.create( dofNumbering_.dofSpace( dimension ), "Coordinates" );
-    SetLocalCoords setLocalCoords( coords_ );
-    mesh_.hierarchicTraverse( setLocalCoords, FillFlags::coords );
-    ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
-    ((ALBERTA DOF_REAL_D_VEC *)coords_)->coarse_restrict = &AlbertHelp::coarseCallBack;
-#endif
+    hIndexSet_.read( filename, mesh_ );
 
     // make vectors know in grid and hSet
     arrangeDofVec();
@@ -750,6 +752,49 @@ namespace Dune
     return true;
   }
 #endif
+
+
+
+  // AlbertaGrid::AdaptationCallback
+  // -------------------------------
+
+  template< int dim, int dimworld >
+  class AlbertaGrid< dim, dimworld >::AdaptationCallback
+  {
+    typedef AlbertHelp::MeshCallBack Callback;
+
+    bool refine_;
+    Callback &callback_;
+
+    explicit AdaptationCallback ( bool refine )
+      : refine_( refine ),
+        callback_( Callback::instance() )
+    {}
+
+  public:
+    void operator() ( const Alberta::Element *father )
+    {
+      // todo: get rid of this if
+      if( refine_ )
+        callback_.postRefinement( const_cast< Alberta::Element * >( father ) );
+      else
+        callback_.preCoarsening( const_cast< Alberta::Element * >( father ) );
+    }
+
+    static void interpolateVector ( const CoordVectorPointer &dofVector,
+                                    const Alberta::Patch &patch )
+    {
+      AdaptationCallback callback( true );
+      patch.forEach( callback );
+    }
+
+    static void restrictVector ( const CoordVectorPointer &dofVector,
+                                 const Alberta::Patch &patch )
+    {
+      AdaptationCallback callback( false );
+      patch.forEach( callback );
+    }
+  };
 
 
 
@@ -883,5 +928,4 @@ namespace Dune
 
 } // namespace Dune
 
-#undef ALBERTA_CHAR
 #endif

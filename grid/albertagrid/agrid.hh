@@ -249,6 +249,8 @@ namespace Dune
     struct ObjectStream;
     struct AdaptationState;
 
+    struct AdaptationCallback;
+
   public:
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
@@ -363,8 +365,8 @@ namespace Dune
     bool adapt ();
 
     //! adapt method with DofManager
-    template <class DofManagerType, class RestrictProlongOperatorType>
-    bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
+    template< class DofManager, class RestrictProlongOperator >
+    bool adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
 
     //! returns true, if a least one element is marked for coarsening
     bool preAdapt ();
@@ -439,6 +441,8 @@ namespace Dune
     using Base::getRealImplementation;
 
     typedef std::vector<int> ArrayType;
+
+    void setup ();
 
     // initialize of some members
     void initGrid ();
@@ -544,18 +548,12 @@ namespace Dune
     struct ElNewCheckInterpolation;
     class SetLocalElementLevel;
 
-#ifndef CALC_COORD
-    typedef Alberta::DofVectorPointer< Alberta::GlobalVector > CoordVectorPointer;
-    CoordVectorPointer coords_;
-    class SetLocalCoords;
-#endif
-
     // for access in the elNewVec and ownerVec
     const int nv_;
     const int dof_;
 
     // hierarchical numbering of AlbertaGrid, unique per codim
-    AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
+    HierarchicIndexSet hIndexSet_;
 
     // the id set of this grid
     IdSetImp idSet_;
@@ -579,9 +577,15 @@ namespace Dune
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable std::vector< MarkerVector > levelMarkerVector_;
 
+#ifndef CALC_COORD
+    typedef Alberta::DofVectorPointer< Alberta::GlobalVector > CoordVectorPointer;
+    CoordVectorPointer coords_;
+    class SetLocalCoords;
+#endif
+
     // current state of adaptation
     AdaptationState adaptationState_;
-  }; // end class AlbertaGrid
+  };
 
 
 
@@ -617,7 +621,7 @@ namespace Dune
   {
     enum Phase { ComputationPhase, PreAdaptationPhase, PostAdaptationPhase };
 
-  public:
+  private:
     Phase phase_;
     int coarsenMarked_;
     int refineMarked_;

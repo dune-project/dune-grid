@@ -432,9 +432,6 @@ namespace Dune
       int *const array = (int *)dofVector_;
       const int dof = dofAccess_( child, subEntity );
       indexStack_.freeIndex( array[ dof ] );
-#ifndef NDEBUG
-      array[ dof ] = -1;
-#endif
     }
 
     static void restrictVector ( const DofVectorPointer &dofVector,

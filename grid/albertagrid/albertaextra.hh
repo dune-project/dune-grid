@@ -214,7 +214,7 @@ namespace AlbertHelp
   template <int dim>
   inline static void refineCoordsAndRefineCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
   {
-    static MeshCallBack & callBack = MeshCallBack::instance();
+    //static MeshCallBack & callBack = MeshCallBack::instance();
 
     const int nv = drv->fe_space->admin->n0_dof[VERTEX];
     REAL_D* vec = 0;
@@ -241,37 +241,6 @@ namespace AlbertHelp
     // as real_refine_inter
     for(int j=0; j<dim; ++j)
       newCoord[j] = 0.5*(oldCoordZero[j] + oldCoordOne[j]);
-
-    if(callBack.dataHandler())
-    {
-      // make sure that mesh is the same as in MeshCallBack
-      assert( drv->fe_space->admin->mesh == callBack.lockMesh() );
-      for(int i=0; i<ref; ++i)
-      {
-        EL * elem = GET_EL_FROM_LIST(list[i]);
-
-        //std::cout << "call refine for element " << elem << "\n";
-        callBack.postRefinement(elem);
-      }
-    }
-  }
-
-  inline static void
-  coarseCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
-  {
-    static MeshCallBack & callBack = MeshCallBack::instance();
-
-    if(callBack.dataHandler())
-    {
-      assert( drv->fe_space->admin->mesh == callBack.lockMesh() );
-      assert(ref > 0);
-      for(int i=0; i<ref; ++i)
-      {
-        EL * el = GET_EL_FROM_LIST(list[i]);
-        //std::cout << "call coarse for element " << el << "\n";
-        callBack.preCoarsening(el);
-      }
-    }
   }
 #endif
 
