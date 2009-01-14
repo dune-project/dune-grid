@@ -202,45 +202,27 @@ namespace Dune
     // make Conversion a friend
     template< class, class > friend class Conversion;
 
-    friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntity <1,dim,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntity <2,dim,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntity <dim,dim,const AlbertaGrid<dim,dimworld> >;
-
-    friend class AlbertaGridEntityPointer <0,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntityPointer <1,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntityPointer <2,const AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridEntityPointer <3,const AlbertaGrid<dim,dimworld> >;
+    template< int, int, class > friend class AlbertaGridEntity;
 
     friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
 
     friend class AlbertaGridIntersectionIterator<AlbertaGrid<dim,dimworld> >;
     friend class AlbertaGridIntersectionIterator<const AlbertaGrid<dim,dimworld> >;
 
-    //! AlbertaGrid is only implemented for 2 and 3 dimension
-    //! for 1d use SGrid or SimpleGrid
-    //CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertaGrid_for_1d_Grids;
-
     friend class AlbertaMarkerVector< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
 
-    // minimum number of elements assumed to be created during adaption
-    enum { defaultElementChunk_ = 100 };
-
-    //**********************************************************
-    // The Interface Methods
-    //**********************************************************
   public:
-    //! the grid family of AlbertaGrid
-    typedef AlbertaGridFamily<dim,dimworld> GridFamily;
-
-    // the Traits
-    typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
-
     typedef Alberta::Real ctype;
 
     static const int dimension = dim;
     static const int dimensionworld = dimworld;
+
+    //! the grid family of AlbertaGrid
+    typedef AlbertaGridFamily< dim, dimworld > GridFamily;
+
+    // the Traits
+    typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
 
     //! type of hierarchic index set
     typedef typename Traits::HierarchicIndexSet HierarchicIndexSet;
@@ -264,42 +246,19 @@ namespace Dune
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
+    struct ObjectStream;
+    struct AdaptationState;
+
   public:
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
-    class ObjectStream
-    {
-    public:
-      class EOFException {} ;
-      template <class T>
-      void readObject (T &) {}
-      void readObject (int) {}
-      void readObject (double) {}
-      template <class T>
-      void writeObject (T &) {}
-      void writeObject (int) {}
-      void writeObject (double) {}
-
-      template <class T>
-      void read (T &) const {}
-      template <class T>
-      void write (const T &) {}
-    };
-
     typedef ObjectStream ObjectStreamType;
 
-    enum {
-      //! \brief we always have dim+1 codimensions
-      numCodim = dim+1
-    };
-
-    enum {
-      //! \brief max number of allowed levels is 64
-      MAXL = 64
-    };
-
   private:
+    // max number of allowed levels is 64
+    static const int MAXL = 64;
+
     typedef Alberta::MeshPointer< dimension > MeshPointer;
 
     // forbid copying and assignment
@@ -316,24 +275,16 @@ namespace Dune
     AlbertaGrid ( const std::string &macroGridFileName,
                   const std::string &gridName = "AlbertaGrid" );
 
-    /* (for internal use only)
-       Constructor which reads an ALBERTA macro triangulation file
-       or given GridFile , proc is the number of domain ,
-       levInd = true means that a consecutive level index is generated
-       if levInd == true the the element number of first macro element is
-       set to 1 so hasLevelIndex_ can be identified we grid is read from
-       file */
-    //AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc);
 
     //! \brief empty Constructor
-    AlbertaGrid();
+    AlbertaGrid ();
 
     //! \brief Desctructor
-    ~AlbertaGrid();
+    ~AlbertaGrid ();
 
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxLevel with 0 the coarsest level.
-    int maxLevel() const;
+    int maxLevel () const;
 
     //! Iterator to first entity of given codim on level
     template<int cd, PartitionIteratorType pitype>
@@ -419,7 +370,7 @@ namespace Dune
     bool preAdapt ();
 
     //! clean up some markers
-    bool postAdapt();
+    void postAdapt();
 
     /** \brief return reference to collective communication, if MPI found
      * this is specialisation for MPI */
@@ -519,9 +470,6 @@ namespace Dune
     // number of maxlevel of the mesh
     int maxlevel_;
     struct CalcMaxLevel;
-
-    // true if grid was refined or coarsend
-    bool wasChanged_;
 
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
@@ -631,12 +579,112 @@ namespace Dune
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable std::vector< MarkerVector > levelMarkerVector_;
 
-    // count how much elements where marked
+    // current state of adaptation
+    AdaptationState adaptationState_;
+  }; // end class AlbertaGrid
+
+
+
+  // AlbertaGrid::ObjectStream
+  // -------------------------
+
+  template< int dim, int dimworld >
+  struct AlbertaGrid< dim, dimworld >::ObjectStream
+  {
+    class EOFException {};
+    template <class T>
+    void readObject (T &) {}
+    void readObject (int) {}
+    void readObject (double) {}
+    template <class T>
+    void writeObject (T &) {}
+    void writeObject (int) {}
+    void writeObject (double) {}
+
+    template <class T>
+    void read (T &) const {}
+    template <class T>
+    void write (const T &) {}
+  };
+
+
+
+  // AlbertaGrid::AdaptationState
+  // ----------------------------
+
+  template< int dim, int dimworld >
+  struct AlbertaGrid< dim, dimworld >::AdaptationState
+  {
+    enum Phase { ComputationPhase, PreAdaptationPhase, PostAdaptationPhase };
+
+  public:
+    Phase phase_;
     int coarsenMarked_;
     int refineMarked_;
 
-    mutable bool lockPostAdapt_;
-  }; // end class AlbertaGrid
+  public:
+    AdaptationState ()
+      : phase_( ComputationPhase ),
+        coarsenMarked_( 0 ),
+        refineMarked_( 0 )
+    {}
+
+    void mark ( int count )
+    {
+      if( count < 0 )
+        ++coarsenMarked_;
+      if( count > 0 )
+        refineMarked_ += (2 << count);
+    }
+
+    void unmark ( int count )
+    {
+      if( count < 0 )
+        --coarsenMarked_;
+      if( count > 0 )
+        refineMarked_ -= (2 << count);
+    }
+
+    bool coarsen () const
+    {
+      return (coarsenMarked_ > 0);
+    }
+
+    int refineMarked () const
+    {
+      return refineMarked_;
+    }
+
+    void preAdapt ()
+    {
+      if( phase_ != ComputationPhase )
+        error( "preAdapt may only be called in computation phase." );
+      phase_ = PreAdaptationPhase;
+    }
+
+    void adapt ()
+    {
+      if( phase_ != PreAdaptationPhase )
+        error( "adapt may only be called in preadapdation phase." );
+      phase_ = PostAdaptationPhase;
+    }
+
+    void postAdapt ()
+    {
+      if( phase_ != PostAdaptationPhase )
+        error( "postAdapt may only be called in postadaptation phase." );
+      phase_ = ComputationPhase;
+
+      coarsenMarked_ = 0;
+      refineMarked_ = 0;
+    }
+
+  private:
+    void error ( const std::string &message )
+    {
+      DUNE_THROW( InvalidStateException, message );
+    }
+  };
 
 } // namespace Dune
 

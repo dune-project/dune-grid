@@ -20,26 +20,8 @@
 namespace Dune
 {
 
-  // AlbertaGrid
-  // -----------
-
   template< int dim, int dimworld >
-  inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
-    : mesh_(),
-      maxlevel_( 0 ),
-      wasChanged_( false ),
-      nv_( dim+1 ),
-      dof_( 0 ),
-      hIndexSet_( *this ),
-      idSet_( hIndexSet_ ),
-      levelIndexVec_( MAXL, 0 ),
-      leafIndexSet_ ( 0 ),
-      sizeCache_ ( 0 ),
-      leafMarkerVector_( hIndexSet_ ),
-      levelMarkerVector_( MAXL, MarkerVector( hIndexSet_ ) ),
-      coarsenMarked_( 0 ),
-      refineMarked_( 0 ),
-      lockPostAdapt_( false )
+  static void checkAlbertaDimensions ()
   {
     // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
     dune_static_assert( (dimworld == DIM_OF_WORLD),
@@ -53,6 +35,27 @@ namespace Dune
                         "Template Parameter dim does not match "
                         "ALBERTA's DIM setting." );
 #endif
+  }
+
+
+  // AlbertaGrid
+  // -----------
+
+  template< int dim, int dimworld >
+  inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
+    : mesh_(),
+      maxlevel_( 0 ),
+      nv_( dim+1 ),
+      dof_( 0 ),
+      hIndexSet_( *this ),
+      idSet_( hIndexSet_ ),
+      levelIndexVec_( (size_t)MAXL, 0 ),
+      leafIndexSet_ ( 0 ),
+      sizeCache_ ( 0 ),
+      leafMarkerVector_( hIndexSet_ ),
+      levelMarkerVector_( (size_t)MAXL, MarkerVector( hIndexSet_ ) )
+  {
+    checkAlbertaDimensions< dim, dimworld>();
   }
 
 
@@ -78,8 +81,6 @@ namespace Dune
 
     hIndexSet_.create( dofNumbering_ );
 
-    wasChanged_ = true;
-
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
@@ -91,32 +92,17 @@ namespace Dune
                   const std::string &gridName )
     : mesh_( 0 ),
       maxlevel_( 0 ),
-      wasChanged_( false ),
       nv_( dim+1 ),
       dof_( 0 ),
       hIndexSet_( *this ),
       idSet_( hIndexSet_ ),
-      levelIndexVec_( MAXL, 0 ),
+      levelIndexVec_( (size_t)MAXL, 0 ),
       leafIndexSet_ ( 0 ),
       sizeCache_( 0 ),
       leafMarkerVector_( hIndexSet_ ),
-      levelMarkerVector_( MAXL, MarkerVector( hIndexSet_ ) ),
-      coarsenMarked_( 0 ),
-      refineMarked_( 0 ),
-      lockPostAdapt_( false )
+      levelMarkerVector_( (size_t)MAXL, MarkerVector( hIndexSet_ ) )
   {
-    // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
-    dune_static_assert( (dimworld == DIM_OF_WORLD),
-                        "Template Parameter dimworld does not match "
-                        "ALBERTA's DIM_OF_WORLD setting." );
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    // ALBERTA 1.2 supports only one grid dimension
-    // If this check fails, reconfigure with --with-alberta-dim=dim
-    dune_static_assert( (dim == DIM),
-                        "Template Parameter dim does not match "
-                        "ALBERTA's DIM setting." );
-#endif
+    checkAlbertaDimensions< dim, dimworld >();
 
     bool makeNew = true;
     {
@@ -360,6 +346,7 @@ namespace Dune
     assert( (refCount + maxlevel_) < MAXL );
 
     assert( refCount >= 0 );
+    bool wasChanged = false;
     for( int i = 0; i < refCount; ++i )
     {
       // mark all interior elements
@@ -367,47 +354,38 @@ namespace Dune
       for( LeafIterator it = leafbegin< 0 >(); it != endit; ++it )
         mark( 1, *it );
 
-      adapt();
+      preAdapt();
+      wasChanged |= adapt();
       postAdapt();
     }
 
-    return wasChanged_;
+    return wasChanged;
   }
 
 
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >::preAdapt ()
   {
-    return (coarsenMarked_ > 0);
+    adaptationState_.preAdapt();
+    return adaptationState_.coarsen();
   }
 
 
   template < int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::postAdapt()
+  inline void AlbertaGrid < dim, dimworld >::postAdapt()
   {
     typedef Alberta::Mesh Mesh;
     assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
     assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
-#if DIM == 3
+  #if DIM == 3
     //assert( (leafIndexSet_ && dim == 3) ? (mesh->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
     assert( (leafIndexSet_ && dim == 3) ? (((Mesh *)mesh_)->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
-#endif
-    // if lockPostAdapt == false, the user forgot to call adapt before postAdapt
-    if( lockPostAdapt_ == false )
-    {
-      DUNE_THROW(InvalidStateException,"AlbertaGrid::postAdapt called without previous adapt call!");
-    }
-
-    // unlock post adapt
-    lockPostAdapt_ = false;
-
-    coarsenMarked_ = 0;
-    refineMarked_  = 0;
+  #endif
 
     // clear refined marker
     Alberta::abs( elNewCheck_ );
 
-    return wasChanged_;
+    adaptationState_.postAdapt();
   }
 
 
@@ -420,18 +398,11 @@ namespace Dune
       return false;
 
     // take back previous marking
-    int mark = getMark( e );
-    if( mark < 0 )
-      --coarsenMarked_;
-    if( mark > 0 )
-      refineMarked_ -= (2 << mark);
+    adaptationState_.unmark( getMark( e ) );
 
-    mark = refCount;
-    if( mark < 0 )
-      ++coarsenMarked_;
-    if( mark > 0 )
-      refineMarked_ += (2 << mark);
-    getRealImplementation( e ).elementInfo().setMark( mark );
+    // set new marking
+    adaptationState_.mark( refCount );
+    getRealImplementation( e ).elementInfo().setMark( refCount );
 
     return true;
   }
@@ -448,17 +419,6 @@ namespace Dune
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >::adapt ()
   {
-    wasChanged_ = false;
-
-    // if lockPostAdapt == true, the user forgot to call postAdapt
-    // in previous cycles
-    if( lockPostAdapt_ == true )
-    {
-      DUNE_THROW(InvalidStateException,"AlbertaGrid::adapt called without previous postAdapt call!");
-    }
-    // lock for post Adapt
-    lockPostAdapt_ = true;
-
     // set all values of elNewCheck positive which means old
     Alberta::abs( elNewCheck_ );
 
@@ -468,13 +428,13 @@ namespace Dune
 
     // adapt mesh
     const bool refined = mesh_.refine();
-    const bool coarsened = (preAdapt() ? mesh_.coarsen() : false);
-    wasChanged_ = (refined || coarsened);
+    const bool coarsened = (adaptationState_.coarsen() ? mesh_.coarsen() : false);
+    adaptationState_.adapt();
 
     // remove global pointer to index stack
     Alberta::currentIndexStack = 0;
 
-    if( wasChanged_ )
+    if( refined || coarsened )
       calcExtras();
 
     // return true if elements were created
@@ -486,6 +446,9 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >::
   adapt(DofManagerType & dm, RestrictProlongOperatorType & data, bool verbose)
   {
+    // minimum number of elements assumed to be created during adaptation
+    const int defaultElementChunk = 100;
+
 #ifndef CALC_COORD
     typedef typename EntityObject::ImplementationType EntityImp;
 
@@ -496,8 +459,8 @@ namespace Dune
     typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
     COType tmprpop ( dm.indexSetRPop() , data );
 
-    int defaultElChunk = defaultElementChunk_;
-    int newElementChunk_ = std::max( defaultElChunk , (refineMarked_ * 4) );
+    const int refineMarked = adaptationState_.refineMarked();
+    int newElementChunk_ = std::max( defaultElementChunk, 4*refineMarked );
 
     // reserve memory
     dm.reserveMemory( newElementChunk_ );
@@ -511,7 +474,8 @@ namespace Dune
 
     callBack.setPointers( mesh_, handler );
 
-    bool refined = this->adapt();
+    preAdapt();
+    bool refined = adapt();
 
     callBack.reset();
 
@@ -664,9 +628,6 @@ namespace Dune
 
     // create new Leaf Index
     if( leafIndexSet_ ) leafIndexSet_->calcNewIndex();
-
-    // we have a new grid
-    wasChanged_ = true;
   }
 
 

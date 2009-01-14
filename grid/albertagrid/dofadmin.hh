@@ -96,6 +96,12 @@ namespace Dune
         return dofSpace_[ codim ];
       }
 
+      const DofSpace *emptyDofSpace () const
+      {
+        assert( !(*this) == false );
+        return emptySpace_;
+      }
+
       void create ( const MeshPointer &mesh );
 
       void release ()
@@ -105,11 +111,12 @@ namespace Dune
 
         for( int codim = 0; codim <= dimension; ++codim )
           freeDofSpace( dofSpace_[ codim ] );
+        freeDofSpace( emptySpace_ );
         mesh_ = MeshPointer();
       }
 
     private:
-      static const DofSpace *emptyDofSpace ( const MeshPointer &mesh );
+      static const DofSpace *createEmptyDofSpace ( const MeshPointer &mesh );
       static const DofSpace *createDofSpace ( const MeshPointer &mesh,
                                               const std::string &name,
                                               const int (&ndof)[ nNodeTypes ] );
@@ -128,7 +135,7 @@ namespace Dune
         return;
 
       mesh_ = mesh;
-      emptySpace_ = emptyDofSpace( mesh_ );
+      emptySpace_ = createEmptyDofSpace( mesh_ );
       for( int i = 0; i < nNodeTypes; ++i )
         assert( emptySpace_->admin->n_dof[ i ] == 0 );
       ForLoop< CreateDofSpace, 0, dimension >::apply( mesh_, dofSpace_ );
@@ -139,7 +146,7 @@ namespace Dune
 
     template< int dim >
     inline const DofSpace *
-    HierarchyDofNumbering< dim >::emptyDofSpace ( const MeshPointer &mesh )
+    HierarchyDofNumbering< dim >::createEmptyDofSpace ( const MeshPointer &mesh )
     {
       int ndof[ nNodeTypes ];
       for( int i = 0; i < nNodeTypes; ++i )
