@@ -150,7 +150,7 @@ namespace Dune
       he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
 
       assert( Entity::dimensionworld <= 3 );
-      const CoordinateType& coord = geometry[ grapeVx ];
+      const CoordinateType coord = geometry.corner( grapeVx );
       for(int j = 0; j < Entity::dimensionworld ; ++j)
       {
         // here the mapping from dune to grape elements is done
