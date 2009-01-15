@@ -249,6 +249,7 @@ namespace Dune
     struct ObjectStream;
     struct AdaptationState;
 
+    template< class DataHandler >
     struct AdaptationCallback;
 
   public:

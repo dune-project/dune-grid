@@ -20,6 +20,12 @@
 namespace Dune
 {
 
+  namespace Alberta
+  {
+    static void *adaptationDataHandler_;
+  }
+
+
   template< int dim, int dimworld >
   static void checkAlbertaDimensions ()
   {
@@ -452,7 +458,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   template< class RestrictProlongOperator >
-  inline bool AlbertaGrid < dim, dimworld >::adapt( RestrictProlongOperator &rpOp )
+  inline bool AlbertaGrid < dim, dimworld >::adapt ( RestrictProlongOperator &rpOp )
   {
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
@@ -462,20 +468,20 @@ namespace Dune
     const int refineMarked = adaptationState_.refineMarked();
     rpOp.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
 
+    typedef Alberta::AdaptRestrictProlongHandler< This, RestrictProlongOperator >
+    DataHandler;
+    DataHandler dataHandler( *this, rpOp );
+
+    typedef AdaptationCallback< DataHandler > Callback;
     Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
     callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
-    callbackVector.template setupInterpolation< AdaptationCallback >();
-    callbackVector.template setupRestriction< AdaptationCallback >();
-
-    typedef Alberta::AdaptRestrictProlongHandler< This, RestrictProlongOperator > Handler;
-    Handler handler( *this, rpOp );
-
-    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA AlbertHelp::MeshCallBack::instance();
-    callBack.setPointers( mesh_, handler );
+    callbackVector.template setupInterpolation< Callback >();
+    callbackVector.template setupRestriction< Callback >();
+    Alberta::adaptationDataHandler_ = &dataHandler;
 
     bool refined = adapt();
 
-    callBack.reset();
+    Alberta::adaptationDataHandler_ = 0;
     callbackVector.release();
 
     rpOp.postAdapt();
@@ -491,7 +497,7 @@ namespace Dune
   template< int dim, int dimworld >
   template< class DofManager, class RestrictProlongOperator >
   inline bool AlbertaGrid < dim, dimworld >
-  ::adapt( DofManager &dofManager, RestrictProlongOperator &rpOp, bool verbose )
+  ::adapt ( DofManager &dofManager, RestrictProlongOperator &rpOp, bool verbose )
   {
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
@@ -508,20 +514,20 @@ namespace Dune
     const int refineMarked = adaptationState_.refineMarked();
     dofManager.reserveMemory( std::max( defaultElementChunk, 4*refineMarked ) );
 
+    typedef Alberta::AdaptRestrictProlongHandler< This, CombinedRestrictProlongOperator >
+    DataHandler;
+    DataHandler dataHandler( *this, cmbRPOp );
+
+    typedef AdaptationCallback< DataHandler > Callback;
     Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
     callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
-    callbackVector.template setupInterpolation< AdaptationCallback >();
-    callbackVector.template setupRestriction< AdaptationCallback >();
-
-    typedef Alberta::AdaptRestrictProlongHandler< This, CombinedRestrictProlongOperator > Handler;
-    Handler handler( *this, cmbRPOp );
-
-    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA AlbertHelp::MeshCallBack::instance();
-    callBack.setPointers( mesh_, handler );
+    callbackVector.template setupInterpolation< Callback >();
+    callbackVector.template setupRestriction< Callback >();
+    Alberta::adaptationDataHandler_ = &dataHandler;
 
     bool refined = adapt();
 
-    callBack.reset();
+    Alberta::adaptationDataHandler_ = 0;
     callbackVector.release();
 
     dofManager.dofCompress();
@@ -793,40 +799,25 @@ namespace Dune
   // -------------------------------
 
   template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::AdaptationCallback
+  template< class DataHandler >
+  struct AlbertaGrid< dim, dimworld >::AdaptationCallback
   {
-    typedef AlbertHelp::MeshCallBack Callback;
-
-    bool refine_;
-    Callback &callback_;
-
-    explicit AdaptationCallback ( bool refine )
-      : refine_( refine ),
-        callback_( Callback::instance() )
-    {}
-
-  public:
-    void operator() ( const Alberta::Element *father )
-    {
-      // todo: get rid of this if
-      if( refine_ )
-        callback_.postRefinement( const_cast< Alberta::Element * >( father ) );
-      else
-        callback_.preCoarsening( const_cast< Alberta::Element * >( father ) );
-    }
-
     static void interpolateVector ( const CoordVectorPointer &dofVector,
                                     const Alberta::Patch &patch )
     {
-      AdaptationCallback callback( true );
-      patch.forEach( callback );
+      DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
+      assert( dataHandler != 0 );
+      for( int i = 0; i < patch.count(); ++i )
+        dataHandler->prolongLocal( patch[ i ] );
     }
 
     static void restrictVector ( const CoordVectorPointer &dofVector,
                                  const Alberta::Patch &patch )
     {
-      AdaptationCallback callback( false );
-      patch.forEach( callback );
+      DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
+      assert( dataHandler != 0 );
+      for( int i = 0; i < patch.count(); ++i )
+        dataHandler->restrictLocal( patch[ i ] );
     }
   };
 

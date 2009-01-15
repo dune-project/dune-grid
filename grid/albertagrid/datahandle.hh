@@ -37,7 +37,6 @@ namespace Dune
       ElementInfo fatherInfo_;
       ElementInfo childInfo_;
       RestrictProlongOperator &rpOp_;
-      int maxlevel_;
 
     public:
       //! Constructor
@@ -47,8 +46,7 @@ namespace Dune
           child_( EntityImp( grid_ ) ),
           fatherInfo_( ElementInfo::createFake() ),
           childInfo_( ElementInfo::createFake() ),
-          rpOp_( rpOp ),
-          maxlevel_( -1 )
+          rpOp_( rpOp )
       {
         AlbertHelp::makeEmptyElInfo< dimension, dimension >( &(fatherInfo_.elInfo()) );
         AlbertHelp::makeEmptyElInfo< dimension, dimension >( &(childInfo_.elInfo()) );
@@ -58,46 +56,44 @@ namespace Dune
       }
 
       //! restrict data , elem is always the father
-      void preCoarsening ( Element *element )
+      void restrictLocal ( Element *father )
       {
         // check pointers of mesh internal dof vecs
         // this call has to be done before all other things
         grid_.arrangeDofVec();
 
-        const int level = grid_.getLevelOfElement( element );
+        const int level = grid_.getLevelOfElement( father );
 
-        fatherInfo_.elInfo().el = element;
+        fatherInfo_.elInfo().el = father;
         fatherInfo_.elInfo().level = level;
         Grid::getRealImplementation( father_ ).setElement( fatherInfo_, 0 );
 
 #if DUNE_ALBERTA_VERSION >= 0x201
         childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
 #else
-        childInfo_.elInfo().parent = element;
+        childInfo_.elInfo().parent = father;
 #endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
         {
-          childInfo_.elInfo().el = element->child[ i ];
+          childInfo_.elInfo().el = father->child[ i ];
           assert( childInfo_.elInfo().el != NULL );
           Grid::getRealImplementation( child_ ).setElement( childInfo_, 0 );
           rpOp_.restrictLocal( father_, child_, (i == 0) );
         }
-
-        maxlevel_ = std::max( level, maxlevel_ );
       }
 
-      //! prolong data, elem is the father
-      void postRefinement ( Alberta::Element *element )
+      //! prolong data
+      void prolongLocal ( Alberta::Element *father )
       {
         // check pointers of mesh internal dof vecs
         // this call has to be done before all other things
         grid_.arrangeDofVec();
 
-        const int level = grid_.getLevelOfElement( element );
+        const int level = grid_.getLevelOfElement( father );
 
-        fatherInfo_.elInfo().el = element;
+        fatherInfo_.elInfo().el = father;
         fatherInfo_.elInfo().level = level;
 
         Grid::getRealImplementation( father_ ).setElement( fatherInfo_, 0 );
@@ -105,27 +101,18 @@ namespace Dune
 #if DUNE_ALBERTA_VERSION >= 0x201
         childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
 #else
-        childInfo_.elInfo().parent = element;
+        childInfo_.elInfo().parent = father;
 #endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
         {
-          childInfo_.elInfo().el = element->child[ i ];
+          childInfo_.elInfo().el = father->child[ i ];
           assert( childInfo_.elInfo().el != NULL );
           Grid::getRealImplementation( child_ ).setElement( childInfo_, 0 );
           rpOp_.prolongLocal( father_, child_, (i == 0) );
         }
-
-        maxlevel_ = std::max( level, maxlevel_ );
       }
-
-#if 0
-      int maxLevel () const
-      {
-        return maxlevel_;
-      }
-#endif
     };
 
   }
