@@ -15,8 +15,8 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
   intersectioniteratorwrapper.hh quadraturerules.hh \
   datahandleif.hh gridfactory.hh \
-	gridview.hh defaultgridview.hh \
-	gridenums.hh
+  gridview.hh defaultgridview.hh \
+  gridenums.hh adaptcallback.hh
 
 SUBDIRS = refinement test quadraturerules
 
