@@ -451,9 +451,47 @@ namespace Dune
 
 
   template< int dim, int dimworld >
+  template< class RestrictProlongOperator >
+  inline bool AlbertaGrid < dim, dimworld >::adapt( RestrictProlongOperator &rpOp )
+  {
+    // minimum number of elements assumed to be created during adaptation
+    const int defaultElementChunk = 100;
+
+#ifndef CALC_COORD
+    preAdapt();
+    const int refineMarked = adaptationState_.refineMarked();
+    rpOp.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
+
+    Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
+    callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
+    callbackVector.template setupInterpolation< AdaptationCallback >();
+    callbackVector.template setupRestriction< AdaptationCallback >();
+
+    typedef Alberta::AdaptRestrictProlongHandler< This, RestrictProlongOperator > Handler;
+    Handler handler( *this, rpOp );
+
+    ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA AlbertHelp::MeshCallBack::instance();
+    callBack.setPointers( mesh_, handler );
+
+    bool refined = adapt();
+
+    callBack.reset();
+    callbackVector.release();
+
+    rpOp.postAdapt();
+    postAdapt();
+    return refined;
+#else
+    derr << "AlbertaGrid::adapt(rpOp) : CALC_COORD defined, therefore adapt with call back not defined! \n";
+    return false;
+#endif
+  }
+
+
+  template< int dim, int dimworld >
   template< class DofManager, class RestrictProlongOperator >
   inline bool AlbertaGrid < dim, dimworld >
-  ::adapt( DofManager &dofManager, RestrictProlongOperator &rPOp, bool verbose )
+  ::adapt( DofManager &dofManager, RestrictProlongOperator &rpOp, bool verbose )
   {
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
@@ -461,14 +499,10 @@ namespace Dune
     typedef CombinedAdaptProlongRestrict
     < typename DofManager::IndexSetRestrictProlongType, RestrictProlongOperator >
     CombinedRestrictProlongOperator;
-    CombinedRestrictProlongOperator cmbRPOp ( dofManager.indexSetRPop(), rPOp );
+    CombinedRestrictProlongOperator cmbRPOp ( dofManager.indexSetRPop(), rpOp );
 
 #ifndef CALC_COORD
     preAdapt();
-
-    typedef typename EntityObject::ImplementationType EntityImp;
-    EntityObject father( EntityImp( *this ) );
-    EntityObject son( EntityImp( *this ) );
 
     // reserve memory
     const int refineMarked = adaptationState_.refineMarked();
@@ -480,7 +514,7 @@ namespace Dune
     callbackVector.template setupRestriction< AdaptationCallback >();
 
     typedef Alberta::AdaptRestrictProlongHandler< This, CombinedRestrictProlongOperator > Handler;
-    Handler handler ( *this, father, getRealImplementation( father ), son, getRealImplementation( son ), cmbRPOp );
+    Handler handler( *this, cmbRPOp );
 
     ALBERTA AlbertHelp::MeshCallBack &callBack = ALBERTA AlbertHelp::MeshCallBack::instance();
     callBack.setPointers( mesh_, handler );

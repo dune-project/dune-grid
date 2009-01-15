@@ -20,44 +20,34 @@ namespace Dune
   namespace Alberta
   {
 
-    template <class GridType , class RestrictProlongOperatorType >
+    template< class Grid, class RestrictProlongOperator >
     class AdaptRestrictProlongHandler
     {
-      static const int dimension = GridType::dimension;
+      static const int dimension = Grid::dimension;
 
-      GridType & grid_;
-
-      typedef Dune::MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
-      typedef typename EntityType :: ImplementationType RealEntityType;
+      typedef typename Grid::template Codim< 0 >::Entity Entity;
+      typedef Dune::MakeableInterfaceObject< Entity > EntityObject;
+      typedef typename EntityObject::ImplementationType EntityImp;
 
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
-      EntityType & reFather_;
-      EntityType & reSon_;
-      RealEntityType & realFather_;
-      RealEntityType & realSon_;
-
-      RestrictProlongOperatorType &rp_;
-
+      Grid &grid_;
+      EntityObject father_;
+      EntityObject child_;
       ElementInfo fatherInfo_;
       ElementInfo childInfo_;
-
+      RestrictProlongOperator &rpOp_;
       int maxlevel_;
 
     public:
       //! Constructor
-      AdaptRestrictProlongHandler ( GridType &grid,
-                                    EntityType &f, RealEntityType &rf,
-                                    EntityType &s, RealEntityType &rs,
-                                    RestrictProlongOperatorType &rp )
+      AdaptRestrictProlongHandler ( Grid &grid, RestrictProlongOperator &rpOp )
         : grid_( grid ),
-          reFather_( f ),
-          reSon_( s ),
-          realFather_( rf ),
-          realSon_( rs ),
-          rp_( rp ),
+          father_( EntityImp( grid_ ) ),
+          child_( EntityImp( grid_ ) ),
           fatherInfo_( ElementInfo::createFake() ),
           childInfo_( ElementInfo::createFake() ),
+          rpOp_( rpOp ),
           maxlevel_( -1 )
       {
         AlbertHelp::makeEmptyElInfo< dimension, dimension >( &(fatherInfo_.elInfo()) );
@@ -68,83 +58,74 @@ namespace Dune
       }
 
       //! restrict data , elem is always the father
-      void preCoarsening ( EL * elem )
+      void preCoarsening ( Element *element )
       {
         // check pointers of mesh internal dof vecs
         // this call has to be done before all other things
         grid_.arrangeDofVec();
 
-        int level   = grid_.getLevelOfElement( elem );
+        const int level = grid_.getLevelOfElement( element );
 
-        fatherInfo_.elInfo().el = elem;
+        fatherInfo_.elInfo().el = element;
         fatherInfo_.elInfo().level = level;
-
-        realFather_.setElement( fatherInfo_, 0 );
+        Grid::getRealImplementation( father_ ).setElement( fatherInfo_, 0 );
 
 #if DUNE_ALBERTA_VERSION >= 0x201
         childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
 #else
-        childInfo_.elInfo().parent = elem;
+        childInfo_.elInfo().parent = element;
 #endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
         {
-          EL *child = elem->child[ i ];
-          assert( child != NULL );
-
-          childInfo_.elInfo().el = child;
-
-          realSon_.setElement( childInfo_, 0 );
-
-          rp_.restrictLocal( reFather_, reSon_, (i == 0) );
+          childInfo_.elInfo().el = element->child[ i ];
+          assert( childInfo_.elInfo().el != NULL );
+          Grid::getRealImplementation( child_ ).setElement( childInfo_, 0 );
+          rpOp_.restrictLocal( father_, child_, (i == 0) );
         }
 
-        if( level+1 > maxlevel_ )
-          maxlevel_ = level;
+        maxlevel_ = std::max( level, maxlevel_ );
       }
 
       //! prolong data, elem is the father
-      void postRefinement ( EL * elem )
+      void postRefinement ( Alberta::Element *element )
       {
         // check pointers of mesh internal dof vecs
         // this call has to be done before all other things
         grid_.arrangeDofVec();
 
-        int level   = grid_.getLevelOfElement( elem );
+        const int level = grid_.getLevelOfElement( element );
 
-        fatherInfo_.elInfo().el = elem;
+        fatherInfo_.elInfo().el = element;
         fatherInfo_.elInfo().level = level;
 
-        realFather_.setElement( fatherInfo_, 0 );
+        Grid::getRealImplementation( father_ ).setElement( fatherInfo_, 0 );
 
 #if DUNE_ALBERTA_VERSION >= 0x201
         childInfo_.elInfo().parent = &(fatherInfo_.elInfo());
 #else
-        childInfo_.elInfo().parent = elem;
+        childInfo_.elInfo().parent = element;
 #endif
         childInfo_.elInfo().level = level+1;
 
         for( int i = 0; i < 2; ++i )
         {
-          EL *child = elem->child[ i ];
-          assert( child );
-
-          childInfo_.elInfo().el = child;
-
-          realSon_.setElement( childInfo_, 0 );
-
-          rp_.prolongLocal( reFather_, reSon_, (i == 0) );
+          childInfo_.elInfo().el = element->child[ i ];
+          assert( childInfo_.elInfo().el != NULL );
+          Grid::getRealImplementation( child_ ).setElement( childInfo_, 0 );
+          rpOp_.prolongLocal( father_, child_, (i == 0) );
         }
 
-        if( level+1 > maxlevel_ )
-          maxlevel_ = level;
+        maxlevel_ = std::max( level, maxlevel_ );
       }
 
+#if 0
       int maxLevel () const
       {
         return maxlevel_;
       }
+#endif
     };
 
   }

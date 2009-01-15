@@ -364,6 +364,9 @@ namespace Dune
     /** \copydoc Dune::Grid::adapt() */
     bool adapt ();
 
+    template< class RestrictProlongOperator >
+    bool adapt ( RestrictProlongOperator &rpOp );
+
     //! adapt method with DofManager
     template< class DofManager, class RestrictProlongOperator >
     bool adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
