@@ -5,24 +5,24 @@
 
 // only use GRIDDIM when 2 or 3
 #if defined GRIDDIM && (GRIDDIM >= 2) && (GRIDDIM <= 3)
-  #undef ALBERTA_DIM
-  #undef ALBERTA_WORLD_DIM
-
-  #define ALBERTA_DIM GRIDDIM
+  #define DIM GRIDDIM
   #if defined GRIDDIMWORLD
-    #define ALBERTA_WORLD_DIM GRIDDIMWORLD
+    #define DIM_OF_WORLD GRIDDIMWORLD
+  #else
+// DIM_OF_WORLD is set to DIM by default
+    #define DIM_OF_WORLD GRIDDIM
   #endif
-#endif
+#else
+  #ifndef ALBERTA_DIM
+    #error "ALBERTA_DIM needed to compile AlbertaGrid! \n"
+  #endif
 
-#ifndef ALBERTA_DIM
-  #error "ALBERTA_DIM needed to compile AlbertaGrid! \n"
-#endif
+  #ifndef ALBERTA_WORLD_DIM
+    #define ALBERTA_WORLD_DIM ALBERTA_DIM
+  #endif
 
-#ifndef ALBERTA_WORLD_DIM
-  #define ALBERTA_WORLD_DIM ALBERTA_DIM
+  #define DIM ALBERTA_DIM
+  #define DIM_OF_WORLD ALBERTA_WORLD_DIM
 #endif
-
-#define DIM ALBERTA_DIM
-#define DIM_OF_WORLD ALBERTA_WORLD_DIM
 
 #endif
