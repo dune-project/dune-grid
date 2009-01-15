@@ -26,29 +26,6 @@ namespace Albert {
 namespace AlbertHelp
 {
 
-  template <int mydim, int cdim>
-  inline void makeEmptyElInfo(EL_INFO * elInfo)
-  {
-    elInfo->mesh = 0;
-    elInfo->el = 0;
-    elInfo->parent = 0;
-    elInfo->macro_el = 0;
-    elInfo->level = 0;
-#if DIM > 2
-    elInfo->orientation = 0;
-    elInfo->el_type = 0;
-#endif
-
-    for(int i =0; i<mydim+1; i++)
-    {
-      for(int j =0; j< cdim; j++)
-      {
-        elInfo->coord[i][j] = 0.0;
-        elInfo->opp_coord[i][j] = 0.0;
-      }
-    }
-  }
-
   //*********************************************************************
 
   // Leaf Data for Albert, only the leaf elements have this data set

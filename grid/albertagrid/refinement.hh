@@ -3,9 +3,17 @@
 #ifndef DUNE_ALBERTA_REFINEMENT_HH
 #define DUNE_ALBERTA_REFINEMENT_HH
 
+/** \file
+ *  \author Martin Nolte
+ *  \brief  provides a wrapper for ALBERTA's refinement patches
+ *          and the corners for geometryInFather
+ */
+
 #include <cassert>
 
 #include <dune/grid/albertagrid/misc.hh>
+
+#if HAVE_ALBERTA
 
 namespace Dune
 {
@@ -324,5 +332,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif

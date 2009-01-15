@@ -3,6 +3,11 @@
 #ifndef DUNE_ALBERTA_ELEMENTINFO_HH
 #define DUNE_ALBERTA_ELEMENTINFO_HH
 
+/** \file
+ *  \author Martin Nolte
+ *  \brief  provides a wrapper for ALBERTA's el_info structure
+ */
+
 #include <cassert>
 
 #include <dune/grid/albertagrid/misc.hh>
@@ -205,7 +210,8 @@ namespace Dune
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
-      static ElementInfo createFake ();
+      static ElementInfo
+      createFake ( const MeshPointer &mesh, const Element *element, int level );
 
     private:
       static bool isLeaf ( Element *element );
@@ -593,11 +599,21 @@ namespace Dune
 
 
     template< int dim >
-    inline ElementInfo< dim > ElementInfo< dim >::createFake ()
+    inline ElementInfo< dim >
+    ElementInfo< dim >
+    ::createFake ( const MeshPointer &mesh, const Element *element, int level )
     {
       InstancePtr instance = stack().allocate();
       instance->parent() = null();
       ++(instance->parent()->refCount);
+
+      instance->elInfo.mesh = mesh;
+      instance->elInfo.macro_el = NULL;
+      instance->elInfo.el = const_cast< Element * >( element );
+      instance->elInfo.parent = NULL;
+      instance->elInfo.fill_flag = FillFlags::nothing;
+      instance->elInfo.level = level;
+
       return ElementInfo< dim >( instance );
     }
 

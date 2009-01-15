@@ -3,6 +3,11 @@
 #ifndef DUNE_ALBERTA_MESHPOINTER_HH
 #define DUNE_ALBERTA_MESHPOINTER_HH
 
+/** \file
+ *  \author Martin Nolte
+ *  \brief  provides a wrapper for ALBERTA's mesh structure
+ */
+
 #include <cassert>
 #include <string>
 

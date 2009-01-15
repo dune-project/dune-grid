@@ -3,6 +3,11 @@
 #ifndef DUNE_ALBERTAGRID_IMP_HH
 #define DUNE_ALBERTAGRID_IMP_HH
 
+/** \file
+ *  \author Robert Kloefkorn and Martin Nolte
+ *  \brief  provides the AlbertaGrid class
+ */
+
 #if HAVE_ALBERTA
 
 #include <iostream>
@@ -13,11 +18,6 @@
 #include <assert.h>
 #include <algorithm>
 
-/** @file
-   @author Robert Kloefkorn
-   @brief Provides base classes for AlbertaGrid
- **/
-
 // Dune includes
 #include <dune/common/misc.hh>
 #include <dune/common/interfaces.hh>
@@ -27,6 +27,7 @@
 #include <dune/common/collectivecommunication.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/adaptcallback.hh>
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
@@ -362,11 +363,14 @@ namespace Dune
     //! uses the interface, mark on entity and refineLocal
     bool globalRefine ( int refCount );
 
+    template< class DataHandle >
+    bool globalRefine ( int refCount, AdaptDataHandleInterface< This, DataHandle > &handle );
+
     /** \copydoc Dune::Grid::adapt() */
     bool adapt ();
 
-    template< class RestrictProlongOperator >
-    bool adapt ( RestrictProlongOperator &rpOp );
+    template< class DataHandle >
+    bool adapt ( AdaptDataHandleInterface< This, DataHandle > &handle );
 
     //! adapt method with DofManager
     template< class DofManager, class RestrictProlongOperator >

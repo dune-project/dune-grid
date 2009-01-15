@@ -352,14 +352,13 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  inline bool AlbertaGrid < dim, dimworld >::globalRefine ( int refCount )
+  inline bool AlbertaGrid< dim, dimworld >::globalRefine ( int refCount )
   {
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
 
     // only MAXL level allowed
-    assert( (refCount + maxlevel_) < MAXL );
+    assert( (refCount >= 0) && (refCount + maxlevel_ < MAXL) );
 
-    assert( refCount >= 0 );
     bool wasChanged = false;
     for( int i = 0; i < refCount; ++i )
     {
@@ -372,7 +371,30 @@ namespace Dune
       wasChanged |= adapt();
       postAdapt();
     }
+    return wasChanged;
+  }
 
+
+  template< int dim, int dimworld >
+  template< class DataHandle >
+  inline bool AlbertaGrid< dim, dimworld >
+  ::globalRefine ( int refCount, AdaptDataHandleInterface< This, DataHandle > &handle )
+  {
+    typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
+
+    // only MAXL level allowed
+    assert( (refCount >= 0) && (refCount + maxlevel_ < MAXL) );
+
+    bool wasChanged = false;
+    for( int i = 0; i < refCount; ++i )
+    {
+      // mark all interior elements
+      const LeafIterator endit = leafend< 0 >();
+      for( LeafIterator it = leafbegin< 0 >(); it != endit; ++it )
+        mark( 1, *it );
+
+      wasChanged |= adapt( handle );
+    }
     return wasChanged;
   }
 
@@ -457,8 +479,9 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  template< class RestrictProlongOperator >
-  inline bool AlbertaGrid < dim, dimworld >::adapt ( RestrictProlongOperator &rpOp )
+  template< class DataHandle >
+  inline bool AlbertaGrid < dim, dimworld >
+  ::adapt ( AdaptDataHandleInterface< This, DataHandle > &handle )
   {
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
@@ -466,11 +489,12 @@ namespace Dune
 #ifndef CALC_COORD
     preAdapt();
     const int refineMarked = adaptationState_.refineMarked();
-    rpOp.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
+    handle.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
 
-    typedef Alberta::AdaptRestrictProlongHandler< This, RestrictProlongOperator >
+    typedef Alberta::AdaptRestrictProlongHandler
+    < This, AdaptDataHandleInterface< This, DataHandle > >
     DataHandler;
-    DataHandler dataHandler( *this, rpOp );
+    DataHandler dataHandler( *this, handle );
 
     typedef AdaptationCallback< DataHandler > Callback;
     Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
@@ -484,7 +508,7 @@ namespace Dune
     Alberta::adaptationDataHandler_ = 0;
     callbackVector.release();
 
-    rpOp.postAdapt();
+    handle.postAdapt();
     postAdapt();
     return refined;
 #else
@@ -499,44 +523,9 @@ namespace Dune
   inline bool AlbertaGrid < dim, dimworld >
   ::adapt ( DofManager &dofManager, RestrictProlongOperator &rpOp, bool verbose )
   {
-    // minimum number of elements assumed to be created during adaptation
-    const int defaultElementChunk = 100;
-
-    typedef CombinedAdaptProlongRestrict
-    < typename DofManager::IndexSetRestrictProlongType, RestrictProlongOperator >
-    CombinedRestrictProlongOperator;
-    CombinedRestrictProlongOperator cmbRPOp ( dofManager.indexSetRPop(), rpOp );
-
-#ifndef CALC_COORD
-    preAdapt();
-
-    // reserve memory
-    const int refineMarked = adaptationState_.refineMarked();
-    dofManager.reserveMemory( std::max( defaultElementChunk, 4*refineMarked ) );
-
-    typedef Alberta::AdaptRestrictProlongHandler< This, CombinedRestrictProlongOperator >
-    DataHandler;
-    DataHandler dataHandler( *this, cmbRPOp );
-
-    typedef AdaptationCallback< DataHandler > Callback;
-    Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
-    callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
-    callbackVector.template setupInterpolation< Callback >();
-    callbackVector.template setupRestriction< Callback >();
-    Alberta::adaptationDataHandler_ = &dataHandler;
-
-    bool refined = adapt();
-
-    Alberta::adaptationDataHandler_ = 0;
-    callbackVector.release();
-
-    dofManager.dofCompress();
-    postAdapt();
-    return refined;
-#else
-    derr << "AlbertaGrid::adapt(dm,rp) : CALC_COORD defined, therefore adapt with call back not defined! \n";
-    return false ;
-#endif
+    typedef RestrictProlongWrapper< This, DofManager, RestrictProlongOperator > Wrapper;
+    Wrapper rpOpWrapper( dofManager, rpOp );
+    return adapt( rpOpWrapper );
   }
 
 
