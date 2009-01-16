@@ -537,7 +537,7 @@ namespace Dune {
     // compute the local coordinates in father refelem
     for(int i=0; i < myGeom.corners() ; ++i)
     {
-      coord_[i] = fatherGeom.local( myGeom[i] );
+      coord_[i] = fatherGeom.local( myGeom.corner( i ) );
       // to avoid rounding errors
       for(int j=0; j<cdim; ++j)
         if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
