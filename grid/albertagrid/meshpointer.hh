@@ -83,6 +83,8 @@ namespace Dune
           return std::string();
       }
 
+      int size ( int codim ) const;
+
       void create ( const std::string &filename, const std::string &name );
 
       void read ( const std::string &filename, Real &time );
@@ -134,6 +136,45 @@ namespace Dune
       }
 #endif
     };
+
+
+
+    template<>
+    inline int MeshPointer< 1 >::size( int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= 1) );
+      return (codim == 0 ? mesh_->n_elements : mesh_->n_vertices);
+    }
+
+#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM >= 2)
+    template<>
+    inline int MeshPointer< 2 >::size( int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= 2) );
+      if( codim == 0 )
+        return mesh_->n_elements;
+      else if( codim == 2 )
+        return mesh_->n_vertices;
+      else
+        return mesh_->n_edges;
+    }
+#endif // #if (DUNE_ALBERTA_VERSION >= 0x200) || (ALBERTA_DIM >= 2)
+
+#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
+    template<>
+    inline int MeshPointer< 3 >::size( int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= 3) );
+      if( codim == 0 )
+        return mesh_->n_elements;
+      else if( codim == 2 )
+        return mesh_->n_vertices;
+      else if( codim == 1 )
+        return mesh_->n_faces;
+      else
+        return mesh_->n_edges;
+    }
+#endif // #if (DUNE_ALBERTA_VERSION >= 0x200) || (ALBERTA_DIM == 3)
 
 
 #if DUNE_ALBERTA_VERSION >= 0x200

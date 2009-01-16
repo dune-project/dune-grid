@@ -401,6 +401,15 @@ namespace Dune
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::postAdapt()
   {
+#ifndef NDEBUG
+    for( int codim = 0; codim <= dimension; ++codim )
+    {
+      if( leafIndexSet_ != 0 )
+        assert( leafIndexSet_->size( codim ) == mesh_.size( codim ) );
+    }
+#endif
+
+#if 0
     typedef Alberta::Mesh Mesh;
     assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
     assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
@@ -408,6 +417,7 @@ namespace Dune
     //assert( (leafIndexSet_ && dim == 3) ? (mesh->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
     assert( (leafIndexSet_ && dim == 3) ? (((Mesh *)mesh_)->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
   #endif
+#endif
 
     // clear refined marker
     Alberta::abs( elNewCheck_ );
@@ -552,34 +562,37 @@ namespace Dune
     return maxlevel_;
   }
 
-  // --size
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
+
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >::size ( int level, int codim ) const
   {
-    if( (level > maxlevel_) || (level < 0) ) return 0;
-    assert( sizeCache_ );
-    return sizeCache_->size(level,codim);
+    assert( sizeCache_ != 0 );
+    return ((level >= 0) && (level <= maxlevel_) ? sizeCache_->size( level, codim ) : 0);
   }
 
 
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::size (int level, GeometryType type) const
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >::size ( int level, GeometryType type ) const
   {
-    return ((type.isSimplex()) ? this->size(level,dim-type.dim()) : 0);
+    return (type.isSimplex() ? size( level, dim - type.dim() ) : 0);
   }
 
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::size (GeometryType type) const
+
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >::size ( int codim ) const
   {
-    return ((type.isSimplex()) ? this->size(dim-type.dim()) : 0);
+    assert( sizeCache_ != 0 );
+    assert( sizeCache_->size( codim ) == mesh_.size( codim ) );
+    return mesh_.size( codim );
   }
 
-  template < int dim, int dimworld >
-  inline int AlbertaGrid < dim, dimworld >::size (int codim) const
+
+  template< int dim, int dimworld >
+  inline int AlbertaGrid< dim, dimworld >::size ( GeometryType type ) const
   {
-    assert( sizeCache_ );
-    return sizeCache_->size(codim);
+    return (type.isSimplex() ? size( dim - type.dim() ) : 0);
   }
+
 
   template < int dim, int dimworld >
   inline const typename AlbertaGrid < dim, dimworld > :: Traits :: LevelIndexSet &
