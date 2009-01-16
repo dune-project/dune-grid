@@ -182,7 +182,7 @@ namespace Dune
    *  Using other template parameters might result in unpredictable behavior.
    *
    *  Further installation instructions can be found here:
-   *  http://www.dune-project.org/doc/contrib-software.html#alberta
+   *  http://www.dune-project.org/external_libraries/install_alberta.html
    *
    *  \note Although ALBERTA supports different combinations of
    *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the

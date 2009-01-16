@@ -985,7 +985,7 @@ namespace Dune {
      \li Dune::YaspGrid (Yet Another Structured Parallel Grid) <br>
          <i> Provides a distributed structured cube mesh.</i>
 
-     For installation instructions for external grid managers see http://www.dune-project.org/doc/contrib-software.html .
+     For installation instructions for external grid managers see http://www.dune-project.org/external_libraries/index.html .
 
    */
   template<int dim,

@@ -166,7 +166,7 @@ namespace Dune {
      Please send any questions, suggestions, or bug reports to
      sander@math.fu-berlin.de
 
-     For installation instructions see http://www.dune-project.org/doc/contrib-software.html#uggrid .
+     For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
   template <int dim>
   class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim,dim> >
