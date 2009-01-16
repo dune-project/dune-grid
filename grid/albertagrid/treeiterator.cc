@@ -191,7 +191,7 @@ namespace Dune
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::nextElement ( ElementInfo &elementInfo )
   {
-    if( elementInfo.isLeaf() )
+    if( elementInfo.isLeaf() || (elementInfo.level() >= level_) )
     {
       while( (elementInfo.level() > 0) && (elementInfo.indexInFather() == 1) )
         elementInfo = elementInfo.father();
