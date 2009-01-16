@@ -110,42 +110,6 @@ namespace AlbertHelp
 
   }; // end of AlbertLeafData
 
-
-#ifndef CALC_COORD
-  // set entry for new elements to 1
-  template <int dim>
-  inline static void refineCoordsAndRefineCallBack ( DOF_REAL_D_VEC * drv , RC_LIST_EL *list, int ref)
-  {
-    //static MeshCallBack & callBack = MeshCallBack::instance();
-
-    const int nv = drv->fe_space->admin->n0_dof[VERTEX];
-    REAL_D* vec = 0;
-    GET_DOF_VEC(vec,drv);
-    assert(ref > 0);
-
-    const EL * el = GET_EL_FROM_LIST(*list);
-
-    // refinement edge is alwyas between vertex 0 and 1
-    const int dof0 = el->dof[0][nv];
-    const int dof1 = el->dof[1][nv];
-
-    assert( el->child[0] );
-    // new dof has local number dim
-    const int dofnew = el->child[0]->dof[dim][nv];
-
-    // get coordinates
-    const REAL_D & oldCoordZero = vec[dof0];
-    const REAL_D & oldCoordOne  = vec[dof1];
-    REAL_D & newCoord = vec[dofnew];
-
-    // new coordinate is average between old on same edge
-    // see ALBERTA docu page 159, where this method is described
-    // as real_refine_inter
-    for(int j=0; j<dim; ++j)
-      newCoord[j] = 0.5*(oldCoordZero[j] + oldCoordOne[j]);
-  }
-#endif
-
 } // end namespace AlbertHelp
 
 #ifdef __ALBERTApp__

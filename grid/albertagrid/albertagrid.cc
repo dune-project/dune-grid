@@ -30,7 +30,7 @@ namespace Dune
   static void checkAlbertaDimensions ()
   {
     // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
-    dune_static_assert( (dimworld == DIM_OF_WORLD),
+    dune_static_assert( (dimworld == Alberta::dimWorld),
                         "Template Parameter dimworld does not match "
                         "ALBERTA's DIM_OF_WORLD setting." );
 
@@ -68,8 +68,6 @@ namespace Dune
   template< int dim, int dimworld >
   inline void AlbertaGrid< dim, dimworld >::setup ()
   {
-    typedef Alberta::FillFlags< dim > FillFlags;
-
     dofNumbering_.create( mesh_ );
 
     elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
@@ -77,10 +75,7 @@ namespace Dune
     elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
 
 #ifndef CALC_COORD
-    coords_.create( dofNumbering_.dofSpace( dimension ), "Coordinates" );
-    SetLocalCoords setLocalCoords( coords_ );
-    mesh_.hierarchicTraverse( setLocalCoords, FillFlags::coords );
-    ((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
+    coordCache_.create( dofNumbering_ );
 #endif
   }
 
@@ -164,7 +159,7 @@ namespace Dune
     hIndexSet_.release();
     elNewCheck_.release();
 #ifndef CALC_COORD
-    coords_.release();
+    coordCache_.release();
 #endif
     dofNumbering_.release();
 
@@ -497,7 +492,7 @@ namespace Dune
     DataHandler dataHandler( *this, handle );
 
     typedef AdaptationCallback< DataHandler > Callback;
-    Alberta::DofVectorPointer< Alberta::GlobalVector > callbackVector;
+    typename Callback::DofVectorPointer callbackVector;
     callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
     callbackVector.template setupInterpolation< Callback >();
     callbackVector.template setupRestriction< Callback >();
@@ -549,9 +544,7 @@ namespace Dune
 #ifdef CALC_COORD
     return elementInfo.coordinate( vx );
 #else
-    assert( !(!coords_) );
-    Alberta::GlobalVector *coordsVec = (Alberta::GlobalVector *)coords_;
-    return coordsVec[ elementInfo.el()->dof[ vertex ][ 0 ] ];
+    return coordCache_( elementInfo, vertex );
 #endif
   }
 
@@ -791,7 +784,9 @@ namespace Dune
   template< class DataHandler >
   struct AlbertaGrid< dim, dimworld >::AdaptationCallback
   {
-    static void interpolateVector ( const CoordVectorPointer &dofVector,
+    typedef Alberta::DofVectorPointer< Alberta::GlobalVector > DofVectorPointer;
+
+    static void interpolateVector ( const DofVectorPointer &dofVector,
                                     const Alberta::Patch &patch )
     {
       DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
@@ -800,7 +795,7 @@ namespace Dune
         dataHandler->prolongLocal( patch[ i ] );
     }
 
-    static void restrictVector ( const CoordVectorPointer &dofVector,
+    static void restrictVector ( const DofVectorPointer &dofVector,
                                  const Alberta::Patch &patch )
     {
       DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
@@ -809,40 +804,6 @@ namespace Dune
         dataHandler->restrictLocal( patch[ i ] );
     }
   };
-
-
-
-  // AlbertaGrid::SetLocalCoords
-  // ---------------------------
-
-#ifndef CALC_COORD
-  template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::SetLocalCoords
-  {
-    typedef Alberta::DofAccess< dim, dim > DofAccess;
-
-    CoordVectorPointer coords_;
-    DofAccess dofAccess_;
-
-  public:
-    explicit SetLocalCoords ( const CoordVectorPointer &coords )
-      : coords_( coords ),
-        dofAccess_( coords.dofSpace() )
-    {}
-
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
-    {
-      Alberta::GlobalVector *array = (Alberta::GlobalVector *)coords_;
-      for( int i = 0; i < DofAccess::numSubEntities; ++i )
-      {
-        const Alberta::GlobalVector &x = elementInfo.coordinate( i );
-        Alberta::GlobalVector &y = array[ dofAccess_( elementInfo.el(), i ) ];
-        for( int i = 0; i < dimworld; ++i )
-          y[ i ] = x[ i ];
-      }
-    }
-  };
-#endif
 
 
 

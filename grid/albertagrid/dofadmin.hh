@@ -102,6 +102,11 @@ namespace Dune
         return emptySpace_;
       }
 
+      const MeshPointer &mesh () const
+      {
+        return mesh_;
+      }
+
       void create ( const MeshPointer &mesh );
 
       void release ()

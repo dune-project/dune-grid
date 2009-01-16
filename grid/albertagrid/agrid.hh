@@ -50,7 +50,7 @@
 // contains a simple memory management for some componds of this grid
 #include "agmemory.hh"
 
-#include "elementinfo.hh"
+#include <dune/grid/albertagrid/coordcache.hh>
 
 #include "indexsets.hh"
 #include "geometry.hh"
@@ -188,7 +188,7 @@ namespace Dune
    *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the
    *        case <tt>DIMGRID</tt>=<tt>DIMWORLD</tt> is supported.
    */
-  template< int dim, int dimworld = DIM_OF_WORLD >
+  template< int dim, int dimworld = Alberta::dimWorld >
   class AlbertaGrid
     : public GridDefaultImplementation
       < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
@@ -586,9 +586,7 @@ namespace Dune
     mutable std::vector< MarkerVector > levelMarkerVector_;
 
 #ifndef CALC_COORD
-    typedef Alberta::DofVectorPointer< Alberta::GlobalVector > CoordVectorPointer;
-    CoordVectorPointer coords_;
-    class SetLocalCoords;
+    Alberta::CoordCache< dimension > coordCache_;
 #endif
 
     // current state of adaptation
