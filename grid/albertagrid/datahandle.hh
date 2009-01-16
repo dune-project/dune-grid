@@ -46,10 +46,6 @@ namespace Dune
       //! restrict data , elem is always the father
       void restrictLocal ( Element *father )
       {
-        // check pointers of mesh internal dof vecs
-        // this call has to be done before all other things
-        grid_.arrangeDofVec();
-
         const int level = grid_.getLevelOfElement( father );
         ElementInfo fatherInfo
           = ElementInfo::createFake( grid_.meshPointer(), father, level );
@@ -61,10 +57,6 @@ namespace Dune
       //! prolong data
       void prolongLocal ( Alberta::Element *father )
       {
-        // check pointers of mesh internal dof vecs
-        // this call has to be done before all other things
-        grid_.arrangeDofVec();
-
         const int level = grid_.getLevelOfElement( father );
         ElementInfo fatherInfo
           = ElementInfo::createFake( grid_.meshPointer(), father, level );

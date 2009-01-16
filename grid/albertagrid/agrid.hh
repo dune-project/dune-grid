@@ -535,9 +535,6 @@ namespace Dune
     void freeEntity ( MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *entity ) const;
 
   public:
-    // make some shortcuts
-    void arrangeDofVec();
-
     // return true if el is new
     bool checkElNew ( const Alberta::Element *element ) const;
 
@@ -555,10 +552,6 @@ namespace Dune
     Alberta::DofVectorPointer< int > elNewCheck_;
     struct ElNewCheckInterpolation;
     class SetLocalElementLevel;
-
-    // for access in the elNewVec and ownerVec
-    const int nv_;
-    const int dof_;
 
     // hierarchical numbering of AlbertaGrid, unique per codim
     HierarchicIndexSet hIndexSet_;

@@ -51,8 +51,6 @@ namespace Dune
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
     : mesh_(),
       maxlevel_( 0 ),
-      nv_( dim+1 ),
-      dof_( 0 ),
       hIndexSet_( *this ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
@@ -101,8 +99,6 @@ namespace Dune
                   const std::string &gridName )
     : mesh_( 0 ),
       maxlevel_( 0 ),
-      nv_( dim+1 ),
-      dof_( 0 ),
       hIndexSet_( *this ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
@@ -528,9 +524,10 @@ namespace Dune
   inline bool AlbertaGrid< dim, dimworld >
   ::checkElNew ( const Alberta::Element *element ) const
   {
-    // if element is new then entry in dofVec is 1
-    const int *elNewVec = (int *)elNewCheck_;
-    return (elNewVec[ element->dof[ dof_ ][ nv_ ] ] < 0);
+    assert( element != NULL );
+    const int *array = (int *)elNewCheck_;
+    const int index = dofNumbering_( element, 0, 0 );
+    return (array[ index ] < 0);
   }
 
 
@@ -605,34 +602,22 @@ namespace Dune
   }
 
 
-  template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
-  {
-    const ALBERTA DOF_ADMIN *elAdmin = dofNumbering_.dofSpace( 0 )->admin;
-
-    // see Albert Doc. , should stay the same
-    const_cast<int &> (nv_)  = elAdmin->n0_dof[CENTER];
-    const_cast<int &> (dof_) = elAdmin->mesh->node[CENTER];
-  }
-
-
   template< int dim, int dimworld >
   inline int AlbertaGrid< dim, dimworld >
   ::getLevelOfElement ( const Alberta::Element *element ) const
   {
     assert( element != NULL );
-    const int *elNewVec = (int *)elNewCheck_;
+
+    const int *array = (int *)elNewCheck_;
+    const int index = dofNumbering_( element, 0, 0 );
     // return the elements level which is the absolute value of the entry
-    return std::abs( elNewVec[ element->dof[ dof_ ][ nv_ ] ] );
+    return std::abs( array[ index ] );
   }
 
 
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   {
-    // store pointer to numbering vectors and so on
-    arrangeDofVec ();
-
     // determine new maxlevel
     maxlevel_ = Alberta::maxAbs( elNewCheck_ );
     assert( (maxlevel_ >= 0) && (maxlevel_ < MAXL) );
@@ -741,9 +726,6 @@ namespace Dune
     mesh_.hierarchicTraverse( setLocalElementLevel, FillFlags::nothing );
 
     hIndexSet_.read( filename, mesh_ );
-
-    // make vectors know in grid and hSet
-    arrangeDofVec();
 
     // calc maxlevel and indexOnLevel and so on
     calcExtras();

@@ -22,6 +22,59 @@ namespace Dune
 
 
 
+    // DofAccess
+    // ---------
+
+    template< int dim, int codim >
+    class DofAccess
+    {
+      static const int codimtype = CodimType< dim, codim >::value;
+
+    public:
+      static const int numSubEntities = NumSubEntities< dim, codim >::value;
+
+      static const int dimension = dim;
+      static const int codimension = codim;
+
+    private:
+      int node_;
+      int index_;
+#ifndef NDEBUG
+      int count_;
+#endif
+
+    public:
+      DofAccess ()
+        : node_( -1 )
+      {}
+
+      explicit DofAccess ( const DofSpace *dofSpace )
+      {
+        node_ = dofSpace->admin->mesh->node[ codimtype ];
+        index_ = dofSpace->admin->n0_dof[ codimtype ];
+#ifndef NDEBUG
+        count_ = dofSpace->admin->n_dof[ codimtype ];
+#endif
+      }
+
+      int operator() ( const Element *element, int subEntity, int i ) const
+      {
+#ifndef NDEBUG
+        assert( node_ != -1 );
+        assert( subEntity < numSubEntities );
+        assert( i < count_ );
+#endif
+        return element->dof[ node_ + subEntity ][ index_ + i ];
+      }
+
+      int operator() ( const Element *element, int subEntity ) const
+      {
+        return (*this)( element, subEntity, 0 );
+      }
+    };
+
+
+
     // HierarchyDofNumbering
     // ---------------------
 
@@ -42,7 +95,6 @@ namespace Dune
 #else
       static const int nNodeTypes = DIM+1;
 #endif
-
 
       template< int codim >
       struct CreateDofSpace;
@@ -75,7 +127,7 @@ namespace Dune
       {
         assert( !(*this) == false );
         assert( (codim >= 0) && (codim <= dimension) );
-        Cache &cache = cache_[ codim ];
+        const Cache &cache = cache_[ codim ];
         return element->dof[ cache.first + subEntity ][ cache.second ];
       }
 
@@ -266,60 +318,6 @@ namespace Dune
         cache[ codim ].second = dofSpace[ codim ]->admin->n0_dof[ codimtype ];
       }
     };
-
-
-
-    // DofAccess
-    // ---------
-
-    template< int dim, int codim >
-    class DofAccess
-    {
-      static const int codimtype = CodimType< dim, codim >::value;
-
-    public:
-      static const int numSubEntities = NumSubEntities< dim, codim >::value;
-
-      static const int dimension = dim;
-      static const int codimension = codim;
-
-    private:
-      int node_;
-      int index_;
-#ifndef NDEBUG
-      int count_;
-#endif
-
-    public:
-      DofAccess ()
-        : node_( -1 )
-      {}
-
-      explicit DofAccess ( const DofSpace *dofSpace )
-      {
-        node_ = dofSpace->admin->mesh->node[ codimtype ];
-        index_ = dofSpace->admin->n0_dof[ codimtype ];
-#ifndef NDEBUG
-        count_ = dofSpace->admin->n_dof[ codimtype ];
-#endif
-      }
-
-      int operator() ( const Element *element, int subEntity, int i ) const
-      {
-#ifndef NDEBUG
-        assert( node_ != -1 );
-        assert( subEntity < numSubEntities );
-        assert( i < count_ );
-#endif
-        return element->dof[ node_ + subEntity ][ index_ + i ];
-      }
-
-      int operator() ( const Element *element, int subEntity ) const
-      {
-        return (*this)( element, subEntity, 0 );
-      }
-    };
-
   }
 
 }
