@@ -452,9 +452,6 @@ namespace Dune
 
     void setup ();
 
-    // initialize of some members
-    void initGrid ();
-
     // make the calculation of indexOnLevel and so on.
     // extra method because of Reihenfolge
     void calcExtras();

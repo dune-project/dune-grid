@@ -56,10 +56,46 @@ namespace Dune
       levelIndexVec_( (size_t)MAXL, 0 ),
       leafIndexSet_ ( 0 ),
       sizeCache_ ( 0 ),
-      leafMarkerVector_( hIndexSet_ ),
-      levelMarkerVector_( (size_t)MAXL, MarkerVector( hIndexSet_ ) )
+      leafMarkerVector_( dofNumbering_ ),
+      levelMarkerVector_( (size_t)MAXL, MarkerVector( dofNumbering_ ) )
   {
     checkAlbertaDimensions< dim, dimworld>();
+  }
+
+
+  template < int dim, int dimworld >
+  inline AlbertaGrid< dim, dimworld >
+  ::AlbertaGrid ( const std::string &macroGridFileName,
+                  const std::string &gridName )
+    : mesh_(),
+      maxlevel_( 0 ),
+      hIndexSet_( *this ),
+      idSet_( hIndexSet_ ),
+      levelIndexVec_( (size_t)MAXL, 0 ),
+      leafIndexSet_ ( 0 ),
+      sizeCache_( 0 ),
+      leafMarkerVector_( dofNumbering_ ),
+      levelMarkerVector_( (size_t)MAXL, MarkerVector( dofNumbering_ ) )
+  {
+    checkAlbertaDimensions< dim, dimworld >();
+
+    mesh_.create( macroGridFileName, gridName );
+    if( !mesh_ )
+    {
+      DUNE_THROW( AlbertaIOError,
+                  "Grid file '" << macroGridFileName
+                                << "' is not in ALBERTA macro triangulation format." );
+    }
+
+    setup();
+    hIndexSet_.create( dofNumbering_ );
+    elNewCheck_.initialize( 0 );
+    LeafDataType::initLeafDataValues( mesh_, 0 );
+
+    calcExtras();
+
+    std::cout << typeName() << " created from macro grid file '"
+              << macroGridFileName << "'." << std::endl;
   }
 
 
@@ -75,65 +111,6 @@ namespace Dune
 #ifndef CALC_COORD
     coordCache_.create( dofNumbering_ );
 #endif
-  }
-
-
-  template< int dim, int dimworld >
-  inline void AlbertaGrid< dim, dimworld >::initGrid ()
-  {
-    setup();
-
-    hIndexSet_.create( dofNumbering_ );
-
-    elNewCheck_.initialize( 0 );
-
-    LeafDataType::initLeafDataValues( mesh_, 0 );
-
-    calcExtras();
-  }
-
-
-  template < int dim, int dimworld >
-  inline AlbertaGrid< dim, dimworld >
-  ::AlbertaGrid ( const std::string &macroGridFileName,
-                  const std::string &gridName )
-    : mesh_( 0 ),
-      maxlevel_( 0 ),
-      hIndexSet_( *this ),
-      idSet_( hIndexSet_ ),
-      levelIndexVec_( (size_t)MAXL, 0 ),
-      leafIndexSet_ ( 0 ),
-      sizeCache_( 0 ),
-      leafMarkerVector_( hIndexSet_ ),
-      levelMarkerVector_( (size_t)MAXL, MarkerVector( hIndexSet_ ) )
-  {
-    checkAlbertaDimensions< dim, dimworld >();
-
-    bool makeNew = true;
-    {
-      std::fstream file( macroGridFileName.c_str(), std::ios::in );
-      if( !file )
-        DUNE_THROW( AlbertaIOError, "Could not open macro grid file '" << macroGridFileName << "'." );
-
-      std::basic_string <char> str,str1;
-      file >> str1; str = str1.assign(str1,0,3);
-      // With that Albert MacroTriang starts DIM or DIM_OF_WORLD
-      if (str != "DIM") makeNew = false;
-      file.close();
-    }
-
-    if( makeNew )
-    {
-      mesh_.create( macroGridFileName, gridName );
-      initGrid();
-      std::cout << typeName() << " created from macro grid file '"
-                << macroGridFileName << "'." << std::endl;
-    }
-    else
-    {
-      derr<<"Couldn't read grid file '"<< macroGridFileName<<"' because it's not in ALBERTA macro triangulation format! \n";
-      DUNE_THROW(NotImplemented,"Constructor reading backup file not implemented!");
-    }
   }
 
 
@@ -644,10 +621,10 @@ namespace Dune
 
     // unset up2Dat status, if lbegin is called then this status is updated
     for( int l = 0; l < MAXL; ++l )
-      levelMarkerVector_[ l ].unsetUp2Date();
+      levelMarkerVector_[ l ].clear();
 
     // unset up2Dat status, if leafbegin is called then this status is updated
-    leafMarkerVector_.unsetUp2Date();
+    leafMarkerVector_.clear();
 
     if(sizeCache_) delete sizeCache_;
     // first bool says we have simplex, second not cube, third, worryabout
@@ -765,7 +742,13 @@ namespace Dune
     // unset up2Dat status, if leafbegin is called then this status is updated
     leafMarkerVector_.unsetUp2Date();
 
-    initGrid();
+    setup();
+    hIndexSet_.create( dofNumbering_ );
+    elNewCheck_.initialize( 0 );
+    LeafDataType::initLeafDataValues( mesh_, 0 );
+
+    calcExtras();
+
     return true;
   }
 #endif

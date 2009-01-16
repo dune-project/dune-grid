@@ -159,6 +159,11 @@ namespace Dune
         return mesh_;
       }
 
+      int size ( int codim ) const
+      {
+        return dofSpace( codim )->admin->size;
+      }
+
       void create ( const MeshPointer &mesh );
 
       void release ()

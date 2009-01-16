@@ -23,13 +23,15 @@ namespace Dune
   template< int dim, int dimworld >
   class AlbertaMarkerVector
   {
+    typedef AlbertaMarkerVector< dim, dimworld > This;
+
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    friend class AlbertaGrid< dim, dimworld >;
+    //friend class AlbertaGrid< dim, dimworld >;
 
     static const int dimension = Grid::dimension;
 
-    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+    typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     template< int codim >
@@ -37,11 +39,29 @@ namespace Dune
 
   public:
     //! create AlbertaMarkerVector with empty vectors
-    explicit AlbertaMarkerVector ( const HierarchicIndexSet &hIndexSet )
-      : hIndexSet_( &hIndexSet ),
-        up2Date_( false )
-    {}
+    explicit AlbertaMarkerVector ( const DofNumbering &dofNumbering )
+      : dofNumbering_( dofNumbering )
+    {
+      for( int codim = 0; codim <= dimension; ++codim )
+        marker_[ codim ] = 0;
+    }
 
+    AlbertaMarkerVector ( const This &other )
+      : dofNumbering_( other.dofNumbering_ )
+    {
+      for( int codim = 0; codim <= dimension; ++codim )
+        marker_[ codim ] = 0;
+    }
+
+    ~AlbertaMarkerVector ()
+    {
+      clear();
+    }
+
+  private:
+    This &operator= ( const This & );
+
+  public:
     //! visit subentity on this element?
     template< int codim >
     bool subEntityOnElement ( const ElementInfo &elementInfo, int subEntity ) const;
@@ -49,24 +69,28 @@ namespace Dune
     template< int firstCodim, class Iterator >
     void markSubEntities ( const Iterator &begin, const Iterator &end );
 
+    void clear ()
+    {
+      for( int codim = 0; codim <= dimension; ++codim )
+      {
+        if( marker_[ codim ] != 0 )
+          delete[] marker_[ codim ];
+        marker_[ codim ] = 0;
+      }
+    }
+
     //! return true if marking is up to date
     bool up2Date () const
     {
-      return up2Date_;
+      return (marker_[ dimension ] != 0);
     }
-
-    //! unset up2date flag
-    void unsetUp2Date () { up2Date_ = false; }
 
     //! print for debugin' only
     void print ( std::ostream &out = std::cout ) const;
 
   private:
-    const HierarchicIndexSet *hIndexSet_;
-    std::vector< int > marker_[ dimension+1 ];
-
-    // true is vertex marker is up to date
-    bool up2Date_;
+    const DofNumbering &dofNumbering_;
+    int *marker_[ dimension+1 ];
   };
 
 

@@ -16,13 +16,13 @@ namespace Dune
   inline bool AlbertaMarkerVector< dim, dimworld >
   ::subEntityOnElement ( const ElementInfo &elementInfo, int subEntity ) const
   {
-    assert( marker_[ codim ].size() > 0 );
+    assert( marker_[ codim ] != 0 );
 
-    const int subIndex = hIndexSet_->template subIndex< codim >( elementInfo, subEntity );
+    const int subIndex = dofNumbering_( elementInfo, codim, subEntity );
     const int markIndex = marker_[ codim ][ subIndex ];
     assert( (markIndex >= 0) );
 
-    const int index = hIndexSet_->template subIndex< 0 >( elementInfo, 0 );
+    const int index = dofNumbering_( elementInfo, 0, 0 );
     return (markIndex == index);
   }
 
@@ -32,23 +32,24 @@ namespace Dune
   inline void AlbertaMarkerVector< dim, dimworld >
   ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
+    clear();
+
     for( int codim = firstCodim; codim <= dimension; ++codim )
     {
-      const size_t size = hIndexSet_->size( codim );
-      std::vector< int > &vec = marker_[ codim ];
-      vec.resize( size );
-      for( size_t i = 0; i < size; ++i )
-        vec[ i ] = -1;
+      const int size = dofNumbering_.size( codim );
+      marker_[ codim ] = new int[ size ];
+
+      int *array = marker_[ codim ];
+      for( int i = 0; i < size; ++i )
+        array[ i ] = -1;
     }
 
     for( Iterator it = begin; it != end; ++it )
     {
       const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
       Alberta::ForLoop< MarkSubEntities, firstCodim, dimension >
-      ::apply( *hIndexSet_, marker_, elementInfo );
+      ::apply( dofNumbering_, marker_, elementInfo );
     }
-
-    up2Date_ = true;
   }
 
 
@@ -58,10 +59,10 @@ namespace Dune
   {
     for( int codim = 1; codim <= dimension; ++codim )
     {
-      std::vector< int > &marker = marker_[ codim ];
-      const int size = marker.size();
-      if( size > 0)
+      int *marker = marker_[ codim ];
+      if( marker != 0 )
       {
+        const int size = dofNumbering_.size( codim );
         out << std::endl;
         out << "Codimension " << codim << " (" << size << " entries)" << std::endl;
         for( int i = 0; i < size; ++i )
@@ -84,18 +85,17 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
   public:
-    template< class Array >
-    static void apply ( const HierarchicIndexSet &hIndexSet,
-                        Array (&marker)[ dimension + 1 ],
+    static void apply ( const DofNumbering &dofNumbering,
+                        int *(&marker)[ dimension + 1 ],
                         const ElementInfo &elementInfo )
     {
-      Array &vec = marker[ codim ];
+      int *array = marker[ codim ];
 
-      const int index = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
+      const int index = dofNumbering( elementInfo, 0, 0 );
       for( int i = 0; i < numSubEntities; ++i )
       {
-        const int subIndex = hIndexSet.template subIndex< codim >( elementInfo, i );
-        vec[ subIndex ] = std::max( index, vec[ subIndex ] );
+        int &mark = array[ dofNumbering( elementInfo, codim, i ) ];
+        mark = std::max( index, mark );
       }
     }
   };
