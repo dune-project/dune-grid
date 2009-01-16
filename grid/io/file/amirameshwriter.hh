@@ -15,10 +15,10 @@ namespace Dune {
    * \brief Provides file writing facilities in the AmiraMesh format.
    *
    */
-  template<class GridType, class IndexSetType>
+  template<class GridView>
   class AmiraMeshWriter {
 
-    enum {dim = GridType::dimension};
+    enum {dim = GridView::dimension};
 
   public:
 
@@ -28,7 +28,6 @@ namespace Dune {
         quadrilateral will be split in two triangles.  If not, the file is not
         readable by standard Amira.
      */
-    template <class GridView>
     void addGrid(const GridView& gridView, bool splitQuads=false);
 
     /** \brief Add level grid
@@ -50,16 +49,19 @@ namespace Dune {
     template <class GridType2>
     void addLeafGrid(const GridType2& grid, bool splitQuads=false);
 
-    /** \brief Add cell data */
-    template <class GridType2, class DataContainer>
-    void addCellData(const DataContainer& data, const GridType2& grid);
+    /** \brief Add cell data
+        \param An ISTL compliant vector type
+        \param Grid view that the data belongs to
+     */
+    template <class DataContainer>
+    void addCellData(const DataContainer& data, const GridView& gridView);
 
     /** \brief Add vertex data
         \param An ISTL compliant vector type
-        \param IndexSet of the grid that the data belongs to
+        \param Grid view that the data belongs to
      */
     template <class DataContainer>
-    void addVertexData(const DataContainer& data, const IndexSetType& indexSet);
+    void addVertexData(const DataContainer& data, const GridView& gridView);
 
     /** \brief Write AmiraMesh object to disk
         \param filename Name of the file to write to
@@ -69,9 +71,9 @@ namespace Dune {
 
     /** \brief Write data on a uniform grid into an AmiraMesh file
      */
-    template <class GridType2, class DataContainer>
-    void addUniformData(const GridType2& grid,
-                        const array<unsigned int, GridType2::dimension>& n,
+    template <class DataContainer>
+    void addUniformData(const GridView& gridView,
+                        const array<unsigned int, dim>& n,
                         const DataContainer& data);
 
   protected:
@@ -85,12 +87,8 @@ namespace Dune {
    */
   template<class GridType>
   class LevelAmiraMeshWriter
-    : public AmiraMeshWriter<GridType,typename GridType::Traits::LevelIndexSet>
+    : public AmiraMeshWriter<typename GridType::LevelGridView>
   {
-
-    enum {dim = GridType::dimension};
-
-    typedef AmiraMeshWriter<GridType,typename GridType::Traits::LevelIndexSet> WriterType;
 
   public:
 
@@ -99,7 +97,7 @@ namespace Dune {
 
     /** \brief Constructor which initializes the AmiraMesh object with a given level grid */
     LevelAmiraMeshWriter(const GridType& grid, int level) {
-      this->addLevelGrid(grid, level);
+      this->addGrid(grid.levelView(level));
     }
 
     /** \brief Write a grid in AmiraMesh format
@@ -128,7 +126,7 @@ namespace Dune {
                                  int level) {
 
       LevelAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.levelIndexSet(level));
+      amiramesh.addVertexData(f, grid.levelView(level));
       amiramesh.write(filename);
     }
 
@@ -140,12 +138,8 @@ namespace Dune {
    */
   template<class GridType>
   class LeafAmiraMeshWriter
-    : public AmiraMeshWriter<GridType,typename GridType::Traits::LeafIndexSet>
+    : public AmiraMeshWriter<typename GridType::LeafGridView>
   {
-
-    enum {dim = GridType::dimension};
-
-    typedef AmiraMeshWriter<GridType,typename GridType::Traits::LeafIndexSet> WriterType;
 
   public:
 
@@ -178,7 +172,7 @@ namespace Dune {
                                  const VectorType& f,
                                  const std::string& filename) {
       LeafAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.leafIndexSet());
+      amiramesh.addVertexData(f, grid.leafView());
       amiramesh.write(filename);
     }
 
@@ -186,7 +180,7 @@ namespace Dune {
 
 }
 
-// The default implementation
+// implementation
 #include "amiramesh/amirameshwriter.cc"
 
 #endif

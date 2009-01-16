@@ -6,17 +6,16 @@
 #include <fstream>
 #include <limits>
 
-template<class GridType, class IndexSetType>
 template<class GridView>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridView& gridView,
-                                                           bool splitQuads)
+void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
+                                              bool splitQuads)
 {
   typedef typename GridView::template Codim<dim>::Iterator VertexIterator;
   typedef typename GridView::template Codim<0>::Iterator ElementIterator;
 
   const typename GridView::IndexSet& indexSet = gridView.indexSet();
 
-  if ((dim!=2 && dim!=3) || int(dim) != int(GridType::dimensionworld))
+  if ((dim!=2 && dim!=3) || int(dim) != int(GridView::dimensionworld))
     DUNE_THROW(IOError, "You can only write grids as AmiraMesh if dim==dimworld==2"
                << " or dim==dimworld==3.");
 
@@ -242,38 +241,40 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addGrid(const GridView& gridV
 }
 
 
-template<class GridType, class IndexSetType>
+template<class GridView>
 template<class GridType2>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLevelGrid(const GridType2& grid,
-                                                                int level,
-                                                                bool splitQuads)
+void Dune::AmiraMeshWriter<GridView>::addLevelGrid(const GridType2& grid,
+                                                   int level,
+                                                   bool splitQuads)
 {
   addGrid(grid.levelView(level), splitQuads);
 }
 
 
-template<class GridType, class IndexSetType>
+template<class GridView>
 template<class GridType2>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addLeafGrid(const GridType2& grid, bool splitQuads)
+void Dune::AmiraMeshWriter<GridView>::addLeafGrid(const GridType2& grid, bool splitQuads)
 {
   addGrid(grid.leafView(), splitQuads);
 }
 
 
-template<class GridType, class IndexSetType>
-template<class GridType2, class DataContainer>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addCellData(const DataContainer& data,
-                                                               const GridType2& grid)
+template<class GridView>
+template<class DataContainer>
+void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
+                                                  const GridView& gridView)
 {
   DUNE_THROW(NotImplemented, "AmiraMeshWriter::addCellData");
 }
 
 
-template<class GridType, class IndexSetType>
+template<class GridView>
 template<class DataContainer>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addVertexData(const DataContainer& data,
-                                                                 const IndexSetType& indexSet)
+void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
+                                                    const GridView& gridView)
 {
+  const typename GridView::IndexSet& indexSet = gridView.indexSet();
+
   // Find out whether the grid contains only tetrahedra.  If yes, then
   // it is written in TetraGrid format.  If not, it is written in
   // hexagrid format.
@@ -287,7 +288,7 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addVertexData(const DataConta
 
   // Set the appropriate content type for 2D grid data, if no other
   // content type hasn't been set already
-  if (GridType::dimension==2
+  if (dim==2
       && amiramesh_.parameters.findBase("ContentType")==NULL)
     amiramesh_.parameters.set("ContentType", "HxTriangularData");
 
@@ -362,9 +363,9 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addVertexData(const DataConta
 
 
 
-template<class GridType, class IndexSetType>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::write(const std::string& filename,
-                                                         bool ascii) const
+template<class GridView>
+void Dune::AmiraMeshWriter<GridView>::write(const std::string& filename,
+                                            bool ascii) const
 {
   // Actually write the file
   if(!amiramesh_.write(filename.c_str(), ascii))
@@ -374,14 +375,14 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::write(const std::string& file
 }
 
 
-template<class GridType, class IndexSetType>
-template<class GridType2, class DataContainer>
-void Dune::AmiraMeshWriter<GridType,IndexSetType>::addUniformData(const GridType2& grid,
-                                                                  const array<unsigned int, GridType2::dimension>& n,
-                                                                  const DataContainer& data)
+template<class GridView>
+template<class DataContainer>
+void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
+                                                     const array<unsigned int, dim>& n,
+                                                     const DataContainer& data)
 {
   dune_static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");
-  dune_static_assert(Capabilities::IsUnstructured<GridType2>::v == false,
+  dune_static_assert(Capabilities::IsUnstructured<GridView>::v == false,
                      "writeUniformData() only for structured grids!");
 
   // ///////////////////////////////////////////
@@ -393,8 +394,8 @@ void Dune::AmiraMeshWriter<GridType,IndexSetType>::addUniformData(const GridType
     bbox[2*i+1] = -std::numeric_limits<double>::max();
   }
 
-  typename GridType2::template Codim<dim>::LeafIterator vIt    = grid.template leafbegin<dim>();
-  typename GridType2::template Codim<dim>::LeafIterator vEndIt = grid.template leafend<dim>();
+  typename GridView::template Codim<dim>::Iterator vIt    = gridView.template begin<dim>();
+  typename GridView::template Codim<dim>::Iterator vEndIt = gridView.template end<dim>();
 
   for (; vIt!=vEndIt; ++vIt)
     for (int i=0; i<dim; i++) {
