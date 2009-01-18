@@ -169,8 +169,8 @@ namespace Dune
 
 
 
-    // DofVector
-    // ---------
+    // DofVectorPointer
+    // ----------------
 
     template< class Dof >
     class DofVectorPointer
@@ -181,6 +181,8 @@ namespace Dune
 
     public:
       typedef typename DofVectorProvider::DofVector DofVector;
+
+      static const bool supportsAdaptationData = (DUNE_ALBERTA_VERSION >= 0x201);
 
     private:
       DofVector *dofVector_;
@@ -269,15 +271,38 @@ namespace Dune
         FOR_ALL_DOFS( dofSpace()->admin, array[ dof ] = value );
       }
 
+      template< class AdaptationData >
+      AdaptationData *getAdaptationData () const
+      {
+        assert( dofVector_ != NULL );
+#if DUNE_ALBERTA_VERSION >= 0x201
+        assert( dofVector_->user_data != NULL );
+        return static_cast< AdaptationData * >( dofVector_->user_data );
+#else
+        return 0;
+#endif
+      }
+
+      template< class AdaptationData >
+      void setAdaptationData ( AdaptationData *adaptationData )
+      {
+        assert( dofVector_ != NULL );
+#if DUNE_ALBERTA_VERSION >= 0x201
+        dofVector_->user_data = adaptationData;
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+      }
+
       template< class Interpolation >
       void setupInterpolation ()
       {
+        assert( dofVector_ != NULL );
         dofVector_->refine_interpol = &refineInterpolate< Interpolation >;
       }
 
       template< class Restriction >
       void setupRestriction ()
       {
+        assert( dofVector_ != NULL );
         dofVector_->coarse_restrict = &coarsenRestrict< Restriction >;
       }
 
@@ -300,6 +325,9 @@ namespace Dune
     };
 
 
+
+    // Auxilliary Functions
+    // --------------------
 
     inline void abs ( const DofVectorPointer< int > &dofVector )
     {

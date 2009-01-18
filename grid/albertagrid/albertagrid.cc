@@ -436,17 +436,12 @@ namespace Dune
     // set all values of elNewCheck positive which means old
     Alberta::abs( elNewCheck_ );
 
-    // set global pointer to index stack
-    assert( Alberta::currentIndexStack == 0 );
-    Alberta::currentIndexStack = hIndexSet_.indexStack_;
-
     // adapt mesh
+    hIndexSet_.preAdapt();
     const bool refined = mesh_.refine();
     const bool coarsened = (adaptationState_.coarsen() ? mesh_.coarsen() : false);
     adaptationState_.adapt();
-
-    // remove global pointer to index stack
-    Alberta::currentIndexStack = 0;
+    hIndexSet_.postAdapt();
 
     if( refined || coarsened )
       calcExtras();
@@ -479,11 +474,15 @@ namespace Dune
     callbackVector.create( dofNumbering_.emptyDofSpace(), "Adaptation Callback" );
     callbackVector.template setupInterpolation< Callback >();
     callbackVector.template setupRestriction< Callback >();
-    Alberta::adaptationDataHandler_ = &dataHandler;
+    if( Callback::DofVectorPointer::supportsAdaptationData )
+      callbackVector.setAdaptationData( dataHandler );
+    else
+      Alberta::adaptationDataHandler_ = &dataHandler;
 
     bool refined = adapt();
 
-    Alberta::adaptationDataHandler_ = 0;
+    if( !Callback::DofVectorPointer::supportsAdaptationData )
+      Alberta::adaptationDataHandler_ = 0;
     callbackVector.release();
 
     handle.postAdapt();
@@ -764,10 +763,21 @@ namespace Dune
   {
     typedef Alberta::DofVectorPointer< Alberta::GlobalVector > DofVectorPointer;
 
+    static DataHandler &getDataHandler ( const DofVectorPointer &dofVector )
+    {
+      DataHandler *dataHandler;
+      if( DofVectorPointer::supportsAdaptationData )
+        dataHandler = dofVector.getAdaptationData< DataHandler >();
+      else
+        dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
+      assert( dataHandler != 0 );
+      return *dataHandler;
+    }
+
     static void interpolateVector ( const DofVectorPointer &dofVector,
                                     const Alberta::Patch &patch )
     {
-      DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
+      DataHandler &dataHandler = getDataHandler();
       assert( dataHandler != 0 );
       for( int i = 0; i < patch.count(); ++i )
         dataHandler->prolongLocal( patch[ i ] );
