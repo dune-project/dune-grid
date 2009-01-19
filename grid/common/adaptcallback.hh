@@ -133,7 +133,7 @@ namespace Dune
 
     void postAdapt ()
     {
-      dofManager_.dofCompress();
+      dofManager_.compress();
     }
 
     void restrictLocal ( const Entity &father ) const
