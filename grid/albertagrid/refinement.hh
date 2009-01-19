@@ -120,6 +120,38 @@ namespace Dune
       return ElementInfo::createFake ( mesh, element, level );
     }
 
+#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 3)
+    template<>
+    template< class LevelProvider >
+    inline typename Patch< 3 >::ElementInfo
+    Patch< 3 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
+    {
+      const MeshPointer< 3 > &mesh = levelProvider.mesh();
+      const Element *element = (*this)[ i ];
+      const int level = levelProvider( element );
+      ElementInfo elementInfo = ElementInfo::createFake ( mesh, element, level );
+      elementInfo.elInfo().el_type = list_[ i ].el_type;
+      return elementInfo;
+    }
+#endif
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template<>
+    template< class LevelProvider >
+    inline typename Patch< 3 >::ElementInfo
+    Patch< 3 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
+    {
+      const MeshPointer< 3 > &mesh = levelProvider.mesh();
+      const Element *element = (*this)[ i ];
+      const int level = levelProvider( element );
+      ElementInfo elementInfo = ElementInfo::createFake ( mesh, element, level );
+      elementInfo.elInfo().el_type = list_[ i ].el_info.el_type;
+      elementInfo.elInfo().orientation = list_[ i ].el_info.orientation;
+      return elementInfo;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
