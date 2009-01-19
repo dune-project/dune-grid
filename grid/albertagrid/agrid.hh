@@ -51,6 +51,7 @@
 #include "agmemory.hh"
 
 #include <dune/grid/albertagrid/coordcache.hh>
+#include <dune/grid/albertagrid/level.hh>
 
 #include "indexsets.hh"
 #include "geometry.hh"
@@ -192,7 +193,7 @@ namespace Dune
   class AlbertaGrid
     : public GridDefaultImplementation
       < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
-      public HasObjectStream,
+      //public HasObjectStream,
       public HasHierarchicIndexSet
   {
     typedef AlbertaGrid< dim, dimworld > This;
@@ -247,7 +248,7 @@ namespace Dune
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
-    struct ObjectStream;
+    //struct ObjectStream;
     struct AdaptationState;
 
     template< class DataHandler >
@@ -257,13 +258,14 @@ namespace Dune
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
-    typedef ObjectStream ObjectStreamType;
+    //typedef ObjectStream ObjectStreamType;
 
   private:
     // max number of allowed levels is 64
     static const int MAXL = 64;
 
     typedef Alberta::MeshPointer< dimension > MeshPointer;
+    typedef AlbertaGridLevelProvider< dimension > LevelProvider;
 
     // forbid copying and assignment
     AlbertaGrid ( const This & );
@@ -445,6 +447,11 @@ namespace Dune
       return mesh_;
     }
 
+    const LevelProvider &levelProvider () const
+    {
+      return levelProvider_;
+    }
+
   private:
     using Base::getRealImplementation;
 
@@ -478,7 +485,6 @@ namespace Dune
 
     // number of maxlevel of the mesh
     int maxlevel_;
-    struct CalcMaxLevel;
 
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
@@ -532,23 +538,15 @@ namespace Dune
     void freeEntity ( MakeableInterfaceObject< typename Traits::template Codim< codim >::Entity > *entity ) const;
 
   public:
-    // return true if el is new
-    bool checkElNew ( const Alberta::Element *element ) const;
-
     // read global element number from elNumbers_
     const Alberta::GlobalVector &
     getCoord ( const Alberta::ElementInfo< dimension > &elementInfo,
                int vertex ) const;
 
-    // read level from elNewCehck vector
-    int getLevelOfElement ( const Alberta::Element *element ) const;
-
   private:
     Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
 
-    Alberta::DofVectorPointer< int > elNewCheck_;
-    struct ElNewCheckInterpolation;
-    class SetLocalElementLevel;
+    LevelProvider levelProvider_;
 
     // hierarchical numbering of AlbertaGrid, unique per codim
     HierarchicIndexSet hIndexSet_;
@@ -585,6 +583,7 @@ namespace Dune
 
 
 
+#if 0
   // AlbertaGrid::ObjectStream
   // -------------------------
 
@@ -606,6 +605,7 @@ namespace Dune
     template <class T>
     void write (const T &) {}
   };
+#endif
 
 
 

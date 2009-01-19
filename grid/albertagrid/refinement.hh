@@ -67,6 +67,9 @@ namespace Dune
         return count_;
       }
 
+      template< class LevelProvider >
+      ElementInfo elementInfo ( int i, const LevelProvider &levelProvider ) const;
+
       int elementType ( int i ) const;
       bool hasNeighbor ( int i, int neighbor ) const;
       int neighborIndex ( int i, int neighbor ) const;
@@ -89,7 +92,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    Element *Patch< dim >::operator[] ( int i ) const
+    inline Element *Patch< dim >::operator[] ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el;
@@ -98,7 +101,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
-    Element *Patch< dim >::operator[] ( int i ) const
+    inline Element *Patch< dim >::operator[] ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el;
@@ -106,9 +109,21 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
+    template< int dim >
+    template< class LevelProvider >
+    inline typename Patch< dim >::ElementInfo
+    Patch< dim >::elementInfo ( int i, const LevelProvider &levelProvider ) const
+    {
+      const MeshPointer< dim > &mesh = levelProvider.mesh();
+      const Element *element = (*this)[ i ];
+      const int level = levelProvider( element );
+      return ElementInfo::createFake ( mesh, element, level );
+    }
+
+
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    int Patch< dim >::elementType ( int i ) const
+    inline int Patch< dim >::elementType ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
 #if DIM == 3
@@ -121,7 +136,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
-    int Patch< dim >::elementType ( int i ) const
+    inline int Patch< dim >::elementType ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el_type;
@@ -131,13 +146,13 @@ namespace Dune
 
 #if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template< int dim >
-    bool Patch< dim >::hasNeighbor ( int i, int neighbor ) const
+    inline bool Patch< dim >::hasNeighbor ( int i, int neighbor ) const
     {
       return (list_[ i ].neigh[ neighbor ] != NULL);
     }
 
     template< int dim >
-    int Patch< dim >::neighborIndex ( int i, int neighbor ) const
+    inline int Patch< dim >::neighborIndex ( int i, int neighbor ) const
     {
       assert( hasNeighbor( i, neighbor ) );
       return (list_[ i ].neigh[ neighbor ]->no);

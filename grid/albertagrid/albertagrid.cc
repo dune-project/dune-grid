@@ -89,7 +89,6 @@ namespace Dune
 
     setup();
     hIndexSet_.create( dofNumbering_ );
-    elNewCheck_.initialize( 0 );
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
@@ -104,9 +103,7 @@ namespace Dune
   {
     dofNumbering_.create( mesh_ );
 
-    elNewCheck_.create( dofNumbering_.dofSpace( 0 ), "el_new_check" );
-    assert( !elNewCheck_ == false );
-    elNewCheck_.template setupInterpolation< ElNewCheckInterpolation >();
+    levelProvider_.create( dofNumbering_ );
 
 #ifndef CALC_COORD
     coordCache_.create( dofNumbering_ );
@@ -130,7 +127,7 @@ namespace Dune
 
     // release dof vectors
     hIndexSet_.release();
-    elNewCheck_.release();
+    levelProvider_.release();
 #ifndef CALC_COORD
     coordCache_.release();
 #endif
@@ -398,9 +395,7 @@ namespace Dune
     }
 #endif
 
-    // clear refined marker
-    Alberta::abs( elNewCheck_ );
-
+    levelProvider_.markAllOld();
     adaptationState_.postAdapt();
   }
 
@@ -435,8 +430,8 @@ namespace Dune
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >::adapt ()
   {
-    // set all values of elNewCheck positive which means old
-    Alberta::abs( elNewCheck_ );
+    // this is already done in postAdapt
+    //levelProvider_.markAllOld();
 
     // adapt mesh
     hIndexSet_.preAdapt();
@@ -505,17 +500,6 @@ namespace Dune
     typedef RestrictProlongWrapper< This, DofManager, RestrictProlongOperator > Wrapper;
     Wrapper rpOpWrapper( dofManager, rpOp );
     return adapt( rpOpWrapper );
-  }
-
-
-  template< int dim, int dimworld >
-  inline bool AlbertaGrid< dim, dimworld >
-  ::checkElNew ( const Alberta::Element *element ) const
-  {
-    assert( element != NULL );
-    const int *array = (int *)elNewCheck_;
-    const int index = dofNumbering_( element, 0, 0 );
-    return (array[ index ] < 0);
   }
 
 
@@ -593,32 +577,12 @@ namespace Dune
   }
 
 
-  template< int dim, int dimworld >
-  inline int AlbertaGrid< dim, dimworld >
-  ::getLevelOfElement ( const Alberta::Element *element ) const
-  {
-    assert( element != NULL );
-
-    const int *array = (int *)elNewCheck_;
-    const int index = dofNumbering_( element, 0, 0 );
-    // return the elements level which is the absolute value of the entry
-    return std::abs( array[ index ] );
-  }
-
-
   template < int dim, int dimworld >
   inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   {
     // determine new maxlevel
-    maxlevel_ = Alberta::maxAbs( elNewCheck_ );
+    maxlevel_ = levelProvider_.maxLevel();
     assert( (maxlevel_ >= 0) && (maxlevel_ < MAXL) );
-
-#ifndef NDEBUG
-    typedef Alberta::FillFlags< dim > FillFlags;
-    CalcMaxLevel calcMaxLevel;
-    mesh_.leafTraverse( calcMaxLevel, FillFlags::nothing );
-    assert( maxlevel_ == calcMaxLevel.maxLevel() );
-#endif
 
     // unset up2Dat status, if lbegin is called then this status is updated
     for( int l = 0; l < MAXL; ++l )
@@ -712,10 +676,6 @@ namespace Dune
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
     setup();
-
-    SetLocalElementLevel setLocalElementLevel( elNewCheck_ );
-    mesh_.hierarchicTraverse( setLocalElementLevel, FillFlags::nothing );
-
     hIndexSet_.read( filename, mesh_ );
 
     // calc maxlevel and indexOnLevel and so on
@@ -745,7 +705,6 @@ namespace Dune
 
     setup();
     hIndexSet_.create( dofNumbering_ );
-    elNewCheck_.initialize( 0 );
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
@@ -784,7 +743,7 @@ namespace Dune
     {
       DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
-        dataHandler.prolongLocal( patch[ i ] );
+        dataHandler.prolongLocal( patch, i );
     }
 
     static void restrictVector ( const DofVectorPointer &dofVector,
@@ -792,104 +751,7 @@ namespace Dune
     {
       DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
-        dataHandler.restrictLocal( patch[ i ] );
-    }
-  };
-
-
-
-  // AlbertaGrid::CalcMaxLevel
-  // -------------------------
-
-  template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::CalcMaxLevel
-  {
-    int maxLevel_;
-
-  public:
-    CalcMaxLevel ()
-      : maxLevel_( 0 )
-    {}
-
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo )
-    {
-      maxLevel_ = std::max( maxLevel_, elementInfo.level() );
-    }
-
-    int maxLevel () const
-    {
-      return maxLevel_;
-    }
-  };
-
-
-
-  // AlbertaGrid::SetLocalElementLevel
-  // ---------------------------------
-
-  template< int dim, int dimworld >
-  class AlbertaGrid< dim, dimworld >::SetLocalElementLevel
-  {
-    typedef Alberta::DofAccess< dim, 0 > DofAccess;
-
-    Alberta::DofVectorPointer< int > levels_;
-    DofAccess dofAccess_;
-
-  public:
-    explicit SetLocalElementLevel ( const Alberta::DofVectorPointer< int > &levels )
-      : levels_( levels ),
-        dofAccess_( levels.dofSpace() )
-    {}
-
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
-    {
-      int *const array = (int *)levels_;
-      const int dof = dofAccess_( elementInfo.el(), 0 );
-      array[ dof ] = elementInfo.level();
-    }
-  };
-
-
-
-  // AlbertaGrid::ElNewCheckInterpolation
-  // ------------------------------------
-
-  template< int dim, int dimworld >
-  struct AlbertaGrid< dim, dimworld >::ElNewCheckInterpolation
-  {
-    static const int dimension = dim;
-    static const int codimension = 0;
-
-  private:
-    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
-    typedef Alberta::Patch< dimension > Patch;
-    typedef Alberta::DofAccess< dimension, codimension > DofAccess;
-
-    DofVectorPointer dofVector_;
-    DofAccess dofAccess_;
-
-    explicit ElNewCheckInterpolation ( const DofVectorPointer &dofVector )
-      : dofVector_( dofVector ),
-        dofAccess_( dofVector.dofSpace() )
-    {}
-
-  public:
-    void operator() ( const Alberta::Element *father )
-    {
-      int *array = (int *)dofVector_;
-      const int fatherLevel = std::abs( array[ dofAccess_( father, 0 ) ] );
-      for( int i = 0; i < 2; ++i )
-      {
-        const Alberta::Element *child = father->child[ i ];
-        array[ dofAccess_( child, 0 ) ] = -(fatherLevel+1);
-      }
-    }
-
-    static void interpolateVector ( const DofVectorPointer &dofVector,
-                                    const Patch &patch )
-    {
-      ElNewCheckInterpolation interpolation( dofVector );
-      patch.forEach( interpolation );
+        dataHandler.restrictLocal( patch, i );
     }
   };
 

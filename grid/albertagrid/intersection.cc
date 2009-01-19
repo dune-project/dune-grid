@@ -334,8 +334,7 @@ namespace Dune
     const ALBERTA EL * myEl    = elementInfo_.el();
     const ALBERTA EL * neighEl = elInfo.neigh[ neighborCount_ ];
 
-    return this->grid_.getLevelOfElement( myEl ) ==
-           this->grid_.getLevelOfElement( neighEl );
+    return (grid_.levelProvider() ( myEl ) == grid_.levelProvider() ( neighEl ));
   }
 
   //*****************************************
@@ -483,7 +482,7 @@ namespace Dune
 
     nbInfo.el = elInfo.neigh[ neighborCount_ ];
     assert( nbInfo.el != NULL );
-    nbInfo.level = grid_.getLevelOfElement( nbInfo.el );
+    nbInfo.level = grid_.levelProvider() ( nbInfo.el );
 
     const int vx = elInfo.opp_vertex[ neighborCount_ ];
     assert( (vx >= 0) && (vx < ElementInfo::maxNeighbors) );

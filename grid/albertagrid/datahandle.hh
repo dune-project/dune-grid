@@ -30,38 +30,30 @@ namespace Dune
       typedef typename EntityObject::ImplementationType EntityImp;
 
       typedef Alberta::ElementInfo< dimension > ElementInfo;
+      typedef Alberta::Patch< dimension > Patch;
 
       Grid &grid_;
-      EntityObject father_;
       RestrictProlongOperator &rpOp_;
+      EntityObject father_;
 
     public:
-      //! Constructor
       AdaptRestrictProlongHandler ( Grid &grid, RestrictProlongOperator &rpOp )
         : grid_( grid ),
-          father_( EntityImp( grid_ ) ),
-          rpOp_( rpOp )
+          rpOp_( rpOp ),
+          father_( EntityImp( grid_ ) )
       {}
 
-      //! restrict data , elem is always the father
-      void restrictLocal ( Element *father )
+      void restrictLocal ( const Patch &patch, int i )
       {
-        const int level = grid_.getLevelOfElement( father );
-        ElementInfo fatherInfo
-          = ElementInfo::createFake( grid_.meshPointer(), father, level );
+        ElementInfo fatherInfo = patch.elementInfo( i, grid_.levelProvider() );
         Grid::getRealImplementation( father_ ).setElement( fatherInfo, 0 );
-
         rpOp_.restrictLocal( (const Entity &)father_ );
       }
 
-      //! prolong data
-      void prolongLocal ( Alberta::Element *father )
+      void prolongLocal ( const Patch &patch, int i )
       {
-        const int level = grid_.getLevelOfElement( father );
-        ElementInfo fatherInfo
-          = ElementInfo::createFake( grid_.meshPointer(), father, level );
+        ElementInfo fatherInfo = patch.elementInfo( i, grid_.levelProvider() );
         Grid::getRealImplementation( father_ ).setElement( fatherInfo, 0 );
-
         rpOp_.prolongLocal( (const Entity &)father_ );
       }
     };

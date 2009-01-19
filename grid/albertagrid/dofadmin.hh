@@ -36,6 +36,8 @@ namespace Dune
       static const int dimension = dim;
       static const int codimension = codim;
 
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
     private:
       int node_;
       int index_;
@@ -70,6 +72,16 @@ namespace Dune
       int operator() ( const Element *element, int subEntity ) const
       {
         return (*this)( element, subEntity, 0 );
+      }
+
+      int operator() ( const ElementInfo &elementInfo, int subEntity, int i ) const
+      {
+        return (*this)( elementInfo.el(), subEntity, i );
+      }
+
+      int operator() ( const ElementInfo &elementInfo, int subEntity ) const
+      {
+        return (*this)( elementInfo.el(), subEntity );
       }
     };
 
