@@ -475,7 +475,7 @@ namespace Dune
     callbackVector.template setupInterpolation< Callback >();
     callbackVector.template setupRestriction< Callback >();
     if( Callback::DofVectorPointer::supportsAdaptationData )
-      callbackVector.setAdaptationData( dataHandler );
+      callbackVector.setAdaptationData( &dataHandler );
     else
       Alberta::adaptationDataHandler_ = &dataHandler;
 
@@ -777,19 +777,17 @@ namespace Dune
     static void interpolateVector ( const DofVectorPointer &dofVector,
                                     const Alberta::Patch &patch )
     {
-      DataHandler &dataHandler = getDataHandler();
-      assert( dataHandler != 0 );
+      DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
-        dataHandler->prolongLocal( patch[ i ] );
+        dataHandler.prolongLocal( patch[ i ] );
     }
 
     static void restrictVector ( const DofVectorPointer &dofVector,
                                  const Alberta::Patch &patch )
     {
-      DataHandler *dataHandler = (DataHandler *)Alberta::adaptationDataHandler_;
-      assert( dataHandler != 0 );
+      DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
-        dataHandler->restrictLocal( patch[ i ] );
+        dataHandler.restrictLocal( patch[ i ] );
     }
   };
 
