@@ -763,7 +763,10 @@ namespace Dune
   template< class DataHandler >
   struct AlbertaGrid< dim, dimworld >::AdaptationCallback
   {
+    static const int dimension = dim;
+
     typedef Alberta::DofVectorPointer< Alberta::GlobalVector > DofVectorPointer;
+    typedef Alberta::Patch< dimension > Patch;
 
     static DataHandler &getDataHandler ( const DofVectorPointer &dofVector )
     {
@@ -777,7 +780,7 @@ namespace Dune
     }
 
     static void interpolateVector ( const DofVectorPointer &dofVector,
-                                    const Alberta::Patch &patch )
+                                    const Patch &patch )
     {
       DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
@@ -785,7 +788,7 @@ namespace Dune
     }
 
     static void restrictVector ( const DofVectorPointer &dofVector,
-                                 const Alberta::Patch &patch )
+                                 const Patch &patch )
     {
       DataHandler &dataHandler = getDataHandler( dofVector );
       for( int i = 0; i < patch.count(); ++i )
@@ -859,6 +862,7 @@ namespace Dune
 
   private:
     typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+    typedef Alberta::Patch< dimension > Patch;
     typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
     DofVectorPointer dofVector_;
@@ -882,7 +886,7 @@ namespace Dune
     }
 
     static void interpolateVector ( const DofVectorPointer &dofVector,
-                                    const Alberta::Patch &patch )
+                                    const Patch &patch )
     {
       ElNewCheckInterpolation interpolation( dofVector );
       patch.forEach( interpolation );

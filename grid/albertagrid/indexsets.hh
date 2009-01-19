@@ -402,6 +402,7 @@ namespace Dune
     static const int codimension = codim;
 
   private:
+    typedef Alberta::Patch< dimension > Patch;
     typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
     IndexStack &indexStack_;
@@ -423,10 +424,10 @@ namespace Dune
     }
 
     static void interpolateVector ( const IndexVectorPointer &dofVector,
-                                    const Alberta::Patch &patch )
+                                    const Patch &patch )
     {
       RefineNumbering refineNumbering( dofVector );
-      patch.forEachInternalSubChild( refineNumbering );
+      patch.forEachInteriorSubChild( refineNumbering );
     }
   };
 
@@ -443,6 +444,7 @@ namespace Dune
     static const int codimension = codim;
 
   private:
+    typedef Alberta::Patch< dimension > Patch;
     typedef Alberta::DofAccess< dimension, codimension > DofAccess;
 
     IndexStack &indexStack_;
@@ -464,10 +466,10 @@ namespace Dune
     }
 
     static void restrictVector ( const IndexVectorPointer &dofVector,
-                                 const Alberta::Patch &patch )
+                                 const Patch &patch )
     {
       CoarsenNumbering coarsenNumbering( dofVector );
-      patch.forEachInternalSubChild( coarsenNumbering );
+      patch.forEachInteriorSubChild( coarsenNumbering );
     }
   };
 

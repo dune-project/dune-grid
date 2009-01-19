@@ -106,6 +106,10 @@ namespace Dune
     template< int dim >
     struct CoordCache< dim >::Interpolation
     {
+      static const int dimension = dim;
+
+      typedef Alberta::Patch< dimension > Patch;
+
       static void
       interpolateVector ( const CoordVectorPointer &dofVector, const Patch &patch )
       {

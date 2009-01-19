@@ -12,6 +12,7 @@
 #include <cassert>
 
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/elementinfo.hh>
 
 #if HAVE_ALBERTA
 
@@ -21,19 +22,35 @@ namespace Dune
   namespace Alberta
   {
 
+    // Internal Forward Declarations
+    // -----------------------------
+
+    template< int dim, int codim >
+    struct ForEachInteriorSubChild;
+
+
 
     // Patch
     // -----
 
+    template< int dim >
     class Patch
     {
+      typedef Patch< dim > This;
+
+      dune_static_assert( ((dim >= 1) && (dim <= 3)),
+                          "Alberta supports only dimensions 1, 2, 3" );
+
+    public:
+      static const int dimension = dim;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
       typedef ALBERTA RC_LIST_EL ElementList;
 
+    private:
       ElementList *list_;
       int count_;
-
-      template< int dim, int codim >
-      struct ForEachInternalSubChild;
 
     public:
       Patch ( ElementList *list, int count )
@@ -62,19 +79,17 @@ namespace Dune
       }
 
       template< class Functor >
-      void forEachInternalSubChild ( Functor &functor ) const
+      void forEachInteriorSubChild ( Functor &functor ) const
       {
-        const int dim = Functor::dimension;
         const int codim = Functor::codimension;
-        dune_static_assert( ((dim >= 1) && (dim <= 3)),
-                            "Alberta supports only dimensions 1, 2, 3" );
-        ForEachInternalSubChild< dim, codim >::apply( functor, *this );
+        ForEachInteriorSubChild< dim, codim >::apply( functor, *this );
       }
     };
 
 
 #if DUNE_ALBERTA_VERSION < 0x200
-    Element *Patch::operator[] ( int i ) const
+    template< int dim >
+    Element *Patch< dim >::operator[] ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el;
@@ -82,7 +97,8 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 #if DUNE_ALBERTA_VERSION >= 0x200
-    Element *Patch::operator[] ( int i ) const
+    template< int dim >
+    Element *Patch< dim >::operator[] ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el;
@@ -91,7 +107,8 @@ namespace Dune
 
 
 #if DUNE_ALBERTA_VERSION < 0x200
-    int Patch::elementType ( int i ) const
+    template< int dim >
+    int Patch< dim >::elementType ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
 #if DIM == 3
@@ -103,7 +120,8 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 #if DUNE_ALBERTA_VERSION >= 0x200
-    int Patch::elementType ( int i ) const
+    template< int dim >
+    int Patch< dim >::elementType ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el_type;
@@ -112,12 +130,14 @@ namespace Dune
 
 
 #if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
-    bool Patch::hasNeighbor ( int i, int neighbor ) const
+    template< int dim >
+    bool Patch< dim >::hasNeighbor ( int i, int neighbor ) const
     {
       return (list_[ i ].neigh[ neighbor ] != NULL);
     }
 
-    int Patch::neighborIndex ( int i, int neighbor ) const
+    template< int dim >
+    int Patch< dim >::neighborIndex ( int i, int neighbor ) const
     {
       assert( hasNeighbor( i, neighbor ) );
       return (list_[ i ].neigh[ neighbor ]->no);
@@ -126,14 +146,14 @@ namespace Dune
 
 
 
-    // Patch::ForEachInternalSubEntity
-    // -------------------------------
+    // ForEachInteriorSubChild
+    // -----------------------
 
     template< int dim >
-    struct Patch::ForEachInternalSubChild< dim, 0 >
+    struct ForEachInteriorSubChild< dim, 0 >
     {
       template< class Functor >
-      static void apply ( Functor &functor, const Patch &patch )
+      static void apply ( Functor &functor, const Patch< dim > &patch )
       {
         for( int i = 0; i < patch.count(); ++i )
         {
@@ -145,20 +165,20 @@ namespace Dune
     };
 
     template< int dim >
-    struct Patch::ForEachInternalSubChild< dim, dim >
+    struct ForEachInteriorSubChild< dim, dim >
     {
       template< class Functor >
-      static void apply ( Functor &functor, const Patch &patch )
+      static void apply ( Functor &functor, const Patch< dim > &patch )
       {
         functor( patch[ 0 ]->child[ 0 ], dim );
       }
     };
 
     template<>
-    struct Patch::ForEachInternalSubChild< 2, 1 >
+    struct ForEachInteriorSubChild< 2, 1 >
     {
       template< class Functor >
-      static void apply ( Functor &functor, const Patch &patch )
+      static void apply ( Functor &functor, const Patch< 2 > &patch )
       {
         // see alberta/src/2d/lagrange_2_2d.c for details
         Element *const firstFather = patch[ 0 ];
@@ -178,10 +198,10 @@ namespace Dune
     };
 
     template<>
-    struct Patch::ForEachInternalSubChild< 3, 1 >
+    struct ForEachInteriorSubChild< 3, 1 >
     {
       template< class Functor >
-      static void apply ( Functor &functor, const Patch &patch )
+      static void apply ( Functor &functor, const Patch< 3 > &patch )
       {
         // see alberta/src/3d/lagrange_3_3d.c for details
         Element *const firstFather = patch[ 0 ];
@@ -225,10 +245,10 @@ namespace Dune
     };
 
     template<>
-    struct Patch::ForEachInternalSubChild< 3, 2 >
+    struct ForEachInteriorSubChild< 3, 2 >
     {
       template< class Functor >
-      static void apply ( Functor &functor, const Patch &patch )
+      static void apply ( Functor &functor, const Patch< 3 > &patch )
       {
         // see alberta/src/3d/lagrange_2_3d.c for details
         Element *const firstFather = patch[ 0 ];
