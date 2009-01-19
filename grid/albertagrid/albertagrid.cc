@@ -376,24 +376,26 @@ namespace Dune
 
 
   template < int dim, int dimworld >
-  inline void AlbertaGrid < dim, dimworld >::postAdapt()
+  inline void AlbertaGrid < dim, dimworld >::postAdapt ()
   {
 #ifndef NDEBUG
-    for( int codim = 0; codim <= dimension; ++codim )
+    if( leafIndexSet_ != 0 )
     {
-      if( leafIndexSet_ != 0 )
-        assert( leafIndexSet_->size( codim ) == mesh_.size( codim ) );
+      bool consistent = true;
+      for( int codim = 0; codim <= dimension; ++codim )
+      {
+        if( leafIndexSet_->size( codim ) == mesh_.size( codim ) )
+          continue;
+        std::cerr << "Incorrect size of leaf index set for codimension "
+                  << codim << "!" << std::endl;
+        std::cerr << "DUNE index set reports: " << leafIndexSet_->size( codim )
+                  << std::endl;
+        std::cerr << "ALBERTA mesh reports: " << mesh_.size( codim ) << std::endl;
+        consistent = false;
+      }
+      if( !consistent )
+        abort();
     }
-#endif
-
-#if 0
-    typedef Alberta::Mesh Mesh;
-    assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_elements == leafIndexSet_->size(0) ?   1 : 0) : 1);
-    assert( (leafIndexSet_) ? (((Mesh *)mesh_)->n_vertices == leafIndexSet_->size(dim) ? 1 : 0) : 1);
-  #if DIM == 3
-    //assert( (leafIndexSet_ && dim == 3) ? (mesh->n_edges == leafIndexSet_->size(dim-1) ?  1 :0) :1);
-    assert( (leafIndexSet_ && dim == 3) ? (((Mesh *)mesh_)->n_faces == leafIndexSet_->size(1) ? 1 : 0) : 1);
-  #endif
 #endif
 
     // clear refined marker

@@ -167,7 +167,7 @@ namespace Dune
       assert( (codim >= 0) && (codim <= 3) );
       if( codim == 0 )
         return mesh_->n_elements;
-      else if( codim == 2 )
+      else if( codim == 3 )
         return mesh_->n_vertices;
       else if( codim == 1 )
         return mesh_->n_faces;
