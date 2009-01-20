@@ -125,7 +125,7 @@ namespace Dune
     {
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      return subIndex< codim >( entityImp.elementInfo().el(), entityImp.getFEVnum() );
+      return subIndex< codim >( entityImp.elementInfo().el(), entityImp.subEntity() );
     }
 
     //! return subIndex of given enitiy's sub entity
@@ -134,8 +134,8 @@ namespace Dune
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-
-      return subIndex< codim >( entityImp.elementInfo().el(), i );
+      const int j = entityImp.grid().dune2alberta( codim, i );
+      return subIndex< codim >( entityImp.elementInfo().el(), j );
     }
 
     //! return size of set for given GeometryType
@@ -185,13 +185,15 @@ namespace Dune
       return subIndex< codim >( elementInfo.el(), i );
     }
 
+    /** \brief obtain hierarchic subindex
+     *
+     *  \param[in]  element  pointer to ALBERTA element
+     *  \param[in]  i        number of the subelement (in ALBERTA numbering)
+     */
     template< int codim >
     int subIndex ( const Alberta::Element *element, int i ) const
     {
       Int2Type< codim > codimVariable;
-
-      if( (dimension == 3) && (codim == 2) )
-        i = refTopo_.dune2albertaEdge( i );
 
       int *array = (int *)entityNumbers_[ codim ];
       const int subIndex = array[ dofAccess_[ codimVariable ]( element, i ) ];
@@ -271,10 +273,7 @@ namespace Dune
     IndexVectorPointer entityNumbers_[ dimension+1 ];
 
     // access to the dof vectors
-    Alberta::CodimTable< DofAccess, dim > dofAccess_;
-
-    // constains the mapping from dune to alberta numbers
-    const ALBERTA AlbertHelp :: AlbertaGridReferenceTopology<dim> refTopo_;
+    Alberta::CodimTable< DofAccess, dimension > dofAccess_;
 
     // all geometry types contained in the grid
     std::vector< GeometryType > geomTypes_[ dimension+1 ];

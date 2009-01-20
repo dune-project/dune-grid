@@ -106,13 +106,6 @@ namespace Dune
   }
 
 
-  template<int codim, int dim, class GridImp>
-  inline int AlbertaGridEntity<codim,dim,GridImp>::getFEVnum() const
-  {
-    return subEntity_;
-  }
-
-
   template<int cd, int dim, class GridImp>
   inline const typename AlbertaGridEntity<cd,dim,GridImp>::Geometry &
   AlbertaGridEntity<cd,dim,GridImp>::geometry() const
@@ -242,7 +235,7 @@ namespace Dune
   AlbertaGridEntity< 0, dim, GridImp >::entity ( int i ) const
   {
     typedef AlbertaGridEntityPointer< codim, GridImp > EntityPointerImpl;
-    return EntityPointerImpl( grid_, elementInfo_, i );
+    return EntityPointerImpl( grid_, elementInfo_, grid_.dune2alberta( codim, i ) );
   }
 
 

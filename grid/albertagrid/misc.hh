@@ -129,6 +129,116 @@ namespace Dune
     };
 #endif
 
+
+
+    // Dune2AlbertaNumbering
+    // ---------------------
+
+    template< int dim, int codim >
+    struct Dune2AlbertaNumbering
+    {
+      static int apply ( int i )
+      {
+        assert( (i >= 0) && (i < NumSubEntities< dim, codim >::value) );
+        return i;
+      }
+    };
+
+    template<>
+    struct Dune2AlbertaNumbering< 3, 2 >
+    {
+      static const int numSubEntities = NumSubEntities< 3, 2 >::value;
+
+      static int apply ( int i )
+      {
+        assert( (i >= 0) && (i < numSubEntities) );
+        static int dune2alberta[ numSubEntities ] = { 0, 3, 1, 2, 4, 5 };
+        return dune2alberta[ i ];
+      }
+    };
+
+
+
+    // NumberingMap
+    // ------------
+
+    template< int dim >
+    class NumberingMap
+    {
+      typedef NumberingMap< dim > This;
+
+      template< int codim >
+      struct Initialize;
+
+      int *dune2alberta_[ dim+1 ];
+      int *alberta2dune_[ dim+1 ];
+      int numSubEntities_[ dim+1 ];
+
+      NumberingMap ( const This & );
+      This &operator= ( const This & );
+
+    public:
+      NumberingMap ()
+      {
+        ForLoop< Initialize, 0, dim >::apply( *this );
+      }
+
+      ~NumberingMap ()
+      {
+        for( int codim = 0; codim <= dim; ++codim )
+        {
+          delete[]( dune2alberta_[ codim ] );
+          delete[]( alberta2dune_[ codim ] );
+        }
+      }
+
+      int dune2alberta ( int codim, int i ) const
+      {
+        assert( (codim >= 0) && (codim <= dim) );
+        assert( (i >= 0) && (i < numSubEntities( codim )) );
+        return dune2alberta_[ codim ][ i ];
+      }
+
+      int alberta2dune ( int codim, int i ) const
+      {
+        assert( (codim >= 0) && (codim <= dim) );
+        assert( (i >= 0) && (i < numSubEntities( codim )) );
+        return alberta2dune_[ codim ][ i ];
+      }
+
+      int numSubEntities ( int codim ) const
+      {
+        assert( (codim >= 0) && (codim <= dim) );
+        return numSubEntities_[ codim ];
+      }
+    };
+
+
+
+    // NumberingMap::Setup
+    // -------------------
+
+    template< int dim >
+    template< int codim >
+    struct NumberingMap< dim >::Initialize
+    {
+      static const int numSubEntities = NumSubEntities< dim, codim >::value;
+
+      static void apply ( NumberingMap< dim > &map )
+      {
+        map.numSubEntities_[ codim ] = numSubEntities;
+        map.dune2alberta_[ codim ] = new int[ numSubEntities ];
+        map.alberta2dune_[ codim ] = new int[ numSubEntities ];
+
+        for( int i = 0; i < numSubEntities; ++i )
+        {
+          const int j = Dune2AlbertaNumbering< dim, codim >::apply( i );
+          map.dune2alberta_[ codim ][ i ] = j;
+          map.alberta2dune_[ codim ][ j ] = i;
+        }
+      }
+    };
+
   }
 
 }

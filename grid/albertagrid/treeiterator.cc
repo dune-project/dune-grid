@@ -267,9 +267,8 @@ namespace Dune
       if( neighbor != NULL )
       {
         // face is reached from element with largest number
-        const HierarchicIndexSet &hIndexSet = grid().hierarchicIndexSet();
-        const int elIndex = hIndexSet.template subIndex< 0 >( elementInfo, 0 );
-        const int nbIndex = hIndexSet.template subIndex< 0 >( neighbor, 0 );
+        const int elIndex = grid().dofNumbering() ( elementInfo, 0, 0 );
+        const int nbIndex = grid().dofNumbering() ( neighbor, 0, 0 );
         if( elIndex < nbIndex )
           goNext( cdVariable, elementInfo );
       }

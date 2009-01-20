@@ -104,10 +104,6 @@ namespace Dune
       return elementInfo_;
     }
 
-    //! return the current face/edge or vertex number
-    //! no interface method
-    int getFEVnum () const;
-
     //! equality of entities
     bool equals ( const This &other ) const;
 
@@ -123,6 +119,12 @@ namespace Dune
       return grid_;
     }
 
+    //! obtain number of the subentity within the element (in ALBERTA numbering)
+    int subEntity () const
+    {
+      return subEntity_;
+    }
+
   private:
     const GeometryImp &geoImp () const
     {
@@ -135,16 +137,16 @@ namespace Dune
     }
 
   private:
-    // the grid this entity belong to
+    // grid this entity belong to
     const GridImp &grid_;
 
-    // Alberta element info
+    // ALBERTA element info
     ElementInfo elementInfo_;
 
-    //! Number of the subentity within the element
+    // number of the subentity within the element (in ALBERTA numbering)
     int subEntity_;
 
-    //! the current geometry
+    // current geometry
     GeometryObject geo_;
   };
 
@@ -328,9 +330,6 @@ namespace Dune
     // return true if this entity belong to master set of this grid
     bool master() const;
 
-    // return 0 for elements
-    int getFEVnum () const { return 0; }
-
     // needed for LevelIterator to compare
     ALBERTA EL_INFO *getElInfo () const;
 
@@ -352,6 +351,12 @@ namespace Dune
     const GridImp &grid () const
     {
       return grid_;
+    }
+
+    //! obtain number of the subentity within the element (in ALBERTA numbering)
+    int subEntity () const
+    {
+      return 0;
     }
 
   private:

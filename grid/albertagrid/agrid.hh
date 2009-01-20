@@ -193,7 +193,6 @@ namespace Dune
   class AlbertaGrid
     : public GridDefaultImplementation
       < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
-      //public HasObjectStream,
       public HasHierarchicIndexSet
   {
     typedef AlbertaGrid< dim, dimworld > This;
@@ -248,7 +247,6 @@ namespace Dune
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
-    //struct ObjectStream;
     struct AdaptationState;
 
     template< class DataHandler >
@@ -258,13 +256,12 @@ namespace Dune
     //! type of leaf data
     typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
 
-    //typedef ObjectStream ObjectStreamType;
-
   private:
     // max number of allowed levels is 64
     static const int MAXL = 64;
 
     typedef Alberta::MeshPointer< dimension > MeshPointer;
+    typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
     typedef AlbertaGridLevelProvider< dimension > LevelProvider;
 
     // forbid copying and assignment
@@ -376,7 +373,7 @@ namespace Dune
 
     //! adapt method with DofManager
     template< class DofManager, class RestrictProlongOperator >
-    bool adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
+    bool adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false ) DUNE_DEPRECATED;
 
     //! returns true, if a least one element is marked for coarsening
     bool preAdapt ();
@@ -447,9 +444,24 @@ namespace Dune
       return mesh_;
     }
 
+    const DofNumbering &dofNumbering () const
+    {
+      return dofNumbering_;
+    }
+
     const LevelProvider &levelProvider () const
     {
       return levelProvider_;
+    }
+
+    int dune2alberta ( int codim, int i ) const
+    {
+      return numberingMap_.dune2alberta( codim, i );
+    }
+
+    int alberta2dune ( int codim, int i ) const
+    {
+      return numberingMap_.alberta2dune( codim, i );
     }
 
   private:
@@ -544,7 +556,10 @@ namespace Dune
                int vertex ) const;
 
   private:
-    Alberta::HierarchyDofNumbering< dimension > dofNumbering_;
+    // map between ALBERTA and DUNE numbering
+    Alberta::NumberingMap< dimension > numberingMap_;
+
+    DofNumbering dofNumbering_;
 
     LevelProvider levelProvider_;
 
@@ -580,32 +595,6 @@ namespace Dune
     // current state of adaptation
     AdaptationState adaptationState_;
   };
-
-
-
-#if 0
-  // AlbertaGrid::ObjectStream
-  // -------------------------
-
-  template< int dim, int dimworld >
-  struct AlbertaGrid< dim, dimworld >::ObjectStream
-  {
-    class EOFException {};
-    template <class T>
-    void readObject (T &) {}
-    void readObject (int) {}
-    void readObject (double) {}
-    template <class T>
-    void writeObject (T &) {}
-    void writeObject (int) {}
-    void writeObject (double) {}
-
-    template <class T>
-    void read (T &) const {}
-    template <class T>
-    void write (const T &) {}
-  };
-#endif
 
 
 

@@ -53,37 +53,6 @@ namespace AlbertHelp {
   static const int * localAlbertaFaceNumber[4] = {tetraFace_0, tetraFace_1,
                                                   tetraFace_2 , tetraFace_3 };
 
-  static const int dune2AlbertaEdgeMap[6] = {0, 3, 1, 2, 4, 5};
-
-  template <int dim>
-  class AlbertaGridReferenceTopology
-  {
-    // the real edge map
-    int em_[6];
-    const int (&edgemap_)[6];
-
-  public:
-    //! create reference topology
-    AlbertaGridReferenceTopology()
-      : edgemap_ (em_)
-    {
-      // the edgemap , see ALBERTA docu
-      for(int i=0; i<6; i++) em_[i] = dune2AlbertaEdgeMap[i];
-    }
-
-    //! dune to alberta vetex mapping
-    //! this is the id
-    int dune2albertaVertex( int i ) const { return i; }
-
-    //! dune to alberta edge mapping
-    int dune2albertaEdge( int i ) const
-    {
-      assert( i >= 0 );
-      assert( i < 6 );
-      return edgemap_[i];
-    }
-  };
-
   //****************************************************************
   //
   //  specialization of mapVertices
@@ -132,8 +101,7 @@ namespace AlbertHelp {
     {
       assert( (subEntity >= 0) && (subEntity < 6) );
       assert( (i >= 0) && (i < 2) );
-      const int edge = ALBERTA AlbertHelp :: dune2AlbertaEdgeMap[ subEntity ];
-      return ALBERTA AlbertHelp :: localEdgeNumber[ edge ][ i ];
+      return ALBERTA AlbertHelp :: localEdgeNumber[ subEntity ][ i ];
     }
   };
 

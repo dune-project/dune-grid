@@ -119,8 +119,6 @@ namespace Dune
     static const int numSubEntities
       = Alberta::NumSubEntities< dimension, codimension >::value;
 
-    typedef typename GridImp::HierarchicIndexSet HierarchicIndexSet;
-
   public:
     typedef typename Base::ElementInfo ElementInfo;
     typedef Alberta::MeshPointer< dimension > MeshPointer;
