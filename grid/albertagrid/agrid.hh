@@ -40,7 +40,7 @@
 // grape data io
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
-// calculate coordinates on the fly (forbidden for ALBERTA 1.2)?
+// calculate coordinates on the fly (forbidden for ALBERTA 2.0 and earlier)?
 #define CALC_COORD 0
 
 // some extra functions for handling the Albert Mesh

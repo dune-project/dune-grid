@@ -119,9 +119,9 @@ namespace Dune
       const Element *element = (*this)[ i ];
       const int level = levelProvider( element );
 #if (DIM == 3)
-      return ElementInfo::createFake ( mesh, element, level, list_[ i ].el_type );
+      return ElementInfo::createFake( mesh, element, level, list_[ i ].el_type );
 #else
-      return ElementInfo::createFake ( mesh, element, level );
+      return ElementInfo::createFake( mesh, element, level );
 #endif
     }
 #endif // #if (DUNE_ALBERTA_VERSION < 0x200)
@@ -133,8 +133,25 @@ namespace Dune
     Patch< dim >::elementInfo ( int i, const LevelProvider &levelProvider ) const
     {
       assert( (i >= 0) && (i < count()) );
-      assert( levelProvider( (*this)[ i ] ) == list_[ i ].el_info.level );
-      return ElementInfo::createFake ( list_[ i ].el_info );
+      return ElementInfo::createFake( list_[ i ].el_info );
+    }
+
+    template<>
+    template< class LevelProvider >
+    inline typename Patch< 2 >::ElementInfo
+    Patch< 2 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
+    {
+      assert( (i >= 0) && (i < count()) );
+      // in 2d, only the first el_info structure is fully valid!
+      if( i > 0 )
+      {
+        const MeshPointer< 2 > &mesh = levelProvider.mesh();
+        const Element *element = (*this)[ i ];
+        const int level = levelProvider( element );
+        return ElementInfo::createFake( mesh, element, level );
+      }
+      else
+        return ElementInfo::createFake( list_[ 0 ].el_info );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 

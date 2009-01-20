@@ -9,7 +9,6 @@
  */
 
 #include <cassert>
-#include <cstdlib>
 
 #include <dune/grid/albertagrid/misc.hh>
 
@@ -67,9 +66,9 @@ namespace Dune
                                | orientation | elementType;
 
 #if CALC_COORD
-      static const Flags standard = all;
+      static const Flags standard = all & ~nonPeriodic;
 #else
-      static const Flags standard = all & ~coords;
+      static const Flags standard = all & ~nonPeriodic & ~coords;
 #endif
     };
 
@@ -632,7 +631,7 @@ namespace Dune
       instance->parent() = null();
       ++(instance->parent()->refCount);
 
-      std::memcpy( &(instance->elInfo), &elInfo, sizeof( ALBERTA EL_INFO ) );
+      instance->elInfo = elInfo;
       return ElementInfo< dim >( instance );
     }
 
