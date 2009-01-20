@@ -41,7 +41,7 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
-    void preAdapt ( int estimateAdditionalElements )
+    void preAdapt ( const size_t estimateAdditionalElements )
     {
       asImp().preAdapt( estimateAdditionalElements );
     }
@@ -51,14 +51,14 @@ namespace Dune
       asImp().postAdapt();
     }
 
-    void restrictLocal ( const Entity &father ) const
+    void preCoarsening ( const Entity &father ) const
     {
-      asImp().restrictLocal( father );
+      asImp().preCoarsening( father );
     }
 
-    void prolongLocal ( const Entity &father ) const
+    void postRefinement ( const Entity &father ) const
     {
-      asImp().prolongLocal( father );
+      asImp().postRefinement( father );
     }
 
   protected:
@@ -96,10 +96,10 @@ namespace Dune
     AdaptDataHandle ( const This & );
     This &operator= ( const This & );
 
-    void preAdapt ( int estimateAdditionalElements );
+    void preAdapt ( const size_t estimateAdditionalElements );
     void postAdapt ();
-    void restrictLocal ( const Entity &father ) const;
-    void prolongLocal ( const Entity &father ) const;
+    void preCoarsening ( const Entity &father ) const;
+    void postRefinement ( const Entity &father ) const;
   };
 
 
@@ -126,7 +126,7 @@ namespace Dune
         rpOp_( rpOp )
     {}
 
-    void preAdapt ( int estimatedAdditionalElements )
+    void preAdapt ( const size_t estimatedAdditionalElements )
     {
       dofManager_.reserveMemory( estimatedAdditionalElements );
     }
@@ -136,7 +136,7 @@ namespace Dune
       dofManager_.compress();
     }
 
-    void restrictLocal ( const Entity &father ) const
+    void preCoarsening ( const Entity &father ) const
     {
       typedef typename Entity::HierarchicIterator HIterator;
 
@@ -156,7 +156,7 @@ namespace Dune
       rpOp_.restrictLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
     }
 
-    void prolongLocal ( const Entity &father ) const
+    void postRefinement ( const Entity &father ) const
     {
       typedef typename Entity::HierarchicIterator HIterator;
 
