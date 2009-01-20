@@ -644,7 +644,7 @@ namespace ALUGridSpace {
       realFather_.setElement(elem);
       realSon_.setElement(*son);
 
-      rp_.prolongLocal(reFather_,reSon_, false);
+      rp_.prolongLocal(reFather_,reSon_, true);
 
       son = son->next();
       while( son )

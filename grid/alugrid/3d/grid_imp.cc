@@ -737,10 +737,6 @@ namespace Dune {
     EntityObject father  ( EntityImp(*this, this->maxLevel()) );
     EntityObject son     ( EntityImp(*this, this->maxLevel()) );
 
-    typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
-    typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
-    COType tmprpop ( dm.indexSetRPop() , rpo );
-
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
 
@@ -759,11 +755,11 @@ namespace Dune {
       // if global id set exists then include into
       // prolongation process
       ALU3DSPACE AdaptRestrictProlongGlSet<ALU3dGrid<dim, dimworld, elType>,
-          COType, GlobalIdSetImp  >
+          RestrictProlongOperatorType, GlobalIdSetImp  >
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         tmprpop,
+         rpo,
          *globalIdSet_);
 
       refined = myGrid().duneAdapt(rp); // adapt grid
@@ -771,11 +767,11 @@ namespace Dune {
     else
     {
       ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>,
-          COType >
+          RestrictProlongOperatorType>
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         tmprpop);
+         rpo);
 
       refined = myGrid().duneAdapt(rp); // adapt grid
     }
