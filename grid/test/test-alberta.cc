@@ -25,6 +25,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
+#include "checkiterators.cc"
 
 
 
@@ -76,24 +77,28 @@ int main () {
 
       std::cout << ">>> Checking macro grid..." << std::endl;
       gridcheck(grid); // check macro grid
+      checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
       for(int i=0; i<1; i++)
       {
         std::cout << ">>> Refining grid and checking again..." << std::endl;
         grid.globalRefine( 1 );
         gridcheck(grid);
+        checkIterators( grid.leafView() );
         checkIntersectionIterator(grid,true);
       }
 
       // check dgf grid width half refinement
       grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
       gridcheck(grid);
+      checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
 
       for(int i=0; i<2; i++)
       {
         markOne(grid,0,dim);
         gridcheck(grid);
+        checkIterators( grid.leafView() );
       }
 
       checkGeometryInFather(grid);
