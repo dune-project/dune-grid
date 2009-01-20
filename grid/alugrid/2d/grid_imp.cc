@@ -473,10 +473,6 @@ namespace Dune {
     EntityObject father  ( EntityImp(*this, this->maxLevel()) );
     EntityObject son     ( EntityImp(*this, this->maxLevel()) );
 
-    typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
-    typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
-    COType tmprpop ( dm.indexSetRPop() , rpo );
-
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
 
@@ -494,11 +490,11 @@ namespace Dune {
 
     bool ref = false ;
     {
-      ALU2DSPACE AdaptRestrictProlong2dImpl<ALU2dGrid<dim, dimworld>,COType >
+      ALU2DSPACE AdaptRestrictProlong2dImpl<ALU2dGrid<dim, dimworld>, RestrictProlongOperatorType>
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         tmprpop);
+         rpo);
 
       ref = myGrid().duneAdapt(rp); // adapt grid
       //if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
@@ -511,7 +507,7 @@ namespace Dune {
     }
 
     // check whether we have balance
-    dm.dofCompress();
+    dm.compress();
 
     postAdapt();
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
