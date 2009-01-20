@@ -14,6 +14,7 @@
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/albertaextra.hh>
+#include <dune/grid/albertagrid/macrodata.hh>
 
 #if HAVE_ALBERTA
 
@@ -85,6 +86,7 @@ namespace Dune
 
       int size ( int codim ) const;
 
+      void create ( const MacroData< dim > &macroData, const std::string &name );
       void create ( const std::string &filename, const std::string &name );
 
       void read ( const std::string &filename, Real &time );
@@ -180,19 +182,15 @@ namespace Dune
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MeshPointer< dim >
-    ::create ( const std::string &filename, const std::string &name )
+    ::create ( const MacroData< dim > &macroData, const std::string &name )
     {
       release();
 
-      ALBERTA MACRO_DATA *macro = ALBERTA read_macro( filename.c_str() );
-
 #if DUNE_ALBERTA_VERSION >= 0x201
-      mesh_ = GET_MESH( dim, name.c_str(), macro, NULL, NULL );
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL, NULL );
 #else
-      mesh_ = GET_MESH( dim, name.c_str(), macro, NULL );
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL );
 #endif
-
-      free_macro_data( macro );
 
       if( mesh_ != NULL )
       {
@@ -201,6 +199,19 @@ namespace Dune
                                 LeafData::AlbertLeafRefine,
                                 LeafData::AlbertLeafCoarsen );
       }
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline void MeshPointer< dim >
+    ::create ( const std::string &filename, const std::string &name )
+    {
+      MacroData< dim > macroData;
+      macroData.read( filename );
+      create( macroData, name );
+      macroData.release();
     }
 #endif // #if DUNE_ABLERTA_VERSION >= 0x200
 
