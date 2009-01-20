@@ -40,7 +40,9 @@
 // grape data io
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
-//#define CALC_COORD
+// calculate coordinates on the fly (forbidden for ALBERTA 1.2)?
+#define CALC_COORD 0
+
 // some extra functions for handling the Albert Mesh
 #include "albertaextra.hh"
 
@@ -260,6 +262,7 @@ namespace Dune
     // max number of allowed levels is 64
     static const int MAXL = 64;
 
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::MeshPointer< dimension > MeshPointer;
     typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
     typedef AlbertaGridLevelProvider< dimension > LevelProvider;
@@ -552,8 +555,7 @@ namespace Dune
   public:
     // read global element number from elNumbers_
     const Alberta::GlobalVector &
-    getCoord ( const Alberta::ElementInfo< dimension > &elementInfo,
-               int vertex ) const;
+    getCoord ( const ElementInfo &elementInfo, int vertex ) const;
 
   private:
     // map between ALBERTA and DUNE numbering
@@ -588,7 +590,7 @@ namespace Dune
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable std::vector< MarkerVector > levelMarkerVector_;
 
-#ifndef CALC_COORD
+#if !CALC_COORD
     Alberta::CoordCache< dimension > coordCache_;
 #endif
 

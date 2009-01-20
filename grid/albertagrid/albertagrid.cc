@@ -105,7 +105,7 @@ namespace Dune
 
     levelProvider_.create( dofNumbering_ );
 
-#ifndef CALC_COORD
+#if !CALC_COORD
     coordCache_.create( dofNumbering_ );
 #endif
   }
@@ -128,7 +128,7 @@ namespace Dune
     // release dof vectors
     hIndexSet_.release();
     levelProvider_.release();
-#ifndef CALC_COORD
+#if !CALC_COORD
     coordCache_.release();
 #endif
     dofNumbering_.release();
@@ -456,7 +456,6 @@ namespace Dune
     // minimum number of elements assumed to be created during adaptation
     const int defaultElementChunk = 100;
 
-#ifndef CALC_COORD
     preAdapt();
     const int refineMarked = adaptationState_.refineMarked();
     handle.preAdapt( std::max( defaultElementChunk, 4*refineMarked ) );
@@ -485,10 +484,6 @@ namespace Dune
     handle.postAdapt();
     postAdapt();
     return refined;
-#else
-    derr << "AlbertaGrid::adapt(rpOp) : CALC_COORD defined, therefore adapt with call back not defined! \n";
-    return false;
-#endif
   }
 
 
@@ -506,12 +501,11 @@ namespace Dune
   template< int dim, int dimworld >
   inline const Alberta::GlobalVector &
   AlbertaGrid< dim, dimworld >
-  ::getCoord ( const Alberta::ElementInfo< dimension > &elementInfo,
-               int vertex ) const
+  ::getCoord ( const ElementInfo &elementInfo, int vertex ) const
   {
     assert( (vertex >= 0) && (vertex <= dim) );
-#ifdef CALC_COORD
-    return elementInfo.coordinate( vx );
+#if CALC_COORD
+    return elementInfo.coordinate( vertex );
 #else
     return coordCache_( elementInfo, vertex );
 #endif

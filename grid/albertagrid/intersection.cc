@@ -356,7 +356,7 @@ namespace Dune
                               const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
     {
 
-  #ifdef CALC_COORD
+  #if CALC_COORD
       // vx is the face number in the neighbour
       const int (& neighmap)[dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[vx];
       // neighborCount is the face number in the actual element
@@ -439,7 +439,7 @@ namespace Dune
       // is used when calculation the outerNormal
       neighInfo->orientation = ( rightOriented ) ? elInfo->orientation : -elInfo->orientation;
 
-  #ifdef CALC_COORD
+  #if CALC_COORD
       // vx is the face number in the neighbour
       const int * neighmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
       // neighborCount is the face number in the actual element
@@ -501,7 +501,7 @@ namespace Dune
     nbInfo.opp_vertex[ vx ] = neighborCount_;
 
 
-  #ifdef CALC_COORD
+  #if CALC_COORD
     // copy the one opposite vertex
     // the same for 2d and 3d
     {

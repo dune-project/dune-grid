@@ -109,6 +109,7 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
+#if (DUNE_ALBERTA_VERSION < 0x200)
     template< int dim >
     template< class LevelProvider >
     inline typename Patch< dim >::ElementInfo
@@ -117,38 +118,23 @@ namespace Dune
       const MeshPointer< dim > &mesh = levelProvider.mesh();
       const Element *element = (*this)[ i ];
       const int level = levelProvider( element );
+#if (DIM == 3)
+      return ElementInfo::createFake ( mesh, element, level, list_[ i ].el_type );
+#else
       return ElementInfo::createFake ( mesh, element, level );
-    }
-
-#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 3)
-    template<>
-    template< class LevelProvider >
-    inline typename Patch< 3 >::ElementInfo
-    Patch< 3 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
-    {
-      const MeshPointer< 3 > &mesh = levelProvider.mesh();
-      const Element *element = (*this)[ i ];
-      const int level = levelProvider( element );
-      ElementInfo elementInfo = ElementInfo::createFake ( mesh, element, level );
-      elementInfo.elInfo().el_type = list_[ i ].el_type;
-      return elementInfo;
-    }
 #endif
-
+    }
+#endif // #if (DUNE_ALBERTA_VERSION < 0x200)
 
 #if DUNE_ALBERTA_VERSION >= 0x200
-    template<>
+    template< int dim >
     template< class LevelProvider >
-    inline typename Patch< 3 >::ElementInfo
-    Patch< 3 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
+    inline typename Patch< dim >::ElementInfo
+    Patch< dim >::elementInfo ( int i, const LevelProvider &levelProvider ) const
     {
-      const MeshPointer< 3 > &mesh = levelProvider.mesh();
-      const Element *element = (*this)[ i ];
-      const int level = levelProvider( element );
-      ElementInfo elementInfo = ElementInfo::createFake ( mesh, element, level );
-      elementInfo.elInfo().el_type = list_[ i ].el_info.el_type;
-      elementInfo.elInfo().orientation = list_[ i ].el_info.orientation;
-      return elementInfo;
+      assert( (i >= 0) && (i < count()) );
+      assert( levelProvider( (*this)[ i ] ) == list_[ i ].el_info.level );
+      return ElementInfo::createFake ( list_[ i ].el_info );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 

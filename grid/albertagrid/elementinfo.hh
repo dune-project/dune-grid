@@ -9,6 +9,7 @@
  */
 
 #include <cassert>
+#include <cstdlib>
 
 #include <dune/grid/albertagrid/misc.hh>
 
@@ -211,7 +212,9 @@ namespace Dune
       ALBERTA EL_INFO &elInfo () const;
 
       static ElementInfo
-      createFake ( const MeshPointer &mesh, const Element *element, int level );
+      createFake ( const MeshPointer &mesh,
+                   const Element *element, int level, int type = 0 );
+      static ElementInfo createFake ( const ALBERTA EL_INFO &elInfo );
 
     private:
       static bool isLeaf ( Element *element );
@@ -545,7 +548,7 @@ namespace Dune
     template< int dim >
     inline bool ElementInfo< dim >::hasCoordinates () const
     {
-      return ((elInfo().fill_flag & FILL_COORDS) != 0);
+      return ((elInfo().fill_flag & FillFlags::coords) != 0);
     }
 
     template< int dim >
@@ -600,8 +603,8 @@ namespace Dune
 
     template< int dim >
     inline ElementInfo< dim >
-    ElementInfo< dim >
-    ::createFake ( const MeshPointer &mesh, const Element *element, int level )
+    ElementInfo< dim >::createFake ( const MeshPointer &mesh,
+                                     const Element *element, int level, int type )
     {
       InstancePtr instance = stack().allocate();
       instance->parent() = null();
@@ -613,7 +616,23 @@ namespace Dune
       instance->elInfo.parent = NULL;
       instance->elInfo.fill_flag = FillFlags::nothing;
       instance->elInfo.level = level;
+#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
+      instance->elInfo.el_type = type;
+#endif
 
+      return ElementInfo< dim >( instance );
+    }
+
+
+    template< int dim >
+    inline ElementInfo< dim >
+    ElementInfo< dim >::createFake ( const ALBERTA EL_INFO &elInfo )
+    {
+      InstancePtr instance = stack().allocate();
+      instance->parent() = null();
+      ++(instance->parent()->refCount);
+
+      std::memcpy( &(instance->elInfo), &elInfo, sizeof( ALBERTA EL_INFO ) );
       return ElementInfo< dim >( instance );
     }
 
