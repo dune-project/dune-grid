@@ -399,7 +399,7 @@ namespace Dune {
         for(int i=0; i < myGeom.corners() ; ++i)
         {
           // calculate coordinate
-          coord[i] = fatherGeom.local( myGeom[i] );
+          coord[i] = fatherGeom.local( myGeom.corner( i ) );
 
           // set pointer
           coordPtr_[i] = reinterpret_cast<const CoordPtrType*> (&(coord[i][0]));
