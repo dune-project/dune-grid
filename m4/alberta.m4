@@ -70,10 +70,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # link_static_flag defines the flag for the linker to link only static
     # didnt work, with $link_static_flag, so quick hack here
 
-    # change CC to libtool during library check (resolves dynamic linking problems)
-    ac_save_CC="$CC"
-    CC="${SHELL} libtool $CC"
-    # if header is found...
+    # check for libalberta_util...
     if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_LIB(alberta_util,[alberta_calloc],
         [ALBERTA_LIBS="-lalberta_util"
@@ -83,7 +80,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
          AC_MSG_WARN(-lalberta_util not found!)])
     fi
 
-    # still everything found?
+    # check for ALBERTA grid library...
     if test "x$HAVE_ALBERTA" = "x1" ; then
       # construct libname
       # the zero is the sign of the no-debug-lib
@@ -97,12 +94,16 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
         albertalibname="ALBERTA${with_alberta_dim}${with_alberta_dim}_${with_alberta_debug}"
       fi
 
-      AC_CHECK_LIB($albertalibname,[mesh_traverse],
-        [ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"],
-        [HAVE_ALBERTA="0"
-         AC_MSG_WARN(-l$albertalibname not found!)])
+      # we do not check libraries for ALBERTA 2.1 (linking would require libtool)
+      if test "$ALBERTA_VERSION" == "2.1" ; then
+        AC_MSG_WARN([ALBERTA $ALBERTA_VERSION found -- Skipping check for ALBERTA grid libraries])
+      else
+        AC_CHECK_LIB($albertalibname,[mesh_traverse], [],
+          [HAVE_ALBERTA="0"
+           AC_MSG_WARN(-l$albertalibname not found!)])
+      fi
+      ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"
     fi
-    CC="$ac_save_CC"
 
   fi  # end of alberta check (--without wasn't set)
 
