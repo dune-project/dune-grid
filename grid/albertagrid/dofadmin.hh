@@ -280,6 +280,7 @@ namespace Dune
     inline void
     HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
     {
+      // the const cast is needed due to a bug in ALBERTA 2.0
       ALBERTA free_fe_space( const_cast< DofSpace * >( dofSpace ) );
     }
 #endif // #if DUNE_ALBERTA_VERSION == 0x200

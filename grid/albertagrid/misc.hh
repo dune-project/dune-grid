@@ -157,6 +157,23 @@ namespace Dune
 
 
 
+    // RefinementEdge
+    // --------------
+
+    template< int dim >
+    struct RefinementEdge
+    {
+      static const int value = 0;
+    };
+
+    template<>
+    struct RefinementEdge< 2 >
+    {
+      static const int value = 2;
+    };
+
+
+
     // Dune2AlbertaNumbering
     // ---------------------
 

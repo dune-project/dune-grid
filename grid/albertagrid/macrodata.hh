@@ -5,6 +5,7 @@
 
 #include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/referencetopo.hh>
 
 namespace Dune
 {
@@ -21,6 +22,7 @@ namespace Dune
 
       static const int dimension = dim;
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
+      static const int numEdges = NumSubEntities< dimension, dimension-1 >::value;
 
       typedef int ElementId[ numVertices ];
 
@@ -42,6 +44,9 @@ namespace Dune
         return data_;
       }
 
+      ElementId &element ( int i ) const;
+      GlobalVector &vertex ( int i ) const;
+
       /** \brief create a new macro data structure
        *
        *  A new macro data structure is created and put into insert mode.
@@ -61,6 +66,16 @@ namespace Dune
         vertexCount_ = elementCount_ = -1;
       }
 
+      /** \brief mark the longest edge of all elements as refinement edges
+       *
+       *  This is a postprocessing step and should be done after finalizing
+       *  the triangulation.
+       *
+       *  \note Thouth it is possible to call markLongestEdge in insert mode,
+       *        you must make sure that all required vertices have been set.
+       */
+      void markLongestEdge ();
+
       /** \brief release the macro data structure */
       void release ()
       {
@@ -77,20 +92,32 @@ namespace Dune
        *  Insert an element into the macro data structure. This may only be
        *  done in insert mode.
        */
-      int insertElement ( const ElementId &element );
+      int insertElement ( const ElementId &id )
+      {
+        assert( elementCount_ >= 0 );
+        if( elementCount_ >= data_->n_macro_elements )
+          resizeElements( 2*elementCount_ );
+
+        ElementId &e = element( elementCount_ );
+        for( int i = 0; i < numVertices; ++i )
+          e[ i ] = id[ i ];
+        return elementCount_++;
+      }
 
       /** \brief insert vertex
        *
        *  Insert a vertex into the macro data structure. This may only be
        *  done in insert mode.
        */
-      int insertVertex ( const GlobalVector &v )
+      int insertVertex ( const GlobalVector &coords )
       {
         assert( vertexCount_ >= 0 );
         if( vertexCount_ >= data_->n_total_vertices )
           resizeVertices( 2*vertexCount_ );
+
+        GlobalVector &v = vertex( vertexCount_ );
         for( int i = 0; i < dimWorld; ++i )
-          data_->coords[ vertexCount_ ][ i ] = v[ i ];
+          v[ i ] = coords[ i ];
         return vertexCount_++;
       }
 
@@ -105,6 +132,45 @@ namespace Dune
       }
 
     private:
+      Real edgeLength ( const ElementId &e, int edge ) const
+      {
+        const int i = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 0 );
+        assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
+        const GlobalVector &x = vertex( e[ i ] );
+
+        const int j = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 1 );
+        assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
+        const GlobalVector &y = vertex( e[ j ] );
+
+        Real sum = (y[ 0 ] - x[ 0 ]) * (y[ 0 ] - x[ 0 ]);
+        for( int i = 1; i < dimWorld; ++i )
+          sum += (y[ i ] - x[ i ]) * (y[ i ] - x[ i ]);
+        return sqrt( sum );
+      }
+
+      int longestEdge ( const ElementId &e ) const
+      {
+        int maxEdge = 0;
+        Real maxLength = edgeLength( e, 0 );
+        for( int i = 1; i < numEdges; ++i )
+        {
+          const Real length = edgeLength( e, i );
+          if( length <= maxLength )
+            continue;
+          maxEdge = i;
+          maxLength = length;
+        }
+        return maxEdge;
+      }
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+      template< class Type >
+      void rotate ( Type *array, int i, int shift );
+#else
+      template< class Type >
+      void rotate ( Type (*array)[ numVertices ], int i, int shift );
+#endif
+
       void resizeElements ( const int newSize );
 
       void resizeVertices ( const int newSize )
@@ -117,10 +183,39 @@ namespace Dune
     };
 
 
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline typename MacroData< dim >::ElementId &
+    MacroData< dim >::element ( int i ) const
+    {
+      assert( (i >= 0) && (i < data_->n_macro_elements) );
+      const int offset = i * numVertices;
+      return *reinterpret_cast< ElementId * >( data_->mel_vertices + offset );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline typename MacroData< dim >::ElementId &
+    MacroData< dim >::element ( int i ) const
+    {
+      assert( (i >= 0) && (i < data_->n_macro_elements) );
+      return data_->mel_vertices[ i ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+    template< int dim >
+    inline GlobalVector &MacroData< dim >::vertex ( int i ) const
+    {
+      assert( (i >= 0) && (i < data_->n_total_vertices) );
+      return data_->coords[ i ];
+    }
+
 
 #if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
-    void MacroData< dim >::create ()
+    inline void MacroData< dim >::create ()
     {
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize );
@@ -131,7 +226,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION == 0x200
     template< int dim >
-    void MacroData< dim >::create ()
+    inline void MacroData< dim >::create ()
     {
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize, 0 );
@@ -142,7 +237,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    void MacroData< dim >::create ()
+    inline void MacroData< dim >::create ()
     {
       dune_static_assert( dimension == dimGrid,
                           "Wrong grid dimension used for ALBERTA 1.2." );
@@ -154,37 +249,57 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
+    template< int dim >
+    inline void MacroData< dim >::markLongestEdge ()
+    {
+      assert( data_ != NULL );
+      if( dimension == 1 )
+        return;
+
+      const int count = (elementCount_ >= 0 ? elementCount_ : data_->n_macro_elements);
+      for( int i = 0; i < count; ++i )
+      {
+        const int refEdge = RefinementEdge< dimension >::value;
+        const int edge = longestEdge( element( i ) );
+        if( edge == refEdge )
+          continue;
+        std::cout << "Longest edge: " << edge << std::endl;
+
+        // shift vertices such that the refinement edge is the longest edge
+        const int shift = edge + (numVertices - refEdge);
+
+        // rotate necessary fields
+        rotate( data_->mel_vertices, i, shift );
+
+        // correct opposite vertices
+#if DUNE_ALBERTA_VERSION >= 0x201
+        if( data_->opp_vertex != NULL )
+        {
+          assert( data_->neigh != NULL );
+          for( int j = 0; j < numVertices; ++j )
+          {
+            const int nb = data_->neigh[ i*numVertices + j ];
+            if( nb < 0 )
+              continue;
+            const int ov = data_->opp_vertex[ i*numVertices + j ];
+            assert( data_->neigh[ nb*numVertices + ov ] == i );
+            assert( data_->opp_vertex[ nb*numVertices + ov ] == j );
+            data_->opp_vertex[ nb*numVertices + ov ] = (j+shift) % numVertices;
+          }
+          rotate( data_->opp_vertex, i, shift );
+        }
+#endif
+
+        // correct neighbors and boundaries
+        rotate( data_->neigh, i, shift );
+        rotate( data_->boundary, i, shift );
+      }
+    }
+
+
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
-    int MacroData< dim >::insertElement ( const ElementId &element )
-    {
-      assert( elementCount_ >= 0 );
-      if( elementCount_ >= data_->n_macro_elements )
-        resizeElements( 2*elementCount_ );
-      const int offset = elementCount_*numVertices;
-      for( int i = 0; i < numVertices; ++i )
-        data_->mel_vertices[ offset + i ] = element[ i ];
-      return elementCount_++;
-    }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    int MacroData< dim >::insertElement ( const ElementId &element )
-    {
-      assert( elementCount_ >= 0 );
-      if( elementCount_ >= data_->n_macro_elements )
-        resizeElements( 2*elementCount_ );
-      for( int i = 0; i < numVertices; ++i )
-        data_->mel_vertices[ elementCount_ ][ i ] = element[ i ];
-      return elementCount_++;
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-
-#if DUNE_ALBERTA_VERSION >= 0x200
-    template< int dim >
-    void MacroData< dim >::read ( const std::string &filename, bool binary )
+    inline void MacroData< dim >::read ( const std::string &filename, bool binary )
     {
       release();
       if( binary )
@@ -196,7 +311,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    void MacroData< dim >::read ( const std::string &filename, bool binary )
+    inline void MacroData< dim >::read ( const std::string &filename, bool binary )
     {
       release();
       DUNE_THROW( NotImplemented, "In ALBERTA 1.2, macro data cannot be read." );
@@ -206,7 +321,43 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
-    void MacroData< dim >::resizeElements ( const int newSize )
+    template< class Type >
+    inline void MacroData< dim >::rotate ( Type *array, int i, int shift )
+    {
+      assert( (i >= 0) && (i < data_->n_macro_elements) );
+      if( array == NULL )
+        return;
+
+      const int offset = i*numVertices;
+      Type old[ numVertices ];
+      for( int j = 0; j < numVertices; ++j )
+        old[ j ] = array[ offset + j ];
+      for( int j = 0; j < numVertices; ++j )
+        array[ offset + j ] = old[ (j+shift) % numVertices ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    template< class Type >
+    inline void MacroData< dim >::rotate ( Type (*array)[ numVertices ], int i, int shift )
+    {
+      assert( (i >= 0) && (i < data_->n_macro_elements) );
+      if( array == NULL )
+        return;
+
+      Type old[ numVertices ];
+      for( int j = 0; j < numVertices; ++j )
+        old[ j ] = array[ i ][ j ];
+      for( int j = 0; j < numVertices; ++j )
+        array[ i ][ j ] = old[ (j+shift) % numVertices ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline void MacroData< dim >::resizeElements ( const int newSize )
     {
       const int oldSize = data_->n_macro_elements;
       data_->n_macro_elements = newSize;
@@ -217,7 +368,7 @@ namespace Dune
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
-    void MacroData< dim >::resizeElements ( const int newSize )
+    inline void MacroData< dim >::resizeElements ( const int newSize )
     {
       const int oldSize = data_->n_macro_elements;
       data_->n_macro_elements = newSize;
