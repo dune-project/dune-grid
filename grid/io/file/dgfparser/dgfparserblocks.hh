@@ -96,9 +96,7 @@ namespace Dune
       // for error messages
       friend std :: ostream &operator<< ( std :: ostream &os, const BasicBlock &b )
       {
-        return os
-               << "block " << b.identifier
-               << " on line " << b.pos << std::endl;
+        return os << "block " << b.identifier << " (line " << b.pos << ")";
       }
     };
 

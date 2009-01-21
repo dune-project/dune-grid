@@ -773,14 +773,17 @@ namespace Dune
       command << name << suffix;
       dverb << "Calling : " << command.str() << std::endl;
       info->print("Calling : "+command.str());
-      system(command.str().c_str());
-      if (para.display()) {
+      if( system(command.str().c_str()) < 0 )
+        DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
+      if (para.display())
+      {
         std::stringstream command;
         if (para.haspath())
           command << para.path() << "/";
         command << "showme " << name; // << ".1.ele";
         dverb << "Calling : " << command.str() << std::endl;
-        system(command.str().c_str());
+        if( system( command.str().c_str() ) < 0 )
+          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
     }
     else if (dimw==3)
@@ -808,7 +811,8 @@ namespace Dune
         command << name << suffix;
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
-        system(command.str().c_str());
+        if( system(command.str().c_str()) < 0 )
+          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
       if (para.minAngle()>0 || para.maxArea()>0)
       { // second call
@@ -829,7 +833,8 @@ namespace Dune
         command << " " << inname << ".1";
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
-        system(command.str().c_str());
+        if( system(command.str().c_str()) < 0 )
+          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
       if (para.display())
       {
@@ -839,7 +844,8 @@ namespace Dune
 
         command << "tetview-linux " << prefixname << "." << call_nr << ".ele";
         dverb << "Calling : " << command.str() << std::endl;
-        system(command.str().c_str());
+        if( system(command.str().c_str()) < 0 )
+          DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
     }
     std::stringstream polyname;
