@@ -22,6 +22,10 @@ namespace Dune
       static const int dimension = dim;
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
 
+      typedef int ElementId[ numVertices ];
+
+      static const int initialSize = 4096;
+
       Data *data_;
       int vertexCount_;
       int elementCount_;
@@ -42,13 +46,7 @@ namespace Dune
        *
        *  A new macro data structure is created and put into insert mode.
        */
-      void create ()
-      {
-        release();
-        data_ = ALBERTA alloc_macro_data( dim, 4096, 4096 );
-        vertexCount_ = elementCount_ = 0;
-        elementCount_ = 0;
-      }
+      void create ();
 
       /** \brief compress macro data structure
        *
@@ -79,16 +77,7 @@ namespace Dune
        *  Insert an element into the macro data structure. This may only be
        *  done in insert mode.
        */
-      int insertElement ( const int (&element)[ numVertices ] )
-      {
-        assert( elementCount_ >= 0 );
-        if( elementCount_ >= data_->n_macro_elements )
-          resizeElements( 2*elementCount_ );
-        const int offset = elementCount_*numVertices;
-        for( int i = 0; i < numVertices; ++i )
-          data_->mel_vertices[ offset + i ] = element[ i ];
-        return elementCount_++;
-      }
+      int insertElement ( const ElementId &element );
 
       /** \brief insert vertex
        *
@@ -105,14 +94,7 @@ namespace Dune
         return vertexCount_++;
       }
 
-      void read ( const std::string &filename, bool binary = false )
-      {
-        release();
-        if( binary )
-          data_ = ALBERTA read_macro_xdr( filename.c_str() );
-        else
-          data_ = ALBERTA read_macro( filename.c_str() );
-      }
+      void read ( const std::string &filename, bool binary = false );
 
       bool write ( const std::string &filename, bool binary = false ) const
       {
@@ -123,22 +105,126 @@ namespace Dune
       }
 
     private:
-      void resizeElements ( const int newSize )
-      {
-        const int oldSize = data_->n_macro_elements;
-        data_->n_macro_elements = newSize;
-        data_->mel_vertices = MEM_REALLOC( data_->mel_vertices, oldSize*numVertices, newSize*numVertices, int );
-        assert( data_->mel_vertices != NULL );
-      }
+      void resizeElements ( const int newSize );
 
       void resizeVertices ( const int newSize )
       {
         const int oldSize = data_->n_total_vertices;
         data_->n_total_vertices = newSize;
-        data_->coords = MEM_REALLOC( data_->coords, oldSize, newSize, GlobalVector );
+        data_->coords = memReAlloc< GlobalVector >( data_->coords, oldSize, newSize );
         assert( data_->coords != NULL );
       }
     };
+
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    void MacroData< dim >::create ()
+    {
+      release();
+      data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize );
+      vertexCount_ = elementCount_ = 0;
+      elementCount_ = 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION == 0x200
+    template< int dim >
+    void MacroData< dim >::create ()
+    {
+      release();
+      data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize, 0 );
+      vertexCount_ = elementCount_ = 0;
+      elementCount_ = 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION == 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    void MacroData< dim >::create ()
+    {
+      dune_static_assert( dimension == dimGrid,
+                          "Wrong grid dimension used for ALBERTA 1.2." );
+      release();
+      data_ = ALBERTA alloc_macro_data( initialSize, initialSize, 0 );
+      vertexCount_ = elementCount_ = 0;
+      elementCount_ = 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    int MacroData< dim >::insertElement ( const ElementId &element )
+    {
+      assert( elementCount_ >= 0 );
+      if( elementCount_ >= data_->n_macro_elements )
+        resizeElements( 2*elementCount_ );
+      const int offset = elementCount_*numVertices;
+      for( int i = 0; i < numVertices; ++i )
+        data_->mel_vertices[ offset + i ] = element[ i ];
+      return elementCount_++;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    int MacroData< dim >::insertElement ( const ElementId &element )
+    {
+      assert( elementCount_ >= 0 );
+      if( elementCount_ >= data_->n_macro_elements )
+        resizeElements( 2*elementCount_ );
+      for( int i = 0; i < numVertices; ++i )
+        data_->mel_vertices[ elementCount_ ][ i ] = element[ i ];
+      return elementCount_++;
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    void MacroData< dim >::read ( const std::string &filename, bool binary )
+    {
+      release();
+      if( binary )
+        data_ = ALBERTA read_macro_xdr( filename.c_str() );
+      else
+        data_ = ALBERTA read_macro( filename.c_str() );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    void MacroData< dim >::read ( const std::string &filename, bool binary )
+    {
+      release();
+      DUNE_THROW( NotImplemented, "In ALBERTA 1.2, macro data cannot be read." );
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    void MacroData< dim >::resizeElements ( const int newSize )
+    {
+      const int oldSize = data_->n_macro_elements;
+      data_->n_macro_elements = newSize;
+      data_->mel_vertices = memReAlloc< int >( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
+      assert( data_->mel_vertices != NULL );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    void MacroData< dim >::resizeElements ( const int newSize )
+    {
+      const int oldSize = data_->n_macro_elements;
+      data_->n_macro_elements = newSize;
+      data_->mel_vertices = memReAlloc< ElementId >( data_->mel_vertices, oldSize, newSize );
+      assert( data_->mel_vertices != NULL );
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
   }
 

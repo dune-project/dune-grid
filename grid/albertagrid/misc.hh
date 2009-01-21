@@ -38,6 +38,9 @@ namespace Dune
     using GenericGeometry::CodimTable;
 
     static const int dimWorld = DIM_OF_WORLD;
+#if DUNE_ALBERTA_VERSION < 0x200
+    static const int dimGrid = DIM;
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
     typedef ALBERTA REAL Real;
     typedef ALBERTA REAL_D GlobalVector;
@@ -50,6 +53,29 @@ namespace Dune
 #endif
 
     typedef ALBERTA FE_SPACE DofSpace;
+
+
+
+    // Memory Manipulation Functions
+    // -----------------------------
+
+    template< class Data >
+    inline Data *memAlloc ( size_t size )
+    {
+      return MEM_ALLOC( size, Data );
+    }
+
+    template< class Data >
+    inline Data *memReAlloc ( Data *ptr, size_t oldSize, size_t newSize )
+    {
+      return MEM_REALLOC( ptr, oldSize, newSize, Data );
+    }
+
+    template< class Data >
+    inline void memFree ( Data *ptr, size_t size )
+    {
+      return MEM_FREE( ptr, size, Data );
+    }
 
 
 

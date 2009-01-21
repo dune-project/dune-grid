@@ -291,7 +291,7 @@ namespace Dune
     {
       if( dofSpace->name != NULL )
         free( (char *)(dofSpace->name) );
-      ALBERTA MEM_FREE( dofSpace, 1, DofSpace );
+      memFree< const DofSpace >( dofSpace, 1 );
     }
 #endif
 

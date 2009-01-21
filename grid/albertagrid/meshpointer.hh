@@ -87,7 +87,7 @@ namespace Dune
       int size ( int codim ) const;
 
       void create ( const MacroData< dim > &macroData, const std::string &name );
-      void create ( const std::string &filename, const std::string &name );
+      void create ( const std::string &filename, const std::string &name, bool binary = false );
 
       void read ( const std::string &filename, Real &time );
 
@@ -202,23 +202,37 @@ namespace Dune
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline void MeshPointer< dim >
+    ::create ( const MacroData< dim > &macroData, const std::string &name )
+    {
+      release();
+
+      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
+      mesh_ = ALBERTA get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
+      if( mesh_ != NULL )
+        ALBERTA macro_data2mesh( mesh_, macroData, BoundaryProvider::initBoundary );
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MeshPointer< dim >
-    ::create ( const std::string &filename, const std::string &name )
+    ::create ( const std::string &filename, const std::string &name, bool binary )
     {
       MacroData< dim > macroData;
-      macroData.read( filename );
+      macroData.read( filename, binary );
       create( macroData, name );
       macroData.release();
     }
-#endif // #if DUNE_ABLERTA_VERSION >= 0x200
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >
     inline void MeshPointer< dim >
-    ::create ( const std::string &filename, const std::string &name )
+    ::create ( const std::string &filename, const std::string &name, bool binary )
     {
       release();
 
@@ -226,10 +240,13 @@ namespace Dune
       mesh_ = ALBERTA get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
       if( mesh_ != NULL )
       {
-        ALBERTA read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
+        if( binary )
+          ALBERTA read_macro_xdr( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
+        else
+          ALBERTA read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
       }
     }
-#endif // #if DUNE_ABLERTA_VERSION < 0x200
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 
@@ -242,7 +259,7 @@ namespace Dune
       typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, LeafData::initLeafData, BoundaryProvider::initBoundary );
     }
-#endif // #if DUNE_ABLERTA_VERSION < 0x200
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
@@ -263,7 +280,7 @@ namespace Dune
                                 LeafData::AlbertLeafCoarsen );
       }
     }
-#endif // #if DUNE_ABLERTA_VERSION >= 0x200
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
     template< int dim >
@@ -361,7 +378,7 @@ namespace Dune
         return mesh().mesh_->n_macro_el;
       }
     };
-#endif // #if DUNE_ABLERTA_VERSION >= 0x200
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
 #if DUNE_ALBERTA_VERSION < 0x200
@@ -413,7 +430,7 @@ namespace Dune
         return mesh_;
       }
     };
-#endif // #if DUNE_ABLERTA_VERSION < 0x200
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 
