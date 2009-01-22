@@ -57,13 +57,21 @@ namespace Dune
        *
        *  Compress the macro data structure to its minimum size and leave
        *  insert mode.
+       *
+       *  \note This method may always be called. It does nothing outside of
+       *        insert mode.
        */
       void finalize ()
       {
-        assert( (vertexCount_ >= 0) && (elementCount_ >= 0) );
-        resizeVertices( vertexCount_ );
-        resizeElements( elementCount_ );
-        vertexCount_ = elementCount_ = -1;
+        if( (vertexCount_ >= 0) && (elementCount_ >= 0) )
+        {
+          resizeVertices( vertexCount_ );
+          resizeElements( elementCount_ );
+          vertexCount_ = elementCount_ = -1;
+          ALBERTA compute_neigh_fast( data_ );
+          ALBERTA default_boundary( data_, 1, true );
+        }
+        assert( (vertexCount_ < 0) && (elementCount_ < 0) );
       }
 
       /** \brief mark the longest edge of all elements as refinement edges
@@ -110,6 +118,23 @@ namespace Dune
        *  done in insert mode.
        */
       int insertVertex ( const GlobalVector &coords )
+      {
+        assert( vertexCount_ >= 0 );
+        if( vertexCount_ >= data_->n_total_vertices )
+          resizeVertices( 2*vertexCount_ );
+
+        GlobalVector &v = vertex( vertexCount_ );
+        for( int i = 0; i < dimWorld; ++i )
+          v[ i ] = coords[ i ];
+        return vertexCount_++;
+      }
+
+      /** \brief insert vertex
+       *
+       *  Insert a vertex into the macro data structure. This may only be
+       *  done in insert mode.
+       */
+      int insertVertex ( const FieldVector< Real, dimWorld > &coords )
       {
         assert( vertexCount_ >= 0 );
         if( vertexCount_ >= data_->n_total_vertices )

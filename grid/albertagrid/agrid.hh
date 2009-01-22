@@ -272,20 +272,26 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
-    /*
-       levInd = true means that a consecutive level index is generated
-       if levInd == true the the element number of first macro element is
-       set to 1 so hasLevelIndex_ can be identified we grid is read from
-       file */
-    /** \brief Constructor which reads an ALBERTA macro triangulation file.*/
+    /** \brief create an empty grid */
+    AlbertaGrid ();
+
+    /** \brief create a grid from an ALBERTA macro data structure
+     *
+     *  \param[in]  macroData  macro data to create grid from
+     *  \param[in]  gridName   name of the grid (defaults to "AlbertaGrid")
+     */
+    AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
+                  const std::string &gridName = "AlbertaGrid" );
+
+    /** \brief create a grid from an ALBERTA macro grid file
+     *
+     *  \param[in]  macroGridFileName  name of the macro grid file
+     *  \param[in]  gridName           name of the grid (defaults to "AlbertaGrid")
+     */
     AlbertaGrid ( const std::string &macroGridFileName,
                   const std::string &gridName = "AlbertaGrid" );
 
-
-    //! \brief empty Constructor
-    AlbertaGrid ();
-
-    //! \brief Desctructor
+    /** \brief desctructor */
     ~AlbertaGrid ();
 
     //! Return maximum level defined in this grid. Levels are numbered
