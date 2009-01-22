@@ -50,6 +50,7 @@ namespace Dune
     typedef ALBERTA EL Element;
 
     static const int InteriorBoundary = INTERIOR;
+    static const int DirichletBoundary = DIRICHLET;
 #if DUNE_ALBERTA_VERSION >= 0x201
     typedef ALBERTA BNDRY_TYPE BoundaryId;
 #else

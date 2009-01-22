@@ -336,7 +336,7 @@ namespace Dune
               id = InteriorBoundary;
             }
             else
-              id = (id == InteriorBoundary ? 1 : id);
+              id = (id == InteriorBoundary ? DirichletBoundary : id);
           }
         }
 
