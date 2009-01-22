@@ -473,10 +473,8 @@ namespace Dune {
     // just map the point of the global intersection to the local
     // coordinates , this is the default procedure
     // for simplices this is not so bad
-    for(int i=0; i<mydim+1; ++i)
-    {
-      coord_[i] = geo.local( localGeom[i] );
-    }
+    for( int i = 0; i <= mydim; ++i )
+      coord_[ i ] = geo.local( localGeom.corner( i ) );
 
     elDet_  = elDeterminant();
 #ifndef NDEBUG
