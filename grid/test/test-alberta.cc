@@ -19,7 +19,7 @@
 #endif
 
 #include <dune/grid/albertagrid.hh>
-#include <dune/grid/io/file/dgfparser/dgfalberta.hh>
+#include <dune/grid/albertagrid/dgfparser.hh>
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
