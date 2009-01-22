@@ -25,6 +25,8 @@ namespace Dune
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
 
+    static const bool supportsBoundaryIds = (DUNE_ALBERTA_VERSION >= 0x200);
+
     typedef FieldVector< ctype, dimensionworld > Coordinate;
 
   private:
@@ -48,13 +50,13 @@ namespace Dune
       macroData_.release();
     }
 
-    void insertVertex ( const Coordinate &coord )
+    virtual void insertVertex ( const Coordinate &coord )
     {
       macroData_.insertVertex( coord );
     }
 
-    void insertElement ( const GeometryType &type,
-                         const std::vector< unsigned int > &vertices )
+    virtual void insertElement ( const GeometryType &type,
+                                 const std::vector< unsigned int > &vertices )
     {
       if( (int)type.dim() != dimension )
         DUNE_THROW( AlbertaError, "Inserting element of wrong dimension: " << type.dim() );
@@ -70,21 +72,24 @@ namespace Dune
       macroData_.insertElement( array );
     }
 
-    Grid *createGrid ( bool markLongestEdge )
+    virtual void insertBoundary ( int element, int face, int id )
+    {
+      if( (id <= 0) || (id > 127) )
+        DUNE_THROW( AlbertaError, "Invalid boundary id: " << id << "." );
+      macroData_.boundaryId( element, numberingMap_.dune2alberta( 1, face ) ) = id;
+    }
+
+    Grid *createGrid ( const std::string &gridName, bool markLongestEdge = false )
     {
       macroData_.finalize();
       if( markLongestEdge )
         macroData_.markLongestEdge();
-      Grid *grid = new Grid( macroData_ );
-      macroData_.release();
-
-      macroData_.create();
-      return grid;
+      return new Grid( macroData_, gridName );
     }
 
-    Grid *createGrid ()
+    virtual Grid *createGrid ()
     {
-      return createGrid( false );
+      return createGrid( "AlbertaGrid", false );
     }
 
     static void destroyGrid ( Grid *grid )
@@ -92,7 +97,7 @@ namespace Dune
       delete grid;
     }
 
-    bool write ( const std::string &filename, bool binary = false ) const
+    virtual bool write ( const std::string &filename, bool binary = false )
     {
       macroData_.finalize();
       return macroData_.write( filename, binary );
