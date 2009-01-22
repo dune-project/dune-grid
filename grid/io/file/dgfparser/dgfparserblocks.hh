@@ -399,33 +399,88 @@ namespace Dune
 
 
     // *************************************************************
-    class GridParameterBlock : public BasicBlock
+    class GridParameterBlock
+      : public BasicBlock
     {
+    public:
+      typedef unsigned int Flags;
+
+      static const Flags foundPeriodic = 1 << 1;
+      static const Flags foundOverlap = 1 << 2;
+      static const Flags foundClosure = 1 << 3;
+      static const Flags foundCopies = 1 << 4;
+      static const Flags foundName = 1 << 5;
+
     protected:
+      Flags foundFlags_; // supportFlags, this block was created with
       std::set<int> _periodic; // periodic grid
       int _overlap; // overlap for YaspGrid
       bool _noClosure; // no closure for UGGrid
       bool _noCopy; // no copies for UGGrid
+      std::string name_; // name of the grid
+
     private:
       // copy not implemented
       GridParameterBlock(const GridParameterBlock&);
+
     public:
       const static char* ID;
       // initialize block and get dimension of world
-      GridParameterBlock ( std :: istream &in, const bool readOverlapAndBnd );
+      GridParameterBlock ( std::istream &in, const bool readOverlapAndBnd = true );
 
       // get dimension of world found in block
-      int overlap() const { return _overlap;  }
+      int overlap () const
+      {
+        if( (foundFlags_ & foundOverlap) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'overlap' not specified, "
+                << "defaulting to '" << _overlap << "'." << std::endl;
+        }
+        return _overlap;
+      }
+
+      std::string name ( const std::string &defaultValue ) const
+      {
+        if( (foundFlags_ & foundName) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'name' not specified, "
+                << "defaulting to '" << defaultValue << "'." << std::endl;
+          return defaultValue;
+        }
+        else
+          return name_;
+      }
 
       // returns true if no closure should be used for UGGrid
-      bool noClosure() const { return _noClosure; }
+      bool noClosure () const
+      {
+        if( (foundFlags_ & foundClosure) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'closure' not specified, "
+                << "defaulting to 'GREEN'." << std::endl;
+        }
+        return _noClosure;
+      }
 
       // returns true if no closure should be used for UGGrid
-      bool noCopy() const { return _noCopy; }
+      bool noCopy () const
+      {
+        if( (foundFlags_ & foundCopies) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'copies' not specified, "
+                << "no copies will be generated." << std::endl;
+        }
+        return _noCopy;
+      }
 
       // returns true if dimension is periodic
-      bool isPeriodic(const int dim) const
+      bool isPeriodic ( const int dim ) const
       {
+        if( (foundFlags_ & foundPeriodic) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'copies' not specified, "
+                << "defaulting to no periodic boundary." << std::endl;
+        }
         return (_periodic.find(dim) != _periodic.end());
       }
 

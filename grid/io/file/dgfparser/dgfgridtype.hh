@@ -96,7 +96,8 @@
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
   #endif
-  #include <dune/grid/io/file/dgfparser/dgfalberta.hh>
+//#include <dune/grid/io/file/dgfparser/dgfalberta.hh>
+  #include <dune/grid/albertagrid/dgfparser.hh>
 #endif
 
 #if defined ALUGRID_CUBE || defined ALUGRID_SIMPLEX || defined ALUGRID_CONFORM

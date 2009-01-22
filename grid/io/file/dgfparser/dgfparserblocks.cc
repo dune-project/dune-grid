@@ -971,75 +971,76 @@ namespace Dune
     const char *GridParameterBlock :: ID = "GridParameter";
 
 
-    GridParameterBlock :: GridParameterBlock ( std :: istream &in,
-                                               const bool readOverlapAndBnd)
-      : BasicBlock(in,ID),
+    GridParameterBlock::GridParameterBlock ( std :: istream &in, const bool readOverlapAndBnd )
+      : BasicBlock( in, ID ),
+        foundFlags_( 0 ),
         _periodic(),
         _overlap(0), // default value
         _noClosure(false), // default value
         _noCopy(true)    // default value
     {
-      if (! isempty() )
+      if( isempty() )
+        return;
+
+      // check name
+      if( findtoken( "name" ) )
       {
-        if( readOverlapAndBnd  )
-        {
-          // check overlap
-          if (findtoken("overlap"))
-          {
-            int x;
-            if( getnextentry(x) ) _overlap = x;
-            else
-            {
-              dwarn << "GridParameterBlock: found keyword `overlap' but no value, defaulting to `" <<  _overlap  <<"' !\n";
-            }
-
-            if (_overlap < 0)
-            {
-              DUNE_THROW(DGFException,"Negative overlap specified!");
-            }
-          }
-          else
-          {
-            dwarn << "GridParameterBlock: could not find keyword `overlap' in DGF file, defaulting to `"<<_overlap<<"' !\n";
-          }
-
-          // check periodic grid
-          if (findtoken("periodic"))
-          {
-            int x;
-            while (getnextentry(x))
-            {
-              _periodic.insert(x);
-            }
-          }
-          else
-          {
-            dwarn << "GridParameterBlock: could not find keyword `periodic' in DGF file, defaulting to no periodic boundary! \n";
-          }
-        }
+        std::string entry;
+        if( getnextentry( entry ) )
+          name_ = entry;
         else
+          dwarn << "GridParameterBlock: Found keyword 'name' without value." << std::endl;
+        foundFlags_ |= foundName;
+      }
+
+      if( readOverlapAndBnd )
+      {
+        // check overlap
+        if( findtoken( "overlap" ) )
         {
-          // check closure
-          if (findtoken("closure"))
-          {
-            std::string clo;
-            if(getnextentry(clo))
-            {
-              makeupcase(clo);
-              if(clo == "NONE")
-              {
-                _noClosure = true;
-              }
-            }
-          }
+          int x;
+          if( getnextentry(x) ) _overlap = x;
           else
           {
-            dwarn << "GridParameterBlock: could not find keyword `closure' in DGF file, defaulting to `GREEN' !\n";
+            dwarn << "GridParameterBlock: found keyword `overlap' but no value, defaulting to `" <<  _overlap  <<"' !\n";
           }
+
+          if (_overlap < 0)
+          {
+            DUNE_THROW(DGFException,"Negative overlap specified!");
+          }
+          foundFlags_ |= foundOverlap;
+        }
+
+        // check periodic grid
+        if (findtoken("periodic"))
+        {
+          int x;
+          while (getnextentry(x))
+          {
+            _periodic.insert(x);
+          }
+          foundFlags_ |= foundPeriodic;
         }
       }
+
       // check closure
-      if (findtoken("copies"))
+      if (findtoken("closure"))
+      {
+        std::string clo;
+        if(getnextentry(clo))
+        {
+          makeupcase(clo);
+          if(clo == "NONE")
+          {
+            _noClosure = true;
+          }
+        }
+        foundFlags_ |= foundClosure;
+      }
+
+      // check copies
+      if( findtoken( "copies" ) )
       {
         std::string clop;
         if(getnextentry(clop))
@@ -1053,10 +1054,7 @@ namespace Dune
             _noCopy = false;
           }
         }
-      }
-      else
-      {
-        dwarn << "GridParameterBlock: could not find keyword `copies' in DGF file, no copies will be generated !\n";
+        foundFlags_ |= foundCopies;
       }
     }
 
