@@ -28,7 +28,7 @@ namespace Dune
                    "file not found in BasicBlock::BasicBlock");
       }
       getblock( in );
-      empty = (linecount > 0);
+      empty = (linecount == 0);
       if (active && !empty) {
         //linecount=countlines();
         reset();
@@ -66,8 +66,8 @@ namespace Dune
         // strip comments
         if( !line.empty() )
         {
-          std :: size_t comment = line.find( "%" );
-          if( comment != std :: string :: npos )
+          std::size_t comment = line.find( '%' );
+          if( comment != std::string::npos )
             line.erase( comment );
         }
         if( line.empty() )
@@ -975,9 +975,10 @@ namespace Dune
       : BasicBlock( in, ID ),
         foundFlags_( 0 ),
         _periodic(),
-        _overlap(0), // default value
-        _noClosure(false), // default value
-        _noCopy(true)    // default value
+        _overlap( 0 ),         // default value
+        _noClosure( false ),   // default value
+        _noCopy( true ),       // default value
+        name_( "Unnamed Grid" ) // default value (used if name is empty)
     {
       if( isempty() )
         return;
