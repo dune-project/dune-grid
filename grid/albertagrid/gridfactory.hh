@@ -5,8 +5,11 @@
 
 #include <dune/grid/common/gridfactory.hh>
 
+#include <dune/grid/utility/grapedataioformattypes.hh>
+
 #include <dune/grid/albertagrid/agrid.hh>
 
+#if HAVE_ALBERTA
 
 namespace Dune
 {
@@ -97,13 +100,17 @@ namespace Dune
       delete grid;
     }
 
-    virtual bool write ( const std::string &filename, bool binary = false )
+    template< GrapeIOFileFormatType type >
+    bool write ( const std::string &filename )
     {
+      dune_static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
-      return macroData_.write( filename, binary );
+      return macroData_.write( filename, (type == xdr) );
     }
   };
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif
