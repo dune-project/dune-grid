@@ -48,6 +48,13 @@ namespace Dune
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
+
+    static const int InteriorBoundary = INTERIOR;
+#if DUNE_ALBERTA_VERSION >= 0x201
+    typedef ALBERTA BNDRY_TYPE BoundaryId;
+#else
+    typedef S_CHAR BoundaryId;
+#endif
 #if DUNE_ALBERTA_VERSION < 0x200
     typedef ALBERTA BOUNDARY Boundary;
 #endif
@@ -63,6 +70,12 @@ namespace Dune
     inline Data *memAlloc ( size_t size )
     {
       return MEM_ALLOC( size, Data );
+    }
+
+    template< class Data >
+    inline Data *memCAlloc ( size_t size )
+    {
+      return MEM_CALLOC( size, Data );
     }
 
     template< class Data >

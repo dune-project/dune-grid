@@ -46,6 +46,8 @@ namespace Dune
 
       ElementId &element ( int i ) const;
       GlobalVector &vertex ( int i ) const;
+      int &neighbor ( int element, int i ) const;
+      BoundaryId &boundaryId ( int element, int i ) const;
 
       /** \brief create a new macro data structure
        *
@@ -61,18 +63,7 @@ namespace Dune
        *  \note This method may always be called. It does nothing outside of
        *        insert mode.
        */
-      void finalize ()
-      {
-        if( (vertexCount_ >= 0) && (elementCount_ >= 0) )
-        {
-          resizeVertices( vertexCount_ );
-          resizeElements( elementCount_ );
-          vertexCount_ = elementCount_ = -1;
-          ALBERTA compute_neigh_fast( data_ );
-          ALBERTA default_boundary( data_, 1, true );
-        }
-        assert( (vertexCount_ < 0) && (elementCount_ < 0) );
-      }
+      void finalize ();
 
       /** \brief mark the longest edge of all elements as refinement edges
        *
@@ -108,7 +99,11 @@ namespace Dune
 
         ElementId &e = element( elementCount_ );
         for( int i = 0; i < numVertices; ++i )
+        {
           e[ i ] = id[ i ];
+          boundaryId( elementCount_, i ) = InteriorBoundary;
+        }
+
         return elementCount_++;
       }
 
@@ -238,12 +233,55 @@ namespace Dune
     }
 
 
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline int &MacroData< dim >::neighbor ( int element, int i ) const
+    {
+      assert( (element >= 0) && (element < data_->n_macro_elements) );
+      assert( (i >= 0) && (i < numVertices) );
+      return data_->neigh[ element*numVertices + i ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline int &MacroData< dim >::neighbor ( int element, int i ) const
+    {
+      assert( (element >= 0) && (element < data_->n_macro_elements) );
+      assert( (i >= 0) && (i < numVertices) );
+      return data_->neigh[ element ][ i ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline BoundaryId &MacroData< dim >::boundaryId ( int element, int i ) const
+    {
+      assert( (element >= 0) && (element < data_->n_macro_elements) );
+      assert( (i >= 0) && (i < numVertices) );
+      return data_->boundary[ element*numVertices + i ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline BoundaryId &MacroData< dim >::boundaryId ( int element, int i ) const
+    {
+      assert( (element >= 0) && (element < data_->n_macro_elements) );
+      assert( (i >= 0) && (i < numVertices) );
+      return data_->boundary[ element ][ i ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
 #if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
     inline void MacroData< dim >::create ()
     {
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize );
+      data_->boundary = memAlloc< BoundaryId >( initialSize*numVertices );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
@@ -255,6 +293,7 @@ namespace Dune
     {
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize, 0 );
+      data_->boundary = memAlloc< BoundaryId >( initialSize*numVertices );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
@@ -270,6 +309,53 @@ namespace Dune
       data_ = ALBERTA alloc_macro_data( initialSize, initialSize, 0 );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x200
+    template< int dim >
+    inline void MacroData< dim >::finalize ()
+    {
+      if( (vertexCount_ >= 0) && (elementCount_ >= 0) )
+      {
+        resizeVertices( vertexCount_ );
+        resizeElements( elementCount_ );
+        ALBERTA compute_neigh_fast( data_ );
+
+        // assign default boundary id (if none is assigned)
+        for( int element = 0; element < elementCount_; ++element )
+        {
+          for( int i = 0; i < numVertices; ++i )
+          {
+            BoundaryId &id = boundaryId( element, i );
+            if( neighbor( element, i ) >= 0 )
+            {
+              assert( id == InteriorBoundary );
+              id = InteriorBoundary;
+            }
+            else
+              id = (id == InteriorBoundary ? 1 : id);
+          }
+        }
+
+        vertexCount_ = elementCount_ = -1;
+      }
+      assert( (vertexCount_ < 0) && (elementCount_ < 0) );
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x200
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    inline void MacroData< dim >::finalize ()
+    {
+      if( (vertexCount_ >= 0) && (elementCount_ >= 0) )
+      {
+        resizeVertices( vertexCount_ );
+        resizeElements( elementCount_ );
+        vertexCount_ = elementCount_ = -1;
+      }
+      assert( (vertexCount_ < 0) && (elementCount_ < 0) );
     }
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
@@ -386,7 +472,8 @@ namespace Dune
     {
       const int oldSize = data_->n_macro_elements;
       data_->n_macro_elements = newSize;
-      data_->mel_vertices = memReAlloc< int >( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
+      data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
+      data_->boundary = memReAlloc( data_->boundary, oldSize*numVertices, newSize*numVertices );
       assert( data_->mel_vertices != NULL );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
@@ -397,7 +484,7 @@ namespace Dune
     {
       const int oldSize = data_->n_macro_elements;
       data_->n_macro_elements = newSize;
-      data_->mel_vertices = memReAlloc< ElementId >( data_->mel_vertices, oldSize, newSize );
+      data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize, newSize );
       assert( data_->mel_vertices != NULL );
     }
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
