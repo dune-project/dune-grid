@@ -87,6 +87,11 @@ namespace Dune
       return createGrid( false );
     }
 
+    static void destroyGrid ( Grid *grid )
+    {
+      delete grid;
+    }
+
     bool write ( const std::string &filename, bool binary = false ) const
     {
       macroData_.finalize();

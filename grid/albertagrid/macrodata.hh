@@ -307,6 +307,7 @@ namespace Dune
                           "Wrong grid dimension used for ALBERTA 1.2." );
       release();
       data_ = ALBERTA alloc_macro_data( initialSize, initialSize, 0 );
+      data_->boundary = memAlloc< BoundaryId[ numVertices ] >( initialSize );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
@@ -353,6 +354,12 @@ namespace Dune
       {
         resizeVertices( vertexCount_ );
         resizeElements( elementCount_ );
+
+        std::cerr << "Warning: GridFactory for ALBERTA 1.2 does not support "
+                  << "boundary ids, yet." << std::endl << std::endl;
+        memFree( data_->boundary, elementCount_ );
+        data_->boundary = NULL;
+
         vertexCount_ = elementCount_ = -1;
       }
       assert( (vertexCount_ < 0) && (elementCount_ < 0) );
