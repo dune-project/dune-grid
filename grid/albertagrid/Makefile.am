@@ -11,6 +11,6 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   geometry.hh  geometry.cc  hierarchiciterator.hh \
   leveliterator.hh  leafiterator.hh  treeiterator.hh  treeiterator.cc \
   intersection.hh  intersection.cc  capabilities.hh \
-  gridfactory.hh  dgfparser.hh  albertareader
+  gridfactory.hh  dgfparser.hh  albertareader.hh
 
 include $(top_srcdir)/am/global-rules
