@@ -107,6 +107,11 @@ namespace Dune
       macroData_.finalize();
       return macroData_.write( filename, (type == xdr) );
     }
+
+    bool write ( const std::string &filename )
+    {
+      return write< ascii >( filename );
+    }
   };
 
 }

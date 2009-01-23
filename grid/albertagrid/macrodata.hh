@@ -28,10 +28,12 @@ namespace Dune
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
       static const int numEdges = NumSubEntities< dimension, dimension-1 >::value;
 
-      typedef int ElementId[ numVertices ];
-
       static const int initialSize = 4096;
 
+    public:
+      typedef int ElementId[ numVertices ];
+
+    private:
       Data *data_;
       int vertexCount_;
       int elementCount_;
@@ -46,6 +48,16 @@ namespace Dune
       operator Data * () const
       {
         return data_;
+      }
+
+      int vertexCount () const
+      {
+        return (vertexCount_ < 0 ? data_->n_total_vertices : vertexCount_);
+      }
+
+      int elementCount () const
+      {
+        return (elementCount_ < 0 ? data_->n_macro_elements : elementCount_);
       }
 
       ElementId &element ( int i ) const;
@@ -378,7 +390,7 @@ namespace Dune
       if( dimension == 1 )
         return;
 
-      const int count = (elementCount_ >= 0 ? elementCount_ : data_->n_macro_elements);
+      const int count = elementCount();
       for( int i = 0; i < count; ++i )
       {
         const int refEdge = RefinementEdge< dimension >::value;
