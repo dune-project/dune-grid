@@ -20,6 +20,7 @@
 
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/albertagrid/dgfparser.hh>
+#include <dune/grid/albertagrid/albertareader.hh>
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
@@ -48,71 +49,90 @@ void markOne ( GridType & grid , int num , int ref )
   grid.postAdapt();
 }
 
-int main () {
-  try {
-    const int dim      = GRIDDIM;
-    const int dimworld = GRIDDIM;
 
-    typedef Dune::AlbertaGrid<dim,dimworld> GridType;
+template< class Grid >
+void testAlbertaReader ()
+{
+  std::cout << ">>> Checking AlbertaReader..." << std::endl;
 
-    std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
+  std::ostringstream filename;
+  filename << "grid-" << Grid::dimension << "-" << Grid::dimensionworld << ".amc";
 
-    /* use grid-file appropriate for dimensions */
-    std::ostringstream filename;
+  AlbertaReader< Grid > reader;
+  GridFactory< Grid > factory;
+  reader.readGrid( filename.str(), factory );
 
-    filename << "simplex-testgrid-" << dim
-             << "-" << dimworld << ".dgf";
+  // create grid and just check the macro grid
+  Grid *grid = factory.createGrid();
+  gridcheck( *grid );
+  GridFactory< Grid >::destroyGrid( grid );
+}
 
-    std::cout << std::endl << "AlbertaGrid<" << dim
-              << "," << dimworld
-              << "> with grid file: " << filename.str()
-              << std::endl << std::endl;
+
+int main ()
+try {
+  const int dim = GRIDDIM;
+
+  typedef Dune::AlbertaGrid< dim > GridType;
+
+  std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
+
+  testAlbertaReader< GridType >();
+
+  /* use grid-file appropriate for dimensions */
+  std::ostringstream filename;
+  filename << "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
+
+  std::cout << std::endl << GridType::typeName() << " with grid file: " << filename.str() << std::endl << std::endl;
+  {
+    factorEpsilon = 5e2;
+
+    Dune::GridPtr<GridType> gridPtr(filename.str());
+    GridType & grid = *gridPtr;
+
+    // extra-environment to check destruction
+
+    std::cout << ">>> Checking macro grid..." << std::endl;
+    gridcheck(grid); // check macro grid
+    checkIterators( grid.leafView() );
+    checkIntersectionIterator(grid,true);
+    for(int i=0; i<1; i++)
     {
-      factorEpsilon = 5e2;
-
-      Dune::GridPtr<GridType> gridPtr(filename.str());
-      GridType & grid = *gridPtr;
-
-      // extra-environment to check destruction
-
-      std::cout << ">>> Checking macro grid..." << std::endl;
-      gridcheck(grid); // check macro grid
-      checkIterators( grid.leafView() );
-      checkIntersectionIterator(grid,true);
-      for(int i=0; i<1; i++)
-      {
-        std::cout << ">>> Refining grid and checking again..." << std::endl;
-        grid.globalRefine( 1 );
-        gridcheck(grid);
-        checkIterators( grid.leafView() );
-        checkIntersectionIterator(grid,true);
-      }
-
-      // check dgf grid width half refinement
-      grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+      std::cout << ">>> Refining grid and checking again..." << std::endl;
+      grid.globalRefine( 1 );
       gridcheck(grid);
       checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
+    }
 
-      for(int i=0; i<2; i++)
-      {
-        markOne(grid,0,dim);
-        gridcheck(grid);
-        checkIterators( grid.leafView() );
-      }
+    // check dgf grid width half refinement
+    grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+    gridcheck(grid);
+    checkIterators( grid.leafView() );
+    checkIntersectionIterator(grid,true);
 
-      checkGeometryInFather(grid);
-      checkIntersectionIterator(grid,true);
+    for(int i=0; i<2; i++)
+    {
+      markOne(grid,0,dim);
+      gridcheck(grid);
+      checkIterators( grid.leafView() );
+    }
 
-      checkCommunication(grid, -1, Dune::dvverb);
-    };
-  } catch (Dune::Exception &e) {
-    std::cerr << e << std::endl;
-    return 1;
-  } catch (...) {
-    std::cerr << "Generic exception!" << std::endl;
-    return 2;
-  }
+    checkGeometryInFather(grid);
+    checkIntersectionIterator(grid,true);
+
+    checkCommunication(grid, -1, Dune::dvverb);
+  };
 
   return 0;
+}
+catch( const Dune::Exception &e )
+{
+  std::cerr << e << std::endl;
+  return 1;
+}
+catch( ... )
+{
+  std::cerr << "Generic exception!" << std::endl;
+  return 2;
 }
