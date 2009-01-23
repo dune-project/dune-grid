@@ -3,9 +3,13 @@
 #ifndef DUNE_ALBERTA_MACRODATA_HH
 #define DUNE_ALBERTA_MACRODATA_HH
 
-#include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/common/fvector.hh>
+
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/referencetopo.hh>
+
+#if HAVE_ALBERTA
 
 namespace Dune
 {
@@ -499,5 +503,7 @@ namespace Dune
   }
 
 }
+
+#endif // #if HAVE_ALBERTA
 
 #endif

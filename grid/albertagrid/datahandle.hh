@@ -3,16 +3,16 @@
 #ifndef DUNE_ALBERTAGRIDDATAHANDLE_HH
 #define DUNE_ALBERTAGRIDDATAHANDLE_HH
 
-#if HAVE_ALBERTA
-
 #include <iostream>
 
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
-#include <dune/grid/albertagrid/albertaextra.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
+#include <dune/grid/albertagrid/refinement.hh>
+
+#if HAVE_ALBERTA
 
 namespace Dune
 {

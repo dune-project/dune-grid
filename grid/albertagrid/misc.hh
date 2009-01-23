@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_MISC_HH
 #define DUNE_ALBERTA_MISC_HH
 
+#include <cassert>
+
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/genericgeometry/codimtable.hh>
