@@ -100,10 +100,15 @@ namespace Dune
     if( !neighborInfo_ )
     {
       assert( !elementInfo_ == false );
+
+#if 1
       neighborInfo_ = ElementInfo::createFake( grid_.meshPointer(), NULL, 0 );
       std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo_.elInfo()), sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
+#else
+      neighborInfo_ = elementInfo_.leafNeighbor( neighborCount_ );
+#endif
     }
 
     assert( !neighborInfo_ == false );

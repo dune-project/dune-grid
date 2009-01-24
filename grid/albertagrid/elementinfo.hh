@@ -157,6 +157,7 @@ namespace Dune
       static const int dimension = dim;
 
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
+      static const int numFaces = NumSubEntities< dimension, 1 >::value;
 
       typedef Alberta::MeshPointer< dimension > MeshPointer;
       typedef Alberta::FillFlags< dimension > FillFlags;
@@ -168,7 +169,7 @@ namespace Dune
 #endif
 
       ElementInfo ();
-      ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement,
+      ElementInfo ( const MeshPointer &mesh, const MacroElement &macroElement,
                     typename FillFlags::Flags fillFlags = FillFlags::standard );
       ElementInfo ( const ElementInfo &other );
 
@@ -185,6 +186,8 @@ namespace Dune
       ElementInfo child ( int i ) const;
       bool isLeaf () const;
 
+      MeshPointer mesh () const;
+
       bool mightVanish () const;
 
       int level () const;
@@ -195,6 +198,7 @@ namespace Dune
       int getMark () const;
       void setMark ( int refCount ) const;
 
+      ElementInfo leafNeighbor ( int face ) const;
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
 
@@ -218,6 +222,9 @@ namespace Dune
     private:
       static bool isLeaf ( Element *element );
       static bool mightVanish ( Element *element, int depth );
+
+      int macroNeighbor ( int face, ElementInfo &neighbor ) const;
+      int leafNeighbor ( const int face, ElementInfo &neighbor ) const;
 
       void addReference () const;
       void removeReference () const;
@@ -289,7 +296,7 @@ namespace Dune
 
     template< int dim >
     inline ElementInfo< dim >
-    ::ElementInfo ( const MeshPointer &mesh, MacroElement &macroElement,
+    ::ElementInfo ( const MeshPointer &mesh, const MacroElement &macroElement,
                     typename FillFlags::Flags fillFlags )
     {
       instance_ = stack().allocate();
@@ -360,7 +367,7 @@ namespace Dune
     template< int dim >
     inline ElementInfo< dim > ElementInfo< dim >::father () const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       return ElementInfo< dim >( instance_->parent() );
     }
 
@@ -414,6 +421,13 @@ namespace Dune
 
 
     template< int dim >
+    inline typename ElementInfo< dim >::MeshPointer ElementInfo< dim >::mesh () const
+    {
+      return MeshPointer( elInfo().mesh );
+    }
+
+
+    template< int dim >
     inline bool ElementInfo< dim >::mightVanish () const
     {
       return mightVanish( el(), 0 );
@@ -456,6 +470,16 @@ namespace Dune
       assert( isLeaf() );
       assert( (refCount >= -128) && (refCount < 127) );
       el()->mark = refCount;
+    }
+
+
+    template< int dim >
+    inline ElementInfo< dim > ElementInfo< dim >::leafNeighbor ( int face ) const
+    {
+      assert( (face >= 0) && (face < numFaces) );
+      ElementInfo neighbor;
+      leafNeighbor( face, neighbor );
+      return neighbor;
     }
 
 
@@ -650,6 +674,78 @@ namespace Dune
         return (element->mark < depth);
       else
         return (mightVanish( element->child[ 0 ], depth-1 ) && mightVanish( element->child[ 1 ], depth-1 ));
+    }
+
+
+    template< int dim >
+    inline int ElementInfo< dim >::macroNeighbor ( int face, ElementInfo &neighbor ) const
+    {
+      assert( (face >= 0) && (face < numFaces) );
+      const MacroElement *const macroElement = elInfo().macro_el;
+      const MacroElement *const macroNeighbor = macroElement->neigh[ face ];
+      if( macroNeighbor != NULL )
+      {
+        neighbor = ElementInfo( mesh(), *macroNeighbor, elInfo().fill_flag );
+        return macroElement->opp_vertex[ face ];
+      }
+      else
+        return -1;
+    }
+
+
+    template<>
+    inline int ElementInfo< 2 >::leafNeighbor ( const int face, ElementInfo &neighbor ) const
+    {
+      static const int neighborInFather[ 2 ][ numFaces ] = { { 2, -1, 1}, {-1, 2, 0} };
+
+      assert( !!(*this) );
+
+      int faceInNeighbor;
+      if( level() > 0 )
+      {
+        assert( (face >= 0) && (face < numFaces) );
+
+        const int myIndex = indexInFather();
+        const int nbInFather = neighborInFather[ myIndex ][ face ];
+        if( nbInFather >= 0 )
+        {
+          faceInNeighbor = father().leafNeighbor( nbInFather, neighbor );
+
+          // handle a common face of in refinement patch
+          if( (faceInNeighbor >= 0) && (nbInFather == dimension) )
+          {
+            assert( faceInNeighbor == dimension );
+
+            int childIndex = myIndex;
+            if( father().el()->dof[ 0 ][ 0 ] != neighbor.el()->dof[ 0 ][ 0 ] )
+            {
+              assert( father().el()->dof[ 0 ][ 0 ] == neighbor.el()->dof[ 1 ][ 0 ] );
+              childIndex = 1-myIndex;
+            }
+            neighbor = neighbor.child( childIndex );
+            faceInNeighbor = childIndex;
+          }
+        }
+        else
+        {
+          neighbor = father().child( 1-myIndex );
+          faceInNeighbor = myIndex;
+        }
+      }
+      else
+        faceInNeighbor = macroNeighbor( face, neighbor );
+
+      if( faceInNeighbor >= 0 )
+      {
+        // refine until we share a refinement face of the neighbor
+        while( !neighbor.isLeaf() && (faceInNeighbor < dimension) )
+        {
+          neighbor = neighbor.child( 1-faceInNeighbor );
+          faceInNeighbor = 2;
+        }
+        assert( neighbor.el() == elInfo().neigh[ face ] );
+      }
+      return faceInNeighbor;
     }
 
 
