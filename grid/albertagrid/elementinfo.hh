@@ -712,9 +712,9 @@ namespace Dune
           faceInNeighbor = father().leafNeighbor( nbInFather, neighbor );
 
           // handle a common face of in refinement patch
-          if( (faceInNeighbor >= 0) && (nbInFather == dimension) )
+          if( (faceInNeighbor >= 0) && (nbInFather >= 2) )
           {
-            assert( faceInNeighbor == dimension );
+            assert( faceInNeighbor >= 2 );
 
             int childIndex = myIndex;
             if( father().el()->dof[ 0 ][ 0 ] != neighbor.el()->dof[ 0 ][ 0 ] )
@@ -738,10 +738,73 @@ namespace Dune
       if( faceInNeighbor >= 0 )
       {
         // refine until we share a refinement face of the neighbor
-        while( !neighbor.isLeaf() && (faceInNeighbor < dimension) )
+        if( !neighbor.isLeaf() && (faceInNeighbor < 2) )
         {
           neighbor = neighbor.child( 1-faceInNeighbor );
-          faceInNeighbor = 2;
+          faceInNeighbor = dimension;
+        }
+        assert( neighbor.el() == elInfo().neigh[ face ] );
+      }
+      return faceInNeighbor;
+    }
+
+
+    template<>
+    inline int ElementInfo< 3 >::leafNeighbor ( const int face, ElementInfo &neighbor ) const
+    {
+      // father.neigh[ neighborInFather[ child[ i ].el_type ][ i ][ j ] == child[ i ].neigh[ j ]
+      static const int neighborInFather[ 3 ][ 2 ][ numFaces ]
+        = { { { -1, 2, 3, 1}, {-1, 2, 3, 0} },
+            { { -1, 2, 3, 1}, {-1, 3, 2, 0} },
+            { { -1, 2, 3, 1}, {-1, 2, 3, 0} } };
+
+      assert( !!(*this) );
+
+      int faceInNeighbor;
+      if( level() > 0 )
+      {
+        assert( (face >= 0) && (face < numFaces) );
+
+        const int myIndex = indexInFather();
+        const int nbInFather = neighborInFather[ type() ][ myIndex ][ face ];
+        if( nbInFather >= 0 )
+        {
+          faceInNeighbor = father().leafNeighbor( nbInFather, neighbor );
+
+          // handle a common face of in refinement patch
+          if( (faceInNeighbor >= 0) && (nbInFather >= 2) )
+          {
+            assert( faceInNeighbor >= 2 );
+
+            int childIndex = myIndex;
+            if( father().el()->dof[ 0 ][ 0 ] != neighbor.el()->dof[ 0 ][ 0 ] )
+            {
+              assert( father().el()->dof[ 0 ][ 0 ] == neighbor.el()->dof[ 1 ][ 0 ] );
+              childIndex = 1-myIndex;
+            }
+
+            const int oppDof = neighbor.el()->dof[ faceInNeighbor ][ 0 ];
+            neighbor = neighbor.child( childIndex );
+            faceInNeighbor = (oppDof == neighbor.el()->dof[ 1 ][ 0 ] ? 1 : 2);
+            assert( oppDof == neighbor.el()->dof[ faceInNeighbor ][ 0 ] );
+          }
+        }
+        else
+        {
+          neighbor = father().child( 1-myIndex );
+          faceInNeighbor = 0;
+        }
+      }
+      else
+        faceInNeighbor = macroNeighbor( face, neighbor );
+
+      if( faceInNeighbor >= 0 )
+      {
+        // refine until we share a refinement face of the neighbor
+        if( !neighbor.isLeaf() && (faceInNeighbor < 2) )
+        {
+          neighbor = neighbor.child( 1-faceInNeighbor );
+          faceInNeighbor = dimension;
         }
         assert( neighbor.el() == elInfo().neigh[ face ] );
       }
