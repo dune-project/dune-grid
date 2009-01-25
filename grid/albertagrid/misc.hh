@@ -37,6 +37,7 @@ namespace Dune
     // ------------
 
     using GenericGeometry::ForLoop;
+    using GenericGeometry::ProtectedIf;
     using GenericGeometry::CodimTable;
 
     static const int dimWorld = DIM_OF_WORLD;

@@ -33,25 +33,9 @@ namespace Dune
   ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
     clear();
-
-    for( int codim = firstCodim; codim <= dimension; ++codim )
-    {
-      const int size = dofNumbering_.size( codim );
-      marker_[ codim ] = new int[ size ];
-
-      int *array = marker_[ codim ];
-      for( int i = 0; i < size; ++i )
-        array[ i ] = -1;
-    }
-
-    for( Iterator it = begin; it != end; ++it )
-    {
-      const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
-      Alberta::ForLoop< MarkSubEntities, firstCodim, dimension >
-      ::apply( dofNumbering_, marker_, elementInfo );
-    }
+    Alberta::ProtectedIf< (firstCodim <= dimension), MarkSubEntities, NoMarkSubEntities >
+    ::template mark< firstCodim, Iterator >( dofNumbering_, marker_, begin, end );
   }
-
 
 
   template< int dim, int dimworld >
@@ -73,29 +57,68 @@ namespace Dune
 
 
 
+  // AlbertaMarkerVector::NoMarkSubEntities
+  // --------------------------------------
+
+  template< int dim, int dimworld >
+  template< bool >
+  struct AlbertaMarkerVector< dim, dimworld >::NoMarkSubEntities
+  {
+    template< int firstCodim, class Iterator >
+    static void mark ( const DofNumbering &dofNumbering, int *(&marker)[ dimension + 1 ],
+                       const Iterator &begin, const Iterator &end )
+    {}
+  };
+
+
+
   // AlbertaMarkerVector::MarkSubEntities
   // ------------------------------------
 
   template< int dim, int dimworld >
-  template< int codim >
-  class AlbertaMarkerVector< dim, dimworld >::MarkSubEntities
+  template< bool >
+  struct AlbertaMarkerVector< dim, dimworld >::MarkSubEntities
   {
-    static const int numSubEntities = Alberta::NumSubEntities< dimension, codim >::value;
-
-    typedef Alberta::ElementInfo< dimension > ElementInfo;
-
-  public:
-    static void apply ( const DofNumbering &dofNumbering,
-                        int *(&marker)[ dimension + 1 ],
-                        const ElementInfo &elementInfo )
+    template< int codim >
+    struct Codim
     {
-      int *array = marker[ codim ];
+      static const int numSubEntities = Alberta::NumSubEntities< dimension, codim >::value;
 
-      const int index = dofNumbering( elementInfo, 0, 0 );
-      for( int i = 0; i < numSubEntities; ++i )
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+      static void apply ( const DofNumbering &dofNumbering,
+                          int *(&marker)[ dimension + 1 ],
+                          const ElementInfo &elementInfo )
       {
-        int &mark = array[ dofNumbering( elementInfo, codim, i ) ];
-        mark = std::max( index, mark );
+        int *array = marker[ codim ];
+
+        const int index = dofNumbering( elementInfo, 0, 0 );
+        for( int i = 0; i < numSubEntities; ++i )
+        {
+          int &mark = array[ dofNumbering( elementInfo, codim, i ) ];
+          mark = std::max( index, mark );
+        }
+      }
+    };
+
+    template< int firstCodim, class Iterator >
+    static void mark ( const DofNumbering &dofNumbering, int *(&marker)[ dimension + 1 ],
+                       const Iterator &begin, const Iterator &end )
+    {
+      for( int codim = firstCodim; codim <= dimension; ++codim )
+      {
+        const int size = dofNumbering.size( codim );
+        marker[ codim ] = new int[ size ];
+
+        int *array = marker[ codim ];
+        for( int i = 0; i < size; ++i )
+          array[ i ] = -1;
+      }
+
+      for( Iterator it = begin; it != end; ++it )
+      {
+        const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
+        Alberta::ForLoop< Codim, firstCodim, dimension >::apply( dofNumbering, marker, elementInfo );
       }
     }
   };

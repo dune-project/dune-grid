@@ -34,8 +34,10 @@ namespace Dune
     typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
-    template< int codim >
-    class MarkSubEntities;
+    template< bool >
+    struct NoMarkSubEntities;
+    template< bool >
+    struct MarkSubEntities;
 
   public:
     //! create AlbertaMarkerVector with empty vectors
