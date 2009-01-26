@@ -41,6 +41,16 @@ namespace Dune
       }
     };
 
+    template< class ctype, int cdim >
+    struct MatrixOps< ctype, cdim, 0 >
+    {
+      static ctype invert ( const FieldMatrix< ctype, cdim, 0 > &A,
+                            FieldMatrix< ctype, cdim, 0 > &invAT )
+      {
+        return ctype( 1 );
+      }
+    };
+
   }
 
 
@@ -50,9 +60,25 @@ namespace Dune
 
 #if !USE_GENERICGEOMETRY
   template< int mydim, int cdim, class GridImp >
-  inline AlbertaGridGeometry< mydim, cdim, GridImp > :: AlbertaGridGeometry ()
+  inline AlbertaGridGeometry< mydim, cdim, GridImp >::AlbertaGridGeometry ()
   {
     invalidate();
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
+  inline AlbertaGridGeometry< mydim, cdim, GridImp >
+  ::AlbertaGridGeometry ( const This &other )
+    : coord_( other.coord_ ),
+      builtElMat_( other.builtElMat_ ),
+      builtinverse_( other.builtinverse_ ),
+      calcedDet_( other.calcedDet_ ),
+      elDet_( other.elDet_ )
+  {
+    if( builtinverse_ )
+      Jinv_ = other.Jinv_;
+    if( builtElMat_ )
+      elMat_ = other.elMat_;
   }
 
 

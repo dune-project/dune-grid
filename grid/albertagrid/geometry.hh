@@ -186,6 +186,7 @@ namespace Dune
     : public GenericGeometry::BasicGeometry
       < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
   {
+    typedef AlbertaGridGeometry< mydim, cdim, GridImp > This;
     typedef GenericGeometry::BasicGeometry
     < mydim, AlbertaGridGeometryTraits< GridImp, cdim > >
     Base;
@@ -196,6 +197,10 @@ namespace Dune
       : Base ()
     {}
 
+    AlbertaGridGeometry ( const This &other )
+      : Base ( other )
+    {}
+
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader )
       : Base( GeometryType( GeometryType::simplex, mydim ), coordReader )
@@ -204,7 +209,7 @@ namespace Dune
     template< class CoordReader >
     void build ( const CoordReader &coordReader )
     {
-      *this = AlbertaGridGeometry( coordReader );
+      (*this) = AlbertaGridGeometry( coordReader );
     }
   };
 #endif // #if USE_GENERICGEOMETRY
@@ -252,7 +257,9 @@ namespace Dune
 
   public:
     //! Default constructor
-    AlbertaGridGeometry();
+    AlbertaGridGeometry ();
+
+    AlbertaGridGeometry ( const This &other );
 
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader );
