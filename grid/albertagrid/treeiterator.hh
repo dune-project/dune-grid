@@ -154,9 +154,6 @@ namespace Dune
     using Base::grid;
 
   private:
-    // private Methods
-    void makeIterator();
-
     void nextElement ( ElementInfo &elementInfo );
     void nextElementStop (ElementInfo &elementInfo );
     bool stopAtElement ( const ElementInfo &elementInfo ) const;

@@ -129,17 +129,6 @@ namespace Dune
   // -----------------------
 
   template< int codim, class GridImp, bool leafIterator >
-  inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >::makeIterator ()
-  {
-    level_ = 0;
-    subEntity_ = -1;
-    marker_ = 0;
-
-    entityImp().clearElement();
-  }
-
-
-  template< int codim, class GridImp, bool leafIterator >
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               const MarkerVector *marker,
@@ -286,7 +275,9 @@ namespace Dune
 
     if( leafIterator )
     {
-      const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ subEntity_ ];
+      const int face = (dimension == 1 ? (numSubEntities-1)-subEntity_ : subEntity_);
+
+      const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ face ];
       if( neighbor != NULL )
       {
         // face is reached from element with largest number
