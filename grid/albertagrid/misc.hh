@@ -174,6 +174,52 @@ namespace Dune
 
 
 
+    // FillFlags
+    // ---------
+
+    template< int dim >
+    struct FillFlags
+    {
+      typedef ALBERTA FLAGS Flags;
+
+      static const Flags nothing = FILL_NOTHING;
+
+      static const Flags coords = FILL_COORDS;
+
+      static const Flags neighbor = FILL_NEIGH;
+
+      static const Flags orientation = (dim == 3 ? FILL_ORIENTATION : FILL_NOTHING);
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags elementType = FILL_NOTHING;
+#else
+      static const Flags elementType = (dim == 3 ? FILL_EL_TYPE : FILL_NOTHING);
+#endif
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags boundaryId = FILL_MACRO_WALLS;
+#else
+      static const Flags boundaryId = FILL_BOUND;
+#endif
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+      static const Flags nonPeriodic = FILL_NON_PERIODIC;
+#else
+      static const Flags nonPeriodic = FILL_NOTHING;
+#endif
+
+      static const Flags all = coords | neighbor | boundaryId | nonPeriodic
+                               | orientation | elementType;
+
+#if CALC_COORD
+      static const Flags standard = all & ~nonPeriodic;
+#else
+      static const Flags standard = all & ~nonPeriodic & ~coords;
+#endif
+    };
+
+
+
     // RefinementEdge
     // --------------
 

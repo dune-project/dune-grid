@@ -43,6 +43,7 @@ namespace Dune
       typedef Alberta::ElementInfo< dim > ElementInfo;
       typedef typename ElementInfo::FillFlags FillFlags;
 
+      class BoundaryProvider;
       class MacroIteratorBase;
 
     public:
@@ -322,8 +323,76 @@ namespace Dune
 
 
 
-    // MeshPointer::MacroIterator
-    // --------------------------
+    // MeshPointer::BoundaryProvider
+    // -----------------------------
+
+#if DUNE_ALBERTA_VERSION < 0x200
+    template< int dim >
+    class MeshPointer< dim >::BoundaryProvider
+    {
+      static const int interior = INTERIOR;
+
+#if DIM > 1
+      static const int numTypes = 256;
+      static const int firstType = -127;
+
+      Boundary boundaries[ numTypes ];
+#endif
+
+      BoundaryProvider ();
+
+      // prohibit copying and assignment
+      BoundaryProvider ( const BoundaryProvider & );
+      BoundaryProvider &operator= ( const BoundaryProvider & );
+
+    public:
+      const Boundary *operator[] ( int type ) const;
+
+      static const BoundaryProvider &instance ()
+      {
+        static BoundaryProvider provider;
+        return provider;
+      }
+
+      static const Boundary *initBoundary ( Mesh *mesh, int type )
+      {
+        return instance()[ type ];
+      }
+    };
+
+
+    template< int dim >
+    inline MeshPointer< dim >::BoundaryProvider::BoundaryProvider ()
+    {
+#if DIM > 1
+      for( int i = 0; i < numTypes; ++i )
+      {
+        boundaries[ i ].param_bound = NULL;
+        boundaries[ i ].bound = i+firstType;
+      }
+#endif
+    }
+
+
+    template< int dim >
+    inline const Boundary *
+    MeshPointer< dim >::BoundaryProvider::operator[] ( int type ) const
+    {
+      int index = type-firstType;
+      if( (type == interior) || (index < 0) || (index >= numTypes) )
+        DUNE_THROW( AlbertaError, "Invalid boundary type: " << type << "." );
+#if DIM > 1
+      return &(boundaries[ index ]);
+#else
+      return NULL;
+#endif
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+
+    // MeshPointer::MacroIteratorBase
+    // ------------------------------
 
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
@@ -379,7 +448,6 @@ namespace Dune
       }
     };
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
 
 #if DUNE_ALBERTA_VERSION < 0x200
     template< int dim >

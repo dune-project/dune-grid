@@ -28,116 +28,6 @@ namespace Dune
 
 
 
-    // FillFlags
-    // ---------
-
-    template< int dim >
-    struct FillFlags
-    {
-      typedef ALBERTA FLAGS Flags;
-
-      static const Flags nothing = FILL_NOTHING;
-
-      static const Flags coords = FILL_COORDS;
-
-      static const Flags neighbor = FILL_NEIGH;
-
-      static const Flags orientation = (dim == 3 ? FILL_ORIENTATION : FILL_NOTHING);
-
-#if DUNE_ALBERTA_VERSION >= 0x201
-      static const Flags elementType = FILL_NOTHING;
-#else
-      static const Flags elementType = (dim == 3 ? FILL_EL_TYPE : FILL_NOTHING);
-#endif
-
-#if DUNE_ALBERTA_VERSION >= 0x201
-      static const Flags boundaryId = FILL_MACRO_WALLS;
-#else
-      static const Flags boundaryId = FILL_BOUND;
-#endif
-
-#if DUNE_ALBERTA_VERSION >= 0x201
-      static const Flags nonPeriodic = FILL_NON_PERIODIC;
-#else
-      static const Flags nonPeriodic = FILL_NOTHING;
-#endif
-
-      static const Flags all = coords | neighbor | boundaryId | nonPeriodic
-                               | orientation | elementType;
-
-#if CALC_COORD
-      static const Flags standard = all & ~nonPeriodic;
-#else
-      static const Flags standard = all & ~nonPeriodic & ~coords;
-#endif
-    };
-
-
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    // BoundaryProvider
-    // ----------------
-
-    class BoundaryProvider
-    {
-      static const int interior = INTERIOR;
-
-#if DIM > 1
-      static const int numTypes = 256;
-      static const int firstType = -127;
-
-      Boundary boundaries[ numTypes ];
-#endif
-
-      BoundaryProvider ();
-
-      // prohibit copying and assignment
-      BoundaryProvider ( const BoundaryProvider & );
-      BoundaryProvider &operator= ( const BoundaryProvider & );
-
-    public:
-      const Boundary *operator[] ( int type ) const;
-
-      static const BoundaryProvider &instance ()
-      {
-        static BoundaryProvider provider;
-        return provider;
-      }
-
-      static const Boundary *initBoundary ( Mesh *mesh, int type )
-      {
-        return instance()[ type ];
-      }
-    };
-
-
-    inline BoundaryProvider::BoundaryProvider ()
-    {
-#if DIM > 1
-      for( int i = 0; i < numTypes; ++i )
-      {
-        boundaries[ i ].param_bound = NULL;
-        boundaries[ i ].bound = i+firstType;
-      }
-#endif
-    }
-
-
-    inline const Boundary *BoundaryProvider::operator[] ( int type ) const
-    {
-      int index = type-firstType;
-      if( (type == interior) || (index < 0) || (index >= numTypes) )
-        DUNE_THROW( AlbertaError, "Invalid boundary type: " << type << "." );
-#if DIM > 1
-      return &(boundaries[ index ]);
-#else
-      return NULL;
-#endif
-    }
-#endif
-
-
-
     // ElementInfo
     // -----------
 
@@ -148,10 +38,6 @@ namespace Dune
       class Stack;
 
       typedef Instance *InstancePtr;
-
-      InstancePtr instance_;
-
-      explicit ElementInfo ( const InstancePtr &instance );
 
     public:
       static const int dimension = dim;
@@ -168,6 +54,14 @@ namespace Dune
       static const int maxNeighbors = N_NEIGH;
 #endif
 
+      typedef ElementInfo< dimension > LevelNeighborSet[ 1 << dimension ];
+
+    private:
+      InstancePtr instance_;
+
+      explicit ElementInfo ( const InstancePtr &instance );
+
+    public:
       ElementInfo ();
       ElementInfo ( const MeshPointer &mesh, const MacroElement &macroElement,
                     typename FillFlags::Flags fillFlags = FillFlags::standard );
