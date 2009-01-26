@@ -77,7 +77,9 @@ try {
 
   std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
 
+#if DUNE_ALBERTA_VERSION >= 0x200
   testAlbertaReader< GridType >();
+#endif
 
   /* use grid-file appropriate for dimensions */
   std::ostringstream filename;
