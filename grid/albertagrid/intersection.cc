@@ -202,13 +202,23 @@ namespace Dune
                 "has not been implemented, yet." );
   }
 
+  template<>
+  inline void
+  AlbertaGridIntersectionIterator< const AlbertaGrid< 1, 1 > >
+  ::calcOuterNormal ( NormalVector &n ) const
+  {
+    assert( !!elementInfo_ );
+    const Alberta::GlobalVector &oppCoord = grid_.getCoord( elementInfo_, neighborCount_ );
+    const Alberta::GlobalVector &myCoord = grid_.getCoord( elementInfo_, 1-neighborCount_ );
+    n[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
+  }
 
   template<>
   inline void
   AlbertaGridIntersectionIterator< const AlbertaGrid< 2, 2 > >
   ::calcOuterNormal ( NormalVector &n ) const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     const Alberta::GlobalVector &coordOne = grid_.getCoord( elementInfo_, (neighborCount_+1)%3 );
     const Alberta::GlobalVector &coordTwo = grid_.getCoord( elementInfo_, (neighborCount_+2)%3 );
 
@@ -216,13 +226,12 @@ namespace Dune
     n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
   }
 
-
   template<>
   inline void
   AlbertaGridIntersectionIterator< const AlbertaGrid< 3, 3 > >
   ::calcOuterNormal ( NormalVector &n ) const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
 
     // in this case the orientation is negative, multiply by -1
 #if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)

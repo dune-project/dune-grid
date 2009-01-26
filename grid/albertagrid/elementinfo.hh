@@ -712,7 +712,7 @@ namespace Dune
         else
         {
           neighbor = father().child( 1-myIndex );
-          faceInNeighbor = myIndex;
+          faceInNeighbor = 1-myIndex;
         }
       }
       else
@@ -721,7 +721,7 @@ namespace Dune
       if( faceInNeighbor >= 0 )
       {
         // refine until we are on the leaf level (faceInNeighbor < 2 is always true)
-        if( !neighbor.isLeaf() )
+        while( !neighbor.isLeaf() )
           neighbor = neighbor.child( 1-faceInNeighbor );
         assert( neighbor.el() == elInfo().neigh[ face ] );
       }
