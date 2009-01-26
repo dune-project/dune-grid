@@ -5,6 +5,9 @@
 
 #include <dune/grid/albertagrid/intersection.hh>
 
+// set to 1 to use ElementInfo::leafNeighbor instead of faking leaf neighbor
+#define TRAVERSE_LEAFNEIGHBOR 0
+
 namespace Dune
 {
 
@@ -17,11 +20,25 @@ namespace Dune
     : grid_( grid ),
       neighborCount_( dimension+1 ),
       elementInfo_(),
-      fakeNeighObj_(LocalGeometryImp()),
-      fakeSelfObj_ (LocalGeometryImp()),
-      neighGlobObj_(LocalGeometryImp()),
+      fakeNeighObj_( LocalGeometryImp() ),
+      fakeSelfObj_ ( LocalGeometryImp() ),
+      neighGlobObj_( GeometryImp() ),
       neighborInfo_()
   {}
+
+
+  template< class GridImp >
+  inline AlbertaGridIntersectionIterator< GridImp >
+  ::AlbertaGridIntersectionIterator ( const This &other )
+    : grid_( other.grid_ ),
+      neighborCount_( other.neighborCount_ ),
+      elementInfo_( other.elementInfo_ ),
+      fakeNeighObj_( LocalGeometryImp() ),
+      fakeSelfObj_ ( LocalGeometryImp() ),
+      neighGlobObj_( GeometryImp() ),
+      neighborInfo_()
+  {}
+
 
   template< class GridImp >
   inline void
@@ -36,6 +53,7 @@ namespace Dune
     assert( elementInfo_.level() == level );
   }
 
+
   template< class GridImp >
   inline void AlbertaGridIntersectionIterator< GridImp >::done ()
   {
@@ -43,20 +61,6 @@ namespace Dune
     neighborInfo_ = ElementInfo();
     elementInfo_ = ElementInfo();
   }
-
-
-  // copy constructor
-  template< class GridImp >
-  inline AlbertaGridIntersectionIterator< GridImp >
-  ::AlbertaGridIntersectionIterator ( const This &other )
-    : grid_( other.grid_ ),
-      neighborCount_( other.neighborCount_ ),
-      elementInfo_( other.elementInfo_ ),
-      fakeNeighObj_( LocalGeometryImp() ),
-      fakeSelfObj_ ( LocalGeometryImp() ),
-      neighGlobObj_( LocalGeometryImp() ),
-      neighborInfo_()
-  {}
 
 
   // assignment operator
@@ -101,13 +105,13 @@ namespace Dune
     {
       assert( !elementInfo_ == false );
 
-#if 1
+#if TRAVERSE_LEAFNEIGHBOR
+      neighborInfo_ = elementInfo_.leafNeighbor( neighborCount_ );
+#else
       neighborInfo_ = ElementInfo::createFake( grid_.meshPointer(), NULL, 0 );
       std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo_.elInfo()), sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
-#else
-      neighborInfo_ = elementInfo_.leafNeighbor( neighborCount_ );
 #endif
     }
 
@@ -344,6 +348,8 @@ namespace Dune
     return (grid_.levelProvider() ( myEl ) == grid_.levelProvider() ( neighEl ));
   }
 
+
+#if !TRAVERSE_LEAFNEIGHBOR
   //*****************************************
   //  setup for 2d
   //*****************************************
@@ -521,6 +527,7 @@ namespace Dune
     twist_ = SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
              setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
   }
+#endif // #if !TRAVERSE_LEAFNEIGHBOR
 
 
 

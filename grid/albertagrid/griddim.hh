@@ -3,8 +3,8 @@
 #ifndef DUNE_ALBERTA_GRIDDIM_HH
 #define DUNE_ALBERTA_GRIDDIM_HH
 
-// only use GRIDDIM when 2 or 3
-#if defined GRIDDIM && (GRIDDIM >= 2) && (GRIDDIM <= 3)
+// only use GRIDDIM when 1, 2 or 3
+#if defined GRIDDIM && (GRIDDIM >= 1) && (GRIDDIM <= 3)
   #define DIM GRIDDIM
   #if defined GRIDDIMWORLD
     #define DIM_OF_WORLD GRIDDIMWORLD

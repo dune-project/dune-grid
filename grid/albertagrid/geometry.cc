@@ -70,16 +70,13 @@ namespace Dune
   inline AlbertaGridGeometry< mydim, cdim, GridImp >
   ::AlbertaGridGeometry ( const This &other )
     : coord_( other.coord_ ),
+      Jinv_( other.Jinv_ ),
+      elMat_( other.elMat_ ),
       builtElMat_( other.builtElMat_ ),
       builtinverse_( other.builtinverse_ ),
       calcedDet_( other.calcedDet_ ),
       elDet_( other.elDet_ )
-  {
-    if( builtinverse_ )
-      Jinv_ = other.Jinv_;
-    if( builtElMat_ )
-      elMat_ = other.elMat_;
-  }
+  {}
 
 
   template< int mydim, int cdim, class GridImp >

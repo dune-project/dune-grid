@@ -694,9 +694,45 @@ namespace Dune
 
 
     template<>
+    inline int ElementInfo< 1 >::leafNeighbor ( const int face, ElementInfo &neighbor ) const
+    {
+      static const int neighborInFather[ 2 ][ numFaces ] = { {-1, 1}, {0, -1} };
+
+      assert( !!(*this) );
+
+      int faceInNeighbor;
+      if( level() > 0 )
+      {
+        assert( (face >= 0) && (face < numFaces) );
+
+        const int myIndex = indexInFather();
+        const int nbInFather = neighborInFather[ myIndex ][ face ];
+        if( nbInFather >= 0 )
+          return father().leafNeighbor( nbInFather, neighbor );
+        else
+        {
+          neighbor = father().child( 1-myIndex );
+          faceInNeighbor = myIndex;
+        }
+      }
+      else
+        faceInNeighbor = macroNeighbor( face, neighbor );
+
+      if( faceInNeighbor >= 0 )
+      {
+        // refine until we are on the leaf level (faceInNeighbor < 2 is always true)
+        if( !neighbor.isLeaf() )
+          neighbor = neighbor.child( 1-faceInNeighbor );
+        assert( neighbor.el() == elInfo().neigh[ face ] );
+      }
+      return faceInNeighbor;
+    }
+
+
+    template<>
     inline int ElementInfo< 2 >::leafNeighbor ( const int face, ElementInfo &neighbor ) const
     {
-      static const int neighborInFather[ 2 ][ numFaces ] = { { 2, -1, 1}, {-1, 2, 0} };
+      static const int neighborInFather[ 2 ][ numFaces ] = { {2, -1, 1}, {-1, 2, 0} };
 
       assert( !!(*this) );
 
@@ -754,9 +790,9 @@ namespace Dune
     {
       // father.neigh[ neighborInFather[ child[ i ].el_type ][ i ][ j ] == child[ i ].neigh[ j ]
       static const int neighborInFather[ 3 ][ 2 ][ numFaces ]
-        = { { { -1, 2, 3, 1}, {-1, 2, 3, 0} },
-            { { -1, 2, 3, 1}, {-1, 3, 2, 0} },
-            { { -1, 2, 3, 1}, {-1, 2, 3, 0} } };
+        = { { {-1, 2, 3, 1}, {-1, 2, 3, 0} },
+            { {-1, 2, 3, 1}, {-1, 3, 2, 0} },
+            { {-1, 2, 3, 1}, {-1, 2, 3, 0} } };
 
       assert( !!(*this) );
 
