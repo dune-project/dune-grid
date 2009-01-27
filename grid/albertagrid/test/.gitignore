@@ -1,3 +1,5 @@
+svgout
+
 Makefile
 Makefile.in
 
@@ -5,3 +7,4 @@ Makefile.in
 *.swp
 
 .deps
+.libs
