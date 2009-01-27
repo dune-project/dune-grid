@@ -13,4 +13,6 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   intersection.hh  intersection.cc  capabilities.hh \
   gridfactory.hh  dgfparser.hh  albertareader.hh
 
+SUBDIRS = test
+
 include $(top_srcdir)/am/global-rules

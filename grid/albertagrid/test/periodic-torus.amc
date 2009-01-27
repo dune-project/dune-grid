@@ -1,0 +1,123 @@
+# Example macro triangulation for a mesh with periodic boundaries: a
+# topological torus.
+
+DIM: 2
+DIM_OF_WORLD: 2
+
+number of elements: 8
+number of vertices: 9
+
+element vertices:
+ 4 0 1
+ 2 4 1
+ 4 2 5
+ 8 4 5
+ 4 8 7
+ 6 4 7
+ 4 6 3
+ 0 4 3
+
+vertex coordinates:
+ -1.0 -1.0  
+  0.0 -1.0
+  1.0 -1.0
+ -1.0  0.0  
+  0.0  0.0
+  1.0  0.0
+ -1.0  1.0  
+  0.0  1.0
+  1.0  1.0
+
+# Neighbours need not be specified, but if so, then the neighbourhood
+# information should treat periodic faces as interior faces. We leave
+# the neighbourhood information commented out such that it can be
+# determined by the geometric face transformations.
+
+# example for a torus:
+# element neighbours:
+#   5  1  7
+#   0  4  2
+#   7  3  1
+#   2  6  4
+#   1  5  3
+#   4  0  6
+#   3  7  5
+#   6  2  0
+
+# In principle it is possible to specify boundary types for periodic
+# faces; those are ignored during "normal" operation, but can be
+# accessed by using the special fill-flag FILL_NON_PERIODIC during
+# mesh-traversal. This is primarily meant for defining parametric
+# periodic meshes: the finite element function defining the mesh
+# geometry is -- of course -- not periodic.
+
+element boundaries:
+ 2 0 0
+ 0 2 0
+ 1 0 0
+ 0 1 0
+ 2 0 0
+ 0 2 0
+ 1 0 0
+ 0 1 0
+
+# Geometric face transformations. It is also possible to specify those
+# in the application program.
+#
+number of wall transformations: 2
+
+wall transformations:
+# generator #1
+ 1 0 2
+ 0 1 0
+ 0 0 1
+# generator #2
+ 1 0 0
+ 0 1 2
+ 0 0 1
+
+# For each face of the triangulation the number of the face
+# transformation attached to it. Counting starts at 1, negative
+# numbers mean the inverse. Expected is the face transformation which
+# maps the macro triangulation to its neighbour across the respective
+# face. It is possible to omit this section in which case the
+# per-element face transformations are computed.
+#
+#element wall transformations:
+# -2  0  0
+#  0 -2  0
+#  1  0  0
+#  0  1  0
+#  2  0  0
+#  0  2  0
+# -1  0  0
+#  0 -1  0
+ 
+# Combinatorical face transformations. These, too, can be omitted.
+#
+# You will observe that there are "duplicate lines" below. Indeed, but
+# this does not matter: you really have to group the vertex-mappings
+# in pairs, the first two lines mean:
+#
+# "map the face defined by vertex 0 and 1 to the face defined by
+# vertex 6 and 7, in that orientation".
+#
+#number of wall vertex transformations: 4
+
+#wall vertex transformations:
+# 0 6
+# 1 7
+
+# 1 7
+# 2 8
+
+# 0 2
+# 3 5
+
+# 3 5
+# 6 8
+
+# (X)Emacs stuff (for editing purposes)
+# Local Variables: ***
+# comment-start: "# " ***
+# End: ***

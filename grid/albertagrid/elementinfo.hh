@@ -377,6 +377,25 @@ namespace Dune
     }
 
 
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline bool ElementInfo< dim >::isBoundary ( int face ) const
+    {
+      assert( !(*this) == false );
+      assert( (face >= 0) && (face < maxNeighbors) );
+
+      const int macroFace = elInfo().macro_wall[ face ];
+      if( macroFace >= 0 )
+      {
+        const int id = elInfo().macro_el->wall_bound[ macroFace ];
+        return (id != 0);
+      }
+      else
+        return false;
+    }
+#endif // DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
     {
@@ -384,6 +403,7 @@ namespace Dune
       assert( (face >= 0) && (face < maxNeighbors) );
       return (elInfo().neigh[ face ] == 0);
     }
+#endif // DUNE_ALBERTA_VERSION <= 0x200
 
 
 #if DUNE_ALBERTA_VERSION >= 0x201

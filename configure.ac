@@ -42,6 +42,7 @@ AC_CONFIG_FILES([Makefile
     grid/uggrid/Makefile
     grid/sgrid/Makefile
     grid/albertagrid/Makefile
+    grid/albertagrid/test/Makefile
     grid/yaspgrid/Makefile
     grid/onedgrid/Makefile
     grid/utility/Makefile
