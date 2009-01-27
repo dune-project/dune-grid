@@ -33,6 +33,8 @@ namespace Dune
     public:
       typedef int ElementId[ numVertices ];
 
+      static const int supportPeriodicity = (DUNE_ALBERTA_VERSION >= 0x201);
+
     private:
       Data *data_;
       int vertexCount_;
@@ -133,10 +135,7 @@ namespace Dune
         assert( vertexCount_ >= 0 );
         if( vertexCount_ >= data_->n_total_vertices )
           resizeVertices( 2*vertexCount_ );
-
-        GlobalVector &v = vertex( vertexCount_ );
-        for( int i = 0; i < dimWorld; ++i )
-          v[ i ] = coords[ i ];
+        copy( coords, vertex( vertexCount_ ) );
         return vertexCount_++;
       }
 
@@ -150,12 +149,13 @@ namespace Dune
         assert( vertexCount_ >= 0 );
         if( vertexCount_ >= data_->n_total_vertices )
           resizeVertices( 2*vertexCount_ );
-
-        GlobalVector &v = vertex( vertexCount_ );
-        for( int i = 0; i < dimWorld; ++i )
-          v[ i ] = coords[ i ];
+        copy( coords, vertex( vertexCount_ ) );
         return vertexCount_++;
       }
+
+      void insertWallTrafo ( const GlobalMatrix &m, const GlobalVector &t );
+      void insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
+                             const FieldVector< Real, dimWorld > &shift );
 
       void read ( const std::string &filename, bool binary = false );
 
@@ -168,35 +168,14 @@ namespace Dune
       }
 
     private:
-      Real edgeLength ( const ElementId &e, int edge ) const
+      Real edgeLength ( const ElementId &e, int edge ) const;
+      int longestEdge ( const ElementId &e ) const;
+
+      template< class Vector >
+      void copy ( const Vector &x, GlobalVector &y )
       {
-        const int i = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 0 );
-        assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
-        const GlobalVector &x = vertex( e[ i ] );
-
-        const int j = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 1 );
-        assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
-        const GlobalVector &y = vertex( e[ j ] );
-
-        Real sum = (y[ 0 ] - x[ 0 ]) * (y[ 0 ] - x[ 0 ]);
-        for( int i = 1; i < dimWorld; ++i )
-          sum += (y[ i ] - x[ i ]) * (y[ i ] - x[ i ]);
-        return sqrt( sum );
-      }
-
-      int longestEdge ( const ElementId &e ) const
-      {
-        int maxEdge = 0;
-        Real maxLength = edgeLength( e, 0 );
-        for( int i = 1; i < numEdges; ++i )
-        {
-          const Real length = edgeLength( e, i );
-          if( length <= maxLength )
-            continue;
-          maxEdge = i;
-          maxLength = length;
-        }
-        return maxEdge;
+        for( int i = 0; i < dimWorld; ++i )
+          y[ i ] = x[ i ];
       }
 
 #if DUNE_ALBERTA_VERSION >= 0x200
@@ -431,6 +410,69 @@ namespace Dune
     }
 
 
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline void MacroData< dim >
+    ::insertWallTrafo ( const GlobalMatrix &matrix, const GlobalVector &shift )
+    {
+      typedef ALBERTA AFF_TRAFO AffineTrafo;
+
+      int &count = data_->n_wall_trafos;
+      AffineTrafo *&array = data_->wall_trafos;
+
+      // resize wall trafo array
+      array = memReAlloc< AffineTrafo >( array, count, count+1 );
+      assert( data_->wall_trafos != NULL );
+
+      // copy matrix and shift
+      for( int i = 0; i < dimWorld; ++i )
+        copy( matrix[ i ], array[ count ].M[ i ] );
+      copy( shift, array[ count ].t );
+      ++count;
+    }
+
+    template< int dim >
+    inline void MacroData< dim >
+    ::insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
+                        const FieldVector< Real, dimWorld > &shift )
+    {
+      typedef ALBERTA AFF_TRAFO AffineTrafo;
+
+      int &count = data_->n_wall_trafos;
+      AffineTrafo *&array = data_->wall_trafos;
+
+      // resize wall trafo array
+      array = memReAlloc< AffineTrafo >( array, count, count+1 );
+      assert( data_->wall_trafos != NULL );
+
+      // copy matrix and shift
+      for( int i = 0; i < dimWorld; ++i )
+        copy( matrix[ i ], array[ count ].M[ i ] );
+      copy( shift, array[ count ].t );
+      ++count;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline void MacroData< dim >
+    ::insertWallTrafo ( const GlobalMatrix &m, const GlobalVector &t )
+    {
+      DUNE_THROW( AlbertaError,
+                  "Periodic grids are only supported in ALBERTA 2.1 or higher." );
+    }
+
+    template< int dim >
+    inline void MacroData< dim >
+    ::insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
+                        const FieldVector< Real, dimWorld > &shift )
+    {
+      DUNE_THROW( AlbertaError,
+                  "Periodic grids are only supported in ALBERTA 2.1 or higher." );
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+
 #if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MacroData< dim >::read ( const std::string &filename, bool binary )
@@ -451,6 +493,41 @@ namespace Dune
       DUNE_THROW( NotImplemented, "In ALBERTA 1.2, macro data cannot be read." );
     }
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+    template< int dim >
+    inline Real MacroData< dim >::edgeLength ( const ElementId &e, int edge ) const
+    {
+      const int i = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 0 );
+      assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
+      const GlobalVector &x = vertex( e[ i ] );
+
+      const int j = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 1 );
+      assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
+      const GlobalVector &y = vertex( e[ j ] );
+
+      Real sum = (y[ 0 ] - x[ 0 ]) * (y[ 0 ] - x[ 0 ]);
+      for( int i = 1; i < dimWorld; ++i )
+        sum += (y[ i ] - x[ i ]) * (y[ i ] - x[ i ]);
+      return sqrt( sum );
+    }
+
+
+    template< int dim >
+    inline int MacroData< dim >::longestEdge ( const ElementId &e ) const
+    {
+      int maxEdge = 0;
+      Real maxLength = edgeLength( e, 0 );
+      for( int i = 1; i < numEdges; ++i )
+      {
+        const Real length = edgeLength( e, i );
+        if( length <= maxLength )
+          continue;
+        maxEdge = i;
+        maxLength = length;
+      }
+      return maxEdge;
+    }
 
 
 #if DUNE_ALBERTA_VERSION >= 0x200

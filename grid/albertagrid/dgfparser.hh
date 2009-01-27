@@ -65,7 +65,7 @@ namespace Dune
     GridFactory factory;
     for( int n = 0; n < macroGrid.nofvtx; ++n )
     {
-      typename GridFactory::Coordinate coord;
+      typename GridFactory::WorldVector coord;
       for( int i = 0; i < dimworld; ++i )
         coord[ i ] = macroGrid.vtx[ n ][ i ];
       factory.insertVertex( coord );
@@ -103,6 +103,28 @@ namespace Dune
         const Iterator it = macroGrid.facemap.find( key );
         if( it != macroGrid.facemap.end() )
           factory.insertBoundary( n, face, it->second );
+      }
+    }
+
+    if( GridFactory::supportPeriodicity )
+    {
+      typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+      dgf::PeriodicFaceTransformationBlock block( file, dimworld );
+      const int size = block.numTransformations();
+      for( int k = 0; k < size; ++k )
+      {
+        const Transformation &trafo = block.transformation( k );
+
+        typename GridFactory::WorldMatrix matrix;
+        for( int i = 0; i < dimworld; ++i )
+          for( int j = 0; j < dimworld; ++j )
+            matrix[ i ][ j ] = trafo.matrix( i, j );
+
+        typename GridFactory::WorldVector shift;
+        for( int i = 0; i < dimworld; ++i )
+          shift[ i ] = trafo.shift[ i ];
+
+        factory.insertFaceTransformation( matrix, shift );
       }
     }
 

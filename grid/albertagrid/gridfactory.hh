@@ -28,9 +28,8 @@ namespace Dune
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
 
-    static const bool supportsBoundaryIds = (DUNE_ALBERTA_VERSION >= 0x200);
-
-    typedef FieldVector< ctype, dimensionworld > Coordinate;
+    typedef FieldVector< ctype, dimensionworld > WorldVector;
+    typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
   private:
     static const int numVertices
@@ -39,6 +38,11 @@ namespace Dune
     typedef Alberta::MacroData< dimension > MacroData;
     typedef Alberta::NumberingMap< dimension > NumberingMap;
 
+  public:
+    static const bool supportsBoundaryIds = (DUNE_ALBERTA_VERSION >= 0x200);
+    static const bool supportPeriodicity = MacroData::supportPeriodicity;
+
+  private:
     MacroData macroData_;
     NumberingMap numberingMap_;
 
@@ -53,7 +57,7 @@ namespace Dune
       macroData_.release();
     }
 
-    virtual void insertVertex ( const Coordinate &coord )
+    virtual void insertVertex ( const WorldVector &coord )
     {
       macroData_.insertVertex( coord );
     }
@@ -80,6 +84,20 @@ namespace Dune
       if( (id <= 0) || (id > 127) )
         DUNE_THROW( AlbertaError, "Invalid boundary id: " << id << "." );
       macroData_.boundaryId( element, numberingMap_.dune2alberta( 1, face ) ) = id;
+    }
+
+    virtual void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
+    {
+      Alberta::GlobalMatrix M;
+      for( int i = 0; i < dimworld; ++i )
+        for( int j = 0; j < dimworld; ++j )
+          M[ i ][ j ] = matrix[ i ][ j ];
+
+      Alberta::GlobalVector t;
+      for( int i = 0; i < dimworld; ++i )
+        t[ i ] = shift[ i ];
+
+      macroData_.insertWallTrafo( M, t );
     }
 
     Grid *createGrid ( const std::string &gridName, bool markLongestEdge = false )

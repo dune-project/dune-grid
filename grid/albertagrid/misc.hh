@@ -47,6 +47,7 @@ namespace Dune
 
     typedef ALBERTA REAL Real;
     typedef ALBERTA REAL_D GlobalVector;
+    typedef ALBERTA REAL_DD GlobalMatrix;
 
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
