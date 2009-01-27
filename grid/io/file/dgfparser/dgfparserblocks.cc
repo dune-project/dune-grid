@@ -1273,6 +1273,62 @@ namespace Dune
       return good_;
     }
 
+
+
+    // PeriodicFaceTransformationBlock
+    // -------------------------------
+
+    const char *PeriodicFaceTransformationBlock::ID = "PeriodicFaceTransformation";
+
+    PeriodicFaceTransformationBlock
+    ::PeriodicFaceTransformationBlock ( std::istream &in, int dimworld )
+      : BasicBlock( in, ID )
+    {
+      while( getnextline() )
+      {
+        AffineTransformation trafo( dimworld );
+        for( int i = 0; i < dimworld; ++i )
+        {
+          if( i > 0 )
+            match( ',' );
+
+          for( int j = 0; j < dimworld; ++j )
+          {
+            if( !getnextentry( trafo.matrix( i, j ) ) )
+            {
+              DUNE_THROW( DGFException,
+                          "Error in " << *this << ": "
+                                      << "Not enough entries in matrix row " << i << "." );
+            }
+          }
+        }
+
+        match( '+' );
+        for( int i = 0; i < dimworld; ++i )
+        {
+          if( !getnextentry( trafo.shift[ i ] ) )
+          {
+            DUNE_THROW( DGFException,
+                        "Error in " << *this << ": "
+                                    << "Not enough entries in shift." );
+          }
+        }
+
+        transformations_.push_back( trafo );
+      }
+    }
+
+
+    void PeriodicFaceTransformationBlock::match ( char what )
+    {
+      char c;
+      if( !getnextentry( c ) || (c != what) )
+      {
+        DUNE_THROW( DGFException,
+                    "Error in " << *this << ": " << what << "expected." );
+      }
+    }
+
   } // end namespace dgf
 
 } // end namespace Dune

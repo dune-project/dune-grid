@@ -574,6 +574,92 @@ namespace Dune
       bool next ();
     };
 
+
+
+    // PeriodicFaceTransformationBlock
+    // -------------------------------
+
+    struct PeriodicFaceTransformationBlock
+      : public BasicBlock
+    {
+      template< class T >
+      class Matrix;
+
+      struct AffineTransformation;
+
+    private:
+      std::vector< AffineTransformation > transformations_;
+
+      // copy not implemented
+      PeriodicFaceTransformationBlock ( const PeriodicFaceTransformationBlock & );
+
+    public:
+      static const char *ID;
+
+      // initialize block and get dimension of world
+      PeriodicFaceTransformationBlock ( std::istream &in, int dimworld );
+
+      const AffineTransformation &transformation ( int i ) const
+      {
+        assert( i < numTransformations() );
+        return transformations_[ i ];
+      }
+
+      int numTransformations () const
+      {
+        return transformations_.size();
+      }
+
+    private:
+      void match ( char what );
+    };
+
+
+
+    // PeriodicFaceTransformationBlock::Matrix
+    // ---------------------------------------
+
+    template< class T >
+    class PeriodicFaceTransformationBlock::Matrix
+    {
+      int rows_;
+      int cols_;
+      std::vector< T > fields_;
+
+    public:
+      Matrix ( int rows, int cols )
+        : rows_( rows ),
+          cols_( cols ),
+          fields_( rows * cols )
+      {}
+
+      const T &operator() ( int i, int j ) const
+      {
+        return fields_[ i * cols_ + j ];
+      }
+
+      T &operator() ( int i, int j )
+      {
+        return fields_[ i * cols_ + j ];
+      }
+    };
+
+
+    // PeriodicFaceTransformationBlock::AffineTransformation
+    // -----------------------------------------------------
+
+    struct PeriodicFaceTransformationBlock::AffineTransformation
+    {
+      Matrix< double > matrix;
+      std::vector< double > shift;
+
+      explicit AffineTransformation ( int dimworld )
+        : matrix( dimworld, dimworld ),
+          shift( dimworld )
+      {}
+    };
+
+
   } // end namespace dgf
 
 } // end namespace Dune
