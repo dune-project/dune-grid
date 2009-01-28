@@ -1,5 +1,5 @@
 if ALBERTA
-noinst_PROGRAMS = svgout
+check_PROGRAMS = svgout
 endif
 
 GRIDDIM=2
