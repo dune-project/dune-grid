@@ -335,6 +335,13 @@ namespace Dune {
   }
 
 
+  template< class GridImp >
+  inline GeometryType ALU2dGridIntersectionBase< GridImp >::type () const
+  {
+    return GeometryType( GeometryType::simplex, dimension-1 );
+  }
+
+
 
   //********************************************************************
   //

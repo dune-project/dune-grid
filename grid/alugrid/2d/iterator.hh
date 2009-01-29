@@ -169,6 +169,9 @@ namespace Dune {
     const LocalGeometry & intersectionNeighborLocal () const;
     const Geometry & intersectionGlobal () const;
 
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const;
+
     /*
        protected:
        //! return true if either inside or outside have hanging nodes at this
