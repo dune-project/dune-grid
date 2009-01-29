@@ -120,6 +120,12 @@ namespace Dune {
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
     const Geometry& intersectionGlobal () const;
 
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return intersectionSelfLocal().type();
+    }
+
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const;
@@ -336,6 +342,12 @@ namespace Dune {
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry& intersectionNeighborLocal () const;
+
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return intersectionSelfLocal().type();
+    }
 
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const {
