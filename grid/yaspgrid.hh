@@ -1546,6 +1546,12 @@ namespace Dune {
       return _is_global;
     }
 
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return intersectionSelfLocal().type();
+    }
+
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const
     {

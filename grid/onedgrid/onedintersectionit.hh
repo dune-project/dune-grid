@@ -189,6 +189,12 @@ namespace Dune {
       return intersectionGlobal_;
     }
 
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return GeometryType( 0 );
+    }
+
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const {return neighbor_;}
 
@@ -453,6 +459,12 @@ namespace Dune {
     const Geometry& intersectionGlobal () const {
       GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
       return intersectionGlobal_;
+    }
+
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return GeometryType( 0 );
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
