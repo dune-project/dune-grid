@@ -268,6 +268,12 @@ namespace Dune
       return this->real.intersectionGlobal();
     }
 
+    /** \brief obtain the type of reference element for this intersection */
+    GeometryType type () const
+    {
+      return this->real.type();
+    }
+
     //! Local number of codim 1 entity in the inside() Entity where intersection is contained in
     int numberInSelf () const
     {
