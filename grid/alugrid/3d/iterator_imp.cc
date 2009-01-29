@@ -363,6 +363,22 @@ namespace Dune {
     return intersectionGlobal_;
   }
 
+
+  template<>
+  inline GeometryType
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::type () const
+  {
+    return GeometryType( GeometryType::simplex, dim-1 );
+  }
+
+  template<>
+  inline GeometryType
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::type () const
+  {
+    return GeometryType( GeometryType::cube, dim-1 );
+  }
+
+
   template<class GridImp>
   inline int
   ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
