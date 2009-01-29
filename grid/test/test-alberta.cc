@@ -108,13 +108,17 @@ try {
     }
 
     // check dgf grid width half refinement
-    grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+    const int stepsForHalf = DGFGridInfo< GridType >::refineStepsForHalf();
+    std::cout << ">>> Refining grid (" << stepsForHalf
+              << " times) and checking again..." << std::endl;
+    grid.globalRefine( stepsForHalf );
     gridcheck(grid);
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
 
     for(int i=0; i<2; i++)
     {
+      std::cout << ">>> Refining one element and checking again..." << std::endl;
       markOne(grid,0,dim);
       gridcheck(grid);
       checkIterators( grid.leafView() );
