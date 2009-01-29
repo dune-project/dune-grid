@@ -127,6 +127,8 @@ namespace Dune
      */
     const Geometry &intersectionGlobal () const;
 
+    GeometryType type () const;
+
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInSelf () const;
 

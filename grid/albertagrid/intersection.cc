@@ -308,18 +308,25 @@ namespace Dune
 
 
   template< class GridImp >
-  inline int AlbertaGridIntersectionIterator<GridImp>::
-  numberInSelf () const
+  inline GeometryType AlbertaGridIntersectionIterator< GridImp >::type () const
+  {
+    return GeometryType( GeometryType::simplex, dimension-1 );
+  }
+
+
+  template< class GridImp >
+  inline int AlbertaGridIntersectionIterator< GridImp >
+  ::numberInSelf () const
   {
     const int oppVertex = neighborCount_;
     return (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
   }
 
   template< class GridImp >
-  inline int AlbertaGridIntersectionIterator<GridImp>::
-  numberInNeighbor () const
+  inline int AlbertaGridIntersectionIterator<GridImp>
+  ::numberInNeighbor () const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     const int oppVertex = elInfo.opp_vertex[ neighborCount_ ];
     return (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
