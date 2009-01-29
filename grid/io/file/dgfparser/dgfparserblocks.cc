@@ -974,11 +974,12 @@ namespace Dune
     GridParameterBlock::GridParameterBlock ( std :: istream &in, const bool readOverlapAndBnd )
       : BasicBlock( in, ID ),
         foundFlags_( 0 ),
+        name_( "Unnamed Grid" ), // default value (used if name is empty)
         _periodic(),
-        _overlap( 0 ),         // default value
-        _noClosure( false ),   // default value
-        _noCopy( true ),       // default value
-        name_( "Unnamed Grid" ) // default value (used if name is empty)
+        _overlap( 0 ),          // default value
+        _noClosure( false ),    // default value
+        _noCopy( true ),        // default value
+        markLongestEdge_( false ) // default value
     {
       if( isempty() )
         return;
@@ -992,6 +993,23 @@ namespace Dune
         else
           dwarn << "GridParameterBlock: Found keyword 'name' without value." << std::endl;
         foundFlags_ |= foundName;
+      }
+
+      // check for markLongestEdge
+      if( findtoken( "refinementedge" ) )
+      {
+        std::string entry;
+        if( getnextentry( entry ) )
+        {
+          makeupcase( entry );
+          if( entry == "LONGEST" )
+            markLongestEdge_ = true;
+          else if( entry != "ARBITRARY" )
+            dwarn << "GridParameterBlock: Invalid value for keyword 'refinementedge': " << entry << std::endl;
+        }
+        else
+          dwarn << "GridParameterBlock: Found keyword 'refinementedge' without value." << std::endl;
+        foundFlags_ |= foundLongestEdge;
       }
 
       if( readOverlapAndBnd )

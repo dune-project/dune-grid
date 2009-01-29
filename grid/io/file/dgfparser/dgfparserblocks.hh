@@ -405,19 +405,21 @@ namespace Dune
     public:
       typedef unsigned int Flags;
 
+      static const Flags foundName = 1 << 0;
       static const Flags foundPeriodic = 1 << 1;
       static const Flags foundOverlap = 1 << 2;
       static const Flags foundClosure = 1 << 3;
       static const Flags foundCopies = 1 << 4;
-      static const Flags foundName = 1 << 5;
+      static const Flags foundLongestEdge = 1 << 5;
 
     protected:
       Flags foundFlags_; // supportFlags, this block was created with
+      std::string name_; // name of the grid
       std::set<int> _periodic; // periodic grid
       int _overlap; // overlap for YaspGrid
       bool _noClosure; // no closure for UGGrid
       bool _noCopy; // no copies for UGGrid
-      std::string name_; // name of the grid
+      bool markLongestEdge_; // Mark longest edge for AlbertaGrid
 
     private:
       // copy not implemented
@@ -449,6 +451,17 @@ namespace Dune
         }
         else
           return name_;
+      }
+
+      // returns true if longest edge should be marked for AlbertaGrid
+      bool markLongestEdge () const
+      {
+        if( (foundFlags_ & foundLongestEdge) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'refinementedge' not specified, "
+                << "defaulting to 'ARBITRARY'." << std::endl;
+        }
+        return markLongestEdge_;
       }
 
       // returns true if no closure should be used for UGGrid
