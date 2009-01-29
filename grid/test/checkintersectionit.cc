@@ -295,6 +295,13 @@ void checkIntersectionIterator(const GridViewType& view,
 
     checkGeometry(intersectionGlobal);
 
+    if( intersectionGlobal.type() != iIt->type() )
+    {
+      std::cerr << "Error: Reference geometry type returned by intersection "
+                << "differs from the one returned by the global geometry." << std::endl;
+      assert( false );
+    }
+
     // //////////////////////////////////////////////////////////
     //   Check the geometry returned by intersectionSelfLocal()
     // //////////////////////////////////////////////////////////
