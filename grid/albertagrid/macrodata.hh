@@ -376,7 +376,6 @@ namespace Dune
         const int edge = longestEdge( element( i ) );
         if( edge == refEdge )
           continue;
-        std::cout << "Longest edge: " << edge << std::endl;
 
         // shift vertices such that the refinement edge is the longest edge
         const int shift = edge + (numVertices - refEdge);
@@ -389,6 +388,7 @@ namespace Dune
         if( data_->opp_vertex != NULL )
         {
           assert( data_->neigh != NULL );
+          const int shiftBack = numVertices - (shift % numVertices);
           for( int j = 0; j < numVertices; ++j )
           {
             const int nb = data_->neigh[ i*numVertices + j ];
@@ -397,7 +397,7 @@ namespace Dune
             const int ov = data_->opp_vertex[ i*numVertices + j ];
             assert( data_->neigh[ nb*numVertices + ov ] == i );
             assert( data_->opp_vertex[ nb*numVertices + ov ] == j );
-            data_->opp_vertex[ nb*numVertices + ov ] = (j+shift) % numVertices;
+            data_->opp_vertex[ nb*numVertices + ov ] = (j+shiftBack) % numVertices;
           }
           rotate( data_->opp_vertex, i, shift );
         }
@@ -498,11 +498,11 @@ namespace Dune
     template< int dim >
     inline Real MacroData< dim >::edgeLength ( const ElementId &e, int edge ) const
     {
-      const int i = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 0 );
+      const int i = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( edge, 0 );
       assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
       const GlobalVector &x = vertex( e[ i ] );
 
-      const int j = ALBERTA AlbertHelp::MapVertices< 1, 3 >::mapVertices( edge, 1 );
+      const int j = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( edge, 1 );
       assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
       const GlobalVector &y = vertex( e[ j ] );
 

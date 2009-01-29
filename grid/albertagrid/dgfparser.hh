@@ -128,7 +128,7 @@ namespace Dune
       }
     }
 
-    return factory.createGrid( gridName );
+    return factory.createGrid( gridName, parameter.markLongestEdge() );
   }
 
 
