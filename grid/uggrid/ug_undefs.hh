@@ -7,6 +7,7 @@
  * This file is created automatically by the perl script <tt>undefAllMacros.pl</tt>.
  */
 
+#undef __PARALLEL_H__
 #undef DUNE_UGINCLUDES_HH
 #undef __GM__
 #undef MODEL
