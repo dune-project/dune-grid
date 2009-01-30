@@ -685,6 +685,8 @@
 #undef NELIST_DEF_IN_GRID
 #undef EDATA_DEF_IN_GRID
 #undef NDATA_DEF_IN_GRID
+#undef GRID_ATTR
+#undef ATTR_TO_GLEVEL
 #undef MULTIGRID_STATUS_OFFSET
 #undef MGSTATUS
 #undef RESETMGSTATUS
@@ -939,14 +941,9 @@
 #undef PARHDR
 #undef GETGID
 #undef GETGID
-#undef CDBG
-#undef CDBG
 #undef PRIO2LISTPART
 #undef LISTPART2PRIO
 #undef PRIO2INDEX
-#undef CDBG
-#undef GRID_ATTR
-#undef ATTR_TO_GLEVEL
 #undef ID_FMT
 #undef ID_FFMT
 #undef ID_PRT
