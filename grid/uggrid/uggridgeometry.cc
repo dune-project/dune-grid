@@ -59,8 +59,12 @@ inline const Dune::FieldVector<typename GridImp::ctype, coorddim>& Dune::UGGridG
 operator [](int i) const
 {
   // This geometry is a vertex
-  if (mydim==0)
-    return reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim>&>(((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x);
+  if (mydim==0) {
+    // the dummy variable is required to avoid g++ complaining
+    // about dereferncing a type-punned pointer
+    double *dummy = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x;
+    return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
+  }
 
   // ////////////////////////////////
   //  This geometry is an element
@@ -69,8 +73,12 @@ operator [](int i) const
 
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
-  if (mode_==element_mode)
-    return reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim>&>(UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x);
+  if (mode_==element_mode) {
+    // the dummy variable is required to avoid g++ complaining
+    // about dereferncing a type-punned pointer
+    double *dummy = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x;
+    return *reinterpret_cast<FieldVector<typename GridImp::ctype, coorddim> *>(dummy);
+  }
 
   return coord_[i];
 }
@@ -79,7 +87,7 @@ template< int mydim, int coorddim, class GridImp>
 inline Dune::FieldVector<typename GridImp::ctype, coorddim> Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 global(const FieldVector<UGCtype, mydim>& local) const
 {
-  FieldVector<UGCtype, coorddim> globalCoord;
+  FieldVector<UGCtype, coorddim> globalCoord(0.0);
 
   if (mode_==element_mode) {
 
