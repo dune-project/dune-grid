@@ -83,6 +83,17 @@ namespace Dune {
     template <int codim>
     class Entity;
 
+#ifdef ModelP
+    /* DDD Interfaces */
+    static DDD_IF &ElementIF() {
+      return UG_NAMESPACE::ElementIF;
+    }
+
+    static DDD_IF &ElementVHIF() {
+      return UG_NAMESPACE::ElementVHIF;
+    }
+#endif
+
     // //////////////////////////////////////////////
     //   Constants exported by UG
     // //////////////////////////////////////////////
