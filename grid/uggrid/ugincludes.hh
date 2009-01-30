@@ -27,5 +27,8 @@
 #include <refine.h>
 #include <ugm.h>
 #include <rm.h>
+#if defined ModelP
+#include "parallel.h"
+#endif
 
 #endif
