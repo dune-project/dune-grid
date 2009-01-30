@@ -627,96 +627,6 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   return true;
 }
 
-#ifdef ModelP
-namespace Dune {
-
-  template <class T, template <class> class P, int GridDim>
-  class UGDataCollector {
-  public:
-
-    static int gather(DDD_OBJ obj, void* data)
-    {
-      int codim=0;
-
-      P<T>* p = (P<T>*)data;
-
-      int index = 0;
-      switch (codim) {
-      case 0 :
-        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Element*)obj);
-        break;
-      case GridDim :
-        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Node*)obj);
-        break;
-      default :
-        DUNE_THROW(GridError, "UGGrid::communicate only implemented for this codim");
-      }
-
-      p->gather(*dataArray, index);
-
-      return 0;
-    }
-
-    static int scatter(DDD_OBJ obj, void* data)
-    {
-      int codim=0;
-
-      P<T>* p = (P<T>*)data;
-
-      int index = 0;
-      switch (codim) {
-      case 0 :
-        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Element*)obj);
-        break;
-      case GridDim :
-        index = UG_NS<GridDim>::index((typename UG_NS<GridDim>::Node*)obj);
-        break;
-      default :
-        DUNE_THROW(GridError, "UGGrid::communicate only implemented for codim 0 and dim");
-      }
-
-      p->scatter(*dataArray, index);
-
-      return 0;
-    }
-
-    static T* dataArray;
-
-  };
-
-}   // end namespace Dune
-
-template <class T, template<class> class P, int GridDim>
-T* Dune::UGDataCollector<T,P,GridDim>::dataArray = 0;
-#endif
-
-#if 0
-/** This used to work at least partially for an old version of the communication interface
-   \todo How do I incorporate the level argument? */
-template < int dim >
-template<class T, template<class> class P, int codim>
-void Dune::UGGrid < dim >::communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
-{
-#ifdef ModelP
-
-  // Currently only elementwise communication is supported
-  if (codim != 0)
-    DUNE_THROW(GridError, "Currently UG supports only element-wise communication!");
-
-  UGDataCollector<T,P,dim>::dataArray = &t;
-
-  // Translate the communication direction from Dune-Speak to UG-Speak
-  DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
-
-  // Trigger communication
-  DDD_IFOneway(UG::ElementVHIF,
-               UGIfDir,
-               sizeof(P<T>),
-               &UGDataCollector<T,P,dim>::gather,
-               &UGDataCollector<T,P,dim>::scatter);
-#endif
-}
-#endif
 
 template < int dim >
 void Dune::UGGrid < dim >::createBegin()
@@ -949,8 +859,19 @@ void Dune::UGGrid < dim >::createEnd()
   // If we are in a parallel setting and we are _not_ the master
   // process we can stop here.
   // ///////////////////////////////////////////////////////////////
-  if (PPIF::me!=0)
+  if (PPIF::me!=0) {
+    // Complete the UG-internal grid data structure even if we are
+    // not the master process. (CreateAlgebra communicates via MPI
+    // so we would be out of sync if we don't do this here...)
+    if (CreateAlgebra(multigrid_) != UG_NS<dim>::GM_OK)
+      DUNE_THROW(IOError, "Call of 'UG::D" << dim << "::CreateAlgebra' failed!");
+
+    /* here all temp memory since CreateMultiGrid is released */
+    Release(multigrid_->theHeap, UG::FROM_TOP, multigrid_->MarkKey);
+    multigrid_->MarkKey = 0;
+
     return;
+  }
 
   // ////////////////////////////////////////////////
   //   Actually insert the interior vertices

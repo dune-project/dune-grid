@@ -97,6 +97,107 @@
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
 
+
+#ifdef ModelP
+namespace Dune {
+
+  // converts the UG speak message buffers to DUNE speak and vince-versa
+  template <class DataHandle, int GridDim>
+  class UGMessageBuffer {
+
+  protected:
+    typedef UGMessageBuffer<DataHandle, GridDim>  ThisType;
+    typedef typename DataHandle::DataType DataType;
+
+    UGMessageBuffer(DataType *ugData)
+    {
+      ugData_ = ugData;
+    };
+
+  public:
+
+    void write(const DataType &t)
+    {
+      *ugData_ = t;
+    }
+
+    void read(DataType &t)
+    {
+      t = *ugData_;
+      ++ ugData_;
+    }
+
+  protected:
+    friend class Dune::UGGrid<GridDim>;
+
+    // called by DDD_IFOneway to serialize the data structure to
+    // be send
+    static int ugGather(DDD_OBJ obj, void* data)
+    {
+      const int codim=0;
+      assert(codim == 0);
+
+      std::cout << "ugGather index: " << UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj) << "\n";
+      UGMakeableEntity<codim, GridDim, UGGrid<GridDim> >
+      e((typename UG_NS<GridDim>::Element*)obj);
+      /*            switch (codim) {
+                    case 0:
+                    index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj);
+                    break;
+                    case GridDim:
+                    index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Node*)obj);
+                    break;
+                    default:
+                    DUNE_THROW(GridError, "UGGrid::communicate not implemented for this codim");
+                    }
+       */
+      ThisType msgBuf(static_cast<DataType*>(data));
+      duneDataHandle_->gather(msgBuf, e);
+
+      return 0;
+    }
+
+    // called by DDD_IFOneway to deserialize the data structure
+    // which has been received
+    static int ugScatter(DDD_OBJ obj, void* data)
+    {
+      const int codim=0;
+      assert(codim == 0);
+
+      int rank;
+      std::cout << "ugScatter element: " << UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj) << "\n";
+      /*
+         int index = 0;
+         switch (codim) {
+         case 0:
+         index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj);
+         break;
+         case GridDim:
+         index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Node*)obj);
+         break;
+         default:
+         DUNE_THROW(GridError, "UGGrid::communicate only implemented for codim 0 and dim");
+         }
+       */
+
+      UGMakeableEntity<codim, GridDim, UGGrid<GridDim> >
+      e((typename UG_NS<GridDim>::Element*)obj);
+      ThisType msgBuf(static_cast<DataType*>(data));
+      duneDataHandle_->scatter(msgBuf, e, 1);
+
+      return 0;
+    }
+    static DataHandle *duneDataHandle_;
+
+    DataType          *ugData_;
+  };
+
+}   // end namespace Dune
+
+template <class DataHandle, int GridDim>
+DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim>::duneDataHandle_ = 0;
+#endif
+
 namespace Dune {
 
   template<int dim, int dimworld>
@@ -490,10 +591,34 @@ namespace Dune {
        the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+    void communicate (DataHandle& dataHandle,
+                      InterfaceType iftype,
+                      CommunicationDirection dir) const
     {
-      DUNE_THROW(NotImplemented, "Leaf communication has not been implemented yet!");
+#ifdef ModelP
+      // Currently only elementwise communication is supported
+      if (!dataHandle.contains(dim, 0))
+        DUNE_THROW(GridError, "Currently UG supports only element-wise communication!");
+      else if (!dataHandle.fixedsize(dim, 0))
+        DUNE_THROW(GridError, "Currently UG supports supports communication of fixed-size data types!");
+
+
+      typedef UGMessageBuffer<DataHandle,dim> UGMsgBuf;
+      UGMsgBuf::duneDataHandle_ = &dataHandle;
+
+      // Translate the communication direction from Dune-Speak to UG-Speak
+      DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
+
+
+      // Trigger communication
+      DDD_IFOneway(UG_NS<dim>::ElementVHIF(),
+                   UGIfDir,
+                   sizeof(typename DataHandle::DataType),
+                   &UGMsgBuf::ugGather,
+                   &UGMsgBuf::ugScatter);
+#endif
     }
+
 
     /** dummy collective communication */
     const CollectiveCommunication<UGGrid>& comm () const
