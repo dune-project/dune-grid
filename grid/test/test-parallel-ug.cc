@@ -1,6 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 // $Id: test-ug.cc 4424 2008-09-29 07:46:41Z sander $
+// Test parallel interface if a parallel UG is used
 
 #include <config.h>
 
@@ -8,11 +9,7 @@
 
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-
-// Test parallel interface if a parallel UG is used
-#ifdef ModelP
-#include <mpi.h>
-#endif
+#include <dune/common/mpihelper.hh>
 
 using namespace Dune;
 
@@ -26,15 +23,18 @@ struct P0Layout
   }
 };
 
+struct VectorType { double blubb[3]; };
+
 // A DataHandle class to exchange entries of a vector
 template<class M, class V> // mapper type and vector type
 class VectorExchange
   : public Dune::CommDataHandleIF<VectorExchange<M,V>,
-        typename V::value_type>
+        V
+        /*typename V::value_type */>
 {
 public:
   //! export type of data for message buffer
-  typedef typename V::value_type DataType;
+  typedef V DataType;
 
   //! returns true if data for this codim should be communicated
   bool contains (int dim, int codim) const
@@ -62,7 +62,16 @@ public:
   template<class MessageBuffer, class EntityType>
   void gather (MessageBuffer& buff, const EntityType& e) const
   {
-    buff.write(c[mapper.map(e)]);
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+    VectorType data;
+    for (int i = 0; i < 3; ++i) {
+      data.blubb[i] = 1e6 + rank*1e5 + mapper.map(e)*1e2 + i;
+      std::cout << "sending " << mapper.map(e) << " -> " << data.blubb[i] << "\n";
+    }
+
+    buff.write(data);
   }
 
   /*! unpack data from message buffer to user
@@ -74,36 +83,31 @@ public:
   {
     DataType x;
     buff.read(x);
-    c[mapper.map(e)]=x;
+    for (int i = 0; i < 3; ++i) {
+      std::cout << "received " << mapper.map(e) << " -> " << x.blubb[i] << "\n";
+    }
   }
 
   //! constructor
-  VectorExchange (const M& mapper_, V& c_)
-    : mapper(mapper_), c(c_)
+  VectorExchange (const M& mapper_)
+    : mapper(mapper_)
   {}
 
 private:
   const M& mapper;
-  V& c;
 };
-
 
 int main (int argc , char **argv) try
 {
+  // initialize MPI, finalize is done automatically on exit
+  Dune::MPIHelper &mpiHelper =
+    Dune::MPIHelper::instance(argc, argv);
 
-#ifdef ModelP
-  // initialize MPI
-  MPI_Init(&argc,&argv);
-#endif
+  int rank = mpiHelper.rank();
+  int size = mpiHelper.size();
 
 
-  int rank;
-  int size;
-
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&size);
-
-  std::cout << "This is process " << rank << " of " << size << "." << std::endl;
+  std::cout << "This is process " << rank << " of " << size << ", PID " << getpid() << " .\n";
 
   // //////////////////////////////////////////////////////////
   //   Make a uniform grid on rank 0 for testing
@@ -137,11 +141,10 @@ int main (int argc , char **argv) try
   factory.createGrid();
 
   grid.loadBalance(0,     // strategy
-                   1,      // minlevel
-                   2,      // depth
-                   32,      // maxlevel
-                   1       // minelement
-                   );
+                   0,     // minlevel
+                   2,     // depth
+                   32,     // maxlevel
+                   1);     // minelement
 
   std::cout << "Process " << rank << " has " << grid.size(0) << " elements." << std::endl;
 
@@ -158,18 +161,11 @@ int main (int argc , char **argv) try
   typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,P0Layout> MapperType;
   MapperType mapper(grid, 0);
 
-  typedef std::vector<double> VectorType;
-  VectorType data(grid.size(0));
-  data.assign(data.size(), rank);
+  //    typedef std::vector<double> VectorType;
 
-  VectorExchange<MapperType,VectorType> datahandle(mapper,data);
+  VectorExchange<MapperType,VectorType> datahandle(mapper);
   grid.communicate<VectorExchange<MapperType,VectorType> >(datahandle,Dune::InteriorBorder_All_Interface,
                                                            Dune::ForwardCommunication);
-
-#ifdef ModelP
-  // Terminate MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }
