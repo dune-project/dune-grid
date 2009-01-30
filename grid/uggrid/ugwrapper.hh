@@ -201,7 +201,7 @@ namespace Dune {
 
     /** \brief Computes the element volume */
     static double Area_Of_Element(int n, const double** cornerCoords) {
-      double area;
+      double area = 0.0;
       using UG::DOUBLE;
       using UG_NAMESPACE ::DOUBLE_VECTOR;
 #if UG_DIM == 2
