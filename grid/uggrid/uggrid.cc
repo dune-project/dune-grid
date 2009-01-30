@@ -617,7 +617,11 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
   if (errCode)
     DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
 
-  // Renumber everything
+  // Renumber everything.
+  // First the level 0 index set ...
+  levelIndexSets_[0]->update(*this, 0);
+
+  // ... then the rest
   setIndices();
 
   return true;
