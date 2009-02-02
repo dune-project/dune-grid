@@ -15,11 +15,21 @@ using namespace Dune;
 
 //! Parameter for mapper class
 template<int dim>
-struct P0Layout
+struct ElementLayout
 {
   bool contains (Dune::GeometryType gt)
   {
-    return gt.dim()==dim;
+    return gt.dim() == 0;
+  }
+};
+
+//! Parameter for mapper class
+template<int dim>
+struct NodeLayout
+{
+  bool contains (Dune::GeometryType gt)
+  {
+    return gt.dim() == dim;
   }
 };
 
@@ -68,7 +78,13 @@ public:
     VectorType data;
     for (int i = 0; i < 3; ++i) {
       data.blubb[i] = 1e6 + rank*1e5 + mapper.map(e)*1e2 + i;
-      std::cout << "sending " << mapper.map(e) << " -> " << data.blubb[i] << "\n";
+      std::cout << "Process "
+                << Dune::MPIHelper::getCollectiveCommunication().rank()
+                << " sends for entity "
+                << mapper.map(e)
+                << ": "
+                << std::setprecision(20)
+                << data.blubb[i] << "\n";
     }
 
     buff.write(data);
@@ -84,7 +100,13 @@ public:
     DataType x;
     buff.read(x);
     for (int i = 0; i < 3; ++i) {
-      std::cout << "received " << mapper.map(e) << " -> " << x.blubb[i] << "\n";
+      std::cout << "Process "
+                << Dune::MPIHelper::getCollectiveCommunication().rank()
+                << " received for entity "
+                << mapper.map(e)
+                << ": "
+                << std::setprecision(20)
+                << x.blubb[i] << "\n";
     }
   }
 
@@ -146,6 +168,7 @@ int main (int argc , char **argv) try
                    32,     // maxlevel
                    1);     // minelement
 
+
   std::cout << "Process " << rank << " has " << grid.size(0) << " elements." << std::endl;
 
   // make sure each process has some elements
@@ -158,7 +181,7 @@ int main (int argc , char **argv) try
   GridType::LevelGridView gridView = grid.levelView(0);
 
   // make a mapper for codim 0 entities in the level grid
-  typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,P0Layout> MapperType;
+  typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,NodeLayout> MapperType;
   MapperType mapper(grid, 0);
 
   //    typedef std::vector<double> VectorType;
