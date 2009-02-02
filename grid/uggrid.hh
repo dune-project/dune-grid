@@ -605,7 +605,7 @@ namespace Dune {
         DUNE_THROW(GridError, "Currently UG supports supports communication of fixed-size data types!");
 
 
-      typedef UGMessageBuffer<DataHandle,dim> UGMsgBuf;
+      typedef UGMessageBuffer<DataHandle,dim,0> UGMsgBuf;
       UGMsgBuf::duneDataHandle_ = &dataHandle;
 
       // Translate the communication direction from Dune-Speak to UG-Speak
