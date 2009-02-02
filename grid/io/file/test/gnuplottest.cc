@@ -19,7 +19,7 @@ void testIO(const GV & gridView, std::string fname)
   vertexdata.push_back(0.22*gridView.indexSet().size(0));
 
   // create writer
-  Dune::GnuplotWriter<typename GV::Grid,GV> gnuplot(gridView.grid(),gridView);
+  Dune::GnuplotWriter<GV> gnuplot(gridView);
 
   // register data
   gnuplot.template addVertexData< std::vector<float> >(vertexdata, std::string("vertexdata"));
