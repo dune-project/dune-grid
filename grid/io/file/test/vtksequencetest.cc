@@ -25,7 +25,7 @@ const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
 
 template< class GridView >
 class VTKVectorFunction
-  : public Dune :: VTKWriter< typename GridView :: Grid, GridView > :: VTKFunction
+  : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
   enum { n = GridView :: dimension };

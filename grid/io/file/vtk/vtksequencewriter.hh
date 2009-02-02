@@ -16,8 +16,8 @@ namespace Dune {
    * <a href="http://public.kitware.com/VTK/">The Visualization Toolkit (VTK)</a>.
    */
   template< class GridView >
-  class VTKSequenceWriter : public VTKWriter<typename GridView::Grid,GridView> {
-    typedef VTKWriter<typename GridView::Grid,GridView> BaseType;
+  class VTKSequenceWriter : public VTKWriter<GridView> {
+    typedef VTKWriter<GridView> BaseType;
     typedef VTKSequenceWriter<GridView> ThisType;
     std::string name_,path_,extendpath_;
     unsigned int count_;
