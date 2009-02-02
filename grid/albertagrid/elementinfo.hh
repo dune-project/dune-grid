@@ -95,6 +95,7 @@ namespace Dune
       ElementInfo leafNeighbor ( int face ) const;
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
+      AffineTransformation *transformation ( int face ) const;
 
       bool hasCoordinates () const;
       const GlobalVector &coordinate ( int vertex ) const;
@@ -381,7 +382,7 @@ namespace Dune
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < maxNeighbors) );
 
       const int macroFace = elInfo().macro_wall[ face ];
@@ -399,7 +400,7 @@ namespace Dune
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < maxNeighbors) );
       return (elInfo().neigh[ face ] == 0);
     }
@@ -410,7 +411,7 @@ namespace Dune
     template< int dim >
     inline int ElementInfo< dim >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_WALLS_MAX) );
 
       const int macroFace = elInfo().macro_wall[ face ];
@@ -426,7 +427,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 1 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
       return elInfo().vertex_bound[ face ];
     }
@@ -434,7 +435,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 2 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_EDGES_MAX) );
       return elInfo().edge_bound[ face ];
     }
@@ -442,7 +443,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 3 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_FACES_MAX) );
       return elInfo().face_bound[ face ];
     }
@@ -454,7 +455,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 1 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_VERTICES) );
       return elInfo().bound[ face ];
     }
@@ -464,7 +465,7 @@ namespace Dune
     template<>
     inline int ElementInfo< 2 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_EDGES) );
       return elInfo().boundary[ face ]->bound;
     }
@@ -474,12 +475,35 @@ namespace Dune
     template<>
     inline int ElementInfo< 3 >::boundaryId ( int face ) const
     {
-      assert( !(*this) == false );
+      assert( !!(*this) );
       assert( (face >= 0) && (face < N_FACES) );
       return elInfo().boundary[ face ]->bound;
     }
 #endif // #if DIM == 3
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline AffineTransformation *
+    ElementInfo< dim >::transformation ( int face ) const
+    {
+      assert( !!(*this) );
+      assert( (face >= 0) && (face < N_WALLS_MAX) );
+
+      const int macroFace = elInfo().macro_wall[ face ];
+      return (macroFace < 0 ? NULL : elInfo().macro_el->wall_trafo[ face ]);
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline AffineTransformation *
+    ElementInfo< dim >::transformation ( int face ) const
+    {
+      return NULL;
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
     template< int dim >

@@ -267,6 +267,14 @@ namespace Dune
 
 
   template< class GridImp >
+  inline AlbertaTransformation
+  AlbertaGridIntersectionIterator< GridImp >::transformation () const
+  {
+    return AlbertaTransformation( elementInfo_.transformation( neighborCount_ ) );
+  }
+
+
+  template< class GridImp >
   inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
   AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
   {

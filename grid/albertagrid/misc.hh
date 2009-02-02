@@ -49,6 +49,16 @@ namespace Dune
     typedef ALBERTA REAL_D GlobalVector;
     typedef ALBERTA REAL_DD GlobalMatrix;
 
+#if DUNE_ALBERTA_VERSION >= 0x201
+    typedef ALBERTA AFF_TRAFO AffineTransformation;
+#else
+    struct AffineTransformation
+    {
+      GlobalMatrix M;
+      GlobalVector t;
+    };
+#endif
+
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
@@ -94,6 +104,52 @@ namespace Dune
     {
       return MEM_FREE( ptr, size, Data );
     }
+
+
+
+    // GlobalSpace
+    // -----------
+
+    class GlobalSpace
+    {
+      typedef GlobalSpace This;
+
+    public:
+      typedef GlobalMatrix Matrix;
+      typedef GlobalVector Vector;
+
+    private:
+      Matrix identityMatrix_;
+      Vector nullVector_;
+
+      GlobalSpace ()
+      {
+        for( int i = 0; i < dimWorld; ++i )
+        {
+          for( int j = 0; j < dimWorld; ++j )
+            identityMatrix_[ i ][ j ] = Real( 0 );
+          identityMatrix_[ i ][ i ] = Real( 1 );
+          nullVector_[ i ] = Real( 0 );
+        }
+      }
+
+      static This &instance ()
+      {
+        static This theInstance;
+        return theInstance;
+      }
+
+    public:
+      static const Matrix &identityMatrix ()
+      {
+        return instance().identityMatrix_;
+      }
+
+      static const Vector &nullVector ()
+      {
+        return instance().nullVector_;
+      }
+    };
 
 
 

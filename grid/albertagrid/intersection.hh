@@ -6,6 +6,7 @@
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
 
+#include <dune/grid/albertagrid/transformation.hh>
 #include <dune/grid/albertagrid/agmemory.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
@@ -110,6 +111,8 @@ namespace Dune
 
     //! return true if intersection is conform.
     bool conforming () const;
+
+    AlbertaTransformation transformation () const;
 
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.

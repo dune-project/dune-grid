@@ -415,13 +415,11 @@ namespace Dune
     inline void MacroData< dim >
     ::insertWallTrafo ( const GlobalMatrix &matrix, const GlobalVector &shift )
     {
-      typedef ALBERTA AFF_TRAFO AffineTrafo;
-
       int &count = data_->n_wall_trafos;
-      AffineTrafo *&array = data_->wall_trafos;
+      AffineTransformation *&array = data_->wall_trafos;
 
       // resize wall trafo array
-      array = memReAlloc< AffineTrafo >( array, count, count+1 );
+      array = memReAlloc< AffineTransformation >( array, count, count+1 );
       assert( data_->wall_trafos != NULL );
 
       // copy matrix and shift
@@ -436,13 +434,11 @@ namespace Dune
     ::insertWallTrafo ( const FieldMatrix< Real, dimWorld, dimWorld > &matrix,
                         const FieldVector< Real, dimWorld > &shift )
     {
-      typedef ALBERTA AFF_TRAFO AffineTrafo;
-
       int &count = data_->n_wall_trafos;
-      AffineTrafo *&array = data_->wall_trafos;
+      AffineTransformation *&array = data_->wall_trafos;
 
       // resize wall trafo array
-      array = memReAlloc< AffineTrafo >( array, count, count+1 );
+      array = memReAlloc< AffineTransformation >( array, count, count+1 );
       assert( data_->wall_trafos != NULL );
 
       // copy matrix and shift
