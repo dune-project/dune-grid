@@ -85,12 +85,120 @@ namespace Dune {
 
 #ifdef ModelP
     /* DDD Interfaces */
-    static DDD_IF &ElementIF() {
+
+    /*! Master->HGhost/VHGhost */
+    static DDD_IF &ElementIF()
+    {
       return UG_NAMESPACE::ElementIF;
     }
 
-    static DDD_IF &ElementVHIF() {
+    /*! ElementSymmIF: Master/HGhost/VHGhost */
+    static DDD_IF &ElementSymmIF()
+    {
+      return UG_NAMESPACE::ElementSymmIF;
+    }
+
+    /*! ElementVIF: Master->VGhost/VHGhost */
+    static DDD_IF &ElementVIF()
+    {
+      return UG_NAMESPACE::ElementVIF;
+    }
+
+    /*! ElementSymmVIF: Master/VGhost/VHGhost" */
+    static DDD_IF &ElementSymmVIF()
+    {
+      return UG_NAMESPACE::ElementSymmVIF;
+    }
+
+    /*! Master->VGhost/HGhost/VHGhost */
+    static DDD_IF &ElementVHIF()
+    {
       return UG_NAMESPACE::ElementVHIF;
+    }
+
+    /*! ElementSymmVHIF: Master/VGhost/HGhost/VHGhost */
+    static DDD_IF &ElementSymmVHIF()
+    {
+      return UG_NAMESPACE::ElementSymmVHIF;
+    }
+
+    /*! BorderNodeIF: Border->Master */
+    static DDD_IF &BorderNodeIF()
+    {
+      return UG_NAMESPACE::BorderNodeIF;
+    }
+
+    /*! BorderNodeSymmIF: Border/Master */
+    static DDD_IF &BorderNodeSymmIF()
+    {
+      return UG_NAMESPACE::BorderNodeSymmIF;
+    }
+
+    /*! OuterNodeIF: Master->HGhost/VGhost */
+    static DDD_IF &OuterNodeIF()
+    {
+      return UG_NAMESPACE::OuterNodeIF;
+    }
+
+
+    /*! NodeVIF: Master->VGhost/VHGhost */
+    static DDD_IF &NodeVIF()
+    {
+      return UG_NAMESPACE::NodeVIF;
+    }
+
+    /*! NodeIF: Master->VGhost/HGhost/VHGhost */
+    static DDD_IF &NodeIF()
+    {
+      return UG_NAMESPACE::NodeIF;
+    }
+
+    /*! NodeAllIF: All/All */
+    static DDD_IF &NodeAllIF()
+    {
+      return UG_NAMESPACE::NodeAllIF;
+    }
+
+    /*! BorderVectorIF: Border->Master */
+    static DDD_IF &BorderVectorIF()
+    {
+      return UG_NAMESPACE::BorderVectorIF;
+    }
+
+    /*! BorderVectorSymmIF: Master/Border */
+    static DDD_IF &BorderVectorSymmIF()
+    {
+      return UG_NAMESPACE::BorderVectorSymmIF;
+    }
+
+    /*! OuterVectorIF: Master->HGhost/VHGhost */
+    static DDD_IF &OuterVectorIF()
+    {
+      return UG_NAMESPACE::OuterVectorIF;
+    }
+
+    /*! OuterVectorSymmIF: Master/Border/HGhost/VHGhost */
+    static DDD_IF &OuterVectorSymmIF()
+    {
+      return UG_NAMESPACE::OuterVectorSymmIF;
+    }
+
+    /*! VectorVIF: Master->VGhost/VHGhost */
+    static DDD_IF &VectorVIF()
+    {
+      return UG_NAMESPACE::VectorVIF;
+    }
+
+    /*! VectorVAllIF: Master/Border/VGhost/VHGhost->Master/Border */
+    static DDD_IF &VectorVAllIF()
+    {
+      return UG_NAMESPACE::VectorVAllIF;
+    }
+
+    /*! VectorIF: Master->VGhost/VHGhost/HGhost */
+    static DDD_IF &VectorIF()
+    {
+      return UG_NAMESPACE::VectorIF;
     }
 #endif
 
@@ -663,7 +771,7 @@ namespace Dune {
     }
 
     static int ConfigureCommand(int argc, const char** argv) {
-      /** \todo Kann man ConfigureCommand so ‰ndern daﬂ man auch ohne den cast auskommt? */
+      /** \todo Can we remove the cast? */
       return UG_NAMESPACE ::ConfigureCommand(argc, (char**)argv);
     }
 
