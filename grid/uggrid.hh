@@ -514,7 +514,7 @@ namespace Dune {
         \return true if the grid has changed
      */
     bool loadBalance() {
-      return loadBalance(0,1,2,32,1);
+      return loadBalance(0,0,2,32,1);
     }
 
     /** \brief Re-balances the load each process has to handle for a parallel grid,
@@ -598,26 +598,50 @@ namespace Dune {
                       CommunicationDirection dir) const
     {
 #ifdef ModelP
-      // Currently only elementwise communication is supported
-      if (!dataHandle.contains(dim, 0))
-        DUNE_THROW(GridError, "Currently UG supports only element-wise communication!");
-      else if (!dataHandle.fixedsize(dim, 0))
-        DUNE_THROW(GridError, "Currently UG supports supports communication of fixed-size data types!");
-
-
-      typedef UGMessageBuffer<DataHandle,dim,0> UGMsgBuf;
-      UGMsgBuf::duneDataHandle_ = &dataHandle;
-
       // Translate the communication direction from Dune-Speak to UG-Speak
       DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
 
+      for (int curCodim = 0; curCodim <= dim; ++curCodim) {
+        if (!dataHandle.contains(dim, curCodim))
+          continue;
+        else if (!dataHandle.fixedsize(dim, curCodim))
+          DUNE_THROW(GridError, "Currently UG supports supports communication of fixed-size data types!");
 
-      // Trigger communication
-      DDD_IFOneway(UG_NS<dim>::ElementVHIF(),
-                   UGIfDir,
-                   sizeof(typename DataHandle::DataType),
-                   &UGMsgBuf::ugGather,
-                   &UGMsgBuf::ugScatter);
+        if (curCodim == 0 &&
+            iftype == InteriorBorder_All_Interface)
+        {
+          typedef UGMessageBuffer<DataHandle,dim,0> UGMsgBuf;
+          UGMsgBuf::duneDataHandle_ = &dataHandle;
+
+          DDD_IFOneway(UG_NS<dim>::ElementVHIF(),
+                       UGIfDir,
+                       sizeof(typename DataHandle::DataType),
+                       &UGMsgBuf::ugGather,
+                       &UGMsgBuf::ugScatter);
+        }
+        else if (curCodim == dim &&
+                 iftype == InteriorBorder_All_Interface)
+        {
+          typedef UGMessageBuffer<DataHandle,dim,dim> UGMsgBuf;
+          UGMsgBuf::duneDataHandle_ = &dataHandle;
+
+          DDD_IFOneway(UG_NS<dim>::NodeIF(),
+                       UGIfDir,
+                       sizeof(typename DataHandle::DataType),
+                       &UGMsgBuf::ugGather,
+                       &UGMsgBuf::ugScatter);
+        }
+        else
+        {
+          DUNE_THROW(GridError,
+                     "Communication for codim "
+                     << curCodim
+                     << " entities is not yet supported "
+                     << "for communication interfaces of type "
+                     << iftype
+                     << " by the DUNE UGGrid interface!");
+        }
+      }
 #endif
     }
 
