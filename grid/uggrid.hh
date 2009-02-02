@@ -102,12 +102,15 @@
 namespace Dune {
 
   // converts the UG speak message buffers to DUNE speak and vince-versa
-  template <class DataHandle, int GridDim>
+  template <class DataHandle, int GridDim, int codim>
   class UGMessageBuffer {
-
   protected:
-    typedef UGMessageBuffer<DataHandle, GridDim>  ThisType;
+    typedef UGMessageBuffer<DataHandle, GridDim, codim>  ThisType;
     typedef typename DataHandle::DataType DataType;
+
+    enum {
+      dim = GridDim
+    };
 
     UGMessageBuffer(DataType *ugData)
     {
@@ -128,31 +131,32 @@ namespace Dune {
     }
 
   protected:
-    friend class Dune::UGGrid<GridDim>;
+    friend class Dune::UGGrid<dim>;
 
     // called by DDD_IFOneway to serialize the data structure to
     // be send
     static int ugGather(DDD_OBJ obj, void* data)
     {
-      const int codim=0;
-      assert(codim == 0);
+      if (codim == 0) {
+        std::cout << "ugGather element index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Element*)obj) << "\n";
 
-      std::cout << "ugGather index: " << UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj) << "\n";
-      UGMakeableEntity<codim, GridDim, UGGrid<GridDim> >
-      e((typename UG_NS<GridDim>::Element*)obj);
-      /*            switch (codim) {
-                    case 0:
-                    index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj);
-                    break;
-                    case GridDim:
-                    index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Node*)obj);
-                    break;
-                    default:
-                    DUNE_THROW(GridError, "UGGrid::communicate not implemented for this codim");
-                    }
-       */
-      ThisType msgBuf(static_cast<DataType*>(data));
-      duneDataHandle_->gather(msgBuf, e);
+        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
+        ThisType msgBuf(static_cast<DataType*>(data));
+        duneDataHandle_->gather(msgBuf, e);
+      }
+      else if (codim == dim) {
+        std::cout << "ugGather node index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Node*)obj) << "\n";
+
+        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
+        ThisType msgBuf(static_cast<DataType*>(data));
+        duneDataHandle_->gather(msgBuf, e);
+      }
+      else {
+        DUNE_THROW(GridError,
+                   "Only node and element wise "
+                   "communication is currently "
+                   "supported by UGGrid");
+      }
 
       return 0;
     }
@@ -161,29 +165,27 @@ namespace Dune {
     // which has been received
     static int ugScatter(DDD_OBJ obj, void* data)
     {
-      const int codim=0;
-      assert(codim == 0);
 
-      int rank;
-      std::cout << "ugScatter element: " << UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj) << "\n";
-      /*
-         int index = 0;
-         switch (codim) {
-         case 0:
-         index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Element*)obj);
-         break;
-         case GridDim:
-         index = UG_NS<GridDim>::levelIndex((typename UG_NS<GridDim>::Node*)obj);
-         break;
-         default:
-         DUNE_THROW(GridError, "UGGrid::communicate only implemented for codim 0 and dim");
-         }
-       */
+      if (codim == 0) {
+        std::cout << "ugScatter element index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Element*)obj) << "\n";
 
-      UGMakeableEntity<codim, GridDim, UGGrid<GridDim> >
-      e((typename UG_NS<GridDim>::Element*)obj);
-      ThisType msgBuf(static_cast<DataType*>(data));
-      duneDataHandle_->scatter(msgBuf, e, 1);
+        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
+        ThisType msgBuf(static_cast<DataType*>(data));
+        duneDataHandle_->scatter(msgBuf, e, 1);
+      }
+      else if (codim == dim) {
+        std::cout << "ugScatter node index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Node*)obj) << "\n";
+
+        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
+        ThisType msgBuf(static_cast<DataType*>(data));
+        duneDataHandle_->scatter(msgBuf, e, 1);
+      }
+      else {
+        DUNE_THROW(GridError,
+                   "Only node and element wise "
+                   "communication is currently "
+                   "supported by UGGrid");
+      }
 
       return 0;
     }
@@ -194,8 +196,8 @@ namespace Dune {
 
 }   // end namespace Dune
 
-template <class DataHandle, int GridDim>
-DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim>::duneDataHandle_ = 0;
+template <class DataHandle, int GridDim, int codim>
+DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = 0;
 #endif
 
 namespace Dune {
