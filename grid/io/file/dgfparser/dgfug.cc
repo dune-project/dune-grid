@@ -23,8 +23,8 @@ namespace Dune {
       }
 
       mg.setOrientation(0,1);
-      UGGrid<dim> *grid = new UGGrid<dim>;
-      grid->createBegin();
+
+      GridFactory<UGGrid<dim> > factory;
 
       for (int n=0; n<mg.nofvtx; n++)
       {
@@ -32,7 +32,7 @@ namespace Dune {
         for (int j=0; j<dim; j++)
           v[j] = mg.vtx[n][j];
 
-        grid->insertVertex(v);
+        factory.insertVertex(v);
       }
 
       // eval 2^dim
@@ -49,14 +49,15 @@ namespace Dune {
 
         // simplices
         if ((int) el.size()== mg.dimw+1)
-          grid->insertElement(GeometryType(GeometryType::simplex,dim),el);
+          factory.insertElement(GeometryType(GeometryType::simplex,dim),el);
         // cubes
         else if (el.size() == two_power_dim)
-          grid->insertElement(GeometryType(GeometryType::cube,dim),el);
+          factory.insertElement(GeometryType(GeometryType::cube,dim),el);
         else
           DUNE_THROW(DGFException, "Wrong number of vertices for element");
       }
-      grid->createEnd();
+
+      UGGrid<dim> *resultGrid = factory.createGrid();
 
       // get grid parameter block
       dgf :: GridParameterBlock gridParam(gridin, false);
@@ -64,13 +65,13 @@ namespace Dune {
       // set closure type to none if parameter say so
       if( gridParam.noClosure() )
       {
-        grid->setClosureType(UGGrid<dim> :: NONE);
+        resultGrid->setClosureType(UGGrid<dim> :: NONE);
       }
       if ( !gridParam.noCopy() )
       {
-        grid->setRefinementType(UGGrid<dim>::COPY);
+        resultGrid->setRefinementType(UGGrid<dim>::COPY);
       }
-      return grid;
+      return resultGrid;
     }
     DUNE_THROW(DGFException,"Macrofile " << filename << " is not a valid DGF file\n"
                                          << "No alternative File-Format implemented!");
