@@ -557,7 +557,10 @@ namespace Dune {
     void postAdapt ( );
 
     /** \brief  @copydoc Dune::Grid::adapt() */
-    bool adapt ( );
+    bool adapt ();
+
+    template< class GridImp, class DataHandle >
+    bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
     /** \brief  @copydoc Dune::Grid::adapt()
         \param dm DofManager for dune-fem package for using callback
@@ -566,7 +569,8 @@ namespace Dune {
         which is a Model of the dune-fem RestrictProlongInterface class.
      */
     template <class DofManagerType, class RestrictProlongOperatorType>
-    bool adapt (DofManagerType &dm, RestrictProlongOperatorType &rp, bool verbose=false );
+    bool DUNE_DEPRECATED
+    adapt (DofManagerType &dm, RestrictProlongOperatorType &rp, bool verbose=false );
 
     //! uses the interface, mark on entity and refineLocal
     bool globalRefine(int refCount);

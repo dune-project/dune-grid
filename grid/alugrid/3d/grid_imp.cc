@@ -724,18 +724,19 @@ namespace Dune {
     return ref;
   }
 
+
   // adapt grid
   // --adapt
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  template <class DofManagerType, class RestrictProlongOperatorType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::
-  adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  template< class GridImp, class DataHandle >
+  inline bool ALU3dGrid< dim, dimworld, elType >
+  ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
-    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
+    typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
 
-    typedef typename EntityObject :: ImplementationType EntityImp;
-    EntityObject father  ( EntityImp(*this, this->maxLevel()) );
-    EntityObject son     ( EntityImp(*this, this->maxLevel()) );
+    typedef typename EntityObject::ImplementationType EntityImp;
+    EntityObject father( EntityImp( *this, this->maxLevel() ) );
+    EntityObject son( EntityImp( *this, this->maxLevel() ) );
 
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
@@ -743,41 +744,35 @@ namespace Dune {
     // guess how many new elements we get
     int newElements = std::max( actChunk , defaultChunk );
 
-    // reserve memory
-    dm.reserveMemory( newElements );
-
     // true if at least one element was marked for coarsening
     bool mightCoarse = preAdapt();
+    // reserve memory
+    handle.preAdapt( newElements );
 
     bool refined = false ;
     if(globalIdSet_)
     {
       // if global id set exists then include into
       // prolongation process
-      ALU3DSPACE AdaptRestrictProlongGlSet<ALU3dGrid<dim, dimworld, elType>,
-          RestrictProlongOperatorType, GlobalIdSetImp  >
+      ALU3DSPACE AdaptRestrictProlongGlSet< MyType, AdaptDataHandle, GlobalIdSetImp >
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         rpo,
+         handle,
          *globalIdSet_);
 
       refined = myGrid().duneAdapt(rp); // adapt grid
     }
     else
     {
-      ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>,
-          RestrictProlongOperatorType>
+      ALU3DSPACE AdaptRestrictProlongImpl< MyType, AdaptDataHandle >
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         rpo);
+         handle);
 
       refined = myGrid().duneAdapt(rp); // adapt grid
     }
-
-    // if new maxlevel was claculated
-    assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
 
     if(refined || mightCoarse)
     {
@@ -790,11 +785,27 @@ namespace Dune {
     }
 
     // check whether we have balance
-    dm.compress();
+    handle.postAdapt();
 
     // here postAdapt is not called, because
     // reset of refinedTag is done in preCoarsening and postRefinement
     // methods of datahandle (see datahandle.hh)
+
+    return refined;
+  }
+
+  // adapt grid
+  // --adapt
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  template <class DofManagerType, class RestrictProlongOperatorType>
+  inline bool ALU3dGrid<dim, dimworld, elType>::
+  adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
+  {
+    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
+
+    typedef RestrictProlongWrapper< MyType, DofManagerType, RestrictProlongOperatorType > Wrapper;
+    Wrapper rpOpWrapper( dm, rpo );
+    const bool refined = adapt( rpOpWrapper );
 
     assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
     return refined;

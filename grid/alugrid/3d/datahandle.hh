@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/adaptcallback.hh>
 
 //- local includes
 #include "alu3dinclude.hh"
@@ -571,8 +572,9 @@ namespace ALUGridSpace {
   //  --AdaptRestrictProlong
   //
   /////////////////////////////////////////////////////////////////
-  template <class GridType , class RestrictProlongOperatorType >
-  class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
+  template< class GridType, class AdaptDataHandle >
+  class AdaptRestrictProlongImpl
+    : public AdaptRestrictProlongType
   {
     GridType & grid_;
     typedef typename GridType::template Codim<0>::Entity EntityType;
@@ -586,15 +588,16 @@ namespace ALUGridSpace {
     RealEntityType & realSon_;
 
     //DofManagerType & dm_;
-    RestrictProlongOperatorType & rp_;
+    AdaptDataHandle &rp_;
 
     typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
 
   public:
     //! Constructor
-    AdaptRestrictProlongImpl (GridType & grid,
-                              MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs
-                              , RestrictProlongOperatorType & rp)
+    AdaptRestrictProlongImpl ( GridType &grid,
+                               MakeableEntityType &f, RealEntityType &rf,
+                               MakeableEntityType &s, RealEntityType &rs,
+                               AdaptDataHandle &rp )
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
@@ -609,6 +612,7 @@ namespace ALUGridSpace {
     //! restrict data , elem is always the father
     int preCoarsening ( HElementType & elem )
     {
+#if 0
       // set element and then start
       HElementType * son = elem.down();
 
@@ -625,6 +629,10 @@ namespace ALUGridSpace {
         rp_.restrictLocal(reFather_,reSon_,false);
         son = son->next();
       }
+#endif
+
+      realFather_.setElement( elem );
+      rp_.preCoarsening( reFather_ );
 
       // reset refinement marker
       elem.resetRefinedTag();
@@ -634,6 +642,7 @@ namespace ALUGridSpace {
     //! prolong data, elem is the father
     int postRefinement ( HElementType & elem )
     {
+#if 0
       // set element and then start
       HElementType * son = elem.down();
       assert( son );
@@ -659,6 +668,16 @@ namespace ALUGridSpace {
 
         son = son->next();
       }
+#endif
+
+      realFather_.setElement( elem );
+      rp_.postRefinement( reFather_ );
+
+      // resert refinement markers
+      elem.resetRefinedTag();
+      for( HElementType *son = elem.down(); son != 0; son = son->next() )
+        son->resetRefinedTag();
+
       return 0;
     }
 
@@ -677,12 +696,13 @@ namespace ALUGridSpace {
     }
   };
 
-  template <class GridType , class RestrictProlongOperatorType ,
-      class GlobalIdSetImp >
+
+
+  template< class GridType, class AdaptDataHandle, class GlobalIdSetImp >
   class AdaptRestrictProlongGlSet
-    : public AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType>
+    : public AdaptRestrictProlongImpl< GridType, AdaptDataHandle >
   {
-    typedef AdaptRestrictProlongImpl<GridType,RestrictProlongOperatorType> BaseType;
+    typedef AdaptRestrictProlongImpl< GridType, AdaptDataHandle > BaseType;
     GlobalIdSetImp & set_;
     typedef typename GridType::template Codim<0>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -691,12 +711,13 @@ namespace ALUGridSpace {
 
   public:
     //! Constructor
-    AdaptRestrictProlongGlSet(GridType & grid,
-                              MakeableEntityType & f, RealEntityType & rf, MakeableEntityType & s, RealEntityType & rs
-                              , RestrictProlongOperatorType & rp
-                              , GlobalIdSetImp & set )
-      : BaseType(grid,f,rf,s,rs,rp)
-        , set_(set)
+    AdaptRestrictProlongGlSet ( GridType &grid,
+                                MakeableEntityType &f, RealEntityType &rf,
+                                MakeableEntityType &s, RealEntityType &rs,
+                                AdaptDataHandle &rp,
+                                GlobalIdSetImp & set )
+      : BaseType( grid, f, rf, s, rs, rp ),
+        set_( set )
     {}
 
     virtual ~AdaptRestrictProlongGlSet () {}
@@ -720,7 +741,6 @@ namespace ALUGridSpace {
     {
       return 0;
     }
-
   };
 
   // this class is for counting the tree depth of the
