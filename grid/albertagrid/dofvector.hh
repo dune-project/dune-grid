@@ -259,7 +259,7 @@ namespace Dune
       }
 
       template< class Functor >
-      void forEach ( Functor &functor )
+      void forEach ( Functor &functor ) const
       {
         Dof *array = (Dof *)(*this);
         FOR_ALL_DOFS( dofSpace()->admin, functor( array[ dof ] ) );
@@ -356,17 +356,6 @@ namespace Dune
       int result = std::numeric_limits< int >::max();
       FOR_ALL_DOFS( dofVector.dofSpace()->admin,
                     result = std::min( result, array[ dof ] ) );
-      return result;
-    }
-
-
-    inline int maxAbs ( const DofVectorPointer< int > &dofVector )
-    {
-      assert( !dofVector == false );
-      int *array = (int *)dofVector;
-      int result = 0;
-      FOR_ALL_DOFS( dofVector.dofSpace()->admin,
-                    result = std::max( result, std::abs( array[ dof ] ) ) );
       return result;
     }
 

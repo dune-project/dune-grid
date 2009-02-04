@@ -23,13 +23,22 @@ namespace Dune
   {
     typedef AlbertaGridLevelProvider< dim > This;
 
-    typedef Alberta::DofVectorPointer< int > DofVectorPointer;
+    typedef unsigned char Level;
+
+    typedef Alberta::DofVectorPointer< Level > DofVectorPointer;
     typedef Alberta::DofAccess< dim, 0 > DofAccess;
 
     typedef Alberta::FillFlags< dim > FillFlags;
 
+    static const Level isNewFlag = (1 << 7);
+    static const Level levelMask = (1 << 7) - 1;
+
     struct SetLocal;
     struct CalcMaxLevel;
+
+    template< Level flags >
+    struct ClearFlags;
+
     struct Interpolation;
 
   public:
@@ -42,21 +51,21 @@ namespace Dune
     DofAccess dofAccess_;
 
   public:
-    int operator() ( const Alberta::Element *element ) const
+    Level operator() ( const Alberta::Element *element ) const
     {
-      const int *array = (int *)level_;
-      return std::abs( array[ dofAccess_( element, 0 ) ] );
+      const Level *array = (Level *)level_;
+      return array[ dofAccess_( element, 0 ) ] & levelMask;
     }
 
-    int operator() ( const ElementInfo &elementInfo ) const
+    Level operator() ( const ElementInfo &elementInfo ) const
     {
       return (*this)( elementInfo.el() );
     }
 
     bool isNew ( const Alberta::Element *element ) const
     {
-      const int *array = (int *)level_;
-      return (array[ dofAccess_( element, 0 ) ] < 0);
+      const Level *array = (Level *)level_;
+      return ((array[ dofAccess_( element, 0 ) ] & isNewFlag) != 0);
     }
 
     bool isNew ( const ElementInfo &elementInfo ) const
@@ -64,15 +73,16 @@ namespace Dune
       return isNew( elementInfo.el() );
     }
 
-    int maxLevel () const
+    Level maxLevel () const
     {
-      const int maxLevel = Alberta::maxAbs( level_ );
+      CalcMaxLevel calcFromCache;
+      level_.forEach( calcFromCache );
 #ifndef NDEBUG
-      CalcMaxLevel calcMaxLevel;
-      mesh().leafTraverse( calcMaxLevel, FillFlags::nothing );
-      assert( maxLevel == calcMaxLevel.maxLevel() );
+      CalcMaxLevel calcFromGrid;
+      mesh().leafTraverse( calcFromGrid, FillFlags::nothing );
+      assert( calcFromCache.maxLevel() == calcFromGrid.maxLevel() );
 #endif
-      return maxLevel;
+      return calcFromCache.maxLevel();;
     }
 
     MeshPointer mesh () const
@@ -82,7 +92,8 @@ namespace Dune
 
     void markAllOld ()
     {
-      Alberta::abs( level_ );
+      ClearFlags< isNewFlag > clearIsNew;
+      level_.forEach( clearIsNew );
     }
 
     void create ( const DofNumbering &dofNumbering )
@@ -124,7 +135,7 @@ namespace Dune
 
     void operator() ( const Alberta::ElementInfo< dim > &elementInfo ) const
     {
-      int *const array = (int *)level_;
+      Level *const array = (Level *)level_;
       array[ dofAccess_( elementInfo, 0 ) ] = elementInfo.level();
     }
   };
@@ -137,21 +148,41 @@ namespace Dune
   template< int dim >
   class AlbertaGridLevelProvider< dim >::CalcMaxLevel
   {
-    int maxLevel_;
+    Level maxLevel_;
 
   public:
     CalcMaxLevel ()
       : maxLevel_( 0 )
     {}
 
-    void operator() ( const Alberta::ElementInfo< dim > &elementInfo )
+    void operator() ( const Level &dof )
     {
-      maxLevel_ = std::max( maxLevel_, elementInfo.level() );
+      maxLevel_ = std::max( maxLevel_, Level( dof & levelMask ) );
     }
 
-    int maxLevel () const
+    void operator() ( const Alberta::ElementInfo< dim > &elementInfo )
+    {
+      maxLevel_ = std::max( maxLevel_, Level( elementInfo.level() ) );
+    }
+
+    Level maxLevel () const
     {
       return maxLevel_;
+    }
+  };
+
+
+
+  // AlbertaGridLevelProvider::ClearFlags
+  // ------------------------------------
+
+  template< int dim >
+  template< typename AlbertaGridLevelProvider< dim >::Level flags >
+  struct AlbertaGridLevelProvider< dim >::ClearFlags
+  {
+    void operator() ( Level &dof ) const
+    {
+      dof &= ~flags;
     }
   };
 
@@ -171,16 +202,17 @@ namespace Dune
                                     const Patch &patch )
     {
       const DofAccess dofAccess( dofVector.dofSpace() );
-      int *array = (int *)dofVector;
+      Level *array = (Level *)dofVector;
 
       for( int i = 0; i < patch.count(); ++i )
       {
         const Alberta::Element *const father = patch[ i ];
-        const int fatherLevel = std::abs( array[ dofAccess( father, 0 ) ] );
+        assert( (array[ dofAccess( father, 0 ) ] & levelMask) < levelMask );
+        const Level childLevel = (array[ dofAccess( father, 0 ) ] + 1) | isNewFlag;
         for( int i = 0; i < 2; ++i )
         {
           const Alberta::Element *child = father->child[ i ];
-          array[ dofAccess( child, 0 ) ] = -(fatherLevel+1);
+          array[ dofAccess( child, 0 ) ] = childLevel;
         }
       }
     }
