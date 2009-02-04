@@ -382,7 +382,8 @@ namespace Dune
 
     //! adapt method with DofManager
     template< class DofManager, class RestrictProlongOperator >
-    bool adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false ) DUNE_DEPRECATED;
+    bool DUNE_DEPRECATED
+    adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
 
     //! returns true, if a least one element is marked for coarsening
     bool preAdapt ();
