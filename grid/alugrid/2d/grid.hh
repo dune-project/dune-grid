@@ -422,11 +422,15 @@ namespace Dune {
     /**! refine all positive marked leaf entities,
        return true if a least one entity was refined
      */
-    bool adapt ( );
+    bool adapt ();
+
+    template< class GridImp, class DataHandle >
+    bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
     //! adapt with DofManager
     template <class DofManagerType, class RestrictProlongOperatorType>
-    bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
+    bool DUNE_DEPRECATED
+    adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
 
     // refine grid
     bool refineGrid();

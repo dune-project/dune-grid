@@ -461,17 +461,18 @@ namespace Dune {
 #endif
   }
 
-  // --adapt
-  template <int dim, int dimworld>
-  template <class DofManagerType, class RestrictProlongOperatorType>
-  inline bool ALU2dGrid<dim, dimworld>::
-  adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
-  {
-    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
 
-    typedef typename EntityObject :: ImplementationType EntityImp;
-    EntityObject father  ( EntityImp(*this, this->maxLevel()) );
-    EntityObject son     ( EntityImp(*this, this->maxLevel()) );
+  // --adapt
+  template< int dim, int dimworld >
+  template< class GridImp, class DataHandle >
+  inline bool ALU2dGrid< dim, dimworld >
+  ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
+  {
+    typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
+
+    typedef typename EntityObject::ImplementationType EntityImp;
+    EntityObject father( EntityImp(*this, this->maxLevel()) );
+    EntityObject son( EntityImp(*this, this->maxLevel()) );
 
     int defaultChunk = newElementsChunk_;
     int actChunk     = refineEstimate_ * refineMarked_;
@@ -480,7 +481,7 @@ namespace Dune {
     int newElements = std::max( actChunk , defaultChunk );
 
     // reserve memory
-    dm.reserveMemory( newElements );
+    handle.preAdapt( newElements );
 
 #if ALU2DGRID_PARALLEL
     // make marking of ghost elements
@@ -488,30 +489,44 @@ namespace Dune {
     rankManager_.notifyMarking();
 #endif
 
-    bool ref = false ;
+    bool ref = false;
     {
-      ALU2DSPACE AdaptRestrictProlong2dImpl<ALU2dGrid<dim, dimworld>, RestrictProlongOperatorType>
+      ALU2DSPACE AdaptRestrictProlong2dImpl< ThisType, AdaptDataHandle >
       rp(*this,
          father,this->getRealImplementation(father),
          son,   this->getRealImplementation(son),
-         rpo);
+         handle );
 
       ref = myGrid().duneAdapt(rp); // adapt grid
       //if(rp.maxLevel() >= 0) maxlevel_ = rp.maxLevel();
     }
-    // if new maxlevel was claculated
-    assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
 
     if(ref) {
       updateStatus();
     }
 
     // check whether we have balance
-    dm.compress();
+    handle.postAdapt();
 
     postAdapt();
-    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
     return ref;
+  }
+
+
+  // --adapt
+  template <int dim, int dimworld>
+  template <class DofManagerType, class RestrictProlongOperatorType>
+  inline bool ALU2dGrid<dim, dimworld>::
+  adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
+  {
+    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
+
+    typedef RestrictProlongWrapper< ThisType, DofManagerType, RestrictProlongOperatorType > Wrapper;
+    Wrapper rpOpWrapper( dm, rpo );
+    const bool refined = adapt( rpOpWrapper );
+
+    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
+    return refined;
   }
 
   //! refine grid

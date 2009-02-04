@@ -6,6 +6,8 @@
 //- system includes
 #include <iostream>
 
+#include <dune/grid/common/adaptcallback.hh>
+
 //- local includes
 #include "alu2dinclude.hh"
 
@@ -22,8 +24,9 @@ namespace ALU2DSPACENAME {
   //  --AdaptRestrictProlong
   //
   /////////////////////////////////////////////////////////////////
-  template <class GridType , class RestrictProlongOperatorType >
-  class AdaptRestrictProlong2dImpl : public AdaptRestrictProlong2dType
+  template< class GridType, class AdaptDataHandle >
+  class AdaptRestrictProlong2dImpl
+    : public AdaptRestrictProlong2dType
   {
     GridType & grid_;
     typedef Dune :: MakeableInterfaceObject<typename GridType::template Codim<0>::Entity> EntityType;
@@ -35,17 +38,17 @@ namespace ALU2DSPACENAME {
     RealEntityType & realFather_;
     RealEntityType & realSon_;
 
-    //DofManagerType & dm_;
-    RestrictProlongOperatorType & rp_;
+    AdaptDataHandle &rp_;
 
     int maxlevel_;
 
 
   public:
     //! Constructor
-    AdaptRestrictProlong2dImpl (GridType & grid,
-                                EntityType & f, RealEntityType & rf, EntityType & s, RealEntityType & rs
-                                , RestrictProlongOperatorType & rp)
+    AdaptRestrictProlong2dImpl ( GridType &grid,
+                                 EntityType &f, RealEntityType &rf,
+                                 EntityType &s, RealEntityType &rs,
+                                 AdaptDataHandle &rp )
       : grid_(grid)
         , reFather_(f)
         , reSon_(s)
@@ -61,6 +64,7 @@ namespace ALU2DSPACENAME {
     //! restrict data , elem is always the father
     int preCoarsening ( HElementType & elem )
     {
+#if 0
       // set element and then start
       HElementType * son = elem.down();
       if(elem.level() > maxlevel_) maxlevel_ = elem.level();
@@ -79,12 +83,20 @@ namespace ALU2DSPACENAME {
         rp_.restrictLocal(reFather_,reSon_,false);
         son = son->next();
       }
+#endif
+
+      maxlevel_ = std::max( maxlevel_, elem.level() );
+      //elem.resetRefinedTag();
+      realFather_.setElement( elem );
+      rp_.preCoarsening( reFather_ );
+
       return 0;
     }
 
     //! prolong data, elem is the father
     int postRefinement ( HElementType & elem )
     {
+#if 0
       // set element and then start
       HElementType * son = elem.down();
       assert( son );
@@ -107,6 +119,13 @@ namespace ALU2DSPACENAME {
 
         son = son->next();
       }
+#endif
+
+      maxlevel_ = std::max( maxlevel_, elem.level()+1 );
+      //elem.resetRefinedTag();
+      realFather_.setElement( elem );
+      rp_.postRefinement( reFather_ );
+
       return 0;
     }
 
