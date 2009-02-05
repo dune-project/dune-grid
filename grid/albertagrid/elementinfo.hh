@@ -93,6 +93,8 @@ namespace Dune
       void setMark ( int refCount ) const;
 
       ElementInfo leafNeighbor ( int face ) const;
+      int twistInSelf ( int face ) const;
+      int twistInNeighbor ( int face ) const;
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
       AffineTransformation *transformation ( int face ) const;
@@ -106,6 +108,8 @@ namespace Dune
       template< class Functor >
       void leafTraverse ( Functor &functor ) const;
 
+      const Element *element () const;
+      const Element *neighbor ( int face ) const;
       Element *el () const;
       ALBERTA EL_INFO &elInfo () const;
 
@@ -378,6 +382,21 @@ namespace Dune
     }
 
 
+    template< int dim >
+    inline int ElementInfo< dim >::twistInSelf ( int face ) const
+    {
+      return Twist< dim >::faceTwist( element(), face );
+    }
+
+
+    template< int dim >
+    inline int ElementInfo< dim >::twistInNeighbor ( const int face ) const
+    {
+      assert( neighbor( face ) != NULL );
+      return Twist< dim >::faceTwist( neighbor( face ), elInfo().opp_vertex[ face ] );
+    }
+
+
 #if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
@@ -545,6 +564,22 @@ namespace Dune
       }
       else
         functor( *this );
+    }
+
+
+    template< int dim >
+    inline const Element *ElementInfo< dim >::element () const
+    {
+      return elInfo().el;
+    }
+
+
+    template< int dim >
+    inline const Element *ElementInfo< dim >::neighbor ( int face ) const
+    {
+      assert( (face >= 0) && (face < numFaces) );
+      assert( (elInfo().fill_flag & FillFlags::neighbor) != 0 );
+      return elInfo().neigh[ face ];
     }
 
 
