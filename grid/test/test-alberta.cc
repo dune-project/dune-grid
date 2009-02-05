@@ -27,7 +27,7 @@
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
 #include "checkiterators.cc"
-
+#include "checktwists.cc"
 
 
 template <class GridType >
@@ -37,11 +37,12 @@ void markOne ( GridType & grid , int num , int ref )
 
   int count = 0;
 
-  LeafIterator endit = grid.template leafend  <0> ();
-  for(LeafIterator it = grid.template leafbegin<0> (); it != endit ; ++it )
+  const LeafIterator end = grid.template leafend< 0 >();
+  for( LeafIterator it = grid.template leafbegin< 0 >(); it != end ; ++it )
   {
-    if(num == count) grid.mark( ref, *it );
-    count++;
+    if( num == count )
+      grid.mark( ref, *it );
+    ++count;
   }
 
   grid.preAdapt();
@@ -98,6 +99,7 @@ try {
     gridcheck(grid); // check macro grid
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
+    checkTwists( grid.leafView(), NoMapTwist() );
     for(int i=0; i<1; i++)
     {
       std::cout << ">>> Refining grid and checking again..." << std::endl;
@@ -105,6 +107,7 @@ try {
       gridcheck(grid);
       checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
+      checkTwists( grid.leafView(), NoMapTwist() );
     }
 
     // check dgf grid width half refinement
@@ -115,6 +118,7 @@ try {
     gridcheck(grid);
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
+    checkTwists( grid.leafView(), NoMapTwist() );
 
     for(int i=0; i<2; i++)
     {
@@ -126,6 +130,7 @@ try {
 
     checkGeometryInFather(grid);
     checkIntersectionIterator(grid,true);
+    checkTwists( grid.leafView(), NoMapTwist() );
 
     checkCommunication(grid, -1, Dune::dvverb);
   };

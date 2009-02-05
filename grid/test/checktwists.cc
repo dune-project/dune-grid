@@ -1,0 +1,98 @@
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=4 sw=2 sts=2:
+int applyTwist ( const int twist, const int i, const int numCorners )
+{
+  return (twist < 0 ? (2*numCorners + 1 - i + twist) : i + twist) % numCorners;
+}
+
+int inverseTwist ( const int twist, const int numCorners )
+{
+  return (twist <= 0 ? twist : numCorners - twist);
+}
+
+
+struct NoMapTwist
+{
+  int operator() ( const int twist ) const
+  {
+    return twist;
+  }
+};
+
+
+template< class Intersection, class MapTwist >
+int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist &mapTwist )
+{
+  typedef typename Intersection::ctype ctype;
+
+  const int dimension = Intersection::dimension;
+
+  typedef typename Intersection::Entity::Geometry Geometry;
+
+  typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
+  typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
+
+  typedef FieldVector< typename Geometry::ctype, Geometry::coorddimension >
+  WorldVector;
+
+  if( !intersection.neighbor() || !intersection.conforming() )
+    return 0;
+
+  int errors = 0;
+
+  const int tIn = mapTwist( intersection.twistInSelf() );
+  const int tOut = mapTwist( intersection.twistInNeighbor() );
+
+  const int nIn = intersection.numberInSelf();
+  const int nOut = intersection.numberInNeighbor();
+
+  const Geometry &geoIn = intersection.inside()->geometry();
+  const Geometry &geoOut = intersection.outside()->geometry();
+
+  const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
+  const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );
+
+  const int numCorners = refIn.size( nIn, 1, dimension );
+  assert( refOut.size( nOut, 1, dimension ) == numCorners );
+  std::cout << "Inside Twist: " << tIn << ", outside twist: " << tOut << std::endl;
+  for( int i = 0; i < numCorners; ++i )
+  {
+    const int iIn = applyTwist( tIn, i, numCorners );
+    const int iOut = applyTwist( tOut, i, numCorners );
+
+    WorldVector xIn = geoIn.corner( refIn.subEntity( nIn, 1, iIn, dimension ) );
+    WorldVector xOut = geoOut.corner( refOut.subEntity( nOut, 1, iOut, dimension ) );
+
+#if 0
+    if( (xIn - xOut).two_norm() < 1e-12 )
+      continue;
+#endif
+
+    std::cout << "Error: corner( " << iIn << " ) = " << xIn
+              << " != " << xOut << " = corner( " << iOut << " )."
+              << std::endl;
+    ++errors;
+  }
+  return errors;
+}
+
+
+template< class GridView, class MapTwist >
+void checkTwists ( const GridView &gridView, const MapTwist &mapTwist )
+{
+  typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+  int errors = 0;
+
+  const Iterator end = gridView.template end< 0 >();
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+  {
+    const IntersectionIterator iend = gridView.iend( *it );
+    for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
+      errors += checkTwistOnIntersection( gridView.grid().getRealIntersection( *iit ), mapTwist );
+  }
+
+  if( errors > 0 )
+    std::cerr << "Error: Intersection twists contain errors." << std::endl;
+}
