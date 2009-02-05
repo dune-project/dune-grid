@@ -193,9 +193,6 @@ namespace Dune
 
     //! ElementInfo to store the information of the neighbor if needed
     mutable ElementInfo neighborInfo_;
-
-    // twist seen from the neighbor
-    mutable int twist_;
   };
 
 }

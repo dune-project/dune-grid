@@ -345,8 +345,7 @@ namespace Dune
   inline int
   AlbertaGridIntersectionIterator< GridImp >::twistInSelf () const
   {
-    // always 0 for indside
-    return 0;
+    return elementInfo_.twistInSelf( neighborCount_ );
   }
 
 
@@ -354,7 +353,7 @@ namespace Dune
   inline int
   AlbertaGridIntersectionIterator< GridImp >::twistInNeighbor () const
   {
-    return twist_;
+    return elementInfo_.twistInNeighbor( neighborCount_ );
   }
 
 
@@ -548,8 +547,8 @@ namespace Dune
   #endif
 
     // setup coordinates of neighbour elInfo
-    twist_ = SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
-             setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
+    SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
+    setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
   }
 #endif // #if !TRAVERSE_LEAFNEIGHBOR
 
