@@ -54,7 +54,6 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   const int numCorners = refIn.size( nIn, 1, dimension );
   assert( refOut.size( nOut, 1, dimension ) == numCorners );
-  std::cout << "Inside Twist: " << tIn << ", outside twist: " << tOut << std::endl;
   for( int i = 0; i < numCorners; ++i )
   {
     const int iIn = applyTwist( tIn, i, numCorners );
@@ -63,10 +62,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     WorldVector xIn = geoIn.corner( refIn.subEntity( nIn, 1, iIn, dimension ) );
     WorldVector xOut = geoOut.corner( refOut.subEntity( nOut, 1, iOut, dimension ) );
 
-#if 0
     if( (xIn - xOut).two_norm() < 1e-12 )
       continue;
-#endif
 
     std::cout << "Error: corner( " << iIn << " ) = " << xIn
               << " != " << xOut << " = corner( " << iOut << " )."
