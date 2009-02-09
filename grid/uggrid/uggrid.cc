@@ -445,7 +445,7 @@ bool Dune::UGGrid < dim >::adapt()
     DUNE_THROW(GridError, "UG::adapt() returned with error code " << rv);
 
   // Renumber everything
-  setIndices();
+  setIndices(false, NULL);
 
   someElementHasBeenMarkedForRefinement_ = false;
 
@@ -618,11 +618,7 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
     DUNE_THROW(GridError, "UG" << dim << "d::LBCommand returned error code " << errCode);
 
   // Renumber everything.
-  // First the level 0 index set ...
-  levelIndexSets_[0]->update(*this, 0);
-
-  // ... then the rest
-  setIndices();
+  setIndices(true, NULL);
 
   return true;
 }
@@ -920,7 +916,7 @@ void Dune::UGGrid < dim >::createEnd()
   multigrid_->MarkKey = 0;
 
   // Set the local indices
-  setIndices(&nodePermutation);
+  setIndices(true, &nodePermutation);
 
   // Clear refinement flags
   typename Traits::template Codim<0>::LevelIterator eIt    = lbegin<0>(0);
@@ -1205,7 +1201,8 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setIndices(std::vector<unsigned int>* nodePermutation)
+void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
+                                      std::vector<unsigned int>* nodePermutation)
 {
   /** \todo The code in the following if-clause is a workaround to fix FlySpray issue 170
       (inconsistent codim 1 subIndices).  UGGrid uses UG's SideVector data structure to
@@ -1262,7 +1259,7 @@ void Dune::UGGrid < dim >::setIndices(std::vector<unsigned int>* nodePermutation
 
   // Update the zero level LevelIndexSet.  It is updated only once, at the time
   // of creation of the coarse grid.  After that it is not touched anymore.
-  if (nodePermutation != NULL)
+  if (setLevelZero)
     levelIndexSets_[0]->update(*this, 0, nodePermutation);
 
   // Update the remaining level index sets

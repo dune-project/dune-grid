@@ -734,7 +734,7 @@ namespace Dune {
       if (Collapse(multigrid_))
         DUNE_THROW(GridError, "UG" << dim << "d::Collapse() returned error code!");
 
-      setIndices();
+      setIndices(true, NULL);
     }
 
     /** \brief Sets a vertex to a new position
@@ -769,8 +769,13 @@ namespace Dune {
 
     CollectiveCommunication<UGGrid> ccobj;
 
-    // Recomputes entity indices after the grid was changed
-    void setIndices(std::vector<unsigned int>* nodePermutation=0);
+    /** \brief Recomputes entity indices after the grid was changed
+        \param setLevelZero If this is false, level indices of the level 0 are not touched
+        \param nodePermutation Permutation array for the vertex level 0 indices.  If this is NULL,
+        the identity is used.
+     */
+    void setIndices(bool setLevelZero,
+                    std::vector<unsigned int>* nodePermutation);
 
     // Each UGGrid object has a unique name to identify it in the
     // UG environment structure
