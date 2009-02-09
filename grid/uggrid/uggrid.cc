@@ -1269,10 +1269,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
   leafIndexSet_.update(nodePermutation);
 
-  localIdSet_.update();
-
-  globalIdSet_.update();
-
+  // id sets don't need updating
 }
 
 // /////////////////////////////////////////////////////////////////////////////////

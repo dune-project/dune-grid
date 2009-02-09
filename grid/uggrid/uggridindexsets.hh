@@ -502,9 +502,6 @@ namespace Dune {
 
     //private:
 
-    /** \todo Should be private */
-    void update() {}
-
     const GridImp& grid_;
   };
 
