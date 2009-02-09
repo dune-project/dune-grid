@@ -75,7 +75,8 @@ namespace Dune {
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLevelIterator;
 
-    friend class UGMakeableEntity<codim,dim,GridImp>;
+    friend class UGMakeableEntity<codim,dim,const UGGrid<dim> >;
+    friend class UGMakeableEntity<codim,dim,UGGrid<dim> >;
 
     friend class UGGrid<dim>;
 
