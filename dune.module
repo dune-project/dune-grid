@@ -1,5 +1,5 @@
 Module: dune-grid
-Version: 1.2svn
+Version: 1.3svn
 Maintainer: dune@dune-project.org
-Depends: dune-common (>= 1.2)
+Depends: dune-common (>=1.3)
 Suggests: UG Alberta Alu3d
