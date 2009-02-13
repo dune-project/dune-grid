@@ -153,14 +153,14 @@ namespace Dune
   template< class GridImp >
   inline bool AlbertaGridIntersectionIterator< GridImp >::boundary() const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     return elementInfo_.isBoundary( neighborCount_ );
   }
 
   template< class GridImp >
   inline bool AlbertaGridIntersectionIterator< GridImp >::neighbor () const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     return (elInfo.neigh[ neighborCount_ ] != NULL);
   }
@@ -278,7 +278,7 @@ namespace Dune
   inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
   AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), intersectionGlobal() );
@@ -292,7 +292,6 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >::intersectionNeighborLocal () const
   {
     assert( neighbor() );
-    assert( !neighborInfo_ == false );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
     const LocalCoordReader coordReader( outside()->geometry(), intersectionGlobal() );
