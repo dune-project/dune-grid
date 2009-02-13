@@ -13,7 +13,7 @@
 
 #include <dune/grid/common/grid.hh>
 
-//#define INDEXSET_HAS_ITERATORS
+#define INDEXSET_HAS_ITERATORS
 /** @file
         @author Peter Bastian
         @brief Provides base classes for index and id sets
