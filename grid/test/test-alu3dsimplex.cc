@@ -14,8 +14,25 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
+#include "checktwists.cc"
 
 using namespace Dune;
+
+template< ALU3dGridElementType type >
+struct MapTwistAlu2Dune;
+
+template<>
+struct MapTwistAlu2Dune< tetra >
+{
+  int operator() ( const int twist ) const
+  {
+    const int map[ 6 ] = { -2, -3, -1, 0, 2, 1 };
+
+    assert( (twist >= -3) && (twist <= 2) );
+    return map[ twist+3 ];
+  }
+};
+
 
 #if 0
 template <class GridType>
@@ -156,10 +173,11 @@ void checkALUSerial ( GridType &grid, int maxLevel = 2 )
   // check the method geometryInFather()
   checkGeometryInFather(grid);
 
-#if 0
+#if 1
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
 #endif
+  checkTwists( grid.leafView(), MapTwistAlu2Dune< GridType::elementType >() );
 
 #if 0
   // some checks for assignment of iterators
