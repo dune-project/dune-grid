@@ -161,6 +161,9 @@ namespace Dune {
     //! local number of codim 1 entity in neighbor where intersection is contained in
     int numberInNeighbor () const;
 
+    int twistInSelf () const;
+    int twistInNeighbor () const;
+
     NormalType & outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
     NormalType & integrationOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
     NormalType & unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;

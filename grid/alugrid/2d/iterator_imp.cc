@@ -241,6 +241,20 @@ namespace Dune {
     return this->current.opposite_;
   }
 
+  template< class GridImp >
+  inline int ALU2dGridIntersectionBase< GridImp >::twistInSelf () const
+  {
+    //return 0;
+    return 0;
+  }
+
+  template< class GridImp >
+  inline int ALU2dGridIntersectionBase< GridImp >::twistInNeighbor () const
+  {
+    //return 1;
+    return 1;
+  }
+
   template<class GridImp>
   inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
   ALU2dGridIntersectionBase<GridImp> :: outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
