@@ -27,7 +27,9 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   const int dimension = Intersection::dimension;
 
-  typedef typename Intersection::Entity::Geometry Geometry;
+  typedef typename Intersection::EntityPointer EntityPointer;
+  typedef typename Intersection::Entity Entity;
+  typedef typename Entity::Geometry Geometry;
 
   typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
   typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
@@ -46,8 +48,12 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const int nIn = intersection.numberInSelf();
   const int nOut = intersection.numberInNeighbor();
 
-  const Geometry &geoIn = intersection.inside()->geometry();
-  const Geometry &geoOut = intersection.outside()->geometry();
+  const EntityPointer ptrIn = intersection.inside();
+  const EntityPointer ptrOut = intersection.outside();
+  const Entity &entityIn = *ptrIn;
+  const Entity &entityOut = *ptrOut;
+  const Geometry &geoIn = entityIn.geometry();
+  const Geometry &geoOut = entityOut.geometry();
 
   const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
   const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );
@@ -56,8 +62,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   assert( refOut.size( nOut, 1, dimension ) == numCorners );
   for( int i = 0; i < numCorners; ++i )
   {
-    const int iIn = applyTwist( tIn, i, numCorners );
-    const int iOut = applyTwist( tOut, i, numCorners );
+    const int iIn = applyTwist( inverseTwist( tIn, numCorners ), i, numCorners );
+    const int iOut = applyTwist( inverseTwist( tOut, numCorners ), i, numCorners );
 
     WorldVector xIn = geoIn.corner( refIn.subEntity( nIn, 1, iIn, dimension ) );
     WorldVector xOut = geoOut.corner( refOut.subEntity( nOut, 1, iOut, dimension ) );
