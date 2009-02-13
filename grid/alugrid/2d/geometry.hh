@@ -117,7 +117,7 @@ namespace Dune {
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
-    const GeometryType & type () const;
+    const GeometryType type () const;
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const;
@@ -184,9 +184,6 @@ namespace Dune {
 
     //! calculates the volume of the element
     alu2d_ctype elDeterminant () const;
-
-    //! my geometry type
-    GeometryType myGeomType_;
 
     //! temporary need vector
     mutable FieldVector<alu2d_ctype, mydim+1> tmpVec_;
