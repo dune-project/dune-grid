@@ -116,18 +116,9 @@ namespace Dune
       void leafTraverse ( Functor &functor,
                           typename FillFlags::Flags fillFlags = FillFlags::standard ) const;
 
-      bool coarsen ()
-      {
-        const bool coarsened = (ALBERTA coarsen( mesh_ ) == MESH_COARSENED);
-        if( coarsened )
-          ALBERTA dof_compress( mesh_ );
-        return coarsened;
-      }
+      bool coarsen ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
 
-      bool refine ()
-      {
-        return (ALBERTA refine( mesh_ ) == MESH_REFINED);
-      }
+      bool refine ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
 
 #if DUNE_ALBERTA_VERSION < 0x200
     private:
@@ -320,6 +311,48 @@ namespace Dune
         info.leafTraverse( functor );
       }
     }
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline bool MeshPointer< dim >::coarsen ( typename FillFlags::Flags fillFlags )
+    {
+      const bool coarsened = (ALBERTA coarsen( mesh_, fillFlags ) == meshCoarsened);
+      if( coarsened )
+        ALBERTA dof_compress( mesh_ );
+      return coarsened;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline bool MeshPointer< dim >::coarsen ( typename FillFlags::Flags fillFlags )
+    {
+      assert( fillFlags == FillFlags::nothing );
+      const bool coarsened = (ALBERTA coarsen( mesh_ ) == meshCoarsened);
+      if( coarsened )
+        ALBERTA dof_compress( mesh_ );
+      return coarsened;
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x201
+    template< int dim >
+    inline bool MeshPointer< dim >::refine ( typename FillFlags::Flags fillFlags )
+    {
+      return (ALBERTA refine( mesh_, fillFlags ) == meshRefined);
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline bool MeshPointer< dim >::refine ( typename FillFlags::Flags fillFlags )
+    {
+      assert( fillFlags == FillFlags::nothing );
+      return (ALBERTA refine( mesh_ ) == meshRefined);
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
 

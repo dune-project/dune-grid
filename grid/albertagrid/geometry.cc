@@ -429,7 +429,7 @@ namespace Dune
 
 
   // AlbertaGridLocalGeometryProvider::FaceCoordReader
-  // --------------------------------------------------------
+  // -------------------------------------------------
 
   template< class Grid >
   struct AlbertaGridLocalGeometryProvider< Grid >::FaceCoordReader

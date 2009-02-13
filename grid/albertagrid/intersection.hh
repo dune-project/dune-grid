@@ -71,6 +71,7 @@ namespace Dune
     typedef AlbertaGridGeometry< dimension-1, dimensionworld, GridImp > GeometryImp;
     typedef AlbertaGridGeometry< dimension-1, dimension, GridImp > LocalGeometryImp;
 
+    struct GlobalCoordReader;
     struct LocalCoordReader;
 
   public:
@@ -92,10 +93,10 @@ namespace Dune
     void increment();
 
     //! access neighbor
-    EntityPointer outside() const;
+    EntityPointer outside () const;
 
     //! access element where IntersectionIterator started
-    EntityPointer inside() const;
+    EntityPointer inside () const;
 
     //! assignment operator, implemented because default does not the right thing
     void assign ( const This &other );
@@ -193,9 +194,6 @@ namespace Dune
 
     //! ElementInfo to store the information of the neighbor if needed
     mutable ElementInfo neighborInfo_;
-
-    // twist seen from the neighbor
-    mutable int twist_;
   };
 
 }

@@ -153,14 +153,14 @@ namespace Dune
   template< class GridImp >
   inline bool AlbertaGridIntersectionIterator< GridImp >::boundary() const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     return elementInfo_.isBoundary( neighborCount_ );
   }
 
   template< class GridImp >
   inline bool AlbertaGridIntersectionIterator< GridImp >::neighbor () const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     return (elInfo.neigh[ neighborCount_ ] != NULL);
   }
@@ -278,7 +278,7 @@ namespace Dune
   inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
   AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), intersectionGlobal() );
@@ -292,7 +292,6 @@ namespace Dune
   AlbertaGridIntersectionIterator< GridImp >::intersectionNeighborLocal () const
   {
     assert( neighbor() );
-    assert( !neighborInfo_ == false );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
     const LocalCoordReader coordReader( outside()->geometry(), intersectionGlobal() );
@@ -305,11 +304,10 @@ namespace Dune
   inline const typename AlbertaGridIntersectionIterator< GridImp >::Geometry &
   AlbertaGridIntersectionIterator< GridImp >::intersectionGlobal () const
   {
-    typedef AlbertaGridCoordinateReader< 1, GridImp > CoordReader;
     assert( !elementInfo_ == false );
 
     GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
-    const CoordReader coordReader( grid_, elementInfo_, neighborCount_ );
+    const GlobalCoordReader coordReader( grid_, elementInfo_, neighborCount_ );
     geo.build( coordReader );
     return neighGlobObj_;
   }
@@ -345,8 +343,7 @@ namespace Dune
   inline int
   AlbertaGridIntersectionIterator< GridImp >::twistInSelf () const
   {
-    // always 0 for indside
-    return 0;
+    return elementInfo_.twistInSelf( neighborCount_ );
   }
 
 
@@ -354,7 +351,7 @@ namespace Dune
   inline int
   AlbertaGridIntersectionIterator< GridImp >::twistInNeighbor () const
   {
-    return twist_;
+    return elementInfo_.twistInNeighbor( neighborCount_ );
   }
 
 
@@ -548,10 +545,80 @@ namespace Dune
   #endif
 
     // setup coordinates of neighbour elInfo
-    twist_ = SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
-             setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
+    SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
+    setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
   }
 #endif // #if !TRAVERSE_LEAFNEIGHBOR
+
+
+
+  // AlbertaGridIntersectionIterator::GlobalCoordReader
+  // --------------------------------------------------
+
+  template< class GridImp >
+  struct AlbertaGridIntersectionIterator< GridImp >::GlobalCoordReader
+  {
+    typedef typename remove_const< GridImp >::type Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int codimension = 1;
+    static const int mydimension = dimension - codimension;
+    static const int coorddimension = Grid::dimensionworld;
+
+    typedef Alberta::Real ctype;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+    typedef FieldVector< ctype, coorddimension > Coordinate;
+
+    typedef Alberta::Twist< dimension > Twist;
+
+  private:
+    const Grid &grid_;
+    const ElementInfo &elementInfo_;
+    const int subEntity_;
+    const int twist_;
+
+  public:
+    GlobalCoordReader ( const GridImp &grid,
+                        const ElementInfo &elementInfo,
+                        int subEntity )
+      : grid_( grid ),
+        elementInfo_( elementInfo ),
+        subEntity_( subEntity ),
+        twist_( Twist::faceTwist( elementInfo_.el(), subEntity ) )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      assert( !elementInfo_ == false );
+      assert( (i >= 0) && (i <= mydimension) );
+
+      const int ti = Alberta::applyInverseTwist< mydimension >( twist_, i );
+      const int k = mapVertices( subEntity_, ti );
+      const Alberta::GlobalVector &coord = grid_.getCoord( elementInfo_, k );
+      for( int j = 0; j < coorddimension; ++j )
+        x[ j ] = coord[ j ];
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      assert( false );
+      return ctype( 0 );
+    }
+
+  private:
+    static int mapVertices ( int subEntity, int i )
+    {
+      typedef AlbertHelp::MapVertices< mydimension, dimension > Mapper;
+      return Mapper::mapVertices( subEntity, i );
+    }
+  };
+
 
 
 

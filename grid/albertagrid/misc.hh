@@ -11,6 +11,7 @@
 #include <dune/grid/genericgeometry/misc.hh>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
+#include <dune/grid/albertagrid/referencetopo.hh>
 
 #if HAVE_ALBERTA
 
@@ -62,6 +63,9 @@ namespace Dune
     typedef ALBERTA MESH Mesh;
     typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
+
+    static const int meshRefined = MESH_REFINED;
+    static const int meshCoarsened = MESH_COARSENED;
 
     static const int InteriorBoundary = INTERIOR;
     static const int DirichletBoundary = DIRICHLET;
@@ -169,6 +173,12 @@ namespace Dune
     struct NumSubEntities< dim, dim >
     {
       static const int value = dim+1;
+    };
+
+    template<>
+    struct NumSubEntities< 0, 0 >
+    {
+      static const int value = 1;
     };
 
     template<>
@@ -401,6 +411,102 @@ namespace Dune
         }
       }
     };
+
+
+
+    // Twist
+    // -----
+
+    // ******************************************************************
+    // Meaning of the twist (same as in ALU)
+    // -------------------------------------
+    //
+    // Consider a fixed ordering of the vertices v_1, ... v_n of a face
+    // (here, we assume their indices to be increasing). Denote by k the
+    // local number of a vertex v within the element and by t the twist.
+    // Then, v = v_j, where j is computed by the following formula:
+    //
+    //        / (2n + 1 - k + t) % n, if t < 0
+    //   j = <
+    //        \ (k + t) % n,          if t >= 0
+    //
+    //  Note: We use the order of the 0-th vertex dof to assign the twist.
+    //        This is ok for two reasons:
+    //        - ALBERTA preserves the relative order of the dofs during
+    //          dof compression.
+    //        - ALBERTA enforces the first vertex dof admin to be periodic.
+    // ******************************************************************
+
+    template< int dim >
+    struct Twist;
+
+    template<>
+    struct Twist< 1 >
+    {
+      static int faceTwist ( const Element *element, int face )
+      {
+        assert( (face >= 0) && (face < NumSubEntities< 1, 1 >::value) );
+        return 0;
+      }
+    };
+
+    template<>
+    struct Twist< 2 >
+    {
+      static const int dim = 2;
+
+      static int faceTwist ( const Element *element, int face )
+      {
+        assert( (face >= 0) && (face < NumSubEntities< dim, 1 >::value) );
+        int dof[ dim ];
+        for( int i = 0; i < dim; ++i )
+        {
+          const int j = ALBERTA AlbertHelp::MapVertices< dim-1, dim >::mapVertices( face, i );
+          dof[ i ] = element->dof[ j ][ 0 ];
+        }
+        return (dof[ 0 ] < dof[ 1 ] ? 0 : 1);
+      }
+    };
+
+    template<>
+    struct Twist< 3 >
+    {
+      static const int dim = 3;
+
+      static int faceTwist ( const Element *element, int face )
+      {
+        assert( (face >= 0) && (face < NumSubEntities< dim, 1 >::value) );
+        int dof[ dim ];
+        for( int i = 0; i < dim; ++i )
+        {
+          const int j = ALBERTA AlbertHelp::MapVertices< dim-1, dim >::mapVertices( face, i );
+          dof[ i ] = element->dof[ j ][ 0 ];
+        }
+
+        const int twist[ 8 ] = { -2, 1, 666, -1, 2, 666, -3, 0 };
+        const int k = int( dof[ 0 ] < dof[ 1 ] )
+                      | (int( dof[ 0 ] < dof[ 2 ] ) << 1)
+                      | (int( dof[ 1 ] < dof[ 2 ] ) << 2);
+        assert( twist[ k ] != 666 );
+        return twist[ k ];
+      }
+    };
+
+
+
+    template< int dim >
+    inline int applyTwist ( int twist, int i )
+    {
+      const int numCorners = NumSubEntities< dim, dim >::value;
+      return (twist < 0 ? (2*numCorners + 1 - i + twist) : i + twist) % numCorners;
+    }
+
+    template< int dim >
+    inline int applyInverseTwist ( int twist, int i )
+    {
+      const int numCorners = NumSubEntities< dim, dim >::value;
+      return (twist < 0 ? (2*numCorners + 1 - i + twist) : numCorners + i - twist) % numCorners;
+    }
 
   }
 
