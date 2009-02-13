@@ -31,11 +31,15 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   typedef typename Intersection::Entity Entity;
   typedef typename Entity::Geometry Geometry;
 
+  typedef typename Intersection::LocalGeometry LocalGeometry;
+
   typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
   typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
 
   typedef FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
+  typedef FieldVector< typename LocalGeometry::ctype, LocalGeometry::coorddimension >
+  LocalVector;
 
   if( !intersection.neighbor() || !intersection.conforming() )
     return 0;
@@ -76,6 +80,38 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
               << std::endl;
     ++errors;
   }
+
+  const LocalGeometry &lGeoIn = intersection.intersectionSelfLocal();
+  const LocalGeometry &lGeoOut = intersection.intersectionNeighborLocal();
+
+  for( int i = 0; i < numCorners; ++i )
+  {
+    const int tid = Dune::GenericGeometry::topologyId( lGeoIn.type() );
+    const int gi = Dune::GenericGeometry::MapNumberingProvider< dimension-1 >::template dune2generic< dimension-1 >( tid, i );
+    //assert( lGeoIn[ i ] == lGeoIn.corner( gi ) );
+    //assert( lGeoOut[ i ] == lGeoOut.corner( gi ) );
+
+    const int iIn = applyTwist( inverseTwist( tIn, numCorners ), i, numCorners );
+    LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
+    if( (xIn - lGeoIn.corner( gi )).two_norm() >= 1e-12 )
+    {
+      std::cout << "Error: twisted reference corner( " << iIn << " ) = " << xIn
+                << " != " << lGeoIn.corner( gi ) << " = local corner( " << i << " )."
+                << std::endl;
+      ++errors;
+    }
+
+    const int iOut = applyTwist( inverseTwist( tOut, numCorners ), i, numCorners );
+    LocalVector xOut = refOut.position( refOut.subEntity( nOut, 1, iOut, dimension ), dimension );
+    if( (xOut - lGeoOut.corner( gi )).two_norm() >= 1e-12 )
+    {
+      std::cout << "Error: twisted reference corner( " << iOut << " ) = " << xOut
+                << " != " << lGeoOut.corner( gi ) << " = local corner( " << i << " )."
+                << std::endl;
+      ++errors;
+    }
+  }
+
   return errors;
 }
 
