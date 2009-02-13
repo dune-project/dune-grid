@@ -176,6 +176,12 @@ namespace Dune
     };
 
     template<>
+    struct NumSubEntities< 0, 0 >
+    {
+      static const int value = 1;
+    };
+
+    template<>
     struct NumSubEntities< 2, 1 >
     {
       static const int value = 3;
@@ -485,6 +491,22 @@ namespace Dune
         return twist[ k ];
       }
     };
+
+
+
+    template< int dim >
+    inline int applyTwist ( int twist, int i )
+    {
+      const int numCorners = NumSubEntities< dim, dim >::value;
+      return (twist < 0 ? (2*numCorners + 1 - i + twist) : i + twist) % numCorners;
+    }
+
+    template< int dim >
+    inline int applyInverseTwist ( int twist, int i )
+    {
+      const int numCorners = NumSubEntities< dim, dim >::value;
+      return (twist < 0 ? (2*numCorners + 1 - i + twist) : numCorners + i - twist) % numCorners;
+    }
 
   }
 
