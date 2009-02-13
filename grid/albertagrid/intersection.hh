@@ -92,10 +92,10 @@ namespace Dune
     void increment();
 
     //! access neighbor
-    EntityPointer outside() const;
+    EntityPointer outside () const;
 
     //! access element where IntersectionIterator started
-    EntityPointer inside() const;
+    EntityPointer inside () const;
 
     //! assignment operator, implemented because default does not the right thing
     void assign ( const This &other );

@@ -64,6 +64,9 @@ namespace Dune
     typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
 
+    static const int meshRefined = MESH_REFINED;
+    static const int meshCoarsened = MESH_COARSENED;
+
     static const int InteriorBoundary = INTERIOR;
     static const int DirichletBoundary = DIRICHLET;
 #if DUNE_ALBERTA_VERSION >= 0x201
@@ -474,7 +477,7 @@ namespace Dune
           dof[ i ] = element->dof[ j ][ 0 ];
         }
 
-        const int twist[ 8 ] = { -2, 2, 666, -1, 1, 666, -3, 0 };
+        const int twist[ 8 ] = { -2, 1, 666, -1, 2, 666, -3, 0 };
         const int k = int( dof[ 0 ] < dof[ 1 ] )
                       | (int( dof[ 0 ] < dof[ 2 ] ) << 1)
                       | (int( dof[ 1 ] < dof[ 2 ] ) << 2);
