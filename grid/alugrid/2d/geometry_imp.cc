@@ -16,8 +16,7 @@ namespace Dune {
 
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim, cdim, GridImp> :: ALU2dGridGeometry()
-    : myGeomType_(GeometryType::simplex,mydim)
-      , coord_(0.0)
+    : coord_(0.0)
       , refCoord_(0.0)
       , builtElMat_(false)
       , builtinverse_(false)
@@ -32,8 +31,7 @@ namespace Dune {
   template <int mydim, int cdim, class GridImp>
   inline ALU2dGridGeometry<mydim,cdim,GridImp>::
   ALU2dGridGeometry(const int child, const int orientation)
-    : myGeomType_(GeometryType::simplex,mydim)
-      , coord_(0.0)
+    : coord_(0.0)
       , refCoord_(0.0)
       , builtElMat_(false)
       , builtinverse_(false)
@@ -81,8 +79,9 @@ namespace Dune {
   //! return the element type identifier
   //! line , triangle or tetrahedron, depends on dim
   template <int mydim, int cdim, class GridImp>
-  inline const GeometryType & ALU2dGridGeometry<mydim, cdim, GridImp> :: type () const {
-    return myGeomType_;
+  inline const GeometryType ALU2dGridGeometry< mydim, cdim, GridImp >::type () const
+  {
+    return GeometryType( GeometryType::simplex, mydim );
   }
 
   //! return the number of corners of this element. Corners are numbered 0...mydim+1
