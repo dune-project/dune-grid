@@ -160,6 +160,7 @@ namespace Dune {
     //! (that is the neighboring Entity)
     EntityPointer outside() const
     {
+      assert(neighbor());
       return OneDGridEntityPointer<0,GridImp>(target());
     }
 
