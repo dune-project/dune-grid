@@ -442,12 +442,12 @@ namespace Dune {
     enum {d=2};
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=61 };
+    enum { highest_order=CubeQuadratureRule<ct,1>::highest_order -1 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
 
-    /** \todo Please doc me! */
+    /** export my type */
     typedef SimplexQuadratureRule value_type;
     ~SimplexQuadratureRule(){}
   private:
@@ -467,7 +467,7 @@ namespace Dune {
     enum {d=3};
 
     /** \brief The highest quadrature order available */
-    enum { highest_order=61 };
+    enum { highest_order=CubeQuadratureRule<ct,1>::highest_order -2 };
 
     /** \brief The type used for coordinates */
     typedef ct CoordType;
