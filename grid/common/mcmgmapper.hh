@@ -115,7 +115,11 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, int& result) const
     {
-      if(!is.contains(e) || !layout.contains(e.type())) return false;
+      if(!is.contains(e) || !layout.contains(e.type()))
+      {
+        result = 0;
+        return false;
+      }
       result = map(e);
       return true;
     }
