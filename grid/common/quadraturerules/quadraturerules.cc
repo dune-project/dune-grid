@@ -656,7 +656,7 @@ namespace Dune {
       QuadratureRule<ct,1> gauss1D =
         QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Gauss);
       QuadratureRule<ct,1> jac1D =
-        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p+1, QuadratureType::Gauss);  //Jacobian_1_0);
 
       // Compute the conical product
       for (typename QuadratureRule<ct,1>::const_iterator
@@ -931,15 +931,9 @@ namespace Dune {
       QuadratureRule<ct,1> gauss1D =
         QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Gauss);
       QuadratureRule<ct,1> jacA1D =
-        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_1_0);
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p+1, QuadratureType::Gauss);  //Jacobian_1_0);
       QuadratureRule<ct,1> jacB1D =
-        QuadratureRules<ct,1>::rule(GeometryType::cube, p, QuadratureType::Jacobian_2_0);
-
-      // Compute the tensor product
-
-      // All rules should be of the same order
-      assert(gauss1D.size() == jacA1D.size());
-      assert(gauss1D.size() == jacB1D.size());
+        QuadratureRules<ct,1>::rule(GeometryType::cube, p+2, QuadratureType::Gauss);  //Jacobian_2_0);
 
       // Compute the conical product
       for (typename QuadratureRule<ct,1>::const_iterator
@@ -954,10 +948,14 @@ namespace Dune {
             // compute coordinates and weight
             double weight = 1.0;
             FieldVector<ct, d> local;
+            /* ~x = x */
             local[0] = j2p->position()[0];
+            /* ~y = y(1-x) */
             local[1] = j1p->position()[0] * (1.0-j2p->position()[0]);
-            local[2] = gp->position()[0] * (1.-j1p->position()[0]) * (1.0-j2p->position()[0]);
-            weight   = (1.0-j2p->position()[0]) * (1.-j1p->position()[0]) * (1.0-j2p->position()[0])
+            /* ~z = z(1-y)(1-x) */
+            local[2] = gp->position()[0] * (1.0-j1p->position()[0]) * (1.0-j2p->position()[0]);
+            /* J = (1-x)^2 * (1-y) */
+            weight   = (1.0-j2p->position()[0]) * (1.0-j2p->position()[0]) * (1.0-j1p->position()[0])
                        * gp->weight() * j1p->weight() * j2p->weight();
             // put in container
             push_back(QuadraturePoint<ct,d>(local,weight));
