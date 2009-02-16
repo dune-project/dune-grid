@@ -278,7 +278,7 @@ namespace Dune {
       {
         // Assume a vertex has exactly one corner
         // Assume the reference element an n-cube has all coordinates ranging from 0 to 1
-        return static_cast<const Common*>(this)->backend->geometry()[0];
+        return static_cast<const Common*>(this)->backend->geometry().corner(0);
       }
 
       // for elements
