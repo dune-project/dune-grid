@@ -97,10 +97,12 @@ try {
 
   // display
   if (myrank <= 0)
+  {
     if (0 && grid.nofParameters(0)>0)
       test(gridPart,eldat,grid.nofParameters(0),0);
     else
       test(gridPart,vtxdat,grid.nofParameters(GridType::dimension),GridType::dimension);
+  }
   // refine
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());

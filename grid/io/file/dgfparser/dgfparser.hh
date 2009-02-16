@@ -262,29 +262,38 @@ namespace Dune
     }
     //! get parameters defined for each codim 0 und dim entity on the grid through the grid file
     template <class Entity>
-    std::vector<double>& parameters(const Entity& en) {
-      if (Entity::codimension==0) {
-        if (elParam.size()==0)
+    std::vector< double > &parameters ( const Entity &entity )
+    {
+      switch( (int)Entity::codimension )
+      {
+      case 0 :
+        if( elParam.size() > 0 )
+        {
+          const typename Entity::Geometry &geo = entity.geometry();
+          DomainType coord( geo.corner( 0 ) );
+          for( int i = 1; i < geo.corners(); ++i )
+            coord += geo.corner( i );
+          coord /= double( geo.corners() );
+          return elementParams( coord );
+        }
+        else
           return emptyParam;
-        DomainType coord(0);
-        typedef typename Entity::Geometry GeometryType;
-        const GeometryType& geo=en.geometry();
-        for (int i=0; i<geo.corners(); ++i)
-          coord += geo[i];
-        coord/=double(geo.corners());
-        return elementParams(coord);
-      } else if (int(Entity::codimension) == int(GridType::dimension)) {
-        if (vtxParam.size()==0)
+
+      case GridType::dimension :
+        if( vtxParam.size() > 0 )
+        {
+          const typename Entity::Geometry &geo = entity.geometry();
+          DomainType coord( geo.corner( 0 ) );
+          return vertexParams( coord );
+        }
+        else
           return emptyParam;
-        DomainType coord;
-        typedef typename Entity::Geometry GeometryType;
-        const GeometryType& geo=en.geometry();
-        coord = geo[0];
-        return vertexParams(coord);
-      } else {
+
+      default :
         return emptyParam;
       }
     }
+
   protected:
     typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
     inline std::vector<double>& elementParams(DomainType& coord) {
