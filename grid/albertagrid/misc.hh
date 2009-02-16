@@ -457,8 +457,9 @@ namespace Dune
       static int twist ( const Element *element, int subEntity )
       {
         assert( (subEntity >= 0) && (subEntity < numSubEntities) );
-        int dof[ 2 ];
-        for( int i = 0; i < 2; ++i )
+        const int numVertices = NumSubEntities< 1, 1 >::value;
+        int dof[ numVertices ];
+        for( int i = 0; i < numVertices; ++i )
         {
           const int j = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];
@@ -487,8 +488,9 @@ namespace Dune
       static int twist ( const Element *element, int subEntity )
       {
         assert( (subEntity >= 0) && (subEntity < numSubEntities) );
-        int dof[ 3 ];
-        for( int i = 0; i < 3; ++i )
+        const int numVertices = NumSubEntities< 2, 2 >::value;
+        int dof[ numVertices ];
+        for( int i = 0; i < numVertices; ++i )
         {
           const int j = ALBERTA AlbertHelp::MapVertices< 2, dim >::mapVertices( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];

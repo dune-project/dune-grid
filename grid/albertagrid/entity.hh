@@ -373,9 +373,9 @@ namespace Dune
 
     //! obtain twist of a subentity
     template< int codim >
-    int twist ( int subEntity )
+    int twist ( int i )
     {
-      return elementInfo().template twist< codim >( subEntity );
+      return elementInfo().template twist< codim >( grid_.dune2alberta( codim, i ) );
     }
 
   private:
@@ -384,7 +384,7 @@ namespace Dune
 
     GeometryImp &geoImp () const
     {
-      return GridImp :: getRealImplementation( geo_ );
+      return GridImp::getRealImplementation( geo_ );
     }
 
     //! the corresponding grid
@@ -394,7 +394,7 @@ namespace Dune
     ElementInfo elementInfo_;
 
     // local coordinates within father
-    typedef MakeableInterfaceObject<Geometry> GeometryObject;
+    typedef MakeableInterfaceObject< Geometry > GeometryObject;
 
     //! the cuurent geometry
     mutable GeometryObject geo_;

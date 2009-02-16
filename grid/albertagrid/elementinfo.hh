@@ -387,7 +387,7 @@ namespace Dune
     template< int codim >
     inline int ElementInfo< dim >::twist ( int subEntity ) const
     {
-      return Twist< dim, codim >::twist( element(), subEntity );
+      return Twist< dim, dim-codim >::twist( element(), subEntity );
     }
 
 
