@@ -125,6 +125,12 @@ namespace Dune
       return subEntity_;
     }
 
+    //! obtain twist
+    int twist () const
+    {
+      return elementInfo().template twist< codimension >( subEntity() );
+    }
+
   private:
     const GeometryImp &geoImp () const
     {
@@ -357,6 +363,19 @@ namespace Dune
     int subEntity () const
     {
       return 0;
+    }
+
+    //! obtain twist
+    int twist () const
+    {
+      return elementInfo().template twist< codimension >( subEntity() );
+    }
+
+    //! obtain twist of a subentity
+    template< int codim >
+    int twist ( int subEntity )
+    {
+      return elementInfo().template twist< codim >( subEntity );
     }
 
   private:

@@ -93,7 +93,8 @@ namespace Dune
       void setMark ( int refCount ) const;
 
       ElementInfo leafNeighbor ( int face ) const;
-      int twistInSelf ( int face ) const;
+      template< int codim >
+      int twist ( int subEntity ) const;
       int twistInNeighbor ( int face ) const;
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
@@ -383,9 +384,10 @@ namespace Dune
 
 
     template< int dim >
-    inline int ElementInfo< dim >::twistInSelf ( int face ) const
+    template< int codim >
+    inline int ElementInfo< dim >::twist ( int subEntity ) const
     {
-      return Twist< dim >::faceTwist( element(), face );
+      return Twist< dim, codim >::twist( element(), subEntity );
     }
 
 
@@ -393,7 +395,7 @@ namespace Dune
     inline int ElementInfo< dim >::twistInNeighbor ( const int face ) const
     {
       assert( neighbor( face ) != NULL );
-      return Twist< dim >::faceTwist( neighbor( face ), elInfo().opp_vertex[ face ] );
+      return Twist< dim, dim-1 >::twist( neighbor( face ), elInfo().opp_vertex[ face ] );
     }
 
 

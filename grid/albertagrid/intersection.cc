@@ -343,7 +343,7 @@ namespace Dune
   inline int
   AlbertaGridIntersectionIterator< GridImp >::twistInSelf () const
   {
-    return elementInfo_.twistInSelf( neighborCount_ );
+    return elementInfo_.template twist< 1 >( neighborCount_ );
   }
 
 
@@ -570,7 +570,7 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef FieldVector< ctype, coorddimension > Coordinate;
 
-    typedef Alberta::Twist< dimension > Twist;
+    typedef Alberta::Twist< dimension, mydimension > Twist;
 
   private:
     const Grid &grid_;
@@ -585,7 +585,7 @@ namespace Dune
       : grid_( grid ),
         elementInfo_( elementInfo ),
         subEntity_( subEntity ),
-        twist_( Twist::faceTwist( elementInfo_.el(), subEntity ) )
+        twist_( Twist::twist( elementInfo_.el(), subEntity ) )
     {}
 
     void coordinate ( int i, Coordinate &x ) const

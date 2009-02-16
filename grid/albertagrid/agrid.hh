@@ -532,22 +532,40 @@ namespace Dune
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
   public:
-    template< class IntersectionInterfaceType >
-    const typename Base
-    :: template ReturnImplementationType< IntersectionInterfaceType >
-    :: ImplementationType & DUNE_DEPRECATED
-    getRealIntersectionIterator ( const IntersectionInterfaceType &iterator ) const
+    template< int codim >
+    static int
+    getTwist ( const typename Traits::template Codim< codim >::Entity &entity )
     {
-      return this->getRealImplementation( iterator );
+      return getRealImplementation( entity ).twist();
+    }
+
+    template< int codim >
+    static int
+    getTwist ( const typename Traits::template Codim< 0 >::Entity &entity, int subEntity )
+    {
+      return getRealImplementation( entity ).template twist< codim >( subEntity );
+    }
+
+    static int
+    getTwistInInside ( const typename Traits::LeafIntersection &intersection )
+    {
+      return getRealImplementation( intersection ).twistInSelf();
+    }
+
+    static int
+    getTwistInOutside ( const typename Traits::LeafIntersection &intersection )
+    {
+      return getRealImplementation( intersection ).twistInNeighbor();
     }
 
     template< class IntersectionType >
     const typename Base
     :: template ReturnImplementationType< IntersectionType >
     :: ImplementationType &
+    DUNE_DEPRECATED
     getRealIntersection ( const IntersectionType &intersection ) const
     {
-      return this->getRealImplementation( intersection );
+      return getRealImplementation( intersection );
     }
 
     // (for internal use only) return obj pointer to EntityImp

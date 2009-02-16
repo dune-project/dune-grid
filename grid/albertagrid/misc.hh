@@ -437,49 +437,60 @@ namespace Dune
     //        - ALBERTA enforces the first vertex dof admin to be periodic.
     // ******************************************************************
 
-    template< int dim >
-    struct Twist;
-
-    template<>
-    struct Twist< 1 >
+    template< int dim, int subdim >
+    struct Twist
     {
-      static int faceTwist ( const Element *element, int face )
+      static const int numSubEntities = NumSubEntities< dim, dim-subdim >::value;
+
+      static int twist ( const Element *element, int subEntity )
       {
-        assert( (face >= 0) && (face < NumSubEntities< 1, 1 >::value) );
+        assert( (subEntity >= 0) && (subEntity < numSubEntities) );
         return 0;
       }
     };
 
-    template<>
-    struct Twist< 2 >
+    template< int dim >
+    struct Twist< dim, 1 >
     {
-      static const int dim = 2;
+      static const int numSubEntities = NumSubEntities< dim, dim-1 >::value;
 
-      static int faceTwist ( const Element *element, int face )
+      static int twist ( const Element *element, int subEntity )
       {
-        assert( (face >= 0) && (face < NumSubEntities< dim, 1 >::value) );
-        int dof[ dim ];
-        for( int i = 0; i < dim; ++i )
+        assert( (subEntity >= 0) && (subEntity < numSubEntities) );
+        int dof[ 2 ];
+        for( int i = 0; i < 2; ++i )
         {
-          const int j = ALBERTA AlbertHelp::MapVertices< dim-1, dim >::mapVertices( face, i );
+          const int j = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];
         }
         return (dof[ 0 ] < dof[ 1 ] ? 0 : 1);
       }
     };
 
-    template<>
-    struct Twist< 3 >
-    {
-      static const int dim = 3;
 
-      static int faceTwist ( const Element *element, int face )
+    template<>
+    struct Twist< 1, 1 >
+    {
+      static int twist ( const Element *element, int subEntity )
       {
-        assert( (face >= 0) && (face < NumSubEntities< dim, 1 >::value) );
-        int dof[ dim ];
-        for( int i = 0; i < dim; ++i )
+        assert( subEntity == 0 );
+        return 0;
+      }
+    };
+
+
+    template< int dim >
+    struct Twist< dim, 2 >
+    {
+      static const int numSubEntities = NumSubEntities< dim, dim-2 >::value;
+
+      static int twist ( const Element *element, int subEntity )
+      {
+        assert( (subEntity >= 0) && (subEntity < numSubEntities) );
+        int dof[ 3 ];
+        for( int i = 0; i < 3; ++i )
         {
-          const int j = ALBERTA AlbertHelp::MapVertices< dim-1, dim >::mapVertices( face, i );
+          const int j = ALBERTA AlbertHelp::MapVertices< 2, dim >::mapVertices( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];
         }
 
@@ -489,6 +500,17 @@ namespace Dune
                       | (int( dof[ 1 ] < dof[ 2 ] ) << 2);
         assert( twist[ k ] != 666 );
         return twist[ k ];
+      }
+    };
+
+
+    template<>
+    struct Twist< 2, 2 >
+    {
+      static int twist ( const Element *element, int subEntity )
+      {
+        assert( subEntity == 0 );
+        return 0;
       }
     };
 
