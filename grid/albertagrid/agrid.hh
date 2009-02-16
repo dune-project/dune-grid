@@ -558,12 +558,11 @@ namespace Dune
       return getRealImplementation( intersection ).twistInNeighbor();
     }
 
-    template< class IntersectionType >
-    const typename Base
-    :: template ReturnImplementationType< IntersectionType >
-    :: ImplementationType &
+    template< class Intersection >
     DUNE_DEPRECATED
-    getRealIntersection ( const IntersectionType &intersection ) const
+    const typename Base
+    ::template ReturnImplementationType< Intersection >::ImplementationType &
+    getRealIntersection ( const Intersection &intersection ) const
     {
       return getRealImplementation( intersection );
     }
