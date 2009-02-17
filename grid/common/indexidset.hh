@@ -251,6 +251,7 @@ namespace Dune
 #ifdef INDEXSET_HAS_ITERATORS
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   template<int cd, PartitionIteratorType pitype>
+  DUNE_DEPRECATED
   typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
   IndexSet<GridImp,IndexSetImp,IndexSetTypes>::begin() const
   {
@@ -260,6 +261,7 @@ namespace Dune
 
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   template<int cd, PartitionIteratorType pitype>
+  DUNE_DEPRECATED
   typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
   IndexSet<GridImp,IndexSetImp,IndexSetTypes>::end() const
   {
