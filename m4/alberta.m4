@@ -134,6 +134,23 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
+
+    if test "$ALBERTA_VERSION" = "2.1" ; then
+      echo
+      echo "  -------------------------------------------------------------------------"
+      echo "                                   WARNING"
+      echo "  -------------------------------------------------------------------------"
+      echo "    ALBERTA 2.1 is still under development. Changes made to ALBERTA after"
+      echo "    the release of DUNE 1.2 might affect AlbertaGrid in an unpredictable"
+      echo "    way."
+      echo
+      echo "    AlbertaGrid has only been tested with ALBERTA 2.1 revision 3060."
+      echo
+      echo "    If possible, consider using ALBERTA 2.0. It can be downloaded from"
+      echo "    www.alberta-fem.de."
+      echo "  -------------------------------------------------------------------------"
+      echo
+    fi
   else
     AC_SUBST(ALBERTA_LIBS, "")
     AC_SUBST(ALBERTA_LDFLAGS, "")
