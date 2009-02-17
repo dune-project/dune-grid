@@ -239,7 +239,7 @@ int main (int argc , char **argv) try
     // Thus their respective output from geometryInFather should be the same
     for (int i=0; i<eIt->geometry().corners(); i++) {
 
-      Dune::FieldVector<double,2> diff = eIt->geometryInFather()[i] - eWoIt->geometryInFather()[i];
+      Dune::FieldVector<double,2> diff = eIt->geometryInFather().corner(i) - eWoIt->geometryInFather().corner(i);
 
       if ( diff.two_norm() > 1e-5 )
         DUNE_THROW(Dune::GridError, "output of geometryInFather() depends on boundary parametrization!");
