@@ -382,7 +382,7 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
                                                      const DataContainer& data)
 {
   dune_static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");
-  dune_static_assert(Capabilities::IsUnstructured<GridView>::v == false,
+  dune_static_assert(Capabilities::IsUnstructured<typename GridView::Grid>::v == false,
                      "writeUniformData() only for structured grids!");
 
   // ///////////////////////////////////////////
@@ -399,8 +399,8 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
 
   for (; vIt!=vEndIt; ++vIt)
     for (int i=0; i<dim; i++) {
-      bbox[2*i]   = std::min((double)bbox[2*i],   vIt->geometry()[0][i]);
-      bbox[2*i+1] = std::max((double)bbox[2*i+1], vIt->geometry()[0][i]);
+      bbox[2*i]   = std::min((double)bbox[2*i],   vIt->geometry().corner(0)[i]);
+      bbox[2*i+1] = std::max((double)bbox[2*i+1], vIt->geometry().corner(0)[i]);
     }
 
   // Set the appropriate content type
