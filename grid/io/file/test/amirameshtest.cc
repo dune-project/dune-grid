@@ -50,15 +50,15 @@ void testWritingUniformData() {
   SGrid<2,2>::Codim<2>::LeafIterator vEndIt2d = sgrid2d.leafend<2>();
 
   for (; vIt2d!=vEndIt2d; ++vIt2d)
-    vertexdata2d[sgrid2d.leafIndexSet().index(*vIt2d)] = vIt2d->geometry()[0].two_norm();
+    vertexdata2d[sgrid2d.leafIndexSet().index(*vIt2d)] = vIt2d->geometry().corner(0).two_norm();
 
   array<unsigned int, 2> n2;
   n2[0] = n[0]+1;
   n2[1] = n[1]+1;
 
   // write data
-  AmiraMeshWriter<SGrid<2,2>,SGrid<2,2>::Traits::LeafIndexSet> amiramesh2d;
-  amiramesh2d.addUniformData(sgrid2d, n2, vertexdata2d);
+  AmiraMeshWriter<SGrid<2,2>::LeafGridView> amiramesh2d;
+  amiramesh2d.addUniformData(sgrid2d.leafView(), n2, vertexdata2d);
   amiramesh2d.write("sgrid2d.am");
 
   // /////////////////////////////////////
@@ -73,7 +73,7 @@ void testWritingUniformData() {
   SGrid<3,3>::Codim<3>::LeafIterator vEndIt = sgrid3d.leafend<3>();
 
   for (; vIt!=vEndIt; ++vIt)
-    vertexdata3d[sgrid3d.leafIndexSet().index(*vIt)] = vIt->geometry()[0].two_norm();
+    vertexdata3d[sgrid3d.leafIndexSet().index(*vIt)] = vIt->geometry().corner(0).two_norm();
 
   array<unsigned int, 3> n3;
   n3[0] = n[0]+1;
@@ -81,8 +81,8 @@ void testWritingUniformData() {
   n3[2] = n[2]+1;
 
   // write data
-  AmiraMeshWriter<SGrid<3,3>,SGrid<3,3>::Traits::LeafIndexSet> amiramesh3d;
-  amiramesh3d.addUniformData(sgrid3d, n3, vertexdata3d);
+  AmiraMeshWriter<SGrid<3,3>::LeafGridView> amiramesh3d;
+  amiramesh3d.addUniformData(sgrid3d.leafView(), n3, vertexdata3d);
   amiramesh3d.write("sgrid3d.am");
 
 }
