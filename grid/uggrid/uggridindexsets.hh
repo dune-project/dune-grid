@@ -406,12 +406,6 @@ namespace Dune {
     template<int cd>
     GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-#ifdef ModelP
-      //       if (cd==0)
-      //           return grid_.getRealImplementation(e).target_->ge.ddd.gid;
-      //       else
-      DUNE_THROW(NotImplemented, "!");
-#else
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
         // we return the id of the lowest ancestor that the element is a copy from.  That way copies
@@ -421,10 +415,28 @@ namespace Dune {
         while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
           ancestor = UG_NS<dim>::EFather(ancestor);
 
+#if defined ModelP
+        return ancestor->ge.ddd.gid;
+#else
         return UG_NS<dim>::id(ancestor);
+#endif
       }
+
+#if defined ModelP
+      if (cd == dim) {
+        typename UG_NS<dim>::Node *node =
+          reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).target_);
+
+        return node->ddd.gid;
+      }
+      else {
+        DUNE_THROW(NotImplemented,
+                   "Global index for entities which are neither nodes nor elements.");
+      }
+#else
       return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
 #endif
+
     }
 
     //! get id of subEntity
@@ -506,6 +518,5 @@ namespace Dune {
   };
 
 }  // namespace Dune
-
 
 #endif
