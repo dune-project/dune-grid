@@ -23,7 +23,7 @@
 // count
 template <int codim, int dim, class GridImp>
 template <int cc>
-inline int Dune::UGGridEntity<codim,dim,GridImp>::count () const
+int Dune::UGGridEntity<codim,dim,GridImp>::count () const
 {
   DUNE_THROW(GridError, "UGGridEntity<" << codim << ", " << dim
                                         << ">::count() not implemented yet!");
@@ -64,13 +64,13 @@ Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
 ////////////////////////////////////////////////////////////////////////////
 
 template< int dim, class GridImp>
-inline bool Dune::UGGridEntity < 0, dim ,GridImp >::isNew () const
+bool Dune::UGGridEntity < 0, dim ,GridImp >::isNew () const
 {
   return UG_NS<dim>::ReadCW(target_, UG_NS<dim>::NEWEL_CE);
 }
 
 template< int dim, class GridImp>
-inline bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
+bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 {
   return ((!isRegular()) || (UG_NS<dim>::ReadCW(target_, UG_NS<dim>::COARSEN_CE)));
 }
@@ -79,7 +79,7 @@ inline bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 // count
 template <int dim, class GridImp>
 template <int cc>
-inline int Dune::UGGridEntity<0,dim,GridImp>::count() const
+int Dune::UGGridEntity<0,dim,GridImp>::count() const
 {
   if (dim==3) {
 
@@ -112,7 +112,7 @@ inline int Dune::UGGridEntity<0,dim,GridImp>::count() const
 
 template <int dim, class GridImp>
 template <int cc>
-inline typename GridImp::template Codim<cc>::EntityPointer
+typename GridImp::template Codim<cc>::EntityPointer
 Dune::UGGridEntity<0,dim,GridImp>::entity ( int i ) const
 {
   assert(i>=0 && i<count<cc>());
@@ -172,7 +172,7 @@ Dune::GeometryType Dune::UGGridEntity<0,dim,GridImp>::type() const
 
 
 template<int dim, class GridImp>
-inline void Dune::UGGridEntity < 0, dim ,GridImp >::
+void Dune::UGGridEntity < 0, dim ,GridImp >::
 setToTarget(typename UG_NS<dim>::Element* target)
 {
   target_ = target;
@@ -180,7 +180,7 @@ setToTarget(typename UG_NS<dim>::Element* target)
 }
 
 template<int dim, class GridImp>
-inline Dune::UGGridHierarchicIterator<GridImp>
+Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
   UGGridHierarchicIterator<GridImp> it(maxlevel);
@@ -207,14 +207,14 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 
 
 template< int dim, class GridImp>
-inline Dune::UGGridHierarchicIterator<GridImp>
+Dune::UGGridHierarchicIterator<GridImp>
 Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 {
   return UGGridHierarchicIterator<GridImp>(maxlevel);
 }
 
 template<int dim, class GridImp>
-inline const typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry&
+const typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry&
 Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 {
   // we need to have a father element
