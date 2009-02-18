@@ -27,6 +27,9 @@ namespace Dune {
     friend class UGGridEntity<codim,GridImp::dimension,GridImp>;
     friend class UGGridEntity<0,    GridImp::dimension,GridImp>;
 
+    // The type of the UG entity we're pointing to
+    typedef typename UG_NS<dim>::template Entity<codim>::T UGEntity;
+
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
@@ -38,15 +41,64 @@ namespace Dune {
     }
 
     //! Constructor
-    explicit UGGridLevelIterator(typename UG_NS<dim>::template Entity<codim>::T* target)
+    explicit UGGridLevelIterator(const typename UG_NS<dim>::Grid *theConstGrid)
     {
-      this->virtualEntity_.setToTarget(target);
+      typename UG_NS<dim>::Grid *theGrid = const_cast<typename UG_NS<dim>::Grid* >(theConstGrid);
+      if (codim==dim) {
+        if (pitype==All_Partition || pitype==Ghost_Partition)
+          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(theGrid));
+        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
+          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstNode(theGrid));
+        else     // overlap and overlap-front
+          this->virtualEntity_.setToTarget(0);
+
+      }
+      else if (codim==0) {
+        if (pitype==All_Partition || pitype==Ghost_Partition)
+          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(theGrid));
+        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
+          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstElement(theGrid));
+        else     // overlap and overlap-front
+          this->virtualEntity_.setToTarget(0);
+      }
+      else
+        DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
+
+      if (this->virtualEntity_.getTarget() && !entityOK_())
+        increment();
     }
 
     //! prefix increment
-    void increment() {
+    void increment()
+    {
       assert(this->level() == UG_NS<dim>::myLevel(this->virtualEntity_.getTarget()));
-      this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()));
+      // Increment
+      do {
+        this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()));
+      }
+      while (this->virtualEntity_.getTarget() && !entityOK_());
+    }
+
+  private:
+    /**
+     * \brief Return true iff the current entity is within the right
+     *        partition.
+     */
+    bool entityOK_()
+    {
+      if (pitype == All_Partition)
+        return true;
+
+      Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
+      if (pitype == Ghost_Partition && entityPIType == GhostEntity)
+        return true;
+      else if (pitype == Interior_Partition && entityPIType == InteriorEntity)
+        return true;
+      else if (pitype == InteriorBorder_Partition &&
+               (entityPIType == BorderEntity ||
+                entityPIType == InteriorEntity))
+        return true;
+      return false;
     }
 
   };

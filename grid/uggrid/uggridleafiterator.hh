@@ -26,28 +26,29 @@ namespace Dune {
   public:
 
     UGGridLeafIterator(const GridImp& grid) : grid_(&grid) {
-
       // Entities below this level are certainly not leaf entities
       const unsigned int startingLevel = grid.leafIndexSet_.coarsestLevelWithLeafElements_;
 
       if (codim==dim) {
-
         if (pitype==All_Partition || pitype==Ghost_Partition)
           setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[startingLevel]));
-        else
+        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
           setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[startingLevel]));
+        else     // overlap and overlap-front
+          setToTarget((UGEntity*) 0);
 
       } else if (codim==0) {
-
         if (pitype==All_Partition || pitype==Ghost_Partition)
           setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[startingLevel]));
-        else
+        else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition)
           setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[startingLevel]));
+        else     // overlap and overlap-front
+          setToTarget((UGEntity*) 0);
 
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
 
-      if (!UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
+      if (this->virtualEntity_.getTarget() && !entityOK_())
         increment();
     }
 
@@ -62,10 +63,38 @@ namespace Dune {
       // Increment until you find a leaf entity
       do {
         globalIncrement();
-      } while (this->virtualEntity_.getTarget() && !UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()));
+      }
+      while (this->virtualEntity_.getTarget() && !entityOK_());
     }
 
   private:
+    /**
+     * \brief Return true iff the current entity is a leaf and is within the right partition.
+     */
+    bool entityOK_()
+    {
+      Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
+      // HACK: ghosts entities are never leafs in UG, in DUNE can be
+      //       leafs
+      if (entityPIType != GhostEntity &&
+          !UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
+      {
+        return false;
+      }
+
+      if (pitype == All_Partition)
+        return true;
+
+      if (pitype == Ghost_Partition && entityPIType == GhostEntity)
+        return true;
+      else if (pitype == Interior_Partition && entityPIType == InteriorEntity)
+        return true;
+      else if (pitype == InteriorBorder_Partition &&
+               (entityPIType == BorderEntity ||
+                entityPIType == InteriorEntity))
+        return true;
+      return false;
+    }
 
     /** \brief This increment makes the iterator wander over all entities on all levels */
     void globalIncrement() {

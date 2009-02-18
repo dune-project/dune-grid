@@ -51,7 +51,7 @@ template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
 
 
 template <int dim>
-inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
+Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
   : multigrid_(NULL),
     leafIndexSet_(*this),
     globalIdSet_(*this),
@@ -126,7 +126,7 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
 
 
 template < int dim >
-inline Dune::UGGrid < dim >::~UGGrid()
+Dune::UGGrid < dim >::~UGGrid()
 {
   for (unsigned int i=0; i<boundarySegments_.size(); i++)
     delete boundarySegments_[i];
@@ -164,7 +164,7 @@ inline Dune::UGGrid < dim >::~UGGrid()
 }
 
 template < int dim >
-inline int Dune::UGGrid < dim >::maxLevel() const
+int Dune::UGGrid < dim >::maxLevel() const
 {
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
@@ -187,21 +187,12 @@ Dune::UGGrid<dim>::lbegin (int level) const
   if (!theGrid)
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  if (codim==0)
-    // The seemingly pointless cast make the code compile in the cases where this if-clause
-    // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstElement(theGrid));
-  else if (codim==dim)
-    // The seemingly pointless cast make the code compile in the cases where this if-clause
-    // does _not_ get executed.
-    return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
-
-  DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
+  return UGGridLevelIterator<codim, All_Partition, const UGGrid<dim> >(theGrid);
 }
 
 template<int dim>
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
+typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::UGGrid<dim>::lbegin (int level) const
 {
   if (!multigrid_)
@@ -212,27 +203,7 @@ Dune::UGGrid<dim>::lbegin (int level) const
   if (!theGrid)
     DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  if (codim==0) {
-
-    typename UG_NS<dim>::Element* firstElement =
-      (PiType==All_Partition || PiType==Ghost_Partition)
-      ? UG_NS<dim>::PFirstElement(theGrid)
-      : UG_NS<dim>::FirstElement(theGrid);
-
-    // The seemingly pointless cast make the code compile in the cases where this if-clause
-    // does _not_ get executed.
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)firstElement);
-
-  } else if (codim==dim) {
-
-    // The seemingly pointless cast make the code compile in the cases where this if-clause
-    // does _not_ get executed.
-    /** \todo Parallel vertex level iterators not properly implemented yet! */
-    return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >((typename UG_NS<dim>::template Entity<codim>::T*)UG_NS<dim>::PFirstNode(theGrid));
-
-  }
-
-  DUNE_THROW(GridError, "UGGrid doesn't support level iterators of codim " << codim);
+  return UGGridLevelIterator<codim, PiType, const UGGrid<dim> >(theGrid);
 }
 
 template < int dim >
@@ -245,14 +216,14 @@ Dune::UGGrid < dim >::lend (int level) const
 
 template < int dim >
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
+typename Dune::UGGrid<dim>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::UGGrid < dim >::lend (int level) const
 {
   return UGGridLevelIterator<codim,PiType, const UGGrid<dim> >();
 }
 
 template < int dim >
-inline int Dune::UGGrid < dim >::size (int level, int codim) const
+int Dune::UGGrid < dim >::size (int level, int codim) const
 {
 #ifndef ModelP
   if(codim == 0)
