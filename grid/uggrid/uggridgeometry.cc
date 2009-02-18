@@ -16,7 +16,7 @@
 
 
 template< int mydim, int coorddim, class GridImp>
-inline Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() const
+Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() const
 {
   switch (mydim)
   {
@@ -55,7 +55,7 @@ inline Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() c
 }
 
 template<int mydim, int coorddim, class GridImp>
-inline const Dune::FieldVector<typename GridImp::ctype, coorddim>& Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+const Dune::FieldVector<typename GridImp::ctype, coorddim>& Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 operator [](int i) const
 {
   // This geometry is a vertex
@@ -84,7 +84,7 @@ operator [](int i) const
 }
 
 template< int mydim, int coorddim, class GridImp>
-inline Dune::FieldVector<typename GridImp::ctype, coorddim> Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+Dune::FieldVector<typename GridImp::ctype, coorddim> Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 global(const FieldVector<UGCtype, mydim>& local) const
 {
   FieldVector<UGCtype, coorddim> globalCoord(0.0);
@@ -108,7 +108,7 @@ global(const FieldVector<UGCtype, mydim>& local) const
 // Maps a global coordinate within the element to a
 // local coordinate in its reference element
 template< int mydim, int coorddim, class GridImp>
-inline Dune::FieldVector<typename GridImp::ctype, mydim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+Dune::FieldVector<typename GridImp::ctype, mydim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 {
   FieldVector<UGCtype, mydim> result;
@@ -134,7 +134,7 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 }
 
 template<int mydim, int coorddim, class GridImp>
-inline bool Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+bool Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
 {
   switch (mydim) {
@@ -185,7 +185,7 @@ checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
 
 
 template< int mydim, int coorddim, class GridImp>
-inline typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   /** \todo No need to recompute the determinant every time on a simplex */
@@ -194,7 +194,7 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
 
 
 template< int mydim, int coorddim, class GridImp>
-inline const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   if (jacobianInverseIsUpToDate_)
