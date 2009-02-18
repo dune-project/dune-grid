@@ -91,19 +91,19 @@ int main() try {
 
   // Test whether unstructured grids can be read and written
 #ifdef HAVE_UG
-  testReadingUnstructuredGrid<UGGrid<2> >("../../../../doc/grids/amiramesh/ug-testgrid-2.am");
-  testReadingUnstructuredGrid<UGGrid<3> >("../../../../doc/grids/amiramesh/ug-testgrid-3.am");
+  testReadingUnstructuredGrid<UGGrid<2> >("../../../../doc/grids/amiramesh/hybrid-testgrid-2d.am");
+  testReadingUnstructuredGrid<UGGrid<3> >("../../../../doc/grids/amiramesh/hybrid-testgrid-3d.am");
 #endif
 
-  /** \todo Testing of AlbertaGrid and ALUGrid currently not possible as we lack suitable test grids. */
 #ifdef HAVE_ALBERTA
-  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2.am");
-  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3.am");
+  testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
 #endif
 
 #ifdef HAVE_ALU
-  testReadingUnstructuredGrid<AluGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2.am");
-  testReadingUnstructuredGrid<AluGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3.am");
+  testReadingUnstructuredGrid<AluSimplexGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  testReadingUnstructuredGrid<AluSimplexGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
+  testReadingUnstructuredGrid<AluCubeGrid<3> >("../../../../doc/grids/amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works
