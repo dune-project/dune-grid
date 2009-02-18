@@ -86,117 +86,119 @@ namespace Dune {
 #ifdef ModelP
     /* DDD Interfaces */
 
+    typedef DDD_IF DDDInterface;
+
     /*! Master->HGhost/VHGhost */
-    static DDD_IF &ElementIF()
+    static DDDInterface &ElementIF()
     {
       return UG_NAMESPACE::ElementIF;
     }
 
     /*! ElementSymmIF: Master/HGhost/VHGhost */
-    static DDD_IF &ElementSymmIF()
+    static DDDInterface &ElementSymmIF()
     {
       return UG_NAMESPACE::ElementSymmIF;
     }
 
     /*! ElementVIF: Master->VGhost/VHGhost */
-    static DDD_IF &ElementVIF()
+    static DDDInterface &ElementVIF()
     {
       return UG_NAMESPACE::ElementVIF;
     }
 
     /*! ElementSymmVIF: Master/VGhost/VHGhost" */
-    static DDD_IF &ElementSymmVIF()
+    static DDDInterface &ElementSymmVIF()
     {
       return UG_NAMESPACE::ElementSymmVIF;
     }
 
     /*! Master->VGhost/HGhost/VHGhost */
-    static DDD_IF &ElementVHIF()
+    static DDDInterface &ElementVHIF()
     {
       return UG_NAMESPACE::ElementVHIF;
     }
 
     /*! ElementSymmVHIF: Master/VGhost/HGhost/VHGhost */
-    static DDD_IF &ElementSymmVHIF()
+    static DDDInterface &ElementSymmVHIF()
     {
       return UG_NAMESPACE::ElementSymmVHIF;
     }
 
     /*! BorderNodeIF: Border->Master */
-    static DDD_IF &BorderNodeIF()
+    static DDDInterface &BorderNodeIF()
     {
       return UG_NAMESPACE::BorderNodeIF;
     }
 
     /*! BorderNodeSymmIF: Border/Master */
-    static DDD_IF &BorderNodeSymmIF()
+    static DDDInterface &BorderNodeSymmIF()
     {
       return UG_NAMESPACE::BorderNodeSymmIF;
     }
 
     /*! OuterNodeIF: Master->HGhost/VGhost */
-    static DDD_IF &OuterNodeIF()
+    static DDDInterface &OuterNodeIF()
     {
       return UG_NAMESPACE::OuterNodeIF;
     }
 
 
     /*! NodeVIF: Master->VGhost/VHGhost */
-    static DDD_IF &NodeVIF()
+    static DDDInterface &NodeVIF()
     {
       return UG_NAMESPACE::NodeVIF;
     }
 
     /*! NodeIF: Master->VGhost/HGhost/VHGhost */
-    static DDD_IF &NodeIF()
+    static DDDInterface &NodeIF()
     {
       return UG_NAMESPACE::NodeIF;
     }
 
     /*! NodeAllIF: All/All */
-    static DDD_IF &NodeAllIF()
+    static DDDInterface &NodeAllIF()
     {
       return UG_NAMESPACE::NodeAllIF;
     }
 
     /*! BorderVectorIF: Border->Master */
-    static DDD_IF &BorderVectorIF()
+    static DDDInterface &BorderVectorIF()
     {
       return UG_NAMESPACE::BorderVectorIF;
     }
 
     /*! BorderVectorSymmIF: Master/Border */
-    static DDD_IF &BorderVectorSymmIF()
+    static DDDInterface &BorderVectorSymmIF()
     {
       return UG_NAMESPACE::BorderVectorSymmIF;
     }
 
     /*! OuterVectorIF: Master->HGhost/VHGhost */
-    static DDD_IF &OuterVectorIF()
+    static DDDInterface &OuterVectorIF()
     {
       return UG_NAMESPACE::OuterVectorIF;
     }
 
     /*! OuterVectorSymmIF: Master/Border/HGhost/VHGhost */
-    static DDD_IF &OuterVectorSymmIF()
+    static DDDInterface &OuterVectorSymmIF()
     {
       return UG_NAMESPACE::OuterVectorSymmIF;
     }
 
     /*! VectorVIF: Master->VGhost/VHGhost */
-    static DDD_IF &VectorVIF()
+    static DDDInterface &VectorVIF()
     {
       return UG_NAMESPACE::VectorVIF;
     }
 
     /*! VectorVAllIF: Master/Border/VGhost/VHGhost->Master/Border */
-    static DDD_IF &VectorVAllIF()
+    static DDDInterface &VectorVAllIF()
     {
       return UG_NAMESPACE::VectorVAllIF;
     }
 
     /*! VectorIF: Master->VGhost/VHGhost/HGhost */
-    static DDD_IF &VectorIF()
+    static DDDInterface &VectorIF()
     {
       return UG_NAMESPACE::VectorIF;
     }
