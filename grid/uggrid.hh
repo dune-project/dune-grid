@@ -14,6 +14,12 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
+#include <dune/common/mpihelper.hh>
+
+#if HAVE_MPI
+#include <dune/common/mpicollectivecommunication.hh>
+#endif
+
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
    UG can support two- and three-dimensional grids.  You choose be setting
@@ -97,7 +103,6 @@
 // Not needed here, but included for user convenience
 #include "uggrid/uggridfactory.hh"
 
-
 #ifdef ModelP
 namespace Dune {
 
@@ -106,49 +111,96 @@ namespace Dune {
   class UGMessageBuffer {
   protected:
     typedef UGMessageBuffer<DataHandle, GridDim, codim>  ThisType;
+    typedef UGGrid<GridDim>                              GridType;
     typedef typename DataHandle::DataType DataType;
 
     enum {
       dim = GridDim
     };
 
-    UGMessageBuffer(DataType *ugData)
+    UGMessageBuffer(void *ugData)
     {
-      ugData_ = ugData;
+      ugData_ = static_cast<char*>(ugData);
     };
 
   public:
-
     void write(const DataType &t)
-    {
-      *ugData_ = t;
-    }
+    { this->writeRaw_<DataType>(t);  }
 
     void read(DataType &t)
-    {
-      t = *ugData_;
-      ++ ugData_;
-    }
+    { this->readRaw_<DataType>(t);  }
+
 
   protected:
     friend class Dune::UGGrid<dim>;
 
+    template <class ValueType>
+    void writeRaw_(const ValueType &v)
+    {
+      *reinterpret_cast<ValueType*>(ugData_) = v;
+      ugData_ += sizeof(ValueType);
+    }
+
+    template <class ValueType>
+    void readRaw_(ValueType &v)
+    {
+      v = *reinterpret_cast<ValueType*>(ugData_);
+      ugData_ += sizeof(ValueType);
+    }
+
+    // returns number of bytes required for the UG message buffer
+    static unsigned ugBufferSize_(const GridType &grid)
+    {
+      if (duneDataHandle_->fixedsize(dim, codim)) {
+        return sizeof(DataType)
+               * duneDataHandle_->size(*grid.template lbegin<codim,InteriorBorder_Partition>(0));
+      }
+
+      typedef typename
+      GridType::template Codim<codim>::Entity Entity;
+
+      // iterate over all entities, find the maximum size for
+      // the current rank
+      int maxSize = 0;
+      typedef typename
+      GridType
+      ::template Codim<codim>
+      ::template Partition<Dune::All_Partition>
+      ::LeafIterator LeafIterator;
+      LeafIterator it = grid.template leafbegin<codim, Dune::All_Partition>();
+      const LeafIterator &endIt = grid.template leafend<codim, Dune::All_Partition>();
+      for (; it != endIt; ++it) {
+        maxSize = std::max((int) maxSize,
+                           (int) duneDataHandle_->size(*it));
+      }
+
+      // find maximum size for all ranks
+      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      if (!maxSize)
+        return 0;
+
+      // add the size of an unsigned integer to the actual
+      // buffer size. (we somewhere have to store the actual
+      // number of objects for each entity.)
+      return sizeof(unsigned)*sizeof(DataType)*maxSize;
+    }
+
     // called by DDD_IFOneway to serialize the data structure to
     // be send
-    static int ugGather(DDD_OBJ obj, void* data)
+    static int ugGather_(DDD_OBJ obj, void* data)
     {
       if (codim == 0) {
-        std::cout << "ugGather element index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Element*)obj) << "\n";
-
         UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
         ThisType msgBuf(static_cast<DataType*>(data));
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
         duneDataHandle_->gather(msgBuf, e);
       }
       else if (codim == dim) {
-        std::cout << "ugGather node index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Node*)obj) << "\n";
-
         UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
         ThisType msgBuf(static_cast<DataType*>(data));
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(e));
         duneDataHandle_->gather(msgBuf, e);
       }
       else {
@@ -163,22 +215,33 @@ namespace Dune {
 
     // called by DDD_IFOneway to deserialize the data structure
     // which has been received
-    static int ugScatter(DDD_OBJ obj, void* data)
+    static int ugScatter_(DDD_OBJ obj, void* data)
     {
 
       if (codim == 0) {
-        std::cout << "ugScatter element index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Element*)obj) << "\n";
 
-        UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
+        typedef UGMakeableEntity<0, dim, UGGrid<dim> > Entity;
+        Entity e((typename UG_NS<dim>::Element*)obj);
         ThisType msgBuf(static_cast<DataType*>(data));
-        duneDataHandle_->scatter(msgBuf, e, 1);
+        int n;
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.readRaw_(n);
+        else
+          n = duneDataHandle_->template size<Entity>(e);
+        if (n > 0)
+          duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
       }
       else if (codim == dim) {
-        std::cout << "ugScatter node index: " << UG_NS<dim>::levelIndex((typename UG_NS<dim>::Node*)obj) << "\n";
-
-        UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > e((typename UG_NS<dim>::Node*)obj);
+        typedef UGMakeableEntity<dim, dim, Dune::UGGrid<dim> > Entity;
+        Entity e((typename UG_NS<dim>::Node*)obj);
         ThisType msgBuf(static_cast<DataType*>(data));
-        duneDataHandle_->scatter(msgBuf, e, 1);
+        int n;
+        if (!duneDataHandle_->fixedsize(dim, codim))
+          msgBuf.readRaw_(n);
+        else
+          n = duneDataHandle_->template size<Entity>(e);
+        if (n > 0)
+          duneDataHandle_->template scatter<ThisType, Entity>(msgBuf, e, n);
       }
       else {
         DUNE_THROW(GridError,
@@ -191,7 +254,7 @@ namespace Dune {
     }
     static DataHandle *duneDataHandle_;
 
-    DataType          *ugData_;
+    char              *ugData_;
   };
 
 }   // end namespace Dune
@@ -201,6 +264,19 @@ DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = 0
 #endif
 
 namespace Dune {
+
+#if HAVE_MPI
+  template <int dim>
+  class CollectiveCommunication<Dune::UGGrid<dim> > : public CollectiveCommunication<MPI_Comm >
+  {
+    typedef CollectiveCommunication<MPI_Comm > ParentType;
+  public:
+    CollectiveCommunication()
+      : ParentType(MPIHelper::getCommunicator())
+    {}
+  };
+#endif
+
 
   template<int dim, int dimworld>
   struct UGGridFamily
@@ -302,6 +378,7 @@ namespace Dune {
     // each others numOfUGGrids field
     friend class UGGrid<2>;
     friend class UGGrid<3>;
+
     //**********************************************************
     // The Interface Methods
     //**********************************************************
@@ -546,27 +623,6 @@ namespace Dune {
      */
     bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
-#if 0
-    /** \brief The communication interface
-
-       This used to work at least partially for an old version of the communication interface.
-       This interface is obsolete, but the method is still there as a hint of how communicate
-       might be implementable today.
-
-       @param T: array class holding data associated with the entities
-       @param P: type used to gather/scatter data in and out of the message buffer
-       @param codim: communicate entites of given codim
-       @param if: one of the predifined interface types, throws error if it is not implemented
-       @param level: communicate for entities on the given level
-
-       Implements a generic communication function sending an object of type P for each entity
-       in the intersection of two processors. P has two methods gather and scatter that implement
-       the protocol. Therefore P is called the "protocol class".
-     */
-    template<class T, template<class> class P, int codim>
-    void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level);
-#endif
-
     /** \brief The communication interface for all codims on a given level
        @param T array class holding data associated with the entities
        @param DataHandle type used to gather/scatter data in and out of the message buffer
@@ -593,65 +649,110 @@ namespace Dune {
        the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
-    void communicate (DataHandle& dataHandle,
-                      InterfaceType iftype,
-                      CommunicationDirection dir) const
+    void communicate(DataHandle& dataHandle,
+                     InterfaceType iftype,
+                     CommunicationDirection dir) const
     {
 #ifdef ModelP
-      // Translate the communication direction from Dune-Speak to UG-Speak
-      DDD_IF_DIR UGIfDir = (dir==ForwardCommunication) ? IF_FORWARD : IF_BACKWARD;
-
       for (int curCodim = 0; curCodim <= dim; ++curCodim) {
         if (!dataHandle.contains(dim, curCodim))
           continue;
-        else if (!dataHandle.fixedsize(dim, curCodim))
-          DUNE_THROW(GridError, "Currently UG supports supports communication of fixed-size data types!");
 
-        if (curCodim == 0 &&
-            iftype == InteriorBorder_All_Interface)
-        {
-          typedef UGMessageBuffer<DataHandle,dim,0> UGMsgBuf;
-          UGMsgBuf::duneDataHandle_ = &dataHandle;
-
-          DDD_IFOneway(UG_NS<dim>::ElementVHIF(),
-                       UGIfDir,
-                       sizeof(typename DataHandle::DataType),
-                       &UGMsgBuf::ugGather,
-                       &UGMsgBuf::ugScatter);
-        }
-        else if (curCodim == dim &&
-                 iftype == InteriorBorder_All_Interface)
-        {
-          typedef UGMessageBuffer<DataHandle,dim,dim> UGMsgBuf;
-          UGMsgBuf::duneDataHandle_ = &dataHandle;
-
-          DDD_IFOneway(UG_NS<dim>::NodeIF(),
-                       UGIfDir,
-                       sizeof(typename DataHandle::DataType),
-                       &UGMsgBuf::ugGather,
-                       &UGMsgBuf::ugScatter);
-        }
-        else
-        {
-          DUNE_THROW(GridError,
-                     "Communication for codim "
-                     << curCodim
-                     << " entities is not yet supported "
-                     << "for communication interfaces of type "
-                     << iftype
-                     << " by the DUNE UGGrid interface!");
-        }
+        if (curCodim == 0)
+          communicateUG_<DataHandle, 0>(dataHandle, iftype, dir);
+        else if (curCodim == dim)
+          communicateUG_<DataHandle, dim>(dataHandle, iftype, dir);
       }
 #endif
     }
 
-
-    /** dummy collective communication */
+    /** the collective communication */
     const CollectiveCommunication<UGGrid>& comm () const
     {
-      return ccobj;
+      return ccobj_;
     }
 
+  protected:
+#ifdef ModelP
+    template <class DataHandle, int codim>
+    void communicateUG_(DataHandle &dataHandle,
+                        InterfaceType iftype,
+                        CommunicationDirection dir) const
+    {
+      DDD_IF_DIR ugIfDir;
+      // Translate the communication direction from Dune-Speak to UG-Speak
+      if (dir==ForwardCommunication)
+        ugIfDir = IF_FORWARD;
+      else
+        ugIfDir = IF_BACKWARD;
+
+      typedef UGMessageBuffer<DataHandle,dim,codim> UGMsgBuf;
+      UGMsgBuf::duneDataHandle_ = &dataHandle;
+
+      std::vector<typename UG_NS<dim>::DDDInterface> ugIfs;
+      findDDDInterfaces_(ugIfs, iftype, codim);
+
+      unsigned bufSize = UGMsgBuf::ugBufferSize_(*this);
+      if (!bufSize)
+        return;     // we don't need to communicate if we don't have any data!
+      for (unsigned i=0; i < ugIfs.size(); ++i)
+        DDD_IFOneway(ugIfs[i],
+                     ugIfDir,
+                     bufSize,
+                     &UGMsgBuf::ugGather_,
+                     &UGMsgBuf::ugScatter_);
+    }
+
+    void findDDDInterfaces_(std::vector<typename UG_NS<dim>::DDDInterface > &dddIfaces,
+                            InterfaceType iftype,
+                            int codim) const
+    {
+      dddIfaces.clear();
+      switch (codim)
+      {
+      case 0 :
+        switch (iftype) {
+        case InteriorBorder_InteriorBorder_Interface :
+          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          return;
+        case InteriorBorder_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          return;
+        default :
+          DUNE_THROW(GridError,
+                     "Element communication not supported for "
+                     "interfaces of type  "
+                     << iftype);
+        }
+
+      case dim :
+        switch (iftype)
+        {
+        case InteriorBorder_InteriorBorder_Interface :
+          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF());
+          return;
+        case InteriorBorder_All_Interface :
+          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF());
+          dddIfaces.push_back(UG_NS<dim>::NodeIF());
+          return;
+        default :
+          DUNE_THROW(GridError,
+                     "Node communication not supported for "
+                     "interfaces of type  "
+                     << iftype);
+        }
+
+      default :
+        DUNE_THROW(GridError,
+                   "Communication for codim "
+                   << codim
+                   << " entities is not yet supported "
+                   << " by the DUNE UGGrid interface!");
+      }
+    };
+#endif
+
+  public:
     // **********************************************************
     // End of Interface Methods
     // **********************************************************
@@ -761,13 +862,14 @@ namespace Dune {
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
     typename UG_NS<dim>::MultiGrid* multigrid_;
 
+    /** \brief The collective communication object. */
+    CollectiveCommunication<UGGrid> ccobj_;
+
     /** \brief The classes implementing the geometry of the boundary segments */
     std::vector<const BoundarySegment<dim>*> boundarySegments_;
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
     std::vector<array<unsigned int, dim*2-2> > boundarySegmentVertices_;
-
-    CollectiveCommunication<UGGrid> ccobj;
 
     /** \brief Recomputes entity indices after the grid was changed
         \param setLevelZero If this is false, level indices of the level 0 are not touched
