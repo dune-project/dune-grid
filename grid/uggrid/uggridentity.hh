@@ -106,7 +106,57 @@ namespace Dune {
 
     /** \brief The partition type for parallel computing
      * \todo So far it always returns InteriorEntity */
-    PartitionType partitionType () const { return InteriorEntity; }
+    PartitionType partitionType () const
+    {
+#ifndef ModelP
+      return InteriorEntity;
+#else
+#define PARHDRE(p) (&((p)->ddd))
+#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
+
+      if (codim != dim) {
+        // TODO
+        return InteriorEntity;
+      }
+
+      typename UG_NS<dim>::Node *node =
+        static_cast<typename UG_NS<dim>::Node *>(target_);
+
+      if (EPRIO(node) == UG::PrioBorder || hasBorderCopy_(node))
+        return BorderEntity;
+      else if (EPRIO(node) == UG::PrioMaster)
+        return InteriorEntity;
+      else if (EPRIO(node)    == UG::PrioHGhost
+               || EPRIO(node) == UG::PrioVGhost
+               || EPRIO(node) == UG::PrioVHGhost)
+        return GhostEntity;
+      else
+        DUNE_THROW(GridError, "Unknown priority " << EPRIO(node));
+
+#undef EPRIO
+#undef PARHDRE
+#endif
+    }
+
+  protected:
+#ifdef ModelP
+    bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
+#define PARHDR(p)         (&((p)->ddd))
+#define PRIOLIST(n)        DDD_InfoProcList(PARHDR(n))
+
+      int  *plist = PRIOLIST(node);
+      for (int i = 0; plist[i] >= 0; i += 2)
+        if (plist[i + 1] == UG::PrioBorder)
+          return true;
+
+      return false;
+#undef PARHDR
+#undef PRIOLIST
+    }
+#endif
+
+  public:
+
 
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
        with codimension cc.
@@ -118,8 +168,6 @@ namespace Dune {
     const Geometry& geometry () const {return geo_;}
 
   private:
-
-
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       target_ = target;
       geo_.setToTarget(target);
