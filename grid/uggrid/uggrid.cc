@@ -225,7 +225,6 @@ Dune::UGGrid < dim >::lend (int level) const
 template < int dim >
 int Dune::UGGrid < dim >::size (int level, int codim) const
 {
-#ifndef ModelP
   if(codim == 0)
   {
     return levelIndexSet(level).size(GeometryType(GeometryType::simplex,dim))
@@ -248,34 +247,6 @@ int Dune::UGGrid < dim >::size (int level, int codim) const
   }
   DUNE_THROW(GridError, "UGGrid<" << dim << ">::size(int level, int codim) is only implemented"
                                   << " for codim==0 and codim==dim!");
-#else
-
-  int numberOfElements = 0;
-
-  if(codim == 0)
-  {
-    typename Traits::template Codim<0>::LevelIterator it = lbegin<0>(level);
-    typename Traits::template Codim<0>::LevelIterator endit = lend<0>(level);
-    for (; it != endit; ++it)
-      numberOfElements++;
-
-  } else
-  if(codim == dim)
-  {
-    typename Traits::template Codim<dim>::LevelIterator it    = lbegin<dim>(level);
-    typename Traits::template Codim<dim>::LevelIterator endit = lend<dim>(level);
-    for(; it != endit; ++it)
-      numberOfElements++;
-  }
-  else
-  {
-    DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dim
-                                    << ">::size(int level, int codim) is only implemented"
-                                    << " for codim==0 and codim==dim!");
-  }
-
-  return numberOfElements;
-#endif
 }
 
 

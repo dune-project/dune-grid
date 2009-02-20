@@ -113,9 +113,9 @@ namespace Dune {
 #else
 #define PARHDRE(p) (&((p)->ddd))
 #define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-
       if (codim != dim) {
-        // TODO
+        // TODO: non-nodes and non-elements (elements are done
+        // below)
         return InteriorEntity;
       }
 
@@ -124,7 +124,7 @@ namespace Dune {
 
       if (EPRIO(node) == UG::PrioBorder || hasBorderCopy_(node))
         return BorderEntity;
-      else if (EPRIO(node) == UG::PrioMaster)
+      else if (EPRIO(node) == UG::PrioMaster || EPRIO(node) == UG::PrioNone)
         return InteriorEntity;
       else if (EPRIO(node)    == UG::PrioHGhost
                || EPRIO(node) == UG::PrioVGhost
@@ -296,7 +296,11 @@ namespace Dune {
 
     //! returns true if Entity has NO children
     bool isLeaf() const {
-      return UG_NS<dim>::isLeaf(target_);
+      Dune::PartitionType piType = this->partitionType();
+
+      // HACK: ghosts entities are never leafs in UG, in DUNE can be
+      //       leafs. Maybe this could also be a bug in UG...
+      return UG_NS<dim>::isLeaf(target_) || piType == GhostEntity;
     }
 
     //! returns true if element is of regular type
