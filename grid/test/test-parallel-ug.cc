@@ -15,23 +15,17 @@
 
 using namespace Dune;
 
-//! Use only elements for a mapper
-template <int dim>
-struct ElementLayout
+//! a "flexible" layout where for which arbitrary codims can be
+//! specified
+template <int commCodim>
+struct LayoutWrapper
 {
-  bool contains (Dune::GeometryType gt)
+  template <int dim>
+  struct Layout
   {
-    return gt.dim() == dim;
-  }
-};
-
-template <int dim>
-struct NodeLayout
-{
-  bool contains (Dune::GeometryType gt)
-  {
-    return gt.dim() == 0;
-  }
+    bool contains(Dune::GeometryType gt)
+    { return gt.dim() == dim - commCodim;  }
+  };
 };
 
 // A DataHandle class to exchange entries of a vector.
@@ -131,14 +125,14 @@ int main (int argc , char **argv) try
   int rank = mpiHelper.rank();
   int size = mpiHelper.size();
 
-  std::cout << "This is process " << rank << " of " << size << ", PID " << getpid() << " .\n";
+  std::cout << "This is process " << rank + 1 << " of " << size << ", PID " << getpid() << " .\n";
 
   ////////////////////////////////////////////////////////////
   // Create uniform grid on rank 0
   ////////////////////////////////////////////////////////////
   int n = 11;
   const int dim = 2;
-  const int commCodim = 0;    // codim of the entities to communicate
+  const int commCodim = dim;    // codim of the entities to communicate
   typedef UGGrid<dim> GridType;
   GridType grid;
   GridFactory<GridType> factory(&grid);
@@ -178,7 +172,10 @@ int main (int argc , char **argv) try
   grid.loadBalance();
 
 
-  std::cout << "Process " << rank << " has " << grid.size(0) << " elements." << std::endl;
+  std::cout << "Process " << rank + 1
+            << " has " << grid.size(0)
+            << " elements and " << grid.size(dim)
+            << " nodes.\n";
 
   // make sure each process has some elements
   assert(grid.size(0) > 0);
@@ -192,14 +189,20 @@ int main (int argc , char **argv) try
   GridType::LeafGridView leafGridView = grid.leafView();
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
-            << " elements and " << level0GridView.size(dim) << " nodes.\n";
+            << " elements "  << level0GridView.size(dim - 1)
+            << " edges and " << level0GridView.size(dim)
+            << " nodes.\n";
   std::cout << "LeafGridView has " << leafGridView.size(0)
-            << " elements and " << leafGridView.size(dim) << " nodes.\n";
+            << " elements, " << leafGridView.size(dim - 1)
+            << " edges and " << leafGridView.size(dim)
+            << " nodes.\n";
 
-  typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,ElementLayout > LevelMapperType;
+  typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,
+      LayoutWrapper<commCodim>::Layout> LevelMapperType;
   LevelMapperType levelMapper(grid, 0);
 
-  typedef LeafMultipleCodimMultipleGeomTypeMapper<GridType,ElementLayout > LeafMapperType;
+  typedef LeafMultipleCodimMultipleGeomTypeMapper<GridType,
+      LayoutWrapper<commCodim>::Layout> LeafMapperType;
   LeafMapperType leafMapper(grid);
 
   std::cout << "Level index set has " << levelMapper.size() << " entities\n";
@@ -209,6 +212,7 @@ int main (int argc , char **argv) try
   typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
   UserDataType userDataSend(leafGridView.size(commCodim), 0.0);
   UserDataType userDataReceive(leafGridView.size(commCodim), 0.0);
+  UserDataType entityIndex(leafGridView.size(commCodim), -1e10);
   UserDataType partitionType(leafGridView.size(commCodim), -1e10);
 
   // write the partition type of each node into the corrosponding
@@ -218,6 +222,7 @@ int main (int argc , char **argv) try
   const GridType::LeafGridView::Codim<commCodim>::Iterator
   &endIt = leafGridView.end<commCodim>();
   for (; it != endIt; ++it) {
+    entityIndex[leafMapper.map(*it)] = leafMapper.map(*it);
     partitionType[leafMapper.map(*it)] = it->partitionType();
   };
 
@@ -246,11 +251,13 @@ int main (int argc , char **argv) try
     writer.addCellData(userDataSend, "Send");
     writer.addCellData(userDataReceive, "Receive");
     writer.addCellData(partitionType, "Partition Type");
+    writer.addCellData(entityIndex, "Entity Index");
   }
   else if (commCodim == dim) {
     writer.addVertexData(userDataSend, "Send");
     writer.addVertexData(userDataReceive, "Receive");
     writer.addVertexData(partitionType, "Partition Type");
+    writer.addVertexData(entityIndex, "Entity Index");
   }
   writer.write("test-parallel-ug",
                Dune::VTKOptions::ascii);
