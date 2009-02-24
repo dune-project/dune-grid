@@ -486,7 +486,7 @@ namespace Dune
     template< int dim >
     class MeshPointer< dim >::MacroIteratorBase
     {
-      friend class MeshPointer< dim >;
+      friend class MacroIterator;
 
     public:
       typedef Alberta::MeshPointer< dim > MeshPointer;
