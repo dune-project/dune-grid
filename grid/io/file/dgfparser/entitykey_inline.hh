@@ -112,36 +112,27 @@ namespace Dune
 
   template< int dimworld >
   inline DGFEntityKey< unsigned int >
-  ElementFaceUtil :: generateCubeFace
-    ( const std :: vector< unsigned int > &element, int f )
+  ElementFaceUtil::generateCubeFace
+    ( const std::vector< unsigned int > &element, int f )
   {
     ReferenceCube< double, dimworld > ref;
     const unsigned int size = ref.size( f, 1, dimworld );
-    std :: vector< unsigned int > k( size );
-    /*
-       for (int i=0;i<size;i++) {
-       k[i] = element[ref.subEntity(f,1,i,dimworld)];
-       }
-       if (dimworld==3) {
-       if (f==2 || f==1 || f==5) {
-        int ktmp=k[0];
-        k[0]=k[1];
-        k[1]=ktmp;
-       }
-       else {
-        int ktmp=k[2];
-        k[2]=k[3];
-        k[3]=ktmp;
-       }
-       }
-     */
-    const int face = ElementTopologyMapping< hexa > :: dune2aluFace( f );
-    for( unsigned int i = 0; i < size; ++i )
+    std::vector< unsigned int > k( size );
+    if( dimworld == 3 )
     {
-      // int idxdune = ref.subEntity(f,1,i,dimworld);
-      int idx = ElementTopologyMapping< hexa > :: alu2duneFaceVertex( face, i );
-      int idxdune = ref.subEntity( f, 1, idx, dimworld );
-      k[ size - (i+1) ] = element[ idxdune ];
+      // ALUCubeGrid needs a special numbering for the faces
+      const int face = ElementTopologyMapping< hexa >::dune2aluFace( f );
+      for( unsigned int i = 0; i < size; ++i )
+      {
+        int idx = ElementTopologyMapping< hexa >::alu2duneFaceVertex( face, i );
+        int idxdune = ref.subEntity( f, 1, idx, dimworld );
+        k[ size - (i+1) ] = element[ idxdune ];
+      }
+    }
+    else
+    {
+      for( unsigned int i = 0; i < size; ++ i )
+        k[ i ] = element[ ref.subEntity( f, 1, i, dimworld ) ];
     }
     return DGFEntityKey< unsigned int >( k );
   }
