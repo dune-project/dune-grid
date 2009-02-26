@@ -24,7 +24,7 @@ const char* VTKDataMode(Dune::VTKOptions::DataMode dm)
 }
 
 template< class GridView >
-class VTKVectorFuction
+class VTKVectorFunction
   : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
@@ -32,7 +32,17 @@ class VTKVectorFuction
   enum { w = GridView :: dimensionworld };
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
+  const char *type;
 public:
+  /** @brief Make a new VTKVectorFunction
+   *
+   * @param type_ Type of the function for use in its name (hint: "cell" or
+   *              "vertex")
+   */
+  VTKVectorFunction(const char *type_)
+    : type(type_)
+  { }
+
   //! return number of components
   virtual int ncomps () const { return n; };
 
@@ -52,7 +62,7 @@ public:
   virtual std::string name () const
   {
     char _name[256];
-    snprintf(_name, 256, "vector-%iD", ncomps());
+    snprintf(_name, 256, "%s-vector-%iD", type, ncomps());
     return std::string(_name);
   };
 
@@ -72,8 +82,8 @@ void doWrite( const GridView &gridView, Dune :: VTKOptions :: DataMode dm )
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
-  VTKVectorFuction< GridView > *vectordata = new VTKVectorFuction< GridView >;
-  vtk.addVertexData(vectordata);
+  vtk.addVertexData(new VTKVectorFunction<GridView>("vertex"));
+  vtk.addCellData(new VTKVectorFunction<GridView>("cell"));
 
   char name[256];
   snprintf(name,256,"vtktest-%iD-%s-ascii", dim, VTKDataMode(dm));

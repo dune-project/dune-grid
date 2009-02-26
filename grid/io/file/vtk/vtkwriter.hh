@@ -1111,8 +1111,13 @@ namespace Dune
         if (outputtype==VTKOptions::binaryappended)
           p = new VTKBinaryAppendedDataArrayWriter<float>(s,(*it)->name(),(*it)->ncomps(),bytecount);
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
+        {
           for (int j=0; j<(*it)->ncomps(); j++)
             p->write((*it)->evaluate(j,*i,i.position()));
+          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+          if((*it)->ncomps()==2)
+            p->write(0.0);
+        }
         delete p;
       }
       indentDown();
@@ -1281,7 +1286,8 @@ namespace Dune
             stream.write(data);
           }
           //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
-          if((*it)->ncomps()==2) {
+          if((*it)->ncomps()==2)
+          {
             float data=0.0;
             stream.write(data);
           }
@@ -1294,11 +1300,19 @@ namespace Dune
         blocklength = ncells * (*it)->ncomps() * sizeof(float);
         stream.write(blocklength);
         for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
+        {
           for (int j=0; j<(*it)->ncomps(); j++)
           {
             float data = (*it)->evaluate(j,*i,i.position());
             stream.write(data);
           }
+          //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+          if((*it)->ncomps()==2)
+          {
+            float data=0.0;
+            stream.write(data);
+          }
+        }
       }
 
       // point coordinates
