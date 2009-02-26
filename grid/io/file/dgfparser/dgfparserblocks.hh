@@ -491,7 +491,7 @@ namespace Dune
       {
         if( (foundFlags_ & foundPeriodic) == 0 )
         {
-          dwarn << "GridParameterBlock: Parameter 'copies' not specified, "
+          dwarn << "GridParameterBlock: Parameter 'periodic' not specified, "
                 << "defaulting to no periodic boundary." << std::endl;
         }
         return (_periodic.find(dim) != _periodic.end());
