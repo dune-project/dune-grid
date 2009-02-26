@@ -34,16 +34,20 @@ namespace Dune {
         count_(0),
         seqFile_()
     {
-      std::stringstream pvdname;
-      pvdname << path << "/" << name << ".pvd";
-      seqFile_.open(pvdname.str().c_str());
-      seqFile_ << "<?xml version=\"1.0\"?> \n"
-               << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
-               << "<Collection> \n" << std::flush;
+      if (gridView.comm().rank()==0) {
+        std::stringstream pvdname;
+        pvdname << name << ".pvd";
+        seqFile_.open(pvdname.str().c_str());
+        seqFile_ << "<?xml version=\"1.0\"?> \n"
+                 << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
+                 << "<Collection> \n" << std::flush;
+      }
     }
     ~VTKSequenceWriter() {
-      seqFile_ << "</Collection> \n"
-               << "</VTKFile> \n" << std::flush;
+      if (seqFile_.is_open()) {
+        seqFile_ << "</Collection> \n"
+                 << "</VTKFile> \n" << std::flush;
+      }
     }
     void write (double time,
                 VTKOptions::OutputType ot = VTKOptions::ascii)
@@ -53,9 +57,11 @@ namespace Dune {
       name << name_ << "-" << std::setw(5) << count_;
       std::string pvtuName = BaseType::pwrite(name.str().c_str(),
                                               path_.c_str(),extendpath_.c_str(),ot);
-      seqFile_ << "<DataSet timestep=\"" << time
-               << "\" group=\"\" part=\"0\" name=\"\" file=\""
-               << pvtuName << "\"/> \n" << std::flush;
+      if (seqFile_.is_open()) {
+        seqFile_ << "<DataSet timestep=\"" << time
+                 << "\" group=\"\" part=\"0\" name=\"\" file=\""
+                 << pvtuName << "\"/> \n" << std::flush;
+      }
       ++count_;
     }
   private:
