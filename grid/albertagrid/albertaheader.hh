@@ -63,6 +63,11 @@ extern "C"
 
 #include <alberta.h>
 
+// Macro nil may be defined by alberta_util.h. If so, undefine it.
+#ifdef nil
+#undef nil
+#endif
+
 // for version 1.2 thing are different
 #if DUNE_ALBERTA_VERSION < 0x200
 
