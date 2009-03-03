@@ -82,22 +82,7 @@ namespace Dune {
 
   template<int dimension, class CoordType>
   class VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, dimension>
-  {
-  public:
-    typedef typename VirtualRefinement<dimension, CoordType>::template Codim<dimension>::SubEntityIterator Common;
-    typedef VirtualRefinement<dimension, CoordType> Refinement;
-    typedef typename Refinement::CoordVector CoordVector;
-
-    CoordVector coords() const;
-  };
-
-  template<int dimension, class CoordType>
-  typename VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, dimension>::CoordVector
-  VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, dimension>::
-  coords() const
-  {
-    return static_cast<const Common *>(this)->backend->coords();
-  }
+  {};
 
   // The iterator for elements
 
@@ -129,8 +114,10 @@ namespace Dune {
       public VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>
   {
   public:
-    typedef typename VirtualRefinement<dimension, CoordType>::template Codim<codimension>::SubEntityIterator This;
-    typedef typename VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<codimension> IteratorBack;
+    typedef VirtualRefinement<dimension, CoordType> Refinement;
+    typedef typename Refinement::template Codim<codimension>::SubEntityIterator This;
+    typedef typename Refinement::template SubEntityIteratorBack<codimension> IteratorBack;
+    typedef typename Refinement::CoordVector CoordVector;
 
     SubEntityIterator(IteratorBack *backend);
     SubEntityIterator(const This &other);
@@ -142,6 +129,7 @@ namespace Dune {
     void increment();
 
     int index() const;
+    CoordVector coords() const;
   private:
     friend class VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
     IteratorBack *backend;
@@ -202,6 +190,13 @@ namespace Dune {
   index() const
   { return backend->index(); }
 
+  template<int dimension, class CoordType>
+  template<int codimension>
+  typename VirtualRefinement<dimension, CoordType>::template Codim<codimension>::SubEntityIterator::CoordVector
+  VirtualRefinement<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
+  coords() const
+  { return backend->coords(); }
+
   //
   // The iterator backend
   //
@@ -215,10 +210,6 @@ namespace Dune {
   class VirtualRefinementSubEntityIteratorBackSpecial<dimension, CoordType, dimension>
   {
   public:
-    typedef VirtualRefinement<dimension, CoordType> Refinement;
-    typedef typename Refinement::CoordVector CoordVector;
-
-    virtual CoordVector coords() const = 0;
 
     virtual ~VirtualRefinementSubEntityIteratorBackSpecial()
     {}
@@ -249,7 +240,9 @@ namespace Dune {
     : public VirtualRefinementSubEntityIteratorBackSpecial<dimension, CoordType, codimension>
   {
   public:
-    typedef typename VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<codimension> This;
+    typedef VirtualRefinement<dimension, CoordType> Refinement;
+    typedef typename Refinement::template SubEntityIteratorBack<codimension> This;
+    typedef typename Refinement::CoordVector CoordVector;
 
     virtual ~SubEntityIteratorBack() {}
 
@@ -259,6 +252,7 @@ namespace Dune {
     virtual This &operator++() = 0;
 
     virtual int index() const = 0;
+    virtual CoordVector coords() const = 0;
   };
 
   // /////////////////////////////////////////////////
@@ -362,22 +356,7 @@ namespace Dune {
   template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
   class VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, dimension>
     : public VirtualRefinement<dimension, CoordType>::template SubEntityIteratorBack<dimension>
-  {
-  public:
-    typedef typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<dimension> Common;
-    typedef VirtualRefinement<dimension, CoordType> RefinementBase;
-    typedef typename RefinementBase::CoordVector CoordVector;
-
-    CoordVector coords() const;
-  };
-
-  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
-  typename VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, dimension>::CoordVector
-  VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, dimension>::
-  coords() const
-  {
-    return static_cast<const Common*>(this)->backend.coords();
-  }
+  {};
 
   // The iterator backend implementation specialties for elements
 
@@ -420,6 +399,7 @@ namespace Dune {
     typedef typename Refinement::template Codim<codimension>::SubEntityIterator BackendIterator;
     typedef typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension> This;
     typedef typename VirtualRefinement::template SubEntityIteratorBack<codimension> Base;
+    typedef typename VirtualRefinement::CoordVector CoordVector;
 
     SubEntityIteratorBack(const BackendIterator &backend);
     SubEntityIteratorBack(const This &other);
@@ -430,6 +410,8 @@ namespace Dune {
     Base &operator++();
 
     int index() const;
+    CoordVector coords() const;
+
   private:
     friend class VirtualRefinementImpSubEntityIteratorBackSpecial<geometryType, CoordType, coerceTo, dimension, codimension>;
     BackendIterator backend;
@@ -483,6 +465,13 @@ namespace Dune {
   VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
   index() const
   { return backend.index(); }
+
+  template<GeometryType::BasicType geometryType, class CoordType, GeometryType::BasicType coerceTo, int dimension>
+  template<int codimension>
+  typename VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::template SubEntityIteratorBack<codimension>::CoordVector
+  VirtualRefinementImp<geometryType, CoordType, coerceTo, dimension>::SubEntityIteratorBack<codimension>::
+  coords() const
+  { return backend.coords(); }
 
   // ////////////////////////
   //

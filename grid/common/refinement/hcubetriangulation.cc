@@ -243,6 +243,7 @@ namespace Dune {
       public:
         typedef RefinementImp<dimension, CoordType> Refinement;
         typedef typename Refinement::IndexVector IndexVector;
+        typedef typename Refinement::CoordVector CoordVector;
         typedef typename Refinement::template Codim<0>::Geometry Geometry;
 
         RefinementIteratorSpecial(int level, bool end = false);
@@ -251,6 +252,7 @@ namespace Dune {
 
         IndexVector vertexIndices() const;
         int index() const;
+        CoordVector coords() const;
         const Geometry &geometry() const;
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
@@ -311,6 +313,17 @@ namespace Dune {
       index() const
       {
         return kuhnIndex*BackendRefinement::nElements(level) + backend.index();
+      }
+
+      template<int dimension, class CoordType>
+      typename RefinementIteratorSpecial<dimension, CoordType, 0>::CoordVector
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      coords() const
+      {
+        return geometry()
+               .global(ReferenceElements<CoordType, dimension>
+                       ::general(GeometryType(GeometryType::simplex, dimension))
+                       .position(0,0));
       }
 
       template<int dimension, class CoordType>
@@ -391,7 +404,7 @@ namespace Dune {
         }
 
         FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
-        { return referenceToKuhn(backend->geometry().global(local), getPermutation<dimension>(kuhnIndex)); }
+        { return referenceToKuhn(backend.geometry().global(local), getPermutation<dimension>(kuhnIndex)); }
 
         FieldVector<ct, mydimension> local(const FieldVector<ct, coorddimension>& global) const
         { return backend->geometry().local(kuhnToReference(global, getPermutation<dimension>(kuhnIndex))); }
