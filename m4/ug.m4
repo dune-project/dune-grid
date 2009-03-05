@@ -8,7 +8,7 @@ AC_DEFUN([DUNE_PATH_UG],[
   AC_REQUIRE([DUNE_MPI])
 
   AC_ARG_WITH(ug,
-    AC_HELP_STRING([--with-ug=PATH],[directory with UG inside]))
+    AC_HELP_STRING([--with-ug=PATH],[directory where UG is installed]))
 
   # store old values
   ac_save_LDFLAGS="$LDFLAGS"
