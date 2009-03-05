@@ -9,8 +9,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   AC_REQUIRE([DUNE_ALBERTA_DIMENSION])
 
   AC_ARG_WITH(alberta,
-    AC_HELP_STRING([--with-alberta=PATH],[directory with ALBERTA (ALBERTA
-    version 1.2 and higher) inside]))
+    AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
+    version 1.2 and higher) is installed]))
 
   # do not use alberta debug lib 
   with_alberta_debug=0
