@@ -464,7 +464,14 @@ namespace Dune {
         // edge, because Dune wants entities which are copies of each other to have the same id.
         const typename UG_NS<dim>::Edge* fatherEdge;
         fatherEdge = GetFatherEdge(edge);
-        while (fatherEdge) {
+
+        while (fatherEdge   // fatherEdge exists
+               // ... and it must be a true copy father
+               && ( (fatherEdge->links[0].nbnode->myvertex == edge->links[0].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[1].nbnode->myvertex)
+                    ||
+                    (fatherEdge->links[0].nbnode->myvertex == edge->links[1].nbnode->myvertex
+                     && fatherEdge->links[1].nbnode->myvertex == edge->links[0].nbnode->myvertex) ) ) {
           edge = fatherEdge;
           fatherEdge = GetFatherEdge(edge);
         }
