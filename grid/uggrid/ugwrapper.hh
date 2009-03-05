@@ -792,6 +792,10 @@ namespace Dune {
     }
 #endif
 
+    static void RemoveDomain(const char* name) {
+      //   UG_NAMESPACE ::RemoveDomain(name);
+    }
+
     static void* InsertInnerNode(UG_NAMESPACE ::grid* grid, const double* pos) {
       return UG_NAMESPACE ::InsertInnerNode(grid, pos);
     }
