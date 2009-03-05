@@ -400,7 +400,7 @@ namespace Dune
      -# The last argument \c should be of the type \c Dune::MPIHelper::MPICommunicator
         which defaults to \c MPI_COMM_WORLD for parallel runs or some default value for serial runs.
      -# If the file given through the first argument is not a dgf file
-        a suitable constructure on the \c GridType class is called - if
+        a suitable constructor on the \c GridType class is called - if
         one is available.
 
      @section FORMAT Format Description
@@ -423,13 +423,13 @@ namespace Dune
      <!---------------------------------------------->
      DGF files must start with the keyword \b DGF. Files passed to the
      grid parser not starting with this keyword are directly passed to a
-     suitable constructure in the GridType class.
+     suitable constructor in the GridType class.
 
      @subsection BLOCKS Blocks
      <!---------------------------------------------->
      In the following all blocks are briefly described in alphabetical order.
      The construction of the grid is detailed below. In general lines
-     are parser sequentially, with the exception of lines starting
+     are parse sequentially, with the exception of lines starting
      with a special keyword which are treated separately.
 
      - \b Boundarydomain  \n
@@ -459,7 +459,7 @@ namespace Dune
        - By means of the special keyword \b parameters followed by a positive
          integer \c n it is possible to add \c n parameters to each element of the
          grid. These double valued parameters then have to be added to the definition
-         lines for the elementsi behind the vertex numbers.
+         lines for the elements behind the vertex numbers.
      - \b Interval \n
        Each interval is described by three lines in this block:
        the first two lines give the lower and upper vector of an interval,
@@ -491,7 +491,7 @@ namespace Dune
        - Using the \b parameters keyword it is possible to add a set of parameters
          to each vertex of the grid.
      - \b GridParameter \n
-       Using this block a grid specific parameters can be passed to certain grids.
+       Using this block grid specific parameters can be passed to certain grids.
        The following options are implemented at the moment: \n
        - For YaspGrid two options can be choosen: \n
           1. \b overlap defining the overlap of the grid (default value is zero) \n
@@ -513,7 +513,7 @@ namespace Dune
      The details of the construction are logged in the file
      \b dgfparser.log.
 
-     The construction of the grid depends on the type of elements the grid
+     The construction of the grid depends on the type of elements the
      given by \c GridType can handle.
 
      @subsection CONSTRCART Cartesian grids
@@ -530,7 +530,7 @@ namespace Dune
 
      The vertices and elements of the grid are constructed in the
      following three steps:
-     -# The file is parser for
+     -# The file is parsed for
         an \b Interval  block; if present a Cartesian grid is build for each
         interval defined in this block and
         each element is partitioned either into two triangles or into six
@@ -590,7 +590,7 @@ namespace Dune
 
      The vertices and elements of the grid are constructed in one of the
      following stages:
-     -# The file is first parser for
+     -# The file is first parsed for
         an \b Interval  block; if present a Cartesian grid is build;
         a simplex grid is generated if a \c Simplex block is present
         otherwise a cube grid is constructed.
@@ -632,13 +632,13 @@ namespace Dune
        option described below.
        One can either use a file in Tetgen/Triangle format to directly generate
        a macro grid or one can prescribe vertices and boundary faces
-       which will be used to generate the grid directly in th DGF file:
-       -# For the first approach use the token \b file to give a filemane
+       which will be used to generate the grid directly in the DGF file:
+       -# For the first approach use the token \b file to give a filename
           and the type of the file (e.g. node, mesh, ply...). Example:
           \code
             file name mesh
           \endcode
-          If the filetype is givn, it will be appended to \b name and this will be
+          If the filetype is given, it will be appended to \b name and this will be
           passed to Tetgen/Triangle. Additional parameters for the grid generators
           can be given by the the \b parameter token.
           If no file type is given it is assumed that in a previous run of
@@ -892,7 +892,7 @@ namespace Dune
    \image html  examplegrid10c.png "The resulting cube grid"
    \image html  examplegrid10s.png "The resulting simplex grid"
 
-   \e Using multiple intervale: Here the boundary ids are not set
+   \e Using multiple intervals: Here the boundary ids are not set
    correctly; this could be done using different boundarydomains.
 
    @include examplegrid11.dgf
