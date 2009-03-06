@@ -20,7 +20,6 @@
 
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/albertagrid/dgfparser.hh>
-#include <dune/grid/albertagrid/albertareader.hh>
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
@@ -28,6 +27,7 @@
 #include "checkcommunicate.cc"
 #include "checkiterators.cc"
 #include "checktwists.cc"
+#include "check-albertareader.cc"
 
 
 template <class GridType >
@@ -51,25 +51,6 @@ void markOne ( GridType & grid , int num , int ref )
 }
 
 
-template< class Grid >
-void testAlbertaReader ()
-{
-  std::cout << ">>> Checking AlbertaReader..." << std::endl;
-
-  std::ostringstream filename;
-  filename << "grid-" << Grid::dimension << "-" << Grid::dimensionworld << ".amc";
-
-  AlbertaReader< Grid > reader;
-  GridFactory< Grid > factory;
-  reader.readGrid( filename.str(), factory );
-
-  // create grid and just check the macro grid
-  Grid *grid = factory.createGrid();
-  gridcheck( *grid );
-  GridFactory< Grid >::destroyGrid( grid );
-}
-
-
 int main ()
 try {
   const int dim = GRIDDIM;
@@ -78,9 +59,7 @@ try {
 
   std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
 
-#if DUNE_ALBERTA_VERSION >= 0x200
-  testAlbertaReader< GridType >();
-#endif
+  checkAlbertaReader< GridType >();
 
   /* use grid-file appropriate for dimensions */
   std::ostringstream filename;

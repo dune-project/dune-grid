@@ -1,6 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 // $Id$
+#ifndef GRIDCHECK_CC
+#define GRIDCHECK_CC
 
 /**
 
@@ -1084,3 +1086,5 @@ void gridcheck (Grid &g)
   for( int level = 0; level <= g.maxLevel(); ++level )
     Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
 }
+
+#endif // #ifndef GRIDCHECK_CC

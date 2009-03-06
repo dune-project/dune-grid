@@ -15,6 +15,7 @@
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
 #include "checktwists.cc"
+#include "check-albertareader.cc"
 
 using namespace Dune;
 
@@ -218,6 +219,9 @@ try {
   {
     typedef ALUSimplexGrid< 3, 3 > GridType;
 
+    if( myrank == 0 )
+      checkAlbertaReader< GridType >();
+
     // check empty grid
     {
       if( myrank == 0 )
@@ -228,7 +232,9 @@ try {
 
     {
       std::string filename;
-      if( mysize <= 2 )
+      if( argc > 1 )
+        filename = argv[ 1 ];
+      else if( mysize <= 2 )
         filename = "simplex-testgrid-3-3.dgf";
       else
         filename = "simplex-testgrid-3-3-large.dgf";
@@ -252,7 +258,7 @@ try {
       }
 #endif
     }
-  };
+  }
 
   return 0;
 }

@@ -187,8 +187,10 @@ void checkIntersectionIterator(const GridViewType& view,
     //   This has to be zero.
     // //////////////////////////////////////////////////////////////////////
     const int interDim = IntersectionIterator::LocalGeometry::mydimension;
-    const QuadratureRule<double, interDim>& quad
-      = QuadratureRules<double, interDim>::rule(iIt->intersectionSelfLocal().type(), interDim);
+    const QuadratureRule< double, interDim > &quad
+      = QuadratureRules< double, interDim >::rule( iIt->type(), 3 );
+    //const QuadratureRule<double, interDim>& quad
+    //    = QuadratureRules<double, interDim>::rule(iIt->intersectionSelfLocal().type(), interDim);
 
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
