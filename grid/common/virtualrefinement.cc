@@ -129,6 +129,9 @@ namespace Dune {
     void increment();
 
     int index() const;
+
+    // If you simply use an unqualified CoordVector here g++-4.2 chokes
+    typename VirtualRefinement<dimension, CoordType>::template Codim<codimension>::SubEntityIterator::
     CoordVector coords() const;
   private:
     friend class VirtualRefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
