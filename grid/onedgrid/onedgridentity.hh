@@ -74,11 +74,13 @@ namespace Dune {
   class OneDEntityImp<1>
   {
   public:
-    enum AdaptationState { NONE , COARSEN , REFINED };
+
+    /** \brief The different ways to mark an element for grid changes */
+    enum MarkState { DO_NOTHING , COARSEN , REFINE };
 
     OneDEntityImp(int level, unsigned int id)
       : id_(id), level_(level),
-        markState_(NONE), adaptationState_(NONE),
+        markState_(DO_NOTHING), isNew_(false),
         pred_(OneDGridNullIteratorFactory<1>::null()),
         succ_(OneDGridNullIteratorFactory<1>::null())
     {
@@ -109,11 +111,10 @@ namespace Dune {
     int level_;
 
     /** \brief Stores requests for refinement and coarsening */
-    AdaptationState markState_;
+    MarkState markState_;
 
-    /** \brief Stores information about prospective refinement and coarsening
-        for use in the interface method state() */
-    AdaptationState adaptationState_;
+    /** \brief This flag is set by adapt() if this element has been newly created. */
+    bool isNew_;
 
     /** \brief Predecessor in the doubly linked list of elements */
     OneDEntityImp<1>* pred_;
@@ -429,9 +430,10 @@ namespace Dune {
     bool wasRefined () const DUNE_DEPRECATED { return isNew(); }
 
     /** returns true, if entity might be coarsened during next adaptation cycle */
-    bool mightVanish () const { return target_->adaptationState_ == OneDEntityImp<1> :: COARSEN; }
+    bool mightVanish () const { return target_->markState_ == OneDEntityImp<1> :: COARSEN; }
+
     /** returns true, if entity was refined during last adaptation cycle */
-    bool isNew () const { return target_->adaptationState_ == OneDEntityImp<1> :: REFINED; }
+    bool isNew () const { return target_->isNew_; }
 
     void setToTarget(OneDEntityImp<1>* target) {
       target_ = target;

@@ -294,7 +294,9 @@ bool Dune::OneDGrid::adapt()
   // for the return value:  true if the grid was changed
   bool changedGrid = false;
 
-  // remove all elements that have been marked for coarsening
+  // remove elements that have been marked for coarsening.
+  // If one son of an element is marked for coarsening, and the other one is not,
+  // then the element is not removed.
   for (int i=1; i<=maxLevel(); i++) {
 
     for (eIt = elements[i].begin(); eIt!=elements[i].end(); ) {
@@ -342,7 +344,7 @@ bool Dune::OneDGrid::adapt()
         rightElementToBeDeleted->father_->sons_[1] = NULL;
 
         // Paranoia: make sure the father is not marked for refinement
-        rightElementToBeDeleted->father_->markState_ = OneDEntityImp<1>::NONE;
+        rightElementToBeDeleted->father_->markState_ = OneDEntityImp<1>::DO_NOTHING;
 
         // Actually delete elements
         elements[i].erase(leftElementToBeDeleted);
@@ -365,7 +367,7 @@ bool Dune::OneDGrid::adapt()
   // /////////////////////////////////////////////////////////////////////////
   bool toplevelRefinement = false;
   for (eIt = elements[maxLevel()].begin(); eIt!=elements[maxLevel()].end(); eIt=eIt->succ_)
-    if (eIt->markState_ == OneDEntityImp<1>::REFINED) {
+    if (eIt->markState_ == OneDEntityImp<1>::REFINE) {
       toplevelRefinement = true;
       break;
     }
@@ -385,7 +387,7 @@ bool Dune::OneDGrid::adapt()
 
     for (eIt = elements[i].begin(); eIt!=elements[i].end(); eIt = eIt->succ_) {
 
-      if (eIt->markState_ == OneDEntityImp<1>::REFINED
+      if (eIt->markState_ == OneDEntityImp<1>::REFINE
           && eIt->isLeaf()) {
 
         // Does the left vertex exist on the next-higher level?
@@ -448,13 +450,13 @@ bool Dune::OneDGrid::adapt()
         newElement0->vertex_[0] = leftUpperVertex;
         newElement0->vertex_[1] = centerVertex;
         newElement0->father_ = eIt;
-        newElement0->adaptationState_ = OneDEntityImp<1>::REFINED;
+        newElement0->isNew_ = true;
 
         OneDGridList<OneDEntityImp<1> >::iterator newElement1 = new OneDEntityImp<1>(i+1, getNextFreeId(0));
         newElement1->vertex_[0] = centerVertex;
         newElement1->vertex_[1] = rightUpperVertex;
         newElement1->father_ = eIt;
-        newElement1->adaptationState_ = OneDEntityImp<1>::REFINED;
+        newElement1->isNew_ = true;
 
         // Insert new elements into element list
         if (leftNeighbor!=NULL)
@@ -547,7 +549,7 @@ bool Dune::OneDGrid::adapt()
           newElement->vertex_[0] = leftUpperVertex;
           newElement->vertex_[1] = rightUpperVertex;
           newElement->father_ = eIt;
-          newElement->adaptationState_ = OneDEntityImp<1>::REFINED;
+          newElement->isNew_ = true;
 
           // Insert new elements into element list
           if (leftNeighbor!=NULL)
@@ -582,7 +584,7 @@ bool Dune::OneDGrid::preAdapt()
   Codim<0>::LeafIterator eEndIt = leafend<0>();
 
   for (; eIt!=eEndIt; ++eIt)
-    if (getRealImplementation(*eIt).target_->markState_ != OneDEntityImp<1>::NONE)
+    if (getRealImplementation(*eIt).target_->markState_ != OneDEntityImp<1>::DO_NOTHING)
       return true;
 
   return false;
@@ -593,7 +595,7 @@ void Dune::OneDGrid::postAdapt()
   for (int i=0; i<=maxLevel(); i++) {
     OneDGridList<OneDEntityImp<1> >::iterator eIt;
     for (eIt = elements[i].begin(); eIt!=elements[i].end(); eIt = eIt->succ_)
-      eIt->markState_ = OneDEntityImp<1>::NONE;
+      eIt->markState_ = OneDEntityImp<1>::DO_NOTHING;
 
   }
 
@@ -660,9 +662,9 @@ bool Dune::OneDGrid::mark(int refCount,
     }
 
   } else if (refCount > 0)
-    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::REFINED;
+    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::REFINE;
   else
-    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::NONE;
+    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::DO_NOTHING;
 
   return true;
 }
@@ -676,7 +678,7 @@ int Dune::OneDGrid::getMark(const Codim<0>::Entity & e ) const
 {
   if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::COARSEN)
     return -1;
-  else if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::REFINED)
+  else if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::REFINE)
     return 1;
   return 0;
 }
