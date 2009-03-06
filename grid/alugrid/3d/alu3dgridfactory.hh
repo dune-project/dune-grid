@@ -7,6 +7,7 @@
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/alugrid.hh>
+#include <dune/grid/io/file/dgfparser/entitykey.hh>
 
 namespace Dune
 {
@@ -45,25 +46,29 @@ namespace Dune
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
     typedef FieldVector< ctype, dimensionworld > VertexType;
-    typedef array< unsigned int, numCorners > ElementType;
+    typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
 
   private:
+    typedef std::vector< VertexType > VertexVector;
+    typedef std::vector< ElementType > ElementVector;
+    typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
+
     const std::string filename_;
     MPICommunicatorType communicator_;
     bool removeGeneratedFile_;
 #if ALU3DGRID_PARALLEL
     int rank_;
 #endif
-    std :: vector< VertexType > vertices_;
-    std :: vector< ElementType > elements_;
-    std :: vector< std :: pair< FaceType, int > > boundaryIds_;
+    VertexVector vertices_;
+    ElementVector elements_;
+    BoundaryIdVector boundaryIds_;
 
   public:
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
                                   = MPIHelper :: getCommunicator(),
-                                bool removeGeneratedFile = true );
+                                bool removeGeneratedFile = false );
 
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
@@ -89,7 +94,7 @@ namespace Dune
      */
     virtual void
     insertElement ( const GeometryType &geometry,
-                    const std :: vector< unsigned int > &vertices );
+                    const std::vector< unsigned int > &vertices );
 
     /** \brief insert a boundary element into the coarse grid
      *
@@ -103,18 +108,26 @@ namespace Dune
      */
     virtual void
     insertBoundary ( const GeometryType &geometry,
-                     const std :: vector< unsigned int > &faceVertices,
-                     int id );
+                     const std::vector< unsigned int > &faceVertices,
+                     const int id );
+
+    void insertBoundary ( const GeometryType &geometry,
+                          const DGFEntityKey< unsigned int > &key,
+                          const int id );
 
     /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
      */
-    virtual GridType *createGrid ();
+    GridType *createGrid ();
+
+    GridType *createGrid ( const bool addMissingBoundaries );
 
   private:
-    inline void assertGeometryType( const GeometryType &geometry );
-    inline static std :: string temporaryFileName ();
+    void assertGeometryType( const GeometryType &geometry );
+    static std::string temporaryFileName ();
+    void correctElementOrientation ();
+    void recreateBoundaryIds ( const int defaultId = 1 );
   };
 
 
