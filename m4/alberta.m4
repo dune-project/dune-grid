@@ -89,21 +89,34 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       # afterwards easily 
       if test "$ALBERTA_VERSION" != "1.2" ; then
         variablealbertalibname="alberta_$``(``ALBERTA_DIM``)``d"
-        albertalibname="alberta_${with_alberta_dim}d"
+        alberta_1d_libname="alberta_1d"
+        alberta_2d_libname="alberta_2d"
+        alberta_3d_libname="alberta_3d"
       else
         variablealbertalibname="ALBERTA$``(``ALBERTA_DIM``)``$``(``ALBERTA_DIM``)``_0"
-        albertalibname="ALBERTA${with_alberta_dim}${with_alberta_dim}_${with_alberta_debug}"
+        alberta_1d_libname="ALBERTA11_0"
+        alberta_2d_libname="ALBERTA22_0"
+        alberta_3d_libname="ALBERTA33_0"
       fi
 
       # we do not check libraries for ALBERTA 2.1 (linking would require libtool)
       if test "$ALBERTA_VERSION" == "2.1" ; then
         AC_MSG_WARN([ALBERTA $ALBERTA_VERSION found -- Skipping check for ALBERTA grid libraries])
       else
-        AC_CHECK_LIB($albertalibname,[mesh_traverse], [],
+        AC_CHECK_LIB($alberta_1d_libname,[mesh_traverse], [],
           [HAVE_ALBERTA="0"
-           AC_MSG_WARN(-l$albertalibname not found!)])
+           AC_MSG_WARN(-l$alberta_1d_libname not found!)])
+        AC_CHECK_LIB($alberta_2d_libname,[mesh_traverse], [],
+          [HAVE_ALBERTA="0"
+           AC_MSG_WARN(-l$alberta_2d_libname not found!)])
+        AC_CHECK_LIB($alberta_3d_libname,[mesh_traverse], [],
+          [HAVE_ALBERTA="0"
+           AC_MSG_WARN(-l$alberta_3d_libname not found!)])
       fi
       ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"
+      ALBERTA_1DLIBS="-l$alberta_1d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
+      ALBERTA_2DLIBS="-l$alberta_2d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
+      ALBERTA_3DLIBS="-l$alberta_3d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
     fi
 
   fi  # end of alberta check (--without wasn't set)
@@ -111,6 +124,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   # survived all tests?
   if test "x$HAVE_ALBERTA" = "x1" ; then
     AC_SUBST(ALBERTA_LIBS, $ALBERTA_LIBS)
+    AC_SUBST(ALBERTA_1DLIBS, $ALBERTA_1DLIBS)
+    AC_SUBST(ALBERTA_2DLIBS, $ALBERTA_2DLIBS)
+    AC_SUBST(ALBERTA_3DLIBS, $ALBERTA_3DLIBS)
     AC_SUBST(ALBERTA_LDFLAGS, $ALBERTA_LDFLAGS)
     AC_SUBST(ALBERTA_CPPFLAGS, $ALBERTA_CPPFLAGS)
     AC_DEFINE(HAVE_ALBERTA, ENABLE_ALBERTA,
@@ -136,6 +152,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     with_alberta="yes (Version $ALBERTA_VERSION)"
   else
     AC_SUBST(ALBERTA_LIBS, "")
+    AC_SUBST(ALBERTA_1DLIBS, "")
+    AC_SUBST(ALBERTA_2DLIBS, "")
+    AC_SUBST(ALBERTA_3DLIBS, "")
     AC_SUBST(ALBERTA_LDFLAGS, "")
     AC_SUBST(ALBERTA_CPPFLAGS, "")
 
