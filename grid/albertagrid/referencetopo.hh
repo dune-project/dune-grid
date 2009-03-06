@@ -50,8 +50,8 @@ namespace AlbertHelp {
     {0,2,1} // face 3
   };
 
-  static const int * localAlbertaFaceNumber[4] = {tetraFace_0, tetraFace_1,
-                                                  tetraFace_2 , tetraFace_3 };
+  static const int *const localAlbertaFaceNumber[ 4 ]
+    = { tetraFace_0, tetraFace_1, tetraFace_2 , tetraFace_3 };
 
   //****************************************************************
   //
