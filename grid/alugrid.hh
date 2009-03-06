@@ -3,6 +3,9 @@
 #ifndef DUNE_ALUGRID_HH
 #define DUNE_ALUGRID_HH
 
+// only include this code, if ENABLE_ALUGRID is defined
+#ifdef ENABLE_ALUGRID
+
 // 3d version
 #include "alugrid/3d/indexsets.hh"
 #include "alugrid/3d/iterator.hh"
@@ -727,4 +730,9 @@ namespace Dune {
 
 
 } //end  namespace Dune
+
+#else
+#error "Trying to use <dune/grid/alugrid.hh> without ALUGRID_CPPFLAGS."
+#endif // #ifdef ENABLE_ALUGRID
+
 #endif
