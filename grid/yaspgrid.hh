@@ -1993,13 +1993,13 @@ namespace Dune {
     //! get number of entities of given type and level (the level is known to the object)
     int size (GeometryType type) const
     {
-      return grid.size(level,GridImp::dimension-type.dim());
+      return grid.size( level, type );
     }
 
     //! return size of set for a given codim
     int size (int codim) const
     {
-      return Base::size(codim);
+      return grid.size( level, codim );
     }
 
     //! return true if the given entity is contained in \f$E\f$.
@@ -2093,13 +2093,13 @@ namespace Dune {
     //! get number of entities of given type
     int size (GeometryType type) const
     {
-      return grid.size(grid.maxLevel(),GridImp::dimension-type.dim());
+      return grid.size( grid.maxLevel(), type );
     }
 
     //! return size of set for a given codim
     int size (int codim) const
     {
-      return Base::size(codim);
+      return grid.size( grid.maxLevel(), codim );
     }
 
     //! return true if the given entity is contained in \f$E\f$.
