@@ -290,8 +290,10 @@ namespace Dune {
         typedef RefinementImp<dimension, CoordType> Refinement;
         typedef typename Refinement::template Codim<0>::SubEntityIterator Common;
         typedef typename Refinement::IndexVector IndexVector;
+        typedef typename Refinement::CoordVector CoordVector;
 
         IndexVector vertexIndices() const;
+        CoordVector coords() const;
       };
 
       template<int dimension, class CoordType>
@@ -306,6 +308,17 @@ namespace Dune {
         for(int i = 0; i < nIndices; ++i)
           vec[i] = RefinementGrid<dimension>::instance().levelIndexSet(static_cast<const Common*>(this)->backend->level()).template subIndex<dimension>(*(static_cast<const Common*>(this)->backend),nIndices - i - 1);
         return vec;
+      }
+
+      template<int dimension, class CoordType>
+      typename RefinementSubEntityIteratorSpecial<dimension, CoordType, 0>::CoordVector
+      RefinementSubEntityIteratorSpecial<dimension, CoordType, 0>::
+      coords() const
+      {
+        return static_cast<const Common*>(this)->backend->geometry()
+               .global(ReferenceElements<CoordType, dimension>
+                       ::general(GeometryType(GeometryType::cube, dimension))
+                       .position(0,0));
       }
 
 

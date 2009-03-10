@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest vtksequencetest
+ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest
 
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
@@ -26,6 +26,9 @@ vtksequencetest_LDADD = $(LOCAL_LIBS)
 
 gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
+
+subsamplingvtktest_SOURCES = subsamplingvtktest.cc
+subsamplingvtktest_LDADD = $(LOCAL_LIBS)
 
 amirameshtest_SOURCES = amirameshtest.cc
 amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS) $(UG_CPPFLAGS) $(PSURFACE_CPPFLAGS)
