@@ -68,7 +68,7 @@ namespace Dune
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
                                   = MPIHelper :: getCommunicator(),
-                                bool removeGeneratedFile = false );
+                                bool removeGeneratedFile = true );
 
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,

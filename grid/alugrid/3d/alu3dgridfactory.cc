@@ -160,7 +160,7 @@ namespace Dune
       return new GridType( communicator_ );
 #endif
 
-    //correctElementOrientation();
+    correctElementOrientation();
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
@@ -267,18 +267,18 @@ namespace Dune
     {
       ElementType &element = *elementIt;
 
-      const VertexType &p1 = vertices_[ element[ 1 ] ];
+      const VertexType &p0 = vertices_[ element[ 1 ] ];
 
-      VertexType p2 = vertices_[ element[ 2 ] ]; p2 -= p1;
-      VertexType p3 = vertices_[ element[ 3 ] ]; p3 -= p1;
-      VertexType p0 = vertices_[ element[ 0 ] ]; p0 -= p1;
+      VertexType p1 = vertices_[ element[ 2 ] ]; p1 -= p0;
+      VertexType p2 = vertices_[ element[ 3 ] ]; p2 -= p0;
+      VertexType p3 = vertices_[ element[ 0 ] ]; p3 -= p0;
 
       VertexType n;
-      n[ 0 ] = p2[ 1 ] * p3[ 2 ] - p3[ 1 ] * p2[ 2 ];
-      n[ 1 ] = p2[ 2 ] * p3[ 0 ] - p3[ 2 ] * p2[ 0 ];
-      n[ 2 ] = p2[ 0 ] * p3[ 1 ] - p3[ 0 ] * p2[ 1 ];
+      n[ 0 ] = p1[ 1 ] * p2[ 2 ] - p2[ 1 ] * p1[ 2 ];
+      n[ 1 ] = p1[ 2 ] * p2[ 0 ] - p2[ 2 ] * p1[ 0 ];
+      n[ 2 ] = p1[ 0 ] * p2[ 1 ] - p2[ 0 ] * p1[ 1 ];
 
-      if( n * p0 < 0 )
+      if( n * p3 > 0 )
       {
         int tmp = element[ 2 ];
         element[ 2 ] = element[ 3 ];
