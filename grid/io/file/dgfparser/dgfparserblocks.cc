@@ -1081,213 +1081,166 @@ namespace Dune
     // IntervalBlock
     // -------------
 
-    const char *IntervalBlock :: ID = "Interval";
+    const char *IntervalBlock::ID = "Interval";
 
 
-    IntervalBlock :: IntervalBlock ( std :: istream &in )
-      : BasicBlock(in,ID),
-        p0_(0),
-        p1_(0),
-        h_(0),
-        nofcells_(0),
-        good_(false),
-        dimw_(0)
+    IntervalBlock::IntervalBlock ( std::istream &in )
+      : BasicBlock( in, ID ),
+        intervals_( 0 ),
+        good_( false ),
+        dimw_( 0 )
     {
-      if(isactive()) {
-        getnextline();
-        double x;
-        while (getnextentry(x)) {
-          dimw_++;
-        }
-        if (dimw_==0) {
-          DUNE_THROW(DGFException,
-                     "Too few coordinates for point p0 in IntervalBlock");
-        } else if (dimw_>3) {
-          DUNE_THROW(DGFException,
-                     "Interval block only implemented for dimension 1,2, and 3");
-        }
-        p0_.resize(dimw_);
-        p1_.resize(dimw_);
-        h_.resize(dimw_);
-        nofcells_.resize(dimw_);
-        reset();
-        next();
+      if( !isactive() )
+        return;
+
+      getnextline();
+      for( double x; getnextentry( x ); ++dimw_ ) ;
+      if( dimw_ == 0 )
+      {
+        DUNE_THROW( DGFException,
+                    "Too few coordinates for point p0 in IntervalBlock" );
       }
+      else if( dimw_ > 3 )
+      {
+        DUNE_THROW( DGFException,
+                    "Interval block only implemented for dimension 1,2, and 3" );
+      }
+
+      reset();
+      while( next() ) ;
     }
 
 
-    int IntervalBlock :: getVtx ( std::vector<std::vector<double> >& vtx )
+    int IntervalBlock::getVtx ( int block, std::vector< std::vector< double > > &vtx ) const
     {
-      size_t countvtx;
+      dverb << "reading vertices for interval " << block << "... ";
+
+      const Interval &interval = get( block );
+
       size_t old_size = vtx.size();
-      //fill vtx
-      dverb << "reading vertices...";
-      vtx.resize(vtx.size()+nofvtx());
-      for (countvtx=old_size; countvtx < vtx.size(); countvtx++)
-        vtx[countvtx].resize(dimw_);
-      int m = old_size;
-      if(dimw_ == 3) {
-        for(int k=0; k < nofcells_[2]+1; k++)        // z-dir
-          for(int j=0; j < nofcells_[1]+1; j++)       // y-dir
-            for(int i =0; i < nofcells_[0]+1; i++) // x-dir
-            {
-              vtx[m][0] = p0_[0] + i*h_[0];
-              vtx[m][1] = p0_[1] + j*h_[1];
-              vtx[m][2] = p0_[2] + k*h_[2];
-              m++;
-            }
-      }
-      else if (dimw_==2)
+      vtx.resize( old_size + nofvtx( block ) );
+      for( size_t i = old_size; i < vtx.size(); ++i )
+        vtx[ i ].resize( dimw() );
+
+      size_t m = old_size;
+      std::vector< int > i( dimw() );
+      const int end = dimw()-1;
+      int k = end;
+      for( i[ end ] = 0; i[ end ] <= interval.n[ end ]; )
       {
-        for(int j=0; j < nofcells_[1]+1; j++)
-          for(int i =0; i < nofcells_[0]+1; i++)
-          {
-            vtx[m][0] = p0_[0] + i*h_[0];
-            vtx[m][1] = p0_[1] + j*h_[1];
-            m++;
-          }
-      } else {
-        for(int j=0; j < nofcells_[0]+1; j++) {
-          vtx[m][0] = p0_[0] + j*h_[0];
-          m++;
-        }
+        // go all the way down
+        for( ; k > 0; --k )
+          i[ k-1 ] = 0;
+
+        assert( m < vtx.size() );
+        for( int j = 0; j < dimw(); ++j )
+          vtx[ m ][ j ] = interval.p[ 0 ][ j ] + i[ j ]*interval.h[ j ];
+        ++m;
+
+        // increase i[ k ] and go up for all finished loops
+        for( ; (++i[ k ] > interval.n[ k ]) && (k < end); ++k ) ;
       }
-      dverb << "done" << std::endl;
-      return nofvtx();
+      assert( m == vtx.size() );
+
+      dverb << "[done]" << std::endl;
+      return m - old_size;;
     }
 
 
-    int IntervalBlock
-    :: getHexa ( std :: vector< std :: vector< unsigned int > > &simplex, int offset )
+    int IntervalBlock::getHexa ( int block, std::vector< std::vector< unsigned int > > &cubes, int offset ) const
     {
-      int oldsize=simplex.size();
-      //fill simplex with Hexaeder
-      size_t counthexa;
-      int verticesPerCube = -1;
-      int m=oldsize;
-      if(dimw_ == 3)
-        verticesPerCube = 8;
-      else if (dimw_ == 2)
-        verticesPerCube = 4;
-      else if (dimw_ == 1)
-        verticesPerCube = 2;
-      else
-        DUNE_THROW(DGFException,
-                   "Invalid dimension world "<< dimw_ << " in IntervalBlock::getHexa!");
+      dverb << "generating cubes for interval " << block << "... ";
 
-      dverb << "generating hexaeder...";
-      simplex.resize(oldsize+nofhexa());
-      for (counthexa=m; counthexa < simplex.size(); counthexa++)
-        simplex[counthexa].resize(verticesPerCube);
-      if(dimw_ == 3) {
-        for(int k=0; k < nofcells_[2]; k++)
-          for(int j=0; j < nofcells_[1]; j++)
-            for(int i =0; i < nofcells_[0]; i++)
-            {
-              simplex[m][0] = offset+getIndex(i,j,k);
-              simplex[m][1] = offset+getIndex(i+1,j,k);
-              simplex[m][2] = offset+getIndex(i,j+1,k);
-              simplex[m][3] = offset+getIndex(i+1,j+1,k);
-              simplex[m][4] = offset+getIndex(i,j,k+1);
-              simplex[m][5] = offset+getIndex(i+1,j,k+1);
-              simplex[m][6] = offset+getIndex(i,j+1,k+1);
-              simplex[m][7] = offset+getIndex(i+1,j+1,k+1);
-              m++;
-            }
-      }
-      else if (dimw_==2)
+      const Interval &interval = get( block );
+
+      const int verticesPerCube = 1 << dimw();
+
+      size_t old_size = cubes.size();
+      cubes.resize( old_size + nofhexa( block ) );
+      for( size_t i = 0; i < cubes.size(); ++i )
+        cubes[ i ].resize( verticesPerCube );
+
+      size_t m = old_size;
+      std::vector< int > i( dimw() );
+      const int end = dimw()-1;
+      int k = end;
+      for( i[ end ] = 0; i[ end ] < interval.n[ end ]; )
       {
-        for(int j=0; j < nofcells_[1]; j++)
+        // go all the way down
+        for( ; k > 0; --k )
+          i[ k-1 ] = 0;
+
+        assert( m < cubes.size() );
+        for( int j = 0; j < verticesPerCube; ++j )
         {
-          for(int i =0; i < nofcells_[0]; i++)
+          cubes[ m ][ j ] = offset;
+          int factor = 1;
+          for( int d = 0; d < dimw(); ++d )
           {
-            simplex[m][0] = offset+getIndex(i,j);
-            simplex[m][1] = offset+getIndex(i+1,j);
-            simplex[m][2] = offset+getIndex(i,j+1);
-            simplex[m][3] = offset+getIndex(i+1,j+1);
-            m++;
+            cubes[ m ][ j ] += factor*(i[ d ] + ((j >> d) & 1));
+            factor *= interval.n[ d ]+1;
           }
         }
+        ++m;
+
+        // increase i[ k ] and go up for all finished loops
+        for( ; (++i[ k ] >= interval.n[ k ]) && (k < end); ++k ) ;
       }
-      else
-      {
-        for(int i =0; i < nofcells_[0]; i++)
-        {
-          simplex[m][0] = offset+getIndex(i);
-          simplex[m][1] = offset+getIndex(i+1);
-          m++;
-        }
-      }
-      dverb << "done" << std::endl;
-      assert((size_t)m==simplex.size());
-      return nofhexa();
+      assert( m == cubes.size() );
+
+      dverb << "[done]" << std::endl;
+      return m - old_size;
     }
 
 
-    bool IntervalBlock :: next ()
+    template< class T >
+    void IntervalBlock::parseLine ( std::vector< T > &v )
     {
-      if (linenumber()==noflines()-1) {
+      getnextline();
+      v.resize( dimw_ );
+      for( int i = 0; i < dimw_; ++i )
+      {
+        if( !getnextentry( v[ i ] ) )
+          DUNE_THROW( DGFException, "ERROR in " << *this << ": Not enough values." );
+      }
+    }
+
+
+    bool IntervalBlock::next ()
+    {
+      if (linenumber()==noflines()-1)
+      {
         good_=false;
         return good_;
       }
-      //read p0_
-      getnextline();
-      double x;
-      for(int i = 0; i<dimw_; i++)
-        if(getnextentry(x))
-          p0_[i] = x;
-        else  {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "Too few coordinates for point p0");
-        }
-      //read p1_
-      getnextline();
-      for(int i = 0; i<dimw_; i++)
-        if(getnextentry(x))
-          p1_[i] = x;
-        else  {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "Too few coordinates for point p1");
+
+      Interval interval;
+      parseLine( interval.p[ 0 ] );
+      parseLine( interval.p[ 1 ] );
+      parseLine( interval.n );
+
+      //find real upper and lower edge and calculate cell width
+      interval.h.resize( dimw_ );
+      for( int i = 0; i < dimw_; ++i )
+      {
+        double &left = interval.p[ 0 ][ i ];
+        double &right = interval.p[ 1 ][ i ];
+        const int &n = interval.n[ i ];
+
+        if( left > right )
+        {
+          double dummy = left;
+          left = right;
+          right = dummy;
         }
 
-      //find real upper and lower edge
-      std::vector<double> p0h(dimw_),p1h(dimw_);  //help variables
-      for(int i = 0; i<dimw_; i++) {
-        p0h[i] = p0_[i] < p1_[i] ? p0_[i] : p1_[i];
-        p1h[i] = p0_[i] > p1_[i] ? p0_[i] : p1_[i];
+        interval.h[ i ] = (right - left) / double( n );
       }
-      p0_ = p0h;
-      p1_ = p1h;
-      //get numbers of cells for every direction
-      getnextline();
-      int number;
-      for(int i = 0; i<dimw_; i++)
-        if(getnextentry(number))
-          nofcells_[i] = number;
-        else {
-          DUNE_THROW(DGFException,
-                     "ERROR in " << *this
-                                 << "Couldn't detect a number of cells for every direction");
-        }
+      intervals_.push_back( interval );
+
+      dverb << interval << std::endl;
+
       good_ = true;
-      for(int i =0; i < dimw_; i++)
-        h_[i] = (p1_[i] - p0_[i])/double(nofcells_[i]);
-      //Printing Data on screen
-      dverb << "p0 = (";
-      for(int i = 0; i<dimw_-1; i++)
-        dverb << p0_[i]  <<",";
-      dverb << p0_[dimw_-1] <<") \n";
-      dverb << "p1 = (";
-      for(int i = 0; i<dimw_-1; i++)
-        dverb << p1_[i]  <<",";
-      dverb << p1_[dimw_-1] <<") \n";
-      dverb << "n = (";
-      for(int i = 0; i<dimw_-1; i++)
-        dverb << nofcells_[i]  <<",";
-      dverb << nofcells_[dimw_-1] <<") \n";
-      dverb << std::endl;
       return good_;
     }
 

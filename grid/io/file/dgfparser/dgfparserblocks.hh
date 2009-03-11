@@ -505,87 +505,154 @@ namespace Dune
     };
 
 
-    // *************************************************************
-    class IntervalBlock : public BasicBlock {
-      std::vector<double> p0_,p1_; //lower and upper boundary points
-      std::vector<double> h_;      // width of the cells in every direction
-      std::vector<int> nofcells_;  // number of cells in every direction
-      bool good_;                  //data read correctly
-      int dimw_;                   //dimension of world
+
+    // IntervalBlock
+    // -------------
+
+    struct IntervalBlock
+      : public BasicBlock
+    {
+      struct Interval
+      {
+        std::vector< double > p[ 2 ]; // lower and upper boundary points
+        std::vector< double > h;      // width of the cells in each direction
+        std::vector< int > n;         // number of cells in each direction
+      };
+
+    private:
+      std::vector< Interval > intervals_;
+      bool good_;                      //data read correctly
+      int dimw_;                       //dimension of world
+
     public:
       const static char* ID;
-      IntervalBlock ( std :: istream &in );
+      explicit IntervalBlock ( std::istream &in );
 
-      void get ( std::vector<std::vector<double> >& vtx,int& nofvtx,
-                 std::vector<std::vector<unsigned int> >& simplex,int& nofsimpl )
+      void get ( std::vector< std::vector< double > > &vtx, int &nofvtx,
+                 std::vector< std::vector< unsigned int > > &simplex, int &nofsimpl )
       {
-        do {
+        for( size_t i = 0; i < intervals_.size(); ++i )
+        {
           int oldvtx = nofvtx;
-          nofvtx  +=getVtx(vtx);
-          nofsimpl+=getHexa(simplex,oldvtx);
-        } while (next());
+          nofvtx += getVtx( i, vtx );
+          nofsimpl += getHexa( i, simplex, oldvtx );
+        }
       }
-      void get ( std::vector<std::vector<double> >& vtx,int& nofvtx )
+
+      void get ( std::vector< std::vector< double > > &vtx, int &nofvtx )
       {
-        do {
-          // int oldvtx = nofvtx;
-          nofvtx  +=getVtx(vtx);
-        } while (next());
-      }
-      int getVtx(std::vector<std::vector<double> >& vtx);
-      int getHexa ( std :: vector< std :: vector< unsigned int > > &simplex,
-                    int offset = 0 );
-
-      int nofvtx() {
-        if(dimw_ == 3)
-          return (nofcells_[0]+1)*(nofcells_[1]+1)*(nofcells_[2]+1);
-        else if (dimw_ == 2)
-          return (nofcells_[0]+1)*(nofcells_[1]+1);
-        else
-          return nofcells_[0]+1;
+        for( size_t i = 0; i < intervals_.size(); ++i )
+          nofvtx += getVtx( i, vtx );
       }
 
-      int nofhexa() {
-        if(dimw_ == 3)
-          return (nofcells_[0])*(nofcells_[1])*(nofcells_[2]);
-        else if (dimw_ == 2)
-          return (nofcells_[0])*(nofcells_[1]);
-        else
-          return nofcells_[0];
+      const Interval &get ( int block ) const
+      {
+        return intervals_[ block ];
       }
-      int segments(int i) {
-        return nofcells_[i];
+
+      int numIntervals () const
+      {
+        return intervals_.size();
       }
-      double length(int i) {
-        return p1_[i]-p0_[i];
-      }
-      double start(int i) {
-        return p0_[i];
-      }
-      double end(int i) {
-        return p1_[i];
-      }
-      /*
-         bool ok() {
-         return good_;
-         }
-       */
-      int dimw() {
+
+      int dimw () const
+      {
         return dimw_;
       }
 
-      int getIndex(int i,int j = 0, int k = 0)
+      int getVtx ( int block, std::vector< std::vector< double > > &vtx ) const;
+      int getHexa ( int block, std::vector< std::vector< unsigned int > > &cubes,
+                    int offset = 0 ) const;
+
+      int nofvtx ( int block ) const
       {
-        if(dimw_ == 3)
-          return k*(nofcells_[1]+1)*(nofcells_[0]+1) + j*(nofcells_[0]+1) + i;
-        else if (dimw_ == 2)
-          return j * (nofcells_[0]+1) + i;
-        else
-          return i;
+        const Interval &interval = get( block );
+        int n = 1;
+        for( int i = 0; i < dimw_; ++i )
+          n *= (interval.n[ i ] + 1);
+        return n;
       }
+
+      int nofhexa ( int block ) const
+      {
+        const Interval &interval = get( block );
+        int n = 1;
+        for( int i = 0; i < dimw_; ++i )
+          n *= interval.n[ i ];
+        return n;
+      }
+
+#if 0
+      int segments ( int block, int i ) const
+      {
+        return get( block ).n[ i ];
+      }
+
+      double length ( int block, int i ) const
+      {
+        const Interval &interval = get( block );
+        return interval.p[ 1 ][ i ] - interval.p[ 0 ][ i ];
+      }
+
+      double start ( int block, int i ) const
+      {
+        return get( block ).p[ 0 ][ i ];
+      }
+
+      double end ( int block, int i )
+      {
+        return get( block ).p[ 1 ][ i ];
+      }
+
+      int getIndex ( int block, int i, int j = 0, int k = 0 )
+      {
+        const Interval &interval = get( block );
+
+        int n0 = interval.n[ 0 ]+1;
+        int n1 = interval.n[ 1 ]+1;
+
+        switch( dimw() )
+        {
+        case 1 :
+          return i;
+
+        case 2 :
+          return j*n0 + i;
+
+        case 3 :
+          return (k*n1 + j)*n0 + i;
+
+        default :
+          DUNE_THROW( InvalidStateException, "dimw must be 1, 2 or 3" );
+        }
+      }
+#endif
+
     private:
+      template< class T >
+      void parseLine ( std::vector< T > &v );
+
       bool next ();
     };
+
+
+    inline std::ostream &
+    operator<< ( std::ostream &out, const IntervalBlock::Interval &interval )
+    {
+      if( interval.p[ 0 ].empty() || interval.p[ 1 ].empty() || interval.n.empty() )
+        return out << "Interval {}";
+
+      out << "Interval { p0 = (" << interval.p[ 0 ][ 0 ];
+      for( size_t i = 1; i < interval.p[ 0 ].size(); ++i )
+        out << ", " << interval.p[ 0 ][ i ];
+      out << "), p1 = (" << interval.p[ 1 ][ 0 ];
+      for( size_t i = 1; i < interval.p[ 1 ].size(); ++i )
+        out << ", " << interval.p[ 1 ][ i ];
+      out << "), n = (" << interval.n[ 0 ];
+      for( size_t i = 1; i < interval.n.size(); ++i )
+        out << ", " << interval.n[ i ];
+      return out << ") }";
+    }
 
 
 
