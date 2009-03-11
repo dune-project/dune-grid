@@ -103,7 +103,7 @@ namespace Dune
      *
      *  \param[in]  geometry    GeometryType of the boundary element
      *  \param[in]  vertices    vertices of the boundary element
-     *  \param[in]  boundaryId  boundary identifier of the boundary element,
+     *  \param[in]  id          boundary identifier of the boundary element,
      *                          the default value is 0 (invalid boundary id)
      */
     virtual void

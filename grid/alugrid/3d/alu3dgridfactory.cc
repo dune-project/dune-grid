@@ -160,7 +160,7 @@ namespace Dune
       return new GridType( communicator_ );
 #endif
 
-    correctElementOrientation();
+    //correctElementOrientation();
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
