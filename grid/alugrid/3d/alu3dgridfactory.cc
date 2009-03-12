@@ -254,24 +254,31 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  inline void ALU3dGridFactory< ALUGrid >
-  ::correctElementOrientation ()
+  inline void
+  ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
-    // orientation is only corrected for tetrahedra
-    if( elementType == hexa )
-      return;
-
     const typename ElementVector::iterator elementEnd = elements_.end();
     for( typename ElementVector::iterator elementIt = elements_.begin();
          elementIt != elementEnd; ++elementIt )
     {
       ElementType &element = *elementIt;
 
-      const VertexType &p0 = vertices_[ element[ 1 ] ];
+      const VertexType &p0 = vertices_[ element[ 0 ] ];
+      VertexType p1, p2, p3;
 
-      VertexType p1 = vertices_[ element[ 2 ] ]; p1 -= p0;
-      VertexType p2 = vertices_[ element[ 3 ] ]; p2 -= p0;
-      VertexType p3 = vertices_[ element[ 0 ] ]; p3 -= p0;
+      if( elementType == tetra )
+      {
+        p1 = vertices_[ element[ 1 ] ];
+        p2 = vertices_[ element[ 2 ] ];
+        p3 = vertices_[ element[ 3 ] ];
+      }
+      else
+      {
+        p1 = vertices_[ element[ 1 ] ];
+        p2 = vertices_[ element[ 2 ] ];
+        p3 = vertices_[ element[ 4 ] ];
+      }
+      p1 -= p0; p2 -= p0; p3 -= p0;
 
       VertexType n;
       n[ 0 ] = p1[ 1 ] * p2[ 2 ] - p2[ 1 ] * p1[ 2 ];
@@ -279,12 +286,16 @@ namespace Dune
       n[ 2 ] = p1[ 0 ] * p2[ 1 ] - p2[ 0 ] * p1[ 1 ];
 
       if( n * p3 > 0 )
+        continue;
+
+      if( elementType == hexa )
       {
-        int tmp = element[ 2 ];
-        element[ 2 ] = element[ 3 ];
-        element[ 3 ] = tmp;
+        for( int i = 0; i < 4; ++i )
+          exchange( element[ i ], element[ i+4 ] );
       }
-    }
+      else
+        exchange( element[ 2 ], element[ 3 ] );
+    } // end of loop over all elements
   }
 
 

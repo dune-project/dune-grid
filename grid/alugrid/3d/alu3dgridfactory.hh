@@ -124,11 +124,22 @@ namespace Dune
     GridType *createGrid ( const bool addMissingBoundaries );
 
   private:
+    template< class T >
+    static void exchange ( T &x, T &y );
+
     void assertGeometryType( const GeometryType &geometry );
     static std::string temporaryFileName ();
     void correctElementOrientation ();
     void recreateBoundaryIds ( const int defaultId = 1 );
   };
+
+
+  template< template< int, int > class ALUGrid >
+  template< class T >
+  inline void ALU3dGridFactory< ALUGrid >::exchange ( T &x, T &y )
+  {
+    T dummy = x; x = y; y = dummy;
+  }
 
 
   template< template< int, int > class ALUGrid >
