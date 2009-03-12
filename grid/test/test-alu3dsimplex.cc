@@ -17,6 +17,8 @@
 #include "checktwists.cc"
 #include "check-albertareader.cc"
 
+#include "basicunitcube.hh"
+
 using namespace Dune;
 
 template< ALU3dGridElementType type >
@@ -219,9 +221,6 @@ try {
   {
     typedef ALUSimplexGrid< 3, 3 > GridType;
 
-    if( myrank == 0 )
-      checkAlbertaReader< GridType >();
-
     // check empty grid
     {
       if( myrank == 0 )
@@ -229,6 +228,20 @@ try {
       GridType grid;
       checkALUSerial( grid );
     }
+
+    {
+      if( myrank == 0 )
+        std::cerr << ">>> Checking twisted unit cube..." << std::endl;
+      GridFactory< GridType > factory;
+      BasicUnitCube< GridType::dimension >::insertVertices( factory );
+      BasicUnitCube< GridType::dimension >::insertSimplices( factory );
+      GridType *grid = factory.createGrid();
+      checkALUSerial( *grid );
+      delete grid;
+    }
+
+    if( myrank == 0 )
+      checkAlbertaReader< GridType >();
 
     {
       std::string filename;

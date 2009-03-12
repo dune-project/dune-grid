@@ -9,7 +9,7 @@ if ALBERTA
 endif
 
 if ALUGRID
-  ALUPROG = test-alu3dgrid test-alu3dsimplex test-alu2dsimplex
+  ALUPROG = test-alu3dgrid test-alu3dsimplex test-alu3dcube test-alu2dsimplex
 endif
 
 if UG
@@ -82,6 +82,10 @@ else
 test_alu3dsimplex_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
 test_alu3dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 endif
+
+test_alu3dcube_SOURCES = test-alu3dcube.cc
+test_alu3dcube_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
+test_alu3dcube_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
 
 test_alu2dsimplex_SOURCES = test-alu2dsimplex.cc
 test_alu2dsimplex_CPPFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)

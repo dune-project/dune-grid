@@ -4,6 +4,7 @@ Makefile.in
 .libs
 test-alu2dsimplex
 test-alu3dsimplex
+test-alu3dcube
 test-alu3dgrid
 test-alberta
 test-sgrid
@@ -14,6 +15,7 @@ test-yaspgrid
 test-dgfalu-uggrid-combination
 test-ug-lgm
 semantic.cache
+alugrid.cfg
 *.gcda
 *.gcno
 
