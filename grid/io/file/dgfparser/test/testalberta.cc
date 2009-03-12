@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "../dgfalberta.hh"
+#include <dune/grid/albertagrid/dgfparser.hh>
 // use grid check
 #include <dune/grid/test/gridcheck.cc>
 
