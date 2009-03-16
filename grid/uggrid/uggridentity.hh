@@ -176,11 +176,7 @@ namespace Dune {
     //! the current geometry
     UGMakeableGeometry<dim-codim,dim,GridImp> geo_;
 
-    FieldVector<UGCtype, dim> localFatherCoords_;
-
     typename UG_NS<dim>::template Entity<codim>::T* target_;
-
-    mutable FieldVector<UGCtype, dim> pos_;
 
   };
 
