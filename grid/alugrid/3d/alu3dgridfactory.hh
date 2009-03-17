@@ -3,10 +3,14 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
+#ifdef ENABLE_ALUGRID
+
 #include <dune/common/fixedarray.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/common/gridfactory.hh>
-#include <dune/grid/alugrid.hh>
+#include <dune/grid/alugrid/3d/alugrid.hh>
+#include <dune/grid/io/file/dgfparser/entitykey.hh>
 
 namespace Dune
 {
@@ -45,19 +49,23 @@ namespace Dune
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
     typedef FieldVector< ctype, dimensionworld > VertexType;
-    typedef array< unsigned int, numCorners > ElementType;
+    typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
 
   private:
+    typedef std::vector< VertexType > VertexVector;
+    typedef std::vector< ElementType > ElementVector;
+    typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
+
     const std::string filename_;
     MPICommunicatorType communicator_;
     bool removeGeneratedFile_;
 #if ALU3DGRID_PARALLEL
     int rank_;
 #endif
-    std :: vector< VertexType > vertices_;
-    std :: vector< ElementType > elements_;
-    std :: vector< std :: pair< FaceType, int > > boundaryIds_;
+    VertexVector vertices_;
+    ElementVector elements_;
+    BoundaryIdVector boundaryIds_;
 
   public:
     /** \brief default constructor */
@@ -89,7 +97,7 @@ namespace Dune
      */
     virtual void
     insertElement ( const GeometryType &geometry,
-                    const std :: vector< unsigned int > &vertices );
+                    const std::vector< unsigned int > &vertices );
 
     /** \brief insert a boundary element into the coarse grid
      *
@@ -98,24 +106,43 @@ namespace Dune
      *
      *  \param[in]  geometry    GeometryType of the boundary element
      *  \param[in]  vertices    vertices of the boundary element
-     *  \param[in]  boundaryId  boundary identifier of the boundary element,
+     *  \param[in]  id          boundary identifier of the boundary element,
      *                          the default value is 0 (invalid boundary id)
      */
     virtual void
     insertBoundary ( const GeometryType &geometry,
-                     const std :: vector< unsigned int > &faceVertices,
-                     int id );
+                     const std::vector< unsigned int > &faceVertices,
+                     const int id );
+
+    void insertBoundary ( const GeometryType &geometry,
+                          const DGFEntityKey< unsigned int > &key,
+                          const int id );
 
     /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
      */
-    virtual GridType *createGrid ();
+    GridType *createGrid ();
+
+    GridType *createGrid ( const bool addMissingBoundaries );
 
   private:
-    inline void assertGeometryType( const GeometryType &geometry );
-    inline static std :: string temporaryFileName ();
+    template< class T >
+    static void exchange ( T &x, T &y );
+
+    void assertGeometryType( const GeometryType &geometry );
+    static std::string temporaryFileName ();
+    void correctElementOrientation ();
+    void recreateBoundaryIds ( const int defaultId = 1 );
   };
+
+
+  template< template< int, int > class ALUGrid >
+  template< class T >
+  inline void ALU3dGridFactory< ALUGrid >::exchange ( T &x, T &y )
+  {
+    T dummy = x; x = y; y = dummy;
+  }
 
 
   template< template< int, int > class ALUGrid >
@@ -202,4 +229,7 @@ namespace Dune
 // This include is nasty, but we cannot incorporate 'alu3dgridfactory.cc' into
 // the lib before HAVE_MPI behaves predictable
 #include "alu3dgridfactory.cc"
+
+#endif // #ifdef ENABLE_ALUGRID
+
 #endif

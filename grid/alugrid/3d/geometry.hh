@@ -12,8 +12,11 @@
 // Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
+#include "mappings.hh"
 
-namespace Dune {
+namespace Dune
+{
+
   // Forward declarations
   template<int cd, int dim, class GridImp>
   class ALU3dGridEntity;
@@ -25,6 +28,11 @@ namespace Dune {
   class ALU3dGrid;
   class BilinearSurfaceMapping;
   class TrilinearMapping;
+
+  template< class GridImp >
+  class ALU3dGridIntersectionIterator;
+
+
 
   //**********************************************************************
   //

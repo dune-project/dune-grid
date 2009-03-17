@@ -5,9 +5,10 @@
 
 // only include if ALUGrid is used
 #if defined ENABLE_ALUGRID
+
 #include <dune/grid/alugrid.hh>
-#include <dune/grid/alugrid/3d/alu3dgridfactory.hh>
-#include "dgfparser.hh"
+#include <dune/grid/io/file/dgfparser/dgfparser.hh>
+
 namespace Dune
 {
 

@@ -16,7 +16,7 @@ namespace Dune
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    std :: ifstream file( filename );
+    std::ifstream file( filename );
     if( macroGrid.readDuneGrid( file, 3, 3 ) )
     {
       if( macroGrid.dimw != 3 )
@@ -123,18 +123,11 @@ namespace Dune
         for( facemap_t :: iterator it = macroGrid.facemap.begin();
              it != macroGrid.facemap.end(); ++it )
         {
-          const unsigned int keySize = it->first.size();
-          std :: vector< unsigned int > key( keySize );
-          for( unsigned int i = 0; i < keySize; ++i )
-          {
-            key[ FaceTopologyMapping< hexa > :: alu2duneVertex( i ) ]
-              = it->first.origKey( i );
-          }
-          factory.insertBoundary( faceType, key, it->second );
+          factory.insertBoundary( faceType, it->first, it->second );
         }
       }
 
-      return factory.createGrid();
+      return factory.createGrid( false );
     }
     else
     {
