@@ -348,7 +348,7 @@ namespace Dune {
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
     {}
 
-    const CollectiveCommunication<OneDGrid>& comm () const
+    const CollectiveCommunication &comm () const
     {
       return ccobj;
     }
@@ -356,7 +356,7 @@ namespace Dune {
 
   private:
 
-    CollectiveCommunication<OneDGrid> ccobj;
+    CollectiveCommunication ccobj;
 
     /** \brief Update all indices and ids */
     void setIndices();

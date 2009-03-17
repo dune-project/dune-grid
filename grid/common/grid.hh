@@ -512,40 +512,48 @@ namespace Dune {
        */
       typedef typename GridFamily::Traits::template Codim<cd>::LeafIterator LeafIterator;
 
-      /*!  \brief A type that is a model of Dune::IndexSet
-         which provides a consecutive, but non persistent, numbering for
-         entities on a grid level.
-       */
-      typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet;
-
-      /*! \brief A type that is a model of Dune::IndexSet
-         which provides a consecutive, but non persistent, numbering for
-         entities in the leaf grid.
-       */
-      typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet;
-
-      /*!  \brief A type that is a model of Dune::IdSet
-         which provides a unique and persistent numbering for
-         all entities in the grid. The numbering is unique over all processes
-         over which the grid is partitioned. The numbering is not necessarily
-         consecutive.
-       */
-      typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet;
-
-      /*! \brief A type that is a model of Dune::IdSet
-         which provides a unique and persistent numbering for
-         all entities in the grid. The numbering is only unique in a single process
-         and it is not necessarily consecutive.
-       */
-      typedef typename GridFamily::Traits::LocalIdSet LocalIdSet;
-
-      /*! \brief A type that is a model of Dune::CollectiveCommunication.
-         It provides a portable way for collective communication on the set
-         of processes used by the grid.
-       */
-      typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication;
-
+      // The following  types used to be part of the Codim structure.
+      // Yet, they are independent of the codimension.
+      typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::LocalIdSet LocalIdSet DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication DUNE_DEPRECATED;
     };
+
+
+    /*!  \brief A type that is a model of Dune::IndexSet
+       which provides a consecutive, but non persistent, numbering for
+       entities on a grid level.
+     */
+    typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet;
+
+    /*! \brief A type that is a model of Dune::IndexSet
+       which provides a consecutive, but non persistent, numbering for
+       entities in the leaf grid.
+     */
+    typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet;
+
+    /*!  \brief A type that is a model of Dune::IdSet
+       which provides a unique and persistent numbering for
+       all entities in the grid. The numbering is unique over all processes
+       over which the grid is partitioned. The numbering is not necessarily
+       consecutive.
+     */
+    typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet;
+
+    /*! \brief A type that is a model of Dune::IdSet
+       which provides a unique and persistent numbering for
+       all entities in the grid. The numbering is only unique in a single process
+       and it is not necessarily consecutive.
+     */
+    typedef typename GridFamily::Traits::LocalIdSet LocalIdSet;
+
+    /*! \brief A type that is a model of Dune::CollectiveCommunication.
+       It provides a portable way for collective communication on the set
+       of processes used by the grid.
+     */
+    typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication;
 
     //! Define type used for coordinates in grid module
     typedef ct ctype;
@@ -726,28 +734,28 @@ namespace Dune {
     //===========================================================
 
     //! return const reference to the grids global id set
-    const typename Codim<0>::GlobalIdSet& globalIdSet() const
+    const GlobalIdSet &globalIdSet () const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().globalIdSet());
       return asImp().globalIdSet();
     }
 
     //! return const reference to the grids local id set
-    const typename Codim<0>::LocalIdSet& localIdSet() const
+    const LocalIdSet &localIdSet () const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().localIdSet());
       return asImp().localIdSet();
     }
 
     //! return const reference to the grids level index set for level level
-    const typename Codim<0>::LevelIndexSet& levelIndexSet(int level) const
+    const LevelIndexSet &levelIndexSet ( int level ) const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().levelIndexSet(level));
       return asImp().levelIndexSet(level);
     }
 
     //! return const reference to the grids leaf index set
-    const typename Codim<0>::LeafIndexSet& leafIndexSet() const
+    const LeafIndexSet &leafIndexSet () const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().leafIndexSet());
       return asImp().leafIndexSet();
@@ -905,7 +913,7 @@ namespace Dune {
     }
 
     //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
-    const typename Codim<0>::CollectiveCommunication& comm () const
+    const CollectiveCommunication &comm () const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().comm());
       return asImp().comm();
