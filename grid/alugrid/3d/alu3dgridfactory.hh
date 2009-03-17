@@ -3,10 +3,13 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
+#ifdef ENABLE_ALUGRID
+
 #include <dune/common/fixedarray.hh>
+#include <dune/common/mpihelper.hh>
 
 #include <dune/grid/common/gridfactory.hh>
-#include <dune/grid/alugrid.hh>
+#include <dune/grid/alugrid/3d/alugrid.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
 
 namespace Dune
@@ -226,4 +229,7 @@ namespace Dune
 // This include is nasty, but we cannot incorporate 'alu3dgridfactory.cc' into
 // the lib before HAVE_MPI behaves predictable
 #include "alu3dgridfactory.cc"
+
+#endif // #ifdef ENABLE_ALUGRID
+
 #endif

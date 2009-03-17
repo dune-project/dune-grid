@@ -14,6 +14,6 @@ alu3dgrid_HEADERS = alu3dinclude.hh alu3dgridfactory.hh alu3dgridfactory.cc \
   mappings.hh mappings_imp.cc topology.hh entity.hh entity_imp.cc \
   faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc \
   indexsets.hh iterator.hh iterator_imp.cc alu3diterators.hh \
-  alu3dutility.hh lbdatahandle.hh
+  alu3dutility.hh lbdatahandle.hh alugrid.hh capabilities.hh
 
 include $(top_srcdir)/am/global-rules
