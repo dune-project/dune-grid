@@ -3,6 +3,8 @@
 #ifndef DUNE_ALU3DGRIDMEMORY_HH
 #define DUNE_ALU3DGRIDMEMORY_HH
 
+#include <cassert>
+#include <cstdlib>
 #include <stack>
 
 namespace Dune {
