@@ -394,17 +394,13 @@ namespace Dune {
     //! constructor stores reference to a grid
     UGGridIdSet (const GridImp& g) : grid_(g) {}
 
-    //! define the type used for persistent indices
-    typedef unsigned int GlobalIdType;
-    typedef unsigned int LocalIdType;
-
     //! get id of an entity
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int cd>
-    GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    unsigned int id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -431,7 +427,8 @@ namespace Dune {
       }
       else {
         DUNE_THROW(NotImplemented,
-                   "Global index for entities which are neither nodes nor elements.");
+                   (Local) ? "Local" : "Global"
+                   " persistent index for entities which are neither nodes nor elements.");
       }
 #else
       return UG_NS<dim>::id(grid_.getRealImplementation(e).target_);
@@ -445,7 +442,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cc>
-    GlobalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       if (cc==0)
         return id<0>(e);
@@ -516,7 +513,7 @@ namespace Dune {
 #endif
       }
 
-      DUNE_THROW(GridError, "UGGrid<" << dim << ">::subGlobalId isn't implemented for cc==" << cc );
+      DUNE_THROW(GridError, "UGGrid<" << dim << ">::subId isn't implemented for cc==" << cc );
     }
 
     //private:
