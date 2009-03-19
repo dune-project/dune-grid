@@ -50,10 +50,28 @@ namespace Dune
         }
      };
      \endcode
+   *
+   * If you don't want to use the default constructor of the LayoutClass you can construct it yourself
+   * and hand it to the respective constructor.
    */
   template <typename G, typename IS, template<int> class Layout>
   class MultipleCodimMultipleGeomTypeMapper : Mapper<G,MultipleCodimMultipleGeomTypeMapper<G,IS,Layout> > {
   public:
+
+    /** @brief Construct mapper from grid and one of its index sets.
+     *
+     * Use this constructor to provide a custom layout object e.g. not
+     * using the default constructor.
+     *
+     * \param grid A Dune grid object.
+     * \param indexset IndexSet object returned by grid.
+     * \param layout A layout object.
+     */
+    MultipleCodimMultipleGeomTypeMapper (const G& grid, const IS& indexset, const Layout<G::dimension> layout)
+      : g(grid), is(indexset), layout(layout)
+    {
+      update();
+    }
 
     /** @brief Construct mapper from grid and one of its index sets.
 
@@ -164,12 +182,8 @@ namespace Dune
     const G& g;
     const IS& is;
     std::map<GeometryType,int> offset;     // provide a map with all geometry types
-    static Layout<G::dimension> layout;     // get layout object
+    Layout<G::dimension> layout;     // get layout object
   };
-
-  // C++ requires definition of static data members outside the class
-  template <typename G, typename IS, template<int> class Layout>
-  Layout<G::dimension> MultipleCodimMultipleGeomTypeMapper<G, IS, Layout>::layout;
 
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
 
@@ -203,6 +217,19 @@ namespace Dune
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
       : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet())
     {}
+
+    /** @brief The constructor
+     *
+     * Use this constructor to provide a custom layout object e.g. not
+     * using the default constructor.
+     *
+     * @param grid A reference to a grid.
+     * @param layout A layout object
+     */
+    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
+      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet(),layout)
+    {}
+
   };
 
   /** @brief Multiple codim and multiple geometry type mapper for entities of one level.
@@ -238,6 +265,19 @@ namespace Dune
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
       : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,Layout>(grid,grid.levelIndexSet(level))
     {}
+
+    /** @brief The constructor
+     *
+     * Use this constructor to provide a custom layout object e.g. not
+     * using the default constructor.
+     *
+     * @param grid A reference to a grid.
+     * @param layout A layout object
+     */
+    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
+      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevekIndexSet,Layout>(grid,grid.levelIndexSet(level),layout)
+    {}
+
   };
 
   /** @} */
