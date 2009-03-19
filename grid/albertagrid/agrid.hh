@@ -136,8 +136,8 @@ namespace Dune
         LeafGridView;
       };
 
-      typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
-      typedef IndexSet<GridImp,LeafIndexSetImp,DefaultLeafIteratorTypes<GridImp> > LeafIndexSet;
+      typedef IndexSet< GridImp, LevelIndexSetImp > LevelIndexSet;
+      typedef IndexSet< GridImp, LeafIndexSetImp > LeafIndexSet;
       typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;

@@ -41,28 +41,6 @@ namespace Dune
 
 
 
-  //! HierarchicIndexSet uses LeafIterator types for all codims and partition types
-  template <class GridImp>
-  struct AlbertaGridHierarchicIteratorTypes
-  {
-    //! The types of the iterator
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        /*
-           We use the remove_const to extract the Type from the mutable class,
-           because the const class is not instantiated yet.
-         */
-        typedef typename remove_const<GridImp>::type::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
-      };
-    };
-  };
-
-
-
   // AlbertaGridHierarchicIndexSet
   // -----------------------------
 
@@ -70,8 +48,7 @@ namespace Dune
   class AlbertaGridHierarchicIndexSet
     : public IndexSetDefaultImplementation
       < AlbertaGrid< dim, dimworld >,
-          AlbertaGridHierarchicIndexSet< dim,dimworld >,
-          AlbertaGridHierarchicIteratorTypes< AlbertaGrid< dim, dimworld > > >
+          AlbertaGridHierarchicIndexSet< dim,dimworld > >
   {
     typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
 
@@ -158,26 +135,6 @@ namespace Dune
       return geomTypes_[ codim ];
     }
 
-#ifdef INDEXSET_HAS_ITERATORS
-    /** @brief Iterator to one past the last entity of given codim for partition type
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename AlbertaGridHierarchicIteratorTypes<Grid>::template Codim<cd>::
-    template Partition<pitype>::Iterator end () const
-    {
-      return grid_.template leafend<cd,pitype> ();
-    }
-
-    /** @brief Iterator to first entity of given codimension and partition type.
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename AlbertaGridHierarchicIteratorTypes<Grid>::template Codim<cd>::
-    template Partition<pitype>::Iterator begin () const
-    {
-      return grid_.template leafbegin<cd,pitype> ();
-    }
-#endif
-
     template< int codim >
     int subIndex ( const Alberta::ElementInfo< dimension > &elementInfo, int i ) const
     {
@@ -261,11 +218,6 @@ namespace Dune
     }
 
   private:
-#ifdef INDEXSET_HAS_ITERATORS
-    // the grid this index set belongs to
-    const Grid &grid_;
-#endif
-
     // index stacks providing new numbers during adaptation
     IndexStack indexStack_[ dimension+1 ];
 
@@ -284,9 +236,6 @@ namespace Dune
   template< int dim, int dimworld >
   inline AlbertaGridHierarchicIndexSet< dim, dimworld >
   ::AlbertaGridHierarchicIndexSet ( const Grid &grid )
-#ifdef INDEXSET_HAS_ITERATORS
-    : grid_( grid )
-#endif
   {
     for( int codim = 0; codim <= dimension; ++codim )
     {
