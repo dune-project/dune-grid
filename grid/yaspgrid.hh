@@ -1947,25 +1947,11 @@ namespace Dune {
    */
   //========================================================================
 
-  template <class GridImp>
-  struct YaspLevelIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
-      };
-    };
-  };
-
   template<class GridImp>
-  class YaspLevelIndexSet : public IndexSetDefaultImplementation<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> >
+  class YaspLevelIndexSet
+    : public IndexSetDefaultImplementation< GridImp, YaspLevelIndexSet< GridImp > >
   {
-    typedef IndexSetDefaultImplementation<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation< GridImp, YaspLevelIndexSet< GridImp > > Base;
   public:
 
     //! constructor stores reference to a grid and level
@@ -2015,20 +2001,6 @@ namespace Dune {
       return mytypes[codim];
     }
 
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid.template lbegin<cd,pitype>(level);
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid.template lend<cd,pitype>(level);
-    }
-
   private:
     const GridImp& grid;
     int level;
@@ -2038,25 +2010,11 @@ namespace Dune {
 
   // Leaf Index Set
 
-  template <class GridImp>
-  struct YaspLeafIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
-      };
-    };
-  };
-
   template<class GridImp>
-  class YaspLeafIndexSet : public IndexSetDefaultImplementation<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> >
+  class YaspLeafIndexSet
+    : public IndexSetDefaultImplementation< GridImp, YaspLeafIndexSet< GridImp > >
   {
-    typedef IndexSetDefaultImplementation<GridImp,YaspLeafIndexSet<GridImp>,YaspLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation< GridImp, YaspLeafIndexSet< GridImp > > Base;
   public:
 
     //! constructor stores reference to a grid
@@ -2114,20 +2072,6 @@ namespace Dune {
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return mytypes[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid.template lbegin<cd,pitype>(grid.maxLevel());
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid.template lend<cd,pitype>(grid.maxLevel());
     }
 
   private:
@@ -2206,10 +2150,8 @@ namespace Dune {
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,
-        YaspLevelIndexSet<const YaspGrid<dim,dimworld> >,
-        YaspLevelIndexSetTypes<const YaspGrid<dim,dimworld> >,
-        YaspLeafIndexSet<const YaspGrid<dim,dimworld> >,
-        YaspLeafIndexSetTypes<const YaspGrid<dim,dimworld> >,
+        YaspLevelIndexSet< const YaspGrid< dim,dimworld > >,
+        YaspLeafIndexSet< const YaspGrid< dim,dimworld > >,
         YaspGlobalIdSet<const YaspGrid<dim,dimworld> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         YaspGlobalIdSet<const YaspGrid<dim,dimworld> >,

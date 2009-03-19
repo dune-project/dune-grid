@@ -1237,7 +1237,7 @@ namespace Dune {
       template<class> class LevelIntersectionIteratorImp,
       template<class> class HierarchicIteratorImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp,
-      class LevelIndexSetImp, class LevelIndexSetTypes, class LeafIndexSetImp, class LeafIndexSetTypes,
+      class LevelIndexSetImp, class LeafIndexSetImp,
       class GlobalIdSetImp, class GIDType, class LocalIdSetImp, class LIDType, class CCType,
       template<class,PartitionIteratorType> class LevelGridViewTraits = DefaultLevelGridViewTraits,
       template<class,PartitionIteratorType> class LeafGridViewTraits = DefaultLeafGridViewTraits
