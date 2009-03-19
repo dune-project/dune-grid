@@ -458,7 +458,7 @@ void checkViewIntersectionIterator(const GridViewType& view) {
     std :: cerr << "Warning: Integral over outer normals is not always zero."
                 << std :: endl;
     std :: cerr << "         This behaviour may be correct for entities with"
-                << " nonzero curature." << std :: endl;;
+                << " nonzero curvature." << std :: endl;;
   }
 }
 
