@@ -361,7 +361,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp> class LeafIterator;
   template<class GridImp> class GenericLeafIterator;
-  template<class GridImp, class IndexSetIteratorImp, class IndexSetImp> class IndexSet;
+  template<class GridImp, class IndexSetImp> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
 
 
@@ -1318,9 +1318,9 @@ namespace Dune {
     };
 
     /** \brief The type of the level index set. */
-    typedef IndexSet<const GridImp,LevelIndexSetImp,LevelIndexSetTypes> LevelIndexSet;
+    typedef IndexSet<const GridImp,LevelIndexSetImp> LevelIndexSet;
     /** \brief The type of the leaf index set. */
-    typedef IndexSet<const GridImp,LeafIndexSetImp,LeafIndexSetTypes> LeafIndexSet;
+    typedef IndexSet<const GridImp,LeafIndexSetImp> LeafIndexSet;
     /** \brief The type of the global id set. */
     typedef IdSet<const GridImp,GlobalIdSetImp,GIDType> GlobalIdSet;
     /** \brief The type of the local id set. */

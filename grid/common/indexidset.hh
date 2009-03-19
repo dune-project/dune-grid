@@ -13,7 +13,6 @@
 
 #include <dune/grid/common/grid.hh>
 
-//#define INDEXSET_HAS_ITERATORS
 /** @file
         @author Peter Bastian
         @brief Provides base classes for index and id sets
@@ -30,7 +29,6 @@ namespace Dune
 
      - <tt>GridImp</tt> Type that is a model of Dune::Grid.
      - <tt>IndexSetImp</tt> Type that is a model of Dune::IndexSet.
-     - <tt>IndexSetTypes</tt> Traits class containing return types depending on implementation.
 
      <H3>Overview</H3>
 
@@ -74,27 +72,9 @@ namespace Dune
 
      @ingroup IndexIdSets
    */
-  template<class GridImp, class IndexSetImp, class IndexSetTypes>
+  template<class GridImp, class IndexSetImp>
   class IndexSet {
   public:
-#ifdef INDEXSET_HAS_ITERATORS
-#warning You are using deprecated code!  The code following this warning will be removed in the next version of DUNE!
-    /** @brief Define types needed to iterate over the entities in the index set
-     */
-    template <int cd>
-    struct Codim
-    {
-
-      /** \brief Define types needed to iterate over entities of a given partition type */
-      template <PartitionIteratorType pitype>
-      struct Partition
-      {
-        /** \brief The iterator needed to iterate over the entities of a given codim and
-            partition type of this index set */
-        typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
-      };
-    } DUNE_DEPRECATED;
-#endif
 
     /** \brief The type used for the indices */
     typedef unsigned int IndexType;
@@ -213,20 +193,6 @@ namespace Dune
       return asImp().contains(e);
     }
 
-#ifdef INDEXSET_HAS_ITERATORS
-    /** @brief Iterator to first entity of given codimension and partition type in \f$E\f$.
-            The iterator type is available via the public Codim struct.
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::Iterator begin () const DUNE_DEPRECATED;
-
-    /** @brief Iterator to one past the last entity of given codim and partition type in \f$E\f$.
-            The iterator type is available via the public Codim struct.
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename Codim<cd>::template Partition<pitype>::Iterator end () const DUNE_DEPRECATED;
-    //@}
-#endif
     // Must be explicitely defined although this class should get a default constructor.
     IndexSet() {}
 
@@ -242,54 +208,19 @@ namespace Dune
     const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
-#ifdef INDEXSET_HAS_ITERATORS
-  template<class GridImp, class IndexSetImp, class IndexSetTypes>
-  template<int cd, PartitionIteratorType pitype>
-  typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
-  IndexSet<GridImp,IndexSetImp,IndexSetTypes>::begin() const
-  {
-    CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
-    return asImp().begin<cd,pitype>();
-  }
-
-  template<class GridImp, class IndexSetImp, class IndexSetTypes>
-  template<int cd, PartitionIteratorType pitype>
-  typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::template Codim<cd>::template Partition<pitype>::Iterator
-  IndexSet<GridImp,IndexSetImp,IndexSetTypes>::end() const
-  {
-    CHECK_INTERFACE_IMPLEMENTATION((asImp().begin<cd,pitype>()));
-    return asImp().end<cd,pitype>();
-  }
-#endif
-
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
   /**\brief Provide default implementation of method if IndexSet
          @ingroup GridDevel
    */
-  template<class GridImp, class IndexSetImp, class IndexSetTypes>
+  template<class GridImp, class IndexSetImp>
   class IndexSetDefaultImplementation :
-    public IndexSet<GridImp,IndexSetImp,IndexSetTypes>
+    public IndexSet<GridImp,IndexSetImp>
   {
   public:
-    /** @brief Define types needed to iterate over the entities in the index set
-     */
-    template <int cd>
-    struct Codim
-    {
 
-      /** \brief Define types needed to iterate over entities of a given partition type */
-      template <PartitionIteratorType pitype>
-      struct Partition
-      {
-        /** \brief The iterator needed to iterate over the entities of a given codim and
-            partition type of this index set */
-        typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
-      };
-    } DUNE_DEPRECATED;
-
-    typedef typename IndexSet<GridImp,IndexSetImp,IndexSetTypes>::IndexType IndexType;
+    typedef typename IndexSet<GridImp,IndexSetImp>::IndexType IndexType;
 
     /** @brief Return total number of entities of given codim as a sum
           for all geometry types in this index set.
@@ -326,6 +257,7 @@ namespace Dune
       return s;
     }
 
+#if 0
     /** @brief Return true if the given entity is contained in \f$E\f$.
      */
     template<class EntityType>
@@ -342,7 +274,7 @@ namespace Dune
       }
       return false;
     }
-
+#endif
   private:
     //!  Barton-Nackman trick
     IndexSetImp& asImp () {return static_cast<IndexSetImp &> (*this);}

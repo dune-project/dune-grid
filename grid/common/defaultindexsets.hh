@@ -508,8 +508,7 @@ namespace Dune {
   template <class GridImp>
   class DefaultLevelIndexSet :
     public IndexSetDefaultImplementation< GridImp,
-        DefaultLevelIndexSet <GridImp>,
-        DefaultLevelIteratorTypes<GridImp> >
+        DefaultLevelIndexSet <GridImp> >
 
   {
     typedef GridImp GridType;
@@ -817,8 +816,7 @@ namespace Dune {
   template <class GridImp>
   class DefaultLeafIndexSet :
     public IndexSetDefaultImplementation< GridImp,
-        DefaultLeafIndexSet <GridImp>,
-        DefaultLeafIteratorTypes<GridImp> >
+        DefaultLeafIndexSet <GridImp> >
 
   {
     typedef GridImp GridType;
