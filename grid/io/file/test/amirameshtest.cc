@@ -107,8 +107,9 @@ int main() try {
 #endif
 
 #ifdef HAVE_ALUGRID
-  std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
+  //  Reading of 2d AluGrid is not implemented yet
+  //std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
+  //testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
 
   std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
   testReadingUnstructuredGrid<ALUSimplexGrid<3,3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
