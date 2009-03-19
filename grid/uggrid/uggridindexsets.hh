@@ -14,27 +14,11 @@
 
 namespace Dune {
 
-  template <class GridImp>
-  struct UGGridLevelIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
-      };
-    };
-  };
-
-
   template<class GridImp>
-  class UGGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> >
+  class UGGridLevelIndexSet : public IndexSet<GridImp,UGGridLevelIndexSet<GridImp> >
   {
     enum {dim = GridImp::dimension};
-    typedef IndexSetDefaultImplementation<GridImp,UGGridLevelIndexSet<GridImp>,UGGridLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSet<GridImp,UGGridLevelIndexSet<GridImp> > Base;
 
   public:
 
@@ -139,20 +123,6 @@ namespace Dune {
       return myTypes_[codim];
     }
 
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid_->template lbegin<cd,pitype>(level_);
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid_->template lend<cd,pitype>(level_);
-    }
-
     /** \brief Update the level indices.  This method is called after each grid change */
     void update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation=0);
 
@@ -171,26 +141,10 @@ namespace Dune {
     std::vector<GeometryType> myTypes_[dim+1];
   };
 
-  template <class GridImp>
-  struct UGGridLeafIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
-      };
-    };
-  };
-
-
   template<class GridImp>
-  class UGGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> >
+  class UGGridLeafIndexSet : public IndexSet<GridImp,UGGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp> > Base;
   public:
 
     /*
@@ -280,27 +234,17 @@ namespace Dune {
     //! get number of entities of given codim
     int size (int codim) const
     {
-      return Base::size(codim);
+      int s=0;
+      const std::vector<GeometryType>& geomTs = geomTypes(codim);
+      for (unsigned int i=0; i<geomTs.size(); ++i)
+        s += size(geomTs[i]);
+      return s;
     }
 
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return myTypes_[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid_.template leafbegin<cd,pitype>();
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid_.template leafend<cd,pitype>();
     }
 
     /** \brief Update the leaf indices.  This method is called after each grid change. */

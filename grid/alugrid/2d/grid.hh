@@ -150,7 +150,7 @@ namespace Dune {
         LeafGridView;
       };
 
-      typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
+      typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
       typedef LeafIndexSetImp LeafIndexSet;
       typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;

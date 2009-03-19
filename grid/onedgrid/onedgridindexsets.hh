@@ -28,9 +28,9 @@ namespace Dune {
 
 
   template<class GridImp>
-  class OneDGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> >
+  class OneDGridLevelIndexSet : public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,OneDGridLevelIndexSet<GridImp>,OneDGridLevelIndexSetTypes<GridImp> > Base;
+    typedef IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> > Base;
   public:
 
     /** \brief Constructor for a given level of a given grid
@@ -69,20 +69,6 @@ namespace Dune {
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return myTypes_[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid_->template lbegin<cd,pitype>(level_);
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid_->template lend<cd,pitype>(level_);
     }
 
     /** \todo Should be private */
@@ -151,9 +137,9 @@ namespace Dune {
 
   template<class GridImp>
   class OneDGridLeafIndexSet :
-    public IndexSetDefaultImplementation<GridImp,OneDGridLeafIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> >
+    public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,OneDGridLeafIndexSet<GridImp>,OneDGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> > Base;
   public:
     //! constructor stores reference to a grid and level
     OneDGridLeafIndexSet (const GridImp& g) : grid_(g)
@@ -207,20 +193,6 @@ namespace Dune {
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return myTypes_[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid_.template leafbegin<cd,pitype>();
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid_.template leafend<cd,pitype>();
     }
 
     /** \todo Should be private */

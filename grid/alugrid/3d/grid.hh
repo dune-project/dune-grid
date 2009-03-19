@@ -163,8 +163,8 @@ namespace Dune {
         LeafGridView;
       };
 
-      typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
-      typedef IndexSet<GridImp,LeafIndexSetImp,DefaultLeafIteratorTypes<GridImp> > LeafIndexSet;
+      typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
+      typedef IndexSet<GridImp,LeafIndexSetImp> LeafIndexSet;
       typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 
 #if ALU3DGRID_PARALLEL

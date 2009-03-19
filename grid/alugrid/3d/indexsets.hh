@@ -47,9 +47,8 @@ namespace Dune {
   //! hierarchic index set of ALU3dGrid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   class ALU3dGridHierarchicIndexSet :
-    public IndexSetDefaultImplementation <ALU3dGrid<dim,dimworld,elType>,
-        ALU3dGridHierarchicIndexSet<dim,dimworld,elType>,
-        ALU3dGridHierarchicIteratorTypes<ALU3dGrid<dim,dimworld,elType> > >
+    public IndexSet <ALU3dGrid<dim,dimworld,elType>,
+        ALU3dGridHierarchicIndexSet<dim,dimworld,elType> >
   {
     typedef ALU3dGrid<dim,dimworld,elType> GridType;
     enum { numCodim = dim+1 }; // i.e. 4

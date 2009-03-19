@@ -293,9 +293,9 @@ namespace Dune {
         UGGridHierarchicIterator,
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
-        UGGridLevelIndexSetTypes< const UGGrid<dim> >,
+        UGGridLevelIndexSet< const UGGrid<dim> >,               // dummy
         UGGridLeafIndexSet< const UGGrid<dim> >,
-        UGGridLeafIndexSetTypes< const UGGrid<dim> >,
+        UGGridLeafIndexSet< const UGGrid<dim> >,                // dummy
         UGGridIdSet< const UGGrid<dim>, false >,
         unsigned int,
         UGGridIdSet< const UGGrid<dim>, true >,

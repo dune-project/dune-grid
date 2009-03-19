@@ -1055,9 +1055,8 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class SGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> >
+  class SGridLevelIndexSet : public IndexSet<GridImp,SGridLevelIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
   public:
 
     //! constructor stores reference to a grid and level
@@ -1091,27 +1090,17 @@ namespace Dune {
     //! return size of set for a given codim
     int size (int codim) const
     {
-      return Base::size(codim);
+      int s=0;
+      const std::vector<GeometryType>& geomTs = geomTypes(codim);
+      for (unsigned int i=0; i<geomTs.size(); ++i)
+        s += size(geomTs[i]);
+      return s;
     }
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return mytypes[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid.template lbegin<cd,pitype>(level);
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid.template lend<cd,pitype>(level);
     }
 
   private:
@@ -1138,9 +1127,9 @@ namespace Dune {
   };
 
   template<class GridImp>
-  class SGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
+  class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
+    typedef IndexSet<GridImp,SGridLeafIndexSet<GridImp> > Base;
     enum {dim = remove_const<GridImp>::type::dimension};
   public:
 
@@ -1190,20 +1179,6 @@ namespace Dune {
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return mytypes[codim];
-    }
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid.template leafbegin<cd,pitype>();
-    }
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid.template leafend<cd,pitype>();
     }
 
   private:
