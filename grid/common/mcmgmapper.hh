@@ -182,7 +182,7 @@ namespace Dune
     const G& g;
     const IS& is;
     std::map<GeometryType,int> offset;     // provide a map with all geometry types
-    Layout<G::dimension> layout;     // get layout object
+    mutable Layout<G::dimension> layout;     // get layout object
   };
 
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
