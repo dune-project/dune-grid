@@ -108,7 +108,7 @@ namespace Dune {
       {
         for (int i=0; i<mydim; ++i)
         {
-          if (j<i || A[i][j] == 0.0)
+          if (j<i || std::abs(A[i][j]) < 1e-15)
             Jinv[j][i] = 0.0;
           else
             Jinv[j][i] = 1.0/A[i][j];
