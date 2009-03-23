@@ -121,9 +121,11 @@ namespace Dune
     }
 
     /** @brief Map subentity of codim cc of codim 0 entity to index.
-            The result of calling this method with an entity that is not
-            in the index set is undefined.
 
+       The result of calling this method with an entity that is not
+       in the index set is undefined.
+
+       \tparam cc Codimension of the subentity we are interested in
        \param e Reference to codim 0 entity.
        \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
        \return An index in the range 0 ... Max number of entities in set - 1.
@@ -138,6 +140,28 @@ namespace Dune
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
       return asImp().template subIndex<cc>(e,i);
+    }
+
+
+    /** @brief Map subentity of codim cc of codim 0 entity to index.
+
+       The result of calling this method with an entity that is not
+       in the index set is undefined.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+       \tparam codim Codimension of the subentity we are interested in
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    /*
+       We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet.
+     */
+    IndexType subIndex (const typename remove_const<GridImp>::type::
+                        Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().subIndex(e,i,codim)));
+      return asImp().subIndex(e,i,codim);
     }
     //@}
 
@@ -387,6 +411,14 @@ namespace Dune
                   Traits::template Codim<0>::Entity& e, int i) const
     {
       return asImp().template subId<cc>(e,i);
+    }
+
+    /** \brief Get id of subentity i of codim cc of a codim 0 entity.
+     */
+    IdType subId (const typename remove_const<GridImp>::type::
+                  Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    {
+      return asImp().subId(e,i,codim);
     }
 
     // Default constructor (is not provided automatically because copy constructor is private)
