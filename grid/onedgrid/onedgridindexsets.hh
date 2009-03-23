@@ -30,10 +30,18 @@ namespace Dune {
     }
 
     //! get index of subentity of a codim 0 entity
-    template<int cc>
-    int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+    template<int codim>
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_->getRealImplementation(e).template subLevelIndex<cc>(i);
+      return subIndex(e,i,codim);
+    }
+
+    //! get index of subentity of a codim 0 entity
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e,
+                           int i,
+                           unsigned int codim) const
+    {
+      return grid_->getRealImplementation(e).subLevelIndex(i,codim);
     }
 
     //! get number of entities of given type and on this level
@@ -148,10 +156,18 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cc>
+    template<int codim>
     int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_.getRealImplementation(e).template subLeafIndex<cc>(i);
+      return subIndex(e,i,codim);
+    }
+
+    //! get index of subentity of a codim 0 entity
+    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+                  int i,
+                  unsigned int codim) const
+    {
+      return grid_.getRealImplementation(e).subLeafIndex(i,codim);
     }
 
     //! get number of entities of given codim, type on the leaf level
@@ -304,10 +320,19 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cd>
+    template<int codim>
     IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return grid_.getRealImplementation(e).template subId<cd>(i);
+      return subId(e,i,codim);
+    }
+
+
+    //! get id of subentity
+    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+                  int i,
+                  unsigned int codim) const
+    {
+      return grid_.getRealImplementation(e).subId(i,codim);
     }
 
     /** \todo Should be private */

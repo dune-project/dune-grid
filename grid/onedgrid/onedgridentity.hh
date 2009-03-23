@@ -290,30 +290,27 @@ namespace Dune {
 
     /** \brief Return index of sub entity with codim = cc and local number i
      */
-    template<int cc>
-    int subLevelIndex (int i) const {
+    int subLevelIndex (int i,unsigned int codim) const {
       assert(i==0 || i==1);
-      return (cc==0)
+      return (codim==0)
              ? target_->levelIndex_
              : target_->vertex_[i]->levelIndex_;
     }
 
     /** \brief Return leaf index of sub entity with codim = cc and local number i
      */
-    template<int cc>
-    int subLeafIndex (int i) const {
+    int subLeafIndex (int i, unsigned int codim) const {
       assert(i==0 || i==1);
-      return (cc==0)
+      return (codim==0)
              ? target_->leafIndex_
              : target_->vertex_[i]->leafIndex_;
     }
 
     /** \brief Return leaf index of sub entity with codim = cc and local number i
      */
-    template<int cc>
-    int subId (int i) const {
+    int subId (int i, unsigned int codim) const {
       assert(i==0 || i==1);
-      return (cc==0)
+      return (codim==0)
              ? target_->id_
              : target_->vertex_[i]->id_;
     }
