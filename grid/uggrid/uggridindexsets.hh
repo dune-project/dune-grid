@@ -18,7 +18,6 @@ namespace Dune {
   class UGGridLevelIndexSet : public IndexSet<GridImp,UGGridLevelIndexSet<GridImp> >
   {
     enum {dim = GridImp::dimension};
-    typedef IndexSet<GridImp,UGGridLevelIndexSet<GridImp> > Base;
 
   public:
 
@@ -164,7 +163,6 @@ namespace Dune {
   template<class GridImp>
   class UGGridLeafIndexSet : public IndexSet<GridImp,UGGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSetDefaultImplementation<GridImp,UGGridLeafIndexSet<GridImp> > Base;
   public:
 
     /*
