@@ -1039,21 +1039,6 @@ namespace Dune {
    */
   //========================================================================
 
-  template <class GridImp>
-  struct SGridLevelIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
-      };
-    };
-  };
-
   template<class GridImp>
   class SGridLevelIndexSet : public IndexSet<GridImp,SGridLevelIndexSet<GridImp> >
   {
@@ -1081,20 +1066,30 @@ namespace Dune {
       return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
     }
 
+    // return true if the given entity is contained in \f$E\f$.
+    template< class EntityType >
+    bool contains ( const EntityType &e ) const
+    {
+      return (e.level() == level);
+    }
+
     //! get number of entities of given type and level (the level is known to the object)
     int size (GeometryType type) const
     {
-      return grid.size(level,GridImp::dimension-type.dim());
+      return grid.size( level, type );
     }
 
     //! return size of set for a given codim
     int size (int codim) const
     {
+#if 0
       int s=0;
       const std::vector<GeometryType>& geomTs = geomTypes(codim);
       for (unsigned int i=0; i<geomTs.size(); ++i)
         s += size(geomTs[i]);
       return s;
+#endif
+      return grid.size( level, codim );
     }
 
     //! deliver all geometry types used in this grid
@@ -1110,21 +1105,6 @@ namespace Dune {
   };
 
   // Leaf Index Set
-
-  template <class GridImp>
-  struct SGridLeafIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
-      };
-    };
-  };
 
   template<class GridImp>
   class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp> >
@@ -1166,13 +1146,20 @@ namespace Dune {
     //! get number of entities of given type
     int size (GeometryType type) const
     {
-      return grid.size(grid.maxLevel(),GridImp::dimension-type.dim());
+      return grid.size( grid.maxLevel(), type );
     }
 
     //! return size of set for a given codim
     int size (int codim) const
     {
-      return Base::size(codim);
+      return grid.size( grid.maxLevel(), codim );
+    }
+
+    // return true if the given entity is contained in \f$E\f$.
+    template< class EntityType >
+    bool contains ( const EntityType &e ) const
+    {
+      return (e.level() == grid.maxLevel());
     }
 
     //! deliver all geometry types used in this grid
