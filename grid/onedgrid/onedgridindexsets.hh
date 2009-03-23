@@ -335,9 +335,6 @@ namespace Dune {
       return grid_.getRealImplementation(e).subId(i,codim);
     }
 
-    /** \todo Should be private */
-    void update() {}
-
   private:
 
     const GridImp& grid_;

@@ -622,8 +622,7 @@ void Dune::OneDGrid::setIndices()
 
   leafIndexSet_.update();
 
-  idSet_.update();
-
+  // IdSets don't need updating
 }
 
 void Dune::OneDGrid::globalRefine(int refCount)
