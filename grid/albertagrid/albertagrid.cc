@@ -51,7 +51,7 @@ namespace Dune
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
     : mesh_(),
       maxlevel_( 0 ),
-      hIndexSet_( *this ),
+      hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
       leafIndexSet_ ( 0 ),
@@ -69,7 +69,7 @@ namespace Dune
                   const std::string &gridName )
     : mesh_(),
       maxlevel_( 0 ),
-      hIndexSet_( *this ),
+      hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
       leafIndexSet_ ( 0 ),
@@ -84,7 +84,7 @@ namespace Dune
       DUNE_THROW( AlbertaError, "Invalid macro data structure." );
 
     setup();
-    hIndexSet_.create( dofNumbering_ );
+    hIndexSet_.create();
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
@@ -97,7 +97,7 @@ namespace Dune
                   const std::string &gridName )
     : mesh_(),
       maxlevel_( 0 ),
-      hIndexSet_( *this ),
+      hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
       leafIndexSet_ ( 0 ),
@@ -116,7 +116,7 @@ namespace Dune
     }
 
     setup();
-    hIndexSet_.create( dofNumbering_ );
+    hIndexSet_.create();
     LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
@@ -698,7 +698,7 @@ namespace Dune
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 
     setup();
-    hIndexSet_.read( filename, mesh_ );
+    hIndexSet_.read( filename );
 
     // calc maxlevel and indexOnLevel and so on
     calcExtras();

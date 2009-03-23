@@ -60,10 +60,10 @@ namespace Dune
 
     static const int dimension = Grid::dimension;
 
-    typedef Alberta::DofVectorPointer< int > IndexVectorPointer;
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+    typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
 
-    template< int codim >
-    class DofAccess;
+    typedef Alberta::DofVectorPointer< int > IndexVectorPointer;
 
     class InitEntityNumber;
 
@@ -76,7 +76,7 @@ namespace Dune
     template< int codim >
     class CoarsenNumbering;
 
-    explicit AlbertaGridHierarchicIndexSet ( const Grid &grid );
+    explicit AlbertaGridHierarchicIndexSet ( const DofNumbering &dofNumbering );
 
   public:
     typedef Alberta::IndexStack IndexStack;
@@ -102,17 +102,23 @@ namespace Dune
     {
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      return subIndex< codim >( entityImp.elementInfo().el(), entityImp.subEntity() );
+      return subIndex( entityImp.elementInfo().el(), codim, entityImp.subEntity() );
+    }
+
+    //! return subIndex of given enitiy's sub entity
+    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, int codim ) const
+    {
+      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
+        = Grid::getRealImplementation( entity );
+      const int j = entityImp.grid().dune2alberta( codim, i );
+      return subIndex( entityImp.elementInfo().el(), codim, j );
     }
 
     //! return subIndex of given enitiy's sub entity
     template< int codim >
     int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
     {
-      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().dune2alberta( codim, i );
-      return subIndex< codim >( entityImp.elementInfo().el(), j );
+      return subIndex( entity, i, codim );
     }
 
     //! return size of set for given GeometryType
@@ -135,11 +141,10 @@ namespace Dune
       return geomTypes_[ codim ];
     }
 
-    template< int codim >
-    int subIndex ( const Alberta::ElementInfo< dimension > &elementInfo, int i ) const
+    int subIndex ( const ElementInfo &elementInfo, int codim, int i ) const
     {
       assert( !elementInfo == false );
-      return subIndex< codim >( elementInfo.el(), i );
+      return subIndex( elementInfo.el(), codim, i );
     }
 
     /** \brief obtain hierarchic subindex
@@ -147,13 +152,10 @@ namespace Dune
      *  \param[in]  element  pointer to ALBERTA element
      *  \param[in]  i        number of the subelement (in ALBERTA numbering)
      */
-    template< int codim >
-    int subIndex ( const Alberta::Element *element, int i ) const
+    int subIndex ( const Alberta::Element *element, int codim, int i ) const
     {
-      Int2Type< codim > codimVariable;
-
       int *array = (int *)entityNumbers_[ codim ];
-      const int subIndex = array[ dofAccess_[ codimVariable ]( element, i ) ];
+      const int subIndex = array[ dofNumbering_( element, codim, i ) ];
       assert( (subIndex >= 0) && (subIndex < size( codim )) );
       return subIndex;
     }
@@ -175,15 +177,16 @@ namespace Dune
         Alberta::currentIndexStack = 0;
     }
 
-    void create ( const Alberta::HierarchyDofNumbering< dimension > &dofNumbering )
+    void create ()
     {
-      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >::apply( dofNumbering, *this );
+      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >
+      ::apply( dofNumbering_, *this );
     }
 
-    void read ( const std::string &filename,
-                const Alberta::MeshPointer< dimension > &mesh )
+    void read ( const std::string &filename )
     {
-      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >::apply( filename, mesh, *this );
+      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >
+      ::apply( filename, dofNumbering_.mesh(), *this );
     }
 
     bool write ( const std::string &filename ) const
@@ -218,14 +221,14 @@ namespace Dune
     }
 
   private:
+    // access to the dof vectors
+    const DofNumbering &dofNumbering_;
+
     // index stacks providing new numbers during adaptation
     IndexStack indexStack_[ dimension+1 ];
 
     // dof vectors storing the (persistent) numbering
     IndexVectorPointer entityNumbers_[ dimension+1 ];
-
-    // access to the dof vectors
-    Alberta::CodimTable< DofAccess, dimension > dofAccess_;
 
     // all geometry types contained in the grid
     std::vector< GeometryType > geomTypes_[ dimension+1 ];
@@ -235,7 +238,8 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline AlbertaGridHierarchicIndexSet< dim, dimworld >
-  ::AlbertaGridHierarchicIndexSet ( const Grid &grid )
+  ::AlbertaGridHierarchicIndexSet ( const DofNumbering &dofNumbering )
+    : dofNumbering_( dofNumbering )
   {
     for( int codim = 0; codim <= dimension; ++codim )
     {
@@ -244,26 +248,6 @@ namespace Dune
     }
   }
 
-
-
-  // AlbertaGridHierarchicIndexSet::DofAccess
-  // ----------------------------------------
-
-  template< int dim, int dimworld >
-  template< int codim >
-  class AlbertaGridHierarchicIndexSet< dim, dimworld >::DofAccess
-    : public Alberta::DofAccess< dim, codim >
-  {
-    typedef Alberta::DofAccess< dim, codim > Base;
-
-  public:
-    DofAccess ()
-    {}
-
-    explicit DofAccess ( const Alberta::DofSpace *dofSpace )
-      : Base( dofSpace )
-    {}
-  };
 
 
 
@@ -298,9 +282,6 @@ namespace Dune
     static void setup ( AlbertaGridHierarchicIndexSet< dim, dimworld > &indexSet )
     {
       IndexVectorPointer &entityNumbers = indexSet.entityNumbers_[ codim ];
-
-      Int2Type< codim > codimVariable;
-      indexSet.dofAccess_[ codimVariable ] = DofAccess< codim >( entityNumbers.dofSpace() );
 
       entityNumbers.template setupInterpolation< RefineNumbering< codim > >();
       entityNumbers.template setupRestriction< CoarsenNumbering< codim > >();
