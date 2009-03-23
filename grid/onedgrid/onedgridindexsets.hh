@@ -54,6 +54,26 @@ namespace Dune {
       return myTypes_[codim];
     }
 
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
+      IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
+      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
+    }
+
     /** \todo Should be private */
     void update() {
 
@@ -153,13 +173,43 @@ namespace Dune {
     //! get number of entities of given codim, type on the leaf level
     int size(int codim) const
     {
-      return Base::size(codim);
+      if (codim==1) {
+
+        return numVertices_;
+
+      } else if (codim==0) {
+
+        return numElements_;
+
+      }
+
+      return 0;
     }
 
     /** deliver all geometry types used in this grid */
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return myTypes_[codim];
+    }
+
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LeafIterator IteratorType;
+      IteratorType iend = grid_.template leafend<cd,All_Partition>();
+      for (IteratorType it = grid_.template leafbegin<cd,All_Partition>();
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
     }
 
     /** \todo Should be private */
@@ -244,7 +294,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).globalId();
     }
@@ -255,7 +305,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    GlobalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid_.getRealImplementation(e).template subId<cd>(i);
     }
