@@ -11,26 +11,9 @@
 
 namespace Dune {
 
-  template <class GridImp>
-  struct OneDGridLevelIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
-      };
-    };
-  };
-
-
   template<class GridImp>
   class OneDGridLevelIndexSet : public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> >
   {
-    typedef IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> > Base;
   public:
 
     /** \brief Constructor for a given level of a given grid
@@ -120,26 +103,10 @@ namespace Dune {
     std::vector<GeometryType> myTypes_[2];
   };
 
-  template <class GridImp>
-  struct OneDGridLeafIndexSetTypes
-  {
-    //! The types
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
-      };
-    };
-  };
-
   template<class GridImp>
   class OneDGridLeafIndexSet :
     public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> > Base;
   public:
     //! constructor stores reference to a grid and level
     OneDGridLeafIndexSet (const GridImp& g) : grid_(g)
@@ -266,8 +233,7 @@ namespace Dune {
   {
   public:
     //! define the type used for persistent indices
-    typedef unsigned int GlobalIdType;
-    typedef unsigned int LocalIdType;
+    typedef unsigned int IdType;
 
     //! constructor stores reference to a grid
     OneDGridIdSet (const GridImp& g) : grid_(g) {}
