@@ -123,6 +123,26 @@ namespace Dune {
       return myTypes_[codim];
     }
 
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
+      IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
+      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
+    }
+
     /** \brief Update the level indices.  This method is called after each grid change */
     void update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation=0);
 
@@ -246,6 +266,27 @@ namespace Dune {
     {
       return myTypes_[codim];
     }
+
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LeafIterator IteratorType;
+      IteratorType iend = grid_.template leafend<cd,All_Partition>();
+      for (IteratorType it = grid_.template leafbegin<cd,All_Partition>();
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
+    }
+
 
     /** \brief Update the leaf indices.  This method is called after each grid change. */
     void update(std::vector<unsigned int>* nodePermutation=0);
