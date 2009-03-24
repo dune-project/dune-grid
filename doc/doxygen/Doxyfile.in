@@ -498,11 +498,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = @top_srcdir@/grid/io/file/dgfparser/test \
-                         @top_srcdir@/grid/io/file/test \
-                         @top_srcdir@/grid/test \
-                         @top_srcdir@/grid/common/test \
-                         @top_srcdir@/grid/genericgeometry
+EXCLUDE                = 
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -514,7 +510,7 @@ EXCLUDE_SYMLINKS       = NO
 # EXCLUDE_PATTERNS tag to specify one or more wildcard patterns to exclude 
 # certain files from those directories.
 
-EXCLUDE_PATTERNS       = .svn/*
+EXCLUDE_PATTERNS       = */.svn/* */test/*
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or 
 # directories that contain example code fragments that are included (see 
