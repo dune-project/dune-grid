@@ -439,8 +439,8 @@ namespace Dune
         bool allRight = true;
         for(int i=0; i<dim; i++)
         {
-          myvx[ i ] = hIndexSet.template subIndex< dim >( elInfo->el, nbmap[ i ] );
-          neighvx[ i ] = hIndexSet.template subIndex< dim >( neighInfo->el, vxmap[ i ] );
+          myvx[ i ] = hIndexSet.template subIndex( elInfo->el, dim, nbmap[ i ] );
+          neighvx[ i ] = hIndexSet.template subIndex( neighInfo->el, dim, vxmap[ i ] );
           if( myvx[ i ] != neighvx[ i ] )
             allRight = false;
         }
