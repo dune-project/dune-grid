@@ -107,8 +107,20 @@ namespace Dune
     int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
       GeometryType gt=ReferenceElements<double,G::dimension>::general(e.type()).type(i,cc);
-      //	  std::cout << "map: cc=" << cc << " gt=" << gt << " offset=" << offset.find(gt)->second << std::endl;
       return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
+    }
+
+    /** @brief Map subentity of codim 0 entity to array index.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of subentity of e
+       \param codim Codimension of the subendity
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    int map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    {
+      GeometryType gt=ReferenceElements<double,G::dimension>::general(e.type()).type(i,codim);
+      return is.subIndex(e,i,codim) + offset.find(gt)->second;
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.

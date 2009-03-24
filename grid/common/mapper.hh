@@ -137,6 +137,20 @@ namespace Dune
       return asImp().template map<cc>(e,i);
     }
 
+    /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    int map (const typename G::Traits::template Codim<0>::Entity& e,
+             int i,
+             unsigned int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().map(e,i,codim)));
+      return asImp().map(e,i,codim);
+    }
+
     /** @brief Return total number of entities in the entity set managed by the mapper.
 
        This number can be used to allocate a vector of data elements associated with the

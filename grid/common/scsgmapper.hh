@@ -70,6 +70,17 @@ namespace Dune
     template<int cc>
     int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const;
 
+    /** @brief Map subentity of codim 0 entity to array index.
+
+       \param e Reference to codim 0 entity.
+       \param i Number of the subentity of e, where cc is the template parameter of the function.
+       \param codim Codimension of the subentity of e
+       \return An index in the range 0 ... Max number of entities in set - 1.
+     */
+    int map (const typename G::Traits::template Codim<0>::Entity& e,
+             int i,
+             unsigned int codim) const;
+
     /** @brief Return total number of entities in the entity set managed by the mapper.
 
        This number can be used to allocate a vector of data elements associated with the
@@ -136,6 +147,14 @@ namespace Dune
   {
     dune_static_assert(cc == c, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
     return is.template subIndex<cc>(e,i);
+  }
+
+  template <typename G, typename IS, int c>
+  int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+  {
+    if (codim != c)
+      DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
+    return is.subIndex(e,i,codim);
   }
 
   template <typename G, typename IS, int c>
