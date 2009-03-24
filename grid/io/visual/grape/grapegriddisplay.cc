@@ -939,9 +939,10 @@ namespace Dune
 
     setIterationMethods(dune,0);
 
+    std::string gridName( grid_.name() );
     /* return hmesh with no data */
     return GrapeInterface<dim,dimworld>::
-           setupHmesh(noe,nov,maxlevel,dune);
+           setupHmesh(noe,nov,maxlevel,dune, gridName.c_str());
   }
 
   template<class GridType>

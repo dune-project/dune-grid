@@ -3,9 +3,6 @@
 #ifndef __GRAPE_ELDESC_H__
 #define __GRAPE_ELDESC_H__
 
-#include <assert.h>
-#include <string.h>
-
 #if GRAPE_DIM==3
 typedef HELEMENT3D HELEMENT;
 typedef ELEMENT3D ELEMENT;

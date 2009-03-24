@@ -12,8 +12,9 @@
 #ifndef __GRAPE_PARTITIONDISPLAY_HH_
 #define __GRAPE_PARTITIONDISPLAY_HH_
 
+#include <cassert>
+
 #include "grapewrapper.hh"
-#include <assert.h>
 
 /*  ------------------------------------------------------------------  */
 

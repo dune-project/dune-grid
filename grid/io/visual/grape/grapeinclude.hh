@@ -3,9 +3,9 @@
 #ifndef DUNE_GRIDDISPLAY_HH
 #define DUNE_GRIDDISPLAY_HH
 
-#include <stdarg.h>
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstdarg>
+#include <cstring>
 
 #include "grapewrapper.hh"
 #include "grapecommon.hh"
@@ -74,10 +74,11 @@ namespace Dune
     }
 
     inline static void *setupHmesh(const int noe,
-                                   const int nov, const int maxlev,DUNE_DAT * dune)
+                                   const int nov, const int maxlev,DUNE_DAT * dune,
+                                   const char *meshName = "Dune Mesh" )
     {
       return GrapeInterface_two_two::setupHmesh(
-               noe,nov,maxlev,dune);
+               noe,nov,maxlev,dune,meshName);
     }
 
     inline static void deleteHmesh( void * hmesh )
@@ -141,10 +142,11 @@ namespace Dune
     }
 
     inline static void *setupHmesh(const int noe,
-                                   const int nov, const int maxlev,DUNE_DAT * dune)
+                                   const int nov, const int maxlev,DUNE_DAT * dune,
+                                   const char *meshName = "Dune Mesh" )
     {
       return GrapeInterface_two_three::setupHmesh(
-               noe,nov,maxlev,dune);
+               noe,nov,maxlev,dune, meshName);
     }
 
     inline static void deleteHmesh( void * hmesh )
@@ -211,10 +213,11 @@ namespace Dune
     }
 
     inline static void *setupHmesh(const int noe,
-                                   const int nov, const int maxlev, DUNE_DAT * dune)
+                                   const int nov, const int maxlev, DUNE_DAT * dune,
+                                   const char *meshName = "Dune Mesh" )
     {
       return GrapeInterface_three_three::
-             setupHmesh(noe,nov,maxlev,dune);
+             setupHmesh(noe,nov,maxlev,dune, meshName);
     }
 
     inline static void deleteFunctions( void * hmesh )

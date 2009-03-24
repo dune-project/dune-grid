@@ -3,8 +3,6 @@
 #ifndef __GRAPE_HMESH_C__
 #define __GRAPE_HMESH_C__
 
-#include <string.h>
-
 #include "ghmesh.hh"
 #include "geldesc.hh"
 
@@ -88,7 +86,7 @@ namespace FctSelector {
     function_modifier modifier;
   } chosen_function;
 
-  typedef std::pair< const char * , const char * > DataFunctionName_t;
+  typedef ::std::pair< const char * , const char * > DataFunctionName_t;
 
   // returns slot and name of selected function
   inline DataFunctionName_t getCurrentFunctionName(GRAPEMESH * mesh)
@@ -749,6 +747,11 @@ inline HMESH * get_partition_number (int * partition)
   END_METHOD(hmesh);
 }
 
+inline GRAPEMESH *getMesh ( const char *meshName = "Dune Mesh" )
+{
+  return (GRAPEMESH *)GRAPE_CALL( GrapeMesh, "new-instance" ) ( meshName );
+}
+
 // if parameter is not 0 ,then mesh is freed (i.e. pushed to stack)
 inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
 {
@@ -765,7 +768,7 @@ inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
     // get mesh
     //if(meshStack.empty())
     {
-      return (GRAPEMESH *) GRAPE_CALL(GrapeMesh,"new-instance") ("Dune Mesh");
+      return getMesh();
     }
     /*
        // not working yet
@@ -790,10 +793,10 @@ inline GRAPEMESH * getAndFreeMesh( GRAPEMESH * mesh = 0 )
 ******************************************************************************
 *****************************************************************************/
 inline void * setupHmesh(const int noe, const int nov,
-                         const int maxlev, DUNE_DAT * dune)
+                         const int maxlev, DUNE_DAT * dune,
+                         const char *meshName )
 {
-  //GRAPEMESH * mesh = (GRAPEMESH *) GRAPE_CALL(GrapeMesh,"new-instance")("Dune Mesh");
-  GRAPEMESH * mesh = getAndFreeMesh();
+  GRAPEMESH *mesh = getMesh( meshName );
 
   assert(mesh != NULL);
 
