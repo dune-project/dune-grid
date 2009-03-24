@@ -34,7 +34,7 @@ foreach my $file (@ARGV) {
 
   # Write header comment
   print OUTFILE "/** \\file\n";
-  print OUTFILE "* \\brief Contains <tt>#undef</tt>s for all preprocessor macros\n";
+  print OUTFILE "* \\brief Contains <tt>\#undef</tt>s for all preprocessor macros\n";
   print OUTFILE "* defined by $packagename.\n";
   print OUTFILE "*\n";
   print OUTFILE "* This file is created automatically by the perl script <tt>undefAllMacros.pl</tt>.\n";
