@@ -128,11 +128,11 @@
 
    @code
    // Include the neccessary files
-   #include <dune/grid/common/refinement.hh>
+   \#include <dune/grid/common/refinement.hh>
 
    // If you know that you are only ever going to need one refinement
    // backend, you can include the corresponding file directly:
-   //#include <dune/grid/common/refinement/hcube.cc>
+   //\#include <dune/grid/common/refinement/hcube.cc>
 
    // Get yourself the Refinement you need:
    typedef Refinement<GeometryType::cube, SGrid<2, 2>::ctype, GeometryType::cube, 2> MyRefinement;
@@ -180,7 +180,7 @@
    geometry type, e.g. SquaringTheCircle (or a particular set of
    geometry types) here is how:
 
-   - create a file refinement/squaringthecircle.cc and #include
+   - create a file refinement/squaringthecircle.cc and \#include
     "base.cc".  Your file will be included by others, so don't forget
     to protect against double inclusion.
    - implement a class (or template class) RefinementImp conforming
@@ -218,7 +218,7 @@
     If you implement a template class, you have to specialise struct
     RefinementImp::Traits for every possible combination of
     geometryType and coerceTo that your implementation supports.
-   - #include "refinement/squaringthecircle.cc" from refinement.hh.
+   - \#include "refinement/squaringthecircle.cc" from refinement.hh.
 
    This is enough to integrate your implementation into the Refinement
    system.  You probably want to include it into @link
