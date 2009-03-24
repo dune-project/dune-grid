@@ -16,7 +16,7 @@
  * Depending on whether you work on a leaf or a level you you have to call
  * the methods ilevel{begin,end}() or ileaf{begin,end}() to get the correct iterator.
  *
- * @deprected This helper class is obsolete when using the new GridView interface
+ * @deprecated This helper class is obsolete when using the new GridView interface
  */
 namespace Dune
 {
