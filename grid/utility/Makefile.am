@@ -2,6 +2,6 @@
 
 gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS = hierarchicsearch.hh \
-  grapedataioformattypes.hh intersectiongetter.hh gridtype.hh griddim.hh
+  grapedataioformattypes.hh gridtype.hh griddim.hh
 
 include $(top_srcdir)/am/global-rules
