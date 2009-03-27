@@ -34,10 +34,8 @@ namespace Dune
    *
    * Template parameters are:
    *
-   * \par G
-   *    A Dune grid type.
-   * \par IS
-   *    LeafIndexSet or LevelIndexSet type of the given grid
+   * \par GV
+   *    A Dune GridView type.
    * \par Layout
    *  A helper class with a method contains(), that returns true for all geometry
    *  types that are in the domain of the map.  The class should be of the following
@@ -54,8 +52,8 @@ namespace Dune
    * If you don't want to use the default constructor of the LayoutClass you can construct it yourself
    * and hand it to the respective constructor.
    */
-  template <typename G, typename IS, template<int> class Layout>
-  class MultipleCodimMultipleGeomTypeMapper : Mapper<G,MultipleCodimMultipleGeomTypeMapper<G,IS,Layout> > {
+  template <typename GV, template<int> class Layout>
+  class MultipleCodimMultipleGeomTypeMapper : Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout> > {
   public:
 
     /** @brief Construct mapper from grid and one of its index sets.
@@ -63,12 +61,11 @@ namespace Dune
      * Use this constructor to provide a custom layout object e.g. not
      * using the default constructor.
      *
-     * \param grid A Dune grid object.
-     * \param indexset IndexSet object returned by grid.
+     * \param gridView A Dune GridView object.
      * \param layout A layout object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const G& grid, const IS& indexset, const Layout<G::dimension> layout)
-      : g(grid), is(indexset), layout(layout)
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView, const Layout<GV::dimension> layout)
+      : is(gridView.indexSet()), layout(layout)
     {
       update();
     }
@@ -79,8 +76,8 @@ namespace Dune
        \param indexset IndexSet object returned by grid.
 
      */
-    MultipleCodimMultipleGeomTypeMapper (const G& grid, const IS& indexset)
-      : g(grid), is(indexset)
+    MultipleCodimMultipleGeomTypeMapper (const GV& gridView)
+      : is(gridView.indexSet())
     {
       update();
     }
@@ -104,9 +101,9 @@ namespace Dune
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<int cc>
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+    int map (const typename GV::template Codim<0>::Entity& e, int i) const
     {
-      GeometryType gt=ReferenceElements<double,G::dimension>::general(e.type()).type(i,cc);
+      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
     }
 
@@ -117,9 +114,9 @@ namespace Dune
        \param codim Codimension of the subendity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
-      GeometryType gt=ReferenceElements<double,G::dimension>::general(e.type()).type(i,codim);
+      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       return is.subIndex(e,i,codim) + offset.find(gt)->second;
     }
 
@@ -162,7 +159,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<int cc>     // this is now the subentity's codim
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int& result) const
     {
       result = this->template map<cc>(e,i);
       return true;
@@ -174,16 +171,15 @@ namespace Dune
     void update ()
     {
       n=0;     // zero data elements
-      for (int c=0; c<=G::dimension; c++)
+      for (int c=0; c<=GV::dimension; c++)
         offset.clear();         // clear all maps
 
       // Compute offsets for the different geometry types.
       // Note that mapper becomes invalid when the grid is modified.
-      for (int c=0; c<=G::dimension; c++)
+      for (int c=0; c<=GV::dimension; c++)
         for (size_t i=0; i<is.geomTypes(c).size(); i++)
           if (layout.contains(is.geomTypes(c)[i]))
           {
-            //			  std::cout << "offset " << c << " " << is.geomTypes(c)[i] << " is " << n << std::endl;
             offset[is.geomTypes(c)[i]] = n;
             n += is.size(is.geomTypes(c)[i]);
           }
@@ -191,10 +187,9 @@ namespace Dune
 
   private:
     int n;     // number of data elements required
-    const G& g;
-    const IS& is;
+    const typename GV::IndexSet& is;
     std::map<GeometryType,int> offset;     // provide a map with all geometry types
-    mutable Layout<G::dimension> layout;     // get layout object
+    mutable Layout<GV::dimension> layout;     // get layout object
   };
 
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
@@ -220,14 +215,14 @@ namespace Dune
    */
   template <typename G, template<int> class Layout>
   class LeafMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,Layout>
   {
   public:
     /** @brief The constructor
          @param grid A reference to a grid.
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
-      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet())
+      : MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,Layout>(grid.leafView())
     {}
 
     /** @brief The constructor
@@ -239,7 +234,7 @@ namespace Dune
      * @param layout A layout object
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
-      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet(),layout)
+      : MultipleCodimMultipleGeomTypeMapper<typename G::Traits::LeafIndexSet,Layout>(grid,grid.leafIndexSet(),layout)
     {}
 
   };
@@ -268,14 +263,14 @@ namespace Dune
    */
   template <typename G, template<int> class Layout>
   class LevelMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,Layout> {
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,Layout> {
   public:
     /** @brief The constructor
          @param grid A reference to a grid.
          @param level A valid level of the grid.
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
-      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,Layout>(grid,grid.levelIndexSet(level))
+      : MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,Layout>(grid.levelView(level))
     {}
 
     /** @brief The constructor
@@ -287,7 +282,7 @@ namespace Dune
      * @param layout A layout object
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
-      : MultipleCodimMultipleGeomTypeMapper<G,typename G::Traits::LevekIndexSet,Layout>(grid,grid.levelIndexSet(level),layout)
+      : MultipleCodimMultipleGeomTypeMapper<typename G::Traits::LevekIndexSet,Layout>(grid,grid.levelIndexSet(level),layout)
     {}
 
   };
