@@ -242,7 +242,9 @@ namespace Dune
 #endif
 
     // neighborCount_ is the local face number
-    const int *localFaces = ALBERTA AlbertHelp::localAlbertaFaceNumber[ neighborCount_ ];
+    static const int faceVertices[ 4 ][ 3 ]
+      = { {1,3,2}, {0,2,3}, {0,3,1}, {0,1,2} };
+    const int *localFaces = faceVertices[ neighborCount_ ];
 
     const Alberta::GlobalVector &coord0 = grid_.getCoord( elementInfo_, localFaces[ 0 ] );
     const Alberta::GlobalVector &coord1 = grid_.getCoord( elementInfo_, localFaces[ 1 ] );
@@ -614,8 +616,7 @@ namespace Dune
   private:
     static int mapVertices ( int subEntity, int i )
     {
-      typedef AlbertHelp::MapVertices< mydimension, dimension > Mapper;
-      return Mapper::mapVertices( subEntity, i );
+      return Alberta::MapVertices< dimension, codimension >::apply( subEntity, i );
     }
   };
 

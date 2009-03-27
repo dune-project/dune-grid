@@ -7,7 +7,6 @@
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
-#include <dune/grid/albertagrid/referencetopo.hh>
 
 #if HAVE_ALBERTA
 
@@ -494,11 +493,11 @@ namespace Dune
     template< int dim >
     inline Real MacroData< dim >::edgeLength ( const ElementId &e, int edge ) const
     {
-      const int i = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( edge, 0 );
+      const int i = MapVertices< dim, dim-1 >::apply( edge, 0 );
       assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
       const GlobalVector &x = vertex( e[ i ] );
 
-      const int j = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( edge, 1 );
+      const int j = MapVertices< dim, dim-1 >::apply( edge, 1 );
       assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
       const GlobalVector &y = vertex( e[ j ] );
 

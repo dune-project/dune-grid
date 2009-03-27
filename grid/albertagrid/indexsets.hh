@@ -13,7 +13,6 @@
 
 #include <dune/grid/albertagrid/albertaheader.hh>
 #include <dune/grid/albertagrid/misc.hh>
-#include <dune/grid/albertagrid/referencetopo.hh>
 #include <dune/grid/albertagrid/dofadmin.hh>
 #include <dune/grid/albertagrid/dofvector.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>

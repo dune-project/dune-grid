@@ -9,7 +9,6 @@
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
-#include <dune/grid/albertagrid/referencetopo.hh>
 
 // set to 1 to use generic geometries in AlbertaGrid
 #define USE_GENERICGEOMETRY 0
@@ -87,8 +86,7 @@ namespace Dune
   private:
     static int mapVertices ( int subEntity, int i )
     {
-      typedef AlbertHelp::MapVertices< mydimension, dimension > Mapper;
-      return Mapper::mapVertices( subEntity, i );
+      return Alberta::MapVertices< dimension, codimension >::apply( subEntity, i );
     }
   };
 

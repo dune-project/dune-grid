@@ -11,7 +11,6 @@
 #include <dune/grid/genericgeometry/misc.hh>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
-#include <dune/grid/albertagrid/referencetopo.hh>
 
 #if HAVE_ALBERTA
 
@@ -462,6 +461,72 @@ namespace Dune
 
 
 
+    // MapVertices
+    // -----------
+
+    template< int dim, int codim >
+    struct MapVertices;
+
+    template< int dim >
+    struct MapVertices< dim, 0 >
+    {
+      static int apply ( int subEntity, int vertex )
+      {
+        assert( subEntity == 0 );
+        assert( (vertex >= 0) && (vertex <= NumSubEntities< dim, dim >::value) );
+        return vertex;
+      }
+    };
+
+    template<>
+    struct MapVertices< 2, 1 >
+    {
+      static int apply ( int subEntity, int vertex )
+      {
+        assert( (subEntity >= 0) && (subEntity < 3) );
+        assert( (vertex >= 0) && (vertex < 2) );
+        static const int map[ 3 ][ 2 ] = { {1,2}, {2,0}, {0,1} };
+        return map[ subEntity ][ vertex ];
+      }
+    };
+
+    template<>
+    struct MapVertices< 3, 1 >
+    {
+      static int apply ( int subEntity, int vertex )
+      {
+        assert( (subEntity >= 0) && (subEntity < 4) );
+        assert( (vertex >= 0) && (vertex < 3) );
+        static const int map[ 4 ][ 3 ] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+        return map[ subEntity ][ vertex ];
+      }
+    };
+
+    template<>
+    struct MapVertices< 3, 2 >
+    {
+      static int apply ( int subEntity, int vertex )
+      {
+        assert( (subEntity >= 0) && (subEntity < 6) );
+        assert( (vertex >= 0) && (vertex < 2) );
+        static const int map[ 6 ][ 2 ] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
+        return map[ subEntity ][ vertex ];
+      }
+    };
+
+    template< int dim >
+    struct MapVertices< dim, dim >
+    {
+      static int apply ( int subEntity, int vertex )
+      {
+        assert( (subEntity >= 0) && (subEntity < NumSubEntities< dim, 1 >::value) );
+        assert( vertex == 0 );
+        return subEntity;
+      }
+    };
+
+
+
     // Twist
     // -----
 
@@ -509,7 +574,7 @@ namespace Dune
         int dof[ numVertices ];
         for( int i = 0; i < numVertices; ++i )
         {
-          const int j = ALBERTA AlbertHelp::MapVertices< 1, dim >::mapVertices( subEntity, i );
+          const int j = MapVertices< dim, dim-1 >::apply( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];
         }
         return (dof[ 0 ] < dof[ 1 ] ? 0 : 1);
@@ -540,7 +605,7 @@ namespace Dune
         int dof[ numVertices ];
         for( int i = 0; i < numVertices; ++i )
         {
-          const int j = ALBERTA AlbertHelp::MapVertices< 2, dim >::mapVertices( subEntity, i );
+          const int j = MapVertices< dim, dim-2 >::apply( subEntity, i );
           dof[ i ] = element->dof[ j ][ 0 ];
         }
 
