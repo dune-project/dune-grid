@@ -6,7 +6,7 @@
 #include <dune/grid/albertagrid/intersection.hh>
 
 // set to 1 to use ElementInfo::leafNeighbor instead of faking leaf neighbor
-#define TRAVERSE_LEAFNEIGHBOR 0
+#define TRAVERSE_LEAFNEIGHBOR 1
 
 namespace Dune
 {
