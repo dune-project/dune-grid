@@ -25,7 +25,7 @@ namespace Dune
   class AlbertaGridHierarchicIterator;
 
   template< class GridImp >
-  class AlbertaGridIntersectionIterator;
+  class AlbertaGridIntersection;
 
 
 
@@ -183,9 +183,10 @@ namespace Dune
   {
     typedef AlbertaGridEntity< 0, dim, GridImp > This;
 
-    enum { dimworld = GridImp::dimensionworld };
-    friend class AlbertaGrid < dim , GridImp::dimensionworld >;
-    friend class AlbertaGridIntersectionIterator <GridImp>;
+    static const int dimworld = GridImp::dimensionworld;
+
+    friend class AlbertaGrid< dim, dimworld >;
+    friend class AlbertaGridIntersection< GridImp >;
     friend class AlbertaGridHierarchicIterator< GridImp >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
     friend class AlbertaGridEntityPointer<0,GridImp>;
@@ -205,7 +206,7 @@ namespace Dune
     typedef typename GridImp::template Codim< 0 >::Entity Entity;
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
-    typedef AlbertaGridGeometry<dim,dimworld,GridImp> GeometryImp;
+    typedef AlbertaGridGeometry< dimension, dimworld, GridImp > GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;

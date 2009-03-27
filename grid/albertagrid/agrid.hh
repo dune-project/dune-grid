@@ -94,10 +94,10 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
-      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LevelIntersection;
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
+      typedef Dune::Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, LeafIntersectionIteratorWrapper > LevelIntersection;
+      typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 
@@ -207,13 +207,11 @@ namespace Dune
 
     template< int, int, class > friend class AlbertaGridEntity;
 
-    friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
-
-    friend class AlbertaGridIntersectionIterator<AlbertaGrid<dim,dimworld> >;
-    friend class AlbertaGridIntersectionIterator<const AlbertaGrid<dim,dimworld> >;
+    friend class AlbertaGridHierarchicIterator< This >;
+    friend class AlbertaGridIntersection< const This >;
 
     friend class AlbertaMarkerVector< dim, dimworld >;
-    friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
+    friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
 
   public:
     typedef Alberta::Real ctype;
@@ -517,7 +515,7 @@ namespace Dune
   public:
     typedef AGMemoryProvider< EntityObject > EntityProvider;
 
-    typedef AlbertaGridIntersectionIterator< const This > IntersectionIteratorImp;
+    typedef AlbertaGridIntersection< const This > IntersectionIteratorImp;
     typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
     typedef AGMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     friend class LeafIntersectionIteratorWrapper< const This >;

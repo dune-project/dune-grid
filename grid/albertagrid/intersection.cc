@@ -11,12 +11,12 @@
 namespace Dune
 {
 
-  // AlbertaGridIntersectionIterator
-  // -------------------------------
+  // AlbertaGridIntersection
+  // -----------------------
 
   template< class GridImp >
-  inline AlbertaGridIntersectionIterator< GridImp >
-  ::AlbertaGridIntersectionIterator ( const GridImp &grid, int level )
+  inline AlbertaGridIntersection< GridImp >
+  ::AlbertaGridIntersection ( const GridImp &grid, int level )
     : grid_( grid ),
       neighborCount_( dimension+1 ),
       elementInfo_(),
@@ -28,8 +28,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline AlbertaGridIntersectionIterator< GridImp >
-  ::AlbertaGridIntersectionIterator ( const This &other )
+  inline AlbertaGridIntersection< GridImp >
+  ::AlbertaGridIntersection ( const This &other )
     : grid_( other.grid_ ),
       neighborCount_( other.neighborCount_ ),
       elementInfo_( other.elementInfo_ ),
@@ -42,7 +42,7 @@ namespace Dune
 
   template< class GridImp >
   inline void
-  AlbertaGridIntersectionIterator< GridImp >
+  AlbertaGridIntersection< GridImp >
   ::first ( const EntityImp &entity, int level )
   {
     neighborCount_ = 0;
@@ -55,7 +55,7 @@ namespace Dune
 
 
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator< GridImp >::done ()
+  inline void AlbertaGridIntersection< GridImp >::done ()
   {
     neighborCount_ = dimension+1;
     neighborInfo_ = ElementInfo();
@@ -66,7 +66,7 @@ namespace Dune
   // assignment operator
   template< class GridImp >
   inline void
-  AlbertaGridIntersectionIterator< GridImp >::assign ( const This &other )
+  AlbertaGridIntersection< GridImp >::assign ( const This &other )
   {
     // only assign iterators from the same grid
     assert( &(this->grid_) == &(other.grid_) );
@@ -79,7 +79,7 @@ namespace Dune
 
   template< class GridImp >
   inline bool
-  AlbertaGridIntersectionIterator< GridImp >::equals ( const This &other ) const
+  AlbertaGridIntersection< GridImp >::equals ( const This &other ) const
   {
     const ALBERTA EL *e1 = elementInfo_.el();
     const ALBERTA EL *e2 = other.elementInfo_.el();
@@ -87,7 +87,7 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator<GridImp>::increment()
+  inline void AlbertaGridIntersection<GridImp>::increment()
   {
     neighborInfo_ = ElementInfo();
     ++neighborCount_;
@@ -96,8 +96,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersectionIterator< GridImp >::EntityPointer
-  AlbertaGridIntersectionIterator< GridImp >::outside () const
+  inline typename AlbertaGridIntersection< GridImp >::EntityPointer
+  AlbertaGridIntersection< GridImp >::outside () const
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
 
@@ -121,8 +121,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersectionIterator< GridImp >::EntityPointer
-  AlbertaGridIntersectionIterator< GridImp >::inside () const
+  inline typename AlbertaGridIntersection< GridImp >::EntityPointer
+  AlbertaGridIntersection< GridImp >::inside () const
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
     assert( !elementInfo_ == false );
@@ -131,7 +131,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersectionIterator<GridImp>::boundaryId () const
+  AlbertaGridIntersection<GridImp>::boundaryId () const
   {
     assert( !elementInfo_ == false );
 
@@ -145,20 +145,20 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator<GridImp>::conforming() const
+  inline bool AlbertaGridIntersection<GridImp>::conforming() const
   {
     return true;
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator< GridImp >::boundary() const
+  inline bool AlbertaGridIntersection< GridImp >::boundary() const
   {
     assert( !!elementInfo_ );
     return elementInfo_.isBoundary( neighborCount_ );
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator< GridImp >::neighbor () const
+  inline bool AlbertaGridIntersection< GridImp >::neighbor () const
   {
     assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
@@ -166,8 +166,8 @@ namespace Dune
   }
 
   template<class GridImp>
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
-  AlbertaGridIntersectionIterator< GridImp >
+  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
+  AlbertaGridIntersection< GridImp >
   ::unitOuterNormal ( const LocalCoordType &local ) const
   {
     NormalVector normal;
@@ -177,8 +177,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
-  AlbertaGridIntersectionIterator< GridImp >
+  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
+  AlbertaGridIntersection< GridImp >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     NormalVector normal;
@@ -187,8 +187,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::NormalVector
-  AlbertaGridIntersectionIterator< GridImp >
+  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
+  AlbertaGridIntersection< GridImp >
   ::outerNormal( const LocalCoordType &local ) const
   {
     return integrationOuterNormal( local );
@@ -196,7 +196,7 @@ namespace Dune
 
   template< class GridImp >
   inline void
-  AlbertaGridIntersectionIterator<GridImp>::calcOuterNormal( NormalVector &n ) const
+  AlbertaGridIntersection<GridImp>::calcOuterNormal( NormalVector &n ) const
   {
     DUNE_THROW( NotImplemented, "AlbertaGrid: outer normal for dim != dimworld "
                 "has not been implemented, yet." );
@@ -204,7 +204,7 @@ namespace Dune
 
   template<>
   inline void
-  AlbertaGridIntersectionIterator< const AlbertaGrid< 1, 1 > >
+  AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >
   ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( !!elementInfo_ );
@@ -215,7 +215,7 @@ namespace Dune
 
   template<>
   inline void
-  AlbertaGridIntersectionIterator< const AlbertaGrid< 2, 2 > >
+  AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >
   ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( !!elementInfo_ );
@@ -228,7 +228,7 @@ namespace Dune
 
   template<>
   inline void
-  AlbertaGridIntersectionIterator< const AlbertaGrid< 3, 3 > >
+  AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >
   ::calcOuterNormal ( NormalVector &n ) const
   {
     assert( !!elementInfo_ );
@@ -270,15 +270,15 @@ namespace Dune
 
   template< class GridImp >
   inline AlbertaTransformation
-  AlbertaGridIntersectionIterator< GridImp >::transformation () const
+  AlbertaGridIntersection< GridImp >::transformation () const
   {
     return AlbertaTransformation( elementInfo_.transformation( neighborCount_ ) );
   }
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
-  AlbertaGridIntersectionIterator< GridImp >::intersectionSelfLocal () const
+  inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
+  AlbertaGridIntersection< GridImp >::intersectionSelfLocal () const
   {
     assert( !!elementInfo_ );
 
@@ -290,8 +290,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::LocalGeometry &
-  AlbertaGridIntersectionIterator< GridImp >::intersectionNeighborLocal () const
+  inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
+  AlbertaGridIntersection< GridImp >::intersectionNeighborLocal () const
   {
     assert( neighbor() );
 
@@ -303,8 +303,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersectionIterator< GridImp >::Geometry &
-  AlbertaGridIntersectionIterator< GridImp >::intersectionGlobal () const
+  inline const typename AlbertaGridIntersection< GridImp >::Geometry &
+  AlbertaGridIntersection< GridImp >::intersectionGlobal () const
   {
     assert( !elementInfo_ == false );
 
@@ -316,14 +316,14 @@ namespace Dune
 
 
   template< class GridImp >
-  inline GeometryType AlbertaGridIntersectionIterator< GridImp >::type () const
+  inline GeometryType AlbertaGridIntersection< GridImp >::type () const
   {
     return GeometryType( GeometryType::simplex, dimension-1 );
   }
 
 
   template< class GridImp >
-  inline int AlbertaGridIntersectionIterator< GridImp >
+  inline int AlbertaGridIntersection< GridImp >
   ::numberInSelf () const
   {
     const int oppVertex = neighborCount_;
@@ -331,7 +331,7 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline int AlbertaGridIntersectionIterator<GridImp>
+  inline int AlbertaGridIntersection<GridImp>
   ::numberInNeighbor () const
   {
     assert( !!elementInfo_ );
@@ -343,7 +343,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersectionIterator< GridImp >::twistInSelf () const
+  AlbertaGridIntersection< GridImp >::twistInSelf () const
   {
     return elementInfo_.template twist< 1 >( neighborCount_ );
   }
@@ -351,7 +351,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersectionIterator< GridImp >::twistInNeighbor () const
+  AlbertaGridIntersection< GridImp >::twistInNeighbor () const
   {
     return elementInfo_.twistInNeighbor( neighborCount_ );
   }
@@ -359,7 +359,7 @@ namespace Dune
 
   // setup neighbor element with the information of elInfo_
   template< class GridImp >
-  inline bool AlbertaGridIntersectionIterator<GridImp>::neighborHasSameLevel () const
+  inline bool AlbertaGridIntersection<GridImp>::neighborHasSameLevel () const
   {
     assert( neighbor() );
     assert( !elementInfo_ == false );
@@ -501,7 +501,7 @@ namespace Dune
 
   // setup neighbor element with the information of elInfo_
   template< class GridImp >
-  inline void AlbertaGridIntersectionIterator< GridImp >::setupVirtEn () const
+  inline void AlbertaGridIntersection< GridImp >::setupVirtEn () const
   {
     // if this assertion fails then outside was called without checking
     // neighbor first
@@ -554,11 +554,11 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersectionIterator::GlobalCoordReader
+  // AlbertaGridIntersection::GlobalCoordReader
   // --------------------------------------------------
 
   template< class GridImp >
-  struct AlbertaGridIntersectionIterator< GridImp >::GlobalCoordReader
+  struct AlbertaGridIntersection< GridImp >::GlobalCoordReader
   {
     typedef typename remove_const< GridImp >::type Grid;
 
@@ -623,11 +623,11 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersectionIterator::LocalCoordReader
-  // -------------------------------------------------
+  // AlbertaGridIntersection::LocalCoordReader
+  // -----------------------------------------
 
   template< class GridImp >
-  struct AlbertaGridIntersectionIterator< GridImp >::LocalCoordReader
+  struct AlbertaGridIntersection< GridImp >::LocalCoordReader
   {
     typedef typename remove_const< GridImp >::type Grid;
 

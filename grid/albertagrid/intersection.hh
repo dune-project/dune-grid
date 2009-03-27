@@ -4,7 +4,6 @@
 #define DUNE_ALBERTA_INTERSECTION_HH
 
 #include <dune/grid/common/intersection.hh>
-#include <dune/grid/common/intersectioniterator.hh>
 
 #include <dune/grid/albertagrid/transformation.hh>
 #include <dune/grid/albertagrid/agmemory.hh>
@@ -22,8 +21,8 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersectionIterator
-  // -------------------------------
+  // AlbertaGridIntersection
+  // -----------------------
 
   /*!
      Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
@@ -33,9 +32,9 @@ namespace Dune
      of an element!
    */
   template< class GridImp >
-  class AlbertaGridIntersectionIterator
+  class AlbertaGridIntersection
   {
-    typedef AlbertaGridIntersectionIterator This;
+    typedef AlbertaGridIntersection< GridImp > This;
 
     friend class AlbertaGridEntity< 0, GridImp::dimension, GridImp >;
 
@@ -53,7 +52,7 @@ namespace Dune
     typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
     typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
 
-    typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersectionIterator >
+    typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersection >
     Intersection;
     typedef This ImplementationType;
 
@@ -76,10 +75,10 @@ namespace Dune
 
   public:
     //! The default Constructor
-    AlbertaGridIntersectionIterator ( const GridImp &grid, int level );
+    AlbertaGridIntersection ( const GridImp &grid, int level );
 
     //! The copy constructor
-    AlbertaGridIntersectionIterator( const This &other );
+    AlbertaGridIntersection ( const This &other );
 
     const Intersection &dereference () const
     {
