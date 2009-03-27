@@ -310,7 +310,7 @@ namespace Dune
     template< int dim, int codim >
     struct Dune2AlbertaNumbering
     {
-      static int apply ( int i )
+      static int apply ( const int i )
       {
         assert( (i >= 0) && (i < NumSubEntities< dim, codim >::value) );
         return i;
@@ -322,7 +322,7 @@ namespace Dune
     {
       static const int numSubEntities = NumSubEntities< 3, 2 >::value;
 
-      static int apply ( int i )
+      static int apply ( const int i )
       {
         assert( (i >= 0) && (i < numSubEntities) );
         static int dune2alberta[ numSubEntities ] = { 0, 3, 1, 2, 4, 5 };
@@ -332,13 +332,61 @@ namespace Dune
 
 
 
+    // Generic2AlbertaNumbering
+    // ------------------------
+
+    template< int dim, int codim >
+    struct Generic2AlbertaNumbering
+    {
+      static int apply ( const int i )
+      {
+        assert( (i >= 0) && (i < NumSubEntities< dim, codim >::value) );
+        return i;
+      }
+    };
+
+    template< int dim >
+    struct Generic2AlbertaNumbering< dim, 1 >
+    {
+      static int apply ( const int i )
+      {
+        assert( (i >= 0) && (i < NumSubEntities< dim, 1 >::value) );
+        return dim - i;
+      }
+    };
+
+    template<>
+    struct Generic2AlbertaNumbering< 1, 1 >
+    {
+      static int apply ( const int i )
+      {
+        assert( (i >= 0) && (i < NumSubEntities< 1, 1 >::value) );
+        return i;
+      }
+    };
+
+    template<>
+    struct Generic2AlbertaNumbering< 3, 2 >
+    {
+      static const int numSubEntities = NumSubEntities< 3, 2 >::value;
+
+      static int apply ( const int i )
+      {
+        assert( (i >= 0) && (i < numSubEntities) );
+        static int generic2alberta[ numSubEntities ] = { 0, 1, 3, 2, 4, 5 };
+        return generic2alberta[ i ];
+      }
+    };
+
+
+
     // NumberingMap
     // ------------
 
-    template< int dim >
+    template< int dim, template< int, int > class Numbering = Dune2AlbertaNumbering >
     class NumberingMap
     {
-      typedef NumberingMap< dim > This;
+      typedef NumberingMap< dim, Numbering > This;
 
       template< int codim >
       struct Initialize;
@@ -388,16 +436,16 @@ namespace Dune
 
 
 
-    // NumberingMap::Setup
-    // -------------------
+    // NumberingMap::Initialize
+    // ------------------------
 
-    template< int dim >
+    template< int dim, template< int, int > class Numbering >
     template< int codim >
-    struct NumberingMap< dim >::Initialize
+    struct NumberingMap< dim, Numbering >::Initialize
     {
       static const int numSubEntities = NumSubEntities< dim, codim >::value;
 
-      static void apply ( NumberingMap< dim > &map )
+      static void apply ( NumberingMap< dim, Numbering > &map )
       {
         map.numSubEntities_[ codim ] = numSubEntities;
         map.dune2alberta_[ codim ] = new int[ numSubEntities ];
@@ -405,7 +453,7 @@ namespace Dune
 
         for( int i = 0; i < numSubEntities; ++i )
         {
-          const int j = Dune2AlbertaNumbering< dim, codim >::apply( i );
+          const int j = Numbering< dim, codim >::apply( i );
           map.dune2alberta_[ codim ][ i ] = j;
           map.alberta2dune_[ codim ][ j ] = i;
         }
