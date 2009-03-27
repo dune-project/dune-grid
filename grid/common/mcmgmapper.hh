@@ -43,7 +43,7 @@ namespace Dune
      \code
      template<int dim>
      struct LayoutClass {
-        bool contains (Dune::GeometryType gt) {
+        bool contains (Dune::GeometryType gt) const {
             // Return true if gt is in the domain of the map
         }
      };
