@@ -181,7 +181,7 @@ namespace Dune
     ::template Partition< VTK_Partition >::Iterator
     GridVertexIterator;
 
-    typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P1Layout > VertexMapper;
+    typedef MultipleCodimMultipleGeomTypeMapper< GridView, P1Layout > VertexMapper;
 
   public:
     /** \brief A base class for grid functions with any return type and dimension
@@ -446,7 +446,7 @@ namespace Dune
     template<class V>
     class P0VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P0Layout > VM0;
+      typedef MultipleCodimMultipleGeomTypeMapper< GridView, P0Layout > VM0;
     public:
       //! return number of components
       virtual int ncomps () const
@@ -490,7 +490,7 @@ namespace Dune
     template<class V>
     class P1VectorWrapper : public VTKFunction
     {
-      typedef MultipleCodimMultipleGeomTypeMapper< Grid, IndexSet, P1Layout > VM1;
+      typedef MultipleCodimMultipleGeomTypeMapper< GridView, P1Layout > VM1;
 
     public:
       //! return number of components
