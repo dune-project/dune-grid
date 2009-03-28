@@ -467,8 +467,12 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P0VectorWrapper ( const Grid &g_, const IndexSet &is_, const V &v_, std::string s_)
-        : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
+      P0VectorWrapper ( const GridView &gridView, const V &v_, std::string s_ )
+        : g( gridView.grid() ),
+          is( gridView.indexSet() ),
+          v( v_ ),
+          s( s_ ),
+          mapper( gridView )
       {
         if (v.size()!=(unsigned int)mapper.size())
           DUNE_THROW(IOError,"VTKWriter::P0VectorWrapper: size mismatch");
@@ -526,8 +530,12 @@ namespace Dune
       }
 
       //! construct from a vector and a name
-      P1VectorWrapper ( const Grid &g_, const IndexSet &is_, const V &v_, std::string s_ )
-        : g(g_), is(is_), v(v_), s(s_), mapper(g_,is_)
+      P1VectorWrapper ( const GridView &gridView, const V &v_, std::string s_ )
+        : g( gridView.grid() ),
+          is( gridView.indexSet() ),
+          v( v_ ),
+          s( s_ ),
+          mapper( gridView )
       {
         if (v.size()!=(unsigned int)mapper.size())
           DUNE_THROW(IOError,"VTKWriter::P1VectorWrapper: size mismatch");
@@ -554,8 +562,6 @@ namespace Dune
     explicit VTKWriter ( const GridView &gridView,
                          VTKOptions::DataMode dm = VTKOptions::conforming )
       : gridView_( gridView ),
-        grid( gridView.grid() ),
-        is( gridView_.indexSet() ),
         datamode( dm )
     {
       indentCount = 0;
@@ -586,7 +592,7 @@ namespace Dune
     template<class V>
     void addCellData (const V& v, std::string name)
     {
-      VTKFunction* p = new P0VectorWrapper<V>(grid,is,v,name);
+      VTKFunction* p = new P0VectorWrapper< V >( gridView_, v, name );
       celldata.push_back(p);
     }
 
@@ -614,7 +620,7 @@ namespace Dune
     template<class V>
     void addVertexData (const V& v, std::string name)
     {
-      VTKFunction* p = new P1VectorWrapper<V>(grid,is,v,name);
+      VTKFunction* p = new P1VectorWrapper< V >( gridView_, v, name );
       vertexdata.push_back(p);
     }
 
@@ -1007,7 +1013,7 @@ namespace Dune
       indentUp();
 
       // Grid characteristics
-      vertexmapper = new VertexMapper(grid,is);
+      vertexmapper = new VertexMapper( gridView_ );
       if (datamode == VTKOptions::conforming)
       {
         number.resize(vertexmapper->size());
@@ -1593,10 +1599,6 @@ namespace Dune
   private:
     // the grid
     GridView gridView_;
-    const Grid& grid;
-
-    // the indexset
-    const IndexSet& is;
 
     // indend counter
     int indentCount;
