@@ -4,7 +4,6 @@
 #define DUNE_ALBERTA_ENTITY_HH
 
 #include <dune/grid/common/entity.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
@@ -212,7 +211,7 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    typedef LeafIntersectionIteratorWrapper<GridImp> AlbertaGridLeafIntersectionIteratorType;
+    typedef AlbertaGridLeafIntersectionIterator< GridImp > AlbertaGridLeafIntersectionIteratorType;
     typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridIntersectionIteratorType;
     typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridLevelIntersectionIteratorType;
 

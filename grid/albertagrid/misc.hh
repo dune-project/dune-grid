@@ -46,6 +46,7 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION < 0x200
 
     typedef ALBERTA REAL Real;
+    typedef ALBERTA REAL_B LocalVector; // in barycentric coordinates
     typedef ALBERTA REAL_D GlobalVector;
     typedef ALBERTA REAL_DD GlobalMatrix;
 
@@ -255,6 +256,8 @@ namespace Dune
       static const Flags neighbor = FILL_NEIGH;
 
       static const Flags orientation = (dim == 3 ? FILL_ORIENTATION : FILL_NOTHING);
+
+      static const Flags projection = FILL_PROJECTION;
 
 #if DUNE_ALBERTA_VERSION >= 0x201
       static const Flags elementType = FILL_NOTHING;

@@ -30,7 +30,6 @@
 #include <dune/grid/common/adaptcallback.hh>
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
-#include <dune/grid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
 //- Local includes
@@ -54,6 +53,8 @@
 
 #include <dune/grid/albertagrid/coordcache.hh>
 #include <dune/grid/albertagrid/level.hh>
+#include <dune/grid/albertagrid/intersection.hh>
+#include <dune/grid/albertagrid/intersectioniterator.hh>
 
 #include "indexsets.hh"
 #include "geometry.hh"
@@ -63,7 +64,6 @@
 #include "treeiterator.hh"
 #include "leveliterator.hh"
 #include "leafiterator.hh"
-#include "intersection.hh"
 
 namespace Dune
 {
@@ -94,10 +94,14 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, LeafIntersectionIteratorWrapper > LevelIntersection;
-      typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator< const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LevelIntersectionIterator;
+      typedef Dune::Intersection< const GridImp, AlbertaGridIntersection > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, AlbertaGridIntersection > LevelIntersection;
+      typedef Dune::IntersectionIterator
+      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridIntersection >
+      LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator
+      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridIntersection >
+      LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 
@@ -515,19 +519,13 @@ namespace Dune
   public:
     typedef AGMemoryProvider< EntityObject > EntityProvider;
 
-    typedef AlbertaGridIntersection< const This > IntersectionIteratorImp;
-    typedef IntersectionIteratorImp LeafIntersectionIteratorImp;
-    typedef AGMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
-    friend class LeafIntersectionIteratorWrapper< const This >;
+    friend class AlbertaGridLeafIntersectionIterator< const This >;
 
-    typedef LeafIntersectionIteratorWrapper< const This >
+    typedef typename Traits::LeafIntersectionIterator
     AlbertaGridIntersectionIteratorType;
-
-    LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
 
   private:
     mutable EntityProvider entityProvider_;
-    mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
 
   public:
     template< int codim >

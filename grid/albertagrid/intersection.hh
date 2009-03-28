@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_HH
 #define DUNE_ALBERTA_INTERSECTION_HH
 
+#include <dune/common/smallobject.hh>
+
 #include <dune/grid/common/intersection.hh>
 
 #include <dune/grid/albertagrid/transformation.hh>
@@ -33,6 +35,7 @@ namespace Dune
    */
   template< class GridImp >
   class AlbertaGridIntersection
+    : public SmallObject
   {
     typedef AlbertaGridIntersection< GridImp > This;
 
@@ -56,7 +59,7 @@ namespace Dune
     Intersection;
     typedef This ImplementationType;
 
-    typedef AGMemoryProvider< This > StorageType;
+    typedef AGMemoryProvider< Intersection > Storage;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -79,6 +82,12 @@ namespace Dune
 
     //! The copy constructor
     AlbertaGridIntersection ( const This &other );
+
+    This &operator= ( const This &other )
+    {
+      assign( other );
+      return *this;
+    }
 
     const Intersection &dereference () const
     {
