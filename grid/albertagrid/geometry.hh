@@ -248,6 +248,11 @@ namespace Dune
     typedef FieldVector< ctype, mydimension > LocalVector;
     typedef FieldVector< ctype, coorddimension > GlobalVector;
 
+    typedef FieldMatrix< ctype, mydimension, coorddimension >
+    JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension >
+    JacobianInverseTransposed;
+
   private:
     static const int numCorners = mydimension + 1;
 
@@ -312,12 +317,14 @@ namespace Dune
     // volume if geometry
     ctype volume () const;
 
-    //! can only be called for dim=dimworld!
-    //! Note that if both methods are called on the same element, then
-    //! call jacobianInverseTransposed first because integration element is calculated
-    //! during calculation of the transposed of the jacobianInverse
-    const FieldMatrix< ctype, cdim, mydim > &
-    jacobianInverseTransposed ( const LocalVector &local ) const;
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed () const;
+
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed ( const LocalVector &local ) const
+    {
+      return jacobianInverseTransposed();
+    }
 
     //***********************************************************************
     //  Methods that not belong to the Interface, but have to be public
@@ -336,23 +343,22 @@ namespace Dune
     // calculate Matrix for Mapping from reference element to actual element
     void calcElMatrix () const;
 
-    //! build the transposed of the jacobian inverse and store the volume
-    void buildJacobianInverseTransposed () const;
-
     // calculates the volume of the element
     ctype elDeterminant () const;
 
     //! the vertex coordinates
     CoordMatrix coord_;
 
-    mutable FieldMatrix< ctype, cdim, mydim > Jinv_; //!< storage for inverse of jacobian
+    // storage for the transposed of the jacobian
+    mutable JacobianTransposed jT_;
 
-    mutable FieldMatrix< ctype, cdim, mydim > elMat_; //!< storage for mapping matrix
+    // storage for the transposed inverse of the jacboian
+    mutable JacobianInverseTransposed jTInv_;
 
-    //! is true if elMat_ was calced
-    mutable bool builtElMat_;
-    //! is true if Jinv_ and volume_ is calced
-    mutable bool builtinverse_;
+    // has jT_ been computed, yet?
+    mutable bool builtJT_;
+    // has jTInv_ been computed, yet?
+    mutable bool builtJTInv_;
 
     mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant

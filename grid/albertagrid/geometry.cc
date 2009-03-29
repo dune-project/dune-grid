@@ -3,57 +3,12 @@
 #ifndef DUNE_ALBERTA_GEOMETRY_CC
 #define DUNE_ALBERTA_GEOMETRY_CC
 
+#include <dune/grid/albertagrid/algebra.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 #include <dune/grid/albertagrid/refinement.hh>
 
 namespace Dune
 {
-
-  namespace Alberta
-  {
-
-    template< class ctype, int cdim, int mydim >
-    struct MatrixOps
-    {
-      static ctype invert ( const FieldMatrix< ctype, cdim, mydim > &A,
-                            FieldMatrix< ctype, cdim, mydim > &invAT )
-      {
-        // calc A^T*A
-        FieldMatrix< ctype, mydim, mydim > ATA;
-        FMatrixHelp::multTransposedMatrix( A, ATA );
-
-        // calc invA = A (A^T*A)^-1
-        FieldMatrix< ctype, mydim, mydim > invATA;
-        const ctype det = FMatrixHelp::invertMatrix( ATA, invATA );
-        FMatrixHelp::multMatrix( A, invATA, invAT );
-        return sqrt( det );
-      }
-    };
-
-    template< class ctype, int cdim >
-    struct MatrixOps< ctype, cdim, cdim >
-    {
-      static ctype invert ( const FieldMatrix< ctype, cdim, cdim > &A,
-                            FieldMatrix< ctype, cdim, cdim > &invAT )
-      {
-        const ctype det = FMatrixHelp::invertMatrix_retTransposed( A, invAT );
-        return std::abs( det );
-      }
-    };
-
-    template< class ctype, int cdim >
-    struct MatrixOps< ctype, cdim, 0 >
-    {
-      static ctype invert ( const FieldMatrix< ctype, cdim, 0 > &A,
-                            FieldMatrix< ctype, cdim, 0 > &invAT )
-      {
-        return ctype( 1 );
-      }
-    };
-
-  }
-
-
 
   // AlbertaGridGeometry
   // -------------------
@@ -70,10 +25,10 @@ namespace Dune
   inline AlbertaGridGeometry< mydim, cdim, GridImp >
   ::AlbertaGridGeometry ( const This &other )
     : coord_( other.coord_ ),
-      Jinv_( other.Jinv_ ),
-      elMat_( other.elMat_ ),
-      builtElMat_( other.builtElMat_ ),
-      builtinverse_( other.builtinverse_ ),
+      jT_( other.jT_ ),
+      jTInv_( other.jTInv_ ),
+      builtJT_( other.builtJT_ ),
+      builtJTInv_( other.builtJTInv_ ),
       calcedDet_( other.calcedDet_ ),
       elDet_( other.elDet_ )
   {}
@@ -123,18 +78,19 @@ namespace Dune
   }
 
 
-  template <int mydim, int cdim, class GridImp>
+  template< int mydim, int cdim, class GridImp >
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::calcElMatrix () const
   {
-    if( (mydimension == 0) || builtElMat_ )
-      return;
-
-    for( int i = 0; i < coorddimension; ++i )
+    if( !builtJT_ )
     {
-      for( int j = 0; j < mydimension; ++j )
-        elMat_[ i ][ j ] = coord_[ j+1 ][ i ] - coord_[ 0 ][ i ];
+      const FieldVector< ctype, coorddimension > &origin = coord_[ 0 ];
+      for( int i = 0; i < mydimension; ++i )
+      {
+        jT_[ i ] = coord_[ i+1 ];
+        jT_[ i ] -= origin;
+      }
+      builtJT_ = true;
     }
-    builtElMat_ = true;
   }
 
 
@@ -145,7 +101,7 @@ namespace Dune
     calcElMatrix();
 
     GlobalVector y = coord_[ 0 ];
-    elMat_.umv( local, y );
+    jT_.umtv( local, y );
     return y;
   }
 
@@ -154,123 +110,41 @@ namespace Dune
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::LocalVector
   AlbertaGridGeometry< mydim, cdim, GridImp>::local ( const GlobalVector &global ) const
   {
-    if( !builtinverse_ )
-      buildJacobianInverseTransposed();
+    const JacobianInverseTransposed &jTInv = jacobianInverseTransposed();
 
-    FieldVector< ctype, coorddimension > y = global;
+    GlobalVector y = global;
     y -= coord_[ 0 ];
 
-    FieldVector< ctype, mydimension > x;
-    FMatrixHelp::multAssignTransposed( Jinv_, y, x );
+    LocalVector x;
+    FMatrixHelp::multAssignTransposed( jTInv, y, x );
     return x;
   }
 
-  // determinant of one Geometry, here line
-  template<>
-  inline AlbertaGridGeometry< 1, 2, const AlbertaGrid< 2, 2 > >::ctype
-  AlbertaGridGeometry< 1, 2, const AlbertaGrid< 2, 2 > >::elDeterminant () const
-  {
-    // volume is length of edge
-    FieldVector< ctype, coorddimension > z = coord_[ 0 ] - coord_[ 1 ];
-    return z.two_norm();
-  }
 
-  // determinant of one Geometry, here line
-  template <>
-  inline AlbertaGridGeometry< 1, 3, const AlbertaGrid< 3, 3 > >::ctype
-  AlbertaGridGeometry<1,3,const AlbertaGrid<3,3> >::elDeterminant () const
-  {
-    // volume is length of edge
-    FieldVector< ctype, coorddimension > z = coord_[0] - coord_[1];
-    return z.two_norm();
-  }
-
-  // determinant of one Geometry, here triangle
-  template <>
-  inline AlbertaGridGeometry< 2, 2, const AlbertaGrid< 2, 2 > >::ctype
-  AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::elDeterminant () const
-  {
-    calcElMatrix();
-    return std::abs ( elMat_.determinant () );
-  }
-
-  // determinant of one Geometry, here triangle in 3d
-  template <>
-  inline AlbertaGridGeometry< 2, 3, const AlbertaGrid< 3, 3 > >::ctype
-  AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::elDeterminant () const
-  {
-    enum { dim = 3 };
-
-    // create vectors of face
-    FieldVector< ctype, coorddimension > v = coord_[1] - coord_[0];
-    FieldVector< ctype, coorddimension > u = coord_[2] - coord_[1];
-
-    // calculate scaled outer normal
-    FieldVector< ctype, coorddimension > z;
-    for( int i = 0; i < dim; ++i )
-      z[i] = u[(i+1)%dim] * v[(i+2)%dim] - u[(i+2)%dim] * v[(i+1)%dim];
-
-    // z is the same as 2.0 * the outer normal
-    return z.two_norm();
-  }
-
-  // volume of one Geometry, here therahedron
-  template <>
-  inline AlbertaGridGeometry< 3, 3, const AlbertaGrid< 3, 3 > >::ctype
-  AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::elDeterminant () const
-  {
-    calcElMatrix();
-    return std::abs(elMat_.determinant ());
-  }
-
-  // volume of one Geometry, here point
-  template <>
-  inline AlbertaGridGeometry< 0, 2, const AlbertaGrid< 2, 2 > >::ctype
-  AlbertaGridGeometry<0,2,const AlbertaGrid<2,2> >::elDeterminant () const
-  {
-    return 1.0;
-  }
-  // volume of one Geometry, here point
-  template <>
-  inline AlbertaGridGeometry< 0, 3, const AlbertaGrid< 3, 3 > >::ctype
-  AlbertaGridGeometry<0,3,const AlbertaGrid<3,3> >::elDeterminant () const
-  {
-    return 1.0;
-  }
-
-  // build jacboianInverseTransposed for (mydim < cdim)
   template< int mydim, int cdim, class GridImp >
-  inline void
-  AlbertaGridGeometry< mydim, cdim, GridImp >
-  :: buildJacobianInverseTransposed () const
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
+  AlbertaGridGeometry< mydim, cdim, GridImp >::elDeterminant () const
   {
-    // calc A and stores it in elMat_
     calcElMatrix();
-    assert( builtElMat_ == true );
-
-    // Jinv = A^-1^T
-    elDet_ = Alberta::MatrixOps< ctype, cdim, mydim >::invert( elMat_, Jinv_ );
-    assert( elDet_ > 1.0e-25 );
-
-    calcedDet_ = true;
-    builtinverse_ = true;
+    return std::abs( Alberta::determinant( jT_ ) );
   }
 
 
-  template <int mydim, int cdim, class GridImp>
+
+  template< int mydim, int cdim, class GridImp >
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry<mydim,cdim,GridImp>::volume () const
+  AlbertaGridGeometry< mydim, cdim, GridImp >::volume () const
   {
     assert( calcedDet_ );
-    const ctype refVolume
-      = ctype( 1 ) / ctype( Factorial< mydimension > :: factorial );
+    static const ctype refVolume
+      = ctype( 1 ) / ctype( Factorial< mydimension >::factorial );
     return refVolume * elDet_;
   }
 
 
-  template <int mydim, int cdim, class GridImp >
+  template< int mydim, int cdim, class GridImp >
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry< mydim, cdim, GridImp>
+  AlbertaGridGeometry< mydim, cdim, GridImp >
   ::integrationElement ( const LocalVector &local ) const
   {
     assert( calcedDet_ );
@@ -279,16 +153,18 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
-  inline const FieldMatrix< Alberta::Real, cdim, mydim > &
-  AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::jacobianInverseTransposed ( const LocalVector &local ) const
+  inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::JacobianInverseTransposed &
+  AlbertaGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed () const
   {
-    if(builtinverse_)
-      return Jinv_;
-
-    // builds the jacobian inverse and calculates the volume
-    buildJacobianInverseTransposed();
-    return Jinv_;
+    if( !builtJTInv_ )
+    {
+      calcElMatrix();
+      elDet_ = std::abs( Alberta::invert( jT_, jTInv_ ) );
+      assert( elDet_ > 1.0e-25 );
+      calcedDet_ = true;
+      builtJTInv_ = true;
+    }
+    return jTInv_;
   }
 
 
@@ -323,8 +199,8 @@ namespace Dune
   template< int mydim, int cdim, class GridImp >
   inline void AlbertaGridGeometry< mydim, cdim, GridImp >::invalidate ()
   {
-    builtinverse_ = false;
-    builtElMat_ = false;
+    builtJT_ = false;
+    builtJTInv_ = false;
     calcedDet_ = false;
   }
 
@@ -335,8 +211,8 @@ namespace Dune
   inline void AlbertaGridGeometry< mydim, cdim, GridImp >
   ::build ( const CoordReader &coordReader )
   {
-    builtinverse_ = false;
-    builtElMat_ = false;
+    builtJT_ = false;
+    builtJTInv_ = false;
 
     for( int i = 0; i <= mydimension; ++i )
       coordReader.coordinate( i, coord_[ i ] );
