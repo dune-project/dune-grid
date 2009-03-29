@@ -191,6 +191,18 @@ namespace Dune
       return realGeometry.volume();
     }
 
+    /** \brief Return the transposed of the Jacobian
+     *
+     *  \param[in]  local  Position \f$x \in D\f$
+     *
+     *  \return \f$J_g^{T}( x )\f$
+     */
+    const FieldMatrix< ctype, mydim, cdim > &
+    jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const
+    {
+      return realGeometry.jacobianTransposed( local );
+    }
+
     /** \brief Return inverse of transposed of Jacobian
 
        The jacobian is defined in the documentation of Dune::Geometry::integrationElement().
