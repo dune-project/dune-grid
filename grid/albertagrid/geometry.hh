@@ -317,8 +317,15 @@ namespace Dune
     // volume if geometry
     ctype volume () const;
 
-    const JacobianInverseTransposed &
-    jacobianInverseTransposed () const;
+    const JacobianTransposed &jacobianTransposed () const;
+
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalVector &local ) const
+    {
+      return jacobianTransposed();
+    }
+
+    const JacobianInverseTransposed &jacobianInverseTransposed () const;
 
     const JacobianInverseTransposed &
     jacobianInverseTransposed ( const LocalVector &local ) const
@@ -340,9 +347,6 @@ namespace Dune
     void print (std::ostream& ss) const;
 
   private:
-    // calculate Matrix for Mapping from reference element to actual element
-    void calcElMatrix () const;
-
     // calculates the volume of the element
     ctype elDeterminant () const;
 
