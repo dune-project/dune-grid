@@ -287,6 +287,7 @@ namespace Dune
 
       /** \brief Type used for Jacobian matrices */
       typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
+      typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
 
     private:
       dune_static_assert( (0 <= mydimension) && (mydimension <= dimGrid),
@@ -440,6 +441,11 @@ namespace Dune
       ctype volume () const
       {
         return mapping().volume();
+      }
+
+      const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
+      {
+        return mapping().jacobianTransposed( local );
       }
 
       /** \brief Compute the transpose of the inverse Jacobian matrix of the transformation

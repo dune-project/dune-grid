@@ -82,10 +82,11 @@ namespace Dune
       static const unsigned int dimension = Traits :: dimension;
       static const unsigned int dimWorld = Traits :: dimWorld;
 
-      typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
-      typedef typename Traits :: JacobianType JacobianType;
+      typedef typename Traits::FieldType FieldType;
+      typedef typename Traits::LocalCoordType LocalCoordType;
+      typedef typename Traits::GlobalCoordType GlobalCoordType;
+      typedef typename Traits::JacobianType JacobianType;
+      typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
       template< int codim >
       struct Codim
@@ -115,6 +116,9 @@ namespace Dune
       virtual FieldType integrationElement ( const LocalCoordType &local ) const = 0;
 
       virtual FieldType volume () const = 0;
+
+      virtual const JacobianTransposedType &
+      jacobianTransposed ( const LocalCoordType &local ) const = 0;
 
       virtual const JacobianType &
       jacobianInverseTransposed ( const LocalCoordType &local ) const = 0;
@@ -194,10 +198,11 @@ namespace Dune
       static const unsigned int dimension = Traits :: dimension;
       static const unsigned int dimWorld = Traits :: dimWorld;
 
-      typedef typename Traits :: FieldType FieldType;
-      typedef typename Traits :: LocalCoordType LocalCoordType;
-      typedef typename Traits :: GlobalCoordType GlobalCoordType;
-      typedef typename Traits :: JacobianType JacobianType;
+      typedef typename Traits::FieldType FieldType;
+      typedef typename Traits::LocalCoordType LocalCoordType;
+      typedef typename Traits::GlobalCoordType GlobalCoordType;
+      typedef typename Traits::JacobianType JacobianType;
+      typedef typename Traits::JacobianTransposedType JacobianTransposedType;
 
       typedef typename Mapping :: ReferenceElement ReferenceElement;
 
@@ -259,6 +264,12 @@ namespace Dune
       virtual FieldType volume () const
       {
         return mapping_.volume();
+      }
+
+      virtual const JacobianTransposedType &
+      jacobianTransposed ( const LocalCoordType &local ) const
+      {
+        return mapping_.jacobianTransposed( local );
       }
 
       virtual const JacobianType &
