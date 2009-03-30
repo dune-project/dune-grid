@@ -114,38 +114,45 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const;
+    const LocalGeometry &geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry& intersectionGlobal () const;
+    const Geometry &geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return intersectionSelfLocal().type();
+      return geometryInInside().type();
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const;
+    const LocalGeometry &geometryInOutside () const;
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {
+    int numberInInside () const
+    {
       return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
     }
 
     //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const;
+    int numberInOutside () const;
 
     //! return outer normal
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    {
       integrationOuterNormal_ = outerNormal(local);
-      integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
-      integrationOuterNormal_ *= intersectionGlobal().integrationElement(local);
+
+      //integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
+      //integrationOuterNormal_ *= geometry().integrationElement(local);
+
+      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= scale;
+
       return integrationOuterNormal_;
     }
 
@@ -333,39 +340,46 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const;
+    const LocalGeometry &geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry& intersectionGlobal () const;
+    const Geometry &geometry () const;
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const;
+    const LocalGeometry &geometryInOutside () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return intersectionSelfLocal().type();
+      return geometryInInside().type();
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {
+    int numberInInside () const
+    {
       return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
     }
 
     //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const;
+    int numberInOutside () const;
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+    const FieldVector<UGCtype, GridImp::dimensionworld>& integrationOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    {
       integrationOuterNormal_ = outerNormal(local);
-      integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
-      integrationOuterNormal_ *= intersectionGlobal().integrationElement(local);
+
+      //integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
+      //integrationOuterNormal_ *= geometry().integrationElement(local);
+
+      const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal_.two_norm();
+      integrationOuterNormal_ *= scale;
+
       return integrationOuterNormal_;
     }
 

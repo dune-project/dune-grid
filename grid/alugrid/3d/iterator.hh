@@ -157,29 +157,29 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry & intersectionSelfLocal () const;
+    const LocalGeometry &geometryInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where
     //!  iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where
     //! iteration started.
-    const Geometry & intersectionGlobal () const;
+    const Geometry &geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;
 
     //! local number of codim 1 entity in self where intersection is contained
     //!  in
-    int numberInSelf () const;
+    int numberInInside () const;
 
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry & intersectionNeighborLocal () const;
+    const LocalGeometry &geometryInOutside () const;
 
     //! local number of codim 1 entity in neighbor where intersection is
     //! contained
-    int numberInNeighbor () const;
+    int numberInOutside () const;
 
     //! returns twist of face compared to inner element
     int twistInSelf() const;

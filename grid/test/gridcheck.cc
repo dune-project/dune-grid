@@ -755,7 +755,7 @@ void assertNeighbor (Grid &g)
       for(; it != endit; ++it)
       {
         // numbering
-        const int numberInSelf = it->numberInSelf();
+        const int numberInSelf = it->numberInInside();
         if( (numberInSelf < 0) || (numberInSelf >= numFaces) )
         {
           std :: cout << "Error: Invalid numberInSelf: " << numberInSelf
@@ -778,8 +778,8 @@ void assertNeighbor (Grid &g)
 
 
         // geometry
-        it->intersectionSelfLocal();
-        it->intersectionGlobal();
+        it->geometryInInside();
+        it->geometry();
 
         // normal vectors
         Dune::FieldVector<ct, dim-1> v(0);
@@ -805,10 +805,10 @@ void assertNeighbor (Grid &g)
           }
 
           // geometry
-          it->intersectionNeighborLocal();
+          it->geometryInOutside();
 
           // numbering
-          const int numberInNeighbor = it->numberInNeighbor();
+          const int numberInNeighbor = it->numberInOutside();
           const int numFaces = outside.template count< 1 >();
           if( (numberInNeighbor < 0) || (numberInNeighbor >= numFaces) )
           {

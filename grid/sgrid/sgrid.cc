@@ -709,34 +709,37 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator<GridImp>::LocalGeometry& SIntersectionIterator<GridImp>::intersectionSelfLocal () const
+  inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
+  SIntersectionIterator< GridImp >::geometryInInside () const
   {
     makeintersections();
     return is_self_local;
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator<GridImp>::LocalGeometry& SIntersectionIterator<GridImp>::intersectionNeighborLocal () const
+  inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
+  SIntersectionIterator< GridImp >::geometryInOutside () const
   {
     makeintersections();
     return is_nb_local;
   }
 
   template<class GridImp>
-  inline typename SIntersectionIterator<GridImp>::Geometry& SIntersectionIterator<GridImp>::intersectionGlobal () const
+  inline const typename SIntersectionIterator< GridImp >::Geometry &
+  SIntersectionIterator< GridImp >::geometry () const
   {
     makeintersections();
     return is_global;
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::numberInSelf () const
+  inline int SIntersectionIterator<GridImp>::numberInInside () const
   {
     return count;
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::numberInNeighbor () const
+  inline int SIntersectionIterator<GridImp>::numberInOutside () const
   {
     return (count/2)*2 + (1-count%2);
   }

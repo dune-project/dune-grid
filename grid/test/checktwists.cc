@@ -49,8 +49,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const int tIn = mapTwist( intersection.twistInSelf() );
   const int tOut = mapTwist( intersection.twistInNeighbor() );
 
-  const int nIn = intersection.numberInSelf();
-  const int nOut = intersection.numberInNeighbor();
+  const int nIn = intersection.numberInInside();
+  const int nOut = intersection.numberInOutside();
 
   const EntityPointer ptrIn = intersection.inside();
   const EntityPointer ptrOut = intersection.outside();
@@ -81,8 +81,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     ++errors;
   }
 
-  const LocalGeometry &lGeoIn = intersection.intersectionSelfLocal();
-  const LocalGeometry &lGeoOut = intersection.intersectionNeighborLocal();
+  const LocalGeometry &lGeoIn = intersection.geometryInInside();
+  const LocalGeometry &lGeoOut = intersection.geometryInOutside();
 
   for( int i = 0; i < numCorners; ++i )
   {

@@ -261,23 +261,23 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline int ALU3dGridIntersectionIterator<GridImp>::numberInSelf () const
+  inline int ALU3dGridIntersectionIterator< GridImp >::numberInInside () const
   {
-    assert(ElementTopo::dune2aluFace(index_) ==
-           connector_.innerALUFaceIndex());
+    assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
     return index_;
   }
 
 
   template <class GridImp>
   inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
-  ALU3dGridIntersectionIterator<GridImp>::intersectionSelfLocal() const {
+  ALU3dGridIntersectionIterator< GridImp >::geometryInInside () const
+  {
     buildLocalGeometries();
     return intersectionSelfLocal_;
   }
 
   template<class GridImp>
-  inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
+  inline int ALU3dGridIntersectionIterator< GridImp >::numberInOutside () const
   {
     return ElementTopo::alu2duneFace(connector_.outerALUFaceIndex());
   }
@@ -287,11 +287,10 @@ namespace Dune {
   {
     const int aluTwist = connector_.innerTwist();
     const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex(numberInSelf(), 0),
-                      aluTwist);
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( numberInInside(), 0), aluTwist);
 
     return
-      (ElementTopo::faceOrientation(numberInSelf()) * sign(aluTwist) < 0 ?
+      (ElementTopo::faceOrientation( numberInInside() ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
   }
 
@@ -306,11 +305,10 @@ namespace Dune {
   {
     const int aluTwist = connector_.outerTwist();
     const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex(numberInNeighbor(), 0),
-                      aluTwist);
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( numberInOutside(), 0), aluTwist);
 
     return
-      (ElementTopo::faceOrientation(numberInNeighbor()) * sign(aluTwist) < 0 ?
+      (ElementTopo::faceOrientation( numberInOutside() ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
   }
 
@@ -322,7 +320,8 @@ namespace Dune {
 
   template <class GridImp>
   inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
-  ALU3dGridIntersectionIterator<GridImp>::intersectionNeighborLocal() const {
+  ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
+  {
     assert(neighbor());
     buildLocalGeometries();
     return intersectionNeighborLocal_;
@@ -357,7 +356,7 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
-  ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
+  ALU3dGridIntersectionIterator< GridImp >::geometry () const
   {
     geoProvider_.buildGlobalGeom(intersectionGlobalImp_);
     return intersectionGlobal_;
@@ -507,7 +506,7 @@ namespace Dune {
     }
 
     std::cout << "Face corner coordinates (intersectionGlobal)" << std::endl;
-    const Geometry& interGlobal = intersectionGlobal();
+    const Geometry& interGlobal = geometry();
     for (int i = 0; i < numVerticesPerFace; ++i) {
       printToScreen(i, FaceTopo::dune2aluVertex(i), interGlobal[i]);
     }

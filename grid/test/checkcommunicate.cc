@@ -261,8 +261,7 @@ class CheckCommunication
         {
           const Intersection &intersection = *nit;
 
-          const typename Intersection :: LocalGeometry &geoInSelf
-            = intersection.intersectionSelfLocal();
+          const typename Intersection::LocalGeometry &geoInSelf = intersection.geometryInInside();
 
           const ReferenceElement< ctype, dim-1 > &faceRefElement
             = ReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );

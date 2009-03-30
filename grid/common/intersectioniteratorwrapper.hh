@@ -107,13 +107,19 @@ namespace Dune {
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry & intersectionSelfLocal () const { return it().intersectionSelfLocal(); }
+    const LocalGeometry &geometryInInside () const
+    {
+      return it().geometryInInside();
+    }
 
     //! intersection of codimension 1 of this neighbor with element where
     //!  iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where
     //! iteration started.
-    const Geometry & intersectionGlobal () const { return it().intersectionGlobal(); }
+    const Geometry &geometry () const
+    {
+      return it().geometry();
+    }
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
@@ -123,16 +129,25 @@ namespace Dune {
 
     //! local number of codim 1 entity in self where intersection is contained
     //!  in
-    int numberInSelf () const { return it().numberInSelf(); }
+    int numberInInside () const
+    {
+      return it().numberInInside();
+    }
 
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry & intersectionNeighborLocal () const { return it().intersectionNeighborLocal(); }
+    const LocalGeometry &geometryInOutside () const
+    {
+      return it().geometryInOutside();
+    }
 
     //! local number of codim 1 entity in neighbor where intersection is
     //! contained
-    int numberInNeighbor () const { return it().numberInNeighbor(); }
+    int numberInOutside () const
+    {
+      return it().numberInOutside();
+    }
 
     //! twist of the face seen from the inner element
     int twistInSelf() const { return it().twistInSelf(); }

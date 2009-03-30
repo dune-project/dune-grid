@@ -1495,7 +1495,7 @@ namespace Dune {
     //! (attach your boundary condition as needed)
     int boundaryId() const
     {
-      if(boundary()) return numberInSelf()+1;
+      if(boundary()) return numberInInside()+1;
       return 0;
     }
 
@@ -1518,14 +1518,14 @@ namespace Dune {
     FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
     {
       FieldVector<ctype, dimworld> n = _normal;
-      n *= intersectionGlobal().volume();
+      n *= geometry().volume();
       return n;
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
           Here returned element is in LOCAL coordinates of the element where iteration started.
      */
-    const LocalGeometry& intersectionSelfLocal () const
+    const LocalGeometry &geometryInInside () const
     {
       return _is_self_local;
     }
@@ -1533,7 +1533,7 @@ namespace Dune {
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
           Here returned element is in LOCAL coordinates of neighbor
      */
-    const LocalGeometry& intersectionNeighborLocal () const
+    const LocalGeometry &geometryInOutside () const
     {
       return _is_nb_local;
     }
@@ -1541,7 +1541,7 @@ namespace Dune {
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
           Here returned element is in LOCAL coordinates of neighbor
      */
-    const Geometry& intersectionGlobal () const
+    const Geometry &geometry () const
     {
       return _is_global;
     }
@@ -1549,17 +1549,17 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return intersectionSelfLocal().type();
+      return geometryInInside().type();
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const
+    int numberInInside () const
     {
       return _count;
     }
 
     //! local number of codim 1 entity in neighbor where intersection is contained in
-    int numberInNeighbor () const
+    int numberInOutside () const
     {
       return _count + 1-2*_face;
     }

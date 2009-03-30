@@ -278,12 +278,12 @@ namespace Dune
 
   template< class GridImp >
   inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
-  AlbertaGridIntersection< GridImp >::intersectionSelfLocal () const
+  AlbertaGridIntersection< GridImp >::geometryInInside () const
   {
     assert( !!elementInfo_ );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
-    const LocalCoordReader coordReader( inside()->geometry(), intersectionGlobal() );
+    const LocalCoordReader coordReader( inside()->geometry(), geometry() );
     geo.build( coordReader );
     return fakeSelfObj_;
   }
@@ -291,12 +291,12 @@ namespace Dune
 
   template< class GridImp >
   inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
-  AlbertaGridIntersection< GridImp >::intersectionNeighborLocal () const
+  AlbertaGridIntersection< GridImp >::geometryInOutside () const
   {
     assert( neighbor() );
 
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
-    const LocalCoordReader coordReader( outside()->geometry(), intersectionGlobal() );
+    const LocalCoordReader coordReader( outside()->geometry(), geometry() );
     geo.build( coordReader );
     return fakeNeighObj_;
   }
@@ -304,7 +304,7 @@ namespace Dune
 
   template< class GridImp >
   inline const typename AlbertaGridIntersection< GridImp >::Geometry &
-  AlbertaGridIntersection< GridImp >::intersectionGlobal () const
+  AlbertaGridIntersection< GridImp >::geometry () const
   {
     assert( !elementInfo_ == false );
 
@@ -323,16 +323,14 @@ namespace Dune
 
 
   template< class GridImp >
-  inline int AlbertaGridIntersection< GridImp >
-  ::numberInSelf () const
+  inline int AlbertaGridIntersection< GridImp >::numberInInside () const
   {
     const int oppVertex = neighborCount_;
     return (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
   }
 
   template< class GridImp >
-  inline int AlbertaGridIntersection<GridImp>
-  ::numberInNeighbor () const
+  inline int AlbertaGridIntersection< GridImp >::numberInOutside () const
   {
     assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();

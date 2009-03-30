@@ -54,7 +54,6 @@ namespace Dune {
 
   template<class GridImp>
   class ALU2dGridIntersectionBase
-  //: public IntersectionIteratorDefaultImplementation <GridImp, ALU2dGridIntersectionBase >
   {
   public:
     typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
@@ -156,10 +155,10 @@ namespace Dune {
     EntityPointer outside() const;
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const;
+    int numberInInside () const;
 
     //! local number of codim 1 entity in neighbor where intersection is contained in
-    int numberInNeighbor () const;
+    int numberInOutside () const;
 
     int twistInSelf () const;
     int twistInNeighbor () const;
@@ -168,9 +167,9 @@ namespace Dune {
     NormalType & integrationOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
     NormalType & unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
 
-    const LocalGeometry & intersectionSelfLocal () const;
-    const LocalGeometry & intersectionNeighborLocal () const;
-    const Geometry & intersectionGlobal () const;
+    const LocalGeometry &geometryInInside () const;
+    const LocalGeometry &geometryInOutside () const;
+    const Geometry &geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;

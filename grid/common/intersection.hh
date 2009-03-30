@@ -5,6 +5,8 @@
 
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/genericgeometry/conversion.hh>
+
 namespace Dune
 {
 
@@ -235,37 +237,53 @@ namespace Dune
       return this->real.conforming();
     }
 
-    /*! @brief geometrical information about this intersection in local
-       coordinates of the inside() entity.
-
-       This method returns a Geometry object that provides a mapping from
-       local coordinates of the intersection to local coordinates of the
-       inside() entity.
+    /** \brief geometrical information about this intersection in local
+     *         coordinates of the inside() entity.
+     *
+     *  This method returns a Geometry object that provides a mapping from
+     *  local coordinates of the intersection to local coordinates of the
+     *  inside() entity.
      */
-    const LocalGeometry& intersectionSelfLocal () const
+    const LocalGeometry &geometryInInside () const
     {
-      return this->real.intersectionSelfLocal();
-    }
-    /*! @brief geometrical information about this intersection in local
-       coordinates of the outside() entity.
-
-       This method returns a Geometry object that provides a mapping from
-       local coordinates of the intersection to local coordinates of the
-       outside() entity.
-     */
-    const LocalGeometry& intersectionNeighborLocal () const
-    {
-      return this->real.intersectionNeighborLocal();
+      return this->real.geometryInInside();
     }
 
-    /*! @brief geometrical information about this intersection in global coordinates.
-
-       This method returns a Geometry object that provides a mapping from
-       local coordinates of the intersection to global (world) coordinates.
-     */
-    const Geometry& intersectionGlobal () const
+    const LocalGeometry& intersectionSelfLocal () const DUNE_DEPRECATED
     {
-      return this->real.intersectionGlobal();
+      return geometryInInside();
+    }
+
+    /** \brief geometrical information about this intersection in local
+     *         coordinates of the outside() entity.
+     *
+     * This method returns a Geometry object that provides a mapping from
+     * local coordinates of the intersection to local coordinates of the
+     * outside() entity.
+     */
+    const LocalGeometry &geometryInOutside () const
+    {
+      return this->real.geometryInOutside();
+    }
+
+    const LocalGeometry& intersectionNeighborLocal () const DUNE_DEPRECATED
+    {
+      return geometryInOutside();
+    }
+
+    /** \brief geometrical information about the intersection in global coordinates.
+     *
+     *  This method returns a Geometry object that provides a mapping from
+     *  local coordinates of the intersection to global (world) coordinates.
+     */
+    const Geometry &geometry () const
+    {
+      return this->real.geometry();
+    }
+
+    const Geometry& intersectionGlobal () const DUNE_DEPRECATED
+    {
+      return geometry();
     }
 
     /** \brief obtain the type of reference element for this intersection */
@@ -274,16 +292,50 @@ namespace Dune
       return this->real.type();
     }
 
-    //! Local number of codim 1 entity in the inside() Entity where intersection is contained in
-    int numberInSelf () const
+    /** \brief Local number of codim 1 entity in the inside() entity where
+     *         intersection is contained in
+     *
+     *  \note This method returns the face number with respect to the generic
+     *        reference element.
+     *
+     *  \returns the number of the inside entity's face containing this
+     *           intersection (with respect to the generic reference element)
+     */
+    int numberInInside () const
     {
-      return this->real.numberInSelf ();
+      const int number = this->real.numberInInside();
+
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
+      return Numbering::template dune2generic< dimension >( tid, number );
     }
 
-    //! Local number of codim 1 entity in outside() Entity where intersection is contained in
+    int numberInSelf () const DUNE_DEPRECATED
+    {
+      return this->real.numberInInside();
+    }
+
+    /** \brief Local number of codim 1 entity in outside() entity where
+     *         intersection is contained in
+     *
+     *  \note This method returns the face number with respect to the generic
+     *        reference element.
+     *
+     *  \returns the number of the outside entity's face containing this
+     *           intersection (with respect to the generic reference element)
+     */
+    int numberInOutside () const
+    {
+      const int number = this->real.numberInOutside();
+
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+      return Numbering::template dune2generic< dimension >( tid, number );
+    }
+
     int numberInNeighbor () const
     {
-      return this->real.numberInNeighbor ();
+      return this->real.numberInOutside();
     }
 
     /*! @brief Return an outer normal (length not necessarily 1)

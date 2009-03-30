@@ -171,21 +171,24 @@ namespace Dune {
 
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
+    const LocalGeometry &geometryInInside () const
+    {
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInInside() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
+    const LocalGeometry &geometryInOutside () const
+    {
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInInside() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry& intersectionGlobal () const {
+    const Geometry &geometry () const
+    {
       GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_];
       return intersectionGlobal_;
     }
@@ -197,10 +200,14 @@ namespace Dune {
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {return neighbor_;}
+    int numberInInside () const
+    {
+      return neighbor_;
+    }
 
     //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const {
+    int numberInOutside () const
+    {
       // If numberInSelf is 0 then numberInNeighbor is 1 and vice versa
       return 1-neighbor_;
     }
@@ -443,21 +450,24 @@ namespace Dune {
 
     //! Here returned element is in LOCAL coordinates of the element
     //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInSelf() == 0) ? 0 : 1 );
+    const LocalGeometry &geometryInInside () const
+    {
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInInside() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInSelf() == 0) ? 1 : 0 );
+    const LocalGeometry &geometryInOutside () const
+    {
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInInside() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    const Geometry& intersectionGlobal () const {
+    const Geometry &geometry () const
+    {
       GridImp::getRealImplementation(intersectionGlobal_).target_ = center_->vertex_[neighbor_%2];
       return intersectionGlobal_;
     }
@@ -469,12 +479,16 @@ namespace Dune {
     }
 
     //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {return neighbor_%2;}
+    int numberInInside () const
+    {
+      return neighbor_ % 2;
+    }
 
     //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const {
+    int numberInOutside () const
+    {
       // If numberInSelf is 0 then numberInNeighbor is 1 and vice versa
-      return 1-(neighbor_%2);
+      return 1-(neighbor_ % 2);
     }
 
     //! return outer normal

@@ -230,7 +230,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
         if (outsideIIt->neighbor() && outsideIIt->outside() == iIt->inside()) {
 
-          if (outsideIIt->numberInSelf() != iIt->numberInNeighbor())
+          if (outsideIIt->numberInInside() != iIt->numberInOutside())
             DUNE_THROW(GridError, "outside()->outside() == inside(), but with incorrect numbering!");
           else
             insideFound = true;
@@ -267,8 +267,15 @@ void checkIntersectionIterator(const GridViewType& view,
     if ( iIt->conforming() && iIt->neighbor() )
     {
       EntityPointer outside = iIt->outside();
-      const int numberInSelf     = iIt->numberInSelf();
-      const int numberInNeighbor = iIt->numberInNeighbor();
+      const int numberInInside  = iIt->numberInInside();
+      const int numberInOutside = iIt->numberInOutside();
+
+      typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tidIn = GenericGeometry::topologyId( eIt->type() );
+      const unsigned int tidOut = GenericGeometry::topologyId( outside->type() );
+
+      const int numberInSelf     = Numbering::template generic2dune< dim >( tidIn, numberInInside );
+      const int numberInNeighbor = Numbering::template generic2dune< dim >( tidOut, numberInOutside );
 
       const unsigned int iIdx = indexSet.template subIndex< 1 >( *eIt, numberInSelf );
       const unsigned int oIdx = indexSet.template subIndex< 1 >( *outside, numberInNeighbor );
@@ -293,7 +300,7 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the geometry returned by intersectionGlobal()
     // //////////////////////////////////////////////////////////
     typedef typename IntersectionIterator::Geometry Geometry;
-    const Geometry& intersectionGlobal = iIt->intersectionGlobal();
+    const Geometry &intersectionGlobal = iIt->geometry();
 
     checkGeometry(intersectionGlobal);
 
@@ -308,7 +315,7 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the geometry returned by intersectionSelfLocal()
     // //////////////////////////////////////////////////////////
 
-    const typename IntersectionIterator::LocalGeometry& intersectionSelfLocal = iIt->intersectionSelfLocal();
+    const typename IntersectionIterator::LocalGeometry &intersectionSelfLocal = iIt->geometryInInside();
     checkGeometry(intersectionSelfLocal);
 
     //  Check the consistency of intersectionSelfLocal() and intersectionGlobal
@@ -393,8 +400,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
     if (iIt->neighbor() )
     {
-
-      const typename IntersectionIterator::LocalGeometry& intersectionNeighborLocal = iIt->intersectionNeighborLocal();
+      const typename IntersectionIterator::LocalGeometry &intersectionNeighborLocal = iIt->geometryInOutside();
 
       checkGeometry(intersectionNeighborLocal);
 

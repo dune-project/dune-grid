@@ -231,13 +231,13 @@ namespace Dune {
 
   //! local number of codim 1 entity in self where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp> :: numberInSelf () const {
+  inline int ALU2dGridIntersectionBase<GridImp> :: numberInInside () const {
     return this->current.index_;
   }
 
   //! local number of codim 1 entity in neighbor where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp> :: numberInNeighbor () const {
+  inline int ALU2dGridIntersectionBase<GridImp> :: numberInOutside () const {
     return this->current.opposite_;
   }
 
@@ -264,7 +264,7 @@ namespace Dune {
 
     if (this->current.isNotConform_ )
     {
-      this->current.neigh_->outernormal(numberInNeighbor(), ((normal_t) (&outerNormal_)[0]) );
+      this->current.neigh_->outernormal( numberInOutside(), ((normal_t) (&outerNormal_)[0]) );
       outerNormal_ *= -1.0;
       return outerNormal_;
     }
@@ -290,7 +290,7 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
-  ALU2dGridIntersectionBase<GridImp> ::intersectionSelfLocal () const
+  ALU2dGridIntersectionBase< GridImp >::geometryInInside () const
   {
     assert(this->current.item_ != 0);
 
@@ -300,12 +300,12 @@ namespace Dune {
       if( this->current.isNotConform_ )
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
-        builtLocalGeom( inside()->geometry() , intersectionGlobal() );
+        builtLocalGeom( inside()->geometry() , geometry() );
       }
       else
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
-        builtLocalGeom( numberInSelf() , 0 );
+        builtLocalGeom( numberInInside() , 0 );
       }
     }
 
@@ -315,7 +315,7 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::LocalGeometry&
-  ALU2dGridIntersectionBase<GridImp> :: intersectionNeighborLocal () const
+  ALU2dGridIntersectionBase< GridImp >::geometryInOutside () const
   {
     assert(this->current.item_ != 0);
     assert(this->current.neigh_ != 0);
@@ -324,7 +324,7 @@ namespace Dune {
     {
       // we don't know here wether we have non-conform or conform situation on the neighbor
       this->grid_.getRealImplementation(intersectionNeighborLocal_).
-      builtLocalGeom( outside()->geometry() , intersectionGlobal());
+      builtLocalGeom( outside()->geometry(), geometry() );
     }
     assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
     return intersectionNeighborLocal_;
@@ -332,7 +332,7 @@ namespace Dune {
 
   template<class GridImp>
   inline const typename ALU2dGridIntersectionBase<GridImp>::Geometry&
-  ALU2dGridIntersectionBase<GridImp> ::intersectionGlobal () const
+  ALU2dGridIntersectionBase<GridImp>::geometry () const
   {
     assert(this->current.item_ != 0);
 
