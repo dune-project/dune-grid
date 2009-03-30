@@ -473,37 +473,6 @@ namespace Dune {
         typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
       };
 
-      /*! \brief A type that is a model of Dune::LeafIntersection, an
-         intersections of two codimension 1 of two codimension 0 entities in the leaf view.
-       */
-      typedef typename GridFamily::Traits::LeafIntersection LeafIntersection;
-
-      /*! \brief A type that is a model of Dune::Intersection, an
-         intersections of two codimension 1 of two codimension 0 entities in a level view.
-       */
-      typedef typename GridFamily::Traits::LevelIntersection LevelIntersection;
-
-      /*! \brief A type that is a model of Dune::IntersectionIterator
-         which is an iterator that allows to examine, but not to modify, the
-         intersections of codimension 1 of an leaf element (entity of codimension 0)
-         with other leaf elements.
-       */
-      typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersectionIterator;
-
-      /*! \brief A type that is a model of Dune::IntersectionIterator
-         which is an iterator that allows to examine, but not to modify, the
-         intersections of codimension 1 of an element (entity of codimension 0)
-         with other elements on the same level.
-       */
-      typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersectionIterator;
-
-      /*! \brief A type that is a model of Dune::HierarchicIterator
-         A type of iterator that allows to examine, but not to modify, entities
-         of codimension 0 that result from refinement of an entity of
-         codimension 0.
-       */
-      typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator;
-
       /*! \brief A type that is a model of Dune::LevelIterator with partition type All_Partition
        */
       typedef typename GridFamily::Traits::template Codim<cd>::LevelIterator LevelIterator;
@@ -514,6 +483,11 @@ namespace Dune {
 
       // The following  types used to be part of the Codim structure.
       // Yet, they are independent of the codimension.
+      typedef typename GridFamily::Traits::LeafIntersection LeafIntersection DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::LevelIntersection LevelIntersection DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersectionIterator DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersectionIterator DUNE_DEPRECATED;
+      typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator DUNE_DEPRECATED;
       typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet DUNE_DEPRECATED;
       typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet DUNE_DEPRECATED;
       typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet DUNE_DEPRECATED;
@@ -521,6 +495,36 @@ namespace Dune {
       typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication DUNE_DEPRECATED;
     };
 
+    /*! \brief A type that is a model of Dune::LeafIntersection, an
+       intersections of two codimension 1 of two codimension 0 entities in the leaf view.
+     */
+    typedef typename GridFamily::Traits::LeafIntersection LeafIntersection;
+
+    /*! \brief A type that is a model of Dune::Intersection, an
+       intersections of two codimension 1 of two codimension 0 entities in a level view.
+     */
+    typedef typename GridFamily::Traits::LevelIntersection LevelIntersection;
+
+    /*! \brief A type that is a model of Dune::IntersectionIterator
+       which is an iterator that allows to examine, but not to modify, the
+       intersections of codimension 1 of an leaf element (entity of codimension 0)
+       with other leaf elements.
+     */
+    typedef typename GridFamily::Traits::LeafIntersectionIterator LeafIntersectionIterator;
+
+    /*! \brief A type that is a model of Dune::IntersectionIterator
+       which is an iterator that allows to examine, but not to modify, the
+       intersections of codimension 1 of an element (entity of codimension 0)
+       with other elements on the same level.
+     */
+    typedef typename GridFamily::Traits::LevelIntersectionIterator LevelIntersectionIterator;
+
+    /*! \brief A type that is a model of Dune::HierarchicIterator
+       A type of iterator that allows to examine, but not to modify, entities
+       of codimension 0 that result from refinement of an entity of
+       codimension 0.
+     */
+    typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator;
 
     /*!  \brief A type that is a model of Dune::IndexSet
        which provides a consecutive, but non persistent, numbering for
