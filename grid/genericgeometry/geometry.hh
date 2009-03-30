@@ -455,15 +455,19 @@ namespace Dune
         return mapping().jacobianInverseTransposed( local );
       }
 
-      /** \brief Compute a normal
-          \todo Doc me properly.  How are the coordinates interpreted?
+      /** \brief compute an outer normal
+       *
+       *  \param[in]  face   number of the face (in generic numbering)
+       *  \param[in]  local  point to compute the normal in (in local coordinates)
+       *
+       *  \returns an outer normal to the given face at the given point
+       *
+       *  \note Thouogh the local coordinates are given with respect to geometry's
+       *        reference domain, the point is required to be on the given face.
        */
       GlobalCoordinate normal ( int face, const LocalCoordinate &local ) const
       {
-        const unsigned int tid = mapping().topologyId();
-        const unsigned int i = MapNumberingProvider< mydimension >
-                               :: template dune2generic< 1 >( tid, face );
-        return mapping().normal( i, local );
+        return mapping().normal( face, local );
       }
 
     private:
