@@ -171,7 +171,7 @@ namespace Dune
   ::unitOuterNormal ( const LocalCoordType &local ) const
   {
     NormalVector normal;
-    calcOuterNormal( normal );
+    calcOuterNormal( local, normal );
     normal *= (1.0 / normal.two_norm());
     return normal;
   }
@@ -182,7 +182,7 @@ namespace Dune
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     NormalVector normal;
-    calcOuterNormal( normal );
+    calcOuterNormal( local, normal );
     return normal;
   }
 
@@ -196,16 +196,22 @@ namespace Dune
 
   template< class GridImp >
   inline void
-  AlbertaGridIntersection<GridImp>::calcOuterNormal( NormalVector &n ) const
+  AlbertaGridIntersection< GridImp >
+  ::calcOuterNormal( const LocalCoordType &local, NormalVector &n ) const
   {
+#if USE_GENERICGEOMETRY
+    const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
+    n = GridImp::getRealImplementation( inside()->geometry() ).normal( numberInInside(), localInInside );
+#else
     DUNE_THROW( NotImplemented, "AlbertaGrid: outer normal for dim != dimworld "
                 "has not been implemented, yet." );
+#endif // #if USE_GENERICGEOMETRY
   }
 
   template<>
   inline void
   AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >
-  ::calcOuterNormal ( NormalVector &n ) const
+  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
   {
     assert( !!elementInfo_ );
     const Alberta::GlobalVector &oppCoord = grid_.getCoord( elementInfo_, neighborCount_ );
@@ -216,7 +222,7 @@ namespace Dune
   template<>
   inline void
   AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >
-  ::calcOuterNormal ( NormalVector &n ) const
+  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
   {
     assert( !!elementInfo_ );
     const Alberta::GlobalVector &coordOne = grid_.getCoord( elementInfo_, (neighborCount_+1)%3 );
@@ -229,7 +235,7 @@ namespace Dune
   template<>
   inline void
   AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >
-  ::calcOuterNormal ( NormalVector &n ) const
+  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
   {
     assert( !!elementInfo_ );
 

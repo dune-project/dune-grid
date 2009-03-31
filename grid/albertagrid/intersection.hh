@@ -173,7 +173,7 @@ namespace Dune
     void setupVirtEn () const;
 
     //! calculate normal to current face
-    void calcOuterNormal ( NormalVector &n ) const;
+    void calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const;
 
     ////////////////////////////////////////////////
     // private member variables
