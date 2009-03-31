@@ -476,6 +476,16 @@ namespace Dune
       return numberingMap_.alberta2dune( codim, i );
     }
 
+    int generic2alberta ( int codim, int i ) const
+    {
+      return genericNumberingMap_.dune2alberta( codim, i );
+    }
+
+    int alberta2generic ( int codim, int i ) const
+    {
+      return genericNumberingMap_.alberta2dune( codim, i );
+    }
+
   private:
     using Base::getRealImplementation;
 
@@ -580,6 +590,7 @@ namespace Dune
   private:
     // map between ALBERTA and DUNE numbering
     Alberta::NumberingMap< dimension > numberingMap_;
+    Alberta::NumberingMap< dimension, Alberta::Generic2AlbertaNumbering > genericNumberingMap_;
 
     DofNumbering dofNumbering_;
 

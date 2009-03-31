@@ -326,11 +326,8 @@ namespace Dune
   inline int AlbertaGridIntersection< GridImp >::numberInInside () const
   {
     const int oppVertex = neighborCount_;
-    const int number = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
-
-    typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-    const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-    return Numbering::template dune2generic< 1 >( tid, number );
+    const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
+    return grid_.alberta2generic( 1, face );
   }
 
   template< class GridImp >
@@ -339,11 +336,8 @@ namespace Dune
     assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     const int oppVertex = elInfo.opp_vertex[ neighborCount_ ];
-    const int number = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
-
-    typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-    const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-    return Numbering::template dune2generic< 1 >( tid, number );
+    const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
+    return grid_.alberta2generic( 1, face );
   }
 
 
