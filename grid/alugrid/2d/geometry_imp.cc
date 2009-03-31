@@ -487,7 +487,7 @@ namespace Dune {
     return true;
   }
 
-  // built Geometry
+  // built Geometry (faceNumber is in generic numbering)
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
   builtLocalGeom(const int faceNumber, const int twist)
@@ -503,13 +503,13 @@ namespace Dune {
     // for simplices this is not so bad
 
     CopyCoordinates<GeometryImp,mydim>::
-    copyData( &refCoord_[(faceNumber + (twist%2) + 1)%3][0] , coord_[0]);
+    copyData( &refCoord_[(2 - faceNumber + (twist%2) + 1)%3][0] , coord_[0]);
 
     CopyCoordinates<GeometryImp,mydim>::
-    copyData( &refCoord_[(faceNumber + ((twist+1)%2) + 1)%3][0] , coord_[1]);
+    copyData( &refCoord_[(2 - faceNumber + ((twist+1)%2) + 1)%3][0] , coord_[1]);
 
     // get length of faces
-    elDet_ = refCoord_[faceNumber][2];
+    elDet_ = refCoord_[2 - faceNumber][2];
     assert( std::abs(elDet_ - elDeterminant()) < 1e-10 );
 
 #ifndef NDEBUG
