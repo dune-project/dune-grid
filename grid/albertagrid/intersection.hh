@@ -55,11 +55,8 @@ namespace Dune
     typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
     typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
 
-    typedef Dune::Intersection< GridImp, Dune::AlbertaGridIntersection >
-    Intersection;
     typedef This ImplementationType;
 
-    typedef AGMemoryProvider< Intersection > Storage;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -87,11 +84,6 @@ namespace Dune
     {
       assign( other );
       return *this;
-    }
-
-    const Intersection &dereference () const
-    {
-      return reinterpret_cast< const Intersection & >( *this );
     }
 
     //! equality
