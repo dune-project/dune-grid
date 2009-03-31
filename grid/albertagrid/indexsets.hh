@@ -409,7 +409,7 @@ namespace Dune
   //! hierarchic index set of AlbertaGrid
   template< int dim, int dimworld >
   class AlbertaGridIdSet
-    : public IdSetDefaultImplementation
+    : public IdSet
       < AlbertaGrid< dim, dimworld >, AlbertaGridIdSet< dim, dimworld >, unsigned int >
   {
     typedef AlbertaGridIdSet< dim, dimworld > This;
@@ -418,8 +418,7 @@ namespace Dune
 
     friend class AlbertaGrid< dim, dimworld >;
 
-    static const int codimShift = 30;
-    static const int maxCodimSize = (1 << codimShift);
+    static const int dimension = Grid::dimension;
 
     typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
 
@@ -446,18 +445,27 @@ namespace Dune
     template< int codim >
     IdType id ( const typename Grid::template Codim< codim >::Entity &e ) const
     {
-      assert( hIndexSet_.size( codim ) < maxCodimSize );
+      assert( (codim >= 0) && (codim <= dimension) );
       const IdType index = hIndexSet_.index( e );
-      return ((IdType)codim << codimShift) + index;
+      return (index << 2) | IdType( codim );
     }
 
     /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i) const */
     template< int codim >
     IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i ) const
     {
-      assert( hIndexSet_.size( codim ) < maxCodimSize );
+      assert( (codim >= 0) && (codim <= dimension) );
       const IdType index = hIndexSet_.template subIndex< codim >( e, i );
-      return ((IdType)codim << codimShift) + index;
+      return (index << 2) | IdType( codim );
+    }
+
+    /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i,unsigned int codim) const */
+    IdType subId ( const typename Grid::template Codim< 0 >::Entity &e,
+                   int i, int codim ) const
+    {
+      assert( (codim >= 0) && (codim <= dimension) );
+      const IdType index = hIndexSet_.subIndex( e, i, codim );
+      return (index << 2) | IdType( codim );
     }
   };
 
