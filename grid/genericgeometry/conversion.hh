@@ -19,85 +19,86 @@ namespace Dune
     // DuneGeometryType
     // ----------------
 
-    template< class Topology, GeometryType :: BasicType defaultType >
+    /** \class DuneGeometryType
+     *  \brief statically convert a generic topology type into a GeometryType
+     *
+     *  \tparam  Topology  topology type to be converted
+     *  \tparam  linetype  basic geometry type to assign to a line
+     *                     (either simplex or cube)
+     */
+    template< class Topology, GeometryType::BasicType linetype >
     class DuneGeometryType;
 
-    template< GeometryType :: BasicType defaultType >
-    class DuneGeometryType< Point, defaultType >
+    template< GeometryType::BasicType linetype >
+    class DuneGeometryType< Point, linetype >
     {
-      dune_static_assert( (defaultType == GeometryType :: simplex)
-                          || (defaultType == GeometryType :: cube),
-                          "defaultType may only be a simplex or a cube." );
+      dune_static_assert( (linetype == GeometryType::simplex)
+                          || (linetype == GeometryType::cube),
+                          "Parameter linetype may only be a simplex or a cube." );
 
     public:
-      enum { dimension = 0 };
-      enum { basicType = defaultType };
+      static const unsigned int dimension = 0;
+      static const GeometryType::BasicType basicType = linetype;
 
       static GeometryType type ()
       {
-        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+        return GeometryType( basicType, dimension );
       }
     };
 
-    template< class BaseTopology, GeometryType :: BasicType defaultType >
-    class DuneGeometryType< Prism< BaseTopology >, defaultType >
+    template< class BaseTopology, GeometryType::BasicType linetype >
+    class DuneGeometryType< Prism< BaseTopology >, linetype >
     {
-      typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
+      typedef DuneGeometryType< BaseTopology, linetype > DuneBaseGeometryType;
 
-      dune_static_assert( ((int)defaultType == (int)GeometryType :: simplex)
-                          || ((int)defaultType == (int)GeometryType :: cube),
-                          "defaultType may only be a simplex or a cube." );
+      dune_static_assert( (linetype == GeometryType::simplex)
+                          || (linetype == GeometryType::cube),
+                          "Parameter linetype may only be a simplex or a cube." );
 
-      dune_static_assert( ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex)
-                          || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube),
+      dune_static_assert( (DuneBaseGeometryType::basicType == GeometryType::simplex)
+                          || (DuneBaseGeometryType::basicType == GeometryType::cube),
                           "Only prisms over simplices or cubes can be converted." );
 
     public:
-      enum { dimension = DuneBaseGeometryType :: dimension + 1 };
-      enum
-      {
-        basicType = (dimension == 1)
-                    ? defaultType
-                    : ((dimension == 2)
-                       || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube))
-                    ? GeometryType :: cube
-                    : GeometryType :: prism
-      };
+      static const unsigned int dimension = DuneBaseGeometryType::dimension + 1;
+      static const GeometryType::BasicType basicType
+        = ((dimension == 1)
+           ? linetype
+           : ((dimension == 2) || (DuneBaseGeometryType::basicType == GeometryType::cube))
+           ? GeometryType::cube
+           : GeometryType::prism);
 
       static GeometryType type ()
       {
-        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+        return GeometryType( basicType, dimension );
       }
     };
 
-    template< class BaseTopology, GeometryType :: BasicType defaultType >
-    class DuneGeometryType< Pyramid< BaseTopology >, defaultType >
+    template< class BaseTopology, GeometryType::BasicType linetype >
+    class DuneGeometryType< Pyramid< BaseTopology >, linetype >
     {
-      typedef DuneGeometryType< BaseTopology, defaultType > DuneBaseGeometryType;
+      typedef DuneGeometryType< BaseTopology, linetype > DuneBaseGeometryType;
 
-      dune_static_assert( ((int)defaultType == (int)GeometryType :: simplex)
-                          || ((int)defaultType == (int)GeometryType :: cube),
-                          "defaultType may only be a simplex or a cube." );
+      dune_static_assert( (linetype == GeometryType::simplex)
+                          || (linetype == GeometryType::cube),
+                          "Parameter linetype may only be a simplex or a cube." );
 
-      dune_static_assert( ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex)
-                          || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: cube),
+      dune_static_assert( (DuneBaseGeometryType::basicType == GeometryType::simplex)
+                          || (DuneBaseGeometryType::basicType == GeometryType::cube),
                           "Only pyramids over simplices or cubes can be converted." );
 
     public:
-      enum { dimension = DuneBaseGeometryType :: dimension + 1 };
-      enum
-      {
-        basicType = (dimension == 1)
-                    ? defaultType
-                    : ((dimension == 2)
-                       || ((int)DuneBaseGeometryType :: basicType == (int)GeometryType :: simplex))
-                    ? GeometryType :: simplex
-                    : GeometryType :: pyramid
-      };
+      static const unsigned int dimension = DuneBaseGeometryType::dimension + 1;
+      static const GeometryType::BasicType basicType
+        = ((dimension == 1)
+           ? linetype
+           : ((dimension == 2) || (DuneBaseGeometryType::basicType == GeometryType::simplex))
+           ? GeometryType::simplex
+           : GeometryType::pyramid);
 
       static GeometryType type ()
       {
-        return GeometryType( (GeometryType :: BasicType)basicType, dimension );
+        return GeometryType( basicType, dimension );
       }
     };
 
@@ -106,11 +107,24 @@ namespace Dune
     // DuneGeometryTypeProvider
     // ------------------------
 
-    template< unsigned int dim, GeometryType :: BasicType defaultType >
+    /** \class DuneGeometryTypeProvider
+     *  \brief dynamically convert a generic topology type into a GeometryType
+     *
+     *  \tparam  dim       dimension of the topologies to be converted
+     *  \tparam  linetype  basic geometry type to assign to a line
+     *                     (either simplex or cube)
+     *
+     *  \note This class will only be available up to 3D. After that, not all
+     *        geometries are simplices, pyramids, prisms or cubes.
+     */
+    template< unsigned int dim, GeometryType::BasicType linetype >
     struct DuneGeometryTypeProvider
     {
-      enum { dimension = dim };
-      enum { numTopologies = (1 << dimension) };
+      /** \brief dimension of the topologies to be converted */
+      static const unsigned int dimension = dim;
+
+      /** \brief number of possible topologies */
+      static const unsigned int numTopologies = (1 << dimension);
 
     private:
       template< int i >
@@ -120,7 +134,7 @@ namespace Dune
 
       DuneGeometryTypeProvider ()
       {
-        ForLoop< Builder, 0, (1 << dim)-1 > :: apply( types_ );
+        ForLoop< Builder, 0, numTopologies-1 >::apply( types_ );
       }
 
       static const DuneGeometryTypeProvider &instance ()
@@ -130,6 +144,12 @@ namespace Dune
       }
 
     public:
+      /** \brief obtain a Geometry type from a topology id
+       *
+       *  \param[in]  topologyId  id of the topology to be converted
+       *
+       *  \returns GeometryType associated with the given topology id
+       */
       static const GeometryType &type ( unsigned int topologyId )
       {
         assert( topologyId < numTopologies );
@@ -138,26 +158,24 @@ namespace Dune
     };
 
 
-    template< unsigned int dim, GeometryType :: BasicType defaultType >
+    template< unsigned int dim, GeometryType::BasicType linetype >
     template< int i >
-    struct DuneGeometryTypeProvider< dim, defaultType > :: Builder
+    struct DuneGeometryTypeProvider< dim, linetype >::Builder
     {
-      typedef typename GenericGeometry :: Topology< i, dimension > :: type Topology;
-      typedef GenericGeometry :: DuneGeometryType< Topology, defaultType >
-      DuneGeometryType;
+      typedef typename GenericGeometry::Topology< i, dimension >::type Topology;
+      typedef GenericGeometry::DuneGeometryType< Topology, linetype > DuneGeometryType;
 
       static void apply ( GeometryType (&types)[ numTopologies ] )
       {
-        types[ i ] = DuneGeometryType :: type();
+        types[ i ] = DuneGeometryType::type();
       }
     };
 
 
 
-
-
     // MapNumbering
     // ------------
+
     template< class Topology >
     struct MapNumbering;
 
