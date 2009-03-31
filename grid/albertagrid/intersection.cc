@@ -330,7 +330,7 @@ namespace Dune
 
     typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
     const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-    return Numbering::template dune2generic< dimension >( tid, number );
+    return Numbering::template dune2generic< 1 >( tid, number );
   }
 
   template< class GridImp >
@@ -343,7 +343,7 @@ namespace Dune
 
     typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
     const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-    return Numbering::template dune2generic< dimension >( tid, number );
+    return Numbering::template dune2generic< 1 >( tid, number );
   }
 
 

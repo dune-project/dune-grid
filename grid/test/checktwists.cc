@@ -49,15 +49,18 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const int tIn = mapTwist( intersection.twistInSelf() );
   const int tOut = mapTwist( intersection.twistInNeighbor() );
 
-  const int nIn = intersection.numberInInside();
-  const int nOut = intersection.numberInOutside();
-
   const EntityPointer ptrIn = intersection.inside();
   const EntityPointer ptrOut = intersection.outside();
   const Entity &entityIn = *ptrIn;
   const Entity &entityOut = *ptrOut;
   const Geometry &geoIn = entityIn.geometry();
   const Geometry &geoOut = entityOut.geometry();
+
+  typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+  const unsigned int tidIn = GenericGeometry::topologyId( entityIn.type() );
+  const int nIn = Numbering::template generic2dune< 1 >( tidIn, intersection.numberInInside() );
+  const unsigned int tidOut = GenericGeometry::topologyId( entityOut.type() );
+  const int nOut = Numbering::template generic2dune< 1 >( tidOut, intersection.numberInOutside() );
 
   const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
   const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );

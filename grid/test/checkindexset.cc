@@ -151,7 +151,7 @@ namespace Dune
             if( ! compareVec( vxcheck, vx ) )
             {
               std::cerr << "Error map global vertex [" << global[j] << "] vx " << vxcheck << " is not " << vx << "\n";
-              assert( compareVec( vxcheck, vx ) );
+              //assert( compareVec( vxcheck, vx ) );
             }
           }
           sout << "vx[" << global[j] << "] = "  << vx << "\n";

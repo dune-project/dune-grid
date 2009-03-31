@@ -274,8 +274,8 @@ void checkIntersectionIterator(const GridViewType& view,
       const unsigned int tidIn = GenericGeometry::topologyId( eIt->type() );
       const unsigned int tidOut = GenericGeometry::topologyId( outside->type() );
 
-      const int numberInSelf     = Numbering::template generic2dune< dim >( tidIn, numberInInside );
-      const int numberInNeighbor = Numbering::template generic2dune< dim >( tidOut, numberInOutside );
+      const int numberInSelf     = Numbering::template generic2dune< 1 >( tidIn, numberInInside );
+      const int numberInNeighbor = Numbering::template generic2dune< 1 >( tidOut, numberInOutside );
 
       const unsigned int iIdx = indexSet.template subIndex< 1 >( *eIt, numberInSelf );
       const unsigned int oIdx = indexSet.template subIndex< 1 >( *outside, numberInNeighbor );

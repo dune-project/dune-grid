@@ -312,7 +312,7 @@ namespace Dune
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-      return Numbering::template generic2dune< dimension >( tid, number );
+      return Numbering::template generic2dune< 1 >( tid, number );
     }
 
     /** \brief Local number of codim 1 entity in outside() entity where
@@ -334,8 +334,8 @@ namespace Dune
       const int number = numberInOutside();
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-      return Numbering::template generic2dune< dimension >( tid, number );
+      const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+      return Numbering::template generic2dune< 1 >( tid, number );
     }
 
     /*! @brief Return an outer normal (length not necessarily 1)

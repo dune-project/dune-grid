@@ -136,7 +136,7 @@ namespace Dune {
       const int number = UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
       typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-      return Numbering::template dune2generic< dim >( tid, number );
+      return Numbering::template dune2generic< 1 >( tid, number );
     }
 
     //! local number of codim 1 entity in neighbor where intersection is contained
@@ -362,7 +362,11 @@ namespace Dune {
     //! local number of codim 1 entity in self where intersection is contained in
     int numberInInside () const
     {
-      return UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+      const int number = UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
+
+      typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
+      return Numbering::template dune2generic< 1 >( tid, number );
     }
 
     //! local number of codim 1 entity in neighbor where intersection is contained

@@ -196,9 +196,9 @@ int Dune::UGGridLevelIntersectionIterator<GridImp>::numberInOutside () const
   // now we have to renumber the side i
   const int number = UGGridRenumberer<dim>::facesUGtoDUNE(i, nSides);
 
-  typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-  const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-  return Numbering::template dune2generic< dimension >( tid, number );
+  typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+  const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+  return Numbering::template dune2generic< 1 >( tid, number );
 }
 
 
@@ -492,7 +492,11 @@ numberInOutside () const
   assert(leafSubFaces_[subNeighborCount_].second < nSides);
 
   // Renumber to DUNE numbering
-  return UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, nSides);
+  const int number = UGGridRenumberer<dim>::facesUGtoDUNE(leafSubFaces_[subNeighborCount_].second, nSides);
+
+  typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+  const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
+  return Numbering::template dune2generic< 1 >( tid, number );
 }
 
 template< class GridImp>
