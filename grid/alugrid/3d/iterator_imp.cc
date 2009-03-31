@@ -260,8 +260,18 @@ namespace Dune {
     return neighbor();
   }
 
-  template<class GridImp>
-  inline int ALU3dGridIntersectionIterator< GridImp >::numberInInside () const
+
+  template<>
+  inline int
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::numberInInside () const
+  {
+    assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
+    return 3 - index_;
+  }
+
+  template<>
+  inline int
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::numberInInside () const
   {
     assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
     return index_;
@@ -276,11 +286,21 @@ namespace Dune {
     return intersectionSelfLocal_;
   }
 
-  template<class GridImp>
-  inline int ALU3dGridIntersectionIterator< GridImp >::numberInOutside () const
+
+  template<>
+  inline int
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::numberInOutside () const
   {
-    return ElementTopo::alu2duneFace(connector_.outerALUFaceIndex());
+    return 3 - ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
   }
+
+  template<>
+  inline int
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::numberInOutside () const
+  {
+    return ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
+  }
+
 
   template<>
   inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInSelf () const

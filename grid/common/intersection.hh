@@ -303,16 +303,16 @@ namespace Dune
      */
     int numberInInside () const
     {
-      const int number = this->real.numberInInside();
-
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-      return Numbering::template dune2generic< dimension >( tid, number );
+      return this->real.numberInInside();
     }
 
     int numberInSelf () const DUNE_DEPRECATED
     {
-      return this->real.numberInInside();
+      const int number = numberInInside();
+
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
+      return Numbering::template generic2dune< dimension >( tid, number );
     }
 
     /** \brief Local number of codim 1 entity in outside() entity where
@@ -326,16 +326,16 @@ namespace Dune
      */
     int numberInOutside () const
     {
-      const int number = this->real.numberInOutside();
-
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
-      return Numbering::template dune2generic< dimension >( tid, number );
+      return this->real.numberInOutside();
     }
 
     int numberInNeighbor () const
     {
-      return this->real.numberInOutside();
+      const int number = numberInOutside();
+
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
+      return Numbering::template generic2dune< dimension >( tid, number );
     }
 
     /*! @brief Return an outer normal (length not necessarily 1)

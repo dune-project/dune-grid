@@ -259,7 +259,7 @@ int main (int argc , char **argv) try
     locallyRefinedGrid.setRefinementType(Dune::UGGrid<2>::COPY);
 
     typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
-    typedef Dune::UGGrid<2>::Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef Dune::UGGrid<2>::HierarchicIterator HierarchicIterator;
     typedef Dune::UGGrid<2>::Traits::GlobalIdSet GlobalIdSet;
     typedef Dune::UGGrid<2>::Traits::LocalIdSet LocalIdSet;
 

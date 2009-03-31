@@ -231,14 +231,16 @@ namespace Dune {
 
   //! local number of codim 1 entity in self where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp> :: numberInInside () const {
-    return this->current.index_;
+  inline int ALU2dGridIntersectionBase<GridImp>::numberInInside () const
+  {
+    return 2 - this->current.index_;
   }
 
   //! local number of codim 1 entity in neighbor where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp> :: numberInOutside () const {
-    return this->current.opposite_;
+  inline int ALU2dGridIntersectionBase<GridImp>::numberInOutside () const
+  {
+    return 2 - this->current.opposite_;
   }
 
   template< class GridImp >
