@@ -583,18 +583,25 @@ namespace Dune
   AlbertaGrid < dim, dimworld > :: levelIndexSet (int level) const
   {
     // assert that given level is in range
-    assert( level >= 0 );
-    assert( level < (int) levelIndexVec_.size() );
+    assert( (level >= 0) && (level < (int)levelIndexVec_.size()) );
 
-    if(!levelIndexVec_[level]) levelIndexVec_[level] = new LevelIndexSetImp (*this,level);
-    return *(levelIndexVec_[level]);
+    if( levelIndexVec_[ level ] == 0 )
+    {
+      levelIndexVec_[ level ] = new typename GridFamily::LevelIndexSetImp ( dofNumbering_ );
+      levelIndexVec_[ level ]->update( lbegin< 0 >( level ), lend< 0 >( level ) );
+    }
+    return *(levelIndexVec_[ level ]);
   }
 
   template < int dim, int dimworld >
   inline const typename AlbertaGrid < dim, dimworld > :: Traits :: LeafIndexSet &
   AlbertaGrid < dim, dimworld > :: leafIndexSet () const
   {
-    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp (*this);
+    if( leafIndexSet_ == 0 )
+    {
+      leafIndexSet_ = new typename GridFamily::LeafIndexSetImp( dofNumbering_ );
+      leafIndexSet_->update( leafbegin< 0 >(), leafend< 0 >() );
+    }
     return *leafIndexSet_;
   }
 
@@ -617,12 +624,14 @@ namespace Dune
     // first bool says we have simplex, second not cube, third, worryabout
     sizeCache_ = new SizeCacheType (*this,true,false,true);
 
-    // if levelIndexSet exists, then update now
-    for(unsigned int i=0; i<levelIndexVec_.size(); ++i)
-      if(levelIndexVec_[i]) (*levelIndexVec_[i]).calcNewIndex();
-
-    // create new Leaf Index
-    if( leafIndexSet_ ) leafIndexSet_->calcNewIndex();
+    // update index sets (if they exist)
+    if( leafIndexSet_ != 0 )
+      leafIndexSet_->update( leafbegin< 0 >(), leafend< 0 >() );
+    for( unsigned int level = 0; level < levelIndexVec_.size(); ++level )
+    {
+      if( levelIndexVec_[ level ] )
+        levelIndexVec_[ level ]->update( lbegin< 0 >( level ), lend< 0 >( level ) );
+    }
   }
 
 

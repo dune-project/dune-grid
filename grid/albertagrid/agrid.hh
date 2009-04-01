@@ -84,8 +84,10 @@ namespace Dune
   {
     typedef AlbertaGrid<dim,dimworld> GridImp;
 
-    typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetImp;
-    typedef DefaultLeafIndexSet< AlbertaGrid<dim,dimworld> > LeafIndexSetImp;
+    typedef AlbertaGridIndexSet< dim, dimworld > LevelIndexSetImp;
+    typedef AlbertaGridIndexSet< dim, dimworld > LeafIndexSetImp;
+    //typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetImp;
+    //typedef DefaultLeafIndexSet< AlbertaGrid<dim,dimworld> > LeafIndexSetImp;
 
     typedef AlbertaGridIdSet< dim, dimworld > IdSetImp;
     typedef unsigned int IdType;
@@ -238,10 +240,6 @@ namespace Dune
   private:
     //! type of LeafIterator
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
-
-    //! impl types of iterators
-    typedef typename GridFamily:: LevelIndexSetImp LevelIndexSetImp;
-    typedef typename GridFamily:: LeafIndexSetImp LeafIndexSetImp;
 
     //! type of leaf index set
     typedef typename Traits :: LeafIndexSet LeafIndexSet;
@@ -604,11 +602,11 @@ namespace Dune
 
     // the level index set, is generated from the HierarchicIndexSet
     // is generated, when accessed
-    mutable std::vector< LevelIndexSetImp * > levelIndexVec_;
+    mutable std::vector< typename GridFamily::LevelIndexSetImp * > levelIndexVec_;
 
     // the leaf index set, is generated from the HierarchicIndexSet
     // is generated, when accessed
-    mutable LeafIndexSetImp* leafIndexSet_;
+    mutable typename GridFamily::LeafIndexSetImp* leafIndexSet_;
 
     typedef SingleTypeSizeCache< This > SizeCacheType;
     SizeCacheType * sizeCache_;
