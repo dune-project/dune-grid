@@ -57,8 +57,8 @@ extern "C"
 #define _ABS_NOT_DEFINED_
 #endif
 
-#ifndef DIM
-#error "DIM or DIM_OF_WORLD not defined!"
+#ifndef DIM_OF_WORLD
+#error "DIM_OF_WORLD not defined!"
 #endif
 
 #include <alberta.h>
@@ -69,25 +69,6 @@ extern "C"
 #endif
 
 // for version 1.2 thing are different
-#if DUNE_ALBERTA_VERSION < 0x200
-
-// face is not defined but should be the value of edge
-//#ifndef FACE
-//#define FACE EDGE
-//#endif
-
-static inline void meshTraverse(MESH *mesh,
-                                int level, FLAGS fill_flag,
-                                void (*el_fct)(const EL_INFO *))
-{
-  mesh_traverse(mesh, level, fill_flag, el_fct);
-}
-
-#define GET_EL_FROM_LIST(rc_list_el) (rc_list_el).el
-
-//////////////////////////////////////////////////
-#else // version 2.0
-//////////////////////////////////////////////////
 
 static inline void wrapped_el_fct(const EL_INFO* elinfo, void * data)
 {
@@ -102,9 +83,6 @@ static inline void meshTraverse(MESH *mesh,
 }
 
 #define GET_EL_FROM_LIST(rc_list_el) (rc_list_el).el_info.el
-
-#endif // end Version 2.0
-//////////////////////////////////////////////////////////////////////
 
 #ifndef _ALBERTA_H_
 #error "Couldn't find alberta.h for include! "

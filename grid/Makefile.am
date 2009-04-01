@@ -14,13 +14,19 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
+if ALBERTA
+  ALBERTALIB = albertagrid/libalbertagrid_1.la \
+               albertagrid/libalbertagrid_2.la \
+               albertagrid/libalbertagrid_3.la
+endif
+
 # the ALUGrid lib contains items that are needed
 # in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(ALBERTALIB) \
   $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB) $(DGFPARSERLIB)
 
 # These libraries do not need other libraries besides lcommon

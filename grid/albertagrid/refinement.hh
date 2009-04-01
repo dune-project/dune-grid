@@ -90,43 +90,14 @@ namespace Dune
     };
 
 
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline Element *Patch< dim >::operator[] ( int i ) const
-    {
-      assert( (i >= 0) && (i < count()) );
-      return list_[ i ].el;
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline Element *Patch< dim >::operator[] ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
-#if (DUNE_ALBERTA_VERSION < 0x200)
-    template< int dim >
-    template< class LevelProvider >
-    inline typename Patch< dim >::ElementInfo
-    Patch< dim >::elementInfo ( int i, const LevelProvider &levelProvider ) const
-    {
-      const MeshPointer< dim > &mesh = levelProvider.mesh();
-      const Element *element = (*this)[ i ];
-      const int level = levelProvider( element );
-#if (DIM == 3)
-      return ElementInfo::createFake( mesh, element, level, list_[ i ].el_type );
-#else
-      return ElementInfo::createFake( mesh, element, level );
-#endif
-    }
-#endif // #if (DUNE_ALBERTA_VERSION < 0x200)
-
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     template< class LevelProvider >
     inline typename Patch< dim >::ElementInfo
@@ -153,33 +124,16 @@ namespace Dune
       else
         return ElementInfo::createFake( list_[ 0 ].el_info );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline int Patch< dim >::elementType ( int i ) const
-    {
-      assert( (i >= 0) && (i < count()) );
-#if DIM == 3
-      return list_[ i ].el_type;
-#else
-      return 0;
-#endif
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline int Patch< dim >::elementType ( int i ) const
     {
       assert( (i >= 0) && (i < count()) );
       return list_[ i ].el_info.el_type;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template< int dim >
     inline bool Patch< dim >::hasNeighbor ( int i, int neighbor ) const
     {
@@ -192,7 +146,6 @@ namespace Dune
       assert( hasNeighbor( i, neighbor ) );
       return (list_[ i ].neigh[ neighbor ]->no);
     }
-#endif // #if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
 
 
 

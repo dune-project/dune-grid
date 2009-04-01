@@ -102,11 +102,7 @@ namespace Dune
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     private:
-#if DUNE_ALBERTA_VERSION >= 0x200
       static const int nNodeTypes = N_NODE_TYPES;
-#else
-      static const int nNodeTypes = DIM+1;
-#endif
 
       template< int codim >
       struct CreateDofSpace;
@@ -254,17 +250,6 @@ namespace Dune
     }
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline const DofSpace *
-    HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
-                                                   const std::string &name,
-                                                   const int (&ndof)[ nNodeTypes ] )
-    {
-      return ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
 
 #if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
@@ -284,17 +269,6 @@ namespace Dune
       ALBERTA free_fe_space( const_cast< DofSpace * >( dofSpace ) );
     }
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void
-    HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
-    {
-      if( dofSpace->name != NULL )
-        free( (char *)(dofSpace->name) );
-      memFree< const DofSpace >( dofSpace, 1 );
-    }
-#endif
 
 
 

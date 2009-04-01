@@ -736,10 +736,8 @@ namespace Dune
 #undef obstack_chunk_free
 #endif
 #include <dune/grid/albertagrid/undefine-2.1.hh>
-#elif DUNE_ALBERTA_VERSION == 0x200
-#include <dune/grid/albertagrid/undefine-2.0.hh>
 #else
-#include <dune/grid/albertagrid/undefine-1.2.hh>
+#include <dune/grid/albertagrid/undefine-2.0.hh>
 #endif
 
 #define _ALBERTA_H_

@@ -10,7 +10,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
   AC_ARG_WITH(alberta,
     AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
-    version 1.2 and higher) is installed]))
+    version 2.0 or higher) is installed]))
 
   # do not use alberta debug lib 
   with_alberta_debug=0
@@ -37,19 +37,13 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     ALBERTA_LIB_PATH="$ALBERTAROOT/lib"
     # take both include paths 
     ALBERTA_INCLUDE_PATH="$ALBERTAROOT/include/alberta"
-    # if path of version 2.0 not exists take old version 
     ALBERTA_VERSION="2.0"
-    if ! test -d $ALBERTA_INCLUDE_PATH ; then 
-      # ALBERTA_INCLUDE_PATH="$ALBERTAROOT/include -DALBERTA_VERSION_12"
-      ALBERTA_INCLUDE_PATH="$ALBERTAROOT/include"
-      ALBERTA_VERSION="1.2"
-    fi
 
     # set variables so that tests can use them
     REM_CPPFLAGS=$CPPFLAGS
 
     LDFLAGS="$LDFLAGS -L$ALBERTA_LIB_PATH"
-    ALBERTADIM="-DDIM=$with_alberta_dim -DDIM_OF_WORLD=$with_alberta_dim"
+    ALBERTADIM="-DDIM_OF_WORLD=$with_alberta_dim"
     CPPFLAGS="$CPPFLAGS $ALBERTADIM -DEL_INDEX=0 -I$ALBERTA_INCLUDE_PATH"
 
     # check for header
@@ -59,9 +53,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_PATH]))
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
-      if test "$ALBERTA_VERSION" = "2.0" ; then
-        AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="2.1"],[],[#include <alberta.h>])
-      fi
+      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="2.1"],[],[#include <alberta.h>])
     fi
 
     CPPFLAGS="$REM_CPPFLAGS -I$ALBERTA_INCLUDE_PATH"
@@ -84,20 +76,12 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # check for ALBERTA grid library...
     if test "x$HAVE_ALBERTA" = "x1" ; then
       # construct libname
-      # the zero is the sign of the no-debug-lib
       # define varaible lib name depending on problem and world dim, to change
       # afterwards easily 
-      if test "$ALBERTA_VERSION" != "1.2" ; then
-        variablealbertalibname="alberta_$``(``ALBERTA_DIM``)``d"
-        alberta_1d_libname="alberta_1d"
-        alberta_2d_libname="alberta_2d"
-        alberta_3d_libname="alberta_3d"
-      else
-        variablealbertalibname="ALBERTA$``(``ALBERTA_DIM``)``$``(``ALBERTA_DIM``)``_0"
-        alberta_1d_libname="ALBERTA11_0"
-        alberta_2d_libname="ALBERTA22_0"
-        alberta_3d_libname="ALBERTA33_0"
-      fi
+      variablealbertalibname="alberta_$``(``ALBERTA_DIM``)``d"
+      alberta_1d_libname="alberta_1d"
+      alberta_2d_libname="alberta_2d"
+      alberta_3d_libname="alberta_3d"
 
       # we do not check libraries for ALBERTA 2.1 (linking would require libtool)
       if test "$ALBERTA_VERSION" == "2.1" ; then
@@ -133,9 +117,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       [This is only true if alberta-library was found by configure 
        _and_ if the application uses the ALBERTA_CPPFLAGS])
 
-    if test "$ALBERTA_VERSION" = "1.2" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x102], [Alberta version found by configure])
-    elif test "$ALBERTA_VERSION" = "2.0" ; then
+    if test "$ALBERTA_VERSION" = "2.0" ; then
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure])
     elif test "$ALBERTA_VERSION" = "2.1" ; then
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x201], [Alberta version found by configure])
@@ -173,29 +155,26 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   DUNE_ADD_SUMMARY_ENTRY([ALBERTA],[$with_alberta])
 ])
 
-# asks for problem-dimension and world-dimension to pass on to Alberta
+# asks for alberta-dim to pass on to Alberta
 AC_DEFUN([DUNE_ALBERTA_DIMENSION],[
   AC_REQUIRE([DUNE_GRID_DIMENSION])
 
-AC_ARG_WITH(alberta_dim,
-            AC_HELP_STRING([--with-alberta-dim=2|3],
-          [dimension of ALBERTA grid (default=grid-dim if delivered otherwise 2)]),,with_alberta_dim=2)
+  AC_ARG_WITH(alberta_dim,
+              AC_HELP_STRING([--with-alberta-dim=1|2|3],
+                [dimension of world enclosing the ALBERTA grid (default=world-dim if delivered, otherwise 2)]),,
+              with_alberta_dim=0)
 
-# default dimension of the world coordinates is 2
-AC_ARG_WITH(alberta_world_dim,
-            AC_HELP_STRING([--with-alberta-world-dim=2|3],
-          [dimension of world enclosing the ALBERTA grid (default=alberta-dim)]),,
-            with_alberta_world_dim=$with_alberta_dim)
+  if test x$with_alberta_dim != x0 ; then
+    variablealbertadim=$with_alberta_dim
+  else
+    with_alberta_dim=2
+    if test x$with_world_dim != x0 || test x$with_grid_dim != x0 ; then
+      variablealbertadim='$(WORLDDIM)'
+    else
+      variablealbertadim=2
+    fi
+  fi
 
-if test x$with_grid_dim != x0 ; then 
-  variablealbertdim="$``(``GRIDDIM``)``"
-  AC_SUBST(ALBERTA_DIM, $variablealbertdim ) 
-else 
-  variablealbertdim=$with_alberta_dim
-  AC_SUBST(ALBERTA_DIM, $variablealbertdim ) 
-fi 
-
-AC_DEFINE_UNQUOTED(ALBERTA_DIM, $with_alberta_dim,
-            [Dimension of ALBERTA grid])
-
+  AC_SUBST(ALBERTA_DIM, $variablealbertadim ) 
+  #AC_DEFINE_UNQUOTED(ALBERTA_DIM, $with_alberta_dim, [World dimension of ALBERTA grid])
 ])

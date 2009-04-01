@@ -53,15 +53,6 @@ namespace Dune
     dgf::GridParameterBlock parameter( file );
     std::string gridName = parameter.name( "AlbertaGrid" );
 
-    if( !GridFactory::supportsBoundaryIds )
-    {
-      std::string albertaFileName = filename + ".albertagrid";
-      std::ofstream out( albertaFileName.c_str() );
-      macroGrid.writeAlberta( out );
-      out.close();
-      return new Grid( albertaFileName, gridName );
-    }
-
     GridFactory factory;
     for( int n = 0; n < macroGrid.nofvtx; ++n )
     {

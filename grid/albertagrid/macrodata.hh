@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_MACRODATA_HH
 
 #include <dune/common/fvector.hh>
+#include <dune/common/fmatrix.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
@@ -177,13 +178,8 @@ namespace Dune
           y[ i ] = x[ i ];
       }
 
-#if DUNE_ALBERTA_VERSION >= 0x200
       template< class Type >
       void rotate ( Type *array, int i, int shift );
-#else
-      template< class Type >
-      void rotate ( Type (*array)[ numVertices ], int i, int shift );
-#endif
 
       void resizeElements ( const int newSize );
 
@@ -197,7 +193,6 @@ namespace Dune
     };
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline typename MacroData< dim >::ElementId &
     MacroData< dim >::element ( int i ) const
@@ -206,17 +201,6 @@ namespace Dune
       const int offset = i * numVertices;
       return *reinterpret_cast< ElementId * >( data_->mel_vertices + offset );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline typename MacroData< dim >::ElementId &
-    MacroData< dim >::element ( int i ) const
-    {
-      assert( (i >= 0) && (i < data_->n_macro_elements) );
-      return data_->mel_vertices[ i ];
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
     template< int dim >
@@ -227,7 +211,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline int &MacroData< dim >::neighbor ( int element, int i ) const
     {
@@ -235,20 +218,8 @@ namespace Dune
       assert( (i >= 0) && (i < numVertices) );
       return data_->neigh[ element*numVertices + i ];
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline int &MacroData< dim >::neighbor ( int element, int i ) const
-    {
-      assert( (element >= 0) && (element < data_->n_macro_elements) );
-      assert( (i >= 0) && (i < numVertices) );
-      return data_->neigh[ element ][ i ];
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline BoundaryId &MacroData< dim >::boundaryId ( int element, int i ) const
     {
@@ -256,17 +227,6 @@ namespace Dune
       assert( (i >= 0) && (i < numVertices) );
       return data_->boundary[ element*numVertices + i ];
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline BoundaryId &MacroData< dim >::boundaryId ( int element, int i ) const
-    {
-      assert( (element >= 0) && (element < data_->n_macro_elements) );
-      assert( (i >= 0) && (i < numVertices) );
-      return data_->boundary[ element ][ i ];
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 #if DUNE_ALBERTA_VERSION >= 0x201
@@ -293,22 +253,7 @@ namespace Dune
     }
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MacroData< dim >::create ()
-    {
-      dune_static_assert( dimension == dimGrid,
-                          "Wrong grid dimension used for ALBERTA 1.2." );
-      release();
-      data_ = ALBERTA alloc_macro_data( initialSize, initialSize, 0 );
-      data_->boundary = memAlloc< BoundaryId[ numVertices ] >( initialSize );
-      vertexCount_ = elementCount_ = 0;
-      elementCount_ = 0;
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
-
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MacroData< dim >::finalize ()
     {
@@ -338,27 +283,6 @@ namespace Dune
       }
       assert( (vertexCount_ < 0) && (elementCount_ < 0) );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MacroData< dim >::finalize ()
-    {
-      if( (vertexCount_ >= 0) && (elementCount_ >= 0) )
-      {
-        resizeVertices( vertexCount_ );
-        resizeElements( elementCount_ );
-
-        std::cerr << "Warning: GridFactory for ALBERTA 1.2 does not support "
-                  << "boundary ids, yet." << std::endl << std::endl;
-        memFree( data_->boundary, elementCount_ );
-        data_->boundary = NULL;
-
-        vertexCount_ = elementCount_ = -1;
-      }
-      assert( (vertexCount_ < 0) && (elementCount_ < 0) );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
     template< int dim >
@@ -468,7 +392,6 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MacroData< dim >::read ( const std::string &filename, bool binary )
     {
@@ -478,16 +401,6 @@ namespace Dune
       else
         data_ = ALBERTA read_macro( filename.c_str() );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MacroData< dim >::read ( const std::string &filename, bool binary )
-    {
-      release();
-      DUNE_THROW( NotImplemented, "In ALBERTA 1.2, macro data cannot be read." );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
     template< int dim >
@@ -525,7 +438,6 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     template< class Type >
     inline void MacroData< dim >::rotate ( Type *array, int i, int shift )
@@ -541,27 +453,8 @@ namespace Dune
       for( int j = 0; j < numVertices; ++j )
         array[ offset + j ] = old[ (j+shift) % numVertices ];
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    template< class Type >
-    inline void MacroData< dim >::rotate ( Type (*array)[ numVertices ], int i, int shift )
-    {
-      assert( (i >= 0) && (i < data_->n_macro_elements) );
-      if( array == NULL )
-        return;
-
-      Type old[ numVertices ];
-      for( int j = 0; j < numVertices; ++j )
-        old[ j ] = array[ i ][ j ];
-      for( int j = 0; j < numVertices; ++j )
-        array[ i ][ j ] = old[ (j+shift) % numVertices ];
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MacroData< dim >::resizeElements ( const int newSize )
     {
@@ -571,18 +464,6 @@ namespace Dune
       data_->boundary = memReAlloc( data_->boundary, oldSize*numVertices, newSize*numVertices );
       assert( data_->mel_vertices != NULL );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MacroData< dim >::resizeElements ( const int newSize )
-    {
-      const int oldSize = data_->n_macro_elements;
-      data_->n_macro_elements = newSize;
-      data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize, newSize );
-      assert( data_->mel_vertices != NULL );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
   }
 

@@ -37,6 +37,9 @@ namespace Dune
       class Instance;
       class Stack;
 
+      template< int >
+      struct Library;
+
       typedef Instance *InstancePtr;
 
     public:
@@ -48,11 +51,7 @@ namespace Dune
       typedef Alberta::MeshPointer< dimension > MeshPointer;
       typedef Alberta::FillFlags< dimension > FillFlags;
 
-#if DUNE_ALBERTA_VERSION >= 0x200
       static const int maxNeighbors = N_NEIGH_MAX;
-#else
-      static const int maxNeighbors = N_NEIGH;
-#endif
 
       typedef ElementInfo< dimension > LevelNeighborSet[ 1 << dimension ];
 
@@ -123,8 +122,8 @@ namespace Dune
       static bool isLeaf ( Element *element );
       static bool mightVanish ( Element *element, int depth );
 
-      int macroNeighbor ( int face, ElementInfo &neighbor ) const;
-      int leafNeighbor ( const int face, ElementInfo &neighbor ) const;
+      //int macroNeighbor ( int face, ElementInfo &neighbor ) const;
+      //int leafNeighbor ( const int face, ElementInfo &neighbor ) const;
 
       void addReference () const;
       void removeReference () const;
@@ -171,6 +170,25 @@ namespace Dune
       InstancePtr allocate ();
       void release ( InstancePtr &p );
       InstancePtr null ();
+    };
+
+
+
+    // ElementInfo::Library
+    // --------------------
+
+    template< int dim >
+    template< int >
+    struct ElementInfo< dim >::Library
+    {
+      typedef Alberta::ElementInfo< dim > ElementInfo;
+
+      static int
+      leafNeighbor ( const ElementInfo &element, const int face, ElementInfo &neighbor );
+
+    private:
+      static int
+      macroNeighbor ( const ElementInfo &element, const int face, ElementInfo &neighbor );
     };
 
 
@@ -348,13 +366,11 @@ namespace Dune
     }
 
 
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template<>
     inline int ElementInfo< 3 >::type () const
     {
       return instance_->elInfo.el_type;
     }
-#endif
 
 
     template< int dim >
@@ -378,7 +394,8 @@ namespace Dune
     {
       assert( (face >= 0) && (face < numFaces) );
       ElementInfo neighbor;
-      leafNeighbor( face, neighbor );
+      //leafNeighbor( face, neighbor );
+      Library< dimWorld >::leafNeighbor( *this, face, neighbor );
       return neighbor;
     }
 
@@ -471,39 +488,6 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
-#if DUNE_ALBERTA_VERSION < 0x200
-#if DIM == 1
-    template<>
-    inline int ElementInfo< 1 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_VERTICES) );
-      return elInfo().bound[ face ];
-    }
-#endif // #if DIM == 1
-
-#if DIM == 2
-    template<>
-    inline int ElementInfo< 2 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_EDGES) );
-      return elInfo().boundary[ face ]->bound;
-    }
-#endif // #if DIM == 2
-
-#if DIM == 3
-    template<>
-    inline int ElementInfo< 3 >::boundaryId ( int face ) const
-    {
-      assert( !!(*this) );
-      assert( (face >= 0) && (face < N_FACES) );
-      return elInfo().boundary[ face ]->bound;
-    }
-#endif // #if DIM == 3
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-
 #if DUNE_ALBERTA_VERSION >= 0x201
     template< int dim >
     inline AffineTransformation *
@@ -544,7 +528,7 @@ namespace Dune
 
     template< int dim >
     template< class Functor >
-    void ElementInfo< dim >::hierarchicTraverse ( Functor &functor ) const
+    inline void ElementInfo< dim >::hierarchicTraverse ( Functor &functor ) const
     {
       functor( *this );
       if( !isLeaf() )
@@ -557,7 +541,7 @@ namespace Dune
 
     template< int dim >
     template< class Functor >
-    void ElementInfo< dim >::leafTraverse ( Functor &functor ) const
+    inline void ElementInfo< dim >::leafTraverse ( Functor &functor ) const
     {
       if( !isLeaf() )
       {
@@ -614,9 +598,7 @@ namespace Dune
       instance->elInfo.parent = NULL;
       instance->elInfo.fill_flag = FillFlags::nothing;
       instance->elInfo.level = level;
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
       instance->elInfo.el_type = type;
-#endif
 
       return ElementInfo< dim >( instance );
     }
@@ -652,6 +634,7 @@ namespace Dune
     }
 
 
+#if 0
     template< int dim >
     inline int ElementInfo< dim >::macroNeighbor ( int face, ElementInfo &neighbor ) const
     {
@@ -821,6 +804,7 @@ namespace Dune
       }
       return faceInNeighbor;
     }
+#endif
 
 
     template< int dim >

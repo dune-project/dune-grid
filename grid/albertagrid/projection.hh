@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_NODEPROJECTION_HH
 
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/elementinfo.hh>
 
 namespace Dune
 {
@@ -11,34 +12,45 @@ namespace Dune
   namespace Alberta
   {
 
+    template< int dim >
+    struct NoProjection
+    {
+      static const int dimension = dim;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+      void operator() ( const ElementInfo &elementInfo, const LocalVector &local,
+                        GlobalVector &global ) const
+      {}
+    };
+
+
+
     // NodeProjection
     // --------------
 
-#if DUNE_ALBERTA_VERSION >= 0x200
-    template< int dim >
+    template< int dim, class Projection = NoProjection< dim > >
     class NodeProjection
       : protected ALBERTA NODE_PROJECTION
     {
-      typedef NodeProjection< dim > This;
+      typedef NodeProjection< dim, void > This;
 
     public:
       static const int dimension = dim;
 
-      typedef Dune::BoundarySegment< dimension, dimWorld > BoundarySegment;
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     private:
-      const BoundarySegment *boundarySegment_;
+      unsigned int boundaryIndex_;
+      Projection projection_;
 
     public:
-      NodeProjection ( const BoundarySegment *const boundarySegment )
-        : boundarySegment_( boundarySegment )
+      NodeProjection ( unsigned int boundaryIndex, const Projection &projection )
+        : boundaryIndex_( boundaryIndex ),
+          projection_( projection )
       {
         func = apply;
       }
-
-      void operator() ( const ALBERTA EL_INFO *info, const LocalVector &local
-                        const GlobalVector &global ) const
-      {}
 
     private:
       // note: global is the return type (it is an array type and hence no
@@ -46,13 +58,15 @@ namespace Dune
       static void apply ( GlobalVector global, const EL_INFO *info,
                           const LocalVector local )
       {
+        const ElementInfo elementInfo = ElementInfo::createFake( info );
+
         assert( info->fill_flag & FillFlags< dimension >::projection != 0 );
-        const This *projection = static_cast< const This * >( info->active_projection );
-        assert( projection != NULL );
-        (*projection)( global, info, local );
+        const This *nodeProjection = static_cast< const This * >( info->active_projection );
+
+        assert( nodeProjection != NULL );
+        nodeProjection->projection_( elementInfo, local, global );
       }
     };
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
   }
 

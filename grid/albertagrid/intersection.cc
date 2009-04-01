@@ -224,12 +224,8 @@ namespace Dune
     assert( !!elementInfo_ );
 
     // in this case the orientation is negative, multiply by -1
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     const ctype val = (elInfo.orientation > 0) ? 1.0 : -1.0;
-#else
-    const ctype val = 1.0;
-#endif
 
     // neighborCount_ is the local face number
     static const int faceVertices[ 4 ][ 3 ]

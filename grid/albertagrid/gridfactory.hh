@@ -68,7 +68,7 @@ namespace Dune
 
   public:
     //! are boundary ids supported by this factory?
-    static const bool supportsBoundaryIds = (DUNE_ALBERTA_VERSION >= 0x200);
+    static const bool supportsBoundaryIds = true;
     //! is the factory able to create periodic meshes?
     static const bool supportPeriodicity = MacroData::supportPeriodicity;
 

@@ -98,11 +98,6 @@ namespace Dune
       {
         if( mesh_ != NULL )
         {
-#if (DUNE_ALBERTA_VERSION < 0x200) && (DIM == 3)
-          // circumvent memory bug in ALBERTA 1.2
-          ALBERTA RC_LIST_EL *list = ALBERTA get_rc_list( mesh_ );
-          list = 0;
-#endif
           ALBERTA free_mesh( mesh_ );
           mesh_ = NULL;
         }
@@ -119,16 +114,6 @@ namespace Dune
       bool coarsen ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
 
       bool refine ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    private:
-      static void initDofAdmins ( Mesh *mesh )
-      {
-        mesh->preserve_coarse_dofs = 1;
-        HierarchyDofNumbering< dim > dofNumbering;
-        dofNumbering.create( MeshPointer< dim >( mesh ) );
-      }
-#endif
     };
 
 
@@ -140,7 +125,6 @@ namespace Dune
       return (codim == 0 ? mesh_->n_elements : mesh_->n_vertices);
     }
 
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM >= 2)
     template<>
     inline int MeshPointer< 2 >::size( int codim ) const
     {
@@ -152,9 +136,7 @@ namespace Dune
       else
         return mesh_->n_edges;
     }
-#endif // #if (DUNE_ALBERTA_VERSION >= 0x200) || (ALBERTA_DIM >= 2)
 
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template<>
     inline int MeshPointer< 3 >::size( int codim ) const
     {
@@ -168,10 +150,8 @@ namespace Dune
       else
         return mesh_->n_edges;
     }
-#endif // #if (DUNE_ALBERTA_VERSION >= 0x200) || (ALBERTA_DIM == 3)
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MeshPointer< dim >
     ::create ( const MacroData< dim > &macroData, const std::string &name )
@@ -192,24 +172,8 @@ namespace Dune
                                 LeafData::AlbertLeafCoarsen );
       }
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MeshPointer< dim >
-    ::create ( const MacroData< dim > &macroData, const std::string &name )
-    {
-      release();
-
-      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      mesh_ = ALBERTA get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
-      if( mesh_ != NULL )
-        ALBERTA macro_data2mesh( mesh_, macroData, BoundaryProvider::initBoundary );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MeshPointer< dim >
     ::create ( const std::string &filename, const std::string &name, bool binary )
@@ -219,41 +183,8 @@ namespace Dune
       create( macroData, name );
       macroData.release();
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MeshPointer< dim >
-    ::create ( const std::string &filename, const std::string &name, bool binary )
-    {
-      release();
-
-      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      mesh_ = ALBERTA get_mesh( name.c_str(), initDofAdmins, LeafData::initLeafData );
-      if( mesh_ != NULL )
-      {
-        if( binary )
-          ALBERTA read_macro_xdr( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
-        else
-          ALBERTA read_macro( mesh_, filename.c_str(), BoundaryProvider::initBoundary );
-      }
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
-    {
-      release();
-
-      typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-      mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, LeafData::initLeafData, BoundaryProvider::initBoundary );
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
     {
@@ -272,7 +203,6 @@ namespace Dune
                                 LeafData::AlbertLeafCoarsen );
       }
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 
     template< int dim >
@@ -356,78 +286,9 @@ namespace Dune
 
 
 
-    // MeshPointer::BoundaryProvider
-    // -----------------------------
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    class MeshPointer< dim >::BoundaryProvider
-    {
-      static const int interior = INTERIOR;
-
-#if DIM > 1
-      static const int numTypes = 256;
-      static const int firstType = -127;
-
-      Boundary boundaries[ numTypes ];
-#endif
-
-      BoundaryProvider ();
-
-      // prohibit copying and assignment
-      BoundaryProvider ( const BoundaryProvider & );
-      BoundaryProvider &operator= ( const BoundaryProvider & );
-
-    public:
-      const Boundary *operator[] ( int type ) const;
-
-      static const BoundaryProvider &instance ()
-      {
-        static BoundaryProvider provider;
-        return provider;
-      }
-
-      static const Boundary *initBoundary ( Mesh *mesh, int type )
-      {
-        return instance()[ type ];
-      }
-    };
-
-
-    template< int dim >
-    inline MeshPointer< dim >::BoundaryProvider::BoundaryProvider ()
-    {
-#if DIM > 1
-      for( int i = 0; i < numTypes; ++i )
-      {
-        boundaries[ i ].param_bound = NULL;
-        boundaries[ i ].bound = i+firstType;
-      }
-#endif
-    }
-
-
-    template< int dim >
-    inline const Boundary *
-    MeshPointer< dim >::BoundaryProvider::operator[] ( int type ) const
-    {
-      int index = type-firstType;
-      if( (type == interior) || (index < 0) || (index >= numTypes) )
-        DUNE_THROW( AlbertaError, "Invalid boundary type: " << type << "." );
-#if DIM > 1
-      return &(boundaries[ index ]);
-#else
-      return NULL;
-#endif
-    }
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
-
-
-
     // MeshPointer::MacroIteratorBase
     // ------------------------------
 
-#if DUNE_ALBERTA_VERSION >= 0x200
     template< int dim >
     class MeshPointer< dim >::MacroIteratorBase
     {
@@ -480,58 +341,6 @@ namespace Dune
         return mesh().mesh_->n_macro_el;
       }
     };
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    template< int dim >
-    class MeshPointer< dim >::MacroIteratorBase
-    {
-      friend class MacroIterator;
-
-    public:
-      typedef Alberta::MeshPointer< dim > MeshPointer;
-      typedef Alberta::ElementInfo< dim > ElementInfo;
-
-      typedef typename ElementInfo::FillFlags FillFlags;
-
-    private:
-      MeshPointer mesh_;
-      MacroElement *element_;
-
-      explicit MacroIteratorBase ( const MeshPointer &mesh, bool end = false )
-        : mesh_( mesh ),
-          element_( end ? NULL : mesh.mesh_->first_macro_el )
-      {}
-
-    public:
-      bool done () const
-      {
-        return (element_ == NULL);
-      }
-
-      bool equals ( const MacroIterator &other ) const
-      {
-        return (element_ == other.element_);
-      }
-
-      void increment ()
-      {
-        assert( !done() );
-        element_ = element_->next;
-      }
-
-      MacroElement &macroElement () const
-      {
-        assert( !done() );
-        return *element_;
-      }
-
-      const MeshPointer &mesh () const
-      {
-        return mesh_;
-      }
-    };
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
 
 

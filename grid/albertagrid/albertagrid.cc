@@ -33,14 +33,6 @@ namespace Dune
     dune_static_assert( (dimworld == Alberta::dimWorld),
                         "Template Parameter dimworld does not match "
                         "ALBERTA's DIM_OF_WORLD setting." );
-
-#if DUNE_ALBERTA_VERSION < 0x200
-    // ALBERTA 1.2 supports only one grid dimension
-    // If this check fails, reconfigure with --with-alberta-dim=dim
-    dune_static_assert( (dim == DIM),
-                        "Template Parameter dim does not match "
-                        "ALBERTA's DIM setting." );
-#endif
   }
 
 

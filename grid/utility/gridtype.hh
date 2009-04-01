@@ -92,15 +92,12 @@
   #if not HAVE_ALBERTA
     #error "ALBERTAGRID defined but no ALBERTA version found!"
   #endif
-  #if (GRIDDIM < 2) || (GRIDDIM > 3)
-    #error "ALBERTAGRID is only available for GRIDDIM=2 and GRIDDIM=3."
-  #endif
-  #if (WORLDDIM != GRIDDIM)
-    #error "ALBERTAGRID currently only supports WORLDDIM=GRIDDIM."
+  #if (GRIDDIM < 1) || (GRIDDIM > 3)
+    #error "ALBERTAGRID is only available for GRIDDIM=1, GRIDDIM=2 and GRIDDIM=3."
   #endif
 
   #include <dune/grid/albertagrid.hh>
-typedef Dune :: AlbertaGrid< dimgrid, dimworld > GridType;
+typedef Dune::AlbertaGrid< dimgrid > GridType;
   #define HAVE_GRIDTYPE 1
 #endif
 

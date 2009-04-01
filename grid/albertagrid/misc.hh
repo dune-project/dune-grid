@@ -41,9 +41,6 @@ namespace Dune
     using GenericGeometry::CodimTable;
 
     static const int dimWorld = DIM_OF_WORLD;
-#if DUNE_ALBERTA_VERSION < 0x200
-    static const int dimGrid = DIM;
-#endif // #if DUNE_ALBERTA_VERSION < 0x200
 
     typedef ALBERTA REAL Real;
     typedef ALBERTA REAL_B LocalVector; // in barycentric coordinates
@@ -73,9 +70,6 @@ namespace Dune
     typedef ALBERTA BNDRY_TYPE BoundaryId;
 #else
     typedef S_CHAR BoundaryId;
-#endif
-#if DUNE_ALBERTA_VERSION < 0x200
-    typedef ALBERTA BOUNDARY Boundary;
 #endif
 
     typedef ALBERTA FE_SPACE DofSpace;
@@ -225,7 +219,6 @@ namespace Dune
       static const int value = EDGE;
     };
 
-#if (DUNE_ALBERTA_VERSION >= 0x200) || (DIM == 3)
     template<>
     struct CodimType< 3, 1 >
     {
@@ -237,7 +230,6 @@ namespace Dune
     {
       static const int value = EDGE;
     };
-#endif
 
 
 

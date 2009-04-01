@@ -81,16 +81,6 @@ namespace AlbertHelp
       }
     }
 
-#if DUNE_ALBERTA_VERSION < 0x200
-    // we dont need Leaf Data
-    inline static void initLeafData(LEAF_DATA_INFO * linfo)
-    {
-      linfo->leaf_data_size = sizeof(Data);
-      linfo->refine_leaf_data  = &AlbertLeafRefine;
-      linfo->coarsen_leaf_data = &AlbertLeafCoarsen;
-    }
-#endif
-
     // function for mesh_traverse, is called on every element
     inline static void setLeafData(const EL_INFO * elf)
     {
