@@ -733,13 +733,13 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::numberInInside () const
+  inline int SIntersectionIterator<GridImp>::indexInInside () const
   {
     return count;
   }
 
   template<class GridImp>
-  inline int SIntersectionIterator<GridImp>::numberInOutside () const
+  inline int SIntersectionIterator<GridImp>::indexInOutside () const
   {
     return (count/2)*2 + (1-count%2);
   }

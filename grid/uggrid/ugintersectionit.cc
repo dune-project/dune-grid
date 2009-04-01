@@ -178,7 +178,7 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::geometryInOutside () const
 }
 
 template< class GridImp>
-int Dune::UGGridLevelIntersectionIterator<GridImp>::numberInOutside () const
+int Dune::UGGridLevelIntersectionIterator<GridImp>::indexInOutside () const
 {
   const typename UG_NS<dim>::Element *other;
 
@@ -481,8 +481,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInOutside () const
 }
 
 template< class GridImp>
-int Dune::UGGridLeafIntersectionIterator<GridImp>::
-numberInOutside () const
+int Dune::UGGridLeafIntersectionIterator<GridImp>::indexInOutside () const
 {
   if (leafSubFaces_[subNeighborCount_].first == NULL)
     DUNE_THROW(GridError,"There is no neighbor!");

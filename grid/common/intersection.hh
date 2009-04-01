@@ -292,46 +292,46 @@ namespace Dune
       return this->real.type();
     }
 
-    /** \brief Local number of codim 1 entity in the inside() entity where
+    /** \brief Local index of codim 1 entity in the inside() entity where
      *         intersection is contained in
      *
      *  \note This method returns the face number with respect to the generic
      *        reference element.
      *
-     *  \returns the number of the inside entity's face containing this
+     *  \returns the index of the inside entity's face containing this
      *           intersection (with respect to the generic reference element)
      */
-    int numberInInside () const
+    int indexInInside () const
     {
-      return this->real.numberInInside();
+      return this->real.indexInInside();
     }
 
     int numberInSelf () const DUNE_DEPRECATED
     {
-      const int number = numberInInside();
+      const int number = indexInInside();
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
       return Numbering::template generic2dune< 1 >( tid, number );
     }
 
-    /** \brief Local number of codim 1 entity in outside() entity where
+    /** \brief Local index of codim 1 entity in outside() entity where
      *         intersection is contained in
      *
      *  \note This method returns the face number with respect to the generic
      *        reference element.
      *
-     *  \returns the number of the outside entity's face containing this
+     *  \returns the index of the outside entity's face containing this
      *           intersection (with respect to the generic reference element)
      */
-    int numberInOutside () const
+    int indexInOutside () const
     {
-      return this->real.numberInOutside();
+      return this->real.indexInOutside();
     }
 
     int numberInNeighbor () const
     {
-      const int number = numberInOutside();
+      const int number = indexInOutside();
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( outside()->type() );

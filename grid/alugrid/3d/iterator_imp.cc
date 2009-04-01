@@ -263,7 +263,7 @@ namespace Dune {
 
   template<>
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::numberInInside () const
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::indexInInside () const
   {
     assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
     return 3 - index_;
@@ -271,7 +271,7 @@ namespace Dune {
 
   template<>
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::numberInInside () const
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::indexInInside () const
   {
     assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
     return index_;
@@ -289,14 +289,14 @@ namespace Dune {
 
   template<>
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::numberInOutside () const
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::indexInOutside () const
   {
     return 3 - ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
   }
 
   template<>
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::numberInOutside () const
+  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::indexInOutside () const
   {
     return ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
   }
@@ -307,10 +307,10 @@ namespace Dune {
   {
     const int aluTwist = connector_.innerTwist();
     const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( numberInInside(), 0), aluTwist);
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
 
     return
-      (ElementTopo::faceOrientation( numberInInside() ) * sign(aluTwist) < 0 ?
+      (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
   }
 
@@ -325,10 +325,10 @@ namespace Dune {
   {
     const int aluTwist = connector_.outerTwist();
     const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( numberInOutside(), 0), aluTwist);
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInOutside(), 0), aluTwist);
 
     return
-      (ElementTopo::faceOrientation( numberInOutside() ) * sign(aluTwist) < 0 ?
+      (ElementTopo::faceOrientation( indexInOutside() ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
   }
 

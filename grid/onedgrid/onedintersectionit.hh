@@ -173,7 +173,7 @@ namespace Dune {
     //! where iteration started.
     const LocalGeometry &geometryInInside () const
     {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInInside() == 0) ? 0 : 1 );
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (indexInInside() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
@@ -181,7 +181,7 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry &geometryInOutside () const
     {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInInside() == 0) ? 1 : 0 );
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (indexInInside() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
@@ -199,14 +199,14 @@ namespace Dune {
       return GeometryType( 0 );
     }
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const
     {
       return neighbor_;
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInOutside () const
+    //! local index of codim 1 entity in neighbor where intersection is contained
+    int indexInOutside () const
     {
       // If numberInSelf is 0 then numberInNeighbor is 1 and vice versa
       return 1-neighbor_;
@@ -452,7 +452,7 @@ namespace Dune {
     //! where iteration started.
     const LocalGeometry &geometryInInside () const
     {
-      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (numberInInside() == 0) ? 0 : 1 );
+      GridImp::getRealImplementation(intersectionSelfLocal_).setPosition( (indexInInside() == 0) ? 0 : 1 );
       return intersectionSelfLocal_;
     }
 
@@ -460,7 +460,7 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry &geometryInOutside () const
     {
-      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (numberInInside() == 0) ? 1 : 0 );
+      GridImp::getRealImplementation(intersectionNeighborLocal_).setPosition( (indexInInside() == 0) ? 1 : 0 );
       return intersectionNeighborLocal_;
     }
 
@@ -478,14 +478,14 @@ namespace Dune {
       return GeometryType( 0 );
     }
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const
     {
       return neighbor_ % 2;
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInOutside () const
+    //! local index of codim 1 entity in neighbor where intersection is contained
+    int indexInOutside () const
     {
       // If numberInSelf is 0 then numberInNeighbor is 1 and vice versa
       return 1-(neighbor_ % 2);

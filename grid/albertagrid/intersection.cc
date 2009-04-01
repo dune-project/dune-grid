@@ -173,13 +173,13 @@ namespace Dune
   {
 #if USE_GENERICGEOMETRY
     const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
-    return GridImp::getRealImplementation( inside()->geometry() ).normal( numberInInside(), localInInside );
+    return GridImp::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
 #else
     typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
     typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
     typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
     const Jacobian &jInvT = GridImp::getRealImplementation( inside()->geometry() ).jacobianInverseTransposed();
-    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integratioOuterNormal( numberInInside() );
+    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integratioOuterNormal( indexInInside() );
 
     NormalVector n;
     jInvT.mv( refNormal, n );
@@ -331,7 +331,7 @@ namespace Dune
 
 
   template< class GridImp >
-  inline int AlbertaGridIntersection< GridImp >::numberInInside () const
+  inline int AlbertaGridIntersection< GridImp >::indexInInside () const
   {
     const int oppVertex = neighborCount_;
     const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
@@ -339,7 +339,7 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline int AlbertaGridIntersection< GridImp >::numberInOutside () const
+  inline int AlbertaGridIntersection< GridImp >::indexInOutside () const
   {
     assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();

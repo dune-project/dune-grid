@@ -127,11 +127,11 @@ namespace Dune {
       return it().type();
     }
 
-    //! local number of codim 1 entity in self where intersection is contained
+    //! local index of codim 1 entity in self where intersection is contained
     //!  in
-    int numberInInside () const
+    int indexInInside () const
     {
-      return it().numberInInside();
+      return it().indexInInside();
     }
 
     //! intersection of codimension 1 of this neighbor with element where
@@ -142,11 +142,11 @@ namespace Dune {
       return it().geometryInOutside();
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is
+    //! local index of codim 1 entity in neighbor where intersection is
     //! contained
-    int numberInOutside () const
+    int indexInOutside () const
     {
-      return it().numberInOutside();
+      return it().indexInOutside();
     }
 
     //! twist of the face seen from the inner element

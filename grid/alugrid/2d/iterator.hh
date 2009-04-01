@@ -154,11 +154,11 @@ namespace Dune {
     //! return EntityPointer to the Entity on the outside of this intersection.
     EntityPointer outside() const;
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const;
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const;
 
-    //! local number of codim 1 entity in neighbor where intersection is contained in
-    int numberInOutside () const;
+    //! local index of codim 1 entity in neighbor where intersection is contained in
+    int indexInOutside () const;
 
     int twistInSelf () const;
     int twistInNeighbor () const;

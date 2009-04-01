@@ -1495,7 +1495,7 @@ namespace Dune {
     //! (attach your boundary condition as needed)
     int boundaryId() const
     {
-      if(boundary()) return numberInInside()+1;
+      if(boundary()) return indexInInside()+1;
       return 0;
     }
 
@@ -1552,14 +1552,14 @@ namespace Dune {
       return geometryInInside().type();
     }
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const
     {
       return _count;
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is contained in
-    int numberInOutside () const
+    //! local index of codim 1 entity in neighbor where intersection is contained in
+    int indexInOutside () const
     {
       return _count + 1-2*_face;
     }

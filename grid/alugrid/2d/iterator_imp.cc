@@ -231,14 +231,14 @@ namespace Dune {
 
   //! local number of codim 1 entity in self where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp>::numberInInside () const
+  inline int ALU2dGridIntersectionBase<GridImp>::indexInInside () const
   {
     return 2 - this->current.index_;
   }
 
   //! local number of codim 1 entity in neighbor where intersection is contained in
   template<class GridImp>
-  inline int ALU2dGridIntersectionBase<GridImp>::numberInOutside () const
+  inline int ALU2dGridIntersectionBase<GridImp>::indexInOutside () const
   {
     return 2 - this->current.opposite_;
   }
@@ -266,7 +266,7 @@ namespace Dune {
 
     if (this->current.isNotConform_ )
     {
-      this->current.neigh_->outernormal( numberInOutside(), ((normal_t) (&outerNormal_)[0]) );
+      this->current.neigh_->outernormal( indexInOutside(), ((normal_t) (&outerNormal_)[0]) );
       outerNormal_ *= -1.0;
       return outerNormal_;
     }
@@ -307,7 +307,7 @@ namespace Dune {
       else
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
-        builtLocalGeom( numberInInside() , 0 );
+        builtLocalGeom( indexInInside() , 0 );
       }
     }
 

@@ -58,9 +58,9 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
   const unsigned int tidIn = GenericGeometry::topologyId( entityIn.type() );
-  const int nIn = Numbering::template generic2dune< 1 >( tidIn, intersection.numberInInside() );
+  const int nIn = Numbering::template generic2dune< 1 >( tidIn, intersection.indexInInside() );
   const unsigned int tidOut = GenericGeometry::topologyId( entityOut.type() );
-  const int nOut = Numbering::template generic2dune< 1 >( tidOut, intersection.numberInOutside() );
+  const int nOut = Numbering::template generic2dune< 1 >( tidOut, intersection.indexInOutside() );
 
   const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
   const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );

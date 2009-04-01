@@ -130,8 +130,8 @@ namespace Dune {
     //! Here returned element is in LOCAL coordinates of neighbor
     const LocalGeometry &geometryInOutside () const;
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const
     {
       const int number = UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
       typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
@@ -139,8 +139,8 @@ namespace Dune {
       return Numbering::template dune2generic< 1 >( tid, number );
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInOutside () const;
+    //! local index of codim 1 entity in neighbor where intersection is contained
+    int indexInOutside () const;
 
     //! return outer normal
     const FieldVector<UGCtype, GridImp::dimensionworld>& outerNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const;
@@ -359,8 +359,8 @@ namespace Dune {
       return geometryInInside().type();
     }
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInInside () const
+    //! local index of codim 1 entity in self where intersection is contained in
+    int indexInInside () const
     {
       const int number = UGGridRenumberer<dim>::facesUGtoDUNE(neighborCount_, UG_NS<dimworld>::Sides_Of_Elem(center_));
 
@@ -369,8 +369,8 @@ namespace Dune {
       return Numbering::template dune2generic< 1 >( tid, number );
     }
 
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInOutside () const;
+    //! local index of codim 1 entity in neighbor where intersection is contained
+    int indexInOutside () const;
 
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary

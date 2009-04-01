@@ -755,7 +755,7 @@ void assertNeighbor (Grid &g)
       for(; it != endit; ++it)
       {
         // numbering
-        const int numberInSelf = it->numberInInside();
+        const int numberInSelf = it->indexInInside();
         if( (numberInSelf < 0) || (numberInSelf >= numFaces) )
         {
           std :: cout << "Error: Invalid numberInSelf: " << numberInSelf
@@ -808,7 +808,7 @@ void assertNeighbor (Grid &g)
           it->geometryInOutside();
 
           // numbering
-          const int numberInNeighbor = it->numberInOutside();
+          const int numberInNeighbor = it->indexInOutside();
           const int numFaces = outside.template count< 1 >();
           if( (numberInNeighbor < 0) || (numberInNeighbor >= numFaces) )
           {
