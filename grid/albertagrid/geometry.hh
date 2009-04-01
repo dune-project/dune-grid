@@ -11,7 +11,7 @@
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 // set to 1 to use generic geometries in AlbertaGrid
-#define USE_GENERICGEOMETRY 0
+#define USE_GENERICGEOMETRY 1
 
 namespace Dune
 {

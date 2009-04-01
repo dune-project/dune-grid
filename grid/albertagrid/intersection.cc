@@ -165,43 +165,15 @@ namespace Dune
     return (elInfo.neigh[ neighborCount_ ] != NULL);
   }
 
-  template<class GridImp>
-  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
-  AlbertaGridIntersection< GridImp >
-  ::unitOuterNormal ( const LocalCoordType &local ) const
-  {
-    NormalVector normal;
-    calcOuterNormal( local, normal );
-    normal *= (1.0 / normal.two_norm());
-    return normal;
-  }
 
   template< class GridImp >
   inline const typename AlbertaGridIntersection< GridImp >::NormalVector
   AlbertaGridIntersection< GridImp >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
-    NormalVector normal;
-    calcOuterNormal( local, normal );
-    return normal;
-  }
-
-  template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
-  AlbertaGridIntersection< GridImp >
-  ::outerNormal( const LocalCoordType &local ) const
-  {
-    return integrationOuterNormal( local );
-  }
-
-  template< class GridImp >
-  inline void
-  AlbertaGridIntersection< GridImp >
-  ::calcOuterNormal( const LocalCoordType &local, NormalVector &n ) const
-  {
 #if USE_GENERICGEOMETRY
     const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
-    n = GridImp::getRealImplementation( inside()->geometry() ).normal( numberInInside(), localInInside );
+    return GridImp::getRealImplementation( inside()->geometry() ).normal( numberInInside(), localInInside );
 #else
     DUNE_THROW( NotImplemented, "AlbertaGrid: outer normal for dim != dimworld "
                 "has not been implemented, yet." );
@@ -209,33 +181,37 @@ namespace Dune
   }
 
   template<>
-  inline void
+  inline const AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >::NormalVector
   AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >
-  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
+  ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
     const Alberta::GlobalVector &oppCoord = grid_.getCoord( elementInfo_, neighborCount_ );
     const Alberta::GlobalVector &myCoord = grid_.getCoord( elementInfo_, 1-neighborCount_ );
+    NormalVector n;
     n[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
+    return n;
   }
 
   template<>
-  inline void
+  inline const AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >::NormalVector
   AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >
-  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
+  ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
     const Alberta::GlobalVector &coordOne = grid_.getCoord( elementInfo_, (neighborCount_+1)%3 );
     const Alberta::GlobalVector &coordTwo = grid_.getCoord( elementInfo_, (neighborCount_+2)%3 );
 
+    NormalVector n;
     n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
     n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
+    return n;
   }
 
   template<>
-  inline void
+  inline const AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >::NormalVector
   AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >
-  ::calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const
+  ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
 
@@ -264,6 +240,7 @@ namespace Dune
       u[ i ] = coord2[ i ] - coord1[ i ];
     }
 
+    NormalVector n;
     // outNormal_ has length 3
     for( int i = 0; i < dimension; ++i )
     {
@@ -271,6 +248,27 @@ namespace Dune
       const int k = (i+2)%dimension;
       n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
     }
+    return n;
+  }
+
+
+  template< class GridImp >
+  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
+  AlbertaGridIntersection< GridImp >
+  ::outerNormal( const LocalCoordType &local ) const
+  {
+    return integrationOuterNormal( local );
+  }
+
+
+  template<class GridImp>
+  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
+  AlbertaGridIntersection< GridImp >
+  ::unitOuterNormal ( const LocalCoordType &local ) const
+  {
+    NormalVector normal = outerNormal( local );
+    normal *= (1.0 / normal.two_norm());
+    return normal;
   }
 
 

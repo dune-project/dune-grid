@@ -145,8 +145,6 @@ namespace Dune
     //! twist of the face seen from the outer element
     int twistInNeighbor () const;
 
-    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
-
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
     const NormalVector outerNormal ( const LocalCoordType &local ) const;
@@ -154,6 +152,8 @@ namespace Dune
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
     const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
+
+    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
     //**********************************************************
     //  private methods
@@ -171,9 +171,6 @@ namespace Dune
 
     //! setup the virtual neighbor
     void setupVirtEn () const;
-
-    //! calculate normal to current face
-    void calcOuterNormal ( const LocalCoordType &local, NormalVector &n ) const;
 
     ////////////////////////////////////////////////
     // private member variables
