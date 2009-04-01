@@ -435,12 +435,6 @@ namespace Dune {
     // refine grid
     bool refineGrid();
 
-    //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) DUNE_DEPRECATED;
-
-    //! @copydoc Dune::Grid::getMark
-    int getMark(const typename Traits::template Codim<0>::EntityPointer & ) const DUNE_DEPRECATED;
-
     //! @copydoc Dune::Grid::getMark
     int getMark(const typename Traits::template Codim<0>::Entity & ) const;
 

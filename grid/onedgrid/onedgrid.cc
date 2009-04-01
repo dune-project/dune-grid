@@ -643,12 +643,6 @@ void Dune::OneDGrid::globalRefine(int refCount)
 }
 
 bool Dune::OneDGrid::mark(int refCount,
-                          const Codim<0>::EntityPointer & ep )
-{
-  return this->mark( refCount, *ep);
-}
-
-bool Dune::OneDGrid::mark(int refCount,
                           const Codim<0>::Entity & e )
 {
   if (refCount < 0) {
@@ -666,11 +660,6 @@ bool Dune::OneDGrid::mark(int refCount,
     getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::DO_NOTHING;
 
   return true;
-}
-
-int Dune::OneDGrid::getMark(const Codim<0>::EntityPointer & ep ) const
-{
-  return this->getMark( *ep );
 }
 
 int Dune::OneDGrid::getMark(const Codim<0>::Entity & e ) const

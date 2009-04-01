@@ -341,16 +341,6 @@ namespace Dune {
     //***************************************************************
 
     //! returns true, if entity was refined during last adaptation cycle
-    bool wasRefined() const DUNE_DEPRECATED {return isNew();}
-
-    /*! \brief
-       returns true, if entity might be coarsened during next adaptation
-       cycle, which is true for entities that have been marked for
-       coarsening or for entities that are not regular (i.e. isRegular
-       returns false) */
-    bool mightBeCoarsened() const DUNE_DEPRECATED {return mightVanish();}
-
-    //! returns true, if entity was refined during last adaptation cycle
     bool isNew() const;
 
     /*! \brief

@@ -603,13 +603,7 @@ namespace Dune {
     void updateStatus ();
 
     //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) DUNE_DEPRECATED;
-
-    //! @copydoc Dune::Grid::mark
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
-
-    //! @copydoc Dune::Grid::getMark
-    int getMark( const typename Traits::template Codim<0>::EntityPointer & ) const DUNE_DEPRECATED;
 
     //! @copydoc Dune::Grid::getMark
     int getMark( const typename Traits::template Codim<0>::Entity & ) const;

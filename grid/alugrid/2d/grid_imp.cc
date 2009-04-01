@@ -535,14 +535,6 @@ namespace Dune {
     return adapt();
   }
 
-  //! mark entities for refinement or coarsening, refCount < 0 will mark
-  //! the entity for one coarsen step and refCount > 0 will mark for one
-  //! refinement, one refinement will create 8 children per element
-  template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: mark( int refCount , const typename Traits::template Codim<0>::EntityPointer & ep ) {
-    return this->mark(refCount,*ep);
-  }
-
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> ::
   mark( int refCount , const typename Traits::template Codim<0>::Entity & en )
@@ -554,12 +546,6 @@ namespace Dune {
       if(refCount < 0) ++coarsenMarked_;
     }
     return marked;
-  }
-
-  template <int dim, int dimworld>
-  inline int ALU2dGrid<dim, dimworld> :: getMark(const typename Traits::template Codim<0>::EntityPointer & ep ) const
-  {
-    return this->getRealImplementation(*ep).getMark();
   }
 
   template <int dim, int dimworld>

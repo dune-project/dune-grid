@@ -506,32 +506,7 @@ namespace Dune {
         <li> false, if nothing changed </li>
         </ul>
      */
-    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer & e ) DUNE_DEPRECATED;
-
-    /** \brief Mark element for refinement
-        \param refCount <ul>
-        <li> 1: mark for red refinement </li>
-        <li> -1: mark for coarsening </li>
-        <li> 0: delete a possible refinement mark </li>
-        </ul>
-        \param e Element to be marked
-       \return <ul>
-        <li> true, if element was marked </li>
-        <li> false, if nothing changed </li>
-        </ul>
-     */
     bool mark(int refCount, const typename Traits::template Codim<0>::Entity & e );
-
-    /** \brief Mark method accepting a UG refinement rule
-
-       \param e Pointer to the element to be marked for refinement
-       \param rule One of the UG refinement rules
-       \param side If rule==UG::D2::BLUE (one quadrilateral is split into two rectangles)
-       you can choose the orientation of the cut by setting side==0 or side==1
-     */
-    bool mark(const typename Traits::template Codim<0>::EntityPointer & e,
-              typename UG_NS<dim>::RefinementRule rule,
-              int side=0) DUNE_DEPRECATED ;
 
     /** \brief Mark method accepting a UG refinement rule
 
@@ -543,9 +518,6 @@ namespace Dune {
     bool mark(const typename Traits::template Codim<0>::Entity & e,
               typename UG_NS<dim>::RefinementRule rule,
               int side=0);
-
-    /** \brief Query whether element is marked for refinement */
-    int getMark(const typename Traits::template Codim<0>::EntityPointer& e) const DUNE_DEPRECATED ;
 
     /** \brief Query whether element is marked for refinement */
     int getMark(const typename Traits::template Codim<0>::Entity& e) const;

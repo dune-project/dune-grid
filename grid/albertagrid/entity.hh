@@ -301,20 +301,10 @@ namespace Dune
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxlevel) const;
 
-    /**\brief Returns true, if entity was refined during last adaptation
-        cycle */
-    bool wasRefined () const DUNE_DEPRECATED {return isNew();}
-
-    /**\brief Returns true, if entity might be coarsened during next
-        adaption cycle */
-    bool mightBeCoarsened () const DUNE_DEPRECATED { return mightVanish(); }
-
-    /**\brief Returns true, if entity was refined during last adaptation
-        cycle */
+    /** \brief Was the entity created during the last adaptation cycle? */
     bool isNew () const;
 
-    /**\brief Returns true, if entity might be coarsened during next
-        adaption cycle */
+    /**\brief Might the entity vanish during the next adaptation cycle? */
     bool mightVanish () const;
 
     /**\brief Returns true, if entity has intersections with boundary

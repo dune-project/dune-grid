@@ -414,14 +414,6 @@ namespace Dune
       return realEntity.hend(maxlevel);
     }
 
-    /**\brief Returns true, if entity was refined during last adaptation cycle
-     */
-    bool wasRefined () const DUNE_DEPRECATED { return realEntity.wasRefined(); }
-
-    /**\brief Returns true, if entity might be coarsened during next adaption cycle
-     */
-    bool mightBeCoarsened () const DUNE_DEPRECATED { return realEntity.mightBeCoarsened (); }
-
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */
     bool isNew () const { return realEntity.isNew(); }
@@ -603,14 +595,6 @@ namespace Dune
         return (asImp().template entity<cc>(i))->boundaryId();
        }
      */
-
-    /**\brief Returns true, if entity was refined during last adaptation cycle
-     */
-    bool wasRefined () const DUNE_DEPRECATED { return false; }
-
-    /**\brief Returns true, if entity might be coarsened during next adaption cycle
-     */
-    bool mightBeCoarsened () const DUNE_DEPRECATED { return false; }
 
     /**\brief Returns true, if the entity has been created during the last call to adapt()
      */

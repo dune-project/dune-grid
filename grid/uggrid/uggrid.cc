@@ -252,13 +252,6 @@ int Dune::UGGrid < dim >::size (int level, int codim) const
 
 template < int dim >
 bool Dune::UGGrid < dim >::mark(int refCount,
-                                const typename Traits::template Codim<0>::EntityPointer & ep )
-{
-  return this->mark( refCount, *ep );
-}
-
-template < int dim >
-bool Dune::UGGrid < dim >::mark(int refCount,
                                 const typename Traits::template Codim<0>::Entity& e )
 {
   typename UG_NS<dim>::Element* target = getRealImplementation(e).target_;
@@ -299,14 +292,6 @@ bool Dune::UGGrid < dim >::mark(int refCount,
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::EntityPointer & ep,
-                                typename UG_NS<dim>::RefinementRule rule,
-                                int side)
-{
-  return this->mark( *ep, rule, side );
-}
-
-template < int dim >
 bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
                                 typename UG_NS<dim>::RefinementRule rule,
                                 int side)
@@ -320,12 +305,6 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
 
   return UG_NS<dim>::MarkForRefinement(target, rule, side);
 
-}
-
-template <int dim>
-int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::EntityPointer & ep) const
-{
-  return this->getMark( *ep );
 }
 
 template <int dim>

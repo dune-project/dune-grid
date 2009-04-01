@@ -621,14 +621,6 @@ namespace Dune {
   // mark given entity
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline bool ALU3dGrid<dim,dimworld, elType>::
-  mark(int ref, const typename Traits::template Codim<0>::EntityPointer & ep )
-  {
-    return this->mark(ref,*ep);
-  }
-
-  // mark given entity
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline bool ALU3dGrid<dim,dimworld, elType>::
   mark(int ref, const typename Traits::template Codim<0>::Entity & ep )
   {
     bool marked = (this->getRealImplementation(ep)).mark(ref);
@@ -638,14 +630,6 @@ namespace Dune {
       if(ref < 0) ++coarsenMarked_;
     }
     return marked;
-  }
-
-  // get Mark of given entity
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline int ALU3dGrid<dim,dimworld, elType>::
-  getMark(const typename Traits::template Codim<0>::EntityPointer & ep) const
-  {
-    return this->getRealImplementation(*ep).getMark();
   }
 
   // get Mark of given entity

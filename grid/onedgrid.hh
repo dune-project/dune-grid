@@ -269,28 +269,11 @@ namespace Dune {
     /** \brief Mark entity for refinement
      *
      * \param refCount if >0 mark for refinement, if <0 mark for coarsening
-     * \param e EntityPointer to the entity you want to mark
-     *
-     * \return True, if marking was successfull
-     */
-    bool mark(int refCount, const Traits::Codim<0>::EntityPointer& e ) DUNE_DEPRECATED;
-
-    /** \brief Mark entity for refinement
-     *
-     * \param refCount if >0 mark for refinement, if <0 mark for coarsening
      * \param e Entity to the entity you want to mark
      *
      * \return True, if marking was successfull
      */
     bool mark(int refCount, const Traits::Codim<0>::Entity& e );
-
-    /** \brief return current adaptation marker of given entity
-
-        \param e Entity to the entity you want to mark
-
-        \return int current adaptation marker of entity pointer e
-     */
-    int getMark(const Traits::Codim<0>::EntityPointer & e ) const DUNE_DEPRECATED;
 
     /** \brief return current adaptation marker of given entity
 
