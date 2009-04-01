@@ -175,8 +175,16 @@ namespace Dune
     const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
     return GridImp::getRealImplementation( inside()->geometry() ).normal( numberInInside(), localInInside );
 #else
-    DUNE_THROW( NotImplemented, "AlbertaGrid: outer normal for dim != dimworld "
-                "has not been implemented, yet." );
+    typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
+    typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
+    typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
+    const Jacobian &jInvT = GridImp::getRealImplementation( inside()->geometry() ).jacobianInverseTransposed();
+    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integratioOuterNormal( numberInInside() );
+
+    NormalVector n;
+    jInvT.mv( refNormal, n );
+    n *= integrationElement( local );
+    return n;
 #endif // #if USE_GENERICGEOMETRY
   }
 
