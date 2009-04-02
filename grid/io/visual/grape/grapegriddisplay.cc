@@ -48,6 +48,26 @@ namespace Dune
     if(!hmesh_) hmesh_ = setupHmesh();
   }
 
+  template< class GridType >
+  template< class VT >
+  inline GrapeGridDisplay< GridType >
+  ::GrapeGridDisplay ( const GridView< VT > &gridView, const int myrank )
+    : grid_( gridView.grid() ),
+      hasLevelIntersections_( grid_.name() != "AlbertaGrid" ),
+      gridPart_( (void *)&gridView ),
+      setGridPartIter_( &GridViewIterators< VT >::set ),
+      indexSet_( (void *)&gridView.indexSet() ),
+      lid_( grid_.localIdSet() ),
+      myRank_( myrank ),
+      hmesh_( 0 ),
+      entityIndex( getEntityIndex< typename GridView< VT >::IndexSet > ),
+      vertexIndex( getVertexIndex< typename GridView< VT >::IndexSet > )
+  {
+    GrapeInterface< dim, dimworld >::init();
+    if( !hmesh_ )
+      hmesh_ = setupHmesh();
+  }
+
   template<class GridType>
   inline GrapeGridDisplay<GridType>::
   ~GrapeGridDisplay()
@@ -296,6 +316,58 @@ namespace Dune
       return 0;
     }
   }
+
+
+  template< class GridType >
+  template< class EntityPointer, class VT >
+  inline int GrapeGridDisplay< GridType >
+  ::el_update ( EntityPointer *it, DUNE_ELEM *he, const GridView< VT > &gridView )
+  {
+    typedef typename GridView< VT >::template Codim< 0 >::Entity Entity;
+    typedef typename Entity::Geometry DuneGeometryType;
+    typedef typename DuneGeometryType::ctype ctype;
+
+    const int dim      = Entity::dimension;
+    const int dimworld = Entity::dimensionworld;
+
+    typedef FieldVector< ctype, dimworld > CoordinateType;
+
+    Entity &entity = **it;
+    assert( &entity != 0 );
+
+    el_update_base ( entity, he );
+
+    typedef typename GridView< VT >::IntersectionIterator IntersectionIterator;
+    // reset the boundary information
+    for( int i = 0; i < MAX_EL_FACE; ++i )
+      he->bnd[ i ] = -1;
+
+    IntersectionIterator iend = gridView.iend( entity );
+    IntersectionIterator iit  = gridView.ibegin( entity );
+
+    checkNeighbors( iit, iend, he );
+
+    // for this type of element we have to swap the faces
+    if( he->type == g_hexahedron )
+    {
+      int help_bnd[ MAX_EL_FACE ];
+      for( int i = 0; i < MAX_EL_FACE; ++i )
+        help_bnd[ i ] = he->bnd[ i ];
+
+      assert( MAX_EL_FACE == 6 );
+      // do the mapping from dune to grape hexa
+      he->bnd[ 0 ] = help_bnd[ 4 ];
+      he->bnd[ 1 ] = help_bnd[ 5 ];
+      he->bnd[ 3 ] = help_bnd[ 1 ];
+      he->bnd[ 4 ] = help_bnd[ 3 ];
+      he->bnd[ 5 ] = help_bnd[ 0 ];
+    }
+
+    // for data displaying
+    he->actElement = it;
+    return 1;
+  }
+
 
   template<class GridType>
   template<PartitionIteratorType pitype>

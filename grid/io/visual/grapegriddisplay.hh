@@ -116,6 +116,9 @@ namespace Dune
     template <class GridPartType>
     inline GrapeGridDisplay(const GridPartType &gridPart, const int myrank = -1);
 
+    template< class VT >
+    inline GrapeGridDisplay ( const GridView< VT > &gridView, const int myrank = -1 );
+
     //! Destructor for GrapeGridDisplay
     inline ~GrapeGridDisplay();
 
@@ -203,6 +206,9 @@ namespace Dune
     // update element from entity
     template <class EntityPointerType, class GridPartType>
     inline int el_update (EntityPointerType *, DUNE_ELEM *, GridPartType& );
+
+    template< class EntityPointer, class VT >
+    int el_update ( EntityPointer *, DUNE_ELEM *, const GridView< VT > & );
 
     // update child element
     template <class EntityPointerType>
@@ -407,6 +413,83 @@ namespace Dune
         dune->first_macro = &IterationMethodsGP<GridPartImp>::fst_item;
         dune->next_macro  = &IterationMethodsGP<GridPartImp>::nxt_item;
         dune->delete_iter = &IterationMethodsGP<GridPartImp>::del_iter;
+
+        dune->first_child = 0;
+        dune->next_child = 0;
+      }
+    };
+
+    template< class ViewTraits >
+    struct GridViewIterators
+    {
+      typedef Dune::GridView< ViewTraits > GridView;
+      typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+
+      static int first_macro ( DUNE_ELEM *he )
+      {
+        assert( he->display != 0 );
+        MyDisplayType &display = *static_cast< MyDisplayType * >( he->display );
+
+        if( he->liter != 0 )
+          display.template delete_iterators< Iterator >( he );
+
+        assert( he->gridPart != 0 );
+        const GridView &gridView = *static_cast< const GridView * >( he->gridPart );
+
+        assert( he->liter   == 0 );
+        assert( he->enditer == 0 );
+
+        Iterator *it  = new Iterator( gridView.template begin< 0 >() );
+        Iterator *end = new Iterator( gridView.template end  < 0 >() );
+
+        he->liter   = it;
+        he->enditer = end;
+
+        if( *it == *end )
+        {
+          display.template delete_iterators< Iterator >( he );
+          return 0;
+        }
+
+        return display.el_update( it, he, gridView );
+      }
+
+      static int next_macro ( DUNE_ELEM *he )
+      {
+        assert( he->display != 0 );
+        MyDisplayType &display = *static_cast< MyDisplayType * >( he->display );
+
+        assert( he->gridPart != 0 );
+        const GridView &gridView = *static_cast< const GridView * >( he->gridPart );
+
+        Iterator *it  = static_cast< Iterator * >( he->liter );
+        Iterator *end = static_cast< Iterator * >( he->enditer );
+        assert( (it != 0) && (end != 0) );
+
+        ++(*it);
+        if( *it == *end )
+        {
+          display.template delete_iterators< Iterator >( he );
+          return 0;
+        }
+
+        return display.el_update( it, he, gridView );
+      }
+
+      static void delete_iter ( DUNE_ELEM *he )
+      {
+        assert( he->display );
+        MyDisplayType &display = *static_cast< MyDisplayType * >( he->display );
+        display.template delete_iterators< Iterator >( he );
+      }
+
+      static void set ( DUNE_DAT *dune, void *gridView )
+      {
+        assert( gridView );
+        dune->gridPart = gridView;
+        dune->first_macro = &first_macro;
+        dune->next_macro = &next_macro;
+        dune->delete_iter = &delete_iter;
 
         dune->first_child = 0;
         dune->next_child = 0;
