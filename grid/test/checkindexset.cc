@@ -451,6 +451,9 @@ namespace Dune
           // the subIndex and the index for subEntity must be the same
           assert( vxidx == lset.index( *vxp ));
 
+          // static and dynamic method must yield the same result
+          assert( vxidx == lset.subIndex(*it,i,dim));
+
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
           FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[vxidx] );

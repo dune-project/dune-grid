@@ -578,6 +578,26 @@ struct subIndexCheck
                    << " ... subIndex(e,i)=" << subid_e_i
                    );
       }
+
+      if( g.levelIndexSet(e.level()).subIndex(e,i,cd)
+          != g.levelIndexSet(e.level()).template subIndex<cd>(e,i) )
+      {
+        int id_e =
+          g.levelIndexSet(e.level()).index(e);
+        int subid_e_i =
+          g.levelIndexSet(e.level()).template subIndex<cd>(e,i);
+        int subid_e_i_cd =
+          g.levelIndexSet(e.level()).subIndex(e,i,cd);
+        DUNE_THROW(CheckError,
+                   "g.levelIndexSet.subIndex(e,i,cd) "
+                   << "== g.levelIndexSet.template subIndex<cd>(e,i) failed "
+                   << "[with cd=" << cd << ", i=" << i << "]"
+                   << " ... index(e)=" << id_e
+                   << " ... subIndex<cd>(e,i)=" << subid_e_i
+                   << " ... subIndex(e,i,cd)=" << subid_e_i_cd
+                   );
+      }
+
     }
     subIndexCheck<cd-1,Grid,Entity,
         Dune::Capabilities::hasEntity<Grid,cd-1>::v> sick(g,e);
