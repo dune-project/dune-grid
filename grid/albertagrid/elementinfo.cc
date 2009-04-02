@@ -129,7 +129,7 @@ namespace Dune
           neighbor = neighbor.child( 1-faceInNeighbor );
           faceInNeighbor = dimension;
         }
-        assert( neighbor.el() == elInfo().neigh[ face ] );
+        assert( neighbor.el() == element.elInfo().neigh[ face ] );
       }
       return faceInNeighbor;
     }
