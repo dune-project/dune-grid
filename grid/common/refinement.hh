@@ -127,7 +127,7 @@
    on.
 
    @code
-   // Include the neccessary files
+   // Include the necessary files
    \#include <dune/grid/common/refinement.hh>
 
    // If you know that you are only ever going to need one refinement
@@ -272,5 +272,6 @@
 #include "refinement/hcube.cc"
 #include "refinement/simplex.cc"
 #include "refinement/hcubetriangulation.cc"
+#include "refinement/prismtriangulation.cc"
 
 #endif //DUNE_GRID_COMMON_REFINEMENT_HH
