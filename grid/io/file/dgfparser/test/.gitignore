@@ -18,3 +18,4 @@ viewdgf
 *.log
 *.so.*
 *.swp
+*.tmp.*

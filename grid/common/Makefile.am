@@ -10,7 +10,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
   defaultindexsets.hh entity.hh entitypointer.hh geometry.hh grid.hh \
   hierarchiciterator.hh indexstack.hh intersection.hh intersectioniterator.hh \
   leafiterator.hh leveliterator.hh refinement.hh \
-  virtualrefinement.hh referenceelements.hh gridpart.hh \
+  virtualrefinement.hh referenceelements.hh \
   boundarysegment.hh gridinfo.hh indexidset.hh mapper.hh \
   mcmgmapper.hh scsgmapper.hh universalmapper.hh sizecache.hh \
   intersectioniteratorwrapper.hh quadraturerules.hh \
