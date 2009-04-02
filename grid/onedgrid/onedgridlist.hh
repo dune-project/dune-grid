@@ -81,7 +81,41 @@ namespace Dune {
 
     int size() const {return numelements;}
 
-    T* push_back (T* t) {
+    iterator push_back (const T& value) {
+
+      T* i = rbegin();
+
+      // New list element by copy construction
+      T* t = new T(value);
+
+      // einfuegen
+      if (begin_==0) {
+        // einfuegen in leere Liste
+        begin_ = t;
+        rbegin_ = t;
+      }
+      else
+      {
+        // nach Element i.p einsetzen
+        t->pred_ = i;
+        t->succ_ = i->succ_;
+        i->succ_ = t;
+
+        if (t->succ_!=0)
+          t->succ_->pred_ = t;
+
+        // tail neu ?
+        if (rbegin_==i)
+          rbegin_ = t;
+      }
+
+      // Groesse und Rueckgabeiterator
+      numelements = numelements+1;
+
+      return t;
+    }
+
+    iterator push_back (iterator t) DUNE_DEPRECATED {
 
       T* i = rbegin();
 
@@ -112,7 +146,42 @@ namespace Dune {
       return t;
     }
 
-    T* insert (T* i, T* t) {
+    iterator insert (iterator i, const T& value) {
+
+      // Insert before 'one-after-the-end' --> append to the list
+      if (i==end())
+        return push_back(value);
+
+      // New list element by copy construction
+      T* t = new T(value);
+
+      // einfuegen
+      if (begin_==0)
+      {
+        // einfuegen in leere Liste
+        begin_=t;
+        rbegin_=t;
+      }
+      else
+      {
+        // vor Element i.p einsetzen
+        t->succ_ = i;
+        t->pred_ = i->pred_;
+        i->pred_ = t;
+
+        if (t->pred_!=0)
+          t->pred_->succ_ = t;
+        // head neu ?
+        if (begin_==i)
+          begin_ = t;
+      }
+
+      // Groesse und Rueckgabeiterator
+      numelements = numelements+1;
+      return t;
+    }
+
+    iterator insert (iterator i, iterator t) DUNE_DEPRECATED {
 
       // Insert before 'one-after-the-end' --> append to the list
       if (i==end())
@@ -144,7 +213,7 @@ namespace Dune {
       return t;
     }
 
-    void erase (T* i)
+    void erase (iterator& i)
     {
       // Teste Eingabe
       if (i==0)

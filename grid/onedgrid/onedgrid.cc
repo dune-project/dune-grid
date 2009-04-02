@@ -63,8 +63,8 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
   for (int i=0; i<numElements+1; i++) {
     ctype newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
 
-    OneDGridList<OneDEntityImp<0> >::iterator newVertex = new OneDEntityImp<0>(0, newCoord);
-    newVertex->id_ = getNextFreeId(1);
+    OneDEntityImp<0> newVertex(0, newCoord);
+    newVertex.id_ = getNextFreeId(1);
     vertices[0].push_back(newVertex);
 
   }
@@ -73,10 +73,10 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices[0].begin();
   for (int i=0; i<numElements; i++) {
 
-    OneDGridList<OneDEntityImp<1> >::iterator newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
-    newElement->vertex_[0] = it;
+    OneDEntityImp<1> newElement(0, getNextFreeId(0));
+    newElement.vertex_[0] = it;
     it = it->succ_;
-    newElement->vertex_[1] = it;
+    newElement.vertex_[1] = it;
 
     elements[0].push_back(newElement);
 
@@ -101,7 +101,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
 
   // Init vertex set
   for (size_t i=0; i<coords.size(); i++) {
-    OneDGridList<OneDEntityImp<0> >::iterator newVertex = new OneDEntityImp<0>(0, coords[i], getNextFreeId(1));
+    OneDEntityImp<0> newVertex(0, coords[i], getNextFreeId(1));
     vertices[0].push_back(newVertex);
   }
 
@@ -109,12 +109,12 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices[0].begin();
   for (size_t i=0; i<coords.size()-1; i++) {
 
-    OneDGridList<OneDEntityImp<1> >::iterator newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
-    newElement->vertex_[0] = it;
+    OneDEntityImp<1> newElement(0, getNextFreeId(0));
+    newElement.vertex_[0] = it;
     it = it->succ_;
-    newElement->vertex_[1] = it;
+    newElement.vertex_[1] = it;
 
-    if (newElement->vertex_[0]->pos_ >= newElement->vertex_[1]->pos_)
+    if (newElement.vertex_[0]->pos_ >= newElement.vertex_[1]->pos_)
       DUNE_THROW(GridError, "The coordinates have to be in ascending order!");
 
     elements[0].push_back(newElement);
@@ -415,7 +415,7 @@ bool Dune::OneDGrid::adapt()
         // Create center vertex
         ctype p = 0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]);
 
-        OneDGridList<OneDEntityImp<0> >::iterator centerVertex = new OneDEntityImp<0>(i+1, p, getNextFreeId(1));
+        OneDEntityImp<0> centerVertex(i+1, p, getNextFreeId(1));
 
         // //////////////////////////////////////
         // Insert new vertices into vertex list
@@ -435,42 +435,38 @@ bool Dune::OneDGrid::adapt()
 
         }
 
-        vertices[i+1].insert(leftUpperVertex->succ_, centerVertex);
+        OneDGridList<OneDEntityImp<0> >::iterator centerVertexIterator = vertices[i+1].insert(leftUpperVertex->succ_, centerVertex);
 
         // Check if rightUpperVertex is already in the list
-        OneDGridList<OneDEntityImp<0> >::iterator succOfCenter = centerVertex->succ_;
+        OneDGridList<OneDEntityImp<0> >::iterator succOfCenter = centerVertexIterator->succ_;
 
         if (succOfCenter==NULL || succOfCenter != rightUpperVertex)
-          vertices[i+1].insert(centerVertex->succ_, rightUpperVertex);
+          vertices[i+1].insert(centerVertexIterator->succ_, rightUpperVertex);
 
         // ///////////////////////
         // Create new elements
         // ///////////////////////
-        OneDGridList<OneDEntityImp<1> >::iterator newElement0 = new OneDEntityImp<1>(i+1, getNextFreeId(0));
-        newElement0->vertex_[0] = leftUpperVertex;
-        newElement0->vertex_[1] = centerVertex;
-        newElement0->father_ = eIt;
-        newElement0->isNew_ = true;
+        OneDEntityImp<1> newElement0(i+1, getNextFreeId(0));
+        newElement0.vertex_[0] = leftUpperVertex;
+        newElement0.vertex_[1] = centerVertexIterator;
+        newElement0.father_ = eIt;
+        newElement0.isNew_ = true;
 
-        OneDGridList<OneDEntityImp<1> >::iterator newElement1 = new OneDEntityImp<1>(i+1, getNextFreeId(0));
-        newElement1->vertex_[0] = centerVertex;
-        newElement1->vertex_[1] = rightUpperVertex;
-        newElement1->father_ = eIt;
-        newElement1->isNew_ = true;
+        OneDEntityImp<1> newElement1(i+1, getNextFreeId(0));
+        newElement1.vertex_[0] = centerVertexIterator;
+        newElement1.vertex_[1] = rightUpperVertex;
+        newElement1.father_ = eIt;
+        newElement1.isNew_ = true;
 
         // Insert new elements into element list
         if (leftNeighbor!=NULL)
           // leftNeighbor exists
-          elements[i+1].insert(leftNeighbor->sons_[1]->succ_, newElement0);
+          eIt->sons_[0] = elements[i+1].insert(leftNeighbor->sons_[1]->succ_, newElement0);
         else
           // leftNeighbor does not exist
-          elements[i+1].insert(elements[i+1].begin(), newElement0);
+          eIt->sons_[0] = elements[i+1].insert(elements[i+1].begin(), newElement0);
 
-        elements[i+1].insert(newElement0->succ_, newElement1);
-
-        // Mark the two new elements as the sons of the refined element
-        eIt->sons_[0] = newElement0;
-        eIt->sons_[1] = newElement1;
+        eIt->sons_[1] = elements[i+1].insert(eIt->sons_[0]->succ_, newElement1);
 
         // The grid has been modified
         changedGrid = true;
@@ -545,22 +541,23 @@ bool Dune::OneDGrid::adapt()
           // /////////////////////////
           //   Create new element
           // /////////////////////////
-          OneDGridList<OneDEntityImp<1> >::iterator newElement = new OneDEntityImp<1>(i+1, eIt->id_);
-          newElement->vertex_[0] = leftUpperVertex;
-          newElement->vertex_[1] = rightUpperVertex;
-          newElement->father_ = eIt;
-          newElement->isNew_ = true;
+          OneDEntityImp<1> newElement(i+1, eIt->id_);
+          newElement.vertex_[0] = leftUpperVertex;
+          newElement.vertex_[1] = rightUpperVertex;
+          newElement.father_ = eIt;
+          newElement.isNew_ = true;
 
           // Insert new elements into element list
+          OneDGridList<OneDEntityImp<1> >::iterator newElementIterator;
           if (leftNeighbor!=NULL)
             // leftNeighbor exists
-            elements[i+1].insert(leftNeighbor->sons_[1]->succ_, newElement);
+            newElementIterator = elements[i+1].insert(leftNeighbor->sons_[1]->succ_, newElement);
           else
             // leftNeighbor does not exist
-            elements[i+1].insert(elements[i+1].begin(), newElement);
+            newElementIterator = elements[i+1].insert(elements[i+1].begin(), newElement);
 
           // Mark the new element as the sons of the refined element
-          eIt->sons_[0] = eIt->sons_[1] = newElement;
+          eIt->sons_[0] = eIt->sons_[1] = newElementIterator;
 
         }
 
