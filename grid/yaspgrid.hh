@@ -710,6 +710,15 @@ namespace Dune {
       DUNE_THROW(GridError, "codim " << cc << " (dim=" << dim << ") not (yet) implemented");
     }
 
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( this->type() );
+      const int j = Numbering::template generic2dune< codim >( tid, i );
+      return entity< codim >( j );
+    }
+
     //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
     EntityPointer father () const
     {

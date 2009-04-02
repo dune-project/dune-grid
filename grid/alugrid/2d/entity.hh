@@ -333,6 +333,15 @@ namespace Dune {
     template <int cc>
     typename Codim<cc>::EntityPointer entity (int i) const;
 
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template generic2dune< codim >( tid, i );
+      return entity< codim >( j );
+    }
+
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const
     {

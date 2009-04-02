@@ -492,6 +492,15 @@ namespace Dune {
      */
     template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
 
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( this->type() );
+      const int j = Numbering::template generic2dune< codim >( tid, i );
+      return entity< codim >( j );
+    }
+
     //! subentity compressed index
     template<int cc>
     int subCompressedIndex (int i) const

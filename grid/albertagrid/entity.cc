@@ -204,38 +204,13 @@ namespace Dune
   }
 
 
-  //*****************************************************************
-  // count
-  template <class GridImp, int dim, int cc> struct AlbertaGridCount {
-    static int count () { return dim+1; }
-  };
-
-  // specialisation for codim 0
-  template <class GridImp, int dim> struct AlbertaGridCount<GridImp,dim,0> {
-    static int count () { return 1; }
-  };
-
-  // specialisation for edges in 3d
-  template <class GridImp> struct AlbertaGridCount<GridImp,3,2> {
-    static int count () { return 6; }
-  };
-
-  template<int dim, class GridImp> template <int cc>
-  inline int AlbertaGridEntity <0,dim,GridImp>::count () const
-  {
-    return AlbertaGridCount<GridImp,dim,cc>::count();
-  }
-
-  //*****************************************************************
-
   template< int dim, class GridImp >
   template< int codim >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >
-  ::template Codim< codim >::EntityPointer
-  AlbertaGridEntity< 0, dim, GridImp >::entity ( int i ) const
+  inline typename AlbertaGridEntity< 0, dim, GridImp >::template Codim< codim >::EntityPointer
+  AlbertaGridEntity< 0, dim, GridImp >::subEntity ( int i ) const
   {
     typedef AlbertaGridEntityPointer< codim, GridImp > EntityPointerImpl;
-    return EntityPointerImpl( grid_, elementInfo_, grid_.dune2alberta( codim, i ) );
+    return EntityPointerImpl( grid_, elementInfo_, grid_.generic2alberta( codim, i ) );
   }
 
 

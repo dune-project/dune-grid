@@ -331,6 +331,15 @@ namespace Dune {
       }
     }
 
+    template< int codim >
+    typename GridImp::template Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template generic2dune< codim >( tid, i );
+      return entity< codim >( j );
+    }
+
     LeafIntersectionIterator ileafbegin () const {
       return OneDGridLeafIntersectionIterator<GridImp>(target_, (isLeaf()) ? 0 : 2);
     }

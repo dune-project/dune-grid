@@ -239,19 +239,30 @@ namespace Dune
     //! type of geometry of this entity
     GeometryType type () const;
 
-    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
-       with codimension cc.
+    /** obtain the number of subentities of a codimension
+     *
+     *  \tparam  codim  codimension
+     *
+     *  \returns the number of subentities of the given codimension
      */
-    //!< Default codim 1 Faces and codim == dim Vertices
-    template<int cc> int count () const;
+    template< int codim >
+    int count () const
+    {
+      return Alberta::NumSubEntities< dimension, codim >::value;
+    }
 
-    //! Provide access to mesh entity i of given codimension. Entities
-    //!  are numbered 0 ... count<cc>()-1
-    template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
-
-    //! Provide access to mesh entity i of given codimension. Entities
-    //!  are numbered 0 ... count<cc>()-1
-    //template<int cc> void entity (AlbertaGridTreeIterator<cc,dim,dimworld>& it, int i);
+    /** obtain a subentity
+     *
+     *  \tparam  codim  codimension of the desired subentity
+     *
+     *  \param[in]  i  number of the subentity (in generic numbering)
+     *
+     *  \returns an EntityPointer to the subentity
+     *
+     *  \Note: The subentities are numbered 0, ..., count< codim >-1
+     */
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const;
 
     /*! Intra-level access to intersection with neighboring elements.
        A neighbor is an entity of codimension 0

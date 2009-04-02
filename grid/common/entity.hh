@@ -315,11 +315,32 @@ namespace Dune
      */
     template<int cc> int count () const { return realEntity.count<cc>(); }
 
-    /** \brief Access to subentity <tt>i</tt> of codimension <tt>cc</tt>.
+    /** \brief Access to subentity <tt>i</tt> of codimension <tt>codim</tt>.
      */
-    template<int cc> typename Codim<cc>::EntityPointer entity (int i) const
+    template< int codim >
+    typename Codim< codim >::EntityPointer
+    DUNE_DEPRECATED entity (int i) const
     {
-      return realEntity.entity<cc>(i);
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template dune2generic< codim >( tid, i );
+      return realEntity.subEntity< codim >( j );
+    }
+
+    /** \brief obtain a pointer to a subentity
+     *
+     *  \tparam  codim  codimension of the desired subentity
+     *
+     *  \param[in]  i  number of the subentity (in generic numbering)
+     *
+     *  \returns an EntityPointer to the specified subentity
+     *
+     *  \Note: The subentities are numbered 0, ..., count< codim >-1
+     */
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      return realEntity.subEntity< codim >( i );
     }
 
     /**\brief Access to intersections with neighboring leaf elements.

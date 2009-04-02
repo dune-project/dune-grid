@@ -279,6 +279,15 @@ namespace Dune {
     template <int cc>
     typename Codim<cc>::EntityPointer entity (int i) const;
 
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    {
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template generic2dune< codim >( tid, i );
+      return entity< codim >( j );
+    }
+
     /*! Access to intersection with neighboring elements that are leaf
      * elements. A neighbor is an entity of codimension 0
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
