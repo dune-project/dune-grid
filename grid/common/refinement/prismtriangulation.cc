@@ -15,7 +15,7 @@ namespace Dune {
   namespace RefinementImp {
 
     /*! @brief This namespace contains the @ref Refinement
-               implementation for triangulating prism
+               implementation for triangulating prisms
                (GeometryType::prism -> GeometryType::simplex)
 
 
