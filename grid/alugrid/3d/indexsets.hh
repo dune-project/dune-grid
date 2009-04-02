@@ -12,6 +12,7 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/alugrid/dynamiccodimsubindexid.hh>
 
 
 //- Local includes
@@ -847,6 +848,13 @@ namespace Dune {
       return getId(macroId);
     }
 
+    //! return subId of given entity
+    IdType subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    {
+      typedef ALU3dGridGlobalIdSet<dim,dimworld, elType> IdSet;
+      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
+    }
+
     template <int d, ALU3dGridElementType element_t >
     struct BuildIds;
 
@@ -1008,6 +1016,13 @@ namespace Dune {
     {
       assert( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
+    }
+
+    //! return subId of given entity
+    IdType subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    {
+      typedef ALU3dGridLocalIdSet<dim,dimworld, elType> IdSet;
+      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
     }
 
     // dummy functions

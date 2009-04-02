@@ -12,6 +12,7 @@
 #include <dune/common/interfaces.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/adaptcallback.hh> // for compatibility only
+#include <dune/grid/alugrid/dynamiccodimsubindexid.hh>
 
 /** @file
    @author Robert Kloefkorn
@@ -626,6 +627,13 @@ namespace Dune {
       return levelIndex_[cd][ hIndexSet_.template subIndex<cd>(en,i) ];
     }
 
+    //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
+    //! given SubEntity codim and number of SubEntity
+    IndexType subIndex (const typename GridType::template Codim<0>::Entity & en, int i, unsigned int cd) const
+    {
+      return DynamicCodimSubIndex<ThisType,typename GridType::template Codim<0>::Entity,dim>::get(*this, en, i, cd);
+    }
+
     //! returns true if this set provides an index for given entity
     template<class EntityType>
     bool contains (const EntityType& en) const
@@ -917,6 +925,13 @@ namespace Dune {
       // therefore only check other codims
       assert(index_[cd][ hIndexSet_.template subIndex<cd>(en,i) ] >= 0 );
       return index_[cd][ hIndexSet_.template subIndex<cd>(en,i) ];
+    }
+
+    //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
+    //! given SubEntity codim and number of SubEntity
+    IndexType subIndex (const typename GridType::template Codim<0>::Entity & en, int i, unsigned int cd) const
+    {
+      return DynamicCodimSubIndex<ThisType,typename GridType::template Codim<0>::Entity,dim>::get(*this, en, i, cd);
     }
 
     //! returns true if this set provides an index for given entity

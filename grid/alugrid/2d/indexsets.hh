@@ -12,6 +12,7 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/alugrid/dynamiccodimsubindexid.hh>
 
 
 //- Local includes
@@ -608,6 +609,14 @@ namespace Dune {
       assert( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
     }
+
+    //! return subId of given entity
+    int subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    {
+      typedef ALU2dGridLocalIdSet<dim,dimworld> IdSet;
+      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
+    }
+
 
   private:
     // our HierarchicIndexSet
