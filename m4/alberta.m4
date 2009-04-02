@@ -43,13 +43,14 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     REM_CPPFLAGS=$CPPFLAGS
 
     LDFLAGS="$LDFLAGS -L$ALBERTA_LIB_PATH"
-    ALBERTADIM="-DDIM_OF_WORLD=$with_alberta_dim"
-    CPPFLAGS="$CPPFLAGS $ALBERTADIM -DEL_INDEX=0 -I$ALBERTA_INCLUDE_PATH"
+    CPPFLAGS="$CPPFLAGS -I$ALBERTA_INCLUDE_PATH -DDIM_OF_WORLD=$with_alberta_dim -DEL_INDEX=0"
+
+    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTA_INCLUDE_PATH"
+    ALBERTA_DIM_CPPFLAGS='-DALBERTA_DIM=$(ALBERTA_DIM)'
+    ALBERTA_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA'
 
     # check for header
-    AC_CHECK_HEADER([alberta.h], 
-       [ALBERTA_CPPFLAGS="-I$ALBERTA_INCLUDE_PATH -DENABLE_ALBERTA"
-      HAVE_ALBERTA="1"],
+    AC_CHECK_HEADER([alberta.h], [HAVE_ALBERTA="1"],
       AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_PATH]))
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
@@ -78,10 +79,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       # construct libname
       # define varaible lib name depending on problem and world dim, to change
       # afterwards easily 
-      variablealbertalibname="alberta_$``(``ALBERTA_DIM``)``d"
-      alberta_1d_libname="alberta_1d"
-      alberta_2d_libname="alberta_2d"
-      alberta_3d_libname="alberta_3d"
+      variablealbertalibname='alberta_$(ALBERTA_DIM)d'
 
       # we do not check libraries for ALBERTA 2.1 (linking would require libtool)
       if test "$ALBERTA_VERSION" == "2.1" ; then
@@ -98,9 +96,6 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
            AC_MSG_WARN(-l$alberta_3d_libname not found!)])
       fi
       ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"
-      ALBERTA_1DLIBS="-l$alberta_1d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
-      ALBERTA_2DLIBS="-l$alberta_2d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
-      ALBERTA_3DLIBS="-l$alberta_3d_libname $ALBERTA_LIBS $ALBERTA_EXTRA"
     fi
 
   fi  # end of alberta check (--without wasn't set)
@@ -108,10 +103,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   # survived all tests?
   if test "x$HAVE_ALBERTA" = "x1" ; then
     AC_SUBST(ALBERTA_LIBS, $ALBERTA_LIBS)
-    AC_SUBST(ALBERTA_1DLIBS, $ALBERTA_1DLIBS)
-    AC_SUBST(ALBERTA_2DLIBS, $ALBERTA_2DLIBS)
-    AC_SUBST(ALBERTA_3DLIBS, $ALBERTA_3DLIBS)
     AC_SUBST(ALBERTA_LDFLAGS, $ALBERTA_LDFLAGS)
+    AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, $ALBERTA_INCLUDE_CPPFLAGS)
+    AC_SUBST(ALBERTA_DIM_CPPFLAGS, $ALBERTA_DIM_CPPFLAGS)
     AC_SUBST(ALBERTA_CPPFLAGS, $ALBERTA_CPPFLAGS)
     AC_DEFINE(HAVE_ALBERTA, ENABLE_ALBERTA,
       [This is only true if alberta-library was found by configure 
@@ -134,10 +128,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     with_alberta="yes (Version $ALBERTA_VERSION)"
   else
     AC_SUBST(ALBERTA_LIBS, "")
-    AC_SUBST(ALBERTA_1DLIBS, "")
-    AC_SUBST(ALBERTA_2DLIBS, "")
-    AC_SUBST(ALBERTA_3DLIBS, "")
     AC_SUBST(ALBERTA_LDFLAGS, "")
+    AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, "")
+    AC_SUBST(ALBERTA_DIM_CPPFLAGS, "")
     AC_SUBST(ALBERTA_CPPFLAGS, "")
 
     # set variable for summary

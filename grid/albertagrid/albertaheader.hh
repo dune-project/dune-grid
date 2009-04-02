@@ -5,7 +5,11 @@
 
 #if HAVE_ALBERTA
 
-#include <dune/grid/albertagrid/griddim.hh>
+// Set ALBERTA's DIM_OF_WORLD preprocessor variable
+#ifndef ALBERTA_DIM
+#error "ALBERTA_DIM needed to use AlbertaGrid."
+#endif
+#define DIM_OF_WORLD ALBERTA_DIM
 
 // if we have ALBERTA C++ lib define namespace for ALBERTA
 #ifdef __ALBERTApp__
