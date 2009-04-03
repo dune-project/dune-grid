@@ -85,15 +85,15 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       if test "$ALBERTA_VERSION" == "2.1" ; then
         AC_MSG_WARN([ALBERTA $ALBERTA_VERSION found -- Skipping check for ALBERTA grid libraries])
       else
-        AC_CHECK_LIB($alberta_1d_libname,[mesh_traverse], [],
+        AC_CHECK_LIB(alberta_1d,[mesh_traverse], [],
           [HAVE_ALBERTA="0"
-           AC_MSG_WARN(-l$alberta_1d_libname not found!)])
-        AC_CHECK_LIB($alberta_2d_libname,[mesh_traverse], [],
+           AC_MSG_WARN(-lalberta_1d not found!)])
+        AC_CHECK_LIB(alberta_2d,[mesh_traverse], [],
           [HAVE_ALBERTA="0"
-           AC_MSG_WARN(-l$alberta_2d_libname not found!)])
-        AC_CHECK_LIB($alberta_3d_libname,[mesh_traverse], [],
+           AC_MSG_WARN(-lalberta_2d not found!)])
+        AC_CHECK_LIB(alberta_3d,[mesh_traverse], [],
           [HAVE_ALBERTA="0"
-           AC_MSG_WARN(-l$alberta_3d_libname not found!)])
+           AC_MSG_WARN(-lalberta_3d not found!)])
       fi
       ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"
     fi
