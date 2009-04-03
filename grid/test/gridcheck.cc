@@ -19,6 +19,8 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/referenceelements.hh>
 
+#include <dune/grid/genericgeometry/conversion.hh>
+
 #include "checkindexset.cc"
 
 #include <limits>
@@ -579,23 +581,27 @@ struct subIndexCheck
                    );
       }
 
-      if( g.levelIndexSet(e.level()).subIndex(e,i,cd)
+      typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int gi = Numbering::template dune2generic< cd >( tid, i );
+
+      if( g.levelIndexSet(e.level()).subIndex(e,gi,cd)
           != g.levelIndexSet(e.level()).template subIndex<cd>(e,i) )
       {
         int id_e =
           g.levelIndexSet(e.level()).index(e);
         int subid_e_i =
           g.levelIndexSet(e.level()).template subIndex<cd>(e,i);
+
         int subid_e_i_cd =
-          g.levelIndexSet(e.level()).subIndex(e,i,cd);
-        DUNE_THROW(CheckError,
-                   "g.levelIndexSet.subIndex(e,i,cd) "
-                   << "== g.levelIndexSet.template subIndex<cd>(e,i) failed "
-                   << "[with cd=" << cd << ", i=" << i << "]"
-                   << " ... index(e)=" << id_e
-                   << " ... subIndex<cd>(e,i)=" << subid_e_i
-                   << " ... subIndex(e,i,cd)=" << subid_e_i_cd
-                   );
+          g.levelIndexSet(e.level()).subIndex(e,gi,cd);
+        std::cerr << "g.levelIndexSet.subIndex(e,dune2generic(i),cd) "
+                  << "== g.levelIndexSet.template subIndex<cd>(e,i) failed "
+                  << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
+        std::cerr << " ... index(e)=" << id_e << std::endl;
+        std::cerr << " ... subIndex<cd>(e,i)=" << subid_e_i << std::endl;
+        std::cerr << " ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
+        assert( false );
       }
 
     }

@@ -451,8 +451,16 @@ namespace Dune
           // the subIndex and the index for subEntity must be the same
           assert( vxidx == lset.index( *vxp ));
 
+          typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
+          const unsigned int tid = GenericGeometry::topologyId( it->type() );
+          const int gi = Numbering::template dune2generic< dim >( tid, i );
+
           // static and dynamic method must yield the same result
-          assert( vxidx == lset.subIndex(*it,i,dim));
+          if( vxidx != lset.subIndex( *it, gi, dim ) )
+          {
+            std::cerr << "Error: subIndex< dim >( entity, i ) != subIndex( entity, dune2generic( i ), dim )" << std::endl;
+            assert( vxidx == lset.subIndex( *it, gi, dim ) );
+          }
 
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
