@@ -419,6 +419,17 @@ namespace Dune
     }
   };
 
+
+
+  // GenericReferenceElements
+  // ------------------------
+
+  template< class ctype, int dim >
+  struct GenericReferenceElements
+  {
+    static GenericReferenceElementContainer< ctype, dim > general;
+  };
+
 }
 
 #endif
