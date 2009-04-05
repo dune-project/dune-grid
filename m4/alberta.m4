@@ -169,5 +169,4 @@ AC_DEFUN([DUNE_ALBERTA_DIMENSION],[
   fi
 
   AC_SUBST(ALBERTA_DIM, $variablealbertadim ) 
-  #AC_DEFINE_UNQUOTED(ALBERTA_DIM, $with_alberta_dim, [World dimension of ALBERTA grid])
 ])
