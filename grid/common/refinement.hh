@@ -116,6 +116,8 @@
     typedef Refinement;
 
     int index() const;
+    // Coords of the center of mass of the element
+    Refinement::CoordVector coords() const;
     Refinement::IndexVector vertexIndices() const;
    }
    @endcode
@@ -128,11 +130,11 @@
 
    @code
    // Include the necessary files
-   \#include <dune/grid/common/refinement.hh>
+   #include <dune/grid/common/refinement.hh>
 
    // If you know that you are only ever going to need one refinement
    // backend, you can include the corresponding file directly:
-   //\#include <dune/grid/common/refinement/hcube.cc>
+   //#include <dune/grid/common/refinement/hcube.cc>
 
    // Get yourself the Refinement you need:
    typedef Refinement<GeometryType::cube, SGrid<2, 2>::ctype, GeometryType::cube, 2> MyRefinement;

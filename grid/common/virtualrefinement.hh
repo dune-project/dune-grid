@@ -129,6 +129,8 @@
     typedef VirtualRefinement<dimension> Refinement;
 
     int index() const;
+    // Coords of the center of mass of the element
+    Refinement::CoordVector coords() const;
     Refinement::IndexVector vertexIndices() const;
    };
    @endcode
