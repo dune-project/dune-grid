@@ -20,21 +20,16 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/referenceelements.hh>
 
-
-// namespace base64
-// {
-// #include"cencode.c"
-// }
+#include "b64enc.hh"
 
 /** @file
-    @author Peter Bastian
+    @author Peter Bastian, Christian Engwer
     @brief Provides file i/o for the visualization toolkit
  */
 
 /**
-    put vtk io intro here ...
+   @todo put vtk io intro here ...
  */
-
 
 namespace Dune
 {
@@ -45,10 +40,14 @@ namespace Dune
     enum OutputType {
       /** @brief Output to the file is in ascii. */
       ascii,
-      /** @brief Output to the file is binary. */
+      /** @brief Output to the file is inline binary. */
       binary,
-      /** @brief Ouput is appended to the binary file. */
+      /** @brief Ouput is appended binary to the file. */
       binaryappended
+      // /** @brief Output to the file is compressed inline binary. */
+      // binarycompressed,
+      // /** @brief Ouput is compressed and appended to the file. */
+      // compressedappended
     };
     enum DataMode {
       /** @brief Output conforming data. */
@@ -690,10 +689,7 @@ namespace Dune
 
       // write process data
       std::ofstream file;
-      if( outputtype == VTKOptions::binaryappended )
-        file.open( pieceName.str().c_str(), std::ios::binary );
-      else
-        file.open( pieceName.str().c_str() );
+      file.open( pieceName.str().c_str(), std::ios::binary );
       writeDataFile( file );
       file.close();
 
@@ -825,10 +821,7 @@ namespace Dune
         sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, commRank, name);
       else
         sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, commRank, name);
-      if (outputtype==VTKOptions::binaryappended)
-        file.open(fullname,std::ios::binary);
-      else
-        file.open(fullname);
+      file.open(fullname,std::ios::binary);
       writeDataFile(file);
       file.close();
       gridView_.comm().barrier();
@@ -885,21 +878,16 @@ namespace Dune
                                const int commSize )
     {
       // xml header
-      s << "<?xml version=\"1.0\"?>" << std::endl;
+      s << "<?xml version=\"1.0\"?>\n";
 
       // VTKFile
-      if (n>1)
-        s << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
-      else
-        s << "<VTKFile type=\"PPolyData\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      s << "<VTKFile type=\"P" << getTypeString()
+        << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
       indentUp();
 
       // PUnstructuredGrid
       indent(s);
-      if (n>1)
-        s << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
-      else
-        s << "<PPolyData GhostLevel=\"0\">" << std::endl;
+      s << "<P" << getTypeString() << " GhostLevel=\"0\">\n";
       indentUp();
 
       // PPointData
@@ -916,21 +904,16 @@ namespace Dune
           s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
-      s << ">" << std::endl;
+      s << ">\n";
       indentUp();
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
         indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
         s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
-        if (outputtype==VTKOptions::ascii)
-          s << "format=\"ascii\"/>" << std::endl;
-        if (outputtype==VTKOptions::binary)
-          s << "format=\"binary\"/>" << std::endl;
-        if (outputtype==VTKOptions::binaryappended)
-          s << "format=\"appended\"/>" << std::endl;
+        s << "format=\"" << getFormatString() << "\"/>\n";
       }
       indentDown();
-      indent(s); s << "</PPointData>" << std::endl;
+      indent(s); s << "</PPointData>\n";
 
       // PCellData
       indent(s); s << "<PCellData";
@@ -946,34 +929,24 @@ namespace Dune
           s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
-      s << ">" << std::endl;
+      s << ">\n";
       indentUp();
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
         indent(s); s << "<PDataArray type=\"Float32\" Name=\"" << (*it)->name() << "\" ";
         s << "NumberOfComponents=\"" << ((*it)->ncomps()>1 ? 3 : 1) << "\" ";
-        if (outputtype==VTKOptions::ascii)
-          s << "format=\"ascii\"/>" << std::endl;
-        if (outputtype==VTKOptions::binary)
-          s << "format=\"binary\"/>" << std::endl;
-        if (outputtype==VTKOptions::binaryappended)
-          s << "format=\"appended\"/>" << std::endl;
+        s << "format=\"" << getFormatString() << "\"/>\n";
       }
       indentDown();
-      indent(s); s << "</PCellData>" << std::endl;
+      indent(s); s << "</PCellData>\n";
 
       // PPoints
-      indent(s); s << "<PPoints>" << std::endl;
+      indent(s); s << "<PPoints>\n";
       indentUp();
       indent(s); s << "<PDataArray type=\"Float32\" Name=\"Coordinates\" NumberOfComponents=\"" << "3" << "\" ";
-      if (outputtype==VTKOptions::ascii)
-        s << "format=\"ascii\"/>" << std::endl;
-      if (outputtype==VTKOptions::binary)
-        s << "format=\"binary\"/>" << std::endl;
-      if (outputtype==VTKOptions::binaryappended)
-        s << "format=\"appended\"/>" << std::endl;
+      s << "format=\"" << getFormatString() << "\"/>\n";
       indentDown();
-      indent(s); s << "</PPoints>" << std::endl;
+      indent(s); s << "</PPoints>\n";
 
       // Pieces
       for( int i = 0; i < commSize; ++i )
@@ -983,33 +956,30 @@ namespace Dune
           sprintf(fullname,"%s/s%04d:p%04d:%s.vtu",piecepath, commSize, i,piecename);
         else
           sprintf(fullname,"%s/s%04d:p%04d:%s.vtp",piecepath, commSize, i,piecename);
-        indent(s); s << "<Piece Source=\"" << fullname << "\"/>" << std::endl;
+        indent(s); s << "<Piece Source=\"" << fullname << "\"/>\n";
       }
 
       // /PUnstructuredGrid
       indentDown();
       indent(s);
-      if (n>1)
-        s << "</PUnstructuredGrid>" << std::endl;
-      else
-        s << "</PPolyData>" << std::endl;
+      s << "</P" << getTypeString() << ">\n";
 
       // /VTKFile
       indentDown();
-      s << "</VTKFile>" << std::endl;
+      s << "</VTKFile>\n";
+
+      s.flush();
     }
 
     //! write data file to stream
     void writeDataFile (std::ostream& s)
     {
       // xml header
-      s << "<?xml version=\"1.0\"?>" << std::endl;
+      s << "<?xml version=\"1.0\"?>\n";
 
       // VTKFile
-      if (n>1)
-        s << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
-      else
-        s << "<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+      s << "<VTKFile type=\"" << getTypeString()
+        << "\" version=\"0.1\" byte_order=\"" << getEndiannessString() << "\">\n";
       indentUp();
 
       // Grid characteristics
@@ -1023,21 +993,18 @@ namespace Dune
 
       // UnstructuredGrid
       indent(s);
-      if (n>1)
-        s << "<UnstructuredGrid>" << std::endl;
-      else
-        s << "<PolyData>" << std::endl;
+      s << "<" << getTypeString() << ">\n";
       indentUp();
 
       // Piece
       indent(s);
       if (n>1)
-        s << "<Piece NumberOfPoints=\"" << nvertices << "\" NumberOfCells=\"" << ncells << "\">" << std::endl;
+        s << "<Piece NumberOfPoints=\"" << nvertices << "\" NumberOfCells=\"" << ncells << "\">\n";
       else
         s << "<Piece NumberOfPoints=\"" << nvertices << "\""
           << " NumberOfVerts=\"0\""
           << " NumberOfLines=\"" << ncells << "\">"
-          << " NumberOfPolys=\"0\"" << std::endl;
+          << " NumberOfPolys=\"0\"\n";
       indentUp();
 
       // PointData
@@ -1054,15 +1021,12 @@ namespace Dune
 
       // /Piece
       indentDown();
-      indent(s); s << "</Piece>" << std::endl;
+      indent(s); s << "</Piece>\n";
 
       // /UnstructuredGrid
       indentDown();
       indent(s);
-      if (n>1)
-        s << "</UnstructuredGrid>" << std::endl;
-      else
-        s << "</PolyData>" << std::endl;
+      s << "</" << getTypeString() << ">\n";
 
       // write appended binary dat section
       if (outputtype==VTKOptions::binaryappended)
@@ -1070,12 +1034,42 @@ namespace Dune
 
       // /VTKFile
       indentDown();
-      s << "</VTKFile>" << std::endl;
+      s << "</VTKFile>\n";
+
+      s.flush();
 
       delete vertexmapper; number.clear();
     }
 
   protected:
+    std::string getEndiannessString() const
+    {
+      short i = 1;
+      if (reinterpret_cast<char*>(&i)[1] == 1)
+        return "BigEndian";
+      else
+        return "LittleEndian";
+    }
+
+    std::string getFormatString() const
+    {
+      if (outputtype==VTKOptions::ascii)
+        return "ascii";
+      if (outputtype==VTKOptions::binary)
+        return "binary";
+      if (outputtype==VTKOptions::binaryappended)
+        return "appended";
+      DUNE_THROW(IOError, "VTKWriter: unsupported OutputType" << outputtype);
+    }
+
+    std::string getTypeString() const
+    {
+      if (n==1)
+        return "PolyData";
+      else
+        return "UnstructuredGrid";
+    }
+
     //! count the vertices, cells and corners
     virtual void countEntities(int &nvertices, int &ncells, int &ncorners)
     {
@@ -1118,7 +1112,7 @@ namespace Dune
           s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
-      s << ">" << std::endl;
+      s << ">\n";
       indentUp();
       for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
       {
@@ -1134,7 +1128,8 @@ namespace Dune
         delete p;
       }
       indentDown();
-      indent(s); s << "</CellData>" << std::endl;
+      indent(s); s << "</CellData>\n";
+      s.flush();
     }
 
     //! write vertex data
@@ -1153,7 +1148,7 @@ namespace Dune
           s << " Vectors=\"" << (*it)->name() << "\"" ;
           break;
         }
-      s << ">" << std::endl;
+      s << ">\n";
       indentUp();
       for (FunctionIterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
       {
@@ -1169,13 +1164,14 @@ namespace Dune
         delete p;
       }
       indentDown();
-      indent(s); s << "</PointData>" << std::endl;
+      indent(s); s << "</PointData>\n";
+      s.flush();
     }
 
     //! write the positions of vertices
     virtual void writeGridPoints (std::ostream& s)
     {
-      indent(s); s << "<Points>" << std::endl;
+      indent(s); s << "<Points>\n";
       indentUp();
 
       VTKDataArrayWriter<float> *p = makeVTKDataArrayWriter<float>(s, "Coordinates", 3, 3*nvertices);
@@ -1191,7 +1187,8 @@ namespace Dune
       delete p;
 
       indentDown();
-      indent(s); s << "</Points>" << std::endl;
+      indent(s); s << "</Points>\n";
+      s.flush();
     }
 
     //! write the connectivity array
@@ -1199,9 +1196,9 @@ namespace Dune
     {
       indent(s);
       if (n>1)
-        s << "<Cells>" << std::endl;
+        s << "<Cells>\n";
       else
-        s << "<Lines>" << std::endl;
+        s << "<Lines>\n";
       indentUp();
 
       // connectivity
@@ -1237,15 +1234,16 @@ namespace Dune
       indentDown();
       indent(s);
       if (n>1)
-        s << "</Cells>" << std::endl;
+        s << "</Cells>\n";
       else
-        s << "</Lines>" << std::endl;
+        s << "</Lines>\n";
+      s.flush();
     }
 
     //! write the appended data sections
     virtual void writeAppendedData (std::ostream& s)
     {
-      indent(s); s << "<AppendedData encoding=\"raw\">" << std::endl;
+      indent(s); s << "<AppendedData encoding=\"raw\">\n";
       indentUp();
       indent(s); s << "_";   // indicates start of binary data
 
@@ -1353,7 +1351,8 @@ namespace Dune
 
       s << std::endl;
       indentDown();
-      indent(s); s << "</AppendedData>" << std::endl;
+      indent(s); s << "</AppendedData>\n";
+      s.flush();
     }
 
     //! base class for data array writers
@@ -1383,7 +1382,7 @@ namespace Dune
         if (ncomps>3)
           DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
         s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-        s << "format=\"ascii\">" << std::endl;
+        s << "format=\"ascii\">\n";
       }
 
       //! write one data element to output stream
@@ -1392,14 +1391,14 @@ namespace Dune
         typedef typename VTKTypeNameTraits<T>::PrintType PT;
         s << (PT) data << " ";
         counter++;
-        if (counter%numPerLine==0) s << std::endl;
+        if (counter%numPerLine==0) s << "\n";
       }
 
       //! finish output; writes end tag
       ~VTKAsciiDataArrayWriter ()
       {
         if (counter%numPerLine!=0) s << std::endl;
-        s << "</DataArray>" << std::endl;
+        s << "</DataArray>\n";
       }
 
     private:
@@ -1415,65 +1414,66 @@ namespace Dune
     public:
       //! make a new data array writer
       VTKBinaryDataArrayWriter (std::ostream& theStream, std::string name, int ncomps, int nitems)
-        : s(theStream),bufsize(4096),n(0)
+        : s(theStream)
       {
-        DUNE_THROW(IOError, "binary does not work yet, use binaryappended!");
         VTKTypeNameTraits<T> tn;
+        ncomps = (ncomps>1 ? 3 : 1);
         s << "<DataArray type=\"" << tn() << "\" Name=\"" << name << "\" ";
         //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
         if (ncomps>3)
           DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
-        s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-        s << "format=\"binary\">" << std::endl;
-        buffer = new char[bufsize*sizeof(T)];
-        code = new char[2*bufsize*sizeof(T)];
-        unsigned int size = nitems*sizeof(T);
-        char* p = reinterpret_cast<char*>(&size);
-        memcpy(buffer+n,p,sizeof(int));
-        n += sizeof(int);
-        //        base64::base64_init_encodestate(&_state);
+        s << "NumberOfComponents=\"" << ncomps << "\" ";
+        s << "format=\"binary\">\n";
+        // reset chunk
+        chunk.txt.read(0,0);
+        // store size
+        unsigned long int size = ncomps*nitems*sizeof(T);
+        b64enc(size);
+        flush();
       }
 
       //! write one data element to output stream
       void write (T data)
       {
-        if (n+sizeof(T)>bufsize)
-        {
-          // flush buffer
-          //          int codelength = base64::base64_encode_block(buffer,n,code,&_state);
-          //          s.write(code,codelength);
-          n=0;
-        }
-        char* p = reinterpret_cast<char*>(&data);
-        memcpy(buffer+n,p,sizeof(T));
-        n += sizeof(T);
+        b64enc(data);
       }
 
       //! finish output; writes end tag
       ~VTKBinaryDataArrayWriter ()
       {
-        //      int codelength;
-        if (n>0)
-        {
-          //          codelength = base64::base64_encode_block(buffer,n,code,&_state);
-          //          s.write(code,codelength);
-        }
-        //        codelength = base64::base64_encode_blockend(code,&_state);
-        //      s.write(code,codelength);
-        //        base64::base64_init_encodestate(&_state);
-        s << std::endl;
-        s << "</DataArray>" << std::endl;
-        delete [] code;
-        delete [] buffer;
+        flush();
+        s << "\n</DataArray>\n";
+        s.flush();
       }
 
     private:
+      template <class X>
+      void b64enc(X & data)
+      {
+        char* p = reinterpret_cast<char*>(&data);
+        for (size_t len = sizeof(X); len > 0; len--,p++)
+        {
+          chunk.txt.put(*p);
+          if (chunk.txt.size == 3)
+          {
+            chunk.data.write(obuf);
+            s.write(obuf,4);
+          }
+        }
+      }
+
+      void flush()
+      {
+        if (chunk.txt.size > 0)
+        {
+          chunk.data.write(obuf);
+          s.write(obuf,4);
+        }
+      }
+
       std::ostream& s;
-      //      base64::base64_encodestate _state;
-      size_t bufsize;
-      char* buffer;
-      char* code;
-      int n;
+      b64chunk chunk;
+      char obuf[4];
     };
 
     //! a streaming writer for data array tags, uses binary appended format
@@ -1491,7 +1491,7 @@ namespace Dune
         if (ncomps>3)
           DUNE_THROW(IOError, "VTKWriter does not support more than 3 components");
         s << "NumberOfComponents=\"" << (ncomps>1 ? 3 : 1) << "\" ";
-        s << "format=\"appended\" offset=\""<< bytecount << "\" />" << std::endl;
+        s << "format=\"appended\" offset=\""<< bytecount << "\" />\n";
         bytecount += 4;   // header
       }
 
