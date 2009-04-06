@@ -116,6 +116,31 @@ private:
   UserDataType &userDataReceive_;
 };
 
+
+template <class GridView>
+void checkConsistency(const GridView &gv)
+{
+  typedef typename GridView::template Codim<0>::Entity Element;
+  typedef typename GridView::template Codim<0>::Iterator Iterator;
+  typedef typename Element::LeafIntersectionIterator IntersectionIterator;
+  Iterator it = gv.template begin<0>();
+  const Iterator &endIt = gv.template end<0>();
+  for (; it != endIt; ++it) {
+    IntersectionIterator isIt = it->ileafbegin();
+    const IntersectionIterator &isEndIt = it->ileafend();
+    int n = 0;
+    for (; isIt != isEndIt; ++isIt) {
+      isIt->boundary();
+      isIt->inside();
+      if (isIt->neighbor()) {
+        isIt->outside();
+      }
+      ++ n;
+    };
+    assert(n == 4);     // rectangles
+  }
+};
+
 int main (int argc , char **argv) try
 {
   // initialize MPI, finalize is done automatically on exit
@@ -207,6 +232,10 @@ int main (int argc , char **argv) try
 
   std::cout << "Level index set has " << levelMapper.size() << " entities\n";
   std::cout << "Leaf index set has " << leafMapper.size() << " entities\n";
+
+  // iterate over all elements and element intersections
+  checkConsistency(level0GridView);
+  checkConsistency(leafGridView);
 
   // create the user data arrays
   typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;

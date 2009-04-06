@@ -301,11 +301,7 @@ namespace Dune {
 
     //! returns true if Entity has NO children
     bool isLeaf() const {
-      Dune::PartitionType piType = this->partitionType();
-
-      // HACK: ghosts entities are never leafs in UG, in DUNE can be
-      //       leafs. Maybe this could also be a bug in UG...
-      return UG_NS<dim>::isLeaf(target_) || piType == GhostEntity;
+      return UG_NS<dim>::isLeaf(target_);
     }
 
     //! returns true if element is of regular type

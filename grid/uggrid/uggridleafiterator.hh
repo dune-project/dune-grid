@@ -73,15 +73,10 @@ namespace Dune {
      */
     bool entityOK_()
     {
-      Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
-      // HACK: ghosts entities are never leafs in UG, in DUNE can be
-      //       leafs
-      if (entityPIType != GhostEntity &&
-          !UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
-      {
+      if (!UG_NS<dim>::isLeaf(this->virtualEntity_.getTarget()))
         return false;
-      }
 
+      Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
       if (pitype == All_Partition)
         return true;
 
