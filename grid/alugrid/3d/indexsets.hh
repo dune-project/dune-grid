@@ -12,7 +12,7 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/alugrid/dynamiccodimsubindexid.hh>
+#include <dune/grid/common/dynamicsubindexid.hh>
 
 
 //- Local includes
@@ -20,8 +20,10 @@
 #include "topology.hh"
 #include "alu3diterators.hh"
 
-namespace Dune {
+namespace Dune
+{
 
+#if 0
   //! HierarchicIndexSet uses LeafIterator tpyes for all codims and partition types
   template <class GridImp>
   struct ALU3dGridHierarchicIteratorTypes
@@ -37,6 +39,7 @@ namespace Dune {
       };
     };
   };
+#endif
 
   // Forward declarations
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -51,13 +54,18 @@ namespace Dune {
     public IndexSet <ALU3dGrid<dim,dimworld,elType>,
         ALU3dGridHierarchicIndexSet<dim,dimworld,elType> >
   {
+    typedef ALU3dGridHierarchicIndexSet< dim, dimworld, elType > This;
+
     typedef ALU3dGrid<dim,dimworld,elType> GridType;
     enum { numCodim = dim+1 }; // i.e. 4
 
-    // constructor
-    ALU3dGridHierarchicIndexSet(const GridType & grid) : grid_(grid)
-    {}
     friend class ALU3dGrid<dim,dimworld,elType>;
+
+    // constructor
+    ALU3dGridHierarchicIndexSet( const GridType &grid )
+      : grid_( grid ),
+        dynamicSubIndex_( *this )
+    {}
 
   public:
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
@@ -78,11 +86,17 @@ namespace Dune {
     }
 
     //! return subIndex of given entity
-    template <int cd>
-    int subIndex (const EntityCodim0Type & ep, int i) const
+    template< int codim >
+    int subIndex ( const EntityCodim0Type &e, int i ) const
     {
-      const ALU3dGridEntity<0,dim,const GridType> & en = (grid_.getRealImplementation(ep));
-      return en.template getSubIndex<cd>(i);
+      typedef ALU3dGridEntity< 0, dim, const GridType > EntityImpl;
+      const EntityImpl &entity = GridType::getRealImplementation( e );
+      return entity.template getSubIndex< codim >( i );
+    }
+
+    int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1
@@ -108,6 +122,7 @@ namespace Dune {
       return grid_.geomTypes(codim);
     }
 
+#if 0
     /** @brief Iterator to one past the last entity of given codim for partition type
      */
     template<int cd, PartitionIteratorType pitype>
@@ -125,6 +140,7 @@ namespace Dune {
     {
       return grid_.template leafbegin<cd,pitype> ();
     }
+#endif
 
     //! return true because all entities are contained in this set
     template <class EntityType>
@@ -133,6 +149,9 @@ namespace Dune {
   private:
     // our Grid
     const GridType & grid_;
+
+    // dynamic caller for subIndex
+    const DynamicSubIndex< GridType, This > dynamicSubIndex_;
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -839,20 +858,24 @@ namespace Dune {
     }
 
     //! return subId of given entity
-    template <int cd>
-    IdType subId (const EntityCodim0Type & ep, int i) const
+    template< int codim >
+    IdType subId ( const EntityCodim0Type &e, int i ) const
     {
-      assert( ids_[cd].find( hset_.template subIndex<cd>(ep,i) ) != ids_[cd].end() );
-      const IdType & macroId = ids_[cd][ hset_.template subIndex<cd>(ep,i) ];
+      const int hIndex = hset_.template subIndex< codim >( e, i );
+      assert( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
+      const IdType &macroId = ids_[ codim ][ hIndex ];
       assert( macroId.isValid() );
-      return getId(macroId);
+      return getId( macroId );
     }
 
     //! return subId of given entity
-    IdType subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    IdType subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      typedef ALU3dGridGlobalIdSet<dim,dimworld, elType> IdSet;
-      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
+      const int hIndex = hset_.subIndex( e, i, codim );
+      assert( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
+      const IdType &macroId = ids_[ codim ][ hIndex ];
+      assert( macroId.isValid() );
+      return getId( macroId );
     }
 
     template <int d, ALU3dGridElementType element_t >
@@ -967,6 +990,8 @@ namespace Dune {
         int >
     , public ALU3DSPACE AdaptRestrictProlongType
   {
+    typedef ALU3dGridLocalIdSet< dim, dimworld, elType > This;
+
     typedef ALU3DSPACE HElementType HElementType;
     typedef ALU3DSPACE HBndSegType HBndSegType;
 
@@ -1011,18 +1036,18 @@ namespace Dune {
     }
 
     //! return subId of given entity
-    template <int cd>
-    int subId (const EntityCodim0Type & ep, int i) const
+    template< int codim >
+    int subId ( const EntityCodim0Type &e, int i ) const
     {
-      assert( hset_.size(cd) < codimMultiplier );
-      return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codimStart_[ codim ] + hset_.template subIndex<codim >( e, i );
     }
 
     //! return subId of given entity
-    IdType subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    IdType subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      typedef ALU3dGridLocalIdSet<dim,dimworld, elType> IdSet;
-      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
     }
 
     // dummy functions

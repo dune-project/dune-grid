@@ -197,20 +197,20 @@ namespace Dune {
   class ALU3dGridEntity<0,dim,GridImp>
     : public EntityDefaultImplementation<0,dim,GridImp,ALU3dGridEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
-    typedef typename ALU3dImplTraits<GridImp::elementType>::GEOElementType GEOElementType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::PLLBndFaceType PLLBndFaceType;
-    typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
+    static const int dimworld = remove_const< GridImp >::type::dimensionworld;
+    static const ALU3dGridElementType elementType = remove_const< GridImp >::type::elementType;
 
-    enum { refine_element_t =
-             ALU3dImplTraits<GridImp::elementType>::refine_element_t };
-    enum { coarse_element_t =
-             ALU3dImplTraits<GridImp::elementType>::coarse_element_t };
-    enum { nosplit_element_t = ALU3dImplTraits<GridImp::elementType>::nosplit_element_t };
+    typedef typename ALU3dImplTraits< elementType >::GEOElementType GEOElementType;
+    typedef typename ALU3dImplTraits< elementType >::PLLBndFaceType PLLBndFaceType;
+    typedef typename ALU3dImplTraits< elementType >::IMPLElementType IMPLElementType;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::MarkRuleType MarkRuleType;
+    enum { refine_element_t = ALU3dImplTraits< elementType >::refine_element_t };
+    enum { coarse_element_t = ALU3dImplTraits< elementType >::coarse_element_t };
+    enum { nosplit_element_t = ALU3dImplTraits< elementType >::nosplit_element_t };
 
-    friend class ALU3dGrid < dim , dimworld, GridImp::elementType>;
+    typedef typename ALU3dImplTraits< elementType >::MarkRuleType MarkRuleType;
+
+    friend class ALU3dGrid< dim, dimworld, elementType >;
     friend class ALU3dGridIntersectionIterator < GridImp >;
     friend class ALU3dGridIntersectionIterator < const GridImp >;
     friend class ALU3dGridHierarchicIterator   < const GridImp >;
