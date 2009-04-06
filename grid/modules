@@ -37,10 +37,14 @@
 	  @ingroup GridInterface */
   
   /**
-     @defgroup GridReferenceElements Reference Elements
+     @defgroup GridGenericReferenceElements Generic Reference Elements
+
      @ingroup Grid
   */
-     
+    /** @defgroup GridReferenceElements Old Dune Reference Elements
+	@ingroup GridGenericReferenceElements */
+    /** @defgroup GridDuneREToGenericRE Transition to Generic Reference Elements
+	@ingroup GridGenericReferenceElements */
 
   /**
      @defgroup Mapper Mappers

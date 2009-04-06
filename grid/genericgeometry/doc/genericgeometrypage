@@ -1,5 +1,6 @@
 /**
 \page GridGenericGeometry Generic Geometries
+@ingroup GridGenericReferenceElements
 
 \section GridGenericGeometryIntroduction Introduction
 
@@ -9,7 +10,7 @@ define geometries by prescibing a set of points in
 the space \f$ \mathbf{R}^w \f$.
 
 The basic building block for these elements is given
-by a recursion formular which assignes to each
+by a recursion formula which assignes to each
 set \f$ E \subset \mathbf{R}^d \f$ either 
 a pyramid element 
 \f$ E^\vert\subset \mathbf{R}^{d+1} \f$
@@ -38,16 +39,16 @@ In general if
 and if 
 \f$ S_d \f$ is a simplex then \f$ S_d^\vert \f$ is also a simplex.
 
-Based on the recursion formular we can also define 
+Based on the recursion formula we can also define 
 a numbering of the subentities and also of the
 sub-subentities of \f$ E^\vert \f$ or \f$ E^\circ \f$
 based on a numbering of \f$ E \f$. For the
 subentities of codimension \f$ c \f$ we use the numbering
 - \f$ E^\vert \f$:
-  we first numbers are assinged to the entities parallel
+  the first numbers are assinged to the entities parallel
   to the \f$ x_d-\f$axis in the same order
   as the subentites of the same codimension in \f$ E \f$;
-  then the subentities of codimension \f$ c-1 \f$ 
+  then to the subentities of codimension \f$ c-1 \f$ 
   in the bottom followed by those in the top. 
 - \f$ E^\circ \f$:
   in this case we first number the subentities of 
@@ -96,7 +97,7 @@ the volume \f$ |\hat{E}| \f$ and the normals
 \f$ n_i(\hat{E}) \f$ 
 to all codimension one subelements.
 
-The recursion formular is also used to define mappings
+The recursion formula is also used to define mappings
 from reference elements \f$ E \f$ to general polytop
 given by a set of coordinates for the corner points -
 together with the mapping \f$ \Phi \f$,
@@ -126,7 +127,7 @@ satisfies \f$ Q Q^T = I \f$:
 .
 The next sections describe the details of the construction.
 
-\section GridGenericGeometryTopology Referemce Topology
+\section GridGenericGeometryTopology Reference Topology
 
 We define the set \f$\mathcal{T}\f$ of reference topologies by the following 
 rules:
@@ -182,7 +183,7 @@ for \f$i=1,\dots,s_c(T)\f$:
 .
 
 
-\section GridGenericGeometrgElement Referemce Domains
+\section GridGenericGeometrgElement Reference Domains
 
 For each reference topology \f$T\f$ we assosiate the set of corners
 \f$\mathcal{C}(T):=(p_i(T))_{1=1}^{s_d(T)}\subset\mathbf{R}^d(T)\f$ 
