@@ -350,49 +350,4 @@ namespace Dune
 
 #include "intersection.hh"
 
-namespace Dune {
-
-  template<class GridImp, template<class> class IntersectionAndIteratorImp>
-  class IntersectionIteratorDefaultImplementation
-  {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
-    typedef typename GridImp::ctype ct;
-  public:
-    //! make the constructor deprecated
-    IntersectionIteratorDefaultImplementation() DUNE_DEPRECATED {}
-
-    typedef Dune::Intersection<const GridImp, IntersectionAndIteratorImp> Intersection;
-    typedef IntersectionAndIteratorImp<const GridImp> ImplementationType;
-    //! return unit outer normal, this should be dependent on
-    //! local coordinates for higher order boundary
-    //! the normal is scaled with the integration element of the intersection.
-    FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
-    {
-      FieldVector<ct, dimworld> n = unitOuterNormal(local);
-      n *= asImp().intersectionGlobal().integrationElement(local);
-      return n;
-    }
-    //! return unit outer normal
-    FieldVector<ct, dimworld> unitOuterNormal (const FieldVector<ct, dim-1>& local) const
-    {
-      FieldVector<ct, dimworld> n = asImp().outerNormal(local);
-      n /= n.two_norm();
-      return n;
-    }
-    //! \brief dereferencing
-    const Intersection & dereference() const
-    {
-      return reinterpret_cast<const Intersection&>(*this);
-    }
-  private:
-    //!  Barton-Nackman trick
-    ImplementationType& asImp ()
-    {return static_cast<ImplementationType&>(*this);}
-    const ImplementationType& asImp () const
-    {return static_cast<const ImplementationType&>(*this);}
-  } DUNE_DEPRECATED;
-
-} // namespace Dune
-
 #endif // DUNE_GRID_INTERSECTIONITERATOR_HH

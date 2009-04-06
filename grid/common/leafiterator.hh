@@ -43,28 +43,6 @@ namespace Dune
     //@}
   };
 
-  //**********************************************************************
-  /**
-     @brief Default Implementations for LevelIteratorImp
-
-     @ingroup GridDevel
-   */
-  template<int codim, PartitionIteratorType pitype, class GridImp,
-      template<int,PartitionIteratorType,class> class LeafIteratorImp>
-  class LeafIteratorDefaultImplementation
-  {
-  public:
-    //! make the constructor deprecated
-    LeafIteratorDefaultImplementation() DUNE_DEPRECATED {}
-
-  private:
-    //!  Barton-Nackman trick
-    LeafIteratorImp<codim,pitype,GridImp>& asImp ()
-    {return static_cast<LeafIteratorImp<codim,pitype,GridImp>&>(*this);}
-    const LeafIteratorImp<codim,pitype,GridImp>& asImp () const
-    {return static_cast<const LeafIteratorImp<codim,pitype,GridImp>&>(*this);}
-  } DUNE_DEPRECATED;
-
 }
 
 #endif // DUNE_GRID_LEAFITERATOR_HH

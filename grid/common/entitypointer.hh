@@ -287,36 +287,6 @@ namespace Dune
 
   };
 
-  //**********************************************************************
-  //
-  //  --EntityPointerDefault
-  //
-  //! Default implementation of EntityPointer.
-  //**********************************************************************
-  template<int codim, class GridImp, class IteratorImp>
-  class EntityPointerDefaultImplementation
-  {
-  public:
-    //! export the type of the EntityPointer Implementation.
-    //! Necessary for the typeconversion between Iterators and EntityPointer
-    typedef IteratorImp EntityPointerImp;
-
-    //! codimension of entity pointer
-    enum { codimension = codim };
-
-    //! make the constructor deprecated
-    EntityPointerDefaultImplementation() DUNE_DEPRECATED {}
-
-  private:
-    //!  Barton-Nackman trick
-    IteratorImp& asImp () {
-      return static_cast<IteratorImp&>(*this);
-    }
-    const IteratorImp& asImp () const {
-      return static_cast<const IteratorImp&>(*this);
-    }
-  } DUNE_DEPRECATED; // end EntityPointerDefaultImplementation
-
 }
 
 #endif // DUNE_GRID_ENTITYPOINTER_HH
