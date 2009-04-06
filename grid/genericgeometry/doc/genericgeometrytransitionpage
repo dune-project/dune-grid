@@ -1,0 +1,68 @@
+/**
+@page Transition to the Generic Reference Element
+@ingroup GridDuneREToGenericRE 
+
+@subsection GridDuneTrans1 New Header File and Class Name
+To obtain the new reference element include the file
+and use the new reference element class
+@code
+  dune/grid/common/genericreferenceelements.hh
+  Dune::GenericReferenceElements
+  Dune::GenericReferenceElement
+@endcode
+instead of 
+@code
+  dune/grid/common/referenceelements.hh
+  Dune::ReferenceElements
+  Dune::ReferenceElement
+@endcode
+The interface of the GenericReferenceElements and 
+of the GenericReferenceElement is the same
+as before.
+
+@subsection GridDuneTrans2 New Subentity Numbering
+<table>
+<tr>
+<td>class</td><td>deprecated method with old numbering</td><td>method with new numbering</td>
+</tr><tr>
+<td>Entity<0></td>    <td>entity</td>               <td>subEntity</td>
+</tr><tr>
+<td>Intersection</td> <td>numberInSelf</td>         <td>indexInInside</td>
+</tr><tr>
+<td></td>             <td>numberInNeighbor</td>     <td>indexInOutside</td>
+</tr><tr>
+<td>IndexSet</td>     <td>subIndex<c>(...)</td>     <td>subIndex(...,c)</td>      
+</tr><tr>
+<td>IdSet</td>        <td>subId<c>(...)</td>        <td>subId(...,c)</td>
+</tr><tr>
+<td>Geometry</td>     <td>operator[] (returns reference) </td> <td>corner (returns value)</td>
+</tr>
+</table>
+
+@subsection GridDuneTrans3 Numbering Conversion Utility
+To map a new subentity number to an old number or vice versa
+use the methods provided by the static methods
+of the class GenericGeometry::MapNumberingProvider.
+To obtain for a given reference element of a fixed 
+dimension and dune geometry type 
+the new number for a new subentity of given codimension
+given the old one (or vice versa) use
+@code
+  // get class with static methods 
+  // using the dimension of the reference elemments
+    typedef GenericGeometry::MapNumberingProvider< dimension > 
+            Numbering;
+
+  // obtain the number of the dune reference element 
+  // in the new numbering provided by the generic geometries
+    const unsigned int tid = 
+          GenericGeometry::topologyId( duneGeometryType );
+
+  // for a subentity<codimension,oldNumber> get the new number
+    newNumber = Numbering::template 
+                dune2generic< codimension >( tid, oldNumber );
+  // for a subentity<codimension,newNumber> get the old number
+    oldNumber = Numbering::template 
+                generic2dune< codimension >( tid, newNumber );
+@endcode
+**/

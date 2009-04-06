@@ -463,6 +463,7 @@ WARN_LOGFILE           =
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
                          @top_srcdir@/grid/genericgeometry/doc/genericgeometrypage \
+                         @top_srcdir@/grid/genericgeometry/doc/genericgeometrytransitionpage \
                          @top_srcdir@/grid/modules \
                          @top_srcdir@/grid/albertagrid \
                          @top_srcdir@/grid/albertagrid.hh \
