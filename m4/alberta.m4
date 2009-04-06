@@ -95,13 +95,15 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
           [HAVE_ALBERTA="0"
            AC_MSG_WARN(-lalberta_3d not found!)])
       fi
-      ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_LIBS $ALBERTA_EXTRA"
+      ALBERTA_BASE_LIBS="$ALBERTA_LIBS $ALBERTA_EXTRA"
+      ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_BASE_LIBS"
     fi
 
   fi  # end of alberta check (--without wasn't set)
 
   # survived all tests?
   if test "x$HAVE_ALBERTA" = "x1" ; then
+    AC_SUBST(ALBERTA_BASE_LIBS, $ALBERTA_BASE_LIBS)
     AC_SUBST(ALBERTA_LIBS, $ALBERTA_LIBS)
     AC_SUBST(ALBERTA_LDFLAGS, $ALBERTA_LDFLAGS)
     AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, $ALBERTA_INCLUDE_CPPFLAGS)
@@ -127,6 +129,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
   else
+    AC_SUBST(ALBERTA_BASE_LIBS, "")
     AC_SUBST(ALBERTA_LIBS, "")
     AC_SUBST(ALBERTA_LDFLAGS, "")
     AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, "")

@@ -3,7 +3,6 @@
 // AlbertaReader needs ALBERTA 2.0 or newer
 // (otherwise just pass this check)
 #if HAVE_ALBERTA
-#if DUNE_ALBERTA_VERSION >= 0x200
 
 #include <dune/grid/albertagrid/albertareader.hh>
 
@@ -27,17 +26,6 @@ void checkAlbertaReader ()
   //GridFactory< Grid >::destroyGrid( grid );
   delete grid;
 }
-
-#else
-
-template< class Grid >
-void checkAlbertaReader ()
-{
-  std::cerr << "Warning: Skipping AlbertaReader check, "
-            << "because AlbertaReader is not available for ALBERTA 1.2." << std::endl;
-}
-
-#endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
 #else
 
