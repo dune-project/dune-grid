@@ -6,8 +6,6 @@
 
 if ALBERTA
   APROG = test-alberta
-
-  ALBERTA_DIM = $(GRIDDIM)
 endif
 
 if ALUGRID
@@ -26,6 +24,8 @@ else
   DGFALU_UGGRID =
 endif
 endif
+
+ALBERTA_DIM = $(GRIDDIM)
 
 #
 ## define the lists of tests to build and run

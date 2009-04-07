@@ -12,14 +12,16 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/alugrid/dynamiccodimsubindexid.hh>
+#include <dune/grid/common/dynamicsubindexid.hh>
 
 
 //- Local includes
 #include "alu2dinclude.hh"
 
-namespace Dune {
+namespace Dune
+{
 
+#if 0
   //! HierarchicIndexSet uses LeafIterator tpyes for all codims and partition types
   template <class GridImp>
   struct ALU2dGridHierarchicIteratorTypes
@@ -35,13 +37,22 @@ namespace Dune {
       };
     };
   };
+#endif
 
-  // Forward declarations
+
+  // External Forward declarations
+  // -----------------------------
+
   template <int dim, int dimworld>
   class ALU2dGrid;
 
   template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
+
+
+
+  // ALU2dGridHierarchicIndexSet
+  // ---------------------------
 
   //! hierarchic index set of ALU2dGrid
   template <int dim, int dimworld>
@@ -49,12 +60,17 @@ namespace Dune {
     public IndexSet <ALU2dGrid<dim,dimworld>,
         ALU2dGridHierarchicIndexSet<dim,dimworld> >
   {
+    typedef ALU2dGridHierarchicIndexSet< dim, dimworld > This;
+
     typedef ALU2dGrid<dim,dimworld> GridType;
     enum { numCodim = dim+1 }; // i.e. 3
 
-    ALU2dGridHierarchicIndexSet(const GridType & grid) : grid_(grid)
-    {}
     friend class ALU2dGrid<dim,dimworld>;
+
+    ALU2dGridHierarchicIndexSet( const GridType &grid )
+      : grid_( grid ),
+        dynamicSubIndex_( *this )
+    {}
 
   public:
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
@@ -74,11 +90,17 @@ namespace Dune {
     }
 
     //! return subIndex of given entity
-    template <int cd>
-    int subIndex (const EntityCodim0Type & ep, int i) const
+    template< int codim >
+    int subIndex ( const EntityCodim0Type &e, int i ) const
     {
-      const ALU2dGridEntity<0,dim,const GridType> & en = (grid_.getRealImplementation(ep));
-      return en.template getSubIndex<cd>(i);
+      typedef ALU2dGridEntity< 0, dim, const GridType > EntityImpl;
+      const EntityImpl &entity = grid_.getRealImplementation( e );
+      return entity.template getSubIndex< codim >( i );
+    }
+
+    int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1
@@ -105,6 +127,7 @@ namespace Dune {
       return grid_.geomTypes(codim);
     }
 
+#if 0
     /** @brief Iterator to one past the last entity of given codim for partition type
      */
     template<int cd, PartitionIteratorType pitype>
@@ -122,6 +145,7 @@ namespace Dune {
     {
       return grid_.template leafbegin<cd,pitype> ();
     }
+#endif
 
     //! return true because all entities are contained in this set
     template <class EntityType>
@@ -130,6 +154,9 @@ namespace Dune {
   private:
     // our Grid
     const GridType & grid_;
+
+    // dynamic caller for subIndex
+    const DynamicSubIndex< GridType, This > dynamicSubIndex_;
   };
 
   //*****************************************************************
@@ -603,20 +630,19 @@ namespace Dune {
     }
 
     //! return subId of given entity
-    template <int cd>
-    int subId (const EntityCodim0Type & ep, int i) const
+    template< int codim >
+    int subId ( const EntityCodim0Type &e, int i ) const
     {
-      assert( hset_.size(cd) < codimMultiplier );
-      return codimStart_[cd] + hset_.template subIndex<cd>(ep,i);
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codimStart_[ codim ] + hset_.template subIndex< codim >( e, i );
     }
 
     //! return subId of given entity
-    int subId (const EntityCodim0Type & ep, int i, unsigned int cd) const
+    int subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      typedef ALU2dGridLocalIdSet<dim,dimworld> IdSet;
-      return DynamicCodimSubId<IdSet,EntityCodim0Type,dim>::get(*this,ep,i,cd);
+      assert( hset_.size( codim ) < codimMultiplier );
+      return codimStart_[ codim ] + hset_.template subIndex( e, i, codim );
     }
-
 
   private:
     // our HierarchicIndexSet
