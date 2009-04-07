@@ -1,8 +1,7 @@
 /**
-@page Transition to the Generic Reference Element
-@ingroup GridDuneREToGenericRE 
+@addtogroup GridDuneREToGenericRE 
 
-@subsection GridDuneTrans1 New Header File and Class Name
+@section GridDuneTrans1 New Header File and Class Name
 To obtain the new reference element include the file
 and use the new reference element class
 @code
@@ -20,7 +19,7 @@ The interface of the GenericReferenceElements and
 of the GenericReferenceElement is the same
 as before.
 
-@subsection GridDuneTrans2 New Subentity Numbering
+@section GridDuneTrans2 New Subentity Numbering
 <table>
 <tr>
 <td>class</td><td>deprecated method with old numbering</td><td>method with new numbering</td>
@@ -39,7 +38,7 @@ as before.
 </tr>
 </table>
 
-@subsection GridDuneTrans3 Numbering Conversion Utility
+@section GridDuneTrans3 Numbering Conversion Utility
 To map a new subentity number to an old number or vice versa
 use the methods provided by the static methods
 of the class GenericGeometry::MapNumberingProvider.
