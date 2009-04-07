@@ -21,26 +21,7 @@
 namespace Dune
 {
 
-#if 0
-  //! HierarchicIndexSet uses LeafIterator tpyes for all codims and partition types
-  template <class GridImp>
-  struct ALU2dGridHierarchicIteratorTypes
-  {
-    //! The types of the iterator
-    template<int cd>
-    struct Codim
-    {
-      template<PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
-      };
-    };
-  };
-#endif
-
-
-  // External Forward declarations
+  // External Forward Declarations
   // -----------------------------
 
   template <int dim, int dimworld>
@@ -126,26 +107,6 @@ namespace Dune
     {
       return grid_.geomTypes(codim);
     }
-
-#if 0
-    /** @brief Iterator to one past the last entity of given codim for partition type
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename ALU2dGridHierarchicIteratorTypes<GridType>::template Codim<cd>::
-    template Partition<pitype>::Iterator end () const
-    {
-      return grid_.template leafend<cd,pitype> ();
-    }
-
-    /** @brief Iterator to first entity of given codimension and partition type.
-     */
-    template<int cd, PartitionIteratorType pitype>
-    typename ALU2dGridHierarchicIteratorTypes<GridType>::template Codim<cd>::
-    template Partition<pitype>::Iterator begin () const
-    {
-      return grid_.template leafbegin<cd,pitype> ();
-    }
-#endif
 
     //! return true because all entities are contained in this set
     template <class EntityType>
