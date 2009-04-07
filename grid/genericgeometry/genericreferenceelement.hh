@@ -52,7 +52,7 @@ namespace Dune
 
   public:
     template< int codim >
-    class Codim
+    struct Codim
     {
       typedef GenericGeometry :: HybridMapping< dim-codim, GeometryTraits > Mapping;
     };
