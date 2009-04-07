@@ -426,9 +426,8 @@ namespace Dune
       }
 
     public:
-      template< unsigned int codim >
       static unsigned int
-      dune2generic ( unsigned int topologyId, unsigned int i )
+      dune2generic ( unsigned int topologyId, unsigned int i, unsigned int codim )
       {
         assert( topologyId < numTopologies );
         return instance().dune2generic_[ topologyId ][ codim ][ i ];
@@ -436,10 +435,23 @@ namespace Dune
 
       template< unsigned int codim >
       static unsigned int
-      generic2dune ( unsigned int topologyId, unsigned int i )
+      dune2generic ( unsigned int topologyId, unsigned int i )
+      {
+        return dune2generic( topologyId, i, codim );
+      }
+
+      static unsigned int
+      generic2dune ( unsigned int topologyId, unsigned int i, unsigned int codim )
       {
         assert( topologyId < numTopologies );
         return instance().generic2dune_[ topologyId ][ codim ][ i ];
+      }
+
+      template< unsigned int codim >
+      static unsigned int
+      generic2dune ( unsigned int topologyId, unsigned int i )
+      {
+        return generic2dune( topologyId, i, codim );
       }
     };
 
