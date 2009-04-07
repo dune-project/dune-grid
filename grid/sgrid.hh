@@ -16,6 +16,7 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/common/dynamicsubindexid.hh>
 
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for
@@ -1051,10 +1052,16 @@ namespace Dune {
   template<class GridImp>
   class SGridLevelIndexSet : public IndexSet<GridImp,SGridLevelIndexSet<GridImp> >
   {
+    typedef SGridLevelIndexSet< GridImp > This;
+    typedef IndexSet< GridImp, This > Base;
+
   public:
 
     //! constructor stores reference to a grid and level
-    SGridLevelIndexSet (const GridImp& g, int l) : grid(g), level(l)
+    SGridLevelIndexSet ( const GridImp &g, int l )
+      : grid( g ),
+        level( l ),
+        dynamicSubIndex_( *this )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -1073,6 +1080,12 @@ namespace Dune {
     int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
+    }
+
+    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     // return true if the given entity is contained in \f$E\f$.
@@ -1111,6 +1124,7 @@ namespace Dune {
     const GridImp& grid;
     int level;
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
+    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
   // Leaf Index Set
@@ -1118,12 +1132,16 @@ namespace Dune {
   template<class GridImp>
   class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp> >
   {
-    typedef IndexSet<GridImp,SGridLeafIndexSet<GridImp> > Base;
-    enum {dim = remove_const<GridImp>::type::dimension};
-  public:
+    typedef SGridLeafIndexSet< GridImp > This;
+    typedef IndexSet< GridImp, This > Base;
 
+    static const int dim = remove_const< GridImp >::type::dimension;
+
+  public:
     //! constructor stores reference to a grid and level
-    SGridLeafIndexSet (const GridImp& g) : grid(g)
+    explicit SGridLeafIndexSet ( const GridImp &g )
+      : grid( g ),
+        dynamicSubIndex_( *this )
     {
       // contains a single element type;
       for (int codim=0; codim<=dim; codim++)
@@ -1150,6 +1168,12 @@ namespace Dune {
     int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subCompressedLeafIndex<cc>(i);
+    }
+
+    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     //! get number of entities of given type
@@ -1180,6 +1204,7 @@ namespace Dune {
   private:
     const GridImp& grid;
     std::vector<GeometryType> mytypes[dim+1];
+    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -1198,6 +1223,8 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
   {
+    typedef SGridGlobalIdSet< GridImp > This;
+
   public:
     //! define the type used for persisitent indices
     /*
@@ -1207,7 +1234,10 @@ namespace Dune {
     typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
 
     //! constructor stores reference to a grid
-    SGridGlobalIdSet (const GridImp& g) : grid(g) {}
+    explicit SGridGlobalIdSet ( const GridImp &g )
+      : grid( g ),
+        dynamicSubId_( *this )
+    {}
 
     //! get id of an entity
     /*
@@ -1231,8 +1261,15 @@ namespace Dune {
       return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
     }
 
+    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim ) const
+    {
+      return dynamicSubId_( e, i, codim );
+    }
+
   private:
     const GridImp& grid;
+    DynamicSubId< GridImp, This > dynamicSubId_;
   };
 
 

@@ -18,6 +18,7 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/grid/common/indexidset.hh>
+#include <dune/grid/common/dynamicsubindexid.hh>
 #include <dune/grid/common/datahandleif.hh>
 
 
@@ -1960,11 +1961,15 @@ namespace Dune {
   class YaspLevelIndexSet
     : public IndexSetDefaultImplementation< GridImp, YaspLevelIndexSet< GridImp > >
   {
-    typedef IndexSetDefaultImplementation< GridImp, YaspLevelIndexSet< GridImp > > Base;
-  public:
+    typedef YaspLevelIndexSet< GridImp > This;
+    typedef IndexSetDefaultImplementation< GridImp, This > Base;
 
+  public:
     //! constructor stores reference to a grid and level
-    YaspLevelIndexSet (const GridImp& g, int l) : grid(g), level(l)
+    YaspLevelIndexSet ( const GridImp &g, int l )
+      : grid( g ),
+        level( l ),
+        dynamicSubIndex_( *this )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -1983,6 +1988,12 @@ namespace Dune {
     int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
+    }
+
+    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     //! get number of entities of given type and level (the level is known to the object)
@@ -2014,6 +2025,7 @@ namespace Dune {
     const GridImp& grid;
     int level;
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
+    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -2023,11 +2035,14 @@ namespace Dune {
   class YaspLeafIndexSet
     : public IndexSetDefaultImplementation< GridImp, YaspLeafIndexSet< GridImp > >
   {
-    typedef IndexSetDefaultImplementation< GridImp, YaspLeafIndexSet< GridImp > > Base;
-  public:
+    typedef YaspLeafIndexSet< GridImp > This;
+    typedef IndexSetDefaultImplementation< GridImp, This > Base;
 
+  public:
     //! constructor stores reference to a grid
-    YaspLeafIndexSet (const GridImp& g) : grid(g)
+    explicit YaspLeafIndexSet ( const GridImp &g )
+      : grid( g ),
+        dynamicSubIndex_( *this )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -2055,6 +2070,12 @@ namespace Dune {
     int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return grid.template getRealEntity<0>(e).template subCompressedLeafIndex<cc>(i);
+    }
+
+    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim ) const
+    {
+      return dynamicSubIndex_( e, i, codim );
     }
 
     //! get number of entities of given type
@@ -2087,6 +2108,7 @@ namespace Dune {
     const GridImp& grid;
     enum { ncodim = remove_const<GridImp>::type::dimension+1 };
     std::vector<GeometryType> mytypes[ncodim];
+    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -2107,12 +2129,17 @@ namespace Dune {
                              because the const class is not instantiated yet.
                            */
   {
+    typedef YaspGlobalIdSet< GridImp > This;
+
   public:
     //! define the type used for persisitent indices
     typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
 
     //! constructor stores reference to a grid
-    YaspGlobalIdSet (const GridImp& g) : grid(g) {}
+    explicit YaspGlobalIdSet ( const GridImp &g )
+      : grid( g ),
+        dynamicSubId_( *this )
+    {}
 
     //! get id of an entity
     /*
@@ -2136,8 +2163,15 @@ namespace Dune {
       return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
     }
 
+    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
+                   int i, unsigned int codim )
+    {
+      return dynamicSubId_( e, i, codim );
+    }
+
   private:
     const GridImp& grid;
+    DynamicSubId< GridImp, This > dynamicSubId_;
   };
 
 
