@@ -135,6 +135,38 @@ namespace Dune
   };
 
 
+  /** \brief A base class for grid functions with any return type and dimension
+      \ingroup VTK
+
+      Trick : use double as return type
+   */
+  template <class Grid>
+  class VTKFunction
+  {
+  public:
+    typedef typename Grid::ctype ctype;
+    enum { dim = Grid::dimension };
+    typedef typename Grid::template Codim< 0 >::Entity Entity;
+
+    //! return number of components
+    virtual int ncomps () const = 0;
+
+    //! evaluate single component comp in the entity e at local coordinates xi
+    /*! Evaluate the function in an entity at local coordinates.
+       @param[in]  comp   number of component to be evaluated
+       @param[in]  e      reference to grid entity of codimension 0
+       @param[in]  xi     point in local coordinates of the reference element of e
+       \return            value of the component
+     */
+    virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<ctype,dim>& xi) const = 0;
+
+    //! get name
+    virtual std::string name () const = 0;
+
+    //! virtual destructor
+    virtual ~VTKFunction () {}
+  };
+
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
    * @ingroup VTK
@@ -187,32 +219,7 @@ namespace Dune
     typedef MultipleCodimMultipleGeomTypeMapper< GridView, P1Layout > VertexMapper;
 
   public:
-    /** \brief A base class for grid functions with any return type and dimension
-        \ingroup VTK
-
-        Trick : use double as return type
-     */
-    class VTKFunction
-    {
-    public:
-      //! return number of components
-      virtual int ncomps () const = 0;
-
-      //! evaluate single component comp in the entity e at local coordinates xi
-      /*! Evaluate the function in an entity at local coordinates.
-         @param[in]  comp   number of component to be evaluated
-         @param[in]  e      reference to grid entity of codimension 0
-         @param[in]  xi     point in local coordinates of the reference element of e
-         \return            value of the component
-       */
-      virtual double evaluate (int comp, const Entity& e, const Dune::FieldVector<DT,n>& xi) const = 0;
-
-      //! get name
-      virtual std::string name () const = 0;
-
-      //! virtual destructor
-      virtual ~VTKFunction () {}
-    };
+    typedef Dune::VTKFunction<Grid> VTKFunction;
 
   protected:
     typedef typename std::list<VTKFunction*>::iterator FunctionIterator;
