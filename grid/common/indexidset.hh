@@ -135,8 +135,8 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IndexType subIndex (const typename remove_const<GridImp>::type::
-                        Traits::template Codim<0>::Entity& e, int i) const
+    IndexType DUNE_DEPRECATED
+    subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i ) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
       return asImp().template subIndex<cc>(e,i);
@@ -407,8 +407,8 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IdType subId (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i) const
+    IdType DUNE_DEPRECATED
+    subId ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i ) const
     {
       return asImp().template subId<cc>(e,i);
     }
