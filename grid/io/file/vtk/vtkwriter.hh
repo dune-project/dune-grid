@@ -29,6 +29,10 @@
 
 /**
    @todo put vtk io intro here ...
+
+   details and examples regarding the VTK file format can be found here:
+
+   http://www.geophysik.uni-muenchen.de/intranet/it-service/applications/paraview/vtk-file-formats/
  */
 
 namespace Dune
