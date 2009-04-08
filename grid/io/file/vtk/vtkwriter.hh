@@ -224,42 +224,24 @@ namespace Dune
   protected:
     typedef typename std::list<VTKFunction*>::iterator FunctionIterator;
 
-    class CellIterator :
-      public ForwardIteratorFacade<CellIterator, Entity, Entity&, int>
+    class CellIterator : public GridCellIterator
     {
-      GridCellIterator git;
-      GridCellIterator gend;
     public:
-      CellIterator(const GridCellIterator & x, const GridCellIterator & end) : git(x), gend(end) {};
-      void increment ()
-      {
-        ++git;
-        while (git!=gend && git->partitionType()!=InteriorEntity) ++git;
-      }
-      bool equals (const CellIterator & cit) const
-      {
-        return git == cit.git;
-      }
-      Entity& dereference() const
-      {
-        return *git;
-      }
+      CellIterator(const GridCellIterator & x) : GridCellIterator(x) {};
       const FieldVector<DT,n> position() const
       {
-        return ReferenceElements<DT,n>::general(git->type()).position(0,0);
+        return ReferenceElements<DT,n>::general((*this)->type()).position(0,0);
       }
     };
 
     CellIterator cellBegin() const
     {
-      return CellIterator( gridView_.template begin< 0, VTK_Partition >(),
-                           gridView_.template end< 0, VTK_Partition >() );
+      return gridView_.template begin< 0, VTK_Partition >();
     }
 
     CellIterator cellEnd() const
     {
-      return CellIterator( gridView_.template end< 0, VTK_Partition >(),
-                           gridView_.template end< 0, VTK_Partition >() );
+      return gridView_.template end< 0, VTK_Partition >();
     }
 
     class VertexIterator :
