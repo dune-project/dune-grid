@@ -17,6 +17,7 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
+#include <dune/common/smartpointer.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/referenceelements.hh>
 
@@ -222,7 +223,8 @@ namespace Dune
     typedef Dune::VTKFunction<Grid> VTKFunction;
 
   protected:
-    typedef typename std::list<VTKFunction*>::iterator FunctionIterator;
+    typedef SmartPointer< Dune::VTKFunction<Grid> > VTKFunctionPtr;
+    typedef typename std::list<VTKFunctionPtr>::iterator FunctionIterator;
 
     class CellIterator : public GridCellIterator
     {
@@ -562,12 +564,21 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
+     * @param p Dune:SmartPointer to the function to visualize
+     */
+    void addCellData (const VTKFunctionPtr & p)
+    {
+      celldata.push_back(p);
+    }
+
+    /**
+     * @brief Add a grid function that lives on the cells of the grid to the visualization.
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addCellData (VTKFunction* p)
+    void addCellData (VTKFunction* p) DUNE_DEPRECATED
     {
-      celldata.push_back(p);
+      celldata.push_back(VTKFunctionPtr(p));
     }
 
     /**
@@ -593,7 +604,16 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addVertexData (VTKFunction* p)
+    void addVertexData (VTKFunction* p) DUNE_DEPRECATED
+    {
+      vertexdata.push_back(VTKFunctionPtr(p));
+    }
+
+    /**
+     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
+     * @param p Dune:SmartPointer to the function to visualize
+     */
+    void addVertexData (const VTKFunctionPtr & p)
     {
       vertexdata.push_back(p);
     }
@@ -619,13 +639,7 @@ namespace Dune
     //! clear list of registered functions
     void clear ()
     {
-      for (FunctionIterator it=celldata.begin();
-           it!=celldata.end(); ++it)
-        delete *it;
       celldata.clear();
-      for (FunctionIterator it=vertexdata.begin();
-           it!=vertexdata.end(); ++it)
-        delete *it;
       vertexdata.clear();
     }
 
@@ -1586,8 +1600,8 @@ namespace Dune
     }
 
     // the list of registered functions
-    std::list<VTKFunction*> celldata;
-    std::list<VTKFunction*> vertexdata;
+    std::list<VTKFunctionPtr> celldata;
+    std::list<VTKFunctionPtr> vertexdata;
 
   private:
     // the grid
