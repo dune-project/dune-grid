@@ -64,4 +64,48 @@ given the old one (or vice versa) use
     oldNumber = Numbering::template 
                 generic2dune< codimension >( tid, newNumber );
 @endcode
+
+@section GridDuneTrans4 Change in Numbering
+<table>
+<tr>
+<th>Geometry type</th><th>Codim 1</th><th>Codim 2</th><th>Codim 3</th>
+</tr><tr>
+<td>(Simplex,1)</td>  <td>identity</td>    <td></td>                      <td></td>
+</tr><tr>
+<td>(Cube,1)</td>     <td>identity</td>    <td></td>                      <td></td>
+</tr><tr>
+<td>(Simplex,2)</td>  <td>2-index</td>     <td>identity</td>              <td></td>
+</tr><tr>
+<td>(Cube,2)</td>     <td>identity</td>    <td>identity</td>              <td></td>
+</tr><tr>
+<td>(Simplex,3)</td>  <td>3-index</td>     <td>xchg(1,2)</td>             <td>identity</td>
+</tr><tr>
+<td>(Cube,3)</td>     <td>identity</td>    <td>xchg(6,8), xchg(7,9)</td>  <td>identity</td>
+</tr><tr>
+<td>(Prism,3)</td>    <td>see below</td>   <td>see below</td>             <td>identity</td>
+</tr><tr>
+<td>(Pyramid,3)</td>  <td>see below</td>   <td>see below</td>             <td>xchg(3,2)</td>
+</tr>
+</table>
+
+@subsection Prism 
+<table>
+<tr>
+<th></th><th>Dune to generic</th><th>generic to Dune</th>
+</tr><tr>
+<th>Codim 1</th><td>(3,0,2,1,4)</td>        <td>(1,3,2,0,4)</td>
+</tr><tr>
+<th>Codim 2</th><td>(3,5,4,0,1,2,6,8,7)</td><td>(3,4,5,0,2,1,6,8,7)</td>
+</tr>
+</table>
+@subsection Pyramid 
+<table>
+<tr>
+<th></th><th>Dune to generic</th><th>generic to Dune</th>
+</tr><tr>
+<th>Codim 1</th><td>(0,3,2,4,1)</td>      <td>(0,4,2,1,3)</td>
+</tr><tr>
+<th>Codim 2</th><td>(2,1,3,0,4,5,7,6)</td><td>(3,1,0,2,4,5,7,6)</td>
+</tr>
+</table>
 **/
