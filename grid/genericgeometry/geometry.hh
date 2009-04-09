@@ -407,6 +407,12 @@ namespace Dune
         return mapping().corner( i );
       }
 
+      /** \brief Return the world coordinates of the i-th corner */
+      GlobalCoordinate corner ( const int i ) const
+      {
+        return mapping().corner( i );
+      }
+
       /** \brief Map local to global coordinates */
       GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
