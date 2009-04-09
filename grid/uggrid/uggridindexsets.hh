@@ -40,16 +40,26 @@ namespace Dune {
 
     //! get index of subEntity of a codim 0 entity
     template<int codim>
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int j) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template dune2generic( tid, j, codim );
+
       return subIndex(e,i,codim);
     }
 
     //! get index of subEntity of a codim 0 entity
     unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e,
-                           int i,
+                           int j,
                            unsigned int codim) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template generic2dune( tid, j, codim );
+
       if (codim==dim)
         return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).target_,
                                                          UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
@@ -200,8 +210,13 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int codim>
-    unsigned subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int j) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template dune2generic( tid, j, codim );
+
       return subIndex(e, i, codim);
     }
 
@@ -211,9 +226,14 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     unsigned int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                           int i,
+                           int j,
                            unsigned int codim) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template generic2dune( tid, j, codim );
+
       if (codim==0)
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).target_);
 
@@ -445,8 +465,13 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int codim>
-    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int j) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template dune2generic( tid, j, codim );
+
       return subId(e,i,codim);
     }
 
@@ -456,9 +481,14 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     unsigned int subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
-                        int i,
+                        int j,
                         unsigned int codim) const
     {
+      /** \todo Fuse this renumbering into the UGGridRenumberer class */
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
+      const int i = Numbering::template generic2dune( tid, j, codim );
+
       if (codim==0)
         return id<0>(e);
 
