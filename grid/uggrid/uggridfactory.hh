@@ -199,6 +199,10 @@ namespace Dune {
     virtual UGGrid<dimworld>* createGrid();
 
   private:
+
+    // Initialize the grid structure in UG
+    void createBegin();
+
     // Pointer to the grid being built
     UGGrid<dimworld>* grid_;
 

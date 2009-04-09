@@ -546,53 +546,6 @@ bool Dune::UGGrid < dim >::loadBalance(int strategy, int minlevel, int depth, in
 
 
 template < int dim >
-void Dune::UGGrid < dim >::createBegin()
-{
-  // ///////////////////////////////////////////////////////
-  //   Clean up existing grid structure if there is one
-  // ///////////////////////////////////////////////////////
-  for (unsigned int i=0; i<boundarySegments_.size(); i++)
-    delete boundarySegments_[i];
-
-  // Delete the UG multigrid if there is one (== createEnd() has already
-  // been called once for this object)
-  if (multigrid_) {
-    // Set UG's currBVP variable to the BVP corresponding to this
-    // grid.  This is necessary if we have more than one UGGrid in use.
-    // DisposeMultiGrid will crash if we don't do this
-    //UG_NS<dim>::Set_Current_BVP(multigrid_->theBVP);
-    // set the multigrid's bvp pointer to NULL to make sure the BVP
-    // is not deleted
-    multigrid_->theBVP = NULL;
-    UG_NS<dim>::DisposeMultiGrid(multigrid_);
-    multigrid_ = NULL;
-  }
-
-  // Delete levelIndexSets if there are any
-  for (unsigned int i=0; i<levelIndexSets_.size(); i++)
-    if (levelIndexSets_[i])
-      delete levelIndexSets_[i];
-
-  levelIndexSets_.resize(0);
-
-  // //////////////////////////////////////////////////////////
-  //   Clear all buffers used during coarse grid creation
-  // //////////////////////////////////////////////////////////
-  boundarySegments_.resize(0);
-  boundarySegmentVertices_.resize(0);
-  elementTypes_.resize(0);
-  elementVertices_.resize(0);
-  vertexPositions_.resize(0);
-
-  // //////////////////////////////////////////////////////////
-  //   Delete the UG domain, if it exists
-  // //////////////////////////////////////////////////////////
-  std::string domainName = name_ + "_Domain";
-  UG_NS<dim>::RemoveDomain(domainName.c_str());
-}
-
-
-template < int dim >
 void Dune::UGGrid < dim >::createEnd()
 {
 #ifdef UG_LGMDOMAIN

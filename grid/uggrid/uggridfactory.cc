@@ -10,7 +10,7 @@ GridFactory()
 
   factoryOwnsGrid_ = true;
 
-  grid_->createBegin();
+  createBegin();
 }
 
 template <int dimworld>
@@ -21,7 +21,7 @@ GridFactory(UGGrid<dimworld>* grid)
 
   factoryOwnsGrid_ = false;
 
-  grid_->createBegin();
+  createBegin();
 }
 
 template <int dimworld>
@@ -72,6 +72,54 @@ createGrid()
   grid_ = NULL;
   return tmp;
 }
+
+template <int dimworld>
+void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+createBegin()
+{
+  // ///////////////////////////////////////////////////////
+  //   Clean up existing grid structure if there is one
+  // ///////////////////////////////////////////////////////
+  for (unsigned int i=0; i<grid_->boundarySegments_.size(); i++)
+    delete grid_->boundarySegments_[i];
+
+  // Delete the UG multigrid if there is one (== createEnd() has already
+  // been called once for this object)
+  if (grid_->multigrid_) {
+    // Set UG's currBVP variable to the BVP corresponding to this
+    // grid.  This is necessary if we have more than one UGGrid in use.
+    // DisposeMultiGrid will crash if we don't do this
+    //UG_NS<dim>::Set_Current_BVP(grid_->multigrid_->theBVP);
+    // set the multigrid's bvp pointer to NULL to make sure the BVP
+    // is not deleted
+    grid_->multigrid_->theBVP = NULL;
+    UG_NS<dimworld>::DisposeMultiGrid(grid_->multigrid_);
+    grid_->multigrid_ = NULL;
+  }
+
+  // Delete levelIndexSets if there are any
+  for (unsigned int i=0; i<grid_->levelIndexSets_.size(); i++)
+    if (grid_->levelIndexSets_[i])
+      delete grid_->levelIndexSets_[i];
+
+  grid_->levelIndexSets_.resize(0);
+
+  // //////////////////////////////////////////////////////////
+  //   Clear all buffers used during coarse grid creation
+  // //////////////////////////////////////////////////////////
+  grid_->boundarySegments_.resize(0);
+  grid_->boundarySegmentVertices_.resize(0);
+  grid_->elementTypes_.resize(0);
+  grid_->elementVertices_.resize(0);
+  grid_->vertexPositions_.resize(0);
+
+  // //////////////////////////////////////////////////////////
+  //   Delete the UG domain, if it exists
+  // //////////////////////////////////////////////////////////
+  std::string domainName = grid_->name_ + "_Domain";
+  UG_NS<dimworld>::RemoveDomain(domainName.c_str());
+}
+
 
 
 

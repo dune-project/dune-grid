@@ -364,6 +364,8 @@ namespace Dune {
     friend class UGGridIdSet<const UGGrid<dim>, false >;
     friend class UGGridIdSet<const UGGrid<dim>, true >;
 
+    friend class GridFactory<UGGrid<dim> >;
+
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
     template <int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
@@ -729,11 +731,6 @@ namespace Dune {
 
     /** @name Coarse Grid Creation Methods */
     /*@{*/
-
-    /** \brief Start the coarse grid creation process
-        \todo This method should delete the grid!
-     */
-    void createBegin() DUNE_DEPRECATED;
 
     /** \brief End the coarse grid creation process */
     void createEnd() DUNE_DEPRECATED;
