@@ -246,10 +246,6 @@ namespace Dune
 
     typedef typename IndexSet<GridImp,IndexSetImp>::IndexType IndexType;
 
-    /** @brief Return total number of entities of given codim as a sum
-          for all geometry types in this index set.
-          \param codim A valid codimension
-     */
     /** @brief Map subentity of codim 0 entity to index.
 
        \param e Reference to codim 0 entity.
