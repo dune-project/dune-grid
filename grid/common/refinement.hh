@@ -275,5 +275,6 @@
 #include "refinement/simplex.cc"
 #include "refinement/hcubetriangulation.cc"
 #include "refinement/prismtriangulation.cc"
+#include "refinement/pyramidtriangulation.cc"
 
 #endif //DUNE_GRID_COMMON_REFINEMENT_HH

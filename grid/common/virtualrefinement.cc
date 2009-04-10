@@ -563,6 +563,15 @@ namespace Dune {
           break;
         }
         break;
+      case GeometryType::pyramid :
+        switch(coerceTo) {
+        case GeometryType::simplex :
+          if(dimension==3)
+            return VirtualRefinementImp<GeometryType::pyramid, CoordType, GeometryType::simplex, dimension>::instance();
+        default :
+          break;
+        }
+        break;
       default :
         break;
       }
