@@ -38,7 +38,8 @@ namespace Dune
 
       static std :: string name ()
       {
-        return BaseTopology :: name() + "'";
+        return BaseTopology :: name() + "l";
+        // return BaseTopology :: name() + "'";
       }
     };
 
@@ -53,7 +54,8 @@ namespace Dune
 
       static std :: string name ()
       {
-        return BaseTopology :: name() + "°";
+        return BaseTopology :: name() + "o";
+        // return BaseTopology :: name() + "°";
       }
     };
 
@@ -136,6 +138,71 @@ namespace Dune
       typedef Point type;
     };
 
+    template< template< class > class Operation, int dim, class Topology = Point >
+    struct IfTopology
+    {
+      static void apply ( int topoId )
+      {
+        if (topoId & 1)
+          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1);
+        else
+          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1);
+      }
+
+      template< class Type >
+      static void apply ( int topoId, Type &param )
+      {
+        if (topoId & 1)
+          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param);
+        else
+          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param);
+      }
+
+      template< class Type1, class Type2 >
+      static void apply ( int topoId, Type1 &param1, Type2 &param2 )
+      {
+        if (topoId & 1)
+          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param1,param2);
+        else
+          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param1,param2);
+      }
+
+      template< class Type1, class Type2, class Type3 >
+      static void apply ( int topoId, Type1 &param1, Type2 &param2, Type3 &param3 )
+      {
+        if (topoId & 1)
+          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param1,param2,param3);
+        else
+          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param1,param2,param3);
+      }
+    };
+    template< template< class > class Operation, class Topology >
+    struct IfTopology<Operation,0,Topology>
+    {
+      static void apply (int topoId)
+      {
+        Operation< Topology > :: apply( );
+      }
+
+      template< class Type >
+      static void apply ( int topoId, Type &param )
+      {
+        Operation< Topology > :: apply( param );
+      }
+
+      template< class Type1, class Type2 >
+      static void apply ( int topoId, Type1 &param1, Type2 &param2 )
+      {
+        Operation< Topology > :: apply( param1, param2 );
+      }
+
+      template< class Type1, class Type2, class Type3 >
+      static void apply ( int topoId, Type1 &param1, Type2 &param2, Type3 &param3 )
+      {
+        Operation< Topology > :: apply( param1, param2, param3 );
+      }
+
+    };
   }
 
 }
