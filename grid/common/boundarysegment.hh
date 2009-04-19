@@ -22,17 +22,16 @@ namespace Dune {
      BoundarySegment.  The set of these objects is handed over to the grid upon grid
      construction.
    */
-  template <int dimworld>
-  class BoundarySegment {
-  public:
-
+  template< int dim, int dimworld = dim >
+  struct BoundarySegment
+  {
     /** \brief Dummy virtual destructor */
     virtual ~BoundarySegment() {}
 
     /** \brief A function mapping local coordinates on a boundary segment to world coordinates
      */
-    virtual FieldVector<double,dimworld> operator()(const FieldVector<double, dimworld-1>& local) const = 0;
-
+    virtual FieldVector< double, dimworld >
+    operator() ( const FieldVector< double, dim-1> &local ) const = 0;
   };
 
 }  // end namespace Dune
