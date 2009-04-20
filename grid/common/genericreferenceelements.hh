@@ -76,7 +76,7 @@ namespace Dune
       return info_[ c ].size();
     }
 
-    int size ( int i, int c, int cc )
+    int size ( int i, int c, int cc ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].size( cc );
