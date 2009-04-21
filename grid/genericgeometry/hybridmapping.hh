@@ -94,6 +94,8 @@ namespace Dune
         typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
 
+      typedef typename GeometryTraits::Caching Caching;
+
       unsigned int referenceCount;
 
       virtual ~HybridMapping ()
@@ -211,6 +213,8 @@ namespace Dune
       {
         typedef HybridMapping< dimension - codim, GeometryTraits > Trace;
       };
+
+      typedef typename GeometryTraits::Caching Caching;
 
     private:
       Mapping mapping_;

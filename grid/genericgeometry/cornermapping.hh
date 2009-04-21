@@ -544,7 +544,7 @@ namespace Dune
       struct SubTopology
       {
         typedef typename GenericGeometry :: SubTopology< Topo, codim, i > :: type Topology;
-        typedef typename CStorage :: template SubStorage< Topology > :: type CornerStorage;
+        typedef typename CStorage::template SubStorage< Topology >::type CornerStorage;
         typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage, affine > Trace;
       };
 

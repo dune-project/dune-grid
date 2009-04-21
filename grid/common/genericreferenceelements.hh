@@ -23,30 +23,24 @@ namespace Dune
     template< class Topology > struct Initialize;
 
     struct GeometryTraits
-      : public GenericGeometry :: DefaultGeometryTraits< ctype, dim, dim >
+      : public GenericGeometry::DefaultGeometryTraits< ctype, dim, dim >
     {
-      typedef GenericGeometry :: DefaultGeometryTraits< ctype, dim, dim > Base;
+      typedef GenericGeometry::DefaultGeometryTraits< ctype, dim, dim > Base;
 
-      typedef typename Base :: CoordTraits CoordTraits;
+      typedef typename Base::CoordTraits CoordTraits;
 
       template< class Topology >
       struct Mapping
       {
-        typedef GenericGeometry :: CornerMapping
-        < CoordTraits, Topology, dim, CornerStorage< Topology >, true >
-        type;
+        typedef GenericGeometry::CornerMapping< CoordTraits, Topology, dim, CornerStorage< Topology >, true > type;
       };
 
       struct Caching
       {
-        static const GenericGeometry :: EvaluationType evaluateJacobianTransposed
-          = GenericGeometry :: PreCompute;
-        static const GenericGeometry :: EvaluationType evaluateJacobianInverseTransposed
-          = GenericGeometry :: PreCompute;
-        static const GenericGeometry :: EvaluationType evaluateIntegrationElement
-          = GenericGeometry :: PreCompute;
-        static const GenericGeometry :: EvaluationType evaluateNormal
-          = GenericGeometry :: PreCompute;
+        static const GenericGeometry::EvaluationType evaluateJacobianTransposed = GenericGeometry::PreCompute;
+        static const GenericGeometry::EvaluationType evaluateJacobianInverseTransposed = GenericGeometry::PreCompute;
+        static const GenericGeometry::EvaluationType evaluateIntegrationElement = GenericGeometry::PreCompute;
+        static const GenericGeometry::EvaluationType evaluateNormal = GenericGeometry::PreCompute;
       };
     };
 
@@ -54,18 +48,18 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      typedef GenericGeometry :: HybridMapping< dim-codim, GeometryTraits > Mapping;
+      typedef GenericGeometry::HybridMapping< dim-codim, GeometryTraits > Mapping;
     };
 
   private:
     template< int codim >
     class MappingArray
-      : public std :: vector< typename Codim< codim > :: Mapping * >
+      : public std::vector< typename Codim< codim >::Mapping * >
     {};
 
-    typedef GenericGeometry :: CodimTable< MappingArray, dim > MappingsTable;
+    typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
-    std :: vector< SubEntityInfo > info_[ dim+1 ];
+    std::vector< SubEntityInfo > info_[ dim+1 ];
     double volume_;
     MappingsTable mappings_;
 
@@ -112,7 +106,7 @@ namespace Dune
     }
 
     template< int codim >
-    typename Codim< codim > :: Mapping &mapping( int i ) const
+    typename Codim< codim >::Mapping &mapping( int i ) const
     {
       Int2Type< codim > codimVariable;
       return *(mappings_[ codimVariable ][ i ]);
@@ -129,20 +123,19 @@ namespace Dune
       return volume_;
     }
 
-    template< GeometryType :: BasicType type >
+    template< GeometryType::BasicType geoType >
     void initialize ()
     {
-      typedef typename GenericGeometry :: Convert< type, dim > :: type Topology;
+      typedef typename GenericGeometry::Convert< geoType, dim >::type Topology;
       typedef Initialize< Topology > Init;
-      typedef GenericGeometry :: VirtualMapping< Topology, GeometryTraits > VirtualMapping;
+      typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
       Int2Type< 0 > codim0Variable;
       mappings_[ codim0Variable ].resize( 1 );
       mappings_[ codim0Variable ][ 0 ]  = new VirtualMapping( codim0Variable );
 
-
-      GenericGeometry :: ForLoop< Init :: template Codim, 0, dim > :: apply( info_, mappings_ );
-      volume_ = GenericGeometry :: ReferenceDomain< Topology > :: template volume< double >();
+      GenericGeometry::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_ );
+      volume_ = GenericGeometry::ReferenceDomain< Topology >::template volume< double >();
     }
   };
 
@@ -198,26 +191,28 @@ namespace Dune
 
   template< class ctype, int dim >
   template< class Topology >
-  class GenericReferenceElement< ctype, dim > :: CornerStorage
+  class GenericReferenceElement< ctype, dim >::CornerStorage
   {
-    typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
+    typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
 
   public:
-    static const unsigned int size = Topology :: numCorners;
+    static const unsigned int size = Topology::numCorners;
 
-  private:
-    FieldVector< ctype, dim > coords_[ size ];
+    template< class SubTopology >
+    struct SubStorage
+    {
+      typedef CornerStorage< SubTopology > type;
+    };
 
-  public:
     explicit CornerStorage ( const Int2Type< 0 > & )
     {
       for( unsigned int i = 0; i < size; ++i )
-        coords_[ i ] = RefElement :: corner( i );
+        coords_[ i ] = RefElement::corner( i );
     }
 
     template< class Mapping, unsigned int codim >
     explicit
-    CornerStorage ( const GenericGeometry :: SubMappingCoords< Mapping, codim > &coords )
+    CornerStorage ( const GenericGeometry::SubMappingCoords< Mapping, codim > &coords )
     {
       for( unsigned int i = 0; i < size; ++i )
         coords_[ i ] = coords[ i ];
@@ -227,45 +222,41 @@ namespace Dune
     {
       return coords_[ i ];
     }
+
+  private:
+    FieldVector< ctype, dim > coords_[ size ];
   };
 
 
   template< class ctype, int dim >
   template< class Topology, int codim >
   template< int subcodim >
-  struct GenericReferenceElement< ctype, dim >
-  :: SubEntityInfo :: Initialize< Topology, codim > :: SubCodim
+  struct GenericReferenceElement< ctype, dim >::SubEntityInfo::Initialize< Topology, codim >::SubCodim
   {
-    typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
+    typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
 
-    static void apply ( unsigned int i, std :: vector< int > (&numbering)[ dim+1 ] )
+    static void apply ( unsigned int i, std::vector< int > (&numbering)[ dim+1 ] )
     {
-      const unsigned int size = RefElement :: template size< codim, subcodim >( i );
+      const unsigned int size = RefElement::template size< codim, subcodim >( i );
       numbering[ codim+subcodim ].resize( size );
       for( unsigned int j = 0; j < size; ++j )
-      {
-        numbering[ codim+subcodim ][ j ]
-          = RefElement ::  template subNumbering< codim, subcodim >[ i ][ j ];
-      }
+        numbering[ codim+subcodim ][ j ] = RefElement::template subNumbering< codim, subcodim >( i, j );
     }
   };
 
 
   template< class ctype, int dim >
   template< class Topology >
-  struct GenericReferenceElement< ctype, dim > :: Initialize
+  struct GenericReferenceElement< ctype, dim >::Initialize
   {
-    typedef Dune :: GenericReferenceElement< ctype, dim > GenericReferenceElement;
+    typedef Dune::GenericReferenceElement< ctype, dim > GenericReferenceElement;
 
-    typedef typename GenericReferenceElement :: template Codim< 0 > :: Mapping
-    ReferenceMapping;
+    typedef typename GenericReferenceElement::template Codim< 0 >::Mapping ReferenceMapping;
 
     template< int codim >
     struct Codim
     {
-      typedef typename GenericReferenceElement
-      :: template Codim< codim > :: Mapping :: CachingType
-      Caching;
+      //typedef typename GenericReferenceElement::template Codim< codim >::Mapping::Caching Caching;
 
       static void apply ( std :: vector< SubEntityInfo > (&info)[ dim+1 ],
                           MappingsTable &mappings )
@@ -277,15 +268,15 @@ namespace Dune
 
         if( codim > 0 )
         {
-          const Int2Type< 0 > codim0Variable;
+          Int2Type< 0 > codim0Variable;
           const ReferenceMapping &refMapping = *(mappings[ codim0Variable ][ 0 ]);
 
-          const Int2Type< codim > codimVariable;
+          Int2Type< codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
           {
             mappings[ codimVariable ][ i ]
-              = refMapping.template subMapping< codim >( i, Caching() );
+              = refMapping.template trace< codim >( i );
           }
         }
       }
@@ -302,42 +293,41 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, dim > value_type;
 
-  private:
-    value_type simplex;
-    value_type cube;
-    value_type pyramid;
-    value_type prism;
-
     GenericReferenceElementContainer ()
     {
-      simplex.template initialize< GeometryType :: simplex >();
-      cube.template initialize< GeometryType :: cube >();
-      pyramid.template initialize< GeometryType :: pyramid >();
-      prism.template initialize< GeometryType :: prism >();
+      simplex_.template initialize< GeometryType::simplex >();
+      cube_.template initialize< GeometryType::cube >();
+      pyramid_.template initialize< GeometryType::pyramid >();
+      prism_.template initialize< GeometryType::prism >();
     }
 
-  public:
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == dim );
       switch( type.basicType() )
       {
-      case GeometryType :: simplex :
-        return simplex;
+      case GeometryType::simplex :
+        return simplex_;
 
-      case GeometryType :: cube :
-        return cube;
+      case GeometryType::cube :
+        return cube_;
 
-      case GeometryType :: pyramid :
-        return pyramid;
+      case GeometryType::pyramid :
+        return pyramid_;
 
-      case GeometryType :: prism :
-        return prism;
+      case GeometryType::prism :
+        return prism_;
 
       default :
         DUNE_THROW( RangeError, "Unknown geometry type: " << type );
       }
     }
+
+  private:
+    value_type simplex_;
+    value_type cube_;
+    value_type pyramid_;
+    value_type prism_;
   };
 
   template< class ctype >
@@ -345,36 +335,35 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, 2 > value_type;
 
-  private:
-    value_type simplex;
-    value_type cube;
-
     GenericReferenceElementContainer ()
     {
-      simplex.template initialize< GeometryType :: simplex >();
-      cube.template initialize< GeometryType :: cube >();
+      simplex_.template initialize< GeometryType::simplex >();
+      cube_.template initialize< GeometryType::cube >();
     }
 
-  public:
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 2 );
       switch( type.basicType() )
       {
-      case GeometryType :: simplex :
-        return simplex;
+      case GeometryType::simplex :
+        return simplex_;
 
-      case GeometryType :: cube :
-        return cube;
+      case GeometryType::cube :
+        return cube_;
 
-      case GeometryType :: pyramid :
-      case GeometryType :: prism :
+      case GeometryType::pyramid :
+      case GeometryType::prism :
         DUNE_THROW( RangeError, "Invalid geometry type: " << type );
 
       default :
         DUNE_THROW( RangeError, "Unknown geometry type: " << type );
       }
     }
+
+  private:
+    value_type simplex_;
+    value_type cube_;
   };
 
   template< class ctype >
@@ -382,20 +371,19 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, 1 > value_type;
 
-  private:
-    value_type line;
-
     GenericReferenceElementContainer ()
     {
-      line.template initialize< GeometryType :: simplex >();
+      line_.template initialize< GeometryType::simplex >();
     }
 
-  public:
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 1 );
-      return line;
+      return line_;
     }
+
+  private:
+    value_type line_;
   };
 
   template< class ctype >
@@ -403,20 +391,19 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, 0 > value_type;
 
-  private:
-    value_type point;
-
     GenericReferenceElementContainer ()
     {
-      point.template initialize< GeometryType :: simplex >();
+      point_.template initialize< GeometryType::simplex >();
     }
 
-  public:
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 0 );
-      return point;
+      return point_;
     }
+
+  private:
+    value_type point_;
   };
 
 

@@ -62,8 +62,9 @@ namespace Dune
         Trace;
       };
 
+      typedef typename GeometryTraits::Caching Caching;
+
     private:
-      typedef typename GeometryTraits :: Caching Caching;
       typedef typename Traits :: MatrixHelper MatrixHelper;
 
     public:
