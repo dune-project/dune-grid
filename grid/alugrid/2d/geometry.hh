@@ -125,6 +125,9 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<alu2d_ctype, cdim>& operator[] (int i) const;
 
+    //! access to coordinates of corners. Index is the number of the corner
+    FieldVector<alu2d_ctype, cdim> corner (int i) const;
+
     //! maps a local coordinate within reference element to
     //! global coordinate in element
     FieldVector<alu2d_ctype, cdim> global (const FieldVector<alu2d_ctype, mydim>& local) const;

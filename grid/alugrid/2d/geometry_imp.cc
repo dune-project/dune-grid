@@ -3,6 +3,8 @@
 #ifndef DUNE_ALU2DGRIDGEOMETRYIMP_CC
 #define DUNE_ALU2DGRIDGEOMETRYIMP_CC
 
+#include <dune/grid/genericgeometry/conversion.hh>
+
 namespace Dune {
 
   // implementation of methods
@@ -98,6 +100,16 @@ namespace Dune {
     assert((i >= 0) && (i < corners()));
     return coord_[i];
   }
+
+  //! access to coordinates of corners. Index is the number of the corner
+  template <int mydim, int cdim, class GridImp>
+  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> :: corner(int i) const {
+    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
+    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const int j = Numbering::template generic2dune< mydim >( tid, i );
+    return this->operator[](j);
+  }
+
 
   ///////////////////////////////////////////////////////////////////////
 

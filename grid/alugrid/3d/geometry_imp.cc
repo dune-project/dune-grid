@@ -1,5 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include <dune/grid/genericgeometry/conversion.hh>
+
 #include "grid.hh"
 #include "mappings.hh"
 
@@ -302,6 +304,16 @@ namespace Dune {
     return coord_[i];
   }
 
+  template<int mydim, int cdim>
+  inline FieldVector<alu3d_ctype, cdim>
+  ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: corner (int i) const
+  {
+    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
+    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const int j = Numbering::template generic2dune< mydim >( tid, i );
+    return this->operator[](j);
+  }
+
   //   G L O B A L   - - -
 
   // dim = 1,2,3 dimworld = 3
@@ -538,6 +550,17 @@ namespace Dune {
   operator[] (int i) const
   {
     return geoImpl_[i];
+  }
+
+  template <int mydim, int cdim>
+  inline FieldVector<alu3d_ctype, cdim>
+  ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+  corner (int i) const
+  {
+    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
+    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const int j = Numbering::template generic2dune< mydim >( tid, i );
+    return this->operator[](j);
   }
 
 

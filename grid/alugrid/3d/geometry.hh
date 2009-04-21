@@ -88,6 +88,9 @@ namespace Dune
     //! access to coordinates of corners. Index is the number of the corner
     inline const FieldVector<alu3d_ctype, cdim>& operator[] (int i) const;
 
+    //! access to coordinates of corners. Index is the number of the corner
+    inline FieldVector<alu3d_ctype, cdim> corner (int i) const;
+
     //! maps a local coordinate within reference element to
     //! global coordinate in element
     inline FieldVector<alu3d_ctype, cdim> global (const FieldVector<alu3d_ctype, mydim>& local) const;
@@ -456,6 +459,9 @@ namespace Dune
 
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<alu3d_ctype, cdim>& operator[] (int i) const;
+
+    //! access to coordinates of corners. Index is the number of the corner
+    FieldVector<alu3d_ctype, cdim> corner (int i) const;
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
