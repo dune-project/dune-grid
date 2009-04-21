@@ -602,7 +602,7 @@ namespace Dune
     int subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
       assert( hset_.size( codim ) < codimMultiplier );
-      return codimStart_[ codim ] + hset_.template subIndex( e, i, codim );
+      return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
     }
 
   private:
