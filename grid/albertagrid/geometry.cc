@@ -70,6 +70,16 @@ namespace Dune
 
 
   template< int mydim, int cdim, class GridImp >
+  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector
+  AlbertaGridGeometry< mydim, cdim, GridImp >::corner ( const int i ) const
+  {
+    // for simplices old and new corner numbering is identical
+    assert( (i >= 0) && (i < numCorners) );
+    return coord_[ i ];
+  }
+
+
+  template< int mydim, int cdim, class GridImp >
   inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector &
   AlbertaGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
   {

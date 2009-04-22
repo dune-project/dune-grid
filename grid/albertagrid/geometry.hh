@@ -274,6 +274,8 @@ namespace Dune
     /** \brief obtain the number of corners of this element */
     int corners () const;
 
+    GlobalVector corner ( const int i ) const;
+
     //! access to coordinates of corners. Index is the number of the corner
     const GlobalVector &operator[] (int i) const;
 
