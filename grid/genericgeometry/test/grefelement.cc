@@ -135,7 +135,8 @@ int main ( int argc, char **argv )
 
   typedef Dune::GeometryType GT;
 
-  bool checkSubentityOrientation = (argc>1);
+  //    bool checkSubentityOrientation = (argc>1);
+  bool checkSubentityOrientation = true;
 
   testWithGeometryType<double,1>(GT(GT::simplex, 1), checkSubentityOrientation);
   testWithGeometryType<double,2>(GT(GT::simplex, 2), checkSubentityOrientation);
