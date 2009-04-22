@@ -20,7 +20,7 @@ void testWithGeometryType(Dune::GeometryType gt)
   const ReferenceElement<T, dim> &ref = ReferenceElements<T,dim>::general(gt);
   const GenericReferenceElement<T, dim> &gref = GenericReferenceElements<T,dim>::general(gt);
 
-  std::cout << "********************* testing for " << gt << std::endl;
+  std::cout << ">>> Testing for " << gt << std::endl;
 
   // test volume
   if (ref.volume() != gref.volume())
@@ -47,7 +47,11 @@ void testWithGeometryType(Dune::GeometryType gt)
 
       //test codim
       if (ref.type(i, codim) != gref.type(gi, codim))
+      {
         std::cout << "ref.type(i, codim) != gref.type(gi, codim)" << std::endl;
+        std::cout << "ref.type( i, codim ) = " << ref.type( i, codim ) << std::endl;
+        std::cout << "gref.type( gi, codim ) = " << gref.type( gi, codim ) << std::endl;
+      }
 
       for(int c=codim; c<=dim; ++c)
       {
@@ -56,6 +60,8 @@ void testWithGeometryType(Dune::GeometryType gt)
       }
     }
   }
+
+  std::cout << std::endl;
 }
 
 
