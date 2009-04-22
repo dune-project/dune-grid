@@ -141,7 +141,7 @@ namespace Dune
 
 
   template< class ctype, int dim >
-  class GenericReferenceElement< ctype, dim > :: SubEntityInfo
+  class GenericReferenceElement< ctype, dim >::SubEntityInfo
   {
     template< class Topology, int codim > struct Initialize
     {
@@ -176,15 +176,18 @@ namespace Dune
       return type_;
     }
 
-    template< class Topology, int codim >
-    void initialize ( unsigned int i )
+    template< class Topology, unsigned int codim, unsigned int i >
+    void initialize ()
     {
       typedef Initialize< Topology, codim > Init;
-      typedef GenericGeometry :: ReferenceElement< Topology, ctype > RefElement;
+      typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
 
-      GenericGeometry :: ForLoop< Init :: template SubCodim, 0, dim-codim > :: apply( i, numbering_ );
-      baryCenter_ = RefElement :: template baryCenter< codim >( i );
-      type_ = GenericGeometry :: DuneGeometryType< Topology, GeometryType :: simplex > :: type();
+      const unsigned int iVariable = i;
+      GenericGeometry::ForLoop< Init::template SubCodim, 0, dim-codim >::apply( iVariable, numbering_ );
+      baryCenter_ = RefElement::template baryCenter< codim >( i );
+
+      typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
+      type_ = GenericGeometry::DuneGeometryType< SubTopology, GeometryType::simplex >::type();
     }
   };
 
@@ -256,15 +259,25 @@ namespace Dune
     template< int codim >
     struct Codim
     {
-      //typedef typename GenericReferenceElement::template Codim< codim >::Mapping::Caching Caching;
+      template< int i >
+      struct SubTopology
+      {
+        static void apply ( std::vector< SubEntityInfo > &info )
+        {
+          info[ i ].template initialize< Topology, codim, i >();
+        }
+      };
 
-      static void apply ( std :: vector< SubEntityInfo > (&info)[ dim+1 ],
+      static void apply ( std::vector< SubEntityInfo > (&info)[ dim+1 ],
                           MappingsTable &mappings )
       {
-        const unsigned int size = GenericGeometry :: Size< Topology, codim > :: value;
+        const unsigned int size = GenericGeometry::Size< Topology, codim >::value;
         info[ codim ].resize( size );
-        for( unsigned int i = 0; i < size; ++i )
-          info[ codim ][ i ].template initialize< Topology, codim >( i );
+        GenericGeometry::ForLoop< SubTopology, 0, size-1 >::apply( info[ codim ] );
+        /*
+           for( unsigned int i = 0; i < size; ++i )
+           info[ codim ][ i ].template initialize< Topology, codim >( i );
+         */
 
         if( codim > 0 )
         {
@@ -274,10 +287,7 @@ namespace Dune
           Int2Type< codim > codimVariable;
           mappings[ codimVariable ].resize( size );
           for( unsigned int i = 0; i < size; ++i )
-          {
-            mappings[ codimVariable ][ i ]
-              = refMapping.template trace< codim >( i );
-          }
+            mappings[ codimVariable ][ i ] = refMapping.template trace< codim >( i );
         }
       }
     };

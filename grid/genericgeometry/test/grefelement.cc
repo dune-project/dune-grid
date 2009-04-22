@@ -127,9 +127,11 @@ void testWithGeometryType(Dune::GeometryType gt, bool checkSubentityOrientation)
 
 int main ( int argc, char **argv )
 {
+#if 0
   const GeometryType type( GeometryType::simplex, 3 );
   const GenericReferenceElement< double, 3 > &refElement
     = GenericReferenceElements< double, 3 >::general( type );
+#endif
 
   typedef Dune::GeometryType GT;
 
