@@ -19,7 +19,7 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/smartpointer.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include "b64enc.hh"
 
@@ -232,7 +232,7 @@ namespace Dune
       CellIterator(const GridCellIterator & x) : GridCellIterator(x) {};
       const FieldVector<DT,n> position() const
       {
-        return ReferenceElements<DT,n>::general((*this)->type()).position(0,0);
+        return GenericReferenceElements<DT,n>::general((*this)->type()).position(0,0);
       }
     };
 
@@ -285,19 +285,19 @@ namespace Dune
         number(num), offset(0)
       {
         if (datamode == VTKOptions::conforming && git != gend)
-          visited[vertexmapper.template map<n>(*git,index)] = true;
+          visited[vertexmapper.template map(*git,index,n)] = true;
       };
       void increment ()
       {
         switch (datamode)
         {
         case VTKOptions::conforming :
-          while(visited[vertexmapper.template map<n>(*git,index)])
+          while(visited[vertexmapper.template map(*git,index,n)])
           {
             basicIncrement();
             if (git == gend) return;
           }
-          visited[vertexmapper.template map<n>(*git,index)] = true;
+          visited[vertexmapper.template map(*git,index,n)] = true;
           break;
         case VTKOptions::nonconforming :
           basicIncrement();
@@ -319,7 +319,7 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.template map<n>(*git,renumber(*git,index))];
+            number[vertexmapper.template map(*git,renumber(*git,index),n)];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
         default :
@@ -332,7 +332,7 @@ namespace Dune
       }
       const FieldVector<DT,n> & position () const
       {
-        return ReferenceElements<DT,n>::general(git->type()).position(index,n);
+        return GenericReferenceElements<DT,n>::general(git->type()).position(index,n);
       }
     };
 
@@ -406,7 +406,7 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.template map<n>(*git,renumber(*git,index))];
+            number[vertexmapper.template map(*git,renumber(*git,index),n)];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
         default :
@@ -506,7 +506,7 @@ namespace Dune
         for (int i=0; i<e.template count<n>(); ++i)
         {
           Dune::FieldVector<DT,n>
-          local = Dune::ReferenceElements<DT,n>::general(gt).position(i,n);
+          local = Dune::GenericReferenceElements<DT,n>::general(gt).position(i,n);
           local -= xi;
           if (local.infinity_norm()<min)
           {
@@ -514,7 +514,7 @@ namespace Dune
             imin = i;
           }
         }
-        return v[mapper.template map<n>(e,imin)];
+        return v[mapper.template map(e,imin,n)];
       }
 
       //! get name
@@ -576,7 +576,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addCellData (VTKFunction* p) DUNE_DEPRECATED
+    void addCellData (VTKFunction* p)   // DUNE_DEPRECATED
     {
       celldata.push_back(VTKFunctionPtr(p));
     }
@@ -604,7 +604,7 @@ namespace Dune
      * @param p The function to visualize.  The VTKWriter object will take
      *          ownership of the VTKFunction *p and delete it when it's done.
      */
-    void addVertexData (VTKFunction* p) DUNE_DEPRECATED
+    void addVertexData (VTKFunction* p)   // DUNE_DEPRECATED
     {
       vertexdata.push_back(VTKFunctionPtr(p));
     }
@@ -1091,7 +1091,7 @@ namespace Dune
           ncorners++;
           if (datamode == VTKOptions::conforming)
           {
-            int alpha = vertexmapper->template map<n>(*it,i);
+            int alpha = vertexmapper->template map(*it,i,n);
             if (number[alpha]<0)
               number[alpha] = nvertices++;
           }
@@ -1576,23 +1576,22 @@ namespace Dune
         s << "  ";
     }
 
-    // renumber VTK -> Dune
+    //! renumber VTK -> Dune
     static int renumber (const GeometryType &t, int i)
     {
       static const int quadRenumbering[4] = {0,1,3,2};
       static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
       static const int prismRenumbering[6] = {0,2,1,3,5,4};
-      switch (vtkType(t))
-      {
-      case vtkQuadrilateral :
+      static const int pyramidRenumbering[6] = {0,2,1,3,5,4};
+      if (t.isQuadrilateral())
         return quadRenumbering[i];
-      case vtkHexahedron :
-        return cubeRenumbering[i];
-      case vtkPrism :
+      if (t.isPyramid())
+        return pyramidRenumbering[i];
+      if (t.isPrism())
         return prismRenumbering[i];
-      default :
-        return i;
-      }
+      if (t.isHexahedron())
+        return cubeRenumbering[i];
+      return i;
     }
     static int renumber (const Entity& e, int i)
     {

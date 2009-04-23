@@ -57,7 +57,6 @@ namespace Dune
     using Base::ncorners;
     using Base::nvertices;
     using Base::outputtype;
-    using Base::renumber;
     using Base::vertexBegin;
     using Base::vertexEnd;
     using Base::vertexdata;
@@ -108,6 +107,25 @@ namespace Dune
     //! write the appended data sections
     virtual void writeAppendedData (std::ostream& s);
 
+    //! vtk -> old refelem
+    static int renumber (const Dune::GeometryType & t, int i)
+    {
+      static const int quadRenumbering[4] = {0,1,3,2};
+      static const int cubeRenumbering[8] = {0,1,3,2,4,5,7,6};
+      static const int prismRenumbering[6] = {0,2,1,3,5,4};
+      //std::cout << "(" << vtkType(t) << " " << i << ")";
+      switch (vtkType(t))
+      {
+      case vtkQuadrilateral :
+        return quadRenumbering[i];
+      case vtkHexahedron :
+        return cubeRenumbering[i];
+      case vtkPrism :
+        return prismRenumbering[i];
+      default :
+        return i;
+      }
+    }
   private:
     unsigned int level;
     bool coerceToSimplex;
