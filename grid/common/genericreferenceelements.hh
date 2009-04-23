@@ -3,7 +3,7 @@
 #ifndef DUNE_GENERICREFERENCEELEMENTS_HH
 #define DUNE_GENERICREFERENCEELEMENTS_HH
 
-#include <dune/grid/genericgeometry/conversion.hh>
+// #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -303,14 +303,6 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, dim > value_type;
 
-    GenericReferenceElementContainer ()
-    {
-      simplex_.template initialize< GeometryType::simplex >();
-      cube_.template initialize< GeometryType::cube >();
-      pyramid_.template initialize< GeometryType::pyramid >();
-      prism_.template initialize< GeometryType::prism >();
-    }
-
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == dim );
@@ -333,7 +325,22 @@ namespace Dune
       }
     }
 
+    static
+    const GenericReferenceElementContainer & instance()
+    {
+      static GenericReferenceElementContainer inst;
+      return inst;
+    }
+
   private:
+    GenericReferenceElementContainer ()
+    {
+      simplex_.template initialize< GeometryType::simplex >();
+      cube_.template initialize< GeometryType::cube >();
+      pyramid_.template initialize< GeometryType::pyramid >();
+      prism_.template initialize< GeometryType::prism >();
+    }
+
     value_type simplex_;
     value_type cube_;
     value_type pyramid_;
@@ -344,12 +351,6 @@ namespace Dune
   struct GenericReferenceElementContainer< ctype, 2 >
   {
     typedef GenericReferenceElement< ctype, 2 > value_type;
-
-    GenericReferenceElementContainer ()
-    {
-      simplex_.template initialize< GeometryType::simplex >();
-      cube_.template initialize< GeometryType::cube >();
-    }
 
     const value_type &operator() ( const GeometryType &type ) const
     {
@@ -371,7 +372,20 @@ namespace Dune
       }
     }
 
+    static
+    const GenericReferenceElementContainer & instance()
+    {
+      static GenericReferenceElementContainer inst;
+      return inst;
+    }
+
   private:
+    GenericReferenceElementContainer ()
+    {
+      simplex_.template initialize< GeometryType::simplex >();
+      cube_.template initialize< GeometryType::cube >();
+    }
+
     value_type simplex_;
     value_type cube_;
   };
@@ -381,18 +395,25 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, 1 > value_type;
 
-    GenericReferenceElementContainer ()
-    {
-      line_.template initialize< GeometryType::simplex >();
-    }
-
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 1 );
       return line_;
     }
 
+    static
+    const GenericReferenceElementContainer & instance()
+    {
+      static GenericReferenceElementContainer inst;
+      return inst;
+    }
+
   private:
+    GenericReferenceElementContainer ()
+    {
+      line_.template initialize< GeometryType::simplex >();
+    }
+
     value_type line_;
   };
 
@@ -401,18 +422,25 @@ namespace Dune
   {
     typedef GenericReferenceElement< ctype, 0 > value_type;
 
-    GenericReferenceElementContainer ()
-    {
-      point_.template initialize< GeometryType::simplex >();
-    }
-
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 0 );
       return point_;
     }
 
+    static
+    const GenericReferenceElementContainer & instance()
+    {
+      static GenericReferenceElementContainer inst;
+      return inst;
+    }
+
   private:
+    GenericReferenceElementContainer ()
+    {
+      point_.template initialize< GeometryType::simplex >();
+    }
+
     value_type point_;
   };
 
@@ -424,7 +452,11 @@ namespace Dune
   template< class ctype, int dim >
   struct GenericReferenceElements
   {
-    static GenericReferenceElementContainer< ctype, dim > general;
+    static
+    const GenericReferenceElement< ctype, dim > & general(const GeometryType &type)
+    {
+      return GenericReferenceElementContainer<ctype, dim>::instance().operator()(type);
+    }
   };
 
 }
