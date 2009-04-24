@@ -116,11 +116,11 @@ namespace Dune
       //std::cout << "(" << vtkType(t) << " " << i << ")";
       switch (vtkType(t))
       {
-      case vtkQuadrilateral :
+      case Base::vtkQuadrilateral :
         return quadRenumbering[i];
-      case vtkHexahedron :
+      case Base::vtkHexahedron :
         return cubeRenumbering[i];
-      case vtkPrism :
+      case Base::vtkPrism :
         return prismRenumbering[i];
       default :
         return i;

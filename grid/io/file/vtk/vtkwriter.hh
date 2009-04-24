@@ -846,7 +846,7 @@ namespace Dune
       return fullname;
     }
 
-  private:
+  protected:
     enum VTKGeometryType
     {
       vtkLine = 3,
@@ -858,7 +858,6 @@ namespace Dune
       vtkPyramid = 14
     };
 
-  protected:
     //! mapping from GeometryType to VTKGeometryType
     static VTKGeometryType vtkType(const Dune::GeometryType & t)
     {
