@@ -1,7 +1,7 @@
 # $Id$
 
 noinst_LTLIBRARIES = libgridcommon.la
-libgridcommon_la_SOURCES = referenceelements.cc genericreferenceelements.cc
+libgridcommon_la_SOURCES = referenceelements.cc
 libgridcommon_la_LIBADD = quadraturerules/libquadraturerules.la \
   $(DUNE_COMMON_LIBS)
 
