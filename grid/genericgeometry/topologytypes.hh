@@ -99,6 +99,65 @@ namespace Dune
 
 
 
+    // SimplexTopology
+    // ---------------
+
+    template< unsigned int dim >
+    struct SimplexTopology
+    {
+      typedef Pyramid< typename SimplexTopology< dim-1 >::type > type;
+    };
+
+    template<>
+    struct SimplexTopology< 0 >
+    {
+      typedef Point type;
+    };
+
+
+
+    // CubeTopology
+    // ------------
+
+    template< unsigned int dim >
+    struct CubeTopology
+    {
+      typedef Prism< typename CubeTopology< dim-1 >::type > type;
+    };
+
+    template<>
+    struct CubeTopology< 0 >
+    {
+      typedef Point type;
+    };
+
+
+
+    // PyramidTopoogy
+    // --------------
+
+    template< unsigned int dim >
+    struct PyramidTopology
+    {
+      typedef Pyramid< typename CubeTopology< dim-1 >::type > type;
+    };
+
+
+
+    // PrismTopoogy
+    // --------------
+
+    template< unsigned int dim >
+    struct PrismTopology
+    {
+      typedef Prism< typename SimplexTopology< dim-1 >::type > type;
+    };
+
+
+
+    // Topology
+    // --------
+
     template< unsigned int id, unsigned int dim >
     class Topology
     {
@@ -108,7 +167,7 @@ namespace Dune
 
       static const bool isPrism = ((id >> (dimension-1)) != 0);
 
-      typedef typename Topology< (id & ~(1 << (dimension-1))), dimension-1 > :: type
+      typedef typename Topology< (id & ~(1 << (dimension-1))), dimension-1 >::type
       BaseTopology;
 
       template< bool >
@@ -124,7 +183,7 @@ namespace Dune
       };
 
     public:
-      typedef typename ProtectedIf< isPrism, Prism, Pyramid > :: type type;
+      typedef typename ProtectedIf< isPrism, Prism, Pyramid >::type type;
     };
 
     template< unsigned int id >
@@ -137,6 +196,11 @@ namespace Dune
     public:
       typedef Point type;
     };
+
+
+
+    // IfTopology
+    // ----------
 
     template< template< class > class Operation, int dim, class Topology = Point >
     struct IfTopology
