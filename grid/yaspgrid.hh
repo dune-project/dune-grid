@@ -52,7 +52,7 @@ namespace Dune {
   //************************************************************************
   // forward declaration of templates
 
-  template<int dim, int dimworld>               class YaspGrid;
+  template<int dim>                             class YaspGrid;
   template<int mydim, int cdim, class GridImp>  class YaspGeometry;
   template<int codim, int dim, class GridImp>   class YaspEntity;
   template<int codim, class GridImp>            class YaspEntityPointer;
@@ -2181,10 +2181,10 @@ namespace Dune {
 #if HAVE_MPI
     typedef CollectiveCommunication<MPI_Comm> CCType;
 #else
-    typedef CollectiveCommunication<Dune::YaspGrid<dim,dimworld> > CCType;
+    typedef CollectiveCommunication<Dune::YaspGrid<dim> > CCType;
 #endif
 
-    typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,
+    typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,YaspLevelIterator,
         YaspIntersectionIterator,              // leaf  intersection
@@ -2193,11 +2193,11 @@ namespace Dune {
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
         YaspLevelIterator,
-        YaspLevelIndexSet< const YaspGrid< dim,dimworld > >,
-        YaspLeafIndexSet< const YaspGrid< dim,dimworld > >,
-        YaspGlobalIdSet<const YaspGrid<dim,dimworld> >,
+        YaspLevelIndexSet< const YaspGrid< dim > >,
+        YaspLeafIndexSet< const YaspGrid< dim > >,
+        YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
-        YaspGlobalIdSet<const YaspGrid<dim,dimworld> >,
+        YaspGlobalIdSet<const YaspGrid<dim> >,
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
         CCType>
     Traits;
@@ -2236,26 +2236,24 @@ namespace Dune {
      and dim, with arbitrary overlap (including zero),
      periodic boundaries and fast implementation allowing on-the-fly computations.
 
-     \deprecated The second template parameter is deprecated.
+     \tparam dim The dimension of the grid and its surrounding world
 
      \par History:
      \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
    */
-  template<int dim, int deprecated_dimworld=dim>
+  template<int dim>
   class YaspGrid :
     public GridDefaultImplementation<dim,dim,yaspgrid_ctype,YaspGridFamily<dim,dim> >,
     public MultiYGrid<dim,yaspgrid_ctype>
   {
-    typedef const YaspGrid<dim,dim> GridImp;
-
-    dune_static_assert(dim==deprecated_dimworld, "YaspGrid can only be instantiated with dim==dimworld");
+    typedef const YaspGrid<dim> GridImp;
 
     void init()
     {
       setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,0) );
-      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim,dim> >(*this) );
-      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim,dim> >(*this) );
+      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,0) );
+      theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim> >(*this) );
+      theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim> >(*this) );
     }
   public:
     //! define type used for coordinates in grid module
@@ -2270,9 +2268,9 @@ namespace Dune {
     typedef typename YaspGridFamily<dim,dim>::Traits Traits;
 
     // need for friend declarations in entity
-    typedef YaspLevelIndexSet<YaspGrid<dim,dim> > LevelIndexSetType;
-    typedef YaspLeafIndexSet<YaspGrid<dim,dim> > LeafIndexSetType;
-    typedef YaspGlobalIdSet<YaspGrid<dim,dim> > GlobalIdSetType;
+    typedef YaspLevelIndexSet<YaspGrid<dim> > LevelIndexSetType;
+    typedef YaspLeafIndexSet<YaspGrid<dim> > LeafIndexSetType;
+    typedef YaspGlobalIdSet<YaspGrid<dim> > GlobalIdSetType;
 
     //! maximum number of levels allowed
     enum { MAXL=64 };
@@ -2362,7 +2360,7 @@ namespace Dune {
       {
         MultiYGrid<dim,ctype>::refine(b);
         setsizes();
-        indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,maxLevel()) );
+        indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,maxLevel()) );
       }
     }
 
@@ -2377,7 +2375,7 @@ namespace Dune {
     {
       MultiYGrid<dim,ctype>::refine(b);
       setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim,dim> >(*this,maxLevel()) );
+      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,maxLevel()) );
     }
 
     //! map adapt to global refine
@@ -2823,13 +2821,13 @@ namespace Dune {
     }
 #endif
 
-    YaspIntersectionIterator<const YaspGrid<dim, dim> >&
+    YaspIntersectionIterator<const YaspGrid<dim> >&
     getRealIntersectionIterator(typename Traits::LevelIntersectionIterator& it)
     {
       return this->getRealImplementation(it);
     }
 
-    const YaspIntersectionIterator<const YaspGrid<dim, dim> >&
+    const YaspIntersectionIterator<const YaspGrid<dim> >&
     getRealIntersectionIterator(const typename Traits::LevelIntersectionIterator& it) const
     {
       return this->getRealImplementation(it);
@@ -2843,14 +2841,14 @@ namespace Dune {
     CollectiveCommunication<YaspGrid> ccobj;
 #endif
 
-    std::vector<YaspLevelIndexSet<const YaspGrid<dim,dim> >*> indexsets;
-    std::vector<YaspLeafIndexSet<const YaspGrid<dim,dim> >*> theleafindexset;
-    std::vector<YaspGlobalIdSet<const YaspGrid<dim,dim> >*> theglobalidset;
+    std::vector<YaspLevelIndexSet<const YaspGrid<dim> >*> indexsets;
+    std::vector<YaspLeafIndexSet<const YaspGrid<dim> >*> theleafindexset;
+    std::vector<YaspGlobalIdSet<const YaspGrid<dim> >*> theglobalidset;
 
     // Index classes need access to the real entity
-    friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim,dim> >;
-    friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim,dim> >;
-    friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim,dim> >;
+    friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim> >;
+    friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim> >;
+    friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim> >;
 
     template<class T>
     void deallocatePointers(T& container)
@@ -2862,14 +2860,14 @@ namespace Dune {
     }
 
     template<int codim>
-    YaspEntity<codim,dim,const YaspGrid<dim,dim> >&
+    YaspEntity<codim,dim,const YaspGrid<dim> >&
     getRealEntity(typename Traits::template Codim<codim>::Entity& e )
     {
       return this->getRealImplementation(e);
     }
 
     template<int codim>
-    const YaspEntity<codim,dim,const YaspGrid<dim,dim> >&
+    const YaspEntity<codim,dim,const YaspGrid<dim> >&
     getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
     {
       return this->getRealImplementation(e);
@@ -3031,8 +3029,8 @@ namespace Dune {
     /** \brief YaspGrid has codim=0 entities (elements)
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct hasEntity< YaspGrid<dim,dimw>, 0 >
+    template<int dim>
+    struct hasEntity< YaspGrid<dim>, 0 >
     {
       static const bool v = true;
     };
@@ -3040,8 +3038,8 @@ namespace Dune {
     /** \brief YaspGrid has codim=dim entities (vertices)
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct hasEntity< YaspGrid<dim,dimw>, dim >
+    template<int dim>
+    struct hasEntity< YaspGrid<dim>, dim >
     {
       static const bool v = true;
     };
@@ -3049,8 +3047,8 @@ namespace Dune {
     /** \brief YaspGrid is parallel
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct isParallel< YaspGrid<dim,dimw> >
+    template<int dim>
+    struct isParallel< YaspGrid<dim> >
     {
       static const bool v = true;
     };
@@ -3058,8 +3056,8 @@ namespace Dune {
     /** \brief YaspGrid is levelwise conforming
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct isLevelwiseConforming< YaspGrid<dim,dimw> >
+    template<int dim>
+    struct isLevelwiseConforming< YaspGrid<dim> >
     {
       static const bool v = true;
     };
@@ -3067,8 +3065,8 @@ namespace Dune {
     /** \brief YaspGrid is leafwise conforming
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct isLeafwiseConforming< YaspGrid<dim,dimw> >
+    template<int dim>
+    struct isLeafwiseConforming< YaspGrid<dim> >
     {
       static const bool v = true;
     };
@@ -3076,8 +3074,8 @@ namespace Dune {
     /** \brief YaspGrid does not support unstructured grids
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct IsUnstructured< YaspGrid<dim,dimw> >
+    template<int dim>
+    struct IsUnstructured< YaspGrid<dim> >
     {
       static const bool v = false;
     };
@@ -3085,8 +3083,8 @@ namespace Dune {
     /** \brief YaspGrid does not support hanging nodes
        \ingroup YaspGrid
      */
-    template<int dim, int dimw>
-    struct hasHangingNodes< YaspGrid<dim,dimw> >
+    template<int dim>
+    struct hasHangingNodes< YaspGrid<dim> >
     {
       static const bool v = false;
     };
