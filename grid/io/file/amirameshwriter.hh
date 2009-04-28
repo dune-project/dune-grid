@@ -28,7 +28,7 @@ namespace Dune {
         quadrilateral will be split in two triangles.  If not, the file is not
         readable by standard Amira.
      */
-    void addGrid(const GridView& gridView, bool splitQuads=false);
+    void addGrid(const GridView& gridView, bool splitAll=false);
 
     /** \brief Add level grid
         \param grid Grid to be written
@@ -38,7 +38,7 @@ namespace Dune {
         readable by standard Amira.
      */
     template <class GridType2>
-    void addLevelGrid(const GridType2& grid, int level, bool splitQuads=false);
+    void addLevelGrid(const GridType2& grid, int level, bool splitAll=false);
 
     /** \brief Add leaf grid
         \param grid Grid to be written
@@ -47,7 +47,7 @@ namespace Dune {
         readable by standard Amira.
      */
     template <class GridType2>
-    void addLeafGrid(const GridType2& grid, bool splitQuads=false);
+    void addLeafGrid(const GridType2& grid, bool splitAll=false);
 
     /** \brief Add cell data
         \param An ISTL compliant vector type
@@ -61,7 +61,7 @@ namespace Dune {
         \param Grid view that the data belongs to
      */
     template <class DataContainer>
-    void addVertexData(const DataContainer& data, const GridView& gridView);
+    void addVertexData(const DataContainer& data, const GridView& gridView, bool GridSplitUp=false);
 
     /** \brief Write AmiraMesh object to disk
         \param filename Name of the file to write to
@@ -123,10 +123,11 @@ namespace Dune {
     static void writeBlockVector(const GridType& grid,
                                  const VectorType& f,
                                  const std::string& filename,
-                                 int level) {
+                                 int level,
+                                 bool GridSplitUp=false) {
 
       LevelAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.levelView(level));
+      amiramesh.addVertexData(f, grid.levelView(level),GridSplitUp);
       amiramesh.write(filename);
     }
 
@@ -170,9 +171,10 @@ namespace Dune {
     template <class VectorType>
     static void writeBlockVector(const GridType& grid,
                                  const VectorType& f,
-                                 const std::string& filename) {
+                                 const std::string& filename,
+                                 bool GridSplitUp = false) {
       LeafAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.leafView());
+      amiramesh.addVertexData(f, grid.leafView(),GridSplitUp);
       amiramesh.write(filename);
     }
 
