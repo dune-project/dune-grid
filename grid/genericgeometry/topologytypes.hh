@@ -203,70 +203,90 @@ namespace Dune
     // ----------
 
     template< template< class > class Operation, int dim, class Topology = Point >
-    struct IfTopology
+    class IfTopology
     {
-      static void apply ( int topoId )
+      typedef IfTopology< Operation, dim-1, Prism< Topology > > IfPrism;
+      typedef IfTopology< Operation, dim-1, Pyramid< Topology > > IfPyramid;
+
+    public:
+      static void apply ( const unsigned int topologyId )
       {
-        if (topoId & 1)
-          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1);
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1 );
         else
-          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1);
+          IfPyramid::apply( topologyId >> 1 );
       }
 
-      template< class Type >
-      static void apply ( int topoId, Type &param )
+      template< class T1 >
+      static void apply ( const unsigned int topologyId, T1 &p1 )
       {
-        if (topoId & 1)
-          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param);
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1 );
         else
-          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param);
+          IfPyramid::apply( topologyId >> 1, p1 );
       }
 
-      template< class Type1, class Type2 >
-      static void apply ( int topoId, Type1 &param1, Type2 &param2 )
+      template< class T1, class T2 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2 )
       {
-        if (topoId & 1)
-          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param1,param2);
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2 );
         else
-          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param1,param2);
+          IfPyramid::apply( topologyId >> 1, p1, p2 );
       }
 
-      template< class Type1, class Type2, class Type3 >
-      static void apply ( int topoId, Type1 &param1, Type2 &param2, Type3 &param3 )
+      template< class T1, class T2, class T3 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3 )
       {
-        if (topoId & 1)
-          IfTopology< Operation, dim-1,Prism<Topology> > :: apply(topoId >> 1,param1,param2,param3);
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2, p3 );
         else
-          IfTopology< Operation, dim-1,Pyramid<Topology> > :: apply(topoId >> 1,param1,param2,param3);
+          IfPyramid::apply( topologyId >> 1, p1, p2, p3 );
+      }
+
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2, p3, p4 );
+        else
+          IfPyramid::apply( topologyId >> 1, p1, p2, p3, p4 );
       }
     };
+
     template< template< class > class Operation, class Topology >
-    struct IfTopology<Operation,0,Topology>
+    struct IfTopology< Operation, 0, Topology >
     {
-      static void apply (int topoId)
+      static void apply ( const unsigned int topologyId )
       {
-        Operation< Topology > :: apply( );
+        Operation< Topology >::apply();
       }
 
-      template< class Type >
-      static void apply ( int topoId, Type &param )
+      template< class T1 >
+      static void apply ( const unsigned int topologyId, T1 &p1 )
       {
-        Operation< Topology > :: apply( param );
+        Operation< Topology >::apply( p1 );
       }
 
-      template< class Type1, class Type2 >
-      static void apply ( int topoId, Type1 &param1, Type2 &param2 )
+      template< class T1, class T2 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2 )
       {
-        Operation< Topology > :: apply( param1, param2 );
+        Operation< Topology >::apply( p1, p2 );
       }
 
-      template< class Type1, class Type2, class Type3 >
-      static void apply ( int topoId, Type1 &param1, Type2 &param2, Type3 &param3 )
+      template< class T1, class T2, class T3 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3 )
       {
-        Operation< Topology > :: apply( param1, param2, param3 );
+        Operation< Topology >::apply( p1, p2, p3 );
       }
 
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        Operation< Topology >::apply( p1, p2, p3, p4 );
+      }
     };
+
   }
 
 }
