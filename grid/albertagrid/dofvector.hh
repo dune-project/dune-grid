@@ -182,7 +182,7 @@ namespace Dune
     public:
       typedef typename DofVectorProvider::DofVector DofVector;
 
-      static const bool supportsAdaptationData = (DUNE_ALBERTA_VERSION >= 0x201);
+      static const bool supportsAdaptationData = (DUNE_ALBERTA_VERSION >= 0x300);
 
     private:
       DofVector *dofVector_;
@@ -275,7 +275,7 @@ namespace Dune
       AdaptationData *getAdaptationData () const
       {
         assert( dofVector_ != NULL );
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
         assert( dofVector_->user_data != NULL );
         return static_cast< AdaptationData * >( dofVector_->user_data );
 #else
@@ -287,9 +287,9 @@ namespace Dune
       void setAdaptationData ( AdaptationData *adaptationData )
       {
         assert( dofVector_ != NULL );
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
         dofVector_->user_data = adaptationData;
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
       }
 
       template< class Interpolation >

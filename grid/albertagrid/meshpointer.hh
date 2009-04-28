@@ -158,7 +158,7 @@ namespace Dune
     {
       release();
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL, NULL );
 #else
       mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL );
@@ -189,7 +189,7 @@ namespace Dune
     inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
     {
       release();
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL, NULL );
 #else
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL );
@@ -243,7 +243,7 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool MeshPointer< dim >::coarsen ( typename FillFlags::Flags fillFlags )
     {
@@ -252,7 +252,7 @@ namespace Dune
         ALBERTA dof_compress( mesh_ );
       return coarsened;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >
@@ -267,13 +267,13 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool MeshPointer< dim >::refine ( typename FillFlags::Flags fillFlags )
     {
       return (ALBERTA refine( mesh_, fillFlags ) == meshRefined);
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >

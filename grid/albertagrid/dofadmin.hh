@@ -227,7 +227,7 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline const DofSpace *
     HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
@@ -237,7 +237,7 @@ namespace Dune
       const ALBERTA FLAGS flags = ADM_PRESERVE_COARSE_DOFS;
       return ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION == 0x200
     template< int dim >
@@ -251,14 +251,14 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void
     HierarchyDofNumbering< dim >::freeDofSpace ( const DofSpace *dofSpace )
     {
       ALBERTA free_fe_space( dofSpace );
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION == 0x200
     template< int dim >

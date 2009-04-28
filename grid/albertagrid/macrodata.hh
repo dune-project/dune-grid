@@ -33,7 +33,7 @@ namespace Dune
     public:
       typedef int ElementId[ numVertices ];
 
-      static const int supportPeriodicity = (DUNE_ALBERTA_VERSION >= 0x201);
+      static const int supportPeriodicity = (DUNE_ALBERTA_VERSION >= 0x300);
 
     private:
       Data *data_;
@@ -229,7 +229,7 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void MacroData< dim >::create ()
     {
@@ -239,7 +239,7 @@ namespace Dune
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION == 0x200
     template< int dim >
@@ -307,7 +307,7 @@ namespace Dune
         rotate( data_->mel_vertices, i, shift );
 
         // correct opposite vertices
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
         if( data_->opp_vertex != NULL )
         {
           assert( data_->neigh != NULL );
@@ -333,7 +333,7 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline void MacroData< dim >
     ::insertWallTrafo ( const GlobalMatrix &matrix, const GlobalVector &shift )
@@ -370,7 +370,7 @@ namespace Dune
       copy( shift, array[ count ].t );
       ++count;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >

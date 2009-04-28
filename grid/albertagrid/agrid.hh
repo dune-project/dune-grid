@@ -727,7 +727,7 @@ namespace Dune
 #undef MAX
 #endif
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
 #ifdef obstack_chunk_alloc
 #undef obstack_chunk_alloc
 #endif

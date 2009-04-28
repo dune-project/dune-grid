@@ -294,7 +294,7 @@ namespace Dune
     inline int ElementInfo< dim >::indexInFather () const
     {
       const Element *element = elInfo().el;
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       const Element *father = elInfo().parent->el;
 #else
       const Element *father = elInfo().parent;
@@ -320,7 +320,7 @@ namespace Dune
       for( int k = 0; k < maxNeighbors; ++k )
         child->elInfo.opp_vertex[ k ] = -2;
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       ALBERTA fill_elinfo( i, FILL_ANY, &elInfo(), &(child->elInfo) );
 #else
       ALBERTA fill_elinfo( i, &elInfo(), &(child->elInfo) );
@@ -416,7 +416,7 @@ namespace Dune
     }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool ElementInfo< dim >::isBoundary ( int face ) const
     {
@@ -432,7 +432,7 @@ namespace Dune
       else
         return false;
     }
-#endif // DUNE_ALBERTA_VERSION >= 0x201
+#endif // DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >
@@ -445,7 +445,7 @@ namespace Dune
 #endif // DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline int ElementInfo< dim >::boundaryId ( int face ) const
     {
@@ -458,7 +458,7 @@ namespace Dune
       // assert( id == elInfo().wall_bound[ face ] );
       return id;
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 
 #if DUNE_ALBERTA_VERSION == 0x200
@@ -488,7 +488,7 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION == 0x200
 
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline AffineTransformation *
     ElementInfo< dim >::transformation ( int face ) const
@@ -499,7 +499,7 @@ namespace Dune
       const int macroFace = elInfo().macro_wall[ face ];
       return (macroFace < 0 ? NULL : elInfo().macro_el->wall_trafo[ face ]);
     }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x201
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >

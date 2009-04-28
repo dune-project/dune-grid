@@ -47,7 +47,7 @@ namespace Dune
     typedef ALBERTA REAL_D GlobalVector;
     typedef ALBERTA REAL_DD GlobalMatrix;
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     typedef ALBERTA AFF_TRAFO AffineTransformation;
 #else
     struct AffineTransformation
@@ -66,7 +66,7 @@ namespace Dune
 
     static const int InteriorBoundary = INTERIOR;
     static const int DirichletBoundary = DIRICHLET;
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
     typedef ALBERTA BNDRY_TYPE BoundaryId;
 #else
     typedef S_CHAR BoundaryId;
@@ -251,19 +251,19 @@ namespace Dune
 
       static const Flags projection = FILL_PROJECTION;
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags elementType = FILL_NOTHING;
 #else
       static const Flags elementType = (dim == 3 ? FILL_EL_TYPE : FILL_NOTHING);
 #endif
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags boundaryId = FILL_MACRO_WALLS;
 #else
       static const Flags boundaryId = FILL_BOUND;
 #endif
 
-#if DUNE_ALBERTA_VERSION >= 0x201
+#if DUNE_ALBERTA_VERSION >= 0x300
       static const Flags nonPeriodic = FILL_NON_PERIODIC;
 #else
       static const Flags nonPeriodic = FILL_NOTHING;
