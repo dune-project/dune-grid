@@ -101,7 +101,7 @@ namespace Dune
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<int cc>
-    int map (const typename GV::template Codim<0>::Entity& e, int i) const
+    int DUNE_DEPRECATED map (const typename GV::template Codim<0>::Entity& e, int i) const
     {
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
