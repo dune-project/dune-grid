@@ -220,10 +220,8 @@ int main (int argc , char **argv) try
   makeHalfCircleQuad(gridWithParametrization, true);
 
   // make grids again just to check this is possible
-#if 0
   makeHalfCircleQuad(gridWithoutParametrization, false);
   makeHalfCircleQuad(gridWithParametrization, true);
-#endif
 
   gridWithParametrization.globalRefine(1);
   gridWithoutParametrization.globalRefine(1);
