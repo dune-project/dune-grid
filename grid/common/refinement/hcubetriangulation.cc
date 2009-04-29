@@ -247,6 +247,7 @@ namespace Dune {
         typedef typename Refinement::template Codim<0>::Geometry Geometry;
 
         RefinementIteratorSpecial(int level, bool end = false);
+        RefinementIteratorSpecial(const RefinementIteratorSpecial<dimension, CoordType, 0> &other);
 
         void increment();
 
@@ -280,6 +281,14 @@ namespace Dune {
         if(end)
           kuhnIndex = nKuhnSimplices;
       }
+      template<int dimension, class CoordType>
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      RefinementIteratorSpecial(const RefinementIteratorSpecial<dimension, CoordType, 0> &other)
+        : level(other.level), kuhnIndex(other.kuhnIndex),
+          backend(other.backend),
+          backendEnd(other.backendEnd),
+          builtGeometry(false), geometry_(backend)
+      {}
 
       template<int dimension, class CoordType>
       void
