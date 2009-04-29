@@ -67,9 +67,7 @@
 #define UGTYPES_H
 #define __HEAPS__
 #define __UGENV__
-#define __PARGM_H__
 #define __DEVICESH__
-#define __SM__
 
 #define _3
 #include "uggrid/ugincludes.hh"

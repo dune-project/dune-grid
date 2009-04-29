@@ -239,13 +239,13 @@ namespace Dune {
      * grid even in a parallel setting.
      */
     static UG_NS< UG_DIM >::Node* PFirstNode(const UG_NS< UG_DIM >::Grid* grid) {
-      using UG::PrioHGhost;
-      using UG::PrioVGhost;
-      using UG::PrioVHGhost;
-      using UG::PrioMaster;
-      using UG::PrioBorder;
-      using UG::ELEMENT_LIST;
-      using UG::NODE_LIST;
+      using UG_NAMESPACE ::PrioHGhost;
+      using UG_NAMESPACE ::PrioVGhost;
+      using UG_NAMESPACE ::PrioVHGhost;
+      using UG_NAMESPACE ::PrioMaster;
+      using UG_NAMESPACE ::PrioBorder;
+      using UG_NAMESPACE ::ELEMENT_LIST;
+      using UG_NAMESPACE ::NODE_LIST;
       return PFIRSTNODE(grid);
     }
 
@@ -253,13 +253,13 @@ namespace Dune {
      * grid even in a parallel setting.
      */
     static UG_NS< UG_DIM >::Node* FirstNode(UG_NS< UG_DIM >::Grid* grid) {
-      using UG::PrioHGhost;
-      using UG::PrioVGhost;
-      using UG::PrioVHGhost;
-      using UG::PrioMaster;
-      using UG::PrioBorder;
-      using UG::ELEMENT_LIST;
-      using UG::NODE_LIST;
+      using UG_NAMESPACE ::PrioHGhost;
+      using UG_NAMESPACE ::PrioVGhost;
+      using UG_NAMESPACE ::PrioVHGhost;
+      using UG_NAMESPACE ::PrioMaster;
+      using UG_NAMESPACE ::PrioBorder;
+      using UG_NAMESPACE ::ELEMENT_LIST;
+      using UG_NAMESPACE ::NODE_LIST;
       return FIRSTNODE(grid);
     }
 
@@ -267,13 +267,13 @@ namespace Dune {
      * grid even in a parallel setting.
      */
     static UG_NS< UG_DIM >::Element* PFirstElement(const UG_NS< UG_DIM >::Grid* grid) {
-      using UG::PrioHGhost;
-      using UG::PrioVGhost;
-      using UG::PrioVHGhost;
-      using UG::PrioMaster;
-      using UG::PrioBorder;
-      using UG::ELEMENT_LIST;
-      using UG::NODE_LIST;
+      using UG_NAMESPACE ::PrioHGhost;
+      using UG_NAMESPACE ::PrioVGhost;
+      using UG_NAMESPACE ::PrioVHGhost;
+      using UG_NAMESPACE ::PrioMaster;
+      using UG_NAMESPACE ::PrioBorder;
+      using UG_NAMESPACE ::ELEMENT_LIST;
+      using UG_NAMESPACE ::NODE_LIST;
       return PFIRSTELEMENT(grid);
     }
 
@@ -281,12 +281,12 @@ namespace Dune {
      * grid even in a parallel setting.
      */
     static UG_NS< UG_DIM >::Element* FirstElement(UG_NS< UG_DIM >::Grid* grid) {
-      using UG::PrioHGhost;
-      using UG::PrioVGhost;
-      using UG::PrioVHGhost;
-      using UG::PrioMaster;
-      using UG::PrioBorder;
-      using UG::ELEMENT_LIST;
+      using UG_NAMESPACE ::PrioHGhost;
+      using UG_NAMESPACE ::PrioVGhost;
+      using UG_NAMESPACE ::PrioVHGhost;
+      using UG_NAMESPACE ::PrioMaster;
+      using UG_NAMESPACE ::PrioBorder;
+      using UG_NAMESPACE ::ELEMENT_LIST;
       return FIRSTELEMENT(grid);
     }
 
