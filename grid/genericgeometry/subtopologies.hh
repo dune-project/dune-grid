@@ -548,6 +548,48 @@ namespace Dune
       enum { value = (codim != 0) && IsHybrid< Topology > :: value };
     };
 
+
+
+    // SubTopologyMapper
+    // -----------------
+
+    template< class Topology >
+    class SubTopologyMapper
+    {
+      static const unsigned int dimension = Topology::dimension;
+
+      template< int codim >
+      struct CalcOffset
+      {
+        static void apply ( unsigned int (&offsets)[ dimension+2 ] )
+        {
+          offsets[ codim+1 ] = offsets[ codim ] + Size< Topology, codim >::value;
+        }
+      };
+
+    public:
+      SubTopologyMapper ()
+      {
+        offsets_[ 0 ] = 0;
+        ForLoop< CalcOffset, 0, dimension >::apply( offsets_ );
+      };
+
+      unsigned int operator() ( const unsigned int codim, const unsigned int subEntity ) const
+      {
+        const unsigned int offset = offsets_[ codim ];
+        assert( offset + subEntity < offsets_[ codim+1 ] );
+        return offset + subEntity;
+      }
+
+      unsigned int size () const
+      {
+        return offsets_[ dimension+1 ];
+      }
+
+    private:
+      unsigned int offsets_[ dimension+2 ];
+    };
+
   }
 
 }
