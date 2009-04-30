@@ -254,10 +254,16 @@ namespace Dune {
     }
 
     //! return sub index of given entities sub entity with codim and number
-    template <int codim,class EntityType>
-    int subIndex (const EntityType & en, int num) const
+    template< int codim, class EntityType >
+    int DUNE_DEPRECATED subIndex ( const EntityType &entity, int num ) const
     {
-      return set_.template subIndex<codim> (en,num);
+      return set_.template subIndex< codim >( entity, num );
+    }
+
+    template< class Entity >
+    int subIndex ( const Entity &entity, int num, unsigned int codim ) const
+    {
+      return set_.subIndex( entity, num, codim );
     }
 
     //! wrap geomTypes method of set
