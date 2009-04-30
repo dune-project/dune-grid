@@ -12,6 +12,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkadaptation.cc"
 
 int main () try
 {
@@ -50,6 +51,8 @@ int main () try
 
     // check the intersection iterator
     checkIntersectionIterator(grid);
+
+    checkAdaptation( grid );
   };
 
   return 0;
