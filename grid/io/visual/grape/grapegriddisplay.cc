@@ -153,7 +153,7 @@ namespace Dune
     he->has_children = 1;
 
     // know the type
-    int geomType = convertToGrapeType ( geometry.type() , dim );
+    int geomType = convertToGrapeType( geometry.type(), dim );
     he->type = geomType;
 
     // get pointer to coordinates and copy from geometry
@@ -164,18 +164,18 @@ namespace Dune
     assert( en.template count<dim>() == geometry.corners() );
     assert( geometry.corners() <= MAX_EL_DOF );
 
-    for(int i= 0 ; i<geometry.corners(); ++i)
+    for( int i = 0; i < geometry.corners(); ++i )
     {
-      const int grapeVx = mapDune2GrapeVertex(geomType,i);
-      he->vindex[i] = this->vertexIndex(indexSet_, en, grapeVx);
+      const int grapeVx = mapDune2GrapeVertex( geomType, i );
+      he->vindex[ i ] = this->vertexIndex( indexSet_, en, grapeVx );
 
       assert( Entity::dimensionworld <= 3 );
       const CoordinateType coord = geometry.corner( grapeVx );
-      for(int j = 0; j < Entity::dimensionworld ; ++j)
+      for( int j = 0; j < Entity::dimensionworld ; ++j )
       {
         // here the mapping from dune to grape elements is done
         // it's only different for quads and hexas
-        vpointer[i][j] = coord[j] ;
+        vpointer[ i ][ j ] = coord[ j ];
       }
     }
   }

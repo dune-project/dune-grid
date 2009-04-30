@@ -176,12 +176,13 @@ namespace Dune
     }
 
     // return vertex index from given index set
-    template <class IndexSetType>
-    static int getVertexIndex(void * iset, const EntityCodim0Type & en, int vx)
+    template< class IndexSet >
+    static int getVertexIndex ( void *iset, const EntityCodim0Type &entity, int vx )
     {
-      assert( iset );
-      const IndexSetType * set = ((const IndexSetType *) iset);
-      return set->template subIndex<dim> (en,vx);
+      assert( iset != 0 );
+      const IndexSet *indexSet = (const IndexSet *)iset;
+      //return set->template subIndex< dim >( entity, vx );
+      return indexSet->subIndex( entity, vx, dim );
     }
 
   public:
