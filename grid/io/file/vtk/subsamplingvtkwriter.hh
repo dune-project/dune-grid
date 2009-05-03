@@ -144,8 +144,8 @@ namespace Dune
 
       ncells += refinement.nElements(level);
       nvertices += refinement.nVertices(level);
+      ncorners += refinement.nElements(level) * refinement.eBegin(level).vertexIndices().size();
     }
-    ncorners = nvertices;
   }
 
   //! write cell data
@@ -438,8 +438,12 @@ namespace Dune
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
         Refinement &refinement = buildRefinement<dim, ctype>(i->type(), subsampledGeometryType(i->type()));
-        offset += refinement.nVertices(level);
-        stream.write(offset);
+        unsigned int verticesPerCell = refinement.eBegin(level).vertexIndices().size();
+        for(int element = 0; element < refinement.nElements(level); ++element)
+        {
+          offset += verticesPerCell;
+          stream.write(offset);
+        }
       }
     }
 
