@@ -37,7 +37,6 @@ struct MapTwistAlu2Dune< tetra >
 };
 
 
-#if 0
 template <class GridType>
 void makeNonConfGrid(GridType &grid,int level,int adapt) {
   int myrank = grid.comm().rank();
@@ -66,7 +65,6 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
     grid.loadBalance();
   }
 }
-#endif
 
 #if 0
 template <class GridType>
@@ -152,7 +150,7 @@ void checkLevelIndexNonConform(GridType & grid)
 #endif
 
 template< class GridType >
-void checkALUSerial ( GridType &grid, int maxLevel = 2 )
+void checkALUSerial ( GridType &grid, int maxLevel = 1 )
 {
   // be careful, each global refine create 8 x maxlevel elements
   if( grid.comm().rank() == 0 )
@@ -167,11 +165,9 @@ void checkALUSerial ( GridType &grid, int maxLevel = 2 )
     gridcheck( grid );
   }
 
-#if 0
   // check also non-conform grids
-  //makeNonConfGrid(grid,0,1);
-  //gridcheck(grid);
-#endif
+  makeNonConfGrid(grid,0,1);
+  gridcheck(grid);
 
   // check the method geometryInFather()
   checkGeometryInFather(grid);
@@ -220,7 +216,7 @@ try {
   // extra-environment to check destruction
   {
     typedef ALUSimplexGrid< 3, 3 > GridType;
-
+    #if 0
     // check empty grid
     {
       if( myrank == 0 )
@@ -242,7 +238,7 @@ try {
 
     if( myrank == 0 )
       checkAlbertaReader< GridType >();
-
+    #endif
     {
       std::string filename;
       if( argc > 1 )

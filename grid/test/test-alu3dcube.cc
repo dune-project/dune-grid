@@ -19,9 +19,37 @@
 
 using namespace Dune;
 
+template <class GridType>
+void makeNonConfGrid(GridType &grid,int level,int adapt) {
+  int myrank = grid.comm().rank();
+  grid.loadBalance();
+  grid.globalRefine(level);
+  grid.loadBalance();
+  for (int i=0; i<adapt; i++)
+  {
+    if (myrank==0)
+    {
+      typedef typename GridType :: template Codim<0> ::
+      template Partition<Interior_Partition> :: LeafIterator LeafIterator;
+
+      LeafIterator endit = grid.template leafend<0,Interior_Partition>   ();
+      int nr = 0;
+      int size = grid.size(0);
+      for(LeafIterator it    = grid.template leafbegin<0,Interior_Partition> ();
+          it != endit ; ++it,nr++ )
+      {
+        grid.mark( 1, *it );
+        if (nr>size*0.2) break;
+      }
+    }
+    grid.adapt();
+    grid.postAdapt();
+    grid.loadBalance();
+  }
+}
 
 template< class GridType >
-void checkALUSerial ( GridType &grid, int maxLevel = 2 )
+void checkALUSerial ( GridType &grid, int maxLevel = 1 )
 {
   // be careful, each global refine create 8 x maxlevel elements
   if( grid.comm().rank() == 0 )
@@ -36,13 +64,15 @@ void checkALUSerial ( GridType &grid, int maxLevel = 2 )
     gridcheck( grid );
   }
 
+  // check also non-conform grids
+  makeNonConfGrid(grid,0,1);
+  gridcheck(grid);
+
   // check the method geometryInFather()
   checkGeometryInFather(grid);
 
-#if 1
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
-#endif
 }
 
 

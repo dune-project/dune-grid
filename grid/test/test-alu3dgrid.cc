@@ -128,19 +128,24 @@ template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
 {
   // be careful, each global refine create 8 x maxlevel elements
+  std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
   for(int i=0; i<mxl; i++) {
     grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
+    std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
   }
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
+  std::cout << "  CHECKING: non-conform" << std::endl;
   gridcheck(grid);
 
   // check the method geometryInFather()
+  std::cout << "  CHECKING: geometry in father" << std::endl;
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
+  std::cout << "  CHECKING: intersections" << std::endl;
   checkIntersectionIterator(grid);
 
   // some checks for assignment of iterators
@@ -198,6 +203,7 @@ int main (int argc , char **argv) {
       {
         typedef ALUSimplexGrid<2,2> GridType;
         std::string filename("simplex-testgrid-2-2.dgf");
+        std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr,2);
       }
