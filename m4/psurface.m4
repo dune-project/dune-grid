@@ -56,13 +56,16 @@ fi
 
 # if header is found...
 if test x$HAVE_PSURFACE = x1 ; then
+   AC_MSG_CHECKING([psurface library -lpsurface])
    LIBS="$LIBS -lpsurface $AMIRAMESH_LDFLAGS $AMIRAMESH_LIBS"
 
    AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface.h"], [psurface::LoadMesh("label", "filename");]),
 	[PSURFACE_LIBS="-lpsurface"
          PSURFACE_LDFLAGS="-L$PSURFACE_LIB_PATH"
-         LIBS="$LIBS $PSURFACE_LIBS"],
+         LIBS="$LIBS $PSURFACE_LIBS"
+         AC_MSG_RESULT(yes)],
 	[HAVE_PSURFACE="0"
+        AC_MSG_RESULT(no)
 	AC_MSG_WARN(psurface header found, but libpsurface missing!)])
 fi
 
@@ -99,5 +102,7 @@ AM_CONDITIONAL(PSURFACE, test x$HAVE_PSURFACE = x1)
 LIBS="$ac_save_LIBS"
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
+
+DUNE_ADD_SUMMARY_ENTRY([psurface],[$with_psurface])
 
 ])
