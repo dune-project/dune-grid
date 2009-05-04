@@ -47,16 +47,16 @@ AC_CHECK_HEADER([psurface.h],
 
 CPPFLAGS="$PSURFACE_CPPFLAGS"
 
-# Psurface uses the AmiraMesh data format to read a write parametrized surfaces to disk.
-# Therefore, its installation only makes sense if AmiraMesh support is installed as well.
-if test x$HAVE_AMIRAMESH != x1 ; then
-  AC_MSG_NOTICE(Check for psurface library aborted because AmiraMesh is unavailable!) 
-  HAVE_PSURFACE="0"
-fi
-
 # if header is found...
 if test x$HAVE_PSURFACE = x1 ; then
    AC_MSG_CHECKING([psurface library -lpsurface])
+
+   # Why are the $AMIRAMESH_LDFLAGS $AMIRAMESH_LIBS here?
+   # OS: This is a hack.  psurface can be compiled with and without AmiraMesh
+   # support.  If it is compiled with AmiraMesh support, then it needs these flags
+   # for the test to link (and since these flags must be set properly the AmiraMesh
+   # test must have been called successfully before).  If psurface is compiled
+   # without AmiraMesh support than the additional flags here do not matter.
    LIBS="$LIBS -lpsurface $AMIRAMESH_LDFLAGS $AMIRAMESH_LIBS"
 
    AC_LINK_IFELSE(AC_LANG_PROGRAM([#include "psurface.h"], [psurface::LoadMesh("label", "filename");]),
