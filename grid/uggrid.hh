@@ -746,9 +746,6 @@ namespace Dune {
     void insertBoundarySegment(const std::vector<unsigned int> vertices,
                                const BoundarySegment<dim>* boundarySegment) DUNE_DEPRECATED;
 
-    /** \brief Insert a vertex into the coarse grid */
-    void insertVertex(const FieldVector<double,dim>& pos) DUNE_DEPRECATED;
-
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering

@@ -38,7 +38,7 @@ template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertVertex(const Dune::FieldVector<typename Dune::GridFactory<Dune::UGGrid<dimworld> >::ctype,dimworld>& pos)
 {
-  grid_->insertVertex(pos);
+  grid_->vertexPositions_.push_back(pos);
 }
 
 template <int dimworld>

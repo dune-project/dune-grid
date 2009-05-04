@@ -927,12 +927,6 @@ void Dune::UGGrid<dim>::insertBoundarySegment(const std::vector<unsigned int> ve
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::insertVertex(const FieldVector<double,dim>& pos)
-{
-  vertexPositions_.push_back(pos);
-}
-
-template <int dim>
 void Dune::UGGrid<dim>::insertElement(GeometryType type,
                                       const std::vector<unsigned int>& vertices)
 {
