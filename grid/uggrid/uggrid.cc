@@ -901,32 +901,6 @@ void Dune::UGGrid < dim >::createLGMGrid(const std::string& name)
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::insertBoundarySegment(const std::vector<unsigned int> vertices,
-                                              const BoundarySegment<dim>* boundarySegment)
-{
-  array<unsigned int, dim*2-2> segmentVertices;
-
-  for (size_t i=0; i<vertices.size(); i++)
-    segmentVertices[i] = vertices[i];
-
-  for (size_t i=vertices.size(); i<dim*2-2; i++)
-    segmentVertices[i] = -1;
-
-  // DUNE --> UG vertex renumbering for quadrilateral boundary segments
-  if (vertices.size()==4) {
-    segmentVertices[2] = vertices[3];
-    segmentVertices[3] = vertices[2];
-  }
-
-  boundarySegmentVertices_.push_back(segmentVertices);
-
-  // Append boundary segment class to the boundary segment class list, so we can
-  // delete them all in the destructor
-  boundarySegments_.push_back(boundarySegment);
-
-}
-
-template <int dim>
 void Dune::UGGrid<dim>::insertElement(GeometryType type,
                                       const std::vector<unsigned int>& vertices)
 {

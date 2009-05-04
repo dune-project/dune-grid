@@ -738,14 +738,6 @@ namespace Dune {
      */
     void createLGMGrid(const std::string& name);
 
-    /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
-        \param vertices The indices of the vertices of the segment
-        \param boundarySegment Class implementing the geometry of the boundary segment.
-        The grid object takes control of this object and deallocates it when destructing itself.
-     */
-    void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                               const BoundarySegment<dim>* boundarySegment) DUNE_DEPRECATED;
-
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering

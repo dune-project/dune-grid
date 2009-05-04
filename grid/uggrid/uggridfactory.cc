@@ -54,7 +54,25 @@ void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int> vertices,
                       const BoundarySegment<dimworld>* boundarySegment)
 {
-  grid_->insertBoundarySegment(vertices, boundarySegment);
+  array<unsigned int, dimworld*2-2> segmentVertices;
+
+  for (size_t i=0; i<vertices.size(); i++)
+    segmentVertices[i] = vertices[i];
+
+  for (size_t i=vertices.size(); i<dimworld*2-2; i++)
+    segmentVertices[i] = -1;
+
+  // DUNE --> UG vertex renumbering for quadrilateral boundary segments
+  if (vertices.size()==4) {
+    segmentVertices[2] = vertices[3];
+    segmentVertices[3] = vertices[2];
+  }
+
+  grid_->boundarySegmentVertices_.push_back(segmentVertices);
+
+  // Append boundary segment class to the boundary segment class list, so we can
+  // delete them all in the destructor
+  grid_->boundarySegments_.push_back(boundarySegment);
 }
 
 template <int dimworld>
