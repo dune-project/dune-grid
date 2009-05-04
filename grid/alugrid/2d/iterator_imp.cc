@@ -266,12 +266,12 @@ namespace Dune {
 
     if (this->current.isNotConform_ )
     {
-      this->current.neigh_->outernormal( indexInOutside(), ((normal_t) (&outerNormal_)[0]) );
+      this->current.neigh_->outernormal( this->current.opposite_, ((normal_t) (&outerNormal_)[0]) );
       outerNormal_ *= -1.0;
       return outerNormal_;
     }
 
-    this->current.item_->outernormal(this->current.index_,  ((normal_t) (&outerNormal_)[0]) );
+    this->current.item_->outernormal(  this->current.index_,  ((normal_t) (&outerNormal_)[0]) );
     return outerNormal_;
   }
 
