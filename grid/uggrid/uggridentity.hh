@@ -112,7 +112,7 @@ namespace Dune {
       return InteriorEntity;
 #else
 #define PARHDRE(p) (&((p)->ddd))
-#define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
+#define EPRIO(e) (PARHDRE(e)->prio)
       if (codim != dim) {
         // TODO: non-nodes and non-elements (elements are done
         // below)
@@ -122,13 +122,13 @@ namespace Dune {
       typename UG_NS<dim>::Node *node =
         static_cast<typename UG_NS<dim>::Node *>(target_);
 
-      if (EPRIO(node) == UG::PrioBorder || hasBorderCopy_(node))
+      if (EPRIO(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
         return BorderEntity;
-      else if (EPRIO(node) == UG::PrioMaster || EPRIO(node) == UG::PrioNone)
+      else if (EPRIO(node) == UG_NS<dim>::PrioMaster || EPRIO(node) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
-      else if (EPRIO(node)    == UG::PrioHGhost
-               || EPRIO(node) == UG::PrioVGhost
-               || EPRIO(node) == UG::PrioVHGhost)
+      else if (EPRIO(node)    == UG_NS<dim>::PrioHGhost
+               || EPRIO(node) == UG_NS<dim>::PrioVGhost
+               || EPRIO(node) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
       else
         DUNE_THROW(GridError, "Unknown priority " << EPRIO(node));
@@ -142,11 +142,11 @@ namespace Dune {
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
 #define PARHDR(p)         (&((p)->ddd))
-#define PRIOLIST(n)        DDD_InfoProcList(PARHDR(n))
+#define PRIOLIST(n)        UG_NS<dim>::DDD_InfoProcList(PARHDR(n))
 
       int  *plist = PRIOLIST(node);
       for (int i = 0; plist[i] >= 0; i += 2)
-        if (plist[i + 1] == UG::PrioBorder)
+        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
 
       return false;
@@ -243,9 +243,9 @@ namespace Dune {
 #else
 #define PARHDRE(p) (&((p)->ge.ddd))
 #define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(target_) == UG::PrioHGhost
-          || EPRIO(target_) == UG::PrioVGhost
-          || EPRIO(target_) == UG::PrioVHGhost)
+      if (EPRIO(target_) == UG_NS<dim>::PrioHGhost
+          || EPRIO(target_) == UG_NS<dim>::PrioVGhost
+          || EPRIO(target_) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
       else
         return InteriorEntity;

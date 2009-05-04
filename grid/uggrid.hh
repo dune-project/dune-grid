@@ -185,7 +185,7 @@ namespace Dune {
 
     // called by DDD_IFOneway to serialize the data structure to
     // be send
-    static int ugGather_(DDD_OBJ obj, void* data)
+    static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       if (codim == 0) {
         UGMakeableEntity<0, dim, UGGrid<dim> > e((typename UG_NS<dim>::Element*)obj);
@@ -213,7 +213,7 @@ namespace Dune {
 
     // called by DDD_IFOneway to deserialize the data structure
     // which has been received
-    static int ugScatter_(DDD_OBJ obj, void* data)
+    static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
 
       if (codim == 0) {
@@ -649,31 +649,31 @@ namespace Dune {
                         InterfaceType iftype,
                         CommunicationDirection dir) const
     {
-      DDD_IF_DIR ugIfDir;
+      typename UG_NS<dim>::DDD_IF_DIR ugIfDir;
       // Translate the communication direction from Dune-Speak to UG-Speak
       if (dir==ForwardCommunication)
-        ugIfDir = IF_FORWARD;
+        ugIfDir = UG_NS<dim>::IF_FORWARD();
       else
-        ugIfDir = IF_BACKWARD;
+        ugIfDir = UG_NS<dim>::IF_BACKWARD();
 
       typedef UGMessageBuffer<DataHandle,dim,codim> UGMsgBuf;
       UGMsgBuf::duneDataHandle_ = &dataHandle;
 
-      std::vector<typename UG_NS<dim>::DDDInterface> ugIfs;
+      std::vector<typename UG_NS<dim>::DDD_IF> ugIfs;
       findDDDInterfaces_(ugIfs, iftype, codim);
 
       unsigned bufSize = UGMsgBuf::ugBufferSize_(*this);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       for (unsigned i=0; i < ugIfs.size(); ++i)
-        DDD_IFOneway(ugIfs[i],
-                     ugIfDir,
-                     bufSize,
-                     &UGMsgBuf::ugGather_,
-                     &UGMsgBuf::ugScatter_);
+        UG_NS<dim>::DDD_IFOneway(ugIfs[i],
+                                 ugIfDir,
+                                 bufSize,
+                                 &UGMsgBuf::ugGather_,
+                                 &UGMsgBuf::ugScatter_);
     }
 
-    void findDDDInterfaces_(std::vector<typename UG_NS<dim>::DDDInterface > &dddIfaces,
+    void findDDDInterfaces_(std::vector<typename UG_NS<dim>::DDD_IF > &dddIfaces,
                             InterfaceType iftype,
                             int codim) const
     {

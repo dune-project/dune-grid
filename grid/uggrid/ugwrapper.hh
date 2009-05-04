@@ -54,6 +54,17 @@ namespace Dune {
 #define UG_NAMESPACE UG::D3
 #endif
 
+    enum {
+      PrioNone = UG_NAMESPACE::PrioNone,
+      PrioMaster = UG_NAMESPACE::PrioMaster,
+      PrioBorder = UG_NAMESPACE::PrioBorder,
+
+      PrioHGhost = UG_NAMESPACE::PrioHGhost,
+      PrioVGhost = UG_NAMESPACE::PrioVGhost,
+      PrioVHGhost = UG_NAMESPACE::PrioVHGhost,
+    };
+
+
     typedef UG_NAMESPACE ::RefinementRule RefinementRule;
 
     typedef UG_NAMESPACE ::CoeffProcPtr CoeffProcPtr;
@@ -67,8 +78,10 @@ namespace Dune {
     /** \todo This type becomes obsolete as soon as UG implements faces and edges */
     typedef UG_NAMESPACE ::vector Vector;
 
+    /** \brief UG type for a hierarchical grid */
     typedef UG_NAMESPACE ::multigrid MultiGrid;
 
+    /** \brief UG type for a level grid */
     typedef UG_NAMESPACE ::grid Grid;
 
     typedef UG_NAMESPACE ::edge Edge;
@@ -79,126 +92,156 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::vertex Vertex;
 
+    /** \brief Point on a UG boundary patch */
+    typedef UG_NAMESPACE ::BNDP BNDP;
+
     /** \brief Types of the subentities parametrized by the codimension.  Gets specialized below */
     template <int codim>
     class Entity;
 
 #ifdef ModelP
     /* DDD Interfaces */
+    typedef UG_NAMESPACE::DDD_IF_DIR DDD_IF_DIR;
+    typedef UG_NAMESPACE::DDD_IF DDD_IF;
+    typedef UG_NAMESPACE::DDD_OBJ DDD_OBJ;
+    typedef UG_NAMESPACE::DDD_HEADER DDD_HEADER;
 
-    typedef DDD_IF DDDInterface;
+    static void DDD_IFOneway(DDD_IF dddIf,
+                             DDD_IF_DIR dddIfDir,
+                             size_t s,
+                             UG_NAMESPACE::ComProcPtr gather,
+                             UG_NAMESPACE::ComProcPtr scatter)
+    {
+      UG_NAMESPACE::DDD_IFOneway(dddIf, dddIfDir, s, gather, scatter);
+    }
+
+    static int *DDD_InfoProcList(DDD_HEADER *hdr)
+    {
+      return UG_NAMESPACE::DDD_InfoProcList(hdr);
+    }
+
+    static DDD_IF_DIR IF_FORWARD()
+    {
+      return UG_NAMESPACE::IF_FORWARD;
+    }
+
+    static DDD_IF_DIR IF_BACKWARD()
+    {
+      return UG_NAMESPACE::IF_BACKWARD;
+    }
+
 
     /*! Master->HGhost/VHGhost */
-    static DDDInterface &ElementIF()
+    static DDD_IF &ElementIF()
     {
       return UG_NAMESPACE::ElementIF;
     }
 
     /*! ElementSymmIF: Master/HGhost/VHGhost */
-    static DDDInterface &ElementSymmIF()
+    static DDD_IF &ElementSymmIF()
     {
       return UG_NAMESPACE::ElementSymmIF;
     }
 
     /*! ElementVIF: Master->VGhost/VHGhost */
-    static DDDInterface &ElementVIF()
+    static DDD_IF &ElementVIF()
     {
       return UG_NAMESPACE::ElementVIF;
     }
 
     /*! ElementSymmVIF: Master/VGhost/VHGhost" */
-    static DDDInterface &ElementSymmVIF()
+    static DDD_IF &ElementSymmVIF()
     {
       return UG_NAMESPACE::ElementSymmVIF;
     }
 
     /*! Master->VGhost/HGhost/VHGhost */
-    static DDDInterface &ElementVHIF()
+    static DDD_IF &ElementVHIF()
     {
       return UG_NAMESPACE::ElementVHIF;
     }
 
     /*! ElementSymmVHIF: Master/VGhost/HGhost/VHGhost */
-    static DDDInterface &ElementSymmVHIF()
+    static DDD_IF &ElementSymmVHIF()
     {
       return UG_NAMESPACE::ElementSymmVHIF;
     }
 
     /*! BorderNodeIF: Border->Master */
-    static DDDInterface &BorderNodeIF()
+    static DDD_IF &BorderNodeIF()
     {
       return UG_NAMESPACE::BorderNodeIF;
     }
 
     /*! BorderNodeSymmIF: Border/Master */
-    static DDDInterface &BorderNodeSymmIF()
+    static DDD_IF &BorderNodeSymmIF()
     {
       return UG_NAMESPACE::BorderNodeSymmIF;
     }
 
     /*! OuterNodeIF: Master->HGhost/VGhost */
-    static DDDInterface &OuterNodeIF()
+    static DDD_IF &OuterNodeIF()
     {
       return UG_NAMESPACE::OuterNodeIF;
     }
 
 
     /*! NodeVIF: Master->VGhost/VHGhost */
-    static DDDInterface &NodeVIF()
+    static DDD_IF &NodeVIF()
     {
       return UG_NAMESPACE::NodeVIF;
     }
 
     /*! NodeIF: Master->VGhost/HGhost/VHGhost */
-    static DDDInterface &NodeIF()
+    static DDD_IF &NodeIF()
     {
       return UG_NAMESPACE::NodeIF;
     }
 
     /*! NodeAllIF: All/All */
-    static DDDInterface &NodeAllIF()
+    static DDD_IF &NodeAllIF()
     {
       return UG_NAMESPACE::NodeAllIF;
     }
 
     /*! BorderVectorIF: Border->Master */
-    static DDDInterface &BorderVectorIF()
+    static DDD_IF &BorderVectorIF()
     {
       return UG_NAMESPACE::BorderVectorIF;
     }
 
     /*! BorderVectorSymmIF: Master/Border */
-    static DDDInterface &BorderVectorSymmIF()
+    static DDD_IF &BorderVectorSymmIF()
     {
       return UG_NAMESPACE::BorderVectorSymmIF;
     }
 
     /*! OuterVectorIF: Master->HGhost/VHGhost */
-    static DDDInterface &OuterVectorIF()
+    static DDD_IF &OuterVectorIF()
     {
       return UG_NAMESPACE::OuterVectorIF;
     }
 
     /*! OuterVectorSymmIF: Master/Border/HGhost/VHGhost */
-    static DDDInterface &OuterVectorSymmIF()
+    static DDD_IF &OuterVectorSymmIF()
     {
       return UG_NAMESPACE::OuterVectorSymmIF;
     }
 
     /*! VectorVIF: Master->VGhost/VHGhost */
-    static DDDInterface &VectorVIF()
+    static DDD_IF &VectorVIF()
     {
       return UG_NAMESPACE::VectorVIF;
     }
 
     /*! VectorVAllIF: Master/Border/VGhost/VHGhost->Master/Border */
-    static DDDInterface &VectorVAllIF()
+    static DDD_IF &VectorVAllIF()
     {
       return UG_NAMESPACE::VectorVAllIF;
     }
 
     /*! VectorIF: Master->VGhost/VHGhost/HGhost */
-    static DDDInterface &VectorIF()
+    static DDD_IF &VectorIF()
     {
       return UG_NAMESPACE::VectorIF;
     }
@@ -502,9 +545,9 @@ namespace Dune {
 
 #define PARHDRE(p) (&((p)->ge.ddd))
 #define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(theElement) == UG::PrioHGhost
-          || EPRIO(theElement) == UG::PrioVGhost
-          || EPRIO(theElement) == UG::PrioVHGhost)
+      if (EPRIO(theElement) == UG_NAMESPACE::PrioHGhost
+          || EPRIO(theElement) == UG_NAMESPACE::PrioVGhost
+          || EPRIO(theElement) == UG_NAMESPACE::PrioVHGhost)
         return true;
 #undef EPRIO
 #undef PARHDRE
@@ -520,9 +563,9 @@ namespace Dune {
 
 #define PARHDRE(p) (&((p)->ddd))
 #define EPRIO(e) DDD_InfoPriority(PARHDRE(e))
-      if (EPRIO(theNode) == UG::PrioHGhost
-          || EPRIO(theNode) == UG::PrioVGhost
-          || EPRIO(theNode) == UG::PrioVHGhost)
+      if (EPRIO(theNode) == UG_NAMESPACE::PrioHGhost
+          || EPRIO(theNode) == UG_NAMESPACE::PrioVGhost
+          || EPRIO(theNode) == UG_NAMESPACE::PrioVHGhost)
         return true;
 #undef EPRIO
 #undef PARHDRE
@@ -786,6 +829,30 @@ namespace Dune {
     //! Dispose of a boundary value problem
     static int BVP_Dispose(void** BVP) {
       return UG_NAMESPACE ::BVP_Dispose(BVP);
+    }
+
+    /** \brief Create new point on the grid boundary by giving local coordinates.
+
+       Global coordinates are computed automatically using the domain boundary information.
+       The point is not inserted as a new vertex in the grid!
+     */
+    static BNDP *BNDP_CreateBndP(UG::HEAP *Heap,
+                                 BNDP *theBndP0,
+                                 BNDP *theBndP1,
+                                 UG::DOUBLE lcoord) {
+      return UG_NAMESPACE::BNDP_CreateBndP(Heap, theBndP0, theBndP1, lcoord);
+    }
+
+    /** \brief Get global position of a point on the grid boundary */
+    static UG::INT BNDP_Global(BNDP *theBndP,
+                               UG::DOUBLE *global) {
+      return UG_NAMESPACE::BNDP_Global(theBndP, global);
+    }
+
+    /** \brief Delete a grid boundary point */
+    static UG::INT BNDP_Dispose(UG::HEAP *Heap,
+                                BNDP *theBndP) {
+      return UG_NAMESPACE::BNDP_Dispose(Heap, theBndP);
     }
 
     //! Get UG multigrid object from its name

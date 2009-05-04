@@ -1,6 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include "config.h"
+#include <config.h>
 
 #include <set>
 
@@ -1028,15 +1028,15 @@ Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundar
     const typename UG_NS<dim>::Vertex* v0 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,0))->myvertex;
     const typename UG_NS<dim>::Vertex* v1 = UG_NS<dim>::Corner(target,UG_NS<dim>::Corner_Of_Edge(target, ugEdgeNumber,1))->myvertex;
 
-    UG::D2::BNDP* bndp = UG::D2::BNDP_CreateBndP(multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,localPos[0]);
+    typename UG_NS<dim>::BNDP* bndp = UG_NS<dim>::BNDP_CreateBndP(multigrid_->theHeap,v0->bv.bndp, v1->bv.bndp,localPos[0]);
     if (bndp == NULL)
       DUNE_THROW(GridError, "UG::D" << dim << "::BNDP_CreateBndP() returned NULL!");
 
-    if (UG::D2::BNDP_Global(bndp,&result[0]))
+    if (UG_NS<dim>::BNDP_Global(bndp,&result[0]))
       DUNE_THROW(GridError, "UG::D" << dim << "::BNDP_Global() returned nonzero error code!");
 
     // Get rid of the boundary point again
-    UG::D2::BNDP_Dispose(multigrid_->theHeap, bndp);
+    UG_NS<dim>::BNDP_Dispose(multigrid_->theHeap, bndp);
 
   } else
     DUNE_THROW(NotImplemented, "getBoundaryPosition for 3d not implemented!");
