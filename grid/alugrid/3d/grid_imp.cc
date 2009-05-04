@@ -697,6 +697,12 @@ namespace Dune {
       ref = myGrid().adaptWithoutLoadBalancing();
     }
 
+    // in parallel this is different
+    if( this->comm().size() == 1 )
+    {
+      ref = ref && refineMarked_ > 0;
+    }
+
     if(ref || mightCoarse)
     {
       // calcs maxlevel and other extras
