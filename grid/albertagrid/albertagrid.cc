@@ -428,6 +428,9 @@ namespace Dune
     if( !e.isLeaf() )
       return false;
 
+    // don't mark macro elements for coarsening
+    if( e.level() == 0 && refCount < 0 ) return false ;
+
     // take back previous marking
     adaptationState_.unmark( getMark( e ) );
 
