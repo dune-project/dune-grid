@@ -230,6 +230,11 @@ namespace Dune
     // the Traits
     typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;
 
+    //! type of leaf index set
+    typedef typename Traits::LeafIndexSet LeafIndexSet;
+    //! type of level index sets
+    typedef typename Traits::LevelIndexSet LevelIndexSet;
+
     //! type of hierarchic index set
     typedef typename Traits::HierarchicIndexSet HierarchicIndexSet;
 
@@ -239,9 +244,6 @@ namespace Dune
   private:
     //! type of LeafIterator
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
-
-    //! type of leaf index set
-    typedef typename Traits :: LeafIndexSet LeafIndexSet;
 
     //! id set impl
     typedef AlbertaGridIdSet<dim,dimworld> IdSetImp;
