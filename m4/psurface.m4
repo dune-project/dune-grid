@@ -66,7 +66,7 @@ if test x$HAVE_PSURFACE = x1 ; then
          AC_MSG_RESULT(yes)],
 	[HAVE_PSURFACE="0"
         AC_MSG_RESULT(no)
-	AC_MSG_WARN(psurface header found, but libpsurface missing!)])
+	AC_MSG_WARN([psurface header found, but libpsurface missing!])])
 fi
 
 AC_LANG_POP([C++])
