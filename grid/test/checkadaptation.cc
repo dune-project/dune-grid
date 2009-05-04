@@ -5,6 +5,7 @@
 
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/grid/common/capabilities.hh>
 
 /** \file
     \brief A test for the Adaptation interface
@@ -107,8 +108,9 @@ void checkAdaptation(GridType& grid)
   const int startSize  = grid.size( 0 );
 
   // some things are different for bisection grids
-  const bool bisectionGrid = (grid.name() == "AlbertGrid") ||
-                             (grid.name() == "ALUConformGrid");
+  const bool bisectionGrid =
+    Capabilities::isLevelwiseConforming<GridType> :: v  == false &&
+    Capabilities::isLeafwiseConforming<GridType>  :: v  == true ;
 
   for(int i=0; i<2; ++i)
   {
