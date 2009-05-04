@@ -208,7 +208,7 @@ namespace Dune
 
       static const This &instance ()
       {
-        This instance;
+        static This instance;
         return instance;
       }
 
