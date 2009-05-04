@@ -81,6 +81,60 @@ namespace Dune
   template< int dim, int dimworld >
   class ALUSimplexGrid;
 
+  namespace Capabilities {
+    /** \struct isLeafwiseConforming
+       \ingroup ALUSimplexGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup ALUSimplexGrid
+     */
+
+    /** \brief ALUSimplexGrid has entities for all codimension
+       \ingroup ALUSimplexGrid
+     */
+    template<int dim,int dimw, int cdim >
+    struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUSimplexGrid is parallel
+       \ingroup ALUSimplexGrid
+     */
+    template<int dim,int dimw>
+    struct isParallel<const ALUSimplexGrid<dim, dimw> > {
+      static const bool v = false;
+    };
+
+    /** \brief ALUSimplexGrid has conforming level grids
+       \ingroup ALUSimplexGrid
+     */
+    template<int dim,int dimw>
+    struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUSimplexGrid has supports hanging nodes
+       \ingroup ALUSimplexGrid
+     */
+    template<int dim,int dimw>
+    struct hasHangingNodes< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUSimplexGrid has backup and restore facilities
+       \ingroup ALUSimplexGrid
+     */
+    template<int dim,int dimw>
+    struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+  } // end namespace Capabilities
 
 
   /** @copydoc Dune::ALUSimplexGrid
@@ -182,61 +236,6 @@ namespace Dune
     operator = (const ALUSimplexGrid& g);
   };
 
-  namespace Capabilities {
-    /** \struct isLeafwiseConforming
-       \ingroup ALUSimplexGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUSimplexGrid
-     */
-
-    /** \brief ALUSimplexGrid has entities for all codimension
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw, int cdim >
-    struct hasEntity<Dune::ALUSimplexGrid<dim, dimw>, cdim >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid is parallel
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct isParallel<const ALUSimplexGrid<dim, dimw> > {
-      static const bool v = false;
-    };
-
-    /** \brief ALUSimplexGrid has conforming level grids
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct isLevelwiseConforming< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid has supports hanging nodes
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct hasHangingNodes< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUSimplexGrid has backup and restore facilities
-       \ingroup ALUSimplexGrid
-     */
-    template<int dim,int dimw>
-    struct hasBackupRestoreFacilities< ALUSimplexGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-  } // end namespace Capabilities
-
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 2d and 3d.
@@ -262,6 +261,72 @@ namespace Dune
    */
   template <int dim, int dimworld>
   class ALUConformGrid {};
+
+  namespace Capabilities {
+    /** \struct isLeafwiseConforming
+       \ingroup ALUConformGrid
+     */
+
+    /** \struct IsUnstructured
+       \ingroup ALUConformGrid
+     */
+
+    /** \brief ALUConformGrid has entities for all codimension
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw, int cdim >
+    struct hasEntity<Dune::ALUConformGrid<dim, dimw>, cdim >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUConformGrid is parallel
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw>
+    struct isParallel<const ALUConformGrid<dim, dimw> > {
+      static const bool v = false;
+    };
+
+    /** \brief ALUConformGrid has non-conforming level grids
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw>
+    struct isLevelwiseConforming< ALUConformGrid<dim,dimw> >
+    {
+      static const bool v = false;
+    };
+
+    /** \brief ALUConformGrid has a conforming leaf grid
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw>
+    struct isLeafwiseConforming< ALUConformGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+    /** \brief ALUConformGrid does not support hanging nodes
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw>
+    struct hasHangingNodes< ALUConformGrid<dim,dimw> >
+    {
+      static const bool v = false;
+    };
+
+    /** \brief ALUConformGrid has backup and restore facilities
+       \ingroup ALUConformGrid
+     */
+    template<int dim,int dimw>
+    struct hasBackupRestoreFacilities< ALUConformGrid<dim,dimw> >
+    {
+      static const bool v = true;
+    };
+
+  } // end namespace Capabilities
+
+
 
   /** @copydoc Dune::ALUConformGrid
      \brief [<em> provides \ref Dune::Grid </em>]
@@ -360,61 +425,6 @@ namespace Dune
     ALUConformGrid<dim,dimworld>&
     operator = (const ALUConformGrid& g);
   };
-
-  namespace Capabilities {
-    /** \struct isLeafwiseConforming
-       \ingroup ALUConformGrid
-     */
-
-    /** \struct IsUnstructured
-       \ingroup ALUConformGrid
-     */
-
-    /** \brief ALUConformGrid has entities for all codimension
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw, int cdim >
-    struct hasEntity<Dune::ALUConformGrid<dim, dimw>, cdim >
-    {
-      static const bool v = true;
-    };
-
-    /** \brief ALUConformGrid is parallel
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw>
-    struct isParallel<const ALUConformGrid<dim, dimw> > {
-      static const bool v = false;
-    };
-
-    /** \brief ALUConformGrid has non-conforming level grids
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw>
-    struct isLevelwiseConforming< ALUConformGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief ALUConformGrid does not support hanging nodes
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw>
-    struct hasHangingNodes< ALUConformGrid<dim,dimw> >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief ALUConformGrid has backup and restore facilities
-       \ingroup ALUConformGrid
-     */
-    template<int dim,int dimw>
-    struct hasBackupRestoreFacilities< ALUConformGrid<dim,dimw> >
-    {
-      static const bool v = true;
-    };
-
-  } // end namespace Capabilities
 
 } //end  namespace Dune
 
