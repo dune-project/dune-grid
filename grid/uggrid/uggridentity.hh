@@ -122,14 +122,14 @@ namespace Dune {
       typename UG_NS<dim>::Node *node =
         static_cast<typename UG_NS<dim>::Node *>(target_);
 
-      if (EPRIO(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
+      if (EPRIO(node)    == UG_NS<dim>::PrioHGhost
+          || EPRIO(node) == UG_NS<dim>::PrioVGhost
+          || EPRIO(node) == UG_NS<dim>::PrioVHGhost)
+        return GhostEntity;
+      else if (EPRIO(node) == UG_NS<dim>::PrioBorder || hasBorderCopy_(node))
         return BorderEntity;
       else if (EPRIO(node) == UG_NS<dim>::PrioMaster || EPRIO(node) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
-      else if (EPRIO(node)    == UG_NS<dim>::PrioHGhost
-               || EPRIO(node) == UG_NS<dim>::PrioVGhost
-               || EPRIO(node) == UG_NS<dim>::PrioVHGhost)
-        return GhostEntity;
       else
         DUNE_THROW(GridError, "Unknown priority " << EPRIO(node));
 
