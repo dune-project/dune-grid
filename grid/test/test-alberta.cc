@@ -28,6 +28,7 @@
 #include "checkiterators.cc"
 #include "checktwists.cc"
 #include "check-albertareader.cc"
+#include "checkadaptation.cc"
 
 
 template <class GridType >
@@ -75,7 +76,12 @@ try {
     // extra-environment to check destruction
 
     std::cout << ">>> Checking macro grid..." << std::endl;
+
     gridcheck(grid); // check macro grid
+
+    // check grid adaptation interface
+    checkAdaptation( grid );
+
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
     checkTwists( grid.leafView(), NoMapTwist() );
