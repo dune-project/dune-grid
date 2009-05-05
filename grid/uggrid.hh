@@ -11,7 +11,6 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/collectivecommunication.hh>
-#include <dune/common/deprecated.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/common/mpihelper.hh>
@@ -730,20 +729,10 @@ namespace Dune {
     /** @name Coarse Grid Creation Methods */
     /*@{*/
 
-    /** \brief End the coarse grid creation process */
-    void createEnd() DUNE_DEPRECATED;
-
     /** \brief When UGGrid has been configured to use the LGM domain manager,
         this routine sets up a grid from an LGM and an NG file
      */
     void createLGMGrid(const std::string& name);
-
-    /** \brief Insert an element into the coarse grid
-        \param type The GeometryType of the new element
-        \param vertices The vertices of the new element, using the DUNE numbering
-     */
-    void insertElement(GeometryType type,
-                       const std::vector<unsigned int>& vertices) DUNE_DEPRECATED;
 
     /*@}*/
 

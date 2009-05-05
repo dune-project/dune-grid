@@ -3,6 +3,36 @@
 #include <config.h>
 
 #include <dune/grid/uggrid/uggridfactory.hh>
+#include "boundaryextractor.hh"
+
+using namespace Dune;
+
+static int boundarySegmentWrapper2d(void *data, double *param, double *result)
+{
+  const BoundarySegment<2>* boundarySegment = static_cast<const BoundarySegment<2>*>(data);
+
+  FieldVector<double, 2> global = (*boundarySegment)(*((FieldVector<double,1>*)param));
+
+  result[0] = global[0];
+  result[1] = global[1];
+
+  return 0;
+}
+
+static int boundarySegmentWrapper3d(void *data, double *param, double *result)
+{
+  const BoundarySegment<3>* boundarySegment = static_cast<const BoundarySegment<3>*>(data);
+
+  FieldVector<double, 3> global = (*boundarySegment)(*((FieldVector<double,2>*)param));
+
+  result[0] = global[0];
+  result[1] = global[1];
+  result[2] = global[2];
+
+  return 0;
+}
+
+
 
 template <int dimworld>
 Dune::GridFactory<Dune::UGGrid<dimworld> >::
@@ -46,7 +76,67 @@ void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertElement(const GeometryType& type,
               const std::vector<unsigned int>& vertices)
 {
-  grid_->insertElement(type, vertices);
+  if (dimworld!=type.dim())
+    DUNE_THROW(GridError, "You cannot insert a " << type
+                                                 << " into a UGGrid<" << dimworld << ">!");
+
+  int newIdx = grid_->elementVertices_.size();
+
+  grid_->elementTypes_.push_back(vertices.size());
+  for (unsigned int i=0; i<vertices.size(); i++)
+    grid_->elementVertices_.push_back(vertices[i]);
+
+  if (type.isTriangle()) {
+    // Everything alright
+    if (vertices.size() != 3)
+      DUNE_THROW(GridError, "You have requested to enter a triangle, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+  } else if (type.isQuadrilateral()) {
+
+    if (vertices.size() != 4)
+      DUNE_THROW(GridError, "You have requested to enter a quadrilateral, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+    // DUNE and UG numberings differ --> reorder the vertices
+    grid_->elementVertices_[newIdx+2] = vertices[3];
+    grid_->elementVertices_[newIdx+3] = vertices[2];
+
+  } else if (type.isTetrahedron()) {
+
+    if (vertices.size() != 4)
+      DUNE_THROW(GridError, "You have requested to enter a tetrahedron, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+  } else if (type.isPyramid()) {
+
+    if (vertices.size() != 5)
+      DUNE_THROW(GridError, "You have requested to enter a pyramid, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+  } else if (type.isPrism()) {
+
+    if (vertices.size() != 6)
+      DUNE_THROW(GridError, "You have requested to enter a prism, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+  } else if (type.isHexahedron()) {
+
+    if (vertices.size() != 8)
+      DUNE_THROW(GridError, "You have requested to enter a hexahedron, but you"
+                 << " have provided " << vertices.size() << " vertices!");
+
+    // DUNE and UG numberings differ --> reorder the vertices
+    grid_->elementVertices_[newIdx+2] = vertices[3];
+    grid_->elementVertices_[newIdx+3] = vertices[2];
+    grid_->elementVertices_[newIdx+6] = vertices[7];
+    grid_->elementVertices_[newIdx+7] = vertices[6];
+
+  } else {
+    DUNE_THROW(GridError, "You cannot insert a " << type
+                                                 << " into a UGGrid<" << dimworld << ">!");
+  }
+
 }
 
 template <int dimworld>
@@ -85,9 +175,303 @@ createGrid()
     return NULL;
 
   // finalize grid creation
-  grid_->createEnd();
+#ifdef UG_LGMDOMAIN
+  DUNE_THROW(GridError, "You cannot call createEnd() when your UGGrid has been configured for LGM!");
+#else
 
-  // hand it over and delete the member pointer
+  // ///////////////////////////////////////////
+  //   Extract grid boundary segments
+  // ///////////////////////////////////////////
+  std::set<UGGridBoundarySegment<dimworld> > boundarySegments;
+  typedef typename std::set<UGGridBoundarySegment<dimworld> >::iterator SetIterator;
+
+  BoundaryExtractor::detectBoundarySegments(grid_->elementTypes_, grid_->elementVertices_, boundarySegments);
+  if (boundarySegments.size() == 0)
+    DUNE_THROW(GridError, "Couldn't extract grid boundary.");
+
+  std::vector<int> isBoundaryNode;
+  BoundaryExtractor::detectBoundaryNodes(boundarySegments, grid_->vertexPositions_.size(), isBoundaryNode);
+
+  dverb << boundarySegments.size() << " boundary segments were found!" << std::endl;
+
+  if (grid_->boundarySegments_.size() > boundarySegments.size())
+    DUNE_THROW(GridError, "You have supplied " << grid_->boundarySegments_.size()
+                                               << " parametrized boundary segments,  but the coarse grid has only "
+                                               << boundarySegments.size() << " boundary faces!");
+
+  // Count number of nodes on the boundary
+  int noOfBNodes = 0;
+  for (unsigned int i=0; i<isBoundaryNode.size(); i++) {
+    if (isBoundaryNode[i] != -1)
+      noOfBNodes++;
+  }
+
+  // ///////////////////////////////////////////////////////
+  //   UG needs all boundary vertices first.  We set up
+  //   up an array to keep track of the reordering.
+  // ///////////////////////////////////////////////////////
+  std::vector<unsigned int> nodePermutation;
+
+  for (unsigned int i=0; i<isBoundaryNode.size(); ++i) {
+    if (isBoundaryNode[i]!=-1)
+      nodePermutation.push_back(i);
+  }
+
+  for (unsigned int i=0; i<isBoundaryNode.size(); ++i) {
+    if (isBoundaryNode[i]==-1)
+      nodePermutation.push_back(i);
+  }
+
+  // ///////////////////////////////////////////
+  //   Create the domain data structure
+  // ///////////////////////////////////////////
+  unsigned int noOfBSegments = boundarySegments.size();
+  std::string domainName = grid_->name_ + "_Domain";
+  const double midPoint[3] = {0, 0, 0};
+
+  if (UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
+                                    midPoint,               // Midpoint of a circle enclosing the grid, only needed for the UG graphics
+                                    1,                      // Radius of the enclosing circle
+                                    noOfBSegments,
+                                    noOfBNodes,
+                                    false) == NULL)                 // The domain is not convex
+    DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");
+
+  // ///////////////////////////////////////////
+  //   Insert the boundary segments
+  // ///////////////////////////////////////////
+  unsigned int i;
+  for (i=0; i<grid_->boundarySegments_.size(); i++) {
+
+    /** \todo Due to some UG weirdness, in 3d, CreateBoundarySegment always expects
+        this array to have four entries, even if only a triangular segment is
+        inserted.  If not, undefined values are will be introduced. */
+    int vertices_c_style[dimworld*2-2];
+    for (int j=0; j<dimworld*2-2; j++)
+      vertices_c_style[j] = grid_->boundarySegmentVertices_[i][j];
+
+    // Create dummy parameter ranges
+    const double alpha[2] = {0, 0};
+    const double beta[2]  = {1, 1};
+
+    // Create some boundary segment name
+    char segmentName[20];
+    if(sprintf(segmentName, "BS %d", i) < 0)
+      DUNE_THROW(GridError, "sprintf returned error code!");
+
+    // Actually create the segment
+    if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                     // internal name of the boundary segment
+                                               1,                          //  id of left subdomain
+                                               2,                          //  id of right subdomain
+                                               i,    // Index of the segment
+                                               1,                   // Resolution, only for the UG graphics
+                                               vertices_c_style,
+                                               alpha,
+                                               beta,
+                                               (dimworld==2)
+                                               ? boundarySegmentWrapper2d
+                                               : boundarySegmentWrapper3d,
+                                               const_cast<BoundarySegment<dimworld>*>(grid_->boundarySegments_[i]))==NULL) {
+      DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
+    }
+
+    // /////////////////////////////////////////////////////////////////////
+    //   Remove this segment from the set of computed boundary segments.
+    // /////////////////////////////////////////////////////////////////////
+
+    UGGridBoundarySegment<dimworld> thisSegment;
+    /** \todo Not nice: we need to copy because the array types are different */
+    for (int j=0; j<2*dimworld-2; j++)
+      thisSegment[j] = grid_->boundarySegmentVertices_[i][j];
+
+    if (boundarySegments.erase(thisSegment)==0)
+      DUNE_THROW(GridError, "You have provided a boundary parametrization for"
+                 << " a segment which is not boundary segment in the grid!");
+  }
+
+
+  // ///////////////////////////////////////////////////////////////////////
+  //   The boundary segments remaining in the std::set boundarySegments
+  //   have not been provided with an explicit parametrization.  They are
+  //   inserted into the domain as straight boundary segments.
+  // ///////////////////////////////////////////////////////////////////////
+  SetIterator it = boundarySegments.begin();
+
+  for (; it != boundarySegments.end(); ++it, ++i) {
+
+    const UGGridBoundarySegment<dimworld>& thisSegment = *it;
+
+    // Copy the vertices into a C-style array
+    int vertices_c_style[4];
+
+    for (int j=0; j<thisSegment.numVertices(); j++)
+      vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
+
+#ifndef UG_LGMDOMAIN
+    // Create some boundary segment name
+    char segmentName[20];
+    if(sprintf(segmentName, "BS %d", i) < 0)
+      DUNE_THROW(GridError, "sprintf returned error code!");
+
+    if (dimworld==2) {
+
+      double segmentCoordinates[2][2];
+      for (int j=0; j<thisSegment.numVertices(); j++)
+        for (int k=0; k<dimworld; k++)
+          segmentCoordinates[j][k] = grid_->vertexPositions_[thisSegment[j]][k];
+
+      if (UG::D2::CreateLinearSegment(segmentName,
+                                      1,               /*id of left subdomain */
+                                      2,              /*id of right subdomain*/
+                                      i,                  /*id of segment*/
+                                      thisSegment.numVertices(),          // Number of corners
+                                      vertices_c_style,
+                                      segmentCoordinates
+                                      )==NULL)
+        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+
+    } else {
+
+      double segmentCoordinates[4][3];
+      for (int j=0; j<thisSegment.numVertices(); j++)
+        for (int k=0; k<dimworld; k++)
+          segmentCoordinates[j][k] = grid_->vertexPositions_[thisSegment[j]][k];
+
+      if (UG::D3::CreateLinearSegment(segmentName,
+                                      1,               /*id of left subdomain */
+                                      2,              /*id of right subdomain*/
+                                      i,                  /*id of segment*/
+                                      thisSegment.numVertices(),                  // Number of corners
+                                      vertices_c_style,
+                                      segmentCoordinates
+                                      )==NULL)
+        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
+    }
+#endif
+
+  }
+
+
+  // ///////////////////////////////////////////
+  //   Call configureCommand and newCommand
+  // ///////////////////////////////////////////
+
+  //configure @PROBLEM $d @DOMAIN;
+  std::string configureArgs[2] = {"configure " + grid_->name_ + "_Problem", "d " + grid_->name_ + "_Domain"};
+  const char* configureArgs_c[2] = {configureArgs[0].c_str(), configureArgs[1].c_str()};
+
+  if (UG_NS<dimworld>::ConfigureCommand(2, configureArgs_c))
+    DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::ConfigureCommand failed!");
+
+  //new @PROBLEM $b @PROBLEM $f @FORMAT $h @HEAP;
+  char* newArgs[4];
+  for (int i=0; i<4; i++)
+    newArgs[i] = (char*)::malloc(50*sizeof(char));
+
+  sprintf(newArgs[0], "new %s", grid_->name_.c_str());
+
+  sprintf(newArgs[1], "b %s_Problem", grid_->name_.c_str());
+  sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
+  sprintf(newArgs[3], "h %dM", grid_->heapsize);
+
+  if (UG_NS<dimworld>::NewCommand(4, newArgs))
+    DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
+
+  for (int i=0; i<4; i++)
+    free(newArgs[i]);
+
+  // Get a direct pointer to the newly created multigrid
+  grid_->multigrid_ = UG_NS<dimworld>::GetMultigrid(grid_->name_.c_str());
+  if (!grid_->multigrid_)
+    DUNE_THROW(GridError, "UG::D" << dimworld << "::GetMultigrid failed!");
+
+  // ///////////////////////////////////////////////////////////////
+  // If we are in a parallel setting and we are _not_ the master
+  // process we can stop here.
+  // ///////////////////////////////////////////////////////////////
+  if (PPIF::me!=0) {
+    // Complete the UG-internal grid data structure even if we are
+    // not the master process. (CreateAlgebra communicates via MPI
+    // so we would be out of sync if we don't do this here...)
+    if (CreateAlgebra(grid_->multigrid_) != UG_NS<dimworld>::GM_OK)
+      DUNE_THROW(IOError, "Call of 'UG::D" << dimworld << "::CreateAlgebra' failed!");
+
+    /* here all temp memory since CreateMultiGrid is released */
+    Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
+    grid_->multigrid_->MarkKey = 0;
+
+    // ///////////////////////////////////////////////////
+    // hand over the grid and delete the member pointer
+    // ///////////////////////////////////////////////////
+
+    Dune::UGGrid<dimworld>* tmp = grid_;
+    grid_ = NULL;
+    return tmp;
+  }
+
+  // ////////////////////////////////////////////////
+  //   Actually insert the interior vertices
+  // ////////////////////////////////////////////////
+  int nodeCounter = noOfBNodes;
+  for (size_t i=0; i<grid_->vertexPositions_.size(); i++) {
+    if (isBoundaryNode[i] != -1)
+      continue;
+    if (UG_NS<dimworld>::InsertInnerNode(grid_->multigrid_->grids[0], &((grid_->vertexPositions_[i])[0])) == NULL)
+      DUNE_THROW(GridError, "Inserting a vertex into UGGrid failed!");
+
+    isBoundaryNode[i] = nodeCounter++;
+  }
+
+  grid_->vertexPositions_.resize(0);
+
+  // ////////////////////////////////////////////////
+  //   Actually insert all the elements
+  // ////////////////////////////////////////////////
+
+  std::vector<const typename UG_NS<dimworld>::Node*> nodePointers(isBoundaryNode.size());
+  for (typename UG_NS<dimworld>::Node* theNode=UG_NS<dimworld>::FirstNode(grid_->multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
+    nodePointers[theNode->id] = theNode;
+
+  int idx = 0;
+  for (size_t i=0; i<grid_->elementTypes_.size(); i++) {
+
+    const typename UG_NS<dimworld>::Node* vertices[grid_->elementTypes_[i]];
+    for (size_t j=0; j<grid_->elementTypes_[i]; j++)
+      vertices[j] = nodePointers[isBoundaryNode[grid_->elementVertices_[idx++]]];
+
+    if (InsertElement(grid_->multigrid_->grids[0], grid_->elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(vertices),NULL,NULL,NULL)==NULL)
+      DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
+  }
+
+  // Not needed any more
+  grid_->elementTypes_.resize(0);
+  grid_->elementVertices_.resize(0);
+
+  // Complete the UG-internal grid data structure
+  if (CreateAlgebra(grid_->multigrid_) != UG_NS<dimworld>::GM_OK)
+    DUNE_THROW(IOError, "Call of 'UG::D" << dimworld << "::CreateAlgebra' failed!");
+
+  /* here all temp memory since CreateMultiGrid is released */
+  Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
+  grid_->multigrid_->MarkKey = 0;
+
+  // Set the local indices
+  grid_->setIndices(true, &nodePermutation);
+
+  // Clear refinement flags
+  typename UGGrid<dimworld>::Traits::template Codim<0>::LevelIterator eIt    = grid_->template lbegin<0>(0);
+  typename UGGrid<dimworld>::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(0);
+
+  for (; eIt!=eEndIt; ++eIt)
+    UG_NS<dimworld>::WriteCW(grid_->getRealImplementation(*eIt).target_, UG_NS<dimworld>::NEWEL_CE, 0);
+
+#endif
+
+
+  // ///////////////////////////////////////////////////
+  // hand over the grid and delete the member pointer
+  // ///////////////////////////////////////////////////
+
   Dune::UGGrid<dimworld>* tmp = grid_;
   grid_ = NULL;
   return tmp;
