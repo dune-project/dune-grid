@@ -427,11 +427,6 @@ namespace Dune {
     template< class GridImp, class DataHandle >
     bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
-    //! adapt with DofManager
-    template <class DofManagerType, class RestrictProlongOperatorType>
-    bool DUNE_DEPRECATED
-    adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
-
     // refine grid
     bool refineGrid();
 

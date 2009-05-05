@@ -378,13 +378,9 @@ namespace Dune
     /** \copydoc Dune::Grid::adapt() */
     bool adapt ();
 
+    //! callback adapt method with AdaptDataHandleInterface
     template< class DataHandle >
     bool adapt ( AdaptDataHandleInterface< This, DataHandle > &handle );
-
-    //! adapt method with DofManager
-    template< class DofManager, class RestrictProlongOperator >
-    bool DUNE_DEPRECATED
-    adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
 
     //! returns true, if a least one element is marked for coarsening
     bool preAdapt ();

@@ -784,23 +784,6 @@ namespace Dune {
     return refined;
   }
 
-  // adapt grid
-  // --adapt
-  template <int dim, int dimworld, ALU3dGridElementType elType>
-  template <class DofManagerType, class RestrictProlongOperatorType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::
-  adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
-  {
-    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
-
-    typedef RestrictProlongWrapper< MyType, DofManagerType, RestrictProlongOperatorType > Wrapper;
-    Wrapper rpOpWrapper( dm, rpo );
-    const bool refined = adapt( rpOpWrapper );
-
-    assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
-    return refined;
-  }
-
   // post process grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()

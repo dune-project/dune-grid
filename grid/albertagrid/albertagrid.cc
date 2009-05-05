@@ -511,17 +511,6 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  template< class DofManager, class RestrictProlongOperator >
-  inline bool AlbertaGrid < dim, dimworld >
-  ::adapt ( DofManager &dofManager, RestrictProlongOperator &rpOp, bool verbose )
-  {
-    typedef RestrictProlongWrapper< This, DofManager, RestrictProlongOperator > Wrapper;
-    Wrapper rpOpWrapper( dofManager, rpOp );
-    return adapt( rpOpWrapper );
-  }
-
-
-  template< int dim, int dimworld >
   inline const Alberta::GlobalVector &
   AlbertaGrid< dim, dimworld >
   ::getCoord ( const ElementInfo &elementInfo, int vertex ) const
