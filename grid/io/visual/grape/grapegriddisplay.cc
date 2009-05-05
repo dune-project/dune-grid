@@ -114,7 +114,7 @@ namespace Dune
     for( ; nit != endnit; ++nit )
     {
       const IntersectionType &intersection = *nit;
-      const int number = intersection.numberInSelf();
+      const int number = intersection.indexInInside();
       assert( (number >= 0) && (number < MAX_EL_FACE) );
 
       if( number != lastElNum )
