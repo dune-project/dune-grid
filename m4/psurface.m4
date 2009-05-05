@@ -2,6 +2,7 @@
 
 AC_DEFUN([DUNE_PATH_PSURFACE],[
   AC_REQUIRE([AC_PROG_CXX])
+  AC_REQUIRE([DUNE_PATH_AMIRAMESH])
 
   AC_ARG_WITH(psurface,
     AC_HELP_STRING([--with-psurface=PATH],[directory with the psurface library inside]))
