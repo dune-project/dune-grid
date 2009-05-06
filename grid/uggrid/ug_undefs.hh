@@ -7,6 +7,7 @@
  * This file is created automatically by the perl script <tt>undefAllMacros.pl</tt>.
  */
 
+#undef __DDD__
 #undef __PARALLEL_H__
 #undef DUNE_UGINCLUDES_HH
 #undef __GM__
@@ -767,6 +768,7 @@
 #undef UGTYPES_H
 #undef UG_NAMESPACE_H
 #undef START_UG_NAMESPACE
+#undef END_UG_NAMESPACE
 #undef END_NAMESPACE
 #undef END_UGDIM_NAMESPACE
 #undef NS_PREFIX
