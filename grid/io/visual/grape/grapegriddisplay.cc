@@ -327,7 +327,7 @@ namespace Dune
     typedef typename Entity::Geometry DuneGeometryType;
     typedef typename DuneGeometryType::ctype ctype;
 
-    const int dim      = Entity::dimension;
+    //const int dim      = Entity::dimension;
     const int dimworld = Entity::dimensionworld;
 
     typedef FieldVector< ctype, dimworld > CoordinateType;

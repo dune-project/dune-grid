@@ -230,6 +230,99 @@ namespace Dune
   }
 
 
+
+  // EvalGrapeFunction
+  // -----------------
+
+  template< class GV, int dimR, int polOrd >
+  inline void EvalGrapeFunction< GV, dimR, polOrd >
+  ::evalCoordNow ( const Entity &entity, DUNE_FDATA *fdata, const double *coord, double *val )
+  {
+    assert( (fdata != 0) && (coord != 0) && (val != 0) );
+
+    const GrapeFunction *function = (const GrapeFunction *)(fdata->discFunc);
+    assert( function != 0 );
+
+    const DomainVector &x = reinterpret_cast< const DomainVector & >( *coord );
+    RangeVector &y = reinterpret_cast< RangeVector & >( *val );
+
+    function->evaluate( entity, x, y );
+  }
+
+
+  template< class GV, int dimR, int polOrd >
+  inline void EvalGrapeFunction< GV, dimR, polOrd >
+  ::evalDofNow ( const Entity &entity, int geomType, DUNE_FDATA *fdata, int localNum, double *val )
+  {
+    assert( (fdata != 0) && (val != 0) );
+
+    const GrapeFunction *function = (const GrapeFunction *)(fdata->discFunc);
+    assert( function != 0 );
+
+    static const GrapeLagrangePoints< typename GridView::Grid::ctype, dimDomain, dimWorld, polOrd > lagrangePoints;
+    const DomainVector &x = lagrangePoints.getPoint( geomType, polOrd, localNum );
+
+    RangeVector &y = reinterpret_cast< RangeVector & >( *val );
+    function->evaluate( entity, x, y );
+  }
+
+
+  template< class GV, int dimR, int polOrd >
+  inline void EvalGrapeFunction< GV, dimR, polOrd >
+  ::calcMinMax ( DUNE_FDATA *fdata )
+  {
+    assert( (fdata != NULL) && (fdata->discFunc != NULL) );
+
+    double minValue = std::numeric_limits< double >::infinity();
+    double maxValue = -std::numeric_limits< double >::infinity();
+
+    const GrapeFunction *function = (const GrapeFunction *)(fdata->discFunc);
+    const GridView &gridView = function->gridView();
+
+    if( dimR == 1 )
+    {
+      typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+      typedef GenericReferenceElement< typename GridView::Grid::ctype, dimDomain > ReferenceElement;
+      typedef GenericReferenceElements< typename GridView::Grid::ctype, dimDomain > ReferenceElements;
+
+      const Iterator end = gridView.template end< 0 >();
+      for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+      {
+        const Entity &entity = *it;
+        const ReferenceElement &refElement = ReferenceElements::general( entity.type() );
+
+        const int numCorners = refElement.size( dimDomain );
+        for( int i = 0; i < numCorners; ++i )
+        {
+          RangeVector y;
+          function->evaluate( entity, refElement.position( i, dimDomain ), y );
+
+          minValue = std::min( minValue, y[ 0 ] );
+          maxValue = std::max( maxValue, y[ 0 ] );
+        }
+      }
+    }
+    else
+    {
+      std::cerr << "EvalGrapeFunction::calcMinMax not implemented for dimR > 1." << std::endl;
+      minValue = 0.0;
+      maxValue = 1.0;
+    }
+
+    if( (maxValue - minValue) < 1e-10 )
+    {
+      std::cout << "Warning: min ("<< minValue << ") and max (" << maxValue << ") values are almost identical." << std::endl;
+      maxValue += 0.01 * maxValue;
+      minValue -= 0.01 * minValue;
+    }
+
+    fdata->minValue = minValue;
+    fdata->maxValue = maxValue;
+    fdata->valuesSet= true;
+  }
+
+
+
   //*******************************************************************
   //  --EvalVectorData
   //*******************************************************************
@@ -547,6 +640,52 @@ namespace Dune
       GrapeInterface<dim,dimworld>::setDefaultIterator(g_GridPart);
     }
   }
+
+
+
+  template< class GridType >
+  template< class GV, int dimR, int polOrd >
+  inline void GrapeDataDisplay< GridType >
+  ::addData ( const GrapeFunction< GV, dimR, polOrd > &function )
+  {
+    DUNE_FDATA *fdata = createDuneFunc();
+    assert( fdata != 0 );
+
+    const unsigned int n = vecFdata_.size();
+    vecFdata_.push_back( fdata );
+
+    fdata->evalDof = EvalGrapeFunction< GV, dimR, polOrd >::evalDof;
+    fdata->evalCoord = EvalGrapeFunction< GV, dimR, polOrd >::evalCoord;
+    fdata->getMinMaxValues = EvalGrapeFunction< GV, dimR, polOrd >::getMinMaxValues;
+
+    fdata->mynum = n;
+    fdata->allLevels = 0;
+
+    fdata->discFunc = (void *)&function;
+    fdata->indexSet = 0;
+    fdata->polyOrd = polOrd;
+    fdata->continuous = false;
+
+    const int dimRange = GrapeFunction< GV, dimR, polOrd >::dimRange;
+    fdata->dimVal = dimRange;
+    fdata->dimRange = dimRange;
+    fdata->comp = new int[ dimRange ];
+    for( int j = 0; j < dimRange; ++j )
+      fdata->comp[ j ] = j;
+    fdata->compName = -1;
+    fdata->name = function.name();
+
+    fdata->gridPart = (void*)&(function.gridView());
+    fdata->setGridPartIterators
+      = &BaseType::template GridViewIterators< typename GV::Traits >::set;
+
+    GrapeInterface< dim, dimworld >::addDataToHmesh( this->hmesh_, vecFdata_[ n ] );
+
+    // make grid view iterator default
+    GrapeInterface< dim, dimworld >::setDefaultIterator( g_GridPart );
+  }
+
+
 
   template<class GridType>
   template<class VectorType,class IndexSetType>

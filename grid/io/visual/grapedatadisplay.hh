@@ -5,6 +5,7 @@
 
 //- system includes
 #include <vector>
+#include <limits>
 
 //- local includes
 #include "grapegriddisplay.hh"
@@ -18,8 +19,44 @@
 namespace Dune
 {
 
-  template <typename ctype, int dim, int dimworld, int polOrd>
+  // Forward Declarations
+  // --------------------
+
+  template< class ctype, int dim, int dimworld, int polOrd >
   class GrapeLagrangePoints;
+
+
+
+  // GrapeFunction
+  // -------------
+
+  template< class GV, int dimR, int polOrd >
+  struct GrapeFunction
+  {
+    typedef GV GridView;
+
+    static const int dimDomain = GridView::Grid::dimension;
+    static const int dimRange = dimR;
+
+    typedef FieldVector< typename GridView::Grid::ctype, dimDomain > DomainVector;
+    typedef FieldVector< typename GridView::Grid::ctype, dimRange > RangeVector;
+
+    typedef typename GridView::template Codim< 0 >::Entity Entity;
+
+    virtual ~GrapeFunction ()
+    {}
+
+    virtual void evaluate ( const Entity &entity, const DomainVector &x, RangeVector &y ) const = 0;
+
+    virtual const GridView &gridView () const = 0;
+
+    virtual std::string name () const = 0;
+  };
+
+
+
+  // EvalFunctionData
+  // ----------------
 
   template <class EvalImpTraits>
   struct EvalFunctionData
@@ -108,6 +145,56 @@ namespace Dune
     // calculate min and max value of function
     inline static void calcMinMax(DUNE_FDATA * df);
   };
+
+
+
+  // EvalGrapeFunction
+  // -----------------
+
+  template< class GV, int dimR, int polOrd >
+  struct EvalGrapeFunction;
+
+  template< class GV, int dimR, int polOrd >
+  struct EvalGrapeFunctionTraits
+  {
+    typedef typename GV::Grid GridType;
+    typedef EvalGrapeFunction< GV, dimR, polOrd > EvalImp;
+  };
+
+  template< class GV, int dimR, int polOrd >
+  struct EvalGrapeFunction
+    : public EvalFunctionData< EvalGrapeFunctionTraits< GV, dimR, polOrd > >
+  {
+    typedef GV GridView;
+
+    typedef Dune::GrapeFunction< GV, dimR, polOrd > GrapeFunction;
+
+    static const int dimDomain = GrapeFunction::dimDomain;
+    static const int dimRange = GrapeFunction::dimRange;
+    static const int dimWorld = GridView::Grid::dimensionworld;
+
+    typedef typename GrapeFunction::DomainVector DomainVector;
+    typedef typename GrapeFunction::RangeVector RangeVector;
+
+    typedef typename GridView::template Codim< 0 >::Entity Entity;
+
+    typedef typename GrapeInterface< dimDomain, dimWorld >::DUNE_ELEM DUNE_ELEM;
+    typedef typename GrapeInterface< dimDomain, dimWorld >::DUNE_FDATA DUNE_FDATA;
+
+    // for the data visualization
+    static void evalCoordNow ( const Entity &entity, DUNE_FDATA *fdata, const double *coord, double *val );
+
+    // for the data visualization
+    static void evalDofNow ( const Entity &entity, int geomType, DUNE_FDATA *fdata, int localNum, double *val );
+
+    // calculate min and max value of function
+    static void calcMinMax ( DUNE_FDATA *fdata );
+  };
+
+
+
+  // EvalVectorData
+  // --------------
 
   template <class GridImp, class VectorType, class IndexSetImp >
   struct EvalVectorData;
@@ -223,6 +310,9 @@ namespace Dune
     //! add discrete function to display
     template <class DiscFuncType>
     inline void addData(const DiscFuncType &func, std::string name , double time , bool vector = false );
+
+    template< class GV, int dimR, int polOrd >
+    void addData ( const GrapeFunction< GV, dimR, polOrd > &function );
 
     // retrun whether we have data or not
     bool hasData () { return (vecFdata_.size() > 0); }
