@@ -35,26 +35,26 @@ namespace Dune
       unsigned int
       size ( unsigned int codim, unsigned int i, unsigned int subcodim ) const
       {
-        assert( codim <= dimension );
+        assert( (codim <= dimension) && (i < info_[ codim ].size()) );
         return info_[ codim ][ i ].size( subcodim );
       }
 
       unsigned int subEntity ( unsigned int codim, unsigned int i,
                                unsigned int subcodim, unsigned int j ) const
       {
-        assert( codim <= dimension );
+        assert( (codim <= dimension) && (i < info_[ codim ].size()) );
         return info_[ codim ][ i ].number( subcodim, j );
       }
 
       unsigned int topologyId ( unsigned int codim, unsigned int i ) const
       {
-        assert( codim <= dimension );
+        assert( (codim <= dimension) && (i < info_[ codim ].size()) );
         return info_[ codim ][ i ].topologyId();
       }
 
       const GeometryType &type ( unsigned int codim, unsigned int i ) const
       {
-        assert( codim <= dimension );
+        assert( (codim <= dimension) && (i < info_[ codim ].size()) );
         return info_[ codim ][ i ].type();
       }
 
