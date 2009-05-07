@@ -60,7 +60,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
       if test "$ALBERTA_VERSION" = "2.0" ; then
-        AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="2.1"],[],[#include <alberta.h>])
+        AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[],[#include <alberta.h>])
       fi
     fi
 
@@ -95,8 +95,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
         albertalibname="ALBERTA${with_alberta_dim}${with_alberta_dim}_${with_alberta_debug}"
       fi
 
-      # we do not check libraries for ALBERTA 2.1 (linking would require libtool)
-      if test "$ALBERTA_VERSION" == "2.1" ; then
+      # we do not check libraries for ALBERTA 3.0 (linking would require libtool)
+      if test "$ALBERTA_VERSION" == "3.0" ; then
         AC_MSG_WARN([ALBERTA $ALBERTA_VERSION found -- Skipping check for ALBERTA grid libraries])
       else
         AC_CHECK_LIB($albertalibname,[mesh_traverse], [],
@@ -121,8 +121,8 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x102], [Alberta version found by configure])
     elif test "$ALBERTA_VERSION" = "2.0" ; then
       AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure])
-    elif test "$ALBERTA_VERSION" = "2.1" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x201], [Alberta version found by configure])
+    elif test "$ALBERTA_VERSION" = "3.0" ; then
+      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x300], [Alberta version found by configure])
     else
       AC_MSG_ERROR([Internal Inconsistency: Invalid Alberta version reported: $ALBERTA_VERSION.])
     fi
@@ -135,16 +135,16 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
 
-    if test "$ALBERTA_VERSION" = "2.1" ; then
+    if test "$ALBERTA_VERSION" = "3.0" ; then
       echo
       echo "  -------------------------------------------------------------------------"
       echo "                                   WARNING"
       echo "  -------------------------------------------------------------------------"
-      echo "    ALBERTA 2.1 is still under development. Changes made to ALBERTA after"
-      echo "    the release of DUNE 1.2 might affect AlbertaGrid in an unpredictable"
+      echo "    ALBERTA 3.0 is still under development. Changes made to ALBERTA after"
+      echo "    the release of DUNE 1.2.1 might affect AlbertaGrid in an unpredictable"
       echo "    way."
       echo
-      echo "    AlbertaGrid has only been tested with ALBERTA 2.1 revision 3060."
+      echo "    AlbertaGrid has only been tested with ALBERTA 3.0 rc 5."
       echo
       echo "    If possible, consider using ALBERTA 2.0. It can be downloaded from"
       echo "    www.alberta-fem.de."
