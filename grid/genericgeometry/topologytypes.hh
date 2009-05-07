@@ -38,7 +38,8 @@ namespace Dune
 
       static std :: string name ()
       {
-        return BaseTopology :: name() + "'";
+        return BaseTopology :: name() + "l";
+        // return BaseTopology :: name() + "'";
       }
     };
 
@@ -53,7 +54,8 @@ namespace Dune
 
       static std :: string name ()
       {
-        return BaseTopology :: name() + "°";
+        return BaseTopology :: name() + "o";
+        // return BaseTopology :: name() + "°";
       }
     };
 
@@ -97,6 +99,65 @@ namespace Dune
 
 
 
+    // SimplexTopology
+    // ---------------
+
+    template< unsigned int dim >
+    struct SimplexTopology
+    {
+      typedef Pyramid< typename SimplexTopology< dim-1 >::type > type;
+    };
+
+    template<>
+    struct SimplexTopology< 0 >
+    {
+      typedef Point type;
+    };
+
+
+
+    // CubeTopology
+    // ------------
+
+    template< unsigned int dim >
+    struct CubeTopology
+    {
+      typedef Prism< typename CubeTopology< dim-1 >::type > type;
+    };
+
+    template<>
+    struct CubeTopology< 0 >
+    {
+      typedef Point type;
+    };
+
+
+
+    // PyramidTopoogy
+    // --------------
+
+    template< unsigned int dim >
+    struct PyramidTopology
+    {
+      typedef Pyramid< typename CubeTopology< dim-1 >::type > type;
+    };
+
+
+
+    // PrismTopoogy
+    // --------------
+
+    template< unsigned int dim >
+    struct PrismTopology
+    {
+      typedef Prism< typename SimplexTopology< dim-1 >::type > type;
+    };
+
+
+
+    // Topology
+    // --------
+
     template< unsigned int id, unsigned int dim >
     class Topology
     {
@@ -106,7 +167,7 @@ namespace Dune
 
       static const bool isPrism = ((id >> (dimension-1)) != 0);
 
-      typedef typename Topology< (id & ~(1 << (dimension-1))), dimension-1 > :: type
+      typedef typename Topology< (id & ~(1 << (dimension-1))), dimension-1 >::type
       BaseTopology;
 
       template< bool >
@@ -122,7 +183,7 @@ namespace Dune
       };
 
     public:
-      typedef typename ProtectedIf< isPrism, Prism, Pyramid > :: type type;
+      typedef typename ProtectedIf< isPrism, Prism, Pyramid >::type type;
     };
 
     template< unsigned int id >
@@ -134,6 +195,96 @@ namespace Dune
 
     public:
       typedef Point type;
+    };
+
+
+
+    // IfTopology
+    // ----------
+
+    template< template< class > class Operation, int dim, class Topology = Point >
+    class IfTopology
+    {
+      typedef IfTopology< Operation, dim-1, Prism< Topology > > IfPrism;
+      typedef IfTopology< Operation, dim-1, Pyramid< Topology > > IfPyramid;
+
+    public:
+      static void apply ( const unsigned int topologyId )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1 );
+        else
+          IfPyramid::apply( topologyId >> 1 );
+      }
+
+      template< class T1 >
+      static void apply ( const unsigned int topologyId, T1 &p1 )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1 );
+        else
+          IfPyramid::apply( topologyId >> 1, p1 );
+      }
+
+      template< class T1, class T2 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2 )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2 );
+        else
+          IfPyramid::apply( topologyId >> 1, p1, p2 );
+      }
+
+      template< class T1, class T2, class T3 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3 )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2, p3 );
+        else
+          IfPyramid::apply( topologyId >> 1, p1, p2, p3 );
+      }
+
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        if( topologyId & 1 )
+          IfPrism::apply( topologyId >> 1, p1, p2, p3, p4 );
+        else
+          IfPyramid::apply( topologyId >> 1, p1, p2, p3, p4 );
+      }
+    };
+
+    template< template< class > class Operation, class Topology >
+    struct IfTopology< Operation, 0, Topology >
+    {
+      static void apply ( const unsigned int topologyId )
+      {
+        Operation< Topology >::apply();
+      }
+
+      template< class T1 >
+      static void apply ( const unsigned int topologyId, T1 &p1 )
+      {
+        Operation< Topology >::apply( p1 );
+      }
+
+      template< class T1, class T2 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2 )
+      {
+        Operation< Topology >::apply( p1, p2 );
+      }
+
+      template< class T1, class T2, class T3 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3 )
+      {
+        Operation< Topology >::apply( p1, p2, p3 );
+      }
+
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( const unsigned int topologyId, T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        Operation< Topology >::apply( p1, p2, p3, p4 );
+      }
     };
 
   }
