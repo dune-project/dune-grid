@@ -382,10 +382,10 @@ namespace Dune
     // --------------------
 
     template< unsigned int dim >
-    class MapNumberingProvider
+    struct MapNumberingProvider
     {
-      enum { dimension = dim };
-      enum { numTopologies = (1 << dimension) };
+      static const unsigned int dimension = dim;
+      static const unsigned int numTopologies = (1 << dimension);
 
     private:
       template< int i >
@@ -398,7 +398,7 @@ namespace Dune
 
       MapNumberingProvider ()
       {
-        ForLoop< Builder, 0, (1 << dim)-1 > :: apply( dune2generic_, generic2dune_ );
+        ForLoop< Builder, 0, (1 << dim)-1 >::apply( dune2generic_, generic2dune_ );
       }
 
       static const MapNumberingProvider &instance ()
@@ -412,7 +412,8 @@ namespace Dune
       static unsigned int
       dune2generic ( unsigned int topologyId, unsigned int i )
       {
-        assert( topologyId < numTopologies );
+        assert( (topologyId < numTopologies) && (codim <= dimension) );
+        assert( i < instance().dune2generic_[ topologyId ][ codim ].size() );
         return instance().dune2generic_[ topologyId ][ codim ][ i ];
       }
 
@@ -420,18 +421,19 @@ namespace Dune
       static unsigned int
       generic2dune ( unsigned int topologyId, unsigned int i )
       {
-        assert( topologyId < numTopologies );
+        assert( (topologyId < numTopologies) && (codim <= dimension) );
+        assert( i < instance().dune2generic_[ topologyId ][ codim ].size() );
         return instance().generic2dune_[ topologyId ][ codim ][ i ];
       }
     };
 
 
     template< unsigned int dim >
-    template< int i >
-    struct MapNumberingProvider< dim > :: Builder
+    template< int topologyId >
+    struct MapNumberingProvider< dim >::Builder
     {
-      typedef typename GenericGeometry :: Topology< i, dimension > :: type Topology;
-      typedef GenericGeometry :: MapNumbering< Topology > MapNumbering;
+      typedef typename GenericGeometry::Topology< topologyId, dimension >::type Topology;
+      typedef GenericGeometry::MapNumbering< Topology > MapNumbering;
 
       template< int codim >
       struct Codim;
@@ -439,19 +441,19 @@ namespace Dune
       static void apply ( Map (&dune2generic)[ numTopologies ][ dimension+1 ],
                           Map (&generic2dune)[ numTopologies ][ dimension+1 ] )
       {
-        ForLoop< Codim, 0, dimension > :: apply( dune2generic[ i ], generic2dune[ i ] );
+        ForLoop< Codim, 0, dimension >::apply( dune2generic[ topologyId ], generic2dune[ topologyId ] );
       }
     };
 
     template< unsigned int dim >
     template< int i >
     template< int codim >
-    struct MapNumberingProvider< dim > :: Builder< i > :: Codim
+    struct MapNumberingProvider< dim >::Builder< i >::Codim
     {
       static void apply ( Map (&dune2generic)[ dimension+1 ],
                           Map (&generic2dune)[ dimension+1 ] )
       {
-        const unsigned int size = Size< Topology, codim > :: value;
+        const unsigned int size = Size< Topology, codim >::value;
 
         Map &d2g = dune2generic[ codim ];
         d2g.resize( size );
