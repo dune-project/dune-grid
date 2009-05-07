@@ -549,66 +549,65 @@ struct GridInterface
 template <int cd, class Grid, class Entity, bool doCheck>
 struct subIndexCheck
 {
-  subIndexCheck (const Grid & g, const Entity & e)
+  subIndexCheck ( const Grid &g, const Entity &e )
   {
-    typedef typename Grid :: template Codim<cd> :: EntityPointer EntityPointer;
+    typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
     const int imax = e.template count<cd>();
-    for (int i=0; i<imax; ++i)
+    for( int i = 0; i < imax; ++i )
     {
       // check construction of entity pointers
-      EntityPointer ep ( *(e.template entity<cd>(i)) );
-      assert( ep == (e.template entity<cd>(i)));
+      EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
+      assert( ep == e.template subEntity< cd >( i ) );
 
       // test compactify
       ep.compactify();
 
-      if( g.levelIndexSet(e.level()).index( *(e.template entity<cd>(i)) )
-          != g.levelIndexSet(e.level()).template subIndex<cd>(e,i) )
+      const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( e.level() );
+
+      if( !levelIndexSet.contains( *ep ) )
       {
-        int id_e =
-          g.levelIndexSet(e.level()).index(e);
-        int id_e_i =
-          g.levelIndexSet(e.level()).index( *(e.template entity<cd>(i)) );
-        int subid_e_i =
-          g.levelIndexSet(e.level()).template subIndex<cd>(e,i);
-        DUNE_THROW(CheckError,
-                   "g.levelIndexSet.index( *(e.template entity<cd>(i)) ) "
-                   << "== g.levelIndexSet.template subIndex<cd>(e,i) failed "
-                   << "[with cd=" << cd << ", i=" << i << "]"
-                   << " ... index(e)=" << id_e
-                   << " ... index(e.entity<cd>(i))=" << id_e_i
-                   << " ... subIndex(e,i)=" << subid_e_i
-                   );
+        std::cerr << "Error: Level index set does not contain all subentities." << std::endl;
+        assert( false );
+      }
+      if( levelIndexSet.index( *ep ) != levelIndexSet.subIndex( e, i, cd ) )
+      {
+        int id_e = levelIndexSet.index( e );
+        int id_e_i = levelIndexSet.index( *ep );
+        int subid_e_i = levelIndexSet.subIndex( e, i, cd );
+        std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( i ) ) ) "
+                  << "!= levelIndexSet.subIndex( e, i, cd )  "
+                  << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
+        std::cerr << "       ... index( e ) = " << id_e << std::endl;
+        std::cerr << "       ... index( e.subEntity< cd >( i ) ) = " << id_e_i << std::endl;
+        std::cerr << "       ... subIndex( e, i, cd ) = " << subid_e_i << std::endl;
+        assert( false );
       }
 
       typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
       const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
-      const int gi = Numbering::template dune2generic< cd >( tid, i );
+      const int oldi = Numbering::template generic2dune< cd >( tid, i );
 
-      if( g.levelIndexSet(e.level()).subIndex(e,gi,cd)
-          != g.levelIndexSet(e.level()).template subIndex<cd>(e,i) )
+      if( levelIndexSet.subIndex( e, i, cd ) != levelIndexSet.template subIndex< cd >( e, oldi ) )
       {
-        int id_e =
-          g.levelIndexSet(e.level()).index(e);
-        int subid_e_i =
-          g.levelIndexSet(e.level()).template subIndex<cd>(e,i);
+        int id_e = levelIndexSet.index( e );
+        int subid_e_i = levelIndexSet.template subIndex< cd >( e, oldi );
+        int subid_e_i_cd = levelIndexSet.subIndex( e, i, cd );
 
-        int subid_e_i_cd =
-          g.levelIndexSet(e.level()).subIndex(e,gi,cd);
-        std::cerr << "g.levelIndexSet.subIndex(e,dune2generic(i),cd) "
-                  << "== g.levelIndexSet.template subIndex<cd>(e,i) failed "
+        std::cerr << "Error: levelIndexSet.subIndex( e, i, cd ) "
+                  << "!= levelIndexSet.subIndex< cd >( e, generic2dune( i ) )  "
                   << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
-        std::cerr << " ... index(e)=" << id_e << std::endl;
-        std::cerr << " ... subIndex<cd>(e,i)=" << subid_e_i << std::endl;
-        std::cerr << " ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
+        std::cerr << "       ... index(e)=" << id_e << std::endl;
+        std::cerr << "       ... subIndex<cd>(e,i)=" << subid_e_i << std::endl;
+        std::cerr << "       ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
         assert( false );
       }
-
     }
-    subIndexCheck<cd-1,Grid,Entity,
-        Dune::Capabilities::hasEntity<Grid,cd-1>::v> sick(g,e);
+
+    subIndexCheck< cd-1, Grid, Entity, Dune::Capabilities::hasEntity< Grid, cd-1 >::v > sick( g, e );
   }
 };
+
+
 // end recursion of subIndexCheck
 template <class Grid, class Entity, bool doCheck>
 struct subIndexCheck<-1, Grid, Entity, doCheck>
