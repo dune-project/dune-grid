@@ -2164,7 +2164,7 @@ namespace Dune {
     }
 
     IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
-                   int i, unsigned int codim )
+                   int i, unsigned int codim ) const
     {
       return dynamicSubId_( e, i, codim );
     }
