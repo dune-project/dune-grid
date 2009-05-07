@@ -583,6 +583,7 @@ struct subIndexCheck
         assert( false );
       }
 
+#if 0
       typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
       const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
       const int oldi = Numbering::template generic2dune< cd >( tid, i );
@@ -601,6 +602,7 @@ struct subIndexCheck
         std::cerr << "       ... subIndex(e,dune2generic(i),cd)=" << subid_e_i_cd << std::endl;
         assert( false );
       }
+#endif
     }
 
     subIndexCheck< cd-1, Grid, Entity, Dune::Capabilities::hasEntity< Grid, cd-1 >::v > sick( g, e );

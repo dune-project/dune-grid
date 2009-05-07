@@ -50,7 +50,7 @@ namespace Dune
     assert( type == en.geometry().type() );
     enum { dim = EntityType::dimension };
     const int dimworld = GridType::dimensionworld;
-    typedef typename EntityType :: ctype coordType;
+    typedef typename EntityType::ctype coordType;
 
     const ReferenceElement< coordType, dim > & refElem =
       ReferenceElements< coordType, dim >::general(type);
@@ -303,9 +303,7 @@ namespace Dune
       typedef typename Grid :: Traits :: LocalIdSet LocalIdSetType;
       typedef typename LocalIdSetType :: IdType IdType;
 
-      std::map < IdType , bool > entityfound;
-      int mycount = 0;
-
+      std::set< IdType > entityfound;
 
       const Iterator endit = view.template end< 0 >();
       Iterator it = view.template begin< 0 >();
@@ -315,24 +313,25 @@ namespace Dune
       const LocalIdSetType &localIdSet = grid.localIdSet();
       for( ; it != endit; ++it )
       {
-        const typename Iterator :: Entity &entity = *it;
-        assert( lset.contains( entity ) );
+        const typename Iterator::Entity &entity = *it;
+        if( !lset.contains( entity ) )
+        {
+          std::cerr << "Error: IndexSet does not contain all entities." << std::endl;
+          assert( false );
+        }
         const int subcount = entity.template count< codim >();
         for( int i = 0; i < subcount; ++i )
         {
-          const IdType id = localIdSet.id( *(entity.template entity< codim >( i ) ) );
-          if( entityfound.find( id ) == entityfound.end() )
-          {
-            ++mycount;
-            entityfound[ id ] = true;
-          }
+          const IdType id = localIdSet.id( *(entity.template subEntity< codim >( i ) ) );
+          entityfound.insert( id );
         }
       }
 
-      if ( gridsize != (int)entityfound.size() )
+      if( (size_t)gridsize != entityfound.size() )
       {
-        derr << "WARNING: gridsize = "<< gridsize << " entities | map of entities = "
-             << entityfound.size() << " for codim " << codim << std::endl;
+        std::cerr << "Warning: gridsize = " << gridsize << " entities"
+                  << ", set of entities = " << entityfound.size()
+                  << " [codim " << codim << "]" << std::endl;
       }
 
       // gridsize should be at least the size of found entities
@@ -424,50 +423,56 @@ namespace Dune
         int svx = it->template count<dim>();
 
         // print all vertex numbers
-        for(int i=0; i<svx; i++)
+        for( int i = 0; i < svx; ++i )
         {
-          int idx = lset.template subIndex<dim> (*it,i);
-          if(i == svx-1) sout << idx << "]\n";
-          else sout << idx << ", ";
+          const typename IndexSetType::IndexType idx = lset.subIndex( *it, i, dim );
+          sout << idx << (i < svx-1 ? ", " : "]\n");
         }
 
         // print all vertex coordinates
         sout << "Vertex Coords = [";
-        for(int i=0; i<svx; i++)
+        for( int i = 0; i < svx; ++i )
         {
           // get entity pointer of sub entity codim=dim (Vertex)
-          typedef typename Grid :: template Codim< dim > :: EntityPointer VertexPointerType;
-          VertexPointerType vxp = it->template entity<dim> (i);
+          typedef typename Grid::template Codim< dim >::EntityPointer VertexPointer;
+          VertexPointer vxp = it->template subEntity< dim >( i );
 
           // get coordinates of entity pointer
-          FieldVector<coordType,dimworld> vx (vxp->geometry().corner( 0 ));
+          FieldVector< coordType, dimworld > vx( vxp->geometry().corner( 0 ) );
 
           // output vertex coordinates
-          if(i<svx-1) sout << vx << " , ";
-          else sout << vx << "]\n";
+          sout << vx << (i < svx-1 ? ", " : "]\n");
 
-          typename IndexSetType::IndexType vxidx = lset.template subIndex<dim> (*it,i);
+          const typename IndexSetType::IndexType vxidx = lset.subIndex( *it, i, dim );
 
           // the subIndex and the index for subEntity must be the same
-          assert( vxidx == lset.index( *vxp ));
+          if( vxidx != lset.index( *vxp ) )
+          {
+            std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
+            assert( vxidx == lset.index( *vxp ) );
+          }
 
+#if 0
           typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
           const unsigned int tid = GenericGeometry::topologyId( it->type() );
-          const int gi = Numbering::template dune2generic< dim >( tid, i );
+          const int di = Numbering::template generic2dune< dim >( tid, i );
 
           // static and dynamic method must yield the same result
-          if( vxidx != lset.subIndex( *it, gi, dim ) )
+          if( vxidx != lset.template subIndex< dim >( *it, di ) )
           {
-            std::cerr << "Error: subIndex< dim >( entity, i ) != subIndex( entity, dune2generic( i ), dim )" << std::endl;
-            assert( vxidx == lset.subIndex( *it, gi, dim ) );
+            std::cerr << "Error: subIndex< dim >( entity, generic2dune( i ) ) != subIndex( entity, i, dim )" << std::endl;
+            assert( vxidx == lset.template subIndex< dim >( *it, dim ) );
           }
+#endif
 
           // check whether the coordinates are the same
           assert(vertexCoordsMap.find(vxidx)!=vertexCoordsMap.end());
           FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[vxidx] );
-          if( ! compareVec( vxcheck, vx ) )
+          if( !compareVec( vxcheck, vx ) )
           {
-            sout << "ERROR: map global vertex " << vxidx << " vx " << vxcheck << " is not " << vx << " type:" << it->partitionType() << "\n";
+            std::cerr << "Error: Inconsistent map of global vertex " << vxidx
+                      << ": " << vxcheck << " != " << vx
+                      << "  (type = " << it->partitionType() << ")" << std::endl;
             assert( compareVec( vxcheck, vx ) );
           }
         }

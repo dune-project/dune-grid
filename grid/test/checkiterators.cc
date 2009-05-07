@@ -52,13 +52,13 @@ struct CheckIterators< GridView >::CheckCodim
       const typename ElementIterator::Entity &entity = *it;
       for( int i = 0; i < entity.template count< codim >(); ++i )
       {
-        IdType id = idSet.template subId< codim >( entity, i );
+        IdType id = idSet.template subId( entity, i, codim );
         if( count[ id ] != 1 )
         {
           std::cerr << "Error: Codim " << codim << " iterator"
                     << " visited entity " << id
                     << " " << count[ id ] << " times." << std::endl;
-          //assert( false );
+          assert( count[ id ] == 1 );
         }
       }
     }

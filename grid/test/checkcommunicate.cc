@@ -9,6 +9,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 using namespace Dune;
 
@@ -276,23 +277,23 @@ class CheckCommunication
           const bool proceedAnyway = (level_ < 0 ? false : !intersection.neighbor());
           if( (calc > -1e-8) || intersection.boundary() || proceedAnyway )
           {
-            const ReferenceElement< ctype, dim > &insideRefElem
-              =  ReferenceElements< ctype, dim > :: general( entity.type() );
+            const GenericReferenceElement< ctype, dim > &insideRefElem
+              = GenericReferenceElements< ctype, dim >::general( entity.type() );
 
-            const int numberInSelf = intersection.numberInSelf();
-            for( int i = 0; i < insideRefElem.size( numberInSelf, 1, cdim ); ++i )
+            const int indexInInside = intersection.indexInInside();
+            for( int i = 0; i < insideRefElem.size( indexInInside, 1, cdim ); ++i )
             {
-              int e = insideRefElem.subEntity( numberInSelf, 1, i, cdim );
-              int idx = indexSet_.template subIndex< cdim >( entity, e );
+              const int e = insideRefElem.subEntity( indexInInside, 1, i, cdim );
+              const int idx = indexSet_.subIndex( entity, e, cdim );
               CoordinateVector cmid( 0.0 );
-              SubEntityPointer subEp = entity.template entity< cdim >( e );
-              int c = subEp->geometry().corners();
-              for (int j=0; j<c; j++)
+              SubEntityPointer subEp = entity.template subEntity< cdim >( e );
+              const int c = subEp->geometry().corners();
+              for( int j = 0; j < c; ++j )
                 cmid += subEp->geometry().corner( j );
-              cmid /= double(c);
+              cmid /= double( c );
 
-              data[idx] = f(cmid);
-              weight[idx] = 1.0;
+              data[ idx ] = f( cmid );
+              weight[ idx ] = 1.0;
             }
 
             // on non-conforming grids the neighbor entities might not
@@ -306,23 +307,23 @@ class CheckCommunication
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
-              const ReferenceElement< ctype, dim > &outsideRefElem
-                = ReferenceElements< ctype, dim > :: general( neigh.type() );
+              const GenericReferenceElement< ctype, dim > &outsideRefElem
+                = GenericReferenceElements< ctype, dim >::general( neigh.type() );
 
-              const int numberInNeighbor = intersection.numberInNeighbor();
-              for( int i = 0; i < outsideRefElem.size(numberInNeighbor, 1, cdim); ++i )
+              const int indexInOutside = intersection.indexInOutside();
+              for( int i = 0; i < outsideRefElem.size( indexInOutside, 1, cdim ); ++i )
               {
-                int e = outsideRefElem.subEntity( numberInNeighbor, 1, i, cdim );
-                int idx = indexSet_.template subIndex<cdim>(neigh, e);
+                const int e = outsideRefElem.subEntity( indexInOutside, 1, i, cdim );
+                const int idx = indexSet_.subIndex( neigh, e, cdim );
                 CoordinateVector cmid( 0.0 );
-                SubEntityPointer subEp = neigh.template entity< cdim >( e );
-                int c = subEp->geometry().corners();
-                for (int j=0; j<c; j++)
+                SubEntityPointer subEp = neigh.template subEntity< cdim >( e );
+                const int c = subEp->geometry().corners();
+                for( int j = 0; j < c; ++j )
                   cmid += subEp->geometry().corner( j );
-                cmid /= double(c);
+                cmid /= double( c );
 
-                data[idx] = f(cmid);
-                weight[idx] = 1.0;
+                data[ idx ] = f( cmid );
+                weight[ idx ] = 1.0;
               }
             }
           }
@@ -374,7 +375,7 @@ class CheckCommunication
         const int numSubEntities = entity.template count< cdim >();
         for( int i=0; i < numSubEntities; ++i )
         {
-          SubEntityPointer subEp = entity.template entity< cdim >( i );
+          SubEntityPointer subEp = entity.template subEntity< cdim >( i );
 
           const int index = indexSet_.index( *subEp );
           CoordinateVector cmid( 0.0 );
@@ -397,15 +398,12 @@ class CheckCommunication
 
             for( int j = 0; j < numVertices; )
             {
-              const ReferenceElement< double, dim > &refElem
-                = ReferenceElements< double, dim > :: general( entity.type() );
+              const GenericReferenceElement< double, dim > &refElem
+                = GenericReferenceElements< double, dim >::general( entity.type() );
               const int vx = refElem.subEntity( i, cdim, j, dim );
 
-              const int tid = Dune::GenericGeometry::topologyId( subEp->type() );
-              const int gj = Dune::GenericGeometry::MapNumberingProvider< dim-cdim >::template dune2generic< dim-cdim >( tid, j );
-
-              sout_ << "index: " << indexSet_.template subIndex< dim >( entity, vx )
-                    << " " << subEp->geometry().corner( gj );
+              sout_ << "index: " << indexSet_.subIndex( entity, vx, dim )
+                    << " " << subEp->geometry().corner( j );
               (++j < numVertices ? sout_ <<  "/" : sout_ << std :: endl);
             }
           }

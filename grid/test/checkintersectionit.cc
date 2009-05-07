@@ -270,30 +270,34 @@ void checkIntersectionIterator(const GridViewType& view,
       const int indexInInside  = iIt->indexInInside();
       const int indexInOutside = iIt->indexInOutside();
 
-      typedef GenericGeometry::MapNumberingProvider< dim > Numbering;
-      const unsigned int tidIn = GenericGeometry::topologyId( eIt->type() );
-      const unsigned int tidOut = GenericGeometry::topologyId( outside->type() );
-
-      const int numberInSelf     = Numbering::template generic2dune< 1 >( tidIn, indexInInside );
-      const int numberInNeighbor = Numbering::template generic2dune< 1 >( tidOut, indexInOutside );
-
-      const unsigned int iIdx = indexSet.template subIndex< 1 >( *eIt, numberInSelf );
-      const unsigned int oIdx = indexSet.template subIndex< 1 >( *outside, numberInNeighbor );
-
-      if( iIdx != oIdx )
+      if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( *outside, indexInOutside, 1 ) )
       {
-        std :: cerr << "Error: index of conforming intersection differs when "
-                    << "obtained from inside and outside." << std :: endl;
-        std :: cerr << "       inside index = " << iIdx
-                    << ", outside index = " << oIdx << std :: endl;
+        std::cerr << "Error: Index of conforming intersection differs when "
+                  << "obtained from inside and outside." << std::endl;
+        std::cerr << "       inside index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
+                  << ", outside index = " << indexSet.subIndex( *outside, indexInOutside, 1 ) << std::endl;
         assert( false );
       }
 
-      assert(grid.localIdSet().template subId<1>(*eIt, numberInSelf)
-             == grid.localIdSet().template subId<1>(*outside, numberInNeighbor));
+      const typename GridType::LocalIdSet &localIdSet = grid.localIdSet();
+      if( localIdSet.subId( *eIt, indexInInside, 1 ) != localIdSet.subId( *outside, indexInOutside, 1 ) )
+      {
+        std::cerr << "Error: Local id of conforming intersection differs when "
+                  << "obtained from inside and outside." << std::endl;
+        std::cerr << "       inside id = " << localIdSet.subId( *eIt, indexInInside, 1 )
+                  << ", outside id = " << localIdSet.subId( *outside, indexInOutside, 1 ) << std::endl;
+        assert( false );
+      }
 
-      assert(grid.globalIdSet().template subId<1>(*eIt, numberInSelf)
-             == grid.globalIdSet().template subId<1>(*outside, numberInNeighbor));
+      const typename GridType::GlobalIdSet &globalIdSet = grid.globalIdSet();
+      if( globalIdSet.subId( *eIt, indexInInside, 1 ) != globalIdSet.subId( *outside, indexInOutside, 1 ) )
+      {
+        std::cerr << "Error: Global id of conforming intersection differs when "
+                  << "obtained from inside and outside." << std::endl;
+        std::cerr << "       inside id = " << globalIdSet.subId( *eIt, indexInInside, 1 )
+                  << ", outside id = " << globalIdSet.subId( *outside, indexInOutside, 1 ) << std::endl;
+        assert( false );
+      }
     }
 
     // //////////////////////////////////////////////////////////
