@@ -226,7 +226,7 @@ void checkAdaptation(GridType& grid)
         DUNE_THROW(InvalidStateException,"grid.maxLevel() wrong after coarsening " << oldMaxLevel << " " << grid.maxLevel() );
     }
 
-    const bool bisectionGrid = grid.name() == "AlbertGrid";
+    //const bool bisectionGrid = grid.name() == "AlbertGrid";
 
     // Loop over all levels except the lowest one
     for (int level = 0 ; level <= grid.maxLevel(); ++level )

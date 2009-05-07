@@ -641,10 +641,19 @@ struct subIndexCheck<-1, Grid, Entity, false>
 template <class Grid>
 void zeroEntityConsistency (Grid &g)
 {
+  typedef typename Grid::ctype ctype;
+  const int dimGrid = Grid::dimension;
+  const int dimWorld = Grid::dimensionworld;
+
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   typedef typename Grid::template Codim<0>::Entity Entity;
   typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
+
+  const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( g.maxLevel() );
+  const typename Grid::LeafIndexSet &leafIndexSet = g.leafIndexSet();
+  const typename Grid::LocalIdSet &localIdSet = g.localIdSet();
+  const typename Grid::GlobalIdSet &globalIdSet = g.globalIdSet();
 
   LevelIterator it = g.template lbegin<0>(g.maxLevel());
   const LevelIterator endit = g.template lend<0>(g.maxLevel());
@@ -658,32 +667,53 @@ void zeroEntityConsistency (Grid &g)
     // check compactify of entity pointer
     ep.compactify();
 
-    // Entity::entity<0>(0) == Entity
-    assert( g.levelIndexSet(g.maxLevel()).index( *(it->template entity<0>(0)) )
-            == g.levelIndexSet(g.maxLevel()).index( *it ) );
-    assert( g.leafIndexSet().index( *(it->template entity<0>(0)) )
-            == g.leafIndexSet().index( *it ) );
-
-    assert( g.globalIdSet().id( *(it->template entity<0>(0)) )
-            == g.globalIdSet().id( *it ) );
-
-    assert( g.localIdSet().id( *(it->template entity<0>(0)) )
-            == g.localIdSet().id( *it ) );
-    assert( it->template entity<0>(0)->level() == it->level() );
-    // Entity::count<dim>() == Entity::geometry().corners();
-    assert( it->template count<Grid::dimension>() == it->geometry().corners() );
-    // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
-    const int cmax = it->template count<Grid::dimension>();
-    for (int c=0; c<cmax; ++c)
+    // Entity::subEntity<0>(0) == Entity
+    EntityPointer subEntity = it->template subEntity< 0 >( 0 );
+    if( levelIndexSet.index( *subEntity ) != levelIndexSet.index( *it ) )
     {
-      const int tid = Dune::GenericGeometry::topologyId( it->type() );
-      const int gc = Dune::GenericGeometry::MapNumberingProvider< Grid::dimension >::template dune2generic< Grid::dimension >( tid, c );
-      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c1(it->geometry().corner( gc ));
-      Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> c2(it->template entity<Grid::dimension>(c)->geometry().corner( 0 ));
-      if( (c2-c1).two_norm() > 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
+      std::cerr << "Error: Level index for subEntity< 0 >( 0 ) differs." << std::endl;
+      assert( false );
+    }
+    if( leafIndexSet.index( *subEntity ) != leafIndexSet.index( *it ) )
+    {
+      std::cerr << "Error: Leaf index for subEntity< 0 >( 0 ) differs." << std::endl;
+      assert( false );
+    }
+    if( globalIdSet.id( *subEntity ) != globalIdSet.id( *it ) )
+    {
+      std::cerr << "Error: Global id for subEntity< 0 >( 0 ) differs." << std::endl;
+      assert( false );
+    }
+    if( localIdSet.id( *subEntity ) != localIdSet.id( *it ) )
+    {
+      std::cerr << "Error: Local id for subEntity< 0 >( 0 ) differs." << std::endl;
+      assert( false );
+    }
+
+    if( subEntity->level() != it->level() )
+    {
+      std::cerr << "Error: Level for subEntity< 0 >( 0 ) differs." << std::endl;
+      assert( false );
+    }
+
+    // Entity::count<dim>() == Entity::geometry().corners();
+    // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
+    const int numCorners = it->template count< dimGrid >();
+    if( numCorners != it->geometry().corners() )
+    {
+      std::cerr << "Error: Entity::count< dimGrid >() != Entity::geometry().corners()." << std::endl;
+      assert( false );
+    }
+    for( int c = 0; c < numCorners; ++c )
+    {
+      Dune::FieldVector< ctype, dimWorld > c1( it->geometry().corner( c ) );
+      Dune::FieldVector< ctype, dimWorld > c2( it->template subEntity< dimGrid >( c )->geometry().corner( 0 ) );
+      if( (c2-c1).two_norm() > 10*std::numeric_limits< ctype >::epsilon() )
       {
-        DUNE_THROW(CheckError, "geometry[i] == entity<dim>(i) failed: || c1-c2 || = || " <<
-                   c1 << " - " << c2 << " || = " << (c2-c1).two_norm() << " [ with i = " << c << " ]");
+        std::cerr << "Error: | geometry.corner( c ) - subEntity< dimGrid >( c ) | = | "
+                  << c1 << " - " << c2 << " | = " << (c2-c1).two_norm()
+                  << " != 0  [with c = " << c << " ]" << std::endl;
+        assert( false );
       }
     }
 
