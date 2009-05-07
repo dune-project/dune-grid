@@ -152,7 +152,7 @@ namespace Dune
 
     void restrictLocal ( const Entity &father, const Entity &son, bool initialize ) const
     {
-      dofManager_.indexSetRPop().restrictLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
+      dofManager_.indexSetRestrictProlong().restrictLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
       rpOp_.restrictLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
     }
 
@@ -172,7 +172,7 @@ namespace Dune
 
     void prolongLocal ( const Entity &father, const Entity &son, bool initialize ) const
     {
-      dofManager_.indexSetRPop().prolongLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
+      dofManager_.indexSetRestrictProlong().prolongLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
       rpOp_.prolongLocal( const_cast< Entity & >( father ), const_cast< Entity & >( son ), initialize );
     }
   };
