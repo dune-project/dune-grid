@@ -68,7 +68,13 @@ namespace Dune
   private:
     void inlineElementData ( ObjectStream &stream, const Element &element ) const
     {
-      inlineCodimData< 0 >( stream, element );
+      // call element data direct without creating entity pointer
+      if( dataHandle_.contains( dimension, 0 ) )
+      {
+        inlineEntityData( stream, element );
+      }
+
+      // now call all higher codims
       inlineCodimData< 1 >( stream, element );
       inlineCodimData< 2 >( stream, element );
       inlineCodimData< 3 >( stream, element );
@@ -76,7 +82,13 @@ namespace Dune
 
     void xtractElementData ( ObjectStream &stream, const Element &element )
     {
-      xtractCodimData< 0 >( stream, element );
+      // call element data direct without creating entity pointer
+      if( dataHandle_.contains( dimension, 0 ) )
+      {
+        xtractEntityData( stream, element );
+      }
+
+      // now call all higher codims
       xtractCodimData< 1 >( stream, element );
       xtractCodimData< 2 >( stream, element );
       xtractCodimData< 3 >( stream, element );
