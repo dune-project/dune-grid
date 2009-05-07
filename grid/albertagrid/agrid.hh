@@ -238,6 +238,11 @@ namespace Dune
     //! type of hierarchic index set
     typedef typename Traits::HierarchicIndexSet HierarchicIndexSet;
 
+    //! type of global id set
+    typedef typename Traits::GlobalIdSet GlobalIdSet;
+    //! type of local id set
+    typedef typename Traits::LocalIdSet LocalIdSet;
+
     //! type of collective communication
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
@@ -247,8 +252,6 @@ namespace Dune
 
     //! id set impl
     typedef AlbertaGridIdSet<dim,dimworld> IdSetImp;
-    typedef typename Traits :: GlobalIdSet GlobalIdSet;
-    typedef typename Traits :: LocalIdSet LocalIdSet;
 
     struct AdaptationState;
 
