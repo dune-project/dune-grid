@@ -292,7 +292,7 @@ bool Dune::OneDGrid::adapt()
   OneDGridList<OneDEntityImp<1> >::iterator eIt;
 
   // for the return value:  true if the grid was changed
-  bool changedGrid = false;
+  bool refinedGrid = false;
 
   // remove elements that have been marked for coarsening.
   // If one son of an element is marked for coarsening, and the other one is not,
@@ -307,8 +307,10 @@ bool Dune::OneDGrid::adapt()
       assert(eIt->succ_);
       OneDGridList<OneDEntityImp<1> >::iterator nextElement = eIt->succ_->succ_;
 
-      if (leftElementToBeDeleted->markState_ == OneDEntityImp<1>::COARSEN && leftElementToBeDeleted->isLeaf()
-          && rightElementToBeDeleted->markState_ == OneDEntityImp<1>::COARSEN && rightElementToBeDeleted->isLeaf()) {
+      if (leftElementToBeDeleted->markState_ ==
+          OneDEntityImp<1>::COARSEN && leftElementToBeDeleted->isLeaf()
+          && rightElementToBeDeleted->markState_ ==
+          OneDEntityImp<1>::COARSEN && rightElementToBeDeleted->isLeaf()) {
 
         assert(rightElementToBeDeleted->isLeaf());
 
@@ -349,9 +351,6 @@ bool Dune::OneDGrid::adapt()
         // Actually delete elements
         elements[i].erase(leftElementToBeDeleted);
         elements[i].erase(rightElementToBeDeleted);
-
-        // The grid has been changed
-        changedGrid = true;
       }
 
       // increment pointer
@@ -473,7 +472,7 @@ bool Dune::OneDGrid::adapt()
         eIt->sons_[1] = newElement1;
 
         // The grid has been modified
-        changedGrid = true;
+        refinedGrid = true;
 
       }
 
@@ -575,7 +574,7 @@ bool Dune::OneDGrid::adapt()
   // ////////////////////////////////////
   setIndices();
 
-  return changedGrid;
+  return refinedGrid;
 }
 
 bool Dune::OneDGrid::preAdapt()
@@ -584,7 +583,7 @@ bool Dune::OneDGrid::preAdapt()
   Codim<0>::LeafIterator eEndIt = leafend<0>();
 
   for (; eIt!=eEndIt; ++eIt)
-    if (getRealImplementation(*eIt).target_->markState_ != OneDEntityImp<1>::DO_NOTHING)
+    if (getRealImplementation(*eIt).target_->markState_ == OneDEntityImp<1>::COARSEN)
       return true;
 
   return false;
@@ -595,7 +594,10 @@ void Dune::OneDGrid::postAdapt()
   for (int i=0; i<=maxLevel(); i++) {
     OneDGridList<OneDEntityImp<1> >::iterator eIt;
     for (eIt = elements[i].begin(); eIt!=elements[i].end(); eIt = eIt->succ_)
+    {
+      eIt->isNew_ = false ;
       eIt->markState_ = OneDEntityImp<1>::DO_NOTHING;
+    }
 
   }
 
@@ -652,6 +654,9 @@ bool Dune::OneDGrid::mark(int refCount,
 bool Dune::OneDGrid::mark(int refCount,
                           const Codim<0>::Entity & e )
 {
+  // don't mark non-leaf entities
+  if( ! e.isLeaf() ) return false ;
+
   if (refCount < 0) {
 
     if (getRealImplementation(e).target_->level_ == 0)
