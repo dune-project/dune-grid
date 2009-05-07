@@ -377,10 +377,13 @@ namespace Dune
     /** \copydoc Dune::Grid::adapt() */
     bool adapt ();
 
+    /** \brief  @copydoc Dune::Grid::adapt()
+     *  \param  handle  handler for restriction and prolongation operations
+     *                  which is a model of the AdaptDataHandleInterface class
+     */
     template< class DataHandle >
     bool adapt ( AdaptDataHandleInterface< This, DataHandle > &handle );
 
-    //! adapt method with DofManager
     template< class DofManager, class RestrictProlongOperator >
     bool DUNE_DEPRECATED
     adapt ( DofManager &, RestrictProlongOperator &, bool verbose = false );
