@@ -325,8 +325,17 @@ namespace Dune
       }
     }
 
-    static
-    const GenericReferenceElementContainer & instance()
+    const value_type &simplex () const
+    {
+      return simplex_;
+    }
+
+    const value_type &cube () const
+    {
+      return cube_;
+    }
+
+    static const GenericReferenceElementContainer &instance ()
     {
       static GenericReferenceElementContainer inst;
       return inst;
@@ -372,8 +381,17 @@ namespace Dune
       }
     }
 
-    static
-    const GenericReferenceElementContainer & instance()
+    const value_type &simplex () const
+    {
+      return simplex_;
+    }
+
+    const value_type &cube () const
+    {
+      return cube_;
+    }
+
+    static const GenericReferenceElementContainer &instance ()
     {
       static GenericReferenceElementContainer inst;
       return inst;
@@ -401,8 +419,17 @@ namespace Dune
       return line_;
     }
 
-    static
-    const GenericReferenceElementContainer & instance()
+    const value_type &simplex () const
+    {
+      return line_;
+    }
+
+    const value_type &cube () const
+    {
+      return line_;
+    }
+
+    static const GenericReferenceElementContainer &instance ()
     {
       static GenericReferenceElementContainer inst;
       return inst;
@@ -425,6 +452,16 @@ namespace Dune
     const value_type &operator() ( const GeometryType &type ) const
     {
       assert( type.dim() == 0 );
+      return point_;
+    }
+
+    const value_type &simplex () const
+    {
+      return point_;
+    }
+
+    const value_type &cube () const
+    {
       return point_;
     }
 
@@ -452,10 +489,20 @@ namespace Dune
   template< class ctype, int dim >
   struct GenericReferenceElements
   {
-    static
-    const GenericReferenceElement< ctype, dim > & general(const GeometryType &type)
+    static const GenericReferenceElement< ctype, dim > &
+    general ( const GeometryType &type )
     {
-      return GenericReferenceElementContainer<ctype, dim>::instance().operator()(type);
+      return GenericReferenceElementContainer< ctype, dim >::instance() ( type );
+    }
+
+    static const GenericReferenceElement< ctype, dim > &simplex ()
+    {
+      return GenericReferenceElementContainer< ctype, dim >::instance().simplex();
+    }
+
+    static const GenericReferenceElement< ctype, dim > &cube ()
+    {
+      return GenericReferenceElementContainer< ctype, dim >::instance().cube();
     }
   };
 
