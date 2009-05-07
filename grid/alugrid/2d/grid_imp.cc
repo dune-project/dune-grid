@@ -222,8 +222,9 @@ namespace Dune {
 
   //! for grid identification
   template <int dim, int dimworld>
-  inline std::string ALU2dGrid<dim, dimworld> :: name () const {
-    return "ALUSimplexGrid";
+  inline std::string ALU2dGrid<dim, dimworld> :: name () const
+  {
+    return ( nrOfHangingNodes_ > 0 ) ? "ALUSimplexGrid" : "ALUConformGrid";
   }
 
   //! Return maximum level defined in this grid. Levels are numbered
@@ -234,11 +235,13 @@ namespace Dune {
   }
 
   template <int dim, int dimworld>
-  inline void ALU2dGrid<dim, dimworld>::calcMaxlevel() {
+  inline void ALU2dGrid<dim, dimworld>::calcMaxlevel()
+  {
     maxLevel_ = 0;
-    ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk(mesh());
-    for( walk->first() ; ! walk->done() ; walk->next()) {
-      //Element & tr = walk->getitem();
+    // walk the leaf level and take maximum as maxLevel
+    ALU2DSPACE Listwalkptr <ALU2DSPACE Hmesh_basic::helement_t > walk( mesh() );
+    for( walk->first() ; ! walk->done() ; walk->next())
+    {
       if(walk->getitem().level() > maxLevel_ )
         maxLevel_ = walk->getitem().level();
     }
