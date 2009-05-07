@@ -150,7 +150,7 @@ namespace Dune
     IdType operator() ( const Element &e, int i, unsigned int codim ) const
     {
       assert( codim <= dimension );
-      return caller_[ codim ]( idSet_, e, i );
+      return caller_[ codim ]->subId( idSet_, e, i );
     }
 
   private:
