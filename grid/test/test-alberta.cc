@@ -27,7 +27,7 @@
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
 #include "checkiterators.cc"
-
+#include "checkadaptation.cc"
 
 
 template <class GridType >
@@ -86,13 +86,16 @@ try {
   filename << "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
 
   std::cout << std::endl << GridType::typeName() << " with grid file: " << filename.str() << std::endl << std::endl;
+
+  // extra-environment to check destruction
   {
     factorEpsilon = 5e2;
 
     Dune::GridPtr<GridType> gridPtr(filename.str());
     GridType & grid = *gridPtr;
 
-    // extra-environment to check destruction
+    // check adaptation interface
+    checkAdaptation( grid );
 
     std::cout << ">>> Checking macro grid..." << std::endl;
     gridcheck(grid); // check macro grid

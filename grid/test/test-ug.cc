@@ -18,6 +18,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkadaptation.cc"
 
 using namespace Dune;
 
@@ -161,6 +162,12 @@ void generalTests(bool greenClosure)
     grid2d->setClosureType(UGGrid<2>::NONE);
     grid3d->setClosureType(UGGrid<3>::NONE);
   }
+
+  // check adaptation interface
+  checkAdaptation( *grid2d );
+
+  // check adaptation interface
+  checkAdaptation( *grid3d );
 
   // check macro grid
   gridcheck(*grid2d);

@@ -58,7 +58,8 @@ inline Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     localIdSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
-    someElementHasBeenMarkedForRefinement_(false)
+    someElementHasBeenMarkedForRefinement_(false),
+    someElementHasBeenMarkedForCoarsening_(false)
 {
   heapsize = heapSize;
 
@@ -349,7 +350,7 @@ bool Dune::UGGrid < dim >::mark(int refCount,
                                       0)      // Irrelevant if refinement rule is not BLUE
         ) DUNE_THROW(GridError, "UG" << dim << "d::MarkForRefinement returned error code!");
 
-    someElementHasBeenMarkedForRefinement_ = true;
+    someElementHasBeenMarkedForCoarsening_ = true;
     return true;
   } else
     DUNE_THROW(GridError, "UGGrid only supports refCount values -1, 0, and 1 for mark()!");
@@ -413,7 +414,7 @@ int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity&
 template <int dim>
 bool Dune::UGGrid <dim>::preAdapt()
 {
-  return someElementHasBeenMarkedForRefinement_;
+  return someElementHasBeenMarkedForCoarsening_ ;
 }
 
 template < int dim >
@@ -447,10 +448,12 @@ bool Dune::UGGrid < dim >::adapt()
   // Renumber everything
   setIndices();
 
-  someElementHasBeenMarkedForRefinement_ = false;
-
+  // this seems not to work
   // Return true iff the grid hierarchy changed
-  return !(bool)multigrid_->status;
+  //!(bool)multigrid_->status;
+
+  // grid has changed if at least one element was marked for refinement
+  return someElementHasBeenMarkedForRefinement_;
 }
 
 template <int dim>
@@ -465,6 +468,10 @@ void Dune::UGGrid <dim>::postAdapt()
       UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
   }
+
+  // reset marker flags
+  someElementHasBeenMarkedForRefinement_ = false;
+  someElementHasBeenMarkedForCoarsening_ = false;
 }
 
 template < int dim >

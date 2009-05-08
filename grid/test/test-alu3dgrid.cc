@@ -14,6 +14,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
+#include "checkadaptation.cc"
 
 using namespace Dune;
 
@@ -127,6 +128,9 @@ void checkLevelIndexNonConform(GridType & grid)
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
 {
+  // check adaptation interface
+  checkAdaptation( grid );
+
   // be careful, each global refine create 8 x maxlevel elements
   gridcheck(grid);
   for(int i=0; i<mxl; i++) {

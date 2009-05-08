@@ -12,6 +12,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkadaptation.cc"
 
 int main () try
 {
@@ -31,6 +32,9 @@ int main () try
 
     // check macro grid
     gridcheck(grid);
+
+    // check adaptation interface
+    checkAdaptation( grid );
 
     // create hybrid grid
     grid.mark(1, * grid.leafbegin<0>());

@@ -98,7 +98,7 @@ test_dgfalu_uggrid_combination_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRI
 test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
 
 ## distribution tarball
-SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc
+SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checkadaptation.cc
 
 GRIDFILES = \
   simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
