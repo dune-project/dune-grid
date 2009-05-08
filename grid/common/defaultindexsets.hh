@@ -16,7 +16,7 @@
 /** @file
    @author Robert Kloefkorn
    @brief Provides default index set implementations for Level- and
-   LeafIndexsets used by ALUGrid.
+   LeafIndexsets used by AlbertaGrid and ALUGrid.
  */
 
 namespace Dune {
