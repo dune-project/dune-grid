@@ -13,6 +13,15 @@ namespace Dune
   // GenericReferenceElement
   // -----------------------
 
+  /** \class GenericReferenceElement
+   *  \ingroup GridGenericReferenceElements
+   *  \brief generic reference element
+   *
+   *  \tparam ctype  field type for vectors
+   *  \tparam dim    dimension of the reference element
+   *
+   *  \seealso Dune::ReferenceElement
+   */
   template< class ctype, int dim >
   class GenericReferenceElement
   {
@@ -45,9 +54,11 @@ namespace Dune
     };
 
   public:
+    /** \brief Collection of types depending on the codimension */
     template< int codim >
     struct Codim
     {
+      //! type of mapping embedding a subentity into the reference element
       typedef GenericGeometry::HybridMapping< dim-codim, GeometryTraits > Mapping;
     };
 
@@ -64,30 +75,83 @@ namespace Dune
     MappingsTable mappings_;
 
   public:
+    /** \brief number of subentities of codimension c
+     *
+     *  \param[in]  c  codimension whose size is desired
+     */
     int size ( int c ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ].size();
     }
 
+    /** \brief number of subentities of codimension cc of subentity (i,c)
+     *
+     *  Denote by E the i-th subentity of codimension c of the current
+     *  reference element. This method returns the number of subentities
+     *  of codimension cc of the current reference element, that are also
+     *  a subentity of E.
+     *
+     *  \param[in]  i   number of subentity E (0 <= i < size( c ))
+     *  \param[in]  c   codimension of subentity E
+     *  \param[in]  cc  codimension whose size is desired (c <= cc <= dim)
+     */
     int size ( int i, int c, int cc ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].size( cc );
     }
 
+    /** \brief obtain number of ii-th subentity with codim cc of (i,c)
+     *
+     *  Denote by E the i-th subentity of codimension c of the current
+     *  reference element. And denote by S the ii-th subentity of codimension
+     *  (cc-c) of E. Then, S is a subentity of codimension c of the current
+     *  reference element. This method returns the number of S with respect
+     *  to the current reference element.
+     *
+     *  \param[in]  i   number of subentity E (0 <= i < size( c ))
+     *  \param[in]  c   codimension of subentity E
+     *  \param[in]  ii  number of subentity S (with respect to E)
+     *  \param[in]  cc  codimension of subentity S (c <= cc <= dim)
+     */
     int subEntity ( int i, int c, int ii, int cc ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].number( ii, cc );
     }
 
+    /** \brief position of the barycenter of entity (i,c)
+     *
+     *  Denote by E the i-th subentity of codimension c of the current
+     *  reference element. This method returns the center of gravity of E
+     *  within the current reference element.
+     *
+     *  \param[in]  i   number of subentity E (0 <= i < size( c ))
+     *  \param[in]  c   codimension of subentity E
+     */
     const FieldVector< ctype, dim > &position( int i, int c ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].position();
     }
 
+    /** \brief map a local coordinate on subentity (i,codim) into the reference
+     *         element
+     *
+     *  Denote by E the i-th subentity of codimension codim of the current
+     *  reference element. This method maps a point within the reference
+     *  element of E into the current reference element.
+     *
+     *  \tparam     codim  codimension of subentity E
+     *
+     *  \param[in]  local  coordinates of the point with respect to the reference
+     *                     element of E
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     *  \param[in]  c      codimension of subentity E
+     *
+     *  \note The runtime argument c is redundant and must equal codim.
+     */
     template< int codim >
     FieldVector< ctype, dim >
     global( const FieldVector< ctype, dim-codim > &local, int i, int c ) const
@@ -98,6 +162,19 @@ namespace Dune
       return mapping< codim >( i ).global( local );
     }
 
+    /** \brief map a local coordinate on subentity (i,codim) into the reference
+     *         element
+     *
+     *  Denote by E the i-th subentity of codimension codim of the current
+     *  reference element. This method maps a point within the reference
+     *  element of E into the current reference element.
+     *
+     *  \tparam     codim  codimension of subentity E
+     *
+     *  \param[in]  local  coordinates of the point with respect to the reference
+     *                     element of E
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     */
     template< int codim >
     FieldVector< ctype, dim >
     global( const FieldVector< ctype, dim-codim > &local, int i ) const
@@ -105,6 +182,21 @@ namespace Dune
       return mapping< codim >( i ).global( local );
     }
 
+    /** \brief obtain the embedding of subentity (i,codim) into the reference
+     *         element
+     *
+     *  Denote by E the i-th subentity of codimension codim of the current
+     *  reference element. This method returns a
+     *  \ref Dune::GenericGeometry::HybridMapping HybridMapping that maps
+     *  the reference element of E into the current reference element.
+     *
+     *  This mehtod can be used in a GenericGeometry to represent subentities
+     *  of the current reference element.
+     *
+     *  \tparam     codim  codimension of subentity E
+     *
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     */
     template< int codim >
     typename Codim< codim >::Mapping &mapping( int i ) const
     {
@@ -112,17 +204,32 @@ namespace Dune
       return *(mappings_[ codimVariable ][ i ]);
     }
 
+    /** \brief obtain the type of subentity (i,c)
+     *
+     *  Denote by E the i-th subentity of codimension c of the current
+     *  reference element. This method returns the GeometryType of E.
+     *
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     *  \param[in]  c      codimension of subentity E
+     */
     GeometryType type ( int i, int c ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].type();
     }
 
+    /** \brief obtain the volume of the reference element */
     double volume () const
     {
       return volume_;
     }
 
+    /** \brief initialize the reference element
+     *
+     *  Initialize the reference element for GeometryType (geoType, dim).
+     *
+     *  \tparam  geoType  basic geometry of the desired reference element
+     */
     template< GeometryType::BasicType geoType >
     void initialize ()
     {
