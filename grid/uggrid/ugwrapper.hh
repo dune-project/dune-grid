@@ -7,23 +7,6 @@
 /** \todo Here only to provide the constant DBL_EPSILON.  There's maybe a better way? */
 #include "float.h"
 
-#if defined ModelP && UG_DIM == 3
-
-/* This is a hack.  The following define is from the UG header pargm.h.  We can include that
-   header only once, because it contains dimension-independent stuff.  However, when we get
-   here for the second time for the 3d stuff, the macro PRIO2LISTPART has been undefined.
-   Hence we define it again here */
-
-/* define mapping from object priority to position in linked list */
-#define PRIO2LISTPART(listtype,prio)                                         \
-  ((listtype == ELEMENT_LIST) ? ((prio == PrioHGhost) ? 0 :                \
-                                 (prio == PrioVGhost) ? 0 : (prio == PrioVHGhost) ? 0 :               \
-                                 (prio == PrioMaster) ? 1 : -1) :                                 \
-   ((prio == PrioHGhost) ? 0 : (prio ==PrioVGhost) ? 0 :            \
-      (prio == PrioVHGhost) ? 0 :                                  \
-      (prio == PrioBorder) ? 2 : (prio == PrioMaster) ? 2 : -1))
-#endif
-
 namespace Dune {
 
   /** \brief Encapsulates a few UG methods and macros
