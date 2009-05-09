@@ -797,8 +797,16 @@ namespace Dune {
      */
     void globalRefine(int n);
 
+    /** \brief Save entire grid hierarchy to disk
+
+       Test implementation -- not working!
+     */
     void saveState(const std::string& filename) const;
 
+    /** \brief Read entire grid hierarchy from disk
+
+       Test implementation -- not working!
+     */
     void loadState(const std::string& filename);
 
   private:
@@ -807,12 +815,6 @@ namespace Dune {
 
     /** \brief The collective communication object. */
     CollectiveCommunication<UGGrid> ccobj_;
-
-    /** \brief The classes implementing the geometry of the boundary segments */
-    std::vector<const BoundarySegment<dim>*> boundarySegments_;
-
-    /** \brief Buffer for the vertices of each explicitly given boundary segment */
-    std::vector<array<unsigned int, dim*2-2> > boundarySegmentVertices_;
 
     /** \brief Recomputes entity indices after the grid was changed
         \param setLevelZero If this is false, level indices of the level 0 are not touched
@@ -841,17 +843,6 @@ namespace Dune {
     //! The type of grid refinement closure currently in use
     ClosureType closureType_;
 
-    /** \brief While inserting the elements this array records the number of
-        vertices of each element. */
-    std::vector<unsigned char> elementTypes_;
-
-    /** \brief While inserting the elements this array records the vertices
-        of the elements. */
-    std::vector<unsigned int> elementVertices_;
-
-    /** \brief Buffer the vertices until createend() is called */
-    std::vector<FieldVector<double, dim> > vertexPositions_;
-
     /** \brief Number of UGGrids currently in use.
      *
      * This counts the number of UGGrids currently instantiated.  All
@@ -872,8 +863,10 @@ namespace Dune {
      *
      * It is handed over to UG for each new multigrid.
      */
-    unsigned int heapsize;
+    unsigned int heapSize_;
 
+    /** \brief The classes implementing the geometry of the boundary segments */
+    std::vector<const BoundarySegment<dim>*> boundarySegments_;
 
   }; // end Class UGGrid
 

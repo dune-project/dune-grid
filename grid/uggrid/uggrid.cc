@@ -32,10 +32,9 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     localIdSet_(*this),
     refinementType_(LOCAL),
     closureType_(GREEN),
-    someElementHasBeenMarkedForRefinement_(false)
+    someElementHasBeenMarkedForRefinement_(false),
+    heapSize_(heapSize)
 {
-  heapsize = heapSize;
-
   if (numOfUGGrids==0) {
 
     // Init the UG system
@@ -668,7 +667,7 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
                                                                          (char*)type,
                                                                          (char*)problemName.c_str(),
                                                                          (char*)formatName.c_str(),
-                                                                         heapsize,
+                                                                         heapSize_,
                                                                          true, //force,
                                                                          true, //optimizedIO,
                                                                          false //autosave
@@ -680,7 +679,7 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
                                                                          (char*)type,
                                                                          (char*)problemName.c_str(),
                                                                          (char*)formatName.c_str(),
-                                                                         heapsize,
+                                                                         heapSize_,
                                                                          true, //force,
                                                                          true, //optimizedIO,
                                                                          false //autosave

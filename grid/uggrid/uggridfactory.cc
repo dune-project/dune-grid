@@ -87,7 +87,7 @@ template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertVertex(const Dune::FieldVector<typename Dune::GridFactory<Dune::UGGrid<dimworld> >::ctype,dimworld>& pos)
 {
-  grid_->vertexPositions_.push_back(pos);
+  vertexPositions_.push_back(pos);
 }
 
 template <int dimworld>
@@ -99,11 +99,11 @@ insertElement(const GeometryType& type,
     DUNE_THROW(GridError, "You cannot insert a " << type
                                                  << " into a UGGrid<" << dimworld << ">!");
 
-  int newIdx = grid_->elementVertices_.size();
+  int newIdx = elementVertices_.size();
 
-  grid_->elementTypes_.push_back(vertices.size());
+  elementTypes_.push_back(vertices.size());
   for (unsigned int i=0; i<vertices.size(); i++)
-    grid_->elementVertices_.push_back(vertices[i]);
+    elementVertices_.push_back(vertices[i]);
 
   if (type.isTriangle()) {
     // Everything alright
@@ -118,8 +118,8 @@ insertElement(const GeometryType& type,
                  << " have provided " << vertices.size() << " vertices!");
 
     // DUNE and UG numberings differ --> reorder the vertices
-    grid_->elementVertices_[newIdx+2] = vertices[3];
-    grid_->elementVertices_[newIdx+3] = vertices[2];
+    elementVertices_[newIdx+2] = vertices[3];
+    elementVertices_[newIdx+3] = vertices[2];
 
   } else if (type.isTetrahedron()) {
 
@@ -146,10 +146,10 @@ insertElement(const GeometryType& type,
                  << " have provided " << vertices.size() << " vertices!");
 
     // DUNE and UG numberings differ --> reorder the vertices
-    grid_->elementVertices_[newIdx+2] = vertices[3];
-    grid_->elementVertices_[newIdx+3] = vertices[2];
-    grid_->elementVertices_[newIdx+6] = vertices[7];
-    grid_->elementVertices_[newIdx+7] = vertices[6];
+    elementVertices_[newIdx+2] = vertices[3];
+    elementVertices_[newIdx+3] = vertices[2];
+    elementVertices_[newIdx+6] = vertices[7];
+    elementVertices_[newIdx+7] = vertices[6];
 
   } else {
     DUNE_THROW(GridError, "You cannot insert a " << type
@@ -177,7 +177,7 @@ insertBoundarySegment(const std::vector<unsigned int> vertices,
     segmentVertices[3] = vertices[2];
   }
 
-  grid_->boundarySegmentVertices_.push_back(segmentVertices);
+  boundarySegmentVertices_.push_back(segmentVertices);
 
   // Append boundary segment class to the boundary segment class list, so we can
   // delete them all in the destructor
@@ -204,12 +204,12 @@ createGrid()
   std::set<UGGridBoundarySegment<dimworld> > boundarySegments;
   typedef typename std::set<UGGridBoundarySegment<dimworld> >::iterator SetIterator;
 
-  BoundaryExtractor::detectBoundarySegments(grid_->elementTypes_, grid_->elementVertices_, boundarySegments);
+  BoundaryExtractor::detectBoundarySegments(elementTypes_, elementVertices_, boundarySegments);
   if (boundarySegments.size() == 0)
     DUNE_THROW(GridError, "Couldn't extract grid boundary.");
 
   std::vector<int> isBoundaryNode;
-  BoundaryExtractor::detectBoundaryNodes(boundarySegments, grid_->vertexPositions_.size(), isBoundaryNode);
+  BoundaryExtractor::detectBoundaryNodes(boundarySegments, vertexPositions_.size(), isBoundaryNode);
 
   dverb << boundarySegments.size() << " boundary segments were found!" << std::endl;
 
@@ -267,7 +267,7 @@ createGrid()
         inserted.  If not, undefined values are will be introduced. */
     int vertices_c_style[dimworld*2-2];
     for (int j=0; j<dimworld*2-2; j++)
-      vertices_c_style[j] = grid_->boundarySegmentVertices_[i][j];
+      vertices_c_style[j] = boundarySegmentVertices_[i][j];
 
     // Create dummy parameter ranges
     const double alpha[2] = {0, 0};
@@ -310,7 +310,7 @@ createGrid()
     UGGridBoundarySegment<dimworld> thisSegment;
     /** \todo Not nice: we need to copy because the array types are different */
     for (int j=0; j<2*dimworld-2; j++)
-      thisSegment[j] = grid_->boundarySegmentVertices_[i][j];
+      thisSegment[j] = boundarySegmentVertices_[i][j];
 
     if (boundarySegments.erase(thisSegment)==0)
       DUNE_THROW(GridError, "You have provided a boundary parametrization for"
@@ -346,7 +346,7 @@ createGrid()
       double segmentCoordinates[2][2];
       for (int j=0; j<thisSegment.numVertices(); j++)
         for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = grid_->vertexPositions_[thisSegment[j]][k];
+          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
       if (UG::D2::CreateLinearSegment(segmentName,
                                       1,               /*id of left subdomain */
@@ -363,7 +363,7 @@ createGrid()
       double segmentCoordinates[4][3];
       for (int j=0; j<thisSegment.numVertices(); j++)
         for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = grid_->vertexPositions_[thisSegment[j]][k];
+          segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
       if (UG::D3::CreateLinearSegment(segmentName,
                                       1,               /*id of left subdomain */
@@ -400,7 +400,7 @@ createGrid()
 
   sprintf(newArgs[1], "b %s_Problem", grid_->name_.c_str());
   sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
-  sprintf(newArgs[3], "h %dM", grid_->heapsize);
+  sprintf(newArgs[3], "h %dM", grid_->heapSize_);
 
   if (UG_NS<dimworld>::NewCommand(4, newArgs))
     DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
@@ -441,16 +441,16 @@ createGrid()
   //   Actually insert the interior vertices
   // ////////////////////////////////////////////////
   int nodeCounter = noOfBNodes;
-  for (size_t i=0; i<grid_->vertexPositions_.size(); i++) {
+  for (size_t i=0; i<vertexPositions_.size(); i++) {
     if (isBoundaryNode[i] != -1)
       continue;
-    if (UG_NS<dimworld>::InsertInnerNode(grid_->multigrid_->grids[0], &((grid_->vertexPositions_[i])[0])) == NULL)
+    if (UG_NS<dimworld>::InsertInnerNode(grid_->multigrid_->grids[0], &((vertexPositions_[i])[0])) == NULL)
       DUNE_THROW(GridError, "Inserting a vertex into UGGrid failed!");
 
     isBoundaryNode[i] = nodeCounter++;
   }
 
-  grid_->vertexPositions_.resize(0);
+  vertexPositions_.resize(0);
 
   // ////////////////////////////////////////////////
   //   Actually insert all the elements
@@ -461,19 +461,19 @@ createGrid()
     nodePointers[theNode->id] = theNode;
 
   int idx = 0;
-  for (size_t i=0; i<grid_->elementTypes_.size(); i++) {
+  for (size_t i=0; i<elementTypes_.size(); i++) {
 
-    const typename UG_NS<dimworld>::Node* vertices[grid_->elementTypes_[i]];
-    for (size_t j=0; j<grid_->elementTypes_[i]; j++)
-      vertices[j] = nodePointers[isBoundaryNode[grid_->elementVertices_[idx++]]];
+    const typename UG_NS<dimworld>::Node* vertices[elementTypes_[i]];
+    for (size_t j=0; j<elementTypes_[i]; j++)
+      vertices[j] = nodePointers[isBoundaryNode[elementVertices_[idx++]]];
 
-    if (InsertElement(grid_->multigrid_->grids[0], grid_->elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(vertices),NULL,NULL,NULL)==NULL)
+    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],const_cast<typename UG_NS<dimworld>::Node**>(vertices),NULL,NULL,NULL)==NULL)
       DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
   }
 
   // Not needed any more
-  grid_->elementTypes_.resize(0);
-  grid_->elementVertices_.resize(0);
+  elementTypes_.resize(0);
+  elementVertices_.resize(0);
 
   // Complete the UG-internal grid data structure
   if (CreateAlgebra(grid_->multigrid_) != UG_NS<dimworld>::GM_OK)
@@ -540,10 +540,10 @@ createBegin()
   //   Clear all buffers used during coarse grid creation
   // //////////////////////////////////////////////////////////
   grid_->boundarySegments_.resize(0);
-  grid_->boundarySegmentVertices_.resize(0);
-  grid_->elementTypes_.resize(0);
-  grid_->elementVertices_.resize(0);
-  grid_->vertexPositions_.resize(0);
+  boundarySegmentVertices_.resize(0);
+  elementTypes_.resize(0);
+  elementVertices_.resize(0);
+  vertexPositions_.resize(0);
 
   // //////////////////////////////////////////////////////////
   //   Delete the UG domain, if it exists

@@ -210,6 +210,20 @@ namespace Dune {
     // grid was handed over from the outside
     bool factoryOwnsGrid_;
 
+    /** \brief Buffer for the vertices of each explicitly given boundary segment */
+    std::vector<array<unsigned int, dimworld*2-2> > boundarySegmentVertices_;
+
+    /** \brief While inserting the elements this array records the number of
+        vertices of each element. */
+    std::vector<unsigned char> elementTypes_;
+
+    /** \brief While inserting the elements this array records the vertices
+        of the elements. */
+    std::vector<unsigned int> elementVertices_;
+
+    /** \brief Buffer the vertices until createend() is called */
+    std::vector<FieldVector<double, dimworld> > vertexPositions_;
+
   };
 
 }
