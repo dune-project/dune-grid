@@ -636,17 +636,17 @@ void Dune::UGGrid<dim>::saveState(const std::string& filename) const
 
   if (dim==2)
     UG::D2::SaveMultiGrid((UG::D2::multigrid*)multigrid_,
-                          (char*)filename.c_str(),
-                          (char*)type,
-                          (char*)comment,
+                          filename.c_str(),
+                          type,
+                          comment,
                           0,      // autosave
                           0       // rename
                           );
   else
     UG::D3::SaveMultiGrid((UG::D3::multigrid*)multigrid_,
-                          (char*)filename.c_str(),
-                          (char*)type,
-                          (char*)comment,
+                          filename.c_str(),
+                          type,
+                          comment,
                           0,      // autosave
                           0       // rename
                           );
@@ -662,11 +662,11 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
 
   if (dim==2) {
     std::string formatName = "DuneFormat2d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid((char*)name_.c_str(),
-                                                                         (char*)filename.c_str(),
-                                                                         (char*)type,
-                                                                         (char*)problemName.c_str(),
-                                                                         (char*)formatName.c_str(),
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid(name_.c_str(),
+                                                                         filename.c_str(),
+                                                                         type,
+                                                                         problemName.c_str(),
+                                                                         formatName.c_str(),
                                                                          heapSize_,
                                                                          true, //force,
                                                                          true, //optimizedIO,
@@ -674,11 +674,11 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
                                                                          );
   } else {
     std::string formatName = "DuneFormat3d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid((char*)name_.c_str(),
-                                                                         (char*)filename.c_str(),
-                                                                         (char*)type,
-                                                                         (char*)problemName.c_str(),
-                                                                         (char*)formatName.c_str(),
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid(name_.c_str(),
+                                                                         filename.c_str(),
+                                                                         type,
+                                                                         problemName.c_str(),
+                                                                         formatName.c_str(),
                                                                          heapSize_,
                                                                          true, //force,
                                                                          true, //optimizedIO,
