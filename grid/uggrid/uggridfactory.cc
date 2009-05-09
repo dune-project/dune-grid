@@ -7,6 +7,16 @@
 
 using namespace Dune;
 
+/* The following three methods are the ones that UG calls to know about the geometry
+   of the boundary.  UG expects one static method for each coarse grid boundary segment.
+   In order to let separate BoundarySegment objects handle the calls we let UG pass
+   them along as 'data'.
+
+   \param data The BoundarySegment object
+   \param param Local coordinates on the boundary segment
+   \param result The world coordinates of the corresponding boundary point
+ */
+
 static int boundarySegmentWrapper2d(void *data, double *param, double *result)
 {
   const BoundarySegment<2>* boundarySegment = static_cast<const BoundarySegment<2>*>(data);
