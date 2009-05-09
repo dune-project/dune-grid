@@ -137,15 +137,9 @@ public:
 
     // Transform local to barycentric coordinates
     double barCoords[2];
-    const double A[4] = {-1, 1, 0, -1};
-    const double b[2] = {1, 0};
 
-    // barCoords = A*param + b;
-    barCoords[0] = A[0]*local[0] + A[2]*local[1];
-    barCoords[1] = A[1]*local[0] + A[3]*local[1];
-
-    barCoords[0] += b[0];
-    barCoords[1] += b[1];
+    barCoords[0] = 1 - local[0] - local[1];
+    barCoords[1] = local[0];
 
     psurface::CallPositionParametrizationForDomain(domain_, triangle_, barCoords, &result[0]);
 

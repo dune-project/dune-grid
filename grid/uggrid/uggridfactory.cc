@@ -19,7 +19,26 @@ static int boundarySegmentWrapper2d(void *data, double *param, double *result)
   return 0;
 }
 
-static int boundarySegmentWrapper3d(void *data, double *param, double *result)
+static int boundarySegmentWrapper3dTriangle(void *data, double *param, double *result)
+{
+  const BoundarySegment<3>* boundarySegment = static_cast<const BoundarySegment<3>*>(data);
+
+  // UG produces coordinates in the triangle (0,0) -- (1,0) -- (1,1),
+  // but we want them to be in (0,0) -- (1,0) -- (0,1)
+  FieldVector<double, 2> local;
+  local[0] = param[0]-param[1];
+  local[1] = param[1];
+
+  FieldVector<double, 3> global = (*boundarySegment)(local);
+
+  result[0] = global[0];
+  result[1] = global[1];
+  result[2] = global[2];
+
+  return 0;
+}
+
+static int boundarySegmentWrapper3dQuad(void *data, double *param, double *result)
 {
   const BoundarySegment<3>* boundarySegment = static_cast<const BoundarySegment<3>*>(data);
 
@@ -259,6 +278,17 @@ createGrid()
     if(sprintf(segmentName, "BS %d", i) < 0)
       DUNE_THROW(GridError, "sprintf returned error code!");
 
+    typedef int (*BndSegFuncPtr)(void *, double *,double *);
+    BndSegFuncPtr boundarySegmentWrapper;
+    if (dimworld==2)
+      boundarySegmentWrapper = boundarySegmentWrapper2d;
+    else {
+      if (vertices_c_style[3]==-1)        // triangular face
+        boundarySegmentWrapper = boundarySegmentWrapper3dTriangle;
+      else
+        boundarySegmentWrapper = boundarySegmentWrapper3dQuad;
+    }
+
     // Actually create the segment
     if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                     // internal name of the boundary segment
                                                1,                          //  id of left subdomain
@@ -268,9 +298,7 @@ createGrid()
                                                vertices_c_style,
                                                alpha,
                                                beta,
-                                               (dimworld==2)
-                                               ? boundarySegmentWrapper2d
-                                               : boundarySegmentWrapper3d,
+                                               boundarySegmentWrapper,
                                                const_cast<BoundarySegment<dimworld>*>(grid_->boundarySegments_[i]))==NULL) {
       DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
     }
