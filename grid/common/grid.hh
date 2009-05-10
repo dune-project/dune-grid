@@ -1064,7 +1064,7 @@ namespace Dune {
 
        \return int adaptation mark, here the default value 0 is returned
      */
-    int getMark(const typename Traits :: template Codim<0>::Entity &) const
+    int getMark ( const typename Traits::template Codim< 0 >::Entity &e ) const
     {
       return 0;
     }
