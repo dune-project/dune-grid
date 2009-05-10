@@ -35,6 +35,7 @@ namespace Dune
     // HybridMappingBase
     // -----------------
 
+    /** \cond */
     template< unsigned int dim, class GeometryTraits, unsigned int codim = dim >
     class HybridMappingBase;
 
@@ -60,6 +61,7 @@ namespace Dune
       virtual HybridMapping< dim, GeometryTraits > *
       trace ( Int2Type< 0 >, unsigned int i ) const = 0;
     };
+    /** \endcond */
 
 
 
@@ -68,8 +70,10 @@ namespace Dune
 
     template< unsigned int dim, class GeometryTraits >
     class HybridMapping
+    /** \cond */
       : public virtual HybridMappingBase< dim, GeometryTraits >,
         public SmallObject
+        /** \endcond */
     {
       typedef HybridMapping< dim, GeometryTraits > This;
 
@@ -144,6 +148,7 @@ namespace Dune
     // VirtualMappingBase
     // ------------------
 
+    /** \cond */
     template< class Topology, class GeometryTraits, unsigned int codim = Topology :: dimension >
     class VirtualMappingBase;
 
@@ -181,13 +186,16 @@ namespace Dune
         return impl.template trace< 0 >( i );
       }
     };
+    /** \endcond */
 
 
 
     template< class Topology, class GeometryTraits >
     class VirtualMapping
       : public HybridMapping< Topology :: dimension, GeometryTraits >,
+        /** \cond */
         public VirtualMappingBase< Topology, GeometryTraits >
+        /**\endcond*/
     {
       typedef HybridMapping< Topology :: dimension, GeometryTraits > Base;
       typedef VirtualMapping< Topology, GeometryTraits > This;
