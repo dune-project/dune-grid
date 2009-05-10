@@ -223,9 +223,9 @@ namespace Dune
     ~AlbertaGridEntity() {};
 
     //! Constructor, real information is set via setElInfo method
-    AlbertaGridEntity ( const GridImp &grid );
+    explicit AlbertaGridEntity ( const GridImp &grid );
 
-    AlbertaGridEntity(const AlbertaGridEntity & org);
+    AlbertaGridEntity ( const This &other );
 
     //! level of this element
     int level () const;
