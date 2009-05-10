@@ -148,9 +148,10 @@ namespace Dune
        The result of calling this method with an entity that is not
        in the index set is undefined.
 
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \tparam codim Codimension of the subentity we are interested in
+       \param[in]  e      reference to codim 0 entity
+       \param[in]  i      number subentity of e within the codimension
+       \param[in]  codim  codimension of the subentity we're interesed in
+
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     /*
