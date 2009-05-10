@@ -7,7 +7,10 @@
 #if defined ENABLE_UG
 #include <dune/grid/uggrid.hh>
 #include "dgfparser.hh"
-namespace Dune {
+namespace Dune
+{
+
+  /** \cond */
   template <int dim>
   class MacroGrid::Impl<UGGrid<dim> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -20,6 +23,8 @@ namespace Dune {
     static int refineStepsForHalf() {return 1;}
     static double refineWeight() {return -1.;}
   };
+  /** \endcond */
+
 }
 #include "dgfug.cc"
 #endif
