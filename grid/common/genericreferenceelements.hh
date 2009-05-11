@@ -136,6 +136,25 @@ namespace Dune
       return info_[ c ][ i ].position();
     }
 
+    /** \brief check if a local coordinate is in the reference element of
+     *         subentity (i,codim)
+     *
+     *  Denote by E the i-th subentity of codimension codim of the current
+     *  reference element. This method return true, if the given local
+     *  coordinate is within the reference element for entity E.
+     *
+     *  \tparam     codim  codimension of subentity E
+     *
+     *  \param[in]  local  coordinates of the point with respect to the
+     *                     reference element of E
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     */
+    template< int codim >
+    bool checkInside ( const FieldVector< ctype, dim-codim > &local, int i ) const
+    {
+      return mapping< codim >( i ).checkInside( local );
+    }
+
     /** \brief map a local coordinate on subentity (i,codim) into the reference
      *         element
      *
