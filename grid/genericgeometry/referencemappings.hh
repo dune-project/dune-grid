@@ -101,7 +101,7 @@ namespace Dune
       explicit CornerStorage ( const Int2Type< 0 > & )
       {
         for( unsigned int i = 0; i < size; ++i )
-          coords_[ i ] = RefDomain::template corner< ctype >( i );
+          RefDomain::template corner< ctype >( i, coords_[ i ] );
       }
 
       template< class Mapping, unsigned int codim >
