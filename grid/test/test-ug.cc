@@ -164,10 +164,10 @@ void generalTests(bool greenClosure)
   }
 
   // check adaptation interface
-  checkAdaptation( *grid2d );
+  checkAdaptation( *grid2d , greenClosure );
 
   // check adaptation interface
-  checkAdaptation( *grid3d );
+  checkAdaptation( *grid3d , greenClosure );
 
   // check macro grid
   gridcheck(*grid2d);

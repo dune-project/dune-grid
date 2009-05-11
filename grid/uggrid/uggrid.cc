@@ -414,7 +414,20 @@ int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity&
 template <int dim>
 bool Dune::UGGrid <dim>::preAdapt()
 {
-  return someElementHasBeenMarkedForCoarsening_ ;
+  if( closureType_ == GREEN )
+  {
+    // when conforming refinement is enabled
+    // green closure has to be removed although not
+    // marked for coarsening
+    return someElementHasBeenMarkedForCoarsening_ ||
+           someElementHasBeenMarkedForRefinement_ ;
+  }
+  else
+  {
+    // in non-conforming meshes only elements marked for coarsening
+    // will be coarsened (hopefully)
+    return someElementHasBeenMarkedForCoarsening_;
+  }
 }
 
 template < int dim >

@@ -210,8 +210,6 @@ namespace Dune {
   inline void ALU3dGridEntity<0,dim,GridImp> ::
   reset (int walkLevel )
   {
-    // assert( walkLevel_ >= 0 );
-
     item_       = 0;
     ghost_      = 0;
     builtgeometry_ = false;
