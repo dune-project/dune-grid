@@ -44,6 +44,9 @@ namespace Dune
     {
       typedef HybridMapping< dim, GeometryTraits > Mapping;
 
+    public:
+      virtual ~HybridMappingBase() {}
+
     protected:
       using HybridMappingBase< dim, GeometryTraits, codim-1 > :: trace;
 
@@ -56,6 +59,8 @@ namespace Dune
     {
       typedef HybridMapping< dim, GeometryTraits > Mapping;
 
+    public:
+      virtual ~HybridMappingBase() {}
     protected:
       virtual HybridMapping< dim, GeometryTraits > *
       trace ( Int2Type< 0 >, unsigned int i ) const = 0;
