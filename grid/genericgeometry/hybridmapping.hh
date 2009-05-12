@@ -6,19 +6,13 @@
 #include <dune/common/smallobject.hh>
 
 #include <dune/grid/genericgeometry/geometrytraits.hh>
+#include <dune/grid/genericgeometry/cachedmapping.hh>
 
 namespace Dune
 {
 
   namespace GenericGeometry
   {
-
-    // External Forward Declarations
-    // -----------------------------
-
-    template< class Topology, class GeometryTraits >
-    class CachedMapping;
-
 
 
     // Internal Forward Declarations

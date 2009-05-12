@@ -42,17 +42,17 @@ namespace Dune
       }
 
       template< int cd >
-      Element< cd > &operator[] ( const Int2Type< cd > codimVariable )
+      Element< cd > &operator[] ( const Int2Type< cd > &codimVariable )
       {
         return map_[ codimVariable ];
       }
 
-      const Element< codim > &operator[] ( const Int2Type< codim > codimVariable ) const
+      const Element< codim > &operator[] ( const Int2Type< codim > &codimVariable ) const
       {
         return element_;
       }
 
-      Element< codim > &operator[] ( const Int2Type< codim > codimVariable )
+      Element< codim > &operator[] ( const Int2Type< codim > &codimVariable )
       {
         return element_;
       }

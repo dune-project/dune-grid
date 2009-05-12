@@ -2,7 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_GENERICGEOMETRY_MAPPINGS_HH
 #define DUNE_GENERICGEOMETRY_MAPPINGS_HH
-
 #include <dune/common/smallobject.hh>
 
 #include <dune/grid/genericgeometry/misc.hh>
@@ -10,7 +9,6 @@
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
 #include <dune/grid/genericgeometry/mapping.hh>
-#include <dune/grid/genericgeometry/hybridmapping.hh>
 #include <dune/grid/genericgeometry/traceprovider.hh>
 
 namespace Dune
