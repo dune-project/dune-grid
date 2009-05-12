@@ -408,8 +408,6 @@ namespace Dune
       static const Flags foundName = 1 << 0;
       static const Flags foundPeriodic = 1 << 1;
       static const Flags foundOverlap = 1 << 2;
-      static const Flags foundClosure = 1 << 3;
-      static const Flags foundCopies = 1 << 4;
       static const Flags foundLongestEdge = 1 << 5;
 
     protected:
@@ -417,8 +415,6 @@ namespace Dune
       std::string name_; // name of the grid
       std::set<int> _periodic; // periodic grid
       int _overlap; // overlap for YaspGrid
-      bool _noClosure; // no closure for UGGrid
-      bool _noCopy; // no copies for UGGrid
       bool markLongestEdge_; // Mark longest edge for AlbertaGrid
 
     private:
@@ -462,28 +458,6 @@ namespace Dune
                 << "defaulting to 'ARBITRARY'." << std::endl;
         }
         return markLongestEdge_;
-      }
-
-      // returns true if no closure should be used for UGGrid
-      bool noClosure () const
-      {
-        if( (foundFlags_ & foundClosure) == 0 )
-        {
-          dwarn << "GridParameterBlock: Parameter 'closure' not specified, "
-                << "defaulting to 'GREEN'." << std::endl;
-        }
-        return _noClosure;
-      }
-
-      // returns true if no closure should be used for UGGrid
-      bool noCopy () const
-      {
-        if( (foundFlags_ & foundCopies) == 0 )
-        {
-          dwarn << "GridParameterBlock: Parameter 'copies' not specified, "
-                << "no copies will be generated." << std::endl;
-        }
-        return _noCopy;
       }
 
       // returns true if dimension is periodic

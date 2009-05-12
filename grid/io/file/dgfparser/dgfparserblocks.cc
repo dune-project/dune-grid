@@ -977,8 +977,6 @@ namespace Dune
         name_( "Unnamed Grid" ), // default value (used if name is empty)
         _periodic(),
         _overlap( 0 ),          // default value
-        _noClosure( false ),    // default value
-        _noCopy( true ),        // default value
         markLongestEdge_( false ) // default value
     {
       if( isempty() )
@@ -1041,39 +1039,6 @@ namespace Dune
           }
           foundFlags_ |= foundPeriodic;
         }
-      }
-
-      // check closure
-      if (findtoken("closure"))
-      {
-        std::string clo;
-        if(getnextentry(clo))
-        {
-          makeupcase(clo);
-          if(clo == "NONE")
-          {
-            _noClosure = true;
-          }
-        }
-        foundFlags_ |= foundClosure;
-      }
-
-      // check copies
-      if( findtoken( "copies" ) )
-      {
-        std::string clop;
-        if(getnextentry(clop))
-        {
-          makeupcase(clop);
-          if(clop == "NONE")
-          {
-            _noCopy = true;
-          }
-          else {
-            _noCopy = false;
-          }
-        }
-        foundFlags_ |= foundCopies;
       }
     }
 

@@ -25,7 +25,12 @@ namespace Dune {
 
       mg.setOrientation(0,1);
 
-      GridFactory<UGGrid<dim> > factory;
+      // get grid parameter block
+      dgf :: UGGridParameterBlock gridParam(gridin);
+
+      // create grid here to set heap size
+      // create grid factory (passed grid is returned by createGrid method)
+      GridFactory<UGGrid<dim> > factory( new UGGrid<dim> ( gridParam.heapSize() ) );
 
       for (int n=0; n<mg.nofvtx; n++)
       {
@@ -59,9 +64,6 @@ namespace Dune {
       }
 
       UGGrid<dim> *resultGrid = factory.createGrid();
-
-      // get grid parameter block
-      dgf :: GridParameterBlock gridParam(gridin, false);
 
       // set closure type to none if parameter say so
       if( gridParam.noClosure() )
