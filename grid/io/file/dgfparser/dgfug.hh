@@ -19,7 +19,7 @@ namespace Dune
     public:
       static const Flags foundClosure  = 1 << 3;
       static const Flags foundCopies   = 1 << 4;
-      static const Flags foundHeapSize = 1 << 4;
+      static const Flags foundHeapSize = 1 << 5;
 
     protected:
       bool _noClosure; // no closure for UGGrid
