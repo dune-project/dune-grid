@@ -221,9 +221,9 @@ namespace Dune
 
   public:
     typedef Dune::VTKFunction<Grid> VTKFunction;
+    typedef SmartPointer< Dune::VTKFunction<Grid> > VTKFunctionPtr;
 
   protected:
-    typedef SmartPointer< Dune::VTKFunction<Grid> > VTKFunctionPtr;
     typedef typename std::list<VTKFunctionPtr>::iterator FunctionIterator;
 
     class CellIterator : public GridCellIterator
