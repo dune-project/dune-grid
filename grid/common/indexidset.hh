@@ -120,7 +120,17 @@ namespace Dune
       return asImp().template index<cc>(e);
     }
 
-    /** @brief Map subentity of codim cc of codim 0 entity to index.
+    /**
+       \deprecated use subIndex without template parameter
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of subIndex (without template parameter) will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+       Map subentity of codim cc of codim 0 entity to index.
 
        The result of calling this method with an entity that is not
        in the index set is undefined.
@@ -380,7 +390,18 @@ namespace Dune
       return asImp().template id<cc>(e);
     }
 
-    //! Get id of subentity i of codim cc of a codim 0 entity.
+    /**
+       \deprecated use subId without template parameter
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of subId (without template parameter) will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+       Get id of subentity i of codim cc of a codim 0 entity.
+     */
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
