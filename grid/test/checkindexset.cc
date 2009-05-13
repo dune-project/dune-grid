@@ -46,14 +46,16 @@ namespace Dune
                         OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
                         MapType3 & vertexCoordsMap )
   {
-    GeometryType type = en.type();
-    assert( type == en.geometry().type() );
     enum { dim = EntityType::dimension };
     const int dimworld = GridType::dimensionworld;
     typedef typename EntityType::ctype coordType;
 
-    const ReferenceElement< coordType, dim > & refElem =
-      ReferenceElements< coordType, dim >::general(type);
+    const GeometryType type = en.type();
+    assert( type == en.geometry().type() );
+    const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
+
+    const ReferenceElement< coordType, dim > &refElem
+      = ReferenceElements< coordType, dim >::general( type );
 
 
     // check all subEntities of codimension  codim
@@ -84,20 +86,20 @@ namespace Dune
         std::vector<int> local (numSubEntities,-1);
         std::vector<int> global(numSubEntities,-1);
 
-        for(int j=0 ; j<numSubEntities; j++ )
-          local[j] = refElem.subEntity(subEntity , codim , j , dim );
-
+        for( int j = 0; j < numSubEntities; ++j )
+        {
+          const int k = refElem.subEntity( subEntity, codim, j, dim );
+          local[ j ] = Dune::GenericGeometry::MapNumberingProvider< dim >::template dune2generic< dim >( topologyId, k );
+        }
 
         sout << numSubEntities << " Vertices on subEntity<codim=" << codim << ">\n";
-        sout << "check suben [";
-        for(int j=0 ; j<numSubEntities-1; j++ )
-          sout << local[j] <<  ", ";
-        sout << local[numSubEntities-1] << "]\n";
+        sout << "check suben [" << local[ 0 ];
+        for( int j = 1; j < numSubEntities; ++j )
+          sout << ", " << local[ j ];
+        sout << "]" << std::endl;
 
-        for(int j=0 ; j<numSubEntities; j++ )
-        {
-          global[j] = lset.template subIndex<dim> ( en, local[j]);
-        }
+        for( int j = 0; j < numSubEntities; ++j )
+          global[ j ] = lset.template subIndex( en, local[ j ], dim );
 
         SubEntityKeyType globalSubEntity =
           SubEntityKeyType ( lset.template subIndex<codim>(en,subEntity),
@@ -122,8 +124,8 @@ namespace Dune
 
           {
             // get entity pointer of sub entity codim=dim (Vertex)
-            typedef typename GridType :: template Codim<dim> :: EntityPointer VertexPointerType;
-            VertexPointerType vxp = en.template entity<dim> (local[j]);
+            typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
+            VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
 
             FieldVector< coordType, dimworld > vx = vxp->geometry().corner( 0 );
             if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
