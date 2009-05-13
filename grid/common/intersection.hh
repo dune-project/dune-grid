@@ -249,6 +249,10 @@ namespace Dune
       return this->real.geometryInInside();
     }
 
+    /**
+       \deprecated use geometryInInside (renamed to improve consistency)
+       \brief please read the details
+     */
     const LocalGeometry& intersectionSelfLocal () const DUNE_DEPRECATED
     {
       return geometryInInside();
@@ -266,6 +270,10 @@ namespace Dune
       return this->real.geometryInOutside();
     }
 
+    /**
+       \deprecated use geometryInOutside (renamed to improve consistency)
+       \brief please read the details
+     */
     const LocalGeometry& intersectionNeighborLocal () const DUNE_DEPRECATED
     {
       return geometryInOutside();
@@ -281,6 +289,10 @@ namespace Dune
       return this->real.geometry();
     }
 
+    /**
+       \deprecated use geometry (renamed to improve consistency)
+       \brief please read the details
+     */
     const Geometry& intersectionGlobal () const DUNE_DEPRECATED
     {
       return geometry();
@@ -306,6 +318,17 @@ namespace Dune
       return this->real.indexInInside();
     }
 
+    /**
+       \deprecated use indexInInside (renamed to improve consistency)
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of indexInInside will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+     */
     int numberInSelf () const DUNE_DEPRECATED
     {
       const int number = indexInInside();
@@ -329,6 +352,17 @@ namespace Dune
       return this->real.indexInOutside();
     }
 
+    /**
+       \deprecated use indexInOutside (renamed to improve consistency)
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of indexInOutside will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+     */
     int numberInNeighbor () const
     {
       const int number = indexInOutside();
