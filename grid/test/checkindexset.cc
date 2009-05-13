@@ -74,11 +74,15 @@ namespace Dune
                  "wrong number of subEntities of codim " << codim);
     }
 
-    for(int subEntity = 0; subEntity < refElem.size(0,0,codim); subEntity++)
+    for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
-      typedef std::pair < int , GeometryType > SubEntityKeyType;
+      typedef std::pair< int, GeometryType > SubEntityKeyType;
+      typedef Dune::GenericGeometry::MapNumberingProvider< dim > MapNumbering;
+
+      const int duneSubEntity = MapNumbering::generic2dune( topologyId, subEntity, codim );
+
       {
-        int numSubEntities = refElem.size(subEntity,codim,dim);
+        int numSubEntities = refElem.size( duneSubEntity, codim, dim );
         // every entity have at least one vertex
         assert( numSubEntities > 0 );
 
@@ -88,12 +92,12 @@ namespace Dune
 
         for( int j = 0; j < numSubEntities; ++j )
         {
-          const int k = refElem.subEntity( subEntity, codim, j, dim );
-          local[ j ] = Dune::GenericGeometry::MapNumberingProvider< dim >::template dune2generic< dim >( topologyId, k );
+          const int k = refElem.subEntity( duneSubEntity, codim, j, dim );
+          local[ j ] = MapNumbering::dune2generic( topologyId, k, dim );
         }
 
-        sout << numSubEntities << " Vertices on subEntity<codim=" << codim << ">\n";
-        sout << "check suben [" << local[ 0 ];
+        sout << numSubEntities << " vertices on subEntity< codim = " << codim << " >" << std::endl;
+        sout << "check subentity [" << local[ 0 ];
         for( int j = 1; j < numSubEntities; ++j )
           sout << ", " << local[ j ];
         sout << "]" << std::endl;
@@ -101,25 +105,36 @@ namespace Dune
         for( int j = 0; j < numSubEntities; ++j )
           global[ j ] = lset.template subIndex( en, local[ j ], dim );
 
-        SubEntityKeyType globalSubEntity =
-          SubEntityKeyType ( lset.template subIndex<codim>(en,subEntity),
-                             (en.template entity<codim> (subEntity))->type());
-        // check equality of geometry types
-        assert( en.template entity<codim> (subEntity)->type() ==
-                en.template entity<codim> (subEntity)->geometry().type() );
+        typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
+        const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
+        if( lset.subIndex( en, subEntity, codim ) != lset.index( *subEntityPtr) )
+        {
+          std::cerr << "Index for subEntity does not match." << std::endl;
+          assert( lset.subIndex( en, subEntity, codim ) == lset.index( *subEntityPtr) );
+        }
+
+        SubEntityKeyType globalSubEntity( lset.index( *subEntityPtr ), subEntityPtr->type() );
         assert( globalSubEntity.first >= 0 );
-        sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << "\n";
+        sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << std::endl;
+
+        if( subEntityPtr->type() != subEntityPtr->geometry().type() )
+        {
+          std::cerr << "Geometry types for subEntity don't match." << std::endl;
+          assert( subEntityPtr->type() == subEntityPtr->geometry().type() );
+        }
+
+        // assert that all sub entities have the same level
+        // otherwise one of the theoretical conditions is violated
+        assert( subEntityPtr.level() == en.level() );
 
         sout << "Found global numbers of entity [ ";
-        for(int j=0 ; j<numSubEntities; j++ )
-        {
-          sout << global[j] << " ";
-        }
-        sout << "]\n";
+        for( int j = 0; j < numSubEntities; ++j )
+          sout << global[ j ] << " ";
+        sout << "]" << std::endl;
 
-        for(int j=0; j<numSubEntities; j++)
+        for( int j = 0; j < numSubEntities; ++j )
         {
-          const int tid = Dune::GenericGeometry::topologyId( refElem.type( subEntity, codim ) );
+          const int tid = Dune::GenericGeometry::topologyId( refElem.type( duneSubEntity, codim ) );
           const int gj = Dune::GenericGeometry::MapNumberingProvider< dim-codim >::template dune2generic< dim-codim >( tid, j );
 
           {
@@ -139,14 +154,7 @@ namespace Dune
             }
           }
 
-          typedef typename GridType :: template Codim<codim> :: EntityPointer SubEnPointerType;
-          SubEnPointerType subenp = en.template entity<codim> (subEntity);
-
-          // assert that all sub entities have the same level
-          // otherwise one of the theoretical conditions is violated
-          assert( subenp.level() == en.level() );
-
-          FieldVector< coordType, dimworld > vx = subenp->geometry().corner( gj );
+          FieldVector< coordType, dimworld > vx = subEntityPtr->geometry().corner( gj );
           if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
           {
             FieldVector<coordType,dimworld> vxcheck ( vertexCoordsMap[global[j]] );
