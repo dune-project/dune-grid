@@ -5,7 +5,7 @@ TESTPROGS = mcmgmappertest
 endif
 
 # which tests to run
-TESTS = test-quadrature referenceelementstest $(TESTPROGS)
+TESTS = test-quadrature referenceelementstest checkrefnumbering $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -21,6 +21,10 @@ mcmgmappertest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(UG
 
 referenceelementstest_SOURCES = referenceelementstest.cc
 referenceelementstest_LDADD = $(LOCAL_LIBS)
+
+checkrefnumbering_SOURCES = checkrefnumbering.cc
+checkrefnumbering_CPPFLAGS = $(AM_CPPFLAGS)
+checkrefnumbering_LDADD = $(LOCAL_LIBS)
 
 test_quadrature_SOURCES = test-quadrature.cc
 test_quadrature_LDADD = $(LOCAL_LIBS)
