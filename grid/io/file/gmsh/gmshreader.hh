@@ -19,7 +19,12 @@
 
 namespace Dune {
 
-  // Options for read operation
+  /**
+     \ingroup Gmesh
+     \{
+   */
+
+  //! Options for read operation
   struct GmshReaderOptions
   {
     enum GeometryOrder {
@@ -858,10 +863,18 @@ namespace Dune {
     }
   };
 
+  /**
+     \ingroup Gmesh
+
+     \brief Read Gmesh mesh file
+
+     Read a .msh file generated using Gmesh and construct a grid using the grid factory interface.
+   */
   template<typename GridType>
   class GmshReader
   {
   public:
+    /** \todo doc me */
     static GridType* read (const std::string& fileName,
                            bool verbose = true)
     {
@@ -871,6 +884,7 @@ namespace Dune {
       return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose);
     }
 
+    /** \todo doc me */
     static GridType* read (GridType& grid, const std::string& fileName,
                            bool verbose = true)
     {
@@ -881,6 +895,7 @@ namespace Dune {
     }
   };
 
+  /** \} */
 
 } // namespace Dune
 

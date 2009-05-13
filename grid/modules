@@ -94,6 +94,9 @@
         /** @defgroup VTK Visualization ToolKit (VTK)
             @ingroup IO */
         
+        /** @defgroup Gmesh Gmesh grid format
+            @ingroup IO */
+        
         /** @defgroup Gnuplot
             @ingroup IO */
         
