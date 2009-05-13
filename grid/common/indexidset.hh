@@ -278,24 +278,6 @@ namespace Dune
       return s;
     }
 
-#if 0
-    /** @brief Return true if the given entity is contained in \f$E\f$.
-     */
-    template<class EntityType>
-    bool contains (const EntityType& e) const
-    {
-      enum { cd = EntityType::codimension };
-      typedef typename Codim<cd>::template Partition<All_Partition>::Iterator IteratorType;
-      IteratorType iend = asImp().template end<cd,All_Partition>();
-      for (IteratorType it = asImp().template begin<cd,All_Partition>();
-           it != iend; ++it)
-      {
-        /** \todo this code is not really valid */
-        if (it->level() == e.level() && this->index(*it) == this->index(e)) return true;
-      }
-      return false;
-    }
-#endif
   private:
     //!  Barton-Nackman trick
     IndexSetImp& asImp () {return static_cast<IndexSetImp &> (*this);}
