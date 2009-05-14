@@ -73,11 +73,13 @@ namespace Dune
      @ingroup IndexIdSets
    */
   template<class GridImp, class IndexSetImp>
-  class IndexSet {
-  public:
-
+  struct IndexSet
+  {
     /** \brief The type used for the indices */
     typedef unsigned int IndexType;
+
+    /** \brief dimension of the grid (maximum allowed codimension) */
+    static const int dimension = remove_const< GridImp >::type::dimension;
 
     //===========================================================
     /** @name Index access from entity
@@ -250,12 +252,17 @@ namespace Dune
          @ingroup GridDevel
    */
   template<class GridImp, class IndexSetImp>
-  class IndexSetDefaultImplementation :
-    public IndexSet<GridImp,IndexSetImp>
+  class IndexSetDefaultImplementation
+    : public IndexSet< GridImp, IndexSetImp >
   {
-  public:
+    typedef IndexSet< GridImp, IndexSetImp > Base;
 
-    typedef typename IndexSet<GridImp,IndexSetImp>::IndexType IndexType;
+  public:
+    /** \brief The type used for the indices */
+    typedef typename Base::IndexType IndexType;
+
+    /** \brief dimension of the grid (maximum allowed codimension) */
+    static const int dimension = Base::dimension;
 
     /** @brief Map subentity of codim 0 entity to index.
 
@@ -269,7 +276,7 @@ namespace Dune
     IndexType subIndex (const typename remove_const<GridImp>::type::
                         Traits::template Codim<0>::Entity& e, int i) const
     {
-      return this->index( *(e.template entity<cc>(i) ));
+      return Base::index( *(e.template entity<cc>(i) ));
     }
 
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
@@ -278,21 +285,16 @@ namespace Dune
        \param[in] codim A valid codimension
                 \return    number of entities.
      */
-
-    IndexType size (int codim) const
+    IndexType size ( const int codim ) const
     {
-      int s=0;
-      const std::vector<GeometryType>& geomTs = asImp().geomTypes(codim);
-      for (unsigned int i=0; i<geomTs.size(); ++i)
-        s += asImp().size(geomTs[i]);
+      IndexType s( 0 );
+      const std::vector< GeometryType > &geomTs = Base::geomTypes( codim );
+      typedef typename std::vector< GeometryType >::const_iterator Iterator;
+      const Iterator end = geomTs.end();
+      for( Iterator it = geomTs.begin(); it != end; ++it )
+        s += Base::size( *it );
       return s;
     }
-
-  private:
-    //!  Barton-Nackman trick
-    IndexSetImp& asImp () {return static_cast<IndexSetImp &> (*this);}
-    //!  Barton-Nackman trick
-    const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
 
