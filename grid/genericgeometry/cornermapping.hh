@@ -170,7 +170,7 @@ namespace Dune
           for( unsigned int i = 0; i < dim-1; ++i )
           {
             Jtop[ i ] -= J[ i ];
-            norm += Jtop[ i ].two_norm2();
+            norm += two_norm2( Jtop[ i ] );
             J[ i ].axpy( xn, Jtop[ i ] );
           }
           affine &= (norm < 1e-12);
@@ -204,7 +204,7 @@ namespace Dune
           for( unsigned int i = 0; i < dim-1; ++i )
           {
             Jtop[ i ] -= Jbottom[ i ];
-            norm += Jtop[ i ].two_norm2();
+            norm += two_norm2( Jtop[ i ] );
             J[ i ].axpy( factor, Jbottom[ i ] );
             J[ i ].axpy( factor*xn, Jtop[ i ] );
           }
@@ -363,7 +363,7 @@ namespace Dune
 
           affine = BottomMapping :: Dphi_add( coords, x, factor, J );
           for( unsigned int i = 0; i < dimW; ++i )
-            q[ i ] = factor * (top[ i ] - bottom[ i ]);
+            q[ i ] += factor * (top[ i ] - bottom[ i ]);
         }
         else
         {

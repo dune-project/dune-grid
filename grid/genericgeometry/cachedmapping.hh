@@ -252,6 +252,7 @@ namespace Dune
 
       void computeJacobianInverseTransposed ( const LocalCoordType &x ) const
       {
+        // jacobian is computed here instead of using the cached value or returning the jacobian
         integrationElement_ = mapping_.jacobianInverseTransposed( x, jacobianInverseTransposed_ );
         integrationElementComputed_ = jacobianInverseTransposedComputed_ = affine();
       }

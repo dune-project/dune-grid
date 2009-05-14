@@ -448,6 +448,15 @@ namespace Dune
 
     };
 
+    template <class F,int dim>
+    F two_norm2(const Dune::FieldVector<F,dim> &f)
+    {
+      F norm(0);
+      for (int d=0; d<dim; ++d)
+        norm += f[d]*f[d];
+      return norm;
+    }
+
   }
 
 }

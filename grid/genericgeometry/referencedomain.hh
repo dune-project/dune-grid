@@ -210,7 +210,7 @@ namespace Dune
       {
         typedef ReferenceDomainBase< BaseTopology > BaseReferenceDomain;
         const ctype baseVolume = BaseReferenceDomain::template volume< ctype >();
-        return baseVolume / ctype( dimension );
+        return baseVolume / ctype( (unsigned int)(dimension) ); // linker problem when using dimension directly
       }
     };
     /** \endcond */
