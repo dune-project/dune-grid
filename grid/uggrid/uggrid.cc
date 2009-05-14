@@ -33,6 +33,7 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     refinementType_(LOCAL),
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
+    someElementHasBeenMarkedForCoarsening_(false),
     heapSize_(heapSize)
 {
   if (numOfUGGrids==0) {
@@ -80,7 +81,7 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
         newArgs[i] = (char*)::malloc(50*sizeof(char));
 
       sprintf(newArgs[0], "newformat DuneFormat3d" );
-      sprintf(newArgs[1], "V s1 : vt 1" );             // generates side vectors in 3D
+      sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
 
       if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
         DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned and error code!");
@@ -257,7 +258,7 @@ bool Dune::UGGrid < dim >::mark(int refCount,
                                       0)      // Irrelevant if refinement rule is not BLUE
         ) DUNE_THROW(GridError, "UG" << dim << "d::MarkForRefinement returned error code!");
 
-    someElementHasBeenMarkedForRefinement_ = true;
+    someElementHasBeenMarkedForCoarsening_ = true;
     return true;
   } else
     DUNE_THROW(GridError, "UGGrid only supports refCount values -1, 0, and 1 for mark()!");
@@ -307,7 +308,20 @@ int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity&
 template <int dim>
 bool Dune::UGGrid <dim>::preAdapt()
 {
-  return someElementHasBeenMarkedForRefinement_;
+  if( closureType_ == GREEN )
+  {
+    // when conforming refinement is enabled
+    // green closure has to be removed although not
+    // marked for coarsening
+    return someElementHasBeenMarkedForCoarsening_ ||
+           someElementHasBeenMarkedForRefinement_ ;
+  }
+  else
+  {
+    // in non-conforming meshes only elements marked for coarsening
+    // will be coarsened (hopefully)
+    return someElementHasBeenMarkedForCoarsening_;
+  }
 }
 
 template < int dim >
@@ -341,10 +355,11 @@ bool Dune::UGGrid < dim >::adapt()
   // Renumber everything
   setIndices(false, NULL);
 
-  someElementHasBeenMarkedForRefinement_ = false;
-
   // Return true iff the grid hierarchy changed
-  return !(bool)multigrid_->status;
+  //return !(bool)multigrid_->status;
+
+  // grid has changed if at least one element was marked for refinement
+  return someElementHasBeenMarkedForRefinement_;
 }
 
 template <int dim>
@@ -359,6 +374,10 @@ void Dune::UGGrid <dim>::postAdapt()
       UG_NS<dim>::WriteCW(getRealImplementation(*eIt).target_, UG_NS<dim>::NEWEL_CE, 0);
 
   }
+
+  // reset marker flags
+  someElementHasBeenMarkedForRefinement_ = false;
+  someElementHasBeenMarkedForCoarsening_ = false;
 }
 
 template < int dim >
@@ -444,7 +463,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
     if (UG_NS<dim>::myLevel(theElement) < maxl) {
 
       Get_Sons_of_ElementSide(theElement,
-                              side,             // Input element side number
+                              side,         // Input element side number
                               &Sons_of_Side,       // Number of topological sons of the element side
                               SonList,            // Output elements
                               SonSides,           // Output element side numbers

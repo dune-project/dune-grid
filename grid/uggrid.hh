@@ -855,9 +855,16 @@ namespace Dune {
     /** \brief Remember whether some element has been marked for refinement
         ever since the last call to adapt().
 
-        This is here to implement the return value of preAdapt().
+        This is here to implement the return value of adapt().
      */
     bool someElementHasBeenMarkedForRefinement_;
+
+    /** \brief Remember whether some element has been marked for coarsening
+        ever since the last call to adapt().
+
+        This is here to implement the return value of preAdapt().
+     */
+    bool someElementHasBeenMarkedForCoarsening_;
 
     /** \brief The size of UG's internal heap in megabytes
      *
