@@ -143,7 +143,7 @@ namespace Dune
 
     ~DynamicSubId ()
     {
-      for( int codim = 0; codim <= dimension; ++codim )
+      for( unsigned int codim = 0; codim <= dimension; ++codim )
         delete caller_[ codim ];
     }
 
