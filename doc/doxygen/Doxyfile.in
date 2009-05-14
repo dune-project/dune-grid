@@ -468,7 +468,7 @@ INPUT                  = @srcdir@/mainpage \
                          @top_srcdir@/grid/albertagrid \
                          @top_srcdir@/grid/albertagrid.hh \
                          @top_srcdir@/grid/alugrid.hh \
-                         @top_srcdir@/grid/alugrid/3d/alu3dgridfactory.hh \
+                         @top_srcdir@/grid/alugrid \
                          @top_srcdir@/grid/common \
                          @top_srcdir@/grid/io \
                          @top_srcdir@/grid/onedgrid.hh \
@@ -1028,7 +1028,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = DOXYGEN HAVE_MPI:=1 HAVE_ALBERTA:=1 DUNE_DEPRECATED:="/** \deprecated */"
+PREDEFINED             = DOXYGEN ENABLE_ALUGRID HAVE_MPI:=1 HAVE_ALBERTA:=1 DUNE_DEPRECATED:="/** \deprecated */"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
