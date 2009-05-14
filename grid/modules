@@ -57,25 +57,25 @@
         @brief A list of the different Implementations of the Dune Grid Interface
   */
   
-	/** @defgroup ALUCubeGrid
+	/** @defgroup ALUCubeGrid ALUCubeGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup ALUSimplexGrid
+	/** @defgroup ALUSimplexGrid ALUSimplexGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup ALUConformGrid
+	/** @defgroup ALUConformGrid ALUConformGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup OneDGrid
+	/** @defgroup OneDGrid OneDGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup SGrid
+	/** @defgroup SGrid SGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup UGGrid
+	/** @defgroup UGGrid UGGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup YaspGrid
+	/** @defgroup YaspGrid YaspGrid
 		@ingroup GridImplementations */
 
 	/** @defgroup AlbertaGrid AlbertaGrid
@@ -88,16 +88,19 @@
         /** @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
             @ingroup IO */
 
+        /** @defgroup DGFGridParameter DGF grid parameter for different grids 
+            @ingroup DuneGridFormatParser */
+
         /** @defgroup AmiraMesh AmiraMesh
             @ingroup IO */
 
         /** @defgroup VTK Visualization ToolKit (VTK)
             @ingroup IO */
         
-        /** @defgroup Gmesh Gmesh grid format
+        /** @defgroup Gnuplot Gnuplot
             @ingroup IO */
-        
-        /** @defgroup Gnuplot
+
+        /** @defgroup Gmesh Gmesh grid format
             @ingroup IO */
         
         /** @defgroup Grape Grape
