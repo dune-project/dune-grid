@@ -506,12 +506,6 @@ namespace Dune
        DGFGridParameter section. See also the \b examplegrid5.dgf file
        for examples.
 
-       The following options are implemented at the moment: \n
-       - For YaspGrid two options can be choosen: \n
-          1. \b overlap defining the overlap of the grid (default value is zero) \n
-          2. \b periodic defining which dimension should have periodic
-                boundaries, i.e. passing \b periodic 0 1 will set
-                periodic boundaries for x and y direction.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->

@@ -36,7 +36,7 @@ namespace Dune
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
     // get grid parameters
-    dgf::GridParameterBlock grdParam( gridin, true );
+    dgf::YaspGridParameterBlock grdParam( gridin );
 
     FieldVector<double,dim> lang;
     FieldVector<int,dim>    anz;

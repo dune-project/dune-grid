@@ -971,12 +971,10 @@ namespace Dune
     const char *GridParameterBlock :: ID = "GridParameter";
 
 
-    GridParameterBlock::GridParameterBlock ( std :: istream &in, const bool readOverlapAndBnd )
+    GridParameterBlock::GridParameterBlock ( std :: istream &in )
       : BasicBlock( in, ID ),
         foundFlags_( 0 ),
         name_( "Unnamed Grid" ), // default value (used if name is empty)
-        _periodic(),
-        _overlap( 0 ),          // default value
         markLongestEdge_( false ) // default value
     {
       if( isempty() )
@@ -1010,36 +1008,6 @@ namespace Dune
         foundFlags_ |= foundLongestEdge;
       }
 
-      if( readOverlapAndBnd )
-      {
-        // check overlap
-        if( findtoken( "overlap" ) )
-        {
-          int x;
-          if( getnextentry(x) ) _overlap = x;
-          else
-          {
-            dwarn << "GridParameterBlock: found keyword `overlap' but no value, defaulting to `" <<  _overlap  <<"' !\n";
-          }
-
-          if (_overlap < 0)
-          {
-            DUNE_THROW(DGFException,"Negative overlap specified!");
-          }
-          foundFlags_ |= foundOverlap;
-        }
-
-        // check periodic grid
-        if (findtoken("periodic"))
-        {
-          int x;
-          while (getnextentry(x))
-          {
-            _periodic.insert(x);
-          }
-          foundFlags_ |= foundPeriodic;
-        }
-      }
     }
 
 
