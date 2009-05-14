@@ -95,7 +95,7 @@ void checkHierarchy(const EntityType& entity)
 }
 
 template <class GridType>
-void checkAdaptation(GridType& grid)
+void checkAdaptation(GridType& grid, const bool greenClosure = false )
 {
   using namespace Dune;
 
@@ -120,7 +120,7 @@ void checkAdaptation(GridType& grid)
     markForAdaptation( grid , 1 );
 
     bool markedCoarsen = grid.preAdapt();
-    if( markedCoarsen == true )
+    if( markedCoarsen != greenClosure )
     {
       DUNE_THROW(InvalidStateException,"grid.preAdapt() does not return correct information");
     }
@@ -225,8 +225,6 @@ void checkAdaptation(GridType& grid)
       if( ! bisectionGrid )
         DUNE_THROW(InvalidStateException,"grid.maxLevel() wrong after coarsening " << oldMaxLevel << " " << grid.maxLevel() );
     }
-
-    //const bool bisectionGrid = grid.name() == "AlbertGrid";
 
     // Loop over all levels except the lowest one
     for (int level = 0 ; level <= grid.maxLevel(); ++level )
