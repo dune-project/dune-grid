@@ -94,7 +94,7 @@ namespace Dune
 
     typedef typename remove_const< Grid >::type::Traits Traits;
 
-    static const int dimension = remove_const< Grid >::type::dimension;
+    static const unsigned int dimension = remove_const< Grid >::type::dimension;
 
     typedef typename Traits::template Codim< 0 >::Entity Element;
 
