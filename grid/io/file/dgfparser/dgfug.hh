@@ -10,9 +10,21 @@
 namespace Dune
 {
 
-  /** \cond */
   namespace dgf {
-    // *************************************************************
+
+    /** \brief Grid parameters for UGGrid
+        \ingroup DGFGridParameter
+        The UGGridParameter class is in charge of passing UGGrid specific
+        parameters to grid construction. Current parameters are:
+          1. \b closure (valid values are \b none or \b green,
+             which is the default value) will set the closure
+             type of the returned UGGrid. \n
+          2. \b copies (valid values are \b yes or \b none,
+             which is the default value) will enforce that non-refined
+             element are copied to the next level on refinement of a UGGrid. \n
+          3. \b heapsize set heap size for UGGrid (default value is 500 MB).
+        See the \b examplegrid5.dgf file for an example.
+     */
     class UGGridParameterBlock
       : public GridParameterBlock
     {
@@ -27,6 +39,7 @@ namespace Dune
       size_t _heapsize; // heap size  for UGGrid
 
     public:
+      //! constructor taking istream
       UGGridParameterBlock(std::istream &in)
         : GridParameterBlock(in, false),
           _noClosure( false ),  // default value
@@ -49,7 +62,7 @@ namespace Dune
         }
       }
 
-      // returns true if no closure should be used for UGGrid
+      //! returns true if no closure should be used for UGGrid
       bool noClosure () const
       {
         if( (foundFlags_ & foundClosure) == 0 )
@@ -60,7 +73,7 @@ namespace Dune
         return _noClosure;
       }
 
-      // returns true if no closure should be used for UGGrid
+      //! returns true if no closure should be used for UGGrid
       bool noCopy () const
       {
         if( (foundFlags_ & foundCopies) == 0 )
@@ -71,6 +84,7 @@ namespace Dune
         return _noCopy;
       }
 
+      //! returns heap size used on construction of the grid
       size_t heapSize() const
       {
         if( (foundFlags_ & foundHeapSize) == 0 )
@@ -107,6 +121,7 @@ namespace Dune
 
   } // end namespace dgf
 
+  /** \cond */
   template <int dim>
   class MacroGrid::Impl<UGGrid<dim> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;

@@ -500,17 +500,18 @@ namespace Dune
        - Using the \b parameters keyword it is possible to add a set of parameters
          to each vertex of the grid.
      - \b GridParameter \n
-       Using this block grid specific parameters can be passed to certain grids.
+       For each grid implementation there is a set of parameters
+       that can be passed via the GridParameter block to the momment of
+       grid construction. For the specific parameters see the \ref
+       DGFGridParameter section. See also the \b examplegrid5.dgf file
+       for examples.
+
        The following options are implemented at the moment: \n
        - For YaspGrid two options can be choosen: \n
           1. \b overlap defining the overlap of the grid (default value is zero) \n
           2. \b periodic defining which dimension should have periodic
                 boundaries, i.e. passing \b periodic 0 1 will set
                 periodic boundaries for x and y direction.
-       - For UGGrid one option can be choosen: \n
-          1. \b closure (valid values are \b none or \b green, which is the default value) will set the closure
-             type of the returned UGGrid. \n
-       See the \b examplegrid5.dgf file for an example.
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->
@@ -771,7 +772,7 @@ namespace Dune
 
    \section dgfexample2 Automated Grid Construction
    Automatic tessellation using Triangle,
-   with vertices defined as in the example \ref dgfexample1:
+   with vertices defined as in the example \ref dgfexample1 :
 
    @include examplegrid1gen.dgf
 
