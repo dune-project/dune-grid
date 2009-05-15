@@ -41,7 +41,7 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
-    void preAdapt ( const size_t estimateAdditionalElements )
+    void preAdapt ( const unsigned int estimateAdditionalElements )
     {
       asImp().preAdapt( estimateAdditionalElements );
     }
@@ -96,7 +96,7 @@ namespace Dune
     AdaptDataHandle ( const This & );
     This &operator= ( const This & );
 
-    void preAdapt ( const size_t estimateAdditionalElements );
+    void preAdapt ( const unsigned int estimateAdditionalElements );
     void postAdapt ();
     void preCoarsening ( const Entity &father ) const;
     void postRefinement ( const Entity &father ) const;
