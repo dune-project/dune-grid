@@ -620,7 +620,34 @@ namespace Dune
         DUNE_THROW( RangeError,
                     "Invalid basic geometry type: " << type.basicType() << "." );
       }
+    }
 
+
+    // geometryType
+    // ------------
+
+    inline GeometryType
+    geometryType ( const unsigned int topologyId, const unsigned int dimension )
+    {
+      static const GeometryType::BasicType basicType1[ 2 ]
+        = { GeometryType::simplex, GeometryType::cube };
+      static const GeometryType::BasicType basicType2[ 4 ]
+        = { GeometryType::simplex, GeometryType::pyramid, GeometryType::prism, GeometryType::cube };
+
+      assert( topologyId < ((unsigned int)1 << dimension) );
+
+      if( dimension == 0 )
+        return GeometryType( GeometryType::simplex, 0 );
+      if( dimension <= 2 )
+        return GeometryType( basicType1[ topologyId >> (dimension-1) ], dimension );
+
+      const unsigned int dimBit = (1 << (dimension-1));
+      const unsigned int baseId = topologyId & (dimBit-1);
+      if( ((baseId | 1) != 1) && ((baseId | 1) != (dimBit-1)) )
+        DUNE_THROW( RangeError, "Topology " << topologyId << " has no corresponding GeometryType." );
+
+      const unsigned int t = topologyId >> (dimension-2);
+      return GeometryType( basicType2[ t ], dimension );
     }
 
   }

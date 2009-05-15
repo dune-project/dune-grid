@@ -52,12 +52,6 @@ namespace Dune
         return info_[ codim ][ i ].topologyId();
       }
 
-      const GeometryType &type ( unsigned int codim, unsigned int i ) const
-      {
-        assert( (codim <= dimension) && (i < info_[ codim ].size()) );
-        return info_[ codim ][ i ].type();
-      }
-
       template< class Topology >
       void initialize ()
       {
@@ -98,11 +92,6 @@ namespace Dune
         return topologyId_;
       }
 
-      const GeometryType &type () const
-      {
-        return type_;
-      }
-
       template< class Topology, unsigned int codim, unsigned int i >
       void initialize ()
       {
@@ -111,7 +100,6 @@ namespace Dune
 
         codim_ = codim;
         topologyId_ = SubTopology::id;
-        type_ = DuneGeometryType< SubTopology, GeometryType::simplex >::type();
         numbering_.resize( SubTopology::dimension+1 );
 
         const unsigned int iVariable = i;
@@ -121,7 +109,6 @@ namespace Dune
     private:
       int codim_;
       unsigned int topologyId_;
-      GeometryType type_;
       std::vector< std::vector< unsigned int > > numbering_;
     };
 
