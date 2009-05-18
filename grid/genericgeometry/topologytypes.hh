@@ -97,6 +97,19 @@ namespace Dune
         = !(IsSimplex< Topology >::value || IsCube< Topology >::value);
     };
 
+    template< class Topology >
+    struct IsGeneralizedPrism
+    {
+      static const bool value = false;
+    };
+
+    template< class BaseTopology >
+    struct IsGeneralizedPrism< Prism< BaseTopology > >
+    {
+      static const bool value
+        = (IsGeneralizedPrism< BaseTopology >::value || IsSimplex< BaseTopology >::value);
+    };
+
 
 
     // SimplexTopology

@@ -45,29 +45,43 @@ namespace Dune
     {
       static void apply ()
       {
-        Operation< first > :: apply();
-        ForLoop< Operation, first+1, last > :: apply();
+        Operation< first >::apply();
+        ForLoop< Operation, first+1, last >::apply();
       }
 
-      template< class Type >
-      static void apply ( Type &param )
+      template< class T1 >
+      static void apply ( T1 &p1 )
       {
-        Operation< first > :: apply( param );
-        ForLoop< Operation, first+1, last > :: apply( param );
+        Operation< first >::apply( p1 );
+        ForLoop< Operation, first+1, last >::apply( p1 );
       }
 
-      template< class Type1, class Type2 >
-      static void apply ( Type1 &param1, Type2 &param2 )
+      template< class T1, class T2 >
+      static void apply ( T1 &p1, T2 &p2 )
       {
-        Operation< first > :: apply( param1, param2 );
-        ForLoop< Operation, first+1, last > :: apply( param1, param2 );
+        Operation< first >::apply( p1, p2 );
+        ForLoop< Operation, first+1, last >::apply( p1, p2 );
       }
 
-      template< class Type1, class Type2, class Type3 >
-      static void apply ( Type1 &param1, Type2 &param2, Type3 &param3 )
+      template< class T1, class T2, class T3 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3 )
       {
-        Operation< first > :: apply( param1, param2, param3 );
-        ForLoop< Operation, first+1, last > :: apply( param1, param2, param3 );
+        Operation< first >::apply( p1, p2, p3 );
+        ForLoop< Operation, first+1, last >::apply( p1, p2, p3 );
+      }
+
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        Operation< first >::apply( p1, p2, p3, p4 );
+        ForLoop< Operation, first+1, last >::apply( p1, p2, p3, p4 );
+      }
+
+      template< class T1, class T2, class T3, class T4, class T5 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3, T4 &p4, T5 &p5 )
+      {
+        Operation< first >::apply( p1, p2, p3, p4, p5 );
+        ForLoop< Operation, first+1, last >::apply( p1, p2, p3, p4, p5 );
       }
 
     private:
@@ -79,25 +93,37 @@ namespace Dune
     {
       static void apply ()
       {
-        Operation< last > :: apply();
+        Operation< last >::apply();
       }
 
-      template< class Type >
-      static void apply ( Type &param )
+      template< class T1 >
+      static void apply ( T1 &p1 )
       {
-        Operation< last > :: apply( param );
+        Operation< last >::apply( p1 );
       }
 
-      template< class Type1, class Type2 >
-      static void apply ( Type1 &param1, Type2 &param2 )
+      template< class T1, class T2 >
+      static void apply ( T1 &p1, T2 &p2 )
       {
-        Operation< last > :: apply( param1, param2 );
+        Operation< last >::apply( p1, p2 );
       }
 
-      template< class Type1, class Type2, class Type3 >
-      static void apply ( Type1 &param1, Type2 &param2, Type3 &param3 )
+      template< class T1, class T2, class T3 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3 )
       {
-        Operation< last > :: apply( param1, param2, param3 );
+        Operation< last >::apply( p1, p2, p3 );
+      }
+
+      template< class T1, class T2, class T3, class T4 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3, T4 &p4 )
+      {
+        Operation< last >::apply( p1, p2, p3, p4 );
+      }
+
+      template< class T1, class T2, class T3, class T4, class T5 >
+      static void apply ( T1 &p1, T2 &p2, T3 &p3, T4 &p4, T5 &p5 )
+      {
+        Operation< last >::apply( p1, p2, p3, p4, p5 );
       }
     };
 
