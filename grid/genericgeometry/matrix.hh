@@ -445,15 +445,28 @@ namespace Dune
         AAT_L< m, n >( A, aat );
         spdInvAx< m >( aat, y );
       }
-
     };
 
-    template <class F,int dim>
-    F two_norm2(const Dune::FieldVector<F,dim> &f)
+
+
+    // Auxilliary Functions
+    // --------------------
+
+    template< class F, int dim >
+    F two_norm2 ( const Dune::FieldVector< F, dim > &f )
     {
-      F norm(0);
-      for (int d=0; d<dim; ++d)
-        norm += f[d]*f[d];
+      F norm( 0 );
+      for( int d = 0; d < dim; ++d )
+        norm += f[ d ]*f[ d ];
+      return norm;
+    }
+
+    template< class F, int rows, int cols >
+    F frobenius_norm2 ( const Dune::FieldMatrix< F, rows, cols > &m )
+    {
+      F norm( 0 );
+      for( int i = 0; i < rows; ++i )
+        norm += two_norm2( m[ i ] );
       return norm;
     }
 
