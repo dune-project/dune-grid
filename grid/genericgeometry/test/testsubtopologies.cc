@@ -7,6 +7,7 @@
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
+#include <dune/grid/genericgeometry/loops.hh>
 
 #ifndef GEOMETRYTYPE
 #error "GEOMETRYTYPE must be one of 'simplex', 'cube', 'prism', 'pyramid'"
@@ -154,7 +155,20 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim >
     ++errors;
 }
 
-
+// *********************************************
+typedef Dune::GenericGeometry::Pyramid< Topology > YTopology;
+typedef Dune::GenericGeometry::Pyramid< YTopology > XTopology;
+template <class T,unsigned int i>
+struct ForSubTest
+{
+  const static unsigned int codimension = XTopology::dimension-T::dimension;
+  const static unsigned int size = Dune::GenericGeometry::Size< XTopology, codimension >::value;
+  static void apply ( )
+  {
+    std::cout << codimension << " " << i << " -> " << T::name()
+              << " ( " << size << " ) " << std::endl;
+  }
+};
 
 int main ( int argc, char **argv )
 {
@@ -168,5 +182,8 @@ int main ( int argc, char **argv )
   Dune :: GenericGeometry :: ForLoop< CheckCodim, 0, Topology :: dimension > :: apply();
 
   std :: cerr << "Number of errors: " << errors << std :: endl;
+
+  Dune :: GenericGeometry :: ForSubTopology< ForSubTest, XTopology >::apply( );
+
   return (errors > 0 ? 1 : 0);
 }
