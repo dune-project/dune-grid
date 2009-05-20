@@ -149,20 +149,7 @@ namespace Dune
         static void
         integrationOuterNormal ( unsigned int i, FieldVector< ctype, dim > &n )
         {
-          typedef ReferenceDomainBase< BaseTopology > BaseReferenceDomain;
-          typedef SubTopologyNumbering< BaseTopology, 1, dimension-2 > Numbering;
-
-          if( i > 0 )
-          {
-            const unsigned int j = Numbering::number( i-1, 0 );
-            FieldVector< ctype, dim > x( ctype( 0 ) );
-            BaseReferenceDomain::corner( j, x );
-
-            BaseReferenceDomain::integrationOuterNormal ( i-1, n );
-            n[ myindex ] = (x * n);
-          }
-          else
-            n[ myindex ] = ctype( -1 );
+          multiDimensionalIntegrationOuterNormal( i, n );
         }
       };
 
@@ -195,6 +182,26 @@ namespace Dune
         const ctype cxn = factor - xn;
         return (xn > -1e-12) && (cxn > -1e-12)
                && ReferenceDomainBase< BaseTopology >::checkInside( x, cxn );
+      }
+
+      template< class ctype, int dim >
+      static void
+      multiDimensionalIntegrationOuterNormal ( unsigned int i, FieldVector< ctype, dim > &n )
+      {
+        typedef ReferenceDomainBase< BaseTopology > BaseReferenceDomain;
+        typedef SubTopologyNumbering< BaseTopology, 1, dimension-2 > Numbering;
+
+        if( i > 0 )
+        {
+          const unsigned int j = Numbering::number( i-1, 0 );
+          FieldVector< ctype, dim > x( ctype( 0 ) );
+          BaseReferenceDomain::corner( j, x );
+
+          BaseReferenceDomain::integrationOuterNormal ( i-1, n );
+          n[ myindex ] = (x * n);
+        }
+        else
+          n[ myindex ] = ctype( -1 );
       }
 
       template< class ctype, int dim >
