@@ -152,7 +152,7 @@ namespace Dune
     }
 
     //! Return true if the point is in the reference element \f$D\f$ of the map
-    bool checkInside (const FieldVector<ctype, mydim>& local) const
+    bool checkInside (const FieldVector<ctype, mydim>& local) const DUNE_DEPRECATED
     {
       return realGeometry.checkInside(local);
     }
