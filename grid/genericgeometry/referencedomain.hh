@@ -32,7 +32,7 @@ namespace Dune
 
     /** \cond */
     template<>
-    struct ReferenceDomainBase< Point >
+    class ReferenceDomainBase< Point >
     {
       typedef Point Topology;
 
@@ -71,7 +71,7 @@ namespace Dune
 
 
     template< class BaseTopology >
-    struct ReferenceDomainBase< Prism< BaseTopology > >
+    class ReferenceDomainBase< Prism< BaseTopology > >
     {
       typedef Prism< BaseTopology > Topology;
 
@@ -129,7 +129,7 @@ namespace Dune
 
 
     template< class BaseTopology >
-    struct ReferenceDomainBase< Pyramid< BaseTopology > >
+    class ReferenceDomainBase< Pyramid< BaseTopology > >
     {
       typedef Pyramid< BaseTopology > Topology;
 
@@ -194,7 +194,7 @@ namespace Dune
         const ctype xn = x[ myindex ];
         const ctype cxn = factor - xn;
         return (xn > -1e-12) && (cxn > -1e-12)
-               && ReferenceDomainBase< BaseTopology >::checkInside( x, factor*cxn );
+               && ReferenceDomainBase< BaseTopology >::checkInside( x, cxn );
       }
 
       template< class ctype, int dim >

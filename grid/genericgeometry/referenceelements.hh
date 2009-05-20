@@ -62,7 +62,7 @@ namespace Dune
 
       static bool checkInside ( const CoordinateType &x )
       {
-        return ReferenceDomain< Topology > :: checkInside( x );
+        return ReferenceDomain< Topology >::checkInside( x );
       }
 
       static const CoordinateType &
