@@ -13,14 +13,13 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/static_assert.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundarysegment.hh>
 
 namespace Dune {
 
   /**
-     \ingroup Gmesh
+     \ingroup Gmsh
      \{
    */
 
@@ -864,11 +863,11 @@ namespace Dune {
   };
 
   /**
-     \ingroup Gmesh
+     \ingroup Gmsh
 
-     \brief Read Gmesh mesh file
+     \brief Read Gmsh mesh file
 
-     Read a .msh file generated using Gmesh and construct a grid using the grid factory interface.
+     Read a .msh file generated using Gmsh and construct a grid using the grid factory interface.
    */
   template<typename GridType>
   class GmshReader

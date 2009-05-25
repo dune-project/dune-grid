@@ -100,7 +100,7 @@
         /** @defgroup Gnuplot Gnuplot
             @ingroup IO */
 
-        /** @defgroup Gmesh Gmesh grid format
+        /** @defgroup Gmsh Gmsh grid format
             @ingroup IO */
         
         /** @defgroup Grape Grape
