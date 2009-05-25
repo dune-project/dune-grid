@@ -17,6 +17,6 @@ Makefile.in
 semantic.cache
 starcdreadertest
 subsamplingvtktest
-test-albertawriter
 vtksequencetest
 vtktest
+gmshtest

@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest
+ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest
 
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
@@ -33,6 +33,10 @@ subsamplingvtktest_LDADD = $(LOCAL_LIBS)
 amirameshtest_SOURCES = amirameshtest.cc
 amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS) $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(PSURFACE_CPPFLAGS)
 amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
+
+gmshtest_SOURCES = gmshtest.cc
+gmshtest_CXXFLAGS = $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS)
+gmshtest_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
