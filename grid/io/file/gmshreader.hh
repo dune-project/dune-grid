@@ -597,7 +597,7 @@ namespace Dune {
         case 2 :    // 3-node triangle
           simplexVertices.resize(3);
           fscanf(file,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-          for (int i=0; i<simplexVertices.size(); i++)
+          for (size_t i=0; i<simplexVertices.size(); i++)
             if (renumber.find(simplexVertices[i])==renumber.end())
             {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
@@ -608,7 +608,7 @@ namespace Dune {
         case 4 :    // 4-node tetrahedron
           simplexVertices.resize(4);
           fscanf(file,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]),&(simplexVertices[3]));
-          for (int i=0; i<simplexVertices.size(); i++)
+          for (size_t i=0; i<simplexVertices.size(); i++)
             if (renumber.find(simplexVertices[i])==renumber.end())
             {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
