@@ -36,12 +36,12 @@ namespace Dune {
 
 
   // arbitrary dimension, implementation is in specialization
-  template<typename GridType, int dimension>
+  template<int dimension>
   class GmshReaderBoundarySegments
   {};
 
-  template<typename GridType>
-  class GmshReaderBoundarySegments<GridType,2>
+  template <>
+  class GmshReaderBoundarySegments<2>
   {
   public:
 
@@ -109,7 +109,7 @@ namespace Dune {
       const int dim = GridType::dimension;
 
       // boundary segment types
-      typedef typename GmshReaderBoundarySegments<GridType,dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
+      typedef typename GmshReaderBoundarySegments<dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
       FILE* file = fopen(fileName.c_str(),"r");
@@ -346,8 +346,8 @@ namespace Dune {
   };
 
 
-  template<typename GridType>
-  class GmshReaderBoundarySegments<GridType,3>
+  template<>
+  class GmshReaderBoundarySegments<3>
   {
   public:
 
@@ -466,7 +466,7 @@ namespace Dune {
       const int dim = GridType::dimension;
 
       // boundary segment types
-      typedef typename GmshReaderBoundarySegments<GridType,dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
+      typedef typename GmshReaderBoundarySegments<dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
       FILE* file = fopen(fileName.c_str(),"r");
