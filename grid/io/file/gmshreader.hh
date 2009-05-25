@@ -45,27 +45,6 @@ namespace Dune {
   {
   public:
 
-    // linear boundary segments in 1d
-    class LinearBoundarySegment : public Dune::BoundarySegment<2>
-    {
-    public:
-      LinearBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_)
-        : p0(p0_), p1(p1_)
-      {}
-
-      virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
-      {
-        Dune::FieldVector<double,2> y;
-        y = 0.0;
-        y.axpy(1.0-local[0],p0);
-        y.axpy(local[0],p1);
-        return y;
-      }
-
-    private:
-      Dune::FieldVector<double,2> p0,p1;
-    };
-
     // quadratic boundary segments in 1d
     /*
        Note the points
@@ -130,7 +109,6 @@ namespace Dune {
       const int dim = GridType::dimension;
 
       // boundary segment types
-      typedef typename GmshReaderBoundarySegments<GridType,dim>::LinearBoundarySegment LinearBoundarySegment;
       typedef typename GmshReaderBoundarySegments<GridType,dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
@@ -319,12 +297,12 @@ namespace Dune {
         switch (elm_type)
         {
         case 1 :    // 2-node line
+
+          // read the vertices, but don't do anything with them.  Linear boundary
+          // segments are the default.
           simplexVertices.resize(2);
           fscanf(file,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-          vertices.resize(2);
-          for (int i=0; i<2; i++)
-            vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+
           break;
         case 8 :    // 3-node line
           simplexVertices.resize(3);
@@ -372,32 +350,6 @@ namespace Dune {
   class GmshReaderBoundarySegments<GridType,3>
   {
   public:
-
-    // linear boundary segments in 2d
-    class LinearBoundarySegment : public Dune::BoundarySegment<3>
-    {
-    public:
-      LinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                             Dune::FieldVector<double,3> p2_)
-        : p0(p0_), p1(p1_), p2(p2_)
-      {
-        //        std::cout << "created boundary segment " << p0 << " | " << p1 << " | " << p2 << std::endl;
-      }
-
-      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
-      {
-        Dune::FieldVector<double,3> y;
-        y = 0.0;
-        y.axpy(1.0-local[0]-local[1],p0);
-        y.axpy(local[0],p1);
-        y.axpy(local[1],p2);
-        //        std::cout << "eval boundary segment local=" << local << " y=" << y << std::endl;
-        return y;
-      }
-
-    private:
-      Dune::FieldVector<double,3> p0,p1,p2;
-    };
 
     // quadratic boundary segments in 2d
     /* numbering of points corresponding to gmsh:
@@ -514,7 +466,6 @@ namespace Dune {
       const int dim = GridType::dimension;
 
       // boundary segment types
-      typedef typename GmshReaderBoundarySegments<GridType,dim>::LinearBoundarySegment LinearBoundarySegment;
       typedef typename GmshReaderBoundarySegments<GridType,dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
@@ -709,13 +660,11 @@ namespace Dune {
         switch (elm_type)
         {
         case 2 :    // 3-node triangle
+
+          // Read the vertices but don't do anything with them.  Linear boundary segments
+          // are the default anyways.
           simplexVertices.resize(3);
           fscanf(file,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
-          vertices.resize(3);
-          for (int i=0; i<3; i++)
-            vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-
-          factory.insertBoundarySegment(vertices,new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
           break;
 
         case 9 :    // 6-node triangle
