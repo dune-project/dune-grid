@@ -37,57 +37,52 @@ namespace Dune {
 
   // arbitrary dimension, implementation is in specialization
   template<int dimension>
-  class GmshReaderBoundarySegments
+  class GmshReaderQuadraticBoundarySegment
   {};
 
+  // quadratic boundary segments in 1d
+  /*
+     Note the points
+
+     (0)   (alpha)   (1)
+
+     are mapped to the points in global coordinates
+
+     p0 p2 p1
+
+     alpha is determined automatically from the given points.
+   */
   template <>
-  class GmshReaderBoundarySegments<2>
+  class GmshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
   {
   public:
-
-    // quadratic boundary segments in 1d
-    /*
-       Note the points
-
-       (0)   (alpha)   (1)
-
-       are mapped to the points in global coordinates
-
-       p0 p2 p1
-
-       alpha is determined automatically from the given points.
-     */
-    class QuadraticBoundarySegment : public Dune::BoundarySegment<2>
+    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
+                                        Dune::FieldVector<double,2> p2_)
+      : p0(p0_), p1(p1_), p2(p2_)
     {
-    public:
-      QuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
-                                Dune::FieldVector<double,2> p2_)
-        : p0(p0_), p1(p1_), p2(p2_)
-      {
-        Dune::FieldVector<double,2> d1(p1);
-        d1 -= p0;
-        Dune::FieldVector<double,2> d2(p2);
-        d2 -= p1;
+      Dune::FieldVector<double,2> d1(p1);
+      d1 -= p0;
+      Dune::FieldVector<double,2> d2(p2);
+      d2 -= p1;
 
-        alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
-        if (alpha<1E-6 || alpha>1-1E-6)
-          DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
-      }
+      alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+      if (alpha<1E-6 || alpha>1-1E-6)
+        DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
+    }
 
-      virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
-      {
-        Dune::FieldVector<double,2> y;
-        y = 0.0;
-        y.axpy((local[0]-alpha)*(local[0]-1.0)/alpha,p0);
-        y.axpy(local[0]*(local[0]-1.0)/(alpha*(alpha-1.0)),p1);
-        y.axpy(local[0]*(local[0]-alpha)/(1.0-alpha),p2);
-        return y;
-      }
+    virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
+    {
+      Dune::FieldVector<double,2> y;
+      y = 0.0;
+      y.axpy((local[0]-alpha)*(local[0]-1.0)/alpha,p0);
+      y.axpy(local[0]*(local[0]-1.0)/(alpha*(alpha-1.0)),p1);
+      y.axpy(local[0]*(local[0]-alpha)/(1.0-alpha),p2);
+      return y;
+    }
 
-    private:
-      Dune::FieldVector<double,2> p0,p1,p2;
-      double alpha;
-    };
+  private:
+    Dune::FieldVector<double,2> p0,p1,p2;
+    double alpha;
   };
 
 
@@ -107,9 +102,6 @@ namespace Dune {
     {
       // the grid dimension
       const int dim = GridType::dimension;
-
-      // boundary segment types
-      typedef typename GmshReaderBoundarySegments<dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
       FILE* file = fopen(fileName.c_str(),"r");
@@ -310,9 +302,9 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new QuadraticBoundarySegment(nodes[simplexVertices[0]],
-                                                                              nodes[simplexVertices[2]],
-                                                                              nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
+                                                                                           nodes[simplexVertices[2]],
+                                                                                           nodes[simplexVertices[1]]));
           break;
         case 2 :    // 3-node triangle
           simplexVertices.resize(3);
@@ -346,110 +338,105 @@ namespace Dune {
   };
 
 
-  template<>
-  class GmshReaderBoundarySegments<3>
+  // quadratic boundary segments in 2d
+  /* numbering of points corresponding to gmsh:
+
+     2
+
+     5  4
+
+     0  3  1
+
+     Note: The vertices 3, 4, 5 are not necessarily at the edge midpoints but can
+     be placed with parameters alpha, beta , gamma at the following positions
+     in local coordinates:
+
+
+     2 = (0,1)
+
+     5 = (0,beta)   4 = (1-gamma/sqrt(2),gamma/sqrt(2))
+
+     0 = (0,0)      3 = (alpha,0)                        1 = (1,0)
+
+     The parameters alpha, beta, gamma are determined from the given vertices in
+     global coordinates.
+   */
+  template <>
+  class GmshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
   {
   public:
-
-    // quadratic boundary segments in 2d
-    /* numbering of points corresponding to gmsh:
-
-       2
-
-       5  4
-
-       0  3  1
-
-       Note: The vertices 3, 4, 5 are not necessarily at the edge midpoints but can
-       be placed with parameters alpha, beta , gamma at the following positions
-       in local coordinates:
-
-
-       2 = (0,1)
-
-       5 = (0,beta)   4 = (1-gamma/sqrt(2),gamma/sqrt(2))
-
-       0 = (0,0)      3 = (alpha,0)                        1 = (1,0)
-
-       The parameters alpha, beta, gamma are determined from the given vertices in
-       global coordinates.
-     */
-    class QuadraticBoundarySegment : public Dune::BoundarySegment<3>
+    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
+                                        Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
+                                        Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
+      : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
     {
-    public:
-      QuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                                Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
-                                Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
-        : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
-      {
-        Dune::FieldVector<double,3> d1,d2;
+      Dune::FieldVector<double,3> d1,d2;
 
-        d1 = p3; d1 -= p0;
-        d2 = p1; d2 -= p3;
-        alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
-        if (alpha<1E-6 || alpha>1-1E-6)
-          DUNE_THROW(Dune::IOError, "alpha in quadratic boundary segment bad");
+      d1 = p3; d1 -= p0;
+      d2 = p1; d2 -= p3;
+      alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+      if (alpha<1E-6 || alpha>1-1E-6)
+        DUNE_THROW(Dune::IOError, "alpha in quadratic boundary segment bad");
 
-        d1 = p5; d1 -= p0;
-        d2 = p2; d2 -= p5;
-        beta=d1.two_norm()/(d1.two_norm()+d2.two_norm());
-        if (beta<1E-6 || beta>1-1E-6)
-          DUNE_THROW(Dune::IOError, "beta in quadratic boundary segment bad");
+      d1 = p5; d1 -= p0;
+      d2 = p2; d2 -= p5;
+      beta=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+      if (beta<1E-6 || beta>1-1E-6)
+        DUNE_THROW(Dune::IOError, "beta in quadratic boundary segment bad");
 
-        d1 = p4; d1 -= p1;
-        d2 = p2; d2 -= p4;
-        gamma=d1.two_norm()/(d1.two_norm()+d2.two_norm());
-        if (gamma<1E-6 || gamma>1-1E-6)
-          DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
+      d1 = p4; d1 -= p1;
+      d2 = p2; d2 -= p4;
+      gamma=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+      if (gamma<1E-6 || gamma>1-1E-6)
+        DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
 
-        sqrt2 = sqrt(2.0);
-      }
+      sqrt2 = sqrt(2.0);
+    }
 
-      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
-      {
-        Dune::FieldVector<double,3> y;
-        y = 0.0;
-        y.axpy(phi0(local),p0);
-        y.axpy(phi1(local),p1);
-        y.axpy(phi2(local),p2);
-        y.axpy(phi3(local),p3);
-        y.axpy(phi4(local),p4);
-        y.axpy(phi5(local),p5);
-        return y;
-      }
+    virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
+    {
+      Dune::FieldVector<double,3> y;
+      y = 0.0;
+      y.axpy(phi0(local),p0);
+      y.axpy(phi1(local),p1);
+      y.axpy(phi2(local),p2);
+      y.axpy(phi3(local),p3);
+      y.axpy(phi4(local),p4);
+      y.axpy(phi5(local),p5);
+      return y;
+    }
 
-    private:
-      // The six Lagrange basis function on the reference element
-      // for the points given above
+  private:
+    // The six Lagrange basis function on the reference element
+    // for the points given above
 
-      double phi0 (const Dune::FieldVector<double,2>& local) const
-      {
-        return (alpha*beta-beta*local[0]-alpha*local[1])*(1-local[0]-local[1])/(alpha*beta);
-      }
-      double phi3 (const Dune::FieldVector<double,2>& local) const
-      {
-        return local[0]*(1-local[0]-local[1])/(alpha*(1-alpha));
-      }
-      double phi1 (const Dune::FieldVector<double,2>& local) const
-      {
-        return local[0]*(gamma*local[0]-(sqrt2-gamma-sqrt2*alpha)*local[1]-alpha*gamma)/(gamma*(1-alpha));
-      }
-      double phi5 (const Dune::FieldVector<double,2>& local) const
-      {
-        return local[1]*(1-local[0]-local[1])/(beta*(1-beta));
-      }
-      double phi4 (const Dune::FieldVector<double,2>& local) const
-      {
-        return local[0]*local[1]/((1-gamma/sqrt2)*gamma/sqrt2);
-      }
-      double phi2 (const Dune::FieldVector<double,2>& local) const
-      {
-        return local[1]*(beta*(1-gamma/sqrt2)-local[0]*(beta-gamma/sqrt2)-local[1]*(1-gamma/sqrt2))/((1-gamma/sqrt2)*(beta-1));
-      }
+    double phi0 (const Dune::FieldVector<double,2>& local) const
+    {
+      return (alpha*beta-beta*local[0]-alpha*local[1])*(1-local[0]-local[1])/(alpha*beta);
+    }
+    double phi3 (const Dune::FieldVector<double,2>& local) const
+    {
+      return local[0]*(1-local[0]-local[1])/(alpha*(1-alpha));
+    }
+    double phi1 (const Dune::FieldVector<double,2>& local) const
+    {
+      return local[0]*(gamma*local[0]-(sqrt2-gamma-sqrt2*alpha)*local[1]-alpha*gamma)/(gamma*(1-alpha));
+    }
+    double phi5 (const Dune::FieldVector<double,2>& local) const
+    {
+      return local[1]*(1-local[0]-local[1])/(beta*(1-beta));
+    }
+    double phi4 (const Dune::FieldVector<double,2>& local) const
+    {
+      return local[0]*local[1]/((1-gamma/sqrt2)*gamma/sqrt2);
+    }
+    double phi2 (const Dune::FieldVector<double,2>& local) const
+    {
+      return local[1]*(beta*(1-gamma/sqrt2)-local[0]*(beta-gamma/sqrt2)-local[1]*(1-gamma/sqrt2))/((1-gamma/sqrt2)*(beta-1));
+    }
 
-      Dune::FieldVector<double,3> p0,p1,p2,p3,p4,p5;
-      double alpha,beta,gamma,sqrt2;
-    };
+    Dune::FieldVector<double,3> p0,p1,p2,p3,p4,p5;
+    double alpha,beta,gamma,sqrt2;
   };
 
 
@@ -464,9 +451,6 @@ namespace Dune {
     {
       // the grid dimension
       const int dim = GridType::dimension;
-
-      // boundary segment types
-      typedef typename GmshReaderBoundarySegments<dim>::QuadraticBoundarySegment QuadraticBoundarySegment;
 
       // open file name, we use C I/O
       FILE* file = fopen(fileName.c_str(),"r");
@@ -675,8 +659,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices first three vertices
 
-          factory.insertBoundarySegment(vertices,new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
-                                                                              nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
+                                                                                           nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
           break;
 
         case 4 :    // 4-node tetrahedron
