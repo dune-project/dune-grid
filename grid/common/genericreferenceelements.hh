@@ -155,6 +155,19 @@ namespace Dune
       return mapping< codim >( i ).checkInside( local );
     }
 
+    /** \brief check if a local coordinate is in the reference element
+     *
+     *  This method return true, if the given local coordinate is within this
+     *  reference element.
+     *
+     *  \param[in]  local  coordinates of the point
+     */
+    bool checkInside ( const FieldVector< ctype, dim > &local ) const
+    {
+      return checkInside< 0 >( local, 0 );
+    }
+
+
     /** \brief map a local coordinate on subentity (i,codim) into the reference
      *         element
      *
