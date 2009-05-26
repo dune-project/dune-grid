@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 /** \file
     \brief Tests for the IntersectionIterator
@@ -36,45 +37,42 @@ void checkGeometry(const GeometryImp& geometry)
   typedef typename GeometryImp::ctype ctype;
 
   // Get the corresponding reference element
-  const ReferenceElement<double,dim>& refElement
-    = ReferenceElements<double, dim>::general(geometry.type());
+  const GenericReferenceElement< double, dim > &genericRefElement
+    = GenericReferenceElements< double, dim >::general( geometry.type() );
 
   // Check whether the number of corners is correct
-  if (geometry.corners() != refElement.size(dim))
+  if (geometry.corners() != genericRefElement.size(dim))
     DUNE_THROW(GridError, "Geometry has wrong number of corners!");
 
   // check consistency between operator[] and global()
-  for( int i = 0; i < refElement.size( dim ); ++i )
+  for( int i = 0; i < genericRefElement.size( dim ); ++i )
   {
-    const int tid = Dune::GenericGeometry::topologyId( geometry.type() );
-    const int gi = Dune::GenericGeometry::MapNumberingProvider< dim >::template dune2generic< dim >( tid, i );
-
-    FieldVector< double, dim > localPos = refElement.position( i, dim );
-    if( (geometry.corner( gi ) - geometry.global( localPos )).infinity_norm() > 1e-6 )
-      DUNE_THROW( GridError, "Methods operator[] and global() are inconsistent." );
+    FieldVector< double, dim > localPos = genericRefElement.position( i, dim );
+    if( (geometry.corner( i ) - geometry.global( localPos )).infinity_norm() > 1e-6 )
+      DUNE_THROW( GridError, "Methods 'corner' and 'global' are inconsistent." );
   }
 
   // Use a quadrature rule to create a few test points for the following checks
   const QuadratureRule<double, dim>& quad
     = QuadratureRules<double, dim>::rule(geometry.type(), 2);
 
-  for (size_t i=0; i<quad.size(); i++) {
+  for( size_t i = 0; i < quad.size(); ++i )
+  {
 
-    const FieldVector<double,dim>& testPoint = quad[i].position();
+    const FieldVector< double, dim > &testPoint = quad[i].position();
 
     // Check whether point is within the intersection
-    if (!geometry.checkInside(testPoint))
+    if( !genericRefElement.checkInside( testPoint ) )
     {
-      std :: cerr << "Test point (" << testPoint << ") not within geometry."
-                  << std :: endl;
-      //DUNE_THROW(GridError, "Test point is not within geometry!");
+      std::cerr << "Test point (" << testPoint
+                << ") not within reference element." << std::endl;
     }
 
     // Transform to global coordinates
-    FieldVector<ctype, dimworld> global = geometry.global(testPoint);
+    FieldVector< ctype, dimworld > global = geometry.global( testPoint );
 
     // The back to local coordinates
-    FieldVector<ctype, dim> local = geometry.local(global);
+    FieldVector< ctype, dim > local = geometry.local( global );
 
     // check for correctness
     if ((testPoint-local).infinity_norm() > 1e-6)
