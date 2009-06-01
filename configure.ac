@@ -6,8 +6,14 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([grid/common/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
+# make dune -> . symlink
+DUNE_SYMLINK
+
 # check all dune-module stuff
-DUNE_CHECK_ALL_M
+DUNE_CHECK_ALL
+
+# set up flags for the automated test system
+DUNE_AUTOBUILD_FLAGS
 
 # preset variable to path such that #include <dune/...> works
 AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
