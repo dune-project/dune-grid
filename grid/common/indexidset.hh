@@ -25,10 +25,9 @@ namespace Dune
      This class template is used as a base class for all index set implementations.
      It uses the Barton-Nackman trick to ensure conformity to the interface.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid.
-     - <tt>IndexSetImp</tt> Type that is a model of Dune::IndexSet.
+     \tparam GridImp Type that is a model of Dune::Grid.
+     \tparam IndexSetImp Type that is a model of Dune::IndexSet.
+     \tparam IndexTypeImp The type used by IndexSetImp to store the indices
 
      <H3>Overview</H3>
 
@@ -72,11 +71,11 @@ namespace Dune
 
      @ingroup IndexIdSets
    */
-  template<class GridImp, class IndexSetImp>
+  template<class GridImp, class IndexSetImp, class IndexTypeImp>
   struct IndexSet
   {
     /** \brief The type used for the indices */
-    typedef unsigned int IndexType;
+    typedef IndexTypeImp IndexType;
 
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = remove_const< GridImp >::type::dimension;

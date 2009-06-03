@@ -361,7 +361,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp,
       template<int,PartitionIteratorType,class> class LeafIteratorImp> class LeafIterator;
   template<class GridImp> class GenericLeafIterator;
-  template<class GridImp, class IndexSetImp> class IndexSet;
+  template<class GridImp, class IndexSetImp, class IndexTypeImp=unsigned int> class IndexSet;
   template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
 
 
