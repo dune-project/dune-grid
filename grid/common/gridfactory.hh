@@ -128,7 +128,7 @@ namespace Dune {
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
      */
-    virtual void insertElement(GeometryType type,
+    virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices) {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }
