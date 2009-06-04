@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GMSHREADER_HH
-#define DUNE_GMSHREADER_HH
+#ifndef DUNE_GMESHREADER_HH
+#define DUNE_GMESHREADER_HH
 
 #include <iostream>
 #include <fstream>
@@ -19,12 +19,12 @@
 namespace Dune {
 
   /**
-     \ingroup Gmsh
+     \ingroup Gmesh
      \{
    */
 
   //! Options for read operation
-  struct GmshReaderOptions
+  struct GmeshReaderOptions
   {
     enum GeometryOrder {
       /** @brief edges are straight lines. */
@@ -34,10 +34,39 @@ namespace Dune {
     };
   };
 
+  // arbitrary dimension, implementation is in specialization
+  template<int dimension>
+  class GmeshReaderLinearBoundarySegment
+  {};
+
+
+  // linear boundary segments in 1d
+  template<>
+  class GmeshReaderLinearBoundarySegment<2> : public Dune::BoundarySegment<2>
+  {
+  public:
+    GmeshReaderLinearBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_)
+      : p0(p0_), p1(p1_)
+    {}
+
+    virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
+    {
+      Dune::FieldVector<double,2> y;
+      y = 0.0;
+      y.axpy(1.0-local[0],p0);
+      y.axpy(local[0],p1);
+      return y;
+    }
+
+  private:
+    Dune::FieldVector<double,2> p0,p1;
+  };
+
+
 
   // arbitrary dimension, implementation is in specialization
   template<int dimension>
-  class GmshReaderQuadraticBoundarySegment
+  class GmeshReaderQuadraticBoundarySegment
   {};
 
   // quadratic boundary segments in 1d
@@ -53,11 +82,11 @@ namespace Dune {
      alpha is determined automatically from the given points.
    */
   template <>
-  class GmshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
+  class GmeshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
   {
   public:
-    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
-                                        Dune::FieldVector<double,2> p2_)
+    GmeshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
+                                         Dune::FieldVector<double,2> p2_)
       : p0(p0_), p1(p1_), p2(p2_)
     {
       Dune::FieldVector<double,2> d1(p1);
@@ -89,16 +118,18 @@ namespace Dune {
 
   // arbitrary dimension, implementation is in specialization
   template<typename GridType, int dimension>
-  class GmshReaderImp
+  class GmeshReaderImp
   {};
 
   template<typename GridType>
-  class GmshReaderImp<GridType,2>
+  class GmeshReaderImp<GridType,2>
   {
   public:
 
+    template<typename T>
     static GridType* read(Dune::GridFactory<GridType>& factory, const std::string& fileName,
-                          bool verbose)
+                          bool verbose, std::vector<T>& boundary_id_to_physical_entity,
+                          std::vector<T>& element_index_to_physical_entity)
     {
       // the grid dimension
       const int dim = GridType::dimension;
@@ -117,6 +148,9 @@ namespace Dune {
       //         Renumber needed vertices
       //=========================================
 
+      int boundary_element_count = 0;
+      int element_count = 0;
+
       // process header
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$MeshFormat")!=0)
@@ -125,7 +159,7 @@ namespace Dune {
       fscanf(file,"%d %d %d\n",&version_number,&file_type,&data_size);
       if (version_number!=2)
         DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
+      if (verbose) std::cout << "version 2 Gmesh file detected" << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
@@ -190,6 +224,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          boundary_element_count++;
           break;
         case 8 :    // 3-node line
           simplexVertices.resize(3);
@@ -200,6 +235,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          boundary_element_count++;
           break;
         case 2 :    // 3-node triangle
           simplexVertices.resize(3);
@@ -210,6 +246,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          element_count++;
           break;
         case 9 :    // 6-node triangle
           simplexVertices.resize(6);
@@ -221,15 +258,20 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          element_count++;
           break;
         default :
           fgets(buf,512,file);     // skip rest of line if no tetrahedron
         }
       }
       if (verbose) std::cout << "number of real vertices = " << number_of_real_vertices << std::endl;
+      if (verbose) std::cout << "number of boundary elements = " << boundary_element_count << std::endl;
+      if (verbose) std::cout << "number of elements = " << element_count << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndElements")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndElements");
+      boundary_id_to_physical_entity.resize(boundary_element_count);
+      element_index_to_physical_entity.resize(element_count);
 
       //==============================================
       // Pass 2: Insert boundary segments and elements
@@ -237,6 +279,8 @@ namespace Dune {
 
       // go to beginning of file
       rewind(file);
+      boundary_element_count = 0;
+      element_count = 0;
 
       // process header
       fscanf(file,"%s\n",buf);
@@ -294,7 +338,12 @@ namespace Dune {
           // segments are the default.
           simplexVertices.resize(2);
           fscanf(file,"%d %d\n",&(simplexVertices[0]),&(simplexVertices[1]));
-
+          vertices.resize(2);
+          for (int i=0; i<2; i++)
+            vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
+          factory.insertBoundarySegment(vertices,new GmeshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+          boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+          boundary_element_count++;
           break;
         case 8 :    // 3-node line
           simplexVertices.resize(3);
@@ -302,9 +351,11 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
-                                                                                           nodes[simplexVertices[2]],
-                                                                                           nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices,new GmeshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
+                                                                                            nodes[simplexVertices[2]],
+                                                                                            nodes[simplexVertices[1]]));
+          boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+          boundary_element_count++;
           break;
         case 2 :    // 3-node triangle
           simplexVertices.resize(3);
@@ -313,6 +364,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          element_index_to_physical_entity[element_count] = physical_entity;
+          element_count++;
           break;
         case 9 :    // 6-node triangle
           simplexVertices.resize(6);
@@ -322,6 +375,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          element_index_to_physical_entity[element_count] = physical_entity;
+          element_count++;
           break;
         default :
           fgets(buf,512,file);     // skip rest of line if no tetrahedron
@@ -335,6 +390,34 @@ namespace Dune {
 
       return factory.createGrid();
     }
+  };
+
+
+  // linear boundary segments in 2d
+  template <>
+  class GmeshReaderLinearBoundarySegment<3> : public Dune::BoundarySegment<3>
+  {
+  public:
+    GmeshReaderLinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
+                                      Dune::FieldVector<double,3> p2_)
+      : p0(p0_), p1(p1_), p2(p2_)
+    {
+      //        std::cout << "created boundary segment " << p0 << " | " << p1 << " | " << p2 << std::endl;
+    }
+
+    virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
+    {
+      Dune::FieldVector<double,3> y;
+      y = 0.0;
+      y.axpy(1.0-local[0]-local[1],p0);
+      y.axpy(local[0],p1);
+      y.axpy(local[1],p2);
+      //        std::cout << "eval boundary segment local=" << local << " y=" << y << std::endl;
+      return y;
+    }
+
+  private:
+    Dune::FieldVector<double,3> p0,p1,p2;
   };
 
 
@@ -362,12 +445,12 @@ namespace Dune {
      global coordinates.
    */
   template <>
-  class GmshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
+  class GmeshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
   {
   public:
-    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                                        Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
-                                        Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
+    GmeshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
+                                         Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
+                                         Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
       : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
     {
       Dune::FieldVector<double,3> d1,d2;
@@ -442,12 +525,14 @@ namespace Dune {
 
 
   template<typename GridType>
-  class GmshReaderImp<GridType,3>
+  class GmeshReaderImp<GridType,3>
   {
   public:
 
+    template<typename T>
     static GridType* read(Dune::GridFactory<GridType>& factory, const std::string& fileName,
-                          bool verbose)
+                          bool verbose, std::vector<T>& boundary_id_to_physical_entity,
+                          std::vector<T>& element_index_to_physical_entity)
     {
       // the grid dimension
       const int dim = GridType::dimension;
@@ -466,6 +551,9 @@ namespace Dune {
       //         Renumber needed vertices
       //=========================================
 
+      int boundary_element_count = 0;
+      int element_count = 0;
+
       // process header
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$MeshFormat")!=0)
@@ -474,7 +562,7 @@ namespace Dune {
       fscanf(file,"%d %d %d\n",&version_number,&file_type,&data_size);
       if (version_number!=2)
         DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
+      if (verbose) std::cout << "version 2 Gmesh file detected" << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
@@ -538,6 +626,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          boundary_element_count++;
           break;
 
         case 4 :    // 4-node tetrahedron
@@ -549,6 +638,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          element_count++;
           break;
 
         case 9 :    // 6-node triangle
@@ -561,6 +651,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          boundary_element_count++;
           break;
 
         case 11 :    // 10-node tetrahedron
@@ -574,6 +665,7 @@ namespace Dune {
               renumber[simplexVertices[i]] = number_of_real_vertices++;
               factory.insertVertex(nodes[simplexVertices[i]]);
             }
+          element_count++;
           break;
 
         default :
@@ -581,9 +673,13 @@ namespace Dune {
         }
       }
       if (verbose) std::cout << "number of real vertices = " << number_of_real_vertices << std::endl;
+      if (verbose) std::cout << "number of boundary elements = " << boundary_element_count << std::endl;
+      if (verbose) std::cout << "number of elements = " << element_count << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndElements")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndElements");
+      boundary_id_to_physical_entity.resize(boundary_element_count);
+      element_index_to_physical_entity.resize(element_count);
 
       //==============================================
       // Pass 2: Insert boundary segments and elements
@@ -591,6 +687,8 @@ namespace Dune {
 
       // go to beginning of file
       rewind(file);
+      boundary_element_count = 0;
+      element_count = 0;
 
       // process header
       fscanf(file,"%s\n",buf);
@@ -649,6 +747,13 @@ namespace Dune {
           // are the default anyways.
           simplexVertices.resize(3);
           fscanf(file,"%d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),&(simplexVertices[2]));
+          vertices.resize(3);
+          for (int i=0; i<3; i++)
+            vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
+
+          factory.insertBoundarySegment(vertices,new GmeshReaderLinearBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
+          boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+          boundary_element_count++;
           break;
 
         case 9 :    // 6-node triangle
@@ -659,8 +764,10 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices first three vertices
 
-          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
-                                                                                           nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          factory.insertBoundarySegment(vertices,new GmeshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
+                                                                                            nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
+          boundary_element_count++;
           break;
 
         case 4 :    // 4-node tetrahedron
@@ -670,6 +777,8 @@ namespace Dune {
           for (int i=0; i<4; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          element_index_to_physical_entity[element_count] = physical_entity;
+          element_count++;
           break;
 
         case 11 :    // 10-node tetrahedron
@@ -681,6 +790,8 @@ namespace Dune {
           for (int i=0; i<4; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          element_index_to_physical_entity[element_count] = physical_entity;
+          element_count++;
           break;
 
         default :
@@ -695,125 +806,44 @@ namespace Dune {
 
       return factory.createGrid();
     }
-
-    /* ========== old code; to be removed ============ */
-
-    static GridType* read_old(Dune::GridFactory<GridType>& factory, const std::string& fileName,
-                              bool verbose)
-    {
-      // check dimension
-      const int dim = GridType::dimension;
-      if (dim != 3)
-        DUNE_THROW(Dune::NotImplemented,
-                   "Reading Gmsh format is not yet implemented for dimension " << dim);
-
-      // open file name, we use C I/O
-      FILE* file = fopen(fileName.c_str(),"r");
-      if (file==0)
-        DUNE_THROW(Dune::IOError, "Could not open " << fileName);
-
-      // a read buffer
-      char buf[512];
-
-      // process header
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$MeshFormat")!=0)
-        DUNE_THROW(Dune::IOError, "expected $MeshFormat in first line");
-      int version_number, file_type, data_size;
-      fscanf(file,"%d %d %d\n",&version_number,&file_type,&data_size);
-      if (version_number!=2)
-        DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$EndMeshFormat")!=0)
-        DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
-
-      // node section
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$Nodes")!=0)
-        DUNE_THROW(Dune::IOError, "expected $Nodes");
-      int number_of_nodes;
-      fscanf(file,"%d\n",&number_of_nodes);
-      if (verbose) std::cout << "file contains " << number_of_nodes << " nodes" << std::endl;
-      for (int i=1; i<=number_of_nodes; i++)
-      {
-        int id;
-        double x,y,z;
-        fscanf(file,"%d %lg %lg %lg\n",&id,&x,&y,&z);
-        //          if (verbose) std::cout << id << " " << x << " " << y << " " << z << std::endl;
-        if (id!=i)
-          DUNE_THROW(Dune::IOError, "expected id " << i);
-
-        Dune::FieldVector<double,dim> position;
-        position[0] = x; position[1] = y; position[2] = z;
-        factory.insertVertex(position);
-      }
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$EndNodes")!=0)
-        DUNE_THROW(Dune::IOError, "expected $EndNodes");
-
-      // element section
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$Elements")!=0)
-        DUNE_THROW(Dune::IOError, "expected $Elements");
-      int number_of_elements;
-      fscanf(file,"%d\n",&number_of_elements);
-      if (verbose) std::cout << "file contains " << number_of_elements << " elements" << std::endl;
-      int number_of_tetrahedra=0;
-      for (int i=1; i<=number_of_elements; i++)
-      {
-        int id, elm_type, number_of_tags;
-        fscanf(file,"%d %d %d",&id,&elm_type,&number_of_tags);
-        if (elm_type!=4)
-          fgets(buf,512,file);   // skip rest of line if no tetrahedron
-        else
-        {
-          int physical_entity, elementary_entity, mesh_partition;
-          for (int k=1; k<=number_of_tags; k++)
-          {
-            int blub;
-            fscanf(file,"%d",&blub);
-            if (k==1) physical_entity = blub;
-            if (k==2) elementary_entity = blub;
-            if (k==3) mesh_partition = blub;
-          }
-          std::vector<unsigned int> simplexVertices(4);
-          fscanf(file,"%d %d %d %d\n",&(simplexVertices[0]),&(simplexVertices[1]),
-                 &(simplexVertices[2]),&(simplexVertices[3]));
-          for (int k=0; k<4; k++) simplexVertices[k] -= 1;
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),
-                                simplexVertices);
-        }
-      }
-      fscanf(file,"%s\n",buf);
-      if (strcmp(buf,"$EndElements")!=0)
-        DUNE_THROW(Dune::IOError, "expected $EndElements");
-
-      fclose(file);
-
-      return factory.createGrid();
-    }
   };
 
   /**
-     \ingroup Gmsh
+     \ingroup Gmesh
 
-     \brief Read Gmsh mesh file
+     \brief Read Gmesh mesh file
 
-     Read a .msh file generated using Gmsh and construct a grid using the grid factory interface.
+     Read a .msh file generated using Gmesh and construct a grid using the grid factory interface.
    */
   template<typename GridType>
-  class GmshReader
+  class GmeshReader
   {
   public:
     /** \todo doc me */
-    static GridType* read (const std::string& fileName,
-                           bool verbose = true)
+    static GridType* read (const std::string& fileName, bool verbose = true)
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory;
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose);
+      std::vector<int> boundary_id_to_physical_entity;
+      std::vector<int> element_index_to_physical_entity;
+
+      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                                boundary_id_to_physical_entity,
+                                                                element_index_to_physical_entity);
+    }
+
+    /** \todo doc me */
+    template<typename T>
+    static GridType* read (const std::string& fileName, std::vector<T>& boundary_id_to_physical_entity,
+                           std::vector<T>& element_index_to_physical_entity, bool verbose = true)
+    {
+      // make a grid factory
+      Dune::GridFactory<GridType> factory;
+
+      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                                boundary_id_to_physical_entity,
+                                                                element_index_to_physical_entity);
     }
 
     /** \todo doc me */
@@ -823,7 +853,28 @@ namespace Dune {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose);
+      // store dummy
+      std::vector<int> boundary_id_to_physical_entity;
+      std::vector<int> element_index_to_physical_entity;
+
+      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                                boundary_id_to_physical_entity,
+                                                                element_index_to_physical_entity);
+    }
+
+    /** \todo doc me */
+    template<typename T>
+    static GridType* read (GridType& grid, const std::string& fileName,
+                           std::vector<T>& boundary_id_to_physical_entity,
+                           std::vector<T>& element_index_to_physical_entity,
+                           bool verbose = true)
+    {
+      // make a grid factory
+      Dune::GridFactory<GridType> factory(&grid);
+
+      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                                boundary_id_to_physical_entity,
+                                                                element_index_to_physical_entity);
     }
   };
 
