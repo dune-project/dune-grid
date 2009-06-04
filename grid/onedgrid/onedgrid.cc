@@ -42,6 +42,13 @@ namespace Dune {
 
 }
 
+Dune::OneDGrid::OneDGrid()
+  : refinementType_(LOCAL),
+    leafIndexSet_(*this),
+    idSet_(*this),
+    freeVertexIdCounter_(0),
+    freeElementIdCounter_(0)
+{}
 
 Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype& rightBoundary)
   : refinementType_(LOCAL),

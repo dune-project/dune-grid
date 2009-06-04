@@ -7,9 +7,11 @@
 #include <list>
 
 #include <dune/common/misc.hh>
-#include <dune/grid/common/capabilities.hh>
 #include <dune/common/collectivecommunication.hh>
+
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/gridfactory.hh>
 
 
 /** \file
@@ -108,8 +110,14 @@ namespace Dune {
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
 
+    template <class GridType_>
+    friend class GridFactory;
+
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
+
+    /** \brief Default constructor for the GridFactory */
+    OneDGrid();
 
     // **********************************************************
     // The Interface Methods
