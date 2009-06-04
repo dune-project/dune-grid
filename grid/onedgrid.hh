@@ -445,4 +445,12 @@ namespace Dune {
 
 } // namespace Dune
 
+// Include the GridFactory specialization for OneDGrid, so everybody
+// who includes the grid also gets the factory.  Since OneDGrid is
+// not a template class, it needs to be a complete type before
+// GridFactory<OneDGrid> can be defined.  This is why the #include-
+// directive is at _the end_ of this file.
+#include <dune/grid/onedgrid/onedgridfactory.hh>
+
+
 #endif

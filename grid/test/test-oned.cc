@@ -8,7 +8,6 @@
 #include <memory>
 
 #include <dune/grid/onedgrid.hh>
-#include <dune/grid/onedgrid/onedgridfactory.hh>
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
