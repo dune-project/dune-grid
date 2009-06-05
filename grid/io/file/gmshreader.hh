@@ -453,6 +453,7 @@ namespace Dune {
                                         Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
       : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
     {
+      sqrt2 = sqrt(2.0);
       Dune::FieldVector<double,3> d1,d2;
 
       d1 = p3; d1 -= p0;
@@ -469,11 +470,12 @@ namespace Dune {
 
       d1 = p4; d1 -= p1;
       d2 = p2; d2 -= p4;
-      gamma=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+      gamma=sqrt2*(d1.two_norm()/(d1.two_norm()+d2.two_norm()));
       if (gamma<1E-6 || gamma>1-1E-6)
         DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
 
-      sqrt2 = sqrt(2.0);
+      //         alpha = beta = 0.5;
+      //         gamma = 0.5*sqrt2;
     }
 
     virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
