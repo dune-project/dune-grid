@@ -19,6 +19,10 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
+#ifdef ModelP
+#include <mpi.h>
+#endif
+
 using namespace Dune;
 
 class ArcOfCircle : public Dune::BoundarySegment<2>
