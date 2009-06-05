@@ -9,9 +9,8 @@
 #include <vector>
 #include <dune/common/exceptions.hh>
 #include <dune/common/helpertemplates.hh>
-#include <dune/common/bartonnackmanifcheck.hh>
-
 #include <dune/grid/common/grid.hh>
+
 
 /** @file
         @author Peter Bastian
@@ -20,6 +19,9 @@
 
 namespace Dune
 {
+
+#include <dune/common/bartonnackmanifcheck.hh>
+
   /** @brief Index Set %Interface base class.
 
      This class template is used as a base class for all index set implementations.
@@ -246,6 +248,8 @@ namespace Dune
 
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
+
+
 
   /**\brief Provide default implementation of method if IndexSet
          @ingroup GridDevel
