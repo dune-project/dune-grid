@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GMESHREADER_HH
-#define DUNE_GMESHREADER_HH
+#ifndef DUNE_GMSHREADER_HH
+#define DUNE_GMSHREADER_HH
 
 #include <iostream>
 #include <fstream>
@@ -19,12 +19,12 @@
 namespace Dune {
 
   /**
-     \ingroup Gmesh
+     \ingroup Gmsh
      \{
    */
 
   //! Options for read operation
-  struct GmeshReaderOptions
+  struct GmshReaderOptions
   {
     enum GeometryOrder {
       /** @brief edges are straight lines. */
@@ -36,16 +36,16 @@ namespace Dune {
 
   // arbitrary dimension, implementation is in specialization
   template<int dimension>
-  class GmeshReaderLinearBoundarySegment
+  class GmshReaderLinearBoundarySegment
   {};
 
 
   // linear boundary segments in 1d
   template<>
-  class GmeshReaderLinearBoundarySegment<2> : public Dune::BoundarySegment<2>
+  class GmshReaderLinearBoundarySegment<2> : public Dune::BoundarySegment<2>
   {
   public:
-    GmeshReaderLinearBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_)
+    GmshReaderLinearBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_)
       : p0(p0_), p1(p1_)
     {}
 
@@ -66,7 +66,7 @@ namespace Dune {
 
   // arbitrary dimension, implementation is in specialization
   template<int dimension>
-  class GmeshReaderQuadraticBoundarySegment
+  class GmshReaderQuadraticBoundarySegment
   {};
 
   // quadratic boundary segments in 1d
@@ -82,11 +82,11 @@ namespace Dune {
      alpha is determined automatically from the given points.
    */
   template <>
-  class GmeshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
+  class GmshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
   {
   public:
-    GmeshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
-                                         Dune::FieldVector<double,2> p2_)
+    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
+                                        Dune::FieldVector<double,2> p2_)
       : p0(p0_), p1(p1_), p2(p2_)
     {
       Dune::FieldVector<double,2> d1(p1);
@@ -118,11 +118,11 @@ namespace Dune {
 
   // arbitrary dimension, implementation is in specialization
   template<typename GridType, int dimension>
-  class GmeshReaderImp
+  class GmshReaderImp
   {};
 
   template<typename GridType>
-  class GmeshReaderImp<GridType,2>
+  class GmshReaderImp<GridType,2>
   {
   public:
 
@@ -159,7 +159,7 @@ namespace Dune {
       fscanf(file,"%d %d %d\n",&version_number,&file_type,&data_size);
       if (version_number!=2)
         DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmesh file detected" << std::endl;
+      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
@@ -341,7 +341,7 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new GmeshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -351,9 +351,9 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new GmeshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
-                                                                                            nodes[simplexVertices[2]],
-                                                                                            nodes[simplexVertices[1]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
+                                                                                           nodes[simplexVertices[2]],
+                                                                                           nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -395,11 +395,11 @@ namespace Dune {
 
   // linear boundary segments in 2d
   template <>
-  class GmeshReaderLinearBoundarySegment<3> : public Dune::BoundarySegment<3>
+  class GmshReaderLinearBoundarySegment<3> : public Dune::BoundarySegment<3>
   {
   public:
-    GmeshReaderLinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                                      Dune::FieldVector<double,3> p2_)
+    GmshReaderLinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
+                                     Dune::FieldVector<double,3> p2_)
       : p0(p0_), p1(p1_), p2(p2_)
     {
       //        std::cout << "created boundary segment " << p0 << " | " << p1 << " | " << p2 << std::endl;
@@ -445,12 +445,12 @@ namespace Dune {
      global coordinates.
    */
   template <>
-  class GmeshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
+  class GmshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
   {
   public:
-    GmeshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
-                                         Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
-                                         Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
+    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
+                                        Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
+                                        Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
       : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
     {
       Dune::FieldVector<double,3> d1,d2;
@@ -525,7 +525,7 @@ namespace Dune {
 
 
   template<typename GridType>
-  class GmeshReaderImp<GridType,3>
+  class GmshReaderImp<GridType,3>
   {
   public:
 
@@ -562,7 +562,7 @@ namespace Dune {
       fscanf(file,"%d %d %d\n",&version_number,&file_type,&data_size);
       if (version_number!=2)
         DUNE_THROW(Dune::IOError, "can only read version_number==2");
-      if (verbose) std::cout << "version 2 Gmesh file detected" << std::endl;
+      if (verbose) std::cout << "version 2 Gmsh file detected" << std::endl;
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndMeshFormat")!=0)
         DUNE_THROW(Dune::IOError, "expected $EndMeshFormat");
@@ -751,7 +751,7 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
 
-          factory.insertBoundarySegment(vertices,new GmeshReaderLinearBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -764,8 +764,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices first three vertices
 
-          factory.insertBoundarySegment(vertices,new GmeshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
-                                                                                            nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
+                                                                                           nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -809,14 +809,14 @@ namespace Dune {
   };
 
   /**
-     \ingroup Gmesh
+     \ingroup Gmsh
 
-     \brief Read Gmesh mesh file
+     \brief Read Gmsh mesh file
 
-     Read a .msh file generated using Gmesh and construct a grid using the grid factory interface.
+     Read a .msh file generated using Gmsh and construct a grid using the grid factory interface.
    */
   template<typename GridType>
-  class GmeshReader
+  class GmshReader
   {
   public:
     /** \todo doc me */
@@ -828,9 +828,9 @@ namespace Dune {
       std::vector<int> boundary_id_to_physical_entity;
       std::vector<int> element_index_to_physical_entity;
 
-      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                                boundary_id_to_physical_entity,
-                                                                element_index_to_physical_entity);
+      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                               boundary_id_to_physical_entity,
+                                                               element_index_to_physical_entity);
     }
 
     /** \todo doc me */
@@ -841,9 +841,9 @@ namespace Dune {
       // make a grid factory
       Dune::GridFactory<GridType> factory;
 
-      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                                boundary_id_to_physical_entity,
-                                                                element_index_to_physical_entity);
+      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                               boundary_id_to_physical_entity,
+                                                               element_index_to_physical_entity);
     }
 
     /** \todo doc me */
@@ -857,9 +857,9 @@ namespace Dune {
       std::vector<int> boundary_id_to_physical_entity;
       std::vector<int> element_index_to_physical_entity;
 
-      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                                boundary_id_to_physical_entity,
-                                                                element_index_to_physical_entity);
+      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                               boundary_id_to_physical_entity,
+                                                               element_index_to_physical_entity);
     }
 
     /** \todo doc me */
@@ -872,9 +872,9 @@ namespace Dune {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
 
-      return GmeshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                                boundary_id_to_physical_entity,
-                                                                element_index_to_physical_entity);
+      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
+                                                               boundary_id_to_physical_entity,
+                                                               element_index_to_physical_entity);
     }
   };
 
