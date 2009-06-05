@@ -250,6 +250,7 @@
 
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/misc.hh>
 #include <dune/common/helpertemplates.hh>
 #include "base.cc"
 
@@ -283,19 +284,6 @@ namespace Dune {
           prod *= i;
         return prod;
       }
-
-      /*! @brief Calculate factorial at compile time
-
-         @param n Number to take the factorial from
-       */
-      template<int n> struct Factorial {
-        enum {
-          //! Value of the factorial @hideinitializer
-          value = Factorial<n-1>::value * n
-        };
-      };
-      template<> struct Factorial<0>
-      { enum { value = 1 }; };
 
       /*! @brief calculate \f$\left({upper}\atop{lower}\right)\f$
 
@@ -626,7 +614,7 @@ namespace Dune {
         const Geometry &geometry() const;
       protected:
         typedef FieldVector<int, dimension> Vertex;
-        enum { nKuhnSimplices = Factorial<dimension>::value };
+        enum { nKuhnSimplices = Factorial<dimension>::factorial };
 
         Vertex origin;
         int kuhnIndex;

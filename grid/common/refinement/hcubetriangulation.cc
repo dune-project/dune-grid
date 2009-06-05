@@ -34,6 +34,7 @@
 
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/misc.hh>
 #include "base.cc"
 #include "simplex.cc"
 
@@ -55,7 +56,6 @@ namespace Dune {
       //
 
       using Simplex::factorial;
-      using Simplex::Factorial;
       using Simplex::binomial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
@@ -121,7 +121,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       nVertices(int level)
       {
-        return BackendRefinement::nVertices(level) * Factorial<dimension>::value;
+        return BackendRefinement::nVertices(level) * Factorial<dimension>::factorial;
       }
 
       template<int dimension, class CoordType>
@@ -145,7 +145,7 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::
       nElements(int level)
       {
-        return BackendRefinement::nElements(level) * Factorial<dimension>::value;
+        return BackendRefinement::nElements(level) * Factorial<dimension>::factorial;
       }
 
       template<int dimension, class CoordType>
@@ -187,7 +187,7 @@ namespace Dune {
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<dimension>::SubEntityIterator BackendIterator;
-        enum { nKuhnSimplices = Factorial<dimension>::value };
+        enum { nKuhnSimplices = Factorial<dimension>::factorial };
 
         int level;
 
@@ -258,7 +258,7 @@ namespace Dune {
       protected:
         typedef typename Refinement::BackendRefinement BackendRefinement;
         typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
-        enum { nKuhnSimplices = Factorial<dimension>::value };
+        enum { nKuhnSimplices = Factorial<dimension>::factorial };
 
         int level;
 
@@ -422,7 +422,7 @@ namespace Dune {
         { return backend->geometry().checkInside(local); }
 
         ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        { return backend->geometry().integrationElement(local) / Factorial<dimension>::value; }
+        { return backend->geometry().integrationElement(local) / Factorial<dimension>::factorial; }
 
         const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
         {

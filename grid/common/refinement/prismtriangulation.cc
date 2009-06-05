@@ -7,6 +7,7 @@
 
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/misc.hh>
 #include "base.cc"
 #include "simplex.cc"
 
@@ -28,7 +29,6 @@ namespace Dune {
       //
 
       using Simplex::factorial;
-      using Simplex::Factorial;
       using Simplex::binomial;
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
@@ -406,7 +406,7 @@ namespace Dune {
         { return backend->geometry().checkInside(local); }
 
         ct integrationElement(const FieldVector<ct, mydimension>& local) const
-        { return backend->geometry().integrationElement(local) / Factorial<dimension>::value; }
+        { return backend->geometry().integrationElement(local) / Factorial<dimension>::factorial; }
 
         const FieldMatrix<ct, mydimension, mydimension>& jacobianInverse(const FieldVector<ct, mydimension>& local) const
         {
