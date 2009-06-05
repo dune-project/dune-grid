@@ -11,20 +11,6 @@ namespace Dune
   namespace GenericGeometry
   {
 
-    template< unsigned int n >
-    struct Faculty
-    {
-      enum { value = n * Faculty< n-1 > :: value };
-    };
-
-    template<>
-    struct Faculty< 0 >
-    {
-      enum { value = 1 };
-    };
-
-
-
     template< bool condition, template< bool > class True, template< bool > class False >
     struct ProtectedIf;
 
