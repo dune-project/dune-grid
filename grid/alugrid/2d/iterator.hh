@@ -743,7 +743,7 @@ namespace Dune {
   // --HierarchicIterator
   //***************************************************************
 
-  //! Hierarichic Iterator of ALU2dGrid
+  //! Hierarchic Iterator of ALU2dGrid
   template<class GridImp>
   class ALU2dGridHierarchicIterator
     : public ALU2dGridEntityPointer<0,GridImp>
