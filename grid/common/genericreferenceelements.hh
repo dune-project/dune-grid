@@ -448,16 +448,16 @@ namespace Dune
       switch( type.basicType() )
       {
       case GeometryType::simplex :
-        return simplex_;
+        return simplex();
 
       case GeometryType::cube :
-        return cube_;
+        return cube();
 
       case GeometryType::pyramid :
-        return pyramid_;
+        return pyramid();
 
       case GeometryType::prism :
-        return prism_;
+        return prism();
 
       default :
         DUNE_THROW( RangeError, "Unknown geometry type: " << type );
@@ -472,6 +472,16 @@ namespace Dune
     const value_type &cube () const
     {
       return cube_;
+    }
+
+    const value_type &pyramid () const
+    {
+      return pyramid_;
+    }
+
+    const value_type &prism () const
+    {
+      return prism_;
     }
 
     static const GenericReferenceElementContainer &instance ()
