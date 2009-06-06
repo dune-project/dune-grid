@@ -288,12 +288,12 @@ namespace Dune
     inline static int check_inside (DUNE_ELEM * he, const double * w);
 
     // dito
-    template <class EntityType>
-    inline int checkInside(EntityType &en, const double * w);
+    template< class Entity >
+    int checkInside ( const Entity &entity, const double *w );
 
     // dito
-    template <class EntityType>
-    inline int  world_to_local(EntityType &en, const double * w, double * c);
+    template< class Entity >
+    int world_to_local ( const Entity &entity, const double *w, double *c );
 
     // dito
     template <class EntityType>

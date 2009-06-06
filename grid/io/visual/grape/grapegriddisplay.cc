@@ -1,5 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include <dune/grid/common/genericreferenceelements.hh>
+
 namespace Dune
 {
 
@@ -709,19 +711,21 @@ namespace Dune
   }
 
   // checkInside
-  template<class GridType> template <class EntityType>
-  inline int GrapeGridDisplay<GridType>::
-  checkInside(EntityType &en, const double * c)
+  template< class GridType >
+  template< class Entity >
+  inline int GrapeGridDisplay< GridType >
+  ::checkInside( const Entity &entity, const double *c )
   {
-    enum { dim = EntityType::dimension };
+    const int dim = Entity::dimension;
 
-    for(int i=0; i<dim; i++) localVec_[i] = c[i];
+    for( int i = 0; i < dim; ++i )
+      localVec_[ i ] = c[ i ];
 
     // see hmesh doc page 32, if point is inside, -1 has to be returned
     // otherwise local face , grrrr
-    int isInside = (en.geometry().checkInside(localVec_) == true) ? -1 : 0;
-
-    return isInside;
+    const GenericReferenceElement< double, dim > &refElement
+      = GenericReferenceElements< double, dim >::general( entity.type() );
+    return (refElement.checkInside( localVec_ ) ? -1 : 0);
   }
 
   // check inside
@@ -764,20 +768,25 @@ namespace Dune
   }
 
   // world to local
-  template<class GridType> template <class EntityType>
-  inline int GrapeGridDisplay<GridType>::
-  world_to_local(EntityType &en, const double * w, double * c)
+  template< class GridType >
+  template< class Entity >
+  inline int GrapeGridDisplay< GridType >
+  ::world_to_local( const Entity &entity, const double *w, double *c )
   {
-    enum { dim      = EntityType::dimension };
-    enum { dimworld = EntityType::dimensionworld };
+    const int dim = Entity::dimension;
+    const int dimworld = Entity::dimensionworld;
 
-    for(int i=0; i<dimworld; i++) globalVec_[i] = w[i];
+    const typename Entity::Geometry &geometry = entity.geometry();
 
-    localVec_ = en.geometry().local(globalVec_);
+    for( int i = 0; i < dimworld; ++i )
+      globalVec_[ i ] = w[ i ];
+    localVec_ = geometry.local( globalVec_ );
+    for( int i = 0; i < dim; ++i )
+      c[ i ] = localVec_[ i ];
 
-    for(int i=0; i<dim; ++i) c[i] = localVec_[i];
-
-    return (en.geometry().checkInside(localVec_) == true) ? -1 : 0;
+    const GenericReferenceElement< double, dim > &refElement
+      = GenericReferenceElements< double, dim >::general( geometry.type() );
+    return (refElement.checkInside( localVec_ ) ? -1 : 0);
   }
 
   // world to local
