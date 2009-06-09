@@ -555,7 +555,10 @@ namespace Dune {
 #endif
 
 #ifdef ModelP
+#ifndef PRINTED_PARALLEL_UG_ISLEAF_WARNING
 #warning Method isLeaf() for nodes will not work properly in case of vertical load balancing
+#define PRINTED_PARALLEL_UG_ISLEAF_WARNING
+#endif // #ifndef PRINTED_PARALLEL_UG_ISLEAF_WARNING
 #endif
       return !theNode->son;
     }
