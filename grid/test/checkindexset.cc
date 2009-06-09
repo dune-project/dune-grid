@@ -9,7 +9,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/referenceelements.hh>
-
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <map>
 #include <set>
@@ -54,9 +54,13 @@ namespace Dune
     assert( type == en.geometry().type() );
     const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
 
+#if NEW_SUBENTITY_NUMBERING
+    const GenericReferenceElement< coordType, dim > &refElem
+      = GenericReferenceElements< coordType, dim >::general( type );
+#else
     const ReferenceElement< coordType, dim > &refElem
       = ReferenceElements< coordType, dim >::general( type );
-
+#endif
 
     // check all subEntities of codimension  codim
     if(en.template count<codim>() != refElem.size(0,0,codim))
@@ -82,7 +86,11 @@ namespace Dune
       const int duneSubEntity = MapNumbering::generic2dune( topologyId, subEntity, codim );
 
       {
+#if NEW_SUBENTITY_NUMBERING
+        int numSubEntities = refElem.size( subEntity, codim, dim );
+#else
         int numSubEntities = refElem.size( duneSubEntity, codim, dim );
+#endif
         // every entity have at least one vertex
         assert( numSubEntities > 0 );
 
@@ -92,8 +100,12 @@ namespace Dune
 
         for( int j = 0; j < numSubEntities; ++j )
         {
+#if NEW_SUBENTITY_NUMBERING
+          local[ j ] = refElem.subEntity ( subEntity, codim, j, dim );
+#else
           const int k = refElem.subEntity( duneSubEntity, codim, j, dim );
           local[ j ] = MapNumbering::dune2generic( topologyId, k, dim );
+#endif
         }
 
         sout << numSubEntities << " vertices on subEntity< codim = " << codim << " >" << std::endl;
@@ -134,7 +146,11 @@ namespace Dune
 
         for( int j = 0; j < numSubEntities; ++j )
         {
+#if NEW_SUBENTITY_NUMBERING
+          const int tid = Dune::GenericGeometry::topologyId( refElem.type( subEntity, codim ) );
+#else
           const int tid = Dune::GenericGeometry::topologyId( refElem.type( duneSubEntity, codim ) );
+#endif
           const int gj = Dune::GenericGeometry::MapNumberingProvider< dim-codim >::template dune2generic< dim-codim >( tid, j );
 
           {
@@ -403,12 +419,17 @@ namespace Dune
 
       GeometryType type = refit->type();
 
-      const ReferenceElement< coordType, dim > & refElem =
-        ReferenceElements< coordType, dim >::general(type);
+#if NEW_SUBENTITY_NUMBERING
+      const GenericReferenceElement< coordType, dim > &refElem
+        = GenericReferenceElements< coordType, dim >::general( type );
+#else
+      const ReferenceElement< coordType, dim > &refElem
+        = ReferenceElements< coordType, dim >::general( type );
+#endif
 
       // print dune reference element
       sout << "Dune reference element provides: \n";
-      for(int i=0; i<refElem.size(codim); i++)
+      for(int i = 0; i < refElem.size( codim ); ++i )
       {
         sout << i << " subEntity [";
         int s = refElem.size(i,codim,dim);
