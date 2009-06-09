@@ -52,12 +52,12 @@ namespace Dune
 
     const GeometryType type = en.type();
     assert( type == en.geometry().type() );
-    const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
 
 #if NEW_SUBENTITY_NUMBERING
     const GenericReferenceElement< coordType, dim > &refElem
       = GenericReferenceElements< coordType, dim >::general( type );
 #else
+    const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
     const ReferenceElement< coordType, dim > &refElem
       = ReferenceElements< coordType, dim >::general( type );
 #endif
@@ -83,7 +83,9 @@ namespace Dune
       typedef std::pair< int, GeometryType > SubEntityKeyType;
       typedef Dune::GenericGeometry::MapNumberingProvider< dim > MapNumbering;
 
+#if ! NEW_SUBENTITY_NUMBERING
       const int duneSubEntity = MapNumbering::generic2dune( topologyId, subEntity, codim );
+#endif
 
       {
 #if NEW_SUBENTITY_NUMBERING
