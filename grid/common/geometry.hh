@@ -195,9 +195,12 @@ namespace Dune
 
     /** \brief Return the transposed of the Jacobian
      *
-     *  \param[in]  local  Position \f$x \in D\f$
+     *  The Jacobian is defined in the documentation of
+     *  \ref Dune::Geometry::integrationElement "integrationElement".
      *
-     *  \return \f$J_g^{T}( x )\f$
+     *  \param[in]  local  position \f$x\in D\f$
+     *
+     *  \return \f$J_g^T(x)\f$
      */
     const FieldMatrix< ctype, mydim, cdim > &
     jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const
@@ -206,20 +209,23 @@ namespace Dune
     }
 
     /** \brief Return inverse of transposed of Jacobian
-
-       The jacobian is defined in the documentation of Dune::Geometry::integrationElement().
-
-       \param[in] local Position \f$x\in D\f$
-       \return \f$J_g^{-T}(x)\f$
-
-       The use of this function is to compute the gradient of some function
-       \f$ f : W \to \textbf{R} \f$ at some position \f$y=g(x)\f$ with \f$x\in D\f$ and
-       \f$g\f$ the transformation of the Geometry. When we set \f$\hat{f}(x) = f(g(x))\f$
-       and apply the chain rule we get
-       \f[\nabla f (g(x)) = J_g^{-T}(x) \nabla \hat{f}(x). \f]
-
-       \note This function may only be called in the case \f$\textrm{cdim}=\textrm{mydim}\f$
-       because otherwise the inverse is not defined.
+     *
+     *  The Jacobian is defined in the documentation of
+     *  \ref Dune::Geometry::integrationElement "integrationElement".
+     *
+     *  \param[in]  local  position \f$x\in D\f$
+     *  \return \f$J_g^{-T}(x)\f$
+     *
+     *  The use of this function is to compute the gradient of some function
+     *  \f$f : W \to \textbf{R}\f$ at some position \f$y=g(x)\f$, where
+     *  \f$x\in D\f$ and \f$g\f$ the transformation of the Geometry.
+     *  When we set \f$\hat{f}(x) = f(g(x))\f$ and apply the chain rule we obtain
+     *  \f[\nabla f(g(x)) = J_g^{-T}(x) \nabla \hat{f}(x).\f]
+     *
+     *  \note In the non-symmetric case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
+     *        pseudoinverse of \f$J_g^T(x)\f$ is returned.
+     *        This means that it is inverse for all tangential vectors in
+     *        \f$g(x)\f$ while mapping all normal vectors to zero.
      */
     const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
     {
