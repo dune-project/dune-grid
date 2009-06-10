@@ -3,7 +3,7 @@
 #ifndef DUNE_NUMBERING_HH
 #define DUNE_NUMBERING_HH
 
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 
 namespace Dune {
 

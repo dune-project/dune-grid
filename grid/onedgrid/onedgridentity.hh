@@ -3,7 +3,7 @@
 #ifndef DUNE_ONE_D_GRID_ENTITY_HH
 #define DUNE_ONE_D_GRID_ENTITY_HH
 
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 
 /** \file
  * \brief The OneDGridEntity class and its specializations

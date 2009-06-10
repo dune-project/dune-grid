@@ -5,7 +5,7 @@
 
 #ifdef ENABLE_ALUGRID
 
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
 
 #include <dune/grid/common/gridfactory.hh>

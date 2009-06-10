@@ -3,7 +3,7 @@
 #ifndef DUNE_GENERICGEOMETRY_REFERENCEDOMAIN_HH
 #define DUNE_GENERICGEOMETRY_REFERENCEDOMAIN_HH
 
-#include <dune/common/fixedarray.hh>
+#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 
 #include <dune/grid/genericgeometry/misc.hh>
