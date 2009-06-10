@@ -241,6 +241,21 @@ namespace Dune {
       return volume();
     }
 
+    //! Compute the transposed of the jacobi matrix
+    FieldMatrix<ctype,mydim,cdim>& jacobianTransposed (const FieldVector<ctype, mydim>& local) const
+    {
+      JT = 0.0;
+      int k=0;
+      for (int i=0; i<cdim; ++i)
+      {
+        if (i != missing)
+        {
+          JT[k][i] = extension[i];     // set diagonal element
+          k++;
+        }
+      }
+      return JT;
+    }
     //! Compute the transposed of the inverse jacobi matrix
     FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
     {
@@ -307,7 +322,8 @@ namespace Dune {
 
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
-    mutable FieldMatrix<ctype, cdim, mydim> Jinv; // the jacobian inverse
+    mutable FieldMatrix<ctype, mydim, cdim> JT;   // the transposed of the jacobian
+    mutable FieldMatrix<ctype, cdim, mydim> Jinv; // the transposed of the jacobian inverse
     mutable FieldMatrix<ctype,  Power_m_p<2,mydim>::power, cdim> coord_; // the coordinates
 
     const YaspGeometry<mydim,cdim,GridImp>&
@@ -384,6 +400,16 @@ namespace Dune {
       return vol;
     }
 
+    //! Compute the transposed of the jacobi matrix
+    FieldMatrix<ctype,mydim,mydim>& jacobianTransposed (const FieldVector<ctype, mydim>& local) const
+    {
+      for (int i=0; i<mydim; ++i)
+      {
+        JT[i] = 0.0;                        // set column to zero
+        JT[i][i] = extension[i];         // set diagonal element
+      }
+      return JT;
+    }
     //! Compute the transposed of the inverse jacobi matrix
     FieldMatrix<ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
     {
@@ -439,7 +465,7 @@ namespace Dune {
 
     // In addition we need memory in order to return references.
     // Possibly we should change this in the interface ...
-    mutable FieldMatrix<ctype, mydim, mydim> Jinv; // the jacobian inverse
+    mutable FieldMatrix<ctype, mydim, mydim> Jinv,JT; // the transpose of the jacobian and its inverse inverse
     mutable FieldMatrix<ctype, Power_m_p<2,mydim>::power, mydim> coord_; // the coordinates
 
     // disable copy
@@ -479,6 +505,12 @@ namespace Dune {
       return 1.0;
     }
 
+    //! Compute the transposed of the jacobi matrix
+    FieldMatrix<ctype,cdim,0>& jacobianTransposed (const FieldVector<ctype, 0>& local) const
+    {
+      static FieldMatrix<ctype,cdim,0> JT(0.0);
+      return JT;
+    }
     //! Compute the transposed of the inverse jacobi matrix
     FieldMatrix<ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<ctype, 0>& local) const
     {
