@@ -1,3 +1,4 @@
+// -*- tab-width: 4; indent-tabs-mode: nil -*-
 /* This file determines the order how things appear in the doxygen
    documentation within the Grid group. It works like this:
 
@@ -84,6 +85,11 @@
   /** @defgroup IO I/O
       @ingroup Grid
   */
+
+        /** @defgroup GridFactory GridFactory
+	        @ingroup IO
+                @brief An interface for the creation of macro grids, for use by grid file readers etc.
+          */
 
         /** @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
             @ingroup IO */

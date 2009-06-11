@@ -165,6 +165,7 @@ namespace Dune
 
 
   /** \brief Specialization of the generic GridFactory for ALUSimplexGrid<3,3>
+   *  \ingroup GridFactory
    */
   template<>
   class GridFactory< ALUSimplexGrid< 3, 3 > >
@@ -196,6 +197,7 @@ namespace Dune
 
 
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
+   *  \ingroup GridFactory
    */
   template<>
   class GridFactory< ALUCubeGrid< 3, 3 > >

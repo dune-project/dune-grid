@@ -17,8 +17,9 @@
 
 namespace Dune {
 
-
   /** \brief Provide a generic factory class for unstructured grids.
+
+      \ingroup GridFactory
 
       This base class declares the interface.
    */
@@ -85,6 +86,8 @@ namespace Dune {
 
 
   /** \brief Provide a generic factory class for unstructured grids.
+
+      \ingroup GridFactory
 
       This is the unspecialized class, which does nothing.  All work is
       done in the specializations for the different grid types.

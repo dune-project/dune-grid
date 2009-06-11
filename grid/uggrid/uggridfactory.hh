@@ -18,7 +18,10 @@
 
 namespace Dune {
 
+
   /** \brief Specialization of the generic GridFactory for UGGrid
+
+      \ingroup GridFactory
 
      <p>
      If you want to write a routine that reads a grid from some

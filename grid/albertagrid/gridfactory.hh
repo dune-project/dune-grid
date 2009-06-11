@@ -23,6 +23,8 @@ namespace Dune
 
   /** \brief specialization of the generic GridFactory for AlbertaGrid
    *
+   *  \ingroup GridFactory
+   *
    *  The GridFactory for AlbertaGrid adds some extensions to the standard
    *  GridFactoryInterface. It provides the following additional features:
    *  - It allows to set boundary ids via insertBoundary. For ALBERTA 1.2,
