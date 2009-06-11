@@ -149,7 +149,8 @@ namespace Dune
     enum { dim = Grid::dimension };
     typedef typename Grid::template Codim< 0 >::Entity Entity;
 
-    //! return number of components
+    //! return number of components (1 for scalar valued functions, 3 for
+    //! vector valued function in 3D etc.)
     virtual int ncomps () const = 0;
 
     //! evaluate single component comp in the entity e at local coordinates xi
