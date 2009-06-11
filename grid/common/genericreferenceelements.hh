@@ -635,20 +635,26 @@ namespace Dune
   // GenericReferenceElements
   // ------------------------
 
+  /** \brief Class providing access to the singletons of the gneric reference elements
+   *  \ingroup GridGenericReferenceElements
+   */
   template< class ctype, int dim >
   struct GenericReferenceElements
   {
+    //! get general generic reference elements
     static const GenericReferenceElement< ctype, dim > &
     general ( const GeometryType &type )
     {
       return GenericReferenceElementContainer< ctype, dim >::instance() ( type );
     }
 
+    //! get simplex generic reference elements
     static const GenericReferenceElement< ctype, dim > &simplex ()
     {
       return GenericReferenceElementContainer< ctype, dim >::instance().simplex();
     }
 
+    //! get hypercube generic reference elements
     static const GenericReferenceElement< ctype, dim > &cube ()
     {
       return GenericReferenceElementContainer< ctype, dim >::instance().cube();
