@@ -3,9 +3,9 @@
 #ifndef DUNE_GENERICREFERENCEELEMENTS_HH
 #define DUNE_GENERICREFERENCEELEMENTS_HH
 
-// #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
-#include <dune/grid/genericgeometry/geometry.hh>
+#include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/grid/genericgeometry/hybridmapping.hh>
 
 namespace Dune
 {
