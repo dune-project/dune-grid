@@ -99,8 +99,10 @@ namespace Dune
     //! local coordinate in its reference element
     inline FieldVector<alu3d_ctype,  mydim> local (const FieldVector<alu3d_ctype, cdim>& global) const;
 
+#if 0
     //! returns true if the point in local coordinates is inside reference element
     inline bool checkInside(const FieldVector<alu3d_ctype, mydim>& local) const;
+#endif
 
     //! A(l) , see grid.hh
     inline alu3d_ctype integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const;
@@ -471,9 +473,11 @@ namespace Dune
     //! local coordinate in its reference element
     FieldVector<alu3d_ctype,  mydim> local (const FieldVector<alu3d_ctype, cdim>& global) const;
 
+#if 0
     //! returns true if the point in local coordinates is inside reference
     //! element
     bool checkInside(const FieldVector<alu3d_ctype, mydim>& local) const;
+#endif
 
     //! A(l) , see grid.hh
     alu3d_ctype integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const;

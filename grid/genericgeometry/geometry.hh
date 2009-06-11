@@ -425,11 +425,13 @@ namespace Dune
         return mapping().local( global );
       }
 
+#if 0
       /** \brief Return true if a given point is within the parameter domain */
       bool checkInside ( const LocalCoordinate &local ) const
       {
         return mapping().checkInside( local );
       }
+#endif
 
       /** \brief Return true if this is an affine geometry */
       bool affine () const

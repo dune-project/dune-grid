@@ -100,8 +100,10 @@ namespace Dune {
     //! maps a global coordinate within the element to a local coordinate in its reference element
     FieldVector<sgrid_ctype, mydim> local (const FieldVector<sgrid_ctype, cdim>& global) const;
 
+#if 0
     //! returns true if the point in local coordinates is located within the refelem
     bool checkInside (const FieldVector<sgrid_ctype, mydim>& local) const;
+#endif
 
     /*! Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
@@ -209,11 +211,13 @@ namespace Dune {
       return 1.;
     }
 
+#if 0
     //! returns always true
     bool checkInside (const FieldVector<sgrid_ctype, 0>& local) const
     {
       return true;
     }
+#endif
 
     //! can only be called for dim=dimworld!
     const FieldMatrix<sgrid_ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const

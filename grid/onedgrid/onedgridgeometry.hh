@@ -52,6 +52,7 @@ namespace Dune {
       return l;
     }
 
+#if 0
     /** \brief Returns true if the point is in the current element
 
        This method really doesn't make much sense for a zero-dimensional
@@ -60,6 +61,7 @@ namespace Dune {
     bool checkInside(const FieldVector<typename GridImp::ctype, 0> &local) const {
       return true;
     }
+#endif
 
 
     /** \brief !!!
@@ -158,12 +160,14 @@ namespace Dune {
       return l;
     }
 
+#if 0
     //! Returns true if the point is in the current element
     bool checkInside(const FieldVector<typename GridImp::ctype, coorddim> &global) const {
       return (storeCoordsLocally_)
              ? pos_[0][0] <= global[0] && global[0] <= pos_[1][0]
              : target_->vertex_[0]->pos_[0] <= global[0] && global[0] <= target_->vertex_[1]->pos_[0];
     }
+#endif
 
     /** ???
      */

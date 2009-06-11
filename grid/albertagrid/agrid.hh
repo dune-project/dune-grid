@@ -562,6 +562,12 @@ namespace Dune
       return getRealImplementation( intersection ).twistInNeighbor();
     }
 
+    const AlbertaGridIntersection< const This > &
+    getRealIntersection ( const typename Traits::LeafIntersection &intersection ) const
+    {
+      return getRealImplementation( intersection );
+    }
+
     template< class Intersection >
     DUNE_DEPRECATED
     const typename Base

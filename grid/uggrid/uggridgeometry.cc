@@ -162,6 +162,7 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
   return result;
 }
 
+#if 0
 template<int mydim, int coorddim, class GridImp>
 bool Dune::UGGridGeometry<mydim,coorddim,GridImp>::
 checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
@@ -211,6 +212,7 @@ checkInside(const Dune::FieldVector<UGCtype, mydim> &loc) const
   }
 
 }
+#endif
 
 
 template< int mydim, int coorddim, class GridImp>

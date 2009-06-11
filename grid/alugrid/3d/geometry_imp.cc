@@ -369,6 +369,8 @@ namespace Dune {
     return localCoord_;
   }
 
+
+#if 0
   template<int mydim, int cdim>
   inline bool ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::
   checkInside(const FieldVector<alu3d_ctype, mydim>& local) const
@@ -394,6 +396,8 @@ namespace Dune {
     }
     return true;
   }
+#endif
+
 
   // for elements this is already calculated
   template<>
@@ -604,6 +608,8 @@ namespace Dune {
     return tmp1_;
   }
 
+
+#if 0
   template <int mydim, int cdim>
   inline bool
   ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
@@ -616,6 +622,8 @@ namespace Dune {
     }
     return result;
   }
+#endif
+
 
   template<>
   inline alu3d_ctype

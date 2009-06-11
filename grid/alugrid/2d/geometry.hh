@@ -11,7 +11,9 @@
 
 // Local includes
 
-namespace Dune {
+namespace Dune
+{
+
   // Forward declarations
   template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
@@ -136,8 +138,10 @@ namespace Dune {
     //! local coordinate in its reference element
     FieldVector<alu2d_ctype,  mydim> local (const FieldVector<alu2d_ctype, cdim>& global) const;
 
+#if 0
     //! returns true if the point in local coordinates is inside reference element
     bool checkInside(const FieldVector<alu2d_ctype, mydim>& local) const;
+#endif
 
     //! A(l) , see grid.hh
     alu2d_ctype integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const;

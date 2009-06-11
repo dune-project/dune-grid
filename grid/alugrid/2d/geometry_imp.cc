@@ -382,6 +382,8 @@ namespace Dune {
     return Jinv_;
   }
 
+
+#if 0
   //! returns true if the point in local coordinates is inside reference element
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry <mydim, cdim, GridImp> :: checkInside(const FieldVector<alu2d_ctype, mydim>& local) const {
@@ -407,6 +409,8 @@ namespace Dune {
 
     return true;
   }
+#endif
+
 
   //! built Geometry
   template <int mydim, int cdim, class GridImp>

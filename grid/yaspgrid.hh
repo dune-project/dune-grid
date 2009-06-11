@@ -272,6 +272,7 @@ namespace Dune {
       return Jinv;
     }
 
+#if 0
     //! check whether local is inside reference element
     bool checkInside (const FieldVector<ctype, mydim>& local) const
     {
@@ -279,6 +280,7 @@ namespace Dune {
         if (local[i]<-yasptolerance || local[i]>1+yasptolerance) return false;
       return true;
     }
+#endif
 
     //! constructor from (storage for) midpoint and extension and missing direction number
     YaspGeometry (const FieldVector<ctype, cdim>& p, const FieldVector<ctype, cdim>& h, int& m)
@@ -421,6 +423,7 @@ namespace Dune {
       return Jinv;
     }
 
+#if 0
     //! check whether local is inside reference element
     bool checkInside (const FieldVector<ctype, mydim>& local) const
     {
@@ -428,6 +431,7 @@ namespace Dune {
         if (local[i]<-yasptolerance || local[i]>1+yasptolerance) return false;
       return true;
     }
+#endif
 
     //! constructor from (storage for) midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& p, const FieldVector<ctype, mydim>& h)

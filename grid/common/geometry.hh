@@ -13,6 +13,7 @@
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/exceptions.hh>
 
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include "referenceelements.hh"
 
@@ -151,12 +152,18 @@ namespace Dune
       return realGeometry.local(global);
     }
 
-    /** Return true if the point is in the reference element \f$D\f$ of the map
-       \deprecated Use the corresponding method in GenericReferenceElement
+    /** \brief Checks whether a point is in the reference element \f$D\f$
+     *
+     *  \param[in]  local  point \f$x\f$ to verify
+     *  \returns true, if \f$x\in D\f$ of.
+     *
+     *  \deprecated Use the corresponding method in GenericReferenceElement
      */
-    bool checkInside (const FieldVector<ctype, mydim>& local) const DUNE_DEPRECATED
+    bool checkInside ( const FieldVector< ctype, mydim > &local ) const DUNE_DEPRECATED
     {
-      return realGeometry.checkInside(local);
+      const GenericReferenceElement< ctype, mydim > &refElement
+        = GenericReferenceElements< ctype, mydim >::general( type() );
+      return refElement.checkInside( local );
     }
 
     /** \brief Return the factor appearing in the integral transformation formula

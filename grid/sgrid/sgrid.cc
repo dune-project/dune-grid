@@ -78,6 +78,7 @@ namespace Dune {
     return l;
   }
 
+#if 0
   template<int mydim, int cdim, class GridImp>
   inline bool SGeometry<mydim,cdim,GridImp>::checkInside (const FieldVector<sgrid_ctype, mydim>& local) const
   {
@@ -89,6 +90,7 @@ namespace Dune {
     }
     return true;
   }
+#endif
 
   template<int mydim, int cdim, class GridImp>
   inline sgrid_ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const

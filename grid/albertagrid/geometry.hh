@@ -279,7 +279,7 @@ namespace Dune
     GlobalVector corner ( const int i ) const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const GlobalVector &operator[] (int i) const;
+    const GlobalVector &operator[] ( const int i ) const;
 
     //! maps a local coordinate within reference element to
     //! global coordinate in element
@@ -289,8 +289,10 @@ namespace Dune
     //! local coordinate in its reference element
     LocalVector local ( const GlobalVector &global ) const;
 
+#if 0
     //! returns true if the point in local coordinates is inside reference element
     bool checkInside( const LocalVector &local ) const;
+#endif
 
     /*!
        Copy from sgrid.hh:
@@ -348,7 +350,7 @@ namespace Dune
 
     //! print internal data
     //! no interface method
-    void print (std::ostream& ss) const;
+    void print ( std::ostream &out ) const;
 
   private:
     // calculates the volume of the element
