@@ -485,6 +485,7 @@ namespace Dune
 
     /** \brief take a vector and interpret it as vertex data
         \ingroup VTK
+        \tparam V Data container type
      */
     template<class V>
     class P1VectorWrapper : public VTKFunction
@@ -620,7 +621,7 @@ namespace Dune
     }
 
     /**
-     * @brief Add a grid function (represented by container) that lives on the cells of the
+     * @brief Add a grid function (represented by container) that lives on the vertices of the
      * grid to the visualization output.
      *
      * The container has to have random access via operator[] (e. g. std::vector). The value
