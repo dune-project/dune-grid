@@ -1670,13 +1670,8 @@ namespace Dune {
     //! assignment
     YaspIntersectionIterator & operator = (const YaspIntersectionIterator& it)
     {
-      /* Assert same Iterator Context */
-      //_inside = it._inside;
-      if (! _inside.equals(it._inside))
-        DUNE_THROW(GridError, "assignment of YaspIntersectionIterator "
-                   << "with different inside Entity");
-
       /* Assign EntityPointers */
+      _inside = it._inside;
       _outside = it._outside;
 
       /* Assign current position */
@@ -1694,8 +1689,7 @@ namespace Dune {
 
   private:
     /* EntityPointers (get automatically updated) */
-    const YaspEntityPointer<0,GridImp> _inside; //!< entitypointer to myself
-    //  const YaspEntity<0,dim,GridImp>&   _myself;  //!< reference to myself
+    YaspEntityPointer<0,GridImp> _inside; //!< entitypointer to myself
     YaspEntityPointer<0,GridImp> _outside;     //!< outside entitypointer
     /* current position */
     int _count;                           //!< valid neighbor count in 0 .. 2*dim-1
