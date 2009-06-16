@@ -61,7 +61,7 @@ namespace Dune
       for (; it != end; ++it)
       {
         FieldVector<ct,dim> local = it->geometry().local(global);
-        if (it->geometry().checkInside(local))
+        if (GenericReferenceElements<double, dim>::general(it->type()).checkInside(local))
         {
           // return if we found the leaf
           if (is.contains(*it)) return it;
@@ -90,7 +90,7 @@ namespace Dune
       for (; it != end; ++it)
       {
         FieldVector<ct,dim> local = it->geometry().local(global);
-        if (it->geometry().checkInside(local))
+        if (GenericReferenceElements<double, dim>::general(it->type()).checkInside(local))
         {
           // return if we found the leaf
           if (is.contains(*it)) return it;
