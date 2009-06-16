@@ -304,6 +304,54 @@ namespace Dune
       : public MapNumberingCube
     {};
 
+    // MapNumbering for 4D-Cube
+    struct MapNumbering4DCube
+    {
+      template< unsigned int codim >
+      static unsigned int dune2generic ( unsigned int i )
+      {
+        static unsigned int codim2[ 24 ] =
+        { 0, 1, 2, 3, 4, 5, 8, 9, 12, 13, 18, 19,
+          6, 7, 10, 11, 14, 15, 20, 21, 16, 17, 22, 23 };
+        static unsigned int codim3[ 32 ] =
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 22, 23,
+          12, 13, 16, 17, 24, 25, 28, 29, 14, 15, 18, 19, 26, 27, 30, 31 };
+        if (codim == 2)
+          return codim2[i];
+        else if (codim == 3)
+          return codim3[i];
+        else
+          return i;
+      }
+
+      template< unsigned int codim >
+      static unsigned int generic2dune ( unsigned int i )
+      {
+        static unsigned int codim2[ 24 ] =
+        { 0, 1, 2, 3, 4, 5, 12, 13, 6, 7, 14, 15,
+          8, 9, 16, 17, 20, 21, 10, 11, 18, 19, 22, 23 };
+        static unsigned int codim3[ 32 ] =
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 24, 25,
+          18, 19, 26, 27, 12, 13, 14, 15, 20, 21, 28, 29, 22, 23, 30, 31 };
+        if (codim == 2)
+          return codim2[i];
+        else if (codim == 3)
+          return codim3[i];
+        else
+          return i;
+      }
+    };
+
+    template<>
+    struct MapNumbering< Prism< Prism< Prism< Pyramid< Point > > > > >
+      : public MapNumbering4DCube
+    {};
+
+    template<>
+    struct MapNumbering< Prism< Prism< Prism< Prism< Point > > > > >
+      : public MapNumbering4DCube
+    {};
+
     // MapNumbering for Pyramid
     struct MapNumberingPyramid
     {
