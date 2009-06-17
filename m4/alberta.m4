@@ -1,6 +1,50 @@
 # $Id: alberta.m4 5156 2008-04-14 09:28:06Z christi $
 # searches for alberta-headers and libs
 
+# Substitutes the following make variables:
+#   ALBERTA_DIM
+#     value of --with-alberta-dim, or taken from --world-dim, or 2 per default
+#
+#   ALBERTA_BASE_LIBS = -lalberta_util $ALBERTA_EXTRA
+#     LIBS that are always required independent of dimension
+#
+#   ALBERTA_LIBS = -lalberta_$(ALBERTA_DIM)d $ALBERTA_BASE_LIBS
+#     All LIBS required for the configured dimension
+#
+#   ALBERTA_INCLUDE_CPPFLAGS = -I$ALBERTAROOT/include/alberta
+#     Include path required for Alberta.
+#
+#   ALBERTA_DIM_CPPFLAGS = -DALBERTA_DIM=$(ALBERTA_DIM)
+#     Pass the configured dimension as a CPP define
+#
+#   ALBERTA_CPPFLAGS = $(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA
+#     All CPPFLAGS required for the configure dimension
+#
+#   ALBERTA_LDFLAGS = -L$ALBERTAROOT/lib
+#     Library path required for alberta
+#
+#   If you want to use the the configured dimension, you have to use
+#   ALBERTA_LIBS, ALBERTA_CPPFLAGS and ALBERTA_LDFLAGS.
+#
+#   If want to use a specific dimension DIM, you have to use
+#     -lalberta_$(DIM)d $(ALBERTA_BASE_LIBS)
+#   for the LIBS,
+#     $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=$(DIM) -DENABLE_ALBERTA
+#   for CPPFLAGS and
+#     $(ALBERTA_LDFLAGS)
+#   for the LDFLAGS.
+#
+# Defines the folling CPP macro
+#   ALBERTA_DIM
+#     The Alberta dimension this binary will be linked with.
+#   DUNE_ALBERTA_VERSION
+#     Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0
+#   HAVE_ALBERTA
+#     This is only true if alberta-library was found by configure 
+#     _and_ if the application uses the ALBERTA_CPPFLAGS
+#
+# Defines the following automake conditional
+#    ALBERTA
 AC_DEFUN([DUNE_PATH_ALBERTA],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PROG_F77])
@@ -10,7 +54,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
 
   AC_ARG_WITH(alberta,
     AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
-    version 2.0 or higher) is installed]))
+    version 2.0 or higher) is installed.  You can pass additional required
+    libraries in the ALBERTA_EXTRA environment variable (in a form suitable
+    for $LIBS)]))
 
   # do not use alberta debug lib 
   with_alberta_debug=0
@@ -114,9 +160,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
        _and_ if the application uses the ALBERTA_CPPFLAGS])
 
     if test "$ALBERTA_VERSION" = "2.0" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure])
+      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x200], [Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0])
     elif test "$ALBERTA_VERSION" = "3.0" ; then
-      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x300], [Alberta version found by configure])
+      AC_DEFINE([DUNE_ALBERTA_VERSION], [0x300], [Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0])
     else
       AC_MSG_ERROR([Internal Inconsistency: Invalid Alberta version reported: $ALBERTA_VERSION.])
     fi
