@@ -134,7 +134,7 @@ try
 
 #ifdef HAVE_ALBERTA
   test( TriangulatedUnitSquareMaker< Dune::AlbertaGrid< 2, 2 > >::create(),
-        result, "alberta", 1 );
+        result, "alberta", 2 );
 #endif
 
 #ifdef HAVE_ALUGRID
