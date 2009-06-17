@@ -36,11 +36,12 @@ AC_CONFIG_FILES([Makefile
     doc/appl/Makefile
     doc/refinement/Makefile
     doc/doxygen/Makefile
-	doc/doxygen/Doxyfile
+    doc/doxygen/Doxyfile
     doc/layout/Makefile
     doc/Makefile
     grid/Makefile
     grid/test/Makefile
+    grid/test/vtktest/Makefile
     grid/common/test/Makefile
     grid/common/quadraturerules/Makefile
     grid/common/refinement/Makefile

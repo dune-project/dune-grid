@@ -1,0 +1,10 @@
+test-2d-edges
+
+Makefile
+Makefile.in
+
+*.swp
+*.vtu
+
+.deps
+.libs
