@@ -180,14 +180,10 @@ namespace Dune
    *  \code
    *  --with-alberta=ALBERTAPATH
    *  --with-alberta-dim=DIMGRID
-   *  --with-alberta-world-dim=DIMWORLD
    *  \endcode
-   *  The default values are <tt>DIMGRID</tt>=2 and
-   *  <tt>DIMWORLD</tt>=<tt>DIMGRID</tt>.
-   *  If the <tt>--with-grid-dim</tt> (see DGF Parser's gridtype.hh) is
-   *  provided, <tt>DIMGRID</tt> will default to this value.
-   *  You can then use <tt>AlbertaGrid< DIMGRID, DIMWORLD ></tt>.
-   *  Using other template parameters might result in unpredictable behavior.
+   *  The default value for <tt>DIMGRID</tt> is obtained from
+   *  <tt>--with-world-dim</tt>.  If <tt>--with-world-dim</tt> was not given,
+   *  the default is 2.
    *
    *  Further installation instructions can be found here:
    *  http://www.dune-project.org/external_libraries/install_alberta.html
@@ -195,6 +191,46 @@ namespace Dune
    *  \note Although ALBERTA supports different combinations of
    *        <tt>DIMGRID</tt><=<tt>DIMWORLD</tt>, so far only the
    *        case <tt>DIMGRID</tt>=<tt>DIMWORLD</tt> is supported.
+   *
+   *  If you use automake and want to compile a program maude, the following
+   *  <tt>Makefile.am</tt> snippet might help:
+   *  \code
+   *  bin_PROGRAMS = maude
+   *
+   *  maude_SOURCES = maude.cc
+   *  maude_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS)
+   *  maude_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
+   *  maude_LDADD = $(ALBERTA_LIBS) $(DUNE_LIBS)
+   *  \endcode
+   *  This will compile and link your program with the default ALBERTA
+   *  dimension set with the <tt>--with-alberta-dim</tt> parameter to
+   *  <tt>configure</tt>.  If you want to use a non-default dimension (or
+   *  different dimension in different programs, you can use the following
+   *  snippet:
+   *  \code
+   *  bin_PROGRAMS = maude2d maude3d
+   *
+   *  maude2d_SOURCES = maude.cc
+   *  maude2d_CPPFLAGS = $(AM_CPPFLAGS) \
+   *    $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=2 -DENABLE_ALBERTA
+   *  maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
+   *  maude2d_LDADD = -lalberta_2d $(ALBERTA_BASE_LIBS) $(DUNE_LIBS)
+   *
+   *  maude3d_SOURCES = maude.cc
+   *  maude3d_CPPFLAGS = $(AM_CPPFLAGS) \
+   *    $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA
+   *  maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
+   *  maude3d_LDADD = -lalberta_3d $(ALBERTA_BASE_LIBS) $(DUNE_LIBS)
+   *  \endcode
+   *  It is not possible to use alberta grids with different world dimensions
+   *  in the same binary however.
+   *
+   *  In both cases you have in your program the preprocessor defines
+   *  <tt>HAVE_ALBERTA</tt> which tells you whether alberta was found by
+   *  configure and <tt>ALBERTA_DIM</tt> which tells you the dimension of
+   *  alberta <em>for this program</em>.
+   *
+   *  For further details look into the <tt>alberta.m4</tt> autoconf snippet.
    */
   template< int dim, int dimworld = Alberta::dimWorld >
   class AlbertaGrid
