@@ -24,27 +24,33 @@ namespace Dune {
 
     /** \brief Add a grid view to the file
         \param grid GridView to be written
-        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
-        quadrilateral will be split in two triangles.  If not, the file is not
-        readable by standard Amira.
+        \param splitAll If this is set every element of the grid will be split into triangles/tetrahedas.
+        Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
+        won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
+        If the grid has been split up and contained other types than triangles/tetrahedas you also have to set
+        GridSplitUp when calling the functions "addVertexData" and "writeBlockVector" to make the data consistent with the grid!
      */
     void addGrid(const GridView& gridView, bool splitAll=false);
 
     /** \brief Add level grid
         \param grid Grid to be written
         \param indexSet Level of the level grid that is to be written
-        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
-        quadrilateral will be split in two triangles.  If not, the file is not
-        readable by standard Amira.
+        \param splitAll If this is set every element of the grid will be split into triangles/tetrahedas.
+        Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
+        won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
+        If the grid has been split up and contained other types than triangles/tetrahedas you also have to set
+        GridSplitUp when calling the functions "addVertexData" and "writeBlockVector" to make the data consistent with the grid!
      */
     template <class GridType2>
     void addLevelGrid(const GridType2& grid, int level, bool splitAll=false);
 
     /** \brief Add leaf grid
         \param grid Grid to be written
-        \param splitQuads Amira doesn't support 2d quad grids.  If this is set any
-        quadrilateral will be split in two triangles.  If not, the file is not
-        readable by standard Amira.
+        \param splitAll If this is set every element of the grid will be split into triangles/tetrahedas.
+        Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
+        won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
+        If the grid has been split up and contained other types than triangles/tetrahedas you also have to set
+        GridSplitUp when calling the functions "addVertexData" and "writeBlockVector" to make the data consistent with the grid!
      */
     template <class GridType2>
     void addLeafGrid(const GridType2& grid, bool splitAll=false);
@@ -59,6 +65,8 @@ namespace Dune {
     /** \brief Add vertex data
         \param An ISTL compliant vector type
         \param Grid view that the data belongs to
+        \param If the grid has been split up into triangles/tetrahedas you have to set GridSplitUp to make the data
+        consistent with the grid
      */
     template <class DataContainer>
     void addVertexData(const DataContainer& data, const GridView& gridView, bool GridSplitUp=false);
@@ -118,6 +126,8 @@ namespace Dune {
         @param f The vector to be written.  Has to comply with the ISTL conventions
         @param filename The filename
         @param level The level of the grid that the vector lives on
+        @param GridSplitUp If the grid has been split up into triangles/tetrahedas you have to set this parameter to
+        make the data consistent with the grid
      */
     template <class VectorType>
     static void writeBlockVector(const GridType& grid,
