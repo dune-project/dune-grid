@@ -383,7 +383,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
   } else if (data.size()==indexSet.size(0)) {
 
     // P0 data
-    if (gridSplitUp) {
+    if (gridSplitUp || containsOnlyTetrahedra) {
 
       Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
       int noOfElements = 0;
