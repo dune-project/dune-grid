@@ -104,6 +104,7 @@ namespace Dune {
     UGGridGeometry()
     {
       mode_ = element_mode;
+      jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
 
@@ -117,6 +118,7 @@ namespace Dune {
       for (int i=0; i<((mydim==2) ? 4 : 8); i++)
         cornerpointers_[i] = &(coord_[i][0]);
 
+      jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
 
@@ -187,8 +189,10 @@ namespace Dune {
       }
     }
 
-    //! The Jacobian matrix of the mapping from the reference element to this element
+    //! The inverse transpose of the Jacobian matrix of the mapping from the reference element to this element
     const FieldMatrix<UGCtype, mydim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    //! The transpose of the Jacobian matrix of the mapping from the reference element to this element
+    const FieldMatrix<UGCtype, mydim,mydim>& jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
 
 
   private:
@@ -202,6 +206,7 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
+      jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
 
@@ -214,19 +219,23 @@ namespace Dune {
       for (int j=0; j<coorddim; j++)
         coord_[i][j] = pos[j];
 
+      jacobianIsUpToDate_ = false;
       jacobianInverseIsUpToDate_ = false;
     }
 
     //! the vertex coordinates
     mutable array<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
-    //! The jacobian inverse
+    //! The jacobian inverse transposed
     mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
+    //! The jacobian transposed
+    mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_;
 
     /** \brief For simplices the Jacobian matrix is a constant, hence it needs
         to be computed only once for each new element.  This can save some
         assembly time. */
     mutable bool jacobianInverseIsUpToDate_;
+    mutable bool jacobianIsUpToDate_;
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one

@@ -251,3 +251,30 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
 
   return jac_inverse_;
 }
+template< int mydim, int coorddim, class GridImp>
+const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
+{
+  if (jacobianIsUpToDate_)
+    return jac_;
+
+  if (mode_==element_mode) {
+
+    // compile array of pointers to corner coordinates
+    UGCtype* cornerCoords[corners()];
+    UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+
+    // compute the transformation onto the reference element (or vice versa?)
+    UG_NS<coorddim>::JacobianTransformation(corners(), cornerCoords, local, jac_);
+
+  } else
+  {
+    // compute the transformation onto the reference element (or vice versa?)
+    UG_NS<coorddim>::JacobianTransformation(corners(), cornerpointers_, local, jac_);
+  }
+
+  if (type().isSimplex())
+    jacobianIsUpToDate_ = true;
+
+  return jac_;
+}

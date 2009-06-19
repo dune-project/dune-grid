@@ -702,6 +702,21 @@ namespace Dune {
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
     }
+    /**
+     * \param n Number of corners of the element
+     * \param x Coordinates of the corners of the element
+     * \param local Local evaluation point
+     *
+     * \return The return type is int because the macro TRANSFORMATION
+     *  returns 1 on failure.
+     */
+    static int JacobianTransformation(int n, double** x,
+                                      const FieldVector<double, UG_DIM>& local, FieldMatrix<double,UG_DIM,UG_DIM>& mat) {
+      using UG_NAMESPACE ::DOUBLE_VECTOR;
+      using UG::DOUBLE;
+      TRANSFORMATION(n, x, local, mat);
+      return 0;
+    }
 
     /** \brief Compute the integration element on an element face
         \param nc Number of corners of the element face
