@@ -30,6 +30,7 @@ static double factorEpsilon = 1.e8;
 
 class CheckError : public Dune::Exception {};
 
+#if 0
 // --- compile-time check of element-interface
 
 template <class Geometry, bool doCheck>
@@ -59,30 +60,35 @@ struct JacobianInverse<Geometry, false>
   };
   void (*c)(const Geometry&);
 };
+#endif
 
 template <class Geometry, int codim, int dim>
 struct GeometryInterface
 {
-  static void check(const Geometry &e)
+  static void check ( const Geometry &geo )
   {
     IsTrue<dim-codim == Geometry::mydimension>::yes();
     IsTrue<dim == Geometry::dimension>::yes();
 
     typedef typename Geometry::ctype ctype;
 
-    e.type();
-    e.corners();
-    e[0];
+    geo.type();
+    geo.corners();
+    geo.corner( 0 );
 
     Dune::FieldVector<ctype, Geometry::mydimension> v;
-    e.global(v);
+    geo.global(v);
     Dune::FieldVector<ctype, Geometry::coorddimension> g;
-    e.local(g);
-    e.checkInside(v);
-    e.integrationElement(v);
+    geo.local(g);
+    geo.integrationElement(v);
+    geo.jacobianTransposed( v );
+    geo.jacobianInverseTransposed( v );
+#if 0
     JacobianInverse<Geometry,
         (int)Geometry::coorddimension == (int)Geometry::mydimension>();
+#endif
   }
+
   GeometryInterface()
   {
     c = check;
@@ -983,22 +989,28 @@ void iterate(Grid &g)
     ++l2;
     assert( (l1 == l2) && (l2 == l1) );
 
-    result = it->geometry().local(it->geometry().global(origin));
+    const Geometry &geo = it->geometry();
+
+    result = geo.local( geo.global( origin ) );
     typename Grid::ctype error = (result-origin).two_norm();
     if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
     {
       DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
                                                           << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
     };
-    it->geometry().integrationElement(origin);
+    geo.integrationElement( origin );
+
     if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-      it->geometry().jacobianInverseTransposed(origin);
+      geo.jacobianInverseTransposed( origin );
 
-    it->geometry().type();
-    it->type();
-    it->geometry().corners();
-    it->geometry().corner( 0 );
-
+    if( geo.type() != it->type() )
+    {
+      std::cerr << "inconsistent geometry type: entity.type() = " << it->type()
+                << ", geometry.type() = " << geo.type() << "." << std::endl;
+      assert( false );
+    }
+    geo.corners();
+    geo.corner( 0 );
   }
 
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
