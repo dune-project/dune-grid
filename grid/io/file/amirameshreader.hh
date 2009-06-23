@@ -73,6 +73,8 @@ namespace Dune {
 
     /** \brief Read a block vector from an AmiraMesh file
      *
+     * The data may either be given on the nodes (P1-Functions) or the elements (P0-Functions).
+     *
      * \param f The vector to read into.  Implicitly assumed to be an ISTL vector
      * \param filename Name of the AmiraMesh file
      */

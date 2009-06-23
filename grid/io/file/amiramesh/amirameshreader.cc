@@ -32,7 +32,9 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
   f = 0;
 
-  // We allow fields defined on the whole grid and fields defined
+  bool datafound=false;
+
+  // We allow P1 fields defined on the whole grid and fields defined
   // only on the boundary.  We now check the file and proceed accordingly
   if (!am->findData("Nodes", HxFLOAT, blocksize, "Data") &&
       !am->findData("Nodes", HxDOUBLE, blocksize, "Data")) {
@@ -40,6 +42,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
     // get the data field
     AmiraMesh::Data* am_ValueData =  am->findData("Nodes", HxFLOAT, blocksize, "values");
     if (am_ValueData) {
+      datafound = true;
 
       if (f.size()<am->nElements("Nodes"))
         DUNE_THROW(IOError, "When reading data from a surface field the "
@@ -56,6 +59,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
     } else {
       am_ValueData =  am->findData("Nodes", HxDOUBLE, blocksize, "values");
       if (am_ValueData) {
+        datafound = true;
 
         if (f.size()<am->nElements("Nodes"))
           DUNE_THROW(IOError, "When reading data from a surface field your the "
@@ -66,9 +70,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
             f[i][j] = ((double*)am_ValueData->dataPtr())[i*blocksize+j];
         }
 
-      } else
-        DUNE_THROW(IOError, "No data found in the file!");
-
+      }
     }
 
   } else {
@@ -76,6 +78,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
     // get the data field
     AmiraMesh::Data* am_ValueData =  am->findData("Nodes", HxFLOAT, blocksize, "Data");
     if (am_ValueData) {
+      datafound = true;
 
       float* am_values_float = (float*) am_ValueData->dataPtr();
       f.resize(am->nElements("Nodes"));
@@ -87,18 +90,51 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
     } else {
       am_ValueData =  am->findData("Nodes", HxDOUBLE, blocksize, "Data");
       if (am_ValueData) {
+        datafound = true;
         f.resize(am->nElements("Nodes"));
 
         for (i=0; i<am->nElements("Nodes"); i++)
           for (j=0; j<blocksize; j++)
             f[i][j] = ((double*)am_ValueData->dataPtr())[i*blocksize+j];
-
       } else
         DUNE_THROW(IOError, "No data found in the file!");
+    }
+  }
+  // No proper P1 function has been found for the grid maybe it's P0 ?
+  if (!datafound and (am->findData("Triangles", HxFLOAT, blocksize, "Data") or am->findData("Triangles", HxDOUBLE, blocksize, "Data")))
+  {
+    // get the data field
+    AmiraMesh::Data* am_ValueData =  am->findData("Triangles", HxFLOAT, blocksize, "Data");
+    if (am_ValueData)
+    {
+      datafound = true;
+
+      float* am_values_float = (float*) am_ValueData->dataPtr();
+      f.resize(am->nElements("Triangles"));
+
+      for (i=0; i<am->nElements("Triangles"); i++)
+        for (j=0; j<blocksize; j++)
+          f[i][j] = am_values_float[i*blocksize+j];
 
     }
+    else
+    {
+      am_ValueData =  am->findData("Triangles", HxDOUBLE, blocksize, "Data");
+      if (am_ValueData)
+      {
+        datafound = true;
+        f.resize(am->nElements("Triangles"));
 
+        for (i=0; i<am->nElements("Triangles"); i++)
+          for (j=0; j<blocksize; j++)
+            f[i][j] = ((double*)am_ValueData->dataPtr())[i*blocksize+j];
+      }
+      else
+        DUNE_THROW(IOError, "No data found in the file!");
+    }
   }
+  if (!datafound)
+    DUNE_THROW(IOError, "No data found in the file!");
 
   dverb << "Data field " << filename << " loaded successfully!" << std::endl;
 
