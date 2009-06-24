@@ -193,6 +193,18 @@ namespace Dune
       return grid().comm();
     }
 
+    /** \brief Return size of the overlap region for a given codim on the grid view.  */
+    int overlapSize(int codim) const
+    {
+      return grid.overlapSize(level_, codim);
+    }
+
+    /** \brief Return size of the ghost region for a given codim on the grid view.  */
+    int ghostSize(int codim) const
+    {
+      return grid.ghostSize(level_, codim);
+    }
+
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
@@ -373,6 +385,18 @@ namespace Dune
     const CollectiveCommunication &comm () const
     {
       return grid().comm();
+    }
+
+    /** \brief Return size of the overlap region for a given codim on the grid view.  */
+    int overlapSize(int codim) const
+    {
+      return grid.overlapSize(codim);
+    }
+
+    /** \brief Return size of the ghost region for a given codim on the grid view.  */
+    int ghostSize(int codim) const
+    {
+      return grid.ghostSize(codim);
     }
 
     /** communicate data on this view */

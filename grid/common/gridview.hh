@@ -171,6 +171,18 @@ namespace Dune
       return asImp().comm();
     }
 
+    /** \brief Return size of the overlap region for a given codim on the grid view.  */
+    int overlapSize(int codim) const
+    {
+      return asImp().overlapSize(codim);
+    }
+
+    /** \brief Return size of the ghost region for a given codim on the grid view.  */
+    int ghostSize(int codim) const
+    {
+      return asImp().ghostSize(codim);
+    }
+
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
