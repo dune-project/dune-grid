@@ -12,6 +12,7 @@
 #include <dune/common/smartpointer.hh>
 #include <dune/common/static_assert.hh>
 
+#include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 #ifdef HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
