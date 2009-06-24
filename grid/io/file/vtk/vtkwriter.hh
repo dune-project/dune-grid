@@ -34,6 +34,10 @@
    details and examples regarding the VTK file format can be found here:
 
    http://www.geophysik.uni-muenchen.de/intranet/it-service/applications/paraview/vtk-file-formats/
+   (not available any more)
+
+   http://www.geophysik.uni-muenchen.de/~moder/Paraview/VTK_File_Formats.php
+   (alternative)
  */
 
 namespace Dune
