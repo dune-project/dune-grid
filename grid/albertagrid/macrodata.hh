@@ -7,6 +7,7 @@
 #include <dune/common/fmatrix.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/algebra.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
 
 #if HAVE_ALBERTA
@@ -92,6 +93,16 @@ namespace Dune
        *        you must make sure that all required vertices have been set.
        */
       void markLongestEdge ();
+
+      /** \brief set the orientation of all elements
+       *
+       *  This is a postprocessing step and should be done after finalizing
+       *  the triangulation.
+       *
+       *  \note Though it is possible to call setOrientation in insert mode,
+       *        you must make sure that all required vertices have been set.
+       */
+      void setOrientation ( const Real orientation );
 
       /** \brief release the macro data structure */
       void release ()
@@ -324,11 +335,40 @@ namespace Dune
           }
           rotate( data_->opp_vertex, i, shift );
         }
-#endif
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
         // correct neighbors and boundaries
         rotate( data_->neigh, i, shift );
         rotate( data_->boundary, i, shift );
+      }
+    }
+
+
+    template< int dim >
+    inline void MacroData< dim >::setOrientation ( const Real orientation )
+    {}
+
+    template<>
+    inline void MacroData< dimWorld >::setOrientation ( const Real orientation )
+    {
+      assert( data_ != NULL );
+
+      const int count = elementCount();
+      for( int i = 0; i < count; ++i )
+      {
+        FieldMatrix< Real, dimWorld, dimWorld > jacobian;
+        ElementId &id = element( i );
+
+        const GlobalVector &x = vertex( id[ 0 ] );
+        for( int j = 0; j < dimWorld; ++j )
+        {
+          const GlobalVector &y = vertex( id[ j+1 ] );
+          for( int k = 0; k < dimWorld; ++k )
+            jacobian[ j ][ k ] = y[ k ] - x[ k ];
+        }
+        const Real det = determinant( jacobian );
+        if( det * orientation < 0 )
+          std::swap( id[ 0 ], id[ 1 ] );
       }
     }
 

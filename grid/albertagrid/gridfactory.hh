@@ -210,6 +210,9 @@ namespace Dune
       macroData_.finalize();
       if( markLongestEdge )
         macroData_.markLongestEdge();
+#if DUNE_ALBERTA_VERSION < 0x300
+      macroData_.setOrientation( Alberta::Real( 1 ) );
+#endif // #if DUNE_ALBERTA_VERSION < 0x300
       return new Grid( macroData_, gridName );
     }
 
