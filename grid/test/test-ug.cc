@@ -16,6 +16,7 @@
 #include <dune/doc/grids/ugascplusplus/ugtestgrids.hh>
 
 #include "gridcheck.cc"
+#include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 
@@ -170,6 +171,14 @@ void generalTests(bool greenClosure)
   gridcheck(*grid2d);
   gridcheck(*grid3d);
 
+  // check communication interface
+  checkCommunication(*grid2d,-1,Dune::dvverb);
+  checkCommunication(*grid3d,-1,Dune::dvverb);
+  for(int l=0; l<=grid2d->maxLevel(); ++l)
+    checkCommunication(*grid2d,l,Dune::dvverb);
+  for(int l=0; l<=grid3d->maxLevel(); ++l)
+    checkCommunication(*grid3d,l,Dune::dvverb);
+
   // create hybrid grid
   markOne(*grid2d,0,1) ;
   markOne(*grid3d,0,1) ;
@@ -177,10 +186,26 @@ void generalTests(bool greenClosure)
   gridcheck(*grid2d);
   gridcheck(*grid3d);
 
+  // check communication interface
+  checkCommunication(*grid2d,-1,Dune::dvverb);
+  checkCommunication(*grid3d,-1,Dune::dvverb);
+  for(int l=0; l<=grid2d->maxLevel(); ++l)
+    checkCommunication(*grid2d,l,Dune::dvverb);
+  for(int l=0; l<=grid3d->maxLevel(); ++l)
+    checkCommunication(*grid3d,l,Dune::dvverb);
+
   grid2d->globalRefine(1);
   grid3d->globalRefine(1);
+
   gridcheck(*grid2d);
   gridcheck(*grid3d);
+  // check communication interface
+  checkCommunication(*grid2d,-1,Dune::dvverb);
+  checkCommunication(*grid3d,-1,Dune::dvverb);
+  for(int l=0; l<=grid2d->maxLevel(); ++l)
+    checkCommunication(*grid2d,l,Dune::dvverb);
+  for(int l=0; l<=grid3d->maxLevel(); ++l)
+    checkCommunication(*grid3d,l,Dune::dvverb);
 
   // check the method geometryInFather()
   checkGeometryInFather(*grid2d);

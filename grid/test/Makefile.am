@@ -104,9 +104,9 @@ test_alu2dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LIBS) $(MPI_LIBS)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
-test_ug_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
-test_ug_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS)
-test_ug_LDADD = $(LOCAL_LIBS) $(UG_LIBS)
+test_ug_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
+test_ug_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(MPI_LDFLAGS)
+test_ug_LDADD = $(LOCAL_LIBS) $(UG_LIBS) $(MPI_LIBS)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
 test_parallel_ug_SOURCES = test-parallel-ug.cc
