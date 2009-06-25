@@ -20,66 +20,6 @@
 #include <dune/grid/albertagrid/gridfactory.hh>
 #endif
 
-
-template<typename Grid>
-class UnitTetrahedronMaker {
-  dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
-  dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
-public:
-  static Dune::SmartPointer<Grid> create() {
-    Dune::GridFactory<Grid> gf;
-    Dune::FieldVector<typename Grid::ctype, 3> pos;
-
-    pos[0] = 0; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 1; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 0; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 0; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
-
-    Dune::GeometryType type;
-    type.makeTetrahedron();
-    std::vector<unsigned int> vid(4);
-
-    vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 3; gf.insertElement(type, vid);
-
-    return gf.createGrid();
-  }
-};
-
-// Kuhn triangulation with 6 tets, does not contain unit tet, all tets have
-// (0,7) as a common edge
-template<typename Grid>
-class KuhnTriangulatedUnitCubeMaker {
-  dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
-  dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
-public:
-  static Dune::SmartPointer<Grid> create() {
-    Dune::GridFactory<Grid> gf;
-    Dune::FieldVector<typename Grid::ctype, 3> pos;
-
-    pos[0] = 0; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 1; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 0; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 1; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
-    pos[0] = 0; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
-    pos[0] = 1; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
-    pos[0] = 0; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
-    pos[0] = 1; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
-
-    Dune::GeometryType type;
-    type.makeTetrahedron();
-    std::vector<unsigned int> vid(4);
-
-    vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-
-    return gf.createGrid();
-  }
-};
-
 // minimal triangulation with 5 tets, contains unit tet
 template<typename Grid>
 class TriangulatedUnitCubeMaker {
@@ -132,10 +72,11 @@ int main(int argc, char** argv)
 #error ALBERTA_DIM is not set to 3 -- please check the Makefile.am
 #endif
     {
+      std::cout << "The following stuff is expected to fail currently, because the recursive" << std::endl
+                << "bisection algorithm of alberta will run into an endless recursion for" << std::endl
+                << "certain grids.  See Flyspry#569." << std::endl;
       typedef Dune::AlbertaGrid<3, 3> Grid;
-      //Dune::SmartPointer<Grid> grid = KuhnTriangulatedUnitCubeMaker<Grid>::create();
       Dune::SmartPointer<Grid> grid = TriangulatedUnitCubeMaker<Grid>::create();
-      //Dune::SmartPointer<Grid> grid = UnitTetrahedronMaker<Grid>::create();
       grid->globalRefine(2);
 
       result = 0;
