@@ -196,13 +196,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid.overlapSize(level_, codim);
+      return grid().overlapSize(level_, codim);
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid.ghostSize(level_, codim);
+      return grid().ghostSize(level_, codim);
     }
 
     /** communicate data on this view */
@@ -390,13 +390,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid.overlapSize(codim);
+      return grid().overlapSize(codim);
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid.ghostSize(codim);
+      return grid().ghostSize(codim);
     }
 
     /** communicate data on this view */
