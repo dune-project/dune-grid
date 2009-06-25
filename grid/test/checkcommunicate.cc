@@ -339,6 +339,19 @@ class CheckCommunication
   double test ( int dataSize, ArrayType &data, ArrayType &weight, bool testweight )
   {
     const int rank = gridView_.comm().rank();
+    const int size = gridView_.comm().size();
+
+    // check whether there is an overlap or ghost region of
+    // cells for the current grid view.
+    if (size > 1 &&
+        gridView_.overlapSize(0) == 0 &&
+        gridView_.ghostSize(0) == 0)
+    {
+      sout_ << "<" << rank << "/test> Error in communication test.";
+      sout_ << " overlapSize+ghostSize:" << gridView_.overlapSize(0) + gridView_.ghostSize(0) << " (should not be 0)";
+      sout_ << " communicator size is:" << size;
+      sout_ << std :: endl;
+    }
 
     //Variante MIT Geisterzellen
     //typedef typename IndexSet :: template Codim<0> :: template Partition<All_Partition> :: Iterator IteratorType;
