@@ -880,14 +880,12 @@ namespace Dune {
       assert(grid == it.grid);
 
       /* Assert same Iterator Context */
-      if (! self.equals(it.self))
-        DUNE_THROW(GridError, "assignment of SIntersectionIterator "
-                   << "with different inside Entity");
       if (partition != it.partition)
         DUNE_THROW(GridError, "assignment of SIntersectionIterator "
                    << "with different partition");
 
       /* Assign current position and update ne */
+      self = it.self;
       ne = it.ne;
       count = it.count;
       make(count);
@@ -898,7 +896,7 @@ namespace Dune {
   private:
     void make (int _count) const;               //!< reinitialze iterator with given neighbor
     void makeintersections () const;            //!< compute intersections
-    const EntityPointer self;                   //!< EntityPointer for myself
+    EntityPointer self;                   //!< EntityPointer for myself
     mutable EntityPointer ne;                   //!< EntityPointer for neighbor
     const GridImp * grid;                       //!< Pointer to the grid
     const int partition;                        //!< partition number of self, needed for coordinate expansion
