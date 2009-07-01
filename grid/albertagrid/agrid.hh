@@ -777,7 +777,7 @@ namespace Dune
 #ifdef obstack_chunk_free
 #undef obstack_chunk_free
 #endif
-#include <dune/grid/albertagrid/undefine-2.1.hh>
+#include <dune/grid/albertagrid/undefine-3.0.hh>
 #else
 #include <dune/grid/albertagrid/undefine-2.0.hh>
 #endif

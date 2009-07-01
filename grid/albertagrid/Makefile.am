@@ -22,7 +22,7 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   indexsets.hh datahandle.hh \
   misc.hh  elementinfo.hh  meshpointer.hh macrodata.hh \
   dofadmin.hh  dofvector.hh  refinement.hh  coordcache.hh  level.hh \
-  undefine-2.0.hh  undefine-2.1.hh \
+  undefine-2.0.hh  undefine-3.0.hh \
   entity.hh  entity.cc  entitypointer.hh  hierarchiciterator.hh \
   algebra.hh  geometry.hh  geometry.cc  projection.hh  transformation.hh \
   leveliterator.hh  leafiterator.hh  treeiterator.hh  treeiterator.cc \
