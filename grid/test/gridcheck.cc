@@ -776,6 +776,17 @@ void assertNeighbor (Grid &g)
       return;
     }
 
+    // small check if LevenIntersectionIterators
+    // from work reassigned EntityPointers
+    // after creation of LevelIterator on different level
+    if (g.maxLevel()>0)
+    {
+      EntityPointer p = g.template lbegin<0>(0);
+      p = g.template lbegin<0>(1);
+      LevelIterator it = g.template lbegin<0>(0);
+      p->ilevelbegin();
+    }
+
     // iterate over level
     for (; e != eend; ++e)
     {
