@@ -12,6 +12,8 @@
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/geometry.hh>
 
+#define ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES 1
+
 namespace Dune
 {
 
@@ -185,8 +187,10 @@ namespace Dune
     ElementInfo elementInfo_;
 
     // the objects holding the real implementations
+#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
     mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
+#endif
     mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
 
     //! ElementInfo to store the information of the neighbor if needed

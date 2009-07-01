@@ -249,8 +249,11 @@ namespace Dune
 
     for( int face = 0; face < numFaces; ++face )
     {
-      const FaceCoordReader coordReader( face );
-      faceGeometry_[ face ] = new LocalGeoObject( LocalGeoImp( coordReader ) );
+      for( int twist = minFaceTwist; twist <= maxFaceTwist; ++twist )
+      {
+        const FaceCoordReader coordReader( face, twist );
+        faceGeometry_[ face ][ twist - minFaceTwist ] = new LocalGeoObject( LocalGeoImp( coordReader ) );
+      }
     }
   }
 
@@ -311,16 +314,19 @@ namespace Dune
 
   private:
     int face_;
+    int twist_;
 
   public:
-    FaceCoordReader ( int face )
-      : face_( face )
+    FaceCoordReader ( const int face, const int twist = 0 )
+      : face_( face ),
+        twist_( twist )
     {}
 
-    void coordinate ( int i, Coordinate &x ) const
+    void coordinate ( const int i, Coordinate &x ) const
     {
-      // here, the reference element should be used
-      refCorner( (i < face_ ? i : i+1), x );
+      const int ti = Alberta::applyInverseTwist< dimension-1 >( twist_, i );
+      const int j = mapVertices< 1 >( face_, ti );
+      refCorner( j, x );
     }
 
     bool hasDeterminant () const
@@ -334,7 +340,7 @@ namespace Dune
     }
 
   private:
-    static void refCorner ( int i, Coordinate &x )
+    static void refCorner ( const int i, Coordinate &x )
     {
       x = ctype( 0 );
       if( i > 0 )
@@ -344,4 +350,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_GEOMETRY_CC

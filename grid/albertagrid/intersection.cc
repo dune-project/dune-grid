@@ -20,8 +20,10 @@ namespace Dune
     : grid_( grid ),
       neighborCount_( dimension+1 ),
       elementInfo_(),
+#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
+#endif
       neighGlobObj_( GeometryImp() ),
       neighborInfo_()
   {}
@@ -33,8 +35,10 @@ namespace Dune
     : grid_( other.grid_ ),
       neighborCount_( other.neighborCount_ ),
       elementInfo_( other.elementInfo_ ),
+#if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
+#endif
       neighGlobObj_( GeometryImp() ),
       neighborInfo_()
   {}
@@ -290,10 +294,16 @@ namespace Dune
   {
     assert( !!elementInfo_ );
 
+#if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
+    typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
+    const int twist = elementInfo_.template twist< 1 >( neighborCount_ );
+    return LocalGeoProvider::instance().faceGeometry( neighborCount_, twist );
+#else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), geometry() );
     geo.build( coordReader );
     return fakeSelfObj_;
+#endif
   }
 
 
@@ -303,10 +313,18 @@ namespace Dune
   {
     assert( neighbor() );
 
+#if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
+    typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
+    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
+    const int oppVertex = elInfo.opp_vertex[ neighborCount_ ];
+    const int twist = elementInfo_.twistInNeighbor( neighborCount_ );
+    return LocalGeoProvider::instance().faceGeometry( oppVertex, twist );
+#else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
     const LocalCoordReader coordReader( outside()->geometry(), geometry() );
     geo.build( coordReader );
     return fakeNeighObj_;
+#endif
   }
 
 
@@ -563,7 +581,7 @@ namespace Dune
 
 
   // AlbertaGridIntersection::GlobalCoordReader
-  // --------------------------------------------------
+  // ------------------------------------------
 
   template< class GridImp >
   struct AlbertaGridIntersection< GridImp >::GlobalCoordReader
@@ -580,8 +598,6 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef FieldVector< ctype, coorddimension > Coordinate;
 
-    typedef Alberta::Twist< dimension, mydimension > Twist;
-
   private:
     const Grid &grid_;
     const ElementInfo &elementInfo_;
@@ -595,7 +611,7 @@ namespace Dune
       : grid_( grid ),
         elementInfo_( elementInfo ),
         subEntity_( subEntity ),
-        twist_( Twist::twist( elementInfo_.el(), subEntity ) )
+        twist_( elementInfo.template twist< codimension >( subEntity ) )
     {}
 
     void coordinate ( int i, Coordinate &x ) const

@@ -550,6 +550,9 @@ namespace Dune
     {
       static const int numSubEntities = NumSubEntities< dim, dim-subdim >::value;
 
+      static const int minTwist = 0;
+      static const int maxTwist = 0;
+
       static int twist ( const Element *element, int subEntity )
       {
         assert( (subEntity >= 0) && (subEntity < numSubEntities) );
@@ -561,6 +564,9 @@ namespace Dune
     struct Twist< dim, 1 >
     {
       static const int numSubEntities = NumSubEntities< dim, dim-1 >::value;
+
+      static const int minTwist = 0;
+      static const int maxTwist = 1;
 
       static int twist ( const Element *element, int subEntity )
       {
@@ -580,6 +586,9 @@ namespace Dune
     template<>
     struct Twist< 1, 1 >
     {
+      static const int minTwist = 0;
+      static const int maxTwist = 0;
+
       static int twist ( const Element *element, int subEntity )
       {
         assert( subEntity == 0 );
@@ -592,6 +601,9 @@ namespace Dune
     struct Twist< dim, 2 >
     {
       static const int numSubEntities = NumSubEntities< dim, dim-2 >::value;
+
+      static const int minTwist = -3;
+      static const int maxTwist = 2;
 
       static int twist ( const Element *element, int subEntity )
       {
@@ -617,6 +629,9 @@ namespace Dune
     template<>
     struct Twist< 2, 2 >
     {
+      static const int minTwist = 0;
+      static const int maxTwist = 0;
+
       static int twist ( const Element *element, int subEntity )
       {
         assert( subEntity == 0 );

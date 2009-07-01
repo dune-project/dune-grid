@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_ALBERTA_GEOMETRY
-#define DUNE_ALBERTA_GEOMETRY
+#ifndef DUNE_ALBERTA_GEOMETRY_HH
+#define DUNE_ALBERTA_GEOMETRY_HH
 
 #include <dune/grid/common/geometry.hh>
 
@@ -403,12 +403,13 @@ namespace Dune
     static const int numChildren = 2;
     static const int numFaces = dimension + 1;
 
+    static const int minFaceTwist = Alberta::Twist< dimension, dimension-1 >::minTwist;
+    static const int maxFaceTwist = Alberta::Twist< dimension, dimension-1 >::maxTwist;
+    static const int numFaceTwists = maxFaceTwist - minFaceTwist + 1;
+
   private:
     struct GeoInFatherCoordReader;
     struct FaceCoordReader;
-
-    const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
-    const LocalFaceGeometry *faceGeometry_[ numFaces ];
 
     AlbertaGridLocalGeometryProvider ()
     {
@@ -425,7 +426,10 @@ namespace Dune
       }
 
       for( int i = 0; i < numFaces; ++i )
-        delete faceGeometry_[ i ];
+      {
+        for( int j = 0; j < numFaceTwists; ++j )
+          delete faceGeometry_[ i ][ j ];
+      }
     }
 
     void buildGeometryInFather();
@@ -441,10 +445,11 @@ namespace Dune
     }
 
     const LocalFaceGeometry &
-    faceGeometry ( int face ) const
+    faceGeometry ( int face, int twist = 0 ) const
     {
       assert( (face >= 0) && (face < numFaces) );
-      return *faceGeometry_[ face ];
+      assert( (twist >= minFaceTwist) && (twist <= maxFaceTwist) );
+      return *faceGeometry_[ face ][ twist - minFaceTwist ];
     }
 
     static const This &instance ()
@@ -452,8 +457,18 @@ namespace Dune
       static This theInstance;
       return theInstance;
     }
+
+  private:
+    template< int codim >
+    static int mapVertices ( int subEntity, int i )
+    {
+      return Alberta::MapVertices< dimension, codim >::apply( subEntity, i );
+    }
+
+    const LocalElementGeometry *geometryInFather_[ numChildren ][ 2 ];
+    const LocalFaceGeometry *faceGeometry_[ numFaces ][ numFaceTwists ];
   };
 
 }
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_GEOMETRY_HH
