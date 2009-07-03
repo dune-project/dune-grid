@@ -142,16 +142,10 @@ namespace Dune
     Patch< 2 >::elementInfo ( int i, const LevelProvider &levelProvider ) const
     {
       assert( (i >= 0) && (i < count()) );
-      // in 2d, only the first el_info structure is fully valid!
-      if( i > 0 )
-      {
-        const MeshPointer< 2 > &mesh = levelProvider.mesh();
-        const Element *element = (*this)[ i ];
-        const int level = levelProvider( element );
-        return ElementInfo::createFake( mesh, element, level );
-      }
-      else
-        return ElementInfo::createFake( list_[ 0 ].el_info );
+      const MeshPointer< 2 > &mesh = levelProvider.mesh();
+      const Element *element = (*this)[ i ];
+      const int level = levelProvider( element );
+      return ElementInfo::createFake( mesh, element, level );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 

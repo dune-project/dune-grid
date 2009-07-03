@@ -193,7 +193,8 @@ namespace Dune
       static const DofSpace *createEmptyDofSpace ( const MeshPointer &mesh );
       static const DofSpace *createDofSpace ( const MeshPointer &mesh,
                                               const std::string &name,
-                                              const int (&ndof)[ nNodeTypes ] );
+                                              const int (&ndof)[ nNodeTypes ],
+                                              const bool periodic = false );
       static void freeDofSpace ( const DofSpace *dofSpace );
     };
 
@@ -236,9 +237,11 @@ namespace Dune
     inline const DofSpace *
     HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
                                                    const std::string &name,
-                                                   const int (&ndof)[ nNodeTypes ] )
+                                                   const int (&ndof)[ nNodeTypes ],
+                                                   const bool periodic )
     {
-      const ALBERTA FLAGS flags = ADM_PRESERVE_COARSE_DOFS;
+      const ALBERTA FLAGS flags
+        = ADM_PRESERVE_COARSE_DOFS | (periodic ? ADM_PERIODIC : 0);
       return ALBERTA get_dof_space ( mesh, name.c_str(), ndof, flags );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x201
@@ -248,7 +251,8 @@ namespace Dune
     inline const DofSpace *
     HierarchyDofNumbering< dim >::createDofSpace ( const MeshPointer &mesh,
                                                    const std::string &name,
-                                                   const int (&ndof)[ nNodeTypes ] )
+                                                   const int (&ndof)[ nNodeTypes ],
+                                                   const bool periodic )
     {
       return ALBERTA get_fe_space ( mesh, name.c_str(), ndof, NULL, 1 );
     }
