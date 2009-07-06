@@ -186,7 +186,7 @@ namespace Dune {
      \brief 3D grid with support for hexahedrons and tetrahedrons.
      The ALU3dGrid implements the Dune GridInterface for 3d tetrahedral and
      hexahedral meshes. This grid can be locally adapted and used in parallel
-     computations using dynamcic load balancing.
+     computations using dynamic load balancing.
 
      @note
      Adaptive parallel grid supporting dynamic load balancing, written

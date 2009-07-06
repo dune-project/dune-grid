@@ -27,7 +27,7 @@ namespace Dune
      @ingroup ALUCubeGrid
      The ALUCubeGrid implements the Dune GridInterface for 3d hexahedral meshes.
      This grid can be locally adapted (non-conforming) and used in parallel
-     computations using dynamcic load balancing.
+     computations using dynamic load balancing.
 
      @note
      Adaptive parallel grid supporting dynamic load balancing, written
@@ -58,7 +58,7 @@ namespace Dune
      The ALUSimplexGrid implements the Dune GridInterface for 2d triangular and
      3d tetrahedral meshes.
      This grid can be locally adapted (non-conforming) and used in parallel
-     computations using dynamcic load balancing.
+     computations using dynamic load balancing.
 
      @note
      Adaptive parallel grid supporting dynamic load balancing, written
@@ -244,7 +244,7 @@ namespace Dune
      The ALUConformGrid implements the Dune GridInterface for 2d triangular and
      3d tetrahedral meshes.
      This grid can be locally adapted (conforming) and used in parallel
-     computations using dynamcic load balancing.
+     computations using dynamic load balancing.
 
      @note
      Adaptive parallel grid supporting dynamic load balancing, written
