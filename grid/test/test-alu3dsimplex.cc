@@ -60,6 +60,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt) {
         if (nr>size*0.8) break;
       }
     }
+    typename GridType::template Codim<0>::LeafIterator it = grid.template leafbegin<0>();
     grid.adapt();
     grid.postAdapt();
     grid.loadBalance();
