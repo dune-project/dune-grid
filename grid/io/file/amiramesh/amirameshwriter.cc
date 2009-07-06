@@ -533,8 +533,11 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
     amiramesh_.insert(loc);
   }
 
+  // set up data (we assume ISTL conventions)
+  int numComponents = DataContainer::block_type::size;
+
   AmiraMesh::Data* amData =
-    new AmiraMesh::Data("Data", loc, McPrimType::mc_double, 1);
+    new AmiraMesh::Data("Data", loc, McPrimType::mc_double, numComponents);
   amiramesh_.insert(amData);
 
   // ////////////////////////////////////////////////////////
@@ -545,7 +548,8 @@ void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
   iterator endIt = data.end();
 
   int i=0;
-  for (; it!=endIt; ++it, ++i)
-    ((double*)amData->dataPtr())[i] = *it;
+  for (; it!=endIt; ++it)
+    for (int j=0; j<numComponents; j++, i++)
+      ((double*)amData->dataPtr())[i] = (*it)[j];
 
 }
