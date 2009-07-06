@@ -404,8 +404,6 @@ namespace Dune {
     GeometryImp & geoImp_;
     mutable bool builtgeometry_; //!< true if geometry has been constructed
 
-    int walkLevel_; //! tells the actual level of walk put to LevelIterator..
-
     int level_;  //!< level of element
 
     mutable GeometryObject geoInFather_;

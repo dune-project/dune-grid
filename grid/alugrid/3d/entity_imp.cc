@@ -174,7 +174,6 @@ namespace Dune {
       , geo_(GeometryImp())
       , geoImp_ (grid_.getRealImplementation(geo_))
       , builtgeometry_(false)
-      , walkLevel_ (wLevel)
       , level_(-1)
       , geoInFather_ (GeometryImp())
       , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
@@ -191,7 +190,6 @@ namespace Dune {
       , geo_(GeometryImp())
       , geoImp_ (grid_.getRealImplementation(geo_))
       , builtgeometry_(false)
-      , walkLevel_ (org.walkLevel_)
       , level_(org.level_)
       , geoInFather_ (GeometryImp())
       , geoInFatherImp_(grid_.getRealImplementation(geoInFather_))
@@ -213,7 +211,6 @@ namespace Dune {
     item_       = 0;
     ghost_      = 0;
     builtgeometry_ = false;
-    walkLevel_     = walkLevel;
     level_      = -1;
     isLeaf_     = false;
   }
@@ -227,7 +224,6 @@ namespace Dune {
     ghost_         = org.ghost_;
     builtgeometry_ = false;
     level_         = org.level_;
-    walkLevel_     = org.walkLevel_;
     isLeaf_        = org.isLeaf_;
   }
 
@@ -560,7 +556,7 @@ namespace Dune {
     // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridIntersectionIteratorType (grid_,*this,walkLevel_, isGhost() );
+    return ALU3dGridIntersectionIteratorType (grid_,*this, this->level(), isGhost() );
   }
 
   template<int dim, class GridImp>
@@ -568,7 +564,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLeafIntersectionIteratorType (grid_, *this ,walkLevel_,true);
+    return ALU3dGridLeafIntersectionIteratorType (grid_, *this , this->level(), true);
   }
 
   template<int dim, class GridImp>
@@ -580,7 +576,7 @@ namespace Dune {
     // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridLevelIntersectionIteratorType (grid_,*this,walkLevel_, isGhost() );
+    return ALU3dGridLevelIntersectionIteratorType (grid_,*this, this->level(), isGhost() );
   }
 
   template<int dim, class GridImp>
@@ -588,7 +584,7 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelend () const
   {
     assert(item_ != 0);
-    return ALU3dGridLevelIntersectionIteratorType (grid_, *this ,walkLevel_,true);
+    return ALU3dGridLevelIntersectionIteratorType (grid_, *this, this->level(),true);
   }
 
   template<int dim, class GridImp>
