@@ -1866,7 +1866,7 @@ namespace Dune {
     YaspEntityPointer (const YaspEntityImp& entity)
       : _g(entity.gridlevel()),
         _it(entity.transformingsubiterator()),
-        _entity(entity)
+        _entity(_g,_it)
     {
       if (codim>0 && codim<dim)
       {
