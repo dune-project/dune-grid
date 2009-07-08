@@ -1,25 +1,26 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_UG_TESTGRIDS_HH
-#define DUNE_UG_TESTGRIDS_HH
+#ifndef DUNE_HYBRID_TESTGRIDS_HH
+#define DUNE_HYBRID_TESTGRIDS_HH
 
 /** \file
     \author Oliver Sander
-    \brief Provides C++ code that create to UGGrids suitable for unit tests.
-
-    We need to provide code because currently the only reader that can read
-    general UGGrids is the AmiraMesh reader.  However, that library is still
-    not easily available.
+    \brief Provides C++ code that creates hybrid grids suitable for unit tests,
+        using the GridFactory.
  */
 
-#include <dune/grid/uggrid.hh>
+#include <dune/common/static_assert.hh>
 
 namespace Dune {
 
-  UGGrid<2>* make2DTestGrid()
+  template <class GridType>
+  GridType* make2DHybridTestGrid()
   {
+    dune_static_assert(GridType::dimension==2,
+                       "Instantiate make2dHybridTestGrid only for 2d grids!");
+
     // Start grid creation
-    GridFactory<UGGrid<2> > factory;
+    GridFactory<GridType> factory;
 
     // The list of grid vertex positions
     int numVertices = 16;
@@ -85,10 +86,14 @@ namespace Dune {
   }
 
 
-  UGGrid<3>* make3DTestGrid()
+  template <class GridType>
+  GridType* make3DHybridTestGrid()
   {
+    dune_static_assert(GridType::dimension==3,
+                       "Instantiate make3DHybridTestGrid only for 3d grids!");
+
     // Start grid creation
-    GridFactory<UGGrid<3> > factory;
+    GridFactory<GridType> factory;
 
     // The list of grid vertex positions
     int numVertices = 61;

@@ -158,8 +158,8 @@ void generalTests(bool greenClosure)
   //   Make some grids for testing
   // //////////////////////////////////////////////////////////
 
-  std::auto_ptr<Dune::UGGrid<2> > grid2d(make2DTestGrid());
-  std::auto_ptr<Dune::UGGrid<3> > grid3d(make3DTestGrid());
+  std::auto_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
+  std::auto_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
