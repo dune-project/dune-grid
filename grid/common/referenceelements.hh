@@ -100,6 +100,7 @@ namespace Dune
   * Interface for reference elements
   ***********************************************************/
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
   //! This is the abstract base class for reference elements
   template<typename ctype, int dim>
   class ReferenceElement
@@ -1839,7 +1840,7 @@ namespace Dune
     static ReferencePyramidContainer<ctype,3> pyramid;
     static ReferenceElementContainer<ctype,3> general;
   };
-
+#endif
   /** @} */
 }
 #endif

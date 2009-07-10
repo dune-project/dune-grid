@@ -123,6 +123,7 @@ namespace Dune
       return asImp().template index<cc>(e);
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /**
        \deprecated use subIndex without template parameter
        \brief please read the details
@@ -154,7 +155,7 @@ namespace Dune
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
       return asImp().template subIndex<cc>(e,i);
     }
-
+#endif
 
     /** @brief Map subentity of codim cc of codim 0 entity to index.
 
@@ -267,6 +268,7 @@ namespace Dune
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = Base::dimension;
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /** @brief Map subentity of codim 0 entity to index.
 
        \param e Reference to codim 0 entity.
@@ -281,6 +283,7 @@ namespace Dune
     {
       return Base::index( *(e.template entity<cc>(i) ));
     }
+#endif
 
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
             is simply a sum over all geometry types.
@@ -395,6 +398,7 @@ namespace Dune
       return asImp().template id<cc>(e);
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /**
        \deprecated use subId without template parameter
        \brief please read the details
@@ -417,6 +421,7 @@ namespace Dune
     {
       return asImp().template subId<cc>(e,i);
     }
+#endif
 
     /** \brief Get id of subentity i of codim cc of a codim 0 entity.
      */
@@ -461,6 +466,7 @@ namespace Dune
     //! define the type used for persistent indices
     typedef IdTypeImp IdType;
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get id of subentity i of codim cc
     /*
        We use the remove_const to extract the Type from the mutable class,
@@ -474,6 +480,8 @@ namespace Dune
     {
       return this->id( *(e.template entity<cc>(i)) );
     }
+#endif
+
   };
 
 

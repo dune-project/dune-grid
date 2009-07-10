@@ -318,6 +318,7 @@ namespace Dune
       return this->real.indexInInside();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /**
        \deprecated use indexInInside (renamed to improve consistency)
        \brief please read the details
@@ -337,6 +338,7 @@ namespace Dune
       const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
       return Numbering::template generic2dune< 1 >( tid, number );
     }
+#endif
 
     /** \brief Local index of codim 1 entity in outside() entity where
      *         intersection is contained in
@@ -352,6 +354,7 @@ namespace Dune
       return this->real.indexInOutside();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /**
        \deprecated use indexInOutside (renamed to improve consistency)
        \brief please read the details
@@ -371,6 +374,7 @@ namespace Dune
       const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
       return Numbering::template generic2dune< 1 >( tid, number );
     }
+#endif
 
     /*! @brief Return an outer normal (length not necessarily 1)
 
