@@ -773,7 +773,11 @@ namespace Dune {
     //@{
     //===========================================================
 
-    //! Refine the grid refCount times using the default refinement rule.
+    /** \brief Refine the grid refCount times using the default refinement rule.
+     *
+     * This behaves like marking all elements for refinement and then calling preAdapt, adapt and postAdapt.
+     * The state after globalRefine is comparable to the state after postAdapt.
+     */
     void globalRefine (int refCount)
     {
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION(asImp().globalRefine(refCount));
@@ -803,9 +807,11 @@ namespace Dune {
       return asImp().getMark(e);
     }
 
-    /*! \brief To be called after entities have been marked and before adapt() is called.
-
-       \return true if an entity may be coarsened during a subsequent adapt(), false otherwise.
+    /** \brief To be called after entities have been marked and before adapt() is called.
+     *
+     * This sets the mightVanish flags of the elements for the next adapt call.
+     *
+     * \return true if an entity may be coarsened during a subsequent adapt(), false otherwise.
      */
     bool preAdapt ()
     {
@@ -831,7 +837,10 @@ namespace Dune {
       return asImp().adapt();
     }
 
-    //! To be called after grid has been adapted and information left over by the adaptation has been processed.
+    /** \brief To be called after grid has been adapted and information left over by the adaptation has been processed.
+     *
+     * This removes the isNew flags of the elements from the last adapt call.
+     */
     void postAdapt()
     {
       return asImp().postAdapt();
