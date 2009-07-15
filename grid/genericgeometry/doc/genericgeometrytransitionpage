@@ -19,7 +19,15 @@ The interface of the GenericReferenceElements and
 of the GenericReferenceElement is the same
 as before.
 
-@section GridDuneTrans2 New Subentity Numbering
+@section GridDuneTrans2 Methods for he new SubEntity Numbering
+
+In order to facilitate the transition we introduced new method names for
+methods that rely on a numbering.  Methods in the second column of the
+table below will give you the old numbering, and methods in the third
+column will give you the new one.  In many cases the new names are also
+more meaningful.  The old methods still work, but they are deprecated
+and will be removed for %Dune 1.4.
+
 <table>
 <tr>
 <td>class</td><td>deprecated method with old numbering</td><td>method with new numbering</td>
@@ -37,6 +45,13 @@ as before.
 <td>Geometry</td>     <td>operator[] (returns reference) </td> <td>corner (returns value)</td>
 </tr>
 </table>
+
+@section GridDuneTrans25 Permanently Switching off old Numbering
+
+If you don't want to rely on deprecation warnings and make sure that your code really
+doesn't use any old numbering stuff, then you can configure %Dune with <tt>--disable-old-numbering</tt>.
+If this is set, all methods providing old numbers are removed from the header files.
+
 
 @section GridDuneTrans3 Numbering Conversion Utility
 To map a new subentity number to an old number or vice versa
