@@ -10,6 +10,11 @@
 namespace Dune
 {
 
+  template< int, int, class, class >
+  class GridDefaultImplementation;
+
+
+
   /** \addtogroup GIGridView
    *
    *  Though a DUNE grid is hierarchic, one often only needs access to
@@ -51,6 +56,10 @@ namespace Dune
   public:
     typedef typename ViewTraits :: GridViewImp GridViewImp;
 
+  protected:
+    typedef GridViewImp ImplementationType;
+
+  public:
     /** \brief Traits class */
     typedef ViewTraits Traits;
 
@@ -76,6 +85,9 @@ namespace Dune
     /** \brief Export if this grid view is conforming */
     enum { conforming = Traits :: conforming };
 
+    /** \brief type used for coordinates in grid */
+    typedef typename Grid::ctype ctype;
+
     /** \brief Dimension of the grid */
     enum { dimension = Grid :: dimension };
 
@@ -92,9 +104,12 @@ namespace Dune
       : imp_( other.imp_ )
     {}
 
-  private:
-    // prohibit assignment
-    ThisType &operator= ( const ThisType & );
+    /** \brief assignment operator */
+    ThisType &operator= ( const ThisType &other )
+    {
+      imp_ = other.imp_;
+      return *this;
+    }
 
   public:
     /** \brief obtain a const reference to the underlying hierarchic grid */
@@ -193,6 +208,16 @@ namespace Dune
     }
 
   protected:
+    ImplementationType &getRealImp ()
+    {
+      return imp_;
+    }
+
+    const ImplementationType &getRealImp () const
+    {
+      return imp_;
+    }
+
     GridViewImp& asImp ()
     {
       return imp_;
@@ -204,6 +229,9 @@ namespace Dune
     }
 
   private:
+    friend class GridDefaultImplementation
+    < dimension, dimensionworld, ctype, typename Grid::GridFamily >;
+
     GridViewImp imp_;
   };
 
