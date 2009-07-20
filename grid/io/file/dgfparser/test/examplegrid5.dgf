@@ -10,8 +10,6 @@ Simplex
 GridParameter
 % set overlap to 1
 overlap 1
-% set periodic boundaries in x direction
-% periodic 0
 % set closure to none for UGGrid 
 closure none
 % generate copies in UGGrid
@@ -21,6 +19,7 @@ heapsize 1000
 #
 
 PERIODICFACETRANSFORMATION
+% set periodic boundaries in x direction
 % 1 0, 0 1 + 1 0
 #
 

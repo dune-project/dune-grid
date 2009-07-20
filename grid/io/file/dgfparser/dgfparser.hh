@@ -505,7 +505,15 @@ namespace Dune
        grid construction. For the specific parameters see the \ref
        DGFGridParameter section. See also the \b examplegrid5.dgf file
        for examples.
-
+     - \b PeriodicFaceTransformation \n
+       Each line describes an affine transformation that shall be used to
+       glue grid boundaries together. The transformation is denoted as
+       \em matrix + \em shift. The following 2d example describes a shift by
+       the first unit vector:
+       \code
+   1 0, 0 1 + 1 0
+       \endcode
+     .
 
      @section CONSTR The Grid Construction Process
      <!---------------------------------------------->
