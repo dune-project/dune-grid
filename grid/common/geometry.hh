@@ -99,6 +99,7 @@ namespace Dune
      */
     int corners () const { return realGeometry.corners(); };
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /** \brief Access to corners of the geometry.
        \param[in] i The number of the corner
        \return const reference to a vector containing the position \f$g(c_i)\f$ where
@@ -108,6 +109,7 @@ namespace Dune
     {
       return realGeometry[i];
     }
+#endif
 
     /** Obtain a corner of the geometry
      *
