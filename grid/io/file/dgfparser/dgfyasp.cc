@@ -1,5 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#include <iostream>
+
 namespace Dune
 {
 
@@ -35,13 +37,8 @@ namespace Dune
 
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
-    // get grid parameters
-    dgf::YaspGridParameterBlock grdParam( gridin );
-
     FieldVector<double,dim> lang;
     FieldVector<int,dim>    anz;
-    FieldVector<bool,dim>   per(false);
-
     for( int i = 0; i < dim; ++i )
     {
       // check that start point is > 0.0
@@ -53,8 +50,48 @@ namespace Dune
 
       lang[ i ] = interval.p[ 1 ][ i ] - interval.p[ 0 ][ i ];
       anz[ i ]  = interval.n[ i ];
-      per[ i ]  = grdParam.isPeriodic( i );
     }
+
+    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+    dgf::PeriodicFaceTransformationBlock trafoBlock( gridin, dim );
+    FieldVector< bool, dim > per( false );
+    const int numTrafos = trafoBlock.numTransformations();
+    for( int k = 0; k < numTrafos; ++k )
+    {
+      const Transformation &trafo = trafoBlock.transformation( k );
+
+      bool identity = true;
+      for( int i = 0; i < dim; ++i )
+        for( int j = 0; j < dim; ++j )
+          identity &= (fabs( (i == j ? 1.0 : 0.0) - trafo.matrix( i, j ) ) < 1e-10);
+      if( !identity )
+        DUNE_THROW( DGFException, "YaspGrid can only handle shifts as periodic face transformations." );
+
+      int numDirs = 0;
+      int dir;
+      for( int i = 0; i < dim; ++i )
+      {
+        if( fabs( trafo.shift[ i ] ) < 1e-10 )
+          continue;
+        dir = i;
+        ++numDirs;
+      }
+      if( (numDirs != 1) || (fabs( fabs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
+      {
+        std::cerr << "Tranformation '" << trafo
+                  << "' does not map boundaries on boundaries." << std::endl;
+      }
+      else
+        per[ dir ] = true;
+    }
+
+    // get grid parameters
+    dgf::YaspGridParameterBlock grdParam( gridin );
+#if 0
+    FieldVector< bool, dim > per( false );
+    for( int i = 0; i < dim; ++i )
+      per[ i ]  = grdParam.isPeriodic( i );
+#endif
 
     #if HAVE_MPI
     return new YaspGrid<dim>(MPICOMM,lang, anz, per , grdParam.overlap() );

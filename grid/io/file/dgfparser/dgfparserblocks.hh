@@ -4,6 +4,7 @@
 #define DUNE_MACROGRIDPARSERBLOCKS_HH
 
 #include <cassert>
+#include <iostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -685,6 +686,16 @@ namespace Dune
       {
         return fields_[ i * cols_ + j ];
       }
+
+      int rows () const
+      {
+        return rows_;
+      }
+
+      int cols () const
+      {
+        return cols_;
+      }
     };
 
 
@@ -701,6 +712,22 @@ namespace Dune
           shift( dimworld )
       {}
     };
+
+
+
+    std::ostream &operator<< ( std::ostream &out, const PeriodicFaceTransformationBlock::AffineTransformation &trafo )
+    {
+      for( int i = 0; i < trafo.matrix.rows(); ++i )
+      {
+        out << (i > 0 ? ", " : "");
+        for( int j = 0; j < trafo.matrix.cols(); ++j )
+          out << (j > 0 ? " " : "") << trafo.matrix( i, j );
+      }
+      out << " +";
+      for( unsigned int i = 0; i < trafo.shift.size(); ++i )
+        out << " " << trafo.shift[ i ];
+      return out;
+    }
 
 
   } // end namespace dgf

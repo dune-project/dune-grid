@@ -18,7 +18,11 @@ closure none
 copies yes
 % set heap size for UGGrid
 heapsize 1000
-# 
+#
+
+PERIODICFACETRANSFORMATION
+% 1 0, 0 1 + 1 0
+#
 
 BOUNDARYDOMAIN
 default 1     % default boundary id

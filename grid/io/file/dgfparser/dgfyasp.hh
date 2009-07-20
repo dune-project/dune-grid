@@ -22,14 +22,18 @@ namespace Dune {
       : public GridParameterBlock
     {
     protected:
+#if 0
       std::set<int> _periodic; // periodic grid
+#endif
       int _overlap; // overlap for YaspGrid
 
     public:
       //! constructor taking istream
       YaspGridParameterBlock( std::istream &in )
         : GridParameterBlock( in ),
+#if 0
           _periodic(), // default is non periodic
+#endif
           _overlap( 0 ) // default value
       {
         // check overlap
@@ -53,6 +57,7 @@ namespace Dune {
                 << "defaulting to '" << _overlap << "'." << std::endl;
         }
 
+#if 0
         // check periodic grid
         if (findtoken("periodic"))
         {
@@ -67,6 +72,7 @@ namespace Dune {
           dwarn << "YaspGridParameterBlock: Parameter 'periodic' not specified, "
                 << "defaulting to no periodic boundary." << std::endl;
         }
+#endif
       }
 
       //! get dimension of world found in block
@@ -75,11 +81,13 @@ namespace Dune {
         return _overlap;
       }
 
+#if 0
       //! returns true if dimension is periodic
       bool isPeriodic ( const int dim ) const
       {
         return (_periodic.find(dim) != _periodic.end());
       }
+#endif
     };
 
   }
