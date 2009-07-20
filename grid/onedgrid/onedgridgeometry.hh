@@ -39,6 +39,12 @@ namespace Dune {
       return (storeCoordsLocally_) ? pos_ : target_->pos_;
     }
 
+    /** \brief access to coordinates of a corner */
+    const FieldVector< typename GridImp::ctype, 1 > corner ( const int i ) const
+    {
+      return (storeCoordsLocally_ ? pos_ : target_->pos_);
+    }
+
     /** \brief Maps a local coordinate within reference element to
      * global coordinate in element  */
     FieldVector<typename GridImp::ctype, 1> global (const FieldVector<typename GridImp::ctype, 0>& local) const {
@@ -134,6 +140,13 @@ namespace Dune {
     const FieldVector<typename GridImp::ctype, coorddim>& operator[](int i) const {
       assert(i==0 || i==1);
       return (storeCoordsLocally_) ? pos_[i] : target_->vertex_[i]->pos_;
+    }
+
+    /** \brief access to coordinates of a corner */
+    const FieldVector< typename GridImp::ctype, coorddim > corner ( const int i ) const
+    {
+      assert( (i == 0) || (i == 1) );
+      return (storeCoordsLocally_ ? pos_[ i ] : target_->vertex_[ i ]->pos_);
     }
 
     /** \brief Maps a local coordinate within reference element to

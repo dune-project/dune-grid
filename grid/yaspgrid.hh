@@ -195,6 +195,11 @@ namespace Dune {
       return c;
     }
 
+    FieldVector< ctype, cdim > corner ( const int i ) const
+    {
+      return (*this)[ i ];
+    }
+
     //! maps a local coordinate within reference element to global coordinate in element
     FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
     {
@@ -369,6 +374,11 @@ namespace Dune {
       return c;
     }
 
+    FieldVector< ctype, mydim > corner ( const int i ) const
+    {
+      return (*this)[ i ];
+    }
+
     //! maps a local coordinate within reference element to global coordinate in element
     FieldVector<ctype, mydim> global (const FieldVector<ctype, mydim>& local) const
     {
@@ -500,6 +510,11 @@ namespace Dune {
     const FieldVector<ctype, cdim>& operator[] (int i) const
     {
       return position;
+    }
+
+    FieldVector< ctype, cdim > corner ( const int i ) const
+    {
+      return (*this)[ i ];
     }
 
     /*! determinant of the jacobian of the mapping

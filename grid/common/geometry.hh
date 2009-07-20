@@ -128,10 +128,13 @@ namespace Dune
      */
     FieldVector< ctype, cdim > corner ( int i ) const
     {
-      typedef GenericGeometry::MapNumberingProvider< mydimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template generic2dune< mydimension >( tid, i );
-      return realGeometry[ j ];
+      return realGeometry.corner( i );
+      /*
+          typedef GenericGeometry::MapNumberingProvider< mydimension > Numbering;
+          const unsigned int tid = GenericGeometry::topologyId( type() );
+          const int j = Numbering::template generic2dune< mydimension >( tid, i );
+          return realGeometry[ j ];
+       */
     }
 
     /** \brief Evaluate the map \f$ g\f$.

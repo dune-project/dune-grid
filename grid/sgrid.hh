@@ -94,6 +94,11 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<sgrid_ctype, cdim>& operator[] (int i) const;
 
+    FieldVector< sgrid_ctype, cdim > corner ( const int i ) const
+    {
+      return (*this)[ i ];
+    }
+
     //! maps a local coordinate within reference element to global coordinate in element
     FieldVector<sgrid_ctype, cdim> global (const FieldVector<sgrid_ctype, mydim>& local) const;
 
@@ -165,6 +170,11 @@ namespace Dune {
 
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<sgrid_ctype, cdim>& operator[] (int i) const;
+
+    FieldVector< sgrid_ctype, cdim > corner ( const int i ) const
+    {
+      return (*this)[ i ];
+    }
 
     //! print internal data
     void print (std::ostream& ss, int indent) const;
