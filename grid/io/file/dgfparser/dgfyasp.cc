@@ -68,7 +68,7 @@ namespace Dune
         DUNE_THROW( DGFException, "YaspGrid can only handle shifts as periodic face transformations." );
 
       int numDirs = 0;
-      int dir;
+      int dir = -1;
       for( int i = 0; i < dim; ++i )
       {
         if( fabs( trafo.shift[ i ] ) < 1e-10 )
