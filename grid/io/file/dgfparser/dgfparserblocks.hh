@@ -715,7 +715,8 @@ namespace Dune
 
 
 
-    std::ostream &operator<< ( std::ostream &out, const PeriodicFaceTransformationBlock::AffineTransformation &trafo )
+    inline std::ostream &
+    operator<< ( std::ostream &out, const PeriodicFaceTransformationBlock::AffineTransformation &trafo )
     {
       for( int i = 0; i < trafo.matrix.rows(); ++i )
       {
