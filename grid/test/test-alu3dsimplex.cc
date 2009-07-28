@@ -217,7 +217,6 @@ try {
   // extra-environment to check destruction
   {
     typedef ALUSimplexGrid< 3, 3 > GridType;
-    #if 0
     // check empty grid
     {
       if( myrank == 0 )
@@ -239,7 +238,7 @@ try {
 
     if( myrank == 0 )
       checkAlbertaReader< GridType >();
-    #endif
+
     {
       std::string filename;
       if( argc > 1 )
