@@ -34,7 +34,7 @@ namespace Dune
     template< class K >
     inline static K determinant ( const FieldMatrix< K, 1, 1 > &matrix )
     {
-      matrix[ 0 ][ 0 ];
+      return matrix[ 0 ][ 0 ];
     }
 
     template< class K, int m >
