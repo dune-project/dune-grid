@@ -2,7 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include "topology.hh"
 
-namespace Dune {
+namespace Dune
+{
 
   //- class ElementTopologyMapping
   template <>
@@ -61,6 +62,34 @@ namespace Dune {
   template <>
   const int ElementTopologyMapping<hexa>::
   alu2duneVertex_[EntityCount<hexa>::numVertices] = {0, 1, 3, 2, 4, 5, 7, 6};
+
+  template<>
+  const int ElementTopologyMapping< tetra >::generic2aluFace_[ numFaces ]
+    = {3, 2, 1, 0};
+  template<>
+  const int ElementTopologyMapping< tetra >::alu2genericFace_[ numFaces ]
+    = {3, 2, 1, 0};
+
+  template<>
+  const int ElementTopologyMapping< hexa >::generic2aluFace_[ numFaces ]
+    = {5, 3, 2, 4, 0, 1};
+  template<>
+  const int ElementTopologyMapping< hexa >::alu2genericFace_[ numFaces ]
+    = {4, 5, 2, 1, 3, 0};
+
+  template<>
+  const int ElementTopologyMapping< tetra >::generic2aluVertex_[ numVertices ]
+    = {0, 1, 2, 3};
+  template<>
+  const int ElementTopologyMapping< tetra >::alu2genericVertex_[ numVertices ]
+    = {0, 1, 2, 3};
+
+  template<>
+  const int ElementTopologyMapping< hexa >::generic2aluVertex_[ numVertices ]
+    = {0, 1, 3, 2, 4, 5, 7, 6};
+  template<>
+  const int ElementTopologyMapping< hexa >::alu2genericVertex_[ numVertices ]
+    = {0, 1, 3, 2, 4, 5, 7, 6};
 
   // actually, the orientation changes on each face, but this is compensated
   // by the change in orientation of the reference face
@@ -199,6 +228,13 @@ namespace Dune {
                                                        {0, 1, 3, 2},  // ok
                                                        {1, 0, 2, 3},  // ok
                                                        {0, 2, 3, 1}}; // ok
+
+  template<>
+  const int ElementTopologyMapping< tetra >::faceVertex_[ numFaces ][ numVerticesPerFace ]
+    = { {1, 2, 3}, {0, 3, 2}, {0, 1, 3}, {0, 2, 1} };
+  template<>
+  const int ElementTopologyMapping< hexa >::faceVertex_[ numFaces ][ numVerticesPerFace ]
+    = { {0, 1, 2, 3}, {5, 4, 7, 6}, {0, 4, 5, 1}, {1, 5, 6, 2}, {3, 2, 6, 7}, {0, 3, 7, 4} };
 
   //- class FaceTopologyMapping
   template <>

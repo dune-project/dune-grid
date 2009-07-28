@@ -120,22 +120,8 @@ namespace Dune
     //ReferenceCube< double, dimworld > refCube;
     const unsigned int size = refCube.size( f, 1, dimworld );
     std::vector< unsigned int > k( size );
-    if( dimworld == 3 )
-    {
-      // ALUCubeGrid needs a special numbering for the faces
-      const int face = ElementTopologyMapping< hexa >::dune2aluFace( f );
-      for( unsigned int i = 0; i < size; ++i )
-      {
-        int idx = ElementTopologyMapping< hexa >::alu2duneFaceVertex( face, i );
-        int idxdune = refCube.subEntity( f, 1, idx, dimworld );
-        k[ size - (i+1) ] = element[ idxdune ];
-      }
-    }
-    else
-    {
-      for( unsigned int i = 0; i < size; ++ i )
-        k[ i ] = element[ refCube.subEntity( f, 1, i, dimworld ) ];
-    }
+    for( unsigned int i = 0; i < size; ++ i )
+      k[ i ] = element[ refCube.subEntity( f, 1, i, dimworld ) ];
     return DGFEntityKey< unsigned int >( k );
   }
 

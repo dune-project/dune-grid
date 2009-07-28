@@ -38,26 +38,24 @@ namespace Dune
           factory.insertVertex( pos );
         }
 
-        GeometryType elementType( GeometryType :: simplex, 3 );
+        GeometryType elementType( GeometryType::simplex, 3 );
         for( int n = 0; n < macroGrid.nofelements; ++n )
-          factory.insertElement( elementType, macroGrid.elements[ n ] );
-
-        GeometryType faceType( GeometryType :: simplex, 2 );
-        for( facemap_t :: iterator it = macroGrid.facemap.begin();
-             it != macroGrid.facemap.end(); ++it )
         {
-          const unsigned int keySize = it->first.size();
-          std :: vector< unsigned int > key( keySize );
-          for( unsigned int i = 0; i < keySize; ++i )
+          factory.insertElement( elementType, macroGrid.elements[ n ] );
+          for( int face = 0; face <= 3; ++face )
           {
-            key[ FaceTopologyMapping< tetra > :: alu2duneVertex( i ) ]
-              = it->first.origKey( i );
+            typedef MacroGrid::facemap_t::key_type Key;
+            typedef MacroGrid::facemap_t::iterator Iterator;
+
+            const Key key = ElementFaceUtil::generateFace( 3, macroGrid.elements[ n ], face );
+            const Iterator it = macroGrid.facemap.find( key );
+            if( it != macroGrid.facemap.end() )
+              factory.insertBoundary( n, face, it->second );
           }
-          factory.insertBoundary( faceType, key, it->second );
         }
       }
 
-      return factory.createGrid();
+      return factory.createGrid( false );
     }
     else
     {
@@ -116,15 +114,20 @@ namespace Dune
           factory.insertVertex( pos );
         }
 
-        GeometryType elementType( GeometryType :: cube, 3 );
+        GeometryType elementType( GeometryType::cube, 3 );
         for( int n = 0; n < macroGrid.nofelements; ++n )
-          factory.insertElement( elementType, macroGrid.elements[ n ] );
-
-        GeometryType faceType( GeometryType :: cube, 2 );
-        for( facemap_t :: iterator it = macroGrid.facemap.begin();
-             it != macroGrid.facemap.end(); ++it )
         {
-          factory.insertBoundary( faceType, it->first, it->second );
+          factory.insertElement( elementType, macroGrid.elements[ n ] );
+          for( int face = 0; face < 6; ++face )
+          {
+            typedef MacroGrid::facemap_t::key_type Key;
+            typedef MacroGrid::facemap_t::iterator Iterator;
+
+            const Key key = ElementFaceUtil::generateFace( 3, macroGrid.elements[ n ], face );
+            const Iterator it = macroGrid.facemap.find( key );
+            if( it != macroGrid.facemap.end() )
+              factory.insertBoundary( n, face, it->second );
+          }
         }
       }
 

@@ -4,6 +4,7 @@
 // is unpredictable.
 //#include <config.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -53,8 +54,7 @@ namespace Dune
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      DUNE_THROW( GridError,
-                  "ALU3dGridFactory allows insertion only for rank 0." );
+      DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
     vertices_.push_back( pos );
   }
@@ -67,8 +67,7 @@ namespace Dune
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      DUNE_THROW( GridError,
-                  "ALU3dGridFactory allows insertion only for rank 0." );
+      DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
     assertGeometryType( geometry );
     if( geometry.dim() != dimension )
@@ -89,10 +88,7 @@ namespace Dune
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-    {
-      DUNE_THROW( GridError,
-                  "ALU3dGridFactory allows insertion only for rank 0." );
-    }
+      DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
     assertGeometryType( geometry );
     if( geometry.dim() != dimension-1 )
@@ -116,29 +112,18 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   void ALU3dGridFactory< ALUGrid >
-  ::insertBoundary ( const GeometryType &geometry,
-                     const DGFEntityKey< unsigned int > &key,
-                     const int id )
+  ::insertBoundary ( const int element, const int face, const int id )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-    {
-      DUNE_THROW( GridError,
-                  "ALU3dGridFactory allows insertion only for rank 0." );
-    }
+      DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
 #endif
-    assertGeometryType( geometry );
-    if( geometry.dim() != dimension-1 )
-    {
-      DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
-                  "into a 3-dimensional ALUGrid." );
-    }
-    if( (unsigned int)key.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
+
+    if( (element < 0) || (element >= (int)elements_.size()) )
+      DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
     std::pair< FaceType, int > boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-      boundaryId.first[ i ] = key.origKey( i );
+    generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
   }
@@ -157,7 +142,7 @@ namespace Dune
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
-      return new GridType( communicator_ );
+      return new Grid( communicator_ );
 #endif
 
     correctElementOrientation();
@@ -229,9 +214,9 @@ namespace Dune
     boundaryIds_.clear();
 
 #if ALU3DGRID_PARALLEL
-    GridType *grid = new GridType( filename_, communicator_ );
+    Grid *grid = new Grid( filename_, communicator_ );
 #else
-    GridType *grid = new GridType( filename_ );
+    Grid *grid = new Grid( filename_ );
 #endif
     if( removeGeneratedFile_ )
       remove( filename_.c_str() );
@@ -250,6 +235,20 @@ namespace Dune
       DUNE_THROW( IOError, "Unable to create temporary file." );
     close( fd );
     return std :: string( filetemp );
+  }
+
+
+  template< template< int, int > class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid >
+  ::generateFace ( const ElementType &element, const int f, FaceType &face )
+  {
+    const int falu = ElementTopologyMapping< elementType >::generic2aluFace( f );
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      const int j = ElementTopologyMapping< elementType >::faceVertex( falu, i );
+      const int k = ElementTopologyMapping< elementType >::alu2genericVertex( j );
+      face[ i ] = element[ k ];
+    }
   }
 
 
@@ -303,30 +302,29 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid >
   ::recreateBoundaryIds ( const int defaultId )
   {
-    typedef std::set< DGFEntityKey< unsigned int > > FaceSet;
-    typedef typename FaceSet::iterator FaceIterator;
-    FaceSet faceSet;
+    typedef std::pair< unsigned int, int > SubEntity;
+    typedef std::map< FaceType, SubEntity > FaceMap;
+    typedef typename FaceMap::iterator FaceIterator;
+    FaceMap faceMap;
 
     const GeometryType faceGeo( elementType == tetra
                                 ? GeometryType::simplex : GeometryType::cube,
                                 dimension-1 );
 
-    // Add all (potential) boundary faces to faceSet (see DGF parser)
-    const typename ElementVector::iterator elementEnd = elements_.end();
-    for( typename ElementVector::iterator elementIt = elements_.begin();
-         elementIt != elementEnd; ++elementIt )
+    const unsigned int numElements = elements_.size();
+    for( unsigned int n = 0; n < numElements; ++n )
     {
-      const int numFaces = ElementFaceUtil::nofFaces( dimension, *elementIt );
-      for( int face = 0; face < numFaces; ++face )
+      for( unsigned int face = 0; face < numFaces; ++face )
       {
-        DGFEntityKey< unsigned int > key
-          = ElementFaceUtil::generateFace( dimension, *elementIt, face );
+        FaceType key;
+        generateFace( elements_[ n ], face, key );
+        std::sort( key.begin(), key.end() );
 
-        const FaceIterator pos = faceSet.find( key );
-        if( pos != faceSet.end() )
-          faceSet.erase( key );
+        const FaceIterator pos = faceMap.find( key );
+        if( pos != faceMap.end() )
+          faceMap.erase( key );
         else
-          faceSet.insert( key );
+          faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
       }
     }
 
@@ -336,27 +334,23 @@ namespace Dune
     assert( boundaryIds_.size() == 0 );
 
     // add all current boundary ids again (with their reordered keys)
-    const typename BoundaryIdVector::iterator bndEnd = boundaryIds.end();
-    for( typename BoundaryIdVector::iterator bndIt = boundaryIds.begin();
-         bndIt != bndEnd; ++bndIt )
+    typedef typename BoundaryIdVector::iterator BoundaryIterator;
+    const BoundaryIterator bndEnd = boundaryIds.end();
+    for( BoundaryIterator bndIt = boundaryIds.begin(); bndIt != bndEnd; ++bndIt )
     {
-      std::vector< unsigned int > face( numFaceCorners );
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
-        face[ i ] = bndIt->first[ i ];
-      DGFEntityKey< unsigned int > key( face );
-
-      const FaceIterator pos = faceSet.find( key );
-      if( pos == faceSet.end() )
+      FaceType key = bndIt->first;
+      std::sort( key.begin(), key.end() );
+      const FaceIterator pos = faceMap.find( key );
+      if( pos == faceMap.end() )
         continue;
-
-      insertBoundary( faceGeo, *pos, bndIt->second );
-      faceSet.erase( pos );
+      insertBoundary( pos->second.first, pos->second.second, bndIt->second );
+      faceMap.erase( pos );
     }
 
     // add all new boundaries (with defaultId)
-    const FaceIterator faceEnd = faceSet.end();
-    for( FaceIterator faceIt = faceSet.begin(); faceIt != faceEnd; ++faceIt )
-      insertBoundary( faceGeo, *faceIt, defaultId );
+    const FaceIterator faceEnd = faceMap.end();
+    for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
+      insertBoundary( faceIt->second.first, faceIt->second.second, defaultId );
   }
 
 }

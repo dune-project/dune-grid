@@ -8,9 +8,9 @@
 #include <dune/common/array.hh>
 #include <dune/common/mpihelper.hh>
 
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/alugrid/3d/alugrid.hh>
-#include <dune/grid/io/file/dgfparser/entitykey.hh>
 
 namespace Dune
 {
@@ -24,26 +24,25 @@ namespace Dune
     typedef GridFactoryInterface< ALUGrid< 3, 3 > > BaseType;
 
   public:
-    typedef ALUGrid< 3, 3 > GridType;
+    typedef ALUGrid< 3, 3 > Grid;
 
-    typedef MPIHelper :: MPICommunicator MPICommunicatorType;
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
   private:
-    typedef typename GridType :: ctype ctype;
+    typedef typename Grid::ctype ctype;
 
-    static const ALU3dGridElementType elementType = GridType :: elementType;
+    static const ALU3dGridElementType elementType = Grid::elementType;
 
     dune_static_assert( (elementType == tetra || elementType == hexa),
                         "ALU3dGridFactory supports only grids containing "
                         "tetrahedrons or hexahedrons exclusively." );
 
-    static const unsigned int dimension = GridType :: dimension;
-    static const unsigned int dimensionworld = GridType :: dimensionworld;
+    static const unsigned int dimension = Grid::dimension;
+    static const unsigned int dimensionworld = Grid::dimensionworld;
 
-    static const unsigned int numCorners
-      = EntityCount< elementType > :: numVertices;
-    static const unsigned int numFaceCorners
-      = EntityCount< elementType > :: numVerticesPerFace;
+    static const unsigned int numCorners = EntityCount< elementType >::numVertices;
+    static const unsigned int numFaces = EntityCount< elementType >::numFaces;
+    static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
 
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
@@ -70,13 +69,13 @@ namespace Dune
   public:
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator
-                                  = MPIHelper :: getCommunicator(),
+                                  = MPIHelper::getCommunicator(),
                                 bool removeGeneratedFile = true );
 
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
                                 const MPICommunicatorType &communicator
-                                  = MPIHelper :: getCommunicator() );
+                                  = MPIHelper::getCommunicator() );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -114,17 +113,21 @@ namespace Dune
                      const std::vector< unsigned int > &faceVertices,
                      const int id );
 
-    void insertBoundary ( const GeometryType &geometry,
-                          const DGFEntityKey< unsigned int > &key,
-                          const int id );
+    /** \brief mark a face as boundary (and assign a boundary id)
+     *
+     *  \param[in]  element  index of the element, the face belongs to
+     *  \param[in]  face     local number of the face within the element
+     *  \param[in]  id       boundary id to assign to the face
+     */
+    virtual void insertBoundary ( const int element, const int face, const int id );
 
     /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
      */
-    GridType *createGrid ();
+    Grid *createGrid ();
 
-    GridType *createGrid ( const bool addMissingBoundaries );
+    Grid *createGrid ( const bool addMissingBoundaries );
 
   private:
     template< class T >
@@ -132,6 +135,7 @@ namespace Dune
 
     void assertGeometryType( const GeometryType &geometry );
     static std::string temporaryFileName ();
+    static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
     void recreateBoundaryIds ( const int defaultId = 1 );
   };
@@ -147,7 +151,7 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid >
-  :: assertGeometryType( const GeometryType &geometry )
+  ::assertGeometryType( const GeometryType &geometry )
   {
     if( elementType == tetra )
     {
@@ -175,21 +179,21 @@ namespace Dune
     typedef ALU3dGridFactory< ALUSimplexGrid > BaseType;
 
   public:
-    typedef ALUSimplexGrid< 3, 3 > GridType;
+    typedef ALUSimplexGrid< 3, 3 > Grid;
 
-    typedef MPIHelper :: MPICommunicator MPICommunicatorType;
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
   public:
     /** \brief Default constructor */
     explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper :: getCommunicator() )
+                             = MPIHelper::getCommunicator() )
       : BaseType( communicator )
     {}
 
     /** \brief constructor taking filename */
     GridFactory ( const std::string filename,
                   const MPICommunicatorType &communicator
-                    = MPIHelper :: getCommunicator() )
+                    = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )
     {}
   };
@@ -207,21 +211,21 @@ namespace Dune
     typedef ALU3dGridFactory< ALUCubeGrid > BaseType;
 
   public:
-    typedef ALUCubeGrid< 3, 3 > GridType;
+    typedef ALUCubeGrid< 3, 3 > Grid;
 
-    typedef MPIHelper :: MPICommunicator MPICommunicatorType;
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
   public:
     /** \brief Default constructor */
     explicit GridFactory ( const MPICommunicatorType &communicator
-                             = MPIHelper :: getCommunicator() )
+                             = MPIHelper::getCommunicator() )
       : BaseType( communicator )
     {}
 
     /** \brief constructor taking filename */
     GridFactory ( const std::string filename,
                   const MPICommunicatorType &communicator
-                    = MPIHelper :: getCommunicator() )
+                    = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )
     {}
   };

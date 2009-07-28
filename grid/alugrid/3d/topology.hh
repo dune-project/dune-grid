@@ -60,6 +60,12 @@ namespace Dune {
     //! Maps vertex index from ALU3dGrid onto Dune reference element
     static int alu2duneVertex(int index);
 
+    static int generic2aluFace ( const int index );
+    static int alu2genericFace ( const int index );
+
+    static int generic2aluVertex ( const int index );
+    static int alu2genericVertex ( const int index );
+
     //! Return 1 if faces in ALU3dGrid and Dune reference element
     //! have the same orientation (edge 0->1 is taken as reference as
     //! they are the same in both reference elements), -1 otherwise.
@@ -81,6 +87,15 @@ namespace Dune {
     //! \return global vertex index in Dune reference element
     static int alu2duneFaceVertex(int face, int localVertex);
 
+    /** \brief Maps a local vertex on a face onto a global vertex
+     *
+     *  \param[in]  face   index of the face (with respect to ALU reference
+     *                     element)
+     *  \param[in]  local  local index of vertex on the face
+     *  \returns global index of vertex in ALU reference element
+     */
+    static int faceVertex ( int face, int local );
+
   private:
     const static int dune2aluFace_[numFaces];
     const static int alu2duneFace_[numFaces];
@@ -91,10 +106,18 @@ namespace Dune {
     const static int dune2aluVertex_[numVertices];
     const static int alu2duneVertex_[numVertices];
 
+    static const int generic2aluFace_[ numFaces ];
+    static const int alu2genericFace_[ numFaces ];
+
+    static const int generic2aluVertex_[ numVertices ];
+    static const int alu2genericVertex_[ numVertices ];
+
     const static int faceOrientation_[numFaces];
 
     const static int dune2aluFaceVertex_[numFaces][numVerticesPerFace];
     const static int alu2duneFaceVertex_[numFaces][numVerticesPerFace];
+
+    static const int faceVertex_[ numFaces ][ numVerticesPerFace ];
   };
 
   //! Maps indices of the Dune reference face onto the indices of the
@@ -177,6 +200,34 @@ namespace Dune {
     return alu2duneVertex_[index];
   }
 
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::generic2aluFace ( const int index )
+  {
+    assert( (index >= 0) && (index < numFaces) );
+    return generic2aluFace_[ index ];
+  }
+
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::alu2genericFace ( const int index )
+  {
+    assert( (index >= 0) && (index < numFaces) );
+    return alu2genericFace_[ index ];
+  }
+
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::generic2aluVertex ( const int index )
+  {
+    assert( (index >= 0) && (index < numVertices) );
+    return generic2aluVertex_[ index ];
+  }
+
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::alu2genericVertex ( const int index )
+  {
+    assert( (index >= 0) && (index < numVertices) );
+    return alu2genericVertex_[ index ];
+  }
+
   template <ALU3dGridElementType type>
   inline int ElementTopologyMapping<type>::faceOrientation(int index) {
     assert(index >= 0 && index < numVertices);
@@ -197,6 +248,14 @@ namespace Dune {
     assert(face >= 0 && face < numFaces);
     assert(localVertex >= 0 && localVertex < numVerticesPerFace);
     return alu2duneFaceVertex_[face][localVertex];
+  }
+
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::faceVertex ( int face, int local )
+  {
+    assert( (face >= 0) && (face < numFaces) );
+    assert( (local >= 0) && (local < numVerticesPerFace) );
+    return faceVertex_[ face ][ local ];
   }
 
   //- class FaceTopologyMapping
