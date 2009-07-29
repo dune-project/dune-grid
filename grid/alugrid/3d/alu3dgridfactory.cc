@@ -303,7 +303,7 @@ namespace Dune
   ::recreateBoundaryIds ( const int defaultId )
   {
     typedef std::pair< unsigned int, int > SubEntity;
-    typedef std::map< FaceType, SubEntity > FaceMap;
+    typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
 

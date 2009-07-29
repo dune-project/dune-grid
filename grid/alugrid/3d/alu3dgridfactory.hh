@@ -52,6 +52,8 @@ namespace Dune
     typedef array< unsigned int, numFaceCorners > FaceType;
 
   private:
+    struct FaceLess;
+
     typedef std::vector< VertexType > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
@@ -138,6 +140,22 @@ namespace Dune
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
     void recreateBoundaryIds ( const int defaultId = 1 );
+  };
+
+
+  template< template< int, int > class ALUGrid >
+  struct ALU3dGridFactory< ALUGrid >::FaceLess
+    : public std::binary_function< FaceType, FaceType, bool >
+  {
+    bool operator() ( const FaceType &a, const FaceType &b ) const
+    {
+      for( unsigned int i = 0; i < numFaceCorners; ++i )
+      {
+        if( a[ i ] != b[ i ] )
+          return (a[ i ] < b[ i ]);
+      }
+      return false;
+    }
   };
 
 
