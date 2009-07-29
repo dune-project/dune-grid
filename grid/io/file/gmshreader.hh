@@ -127,9 +127,10 @@ namespace Dune {
   public:
 
     template<typename T>
-    static GridType* read(Dune::GridFactory<GridType>& factory, const std::string& fileName,
-                          bool verbose, std::vector<T>& boundary_id_to_physical_entity,
-                          std::vector<T>& element_index_to_physical_entity)
+    static void read (Dune::GridFactory<GridType>& factory, const std::string& fileName,
+                      bool verbose, bool insert_boundary_segments,
+                      std::vector<T>& boundary_id_to_physical_entity,
+                      std::vector<T>& element_index_to_physical_entity)
     {
       // the grid dimension
       const int dim = GridType::dimension;
@@ -341,7 +342,8 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+          if (insert_boundary_segments)
+            factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -351,9 +353,8 @@ namespace Dune {
           vertices.resize(2);
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
-          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],
-                                                                                           nodes[simplexVertices[2]],
-                                                                                           nodes[simplexVertices[1]]));
+          if (insert_boundary_segments)
+            factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -387,8 +388,6 @@ namespace Dune {
         DUNE_THROW(Dune::IOError, "expected $EndElements");
 
       fclose(file);
-
-      return factory.createGrid();
     }
   };
 
@@ -532,9 +531,10 @@ namespace Dune {
   public:
 
     template<typename T>
-    static GridType* read(Dune::GridFactory<GridType>& factory, const std::string& fileName,
-                          bool verbose, std::vector<T>& boundary_id_to_physical_entity,
-                          std::vector<T>& element_index_to_physical_entity)
+    static void read (Dune::GridFactory<GridType>& factory, const std::string& fileName,
+                      bool verbose, bool insert_boundary_segments,
+                      std::vector<T>& boundary_id_to_physical_entity,
+                      std::vector<T>& element_index_to_physical_entity)
     {
       // the grid dimension
       const int dim = GridType::dimension;
@@ -753,7 +753,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
 
-          factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
+          if (insert_boundary_segments)
+            factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -766,8 +767,8 @@ namespace Dune {
           for (int i=0; i<3; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices first three vertices
 
-          factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],
-                                                                                           nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
+          if (insert_boundary_segments)
+            factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<3>(nodes[simplexVertices[0]],nodes[simplexVertices[1]],nodes[simplexVertices[2]],nodes[simplexVertices[3]],nodes[simplexVertices[4]],nodes[simplexVertices[5]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -805,8 +806,6 @@ namespace Dune {
         DUNE_THROW(Dune::IOError, "expected $EndElements");
 
       fclose(file);
-
-      return factory.createGrid();
     }
   };
 
@@ -822,7 +821,7 @@ namespace Dune {
   {
   public:
     /** \todo doc me */
-    static GridType* read (const std::string& fileName, bool verbose = true)
+    static GridType* read (const std::string& fileName, bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory;
@@ -830,27 +829,31 @@ namespace Dune {
       std::vector<int> boundary_id_to_physical_entity;
       std::vector<int> element_index_to_physical_entity;
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                               boundary_id_to_physical_entity,
-                                                               element_index_to_physical_entity);
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
+
+      return factory.createGrid();
     }
 
     /** \todo doc me */
     template<typename T>
     static GridType* read (const std::string& fileName, std::vector<T>& boundary_id_to_physical_entity,
-                           std::vector<T>& element_index_to_physical_entity, bool verbose = true)
+                           std::vector<T>& element_index_to_physical_entity, bool verbose = true,
+                           bool insert_boundary_segments=true)
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory;
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                               boundary_id_to_physical_entity,
-                                                               element_index_to_physical_entity);
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
+      return factory.createGrid();
     }
 
     /** \todo doc me */
     static GridType* read (GridType& grid, const std::string& fileName,
-                           bool verbose = true)
+                           bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
@@ -859,9 +862,10 @@ namespace Dune {
       std::vector<int> boundary_id_to_physical_entity;
       std::vector<int> element_index_to_physical_entity;
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                               boundary_id_to_physical_entity,
-                                                               element_index_to_physical_entity);
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
+      return factory.createGrid();
     }
 
     /** \todo doc me */
@@ -869,14 +873,42 @@ namespace Dune {
     static GridType* read (GridType& grid, const std::string& fileName,
                            std::vector<T>& boundary_id_to_physical_entity,
                            std::vector<T>& element_index_to_physical_entity,
-                           bool verbose = true)
+                           bool verbose = true, bool insert_boundary_segments=true)
     {
       // make a grid factory
       Dune::GridFactory<GridType> factory(&grid);
 
-      return GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,
-                                                               boundary_id_to_physical_entity,
-                                                               element_index_to_physical_entity);
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
+      return factory.createGrid();
+    }
+
+
+    /** \todo doc me */
+    static void read (Dune::GridFactory<GridType>& factory, const std::string& fileName, bool verbose = true,
+                      bool insert_boundary_segments=true)
+    {
+      // store dummy
+      std::vector<int> boundary_id_to_physical_entity;
+      std::vector<int> element_index_to_physical_entity;
+
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
+    }
+
+    /** \todo doc me */
+    template<typename T>
+    static void read (Dune::GridFactory<GridType>& factory,
+                      const std::string& fileName,
+                      std::vector<T>& boundary_id_to_physical_entity,
+                      std::vector<T>& element_index_to_physical_entity,
+                      bool verbose = true, bool insert_boundary_segments=true)
+    {
+      GmshReaderImp<GridType,GridType::dimension>::read(factory,fileName,verbose,insert_boundary_segments,
+                                                        boundary_id_to_physical_entity,
+                                                        element_index_to_physical_entity);
     }
   };
 
