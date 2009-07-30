@@ -722,7 +722,7 @@ namespace Dune
       if( commRank == 0 )
       {
         file.open( parallelName.str().c_str() );
-        writeParallelHeader( file, name.c_str(), "", commSize );
+        writeParallelHeader( file, name.c_str(), ".", commSize );
         file.close();
       }
 
