@@ -358,6 +358,9 @@ namespace Dune
     for (FunctionIterator it=celldata.begin(); it!=celldata.end(); ++it)
     {
       blocklength = ncells * (*it)->ncomps() * sizeof(float);
+      //vtk file format: a vector data always should have 3 comps(with 3rd comp = 0 in 2D case)
+      if((*it)->ncomps()==2)
+        blocklength = ncells * (3) * sizeof(float);
       stream.write(blocklength);
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
