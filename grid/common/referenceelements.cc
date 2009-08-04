@@ -5,6 +5,8 @@
 
 namespace Dune {
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
+
   /** \brief Singleton containing reference hypercubes.
       \ingroup GridReferenceElements */
   template<typename ctype, int dim>
@@ -107,5 +109,7 @@ namespace Dune {
     }
 
   }
+
+#endif
 
 }
