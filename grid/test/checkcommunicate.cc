@@ -264,8 +264,8 @@ class CheckCommunication
 
           const typename Intersection::LocalGeometry &geoInSelf = intersection.geometryInInside();
 
-          const ReferenceElement< ctype, dim-1 > &faceRefElement
-            = ReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
+          const GenericReferenceElement< ctype, dim-1 > &faceRefElement
+            = GenericReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
           const FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
 
           const CoordinateVector normal = intersection.integrationOuterNormal( bary );
