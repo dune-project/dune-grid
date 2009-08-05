@@ -131,7 +131,6 @@ namespace Dune
     FieldVector< ctype, cdim > corner ( int i ) const
     {
       return realGeometry.corner( i );
-      */
     }
 
     /** \brief Evaluate the map \f$ g\f$.
