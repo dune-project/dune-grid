@@ -622,7 +622,7 @@ Dune::FieldVector<typename UGGrid<dim>::ctype,dim> Dune::UGGrid<dim>::getBoundar
 
   if (dim==2) {
 
-    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUG(iIt->numberInSelf(), iIt->inside()->type());
+    int ugEdgeNumber = UGGridRenumberer<dim>::edgesDUNEtoUGNew(iIt->indexInInside(), iIt->inside()->type());
 
     // Get UG element from which this intersection iterator is taken
     const typename UG_NS<dim>::Element* target = getRealImplementation(*iIt->inside()).target_;
@@ -745,8 +745,8 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 
           typename UG_NS<dim>::Element* elem1 = getRealImplementation(*nIt->outside()).target_;
 
-          int side0 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->numberInSelf(), eIt->type());
-          int side1 = UGGridRenumberer<dim>::facesDUNEtoUG(nIt->numberInNeighbor(), nIt->outside()->type());
+          int side0 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInInside(), eIt->type());
+          int side1 = UGGridRenumberer<dim>::facesDUNEtoUGNew(nIt->indexInOutside(), nIt->outside()->type());
 
           UG::D3::DisposeDoubledSideVector((typename UG_NS<3>::Grid*)multigrid_->grids[i],
                                            (typename UG_NS<3>::Element*)elem0,
