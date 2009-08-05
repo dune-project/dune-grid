@@ -28,6 +28,15 @@ namespace Dune {
       return i;
     }
 
+    /** \brief Turn a local vertex number from DUNE numbering to UG numbering
+
+       This is a dummy method which simply returns i.  The real work is done
+       in the class specializations.
+     */
+    static int verticesDUNEtoUGNew(int i, const GeometryType& type) {
+      return i;
+    }
+
     /** \brief Turn a local vertex number from UG numbering to DUNE numbering
 
        This is a dummy method which simply returns i.  The real work is done
@@ -49,6 +58,15 @@ namespace Dune {
   class UGGridRenumberer<2> {
 
   public:
+
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int verticesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 2 );
+
+      return verticesDUNEtoUG(j, type);
+    }
 
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
@@ -75,6 +93,15 @@ namespace Dune {
     }
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 1 );
+
+      return edgesDUNEtoUG(j, type);
+    }
+
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int edgesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
@@ -93,6 +120,15 @@ namespace Dune {
       }
 
       return i;
+    }
+
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int facesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 1 );
+
+      return facesDUNEtoUG(j, type);
     }
 
     /** \brief Turn a local face number from DUNE numbering to UG numbering */
@@ -152,6 +188,15 @@ namespace Dune {
 
   public:
 
+    /** \brief Turn a local edge number from new DUNE numbering to UG numbering */
+    static int verticesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 3 );
+
+      return verticesDUNEtoUG(j, type);
+    }
+
     /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
     static int verticesDUNEtoUG(int i, const GeometryType& type) {
 
@@ -175,6 +220,15 @@ namespace Dune {
     }
 
     /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int edgesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 2 );
+
+      return edgesDUNEtoUG(j, type);
+    }
+
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
     static int edgesDUNEtoUG(int i, const GeometryType& type) {
 
       if (type.isCube()) {
@@ -193,6 +247,15 @@ namespace Dune {
       //             }
 
       return i;
+    }
+
+    /** \brief Turn a local edge number from DUNE numbering to UG numbering */
+    static int facesDUNEtoUGNew(int i, const GeometryType& type) {
+      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      const int j = Numbering::generic2dune( tid, i, 1 );
+
+      return facesDUNEtoUG(j, type);
     }
 
     /** \brief Turn a local face number from DUNE numbering to UG numbering */
