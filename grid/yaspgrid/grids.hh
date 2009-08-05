@@ -1070,7 +1070,7 @@ namespace Dune {
         if(power<d>::eval(i)==_procs) {
           for(int j=0; j<d; ++j)
             _dims[j]=i;
-          found=true;
+          //found=true;
         }
       if(!found)
         optimize_dims(d-1,size,_procs,dims,opt);
@@ -1554,7 +1554,7 @@ namespace Dune {
           if (fmod((double)size[k],(double)dims[k])>0.0001) mm*=3;
           if ( mm > m ) m = mm;
         }
-        //		  if (_rank==0) std::cout << "optimize_dims: " << size << " | " << dims << " norm=" << m << std::endl;
+        //if (_rank==0) std::cout << "optimize_dims: " << size << " | " << dims << " norm=" << m << std::endl;
         if (m<opt)
         {
           opt = m;
