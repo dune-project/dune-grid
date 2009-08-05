@@ -23,7 +23,6 @@
 #endif
 #ifdef HAVE_UG
 #include <dune/grid/uggrid.hh>
-#include <dune/grid/uggrid/uggridfactory.hh>
 #endif
 
 
