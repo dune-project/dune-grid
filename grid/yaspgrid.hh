@@ -2345,7 +2345,17 @@ namespace Dune {
     {
       init();
     }
+
+#else
+    YaspGrid (int, Dune::FieldVector<ctype, dim> L,
+              Dune::FieldVector<int, dim> s,
+              Dune::FieldVector<bool, dim> periodic, int overlap)
+      : MultiYGrid<dim,ctype>(L,s,periodic,overlap)
+    {
+      init();
+    }
 #endif
+
 
     /*! Constructor for a sequential YaspGrid, they are all forwarded to the base class.
 
