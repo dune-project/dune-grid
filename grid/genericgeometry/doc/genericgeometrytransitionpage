@@ -63,7 +63,7 @@ the new number for a new subentity of given codimension
 given the old one (or vice versa) use
 @code
   // get class with static methods 
-  // using the dimension of the reference elemments
+  // using the dimension of the reference elements
     typedef GenericGeometry::MapNumberingProvider< dimension > 
             Numbering;
 
