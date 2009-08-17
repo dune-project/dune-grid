@@ -417,7 +417,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
   //   Change the input face number from Dune numbering to UG numbering
   // //////////////////////////////////////////////////////////////////////
 
-  elementSide = UGGridRenumberer<dim>::facesDUNEtoUG(elementSide, e->type());
+  elementSide = UGGridRenumberer<dim>::facesDUNEtoUGNew(elementSide, e->type());
 
   // ///////////////
   //   init list
@@ -481,7 +481,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
   //   Extract result from stack
   // //////////////////////////////
 
-  /** \todo Initialized with a dummy value because EntityPointer isn't default constructible */
+  // Initialized with a dummy value because EntityPointer isn't default constructible
   childElements.resize(list.size(), lbegin<0>(0));
   childElementSides.resize(list.size());
 
@@ -495,7 +495,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(typename Traits::template Codim<0>:
 
     // Dune numbers the faces of several elements differently than UG.
     // The following switch does the transformation
-    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNE(side, childElements[i]->type());
+    childElementSides[i] = UGGridRenumberer<dim>::facesUGtoDUNENew(side, childElements[i]->type());
 
   }
 

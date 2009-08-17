@@ -138,6 +138,15 @@ namespace Dune {
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
+    static int facesUGtoDUNENew(int i, const GeometryType& type) {
+      int j = facesUGtoDUNE(i, type);
+
+      typedef Dune::GenericGeometry::MapNumberingProvider<2> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      return Numbering::dune2generic( tid, j, 1 );
+    }
+
+    /** \brief Turn a local face number from UG numbering to DUNE numbering */
     static int facesUGtoDUNE(int i, const GeometryType& type) {
 
       if (type.isCube()) {
@@ -277,6 +286,15 @@ namespace Dune {
       }
 
       return i;
+    }
+
+    /** \brief Turn a local face number from UG numbering to DUNE numbering */
+    static int facesUGtoDUNENew(int i, const GeometryType& type) {
+      int j = facesUGtoDUNE(i, type);
+
+      typedef Dune::GenericGeometry::MapNumberingProvider<3> Numbering;
+      const unsigned int tid = Dune::GenericGeometry::topologyId( type );
+      return Numbering::dune2generic( tid, j, 1 );
     }
 
     /** \brief Turn a local face number from UG numbering to DUNE numbering */
