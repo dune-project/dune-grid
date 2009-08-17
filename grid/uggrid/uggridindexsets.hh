@@ -441,7 +441,7 @@ namespace Dune {
       }
       else {
         DUNE_THROW(NotImplemented,
-                   (Local) ? "Local" : "Global"
+                   (Local ? "Local" : "Global") <<
                    " persistent index for entities which are neither nodes nor elements.");
       }
 #else
