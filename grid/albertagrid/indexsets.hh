@@ -115,7 +115,7 @@ namespace Dune
 
     //! return subIndex of given enitiy's sub entity
     template< int codim >
-    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
+    int DUNE_DEPRECATED subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
