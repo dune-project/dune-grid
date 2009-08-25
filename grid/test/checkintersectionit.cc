@@ -262,7 +262,7 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the consistency of numberInSelf, numberInNeighbor
     //   and the indices of the subface between.
     // /////////////////////////////////////////////////////////////
-    if ( iIt->conforming() && iIt->neighbor() )
+    if( iIt->conforming() && iIt->neighbor() && !iIt->boundary() )
     {
       EntityPointer outside = iIt->outside();
       const int indexInInside  = iIt->indexInInside();
@@ -400,7 +400,7 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the geometry returned by intersectionNeighborLocal()
     // ////////////////////////////////////////////////////////////////
 
-    if (iIt->neighbor() )
+    if( iIt->neighbor() && !iIt->boundary() )
     {
       const typename IntersectionIterator::LocalGeometry &intersectionNeighborLocal = iIt->geometryInOutside();
 

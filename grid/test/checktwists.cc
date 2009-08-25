@@ -41,7 +41,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   typedef FieldVector< typename LocalGeometry::ctype, LocalGeometry::coorddimension >
   LocalVector;
 
-  if( !intersection.neighbor() || !intersection.conforming() )
+  if( !intersection.neighbor() || intersection.boundary() || !intersection.conforming() )
     return 0;
 
   int errors = 0;

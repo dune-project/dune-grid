@@ -52,7 +52,7 @@ void markOne ( GridType & grid , int num , int ref )
 }
 
 
-int main ()
+int main ( int argc, char **argv )
 try {
   const int dim = GRIDDIM;
 
@@ -62,15 +62,22 @@ try {
 
   checkAlbertaReader< GridType >();
 
-  /* use grid-file appropriate for dimensions */
-  std::ostringstream filename;
-  filename << "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
+  std::string filename;
+  if( argc <= 1 )
+  {
+    /* use grid-file appropriate for dimensions */
+    std::ostringstream sfilename;
+    sfilename << "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
+    filename = sfilename.str();
+  }
+  else
+    filename = argv[ 1 ];
 
-  std::cout << std::endl << GridType::typeName() << " with grid file: " << filename.str() << std::endl << std::endl;
+  std::cout << std::endl << GridType::typeName() << " with grid file: " << filename << std::endl << std::endl;
   {
     factorEpsilon = 5e2;
 
-    Dune::GridPtr<GridType> gridPtr(filename.str());
+    Dune::GridPtr<GridType> gridPtr( filename );
     GridType & grid = *gridPtr;
 
     // extra-environment to check destruction
