@@ -219,9 +219,9 @@ namespace Dune
 
           int lr_set = 0;
           if( patch.hasNeighbor( i, 0 ) && (patch.neighborIndex( i, 0 ) < i) )
-            lr_set = 1;
+            lr_set |= 1;
           if( patch.hasNeighbor( i, 1 ) && (patch.neighborIndex( i, 1 ) < i) )
-            lr_set += 2;
+            lr_set |= 2;
           assert( lr_set != 0 );
 
           functor( father->child[ 0 ], 0 );
