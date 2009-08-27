@@ -116,7 +116,8 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
     for (int i=0; eIt!=eEndIt; ++eIt) {
       if (eIt->type().isSimplex()) {
         for (int j=0; j<VerticesPerElement; j++)
-          dPtr[i*VerticesPerElement+j] = indexSet.template subIndex<dim>(*eIt,j)+1;           //warum +1 ?
+          // The +1 is added because AmiraMesh numbers vertices starting from 1
+          dPtr[i*VerticesPerElement+j] = indexSet.subIndex(*eIt,j,dim)+1;
         i++;
       }
       else {
@@ -236,19 +237,19 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
 
             const int prismReordering[8] = {0, 1, 1, 2, 3, 4, 4, 5};
             for (int j=0; j<8; j++)
-              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, prismReordering[j])+1;
+              dPtr[8*i + j] = indexSet.subIndex(*eIt, prismReordering[j],dim)+1;
 
           } else if (type.isPyramid()) {
 
-            const int pyramidReordering[8] = {0, 1, 2, 3, 4, 4, 4, 4};
+            const int pyramidReordering[8] = {0, 1, 3, 2, 4, 4, 4, 4};
             for (int j=0; j<8; j++)
-              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, pyramidReordering[j])+1;
+              dPtr[8*i + j] = indexSet.subIndex(*eIt, pyramidReordering[j], dim)+1;
 
           } else if (type.isTetrahedron()) {
 
             const int tetraReordering[8] = {0, 1, 2, 2, 3, 3, 3, 3};
             for (int j=0; j<8; j++)
-              dPtr[8*i + j] = indexSet.template subIndex<dim>(*eIt, tetraReordering[j])+1;
+              dPtr[8*i + j] = indexSet.subIndex(*eIt, tetraReordering[j],dim)+1;
 
           } else
             DUNE_THROW(NotImplemented, "Unknown element type encountered");
@@ -265,15 +266,15 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
 
         if (type.isQuadrilateral()) {
 
-          dPtr[i*4+0] = indexSet.template subIndex<dim>(*eIt, 0)+1;
-          dPtr[i*4+1] = indexSet.template subIndex<dim>(*eIt, 1)+1;
-          dPtr[i*4+2] = indexSet.template subIndex<dim>(*eIt, 3)+1;
-          dPtr[i*4+3] = indexSet.template subIndex<dim>(*eIt, 2)+1;
+          dPtr[i*4+0] = indexSet.subIndex(*eIt, 0, dim)+1;
+          dPtr[i*4+1] = indexSet.subIndex(*eIt, 1, dim)+1;
+          dPtr[i*4+2] = indexSet.subIndex(*eIt, 3, dim)+1;
+          dPtr[i*4+3] = indexSet.subIndex(*eIt, 2, dim)+1;
 
         } else if (type.isTriangle()) {
 
           for (int j=0; j<3; j++)
-            dPtr[i*maxVerticesPerElement+j] = indexSet.template subIndex<dim>(*eIt, j)+1;
+            dPtr[i*maxVerticesPerElement+j] = indexSet.subIndex(*eIt, j, dim)+1;
 
           // If 4 vertices are expected per element use the last value
           // to fill up the remaining slots
