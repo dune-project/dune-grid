@@ -22,7 +22,7 @@ namespace Dune
     public EntityPointer<GridImp, LeafIteratorImp<codim,pitype,GridImp> >
   {
   public:
-    typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef typename GridImp::template Codim< codim >::Entity Entity;
 
     /** @brief Preincrement operator. */
     LeafIterator& operator++()
