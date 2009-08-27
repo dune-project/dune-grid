@@ -143,6 +143,10 @@ insertElement(const GeometryType& type,
       DUNE_THROW(GridError, "You have requested to enter a pyramid, but you"
                  << " have provided " << vertices.size() << " vertices!");
 
+    // DUNE and UG numberings differ --> reorder the vertices
+    elementVertices_[newIdx+2] = vertices[3];
+    elementVertices_[newIdx+3] = vertices[2];
+
   } else if (type.isPrism()) {
 
     if (vertices.size() != 6)
