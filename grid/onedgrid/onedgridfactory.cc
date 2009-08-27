@@ -19,7 +19,7 @@ GridFactory() :
 
 Dune::GridFactory<Dune::OneDGrid >::
 GridFactory(OneDGrid* grid) :
-  factoryOwnsGrid_(true),
+  factoryOwnsGrid_(false),
   vertexIndex_(0)
 {
   grid_ = grid;
