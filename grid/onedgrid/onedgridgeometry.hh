@@ -58,18 +58,6 @@ namespace Dune {
       return l;
     }
 
-#if 0
-    /** \brief Returns true if the point is in the current element
-
-       This method really doesn't make much sense for a zero-dimensional
-       object.  It always returns 'true'.
-     */
-    bool checkInside(const FieldVector<typename GridImp::ctype, 0> &local) const {
-      return true;
-    }
-#endif
-
-
     /** \brief !!!
 
        This method really doesn't make much sense for a zero-dimensional
