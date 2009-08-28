@@ -126,7 +126,7 @@ namespace Dune
      */
     int map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
-      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
+      GeometryType gt=GenericReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       return is.subIndex(e,i,codim) + offset.find(gt)->second;
     }
 
