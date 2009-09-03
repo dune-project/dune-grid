@@ -346,8 +346,19 @@ namespace Dune
         mapping_->referenceCount = 1;
       }
 
-      /** \brief I don't understand what this is supposed to do
-          \todo Please doc me */
+      /** \brief obtain a geometry for a subentity
+       *
+       *  Assume that we have a geometry for some entity d-dimensional E.
+       *  This method can provide a geometry for the i-th subentity of E
+       *  (of codimension d - mydimension).
+       *
+       *  \note This method can be more efficient than just building up the
+       *        geometry for the subentity. For example, the subgeometry
+       *        automatically inherits affinity.
+       *
+       *  \param[in]  father  geometry of entity \em E
+       *  \param[in]  i       number of the subentity (in generic numbering)
+       */
       template< int fatherdim >
       BasicGeometry ( const BasicGeometry< fatherdim, Traits > &father, int i )
         : mapping_( subMapping( father, i ) )
@@ -484,17 +495,14 @@ namespace Dune
         assert( mapping_ != 0 );
         return *mapping_;
       }
+
       template< int fatherdim >
       Mapping *
       subMapping ( const BasicGeometry< fatherdim, Traits > &father, int i )
       {
         const unsigned int codim = fatherdim - mydim;
-        const unsigned int ftid = father.mapping().topologyId();
-        const unsigned int j = MapNumberingProvider< fatherdim >
-                               :: template dune2generic< codim >( ftid, i );
-        return father.mapping().template trace< codim >( j );
+        return father.mapping().template trace< codim >( i );
       }
-
     };
 
 
