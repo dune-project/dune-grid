@@ -188,17 +188,6 @@ namespace Dune {
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(0);}
 
-    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
-       with codimension cc.
-     */
-    //!< Default codim 1 Faces and codim == dim Vertices
-    template<int cc> int count () const;
-
-    //! Provide access to mesh entity i of given codimension. Entities
-    //!  are numbered 0 ... count<cc>()-1
-    template<int cc>
-    OneDGridLevelIterator<cc,All_Partition, GridImp> entity (int i);
-
     //! geometry of this entity
     const Geometry& geometry () const {return geo_;}
 
