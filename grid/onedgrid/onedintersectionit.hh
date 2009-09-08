@@ -53,9 +53,6 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef Dune::Intersection<const GridImp, Dune::OneDGridLevelIntersectionIterator> Intersection;
 
-    //! The Destructor
-    ~OneDGridLevelIntersectionIterator() {};
-
     //! equality
     bool equals(const OneDGridLevelIntersectionIterator<GridImp>& other) const {
       return (center_ == other.center_) && (neighbor_ == other.neighbor_);
