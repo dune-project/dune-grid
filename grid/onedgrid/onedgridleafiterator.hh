@@ -29,16 +29,16 @@ namespace Dune {
       /** \todo Can a make the fullRefineLevel work somehow? */
       const int fullRefineLevel = 0;
 
-      this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*) Dune::get<1-codim>(grid_->entityImps_[fullRefineLevel]).begin());
+      GridImp::getRealImplementation(this->virtualEntity_).setToTarget((OneDEntityImp<1-codim>*) Dune::get<1-codim>(grid_->entityImps_[fullRefineLevel]).begin());
 
-      if (!this->virtualEntity_.target()->isLeaf())
+      if (!GridImp::getRealImplementation(this->virtualEntity_).target_->isLeaf())
         increment();
     }
 
     //! Constructor
     OneDGridLeafIterator()
     {
-      this->virtualEntity_.setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
+      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
     }
 
     //! prefix increment
@@ -46,7 +46,8 @@ namespace Dune {
       // Increment until you find a leaf entity
       do {
         globalIncrement();
-      } while (this->virtualEntity_.target() && !this->virtualEntity_.target()->isLeaf());
+      } while (GridImp::getRealImplementation(this->virtualEntity_).target_
+               && !GridImp::getRealImplementation(this->virtualEntity_).target_->isLeaf());
     }
 
   private:
@@ -59,12 +60,12 @@ namespace Dune {
       const int oldLevel = this->virtualEntity_.level();
 
       // Increment on this level
-      this->virtualEntity_.setToTarget(this->virtualEntity_.target()->succ_);
+      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(GridImp::getRealImplementation(this->virtualEntity_).target_->succ_);
 
       // If beyond the end of this level set to first of next level
-      if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel()) {
+      if (!GridImp::getRealImplementation(this->virtualEntity_).target_ && oldLevel < grid_->maxLevel()) {
 
-        this->virtualEntity_.setToTarget(const_cast<OneDEntityImp<dim-codim>*>(Dune::get<1-codim>(grid_->entityImps_[oldLevel+1]).begin()));
+        GridImp::getRealImplementation(this->virtualEntity_).setToTarget(const_cast<OneDEntityImp<dim-codim>*>(Dune::get<1-codim>(grid_->entityImps_[oldLevel+1]).begin()));
 
       }
 

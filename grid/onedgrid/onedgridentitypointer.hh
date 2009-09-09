@@ -32,7 +32,8 @@ namespace Dune {
 
     //! equality
     bool equals(const OneDGridEntityPointer<codim,GridImp>& other) const {
-      return other.virtualEntity_.target() == virtualEntity_.target();
+      return GridImp::getRealImplementation(other.virtualEntity_).target_
+             == GridImp::getRealImplementation(virtualEntity_).target_;
     }
 
     //! dereferencing
@@ -41,13 +42,14 @@ namespace Dune {
     //! ask for level of entity
     int level () const {return virtualEntity_.level();}
 
-    OneDGridEntityPointer() {}
+    OneDGridEntityPointer()
+      : virtualEntity_(OneDGridEntity<codim, dim, GridImp>())
+    {}
 
     /** \brief Constructor from a given entity  */
     OneDGridEntityPointer(const OneDGridEntity<codim, dim, GridImp> & entity)
-    {
-      virtualEntity_.setToTarget(entity.target_);
-    }
+      : virtualEntity_(entity)
+    {}
 
     //! empty method since internal entity is not a pointer
     void compactify () {}
@@ -55,13 +57,15 @@ namespace Dune {
   protected:
 
     /** \brief Constructor from a given iterator */
-    OneDGridEntityPointer(OneDEntityImp<dim-codim>* it) {
-      virtualEntity_.setToTarget(it);
+    OneDGridEntityPointer(OneDEntityImp<dim-codim>* it)
+      : virtualEntity_(OneDGridEntity<codim, dim, GridImp>())
+    {
+      GridImp::getRealImplementation(virtualEntity_).setToTarget(it);
     };
 
   protected:
 
-    mutable OneDEntityWrapper<codim,GridImp::dimension,GridImp> virtualEntity_;
+    mutable MakeableInterfaceObject<Entity> virtualEntity_;
 
   };
 

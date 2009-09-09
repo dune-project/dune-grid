@@ -92,6 +92,14 @@ namespace Dune {
    */
   class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily<1,1> >
   {
+    template <int, class >
+    friend class OneDGridEntityPointer;
+
+    template <int , PartitionIteratorType, class >
+    friend class OneDGridLevelIterator;
+
+    friend class OneDGridHierarchicIterator<const OneDGrid>;
+
     // Grid and world dimension are hardwired in this grid
     enum {dim = 1};
     enum {dimworld = 1};
