@@ -68,8 +68,7 @@ createGrid()
   //   Insert the vertices into the grid
   // ////////////////////////////////////////////////////////
 
-  grid_->vertices.resize(1);
-  grid_->elements.resize(1);
+  grid_->entityImps_.resize(1);
 
 
   VertexIterator vIt    = vertexPositions_.begin();
@@ -84,7 +83,7 @@ createGrid()
     newVertex.leafIndex_ = vIt->second;
     newVertex.levelIndex_ = vIt->second;
 
-    grid_->vertices[0].push_back(newVertex);
+    grid_->vertices(0).push_back(newVertex);
 
   }
 
@@ -96,7 +95,7 @@ createGrid()
   // The only thing of interest are the indices.
   // ///////////////////////////////////////////////////////////////////
 
-  OneDGridList<OneDEntityImp<0> >::iterator it = grid_->vertices[0].begin();
+  OneDGridList<OneDEntityImp<0> >::iterator it = Dune::get<0>(grid_->entityImps_[0]).begin();
   for (size_t i=0; i<vertexPositions_.size()-1; i++) {
 
     OneDEntityImp<1> newElement(0, grid_->getNextFreeId(0));
@@ -104,7 +103,7 @@ createGrid()
     it = it->succ_;
     newElement.vertex_[1] = it;
 
-    grid_->elements[0].push_back(newElement);
+    grid_->elements(0).push_back(newElement);
 
   }
 

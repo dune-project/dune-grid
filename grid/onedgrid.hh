@@ -8,6 +8,7 @@
 
 #include <dune/common/misc.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/tuples.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
@@ -152,7 +153,7 @@ namespace Dune {
 
        Levels are numbered 0 ... maxlevel with 0 the coarsest level.
      */
-    int maxLevel() const {return vertices.size()-1;}
+    int maxLevel() const {return entityImps_.size()-1;}
 
     //! Iterator to first entity of given codim on level
     template<int codim>
@@ -193,9 +194,9 @@ namespace Dune {
         DUNE_THROW(GridError, "There are no codim " << codim << " entities in a OneDGrid!");
 
       if (codim==0)
-        return elements[level].size();
+        return elements(level).size();
 
-      return vertices[level].size();
+      return vertices(level).size();
     }
 
 
@@ -345,6 +346,26 @@ namespace Dune {
 
   private:
 
+    /** \brief Get vertex lists directly -- makes the code more readable */
+    OneDGridList<OneDEntityImp<0> >& vertices(int level) {
+      return Dune::get<0>(entityImps_[level]);
+    }
+
+    /** \brief Get vertex lists directly -- makes the code more readable */
+    const OneDGridList<OneDEntityImp<0> >& vertices(int level) const {
+      return Dune::get<0>(entityImps_[level]);
+    }
+
+    /** \brief Get element lists directly -- makes the code more readable */
+    OneDGridList<OneDEntityImp<1> >& elements(int level) {
+      return Dune::get<1>(entityImps_[level]);
+    }
+
+    /** \brief Get element lists directly -- makes the code more readable */
+    const OneDGridList<OneDEntityImp<1> >& elements(int level) const {
+      return Dune::get<1>(entityImps_[level]);
+    }
+
     CollectiveCommunication ccobj;
 
     /** \brief Update all indices and ids */
@@ -366,12 +387,9 @@ namespace Dune {
      */
     OneDGridList<OneDEntityImp<1> >::iterator getLeftNeighborWithSon(OneDGridList<OneDEntityImp<1> >::iterator eIt);
 
-    // The vertices of the grid hierarchy
-    std::vector<OneDGridList<OneDEntityImp<0> > > vertices;
-    //std::vector<std::list<OneDEntityImp<0> > > vertices;
-
-    // The elements of the grid hierarchy
-    std::vector<OneDGridList<OneDEntityImp<1> > > elements;
+    // The vertices and elements of the grid hierarchy
+    std::vector<tuple<OneDGridList<OneDEntityImp<0> >,
+            OneDGridList<OneDEntityImp<1> > > > entityImps_;
 
     // Our set of level indices
     mutable std::vector<OneDGridLevelIndexSet<const OneDGrid>* > levelIndexSets_;

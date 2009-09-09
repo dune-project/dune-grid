@@ -90,7 +90,7 @@ namespace Dune {
       // ///////////////////////////////
       numElements_ = 0;
       OneDGridList<OneDEntityImp<1> >::const_iterator eIt;
-      for (eIt = grid_->elements[level_].begin(); eIt!=grid_->elements[level_].end(); eIt = eIt->succ_)
+      for (eIt = grid_->elements(level_).begin(); eIt != grid_->elements(level_).end(); eIt = eIt->succ_)
         /** \todo Remove this const cast */
         const_cast<OneDEntityImp<1>*>(eIt)->levelIndex_ = numElements_++;
 
@@ -100,7 +100,7 @@ namespace Dune {
 
       numVertices_ = 0;
       OneDGridList<OneDEntityImp<0> >::const_iterator vIt;
-      for (vIt = grid_->vertices[level_].begin(); vIt!=grid_->vertices[level_].end(); vIt = vIt->succ_)
+      for (vIt = grid_->vertices(level_).begin(); vIt != grid_->vertices(level_).end(); vIt = vIt->succ_)
         /** \todo Remove this const cast */
         const_cast<OneDEntityImp<0>*>(vIt)->levelIndex_ = numVertices_++;
 
@@ -253,7 +253,7 @@ namespace Dune {
       for (int i=grid_.maxLevel(); i>=0; i--) {
 
         const OneDEntityImp<0>* vIt;
-        for (vIt = grid_.vertices[i].begin(); vIt!=grid_.vertices[i].end(); vIt = vIt->succ_) {
+        for (vIt = grid_.vertices(i).begin(); vIt != grid_.vertices(i).end(); vIt = vIt->succ_) {
 
           /** \todo Remove the const casts */
           if (vIt->isLeaf())

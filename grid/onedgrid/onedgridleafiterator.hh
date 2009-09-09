@@ -29,10 +29,7 @@ namespace Dune {
       /** \todo Can a make the fullRefineLevel work somehow? */
       const int fullRefineLevel = 0;
 
-      if (codim==0)
-        this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->elements[fullRefineLevel].begin());
-      else
-        this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->vertices[fullRefineLevel].begin());
+      this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*) Dune::get<1-codim>(grid_->entityImps_[fullRefineLevel]).begin());
 
       if (!this->virtualEntity_.target()->isLeaf())
         increment();
@@ -67,10 +64,7 @@ namespace Dune {
       // If beyond the end of this level set to first of next level
       if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel()) {
 
-        if (codim==0)
-          this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->elements[oldLevel+1].begin());
-        else
-          this->virtualEntity_.setToTarget((OneDEntityImp<1-codim>*)grid_->vertices[oldLevel+1].begin());
+        this->virtualEntity_.setToTarget(const_cast<OneDEntityImp<dim-codim>*>(Dune::get<1-codim>(grid_->entityImps_[oldLevel+1]).begin()));
 
       }
 
