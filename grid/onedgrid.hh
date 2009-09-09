@@ -32,8 +32,6 @@ namespace Dune
   template<class GridImp, bool LeafIterator> class OneDGridIntersectionIterator;
   class OneDGrid;
 
-  template<int codim>                        class OneDGridLevelIteratorFactory;
-
 }
 
 #include "onedgrid/onedgridlist.hh"
@@ -92,6 +90,10 @@ namespace Dune {
    */
   class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily<1,1> >
   {
+    // Grid and world dimension are hardwired in this grid
+    enum {dim = 1};
+    enum {dimworld = 1};
+
     template <int, class >
     friend class OneDGridEntityPointer;
 
@@ -100,12 +102,6 @@ namespace Dune {
 
     friend class OneDGridHierarchicIterator<const OneDGrid>;
 
-    // Grid and world dimension are hardwired in this grid
-    enum {dim = 1};
-    enum {dimworld = 1};
-
-    friend class OneDGridLevelIteratorFactory <0>;
-    friend class OneDGridLevelIteratorFactory <1>;
     template <int codim_, int dim_, class GridImp_>
     friend class OneDGridEntity;
     friend class OneDGridHierarchicIterator<OneDGrid>;

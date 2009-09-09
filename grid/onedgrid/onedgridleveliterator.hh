@@ -24,7 +24,6 @@ namespace Dune {
   {
   public:
     enum {dim=GridImp::dimension};
-    friend class OneDGridLevelIteratorFactory<codim>;
     friend class OneDGrid;
     friend class OneDGridEntity<codim,dim,GridImp>;
     friend class OneDGridEntity<0,dim,GridImp>;
