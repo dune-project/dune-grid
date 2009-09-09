@@ -26,10 +26,10 @@ namespace Dune {
   template <class GridType>
   class GridFactoryInterface {
 
+  protected:
+
     /** \brief The grid world dimension */
     enum {dimworld = GridType::dimensionworld};
-
-  protected:
 
     /** \brief Type used by the grid for coordinates */
     typedef typename GridType::ctype ctype;
