@@ -123,23 +123,6 @@ namespace Dune {
   };
 
 
-  template<int cd, int dim, class GridImp>
-  class OneDEntityWrapper :
-    public GridImp::template Codim<cd>::Entity
-  {
-  public:
-
-    OneDEntityWrapper() :
-      GridImp::template Codim<cd>::Entity (OneDGridEntity<cd, dim, GridImp>())
-    {}
-
-    void setToTarget(OneDEntityImp<dim-cd>* target) {
-      this->realEntity.setToTarget(target);
-    }
-
-    OneDEntityImp<dim-cd>* target() {return this->realEntity.target_;}
-  };
-
 
   //**********************************************************************
   //
@@ -402,8 +385,8 @@ namespace Dune {
 
       }
 
-      it.virtualEntity_.setToTarget((it.elemStack.empty())
-                                    ? OneDGridNullIteratorFactory<1>::null() : it.elemStack.top());
+      GridImp::getRealImplementation(it.virtualEntity_).setToTarget((it.elemStack.empty())
+                                                                    ? OneDGridNullIteratorFactory<1>::null() : it.elemStack.top());
 
       return it;
     }

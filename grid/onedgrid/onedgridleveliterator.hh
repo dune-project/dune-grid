@@ -42,7 +42,7 @@ namespace Dune {
 
     //! prefix increment
     void increment() {
-      this->virtualEntity_.setToTarget(this->virtualEntity_.target()->succ_);
+      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(GridImp::getRealImplementation(this->virtualEntity_).target_->succ_);
     }
   };
 
