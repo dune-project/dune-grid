@@ -67,8 +67,8 @@ namespace Dune {
 
       }
 
-      GridImp::getRealImplementation(this->virtualEntity_).setToTarget((elemStack.empty())
-                                                                       ? OneDGridNullIteratorFactory<1>::null() : elemStack.top());
+      this->virtualEntity_.setToTarget((elemStack.empty())
+                                       ? OneDGridNullIteratorFactory<1>::null() : elemStack.top());
     }
 
   private:
