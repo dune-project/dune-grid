@@ -427,6 +427,7 @@ namespace Dune
   };
 
 } //end  namespace Dune
+#include <dune/grid/alugrid/2d/alu2dgridfactory.hh>
 
 #else
 #error "Trying to use <dune/grid/alugrid.hh> without ALUGRID_CPPFLAGS."
