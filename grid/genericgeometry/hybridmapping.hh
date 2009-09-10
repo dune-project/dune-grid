@@ -131,15 +131,16 @@ namespace Dune
       virtual GlobalCoordType
       normal ( int face, const LocalCoordType &local ) const = 0;
 
+    protected:
+      using HybridMappingBase< dim, GeometryTraits > :: trace;
+
+    public:
       template< int codim >
       typename Codim< codim > :: Trace *trace ( unsigned int i ) const
       {
         Int2Type< codim > codimVariable;
         return trace( codimVariable, i );
       }
-
-    protected:
-      using HybridMappingBase< dim, GeometryTraits > :: trace;
     };
 
 
