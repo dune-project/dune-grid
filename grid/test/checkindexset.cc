@@ -57,7 +57,6 @@ namespace Dune
     const GenericReferenceElement< coordType, dim > &refElem
       = GenericReferenceElements< coordType, dim >::general( type );
 #else
-    const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
     const ReferenceElement< coordType, dim > &refElem
       = ReferenceElements< coordType, dim >::general( type );
 #endif
