@@ -1528,7 +1528,7 @@ namespace Dune {
 
   private:
 
-    void optimize_dims (int i, iTupel& size, int P, iTupel& dims, double &opt )
+    void optimize_dims (int i, const iTupel& size, int P, iTupel& dims, double &opt )
     {
       if (i>0)     // test all subdivisions recursively
       {
