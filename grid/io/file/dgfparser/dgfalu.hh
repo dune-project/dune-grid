@@ -70,7 +70,34 @@ namespace Dune
 
 
   /** \cond */
+  template <int dim,int dimworld>
+  class MacroGrid::Impl<ALUConformGrid<dim,dimworld> > {
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    friend class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> >;
+  public:
+    static ALUConformGrid<dim,dimworld>*
+    generate(MacroGrid& mg,
+             const char* filename,
+             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+
+  private:
+    inline void
+    generateAlu3d(MacroGrid& mg,
+                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
+
+    static bool fileExists ( const char *fileName )
+    {
+      std :: ifstream testfile( fileName );
+      if( !testfile )
+        return false;
+      testfile.close();
+      return true;
+    }
+
+    // friend MacroGrid::Impl<ALUConformGrid<dim,dimworld> >;
+  };
   /* needs new version of alulib */
+#if 0 // old implementation
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUConformGrid<dim,dimworld> > {
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -84,6 +111,7 @@ namespace Dune
     generateAlu3d(MacroGrid& mg,
                   const char* filename, std::string& str, MPICommunicatorType MPICOMM );
   };
+#endif
   /** \endcond */
 
 
