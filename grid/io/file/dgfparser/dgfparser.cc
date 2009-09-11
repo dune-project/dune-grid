@@ -496,16 +496,28 @@ namespace Dune
         if( bsimplex.isactive() && (element == General) )
         {
           // make simplex grid
-          info->cube2simplex( element );
-          nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
-          simplexgrid = true;
+          /*
+             info->cube2simplex( element );
+             nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
+             simplexgrid = true;
+           */
+          nofelements += bsimplex.get( elements, elParams, nofelparams );
         }
       }
       else
       {
         simplexgrid = true;
+        if( bcube.isactive() )
+        {
+          info->block( bcube );
+          info->cube2simplex( element );
+          nofelements = bcube.get( elements, elParams, nofelparams );
+          // make simplex grid
+          nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
+        }
         if( bsimplex.isactive() )
         {
+          info->block(bsimplex);
           nofelements += bsimplex.get( elements, elParams, nofelparams );
           if( dimw == 2 )
           {
@@ -513,7 +525,8 @@ namespace Dune
               testTriang( i );
           }
         }
-        if( (nofelements == 0) && bcube.isactive() )
+#if 0
+        if( ( nofelements == 0) && bcube.isactive() )
         {
           info->block( bcube );
           info->cube2simplex( element );
@@ -522,8 +535,7 @@ namespace Dune
           nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
           cube2simplex = true; // needed by AlbertaGrid to write correct simplex info
         }
-        else if( bsimplex.isactive() )
-          info->block(bsimplex);
+#endif
       }
     }
 
