@@ -4,8 +4,6 @@
 ## Find out which tests can be built
 #
 
-SUBDIRS = vtktest
-
 if ALBERTA
   APROG = test-alberta
 endif

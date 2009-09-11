@@ -41,7 +41,6 @@ AC_CONFIG_FILES([Makefile
     doc/Makefile
     grid/Makefile
     grid/test/Makefile
-    grid/test/vtktest/Makefile
     grid/common/test/Makefile
     grid/common/quadraturerules/Makefile
     grid/common/refinement/Makefile
