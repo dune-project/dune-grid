@@ -219,9 +219,9 @@ namespace Dune {
   public:
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename GridImp::template Codim<0>::LevelIntersectionIterator LevelIntersectionIterator;
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename GridImp::LevelIntersectionIterator LevelIntersectionIterator;
+    typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
     //! Default Constructor
     OneDGridEntity ()

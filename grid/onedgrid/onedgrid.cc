@@ -396,11 +396,11 @@ bool Dune::OneDGrid::adapt()
 
           // leftNeighbor exists
           if ( leftNeighbor->sons_[1]->vertex_[1] != leftUpperVertex)
-            vertices(i+1).insert(leftNeighbor->sons_[1]->vertex_[1]->succ_, leftUpperVertex);
+            vertices(i+1).insert(leftNeighbor->sons_[1]->vertex_[1]->succ_, *leftUpperVertex);
 
         } else {
           // leftNeighbor does not exist
-          vertices(i+1).insert(vertices(i+1).begin(), leftUpperVertex);
+          vertices(i+1).insert(vertices(i+1).begin(), *leftUpperVertex);
 
         }
 
@@ -410,7 +410,7 @@ bool Dune::OneDGrid::adapt()
         OneDGridList<OneDEntityImp<0> >::iterator succOfCenter = centerVertexIterator->succ_;
 
         if (succOfCenter==NULL || succOfCenter != rightUpperVertex)
-          vertices(i+1).insert(centerVertexIterator->succ_, rightUpperVertex);
+          vertices(i+1).insert(centerVertexIterator->succ_, *rightUpperVertex);
 
         // ///////////////////////
         // Create new elements
@@ -492,11 +492,11 @@ bool Dune::OneDGrid::adapt()
 
             // leftNeighbor exists
             if ( leftNeighbor->sons_[1]->vertex_[1] != leftUpperVertex)
-              vertices(i+1).insert(leftNeighbor->sons_[1]->vertex_[1]->succ_, leftUpperVertex);
+              vertices(i+1).insert(leftNeighbor->sons_[1]->vertex_[1]->succ_, *leftUpperVertex);
 
           } else {
             // leftNeighbor does not exist
-            vertices(i+1).insert(vertices(i+1).begin(), leftUpperVertex);
+            vertices(i+1).insert(vertices(i+1).begin(), *leftUpperVertex);
 
           }
 
@@ -504,7 +504,7 @@ bool Dune::OneDGrid::adapt()
           OneDGridList<OneDEntityImp<0> >::iterator succOfLeft = leftUpperVertex->succ_;
 
           if (succOfLeft==NULL || succOfLeft != rightUpperVertex)
-            vertices(i+1).insert(leftUpperVertex->succ_, rightUpperVertex);
+            vertices(i+1).insert(leftUpperVertex->succ_, *rightUpperVertex);
 
           // /////////////////////////
           //   Create new element
