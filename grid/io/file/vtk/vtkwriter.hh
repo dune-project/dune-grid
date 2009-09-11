@@ -229,7 +229,7 @@ namespace Dune
     typedef SmartPointer< Dune::VTKFunction<Grid> > VTKFunctionPtr;
 
   protected:
-    typedef typename std::list<VTKFunctionPtr>::iterator FunctionIterator;
+    typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;
 
     class CellIterator : public GridCellIterator
     {
