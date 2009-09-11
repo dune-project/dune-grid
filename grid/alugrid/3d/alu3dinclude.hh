@@ -108,6 +108,11 @@ namespace Dune {
     typedef ALU3DSPACE BNDFace3Type BNDFaceType;
     typedef ALU3DSPACE ImplBndFace3Type ImplBndFaceType;
     typedef ALU3DSPACE BNDFace3Type PLLBndFaceType;
+    typedef ALU3DSPACE HElementType HElementType;    // Interface Element
+    typedef ALU3DSPACE HFaceType HFaceType;          // Interface Face
+    typedef ALU3DSPACE HEdgeType HEdgeType;          // Interface Edge
+    typedef ALU3DSPACE VertexType VertexType;        // Interface Vertex
+    typedef ALU3DSPACE HBndSegType HBndSegType;      // Interface Boundaries
 
     // refinement and coarsening enum for tetrahedons
     enum { refine_element_t =
@@ -167,6 +172,11 @@ namespace Dune {
     typedef ALU3DSPACE BNDFace4Type BNDFaceType;
     typedef ALU3DSPACE ImplBndFace4Type ImplBndFaceType;
     typedef ALU3DSPACE BNDFace4Type PLLBndFaceType;
+    typedef ALU3DSPACE HElementType HElementType;    // Interface Element
+    typedef ALU3DSPACE HFaceType HFaceType;          // Interface Face
+    typedef ALU3DSPACE HEdgeType HEdgeType;          // Interface Edge
+    typedef ALU3DSPACE VertexType VertexType;        // Interface Vertex
+    typedef ALU3DSPACE HBndSegType HBndSegType;      // Interface Boundaries
 
     // refinement and coarsening enum for hexahedrons
     enum { refine_element_t  = ALU3DSPACE GitterType::Geometric::HexaRule::iso8 };
