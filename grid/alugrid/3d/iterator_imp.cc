@@ -42,7 +42,7 @@ namespace Dune {
   template<class GridImp>
   inline ALU3dGridIntersectionIterator<GridImp> ::
   ALU3dGridIntersectionIterator(const GridImp & grid,
-                                ALU3DSPACE HElementType *el,
+                                HElementType *el,
                                 int wLevel,bool end) :
     connector_(),
     geoProvider_(connector_),
@@ -77,7 +77,7 @@ namespace Dune {
 
   template<class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp> ::
-  setFirstItem (const ALU3DSPACE HElementType & elem, int wLevel)
+  setFirstItem (const HElementType & elem, int wLevel)
   {
     item_       = static_cast<const IMPLElementType *> (&elem);
 
@@ -418,7 +418,7 @@ namespace Dune {
   template <class GridImp>
   inline const ALU3dImplTraits<tetra>::GEOFaceType*
   ALU3dGridIntersectionIterator<GridImp>::
-  getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) const {
+  getFace(const GEOTetraElementType & elem, int index) const {
     assert(index >= 0 && index < numFaces);
     return elem.myhface3(ElementTopo::dune2aluFace(index));
   }
@@ -426,7 +426,7 @@ namespace Dune {
   template <class GridImp>
   inline const ALU3dImplTraits<hexa>::GEOFaceType*
   ALU3dGridIntersectionIterator<GridImp>::
-  getFace(const ALU3DSPACE GEOHexaElementType& elem, int index) const {
+  getFace(const GEOHexaElementType & elem, int index) const {
     assert(index >= 0 && index < numFaces);
     return elem.myhface4(ElementTopo::dune2aluFace(index));
   }
@@ -590,7 +590,7 @@ namespace Dune {
   template<class GridImp>
   inline ALU3dGridLevelIntersectionIterator<GridImp> ::
   ALU3dGridLevelIntersectionIterator(const GridImp & grid,
-                                     ALU3DSPACE HElementType *el,
+                                     HElementType *el,
                                      int wLevel,bool end)
     : ALU3dGridIntersectionIterator<GridImp>(grid,el,wLevel,end)
       , levelNeighbor_(false)
@@ -612,7 +612,7 @@ namespace Dune {
 
   template<class GridImp>
   inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
-  setFirstItem (const ALU3DSPACE HElementType & elem, int wLevel)
+  setFirstItem (const HElementType & elem, int wLevel)
   {
     this->item_        = static_cast<const IMPLElementType *> (&elem);
     this->innerLevel_  = wLevel;
@@ -971,15 +971,15 @@ namespace Dune {
   template <class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const GridImp & grid ,
-                              const ALU3DSPACE HElementType & elem, int maxlevel ,bool end)
+                              const HElementType & elem, int maxlevel ,bool end)
     : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
       , elem_(&elem)
       , maxlevel_(maxlevel)
   {
     if (!end)
     {
-      ALU3DSPACE HElementType * item =
-        const_cast<ALU3DSPACE HElementType *> (elem.down());
+      HElementType * item =
+        const_cast<HElementType *> (elem.down());
       if(item)
       {
         // we have children and they lie in the disired level range
@@ -1029,14 +1029,15 @@ namespace Dune {
   }
 
   template <class GridImp>
-  inline ALU3DSPACE HElementType * ALU3dGridHierarchicIterator<GridImp>::
-  goNextElement(ALU3DSPACE HElementType * oldelem )
+  inline typename ALU3dGridHierarchicIterator<GridImp>::HElementType*
+  ALU3dGridHierarchicIterator<GridImp>::
+  goNextElement(HElementType * oldelem )
   {
     // strategy is:
     // - go down as far as possible and then over all children
     // - then go to father and next and down again
 
-    ALU3DSPACE HElementType * nextelem = oldelem->down();
+    HElementType * nextelem = oldelem->down();
     if(nextelem)
     {
       if(nextelem->level() <= maxlevel_)
@@ -1069,7 +1070,7 @@ namespace Dune {
   {
     assert(this->item_ != 0);
 
-    ALU3DSPACE HElementType * nextItem = goNextElement( this->item_ );
+    HElementType * nextItem = goNextElement( this->item_ );
     if(!nextItem)
     {
       this->done();

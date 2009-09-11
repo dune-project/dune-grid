@@ -58,12 +58,17 @@ namespace Dune {
     enum { dimworld  = GridImp::dimensionworld };
 
     typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
+
+    typedef ALU3DSPACE HElementType HElementType ;
     typedef typename ImplTraits::GEOElementType GEOElementType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
     typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
     typedef typename ImplTraits::PLLBndFaceType PLLBndFaceType;
     typedef typename ImplTraits::BNDFaceType BNDFaceType;
+
+    typedef ALU3DSPACE GEOTetraElementType GEOTetraElementType;
+    typedef ALU3DSPACE GEOHexaElementType GEOHexaElementType;
 
     typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
     typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
@@ -240,10 +245,10 @@ namespace Dune {
 
     // get the face corresponding to the index
     const typename ALU3dImplTraits<tetra>::GEOFaceType*
-    getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) const;
+    getFace(const GEOTetraElementType & elem, int index) const;
 
     const typename ALU3dImplTraits<hexa>::GEOFaceType*
-    getFace(const ALU3DSPACE GEOHexaElementType& elem, int index) const;
+    getFace(const GEOHexaElementType & elem, int index) const;
 
     //! structure containing the topological and geometrical information about
     //! the face which the iterator points to
@@ -281,6 +286,7 @@ namespace Dune {
     enum { dimworld  = GridImp::dimensionworld };
 
     typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
+    typedef ALU3DSPACE HElementType HElementType ;
     typedef typename ImplTraits::GEOElementType GEOElementType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
@@ -316,7 +322,7 @@ namespace Dune {
     //! The default Constructor , level tells on which level we want
     //! neighbours
     ALU3dGridLevelIntersectionIterator(const GridImp & grid,
-                                       ALU3DSPACE HElementType *el,
+                                       HElementType *el,
                                        int wLevel,bool end=false);
 
     ALU3dGridLevelIntersectionIterator(const GridImp & grid,int wLevel);
@@ -354,7 +360,7 @@ namespace Dune {
     void setNewFace(const GEOFaceType& newFace);
 
     // reset IntersectionIterator to first neighbour
-    void setFirstItem(const ALU3DSPACE HElementType & elem, int wLevel);
+    void setFirstItem(const HElementType & elem, int wLevel);
 
     bool levelNeighbor_;
     bool isLeafItem_;
@@ -618,13 +624,15 @@ namespace Dune {
   {
     enum { dim = GridImp::dimension };
     typedef ALU3dGridHierarchicIterator<GridImp> ThisType;
+    typedef ALU3DSPACE HElementType HElementType ;
+
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const GridImp &grid,
-                                const ALU3DSPACE HElementType & elem, int maxlevel, bool end );
+                                const HElementType & elem, int maxlevel, bool end );
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
@@ -646,10 +654,10 @@ namespace Dune {
     void assign(const ThisType & org);
 
     // go to next valid element
-    ALU3DSPACE HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
+    HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
 
     //! element from where we started
-    const ALU3DSPACE HElementType * elem_;
+    const HElementType * elem_;
 
     //! maximal level to go down
     int maxlevel_;

@@ -68,6 +68,11 @@ namespace Dune
     typedef typename ALU3dImplTraits<tetra>::GEOEdgeType GEOEdgeType;
     typedef typename ALU3dImplTraits<tetra>::GEOVertexType GEOVertexType;
 
+    // interface types
+    typedef typename ALU3dImplTraits<tetra>::HFaceType HFaceType;
+    typedef typename ALU3dImplTraits<tetra>::HEdgeType HEdgeType;
+    typedef typename ALU3dImplTraits<tetra>::VertexType VertexType;
+
     typedef ElementTopologyMapping<tetra> ElementTopo;
     typedef FaceTopologyMapping<tetra> FaceTopo;
     //! know number of vertices
@@ -120,9 +125,9 @@ namespace Dune
     //***********************************************************************
     //! generate the geometry for out of given ALU3dGridElement
     inline bool buildGeom(const IMPLElementType & item);
-    inline bool buildGeom(const ALU3DSPACE HFaceType & item, int twist, int face );
-    inline bool buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int );
-    inline bool buildGeom(const ALU3DSPACE VertexType & item, int twist, int);
+    inline bool buildGeom(const HFaceType & item, int twist, int face );
+    inline bool buildGeom(const HEdgeType & item, int twist, int );
+    inline bool buildGeom(const VertexType & item, int twist, int);
 
     // this method is used by the intersection iterator
     inline bool buildGeom(const FaceCoordinatesType& coords);
@@ -196,6 +201,11 @@ namespace Dune
     typedef typename ALU3dImplTraits<hexa>::GEOFaceType GEOFaceType;
     typedef typename ALU3dImplTraits<hexa>::GEOEdgeType GEOEdgeType;
     typedef typename ALU3dImplTraits<hexa>::GEOVertexType GEOVertexType;
+
+    // interface types
+    typedef typename ALU3dImplTraits<hexa>::HFaceType HFaceType;
+    typedef typename ALU3dImplTraits<hexa>::HEdgeType HEdgeType;
+    typedef typename ALU3dImplTraits<hexa>::VertexType VertexType;
 
     typedef ElementTopologyMapping<hexa> ElementTopo;
     typedef FaceTopologyMapping<hexa> FaceTopo;
@@ -497,9 +507,9 @@ namespace Dune
     //***********************************************************************
     //! generate the geometry out of a given ALU3dGridElement
     bool buildGeom(const IMPLElementType & item);
-    bool buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum);
-    bool buildGeom(const ALU3DSPACE HEdgeType & item, int twist, int);
-    bool buildGeom(const ALU3DSPACE VertexType & item, int twist, int);
+    bool buildGeom(const HFaceType & item, int twist, int faceNum);
+    bool buildGeom(const HEdgeType & item, int twist, int);
+    bool buildGeom(const VertexType & item, int twist, int);
 
     // this method is used by the intersection iterator
     bool buildGeom(const FaceCoordinatesType& coords);
