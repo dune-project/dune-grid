@@ -75,8 +75,11 @@ namespace Dune {
     friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
   public:
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType ElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::VertexType VertexType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
+
 
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
@@ -105,14 +108,15 @@ namespace Dune {
     GeometryType type () const;
 
     // set element as normal entity
-    void setElement(const ElementType & item);
-    void setElement(const ElementType & item, const int level, int twist=0, int face = -1);
+    void setElement(const HElementType & item);
+    void setElement(const HElementType & item, const int level, int twist=0, int face = -1);
 
     // not needed anymore
-    void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
+    void setElement(const HElementType & el,
+                    const VertexType & vx);
 
     //! setGhost is not valid for this codim
-    void setGhost(const ALU3DSPACE HBndSegType  &ghost);
+    void setGhost(const HBndSegType  &ghost);
 
     //! reset item pointer to NULL
     void removeElement ();
@@ -137,22 +141,7 @@ namespace Dune {
     int getIndex () const;
 
     //! convert ALUGrid partition type to dune partition type
-    PartitionType convertBndId(const ElementType & item) const
-    {
-      if(item.isGhost())
-      {
-        return GhostEntity;
-      }
-      else if(item.isBorder())
-      {
-        return BorderEntity;
-      }
-      else
-      {
-        assert( item.isInterior() );
-        return InteriorEntity;
-      }
-    }
+    PartitionType convertBndId(const HElementType & item) const ;
 
     // the grid this entity belongs to
     const GridImp &grid_;
@@ -199,6 +188,11 @@ namespace Dune {
   {
     static const int dimworld = remove_const< GridImp >::type::dimensionworld;
     static const ALU3dGridElementType elementType = remove_const< GridImp >::type::elementType;
+
+    typedef typename ALU3dImplTraits<GridImp::elementType>::
+    template Codim<0>::InterfaceType HElementType;
+
+    typedef typename ALU3dImplTraits< elementType >::HBndSegType HBndSegType;
 
     typedef typename ALU3dImplTraits< elementType >::GEOElementType GEOElementType;
     typedef typename ALU3dImplTraits< elementType >::PLLBndFaceType PLLBndFaceType;
@@ -360,10 +354,10 @@ namespace Dune {
     /*! private methods, but public because of datahandle and template
         arguments of these methods
      */
-    void setElement(ALU3DSPACE HElementType &element);
+    void setElement(HElementType &element);
 
     //! set original element pointer to fake entity
-    void setGhost(ALU3DSPACE HBndSegType & ghost);
+    void setGhost(HBndSegType & ghost);
 
     //! set actual walk level
     void reset ( int l );
@@ -439,9 +433,9 @@ namespace Dune {
     friend class ALU3dGridEntity< 0,dim,GridImp>;
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<codim>::InterfaceType MyHElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<codim>::InterfaceType HElementType;
 
-    typedef ALU3DSPACE HBndSegType HBndSegType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
   public:
     enum { codimension = codim };
@@ -461,7 +455,7 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointerBase(const GridImp & grid,
                                const int level,
-                               const MyHElementType & item);
+                               const HElementType & item);
 
     //! Constructor for EntityPointer that points to an ghost
     ALU3dGridEntityPointerBase(const GridImp & grid,
@@ -508,13 +502,13 @@ namespace Dune {
     // update underlying item pointer and set ghost entity
     void updateGhostPointer( HBndSegType & ghostFace );
     // update underlying item pointer and set entity
-    void updateEntityPointer( MyHElementType * item , int level = -1 );
+    void updateEntityPointer( HElementType * item , int level = -1 );
 
     // reference to grid
     const GridImp & grid_;
 
     // pointer to item
-    MyHElementType * item_;
+    HElementType * item_;
 
     // entity that this EntityPointer points to
     mutable EntityObject * entity_;
@@ -545,9 +539,9 @@ namespace Dune {
     friend class ALU3dGridEntity< 0,dim,GridImp>;
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
 
-    typedef ALU3DSPACE HBndSegType HBndSegType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
 
     typedef ALU3dGridEntity< 0,dim,GridImp> ALU3dGridEntityType ;
@@ -560,7 +554,7 @@ namespace Dune {
 
     //! Constructor for EntityPointer that points to an interior element
     ALU3dGridEntityPointer(const GridImp & grid,
-                           const MyHElementType & item)
+                           const HElementType & item)
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1,item) {} // -1 is fake level here
 
     //! Constructor for EntityPointer that points to an entity
@@ -613,9 +607,9 @@ namespace Dune {
     friend class ALU3dGridEntity< 0,dim,GridImp>;
     friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
-    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
 
-    typedef ALU3DSPACE HBndSegType HBndSegType;
+    typedef typename ALU3dImplTraits<GridImp::elementType>::HBndSegType HBndSegType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
     typedef ALU3dGridEntity<cd,dim,GridImp> ALU3dGridEntityType;
   public:
@@ -628,7 +622,7 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointer(const GridImp & grid,
                            const int level,
-                           const MyHElementType & item,
+                           const HElementType & item,
                            const int twist = 0,
                            const int duneFace = -1
                            );
@@ -657,7 +651,7 @@ namespace Dune {
     // clones object
     void clone (const ALU3dGridEntityPointerType & org);
 
-    void updateEntityPointer( MyHElementType * item , int level );
+    void updateEntityPointer( HElementType * item , int level );
 
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
     //! HierarchicIterator

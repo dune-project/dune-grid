@@ -79,14 +79,14 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const ElementType & item)
+  setElement(const HElementType & item)
   {
     setElement(item,GetLevel<GridImp,cd>::getLevel(grid_,item));
   }
 
   template<int cd, int dim, class GridImp>
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const ElementType & item, const int level, int twist , int face )
+  setElement(const HElementType & item, const int level, int twist , int face )
   {
     item_   = static_cast<const IMPLElementType *> (&item);
     gIndex_ = (*item_).getIndex();
@@ -99,7 +99,7 @@ namespace Dune {
 
   template<>
   inline void ALU3dGridEntity<3,3,const ALU3dGrid<3,3,hexa> > ::
-  setElement(const ALU3DSPACE HElementType &el, const ALU3DSPACE VertexType &vx)
+  setElement(const HElementType &el, const VertexType &vx)
   {
     item_   = static_cast<const IMPLElementType *> (&vx);
     gIndex_ = (*item_).getIndex();
@@ -110,7 +110,7 @@ namespace Dune {
 
   template<>
   inline void ALU3dGridEntity<3,3,const ALU3dGrid<3,3,tetra> > ::
-  setElement(const ALU3DSPACE HElementType &el, const ALU3DSPACE VertexType &vx)
+  setElement(const HElementType &el, const VertexType &vx)
   {
     // * what the heck does this static_cast do!?
     item_   = static_cast<const IMPLElementType *> (&vx);
@@ -122,7 +122,7 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setGhost(const ALU3DSPACE HBndSegType &ghost)
+  setGhost(const HBndSegType &ghost)
   {
     // this method only exists, that we don't have to pecialise the
     // Iterators for each codim, this method should not be called otherwise
@@ -147,6 +147,25 @@ namespace Dune {
   partitionType () const
   {
     return partitionType_;
+  }
+
+  template<int cd, int dim, class GridImp>
+  inline PartitionType ALU3dGridEntity<cd,dim,GridImp> ::
+  convertBndId(const HElementType & item) const
+  {
+    if(item.isGhost())
+    {
+      return GhostEntity;
+    }
+    else if(item.isBorder())
+    {
+      return BorderEntity;
+    }
+    else
+    {
+      assert( item.isInterior() );
+      return InteriorEntity;
+    }
   }
 
   template<int cd, int dim, class GridImp>
@@ -230,7 +249,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline void
   ALU3dGridEntity<0,dim,GridImp>::
-  setElement(ALU3DSPACE HElementType & element)
+  setElement(HElementType & element)
   {
     item_= static_cast<IMPLElementType *> (&element);
     assert( item_ );
@@ -244,7 +263,7 @@ namespace Dune {
 
   template<int dim, class GridImp>
   inline void
-  ALU3dGridEntity<0,dim,GridImp> :: setGhost(ALU3DSPACE HBndSegType & ghost)
+  ALU3dGridEntity<0,dim,GridImp> :: setGhost(HBndSegType & ghost)
   {
     // use element as ghost
     typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
@@ -594,9 +613,9 @@ namespace Dune {
     if(! item_->up() )
     {
       std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << getIndex() << "\n";
-      return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<ALU3DSPACE HElementType &> (*item_));
+      return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*item_));
     }
-    return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<ALU3DSPACE HElementType &> (*(item_->up())));
+    return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*(item_->up())));
   }
 
   // Adaptation methods
@@ -705,9 +724,9 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const GridImp & grid,
                              const int level,
-                             const MyHElementType &item)
+                             const HElementType &item)
     : grid_(grid)
-      , item_(const_cast<MyHElementType *> (&item))
+      , item_(const_cast<HElementType *> (&item))
       , entity_(0)
       , locked_(false)
   {}
@@ -888,19 +907,19 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::
-  updateGhostPointer( ALU3DSPACE HBndSegType & ghostFace )
+  updateGhostPointer( HBndSegType & ghostFace )
   {
     assert( entity_ );
     this->entityImp().setGhost( ghostFace );
     // inside the method setGhost the method getGhost of the ghostFace is
     // called and set as item
-    const MyHElementType * item = & (this->entityImp().getItem());
-    item_ = const_cast<MyHElementType *> (item);
+    const HElementType * item = & (this->entityImp().getItem());
+    item_ = const_cast<HElementType *> (item);
   }
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::
-  updateEntityPointer( MyHElementType * item , int )
+  updateEntityPointer( HElementType * item , int )
   {
     item_ = item;
     if( item_ && entity_ )
@@ -919,7 +938,7 @@ namespace Dune {
   inline ALU3dGridEntityPointer<codim,GridImp> ::
   ALU3dGridEntityPointer(const GridImp & grid,
                          const int level,
-                         const MyHElementType &item,
+                         const HElementType &item,
                          const int twist,
                          const int duneFace )
     : ALU3dGridEntityPointerBase<codim,GridImp> (grid,level,item)
@@ -1000,7 +1019,7 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointer<codim,GridImp>::
-  updateEntityPointer( MyHElementType * item, int level)
+  updateEntityPointer( HElementType * item, int level)
   {
     this->item_ = item;
     level_ = level;
