@@ -483,7 +483,7 @@ void Dune::AmiraMeshWriter<GridView>::write(const std::string& filename,
 {
   // Actually write the file
   if(!amiramesh_.write(filename.c_str(), ascii))
-    DUNE_THROW(IOError, "Writing geometry file failed!");
+    DUNE_THROW(IOError, "Writing geometry file '" << filename << "' failed!");
 
   std::cout << "Grid written successfully to: " << filename << std::endl;
 }
