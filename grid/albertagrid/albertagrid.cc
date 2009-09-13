@@ -337,14 +337,13 @@ namespace Dune
 
 
   template< int dim, int dimworld >
-  inline bool AlbertaGrid< dim, dimworld >::globalRefine ( int refCount )
+  inline void AlbertaGrid< dim, dimworld >::globalRefine ( int refCount )
   {
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
 
-    // only MAXL level allowed
+    // only MAXL levels allowed
     assert( (refCount >= 0) && (refCount + maxlevel_ < MAXL) );
 
-    bool wasChanged = false;
     for( int i = 0; i < refCount; ++i )
     {
       // mark all interior elements
@@ -353,24 +352,22 @@ namespace Dune
         mark( 1, *it );
 
       preAdapt();
-      wasChanged |= adapt();
+      adapt();
       postAdapt();
     }
-    return wasChanged;
   }
 
 
   template< int dim, int dimworld >
   template< class DataHandle >
-  inline bool AlbertaGrid< dim, dimworld >
+  inline void AlbertaGrid< dim, dimworld >
   ::globalRefine ( int refCount, AdaptDataHandleInterface< This, DataHandle > &handle )
   {
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
 
-    // only MAXL level allowed
+    // only MAXL levels allowed
     assert( (refCount >= 0) && (refCount + maxlevel_ < MAXL) );
 
-    bool wasChanged = false;
     for( int i = 0; i < refCount; ++i )
     {
       // mark all interior elements
@@ -378,9 +375,8 @@ namespace Dune
       for( LeafIterator it = leafbegin< 0 >(); it != endit; ++it )
         mark( 1, *it );
 
-      wasChanged |= adapt( handle );
+      adapt( handle );
     }
-    return wasChanged;
   }
 
 
