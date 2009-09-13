@@ -567,7 +567,10 @@ namespace Dune {
     bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
     //! uses the interface, mark on entity and refineLocal
-    bool globalRefine(int refCount);
+    void globalRefine ( int refCount );
+
+    template< class GridImp, class DataHandle >
+    void globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
     //**********************************************************
     // End of Interface Methods

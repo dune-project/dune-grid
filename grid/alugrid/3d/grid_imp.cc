@@ -642,23 +642,39 @@ namespace Dune {
 
   // global refine
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline bool ALU3dGrid<dim, dimworld, elType>::globalRefine(int numberOfRefines)
+  inline void ALU3dGrid<dim, dimworld, elType>::globalRefine ( int refCount )
   {
-    assert( (numberOfRefines + maxLevel()) < MAXL );
+    assert( (refCount + maxLevel()) < MAXL );
 
-    bool ref = false;
-    for (int count = numberOfRefines; count>0; count--)
+    for( int count = refCount; count > 0; --count )
     {
-      LeafIteratorType endit  = leafend   ( maxLevel() );
-      for(LeafIteratorType it = leafbegin ( maxLevel() ); it != endit; ++it)
-      {
-        this->mark(1 , (*it) );
-      }
-      ref = this->adapt();
-      if(ref) this->postAdapt();
+      const LeafIteratorType end = leafend();
+      for( LeafIteratorType it = leafbegin(); it != end; ++it )
+        mark( 1, *it );
+      const bool refined = adapt();
+      if( refined )
+        postAdapt();
     }
-    return ref;
   }
+
+
+  // global refine
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  template< class GridImp, class DataHandle >
+  inline void ALU3dGrid< dim, dimworld, elType >
+  ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
+  {
+    assert( (refCount + maxLevel()) < MAXL );
+
+    for( int count = refCount; count > 0; --count )
+    {
+      const LeafIteratorType end = leafend();
+      for( LeafIteratorType it = leafbegin(); it != end; ++it )
+        mark( 1 , *it );
+      adapt( handle );
+    }
+  }
+
 
   // preprocess grid
   template <int dim, int dimworld, ALU3dGridElementType elType>

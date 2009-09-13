@@ -333,9 +333,10 @@ namespace Dune {
 
   //! refine grid refCount times
   template <int dim, int dimworld>
-  inline bool ALU2dGrid<dim, dimworld> :: globalRefine(int refCount)
+  inline void ALU2dGrid<dim, dimworld> :: globalRefine(int refCount)
   {
-    if( refCount <= 0 ) return false;
+    if( refCount <= 0 )
+      return;
 
     for (int j = 0; j < refCount; ++j)
     {
@@ -371,8 +372,27 @@ namespace Dune {
 
     // cleanup markers
     postAdapt();
-    return true;
   }
+
+
+  // global refine
+  template< int dim, int dimworld >
+  template< class GridImp, class DataHandle >
+  inline void ALU2dGrid< dim, dimworld >
+  ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
+  {
+    assert( (refCount + maxLevel()) < MAXL );
+
+    for( int count = refCount; count > 0; --count )
+    {
+      typedef typename Traits::template Codim< 0 >::template Partition< Interior_Partition >::LeafIterator LeafIterator;
+      const LeafIterator end = leafend< 0, Interior_Partition >();
+      for( LeafIterator it = leafbegin< 0, Interior_Partition >(); it != end; ++it )
+        mark( 1 , *it );
+      adapt( handle );
+    }
+  }
+
 
   //! returns true if a least one entity was marked for coarseing
   template <int dim, int dimworld>

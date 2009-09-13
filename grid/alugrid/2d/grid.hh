@@ -412,7 +412,10 @@ namespace Dune {
     ALU2DSPACE Hmesh & myGrid() const;
 
     //! refine grid refCount times
-    bool globalRefine(int refCount);
+    void globalRefine ( int refCount );
+
+    template< class GridImp, class DataHandle >
+    void globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &hamdle );
 
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
