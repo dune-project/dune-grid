@@ -11,15 +11,185 @@
 namespace Dune
 {
 
+  // AlbertaGridIntersectionBase
+  // ---------------------------
+
+  template< class Grid >
+  inline AlbertaGridIntersectionBase< Grid >
+  ::AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex )
+    : grid_( &entity.grid() ),
+      elementInfo_( entity.elementInfo() ),
+      oppVertex_( oppVertex )
+  {}
+
+
+  template< class Grid >
+  inline typename AlbertaGridIntersectionBase< Grid >::EntityPointer
+  AlbertaGridIntersectionBase< Grid >::inside () const
+  {
+    typedef AlbertaGridEntityPointer< 0, Grid > EntityPointerImp;
+    return EntityPointerImp( grid(), elementInfo(), 0 );
+  }
+
+
+  template< class Grid >
+  inline bool AlbertaGridIntersectionBase< Grid >::boundary () const
+  {
+    return elementInfo().isBoundary( oppVertex_ );
+  }
+
+
+  template< class Grid >
+  inline int AlbertaGridIntersectionBase< Grid >::boundaryId () const
+  {
+    if( boundary() )
+    {
+      const int id = elementInfo().boundaryId( oppVertex_ );
+      assert( id != 0 );
+      return id;
+    }
+    else
+      return 0;
+  }
+
+
+  template< class Grid >
+  inline int AlbertaGridIntersectionBase< Grid >::indexInInside () const
+  {
+    const int face = (dimension > 1 ? grid().alberta2dune( 1, oppVertex_ ) : 1-oppVertex_);
+    return grid().alberta2generic( 1, face );
+  }
+
+
+  template< class Grid >
+  inline GeometryType AlbertaGridIntersectionBase< Grid >::type () const
+  {
+    return GeometryType( GeometryType::simplex, dimension-1 );
+  }
+
+
+  template< class Grid >
+  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
+  {
+#if USE_GENERICGEOMETRY
+    const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
+    return GridImp::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
+#else
+    typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
+    typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
+    typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
+    const Jacobian &jInvT = Grid::getRealImplementation( inside()->geometry() ).jacobianInverseTransposed();
+    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integratioOuterNormal( indexInInside() );
+
+    NormalVector n;
+    jInvT.mv( refNormal, n );
+    n *= integrationElement( local );
+    return n;
+#endif // #if USE_GENERICGEOMETRY
+  }
+
+  template<>
+  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  {
+    const Alberta::GlobalVector &oppCoord = grid().getCoord( elementInfo(), oppVertex_ );
+    const Alberta::GlobalVector &myCoord = grid().getCoord( elementInfo(), 1-oppVertex_ );
+    NormalVector n;
+    n[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
+    return n;
+  }
+
+  template<>
+  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  {
+    const Alberta::GlobalVector &coordOne = grid().getCoord( elementInfo(), (oppVertex_+1)%3 );
+    const Alberta::GlobalVector &coordTwo = grid().getCoord( elementInfo(), (oppVertex_+2)%3 );
+
+    NormalVector n;
+    n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
+    n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
+    return n;
+  }
+
+  template<>
+  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  {
+    // in this case the orientation is negative, multiply by -1
+    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
+    const ctype val = (elInfo.orientation > 0) ? 1.0 : -1.0;
+
+    static const int faceVertices[ 4 ][ 3 ]
+      = { {1,3,2}, {0,2,3}, {0,3,1}, {0,1,2} };
+    const int *localFaces = faceVertices[ oppVertex_ ];
+
+    const Alberta::GlobalVector &coord0 = grid().getCoord( elementInfo(), localFaces[ 0 ] );
+    const Alberta::GlobalVector &coord1 = grid().getCoord( elementInfo(), localFaces[ 1 ] );
+    const Alberta::GlobalVector &coord2 = grid().getCoord( elementInfo(), localFaces[ 2 ] );
+
+    FieldVector< ctype, dimensionworld > u;
+    FieldVector< ctype, dimensionworld > v;
+    for( int i = 0; i < dimension; ++i )
+    {
+      v[ i ] = coord1[ i ] - coord0[ i ];
+      u[ i ] = coord2[ i ] - coord1[ i ];
+    }
+
+    NormalVector n;
+    for( int i = 0; i < dimension; ++i )
+    {
+      const int j = (i+1)%dimension;
+      const int k = (i+2)%dimension;
+      n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
+    }
+    return n;
+  }
+
+
+  template< class Grid >
+  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::outerNormal( const LocalCoordType &local ) const
+  {
+    return integrationOuterNormal( local );
+  }
+
+
+  template< class Grid >
+  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::unitOuterNormal ( const LocalCoordType &local ) const
+  {
+    NormalVector normal = outerNormal( local );
+    normal *= (1.0 / normal.two_norm());
+    return normal;
+  }
+
+
+  template< class Grid >
+  inline const Grid &AlbertaGridIntersectionBase< Grid >::grid () const
+  {
+    return *grid_;
+  }
+
+
+  template< class Grid >
+  inline const typename AlbertaGridIntersectionBase< Grid >::ElementInfo &
+  AlbertaGridIntersectionBase< Grid >::elementInfo () const
+  {
+    assert( !!elementInfo_ );
+    return elementInfo_;
+  }
+
+
+
   // AlbertaGridLeafIntersection
   // ---------------------------
 
   template< class GridImp >
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const EntityImp &entity, const int n )
-    : grid_( entity.grid() ),
-      neighborCount_( n ),
-      elementInfo_( entity.elementInfo() ),
+    : Base( entity, n ),
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
@@ -32,9 +202,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const This &other )
-    : grid_( other.grid_ ),
-      neighborCount_( other.neighborCount_ ),
-      elementInfo_( other.elementInfo_ ),
+    : Base( other ),
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
@@ -49,11 +217,7 @@ namespace Dune
   inline void
   AlbertaGridLeafIntersection< GridImp >::assign ( const This &other )
   {
-    // only assign iterators from the same grid
-    assert( &(this->grid_) == &(other.grid_) );
-
-    neighborCount_ = other.neighborCount_;
-    elementInfo_ = other.elementInfo_;
+    *((Base *)this) = other;
     neighborInfo_ = ElementInfo();
   }
 
@@ -62,17 +226,15 @@ namespace Dune
   inline bool
   AlbertaGridLeafIntersection< GridImp >::equals ( const This &other ) const
   {
-    const ALBERTA EL *e1 = elementInfo_.el();
-    const ALBERTA EL *e2 = other.elementInfo_.el();
-    return (e1 == e2) && (neighborCount_ == other.neighborCount_);
+    return ((elementInfo() == other.elementInfo()) && (oppVertex_ == other.oppVertex_));
   }
 
   template< class GridImp >
   inline void AlbertaGridLeafIntersection<GridImp>::next ()
   {
-    assert( neighborCount_ <= dimension );
+    assert( oppVertex_ <= dimension );
+    ++oppVertex_;
     neighborInfo_ = ElementInfo();
-    ++neighborCount_;
   }
 
   template< class GridImp >
@@ -86,10 +248,10 @@ namespace Dune
       assert( neighbor() );
 
 #if TRAVERSE_LEAFNEIGHBOR
-      neighborInfo_ = elementInfo_.leafNeighbor( neighborCount_ );
+      neighborInfo_ = elementInfo().leafNeighbor( oppVertex_ );
 #else
-      neighborInfo_ = ElementInfo::createFake( grid_.meshPointer(), NULL, 0 );
-      std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo_.elInfo()), sizeof( ALBERTA EL_INFO ) );
+      neighborInfo_ = ElementInfo::createFake( grid().meshPointer(), NULL, 0 );
+      std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo().elInfo()), sizeof( ALBERTA EL_INFO ) );
 
       setupVirtEn();
 #endif
@@ -97,31 +259,7 @@ namespace Dune
 
     assert( !neighborInfo_ == false );
     assert( neighborInfo_.el() != NULL );
-    return EntityPointerImp( grid_, neighborInfo_, 0 );
-  }
-
-  template< class GridImp >
-  inline typename AlbertaGridLeafIntersection< GridImp >::EntityPointer
-  AlbertaGridLeafIntersection< GridImp >::inside () const
-  {
-    typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
-    assert( !elementInfo_ == false );
-    return EntityPointerImp( grid_, elementInfo_, 0 );
-  }
-
-  template< class GridImp >
-  inline int
-  AlbertaGridLeafIntersection<GridImp>::boundaryId () const
-  {
-    assert( !elementInfo_ == false );
-
-    // id of interior intersections is 0
-    if( !boundary() )
-      return 0;
-
-    const int id = elementInfo_.boundaryId( neighborCount_ );
-    assert( id != 0 );
-    return id;
+    return EntityPointerImp( grid(), neighborInfo_, 0 );
   }
 
   template< class GridImp >
@@ -131,129 +269,11 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline bool AlbertaGridLeafIntersection< GridImp >::boundary() const
-  {
-    assert( !!elementInfo_ );
-    return elementInfo_.isBoundary( neighborCount_ );
-  }
-
-  template< class GridImp >
   inline bool AlbertaGridLeafIntersection< GridImp >::neighbor () const
   {
-    assert( !!elementInfo_ );
-    assert( neighborCount_ <= dimension );
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    return (elInfo.neigh[ neighborCount_ ] != NULL);
-  }
-
-
-  template< class GridImp >
-  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
-  AlbertaGridLeafIntersection< GridImp >
-  ::integrationOuterNormal ( const LocalCoordType &local ) const
-  {
-#if USE_GENERICGEOMETRY
-    const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
-    return GridImp::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
-#else
-    typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
-    typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
-    typedef FieldMatrix< ctype, dimensionworld, dimension > Jacobian;
-    const Jacobian &jInvT = GridImp::getRealImplementation( inside()->geometry() ).jacobianInverseTransposed();
-    const FieldVector< ctype, dimension > &refNormal = ReferenceElement::integratioOuterNormal( indexInInside() );
-
-    NormalVector n;
-    jInvT.mv( refNormal, n );
-    n *= integrationElement( local );
-    return n;
-#endif // #if USE_GENERICGEOMETRY
-  }
-
-  template<>
-  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 1, 1 > >::NormalVector
-  AlbertaGridLeafIntersection< const AlbertaGrid< 1, 1 > >
-  ::integrationOuterNormal ( const LocalCoordType &local ) const
-  {
-    assert( !!elementInfo_ );
-    const Alberta::GlobalVector &oppCoord = grid_.getCoord( elementInfo_, neighborCount_ );
-    const Alberta::GlobalVector &myCoord = grid_.getCoord( elementInfo_, 1-neighborCount_ );
-    NormalVector n;
-    n[ 0 ] = (myCoord[ 0 ] > oppCoord[ 0 ] ? ctype( 1 ) : -ctype( 1 ));
-    return n;
-  }
-
-  template<>
-  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 2, 2 > >::NormalVector
-  AlbertaGridLeafIntersection< const AlbertaGrid< 2, 2 > >
-  ::integrationOuterNormal ( const LocalCoordType &local ) const
-  {
-    assert( !!elementInfo_ );
-    const Alberta::GlobalVector &coordOne = grid_.getCoord( elementInfo_, (neighborCount_+1)%3 );
-    const Alberta::GlobalVector &coordTwo = grid_.getCoord( elementInfo_, (neighborCount_+2)%3 );
-
-    NormalVector n;
-    n[ 0 ] = -(coordOne[ 1 ] - coordTwo[ 1 ]);
-    n[ 1 ] =   coordOne[ 0 ] - coordTwo[ 0 ];
-    return n;
-  }
-
-  template<>
-  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 3, 3 > >::NormalVector
-  AlbertaGridLeafIntersection< const AlbertaGrid< 3, 3 > >
-  ::integrationOuterNormal ( const LocalCoordType &local ) const
-  {
-    assert( !!elementInfo_ );
-
-    // in this case the orientation is negative, multiply by -1
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const ctype val = (elInfo.orientation > 0) ? 1.0 : -1.0;
-
-    // neighborCount_ is the local face number
-    static const int faceVertices[ 4 ][ 3 ]
-      = { {1,3,2}, {0,2,3}, {0,3,1}, {0,1,2} };
-    const int *localFaces = faceVertices[ neighborCount_ ];
-
-    const Alberta::GlobalVector &coord0 = grid_.getCoord( elementInfo_, localFaces[ 0 ] );
-    const Alberta::GlobalVector &coord1 = grid_.getCoord( elementInfo_, localFaces[ 1 ] );
-    const Alberta::GlobalVector &coord2 = grid_.getCoord( elementInfo_, localFaces[ 2 ] );
-
-    FieldVector< ctype, dimensionworld > u;
-    FieldVector< ctype, dimensionworld > v;
-    for( int i = 0; i < dimension; ++i )
-    {
-      v[ i ] = coord1[ i ] - coord0[ i ];
-      u[ i ] = coord2[ i ] - coord1[ i ];
-    }
-
-    NormalVector n;
-    // outNormal_ has length 3
-    for( int i = 0; i < dimension; ++i )
-    {
-      const int j = (i+1)%dimension;
-      const int k = (i+2)%dimension;
-      n[ i ] = val * (u[ j ] * v[ k ] - u[ k ] * v[ j ]);
-    }
-    return n;
-  }
-
-
-  template< class GridImp >
-  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
-  AlbertaGridLeafIntersection< GridImp >
-  ::outerNormal( const LocalCoordType &local ) const
-  {
-    return integrationOuterNormal( local );
-  }
-
-
-  template<class GridImp>
-  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
-  AlbertaGridLeafIntersection< GridImp >
-  ::unitOuterNormal ( const LocalCoordType &local ) const
-  {
-    NormalVector normal = outerNormal( local );
-    normal *= (1.0 / normal.two_norm());
-    return normal;
+    assert( oppVertex_ <= dimension );
+    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
+    return (elInfo.neigh[ oppVertex_ ] != NULL);
   }
 
 
@@ -261,7 +281,7 @@ namespace Dune
   inline AlbertaTransformation
   AlbertaGridLeafIntersection< GridImp >::transformation () const
   {
-    return AlbertaTransformation( elementInfo_.transformation( neighborCount_ ) );
+    return AlbertaTransformation( elementInfo().transformation( oppVertex_ ) );
   }
 
 
@@ -269,12 +289,10 @@ namespace Dune
   inline const typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry &
   AlbertaGridLeafIntersection< GridImp >::geometryInInside () const
   {
-    assert( !!elementInfo_ );
-
 #if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
-    const int twist = elementInfo_.template twist< 1 >( neighborCount_ );
-    return LocalGeoProvider::instance().faceGeometry( neighborCount_, twist );
+    const int twist = elementInfo().template twist< 1 >( oppVertex_ );
+    return LocalGeoProvider::instance().faceGeometry( oppVertex_, twist );
 #else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeSelfObj_ );
     const LocalCoordReader coordReader( inside()->geometry(), geometry() );
@@ -292,9 +310,9 @@ namespace Dune
 
 #if ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     typedef AlbertaGridLocalGeometryProvider< GridImp > LocalGeoProvider;
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const int oppVertex = elInfo.opp_vertex[ neighborCount_ ];
-    const int twist = elementInfo_.twistInNeighbor( neighborCount_ );
+    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
+    const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
+    const int twist = elementInfo().twistInNeighbor( oppVertex_ );
     return LocalGeoProvider::instance().faceGeometry( oppVertex, twist );
 #else
     LocalGeometryImp &geo = GridImp::getRealImplementation( fakeNeighObj_ );
@@ -309,38 +327,20 @@ namespace Dune
   inline const typename AlbertaGridLeafIntersection< GridImp >::Geometry &
   AlbertaGridLeafIntersection< GridImp >::geometry () const
   {
-    assert( !elementInfo_ == false );
-
     GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
-    const GlobalCoordReader coordReader( grid_, elementInfo_, neighborCount_ );
+    const GlobalCoordReader coordReader( grid(), elementInfo(), oppVertex_ );
     geo.build( coordReader );
     return neighGlobObj_;
   }
 
 
   template< class GridImp >
-  inline GeometryType AlbertaGridLeafIntersection< GridImp >::type () const
-  {
-    return GeometryType( GeometryType::simplex, dimension-1 );
-  }
-
-
-  template< class GridImp >
-  inline int AlbertaGridLeafIntersection< GridImp >::indexInInside () const
-  {
-    const int oppVertex = neighborCount_;
-    const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
-    return grid_.alberta2generic( 1, face );
-  }
-
-  template< class GridImp >
   inline int AlbertaGridLeafIntersection< GridImp >::indexInOutside () const
   {
-    assert( !!elementInfo_ );
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-    const int oppVertex = elInfo.opp_vertex[ neighborCount_ ];
-    const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
-    return grid_.alberta2generic( 1, face );
+    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
+    const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
+    const int face = (dimension > 1 ? grid().alberta2dune( 1, oppVertex ) : 1-oppVertex);
+    return grid().alberta2generic( 1, face );
   }
 
 
@@ -348,7 +348,7 @@ namespace Dune
   inline int
   AlbertaGridLeafIntersection< GridImp >::twistInSelf () const
   {
-    return elementInfo_.template twist< 1 >( neighborCount_ );
+    return elementInfo().template twist< 1 >( oppVertex_ );
   }
 
 
@@ -356,7 +356,7 @@ namespace Dune
   inline int
   AlbertaGridLeafIntersection< GridImp >::twistInNeighbor () const
   {
-    return elementInfo_.twistInNeighbor( neighborCount_ );
+    return elementInfo().twistInNeighbor( oppVertex_ );
   }
 
 
@@ -494,21 +494,20 @@ namespace Dune
     // if this assertion fails then outside was called without checking
     // neighbor first
     assert( neighbor() );
-    assert( neighborCount_ < dimension+1 );
+    assert( oppVertex_ < dimension+1 );
 
-    assert( !elementInfo_ == false );
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
+    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
 
     // set the neighbor element as element
     // use ALBERTA macro to get neighbour
     assert( !neighborInfo_ == false );
     ALBERTA EL_INFO &nbInfo = neighborInfo_.elInfo();
 
-    nbInfo.el = elInfo.neigh[ neighborCount_ ];
+    nbInfo.el = elInfo.neigh[ oppVertex_ ];
     assert( nbInfo.el != NULL );
-    nbInfo.level = grid_.levelProvider() ( nbInfo.el );
+    nbInfo.level = grid().levelProvider() ( nbInfo.el );
 
-    const int vx = elInfo.opp_vertex[ neighborCount_ ];
+    const int vx = elInfo.opp_vertex[ oppVertex_ ];
     assert( (vx >= 0) && (vx < ElementInfo::maxNeighbors) );
 
     // reset neighbor information
@@ -520,14 +519,14 @@ namespace Dune
 
     // set origin
     nbInfo.neigh[ vx ] = elInfo.el;
-    nbInfo.opp_vertex[ vx ] = neighborCount_;
+    nbInfo.opp_vertex[ vx ] = oppVertex_;
 
 
   #if CALC_COORD
     // copy the one opposite vertex
     // the same for 2d and 3d
     {
-      const ALBERTA REAL_D &coord = elInfo.opp_coord[ neighborCount_ ];
+      const ALBERTA REAL_D &coord = elInfo.opp_coord[ oppVertex_ ];
       ALBERTA REAL_D &newcoord = nbInfo.coord[ vx ];
       for( int j = 0; j < dimensionworld; ++j )
         newcoord[ j ] = coord[ j ];
@@ -536,7 +535,7 @@ namespace Dune
 
     // setup coordinates of neighbour elInfo
     SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
-    setupNeighInfo( this->grid_, &elInfo, vx, neighborCount_, &nbInfo );
+    setupNeighInfo( grid(), &elInfo, vx, oppVertex_, &nbInfo );
   }
 #endif // #if !TRAVERSE_LEAFNEIGHBOR
 

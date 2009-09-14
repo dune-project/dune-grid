@@ -25,6 +25,65 @@ namespace Dune
 
 
 
+  // AlbertaGridIntersectionBase
+  // ---------------------------
+
+  template< class Grid >
+  class AlbertaGridIntersectionBase
+    : public SmallObject
+  {
+    typedef AlbertaGridIntersectionBase< Grid > This;
+
+  public:
+    typedef typename Grid::ctype ctype;
+
+    static const int dimension = Grid::dimension;
+    static const int dimensionworld = Grid::dimensionworld;
+
+    typedef FieldVector< ctype, dimensionworld > NormalVector;
+    typedef FieldVector< ctype, dimension-1 > LocalCoordType;
+
+    typedef typename Grid::template Codim< 0 >::Entity Entity;
+    typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+
+    typedef typename Grid::template Codim< 1 >::Geometry Geometry;
+    typedef typename Grid::template Codim< 1 >::LocalGeometry LocalGeometry;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+  protected:
+    typedef AlbertaGridEntity< 0, dimension, Grid > EntityImp;
+    typedef AlbertaGridGeometry< dimension-1, dimensionworld, Grid > GeometryImp;
+    typedef AlbertaGridGeometry< dimension-1, dimension, Grid > LocalGeometryImp;
+
+  public:
+    AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex );
+
+    EntityPointer inside () const;
+
+    bool boundary () const;
+    int boundaryId () const;
+
+    int indexInInside () const;
+
+    GeometryType type () const;
+
+    const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
+    const NormalVector outerNormal ( const LocalCoordType &local ) const;
+    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
+
+
+    const Grid &grid () const;
+    const ElementInfo &elementInfo () const;
+
+  protected:
+    const Grid *grid_;
+    ElementInfo elementInfo_;
+    int oppVertex_;
+  };
+
+
+
   // AlbertaGridLeafIntersection
   // ---------------------------
 
@@ -37,48 +96,52 @@ namespace Dune
    */
   template< class GridImp >
   class AlbertaGridLeafIntersection
-    : public SmallObject
+    : public AlbertaGridIntersectionBase< GridImp >
   {
     typedef AlbertaGridLeafIntersection< GridImp > This;
+    typedef AlbertaGridIntersectionBase< GridImp > Base;
 
     friend class AlbertaGridEntity< 0, GridImp::dimension, GridImp >;
 
   public:
+    typedef This ImplementationType;
+
     //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
+    typedef typename Base::ctype ctype;
 
     //! know your own dimension
-    static const int dimension = GridImp::dimension;
+    static const int dimension = Base::dimension;
     //! know your own dimension of world
-    static const int dimensionworld = GridImp::dimensionworld;
+    static const int dimensionworld = Base::dimensionworld;
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary
-    typedef FieldVector< ctype, GridImp::dimensionworld > NormalVector;
-    typedef FieldVector< ctype, GridImp::dimension-1 > LocalCoordType;
+    typedef typename Base::NormalVector NormalVector;
+    typedef typename Base::LocalCoordType LocalCoordType;
 
-    typedef This ImplementationType;
+    typedef typename Base::Entity Entity;
+    typedef typename Base::EntityPointer EntityPointer;
 
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename Base::Geometry Geometry;
+    typedef typename Base::LocalGeometry LocalGeometry;
 
-    typedef typename GridImp::template Codim<1>::Geometry Geometry;
-    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+    typedef typename Base::ElementInfo ElementInfo;
 
-    typedef Alberta::ElementInfo< dimension > ElementInfo;
+  protected:
+    typedef typename Base::EntityImp EntityImp;
+    typedef typename Base::GeometryImp GeometryImp;
+    typedef typename Base::LocalGeometryImp LocalGeometryImp;
+
+    using Base::grid;
+    using Base::elementInfo;
 
   private:
-    typedef AlbertaGridEntity< 0, dimension, GridImp > EntityImp;
-    typedef AlbertaGridGeometry< dimension-1, dimensionworld, GridImp > GeometryImp;
-    typedef AlbertaGridGeometry< dimension-1, dimension, GridImp > LocalGeometryImp;
-
     struct GlobalCoordReader;
     struct LocalCoordReader;
 
   public:
     AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );
 
-    //! The copy constructor
     AlbertaGridLeafIntersection ( const This &other );
 
     This &operator= ( const This &other )
@@ -87,99 +150,42 @@ namespace Dune
       return *this;
     }
 
-    //! equality
     bool equals ( const This &other ) const;
 
-    //! increment
     void next ();
 
-    //! access neighbor
     EntityPointer outside () const;
 
-    //! access element where IntersectionIterator started
-    EntityPointer inside () const;
-
-    //! assignment operator, implemented because default does not the right thing
     void assign ( const This &other );
 
-    //! return true if intersection is with boundary.
-    bool boundary () const;
-
-    //! return true if across the edge an neighbor on this level exists
     bool neighbor () const;
 
-    //! return information about the Boundary
-    int boundaryId () const;
-
-    //! return true if intersection is conform.
     bool conforming () const;
 
     AlbertaTransformation transformation () const;
 
-    //! intersection of codimension 1 of this neighbor with element where
-    //! iteration started.
-    //! Here returned element is in LOCAL coordinates of the element
-    //! where iteration started.
     const LocalGeometry &geometryInInside () const;
-
-    /*! intersection of codimension 1 of this neighbor with element where iteration started.
-       Here returned element is in LOCAL coordinates of neighbor
-     */
     const LocalGeometry &geometryInOutside () const;
 
-    /*! intersection of codimension 1 of this neighbor with element where iteration started.
-       Here returned element is in GLOBAL coordinates of the element where iteration started.
-     */
     const Geometry &geometry () const;
 
-    GeometryType type () const;
-
-    //! local index of codim 1 entity in self where intersection is contained in
-    int indexInInside () const;
-
-    //! local index of codim 1 entity in neighbor where intersection is contained in
     int indexInOutside () const;
 
-    //! twist of the face seen from the inner element
     int twistInSelf () const;
-
-    //! twist of the face seen from the outer element
     int twistInNeighbor () const;
 
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    const NormalVector outerNormal ( const LocalCoordType &local ) const;
-
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
-
-    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
-
   private:
-    //! setup the virtual neighbor
     void setupVirtEn () const;
 
-    ////////////////////////////////////////////////
-    // private member variables
-    ////////////////////////////////////////////////
+  protected:
+    using Base::oppVertex_;
 
-    //! know the grid were im coming from
-    const GridImp &grid_;
-
-    //! count on which neighbor we are lookin' at
-    mutable int neighborCount_;
-
-    ElementInfo elementInfo_;
-
-    // the objects holding the real implementations
+  private:
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
     mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
 #endif
     mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
-
-    //! ElementInfo to store the information of the neighbor if needed
     mutable ElementInfo neighborInfo_;
   };
 
