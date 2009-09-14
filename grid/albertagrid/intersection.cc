@@ -383,21 +383,6 @@ namespace Dune
   }
 
 
-  // setup neighbor element with the information of elInfo_
-  template< class GridImp >
-  inline bool AlbertaGridIntersection<GridImp>::neighborHasSameLevel () const
-  {
-    assert( neighbor() );
-    assert( !elementInfo_ == false );
-    const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
-
-    const ALBERTA EL * myEl    = elementInfo_.el();
-    const ALBERTA EL * neighEl = elInfo.neigh[ neighborCount_ ];
-
-    return (grid_.levelProvider() ( myEl ) == grid_.levelProvider() ( neighEl ));
-  }
-
-
 #if !TRAVERSE_LEAFNEIGHBOR
   //*****************************************
   //  setup for 2d

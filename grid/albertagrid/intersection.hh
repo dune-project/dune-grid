@@ -168,9 +168,6 @@ namespace Dune
     void done ();
 
   private:
-    // returns true if actual neighbor has same level
-    bool neighborHasSameLevel () const;
-
     //! setup the virtual neighbor
     void setupVirtEn () const;
 
