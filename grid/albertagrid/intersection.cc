@@ -11,12 +11,12 @@
 namespace Dune
 {
 
-  // AlbertaGridIntersection
-  // -----------------------
+  // AlbertaGridLeafIntersection
+  // ---------------------------
 
   template< class GridImp >
-  inline AlbertaGridIntersection< GridImp >
-  ::AlbertaGridIntersection ( const EntityImp &entity, const int n )
+  inline AlbertaGridLeafIntersection< GridImp >
+  ::AlbertaGridLeafIntersection ( const EntityImp &entity, const int n )
     : grid_( entity.grid() ),
       neighborCount_( n ),
       elementInfo_( entity.elementInfo() ),
@@ -30,8 +30,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline AlbertaGridIntersection< GridImp >
-  ::AlbertaGridIntersection ( const This &other )
+  inline AlbertaGridLeafIntersection< GridImp >
+  ::AlbertaGridLeafIntersection ( const This &other )
     : grid_( other.grid_ ),
       neighborCount_( other.neighborCount_ ),
       elementInfo_( other.elementInfo_ ),
@@ -47,7 +47,7 @@ namespace Dune
   // assignment operator
   template< class GridImp >
   inline void
-  AlbertaGridIntersection< GridImp >::assign ( const This &other )
+  AlbertaGridLeafIntersection< GridImp >::assign ( const This &other )
   {
     // only assign iterators from the same grid
     assert( &(this->grid_) == &(other.grid_) );
@@ -60,7 +60,7 @@ namespace Dune
 
   template< class GridImp >
   inline bool
-  AlbertaGridIntersection< GridImp >::equals ( const This &other ) const
+  AlbertaGridLeafIntersection< GridImp >::equals ( const This &other ) const
   {
     const ALBERTA EL *e1 = elementInfo_.el();
     const ALBERTA EL *e2 = other.elementInfo_.el();
@@ -68,7 +68,7 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline void AlbertaGridIntersection<GridImp>::next ()
+  inline void AlbertaGridLeafIntersection<GridImp>::next ()
   {
     assert( neighborCount_ <= dimension );
     neighborInfo_ = ElementInfo();
@@ -76,8 +76,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersection< GridImp >::EntityPointer
-  AlbertaGridIntersection< GridImp >::outside () const
+  inline typename AlbertaGridLeafIntersection< GridImp >::EntityPointer
+  AlbertaGridLeafIntersection< GridImp >::outside () const
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
 
@@ -101,8 +101,8 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline typename AlbertaGridIntersection< GridImp >::EntityPointer
-  AlbertaGridIntersection< GridImp >::inside () const
+  inline typename AlbertaGridLeafIntersection< GridImp >::EntityPointer
+  AlbertaGridLeafIntersection< GridImp >::inside () const
   {
     typedef AlbertaGridEntityPointer< 0, GridImp > EntityPointerImp;
     assert( !elementInfo_ == false );
@@ -111,7 +111,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersection<GridImp>::boundaryId () const
+  AlbertaGridLeafIntersection<GridImp>::boundaryId () const
   {
     assert( !elementInfo_ == false );
 
@@ -125,20 +125,20 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersection<GridImp>::conforming() const
+  inline bool AlbertaGridLeafIntersection<GridImp>::conforming() const
   {
     return true;
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersection< GridImp >::boundary() const
+  inline bool AlbertaGridLeafIntersection< GridImp >::boundary() const
   {
     assert( !!elementInfo_ );
     return elementInfo_.isBoundary( neighborCount_ );
   }
 
   template< class GridImp >
-  inline bool AlbertaGridIntersection< GridImp >::neighbor () const
+  inline bool AlbertaGridLeafIntersection< GridImp >::neighbor () const
   {
     assert( !!elementInfo_ );
     assert( neighborCount_ <= dimension );
@@ -148,8 +148,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
-  AlbertaGridIntersection< GridImp >
+  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
+  AlbertaGridLeafIntersection< GridImp >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
 #if USE_GENERICGEOMETRY
@@ -170,8 +170,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >::NormalVector
-  AlbertaGridIntersection< const AlbertaGrid< 1, 1 > >
+  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 1, 1 > >::NormalVector
+  AlbertaGridLeafIntersection< const AlbertaGrid< 1, 1 > >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
@@ -183,8 +183,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >::NormalVector
-  AlbertaGridIntersection< const AlbertaGrid< 2, 2 > >
+  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 2, 2 > >::NormalVector
+  AlbertaGridLeafIntersection< const AlbertaGrid< 2, 2 > >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
@@ -198,8 +198,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >::NormalVector
-  AlbertaGridIntersection< const AlbertaGrid< 3, 3 > >
+  inline const AlbertaGridLeafIntersection< const AlbertaGrid< 3, 3 > >::NormalVector
+  AlbertaGridLeafIntersection< const AlbertaGrid< 3, 3 > >
   ::integrationOuterNormal ( const LocalCoordType &local ) const
   {
     assert( !!elementInfo_ );
@@ -238,8 +238,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
-  AlbertaGridIntersection< GridImp >
+  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
+  AlbertaGridLeafIntersection< GridImp >
   ::outerNormal( const LocalCoordType &local ) const
   {
     return integrationOuterNormal( local );
@@ -247,8 +247,8 @@ namespace Dune
 
 
   template<class GridImp>
-  inline const typename AlbertaGridIntersection< GridImp >::NormalVector
-  AlbertaGridIntersection< GridImp >
+  inline const typename AlbertaGridLeafIntersection< GridImp >::NormalVector
+  AlbertaGridLeafIntersection< GridImp >
   ::unitOuterNormal ( const LocalCoordType &local ) const
   {
     NormalVector normal = outerNormal( local );
@@ -259,15 +259,15 @@ namespace Dune
 
   template< class GridImp >
   inline AlbertaTransformation
-  AlbertaGridIntersection< GridImp >::transformation () const
+  AlbertaGridLeafIntersection< GridImp >::transformation () const
   {
     return AlbertaTransformation( elementInfo_.transformation( neighborCount_ ) );
   }
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
-  AlbertaGridIntersection< GridImp >::geometryInInside () const
+  inline const typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry &
+  AlbertaGridLeafIntersection< GridImp >::geometryInInside () const
   {
     assert( !!elementInfo_ );
 
@@ -285,8 +285,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::LocalGeometry &
-  AlbertaGridIntersection< GridImp >::geometryInOutside () const
+  inline const typename AlbertaGridLeafIntersection< GridImp >::LocalGeometry &
+  AlbertaGridLeafIntersection< GridImp >::geometryInOutside () const
   {
     assert( neighbor() );
 
@@ -306,8 +306,8 @@ namespace Dune
 
 
   template< class GridImp >
-  inline const typename AlbertaGridIntersection< GridImp >::Geometry &
-  AlbertaGridIntersection< GridImp >::geometry () const
+  inline const typename AlbertaGridLeafIntersection< GridImp >::Geometry &
+  AlbertaGridLeafIntersection< GridImp >::geometry () const
   {
     assert( !elementInfo_ == false );
 
@@ -319,14 +319,14 @@ namespace Dune
 
 
   template< class GridImp >
-  inline GeometryType AlbertaGridIntersection< GridImp >::type () const
+  inline GeometryType AlbertaGridLeafIntersection< GridImp >::type () const
   {
     return GeometryType( GeometryType::simplex, dimension-1 );
   }
 
 
   template< class GridImp >
-  inline int AlbertaGridIntersection< GridImp >::indexInInside () const
+  inline int AlbertaGridLeafIntersection< GridImp >::indexInInside () const
   {
     const int oppVertex = neighborCount_;
     const int face = (dimension > 1 ? grid_.alberta2dune( 1, oppVertex ) : 1-oppVertex);
@@ -334,7 +334,7 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline int AlbertaGridIntersection< GridImp >::indexInOutside () const
+  inline int AlbertaGridLeafIntersection< GridImp >::indexInOutside () const
   {
     assert( !!elementInfo_ );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
@@ -346,7 +346,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersection< GridImp >::twistInSelf () const
+  AlbertaGridLeafIntersection< GridImp >::twistInSelf () const
   {
     return elementInfo_.template twist< 1 >( neighborCount_ );
   }
@@ -354,7 +354,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridIntersection< GridImp >::twistInNeighbor () const
+  AlbertaGridLeafIntersection< GridImp >::twistInNeighbor () const
   {
     return elementInfo_.twistInNeighbor( neighborCount_ );
   }
@@ -489,7 +489,7 @@ namespace Dune
 
   // setup neighbor element with the information of elInfo_
   template< class GridImp >
-  inline void AlbertaGridIntersection< GridImp >::setupVirtEn () const
+  inline void AlbertaGridLeafIntersection< GridImp >::setupVirtEn () const
   {
     // if this assertion fails then outside was called without checking
     // neighbor first
@@ -542,11 +542,11 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersection::GlobalCoordReader
-  // ------------------------------------------
+  // AlbertaGridLeafIntersection::GlobalCoordReader
+  // ----------------------------------------------
 
   template< class GridImp >
-  struct AlbertaGridIntersection< GridImp >::GlobalCoordReader
+  struct AlbertaGridLeafIntersection< GridImp >::GlobalCoordReader
   {
     typedef typename remove_const< GridImp >::type Grid;
 
@@ -609,11 +609,11 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersection::LocalCoordReader
-  // -----------------------------------------
+  // AlbertaGridLeafIntersection::LocalCoordReader
+  // ---------------------------------------------
 
   template< class GridImp >
-  struct AlbertaGridIntersection< GridImp >::LocalCoordReader
+  struct AlbertaGridLeafIntersection< GridImp >::LocalCoordReader
   {
     typedef typename remove_const< GridImp >::type Grid;
 

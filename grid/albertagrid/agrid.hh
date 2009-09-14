@@ -95,13 +95,13 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::Intersection< const GridImp, AlbertaGridIntersection > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, AlbertaGridIntersection > LevelIntersection;
+      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LeafIntersection;
+      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LevelIntersection;
       typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridIntersection >
+      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
       LeafIntersectionIterator;
       typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridIntersection >
+      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
       LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
@@ -249,7 +249,7 @@ namespace Dune
     template< int, int, class > friend class AlbertaGridEntity;
 
     friend class AlbertaGridHierarchicIterator< This >;
-    friend class AlbertaGridIntersection< const This >;
+    friend class AlbertaGridLeafIntersection< const This >;
 
     friend class AlbertaMarkerVector< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
@@ -565,9 +565,6 @@ namespace Dune
 
     friend class AlbertaGridLeafIntersectionIterator< const This >;
 
-    typedef typename Traits::LeafIntersectionIterator
-    AlbertaGridIntersectionIteratorType;
-
   private:
     mutable EntityProvider entityProvider_;
 
@@ -598,7 +595,7 @@ namespace Dune
       return getRealImplementation( intersection ).twistInNeighbor();
     }
 
-    const AlbertaGridIntersection< const This > &
+    const AlbertaGridLeafIntersection< const This > &
     getRealIntersection ( const typename Traits::LeafIntersection &intersection ) const
     {
       return getRealImplementation( intersection );

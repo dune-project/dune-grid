@@ -25,8 +25,8 @@ namespace Dune
 
 
 
-  // AlbertaGridIntersection
-  // -----------------------
+  // AlbertaGridLeafIntersection
+  // ---------------------------
 
   /*!
      Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
@@ -36,10 +36,10 @@ namespace Dune
      of an element!
    */
   template< class GridImp >
-  class AlbertaGridIntersection
+  class AlbertaGridLeafIntersection
     : public SmallObject
   {
-    typedef AlbertaGridIntersection< GridImp > This;
+    typedef AlbertaGridLeafIntersection< GridImp > This;
 
     friend class AlbertaGridEntity< 0, GridImp::dimension, GridImp >;
 
@@ -76,10 +76,10 @@ namespace Dune
     struct LocalCoordReader;
 
   public:
-    AlbertaGridIntersection ( const EntityImp &entity, const int n );
+    AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );
 
     //! The copy constructor
-    AlbertaGridIntersection ( const This &other );
+    AlbertaGridLeafIntersection ( const This &other );
 
     This &operator= ( const This &other )
     {
@@ -185,4 +185,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_INTERSECTION_HH

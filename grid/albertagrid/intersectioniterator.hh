@@ -24,7 +24,7 @@ namespace Dune
     typedef AlbertaGridLeafIntersectionIterator< GridImp > This;
 
   public:
-    typedef Dune::Intersection< GridImp, AlbertaGridIntersection > Intersection;
+    typedef Dune::Intersection< GridImp, AlbertaGridLeafIntersection > Intersection;
 
     static const int dimension = Intersection::dimension;
 
@@ -32,7 +32,7 @@ namespace Dune
     struct End {};
 
   private:
-    typedef AlbertaGridIntersection< GridImp > IntersectionImp;
+    typedef AlbertaGridLeafIntersection< GridImp > IntersectionImp;
 
     Intersection *intersection_;
 
