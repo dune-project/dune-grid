@@ -76,8 +76,7 @@ namespace Dune
     struct LocalCoordReader;
 
   public:
-    //! The default Constructor
-    AlbertaGridIntersection ( const GridImp &grid, int level );
+    AlbertaGridIntersection ( const EntityImp &entity, const int n );
 
     //! The copy constructor
     AlbertaGridIntersection ( const This &other );
@@ -92,7 +91,7 @@ namespace Dune
     bool equals ( const This &other ) const;
 
     //! increment
-    void increment();
+    void next ();
 
     //! access neighbor
     EntityPointer outside () const;
@@ -156,16 +155,6 @@ namespace Dune
     const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
 
     const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
-
-    //**********************************************************
-    //  private methods
-    //**********************************************************
-
-    // reset IntersectionIterator
-    void first ( const EntityImp &entity, int level );
-
-    // calls EntityPointer done and sets done_ to true
-    void done ();
 
   private:
     //! setup the virtual neighbor

@@ -344,8 +344,9 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafbegin() const
   {
-    assert( !elementInfo_ == false );
-  #ifndef NDEBUG
+    assert( !!elementInfo_ );
+
+#ifndef NDEBUG
     for( int i = 0; i <= dimension; ++i )
     {
       // std::cout << "Opposite vertex " << i << ": "
@@ -357,10 +358,10 @@ namespace Dune
                     "entities are not fully implemented, yet." );
       }
     }
-  #endif
+#endif
 
     typename AlbertaGridLeafIntersectionIterator::Begin begin;
-    return AlbertaGridLeafIntersectionIterator( grid_, *this, level(), begin );
+    return AlbertaGridLeafIntersectionIterator( *this, begin );
   }
 
 
@@ -368,9 +369,9 @@ namespace Dune
   inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafend() const
   {
-    assert( !elementInfo_ == false );
+    assert( !!elementInfo_ );
     typename AlbertaGridLeafIntersectionIterator::End end;
-    return AlbertaGridLeafIntersectionIterator( grid_, *this, level(), end );
+    return AlbertaGridLeafIntersectionIterator( *this, end );
   }
 
 }

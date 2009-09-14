@@ -16,10 +16,10 @@ namespace Dune
 
   template< class GridImp >
   inline AlbertaGridIntersection< GridImp >
-  ::AlbertaGridIntersection ( const GridImp &grid, int level )
-    : grid_( grid ),
-      neighborCount_( dimension+1 ),
-      elementInfo_(),
+  ::AlbertaGridIntersection ( const EntityImp &entity, const int n )
+    : grid_( entity.grid() ),
+      neighborCount_( n ),
+      elementInfo_( entity.elementInfo() ),
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
       fakeNeighObj_( LocalGeometryImp() ),
       fakeSelfObj_ ( LocalGeometryImp() ),
@@ -42,29 +42,6 @@ namespace Dune
       neighGlobObj_( GeometryImp() ),
       neighborInfo_()
   {}
-
-
-  template< class GridImp >
-  inline void
-  AlbertaGridIntersection< GridImp >
-  ::first ( const EntityImp &entity, int level )
-  {
-    neighborCount_ = 0;
-    neighborInfo_ = ElementInfo();
-    elementInfo_ = entity.elementInfo_;
-
-    assert( !elementInfo_ == false );
-    assert( elementInfo_.level() == level );
-  }
-
-
-  template< class GridImp >
-  inline void AlbertaGridIntersection< GridImp >::done ()
-  {
-    neighborCount_ = dimension+1;
-    neighborInfo_ = ElementInfo();
-    elementInfo_ = ElementInfo();
-  }
 
 
   // assignment operator
@@ -91,12 +68,11 @@ namespace Dune
   }
 
   template< class GridImp >
-  inline void AlbertaGridIntersection<GridImp>::increment()
+  inline void AlbertaGridIntersection<GridImp>::next ()
   {
+    assert( neighborCount_ <= dimension );
     neighborInfo_ = ElementInfo();
     ++neighborCount_;
-    if( neighborCount_ > dimension )
-      this->done();
   }
 
   template< class GridImp >
@@ -107,7 +83,7 @@ namespace Dune
 
     if( !neighborInfo_ )
     {
-      assert( !elementInfo_ == false );
+      assert( neighbor() );
 
 #if TRAVERSE_LEAFNEIGHBOR
       neighborInfo_ = elementInfo_.leafNeighbor( neighborCount_ );
@@ -165,6 +141,7 @@ namespace Dune
   inline bool AlbertaGridIntersection< GridImp >::neighbor () const
   {
     assert( !!elementInfo_ );
+    assert( neighborCount_ <= dimension );
     const ALBERTA EL_INFO &elInfo = elementInfo_.elInfo();
     return (elInfo.neigh[ neighborCount_ ] != NULL);
   }
