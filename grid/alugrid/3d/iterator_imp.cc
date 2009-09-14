@@ -1096,6 +1096,8 @@ namespace Dune {
                               const HElementType & elem, int maxlevel ,bool end)
     : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
       , elem_(&elem)
+      , ghost_( 0 )
+      , nextGhost_( 0 )
       , maxlevel_(maxlevel)
   {
     if (!end)
@@ -1121,6 +1123,42 @@ namespace Dune {
     }
   }
 
+#ifdef ALU3DGRID_PARALLEL
+  template <class GridImp>
+  inline ALU3dGridHierarchicIterator<GridImp> ::
+  ALU3dGridHierarchicIterator(const GridImp & grid ,
+                              const HBndSegType& ghost,
+                              int maxlevel,
+                              bool end)
+    : ALU3dGridEntityPointer<0,GridImp> ( grid, maxlevel )
+      , elem_( 0 )
+      , ghost_( &ghost )
+      , nextGhost_( 0 )
+      , maxlevel_(maxlevel)
+  {
+    if( ! end )
+    {
+      // lock entity pointer
+      this->locked_ = true ;
+      nextGhost_ = const_cast<HBndSegType *> (ghost.down());
+
+      // we have children and they lie in the disired level range
+      if( nextGhost_ && nextGhost_->ghostLevel() <= maxlevel_)
+      {
+        this->updateGhostPointer( *nextGhost_ );
+      }
+      else
+      { // otherwise do nothing
+        this->done();
+      }
+    }
+    else
+    {
+      this->done();
+    }
+  }
+#endif
+
   template <class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const ThisType& org)
@@ -1143,43 +1181,71 @@ namespace Dune {
   ALU3dGridHierarchicIterator<GridImp> ::
   assign(const ThisType& org)
   {
-    elem_     = org.elem_;
-    maxlevel_ = org.maxlevel_;
+    // copy my data
+    elem_      = org.elem_;
+#ifdef ALU3DGRID_PARALLEL
+    ghost_     = org.ghost_;
+    nextGhost_ = org.nextGhost_;
+#endif
+    maxlevel_  = org.maxlevel_;
 
-    // this method will free entity
+    // copy entity pointer
+    // this method will probably free entity
     ALU3dGridEntityPointer<0,GridImp> :: clone(org);
   }
 
   template <class GridImp>
-  inline typename ALU3dGridHierarchicIterator<GridImp>::HElementType*
+  inline int
   ALU3dGridHierarchicIterator<GridImp>::
-  goNextElement(HElementType * oldelem )
+  getLevel(const HBndSegType* face) const
+  {
+    // return ghost level
+    assert( face );
+    return face->ghostLevel();
+  }
+
+  template <class GridImp>
+  inline int
+  ALU3dGridHierarchicIterator<GridImp>::
+  getLevel(const HElementType * item) const
+  {
+    // return normal level
+    assert( item );
+    return item->level();
+  }
+  template <class GridImp>
+  template <class HItemType>
+  inline HItemType*
+  ALU3dGridHierarchicIterator<GridImp>::
+  goNextElement(const HItemType* startElem, HItemType * oldelem )
   {
     // strategy is:
     // - go down as far as possible and then over all children
     // - then go to father and next and down again
 
-    HElementType * nextelem = oldelem->down();
+    HItemType * nextelem = oldelem->down();
     if(nextelem)
     {
-      if(nextelem->level() <= maxlevel_)
+      // use getLevel method
+      if( getLevel(nextelem) <= maxlevel_)
         return nextelem;
     }
 
     nextelem = oldelem->next();
     if(nextelem)
     {
-      if(nextelem->level() <= maxlevel_)
+      // use getLevel method
+      if( getLevel(nextelem) <= maxlevel_)
         return nextelem;
     }
 
     nextelem = oldelem->up();
-    if(nextelem == elem_) return 0;
+    if(nextelem == startElem) return 0;
 
     while( !nextelem->next() )
     {
       nextelem = nextelem->up();
-      if(nextelem == elem_) return 0;
+      if(nextelem == startElem) return 0;
     }
 
     if(nextelem) nextelem = nextelem->next();
@@ -1192,14 +1258,31 @@ namespace Dune {
   {
     assert(this->item_ != 0);
 
-    HElementType * nextItem = goNextElement( this->item_ );
-    if(!nextItem)
+#ifdef ALU3DGRID_PARALLEL
+    if( ghost_ )
     {
-      this->done();
-      return ;
-    }
+      assert( nextGhost_ );
+      nextGhost_ = goNextElement( ghost_, nextGhost_ );
+      if( ! nextGhost_ )
+      {
+        this->done();
+        return ;
+      }
 
-    this->updateEntityPointer(nextItem);
+      this->updateGhostPointer( *nextGhost_ );
+    }
+    else
+#endif
+    {
+      HElementType * nextItem = goNextElement( elem_, this->item_ );
+      if( ! nextItem)
+      {
+        this->done();
+        return ;
+      }
+
+      this->updateEntityPointer(nextItem);
+    }
     return ;
   }
 

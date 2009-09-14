@@ -556,14 +556,21 @@ namespace Dune {
   {
     assert(item_ != 0);
     // if isGhost is true the end iterator will be returned
-    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
+    //return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isGhost() );
+#ifdef ALU3DGRID_PARALLEL
+    if( isGhost() )
+    {
+      return ALU3dGridHierarchicIterator<GridImp>(grid_,*ghost_,maxlevel, isLeaf() );
+    }
+#endif
+    return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel, isLeaf() );
   }
 
   template<int dim, class GridImp>
   inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hend (int maxlevel) const
   {
     assert(item_ != 0);
-    return ALU3dGridHierarchicIterator<GridImp> (grid_,*item_,maxlevel,true);
+    return ALU3dGridHierarchicIterator<GridImp> (grid_, *item_, maxlevel, true);
   }
 
   template<int dim, class GridImp>

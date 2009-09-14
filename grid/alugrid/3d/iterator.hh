@@ -652,6 +652,7 @@ namespace Dune {
     enum { dim = GridImp::dimension };
     typedef ALU3dGridHierarchicIterator<GridImp> ThisType;
     typedef ALU3DSPACE HElementType HElementType ;
+    typedef ALU3DSPACE HBndSegType HBndSegType  ;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -660,6 +661,14 @@ namespace Dune {
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const GridImp &grid,
                                 const HElementType & elem, int maxlevel, bool end );
+
+#ifdef ALU3DGRID_PARALLEL
+    //! start constructor for ghosts
+    ALU3dGridHierarchicIterator(const GridImp &grid,
+                                const HBndSegType& ghost,
+                                int maxlevel,
+                                bool end);
+#endif
 
     //! the normal Constructor
     ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
@@ -680,11 +689,24 @@ namespace Dune {
     // assign iterator
     void assign(const ThisType & org);
 
+    //! return level of item
+    int getLevel(const HElementType* item) const;
+
+    //! return correct level for ghosts
+    int getLevel(const HBndSegType* face) const;
+
     // go to next valid element
-    HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
+    template <class HItemType>
+    HItemType* goNextElement (const HItemType* startElem, HItemType * oldEl);
 
     //! element from where we started
     const HElementType * elem_;
+
+#ifdef ALU3DGRID_PARALLEL
+    // pointers to ghost and current ghost
+    const HBndSegType * ghost_;
+    HBndSegType * nextGhost_;
+#endif
 
     //! maximal level to go down
     int maxlevel_;
