@@ -211,9 +211,8 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
-    typedef AlbertaGridLeafIntersectionIterator< GridImp > AlbertaGridLeafIntersectionIteratorType;
-    typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridIntersectionIteratorType;
-    typedef AlbertaGridLeafIntersectionIteratorType AlbertaGridLevelIntersectionIteratorType;
+    typedef Dune::AlbertaGridLeafIntersectionIterator< GridImp > AlbertaGridLeafIntersectionIterator;
+    typedef AlbertaGridLeafIntersectionIterator AlbertaGridLevelIntersectionIterator;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
 
@@ -269,18 +268,18 @@ namespace Dune
        which has an entity of codimension 1 in commen with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
-    AlbertaGridLeafIntersectionIteratorType ileafbegin () const;
+    AlbertaGridLeafIntersectionIterator ileafbegin () const;
 
     //! Reference to one past the last intersection with neighbor
-    AlbertaGridIntersectionIteratorType ileafend () const;
+    AlbertaGridLeafIntersectionIterator ileafend () const;
 
-    AlbertaGridLevelIntersectionIteratorType ilevelbegin () const
+    AlbertaGridLevelIntersectionIterator ilevelbegin () const
     {
       DUNE_THROW( NotImplemented, "method ilevelbegin not implemented for AlbertaGrid." );
       return ileafend();
     }
 
-    AlbertaGridLeafIntersectionIteratorType ilevelend () const
+    AlbertaGridLevelIntersectionIterator ilevelend () const
     {
       DUNE_THROW( NotImplemented, "method ilevelend not implemented for AlbertaGrid." );
       return ileafend();

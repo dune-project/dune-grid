@@ -26,6 +26,9 @@ namespace Dune
   public:
     typedef Dune::Intersection< GridImp, AlbertaGridIntersection > Intersection;
 
+    struct Begin {};
+    struct End {};
+
   private:
     typedef AlbertaGridIntersection< GridImp > IntersectionImp;
 
@@ -34,13 +37,18 @@ namespace Dune
   public:
     template< class EntityImp >
     AlbertaGridLeafIntersectionIterator
-      ( const GridImp &grid, const EntityImp &entity, int wLevel, bool end )
+      ( const GridImp &grid, const EntityImp &entity, int wLevel, Begin )
       : intersection_( new Intersection( IntersectionImp( grid, wLevel ) ) )
     {
-      if( end )
-        intersectionImp().done();
-      else
-        intersectionImp().first( entity, wLevel );
+      intersectionImp().first( entity, wLevel );
+    }
+
+    template< class EntityImp >
+    AlbertaGridLeafIntersectionIterator
+      ( const GridImp &grid, const EntityImp &entity, int wLevel, End )
+      : intersection_( new Intersection( IntersectionImp( grid, wLevel ) ) )
+    {
+      intersectionImp().done();
     }
 
     AlbertaGridLeafIntersectionIterator ( const This &other )

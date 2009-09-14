@@ -341,7 +341,7 @@ namespace Dune
 
 
   template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIteratorType
+  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafbegin() const
   {
     assert( !elementInfo_ == false );
@@ -358,16 +358,19 @@ namespace Dune
       }
     }
   #endif
-    return AlbertaGridLeafIntersectionIteratorType( grid_, *this, level(), false );
+
+    typename AlbertaGridLeafIntersectionIterator::Begin begin;
+    return AlbertaGridLeafIntersectionIterator( grid_, *this, level(), begin );
   }
 
 
   template< int dim, class GridImp >
-  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIteratorType
+  inline typename AlbertaGridEntity< 0, dim, GridImp >::AlbertaGridLeafIntersectionIterator
   AlbertaGridEntity< 0, dim, GridImp >::ileafend() const
   {
     assert( !elementInfo_ == false );
-    return AlbertaGridLeafIntersectionIteratorType( grid_, *this, level(), true );
+    typename AlbertaGridLeafIntersectionIterator::End end;
+    return AlbertaGridLeafIntersectionIterator( grid_, *this, level(), end );
   }
 
 }
