@@ -17,6 +17,7 @@ namespace Dune {
     outerTwist_(-665),
     outerBoundary_  ( false ),
     ghostBoundary_  ( false ),
+    innerBoundary_  ( false ),
     conformanceState_(UNDEFINED)
   {}
 
@@ -34,8 +35,6 @@ namespace Dune {
     outerFaceNumber_ = -1;
     outerBoundary_   = false;
     ghostBoundary_   = false;
-
-    innerTwist_ = innerTwist;
 
     // points face from inner element away?
     if (innerTwist < 0)
@@ -57,6 +56,48 @@ namespace Dune {
     assert( innerElement_->isRealObject() );
     // if not true we are accessing a fake bnd
     assert( outerElement_->isRealObject() );
+
+#if ALU3DGRID_PARALLEL
+    innerBoundary_ = innerElement_->isboundary();
+    if( innerBoundary_ )
+    {
+      // check for ghosts
+      // this check is only need in the parallel case
+      const BndFaceType * bnd = dynamic_cast<const BndFaceType *> (innerElement_);
+
+      if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
+      {
+        // if nonconformity occurs then go up one level
+        if( bnd->level () != bnd->ghostLevel() )
+        {
+          bnd = static_cast<const BndFaceType *>(bnd->up());
+          assert( bnd );
+          innerElement_ = dynamic_cast<const HasFaceType*> (bnd);
+        }
+
+        // get ghost and internal number
+        GhostPairType p  = bnd->getGhost();
+
+        innerFaceNumber_ = p.second;
+
+        // this doesn't count as outer boundary
+        const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
+        assert(ghost);
+
+        innerTwist_ = ghost->twist(innerFaceNumber_);
+      }
+      else
+      {
+        innerTwist_ = innerFace().twist(innerALUFaceIndex());
+      }
+    }
+    else
+    {
+      assert(innerTwist == innerEntity().twist(innerFaceNumber_));
+      innerTwist_ = innerTwist;
+    }
+
+#endif
 
     outerBoundary_ = outerElement_->isboundary();
     if( outerBoundary_ )
@@ -99,7 +140,6 @@ namespace Dune {
     {
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
     }
-    assert(innerTwist == innerEntity().twist(innerFaceNumber_));
 
     // set conformance information
     conformanceState_ = getConformanceState(innerLevel);
@@ -128,6 +168,7 @@ namespace Dune {
     outerTwist_(orig.outerTwist_),
     outerBoundary_(orig.outerBoundary_),
     ghostBoundary_(orig.ghostBoundary_),
+    innerBoundary_(orig.innerBoundary_),
     conformanceState_(orig.conformanceState_)
   {}
 
@@ -168,14 +209,24 @@ namespace Dune {
 
   template <ALU3dGridElementType type>
   inline const typename ALU3dGridFaceInfo<type>::BndFaceType&
+  ALU3dGridFaceInfo<type>::innerFace() const {
+    assert( innerElement_->isboundary() );
+    return static_cast<const BndFaceType&>(*innerElement_);
+  }
+
+  template <ALU3dGridElementType type>
+  inline const typename ALU3dGridFaceInfo<type>::BndFaceType&
   ALU3dGridFaceInfo<type>::boundaryFace() const {
     assert(boundary());
     return static_cast<const BndFaceType&>(*outerElement_);
   }
 
   template <ALU3dGridElementType type>
-  inline int ALU3dGridFaceInfo<type>::innerTwist() const {
-    assert( innerEntity().twist(innerALUFaceIndex()) == innerTwist_ );
+  inline int ALU3dGridFaceInfo<type>::innerTwist() const
+  {
+    // don't check ghost boundaries here
+    assert( ( ! innerBoundary_) ?
+            innerEntity().twist(innerALUFaceIndex()) == innerTwist_ : true );
     return innerTwist_;
   }
 

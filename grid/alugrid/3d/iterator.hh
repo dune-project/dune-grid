@@ -59,7 +59,8 @@ namespace Dune {
 
     typedef ALU3dImplTraits<GridImp::elementType> ImplTraits;
 
-    typedef ALU3DSPACE HElementType HElementType ;
+    typedef typename ImplTraits::HElementType HElementType ;
+    typedef typename ImplTraits::HBndSegType HBndSegType;
     typedef typename ImplTraits::GEOElementType GEOElementType;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
@@ -69,6 +70,8 @@ namespace Dune {
 
     typedef ALU3DSPACE GEOTetraElementType GEOTetraElementType;
     typedef ALU3DSPACE GEOHexaElementType GEOHexaElementType;
+    typedef ALU3DSPACE BNDFace3Type GEOTriangleBndType;
+    typedef ALU3DSPACE BNDFace4Type GEOQuadBndType;
 
     typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
     typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
@@ -115,7 +118,7 @@ namespace Dune {
     //! The default Constructor , level tells on which level we want
     //! neighbours
     ALU3dGridIntersectionIterator(const GridImp & grid,
-                                  ALU3DSPACE HElementType *el,
+                                  HElementType *el,
                                   int wLevel,bool end=false);
 
     ALU3dGridIntersectionIterator(const GridImp & grid,int wLevel);
@@ -231,7 +234,11 @@ namespace Dune {
     NormalType convert2FV(const alu3d_ctype (&p)[3]) const;
 
     // reset IntersectionIterator to first neighbour
-    void setFirstItem(const ALU3DSPACE HElementType & elem, int wLevel);
+    void setFirstItem(const HElementType & elem, int wLevel);
+
+    // reset IntersectionIterator to first neighbour
+    void setInteriorItem(const HElementType  & elem,
+                         const PLLBndFaceType& bnd, int wLevel);
 
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
@@ -240,8 +247,21 @@ namespace Dune {
     // set new face
     void setNewFace(const GEOFaceType& newFace);
 
+  private:
+    // set new face (only LeafIntersectionIterator)
+    void setGhostFace(const GEOFaceType& newFace);
+
+  protected:
     // generate local geometries
     void buildLocalGeometries() const;
+
+    // get the face corresponding to the index
+    const typename ALU3dImplTraits<tetra>::GEOFaceType*
+    getFace(const GEOTriangleBndType & bnd, int index) const;
+
+    // get the face corresponding to the index
+    const typename ALU3dImplTraits<hexa>::GEOFaceType*
+    getFace(const GEOQuadBndType & bnd, int index) const;
 
     // get the face corresponding to the index
     const typename ALU3dImplTraits<tetra>::GEOFaceType*
@@ -260,6 +280,9 @@ namespace Dune {
 
     //! current element from which we started the intersection iterator
     const IMPLElementType* item_;
+
+    //! current pointer to ghost face if iterator was started from ghost element
+    const PLLBndFaceType* ghost_;
 
     mutable int innerLevel_;
     mutable int index_;
@@ -361,6 +384,10 @@ namespace Dune {
 
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
+
+    // reset IntersectionIterator to first neighbour
+    void setInteriorItem(const HElementType  & elem,
+                         const PLLBndFaceType& bnd, int wLevel);
 
     bool levelNeighbor_;
     bool isLeafItem_;

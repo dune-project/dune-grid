@@ -71,6 +71,9 @@ namespace Dune {
     //! Returns the outer element at that face
     //! \note This function is only meaningful in the interior
     const GEOElementType& outerEntity() const;
+    //! Returns the inner element at that face
+    //! \note This function is only meaningful at a boundary
+    const BndFaceType& innerFace() const;
     //! Returns the boundary (outer) element at that face
     //! \note This function is only meaningful at a boundary
     const BndFaceType& boundaryFace() const;
@@ -110,6 +113,7 @@ namespace Dune {
 
     bool outerBoundary_;
     bool ghostBoundary_;
+    bool innerBoundary_;
 
     ConformanceState conformanceState_;
   };

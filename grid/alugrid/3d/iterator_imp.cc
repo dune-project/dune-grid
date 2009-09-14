@@ -28,6 +28,7 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(grid),
     item_(0),
+    ghost_(0),
     index_(0),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
@@ -48,6 +49,7 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(grid),
     item_(0),
+    ghost_(0),
     index_(0),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
@@ -71,24 +73,49 @@ namespace Dune {
   inline void
   ALU3dGridIntersectionIterator<GridImp> :: done ()
   {
-    done_ = true;
-    item_ = 0;
+    done_  = true;
+    item_  = 0;
+#if ALU3DGRID_PARALLEL
+    ghost_ = 0;
+#endif
   }
 
   template<class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp> ::
   setFirstItem (const HElementType & elem, int wLevel)
   {
+    ghost_      = 0;
     item_       = static_cast<const IMPLElementType *> (&elem);
 
     // Get first face
     const GEOFaceType* firstFace = getFace(*item_, index_);
 
-    const GEOFaceType * childFace = firstFace->down();
+    const GEOFaceType* childFace = firstFace->down();
     if( childFace ) firstFace = childFace;
 
     // Store the face in the connector
     setNewFace(*firstFace);
+  }
+
+  template<class GridImp>
+  inline void ALU3dGridIntersectionIterator<GridImp> ::
+  setInteriorItem (const HElementType & elem, const PLLBndFaceType& ghost, int wLevel)
+  {
+    // get correct face number
+    index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
+
+    // store ghost for method inside
+    ghost_   = &ghost;
+
+    // Get first face
+    const GEOFaceType* firstFace = getFace( ghost, index_ );
+    item_   = static_cast<const IMPLElementType *> (&elem);
+
+    const GEOFaceType* childFace = firstFace->down();
+    if( childFace ) firstFace = childFace;
+
+    // Store the face in the connector
+    setGhostFace(*firstFace);
   }
 
   template<class GridImp>
@@ -103,10 +130,20 @@ namespace Dune {
     }
 
     done_   = false;
-    assert( numFaces == en.getItem().nFaces() );
     innerLevel_ = en.level();
     index_  = 0;
-    setFirstItem(en.getItem(),wLevel);
+
+#if ALU3DGRID_PARALLEL
+    if( en.isGhost() )
+    {
+      setInteriorItem(en.getItem(), en.getGhost(), wLevel);
+    }
+    else
+#endif
+    {
+      assert( numFaces == en.getItem().nFaces() );
+      setFirstItem(en.getItem(), wLevel);
+    }
   }
 
   // copy constructor
@@ -117,6 +154,7 @@ namespace Dune {
     geoProvider_(connector_),
     grid_(org.grid_),
     item_(org.item_),
+    ghost_(org.ghost_),
     intersectionGlobal_(GeometryImp()),
     intersectionGlobalImp_(grid_.getRealImplementation(intersectionGlobal_)),
     intersectionSelfLocal_(GeometryImp()),
@@ -125,11 +163,14 @@ namespace Dune {
     intersectionNeighborLocalImp_(grid_.getRealImplementation(intersectionNeighborLocal_)),
     done_(org.done_)
   {
-    if(org.item_) { // else it's a end iterator
+    if(org.item_)
+    { // else it's a end iterator
       item_        = org.item_;
       innerLevel_  = org.innerLevel_;
       index_       = org.index_;
-    } else {
+    }
+    else
+    {
       done();
     }
   }
@@ -143,9 +184,10 @@ namespace Dune {
     if(org.item_)
     {
       // else it's a end iterator
-      item_      = org.item_;
+      item_       = org.item_;
+      ghost_      = org.ghost_;
       innerLevel_ = org.innerLevel_;
-      index_     = org.index_;
+      index_      = org.index_;
       connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
                                 item_->twist(ElementTopo::dune2aluFace(index_)));
       geoProvider_.resetFaceGeom();
@@ -180,8 +222,18 @@ namespace Dune {
       nextFace = connector_.face().next();
 
       // There was a next child face...
-      if (nextFace) {
-        setNewFace(*nextFace);
+      if (nextFace)
+      {
+#ifdef ALU3DGRID_PARALLEL
+        if( ghost_ )
+        {
+          setGhostFace( *nextFace );
+        }
+        else
+#endif
+        {
+          setNewFace(*nextFace);
+        }
         return; // we found what we were looking for...
       }
     } // end if
@@ -191,7 +243,9 @@ namespace Dune {
 
     // When the face number is larger than the number of faces an element
     // can have, we've reached the end...
-    if (index_ >= numFaces) {
+    // for ghost elements here is finito
+    if (index_ >= numFaces || ghost_ )
+    {
       this->done();
       return;
     }
@@ -230,10 +284,19 @@ namespace Dune {
 
   template<class GridImp>
   inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
-  ALU3dGridIntersectionIterator<GridImp>::inside () const {
-    // make sure that inside is not called for an end iterator
-    //assert( !done_ );
-    return EntityPointer(this->grid_, connector_.innerEntity() );
+  ALU3dGridIntersectionIterator<GridImp>::inside () const
+  {
+#if ALU3DGRID_PARALLEL
+    if( ghost_ )
+    {
+      return EntityPointer(this->grid_, *ghost_ );
+    }
+    else
+#endif
+    {
+      // make sure that inside is not called for an end iterator
+      return EntityPointer(this->grid_, connector_.innerEntity() );
+    }
   }
 
   template<class GridImp>
@@ -418,6 +481,22 @@ namespace Dune {
   template <class GridImp>
   inline const ALU3dImplTraits<tetra>::GEOFaceType*
   ALU3dGridIntersectionIterator<GridImp>::
+  getFace(const GEOTriangleBndType & bnd, int index) const
+  {
+    return bnd.myhface3(0);
+  }
+
+  template <class GridImp>
+  inline const ALU3dImplTraits<hexa>::GEOFaceType*
+  ALU3dGridIntersectionIterator<GridImp>::
+  getFace(const GEOQuadBndType & bnd, int index) const
+  {
+    return bnd.myhface4(0);
+  }
+
+  template <class GridImp>
+  inline const ALU3dImplTraits<tetra>::GEOFaceType*
+  ALU3dGridIntersectionIterator<GridImp>::
   getFace(const GEOTetraElementType & elem, int index) const {
     assert(index >= 0 && index < numFaces);
     return elem.myhface3(ElementTopo::dune2aluFace(index));
@@ -435,9 +514,20 @@ namespace Dune {
   inline void ALU3dGridIntersectionIterator<GridImp>::
   setNewFace(const GEOFaceType& newFace)
   {
+    assert( ! ghost_ );
     assert( innerLevel_ == item_->level() );
     connector_.updateFaceInfo(newFace,innerLevel_,
-                              item_->twist(ElementTopo::dune2aluFace(index_)));
+                              item_->twist(ElementTopo::dune2aluFace(index_)) );
+    geoProvider_.resetFaceGeom();
+  }
+
+  template <class GridImp>
+  inline void ALU3dGridIntersectionIterator<GridImp>::
+  setGhostFace(const GEOFaceType& newFace)
+  {
+    assert( ghost_ );
+    assert( innerLevel_ == ghost_->level() );
+    connector_.updateFaceInfo(newFace,innerLevel_, ghost_->twist(0) );
     geoProvider_.resetFaceGeom();
   }
 
@@ -604,20 +694,50 @@ namespace Dune {
   {
     // if given Entity is not leaf, we create an end iterator
     this->done_   = false;
-    assert( numFaces == en.getItem().nFaces() );
     this->index_  = 0;
-    isLeafItem_ = en.isLeaf();
-    setFirstItem(en.getItem(),wLevel);
+    isLeafItem_   = en.isLeaf();
+
+#if ALU3DGRID_PARALLEL
+    if( en.isGhost() )
+    {
+      setInteriorItem(en.getItem(), en.getGhost(), wLevel);
+    }
+    else
+#endif
+    {
+      assert( numFaces == en.getItem().nFaces() );
+      setFirstItem(en.getItem(), wLevel);
+    }
   }
 
   template<class GridImp>
   inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
   setFirstItem (const HElementType & elem, int wLevel)
   {
+    this->ghost_       = 0;
     this->item_        = static_cast<const IMPLElementType *> (&elem);
     this->innerLevel_  = wLevel;
     // Get first face
     const GEOFaceType* firstFace = getFace(*this->item_, this->index_);
+    // Store the face in the connector
+    setNewFace(*firstFace);
+  }
+
+  template<class GridImp>
+  inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+  setInteriorItem (const HElementType & elem, const PLLBndFaceType& ghost, int wLevel)
+  {
+    // store ghost for method inside
+    this->ghost_   = &ghost;
+    this->item_   = static_cast<const IMPLElementType *> (&elem);
+    // get correct face number
+    this->index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
+
+    this->innerLevel_  = wLevel;
+
+    // Get first face
+    const GEOFaceType* firstFace = this->getFace( ghost, this->index_ );
+
     // Store the face in the connector
     setNewFace(*firstFace);
   }
@@ -653,7 +773,7 @@ namespace Dune {
 
     // When the face number is larger than the number of faces an element
     // can have, we've reached the end...
-    if (this->index_ >= numFaces) {
+    if (this->index_ >= numFaces || this->ghost_ ) {
       this->done();
       return;
     }
@@ -690,9 +810,11 @@ namespace Dune {
   setNewFace(const GEOFaceType& newFace)
   {
     assert( this->item_->level() == this->innerLevel_ );
-    //const int itemLevel = wLevel; //this->item_->level();
     levelNeighbor_ = (newFace.level() == this->innerLevel_);
     this->connector_.updateFaceInfo(newFace,this->innerLevel_,
+#if ALU3DGRID_PARALLEL
+                                    (this->ghost_) ? this->ghost_->twist(0) :
+#endif
                                     this->item_->twist(ElementTopo::dune2aluFace(this->index_)));
     this->geoProvider_.resetFaceGeom();
 
