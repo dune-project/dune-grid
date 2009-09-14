@@ -221,6 +221,7 @@ namespace Dune {
   removeElement ()
   {
     item_  = 0;
+    ghost_ = 0;
   }
 
   template<int dim, class GridImp>
@@ -256,7 +257,7 @@ namespace Dune {
     // make sure this method is not called for ghosts
     assert( ! item_->isGhost() );
     ghost_   = 0;
-    builtgeometry_=false;
+    builtgeometry_ = false;
     level_   = (*item_).level();
     isLeaf_  = ((*item_).down() == 0);
   }
@@ -266,7 +267,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: setGhost(HBndSegType & ghost)
   {
     // use element as ghost
-    typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
     item_  = static_cast<IMPLElementType *> ( ghost.getGhost().first );
 
     // method getGhost can return 0, but then is something wrong
@@ -434,11 +434,11 @@ namespace Dune {
     static typename ALU3dGridEntity<0,dim,GridImp>::template Codim<0>::EntityPointer
     entity (const GridImp & grid,
             const int level,
-            const EntityType & en,
+            const EntityType & entity,
             const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item,
             int i)
     {
-      return ALU3dGridEntityPointer<0, GridImp>(grid , en );
+      return ALU3dGridEntityPointer<0, GridImp>( entity );
     }
   };
 
@@ -575,7 +575,7 @@ namespace Dune {
     // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridIntersectionIteratorType (grid_,*this, this->level(), isGhost() );
+    return ALU3dGridIntersectionIteratorType (grid_, *this, this->level(), false );
   }
 
   template<int dim, class GridImp>
@@ -595,7 +595,7 @@ namespace Dune {
     // end iterator, but isGhost() is normaly false. If isGhost() is true,
     // an end iterator is created,
     // because on ghosts we dont run itersection iterators
-    return ALU3dGridLevelIntersectionIteratorType (grid_,*this, this->level(), isGhost() );
+    return ALU3dGridLevelIntersectionIteratorType (grid_,*this, this->level(), false );
   }
 
   template<int dim, class GridImp>
@@ -610,12 +610,19 @@ namespace Dune {
   inline typename ALU3dGridEntity<0,dim,GridImp> :: EntityPointer
   ALU3dGridEntity<0,dim,GridImp> :: father() const
   {
-    if(! item_->up() )
+    HElementType* up = item_->up();
+    if( ! up )
     {
       std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << getIndex() << "\n";
       return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*item_));
     }
-    return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> (*(item_->up())));
+#ifdef ALU3DGRID_PARALLEL
+    if( isGhost () )
+    {
+      return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<const HBndSegType &> (*(getGhost().up())));
+    }
+#endif
+    return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<HElementType &> ( *up ));
   }
 
   // Adaptation methods
@@ -723,12 +730,11 @@ namespace Dune {
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const GridImp & grid,
-                             const int level,
                              const HElementType &item)
     : grid_(grid)
       , item_(const_cast<HElementType *> (&item))
-      , entity_(0)
-      , locked_(false)
+      , entity_( 0 )
+      , locked_ ( false ) // entity can be released
   {}
 
   template<int codim, class GridImp >
@@ -738,7 +744,7 @@ namespace Dune {
     : grid_(grid)
       , item_(0)
       , entity_ ( grid_.template getNewEntity<codim> ( ghostFace.level() ))
-      , locked_( true ) // entity should not be released
+      , locked_( true ) // entity should not be released, otherwise is ghost info lost
   {
     // sets entity and item pointer
     updateGhostPointer( const_cast<HBndSegType &> (ghostFace) );
@@ -751,7 +757,7 @@ namespace Dune {
     : grid_(grid)
       , item_(0)
       , entity_ ( grid_.template getNewEntity<codim> ( level ) )
-      , locked_(true) // entity should not be released
+      , locked_ ( false ) // entity can be released
   {
     // this needs to be called
     // have to investigate why
@@ -763,8 +769,8 @@ namespace Dune {
   ALU3dGridEntityPointerBase(const ALU3dGridEntityPointerType & org)
     : grid_(org.grid_)
       , item_(org.item_)
-      , entity_(0)
-      , locked_(org.locked_)
+      , entity_( 0 )
+      , locked_( org.locked_ )
   {
     // if entity exists then copy entity
     getEntity( org );
@@ -774,10 +780,12 @@ namespace Dune {
   inline void ALU3dGridEntityPointerBase<codim,GridImp> ::
   getEntity(const ALU3dGridEntityPointerType & org)
   {
+    // if entity existed for original pointer then copy
     if( org.entity_ )
     {
       assert( entity_ == 0 );
       entity_ = grid_.template getNewEntity<codim> ();
+      // set entity right away
       this->entityImp().setEntity( org.entityImp() );
     }
   }
@@ -787,11 +795,7 @@ namespace Dune {
   ALU3dGridEntityPointerBase<codim,GridImp> ::
   operator = (const ALU3dGridEntityPointerType & org)
   {
-    assert( &grid_ == &org.grid_ );
-    // if entity exists, just free and reset pointers
-    if(entity_) this->done();
-    // set item
-    item_ = org.item_;
+    clone( org );
     return *this;
   }
 
@@ -803,7 +807,9 @@ namespace Dune {
     assert( &grid_ == &org.grid_ );
 
     // set item
-    item_ = org.item_;
+    item_   = org.item_;
+    // copy locked info
+    locked_ = org.locked_;
 
     if(item_)
     {
@@ -822,6 +828,7 @@ namespace Dune {
           // on ghosts entity pointers entity always exists
           assert( org.entity_ );
           this->entityImp().setEntity( org.entityImp() );
+          locked_ = true ;
         }
         else
 #endif
@@ -848,7 +855,8 @@ namespace Dune {
   template<int codim, class GridImp >
   inline void ALU3dGridEntityPointerBase<codim,GridImp>::done ()
   {
-    item_ = 0;
+    item_   = 0;
+    locked_ = false;
     // free entity
     freeEntity();
   }
@@ -889,7 +897,9 @@ namespace Dune {
   {
     // don't dereference empty entity pointer
     assert( item_ );
-    if(!entity_)
+    assert( (item_->isGhost()) ? locked_ : true );
+    assert( (locked_) ? (entity_ != 0) : true);
+    if( ! entity_ )
     {
       entity_ = grid_.template getNewEntity<codim> ();
       this->entityImp().setElement( *item_ );
@@ -941,7 +951,7 @@ namespace Dune {
                          const HElementType &item,
                          const int twist,
                          const int duneFace )
-    : ALU3dGridEntityPointerBase<codim,GridImp> (grid,level,item)
+    : ALU3dGridEntityPointerBase<codim,GridImp> (grid,item)
       , level_(level)
       , twist_ (twist)
       , face_(duneFace)
@@ -963,13 +973,7 @@ namespace Dune {
   ALU3dGridEntityPointer<codim,GridImp>::
   operator = (const ALU3dGridEntityPointerType & org)
   {
-    // first copy level, twist and face, because this might be used in
-    // clone
-    level_ = org.level_;
-    twist_ = org.twist_;
-    face_  = org.face_;
-
-    // copy item pointer
+    // clone pointer
     clone(org);
     return *this;
   }
@@ -979,9 +983,17 @@ namespace Dune {
   ALU3dGridEntityPointer<codim,GridImp> ::
   clone (const ALU3dGridEntityPointerType & org)
   {
+    // first copy level, twist and face, because this might be used in
+    // clone
+    level_ = org.level_;
+    twist_ = org.twist_;
+    face_  = org.face_;
+
     assert( &this->grid_ == &org.grid_ );
     // set item
     this->item_ = org.item_;
+    // copy lock status
+    this->locked_ = org.locked_;
 
     // if entity exists, just remove item pointer
     if(this->item_)
@@ -1002,7 +1014,7 @@ namespace Dune {
   {
     // don't dereference empty entity pointer
     assert( this->item_ );
-    if(!this->entity_)
+    if( ! this->entity_ )
     {
       this->entity_ = this->grid_.template getNewEntity<codim> ();
       this->entityImp().setElement( *this->item_ , this->level(), twist_ , face_ );

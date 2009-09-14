@@ -192,11 +192,10 @@ namespace Dune {
     typedef typename ALU3dImplTraits<GridImp::elementType>::
     template Codim<0>::InterfaceType HElementType;
 
-    typedef typename ALU3dImplTraits< elementType >::HBndSegType HBndSegType;
-
     typedef typename ALU3dImplTraits< elementType >::GEOElementType GEOElementType;
     typedef typename ALU3dImplTraits< elementType >::PLLBndFaceType PLLBndFaceType;
     typedef typename ALU3dImplTraits< elementType >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< elementType >::HBndSegType HBndSegType;
 
     enum { refine_element_t = ALU3dImplTraits< elementType >::refine_element_t };
     enum { coarse_element_t = ALU3dImplTraits< elementType >::coarse_element_t };
@@ -376,7 +375,14 @@ namespace Dune {
     template<int cc> int getSubIndex (int i) const;
 
     // return reference to internal item
-    const IMPLElementType & getItem () const { return *item_; }
+    const IMPLElementType& getItem () const { return *item_; }
+
+    // return reference to internal item
+    const PLLBndFaceType& getGhost () const
+    {
+      assert( isGhost() );
+      return *ghost_;
+    }
 
     //! return reference to grid
     const GridImp& grid() const { return grid_; }
@@ -454,7 +460,6 @@ namespace Dune {
 
     //! Constructor for EntityPointer that points to an element
     ALU3dGridEntityPointerBase(const GridImp & grid,
-                               const int level,
                                const HElementType & item);
 
     //! Constructor for EntityPointer that points to an ghost
@@ -514,7 +519,7 @@ namespace Dune {
     mutable EntityObject * entity_;
 
     // is true if entity must not be released
-    const bool locked_;
+    bool locked_;
 
     // return reference to internal entity implementation
     EntityImp & entityImp () const {
@@ -530,6 +535,8 @@ namespace Dune {
   class ALU3dGridEntityPointer<0,GridImp> :
     public ALU3dGridEntityPointerBase<0,GridImp>
   {
+    typedef ALU3dGridEntityPointerBase<0,GridImp> BaseType;
+
     enum { cd = 0 };
     typedef ALU3dGridEntityPointer <cd,GridImp> ThisType;
     enum { dim       = GridImp::dimension };
@@ -555,37 +562,35 @@ namespace Dune {
     //! Constructor for EntityPointer that points to an interior element
     ALU3dGridEntityPointer(const GridImp & grid,
                            const HElementType & item)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1,item) {} // -1 is fake level here
-
-    //! Constructor for EntityPointer that points to an entity
-    ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
-                                                -1, // -1 is fake level here
-                                                entity.getItem() ) {}
-
-    //! Constructor for EntityPointer that points to an iterior or ghost element
-    ALU3dGridEntityPointer(const GridImp & grid,
-                           const ALU3dGridEntityType& entity)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,-1, entity.getItem() ) // -1 is fake level here
-    {
-      // for ghost entities we have to copy right away
-      if( entity.partitionType() == GhostEntity )
-      {
-        assert( this->entity_ == 0 );
-        this->entity_ = this->grid_.template getNewEntity<0> ();
-        assert( this->entity_ );
-        this->entityImp().setEntity( entity );
-      }
-    }
+      : ALU3dGridEntityPointerBase<cd,GridImp> (grid,item) {}
 
     //! Constructor for EntityPointer that points to an ghost
     ALU3dGridEntityPointer(const GridImp & grid,
                            const HBndSegType & ghostFace )
       : ALU3dGridEntityPointerBase<cd,GridImp> (grid,ghostFace) {}
 
+    //! Constructor for EntityPointer that points to an entity (interior or ghost)
+    ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
+      : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
+                                                entity.getItem() )
+    {
+      // for ghost entities we have to copy right away
+      if( entity.isGhost() )
+      {
+        assert( this->entity_ == 0 );
+        this->entity_ = this->grid_.template getNewEntity<0> ();
+        assert( this->entity_ );
+        this->entityImp().setEntity( entity );
+
+        // don't free on compactify, otherwise ghost info is lost
+        this->locked_ = true ;
+      }
+    }
+
     //! copy constructor
     ALU3dGridEntityPointer(const ALU3dGridEntityPointerType & org)
-      : ALU3dGridEntityPointerBase<cd,GridImp> (org) {}
+      : ALU3dGridEntityPointerBase<cd,GridImp> (org)
+    {}
 
   protected:
     //! Constructor for EntityPointer init of Level-, and Leaf-, and
@@ -630,7 +635,6 @@ namespace Dune {
     //! Constructor for EntityPointer that points to given entity
     ALU3dGridEntityPointer(const ALU3dGridEntityType& entity)
       : ALU3dGridEntityPointerBase<cd,GridImp> (entity.grid(),
-                                                entity.level(),
                                                 entity.getItem()),
         level_(entity.level()), twist_(0), face_(-1)
     {}
