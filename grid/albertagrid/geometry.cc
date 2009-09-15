@@ -133,8 +133,7 @@ namespace Dune
 
   template< int mydim, int cdim, class GridImp >
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::integrationElement ( const LocalVector &local ) const
+  AlbertaGridGeometry< mydim, cdim, GridImp >::integrationElement () const
   {
     assert( calcedDet_ );
     return elDet_;

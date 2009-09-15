@@ -317,8 +317,12 @@ namespace Dune
        stiffness matrices.
      */
 
-    // A(l)
-    ctype integrationElement ( const LocalVector &local ) const;
+    ctype integrationElement () const;
+
+    ctype integrationElement ( const LocalVector &local ) const
+    {
+      return integrationElement();
+    }
 
     // volume if geometry
     ctype volume () const;
