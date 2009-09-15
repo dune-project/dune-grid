@@ -171,6 +171,14 @@ namespace Dune
 
 
   template< class Grid >
+  inline AlbertaTransformation
+  AlbertaGridIntersectionBase< Grid >::transformation () const
+  {
+    return AlbertaTransformation( elementInfo().transformation( oppVertex_ ) );
+  }
+
+
+  template< class Grid >
   inline const Grid &AlbertaGridIntersectionBase< Grid >::grid () const
   {
     return *grid_;
@@ -216,19 +224,19 @@ namespace Dune
   {}
 
 
-  // assignment operator
   template< class GridImp >
-  inline void
-  AlbertaGridLeafIntersection< GridImp >::assign ( const This &other )
+  inline AlbertaGridLeafIntersection< GridImp > &
+  AlbertaGridLeafIntersection< GridImp >::operator= ( const This &other )
   {
     *((Base *)this) = other;
     neighborInfo_ = ElementInfo();
+    return *this;
   }
 
 
   template< class GridImp >
   inline bool
-  AlbertaGridLeafIntersection< GridImp >::equals ( const This &other ) const
+  AlbertaGridLeafIntersection< GridImp >::operator== ( const This &other ) const
   {
     return ((elementInfo() == other.elementInfo()) && (oppVertex_ == other.oppVertex_));
   }
@@ -278,14 +286,6 @@ namespace Dune
     assert( oppVertex_ <= dimension );
     const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
     return (elInfo.neigh[ oppVertex_ ] != NULL);
-  }
-
-
-  template< class GridImp >
-  inline AlbertaTransformation
-  AlbertaGridLeafIntersection< GridImp >::transformation () const
-  {
-    return AlbertaTransformation( elementInfo().transformation( oppVertex_ ) );
   }
 
 

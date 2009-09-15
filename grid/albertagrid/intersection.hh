@@ -73,6 +73,9 @@ namespace Dune
     const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
 
+    AlbertaTransformation transformation () const;
+
+
     const Grid &grid () const;
     const ElementInfo &elementInfo () const;
 
@@ -87,13 +90,6 @@ namespace Dune
   // AlbertaGridLeafIntersection
   // ---------------------------
 
-  /*!
-     Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension 1
-     These neighbors are accessed via a IntersectionIterator. This allows the implementation of
-     non-matching meshes. The number of neigbors may be different from the number of faces
-     of an element!
-   */
   template< class GridImp >
   class AlbertaGridLeafIntersection
     : public AlbertaGridIntersectionBase< GridImp >
@@ -108,8 +104,6 @@ namespace Dune
 
     static const int dimension = Base::dimension;
 
-    //! return unit outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
     typedef typename Base::NormalVector NormalVector;
     typedef typename Base::LocalCoordType LocalCoordType;
 
@@ -138,25 +132,17 @@ namespace Dune
 
     AlbertaGridLeafIntersection ( const This &other );
 
-    This &operator= ( const This &other )
-    {
-      assign( other );
-      return *this;
-    }
+    This &operator= ( const This &other );
 
-    bool equals ( const This &other ) const;
+    bool operator== ( const This &other ) const;
 
     void next ();
 
     EntityPointer outside () const;
 
-    void assign ( const This &other );
-
     bool neighbor () const;
 
     bool conforming () const;
-
-    AlbertaTransformation transformation () const;
 
     const LocalGeometry &geometryInInside () const;
     const LocalGeometry &geometryInOutside () const;
@@ -164,6 +150,7 @@ namespace Dune
     const Geometry &geometry () const;
 
     int indexInOutside () const;
+
 
     int twistInSelf () const;
     int twistInNeighbor () const;

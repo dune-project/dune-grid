@@ -69,7 +69,7 @@ namespace Dune
 
     bool equals ( const This &other ) const
     {
-      return intersectionImp().equals( other.intersectionImp() );
+      return (intersectionImp() == other.intersectionImp());
     }
 
     void increment ()
