@@ -309,8 +309,8 @@ namespace Dune {
   {
     // copy n
     {
-      for (int i = 0 ; i < 3 ; i ++)
-        for (int j = 0 ; j < 3 ; j ++ )
+      for (int i = 0 ; i < 3 ; ++i)
+        for (int j = 0 ; j < 3 ; ++j)
           _n [i][j] = m._n [i][j] ;
     }
     _affine = m._affine;
@@ -383,7 +383,7 @@ namespace Dune {
   {
     BaseType :: buildMapping( _p0, _p1, _p2, _p3, _b );
     // initialize flags
-    _calcedDet = _calcedInv = _calcedTransposed = false ;
+    _calcedInv = _calcedTransposed = false ;
 
     return ;
   }
@@ -394,13 +394,13 @@ namespace Dune {
   {
     // copy _b
     {
-      for (int i = 0 ; i < 4 ; i ++)
-        for (int j = 0 ; j < 3 ; j ++ )
+      for (int i = 0 ; i < 4 ; ++i)
+        for (int j = 0 ; j < 3 ; ++j)
           _b [i][j] = m._b [i][j] ;
     }
 
     // initialize flags
-    _calcedDet = _calcedInv = _calcedTransposed = false ;
+    _calcedInv = _calcedTransposed = false ;
     return ;
   }
 
@@ -456,27 +456,24 @@ namespace Dune {
     return ;
   }
 
-
-  inline double BilinearSurfaceMapping :: det(const coord3_t& point ) const
+  // calculates determinant of face mapping
+  inline double BilinearSurfaceMapping :: det(const coord2_t& point ) const
   {
-    // return det if already calculated
-    if( _calcedDet ) return DetDf;
-
-    //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
-    map2worldlinear (point[0],point[1],point[2]) ;
-
-    // only true for affine mappings
-    _calcedDet = _affine ;
-
-    return (DetDf = Df.determinant());
+    // calculate normal
+    normal(point[0], point[1], normal_);
+    // return length
+    return normal_.two_norm();
   }
 
   inline void BilinearSurfaceMapping :: inverse(const coord3_t& point ) const
   {
     if( _calcedInv ) return ;
 
+    //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
+    map2worldlinear (point[0],point[1],point[2]) ;
+
     //  Kramer - Regel, det() rechnet Df und DetDf neu aus.
-    const double val = 1.0 / det(point) ;
+    const double val = 1.0 / Df.determinant();
 
     Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
     Dfi[0][1] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
@@ -550,6 +547,280 @@ namespace Dune {
     map[0] = map_[0];
     map[1] = map_[1];
     return ;
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  //
+  //  Tetra specializations
+  //  -- tetra spec
+  //
+  ////////////////////////////////////////////////////////////////////////
+
+  //- Bilinear surface mapping
+  // Constructor for FieldVectors
+  template <int cdim, int mydim>
+  inline LinearMapping<cdim, mydim> ::
+  LinearMapping ()
+    : _matrix ( 0.0 )
+      , _invTransposed( 0.0 )
+      , _p0( 0.0 )
+      , _calcedInv( false )
+      , _calcedDet( false )
+  {}
+
+  // copy constructor
+  template <int cdim, int mydim>
+  inline LinearMapping<cdim, mydim> ::
+  LinearMapping (const LinearMapping & m)
+    : _matrix ( m._matrix )
+      , _invTransposed( m._invTransposed )
+      , _p0( m._p0 )
+      , _calcedInv( m._calcedInv )
+      , _calcedDet( m._calcedDet )
+  {}
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <int cdim, int mydim>
+  template <class vector_t>
+  inline void LinearMapping<cdim, mydim> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1,
+                 const vector_t & p2, const vector_t & p3 )
+  {
+    assert( mydim == 3 );
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [1][0] = p1[1] - p0 [1] ;
+    _matrix [2][0] = p1[2] - p0 [2] ;
+
+    _matrix [0][1] = p2[0] - p0 [0] ;
+    _matrix [1][1] = p2[1] - p0 [1] ;
+    _matrix [2][1] = p2[2] - p0 [2] ;
+
+    _matrix [0][2] = p3[0] - p0 [0] ;
+    _matrix [1][2] = p3[1] - p0 [1] ;
+    _matrix [2][2] = p3[2] - p0 [2] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+    _p0[2] = p0[2];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <int cdim, int mydim>
+  template <class vector_t>
+  inline void LinearMapping<cdim, mydim> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1,
+                 const vector_t & p2)
+  {
+    assert( mydim == 2 );
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [1][0] = p1[1] - p0 [1] ;
+    _matrix [2][0] = p1[2] - p0 [2] ;
+
+    _matrix [0][1] = p2[0] - p0 [0] ;
+    _matrix [1][1] = p2[1] - p0 [1] ;
+    _matrix [2][1] = p2[2] - p0 [2] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+    _p0[2] = p0[2];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <int cdim, int mydim>
+  template <class vector_t>
+  inline void LinearMapping<cdim, mydim> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1)
+  {
+    assert( mydim == 2 );
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [1][0] = p1[1] - p0 [1] ;
+    _matrix [2][0] = p1[2] - p0 [2] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+    _p0[2] = p0[2];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+  // local --> global
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  map2world (const localcoord_t& local, coord_t& global) const
+  {
+    // initialize
+    global = _p0;
+
+    // multiply with
+    _matrix.umv(local, global);
+  }
+
+  // global --> local
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  world2map (const coord_t& global, localcoord_t& local) const
+  {
+    // calculate inverse if necessary
+    if( ! _calcedInv ) inverse( local );
+
+    // initialize
+    coord_t globalCoord( global );
+    // substract p0
+    globalCoord -= _p0;
+
+    // multiply with transposed because _invTransposed is already transposed
+    _invTransposed.mtv(globalCoord, local);
+  }
+
+
+  // tetra mapping
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  inverse(const localcoord_t& local) const
+  {
+    // invert transposed matrix and return determinant
+    _det = std::abs( FMatrixHelp::invertMatrix_retTransposed(_matrix , _invTransposed ) );
+    // set flag
+    _calcedDet = _calcedInv = true ;
+  }
+
+  // tetra mapping
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  calculateDeterminant(const localcoord_t& local) const
+  {
+    inverse( local );
+  }
+
+  // triangle mapping
+  template <>
+  inline void LinearMapping<3, 2> ::
+  inverse(const localcoord_t& local) const
+  {
+    enum { mydim = 2 };
+    enum { cdim  = 3 };
+
+    // use least squares approach
+    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A_;
+
+    // calc ret = A^T*A
+    FMatrixHelp::multTransposedMatrix(_matrix , AT_A_);
+
+    // calc Jinv_ = A (A^T*A)^-1
+    FieldMatrix< alu3d_ctype, mydim, mydim> inv_AT_A;
+
+    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
+
+    // set flag
+    _calcedInv = true ;
+  }
+
+  // triangle mapping
+  template <>
+  inline void LinearMapping<3, 2> ::
+  calculateDeterminant(const localcoord_t& local) const
+  {
+    enum { cdim  = 3 };
+    coord_t tmpV; //! temporary memory
+    coord_t tmpU; //! temporary memory
+
+    for(int i=0; i<cdim; ++i)
+    {
+      // p1 - p0
+      tmpV[i] = _matrix[i][0];
+
+      // p2 - p1 = (p2 - p0) - (p1 - p0)
+      tmpU[i] = _matrix[i][1] - _matrix[i][0];
+    }
+
+    coord_t globalCoord;
+
+    // calculate scaled outer normal
+    for(int i=0; i<cdim; ++i)
+    {
+      globalCoord[i] = (  tmpV[(i+1)%cdim] * tmpU[(i+2)%cdim]
+                          - tmpV[(i+2)%cdim] * tmpU[(i+1)%cdim] );
+    }
+
+    // calculate determinant
+    _det = globalCoord.two_norm();
+
+    // set flag
+    _calcedDet = true ;
+  }
+
+  // edge mapping
+  template <>
+  inline void LinearMapping<3, 1> ::
+  inverse(const localcoord_t& local) const
+  {
+    FieldMatrix<alu3d_ctype, 1, 1> AT_A_;
+
+    // calc ret = A^T*A
+    FMatrixHelp::multTransposedMatrix(_matrix, AT_A_ );
+
+    // calc Jinv_ = A (A^T*A)^-1
+    FieldMatrix< alu3d_ctype, 1, 1 > inv_AT_A;
+    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
+
+    // set flag
+    _calcedInv = true ;
+  }
+
+  // triangle mapping
+  template <>
+  inline void LinearMapping<3, 1> ::
+  calculateDeterminant(const localcoord_t& local) const
+  {
+    // calculate length
+    _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
+                      (_matrix[1][0] * _matrix[1][0]) +
+                      (_matrix[2][0] * _matrix[2][0]) );
+
+    // set flag
+    _calcedDet = true ;
+  }
+
+  template <int cdim, int mydim>
+  inline alu3d_ctype LinearMapping<cdim, mydim> ::
+  det(const localcoord_t& local ) const
+  {
+    // return det if already calculated
+    if( _calcedDet ) return _det;
+
+    // calculate inverse
+    calculateDeterminant( local );
+
+    return _det;
+  }
+
+  template <int cdim, int mydim>
+  inline const typename LinearMapping<cdim, mydim> :: inv_t&
+  LinearMapping<cdim, mydim> ::
+  jacobianInverseTransposed(const localcoord_t & local) const
+  {
+    // if calculated return
+    if( _calcedInv ) return _invTransposed;
+
+    // calculate
+    inverse ( local ) ;
+
+    return _invTransposed;
   }
 
 } // end namespace Dune

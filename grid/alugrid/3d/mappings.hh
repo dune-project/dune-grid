@@ -161,7 +161,6 @@ namespace Dune {
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
 
-    mutable bool _calcedDet;
     mutable bool _calcedInv;
     mutable bool _calcedTransposed;
 
@@ -181,8 +180,8 @@ namespace Dune {
     void inverse (const coord3_t&) const;
     const inv_t& jacobianInverseTransposed(const coord2_t&) const ;
 
-    // calculates determinant of mapping
-    double det(const coord3_t&) const;
+    // calculates determinant of face mapping using the normal
+    double det(const coord2_t&) const;
 
     // maps from local coordinates to global coordinates
     void world2map(const coord3_t &, coord2_t & ) const;
@@ -203,6 +202,88 @@ namespace Dune {
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & );
   } ;
+
+
+  //! A linear surface mapping
+  template <int cdim, int mydim>
+  class LinearMapping
+  {
+  protected:
+    // alu3d_ctype = double
+    typedef FieldVector<alu3d_ctype, cdim>   coord_t;
+    typedef FieldVector<alu3d_ctype, mydim>  localcoord_t;
+
+    typedef FieldMatrix<alu3d_ctype, cdim, mydim> inv_t ;
+
+    inv_t _matrix;                //!< transformation matrix (transposed)
+    mutable inv_t _invTransposed; //!< storage for inverse of jacobian
+    coord_t _p0;                  //! P[0]
+
+    //! stores the determinant of the inverse
+    mutable alu3d_ctype _det;
+
+    //! true if inverse has been calculated
+    mutable bool _calcedInv;
+
+    //! true if determinant has been calculated
+    mutable bool _calcedDet;
+
+  public:
+    //! Constructor creating empty mapping with double , i.e. zero
+    LinearMapping ();
+
+    //! copy constructor
+    LinearMapping (const LinearMapping &) ;
+
+    // returns true if mapping is affine (which is always true)
+    inline bool affine () const { return true ; }
+
+    // return reference to transposed jacobian inverse
+    const inv_t& jacobianInverseTransposed(const localcoord_t&) const ;
+
+    // calculates determinant of mapping
+    alu3d_ctype det(const localcoord_t&) const;
+
+    // maps from local coordinates to global coordinates
+    void world2map(const coord_t &, localcoord_t & ) const;
+
+    // maps form global coordinates to local (within reference element)
+    // coordinates
+    void map2world(const localcoord_t&, coord_t&) const ;
+
+  protected:
+    // calculate inverse
+    void inverse (const localcoord_t&) const;
+
+    // calculate determinant
+    void calculateDeterminant (const localcoord_t&) const;
+
+  public:
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
+    template <class vector_t>
+    void buildMapping (const vector_t & , const vector_t & ,
+                       const vector_t & , const vector_t & );
+
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
+    template <class vector_t>
+    void buildMapping (const vector_t & , const vector_t & ,
+                       const vector_t & );
+
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
+    template <class vector_t>
+    void buildMapping (const vector_t & , const vector_t & );
+  } ;
+
+
+  ///////////////////////////////////////////////////////////////////
+  //
+  // NonConforming Mappings
+  //
+  ///////////////////////////////////////////////////////////////////
+
 
   //! General form of non-conforming face mapping
   //! This class is empty and needs to be specialised
