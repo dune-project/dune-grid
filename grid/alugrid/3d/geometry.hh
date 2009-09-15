@@ -66,6 +66,9 @@ namespace Dune
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
 
+      // for edges use LinearMapping<cdim, 1> here that has all features
+      // implemented
+
       CoordinateMatrixType coord_;
 
     public:
