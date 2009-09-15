@@ -578,10 +578,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ileafbegin () const
   {
     assert(item_ != 0);
-    // NOTE: normaly here false should be given, which means that we create a non
-    // end iterator, but isGhost() is normaly false. If isGhost() is true,
-    // an end iterator is created,
-    // because on ghosts we dont run itersection iterators
     return ALU3dGridIntersectionIteratorType (grid_, *this, this->level(), false );
   }
 
@@ -598,10 +594,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: ilevelbegin () const
   {
     assert(item_ != 0);
-    // NOTE: normaly here false should be given, which means that we create a non
-    // end iterator, but isGhost() is normaly false. If isGhost() is true,
-    // an end iterator is created,
-    // because on ghosts we dont run itersection iterators
     return ALU3dGridLevelIntersectionIteratorType (grid_,*this, this->level(), false );
   }
 
