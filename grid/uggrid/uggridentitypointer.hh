@@ -14,14 +14,13 @@ namespace Dune {
     enum { dim = GridImp::dimension };
   public:
     //! export the type of the EntityPointer Implementation.
-    //! Necessary for the typeconversion between Iterators and EntityPointer
+    //! Necessary for the type conversion between Iterators and EntityPointer
     typedef UGGridEntityPointer EntityPointerImp;
 
     //! codimension of entity pointer
     enum { codimension = codim };
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    typedef UGGridEntityPointer<codim,GridImp> Base;
 
     //! constructor
     UGGridEntityPointer ()  {
@@ -42,9 +41,17 @@ namespace Dune {
       virtualEntity_.setToTarget(target);
     }
 
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
+      virtualEntity_.getTarget();
+    }
+
+    const typename UG_NS<dim>::template Entity<codim>::T* getTarget() const {
+      virtualEntity_.getTarget();
+    }
+
     //! equality
     bool equals(const UGGridEntityPointer<codim,GridImp>& i) const {
-      return virtualEntity_.getTarget() == i.virtualEntity_.getTarget();
+      return getTarget() == i.getTarget();
     }
 
     //! dereferencing

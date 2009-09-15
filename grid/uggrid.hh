@@ -365,6 +365,10 @@ namespace Dune {
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLeafIterator;
+    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
+    friend class UGGridLevelIterator;
+    template <int codim_, class GridImp_>
+    friend class UGGridEntityPointer;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
     dune_static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");
