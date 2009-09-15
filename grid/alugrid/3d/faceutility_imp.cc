@@ -92,12 +92,12 @@ namespace Dune {
       }
     }
     else
+#endif
     {
+      // set inner twist
       assert(innerTwist == innerEntity().twist(innerFaceNumber_));
       innerTwist_ = innerTwist;
     }
-
-#endif
 
     outerBoundary_ = outerElement_->isboundary();
     if( outerBoundary_ )
@@ -196,7 +196,7 @@ namespace Dune {
   template <ALU3dGridElementType type>
   inline const typename ALU3dGridFaceInfo<type>::GEOElementType&
   ALU3dGridFaceInfo<type>::innerEntity() const {
-    assert(!innerElement_->isboundary());
+    assert( ! innerElement_->isboundary() );
     return static_cast<const GEOElementType&>(*innerElement_);
   }
 
