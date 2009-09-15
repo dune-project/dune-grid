@@ -106,13 +106,7 @@ namespace Dune
   public:
     typedef This ImplementationType;
 
-    //! define type used for coordinates in grid module
-    typedef typename Base::ctype ctype;
-
-    //! know your own dimension
     static const int dimension = Base::dimension;
-    //! know your own dimension of world
-    static const int dimensionworld = Base::dimensionworld;
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary

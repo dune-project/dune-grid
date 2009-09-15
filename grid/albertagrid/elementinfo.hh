@@ -394,7 +394,6 @@ namespace Dune
     {
       assert( (face >= 0) && (face < numFaces) );
       ElementInfo neighbor;
-      //leafNeighbor( face, neighbor );
       Library< dimWorld >::leafNeighbor( *this, face, neighbor );
       return neighbor;
     }
