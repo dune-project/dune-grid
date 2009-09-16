@@ -22,6 +22,13 @@ struct CheckIntersectionIteratorErrorState
 };
 
 
+template< class Grid >
+struct EnableIntersectionIteratorReverseCheck
+{
+  static const bool v = true;
+};
+
+
 
 /** \brief Helper routine: Test a general geometry
  */
@@ -144,7 +151,7 @@ void checkIntersectionIterator(const GridViewType& view,
   typedef typename GridViewType::IntersectionIterator IntersectionIterator;
 
   const GridType& grid = view.grid();
-  const bool checkOutside = (grid.name() != "AlbertaGrid");
+  const bool checkOutside = EnableIntersectionIteratorReverseCheck< GridType >::v;
   const typename GridViewType::IndexSet& indexSet = view.indexSet();
 
   typedef typename GridType :: ctype ctype;
