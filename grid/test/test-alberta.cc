@@ -2,15 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-/*
-
-   Instantiate Alberta-Grid and feed it to the generic gridcheck()
-
-   Note: Albert needs the defines DIM and DIM_OF_WORLD on the
-   commandline anyway thus we can use them to select the correct class
-
- */
-
 #include <iostream>
 #include <sstream>
 
@@ -20,6 +11,8 @@
 
 #include <dune/grid/albertagrid.hh>
 #include <dune/grid/albertagrid/dgfparser.hh>
+
+#include "basicunitcube.hh"
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
@@ -52,6 +45,27 @@ void markOne ( GridType & grid , int num , int ref )
 }
 
 
+template< class Grid >
+void checkProjectedUnitCube ()
+{
+  std::cout << ">>> Checking projected unit cube..." << std::endl;
+  CircleBoundaryProjection< Grid::dimensionworld > projection;
+  GridFactory< Grid > gridFactory;
+  BasicUnitCube< Grid::dimension >::insertVertices( gridFactory, -1.0, 1.0 );
+  BasicUnitCube< Grid::dimension >::insertSimplices( gridFactory );
+  gridFactory.insertBoundaryProjection( projection );
+  Grid *grid = gridFactory.createGrid();
+  for( int i = 0; i < 2; ++i )
+  {
+    grid->globalRefine( Grid::dimension );
+    gridcheck( *grid );
+    checkGeometryInFather( *grid );
+  }
+  delete grid;
+}
+
+
+
 int main ( int argc, char **argv )
 try {
   const int dim = GRIDDIM;
@@ -61,6 +75,8 @@ try {
   std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
 
   checkAlbertaReader< GridType >();
+
+  checkProjectedUnitCube< GridType >();
 
   std::string filename;
   if( argc <= 1 )

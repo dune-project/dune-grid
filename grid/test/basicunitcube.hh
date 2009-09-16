@@ -14,20 +14,20 @@ template<>
 struct BasicUnitCube< 2 >
 {
   template< class Grid >
-  static void insertVertices ( Dune::GridFactory< Grid > &factory )
+  static void insertVertices ( Dune::GridFactory< Grid > &factory, const double left = 0.0, const double right = 1.0 )
   {
     Dune::FieldVector<double,2> pos;
 
-    pos[0] = 1;  pos[1] = 0;
+    pos[0] = right;  pos[1] = left;
     factory.insertVertex(pos);                         /*@\label{uc:iv}@*/
 
-    pos[0] = 0;  pos[1] = 0;
+    pos[0] = left;  pos[1] = left;
     factory.insertVertex(pos);
 
-    pos[0] = 1;  pos[1] = 1;
+    pos[0] = right;  pos[1] = right;
     factory.insertVertex(pos);
 
-    pos[0] = 0;  pos[1] = 1;
+    pos[0] = left;  pos[1] = right;
     factory.insertVertex(pos);
   }
 
@@ -60,18 +60,18 @@ template<>
 struct BasicUnitCube< 3 >
 {
   template< class Grid >
-  static void insertVertices ( Dune::GridFactory< Grid > &factory, const double zero = 0.0 )
+  static void insertVertices ( Dune::GridFactory< Grid > &factory, const double left = 0.0, const double right = 1.0 )
   {
     Dune::FieldVector< double, 3 > pos;
 
-    pos[0] = 1;     pos[1] = zero;  pos[2] = zero;    factory.insertVertex(pos);
-    pos[0] = zero;  pos[1] = zero;  pos[2] = zero;    factory.insertVertex(pos);
-    pos[0] = 1;     pos[1] = 1;     pos[2] = zero;    factory.insertVertex(pos);
-    pos[0] = zero;  pos[1] = 1;     pos[2] = zero;    factory.insertVertex(pos);
-    pos[0] = 1;     pos[1] = zero;  pos[2] = 1;       factory.insertVertex(pos);
-    pos[0] = zero;  pos[1] = zero;  pos[2] = 1;       factory.insertVertex(pos);
-    pos[0] = 1;     pos[1] = 1;     pos[2] = 1;       factory.insertVertex(pos);
-    pos[0] = zero;  pos[1] = 1;     pos[2] = 1;       factory.insertVertex(pos);
+    pos[0] = right; pos[1] = left;  pos[2] = left;    factory.insertVertex(pos);
+    pos[0] = left;  pos[1] = left;  pos[2] = left;    factory.insertVertex(pos);
+    pos[0] = right; pos[1] = right; pos[2] = left;    factory.insertVertex(pos);
+    pos[0] = left;  pos[1] = right; pos[2] = left;    factory.insertVertex(pos);
+    pos[0] = right; pos[1] = left;  pos[2] = right;   factory.insertVertex(pos);
+    pos[0] = left;  pos[1] = left;  pos[2] = right;   factory.insertVertex(pos);
+    pos[0] = right; pos[1] = right; pos[2] = right;   factory.insertVertex(pos);
+    pos[0] = left;  pos[1] = right; pos[2] = right;   factory.insertVertex(pos);
   }
 
   template< class Grid >
