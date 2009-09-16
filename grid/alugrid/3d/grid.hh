@@ -22,6 +22,8 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
+#include <dune/grid/common/boundaryprojection.hh>
+
 //- Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
@@ -128,6 +130,8 @@ namespace Dune {
       typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionIteratorWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
+
+      typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
 
       template <int cd>
       struct Codim
@@ -264,10 +268,8 @@ namespace Dune {
     friend class LocalGeometryStorage< GeometryObject , 8 >;
 
   public:
-
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
-
 
     //! Type of the level index set, needed by data handle
     typedef typename GridFamily :: LevelIndexSetImp LevelIndexSetImp;
@@ -279,7 +281,13 @@ namespace Dune {
         ReferenceSimplex<alu3d_ctype, dim>,
         ReferenceCube   <alu3d_ctype, dim> >::Type ReferenceElementType;
 
+    //! \brief boundary projection type
+    typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
   protected:
+
+    // type of ALUGrid boundary projection wrapper
+    typedef ALUGridBoundaryProjection< DuneBoundaryProjectionType> ALUGridBoundaryProjectionType;
+
     //! Type of the local id set
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;
 
@@ -326,9 +334,11 @@ namespace Dune {
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
 #if ALU3DGRID_PARALLEL
-    ALU3dGrid(const std::string macroTriangFilename , MPI_Comm mpiComm = MPI_COMM_WORLD );
+    ALU3dGrid(const std::string macroTriangFilename,
+              MPI_Comm mpiComm,
+              const DuneBoundaryProjectionType* bndPrj);
 #else
-    ALU3dGrid(const std::string macroTriangFilename , int myrank = -1);
+    ALU3dGrid(const std::string macroTriangFilename, const DuneBoundaryProjectionType* bndPrj);
 #endif
   public:
 
@@ -829,6 +839,9 @@ namespace Dune {
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
+
+    // boundary projection for vertices
+    ALUGridBoundaryProjectionType* vertexProjection_ ;
   }; // end class ALU3dGrid
 
   template <class GridImp>

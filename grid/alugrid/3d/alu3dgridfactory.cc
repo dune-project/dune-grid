@@ -22,7 +22,8 @@ namespace Dune
                         bool removeGeneratedFile )
     : filename_( temporaryFileName() ),
       communicator_( communicator ),
-      removeGeneratedFile_( removeGeneratedFile )
+      removeGeneratedFile_( removeGeneratedFile ),
+      bndPrjct_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -36,7 +37,8 @@ namespace Dune
                         const MPICommunicatorType &communicator )
     : filename_( filename + ".ALU3dGrid" ),
       communicator_( communicator ),
-      removeGeneratedFile_( false )
+      removeGeneratedFile_( false ),
+      bndPrjct_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -128,6 +130,12 @@ namespace Dune
     boundaryIds_.push_back( boundaryId );
   }
 
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid > ::
+  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
+  {
+    bndPrjct_ = &bndProjection;
+  }
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
@@ -214,12 +222,16 @@ namespace Dune
     boundaryIds_.clear();
 
 #if ALU3DGRID_PARALLEL
-    Grid *grid = new Grid( filename_, communicator_ );
+    Grid *grid = new Grid( filename_, communicator_, bndPrjct_ );
 #else
-    Grid *grid = new Grid( filename_ );
+    Grid *grid = new Grid( filename_, bndPrjct_);
 #endif
     if( removeGeneratedFile_ )
       remove( filename_.c_str() );
+
+    // remove pointer
+    bndPrjct_ = 0;
+
     return grid;
   }
 

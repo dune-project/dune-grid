@@ -10,6 +10,8 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/common/boundaryprojection.hh>
+
 #include <dune/grid/alugrid/3d/alugrid.hh>
 
 namespace Dune
@@ -27,6 +29,9 @@ namespace Dune
     typedef ALUGrid< 3, 3 > Grid;
 
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
+
+    //! \brief type of boundary projection class
+    typedef DuneBoundaryProjection< 3 >  DuneBoundaryProjectionType;
 
   private:
     typedef typename Grid::ctype ctype;
@@ -67,6 +72,7 @@ namespace Dune
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
+    const DuneBoundaryProjectionType* bndPrjct_ ;
 
   public:
     /** \brief default constructor */
@@ -122,6 +128,12 @@ namespace Dune
      *  \param[in]  id       boundary id to assign to the face
      */
     virtual void insertBoundary ( const int element, const int face, const int id );
+
+    /** \brief insert a boundary projection object, (a copy is made)
+     *
+     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved
+     */
+    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
 
     /** \brief finalize the grid creation and hand over the grid
      *

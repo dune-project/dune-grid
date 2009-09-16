@@ -164,12 +164,11 @@ namespace Dune {
   //--Grid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::
-  ALU3dGrid(const std::string macroTriangFilename
+  ALU3dGrid(const std::string macroTriangFilename,
 #if ALU3DGRID_PARALLEL
-            , const MPI_Comm mpiComm
-#else
-            , int myrank
+            const MPI_Comm mpiComm,
 #endif
+            const DuneBoundaryProjectionType* bndPrj
             )
     : mygrid_ (0)
 #if ALU3DGRID_PARALLEL
@@ -184,6 +183,7 @@ namespace Dune {
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
       , sizeCache_ (0)
       , lockPostAdapt_(false)
+      , vertexProjection_( (bndPrj) ? new ALUGridBoundaryProjectionType( *bndPrj ) : 0 )
   {
     makeGeomTypes();
 
@@ -201,7 +201,10 @@ namespace Dune {
     {
       mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
 #if ALU3DGRID_PARALLEL
-                                               , mpAccess_
+                                               , mpAccess_ ,
+#endif
+#ifdef ALUGRID_VERTEX_PROJECTION
+                                               , vertexProjection_ // only for newer versions
 #endif
                                                );
     }
@@ -229,6 +232,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
   {
+    delete vertexProjection_;
+
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
     delete globalIdSet_; globalIdSet_ = 0;
     delete leafIndexSet_; leafIndexSet_ = 0;

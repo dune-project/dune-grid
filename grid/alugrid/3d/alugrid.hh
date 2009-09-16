@@ -45,13 +45,18 @@ namespace Dune
     enum { dim      = 3 };
     enum { dimworld = 3 };
   public:
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
   #if ALU3DGRID_PARALLEL
     //! \brief constructor for creating ALUCubeGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid hexa format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
-    ALUCubeGrid(const std::string macroName , MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(macroName,mpiComm)
+    ALUCubeGrid(const std::string macroName,
+                MPI_Comm mpiComm = MPI_COMM_WORLD,
+                const DuneBoundaryProjectionType* bndProject = 0) :
+      BaseType(macroName,mpiComm,bndProject)
     {
       if(this->comm().rank() == 0)
       {
@@ -60,8 +65,9 @@ namespace Dune
       }
     }
     //! \brief constructor creating empty grid
-    ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType("",mpiComm)
+    ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD,
+                const DuneBoundaryProjectionType* bndProject = 0) :
+      BaseType("",mpiComm, bndProject)
     {
       if(this->comm().rank() == 0)
       {
@@ -73,15 +79,16 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid hexa format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
-    ALUCubeGrid(const std::string macroName , int mpiComm = 0 ) :
-      BaseType(macroName)
+    ALUCubeGrid(const std::string macroName,
+                const DuneBoundaryProjectionType* bndProject = 0)
+      : BaseType(macroName, bndProject)
     {
       std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
+
     //! constructor creating empty grid
-    ALUCubeGrid(int myrank = -1) :
-      BaseType("",myrank)
+    ALUCubeGrid() : BaseType("", (const DuneBoundaryProjectionType*) 0)
     {
       std::cout << "\nCreated empty ALUCubeGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
@@ -175,13 +182,18 @@ namespace Dune
     enum { dim      = 3 };
     enum { dimworld = 3 };
   public:
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
   #if ALU3DGRID_PARALLEL
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid tetra format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
-    ALUSimplexGrid(const std::string macroName, MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType(macroName,mpiComm)
+    ALUSimplexGrid(const std::string macroName,
+                   MPI_Comm mpiComm = MPI_COMM_WORLD,
+                   const DuneBoundaryProjectionType* bndProject = 0) :
+      BaseType(macroName, mpiComm, bndProject)
     {
       if(this->comm().rank() == 0)
       {
@@ -190,8 +202,9 @@ namespace Dune
       }
     }
     //! constructor creating empty grid, empty string creates empty grid
-    ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
-      BaseType("",mpiComm)
+    ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD,
+                   const DuneBoundaryProjectionType* bndProject = 0) :
+      BaseType("", mpiComm, bndProject)
     {
       if(this->comm().rank() == 0)
       {
@@ -203,15 +216,16 @@ namespace Dune
     //! \param macroName filename for macro grid in ALUGrid tetra format
     //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
     //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
-    ALUSimplexGrid(const std::string macroName , int mpicomm = 0) :
-      BaseType(macroName)
+    ALUSimplexGrid(const std::string macroName,
+                   const DuneBoundaryProjectionType* bndProject = 0) :
+      BaseType(macroName, bndProject)
     {
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
     //! constructor creating empty grid
-    ALUSimplexGrid(int myrank = -1) :
-      BaseType("",myrank)
+    ALUSimplexGrid() :
+      BaseType("", (const DuneBoundaryProjectionType*) 0)
     {
       std::cout << "\nCreated empty ALUSimplexGrid<"<<dim<<","<<dimworld <<">. \n\n";
     }
