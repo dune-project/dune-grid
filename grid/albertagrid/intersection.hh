@@ -56,6 +56,9 @@ namespace Dune
     typedef AlbertaGridGeometry< dimension-1, dimensionworld, Grid > GeometryImp;
     typedef AlbertaGridGeometry< dimension-1, dimension, Grid > LocalGeometryImp;
 
+    struct GlobalCoordReader;
+    struct LocalCoordReader;
+
   public:
     AlbertaGridIntersectionBase ( const EntityImp &entity, const int oppVertex );
 
@@ -120,14 +123,15 @@ namespace Dune
     typedef typename Base::GeometryImp GeometryImp;
     typedef typename Base::LocalGeometryImp LocalGeometryImp;
 
+    typedef typename Base::GlobalCoordReader GlobalCoordReader;
+    typedef typename Base::LocalCoordReader LocalCoordReader;
+
     using Base::grid;
     using Base::elementInfo;
 
-  private:
-    struct GlobalCoordReader;
-    struct LocalCoordReader;
-
   public:
+    using Base::inside;
+
     AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );
 
     AlbertaGridLeafIntersection ( const This &other );
@@ -159,12 +163,12 @@ namespace Dune
     using Base::oppVertex_;
 
   private:
+    mutable ElementInfo neighborInfo_;
+    mutable MakeableInterfaceObject< Geometry > geo_;
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
     mutable MakeableInterfaceObject< LocalGeometry > fakeNeighObj_;
     mutable MakeableInterfaceObject< LocalGeometry > fakeSelfObj_;
 #endif
-    mutable MakeableInterfaceObject< Geometry > neighGlobObj_;
-    mutable ElementInfo neighborInfo_;
   };
 
 }

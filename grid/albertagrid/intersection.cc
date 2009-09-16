@@ -192,6 +192,122 @@ namespace Dune
 
 
 
+  // AlbertaGridIntersectionBase::GlobalCoordReader
+  // ----------------------------------------------
+
+  template< class GridImp >
+  struct AlbertaGridIntersectionBase< GridImp >::GlobalCoordReader
+  {
+    typedef typename remove_const< GridImp >::type Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int codimension = 1;
+    static const int mydimension = dimension - codimension;
+    static const int coorddimension = Grid::dimensionworld;
+
+    typedef Alberta::Real ctype;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
+    typedef FieldVector< ctype, coorddimension > Coordinate;
+
+  private:
+    const Grid &grid_;
+    const ElementInfo &elementInfo_;
+    const int subEntity_;
+    const int twist_;
+
+  public:
+    GlobalCoordReader ( const GridImp &grid,
+                        const ElementInfo &elementInfo,
+                        int subEntity )
+      : grid_( grid ),
+        elementInfo_( elementInfo ),
+        subEntity_( subEntity ),
+        twist_( elementInfo.template twist< codimension >( subEntity ) )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      assert( !elementInfo_ == false );
+      assert( (i >= 0) && (i <= mydimension) );
+
+      const int ti = Alberta::applyInverseTwist< mydimension >( twist_, i );
+      const int k = mapVertices( subEntity_, ti );
+      const Alberta::GlobalVector &coord = grid_.getCoord( elementInfo_, k );
+      for( int j = 0; j < coorddimension; ++j )
+        x[ j ] = coord[ j ];
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      assert( false );
+      return ctype( 0 );
+    }
+
+  private:
+    static int mapVertices ( int subEntity, int i )
+    {
+      return Alberta::MapVertices< dimension, codimension >::apply( subEntity, i );
+    }
+  };
+
+
+
+
+  // AlbertaGridIntersectionBase::LocalCoordReader
+  // ---------------------------------------------
+
+  template< class GridImp >
+  struct AlbertaGridIntersectionBase< GridImp >::LocalCoordReader
+  {
+    typedef typename remove_const< GridImp >::type Grid;
+
+    static const int dimension = Grid::dimension;
+    static const int codimension = 1;
+    static const int mydimension = dimension - codimension;
+    static const int coorddimension = dimension;
+
+    typedef Alberta::Real ctype;
+
+    typedef FieldVector< ctype, coorddimension > Coordinate;
+
+    typedef typename Grid::template Codim< 0 >::Geometry ElementGeometry;
+    typedef typename Grid::template Codim< 1 >::Geometry FaceGeometry;
+
+  private:
+    const ElementGeometry &elementGeometry_;
+    const FaceGeometry &faceGeometry_;
+
+  public:
+    LocalCoordReader ( const ElementGeometry &elementGeometry,
+                       const FaceGeometry &faceGeometry )
+      : elementGeometry_( elementGeometry ),
+        faceGeometry_( faceGeometry )
+    {}
+
+    void coordinate ( int i, Coordinate &x ) const
+    {
+      x = elementGeometry_.local( faceGeometry_.corner( i ) );
+    }
+
+    bool hasDeterminant () const
+    {
+      return false;
+    }
+
+    ctype determinant () const
+    {
+      return ctype( 0 );
+    }
+  };
+
+
+
   // AlbertaGridLeafIntersection
   // ---------------------------
 
@@ -199,12 +315,12 @@ namespace Dune
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const EntityImp &entity, const int n )
     : Base( entity, n ),
+      neighborInfo_(),
+      geo_( GeometryImp() )
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-      fakeNeighObj_( LocalGeometryImp() ),
-      fakeSelfObj_ ( LocalGeometryImp() ),
+      , fakeNeighObj_( LocalGeometryImp() )
+      , fakeSelfObj_ ( LocalGeometryImp() )
 #endif
-      neighGlobObj_( GeometryImp() ),
-      neighborInfo_()
   {}
 
 
@@ -212,12 +328,12 @@ namespace Dune
   inline AlbertaGridLeafIntersection< GridImp >
   ::AlbertaGridLeafIntersection ( const This &other )
     : Base( other ),
+      neighborInfo_(),
+      geo_( GeometryImp() )
 #if not ALBERTA_CACHED_LOCAL_INTERSECTION_GEOMETRIES
-      fakeNeighObj_( LocalGeometryImp() ),
-      fakeSelfObj_ ( LocalGeometryImp() ),
+      , fakeNeighObj_( LocalGeometryImp() )
+      , fakeSelfObj_ ( LocalGeometryImp() )
 #endif
-      neighGlobObj_( GeometryImp() ),
-      neighborInfo_()
   {}
 
 
@@ -321,10 +437,10 @@ namespace Dune
   inline const typename AlbertaGridLeafIntersection< GridImp >::Geometry &
   AlbertaGridLeafIntersection< GridImp >::geometry () const
   {
-    GeometryImp &geo = GridImp::getRealImplementation( neighGlobObj_ );
+    GeometryImp &geo = GridImp::getRealImplementation( geo_ );
     const GlobalCoordReader coordReader( grid(), elementInfo(), oppVertex_ );
     geo.build( coordReader );
-    return neighGlobObj_;
+    return geo_;
   }
 
 
@@ -352,122 +468,6 @@ namespace Dune
   {
     return elementInfo().twistInNeighbor( oppVertex_ );
   }
-
-
-
-  // AlbertaGridLeafIntersection::GlobalCoordReader
-  // ----------------------------------------------
-
-  template< class GridImp >
-  struct AlbertaGridLeafIntersection< GridImp >::GlobalCoordReader
-  {
-    typedef typename remove_const< GridImp >::type Grid;
-
-    static const int dimension = Grid::dimension;
-    static const int codimension = 1;
-    static const int mydimension = dimension - codimension;
-    static const int coorddimension = Grid::dimensionworld;
-
-    typedef Alberta::Real ctype;
-
-    typedef Alberta::ElementInfo< dimension > ElementInfo;
-    typedef FieldVector< ctype, coorddimension > Coordinate;
-
-  private:
-    const Grid &grid_;
-    const ElementInfo &elementInfo_;
-    const int subEntity_;
-    const int twist_;
-
-  public:
-    GlobalCoordReader ( const GridImp &grid,
-                        const ElementInfo &elementInfo,
-                        int subEntity )
-      : grid_( grid ),
-        elementInfo_( elementInfo ),
-        subEntity_( subEntity ),
-        twist_( elementInfo.template twist< codimension >( subEntity ) )
-    {}
-
-    void coordinate ( int i, Coordinate &x ) const
-    {
-      assert( !elementInfo_ == false );
-      assert( (i >= 0) && (i <= mydimension) );
-
-      const int ti = Alberta::applyInverseTwist< mydimension >( twist_, i );
-      const int k = mapVertices( subEntity_, ti );
-      const Alberta::GlobalVector &coord = grid_.getCoord( elementInfo_, k );
-      for( int j = 0; j < coorddimension; ++j )
-        x[ j ] = coord[ j ];
-    }
-
-    bool hasDeterminant () const
-    {
-      return false;
-    }
-
-    ctype determinant () const
-    {
-      assert( false );
-      return ctype( 0 );
-    }
-
-  private:
-    static int mapVertices ( int subEntity, int i )
-    {
-      return Alberta::MapVertices< dimension, codimension >::apply( subEntity, i );
-    }
-  };
-
-
-
-
-  // AlbertaGridLeafIntersection::LocalCoordReader
-  // ---------------------------------------------
-
-  template< class GridImp >
-  struct AlbertaGridLeafIntersection< GridImp >::LocalCoordReader
-  {
-    typedef typename remove_const< GridImp >::type Grid;
-
-    static const int dimension = Grid::dimension;
-    static const int codimension = 1;
-    static const int mydimension = dimension - codimension;
-    static const int coorddimension = dimension;
-
-    typedef Alberta::Real ctype;
-
-    typedef FieldVector< ctype, coorddimension > Coordinate;
-
-    typedef typename Grid::template Codim< 0 >::Geometry ElementGeometry;
-    typedef typename Grid::template Codim< 1 >::Geometry FaceGeometry;
-
-  private:
-    const ElementGeometry &elementGeometry_;
-    const FaceGeometry &faceGeometry_;
-
-  public:
-    LocalCoordReader ( const ElementGeometry &elementGeometry,
-                       const FaceGeometry &faceGeometry )
-      : elementGeometry_( elementGeometry ),
-        faceGeometry_( faceGeometry )
-    {}
-
-    void coordinate ( int i, Coordinate &x ) const
-    {
-      x = elementGeometry_.local( faceGeometry_.corner( i ) );
-    }
-
-    bool hasDeterminant () const
-    {
-      return false;
-    }
-
-    ctype determinant () const
-    {
-      return ctype( 0 );
-    }
-  };
 
 }
 
