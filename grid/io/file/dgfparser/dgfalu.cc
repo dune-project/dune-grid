@@ -70,9 +70,9 @@ namespace Dune
       if( fileExists( filename ) )
       {
         if( rank == 0 )
-          return new ALUSimplexGrid< 3, 3 >( filename, communicator );
+          return new ALUSimplexGrid< 3, 3 >( filename );
         else
-          return new ALUSimplexGrid< 3, 3 >( communicator );
+          return new ALUSimplexGrid< 3, 3 >( );
       }
     }
     DUNE_THROW( GridError, "Unable to create ALUSimplexGrid< 3, 3 > from '"
@@ -146,9 +146,9 @@ namespace Dune
       if( fileExists( filename ) )
       {
         if( rank == 0 )
-          return new ALUCubeGrid< 3, 3 >( filename, communicator );
+          return new ALUCubeGrid< 3, 3 >( filename );
         else
-          return new ALUCubeGrid< 3, 3 >( communicator );
+          return new ALUCubeGrid< 3, 3 >( );
       }
     }
     DUNE_THROW( GridError, "Unable to create ALUCubeGrid< 3, 3 > from '"
