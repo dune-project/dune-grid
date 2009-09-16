@@ -60,18 +60,18 @@ template<>
 struct BasicUnitCube< 3 >
 {
   template< class Grid >
-  static void insertVertices ( Dune::GridFactory< Grid > &factory )
+  static void insertVertices ( Dune::GridFactory< Grid > &factory, const double zero = 0.0 )
   {
     Dune::FieldVector< double, 3 > pos;
 
-    pos[0] = 1;  pos[1] = 0;  pos[2] = 0;    factory.insertVertex(pos);
-    pos[0] = 0;  pos[1] = 0;  pos[2] = 0;    factory.insertVertex(pos);
-    pos[0] = 1;  pos[1] = 1;  pos[2] = 0;    factory.insertVertex(pos);
-    pos[0] = 0;  pos[1] = 1;  pos[2] = 0;    factory.insertVertex(pos);
-    pos[0] = 1;  pos[1] = 0;  pos[2] = 1;    factory.insertVertex(pos);
-    pos[0] = 0;  pos[1] = 0;  pos[2] = 1;    factory.insertVertex(pos);
-    pos[0] = 1;  pos[1] = 1;  pos[2] = 1;    factory.insertVertex(pos);
-    pos[0] = 0;  pos[1] = 1;  pos[2] = 1;    factory.insertVertex(pos);
+    pos[0] = 1;     pos[1] = zero;  pos[2] = zero;    factory.insertVertex(pos);
+    pos[0] = zero;  pos[1] = zero;  pos[2] = zero;    factory.insertVertex(pos);
+    pos[0] = 1;     pos[1] = 1;     pos[2] = zero;    factory.insertVertex(pos);
+    pos[0] = zero;  pos[1] = 1;     pos[2] = zero;    factory.insertVertex(pos);
+    pos[0] = 1;     pos[1] = zero;  pos[2] = 1;       factory.insertVertex(pos);
+    pos[0] = zero;  pos[1] = zero;  pos[2] = 1;       factory.insertVertex(pos);
+    pos[0] = 1;     pos[1] = 1;     pos[2] = 1;       factory.insertVertex(pos);
+    pos[0] = zero;  pos[1] = 1;     pos[2] = 1;       factory.insertVertex(pos);
   }
 
   template< class Grid >
