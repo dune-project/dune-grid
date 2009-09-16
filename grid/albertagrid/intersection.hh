@@ -155,9 +155,6 @@ namespace Dune
     int twistInSelf () const;
     int twistInNeighbor () const;
 
-  private:
-    void setupVirtEn () const;
-
   protected:
     using Base::oppVertex_;
 

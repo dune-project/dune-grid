@@ -5,9 +5,6 @@
 
 #include <dune/grid/albertagrid/intersection.hh>
 
-// set to 1 to use ElementInfo::leafNeighbor instead of faking leaf neighbor
-#define TRAVERSE_LEAFNEIGHBOR 1
-
 namespace Dune
 {
 
@@ -259,14 +256,7 @@ namespace Dune
     {
       assert( neighbor() );
 
-#if TRAVERSE_LEAFNEIGHBOR
       neighborInfo_ = elementInfo().leafNeighbor( oppVertex_ );
-#else
-      neighborInfo_ = ElementInfo::createFake( grid().meshPointer(), NULL, 0 );
-      std::memcpy( &(neighborInfo_.elInfo()), &(elementInfo().elInfo()), sizeof( ALBERTA EL_INFO ) );
-
-      setupVirtEn();
-#endif
     }
 
     assert( !neighborInfo_ == false );
@@ -362,186 +352,6 @@ namespace Dune
   {
     return elementInfo().twistInNeighbor( oppVertex_ );
   }
-
-
-#if !TRAVERSE_LEAFNEIGHBOR
-  //*****************************************
-  //  setup for 2d
-  //*****************************************
-  template <class GridImp, int dimworld , int dim >
-  struct SetupVirtualNeighbour;
-
-
-  #if DIM == 2
-  template <class GridImp>
-  struct SetupVirtualNeighbour<GridImp,2,2>
-  {
-    enum { dim      = 2 };
-    enum { dimworld = 2 };
-    static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
-                              const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
-    {
-
-  #if CALC_COORD
-      // vx is the face number in the neighbour
-      const int (& neighmap)[dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[vx];
-      // neighborCount is the face number in the actual element
-      const int (& selfmap) [dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[nb];
-
-      // copy the two edge vertices
-      for(int i=0; i<dim; i++)
-      {
-        const ALBERTA REAL_D & coord = elInfo->coord[ selfmap[i] ];
-        // here the twist is simple, just swap the vertices, and do this by hand
-        ALBERTA REAL_D & newcoord    = neighInfo->coord[ neighmap[(dim-1) - i] ];
-        for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
-      }
-  #endif
-
-      //****************************************
-      // twist is always 1
-      return 1;
-    }
-  };
-  #endif
-
-  //******************************************
-  //  setup for 3d
-  //******************************************
-  #if DIM == 3
-  template <class GridImp>
-  struct SetupVirtualNeighbour<GridImp,3,3>
-  {
-    enum { dim      = 3 };
-    enum { dimworld = 3 };
-    static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
-                              const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
-    {
-      // the face might be twisted when look from different elements
-      // default is no, and then rthe orientation is -1
-      int facemap[dim]   = {0,1,2};
-      bool rightOriented = false;
-      {
-        const typename GridImp::HierarchicIndexSet &hIndexSet = grid.hierarchicIndexSet();
-
-        int myvx[dim];
-        int neighvx[dim];
-
-        const int * vxmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[ vx ];
-        const int * nbmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[ nb ];
-
-        bool allRight = true;
-        for(int i=0; i<dim; i++)
-        {
-          myvx[ i ] = hIndexSet.template subIndex( elInfo->el, dim, nbmap[ i ] );
-          neighvx[ i ] = hIndexSet.template subIndex( neighInfo->el, dim, vxmap[ i ] );
-          if( myvx[ i ] != neighvx[ i ] )
-            allRight = false;
-        }
-
-        // note: if the vertices are equal then the face in the neighbor
-        // is not oriented right, because all face are oriented math. pos when
-        // one looks from the outside of the element.
-        // if the vertices are the same, the face in the neighbor is therefore
-        // wrong oriented
-        if( !allRight )
-        {
-          for(int i=0; i<dim; i++)
-          {
-            if(myvx[i] != neighvx[i])
-            {
-              for(int k=1; k<dim; k++)
-              {
-                int newvx = (i+k) % dim;
-                if( myvx[i] == neighvx[newvx] ) facemap[i] = newvx;
-              }
-            }
-          }
-          rightOriented = true;
-        }
-      }
-
-      // TODO check infulence of orientation
-      // is used when calculation the outerNormal
-      neighInfo->orientation = ( rightOriented ) ? elInfo->orientation : -elInfo->orientation;
-
-  #if CALC_COORD
-      // vx is the face number in the neighbour
-      const int * neighmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
-      // neighborCount is the face number in the actual element
-      const int * selfmap  = ALBERTA AlbertHelp :: localAlbertaFaceNumber[nb];
-
-      // copy the three face vertices
-      for(int i=0; i<dim; i++)
-      {
-        const ALBERTA REAL_D & coord = elInfo->coord[selfmap[i]];
-        // here consider possible twist
-        ALBERTA REAL_D & newcoord    = neighInfo->coord[ neighmap[ facemap[i] ] ];
-        for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
-      }
-  #endif
-
-      //****************************************
-      if (facemap[1] == (facemap[0]+1)%3) {
-        return facemap[0];
-      }
-      // twist
-      return facemap[1]-3;
-    }
-  };
-  #endif
-
-  // setup neighbor element with the information of elInfo_
-  template< class GridImp >
-  inline void AlbertaGridLeafIntersection< GridImp >::setupVirtEn () const
-  {
-    // if this assertion fails then outside was called without checking
-    // neighbor first
-    assert( neighbor() );
-    assert( oppVertex_ < dimension+1 );
-
-    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
-
-    // set the neighbor element as element
-    // use ALBERTA macro to get neighbour
-    assert( !neighborInfo_ == false );
-    ALBERTA EL_INFO &nbInfo = neighborInfo_.elInfo();
-
-    nbInfo.el = elInfo.neigh[ oppVertex_ ];
-    assert( nbInfo.el != NULL );
-    nbInfo.level = grid().levelProvider() ( nbInfo.el );
-
-    const int vx = elInfo.opp_vertex[ oppVertex_ ];
-    assert( (vx >= 0) && (vx < ElementInfo::maxNeighbors) );
-
-    // reset neighbor information
-    for( int i = 0; i <= dimension; ++i )
-    {
-      nbInfo.neigh[ i ] = NULL;
-      nbInfo.opp_vertex[ i ] = 127;
-    }
-
-    // set origin
-    nbInfo.neigh[ vx ] = elInfo.el;
-    nbInfo.opp_vertex[ vx ] = oppVertex_;
-
-
-  #if CALC_COORD
-    // copy the one opposite vertex
-    // the same for 2d and 3d
-    {
-      const ALBERTA REAL_D &coord = elInfo.opp_coord[ oppVertex_ ];
-      ALBERTA REAL_D &newcoord = nbInfo.coord[ vx ];
-      for( int j = 0; j < dimensionworld; ++j )
-        newcoord[ j ] = coord[ j ];
-    }
-  #endif
-
-    // setup coordinates of neighbour elInfo
-    SetupVirtualNeighbour<GridImp,dimensionworld,dimension>::
-    setupNeighInfo( grid(), &elInfo, vx, oppVertex_, &nbInfo );
-  }
-#endif // #if !TRAVERSE_LEAFNEIGHBOR
 
 
 
