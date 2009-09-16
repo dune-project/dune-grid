@@ -14,63 +14,6 @@
 
 namespace Dune {
 
-  template<int mydim, int coorddim, class GridImp>
-  class UGGridGeometry;
-
-  template<int mydim, int coorddim, class GridImp>
-  class UGMakeableGeometry : public Geometry<mydim, coorddim, GridImp, UGGridGeometry>
-  {
-    typedef typename GridImp::ctype UGCtype;
-  public:
-    UGMakeableGeometry() :
-      Geometry<mydim, coorddim, GridImp, UGGridGeometry>(UGGridGeometry<mydim, coorddim, GridImp>())
-    {};
-
-    void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target) {
-      this->realGeometry.setToTarget(target);
-    }
-
-    void setCoords (int n, const UGCtype* pos) {
-      this->realGeometry.setCoords(n,pos);
-    }
-
-    void coordmode ()
-    {
-      this->realGeometry.coordmode();
-    }
-  };
-
-  template<class GridImp>
-  class UGMakeableGeometry<2,3,GridImp> : public Geometry<2, 3, GridImp, UGGridGeometry>
-  {
-    typedef typename GridImp::ctype UGCtype;
-
-  public:
-    UGMakeableGeometry() :
-      Geometry<2, 3, GridImp, UGGridGeometry>(UGGridGeometry<2,3,GridImp>())
-    {};
-
-    void setup(GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates) {
-      this->realGeometry.setup(type, coordinates);
-    }
-
-  };
-
-  template<class GridImp>
-  class UGMakeableGeometry<1,2,GridImp> : public Geometry<1, 2, GridImp, UGGridGeometry>
-  {
-    typedef typename GridImp::ctype UGCtype;
-
-  public:
-    UGMakeableGeometry() :
-      Geometry<1, 2, GridImp, UGGridGeometry>(UGGridGeometry<1,2,GridImp>())
-    {};
-
-    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates) {
-      this->realGeometry.setup(type, coordinates);
-    }
-
-  };
 
   //**********************************************************************
   //
@@ -94,8 +37,6 @@ namespace Dune {
 
     template <int codim_, int dim_, class GridImp_>
     friend class UGGridEntity;
-
-    friend class UGMakeableGeometry<mydim,coorddim,GridImp>;
 
   public:
 

@@ -176,7 +176,7 @@ void Dune::UGGridEntity < 0, dim ,GridImp >::
 setToTarget(typename UG_NS<dim>::Element* target)
 {
   target_ = target;
-  geo_.setToTarget(target);
+  GridImp::getRealImplementation(geo_).setToTarget(target);
 }
 
 template<int dim, class GridImp>
@@ -222,8 +222,8 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   if (!fatherElement)
     DUNE_THROW(GridError, "Called geometryInFather() for an entity which doesn't have a father!");
 
-  geometryInFather_.coordmode(); // put in the new mode
-  geometryInFather_.setToTarget(target_);
+  GridImp::getRealImplementation(geometryInFather_).coordmode(); // put in the new mode
+  GridImp::getRealImplementation(geometryInFather_).setToTarget(target_);
 
   // The task is to find out the positions of the vertices of this element
   // in the local coordinate system of the father.
@@ -265,7 +265,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           // The edge midpoints
           {0.5,0}, {0.5,0.5}, {0,0.5}
         };
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
       case UG::D2::QUADRILATERAL : {
@@ -279,7 +279,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           // The element midpoint
           {0.5,0.5}
         };
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
 
@@ -304,7 +304,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           {0.25,0.25,0.25}
         };
 
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
       case UG::D3::PYRAMID : {
@@ -328,7 +328,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           {0.4,0.4,0.2}
         };
 
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
       case UG::D3::PRISM : {
@@ -356,7 +356,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           {0.333333333333333333, 0.333333333333333333, 0.5}
         };
 
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
       case UG::D3::HEXAHEDRON : {
@@ -374,7 +374,7 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
           // The element midpoint
           {0.5,0.5,0.5}
         };
-        geometryInFather_.setCoords(i,coords[idx]);
+        GridImp::getRealImplementation(geometryInFather_).setCoords(i,coords[idx]);
         break;
       }
       }

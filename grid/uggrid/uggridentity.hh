@@ -94,6 +94,10 @@ namespace Dune {
 
   public:
 
+    UGGridEntity()
+      : geo_(UGGridGeometry<dim-codim,dim,GridImp>())
+    {}
+
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     //! level of this element
@@ -170,11 +174,11 @@ namespace Dune {
   private:
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target) {
       target_ = target;
-      geo_.setToTarget(target);
+      GridImp::getRealImplementation(geo_).setToTarget(target);
     }
 
     //! the current geometry
-    UGMakeableGeometry<dim-codim,dim,GridImp> geo_;
+    MakeableInterfaceObject<Geometry> geo_;
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
@@ -226,6 +230,11 @@ namespace Dune {
 
     //! Iterator over descendants of the entity
     typedef UGGridHierarchicIterator<GridImp> HierarchicIterator;
+
+    UGGridEntity()
+      : geo_(UGGridGeometry<dim,dim,GridImp>()),
+        geometryInFather_(UGGridGeometry<dim,dim,GridImp>())
+    {}
 
     //! Level of this element
     int level () const {
@@ -359,10 +368,10 @@ namespace Dune {
     void setToTarget(typename UG_NS<dim>::Element* target);
 
     //! the current geometry
-    UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geo_;
+    MakeableInterfaceObject<Geometry> geo_;
 
     //! geometry for mapping into father's reference element
-    mutable UGMakeableGeometry<dim,GridImp::dimensionworld,GridImp> geometryInFather_;
+    mutable MakeableInterfaceObject<Geometry> geometryInFather_;
 
     typename UG_NS<dim>::Element* target_;
 
