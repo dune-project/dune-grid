@@ -116,18 +116,26 @@ namespace Dune
         DofAccess dofAccess( dofVector.dofSpace() );
         GlobalVector *array = (GlobalVector *)dofVector;
 
-        // refinement edge is always between vertices 0 and 1
         const Element *element = patch[ 0 ];
-        const GlobalVector &coord0 = array[ dofAccess( element, 0 ) ];
-        const GlobalVector &coord1 = array[ dofAccess( element, 1 ) ];
 
         // new vertex is always the last one
         assert( element->child[ 0 ] != NULL );
         GlobalVector &newCoord = array[ dofAccess( element->child[ 0 ], dimension ) ];
 
-        // new coordinate is the average of of old ones on the same edge
-        for( int j = 0; j < dimWorld; ++j )
-          newCoord[ j ] = 0.5 * (coord0[ j ] + coord1[ j ]);
+        if( element->new_coord != NULL )
+        {
+          for( int j = 0; j < dimWorld; ++j )
+            newCoord[ j ] = element->new_coord[ j ];
+        }
+        else
+        {
+          // new coordinate is the average of of old ones on the same edge
+          // refinement edge is always between vertices 0 and 1
+          const GlobalVector &coord0 = array[ dofAccess( element, 0 ) ];
+          const GlobalVector &coord1 = array[ dofAccess( element, 1 ) ];
+          for( int j = 0; j < dimWorld; ++j )
+            newCoord[ j ] = 0.5 * (coord0[ j ] + coord1[ j ]);
+        }
       }
     };
 
