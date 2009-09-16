@@ -50,7 +50,7 @@ namespace Dune {
       Geometry<2, 3, GridImp, UGGridGeometry>(UGGridGeometry<2,3,GridImp>())
     {};
 
-    void setCoordinates(const std::vector<FieldVector<UGCtype,3> >& coordinates, const GeometryType& type) {
+    void setup(GeometryType& type, const std::vector<FieldVector<UGCtype,3> >& coordinates) {
       this->realGeometry.setup(type, coordinates);
     }
 
@@ -66,7 +66,7 @@ namespace Dune {
       Geometry<1, 2, GridImp, UGGridGeometry>(UGGridGeometry<1,2,GridImp>())
     {};
 
-    void setCoordinates(const std::vector<FieldVector<UGCtype,2> >& coordinates, const GeometryType& type) {
+    void setup(const GeometryType& type, const std::vector<FieldVector<UGCtype,2> >& coordinates) {
       this->realGeometry.setup(type, coordinates);
     }
 
