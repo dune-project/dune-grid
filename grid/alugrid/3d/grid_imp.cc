@@ -201,7 +201,7 @@ namespace Dune {
     {
       mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
 #if ALU3DGRID_PARALLEL
-                                               , mpAccess_ ,
+                                               , mpAccess_
 #endif
 #ifdef ALUGRID_VERTEX_PROJECTION
                                                , vertexProjection_ // only for newer versions
