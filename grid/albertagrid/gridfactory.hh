@@ -61,6 +61,8 @@ namespace Dune
     //! type of matrix from world coordinates to world coordinates
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
+    typedef DuneBoundaryProjection< dimensionworld > BoundaryProjection;
+
   private:
     static const int numVertices
       = Alberta::NumSubEntities< dimension, dimension >::value;
@@ -77,10 +79,12 @@ namespace Dune
   private:
     MacroData macroData_;
     NumberingMap numberingMap_;
+    const BoundaryProjection *boundaryProjection_;
 
   public:
     /** default constructor */
     GridFactory ()
+      : boundaryProjection_( 0 )
     {
       macroData_.create();
     }
@@ -134,6 +138,13 @@ namespace Dune
       if( (id <= 0) || (id > 127) )
         DUNE_THROW( AlbertaError, "Invalid boundary id: " << id << "." );
       macroData_.boundaryId( element, numberingMap_.dune2alberta( 1, face ) ) = id;
+    }
+
+    virtual void insertBoundaryProjection ( const BoundaryProjection &projection )
+    {
+      if( boundaryProjection_ != 0 )
+        DUNE_THROW( InvalidStateException, "Only one global boundary projection can be attached to a grid." );
+      boundaryProjection_ = &projection;
     }
 
     /** \brief add a face transformation (for periodic identification)
@@ -213,7 +224,7 @@ namespace Dune
 #if DUNE_ALBERTA_VERSION < 0x300
       macroData_.setOrientation( Alberta::Real( 1 ) );
 #endif // #if DUNE_ALBERTA_VERSION < 0x300
-      return new Grid( macroData_, gridName );
+      return new Grid( macroData_, gridName, boundaryProjection_ );
     }
 
     /** \brief finalize grid creation and hand over the grid

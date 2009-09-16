@@ -9,6 +9,7 @@
  */
 
 #include <cassert>
+#include <vector>
 
 #include <dune/grid/albertagrid/misc.hh>
 
@@ -53,7 +54,7 @@ namespace Dune
 
       static const int maxNeighbors = N_NEIGH_MAX;
 
-      typedef ElementInfo< dimension > LevelNeighborSet[ 1 << dimension ];
+      static const int maxLevelNeighbors = Library< dimWorld >::maxLevelNeighbors;
 
     private:
       InstancePtr instance_;
@@ -91,7 +92,20 @@ namespace Dune
       int getMark () const;
       void setMark ( int refCount ) const;
 
-      ElementInfo leafNeighbor ( int face ) const;
+      ElementInfo leafNeighbor ( const int face ) const;
+
+      /* obtain all level neighbors of a face
+       *
+       * param[in]  face            face for which the neighbors are desired
+       * param[out] neighbor        array storing the neighbors
+       * param[out] faceInNeighbor  array storing the faces in neighbor
+       *                            (-1, if this neighbor does not exist)
+       *
+       * returns (potential) number of neighbors (i.e., the number of valid
+       *         entries in the output arrays
+       */
+      int levelNeighbors ( const int face, ElementInfo (&neighbor)[ maxLevelNeighbors ], int (&faceInNeighbor)[ maxLevelNeighbors ] ) const;
+
       template< int codim >
       int twist ( int subEntity ) const;
       int twistInNeighbor ( int face ) const;
@@ -121,9 +135,6 @@ namespace Dune
     private:
       static bool isLeaf ( Element *element );
       static bool mightVanish ( Element *element, int depth );
-
-      //int macroNeighbor ( int face, ElementInfo &neighbor ) const;
-      //int leafNeighbor ( const int face, ElementInfo &neighbor ) const;
 
       void addReference () const;
       void removeReference () const;
@@ -183,8 +194,14 @@ namespace Dune
     {
       typedef Alberta::ElementInfo< dim > ElementInfo;
 
+      static const int maxLevelNeighbors = (1 << (dim-1));
+
       static int
       leafNeighbor ( const ElementInfo &element, const int face, ElementInfo &neighbor );
+
+      static int
+      levelNeighbors ( const ElementInfo &element, const int face,
+                       ElementInfo (&neighbor)[ maxLevelNeighbors ], int (&faceInNeighbor)[ maxLevelNeighbors ] );
 
     private:
       static int
@@ -390,12 +407,21 @@ namespace Dune
 
 
     template< int dim >
-    inline ElementInfo< dim > ElementInfo< dim >::leafNeighbor ( int face ) const
+    inline ElementInfo< dim > ElementInfo< dim >::leafNeighbor ( const int face ) const
     {
       assert( (face >= 0) && (face < numFaces) );
       ElementInfo neighbor;
       Library< dimWorld >::leafNeighbor( *this, face, neighbor );
       return neighbor;
+    }
+
+
+    template< int dim >
+    inline int ElementInfo< dim >
+    ::levelNeighbors ( const int face, ElementInfo (&neighbor)[ maxLevelNeighbors ], int (&faceInNeighbor)[ maxLevelNeighbors ] ) const
+    {
+      assert( (face >= 0) && (face < numFaces) );
+      return Library< dimWorld >::levelNeighbors( *this, face, neighbor, faceInNeighbor );
     }
 
 

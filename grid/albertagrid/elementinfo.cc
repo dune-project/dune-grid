@@ -199,6 +199,208 @@ namespace Dune
       return faceInNeighbor;
     }
 
+
+    template<>
+    template<>
+    int ElementInfo< 1 >::Library< dimWorld >
+    ::levelNeighbors ( const ElementInfo &element, const int face,
+                       ElementInfo (&neighbor)[ maxLevelNeighbors ],
+                       int (&faceInNeighbor)[ maxLevelNeighbors ] )
+    {
+      static const int neighborInFather[ 2 ][ numFaces ] = { {-1, 1}, {0, -1} };
+
+      assert( !!element );
+
+      int numNeighbors; // number of neighbors if grid is sufficiently fine
+      if( element.level() > 0 )
+      {
+        assert( (face >= 0) && (face < numFaces) );
+
+        const int myIndex = element.indexInFather();
+        const int nbInFather = neighborInFather[ myIndex ][ face ];
+        if( nbInFather >= 0 )
+        {
+          numNeighbors = levelNeighbors( element.father(), nbInFather, neighbor, faceInNeighbor );
+          if( numNeighbors >= 0 )
+          {
+            if( !neighbor[ 0 ].isLeaf() )
+              neighbor[ 0 ] = neighbor[ 0 ].child( 1-faceInNeighbor[ 0 ] );
+            else
+            {
+              faceInNeighbor[ 0 ] = -1;
+              numNeighbors = 0;
+            }
+          }
+        }
+        else
+        {
+          // the neighbor is the other child of our father
+          neighbor[ 0 ] = element.father().child( 1-myIndex );
+          faceInNeighbor[ 0 ] = 1-myIndex;
+          numNeighbors = 1;
+        }
+      }
+      else
+      {
+        // find macro level neighbors
+        faceInNeighbor[ 0 ] = macroNeighbor( element, face, neighbor[ 0 ] );
+        numNeighbors = (faceInNeighbor[ 0 ] >= 0);
+      }
+
+      return numNeighbors;
+    }
+
+
+    template<>
+    template<>
+    int ElementInfo< 2 >::Library< dimWorld >
+    ::levelNeighbors ( const ElementInfo &element, const int face,
+                       ElementInfo (&neighbor)[ maxLevelNeighbors ],
+                       int (&faceInNeighbor)[ maxLevelNeighbors ] )
+    {
+      static const int neighborInFather[ 2 ][ numFaces ] = { {2, -1, 1}, {-1, 2, 0} };
+
+      assert( !!element );
+
+      int numNeighbors; // number of neighbors if grid is sufficiently fine
+      if( element.level() > 0 )
+      {
+        assert( (face >= 0) && (face < numFaces) );
+
+        const int myIndex = element.indexInFather();
+        const int nbInFather = neighborInFather[ myIndex ][ face ];
+        if( nbInFather >= 0 )
+        {
+          numNeighbors = levelNeighbors( element.father(), nbInFather, neighbor, faceInNeighbor );
+
+          if( numNeighbors >= 0 )
+          {
+            if( nbInFather >= 2 )
+            {
+              // handle a refinement edge in inside
+              if( faceInNeighbor[ 0 ] >= 2 )
+              {
+                // handle a refinement edge in outside (common refinement edge)
+                assert( numNeighbors < 2 );
+
+                int childIndex = myIndex;
+                if( element.father().el()->dof[ 0 ][ 0 ] != neighbor[ 0 ].el()->dof[ 0 ][ 0 ] )
+                {
+                  assert( element.father().el()->dof[ 0 ][ 0 ] != neighbor[ 0 ].el()->dof[ 1 ][ 0 ] );
+                  childIndex = 1-myIndex;
+                }
+                neighbor[ 0 ] = neighbor[ 0 ].child( childIndex );
+                faceInNeighbor[ 0 ] = childIndex;
+              }
+              else
+              {
+                // handle a non-refinement edge in outside
+                if( numNeighbors >= 2 )
+                {
+                  // drop the neighbor for the other child
+                  neighbor[ 0 ] = neighbor[ myIndex ];
+                  faceInNeighbor[ 0 ] = faceInNeighbor[ myIndex ];
+                  numNeighbors = 1;
+                }
+                neighbor[ 0 ] = neighbor[ 0 ].child( 1-faceInNeighbor[ 0 ] );
+                faceInNeighbor[ 0 ] = 2;
+              }
+            }
+            else
+            {
+              // handle non-refinement edge in inside
+              if( faceInNeighbor[ 0 ] >= 2 )
+              {
+                // handle refinement edge in outside
+                assert( numNeighbors < 2 );
+                if( !neighbor[ 0 ].isLeaf() )
+                {
+                  if( element.father().el()->dof[ 2 ][ 0 ] != neighbor[ 0 ].el()->dof[ faceInNeighbor[ 0 ] ][ 0 ] )
+                  {
+                    assert( element.father().el()->dof[ 2 ][ 0 ] == neighbor[ 0 ].el()->dof[ 1-faceInNeighbor[ 0 ] ][ 0 ] );
+                    faceInNeighbor[ 0 ] = 0;
+                  }
+                  else
+                    faceInNeighbor[ 0 ] = 1;
+
+                  faceInNeighbor[ 1 ] = 1 - faceInNeighbor[ 0 ];
+                  neighbor[ 1 ] = neighbor[ 0 ].child( faceInNeighbor[ 1 ] );
+                  neighbor[ 0 ] = neighbor[ 0 ].child( faceInNeighbor[ 0 ] );
+                  numNeighbors = 2;
+                }
+                else
+                  numNeighbors = 0;
+              }
+              else
+              {
+                // handle non-refinement edge in outside
+                int realNumNeighbors = 0;
+                for( int i = 0; i < numNeighbors; ++i )
+                {
+                  assert( faceInNeighbor[ i ] < 2 );
+                  if( faceInNeighbor[ i ]  < 0 )
+                    continue;
+
+                  if( !neighbor[ i ].isLeaf() )
+                  {
+                    neighbor[ i ] = neighbor[ i ].child( 1-faceInNeighbor[ i ] );
+                    faceInNeighbor[ i ] = 2;
+                    ++realNumNeighbors;
+                  }
+                  else
+                    faceInNeighbor[ i ] = -1;
+                }
+                numNeighbors = (realNumNeighbors > 0 ? numNeighbors : 0);
+              }
+            }
+          }
+        }
+        else
+        {
+          // the neighbor is the other child of our father
+          neighbor[ 0 ] = element.father().child( 1-myIndex );
+          faceInNeighbor[ 0 ] = myIndex;
+          faceInNeighbor[ 1 ] = -1;
+          numNeighbors = 1;
+        }
+      }
+      else
+      {
+        // find macro level neighbors
+        faceInNeighbor[ 0 ] = macroNeighbor( element, face, neighbor[ 0 ] );
+        faceInNeighbor[ 1 ] = -1;
+        numNeighbors = (faceInNeighbor[ 0 ] >= 0);
+      }
+
+      return numNeighbors;
+    }
+
+
+    template<>
+    template<>
+    int ElementInfo< 3 >::Library< dimWorld >
+    ::levelNeighbors ( const ElementInfo &element, const int face,
+                       ElementInfo (&neighbor)[ maxLevelNeighbors ],
+                       int (&faceInNeighbor)[ maxLevelNeighbors ] )
+    {
+      assert( !!element );
+
+      int numNeighbors;
+      if( element.level() > 0 )
+      {
+        // we support level neighbors only on the macro level for now
+        numNeighbors = 0;
+      }
+      else
+      {
+        // find macro level neighbors
+        faceInNeighbor[ 0 ] = macroNeighbor( element, face, neighbor[ 0 ] );
+        numNeighbors = (faceInNeighbor[ 0 ] >= 0);
+      }
+
+      return numNeighbors;
+    }
+
   }
 
 }

@@ -15,6 +15,7 @@
 #include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/albertaextra.hh>
 #include <dune/grid/albertagrid/macrodata.hh>
+#include <dune/grid/albertagrid/projection.hh>
 
 #if HAVE_ALBERTA
 
@@ -45,6 +46,13 @@ namespace Dune
 
       class BoundaryProvider;
       class MacroIteratorBase;
+
+      template< int dimWorld >
+      struct Library
+      {
+        static int boundaryCount;
+        static const void *projectionFactory;
+      };
 
     public:
       class MacroIterator;
@@ -88,6 +96,8 @@ namespace Dune
       int size ( int codim ) const;
 
       void create ( const MacroData< dim > &macroData, const std::string &name );
+      template< class ProjectionFactory >
+      void create ( const MacroData< dim > &macroData, const std::string &name, const ProjectionFactory &projectionFactory );
       void create ( const std::string &filename, const std::string &name, bool binary = false );
 
       void read ( const std::string &filename, Real &time );
@@ -114,6 +124,11 @@ namespace Dune
       bool coarsen ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
 
       bool refine ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
+
+    private:
+      template< class ProjectionProvider >
+      static ALBERTA NODE_PROJECTION *
+      initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n );
     };
 
 
@@ -156,13 +171,26 @@ namespace Dune
     inline void MeshPointer< dim >
     ::create ( const MacroData< dim > &macroData, const std::string &name )
     {
+      NoBoundaryProjectionFactory< dim > projectionFactory;
+      create( macroData, name, projectionFactory );
+    }
+
+
+    template< int dim >
+    template< class ProjectionFactory >
+    inline void MeshPointer< dim >
+    ::create ( const MacroData< dim > &macroData, const std::string &name, const ProjectionFactory &projectionFactory )
+    {
       release();
 
+      Library< dimWorld >::boundaryCount = 0;
+      Library< dimWorld >::projectionFactory = &projectionFactory;
 #if DUNE_ALBERTA_VERSION >= 0x300
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL, NULL );
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory >, NULL );
 #else
-      mesh_ = GET_MESH( dim, name.c_str(), macroData, NULL );
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory > );
 #endif
+      Library< dimWorld >::projectionFactory = 0;
 
       if( mesh_ != NULL )
       {
@@ -172,6 +200,8 @@ namespace Dune
                                 LeafData::AlbertLeafCoarsen );
       }
     }
+
+
 
 
     template< int dim >
@@ -283,6 +313,30 @@ namespace Dune
       return (ALBERTA refine( mesh_ ) == meshRefined);
     }
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+
+    template< int dim >
+    template< class ProjectionFactory >
+    inline ALBERTA NODE_PROJECTION *
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    {
+      typedef typename ProjectionFactory::Projection Projection;
+
+      if( n == 0 )
+        return 0;
+
+      const int face = n-1;
+      if( macroElement->wall_bound[ face ] != 0 )
+      {
+        MeshPointer< dim > meshPointer( mesh );
+        ElementInfo elementInfo( meshPointer, *macroElement, FillFlags::standard );
+        const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
+        Projection projection = projectionFactory.projection( elementInfo, face );
+        return new NodeProjection< dim, Projection >( Library< dimWorld >::boundaryCount++, projection );
+      }
+      else
+        return 0;
+    }
 
 
 
@@ -409,4 +463,4 @@ namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_MESHPOINTER_HH

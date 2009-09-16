@@ -321,7 +321,8 @@ namespace Dune
      *  \param[in]  gridName   name of the grid (defaults to "AlbertaGrid")
      */
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
-                  const std::string &gridName = "AlbertaGrid" );
+                  const std::string &gridName = "AlbertaGrid",
+                  const DuneBoundaryProjection< dimensionworld > *projection = 0 );
 
     /** \brief create a grid from an ALBERTA macro grid file
      *

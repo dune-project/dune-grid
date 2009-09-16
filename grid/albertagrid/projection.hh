@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_NODEPROJECTION_HH
 #define DUNE_ALBERTA_NODEPROJECTION_HH
 
+#include <dune/grid/common/boundaryprojection.hh>
+
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
@@ -12,6 +14,9 @@ namespace Dune
   namespace Alberta
   {
 
+    // NoProjection
+    // ------------
+
     template< int dim >
     struct NoProjection
     {
@@ -19,9 +24,97 @@ namespace Dune
 
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
-      void operator() ( const ElementInfo &elementInfo, const LocalVector &local,
-                        GlobalVector &global ) const
+      // note: GlobalVector is an array type; global is the return value
+      void operator() ( const ElementInfo &elementInfo, const LocalVector local,
+                        GlobalVector global ) const
       {}
+    };
+
+
+
+    // NoBoundaryProjectionFactory
+    // ---------------------------
+
+    template< int dim >
+    struct NoBoundaryProjectionFactory
+    {
+      static const int dimension = dim;
+
+      typedef NoProjection< dimension > Projection;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+      Projection projection ( const ElementInfo &elementInfo, const int face ) const
+      {
+        return Projection();
+      };
+    };
+
+
+
+    // DuneBoundaryProjection
+    // ----------------------
+
+    template< int dim >
+    struct DuneBoundaryProjection
+    {
+      static const int dimension = dim;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+      typedef FieldVector< Real, dimWorld > GlobalCoordinate;
+
+      typedef Dune::DuneBoundaryProjection< dimWorld > Projection;
+
+      DuneBoundaryProjection ( const Projection &projection )
+        : projection_( &projection )
+      {}
+
+      // note: GlobalVector is an array type; global is the return value
+      void operator() ( const ElementInfo &elementInfo, const LocalVector local,
+                        GlobalVector global ) const
+      {
+        GlobalCoordinate x;
+        for( int i = 0; i < dimWorld; ++i )
+          x[ i ] = global[ i ];
+        GlobalCoordinate y = projection() ( x );
+        for( int i = 0; i < dimWorld; ++i )
+          global[ i ] = y[ i ];
+      }
+
+      const Projection &projection () const
+      {
+        return *projection_;
+      }
+
+    private:
+      const Projection *projection_;
+    };
+
+
+
+    // DuneGlobalBoundaryProjectionFactory
+    // -----------------------------------
+
+    template< int dim >
+    struct DuneGlobalBoundaryProjectionFactory
+    {
+      static const int dimension = dim;
+
+      typedef DuneBoundaryProjection< dimension > Projection;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+      DuneGlobalBoundaryProjectionFactory ( const Projection &projection )
+        : projection_( projection )
+      {}
+
+      Projection projection ( const ElementInfo &elementInfo, const int face ) const
+      {
+        return Projection( projection_ );
+      };
+
+    private:
+      const Projection &projection_;
     };
 
 
@@ -31,9 +124,9 @@ namespace Dune
 
     template< int dim, class Projection = NoProjection< dim > >
     class NodeProjection
-      : protected ALBERTA NODE_PROJECTION
+      : public ALBERTA NODE_PROJECTION
     {
-      typedef NodeProjection< dim, void > This;
+      typedef NodeProjection< dim, Projection > This;
 
     public:
       static const int dimension = dim;
@@ -58,9 +151,9 @@ namespace Dune
       static void apply ( GlobalVector global, const EL_INFO *info,
                           const LocalVector local )
       {
-        const ElementInfo elementInfo = ElementInfo::createFake( info );
+        const ElementInfo elementInfo = ElementInfo::createFake( *info );
 
-        assert( info->fill_flag & FillFlags< dimension >::projection != 0 );
+        assert( (info->fill_flag & FillFlags< dimension >::projection) != 0 );
         const This *nodeProjection = static_cast< const This * >( info->active_projection );
 
         assert( nodeProjection != NULL );
