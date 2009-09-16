@@ -106,7 +106,7 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::geometryInInside () const
 
   }
 
-  selfLocal_.setup(intersectionGeometryType, coordinates);
+  GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
 
   return selfLocal_;
 }
@@ -130,7 +130,7 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::geometry () const
 
   }
 
-  neighGlob_.setup(intersectionGeometryType, coordinates);
+  GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
 
   return neighGlob_;
 }
@@ -172,7 +172,7 @@ Dune::UGGridLevelIntersectionIterator<GridImp>::geometryInOutside () const
 
   }
 
-  neighLocal_.setup(intersectionGeometryType, coordinates);
+  GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
 
   return neighLocal_;
 }
@@ -316,7 +316,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInInside () const
 
     }
 
-    selfLocal_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
 
   } else {
 
@@ -345,7 +345,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInInside () const
 
     }
 
-    selfLocal_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(selfLocal_).setup(intersectionGeometryType, coordinates);
   }
 
   return selfLocal_;
@@ -380,7 +380,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometry () const
 
     }
 
-    neighGlob_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
 
   } else {
 
@@ -405,7 +405,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometry () const
 
     }
 
-    neighGlob_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(neighGlob_).setup(intersectionGeometryType, coordinates);
 
   }
 
@@ -454,7 +454,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInOutside () const
 
     }
 
-    neighLocal_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
 
   } else {
 
@@ -473,7 +473,7 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInOutside () const
 
     }
 
-    neighLocal_.setup(intersectionGeometryType, coordinates);
+    GridImp::getRealImplementation(neighLocal_).setup(intersectionGeometryType, coordinates);
 
   }
 

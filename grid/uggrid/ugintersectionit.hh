@@ -47,7 +47,10 @@ namespace Dune {
         \todo Should be private
      */
     UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : center_(center), neighborCount_(nb)
+      : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        center_(center), neighborCount_(nb)
     {}
 
     //! The Destructor
@@ -178,12 +181,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable UGMakeableGeometry<dim-1,dim,GridImp> selfLocal_;
-    mutable UGMakeableGeometry<dim-1,dim,GridImp> neighLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> selfLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> neighLocal_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
+    mutable MakeableInterfaceObject<Geometry> neighGlob_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -219,7 +222,10 @@ namespace Dune {
     typedef Dune::Intersection<const GridImp, Dune::UGGridLeafIntersectionIterator> Intersection;
 
     UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
-      : center_(center), neighborCount_(nb), subNeighborCount_(0)
+      : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
+        center_(center), neighborCount_(nb), subNeighborCount_(0)
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
@@ -425,12 +431,12 @@ namespace Dune {
 
     //! pointer to element holding the self_local and self_global information.
     //! This element is created on demand.
-    mutable UGMakeableGeometry<dim-1,dim,GridImp> selfLocal_;
-    mutable UGMakeableGeometry<dim-1,dim,GridImp> neighLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> selfLocal_;
+    mutable MakeableInterfaceObject<LocalGeometry> neighLocal_;
 
     //! pointer to element holding the neighbor_global and neighbor_local
     //! information.
-    mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
+    mutable MakeableInterfaceObject<Geometry> neighGlob_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
