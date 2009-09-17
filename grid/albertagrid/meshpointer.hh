@@ -306,6 +306,24 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline ALBERTA NODE_PROJECTION *
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    {
+      return 0;
+    }
+
+    template< int dim >
+    template< class ProjectionFactory >
+    inline ALBERTA NODE_PROJECTION *
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    {
+      return 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline ALBERTA NODE_PROJECTION *
     MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
@@ -334,6 +352,7 @@ namespace Dune
       }
       return 0;
     }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
 

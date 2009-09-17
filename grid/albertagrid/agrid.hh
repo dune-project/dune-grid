@@ -20,7 +20,6 @@
 
 // Dune includes
 #include <dune/common/misc.hh>
-#include <dune/common/interfaces.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
@@ -232,8 +231,7 @@ namespace Dune
   template< int dim, int dimworld = Alberta::dimWorld >
   class AlbertaGrid
     : public GridDefaultImplementation
-      < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >,
-      public HasHierarchicIndexSet
+      < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >
   {
     typedef AlbertaGrid< dim, dimworld > This;
     typedef GridDefaultImplementation
