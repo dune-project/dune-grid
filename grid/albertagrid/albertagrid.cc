@@ -84,7 +84,6 @@ namespace Dune
 
     setup();
     hIndexSet_.create();
-    LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
   }
@@ -116,7 +115,6 @@ namespace Dune
 
     setup();
     hIndexSet_.create();
-    LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
 
@@ -723,7 +721,6 @@ namespace Dune
 
     setup();
     hIndexSet_.create( dofNumbering_ );
-    LeafDataType::initLeafDataValues( mesh_, 0 );
 
     calcExtras();
 

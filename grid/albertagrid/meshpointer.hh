@@ -13,7 +13,6 @@
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
-#include <dune/grid/albertagrid/albertaextra.hh>
 #include <dune/grid/albertagrid/macrodata.hh>
 #include <dune/grid/albertagrid/projection.hh>
 
@@ -191,14 +190,6 @@ namespace Dune
       mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory > );
 #endif
       Library< dimWorld >::projectionFactory = 0;
-
-      if( mesh_ != NULL )
-      {
-        typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-        ALBERTA init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
-                                LeafData::AlbertLeafRefine,
-                                LeafData::AlbertLeafCoarsen );
-      }
     }
 
 
@@ -224,14 +215,6 @@ namespace Dune
 #else
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL );
 #endif
-
-      if( mesh_ != NULL )
-      {
-        typedef AlbertHelp::AlbertLeafData< dim, dim+1 > LeafData;
-        ALBERTA init_leaf_data( mesh_, sizeof( typename LeafData::Data ),
-                                LeafData::AlbertLeafRefine,
-                                LeafData::AlbertLeafCoarsen );
-      }
     }
 
 

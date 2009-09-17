@@ -15,6 +15,9 @@ namespace Dune
   namespace Alberta
   {
 
+    // CoordCache
+    // ----------
+
     template< int dim >
     class CoordCache
     {
@@ -31,11 +34,6 @@ namespace Dune
       typedef Alberta::MeshPointer< dimension > MeshPointer;
       typedef HierarchyDofNumbering< dimension > DofNumbering;
 
-    private:
-      CoordVectorPointer coords_;
-      DofAccess dofAccess_;
-
-    public:
       GlobalVector &operator() ( const Element *element, int vertex ) const
       {
         assert( !(!coords_) );
@@ -57,7 +55,6 @@ namespace Dune
         LocalCaching localCaching( coords_ );
         mesh.hierarchicTraverse( localCaching, FillFlags< dimension >::coords );
         coords_.template setupInterpolation< Interpolation >();
-        //((ALBERTA DOF_REAL_D_VEC *)coords_)->refine_interpol = &AlbertHelp::refineCoordsAndRefineCallBack< dimension  >;
 
         dofAccess_ = DofAccess( dofSpace );
       }
@@ -66,6 +63,10 @@ namespace Dune
       {
         coords_.release();
       }
+
+    private:
+      CoordVectorPointer coords_;
+      DofAccess dofAccess_;
     };
 
 
@@ -145,4 +146,4 @@ namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_COORDCACHE_HH

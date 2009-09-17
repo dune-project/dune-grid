@@ -327,15 +327,6 @@ namespace Dune
     //! equality of entities
     bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
 
-    //***************************************************************
-    //  Interface for parallelisation
-    //***************************************************************
-    // set leaf data with processor number
-    void setLeafData( int proc );
-
-    // return true if this entity belong to master set of this grid
-    bool master() const;
-
     // needed for LevelIterator to compare
     ALBERTA EL_INFO *getElInfo () const;
 

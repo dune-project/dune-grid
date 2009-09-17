@@ -41,9 +41,6 @@
 // calculate coordinates on the fly (forbidden for ALBERTA 2.0 and earlier)?
 #define CALC_COORD 0
 
-// some extra functions for handling the Albert Mesh
-#include "albertaextra.hh"
-
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
 
@@ -294,11 +291,6 @@ namespace Dune
     template< class DataHandler >
     struct AdaptationCallback;
 
-  public:
-    //! type of leaf data
-    typedef typename ALBERTA AlbertHelp::AlbertLeafData<dimworld,dim+1> LeafDataType;
-
-  private:
     // max number of allowed levels is 64
     static const int MAXL = 64;
 

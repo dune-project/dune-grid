@@ -71,18 +71,13 @@ namespace Dune
 
     bool hasDeterminant () const
     {
-      return ((codimension == 0) && elementInfo_.isLeaf());
+      return false;
     }
 
     ctype determinant () const
     {
       assert( hasDeterminant() );
-
-      const Alberta::Element *el = elementInfo_.el();
-      typedef typename Grid::LeafDataType::Data LeafData;
-      LeafData *leafdata = (LeafData *)el->child[ 1 ];
-      assert( leafdata != NULL );
-      return leafdata->determinant;
+      return ctype( 0 );
     }
 
   private:
