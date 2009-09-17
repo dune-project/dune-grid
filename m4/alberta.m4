@@ -113,7 +113,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     # check for libalberta_util...
     if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_LIB(alberta_util,[alberta_calloc],
-        [ALBERTA_LIBS="-lalberta_util"
+        [ALBERTA_LIBS="-lalberta_util -lcblas"
          ALBERTA_LDFLAGS="-L$ALBERTA_LIB_PATH"
          LIBS="$LIBS $ALBERTA_LIBS"],
         [HAVE_ALBERTA="0"
