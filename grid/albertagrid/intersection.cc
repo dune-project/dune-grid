@@ -70,8 +70,10 @@ namespace Dune
   AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
   {
 #if USE_GENERICGEOMETRY
-    const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
-    return GridImp::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
+    //const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
+    const GenericReferenceElement< ctype, dimension > &refElement = GenericReferenceElements< ctype, dimension >::simplex();
+    const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
+    return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
 #else
     typedef typename GenericGeometry::Convert< GeometryType::simplex, dimension >::type Topology;
     typedef GenericGeometry::ReferenceElement< Topology, ctype > ReferenceElement;
