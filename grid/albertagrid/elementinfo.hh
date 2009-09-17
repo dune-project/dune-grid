@@ -27,6 +27,8 @@ namespace Dune
     template< int dim >
     class MeshPointer;
 
+    class BasicNodeProjection;
+
 
 
     // ElementInfo
@@ -112,6 +114,7 @@ namespace Dune
       bool isBoundary ( int face ) const;
       int boundaryId ( int face ) const;
       AffineTransformation *transformation ( int face ) const;
+      BasicNodeProjection *boundaryProjection ( int face ) const;
 
       bool hasCoordinates () const;
       const GlobalVector &coordinate ( int vertex ) const;
@@ -532,6 +535,34 @@ namespace Dune
     ElementInfo< dim >::transformation ( int face ) const
     {
       return NULL;
+    }
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
+
+
+#if DUNE_ALBERTA_VERSION >= 0x300
+    template< int dim >
+    inline BasicNodeProjection *
+    ElementInfo< dim >::boundaryProjection ( int face ) const
+    {
+      assert( !!(*this) );
+      assert( (face >= 0) && (face < N_WALLS_MAX) );
+
+      const int macroFace = elInfo().macro_wall[ face ];
+      if( macroFace >= 0 )
+        return static_cast< BasicNodeProjection * >( elInfo().macro_el->projection[ face+1 ] );
+      else
+        return 0;
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+
+#if DUNE_ALBERTA_VERSION <= 0x200
+    template< int dim >
+    inline BasicNodeProjection *
+    ElementInfo< dim >::boundaryProjection ( int face ) const
+    {
+      assert( !!(*this) );
+      assert( (face >= 0) && (face < maxNeighbors) );
+      return static_cast< BasicNodeProjection * >( elInfo().projections[ face+1 ] );
     }
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 

@@ -105,13 +105,19 @@ namespace Dune
     struct BasicNodeProjection
       : public ALBERTA NODE_PROJECTION
     {
-      unsigned int boundaryIndex_;
-
       explicit BasicNodeProjection ( unsigned int boundaryIndex )
         : boundaryIndex_( boundaryIndex )
       {
         func = 0;
       }
+
+      unsigned int boundaryIndex () const
+      {
+        return boundaryIndex_;
+      }
+
+    private:
+      unsigned int boundaryIndex_;
     };
 
 

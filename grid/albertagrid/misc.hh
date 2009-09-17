@@ -270,13 +270,23 @@ namespace Dune
 #endif
 
       static const Flags all = coords | neighbor | boundaryId | nonPeriodic
-                               | orientation | elementType;
+                               | orientation | projection | elementType;
 
+#if DUNE_ALBERTA_VERSION >= 0x300
+#if CALC_COORD
+      static const Flags standard = all & ~nonPeriodic & ~projection;
+#else
+      static const Flags standard = all & ~nonPeriodic & ~coords & ~projection;
+#endif
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+
+#if DUNE_ALBERTA_VERSION <= 0x200
 #if CALC_COORD
       static const Flags standard = all & ~nonPeriodic;
 #else
       static const Flags standard = all & ~nonPeriodic & ~coords;
 #endif
+#endif // #if DUNE_ALBERTA_VERSION <= 0x200
     };
 
 
