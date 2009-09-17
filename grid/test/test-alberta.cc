@@ -47,6 +47,7 @@ void markOne ( GridType & grid , int num , int ref )
 }
 
 
+#if DUNE_ALBERTA_VERSION >= 0x300
 template< class Grid >
 void checkProjectedUnitCube ()
 {
@@ -65,7 +66,7 @@ void checkProjectedUnitCube ()
   }
   delete grid;
 }
-
+#endif // DUNE_ALBERTA_VERSION >= 0x300
 
 
 int main ( int argc, char **argv )
@@ -78,7 +79,9 @@ try {
 
   checkAlbertaReader< GridType >();
 
+#if DUNE_ALBERTA_VERSION >= 0x300
   checkProjectedUnitCube< GridType >();
+#endif // DUNE_ALBERTA_VERSION >= 0x300
 
   std::string filename;
   if( argc <= 1 )
