@@ -14,6 +14,8 @@
 
 #include "basicunitcube.hh"
 
+#include "../common/boundaryprojection.hh"
+
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
