@@ -201,13 +201,6 @@ namespace Dune
     }
     else
     {
-      std :: stringstream tmps;
-      tmps << filename;
-      const std :: string &tmp = tmps.str();
-
-      if( fileExists( tmp.c_str() ) )
-        return new ALUConformGrid< 2, 2 >( tmp.c_str() );
-
       if( fileExists( filename ) )
         return new ALUConformGrid< 2, 2 >( filename );
     }
@@ -259,13 +252,6 @@ namespace Dune
     }
     else
     {
-      std :: stringstream tmps;
-      tmps << filename;
-      const std :: string &tmp = tmps.str();
-
-      if( fileExists( tmp.c_str() ) )
-        return new ALUSimplexGrid< 2, 2 >( tmp.c_str() );
-
       if( fileExists( filename ) )
         return new ALUSimplexGrid< 2, 2 >( filename );
     }
