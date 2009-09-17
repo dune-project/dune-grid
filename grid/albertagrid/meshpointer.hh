@@ -49,7 +49,7 @@ namespace Dune
       template< int dimWorld >
       struct Library
       {
-        static int boundaryCount;
+        static unsigned int boundaryCount;
         static const void *projectionFactory;
       };
 
@@ -125,6 +125,8 @@ namespace Dune
       bool refine ( typename FillFlags::Flags fillFlags = FillFlags::nothing );
 
     private:
+      static ALBERTA NODE_PROJECTION *
+      initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n );
       template< class ProjectionProvider >
       static ALBERTA NODE_PROJECTION *
       initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n );
@@ -170,8 +172,14 @@ namespace Dune
     inline void MeshPointer< dim >
     ::create ( const MacroData< dim > &macroData, const std::string &name )
     {
-      NoBoundaryProjectionFactory< dim > projectionFactory;
-      create( macroData, name, projectionFactory );
+      release();
+
+      Library< dimWorld >::boundaryCount = 0;
+#if DUNE_ALBERTA_VERSION >= 0x300
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection, NULL );
+#else
+      mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection );
+#endif
     }
 
 
@@ -299,26 +307,32 @@ namespace Dune
 
 
     template< int dim >
+    inline ALBERTA NODE_PROJECTION *
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    {
+      if( (n > 0) && (macroElement->wall_bound[ n-1 ] != 0) )
+        return new BasicNodeProjection( Library< dimWorld >::boundaryCount++ );
+      else
+        return 0;
+    }
+
+
+    template< int dim >
     template< class ProjectionFactory >
     inline ALBERTA NODE_PROJECTION *
     MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
     {
       typedef typename ProjectionFactory::Projection Projection;
 
-      if( n == 0 )
-        return 0;
-
-      const int face = n-1;
-      if( macroElement->wall_bound[ face ] != 0 )
+      if( (n > 0) && (macroElement->wall_bound[ n-1 ] != 0) )
       {
         MeshPointer< dim > meshPointer( mesh );
         ElementInfo elementInfo( meshPointer, *macroElement, FillFlags::standard );
         const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
-        Projection projection = projectionFactory.projection( elementInfo, face );
+        Projection projection = projectionFactory.projection( elementInfo, n-1 );
         return new NodeProjection< dim, Projection >( Library< dimWorld >::boundaryCount++, projection );
       }
-      else
-        return 0;
+      return 0;
     }
 
 

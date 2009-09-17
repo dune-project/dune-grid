@@ -32,26 +32,6 @@ namespace Dune
 
 
 
-    // NoBoundaryProjectionFactory
-    // ---------------------------
-
-    template< int dim >
-    struct NoBoundaryProjectionFactory
-    {
-      static const int dimension = dim;
-
-      typedef NoProjection< dimension > Projection;
-
-      typedef Alberta::ElementInfo< dimension > ElementInfo;
-
-      Projection projection ( const ElementInfo &elementInfo, const int face ) const
-      {
-        return Projection();
-      };
-    };
-
-
-
     // DuneBoundaryProjection
     // ----------------------
 
@@ -119,14 +99,33 @@ namespace Dune
 
 
 
+    // BasicNodeProjection
+    // -------------------
+
+    struct BasicNodeProjection
+      : public ALBERTA NODE_PROJECTION
+    {
+      unsigned int boundaryIndex_;
+
+      explicit BasicNodeProjection ( unsigned int boundaryIndex )
+        : boundaryIndex_( boundaryIndex )
+      {
+        func = 0;
+      }
+    };
+
+
+
+
     // NodeProjection
     // --------------
 
     template< int dim, class Projection = NoProjection< dim > >
     class NodeProjection
-      : public ALBERTA NODE_PROJECTION
+      : public BasicNodeProjection
     {
       typedef NodeProjection< dim, Projection > This;
+      typedef BasicNodeProjection Base;
 
     public:
       static const int dimension = dim;
@@ -134,12 +133,11 @@ namespace Dune
       typedef Alberta::ElementInfo< dimension > ElementInfo;
 
     private:
-      unsigned int boundaryIndex_;
       Projection projection_;
 
     public:
       NodeProjection ( unsigned int boundaryIndex, const Projection &projection )
-        : boundaryIndex_( boundaryIndex ),
+        : Base( boundaryIndex ),
           projection_( projection )
       {
         func = apply;
@@ -148,8 +146,7 @@ namespace Dune
     private:
       // note: global is the return type (it is an array type and hence no
       //       reference is needed)
-      static void apply ( GlobalVector global, const EL_INFO *info,
-                          const LocalVector local )
+      static void apply ( GlobalVector global, const EL_INFO *info, const LocalVector local )
       {
         const ElementInfo elementInfo = ElementInfo::createFake( *info );
 

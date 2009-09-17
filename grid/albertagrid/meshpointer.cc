@@ -14,7 +14,7 @@ namespace Dune
 
     template<>
     template<>
-    int MeshPointer< 1 >::Library< dimWorld >::boundaryCount = 0;
+    unsigned int MeshPointer< 1 >::Library< dimWorld >::boundaryCount = 0;
 
     template<>
     template<>
@@ -23,7 +23,7 @@ namespace Dune
 
     template<>
     template<>
-    int MeshPointer< 2 >::Library< dimWorld >::boundaryCount = 0;
+    unsigned int MeshPointer< 2 >::Library< dimWorld >::boundaryCount = 0;
 
     template<>
     template<>
@@ -32,7 +32,7 @@ namespace Dune
 
     template<>
     template<>
-    int MeshPointer< 3 >::Library< dimWorld >::boundaryCount = 0;
+    unsigned int MeshPointer< 3 >::Library< dimWorld >::boundaryCount = 0;
 
     template<>
     template<>
