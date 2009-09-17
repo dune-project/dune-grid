@@ -41,12 +41,14 @@ namespace Dune {
       virtualEntity_.setToTarget(target);
     }
 
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() {
-      virtualEntity_.getTarget();
+    typename UG_NS<dim>::template Entity<codim>::T* getTarget()
+    {
+      return virtualEntity_.getTarget();
     }
 
-    const typename UG_NS<dim>::template Entity<codim>::T* getTarget() const {
-      virtualEntity_.getTarget();
+    const typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
+    {
+      return virtualEntity_.getTarget();
     }
 
     //! equality
