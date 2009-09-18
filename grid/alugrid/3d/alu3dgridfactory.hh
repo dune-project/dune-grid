@@ -64,8 +64,8 @@ namespace Dune
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
 
     const std::string filename_;
-    MPICommunicatorType communicator_;
     bool removeGeneratedFile_;
+    MPICommunicatorType communicator_;
 #if ALU3DGRID_PARALLEL
     int rank_;
 #endif
@@ -221,7 +221,7 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string filename,
+    GridFactory ( const std::string &filename,
                   const MPICommunicatorType &communicator
                     = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )
@@ -253,7 +253,7 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string filename,
+    GridFactory ( const std::string &filename,
                   const MPICommunicatorType &communicator
                     = MPIHelper::getCommunicator() )
       : BaseType( filename, communicator )

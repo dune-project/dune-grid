@@ -21,8 +21,8 @@ namespace Dune
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
     : filename_( temporaryFileName() ),
-      communicator_( communicator ),
       removeGeneratedFile_( removeGeneratedFile ),
+      communicator_( communicator ),
       bndPrjct_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
@@ -35,9 +35,9 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : filename_( filename + ".ALU3dGrid" ),
+    : filename_( filename.empty() ? temporaryFileName() : filename ),
+      removeGeneratedFile_( filename.empty() ),
       communicator_( communicator ),
-      removeGeneratedFile_( false ),
       bndPrjct_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL

@@ -27,7 +27,8 @@ namespace Dune
                                                << "ALUGrid of dimension 3." );
       macroGrid.setOrientation( 2, 3 );
 
-      GridFactory< ALUSimplexGrid< 3, 3 > > factory( filename, communicator );
+      dgf::GridParameterBlock parameter( file );
+      GridFactory< ALUSimplexGrid< 3, 3 > > factory( parameter.dumpFileName(), communicator );
       if( rank == 0 )
       {
         for( int n = 0; n < macroGrid.nofvtx; ++n )
@@ -103,7 +104,8 @@ namespace Dune
                                                << " and cannot be used to initialize an "
                                                << "ALUGrid of dimension 3." );
 
-      GridFactory< ALUCubeGrid< 3, 3 > > factory( filename, communicator );
+      dgf::GridParameterBlock parameter( file );
+      GridFactory< ALUCubeGrid< 3, 3 > > factory( parameter.dumpFileName(), communicator );
       if( rank == 0 )
       {
         for( int n = 0; n < macroGrid.nofvtx; ++n )
