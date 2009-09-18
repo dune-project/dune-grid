@@ -18,30 +18,33 @@ namespace Dune
   /** \addtogroup GIGridView
    *
    *  Though a DUNE grid is hierarchic, one often only needs access to
-   *  a certain level of the grid. These views are provided by an
+   *  a certain subset of the entities in the grid, e.g., the all entities
+   *  on a given level or the leaf entities in the hierarchy.
+   *  These views are provided by an
    *  implementation of GridView. Each grid exports a LevelGridView and
-   *  a LeafGridView, corresponding to the two different types of levels.
+   *  a LeafGridView, corresponding to the two different subsets (views)
+   *  described above.
    *
    *  A grid view provides the following functionality:
-   *  - The index set for the grid level can be accessed by the indexSet()
+   *  - The index set for the required subset can be accessed by the indexSet()
    *    method.
    *  - A pair of begin() / end() methods provide iterators for each
    *    codimension.
    *  - A pair of ibegin() / iend() methods return suitable intersection
-   *    iterators for a given entity of codimension 0.
+   *    iterators for a given entity of codimension 0 in the subset.
    *  - For parallel computations, a suitable communicate() method is provided.
    *  - The underlying grid can be accessed through the grid() method.
    *  .
    *
-   *  A GridView is obtained from the grid by calling one of the levelView() or
-   *  leafView() methods.
+   *  The default GridViews can be obtained from the grid by calling one of the
+   *  levelView() or leafView() methods.
    */
 
 
   /** \brief Grid view abstract base class
    *  \ingroup GIGridView
    *
-   *  Interface class for view on grids. Grids return two types of view,
+   *  Interface class for a view on grids. Grids return two types of view,
    *  a view of the leaf grid and of a level grid, which both satisfy
    *  the same interface. Through the view the user has access to the
    *  iterators, the intersections and the index set.
@@ -78,23 +81,54 @@ namespace Dune
     /** \brief type of the collective communication */
     typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
-    /** \brief Codim Structure */
+    /** \brief A struct that collects all associated types of one implementation
+               from the Traits class.
+     */
     template< int cd >
-    struct Codim : public Traits :: template Codim<cd> {};
+    struct Codim {
+      /** \brief type of iterator returned by the grid view */
+      typedef typename Traits :: template Codim<cd> :: Iterator Iterator;
 
-    /** \brief Export if this grid view is conforming */
-    enum { conforming = Traits :: conforming };
+      /** \brief type of corresponding entity pointer */
+      typedef typename Traits :: template Codim<cd> :: EntityPointer EntityPointer;
+
+      /** \brief type of corresponding entity */
+      typedef typename Traits :: template Codim<cd> :: Entity Entity;
+
+      /** \brief type of the geometry implementation */
+      typedef typename Traits :: template Codim<cd> :: Geometry Geometry;
+
+      /** \brief type of the implementation for local geometries */
+      typedef typename Traits :: template Codim<cd> :: LocalGeometry LocalGeometry;
+
+      /** \brief Define types needed to iterate over entities of a given partition type */
+      template< PartitionIteratorType pit >
+      struct Partition
+      {
+        /** \brief iterator over a given codim and partition type */
+        typedef typename Traits :: template Codim< cd >
+        :: template Partition< pit > :: Iterator Iterator;
+      };
+    }; //: public Traits :: template Codim<cd> {};
+
+    enum {
+      //! \brief Export if this grid view is conforming */
+      conforming = Traits :: conforming
+    };
 
     /** \brief type used for coordinates in grid */
     typedef typename Grid::ctype ctype;
 
-    /** \brief Dimension of the grid */
-    enum { dimension = Grid :: dimension };
+    enum { //! \brief The dimension of the grid
+      dimension = Grid :: dimension
+    };
 
-    /** \brief Dimension of the world */
-    enum { dimensionworld = Grid :: dimensionworld };
+    enum { //! \brief The dimension of the world the grid lives in.
+      dimensionworld = Grid :: dimensionworld
+    };
 
   public:
+    /** \brief constructor (engine concept) */
     GridView ( const GridViewImp& imp)
       : imp_( imp )
     {}
