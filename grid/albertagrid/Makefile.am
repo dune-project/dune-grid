@@ -20,7 +20,7 @@ albertadir = $(includedir)/dune/grid/albertagrid/
 alberta_HEADERS = agrid.hh albertagrid.cc \
   agmemory.hh  albertaheader.hh \
   indexsets.hh datahandle.hh \
-  misc.hh  elementinfo.hh  meshpointer.hh macrodata.hh \
+  misc.hh  macroelement.hh  elementinfo.hh  meshpointer.hh macrodata.hh \
   dofadmin.hh  dofvector.hh  refinement.hh  coordcache.hh  level.hh \
   undefine-2.0.hh  undefine-3.0.hh \
   entity.hh  entity.cc  entitypointer.hh  hierarchiciterator.hh \

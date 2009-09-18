@@ -41,6 +41,7 @@ namespace Dune
       Mesh *mesh_;
 
       typedef Alberta::ElementInfo< dim > ElementInfo;
+      typedef typename ElementInfo::MacroElement MacroElement;
       typedef typename ElementInfo::FillFlags FillFlags;
 
       class BoundaryProvider;
@@ -126,10 +127,10 @@ namespace Dune
 
     private:
       static ALBERTA NODE_PROJECTION *
-      initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n );
+      initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
       template< class ProjectionProvider >
       static ALBERTA NODE_PROJECTION *
-      initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n );
+      initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
     };
 
 
@@ -306,29 +307,12 @@ namespace Dune
 #endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
-#if DUNE_ALBERTA_VERSION <= 0x200
     template< int dim >
     inline ALBERTA NODE_PROJECTION *
-    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroEl, int n )
     {
-      return 0;
-    }
-
-    template< int dim >
-    template< class ProjectionFactory >
-    inline ALBERTA NODE_PROJECTION *
-    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
-    {
-      return 0;
-    }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
-
-#if DUNE_ALBERTA_VERSION >= 0x300
-    template< int dim >
-    inline ALBERTA NODE_PROJECTION *
-    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
-    {
-      if( (n > 0) && (macroElement->wall_bound[ n-1 ] != 0) )
+      const MacroElement &macroElement = static_cast< const MacroElement & >( *macroEl );
+      if( (n > 0) && macroElement.isBoundary( n-1 ) )
         return new BasicNodeProjection( Library< dimWorld >::boundaryCount++ );
       else
         return 0;
@@ -338,21 +322,21 @@ namespace Dune
     template< int dim >
     template< class ProjectionFactory >
     inline ALBERTA NODE_PROJECTION *
-    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, MacroElement *macroElement, int n )
+    MeshPointer< dim >::initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroEl, int n )
     {
       typedef typename ProjectionFactory::Projection Projection;
 
-      if( (n > 0) && (macroElement->wall_bound[ n-1 ] != 0) )
+      const MacroElement &macroElement = static_cast< const MacroElement & >( *macroEl );
+      if( (n > 0) && macroElement.isBoundary( n-1 ) )
       {
         MeshPointer< dim > meshPointer( mesh );
-        ElementInfo elementInfo( meshPointer, *macroElement, FillFlags::standard );
+        ElementInfo elementInfo( meshPointer, macroElement, FillFlags::standard );
         const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
         Projection projection = projectionFactory.projection( elementInfo, n-1 );
         return new NodeProjection< dim, Projection >( Library< dimWorld >::boundaryCount++, projection );
       }
       return 0;
     }
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
 
 
 
@@ -394,10 +378,10 @@ namespace Dune
         ++index_;
       }
 
-      MacroElement &macroElement () const
+      const MacroElement &macroElement () const
       {
         assert( !done() );
-        return mesh().mesh_->macro_els[ index_ ];
+        return static_cast< const MacroElement & >( mesh().mesh_->macro_els[ index_ ] );
       }
 
       const MeshPointer &mesh () const

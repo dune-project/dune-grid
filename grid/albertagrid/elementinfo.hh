@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/macroelement.hh>
 
 #if HAVE_ALBERTA
 
@@ -51,6 +52,7 @@ namespace Dune
       static const int numVertices = NumSubEntities< dimension, dimension >::value;
       static const int numFaces = NumSubEntities< dimension, 1 >::value;
 
+      typedef Alberta::MacroElement< dimension > MacroElement;
       typedef Alberta::MeshPointer< dimension > MeshPointer;
       typedef Alberta::FillFlags< dimension > FillFlags;
 
@@ -77,6 +79,7 @@ namespace Dune
       bool operator== ( const ElementInfo &other ) const;
       bool operator!= ( const ElementInfo &other ) const;
 
+      const MacroElement &macroElement () const;
       ElementInfo father () const;
       int indexInFather () const;
       ElementInfo child ( int i ) const;
@@ -302,6 +305,16 @@ namespace Dune
     }
 
 
+
+    template< int dim >
+    inline const typename ElementInfo< dim >::MacroElement &
+    ElementInfo< dim >::macroElement () const
+    {
+      assert( !!(*this) );
+      return static_cast< const MacroElement & >( *(elInfo().macro_el) );
+    }
+
+
     template< int dim >
     inline ElementInfo< dim > ElementInfo< dim >::father () const
     {
@@ -453,10 +466,7 @@ namespace Dune
 
       const int macroFace = elInfo().macro_wall[ face ];
       if( macroFace >= 0 )
-      {
-        const int id = elInfo().macro_el->wall_bound[ macroFace ];
-        return (id != 0);
-      }
+        return macroElement().isBoundary( macroFace );
       else
         return false;
     }

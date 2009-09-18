@@ -58,7 +58,6 @@ namespace Dune
 #endif
 
     typedef ALBERTA MESH Mesh;
-    typedef ALBERTA MACRO_EL MacroElement;
     typedef ALBERTA EL Element;
 
     static const int meshRefined = MESH_REFINED;

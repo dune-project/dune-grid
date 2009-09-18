@@ -27,12 +27,12 @@ namespace Dune
     ::macroNeighbor ( const ElementInfo &element, int face, ElementInfo &neighbor )
     {
       assert( (face >= 0) && (face < numFaces) );
-      const MacroElement *const macroElement = element.elInfo().macro_el;
-      const MacroElement *const macroNeighbor = macroElement->neigh[ face ];
-      if( macroNeighbor != NULL )
+      const MacroElement &macroElement = element.macroElement();
+      const MacroElement *macroNeighbor = macroElement.neighbor( face );
+      if( macroNeighbor != 0 )
       {
         neighbor = ElementInfo( element.mesh(), *macroNeighbor, element.elInfo().fill_flag );
-        return macroElement->opp_vertex[ face ];
+        return macroElement.opp_vertex[ face ];
       }
       else
         return -1;
