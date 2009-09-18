@@ -100,7 +100,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_PATH]))
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
-      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[],[#include <alberta.h>])
+      AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta.h>])
     fi
 
     CPPFLAGS="$REM_CPPFLAGS -I$ALBERTA_INCLUDE_PATH"
