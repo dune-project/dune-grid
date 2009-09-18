@@ -975,6 +975,7 @@ namespace Dune
       : BasicBlock( in, ID ),
         foundFlags_( 0 ),
         name_( "Unnamed Grid" ), // default value (used if name is empty)
+        dumpFileName_( "" ),
         markLongestEdge_( false ) // default value
     {
       if( isempty() )
@@ -989,6 +990,17 @@ namespace Dune
         else
           dwarn << "GridParameterBlock: Found keyword 'name' without value." << std::endl;
         foundFlags_ |= foundName;
+      }
+
+      // get file name
+      if ( findtoken( "dumpfilename" ) )
+      {
+        std::string entry;
+        if( getnextentry( entry ) )
+          dumpFileName_ = entry;
+        else
+          dwarn << "GridParameterBlock: Found keyword 'dumpFileName' without value." << std::endl;
+        foundFlags_ |= foundDumpFileName;
       }
 
       // check for markLongestEdge

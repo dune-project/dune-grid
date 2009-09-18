@@ -178,7 +178,7 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string filename )
+    GridFactory ( const std::string &filename )
       : BaseType( filename )
     {}
   };
@@ -202,7 +202,7 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string filename )
+    GridFactory ( const std::string &filename )
       : BaseType( filename )
     {}
   };

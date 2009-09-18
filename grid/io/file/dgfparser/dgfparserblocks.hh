@@ -421,11 +421,13 @@ namespace Dune
       typedef unsigned int Flags;
 
       static const Flags foundName = 1 << 0;
+      static const Flags foundDumpFileName = 1 << 1;
       static const Flags foundLongestEdge = 1 << 5;
 
     protected:
       Flags foundFlags_; // supportFlags, this block was created with
       std::string name_; // name of the grid
+      std::string dumpFileName_; // name of the grid
       bool markLongestEdge_; // Mark longest edge for AlbertaGrid
 
     private:
@@ -438,7 +440,7 @@ namespace Dune
       GridParameterBlock ( std::istream &in );
 
       //! return the name of the grid
-      std::string name ( const std::string &defaultValue ) const
+      const std::string &name ( const std::string &defaultValue ) const
       {
         if( (foundFlags_ & foundName) == 0 )
         {
@@ -448,6 +450,16 @@ namespace Dune
         }
         else
           return name_;
+      }
+
+      const std::string &dumpFileName ( ) const
+      {
+        if( (foundFlags_ & foundDumpFileName) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'dumpfilename' not specified, "
+                << "not dumping!" << std::endl;
+        }
+        return dumpFileName_;
       }
 
       //! returns true if longest edge should be marked for AlbertaGrid

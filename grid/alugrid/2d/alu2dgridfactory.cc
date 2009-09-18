@@ -26,8 +26,8 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( const std::string &filename )
-    : filename_( filename + ".ALU2dGrid" ),
-      removeGeneratedFile_( false )
+    : filename_( filename.empty() ? temporaryFileName() : filename ),
+      removeGeneratedFile_( filename.empty() )
   {}
 
 

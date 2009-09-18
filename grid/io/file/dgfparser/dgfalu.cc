@@ -173,7 +173,8 @@ namespace Dune
                                                << " and cannot be used to initialize an "
                                                << "ALUGrid of dimension 2." );
 
-      GridFactory< ALUConformGrid< 2, 2 > > factory( filename );
+      dgf::GridParameterBlock parameter( file );
+      GridFactory< ALUConformGrid< 2, 2 > > factory( parameter.dumpFileName() );
       for( int n = 0; n < macroGrid.nofvtx; ++n )
       {
         FieldVector< double, 2 > pos;
@@ -224,7 +225,8 @@ namespace Dune
                                                << " and cannot be used to initialize an "
                                                << "ALUGrid of dimension 2." );
 
-      GridFactory< ALUSimplexGrid< 2, 2 > > factory( filename );
+      dgf::GridParameterBlock parameter( file );
+      GridFactory< ALUSimplexGrid< 2, 2 > > factory( parameter.dumpFileName() );
       for( int n = 0; n < macroGrid.nofvtx; ++n )
       {
         FieldVector< double, 2 > pos;
