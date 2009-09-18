@@ -116,7 +116,14 @@ namespace Dune
       }
     }
 
-    return factory.createGrid( gridName, parameter.markLongestEdge() );
+    if( parameter.markLongestEdge() )
+      factory.markLongestEdge();
+
+    const std::string &dumpFileName = parameter.dumpFileName();
+    if( !dumpFileName.empty() )
+      factory.write( dumpFileName );
+
+    return factory.createGrid( gridName );
   }
 
 

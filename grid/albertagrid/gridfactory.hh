@@ -192,22 +192,25 @@ namespace Dune
       macroData_.insertWallTrafo( M, t );
     }
 
-    /** \brief finalize grid creation and hand over the grid
-     *
-     *  This version of createGrid is original to the AlbertaGrid grid factroy.
-     *  Besides allowing to specity a grid name, it provides the possibility
-     *  mark the longest edge of each macro element as the refinement edge for
-     *  the recursive bisection algorithms.
+    /** \brief mark the longest edge as refinemet edge
      *
      *  Marking the longest edge avoids cycles in the recursive bisection
      *  algorithm, if the longest edge of each element is unique. It also
      *  makes sure the angles degenerate least. It can, hoowever, produce
      *  more nonlocal refinements than necessary. Therefore this feature is
      *  disabled by default.
+     */
+    void markLongestEdge ()
+    {
+      macroData_.markLongestEdge();
+    }
+
+    /** \brief finalize grid creation and hand over the grid
+     *
+     *  This version of createGrid is original to the AlbertaGrid grid factroy,
+     *  allowing to specity a grid name.
      *
      *  \param[in]  gridName         name for the grid
-     *  \param[in]  markLongestEdge  mark longest edges for refinement
-     *                               (defaults to \c false)
      *
      *  \returns a pointer to the newly created grid
      *
@@ -216,14 +219,12 @@ namespace Dune
      *  \note ALBERTA's grid factory provides a static method for freeing the
      *        grid (destroyGrid).
      */
-    Grid *createGrid ( const std::string &gridName, bool markLongestEdge = false )
+    Grid *createGrid ( const std::string &gridName )
     {
       macroData_.finalize();
-      if( markLongestEdge )
-        macroData_.markLongestEdge();
-#if DUNE_ALBERTA_VERSION < 0x300
+      //#if DUNE_ALBERTA_VERSION < 0x300
       macroData_.setOrientation( Alberta::Real( 1 ) );
-#endif // #if DUNE_ALBERTA_VERSION < 0x300
+      //#endif // #if DUNE_ALBERTA_VERSION < 0x300
       return new Grid( macroData_, gridName, boundaryProjection_ );
     }
 
@@ -238,7 +239,7 @@ namespace Dune
      */
     virtual Grid *createGrid ()
     {
-      return createGrid( "AlbertaGrid", false );
+      return createGrid( "AlbertaGrid" );
     }
 
     /** \brief destroy a grid previously obtain from this factory
@@ -263,6 +264,9 @@ namespace Dune
     {
       dune_static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
+      //#if DUNE_ALBERTA_VERSION < 0x300
+      macroData_.setOrientation( Alberta::Real( 1 ) );
+      //#endif // #if DUNE_ALBERTA_VERSION < 0x300
       return macroData_.write( filename, (type == xdr) );
     }
 
