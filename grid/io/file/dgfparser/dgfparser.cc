@@ -621,6 +621,9 @@ namespace Dune
     // if no boundary elements, return
     if (nofelements==0) return;
 
+    dgf :: BoundaryDomBlock dombound(gridin, dimw);
+    if ( !dombound.isactive() && facemap.empty() ) return;
+
     facemap_t :: iterator pos;
     // now add all boundary faces
     {
@@ -671,7 +674,6 @@ namespace Dune
     int remainingBndSegs = 0;
     int defaultBndSegs = 0;
     int inbnddomain = 0;
-    dgf :: BoundaryDomBlock dombound(gridin, dimw);
     if (dombound.isactive()) {
       info->block(dombound);
       for (; dombound.ok(); dombound.next()) {

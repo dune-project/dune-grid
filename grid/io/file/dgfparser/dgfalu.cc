@@ -55,7 +55,7 @@ namespace Dune
         }
       }
 
-      return factory.createGrid( false );
+      return factory.createGrid( macroGrid.facemap.empty() );
     }
     else
     {
@@ -131,7 +131,7 @@ namespace Dune
         }
       }
 
-      return factory.createGrid( false );
+      return factory.createGrid( macroGrid.facemap.empty() );
     }
     else
     {
@@ -197,7 +197,7 @@ namespace Dune
             factory.insertBoundary( n, face, it->second );
         }
       }
-      return factory.createGrid( false );
+      return factory.createGrid( macroGrid.facemap.empty() );
     }
     else
     {
@@ -248,7 +248,7 @@ namespace Dune
             factory.insertBoundary( n, face, it->second );
         }
       }
-      return factory.createGrid( false );
+      return factory.createGrid( macroGrid.facemap.empty() );
     }
     else
     {
