@@ -47,9 +47,6 @@ namespace Dune
     if( !macroGrid.readDuneGrid( file, dim, dimworld ) )
       return new AlbertaGrid< dim, dimworld >( filename.c_str() );
 
-    macroGrid.setOrientation( 0, 1 );
-    macroGrid.setRefinement( 0, 1, -1, -1 );
-
     dgf::GridParameterBlock parameter( file );
     std::string gridName = parameter.name( "AlbertaGrid" );
 

@@ -368,7 +368,30 @@ namespace Dune
         }
         const Real det = determinant( jacobian );
         if( det * orientation < 0 )
+        {
           std::swap( id[ 0 ], id[ 1 ] );
+#if DUNE_ALBERTA_VERSION >= 0x300
+          if( data_->opp_vertex != NULL )
+          {
+            assert( data_->neigh != NULL );
+            for( int j = 0; j < 2; ++j )
+            {
+              const int nb = data_->neigh[ i*numVertices + j ];
+              if( nb < 0 )
+                continue;
+              const int ov = data_->opp_vertex[ i*numVertices + j ];
+              assert( data_->neigh[ nb*numVertices + ov ] == i );
+              assert( data_->opp_vertex[ nb*numVertices + ov ] == j );
+              data_->opp_vertex[ nb*numVertices + ov ] = (1-j);
+            }
+            std::swap( data_->opp_vertex[ i*numVertices ], data_->opp_vertex[ i*numVertices + 1 ] );
+          }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+          if( data_->neigh != NULL )
+            std::swap( neighbor( i, 0 ), neighbor( i, 1 ) );
+          if( data_->boundary != NULL )
+            std::swap( boundaryId( i, 0 ), boundaryId( i, 1 ) );
+        }
       }
     }
 
