@@ -155,6 +155,7 @@ namespace Dune
       std::string filename_;
       std::string filetype_;
       std::string parameter_;
+      std::string dumpfilename_;
       bool hasfile_;
       int dimension_;
 
@@ -210,6 +211,11 @@ namespace Dune
       std :: string parameter ()
       {
         return parameter_;
+      }
+
+      const std::string dumpFileName ( ) const
+      {
+        return dumpfilename_;
       }
     };
 

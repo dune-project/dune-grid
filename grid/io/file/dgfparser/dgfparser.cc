@@ -732,9 +732,14 @@ namespace Dune
     dgf :: SimplexGenerationBlock para(gridin);
     info->block(para);
 
-    std::string name = "gridparserfile.polylists.tmp";
+    // std::string name = "gridparserfile.polylists.tmp";
+    std::string name = para.dumpFileName();
+    bool tempFile = name.empty();
+    if (tempFile)
+      std::string name = temporaryFileName();
     const std::string prefixname = name;
-    const std::string inname = "gridparserfile.polylists.tmp";
+    const std::string inname = name;
+    // "gridparserfile.polylists.tmp";
     std::string params;
 
     if(!para.hasfile()) {
@@ -865,6 +870,12 @@ namespace Dune
     std::stringstream polyname;
     polyname << inname << "." << call_nr;
     readTetgenTriangle(polyname.str());
+
+    if (tempFile)
+    {
+      // remove( prefixname* )
+    }
+
     info->print("Automatic grid generation finished");
   }
 
@@ -1164,6 +1175,18 @@ namespace Dune
       coord[j]=0.;
     coord = vtx[i];
     return vtxParams[i];
+  }
+
+  inline std::string
+  DuneGridFormatParser::temporaryFileName ()
+  {
+    char filetemp[ FILENAME_MAX ];
+    std :: strcpy( filetemp, "DGFParser.XXXXXX" );
+    const int fd = mkstemp( filetemp );
+    if( fd < 0 )
+      DUNE_THROW( IOError, "Unable to create temporary file." );
+    close( fd );
+    return std :: string( filetemp );
   }
 
 } // end namespace Dune

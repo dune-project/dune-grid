@@ -256,6 +256,7 @@ namespace Dune
         haspath_(false),
         filetype_(),
         parameter_(),
+        dumpfilename_(),
         hasfile_(false),
         dimension_(-1)
     {
@@ -291,6 +292,10 @@ namespace Dune
           }
         gettokenparam("parameter",parameter_);
       }
+      if (findtoken("dumpfilename"))
+        if (getnextentry(p)) {
+          dumpfilename_=p;
+        }
     }
 
 

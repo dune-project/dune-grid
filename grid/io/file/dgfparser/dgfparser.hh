@@ -99,6 +99,8 @@ namespace Dune
 
     std :: vector< double > &getElParam ( int i, std::vector< double > &coord );
     std :: vector< double > &getVtxParam ( int i, std::vector< double > &coord );
+
+    static std::string temporaryFileName ();
   };
 
 
