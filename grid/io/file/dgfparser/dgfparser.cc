@@ -736,7 +736,7 @@ namespace Dune
     std::string name = para.dumpFileName();
     bool tempFile = name.empty();
     if (tempFile)
-      std::string name = temporaryFileName();
+      name = temporaryFileName();
     const std::string prefixname = name;
     const std::string inname = name;
     // "gridparserfile.polylists.tmp";
@@ -871,9 +871,19 @@ namespace Dune
     polyname << inname << "." << call_nr;
     readTetgenTriangle(polyname.str());
 
-    if (tempFile)
+    if ( tempFile &&
+         prefixname.compare(0,12,"TMPDGFParser")==0 )
     {
-      // remove( prefixname* )
+      /*
+         std::stringstream command;
+         command << "rm -f "
+              << prefixname << "*.ele "
+              << prefixname << "*.edge "
+              << prefixname << "*.node "
+              << prefixname << "*.poly ";
+         if( system(command.str().c_str()) < 0 )
+         DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
+       */
     }
 
     info->print("Automatic grid generation finished");
@@ -1181,11 +1191,13 @@ namespace Dune
   DuneGridFormatParser::temporaryFileName ()
   {
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, "DGFParser.XXXXXX" );
+    std :: strcpy( filetemp, "TMPDGFParser.XXXXXX" );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
-      DUNE_THROW( IOError, "Unable to create temporary file." );
+      DUNE_THROW( IOError, "Unable to create temporary file: " +
+                  std :: string( filetemp) );
     close( fd );
+    remove( filetemp );
     return std :: string( filetemp );
   }
 
