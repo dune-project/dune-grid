@@ -279,13 +279,13 @@ namespace Dune
 #endif
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
-#if DUNE_ALBERTA_VERSION <= 0x200
+#if DUNE_ALBERTA_VERSION < 0x300
 #if CALC_COORD
-      static const Flags standard = all & ~nonPeriodic;
+      static const Flags standard = all;
 #else
-      static const Flags standard = all & ~nonPeriodic & ~coords;
+      static const Flags standard = all & ~coords;
 #endif
-#endif // #if DUNE_ALBERTA_VERSION <= 0x200
+#endif // #if DUNE_ALBERTA_VERSION < 0x300
     };
 
 
