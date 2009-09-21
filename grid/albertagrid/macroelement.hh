@@ -39,11 +39,11 @@ namespace Dune
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
-#if DUNE_ALBERTA_VERSION == 0x200
+#if DUNE_ALBERTA_VERSION < 0x300
     template< int dim >
     inline int MacroElement< dim >::boundaryId ( const int face ) const
     {
-      switch (dim)
+      switch( dim )
       {
       case 1 :
         assert( (face >= 0) && (face < N_VERTICES_MAX) );
@@ -54,13 +54,12 @@ namespace Dune
       case 3 :
         assert( (face >= 0) && (face < N_FACES_MAX) );
         return face_bound[ face ];
-      default :
-        return (boundaryId( face ) != InteriorBoundary);
       }
     }
+
 #if 0
     template<>
-    inline int MacroElement< 1 >::isBoundary ( const int face ) const
+    inline int MacroElement< 1 >::boundaryId ( const int face ) const
     {
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
       return vertex_bound[ face ];
@@ -80,7 +79,7 @@ namespace Dune
       return face_bound[ face ];
     }
 #endif
-#endif // #if DUNE_ALBERTA_VERSION == 0x200
+#endif // #if DUNE_ALBERTA_VERSION < 0x300
 
 
     template< int dim >
