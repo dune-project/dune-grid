@@ -18,37 +18,44 @@ namespace Dune
     struct MacroElement
       : public ALBERTA MACRO_EL
     {
+      int boundaryId ( const int face ) const;
       bool isBoundary ( const int face ) const;
       const MacroElement< dim > *neighbor ( const int face ) const;
     };
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
     template< int dim >
     inline bool MacroElement< dim >::isBoundary ( const int face ) const
     {
-      const int id = wall_bound[ face ];
-      return (id != 0);
+      return (boundaryId( face ) != InteriorBoundary);
+    }
+
+
+#if DUNE_ALBERTA_VERSION >= 0x300
+    template< int dim >
+    inline int MacroElement< dim >::boundaryId ( const int face ) const
+    {
+      return wall_bound[ face ];
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
 #if DUNE_ALBERTA_VERSION == 0x200
     template<>
-    inline bool MacroElement< 1 >::isBoundary ( const int face ) const
+    inline int MacroElement< 1 >::isBoundary ( const int face ) const
     {
       assert( (face >= 0) && (face < N_VERTICES_MAX) );
       return vertex_bound[ face ];
     }
 
     template<>
-    inline bool MacroElement< 2 >::isBoundary ( const int face ) const
+    inline int MacroElement< 2 >::isBoundary ( const int face ) const
     {
       assert( (face >= 0) && (face < N_EDGES_MAX) );
       return edge_bound[ face ];
     }
 
     template<>
-    inline bool MacroElement< 3 >::isBoundary ( const int face ) const
+    inline int MacroElement< 3 >::isBoundary ( const int face ) const
     {
       assert( (face >= 0) && (face < N_FACES_MAX) );
       return face_bound[ face ];
@@ -63,10 +70,8 @@ namespace Dune
       return static_cast< const MacroElement * >( neigh[ face ] );
     }
 
-
   }
 
 }
-
 
 #endif // #ifndef DUNE_ALBERTA_MACROELEMENT_HH

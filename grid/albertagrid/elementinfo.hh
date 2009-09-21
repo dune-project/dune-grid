@@ -311,6 +311,7 @@ namespace Dune
     ElementInfo< dim >::macroElement () const
     {
       assert( !!(*this) );
+      assert( elInfo().macro_el != NULL );
       return static_cast< const MacroElement & >( *(elInfo().macro_el) );
     }
 
@@ -491,7 +492,7 @@ namespace Dune
       assert( (face >= 0) && (face < N_WALLS_MAX) );
 
       const int macroFace = elInfo().macro_wall[ face ];
-      const int id = elInfo().macro_el->wall_bound[ macroFace ];
+      const int id = macroElement().boundaryId( macroFace );
       // this assertion is only allowed, if FILL_BOUND is set
       // assert( id == elInfo().wall_bound[ face ] );
       return id;
