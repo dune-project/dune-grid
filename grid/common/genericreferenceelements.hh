@@ -15,12 +15,20 @@ namespace Dune
 
   /** \class GenericReferenceElement
    *  \ingroup GridGenericReferenceElements
-   *  \brief generic reference element
+   *  \brief This class provides access to geometric and topological
+   *  properties of a reference element. This includes its type,
+   *  the number of subentities,
+   *  the volume of the reference element, and a method for checking
+   *  if a point is inside.
+   *  The embedding of each subentity into the reference element is also
+   *  provided.
    *
+   *  A singleton of this class for a given geometry type can be accessed
+   *  through the GenericReferenceElements class.
+
    *  \tparam ctype  field type for vectors
    *  \tparam dim    dimension of the reference element
    *
-   *  \seealso Dune::ReferenceElement
    */
   template< class ctype, int dim >
   class GenericReferenceElement
@@ -106,7 +114,7 @@ namespace Dune
      *
      *  Denote by E the i-th subentity of codimension c of the current
      *  reference element. And denote by S the ii-th subentity of codimension
-     *  (cc-c) of E. Then, S is a subentity of codimension c of the current
+     *  (cc-c) of E. Then, S is a also a subentity of codimension c of the current
      *  reference element. This method returns the number of S with respect
      *  to the current reference element.
      *
@@ -124,8 +132,8 @@ namespace Dune
     /** \brief position of the barycenter of entity (i,c)
      *
      *  Denote by E the i-th subentity of codimension c of the current
-     *  reference element. This method returns the center of gravity of E
-     *  within the current reference element.
+     *  reference element. This method returns the coordinates of
+     *  the center of gravity of E within the current reference element.
      *
      *  \param[in]  i   number of subentity E (0 <= i < size( c ))
      *  \param[in]  c   codimension of subentity E
@@ -134,25 +142,6 @@ namespace Dune
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].position();
-    }
-
-    /** \brief check if a local coordinate is in the reference element of
-     *         subentity (i,codim)
-     *
-     *  Denote by E the i-th subentity of codimension codim of the current
-     *  reference element. This method return true, if the given local
-     *  coordinate is within the reference element for entity E.
-     *
-     *  \tparam     codim  codimension of subentity E
-     *
-     *  \param[in]  local  coordinates of the point with respect to the
-     *                     reference element of E
-     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
-     */
-    template< int codim >
-    bool checkInside ( const FieldVector< ctype, dim-codim > &local, int i ) const
-    {
-      return mapping< codim >( i ).checkInside( local );
     }
 
     /** \brief check if a local coordinate is in the reference element
@@ -165,6 +154,26 @@ namespace Dune
     bool checkInside ( const FieldVector< ctype, dim > &local ) const
     {
       return checkInside< 0 >( local, 0 );
+    }
+
+    /** \brief check if a local coordinate is in the reference element of
+     *         the i-th subentity E with codimension c of the current
+     *         referencre element.
+     *
+     *  Denote by E the i-th subentity of codimension codim of the current
+     *  reference element. This method return true, if the given local
+     *  coordinate is within the reference element for the entity E.
+     *
+     *  \tparam     codim  codimension of subentity E
+     *
+     *  \param[in]  local  coordinates of the point with respect to the
+     *                     reference element of E
+     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     */
+    template< int codim >
+    bool checkInside ( const FieldVector< ctype, dim-codim > &local, int i ) const
+    {
+      return mapping< codim >( i ).checkInside( local );
     }
 
 
@@ -638,7 +647,12 @@ namespace Dune
   // GenericReferenceElements
   // ------------------------
 
-  /** \brief Class providing access to the singletons of the gneric reference elements
+  /** \brief Class providing access to the singletons of the generic
+   *  reference elements. Special method are available for
+   *  simplex and cube elements of any dimension.
+   *  The method general can be used to obtain the reference element
+   *  for a given geometry type.
+   *
    *  \ingroup GridGenericReferenceElements
    */
   template< class ctype, int dim >
