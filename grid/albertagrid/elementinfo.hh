@@ -97,6 +97,7 @@ namespace Dune
       int getMark () const;
       void setMark ( int refCount ) const;
 
+      bool hasLeafNeighbor ( const int face ) const;
       ElementInfo leafNeighbor ( const int face ) const;
 
       /* obtain all level neighbors of a face
@@ -423,6 +424,31 @@ namespace Dune
     }
 
 
+#if DUNE_ALBERTA_VERSION >= 0x300
+    template< int dim >
+    inline bool ElementInfo< dim >::hasLeafNeighbor ( const int face ) const
+    {
+      assert( !!(*this) );
+      assert( (face >= 0) && (face < maxNeighbors) );
+
+      assert( (elInfo().fill_flag & FillFlags::boundaryId) != 0 );
+      const int macroFace = elInfo().macro_wall[ face ];
+      if( macroFace >= 0 )
+        return (macroElement().neighbor( macroFace ) != NULL);
+      else
+        return true;
+    }
+#endif // DUNE_ALBERTA_VERSION >= 0x300
+
+#if DUNE_ALBERTA_VERSION < 0x300
+    template< int dim >
+    inline bool ElementInfo< dim >::hasLeafNeighbor ( const int face ) const
+    {
+      return (neighbor( face ) != NULL);
+    }
+#endif // DUNE_ALBERTA_VERSION < 0x300
+
+
     template< int dim >
     inline ElementInfo< dim > ElementInfo< dim >::leafNeighbor ( const int face ) const
     {
@@ -465,6 +491,7 @@ namespace Dune
       assert( !!(*this) );
       assert( (face >= 0) && (face < maxNeighbors) );
 
+      assert( (elInfo().fill_flag & FillFlags::boundaryId) != 0 );
       const int macroFace = elInfo().macro_wall[ face ];
       if( macroFace >= 0 )
         return macroElement().isBoundary( macroFace );
@@ -491,6 +518,7 @@ namespace Dune
       assert( !!(*this) );
       assert( (face >= 0) && (face < N_WALLS_MAX) );
 
+      assert( (elInfo().fill_flag & FillFlags::boundaryId) != 0 );
       const int macroFace = elInfo().macro_wall[ face ];
       const int id = macroElement().boundaryId( macroFace );
       // this assertion is only allowed, if FILL_BOUND is set
@@ -535,8 +563,9 @@ namespace Dune
       assert( !!(*this) );
       assert( (face >= 0) && (face < N_WALLS_MAX) );
 
+      assert( (elInfo().fill_flag & FillFlags::boundaryId) != 0 );
       const int macroFace = elInfo().macro_wall[ face ];
-      return (macroFace < 0 ? NULL : elInfo().macro_el->wall_trafo[ face ]);
+      return (macroFace < 0 ? NULL : macroElement().wall_trafo[ macroFace ]);
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
@@ -558,9 +587,10 @@ namespace Dune
       assert( !!(*this) );
       assert( (face >= 0) && (face < N_WALLS_MAX) );
 
+      assert( (elInfo().fill_flag & FillFlags::boundaryId) != 0 );
       const int macroFace = elInfo().macro_wall[ face ];
       if( macroFace >= 0 )
-        return static_cast< BasicNodeProjection * >( elInfo().macro_el->projection[ face+1 ] );
+        return static_cast< BasicNodeProjection * >( macroElement().projection[ macroFace+1 ] );
       else
         return 0;
     }

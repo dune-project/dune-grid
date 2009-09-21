@@ -402,8 +402,7 @@ namespace Dune
   inline bool AlbertaGridLeafIntersection< GridImp >::neighbor () const
   {
     assert( oppVertex_ <= dimension );
-    const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
-    return (elInfo.neigh[ oppVertex_ ] != NULL);
+    return elementInfo().hasLeafNeighbor( oppVertex_ );
   }
 
 

@@ -66,7 +66,7 @@ namespace Dune
     template< int dim >
     const MacroElement< dim > *MacroElement< dim >::neighbor ( const int face ) const
     {
-      assert( (face >= 0) && (face < N_FACES_MAX) );
+      assert( (face >= 0) && (face < N_NEIGH_MAX) );
       return static_cast< const MacroElement * >( neigh[ face ] );
     }
 
