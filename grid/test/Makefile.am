@@ -70,9 +70,9 @@ test_yaspgrid_LDADD = $(LOCAL_LIBS) $(MPI_LIBS)
 
 # this implicitly checks the autoconf-test as well...
 test_alberta_SOURCES = test-alberta.cc
-test_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DGRIDDIM=$(GRIDDIM)
-test_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS)
-test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS)
+test_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DGRIDDIM=$(GRIDDIM) $(GRAPE_CPPFLAGS)
+test_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
+test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS) $(GRAPE_LIBS)
 
 # files for alu3dgrid
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc

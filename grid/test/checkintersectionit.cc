@@ -8,6 +8,8 @@
 #include <dune/grid/common/quadraturerules.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
+#include "checkgeometry.cc"
+
 /** \file
     \brief Tests for the IntersectionIterator
  */
@@ -28,76 +30,6 @@ struct EnableIntersectionIteratorReverseCheck
   static const bool v = true;
 };
 
-
-
-/** \brief Helper routine: Test a general geometry
- */
-template <class GeometryImp>
-void checkGeometry(const GeometryImp& geometry)
-{
-  using namespace Dune;
-
-  // Get the dimensions and types
-  const int dim      = GeometryImp::mydimension;
-  const int dimworld = GeometryImp::coorddimension;
-
-  typedef typename GeometryImp::ctype ctype;
-
-  // Get the corresponding reference element
-  const GenericReferenceElement< double, dim > &genericRefElement
-    = GenericReferenceElements< double, dim >::general( geometry.type() );
-
-  // Check whether the number of corners is correct
-  if (geometry.corners() != genericRefElement.size(dim))
-    DUNE_THROW(GridError, "Geometry has wrong number of corners!");
-
-  // check consistency between operator[] and global()
-  for( int i = 0; i < genericRefElement.size( dim ); ++i )
-  {
-    FieldVector< double, dim > localPos = genericRefElement.position( i, dim );
-    if( (geometry.corner( i ) - geometry.global( localPos )).infinity_norm() > 1e-6 )
-      DUNE_THROW( GridError, "Methods 'corner' and 'global' are inconsistent." );
-  }
-
-  // Use a quadrature rule to create a few test points for the following checks
-  const QuadratureRule<double, dim>& quad
-    = QuadratureRules<double, dim>::rule(geometry.type(), 2);
-
-  for( size_t i = 0; i < quad.size(); ++i )
-  {
-
-    const FieldVector< double, dim > &testPoint = quad[i].position();
-
-    // Check whether point is within the intersection
-    if( !genericRefElement.checkInside( testPoint ) )
-    {
-      std::cerr << "Test point (" << testPoint
-                << ") not within reference element." << std::endl;
-    }
-
-    // Transform to global coordinates
-    FieldVector< ctype, dimworld > global = geometry.global( testPoint );
-
-    // The back to local coordinates
-    FieldVector< ctype, dim > local = geometry.local( global );
-
-    // check for correctness
-    if ((testPoint-local).infinity_norm() > 1e-6)
-      DUNE_THROW(GridError, "local() and global() are not inverse to each other!");
-
-    // The integration element at the element center
-    ctype intElement = geometry.integrationElement(testPoint);
-    if (intElement <=0)
-      DUNE_THROW(GridError, "nonpositive integration element found!");
-
-#if 0
-    // This method exists in the interface, but it is not expected to work
-    // unless dim==dimworld
-    const FieldMatrix<ctype, dim, dim> jacobi
-      = intersectionGlobal.jacobianInverseTransposed(testPoint);
-#endif
-  }
-}
 
 // Check that normal and normal2 pointing in the same direction
 template< class ctype, int dimworld, class String >

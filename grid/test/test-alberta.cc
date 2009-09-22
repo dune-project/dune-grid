@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+//#define NEW_SUBENTITY_NUMBERING 1
+
 #include <iostream>
 #include <sstream>
 
@@ -18,6 +20,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
+#include "checkgeometry.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
 #include "checkiterators.cc"
@@ -47,7 +50,6 @@ void markOne ( GridType & grid , int num , int ref )
 }
 
 
-#if DUNE_ALBERTA_VERSION >= 0x300
 template< class Grid >
 void checkProjectedUnitCube ()
 {
@@ -62,11 +64,11 @@ void checkProjectedUnitCube ()
   {
     grid->globalRefine( Grid::dimension );
     gridcheck( *grid );
+    checkGeometry( grid->leafView() );
     checkGeometryInFather( *grid );
   }
   delete grid;
 }
-#endif // DUNE_ALBERTA_VERSION >= 0x300
 
 
 int main ( int argc, char **argv )
@@ -77,15 +79,12 @@ try {
 
   std::cout << "Testing " << GridType::typeName() << "..." << std::endl;
 
-  checkAlbertaReader< GridType >();
-
-#if DUNE_ALBERTA_VERSION >= 0x300
-  checkProjectedUnitCube< GridType >();
-#endif // DUNE_ALBERTA_VERSION >= 0x300
-
   std::string filename;
   if( argc <= 1 )
   {
+    checkAlbertaReader< GridType >();
+    checkProjectedUnitCube< GridType >();
+
     /* use grid-file appropriate for dimensions */
     std::ostringstream sfilename;
     sfilename << "simplex-testgrid-" << GridType::dimension << "-" << GridType::dimensionworld << ".dgf";
@@ -110,6 +109,7 @@ try {
     // check grid adaptation interface
     checkAdaptation( grid );
 
+    checkGeometry( grid.leafView() );
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
     checkTwists( grid.leafView(), NoMapTwist() );
@@ -118,6 +118,7 @@ try {
       std::cout << ">>> Refining grid and checking again..." << std::endl;
       grid.globalRefine( 1 );
       gridcheck(grid);
+      checkGeometry( grid.leafView() );
       checkIterators( grid.leafView() );
       checkIntersectionIterator(grid,true);
       checkTwists( grid.leafView(), NoMapTwist() );
@@ -129,6 +130,7 @@ try {
               << " times) and checking again..." << std::endl;
     grid.globalRefine( stepsForHalf );
     gridcheck(grid);
+    checkGeometry( grid.leafView() );
     checkIterators( grid.leafView() );
     checkIntersectionIterator(grid,true);
     checkTwists( grid.leafView(), NoMapTwist() );
@@ -138,6 +140,7 @@ try {
       std::cout << ">>> Refining one element and checking again..." << std::endl;
       markOne(grid,0,dim);
       gridcheck(grid);
+      checkGeometry( grid.leafView() );
       checkIterators( grid.leafView() );
     }
 
