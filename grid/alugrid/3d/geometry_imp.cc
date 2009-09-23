@@ -171,8 +171,16 @@ namespace Dune {
     // update geo impl
     geoImpl_.updateInFather( fatherGeom, myGeom );
 
-    // my volume is a part of 1
+    // my volume is a part of 1 for hexas, for tetra adjust with factor
     volume_ = myGeom.volume() / fatherGeom.volume();
+    if( elementType == tetra )
+    {
+      volume_ /= 6.0;
+#ifndef NDEBUG
+      FieldVector< alu3d_ctype, mydim> local( 0.0 );
+      assert( std::abs( 6.0 * volume_ - integrationElement( local ) ) < 1e-12 );
+#endif
+    }
 
     return true;
   }

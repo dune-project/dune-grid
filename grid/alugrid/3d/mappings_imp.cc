@@ -635,6 +635,29 @@ namespace Dune {
     return ;
   }
 
+  // the real constructor, this can be called for FieldVectors
+  // and double[3], we dont have to convert one type
+  template <>
+  template <class vector_t>
+  inline void LinearMapping<2, 2> ::
+  buildMapping  (const vector_t & p0,
+                 const vector_t & p1,
+                 const vector_t & p2)
+  {
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [1][0] = p1[1] - p0 [1] ;
+
+    _matrix [0][1] = p2[0] - p0 [0] ;
+    _matrix [1][1] = p2[1] - p0 [1] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
   // the real constructor, this can be called fro FieldVectors
   // and double[3], we dont have to convert one type
   template <int cdim, int mydim>
@@ -650,6 +673,24 @@ namespace Dune {
     _p0[0] = p0[0];
     _p0[1] = p0[1];
     _p0[2] = p0[2];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+  // the real constructor, this can be called fro FieldVectors
+  // and double[3], we dont have to convert one type
+  template <>
+  template <class vector_t>
+  inline void LinearMapping<2, 1> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1)
+  {
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [1][0] = p1[1] - p0 [1] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
 
     // initialize flags
     _calcedDet = _calcedInv = false ;
@@ -731,6 +772,30 @@ namespace Dune {
 
   // triangle mapping
   template <>
+  inline void LinearMapping<2, 1> ::
+  inverse(const localcoord_t& local) const
+  {
+    enum { mydim = 1 };
+    enum { cdim  = 2 };
+
+    // use least squares approach
+    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A_;
+
+    // calc ret = A^T*A
+    FMatrixHelp::multTransposedMatrix(_matrix , AT_A_);
+
+    // calc Jinv_ = A (A^T*A)^-1
+    FieldMatrix< alu3d_ctype, mydim, mydim> inv_AT_A;
+
+    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
+
+    // set flag
+    _calcedInv = true ;
+  }
+
+  // triangle mapping
+  template <>
   inline void LinearMapping<3, 2> ::
   calculateDeterminant(const localcoord_t& local) const
   {
@@ -791,6 +856,18 @@ namespace Dune {
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
                       (_matrix[1][0] * _matrix[1][0]) +
                       (_matrix[2][0] * _matrix[2][0]) );
+
+    // set flag
+    _calcedDet = true ;
+  }
+  // triangle mapping
+  template <>
+  inline void LinearMapping<2, 1> ::
+  calculateDeterminant(const localcoord_t& local) const
+  {
+    // calculate length
+    _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
+                      (_matrix[1][0] * _matrix[1][0]) );
 
     // set flag
     _calcedDet = true ;
