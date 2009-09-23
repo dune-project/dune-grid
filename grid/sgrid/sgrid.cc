@@ -101,6 +101,13 @@ namespace Dune {
   }
 
   template<int mydim, int cdim, class GridImp>
+  inline const FieldMatrix< sgrid_ctype, mydim, cdim > &
+  SGeometry< mydim, cdim, GridImp >::jacobianTransposed ( const FieldVector< sgrid_ctype, mydim > &local ) const
+  {
+    DUNE_THROW( NotImplemented, "jacobianTransposed for SGrid not implemented." );
+  }
+
+  template<int mydim, int cdim, class GridImp>
   inline const FieldMatrix<sgrid_ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const
   {
     if (!builtinverse)

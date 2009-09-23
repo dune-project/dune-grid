@@ -131,7 +131,7 @@ namespace Dune {
      */
     sgrid_ctype integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const;
 
-    //! can only be called for dim=dimworld!
+    const FieldMatrix<sgrid_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
     const FieldMatrix<sgrid_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
 
     //! print internal data
@@ -229,7 +229,12 @@ namespace Dune {
     }
 #endif
 
-    //! can only be called for dim=dimworld!
+    const FieldMatrix<sgrid_ctype,0,cdim>& jacobianTransposed (const FieldVector<sgrid_ctype, 0>& local) const
+    {
+      static FieldMatrix<sgrid_ctype,0,cdim> dummy( sgrid_ctype(0) );
+      return dummy;
+    }
+
     const FieldMatrix<sgrid_ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const
     {
       static FieldMatrix<sgrid_ctype,cdim,0> dummy( sgrid_ctype(0) );
