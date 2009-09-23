@@ -1322,12 +1322,6 @@ namespace Dune {
 #include "leafiterator.hh"
 #include "indexidset.hh"
 
-inline std::ostream& operator<< (std::ostream& s, Dune::PartitionType t)
-{
-  s << Dune::PartitionName(t);
-  return s;
-}
-
 template<int d, int dw, class ct, class gf>
 inline std::ostream& operator<< (std::ostream& s,
                                  const Dune::Grid<d,dw,ct,gf> & g)

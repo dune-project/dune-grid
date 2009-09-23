@@ -3,6 +3,8 @@
 #ifndef DUNE_GRIDENUMS_HH
 #define DUNE_GRIDENUMS_HH
 
+#include <iostream>
+
 #include <dune/common/exceptions.hh>
 
 namespace Dune {
@@ -44,6 +46,13 @@ namespace Dune {
     }
   }
 
+
+  inline std::ostream &operator<< ( std::ostream &out, const PartitionType &type )
+  {
+    return out << PartitionName( type );
+  }
+
+
   /** \brief Parameter to be used for the communication functions
      @ingroup GIRelatedTypes
    */
@@ -66,6 +75,14 @@ namespace Dune {
     All_Partition=4,                //!< all entities
     Ghost_Partition=5               //!< only ghost entities
   };
+
+
+  inline std::ostream &operator<< ( std::ostream &out, const PartitionIteratorType &type )
+  {
+    static std::string name[ 6 ] = { "interior partition", "interior-border partition", "overlap partition",
+                                     "overlap-front partition", "all partition", "ghost partition" };
+    return out << name[ type ];
+  }
 
 
   /** \brief Define a type for communication direction parameter
