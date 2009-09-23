@@ -33,9 +33,9 @@ namespace Dune {
 #endif
   {
 #if ALU2DGRID_PARALLEL
-    abort();
+    //abort();
     rankManager_.initialize();
-    //rankManager_.loadBalance();
+    rankManager_.loadBalance();
 #endif
 
     assert(mygrid_);
@@ -450,16 +450,17 @@ namespace Dune {
   template <int dim, int dimworld>
   inline bool ALU2dGrid<dim, dimworld> :: adapt ( )
   {
-    if( lockPostAdapt_ == true )
-    {
-      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
-    }
 
 #if ALU2DGRID_PARALLEL
     // make marking of ghost elements
     // needs one communication
     rankManager_.notifyMarking();
 #else
+    if( lockPostAdapt_ == true )
+    {
+      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
+    }
+
     if( (refineMarked_ > 0) || (coarsenMarked_ > 0) )
 #endif
     {
@@ -684,6 +685,10 @@ namespace Dune {
     ALU2DSPACE Hmesh & mygrd = myGrid();
     mygrd.storeGrid(filename.c_str(),time,0);
 
+#if ALU2DGRID_PARALLEL
+    rankManager_.backup( filename );
+#endif
+
     // write time and maxlevel
     {
       std::string extraName(filename);
@@ -729,6 +734,11 @@ namespace Dune {
         derr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
       }
     }
+
+#if ALU2DGRID_PARALLEL
+    calcMaxlevel();
+    rankManager_.restore( filename );
+#endif
 
     // calculate new maxlevel
     // calculate indices
