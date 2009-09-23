@@ -1,0 +1,19 @@
+DIM: 2
+DIM_OF_WORLD: 3
+
+number of vertices: 3
+number of elements: 1
+
+vertex coordinates:
+ 0.0000000000e+00  0.0000000000e+00  0.0000000000e+00
+ 1.0000000000e+00  0.0000000000e+00  0.0000000000e+00
+ 0.0000000000e+00  1.0000000000e+00  5.0000000000e-01
+
+element vertices:
+    0     1     2
+
+element boundaries:
+   1    1    1
+
+element neighbours:
+  -1   -1   -1

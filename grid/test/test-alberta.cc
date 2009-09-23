@@ -84,8 +84,10 @@ try {
   {
     checkAlbertaReader< GridType >();
 
+#if ALBERTA_DIM == GRIDDIM
     if( dim < 3 )
       checkProjectedUnitCube< GridType >();
+#endif
 
     /* use grid-file appropriate for dimensions */
     std::ostringstream sfilename;
