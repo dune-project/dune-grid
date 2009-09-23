@@ -15,17 +15,19 @@ namespace Dune
   /** \cond */
   template <int dim,int dimworld>
   class MacroGrid::Impl<ALUCubeGrid<dim,dimworld> > {
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    friend class MacroGrid::Impl< ALUConformGrid<dim,dimworld> >;
   public:
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
     static ALUCubeGrid<dim,dimworld>*
     generate(MacroGrid& mg,
              const char* filename,
              MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
 
-  private:
-    inline void
-    generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
+    template <class GridImp>
+    static GridImp* callDirectly( const char* gridname,
+                                  const int rank,
+                                  const char *filename,
+                                  MPICommunicatorType communicator );
 
     static bool fileExists ( const char *fileName )
     {
@@ -38,83 +40,59 @@ namespace Dune
   };
   /** \endcond */
 
-
   /** \cond */
   template <int dim,int dimworld>
-  class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> > {
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    friend class MacroGrid::Impl<ALUConformGrid<dim,dimworld> >;
+  class MacroGrid::Impl< ALUSimplexGrid<dim,dimworld> >
+  {
   public:
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
     static ALUSimplexGrid<dim,dimworld>*
     generate(MacroGrid& mg,
              const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-
-  private:
-    inline void
-    generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
-
-    static bool fileExists ( const char *fileName )
+             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
     {
-      std :: ifstream testfile( fileName );
-      if( !testfile )
-        return false;
-      testfile.close();
-      return true;
+      // call generic generation of confrom grid (is the same)
+      return MacroGrid::Impl< ALUConformGrid<dim,dimworld> > :: template
+             generate< ALUSimplexGrid<dim,dimworld> >
+               ("ALUSimplexGrid< 2 , 2 >", mg, filename, MPICOMM );
     }
-
-    // friend MacroGrid::Impl<ALUConformGrid<dim,dimworld> >;
   };
   /** \endcond */
 
 
   /** \cond */
   template <int dim,int dimworld>
-  class MacroGrid::Impl<ALUConformGrid<dim,dimworld> > {
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    friend class MacroGrid::Impl<ALUSimplexGrid<dim,dimworld> >;
+  class MacroGrid::Impl< ALUConformGrid<dim,dimworld> >
+  {
+    friend class MacroGrid::Impl< ALUSimplexGrid<dim,dimworld> >;
   public:
+    // type of MPI communicator
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+
     static ALUConformGrid<dim,dimworld>*
     generate(MacroGrid& mg,
              const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
+             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+    {
+      return MacroGrid::Impl< ALUConformGrid<dim,dimworld> > ::
+             template generate < ALUConformGrid<dim,dimworld> >
+               ("ALUConformGrid< 2 , 2 >", mg, filename, MPICOMM );
+    }
 
-  private:
-    inline void
-    generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
+    // generic 2d grid generation method
+    template <class GridImp>
+    static GridImp*
+    generate(const char* gridname,
+             MacroGrid& mg,
+             const char* filename,
+             MPICommunicatorType MPICOMM );
+
 
     static bool fileExists ( const char *fileName )
     {
-      std :: ifstream testfile( fileName );
-      if( !testfile )
-        return false;
-      testfile.close();
-      return true;
+      return MacroGrid::Impl< ALUCubeGrid<dim,dimworld> > :: fileExists( fileName );
     }
-
-    // friend MacroGrid::Impl<ALUConformGrid<dim,dimworld> >;
   };
-  /* needs new version of alulib */
-#if 0 // old implementation
-  template <int dim,int dimworld>
-  class MacroGrid::Impl<ALUConformGrid<dim,dimworld> > {
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-  public:
-    static ALUConformGrid<dim,dimworld>*
-    generate(MacroGrid& mg,
-             const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-  private:
-    inline void
-    generateAlu3d(MacroGrid& mg,
-                  const char* filename, std::string& str, MPICommunicatorType MPICOMM );
-  };
-#endif
-  /** \endcond */
-
-
 
   // DGFGridInfo (specialization for ALUGrid)
   // ----------------------------------------
