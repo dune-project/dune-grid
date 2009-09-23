@@ -86,6 +86,17 @@ namespace Dune
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
+    //! type of local coordinates
+    typedef FieldVector<ctype, mydim> LocalCoordinate;
+
+    //! type of the global coordinates
+    typedef FieldVector< ctype, cdim > GlobalCoordinate;
+
+    //! type of jacobian (also of jacobian inverse transposed)
+    typedef FieldMatrix<ctype,cdim,mydim> Jacobian;
+
+    //! type of jacobian transposed
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::ReferenceElement.
@@ -105,7 +116,7 @@ namespace Dune
        \return const reference to a vector containing the position \f$g(c_i)\f$ where
        \f$c_i\f$ is the position of the i'th corner of the reference element.
      */
-    const FieldVector< ctype, cdim > &operator[] ( int i ) const DUNE_DEPRECATED
+    const GlobalCoordinate &operator[] ( int i ) const DUNE_DEPRECATED
     {
       return realGeometry[i];
     }
@@ -128,7 +139,7 @@ namespace Dune
      *                 element)
      *  \returns position of the i'th corner
      */
-    FieldVector< ctype, cdim > corner ( int i ) const
+    GlobalCoordinate corner ( int i ) const
     {
       return realGeometry.corner( i );
     }
@@ -137,7 +148,7 @@ namespace Dune
        \param[in] local Position in the reference element \f$D\f$
        \return Position in \f$W\f$
      */
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
+    GlobalCoordinate global (const LocalCoordinate& local) const
     {
       return realGeometry.global(local);
     }
@@ -146,7 +157,7 @@ namespace Dune
        \param[in] global Position in \f$W\f$
        \return Position in \f$D\f$ that maps to global
      */
-    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& global) const
+    LocalCoordinate local (const GlobalCoordinate& global) const
     {
       return realGeometry.local(global);
     }
@@ -158,7 +169,7 @@ namespace Dune
      *
      *  \deprecated Use the corresponding method in GenericReferenceElement
      */
-    bool checkInside ( const FieldVector< ctype, mydim > &local ) const DUNE_DEPRECATED
+    bool checkInside ( const LocalCoordinate& local ) const DUNE_DEPRECATED
     {
       const GenericReferenceElement< ctype, mydim > &refElement
         = GenericReferenceElements< ctype, mydim >::general( type() );
@@ -188,7 +199,7 @@ namespace Dune
        efficieny. For example in an equidistant structured mesh it may be as
        simple as \f$h^\textrm{mydim}\f$.
      */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
+    ctype integrationElement (const LocalCoordinate& local) const
     {
       return realGeometry.integrationElement(local);
     }
@@ -208,8 +219,8 @@ namespace Dune
      *
      *  \return \f$J_g^T(x)\f$
      */
-    const FieldMatrix< ctype, mydim, cdim > &
-    jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalCoordinate& local ) const
     {
       return realGeometry.jacobianTransposed( local );
     }
@@ -233,7 +244,7 @@ namespace Dune
      *        This means that it is inverse for all tangential vectors in
      *        \f$g(x)\f$ while mapping all normal vectors to zero.
      */
-    const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const
+    const Jacobian& jacobianInverseTransposed (const LocalCoordinate& local) const
     {
       return realGeometry.jacobianInverseTransposed(local);
     }
