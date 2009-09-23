@@ -35,7 +35,7 @@ namespace Dune {
 #if ALU2DGRID_PARALLEL
     //abort();
     rankManager_.initialize();
-    rankManager_.loadBalance();
+    //rankManager_.loadBalance();
 #endif
 
     assert(mygrid_);
