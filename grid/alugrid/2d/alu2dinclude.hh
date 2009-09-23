@@ -8,10 +8,13 @@
 #define ALU2DSPACENAME ALUGridSpace
 
 // use the ALU3dGrid Parallel detection
-#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
+//#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
+#define ALU2DGRID_PARALLEL 0
 
-#include "communicator.hh"
+#include <dune/common/collectivecommunication.hh>
+
 #if ALU2DGRID_PARALLEL
+//#include "communicator.hh"
 #warning "Using ALU2dGrid in parallel"
 #endif
 
