@@ -60,7 +60,7 @@ namespace Dune {
         \param Grid view that the data belongs to
      */
     template <class DataContainer>
-    void addCellData(const DataContainer& data, const GridView& gridView);
+    void addCellData(const DataContainer& data, const GridView& gridView, bool GridSplitUp=false);
 
     /** \brief Add vertex data
         \param An ISTL compliant vector type

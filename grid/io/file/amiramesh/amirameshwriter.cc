@@ -75,8 +75,6 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
 
 
   if (splitAll) {
-
-
     Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
     noOfElements = 0;
     int count=0;
@@ -128,10 +126,8 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
         eIterator eSubIt = refinement.eBegin(0);
         IndexVector vertexIds;
 
-
         //Have to do this, because Refinement indices of corners don't match indexSet indices of the corners of that entity
         //So we have to check equality of two indices by checking equality of the coordinates of the corners
-
 
         //coordinates of nodes using refinement indices
         std::vector<Coordinate> vertices(refinement.nVertices(0));
@@ -143,7 +139,6 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
         for( ; eSubIt != eSubEnd; ++eSubIt) {
 
           vertexIds = eSubIt.vertexIndices();
-
 
           for (int j=0; j<VerticesPerElement; j++) {
 
@@ -324,22 +319,9 @@ void Dune::AmiraMeshWriter<GridView>::addLeafGrid(const GridType2& grid, bool sp
 template<class GridView>
 template<class DataContainer>
 void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
-                                                  const GridView& gridView)
+                                                  const GridView& gridView,
+                                                  bool gridSplitUp)
 {
-  DUNE_THROW(NotImplemented, "AmiraMeshWriter::addCellData");
-}
-
-
-
-
-
-template<class GridView>
-template<class DataContainer>
-void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
-                                                    const GridView& gridView,
-                                                    bool gridSplitUp)
-{
-
   typedef typename GridView::template Codim<0>::Iterator ElementIterator;
   typedef typename GridView::Grid::ctype ct;
   typedef Dune::VirtualRefinement<dim, ct> Refinement;
@@ -350,7 +332,6 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
   //gridSplitUp tells programm that Amira "thinks" that all elements are tethraheda
 
 
-
   // Find out whether the grid contains only tetrahedra.  If yes, then
   // it is written in TetraGrid format.  If not, it is written in
   // hexagrid format (if gridSplitUp=false).
@@ -358,43 +339,36 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
     (indexSet.geomTypes(0).size()==1)
     && (indexSet.geomTypes(0)[0].isSimplex());
 
-
   // Get number of components
   const int ncomp = DataContainer::block_type::size;
 
   // Set the appropriate content type for 2D grid data, if no other
   // content type hasn't been set already
-  if (dim==2
-      && amiramesh_.parameters.findBase("ContentType")==NULL)
+  if (dim==2 and amiramesh_.parameters.findBase("ContentType")==NULL)
     amiramesh_.parameters.set("ContentType", "HxTriangularData");
 
-  if (!containsOnlyTetrahedra && dim==3 && !gridSplitUp) {
-
+  if (!containsOnlyTetrahedra and dim==3 and !gridSplitUp)
+  {
     AmiraMesh::Location* hexa_loc = new AmiraMesh::Location("Hexahedra", indexSet.size(0));
     amiramesh_.insert(hexa_loc);
-
   }
 
   AmiraMesh::Location* amLocation;
-  if (data.size()==indexSet.size(dim)) {
 
-    // P1 data
-    amLocation = new AmiraMesh::Location("Nodes", data.size());
-
-  } else if (data.size()==indexSet.size(0)) {
-
-    // P0 data
-    if (gridSplitUp || containsOnlyTetrahedra) {
-
+  if (data.size()==indexSet.size(0))
+  {
+    if (gridSplitUp || containsOnlyTetrahedra)
+    {
       Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
       int noOfElements = 0;
       int count;
 
-      for (int i=0; i<indexSet.geomTypes(0).size(); i++) {
-
+      for (int i=0; i<indexSet.geomTypes(0).size(); i++)
+      {
         if (indexSet.geomTypes(0)[i].isSimplex())
           count=1;
-        else {
+        else
+        {
           Refinement & refinement = Dune::buildRefinement<dim, ct>(indexSet.geomTypes(0)[i],coerceTo);
           count = refinement.nElements(0);
         }
@@ -407,8 +381,9 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
     else
       amLocation = new AmiraMesh::Location("Hexahedra", data.size());
 
-  } else
-    DUNE_THROW(IOError, "BlockVector doesn't match the grid!");
+  }
+  else
+    DUNE_THROW(IOError, "AmiraMeshWriter::addCellData: BlockVector doesn't match the grid! For vertex based data use addVertexData");
 
   amiramesh_.insert(amLocation);
 
@@ -419,62 +394,122 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   AmiraMesh::Field* nodeField;
 
-  if (data.size()==indexSet.size(0)) {
-    // P0 data
-    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
-                                     AmiraMesh::t_constant, nodeData);
-
-  } else if (containsOnlyTetrahedra || dim==2 || gridSplitUp) {
-    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
-                                     AmiraMesh::t_linear, nodeData);
-  } else {
-
-    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
-                                     AmiraMesh::t_trilinear, nodeData);
-  }
+  nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double, AmiraMesh::t_constant, nodeData);
 
   amiramesh_.insert(nodeField);
 
-
   // write the data into the AmiraMesh object
-
   typedef typename DataContainer::ConstIterator Iterator;
 
   Iterator dit    = data.begin();
   Iterator ditend = data.end();
 
   int i=0;
-  if (indexSet.size(0)==data.size() && gridSplitUp) {
+  if (gridSplitUp)
+  {
     ElementIterator eIt    = gridView.template begin<0>();
     Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
 
-    for (; dit!=ditend; ++dit) {
-
+    for (; dit!=ditend; ++dit)
+    {
       Refinement & refinement = Dune::buildRefinement<dim, ct>(eIt->type(),coerceTo);
       int num_subsimplices=refinement.nElements(0);
 
       //Have to copy data if gridSplitUp because number_elements != number_data;
-      for(int k=0; k<num_subsimplices; k++) {
+      for(int k=0; k<num_subsimplices; k++)
+      {
         for (int j=0; j<ncomp; j++)
           ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
       }
       ++eIt;
     }
-
   }
-  else {
-    for (; dit!=ditend; ++dit) {
-      for (int j=0; j<ncomp; j++)
-        ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
-    }
-  }
-
 }
 
 
 
+template<class GridView>
+template<class DataContainer>
+void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
+                                                    const GridView& gridView,
+                                                    bool gridSplitUp)
+{
+  typedef typename GridView::template Codim<0>::Iterator ElementIterator;
+  typedef typename GridView::Grid::ctype ct;
+  typedef Dune::VirtualRefinement<dim, ct> Refinement;
 
 
+  const typename GridView::IndexSet& indexSet = gridView.indexSet();
+
+  //gridSplitUp tells programm that Amira "thinks" that all elements are tethraheda
+
+
+  // Find out whether the grid contains only tetrahedra.  If yes, then
+  // it is written in TetraGrid format.  If not, it is written in
+  // hexagrid format (if gridSplitUp=false).
+  bool containsOnlyTetrahedra =
+    (indexSet.geomTypes(0).size()==1)
+    && (indexSet.geomTypes(0)[0].isSimplex());
+
+  // Get number of components
+  const int ncomp = DataContainer::block_type::size;
+
+  // Set the appropriate content type for 2D grid data, if no other
+  // content type hasn't been set already
+  if (dim==2 and amiramesh_.parameters.findBase("ContentType")==NULL)
+    amiramesh_.parameters.set("ContentType", "HxTriangularData");
+
+  if (!containsOnlyTetrahedra and dim==3 and !gridSplitUp)
+  {
+    AmiraMesh::Location* hexa_loc = new AmiraMesh::Location("Hexahedra", indexSet.size(0));
+    amiramesh_.insert(hexa_loc);
+  }
+
+  AmiraMesh::Location* amLocation;
+
+  if (data.size()==indexSet.size(dim))
+  {
+    // P1 data
+    amLocation = new AmiraMesh::Location("Nodes", data.size());
+  }
+  else
+    DUNE_THROW(IOError, "AmiraMeshWriter::addVertexData: BlockVector doesn't match the grid! For element based data use addCellData");
+
+  amiramesh_.insert(amLocation);
+
+  // \todo Auto-detect data type
+  AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", amLocation, McPrimType::mc_double, ncomp);
+  amiramesh_.insert(nodeData);
+
+
+  AmiraMesh::Field* nodeField;
+
+  if (containsOnlyTetrahedra || dim==2 || gridSplitUp)
+  {
+    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double, AmiraMesh::t_linear, nodeData);
+  }
+  else
+  {
+    nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double, AmiraMesh::t_trilinear, nodeData);
+  }
+
+  amiramesh_.insert(nodeField);
+
+  // write the data into the AmiraMesh object
+  typedef typename DataContainer::ConstIterator Iterator;
+
+  Iterator dit    = data.begin();
+  Iterator ditend = data.end();
+
+  int i=0;
+
+  for (; dit!=ditend; ++dit)
+  {
+    for (int j=0; j<ncomp; j++)
+      ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
+  }
+
+}
 
 
 template<class GridView>
