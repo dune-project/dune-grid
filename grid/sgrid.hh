@@ -79,7 +79,8 @@ namespace Dune {
      The resulting system is diagonal since the direction vectors are required to be orthogonal.
    */
   template<int mydim, int cdim, class GridImp>
-  class SGeometry : public GeometryDefaultImplementation<mydim,cdim,GridImp,SGeometry>
+  class SGeometry
+    : public GeometryDefaultImplementation<mydim,cdim,GridImp,SGeometry>
   {
   public:
     //! define type used for coordinates in grid module
@@ -131,7 +132,7 @@ namespace Dune {
      */
     sgrid_ctype integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const;
 
-    const FieldMatrix<sgrid_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
+    const FieldMatrix< sgrid_ctype, mydim, cdim > &jacobianTransposed ( const FieldVector< sgrid_ctype, mydim > &local ) const;
     const FieldMatrix<sgrid_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
 
     //! print internal data
@@ -156,7 +157,8 @@ namespace Dune {
 
   //! specialization for dim=0, this is a vertex
   template<int cdim, class GridImp>
-  class SGeometry<0,cdim,GridImp> : public GeometryDefaultImplementation<0,cdim,GridImp,SGeometry>
+  class SGeometry<0,cdim,GridImp>
+    : public GeometryDefaultImplementation<0,cdim,GridImp,SGeometry>
   {
   public:
     //! define type used for coordinates in grid module
@@ -221,17 +223,9 @@ namespace Dune {
       return 1.;
     }
 
-#if 0
-    //! returns always true
-    bool checkInside (const FieldVector<sgrid_ctype, 0>& local) const
+    const FieldMatrix< sgrid_ctype, 0, cdim > &jacobianTansposed ( const FieldVector< sgrid_ctype, 0 > &local ) const
     {
-      return true;
-    }
-#endif
-
-    const FieldMatrix<sgrid_ctype,0,cdim>& jacobianTransposed (const FieldVector<sgrid_ctype, 0>& local) const
-    {
-      static FieldMatrix<sgrid_ctype,0,cdim> dummy( sgrid_ctype(0) );
+      static FieldMatrix< sgrid_ctype, 0, cdim > dummy ( sgrid_ctype( 0 ) );
       return dummy;
     }
 
