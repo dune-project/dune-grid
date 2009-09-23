@@ -69,8 +69,8 @@ struct GeometryInterface <Geometry, dim, dim>
 {
   static void check(const Geometry &e)
   {
-    IsTrue<0 == Geometry::mydimension>::yes();
-    IsTrue<dim == Geometry::dimension>::yes();
+    dune_static_assert( (Geometry::mydimension == 0), "" );
+    dune_static_assert( (Geometry::dimension == dim), "" );
 
     // vertices have only a subset of functionality
     e.type();
