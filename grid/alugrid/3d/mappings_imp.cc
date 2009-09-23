@@ -751,33 +751,21 @@ namespace Dune {
   inline void LinearMapping<3, 2> ::
   inverse(const localcoord_t& local) const
   {
-    enum { mydim = 2 };
-    enum { cdim  = 3 };
-
-    // use least squares approach
-    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A_;
-
-    // calc ret = A^T*A
-    FMatrixHelp::multTransposedMatrix(_matrix , AT_A_);
-
-    // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< alu3d_ctype, mydim, mydim> inv_AT_A;
-
-    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
-    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
-
-    // set flag
-    _calcedInv = true ;
+    inverseCodimOne( local );
   }
 
-  // triangle mapping
+  // edge mapping
   template <>
   inline void LinearMapping<2, 1> ::
   inverse(const localcoord_t& local) const
   {
-    enum { mydim = 1 };
-    enum { cdim  = 2 };
+    inverseCodimOne( local );
+  }
 
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  inverseCodimOne(const localcoord_t& local) const
+  {
     // use least squares approach
     FieldMatrix<alu3d_ctype, mydim, mydim> AT_A_;
 

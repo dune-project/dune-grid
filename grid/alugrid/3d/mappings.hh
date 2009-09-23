@@ -255,6 +255,9 @@ namespace Dune {
     // calculate inverse
     void inverse (const localcoord_t&) const;
 
+    // calculate inverse one codim one entity
+    void inverseCodimOne (const localcoord_t&) const;
+
     // calculate determinant
     void calculateDeterminant (const localcoord_t&) const;
 
