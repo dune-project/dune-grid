@@ -2,7 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 // Dune includes
 #include <dune/common/stdstreams.hh>
-#include <dune/common/interfaces.hh>
 
 // Local includes
 #include "entity.hh"
