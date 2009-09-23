@@ -222,9 +222,9 @@ namespace Dune
     Grid *createGrid ( const std::string &gridName )
     {
       macroData_.finalize();
-#if DUNE_ALBERTA_VERSION < 0x300
-      macroData_.setOrientation( Alberta::Real( 1 ) );
-#endif // #if DUNE_ALBERTA_VERSION < 0x300
+      if( dimension < 3 )
+        macroData_.setOrientation( Alberta::Real( 1 ) );
+      assert( macroData_.checkNeighbors() );
       return new Grid( macroData_, gridName, boundaryProjection_ );
     }
 
@@ -264,9 +264,9 @@ namespace Dune
     {
       dune_static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
-#if DUNE_ALBERTA_VERSION < 0x300
-      macroData_.setOrientation( Alberta::Real( 1 ) );
-#endif // #if DUNE_ALBERTA_VERSION < 0x300
+      if( dimension < 3 )
+        macroData_.setOrientation( Alberta::Real( 1 ) );
+      assert( macroData_.checkNeighbors() );
       return macroData_.write( filename, (type == xdr) );
     }
 
