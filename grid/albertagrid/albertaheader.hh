@@ -22,25 +22,6 @@
 #define ALBERTA_DEBUG 0
 #endif
 
-// we dont use the el->index, its for debugging
-#ifndef EL_INDEX
-#define EL_INDEX 0
-#else
-#if EL_INDEX != 0
-#warning "EL_INDEX != 0, but not used in interface implementation!\n"
-#endif
-#endif
-
-
-#ifndef NEIGH_IN_EL
-// neighbours were calculated on walkthrough
-#define NEIGH_IN_EL 0
-#else
-#if NEIGH_IN_EL != 0
-#error "NEIGH_IN_EL != 0 is not supported by this implementation!\n"
-#endif
-#endif
-
 // MAX, MIN, and ABS are defined macros of ALBERTA
 // if they are not defined elsewhere, they are undefined here
 #ifndef MAX
