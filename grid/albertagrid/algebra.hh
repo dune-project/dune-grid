@@ -74,6 +74,13 @@ namespace Dune
     }
 
 
+    template< class K, int m >
+    inline static K invert ( const FieldMatrix< K, 0, m > &matrix,
+                             FieldMatrix< K, m, 0 > &inverse )
+    {
+      return K( 1 );
+    }
+
     template< class K >
     inline static K invert ( const FieldMatrix< K, 1, 1 > &matrix,
                              FieldMatrix< K, 1, 1 > &inverse )
