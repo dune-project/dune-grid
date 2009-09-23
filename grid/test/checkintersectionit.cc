@@ -33,17 +33,14 @@ struct EnableIntersectionIteratorReverseCheck
 
 // Check that normal and normal2 pointing in the same direction
 template< class ctype, int dimworld, class String >
-inline void checkParallel ( const Dune :: FieldVector< ctype, dimworld > &normal,
-                            const Dune :: FieldVector< ctype, dimworld > &normal2,
+inline void checkParallel ( const Dune::FieldVector< ctype, dimworld > &normal,
+                            const Dune::FieldVector< ctype, dimworld > &refNormal,
                             const String & name )
 {
-  if( std :: abs( normal * normal2 - normal.two_norm() * normal2.two_norm() ) > 1e-8 )
+  if( (normal.two_norm()*refNormal.two_norm() - normal*refNormal) > 1e-8 )
   {
-    std :: cerr << "Error: " << name
-                << " does not point in the direction of outerNormal."
-                << std :: endl;
-    std :: cerr << "       " << name << " = " << normal2
-                << ", normal = " << normal << std :: endl;
+    std::cerr << "Error: " << name << " does not point in the direction of outer normal." << std::endl;
+    std::cerr << "       " << name << " = " << normal << ", outer normal = " << refNormal << std :: endl;
     assert( false );
   }
 }
@@ -86,10 +83,13 @@ void checkIntersectionIterator(const GridViewType& view,
   const bool checkOutside = EnableIntersectionIteratorReverseCheck< GridType >::v;
   const typename GridViewType::IndexSet& indexSet = view.indexSet();
 
-  typedef typename GridType :: ctype ctype;
+  typedef typename GridType::ctype ctype;
 
-  const int dim      = GridType :: dimension;
-  const int dimworld = GridType :: dimensionworld;
+  const int dim      = GridType::dimension;
+  const int dimworld = GridType::dimensionworld;
+
+  const typename GridViewType::template Codim< 0 >::Geometry &geoInside = eIt->geometry();
+  const GenericReferenceElement< ctype, dim > &refElement = GenericReferenceElements< ctype, dim >::general( eIt->type() );
 
   FieldVector< ctype,dimworld > sumNormal( ctype( 0 ) );
 
@@ -119,6 +119,8 @@ void checkIntersectionIterator(const GridViewType& view,
 
   for (;iIt!=iEndIt; ++iIt)
   {
+    const int indexInInside  = iIt->indexInInside();
+
     // //////////////////////////////////////////////////////////////////////
     //   Compute the integral of the outer normal over the whole element.
     //   This has to be zero.
@@ -126,8 +128,6 @@ void checkIntersectionIterator(const GridViewType& view,
     const int interDim = IntersectionIterator::LocalGeometry::mydimension;
     const QuadratureRule< double, interDim > &quad
       = QuadratureRules< double, interDim >::rule( iIt->type(), 3 );
-    //const QuadratureRule<double, interDim>& quad
-    //    = QuadratureRules<double, interDim>::rule(iIt->intersectionSelfLocal().type(), interDim);
 
     typedef typename IntersectionIterator::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
@@ -204,7 +204,6 @@ void checkIntersectionIterator(const GridViewType& view,
     if( iIt->conforming() && iIt->neighbor() && !iIt->boundary() )
     {
       EntityPointer outside = iIt->outside();
-      const int indexInInside  = iIt->indexInInside();
       const int indexInOutside = iIt->indexInOutside();
 
       if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( *outside, indexInOutside, 1 ) )
@@ -271,8 +270,16 @@ void checkIntersectionIterator(const GridViewType& view,
       const FieldMatrix< ctype, dimworld, dim-1 > &jit
         = intersectionGlobal.jacobianInverseTransposed( pt );
 
+      // independently calculate the integration outer normal for the inside element
+      FieldVector< ctype, dim > xInside = intersectionSelfLocal.global( pt );
+      FieldVector< ctype, dim > refNormal = refElement.template mapping< 0 >( 0 ).normal( indexInInside, xInside );
+      FieldVector< ctype, dimworld > refIntNormal;
+      geoInside.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
+      refIntNormal *= geoInside.integrationElement( xInside );
+
       // Check outer normal
       const FieldVector< ctype, dimworld > normal = iIt->outerNormal( pt );
+      checkParallel( normal, refIntNormal, "outerNormal" );
 
       // Check normal vector is orthogonal to all vectors connecting
       // the vertices
@@ -310,7 +317,13 @@ void checkIntersectionIterator(const GridViewType& view,
       }
 
       checkJIn( intNormal, jit, "integrationOuterNormal" );
-      checkParallel ( intNormal, normal, "integrationOuterNormal");
+      checkParallel ( intNormal, refIntNormal, "integrationOuterNormal");
+      if( (intNormal - refIntNormal).two_norm() > 1e-8 )
+      {
+        std::cerr << "Error: Wrong integration outer normal (" << intNormal
+                  << ", should be " << refIntNormal << ")." << std::endl;
+        assert( false );
+      }
 
       // Check unit outer normal
       const FieldVector< ctype, dimworld > unitNormal = iIt->unitOuterNormal( pt );
@@ -324,7 +337,7 @@ void checkIntersectionIterator(const GridViewType& view,
       }
 
       checkJIn( unitNormal, jit, "unitOuterNormal" );
-      checkParallel ( unitNormal, normal, "unitOuterNormal");
+      checkParallel ( unitNormal, refIntNormal, "unitOuterNormal");
 
       // check intersectionSelfLocal
       FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
