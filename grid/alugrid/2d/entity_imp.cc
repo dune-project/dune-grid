@@ -98,7 +98,7 @@ namespace Dune {
   ALU2dGridEntity<cd, dim, GridImp> :: geometry () const
   {
     if( !geoImp_.up2Date() )
-      geoImp_.builtGeom(*item_,face_);
+      geoImp_.buildGeom(*item_,face_);
 
     assert( geoImp_.up2Date() );
     return geoObj_;
@@ -175,10 +175,12 @@ namespace Dune {
 
   //! geometry of this entity
   template<int dim, class GridImp>
-  inline const typename ALU2dGridEntity<0, dim, GridImp> :: Geometry & ALU2dGridEntity<0,dim,GridImp> :: geometry () const {
+  inline const typename ALU2dGridEntity<0, dim, GridImp> :: Geometry & ALU2dGridEntity<0,dim,GridImp> ::
+  geometry () const
+  {
     assert(item_ != 0);
     if(! geoImp_.up2Date() )
-      geoImp_.builtGeom(*item_,-1);
+      geoImp_.buildGeom(*item_);
 
     assert( geoImp_.up2Date() );
     return geoObj_;
@@ -208,7 +210,9 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline int ALU2dGridEntity<0, dim, GridImp> :: nChild() const {
+  inline int ALU2dGridEntity<0, dim, GridImp> :: nChild() const
+  {
+    assert( item_ );
     return item_->childNr();
   }
 
@@ -218,6 +222,8 @@ namespace Dune {
   {
     assert( item_ );
     const int child = this->nChild();
+    assert( level() > 0 );
+
     typedef MakeableInterfaceObject<Geometry> GeometryObject;
     typedef typename GeometryObject::ImplementationType GeometryImp;
     // to be improved, when we using not the refine 8 rule
@@ -228,7 +234,7 @@ namespace Dune {
       {
         typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
         const EntityPointer ep = father();
-        geoms.create(grid_,(*ep).geometry(),geometry(),child );
+        geoms.create(grid_, (*ep).geometry(), geometry(), child);
       }
       return geoms[child];
     }

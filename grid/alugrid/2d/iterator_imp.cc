@@ -302,12 +302,12 @@ namespace Dune {
       if( this->current.isNotConform_ )
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
-        builtLocalGeom( inside()->geometry() , geometry() );
+        buildLocalGeom( inside()->geometry() , geometry() );
       }
       else
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
-        builtLocalGeom( indexInInside() , 0 );
+        buildLocalGeom( indexInInside() , 0 );
       }
     }
 
@@ -326,7 +326,7 @@ namespace Dune {
     {
       // we don't know here wether we have non-conform or conform situation on the neighbor
       this->grid_.getRealImplementation(intersectionNeighborLocal_).
-      builtLocalGeom( outside()->geometry(), geometry() );
+      buildLocalGeom( outside()->geometry(), geometry() );
     }
     assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
     return intersectionNeighborLocal_;
@@ -341,9 +341,9 @@ namespace Dune {
     if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
     {
       if( this->current.isNotConform_ )
-        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.neigh_), this->current.opposite_);
+        this->grid_.getRealImplementation(intersectionGlobal_).buildGeom(*(this->current.neigh_), this->current.opposite_);
       else
-        this->grid_.getRealImplementation(intersectionGlobal_).builtGeom(*(this->current.item_), this->current.index_);
+        this->grid_.getRealImplementation(intersectionGlobal_).buildGeom(*(this->current.item_), this->current.index_);
     }
 
     assert(this->grid_.getRealImplementation(intersectionGlobal_).up2Date());

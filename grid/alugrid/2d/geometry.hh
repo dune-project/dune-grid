@@ -3,13 +3,12 @@
 #ifndef DUNE_ALU2DGRIDGEOMETRY_HH
 #define DUNE_ALU2DGRIDGEOMETRY_HH
 
-// System includes
-
 // Dune includes
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 
-// Local includes
+// alugrid mappings
+#include <dune/grid/alugrid/3d/mappings.hh>
 
 namespace Dune
 {
@@ -23,6 +22,228 @@ namespace Dune
   class ALU2dGridGeometry;
   template<int dim, int dimworld>
   class ALU2dGrid;
+
+  template <int cdim>
+  class MyALU2dGridGeometryImplementation
+  {
+  public:
+    typedef FieldVector<alu2d_ctype, cdim> CoordinateVectorType;
+
+    struct CoordVecCopy
+    {
+      // copy coordinate vector from field vector or double[cdim]
+      template <class CoordPtrType>
+      static inline void copy(const CoordPtrType& p,
+                              CoordinateVectorType& c)
+      {
+        assert( cdim == 2 );
+        c[0] = p[0];
+        c[1] = p[1];
+      }
+    };
+
+    //! general type of geometry implementation
+    template <int dummy, int dim> class GeometryImpl;
+  public:
+    // geometry implementation for edges and vertices
+    template <int dummy, int dim>
+    class GeometryImpl : public CoordVecCopy
+    {
+      using CoordVecCopy :: copy ;
+
+      enum { corners_ = dim+1 };
+      //! the vertex coordinates
+      typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
+
+      // for edges use LinearMapping<cdim, 1> here that has all features
+      // implemented
+
+      CoordinateMatrixType coord_;
+
+    public:
+      GeometryImpl() : coord_() {}
+      GeometryImpl(const GeometryImpl& other) : coord_(other.coord_) {}
+
+      // return true since we have affine mapping
+      bool affine() const { return true; }
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      // update vertex
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0)
+      {
+        assert( corners_ == 1 );
+        copy( p0, coord_[0] );
+      }
+    };
+
+    // geom impl for edges
+    template <int dummy>
+    class GeometryImpl<dummy,1> : public CoordVecCopy
+    {
+      using CoordVecCopy :: copy ;
+
+      enum { corners_ = 2 };
+
+      //! the vertex coordinates
+      typedef FieldMatrix<alu2d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef LinearMapping<cdim, 1>   MappingType;
+
+      //! the coordinates (for dim = 3 only a pointer)
+      CoordinateMatrixType coord_;
+
+      MappingType liMap_;
+      bool builtMapping_;
+
+    public:
+      // constructor
+      GeometryImpl() : coord_(), liMap_(), builtMapping_(false) {}
+      // copy constructor
+      GeometryImpl(const GeometryImpl& other) :
+        coord_(other.coord_),
+        liMap_(other.liMap_),
+        builtMapping_(other.builtMapping_)
+      {}
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      // return true since we have affine mapping
+      bool affine() const { return liMap_.affine(); }
+
+      // update geometry in father coordinates
+      template <class GeometryImp, class LocalGeoImp>
+      inline void updateLocal(const GeometryImp& globalGeom,
+                              const LocalGeoImp& localGeom)
+      {
+        // compute the local coordinates in father refelem
+        for(int i=0; i < localGeom.corners() ; ++i)
+        {
+          // calculate coordinate
+          coord_[i] = globalGeom.local( localGeom.corner( i ) );
+
+          // to avoid rounding errors
+          for(int j=0; j<cdim; ++j)
+          {
+            if ( coord_[i][j] < 1e-14) coord_[i][j] = 0.0;
+          }
+        }
+
+        builtMapping_ = false ;
+      }
+
+      // update geometry coordinates
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0,
+                         const CoordPtrType& p1)
+      {
+        copy(p0, coord_[0] );
+        copy(p1, coord_[1] );
+        builtMapping_ = false;
+      }
+
+      // return mapping (always up2date)
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return liMap_;
+
+        liMap_.buildMapping( coord_[0], coord_[1] );
+        builtMapping_ = true ;
+        return liMap_;
+      }
+    };
+
+    // geom impl for simplices
+    template <int dummy>
+    class GeometryImpl<dummy,2> : public CoordVecCopy
+    {
+      using CoordVecCopy :: copy ;
+
+      enum { corners_ = 3 };
+
+      //! the vertex coordinates
+      typedef FieldMatrix<alu2d_ctype, corners_ , cdim>  CoordinateMatrixType;
+      typedef LinearMapping<cdim, 2>   MappingType;
+
+      //! the coordinates (for dim = 3 only a pointer)
+      CoordinateMatrixType coord_;
+
+      MappingType liMap_;
+      bool builtMapping_;
+
+    public:
+      // constructor
+      GeometryImpl() : coord_(), liMap_(), builtMapping_(false) {}
+      // copy constructor
+      GeometryImpl(const GeometryImpl& other) :
+        coord_(other.coord_),
+        liMap_(other.liMap_),
+        builtMapping_(other.builtMapping_)
+      {}
+
+      // return coordinate vector
+      inline const CoordinateVectorType& operator [] (const int i) const
+      {
+        assert( i>=0 && i<corners_ );
+        return coord_[i];
+      }
+
+      // return true since we have affine mapping
+      bool affine() const { return liMap_.affine(); }
+
+      // update geometry in father coordinates
+      template <class GeometryImp, class LocalGeoImp>
+      inline void updateLocal(const GeometryImp& globalGeom,
+                              const LocalGeoImp& localGeom)
+      {
+        // compute the local coordinates in father refelem
+        for(int i=0; i < localGeom.corners() ; ++i)
+        {
+          // calculate coordinate
+          coord_[i] = globalGeom.local( localGeom.corner( i ) );
+
+          // to avoid rounding errors
+          for(int j=0; j<cdim; ++j)
+          {
+            if ( coord_[i][j] < 1e-14) coord_[i][j] = 0.0;
+          }
+        }
+        builtMapping_ = false ;
+      }
+
+      // update geometry coordinates
+      template <class CoordPtrType>
+      inline void update(const CoordPtrType& p0,
+                         const CoordPtrType& p1,
+                         const CoordPtrType& p2)
+      {
+        copy(p0, coord_[0] );
+        copy(p1, coord_[1] );
+        copy(p2, coord_[2] );
+        builtMapping_ = false;
+      }
+
+      // return mapping (always up2date)
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return liMap_;
+
+        liMap_.buildMapping( coord_[0], coord_[1], coord_[2] );
+        builtMapping_ = true ;
+        return liMap_;
+      }
+    };
+  }; // end of class ALUGridGeometryImplementation
 
   //**********************************************************************
   //
@@ -57,65 +278,14 @@ namespace Dune
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
-    template <class GeomImp, int gdim>
-    struct CopyCoordinates;
-
-    template <class GeomImp>
-    struct CopyCoordinates<GeomImp,2>
-    {
-      template <class VecType>
-      static inline void copyData(const double p[cdim], VecType& vec)
-      {
-        assert( cdim == 2 );
-        vec[0] = p[0];
-        vec[1] = p[1];
-      }
-
-      // copy coordinates and return determinant
-      template<class CoordMatrixType>
-      static inline double copy(const HElementType& item, CoordMatrixType& coord, const int )
-      {
-        assert( cdim == 2 );
-        // copy coordinates
-        copyData(item.getVertex(0)->coord(),coord[0]);
-        copyData(item.getVertex(1)->coord(),coord[1]);
-        copyData(item.getVertex(2)->coord(),coord[2]);
-        return 2.0*item.area();
-      }
-    };
-
-    template <class GeomImp>
-    struct CopyCoordinates<GeomImp,1>
-    {
-      template <class VecType>
-      static inline void copyData(const double p[cdim], VecType& vec)
-      {
-        assert( cdim == 2 );
-        vec[0] = p[0];
-        vec[1] = p[1];
-      }
-
-      // copy coordinates and return determinant
-      template<class CoordMatrixType>
-      static inline double copy(const HElementType& item, CoordMatrixType& coord, const int face)
-      {
-        // copy coordinates
-        for(int i=0; i<2; ++i)
-        {
-          const int vx = (i+face+1)%3;
-          copyData(item.getVertex(vx)->coord(),coord[i]);
-        }
-        return item.sidelength((face)%3);
-      }
-    };
+    // type of specialized geometry implementation
+    typedef typename MyALU2dGridGeometryImplementation<cdim> ::
+    template GeometryImpl<0, mydim> GeometryImplType;
 
   public:
     //! for makeRefGeometry == true a Geometry with the coordinates of the
     //! reference element is made
     ALU2dGridGeometry();
-
-    //! constructor building geometry in father
-    ALU2dGridGeometry(const int child, const int orientation );
 
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
@@ -149,6 +319,9 @@ namespace Dune
     //! return volume of geometry
     alu2d_ctype volume () const;
 
+    //! return true if geometry has affine mapping
+    bool affine() const { return geoImpl_.affine(); }
+
     //! can only be called for dim=dimworld!
     const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
 
@@ -156,16 +329,20 @@ namespace Dune
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
     //! generate the geometry for out of given ALU2dGridElement
-    bool builtGeom(const ALU2DSPACE Vertex & item, int );
-    bool builtGeom(const HElementType & item, int face);
+    // method for elements
+    bool buildGeom(const HElementType & item);
+    // method for edges
+    bool buildGeom(const HElementType & item, const int face);
+    // method for vertices
+    bool buildGeom(const ALU2DSPACE Vertex & item, const int );
 
     //! build geometry for intersectionSelfLocal and
     //! intersectionNeighborLocal
     template <class GeometryType, class LocalGeomType >
-    bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
+    bool buildLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
 
     //! build local geometry given local face number
-    bool builtLocalGeom(const int faceNumber, const int twist);
+    bool buildLocalGeom(const int faceNumber, const int twist);
 
     //! return non-const reference to coord vecs
     FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
@@ -174,66 +351,22 @@ namespace Dune
     void print (std::ostream& ss) const;
 
     //! build geometry with local coords of child in reference element
-    //void buildGeomInFather(const int child, const int orientation);
     inline bool buildGeomInFather(const Geometry &fatherGeom , const Geometry & myGeom);
 
+    // returns true if geometry is up-2-date
     inline bool up2Date() const { return up2Date_; }
+
+    // set up2Date flag to false
     inline void unsetUp2Date() const { up2Date_ = false; }
-  private:
-    // set ref coords
-    void setReferenceCoordinates();
 
-    //! build the transposed of the jacobian inverse and store the volume
-    void buildJacobianInverseTransposed () const;
-
-    //! calculates the element matrix for calculation of the jacobian inverse
-    void calcElMatrix () const;
-
-    //! calculates the volume of the element
-    alu2d_ctype elDeterminant () const;
-
-    //! temporary need vector
-    mutable FieldVector<alu2d_ctype, mydim+1> tmpVec_;
-
-    //! the vertex coordinates
-    mutable FieldMatrix<alu2d_ctype, mydim+1, cdim> coord_;
-
-    //! the reference element coordinates, last is the length of face
-    FieldMatrix<alu2d_ctype, 3 , 3> refCoord_;
-
-    //! storage for global coords
-    mutable FieldVector<alu2d_ctype, cdim> globalCoord_;
-
-    //! storage for local coords
-    mutable FieldVector<alu2d_ctype, mydim> localCoord_;
-
-    enum { matdim = (mydim > 0) ? mydim : 1 };
-    mutable FieldMatrix<alu2d_ctype,cdim,matdim> Jinv_; //!< storage for inverse of jacobian
-    mutable FieldMatrix<alu2d_ctype,matdim,matdim> Mtmp_;    //!< storage for inverse of jacobian
-
-    mutable FieldMatrix<alu2d_ctype,cdim,mydim> elMat_; //!< storage for mapping matrix
-    mutable FieldMatrix<alu2d_ctype,matdim,matdim> elMatT_elMat_; //!< storage for mapping matrix
-
-    //! is true if elMat_ was calced
-    mutable bool builtElMat_;
-    //! is true if Jinv_ and volume_ is calced
-    mutable bool builtinverse_;
-
-#ifndef NDEBUG
-    mutable bool calcedDet_; //! true if determinant was calculated
-#endif
-    mutable alu2d_ctype elDet_;                           //!< storage of integration_element
+  protected:
+    // implementation of coord and mapping
+    mutable GeometryImplType geoImpl_;
+    // determinant
+    mutable alu3d_ctype det_;
 
     //! is true if geom is up2date
     mutable bool up2Date_;
-
-    // temporary mem for integrationElement with mydim < cdim
-    mutable FieldVector<alu2d_ctype,cdim> tmpV_; //! temporary memory
-    mutable FieldVector<alu2d_ctype,cdim> tmpU_; //! temporary memory
-    mutable FieldVector<alu2d_ctype,cdim> tmpZ_;
-
-    mutable FieldVector<alu2d_ctype,mydim> AT_x_;
-
   };
 
   template <class GeometryImp, int nChild>
@@ -245,12 +378,14 @@ namespace Dune
     int count_;
   public:
     // create empty storage
-    ALU2DLocalGeometryStorage () : geoms_ (nChild) , count_ (0) {
+    ALU2DLocalGeometryStorage () : geoms_ (nChild) , count_ (0)
+    {
       for(size_t i=0 ; i<geoms_.size(); ++i) geoms_[i] = 0;
     }
 
     // desctructor deleteing geometries
-    ~ALU2DLocalGeometryStorage () {
+    ~ALU2DLocalGeometryStorage ()
+    {
       for(size_t i=0 ; i<geoms_.size(); ++i)
         if(geoms_[i]) delete geoms_[i];
     }
@@ -260,7 +395,9 @@ namespace Dune
 
     // create local geometry
     template <class GridImp, class Geometry>
-    void create (const GridImp & grid, const Geometry & father, const Geometry & son, const int child)
+    void create (const GridImp & grid,
+                 const Geometry & father,
+                 const Geometry & son, const int child)
     {
       assert( !geomCreated(child) );
       assert( child >=0 && child < nChild );
