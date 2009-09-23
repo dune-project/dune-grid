@@ -37,9 +37,6 @@
 // grape data io
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
-// calculate coordinates on the fly (forbidden for ALBERTA 2.0 and earlier)?
-#define CALC_COORD 0
-
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
 
@@ -649,7 +646,7 @@ namespace Dune
     // needed for VertexIterator, mark on which element a vertex is treated
     mutable std::vector< MarkerVector > levelMarkerVector_;
 
-#if !CALC_COORD
+#if DUNE_ALBERTA_CACHE_COORDINATES
     Alberta::CoordCache< dimension > coordCache_;
 #endif
 
@@ -744,7 +741,6 @@ namespace Dune
 // undef all dangerous defines
 #undef DIM
 #undef DIM_OF_WORLD
-#undef CALC_COORD
 
 #ifdef _ABS_NOT_DEFINED_
 #undef ABS

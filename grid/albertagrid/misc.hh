@@ -14,6 +14,11 @@
 
 #if HAVE_ALBERTA
 
+// should the coordinates be cached in a vector (required for ALBERTA 2.0)?
+#ifndef DUNE_ALBERTA_CACHE_COORDINATES
+#define DUNE_ALBERTA_CACHE_COORDINATES 1
+#endif
+
 namespace Dune
 {
 
@@ -272,20 +277,16 @@ namespace Dune
                                | orientation | projection | elementType;
 
 #if DUNE_ALBERTA_VERSION >= 0x300
-#if CALC_COORD
-      static const Flags standard = all & ~nonPeriodic & ~projection;
+      static const Flags standardWithCoords = all & ~nonPeriodic & ~projection;
 #else
-      static const Flags standard = all & ~nonPeriodic & ~coords & ~projection;
+      static const Flags standardWithCoords = all;
 #endif
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
 
-#if DUNE_ALBERTA_VERSION < 0x300
-#if CALC_COORD
-      static const Flags standard = all;
+#if DUNE_ALBERTA_CACHE_COORDINATES
+      static const Flags standard = standardWithCoords & ~coords;
 #else
-      static const Flags standard = all & ~coords;
+      static const Flags standard = standardWithCoords;
 #endif
-#endif // #if DUNE_ALBERTA_VERSION < 0x300
     };
 
 

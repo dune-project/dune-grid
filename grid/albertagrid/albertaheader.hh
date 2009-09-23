@@ -18,12 +18,6 @@
 #define ALBERTA ::
 #endif
 
-// the keyword ALBERTA stands for ALBERTA routines
-#ifndef __ALBERTApp__
-extern "C"
-{
-#endif
-
 #ifndef ALBERTA_DEBUG
 #define ALBERTA_DEBUG 0
 #endif
@@ -62,40 +56,20 @@ extern "C"
 #endif
 
 #ifndef DIM_OF_WORLD
-#error "DIM_OF_WORLD not defined!"
+#error "DIM_OF_WORLD not defined."
 #endif
 
 #include <alberta.h>
+
+#ifndef _ALBERTA_H_
+#error "Unable to include alberta.h."
+#endif
 
 // Macro nil may be defined by alberta_util.h. If so, undefine it.
 #ifdef nil
 #undef nil
 #endif
 
-// for version 1.2 thing are different
+#endif // #if HAVE_ALBERTA
 
-static inline void wrapped_el_fct(const EL_INFO* elinfo, void * data)
-{
-  ((void (*)(const EL_INFO *))data)(elinfo);
-}
-
-static inline void meshTraverse(MESH *mesh,
-                                int level, FLAGS fill_flag,
-                                void (*el_fct)(const EL_INFO *))
-{
-  mesh_traverse(mesh, level, fill_flag, wrapped_el_fct, (void*)el_fct );
-}
-
-#define GET_EL_FROM_LIST(rc_list_el) (rc_list_el).el_info.el
-
-#ifndef _ALBERTA_H_
-#error "Couldn't find alberta.h for include! "
-#endif
-
-#ifndef __ALBERTApp__
-} // end extern "C"
-#endif
-
-#endif // HAVE_ALBERTA
-
-#endif
+#endif // #ifndef DUNE_ALBERTAHEADER_HH

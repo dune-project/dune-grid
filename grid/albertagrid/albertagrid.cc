@@ -130,7 +130,7 @@ namespace Dune
 
     levelProvider_.create( dofNumbering_ );
 
-#if !CALC_COORD
+#if DUNE_ALBERTA_CACHE_COORDINATES
     coordCache_.create( dofNumbering_ );
 #endif
   }
@@ -153,7 +153,7 @@ namespace Dune
     // release dof vectors
     hIndexSet_.release();
     levelProvider_.release();
-#if !CALC_COORD
+#if DUNE_ALBERTA_CACHE_COORDINATES
     coordCache_.release();
 #endif
     dofNumbering_.release();
@@ -517,10 +517,10 @@ namespace Dune
   ::getCoord ( const ElementInfo &elementInfo, int vertex ) const
   {
     assert( (vertex >= 0) && (vertex <= dim) );
-#if CALC_COORD
-    return elementInfo.coordinate( vertex );
-#else
+#if DUNE_ALBERTA_CACHE_COORDINATES
     return coordCache_( elementInfo, vertex );
+#else
+    return elementInfo.coordinate( vertex );
 #endif
   }
 
