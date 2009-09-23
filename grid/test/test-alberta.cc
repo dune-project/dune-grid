@@ -27,6 +27,7 @@
 #include "checktwists.cc"
 #include "check-albertareader.cc"
 #include "checkadaptation.cc"
+#include "checkpartition.cc"
 
 
 template <class GridType >
@@ -112,6 +113,8 @@ try {
 
     // check grid adaptation interface
     checkAdaptation( grid );
+
+    checkPartitionType( grid.leafView() );
 
     checkGeometry( grid.leafView() );
     checkIterators( grid.leafView() );
