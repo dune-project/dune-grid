@@ -201,7 +201,7 @@ namespace Dune
      *    struct Mapping
      *    {
      *      typedef MappingTraits< CoordTraits, Topology :: dimension, dimWorld > Traits;
-     *      typedef CoordPointerStorage< Topology, typename Traits :: GlobalCoordType >
+     *      typedef CoordStorage< Topology, typename Traits :: GlobalCoordType >
      *        CornerStorage;
      *      typedef CornerMapping< Topology, Traits, CornerStorage > type;
      *    };
