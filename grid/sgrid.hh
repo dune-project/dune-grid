@@ -223,7 +223,7 @@ namespace Dune {
       return 1.;
     }
 
-    const FieldMatrix< sgrid_ctype, 0, cdim > &jacobianTansposed ( const FieldVector< sgrid_ctype, 0 > &local ) const
+    const FieldMatrix< sgrid_ctype, 0, cdim > &jacobianTransposed ( const FieldVector< sgrid_ctype, 0 > &local ) const
     {
       static FieldMatrix< sgrid_ctype, 0, cdim > dummy ( sgrid_ctype( 0 ) );
       return dummy;
