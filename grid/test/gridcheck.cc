@@ -90,12 +90,13 @@ struct ZeroEntityMethodCheck
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::IntersectionIterator IntersectionIterator;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename Entity::HierarchicIterator HierarchicIterator;
     typedef typename Entity::EntityPointer EntityPointer;
 
     e.template count<cd>();
-    e.template entity<cd>(0);
+    e.template subEntity<cd>(0);
 
     // recursively check on
     ZeroEntityMethodCheck<Grid, cd - 1,
@@ -116,7 +117,8 @@ struct ZeroEntityMethodCheck<Grid, cd, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::IntersectionIterator IntersectionIterator;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename Entity::HierarchicIterator HierarchicIterator;
     typedef typename Entity::EntityPointer EntityPointer;
 
@@ -139,12 +141,13 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::IntersectionIterator IntersectionIterator;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename Entity::HierarchicIterator HierarchicIterator;
     typedef typename Entity::EntityPointer EntityPointer;
 
     e.template count<0>();
-    e.template entity<0>(0);
+    e.template subEntity<0>(0);
 
   }
   ZeroEntityMethodCheck ()
@@ -163,12 +166,13 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
   static void check(Entity &e)
   {
     // check types
-    typedef typename Entity::IntersectionIterator IntersectionIterator;
+    typedef typename Entity::LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Entity::LevelIntersectionIterator LevelIntersectionIterator;
     typedef typename Entity::HierarchicIterator HierarchicIterator;
     typedef typename Entity::EntityPointer EntityPointer;
 
     e.template count<0>();
-    e.template entity<0>(0);
+    e.template subEntity<0>(0);
   }
   ZeroEntityMethodCheck ()
   {
@@ -178,10 +182,9 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
 };
 
 // IntersectionIterator interface check
-template <class Grid>
+template <class Grid,class IntersectionIterator>
 struct IntersectionIteratorInterface
 {
-  typedef typename Grid::template Codim<0>::IntersectionIterator IntersectionIterator;
   enum { dim = Grid::dimension };
   typedef typename Grid::ctype ct;
 
@@ -189,39 +192,41 @@ struct IntersectionIteratorInterface
   {
     // increment / equality / ...
     IntersectionIterator j = i;
-    j++;
+    ++j;
     i == j;
     i != j;
     j = i;
 
     // state
-    i.boundary();
-    i.neighbor();
+    typename IntersectionIterator::Intersection inter = *i;
+    inter.boundary();
+    inter.neighbor();
 
     // id of boundary segment
-    i.boundaryId();
+    inter.boundaryId();
 
     // neighbouring elements
-    i.inside();
-    if(i.neighbor()) i.outside();
+    inter.inside();
+    if(inter.neighbor()) inter.outside();
 
     // geometry
-    i.intersectionSelfLocal();
-    if(i.neighbor()) i.intersectionNeighborLocal();
-    i.intersectionGlobal();
+    inter.geometryInInside();
+    if(inter.neighbor()) inter.geometryInOutside();
+    inter.geometry();
 
-    i.numberInSelf();
-    if(i.neighbor()) i.numberInNeighbor();
+    inter.indexInInside();
+    if(inter.neighbor()) inter.indexInOutside();
 
     Dune::FieldVector<ct, dim-1> v(0);
-    i.outerNormal(v);
-    i.integrationOuterNormal(v);
-    i.unitOuterNormal(v);
+    inter.outerNormal(v);
+    inter.integrationOuterNormal(v);
+    inter.unitOuterNormal(v);
   }
   IntersectionIteratorInterface ()
   {
     c = check;
   }
+private:
   void (*c)(IntersectionIterator&);
 };
 
@@ -287,11 +292,9 @@ struct EntityInterface<Grid, 0, dim, true>
     // do the common checking
     DoEntityInterfaceCheck(e);
 
-#if 0 // WARNING must be updated to new interface
-      // special codim-0-entity methods which are parametrized by a codimension
+    // special codim-0-entity methods which are parametrized by a codimension
     ZeroEntityMethodCheck
     <Grid, dim, Dune::Capabilities::hasEntity<Grid, dim>::v >();
-#endif
 
     // grid hierarchy
     e.father();
@@ -302,17 +305,16 @@ struct EntityInterface<Grid, 0, dim, true>
     if (checkLevelIter) {
       e.ilevelbegin();
       e.ilevelend();
-#if 0 // WARNING must be updated to new interface
-      IntersectionIteratorInterface<Grid>(e.ilevelbegin());
-#endif
+      // #if 0 // WARNING must be updated to new interface
+      IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
+      // #endif
     }
     e.ileafbegin();
     e.ileafend();
-
-#if 0 // WARNING must be updated to new interface
+    // #if 0 // WARNING must be updated to new interface
     if(e.isLeaf())
-      IntersectionIteratorInterface<Grid>(e.ileafbegin());
-#endif
+      IntersectionIteratorInterface<Grid,typename Grid::LevelIntersectionIterator>();
+    // #endif
 
     // hierarchic iterator
     e.hbegin(0);
