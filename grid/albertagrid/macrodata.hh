@@ -104,6 +104,18 @@ namespace Dune
        */
       void setOrientation ( const Real orientation );
 
+      /** \brief check the neighbor information
+       *
+       *  This method allows the verification of neighbor information in a
+       *  finalized (and possibly postprecessed) macro triangulation.
+       *
+       *  \note On unfinalized macro triangulations there is no neighbor
+       *        information. Hence this check will succeed in this case.
+       *
+       *  \returns true, if all generated neighbor information is correct.
+       */
+      bool checkNeighbors () const;
+
       /** \brief release the macro data structure */
       void release ()
       {
@@ -191,6 +203,8 @@ namespace Dune
 
       template< class Type >
       void rotate ( Type *array, int i, int shift );
+
+      void swap ( int el, int v1, int v2 );
 
       void resizeElements ( const int newSize );
 
@@ -366,33 +380,60 @@ namespace Dune
           for( int k = 0; k < dimWorld; ++k )
             jacobian[ j ][ k ] = y[ k ] - x[ k ];
         }
-        const Real det = determinant( jacobian );
-        if( det * orientation < 0 )
-        {
-          std::swap( id[ 0 ], id[ 1 ] );
+        if( determinant( jacobian ) * orientation < 0 )
+          swap( i, (dimWorld == 3 ? 2 : 0), (dimWorld == 3 ? 3 : 1) );
+      }
+    }
+
+
+    template< int dim >
+    inline bool MacroData< dim >::checkNeighbors () const
+    {
+      assert( data_ != NULL );
+      if( data_->neigh == NULL )
+        return true;
+
 #if DUNE_ALBERTA_VERSION >= 0x300
-          if( data_->opp_vertex != NULL )
+      const bool hasOppVertex = (data_->opp_vertex != NULL);
+#else
+      const bool hasOppVertex = false;
+#endif
+
+      const int count = elementCount();
+      for( int i = 0; i < count; ++i )
+      {
+        for( int j = 0; j <= dimension; ++j )
+        {
+          const int nb = data_->neigh[ i*numVertices + j ];
+          if( nb < 0 )
+            continue;
+          if( nb >= elementCount() )
+            return false;
+
+#if DUNE_ALBERTA_VERSION >= 0x300
+          if( hasOppVertex )
           {
-            assert( data_->neigh != NULL );
-            for( int j = 0; j < 2; ++j )
-            {
-              const int nb = data_->neigh[ i*numVertices + j ];
-              if( nb < 0 )
-                continue;
-              const int ov = data_->opp_vertex[ i*numVertices + j ];
-              assert( data_->neigh[ nb*numVertices + ov ] == i );
-              assert( data_->opp_vertex[ nb*numVertices + ov ] == j );
-              data_->opp_vertex[ nb*numVertices + ov ] = (1-j);
-            }
-            std::swap( data_->opp_vertex[ i*numVertices ], data_->opp_vertex[ i*numVertices + 1 ] );
+            const int ov = data_->opp_vertex[ i*numVertices + j ];
+            if( ov > dimension )
+              return false;
+            if( data_->neigh[ nb*numVertices + ov ] != i )
+              return false;
+            if( data_->opp_vertex[ nb*numVertices + ov ] != j )
+              return false;
           }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x300
-          if( data_->neigh != NULL )
-            std::swap( neighbor( i, 0 ), neighbor( i, 1 ) );
-          if( data_->boundary != NULL )
-            std::swap( boundaryId( i, 0 ), boundaryId( i, 1 ) );
+
+          if( !hasOppVertex )
+          {
+            bool foundSelf = false;
+            for( int k = 0; k <= dimension; ++k )
+              foundSelf |= (data_->neigh[ nb*numVertices + k ] == i);
+            if( !foundSelf )
+              return false;
+          }
         }
       }
+      return true;
     }
 
 
@@ -515,6 +556,44 @@ namespace Dune
         old[ j ] = array[ offset + j ];
       for( int j = 0; j < numVertices; ++j )
         array[ offset + j ] = old[ (j+shift) % numVertices ];
+    }
+
+
+    template< int dim >
+    inline void MacroData< dim >::swap ( int el, int v1, int v2 )
+    {
+      std::swap( element( el )[ v1 ], element( el )[ v2 ] );
+#if DUNE_ALBERTA_VERSION >= 0x300
+      if( data_->opp_vertex != NULL )
+      {
+        assert( data_->neigh != NULL );
+
+        const int nb1 = neighbor( el, v1 );
+        if( nb1 >= 0 )
+        {
+          const int ov = data_->opp_vertex[ el*numVertices + v1 ];
+          assert( neighbor( nb1, ov ) == el );
+          assert( data_->opp_vertex[ nb1*numVertices + ov ] == v1 );
+          data_->opp_vertex[ nb1*numVertices + ov ] = v2;
+        }
+
+        const int nb2 = neighbor( el, v2 );
+        if( nb2 >= 0 )
+        {
+          const int ov = data_->opp_vertex[ el*numVertices + v2 ];
+          assert( neighbor( nb2, ov ) == el );
+          assert( data_->opp_vertex[ nb2*numVertices + ov ] == v2 );
+          data_->opp_vertex[ nb2*numVertices + ov ] = v1;
+        }
+
+        std::swap( data_->opp_vertex[ el*numVertices + v1 ], data_->opp_vertex[ el*numVertices + v2 ] );
+      }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+
+      if( data_->neigh != NULL )
+        std::swap( neighbor( el, v1 ), neighbor( el, v2 ) );
+      if( data_->boundary != NULL )
+        std::swap( boundaryId( el, v1 ), boundaryId( el, v2 ) );
     }
 
 
