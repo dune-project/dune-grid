@@ -253,7 +253,7 @@ namespace Dune
      *  \param[in]  i      number of subentity E (0 <= i < size( c ))
      *  \param[in]  c      codimension of subentity E
      */
-    GeometryType type ( int i, int c ) const
+    const GeometryType &type ( int i, int c ) const
     {
       assert( (c >= 0) && (c <= dim) );
       return info_[ c ][ i ].type();
@@ -319,7 +319,7 @@ namespace Dune
       return baryCenter_;
     }
 
-    GeometryType type () const
+    const GeometryType &type () const
     {
       return type_;
     }
