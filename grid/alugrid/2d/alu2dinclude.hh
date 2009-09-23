@@ -8,9 +8,9 @@
 #define ALU2DSPACENAME ALUGridSpace
 
 // use the ALU3dGrid Parallel detection
-//#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
-#define ALU2DGRID_PARALLEL 0
+#define ALU2DGRID_PARALLEL ALU3DGRID_PARALLEL
 
+#include "communicator.hh"
 #if ALU2DGRID_PARALLEL
 #warning "Using ALU2dGrid in parallel"
 #endif

@@ -20,12 +20,7 @@
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
 #include <dune/common/mpihelper.hh>
-#if ALU2DGRID_PARALLEL
-#include <dune/common/mpicollectivecommunication.hh>
-#include "communicator.hh"
-#else
-#include <dune/common/collectivecommunication.hh>
-#endif
+
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 //- Local includes
