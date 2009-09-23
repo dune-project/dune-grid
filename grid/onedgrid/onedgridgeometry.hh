@@ -68,6 +68,13 @@ namespace Dune {
     }
 
     //! The Jacobian matrix of the mapping from the reference element to this element
+    const FieldMatrix< typename GridImp::ctype, 0, 1 > &
+    jacobianTransposed ( const FieldVector< typename GridImp::ctype, 0 > &local ) const
+    {
+      return jacTransposed_;
+    }
+
+    //! The Jacobian matrix of the mapping from the reference element to this element
     const FieldMatrix<typename GridImp::ctype,1,0>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, 0>& local) const {
       return jacInverse_;
     }
@@ -85,6 +92,7 @@ namespace Dune {
 
     OneDEntityImp<0>* target_;
 
+    FieldMatrix< typename GridImp::ctype, 0, 1 > jacTransposed_;
     FieldMatrix<typename GridImp::ctype,1,0> jacInverse_;
   };
 
@@ -170,6 +178,18 @@ namespace Dune {
     }
 
     //! The Jacobian matrix of the mapping from the reference element to this element
+    const FieldMatrix< typename GridImp::ctype, mydim, mydim > &
+    jacobianTransposed ( const FieldVector< typename GridImp::ctype, mydim > &local ) const
+    {
+      if( storeCoordsLocally_ )
+        jacTransposed_[ 0 ][ 0 ] = (pos_[ 1 ][ 0 ] - pos_[ 0 ][ 0 ] );
+      else
+        jacTransposed_[ 0 ][ 0 ] = target_->vertex_[ 1 ]->pos_[ 0 ] - target_->vertex_[ 0 ]->pos_[ 0 ];
+
+      return jacTransposed_;
+    }
+
+    //! The Jacobian matrix of the mapping from the reference element to this element
     const FieldMatrix<typename GridImp::ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const {
       if (storeCoordsLocally_)
         jacInverse_[0][0] = 1 / (pos_[1][0] - pos_[0][0]);
@@ -193,7 +213,9 @@ namespace Dune {
     // Stores the element corner positions if it is returned as geometryInFather
     FieldVector<typename GridImp::ctype,coorddim> pos_[2];
 
-    //! The jacobian inverse
+    //! jacobian transposed
+    mutable FieldMatrix< typename GridImp::ctype, coorddim, coorddim > jacTransposed_;
+    //! jacobian inverse
     mutable FieldMatrix<typename GridImp::ctype,coorddim,coorddim> jacInverse_;
 
   };
