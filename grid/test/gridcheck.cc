@@ -44,9 +44,11 @@ struct GeometryInterface
     geo.corners();
     geo.corner( 0 );
 
-    Dune::FieldVector<ctype, Geometry::mydimension> v;
+    // Dune::FieldVector<ctype, Geometry::mydimension> v;
+    typename Geometry::LocalCoordinate v;
     geo.global(v);
-    Dune::FieldVector<ctype, Geometry::coorddimension> g;
+    // Dune::FieldVector<ctype, Geometry::coorddimension> g;
+    typename Geometry::GlobalCoordinate g;
     geo.local(g);
     geo.integrationElement(v);
     geo.jacobianTransposed( v );
@@ -61,29 +63,6 @@ struct GeometryInterface
 private:
   void (*c)( const Geometry & );
 };
-
-#if 0
-// reduced test on vertices
-template <class Geometry, int dim>
-struct GeometryInterface <Geometry, dim, dim>
-{
-  static void check(const Geometry &e)
-  {
-    dune_static_assert( (Geometry::mydimension == 0), "" );
-    dune_static_assert( (Geometry::dimension == dim), "" );
-
-    // vertices have only a subset of functionality
-    e.type();
-    e.corners();
-    e.corner( 0 );
-  }
-  GeometryInterface()
-  {
-    c = check;
-  };
-  void (*c)(const Geometry&);
-};
-#endif
 
 // --- compile-time check of entity-interface
 
@@ -308,8 +287,8 @@ struct EntityInterface<Grid, 0, dim, true>
     // do the common checking
     DoEntityInterfaceCheck(e);
 
-#if 0
-    // special codim-0-entity methods which are parametrized by a codimension
+#if 0 // WARNING must be updated to new interface
+      // special codim-0-entity methods which are parametrized by a codimension
     ZeroEntityMethodCheck
     <Grid, dim, Dune::Capabilities::hasEntity<Grid, dim>::v >();
 #endif
@@ -323,14 +302,14 @@ struct EntityInterface<Grid, 0, dim, true>
     if (checkLevelIter) {
       e.ilevelbegin();
       e.ilevelend();
-#if 0
+#if 0 // WARNING must be updated to new interface
       IntersectionIteratorInterface<Grid>(e.ilevelbegin());
 #endif
     }
     e.ileafbegin();
     e.ileafend();
 
-#if 0
+#if 0 // WARNING must be updated to new interface
     if(e.isLeaf())
       IntersectionIteratorInterface<Grid>(e.ileafbegin());
 #endif
@@ -514,10 +493,8 @@ struct GridInterface
     EntityInterface< Grid, 0, Grid::dimension, Dune::Capabilities::hasEntity< Grid, 0 >::v >();
 
     // !!! check for parallel grid?
-    /*
-       g.template lbegin<0, Dune::Ghost_Partition>(0);
-       g.template lend<0, Dune::Ghost_Partition>(0);
-     */
+    g.template lbegin<0, Dune::Ghost_Partition>(0);
+    g.template lend<0, Dune::Ghost_Partition>(0);
   }
   GridInterface()
   {
@@ -567,7 +544,7 @@ struct subIndexCheck
         assert( false );
       }
 
-#if 0
+#if 0  // should this be removed?
       typedef Dune::GenericGeometry::MapNumberingProvider< Entity::dimension > Numbering;
       const unsigned int tid = Dune::GenericGeometry::topologyId( e.type() );
       const int oldi = Numbering::template generic2dune< cd >( tid, i );
