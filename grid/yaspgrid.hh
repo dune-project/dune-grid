@@ -525,9 +525,9 @@ namespace Dune {
     }
 
     //! Compute the transposed of the jacobi matrix
-    FieldMatrix<ctype,cdim,0>& jacobianTransposed (const FieldVector<ctype, 0>& local) const
+    FieldMatrix<ctype,0,cdim>& jacobianTransposed (const FieldVector<ctype, 0>& local) const
     {
-      static FieldMatrix<ctype,cdim,0> JT(0.0);
+      static FieldMatrix<ctype,0,cdim> JT(0.0);
       return JT;
     }
     //! Compute the transposed of the inverse jacobi matrix
