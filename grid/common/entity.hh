@@ -315,6 +315,7 @@ namespace Dune
      */
     template<int cc> int count () const { return realEntity.count<cc>(); }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /** \brief Access to subentity <tt>i</tt> of codimension <tt>codim</tt>.
      */
     template< int codim >
@@ -326,6 +327,7 @@ namespace Dune
       const int j = Numbering::template dune2generic< codim >( tid, i );
       return realEntity.subEntity< codim >( j );
     }
+#endif
 
     /** \brief obtain a pointer to a subentity
      *
