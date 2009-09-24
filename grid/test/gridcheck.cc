@@ -17,7 +17,8 @@
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/common/gridinfo.hh>
 
 #include <dune/grid/genericgeometry/conversion.hh>
 
@@ -1099,6 +1100,12 @@ void gridcheck (Grid &g)
   enum { dimworld = Grid :: dimensionworld };
   typedef typename Grid  :: ctype ctype;
   typedef typename Grid  :: GridFamily GridFamily;
+
+  // print infos
+  Dune::gridinfo(g, "GridInfo");
+  for(int l=0; l<g.maxLevel(); l++)
+    Dune::gridlevellist(g, l, "GridLevelInfo");
+  Dune::gridleaflist(g, "GridLeafInfo");
 
   // type of GridInterface == GridDefaultImplementation
   typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
