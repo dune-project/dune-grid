@@ -9,7 +9,7 @@
 #include <dune/common/exceptions.hh>
 #include "dune/common/helpertemplates.hh"
 #include "grid.hh"
-#include "referenceelements.hh"
+#include "genericreferenceelements.hh"
 
 /** @file
  * @author Peter Bastian
@@ -88,7 +88,6 @@ namespace Dune
   {
     // first we extract the dimensions of the grid
     const int dim = G::dimension;
-    const int dimworld = G::dimensionworld;
 
     // type used for coordinates in the grid
     typedef typename G::ctype ct;
@@ -103,7 +102,7 @@ namespace Dune
               << " dim=" << dim
               << " geomTypes=(";
     bool first=true;
-    for (int i=0; i<grid.levelIndexSet(level).geomTypes(0).size(); i++)
+    for (unsigned i=0; i<grid.levelIndexSet(level).geomTypes(0).size(); i++)
     {
       if (!first) std::cout << ",";
       std::cout << grid.levelIndexSet(level).geomTypes(0)[i]
@@ -123,22 +122,22 @@ namespace Dune
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << it->geometry().global(Dune::GenericReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
-                << " first=(" << it->geometry()[0] << ")"
+                << " first=(" << it->geometry().corner(0) << ")"
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
       for (int i=0; i<it->template count<dim>(); i++)
       {
-        std::cout << " " << i << ":" << grid.levelIndexSet(level).template subIndex<dim>(*it,i);
+        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
       for (int i=0; i<it->template count<dim-1>(); i++)
       {
-        std::cout << " " << i << ":" << grid.levelIndexSet(level).template subIndex<dim-1>(*it,i);
+        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim-1);
       }
       std::cout << std::endl;
 
@@ -155,7 +154,6 @@ namespace Dune
   {
     // first we extract the dimensions of the grid
     const int dim = G::dimension;
-    const int dimworld = G::dimensionworld;
 
     // type used for coordinates in the grid
     typedef typename G::ctype ct;
@@ -173,7 +171,7 @@ namespace Dune
     bool first=true;
     for (int c=0; c<=dim; c++)
     {
-      for (int i=0; i<grid.leafIndexSet().geomTypes(c).size(); i++)
+      for (unsigned i=0; i<grid.leafIndexSet().geomTypes(c).size(); i++)
       {
         if (!first) std::cout << ",";
         std::cout << grid.leafIndexSet().geomTypes(c)[i]
@@ -193,7 +191,7 @@ namespace Dune
                 << " index=" << grid.leafIndexSet().index(*it)
                 << " gid=" << grid.globalIdSet().template id<dim>(*it)
                 << " partition=" << PartitionName(it->partitionType())
-                << " pos=(" << it->geometry()[0] << ")"
+                << " pos=(" << it->geometry().corner(0) << ")"
                 << std::endl;
     }
 
@@ -208,22 +206,22 @@ namespace Dune
                 << " leaf=" << it->isLeaf()
                 << " partition=" << PartitionName(it->partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << it->geometry().global(Dune::GenericReferenceElements<ct,dim>::general(it->type()).position(0,0))
                 << ")"
-                << " first=(" << it->geometry()[0] << ")"
+                << " first=(" << it->geometry().corner(0) << ")"
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
       for (int i=0; i<it->template count<dim>(); i++)
       {
-        std::cout << " " << i << ":" << grid.leafIndexSet().template subIndex<dim>(*it,i);
+        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
       for (int i=0; i<it->template count<dim-1>(); i++)
       {
-        std::cout << " " << i << ":" << grid.leafIndexSet().template subIndex<dim-1>(*it,i);
+        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim-1);
       }
       std::cout << std::endl;
 
