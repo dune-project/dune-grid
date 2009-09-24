@@ -86,8 +86,8 @@ namespace Dune {
   void
   GnuplotWriter<GridView>::addData(DataType t, const DataContainer& data, const std::string & name)
   {
-    assert((t == cellData && _is.size(0) == (int) data.size())
-           || (t == vertexData && _is.size(GridView::dimension) == (int) data.size()) );
+    assert((t == cellData && _is.size(0) == data.size())
+           || (t == vertexData && _is.size(GridView::dimension) == data.size()) );
     _names.push_back(name);
 
     // copy data to new container
