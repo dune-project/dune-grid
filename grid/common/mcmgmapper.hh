@@ -94,6 +94,7 @@ namespace Dune
     }
 
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /**
        \deprecated use map without template parameter
        \brief please read the details
@@ -116,6 +117,7 @@ namespace Dune
       GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
     }
+#endif
 
     /** @brief Map subentity of codim 0 entity to array index.
 

@@ -124,6 +124,7 @@ namespace Dune
       return asImp().map(e);
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
 
        \param e Reference to codim 0 entity.
@@ -131,11 +132,12 @@ namespace Dune
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<int cc>     // this is now the subentity's codim
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+    int DUNE_DEPRECATED map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template map<cc>(e,i)));
       return asImp().template map<cc>(e,i);
     }
+#endif
 
     /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
 
