@@ -423,6 +423,13 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
       }
       ++eIt;
     }
+  } else {
+
+    // Write data directly
+    for (; dit!=ditend; ++dit)
+      for (int j=0; j<ncomp; j++)
+        ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
+
   }
 }
 
