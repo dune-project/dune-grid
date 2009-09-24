@@ -12,7 +12,7 @@
 #include <set>
 
 #include <dune/grid/uggrid.hh>
-#include <dune/doc/grids/ugascplusplus/ugtestgrids.hh>
+#include "../../../doc/grids/gridfactory/hybridtestgrids.hh"
 #include <dune/grid/common/mcmgmapper.hh>
 
 using namespace Dune;
@@ -142,7 +142,7 @@ int main () try
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    std::auto_ptr< GridType > gridptr(make2DTestGrid());
+    std::auto_ptr< GridType > gridptr(make2DHybridTestGrid< GridType >());
     GridType & grid = *gridptr;
 
     // create hybrid grid
@@ -167,7 +167,7 @@ int main () try
     typedef GridType::Traits::LeafIndexSet LeafIndexSetType;
     typedef GridType::Traits::LevelIndexSet LevelIndexSetType;
 
-    std::auto_ptr< GridType > gridptr(make3DTestGrid());
+    std::auto_ptr< GridType > gridptr(make3DHybridTestGrid< GridType >());
     GridType & grid = *gridptr;
 
     // create hybrid grid
