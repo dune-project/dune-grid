@@ -2404,7 +2404,6 @@ namespace Dune {
       if (refCount < -maxLevel())
         DUNE_THROW(GridError, "Only " << maxLevel() << " levels left. " <<
                    "Coarsening " << -refCount << " levels requested!");
-      bool b=true;
       for (int k=refCount; k<0; k++)
       {
         MultiYGrid<dim,ctype>::coarsen();
@@ -2413,32 +2412,61 @@ namespace Dune {
       }
       for (int k=0; k<refCount; k++)
       {
-        MultiYGrid<dim,ctype>::refine(b);
+        MultiYGrid<dim,ctype>::refine(keep_ovlp);
         setsizes();
         indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,maxLevel()) );
       }
     }
 
-    // set options for refinement
-    void refineOptions (bool b)
+    /**
+       \brief set options for refinement
+       @param keepPhysicalOverlap [true] keep the physical size f the overlap, [false] keep the number of cells in the overlap
+     */
+    void refineOptions (bool keepPhysicalOverlap)
     {
-      keep_ovlp=b;
+      keep_ovlp = keepPhysicalOverlap;
     }
 
-    //! refine the grid refCount times. What about overlap?
-    void refine (bool b)
+    /** \brief Marks an entity to be refined/coarsened in a subsequent adapt.
+
+       \param[in] refCount Number of subdivisions that should be applied. Negative value means coarsening.
+       \param[in] e        Entity to Entity that should be refined
+
+       \return true if Entity was marked, false otherwise.
+
+       \note
+          -  On yaspgrid marking one element will mark all other elements of the level aswell
+          -  If refCount is lower than refCount of a previous mark-call, nothing is changed
+     */
+    bool mark( int refCount, const typename Traits::template Codim<0>::Entity & e )
     {
-      MultiYGrid<dim,ctype>::refine(b);
-      setsizes();
-      indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,maxLevel()) );
+      adaptRefCount = std::max(adaptRefCount, refCount);
+      return true;
+    }
+
+    /** \brief returns adaptation mark for given entity
+
+       \param[in] e   Entity for which adaptation mark should be determined
+
+       \return int adaptation mark, here the default value 0 is returned
+     */
+    int getMark ( const typename Traits::template Codim<0>::Entity &e ) const
+    {
+      return adaptRefCount;
     }
 
     //! map adapt to global refine
     bool adapt ()
     {
-      globalRefine(1);
-      return true;
+      globalRefine(adaptRefCount);
+      return preAdapt();
     }
+
+    //! returns true, if at least one entity is marked for adaption
+    bool preAdapt () { return (adaptRefCount != 0); }
+
+    //! clean up some markers
+    void postAdapt() { adaptRefCount = 0; }
 
     //! one past the end on this level
     template<int cd, PartitionIteratorType pitype>
@@ -3068,6 +3096,7 @@ namespace Dune {
 
     int sizes[MAXL][dim+1]; // total number of entities per level and codim
     bool keep_ovlp;
+    int adaptRefCount;
   };
 
   namespace Capabilities
