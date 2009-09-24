@@ -13,6 +13,27 @@
 namespace Dune
 {
 
+  /*!
+     \brief Helperclass to find spots that still use the old numbering
+
+     add -DDEPRECATEDINT to your CXXFLAGS to disable the transparent usage of
+     deprecated_int. This will disable implicit typeconversion from and to unsigned int
+   */
+  class deprecated_int
+  {
+    unsigned int i;
+  public:
+    //! implicit typeconversion to unsigned int
+    #ifndef DEPRECATEDINT
+    operator unsigned int () { return i; }
+    #endif
+    unsigned int value() { return i; };
+    #ifdef DEPRECATEDINT
+    explicit
+    #endif
+    deprecated_int(unsigned int j) : i(j) {};
+  };
+
   namespace GenericGeometry
   {
 
