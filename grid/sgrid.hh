@@ -16,7 +16,6 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/sgrid/numbering.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/common/dynamicsubindexid.hh>
 
 /*! \file sgrid.hh
    This file documents the DUNE grid interface. We use the special implementation for
@@ -105,11 +104,6 @@ namespace Dune {
 
     //! maps a global coordinate within the element to a local coordinate in its reference element
     FieldVector<sgrid_ctype, mydim> local (const FieldVector<sgrid_ctype, cdim>& global) const;
-
-#if 0
-    //! returns true if the point in local coordinates is located within the refelem
-    bool checkInside (const FieldVector<sgrid_ctype, mydim>& local) const;
-#endif
 
     /*! Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
@@ -219,19 +213,29 @@ namespace Dune {
      * This routine exists so that algorithms that integrate over grid
      * boundaries can also be compiled for 1d-grids.
      */
+    sgrid_ctype volume() const
+    {
+      return 1;
+    }
+
+    /** \brief This dummy routine always returns 1.0.
+     *
+     * This routine exists so that algorithms that integrate over grid
+     * boundaries can also be compiled for 1d-grids.
+     */
     sgrid_ctype integrationElement(const FieldVector<sgrid_ctype, 0>& local) const {
-      return 1.;
+      return volume();
     }
 
     const FieldMatrix< sgrid_ctype, 0, cdim > &jacobianTransposed ( const FieldVector< sgrid_ctype, 0 > &local ) const
     {
-      static FieldMatrix< sgrid_ctype, 0, cdim > dummy ( sgrid_ctype( 0 ) );
+      static const FieldMatrix< sgrid_ctype, 0, cdim > dummy ( sgrid_ctype( 0 ) );
       return dummy;
     }
 
     const FieldMatrix<sgrid_ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const
     {
-      static FieldMatrix<sgrid_ctype,cdim,0> dummy( sgrid_ctype(0) );
+      static const FieldMatrix<sgrid_ctype,cdim,0> dummy( sgrid_ctype(0) );
       return dummy;
     }
 
@@ -278,13 +282,6 @@ namespace Dune {
       return l;
     }
 
-    //! index is unique and consecutive per level and codim
-    //! used for access to degrees of freedom
-    int index () const
-    {
-      return compressedIndex();
-    }
-
     //! global index is calculated from the index and grid size
     int globalIndex() const;
 
@@ -293,7 +290,17 @@ namespace Dune {
 
     //! constructor
     SEntityBase (GridImp* _grid, int _l, int _id);
+    //! empty constructor
     SEntityBase ();
+    //! copy constructor
+    SEntityBase ( const SEntityBase& other ) :
+      grid(other.grid),
+      l(other.l),
+      index(other.index),
+      z(other.z),
+      geo(), // do not copy geometry
+      builtgeometry(false) // mark geometry as not built
+    {}
 
     //! Reinitialization
     void make (GridImp* _grid, int _l, int _id);
@@ -304,67 +311,13 @@ namespace Dune {
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
     {
-      if (codim!=dim)
-      {
-        // encode codim, this would actually not be necessary
-        // because z is unique in codim
-        PersistentIndexType id(codim);
-
-        // encode level
-        id = id << sgrid_level_bits;
-        id = id+PersistentIndexType(l);
-
-        // encode coordinates
-        for (int i=dim-1; i>=0; i--)
-        {
-          id = id << sgrid_dim_bits;
-          id = id+PersistentIndexType(z[i]);
-        }
-
-        return id;
-      }
-      else
-      {
-        // determine min number of trailing zeroes
-        // consider that z is on the doubled grid !
-        int trailing = 1000;
-        for (int i=0; i<dim; i++)
-        {
-          // count trailing zeros
-          int zeros = 0;
-          for (int j=0; j<l; j++)
-            if (z[i]&(1<<(j+1)))
-              break;
-            else
-              zeros++;
-          trailing = std::min(trailing,zeros);
-        }
-
-        // determine the level of this vertex
-        int level = l-trailing;
-
-        // encode codim
-        PersistentIndexType id(dim);
-
-        // encode level
-        id = id << sgrid_level_bits;
-        id = id+PersistentIndexType(level);
-
-        // encode coordinates
-        for (int i=dim-1; i>=0; i--)
-        {
-          id = id << sgrid_dim_bits;
-          id = id+PersistentIndexType(z[i]>>trailing);
-        }
-
-        return id;
-      }
+      return grid->persistentIndex(l, codim, z);
     }
 
     //! consecutive, codim-wise, level-wise index
     int compressedIndex () const
     {
-      return id;
+      return index;
     }
 
     //! consecutive, codim-wise, level-wise index
@@ -373,7 +326,7 @@ namespace Dune {
       // codim != dim -> there are no copies of entities
       // maxlevel -> ids are fine
       if (codim<dim || l==grid->maxLevel())
-        return id;
+        return compressedIndex();
 
       // this is a vertex which is not on the finest level
       // move coordinates up to maxlevel (multiply by 2 for each level
@@ -389,7 +342,7 @@ namespace Dune {
     // this is how we implement our elements
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
     int l;               //!< level where element is on
-    int id;              //!< my consecutive id
+    int index;           //!< my consecutive index
     array<int,dim> z; //!< my coordinate, number of even components = codim
     mutable MakeableGeometry geo; //!< geometry, is only built on demand
     mutable bool builtgeometry; //!< true if geometry has been constructed
@@ -417,9 +370,6 @@ namespace Dune {
     // disambiguate member functions with the same name in both bases
     //! level of this element
     int level () const {return SEntityBase<codim,dim,GridImp>::level();}
-
-    //! index is unique and consecutive per level and codim used for access to degrees of freedom
-    int index () const {return SEntityBase<codim,dim,GridImp>::index();}
 
     //! geometry of this entity
     const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
@@ -484,10 +434,6 @@ namespace Dune {
     //! level of this element
     int level () const {return SEntityBase<0,dim,GridImp>::level();}
 
-    //! index is unique and consecutive per level and codim
-    //! used for access to degrees of freedom
-    int index () const {return SEntityBase<0,dim,GridImp>::index();}
-
     //! only interior entities
     PartitionType partitionType () const { return InteriorEntity; }
 
@@ -504,39 +450,34 @@ namespace Dune {
        Provide access to mesh entity i of given codimension. Entities
        are numbered 0 ... count<cc>()-1
      */
-    template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
-
-    template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const
-    {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( this->type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
-      return entity< codim >( j );
-    }
+    template<int cc> typename Codim<cc>::EntityPointer subEntity (int i) const;
 
     //! subentity compressed index
-    template<int cc>
-    int subCompressedIndex (int i) const
+    int subCompressedIndex (int codim, int i) const
     {
-      if (cc==0) return this->compressedIndex();
-      return this->grid->template getRealEntity<cc>(*entity<cc>(i)).compressedIndex();
+      if (codim==0) return this->compressedIndex();
+      // compute subIndex
+      return (this->grid)->n(this->l, this->grid->subz(this->z,i,codim));
     }
 
-    //! subentity compressed index
-    template<int cc>
-    int subCompressedLeafIndex (int i) const
+    /*! subentity leaf index
+       \todo add handling of not-leaf vertices
+     */
+    int subCompressedLeafIndex (int codim, int i) const
     {
-      if (cc==0) return this->compressedLeafIndex();
-      return this->grid->template getRealEntity<cc>(*entity<cc>(i)).compressedLeafIndex();
+      if (codim==0) return this->compressedLeafIndex();
+
+      assert(this->l == this->grid->maxLevel());
+      // compute subIndex
+      return (this->grid)->n(this->l, this->grid->subz(this->z,i,codim));
     }
 
     //! subentity persistent index
-    template<int cc>
-    PersistentIndexType subPersistentIndex (int i) const
+    PersistentIndexType subPersistentIndex (int codim, int i) const
     {
-      if (cc==0) return this->persistentIndex();
-      return this->grid->template getRealEntity<cc>(*entity<cc>(i)).persistentIndex();
+      if (codim==0) return this->persistentIndex();
+      // compute subId
+      return this->grid->persistentIndex(this->l, codim, this->grid->subz(this->z,i,codim));
     }
 
     /**
@@ -593,8 +534,8 @@ namespace Dune {
 
     // members specific to SEntity
     //! constructor
-    SEntity (GridImp* _grid, int _l, int _id) :
-      SEntityBase<0,dim,GridImp>::SEntityBase(_grid,_l,_id)
+    SEntity (GridImp* _grid, int _l, int _index) :
+      SEntityBase<0,dim,GridImp>::SEntityBase(_grid,_l,_index)
     {
       built_father = false;
     }
@@ -603,6 +544,11 @@ namespace Dune {
     {
       built_father = false;
     }
+
+    SEntity (const SEntity& other )
+      : SEntityBase<0,dim,GridImp>(other.grid, other.l, other.index ),
+        built_father(false)
+    {}
 
     //! Reinitialization
     void make (GridImp* _grid, int _l, int _id)
@@ -621,7 +567,7 @@ namespace Dune {
   private:
 
     mutable bool built_father;
-    mutable int father_id;
+    mutable int father_index;
     mutable SMakeableGeometry<dim,dim,const GridImp> in_father_local;
     void make_father() const;
   };
@@ -647,9 +593,6 @@ namespace Dune {
     // disambiguate member functions with the same name in both bases
     //! level of this element
     int level () const {return SEntityBase<dim,dim,GridImp>::level();}
-
-    //! index is unique and consecutive per level and codim used for access to degrees of freedom
-    int index () const {return SEntityBase<dim,dim,GridImp>::index();}
 
     //! only interior entities
     PartitionType partitionType () const { return InteriorEntity; }
@@ -680,7 +623,7 @@ namespace Dune {
 
   private:
     mutable bool built_father;
-    mutable int father_id;
+    mutable int father_index;
     mutable FieldVector<sgrid_ctype, dim> in_father_local;
     void make_father() const;
   };
@@ -711,11 +654,11 @@ namespace Dune {
    */
   struct SHierarchicStackElem {
     int l;
-    int id;
-    SHierarchicStackElem () : l(-1), id(-1) {}
-    SHierarchicStackElem (int _l, int _id) {l=_l; id=_id;}
+    int index;
+    SHierarchicStackElem () : l(-1), index(-1) {}
+    SHierarchicStackElem (int _l, int _index) {l=_l; index=_index;}
     bool operator== (const SHierarchicStackElem& s) const {return !operator!=(s);}
-    bool operator!= (const SHierarchicStackElem& s) const {return l!=s.l || id!=s.id;}
+    bool operator!= (const SHierarchicStackElem& s) const {return l!=s.l || index!=s.index;}
   };
 
   template<class GridImp>
@@ -741,7 +684,7 @@ namespace Dune {
     SHierarchicIterator (GridImp* _grid,
                          const Dune::SEntity<0,GridImp::dimension,GridImp>& _e,
                          int _maxLevel, bool makeend) :
-      Dune::SEntityPointer<0,GridImp>(_grid,_e.level(),_e.index())
+      Dune::SEntityPointer<0,GridImp>(_grid,_e.level(),_e.compressedIndex())
     {
       // without sons, we are done
       // (the end iterator is equal to the calling iterator)
@@ -749,17 +692,17 @@ namespace Dune {
 
       // remember element where begin has been called
       orig_l = this->entity().level();
-      orig_id = _grid->template getRealEntity<0>(this->entity()).index();
+      orig_index = _grid->getRealImplementation(this->entity()).compressedIndex();
 
       // push original element on stack
-      SHierarchicStackElem originalElement(orig_l, orig_id);
+      SHierarchicStackElem originalElement(orig_l, orig_index);
       stack.push(originalElement);
 
       // compute maxLevel
       maxLevel = std::min(_maxLevel,this->grid->maxLevel());
 
       // ok, push all the sons as well
-      push_sons(orig_l,orig_id);
+      push_sons(orig_l,orig_index);
 
       // and pop the first son
       increment();
@@ -767,7 +710,7 @@ namespace Dune {
 
   private:
     int maxLevel;              //!< maximum level of elements to be processed
-    int orig_l, orig_id;       //!< element where begin was called (the root of the tree to be processed)
+    int orig_l, orig_index;       //!< element where begin was called (the root of the tree to be processed)
 
     FiniteStack<SHierarchicStackElem,GridImp::MAXL> stack;    //!< stack holding elements to be processed
 
@@ -943,20 +886,20 @@ namespace Dune {
     int level () const;
 
     //! constructor
-    SEntityPointer (GridImp * _grid, int _l, int _id) :
-      grid(_grid), l(_l), id(_id),
+    SEntityPointer (GridImp * _grid, int _l, int _index) :
+      grid(_grid), l(_l), index(_index),
       e(0)
     {}
 
     //! constructor
     SEntityPointer (const SEntity<codim,dim,GridImp> & _e) :
-      grid(_e.grid), l(_e.l), id(_e.id),
+      grid(_e.grid), l(_e.l), index(_e.index),
       e(0)
     {}
 
     //! constructor
     SEntityPointer (const SEntityPointer<codim,GridImp>& other) :
-      grid(other.grid), l(other.l), id(other.id),
+      grid(other.grid), l(other.l), index(other.index),
       e( 0 )
     {}
 
@@ -965,7 +908,7 @@ namespace Dune {
     {
       compactify();
 #ifndef NDEBUG
-      id = -1;
+      index = -1;
 #endif
     }
 
@@ -974,7 +917,7 @@ namespace Dune {
     {
       grid = other.grid;
       l = other.l;
-      id = other.id;
+      index = other.index;
 
       compactify();
       return *this;
@@ -995,7 +938,7 @@ namespace Dune {
     {
       if( ! e )
       {
-        e = getEntity( grid, l, id );
+        e = getEntity( grid, l, index );
       }
       return *e;
     }
@@ -1027,7 +970,7 @@ namespace Dune {
 
     GridImp* grid;               //!< my grid
     int l;                       //!< level where element is on
-    mutable int id;              //!< my consecutive id
+    mutable int index;           //!< my consecutive index
     mutable SMakeableEntity<codim,dim,GridImp>* e; //!< virtual entity
   };
   //************************************************************************
@@ -1066,13 +1009,14 @@ namespace Dune {
     typedef SGridLevelIndexSet< GridImp > This;
     typedef IndexSet< GridImp, This > Base;
 
+    enum { dim = GridImp::dimension };
+
   public:
 
     //! constructor stores reference to a grid and level
     SGridLevelIndexSet ( const GridImp &g, int l )
       : grid( g ),
-        level( l ),
-        dynamicSubIndex_( *this )
+        level( l )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -1083,20 +1027,13 @@ namespace Dune {
     template<int cd>
     int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.template getRealEntity<cd>(e).compressedIndex();
-    }
-
-    //! get index of subentity of a codim 0 entity
-    template<int cc>
-    int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
+      return grid.getRealImplementation(e).compressedIndex();
     }
 
     int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return dynamicSubIndex_( e, i, codim );
+      return grid.getRealImplementation(e).subCompressedIndex(codim, i);
     }
 
     // return true if the given entity is contained in \f$E\f$.
@@ -1115,13 +1052,6 @@ namespace Dune {
     //! return size of set for a given codim
     int size (int codim) const
     {
-#if 0
-      int s=0;
-      const std::vector<GeometryType>& geomTs = geomTypes(codim);
-      for (unsigned int i=0; i<geomTs.size(); ++i)
-        s += size(geomTs[i]);
-      return s;
-#endif
       return grid.size( level, codim );
     }
 
@@ -1135,7 +1065,6 @@ namespace Dune {
     const GridImp& grid;
     int level;
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
-    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
   // Leaf Index Set
@@ -1146,13 +1075,12 @@ namespace Dune {
     typedef SGridLeafIndexSet< GridImp > This;
     typedef IndexSet< GridImp, This > Base;
 
-    static const int dim = remove_const< GridImp >::type::dimension;
+    enum { dim = GridImp::dimension };
 
   public:
     //! constructor stores reference to a grid and level
     explicit SGridLeafIndexSet ( const GridImp &g )
-      : grid( g ),
-        dynamicSubIndex_( *this )
+      : grid( g )
     {
       // contains a single element type;
       for (int codim=0; codim<=dim; codim++)
@@ -1167,24 +1095,13 @@ namespace Dune {
     template<int cd>
     int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.template getRealEntity<cd>(e).compressedLeafIndex();
-    }
-
-    //! get index of subentity of a codim 0 entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
-    template<int cc>
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid.template getRealEntity<0>(e).template subCompressedLeafIndex<cc>(i);
+      return grid.getRealImplementation(e).compressedLeafIndex();
     }
 
     int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return dynamicSubIndex_( e, i, codim );
+      return grid.getRealImplementation(e).subCompressedLeafIndex(codim, i);
     }
 
     //! get number of entities of given type
@@ -1215,7 +1132,6 @@ namespace Dune {
   private:
     const GridImp& grid;
     std::vector<GeometryType> mytypes[dim+1];
-    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -1246,8 +1162,7 @@ namespace Dune {
 
     //! constructor stores reference to a grid
     explicit SGridGlobalIdSet ( const GridImp &g )
-      : grid( g ),
-        dynamicSubId_( *this )
+      : grid( g )
     {}
 
     //! get id of an entity
@@ -1258,7 +1173,7 @@ namespace Dune {
     template<int cd>
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.template getRealEntity<cd>(e).persistentIndex();
+      return grid.getRealImplementation(e).persistentIndex();
     }
 
     //! get id of subentity
@@ -1266,21 +1181,14 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cc>
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
-    }
-
     IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return dynamicSubId_( e, i, codim );
+      return grid.getRealImplementation(e).template subPersistentIndex(codim, i);
     }
 
   private:
     const GridImp& grid;
-    DynamicSubId< GridImp, This > dynamicSubId_;
   };
 
 
@@ -1551,34 +1459,6 @@ namespace Dune {
       return true;
     }
 
-
-    //! map expanded coordinates to position
-    FieldVector<sgrid_ctype, dimworld> pos (int level, array<int,dim>& z) const;
-
-    //! compute codim from coordinate
-    int calc_codim (int level, const array<int,dim>& z) const;
-
-    //! compute number from expanded coordinate
-    int n (int level, const array<int,dim>& z) const;
-
-    //! compute coordinates from number and codimension
-    array<int,dim> z (int level, int i, int codim) const;
-
-    //! compress from expanded coordinates to grid for a single partition number
-    array<int,dim> compress (int level, const array<int,dim>& z) const;
-
-    //! expand with respect to partition number
-    array<int,dim> expand (int level, const array<int,dim>& r, int b) const;
-
-    /*! There are \f$2^d\f$ possibilities of having even/odd coordinates.
-          The binary representation is called partition number.
-     */
-    int partition (int level, const array<int,dim>& z) const;
-
-    //! given reduced coordinates of an element, determine if element is in the grid
-    bool exists (int level, const array<int,dim>& zred) const;
-
-
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
@@ -1601,8 +1481,10 @@ namespace Dune {
       return *theleafindexset;
     }
 
-    // dummy parallel functions
-
+    /*!
+       @name dummy parallel functions
+       @{
+     */
     template<class DataHandle>
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {}
@@ -1640,18 +1522,9 @@ namespace Dune {
       return 0;
     }
 
-    SIntersectionIterator<const SGrid<dim, dimworld> >&
-    getRealIntersectionIterator(typename Traits::LeafIntersectionIterator& it)
-    {
-      return this->getRealImplementation(it);
-    }
-
-    const SIntersectionIterator<const SGrid<dim, dimworld> >&
-    getRealIntersectionIterator(const typename Traits::LeafIntersectionIterator& it) const
-    {
-      return this->getRealImplementation(it);
-    }
-
+    /*
+       @}
+     */
 
   private:
     /*
@@ -1671,22 +1544,99 @@ namespace Dune {
     friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
     friend class Dune::SEntity<0,dim,const Dune::SGrid<dim,dimworld> >;
 
+    template<int codim_, int dim_, class GridImp_>
+    friend class Dune::SEntityBase;
+
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
 
-    /*
-       private methods
-     */
-    template<int codim>
-    SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(typename Traits::template Codim<codim>::Entity& e )
-    {
-      return this->getRealImplementaion(e);
-    }
+    //! map expanded coordinates to position
+    FieldVector<sgrid_ctype, dimworld> pos (int level, array<int,dim>& z) const;
 
-    template<int codim>
-    const SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
+    //! compute codim from coordinate
+    int calc_codim (int level, const array<int,dim>& z) const;
+
+    //! compute number from expanded coordinate
+    int n (int level, const array<int,dim>& z) const;
+
+    //! compute coordinates from number and codimension
+    array<int,dim> z (int level, int i, int codim) const;
+
+    //! compute zentity of subentity of given codim
+    array<int,dim> subz (const array<int,dim> & z, int i, int codim) const;
+
+    //! compress from expanded coordinates to grid for a single partition number
+    array<int,dim> compress (int level, const array<int,dim>& z) const;
+
+    //! expand with respect to partition number
+    array<int,dim> expand (int level, const array<int,dim>& r, int b) const;
+
+    /*! There are \f$2^d\f$ possibilities of having even/odd coordinates.
+          The binary representation is called partition number.
+     */
+    int partition (int level, const array<int,dim>& z) const;
+
+    //! given reduced coordinates of an element, determine if element is in the grid
+    bool exists (int level, const array<int,dim>& zred) const;
+
+    // compute persistent index for a given zentity
+    PersistentIndexType persistentIndex (int l, int codim, const array<int,dim> & zentity) const
     {
-      return this->getRealImplementation(e);
+      if (codim!=dim)
+      {
+        // encode codim, this would actually not be necessary
+        // because z is unique in codim
+        PersistentIndexType id(codim);
+
+        // encode level
+        id = id << sgrid_level_bits;
+        id = id+PersistentIndexType(l);
+
+        // encode coordinates
+        for (int i=dim-1; i>=0; i--)
+        {
+          id = id << sgrid_dim_bits;
+          id = id+PersistentIndexType(zentity[i]);
+        }
+
+        return id;
+      }
+      else
+      {
+        // determine min number of trailing zeroes
+        // consider that z is on the doubled grid !
+        int trailing = 1000;
+        for (int i=0; i<dim; i++)
+        {
+          // count trailing zeros
+          int zeros = 0;
+          for (int j=0; j<l; j++)
+            if (zentity[i]&(1<<(j+1)))
+              break;
+            else
+              zeros++;
+          trailing = std::min(trailing,zeros);
+        }
+
+        // determine the level of this vertex
+        int level = l-trailing;
+
+        // encode codim
+        PersistentIndexType id(dim);
+
+        // encode level
+        id = id << sgrid_level_bits;
+        id = id+PersistentIndexType(level);
+
+        // encode coordinates
+        for (int i=dim-1; i>=0; i--)
+        {
+          id = id << sgrid_dim_bits;
+          id = id+PersistentIndexType(zentity[i]>>trailing);
+        }
+
+        return id;
+      }
     }
 
     // disable copy and assign
