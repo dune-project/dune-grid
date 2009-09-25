@@ -41,24 +41,6 @@ namespace Dune {
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline GeometryType SGeometry<mydim,cdim,GridImp>::type () const
-  {
-    return GeometryType(GeometryType::cube,mydim);
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline int SGeometry<mydim,cdim,GridImp>::corners () const
-  {
-    return 1<<mydim;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline const FieldVector<typename GridImp::ctype, cdim>& SGeometry<mydim,cdim,GridImp>::operator[] (int i) const
-  {
-    return c[i];
-  }
-
-  template<int mydim, int cdim, class GridImp>
   inline FieldVector<typename GridImp::ctype, cdim> SGeometry<mydim,cdim,GridImp>::global (const FieldVector<typename GridImp::ctype, mydim>& local) const
   {
     FieldVector<ctype, cdim> global = s;
@@ -78,33 +60,13 @@ namespace Dune {
     return l;
   }
 
-#if 0
   template<int mydim, int cdim, class GridImp>
-  inline bool SGeometry<mydim,cdim,GridImp>::checkInside (const FieldVector<typename GridImp::ctype, mydim>& local) const
-  {
-    // check wether they are in the reference element
-    for(int i=0; i<mydim; i++)
-    {
-      if((local[i] < 0.0) || (local[i] > 1.0 ))
-        return false;
-    }
-    return true;
-  }
-#endif
-
-  template<int mydim, int cdim, class GridImp>
-  inline GridImp::ctype SGeometry<mydim,cdim,GridImp>::volume () const
+  inline typename GridImp::ctype SGeometry<mydim,cdim,GridImp>::volume () const
   {
     sgrid_ctype s = 1.0;
     for (int j=0; j<mydim; j++) s *= A[j].one_norm();
 
     return s;
-  }
-
-  template<int mydim, int cdim, class GridImp>
-  inline GridImp::ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const
-  {
-    return volume();
   }
 
   template< int mydim, int cdim, class GridImp >
@@ -167,24 +129,6 @@ namespace Dune {
   }
 
   template<int cdim, class GridImp>
-  inline GeometryType SGeometry<0,cdim,GridImp>::type () const
-  {
-    return GeometryType(GeometryType::cube,0);
-  }
-
-  template<int cdim, class GridImp>
-  inline int SGeometry<0,cdim,GridImp>::corners () const
-  {
-    return 1;
-  }
-
-  template<int cdim, class GridImp>
-  inline const FieldVector<typename GridImp::ctype, cdim>& SGeometry<0,cdim,GridImp>::operator[] (int i) const
-  {
-    return s;
-  }
-
-  template<int cdim, class GridImp>
   inline void SGeometry<0,cdim,GridImp>::print (std::ostream& ss, int indent) const
   {
     for (int i=0; i<indent; i++) ss << " ";
@@ -194,15 +138,8 @@ namespace Dune {
   //************************************************************************
   // inline methods for SEntityBase
 
-  template<int n>
-  static inline array<int,n>& coarsen (array<int,n>& in)
-  {
-    for (int i=0; i<n; i++) in[i] = in[i]/2;
-    return in;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline SEntityBase<codim,dim,GridImp>::SEntityBase (GridImp* _grid, int _l, int _id)
+  template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+  inline void SEntityBase<codim,dim,GridImp,EntityImp>::make (GridImp* _grid, int _l, int _id)
   {
     grid = _grid;
     l = _l;
@@ -211,24 +148,8 @@ namespace Dune {
     builtgeometry = false;
   }
 
-  template<int codim, int dim, class GridImp>
-  inline SEntityBase<codim,dim,GridImp>::SEntityBase ()
-  {
-    builtgeometry = false;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void SEntityBase<codim,dim,GridImp>::make (GridImp* _grid, int _l, int _id)
-  {
-    grid = _grid;
-    l = _l;
-    index = _id;
-    z = grid->z(_l,_id,codim);
-    builtgeometry = false;
-  }
-
-  template<int codim, int dim, class GridImp>
-  inline void SEntityBase<codim,dim,GridImp>::make (int _l, int _id)
+  template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+  inline void SEntityBase<codim,dim,GridImp,EntityImp>::make (int _l, int _id)
   {
     l = _l;
     index = _id;
@@ -236,8 +157,8 @@ namespace Dune {
     builtgeometry = false;
   }
 
-  template<int codim, int dim, class GridImp>
-  inline int SEntityBase<codim,dim,GridImp>::globalIndex () const
+  template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+  inline int SEntityBase<codim,dim,GridImp,EntityImp>::globalIndex () const
   {
     int ind = 0;
     for(int i=0; i<this->l; i++)
@@ -245,8 +166,8 @@ namespace Dune {
     return ind+this->compressedIndex();
   }
 
-  template<int codim, int dim, class GridImp>
-  inline const typename GridImp::template Codim<codim>::Geometry& SEntityBase<codim,dim,GridImp>::geometry () const
+  template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+  inline const typename GridImp::template Codim<codim>::Geometry& SEntityBase<codim,dim,GridImp,EntityImp>::geometry () const
   {
     if (builtgeometry) return geo;
 
@@ -431,57 +352,6 @@ namespace Dune {
   inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hend (int maxLevel) const
   {
     return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxLevel,true));
-  }
-
-
-  // codim dim
-  template<int dim, class GridImp>
-  inline void SEntity<dim,dim,GridImp>::make_father () const
-  {
-    // check level
-    if (this->l<=0)
-    {
-      father_index = 0;
-      built_father = true;
-      return;
-    }
-
-    // reduced coordinates from expanded coordinates
-    // reduced coordinates of a fine grid vertex can be interpreted as
-    // expanded coordinates on the next coarser level !
-    array<int,dim> zz = this->grid->compress(this->l,this->z);
-
-    // to find father, make all coordinates odd
-    FieldVector<ctype, dim> delta;
-    for (int i=0; i<dim; i++)
-      if (zz[i]%2)
-      {
-        // component i is odd
-        delta[i] = 0.0;
-      }
-      else
-      {
-        // component i is even
-        if (zz[i]>0)
-        {
-          zz[i] -= 1;                       // now it is odd and >= 1
-          delta[i] = 0.5;
-        }
-        else
-        {
-          zz[i] += 1;                       // now it is odd and >= 1
-          delta[i] = -0.5;
-        }
-      }
-
-    // zz is now an expanded coordinate on the coarse grid
-    father_index = this->grid->n((this->l)-1,zz);
-
-    // compute the local coordinates in father
-    in_father_local = 0.5;
-    for (int i=0; i<dim; i++) in_father_local[i] += delta[i];
-
-    built_father = true;
   }
 
   //************************************************************************

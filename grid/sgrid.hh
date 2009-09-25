@@ -86,17 +86,21 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     //! return the element type identifier
-    GeometryType type () const;
+    GeometryType type () const
+    {
+      static const GeometryType cubeType(GeometryType::cube,mydim);
+      return cubeType;
+    }
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const;
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, cdim>& operator[] (int i) const;
+    int corners () const
+    {
+      return 1<<mydim;
+    }
 
     FieldVector< ctype, cdim > corner ( const int i ) const
     {
-      return (*this)[ i ];
+      return c[i];
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
@@ -124,7 +128,10 @@ namespace Dune {
        will directly translate in substantial savings in the computation of finite element
        stiffness matrices.
      */
-    ctype integrationElement (const FieldVector<ctype, mydim>& local) const;
+    ctype integrationElement (const FieldVector<ctype, mydim>& local) const
+    {
+      return volume();
+    }
 
     /** \brief return volume of geometry */
     ctype volume() const;
@@ -162,17 +169,21 @@ namespace Dune {
     typedef typename GridImp::ctype ctype;
 
     //! return the element type identifier
-    GeometryType type () const;
+    GeometryType type () const
+    {
+      static const GeometryType cubeType(GeometryType::cube,0);
+      return cubeType;
+    }
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
-    int corners () const;
-
-    //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, cdim>& operator[] (int i) const;
+    int corners () const
+    {
+      return 1;
+    }
 
     FieldVector<ctype, cdim > corner ( const int i ) const
     {
-      return (*this)[ i ];
+      return s;
     }
 
     //! print internal data
@@ -182,7 +193,7 @@ namespace Dune {
     void make (FieldMatrix<ctype,1,cdim>& __As);
 
     //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return this->operator[] (0); }
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return corner(0); }
 
     //! maps a global coordinate within the element to a local coordinate in its reference element
     FieldVector<ctype, 0> local (const FieldVector<ctype, cdim>& global) const { return FieldVector<ctype,0> (0.0); }
@@ -272,8 +283,10 @@ namespace Dune {
      without specialization. This is the base for all SEntity classes with dim>0.
    */
 
-  template<int codim, int dim, class GridImp>
-  class SEntityBase {
+  template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+  class SEntityBase :
+    public EntityDefaultImplementation<codim,dim,GridImp,EntityImp>
+  {
     friend class SEntityPointer<codim,GridImp>;
     friend class SIntersectionIterator<GridImp>;
     enum { dimworld = GridImp::dimensionworld };
@@ -292,13 +305,31 @@ namespace Dune {
     //! global index is calculated from the index and grid size
     int globalIndex() const;
 
+    //! return the element type identifier
+    GeometryType type () const
+    {
+      static const GeometryType cubeType(GeometryType::cube,dim-codim);
+      return cubeType;
+    }
+
     //! geometry of this entity
     const Geometry& geometry () const;
 
+    PartitionType partitionType () const { return InteriorEntity; }
+
     //! constructor
-    SEntityBase (GridImp* _grid, int _l, int _id);
+    SEntityBase (GridImp* _grid, int _l, int _index) :
+      grid(_grid),
+      l(_l),
+      index(_index),
+      z(grid->z(l,index,codim)),
+      builtgeometry(false) {}
+
     //! empty constructor
-    SEntityBase ();
+    SEntityBase () :
+      builtgeometry(false) // mark geometry as not built
+    {}
+
     //! copy constructor
     SEntityBase ( const SEntityBase& other ) :
       grid(other.grid),
@@ -364,10 +395,10 @@ namespace Dune {
      Here: the general template
    */
   template<int codim, int dim, class GridImp>
-  class SEntity : public SEntityBase<codim,dim,GridImp>,
-                  public EntityDefaultImplementation<codim,dim,GridImp,SEntity>
+  class SEntity : public SEntityBase<codim,dim,GridImp,SEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
+    typedef Dune::SEntityBase<codim,dim,GridImp,Dune::SEntity> SEntityBase;
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
@@ -376,18 +407,17 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
     // disambiguate member functions with the same name in both bases
-    //! level of this element
-    int level () const {return SEntityBase<codim,dim,GridImp>::level();}
-
-    //! geometry of this entity
-    const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
+    // int level () const {return SEntityBase<codim,dim,GridImp>::level();}
+    // GeometryType type () const { return SEntityBase<codim,dim,GridImp>::type(); };
+    // const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
 
     //! only interior entities
-    PartitionType partitionType () const { return InteriorEntity; }
+    // PartitionType partitionType () const { return InteriorEntity; }
 
     // specific to SEntity
     //! constructor
-    SEntity (GridImp* _grid, int _l, int _id) : SEntityBase<codim,dim,GridImp>::SEntityBase(_grid,_l,_id) {};
+    SEntity (GridImp* _grid, int _l, int _id) :
+      SEntityBase(_grid,_l,_id) {};
   };
 
   /**
@@ -417,10 +447,10 @@ namespace Dune {
      interface compared to the general case
    */
   template<int dim, class GridImp>
-  class SEntity<0,dim,GridImp> : public SEntityBase<0,dim,GridImp>,
-                                 public EntityDefaultImplementation<0,dim,GridImp,SEntity>
+  class SEntity<0,dim,GridImp> : public SEntityBase<0,dim,GridImp,SEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
+    typedef Dune::SEntityBase<0,dim,GridImp,Dune::SEntity> SEntityBase;
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -438,16 +468,6 @@ namespace Dune {
 
     //! make HierarchicIterator a friend
     friend class SHierarchicIterator<GridImp>;
-
-    // disambiguate member functions with the same name in both bases
-    //! level of this element
-    int level () const {return SEntityBase<0,dim,GridImp>::level();}
-
-    //! only interior entities
-    PartitionType partitionType () const { return InteriorEntity; }
-
-    //! geometry of this entity
-    const Geometry& geometry () const {return SEntityBase<0,dim,GridImp>::geometry();}
 
     /**
        Intra-element access to entities of codimension cc > codim.
@@ -514,7 +534,7 @@ namespace Dune {
     //! return true if the entity is leaf
     bool isLeaf () const
     {
-      return ( this->grid->maxLevel() == level() );
+      return ( this->grid->maxLevel() == this->level() );
     }
 
     /**
@@ -544,36 +564,32 @@ namespace Dune {
     // members specific to SEntity
     //! constructor
     SEntity (GridImp* _grid, int _l, int _index) :
-      SEntityBase<0,dim,GridImp>::SEntityBase(_grid,_l,_index)
-    {
-      built_father = false;
-    }
+      SEntityBase(_grid,_l,_index),
+      built_father(false)
+    {}
 
-    SEntity ()
-    {
-      built_father = false;
-    }
-
-    SEntity (const SEntity& other )
-      : SEntityBase<0,dim,GridImp>(other.grid, other.l, other.index ),
-        built_father(false)
+    SEntity (const SEntity& other ) :
+      SEntityBase(other.grid, other.l, other.index ),
+      built_father(false)
     {}
 
     //! Reinitialization
     void make (GridImp* _grid, int _l, int _id)
     {
-      SEntityBase<0,dim,GridImp>::make(_grid,_l,_id);
+      SEntityBase::make(_grid,_l,_id);
       built_father = false;
     }
 
     //! Reinitialization
     void make (int _l, int _id)
     {
-      SEntityBase<0,dim,GridImp>::make(_l,_id);
+      SEntityBase::make(_l,_id);
       built_father = false;
     }
 
   private:
+
+    SEntity();
 
     mutable bool built_father;
     mutable int father_index;
@@ -581,62 +597,6 @@ namespace Dune {
     void make_father() const;
   };
 
-  /**
-     A Grid is a container of grid entities. An entity is parametrized
-     by the codimension.  An entity of codimension c in dimension d is a
-     d-c dimensional object.
-
-     Entities of codimension=dimension ("vertices") are defined through
-     template specialization. Note that this specialization has an
-     extended interface compared to the general case
-   */
-  template<int dim, class GridImp>
-  class SEntity<dim,dim,GridImp> : public SEntityBase<dim,dim,GridImp>,
-                                   public EntityDefaultImplementation <dim,dim,GridImp,SEntity>
-  {
-    enum { dimworld = GridImp::dimensionworld };
-  public:
-    typedef typename GridImp::ctype ctype;
-    typedef typename GridImp::template Codim<dim>::Geometry Geometry;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
-    // disambiguate member functions with the same name in both bases
-    //! level of this element
-    int level () const {return SEntityBase<dim,dim,GridImp>::level();}
-
-    //! only interior entities
-    PartitionType partitionType () const { return InteriorEntity; }
-
-    //! geometry of this entity
-    const Geometry& geometry () const {return SEntityBase<dim,dim,GridImp>::geometry();}
-
-    // members specific to SEntity
-    //! constructor
-    SEntity (GridImp* _grid, int _l, int _id) : SEntityBase<dim,dim,GridImp>::SEntityBase(_grid,_l,_id)
-    {
-      built_father = false;
-    }
-
-    //! Reinitialization
-    void make (GridImp* _grid, int _l, int _id)
-    {
-      SEntityBase<dim,dim,GridImp>::make(_grid, _l,_id);
-      built_father = false;
-    }
-
-    //! Reinitialization
-    void make (int _l, int _id)
-    {
-      SEntityBase<dim,dim,GridImp>::make(_l,_id);
-      built_father = false;
-    }
-
-  private:
-    mutable bool built_father;
-    mutable int father_index;
-    mutable FieldVector<ctype, dim> in_father_local;
-    void make_father() const;
-  };
 
   template<int codim, int dim, class GridImp>
   class SMakeableEntity :
@@ -825,7 +785,8 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return geometryInInside().type();
+      static const GeometryType cubeType(GeometryType::cube,dim-1);
+      return cubeType;
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
@@ -1028,6 +989,7 @@ namespace Dune {
       : grid( g ),
         level( l )
     {
+      // TODO move list of geometrytypes to grid, can be computed static (singleton)
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
         mytypes[codim].push_back(GeometryType(GeometryType::cube,GridImp::dimension-codim));
@@ -1092,6 +1054,7 @@ namespace Dune {
     explicit SGridLeafIndexSet ( const GridImp &g )
       : grid( g )
     {
+      // TODO move list of geometrytypes to grid, can be computed static (singleton)
       // contains a single element type;
       for (int codim=0; codim<=dim; codim++)
         mytypes[codim].push_back(GeometryType(GeometryType::cube,dim-codim));
