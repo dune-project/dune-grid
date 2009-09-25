@@ -290,19 +290,19 @@ namespace Dune
         number(num), offset(0)
       {
         if (datamode == VTKOptions::conforming && git != gend)
-          visited[vertexmapper.template map(*git,index,n)] = true;
+          visited[vertexmapper.map(*git,index,n)] = true;
       };
       void increment ()
       {
         switch (datamode)
         {
         case VTKOptions::conforming :
-          while(visited[vertexmapper.template map(*git,index,n)])
+          while(visited[vertexmapper.map(*git,index,n)])
           {
             basicIncrement();
             if (git == gend) return;
           }
-          visited[vertexmapper.template map(*git,index,n)] = true;
+          visited[vertexmapper.map(*git,index,n)] = true;
           break;
         case VTKOptions::nonconforming :
           basicIncrement();
@@ -324,7 +324,7 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.template map(*git,renumber(*git,index),n)];
+            number[vertexmapper.map(*git,renumber(*git,index),n)];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
         default :
@@ -411,7 +411,7 @@ namespace Dune
         {
         case VTKOptions::conforming :
           return
-            number[vertexmapper.template map(*git,renumber(*git,index),n)];
+            number[vertexmapper.map(*git,renumber(*git,index),n)];
         case VTKOptions::nonconforming :
           return offset + renumber(*git,index);
         default :
@@ -520,7 +520,7 @@ namespace Dune
             imin = i;
           }
         }
-        return v[mapper.template map(e,imin,n)];
+        return v[mapper.map(e,imin,n)];
       }
 
       //! get name
@@ -1096,7 +1096,7 @@ namespace Dune
           ncorners++;
           if (datamode == VTKOptions::conforming)
           {
-            int alpha = vertexmapper->template map(*it,i,n);
+            int alpha = vertexmapper->map(*it,i,n);
             if (number[alpha]<0)
               number[alpha] = nvertices++;
           }
