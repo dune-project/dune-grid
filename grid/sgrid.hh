@@ -264,20 +264,6 @@ namespace Dune {
     return s;
   }
 
-  template<int mydim, int cdim, class GridImp>
-  class SMakeableGeometry : public Geometry<mydim, cdim, GridImp, SGeometry>
-  {
-  public:
-    //! define type used for coordinates in grid module
-    typedef typename GridImp::ctype ctype;
-
-    SMakeableGeometry() :
-      Geometry<mydim, cdim, GridImp, SGeometry>(SGeometry<mydim, cdim, GridImp>())
-    {};
-
-    void make (FieldMatrix<ctype,mydim+1,cdim>& __As) { this->realGeometry.make(__As); }
-  };
-
   //************************************************************************
   /*! SEntityBase contains the part of SEntity that can be defined
      without specialization. This is the base for all SEntity classes with dim>0.
@@ -293,7 +279,6 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
-    typedef SMakeableGeometry<dim-codim, dimworld, const GridImp> MakeableGeometry;
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! level of this element
@@ -323,10 +308,12 @@ namespace Dune {
       l(_l),
       index(_index),
       z(grid->z(l,index,codim)),
+      geo(SGeometry<dim-codim,dimworld,GridImp>()),
       builtgeometry(false) {}
 
     //! empty constructor
     SEntityBase () :
+      geo(SGeometry<dim-codim,dimworld,GridImp>()),
       builtgeometry(false) // mark geometry as not built
     {}
 
@@ -336,7 +323,7 @@ namespace Dune {
       l(other.l),
       index(other.index),
       z(other.z),
-      geo(), // do not copy geometry
+      geo(SGeometry<dim-codim,dimworld,GridImp>()), // do not copy geometry
       builtgeometry(false) // mark geometry as not built
     {}
 
@@ -381,8 +368,8 @@ namespace Dune {
     GridImp* grid;       //!< grid containes mapper, geometry, etc.
     int l;               //!< level where element is on
     int index;           //!< my consecutive index
-    array<int,dim> z; //!< my coordinate, number of even components = codim
-    mutable MakeableGeometry geo; //!< geometry, is only built on demand
+    array<int,dim> z;    //!< my coordinate, number of even components = codim
+    mutable Geometry geo; //!< geometry, is only built on demand
     mutable bool builtgeometry; //!< true if geometry has been constructed
   };
 
@@ -391,30 +378,12 @@ namespace Dune {
      A Grid is a container of grid entities. An entity is parametrized by
      the codimension.  An entity of codimension c in dimension d is a d-c
      dimensional object.
-
-     Here: the general template
    */
   template<int codim, int dim, class GridImp>
   class SEntity : public SEntityBase<codim,dim,GridImp,SEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
     typedef Dune::SEntityBase<codim,dim,GridImp,Dune::SEntity> SEntityBase;
   public:
-    typedef typename GridImp::ctype ctype;
-    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
-    typedef typename GridImp::template Codim<codim>::LevelIterator LevelIterator;
-    typedef typename GridImp::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
-    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
-
-    // disambiguate member functions with the same name in both bases
-    // int level () const {return SEntityBase<codim,dim,GridImp>::level();}
-    // GeometryType type () const { return SEntityBase<codim,dim,GridImp>::type(); };
-    // const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
-
-    //! only interior entities
-    // PartitionType partitionType () const { return InteriorEntity; }
-
-    // specific to SEntity
     //! constructor
     SEntity (GridImp* _grid, int _l, int _id) :
       SEntityBase(_grid,_l,_id) {};
@@ -451,11 +420,11 @@ namespace Dune {
   {
     enum { dimworld = GridImp::dimensionworld };
     typedef Dune::SEntityBase<0,dim,GridImp,Dune::SEntity> SEntityBase;
+    using SEntityBase::grid;
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
-    typedef SMakeableGeometry<dim, dimworld, const GridImp> MakeableGeometry;
     template <int cd>
     struct Codim
     {
@@ -565,12 +534,14 @@ namespace Dune {
     //! constructor
     SEntity (GridImp* _grid, int _l, int _index) :
       SEntityBase(_grid,_l,_index),
-      built_father(false)
+      built_father(false),
+      in_father_local(SGeometry<dim,dim,GridImp>())
     {}
 
     SEntity (const SEntity& other ) :
       SEntityBase(other.grid, other.l, other.index ),
-      built_father(false)
+      built_father(false),
+      in_father_local(SGeometry<dim,dim,GridImp>())
     {}
 
     //! Reinitialization
@@ -593,7 +564,7 @@ namespace Dune {
 
     mutable bool built_father;
     mutable int father_index;
-    mutable SMakeableGeometry<dim,dim,const GridImp> in_father_local;
+    mutable LocalGeometry in_father_local;
     void make_father() const;
   };
 
@@ -795,7 +766,28 @@ namespace Dune {
     int indexInOutside () const;
 
     //! constructor
-    SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count);
+    SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count) :
+      self(*_self), ne(self), grid(_grid),
+      partition(_grid->partition(grid->getRealImplementation(ne).l,_self->z)),
+      zred(_grid->compress(grid->getRealImplementation(ne).l,_self->z)),
+      is_self_local(SGeometry<dim-1, dim, GridImp>()),
+      is_global(SGeometry<dim-1, dimworld, GridImp>()),
+      is_nb_local(SGeometry<dim-1, dim, GridImp>())
+    {
+      // make neighbor
+      make(_count);
+    }
+
+    SIntersectionIterator (const SIntersectionIterator & other) :
+      self(other.self), ne(other.ne), grid(other.grid),
+      partition(other.partition), zred(other.zred),
+      is_self_local(SGeometry<dim-1, dim, GridImp>()),
+      is_global(SGeometry<dim-1, dimworld, GridImp>()),
+      is_nb_local(SGeometry<dim-1, dim, GridImp>())
+    {
+      // make neighbor
+      make(other.count);
+    }
 
     //! assignment operator
     SIntersectionIterator& operator = (const SIntersectionIterator& it)
@@ -809,29 +801,27 @@ namespace Dune {
 
       /* Assign current position and update ne */
       self = it.self;
-      ne = it.ne;
-      count = it.count;
-      make(count);
+      make(it.count);
 
       return *this;
     }
 
   private:
-    void make (int _count) const;               //!< reinitialze iterator with given neighbor
-    void makeintersections () const;            //!< compute intersections
+    void make (int _count) const;         //!< reinitialze iterator with given neighbor
+    void makeintersections () const;      //!< compute intersections
     EntityPointer self;                   //!< EntityPointer for myself
-    mutable EntityPointer ne;                   //!< EntityPointer for neighbor
-    const GridImp * grid;                       //!< Pointer to the grid
-    const int partition;                        //!< partition number of self, needed for coordinate expansion
-    const array<int,dim> zred;               //!< reduced coordinates of myself, allows easy computation of neighbors
-    mutable int count;                            //!< number of neighbor
-    mutable bool valid_count;                     //!< true if count is in range
-    mutable bool valid_nb;                        //!< true if nb is initialized
-    mutable bool is_on_boundary;                  //!< true if neighbor is otside the domain
-    mutable bool built_intersections;             //!< true if all intersections have been built
-    mutable SMakeableGeometry<dim-1,dim,const GridImp> is_self_local;    //!< intersection in own local coordinates
-    mutable SMakeableGeometry<dim-1,dimworld,const GridImp> is_global;   //!< intersection in global coordinates, map consistent with is_self_local
-    mutable SMakeableGeometry<dim-1,dim,const GridImp> is_nb_local;      //!< intersection in neighbors local coordinates
+    mutable EntityPointer ne;             //!< EntityPointer for neighbor
+    const GridImp * grid;                 //!< Pointer to the grid
+    const int partition;                  //!< partition number of self, needed for coordinate expansion
+    const array<int,dim> zred;            //!< reduced coordinates of myself, allows easy computation of neighbors
+    mutable int count;                    //!< number of neighbor
+    mutable bool valid_count;             //!< true if count is in range
+    mutable bool valid_nb;                //!< true if nb is initialized
+    mutable bool is_on_boundary;          //!< true if neighbor is otside the domain
+    mutable bool built_intersections;     //!< true if all intersections have been built
+    mutable LocalGeometry is_self_local;  //!< intersection in own local coordinates
+    mutable Geometry is_global;           //!< intersection in global coordinates, map consistent with is_self_local
+    mutable LocalGeometry is_nb_local;    //!< intersection in neighbors local coordinates
   };
 
   //************************************************************************

@@ -200,7 +200,7 @@ namespace Dune {
     __As[dir] =grid->pos(l,t);     // all components of t are even
 
     // make element
-    geo.make(__As);
+    grid->getRealImplementation(geo).make(__As);
     builtgeometry = true;
     // return result
     return geo;
@@ -318,7 +318,7 @@ namespace Dune {
     }
     for (int i=0; i<dim; i++) v[i] = 0.5*delta[i];
     __As[dim] =v;
-    in_father_local.make(__As);     // build geometry
+    grid->getRealImplementation(in_father_local).make(__As);     // build geometry
 
     built_father = true;
   }
@@ -454,17 +454,6 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline SIntersectionIterator<GridImp>::SIntersectionIterator
-    (GridImp* _grid, const SEntity<0,dim,GridImp>* _self, int _count) :
-    self(*_self), ne(self), grid(_grid),
-    partition(_grid->partition(grid->getRealImplementation(ne).l,_self->z)),
-    zred(_grid->compress(grid->getRealImplementation(ne).l,_self->z))
-  {
-    // make neighbor
-    make(_count);
-  }
-
-  template<class GridImp>
   inline bool SIntersectionIterator<GridImp>::equals (const SIntersectionIterator<GridImp>& i) const
   {
     return (self == i.self) && (count==i.count);
@@ -545,7 +534,8 @@ namespace Dune {
         __AsLocal[t] = p2Local-p1Local;                 // a direction vector
         ++t;
       }
-    is_self_local.make(__AsLocal);     // build geometry
+    // update geometry
+    grid->getRealImplementation(is_self_local).make(__AsLocal);
 
     // local coordinates in neighbor
     p1Local = 0.0;
@@ -561,10 +551,10 @@ namespace Dune {
         __AsLocal[t] = p2Local-p1Local;                 // a direction vector
         ++t;
       }
-    is_nb_local.make(__AsLocal);     // build geometry
+    // update geometry
+    grid->getRealImplementation(is_nb_local).make(__AsLocal);
 
     // global coordinates
-
     FieldMatrix<ctype,dim,dimworld> __As;
     FieldVector<ctype, dimworld> p1,p2;
     t = 0;
@@ -584,7 +574,8 @@ namespace Dune {
       if (i!=dir)
         z1[i] -= 1;
     __As[t] = grid->pos(self.level(),z1);
-    is_global.make(__As);     // build geometry
+    // update geometry
+    grid->getRealImplementation(is_global).make(__As);
 
     built_intersections = true;
   }
