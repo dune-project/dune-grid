@@ -1,0 +1,200 @@
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_DGFWRITER_HH
+#define DUNE_DGFWRITER_HH
+
+/** \file
+ *  \brief write a GridView to a DGF file
+ *  \author Martin Nolte
+ */
+
+#include <fstream>
+#include <vector>
+
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
+
+namespace Dune
+{
+
+  /** \class DGFWriter
+   *  \ingroup DuneGridFormatParser
+   *  \brief write a GridView to a DGF file
+   *
+   *  The DGFWriter allows create a DGF file from a given GridView. It allows
+   *  for the easy creation of file format converters.
+   *
+   *  \tparam  GV  GridView to write in DGF format
+   */
+  template< class GV >
+  class DGFWriter
+  {
+    typedef DGFWriter< GV > This;
+
+  public:
+    /** \brief type of grid view */
+    typedef GV GridView;
+    /** \brief type of underlying hierarchical grid */
+    typedef typename GridView::Grid Grid;
+
+    /** \brief dimension of the grid */
+    static const int dimGrid = GridView::dimension;
+
+  private:
+    typedef typename GridView::IndexSet IndexSet;
+    typedef typename GridView::template Codim< 0 >::Iterator ElementIterator;
+    typedef typename GridView::template Codim< dimGrid >::Iterator VertexIterator;
+    typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+    typedef GenericReferenceElement< typename Grid::ctype, dimGrid > RefElement;
+    typedef GenericReferenceElements< typename Grid::ctype, dimGrid > RefElements;
+
+  public:
+    /** \brief constructor
+     *
+     *  \param[in]  gridView  grid view to operate on
+     */
+    DGFWriter ( const GridView &gridView )
+      : gridView_( gridView )
+    {}
+
+    /** \brief write the GridView into a std::ostreamm
+     *
+     *  \param  gridout  std::ostream to write the grid to
+     */
+    void write ( std::ostream &gridout ) const;
+
+    /** \brief write the GridView to a file
+     *
+     *  \param[in] fileName  name of the write to write the grid to
+     */
+    void write ( const std::string &fileName ) const;
+
+  private:
+    GridView gridView_;
+  };
+
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::write ( std::ostream &gridout ) const
+  {
+    // set the stream to full double precision
+    gridout.setf( std::ios_base::scientific, std::ios_base::floatfield );
+    gridout.precision( 16 );
+
+    const IndexSet &indexSet = gridView_.indexSet();
+
+    // write DGF header
+    gridout << "DGF" << std::endl;
+
+    std::vector< unsigned int > vertexIndex( indexSet.size( dimGrid ) );
+
+    // write all vertices into the "vertex" block
+    gridout << std::endl << "VERTEX" << std::endl;
+    unsigned int vertexCount = 0;
+    const VertexIterator vend = gridView_.template end< dimGrid >();
+    for( VertexIterator vit = gridView_.template begin< dimGrid >(); vit != vend; ++vit )
+    {
+      vertexIndex[ indexSet.index( *vit ) ] = vertexCount++;
+      gridout << vit->geometry().corner( 0 ) << std::endl;
+    }
+    gridout << "#" << std::endl;
+    if( vertexCount != indexSet.size( dimGrid ) )
+      DUNE_THROW( GridError, "Index set reports wrong number of vertices." );
+
+    // write all simplices to the "simplex" block
+    gridout << std::endl << "SIMPLEX" << std::endl;
+    const ElementIterator end = gridView_.template end< 0 >();
+    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    {
+      if( !it->type().isSimplex() )
+        continue;
+
+      std::vector< unsigned int > vertices( dimGrid+1 );
+      for( unsigned int i = 0; i < vertices.size(); ++i )
+        vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
+
+      gridout << vertices[ 0 ];
+      for( unsigned int i = 1; i < vertices.size(); ++i )
+        gridout << " " << vertices[ i ];
+      gridout << std::endl;
+    }
+    gridout << "#" << std::endl;
+
+    // write all cubes to the "cube" block
+    gridout << std::endl << "CUBE" << std::endl;
+    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    {
+      if( !it->type().isCube() )
+        continue;
+
+      std::vector< unsigned int > vertices( 1 << dimGrid );
+      for( unsigned int i = 0; i < vertices.size(); ++i )
+        vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
+
+      gridout << vertices[ 0 ];
+      for( unsigned int i = 1; i < vertices.size(); ++i )
+        gridout << " " << vertices[ i ];
+      gridout << std::endl;
+    }
+    gridout << "#" << std::endl;
+
+    // write all boundaries to the "boundarysegments" block
+    gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
+    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    {
+      if( !it->hasBoundaryIntersections() )
+        continue;
+
+      const RefElement &refElement = RefElements::general( it->type() );
+
+      const IntersectionIterator iend = it->ileafend();
+      for( IntersectionIterator iit = it->ileafbegin(); iit != iend; ++iit )
+      {
+        if( !iit->boundary() )
+          continue;
+
+        const int boundaryId = iit->boundaryId();
+        if( boundaryId <= 0 )
+        {
+          std::cerr << "Warning: Ignoring nonpositive boundary id: "
+                    << boundaryId << "." << std::endl;
+          continue;
+        }
+
+        const int faceNumber = iit->indexInInside();
+        const unsigned int faceSize = refElement.size( faceNumber, 1, dimGrid );
+        std::vector< unsigned int > vertices( faceSize );
+        for( unsigned int i = 0; i < faceSize; ++i )
+        {
+          const int j = refElement.subEntity( faceNumber, 1, i, dimGrid );
+          vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, j, dimGrid ) ];
+        }
+        gridout << boundaryId << "   " << vertices[ 0 ];
+        for( unsigned int i = 1; i < faceSize; ++i )
+          gridout << " " << vertices[ i ];
+        gridout << std::endl;
+      }
+    }
+    gridout << "#" << std::endl;
+
+    // write the name into the "gridparameter" block
+    gridout << std::endl << "GRIDPARAMETER" << std::endl;
+    gridout << "NAME " << gridView_.grid().name() << std::endl;
+    gridout << "#" << std::endl;
+
+    gridout << std::endl << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::write ( const std::string &fileName ) const
+  {
+    std::ofstream gridout( fileName.c_str() );
+    write( gridout );
+  }
+
+}
+
+#endif // #ifndef DUNE_DGFWRITER_HH

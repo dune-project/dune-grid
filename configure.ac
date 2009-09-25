@@ -59,6 +59,7 @@ AC_CONFIG_FILES([Makefile
     grid/io/file/amiramesh/Makefile
     grid/io/file/dgfparser/Makefile
     grid/io/file/dgfparser/test/Makefile
+    grid/io/file/dgfparser/utils/Makefile
     grid/io/file/gnuplot/Makefile
     grid/io/file/vtk/Makefile
     grid/io/file/Makefile

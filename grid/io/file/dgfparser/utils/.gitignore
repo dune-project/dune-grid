@@ -1,0 +1,12 @@
+dgf2dgf
+
+Makefile
+Makefile.in
+
+TMPDGFParser.*
+
+*.log
+*.swp
+
+.deps
+.libs
