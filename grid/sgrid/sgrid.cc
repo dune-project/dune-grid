@@ -161,9 +161,9 @@ namespace Dune {
   inline int SEntityBase<codim,dim,GridImp,EntityImp>::globalIndex () const
   {
     int ind = 0;
-    for(int i=0; i<this->l; i++)
-      ind += this->grid->size(i,codim);
-    return ind+this->compressedIndex();
+    for(int i=0; i<l; i++)
+      ind += grid->size(i,codim);
+    return ind+compressedIndex();
   }
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
@@ -232,13 +232,13 @@ namespace Dune {
   inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::subEntity (int i) const
   {
     // make Iterator
-    return SLevelIterator<cc,All_Partition,const GridImp>(this->grid,this->l,this->subCompressedIndex(cc,i));
+    return SLevelIterator<cc,All_Partition,const GridImp>(grid,l,this->subCompressedIndex(cc,i));
   }
 
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ibegin () const
   {
-    return IntersectionIterator(SIntersectionIterator<GridImp>(this->grid,this,0));
+    return IntersectionIterator(SIntersectionIterator<GridImp>(grid,this,0));
   }
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ileafbegin () const
@@ -259,7 +259,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::iend () const
   {
-    return IntersectionIterator(SIntersectionIterator<GridImp>(this->grid,this,count<1>()));
+    return IntersectionIterator(SIntersectionIterator<GridImp>(grid,this,count<1>()));
   }
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::IntersectionIterator SEntity<0,dim,GridImp>::ileafend () const
@@ -277,7 +277,7 @@ namespace Dune {
   inline void SEntity<0,dim,GridImp>::make_father () const
   {
     // check level
-    if (this->l<=0)
+    if (l<=0)
     {
       father_index = 0;
       built_father = true;
@@ -285,7 +285,7 @@ namespace Dune {
     }
 
     // reduced coordinates from expanded coordinates
-    array<int,dim> zz = this->grid->compress(this->l,this->z);
+    array<int,dim> zz = grid->compress(l,z);
 
     // look for odd coordinates
     FieldVector<ctype, dim> delta;
@@ -305,8 +305,8 @@ namespace Dune {
       }
 
     // zz is now the reduced coordinate of the father, compute index
-    int partition = this->grid->partition(this->l,this->z);
-    father_index = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
+    int partition = grid->partition(l,z);
+    father_index = grid->n((l)-1,grid->expand((l)-1,zz,partition));
 
     // now make a subcube of size 1/2 in each direction
     FieldMatrix<ctype,dim+1,dim> __As;
@@ -327,10 +327,10 @@ namespace Dune {
   inline typename SEntity<0,dim,GridImp>::EntityPointer SEntity<0,dim,GridImp>::father () const
   {
     if (!built_father) make_father();
-    if (this->l>0)
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),(this->l)-1,father_index);
+    if (l>0)
+      return SLevelIterator<0,All_Partition,const GridImp>((grid),(l)-1,father_index);
     else
-      return SLevelIterator<0,All_Partition,const GridImp>((this->grid),this->l,this->index);
+      return SLevelIterator<0,All_Partition,const GridImp>((grid),l,index);
   }
 
   template<int dim, class GridImp>
@@ -345,13 +345,13 @@ namespace Dune {
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hbegin (int maxLevel) const
   {
-    return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxLevel,false));
+    return HierarchicIterator(SHierarchicIterator<GridImp>(grid,*this,maxLevel,false));
   }
 
   template<int dim, class GridImp>
   inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hend (int maxLevel) const
   {
-    return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxLevel,true));
+    return HierarchicIterator(SHierarchicIterator<GridImp>(grid,*this,maxLevel,true));
   }
 
   //************************************************************************
@@ -365,22 +365,22 @@ namespace Dune {
 
     // compute reduced coordinates of element
     array<int,dim> z =
-      this->grid->z(level,fatherid,0);      // expanded coordinates from index
+      grid->z(level,fatherid,0);      // expanded coordinates from index
     array<int,dim> zred =
-      this->grid->compress(level,z);     // reduced coordinates from expaned coordinates
+      grid->compress(level,z);     // reduced coordinates from expaned coordinates
 
     // refine to first son
     for (int i=0; i<dim; i++) zred[i] = 2*zred[i];
 
     // generate all \f$2^{dim}\f$ sons
-    int partition = this->grid->partition(level,z);
+    int partition = grid->partition(level,z);
     for (int b=0; b<(1<<dim); b++)
     {
       array<int,dim> zz = zred;
       for (int i=0; i<dim; i++)
         if (b&(1<<i)) zz[i] += 1;
       // zz is reduced coordinate of a son on level level+1
-      int sonid = this->grid->n(level+1,this->grid->expand(level+1,zz,partition));
+      int sonid = grid->n(level+1,grid->expand(level+1,zz,partition));
 
       // push son on stack
       SHierarchicStackElem son(level+1,sonid);
@@ -397,9 +397,9 @@ namespace Dune {
 
     // OK, lets pop
     SHierarchicStackElem newe = stack.pop();
-    this->l = newe.l;
-    this->index = newe.index;
-    this->entity().make(this->l,this->index);     // here is our new element
+    l = newe.l;
+    index = newe.index;
+    realEntity().make(l,index);     // here is our new element
 
     // push all sons of this element if it is not the original element
     if (newe.l!=orig_l || newe.index!=orig_index)
@@ -448,7 +448,7 @@ namespace Dune {
     grid->getRealImplementation(ne).index =
       grid->n(grid->getRealImplementation(self).l,
               grid->expand(grid->getRealImplementation(self).l,zrednb,partition));
-    grid->getRealImplementation(ne).entity().make(
+    grid->getRealImplementation(ne).realEntity().make(
       grid->getRealImplementation(ne).l,
       grid->getRealImplementation(ne).index);
   }
@@ -622,8 +622,8 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   inline void SLevelIterator<codim,pitype,GridImp>::increment ()
   {
-    ++this->index;
-    this->entity().make(this->l,this->index);
+    ++index;
+    realEntity().make(l,index);
   }
 
   //************************************************************************
@@ -813,8 +813,8 @@ namespace Dune {
   inline int SGrid<dim,dimworld,ctype>::global_size (int codim) const
   {
     int gSize = 0;
-    for(int i=0; i <= this->maxLevel(); i++)
-      gSize += this->size(i,codim);
+    for(int i=0; i <= maxLevel(); i++)
+      gSize += size(i,codim);
     return gSize;
   }
 

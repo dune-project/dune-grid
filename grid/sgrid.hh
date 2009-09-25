@@ -421,6 +421,9 @@ namespace Dune {
     enum { dimworld = GridImp::dimensionworld };
     typedef Dune::SEntityBase<0,dim,GridImp,Dune::SEntity> SEntityBase;
     using SEntityBase::grid;
+    using SEntityBase::l;
+    using SEntityBase::index;
+    using SEntityBase::z;
   public:
     typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -569,22 +572,6 @@ namespace Dune {
   };
 
 
-  template<int codim, int dim, class GridImp>
-  class SMakeableEntity :
-    public GridImp::template Codim<codim>::Entity
-  {
-  public:
-
-    SMakeableEntity(GridImp* _grid, int _l, int _id) :
-      GridImp::template Codim<codim>::Entity (SEntity<codim, dim, GridImp>(_grid,_l,_id))
-    {};
-    SMakeableEntity(const SEntity<codim, dim, GridImp>& e) :
-      GridImp::template Codim<codim>::Entity (e)
-    {};
-    void make (int _l, int _id) { this->realEntity.make(_l, _id); }
-    void make (GridImp* _grid, int _l, int _id) { this->realEntity.make(_grid, _l, _id); }
-  };
-
   //************************************************************************
   /*! Mesh entities of codimension 0 ("elements") allow to visit all entities of
      codimension 0 obtained through nested, hierarchic refinement of the entity.
@@ -609,6 +596,11 @@ namespace Dune {
     friend class SHierarchicIterator<const GridImp>;
     enum { dim = GridImp::dimension };
     enum { dimworld = GridImp::dimensionworld };
+    typedef Dune::SEntityPointer<0,GridImp> SEntityPointer;
+    using SEntityPointer::realEntity;
+    using SEntityPointer::grid;
+    using SEntityPointer::l;
+    using SEntityPointer::index;
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
@@ -625,7 +617,7 @@ namespace Dune {
     SHierarchicIterator (GridImp* _grid,
                          const Dune::SEntity<0,GridImp::dimension,GridImp>& _e,
                          int _maxLevel, bool makeend) :
-      Dune::SEntityPointer<0,GridImp>(_grid,_e.level(),_e.compressedIndex())
+      SEntityPointer(_grid,_e.level(),_e.compressedIndex())
     {
       // without sons, we are done
       // (the end iterator is equal to the calling iterator)
@@ -895,7 +887,12 @@ namespace Dune {
     }
 
   protected:
-    SMakeableEntity<codim,dim,GridImp>& entity() const
+    SEntity<codim,dim,GridImp>& realEntity() const
+    {
+      return grid->getRealImplementation(entity());
+    }
+
+    Entity& entity() const
     {
       if( ! e )
       {
@@ -904,27 +901,27 @@ namespace Dune {
       return *e;
     }
 
-    typedef std::stack< SMakeableEntity<codim,dim,GridImp> * > EntityStackType;
+    typedef std::stack< Entity* > EntityStackType;
     static inline EntityStackType& enStack()
     {
       static EntityStackType eStack;
       return eStack;
     }
 
-    inline SMakeableEntity<codim,dim,GridImp>* getEntity(GridImp* _grid, int _l, int _id ) const
+    inline Entity* getEntity(GridImp* _grid, int _l, int _id ) const
     {
       // get stack reference
       EntityStackType& enSt = enStack();
 
       if( enSt.empty() )
       {
-        return (new SMakeableEntity<codim,dim,GridImp>(_grid, _l, _id));
+        return (new Entity(SEntity<codim,dim,GridImp>(_grid, _l, _id)));
       }
       else
       {
-        SMakeableEntity<codim,dim,GridImp>* e = enSt.top();
+        Entity* e = enSt.top();
         enSt.pop();
-        e->make(_grid, _l,_id);
+        grid->getRealImplementation(*e).make(_grid, _l,_id);
         return e;
       }
     }
@@ -932,7 +929,7 @@ namespace Dune {
     GridImp* grid;               //!< my grid
     int l;                       //!< level where element is on
     mutable int index;           //!< my consecutive index
-    mutable SMakeableEntity<codim,dim,GridImp>* e; //!< virtual entity
+    mutable Entity* e;           //!< virtual entity
   };
   //************************************************************************
 
@@ -945,6 +942,10 @@ namespace Dune {
   {
     friend class SLevelIterator<codim, pitype,const GridImp>;
     enum { dim = GridImp::dimension };
+    typedef Dune::SEntityPointer<codim,GridImp> SEntityPointer;
+    using SEntityPointer::realEntity;
+    using SEntityPointer::l;
+    using SEntityPointer::index;
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 
@@ -953,7 +954,7 @@ namespace Dune {
 
     //! constructor
     SLevelIterator (GridImp * _grid, int _l, int _id) :
-      Dune::SEntityPointer<codim,GridImp>(_grid,_l,_id) {}
+      SEntityPointer(_grid,_l,_id) {}
   };
 
 
@@ -1509,6 +1510,9 @@ namespace Dune {
 
     template<int codim_, int dim_, class GridImp_>
     friend class Dune::SEntityBase;
+
+    template<int codim_, class GridImp_>
+    friend class Dune::SEntityPointer;
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
