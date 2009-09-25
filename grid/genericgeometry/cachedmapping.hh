@@ -206,6 +206,7 @@ namespace Dune
 
       FieldType volume () const
       {
+        // do we need a quadrature of higher order, here?
         const FieldType refVolume = ReferenceElement :: volume();
         return refVolume * integrationElement( baryCenter() );
       }
