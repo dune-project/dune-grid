@@ -11,7 +11,7 @@
 #include <cassert>
 #include <vector>
 
-#include <dune/grid/albertagrid/misc.hh>
+#include <dune/grid/albertagrid/geometrycache.hh>
 #include <dune/grid/albertagrid/macroelement.hh>
 
 #if HAVE_ALBERTA
@@ -59,6 +59,10 @@ namespace Dune
       static const int maxNeighbors = N_NEIGH_MAX;
 
       static const int maxLevelNeighbors = Library< dimWorld >::maxLevelNeighbors;
+
+#if !DUNE_ALBERTA_CACHE_COORDINATES
+      typedef GeometryCacheProxy< dim > GeometryCache;
+#endif
 
     private:
       InstancePtr instance_;
@@ -122,6 +126,12 @@ namespace Dune
 
       bool hasCoordinates () const;
       const GlobalVector &coordinate ( int vertex ) const;
+#if !DUNE_ALBERTA_CACHE_COORDINATES
+      GeometryCache geometryCache () const
+      {
+        return GeometryCache( instance_->geometryCache, instance_->elInfo );
+      }
+#endif
 
       template< class Functor >
       void hierarchicTraverse ( Functor &functor ) const;
@@ -168,6 +178,11 @@ namespace Dune
 
     private:
       InstancePtr parent_;
+
+#if !DUNE_ALBERTA_CACHE_COORDINATES
+    public:
+      Alberta::GeometryCache< dim > geometryCache;
+#endif
     };
 
 

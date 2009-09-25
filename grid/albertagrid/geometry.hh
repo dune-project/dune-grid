@@ -44,12 +44,6 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef FieldVector< ctype, coorddimension > Coordinate;
 
-  private:
-    const Grid &grid_;
-    const ElementInfo &elementInfo_;
-    const int subEntity_;
-
-  public:
     AlbertaGridCoordinateReader ( const GridImp &grid,
                                   const ElementInfo &elementInfo,
                                   int subEntity )
@@ -57,6 +51,11 @@ namespace Dune
         elementInfo_( elementInfo ),
         subEntity_( subEntity )
     {}
+
+    const ElementInfo &elementInfo () const
+    {
+      return elementInfo_;
+    }
 
     void coordinate ( int i, Coordinate &x ) const
     {
@@ -85,6 +84,10 @@ namespace Dune
     {
       return Alberta::MapVertices< dimension, codimension >::apply( subEntity, i );
     }
+
+    const Grid &grid_;
+    const ElementInfo &elementInfo_;
+    const int subEntity_;
   };
 
 
@@ -256,24 +259,42 @@ namespace Dune
     typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
 
   public:
-    AlbertaGridGeometry ();
-
-    AlbertaGridGeometry ( const This &other );
+    AlbertaGridGeometry ()
+    {
+      invalidate();
+    }
 
     template< class CoordReader >
-    AlbertaGridGeometry ( const CoordReader &coordReader );
+    AlbertaGridGeometry ( const CoordReader &coordReader )
+    {
+      build( coordReader );
+    }
 
     /** \brief obtain the type of reference element */
-    GeometryType type () const;
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::simplex, mydimension );
+    }
 
     /** \brief number of corner the geometry */
-    int corners () const;
+    int corners () const
+    {
+      return numCorners;
+    }
 
     /** \brief obtain the i-th corner of this geometry */
-    GlobalVector corner ( const int i ) const;
+    GlobalVector corner ( const int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+      return coord_[ i ];
+    }
 
     /** \brief deprecated way of obtaining the i-th corner */
-    const GlobalVector &operator[] ( const int i ) const;
+    const GlobalVector &operator[] ( const int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+      return coord_[ i ];
+    }
 
     /** \brief map a point from the refence element to the geometry */
     GlobalVector global ( const LocalVector &local ) const;
@@ -286,7 +307,11 @@ namespace Dune
      *  \note This method is not part of the geometry interface. It is used
      *        internally only.
      */
-    ctype integrationElement () const;
+    ctype integrationElement () const
+    {
+      assert( calcedDet_ );
+      return elDet_;
+    }
 
     /** \brief integration element of the geometry mapping */
     ctype integrationElement ( const LocalVector &local ) const
@@ -295,7 +320,10 @@ namespace Dune
     }
 
     /** \brief volume of geometry */
-    ctype volume () const;
+    ctype volume () const
+    {
+      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+    }
 
     /** \brief transposed of the geometry mapping's Jacobian
      *
@@ -330,7 +358,12 @@ namespace Dune
     //***********************************************************************
 
     /** \brief invalidate the geometry */
-    void invalidate ();
+    void invalidate ()
+    {
+      builtJT_ = false;
+      builtJTInv_ = false;
+      calcedDet_ = false;
+    }
 
     /** \brief build the geometry from a coordinate reader */
     template< class CoordReader >
@@ -340,7 +373,10 @@ namespace Dune
 
   private:
     // calculates the volume of the element
-    ctype elDeterminant () const;
+    ctype elDeterminant () const
+    {
+      return std::abs( Alberta::determinant( jacobianTransposed() ) );
+    }
 
     //! the vertex coordinates
     CoordMatrix coord_;
@@ -359,6 +395,193 @@ namespace Dune
     mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant
   };
+#endif // #if !USE_GENERICGEOMETRY
+
+
+
+  // AlbertaGridGlobalGeometry
+  // -------------------------
+
+  template< int mydim, int cdim, class GridImp >
+  class AlbertaGridGlobalGeometry
+    : public AlbertaGridGeometry< mydim, cdim, GridImp >
+  {
+    typedef AlbertaGridGlobalGeometry< mydim, cdim, GridImp > This;
+    typedef AlbertaGridGeometry< mydim, cdim, GridImp > Base;
+
+  public:
+    AlbertaGridGlobalGeometry ()
+      : Base()
+    {}
+
+    template< class CoordReader >
+    AlbertaGridGlobalGeometry ( const CoordReader &coordReader )
+      : Base( coordReader )
+    {}
+  };
+
+
+#if !USE_GENERICGEOMETRY
+#if !DUNE_ALBERTA_CACHE_COORDINATES && 0
+  template< int dim, int cdim >
+  class AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >
+  {
+    typedef AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > > This;
+
+    // remember type of the grid
+    typedef AlbertaGrid< dim, cdim > Grid;
+
+    // dimension of barycentric coordinates
+    static const int dimbary = dim + 1;
+
+    typedef Alberta::ElementInfo< dim > ElementInfo;
+
+  public:
+    //! type of coordinates
+    typedef Alberta::Real ctype;
+
+    static const int dimension = Grid::dimension;
+    static const int mydimension = dimension;
+    static const int codimension = dimension - mydimension;
+    static const int coorddimension = cdim;
+
+    typedef FieldVector< ctype, mydimension > LocalVector;
+    typedef FieldVector< ctype, coorddimension > GlobalVector;
+
+    typedef FieldMatrix< ctype, mydimension, coorddimension >
+    JacobianTransposed;
+    typedef FieldMatrix< ctype, coorddimension, mydimension >
+    JacobianInverseTransposed;
+
+  private:
+    static const int numCorners = mydimension + 1;
+
+    typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
+
+  public:
+    AlbertaGridGlobalGeometry ()
+    {
+      invalidate();
+    }
+
+    template< class CoordReader >
+    AlbertaGridGlobalGeometry ( const CoordReader &coordReader )
+    {
+      build( coordReader );
+    }
+
+    /** \brief obtain the type of reference element */
+    GeometryType type () const
+    {
+      return GeometryType( GeometryType::simplex, mydimension );
+    }
+
+    /** \brief number of corner the geometry */
+    int corners () const
+    {
+      return numCorners;
+    }
+
+    /** \brief obtain the i-th corner of this geometry */
+    GlobalVector corner ( const int i ) const
+    {
+      assert( (i >= 0) && (i < corners()) );
+      const Alberta::GlobalVector &x = elementInfo_.coordinate( i );
+      GlobalVector y;
+      for( int j = 0; j < coorddimension; ++j )
+        y[ j ] = x[ j ];
+      return y;
+    }
+
+    /** \brief deprecated way of obtaining the i-th corner */
+    const GlobalVector &operator[] ( const int i ) const
+    {
+      return reinterpret_cast< const GlobalVector & >( elementInfo_.coordinate( i ) );
+    }
+
+    /** \brief map a point from the refence element to the geometry */
+    GlobalVector global ( const LocalVector &local ) const;
+
+    /** \brief map a point from the geometry to the reference element */
+    LocalVector local ( const GlobalVector &global ) const;
+
+    /** \brief integration element of the geometry mapping
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
+     */
+    ctype integrationElement () const
+    {
+      return elementInfo_.geometryCache().integrationElement();
+    }
+
+    /** \brief integration element of the geometry mapping */
+    ctype integrationElement ( const LocalVector &local ) const
+    {
+      return integrationElement();
+    }
+
+    /** \brief volume of geometry */
+    ctype volume () const
+    {
+      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+    }
+
+    /** \brief transposed of the geometry mapping's Jacobian
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
+     */
+    const JacobianTransposed &jacobianTransposed () const
+    {
+      return elementInfo_.geometryCache().jacobianTransposed();
+    }
+
+    /** \brief transposed of the geometry mapping's Jacobian */
+    const JacobianTransposed &
+    jacobianTransposed ( const LocalVector &local ) const
+    {
+      return jacobianTransposed();
+    }
+
+    /** \brief transposed inverse of the geometry mapping's Jacobian
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
+     */
+    const JacobianInverseTransposed &jacobianInverseTransposed () const
+    {
+      return elementInfo_.geometryCache().jacobianInverseTransposed();
+    }
+
+    /** \brief transposed inverse of the geometry mapping's Jacobian */
+    const JacobianInverseTransposed &
+    jacobianInverseTransposed ( const LocalVector &local ) const
+    {
+      return jacobianInverseTransposed();
+    }
+
+    //***********************************************************************
+    //  Methods that not belong to the Interface, but have to be public
+    //***********************************************************************
+
+    /** \brief invalidate the geometry */
+    void invalidate ()
+    {
+      elementInfo_ = ElementInfo();
+    }
+
+    /** \brief build the geometry from a coordinate reader */
+    template< class CoordReader >
+    void build ( const CoordReader &coordReader )
+    {
+      elementInfo_ = coordReader.elementInfo();
+    }
+
+  private:
+    ElementInfo elementInfo_;
+  };
+#endif // #if !DUNE_ALBERTA_CACHE_COORDINATES
 #endif // #if !USE_GENERICGEOMETRY
 
 

@@ -14,35 +14,6 @@ namespace Dune
   // -------------------
 
 #if !USE_GENERICGEOMETRY
-  template< int mydim, int cdim, class GridImp >
-  inline AlbertaGridGeometry< mydim, cdim, GridImp >::AlbertaGridGeometry ()
-  {
-    invalidate();
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::AlbertaGridGeometry ( const This &other )
-    : coord_( other.coord_ ),
-      jT_( other.jT_ ),
-      jTInv_( other.jTInv_ ),
-      builtJT_( other.builtJT_ ),
-      builtJTInv_( other.builtJTInv_ ),
-      calcedDet_( other.calcedDet_ ),
-      elDet_( other.elDet_ )
-  {}
-
-
-  template< int mydim, int cdim, class GridImp >
-  template< class CoordReader >
-  inline AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::AlbertaGridGeometry ( const CoordReader &coordReader )
-  {
-    build( coordReader );
-  }
-
-
   // print the GeometryInformation
   template <int mydim, int cdim, class GridImp>
   inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
@@ -56,87 +27,25 @@ namespace Dune
     ss << "} \n";
   }
 
-  template< int mydim, int cdim, class GridImp >
-  inline GeometryType AlbertaGridGeometry< mydim, cdim, GridImp >::type () const
-  {
-    return GeometryType( GeometryType::simplex, mydimension );
-  }
-
-  template< int mydim, int cdim, class GridImp >
-  inline int AlbertaGridGeometry< mydim, cdim, GridImp >::corners () const
-  {
-    return numCorners;
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector
-  AlbertaGridGeometry< mydim, cdim, GridImp >::corner ( const int i ) const
-  {
-    // for simplices old and new corner numbering is identical
-    assert( (i >= 0) && (i < numCorners) );
-    return coord_[ i ];
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline const typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector &
-  AlbertaGridGeometry< mydim, cdim, GridImp >::operator[] ( int i ) const
-  {
-    assert( (i >= 0) && (i < numCorners) );
-    return coord_[ i ];
-  }
-
 
   template< int mydim, int cdim, class GridImp >
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::GlobalVector
   AlbertaGridGeometry< mydim, cdim, GridImp >::global ( const LocalVector &local ) const
   {
-    GlobalVector y = coord_[ 0 ];
+    GlobalVector y = corner( 0 );
     jacobianTransposed().umtv( local, y );
     return y;
   }
 
+
   //local implementation for mydim < cdim
   template< int mydim, int cdim, class GridImp >
   inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::LocalVector
-  AlbertaGridGeometry< mydim, cdim, GridImp>::local ( const GlobalVector &global ) const
+  AlbertaGridGeometry< mydim, cdim, GridImp >::local ( const GlobalVector &global ) const
   {
-    GlobalVector y = global;
-    y -= coord_[ 0 ];
-
     LocalVector x;
-    FMatrixHelp::multAssignTransposed( jacobianInverseTransposed(), y, x );
+    jacobianInverseTransposed().mtv( global - corner( 0 ), x );
     return x;
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry< mydim, cdim, GridImp >::elDeterminant () const
-  {
-    return std::abs( Alberta::determinant( jacobianTransposed() ) );
-  }
-
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry< mydim, cdim, GridImp >::volume () const
-  {
-    assert( calcedDet_ );
-    static const ctype refVolume
-      = ctype( 1 ) / ctype( Factorial< mydimension >::factorial );
-    return refVolume * elDet_;
-  }
-
-
-  template< int mydim, int cdim, class GridImp >
-  inline typename AlbertaGridGeometry< mydim, cdim, GridImp >::ctype
-  AlbertaGridGeometry< mydim, cdim, GridImp >::integrationElement () const
-  {
-    assert( calcedDet_ );
-    return elDet_;
   }
 
 
@@ -173,15 +82,6 @@ namespace Dune
   }
 
 
-  template< int mydim, int cdim, class GridImp >
-  inline void AlbertaGridGeometry< mydim, cdim, GridImp >::invalidate ()
-  {
-    builtJT_ = false;
-    builtJTInv_ = false;
-    calcedDet_ = false;
-  }
-
-
   // built Geometry
   template< int mydim, int cdim, class GridImp >
   template< class CoordReader >
@@ -198,6 +98,29 @@ namespace Dune
     assert( std::abs( elDet_ ) > 0.0 );
     calcedDet_ = true;
   }
+
+
+#if !DUNE_ALBERTA_CACHE_COORDINATES && 0
+  template< int dim, int cdim >
+  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::GlobalVector
+  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::global ( const LocalVector &local ) const
+  {
+    GlobalVector y = corner( 0 );
+    jacobianTransposed().umtv( local, y );
+    return y;
+  }
+
+
+  //local implementation for mydim < cdim
+  template< int dim, int cdim >
+  inline typename AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::LocalVector
+  AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >::local ( const GlobalVector &global ) const
+  {
+    LocalVector x;
+    jacobianInverseTransposed().mtv( global - corner( 0 ), x );
+    return x;
+  }
+#endif // #if !DUNE_ALBERTA_CACHE_COORDINATES
 #endif // #if !USE_GENERICGEOMETRY
 
 

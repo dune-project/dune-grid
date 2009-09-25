@@ -205,7 +205,7 @@ namespace Dune
     typedef typename GridImp::template Codim< 0 >::Entity Entity;
     typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
     typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
-    typedef AlbertaGridGeometry< dimension, dimworld, GridImp > GeometryImp;
+    typedef AlbertaGridGlobalGeometry< dimension, dimworld, GridImp > GeometryImp;
 
     typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
