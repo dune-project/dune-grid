@@ -42,7 +42,7 @@ namespace Dune {
   template<int codim, int dim, class GridImp> class SEntity;
   template<int codim, class GridImp> class SEntityPointer;
   template<int codim, PartitionIteratorType, class GridImp> class SLevelIterator;
-  template<int dim, int dimworld> class SGrid;
+  template<int dim, int dimworld, class ctype> class SGrid;
   template<class GridImp> class SIntersectionIterator;
   template<class GridImp> class SHierarchicIterator;
 
@@ -83,7 +83,7 @@ namespace Dune {
   {
   public:
     //! define type used for coordinates in grid module
-    typedef sgrid_ctype ctype;
+    typedef typename GridImp::ctype ctype;
 
     //! return the element type identifier
     GeometryType type () const;
@@ -92,18 +92,18 @@ namespace Dune {
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<sgrid_ctype, cdim>& operator[] (int i) const;
+    const FieldVector<ctype, cdim>& operator[] (int i) const;
 
-    FieldVector< sgrid_ctype, cdim > corner ( const int i ) const
+    FieldVector< ctype, cdim > corner ( const int i ) const
     {
       return (*this)[ i ];
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<sgrid_ctype, cdim> global (const FieldVector<sgrid_ctype, mydim>& local) const;
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const;
 
     //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<sgrid_ctype, mydim> local (const FieldVector<sgrid_ctype, cdim>& global) const;
+    FieldVector<ctype, mydim> local (const FieldVector<ctype, cdim>& global) const;
 
     /*! Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
@@ -124,10 +124,13 @@ namespace Dune {
        will directly translate in substantial savings in the computation of finite element
        stiffness matrices.
      */
-    sgrid_ctype integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const;
+    ctype integrationElement (const FieldVector<ctype, mydim>& local) const;
 
-    const FieldMatrix< sgrid_ctype, mydim, cdim > &jacobianTransposed ( const FieldVector< sgrid_ctype, mydim > &local ) const;
-    const FieldMatrix<sgrid_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const;
+    /** \brief return volume of geometry */
+    ctype volume() const;
+
+    const FieldMatrix<ctype, mydim, cdim > &jacobianTransposed ( const FieldVector< ctype, mydim > &local ) const;
+    const FieldMatrix<ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<ctype, mydim>& local) const;
 
     //! print internal data
     void print (std::ostream& ss, int indent) const;
@@ -136,16 +139,16 @@ namespace Dune {
        Column dim is the position vector. This format allows a consistent
        treatement of all dimensions, including 0 (the vertex).
      */
-    void make (FieldMatrix<sgrid_ctype,mydim+1,cdim>& __As);
+    void make (FieldMatrix<ctype,mydim+1,cdim>& __As);
 
     //! constructor
     SGeometry () : builtinverse(false) {};
 
   private:
-    FieldVector<sgrid_ctype, cdim> s;             //!< position of element
-    FieldMatrix<sgrid_ctype,mydim,cdim> A;         //!< direction vectors as matrix
-    array<FieldVector<sgrid_ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
-    mutable FieldMatrix<sgrid_ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
+    FieldVector<ctype, cdim> s;             //!< position of element
+    FieldMatrix<ctype,mydim,cdim> A;         //!< direction vectors as matrix
+    array<FieldVector<ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
+    mutable FieldMatrix<ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
     mutable bool builtinverse;
   };
 
@@ -156,7 +159,7 @@ namespace Dune {
   {
   public:
     //! define type used for coordinates in grid module
-    typedef sgrid_ctype ctype;
+    typedef typename GridImp::ctype ctype;
 
     //! return the element type identifier
     GeometryType type () const;
@@ -165,9 +168,9 @@ namespace Dune {
     int corners () const;
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<sgrid_ctype, cdim>& operator[] (int i) const;
+    const FieldVector<ctype, cdim>& operator[] (int i) const;
 
-    FieldVector< sgrid_ctype, cdim > corner ( const int i ) const
+    FieldVector<ctype, cdim > corner ( const int i ) const
     {
       return (*this)[ i ];
     }
@@ -176,13 +179,13 @@ namespace Dune {
     void print (std::ostream& ss, int indent) const;
 
     //! constructor, makes element from position and direction vectors
-    void make (FieldMatrix<sgrid_ctype,1,cdim>& __As);
+    void make (FieldMatrix<ctype,1,cdim>& __As);
 
     //! maps a local coordinate within reference element to global coordinate in element
-    FieldVector<sgrid_ctype, cdim> global (const FieldVector<sgrid_ctype, 0>& local) const { return this->operator[] (0); }
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, 0>& local) const { return this->operator[] (0); }
 
     //! maps a global coordinate within the element to a local coordinate in its reference element
-    FieldVector<sgrid_ctype, 0> local (const FieldVector<sgrid_ctype, cdim>& global) const { return FieldVector<sgrid_ctype,0> (0.0); }
+    FieldVector<ctype, 0> local (const FieldVector<ctype, cdim>& global) const { return FieldVector<ctype,0> (0.0); }
 
     /*! Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
@@ -213,7 +216,7 @@ namespace Dune {
      * This routine exists so that algorithms that integrate over grid
      * boundaries can also be compiled for 1d-grids.
      */
-    sgrid_ctype volume() const
+    ctype volume() const
     {
       return 1;
     }
@@ -223,24 +226,24 @@ namespace Dune {
      * This routine exists so that algorithms that integrate over grid
      * boundaries can also be compiled for 1d-grids.
      */
-    sgrid_ctype integrationElement(const FieldVector<sgrid_ctype, 0>& local) const {
+    ctype integrationElement(const FieldVector<ctype, 0>& local) const {
       return volume();
     }
 
-    const FieldMatrix< sgrid_ctype, 0, cdim > &jacobianTransposed ( const FieldVector< sgrid_ctype, 0 > &local ) const
+    const FieldMatrix<ctype, 0, cdim > &jacobianTransposed ( const FieldVector<ctype, 0 > &local ) const
     {
-      static const FieldMatrix< sgrid_ctype, 0, cdim > dummy ( sgrid_ctype( 0 ) );
+      static const FieldMatrix<ctype, 0, cdim > dummy ( ctype( 0 ) );
       return dummy;
     }
 
-    const FieldMatrix<sgrid_ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<sgrid_ctype, 0>& local) const
+    const FieldMatrix<ctype,cdim,0>& jacobianInverseTransposed (const FieldVector<ctype, 0>& local) const
     {
-      static const FieldMatrix<sgrid_ctype,cdim,0> dummy( sgrid_ctype(0) );
+      static const FieldMatrix<ctype,cdim,0> dummy( ctype(0) );
       return dummy;
     }
 
   protected:
-    FieldVector<sgrid_ctype, cdim> s;             //!< position of element
+    FieldVector<ctype, cdim> s;             //!< position of element
   };
 
   template <int mydim, int cdim, class GridImp>
@@ -254,11 +257,14 @@ namespace Dune {
   class SMakeableGeometry : public Geometry<mydim, cdim, GridImp, SGeometry>
   {
   public:
+    //! define type used for coordinates in grid module
+    typedef typename GridImp::ctype ctype;
+
     SMakeableGeometry() :
       Geometry<mydim, cdim, GridImp, SGeometry>(SGeometry<mydim, cdim, GridImp>())
     {};
 
-    void make (FieldMatrix<sgrid_ctype,mydim+1,cdim>& __As) { this->realGeometry.make(__As); }
+    void make (FieldMatrix<ctype,mydim+1,cdim>& __As) { this->realGeometry.make(__As); }
   };
 
   //************************************************************************
@@ -272,6 +278,7 @@ namespace Dune {
     friend class SIntersectionIterator<GridImp>;
     enum { dimworld = GridImp::dimensionworld };
   public:
+    typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
     typedef SMakeableGeometry<dim-codim, dimworld, const GridImp> MakeableGeometry;
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
@@ -362,6 +369,7 @@ namespace Dune {
   {
     enum { dimworld = GridImp::dimensionworld };
   public:
+    typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
     typedef typename GridImp::template Codim<codim>::LevelIterator LevelIterator;
     typedef typename GridImp::template Codim<0>::LeafIntersectionIterator IntersectionIterator;
@@ -414,6 +422,7 @@ namespace Dune {
   {
     enum { dimworld = GridImp::dimensionworld };
   public:
+    typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
     typedef SMakeableGeometry<dim, dimworld, const GridImp> MakeableGeometry;
@@ -587,6 +596,7 @@ namespace Dune {
   {
     enum { dimworld = GridImp::dimensionworld };
   public:
+    typedef typename GridImp::ctype ctype;
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -624,7 +634,7 @@ namespace Dune {
   private:
     mutable bool built_father;
     mutable int father_index;
-    mutable FieldVector<sgrid_ctype, dim> in_father_local;
+    mutable FieldVector<ctype, dim> in_father_local;
     void make_father() const;
   };
 
@@ -783,7 +793,7 @@ namespace Dune {
     FieldVector<ctype, GridImp::dimensionworld> unitOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
     {
       // while we are at it, compute normal direction
-      FieldVector<sgrid_ctype, dimworld> normal(0.0);
+      FieldVector<ctype, dimworld> normal(0.0);
       if (count%2)
         normal[count/2] =  1.0; // odd
       else
@@ -794,7 +804,7 @@ namespace Dune {
     //! return integration outer normal
     FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
     {
-      FieldVector<sgrid_ctype, dimworld> n = unitOuterNormal(local);
+      FieldVector<ctype, dimworld> n = unitOuterNormal(local);
       n *= is_global.integrationElement(local);
       return n;
     }
@@ -1192,10 +1202,10 @@ namespace Dune {
   };
 
 
-  template<int dim, int dimworld>
+  template<int dim, int dimworld, class ctype>
   struct SGridFamily
   {
-    typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
+    typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld,ctype>,
         SGeometry,SEntity,
         SEntityPointer,SLevelIterator,
         SIntersectionIterator,              // leaf intersection
@@ -1204,13 +1214,13 @@ namespace Dune {
         SIntersectionIterator,              // level intersection iter
         SHierarchicIterator,
         SLevelIterator,
-        SGridLevelIndexSet<const SGrid<dim,dimworld> >,
-        SGridLeafIndexSet<const SGrid<dim,dimworld> >,
-        SGridGlobalIdSet<const SGrid<dim,dimworld> >,
+        SGridLevelIndexSet<const SGrid<dim,dimworld,ctype> >,
+        SGridLeafIndexSet<const SGrid<dim,dimworld,ctype> >,
+        SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
-        SGridGlobalIdSet<const SGrid<dim,dimworld> >,
+        SGridGlobalIdSet<const SGrid<dim,dimworld,ctype> >,
         bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
-        CollectiveCommunication<Dune::SGrid<dim,dimworld> > >
+        CollectiveCommunication<Dune::SGrid<dim,dimworld,ctype> > >
     Traits;
   };
 
@@ -1269,11 +1279,11 @@ namespace Dune {
      dim-dimensional structured grid which is embedded in the first dim components of
      dimworld-dimensional Euclidean space.
    */
-  template<int dim, int dimworld>
-  class SGrid : public GridDefaultImplementation <dim,dimworld,sgrid_ctype,SGridFamily<dim,dimworld> >
+  template<int dim, int dimworld, typename _ctype = sgrid_ctype>
+  class SGrid : public GridDefaultImplementation <dim,dimworld,_ctype,SGridFamily<dim,dimworld,_ctype> >
   {
   public:
-    typedef SGridFamily<dim,dimworld> GridFamily;
+    typedef SGridFamily<dim,dimworld,_ctype> GridFamily;
     typedef bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits> PersistentIndexType;
 
     // need for friend declarations in entity
@@ -1281,13 +1291,13 @@ namespace Dune {
     typedef SGridLeafIndexSet<SGrid<dim,dimworld> > LeafIndexSetType;
     typedef SGridGlobalIdSet<SGrid<dim,dimworld> > GlobalIdSetType;
 
-    typedef typename SGridFamily<dim,dimworld>::Traits Traits;
+    typedef typename SGridFamily<dim,dimworld,_ctype>::Traits Traits;
 
     //! maximum number of levels allowed
     enum { MAXL=32 };
 
     //! define type used for coordinates in grid module
-    typedef sgrid_ctype ctype;
+    typedef _ctype ctype;
 
     //! return the name of this grid
     std::string name() const { return "SGrid"; };
@@ -1301,7 +1311,7 @@ namespace Dune {
 
        Note: The origin of the cube is always at (0,0,...,0), only the extend is given.
      */
-    SGrid (const int* N_, const sgrid_ctype* H_);
+    SGrid (const int* N_, const ctype* H_);
 
     /*! @brief Make an SGrid from position, extend and number of cells per direction
 
@@ -1310,7 +1320,7 @@ namespace Dune {
        \param[in] H_ position of the upper right corner of the cube
 
      */
-    SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
+    SGrid (const int* N_, const ctype* L_, const ctype* H_);
 
     /*! @brief Make an SGrid from position, extend and number of cells per direction
 
@@ -1321,7 +1331,7 @@ namespace Dune {
        Note: This constructor uses FieldVectors instead of built-in arrays. This is compatible
           with the YaspGrid class.
      */
-    SGrid (FieldVector<int,dim> N_, FieldVector<sgrid_ctype,dim> L_, FieldVector<sgrid_ctype,dim> H_);
+    SGrid (FieldVector<int,dim> N_, FieldVector<ctype,dim> L_, FieldVector<ctype,dim> H_);
 
     //! @brief empty constructor making grid of unit square discretized with one cell
     SGrid ();
@@ -1443,12 +1453,12 @@ namespace Dune {
     }
 
     /** \brief Get lower left corner */
-    const FieldVector<sgrid_ctype, dimworld>& lowerLeft() const {
+    const FieldVector<ctype, dimworld>& lowerLeft() const {
       return low;
     }
 
     /** \brief Get upper right corner */
-    FieldVector<sgrid_ctype, dimworld> upperRight() const {
+    FieldVector<ctype, dimworld> upperRight() const {
       return H;
     }
 
@@ -1551,7 +1561,7 @@ namespace Dune {
     friend class Entity;
 
     //! map expanded coordinates to position
-    FieldVector<sgrid_ctype, dimworld> pos (int level, array<int,dim>& z) const;
+    FieldVector<ctype, dimworld> pos (int level, array<int,dim>& z) const;
 
     //! compute codim from coordinate
     int calc_codim (int level, const array<int,dim>& z) const;
@@ -1643,7 +1653,7 @@ namespace Dune {
     SGrid(const SGrid &) {};
     SGrid & operator = (const SGrid &) { return *this; };
     // generate SGrid
-    void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
+    void makeSGrid (const int* N_,  const ctype* L_, const ctype* H_);
 
     /*
        internal data
@@ -1655,10 +1665,10 @@ namespace Dune {
     SGridGlobalIdSet<const SGrid<dim,dimworld> > *theglobalidset;
 
     int L;                        // number of levels in hierarchic mesh 0<=level<L
-    FieldVector<sgrid_ctype, dim> low;   // lower left corner of the grid
-    FieldVector<sgrid_ctype, dim> H;     // length of cube per direction
+    FieldVector<ctype, dim> low;   // lower left corner of the grid
+    FieldVector<ctype, dim> H;     // length of cube per direction
     array<int,dim> *N;              // number of elements per direction
-    FieldVector<sgrid_ctype, dim> *h;    // mesh size per direction
+    FieldVector<ctype, dim> *h;    // mesh size per direction
     mutable CubeMapper<dim> *mapper;     // a mapper for each level
 
     // faster implementation of subIndex

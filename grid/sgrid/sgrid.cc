@@ -17,7 +17,7 @@ namespace Dune {
   // SGeometry
 
   template<int mydim, int cdim, class GridImp>
-  inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<sgrid_ctype,mydim+1,cdim>& __As)
+  inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
   {
     // clear jacobian
     builtinverse = false;
@@ -53,15 +53,15 @@ namespace Dune {
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline const FieldVector<sgrid_ctype, cdim>& SGeometry<mydim,cdim,GridImp>::operator[] (int i) const
+  inline const FieldVector<typename GridImp::ctype, cdim>& SGeometry<mydim,cdim,GridImp>::operator[] (int i) const
   {
     return c[i];
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline FieldVector<sgrid_ctype, cdim> SGeometry<mydim,cdim,GridImp>::global (const FieldVector<sgrid_ctype, mydim>& local) const
+  inline FieldVector<typename GridImp::ctype, cdim> SGeometry<mydim,cdim,GridImp>::global (const FieldVector<typename GridImp::ctype, mydim>& local) const
   {
-    FieldVector<sgrid_ctype, cdim> global = s;
+    FieldVector<ctype, cdim> global = s;
     // global += A^t * local
     A.umtv(local,global);
 
@@ -69,10 +69,10 @@ namespace Dune {
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline FieldVector<sgrid_ctype, mydim> SGeometry<mydim,cdim,GridImp>::local (const FieldVector<sgrid_ctype, cdim>& global) const
+  inline FieldVector<typename GridImp::ctype, mydim> SGeometry<mydim,cdim,GridImp>::local (const FieldVector<typename GridImp::ctype, cdim>& global) const
   {
-    FieldVector<sgrid_ctype, mydim> l;     // result
-    FieldVector<sgrid_ctype, cdim> rhs = global-s;
+    FieldVector<ctype, mydim> l;     // result
+    FieldVector<ctype, cdim> rhs = global-s;
     for (int k=0; k<mydim; k++)
       l[k] = (rhs*A[k]) / (A[k]*A[k]);
     return l;
@@ -80,7 +80,7 @@ namespace Dune {
 
 #if 0
   template<int mydim, int cdim, class GridImp>
-  inline bool SGeometry<mydim,cdim,GridImp>::checkInside (const FieldVector<sgrid_ctype, mydim>& local) const
+  inline bool SGeometry<mydim,cdim,GridImp>::checkInside (const FieldVector<typename GridImp::ctype, mydim>& local) const
   {
     // check wether they are in the reference element
     for(int i=0; i<mydim; i++)
@@ -93,22 +93,22 @@ namespace Dune {
 #endif
 
   template<int mydim, int cdim, class GridImp>
-  inline sgrid_ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const
+  inline typename GridImp::ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) const
   {
-    sgrid_ctype s = 1.0;
+    ctype s = 1.0;
     for (int j=0; j<mydim; j++) s *= A[j].one_norm();
     return s;
   }
 
   template< int mydim, int cdim, class GridImp >
-  inline const FieldMatrix< sgrid_ctype, mydim, cdim > &
-  SGeometry< mydim, cdim, GridImp >::jacobianTransposed ( const FieldVector< sgrid_ctype, mydim > &local ) const
+  inline const FieldMatrix< typename GridImp::ctype, mydim, cdim > &
+  SGeometry< mydim, cdim, GridImp >::jacobianTransposed ( const FieldVector< typename GridImp::ctype, mydim > &local ) const
   {
     return A;
   }
 
   template<int mydim, int cdim, class GridImp>
-  inline const FieldMatrix<sgrid_ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const
+  inline const FieldMatrix<typename GridImp::ctype,cdim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
   {
     if (!builtinverse)
     {
@@ -154,7 +154,7 @@ namespace Dune {
   }
 
   template<int cdim, class GridImp>
-  inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<sgrid_ctype,1,cdim>& __As)
+  inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<typename GridImp::ctype,1,cdim>& __As)
   {
     s = __As[0];
   }
@@ -172,7 +172,7 @@ namespace Dune {
   }
 
   template<int cdim, class GridImp>
-  inline const FieldVector<sgrid_ctype, cdim>& SGeometry<0,cdim,GridImp>::operator[] (int i) const
+  inline const FieldVector<typename GridImp::ctype, cdim>& SGeometry<0,cdim,GridImp>::operator[] (int i) const
   {
     return s;
   }
@@ -244,11 +244,11 @@ namespace Dune {
     if (builtgeometry) return geo;
 
     // find dim-codim direction vectors and reference point
-    FieldMatrix<sgrid_ctype,dim-codim+1,dimworld> __As;
+    FieldMatrix<ctype,dim-codim+1,dimworld> __As;
 
     // count number of direction vectors found
     int dir=0;
-    FieldVector<sgrid_ctype, dimworld> p1,p2;
+    FieldVector<ctype, dimworld> p1,p2;
     array<int,dim> t=z;
 
     // check all directions
@@ -360,7 +360,7 @@ namespace Dune {
     array<int,dim> zz = this->grid->compress(this->l,this->z);
 
     // look for odd coordinates
-    FieldVector<sgrid_ctype, dim> delta;
+    FieldVector<ctype, dim> delta;
     for (int i=0; i<dim; i++)
       if (zz[i]%2)
       {
@@ -381,8 +381,8 @@ namespace Dune {
     father_index = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
     // now make a subcube of size 1/2 in each direction
-    FieldMatrix<sgrid_ctype,dim+1,dim> __As;
-    FieldVector<sgrid_ctype, dim> v;
+    FieldMatrix<ctype,dim+1,dim> __As;
+    FieldVector<ctype, dim> v;
     for (int i=0; i<dim; i++)
     {
       v = 0.0; v[i] = 0.5;
@@ -445,7 +445,7 @@ namespace Dune {
     array<int,dim> zz = this->grid->compress(this->l,this->z);
 
     // to find father, make all coordinates odd
-    FieldVector<sgrid_ctype, dim> delta;
+    FieldVector<ctype, dim> delta;
     for (int i=0; i<dim; i++)
       if (zz[i]%2)
       {
@@ -649,8 +649,8 @@ namespace Dune {
       z1[dir] -= 1;           // even
 
     // z1 is even in direction dir, all others must be odd because it is codim 1
-    FieldMatrix<sgrid_ctype,dim,dim> __AsLocal;
-    FieldVector<sgrid_ctype, dim> p1Local,p2Local;
+    FieldMatrix<ctype,dim,dim> __AsLocal;
+    FieldVector<ctype, dim> p1Local,p2Local;
 
     int t;
 
@@ -688,8 +688,8 @@ namespace Dune {
 
     // global coordinates
 
-    FieldMatrix<sgrid_ctype,dim,dimworld> __As;
-    FieldVector<sgrid_ctype, dimworld> p1,p2;
+    FieldMatrix<ctype,dim,dimworld> __As;
+    FieldVector<ctype, dimworld> p1,p2;
     t = 0;
     for (int i=0; i<dim; i++)
       if (i!=dir)
@@ -782,14 +782,14 @@ namespace Dune {
 
   //************************************************************************
   // inline methods for SGrid
-  template<int dim, int dimworld>
-  inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
-                                              const sgrid_ctype* L_, const sgrid_ctype* H_)
+  template<int dim, int dimworld, typename ctype>
+  inline void SGrid<dim,dimworld,ctype>::makeSGrid (const int* N_,
+                                                    const ctype* L_, const ctype* H_)
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
     N = new array<int,dim>[MAXL];
-    h = new FieldVector<sgrid_ctype, dim>[MAXL];
+    h = new FieldVector<ctype, dim>[MAXL];
     mapper = new CubeMapper<dim>[MAXL];
 
     indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
@@ -804,40 +804,40 @@ namespace Dune {
     // define coarse mesh
     mapper[0].make(N[0]);
     for (int i=0; i<dim; i++)
-      h[0][i] = (H[i]-low[i])/((sgrid_ctype)N[0][i]);
+      h[0][i] = (H[i]-low[i])/((ctype)N[0][i]);
 
     dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
     for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];
     dinfo << ")" << std::endl;
   }
 
-  template<int dim, int dimworld>
-  inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
+  template<int dim, int dimworld, typename ctype>
+  inline SGrid<dim,dimworld,ctype>::SGrid (const int* N_, const ctype* H_)
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
-    sgrid_ctype L_[dim];
+    ctype L_[dim];
     for (int i=0; i<dim; i++)
       L_[i] = 0;
 
     makeSGrid(N_,L_, H_);
   }
 
-  template<int dim, int dimworld>
-  inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)
+  template<int dim, int dimworld, typename ctype>
+  inline SGrid<dim,dimworld,ctype>::SGrid (const int* N_, const ctype* L_, const ctype* H_)
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     makeSGrid(N_, L_, H_);
   }
 
-  template<int dim, int dimworld>
-  inline SGrid<dim,dimworld>::SGrid (FieldVector<int,dim> N_, FieldVector<sgrid_ctype,dim> L_,
-                                     FieldVector<sgrid_ctype,dim> H_)
+  template<int dim, int dimworld, typename ctype>
+  inline SGrid<dim,dimworld,ctype>::SGrid (FieldVector<int,dim> N_, FieldVector<ctype,dim> L_,
+                                           FieldVector<ctype,dim> H_)
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
-    sgrid_ctype LL[dim], HH[dim];
+    ctype LL[dim], HH[dim];
     int NN[dim];
 
     for (int i=0; i<dim; ++i)
@@ -849,14 +849,14 @@ namespace Dune {
   }
 
 
-  template<int dim, int dimworld>
-  inline SGrid<dim,dimworld>::SGrid ()
+  template<int dim, int dimworld, typename ctype>
+  inline SGrid<dim,dimworld,ctype>::SGrid ()
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits, "dimworld is too large!");
 
     int N_[dim];
-    sgrid_ctype L_[dim];
-    sgrid_ctype H_[dim];
+    ctype L_[dim];
+    ctype H_[dim];
 
     for(int i = 0; i < dim; ++i) {
       N_[i] = 1;
@@ -867,8 +867,8 @@ namespace Dune {
     makeSGrid(N_, L_, H_);
   }
 
-  template<int dim, int dimworld>
-  inline SGrid<dim,dimworld>::~SGrid ()
+  template<int dim, int dimworld, typename ctype>
+  inline SGrid<dim,dimworld,ctype>::~SGrid ()
   {
     for (size_t i=0; i<indexsets.size(); i++)
       delete indexsets[i];
@@ -882,8 +882,8 @@ namespace Dune {
     delete[] mapper;
   }
 
-  template<int dim, int dimworld>
-  inline void SGrid<dim,dimworld>::globalRefine (int refCount)
+  template<int dim, int dimworld, typename ctype>
+  inline void SGrid<dim,dimworld,ctype>::globalRefine (int refCount)
   {
     for(int ref=0; ref<refCount; ref++)
     {
@@ -894,55 +894,55 @@ namespace Dune {
 
       // compute mesh size
       for (int i=0; i<dim; i++)
-        h[L][i] = (H[i]-low[i])/((sgrid_ctype)N[L][i]);
+        h[L][i] = (H[i]-low[i])/((ctype)N[L][i]);
       L++;
 
       indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,maxLevel()) );
     }
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::maxLevel () const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::maxLevel () const
   {
     return L-1;
   }
 
-  template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-  inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
-  SGrid<dim,dimworld>::lbegin (int level) const
+  template <int dim, int dimworld,class ctype> template <int cd, PartitionIteratorType pitype>
+  inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
+  SGrid<dim,dimworld,ctype>::lbegin (int level) const
   {
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,0);
   }
 
-  template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-  inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
-  SGrid<dim,dimworld>::lend (int level) const
+  template <int dim, int dimworld,class ctype> template <int cd, PartitionIteratorType pitype>
+  inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
+  SGrid<dim,dimworld,ctype>::lend (int level) const
   {
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,size(level,cd));
   }
 
-  template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-  inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
-  SGrid<dim,dimworld>::leafbegin () const
+  template <int dim, int dimworld,class ctype> template <int cd, PartitionIteratorType pitype>
+  inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
+  SGrid<dim,dimworld,ctype>::leafbegin () const
   {
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxLevel(),0);
   }
 
-  template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-  inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
-  SGrid<dim,dimworld>::leafend () const
+  template <int dim, int dimworld,class ctype> template <int cd, PartitionIteratorType pitype>
+  inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
+  SGrid<dim,dimworld,ctype>::leafend () const
   {
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxLevel(),size(maxLevel(),cd));
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::size (int level, int codim) const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::size (int level, int codim) const
   {
     return mapper[level].elements(codim);
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::global_size (int codim) const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::global_size (int codim) const
   {
     int gSize = 0;
     for(int i=0; i <= this->maxLevel(); i++)
@@ -950,10 +950,10 @@ namespace Dune {
     return gSize;
   }
 
-  template<int dim, int dimworld>
-  inline FieldVector<sgrid_ctype, dimworld> SGrid<dim,dimworld>::pos (int level, array<int,dim>& z) const
+  template<int dim, int dimworld, typename ctype>
+  inline FieldVector<ctype, dimworld> SGrid<dim,dimworld,ctype>::pos (int level, array<int,dim>& z) const
   {
-    FieldVector<sgrid_ctype, dimworld> x;
+    FieldVector<ctype, dimworld> x;
     for (int k=0; k<dim; k++)
       x[k] = (z[k]*h[level][k])*0.5 + low[k];
 
@@ -964,26 +964,26 @@ namespace Dune {
     return x;
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::calc_codim (int level, const array<int,dim>& z) const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::calc_codim (int level, const array<int,dim>& z) const
   {
     return mapper[level].codim(z);
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::n (int level, const array<int,dim>& z) const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::n (int level, const array<int,dim>& z) const
   {
     return mapper[level].n(z);
   }
 
-  template<int dim, int dimworld>
-  inline array<int,dim> SGrid<dim,dimworld>::z (int level, int i, int codim) const
+  template<int dim, int dimworld, typename ctype>
+  inline array<int,dim> SGrid<dim,dimworld,ctype>::z (int level, int i, int codim) const
   {
     return mapper[level].z(i,codim);
   }
 
-  template<int dim, int dimworld>
-  inline array<int,dim> SGrid<dim,dimworld>::subz (const array<int,dim> & z, int i, int codim) const
+  template<int dim, int dimworld, typename ctype>
+  inline array<int,dim> SGrid<dim,dimworld,ctype>::subz (const array<int,dim> & z, int i, int codim) const
   {
     static const GeometryType cubeType(dim);
 
@@ -1005,26 +1005,26 @@ namespace Dune {
 
 
 
-  template<int dim, int dimworld>
-  inline array<int,dim> SGrid<dim,dimworld>::compress (int level, const array<int,dim>& z) const
+  template<int dim, int dimworld, typename ctype>
+  inline array<int,dim> SGrid<dim,dimworld,ctype>::compress (int level, const array<int,dim>& z) const
   {
     return mapper[level].compress(z);
   }
 
-  template<int dim, int dimworld>
-  inline array<int,dim> SGrid<dim,dimworld>::expand (int level, const array<int,dim>& r, int b) const
+  template<int dim, int dimworld, typename ctype>
+  inline array<int,dim> SGrid<dim,dimworld,ctype>::expand (int level, const array<int,dim>& r, int b) const
   {
     return mapper[level].expand(r,b);
   }
 
-  template<int dim, int dimworld>
-  inline int SGrid<dim,dimworld>::partition (int level, const array<int,dim>& z) const
+  template<int dim, int dimworld, typename ctype>
+  inline int SGrid<dim,dimworld,ctype>::partition (int level, const array<int,dim>& z) const
   {
     return mapper[level].partition(z);
   }
 
-  template<int dim, int dimworld>
-  inline bool SGrid<dim,dimworld>::exists (int level, const array<int,dim>& zred) const
+  template<int dim, int dimworld, typename ctype>
+  inline bool SGrid<dim,dimworld,ctype>::exists (int level, const array<int,dim>& zred) const
   {
     for (int i=0; i<dim; i++)
     {
