@@ -256,7 +256,6 @@ namespace Dune
     typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
 
   public:
-    //! Default constructor
     AlbertaGridGeometry ();
 
     AlbertaGridGeometry ( const This &other );
@@ -264,74 +263,62 @@ namespace Dune
     template< class CoordReader >
     AlbertaGridGeometry ( const CoordReader &coordReader );
 
-    //! return the element type identifier
-    //! line , triangle or tetrahedron, depends on dim
+    /** \brief obtain the type of reference element */
     GeometryType type () const;
 
-    /** \brief obtain the number of corners of this element */
+    /** \brief number of corner the geometry */
     int corners () const;
 
+    /** \brief obtain the i-th corner of this geometry */
     GlobalVector corner ( const int i ) const;
 
-    //! access to coordinates of corners. Index is the number of the corner
+    /** \brief deprecated way of obtaining the i-th corner */
     const GlobalVector &operator[] ( const int i ) const;
 
-    //! maps a local coordinate within reference element to
-    //! global coordinate in element
+    /** \brief map a point from the refence element to the geometry */
     GlobalVector global ( const LocalVector &local ) const;
 
-    //! maps a global coordinate within the element to a
-    //! local coordinate in its reference element
+    /** \brief map a point from the geometry to the reference element */
     LocalVector local ( const GlobalVector &global ) const;
 
-#if 0
-    //! returns true if the point in local coordinates is inside reference element
-    bool checkInside( const LocalVector &local ) const;
-#endif
-
-    /*!
-       Copy from sgrid.hh:
-
-       Integration over a general element is done by integrating over the reference element
-       and using the transformation from the reference element to the global element as follows:
-       \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-       \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element.
-
-       For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-       the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-       \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
-
-       For linear elements, the derivatives of the map with respect to local coordinates
-       do not depend on the local coordinates and are the same over the whole element.
-
-       For a structured mesh where all edges are parallel to the coordinate axes, the
-       computation is the length, area or volume of the element is very simple to compute.
-
-       Each grid module implements the integration element with optimal efficieny. This
-       will directly translate in substantial savings in the computation of finite element
-       stiffness matrices.
+    /** \brief integration element of the geometry mapping
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
      */
-
     ctype integrationElement () const;
 
+    /** \brief integration element of the geometry mapping */
     ctype integrationElement ( const LocalVector &local ) const
     {
       return integrationElement();
     }
 
-    // volume if geometry
+    /** \brief volume of geometry */
     ctype volume () const;
 
+    /** \brief transposed of the geometry mapping's Jacobian
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
+     */
     const JacobianTransposed &jacobianTransposed () const;
 
+    /** \brief transposed of the geometry mapping's Jacobian */
     const JacobianTransposed &
     jacobianTransposed ( const LocalVector &local ) const
     {
       return jacobianTransposed();
     }
 
+    /** \brief transposed inverse of the geometry mapping's Jacobian
+     *
+     *  \note This method is not part of the geometry interface. It is used
+     *        internally only.
+     */
     const JacobianInverseTransposed &jacobianInverseTransposed () const;
 
+    /** \brief transposed inverse of the geometry mapping's Jacobian */
     const JacobianInverseTransposed &
     jacobianInverseTransposed ( const LocalVector &local ) const
     {
@@ -342,13 +329,13 @@ namespace Dune
     //  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
 
+    /** \brief invalidate the geometry */
     void invalidate ();
 
+    /** \brief build the geometry from a coordinate reader */
     template< class CoordReader >
     void build ( const CoordReader &coordReader );
 
-    //! print internal data
-    //! no interface method
     void print ( std::ostream &out ) const;
 
   private:

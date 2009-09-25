@@ -173,23 +173,6 @@ namespace Dune
   }
 
 
-#if 0
-  template< int mydim, int cdim, class GridImp >
-  inline bool AlbertaGridGeometry< mydim, cdim, GridImp >
-  ::checkInside ( const LocalVector &local ) const
-  {
-    ctype sum = 0.0;
-    for( int i = 0; i < mydim; ++i )
-    {
-      sum += local[ i ];
-      if( local[ i ] < -1e-13 )
-        return false;
-    }
-    return (sum <= 1.0 + 1e-13);
-  }
-#endif
-
-
   template< int mydim, int cdim, class GridImp >
   inline void AlbertaGridGeometry< mydim, cdim, GridImp >::invalidate ()
   {
