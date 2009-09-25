@@ -93,7 +93,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking partition iterators..." << std::endl;
-    ForLoop< CheckCodim, 0, GridView::dimension >::apply( gridView );
+    Dune::ForLoop< CheckCodim, 0, GridView::dimension >::apply( gridView );
   }
 };
 
