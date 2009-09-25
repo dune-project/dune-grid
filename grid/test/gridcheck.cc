@@ -45,10 +45,8 @@ struct GeometryInterface
     geo.corners();
     geo.corner( 0 );
 
-    // Dune::FieldVector<ctype, Geometry::mydimension> v;
     typename Geometry::LocalCoordinate v;
     geo.global(v);
-    // Dune::FieldVector<ctype, Geometry::coorddimension> g;
     typename Geometry::GlobalCoordinate g;
     geo.local(g);
     geo.integrationElement(v);
@@ -608,7 +606,7 @@ void zeroEntityConsistency (Grid &g)
 {
   typedef typename Grid::ctype ctype;
   const int dimGrid = Grid::dimension;
-  const int dimWorld = Grid::dimensionworld;
+  // const int dimWorld = Grid::dimensionworld;
 
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
@@ -671,8 +669,9 @@ void zeroEntityConsistency (Grid &g)
     }
     for( int c = 0; c < numCorners; ++c )
     {
-      Dune::FieldVector< ctype, dimWorld > c1( it->geometry().corner( c ) );
-      Dune::FieldVector< ctype, dimWorld > c2( it->template subEntity< dimGrid >( c )->geometry().corner( 0 ) );
+      typename Geometry::GlobalCoordinate c1( it->geometry().corner( c ) );
+      typename Geometry::GlobalCoordinate c2( it->template subEntity< dimGrid >( c )->geometry().corner( 0 ) );
+
       if( (c2-c1).two_norm() > 10*std::numeric_limits< ctype >::epsilon() )
       {
         std::cerr << "Error: | geometry.corner( c ) - subEntity< dimGrid >( c ) | = | "
@@ -686,11 +685,10 @@ void zeroEntityConsistency (Grid &g)
     const int corners= it->geometry().corners();
     for (int c=0; c<corners; ++c)
     {
-      typedef Dune::FieldVector<typename Grid::ctype, Grid::dimensionworld> CoordinateType;
       for(int d=c+1; d<corners; ++d)
       {
-        const CoordinateType c1 = it->geometry().corner( c );
-        const CoordinateType c2 = it->geometry().corner( d );
+        const typename Geometry::GlobalCoordinate c1 = it->geometry().corner( c );
+        const typename Geometry::GlobalCoordinate c2 = it->geometry().corner( d );
         if( (c2-c1).two_norm() < 10 * std::numeric_limits<typename Grid::ctype>::epsilon() )
         {
           DUNE_THROW(CheckError, "geometry["<<c<<"] == geometry["<<d<<"]");
@@ -946,8 +944,8 @@ void iterate(Grid &g)
   LevelIterator it = g.template lbegin<0>(l);
   const LevelIterator endit = g.template lend<0>(l);
 
-  Dune::FieldVector<typename Grid::ctype, Grid::dimension> origin(1);
-  Dune::FieldVector<typename Grid::ctype, Grid::dimension> result;
+  typename Geometry::LocalCoordinate origin(1);
+  typename Geometry::LocalCoordinate result;
 
   for (; it != endit; ++it)
   {

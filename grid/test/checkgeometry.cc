@@ -6,13 +6,14 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/quadraturerules.hh>
+#include <dune/grid/genericgeometry/forloop.hh>
 
 namespace Dune
 {
-
   template< int mydim, int cdim, class Grid, template< int, int, class > class Imp >
   void checkGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry )
   {
+    typedef Dune::Geometry< mydim, cdim, Grid, Imp > Geometry;
     const GenericReferenceElement< double, mydim > &refElement = GenericReferenceElements< double, mydim >::general( geometry.type() );
     if( refElement.size( mydim ) == geometry.corners() )
     {
@@ -28,7 +29,7 @@ namespace Dune
     const QuadratureRule< double, mydim > &quadrature = QuadratureRules< double, mydim >::rule( geometry.type(), 2 );
     for( size_t i = 0; i < quadrature.size(); ++i )
     {
-      const FieldVector< double, mydim > &x = quadrature[ i ].position();
+      const typename Geometry::LocalCoordinate &x = quadrature[ i ].position();
 
       if( (x - geometry.local( geometry.global( x ) )).two_norm() > 1e-8 )
         std::cerr << "Error: global and local are not inverse to each other." << std::endl;
@@ -58,6 +59,34 @@ namespace Dune
     }
   }
 
+  template <int codim>
+  struct CheckSubEntityGeometry
+  {
+    template <int dim,class GI,template <int,int,class> class EI>
+    static void apply(const Entity<0,dim,GI,EI> &entity)
+    {
+      Int2Type<Dune::Capabilities::hasEntity<GI,codim>::v > capVar;
+      check(capVar,entity);
+    }
+    template <class Entity>
+    static void check(const Int2Type<true>&, const Entity &entity)
+    {
+      for (int i=0; i<entity.template count<codim>(); ++i)
+      {
+        typedef typename Entity::template Codim< codim >::EntityPointer SubEP;
+        const SubEP subEP = entity.template subEntity<codim>(i);
+        const typename SubEP::Entity &subEn = *subEP;
+        const typename SubEP::Entity::Geometry &subGeo = subEn.geometry();
+
+        if( subEn.type() != subGeo.type() )
+          std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
+        checkGeometry(subGeo);
+      }
+    }
+    template <class Entity>
+    static void check(const Int2Type<false>&, const Entity &entity)
+    {}
+  };
 
   template< class VT >
   void checkGeometry ( const GridView< VT > &gridView )
@@ -67,13 +96,7 @@ namespace Dune
     const Iterator end = gridView.template end< 0 >();
     for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
     {
-      const typename Iterator::Entity &entity = *it;
-      const typename Iterator::Entity::Geometry &geometry = entity.geometry();
-
-      if( entity.type() != geometry.type() )
-        std::cerr << "Error: Entity and geometry report different geometry types." << std::endl;
-
-      checkGeometry( geometry );
+      ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
     }
   }
 

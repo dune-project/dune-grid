@@ -78,6 +78,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
   typedef typename GridViewType::Grid GridType;
   typedef typename GridViewType::IntersectionIterator IntersectionIterator;
+  typedef typename IntersectionIterator::Intersection Intersection;
 
   const GridType& grid = view.grid();
   const bool checkOutside = EnableIntersectionIteratorReverseCheck< GridType >::v;
@@ -86,18 +87,19 @@ void checkIntersectionIterator(const GridViewType& view,
   typedef typename GridType::ctype ctype;
 
   const int dim      = GridType::dimension;
-  const int dimworld = GridType::dimensionworld;
+  // const int dimworld = GridType::dimensionworld;
 
-  const typename GridViewType::template Codim< 0 >::Geometry &geoInside = eIt->geometry();
+  typedef typename GridViewType::template Codim< 0 >::Geometry ElementGeometry;
+  const ElementGeometry &geoInside = eIt->geometry();
   const GenericReferenceElement< ctype, dim > &refElement = GenericReferenceElements< ctype, dim >::general( eIt->type() );
 
-  FieldVector< ctype,dimworld > sumNormal( ctype( 0 ) );
+  typename ElementGeometry::GlobalCoordinate sumNormal( ctype( 0 ) );
 
   // /////////////////////////////////////////////////////////
   //   Check the types defined by the iterator
   // /////////////////////////////////////////////////////////
   dune_static_assert((is_same<
-                        typename IntersectionIterator::ctype,
+                        typename Intersection::ctype,
                         typename GridType::ctype>::value),
                      "IntersectionIterator has wrong ctype");
 
@@ -106,10 +108,10 @@ void checkIntersectionIterator(const GridViewType& view,
                         typename GridViewType::Intersection>::value),
                      "IntersectionIterator has wrong Intersection type");
 
-  dune_static_assert((static_cast<int>(IntersectionIterator::dimension)
+  dune_static_assert((static_cast<int>(Intersection::dimension)
                       == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
 
-  dune_static_assert((static_cast<int>(IntersectionIterator::dimensionworld)
+  dune_static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
 
   IntersectionIterator iIt    = view.ibegin(*eIt);
@@ -125,11 +127,11 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Compute the integral of the outer normal over the whole element.
     //   This has to be zero.
     // //////////////////////////////////////////////////////////////////////
-    const int interDim = IntersectionIterator::LocalGeometry::mydimension;
+    const int interDim = Intersection::LocalGeometry::mydimension;
     const QuadratureRule< double, interDim > &quad
       = QuadratureRules< double, interDim >::rule( iIt->type(), 3 );
 
-    typedef typename IntersectionIterator::Entity EntityType;
+    typedef typename Intersection::Entity EntityType;
     typedef typename EntityType::EntityPointer EntityPointer;
 
     assert(eIt == iIt->inside());
@@ -239,7 +241,7 @@ void checkIntersectionIterator(const GridViewType& view,
     // //////////////////////////////////////////////////////////
     //   Check the geometry returned by intersectionGlobal()
     // //////////////////////////////////////////////////////////
-    typedef typename IntersectionIterator::Geometry Geometry;
+    typedef typename Intersection::Geometry Geometry;
     const Geometry &intersectionGlobal = iIt->geometry();
 
     checkGeometry(intersectionGlobal);
@@ -255,7 +257,9 @@ void checkIntersectionIterator(const GridViewType& view,
     //   Check the geometry returned by intersectionSelfLocal()
     // //////////////////////////////////////////////////////////
 
-    const typename IntersectionIterator::LocalGeometry &intersectionSelfLocal = iIt->geometryInInside();
+    typedef typename Intersection::LocalGeometry LocalGeometry;
+    typedef typename Intersection::Geometry IntersectionGeometry;
+    const LocalGeometry &intersectionSelfLocal = iIt->geometryInInside();
     checkGeometry(intersectionSelfLocal);
 
     //  Check the consistency of intersectionSelfLocal() and intersectionGlobal
@@ -266,26 +270,26 @@ void checkIntersectionIterator(const GridViewType& view,
     // Use a quadrature rule as a set of test points
     for (size_t i=0; i<quad.size(); i++)
     {
-      const FieldVector< ctype, dim-1 > &pt = quad[ i ].position();
-      const FieldMatrix< ctype, dimworld, dim-1 > &jit
+      const typename LocalGeometry::LocalCoordinate &pt = quad[ i ].position();
+      const typename IntersectionGeometry::Jacobian &jit
         = intersectionGlobal.jacobianInverseTransposed( pt );
 
       // independently calculate the integration outer normal for the inside element
-      FieldVector< ctype, dim > xInside = intersectionSelfLocal.global( pt );
-      FieldVector< ctype, dim > refNormal = refElement.template mapping< 0 >( 0 ).normal( indexInInside, xInside );
-      FieldVector< ctype, dimworld > refIntNormal;
+      typename LocalGeometry::GlobalCoordinate xInside = intersectionSelfLocal.global( pt );
+      typename LocalGeometry::GlobalCoordinate refNormal = refElement.template mapping< 0 >( 0 ).normal( indexInInside, xInside );
+      typename IntersectionGeometry::GlobalCoordinate refIntNormal;
       geoInside.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
       refIntNormal *= geoInside.integrationElement( xInside );
 
       // Check outer normal
-      const FieldVector< ctype, dimworld > normal = iIt->outerNormal( pt );
+      const typename IntersectionGeometry::GlobalCoordinate normal = iIt->outerNormal( pt );
       checkParallel( normal, refIntNormal, "outerNormal" );
 
       // Check normal vector is orthogonal to all vectors connecting
       // the vertices
       for (int c=1; c<intersectionGlobal.corners(); c++)
       {
-        Dune::FieldVector< ctype, dimworld > x = intersectionGlobal.corner( c-1 );
+        typename IntersectionGeometry::GlobalCoordinate x = intersectionGlobal.corner( c-1 );
         x -= intersectionGlobal.corner( c );
         if( x*normal >= 10*std::numeric_limits< ctype >::epsilon() )
         {
@@ -302,7 +306,7 @@ void checkIntersectionIterator(const GridViewType& view,
       checkJIn( normal, jit, "outerNormal" );
 
       // Check integration outer normal
-      const FieldVector< ctype, dimworld > intNormal =
+      typename IntersectionGeometry::GlobalCoordinate intNormal =
         iIt->integrationOuterNormal( pt );
       sumNormal.axpy( quad[ i ].weight(), intNormal );
 
@@ -326,8 +330,7 @@ void checkIntersectionIterator(const GridViewType& view,
       }
 
       // Check unit outer normal
-      const FieldVector< ctype, dimworld > unitNormal = iIt->unitOuterNormal( pt );
-
+      const typename IntersectionGeometry::GlobalCoordinate unitNormal = iIt->unitOuterNormal( pt );
       if( std :: abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
       {
         std :: cerr << "Error: unitOuterNormal yields wrong length." << std :: endl;
@@ -340,8 +343,8 @@ void checkIntersectionIterator(const GridViewType& view,
       checkParallel ( unitNormal, refIntNormal, "unitOuterNormal");
 
       // check intersectionSelfLocal
-      FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
-      FieldVector<double,dimworld> localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
+      typename IntersectionGeometry::GlobalCoordinate globalPos = intersectionGlobal.global(quad[i].position());
+      typename IntersectionGeometry::GlobalCoordinate localPos  = eIt->geometry().global(intersectionSelfLocal.global(quad[i].position()));
 
       if( (globalPos - localPos).infinity_norm() > 1e-6 )
         DUNE_THROW( GridError, "entity.geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x ) at x = " << quad[ i ].position() << "." );
@@ -354,7 +357,7 @@ void checkIntersectionIterator(const GridViewType& view,
 
     if( iIt->neighbor() && !iIt->boundary() )
     {
-      const typename IntersectionIterator::LocalGeometry &intersectionNeighborLocal = iIt->geometryInOutside();
+      const typename Intersection::LocalGeometry &intersectionNeighborLocal = iIt->geometryInOutside();
 
       checkGeometry(intersectionNeighborLocal);
 
@@ -362,15 +365,14 @@ void checkIntersectionIterator(const GridViewType& view,
         DUNE_THROW(GridError, "Geometry of intersection is inconsistent from left and right hand side!");
 
       // (Ab)use a quadrature rule as a set of test points
-      const int interDim = IntersectionIterator::LocalGeometry::mydimension;
+      const int interDim = Intersection::LocalGeometry::mydimension;
       const QuadratureRule<double, interDim>& quad
         = QuadratureRules<double, interDim>::rule(intersectionNeighborLocal.type(), 2);
 
       for (size_t i=0; i<quad.size(); i++)
       {
-
-        FieldVector<double,dimworld> globalPos = intersectionGlobal.global(quad[i].position());
-        FieldVector<double,dimworld> localPos  = iIt->outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
+        typename IntersectionGeometry::GlobalCoordinate globalPos = intersectionGlobal.global(quad[i].position());
+        typename IntersectionGeometry::GlobalCoordinate localPos  = iIt->outside()->geometry().global(intersectionNeighborLocal.global(quad[i].position()));
 
         if ( (globalPos - localPos).infinity_norm() > 1e-6)
           DUNE_THROW(GridError, "global( intersectionNeighborLocal(global() ) is not the same as intersectionGlobal.global() at " << quad[i].position() << "!");
