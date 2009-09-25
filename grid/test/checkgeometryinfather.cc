@@ -26,8 +26,6 @@ void checkGeometryInFather(const GridType& grid)
 
   typedef typename GridType::Traits::LocalIdSet IdSet;
   typedef typename GridType::ctype ctype;
-  const int dim = GridType::dimension;
-  const int dimworld = GridType::dimensionworld;
 
   const IdSet &idSet = grid.localIdSet();
 
@@ -145,7 +143,8 @@ void checkGeometryInFather(const GridType& grid)
         DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
 
       // Compute the element center just to have an argument for the following methods
-      FieldVector<ctype, dim> center(0);
+      typename LocalGeometry::GlobalCoordinate center(0);
+
       for (int j=0; j<geometryInFather.corners(); j++)
         center += geometryInFather.corner( j );
 
@@ -163,9 +162,9 @@ void checkGeometryInFather(const GridType& grid)
       // /////////////////////////////////////////////////////////////////////////////////////
       for( int j=0; j < geometryInFather.corners(); ++j )
       {
-        const FieldVector< ctype, dimworld > cornerInFather
+        const typename Geometry::GlobalCoordinate cornerInFather
           = eIt->father()->geometry().global( geometryInFather.corner( j ) );
-        const FieldVector< ctype, dimworld > &cornerInSon = eIt->geometry().corner( j );
+        const typename Geometry::GlobalCoordinate &cornerInSon = eIt->geometry().corner( j );
 
         if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
         {

@@ -197,7 +197,8 @@ struct IntersectionIteratorInterface
     j = i;
 
     // state
-    typename IntersectionIterator::Intersection inter = *i;
+    typedef typename IntersectionIterator::Intersection Intersection;
+    Intersection inter = *i;
     inter.boundary();
     inter.neighbor();
 
@@ -216,7 +217,8 @@ struct IntersectionIteratorInterface
     inter.indexInInside();
     if(inter.neighbor()) inter.indexInOutside();
 
-    Dune::FieldVector<ct, dim-1> v(0);
+    typename Intersection::LocalCoordinate v(0);
+
     inter.outerNormal(v);
     inter.integrationOuterNormal(v);
     inter.unitOuterNormal(v);
@@ -812,7 +814,8 @@ void assertNeighbor (Grid &g)
         it->geometry();
 
         // normal vectors
-        Dune::FieldVector<ct, dim-1> v(0);
+        typename IntersectionIterator::Intersection::LocalCoordinate v(0);
+
         it->outerNormal(v);
         it->integrationOuterNormal(v);
         it->unitOuterNormal(v);

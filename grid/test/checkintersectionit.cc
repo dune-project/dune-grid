@@ -282,7 +282,8 @@ void checkIntersectionIterator(const GridViewType& view,
       refIntNormal *= geoInside.integrationElement( xInside );
 
       // Check outer normal
-      const typename IntersectionGeometry::GlobalCoordinate normal = iIt->outerNormal( pt );
+      // const typename IntersectionGeometry::GlobalCoordinate normal = iIt->outerNormal( pt );
+      const typename Intersection::GlobalCoordinate normal = iIt->outerNormal( pt );
       checkParallel( normal, refIntNormal, "outerNormal" );
 
       // Check normal vector is orthogonal to all vectors connecting
@@ -330,7 +331,8 @@ void checkIntersectionIterator(const GridViewType& view,
       }
 
       // Check unit outer normal
-      const typename IntersectionGeometry::GlobalCoordinate unitNormal = iIt->unitOuterNormal( pt );
+      // const typename IntersectionGeometry::GlobalCoordinate unitNormal = iIt->unitOuterNormal( pt );
+      const typename Intersection::GlobalCoordinate unitNormal = iIt->unitOuterNormal( pt );
       if( std :: abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
       {
         std :: cerr << "Error: unitOuterNormal yields wrong length." << std :: endl;
