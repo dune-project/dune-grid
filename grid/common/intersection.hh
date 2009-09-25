@@ -158,6 +158,12 @@ namespace Dune
     /** \brief Codim 1 geometry returned by intersectionGlobal() */
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
 
+    /** \brief local coordinate type used as parameter for the normals */
+    typedef typename Geometry::LocalCoordinate LocalCoordinate;
+
+    /** \brief global coordinate type used as parameter for the normals */
+    typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
+
     /** \brief Codim 1 geometry returned by intersectionSelfLocal()
         and intersectionNeighborLocal() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -380,7 +386,7 @@ namespace Dune
 
        The returned vector may depend on local position within the intersection.
      */
-    FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const
+    GlobalCoordinate outerNormal (const LocalCoordinate& local) const
     {
       return this->real.outerNormal(local);
     }
@@ -391,7 +397,7 @@ namespace Dune
           method is redundant but it may be more efficent to use this function
           rather than computing the integration element via intersectionGlobal().
      */
-    FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
+    GlobalCoordinate integrationOuterNormal (const LocalCoordinate& local) const
     {
       return this->real.integrationOuterNormal(local);
     }
@@ -401,7 +407,7 @@ namespace Dune
        The returned vector may depend on the local position within the intersection.
        It is scaled to have unit length.
      */
-    FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const
+    GlobalCoordinate unitOuterNormal (const LocalCoordinate& local) const
     {
       return this->real.unitOuterNormal(local);
     }
