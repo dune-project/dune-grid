@@ -12,6 +12,7 @@
 #include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkpartition.cc"
 
 int rank;
 
@@ -50,6 +51,7 @@ void check_yasp(bool p0=false) {
   checkGeometryInFather(grid);
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
+  checkPartitionType( grid.leafView() );
 };
 
 int main (int argc , char **argv) {

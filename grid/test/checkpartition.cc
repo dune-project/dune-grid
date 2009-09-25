@@ -2,80 +2,81 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <map>
 
+#include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/gridenums.hh>
 #include <dune/grid/genericgeometry/misc.hh>
 
-using GenericGeometry::ForLoop;
+using Dune::GenericGeometry::ForLoop;
 
-
-template< PartitionIteratorType pitype >
+template< Dune::PartitionIteratorType pitype >
 struct PartitionFilter;
 
 template<>
-struct PartitionFilter< Interior_Partition >
+struct PartitionFilter< Dune::Interior_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
-    return (partitionType == InteriorEntity);
+    return (partitionType == Dune::InteriorEntity);
   }
 };
 
 template<>
-struct PartitionFilter< InteriorBorder_Partition >
+struct PartitionFilter< Dune::InteriorBorder_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
-    return (partitionType == InteriorEntity) || (partitionType == BorderEntity);
+    return (partitionType == Dune::InteriorEntity) || (partitionType == Dune::BorderEntity);
   }
 };
 
 template<>
-struct PartitionFilter< Overlap_Partition >
+struct PartitionFilter< Dune::Overlap_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
-    return (partitionType == OverlapEntity);
+    return (partitionType != Dune::FrontEntity) && (partitionType != Dune::GhostEntity);
   }
 };
 
 template<>
-struct PartitionFilter< OverlapFront_Partition >
+struct PartitionFilter< Dune::OverlapFront_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
-    return (partitionType == OverlapEntity) || (partitionType == FrontEntity);
+    return (partitionType != Dune::GhostEntity);
   }
 };
 
 template<>
-struct PartitionFilter< All_Partition >
+struct PartitionFilter< Dune::All_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
     return true;
   }
 };
 
 template<>
-struct PartitionFilter< Ghost_Partition >
+struct PartitionFilter< Dune::Ghost_Partition >
 {
-  static bool contains ( const PartitionType partitionType )
+  static bool contains ( const Dune::PartitionType partitionType )
   {
-    return (partitionType == GhostEntity);
+    return (partitionType == Dune::GhostEntity);
   }
 };
 
 
 
-inline bool possibleSubPartitionType ( PartitionType ept, PartitionType pt )
+inline bool possibleSubPartitionType ( Dune::PartitionType ept, Dune::PartitionType pt )
 {
   switch( ept )
   {
-  case InteriorEntity :
-    return (pt == InteriorEntity) || (pt == BorderEntity);
-  case OverlapEntity :
-    return (pt == BorderEntity) || (pt == OverlapEntity) || (pt == FrontEntity);
-  case GhostEntity :
-    return (pt == BorderEntity) || (pt == FrontEntity) || (pt == GhostEntity);
+  case Dune::InteriorEntity :
+    return (pt == Dune::InteriorEntity) || (pt == Dune::BorderEntity);
+  case Dune::OverlapEntity :
+    return (pt == Dune::BorderEntity) || (pt == Dune::OverlapEntity) || (pt == Dune::FrontEntity);
+  case Dune::GhostEntity :
+    return (pt == Dune::BorderEntity) || (pt == Dune::FrontEntity) || (pt == Dune::GhostEntity);
   default :
     std::cerr << "Error: Codimension 0 entity cannot be of partition type " << ept << "." << std::endl;
     return false;
@@ -84,7 +85,7 @@ inline bool possibleSubPartitionType ( PartitionType ept, PartitionType pt )
 
 
 
-template< class GridView, PartitionIteratorType pitype >
+template< class GridView, Dune::PartitionIteratorType pitype >
 class CheckPartitionType
 {
   template< int codim >
@@ -99,73 +100,86 @@ public:
 };
 
 
-template< class GridView, PartitionIteratorType pitype >
+template< class GridView, Dune::PartitionIteratorType pitype >
 template< int codim >
 struct CheckPartitionType< GridView, pitype >::CheckCodim
 {
-  typedef typename GridView::Grid::Traits::LocalIdSet LocalIdSet;
-  typedef typename LocalIdSet::IdType IdType;
-
   typedef typename GridView::template Codim< codim >::template Partition< pitype >::Iterator Iterator;
-  typedef typename GridView::template Codim< 0 >::template Partition< All_Partition >::Iterator AllIterator;
+  typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
 
-  static void apply ( const GridView &gridView )
+  template< class IdSet >
+  static void check ( const Dune::Int2Type< true > &, const GridView &gridView, const IdSet &idSet )
   {
-    const LocalIdSet &idSet = gridView.grid().localIdSet();
-
-    typedef std::map< IdType, PartitionType > Map;
+    typedef std::map< typename IdSet::IdType, Dune::PartitionType > Map;
     typedef typename Map::iterator MapIterator;
     Map map;
 
-    const Iterator end = gridView.template end< codim, pitype >();
-    for( Iterator it = gridView.template begin< codim, pitype >(); it != end; ++it )
-    {
-      PartitionType pt = it->partitionType();
-      if( !PartitionFilter< pitype >::contains( pt ) )
+    try {
+      const Iterator end = gridView.template end< codim, pitype >();
+      for( Iterator it = gridView.template begin< codim, pitype >(); it != end; ++it )
       {
-        std::cerr << "Error: Codim " << codim << " iterator for the " << pitype
-                  << " visited entity " << idSet.id( *it )
-                  << " with partition type " << pt << "." << std::endl;
-      }
-      map[ idSet.id( *it ) ] = pt;
-    }
-
-    const AllIterator allEnd = gridView.template end< 0, All_Partition >();
-    for( AllIterator it = gridView.template begin< 0, All_Partition >(); it != allEnd; ++it )
-    {
-      PartitionType ept = it->partitionType();
-      for( int i = 0; i < it->template count< codim >(); ++i )
-      {
-        PartitionType pt = it->template subEntity< codim >( i )->partitionType();
-        if( !possibleSubPartitionType( ept, pt ) )
+        Dune::PartitionType pt = it->partitionType();
+        if( !PartitionFilter< pitype >::contains( pt ) )
         {
-          std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
-                    << " with partition type " << pt << " is a subentity of entity "
-                    << idSet.id( *it ) << " with partition type " << ept << "." << std::endl;
+          std::cerr << "Error: Codim " << codim << " iterator for the " << pitype
+                    << " visited entity " << idSet.id( *it )
+                    << " with partition type " << pt << "." << std::endl;
         }
+        map[ idSet.id( *it ) ] = pt;
+      }
 
-        const MapIterator mapIt = map.find( idSet.subId( *it, i, codim ) );
-        if( mapIt == map.end() )
+      const AllIterator allEnd = gridView.template end< 0, Dune::All_Partition >();
+      for( AllIterator it = gridView.template begin< 0, Dune::All_Partition >(); it != allEnd; ++it )
+      {
+        Dune::PartitionType ept = it->partitionType();
+        for( int i = 0; i < it->template count< codim >(); ++i )
         {
-          if( PartitionFilter< pitype >::contains( pt ) )
+          Dune::PartitionType pt = it->template subEntity< codim >( i )->partitionType();
+          if( !possibleSubPartitionType( ept, pt ) )
           {
             std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
-                      << " with partition type " << pt << " is not visited by codim " << codim
-                      << " iterator for the " << pitype << "." << std::endl;
+                      << " with partition type " << pt << " is a subentity of entity "
+                      << idSet.id( *it ) << " with partition type " << ept << "." << std::endl;
           }
-        }
-        else
-        {
-          if( pt != mapIt->second )
+
+          const MapIterator mapIt = map.find( idSet.subId( *it, i, codim ) );
+          if( mapIt == map.end() )
           {
-            std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
-                      << " with partition type " << pt << " reported partition type "
-                      << mapIt->second << " when accessed with the codim " << codim
-                      << " iterator for the " << pitype << "." << std::endl;
+            if( PartitionFilter< pitype >::contains( pt ) )
+            {
+              std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
+                        << " with partition type " << pt << " is not visited by codim " << codim
+                        << " iterator for the " << pitype << "." << std::endl;
+            }
+          }
+          else
+          {
+            if( pt != mapIt->second )
+            {
+              std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
+                        << " with partition type " << pt << " reported partition type "
+                        << mapIt->second << " when accessed with the codim " << codim
+                        << " iterator for the " << pitype << "." << std::endl;
+            }
           }
         }
       }
     }
+    catch( const Dune::Exception &exception )
+    {
+      std::cerr << "Error: Caught  exception when testing partition iterator for the " << pitype
+                << "(" << exception << ")." << std::endl;
+    }
+  }
+
+  template< class IdSet >
+  static void check ( const Dune::Int2Type< false > &, const GridView &gridView, const IdSet &idSet )
+  {}
+
+  static void apply ( const GridView &gridView )
+  {
+    Dune::Int2Type< Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v > capabilityVariable;
+    check( capabilityVariable, gridView, gridView.grid().localIdSet() );
   }
 };
 
@@ -174,9 +188,9 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
 template< class GridView >
 inline void checkPartitionType ( const GridView &gridView )
 {
-  CheckPartitionType< GridView, Interior_Partition >::apply( gridView );
-  CheckPartitionType< GridView, InteriorBorder_Partition >::apply( gridView );
-  CheckPartitionType< GridView, Overlap_Partition >::apply( gridView );
-  CheckPartitionType< GridView, OverlapFront_Partition >::apply( gridView );
-  CheckPartitionType< GridView, Ghost_Partition >::apply( gridView );
+  CheckPartitionType< GridView, Dune::Interior_Partition >::apply( gridView );
+  CheckPartitionType< GridView, Dune::InteriorBorder_Partition >::apply( gridView );
+  CheckPartitionType< GridView, Dune::Overlap_Partition >::apply( gridView );
+  CheckPartitionType< GridView, Dune::OverlapFront_Partition >::apply( gridView );
+  CheckPartitionType< GridView, Dune::Ghost_Partition >::apply( gridView );
 }

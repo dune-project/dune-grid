@@ -11,6 +11,7 @@
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkpartition.cc"
 
 template<int d, int w>
 void runtest()
@@ -25,6 +26,7 @@ void runtest()
   g.globalRefine(1);
   checkGeometryInFather(g);
   checkIntersectionIterator(g);
+  checkPartitionType( g.leafView() );
 
   std::cout << std::endl;
 }
