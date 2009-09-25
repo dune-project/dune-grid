@@ -4,9 +4,7 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
-#include <dune/grid/genericgeometry/misc.hh>
-
-using Dune::GenericGeometry::ForLoop;
+#include <dune/grid/genericgeometry/forloop.hh>
 
 template< Dune::PartitionIteratorType pitype >
 struct PartitionFilter;
