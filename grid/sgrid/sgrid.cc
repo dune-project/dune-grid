@@ -93,11 +93,18 @@ namespace Dune {
 #endif
 
   template<int mydim, int cdim, class GridImp>
-  inline typename GridImp::ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) const
+  inline GridImp::ctype SGeometry<mydim,cdim,GridImp>::volume () const
   {
-    ctype s = 1.0;
+    sgrid_ctype s = 1.0;
     for (int j=0; j<mydim; j++) s *= A[j].one_norm();
+
     return s;
+  }
+
+  template<int mydim, int cdim, class GridImp>
+  inline GridImp::ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const
+  {
+    return volume();
   }
 
   template< int mydim, int cdim, class GridImp >
