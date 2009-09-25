@@ -29,6 +29,12 @@ namespace Dune
   template< int dim, int dimworld >
   static void checkAlbertaDimensions ()
   {
+#if DUNE_ALBERTA_VERSION < 0x300 && !DUNE_ALBERTA_SURFACE_GRID
+    dune_static_assert( (dimworld == dim),
+                        "Surface grids only work reliable in Alberta 3.0 "
+                        "- this assertion can be disabled by defining "
+                        "DUNE_ALBERTA_SURFACE_GRID." );
+#endif
     // If this check fails, reconfigure with --with-alberta-world-dim=dimworld
     dune_static_assert( (dimworld == Alberta::dimWorld),
                         "Template Parameter dimworld does not match "
