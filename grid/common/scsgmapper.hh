@@ -64,22 +64,12 @@ namespace Dune
     /** @brief Map subentity of codim 0 entity to array index.
 
        \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    template<int cc>
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const;
-
-    /** @brief Map subentity of codim 0 entity to array index.
-
-       \param e Reference to codim 0 entity.
        \param i Number of the subentity of e, where cc is the template parameter of the function.
        \param codim Codimension of the subentity of e
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     int map (const typename G::Traits::template Codim<0>::Entity& e,
-             int i,
-             unsigned int codim) const;
+             int i, unsigned int codim) const;
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
 
@@ -104,11 +94,11 @@ namespace Dune
 
        \param e Reference to codim 0 entity
        \param i subentity number
+       \param cc subentity codim
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    template<int cc>     // this is now the subentity's codim
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const;
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const;
 
     /** @brief Recalculates map after mesh adaptation
      */
@@ -134,23 +124,15 @@ namespace Dune
 
   template <typename G, typename IS, int c>
   template<class EntityType>
-  int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const EntityType& e) const
+  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
     dune_static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
-    return is.template index<cc>(e);
+    return is.index(e);
   }
 
   template <typename G, typename IS, int c>
-  template<int cc>
-  int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
-  {
-    dune_static_assert(cc == c, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
-    return is.template subIndex<cc>(e,i);
-  }
-
-  template <typename G, typename IS, int c>
-  int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
   {
     if (codim != c)
       DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
@@ -158,24 +140,23 @@ namespace Dune
   }
 
   template <typename G, typename IS, int c>
-  int SingleCodimSingleGeomTypeMapper<G,IS,c>::size () const
+  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::size () const
   {
     return is.size(c,is.geomTypes(c)[0]);
   }
 
   template <typename G, typename IS, int c>
   template<class EntityType>
-  bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const EntityType& e, int& result) const
+  inline bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const EntityType& e, int& result) const
   {
     result = map(e);
     return true;
   }
 
   template <typename G, typename IS, int c>
-  template<int cc>
-  bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const
+  inline bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
   {
-    result = this->template map<cc>(e,i);
+    result = this->map(e,i,cc);
     return true;
   }
 

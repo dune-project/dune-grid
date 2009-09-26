@@ -148,7 +148,7 @@ namespace Dune
       typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( e.type() );
       const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      return = asImp().map(e,j,cc);
+      return asImp().map(e,j,cc);
     }
 #endif
 
@@ -195,8 +195,19 @@ namespace Dune
       return asImp().contains(e,result );
     }
 
-    /** @brief Returns true if the subentity is contained in the index set and at the same time
-            the array index is returned.
+#ifdef DUNE_ENABLE_OLD_NUMBERING
+    /**
+       \deprecated use map without template parameter
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of map (without template parameter) will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+       Returns true if the subentity is contained in the index set and at the same time
+       the array index is returned.
 
        \param[in] e Reference to codim 0 entity
        \param[in] i subentity number
@@ -204,10 +215,29 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<int cc>     // this is now the subentity's codim
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const
+    bool DUNE_DEPRECATED contains (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i, int& result) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template contains<cc>(e,i,result)))
-      return asImp().template contains<cc>(e,i,result);
+      typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( e.type() );
+      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
+      return asImp().contains(e,j,cc,result);
+    }
+#endif
+
+    /** @brief Returns true if the subentity is contained in the index set and at the same time
+            the array index is returned.
+
+       \param[in] e Reference to codim 0 entity
+       \param[in] i subentity number
+       \param[in] cc subentity codim
+       \param[out] result Filled with array index if entity is contained
+       \return true if entity is in entity set of the mapper
+     */
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,i,cc,result)))
+      return asImp().contains(e,i,cc,result);
     }
 
     /** @brief Reinitialize mapper after grid has been modified.

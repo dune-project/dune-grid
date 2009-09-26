@@ -141,11 +141,11 @@ namespace Dune
 
        \param e Reference to codim 0 entity
        \param i subentity number
+       \param cc subentity codim
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    template<int cc>     // this is now the subentity's codim
-    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int& result) const
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const
     {
       result = this->map(e,i,cc);
       return true;

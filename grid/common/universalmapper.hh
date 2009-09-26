@@ -70,12 +70,12 @@ namespace Dune
 
        \param e Reference to codim 0 entity.
        \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+       \param cc codim of the subentity
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    template<int cc>
-    int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+    int map (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
-      IdType id = ids.template subId<cc>(e,i);               // get id
+      IdType id = ids.subId(e,i,cc);           // get id
       typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
       if (it!=index.end()) return it->second;                // return index if found
       index[id] = n++;                                       // put next index in map
@@ -117,15 +117,15 @@ namespace Dune
 
     /** @brief Returns true if the entity is contained in the index set
 
-       \param e Reference to codim 0 entity
-       \param i subentity number
-       \param result integer reference where corresponding index is  stored if true
+       \param[in] e Reference to codim 0 entity
+       \param[in] i subentity number
+       \param[in] i subentity codim
+       \param[out] result integer reference where corresponding index is stored if true
        \return true if entity is in entity set of the mapper
      */
-    template<int cc>     // this is now the subentity's codim
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int& result) const
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
     {
-      IdType id = ids.template subId<cc>(e,i);               // get id
+      IdType id = ids.subId(e,i,cc);           // get id
       typename std::map<IdType,int>::iterator it = index.find(id);    // look up in map
       if (it!=index.end())
       {
