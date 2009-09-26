@@ -3,4 +3,5 @@
 #ifndef DUNE_ALBERTAGRID_HH
 #define DUNE_ALBERTAGRID_HH
 #include "albertagrid/agrid.hh"
+#include "albertagrid/gridfactory.hh"
 #endif
