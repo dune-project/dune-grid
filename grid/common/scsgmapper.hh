@@ -42,8 +42,15 @@ namespace Dune
    *    A valid codimension.
    */
   template <typename G, typename IS, int c>
-  class SingleCodimSingleGeomTypeMapper : Mapper<G,SingleCodimSingleGeomTypeMapper<G,IS,c> > {
+  class SingleCodimSingleGeomTypeMapper :
+    public Mapper<G,SingleCodimSingleGeomTypeMapper<G,IS,c> >
+  {
   public:
+
+    //! import the base class implementation of map and contains (including the deprecated version)
+    //! \todo remove in after next release
+    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
+    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
 
     /** @brief Construct mapper from grid and one fo its index sets.
 

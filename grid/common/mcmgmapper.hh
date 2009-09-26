@@ -53,8 +53,15 @@ namespace Dune
    * and hand it to the respective constructor.
    */
   template <typename GV, template<int> class Layout>
-  class MultipleCodimMultipleGeomTypeMapper : Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout> > {
+  class MultipleCodimMultipleGeomTypeMapper :
+    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout> >
+  {
   public:
+
+    //! import the base class implementation of map and contains (including the deprecated version)
+    //! \todo remove in after next release
+    using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::map;
+    using Mapper< typename GV::Grid, MultipleCodimMultipleGeomTypeMapper >::contains;
 
     /** @brief Construct mapper from grid and one of its index sets.
      *
@@ -84,8 +91,8 @@ namespace Dune
 
     /** @brief Map entity to array index.
 
-            \param e Reference to codim cc entity, where cc is the template parameter of the function.
-            \return An index in the range 0 ... Max number of entities in set - 1.
+                \param e Reference to codim cc entity, where cc is the template parameter of the function.
+                \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<class EntityType>
     int map (const EntityType& e) const

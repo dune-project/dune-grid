@@ -34,9 +34,16 @@ namespace Dune
           An Id set for the given grid
    */
   template <typename G, typename IDS>
-  class UniversalMapper : Mapper<G,UniversalMapper<G,IDS> > {
+  class UniversalMapper :
+    public Mapper<G,UniversalMapper<G,IDS> >
+  {
     typedef typename IDS::IdType IdType;
   public:
+
+    //! import the base class implementation of map and contains (including the deprecated version)
+    //! \todo remove in after next release
+    using Mapper< typename GV::Grid, UniversalMapper >::map;
+    using Mapper< typename GV::Grid, UniversalMapper >::contains;
 
     /** @brief Construct mapper from grid and one of its id sets
 
