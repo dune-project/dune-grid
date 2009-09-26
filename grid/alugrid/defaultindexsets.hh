@@ -337,6 +337,10 @@ namespace Dune {
     };
 
   public:
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet<GridType, DefaultLevelIndexSet>::subIndex;
+
     //! create LevelIndex by using the HierarchicIndexSet of a grid
     //! for the given level
     DefaultLevelIndexSet(const GridType & grid , int level ) :
@@ -373,18 +377,6 @@ namespace Dune {
       assert( levelIndex_[codim][ hIndexSet_.index(en) ] >= 0 );
 #endif
       return levelIndex_[cd][ hIndexSet_.index(en) ];
-    }
-
-    //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
-    //! given SubEntity codim and number of SubEntity
-    template< int codim >
-    IndexType
-    subIndex ( const typename GridType::template Codim<0>::Entity &e, int i ) const
-    {
-      const int hIndex = hIndexSet_.template subIndex< codim >( e, i );
-      assert( (codim != 0) || (level_ == e.level()) );
-      assert( levelIndex_[ codim ][ hIndex ] >= 0 );
-      return levelIndex_[ codim ][ hIndex ];
     }
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
@@ -650,6 +642,10 @@ namespace Dune {
     };
 
   public:
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet<GridType, DefaultLeafIndexSet>::subIndex;
+
     //! create LevelIndex by using the HierarchicIndexSet of a grid
     //! for the given level
     DefaultLeafIndexSet(const GridType & grid)
@@ -678,17 +674,6 @@ namespace Dune {
       // therefore only check other codims
       assert( index_[cd][ hIndexSet_.index(en) ] >= 0 );
       return index_[cd][ hIndexSet_.index(en) ];
-    }
-
-    //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
-    //! given SubEntity codim and number of SubEntity
-    template< int codim >
-    IndexType
-    subIndex ( const typename GridType::template Codim< 0 >::Entity &e, int i ) const
-    {
-      const int hIndex = hIndexSet_.template subIndex< codim >( e, i );
-      assert( index_[ codim ][ hIndex ] >= 0 );
-      return index_[ codim ][ hIndex ];
     }
 
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a

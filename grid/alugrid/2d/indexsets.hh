@@ -54,6 +54,10 @@ namespace Dune
     {}
 
   public:
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet<GridType, ALU2dGridHierarchicIndexSet>::subIndex;
+
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
 
     //! return hierarchic index of given entity
@@ -70,14 +74,16 @@ namespace Dune
       return GridType::getRealImplementation( entity ).getIndex();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! return subIndex of given entity
     template< int codim >
-    int subIndex ( const EntityCodim0Type &e, int i ) const
+    int DUNE_DEPRECATED subIndex ( const EntityCodim0Type &e, int i ) const
     {
       typedef ALU2dGridEntity< 0, dim, const GridType > EntityImpl;
       const EntityImpl &entity = grid_.getRealImplementation( e );
       return entity.template getSubIndex< codim >( i );
     }
+#endif
 
     int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
@@ -572,6 +578,10 @@ namespace Dune
     //! export type of id
     typedef int IdType;
 
+    //! import default implementation of subId<cc>
+    //! \todo remove after next release
+    using IdSetDefaultImplementation < GridType , ALU2dGridLocalIdSet, IdType > :: subId;
+
     //! return global id of given entity
     template <class EntityType>
     int id (const EntityType & ep) const
@@ -588,14 +598,6 @@ namespace Dune
       //enum { cd = EntityType :: codimension };
       assert( hset_.size(codim) < codimMultiplier );
       return codimStart_[codim] + hset_.index(ep);
-    }
-
-    //! return subId of given entity
-    template< int codim >
-    int subId ( const EntityCodim0Type &e, int i ) const
-    {
-      assert( hset_.size( codim ) < codimMultiplier );
-      return codimStart_[ codim ] + hset_.template subIndex< codim >( e, i );
     }
 
     //! return subId of given entity
