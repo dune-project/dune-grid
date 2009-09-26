@@ -93,32 +93,6 @@ namespace Dune
       return is.index(e) + offset.find(e.type())->second;
     }
 
-
-#ifdef DUNE_ENABLE_OLD_NUMBERING
-    /**
-       \deprecated use map without template parameter
-       \brief please read the details
-
-       \warning \{
-       this method uses the numbering of the old referenceelements (see GridReferenceElements)
-       the output of map (without template parameter) will differ as it uses the numbering of the generic referenceelements
-       (see GridGenericReferenceElements).
-       \}
-
-       Map subentity of codim 0 entity to array index.
-
-       \param e Reference to codim 0 entity.
-       \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
-       \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    template<int cc>
-    int DUNE_DEPRECATED map (const typename GV::template Codim<0>::Entity& e, int i) const
-    {
-      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
-      return is.template subIndex<cc>(e,i) + offset.find(gt)->second;
-    }
-#endif
-
     /** @brief Map subentity of codim 0 entity to array index.
 
        \param e Reference to codim 0 entity.
@@ -173,7 +147,7 @@ namespace Dune
     template<int cc>     // this is now the subentity's codim
     bool contains (const typename GV::template Codim<0>::Entity& e, int i, int& result) const
     {
-      result = this->template map<cc>(e,i);
+      result = this->map(e,i,cc);
       return true;
     }
 
