@@ -44,6 +44,8 @@ and will be removed for %Dune 1.4.
 </tr><tr>
 <td>Mapper</td>       <td>map<c>(...)</td>          <td>map(...,c)</td>      
 </tr><tr>
+<td></td>             <td>contains<c>(...)</td>     <td>contains(...,c,result)</td>
+</tr><tr>
 <td>Geometry</td>     <td>operator[] (returns reference) </td> <td>corner (returns value)</td>
 </tr>
 </table>
