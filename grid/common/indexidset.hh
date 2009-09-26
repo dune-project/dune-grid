@@ -480,7 +480,7 @@ namespace Dune
     IdType subId (const typename remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
-      return this->id( *(e.subEntity(i.value()), cc) );
+      return this->id( *(e.subEntity(i), cc) );
     }
 
   };
