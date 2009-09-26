@@ -32,7 +32,7 @@ namespace Dune {
 #ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get index of subentity of a codim 0 entity
     template<int codim>
-    unsigned int DUNE_DEPRECATED subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned int DUNE_DEPRECATED subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, deprecated_int i) const
     {
       return subIndex(e,i,codim);
     }
@@ -160,7 +160,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int codim>
-    int DUNE_DEPRECATED subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    int DUNE_DEPRECATED subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i) const
     {
       return subIndex(e,i,codim);
     }
@@ -326,7 +326,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int codim>
-    IdType DUNE_DEPRECATED subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    IdType DUNE_DEPRECATED subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i) const
     {
       return subId(e,i,codim);
     }
