@@ -149,11 +149,13 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IndexType DUNE_DEPRECATED
-    subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i ) const
+    IndexType
+    DUNE_DEPRECATED subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i ) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex<cc>(e,i)));
-      return asImp().template subIndex<cc>(e,i);
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( e.type() );
+      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
+      return asImp().subIndex(e,j,cc);
     }
 #endif
 
@@ -268,22 +270,21 @@ namespace Dune
     /** \brief dimension of the grid (maximum allowed codimension) */
     static const int dimension = Base::dimension;
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
     /** @brief Map subentity of codim 0 entity to index.
 
        \param e Reference to codim 0 entity.
        \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
+       \param cc subentity codim
        \return An index in the range 0 ... Max number of entities in set - 1.
        Here the method entity of Entity is used to get the subEntity and
        then the index of this Entity is returned.
      */
     template<int cc>
     IndexType subIndex (const typename remove_const<GridImp>::type::
-                        Traits::template Codim<0>::Entity& e, int i) const
+                        Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
-      return Base::index( *(e.template entity<cc>(i) ));
+      return Base::index( *(e.subEntity(i, cc) ));
     }
-#endif
 
     /** @brief Return total number of entities of given codim in the entity set \f$E\f$. This
             is simply a sum over all geometry types.
@@ -417,9 +418,12 @@ namespace Dune
      */
     template<int cc>
     IdType DUNE_DEPRECATED
-    subId ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i ) const
+    subId ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i ) const
     {
-      return asImp().template subId<cc>(e,i);
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( e.type() );
+      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
+      return asImp().subId(e,j,cc);
     }
 #endif
 
@@ -466,7 +470,6 @@ namespace Dune
     //! define the type used for persistent indices
     typedef IdTypeImp IdType;
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get id of subentity i of codim cc
     /*
        We use the remove_const to extract the Type from the mutable class,
@@ -474,13 +477,11 @@ namespace Dune
        This default implementation uses the entity's entity() method. This is
        slow but works by default for ervery id set implementation.
      */
-    template<int cc>
     IdType subId (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i) const
+                  Traits::template Codim<0>::Entity& e, int i, codim cc) const
     {
-      return this->id( *(e.template entity<cc>(i)) );
+      return this->id( *(e.subEntity(i.value()), cc) );
     }
-#endif
 
   };
 
