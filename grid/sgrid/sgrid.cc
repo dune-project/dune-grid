@@ -17,7 +17,7 @@ namespace Dune {
   // SGeometry
 
   template<int mydim, int cdim, class GridImp>
-  inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
+  void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<typename GridImp::ctype,mydim+1,cdim>& __As)
   {
     // clear jacobian
     builtinverse = false;
@@ -139,7 +139,7 @@ namespace Dune {
   // inline methods for SEntityBase
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
-  inline void SEntityBase<codim,dim,GridImp,EntityImp>::make (GridImp* _grid, int _l, int _id)
+  void SEntityBase<codim,dim,GridImp,EntityImp>::make (GridImp* _grid, int _l, int _id)
   {
     grid = _grid;
     l = _l;
@@ -149,7 +149,7 @@ namespace Dune {
   }
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
-  inline void SEntityBase<codim,dim,GridImp,EntityImp>::make (int _l, int _id)
+  void SEntityBase<codim,dim,GridImp,EntityImp>::make (int _l, int _id)
   {
     l = _l;
     index = _id;
@@ -167,10 +167,8 @@ namespace Dune {
   }
 
   template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
-  inline const typename GridImp::template Codim<codim>::Geometry& SEntityBase<codim,dim,GridImp,EntityImp>::geometry () const
+  void SEntityBase<codim,dim,GridImp,EntityImp>::makegeometry () const
   {
-    if (builtgeometry) return geo;
-
     // find dim-codim direction vectors and reference point
     FieldMatrix<ctype,dim-codim+1,dimworld> __As;
 
@@ -202,8 +200,6 @@ namespace Dune {
     // make element
     grid->getRealImplementation(geo).make(__As);
     builtgeometry = true;
-    // return result
-    return geo;
   }
 
   //************************************************************************
@@ -274,7 +270,7 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline void SEntity<0,dim,GridImp>::make_father () const
+  void SEntity<0,dim,GridImp>::make_father () const
   {
     // check level
     if (l<=0)
@@ -410,7 +406,7 @@ namespace Dune {
   // inline methods for IntersectionIterator
 
   template<class GridImp>
-  inline void SIntersectionIterator<GridImp>::make (int _count) const
+  void SIntersectionIterator<GridImp>::make (int _count) const
   {
     // reset cache flags
     built_intersections = false;
@@ -497,11 +493,8 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline void SIntersectionIterator<GridImp>::makeintersections () const
+  void SIntersectionIterator<GridImp>::makeintersections () const
   {
-    if (built_intersections) return;     // already done
-    if (!valid_count) return;     // nothing to do
-
     // compute direction and value in direction
     int dir = count/2;
     int c = count%2;
@@ -584,7 +577,8 @@ namespace Dune {
   inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
   SIntersectionIterator< GridImp >::geometryInInside () const
   {
-    makeintersections();
+    assert (valid_count);
+    if (!built_intersections) makeintersections();
     return is_self_local;
   }
 
@@ -592,7 +586,8 @@ namespace Dune {
   inline const typename SIntersectionIterator< GridImp >::LocalGeometry &
   SIntersectionIterator< GridImp >::geometryInOutside () const
   {
-    makeintersections();
+    assert (valid_count);
+    if (!built_intersections) makeintersections();
     return is_nb_local;
   }
 
@@ -600,7 +595,8 @@ namespace Dune {
   inline const typename SIntersectionIterator< GridImp >::Geometry &
   SIntersectionIterator< GridImp >::geometry () const
   {
-    makeintersections();
+    assert (valid_count);
+    if (!built_intersections) makeintersections();
     return is_global;
   }
 

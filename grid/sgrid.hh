@@ -298,7 +298,13 @@ namespace Dune {
     }
 
     //! geometry of this entity
-    const Geometry& geometry () const;
+    const Geometry& geometry () const
+    {
+      if (!builtgeometry) makegeometry();
+
+      // return result
+      return geo;
+    }
 
     PartitionType partitionType () const { return InteriorEntity; }
 
@@ -332,6 +338,9 @@ namespace Dune {
 
     //! Reinitialization
     void make (int _l, int _id);
+
+    //! geometry of this entity
+    void makegeometry () const;
 
     //! globally unique, persistent index
     PersistentIndexType persistentIndex () const
@@ -773,13 +782,13 @@ namespace Dune {
     SIntersectionIterator (const SIntersectionIterator & other) :
       self(other.self), ne(other.ne), grid(other.grid),
       partition(other.partition), zred(other.zred),
+      count(other.count), valid_count(other.valid_count),
+      valid_nb(other.valid_nb), is_on_boundary(other.is_on_boundary),
+      built_intersections(false),
       is_self_local(SGeometry<dim-1, dim, GridImp>()),
       is_global(SGeometry<dim-1, dimworld, GridImp>()),
       is_nb_local(SGeometry<dim-1, dim, GridImp>())
-    {
-      // make neighbor
-      make(other.count);
-    }
+    {}
 
     //! assignment operator
     SIntersectionIterator& operator = (const SIntersectionIterator& it)
@@ -877,7 +886,7 @@ namespace Dune {
     }
 
     /** \brief free all memory that is not necessarily needed */
-    void compactify()
+    inline void compactify()
     {
       if( e )
       {
@@ -887,12 +896,12 @@ namespace Dune {
     }
 
   protected:
-    SEntity<codim,dim,GridImp>& realEntity() const
+    inline SEntity<codim,dim,GridImp>& realEntity() const
     {
       return grid->getRealImplementation(entity());
     }
 
-    Entity& entity() const
+    inline Entity& entity() const
     {
       if( ! e )
       {
