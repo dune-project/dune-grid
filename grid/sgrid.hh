@@ -984,6 +984,10 @@ namespace Dune {
 
   public:
 
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet<GridImp, SGridLevelIndexSet<GridImp> >::subIndex;
+
     //! constructor stores reference to a grid and level
     SGridLevelIndexSet ( const GridImp &g, int l )
       : grid( g ),
@@ -1050,6 +1054,11 @@ namespace Dune {
     enum { dim = GridImp::dimension };
 
   public:
+
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet<GridImp, SGridLeafIndexSet<GridImp> >::subIndex;
+
     //! constructor stores reference to a grid and level
     explicit SGridLeafIndexSet ( const GridImp &g )
       : grid( g )
@@ -1126,6 +1135,11 @@ namespace Dune {
     typedef SGridGlobalIdSet< GridImp > This;
 
   public:
+
+    //! import default implementation of subId<cc>
+    //! \todo remove after next release
+    using IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>::subId;
+
     //! define the type used for persisitent indices
     /*
        We use the remove_const to extract the Type from the mutable class,
