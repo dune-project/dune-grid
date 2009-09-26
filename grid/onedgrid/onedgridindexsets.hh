@@ -29,12 +29,14 @@ namespace Dune {
       return grid_->getRealImplementation(e).levelIndex();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get index of subentity of a codim 0 entity
     template<int codim>
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+    unsigned int DUNE_DEPRECATED subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
     {
       return subIndex(e,i,codim);
     }
+#endif
 
     //! get index of subentity of a codim 0 entity
     unsigned int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e,
@@ -151,16 +153,18 @@ namespace Dune {
       return grid_.getRealImplementation(e).leafIndex();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get index of subentity of a codim 0 entity
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int codim>
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    int DUNE_DEPRECATED subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return subIndex(e,i,codim);
     }
+#endif
 
     //! get index of subentity of a codim 0 entity
     int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
@@ -315,17 +319,18 @@ namespace Dune {
       return grid_.getRealImplementation(e).globalId();
     }
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get id of subentity
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
     template<int codim>
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    IdType DUNE_DEPRECATED subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
     {
       return subId(e,i,codim);
     }
-
+#endif
 
     //! get id of subentity
     IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
