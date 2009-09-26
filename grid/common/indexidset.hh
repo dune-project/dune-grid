@@ -420,7 +420,7 @@ namespace Dune
     IdType DUNE_DEPRECATED
     subId ( const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, deprecated_int i ) const
     {
-      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( e.type() );
       const int j = Numbering::template dune2generic< cc >( tid, i.value() );
       return asImp().subId(e,j,cc);
@@ -478,7 +478,7 @@ namespace Dune
        slow but works by default for ervery id set implementation.
      */
     IdType subId (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i, codim cc) const
+                  Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
       return this->id( *(e.subEntity(i.value()), cc) );
     }
