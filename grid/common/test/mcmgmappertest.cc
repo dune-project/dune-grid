@@ -60,6 +60,18 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
     min = std::min(min, index);
     max = std::max(max, index);
 
+    typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+    IntersectionIterator iIt    = gridView.ibegin(*eIt);
+    IntersectionIterator iEndIt = gridView.iend(*eIt);
+
+    for (; iIt!=iEndIt; ++iIt) {
+
+      int oldindex = mapper.template map<1>(*eIt, iIt->numberInSelf());
+      int index = mapper.map(*eIt, iIt->indexInInside(), 1);
+      assert(oldindex == index);
+    }
+
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
 
     if (!status.second)       // not inserted because already existing
