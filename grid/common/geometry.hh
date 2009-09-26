@@ -20,10 +20,6 @@
 namespace Dune
 {
 
-  // forward deklaration for volume implementation
-  template<typename ctype, int dim> class ReferenceElement;
-  template<typename ctype, int dim> class ReferenceElements;
-
   //*****************************************************************************
   //
   // Geometry
@@ -48,7 +44,7 @@ namespace Dune
      \f$D\subseteq\mathbf{R}^\textrm{mydim}\f$ and
      \f$W\subseteq\mathbf{R}^\textrm{cdim}\f$.
      The domain \f$D\f$ is one of a set of predefined convex polytopes, the
-     so-called reference elements (see also Dune::ReferenceElement). The dimensionality
+     so-called reference elements (\see Dune::GenericReferenceElement). The dimensionality
      of \f$D\f$ is <tt>mydim</tt>.
      In general \f$\textrm{mydim}\leq\textrm{cdim}\f$, i.e.
      the convex polytope may be mapped to a manifold. Moreover, we require that
@@ -99,7 +95,7 @@ namespace Dune
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
     /** \brief Return the name of the reference element. The type can
-       be used to access the Dune::ReferenceElement.
+       be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return realGeometry.type(); };
 
@@ -116,9 +112,12 @@ namespace Dune
        \return const reference to a vector containing the position \f$g(c_i)\f$ where
        \f$c_i\f$ is the position of the i'th corner of the reference element.
      */
-    const GlobalCoordinate &operator[] ( int i ) const DUNE_DEPRECATED
+    const GlobalCoordinate operator[] ( deprecated_int i ) const DUNE_DEPRECATED
     {
-      return realGeometry[i];
+      typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( type() );
+      const int j = Numbering::template dune2generic< dimension >( tid, i.value() );
+      return realGeometry.corner(j);
     }
 #endif
 
@@ -296,8 +295,8 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const ReferenceElement< ctype , mydim > & refElement =
-        ReferenceElements< ctype, mydim >::general(type);
+      const GenericReferenceElement< ctype , mydim > & refElement =
+        GenericReferenceElements< ctype, mydim >::general(type);
 
       FieldVector<ctype,mydim> localBaryCenter (0.0);
       // calculate local bary center

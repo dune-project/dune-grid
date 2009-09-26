@@ -148,7 +148,7 @@ namespace Dune
     //@}
 
     /** \brief Return the name of the reference element. The type can
-       be used to access the Dune::ReferenceElement.
+       be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return realEntity.type(); };
 
@@ -298,7 +298,7 @@ namespace Dune
     //@}
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::ReferenceElement.
+        be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return realEntity.type(); };
 
@@ -320,11 +320,11 @@ namespace Dune
      */
     template< int codim >
     typename Codim< codim >::EntityPointer
-    DUNE_DEPRECATED entity (int i) const
+    DUNE_DEPRECATED entity (deprecated_int i) const
     {
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template dune2generic< codim >( tid, i );
+      const int j = Numbering::template dune2generic< codim >( tid, i.value() );
       return realEntity.subEntity< codim >( j );
     }
 #endif
@@ -545,7 +545,7 @@ namespace Dune
     typedef ct ctype;
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::ReferenceElement.
+        be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
 
@@ -601,7 +601,7 @@ namespace Dune
     bool isRegular() const { return true; }
 
     /** \brief Return the name of the reference element. The type can
-        be used to access the Dune::ReferenceElement.
+        be used to access the Dune::GenericReferenceElement.
      */
     GeometryType type () const { return asImp().geometry().type(); };
 

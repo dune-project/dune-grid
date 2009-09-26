@@ -336,13 +336,13 @@ namespace Dune
        \}
 
      */
-    int numberInSelf () const DUNE_DEPRECATED
+    deprecated_int numberInSelf () const DUNE_DEPRECATED
     {
       const int number = indexInInside();
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( inside()->type() );
-      return Numbering::template generic2dune< 1 >( tid, number );
+      return deprecated_int(Numbering::template generic2dune< 1 >( tid, number ));
     }
 #endif
 
@@ -372,13 +372,13 @@ namespace Dune
        \}
 
      */
-    int numberInNeighbor () const
+    deprecated_int numberInNeighbor () const
     {
       const int number = indexInOutside();
 
       typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( outside()->type() );
-      return Numbering::template generic2dune< 1 >( tid, number );
+      return deprecated_int(Numbering::template generic2dune< 1 >( tid, number ));
     }
 #endif
 
