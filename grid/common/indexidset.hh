@@ -279,7 +279,6 @@ namespace Dune
        Here the method entity of Entity is used to get the subEntity and
        then the index of this Entity is returned.
      */
-    template<int cc>
     IndexType subIndex (const typename remove_const<GridImp>::type::
                         Traits::template Codim<0>::Entity& e, int i, int cc) const
     {
