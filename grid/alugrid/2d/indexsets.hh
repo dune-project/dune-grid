@@ -77,7 +77,7 @@ namespace Dune
 #ifdef DUNE_ENABLE_OLD_NUMBERING
     //! return subIndex of given entity
     template< int codim >
-    int DUNE_DEPRECATED subIndex ( const EntityCodim0Type &e, int i ) const
+    int DUNE_DEPRECATED subIndex ( const EntityCodim0Type &e, deprecated_int i ) const
     {
       typedef ALU2dGridEntity< 0, dim, const GridType > EntityImpl;
       const EntityImpl &entity = grid_.getRealImplementation( e );
