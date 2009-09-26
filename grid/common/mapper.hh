@@ -125,17 +125,30 @@ namespace Dune
     }
 
 #ifdef DUNE_ENABLE_OLD_NUMBERING
-    /** @brief Map subentity i of codim cc of a codim 0 entity to array index.
+    /**
+       \deprecated use map without template parameter
+       \brief please read the details
+
+       \warning \{
+       this method uses the numbering of the old referenceelements (see GridReferenceElements)
+       the output of map (without template parameter) will differ as it uses the numbering of the generic referenceelements
+       (see GridGenericReferenceElements).
+       \}
+
+       Map subentity of codim 0 entity to array index.
 
        \param e Reference to codim 0 entity.
        \param i Number of codim cc subentity of e, where cc is the template parameter of the function.
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<int cc>     // this is now the subentity's codim
-    int DUNE_DEPRECATED map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+    int DUNE_DEPRECATED map (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template map<cc>(e,i)));
-      return asImp().template map<cc>(e,i);
+      typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
+      const unsigned int tid = GenericGeometry::topologyId( e.type() );
+      const int j = Numbering::template dune2generic< cc >( tid, i.value() );
+      return = asImp().map(e,j,cc);
     }
 #endif
 
