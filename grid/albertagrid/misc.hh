@@ -16,7 +16,7 @@
 
 // should the coordinates be cached in a vector (required for ALBERTA 2.0)?
 #ifndef DUNE_ALBERTA_CACHE_COORDINATES
-#define DUNE_ALBERTA_CACHE_COORDINATES 1
+#define DUNE_ALBERTA_CACHE_COORDINATES 0
 #endif
 
 namespace Dune
@@ -490,7 +490,8 @@ namespace Dune
       {
         assert( (subEntity >= 0) && (subEntity < 3) );
         assert( (vertex >= 0) && (vertex < 2) );
-        static const int map[ 3 ][ 2 ] = { {1,2}, {2,0}, {0,1} };
+        //static const int map[ 3 ][ 2 ] = { {1,2}, {2,0}, {0,1} };
+        static const int map[ 3 ][ 2 ] = { {1,2}, {0,2}, {0,1} };
         return map[ subEntity ][ vertex ];
       }
     };
@@ -502,7 +503,8 @@ namespace Dune
       {
         assert( (subEntity >= 0) && (subEntity < 4) );
         assert( (vertex >= 0) && (vertex < 3) );
-        static const int map[ 4 ][ 3 ] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+        //static const int map[ 4 ][ 3 ] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+        static const int map[ 4 ][ 3 ] = { {1,2,3}, {0,2,3}, {0,1,3}, {0,1,2} };
         return map[ subEntity ][ vertex ];
       }
     };

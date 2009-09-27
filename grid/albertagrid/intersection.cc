@@ -467,7 +467,7 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridLeafIntersection< GridImp >::twistInSelf () const
+  AlbertaGridLeafIntersection< GridImp >::twistInInside () const
   {
     return elementInfo().template twist< 1 >( oppVertex_ );
   }
@@ -475,11 +475,11 @@ namespace Dune
 
   template< class GridImp >
   inline int
-  AlbertaGridLeafIntersection< GridImp >::twistInNeighbor () const
+  AlbertaGridLeafIntersection< GridImp >::twistInOutside () const
   {
     return elementInfo().twistInNeighbor( oppVertex_ );
   }
 
 }
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_INTERSECTION_CC

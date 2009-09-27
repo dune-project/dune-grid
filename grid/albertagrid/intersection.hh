@@ -157,8 +157,8 @@ namespace Dune
     int indexInOutside () const;
 
 
-    int twistInSelf () const;
-    int twistInNeighbor () const;
+    int twistInInside () const;
+    int twistInOutside () const;
 
   protected:
     using Base::oppVertex_;
