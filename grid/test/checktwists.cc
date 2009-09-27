@@ -33,8 +33,13 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
 
+#if NEW_SUBENTITY_NUMBERING
+  typedef Dune::GenericReferenceElement< ctype, dimension > ReferenceElement;
+  typedef Dune::GenericReferenceElements< ctype, dimension > ReferenceElements;
+#else
   typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
   typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
+#endif
 
   typedef FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
@@ -46,8 +51,13 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   int errors = 0;
 
+#if NEW_SUBENTITY_NUMBERING
+  const int tIn = mapTwist( intersection.twistInInside() );
+  const int tOut = mapTwist( intersection.twistInOutside() );
+#else
   const int tIn = mapTwist( intersection.twistInSelf() );
   const int tOut = mapTwist( intersection.twistInNeighbor() );
+#endif
 
   const EntityPointer ptrIn = intersection.inside();
   const EntityPointer ptrOut = intersection.outside();
@@ -56,11 +66,16 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const Geometry &geoIn = entityIn.geometry();
   const Geometry &geoOut = entityOut.geometry();
 
+#if NEW_SUBENTITY_NUMBERING
+  const int nIn = intersection.indexInInside();
+  const int nOut = intersection.indexInOutside();
+#else
   typedef GenericGeometry::MapNumberingProvider< dimension > Numbering;
   const unsigned int tidIn = GenericGeometry::topologyId( entityIn.type() );
   const int nIn = Numbering::template generic2dune< 1 >( tidIn, intersection.indexInInside() );
   const unsigned int tidOut = GenericGeometry::topologyId( entityOut.type() );
   const int nOut = Numbering::template generic2dune< 1 >( tidOut, intersection.indexInOutside() );
+#endif
 
   const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
   const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );
@@ -89,10 +104,14 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   for( int i = 0; i < numCorners; ++i )
   {
+#if NEW_SUBENTITY_NUMBERING
+    const int gi = i;
+#else
     const int tid = Dune::GenericGeometry::topologyId( lGeoIn.type() );
     const int gi = Dune::GenericGeometry::MapNumberingProvider< dimension-1 >::template dune2generic< dimension-1 >( tid, i );
     //assert( lGeoIn[ i ] == lGeoIn.corner( gi ) );
     //assert( lGeoOut[ i ] == lGeoOut.corner( gi ) );
+#endif
 
     const int iIn = applyTwist( inverseTwist( tIn, numCorners ), i, numCorners );
     LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
