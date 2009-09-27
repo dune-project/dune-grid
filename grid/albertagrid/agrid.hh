@@ -574,13 +574,13 @@ namespace Dune
     static int
     getTwistInInside ( const typename Traits::LeafIntersection &intersection )
     {
-      return getRealImplementation( intersection ).twistInSelf();
+      return getRealImplementation( intersection ).twistInInside();
     }
 
     static int
     getTwistInOutside ( const typename Traits::LeafIntersection &intersection )
     {
-      return getRealImplementation( intersection ).twistInNeighbor();
+      return getRealImplementation( intersection ).twistInOutside();
     }
 
     const AlbertaGridLeafIntersection< const This > &
