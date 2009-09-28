@@ -302,10 +302,10 @@ namespace Dune {
                          int (&num)[ncodim])
       {
         IndexArrayType & idx = index[codim];
-        for(int i=0; i<en.template count<codim>(); ++i)
+        for( int i = 0; i < en.template count< codim >(); ++i )
         {
-          const int id = hset.template subIndex<codim>(en,i);
-          if( idx[id] < 0)
+          const int id = hset.subIndex( en, i, codim );
+          if( idx[ id ] < 0 )
           {
             idx[id] = num[codim];
             ++num[codim];
@@ -606,10 +606,10 @@ namespace Dune {
                          int (&num)[ncodim])
       {
         IndexArrayType & idx = index[codim];
-        for(int i=0; i<en.template count<codim>(); ++i)
+        for( int i = 0; i < en.template count< codim >(); ++i )
         {
-          const int id = hset.template subIndex<codim>(en,i);
-          if( idx[id] < 0)
+          const int id = hset.subIndex( en, i, codim );
+          if( idx[ id ] < 0 )
           {
             idx[id] = num[codim];
             ++num[codim];
