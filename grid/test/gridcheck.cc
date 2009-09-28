@@ -919,7 +919,7 @@ struct CheckMark
       if(marked)
       {
         // now getMark should return the mark we just set, otherwise error
-        if( grid.getMark( *it ) != refCount[k] )
+        if( grid.getMark( *it ) < refCount[k] )
           DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
       }
     }
