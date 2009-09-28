@@ -81,6 +81,13 @@ namespace Dune {
   }
 
   inline const FieldMatrix<double, 3, 3>&
+  TrilinearMapping::jacobianTransposed(const coord_t& p)
+  {
+    linear(p[0], p[1], p[2]);
+    return Df;
+  }
+
+  inline const FieldMatrix<double, 3, 3>&
   TrilinearMapping::jacobianInverseTransposed(const coord_t& p)
   {
     // calculate inverse if not calculated or not affine
@@ -490,6 +497,22 @@ namespace Dune {
     return ;
   }
 
+  inline const BilinearSurfaceMapping:: matrix_t&
+  BilinearSurfaceMapping::jacobianTransposed(const coord2_t & local) const
+  {
+    map2worldlinear(local[0], local[1], 0.0);
+    // calculate transposed inverse
+    matrix_[0][0] = Df[0][0];
+    matrix_[0][1] = Df[1][0];
+
+    matrix_[1][0] = Df[0][1];
+    matrix_[1][1] = Df[1][1];
+
+    matrix_[2][0] = Df[0][2];
+    matrix_[2][1] = Df[1][2];
+
+    return matrix_;
+  }
   inline const BilinearSurfaceMapping:: inv_t&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
   {
@@ -636,11 +659,13 @@ namespace Dune {
   // the real constructor,
   // this can be called for FieldVectors
   // and double[3], we dont have to convert one type
-  template <>
+  template <int cdim, int mydim>
   template <class vector_t>
-  inline void LinearMapping<3, 1> ::
+  inline void LinearMapping<cdim, mydim> ::
   buildMapping  (const vector_t & p0, const vector_t & p1)
   {
+    assert( mydim == 1 );
+
     _matrix [0][0] = p1[0] - p0 [0] ;
     _matrix [0][1] = p1[1] - p0 [1] ;
     _matrix [0][2] = p1[2] - p0 [2] ;
@@ -804,11 +829,11 @@ namespace Dune {
 
     for(int i=0; i<cdim; ++i)
     {
-      // p1 - p0
-      tmpV[i] = _matrix[i][0];
+      // p1 - p0 (see buildMapping method)
+      tmpV[i] = _matrix[0][i];
 
       // p2 - p1 = (p2 - p0) - (p1 - p0)
-      tmpU[i] = _matrix[i][1] - _matrix[i][0];
+      tmpU[i] = _matrix[1][i] - _matrix[0][i];
     }
 
     coord_t globalCoord;

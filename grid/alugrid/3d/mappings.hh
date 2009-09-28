@@ -58,6 +58,7 @@ namespace Dune {
     ~TrilinearMapping () {}
     double det (const coord_t&) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
+    const mat_t& jacobianTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
     void map2world (const double , const double , const double ,
                     coord_t&) const ;
@@ -150,12 +151,16 @@ namespace Dune {
     typedef FieldMatrix<double,3,3> mat3_t;
 
     // type for inverse matrices
+    typedef FieldMatrix<double,2,3> matrix_t;
+
+    // type for inverse matrices
     typedef FieldMatrix<double,3,2> inv_t;
 
     double _b [4][3] ;
 
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
+    mutable matrix_t matrix_;
     mutable double DetDf;
 
     mutable coord3_t normal_;
@@ -179,6 +184,8 @@ namespace Dune {
 
     void inverse (const coord3_t&) const;
     const inv_t& jacobianInverseTransposed(const coord2_t&) const ;
+
+    const matrix_t& jacobianTransposed(const coord2_t&) const ;
 
     // calculates determinant of face mapping using the normal
     double det(const coord2_t&) const;

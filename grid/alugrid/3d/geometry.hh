@@ -66,20 +66,37 @@ namespace Dune
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
 
+      typedef LinearMapping<cdim, dim> MappingType;
+
       // for edges use LinearMapping<cdim, 1> here that has all features
       // implemented
 
       CoordinateMatrixType coord_;
+      MappingType liMap_;
+      bool builtMapping_;
 
     public:
-      GeometryImpl() : coord_() {}
-      GeometryImpl(const GeometryImpl& other) : coord_(other.coord_) {}
+      GeometryImpl() : coord_() , liMap_() , builtMapping_(false) {}
+      GeometryImpl(const GeometryImpl& other)
+        : coord_(other.coord_),
+          liMap_(other.liMap_),
+          builtMapping_(other.builtMapping_)
+      {}
 
       // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
         assert( i>=0 && i<corners_ );
         return coord_[i];
+      }
+
+      inline MappingType& mapping()
+      {
+        if( builtMapping_ ) return liMap_;
+
+        liMap_.buildMapping( coord_[0], coord_[1] );
+        builtMapping_ = true ;
+        return liMap_;
       }
 
       // update edge
@@ -90,7 +107,9 @@ namespace Dune
         assert( corners_ == 2 );
         copy( p0, coord_[0] );
         copy( p1, coord_[1] );
+        builtMapping_ = false;
       }
+
 
       // update vertex
       template <class CoordPtrType>
@@ -527,6 +546,9 @@ namespace Dune
     //! can only be called for dim=dimworld! (Trivially true, since there is no
     //! other specialization...)
     const FieldMatrix<alu3d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
+
+    //! jacobian transposed
+    const FieldMatrix<alu3d_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<alu3d_ctype, mydim>& local) const;
 
     //! returns true if mapping is affine
     inline bool affine () const;

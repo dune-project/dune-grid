@@ -96,6 +96,14 @@ namespace Dune {
 
   template<>
   inline alu3d_ctype
+  ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, tetra> >::
+  integrationElement (const FieldVector<alu3d_ctype, 0>& local) const
+  {
+    return 1.0;
+  }
+
+  template<>
+  inline alu3d_ctype
   ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
   volume() const
   {
@@ -135,7 +143,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   affine() const
   {
-    return (elementType == tetra) ? true : geoImpl_.mapping().affine();
+    return geoImpl_.mapping().affine();
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -144,6 +152,14 @@ namespace Dune {
   jacobianInverseTransposed (const FieldVector<alu3d_ctype, mydim>& local) const
   {
     return geoImpl_.mapping().jacobianInverseTransposed( local );
+  }
+
+  template< int mydim, int cdim, class GridImp>
+  inline const FieldMatrix<alu3d_ctype, mydim, cdim>&
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
+  jacobianTransposed (const FieldVector<alu3d_ctype, mydim>& local) const
+  {
+    return geoImpl_.mapping().jacobianTransposed( local );
   }
 
   template <int mydim, int cdim, class GridImp>
