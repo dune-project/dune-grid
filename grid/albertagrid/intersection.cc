@@ -63,7 +63,7 @@ namespace Dune
   template< class Grid >
   inline int AlbertaGridIntersectionBase< Grid >::indexInInside () const
   {
-    const int face = (dimension > 1 ? grid().alberta2dune( 1, oppVertex_ ) : 1-oppVertex_);
+    const int face = (dimension > 1 ? oppVertex_ : 1-oppVertex_);
     return grid().alberta2generic( 1, face );
   }
 
@@ -460,7 +460,7 @@ namespace Dune
   {
     const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
     const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
-    const int face = (dimension > 1 ? grid().alberta2dune( 1, oppVertex ) : 1-oppVertex);
+    const int face = (dimension > 1 ? oppVertex : 1-oppVertex);
     return grid().alberta2generic( 1, face );
   }
 
