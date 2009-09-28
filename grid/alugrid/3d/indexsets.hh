@@ -59,10 +59,6 @@ namespace Dune
   public:
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
 
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
-    using IndexSet<GridType, ALU3dGridHierarchicIndexSet>::subIndex;
-
     //! return hierarchic index of given entity
     template <class EntityType>
     int index (const EntityType & ep) const

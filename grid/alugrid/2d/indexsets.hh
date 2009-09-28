@@ -54,10 +54,6 @@ namespace Dune
     {}
 
   public:
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
-    using IndexSet<GridType, ALU2dGridHierarchicIndexSet>::subIndex;
-
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
 
     //! return hierarchic index of given entity
