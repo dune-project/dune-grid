@@ -11,6 +11,8 @@
 
 #include <dune/common/bartonnackmanifcheck.hh>
 
+#include <dune/grid/genericgeometry/conversion.hh>
+
 /** @file
  * @author Peter Bastian
  * @brief Provides classes with basic mappers which are used to attach data to a grid

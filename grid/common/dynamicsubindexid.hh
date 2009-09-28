@@ -4,6 +4,8 @@
 #define DUNE_DYNAMICCODIMSUBINDEXID_HH
 
 #include <dune/grid/genericgeometry/misc.hh>
+#include <dune/grid/genericgeometry/conversion.hh>
+#include <dune/common/typetraits.hh>
 
 namespace Dune
 {
