@@ -45,8 +45,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   class AlbertaGridHierarchicIndexSet
-    : public IndexSetDefaultImplementation
-      < AlbertaGrid< dim, dimworld >,
+    : public IndexSet < AlbertaGrid< dim, dimworld >,
           AlbertaGridHierarchicIndexSet< dim,dimworld > >
   {
     typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
@@ -80,6 +79,11 @@ namespace Dune
   public:
     typedef Alberta::IndexStack IndexStack;
 
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using IndexSet < AlbertaGrid< dim, dimworld >,
+        AlbertaGridHierarchicIndexSet< dim,dimworld > > :: subIndex;
+
     //! return true if entity is contained in set
     template< class Entity >
     bool contains ( const Entity & ) const
@@ -110,16 +114,6 @@ namespace Dune
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
       const int j = entityImp.grid().generic2alberta( codim, i );
-      return subIndex( entityImp.elementInfo().el(), codim, j );
-    }
-
-    //! return subIndex of given enitiy's sub entity
-    template< int codim >
-    int DUNE_DEPRECATED subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
-    {
-      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().dune2alberta( codim, i );
       return subIndex( entityImp.elementInfo().el(), codim, j );
     }
 
@@ -488,15 +482,6 @@ namespace Dune
       return subIndex( entityImp.elementInfo().el(), codim, j );
     }
 
-    template< int codim >
-    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
-    {
-      const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().dune2alberta( codim, i );
-      return subIndex( entityImp.elementInfo().el(), codim, j );
-    }
-
     int size ( GeometryType type ) const
     {
       return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
@@ -635,15 +620,6 @@ namespace Dune
     {
       assert( (codim >= 0) && (codim <= dimension) );
       const IdType index = hIndexSet_.index( e );
-      return (index << 2) | IdType( codim );
-    }
-
-    /** \copydoc IdSet::subId(const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity &e,int i) const */
-    template< int codim >
-    IdType subId ( const typename Grid::template Codim< 0 >::Entity &e, int i ) const
-    {
-      assert( (codim >= 0) && (codim <= dimension) );
-      const IdType index = hIndexSet_.template subIndex< codim >( e, i );
       return (index << 2) | IdType( codim );
     }
 
