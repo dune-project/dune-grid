@@ -49,8 +49,8 @@ namespace Dune
 
     //! import the base class implementation of map and contains (including the deprecated version)
     //! \todo remove in after next release
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
-    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
+    using Mapper< G, SingleCodimSingleGeomTypeMapper >::map;
+    using Mapper< G, SingleCodimSingleGeomTypeMapper >::contains;
 
     /** @brief Construct mapper from grid and one fo its index sets.
 

@@ -42,8 +42,8 @@ namespace Dune
 
     //! import the base class implementation of map and contains (including the deprecated version)
     //! \todo remove in after next release
-    using Mapper< typename GV::Grid, UniversalMapper >::map;
-    using Mapper< typename GV::Grid, UniversalMapper >::contains;
+    using Mapper< G, UniversalMapper >::map;
+    using Mapper< G, UniversalMapper >::contains;
 
     /** @brief Construct mapper from grid and one of its id sets
 
