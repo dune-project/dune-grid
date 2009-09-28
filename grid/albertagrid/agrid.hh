@@ -614,7 +614,7 @@ namespace Dune
 
   private:
     // map between ALBERTA and DUNE numbering
-    Alberta::NumberingMap< dimension > numberingMap_;
+    Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > numberingMap_;
     Alberta::NumberingMap< dimension, Alberta::Generic2AlbertaNumbering > genericNumberingMap_;
 
     DofNumbering dofNumbering_;

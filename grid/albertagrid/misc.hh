@@ -387,7 +387,7 @@ namespace Dune
     // NumberingMap
     // ------------
 
-    template< int dim, template< int, int > class Numbering = Dune2AlbertaNumbering >
+    template< int dim, template< int, int > class Numbering = Generic2AlbertaNumbering >
     class NumberingMap
     {
       typedef NumberingMap< dim, Numbering > This;

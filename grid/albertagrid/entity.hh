@@ -366,7 +366,7 @@ namespace Dune
     template< int codim >
     int twist ( int i )
     {
-      return elementInfo().template twist< codim >( grid_.dune2alberta( codim, i ) );
+      return elementInfo().template twist< codim >( grid_.generic2alberta( codim, i ) );
     }
 
   private:

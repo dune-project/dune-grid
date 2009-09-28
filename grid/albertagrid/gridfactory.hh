@@ -68,7 +68,7 @@ namespace Dune
       = Alberta::NumSubEntities< dimension, dimension >::value;
 
     typedef Alberta::MacroData< dimension > MacroData;
-    typedef Alberta::NumberingMap< dimension > NumberingMap;
+    typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
 
   public:
     //! are boundary ids supported by this factory?
