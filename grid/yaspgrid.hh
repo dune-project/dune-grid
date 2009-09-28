@@ -3050,6 +3050,8 @@ namespace Dune {
                           "YaspGrid only supports Entities with codim=dim and codim=0");
       YGLI g = MultiYGrid<dim,ctype>::begin(level);
       if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
+      if (pitype==Ghost_Partition)
+        return levelend <cd, pitype> (level);
       if (cd==0)   // the elements
       {
         if (pitype<=InteriorBorder_Partition)
@@ -3083,7 +3085,7 @@ namespace Dune {
       {
         if (pitype<=InteriorBorder_Partition)
           return YaspLevelIterator<cd,pitype,GridImp>(g,g.cell_interior().tsubend());
-        if (pitype<=All_Partition)
+        if (pitype<=All_Partition || pitype == Ghost_Partition)
           return YaspLevelIterator<cd,pitype,GridImp>(g,g.cell_overlap().tsubend());
       }
       if (cd==dim)   // the vertices
@@ -3094,7 +3096,7 @@ namespace Dune {
           return YaspLevelIterator<cd,pitype,GridImp>(g,g.vertex_interiorborder().tsubend());
         if (pitype==Overlap_Partition)
           return YaspLevelIterator<cd,pitype,GridImp>(g,g.vertex_overlap().tsubend());
-        if (pitype<=All_Partition)
+        if (pitype<=All_Partition || pitype == Ghost_Partition)
           return YaspLevelIterator<cd,pitype,GridImp>(g,g.vertex_overlapfront().tsubend());
       }
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
