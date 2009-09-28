@@ -63,7 +63,7 @@ namespace Dune {
     }
 
     // initialize flags
-    calcedDet_ = calcedInv_ = false;
+    calcedDet_ = calcedLinear_ = calcedInv_ = false;
 
     return ;
   }
@@ -76,14 +76,14 @@ namespace Dune {
         a [i][j] = map.a [i][j] ;
     // copy flags
     affine_ = map.affine_;
-    calcedDet_ = calcedInv_ = false;
+    calcedDet_ = calcedLinear_ = calcedInv_ = false;
     return ;
   }
 
   inline const FieldMatrix<double, 3, 3>&
   TrilinearMapping::jacobianTransposed(const coord_t& p)
   {
-    linear(p[0], p[1], p[2]);
+    linear( p );
     return Df;
   }
 
@@ -136,24 +136,30 @@ namespace Dune {
                                          const double y,
                                          const double z)
   {
-    const double yz = y * z ;
-    const double xz = x * z ;
-    const double xy = x * y ;
+    if( ! calcedLinear_ )
+    {
+      const double yz = y * z ;
+      const double xz = x * z ;
+      const double xy = x * y ;
 
-    // derivatives with respect to x
-    Df[0][0] = a[1][0] + y * a[4][0] + z * a[6][0] + yz * a[7][0] ;
-    Df[1][0] = a[1][1] + y * a[4][1] + z * a[6][1] + yz * a[7][1] ;
-    Df[2][0] = a[1][2] + y * a[4][2] + z * a[6][2] + yz * a[7][2] ;
+      // derivatives with respect to x
+      Df[0][0] = a[1][0] + y * a[4][0] + z * a[6][0] + yz * a[7][0] ;
+      Df[0][1] = a[1][1] + y * a[4][1] + z * a[6][1] + yz * a[7][1] ;
+      Df[0][2] = a[1][2] + y * a[4][2] + z * a[6][2] + yz * a[7][2] ;
 
-    // derivatives with respect to y
-    Df[0][1] = a[2][0] + x * a[4][0] + z * a[5][0] + xz * a[7][0] ;
-    Df[1][1] = a[2][1] + x * a[4][1] + z * a[5][1] + xz * a[7][1] ;
-    Df[2][1] = a[2][2] + x * a[4][2] + z * a[5][2] + xz * a[7][2] ;
+      // derivatives with respect to y
+      Df[1][0] = a[2][0] + x * a[4][0] + z * a[5][0] + xz * a[7][0] ;
+      Df[1][1] = a[2][1] + x * a[4][1] + z * a[5][1] + xz * a[7][1] ;
+      Df[1][2] = a[2][2] + x * a[4][2] + z * a[5][2] + xz * a[7][2] ;
 
-    // derivatives with respect to z
-    Df[0][2] = a[3][0] + y * a[5][0] + x * a[6][0] + xy * a[7][0] ;
-    Df[1][2] = a[3][1] + y * a[5][1] + x * a[6][1] + xy * a[7][1] ;
-    Df[2][2] = a[3][2] + y * a[5][2] + x * a[6][2] + xy * a[7][2] ;
+      // derivatives with respect to z
+      Df[2][0] = a[3][0] + y * a[5][0] + x * a[6][0] + xy * a[7][0] ;
+      Df[2][1] = a[3][1] + y * a[5][1] + x * a[6][1] + xy * a[7][1] ;
+      Df[2][2] = a[3][2] + y * a[5][2] + x * a[6][2] + xy * a[7][2] ;
+
+      // set calced det to affine (true if affine false otherwise)
+      calcedLinear_ = affine_ ;
+    }
   }
 
   inline double TrilinearMapping :: det(const coord_t& point )
@@ -192,15 +198,15 @@ namespace Dune {
     const double val = 1.0 / det(point) ;
 
     // calculate inverse^T
-    Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[1][2] * Df[2][1] ) * val ;
-    Dfi[1][0] = ( Df[0][2] * Df[2][1] - Df[0][1] * Df[2][2] ) * val ;
-    Dfi[2][0] = ( Df[0][1] * Df[1][2] - Df[0][2] * Df[1][1] ) * val ;
-    Dfi[0][1] = ( Df[1][2] * Df[2][0] - Df[1][0] * Df[2][2] ) * val ;
-    Dfi[1][1] = ( Df[0][0] * Df[2][2] - Df[0][2] * Df[2][0] ) * val ;
-    Dfi[2][1] = ( Df[0][2] * Df[1][0] - Df[0][0] * Df[1][2] ) * val ;
-    Dfi[0][2] = ( Df[1][0] * Df[2][1] - Df[1][1] * Df[2][0] ) * val ;
-    Dfi[1][2] = ( Df[0][1] * Df[2][0] - Df[0][0] * Df[2][1] ) * val ;
-    Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[0][1] * Df[1][0] ) * val ;
+    Dfi[0][0] = ( Df[1][1] * Df[2][2] - Df[2][1] * Df[1][2] ) * val ;
+    Dfi[1][0] = ( Df[2][0] * Df[1][2] - Df[1][0] * Df[2][2] ) * val ;
+    Dfi[2][0] = ( Df[1][0] * Df[2][1] - Df[2][0] * Df[1][1] ) * val ;
+    Dfi[0][1] = ( Df[2][1] * Df[0][2] - Df[0][1] * Df[2][2] ) * val ;
+    Dfi[1][1] = ( Df[0][0] * Df[2][2] - Df[2][0] * Df[0][2] ) * val ;
+    Dfi[2][1] = ( Df[2][0] * Df[0][1] - Df[0][0] * Df[2][1] ) * val ;
+    Dfi[0][2] = ( Df[0][1] * Df[1][2] - Df[1][1] * Df[0][2] ) * val ;
+    Dfi[1][2] = ( Df[1][0] * Df[0][2] - Df[0][0] * Df[1][2] ) * val ;
+    Dfi[2][2] = ( Df[0][0] * Df[1][1] - Df[1][0] * Df[0][1] ) * val ;
 
     // set calcedInv_ to affine (true if affine false otherwise)
     calcedInv_ = affine_;
@@ -468,6 +474,7 @@ namespace Dune {
   {
     // calculate normal
     normal(point[0], point[1], normal_);
+
     // return length
     return normal_.two_norm();
   }
@@ -500,16 +507,17 @@ namespace Dune {
   inline const BilinearSurfaceMapping:: matrix_t&
   BilinearSurfaceMapping::jacobianTransposed(const coord2_t & local) const
   {
-    map2worldlinear(local[0], local[1], 0.0);
+    map2worldlinear( local[0], local[1], 0.0 );
+
     // calculate transposed inverse
     matrix_[0][0] = Df[0][0];
-    matrix_[0][1] = Df[1][0];
-
     matrix_[1][0] = Df[0][1];
+
+    matrix_[0][1] = Df[1][0];
     matrix_[1][1] = Df[1][1];
 
-    matrix_[2][0] = Df[0][2];
-    matrix_[2][1] = Df[1][2];
+    matrix_[0][2] = Df[2][0];
+    matrix_[1][2] = Df[2][1];
 
     return matrix_;
   }

@@ -38,6 +38,7 @@ namespace Dune {
     double DetDf ;
 
     bool calcedDet_;
+    bool calcedLinear_;
     bool calcedInv_;
     bool affine_;
 
