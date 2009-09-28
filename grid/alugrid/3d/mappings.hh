@@ -169,6 +169,7 @@ namespace Dune {
 
     mutable bool _calcedInv;
     mutable bool _calcedTransposed;
+    mutable bool _calcedMatrix;
 
   public:
     //! Constructor creating empty mapping with double , i.e. zero

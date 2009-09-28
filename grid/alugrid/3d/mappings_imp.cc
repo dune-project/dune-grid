@@ -396,8 +396,7 @@ namespace Dune {
   {
     BaseType :: buildMapping( _p0, _p1, _p2, _p3, _b );
     // initialize flags
-    _calcedInv = _calcedTransposed = false ;
-
+    _calcedInv = _calcedTransposed = _calcedMatrix = false ;
     return ;
   }
 
@@ -413,7 +412,7 @@ namespace Dune {
     }
 
     // initialize flags
-    _calcedInv = _calcedTransposed = false ;
+    _calcedInv = _calcedTransposed = _calcedMatrix = false ;
     return ;
   }
 
@@ -454,19 +453,42 @@ namespace Dune {
   {
     normal(x,y,normal_);
 
-    Df[0][0] = _b [1][0] + y * _b [3][0]+ z*_n[1][0] ;
-    Df[1][0] = _b [1][1] + y * _b [3][1]+ z*_n[1][1] ;
-    Df[2][0] = _b [1][2] + y * _b [3][2]+ z*_n[1][2] ;
+    Df[0][0] = _b [1][0] + y * _b [3][0]+ z * _n[1][0] ;
+    Df[1][0] = _b [1][1] + y * _b [3][1]+ z * _n[1][1] ;
+    Df[2][0] = _b [1][2] + y * _b [3][2]+ z * _n[1][2] ;
 
-    Df[0][1] = _b [2][0] + x * _b [3][0]+ z*_n[2][0] ;
-    Df[1][1] = _b [2][1] + x * _b [3][1]+ z*_n[2][1] ;
-    Df[2][1] = _b [2][2] + x * _b [3][2]+ z*_n[2][2] ;
+    Df[0][1] = _b [2][0] + x * _b [3][0]+ z * _n[2][0] ;
+    Df[1][1] = _b [2][1] + x * _b [3][1]+ z * _n[2][1] ;
+    Df[2][1] = _b [2][2] + x * _b [3][2]+ z * _n[2][2] ;
 
     Df[0][2] = normal_[0];
     Df[1][2] = normal_[1];
     Df[2][2] = normal_[2];
 
     return ;
+  }
+
+  inline const BilinearSurfaceMapping:: matrix_t&
+  BilinearSurfaceMapping::jacobianTransposed(const coord2_t & local) const
+  {
+    if( ! _calcedMatrix )
+    {
+      const double x = local[0];
+      const double y = local[1];
+
+      matrix_[0][0] = _b [1][0] + y * _b [3][0] ;
+      matrix_[0][1] = _b [1][1] + y * _b [3][1] ;
+      matrix_[0][2] = _b [1][2] + y * _b [3][2] ;
+
+      matrix_[1][0] = _b [2][0] + x * _b [3][0] ;
+      matrix_[1][1] = _b [2][1] + x * _b [3][1] ;
+      matrix_[1][2] = _b [2][2] + x * _b [3][2] ;
+
+      // only true for affine mappings
+      _calcedMatrix = _affine ;
+    }
+
+    return matrix_;
   }
 
   // calculates determinant of face mapping
@@ -502,24 +524,6 @@ namespace Dune {
     // only true for affine mappings
     _calcedInv = _affine ;
     return ;
-  }
-
-  inline const BilinearSurfaceMapping:: matrix_t&
-  BilinearSurfaceMapping::jacobianTransposed(const coord2_t & local) const
-  {
-    map2worldlinear( local[0], local[1], 0.0 );
-
-    // calculate transposed inverse
-    matrix_[0][0] = Df[0][0];
-    matrix_[1][0] = Df[0][1];
-
-    matrix_[0][1] = Df[1][0];
-    matrix_[1][1] = Df[1][1];
-
-    matrix_[0][2] = Df[2][0];
-    matrix_[1][2] = Df[2][1];
-
-    return matrix_;
   }
   inline const BilinearSurfaceMapping:: inv_t&
   BilinearSurfaceMapping::jacobianInverseTransposed(const coord2_t & local) const
