@@ -245,7 +245,7 @@ namespace Dune {
     buildMapping(p,p,p,p);
   }
 
-  // the real constructor, this can be called fro FieldVectors
+  // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
   inline void SurfaceNormalCalculator ::
@@ -256,7 +256,7 @@ namespace Dune {
     buildMapping( _p0, _p1, _p2, _p3, b );
   }
 
-  // the real constructor, this can be called fro FieldVectors
+  // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
   inline void SurfaceNormalCalculator ::
@@ -374,7 +374,7 @@ namespace Dune {
     buildMapping(x0,x1,x2,x3);
   }
 
-  // the real constructor, this can be called fro FieldVectors
+  // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <class vector_t>
   inline void BilinearSurfaceMapping ::
@@ -579,52 +579,25 @@ namespace Dune {
       , _calcedDet( m._calcedDet )
   {}
 
-  // the real constructor, this can be called fro FieldVectors
+  // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
-  template <int cdim, int mydim>
+  template <>
   template <class vector_t>
-  inline void LinearMapping<cdim, mydim> ::
+  inline void LinearMapping<3, 3> ::
   buildMapping  (const vector_t & p0, const vector_t & p1,
                  const vector_t & p2, const vector_t & p3 )
   {
-    assert( mydim == 3 );
     _matrix [0][0] = p1[0] - p0 [0] ;
-    _matrix [1][0] = p1[1] - p0 [1] ;
-    _matrix [2][0] = p1[2] - p0 [2] ;
+    _matrix [0][1] = p1[1] - p0 [1] ;
+    _matrix [0][2] = p1[2] - p0 [2] ;
 
-    _matrix [0][1] = p2[0] - p0 [0] ;
+    _matrix [1][0] = p2[0] - p0 [0] ;
     _matrix [1][1] = p2[1] - p0 [1] ;
-    _matrix [2][1] = p2[2] - p0 [2] ;
+    _matrix [1][2] = p2[2] - p0 [2] ;
 
-    _matrix [0][2] = p3[0] - p0 [0] ;
-    _matrix [1][2] = p3[1] - p0 [1] ;
+    _matrix [2][0] = p3[0] - p0 [0] ;
+    _matrix [2][1] = p3[1] - p0 [1] ;
     _matrix [2][2] = p3[2] - p0 [2] ;
-
-    _p0[0] = p0[0];
-    _p0[1] = p0[1];
-    _p0[2] = p0[2];
-
-    // initialize flags
-    _calcedDet = _calcedInv = false ;
-    return ;
-  }
-
-  // the real constructor, this can be called fro FieldVectors
-  // and double[3], we dont have to convert one type
-  template <int cdim, int mydim>
-  template <class vector_t>
-  inline void LinearMapping<cdim, mydim> ::
-  buildMapping  (const vector_t & p0, const vector_t & p1,
-                 const vector_t & p2)
-  {
-    assert( mydim == 2 );
-    _matrix [0][0] = p1[0] - p0 [0] ;
-    _matrix [1][0] = p1[1] - p0 [1] ;
-    _matrix [2][0] = p1[2] - p0 [2] ;
-
-    _matrix [0][1] = p2[0] - p0 [0] ;
-    _matrix [1][1] = p2[1] - p0 [1] ;
-    _matrix [2][1] = p2[2] - p0 [2] ;
 
     _p0[0] = p0[0];
     _p0[1] = p0[1];
@@ -639,36 +612,17 @@ namespace Dune {
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
-  inline void LinearMapping<2, 2> ::
-  buildMapping  (const vector_t & p0,
-                 const vector_t & p1,
+  inline void LinearMapping<3, 2> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1,
                  const vector_t & p2)
   {
     _matrix [0][0] = p1[0] - p0 [0] ;
-    _matrix [1][0] = p1[1] - p0 [1] ;
+    _matrix [0][1] = p1[1] - p0 [1] ;
+    _matrix [0][2] = p1[2] - p0 [2] ;
 
-    _matrix [0][1] = p2[0] - p0 [0] ;
+    _matrix [1][0] = p2[0] - p0 [0] ;
     _matrix [1][1] = p2[1] - p0 [1] ;
-
-    _p0[0] = p0[0];
-    _p0[1] = p0[1];
-
-    // initialize flags
-    _calcedDet = _calcedInv = false ;
-    return ;
-  }
-
-  // the real constructor, this can be called fro FieldVectors
-  // and double[3], we dont have to convert one type
-  template <int cdim, int mydim>
-  template <class vector_t>
-  inline void LinearMapping<cdim, mydim> ::
-  buildMapping  (const vector_t & p0, const vector_t & p1)
-  {
-    assert( mydim == 2 );
-    _matrix [0][0] = p1[0] - p0 [0] ;
-    _matrix [1][0] = p1[1] - p0 [1] ;
-    _matrix [2][0] = p1[2] - p0 [2] ;
+    _matrix [1][2] = p2[2] - p0 [2] ;
 
     _p0[0] = p0[0];
     _p0[1] = p0[1];
@@ -679,7 +633,52 @@ namespace Dune {
     return ;
   }
 
-  // the real constructor, this can be called fro FieldVectors
+  // the real constructor,
+  // this can be called for FieldVectors
+  // and double[3], we dont have to convert one type
+  template <>
+  template <class vector_t>
+  inline void LinearMapping<3, 1> ::
+  buildMapping  (const vector_t & p0, const vector_t & p1)
+  {
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [0][1] = p1[1] - p0 [1] ;
+    _matrix [0][2] = p1[2] - p0 [2] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+    _p0[2] = p0[2];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+
+  // the real constructor, this can be called for FieldVectors
+  // and double[3], we dont have to convert one type
+  template <>
+  template <class vector_t>
+  inline void LinearMapping<2, 2> ::
+  buildMapping  (const vector_t & p0,
+                 const vector_t & p1,
+                 const vector_t & p2)
+  {
+    _matrix [0][0] = p1[0] - p0 [0] ;
+    _matrix [0][1] = p1[1] - p0 [1] ;
+
+    _matrix [1][0] = p2[0] - p0 [0] ;
+    _matrix [1][1] = p2[1] - p0 [1] ;
+
+    _p0[0] = p0[0];
+    _p0[1] = p0[1];
+
+    // initialize flags
+    _calcedDet = _calcedInv = false ;
+    return ;
+  }
+
+  // the real constructor, this can be called for FieldVectors
   // and double[3], we dont have to convert one type
   template <>
   template <class vector_t>
@@ -687,13 +686,17 @@ namespace Dune {
   buildMapping  (const vector_t & p0, const vector_t & p1)
   {
     _matrix [0][0] = p1[0] - p0 [0] ;
-    _matrix [1][0] = p1[1] - p0 [1] ;
+    _matrix [0][1] = p1[1] - p0 [1] ;
 
     _p0[0] = p0[0];
     _p0[1] = p0[1];
 
+    _det = std::sqrt( (_matrix [0][0] * _matrix [0][0]) +
+                      (_matrix [0][1] * _matrix [0][1]) );
+
     // initialize flags
-    _calcedDet = _calcedInv = false ;
+    _calcedDet = true;
+    _calcedInv = false ;
     return ;
   }
 
@@ -705,8 +708,8 @@ namespace Dune {
     // initialize
     global = _p0;
 
-    // multiply with
-    _matrix.umv(local, global);
+    // multiply with (transposed)
+    _matrix.umtv(local, global);
   }
 
   // global --> local
@@ -714,16 +717,13 @@ namespace Dune {
   inline void LinearMapping<cdim, mydim> ::
   world2map (const coord_t& global, localcoord_t& local) const
   {
-    // calculate inverse if necessary
-    if( ! _calcedInv ) inverse( local );
-
     // initialize
     coord_t globalCoord( global );
     // substract p0
     globalCoord -= _p0;
 
-    // multiply with transposed because _invTransposed is already transposed
-    _invTransposed.mtv(globalCoord, local);
+    // multiply with jacobian inverse transposed
+    jacobianInverseTransposed( local ).mtv(globalCoord, local);
   }
 
 
@@ -733,7 +733,7 @@ namespace Dune {
   inverse(const localcoord_t& local) const
   {
     // invert transposed matrix and return determinant
-    _det = std::abs( FMatrixHelp::invertMatrix_retTransposed(_matrix , _invTransposed ) );
+    _det = std::abs( FMatrixHelp::invertMatrix(_matrix , _invTransposed ) );
     // set flag
     _calcedDet = _calcedInv = true ;
   }
@@ -767,16 +767,27 @@ namespace Dune {
   inverseCodimOne(const localcoord_t& local) const
   {
     // use least squares approach
-    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A_;
+    FieldMatrix<alu3d_ctype, mydim, mydim> AT_A;
+
+    /*
+       inv_t matrix;
+       for( int i=0; i<cdim; ++i)
+       for( int j=0; j<mydim; ++j)
+       {
+        matrix[i][j] = _matrix[j][i];
+       }
+     */
 
     // calc ret = A^T*A
-    FMatrixHelp::multTransposedMatrix(_matrix , AT_A_);
+    //FMatrixHelp::multTransposedMatrix( matrix, AT_A);
+    multTransposedMatrix(_matrix, AT_A );
 
     // calc Jinv_ = A (A^T*A)^-1
     FieldMatrix< alu3d_ctype, mydim, mydim> inv_AT_A;
 
-    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
-    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
+    FMatrixHelp :: invertMatrix( AT_A, inv_AT_A );
+    //FMatrixHelp :: multMatrix( matrix, inv_AT_A, _invTransposed );
+    multMatrix( _matrix, inv_AT_A, _invTransposed );
 
     // set flag
     _calcedInv = true ;
@@ -816,6 +827,45 @@ namespace Dune {
     _calcedDet = true ;
   }
 
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  multTransposedMatrix(const matrix_t& matrix,
+                       FieldMatrix<alu3d_ctype, mydim, mydim>& result) const
+  {
+    typedef typename matrix_t::size_type size_type;
+    for(size_type i=0; i<mydim; ++i)
+    {
+      for(size_type j=0; j<mydim; ++j)
+      {
+        result[i][j] = 0.0;
+        for(size_type k=0; k<cdim; ++k)
+        {
+          result[i][j] += matrix[i][k] * matrix[j][k];
+        }
+      }
+    }
+  }
+
+  template <int cdim, int mydim>
+  inline void LinearMapping<cdim, mydim> ::
+  multMatrix ( const matrix_t &A,
+               const FieldMatrix< alu3d_ctype, mydim, mydim > &B,
+               inv_t& ret ) const
+  {
+    //! calculates ret = A * B
+    typedef typename matrix_t :: size_type size_type;
+
+    for( size_type i = 0; i < cdim; ++i )
+    {
+      for( size_type j = 0; j < mydim; ++j )
+      {
+        ret[ i ][ j ] = 0 ;
+        for( size_type k = 0; k < mydim; ++k )
+          ret[ i ][ j ] += A[ k ][ i ] * B[ k ][ j ];
+      }
+    }
+  }
+
   // edge mapping
   template <>
   inline void LinearMapping<3, 1> ::
@@ -824,12 +874,12 @@ namespace Dune {
     FieldMatrix<alu3d_ctype, 1, 1> AT_A_;
 
     // calc ret = A^T*A
-    FMatrixHelp::multTransposedMatrix(_matrix, AT_A_ );
+    multTransposedMatrix(_matrix, AT_A_ );
 
     // calc Jinv_ = A (A^T*A)^-1
     FieldMatrix< alu3d_ctype, 1, 1 > inv_AT_A;
     FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
-    FMatrixHelp :: multMatrix( _matrix, inv_AT_A, _invTransposed );
+    multMatrix( _matrix, inv_AT_A, _invTransposed );
 
     // set flag
     _calcedInv = true ;
@@ -842,8 +892,8 @@ namespace Dune {
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
-                      (_matrix[1][0] * _matrix[1][0]) +
-                      (_matrix[2][0] * _matrix[2][0]) );
+                      (_matrix[0][1] * _matrix[0][1]) +
+                      (_matrix[0][2] * _matrix[0][2]) );
 
     // set flag
     _calcedDet = true ;
@@ -855,7 +905,7 @@ namespace Dune {
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
-                      (_matrix[1][0] * _matrix[1][0]) );
+                      (_matrix[0][1] * _matrix[0][1]) );
 
     // set flag
     _calcedDet = true ;
@@ -875,6 +925,14 @@ namespace Dune {
   }
 
   template <int cdim, int mydim>
+  inline const typename LinearMapping<cdim, mydim> :: matrix_t&
+  LinearMapping<cdim, mydim> ::
+  jacobianTransposed(const localcoord_t & local) const
+  {
+    return _matrix;
+  }
+
+  template <int cdim, int mydim>
   inline const typename LinearMapping<cdim, mydim> :: inv_t&
   LinearMapping<cdim, mydim> ::
   jacobianInverseTransposed(const localcoord_t & local) const
@@ -885,6 +943,22 @@ namespace Dune {
     // calculate
     inverse ( local ) ;
 
+    return _invTransposed;
+  }
+
+  template <>
+  inline const LinearMapping<3, 0> :: inv_t&
+  LinearMapping<3, 0> ::
+  jacobianInverseTransposed(const localcoord_t & local) const
+  {
+    return _invTransposed;
+  }
+
+  template <>
+  inline const LinearMapping<2, 0> :: inv_t&
+  LinearMapping<2, 0> ::
+  jacobianInverseTransposed(const localcoord_t & local) const
+  {
     return _invTransposed;
   }
 

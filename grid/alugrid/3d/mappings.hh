@@ -213,10 +213,11 @@ namespace Dune {
     typedef FieldVector<alu3d_ctype, cdim>   coord_t;
     typedef FieldVector<alu3d_ctype, mydim>  localcoord_t;
 
+    typedef FieldMatrix<alu3d_ctype, mydim, cdim> matrix_t ;
     typedef FieldMatrix<alu3d_ctype, cdim, mydim> inv_t ;
 
-    inv_t _matrix;                //!< transformation matrix (transposed)
-    mutable inv_t _invTransposed; //!< storage for inverse of jacobian
+    matrix_t _matrix;             //!< transformation matrix (transposed)
+    mutable inv_t _invTransposed; //!< storage for inverse of jacobian (transposed)
     coord_t _p0;                  //! P[0]
 
     //! stores the determinant of the inverse
@@ -237,6 +238,9 @@ namespace Dune {
 
     // returns true if mapping is affine (which is always true)
     inline bool affine () const { return true ; }
+
+    // return reference to transposed jacobian
+    const matrix_t& jacobianTransposed(const localcoord_t&) const ;
 
     // return reference to transposed jacobian inverse
     const inv_t& jacobianInverseTransposed(const localcoord_t&) const ;
@@ -260,6 +264,13 @@ namespace Dune {
 
     // calculate determinant
     void calculateDeterminant (const localcoord_t&) const;
+
+    void multTransposedMatrix(const matrix_t& matrix,
+                              FieldMatrix<alu3d_ctype, mydim, mydim>& result) const;
+
+    void multMatrix ( const matrix_t& A,
+                      const FieldMatrix< alu3d_ctype, mydim, mydim> &B,
+                      inv_t& ret ) const ;
 
   public:
     // builds _b and _n, called from the constructors
