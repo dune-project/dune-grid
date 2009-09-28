@@ -27,7 +27,7 @@ vtksequencetest_LDADD = $(LOCAL_LIBS)
 gnuplottest_SOURCES = gnuplottest.cc
 gnuplottest_LDADD = $(LOCAL_LIBS)
 
-subsamplingvtktest_SOURCES = subsamplingvtktest.cc
+subsamplingvtktest_SOURCES = subsamplingvtktest.cc test-linking.cc
 subsamplingvtktest_LDADD = $(LOCAL_LIBS)
 
 amirameshtest_SOURCES = amirameshtest.cc
