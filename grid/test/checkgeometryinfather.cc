@@ -5,6 +5,8 @@
 
 #include <dune/common/typetraits.hh>
 
+#include "checkgeometry.cc"
+
 /** \file
     \brief A test for the Method Geometry::geometryInFather()
  */
@@ -45,11 +47,17 @@ void checkGeometryInFather(const GridType& grid)
 
     for (; eIt!=eEndIt; ++eIt)
     {
+      // check geometry
+      checkGeometry( eIt->geometry() );
+
       // check the father method
       if( eIt->level () > 0 )
       {
         typedef typename GridType::template Codim<0>::EntityPointer EntityPointer;
         EntityPointer father = eIt->father();
+
+        // check geometry
+        checkGeometry( father->geometry() );
 
         while ( father->level() > 0 )
         {
@@ -62,6 +70,9 @@ void checkGeometryInFather(const GridType& grid)
           const HierarchicIterator end = grandPa->hend( mxl );
           for( HierarchicIterator sons = grandPa->hbegin( mxl ); sons != end; ++sons )
           {
+            // check geometry
+            checkGeometry( sons->geometry() );
+
             if( father != sons )
             {
               if( idSet.id( *father ) == idSet.id( *sons ) )
