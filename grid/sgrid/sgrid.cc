@@ -775,6 +775,8 @@ namespace Dune {
   inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
   SGrid<dim,dimworld,ctype>::lbegin (int level) const
   {
+    if (pitype == Ghost_Partition)
+      return lend<cd, pitype> (level);
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,0);
   }
 
@@ -789,6 +791,8 @@ namespace Dune {
   inline typename SGrid<dim,dimworld,ctype>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
   SGrid<dim,dimworld,ctype>::leafbegin () const
   {
+    if (pitype == Ghost_Partition)
+      return leafend<cd, pitype> ();
     return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxLevel(),0);
   }
 
