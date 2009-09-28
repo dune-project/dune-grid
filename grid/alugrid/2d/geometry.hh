@@ -55,14 +55,19 @@ namespace Dune
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners_ , cdim>  CoordinateMatrixType;
 
+      typedef LinearMapping<cdim, 0>   MappingType;
       // for edges use LinearMapping<cdim, 1> here that has all features
       // implemented
 
+      // coordinates
       CoordinateMatrixType coord_;
+      // fake mapping
+      MappingType liMap_;
 
     public:
-      GeometryImpl() : coord_() {}
-      GeometryImpl(const GeometryImpl& other) : coord_(other.coord_) {}
+      GeometryImpl() : coord_() , liMap_() {}
+      GeometryImpl(const GeometryImpl& other)
+        : coord_(other.coord_), liMap_( other.liMap_ ) {}
 
       // return true since we have affine mapping
       bool affine() const { return true; }
@@ -73,6 +78,8 @@ namespace Dune
         assert( i>=0 && i<corners_ );
         return coord_[i];
       }
+
+      const MappingType& mapping() const { return liMap_; }
 
       // update vertex
       template <class CoordPtrType>
@@ -322,8 +329,11 @@ namespace Dune
     //! return true if geometry has affine mapping
     bool affine() const { return geoImpl_.affine(); }
 
-    //! can only be called for dim=dimworld!
+    //! jacobian inverse transposed
     const FieldMatrix<alu2d_ctype,cdim,mydim>& jacobianInverseTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
+
+    //! jacobian transposed
+    const FieldMatrix<alu2d_ctype,mydim,cdim>& jacobianTransposed (const FieldVector<alu2d_ctype, mydim>& local) const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public

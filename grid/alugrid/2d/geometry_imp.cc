@@ -111,14 +111,28 @@ namespace Dune {
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>::
   integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const
   {
-    assert( std::abs( geoImpl_.mapping().det( local ) - det_ ) < 1e-12 );
+    assert( std::abs( geoImpl_.mapping().det( local ) - det_ ) < 1e-8 );
     return det_;
+  }
+
+  template <>
+  inline alu2d_ctype ALU2dGridGeometry<0,2,const ALU2dGrid<2,2> >::
+  integrationElement (const FieldVector<alu2d_ctype, 0>& local) const
+  {
+    return 1.0;
   }
 
   template <int mydim, int cdim, class GridImp>
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>:: volume () const
   {
     return (mydim == 2) ? 0.5 * det_ : det_;
+  }
+
+  template <int mydim, int cdim, class GridImp>
+  inline const FieldMatrix<alu2d_ctype,mydim,cdim>& ALU2dGridGeometry<mydim,cdim,GridImp>::
+  jacobianTransposed (const FieldVector<alu2d_ctype, mydim>& local) const
+  {
+    return geoImpl_.mapping().jacobianTransposed( local );
   }
 
   template <int mydim, int cdim, class GridImp>
