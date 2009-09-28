@@ -537,6 +537,8 @@ struct subIndexCheck
       {
         int id_e = levelIndexSet.index( e );
         int id_e_i = levelIndexSet.index( *ep );
+        int subid_e_i_old = levelIndexSet.template subIndex<cd>( e, i);
+        subid_e_i_old = 0;
         int subid_e_i = levelIndexSet.subIndex( e, i, cd );
         std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( i ) ) ) "
                   << "!= levelIndexSet.subIndex( e, i, cd )  "
