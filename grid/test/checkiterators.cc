@@ -14,7 +14,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking iterators for higher codimension..." << std::endl;
-    ForLoop< CheckCodim, 1, GridView::dimension >::apply( gridView );
+    Dune::ForLoop< CheckCodim, 1, GridView::dimension >::apply( gridView );
   }
 };
 
