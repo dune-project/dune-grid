@@ -279,7 +279,10 @@ void checkIntersectionIterator(const GridViewType& view,
       typename LocalGeometry::GlobalCoordinate refNormal = refElement.template mapping< 0 >( 0 ).normal( indexInInside, xInside );
       typename IntersectionGeometry::GlobalCoordinate refIntNormal;
       geoInside.jacobianInverseTransposed( xInside ).mv( refNormal, refIntNormal );
-      refIntNormal *= geoInside.integrationElement( xInside );
+      // note: refElement.template mapping< 1 >( indexInInside ) is affine,
+      //       hence we may use any point to obtain the integrationElement
+      refIntNormal *= geoInside.integrationElement( xInside ) * intersectionSelfLocal.integrationElement( pt )
+                      / refElement.template mapping< 1 >( indexInInside ).integrationElement( pt );
 
       // Check outer normal
       // const typename IntersectionGeometry::GlobalCoordinate normal = iIt->outerNormal( pt );
@@ -327,6 +330,10 @@ void checkIntersectionIterator(const GridViewType& view,
       {
         std::cerr << "Error: Wrong integration outer normal (" << intNormal
                   << ", should be " << refIntNormal << ")." << std::endl;
+        std::cerr << "       Intersection: " << intersectionGlobal.corner( 0 );
+        for( int c = 1; c < intersectionGlobal.corners(); ++c )
+          std::cerr << ", " << intersectionGlobal.corner( c );
+        std::cerr << "." << std::endl;
         assert( false );
       }
 
