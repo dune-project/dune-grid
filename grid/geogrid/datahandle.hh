@@ -32,6 +32,9 @@ namespace Dune
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
 
+    template< class HostEntity >
+    class EntityProxy;
+
     const Grid &grid_;
     WrappedCommDataHandle &wrappedHandle_;
 
@@ -58,54 +61,91 @@ namespace Dune
     template< class HostEntity >
     size_t size ( const HostEntity &hostEntity ) const
     {
-      const int codimension = HostEntity :: codimension;
-      typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
-
-      EntityWrapper *entity = EntityStorage :: alloc();
-      entity->initialize( grid_, hostEntity );
-      const size_t size = wrappedHandle_.size( (const Entity &)(*entity) );
-      EntityStorage :: free( entity );
-      return size;
+      EntityProxy< HostEntity > proxy( grid_, hostEntity );
+      return wrappedHandle_.size( *proxy );
     }
 
     template< class MessageBuffer, class HostEntity >
     void gather ( MessageBuffer &buffer, const HostEntity &hostEntity ) const
     {
-      const int codimension = HostEntity :: codimension;
-      typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
-
-      EntityWrapper *entity = EntityStorage :: alloc();
-      entity->initialize( grid_, hostEntity );
-      wrappedHandle_.gather( buffer, (const Entity &)(*entity) );
-      EntityStorage :: free( entity );
+      EntityProxy< HostEntity > proxy( grid_, hostEntity );
+      wrappedHandle_.gather( buffer, *proxy );
     }
 
     template< class MessageBuffer, class HostEntity >
     void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
     {
-      const int codimension = HostEntity :: codimension;
-      typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
-
-      EntityWrapper *entity = EntityStorage :: alloc();
-      entity->initialize( grid_, hostEntity );
-      wrappedHandle_.scatter( buffer, (const Entity &)(*entity), size );
-      EntityStorage :: free( entity );
+      EntityProxy< HostEntity > proxy( grid_, hostEntity );
+      wrappedHandle_.scatter( buffer, *proxy, size );
     }
 
   private:
     void assertHostEntity ( int dim, int codim ) const
     {
       if( !Capabilities :: CodimCache< Grid > :: hasHostEntity( codim ) )
+        noEntity( codim );
+    }
+
+    static void noEntity ( int codim )
+    {
+      DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
+                  << codim << "." );
+    }
+  };
+
+
+
+  template< class Grid, class WrappedCommDataHandle >
+  template< class HostEntity >
+  class GeometryGridCommDataHandle< Grid, WrappedCommDataHandle > :: EntityProxy
+  {
+    static const int codimension = HostEntity :: codimension;
+    typedef typename Traits :: template Codim< codimension > :: Entity Entity;
+    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+
+    template< bool >
+    struct InitializeReal
+    {
+      static void
+      apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
       {
-        DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
-                    << codim << "." );
+        entity.initialize( grid, hostEntity );
       }
+    };
+
+    template< bool >
+    struct InitializeFake
+    {
+      static void
+      apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+      {
+        noEntity( codimension );
+      }
+    };
+
+    typedef GenericGeometry :: ProtectedIf
+    < Capabilities :: hasHostEntity< Grid, codimension > :: v,
+        InitializeReal, InitializeFake >
+    Initialize;
+
+    EntityWrapper *entity_;
+
+  public:
+    EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
+      : entity_( EntityStorage :: alloc() )
+    {
+      Initialize :: apply( *entity_, grid, hostEntity );
+    }
+
+    ~EntityProxy ()
+    {
+      EntityStorage :: free( entity_ );
+    }
+
+    const Entity &operator* () const
+    {
+      return *entity_;
     }
   };
 
