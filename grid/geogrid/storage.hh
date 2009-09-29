@@ -6,64 +6,69 @@
 namespace Dune
 {
 
-  template< class Object >
-  class GeometryGridStorage
+  namespace GeoGrid
   {
-    struct MemObject
+
+    template< class Object >
+    class Storage
     {
-      Object object;
-      MemObject *next;
+      struct MemObject
+      {
+        Object object;
+        MemObject *next;
+      };
+
+      MemObject *top_;
+
+      Storage ()
+        : top_( 0 )
+      {}
+
+      Storage ( const Storage & );
+
+      ~Storage ()
+      {
+        while( top_ != 0 )
+        {
+          MemObject *ptr = top_;
+          top_ = top_->next;
+          delete ptr;
+        }
+      }
+
+      static Storage &instance ()
+      {
+        static Storage singleton;
+        return singleton;
+      }
+
+    public:
+      static Object *alloc ()
+      {
+        MemObject *&top = instance().top_;
+
+        MemObject *ptr = top;
+        if( ptr != 0 )
+          top = ptr->next;
+        else
+          ptr = new MemObject;
+        return &(ptr->object);
+      }
+
+      static void free ( Object *object )
+      {
+        MemObject *&top = instance().top_;
+
+        MemObject *ptr = reinterpret_cast< MemObject * >( object );
+        if( ptr != 0 )
+        {
+          ptr->next = top;
+          top = ptr;
+        }
+      }
     };
 
-    MemObject *top_;
-
-    GeometryGridStorage ()
-      : top_( 0 )
-    {}
-
-    GeometryGridStorage ( const GeometryGridStorage & );
-
-    ~GeometryGridStorage ()
-    {
-      while( top_ != 0 )
-      {
-        MemObject *ptr = top_;
-        top_ = top_->next;
-        delete ptr;
-      }
-    }
-
-    static GeometryGridStorage &instance ()
-    {
-      static GeometryGridStorage singleton;
-      return singleton;
-    }
-
-  public:
-    static Object *alloc ()
-    {
-      MemObject *&top = instance().top_;
-
-      MemObject *ptr = top;
-      if( ptr != 0 )
-        top = ptr->next;
-      else
-        ptr = new MemObject;
-      return &(ptr->object);
-    }
-
-    static void free ( Object *object )
-    {
-      MemObject *&top = instance().top_;
-
-      MemObject *ptr = reinterpret_cast< MemObject * >( object );
-      if( ptr != 0 )
-      {
-        ptr->next = top;
-        top = ptr;
-      }
-    }
-  };
+  }
 
 }
 

@@ -116,7 +116,7 @@ namespace Dune
 
     private:
       typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;
@@ -244,7 +244,7 @@ namespace Dune
 
     private:
       typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;

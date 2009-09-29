@@ -103,7 +103,7 @@ namespace Dune
       static const int codimension = HostEntity :: codimension;
       typedef typename Traits :: template Codim< codimension > :: Entity Entity;
       typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
 
       template< bool >
       struct InitializeReal
