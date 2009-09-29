@@ -68,8 +68,22 @@ namespace Dune
       static const bool v = true;
     };
 
+
+
+    // non-standard capabilities
+    // -------------------------
+
+    template< class Grid >
+    struct hasHierarchicIndexSet;
+
+    template< int dim, int dimworld >
+    struct hasHierarchicIndexSet< AlbertaGrid< dim, dimworld > >
+    {
+      static const bool v = true;
+    };
+
   }
 
 }
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_CAPABILITIES_HH
