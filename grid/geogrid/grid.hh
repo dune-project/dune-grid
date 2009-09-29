@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include <dune/common/static_assert.hh>
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
@@ -34,7 +35,8 @@ namespace Dune
   template< class HostGrid >
   class DefaultCoordFunction;
 
-  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid > >
+  template< class HostGrid,
+      class CoordFunction = DefaultCoordFunction< HostGrid > >
   class GeometryGrid;
 
 
@@ -94,8 +96,13 @@ namespace Dune
     // ------------------------
 
     template< class HG, class CF >
-    struct ExportParams
+    class ExportParams
     {
+      static const bool isCoordFunction
+        = isCoordFunctionInterface< typename CF :: Interface > :: value;
+      dune_static_assert( isCoordFunction, "Invalid CoordFunction." );
+
+    public:
       typedef HG HostGrid;
       typedef CF CoordFunction;
     };
@@ -115,10 +122,8 @@ namespace Dune
 
         typedef typename HostGrid :: ctype ctype;
 
-        dune_static_assert( (int)HostGrid :: dimensionworld == (int)CoordFunction :: dimDomain,
-                            "HostGrid and CoordFunction are incompatible." );
-        enum { dimension = HostGrid :: dimension };
-        enum { dimensionworld = CoordFunction :: dimRange };
+        static const int dimension = HostGrid :: dimension;
+        static const int dimensionworld = CoordFunction :: dimRange;
 
         typedef Dune :: Intersection< const Grid, GeoGrid :: LeafIntersection >
         LeafIntersection;
@@ -126,13 +131,16 @@ namespace Dune
         LevelIntersection;
 
         typedef Dune :: IntersectionIterator
-        < const Grid, GeoGrid :: LeafIntersectionIterator, GeoGrid :: LeafIntersection >
+        < const Grid, GeoGrid :: LeafIntersectionIterator,
+            GeoGrid :: LeafIntersection >
         LeafIntersectionIterator;
         typedef Dune :: IntersectionIterator
-        < const Grid, GeoGrid :: LevelIntersectionIterator, GeoGrid :: LevelIntersection >
+        < const Grid, GeoGrid :: LevelIntersectionIterator,
+            GeoGrid :: LevelIntersection >
         LevelIntersectionIterator;
 
-        typedef Dune :: HierarchicIterator< const Grid, GeoGrid :: HierarchicIterator >
+        typedef Dune :: HierarchicIterator
+        < const Grid, GeoGrid :: HierarchicIterator >
         HierarchicIterator;
 
         template< int codim >
@@ -172,9 +180,11 @@ namespace Dune
         typedef GeoGrid :: LeafIndexSet< const Grid > LeafIndexSet;
         typedef GeoGrid :: LevelIndexSet< const Grid > LevelIndexSet;
 
-        typedef GeoGrid :: IdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
+        typedef GeoGrid :: IdSet
+        < const Grid, typename HostGrid :: Traits :: GlobalIdSet >
         GlobalIdSet;
-        typedef GeoGrid :: IdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
+        typedef GeoGrid :: IdSet
+        < const Grid, typename HostGrid :: Traits :: LocalIdSet >
         LocalIdSet;
 
         typedef typename HostGrid :: Traits :: CollectiveCommunication
@@ -211,13 +221,17 @@ namespace Dune
    *
    *  An example of a coordinate function is given by the following code:
    *  \code
-   *  struct ExampleFunction
+   *  class ExampleFunction
+   *  : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
    *  {
-   *    enum { dimRange = 3 };
-   *    enum { dimDomain = 2 };
+   *    typedef ExampleFunction This;
+   *    typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
    *
-   *    void evaluate ( const Dune :: FieldVector< double, dimDomain > &x,
-   *                    Dune :: FieldVector< double, dimRange > &y ) const
+   *  public:
+   *    typedef Base :: DomainVector DomainVector;
+   *    typedef Base :: RangeVector RangeVector;
+   *
+   *    void evaluate ( const DomainVector &x, RangeVector &y ) const
    *    {
    *      y[ 0 ] = x[ 0 ];
    *      y[ 1 ] = x[ 1 ];
@@ -588,7 +602,11 @@ namespace Dune
     {
       assert( levelIndexSets_.size() == (size_t)(maxLevel()+1) );
       if( (level < 0) || (level > maxLevel()) )
-        DUNE_THROW( GridError, "levelIndexSet of nonexisting level " << level << " requested." );
+      {
+        DUNE_THROW( GridError, "LevelIndexSet for nonexisting level " << level
+                                                                      << " requested." );
+      }
+
       if( levelIndexSets_[ level ] == 0 )
         levelIndexSets_[ level ] = new LevelIndexSet( *this, level );
       assert( levelIndexSets_[ level ] );

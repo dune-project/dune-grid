@@ -169,6 +169,36 @@ namespace Dune
     void evaluate ( const Index &vIdx, RangeVector &y ) const;
   };
 
+
+
+  namespace GeoGrid
+  {
+
+    // isCoordFunctionInterface
+    // ------------------------
+
+    template< class CoordFunctionInterface >
+    struct isCoordFunctionInterface
+    {
+      static const bool value = false;
+    };
+
+    template< class ct, unsigned int dimD, unsigned int dimR, class Impl >
+    struct isCoordFunctionInterface
+    < AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > >
+    {
+      static const bool value = true;
+    };
+
+    template< class ct, unsigned int dimR, class Impl >
+    struct isCoordFunctionInterface
+    < DiscreteCoordFunctionInterface< ct, dimR, Impl > >
+    {
+      static const bool value = true;
+    };
+
+  }
+
 }
 
 #endif
