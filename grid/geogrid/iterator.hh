@@ -212,7 +212,7 @@ namespace Dune
 
     protected:
       using Base :: hostEntityIterator_;
-      using Base :: update;
+      using Base :: releaseEntity;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
@@ -222,7 +222,7 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        update();
+        releaseEntity();
       }
     };
 
@@ -259,7 +259,7 @@ namespace Dune
     protected:
       using Base :: hostElementIterator_;
       using Base :: subEntity_;
-      using Base :: update;
+      using Base :: releaseEntity;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
@@ -297,14 +297,14 @@ namespace Dune
             if( !visited_[ index ] )
             {
               visited_[ index ] = true;
-              update();
+              releaseEntity();
               return;
             }
           }
           ++hostElementIterator_;
           subEntity_ = -1;
         }
-        update();
+        releaseEntity();
       }
     };
 
@@ -484,7 +484,7 @@ namespace Dune
       typedef typename Traits :: HostEntityIterator HostEntityIterator;
 
       using Base :: hostEntityIterator_;
-      using Base :: update;
+      using Base :: releaseEntity;
 
     public:
       HierarchicIterator ( const Grid &grid,
@@ -495,7 +495,7 @@ namespace Dune
       void increment ()
       {
         ++hostEntityIterator_;
-        update();
+        releaseEntity();
       }
     };
 

@@ -140,6 +140,12 @@ namespace Dune
           hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
       {}
 
+      EntityPointer ( const typename EntityWrapper :: Implementation &entity )
+        : grid_( &entity.grid() ),
+          entity_( 0 ),
+          hostEntityIterator_( entity.hostEntity() )
+      {}
+
       EntityPointer ( const This &other )
         : grid_( other.grid_ ),
           entity_( 0 ),
@@ -162,7 +168,7 @@ namespace Dune
       {
         grid_ = other.grid_;
         hostEntityIterator_ = other.hostEntityIterator_;
-        update();
+        releaseEntity();
         return *this;
       }
 
@@ -197,6 +203,12 @@ namespace Dune
         return hostEntityPointer().level();
       }
 
+      void compactify ()
+      {
+        hostEntityIterator_.compactify();
+        releaseEntity();
+      }
+
       const HostEntityPointer &hostEntityPointer () const
       {
         return hostEntityIterator_;
@@ -208,7 +220,7 @@ namespace Dune
       }
 
     protected:
-      void update ()
+      void releaseEntity ()
       {
         EntityStorage :: free( entity_ );
         entity_ = 0;
@@ -272,6 +284,13 @@ namespace Dune
           hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
       {}
 
+      EntityPointer ( const typename EntityWrapper :: Implementation &entity )
+        : grid_( &entity.grid() ),
+          entity_( 0 ),
+          subEntity_( entity.subEntity() ),
+          hostElementIterator_( entity.hostElement() )
+      {}
+
       EntityPointer ( const This &other )
         : grid_( other.grid_ ),
           entity_( 0 ),
@@ -297,7 +316,7 @@ namespace Dune
         grid_ = other.grid_;
         subEntity_ = other.subEntity_;
         hostElementIterator_ = other.hostElementIterator_;
-        update();
+        releaseEntity();
         return *this;
       }
 
@@ -354,6 +373,12 @@ namespace Dune
         return hostElementPointer().level();
       }
 
+      void compactify ()
+      {
+        hostElementIterator_.compactify();
+        releaseEntity();
+      }
+
       const HostEntityPointer &hostEntityPointer () const
       {
         DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
@@ -366,7 +391,7 @@ namespace Dune
       }
 
     protected:
-      void update ()
+      void releaseEntity ()
       {
         EntityStorage :: free( entity_ );
         entity_ = 0;

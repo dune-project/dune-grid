@@ -507,6 +507,11 @@ namespace Dune
         return *hostElement_;
       }
 
+      int subEntity () const
+      {
+        return subEntity_;
+      }
+
       const HostEntity &hostEntity () const
       {
         DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
