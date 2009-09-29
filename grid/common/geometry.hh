@@ -97,14 +97,17 @@ namespace Dune
     /** \brief Return the name of the reference element. The type can
        be used to access the Dune::GenericReferenceElement.
      */
-    GeometryType type () const { return realGeometry.type(); };
+    GeometryType type () const { return realGeometry.type(); }
+
+    /** \brief Return true if the geometry mapping is affine and false otherwise */
+    bool affine() const { return realGeometry.affine(); }
 
     /** \brief Return the number of corners of the reference element. Since
        this is a convex polytope the number of corners is a well-defined concept.
        The method is redundant because this information is also available
        via the reference element. It is here for efficiency and ease of use.
      */
-    int corners () const { return realGeometry.corners(); };
+    int corners () const { return realGeometry.corners(); }
 
 #ifdef DUNE_ENABLE_OLD_NUMBERING
     /** \brief Access to corners of the geometry.

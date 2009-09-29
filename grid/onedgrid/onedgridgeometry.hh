@@ -31,6 +31,9 @@ namespace Dune {
     //! return the element type identifier (vertex)
     GeometryType type () const {return GeometryType(0);}
 
+    //! here we have always an affine geometry
+    bool affine() const { return true; }
+
     //! return the number of corners of this element (==1)
     int corners () const {return 1;}
 
@@ -122,6 +125,9 @@ namespace Dune {
   public:
 
     OneDGridGeometry() : storeCoordsLocally_(false) {}
+
+    //! here we have always an affine geometry
+    bool affine() const { return true; }
 
     /** \brief Return the element type identifier
      *

@@ -165,6 +165,9 @@ namespace Dune {
       return GeometryType(GeometryType::cube,mydim);
     }
 
+    //! here we have always an affine geometry
+    bool affine() const { return true; }
+
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const
     {
@@ -355,6 +358,9 @@ namespace Dune {
       return GeometryType(GeometryType::cube,mydim);
     }
 
+    //! here we have always an affine geometry
+    bool affine() const { return true; }
+
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const
     {
@@ -499,6 +505,9 @@ namespace Dune {
     {
       return GeometryType(GeometryType::cube,0);
     }
+
+    //! here we have always an affine geometry
+    bool affine() const { return true; }
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const

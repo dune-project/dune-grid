@@ -276,6 +276,9 @@ namespace Dune
       return GeometryType( GeometryType::simplex, mydimension );
     }
 
+    //! returns always true since we only have simplices
+    bool affine () const { return true; }
+
     /** \brief number of corner the geometry */
     int corners () const
     {
