@@ -4,6 +4,7 @@ grid_HEADERS = capabilities.hh \
                entity.hh \
                entitypointer.hh \
                grid.hh \
+	       identity.hh \
 	       indexsets.hh \
 	       intersectioniterator.hh \
 	       iterator.hh
