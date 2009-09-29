@@ -60,7 +60,10 @@ namespace Dune
       : public DefaultGeometryTraits
         < typename HostGrid :: ctype,
             HostGrid :: dimension, CoordFunction :: dimRange >
-    {};
+    {
+      // static const bool hybrid = false;
+      // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+    };
 
   }
 
