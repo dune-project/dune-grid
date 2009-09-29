@@ -43,7 +43,7 @@ namespace Dune
     template< int codim, class Grid >
     struct EntityPointerTraits;
 
-    template< class Traits, bool fake = Traits :: fake >
+    template< class Traits, bool fake = Traits::fake >
     class EntityPointer;
 
 
@@ -65,26 +65,23 @@ namespace Dune
     struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction > >
       : public ExportParams< HostGrid, CoordFunction >
     {
-      typedef Dune :: GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef Dune::GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      static const bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v;
+      static const bool fake = !Capabilities::hasHostEntity< Grid, codim >::v;
 
-      typedef typename HostGrid :: ctype ctype;
+      typedef typename HostGrid::ctype ctype;
 
-      static const int dimension = HostGrid :: dimension;
+      static const int dimension = HostGrid::dimension;
       static const int codimension = codim;
 
-      typedef Dune :: Entity< codimension, dimension, const Grid, GeoGrid :: Entity >
-      Entity;
+      typedef Dune::Entity< codimension, dimension, const Grid, GeoGrid::Entity > Entity;
 
-      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-      typedef typename HostGrid :: template Codim< codim > :: EntityPointer
-      HostEntityPointer;
+      typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
+      typedef typename HostGrid::template Codim< codim >::EntityPointer HostEntityPointer;
       typedef HostEntityPointer HostEntityIterator;
 
-      typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
-      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer
-      HostElementPointer;
+      typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
+      typedef typename HostGrid::template Codim< 0 >::EntityPointer HostElementPointer;
       typedef HostElementPointer HostElementIterator;
     };
 
@@ -98,32 +95,32 @@ namespace Dune
     {
       typedef EntityPointer< Traits, false > This;
 
-      typedef typename Traits :: Grid Grid;
+      typedef typename Traits::Grid Grid;
 
       typedef EntityPointerTraits< Traits :: codimension, const Grid > BaseTraits;
       friend class EntityPointer< BaseTraits, false >;
 
     public:
-      static const int dimension = Traits :: dimension;
-      static const int codimension = Traits :: codimension;
+      static const int dimension = Traits::dimension;
+      static const int codimension = Traits::codimension;
 
-      typedef typename Traits :: Entity Entity;
+      typedef typename Traits::Entity Entity;
 
-      static const bool fake = Traits :: fake;
+      static const bool fake = Traits::fake;
 
       typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
     private:
-      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
+      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
+      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;
 
     protected:
-      typedef typename Traits :: HostEntityPointer HostEntityPointer;
-      typedef typename Traits :: HostEntityIterator HostEntityIterator;
-      typedef typename Traits :: HostElement HostElement;
+      typedef typename Traits::HostEntityPointer HostEntityPointer;
+      typedef typename Traits::HostEntityIterator HostEntityIterator;
+      typedef typename Traits::HostElement HostElement;
 
       HostEntityIterator hostEntityIterator_;
 
@@ -137,10 +134,10 @@ namespace Dune
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
-          hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
+          hostEntityIterator_( hostElement.template subEntity< codimension >( subEntity ) )
       {}
 
-      EntityPointer ( const typename EntityWrapper :: Implementation &entity )
+      EntityPointer ( const typename EntityWrapper::Implementation &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
           hostEntityIterator_( entity.hostEntity() )
@@ -161,7 +158,7 @@ namespace Dune
 
       ~EntityPointer ()
       {
-        EntityStorage :: free( entity_ );
+        EntityStorage::free( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -192,7 +189,7 @@ namespace Dune
       {
         if( entity_ == 0 )
         {
-          entity_ = EntityStorage :: alloc();
+          entity_ = EntityStorage::alloc();
           entity_->initialize( grid(), *hostEntityPointer() );
         }
         return *entity_;
@@ -222,7 +219,7 @@ namespace Dune
     protected:
       void releaseEntity ()
       {
-        EntityStorage :: free( entity_ );
+        EntityStorage::free( entity_ );
         entity_ = 0;
       }
     };
@@ -237,33 +234,33 @@ namespace Dune
     {
       typedef EntityPointer< Traits, true > This;
 
-      typedef typename Traits :: Grid Grid;
+      typedef typename Traits::Grid Grid;
 
-      typedef EntityPointerTraits< Traits :: codimension, const Grid > BaseTraits;
+      typedef EntityPointerTraits< Traits::codimension, const Grid > BaseTraits;
       friend class EntityPointer< BaseTraits, true >;
 
     public:
-      static const int dimension = Traits :: dimension;
-      static const int codimension = Traits :: codimension;
+      static const int dimension = Traits::dimension;
+      static const int codimension = Traits::codimension;
 
-      typedef typename Traits :: Entity Entity;
+      typedef typename Traits::Entity Entity;
 
-      static const bool fake = Traits :: fake;
+      static const bool fake = Traits::fake;
 
       typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
     private:
-      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
+      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
+      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       const Grid *grid_;
       mutable EntityWrapper *entity_;
 
     protected:
-      typedef typename Traits :: HostEntityPointer HostEntityPointer;
-      typedef typename Traits :: HostElementPointer HostElementPointer;
-      typedef typename Traits :: HostElementIterator HostElementIterator;
-      typedef typename Traits :: HostElement HostElement;
+      typedef typename Traits::HostEntityPointer HostEntityPointer;
+      typedef typename Traits::HostElementPointer HostElementPointer;
+      typedef typename Traits::HostElementIterator HostElementIterator;
+      typedef typename Traits::HostElement HostElement;
 
       int subEntity_;
       HostElementIterator hostElementIterator_;
@@ -280,12 +277,16 @@ namespace Dune
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
-          subEntity_( subEntity ),
+          subEntity_( -1 ),
           hostElementIterator_( hostElement )
           //hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
-      {}
+      {
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const int tid = GenericGeometry::topologyId( hostElement.type() );
+        subEntity_ = Map::template generic2dune< codimension >( tid, subEntity );
+      }
 
-      EntityPointer ( const typename EntityWrapper :: Implementation &entity )
+      EntityPointer ( const typename EntityWrapper::Implementation &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
           subEntity_( entity.subEntity() ),
@@ -309,7 +310,7 @@ namespace Dune
 
       ~EntityPointer ()
       {
-        EntityStorage :: free( entity_ );
+        EntityStorage::free( entity_ );
       }
 
       This &operator= ( const This &other )
@@ -344,7 +345,7 @@ namespace Dune
         if( lvl != other.level() )
           return false;
 
-        const typename Traits :: HostGrid :: Traits :: LevelIndexSet &indexSet
+        const typename Traits::HostGrid::Traits::LevelIndexSet &indexSet
           = grid().hostGrid().levelIndexSet( lvl );
 
         const HostElement &thisElement = *hostElementPointer();
@@ -367,7 +368,7 @@ namespace Dune
       {
         if( entity_ == 0 )
         {
-          entity_ = EntityStorage :: alloc();
+          entity_ = EntityStorage::alloc();
           entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
         }
         return *entity_;
@@ -398,7 +399,7 @@ namespace Dune
     protected:
       void releaseEntity ()
       {
-        EntityStorage :: free( entity_ );
+        EntityStorage::free( entity_ );
         entity_ = 0;
       }
 

@@ -842,12 +842,13 @@ namespace Dune
         typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
         typedef typename MakeableEntityPointer::ImplementationType EntityPointerImpl;
 
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        //typedef GenericGeometry::MapNumberingProvider< dimension > Map;
 
-        const int tid = GenericGeometry::topologyId( type() );
-        const int di = Map::template generic2dune< codim >( tid, i );
+        //const int tid = GenericGeometry::topologyId( type() );
+        //const int di = Map::template generic2dune< codim >( tid, i );
 
-        EntityPointerImpl impl( *grid_, hostEntity(), di );
+        //EntityPointerImpl impl( *grid_, hostEntity(), di );
+        EntityPointerImpl impl( *grid_, hostEntity(), i );
         return MakeableEntityPointer( impl );
       }
 
