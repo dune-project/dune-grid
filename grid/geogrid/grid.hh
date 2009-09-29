@@ -17,6 +17,8 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
+#include <dune/grid/geogrid/identity.hh>
+
 /** \brief namespace shared by all DUNE modules
  *
  *  This is DUNE's main name space. All DUNE modules provide their
@@ -28,8 +30,22 @@ namespace Dune
   // Forward Declarations
   // --------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class HostGrid >
+  class DefaultCoordFunction;
+
+  template< class HostGrid, class CoordFunction = DefaultCoordFunction< HostGrid > >
   class GeometryGrid;
+
+
+
+  // DefaultCoordFunction
+  // --------------------
+
+  template< class HostGrid >
+  class DefaultCoordFunction
+    : public IdenticalCoordFunction
+      < typename HostGrid :: ctype, HostGrid :: dimensionworld >
+  {};
 
 
 
