@@ -9,6 +9,7 @@
 // Dune includes
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
+#include <dune/common/exceptions.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
