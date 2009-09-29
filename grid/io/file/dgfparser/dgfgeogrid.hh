@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_DGFGEOGRID_HH
-#define DUNE_DGFGEOGRiID_HH
+#define DUNE_DGFGEOGRID_HH
 
 #include <dune/grid/geogrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>

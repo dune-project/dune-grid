@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_CAPABILITIES_HH
 #define DUNE_GEOGRID_CAPABILITIES_HH
 
+#include <cassert>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/genericgeometry/misc.hh>
 

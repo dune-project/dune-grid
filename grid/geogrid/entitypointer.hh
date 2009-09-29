@@ -17,6 +17,9 @@ namespace Dune
   template< int, int, class >
   class GeometryGridEntity;
 
+  template< class >
+  class GeometryGridEntityWrapper;
+
   template< class HostGrid, class CoordFunction >
   struct GeometryGridExportParams;
 
