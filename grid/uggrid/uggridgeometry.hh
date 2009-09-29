@@ -70,6 +70,9 @@ namespace Dune {
      */
     GeometryType type () const;
 
+    //! returns true if type is simplex, false otherwise (impl could be improved)
+    bool affine() const { return type().isSimplex(); }
+
     //! return the number of corners of this element.
     int corners () const {
       return UG_NS<coorddim>::Corners_Of_Elem(target_);
