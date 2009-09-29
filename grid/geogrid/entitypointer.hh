@@ -211,6 +211,16 @@ namespace Dune
       return impl.grid();
     }
 
+    const HostElementPointer &hostElementPointer () const
+    {
+      return hostElementPointer_;
+    }
+
+    int subEntity () const
+    {
+      return subEntity_;
+    }
+
     void setToTarget ( const HostEntityPointer &target )
     {
       DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
