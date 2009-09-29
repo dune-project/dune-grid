@@ -270,14 +270,9 @@ namespace Dune
                       const HostElementIterator &hostElementIterator, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
-          subEntity_( -1 ),
+          subEntity_( subEntity ),
           hostElementIterator_( hostElementIterator )
-      {
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const int tid = GenericGeometry::topologyId( hostElementPointer()->type() );
-        if( subEntity != -1 )
-          subEntity_ = Map::template dune2generic( tid, subEntity, codimension );
-      }
+      {}
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),

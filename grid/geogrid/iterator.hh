@@ -263,9 +263,9 @@ namespace Dune
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : Base( grid, Traits :: getHostElementIterator( grid, level, type ), -1 ),
-          hostEnd_( Traits :: getHostElementIterator( grid, level, Traits :: end ) ),
-          hostIndexSet_( &Traits :: getHostIndexSet( grid, level ) )
+        : Base( grid, Traits::getHostElementIterator( grid, level, type ), -1 ),
+          hostEnd_( Traits::getHostElementIterator( grid, level, Traits::end ) ),
+          hostIndexSet_( &Traits::getHostIndexSet( grid, level ) )
       {
         if( hostElementIterator_ != hostEnd_ )
         {
