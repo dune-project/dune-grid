@@ -41,7 +41,7 @@ namespace Dune
   protected:
     typedef typename Traits :: HostGrid HostGrid;
 
-    typedef typename HostGrid :: template Codim< codim > :: EntityPointer
+    typedef typename HostGrid :: template Codim< codimension > :: EntityPointer
     HostEntityPointer;
     typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
 
@@ -55,6 +55,13 @@ namespace Dune
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostEntityPointer &hostEntityPointer )
       : hostEntityPointer_( hostEntityPointer ),
+        virtualEntity_( EntityImpl( grid ) )
+    {}
+
+    GeometryGridEntityPointer ( const Grid &grid,
+                                const HostElement &hostElement,
+                                int subEntity )
+      : hostEntityPointer_( hostElement.template entity< codimension >( subEntity ) ),
         virtualEntity_( EntityImpl( grid ) )
     {}
 
@@ -132,6 +139,14 @@ namespace Dune
                                 const HostElementPointer &hostElementPointer,
                                 int subEntity )
       : hostElementPointer_( hostElementPointer ),
+        subEntity_( subEntity ),
+        virtualEntity_( EntityImpl( grid ) )
+    {}
+
+    GeometryGridEntityPointer ( const Grid &grid,
+                                const HostElement &hostElement,
+                                int subEntity )
+      : hostElementPointer_( hostElement.template entity< 0 >( 0 ) ),
         subEntity_( subEntity ),
         virtualEntity_( EntityImpl( grid ) )
     {}

@@ -531,7 +531,7 @@ namespace Dune
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
 
-      EntityPointerImpl impl( *grid_, hostEntity().template entity< codim >( i ) );
+      EntityPointerImpl impl( *grid_, hostEntity(), i );
       return MakeableEntityPointer( impl );
     }
 
