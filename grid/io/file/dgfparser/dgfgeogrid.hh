@@ -19,6 +19,7 @@ namespace Dune
   ************************************************************************/
 
 
+
   // MacroGrid :: Impl for GeomegryGrid
   // ----------------------------------
 
@@ -28,10 +29,48 @@ namespace Dune
   {
     typedef MPIHelper :: MPICommunicator MPICommunicator;
 
+    static const bool isDiscreteCoordFunction
+      = GeoGrid :: isDiscreteCoordFunctionInterface
+        < typename CoordFunction :: Interface > :: value;
+
+  private:
+    template< bool >
+    struct DiscreteFactory;
+
+    template< bool >
+    struct AnalyticalFactory;
+
+    typedef GenericGeometry :: ProtectedIf
+    < isDiscreteCoordFunction, DiscreteFactory, AnalyticalFactory >
+    Factory;
+
+  public:
     inline static GeometryGrid< HostGrid, CoordFunction > *
     generate ( MacroGrid &macroGrid,
                const char *filename,
                MPICommunicator communicator = MPIHelper :: getCommunicator() );
+  };
+
+
+  template< class HostGrid, class CoordFunction >
+  template< bool >
+  struct MacroGrid :: Impl< GeometryGrid< HostGrid, CoordFunction > > :: DiscreteFactory
+  {
+    static CoordFunction *create ( const HostGrid &hostGrid )
+    {
+      return new CoordFunction( hostGrid );
+    }
+  };
+
+
+  template< class HostGrid, class CoordFunction >
+  template< bool >
+  struct MacroGrid :: Impl< GeometryGrid< HostGrid, CoordFunction > > :: AnalyticalFactory
+  {
+    static CoordFunction *create ( const HostGrid &hostGrid )
+    {
+      return new CoordFunction;
+    }
   };
 
 
@@ -47,7 +86,7 @@ namespace Dune
 
     HostGrid *hostGrid = HostImpl :: generate( macroGrid, filename, communicator );
     assert( hostGrid != 0 );
-    CoordFunction *coordFunction = new CoordFunction;
+    CoordFunction *coordFunction = Factory :: create( *hostGrid );
     return new Grid( *hostGrid, *coordFunction );
   }
 
