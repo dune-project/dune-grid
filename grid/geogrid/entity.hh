@@ -42,12 +42,9 @@ namespace Dune
 
 
 
-  /** \brief The implementation of entities in a GeometryGrid
-   *   \ingroup GeometryGrid
-   *
-   *  A Grid is a container of grid entities. An entity is parametrized by the codimension.
-   *  An entity of codimension c in dimension d is a d-c dimensional object.
-   */
+  // GeometryGridEntity
+  // ------------------
+
   template< int codim, int dim, class HostGrid, class CoordFunction >
   class GeometryGridEntity< codim, dim, const GeometryGrid< HostGrid, CoordFunction > >
   {
@@ -82,30 +79,24 @@ namespace Dune
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-  public:
-    HostEntityPointer hostEntity_;
-
-  private:
     const Grid *grid_;
+    const HostEntity *hostEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
     mutable Geometry *geo_;
 
   public:
-    //! Constructor for an entity in a given grid level
-    GeometryGridEntity( const Grid *grid, const HostEntityPointer &hostEntity )
-      : hostEntity_( hostEntity ),
-        grid_( grid ),
+    GeometryGridEntity( const Grid &grid )
+      : grid_( &grid ),
+        hostEntity_( 0 ),
         geo_( 0 )
     {}
 
-    //! \todo Please doc me !
     GeometryGridEntity( const GeometryGridEntity &other )
-      : hostEntity_( other.hostEntity_ ),
-        grid_( other.grid_ ),
+      : grid_( other.grid_ ),
+        hostEntity_( other.hostEntity_ ),
         geo_( 0 )
     {}
 
-    //! Destructor
     ~GeometryGridEntity ()
     {
       if( geo_ != 0 )
@@ -133,28 +124,16 @@ namespace Dune
       return hostEntity().type();
     }
 
-    //! level of this element
     int level () const
     {
       return hostEntity().level();
     }
 
-    //! The partition type for parallel computing
     PartitionType partitionType () const
     {
       return hostEntity().partitionType();
     }
 
-#if 0
-    /** Intra-element access to entities of codimension cc > codim. Return number of entities
-     * with codimension cc.
-     */
-    template<int cc> int count () const {
-      return hostEntity_->template count<cc>();
-    }
-#endif
-
-    //! Geometry of this entity
     const Geometry &geometry () const
     {
       if( geo_ ==0 )
@@ -170,6 +149,7 @@ namespace Dune
 
     const HostEntity &hostEntity () const
     {
+      assert( isValid() );
       return *hostEntity_;
     }
 
@@ -179,27 +159,31 @@ namespace Dune
       return grid_->coordFunction();
     }
 
-    void setToTarget( const HostEntityPointer &target )
+    bool isValid () const
     {
+      return (hostEntity_ != 0);
+    }
+
+    void invalidate ()
+    {
+      hostEntity_ = 0;
+    }
+
+    void setToTarget( const HostEntity &hostEntity )
+    {
+      hostEntity_ = &hostEntity;
       if( geo_ != 0 )
       {
         delete geo_;
         geo_ = 0;
       }
-      hostEntity_ = target;
     }
   };
 
 
+  // GeometryGridEntity for codimension 0
+  // ------------------------------------
 
-
-  /** \brief Specialization for codim-0-entities.
-   * \ingroup GeometryGrid
-   *
-   * This class embodies the topological parts of elements of the grid.
-   * It has an extended interface compared to the general entity class.
-   * For example, Entities of codimension 0  allow to visit all neighbors.
-   */
   template< int dim, class HostGrid, class CoordFunction >
   class GeometryGridEntity< 0, dim, const GeometryGrid< HostGrid, CoordFunction > >
   {
@@ -240,26 +224,23 @@ namespace Dune
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-  public:
-    HostEntityPointer hostEntity_;
-
-  private:
     const Grid *grid_;
+    const HostEntity *hostEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
     mutable Geometry *geo_;
     mutable LocalGeometry *geoInFather_;
 
   public:
-    GeometryGridEntity ( const Grid *grid, const HostEntityPointer &hostEntity )
-      : hostEntity_( hostEntity ),
-        grid_( grid ),
+    GeometryGridEntity ( const Grid &grid )
+      : grid_( &grid ),
+        hostEntity_( 0 ),
         geo_( 0 ),
         geoInFather_( 0 )
     {}
 
     GeometryGridEntity( const GeometryGridEntity &other )
-      : hostEntity_( other.hostEntity_ ),
-        grid_( other.grid_ ),
+      : grid_( other.grid_ ),
+        hostEntity_( other.hostEntity_ ),
         geo_( 0 ),
         geoInFather_( 0 )
     {}
@@ -300,19 +281,16 @@ namespace Dune
       return hostEntity().type();
     }
 
-    //! level of this element
     int level () const
     {
       return hostEntity().level();
     }
 
-    //! The partition type for parallel computing
     PartitionType partitionType () const
     {
       return hostEntity().partitionType();
     }
 
-    //! Geometry of this entity
     const Geometry &geometry () const
     {
       if( geo_ ==0 )
@@ -453,8 +431,19 @@ namespace Dune
       return grid_->coordFunction();
     }
 
-    void setToTarget( const HostEntityPointer &target )
+    bool isValid () const
     {
+      return (hostEntity_ != 0);
+    }
+
+    void invalidate ()
+    {
+      hostEntity_ = 0;
+    }
+
+    void setToTarget( const HostEntity &hostEntity )
+    {
+      hostEntity_ = &hostEntity;
       if( geo_ != 0 )
       {
         delete geo_;
@@ -465,10 +454,9 @@ namespace Dune
         delete geoInFather_;
         geoInFather_ = 0;
       }
-      hostEntity_ = target;
     }
   };
 
-} // namespace Dune
+}
 
 #endif

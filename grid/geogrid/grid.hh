@@ -423,12 +423,12 @@ namespace Dune
 
     bool mark( int refCount, const typename Codim< 0 > :: EntityPointer &entity )
     {
-      return hostGrid().mark( refCount, getHostEntity< 0 >( *entity ) );
+      return hostGrid().mark( refCount, getHostEntityPointer< 0 >( entity ) );
     }
 
     int getMark ( const typename Codim< 0 > :: EntityPointer &entity ) const
     {
-      return hostGrid().getMark( getHostEntity< 0 >( *entity ) );
+      return hostGrid().getMark( getHostEntityPointer< 0 >( entity ) );
     }
 
     bool preAdapt ()
@@ -551,10 +551,17 @@ namespace Dune
     using Base :: getRealImplementation;
 
     template< int codim >
-    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
+    static const typename HostGrid :: template Codim< codim > :: Entity &
     getHostEntity( const typename Codim< codim > :: Entity &entity )
     {
-      return getRealImplementation( entity ).hostEntity_;
+      return getRealImplementation( entity ).hostEntity();
+    }
+
+    template< int codim >
+    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
+    getHostEntityPointer( const typename Codim< codim > :: EntityPointer &entity )
+    {
+      return getRealImplementation( entity ).hostEntityPointer();
     }
 
   private:

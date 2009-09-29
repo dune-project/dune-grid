@@ -88,9 +88,9 @@ namespace Dune
     template< int codim >
     IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().template index< codim >( *hostEntity );
+      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().template index< codim >( hostEntity );
     }
 
     template< class Entity >
@@ -102,9 +102,9 @@ namespace Dune
     template< int codim >
     IndexType subIndex ( const typename Grid :: template Codim< 0 > :: Entity &entity, int i ) const
     {
-      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< 0 >( entity );
-      return hostIndexSet().template subIndex< codim >( *hostEntity, i );
+      typedef typename HostGrid :: template Codim< 0 > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< 0 >( entity );
+      return hostIndexSet().template subIndex< codim >( hostEntity, i );
     }
 
     IndexType size ( GeometryType type ) const
@@ -120,9 +120,9 @@ namespace Dune
     template< int codim >
     bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().contains( *hostEntity );
+      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().contains( hostEntity );
     }
 
     template< class Entity >
@@ -221,9 +221,9 @@ namespace Dune
     template< int codim >
     IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().template index< codim >( *hostEntity );
+      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().template index< codim >( hostEntity );
     }
 
     template< class Entity >
@@ -235,9 +235,9 @@ namespace Dune
     template< int codim >
     IndexType subIndex ( const typename Grid :: template Codim< 0 > :: Entity &entity, int i ) const
     {
-      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< 0 >( entity );
-      return hostIndexSet().template subIndex< codim >( *hostEntity, i );
+      typedef typename HostGrid :: template Codim< 0 > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< 0 >( entity );
+      return hostIndexSet().template subIndex< codim >( hostEntity, i );
     }
 
     IndexType size ( GeometryType type ) const
@@ -253,9 +253,9 @@ namespace Dune
     template< int codim >
     bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
-      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().contains( *hostEntity );
+      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().contains( hostEntity );
     }
 
     template< class Entity >
@@ -320,7 +320,7 @@ namespace Dune
     template< int codim >
     IdType id ( const typename Traits :: template Codim< codim > :: Entity &entity ) const
     {
-      return hostIdSet_.id< codim >( *(Grid :: template getHostEntity< codim >( entity )) );
+      return hostIdSet_.id< codim >( Grid :: template getHostEntity< codim >( entity ) );
     }
 
     template< class Entity >
@@ -332,7 +332,7 @@ namespace Dune
     template< int codim >
     IdType subId ( const typename Traits :: template Codim< 0 > :: Entity &entity, int i) const
     {
-      return hostIdSet_.template subId< codim >( *(Grid :: template getHostEntity< 0 >( entity )), i );
+      return hostIdSet_.template subId< codim >( Grid :: template getHostEntity< 0 >( entity ), i );
     }
 
   private:

@@ -52,24 +52,26 @@ namespace Dune
     typedef MakeableInterfaceObject< Entity > MakeableEntity;
     typedef typename MakeableEntity :: ImplementationType EntityImpl;
 
+    HostEntityPointer hostEntityPointer_;
     mutable MakeableEntity virtualEntity_;
 
   public:
-    GeometryGridEntityPointer ( const Grid &grid, const HostEntityPointer &hostEntity )
-      : virtualEntity_( EntityImpl( &grid, hostEntity ) )
+    GeometryGridEntityPointer ( const Grid &grid,
+                                const HostEntityPointer &hostEntityPointer )
+      : hostEntityPointer_( hostEntityPointer ),
+        virtualEntity_( EntityImpl( grid ) )
     {}
 
     bool equals ( const GeometryGridEntityPointer &other ) const
     {
-      const HostEntityPointer &thisHostEntity
-        = Grid :: template getHostEntity< codim >( virtualEntity_ );
-      const HostEntityPointer &otherHostEntity
-        = Grid :: template getHostEntity< codim >( other.virtualEntity_ );
-      return (thisHostEntity == otherHostEntity);
+      return (hostEntityPointer() == other.hostEntityPointer());
     }
 
     Entity &dereference () const
     {
+      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
+      if( !impl.isValid() )
+        impl.setToTarget( *hostEntityPointer_ );
       return virtualEntity_;
     }
 
@@ -79,10 +81,16 @@ namespace Dune
       return dereference().level();
     }
 
+    const HostEntityPointer &hostEntityPointer () const
+    {
+      return hostEntityPointer_;
+    }
+
   protected:
     void setToTarget ( const HostEntityPointer &target )
     {
-      Grid :: getRealImplementation( virtualEntity_ ).setToTarget( target );
+      hostEntityPointer_ = target;
+      Grid :: getRealImplementation( virtualEntity_ ).invalidate();
     }
   };
 
