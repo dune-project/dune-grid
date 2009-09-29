@@ -69,6 +69,7 @@ namespace Dune
     template< class > friend class GeometryGridLeafIndexSet;
     template< class > friend class GeometryGridLocalIdSet;
     template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridCommDataHandle;
     template< class, int > friend class IndexSetter;
 
     typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
@@ -214,6 +215,7 @@ namespace Dune
     template< class > friend class GeometryGridLeafIndexSet;
     template< class > friend class GeometryGridLocalIdSet;
     template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridCommDataHandle;
     template< class, int > friend class IndexSetter;
 
     typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;

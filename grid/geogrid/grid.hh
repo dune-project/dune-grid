@@ -13,6 +13,7 @@
 #include <dune/grid/geogrid/intersectioniterator.hh>
 #include <dune/grid/geogrid/iterator.hh>
 #include <dune/grid/geogrid/indexsets.hh>
+#include <dune/grid/geogrid/datahandle.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -473,45 +474,48 @@ namespace Dune
     }
 
 
-#if 0
-    /** \brief Distributes this grid over the available nodes in a distributed machine
-     *
-     * \param minlevel The coarsest grid level that gets distributed
-     * \param maxlevel does currently get ignored
-     */
-    void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement){
-      DUNE_THROW(NotImplemented, "GeometryGrid::loadBalance()");
+    bool loadBalance ()
+    {
+      bool ret = hostGrid().loalBalance();
+      updateIndexSets();
+      return ret;
     }
 
-    /** \brief The communication interface
-     *  @param T: array class holding data associated with the entities
-     *  @param P: type used to gather/scatter data in and out of the message buffer
-     *  @param codim: communicate entites of given codim
-     *  @param if: one of the predifined interface types, throws error if it is not implemented
-     *  @param level: communicate for entities on the given level
-     *
-     *  Implements a generic communication function sending an object of type P for each entity
-     *  in the intersection of two processors. P has two methods gather and scatter that implement
-     *  the protocol. Therefore P is called the "protocol class".
-     */
-    template<class T, template<class> class P, int codim>
-    void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level);
+    template< class DataHandle, class DataType >
+    bool loadBalance ( CommDataHandleIF< DataHandle, DataType > &data )
+    {
+      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
+      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-    /*! The new communication interface
+      WrappedDataHandle wrappedData( *this, data );
+      bool ret = hostGrid().loadBalance( wrappedData );
+      updateIndexSets();
+      return ret;
+    }
 
-       communicate objects for all codims on a given level
-     */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
+    template< class DataHandle, class DataType >
+    void communicate ( CommDataHandleIF< DataHandle, DataType > &data,
+                       InterfaceType iftype, CommunicationDirection dir,
+                       int level ) const
+    {
+      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
+      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
-    {}
-#endif
+      WrappedDataHandle wrappedData( *this, data );
+      hostGrid().communicate( wrappedData, iftype, dir, level );
+    }
 
+    template< class DataHandle, class DataType >
+    void communicate ( CommDataHandleIF< DataHandle, DataType > &data,
+                       InterfaceType iftype, CommunicationDirection dir ) const
+    {
+      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
+      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-    //! Obtain CollectiveCommunication object (taken from host grid)
+      WrappedDataHandle wrappedData( *this, data );
+      hostGrid().communicate( wrappedData, iftype, dir );
+    }
+
     const CollectiveCommunication &comm () const
     {
       return hostGrid().comm();
@@ -522,11 +526,12 @@ namespace Dune
     // End of Interface Methods
     // **********************************************************
 
-    //! Returns the hostgrid this GeometryGrid lives in
+#if 0
     HostGrid &getHostGrid() const
     {
       return *hostGrid_;
     }
+#endif
 
   private:
     //! Obtain the host grid wrapped by this GeometryGrid

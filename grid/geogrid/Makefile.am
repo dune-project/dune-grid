@@ -1,5 +1,6 @@
 griddir = $(includedir)/dune/grid/geogrid
 grid_HEADERS = capabilities.hh \
+	       datahandle.hh \
                entity.hh \
                entitypointer.hh \
                grid.hh \
