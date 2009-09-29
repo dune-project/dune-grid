@@ -1,7 +1,7 @@
 # $Id$
 
 SUBDIRS = albertagrid alugrid common onedgrid sgrid uggrid utility yaspgrid \
-	test io genericgeometry
+	test io genericgeometry geogrid
 noinst_LTLIBRARIES = libgrid.la
 
 # always part of lib:
@@ -36,6 +36,7 @@ grid_HEADERS = albertagrid.hh \
                sgrid.hh \
                uggrid.hh \
                yaspgrid.hh \
-               onedgrid.hh
+               onedgrid.hh \
+	       geogrid.hh
 
 include $(top_srcdir)/am/global-rules
