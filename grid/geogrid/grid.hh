@@ -187,7 +187,6 @@ namespace Dune
           GeometryGridFamily< HostGrid, CoordFunction > >
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
 
     typedef GridDefaultImplementation
     < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
@@ -206,6 +205,10 @@ namespace Dune
     template< class, class > friend class GeometryGridIdSet;
 
   public:
+    /** \cond */
+    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
+    /** \endcond */
+
     /** \name Exported Types
      * \{ */
 
