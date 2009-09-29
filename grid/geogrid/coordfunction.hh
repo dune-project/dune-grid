@@ -128,7 +128,7 @@ namespace Dune
     void evaluate ( const HostEntity &hostEntity, unsigned int corner,
                     RangeVector &y ) const
     {
-      return asImp().evaluate( hostEntity, corner, y );
+      asImp().evaluate( hostEntity, corner, y );
     }
 
   protected:
