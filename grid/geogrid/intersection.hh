@@ -94,7 +94,12 @@ namespace Dune
 
       bool boundary () const
       {
-        return hostIntersection().boundary ();
+        return hostIntersection().boundary();
+      }
+
+      bool conforming () const
+      {
+        return hostIntersection().conforming();
       }
 
       bool neighbor () const
