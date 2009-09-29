@@ -268,14 +268,19 @@ namespace Dune
   inline void CachedCoordFunction< HostGrid, CoordFunction >
   :: insertEntity ( const HostEntity &hostEntity )
   {
-    typedef typename HostEntity :: Geometry HostGeometry;
+    const int dimension = HostEntity::dimension;
+
+    typedef typename HostEntity::Geometry HostGeometry;
+    typedef GenericGeometry::MapNumberingProvider< dimension > Map;
 
     const HostGeometry &hostGeo = hostEntity.geometry();
+    const int tid = GenericGeometry::topologyId( hostGeo.type() );
     const unsigned int numCorners = hostGeo.corners();
     for( unsigned int i = 0; i < numCorners; ++i )
     {
+      const int gi = Map::template dune2generic< dimension >( tid, i );
       RangeVector &y = cache_( hostEntity, i );
-      coordFunction_.evaluate( hostGeo[ i ], y );
+      coordFunction_.evaluate( hostGeo.corner( gi ), y );
     }
   }
 

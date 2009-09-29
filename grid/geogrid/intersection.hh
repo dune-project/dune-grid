@@ -134,6 +134,11 @@ namespace Dune
         return geo_;
       }
 
+      GeometryType type () const
+      {
+        return hostIntersection().type();
+      }
+
       int numberInSelf () const
       {
         return hostIntersection().numberInSelf();

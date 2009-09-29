@@ -28,9 +28,11 @@ namespace Dune
       CoordFunctionInterface;
       typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
 
-      typedef typename HostEntity :: Geometry HostGeometry;
+      static const int dimension = HostEntity::dimension;
 
-      typedef typename CoordFunctionInterface :: RangeVector RangeVector;
+      typedef typename HostEntity::Geometry HostGeometry;
+
+      typedef typename CoordFunctionInterface::RangeVector RangeVector;
 
       const HostGeometry &hostGeometry_;
       const CoordFunctionInterface &coordFunction_;
@@ -44,7 +46,10 @@ namespace Dune
 
       void evaluate ( unsigned int i, RangeVector &y ) const
       {
-        return coordFunction_.evaluate( hostGeometry_[ i ], y );
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const int tid = GenericGeometry::topologyId( type() );
+        const int gi = Map::template dune2generic< dimension >( tid, i );
+        return coordFunction_.evaluate( hostGeometry_.corner( gi ), y );
       }
 
       GeometryType type () const
@@ -238,9 +243,15 @@ namespace Dune
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const int tid = GenericGeometry::topologyId( hostLocalGeometry_.type() );
+
         assert( numCorners == hostLocalGeometry_.corners() );
         for( unsigned int i = 0; i < numCorners; ++i )
-          corners[ i ] = elementGeometry_.global( hostLocalGeometry_[ i ] );
+        {
+          const int gi = Map::template dune2generic< dimension >( tid, i );
+          corners[ i ] = elementGeometry_.global( hostLocalGeometry_.corner( gi ) );
+        }
       }
     };
 
