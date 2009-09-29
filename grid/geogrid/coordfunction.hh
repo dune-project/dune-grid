@@ -131,6 +131,11 @@ namespace Dune
       asImp().evaluate( hostEntity, corner, y );
     }
 
+    void adapt ()
+    {
+      asImp().adapt();
+    }
+
   protected:
     const Implementation &asImp () const
     {
@@ -160,6 +165,9 @@ namespace Dune
 
   protected:
     DiscreteCoordFunction ()
+    {}
+
+    void adapt ()
     {}
 
   private:
@@ -197,6 +205,29 @@ namespace Dune
     < DiscreteCoordFunctionInterface< ct, dimR, Impl > >
     {
       static const bool value = true;
+    };
+
+
+
+    // AdaptCoordFunction
+    // ------------------
+
+    template< class CoordFunctionInterface >
+    struct AdaptCoordFunction
+    {
+      static void adapt ( CoordFunctionInterface &coordFunction )
+      {}
+    };
+
+    template< class ct, unsigned int dimR, class Impl >
+    struct AdaptCoordFunction< DiscreteCoordFunctionInterface< ct, dimR, Impl > >
+    {
+      typedef DiscreteCoordFunctionInterface< ct, dimR, Impl > CoordFunctionInterface;
+
+      static void adapt ( CoordFunctionInterface &coordFunction )
+      {
+        coordFunction.adapt();
+      }
     };
 
   }

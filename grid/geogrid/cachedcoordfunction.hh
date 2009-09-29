@@ -87,6 +87,11 @@ namespace Dune
         assert( corner == 0 );
         return data_[ indexSet_.index( vertex ) ];
       }
+
+      void adapt ()
+      {
+        data_.resize( indexSet_.size( dimension ) );
+      }
     };
 
 
@@ -121,7 +126,7 @@ namespace Dune
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
         const Id id = idSet_.template subId< dimension >( entity, corner );
-        return data_[]  ;
+        return data_[ id ];
       }
 
       const Coordinate &operator() ( const Vertex &vertex, unsigned int corner ) const
@@ -144,6 +149,9 @@ namespace Dune
         const Id id = idSet_.id( vertex );
         return data_[ id ];
       }
+
+      void adapt ()
+      {}
     };
 
   }
@@ -183,6 +191,12 @@ namespace Dune
         coordFunction_( coordFunction ),
         cache_( hostGrid )
     {
+      buildCache();
+    }
+
+    void adapt ()
+    {
+      cache_.adapt();
       buildCache();
     }
 

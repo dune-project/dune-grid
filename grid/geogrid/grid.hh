@@ -383,7 +383,7 @@ namespace Dune
 
   private:
     HostGrid *const hostGrid_;
-    const CoordFunction &coordFunction_;
+    CoordFunction &coordFunction_;
     mutable std :: vector< LevelIndexSet * > levelIndexSets_;
     mutable LeafIndexSet *leafIndexSet_;
 
@@ -402,7 +402,7 @@ namespace Dune
      *  \param hostGrid       reference to the grid to wrap
      *  \param coordFunction  reference to the coordinate function
      */
-    GeometryGrid ( HostGrid &hostGrid, const CoordFunction &coordFunction )
+    GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
@@ -829,6 +829,10 @@ namespace Dune
      */
     void update ()
     {
+      // adapt the coordinate function
+      GeoGrid :: AdaptCoordFunction< typename CoordFunction :: Interface >
+      :: adapt( coordFunction_ );
+
       if( leafIndexSet_ != 0 )
         leafIndexSet_->update();
 
