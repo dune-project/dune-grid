@@ -61,18 +61,18 @@ namespace Dune
       enum { dimension = HostGrid :: dimension };
       enum { dimensionworld = CoordFunction :: dimRange };
 
-      typedef Intersection< const Grid, GeometryGridLeafIntersectionIterator >
+      typedef Intersection< const Grid, GeometryGridLeafIntersection >
       LeafIntersection;
-      typedef Intersection< const Grid, GeometryGridLevelIntersectionIterator >
+      typedef Intersection< const Grid, GeometryGridLevelIntersection >
       LevelIntersection;
 
       typedef IntersectionIterator
       < const Grid, GeometryGridLeafIntersectionIterator,
-          GeometryGridLeafIntersectionIterator >
+          GeometryGridLeafIntersection >
       LeafIntersectionIterator;
       typedef IntersectionIterator
       < const Grid, GeometryGridLevelIntersectionIterator,
-          GeometryGridLevelIntersectionIterator >
+          GeometryGridLevelIntersection >
       LevelIntersectionIterator;
 
       typedef Dune :: HierarchicIterator
@@ -160,13 +160,12 @@ namespace Dune
     friend class GeometryGridLevelIndexSet< const Grid >;
     friend class GeometryGridLeafIndexSet< const Grid >;
     friend class GeometryGridHierarchicIterator< const Grid >;
-    friend class GeometryGridLevelIntersectionIterator< const Grid >;
-    friend class GeometryGridLeafIntersectionIterator< const Grid >;
 
     template< int, int, class > friend class GeometryGridEntity;
     template< int, class > friend class GeometryGridEntityPointer;
     template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
     template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;
+    template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
 
   public:
