@@ -67,8 +67,7 @@ namespace Dune
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
-    template< class > friend class GeometryGridLocalIdSet;
-    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
     template< class, int > friend class IndexSetter;
 
@@ -171,6 +170,18 @@ namespace Dune
       hostEntity_ = 0;
     }
 
+    template< class IndexSet >
+    typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
+    {
+      return indexSet.template index< codimension >( hostEntity() );
+    }
+
+    template< class IdSet >
+    typename IdSet :: IdType id ( const IdSet &idSet ) const
+    {
+      return idSet.template id< codimension >( hostEntity() );
+    }
+
     void setToTarget( const HostEntity &hostEntity )
     {
       hostEntity_ = &hostEntity;
@@ -212,8 +223,7 @@ namespace Dune
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
-    template< class > friend class GeometryGridLocalIdSet;
-    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
     template< class, int > friend class IndexSetter;
 
@@ -366,6 +376,18 @@ namespace Dune
       hostElement_ = 0;
     }
 
+    template< class IndexSet >
+    typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
+    {
+      return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
+    }
+
+    template< class IdSet >
+    typename IdSet :: IdType id ( const IdSet &idSet ) const
+    {
+      return idSet.template subId< codimension >( hostElement(), subEntity_ );
+    }
+
     void setToTarget ( const HostEntity &hostEntity )
     {
       DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
@@ -420,8 +442,7 @@ namespace Dune
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
-    template< class > friend class GeometryGridLocalIdSet;
-    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
     template< class, int > friend class IndexSetter;
 
@@ -649,6 +670,18 @@ namespace Dune
     void invalidate ()
     {
       hostEntity_ = 0;
+    }
+
+    template< class IndexSet >
+    typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
+    {
+      return indexSet.template index< codimension >( hostEntity() );
+    }
+
+    template< class IdSet >
+    typename IdSet :: IdType id ( const IdSet &idSet ) const
+    {
+      return idSet.template id< codimension >( hostEntity() );
     }
 
     void setToTarget( const HostEntity &hostEntity )

@@ -88,9 +88,7 @@ namespace Dune
     template< int codim >
     IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().template index< codim >( hostEntity );
+      return Grid :: getRealImplementation( entity ).index( hostIndexSet() );
     }
 
     template< class Entity >
@@ -223,9 +221,7 @@ namespace Dune
     template< int codim >
     IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-      const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
-      return hostIndexSet().template index< codim >( hostEntity );
+      return Grid :: getRealImplementation( entity ).index( hostIndexSet() );
     }
 
     template< class Entity >
@@ -324,7 +320,7 @@ namespace Dune
     template< int codim >
     IdType id ( const typename Traits :: template Codim< codim > :: Entity &entity ) const
     {
-      return hostIdSet_.id< codim >( Grid :: template getHostEntity< codim >( entity ) );
+      return Grid :: getRealImplementation( entity ).id( hostIdSet_ );
     }
 
     template< class Entity >
