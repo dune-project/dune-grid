@@ -17,6 +17,7 @@
 #include <dune/grid/geogrid/idset.hh>
 #include <dune/grid/geogrid/indexsets.hh>
 #include <dune/grid/geogrid/datahandle.hh>
+#include <dune/grid/geogrid/backuprestore.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
@@ -267,10 +268,14 @@ namespace Dune
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
-      < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
+      < HostGrid :: dimension, CoordFunction :: dimRange,
+          typename HostGrid :: ctype,
           GeoGrid :: GridFamily< HostGrid, CoordFunction > >,
       public GeoGrid :: ExportParams< HostGrid, CoordFunction >,
-      public GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >
+      public GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >,
+      public GeoGrid :: BackupRestoreFacilities
+      < GeometryGrid< HostGrid, CoordFunction >,
+          Capabilities :: hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > > :: v >
       /** \endcond */
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;

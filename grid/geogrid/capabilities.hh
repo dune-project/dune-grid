@@ -67,7 +67,7 @@ namespace Dune
     template< class HostGrid, class CoordFunction >
     struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = false;
+      static const bool v = hasBackupRestoreFacilities< HostGrid > :: v;
     };
 
     template< class HostGrid, class CoordFunction >
