@@ -106,7 +106,7 @@ namespace Dune
       GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
       if( !geo )
       {
-        CoordVector coords( hostEntity.geometry(), grid().coordFunction() );
+        CoordVector coords( hostEntity().geometry(), grid().coordFunction() );
         geo = GeometryImpl( type(), coords );
       }
       return geo_;
@@ -255,7 +255,7 @@ namespace Dune
       GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
       if( !geo )
       {
-        CoordVector coords( hostEntity.geometry(), subEntity_, grid().coordFunction() );
+        CoordVector coords( hostElement().geometry(), subEntity_, grid().coordFunction() );
         geo = GeometryImpl( type(), coords );
       }
       return geo_;
