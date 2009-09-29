@@ -16,15 +16,16 @@ namespace Dune
 
     template< class Grid, class HostIdSet >
     class IdSet
-      : public Dune::IdSet
-        < Grid, IdSet< Grid, HostIdSet >, typename HostIdSet::IdType >
+      : public Dune::IdSet< Grid, IdSet< Grid, HostIdSet >, typename HostIdSet::IdType >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef Dune::IdSet< Grid, IdSet< Grid, HostIdSet >, typename HostIdSet::IdType > Base;
 
-      const HostIdSet &hostIdSet_;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
     public:
       typedef typename HostIdSet::IdType IdType;
+
+      using Base::subId;
 
       IdSet ( const HostIdSet &hostIdSet )
         : hostIdSet_( hostIdSet )
@@ -42,12 +43,6 @@ namespace Dune
         return id< Entity :: codimension >( entity );
       }
 
-      template< int codim >
-      IdType subId ( const typename Traits::template Codim< 0 >::Entity &entity, int i ) const
-      {
-        return hostIdSet_.template subId< codim >( Grid::template getHostEntity< 0 >( entity ), i );
-      }
-
       IdType subId ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int codim ) const
       {
         return hostIdSet_.template subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
@@ -56,10 +51,12 @@ namespace Dune
     private:
       IdSet ( const IdSet & );
       IdSet &operator= ( const IdSet & );
+
+      const HostIdSet &hostIdSet_;
     };
 
   }
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_IDSET_HH

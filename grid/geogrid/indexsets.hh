@@ -89,6 +89,12 @@ namespace Dune
         return subIndex< Entity::codimension >( entity, i, subcodim );
       }
 
+      // This one is only necessary due to the using directive
+      IndexType subIndex ( const typename Grid::template Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
+      {
+        return subIndex< 0 >( entity, i, subcodim );
+      }
+
       IndexType size ( GeometryType type ) const
       {
         return hostIndexSet().size( type );
