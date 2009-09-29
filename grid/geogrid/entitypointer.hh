@@ -239,8 +239,7 @@ namespace Dune
 
       static const bool fake = Traits :: fake;
 
-      typedef EntityPointer< BaseTraits, fake > Base;
-      typedef EntityPointer< BaseTraits, fake > base;
+      typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
     private:
       typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
