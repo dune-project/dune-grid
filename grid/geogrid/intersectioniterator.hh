@@ -290,7 +290,7 @@ namespace Dune
     typedef GeometryGridIntersectionWrapper< Intersection > IntersectionWrapper;
     typedef GeometryGridStorage< IntersectionWrapper > IntersectionStorage;
 
-    const EntityPointer inside_;
+    EntityPointer inside_;
     HostIntersectionIterator hostIterator_;
     mutable IntersectionWrapper *intersection_;
 
