@@ -3,9 +3,8 @@
 #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
-#include <vector>
-
 #include <dune/grid/geogrid/entitypointer.hh>
+#include <dune/grid/geogrid/cache.hh>
 #include <dune/grid/geogrid/storage.hh>
 
 namespace Dune
@@ -72,7 +71,7 @@ namespace Dune
 
     const Grid *grid_;
     const HostIntersection *hostIntersection_;
-    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -131,8 +130,10 @@ namespace Dune
       if( !geo )
       {
         const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
-        corners_.resize( hostGeo.corners() );
-        for( unsigned int i = 0; i < corners_.size(); ++i )
+
+        const unsigned int numCorners = hostGeo.corners();
+        corners_.reserve( numCorners );
+        for( unsigned int i = 0; i < numCorners; ++i )
           coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
         geo = GeometryImpl( hostGeo.type(), corners_ );
       }

@@ -6,6 +6,7 @@
 #include <dune/grid/common/referenceelements.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
+#include <dune/grid/geogrid/cache.hh>
 
 namespace Dune
 {
@@ -67,7 +68,7 @@ namespace Dune
 
     const Grid *grid_;
     const HostEntity *hostEntity_;
-    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -107,8 +108,10 @@ namespace Dune
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         const CoordFunction &coordFunction = grid().coordFunction();
-        corners_.resize( hostGeo.corners() );
-        for( unsigned int i = 0; i < corners_.size(); ++i )
+
+        const unsigned int numCorners = hostGeo.corners();
+        corners_.reserve( numCorners );
+        for( unsigned int i = 0; i < numCorners; ++i )
           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
         geo = GeometryImpl( type(), corners_ );
       }
@@ -196,7 +199,7 @@ namespace Dune
     const Grid *grid_;
     const HostElement *hostElement_;
     unsigned int subEntity_;
-    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable Geometry geo_;
 
   public:
@@ -260,11 +263,13 @@ namespace Dune
       {
         const ReferenceElement< ctype, dimension > &refElement
           = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
-        corners_.resize( refElement.size( subEntity_, codimension, dimension ) );
+        const unsigned int numCorners
+          = refElement.size( subEntity_, codimension, dimension );
+        corners_.reserve( numCorners );
 
         const HostGeometry &hostGeo = hostElement().geometry();
         const CoordFunction &coordFunction = grid().coordFunction();
-        for( unsigned int i = 0; i < corners_.size(); ++i )
+        for( unsigned int i = 0; i < numCorners; ++i )
         {
           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
           coordFunction.evaluate( hostGeo[ j ], corners_[ i ] );
@@ -378,7 +383,7 @@ namespace Dune
 
     const Grid *grid_;
     const HostEntity *hostEntity_;
-    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -419,8 +424,10 @@ namespace Dune
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         const CoordFunction &coordFunction = grid().coordFunction();
-        corners_.resize( hostGeo.corners() );
-        for( unsigned int i = 0; i < corners_.size(); ++i )
+
+        const unsigned int numCorners = hostGeo.corners();
+        corners_.reserve( numCorners );
+        for( unsigned int i = 0; i < numCorners; ++i )
           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
         geo = GeometryImpl( type(), corners_ );
       }
