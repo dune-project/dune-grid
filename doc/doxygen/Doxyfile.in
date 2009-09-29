@@ -477,7 +477,9 @@ INPUT                  = @srcdir@/mainpage \
                          @top_srcdir@/grid/uggrid/uggridfactory.hh \
                          @top_srcdir@/grid/utility \
                          @top_srcdir@/grid/yaspgrid.hh \
-                         @top_srcdir@/grid/genericgeometry
+                         @top_srcdir@/grid/genericgeometry \
+                         @top_srcdir@/grid/geogrid.hh \
+                         @top_srcdir@/grid/geogrid
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -543,7 +545,8 @@ IMAGE_PATH             = @top_srcdir@/grid/sgrid \
                          @top_srcdir@/grid/io/file/dgfparser/test \
                          @top_srcdir@/doc/appl/refelements \
                          @top_srcdir@/doc/refinement \
-                         @top_srcdir@/grid/genericgeometry/doc
+                         @top_srcdir@/grid/genericgeometry/doc \
+                         @top_srcdir@/grid/geogrid
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 

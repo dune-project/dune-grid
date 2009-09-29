@@ -22,21 +22,6 @@ namespace Dune
   // Capabilities
   // ------------
 
-  /** \brief capability structures
-   *
-   *  In DUNE, capabilities are flags indicating support for some feature.
-   *  They are set by specializing a structure for a certain implementation.
-   *
-   *  An example from dune-grid is:
-   *  \code
-   *  template< class Grid >
-   *  struct isParallel
-   *  {
-   *    static bool v = false;
-   *  };
-   *  \endcode
-   *  Here, the capability isParallel is defined and defaults to false.
-   */
   namespace Capabilities
   {
 
@@ -47,7 +32,6 @@ namespace Dune
     struct hasEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
     {
       static const bool v = true;
-      //static const bool v = ((codim == 0) || (codim == HostGrid :: dimension));
     };
 
 

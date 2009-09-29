@@ -20,6 +20,7 @@ namespace Dune
 
     /** \class EntityBase
      *  \brief actual implementation of the entity
+     *  \ingroup GeoGrid
      *
      *  \tparam  codim  codimension of the entity
      *  \tparam  Grid   GeometryGrid, this entity belongs to
@@ -33,6 +34,7 @@ namespace Dune
 
     /** \class Entity
      *  \brief DUNE-conform implementation of the entity
+     *  \ingroup GeoGrid
      *
      *  This class merely changes the template parameters of the entity to make
      *  DUNE happy. The actual implementation of the entity can be found in
@@ -47,6 +49,7 @@ namespace Dune
 
     /** \class EntityWrapper
      *  \brief wrapper around the DUNE entity interface
+     *  \ingroup GeoGrid
      *
      *  This class wraps the DUNE interface for the entity, making creation
      *  and initialization a little easier. It is similar to

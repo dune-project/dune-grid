@@ -67,6 +67,9 @@
 	/** @defgroup ALUConformGrid ALUConformGrid 
 		@ingroup GridImplementations */
 
+        /** \defgroup GeoGrid GeometryGrid
+            \ingroup GridImplementations */
+
 	/** @defgroup OneDGrid OneDGrid 
 		@ingroup GridImplementations */
 

@@ -23,11 +23,6 @@
 
 #include <dune/grid/geogrid/identity.hh>
 
-/** \brief namespace shared by all DUNE modules
- *
- *  This is DUNE's main name space. All DUNE modules provide their
- *  functionality though this name space (or a subspace of it).
- */
 namespace Dune
 {
 
@@ -54,8 +49,8 @@ namespace Dune
 
 
 
-  // GenericGeometry :: GeometryTraits
-  // ---------------------------------
+  // GenericGeometry::GeometryTraits
+  // -------------------------------
 
   namespace GenericGeometry
   {
@@ -104,7 +99,9 @@ namespace Dune
 
 
 
-  /** \brief namespace containing the implementations of GeometryGrid */
+  /** \brief namespace containing the implementations of GeometryGrid
+   *  \ingroup GeoGrid
+   */
   namespace GeoGrid
   {
 
@@ -231,6 +228,7 @@ namespace Dune
 
   /** \class GeometryGrid
    *  \brief grid wrapper replacing the geometries
+   *  \ingroup GeoGrid
    *
    *  GeometryGrid wraps another DUNE grid and replaces its geometry by the
    *  generic geometries from dune-grid. These are linear (respectively
