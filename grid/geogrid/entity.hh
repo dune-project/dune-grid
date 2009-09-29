@@ -66,6 +66,8 @@ namespace Dune
     typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
 
   private:
+    friend class GeometryGridEntityPointer< codimension, const Grid >;
+
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
     template< class > friend class GeometryGridLocalIdSet;
@@ -324,19 +326,21 @@ namespace Dune
       return *geo_;
     }
 
-    template< int cc >
+    template< int codim >
     int count () const
     {
-      return hostEntity().template count< cc >();
+      return hostEntity().template count< codim >();
     }
 
-    template< int cc >
-    typename Grid :: template Codim< cc > :: EntityPointer
+    template< int codim >
+    typename Grid :: template Codim< codim > :: EntityPointer
     entity ( int i ) const
     {
+      typedef typename Grid :: template Codim< codim > :: EntityPointer EntityPointer;
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      EntityPointerImpl impl( grid_, hostEntity().template entity< cc >( i ) );
+
+      EntityPointerImpl impl( grid_, hostEntity().template entity< codim >( i ) );
       return MakeableEntityPointer( impl );
     }
 

@@ -63,6 +63,7 @@ namespace Dune
     typedef typename HostGrid :: Traits :: LevelIndexSet HostLevelIndexSet;
 
     const Grid *grid_;
+    int level_;
     const HostLevelIndexSet *hostIndexSet_;
 
   public:
@@ -75,8 +76,10 @@ namespace Dune
     Base;
 
     GeometryGridLevelIndexSet ( const Grid &grid, int level )
+      : grid_( &grid ),
+        level_( level )
     {
-      update( grid, level );
+      update();
     }
 
     template< int codim >
@@ -120,25 +123,25 @@ namespace Dune
     typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
     begin () const
     {
-      return grid_->template leafbegin< codim, pitype >();
+      return grid_->template lbegin< codim, pitype >( level_ );
     }
 
     template< int codim, PartitionIteratorType pitype >
     typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
     end () const
     {
-      return grid_->template leafend< codim, pitype >();
+      return grid_->template lend< codim, pitype >( level_ );
     }
 
-    void update ( const Grid &grid, int level )
+    void update ()
     {
-      grid_ = &grid;
-      hostIndexSet_ = &(grid.hostGrid().levelIndexSet( level ));
+      hostIndexSet_ = &(grid_->hostGrid().levelIndexSet( level_ ));
     }
 
   private:
     const HostLevelIndexSet &hostIndexSet () const
     {
+      assert( hostIndexSet_ != 0 );
       return *hostIndexSet_;
     }
   };
@@ -193,8 +196,9 @@ namespace Dune
     Base;
 
     GeometryGridLeafIndexSet ( const Grid &grid )
+      : grid_( &grid )
     {
-      update( grid );
+      update();
     }
 
     template< int codim >
@@ -248,15 +252,15 @@ namespace Dune
       return grid_->template leafend< codim, pitype >();
     }
 
-    void update ( const Grid &grid )
+    void update ()
     {
-      grid_ = &grid;
-      hostIndexSet_ = &(grid.hostGrid().leafIndexSet());
+      hostIndexSet_ = &(grid_->hostGrid().leafIndexSet());
     }
 
   private:
     const HostLeafIndexSet &hostIndexSet () const
     {
+      assert( hostIndexSet_ != 0 );
       return *hostIndexSet_;
     }
   };
@@ -285,7 +289,7 @@ namespace Dune
     template< int codim >
     IdType id ( const typename Traits :: template Codim< codim > :: Entity &entity ) const
     {
-      return hostIdSet_.id( *(Grid :: template getHostEntity< codim >( entity )) );
+      return hostIdSet_.id< codim >( *(Grid :: template getHostEntity< codim >( entity )) );
     }
 
     template< class Entity >
@@ -297,7 +301,7 @@ namespace Dune
     template< int codim >
     IdType subId ( const typename Traits :: template Codim< 0 > :: Entity &entity, int i) const
     {
-      return hostIdSet_.subId( *(Grid :: template getHostEntity< 0 >( entity )), i );
+      return hostIdSet_.template subId< codim >( *(Grid :: template getHostEntity< 0 >( entity )), i );
     }
 
   private:

@@ -176,26 +176,23 @@ namespace Dune
     template< class, class > friend class GeometryGridIdSet;
 
   public:
-    /** \todo Should not be public */
     typedef HostGrid HostGridType;
 
-    //! type of the used GridFamily for this grid
     typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
-
-    //! the Traits
     typedef typename GridFamily :: Traits Traits;
 
-    //! The type used to store coordinates, inherited from the HostGrid
     typedef typename Traits :: ctype ctype;
 
     typedef typename Traits :: HierarchicIterator HierarchicIterator;
     typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
+    typedef typename Traits :: LeafIndexSet LeafIndexSet;
+    typedef typename Traits :: LevelIndexSet LevelIndexSet;
+
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
-    //! Model of Dune::CollectiveCommunication
     typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
     template< int codim >
@@ -234,48 +231,41 @@ namespace Dune
   private:
     HostGrid *const hostGrid_;
     const CoordFunction &coordFunction_;
-    std :: vector
-    < GeometryGridLevelIndexSet< const Grid >* > levelIndexSets_;
-    GeometryGridLeafIndexSet< const Grid > leafIndexSet_;
+    mutable std :: vector< LevelIndexSet * > levelIndexSets_;
+    mutable LeafIndexSet *leafIndexSet_;
 
     GlobalIdSet globalIdSet_;
     LocalIdSet localIdSet_;
 
   public:
-    /** \brief constructor
-     *
-     *  \param[in]  hostGrid       host grid to be wrapped
-     *  \param[in]  coordFunction  function to apply to vertex coordinates
-     */
     GeometryGrid ( HostGrid &hostGrid, const CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
-        leafIndexSet_( *this ),
+        levelIndexSets_( hostGrid.maxLevel()+1 ),
+        leafIndexSet_( 0 ),
         globalIdSet_( hostGrid.globalIdSet() ),
         localIdSet_( hostGrid.localIdSet() )
     {
-      setIndices();
+      for( int i = 0; i < hostGrid.maxLevel(); ++i )
+        levelIndexSets_[ i ] = 0;
     }
 
-
-    //! desctructor
     ~GeometryGrid ()
     {
-      // Delete level index sets
+      if( leafIndexSet_ != 0 )
+        delete leafIndexSet_;
+
       for( unsigned int i = 0; i < levelIndexSets_.size(); ++i )
       {
-        if( levelIndexSets_[ i ] )
+        if( levelIndexSets_[ i ] != 0 )
           delete( levelIndexSets_[ i ] );
       }
     }
-
 
     //**********************************************************
     // The Interface Methods
     //**********************************************************
 
-
-    //! return grid name
     std :: string name () const
     {
       return std :: string( "GeometryGrid< " )
@@ -357,31 +347,24 @@ namespace Dune
       return GeometryGridLeafIterator< codim, pitype, const Grid >( this, true );
     }
 
-
-    /** \brief Number of grid entities per level and codim
-     */
     int size ( int level, int codim ) const
     {
-      return hostGrid().size(level,codim);
+      return hostGrid().size( level, codim );
     }
 
-
-    //! number of leaf entities per codim in this process
-    int size (int codim) const {
-      return leafIndexSet().size(codim);
-    }
-
-
-    //! number of entities per level, codim and geometry type in this process
-    int size (int level, GeometryType type) const {
-      return levelIndexSets_[level]->size(type);
-    }
-
-
-    //! number of leaf entities per codim and geometry type in this process
-    int size (GeometryType type) const
+    int size ( int codim ) const
     {
-      return leafIndexSet().size(type);
+      return hostGrid().size( codim );
+    }
+
+    int size ( int level, GeometryType type ) const
+    {
+      return hostGrid().size( level, type );
+    }
+
+    int size ( GeometryType type ) const
+    {
+      return hostGrid().size( type );
     }
 
     const GlobalIdSet &globalIdSet () const
@@ -394,88 +377,60 @@ namespace Dune
       return localIdSet_;
     }
 
-
-    /** \brief Access to the LevelIndexSets */
-    const typename Traits::LevelIndexSet& levelIndexSet(int level) const
+    const LevelIndexSet &levelIndexSet ( int level ) const
     {
-      if (level<0 || level>maxLevel())
-        DUNE_THROW(GridError, "levelIndexSet of nonexisting level " << level << " requested!");
-      return *levelIndexSets_[level];
+      if( (level < 0) || (level > maxLevel()) )
+        DUNE_THROW( GridError, "levelIndexSet of nonexisting level " << level << " requested." );
+      if( levelIndexSets_[ level ] == 0 )
+        levelIndexSets_[ level ] = new LevelIndexSet( *this, level );
+      return *levelIndexSets_[ level ];
     }
 
-
-    /** \brief Access to the LeafIndexSet */
-    const typename Traits::LeafIndexSet& leafIndexSet() const
+    const LeafIndexSet &leafIndexSet () const
     {
-      return leafIndexSet_;
+      if( leafIndexSet_ == 0 )
+        leafIndexSet_ = new LeafIndexSet( *this );
+      return *leafIndexSet_;
     }
 
-
-    /** @name Grid Refinement Methods */
-    /*@{*/
-
-
-    /** global refinement
-     * \todo optimize implementation
-     */
     void globalRefine ( int refCount )
     {
       hostGrid().globalRefine( refCount );
+      updateIndexSets();
     }
 
-    /** \brief Mark entity for refinement
-     *
-     * This only works for entities of codim 0.
-     * The parameter is currently ignored
-     *
-     * \return <ul>
-     * <li> true, if marking was succesfull </li>
-     * <li> false, if marking was not possible </li>
-     * </ul>
-     */
     bool mark( int refCount, const typename Codim< 0 > :: EntityPointer &entity )
     {
       return hostGrid().mark( refCount, getHostEntity< 0 >( *entity ) );
     }
 
-    /** \brief Return refinement mark for entity
-     *
-     * \return refinement mark (1,0,-1)
-     */
     int getMark ( const typename Codim< 0 > :: EntityPointer &entity ) const
     {
       return hostGrid().getMark( getHostEntity< 0 >( *entity ) );
     }
 
-    //! \todo Please doc me !
     bool preAdapt ()
     {
       return hostGrid().preAdapt();
     }
 
-
-    //! Triggers the grid refinement process
     bool adapt ()
     {
-      return hostGrid().adapt();
+      bool ret = hostGrid().adapt();
+      updateIndexSets();
+      return ret;
     }
 
-    /** \brief Clean up refinement markers */
     void postAdapt ()
     {
       return hostGrid().postAdapt();
     }
 
-    /*@}*/
-
-    /** \brief Size of the overlap on the leaf level */
     unsigned int overlapSize ( int codim ) const
     {
       return hostGrid().overlapSize( codim );
     }
 
-
-    /** \brief Size of the ghost cell layer on the leaf level */
     unsigned int ghostSize( int codim ) const
     {
       return hostGrid().ghostSize( codim );
@@ -583,21 +538,30 @@ namespace Dune
 
   private:
     //! compute the grid indices and ids
-    void setIndices ()
+    void updateIndexSets ()
     {
-      for( int i = levelIndexSets_.size(); i <= maxLevel(); ++i )
+      if( leafIndexSet_ != 0 )
+        leafIndexSet_->update();
+
+      const int newNumLevels = maxLevel()+1;
+      const int oldNumLevels = levelIndexSets_.size();
+      int updateLevels = std :: min( oldNumLevels, newNumLevels );
+
+      for( int i = 0; i < updateLevels; ++i )
       {
-        GeometryGridLevelIndexSet< const Grid > *p
-          = new GeometryGridLevelIndexSet< const Grid >( *this, i );
-        levelIndexSets_.push_back( p );
+        if( levelIndexSets_[ i ] != 0 )
+          levelIndexSets_[ i ]->update();
       }
 
-      for( int i = 0; i <= maxLevel(); ++i )
+      for( int i = updateLevels; i < oldNumLevels; ++i )
       {
-        if( levelIndexSets_[ i ] )
-          levelIndexSets_[ i ]->update( *this, i );
+        if( levelIndexSets_[ i ] != 0 )
+          delete levelIndexSets_[ i ];
       }
-      leafIndexSet_.update( *this );
+
+      levelIndexSets_.resize( newNumLevels );
+      for( int i = updateLevels; i < newNumLevels; ++i )
+        levelIndexSets_[ i ] = 0;
     }
   }; // end Class GeometryGrid
 
