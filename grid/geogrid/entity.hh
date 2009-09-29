@@ -212,9 +212,8 @@ namespace Dune
         typedef typename HostGridEntityPointer::Entity::Geometry HostGeo;
         const HostGeo& hostGeo = hostEntity_->geometry();
         corners_.resize(hostGeo.corners());
-        for (int i=0; i<corners_.size(); ++i) {
+        for ( unsigned int i = 0; i < corners_.size(); ++i )
           func(hostGeo[i],corners_[i]);
-        }
         geo_ = new MakeableGeo(GeoImpl(type(),corners_));
       }
       return *geo_;
@@ -375,9 +374,8 @@ namespace Dune
         typedef typename HostGridEntityPointer::Entity::Geometry HostGeo;
         const HostGeo& hostGeo = hostEntity_->geometry();
         corners_.resize(hostGeo.corners());
-        for (int i=0; i<corners_.size(); ++i) {
+        for ( unsigned int i = 0; i < corners_.size(); ++i )
           func(hostGeo[i],corners_[i]);
-        }
         geo_ = new MakeableGeo(GeoImpl(type(),corners_));
       }
       return *geo_;

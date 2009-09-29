@@ -136,9 +136,8 @@ namespace Dune
         typedef typename HostLeafIntersectionIterator::Geometry HostGeo;
         const HostGeo& hostGeo = hostIterator_->intersectionGlobal();
         corners_.resize(hostGeo.corners());
-        for (int i=0; i<corners_.size(); ++i) {
+        for( unsigned int i = 0; i < corners_.size(); ++i )
           func(hostGeo[i],corners_[i]);
-        }
         intersectionGlobal_ = new MakeableGeo(GeoImpl(hostGeo.type(),corners_) );
       }
       return *intersectionGlobal_;
@@ -309,9 +308,8 @@ namespace Dune
         typedef typename HostLevelIntersectionIterator::Geometry HostGeo;
         const HostGeo& hostGeo = hostIterator_->intersectionGlobal();
         corners_.resize(hostGeo.corners());
-        for (int i=0; i<corners_.size(); ++i) {
+        for( unsigned int i = 0; i < corners_.size(); ++i )
           func(hostGeo[i],corners_[i]);
-        }
         intersectionGlobal_ = new MakeableGeo(GeoImpl(hostGeo.type(),corners_) );
       }
       return *intersectionGlobal_;

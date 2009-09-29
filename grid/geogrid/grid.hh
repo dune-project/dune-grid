@@ -63,36 +63,93 @@ namespace Dune
     {};
   }
 
-  template<int dim, class HostGrid>
+  template< class HostGrid >
   struct GeometryGridFamily
   {
-    typedef GridTraits<
-        dim,
-        func::dimW,
-        Dune::GeometryGrid<HostGrid>,
-        Dune::GenericGeometry::Geometry,
-        GeometryGridEntity,
-        GeometryGridEntityPointer,
-        GeometryGridLevelIterator,
-        GeometryGridLeafIntersectionIterator,  // leaf  intersection
-        GeometryGridLevelIntersectionIterator, // level  intersection
-        GeometryGridLeafIntersectionIterator,  // leaf  intersection iterator
-        GeometryGridLevelIntersectionIterator, // level  intersection iterator
-        GeometryGridHierarchicIterator,
-        GeometryGridLeafIterator,
-        GeometryGridLevelIndexSet< const GeometryGrid<HostGrid> >,
-        GeometryGridLevelIndexSetTypes< const GeometryGrid<HostGrid> >,
-        GeometryGridLeafIndexSet< const GeometryGrid<HostGrid> >,
-        GeometryGridLeafIndexSetTypes< const GeometryGrid<HostGrid> >,
-        GeometryGridGlobalIdSet< const GeometryGrid<HostGrid> >,
-        typename HostGrid::Traits::GlobalIdSet::IdType,
-        GeometryGridLocalIdSet< const GeometryGrid<HostGrid> >,
-        typename HostGrid::Traits::LocalIdSet::IdType,
-        CollectiveCommunication<GeometryGrid<HostGrid> >,
-        Dune::GenericGeometry::LocalGeometry
-        > Traits;
-  };
+    struct Traits
+    {
+      typedef GeometryGrid< HostGrid > Grid;
 
+      dune_static_assert( (int)HostGrid :: dimensionworld == (int)func :: dimG,
+                          "HostGrid and GridFunction are incompatible." );
+      enum { dimension = HostGrid :: dimension };
+      enum { dimensionworld = func :: dimW };
+
+      typedef Intersection< const Grid, GeometryGridLeafIntersectionIterator >
+      LeafIntersection;
+      typedef Intersection< const Grid, GeometryGridLevelIntersectionIterator >
+      LevelIntersection;
+
+      typedef IntersectionIterator
+      < const Grid, GeometryGridLeafIntersectionIterator,
+          GeometryGridLeafIntersectionIterator >
+      LeafIntersectionIterator;
+      typedef IntersectionIterator
+      < const Grid, GeometryGridLevelIntersectionIterator,
+          GeometryGridLevelIntersectionIterator >
+      LevelIntersectionIterator;
+
+      typedef Dune :: HierarchicIterator
+      < const Grid, GeometryGridHierarchicIterator >
+      HierarchicIterator;
+
+      template< int codim >
+      struct Codim
+      {
+        typedef Dune :: Geometry
+        < dimension-codim, dimensionworld, const Grid,
+            Dune :: GenericGeometry :: Geometry >
+        Geometry;
+        typedef Dune :: Geometry
+        < dimension-codim, dimension, const Grid,
+            Dune :: GenericGeometry :: LocalGeometry >
+        LocalGeometry;
+
+        typedef Dune :: Entity
+        < codim, dimension, const Grid, GeometryGridEntity >
+        Entity;
+        typedef Dune :: EntityPointer
+        < const Grid, GeometryGridEntityPointer< codim, const Grid > >
+        EntityPointer;
+
+        template< PartitionIteratorType pitype >
+        struct Partition
+        {
+          typedef Dune :: LeafIterator
+          < codim, pitype, const Grid, GeometryGridLeafIterator >
+          LeafIterator;
+          typedef Dune :: LevelIterator
+          < codim, pitype, const Grid, GeometryGridLevelIterator >
+          LevelIterator;
+        };
+
+        typedef typename Partition< All_Partition > :: LeafIterator
+        LeafIterator;
+        typedef typename Partition< All_Partition > :: LevelIterator
+        LevelIterator;
+      };
+
+      typedef GeometryGridLeafIndexSet< const Grid > LeafIndexSet;
+      typedef GeometryGridLevelIndexSet< const Grid > LevelIndexSet;
+
+      typedef GeometryGridGlobalIdSet< const Grid > GlobalIdSet;
+      typedef GeometryGridLocalIdSet< const Grid > LocalIdSet;
+
+      typedef typename HostGrid :: Traits :: CollectiveCommunication
+      CollectiveCommunication;
+
+      template< PartitionIteratorType pitype >
+      struct Partition
+      {
+        typedef Dune :: GridView
+        < DefaultLeafGridViewTraits< const Grid, pitype > >
+        LeafGridView;
+        typedef Dune :: GridView
+        < DefaultLevelGridViewTraits< const Grid, pitype > >
+        LevelGridView;
+      };
+    };
+  };
 
 
 
@@ -105,11 +162,12 @@ namespace Dune
   /** \brief [<em> provides \ref Dune::Grid </em>]
    *
    */
-  template <class HostGrid>
-  class GeometryGrid :
-    public GridDefaultImplementation  <HostGrid::dimension, func::dimW, double, GeometryGridFamily<HostGrid::dimension,HostGrid> >
+  template< class HostGrid >
+  class GeometryGrid
+    : public GridDefaultImplementation
+      < HostGrid :: dimension, func :: dimW, double,
+          GeometryGridFamily< HostGrid > >
   {
-
     friend class GeometryGridLevelIndexSet<const GeometryGrid<HostGrid> >;
     friend class GeometryGridLeafIndexSet<const GeometryGrid<HostGrid> >;
     friend class GeometryGridGlobalIdSet<const GeometryGrid<HostGrid> >;
@@ -129,7 +187,6 @@ namespace Dune
     friend class GeometryGridEntity;
 
   public:
-
     /** \todo Should not be public */
     typedef HostGrid HostGridType;
 
@@ -138,15 +195,24 @@ namespace Dune
     //**********************************************************
 
     //! type of the used GridFamily for this grid
-    typedef GeometryGridFamily<HostGrid::dimension,HostGrid>  GridFamily;
+    typedef GeometryGridFamily< HostGrid > GridFamily;
 
     //! the Traits
-    typedef typename GeometryGridFamily<HostGrid::dimension,HostGrid>::Traits Traits;
+    typedef typename GridFamily :: Traits Traits;
 
     //! The type used to store coordinates, inherited from the HostGrid
-    typedef typename HostGrid::ctype ctype;
+    typedef typename HostGrid :: ctype ctype;
 
+  private:
+    HostGrid* hostgrid_;
+    std :: vector
+    < GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > >* >
+    levelIndexSets_;
+    GeometryGridLeafIndexSet< const GeometryGrid< HostGrid > > leafIndexSet_;
+    GeometryGridGlobalIdSet< const GeometryGrid< HostGrid > > globalIdSet_;
+    GeometryGridLocalIdSet< const GeometryGrid< HostGrid > > localIdSet_;
 
+  public:
     /** \brief Constructor
      */
     explicit GeometryGrid(HostGrid& hostgrid) :
@@ -170,9 +236,10 @@ namespace Dune
 
 
     //! return grid name
-    std::string name() const
+    std :: string name () const
     {
-      return "GeometryGrid";
+      return std :: string( "GeometryGrid< " )
+             + hostGrid().name() + std :: string( " >" );
     }
 
 
@@ -410,10 +477,10 @@ namespace Dune
 #endif
 
 
-    /** dummy collective communication */
+    //! Obtain CollectiveCommunication object (taken from host grid)
     const CollectiveCommunication<GeometryGrid>& comm () const
     {
-      return ccobj;
+      return hostGrid().comm();
     }
 
 
@@ -427,6 +494,11 @@ namespace Dune
       return *hostgrid_;
     }
 
+    //! Obtain the host grid wrapped this this GeometryGrid
+    const HostGridType &hostGrid () const
+    {
+      return *hostgrid_;
+    }
 
     //! Returns the hostgrid entity encapsulated in given subgrid entity
     template <int codim>
@@ -435,56 +507,36 @@ namespace Dune
       return getRealImplementation(e).hostEntity_;
     }
 
-  protected:
-
-    //! The host grid which contains the actual grid hierarchy structure
-    HostGrid* hostgrid_;
-
   private:
-
     //! compute the grid indices and ids
-    void setIndices()
+    void setIndices ()
     {
       localIdSet_.update();
-
       globalIdSet_.update();
 
       // //////////////////////////////////////////
       //   Create the index sets
       // //////////////////////////////////////////
-      for (int i=levelIndexSets_.size(); i<=maxLevel(); i++) {
-        GeometryGridLevelIndexSet<const GeometryGrid<HostGrid> >* p
-          = new GeometryGridLevelIndexSet<const GeometryGrid<HostGrid> >();
-        levelIndexSets_.push_back(p);
+      for( int i = levelIndexSets_.size(); i <= maxLevel(); ++i )
+      {
+        GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > > *p
+          = new GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > >();
+        levelIndexSets_.push_back( p );
       }
 
-      for (int i=0; i<=maxLevel(); i++)
-        if (levelIndexSets_[i])
-          levelIndexSets_[i]->update(*this, i);
-
+      for( int i = 0; i <= maxLevel(); ++i )
+      {
+        if( levelIndexSets_[ i ] )
+          levelIndexSets_[ i ]->update( *this, i );
+      }
       leafIndexSet_.update(*this);
-
     }
-
-    //! \todo Please doc me !
-    CollectiveCommunication<GeometryGrid> ccobj;
-
-    //! Our set of level indices
-    std::vector<GeometryGridLevelIndexSet<const GeometryGrid<HostGrid> >*> levelIndexSets_;
-
-    //! \todo Please doc me !
-    GeometryGridLeafIndexSet<const GeometryGrid<HostGrid> > leafIndexSet_;
-
-    //! \todo Please doc me !
-    GeometryGridGlobalIdSet<const GeometryGrid<HostGrid> > globalIdSet_;
-
-    //! \todo Please doc me !
-    GeometryGridLocalIdSet<const GeometryGrid<HostGrid> > localIdSet_;
-
   }; // end Class GeometryGrid
 
 
 
+  // Capabilities
+  // ------------
 
   namespace Capabilities
   {
