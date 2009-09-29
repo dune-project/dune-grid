@@ -35,25 +35,29 @@ namespace Dune
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
-      typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
+      typedef typename HostGrid :: template Codim< codimension > :: Entity
+      HostEntity;
+      typedef typename HostGrid :: template Codim< codimension > :: Geometry
+      HostGeometry;
 
     private:
-      const HostGeometry &hostGeometry_;
+      const HostEntity &hostEntity_;
       const CoordFunction &coordFunction_;
 
     public:
-      CoordVector ( const HostGeometry &hostGeometry,
+      CoordVector ( const HostEntity &hostEntity,
                     const CoordFunction &coordFunction )
-        : hostGeometry_( hostGeometry ),
+        : hostEntity_( hostEntity ),
           coordFunction_( coordFunction )
       {}
 
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
-        assert( numCorners == hostGeometry_.corners() );
+        const HostGeometry &hostGeo = hostEntity_.geometry();
+        assert( numCorners == hostGeo.corners() );
         for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction_.evaluate( hostGeometry_[ i ], corners[ i ] );
+          coordFunction_.evaluate( hostGeo[ i ], corners[ i ] );
       }
     };
 
@@ -75,18 +79,19 @@ namespace Dune
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
+      typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
       typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
 
     private:
-      const HostGeometry &hostGeometry_;
+      const HostElement &hostElement_;
       const unsigned int subEntity_;
       const CoordFunction &coordFunction_;
 
     public:
-      CoordVector ( const HostGeometry &hostGeometry,
+      CoordVector ( const HostElement &hostElement,
                     const unsigned int subEntity,
                     const CoordFunction &coordFunction )
-        : hostGeometry_( hostGeometry ),
+        : hostElement_( hostElement ),
           subEntity_( subEntity ),
           coordFunction_( coordFunction )
       {}
@@ -95,13 +100,14 @@ namespace Dune
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
         const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostGeometry_.type() );
+          = ReferenceElements< ctype, dimension > :: general( hostElement_.type() );
         assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
 
+        const HostGeometry &hostGeo = hostElement_.geometry();
         for( unsigned int i = 0; i < numCorners; ++i )
         {
           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-          coordFunction_.evaluate( hostGeometry_[ j ], corners[ i ] );
+          coordFunction_.evaluate( hostGeo[ j ], corners[ i ] );
         }
       }
     };
