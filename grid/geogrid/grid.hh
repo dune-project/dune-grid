@@ -555,48 +555,50 @@ namespace Dune
       return hostGrid().postAdapt();
     }
 
-    unsigned int overlapSize ( int codim ) const
+    /** \name Parallel Data Distribution and Communication
+     *  \{ */
+
+    /** \brief obtain size of overlap region for the leaf grid
+     *
+     *  \param[in]  codim  codimension for with the information is desired
+     */
+    int overlapSize ( int codim ) const
     {
       return hostGrid().overlapSize( codim );
     }
 
-    unsigned int ghostSize( int codim ) const
+    /** \brief obtain size of ghost region for the leaf grid
+     *
+     *  \param[in]  codim  codimension for with the information is desired
+     */
+    int ghostSize( int codim ) const
     {
       return hostGrid().ghostSize( codim );
     }
 
-    unsigned int overlapSize ( int level, int codim ) const
+    /** \brief obtain size of overlap region for a grid level
+     *
+     *  \param[in]  level  grid level (0, ..., maxLevel())
+     *  \param[in]  codim  codimension (0, ..., dimension)
+     */
+    int overlapSize ( int level, int codim ) const
     {
       return hostGrid().overlapSize( level, codim );
     }
 
-    unsigned int ghostSize ( int level, int codim ) const
+    /** \brief obtain size of ghost region for a grid level
+     *
+     *  \param[in]  level  grid level (0, ..., maxLevel())
+     *  \param[in]  codim  codimension (0, ..., dimension)
+     */
+    int ghostSize ( int level, int codim ) const
     {
       return hostGrid().ghostSize( level, codim );
     }
 
-    bool loadBalance ()
-    {
-      bool ret = hostGrid().loadBalance();
-      update();
-      return ret;
-    }
-
-    template< class DataHandle, class DataType >
-    bool loadBalance ( CommDataHandleIF< DataHandle, DataType > &data )
-    {
-      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
-      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
-
-      WrappedDataHandle wrappedData( *this, data );
-      bool ret = hostGrid().loadBalance( wrappedData );
-      update();
-      return ret;
-    }
-
     /** \brief communicate information on a grid level
      *
-     *  \param      datahandle  data handle
+     *  \param      datahandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -622,7 +624,7 @@ namespace Dune
 
     /** \brief communicate information on leaf entities
      *
-     *  \param      datahandle  data handle
+     *  \param      datahandle  communication data handle (user defined)
      *  \param[in]  interface   communication interface (one of
      *                          InteriorBorder_InteriorBorder_Interface,
      *                          InteriorBorder_All_Interface,
@@ -656,6 +658,52 @@ namespace Dune
     {
       return hostGrid().comm();
     }
+
+    /** \brief rebalance the load each process has to handle
+     *
+     *  A parallel grid is redistributed such that each process has about
+     *  the same load (e.g., the same number of leaf entites).
+     *
+     *  \note DUNE does not specify, how the load is measured.
+     *
+     *  \returns \b true, if the grid has changed.
+     */
+    bool loadBalance ()
+    {
+      const bool gridChanged= hostGrid().loadBalance();
+      if( gridChanged )
+        update();
+      return gridChanged;
+    }
+
+    /** \brief rebalance the load each process has to handle
+     *
+     *  A parallel grid is redistributed such that each process has about
+     *  the same load (e.g., the same number of leaf entites).
+     *
+     *  The data handle is used to communicate the data associated with
+     *  entities that move from one process to another.
+     *
+     *  \note DUNE does not specify, how the load is measured.
+     *
+     *  \param  datahandle  communication data handle (user defined)
+     *
+     *  \returns \b true, if the grid has changed.
+     */
+    template< class DataHandle, class Data >
+    bool loadBalance ( CommDataHandleIF< DataHandle, Data > &datahandle )
+    {
+      typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
+      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+
+      WrappedDataHandle wrappedDataHandle( *this, datahandle );
+      const bool gridChanged = hostGrid().loadBalance( wrappedDataHandle );
+      if( gridChanged )
+        update();
+      return gridChanged;
+    }
+
+    /** \} */
 
     /** \brief update grid caches
      *
