@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <dune/grid/geogrid/entitypointer.hh>
+#include <dune/grid/geogrid/storage.hh>
 
 namespace Dune
 {
@@ -29,6 +30,9 @@ namespace Dune
 
   template< class Grid >
   class GeometryGridLevelIntersection;
+
+  template< class Intersection >
+  class GeometryGridIntersectionWrapper;
 
   template< class Grid >
   class GeometryGridLeafIntersectionIterator;
@@ -72,10 +76,8 @@ namespace Dune
     mutable MakeableGeometry geo_;
 
   public:
-    GeometryGridIntersection ( const Grid &grid )
-      : grid_( &grid ),
-        hostIntersection_( 0 ),
-        geo_( GeometryImpl() )
+    GeometryGridIntersection ()
+      : geo_( GeometryImpl() )
     {}
 
     GeometryGridIntersection ( const GeometryGridIntersection &other )
@@ -171,6 +173,13 @@ namespace Dune
       return normal;
     }
 
+    void initialize( const Grid &grid, const HostIntersection &hostIntersection )
+    {
+      grid_ = &grid;
+      hostIntersection_ = &hostIntersection;
+      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+    }
+
   protected:
     const CoordFunction &coordFunction () const
     {
@@ -211,17 +220,9 @@ namespace Dune
           typename HostGrid :: Traits :: LeafIntersection >
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-
-    friend class GeometryGridLeafIntersectionIterator< const Grid >;
-
     typedef typename HostGrid :: Traits :: LeafIntersection HostIntersection;
 
-    typedef GeometryGridIntersection< const Grid, HostIntersection > Base;
-
-  public:
-    GeometryGridLeafIntersection ( const Grid &grid )
-      : Base( grid )
-    {}
+    template< class > friend class GeometryGridIntersectionWrapper;
   };
 
 
@@ -236,17 +237,139 @@ namespace Dune
           typename HostGrid :: Traits :: LevelIntersection >
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-
-    friend class GeometryGridLevelIntersectionIterator< const Grid >;
-
     typedef typename HostGrid :: Traits :: LevelIntersection HostIntersection;
 
-    typedef GeometryGridIntersection< const Grid, HostIntersection > Base;
+    template< class > friend class GeometryGridIntersectionWrapper;
+  };
+
+
+
+  // GeomegryGridIntersectionWrapper
+  // -------------------------------
+
+  template< class Intersection >
+  class GeometryGridIntersectionWrapper
+    : public Intersection
+  {
+    typedef Intersection Base;
+
+  protected:
+    using Base :: getRealImp;
 
   public:
-    GeometryGridLevelIntersection ( const Grid &grid )
-      : Base( grid )
+    typedef typename Intersection :: ImplementationType Implementation;
+
+    typedef typename Implementation :: Grid Grid;
+    typedef typename Implementation :: HostIntersection HostIntersection;
+
+    GeometryGridIntersectionWrapper ()
+      : Base( Implementation() )
     {}
+
+    void initialize( const Grid &grid, const HostIntersection &hostIntersection )
+    {
+      getRealImp().initialize( grid, hostIntersection );
+    }
+  };
+
+
+
+  // GeometryGridIntersectionIterator
+  // --------------------------------
+
+  template< class Traits >
+  class GeometryGridIntersectionIterator
+  {
+    typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
+
+  public:
+    typedef typename Traits :: Intersection Intersection;
+    typedef typename Traits :: GridTraits :: Grid Grid;
+
+  private:
+    typedef GeometryGridIntersectionWrapper< Intersection > IntersectionWrapper;
+    typedef GeometryGridStorage< IntersectionWrapper > IntersectionStorage;
+
+    const Grid *grid_;
+    HostIntersectionIterator hostIterator_;
+    mutable IntersectionWrapper *intersection_;
+
+  public:
+    GeometryGridIntersectionIterator ( const Grid &grid,
+                                       const HostIntersectionIterator &hostIterator )
+      : grid_( &grid ),
+        hostIterator_( hostIterator ),
+        intersection_( 0 )
+    {}
+
+    GeometryGridIntersectionIterator  ( const GeometryGridIntersectionIterator &other )
+      : grid_( other.grid_ ),
+        hostIterator_( other.hostIterator_ ),
+        intersection_( 0 )
+    {}
+
+    GeometryGridIntersectionIterator &
+    operator= ( const GeometryGridIntersectionIterator &other )
+    {
+      grid_ = other.grid_;
+      hostIterator_ = other.hostIterator_;
+      update();
+      return *this;
+    }
+
+    ~GeometryGridIntersectionIterator ()
+    {
+      IntersectionStorage :: free( intersection_ );
+    }
+
+    bool equals ( const GeometryGridIntersectionIterator &other ) const
+    {
+      return (hostIterator_ == other.hostIterator_);
+    }
+
+    void increment ()
+    {
+      ++hostIterator_;
+      update();
+    }
+
+    const Intersection &dereference () const
+    {
+      if( intersection_ == 0 )
+      {
+        intersection_ = IntersectionStorage :: alloc();
+        intersection_->initialize( grid(), *hostIterator_ );
+      }
+      return *intersection_;
+    }
+
+  private:
+    const Grid &grid () const
+    {
+      return *grid_;
+    }
+
+    void update ()
+    {
+      IntersectionStorage :: free( intersection_ );
+      intersection_ = 0;
+    }
+  };
+
+
+
+  // GeometryGridLeafIntersectionIteratorTraits
+  // ------------------------------------------
+
+  template< class Grid >
+  struct GeometryGridLeafIntersectionIteratorTraits
+  {
+    typedef typename remove_const< Grid > :: type :: Traits GridTraits;
+
+    typedef typename GridTraits :: LeafIntersection Intersection;
+
+    typedef typename GridTraits :: HostGrid :: Traits :: LeafIntersectionIterator
+    HostIntersectionIterator;
   };
 
 
@@ -254,51 +377,41 @@ namespace Dune
   // GeometryGridLeafIntersectionIterator
   // ------------------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class Grid >
   class GeometryGridLeafIntersectionIterator
-  < const GeometryGrid< HostGrid, CoordFunction > >
+    : public GeometryGridIntersectionIterator
+      < GeometryGridLeafIntersectionIteratorTraits< Grid > >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGridLeafIntersectionIteratorTraits< Grid > Traits;
+    typedef GeometryGridIntersectionIterator< Traits > Base;
 
-    typedef typename HostGrid :: Traits :: LeafIntersectionIterator
-    HostIntersectionIterator;
+    typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
 
   public:
-    typedef typename Grid :: Traits :: LeafIntersection Intersection;
-
-  private:
-    typedef MakeableInterfaceObject< Intersection > MakeableIntersection;
-    typedef typename MakeableIntersection :: ImplementationType IntersectionImpl;
-
-    HostIntersectionIterator hostIterator_;
-    mutable MakeableIntersection intersection_;
+    typedef typename Traits :: Intersection Intersection;
 
   public:
     GeometryGridLeafIntersectionIterator
       ( const Grid &grid,
       const HostIntersectionIterator &hostIterator )
-      : hostIterator_( hostIterator ),
-        intersection_( IntersectionImpl( grid ) )
+      : Base( grid, hostIterator )
     {}
+  };
 
-    bool equals ( const GeometryGridLeafIntersectionIterator &other ) const
-    {
-      return (hostIterator_ == other.hostIterator_);
-    }
 
-    void increment ()
-    {
-      ++hostIterator_;
-      Grid :: getRealImplementation( intersection_ ).invalidate();
-    }
 
-    const Intersection &dereference () const
-    {
-      IntersectionImpl &impl = Grid :: getRealImplementation( intersection_ );
-      if( !impl.isValid() )
-        impl.setToTarget( *hostIterator_ );
-      return intersection_;
-    }
+  // GeometryGridLevelIntersectionIteratorTraits
+  // -------------------------------------------
+
+  template< class Grid >
+  struct GeometryGridLevelIntersectionIteratorTraits
+  {
+    typedef typename remove_const< Grid > :: type :: Traits GridTraits;
+
+    typedef typename GridTraits :: LevelIntersection Intersection;
+
+    typedef typename GridTraits :: HostGrid :: Traits :: LevelIntersectionIterator
+    HostIntersectionIterator;
   };
 
 
@@ -306,51 +419,25 @@ namespace Dune
   // GeometryGridLevelIntersectionIterator
   // -------------------------------------
 
-  template< class HostGrid, class CoordFunction >
+  template< class Grid >
   class GeometryGridLevelIntersectionIterator
-  < const GeometryGrid< HostGrid, CoordFunction > >
+    : public GeometryGridIntersectionIterator
+      < GeometryGridLevelIntersectionIteratorTraits< Grid > >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGridLevelIntersectionIteratorTraits< Grid > Traits;
+    typedef GeometryGridIntersectionIterator< Traits > Base;
 
-    typedef typename HostGrid :: Traits :: LevelIntersectionIterator
-    HostIntersectionIterator;
+    typedef typename Traits :: HostIntersectionIterator HostIntersectionIterator;
 
   public:
-    typedef typename Grid :: Traits :: LevelIntersection Intersection;
-
-  private:
-    typedef MakeableInterfaceObject< Intersection > MakeableIntersection;
-    typedef typename MakeableIntersection :: ImplementationType IntersectionImpl;
-
-    HostIntersectionIterator hostIterator_;
-    mutable MakeableIntersection intersection_;
+    typedef typename Traits :: Intersection Intersection;
 
   public:
     GeometryGridLevelIntersectionIterator
       ( const Grid &grid,
       const HostIntersectionIterator &hostIterator )
-      : hostIterator_( hostIterator ),
-        intersection_( IntersectionImpl( grid ) )
+      : Base( grid, hostIterator )
     {}
-
-    bool equals ( const GeometryGridLevelIntersectionIterator &other ) const
-    {
-      return (hostIterator_ == other.hostIterator_);
-    }
-
-    void increment ()
-    {
-      ++hostIterator_;
-      Grid :: getRealImplementation( intersection_ ).invalidate();
-    }
-
-    const Intersection &dereference () const
-    {
-      IntersectionImpl &impl = Grid :: getRealImplementation( intersection_ );
-      if( !impl.isValid() )
-        impl.setToTarget( *hostIterator_ );
-      return intersection_;
-    }
   };
 
 }

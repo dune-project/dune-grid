@@ -599,7 +599,7 @@ namespace Dune
     typedef Entity< codim, dim, Grid, GeometryGridEntity > Base;
 
   protected:
-    using Base :: realEntity;
+    using Base :: getRealImp;
 
   public:
     typedef GeometryGridEntity< codim, dim, Grid > Implementation;
@@ -613,12 +613,12 @@ namespace Dune
 
     void initialize ( const Grid &grid, const HostEntity &hostEntity )
     {
-      realEntity.initialize( grid, hostEntity );
+      getRealImp().initialize( grid, hostEntity );
     }
 
     void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
     {
-      realEntity.initialize( grid, hostElement, subEntity );
+      getRealImp().initialize( grid, hostElement, subEntity );
     }
   };
 
