@@ -152,6 +152,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   checkIteratorAssignment(grid);
 
   checkLevelIndexNonConform(grid);
+
+  std::cout << std::endl << std::endl;
 }
 #if HAVE_MPI
 template <class GridType>
@@ -181,6 +183,40 @@ int main (int argc , char **argv) {
   try {
     /* use grid-file appropriate for dimensions */
 
+    std::string key;
+    bool initialize = true ;
+    if( argc >= 2 )
+    {
+      key = argv[1];
+      initialize = false;
+    }
+    else
+    {
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dconf|3d|3dsimp|3dcube> " << std::endl;
+    }
+
+    bool testALU2dSimplex = initialize ;
+    bool testALU2dConform = initialize ;
+    bool testALU3dSimplex = initialize ;
+    bool testALU3dCube    = initialize ;
+
+    if( key == "2d" )
+    {
+      testALU2dSimplex = true ;
+      testALU2dConform = true ;
+    }
+
+    if( key == "2dsimp" ) testALU2dSimplex = true ;
+    if( key == "2dconf" ) testALU2dConform = true ;
+
+    if( key == "3d" )
+    {
+      testALU3dSimplex = true ;
+      testALU3dCube    = true ;
+    }
+    if( key == "3dsimp" ) testALU3dSimplex = true ;
+    if( key == "3dcube" ) testALU3dCube    = true ;
+
     // extra-environment to check destruction
     {
       factorEpsilon = 5.e+5;
@@ -200,6 +236,7 @@ int main (int argc , char **argv) {
       }
 
       // check non-confrom ALUGrid for 2d
+      if( testALU2dSimplex )
       {
         typedef ALUSimplexGrid<2,2> GridType;
         std::string filename("simplex-testgrid-2-2.dgf");
@@ -209,6 +246,7 @@ int main (int argc , char **argv) {
       }
 
       // check confrom ALUGrid for 2d
+      if( testALU2dConform )
       {
         typedef ALUConformGrid<2,2> GridType;
         std::string filename("simplex-testgrid-2-2.dgf");
@@ -216,6 +254,7 @@ int main (int argc , char **argv) {
         checkALUSerial(*gridPtr,2);
       }
 
+      if( testALU3dCube )
       {
         std::string filename;
         if (mysize<=2)
@@ -242,6 +281,7 @@ int main (int argc , char **argv) {
         }
       }
 
+      if( testALU3dSimplex )
       {
         std::string filename;
         if (mysize<=2)
