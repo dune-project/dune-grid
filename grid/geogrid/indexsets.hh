@@ -86,7 +86,7 @@ namespace Dune
       template< int codim, int subcodim >
       IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i ) const
       {
-        return Grid :: getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
+        return Grid::getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
       }
 
       template< int codim >
@@ -114,10 +114,11 @@ namespace Dune
       template< int codim >
       bool contains ( const typename Grid::template Codim< codim >::Entity &entity ) const
       {
-        typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
-        const HostEntity &hostEntity
-          = Grid::template getHostEntity< codim >( entity );
-        return hostIndexSet().contains( hostEntity );
+        return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
+        //typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
+        //const HostEntity &hostEntity
+        //  = Grid::template getHostEntity< codim >( entity );
+        //return hostIndexSet().contains( hostEntity );
       }
 
       template< class Entity >

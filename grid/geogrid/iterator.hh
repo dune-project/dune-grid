@@ -292,8 +292,12 @@ namespace Dune
             if( !Filter :: apply( refElement, hostElement, subEntity_ ) )
               continue;
 
+            typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+            const unsigned int topologyId = GenericGeometry::topologyId( hostElement.type() );
+            const int genericSub = Map::dune2generic( topologyId, subEntity_, codimension );
+
             const size_t index
-              = hostIndexSet_->template subIndex< codimension >( hostElement, subEntity_ );
+              = hostIndexSet_->subIndex( hostElement, genericSub, codimension );
             if( !visited_[ index ] )
             {
               visited_[ index ] = true;

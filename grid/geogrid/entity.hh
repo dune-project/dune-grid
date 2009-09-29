@@ -4,7 +4,7 @@
 #define DUNE_GEOGRID_ENTITY_HH
 
 #include <dune/grid/common/referenceelements.hh>
-#include <dune/grid/genericgeometry/genericreferenceelement.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/cornerstorage.hh>
@@ -283,6 +283,19 @@ namespace Dune
         return indexSet.subIndex( hostEntity(), i, cd );
       }
 
+      /** \brief check whether the entity is contained in a host index set
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
+      template< class HostIndexSet >
+      bool isContained ( const HostIndexSet &indexSet ) const
+      {
+        return indexSet.contains( hostEntity() );
+      }
+
       /** \brief obtain the entity's id from a host IdSet
        *
        *  \internal This method is provided by the entity, because its
@@ -462,8 +475,8 @@ namespace Dune
         if( !(Capabilities :: isParallel< HostGrid > :: v) )
           return InteriorEntity;
 
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
 
         PartitionType type = vertexPartitionType( refElement, 0 );
         if( (type == InteriorEntity) || (type == OverlapEntity)
@@ -543,7 +556,11 @@ namespace Dune
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
-        return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const unsigned int topologyId = GenericGeometry::topologyId( hostElement().type() );
+        const int genericSub = Map::dune2generic( topologyId, subEntity_, codimension );
+        //return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
+        return indexSet.subIndex( hostElement(), genericSub, codimension );
       }
 
       template< int subcodim, class HostIndexSet >
@@ -565,14 +582,27 @@ namespace Dune
       {
         typedef GenericGeometry::MapNumberingProvider< dimension > Map;
 
-        const int tid = GenericGeometry::topologyId( hostElement().type() );
-        const int gi = Map::template dune2generic< codimension >( tid, i );
+        const int topologyId = GenericGeometry::topologyId( hostElement().type() );
+        const int gi = Map::template dune2generic( topologyId, i, codimension );
 
         const GenericReferenceElement< ctype, dimension > &refElement
           = GenericReferenceElements< ctype, dimension >::general( type );
         const int j = refElement.subEntity( subEntity_, codimension, gi, cd );
 
         return indexSet.subIndex( hostElement(), j, codimension+cd );
+      }
+
+      /** \brief check whether the entity is contained in a host index set
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
+      template< class HostIndexSet >
+      bool isContained ( const HostIndexSet &indexSet ) const
+      {
+        return indexSet.contains( hostElement() );
       }
 
       /** \brief obtain the entity's id from a host IdSet
@@ -583,19 +613,25 @@ namespace Dune
        *  \param  idSet  host IdSet to use
        */
       template< class HostIdSet >
-      typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
+      typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
-        return idSet.template subId< codimension >( hostElement(), subEntity_ );
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const unsigned int topologyId = GenericGeometry::topologyId( hostElement().type() );
+        const int genericSub = Map::dune2generic( topologyId, subEntity_, codimension );
+        return idSet.subId( hostElement(), genericSub, codimension );
+        //return idSet.template subId< codimension >( hostElement(), subEntity_ );
       }
       /** \} */
 
     private:
       PartitionType
-      vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement,
-                            int i ) const
+      vertexPartitionType ( const GenericReferenceElement< ctype, dimension > &refElement, int i ) const
       {
-        const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
-        return hostElement().template entity< dimension >( j )->partitionType();
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const unsigned int topologyId = GenericGeometry::topologyId( hostElement().type() );
+        const int genericSub = Map::dune2generic( topologyId, subEntity_, codimension );
+        const int j = refElement.subEntity( genericSub, codimension, 0, dimension );
+        return hostElement().template subEntity< dimension >( j )->partitionType();
       }
     };
 
@@ -947,6 +983,19 @@ namespace Dune
         return indexSet.subIndex( hostEntity(), i, cd );
       }
 
+      /** \brief check whether the entity is contained in a host index set
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
+      template< class HostIndexSet >
+      bool isContained ( const HostIndexSet &indexSet ) const
+      {
+        return indexSet.contains( hostEntity() );
+      }
+
       /** \brief obtain the entity's id from a host IdSet
        *
        *  \internal This method is provided by the entity, because its
@@ -955,7 +1004,7 @@ namespace Dune
        *  \param  idSet  host IdSet to use
        */
       template< class HostIdSet >
-      typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
+      typename HostIdSet::IdType id ( const HostIdSet &idSet ) const
       {
         return idSet.template id< codimension >( hostEntity() );
       }
@@ -984,19 +1033,19 @@ namespace Dune
 
 
     template< int codim, int dim, class Grid >
-    class EntityWrapper< Dune :: Entity< codim, dim, Grid, Entity > >
-      : public Dune :: Entity< codim, dim, Grid, Entity >
+    class EntityWrapper< Dune::Entity< codim, dim, Grid, Entity > >
+      : public Dune::Entity< codim, dim, Grid, Entity >
     {
-      typedef Dune :: Entity< codim, dim, Grid, Entity > Base;
+      typedef Dune::Entity< codim, dim, Grid, Entity > Base;
 
     protected:
-      using Base :: getRealImp;
+      using Base::getRealImp;
 
     public:
       typedef Entity< codim, dim, Grid > Implementation;
 
-      typedef typename Implementation :: HostEntity HostEntity;
-      typedef typename Implementation :: HostElement HostElement;
+      typedef typename Implementation::HostEntity HostEntity;
+      typedef typename Implementation::HostElement HostElement;
 
       EntityWrapper ()
         : Base( Implementation() )

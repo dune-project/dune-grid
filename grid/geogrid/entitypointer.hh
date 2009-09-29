@@ -281,7 +281,8 @@ namespace Dune
         : grid_( &grid ),
           entity_( 0 ),
           subEntity_( subEntity ),
-          hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
+          hostElementIterator_( hostElement )
+          //hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
       {}
 
       EntityPointer ( const typename EntityWrapper :: Implementation &entity )
@@ -351,11 +352,15 @@ namespace Dune
         const HostElement &otherElement = *(other.hostElementPointer());
         assert( indexSet.contains( otherElement ) );
 
-        const int thisIndex
-          = indexSet.template subIndex< codimension >( thisElement, thisSub );
-        const int otherIndex
-          = indexSet.template subIndex< codimension >( otherElement, otherSub );
-        return thisIndex == otherIndex;
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const unsigned int thisId = GenericGeometry::topologyId( thisElement.type() );
+        const unsigned int otherId = GenericGeometry::topologyId( otherElement.type() );
+        const int thisGSub = Map::dune2generic( thisId, thisSub, codimension );
+        const int otherGSub = Map::dune2generic( otherId, otherSub, codimension );
+
+        const int thisIndex = indexSet.subIndex( thisElement, thisGSub, codimension );
+        const int otherIndex = indexSet.subIndex( otherElement, otherGSub, codimension );
+        return (thisIndex == otherIndex);
       }
 
       Entity &dereference () const
