@@ -11,3 +11,5 @@ grid_HEADERS = capabilities.hh \
 	       intersectioniterator.hh \
 	       iterator.hh \
 	       storage.hh
+
+include $(top_srcdir)/am/global-rules
