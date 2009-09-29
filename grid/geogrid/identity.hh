@@ -11,8 +11,8 @@ namespace Dune
   template< class ctype, unsigned int dim >
   struct IdenticalCoordFunction
   {
-    enum { dimRange = dim };
-    enum { dimDomain = dim };
+    static const unsigned int dimDomain = dim;
+    static const unsigned int dimRange = dim;
 
     typedef Dune :: FieldVector< ctype, dim > Vector;
 
