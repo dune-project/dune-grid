@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#define NEW_SUBENTITY_NUMBERING 1
+
 #ifdef COORDFUNCTION
 
 #include <dune/grid/geogrid.hh>
@@ -19,6 +21,29 @@
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
 
+
+namespace Dune
+{
+
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+}
+
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
+template< class HostGrid, class CoordFunction >
+struct EnableLevelIntersectionIteratorCheck< Dune::GeometryGrid< HostGrid, CoordFunction > >
+{
+  static const bool v = EnableLevelIntersectionIteratorCheck< HostGrid >::v;
+};
+
+
+
 using namespace Dune;
 
 typedef COORDFUNCTION AnalyticalCoordFunctionType;
@@ -30,6 +55,7 @@ typedef AnalyticalCoordFunctionType CoordFunctionType;
 #endif
 
 typedef GeometryGrid< GridType, CoordFunctionType > GeometryGridType;
+
 
 
 int main ( int argc, char **argv )
@@ -64,12 +90,15 @@ try
   std :: cerr << "Checking geometry in father..." << std :: endl;
   checkGeometryInFather( geogrid );
   std :: cerr << "Checking intersections..." << std :: endl;
-  checkIntersectionIterator( geogrid );
+  checkIntersectionIterator( geogrid, !EnableLevelIntersectionIteratorCheck< GridType >::v );
 
   std :: cerr << "Checking communication..." << std :: endl;
   checkCommunication( geogrid, -1, std :: cout );
-  for( int i = 0; i <= geogrid.maxLevel(); ++i )
-    checkCommunication( geogrid, i, std :: cout );
+  if( EnableLevelIntersectionIteratorCheck< GridType >::v )
+  {
+    for( int i = 0; i <= geogrid.maxLevel(); ++i )
+      checkCommunication( geogrid, i, std :: cout );
+  }
 
   return 0;
 }
