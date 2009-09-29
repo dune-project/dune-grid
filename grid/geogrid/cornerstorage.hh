@@ -267,6 +267,13 @@ namespace Dune
     public:
       static const unsigned int size = Topology :: numCorners;
 
+      template< unsigned int codim, unsigned int i >
+      struct SubTopology
+      {
+        typedef typename GenericGeometry :: SubTopology< Topology, codim, i > :: type type;
+        typedef GeoGrid :: CornerStorage< type, Grid > CornerStorage;
+      };
+
     private:
       Coordinate coords_[ size ];
 

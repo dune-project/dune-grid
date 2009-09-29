@@ -60,29 +60,26 @@ namespace Dune
   {
 
     template< class HostGrid, class CoordFunction >
-    struct GeometryGridCoordTraits
-      : public DefaultCoordTraits< typename HostGrid :: ctype, CoordFunction :: dimRange >
-    {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-
-      template< class Topology >
-      struct CornerStorage
-      {
-        typedef GeoGrid :: CornerStorage< Topology, const Grid > Type;
-      };
-    };
-
-
-    template< class HostGrid, class CoordFunction >
-    struct GeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
+    struct GlobalGeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
       : public DefaultGeometryTraits
-        < typename HostGrid :: ctype,
-            HostGrid :: dimension, CoordFunction :: dimRange >
+        < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
     {
-      typedef GeometryGridCoordTraits< HostGrid, CoordFunction > CoordTraits;
+      typedef DefaultGeometryTraits
+      < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
+      Base;
+
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
       // static const bool hybrid = false;
       // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+
+      template< class Topology >
+      struct Mapping
+      {
+        typedef typename Base :: template Mapping< Topology > :: Traits Traits;
+        typedef GeoGrid :: CornerStorage< Topology, const Grid > CornerStorage;
+        typedef CornerMapping< Topology, Traits, CornerStorage > type;
+      };
     };
 
   }
