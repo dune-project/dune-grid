@@ -288,11 +288,11 @@ namespace Dune
       : Base( grid, getHostIterator( grid, type ), -1 ),
         hostEndIterator_( getHostIterator( grid, end ) ),
         hostIterator_( getHostIterator( grid, type ) ),
-        hostIndexSet_( grid.hostGrid().leafIndexSet() )
+        hostIndexSet_( &grid.hostGrid().leafIndexSet() )
     {
       if( hostIterator_ != hostEndIterator_ )
       {
-        visited_.resize( hostIndexSet_.size( codim ), false );
+        visited_.resize( hostIndexSet_->size( codim ), false );
         increment();
       }
     }
@@ -307,7 +307,7 @@ namespace Dune
         const HostElement &hostElement = *hostElementPointer();
 
         const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement.type );
+          = ReferenceElements< ctype, dimension > :: general( hostElement.type() );
 
         const int count = refElement.size( codim );
         for( int number = subEntity() + 1; number < count; ++number )
@@ -315,7 +315,8 @@ namespace Dune
           if( !Filter :: apply( refElement, hostElement, number ) )
             continue;
 
-          const size_t index = hostIndexSet_->template subIndex( hostElement, number );
+          const size_t index
+            = hostIndexSet_->template subIndex< codim >( hostElement, number );
           if( !visited_[ index ] )
           {
             visited_[ index ] = true;
@@ -449,12 +450,12 @@ namespace Dune
     GeometryGridLevelIterator ( const Grid &grid, int level, IteratorType type )
       : Base( grid, getHostIterator( grid, level, type ), -1 ),
         hostEndIterator_( getHostIterator( grid, level, end ) ),
-        hostIterator_( getHostIterator( grid, type ) ),
-        hostIndexSet_( grid.hostGrid().levelIndexSet( level ) )
+        hostIterator_( getHostIterator( grid, level, type ) ),
+        hostIndexSet_( &grid.hostGrid().levelIndexSet( level ) )
     {
       if( hostIterator_ != hostEndIterator_ )
       {
-        visited_.resize( hostIndexSet_.size( codim ), false );
+        visited_.resize( hostIndexSet_->size( codim ), false );
         increment();
       }
     }
@@ -469,7 +470,7 @@ namespace Dune
         const HostElement &hostElement = *hostElementPointer();
 
         const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement.type );
+          = ReferenceElements< ctype, dimension > :: general( hostElement.type() );
 
         const int count = refElement.size( codim );
         for( int number = subEntity() + 1; number < count; ++number )
@@ -477,7 +478,8 @@ namespace Dune
           if( !Filter :: apply( refElement, hostElement, number ) )
             continue;
 
-          const size_t index = hostIndexSet_->template subIndex( hostElement, number );
+          const size_t index
+            = hostIndexSet_->template subIndex< codim >( hostElement, number );
           if( !visited_[ index ] )
           {
             visited_[ index ] = true;
@@ -495,9 +497,9 @@ namespace Dune
     getHostIterator ( const Grid &grid, int level, IteratorType type )
     {
       if( type == begin )
-        return grid.hostGrid().template leafbegin< 0, pitype >( level );
+        return grid.hostGrid().template lbegin< 0, pitype >( level );
       else
-        return grid.hostGrid().template leafend< 0, pitype >( level );
+        return grid.hostGrid().template lend< 0, pitype >( level );
     }
   };
 
