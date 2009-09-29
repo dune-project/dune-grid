@@ -6,354 +6,388 @@
 namespace Dune
 {
 
-  /** \brief Iterator over all element neighbors
-   * \ingroup GeometryGrid
-   * Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
-   * a neighbor is an entity of codimension 0 which has a common entity of codimension 1
-   * These neighbors are accessed via a IntersectionIterator. This allows the implement
-   * non-matching meshes. The number of neighbors may be different from the number
-   * of an element!
-   */
-  template<class GridImp>
-  class GeometryGridLeafIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,GeometryGridLeafIntersectionIterator>
+  // External Forward Declataions
+  // ----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< class Grid >
+  class GeometryGridLeafIntersectionIterator;
+
+  template< class Grid >
+  class GeometryGridLevelIntersectionIterator;
+
+
+
+  // GeometryGridLeafIntersectionIterator
+  // ------------------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGridLeafIntersectionIterator< const GeometryGrid< HostGrid, CoordFunction > >
+    : public IntersectionIteratorDefaultImplementation
+      < const GeometryGrid< HostGrid, CoordFunction >, GeometryGridLeafIntersectionIterator >
   {
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    enum {dim=GridImp::dimension};
+    typedef typename Grid :: ctype ctype;
 
-    enum {dimworld=GridImp::dimensionworld};
+    enum { dimension = Grid :: dimension };
+    enum { dimensionworld = Grid :: dimensionworld };
 
-    // The type used to store coordinates
-    typedef typename GridImp::ctype ctype;
-
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LeafIntersectionIterator HostLeafIntersectionIterator;
+    typedef typename HostGrid :: Traits :: LeafIntersectionIterator
+    HostLeafIntersectionIterator;
+    typedef typename HostGrid :: template Codim< 1 > :: Geometry HostGeometry;
 
   public:
-
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<1>::Geometry Geometry;
-    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-
-    GeometryGridLeafIntersectionIterator(const GridImp* identityGrid,
-                                         const HostLeafIntersectionIterator& hostIterator)
-      : selfLocal_(NULL), neighborLocal_(NULL), intersectionGlobal_(NULL),
-        identityGrid_(identityGrid),
-        hostIterator_(hostIterator)
-    {}
-
-    //! The Destructor
-    ~GeometryGridLeafIntersectionIterator() {};
-
-    //! equality
-    bool equals(const GeometryGridLeafIntersectionIterator<GridImp>& other) const {
-      return hostIterator_ == other.hostIterator_;
-    }
-
-
-    //! prefix increment
-    void increment() {
-      ++hostIterator_;
-
-      // Delete intersection geometry objects, if present
-      if (intersectionGlobal_ != NULL) {
-        delete intersectionGlobal_;
-        intersectionGlobal_ = NULL;
-      }
-
-      if (selfLocal_ != NULL) {
-        delete selfLocal_;
-        selfLocal_ = NULL;
-      }
-
-      if (neighborLocal_ != NULL) {
-        delete neighborLocal_;
-        neighborLocal_ = NULL;
-      }
-    }
-
-
-    //! return EntityPointer to the Entity on the inside of this intersection
-    //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-      return GeometryGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->inside());
-    }
-
-
-    //! return EntityPointer to the Entity on the outside of this intersection
-    //! (that is the neighboring Entity)
-    EntityPointer outside() const {
-      return GeometryGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->outside());
-    }
-
-
-    //! return true if intersection is with boundary.
-    bool boundary () const {
-      return hostIterator_->boundary();
-    }
-
-
-    //! return true if across the edge an neighbor on this level exists
-    bool neighbor () const {
-      return hostIterator_->neighbor();
-    }
-
-
-    //! return information about the Boundary
-    int boundaryId () const {
-      return hostIterator_->boundaryId();
-    }
-
-
-    //! intersection of codimension 1 of this neighbor with element where
-    //! iteration started.
-    //! Here returned element is in LOCAL coordinates of the element
-    //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const {
-      typedef MakeableInterfaceObject<LocalGeometry> MakeableGeo;
-      typedef typename MakeableGeo::ImplementationType GeoImpl;
-      if (selfLocal_ == 0)
-        selfLocal_ = new MakeableGeo(GeoImpl(hostIterator_->intersectionSelfLocal()));
-      return *selfLocal_;
-    }
-
-    //! intersection of codimension 1 of this neighbor with element where iteration started.
-    //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const {
-      typedef MakeableInterfaceObject<LocalGeometry> MakeableGeo;
-      typedef typename MakeableGeo::ImplementationType GeoImpl;
-      if (neighborLocal_ == 0)
-        neighborLocal_ = new MakeableGeo(GeoImpl(hostIterator_->intersectionNeighborLocal()));
-      return *neighborLocal_;
-    }
-
-    typedef MakeableInterfaceObject<Geometry> MakeableGeo;
-    typedef typename MakeableGeo::ImplementationType GeoImpl;
-    typedef typename GeoImpl::GlobalCoordinate GlobalCoordinate;
-    mutable std::vector<typename GeoImpl::GlobalCoordinate> corners_;
-    const Geometry& intersectionGlobal () const {
-      if (intersectionGlobal_ == 0) {
-        typedef typename HostLeafIntersectionIterator::Geometry HostGeo;
-        const HostGeo& hostGeo = hostIterator_->intersectionGlobal();
-        corners_.resize(hostGeo.corners());
-        for( unsigned int i = 0; i < corners_.size(); ++i )
-          func(hostGeo[i],corners_[i]);
-        intersectionGlobal_ = new MakeableGeo(GeoImpl(hostGeo.type(),corners_) );
-      }
-      return *intersectionGlobal_;
-    }
-
-
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {
-      return hostIterator_->numberInSelf();
-    }
-
-
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const {
-      return hostIterator_->numberInNeighbor();
-    }
-
-
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return GridImp::getRealImplementation(inside()->geometry()).
-             normal(numberInSelf(),intersectionSelfLocal().global(local));
-    }
-    FieldVector<ctype, GridImp::dimensionworld> outerNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return integrationOuterNormal(local);
-    }
-
+    typedef typename Grid :: template Codim< 0 > :: Entity Entity;
+    typedef typename Grid :: template Codim< 0 > :: EntityPointer EntityPointer;
+    typedef typename Grid :: template Codim< 1 > :: Geometry Geometry;
+    typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
 
   private:
-    //**********************************************************
-    //  private methods
-    //**********************************************************
+    typedef MakeableInterfaceObject<Geometry> MakeableGeometry;
+    typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
+    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-    //! pointer to element holding the selfLocal and selfGlobal information.
-    //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry>* selfLocal_;
-    mutable MakeableInterfaceObject<LocalGeometry>* neighborLocal_;
-
-    //! pointer to element holding the neighbor_global and neighbor_local
-    //! information.
-    mutable MakeableInterfaceObject<Geometry>* intersectionGlobal_;
-
-    const GridImp* identityGrid_;
-
+    const Grid *grid_;
     HostLeafIntersectionIterator hostIterator_;
-  };
-
-
-
-
-  //! \todo Please doc me !
-  template<class GridImp>
-  class GeometryGridLevelIntersectionIterator :
-    public IntersectionIteratorDefaultImplementation <GridImp,GeometryGridLevelIntersectionIterator>
-  {
-
-    enum {dim=GridImp::dimension};
-
-    enum {dimworld=GridImp::dimensionworld};
-
-    // The type used to store coordinates
-    typedef typename GridImp::ctype ctype;
-
-    typedef typename GridImp::HostGridType::template Codim<0>::Entity::LevelIntersectionIterator HostLevelIntersectionIterator;
+    mutable std::vector< GlobalCoordinate > corners_;
+    mutable Geometry *geo_;
+    mutable LocalGeometry *geoSelf_;
+    mutable LocalGeometry *geoNeighbor_;
 
   public:
-
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    typedef typename GridImp::template Codim<1>::Geometry Geometry;
-    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef typename GridImp::template Codim<0>::Entity Entity;
-
-    GeometryGridLevelIntersectionIterator(const GridImp* identityGrid,
-                                          const HostLevelIntersectionIterator& hostIterator)
-      : selfLocal_(NULL), neighborLocal_(NULL), intersectionGlobal_(NULL),
-        identityGrid_(identityGrid), hostIterator_(hostIterator)
+    GeometryGridLeafIntersectionIterator
+      ( const Grid *grid,
+      const HostLeafIntersectionIterator &hostIterator )
+      : grid_( grid ),
+        hostIterator_( hostIterator ),
+        geo_( 0 ),
+        geoSelf_( 0 ),
+        geoNeighbor_( 0 )
     {}
 
-    //! equality
-    bool equals(const GeometryGridLevelIntersectionIterator<GridImp>& other) const {
-      return hostIterator_ == other.hostIterator_;
+    ~GeometryGridLeafIntersectionIterator ()
+    {}
+
+    bool equals ( const GeometryGridLeafIntersectionIterator &other ) const
+    {
+      return (grid_ == other.grid_) && (hostIterator_ == other.hostIterator_);
     }
 
-
-    //! prefix increment
-    void increment() {
+    void increment ()
+    {
       ++hostIterator_;
 
-      // Delete intersection geometry objects, if present
-      if (intersectionGlobal_ != NULL) {
-        delete intersectionGlobal_;
-        intersectionGlobal_ = NULL;
+      if( geo_ != 0 )
+      {
+        delete geo_;
+        geo_ = 0;
       }
 
-      if (selfLocal_ != NULL) {
-        delete selfLocal_;
-        selfLocal_ = NULL;
+      if( geoSelf_ != 0 )
+      {
+        delete geoSelf_;
+        geoSelf_ = 0;
       }
 
-      if (neighborLocal_ != NULL) {
-        delete neighborLocal_;
-        neighborLocal_ = NULL;
+      if( geoNeighbor_ != 0 )
+      {
+        delete geoNeighbor_;
+        geoNeighbor_ = 0;
       }
-
     }
 
-
-    //! return EntityPointer to the Entity on the inside of this intersection
-    //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-      return GeometryGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->inside());
+    EntityPointer inside () const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->inside() ) );
     }
 
-
-    //! return EntityPointer to the Entity on the outside of this intersection
-    //! (that is the neighboring Entity)
-    EntityPointer outside() const {
-      return GeometryGridEntityPointer<0,GridImp> (identityGrid_, hostIterator_->outside());
+    EntityPointer outside () const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->outside() ) );
     }
 
-
-    /** \brief return true if intersection is with boundary.
-     */
-    bool boundary () const {
-      return hostIterator_->boundary();
+    bool boundary () const
+    {
+      return hostIterator_->boundary ();
     }
 
-
-    //! return true if across the edge an neighbor on this level exists
-    bool neighbor () const {
+    bool neighbor () const
+    {
       return hostIterator_->neighbor();
     }
 
-
-    //! return information about the Boundary
-    int boundaryId () const {
+    int boundaryId () const
+    {
       return hostIterator_->boundaryId();
     }
 
+    const LocalGeometry &intersectionSelfLocal () const
+    {
+      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
 
-    //! intersection of codimension 1 of this neighbor with element where
-    //! iteration started.
-    //! Here returned element is in LOCAL coordinates of the element
-    //! where iteration started.
-    const LocalGeometry& intersectionSelfLocal () const {
-      if (selfLocal_ == NULL)
-        selfLocal_ = new MakeableInterfaceObject<LocalGeometry>(hostIterator_->intersectionSelfLocal());
-
-      return *selfLocal_;
-    }
-
-    //! intersection of codimension 1 of this neighbor with element where iteration started.
-    //! Here returned element is in LOCAL coordinates of neighbor
-    const LocalGeometry& intersectionNeighborLocal () const {
-      if (neighborLocal_ == NULL)
-        neighborLocal_ = new MakeableInterfaceObject<LocalGeometry>(hostIterator_->intersectionNeighborLocal());
-
-      return *neighborLocal_;
-    }
-
-    typedef MakeableInterfaceObject<Geometry> MakeableGeo;
-    typedef typename MakeableGeo::ImplementationType GeoImpl;
-    typedef typename GeoImpl::GlobalCoordinate GlobalCoordinate;
-    mutable std::vector<typename GeoImpl::GlobalCoordinate> corners_;
-    const Geometry& intersectionGlobal () const {
-      if (intersectionGlobal_ == 0) {
-        typedef typename HostLevelIntersectionIterator::Geometry HostGeo;
-        const HostGeo& hostGeo = hostIterator_->intersectionGlobal();
-        corners_.resize(hostGeo.corners());
-        for( unsigned int i = 0; i < corners_.size(); ++i )
-          func(hostGeo[i],corners_[i]);
-        intersectionGlobal_ = new MakeableGeo(GeoImpl(hostGeo.type(),corners_) );
+      if( geoSelf_ == 0 )
+      {
+        LocalGeometryImpl impl( hostIterator_->intersectionSelfLocal() );
+        geoSelf_ = new MakeableLocalGeometry( impl );
       }
-      return *intersectionGlobal_;
+      return *geoSelf_;
     }
 
-    //! local number of codim 1 entity in self where intersection is contained in
-    int numberInSelf () const {
+    const LocalGeometry &intersectionNeighborLocal () const
+    {
+      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
+
+      if( geoNeighbor_ == 0 )
+      {
+        LocalGeometryImpl impl( hostIterator_->intersectionNeighborLocal() );
+        geoNeighbor_ = new MakeableLocalGeometry( impl );
+      }
+      return *geoNeighbor_;
+    }
+
+    const Geometry &intersectionGlobal () const
+    {
+      if( geo_ == 0 )
+      {
+        const HostGeometry &hostGeo = hostIterator_->intersectionGlobal();
+        corners_.resize( hostGeo.corners() );
+        for( unsigned int i = 0; i < corners_.size(); ++i )
+          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+        geo_ = new MakeableGeometry( GeometryImpl( hostGeo.type(), corners_ ) );
+      }
+      return *geo_;
+    }
+
+    int numberInSelf () const
+    {
       return hostIterator_->numberInSelf();
     }
 
-
-    //! local number of codim 1 entity in neighbor where intersection is contained
-    int numberInNeighbor () const {
+    int numberInNeighbor () const
+    {
       return hostIterator_->numberInNeighbor();
     }
 
 
-    //! return outer normal, this should be dependent on local
-    //! coordinates for higher order boundary
-    FieldVector<ctype, GridImp::dimensionworld> integrationOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return GridImp::getRealImplementation(inside()->geometry()).
-             normal(numberInSelf(),intersectionSelfLocal().global(local));
+    FieldVector< ctype, dimensionworld >
+    integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
+    {
+      typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
+      EntityPointer insideEntity = inside();
+      const Geometry &geo = insideEntity->geometry();
+      FieldVector< ctype, dimension > x( intersectionSelfLocal().global( local ) );
+      return Grid :: getRealImplementation( geo ).normal( numberInSelf(), x );
     }
-    FieldVector<ctype, GridImp::dimensionworld> outerNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const {
-      return integrationOuterNormal(local);
+
+    FieldVector< ctype, dimensionworld >
+    outerNormal ( const FieldVector< ctype, dimension-1 > &local ) const
+    {
+      return integrationOuterNormal( local );
     }
 
   private:
-
-    //! pointer to element holding the selfLocal and selfGlobal information.
-    //! This element is created on demand.
-    mutable MakeableInterfaceObject<LocalGeometry>* selfLocal_;
-    mutable MakeableInterfaceObject<LocalGeometry>* neighborLocal_;
-
-    //! pointer to element holding the neighbor_global and neighbor_local
-    //! information.
-    mutable MakeableInterfaceObject<Geometry>* intersectionGlobal_;
-
-    const GridImp* identityGrid_;
-
-    HostLevelIntersectionIterator hostIterator_;
-
+    const CoordFunction &coordFunction () const
+    {
+      return grid_->coordFunction();
+    }
   };
 
+
+
+  // GeometryGridLevelIntersectionIterator
+  // -------------------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGridLevelIntersectionIterator< const GeometryGrid< HostGrid, CoordFunction > >
+    : public IntersectionIteratorDefaultImplementation
+      < const GeometryGrid< HostGrid, CoordFunction >, GeometryGridLevelIntersectionIterator >
+  {
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    typedef typename Grid :: ctype ctype;
+
+    enum { dimension = Grid :: dimension };
+    enum { dimensionworld = Grid :: dimensionworld };
+
+    typedef typename HostGrid :: Traits :: LevelIntersectionIterator
+    HostLevelIntersectionIterator;
+    typedef typename HostGrid :: template Codim< 1 > :: Geometry HostGeometry;
+
+  public:
+    typedef typename Grid :: template Codim< 0 > :: Entity Entity;
+    typedef typename Grid :: template Codim< 0 > :: EntityPointer EntityPointer;
+    typedef typename Grid :: template Codim< 1 > :: Geometry Geometry;
+    typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
+
+  private:
+    typedef MakeableInterfaceObject<Geometry> MakeableGeometry;
+    typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
+    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
+
+    const Grid *grid_;
+    HostLevelIntersectionIterator hostIterator_;
+    mutable std::vector< GlobalCoordinate > corners_;
+    mutable Geometry *geo_;
+    mutable LocalGeometry *geoSelf_;
+    mutable LocalGeometry *geoNeighbor_;
+
+  public:
+    GeometryGridLevelIntersectionIterator
+      ( const Grid *grid,
+      const HostLevelIntersectionIterator &hostIterator )
+      : grid_( grid ),
+        hostIterator_( hostIterator ),
+        geo_( 0 ),
+        geoSelf_( 0 ),
+        geoNeighbor_( 0 )
+    {}
+
+    ~GeometryGridLevelIntersectionIterator ()
+    {}
+
+    bool equals ( const GeometryGridLevelIntersectionIterator &other ) const
+    {
+      return (grid_ == other.grid_) && (hostIterator_ == other.hostIterator_);
+    }
+
+    void increment ()
+    {
+      ++hostIterator_;
+
+      if( geo_ != 0 )
+      {
+        delete geo_;
+        geo_ = 0;
+      }
+
+      if( geoSelf_ != 0 )
+      {
+        delete geoSelf_;
+        geoSelf_ = 0;
+      }
+
+      if( geoNeighbor_ != 0 )
+      {
+        delete geoNeighbor_;
+        geoNeighbor_ = 0;
+      }
+    }
+
+    EntityPointer inside () const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->inside() ) );
+    }
+
+    EntityPointer outside () const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->outside() ) );
+    }
+
+    bool boundary () const
+    {
+      return hostIterator_->boundary ();
+    }
+
+    bool neighbor () const
+    {
+      return hostIterator_->neighbor();
+    }
+
+    int boundaryId () const
+    {
+      return hostIterator_->boundaryId();
+    }
+
+    const LocalGeometry &intersectionSelfLocal () const
+    {
+      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
+
+      if( geoSelf_ == 0 )
+      {
+        LocalGeometryImpl impl( hostIterator_->intersectionSelfLocal() );
+        geoSelf_ = new MakeableLocalGeometry( impl );
+      }
+      return *geoSelf_;
+    }
+
+    const LocalGeometry &intersectionNeighborLocal () const
+    {
+      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
+
+      if( geoNeighbor_ == 0 )
+      {
+        LocalGeometryImpl impl( hostIterator_->intersectionNeighborLocal() );
+        geoNeighbor_ = new MakeableLocalGeometry( impl );
+      }
+      return *geoNeighbor_;
+    }
+
+    const Geometry &intersectionGlobal () const
+    {
+      if( geo_ == 0 )
+      {
+        const HostGeometry &hostGeo = hostIterator_->intersectionGlobal();
+        corners_.resize( hostGeo.corners() );
+        for( unsigned int i = 0; i < corners_.size(); ++i )
+          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+        geo_ = new MakeableGeometry( GeometryImpl( hostGeo.type(), corners_ ) );
+      }
+      return *geo_;
+    }
+
+    int numberInSelf () const
+    {
+      return hostIterator_->numberInSelf();
+    }
+
+    int numberInNeighbor () const
+    {
+      return hostIterator_->numberInNeighbor();
+    }
+
+
+    FieldVector< ctype, dimensionworld >
+    integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
+    {
+      typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
+      EntityPointer insideEntity = inside();
+      const Geometry &geo = insideEntity->geometry();
+      FieldVector< ctype, dimension > x( intersectionSelfLocal().global( local ) );
+      return Grid :: getRealImplementation( geo ).normal( numberInSelf(), x );
+    }
+
+    FieldVector< ctype, dimensionworld >
+    outerNormal ( const FieldVector< ctype, dimension-1 > &local ) const
+    {
+      return integrationOuterNormal( local );
+    }
+
+  private:
+    const CoordFunction &coordFunction () const
+    {
+      return grid_->coordFunction();
+    }
+  };
 
 }  // namespace Dune
 

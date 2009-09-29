@@ -13,29 +13,6 @@
 #include <dune/common/timer.hh>
 #include <dune/common/fvector.hh>
 
-struct Helix {
-  enum {dimW = 3};
-  enum {dimG = 2};
-  typedef Dune::FieldVector<double,dimW> WCoord;
-  typedef Dune::FieldVector<double,dimG> GCoord;
-  Helix(const GCoord& x,WCoord& ret) {
-    ret[0] = (x[0]+0.2)*cos(2.*M_PI*x[1]);
-    ret[1] = (x[0]+0.2)*sin(2.*M_PI*x[1]);
-    ret[2] = x[1];
-  }
-};
-struct Circle {
-  enum {dimW = 2};
-  enum {dimG = 2};
-  typedef Dune::FieldVector<double,dimW> WCoord;
-  typedef Dune::FieldVector<double,dimG> GCoord;
-  Circle(const GCoord& x,WCoord& ret) {
-    ret[0] = (x[0]+0.2)*cos(x[1]);
-    ret[1] = (x[0]+0.2)*sin(x[1]);
-  }
-};
-typedef Circle func;
-
 #include <dune/grid/geogrid/entity.hh>
 #include <dune/grid/geogrid/entitypointer.hh>
 #include <dune/grid/geogrid/intersectioniterator.hh>
@@ -49,31 +26,46 @@ typedef Circle func;
 namespace Dune
 {
 
-  // Forward declaration
-  template< class HostGrid >
+  // Forward Declarations
+  // --------------------
+
+  template< class HostGrid, class CoordFunction >
   class GeometryGrid;
 
 
+
+  // GenericGeometry :: GeometryTraits
+  // ---------------------------------
+
   namespace GenericGeometry
   {
-    template< class HostGrid >
-    struct GeometryTraits< GeometryGrid< HostGrid > >
+
+    template< class HostGrid, class CoordFunction >
+    struct GeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
       : public DefaultGeometryTraits
-        < typename HostGrid :: ctype, HostGrid :: dimension, func :: dimW >
+        < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
     {};
+
   }
 
-  template< class HostGrid >
+
+
+  // GeometryGridFamily
+  // ------------------
+
+  template< class HostGrid, class CoordFunction >
   struct GeometryGridFamily
   {
     struct Traits
     {
-      typedef GeometryGrid< HostGrid > Grid;
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      dune_static_assert( (int)HostGrid :: dimensionworld == (int)func :: dimG,
-                          "HostGrid and GridFunction are incompatible." );
+      typedef typename HostGrid :: ctype ctype;
+
+      dune_static_assert( (int)HostGrid :: dimensionworld == (int)CoordFunction :: dimDomain,
+                          "HostGrid and CoordFunction are incompatible." );
       enum { dimension = HostGrid :: dimension };
-      enum { dimensionworld = func :: dimW };
+      enum { dimensionworld = CoordFunction :: dimRange };
 
       typedef Intersection< const Grid, GeometryGridLeafIntersectionIterator >
       LeafIntersection;
@@ -153,86 +145,117 @@ namespace Dune
 
 
 
-  //**********************************************************************
-  //
-  // --GeometryGrid
-  //
-  //**********************************************************************
+  // GeometryGrid
+  // ------------
 
-  /** \brief [<em> provides \ref Dune::Grid </em>]
-   *
-   */
-  template< class HostGrid >
+  template< class HostGrid, class CoordFunction >
   class GeometryGrid
     : public GridDefaultImplementation
-      < HostGrid :: dimension, func :: dimW, double,
-          GeometryGridFamily< HostGrid > >
+      < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
+          GeometryGridFamily< HostGrid, CoordFunction > >
   {
-    friend class GeometryGridLevelIndexSet<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridLeafIndexSet<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridGlobalIdSet<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridLocalIdSet<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridHierarchicIterator<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridLevelIntersectionIterator<const GeometryGrid<HostGrid> >;
-    friend class GeometryGridLeafIntersectionIterator<const GeometryGrid<HostGrid> >;
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    template<int codim, PartitionIteratorType pitype, class GridImp_>
-    friend class GeometryGridLevelIterator;
+    friend class GeometryGridLevelIndexSet< const Grid >;
+    friend class GeometryGridLeafIndexSet< const Grid >;
+    friend class GeometryGridGlobalIdSet< const Grid >;
+    friend class GeometryGridLocalIdSet< const Grid >;
+    friend class GeometryGridHierarchicIterator< const Grid >;
+    friend class GeometryGridLevelIntersectionIterator< const Grid >;
+    friend class GeometryGridLeafIntersectionIterator< const Grid >;
 
-    template<int codim, PartitionIteratorType pitype, class GridImp_>
-    friend class GeometryGridLeafIterator;
-
-
-    template<int codim_, int dim_, class GridImp_>
-    friend class GeometryGridEntity;
+    template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
+    template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;
+    template< int, int, class > friend class GeometryGridEntity;
 
   public:
     /** \todo Should not be public */
     typedef HostGrid HostGridType;
 
-    //**********************************************************
-    // The Interface Methods
-    //**********************************************************
-
     //! type of the used GridFamily for this grid
-    typedef GeometryGridFamily< HostGrid > GridFamily;
+    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
 
     //! the Traits
     typedef typename GridFamily :: Traits Traits;
 
     //! The type used to store coordinates, inherited from the HostGrid
-    typedef typename HostGrid :: ctype ctype;
+    typedef typename Traits :: ctype ctype;
+
+    typedef typename Traits :: HierarchicIterator HierarchicIterator;
+    typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+
+    //! Model of Dune::CollectiveCommunication
+    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+
+    template< int codim >
+    struct Codim
+    {
+      typedef typename Traits :: template Codim< codim > :: Entity Entity;
+      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+      typedef typename Traits :: template Codim< codim > :: Geometry Geometry;
+      typedef typename Traits :: template Codim< codim > :: LocalGeometry LocalGeometry;
+
+      typedef typename Traits :: HierarchicIterator HierarchicIterator;
+      typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+      typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+
+      template< PartitionIteratorType pitype >
+      struct Partition
+      {
+        typedef typename Traits :: template Codim< codim >
+        :: template Partition< pitype > :: LeafIterator
+        LeafIterator;
+        typedef typename Traits :: template Codim< codim >
+        :: template Partition< pitype > :: LevelIterator
+        LevelIterator;
+      };
+
+      typedef typename Partition< All_Partition > :: LeafIterator LeafIterator;
+      typedef typename Partition< All_Partition > :: LevelIterator LevelIterator;
+    };
 
   private:
-    HostGrid* hostgrid_;
+    HostGrid *const hostGrid_;
+    const CoordFunction &coordFunction_;
     std :: vector
-    < GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > >* >
-    levelIndexSets_;
-    GeometryGridLeafIndexSet< const GeometryGrid< HostGrid > > leafIndexSet_;
-    GeometryGridGlobalIdSet< const GeometryGrid< HostGrid > > globalIdSet_;
-    GeometryGridLocalIdSet< const GeometryGrid< HostGrid > > localIdSet_;
+    < GeometryGridLevelIndexSet< const Grid >* > levelIndexSets_;
+    GeometryGridLeafIndexSet< const Grid > leafIndexSet_;
+    GeometryGridGlobalIdSet< const Grid > globalIdSet_;
+    GeometryGridLocalIdSet< const Grid > localIdSet_;
 
   public:
-    /** \brief Constructor
+    /** \brief constructor
+     *
+     *  \param[in]  hostGrid       host grid to be wrapped
+     *  \param[in]  coordFunction  function to apply to vertex coordinates
      */
-    explicit GeometryGrid(HostGrid& hostgrid) :
-      hostgrid_(&hostgrid),
-      leafIndexSet_(*this),
-      globalIdSet_(*this),
-      localIdSet_(*this)
+    GeometryGrid ( HostGrid &hostGrid, const CoordFunction &coordFunction )
+      : hostGrid_( &hostGrid ),
+        coordFunction_( coordFunction ),
+        leafIndexSet_( *this ),
+        globalIdSet_( *this ),
+        localIdSet_( *this )
     {
       setIndices();
     }
 
 
-    //! Desctructor
-    ~GeometryGrid()
+    //! desctructor
+    ~GeometryGrid ()
     {
       // Delete level index sets
-      for (size_t i=0; i<levelIndexSets_.size(); i++)
-        if (levelIndexSets_[i])
-          delete (levelIndexSets_[i]);
+      for( unsigned int i = 0; i < levelIndexSets_.size(); ++i )
+      {
+        if( levelIndexSets_[ i ] )
+          delete( levelIndexSets_[ i ] );
+      }
     }
+
+
+    //**********************************************************
+    // The Interface Methods
+    //**********************************************************
 
 
     //! return grid name
@@ -245,71 +268,84 @@ namespace Dune
 
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxlevel with 0 the coarsest level.
-    int maxLevel() const {
-      return hostgrid_->maxLevel();
+    int maxLevel () const
+    {
+      return hostGrid().maxLevel();
     }
 
 
     //! Iterator to first entity of given codim on level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lbegin (int level) const {
-      return GeometryGridLevelIterator<codim,All_Partition, const GeometryGrid<HostGrid> >(this, level);
+    template< int codim >
+    typename Codim< codim > :: LevelIterator lbegin ( int level ) const
+    {
+      return GeometryGridLevelIterator<codim,All_Partition, const Grid >(this, level);
     }
 
 
     //! one past the end on this level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lend (int level) const {
-      return GeometryGridLevelIterator<codim,All_Partition, const GeometryGrid<HostGrid> >(this, level, true);
+    template< int codim >
+    typename Codim< codim > :: LevelIterator lend ( int level ) const
+    {
+      return GeometryGridLevelIterator<codim,All_Partition, const Grid >(this, level, true);
     }
 
 
     //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lbegin (int level) const {
-      return GeometryGridLevelIterator<codim,PiType, const GeometryGrid<HostGrid> >(this, level);
+    template< int codim, PartitionIteratorType pitype >
+    typename Codim< codim > :: template Partition<pitype> :: LevelIterator
+    lbegin ( int level ) const
+    {
+      return GeometryGridLevelIterator< codim, pitype, const Grid >(this, level);
     }
 
 
     //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lend (int level) const {
-      return GeometryGridLevelIterator<codim,PiType, const GeometryGrid<HostGrid> >(this, level, true);
+    template< int codim, PartitionIteratorType pitype >
+    typename Codim< codim > :: template Partition<pitype> :: LevelIterator
+    lend ( int level ) const
+    {
+      return GeometryGridLevelIterator< codim, pitype, const Grid >(this, level, true);
     }
 
 
     //! Iterator to first leaf entity of given codim
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafbegin() const {
-      return GeometryGridLeafIterator<codim,All_Partition, const GeometryGrid<HostGrid> >(this);
+    template< int codim >
+    typename Codim< codim > :: LeafIterator leafbegin () const
+    {
+      return GeometryGridLeafIterator< codim, All_Partition, const Grid >( this );
     }
 
 
     //! one past the end of the sequence of leaf entities
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafend() const {
-      return GeometryGridLeafIterator<codim,All_Partition, const GeometryGrid<HostGrid> >(this, true);
+    template< int codim >
+    typename Codim< codim > :: LeafIterator leafend () const
+    {
+      return GeometryGridLeafIterator< codim, All_Partition, const Grid >( this, true );
     }
 
 
     //! Iterator to first leaf entity of given codim
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafbegin() const {
-      return GeometryGridLeafIterator<codim,PiType, const GeometryGrid<HostGrid> >(this);
+    template< int codim, PartitionIteratorType pitype >
+    typename Codim< codim > :: template Partition<pitype> :: LeafIterator
+    leafbegin () const
+    {
+      return GeometryGridLeafIterator< codim, pitype, const Grid >( this );
     }
 
-
     //! one past the end of the sequence of leaf entities
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
-      return GeometryGridLeafIterator<codim,PiType, const GeometryGrid<HostGrid> >(this, true);
+    template< int codim, PartitionIteratorType pitype >
+    typename Codim< codim > :: template Partition<pitype> :: LeafIterator
+    leafend () const
+    {
+      return GeometryGridLeafIterator< codim, pitype, const Grid >( this, true );
     }
 
 
     /** \brief Number of grid entities per level and codim
      */
-    int size (int level, int codim) const {
-      return hostgrid_->size(level,codim);
+    int size ( int level, int codim ) const
+    {
+      return hostGrid().size(level,codim);
     }
 
 
@@ -367,9 +403,9 @@ namespace Dune
     /** global refinement
      * \todo optimize implementation
      */
-    void globalRefine (int refCount)
+    void globalRefine ( int refCount )
     {
-      hostgrid_->globalRefine(refCount);
+      hostGrid().globalRefine( refCount );
     }
 
     /** \brief Mark entity for refinement
@@ -382,60 +418,66 @@ namespace Dune
      * <li> false, if marking was not possible </li>
      * </ul>
      */
-    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer & e)
+    bool mark( int refCount, const typename Codim< 0 > :: EntityPointer &entity )
     {
-      return hostgrid_->mark(refCount, getHostEntity<0>(*e));
+      return hostGrid().mark( refCount, getHostEntity< 0 >( *entity ) );
     }
 
     /** \brief Return refinement mark for entity
      *
      * \return refinement mark (1,0,-1)
      */
-    int getMark(const typename Traits::template Codim<0>::EntityPointer & e) const
+    int getMark ( const typename Codim< 0 > :: EntityPointer &entity ) const
     {
-      return hostgrid_->getMark(getHostEntity<0>(*e));
+      return hostGrid().getMark( getHostEntity< 0 >( *entity ) );
     }
 
     //! \todo Please doc me !
-    bool preAdapt() {
-      return hostgrid_->preAdapt();
+    bool preAdapt ()
+    {
+      return hostGrid().preAdapt();
     }
 
 
     //! Triggers the grid refinement process
-    bool adapt()
+    bool adapt ()
     {
-      return hostgrid_->adapt();
+      return hostGrid().adapt();
     }
 
     /** \brief Clean up refinement markers */
-    void postAdapt() {
-      return hostgrid_->postAdapt();
+    void postAdapt ()
+    {
+      return hostGrid().postAdapt();
     }
 
     /*@}*/
 
     /** \brief Size of the overlap on the leaf level */
-    unsigned int overlapSize(int codim) const {
-      return hostgrid_->overlapSize(codim);
+    unsigned int overlapSize ( int codim ) const
+    {
+      return hostGrid().overlapSize( codim );
     }
 
 
     /** \brief Size of the ghost cell layer on the leaf level */
-    unsigned int ghostSize(int codim) const {
-      return hostgrid_->ghostSize(codim);
+    unsigned int ghostSize( int codim ) const
+    {
+      return hostGrid().ghostSize( codim );
     }
 
 
     /** \brief Size of the overlap on a given level */
-    unsigned int overlapSize(int level, int codim) const {
-      return hostgrid_->overlapSize(level,codim);
+    unsigned int overlapSize ( int level, int codim ) const
+    {
+      return hostGrid().overlapSize( level, codim );
     }
 
 
     /** \brief Size of the ghost cell layer on a given level */
-    unsigned int ghostSize(int level, int codim) const {
-      return hostgrid_->ghostSize(level,codim);
+    unsigned int ghostSize ( int level, int codim ) const
+    {
+      return hostGrid().ghostSize( level, codim );
     }
 
 
@@ -478,7 +520,7 @@ namespace Dune
 
 
     //! Obtain CollectiveCommunication object (taken from host grid)
-    const CollectiveCommunication<GeometryGrid>& comm () const
+    const CollectiveCommunication &comm () const
     {
       return hostGrid().comm();
     }
@@ -489,22 +531,37 @@ namespace Dune
     // **********************************************************
 
     //! Returns the hostgrid this GeometryGrid lives in
-    HostGridType& getHostGrid() const
+    HostGrid &getHostGrid() const
     {
-      return *hostgrid_;
+      return *hostGrid_;
     }
 
-    //! Obtain the host grid wrapped this this GeometryGrid
-    const HostGridType &hostGrid () const
+  private:
+    //! Obtain the host grid wrapped by this GeometryGrid
+    const HostGrid &hostGrid () const
     {
-      return *hostgrid_;
+      return *hostGrid_;
     }
 
+    //! Obtain the host grid wrapped by this GeometryGrid
+    HostGrid &hostGrid ()
+    {
+      return *hostGrid_;
+    }
+
+    //! Obtain the coordinate function
+    const CoordFunction &coordFunction () const
+    {
+      return coordFunction_;
+    }
+
+  public:
     //! Returns the hostgrid entity encapsulated in given subgrid entity
-    template <int codim>
-    typename HostGrid::Traits::template Codim<codim>::EntityPointer getHostEntity(const typename Traits::template Codim<codim>::Entity& e) const
+    template< int codim >
+    static typename HostGrid :: template Codim< codim > :: EntityPointer
+    getHostEntity( const typename Codim< codim > :: Entity &entity )
     {
-      return getRealImplementation(e).hostEntity_;
+      return getRealImplementation( entity ).hostEntity_;
     }
 
   private:
@@ -519,8 +576,8 @@ namespace Dune
       // //////////////////////////////////////////
       for( int i = levelIndexSets_.size(); i <= maxLevel(); ++i )
       {
-        GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > > *p
-          = new GeometryGridLevelIndexSet< const GeometryGrid< HostGrid > >();
+        GeometryGridLevelIndexSet< const Grid > *p
+          = new GeometryGridLevelIndexSet< const Grid >( *this, i );
         levelIndexSets_.push_back( p );
       }
 
@@ -529,7 +586,7 @@ namespace Dune
         if( levelIndexSets_[ i ] )
           levelIndexSets_[ i ]->update( *this, i );
       }
-      leafIndexSet_.update(*this);
+      leafIndexSet_.update( *this );
     }
   }; // end Class GeometryGrid
 
@@ -541,40 +598,40 @@ namespace Dune
   namespace Capabilities
   {
     //! \todo Please doc me !
-    template<class HostGrid, int codim>
-    struct hasEntity< GeometryGrid<HostGrid>, codim>
+    template< class HostGrid, class CoordFunction, int codim >
+    struct hasEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
     {
-      static const bool v = hasEntity<HostGrid,codim>::v;
+      static const bool v = hasEntity< HostGrid, codim > :: v;
     };
 
 
     //! \todo Please doc me !
-    template<class HostGrid>
-    struct isParallel< GeometryGrid<HostGrid> >
+    template< class HostGrid, class CoordFunction >
+    struct isParallel< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = isParallel<HostGrid>::v;
+      static const bool v = isParallel< HostGrid > :: v;
     };
 
 
     //! \todo Please doc me !
-    template<class HostGrid>
-    struct hasHangingNodes< GeometryGrid<HostGrid> >
+    template< class HostGrid, class CoordFunction >
+    struct hasHangingNodes< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = hasHangingNodes<HostGrid>::v;
+      static const bool v = hasHangingNodes< HostGrid > :: v;
     };
 
     //! \todo Please doc me !
-    template<class HostGrid>
-    struct isLevelwiseConforming< GeometryGrid<HostGrid> >
+    template< class HostGrid, class CoordFunction >
+    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = isLevelwiseConforming<HostGrid>::v;
+      static const bool v = isLevelwiseConforming< HostGrid > :: v;
     };
 
     //! \todo Please doc me !
-    template<class HostGrid>
-    struct isLeafwiseConforming< GeometryGrid<HostGrid> >
+    template< class HostGrid, class CoordFunction >
+    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = isLeafwiseConforming<HostGrid>::v;
+      static const bool v = isLeafwiseConforming< HostGrid > :: v;
     };
   }
 

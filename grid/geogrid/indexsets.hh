@@ -8,6 +8,27 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
+  // Forward Declarations
+  // --------------------
+
+  template< class Grid >
+  class GeometryGridLevelIndexSet;
+
+  template< class Grid >
+  class GeometryGridLeafIndexSet;
+
+
+  // GeometryGridLevelIndexSetTypes
+  // ------------------------------
+
   template <class GridImp>
   struct GeometryGridLevelIndexSetTypes
   {
@@ -21,6 +42,100 @@ namespace Dune
         typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
       };
     };
+  };
+
+
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGridLevelIndexSet< const GeometryGrid< HostGrid, CoordFunction > >
+    : public IndexSetDefaultImplementation
+      < const GeometryGrid< HostGrid, CoordFunction >,
+          GeometryGridLevelIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
+          GeometryGridLevelIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
+  {
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    typedef typename HostGrid :: Traits :: LevelIndexSet HostLevelIndexSet;
+
+    const Grid *grid_;
+    const HostLevelIndexSet *hostIndexSet_;
+
+  public:
+    enum { dimension = Grid :: dimension };
+
+    typedef unsigned int IndexType;
+
+    typedef IndexSet
+    < Grid, GeometryGridLevelIndexSet< Grid >, GeometryGridLevelIndexSetTypes< Grid > >
+    Base;
+
+    GeometryGridLevelIndexSet ( const Grid &grid, int level )
+    {
+      update( grid, level );
+    }
+
+    template< int codim >
+    IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
+    {
+      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().template index< codim >( *hostEntity );
+    }
+
+    template< class Entity >
+    IndexType index ( const Entity &entity ) const
+    {
+      return index< Entity :: codimension >( entity );
+    }
+
+    template< int codim >
+    IndexType subIndex ( const typename Grid :: template Codim< 0 > :: Entity &entity, int i ) const
+    {
+      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< 0 >( entity );
+      return hostIndexSet().template subIndex< codim >( *hostEntity, i );
+    }
+
+    IndexType size ( GeometryType type ) const
+    {
+      return hostIndexSet().size( type );
+    }
+
+    int size ( int codim ) const
+    {
+      return hostIndexSet().size( codim );
+    }
+
+    const std :: vector< GeometryType > &geomTypes ( int codim ) const
+    {
+      return hostIndexSet().geomTypes( codim );
+    }
+
+    template< int codim, PartitionIteratorType pitype >
+    typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
+    begin () const
+    {
+      return grid_->template leafbegin< codim, pitype >();
+    }
+
+    template< int codim, PartitionIteratorType pitype >
+    typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
+    end () const
+    {
+      return grid_->template leafend< codim, pitype >();
+    }
+
+    void update ( const Grid &grid, int level )
+    {
+      grid_ = &grid;
+      hostIndexSet_ = &(grid.hostGrid().levelIndexSet( level ));
+    }
+
+  private:
+    const HostLevelIndexSet &hostIndexSet () const
+    {
+      return *hostIndexSet_;
+    }
   };
 
 
@@ -125,99 +240,96 @@ namespace Dune
 
 
 
-  template<class GridImp>
-  class GeometryGridLeafIndexSet :
-    public IndexSetDefaultImplementation<GridImp,GeometryGridLeafIndexSet<GridImp>,GeometryGridLeafIndexSetTypes<GridImp> >
+  template< class HostGrid, class CoordFunction >
+  class GeometryGridLeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >
+    : public IndexSetDefaultImplementation
+      < const GeometryGrid< HostGrid, CoordFunction >,
+          GeometryGridLeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
+          GeometryGridLeafIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
   {
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    typedef typename HostGrid :: Traits :: LeafIndexSet HostLeafIndexSet;
+
+    const Grid *grid_;
+    const HostLeafIndexSet *hostIndexSet_;
 
   public:
+    enum { dimension = Grid :: dimension };
 
+    typedef unsigned int IndexType;
 
-    /*
-     * We use the remove_const to extract the Type from the mutable class,
-     * because the const class is not instatiated yet.
-     */
-    enum {dim = remove_const<GridImp>::type::dimension};
+    typedef IndexSet
+    < Grid, GeometryGridLeafIndexSet< Grid >, GeometryGridLeafIndexSetTypes< Grid > >
+    Base;
 
-    typedef IndexSet<GridImp,GeometryGridLeafIndexSet<GridImp>,GeometryGridLeafIndexSetTypes<GridImp> > Base;
-
-
-    //! constructor stores reference to a grid and level
-    GeometryGridLeafIndexSet (const GridImp& grid)
-      : grid_(&grid)
-    {}
-
-
-    //! get index of an entity
-    /*
-        We use the RemoveConst to extract the Type from the mutable class,
-        because the const class is not instatiated yet.
-     */
-    template<int codim>
-    int index (const typename remove_const<GridImp>::type::template Codim<codim>::Entity& e) const
+    GeometryGridLeafIndexSet ( const Grid &grid )
     {
-      return grid_->hostgrid_->leafIndexSet().template index<codim>(*grid_->template getHostEntity<codim>(e));
+      update( grid );
     }
 
-
-    //! get index of subEntity of a codim 0 entity
-    /*
-        We use the RemoveConst to extract the Type from the mutable class,
-        because the const class is not instatiated yet.
-     */
-    template<int codim>
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    template< int codim >
+    IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
     {
-      return grid_->hostgrid_->leafIndexSet().template subIndex<codim>(*grid_->template getHostEntity<0>(e),i);
+      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().template index< codim >( *hostEntity );
     }
 
-
-    //! get number of entities of given type
-    int size (GeometryType type) const
+    template< class Entity >
+    IndexType index ( const Entity &entity ) const
     {
-      return grid_->hostgrid_->leafIndexSet().size(type);
+      return index< Entity :: codimension >( entity );
     }
 
-
-    //! get number of entities of given codim
-    int size (int codim) const
+    template< int codim >
+    IndexType subIndex ( const typename Grid :: template Codim< 0 > :: Entity &entity, int i ) const
     {
-      return grid_->hostgrid_->leafIndexSet().size(codim);
+      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< 0 >( entity );
+      return hostIndexSet().template subIndex< codim >( *hostEntity, i );
     }
 
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
+    IndexType size ( GeometryType type ) const
     {
-      return grid_->hostgrid_->leafIndexSet().geomTypes(codim);
+      return hostIndexSet().size( type );
     }
 
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType pitype>
-    typename Base::template Codim<codim>::template Partition<pitype>::Iterator begin () const
+    int size ( int codim ) const
     {
-      return grid_->template leafbegin<codim,pitype>();
+      return hostIndexSet().size( codim );
     }
 
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int codim, PartitionIteratorType pitype>
-    typename Base::template Codim<codim>::template Partition<pitype>::Iterator end () const
+    const std :: vector< GeometryType > &geomTypes ( int codim ) const
     {
-      return grid_->template leafend<codim,pitype>();
+      return hostIndexSet().geomTypes( codim );
     }
 
+    template< int codim, PartitionIteratorType pitype >
+    typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
+    begin () const
+    {
+      return grid_->template leafbegin< codim, pitype >();
+    }
 
-    /** \todo Currently we support only vertex and element indices */
-    void update(const GridImp& grid)
+    template< int codim, PartitionIteratorType pitype >
+    typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
+    end () const
+    {
+      return grid_->template leafend< codim, pitype >();
+    }
+
+    void update ( const Grid &grid )
     {
       grid_ = &grid;
+      hostIndexSet_ = &(grid.hostGrid().leafIndexSet());
     }
 
-
-    GridImp* grid_;
+  private:
+    const HostLeafIndexSet &hostIndexSet () const
+    {
+      return *hostIndexSet_;
+    }
   };
 
 

@@ -6,65 +6,58 @@
 namespace Dune
 {
 
-  //**********************************************************************
-  //
-  // --GeometryGridLevelIterator
-  /** \brief Iterator over all entities of a given codimension and level of a grid.
-   * \ingroup GeometryGrid
-   */
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  class GeometryGridLevelIterator :
-    public Dune::GeometryGridEntityPointer <codim,GridImp>,
-    public LevelIteratorDefaultImplementation <codim,pitype,GridImp,GeometryGridLevelIterator>
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLevelIterator;
+
+
+
+  // GeometryGridLeafIterator
+  // ------------------------
+
+  template< int codim, PartitionIteratorType pitype, class HostGrid, class CoordFunction >
+  class GeometryGridLevelIterator< codim, pitype, const GeometryGrid< HostGrid, CoordFunction > >
+    : public GeometryGridEntityPointer< codim, const GeometryGrid< HostGrid, CoordFunction > >
   {
-  private:
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    enum {dim = GridImp::dimension};
+    enum { dimension = Grid :: dimension };
 
+    typedef typename HostGrid :: template Codim< codim > :: LevelIterator HostLevelIterator;
+
+    HostLevelIterator hostIterator_;
 
   public:
+    typedef GeometryGridEntityPointer< codim, const Grid > Base;
 
-    //! Constructor
-    explicit GeometryGridLevelIterator(const GridImp* identityGrid, int level)
-      : GeometryGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lbegin<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lbegin<codim>(level)),
-        hostGridLevelEndIterator_(identityGrid->hostgrid_->template lend<codim>(level))
+    explicit GeometryGridLevelIterator ( const Grid *grid, int level )
+      : Base( grid, grid->hostGrid().template lbegin< codim >( level ) ),
+        hostIterator_( grid->hostGrid().template lbegin< codim >( level ) )
     {
-      this->virtualEntity_.setToTarget(hostGridLevelIterator_);
+      this->virtualEntity_.setToTarget( hostIterator_ );
     }
 
-
-    /** \brief Constructor which create the end iterator
-        \param endDummy Here only to distinguish it from the other constructor
-     */
-    explicit GeometryGridLevelIterator(const GridImp* identityGrid, int level, bool endDummy)
-      :
-        GeometryGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template lend<codim>(level)),
-        hostGridLevelIterator_(identityGrid->hostgrid_->template lend<codim>(level)),
-        hostGridLevelEndIterator_(identityGrid->hostgrid_->template lend<codim>(level))
+    GeometryGridLevelIterator( const Grid *grid, int level, bool endDummy )
+      : Base( grid, grid->hostGrid().template lend< codim >( level ) ),
+        hostIterator_( grid->hostGrid().template lend< codim >( level ) )
     {}
 
-
-    //! prefix increment
-    void increment() {
-      ++hostGridLevelIterator_;
-      this->virtualEntity_.setToTarget(hostGridLevelIterator_);
+    void increment ()
+    {
+      ++hostIterator_;
+      this->virtualEntity_.setToTarget( hostIterator_ );
     }
-
-
-  private:
-
-    // LevelIterator to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<codim>::LevelIterator HostGridLevelIterator;
-
-    //! \todo Please doc me !
-    HostGridLevelIterator hostGridLevelIterator_;
-
-    //! \todo Please doc me !
-    HostGridLevelIterator hostGridLevelEndIterator_;
-
   };
-
 
 }  // namespace Dune
 

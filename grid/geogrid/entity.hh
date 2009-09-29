@@ -8,11 +8,11 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
 
-  // Forward declarations
-
-  template<int codim, int dim, class GridImp>
-  class GeometryGridEntity;
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
 
   template<int codim, class GridImp>
   class GeometryGridEntityPointer;
@@ -31,6 +31,17 @@ namespace Dune
 
 
 
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< int codim, int dim, class Grid >
+  class GeometryGridEntity;
+
+
+
+
+  // GeometryGridMakeableEntity
+  // --------------------------
 
   template<int codim, int dim, class GridImp>
   class GeometryGridMakeableEntity :
@@ -70,192 +81,156 @@ namespace Dune
   };
 
 
-  //**********************************************************************
-  //
-  // --GeometryGridEntity
-  // --Entity
-  //
+
   /** \brief The implementation of entities in a GeometryGrid
    *   \ingroup GeometryGrid
    *
    *  A Grid is a container of grid entities. An entity is parametrized by the codimension.
    *  An entity of codimension c in dimension d is a d-c dimensional object.
-   *
    */
-  template<int codim, int dim, class GridImp>
-  class GeometryGridEntity :
-    public EntityDefaultImplementation <codim,dim,GridImp,GeometryGridEntity>
+  template< int codim, int dim, class HostGrid, class CoordFunction >
+  class GeometryGridEntity< codim, dim, const GeometryGrid< HostGrid, CoordFunction > >
+    : public EntityDefaultImplementation
+      < codim, dim, const GeometryGrid< HostGrid, CoordFunction >, GeometryGridEntity >
   {
-    friend class GeometryGridMakeableEntity<codim,dim,GridImp>;
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    template <class GridImp_>
-    friend class GeometryGridLevelIndexSet;
+    friend class GeometryGridMakeableEntity< codim, dim, const Grid >;
 
-    template <class GridImp_>
-    friend class GeometryGridLeafIndexSet;
+    template< class > friend class GeometryGridLevelIndexSet;
+    template< class > friend class GeometryGridLeafIndexSet;
+    template< class > friend class GeometryGridLocalIdSet;
+    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, int > friend class IndexSetter;
 
-    template <class GridImp_>
-    friend class GeometryGridLocalIdSet;
+    typedef typename Grid :: ctype ctype;
 
-    template <class GridImp_>
-    friend class GeometryGridGlobalIdSet;
-
-    template <class GridImp_, int EntityDim>
-    friend class IndexSetter;
-
-
-  private:
-
-    typedef typename GridImp::ctype ctype;
-
-    // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
-
-    // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
-
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: Entity
+    HostEntity;
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: EntityPointer
+    HostEntityPointer;
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: Geometry
+    HostGeometry;
 
   public:
+    typedef typename Grid :: template Codim< codim > :: Geometry Geometry;
 
-    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+  private:
+    typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
+    typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
+    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
+  public:
+    HostEntityPointer hostEntity_;
 
+  private:
+    const Grid *grid_;
+    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable Geometry *geo_;
+
+  public:
     //! Constructor for an entity in a given grid level
-    GeometryGridEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      hostEntity_(hostEntity),
-      identityGrid_(identityGrid),
-      geo_(0),
-      geoInFather_(0)
+    GeometryGridEntity( const Grid *grid, const HostEntityPointer &hostEntity )
+      : hostEntity_( hostEntity ),
+        grid_( grid ),
+        geo_( 0 )
     {}
-
 
     //! \todo Please doc me !
-    GeometryGridEntity(const GeometryGridEntity& original) :
-      hostEntity_(original.hostEntity_),
-      identityGrid_(original.identityGrid_),
-      geo_(0),
-      geoInFather_(0)
+    GeometryGridEntity( const GeometryGridEntity &other )
+      : hostEntity_( other.hostEntity_ ),
+        grid_( other.grid_ ),
+        geo_( 0 )
     {}
 
-
     //! Destructor
-    ~GeometryGridEntity()
+    ~GeometryGridEntity ()
     {
-      if (geo_!=0)
+      if( geo_ != 0 )
+        delete geo_;
+    }
+
+    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    {
+      if( this == &other )
+        return *this;
+
+      if( geo_ != 0 )
       {
         delete geo_;
         geo_ = 0;
       }
-      if (geoInFather_!=0)
-      {
-        delete geoInFather_;
-        geoInFather_ = 0;
-      }
-    }
 
-
-    //! \todo Please doc me !
-    GeometryGridEntity& operator=(const GeometryGridEntity& original)
-    {
-      if (this != &original)
-      {
-        if (geo_!=0)
-        {
-          delete geo_;
-          geo_ = 0;
-        }
-        if (geoInFather_!=0)
-        {
-          delete geoInFather_;
-          geoInFather_ = 0;
-        }
-        identityGrid_ = original.identityGrid_;
-        hostEntity_ = original.hostEntity_;
-      }
+      grid_ = other.grid_;
+      hostEntity_ = other.hostEntity_;
       return *this;
     }
 
-
     GeometryType type () const
     {
-      return hostEntity_->type();
+      return hostEntity().type();
     }
 
     //! level of this element
-    int level () const {
-      return hostEntity_->level();
+    int level () const
+    {
+      return hostEntity().level();
     }
 
-    /** \brief The partition type for parallel computing
-     */
-    PartitionType partitionType () const {
-      return hostEntity_->partitionType();
+    //! The partition type for parallel computing
+    PartitionType partitionType () const
+    {
+      return hostEntity().partitionType();
     }
 
-
+#if 0
     /** Intra-element access to entities of codimension cc > codim. Return number of entities
      * with codimension cc.
      */
     template<int cc> int count () const {
       return hostEntity_->template count<cc>();
     }
-
-    typedef MakeableInterfaceObject<Geometry> MakeableGeo;
-    typedef typename MakeableGeo::ImplementationType GeoImpl;
-    typedef typename GeoImpl::GlobalCoordinate GlobalCoordinate;
-    mutable std::vector<typename GeoImpl::GlobalCoordinate> corners_;
+#endif
 
     //! Geometry of this entity
-    const Geometry& geometry () const
+    const Geometry &geometry () const
     {
-      if (geo_==0) {
-        typedef typename HostGridEntityPointer::Entity::Geometry HostGeo;
-        const HostGeo& hostGeo = hostEntity_->geometry();
-        corners_.resize(hostGeo.corners());
-        for ( unsigned int i = 0; i < corners_.size(); ++i )
-          func(hostGeo[i],corners_[i]);
-        geo_ = new MakeableGeo(GeoImpl(type(),corners_));
+      if( geo_ ==0 )
+      {
+        const HostGeometry &hostGeo = hostEntity().geometry();
+        corners_.resize( hostGeo.corners() );
+        for( unsigned int i = 0; i < corners_.size(); ++i )
+          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
       }
       return *geo_;
     }
 
-    HostGridEntityPointer hostEntity_;
-
+    const HostEntity &hostEntity () const
+    {
+      return *hostEntity_;
+    }
 
   private:
-
-    //! \todo Please doc me !
-    void setToTarget(const HostGridEntityPointer& target)
+    const CoordFunction &coordFunction () const
     {
-      if(geo_!=0)
+      return grid_->coordFunction();
+    }
+
+    void setToTarget( const HostEntityPointer &target )
+    {
+      if( geo_ != 0 )
       {
         delete geo_;
         geo_ = 0;
       }
-      if (geoInFather_!=0)
-      {
-        delete geoInFather_;
-        geoInFather_ = 0;
-      }
       hostEntity_ = target;
     }
-
-
-    const GridImp* identityGrid_;
-
-    //! the current geometry
-    mutable MakeableInterfaceObject<Geometry> *geo_;
-    mutable MakeableInterfaceObject<Geometry> *geoInFather_;
   };
 
 
 
 
-  //***********************
-  //
-  //  --GeometryGridEntity
-  //
-  //***********************
   /** \brief Specialization for codim-0-entities.
    * \ingroup GeometryGrid
    *
@@ -263,278 +238,265 @@ namespace Dune
    * It has an extended interface compared to the general entity class.
    * For example, Entities of codimension 0  allow to visit all neighbors.
    */
-  template<int dim, class GridImp>
-  class GeometryGridEntity<0,dim,GridImp> :
-    public EntityDefaultImplementation<0,dim,GridImp, GeometryGridEntity>
+  template< int dim, class HostGrid, class CoordFunction >
+  class GeometryGridEntity< 0, dim, const GeometryGrid< HostGrid, CoordFunction > >
+    : public EntityDefaultImplementation
+      < 0, dim, const GeometryGrid< HostGrid, CoordFunction >, GeometryGridEntity >
   {
+    enum { codim = 0 };
+
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    friend class GeometryGridMakeableEntity< codim, dim, const Grid >;
+
+    template< class > friend class GeometryGridLevelIndexSet;
+    template< class > friend class GeometryGridLeafIndexSet;
+    template< class > friend class GeometryGridLocalIdSet;
+    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, int > friend class IndexSetter;
+
+    typedef typename Grid :: ctype ctype;
+
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: Entity
+    HostEntity;
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: EntityPointer
+    HostEntityPointer;
+    typedef typename HostGrid :: Traits :: template Codim< codim > :: Geometry
+    HostGeometry;
+
   public:
+    typedef typename Grid :: template Codim< codim > :: EntityPointer EntityPointer;
+    typedef typename Grid :: template Codim< codim > :: Geometry Geometry;
+    typedef typename Grid :: template Codim< codim > :: LocalGeometry LocalGeometry;
 
-    // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension};
+    typedef typename Grid :: HierarchicIterator HierarchicIterator;
+    typedef typename Grid :: LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Grid :: LevelIntersectionIterator LevelIntersectionIterator;
 
-    // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
+  private:
+    typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
+    typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
+    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-    typedef typename GridImp::template Codim<0>::Geometry Geometry;
+  public:
+    HostEntityPointer hostEntity_;
 
-    typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
+  private:
+    const Grid *grid_;
+    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable Geometry *geo_;
+    mutable LocalGeometry *geoInFather_;
 
-    //! The Iterator over intersections on this level
-    typedef GeometryGridLevelIntersectionIterator<GridImp> LevelIntersectionIterator;
-
-    //! The Iterator over intersections on the leaf level
-    typedef GeometryGridLeafIntersectionIterator<GridImp> LeafIntersectionIterator;
-
-    //! Iterator over descendants of the entity
-    typedef GeometryGridHierarchicIterator<GridImp> HierarchicIterator;
-
-
-    //! Constructor for an entity in a given grid level
-    GeometryGridEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      identityGrid_(identityGrid),
-      geo_(0),
-      geoInFather_(0),
-      hostEntity_(hostEntity)
+  public:
+    GeometryGridEntity ( const Grid *grid, const HostEntityPointer &hostEntity )
+      : hostEntity_( hostEntity ),
+        grid_( grid ),
+        geo_( 0 ),
+        geoInFather_( 0 )
     {}
 
-
-    //! \todo Please doc me !
-    GeometryGridEntity(const GeometryGridEntity& original) :
-      identityGrid_(original.identityGrid_),
-      geo_(0),
-      geoInFather_(0),
-      hostEntity_(original.hostEntity_)
+    GeometryGridEntity( const GeometryGridEntity &other )
+      : hostEntity_( other.hostEntity_ ),
+        grid_( other.grid_ ),
+        geo_( 0 ),
+        geoInFather_( 0 )
     {}
 
-
-    //! Destructor
-    ~GeometryGridEntity()
+    ~GeometryGridEntity ()
     {
-      if (geo_!=0)
+      if( geo_ != 0 )
+        delete geo_;
+      if( geoInFather_ != 0 )
+        delete geoInFather_;
+    }
+
+
+    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    {
+      if( this == &other )
+        return *this;
+
+      if( geo_ != 0 )
       {
         delete geo_;
         geo_ = 0;
       }
-      if (geoInFather_!=0)
+
+      if( geoInFather_ != 0 )
       {
         delete geoInFather_;
         geoInFather_ = 0;
       }
-    }
 
-
-    //! \todo Please doc me !
-    GeometryGridEntity& operator=(const GeometryGridEntity& original)
-    {
-      if (this != &original)
-      {
-        if (geo_!=0)
-        {
-          delete geo_;
-          geo_ = 0;
-        }
-        if (geoInFather_!=0)
-        {
-          delete geoInFather_;
-          geoInFather_ = 0;
-        }
-        identityGrid_ = original.identityGrid_;
-        hostEntity_ = original.hostEntity_;
-      }
+      grid_ = other.grid_;
+      hostEntity_ = other.hostEntity_;
       return *this;
     }
 
-
     GeometryType type () const
     {
-      return hostEntity_->type();
+      return hostEntity().type();
     }
 
-    //! Level of this element
+    //! level of this element
     int level () const
     {
-      return hostEntity_->level();
+      return hostEntity().level();
     }
 
-
-    /** \brief The partition type for parallel computing */
-    PartitionType partitionType () const {
-      return hostEntity_->partitionType();
+    //! The partition type for parallel computing
+    PartitionType partitionType () const
+    {
+      return hostEntity().partitionType();
     }
-
-    typedef MakeableInterfaceObject<Geometry> MakeableGeo;
-    typedef typename MakeableGeo::ImplementationType GeoImpl;
-    typedef typename GeoImpl::GlobalCoordinate GlobalCoordinate;
-    mutable std::vector<typename GeoImpl::GlobalCoordinate> corners_;
 
     //! Geometry of this entity
-    const Geometry& geometry () const
+    const Geometry &geometry () const
     {
-      if (geo_==0) {
-        typedef typename HostGridEntityPointer::Entity::Geometry HostGeo;
-        const HostGeo& hostGeo = hostEntity_->geometry();
-        corners_.resize(hostGeo.corners());
-        for ( unsigned int i = 0; i < corners_.size(); ++i )
-          func(hostGeo[i],corners_[i]);
-        geo_ = new MakeableGeo(GeoImpl(type(),corners_));
+      if( geo_ ==0 )
+      {
+        const HostGeometry &hostGeo = hostEntity().geometry();
+        corners_.resize( hostGeo.corners() );
+        for( unsigned int i = 0; i < corners_.size(); ++i )
+          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
       }
       return *geo_;
     }
 
-
-    /** \brief Return the number of subEntities of codimension cc.
-     */
-    template<int cc>
+    template< int cc >
     int count () const
     {
-      return hostEntity_->template count<cc>();
+      return hostEntity().template count< cc >();
     }
 
-
-    /** \brief Provide access to sub entity i of given codimension. Entities
-     *  are numbered 0 ... count<cc>()-1
-     */
-    template<int cc>
-    typename GridImp::template Codim<cc>::EntityPointer entity (int i) const {
-      return GeometryGridEntityPointer<cc,GridImp>(identityGrid_, hostEntity_->template entity<cc>(i));
+    template< int cc >
+    typename Grid :: template Codim< cc > :: EntityPointer
+    entity ( int i ) const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      EntityPointerImpl impl( grid_, hostEntity().template entity< cc >( i ) );
+      return MakeableEntityPointer( impl );
     }
 
-
-    //! First level intersection
-    GeometryGridLevelIntersectionIterator<GridImp> ilevelbegin () const {
-      return GeometryGridLevelIntersectionIterator<GridImp>(identityGrid_,
-                                                            hostEntity_->ilevelbegin());
+    LevelIntersectionIterator ilevelbegin () const
+    {
+      typedef MakeableInterfaceObject< LevelIntersectionIterator >
+      MakeableLevelIntersectionIterator;
+      typedef typename MakeableLevelIntersectionIterator :: ImplementationType
+      LevelIntersectionIteratorImpl;
+      LevelIntersectionIteratorImpl impl( grid_, hostEntity().ilevelbegin() );
+      return MakeableLevelIntersectionIterator( impl );
     }
 
-
-    //! Reference to one past the last neighbor
-    GeometryGridLevelIntersectionIterator<GridImp> ilevelend () const {
-      return GeometryGridLevelIntersectionIterator<GridImp>(identityGrid_,
-                                                            hostEntity_->ilevelend());
+    LevelIntersectionIterator ilevelend () const
+    {
+      typedef MakeableInterfaceObject< LevelIntersectionIterator >
+      MakeableLevelIntersectionIterator;
+      typedef typename MakeableLevelIntersectionIterator :: ImplementationType
+      LevelIntersectionIteratorImpl;
+      LevelIntersectionIteratorImpl impl( grid_, hostEntity().ilevelend() );
+      return MakeableLevelIntersectionIterator( impl );
     }
 
-
-    //! First leaf intersection
-    GeometryGridLeafIntersectionIterator<GridImp> ileafbegin () const {
-      return GeometryGridLeafIntersectionIterator<GridImp>(identityGrid_,
-                                                           hostEntity_->ileafbegin());
+    LeafIntersectionIterator ileafbegin () const
+    {
+      typedef MakeableInterfaceObject< LeafIntersectionIterator >
+      MakeableLeafIntersectionIterator;
+      typedef typename MakeableLeafIntersectionIterator :: ImplementationType
+      LeafIntersectionIteratorImpl;
+      LeafIntersectionIteratorImpl impl( grid_, hostEntity().ileafbegin() );
+      return MakeableLeafIntersectionIterator( impl );
     }
 
-
-    //! Reference to one past the last leaf intersection
-    GeometryGridLeafIntersectionIterator<GridImp> ileafend () const {
-      return GeometryGridLeafIntersectionIterator<GridImp>(identityGrid_,
-                                                           hostEntity_->ileafend());
+    LeafIntersectionIterator ileafend () const
+    {
+      typedef MakeableInterfaceObject< LeafIntersectionIterator >
+      MakeableLeafIntersectionIterator;
+      typedef typename MakeableLeafIntersectionIterator :: ImplementationType
+      LeafIntersectionIteratorImpl;
+      LeafIntersectionIteratorImpl impl( grid_, hostEntity().ileafend() );
+      return MakeableLeafIntersectionIterator( impl );
     }
 
-
-    //! returns true if Entity has NO children
-    bool isLeaf() const {
-      return hostEntity_->isLeaf();
+    bool isLeaf () const
+    {
+      return hostEntity().isLeaf();
     }
 
-
-    //! Inter-level access to father element on coarser grid.
-    //! Assumes that meshes are nested.
-    GeometryGridEntityPointer<0,GridImp> father () const {
-      return GeometryGridEntityPointer<0,GridImp>(identityGrid_, hostEntity_->father());
+    EntityPointer father () const
+    {
+      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      return MakeableEntityPointer( EntityPointerImpl( grid_, hostEntity().father() ) );
     }
 
+    const LocalGeometry &geometryInFather () const
+    {
+      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+      typedef typename MakeableLocalGeometry :: ImplementationType LocalGeometryImpl;
 
-    /** \brief Location of this element relative to the reference element element of the father.
-     * This is sufficient to interpolate all dofs in conforming case.
-     * Nonconforming may require access to neighbors of father and
-     * computations with local coordinates.
-     * On the fly case is somewhat inefficient since dofs  are visited several times.
-     * If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-     * implementation of numerical algorithms is only done for simple discretizations.
-     * Assumes that meshes are nested.
-     */
-    const LocalGeometry& geometryInFather () const {
-      if (geoInFather_==0)
-        geoInFather_ = new MakeableInterfaceObject<LocalGeometry>(hostEntity_->geometryInFather());
+      if( geoInFather_ == 0 )
+        geoInFather_ = new MakeableLocalGeometry( LocalGeometryImpl( hostEntity().geometryInFather() ) );
       return *geoInFather_;
     }
 
-
-    /** \brief Inter-level access to son elements on higher levels<=maxlevel.
-     * This is provided for sparsely stored nested unstructured meshes.
-     * Returns iterator to first son.
-     */
-    GeometryGridHierarchicIterator<GridImp> hbegin (int maxLevel) const
+    HierarchicIterator hbegin ( int maxLevel ) const
     {
-      return GeometryGridHierarchicIterator<const GridImp>(identityGrid_, *this, maxLevel);
+      typedef MakeableInterfaceObject< HierarchicIterator > MakeableHierarchicIterator;
+      typedef typename MakeableHierarchicIterator :: ImplementationType HierarchicIteratorImpl;
+      return MakeableHierarchicIterator( HierarchicIteratorImpl( grid_, *this, maxLevel ) );
     }
 
-
-    //! Returns iterator to one past the last son
-    GeometryGridHierarchicIterator<GridImp> hend (int maxLevel) const
+    HierarchicIterator hend ( int maxLevel ) const
     {
-      return GeometryGridHierarchicIterator<const GridImp>(identityGrid_, *this, maxLevel, true);
+      typedef MakeableInterfaceObject< HierarchicIterator > MakeableHierarchicIterator;
+      typedef typename MakeableHierarchicIterator :: ImplementationType HierarchicIteratorImpl;
+      return MakeableHierarchicIterator( HierarchicIteratorImpl( grid_, *this, maxLevel, true ) );
     }
 
-
-    //! \todo Please doc me !
     bool wasRefined () const
     {
-      if (identityGrid_->adaptationStep!=GridImp::adaptDone)
+      if( grid_->adaptationStep != Grid :: adaptDone )
         return false;
 
-      int level = this->level();
-      int index = identityGrid_->levelIndexSet(level).index(*this);
-      return identityGrid_->refinementMark_[level][index];
+      int index = grid_->levelIndexSet( level() ).index( *this );
+      return grid_->refinementMark_[ level ][ index ];
     }
 
-
-    //! \todo Please doc me !
     bool mightBeCoarsened () const
     {
       return true;
     }
 
-
-    // /////////////////////////////////////////
-    //   Internal stuff
-    // /////////////////////////////////////////
-
-
-    //! \todo Please doc me !
-    void setToTarget(const HostGridEntityPointer& target)
+    const HostEntity &hostEntity () const
     {
-      if(geo_!=0)
+      return *hostEntity_;
+    }
+
+  private:
+    const CoordFunction &coordFunction () const
+    {
+      return grid_->coordFunction();
+    }
+
+    void setToTarget( const HostEntityPointer &target )
+    {
+      if( geo_ != 0 )
       {
         delete geo_;
         geo_ = 0;
       }
-      if (geoInFather_!=0)
+      if( geoInFather_ != 0 )
       {
         delete geoInFather_;
         geoInFather_ = 0;
       }
       hostEntity_ = target;
     }
-
-
-    const GridImp* identityGrid_;
-
-    //! the current geometry
-    mutable MakeableInterfaceObject<Geometry> *geo_;
-
-    //! \todo Please doc me !
-    mutable MakeableInterfaceObject<LocalGeometry> *geoInFather_;
-
-    //! \todo Please doc me !
-    HostGridEntityPointer hostEntity_;
-
-
-  private:
-
-    typedef typename GridImp::ctype ctype;
-
   }; // end of GeometryGridEntity codim = 0
 
-
 } // namespace Dune
-
 
 #endif

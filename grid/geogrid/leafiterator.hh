@@ -6,64 +6,58 @@
 namespace Dune
 {
 
-  /** \brief Iterator over all entities of a given codimension and level of a grid.
-   *  \ingroup GeometryGrid
-   */
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  class GeometryGridLeafIterator :
-    public Dune::GeometryGridEntityPointer <codim,GridImp>
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLeafIterator;
+
+
+
+  // GeometryGridLeafIterator
+  // ------------------------
+
+  template< int codim, PartitionIteratorType pitype, class HostGrid, class CoordFunction >
+  class GeometryGridLeafIterator< codim, pitype, const GeometryGrid< HostGrid, CoordFunction > >
+    : public GeometryGridEntityPointer< codim, const GeometryGrid< HostGrid, CoordFunction > >
   {
-  private:
+    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    enum {dim = GridImp::dimension};
+    enum { dimension = Grid :: dimension };
 
+    typedef typename HostGrid :: template Codim< codim > :: LeafIterator HostLeafIterator;
+
+    HostLeafIterator hostIterator_;
 
   public:
+    typedef GeometryGridEntityPointer< codim, const Grid > Base;
 
-    //! \todo Please doc me !
-    explicit GeometryGridLeafIterator(const GridImp* identityGrid) :
-      GeometryGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafIterator_(identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafEndIterator_(identityGrid->hostgrid_->template leafend<codim>())
+    explicit GeometryGridLeafIterator ( const Grid *grid )
+      : Base( grid, grid->hostGrid().template leafbegin< codim >() ),
+        hostIterator_( grid->hostGrid().template leafbegin< codim >() )
     {
-      this->virtualEntity_.setToTarget(hostGridLeafIterator_);
+      this->virtualEntity_.setToTarget( hostIterator_ );
     }
 
-
-    /** \brief Constructor which create the end iterator
-     *  \param endDummy Here only to distinguish it from the other constructor
-     */
-    explicit GeometryGridLeafIterator(const GridImp* identityGrid, bool endDummy) :
-      GeometryGridEntityPointer<codim,GridImp>(identityGrid, identityGrid->hostgrid_->template leafend<codim>()),
-      hostGridLeafIterator_(identityGrid->hostgrid_->template leafbegin<codim>()),
-      hostGridLeafEndIterator_(identityGrid->hostgrid_->template leafend<codim>())
+    GeometryGridLeafIterator( const Grid *grid, bool endDummy )
+      : Base( grid, grid->hostGrid().template leafend< codim >() ),
+        hostIterator_( grid->hostGrid().template leafend< codim >() )
     {}
 
-
-    //! prefix increment
-    void increment() {
-      ++hostGridLeafIterator_;
-      this->virtualEntity_.setToTarget(hostGridLeafIterator_);
+    void increment ()
+    {
+      ++hostIterator_;
+      this->virtualEntity_.setToTarget( hostIterator_ );
     }
-
-
-  private:
-
-    // /////////////////////////////////////
-    //   Data members
-    // /////////////////////////////////////
-
-    // LevelIterator to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::template Codim<codim>::LeafIterator HostGridLeafIterator;
-
-    //! \todo Please doc me !
-    HostGridLeafIterator hostGridLeafIterator_;
-
-    //! \todo Please doc me !
-    HostGridLeafIterator hostGridLeafEndIterator_;
-
   };
-
 
 }  // namespace Dune
 
