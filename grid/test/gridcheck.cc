@@ -42,6 +42,7 @@ struct GeometryInterface
     typedef typename Geometry::ctype ctype;
 
     geo.type();
+    geo.affine();
     geo.corners();
     geo.corner( 0 );
 
