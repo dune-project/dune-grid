@@ -38,8 +38,9 @@ namespace Dune
 
 
 
-  // GeometryGridLeafIterator
-  // ------------------------
+
+  // GeometryGridLeafIterator (real)
+  // -------------------------------
 
   template< int codim, PartitionIteratorType pitype, class Grid >
   class GeometryGridLeafIterator< codim, pitype, Grid, false >
@@ -54,6 +55,8 @@ namespace Dune
     typedef typename HostGrid :: template Codim< codim >
     :: template Partition< pitype > :: LeafIterator
     HostIterator;
+
+    enum IteratorType { begin, end };
 
   private:
     HostIterator hostIterator_;
@@ -73,6 +76,22 @@ namespace Dune
       ++hostIterator_;
       setToTarget( hostIterator_ );
     }
+
+  protected:
+    static HostIterator getHostIterator ( const Grid &grid, IteratorType type )
+    {
+      switch( type )
+      {
+      case begin :
+        return grid.hostGrid().template leafbegin< codim, pitype >();
+
+      case end :
+        return grid.hostGrid().template leafend< codim, pitype >();
+
+      default :
+        DUNE_THROW( GridError, "Invalid iterator requested." );
+      }
+    }
   };
 
 
@@ -87,18 +106,17 @@ namespace Dune
     typedef GeometryGridLeafIterator< codim, pitype, Grid > BaseType;
 
   public:
-    typedef typename BaseType :: HostIterator HostIterator;
+    typedef typename BaseType :: IteratorType IteratorType;
 
-    GeometryGridLeafIteratorAdapter ( const Grid &grid,
-                                      const HostIterator &hostIterator )
-      : BaseType( grid, hostIterator )
+    GeometryGridLeafIteratorAdapter ( const Grid &grid, IteratorType type )
+      : BaseType( grid, BaseType :: getHostIterator( grid, type ) )
     {}
   };
 
 
 
-  // GeometryGridLeafIterator
-  // ------------------------
+  // GeometryGridLeafIterator (real)
+  // -------------------------------
 
   template< int codim, PartitionIteratorType pitype, class Grid >
   class GeometryGridLevelIterator< codim, pitype, Grid, false >
@@ -113,6 +131,8 @@ namespace Dune
     typedef typename HostGrid :: template Codim< codim >
     :: template Partition< pitype > :: LevelIterator
     HostIterator;
+
+    enum IteratorType { begin, end };
 
   private:
     HostIterator hostIterator_;
@@ -132,6 +152,23 @@ namespace Dune
       ++hostIterator_;
       setToTarget( hostIterator_ );
     }
+
+  protected:
+    static HostIterator
+    getHostIterator ( const Grid &grid, int level, IteratorType type )
+    {
+      switch( type )
+      {
+      case begin :
+        return grid.hostGrid().template lbegin< codim, pitype >( level );
+
+      case end :
+        return grid.hostGrid().template lend< codim, pitype >( level );
+
+      default :
+        DUNE_THROW( GridError, "Invalid iterator requested." );
+      }
+    }
   };
 
 
@@ -146,11 +183,10 @@ namespace Dune
     typedef GeometryGridLevelIterator< codim, pitype, Grid > BaseType;
 
   public:
-    typedef typename BaseType :: HostIterator HostIterator;
+    typedef typename BaseType :: IteratorType IteratorType;
 
-    GeometryGridLevelIteratorAdapter ( const Grid &grid,
-                                       const HostIterator &hostIterator )
-      : BaseType( grid, hostIterator )
+    GeometryGridLevelIteratorAdapter ( const Grid &grid, int level, IteratorType type )
+      : BaseType( grid, BaseType :: getHostIterator( grid, level, type ) )
     {}
   };
 

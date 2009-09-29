@@ -421,23 +421,19 @@ namespace Dune
     template< int codim >
     typename Codim< codim > :: LevelIterator lbegin ( int level ) const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim > :: LevelIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template lbegin< codim >( level ) );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, level, Impl :: begin ) );
     }
 
     template< int codim >
     typename Codim< codim > :: LevelIterator lend ( int level ) const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim > :: LevelIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template lend< codim >( level ) );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, level, Impl :: end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -445,12 +441,10 @@ namespace Dune
     lbegin ( int level ) const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim >
-          :: template Partition< pitype > :: LevelIterator >
+      < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template lbegin< codim, pitype >( level ) );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, level, Impl :: begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -458,34 +452,28 @@ namespace Dune
     lend ( int level ) const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim >
-          :: template Partition< pitype > :: LevelIterator >
+      < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template lend< codim, pitype >( level ) );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, level, Impl :: end ) );
     }
 
     template< int codim >
     typename Codim< codim > :: LeafIterator leafbegin () const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim > :: LeafIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template leafbegin< codim >() );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, Impl :: begin ) );
     }
 
     template< int codim >
     typename Codim< codim > :: LeafIterator leafend () const
     {
-      typedef MakeableInterfaceObject
-      < typename Codim< codim > :: LeafIterator >
+      typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template leafend< codim >() );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, Impl :: end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -493,12 +481,10 @@ namespace Dune
     leafbegin () const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim >
-          :: template Partition< pitype > :: LeafIterator >
+      < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template leafbegin< codim, pitype >() );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, Impl :: begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -506,12 +492,10 @@ namespace Dune
     leafend () const
     {
       typedef MakeableInterfaceObject
-      < typename Codim< codim >
-          :: template Partition< pitype > :: LeafIterator >
+      < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      Impl impl( *this, hostGrid().template leafend< codim, pitype >() );
-      return MakeableIterator( impl );
+      return MakeableIterator( Impl( *this, Impl :: end ) );
     }
 
     const GlobalIdSet &globalIdSet () const
