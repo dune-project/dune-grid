@@ -14,6 +14,7 @@
 #include <dune/grid/geogrid/intersection.hh>
 #include <dune/grid/geogrid/intersectioniterator.hh>
 #include <dune/grid/geogrid/iterator.hh>
+#include <dune/grid/geogrid/idset.hh>
 #include <dune/grid/geogrid/indexsets.hh>
 #include <dune/grid/geogrid/datahandle.hh>
 
