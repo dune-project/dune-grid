@@ -17,6 +17,11 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
+/** \brief namespace shared by all DUNE modules
+ *
+ *  This is DUNE's main name space. All DUNE modules provide their
+ *  functionality though this name space (or a subspace of it).
+ */
 namespace Dune
 {
 
@@ -195,11 +200,13 @@ namespace Dune
    */
   template< class HostGrid, class CoordFunction >
   class GeometryGrid
+  /** \cond */
     : public GridDefaultImplementation
       < HostGrid :: dimension, CoordFunction :: dimRange,
           typename HostGrid :: ctype,
           GeometryGridFamily< HostGrid, CoordFunction > >,
       public GeometryGridExportParams< HostGrid, CoordFunction >
+      /** \endcond */
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
@@ -229,14 +236,25 @@ namespace Dune
     typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
     /** \endcond */
 
-    /** \name Exported Types
-     * \{ */
+    /** \name Traits
+     *  \{ */
 
-    //! type of the grid traints
+    //! type of the grid traits
     typedef typename GridFamily :: Traits Traits;
 
-    //! type of vector coordinates (e.g., double)
-    typedef typename Traits :: ctype ctype;
+    /** \brief traits structure containing types for a codimension
+     *
+     *  \tparam codim  codimension
+     *
+     *  \nosubgrouping
+     */
+    template< int codim >
+    struct Codim;
+
+    /** \} */
+
+    /** \name Iterator Types
+     *  \{ */
 
     //! iterator over the grid hierarchy
     typedef typename Traits :: HierarchicIterator HierarchicIterator;
@@ -245,51 +263,70 @@ namespace Dune
     //! iterator over intersections with other entities on the same level
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
-    //! index set for the the leaf entities in the hierarchy
+    /** \} */
+
+    /** \name Index and Id Set Types
+     *  \{ */
+
+    /** \brief type of leaf index set
+     *
+     *  The index set assigns consecutive indices to the entities of the
+     *  leaf grid. The indices are of integral type and can be used to access
+     *  arrays.
+     *
+     *  The leaf index set is a model of Dune::IndexSet.
+     */
     typedef typename Traits :: LeafIndexSet LeafIndexSet;
-    //! index set for one level of entities in the hierarchy
+
+    /** \brief type of level index set
+     *
+     *  The index set assigns consecutive indices to the entities of a grid
+     *  level. The indices are of integral type and can be used to access
+     *  arrays.
+     *
+     *  The level index set is a model of Dune::IndexSet.
+     */
     typedef typename Traits :: LevelIndexSet LevelIndexSet;
 
-    //! set of identifiers that are globally (i.e., within all processes) unique
+    /** \brief type of global id set
+     *
+     *  The id set assigns a unique identifier to each entity within the
+     *  grid. This identifier is unique over all processes sharing this grid.
+     *
+     *  \note Id's are neither consecutive nor necessarily of an integral
+     *        type.
+     *
+     *  The global id set is a model of Dune::IdSet.
+     */
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
-    //! set of identifiers that are locally (i.e., only within this process) unique
+
+    /** \brief type of local id set
+     *
+     *  The id set assigns a unique identifier to each entity within the
+     *  grid. This identifier needs only to be unique over this process.
+     *
+     *  Though the local id set may be identical to the global id set, it is
+     *  often implemented more efficiently.
+     *
+     *  \note Ids are neither consecutive nor necessarily of an integral
+     *        type.
+     *  \note Local ids need not be compatible with global ids. Also, no
+     *        mapping from local ids to global ones needs to exist.
+     *
+     *  The global id set is a model of Dune::IdSet.
+     */
     typedef typename Traits :: LocalIdSet LocalIdSet;
+
+    /** \} */
+
+    /** \name Miscellaneous Types
+     * \{ */
+
+    //! type of vector coordinates (e.g., double)
+    typedef typename Traits :: ctype ctype;
 
     //! communicator with all other processes having some part of the grid
     typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
-
-    template< int codim >
-    struct Codim
-    {
-      typedef typename Traits :: template Codim< codim > :: Entity Entity;
-      typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
-      typedef typename Traits :: template Codim< codim > :: Geometry Geometry;
-      typedef typename Traits :: template Codim< codim > :: LocalGeometry LocalGeometry;
-
-      typedef typename Traits :: HierarchicIterator HierarchicIterator;
-      typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
-      typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
-
-      typedef typename Traits :: LeafIndexSet LeafIndexSet;
-      typedef typename Traits :: LevelIndexSet LevelIndexSet;
-
-      typedef typename Traits :: GlobalIdSet GlobalIdSet;
-      typedef typename Traits :: LocalIdSet LocalIdSet;
-
-      template< PartitionIteratorType pitype >
-      struct Partition
-      {
-        typedef typename Traits :: template Codim< codim >
-        :: template Partition< pitype > :: LeafIterator
-        LeafIterator;
-        typedef typename Traits :: template Codim< codim >
-        :: template Partition< pitype > :: LevelIterator
-        LevelIterator;
-      };
-
-      typedef typename Partition< All_Partition > :: LeafIterator LeafIterator;
-      typedef typename Partition< All_Partition > :: LevelIterator LevelIterator;
-    };
 
     /** \} */
 
@@ -303,6 +340,9 @@ namespace Dune
     LocalIdSet localIdSet_;
 
   public:
+    /** \name Construction and Destruction
+     *  \{ */
+
     /** \brief constructor
      *
      *  The references to host grid and coordinate function are stored in the
@@ -320,6 +360,8 @@ namespace Dune
         localIdSet_( hostGrid.localIdSet() )
     {}
 
+    /** \brief destructor
+     */
     ~GeometryGrid ()
     {
       if( leafIndexSet_ != 0 )
@@ -332,7 +374,9 @@ namespace Dune
       }
     }
 
-    /** \name Grid Identification
+    /** \} */
+
+    /** \name Grid Identification Methods
      *  \{ */
 
     /** \brief obtain a string naming the grid
@@ -348,7 +392,7 @@ namespace Dune
     /** \} */
 
 
-    /** \name Sizes
+    /** \name Size Methods
      *  \{ */
 
     /** \brief obtain maximal grid level
@@ -555,7 +599,7 @@ namespace Dune
       return hostGrid().postAdapt();
     }
 
-    /** \name Parallel Data Distribution and Communication
+    /** \name Parallel Data Distribution and Communication Methods
      *  \{ */
 
     /** \brief obtain size of overlap region for the leaf grid
@@ -705,6 +749,9 @@ namespace Dune
 
     /** \} */
 
+    /** \name Miscellaneous Methods
+     *  \{ */
+
     /** \brief update grid caches
      *
      *  This method has to be called whenever the underlying host grid changes.
@@ -737,22 +784,21 @@ namespace Dune
       levelIndexSets_.resize( newNumLevels, (LevelIndexSet *)0 );
     }
 
+    /** \} */
+
   protected:
     using Base :: getRealImplementation;
 
-    //! Obtain the host grid wrapped by this GeometryGrid
     const HostGrid &hostGrid () const
     {
       return *hostGrid_;
     }
 
-    //! Obtain the host grid wrapped by this GeometryGrid
     HostGrid &hostGrid ()
     {
       return *hostGrid_;
     }
 
-    //! Obtain the coordinate function
     const CoordFunction &coordFunction () const
     {
       return coordFunction_;
@@ -772,6 +818,91 @@ namespace Dune
       return getRealImplementation( entity ).hostEntityPointer();
     }
   };
+
+
+
+  template< class HostGrid, class CoordFunction >
+  template< int codim >
+  struct GeometryGrid< HostGrid, CoordFunction > :: Codim
+    : public Base :: template Codim< codim >
+  {
+    /** \name Entity and Entity Pointer Types
+     *  \{ */
+
+    /** \brief type of entity
+     *
+     *  The entity is a model of Dune::Entity.
+     */
+    typedef typename Traits :: template Codim< codim > :: Entity Entity;
+
+    /** \brief type of entity pointer
+     *
+     *  The entity pointer is a model of Dune::EntityPointer.
+     */
+    typedef typename Traits :: template Codim< codim > :: EntityPointer EntityPointer;
+
+    /** \} */
+
+    /** \name Geometry Types
+     *  \{ */
+
+    /** \brief type of world geometry
+     *
+     *  Models the geomtry mapping of the entity, i.e., the mapping from the
+     *  reference element into world coordinates.
+     *
+     *  The geometry is a model of Dune::Geometry, implemented through the
+     *  generic geometries provided by dune-grid.
+     */
+    typedef typename Traits :: template Codim< codim > :: Geometry Geometry;
+
+    /** \brief type of local geometry
+     *
+     *  Models the geomtry mapping into the reference element of dimension
+     *  \em dimension.
+     *
+     *  The local geometry is a model of Dune::Geometry, implemented through
+     *  the generic geometries provided by dune-grid.
+     */
+    typedef typename Traits :: template Codim< codim > :: LocalGeometry LocalGeometry;
+
+    /** \} */
+
+    /** \name Iterator Types
+     *  \{ */
+
+    template< PartitionIteratorType pitype >
+    struct Partition
+    {
+      typedef typename Traits :: template Codim< codim >
+      :: template Partition< pitype > :: LeafIterator
+      LeafIterator;
+      typedef typename Traits :: template Codim< codim >
+      :: template Partition< pitype > :: LevelIterator
+      LevelIterator;
+    };
+
+    /** \brief type of level iterator
+     *
+     *  This iterator enumerates the entites of codimension \em codim of a
+     *  grid level.
+     *
+     *  The level iterator is a model of Dune::LevelIterator.
+     */
+    typedef typename Partition< All_Partition > :: LeafIterator LeafIterator;
+
+    /** \brief type of leaf iterator
+     *
+     *  This iterator enumerates the entites of codimension \em codim of the
+     *  leaf grid.
+     *
+     *  The leaf iterator is a model of Dune::LeafIterator.
+     */
+    typedef typename Partition< All_Partition > :: LevelIterator LevelIterator;
+
+    /** \} */
+  };
+
 
 }
 
