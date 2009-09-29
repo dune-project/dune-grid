@@ -89,6 +89,18 @@ namespace Dune
         return Grid :: getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
       }
 
+      template< int codim >
+      IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+      {
+        return Grid::getRealImplementation( entity ).template subIndex( hostIndexSet(), i, subcodim );
+      }
+
+      template< class Entity >
+      IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
+      {
+        return subIndex< Entity::codimension >( entity, i, subcodim );
+      }
+
       IndexType size ( GeometryType type ) const
       {
         return hostIndexSet().size( type );

@@ -53,7 +53,7 @@ namespace Dune
       template< class Entity >
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
-        : inside_( inside.template entity< 0 >( 0 ) ),
+        : inside_( inside.template subEntity< 0 >( 0 ) ),
           hostIterator_( hostIterator ),
           intersection_( 0 )
       {}

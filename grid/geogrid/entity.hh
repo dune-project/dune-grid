@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_ENTITY_HH
 
 #include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/genericgeometry/genericreferenceelement.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/cornerstorage.hh>
@@ -270,9 +271,16 @@ namespace Dune
 
       template< int subcodim, class HostIndexSet >
       typename HostIndexSet :: IndexType
-      subIndex ( const HostIndexSet &indexSet, int i )
+      subIndex ( const HostIndexSet &indexSet, int i ) const
       {
         return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
+      }
+
+      template< class HostIndexSet >
+      typename HostIndexSet::IndexType
+      subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
+      {
+        return indexSet.subIndex( hostEntity(), i, cd );
       }
 
       /** \brief obtain the entity's id from a host IdSet
@@ -314,11 +322,11 @@ namespace Dune
       //! codimensioon of the entity
       static const int codimension = codim;
       //! dimension of the grid
-      static const int dimension = Traits :: dimension;
+      static const int dimension = Traits::dimension;
       //! dimension of the entity
       static const int mydimension = dimension - codimension;
       //! dimension of the world
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
       static const bool fake = true;
@@ -533,14 +541,14 @@ namespace Dune
        *  \param  indexSet  host IndexSet to use
        */
       template< class HostIndexSet >
-      typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
+      typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
       }
 
       template< int subcodim, class HostIndexSet >
-      typename HostIndexSet :: IndexType
-      subIndex ( const HostIndexSet &indexSet, int i )
+      typename HostIndexSet::IndexType
+      subIndex ( const HostIndexSet &indexSet, int i ) const
       {
         const GeometryType type = hostElement().type();
         const ReferenceElement< ctype, dimension > &refElement
@@ -549,6 +557,22 @@ namespace Dune
 
         const int realcodim = codimension + subcodim;
         return indexSet.template subIndex< 0, realcodim >( hostElement(), j );
+      }
+
+      template< class HostIndexSet >
+      typename HostIndexSet::IndexType
+      subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
+      {
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+
+        const int tid = GenericGeometry::topologyId( hostElement().type() );
+        const int gi = Map::template dune2generic< codimension >( tid, i );
+
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension >::general( type );
+        const int j = refElement.subEntity( subEntity_, codimension, gi, cd );
+
+        return indexSet.subIndex( hostElement(), j, codimension+cd );
       }
 
       /** \brief obtain the entity's id from a host IdSet
@@ -775,14 +799,19 @@ namespace Dune
       }
 
       template< int codim >
-      typename Grid :: template Codim< codim > :: EntityPointer
-      entity ( int i ) const
+      typename Grid::template Codim< codim >::EntityPointer
+      subEntity ( int i ) const
       {
-        typedef typename Grid :: template Codim< codim > :: EntityPointer EntityPointer;
+        typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
         typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-        typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+        typedef typename MakeableEntityPointer::ImplementationType EntityPointerImpl;
 
-        EntityPointerImpl impl( *grid_, hostEntity(), i );
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+
+        const int tid = GenericGeometry::topologyId( type() );
+        const int di = Map::template generic2dune< codim >( tid, i );
+
+        EntityPointerImpl impl( *grid_, hostEntity(), di );
         return MakeableEntityPointer( impl );
       }
 
@@ -899,16 +928,23 @@ namespace Dune
        *  \param  indexSet  host IndexSet to use
        */
       template< class HostIndexSet >
-      typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
+      typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template index< codimension >( hostEntity() );
       }
 
       template< int subcodim, class HostIndexSet >
       typename HostIndexSet :: IndexType
-      subIndex ( const HostIndexSet &indexSet, int i )
+      subIndex ( const HostIndexSet &indexSet, int i ) const
       {
         return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
+      }
+
+      template< class HostIndexSet >
+      typename HostIndexSet::IndexType
+      subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
+      {
+        return indexSet.subIndex( hostEntity(), i, cd );
       }
 
       /** \brief obtain the entity's id from a host IdSet
@@ -923,6 +959,7 @@ namespace Dune
       {
         return idSet.template id< codimension >( hostEntity() );
       }
+
       /** \} */
     };
 

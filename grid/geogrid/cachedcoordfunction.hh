@@ -70,7 +70,7 @@ namespace Dune
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
 #ifdef ALLCODIM_SUBINDEX
-        static const int codim = Entity :: codimension;
+        static const int codim = Entity::codimension;
         static const int subcodim = dimension - codim;
         return data_[ indexSet_.template subIndex< codim, subcodim >( entity, corner ) ];
 #else
