@@ -4,7 +4,8 @@
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
 #include <dune/grid/geogrid/entitypointer.hh>
-#include <dune/grid/geogrid/cache.hh>
+//#include <dune/grid/geogrid/cache.hh>
+#include <dune/grid/geogrid/cornerstorage.hh>
 #include <dune/grid/geogrid/storage.hh>
 
 namespace Dune
@@ -65,13 +66,15 @@ namespace Dune
     typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
 
   private:
+    typedef GeometryGridCoordVector< dimension-1, const Grid, false > CoordVector;
+
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
+    // typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
     const EntityPointer *inside_;
     const HostIntersection *hostIntersection_;
-    mutable GeometryGridCache< GlobalCoordinate > corners_;
+    // mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -132,13 +135,18 @@ namespace Dune
       if( !geo )
       {
         const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
-        const CoordFunction &coordFunction = grid().coordFunction();
+        CoordVector coords( hostGeo, grid().coordFunction() );
+        geo = GeometryImpl( hostGeo.type(), coords );
 
-        const unsigned int numCorners = hostGeo.corners();
-        corners_.reserve( numCorners );
-        for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-        geo = GeometryImpl( hostGeo.type(), corners_ );
+        /*
+           const CoordFunction &coordFunction = grid().coordFunction();
+
+           const unsigned int numCorners = hostGeo.corners();
+           corners_.reserve( numCorners );
+           for( unsigned int i = 0; i < numCorners; ++i )
+           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
+           geo = GeometryImpl( hostGeo.type(), corners_ );
+         */
       }
       return geo_;
     }

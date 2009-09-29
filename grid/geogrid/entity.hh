@@ -6,7 +6,8 @@
 #include <dune/grid/common/referenceelements.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
-#include <dune/grid/geogrid/cache.hh>
+//#include <dune/grid/geogrid/cache.hh>
+#include <dune/grid/geogrid/cornerstorage.hh>
 
 namespace Dune
 {
@@ -62,13 +63,15 @@ namespace Dune
   private:
     typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
+    typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
+    // typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
     const Grid *grid_;
     const HostEntity *hostEntity_;
-    mutable GeometryGridCache< GlobalCoordinate > corners_;
+    // mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -106,14 +109,19 @@ namespace Dune
       GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
       if( !geo )
       {
-        const HostGeometry &hostGeo = hostEntity().geometry();
-        const CoordFunction &coordFunction = grid().coordFunction();
+        CoordVector coords( hostEntity.geometry(), grid().coordFunction() );
+        geo = GeometryImpl( type(), coords );
 
-        const unsigned int numCorners = hostGeo.corners();
-        corners_.reserve( numCorners );
-        for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-        geo = GeometryImpl( type(), corners_ );
+        /*
+           const HostGeometry &hostGeo = hostEntity().geometry();
+           const CoordFunction &coordFunction = grid().coordFunction();
+
+           const unsigned int numCorners = hostGeo.corners();
+           corners_.reserve( numCorners );
+           for( unsigned int i = 0; i < numCorners; ++i )
+           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
+           geo = GeometryImpl( type(), corners_ );
+         */
       }
       return geo_;
     }
@@ -192,14 +200,16 @@ namespace Dune
     typedef typename HostGrid :: template Codim< dimension > :: EntityPointer
     HostVertexPointer;
 
+    typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
+    // typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
     const Grid *grid_;
     const HostElement *hostElement_;
     unsigned int subEntity_;
-    mutable GeometryGridCache< GlobalCoordinate > corners_;
+    // mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable Geometry geo_;
 
   public:
@@ -261,20 +271,25 @@ namespace Dune
       GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
       if( !geo )
       {
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
-        const unsigned int numCorners
-          = refElement.size( subEntity_, codimension, dimension );
-        corners_.reserve( numCorners );
+        CoordVector coords( hostEntity.geometry(), subEntity_, grid().coordFunction() );
+        geo = GeometryImpl( type(), coords );
 
-        const HostGeometry &hostGeo = hostElement().geometry();
-        const CoordFunction &coordFunction = grid().coordFunction();
-        for( unsigned int i = 0; i < numCorners; ++i )
-        {
-          const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-          coordFunction.evaluate( hostGeo[ j ], corners_[ i ] );
-        }
-        geo = GeometryImpl( type(), corners_ );
+        /*
+           const ReferenceElement< ctype, dimension > &refElement
+           = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
+           const unsigned int numCorners
+           = refElement.size( subEntity_, codimension, dimension );
+           corners_.reserve( numCorners );
+
+           const HostGeometry &hostGeo = hostElement().geometry();
+           const CoordFunction &coordFunction = grid().coordFunction();
+           for( unsigned int i = 0; i < numCorners; ++i )
+           {
+           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
+           coordFunction.evaluate( hostGeo[ j ], corners_[ i ] );
+           }
+           geo = GeometryImpl( type(), corners_ );
+         */
       }
       return geo_;
     }
@@ -377,13 +392,15 @@ namespace Dune
   private:
     typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
+    typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
     const Grid *grid_;
     const HostEntity *hostEntity_;
-    mutable GeometryGridCache< GlobalCoordinate > corners_;
+    //mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -422,14 +439,19 @@ namespace Dune
 
       if( !geo )
       {
-        const HostGeometry &hostGeo = hostEntity().geometry();
-        const CoordFunction &coordFunction = grid().coordFunction();
+        CoordVector coords( hostEntity().geometry(), grid().coordFunction() );
+        geo = GeometryImpl( type(), coords );
 
-        const unsigned int numCorners = hostGeo.corners();
-        corners_.reserve( numCorners );
-        for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-        geo = GeometryImpl( type(), corners_ );
+        /*
+           const HostGeometry &hostGeo = hostEntity().geometry();
+           const CoordFunction &coordFunction = grid().coordFunction();
+
+           const unsigned int numCorners = hostGeo.corners();
+           corners_.reserve( numCorners );
+           for( unsigned int i = 0; i < numCorners; ++i )
+           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
+           geo = GeometryImpl( type(), corners_ );
+         */
       }
       return geo_;
     }
