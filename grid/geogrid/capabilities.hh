@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_CAPABILITIES_HH
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/genericgeometry/misc.hh>
 
 namespace Dune
 {
@@ -93,6 +94,50 @@ namespace Dune
     struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
     {
       static const bool v = hasEntity< HostGrid, codim > :: v;
+    };
+
+
+
+    // CodimCache
+
+    template< class Grid >
+    class CodimCache
+    {
+      static const int dimension = Grid :: dimension;
+
+      template< int codim >
+      struct BuildCache;
+
+      bool hasHostEntity_[ Grid :: dimension + 1 ];
+
+      CodimCache ()
+      {
+        GenericGeometry :: ForLoop< BuildCache, 0, dimension >
+        :: apply( hasHostEntity_ );
+      }
+
+      static CodimCache &instance ()
+      {
+        static CodimCache singleton;
+        return singleton;
+      }
+
+    public:
+      static bool hasHostEntity ( int codim )
+      {
+        assert( (codim >= 0) && (codim <= dimension) );
+        return instance().hasHostEntity_[ codim ];
+      }
+    };
+
+    template< class Grid >
+    template< int codim >
+    struct CodimCache< Grid > :: BuildCache
+    {
+      static void apply ( bool (&hasHostEntity)[ dimension + 1 ] )
+      {
+        hasHostEntity[ codim ] = Capabilities :: hasHostEntity< Grid, codim > :: v;
+      }
     };
 
   }

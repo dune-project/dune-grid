@@ -7,6 +7,8 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/geogrid/capabilities.hh>
+
 namespace Dune
 {
 
@@ -33,7 +35,10 @@ namespace Dune
 
     bool contains ( int dim, int codim ) const
     {
-      return wrappedHandle_.contains( dim, codim );
+      const bool contains = wrappedHandle_.contains( dim, codim );
+      if( contains )
+        assertHostEntity( dim, codim );
+      return contains;
     }
 
     bool fixedsize ( int dim, int codim ) const
@@ -84,6 +89,16 @@ namespace Dune
       MakeableEntity entity( impl );
 
       wrappedHandle_.scatter( buffer, (const Entity &)entity, size );
+    }
+
+  private:
+    void assertHostEntity ( int dim, int codim ) const
+    {
+      if( !Capabilities :: CodimCache< Grid > :: hasHostEntity( codim ) )
+      {
+        DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
+                    << codim << "." );
+      }
     }
   };
 
