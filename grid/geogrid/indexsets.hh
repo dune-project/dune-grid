@@ -29,8 +29,7 @@ namespace Dune
     // -----------------------------
 
     template< class HostGrid, class CoordFunction,
-        bool hasHierarchicIndexSet
-          = Conversion< HostGrid, HasHierarchicIndexSet >::exists >
+        bool hasHierarchicIndexSet = Conversion< HostGrid, HasHierarchicIndexSet >::exists >
     class HierarchicIndexSetProvider;
 
 
@@ -115,10 +114,6 @@ namespace Dune
       bool contains ( const typename Grid::template Codim< codim >::Entity &entity ) const
       {
         return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
-        //typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
-        //const HostEntity &hostEntity
-        //  = Grid::template getHostEntity< codim >( entity );
-        //return hostIndexSet().contains( hostEntity );
       }
 
       template< class Entity >
