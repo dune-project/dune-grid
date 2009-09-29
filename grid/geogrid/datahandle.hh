@@ -13,141 +13,144 @@
 namespace Dune
 {
 
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class Entity >
-  class GeometryGridEntityWrapper;
-
-
-
-  // GeometryGridDataHandle
-  // ----------------------
-
-  template< class Grid, class WrappedCommDataHandle >
-  class GeometryGridCommDataHandle
-    : public CommDataHandleIF
-      < GeometryGridCommDataHandle< Grid, WrappedCommDataHandle >,
-          typename WrappedCommDataHandle :: DataType >
+  namespace GeoGrid
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-    template< class HostEntity >
-    class EntityProxy;
+    // External Forward Declarations
+    // -----------------------------
 
-    const Grid &grid_;
-    WrappedCommDataHandle &wrappedHandle_;
+    template< class Entity >
+    class GeometryGridEntityWrapper;
 
-  public:
-    GeometryGridCommDataHandle ( const Grid &grid,
-                                 WrappedCommDataHandle &handle )
-      : grid_( grid ),
-        wrappedHandle_( handle )
-    {}
 
-    bool contains ( int dim, int codim ) const
+
+    // GeometryGridDataHandle
+    // ----------------------
+
+    template< class Grid, class WrappedHandle >
+    class CommDataHandle
+      : public CommDataHandleIF
+        < CommDataHandle< Grid, WrappedHandle >, typename WrappedHandle :: DataType >
     {
-      const bool contains = wrappedHandle_.contains( dim, codim );
-      if( contains )
-        assertHostEntity( dim, codim );
-      return contains;
-    }
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-    bool fixedsize ( int dim, int codim ) const
-    {
-      return wrappedHandle_.fixedsize( dim, codim );
-    }
+      template< class HostEntity >
+      class EntityProxy;
 
-    template< class HostEntity >
-    size_t size ( const HostEntity &hostEntity ) const
-    {
-      EntityProxy< HostEntity > proxy( grid_, hostEntity );
-      return wrappedHandle_.size( *proxy );
-    }
+      const Grid &grid_;
+      WrappedHandle &wrappedHandle_;
 
-    template< class MessageBuffer, class HostEntity >
-    void gather ( MessageBuffer &buffer, const HostEntity &hostEntity ) const
-    {
-      EntityProxy< HostEntity > proxy( grid_, hostEntity );
-      wrappedHandle_.gather( buffer, *proxy );
-    }
+    public:
+      CommDataHandle ( const Grid &grid, WrappedHandle &handle )
+        : grid_( grid ),
+          wrappedHandle_( handle )
+      {}
 
-    template< class MessageBuffer, class HostEntity >
-    void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
-    {
-      EntityProxy< HostEntity > proxy( grid_, hostEntity );
-      wrappedHandle_.scatter( buffer, *proxy, size );
-    }
-
-  private:
-    void assertHostEntity ( int dim, int codim ) const
-    {
-      if( !Capabilities :: CodimCache< Grid > :: hasHostEntity( codim ) )
-        noEntity( codim );
-    }
-
-    static void noEntity ( int codim )
-    {
-      DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
-                  << codim << "." );
-    }
-  };
-
-
-
-  template< class Grid, class WrappedCommDataHandle >
-  template< class HostEntity >
-  class GeometryGridCommDataHandle< Grid, WrappedCommDataHandle > :: EntityProxy
-  {
-    static const int codimension = HostEntity :: codimension;
-    typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
-
-    template< bool >
-    struct InitializeReal
-    {
-      static void
-      apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+      bool contains ( int dim, int codim ) const
       {
-        entity.initialize( grid, hostEntity );
+        const bool contains = wrappedHandle_.contains( dim, codim );
+        if( contains )
+          assertHostEntity( dim, codim );
+        return contains;
+      }
+
+      bool fixedsize ( int dim, int codim ) const
+      {
+        return wrappedHandle_.fixedsize( dim, codim );
+      }
+
+      template< class HostEntity >
+      size_t size ( const HostEntity &hostEntity ) const
+      {
+        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        return wrappedHandle_.size( *proxy );
+      }
+
+      template< class MessageBuffer, class HostEntity >
+      void gather ( MessageBuffer &buffer, const HostEntity &hostEntity ) const
+      {
+        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        wrappedHandle_.gather( buffer, *proxy );
+      }
+
+      template< class MessageBuffer, class HostEntity >
+      void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
+      {
+        EntityProxy< HostEntity > proxy( grid_, hostEntity );
+        wrappedHandle_.scatter( buffer, *proxy, size );
+      }
+
+    private:
+      void assertHostEntity ( int dim, int codim ) const
+      {
+        if( !Capabilities :: CodimCache< Grid > :: hasHostEntity( codim ) )
+          noEntity( codim );
+      }
+
+      static void noEntity ( int codim )
+      {
+        DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
+                    << codim << "." );
       }
     };
 
-    template< bool >
-    struct InitializeFake
+
+
+    template< class Grid, class WrappedHandle >
+    template< class HostEntity >
+    class CommDataHandle< Grid, WrappedHandle > :: EntityProxy
     {
-      static void
-      apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+      static const int codimension = HostEntity :: codimension;
+      typedef typename Traits :: template Codim< codimension > :: Entity Entity;
+      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+
+      template< bool >
+      struct InitializeReal
       {
-        noEntity( codimension );
+        static void
+        apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+        {
+          entity.initialize( grid, hostEntity );
+        }
+      };
+
+      template< bool >
+      struct InitializeFake
+      {
+        static void
+        apply ( EntityWrapper &entity, const Grid &grid, const HostEntity &hostEntity )
+        {
+          noEntity( codimension );
+        }
+      };
+
+      typedef GenericGeometry :: ProtectedIf
+      < Capabilities :: hasHostEntity< Grid, codimension > :: v,
+          InitializeReal, InitializeFake >
+      Initialize;
+
+      EntityWrapper *entity_;
+
+    public:
+      EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
+        : entity_( EntityStorage :: alloc() )
+      {
+        Initialize :: apply( *entity_, grid, hostEntity );
+      }
+
+      ~EntityProxy ()
+      {
+        EntityStorage :: free( entity_ );
+      }
+
+      const Entity &operator* () const
+      {
+        return *entity_;
       }
     };
 
-    typedef GenericGeometry :: ProtectedIf
-    < Capabilities :: hasHostEntity< Grid, codimension > :: v,
-        InitializeReal, InitializeFake >
-    Initialize;
-
-    EntityWrapper *entity_;
-
-  public:
-    EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
-      : entity_( EntityStorage :: alloc() )
-    {
-      Initialize :: apply( *entity_, grid, hostEntity );
-    }
-
-    ~EntityProxy ()
-    {
-      EntityStorage :: free( entity_ );
-    }
-
-    const Entity &operator* () const
-    {
-      return *entity_;
-    }
-  };
+  }
 
 }
 

@@ -14,371 +14,373 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< int, int, class >
-  class GeometryGridEntity;
-
-  template< class >
-  class GeometryGridEntityWrapper;
-
-  template< class HostGrid, class CoordFunction >
-  struct GeometryGridExportParams;
-
   template< class HostGrid, class CordFunction >
   class GeometryGrid;
 
 
 
-  // Internal Forward Declarations
-  // -----------------------------
-
-  template< int codim, class Grid >
-  struct GeometryGridEntityPointerTraits;
-
-  template< class Traits, bool fake = Traits :: fake >
-  class GeometryGridEntityPointer;
-
-
-
-  // GeometryGridEntityPointerTraits
-  // -------------------------------
-
-  template< int codim, class Grid >
-  struct GeometryGridEntityPointerTraits;
-
-  /** \cond */
-  template< int codim, class Grid >
-  struct GeometryGridEntityPointerTraits< codim, const Grid >
-    : public GeometryGridEntityPointerTraits< codim, Grid >
-  {};
-  /** \endcond */
-
-  template< int codim, class HostGrid, class CoordFunction >
-  struct GeometryGridEntityPointerTraits
-  < codim, GeometryGrid< HostGrid, CoordFunction > >
-    : public GeometryGridExportParams< HostGrid, CoordFunction >
+  namespace GeoGrid
   {
-    typedef Dune :: GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    static const bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v;
+    // External Forward Declarations
+    // -----------------------------
 
-    typedef typename HostGrid :: ctype ctype;
+    template< int, int, class >
+    class Entity;
 
-    static const int dimension = HostGrid :: dimension;
-    static const int codimension = codim;
+    template< class >
+    class EntityWrapper;
 
-    typedef Dune :: Entity< codimension, dimension, const Grid, GeometryGridEntity >
-    Entity;
-
-    typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-    typedef typename HostGrid :: template Codim< codim > :: EntityPointer
-    HostEntityPointer;
-    typedef HostEntityPointer HostEntityIterator;
-
-    typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
-    typedef typename HostGrid :: template Codim< 0 > :: EntityPointer
-    HostElementPointer;
-    typedef HostElementPointer HostElementIterator;
-  };
+    template< class HostGrid, class CoordFunction >
+    struct ExportParams;
 
 
 
-  // GeometryGridEntityPointer (real)
-  // --------------------------------
 
-  template< class Traits >
-  class GeometryGridEntityPointer< Traits, false >
-  {
-    typedef GeometryGridEntityPointer< Traits, false > This;
+    // Internal Forward Declarations
+    // -----------------------------
 
-    typedef typename Traits :: Grid Grid;
+    template< int codim, class Grid >
+    struct EntityPointerTraits;
 
-    typedef GeometryGridEntityPointerTraits< Traits :: codimension, const Grid >
-    BaseTraits;
-    friend class GeometryGridEntityPointer< BaseTraits, false >;
+    template< class Traits, bool fake = Traits :: fake >
+    class EntityPointer;
 
-  public:
-    static const int dimension = Traits :: dimension;
-    static const int codimension = Traits :: codimension;
 
-    typedef typename Traits :: Entity Entity;
 
-    static const bool fake = Traits :: fake;
+    // EntityPointerTraits
+    // -------------------
 
-    typedef GeometryGridEntityPointer< BaseTraits, fake > Base;
-    typedef GeometryGridEntityPointer< BaseTraits, fake > base;
+    template< int codim, class Grid >
+    struct EntityPointerTraits;
 
-  private:
-    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+    /** \cond */
+    template< int codim, class Grid >
+    struct EntityPointerTraits< codim, const Grid >
+      : public EntityPointerTraits< codim, Grid >
+    {};
+    /** \endcond */
 
-    const Grid *grid_;
-    mutable EntityWrapper *entity_;
-
-  protected:
-    typedef typename Traits :: HostEntityPointer HostEntityPointer;
-    typedef typename Traits :: HostEntityIterator HostEntityIterator;
-    typedef typename Traits :: HostElement HostElement;
-
-    HostEntityIterator hostEntityIterator_;
-
-  public:
-    GeometryGridEntityPointer ( const Grid &grid,
-                                const HostEntityIterator &hostEntityIterator )
-      : grid_( &grid ),
-        entity_( 0 ),
-        hostEntityIterator_( hostEntityIterator )
-    {}
-
-    GeometryGridEntityPointer ( const Grid &grid,
-                                const HostElement &hostElement,
-                                int subEntity )
-      : grid_( &grid ),
-        entity_( 0 ),
-        hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
-    {}
-
-    GeometryGridEntityPointer ( const This &other )
-      : grid_( other.grid_ ),
-        entity_( 0 ),
-        hostEntityIterator_( other.hostEntityIterator_ )
-    {}
-
-    template< class T >
-    explicit GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : grid_( other.grid_ ),
-        entity_( 0 ),
-        hostEntityIterator_( other.hostEntityIterator_ )
-    {}
-
-    ~GeometryGridEntityPointer ()
+    template< int codim, class HostGrid, class CoordFunction >
+    struct EntityPointerTraits< codim, GeometryGrid< HostGrid, CoordFunction > >
+      : public ExportParams< HostGrid, CoordFunction >
     {
-      EntityStorage :: free( entity_ );
-    }
+      typedef Dune :: GeometryGrid< HostGrid, CoordFunction > Grid;
 
-    This &operator= ( const This &other )
-    {
-      grid_ = other.grid_;
-      hostEntityIterator_ = other.hostEntityIterator_;
-      update();
-      return *this;
-    }
+      static const bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v;
 
-    operator const Base & () const
-    {
-      return reinterpret_cast< const Base & >( *this );
-    }
+      typedef typename HostGrid :: ctype ctype;
 
-    operator Base & ()
-    {
-      return reinterpret_cast< Base & >( *this );
-    }
+      static const int dimension = HostGrid :: dimension;
+      static const int codimension = codim;
 
-    template< class T >
-    bool equals ( const GeometryGridEntityPointer< T, fake > &other ) const
-    {
-      return (hostEntityPointer() == other.hostEntityPointer());
-    }
+      typedef Dune :: Entity< codimension, dimension, const Grid, GeoGrid :: Entity >
+      Entity;
 
-    Entity &dereference () const
+      typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+      typedef typename HostGrid :: template Codim< codim > :: EntityPointer
+      HostEntityPointer;
+      typedef HostEntityPointer HostEntityIterator;
+
+      typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      typedef typename HostGrid :: template Codim< 0 > :: EntityPointer
+      HostElementPointer;
+      typedef HostElementPointer HostElementIterator;
+    };
+
+
+
+    // EntityPointer (real)
+    // --------------------
+
+    template< class Traits >
+    class EntityPointer< Traits, false >
     {
-      if( entity_ == 0 )
+      typedef EntityPointer< Traits, false > This;
+
+      typedef typename Traits :: Grid Grid;
+
+      typedef EntityPointerTraits< Traits :: codimension, const Grid > BaseTraits;
+      friend class EntityPointer< BaseTraits, false >;
+
+    public:
+      static const int dimension = Traits :: dimension;
+      static const int codimension = Traits :: codimension;
+
+      typedef typename Traits :: Entity Entity;
+
+      static const bool fake = Traits :: fake;
+
+      typedef EntityPointer< BaseTraits, fake > Base;
+      typedef EntityPointer< BaseTraits, fake > base;
+
+    private:
+      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+
+      const Grid *grid_;
+      mutable EntityWrapper *entity_;
+
+    protected:
+      typedef typename Traits :: HostEntityPointer HostEntityPointer;
+      typedef typename Traits :: HostEntityIterator HostEntityIterator;
+      typedef typename Traits :: HostElement HostElement;
+
+      HostEntityIterator hostEntityIterator_;
+
+    public:
+      EntityPointer ( const Grid &grid, const HostEntityIterator &hostEntityIterator )
+        : grid_( &grid ),
+          entity_( 0 ),
+          hostEntityIterator_( hostEntityIterator )
+      {}
+
+      EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : grid_( &grid ),
+          entity_( 0 ),
+          hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
+      {}
+
+      EntityPointer ( const This &other )
+        : grid_( other.grid_ ),
+          entity_( 0 ),
+          hostEntityIterator_( other.hostEntityIterator_ )
+      {}
+
+      template< class T >
+      explicit EntityPointer ( const EntityPointer< T, fake > &other )
+        : grid_( other.grid_ ),
+          entity_( 0 ),
+          hostEntityIterator_( other.hostEntityIterator_ )
+      {}
+
+      ~EntityPointer ()
       {
-        entity_ = EntityStorage :: alloc();
-        entity_->initialize( grid(), *hostEntityPointer() );
+        EntityStorage :: free( entity_ );
       }
-      return *entity_;
-    }
 
-    int level () const
-    {
-      return hostEntityPointer().level();
-    }
-
-    const HostEntityPointer &hostEntityPointer () const
-    {
-      return hostEntityIterator_;
-    }
-
-    const Grid &grid () const
-    {
-      return *grid_;
-    }
-
-  protected:
-    void update ()
-    {
-      EntityStorage :: free( entity_ );
-      entity_ = 0;
-    }
-  };
-
-
-
-  // GeometryGridEntityPointer (fake)
-  // --------------------------------
-
-  template< class Traits >
-  class GeometryGridEntityPointer< Traits, true >
-  {
-    typedef GeometryGridEntityPointer< Traits, true > This;
-
-    typedef typename Traits :: Grid Grid;
-
-    typedef GeometryGridEntityPointerTraits< Traits :: codimension, const Grid >
-    BaseTraits;
-    friend class GeometryGridEntityPointer< BaseTraits, true >;
-
-  public:
-    static const int dimension = Traits :: dimension;
-    static const int codimension = Traits :: codimension;
-
-    typedef typename Traits :: Entity Entity;
-
-    static const bool fake = Traits :: fake;
-
-    typedef GeometryGridEntityPointer< BaseTraits, fake > Base;
-    typedef GeometryGridEntityPointer< BaseTraits, fake > base;
-
-  private:
-    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
-    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
-
-    const Grid *grid_;
-    mutable EntityWrapper *entity_;
-
-  protected:
-    typedef typename Traits :: HostEntityPointer HostEntityPointer;
-    typedef typename Traits :: HostElementPointer HostElementPointer;
-    typedef typename Traits :: HostElementIterator HostElementIterator;
-    typedef typename Traits :: HostElement HostElement;
-
-    int subEntity_;
-    HostElementIterator hostElementIterator_;
-
-  public:
-    GeometryGridEntityPointer ( const Grid &grid,
-                                const HostElementIterator &hostElementIterator,
-                                int subEntity )
-      : grid_( &grid ),
-        entity_( 0 ),
-        subEntity_( subEntity ),
-        hostElementIterator_( hostElementIterator )
-    {}
-
-    GeometryGridEntityPointer ( const Grid &grid,
-                                const HostElement &hostElement,
-                                int subEntity )
-      : grid_( &grid ),
-        entity_( 0 ),
-        subEntity_( subEntity ),
-        hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
-    {}
-
-    GeometryGridEntityPointer ( const This &other )
-      : grid_( other.grid_ ),
-        entity_( 0 ),
-        subEntity_( other.subEntity_ ),
-        hostElementIterator_( other.hostElementIterator_ )
-    {}
-
-    template< class T >
-    explicit GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : grid_( other.grid_ ),
-        entity_( 0 ),
-        subEntity_( other.subEntity_ ),
-        hostElementIterator_( other.hostElementIterator_ )
-    {}
-
-    ~GeometryGridEntityPointer ()
-    {
-      EntityStorage :: free( entity_ );
-    }
-
-    This &operator= ( const This &other )
-    {
-      grid_ = other.grid_;
-      subEntity_ = other.subEntity_;
-      hostElementIterator_ = other.hostElementIterator_;
-      update();
-      return *this;
-    }
-
-    operator const Base & () const
-    {
-      return reinterpret_cast< const Base & >( *this );
-    }
-
-    operator Base & ()
-    {
-      return reinterpret_cast< Base & >( *this );
-    }
-
-    template< class T >
-    bool equals ( const GeometryGridEntityPointer< T, fake > &other ) const
-    {
-      const int thisSub = subEntity_;
-      const int otherSub = other.subEntity_;
-
-      if( (thisSub < 0) || (otherSub < 0) )
-        return (thisSub * otherSub >= 0);
-
-      const int lvl = level();
-      if( lvl != other.level() )
-        return false;
-
-      const typename Traits :: HostGrid :: Traits :: LevelIndexSet &indexSet
-        = grid().hostGrid().levelIndexSet( lvl );
-
-      const HostElement &thisElement = *hostElementPointer();
-      assert( indexSet.contains( thisElement ) );
-      const HostElement &otherElement = *(other.hostElementPointer());
-      assert( indexSet.contains( otherElement ) );
-
-      const int thisIndex
-        = indexSet.template subIndex< codimension >( thisElement, thisSub );
-      const int otherIndex
-        = indexSet.template subIndex< codimension >( otherElement, otherSub );
-      return thisIndex == otherIndex;
-    }
-
-    Entity &dereference () const
-    {
-      if( entity_ == 0 )
+      This &operator= ( const This &other )
       {
-        entity_ = EntityStorage :: alloc();
-        entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
+        grid_ = other.grid_;
+        hostEntityIterator_ = other.hostEntityIterator_;
+        update();
+        return *this;
       }
-      return *entity_;
-    }
 
-    int level () const
-    {
-      return hostElementPointer().level();
-    }
+      operator const Base & () const
+      {
+        return reinterpret_cast< const Base & >( *this );
+      }
 
-    const HostEntityPointer &hostEntityPointer () const
-    {
-      DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
-                  << codimension << "." );
-    }
+      operator Base & ()
+      {
+        return reinterpret_cast< Base & >( *this );
+      }
 
-    const Grid &grid () const
-    {
-      return *grid_;
-    }
+      template< class T >
+      bool equals ( const EntityPointer< T, fake > &other ) const
+      {
+        return (hostEntityPointer() == other.hostEntityPointer());
+      }
 
-  protected:
-    void update ()
-    {
-      EntityStorage :: free( entity_ );
-      entity_ = 0;
-    }
+      Entity &dereference () const
+      {
+        if( entity_ == 0 )
+        {
+          entity_ = EntityStorage :: alloc();
+          entity_->initialize( grid(), *hostEntityPointer() );
+        }
+        return *entity_;
+      }
 
-    const HostElementPointer &hostElementPointer () const
+      int level () const
+      {
+        return hostEntityPointer().level();
+      }
+
+      const HostEntityPointer &hostEntityPointer () const
+      {
+        return hostEntityIterator_;
+      }
+
+      const Grid &grid () const
+      {
+        return *grid_;
+      }
+
+    protected:
+      void update ()
+      {
+        EntityStorage :: free( entity_ );
+        entity_ = 0;
+      }
+    };
+
+
+
+    // EntityPointer (fake)
+    // --------------------
+
+    template< class Traits >
+    class EntityPointer< Traits, true >
     {
-      return hostElementIterator_;
-    }
-  };
+      typedef EntityPointer< Traits, true > This;
+
+      typedef typename Traits :: Grid Grid;
+
+      typedef EntityPointerTraits< Traits :: codimension, const Grid > BaseTraits;
+      friend class EntityPointer< BaseTraits, true >;
+
+    public:
+      static const int dimension = Traits :: dimension;
+      static const int codimension = Traits :: codimension;
+
+      typedef typename Traits :: Entity Entity;
+
+      static const bool fake = Traits :: fake;
+
+      typedef EntityPointer< BaseTraits, fake > Base;
+      typedef EntityPointer< BaseTraits, fake > base;
+
+    private:
+      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
+
+      const Grid *grid_;
+      mutable EntityWrapper *entity_;
+
+    protected:
+      typedef typename Traits :: HostEntityPointer HostEntityPointer;
+      typedef typename Traits :: HostElementPointer HostElementPointer;
+      typedef typename Traits :: HostElementIterator HostElementIterator;
+      typedef typename Traits :: HostElement HostElement;
+
+      int subEntity_;
+      HostElementIterator hostElementIterator_;
+
+    public:
+      EntityPointer ( const Grid &grid,
+                      const HostElementIterator &hostElementIterator, int subEntity )
+        : grid_( &grid ),
+          entity_( 0 ),
+          subEntity_( subEntity ),
+          hostElementIterator_( hostElementIterator )
+      {}
+
+      EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : grid_( &grid ),
+          entity_( 0 ),
+          subEntity_( subEntity ),
+          hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
+      {}
+
+      EntityPointer ( const This &other )
+        : grid_( other.grid_ ),
+          entity_( 0 ),
+          subEntity_( other.subEntity_ ),
+          hostElementIterator_( other.hostElementIterator_ )
+      {}
+
+      template< class T >
+      explicit EntityPointer ( const EntityPointer< T, fake > &other )
+        : grid_( other.grid_ ),
+          entity_( 0 ),
+          subEntity_( other.subEntity_ ),
+          hostElementIterator_( other.hostElementIterator_ )
+      {}
+
+      ~EntityPointer ()
+      {
+        EntityStorage :: free( entity_ );
+      }
+
+      This &operator= ( const This &other )
+      {
+        grid_ = other.grid_;
+        subEntity_ = other.subEntity_;
+        hostElementIterator_ = other.hostElementIterator_;
+        update();
+        return *this;
+      }
+
+      operator const Base & () const
+      {
+        return reinterpret_cast< const Base & >( *this );
+      }
+
+      operator Base & ()
+      {
+        return reinterpret_cast< Base & >( *this );
+      }
+
+      template< class T >
+      bool equals ( const EntityPointer< T, fake > &other ) const
+      {
+        const int thisSub = subEntity_;
+        const int otherSub = other.subEntity_;
+
+        if( (thisSub < 0) || (otherSub < 0) )
+          return (thisSub * otherSub >= 0);
+
+        const int lvl = level();
+        if( lvl != other.level() )
+          return false;
+
+        const typename Traits :: HostGrid :: Traits :: LevelIndexSet &indexSet
+          = grid().hostGrid().levelIndexSet( lvl );
+
+        const HostElement &thisElement = *hostElementPointer();
+        assert( indexSet.contains( thisElement ) );
+        const HostElement &otherElement = *(other.hostElementPointer());
+        assert( indexSet.contains( otherElement ) );
+
+        const int thisIndex
+          = indexSet.template subIndex< codimension >( thisElement, thisSub );
+        const int otherIndex
+          = indexSet.template subIndex< codimension >( otherElement, otherSub );
+        return thisIndex == otherIndex;
+      }
+
+      Entity &dereference () const
+      {
+        if( entity_ == 0 )
+        {
+          entity_ = EntityStorage :: alloc();
+          entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
+        }
+        return *entity_;
+      }
+
+      int level () const
+      {
+        return hostElementPointer().level();
+      }
+
+      const HostEntityPointer &hostEntityPointer () const
+      {
+        DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
+                    << codimension << "." );
+      }
+
+      const Grid &grid () const
+      {
+        return *grid_;
+      }
+
+    protected:
+      void update ()
+      {
+        EntityStorage :: free( entity_ );
+        entity_ = 0;
+      }
+
+      const HostElementPointer &hostElementPointer () const
+      {
+        return hostElementIterator_;
+      }
+    };
+
+  }
 
 }
 

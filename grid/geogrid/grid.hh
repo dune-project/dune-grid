@@ -85,111 +85,115 @@ namespace Dune
 
 
 
-  // GeometryGridExportParams
-  // ------------------------
-
-  template< class HG, class CF >
-  struct GeometryGridExportParams
+  namespace GeoGrid
   {
-    typedef HG HostGrid;
-    typedef CF CoordFunction;
-  };
 
+    // GeometryGridExportParams
+    // ------------------------
 
-
-  // GeometryGridFamily
-  // ------------------
-
-  template< class HostGrid, class CoordFunction >
-  struct GeometryGridFamily
-  {
-    struct Traits
-      : public GeometryGridExportParams< HostGrid, CoordFunction >
+    template< class HG, class CF >
+    struct ExportParams
     {
-      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+      typedef HG HostGrid;
+      typedef CF CoordFunction;
+    };
 
-      typedef typename HostGrid :: ctype ctype;
 
-      dune_static_assert( (int)HostGrid :: dimensionworld == (int)CoordFunction :: dimDomain,
-                          "HostGrid and CoordFunction are incompatible." );
-      enum { dimension = HostGrid :: dimension };
-      enum { dimensionworld = CoordFunction :: dimRange };
 
-      typedef Intersection< const Grid, GeometryGridLeafIntersection >
-      LeafIntersection;
-      typedef Intersection< const Grid, GeometryGridLevelIntersection >
-      LevelIntersection;
+    // GeometryGridFamily
+    // ------------------
 
-      typedef IntersectionIterator
-      < const Grid, GeometryGridLeafIntersectionIterator,
-          GeometryGridLeafIntersection >
-      LeafIntersectionIterator;
-      typedef IntersectionIterator
-      < const Grid, GeometryGridLevelIntersectionIterator,
-          GeometryGridLevelIntersection >
-      LevelIntersectionIterator;
-
-      typedef Dune :: HierarchicIterator
-      < const Grid, GeometryGridHierarchicIterator >
-      HierarchicIterator;
-
-      template< int codim >
-      struct Codim
+    template< class HostGrid, class CoordFunction >
+    struct GridFamily
+    {
+      struct Traits
+        : public ExportParams< HostGrid, CoordFunction >
       {
-        typedef Dune :: Geometry
-        < dimension-codim, dimensionworld, const Grid,
-            Dune :: GenericGeometry :: Geometry >
-        Geometry;
-        typedef typename HostGrid :: template Codim< codim > :: LocalGeometry
-        LocalGeometry;
+        typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-        typedef GeometryGridEntityPointerTraits< codim, const Grid >
-        EntityPointerTraits;
-        typedef Dune :: EntityPointer
-        < const Grid, GeometryGridEntityPointer< EntityPointerTraits > >
-        EntityPointer;
-        typedef typename EntityPointerTraits :: Entity Entity;
+        typedef typename HostGrid :: ctype ctype;
+
+        dune_static_assert( (int)HostGrid :: dimensionworld == (int)CoordFunction :: dimDomain,
+                            "HostGrid and CoordFunction are incompatible." );
+        enum { dimension = HostGrid :: dimension };
+        enum { dimensionworld = CoordFunction :: dimRange };
+
+        typedef Intersection< const Grid, GeometryGridLeafIntersection >
+        LeafIntersection;
+        typedef Intersection< const Grid, GeometryGridLevelIntersection >
+        LevelIntersection;
+
+        typedef IntersectionIterator
+        < const Grid, GeometryGridLeafIntersectionIterator,
+            GeometryGridLeafIntersection >
+        LeafIntersectionIterator;
+        typedef IntersectionIterator
+        < const Grid, GeometryGridLevelIntersectionIterator,
+            GeometryGridLevelIntersection >
+        LevelIntersectionIterator;
+
+        typedef Dune :: HierarchicIterator< const Grid, GeoGrid :: HierarchicIterator >
+        HierarchicIterator;
+
+        template< int codim >
+        struct Codim
+        {
+          typedef Dune :: Geometry
+          < dimension-codim, dimensionworld, const Grid,
+              Dune :: GenericGeometry :: Geometry >
+          Geometry;
+          typedef typename HostGrid :: template Codim< codim > :: LocalGeometry
+          LocalGeometry;
+
+          typedef GeoGrid :: EntityPointerTraits< codim, const Grid >
+          EntityPointerTraits;
+          typedef Dune :: EntityPointer
+          < const Grid, GeoGrid :: EntityPointer< EntityPointerTraits > >
+          EntityPointer;
+          typedef typename EntityPointerTraits :: Entity Entity;
+
+          template< PartitionIteratorType pitype >
+          struct Partition
+          {
+            typedef Dune :: LeafIterator
+            < codim, pitype, const Grid, GeoGrid :: LeafIterator >
+            LeafIterator;
+            typedef Dune :: LevelIterator
+            < codim, pitype, const Grid, GeoGrid :: LevelIterator >
+            LevelIterator;
+          };
+
+          typedef typename Partition< All_Partition > :: LeafIterator
+          LeafIterator;
+          typedef typename Partition< All_Partition > :: LevelIterator
+          LevelIterator;
+        };
+
+        typedef GeometryGridLeafIndexSet< const Grid > LeafIndexSet;
+        typedef GeometryGridLevelIndexSet< const Grid > LevelIndexSet;
+
+        typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
+        GlobalIdSet;
+        typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
+        LocalIdSet;
+
+        typedef typename HostGrid :: Traits :: CollectiveCommunication
+        CollectiveCommunication;
 
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune :: LeafIterator
-          < codim, pitype, const Grid, GeometryGridLeafIterator >
-          LeafIterator;
-          typedef Dune :: LevelIterator
-          < codim, pitype, const Grid, GeometryGridLevelIterator >
-          LevelIterator;
+          typedef Dune :: GridView
+          < DefaultLeafGridViewTraits< const Grid, pitype > >
+          LeafGridView;
+          typedef Dune :: GridView
+          < DefaultLevelGridViewTraits< const Grid, pitype > >
+          LevelGridView;
         };
-
-        typedef typename Partition< All_Partition > :: LeafIterator
-        LeafIterator;
-        typedef typename Partition< All_Partition > :: LevelIterator
-        LevelIterator;
-      };
-
-      typedef GeometryGridLeafIndexSet< const Grid > LeafIndexSet;
-      typedef GeometryGridLevelIndexSet< const Grid > LevelIndexSet;
-
-      typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
-      GlobalIdSet;
-      typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
-      LocalIdSet;
-
-      typedef typename HostGrid :: Traits :: CollectiveCommunication
-      CollectiveCommunication;
-
-      template< PartitionIteratorType pitype >
-      struct Partition
-      {
-        typedef Dune :: GridView
-        < DefaultLeafGridViewTraits< const Grid, pitype > >
-        LeafGridView;
-        typedef Dune :: GridView
-        < DefaultLevelGridViewTraits< const Grid, pitype > >
-        LevelGridView;
       };
     };
-  };
+
+  }
 
 
 
@@ -237,8 +241,8 @@ namespace Dune
     : public GridDefaultImplementation
       < HostGrid :: dimension, CoordFunction :: dimRange,
           typename HostGrid :: ctype,
-          GeometryGridFamily< HostGrid, CoordFunction > >,
-      public GeometryGridExportParams< HostGrid, CoordFunction >
+          GeoGrid :: GridFamily< HostGrid, CoordFunction > >,
+      public GeoGrid :: ExportParams< HostGrid, CoordFunction >
       /** \endcond */
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
@@ -246,27 +250,27 @@ namespace Dune
     typedef GridDefaultImplementation
     < HostGrid :: dimension, CoordFunction :: dimRange,
         typename HostGrid :: ctype,
-        GeometryGridFamily< HostGrid, CoordFunction > >
+        GeoGrid :: GridFamily< HostGrid, CoordFunction > >
     Base;
 
     friend class GeometryGridLevelIndexSet< const Grid >;
     friend class GeometryGridLeafIndexSet< const Grid >;
-    friend class GeometryGridHierarchicIterator< const Grid >;
+    friend class GeoGrid :: HierarchicIterator< const Grid >;
 
-    template< int, class, bool > friend class GeometryGridEntityImpl;
-    template< class, bool > friend class GeometryGridEntityPointer;
+    template< int, class, bool > friend class GeoGrid :: EntityImpl;
+    template< class, bool > friend class GeoGrid :: EntityPointer;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
     template < class > friend class HostGridAccess;
 
     template< int, PartitionIteratorType, class >
-    friend class GeometryGridLevelIteratorTraits;
+    friend class GeoGrid :: LevelIteratorTraits;
     template< int, PartitionIteratorType, class >
-    friend class GeometryGridLeafIteratorTraits;
+    friend class GeoGrid :: LeafIteratorTraits;
 
   public:
     /** \cond */
-    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
+    typedef GeoGrid :: GridFamily< HostGrid, CoordFunction > GridFamily;
     /** \endcond */
 
     /** \name Traits
@@ -693,7 +697,7 @@ namespace Dune
                        int level ) const
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+      typedef GeoGrid :: CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
       WrappedDataHandle wrappedDataHandle( *this, datahandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction, level );
@@ -717,7 +721,7 @@ namespace Dune
                        CommunicationDirection direction ) const
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+      typedef GeoGrid :: CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
       WrappedDataHandle wrappedDataHandle( *this, datahandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction );
@@ -771,7 +775,7 @@ namespace Dune
     bool loadBalance ( CommDataHandleIF< DataHandle, Data > &datahandle )
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+      typedef GeoGrid :: CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
       WrappedDataHandle wrappedDataHandle( *this, datahandle );
       const bool gridChanged = hostGrid().loadBalance( wrappedDataHandle );
