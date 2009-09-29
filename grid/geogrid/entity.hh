@@ -16,18 +16,18 @@ namespace Dune
 
   template< int codim, class Grid,
       bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
-  class GeometryGridEntity;
+  class GeometryGridEntityImpl;
 
   template< int codim, int dim, class Grid >
-  class GeometryGridEntityAdapter;
+  class GeometryGridEntity;
 
 
 
-  // GeometryGridEntity (real)
-  // -------------------------
+  // GeometryGridEntityImpl (real)
+  // -----------------------------
 
   template< int codim, class Grid >
-  class GeometryGridEntity< codim, Grid, false >
+  class GeometryGridEntityImpl< codim, Grid, false >
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -67,25 +67,25 @@ namespace Dune
     mutable Geometry *geo_;
 
   public:
-    GeometryGridEntity( const Grid &grid )
+    explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostEntity_( 0 ),
         geo_( 0 )
     {}
 
-    GeometryGridEntity( const GeometryGridEntity &other )
+    GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostEntity_( other.hostEntity_ ),
         geo_( 0 )
     {}
 
-    ~GeometryGridEntity ()
+    ~GeometryGridEntityImpl ()
     {
       if( geo_ != 0 )
         delete geo_;
     }
 
-    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
     {
       if( this == &other )
         return *this;
@@ -177,11 +177,11 @@ namespace Dune
 
 
 
-  // GeometryGridEntity (fake)
-  // -------------------------
+  // GeometryGridEntityImpl (fake)
+  // -----------------------------
 
   template< int codim, class Grid >
-  class GeometryGridEntity< codim, Grid, true >
+  class GeometryGridEntityImpl< codim, Grid, true >
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -226,26 +226,26 @@ namespace Dune
     mutable Geometry *geo_;
 
   public:
-    GeometryGridEntity( const Grid &grid )
+    explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostElement_( 0 ),
         geo_( 0 )
     {}
 
-    GeometryGridEntity( const GeometryGridEntity &other )
+    GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostElement_( other.hostElement_ ),
         subEntity_( other.subEntity_ ),
         geo_( 0 )
     {}
 
-    ~GeometryGridEntity ()
+    ~GeometryGridEntityImpl ()
     {
       if( geo_ != 0 )
         delete geo_;
     }
 
-    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
     {
       if( this == &other )
         return *this;
@@ -388,11 +388,11 @@ namespace Dune
 
 
 
-  // GeometryGridEntity for codimension 0
-  // ------------------------------------
+  // GeometryGridEntityImpl for codimension 0
+  // ----------------------------------------
 
   template< class Grid >
-  class GeometryGridEntity< 0, Grid, false >
+  class GeometryGridEntityImpl< 0, Grid, false >
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -439,21 +439,21 @@ namespace Dune
     mutable LocalGeometry *geoInFather_;
 
   public:
-    GeometryGridEntity ( const Grid &grid )
+    explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostEntity_( 0 ),
         geo_( 0 ),
         geoInFather_( 0 )
     {}
 
-    GeometryGridEntity( const GeometryGridEntity &other )
+    GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostEntity_( other.hostEntity_ ),
         geo_( 0 ),
         geoInFather_( 0 )
     {}
 
-    ~GeometryGridEntity ()
+    ~GeometryGridEntityImpl ()
     {
       if( geo_ != 0 )
         delete geo_;
@@ -462,7 +462,7 @@ namespace Dune
     }
 
 
-    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
     {
       if( this == &other )
         return *this;
@@ -681,14 +681,30 @@ namespace Dune
 
 
   template< int codim, int dim, class Grid >
-  class GeometryGridEntityAdapter
-    : public GeometryGridEntity< codim, Grid >
+  class GeometryGridEntity
+    : public GeometryGridEntityImpl< codim, Grid >
   {
-    typedef GeometryGridEntity< codim, Grid > Base;
+    typedef GeometryGridEntityImpl< codim, Grid > Base;
 
   public:
-    GeometryGridEntityAdapter ( const Grid &grid )
+    GeometryGridEntity ( const Grid &grid )
       : Base( grid )
+    {}
+  };
+
+
+
+  template< int codim, int dim, class Grid >
+  class GeometryGridEntityWrapper
+    : public Entity< codim, dim, Grid, GeometryGridEntity >
+  {
+    typedef Entity< codim, dim, Grid, GeometryGridEntity > Base;
+
+  public:
+    typedef GeometryGridEntity< codim, dim, Grid > Implementation;
+
+    GeometryGridEntityWrapper ( const Grid &grid )
+      : Base( Implementation( grid ) )
     {}
   };
 

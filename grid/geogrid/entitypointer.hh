@@ -14,7 +14,7 @@ namespace Dune
   // -----------------------------
 
   template< int, int, class >
-  class GeometryGridEntityAdapter;
+  class GeometryGridEntity;
 
   template< class HostGrid, class CoordFunction >
   struct GeometryGridExportParams;
@@ -62,8 +62,7 @@ namespace Dune
     static const int dimension = HostGrid :: dimension;
     static const int codimension = codim;
 
-    typedef Dune :: Entity
-    < codimension, dimension, const Grid, GeometryGridEntityAdapter >
+    typedef Dune :: Entity< codimension, dimension, const Grid, GeometryGridEntity >
     Entity;
 
     typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
@@ -105,10 +104,11 @@ namespace Dune
     typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
   private:
-    typedef MakeableInterfaceObject< Entity > MakeableEntity;
-    typedef typename MakeableEntity :: ImplementationType EntityImpl;
+    typedef GeometryGridEntityWrapper< codimension, dimension, const Grid >
+    EntityWrapper;
+    typedef typename EntityWrapper :: Implementation EntityImpl;
 
-    mutable MakeableEntity virtualEntity_;
+    mutable EntityWrapper virtualEntity_;
 
   protected:
     typedef typename Traits :: HostEntityPointer HostEntityPointer;
@@ -120,14 +120,14 @@ namespace Dune
   public:
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostEntityIterator &hostEntityIterator )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : virtualEntity_( grid ),
         hostEntityIterator_( hostEntityIterator )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : virtualEntity_( grid ),
         hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
     {}
 
@@ -223,10 +223,11 @@ namespace Dune
     typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
   private:
-    typedef MakeableInterfaceObject< Entity > MakeableEntity;
-    typedef typename MakeableEntity :: ImplementationType EntityImpl;
+    typedef GeometryGridEntityWrapper< codimension, dimension, const Grid >
+    EntityWrapper;
+    typedef typename EntityWrapper :: Implementation EntityImpl;
 
-    mutable MakeableEntity virtualEntity_;
+    mutable EntityWrapper virtualEntity_;
 
   protected:
     typedef typename Traits :: HostEntityPointer HostEntityPointer;
@@ -241,7 +242,7 @@ namespace Dune
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElementIterator &hostElementIterator,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : virtualEntity_( grid ),
         subEntity_( subEntity ),
         hostElementIterator_( hostElementIterator )
     {}
@@ -249,7 +250,7 @@ namespace Dune
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : virtualEntity_( grid ),
         subEntity_( subEntity ),
         hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
     {}

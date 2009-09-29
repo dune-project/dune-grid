@@ -236,7 +236,7 @@ namespace Dune
     friend class GeometryGridLeafIndexSet< const Grid >;
     friend class GeometryGridHierarchicIterator< const Grid >;
 
-    template< int, class, bool > friend class GeometryGridEntity;
+    template< int, class, bool > friend class GeometryGridEntityImpl;
     template< class, bool > friend class GeometryGridEntityPointer;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
