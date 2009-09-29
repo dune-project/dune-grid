@@ -209,6 +209,24 @@ namespace Dune
 
 
 
+    // isDiscreteCoordFunctionInterface
+    // --------------------------------
+
+    template< class CoordFunctionInterface >
+    struct isDiscreteCoordFunctionInterface
+    {
+      static const bool value = false;
+    };
+
+    template< class ct, unsigned int dimR, class Impl >
+    struct isDiscreteCoordFunctionInterface
+    < DiscreteCoordFunctionInterface< ct, dimR, Impl > >
+    {
+      static const bool value = true;
+    };
+
+
+
     // AdaptCoordFunction
     // ------------------
 

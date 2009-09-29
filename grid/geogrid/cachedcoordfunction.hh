@@ -185,8 +185,9 @@ namespace Dune
     Cache cache_;
 
   public:
+    explicit
     CachedCoordFunction ( const HostGrid &hostGrid,
-                          const CoordFunction &coordFunction )
+                          const CoordFunction &coordFunction = CoordFunction() )
       : hostGrid_( hostGrid ),
         coordFunction_( coordFunction ),
         cache_( hostGrid )
