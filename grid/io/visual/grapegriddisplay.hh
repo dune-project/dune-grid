@@ -26,12 +26,12 @@ namespace Dune
   //! the internal grape partition iterator types
   enum GrapePartitionIteratorType
   {
-    g_Interior_Partition       = 0,
-    g_InteriorBorder_Partition = 1,
-    g_Overlap_Partition        = 2,
-    g_OverlapFront_Partition   = 3,
-    g_All_Partition            = 4,
-    g_Ghost_Partition          = 5
+    g_Interior_Partition       = Interior_Partition,
+    g_InteriorBorder_Partition = InteriorBorder_Partition,
+    g_Overlap_Partition        = Overlap_Partition,
+    g_OverlapFront_Partition   = OverlapFront_Partition,
+    g_All_Partition            = All_Partition,
+    g_Ghost_Partition          = Ghost_Partition
   };
 
   /** \brief the internal grape partition iterator types

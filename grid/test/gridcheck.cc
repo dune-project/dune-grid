@@ -538,6 +538,8 @@ struct subIndexCheck
       {
         int id_e = levelIndexSet.index( e );
         int id_e_i = levelIndexSet.index( *ep );
+        int subid_e_i_old = levelIndexSet.template subIndex<cd>( e, i);
+        subid_e_i_old = 0;
         int subid_e_i = levelIndexSet.subIndex( e, i, cd );
         std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( i ) ) ) "
                   << "!= levelIndexSet.subIndex( e, i, cd )  "
@@ -1102,6 +1104,12 @@ void gridcheck (Grid &g)
   enum { dimworld = Grid :: dimensionworld };
   typedef typename Grid  :: ctype ctype;
   typedef typename Grid  :: GridFamily GridFamily;
+
+  // print infos
+  Dune::gridinfo(g, "GridInfo");
+  for(int l=0; l<g.maxLevel(); l++)
+    Dune::gridlevellist(g, l, "GridLevelInfo");
+  Dune::gridleaflist(g, "GridLeafInfo");
 
   // type of GridInterface == GridDefaultImplementation
   typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
