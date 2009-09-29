@@ -490,7 +490,7 @@ namespace Dune {
 
     if( ! _affine )
     {
-      DUNE_THROW(NotImplemented,"BilinearSurfaceMapping::jacobianTransposed not implemented correctly for non-affine mappings!");
+      //DUNE_THROW(NotImplemented,"BilinearSurfaceMapping::jacobianTransposed not implemented correctly for non-affine mappings!");
     }
 
     return matrix_;

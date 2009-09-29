@@ -3190,20 +3190,6 @@ namespace Dune {
       static const bool v = false;
     };
 
-
-
-    // non-standard capabilities
-    // -------------------------
-
-    template< class Grid >
-    struct hasHierarchicIndexSet;
-
-    template< int dim >
-    struct hasHierarchicIndexSet< YaspGrid< dim > >
-    {
-      static const bool v = false;
-    };
-
   }
 
 } // end namespace

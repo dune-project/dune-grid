@@ -88,22 +88,25 @@ try
   {
     typedef ALUCubeGrid< 3, 3 > GridType;
 
+    if( argc < 2 )
     {
-      if( myrank == 0 )
-        std::cout << ">>> Checking empty grid..." << std::endl;
-      GridType grid;
-      checkALUSerial( grid );
-    }
+      {
+        if( myrank == 0 )
+          std::cout << ">>> Checking empty grid..." << std::endl;
+        GridType grid;
+        checkALUSerial( grid );
+      }
 
-    {
-      if( myrank == 0 )
-        std::cerr << ">>> Checking twisted unit cube..." << std::endl;
-      GridFactory< GridType > factory;
-      BasicUnitCube< GridType::dimension >::insertVertices( factory );
-      BasicUnitCube< GridType::dimension >::insertCubes( factory );
-      GridType *grid = factory.createGrid();
-      checkALUSerial( *grid );
-      delete grid;
+      {
+        if( myrank == 0 )
+          std::cerr << ">>> Checking twisted unit cube..." << std::endl;
+        GridFactory< GridType > factory;
+        BasicUnitCube< GridType::dimension >::insertVertices( factory );
+        BasicUnitCube< GridType::dimension >::insertCubes( factory );
+        GridType *grid = factory.createGrid();
+        checkALUSerial( *grid );
+        delete grid;
+      }
     }
 
     {

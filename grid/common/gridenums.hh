@@ -17,12 +17,13 @@ namespace Dune {
 
      @ingroup GIRelatedTypes
    */
-  enum PartitionType {
-    InteriorEntity=0,     //!< all interior entities
-    BorderEntity=1  ,     //!< on boundary between interior and overlap
-    OverlapEntity=2 ,     //!< all entities lying in the overlap zone
-    FrontEntity=3  ,      //!< on boundary between overlap and ghost
-    GhostEntity=4         //!< ghost entities
+  enum PartitionType
+  {
+    InteriorEntity = (1 << 0), //!< all interior entities
+    BorderEntity = (1 << 1),   //!< on boundary between interior and overlap
+    OverlapEntity = (1 << 2),  //!< all entities lying in the overlap zone
+    FrontEntity = (1 << 3),    //!< on boundary between overlap and ghost
+    GhostEntity = (1 << 4)     //!< ghost entities
   };
 
   /** \brief Provide names for the partition types
@@ -67,13 +68,20 @@ namespace Dune {
   /** \brief Parameter to be used for the parallel level- and leaf iterators
      @ingroup GIRelatedTypes
    */
-  enum PartitionIteratorType {
-    Interior_Partition=0,           //!< only interior entities
-    InteriorBorder_Partition=1,     //!< interior and border entities
-    Overlap_Partition=2,            //!< only overlap entities
-    OverlapFront_Partition=3,       //!< overlap and front entities
-    All_Partition=4,                //!< all entities
-    Ghost_Partition=5               //!< only ghost entities
+  enum PartitionIteratorType
+  {
+    //! only interior entities
+    Interior_Partition = InteriorEntity,
+    //! interior and border entities
+    InteriorBorder_Partition = InteriorEntity | BorderEntity,
+    //! interior, border, and overlap entities
+    Overlap_Partition = InteriorBorder_Partition | OverlapEntity,
+    //! interior, border, overlap, and front entities
+    OverlapFront_Partition = Overlap_Partition | FrontEntity,
+    //! all entities
+    All_Partition = OverlapFront_Partition | GhostEntity,
+    //! only ghost entities
+    Ghost_Partition = GhostEntity
   };
 
 
