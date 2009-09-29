@@ -42,6 +42,12 @@ namespace Dune
     };
 
     template< class HostGrid, class CoordFunction >
+    struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >
+    {
+      static const bool v = false;
+    };
+
+    template< class HostGrid, class CoordFunction >
     struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
     {
       static const bool v = isLevelwiseConforming< HostGrid > :: v;
@@ -51,6 +57,24 @@ namespace Dune
     struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
     {
       static const bool v = isLeafwiseConforming< HostGrid > :: v;
+    };
+
+    template< class HostGrid, class CoordFunction >
+    struct IsUnstructured< GeometryGrid< HostGrid, CoordFunction > >
+    {
+      static const bool v = true;
+    };
+
+    template< class HostGrid, class CoordFunction >
+    struct threadSafe< GeometryGrid< HostGrid, CoordFunction > >
+    {
+      static const bool v = false;
+    };
+
+    template< class HostGrid, class CoordFunction >
+    struct viewThreadSafe< GeometryGrid< HostGrid, CoordFunction > >
+    {
+      static const bool v = false;
     };
 
   }
