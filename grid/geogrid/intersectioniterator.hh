@@ -4,7 +4,6 @@
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
 #include <dune/grid/geogrid/entitypointer.hh>
-//#include <dune/grid/geogrid/cache.hh>
 #include <dune/grid/geogrid/cornerstorage.hh>
 #include <dune/grid/geogrid/storage.hh>
 
@@ -70,11 +69,9 @@ namespace Dune
 
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-    // typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
     const EntityPointer *inside_;
     const HostIntersection *hostIntersection_;
-    // mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
 
   public:
@@ -88,12 +85,8 @@ namespace Dune
         geo_( GeometryImpl() )
     {}
 
-    //EntityPointer inside () const
     const EntityPointer &inside () const
     {
-      // typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-      // typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      // return MakeableEntityPointer( EntityPointerImpl( grid(), hostIntersection().inside() ) );
       return *inside_;
     }
 
@@ -137,16 +130,6 @@ namespace Dune
         const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
         CoordVector coords( hostGeo, grid().coordFunction() );
         geo = GeometryImpl( hostGeo.type(), coords );
-
-        /*
-           const CoordFunction &coordFunction = grid().coordFunction();
-
-           const unsigned int numCorners = hostGeo.corners();
-           corners_.reserve( numCorners );
-           for( unsigned int i = 0; i < numCorners; ++i )
-           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-           geo = GeometryImpl( hostGeo.type(), corners_ );
-         */
       }
       return geo_;
     }
