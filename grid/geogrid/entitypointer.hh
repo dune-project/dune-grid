@@ -90,6 +90,12 @@ namespace Dune
     }
 
   protected:
+    const Grid &grid () const
+    {
+      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
+      return impl.grid();
+    }
+
     void setToTarget ( const HostEntityPointer &target )
     {
       hostEntityPointer_ = target;
@@ -163,9 +169,8 @@ namespace Dune
       if( level != other.hostElementPointer_.level() )
         return false;
 
-      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
       const typename HostGrid :: Traits :: LevelIndexSet &indexSet
-        = impl.grid().hostGrid().levelIndexSet( level );
+        = grid().hostGrid().levelIndexSet( level );
 
       const HostElement &thisElement = *hostElementPointer_;
       assert( indexSet.contains( thisElement ) );
@@ -200,6 +205,12 @@ namespace Dune
     }
 
   protected:
+    const Grid &grid () const
+    {
+      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
+      return impl.grid();
+    }
+
     void setToTarget ( const HostEntityPointer &target )
     {
       DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
