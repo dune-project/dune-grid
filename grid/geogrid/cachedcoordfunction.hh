@@ -182,7 +182,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   class CachedCoordFunction
     : public DiscreteCoordFunction
-      < typename CoordFunction :: ctype, CoordFunction :: dimRange,
+      < typename CoordFunction::ctype, CoordFunction::dimRange,
           CachedCoordFunction< HostGrid, CoordFunction > >
   {
     typedef CachedCoordFunction< HostGrid, CoordFunction > This;
@@ -196,7 +196,7 @@ namespace Dune
   private:
     static const bool hasHierarchicIndexSet
       = Conversion< HostGrid, HasHierarchicIndexSet > :: exists;
-    typedef GeoGrid :: CoordCache< HostGrid, RangeVector, hasHierarchicIndexSet > Cache;
+    typedef GeoGrid::CoordCache< HostGrid, RangeVector, hasHierarchicIndexSet > Cache;
 
     const HostGrid &hostGrid_;
     const CoordFunction &coordFunction_;
@@ -231,9 +231,21 @@ namespace Dune
       y = cache_( hostEntity, corner );
 #ifndef NDEBUG
       RangeVector z;
-      coordFunction_.evaluate( hostEntity.geometry()[ corner ], z );
+      calculate( hostEntity.geometry(), corner, z );
       assert( ((y - z).two_norm() < 1e-6) );
 #endif
+    }
+
+    template< class HostGeometry >
+    void calculate ( const HostGeometry &hostGeometry, unsigned int corner,
+                     RangeVector &y ) const
+    {
+      const int dimension = HostGeometry::dimension;
+      typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+
+      const int tid = GenericGeometry::topologyId( hostGeometry.type() );
+      const int i = Map::template dune2generic< dimension >( tid, corner );
+      coordFunction_.evaluate( hostGeometry.corner( i ), y );
     }
   };
 
@@ -268,19 +280,14 @@ namespace Dune
   inline void CachedCoordFunction< HostGrid, CoordFunction >
   :: insertEntity ( const HostEntity &hostEntity )
   {
-    const int dimension = HostEntity::dimension;
-
     typedef typename HostEntity::Geometry HostGeometry;
-    typedef GenericGeometry::MapNumberingProvider< dimension > Map;
 
     const HostGeometry &hostGeo = hostEntity.geometry();
-    const int tid = GenericGeometry::topologyId( hostGeo.type() );
     const unsigned int numCorners = hostGeo.corners();
     for( unsigned int i = 0; i < numCorners; ++i )
     {
-      const int gi = Map::template dune2generic< dimension >( tid, i );
       RangeVector &y = cache_( hostEntity, i );
-      coordFunction_.evaluate( hostGeo.corner( gi ), y );
+      calculate( hostGeo, i, y );
     }
   }
 
