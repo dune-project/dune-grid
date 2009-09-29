@@ -594,27 +594,54 @@ namespace Dune
       return ret;
     }
 
-    template< class DataHandle, class DataType >
-    void communicate ( CommDataHandleIF< DataHandle, DataType > &data,
-                       InterfaceType iftype, CommunicationDirection dir,
+    /** \brief communicate information on a grid level
+     *
+     *  \param      datahandle  data handle
+     *  \param[in]  interface   communication interface (one of
+     *                          InteriorBorder_InteriorBorder_Interface,
+     *                          InteriorBorder_All_Interface,
+     *                          Overlap_OverlapFront_Interface,
+     *                          Overlap_All_Interface,
+     *                          All_All_Interface)
+     *  \param[in]  direction   communication direction (one of
+     *                          ForwardCommunication or BackwardCommunication)
+     *  \param[in]  level       grid level to communicate
+     */
+    template< class DataHandle, class Data >
+    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+                       InterfaceType interface,
+                       CommunicationDirection direction,
                        int level ) const
     {
-      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
+      typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
       typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-      WrappedDataHandle wrappedData( *this, data );
-      hostGrid().communicate( wrappedData, iftype, dir, level );
+      WrappedDataHandle wrappedDataHandle( *this, datahandle );
+      hostGrid().communicate( wrappedDataHandle, interface, direction, level );
     }
 
-    template< class DataHandle, class DataType >
-    void communicate ( CommDataHandleIF< DataHandle, DataType > &data,
-                       InterfaceType iftype, CommunicationDirection dir ) const
+    /** \brief communicate information on leaf entities
+     *
+     *  \param      datahandle  data handle
+     *  \param[in]  interface   communication interface (one of
+     *                          InteriorBorder_InteriorBorder_Interface,
+     *                          InteriorBorder_All_Interface,
+     *                          Overlap_OverlapFront_Interface,
+     *                          Overlap_All_Interface,
+     *                          All_All_Interface)
+     *  \param[in]  direction   communication direction (one of
+     *                          ForwardCommunication, BackwardCommunication)
+     */
+    template< class DataHandle, class Data >
+    void communicate ( CommDataHandleIF< DataHandle, Data > &datahandle,
+                       InterfaceType interface,
+                       CommunicationDirection direction ) const
     {
-      typedef CommDataHandleIF< DataHandle, DataType > DataHandleIF;
+      typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
       typedef GeometryGridCommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
-      WrappedDataHandle wrappedData( *this, data );
-      hostGrid().communicate( wrappedData, iftype, dir );
+      WrappedDataHandle wrappedDataHandle( *this, datahandle );
+      hostGrid().communicate( wrappedDataHandle, interface, direction );
     }
 
     /** \brief obtain CollectiveCommunication object
