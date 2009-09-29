@@ -284,13 +284,9 @@ namespace Dune
       EntityPointer ( const typename EntityWrapper::Implementation &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
-          subEntity_( -1 ),
+          subEntity_( entity.subEntity() ),
           hostElementIterator_( entity.hostElement() )
-      {
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const int tid = GenericGeometry::topologyId( entity.hostElement().type() );
-        subEntity_ = Map::template dune2generic( tid, entity.subEntity(), codimension );
-      }
+      {}
 
       EntityPointer ( const This &other )
         : grid_( other.grid_ ),
@@ -361,12 +357,8 @@ namespace Dune
       {
         if( entity_ == 0 )
         {
-          typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-          const int tid = GenericGeometry::topologyId( hostElementPointer()->type() );
-          const int duneSubEntity = Map::template dune2generic( tid, subEntity_, codimension );
-
           entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostElementPointer(), duneSubEntity );
+          entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
         }
         return *entity_;
       }
