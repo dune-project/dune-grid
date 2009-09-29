@@ -48,6 +48,7 @@ namespace Dune
     };
 
     /** \brief Get underlying HostGrid.
+     *  \param[in] grid  GeometryGrid
      *  \returns HostGrid
      */
     static const HostGrid & hostGrid (const GeometryGrid & grid)
