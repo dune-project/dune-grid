@@ -64,42 +64,38 @@ namespace Dune
     const Grid *grid_;
     const HostEntity *hostEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
-    mutable Geometry *geo_;
+    mutable MakeableGeometry geo_;
 
   public:
     explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostEntity_( 0 ),
-        geo_( 0 )
+        geo_( GeometryImpl() )
     {}
 
     GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostEntity_( other.hostEntity_ ),
-        geo_( 0 )
+        geo_( GeometryImpl() )
     {}
 
-    ~GeometryGridEntityImpl ()
-    {
-      if( geo_ != 0 )
-        delete geo_;
-    }
+  public:
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
-    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-    {
-      if( this == &other )
+  public:
+    /*
+       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
+       {
+       if( this == &other )
         return *this;
 
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
+       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
 
-      grid_ = other.grid_;
-      hostEntity_ = other.hostEntity_;
-      return *this;
-    }
+       grid_ = other.grid_;
+       hostEntity_ = other.hostEntity_;
+       return *this;
+       }
+     */
 
     GeometryType type () const
     {
@@ -118,16 +114,17 @@ namespace Dune
 
     const Geometry &geometry () const
     {
-      if( geo_ == 0 )
+      GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+      if( !geo )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         const CoordFunction &coordFunction = grid().coordFunction();
         corners_.resize( hostGeo.corners() );
         for( unsigned int i = 0; i < corners_.size(); ++i )
           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
+        geo = GeometryImpl( type(), corners_ );
       }
-      return *geo_;
+      return geo_;
     }
 
     const HostEntity &hostEntity () const
@@ -167,11 +164,7 @@ namespace Dune
     void setToTarget( const HostEntity &hostEntity )
     {
       hostEntity_ = &hostEntity;
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
+      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
     }
   };
 
@@ -223,44 +216,40 @@ namespace Dune
     const HostElement *hostElement_;
     unsigned int subEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
-    mutable Geometry *geo_;
+    mutable Geometry geo_;
 
   public:
     explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostElement_( 0 ),
-        geo_( 0 )
+        geo_( GeometryImpl() )
     {}
 
     GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostElement_( other.hostElement_ ),
         subEntity_( other.subEntity_ ),
-        geo_( 0 )
+        geo_( GeometryImpl() )
     {}
 
-    ~GeometryGridEntityImpl ()
-    {
-      if( geo_ != 0 )
-        delete geo_;
-    }
+  private:
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
-    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-    {
-      if( this == &other )
+  public:
+    /*
+       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
+       {
+       if( this == &other )
         return *this;
 
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
+       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
 
-      grid_ = other.grid_;
-      hostElement_ = other.hostElement_;
-      subEntity_ = other.subEntity_;
-      return *this;
-    }
+       grid_ = other.grid_;
+       hostElement_ = other.hostElement_;
+       subEntity_ = other.subEntity_;
+       return *this;
+       }
+     */
 
     GeometryType type () const
     {
@@ -302,7 +291,8 @@ namespace Dune
 
     const Geometry &geometry () const
     {
-      if( geo_ == 0 )
+      GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+      if( !geo )
       {
         const ReferenceElement< ctype, dimension > &refElement
           = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
@@ -315,9 +305,9 @@ namespace Dune
           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
           coordFunction.evaluate( hostGeo[ j ], corners_[ i ] );
         }
-        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
+        geo = GeometryImpl( type(), corners_ );
       }
-      return *geo_;
+      return geo_;
     }
 
     const HostEntity &hostEntity () const
@@ -378,11 +368,7 @@ namespace Dune
     {
       hostElement_ = &hostElement;
       subEntity_ = subEntity;
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
+      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
     }
   };
 
@@ -432,57 +418,48 @@ namespace Dune
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
+    typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
+    typedef typename MakeableLocalGeometry :: ImplementationType LocalGeometryImpl;
+
     const Grid *grid_;
     const HostEntity *hostEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
-    mutable Geometry *geo_;
-    mutable LocalGeometry *geoInFather_;
+    mutable MakeableGeometry geo_;
+    mutable MakeableLocalGeometry geoInFather_;
 
   public:
     explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostEntity_( 0 ),
-        geo_( 0 ),
-        geoInFather_( 0 )
+        geo_( GeometryImpl() ),
+        geoInFather_( LocalGeometryImpl() )
     {}
 
     GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostEntity_( other.hostEntity_ ),
-        geo_( 0 ),
-        geoInFather_( 0 )
+        geo_( GeometryImpl() ),
+        geoInFather_( LocalGeometryImpl() )
     {}
 
-    ~GeometryGridEntityImpl ()
-    {
-      if( geo_ != 0 )
-        delete geo_;
-      if( geoInFather_ != 0 )
-        delete geoInFather_;
-    }
+  private:
+    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
-
-    GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-    {
-      if( this == &other )
+  public:
+    /*
+       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
+       {
+       if( this == &other )
         return *this;
 
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
+       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+       Grid :: getRealImplementation( geoInFather_ ) = LocalGeometryImpl();
 
-      if( geoInFather_ != 0 )
-      {
-        delete geoInFather_;
-        geoInFather_ = 0;
-      }
-
-      grid_ = other.grid_;
-      hostEntity_ = other.hostEntity_;
-      return *this;
-    }
+       grid_ = other.grid_;
+       hostEntity_ = other.hostEntity_;
+       return *this;
+       }
+     */
 
     GeometryType type () const
     {
@@ -501,16 +478,18 @@ namespace Dune
 
     const Geometry &geometry () const
     {
-      if( geo_ == 0 )
+      GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+
+      if( !geo )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         const CoordFunction &coordFunction = grid().coordFunction();
         corners_.resize( hostGeo.corners() );
         for( unsigned int i = 0; i < corners_.size(); ++i )
           coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
-        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
+        geo = GeometryImpl( type(), corners_ );
       }
-      return *geo_;
+      return geo_;
     }
 
     template< int codim >
@@ -590,12 +569,10 @@ namespace Dune
 
     const LocalGeometry &geometryInFather () const
     {
-      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
-      typedef typename MakeableLocalGeometry :: ImplementationType LocalGeometryImpl;
-
-      if( geoInFather_ == 0 )
-        geoInFather_ = new MakeableLocalGeometry( LocalGeometryImpl( hostEntity().geometryInFather() ) );
-      return *geoInFather_;
+      LocalGeometryImpl &geo = Grid :: getRealImplementation( geoInFather_ );
+      if( !geo )
+        geo = LocalGeometryImpl( hostEntity().geometryInFather() );
+      return geoInFather_;
     }
 
     HierarchicIterator hbegin ( int maxLevel ) const
@@ -665,16 +642,9 @@ namespace Dune
     void setToTarget( const HostEntity &hostEntity )
     {
       hostEntity_ = &hostEntity;
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
-      if( geoInFather_ != 0 )
-      {
-        delete geoInFather_;
-        geoInFather_ = 0;
-      }
+
+      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+      Grid :: getRealImplementation( geoInFather_ ) = LocalGeometryImpl();
     }
   };
 
