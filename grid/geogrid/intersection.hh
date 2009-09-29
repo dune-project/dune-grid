@@ -162,6 +162,12 @@ namespace Dune
         return normal;
       }
 
+      const HostIntersection &hostIntersection () const
+      {
+        assert( isValid() );
+        return *hostIntersection_;
+      }
+
       void initialize( const EntityPointer &inside, const HostIntersection &hostIntersection )
       {
         inside_ = &inside;
@@ -178,12 +184,6 @@ namespace Dune
       bool isValid () const
       {
         return (hostIntersection_ != 0);
-      }
-
-      const HostIntersection &hostIntersection () const
-      {
-        assert( isValid() );
-        return *hostIntersection_;
       }
 
       void invalidate ()
