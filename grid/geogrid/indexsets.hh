@@ -6,10 +6,11 @@
 #include <vector>
 
 #include <dune/common/typetraits.hh>
-#include <dune/common/interfaces.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
+
+#include <dune/grid/geogrid/capabilities.hh>
 
 namespace Dune
 {
@@ -29,7 +30,7 @@ namespace Dune
     // -----------------------------
 
     template< class HostGrid, class CoordFunction,
-        bool hasHierarchicIndexSet = Conversion< HostGrid, HasHierarchicIndexSet >::exists >
+        bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v >
     class HierarchicIndexSetProvider;
 
 
@@ -146,7 +147,6 @@ namespace Dune
 
     template< class HostGrid, class CoordFunction >
     class HierarchicIndexSetProvider< HostGrid, CoordFunction, true >
-      : public HasHierarchicIndexSet
     {
       typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, true > This;
 
