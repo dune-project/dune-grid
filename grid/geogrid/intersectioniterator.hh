@@ -69,7 +69,7 @@ namespace Dune
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-    const Grid *grid_;
+    const EntityPointer *inside_;
     const HostIntersection *hostIntersection_;
     mutable GeometryGridCache< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
@@ -80,23 +80,25 @@ namespace Dune
     {}
 
     GeometryGridIntersection ( const GeometryGridIntersection &other )
-      : grid_( other.grid_ ),
+      : inside_( other.inside_ ),
         hostIntersection_( other.hostIntersection_ ),
         geo_( GeometryImpl() )
     {}
 
-    EntityPointer inside () const
+    //EntityPointer inside () const
+    const EntityPointer &inside () const
     {
-      typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
-      typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIntersection().inside() ) );
+      // typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
+      // typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
+      // return MakeableEntityPointer( EntityPointerImpl( grid(), hostIntersection().inside() ) );
+      return *inside_;
     }
 
     EntityPointer outside () const
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIntersection().outside() ) );
+      return MakeableEntityPointer( EntityPointerImpl( grid(), hostIntersection().outside() ) );
     }
 
     bool boundary () const
@@ -130,11 +132,12 @@ namespace Dune
       if( !geo )
       {
         const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
+        const CoordFunction &coordFunction = grid().coordFunction();
 
         const unsigned int numCorners = hostGeo.corners();
         corners_.reserve( numCorners );
         for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
         geo = GeometryImpl( hostGeo.type(), corners_ );
       }
       return geo_;
@@ -154,8 +157,7 @@ namespace Dune
     integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
     {
       typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
-      EntityPointer insideEntity = inside();
-      const Geometry &geo = insideEntity->geometry();
+      const Geometry &geo = inside()->geometry();
       FieldVector< ctype, dimension > x( intersectionSelfLocal().global( local ) );
       return Grid :: getRealImplementation( geo ).normal( numberInSelf(), x );
     }
@@ -174,17 +176,17 @@ namespace Dune
       return normal;
     }
 
-    void initialize( const Grid &grid, const HostIntersection &hostIntersection )
+    void initialize( const EntityPointer &inside, const HostIntersection &hostIntersection )
     {
-      grid_ = &grid;
+      inside_ = &inside;
       hostIntersection_ = &hostIntersection;
       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
     }
 
   protected:
-    const CoordFunction &coordFunction () const
+    const Grid &grid () const
     {
-      return grid_->coordFunction();
+      return Grid :: getRealImplementation( inside() ).grid();
     }
 
     bool isValid () const
@@ -201,12 +203,6 @@ namespace Dune
     void invalidate ()
     {
       hostIntersection_ = 0;
-    }
-
-    void setToTarget ( const HostIntersection &hostIntersection )
-    {
-      hostIntersection_ = &hostIntersection;
-      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
     }
   };
 
@@ -260,16 +256,17 @@ namespace Dune
   public:
     typedef typename Intersection :: ImplementationType Implementation;
 
-    typedef typename Implementation :: Grid Grid;
+    typedef typename Implementation :: EntityPointer EntityPointer;
     typedef typename Implementation :: HostIntersection HostIntersection;
 
     GeometryGridIntersectionWrapper ()
       : Base( Implementation() )
     {}
 
-    void initialize( const Grid &grid, const HostIntersection &hostIntersection )
+    void initialize( const EntityPointer &inside,
+                     const HostIntersection &hostIntersection )
     {
-      getRealImp().initialize( grid, hostIntersection );
+      getRealImp().initialize( inside, hostIntersection );
     }
   };
 
@@ -287,24 +284,27 @@ namespace Dune
     typedef typename Traits :: Intersection Intersection;
     typedef typename Traits :: GridTraits :: Grid Grid;
 
+    typedef typename Grid :: template Codim< 0 > :: EntityPointer EntityPointer;
+
   private:
     typedef GeometryGridIntersectionWrapper< Intersection > IntersectionWrapper;
     typedef GeometryGridStorage< IntersectionWrapper > IntersectionStorage;
 
-    const Grid *grid_;
+    const EntityPointer inside_;
     HostIntersectionIterator hostIterator_;
     mutable IntersectionWrapper *intersection_;
 
   public:
-    GeometryGridIntersectionIterator ( const Grid &grid,
+    template< class Entity >
+    GeometryGridIntersectionIterator ( const Entity &inside,
                                        const HostIntersectionIterator &hostIterator )
-      : grid_( &grid ),
+      : inside_( inside.template entity< 0 >( 0 ) ),
         hostIterator_( hostIterator ),
         intersection_( 0 )
     {}
 
     GeometryGridIntersectionIterator  ( const GeometryGridIntersectionIterator &other )
-      : grid_( other.grid_ ),
+      : inside_( other.inside_ ),
         hostIterator_( other.hostIterator_ ),
         intersection_( 0 )
     {}
@@ -312,7 +312,7 @@ namespace Dune
     GeometryGridIntersectionIterator &
     operator= ( const GeometryGridIntersectionIterator &other )
     {
-      grid_ = other.grid_;
+      inside_ = other.inside_;
       hostIterator_ = other.hostIterator_;
       update();
       return *this;
@@ -339,7 +339,7 @@ namespace Dune
       if( intersection_ == 0 )
       {
         intersection_ = IntersectionStorage :: alloc();
-        intersection_->initialize( grid(), *hostIterator_ );
+        intersection_->initialize( inside_, *hostIterator_ );
       }
       return *intersection_;
     }
@@ -347,7 +347,7 @@ namespace Dune
   private:
     const Grid &grid () const
     {
-      return *grid_;
+      return Grid :: getRealImplementation( inside_ ).grid();
     }
 
     void update ()
@@ -392,10 +392,11 @@ namespace Dune
     typedef typename Traits :: Intersection Intersection;
 
   public:
+    template< class Entity >
     GeometryGridLeafIntersectionIterator
-      ( const Grid &grid,
+      ( const Entity &inside,
       const HostIntersectionIterator &hostIterator )
-      : Base( grid, hostIterator )
+      : Base( inside, hostIterator )
     {}
   };
 
@@ -434,10 +435,11 @@ namespace Dune
     typedef typename Traits :: Intersection Intersection;
 
   public:
+    template< class Entity >
     GeometryGridLevelIntersectionIterator
-      ( const Grid &grid,
+      ( const Entity &inside,
       const HostIntersectionIterator &hostIterator )
-      : Base( grid, hostIterator )
+      : Base( inside, hostIterator )
     {}
   };
 

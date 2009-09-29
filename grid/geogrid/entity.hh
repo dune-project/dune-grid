@@ -458,7 +458,7 @@ namespace Dune
       MakeableLevelIntersectionIterator;
       typedef typename MakeableLevelIntersectionIterator :: ImplementationType
       LevelIntersectionIteratorImpl;
-      LevelIntersectionIteratorImpl impl( *grid_, hostEntity().ilevelbegin() );
+      LevelIntersectionIteratorImpl impl( *this, hostEntity().ilevelbegin() );
       return MakeableLevelIntersectionIterator( impl );
     }
 
@@ -468,7 +468,7 @@ namespace Dune
       MakeableLevelIntersectionIterator;
       typedef typename MakeableLevelIntersectionIterator :: ImplementationType
       LevelIntersectionIteratorImpl;
-      LevelIntersectionIteratorImpl impl( *grid_, hostEntity().ilevelend() );
+      LevelIntersectionIteratorImpl impl( *this, hostEntity().ilevelend() );
       return MakeableLevelIntersectionIterator( impl );
     }
 
@@ -478,7 +478,7 @@ namespace Dune
       MakeableLeafIntersectionIterator;
       typedef typename MakeableLeafIntersectionIterator :: ImplementationType
       LeafIntersectionIteratorImpl;
-      LeafIntersectionIteratorImpl impl( *grid_, hostEntity().ileafbegin() );
+      LeafIntersectionIteratorImpl impl( *this, hostEntity().ileafbegin() );
       return MakeableLeafIntersectionIterator( impl );
     }
 
@@ -488,7 +488,7 @@ namespace Dune
       MakeableLeafIntersectionIterator;
       typedef typename MakeableLeafIntersectionIterator :: ImplementationType
       LeafIntersectionIteratorImpl;
-      LeafIntersectionIteratorImpl impl( *grid_, hostEntity().ileafend() );
+      LeafIntersectionIteratorImpl impl( *this, hostEntity().ileafend() );
       return MakeableLeafIntersectionIterator( impl );
     }
 

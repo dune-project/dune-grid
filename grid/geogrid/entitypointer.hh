@@ -196,12 +196,12 @@ namespace Dune
       return hostEntityIterator_;
     }
 
-  protected:
     const Grid &grid () const
     {
       return *grid_;
     }
 
+  protected:
     void update ()
     {
       EntityStorage :: free( entity_ );
@@ -359,12 +359,12 @@ namespace Dune
                   << codimension << "." );
     }
 
-  protected:
     const Grid &grid () const
     {
       return *grid_;
     }
 
+  protected:
     void update ()
     {
       EntityStorage :: free( entity_ );
