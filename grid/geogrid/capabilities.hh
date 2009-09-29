@@ -24,7 +24,8 @@ namespace Dune
     template< class HostGrid, class CoordFunction, int codim >
     struct hasEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
     {
-      static const bool v = hasEntity< HostGrid, codim > :: v;
+      //static const bool v = hasEntity< HostGrid, codim > :: v;
+      static const bool v = true;
     };
 
 
