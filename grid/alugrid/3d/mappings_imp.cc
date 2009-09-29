@@ -453,13 +453,13 @@ namespace Dune {
   {
     normal(x,y,normal_);
 
-    Df[0][0] = _b [1][0] + y * _b [3][0]+ z * _n[1][0] ;
-    Df[1][0] = _b [1][1] + y * _b [3][1]+ z * _n[1][1] ;
-    Df[2][0] = _b [1][2] + y * _b [3][2]+ z * _n[1][2] ;
+    Df[0][0] = _b [1][0] + y * _b [3][0] + z * _n[1][0] ;
+    Df[1][0] = _b [1][1] + y * _b [3][1] + z * _n[1][1] ;
+    Df[2][0] = _b [1][2] + y * _b [3][2] + z * _n[1][2] ;
 
-    Df[0][1] = _b [2][0] + x * _b [3][0]+ z * _n[2][0] ;
-    Df[1][1] = _b [2][1] + x * _b [3][1]+ z * _n[2][1] ;
-    Df[2][1] = _b [2][2] + x * _b [3][2]+ z * _n[2][2] ;
+    Df[0][1] = _b [2][0] + x * _b [3][0] + z * _n[2][0] ;
+    Df[1][1] = _b [2][1] + x * _b [3][1] + z * _n[2][1] ;
+    Df[2][1] = _b [2][2] + x * _b [3][2] + z * _n[2][2] ;
 
     Df[0][2] = normal_[0];
     Df[1][2] = normal_[1];
@@ -486,11 +486,6 @@ namespace Dune {
 
       // only true for affine mappings
       _calcedMatrix = _affine ;
-    }
-
-    if( ! _affine )
-    {
-      DUNE_THROW(NotImplemented,"BilinearSurfaceMapping::jacobianTransposed not implemented correctly for non-affine mappings!");
     }
 
     return matrix_;
@@ -536,7 +531,10 @@ namespace Dune {
     // if calculated return
     if( _calcedTransposed) return invTransposed_;
 
-    map2worldnormal (local[0],local[1],0.0,tmp_);
+    tmp_[0] = local[0];
+    tmp_[1] = local[1];
+    tmp_[2] = 0.0;
+
     inverse (tmp_) ;
 
     // calculate transposed inverse
