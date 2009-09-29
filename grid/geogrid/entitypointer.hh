@@ -111,8 +111,7 @@ namespace Dune
 
       static const bool fake = Traits :: fake;
 
-      typedef EntityPointer< BaseTraits, fake > Base;
-      typedef EntityPointer< BaseTraits, fake > base;
+      typedef EntityPointer< BaseTraits, fake > EntityPointerImp;
 
     private:
       typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
@@ -167,14 +166,14 @@ namespace Dune
         return *this;
       }
 
-      operator const Base & () const
+      operator const EntityPointerImp & () const
       {
-        return reinterpret_cast< const Base & >( *this );
+        return reinterpret_cast< const EntityPointerImp & >( *this );
       }
 
-      operator Base & ()
+      operator EntityPointerImp & ()
       {
-        return reinterpret_cast< Base & >( *this );
+        return reinterpret_cast< EntityPointerImp & >( *this );
       }
 
       template< class T >
@@ -302,14 +301,14 @@ namespace Dune
         return *this;
       }
 
-      operator const Base & () const
+      operator const EntityPointerImp & () const
       {
-        return reinterpret_cast< const Base & >( *this );
+        return reinterpret_cast< const EntityPointerImp & >( *this );
       }
 
-      operator Base & ()
+      operator EntityPointerImp & ()
       {
-        return reinterpret_cast< Base & >( *this );
+        return reinterpret_cast< EntityPointerImp & >( *this );
       }
 
       template< class T >

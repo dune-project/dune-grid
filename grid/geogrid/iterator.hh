@@ -203,7 +203,7 @@ namespace Dune
     class Iterator< Traits, false >
       : public EntityPointer< Traits, false >
     {
-      typedef EntityPointer< Traits, false > ExactBase;
+      typedef EntityPointer< Traits, false > Base;
 
       typedef typename Traits :: Grid Grid;
 
@@ -211,12 +211,12 @@ namespace Dune
       typedef typename Traits :: IteratorType IteratorType;
 
     protected:
-      using ExactBase :: hostEntityIterator_;
-      using ExactBase :: update;
+      using Base :: hostEntityIterator_;
+      using Base :: update;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : ExactBase( grid, Traits :: getHostEntityIterator( grid, level, type ) )
+        : Base( grid, Traits :: getHostEntityIterator( grid, level, type ) )
       {}
 
       void increment ()
@@ -235,7 +235,7 @@ namespace Dune
     class Iterator< Traits, true >
       : public EntityPointer< Traits, true >
     {
-      typedef EntityPointer< Traits, true > ExactBase;
+      typedef EntityPointer< Traits, true > Base;
 
       typedef typename Traits :: Grid Grid;
 
@@ -257,13 +257,13 @@ namespace Dune
       std :: vector< bool > visited_;
 
     protected:
-      using ExactBase :: hostElementIterator_;
-      using ExactBase :: subEntity_;
-      using ExactBase :: update;
+      using Base :: hostElementIterator_;
+      using Base :: subEntity_;
+      using Base :: update;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
-        : ExactBase( grid, Traits :: getHostElementIterator( grid, level, type ), -1 ),
+        : Base( grid, Traits :: getHostElementIterator( grid, level, type ), -1 ),
           hostEnd_( Traits :: getHostElementIterator( grid, level, Traits :: end ) ),
           hostIndexSet_( &Traits :: getHostIndexSet( grid, level ) )
       {
@@ -478,18 +478,18 @@ namespace Dune
     {
       typedef HierarchicIteratorTraits< Grid > Traits;
 
-      typedef EntityPointer< Traits > ExactBase;
+      typedef EntityPointer< Traits > Base;
 
     protected:
       typedef typename Traits :: HostEntityIterator HostEntityIterator;
 
-      using ExactBase :: hostEntityIterator_;
-      using ExactBase :: update;
+      using Base :: hostEntityIterator_;
+      using Base :: update;
 
     public:
       HierarchicIterator ( const Grid &grid,
                            const HostEntityIterator &hostEntityIterator )
-        : ExactBase( grid, hostEntityIterator )
+        : Base( grid, hostEntityIterator )
       {}
 
       void increment ()
