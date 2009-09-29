@@ -150,13 +150,17 @@ namespace Dune
 
     private:
       const HostIndexSet *hostIndexSet_;
+#ifdef INDEXSET_HAS_ITERATORS
       const IteratorProvider iteratorProvider_;
+#endif
 
     public:
       IndexSet ( const HostIndexSet &hostIndexSet,
                  const IteratorProvider &iteratorProvider )
-        : hostIndexSet_( &hostIndexSet ),
-          iteratorProvider_( iteratorProvider )
+        : hostIndexSet_( &hostIndexSet )
+#ifdef INDEXSET_HAS_ITERATORS
+          , iteratorProvider_( iteratorProvider )
+#endif
       {}
 
       template< int codim >
@@ -209,7 +213,7 @@ namespace Dune
         return hostIndexSet().geomTypes( codim );
       }
 
-#if INDEXSET_HAS_ITERATORS
+#ifdef INDEXSET_HAS_ITERATORS
       template< int codim, PartitionIteratorType pitype >
       typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
       begin () const
