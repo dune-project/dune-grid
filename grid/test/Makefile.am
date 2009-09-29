@@ -27,12 +27,15 @@ endif
 
 ALBERTA_DIM = $(GRIDDIM)
 
+COORDFUNCTION = Helix
+CACHECOORDFUNCTION = 0
+
 #
 ## define the lists of tests to build and run
 #
 
 # tests where program to build and program to run are equal
-NORMALTESTS = test-sgrid test-oned test-yaspgrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
+NORMALTESTS = test-sgrid test-oned test-yaspgrid test-geogrid $(APROG) $(UPROG) $(ALUPROG) $(DGFALU_UGGRID)
 
 # list of tests to run
 TESTS = $(NORMALTESTS)
@@ -78,6 +81,11 @@ test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS) $(GRAPE_LIBS)
 test_alu3dgrid_SOURCES = test-alu3dgrid.cc
 test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
 test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
+
+test_geogrid_SOURCES = test-geogrid.cc
+test_geogrid_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS) -DCOORDFUNCTION=$(COORDFUNCTION) -DCACHECOORDFUNCTION=$(CACHECOORDFUNCTION)
+test_geogrid_LDFLAGS = $(ALL_PKG_LDFLAGS) $(MPI_LDFLAGS)
+test_geogrid_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LIBS) $(MPI_LIBS)
 
 test_alu3dsimplex_SOURCES = test-alu3dsimplex.cc
 if ALBERTA
