@@ -108,6 +108,53 @@ namespace Dune
 
 
 
+    // IntersectionCoordVector
+    // -----------------------
+
+    template< class Grid >
+    class IntersectionCoordVector
+    {
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+      typedef typename Traits :: ctype ctype;
+
+      static const int dimension = Traits :: dimension;
+      static const int codimension = 1;
+      static const int mydimension = dimension-codimension;
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      typedef FieldVector< ctype, dimensionworld > Coordinate;
+
+      typedef typename Traits :: HostGrid HostGrid;
+
+      typedef typename Traits :: template Codim< 0 > :: Geometry
+      ElementGeometry;
+      typedef typename Traits :: template Codim< codimension > :: LocalGeometry
+      HostLocalGeometry;
+
+    private:
+      const ElementGeometry &elementGeometry_;
+      const HostLocalGeometry &hostLocalGeometry_;
+
+    public:
+      IntersectionCoordVector ( const ElementGeometry &elementGeometry,
+                                const HostLocalGeometry &hostLocalGeometry )
+        : elementGeometry_( elementGeometry ),
+          hostLocalGeometry_( hostLocalGeometry )
+      {}
+
+      template< unsigned int numCorners >
+      void calculate ( Coordinate (&corners)[ numCorners ] ) const
+      {
+        assert( numCorners == hostLocalGeometry_.corners() );
+        for( unsigned int i = 0; i < numCorners; ++i )
+          corners[ i ] = elementGeometry_.global( hostLocalGeometry_[ i ] );
+      }
+    };
+
+
+
+
     // CornerStorage
     // -------------
 
@@ -135,6 +182,11 @@ namespace Dune
       template< bool fake >
       explicit
       CornerStorage ( const CoordVector< mydimension, Grid, fake > &coords )
+      {
+        coords.calculate( coords_ );
+      }
+
+      explicit CornerStorage ( const IntersectionCoordVector< Grid > &coords )
       {
         coords.calculate( coords_ );
       }

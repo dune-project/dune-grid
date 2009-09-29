@@ -60,7 +60,8 @@ namespace Dune
       typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
 
     private:
-      typedef GeoGrid :: CoordVector< dimension-1, const Grid, false > CoordVector;
+      //typedef GeoGrid :: CoordVector< dimension-1, const Grid, false > CoordVector;
+      typedef GeoGrid :: IntersectionCoordVector< const Grid > CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -122,9 +123,12 @@ namespace Dune
         GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
         if( !geo )
         {
-          const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
-          CoordVector coords( hostGeo, grid().coordFunction() );
-          geo = GeometryImpl( hostGeo.type(), coords );
+          const LocalGeometry &localGeo = intersectionSelfLocal();
+          CoordVector coords( inside()->geometry(), localGeo );
+          geo = GeometryImpl( localGeo.type(), coords );
+          //const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
+          //CoordVector coords( hostGeo, grid().coordFunction() );
+          //geo = GeometryImpl( hostGeo.type(), coords );
         }
         return geo_;
       }
