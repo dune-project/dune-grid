@@ -136,6 +136,7 @@ namespace Dune
       return hostIndexSet().geomTypes( codim );
     }
 
+#if INDEXSET_HAS_ITERATORS
     template< int codim, PartitionIteratorType pitype >
     typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
     begin () const
@@ -149,6 +150,7 @@ namespace Dune
     {
       return grid_->template lend< codim, pitype >( level_ );
     }
+#endif
 
     void update ()
     {
@@ -269,6 +271,7 @@ namespace Dune
       return hostIndexSet().geomTypes( codim );
     }
 
+#if INDEXSET_HAS_ITERATORS
     template< int codim, PartitionIteratorType pitype >
     typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
     begin () const
@@ -282,6 +285,7 @@ namespace Dune
     {
       return grid_->template leafend< codim, pitype >();
     }
+#endif
 
     void update ()
     {

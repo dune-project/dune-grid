@@ -3,7 +3,9 @@
 #ifndef DUNE_GEOGRID_DATAHANDLE_HH
 #define DUNE_GEOGRID_DATAHANDLE_HH
 
+#include <dune/common/typetraits.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/grid.hh>
 
 namespace Dune
 {
