@@ -139,14 +139,14 @@ namespace Dune
         return hostIntersection().type();
       }
 
-      int numberInInside () const
+      int indexInInside () const
       {
-        return hostIntersection().numberInInside();
+        return hostIntersection().indexInInside();
       }
 
-      int numberInOutside () const
+      int indexInOutside () const
       {
-        return hostIntersection().numberInOutside();
+        return hostIntersection().indexInOutside();
       }
 
       FieldVector< ctype, dimensionworld >
@@ -155,7 +155,7 @@ namespace Dune
         typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
         const Geometry &geo = inside()->geometry();
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
-        return Grid::getRealImplementation( geo ).normal( numberInInside(), x );
+        return Grid::getRealImplementation( geo ).normal( indexInInside(), x );
       }
 
       FieldVector< ctype, dimensionworld >
