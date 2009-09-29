@@ -22,6 +22,7 @@ namespace Dune
   // MacroGrid :: Impl for GeomegryGrid
   // ----------------------------------
 
+  /** \cond */
   template< class HostGrid, class CoordFunction >
   struct MacroGrid :: Impl< GeometryGrid< HostGrid, CoordFunction > >
   {
@@ -68,6 +69,7 @@ namespace Dune
       return -1.0;
     }
   };
+  /** \endcond */
 
 }
 

@@ -10,6 +10,7 @@
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/entity.hh>
 #include <dune/grid/geogrid/entitypointer.hh>
+#include <dune/grid/geogrid/intersection.hh>
 #include <dune/grid/geogrid/intersectioniterator.hh>
 #include <dune/grid/geogrid/iterator.hh>
 #include <dune/grid/geogrid/indexsets.hh>
@@ -85,6 +86,7 @@ namespace Dune
 
 
 
+  /** \brief namespace containing the implementations of GeometryGrid */
   namespace GeoGrid
   {
 
@@ -167,12 +169,12 @@ namespace Dune
           LevelIterator;
         };
 
-        typedef GeometryGridLeafIndexSet< const Grid > LeafIndexSet;
-        typedef GeometryGridLevelIndexSet< const Grid > LevelIndexSet;
+        typedef GeoGrid :: LeafIndexSet< const Grid > LeafIndexSet;
+        typedef GeoGrid :: LevelIndexSet< const Grid > LevelIndexSet;
 
-        typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
+        typedef GeoGrid :: IdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
         GlobalIdSet;
-        typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
+        typedef GeoGrid :: IdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
         LocalIdSet;
 
         typedef typename HostGrid :: Traits :: CollectiveCommunication
@@ -251,14 +253,14 @@ namespace Dune
         GeoGrid :: GridFamily< HostGrid, CoordFunction > >
     Base;
 
-    friend class GeometryGridLevelIndexSet< const Grid >;
-    friend class GeometryGridLeafIndexSet< const Grid >;
+    friend class GeoGrid :: LevelIndexSet< const Grid >;
+    friend class GeoGrid :: LeafIndexSet< const Grid >;
     friend class GeoGrid :: HierarchicIterator< const Grid >;
 
     template< int, class, bool > friend class GeoGrid :: EntityImpl;
     template< class, bool > friend class GeoGrid :: EntityPointer;
     template< class, class > friend class GeoGrid :: Intersection;
-    template< class, class > friend class GeometryGridIdSet;
+    template< class, class > friend class GeoGrid :: IdSet;
     template < class > friend class HostGridAccess;
 
     template< int, PartitionIteratorType, class >
