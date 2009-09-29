@@ -171,37 +171,35 @@ namespace Dune
           template< PartitionIteratorType pitype >
           struct Partition
           {
-            typedef Dune :: LeafIterator
-            < codim, pitype, const Grid, GeoGrid :: LeafIterator >
+            typedef Dune::LeafIterator
+            < codim, pitype, const Grid, GeoGrid::LeafIterator >
             LeafIterator;
-            typedef Dune :: LevelIterator
-            < codim, pitype, const Grid, GeoGrid :: LevelIterator >
+            typedef Dune::LevelIterator
+            < codim, pitype, const Grid, GeoGrid::LevelIterator >
             LevelIterator;
           };
 
-          typedef typename Partition< All_Partition > :: LeafIterator
+          typedef typename Partition< All_Partition >::LeafIterator
           LeafIterator;
-          typedef typename Partition< All_Partition > :: LevelIterator
+          typedef typename Partition< All_Partition >::LevelIterator
           LevelIterator;
         };
 
-        typedef GeoGrid :: IndexSet
-        < const Grid, typename HostGrid :: Traits :: LeafIndexSet,
-            LeafIteratorProvider< const Grid > >
+        typedef GeoGrid::IndexSet
+        < const Grid, typename HostGrid::Traits::LeafIndexSet >
         LeafIndexSet;
-        typedef GeoGrid :: IndexSet
-        < const Grid, typename HostGrid :: Traits :: LevelIndexSet,
-            LevelIteratorProvider< const Grid > >
+        typedef GeoGrid::IndexSet
+        < const Grid, typename HostGrid::Traits::LevelIndexSet >
         LevelIndexSet;
 
-        typedef GeoGrid :: IdSet
-        < const Grid, typename HostGrid :: Traits :: GlobalIdSet >
+        typedef GeoGrid::IdSet
+        < const Grid, typename HostGrid::Traits::GlobalIdSet >
         GlobalIdSet;
-        typedef GeoGrid :: IdSet
-        < const Grid, typename HostGrid :: Traits :: LocalIdSet >
+        typedef GeoGrid::IdSet
+        < const Grid, typename HostGrid::Traits::LocalIdSet >
         LocalIdSet;
 
-        typedef typename HostGrid :: Traits :: CollectiveCommunication
+        typedef typename HostGrid::Traits::CollectiveCommunication
         CollectiveCommunication;
 
         template< PartitionIteratorType pitype >
@@ -630,10 +628,8 @@ namespace Dune
 
       if( levelIndexSets_[ level ] == 0 )
       {
-        typedef GeoGrid :: LevelIteratorProvider< const Grid > IteratorProvider;
         levelIndexSets_[ level ]
-          = new LevelIndexSet( hostGrid().levelIndexSet( level ),
-                               IteratorProvider( *this, level ) );
+          = new LevelIndexSet( hostGrid().levelIndexSet( level ) );
       }
       assert( levelIndexSets_[ level ] != 0 );
       return *levelIndexSets_[ level ];
@@ -642,11 +638,7 @@ namespace Dune
     const LeafIndexSet &leafIndexSet () const
     {
       if( leafIndexSet_ == 0 )
-      {
-        typedef GeoGrid :: LeafIteratorProvider< const Grid > IteratorProvider;
-        leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet(),
-                                          IteratorProvider( *this ) );
-      }
+        leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet() );
       assert( leafIndexSet_ != 0 );
       return *leafIndexSet_;
     }

@@ -30,163 +30,61 @@ namespace Dune
 
     template< class HostGrid, class CoordFunction,
         bool hasHierarchicIndexSet
-          = Conversion< HostGrid, HasHierarchicIndexSet > :: exists >
+          = Conversion< HostGrid, HasHierarchicIndexSet >::exists >
     class HierarchicIndexSetProvider;
-
-
-
-    // LevelIteratorProvider
-    // ---------------------
-
-    template< class Grid >
-    class LevelIteratorProvider
-    {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
-
-    public:
-      template< int codim >
-      struct Codim
-      {
-        template< PartitionIteratorType pitype >
-        struct Partition
-        {
-          typedef typename Traits :: template Codim< codim >
-          :: template Partition< pitype > :: LevelIterator
-          Iterator;
-        };
-      };
-
-    private:
-      const Grid &grid_;
-      const int level_;
-
-    public:
-      LevelIteratorProvider ( const Grid &grid, int level )
-        : grid_( grid ),
-          level_( level )
-      {}
-
-      template< int codim, PartitionIteratorType pitype >
-      typename Codim< codim > :: template Partition< pitype > :: Iterator
-      begin () const
-      {
-        return grid_->template lbegin< codim, pitype >( level_ );
-      }
-
-      template< int codim, PartitionIteratorType pitype >
-      typename Codim< codim > :: template Partition< pitype > :: Iterator
-      end () const
-      {
-        return grid_->template lend< codim, pitype >( level_ );
-      }
-    };
-
-
-
-    // LeafIteratorProvider
-    // --------------------
-
-    template< class Grid >
-    class LeafIteratorProvider
-    {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
-
-    public:
-      template< int codim >
-      struct Codim
-      {
-        template< PartitionIteratorType pitype >
-        struct Partition
-        {
-          typedef typename Traits :: template Codim< codim >
-          :: template Partition< pitype > :: LeafIterator
-          Iterator;
-        };
-      };
-
-    private:
-      const Grid &grid_;
-
-    public:
-      LeafIteratorProvider ( const Grid &grid )
-        : grid_( grid )
-      {}
-
-      template< int codim, PartitionIteratorType pitype >
-      typename Codim< codim > :: template Partition< pitype > :: Iterator
-      begin () const
-      {
-        return grid_->template leafbegin< codim, pitype >();
-      }
-
-      template< int codim, PartitionIteratorType pitype >
-      typename Codim< codim > :: template Partition< pitype > :: Iterator
-      end () const
-      {
-        return grid_->template leafend< codim, pitype >();
-      }
-    };
 
 
 
     // IndexSet
     // --------
 
-    template< class Grid, class HostIndexSet, class IteratorProvider >
+    template< class Grid, class HostIndexSet >
     class IndexSet
-      : public Dune :: IndexSet
-        < Grid, IndexSet< Grid, HostIndexSet, IteratorProvider >, IteratorProvider >
+      : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet > >
     {
-      typedef IndexSet< Grid, HostIndexSet, IteratorProvider > This;
+      typedef IndexSet< Grid, HostIndexSet > This;
 
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits :: HostGrid HostGrid;
+      typedef typename Traits::HostGrid HostGrid;
 
     public:
-      typedef Dune :: IndexSet< Grid, This, IteratorProvider > Base;
+      typedef Dune::IndexSet< Grid, This > Base;
 
-      static const int dimension = Grid :: dimension;
+      static const int dimension = Grid::dimension;
 
       typedef unsigned int IndexType;
 
     private:
       const HostIndexSet *hostIndexSet_;
-#ifdef INDEXSET_HAS_ITERATORS
-      const IteratorProvider iteratorProvider_;
-#endif
 
     public:
-      IndexSet ( const HostIndexSet &hostIndexSet,
-                 const IteratorProvider &iteratorProvider )
+      IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
-#ifdef INDEXSET_HAS_ITERATORS
-          , iteratorProvider_( iteratorProvider )
-#endif
       {}
 
       template< int codim >
-      IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
+      IndexType index ( const typename Grid::template Codim< codim >::Entity &entity ) const
       {
-        return Grid :: getRealImplementation( entity ).index( hostIndexSet() );
+        return Grid::getRealImplementation( entity ).index( hostIndexSet() );
       }
 
       template< class Entity >
       IndexType index ( const Entity &entity ) const
       {
-        return index< Entity :: codimension >( entity );
+        return index< Entity::codimension >( entity );
       }
 
       template< int codim >
-      IndexType subIndex ( const typename Grid :: template Codim< 0 > :: Entity &entity, int i ) const
+      IndexType subIndex ( const typename Grid::template Codim< 0 >::Entity &entity, int i ) const
       {
-        typedef typename HostGrid :: template Codim< 0 > :: Entity HostEntity;
-        const HostEntity &hostEntity = Grid :: template getHostEntity< 0 >( entity );
+        typedef typename HostGrid::template Codim< 0 >::Entity HostEntity;
+        const HostEntity &hostEntity = Grid::template getHostEntity< 0 >( entity );
         return hostIndexSet().template subIndex< codim >( hostEntity, i );
       }
 
       template< int codim, int subcodim >
-      IndexType subIndex ( const typename Grid :: template Codim< codim > :: Entity &entity, int i ) const
+      IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i ) const
       {
         return Grid :: getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
       }
@@ -202,40 +100,24 @@ namespace Dune
       }
 
       template< int codim >
-      bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
+      bool contains ( const typename Grid::template Codim< codim >::Entity &entity ) const
       {
-        typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+        typedef typename HostGrid::template Codim< codim >::Entity HostEntity;
         const HostEntity &hostEntity
-          = Grid :: template getHostEntity< codim >( entity );
+          = Grid::template getHostEntity< codim >( entity );
         return hostIndexSet().contains( hostEntity );
       }
 
       template< class Entity >
       bool contains ( const Entity &entity ) const
       {
-        return contains< Entity :: codimension >( entity );
+        return contains< Entity::codimension >( entity );
       }
 
-      const std :: vector< GeometryType > &geomTypes ( int codim ) const
+      const std::vector< GeometryType > &geomTypes ( int codim ) const
       {
         return hostIndexSet().geomTypes( codim );
       }
-
-#ifdef INDEXSET_HAS_ITERATORS
-      template< int codim, PartitionIteratorType pitype >
-      typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
-      begin () const
-      {
-        return iteratorProvider_.begin();
-      }
-
-      template< int codim, PartitionIteratorType pitype >
-      typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
-      end () const
-      {
-        return iteratorProvider_.end();
-      }
-#endif
 
     private:
       const HostIndexSet &hostIndexSet () const
@@ -263,9 +145,7 @@ namespace Dune
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
     public:
-      typedef IndexSet
-      < const Grid, typename HostGrid :: HierarchicIndexSet,
-          LeafIteratorProvider< const Grid > >
+      typedef IndexSet< const Grid, typename HostGrid::HierarchicIndexSet >
       HierarchicIndexSet;
 
     private:
@@ -293,10 +173,8 @@ namespace Dune
       {
         if( hierarchicIndexSet_ == 0 )
         {
-          typedef LeafIteratorProvider< const Grid > IteratorProvider;
           hierarchicIndexSet_
-            = new HierarchicIndexSet( grid_.hostGrid().hierarchicIndexSet(),
-                                      IteratorProvider( grid_ ) );
+            = new HierarchicIndexSet( grid_.hostGrid().hierarchicIndexSet() );
         }
         assert( hierarchicIndexSet_ != 0 );
         return *hierarchicIndexSet_;
