@@ -5,14 +5,35 @@
 
 #include <vector>
 
+#include <dune/common/typetraits.hh>
+#include <dune/common/interfaces.hh>
+
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
   namespace GeoGrid
   {
+
+    // Internal Forward Declarations
+    // -----------------------------
+
+    template< class HostGrid, class CoordFunction,
+        bool hasHierarchicIndexSet
+          = Conversion< HostGrid, HasHierarchicIndexSet > :: exists >
+    class HierarchicIndexSetProvider;
+
+
 
     // LevelIteratorProvider
     // ---------------------
@@ -210,16 +231,69 @@ namespace Dune
       }
 #endif
 
-      void update ( const HostIndexSet &hostIndexSet )
-      {
-        hostIndexSet_ = &hostIndexSet;
-      }
-
     private:
       const HostIndexSet &hostIndexSet () const
       {
         assert( hostIndexSet_ != 0 );
         return *hostIndexSet_;
+      }
+    };
+
+
+
+    // HierarchicIndexSetProvider
+    // --------------------------
+
+    template< class HostGrid, class CoordFunction >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, false >
+    {};
+
+    template< class HostGrid, class CoordFunction >
+    class HierarchicIndexSetProvider< HostGrid, CoordFunction, true >
+      : public HasHierarchicIndexSet
+    {
+      typedef HierarchicIndexSetProvider< HostGrid, CoordFunction, true > This;
+
+      typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    public:
+      typedef IndexSet
+      < const Grid, typename HostGrid :: HierarchicIndexSet,
+          LeafIteratorProvider< const Grid > >
+      HierarchicIndexSet;
+
+    private:
+      const Grid &grid_;
+      mutable HierarchicIndexSet *hierarchicIndexSet_;
+
+    public:
+      HierarchicIndexSetProvider ( const Grid &grid )
+        : grid_( grid ),
+          hierarchicIndexSet_( 0 )
+      {}
+
+      HierarchicIndexSetProvider ( const This &other )
+        : grid_( other.grid_ ),
+          hierarchicIndexSet_( 0 )
+      {}
+
+      ~HierarchicIndexSetProvider ()
+      {
+        if( hierarchicIndexSet_ != 0 )
+          delete hierarchicIndexSet_;
+      }
+
+      const HierarchicIndexSet &hierarchicIndexSet () const
+      {
+        if( hierarchicIndexSet_ == 0 )
+        {
+          typedef LeafIteratorProvider< const Grid > IteratorProvider;
+          hierarchicIndexSet_
+            = new HierarchicIndexSet( grid_.hostGrid().hierarchicIndexSet(),
+                                      IteratorProvider( grid_ ) );
+        }
+        assert( hierarchicIndexSet_ != 0 );
+        return *hierarchicIndexSet_;
       }
     };
 

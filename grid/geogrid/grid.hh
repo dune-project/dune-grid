@@ -260,10 +260,10 @@ namespace Dune
   class GeometryGrid
   /** \cond */
     : public GridDefaultImplementation
-      < HostGrid :: dimension, CoordFunction :: dimRange,
-          typename HostGrid :: ctype,
+      < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
           GeoGrid :: GridFamily< HostGrid, CoordFunction > >,
-      public GeoGrid :: ExportParams< HostGrid, CoordFunction >
+      public GeoGrid :: ExportParams< HostGrid, CoordFunction >,
+      public GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >
       /** \endcond */
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
@@ -273,6 +273,9 @@ namespace Dune
         typename HostGrid :: ctype,
         GeoGrid :: GridFamily< HostGrid, CoordFunction > >
     Base;
+
+    typedef GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >
+    HierarchicIndexSetProvider;
 
     friend class GeoGrid :: HierarchicIterator< const Grid >;
 
@@ -409,7 +412,8 @@ namespace Dune
      *  \param coordFunction  reference to the coordinate function
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction )
-      : hostGrid_( &hostGrid ),
+      : HierarchicIndexSetProvider( *this ),
+        hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
@@ -620,7 +624,7 @@ namespace Dune
           = new LevelIndexSet( hostGrid().levelIndexSet( level ),
                                IteratorProvider( *this, level ) );
       }
-      assert( levelIndexSets_[ level ] );
+      assert( levelIndexSets_[ level ] != 0 );
       return *levelIndexSets_[ level ];
     }
 
@@ -632,7 +636,7 @@ namespace Dune
         leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet(),
                                           IteratorProvider( *this ) );
       }
-      assert( leafIndexSet_ );
+      assert( leafIndexSet_ != 0 );
       return *leafIndexSet_;
     }
 
@@ -834,6 +838,16 @@ namespace Dune
     /** \name Miscellaneous Methods
      *  \{ */
 
+    const HostGrid &hostGrid () const
+    {
+      return *hostGrid_;
+    }
+
+    HostGrid &hostGrid ()
+    {
+      return *hostGrid_;
+    }
+
     /** \brief update grid caches
      *
      *  This method has to be called whenever the underlying host grid changes.
@@ -848,25 +862,14 @@ namespace Dune
       GeoGrid :: AdaptCoordFunction< typename CoordFunction :: Interface >
       :: adapt( coordFunction_ );
 
-      if( leafIndexSet_ != 0 )
-        leafIndexSet_->update( hostGrid().leafIndexSet() );
-
       const int newNumLevels = maxLevel()+1;
       const int oldNumLevels = levelIndexSets_.size();
-      int updateLevels = std :: min( oldNumLevels, newNumLevels );
 
-      for( int i = 0; i < updateLevels; ++i )
-      {
-        if( levelIndexSets_[ i ] != 0 )
-          levelIndexSets_[ i ]->update( hostGrid().levelIndexSet( i ) );
-      }
-
-      for( int i = updateLevels; i < oldNumLevels; ++i )
+      for( int i = newNumLevels; i < oldNumLevels; ++i )
       {
         if( levelIndexSets_[ i ] != 0 )
           delete levelIndexSets_[ i ];
       }
-
       levelIndexSets_.resize( newNumLevels, (LevelIndexSet *)0 );
     }
 
@@ -874,16 +877,6 @@ namespace Dune
 
   protected:
     using Base :: getRealImplementation;
-
-    const HostGrid &hostGrid () const
-    {
-      return *hostGrid_;
-    }
-
-    HostGrid &hostGrid ()
-    {
-      return *hostGrid_;
-    }
 
     const CoordFunction &coordFunction () const
     {
