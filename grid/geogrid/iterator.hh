@@ -19,11 +19,19 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, PartitionIteratorType pitype, class Grid >
+  template< int codim, PartitionIteratorType pitype, class Grid,
+      bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
   class GeometryGridLeafIterator;
 
   template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLeafIteratorAdapter;
+
+  template< int codim, PartitionIteratorType pitype, class Grid,
+      bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v ) >
   class GeometryGridLevelIterator;
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLevelIteratorAdapter;
 
   template< class Grid >
   class GeometryGridHierarchicIterator;
@@ -33,23 +41,22 @@ namespace Dune
   // GeometryGridLeafIterator
   // ------------------------
 
-  template< int codim, PartitionIteratorType pitype,
-      class HostGrid, class CoordFunction >
-  class GeometryGridLeafIterator
-  < codim, pitype, const GeometryGrid< HostGrid, CoordFunction > >
-    : public GeometryGridEntityPointer
-      < codim, const GeometryGrid< HostGrid, CoordFunction > >
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLeafIterator< codim, pitype, Grid, false >
+    : public GeometryGridEntityPointer< codim, Grid, false >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+    typedef typename Traits :: HostGrid HostGrid;
+
+  public:
+    typedef GeometryGridEntityPointer< codim, Grid, false > Base;
 
     typedef typename HostGrid :: template Codim< codim >
     :: template Partition< pitype > :: LeafIterator
     HostIterator;
 
+  private:
     HostIterator hostIterator_;
-
-  public:
-    typedef GeometryGridEntityPointer< codim, const Grid > Base;
 
   protected:
     using Base :: setToTarget;
@@ -70,26 +77,45 @@ namespace Dune
 
 
 
+  // GeometryGridLeafIteratorAdapter
+  // -------------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLeafIteratorAdapter
+    : public GeometryGridLeafIterator< codim, pitype, Grid >
+  {
+    typedef GeometryGridLeafIterator< codim, pitype, Grid > BaseType;
+
+  public:
+    typedef typename BaseType :: HostIterator HostIterator;
+
+    GeometryGridLeafIteratorAdapter ( const Grid &grid,
+                                      const HostIterator &hostIterator )
+      : BaseType( grid, hostIterator )
+    {}
+  };
+
+
+
   // GeometryGridLeafIterator
   // ------------------------
 
-  template< int codim, PartitionIteratorType pitype,
-      class HostGrid, class CoordFunction >
-  class GeometryGridLevelIterator
-  < codim, pitype, const GeometryGrid< HostGrid, CoordFunction > >
-    : public GeometryGridEntityPointer
-      < codim, const GeometryGrid< HostGrid, CoordFunction > >
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLevelIterator< codim, pitype, Grid, false >
+    : public GeometryGridEntityPointer< codim, Grid, false >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+    typedef typename Traits :: HostGrid HostGrid;
+
+  public:
+    typedef GeometryGridEntityPointer< codim, Grid, false > Base;
 
     typedef typename HostGrid :: template Codim< codim >
     :: template Partition< pitype > :: LevelIterator
     HostIterator;
 
+  private:
     HostIterator hostIterator_;
-
-  public:
-    typedef GeometryGridEntityPointer< codim, const Grid > Base;
 
   protected:
     using Base :: setToTarget;
@@ -110,22 +136,45 @@ namespace Dune
 
 
 
+  // GeometryGridLeafIteratorAdapter
+  // -------------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  class GeometryGridLevelIteratorAdapter
+    : public GeometryGridLevelIterator< codim, pitype, Grid >
+  {
+    typedef GeometryGridLevelIterator< codim, pitype, Grid > BaseType;
+
+  public:
+    typedef typename BaseType :: HostIterator HostIterator;
+
+    GeometryGridLevelIteratorAdapter ( const Grid &grid,
+                                       const HostIterator &hostIterator )
+      : BaseType( grid, hostIterator )
+    {}
+  };
+
+
+
   // GeometryGridHierarchicIterator
   // ------------------------------
 
-  template< class HostGrid, class CoordFunction >
-  class GeometryGridHierarchicIterator< const GeometryGrid< HostGrid, CoordFunction > >
-    : public GeometryGridEntityPointer< 0, const GeometryGrid< HostGrid, CoordFunction > >
+  template< class Grid >
+  class GeometryGridHierarchicIterator
+    : public GeometryGridEntityPointer< 0, Grid >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+    typedef typename Traits :: HostGrid HostGrid;
+
+  public:
+    typedef GeometryGridEntityPointer< 0, Grid > Base;
 
     typedef typename HostGrid :: Traits :: HierarchicIterator HostIterator;
 
+  private:
     HostIterator hostIterator_;
 
   public:
-    typedef GeometryGridEntityPointer< 0, const Grid > Base;
-
     GeometryGridHierarchicIterator ( const Grid &grid,
                                      const HostIterator &hostIterator )
       : Base( grid, hostIterator ),

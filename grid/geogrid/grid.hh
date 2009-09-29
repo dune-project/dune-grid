@@ -116,10 +116,10 @@ namespace Dune
         struct Partition
         {
           typedef Dune :: LeafIterator
-          < codim, pitype, const Grid, GeometryGridLeafIterator >
+          < codim, pitype, const Grid, GeometryGridLeafIteratorAdapter >
           LeafIterator;
           typedef Dune :: LevelIterator
-          < codim, pitype, const Grid, GeometryGridLevelIterator >
+          < codim, pitype, const Grid, GeometryGridLevelIteratorAdapter >
           LevelIterator;
         };
 
@@ -215,10 +215,13 @@ namespace Dune
 
     template< int, class, bool > friend class GeometryGridEntity;
     template< int, class, bool > friend class GeometryGridEntityPointer;
-    template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
-    template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
+
+    template< int, PartitionIteratorType, class, bool >
+    friend class GeometryGridLevelIterator;
+    template< int, PartitionIteratorType, class, bool >
+    friend class GeometryGridLeafIterator;
 
   public:
     /** \cond */

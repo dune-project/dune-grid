@@ -13,19 +13,16 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template<int codim, class Grid, bool fake >
+  template< int codim, class Grid, bool fake >
   class GeometryGridEntityPointer;
 
-  template<int codim, PartitionIteratorType pitype, class GridImp>
-  class GeometryGridLevelIterator;
-
-  template<class GridImp>
+  template< class Grid >
   class GeometryGridLevelIntersectionIterator;
 
-  template<class GridImp>
+  template< class Grid >
   class GeometryGridLeafIntersectionIterator;
 
-  template<class GridImp>
+  template< class Grid >
   class GeometryGridHierarchicIterator;
 
 
@@ -681,10 +678,6 @@ namespace Dune
   public:
     GeometryGridEntityAdapter ( const Grid &grid )
       : Base( grid )
-    {}
-
-    GeometryGridEntityAdapter ( const GeometryGridEntityAdapter &other )
-      : Base( other )
     {}
   };
 
