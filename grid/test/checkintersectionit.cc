@@ -295,7 +295,8 @@ void checkIntersectionIterator(const GridViewType& view,
       {
         typename IntersectionGeometry::GlobalCoordinate x = intersectionGlobal.corner( c-1 );
         x -= intersectionGlobal.corner( c );
-        if( x*normal >= 40*std::numeric_limits< ctype >::epsilon() )
+        // this only makes sense for non-curved faces
+        if( intersectionGlobal.affine() && x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
         {
           std::cerr << "outerNormal not orthogonal to line between corner "
                     << (c-1) << " and corner " << c << "." << std::endl;
