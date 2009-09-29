@@ -42,11 +42,11 @@ namespace Dune
 
 
 
-  // GeometryGridEntity
-  // ------------------
+  // GeometryGridEntity (real)
+  // -------------------------
 
-  template< int codim, class Grid, bool fake >
-  class GeometryGridEntity
+  template< int codim, class Grid >
+  class GeometryGridEntity< codim, Grid, false >
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -59,6 +59,8 @@ namespace Dune
     enum { dimensionworld = Traits :: dimensionworld };
 
     typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+
+    static const bool fake = false;
 
   private:
     typedef typename Traits :: HostGrid HostGrid;
@@ -138,7 +140,7 @@ namespace Dune
 
     const Geometry &geometry () const
     {
-      if( geo_ ==0 )
+      if( geo_ == 0 )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         corners_.resize( hostGeo.corners() );
@@ -183,6 +185,208 @@ namespace Dune
   };
 
 
+
+  // GeometryGridEntity (fake)
+  // -------------------------
+
+  template< int codim, class Grid >
+  class GeometryGridEntity< codim, Grid, true >
+  {
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+  public:
+    typedef typename Traits :: ctype ctype;
+
+    enum { codimension = codim };
+    enum { dimension = Traits :: dimension };
+    enum { mydimension = dimension - codimension };
+    enum { dimensionworld = Traits :: dimensionworld };
+
+    typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+
+    static const bool fake = true;
+
+  private:
+    typedef typename Traits :: HostGrid HostGrid;
+    typedef typename Traits :: CoordFunction CoordFunction;
+
+    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
+
+    template< class > friend class GeometryGridLevelIndexSet;
+    template< class > friend class GeometryGridLeafIndexSet;
+    template< class > friend class GeometryGridLocalIdSet;
+    template< class > friend class GeometryGridGlobalIdSet;
+    template< class, class > friend class GeometryGridCommDataHandle;
+    template< class, int > friend class IndexSetter;
+
+    typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+    typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+
+    typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+    typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
+    typedef typename HostGrid :: template Codim< dimension > :: EntityPointer
+    HostVertexPointer;
+
+    typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
+    typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
+    typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
+
+    const Grid *grid_;
+    const HostElement *hostElement_;
+    unsigned int subEntity_;
+    mutable std :: vector< GlobalCoordinate > corners_;
+    mutable Geometry *geo_;
+
+  public:
+    GeometryGridEntity( const Grid &grid )
+      : grid_( &grid ),
+        hostElement_( 0 ),
+        geo_( 0 )
+    {}
+
+    GeometryGridEntity( const GeometryGridEntity &other )
+      : grid_( other.grid_ ),
+        hostElement_( other.hostElement_ ),
+        subEntity_( other.subEntity_ ),
+        geo_( 0 )
+    {}
+
+    ~GeometryGridEntity ()
+    {
+      if( geo_ != 0 )
+        delete geo_;
+    }
+
+    GeometryGridEntity &operator= ( const GeometryGridEntity &other )
+    {
+      if( this == &other )
+        return *this;
+
+      if( geo_ != 0 )
+      {
+        delete geo_;
+        geo_ = 0;
+      }
+
+      grid_ = other.grid_;
+      hostElement_ = other.hostElement_;
+      subEntity_ = other.subEntity_;
+      return *this;
+    }
+
+    GeometryType type () const
+    {
+      const ReferenceElement< ctype, dimension > &refElement
+        = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
+      return refElement.type( subEntity_, codimension );
+    }
+
+    int level () const
+    {
+      return hostElement().level();
+    }
+
+    PartitionType partitionType () const
+    {
+      if( !(Capabilities :: isParallel< HostGrid > :: v) )
+        return InteriorEntity;
+
+      const ReferenceElement< ctype, dimension > &refElement
+        = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
+
+      PartitionType type = vertexPartitionType( refElement, 0 );
+      if( (type == InteriorEntity) || (type == OverlapEntity)
+          || (type == GhostEntity) )
+        return type;
+
+      const int numVertices = refElement.size( subEntity_, codimension, dimension );
+      for( int i = 1; i < numVertices; ++i )
+      {
+        PartitionType vtxType = vertexPartitionType( refElement, i );
+        if( (vtxType == InteriorEntity) || (vtxType == OverlapEntity)
+            || (vtxType == GhostEntity) )
+          return vtxType;
+        assert( type == vtxType );
+      }
+      assert( (type == BorderEntity) || (type == FrontEntity) );
+      return type;
+    }
+
+    const Geometry &geometry () const
+    {
+      if( geo_ == 0 )
+      {
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension > :: general( hostElement().type() );
+        corners_.resize( refElement.size( subEntity_, codimension, dimension ) );
+
+        const HostGeometry &hostGeo = hostElement().geometry();
+        for( unsigned int i = 0; i < corners_.size(); ++i )
+        {
+          const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
+          coordFunction().evaluate( hostGeo[ j ], corners_[ i ] );
+        }
+        geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
+      }
+      return *geo_;
+    }
+
+    const HostEntity &hostEntity () const
+    {
+      DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
+                  << codimension << "." );
+    }
+
+  private:
+    PartitionType
+    vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement,
+                          int i ) const
+    {
+      const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
+      return hostElement().template entity< dimension >( j )->partitionType();
+    }
+
+    const HostElement &hostElement () const
+    {
+      assert( isValid() );
+      return *hostElement_;
+    }
+
+    const CoordFunction &coordFunction () const
+    {
+      return grid_->coordFunction();
+    }
+
+    bool isValid () const
+    {
+      return (hostElement_ != 0);
+    }
+
+    void invalidate ()
+    {
+      hostElement_ = 0;
+    }
+
+    void setToTarget ( const HostEntity &hostEntity )
+    {
+      DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
+                  << codimension << "." );
+    }
+
+    void setToTarget ( const HostElement &hostElement, int subEntity )
+    {
+      hostElement_ = &hostElement;
+      subEntity_ = subEntity;
+      if( geo_ != 0 )
+      {
+        delete geo_;
+        geo_ = 0;
+      }
+    }
+  };
+
+
+
   // GeometryGridEntity for codimension 0
   // ------------------------------------
 
@@ -207,11 +411,13 @@ namespace Dune
     typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
+    static const bool fake = false;
+
   private:
     typedef typename Traits :: HostGrid HostGrid;
     typedef typename Traits :: CoordFunction CoordFunction;
 
-    friend class GeometryGridEntityPointer< codimension, const Grid, false >;
+    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
@@ -297,7 +503,7 @@ namespace Dune
 
     const Geometry &geometry () const
     {
-      if( geo_ ==0 )
+      if( geo_ == 0 )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
         corners_.resize( hostGeo.corners() );
