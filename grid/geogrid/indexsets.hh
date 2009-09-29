@@ -33,23 +33,50 @@ namespace Dune
 
 
 
-    // LevelIndexSetTypes
-    // ------------------
+    // LevelIteratorProvider
+    // ---------------------
 
     template< class Grid >
-    struct LevelIndexSetTypes
+    class LevelIteratorProvider
     {
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+    public:
       template< int codim >
       struct Codim
       {
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef typename Grid :: template Codim< codim >
+          typedef typename Traits :: template Codim< codim >
           :: template Partition< pitype > :: LevelIterator
           Iterator;
         };
       };
+
+    private:
+      const Grid &grid_;
+      const int level_;
+
+    public:
+      LevelIteratorProvider ( const Grid &grid, int level )
+        : grid_( grid ),
+          level_( level )
+      {}
+
+      template< int codim, PartitionIteratorType pitype >
+      typename Codim< codim > :: template Partition< pitype > :: Iterator
+      begin () const
+      {
+        return grid_->template lbegin< codim, pitype >( level_ );
+      }
+
+      template< int codim, PartitionIteratorType pitype >
+      typename Codim< codim > :: template Partition< pitype > :: Iterator
+      end () const
+      {
+        return grid_->template lend< codim, pitype >( level_ );
+      }
     };
 
 
@@ -62,30 +89,29 @@ namespace Dune
       : public IndexSet
         < const GeometryGrid< HostGrid, CoordFunction >,
             LevelIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
-            LevelIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
+            LevelIteratorProvider< const GeometryGrid< HostGrid, CoordFunction > > >
     {
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      typedef typename HostGrid :: Traits :: LevelIndexSet HostLevelIndexSet;
+      typedef typename HostGrid :: Traits :: LevelIndexSet HostIndexSet;
 
-      const Grid *grid_;
-      int level_;
-      const HostLevelIndexSet *hostIndexSet_;
+      typedef LevelIteratorProvider< const Grid > IteratorProvider;
+
+      const HostIndexSet *hostIndexSet_;
+      const IteratorProvider iteratorProvider_;
 
     public:
       enum { dimension = Grid :: dimension };
 
       typedef unsigned int IndexType;
 
-      typedef IndexSet< Grid, LevelIndexSet< Grid >, LevelIndexSetTypes< Grid > >
+      typedef IndexSet< Grid, LevelIndexSet< Grid >, IteratorProvider >
       Base;
 
       LevelIndexSet ( const Grid &grid, int level )
-        : grid_( &grid ),
-          level_( level )
-      {
-        update();
-      }
+        : hostIndexSet_( &(grid.hostGrid().levelIndexSet( level )) ),
+          iteratorProvider_( grid, level )
+      {}
 
       template< int codim >
       IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
@@ -121,7 +147,8 @@ namespace Dune
       bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
       {
         typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-        const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+        const HostEntity &hostEntity
+          = Grid :: template getHostEntity< codim >( entity );
         return hostIndexSet().contains( hostEntity );
       }
 
@@ -136,29 +163,29 @@ namespace Dune
         return hostIndexSet().geomTypes( codim );
       }
 
-  #if INDEXSET_HAS_ITERATORS
+#if INDEXSET_HAS_ITERATORS
       template< int codim, PartitionIteratorType pitype >
       typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
       begin () const
       {
-        return grid_->template lbegin< codim, pitype >( level_ );
+        return iteratorProvider_.begin();
       }
 
       template< int codim, PartitionIteratorType pitype >
       typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
       end () const
       {
-        return grid_->template lend< codim, pitype >( level_ );
+        return iteratorProvider_.end();
       }
-  #endif
+#endif
 
-      void update ()
+      void update ( const HostIndexSet &hostIndexSet )
       {
-        hostIndexSet_ = &(grid_->hostGrid().levelIndexSet( level_ ));
+        hostIndexSet_ = &hostIndexSet;
       }
 
     private:
-      const HostLevelIndexSet &hostIndexSet () const
+      const HostIndexSet &hostIndexSet () const
       {
         assert( hostIndexSet_ != 0 );
         return *hostIndexSet_;
@@ -167,23 +194,49 @@ namespace Dune
 
 
 
-    // LeafIndexSetTypes
-    // -----------------
+
+    // LeafIteratorProvider
+    // --------------------
 
     template< class Grid >
-    struct LeafIndexSetTypes
+    class LeafIteratorProvider
     {
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+    public:
       template< int codim >
       struct Codim
       {
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef typename Grid :: template Codim< codim >
+          typedef typename Traits :: template Codim< codim >
           :: template Partition< pitype > :: LeafIterator
           Iterator;
         };
       };
+
+    private:
+      const Grid &grid_;
+
+    public:
+      LeafIteratorProvider ( const Grid &grid )
+        : grid_( grid )
+      {}
+
+      template< int codim, PartitionIteratorType pitype >
+      typename Codim< codim > :: template Partition< pitype > :: Iterator
+      begin () const
+      {
+        return grid_->template leafbegin< codim, pitype >();
+      }
+
+      template< int codim, PartitionIteratorType pitype >
+      typename Codim< codim > :: template Partition< pitype > :: Iterator
+      end () const
+      {
+        return grid_->template leafend< codim, pitype >();
+      }
     };
 
 
@@ -196,28 +249,29 @@ namespace Dune
       : public IndexSet
         < const GeometryGrid< HostGrid, CoordFunction >,
             LeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
-            LeafIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
+            LeafIteratorProvider< const GeometryGrid< HostGrid, CoordFunction > > >
     {
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      typedef typename HostGrid :: Traits :: LeafIndexSet HostLeafIndexSet;
+      typedef typename HostGrid :: Traits :: LeafIndexSet HostIndexSet;
 
-      const Grid *grid_;
-      const HostLeafIndexSet *hostIndexSet_;
+      typedef LeafIteratorProvider< const Grid > IteratorProvider;
+
+      const HostIndexSet *hostIndexSet_;
+      const IteratorProvider iteratorProvider_;
 
     public:
       enum { dimension = Grid :: dimension };
 
       typedef unsigned int IndexType;
 
-      typedef IndexSet< Grid, LeafIndexSet< Grid >, LeafIndexSetTypes< Grid > >
+      typedef IndexSet< Grid, LeafIndexSet< Grid >, IteratorProvider >
       Base;
 
       LeafIndexSet ( const Grid &grid )
-        : grid_( &grid )
-      {
-        update();
-      }
+        : hostIndexSet_( &(grid.hostGrid().leafIndexSet()) ),
+          iteratorProvider_( grid )
+      {}
 
       template< int codim >
       IndexType index ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
@@ -253,7 +307,8 @@ namespace Dune
       bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
       {
         typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
-        const HostEntity &hostEntity = Grid :: template getHostEntity< codim >( entity );
+        const HostEntity &hostEntity
+          = Grid :: template getHostEntity< codim >( entity );
         return hostIndexSet().contains( hostEntity );
       }
 
@@ -273,24 +328,24 @@ namespace Dune
       typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
       begin () const
       {
-        return grid_->template leafbegin< codim, pitype >();
+        return iteratorProvider_.begin();
       }
 
       template< int codim, PartitionIteratorType pitype >
       typename Base :: template Codim< codim > :: template Partition< pitype > :: Iterator
       end () const
       {
-        return grid_->template leafend< codim, pitype >();
+        return iteratorProvider.end();
       }
   #endif
 
-      void update ()
+      void update ( const HostIndexSet &hostIndexSet )
       {
-        hostIndexSet_ = &(grid_->hostGrid().leafIndexSet());
+        hostIndexSet_ = &hostIndexSet;
       }
 
     private:
-      const HostLeafIndexSet &hostIndexSet () const
+      const HostIndexSet &hostIndexSet () const
       {
         assert( hostIndexSet_ != 0 );
         return *hostIndexSet_;

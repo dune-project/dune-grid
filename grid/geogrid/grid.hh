@@ -835,7 +835,7 @@ namespace Dune
       :: adapt( coordFunction_ );
 
       if( leafIndexSet_ != 0 )
-        leafIndexSet_->update();
+        leafIndexSet_->update( hostGrid().leafIndexSet() );
 
       const int newNumLevels = maxLevel()+1;
       const int oldNumLevels = levelIndexSets_.size();
@@ -844,7 +844,7 @@ namespace Dune
       for( int i = 0; i < updateLevels; ++i )
       {
         if( levelIndexSets_[ i ] != 0 )
-          levelIndexSets_[ i ]->update();
+          levelIndexSets_[ i ]->update( hostGrid().levelIndexSet( i ) );
       }
 
       for( int i = updateLevels; i < oldNumLevels; ++i )
