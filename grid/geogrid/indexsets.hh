@@ -185,6 +185,12 @@ namespace Dune
         return hostIndexSet().template subIndex< codim >( hostEntity, i );
       }
 
+      template< int codim, int subcodim >
+      IndexType subIndex ( const typename Grid :: template Codim< codim > :: Entity &entity, int i ) const
+      {
+        return Grid :: getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
+      }
+
       IndexType size ( GeometryType type ) const
       {
         return hostIndexSet().size( type );

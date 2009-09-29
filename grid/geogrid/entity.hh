@@ -268,6 +268,13 @@ namespace Dune
         return indexSet.template index< codimension >( hostEntity() );
       }
 
+      template< int subcodim, class HostIndexSet >
+      typename HostIndexSet :: IndexType
+      subIndex ( const HostIndexSet &indexSet, int i )
+      {
+        return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
+      }
+
       /** \brief obtain the entity's id from a host IdSet
        *
        *  \internal This method is provided by the entity, because its
@@ -529,6 +536,19 @@ namespace Dune
       typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
+      }
+
+      template< int subcodim, class HostIndexSet >
+      typename HostIndexSet :: IndexType
+      subIndex ( const HostIndexSet &indexSet, int i )
+      {
+        const GeometryType type = hostElement().type();
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension > :: general( type );
+        const int j = refElement.subEntity( subEntity_, codimension, i, subcodim );
+
+        const int realcodim = codimension + subcodim;
+        return indexSet.template subIndex< 0, realcodim >( hostElement(), j );
       }
 
       /** \brief obtain the entity's id from a host IdSet
@@ -883,6 +903,13 @@ namespace Dune
       typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template index< codimension >( hostEntity() );
+      }
+
+      template< int subcodim, class HostIndexSet >
+      typename HostIndexSet :: IndexType
+      subIndex ( const HostIndexSet &indexSet, int i )
+      {
+        return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
       }
 
       /** \brief obtain the entity's id from a host IdSet
