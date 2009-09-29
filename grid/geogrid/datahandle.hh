@@ -12,6 +12,14 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class Entity >
+  class GeometryGridEntityWrapper;
+
+
+
   // GeometryGridDataHandle
   // ----------------------
 
@@ -51,14 +59,14 @@ namespace Dune
     {
       const int codimension = HostEntity :: codimension;
       typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity :: ImplementationType EntityImpl;
+      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
 
-      EntityImpl impl( grid_ );
-      impl.setToTarget( hostEntity );
-      MakeableEntity entity( impl );
-
-      return wrappedHandle_.size( (const Entity &)entity );
+      EntityWrapper *entity = EntityStorage :: alloc();
+      entity->initialize( grid_, hostEntity );
+      const size_t size = wrappedHandle_.size( (const Entity &)(*entity) );
+      EntityStorage :: free( entity );
+      return size;
     }
 
     template< class MessageBuffer, class HostEntity >
@@ -66,14 +74,13 @@ namespace Dune
     {
       const int codimension = HostEntity :: codimension;
       typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity :: ImplementationType EntityImpl;
+      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
 
-      EntityImpl impl( grid_ );
-      impl.setToTarget( hostEntity );
-      MakeableEntity entity( impl );
-
-      wrappedHandle_.gather( buffer, (const Entity &)entity );
+      EntityWrapper *entity = EntityStorage :: alloc();
+      entity->initialize( grid_, hostEntity );
+      wrappedHandle_.gather( buffer, (const Entity &)(*entity) );
+      EntityStorage :: free( entity );
     }
 
     template< class MessageBuffer, class HostEntity >
@@ -81,14 +88,13 @@ namespace Dune
     {
       const int codimension = HostEntity :: codimension;
       typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef MakeableInterfaceObject< Entity > MakeableEntity;
-      typedef typename MakeableEntity :: ImplementationType EntityImpl;
+      typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+      typedef GeometryGridStorage< EntityWrapper > EntityStorage;
 
-      EntityImpl impl( grid_ );
-      impl.setToTarget( hostEntity );
-      MakeableEntity entity( impl );
-
-      wrappedHandle_.scatter( buffer, (const Entity &)entity, size );
+      EntityWrapper *entity = EntityStorage :: alloc();
+      entity->initialize( grid_, hostEntity );
+      wrappedHandle_.scatter( buffer, (const Entity &)(*entity), size );
+      EntityStorage :: free( entity );
     }
 
   private:

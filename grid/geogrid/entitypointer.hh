@@ -6,6 +6,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
+#include <dune/grid/geogrid/storage.hh>
 
 namespace Dune
 {
@@ -104,11 +105,11 @@ namespace Dune
     typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
   private:
-    typedef GeometryGridEntityWrapper< codimension, dimension, const Grid >
-    EntityWrapper;
-    typedef typename EntityWrapper :: Implementation EntityImpl;
+    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
 
-    mutable EntityWrapper virtualEntity_;
+    const Grid *grid_;
+    mutable EntityWrapper *entity_;
 
   protected:
     typedef typename Traits :: HostEntityPointer HostEntityPointer;
@@ -120,30 +121,40 @@ namespace Dune
   public:
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostEntityIterator &hostEntityIterator )
-      : virtualEntity_( grid ),
+      : grid_( &grid ),
+        entity_( 0 ),
         hostEntityIterator_( hostEntityIterator )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( grid ),
+      : grid_( &grid ),
+        entity_( 0 ),
         hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
     {}
 
     GeometryGridEntityPointer ( const This &other )
-      : virtualEntity_( other.grid() ),
+      : grid_( other.grid_ ),
+        entity_( 0 ),
         hostEntityIterator_( other.hostEntityIterator_ )
     {}
 
     template< class T >
     explicit GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : virtualEntity_( other.grid() ),
+      : grid_( other.grid_ ),
+        entity_( 0 ),
         hostEntityIterator_( other.hostEntityIterator_ )
     {}
 
+    ~GeometryGridEntityPointer ()
+    {
+      EntityStorage :: free( entity_ );
+    }
+
     This &operator= ( const This &other )
     {
+      grid_ = other.grid_;
       hostEntityIterator_ = other.hostEntityIterator_;
       update();
       return *this;
@@ -167,10 +178,12 @@ namespace Dune
 
     Entity &dereference () const
     {
-      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
-      if( !impl.isValid() )
-        impl.setToTarget( *hostEntityPointer() );
-      return virtualEntity_;
+      if( entity_ == 0 )
+      {
+        entity_ = EntityStorage :: alloc();
+        entity_->initialize( grid(), *hostEntityPointer() );
+      }
+      return *entity_;
     }
 
     int level () const
@@ -186,12 +199,13 @@ namespace Dune
   protected:
     const Grid &grid () const
     {
-      return Grid :: getRealImplementation( virtualEntity_ ).grid();
+      return *grid_;
     }
 
     void update ()
     {
-      Grid :: getRealImplementation( virtualEntity_ ).invalidate();
+      EntityStorage :: free( entity_ );
+      entity_ = 0;
     }
   };
 
@@ -223,11 +237,11 @@ namespace Dune
     typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
   private:
-    typedef GeometryGridEntityWrapper< codimension, dimension, const Grid >
-    EntityWrapper;
-    typedef typename EntityWrapper :: Implementation EntityImpl;
+    typedef GeometryGridEntityWrapper< Entity > EntityWrapper;
+    typedef GeometryGridStorage< EntityWrapper > EntityStorage;
 
-    mutable EntityWrapper virtualEntity_;
+    const Grid *grid_;
+    mutable EntityWrapper *entity_;
 
   protected:
     typedef typename Traits :: HostEntityPointer HostEntityPointer;
@@ -242,7 +256,8 @@ namespace Dune
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElementIterator &hostElementIterator,
                                 int subEntity )
-      : virtualEntity_( grid ),
+      : grid_( &grid ),
+        entity_( 0 ),
         subEntity_( subEntity ),
         hostElementIterator_( hostElementIterator )
     {}
@@ -250,26 +265,35 @@ namespace Dune
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( grid ),
+      : grid_( &grid ),
+        entity_( 0 ),
         subEntity_( subEntity ),
         hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
     {}
 
     GeometryGridEntityPointer ( const This &other )
-      : virtualEntity_( other.grid() ),
+      : grid_( other.grid_ ),
+        entity_( 0 ),
         subEntity_( other.subEntity_ ),
         hostElementIterator_( other.hostElementIterator_ )
     {}
 
     template< class T >
     explicit GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : virtualEntity_( other.grid() ),
+      : grid_( other.grid_ ),
+        entity_( 0 ),
         subEntity_( other.subEntity_ ),
         hostElementIterator_( other.hostElementIterator_ )
     {}
 
+    ~GeometryGridEntityPointer ()
+    {
+      EntityStorage :: free( entity_ );
+    }
+
     This &operator= ( const This &other )
     {
+      grid_ = other.grid_;
       subEntity_ = other.subEntity_;
       hostElementIterator_ = other.hostElementIterator_;
       update();
@@ -316,10 +340,12 @@ namespace Dune
 
     Entity &dereference () const
     {
-      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
-      if( !impl.isValid() )
-        impl.setToTarget( *hostElementPointer(), subEntity_ );
-      return virtualEntity_;
+      if( entity_ == 0 )
+      {
+        entity_ = EntityStorage :: alloc();
+        entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
+      }
+      return *entity_;
     }
 
     int level () const
@@ -336,12 +362,13 @@ namespace Dune
   protected:
     const Grid &grid () const
     {
-      return Grid :: getRealImplementation( virtualEntity_ ).grid();
+      return *grid_;
     }
 
     void update ()
     {
-      Grid :: getRealImplementation( virtualEntity_ ).invalidate();
+      EntityStorage :: free( entity_ );
+      entity_ = 0;
     }
 
     const HostElementPointer &hostElementPointer () const

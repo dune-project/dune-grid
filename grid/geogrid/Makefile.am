@@ -7,4 +7,5 @@ grid_HEADERS = capabilities.hh \
 	       identity.hh \
 	       indexsets.hh \
 	       intersectioniterator.hh \
-	       iterator.hh
+	       iterator.hh \
+	       storage.hh
