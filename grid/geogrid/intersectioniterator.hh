@@ -69,36 +69,20 @@ namespace Dune
     const Grid *grid_;
     const HostIntersection *hostIntersection_;
     mutable std :: vector< GlobalCoordinate > corners_;
-    mutable Geometry *geo_;
-    mutable LocalGeometry *geoSelf_;
-    mutable LocalGeometry *geoNeighbor_;
+    mutable MakeableGeometry geo_;
 
   public:
     GeometryGridIntersection ( const Grid &grid )
       : grid_( &grid ),
         hostIntersection_( 0 ),
-        geo_( 0 ),
-        geoSelf_( 0 ),
-        geoNeighbor_( 0 )
+        geo_( GeometryImpl() )
     {}
 
     GeometryGridIntersection ( const GeometryGridIntersection &other )
       : grid_( other.grid_ ),
         hostIntersection_( other.hostIntersection_ ),
-        geo_( 0 ),
-        geoSelf_( 0 ),
-        geoNeighbor_( 0 )
+        geo_( GeometryImpl() )
     {}
-
-    ~GeometryGridIntersection ()
-    {
-      if( geo_ != 0 )
-        delete geo_;
-      if( geoSelf_ != 0 )
-        delete geoSelf_;
-      if( geoNeighbor_ != 0 )
-        delete geoNeighbor_;
-    }
 
     EntityPointer inside () const
     {
@@ -131,41 +115,26 @@ namespace Dune
 
     const LocalGeometry &intersectionSelfLocal () const
     {
-      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
-      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
-
-      if( geoSelf_ == 0 )
-      {
-        LocalGeometryImpl impl( hostIntersection().intersectionSelfLocal() );
-        geoSelf_ = new MakeableLocalGeometry( impl );
-      }
-      return *geoSelf_;
+      return hostIntersection().intersectionSelfLocal();
     }
 
     const LocalGeometry &intersectionNeighborLocal () const
     {
-      typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
-      typedef typename MakeableLocalGeometry::ImplementationType LocalGeometryImpl;
-
-      if( geoNeighbor_ == 0 )
-      {
-        LocalGeometryImpl impl( hostIntersection().intersectionNeighborLocal() );
-        geoNeighbor_ = new MakeableLocalGeometry( impl );
-      }
-      return *geoNeighbor_;
+      return hostIntersection().intersectionNeighborLocal();
     }
 
     const Geometry &intersectionGlobal () const
     {
-      if( geo_ == 0 )
+      GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+      if( !geo )
       {
         const HostGeometry &hostGeo = hostIntersection().intersectionGlobal();
         corners_.resize( hostGeo.corners() );
         for( unsigned int i = 0; i < corners_.size(); ++i )
           coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
-        geo_ = new MakeableGeometry( GeometryImpl( hostGeo.type(), corners_ ) );
+        geo = GeometryImpl( hostGeo.type(), corners_ );
       }
-      return *geo_;
+      return geo_;
     }
 
     int numberInSelf () const
@@ -227,24 +196,7 @@ namespace Dune
     void setToTarget ( const HostIntersection &hostIntersection )
     {
       hostIntersection_ = &hostIntersection;
-
-      if( geo_ != 0 )
-      {
-        delete geo_;
-        geo_ = 0;
-      }
-
-      if( geoSelf_ != 0 )
-      {
-        delete geoSelf_;
-        geoSelf_ = 0;
-      }
-
-      if( geoNeighbor_ != 0 )
-      {
-        delete geoNeighbor_;
-        geoNeighbor_ = 0;
-      }
+      Grid :: getRealImplementation( geo_ ) = GeometryImpl();
     }
   };
 

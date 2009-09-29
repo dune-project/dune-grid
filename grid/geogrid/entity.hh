@@ -83,20 +83,6 @@ namespace Dune
     GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
   public:
-    /*
-       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-       {
-       if( this == &other )
-        return *this;
-
-       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
-
-       grid_ = other.grid_;
-       hostEntity_ = other.hostEntity_;
-       return *this;
-       }
-     */
-
     GeometryType type () const
     {
       return hostEntity().type();
@@ -236,21 +222,6 @@ namespace Dune
     GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
   public:
-    /*
-       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-       {
-       if( this == &other )
-        return *this;
-
-       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
-
-       grid_ = other.grid_;
-       hostElement_ = other.hostElement_;
-       subEntity_ = other.subEntity_;
-       return *this;
-       }
-     */
-
     GeometryType type () const
     {
       const ReferenceElement< ctype, dimension > &refElement
@@ -418,49 +389,28 @@ namespace Dune
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
 
-    typedef MakeableInterfaceObject< LocalGeometry > MakeableLocalGeometry;
-    typedef typename MakeableLocalGeometry :: ImplementationType LocalGeometryImpl;
-
     const Grid *grid_;
     const HostEntity *hostEntity_;
     mutable std :: vector< GlobalCoordinate > corners_;
     mutable MakeableGeometry geo_;
-    mutable MakeableLocalGeometry geoInFather_;
 
   public:
     explicit GeometryGridEntityImpl ( const Grid &grid )
       : grid_( &grid ),
         hostEntity_( 0 ),
-        geo_( GeometryImpl() ),
-        geoInFather_( LocalGeometryImpl() )
+        geo_( GeometryImpl() )
     {}
 
     GeometryGridEntityImpl ( const GeometryGridEntityImpl &other )
       : grid_( other.grid_ ),
         hostEntity_( other.hostEntity_ ),
-        geo_( GeometryImpl() ),
-        geoInFather_( LocalGeometryImpl() )
+        geo_( GeometryImpl() )
     {}
 
   private:
     GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl & );
 
   public:
-    /*
-       GeometryGridEntityImpl &operator= ( const GeometryGridEntityImpl &other )
-       {
-       if( this == &other )
-        return *this;
-
-       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
-       Grid :: getRealImplementation( geoInFather_ ) = LocalGeometryImpl();
-
-       grid_ = other.grid_;
-       hostEntity_ = other.hostEntity_;
-       return *this;
-       }
-     */
-
     GeometryType type () const
     {
       return hostEntity().type();
@@ -569,10 +519,7 @@ namespace Dune
 
     const LocalGeometry &geometryInFather () const
     {
-      LocalGeometryImpl &geo = Grid :: getRealImplementation( geoInFather_ );
-      if( !geo )
-        geo = LocalGeometryImpl( hostEntity().geometryInFather() );
-      return geoInFather_;
+      return hostEntity().geometryInFather();
     }
 
     HierarchicIterator hbegin ( int maxLevel ) const
@@ -644,7 +591,6 @@ namespace Dune
       hostEntity_ = &hostEntity;
 
       Grid :: getRealImplementation( geo_ ) = GeometryImpl();
-      Grid :: getRealImplementation( geoInFather_ ) = LocalGeometryImpl();
     }
   };
 

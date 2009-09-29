@@ -121,9 +121,7 @@ namespace Dune
         < dimension-codim, dimensionworld, const Grid,
             Dune :: GenericGeometry :: Geometry >
         Geometry;
-        typedef Dune :: Geometry
-        < dimension-codim, dimension, const Grid,
-            Dune :: GenericGeometry :: LocalGeometry >
+        typedef typename HostGrid :: template Codim< codim > :: LocalGeometry
         LocalGeometry;
 
         typedef GeometryGridEntityPointerTraits< codim, const Grid >
