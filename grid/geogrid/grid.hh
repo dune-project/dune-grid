@@ -217,6 +217,7 @@ namespace Dune
     template< int, class, bool > friend class GeometryGridEntityPointer;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
+    template < class > friend class HostEntityAccess;
 
     template< int, PartitionIteratorType, class, bool >
     friend class GeometryGridLevelIterator;
