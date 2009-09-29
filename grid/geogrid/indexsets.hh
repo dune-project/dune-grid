@@ -40,7 +40,7 @@ namespace Dune
 
     template< class Grid, class HostIndexSet >
     class IndexSet
-      : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet > >
+      : public Dune::IndexSet< Grid, IndexSet< Grid, HostIndexSet >, typename HostIndexSet::IndexType >
     {
       typedef IndexSet< Grid, HostIndexSet > This;
 
@@ -53,12 +53,14 @@ namespace Dune
 
       static const int dimension = Grid::dimension;
 
-      typedef unsigned int IndexType;
+      typedef typename Base::IndexType IndexType;
 
     private:
       const HostIndexSet *hostIndexSet_;
 
     public:
+      using Base::subIndex;
+
       IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
       {}
@@ -73,20 +75,6 @@ namespace Dune
       IndexType index ( const Entity &entity ) const
       {
         return index< Entity::codimension >( entity );
-      }
-
-      template< int codim >
-      IndexType subIndex ( const typename Grid::template Codim< 0 >::Entity &entity, int i ) const
-      {
-        typedef typename HostGrid::template Codim< 0 >::Entity HostEntity;
-        const HostEntity &hostEntity = Grid::template getHostEntity< 0 >( entity );
-        return hostIndexSet().template subIndex< codim >( hostEntity, i );
-      }
-
-      template< int codim, int subcodim >
-      IndexType subIndex ( const typename Grid::template Codim< codim >::Entity &entity, int i ) const
-      {
-        return Grid::getRealImplementation( entity ).template subIndex< subcodim >( hostIndexSet(), i );
       }
 
       template< int codim >
