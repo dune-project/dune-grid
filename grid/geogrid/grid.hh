@@ -314,14 +314,11 @@ namespace Dune
     GeometryGrid ( HostGrid &hostGrid, const CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
-        levelIndexSets_( hostGrid.maxLevel()+1 ),
+        levelIndexSets_( hostGrid.maxLevel()+1, (LevelIndexSet *) 0 ),
         leafIndexSet_( 0 ),
         globalIdSet_( hostGrid.globalIdSet() ),
         localIdSet_( hostGrid.localIdSet() )
-    {
-      for( int i = 0; i < hostGrid.maxLevel(); ++i )
-        levelIndexSets_[ i ] = 0;
-    }
+    {}
 
     ~GeometryGrid ()
     {
@@ -662,9 +659,7 @@ namespace Dune
           delete levelIndexSets_[ i ];
       }
 
-      levelIndexSets_.resize( newNumLevels );
-      for( int i = updateLevels; i < newNumLevels; ++i )
-        levelIndexSets_[ i ] = 0;
+      levelIndexSets_.resize( newNumLevels, (LevelIndexSet *)0 );
     }
 
   protected:
