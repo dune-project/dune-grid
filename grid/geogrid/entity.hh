@@ -70,6 +70,8 @@ namespace Dune
      *
      *  This specialization implements the case, where the host grid provides
      *  the entity for this codimension, i.e., \em fake = \b false.
+     *
+     *  \nosubgrouping
      */
     template< int codim, class Grid >
     class EntityBase< codim, Grid, false >
@@ -77,25 +79,49 @@ namespace Dune
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
     public:
+      /** \name Attributes
+       *  \{ */
+
+      //! codimensioon of the entity
+      static const int codimension = codim;
+      //! dimension of the grid
+      static const int dimension = Traits :: dimension;
+      //! dimension of the entity
+      static const int mydimension = dimension - codimension;
+      //! dimension of the world
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
+      static const bool fake = false;
+
+      /** \} */
+
+      /** \name Types Required by DUNE
+       *  \{ */
+
+      //! coordinate type of the grid
       typedef typename Traits :: ctype ctype;
 
-      enum { codimension = codim };
-      enum { dimension = Traits :: dimension };
-      enum { mydimension = dimension - codimension };
-      enum { dimensionworld = Traits :: dimensionworld };
-
+      //! type of corresponding geometry
       typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
-
-      static const bool fake = false;
+      /** \} */
 
     private:
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
     public:
+      /** \name Host Types
+       *  \{ */
+
+      //! type of corresponding host entity
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+      //! type of corresponding host entity pointer
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+
+      //! type of host elements, i.e., of host entities of codimension 0
       typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      /** \} */
 
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
@@ -110,6 +136,9 @@ namespace Dune
       mutable MakeableGeometry geo_;
 
     public:
+      /** \name Construction, Initialization and Destruction
+       *  \{ */
+
       /** \brief construct an uninitialized entity
        *
        *  The default constructor is provided for use with storages. Call
@@ -141,49 +170,6 @@ namespace Dune
           geo_( GeometryImpl() )
       {}
 
-    public:
-      EntityBase &operator= ( const EntityBase & );
-
-    public:
-      GeometryType type () const
-      {
-        return hostEntity().type();
-      }
-
-      int level () const
-      {
-        return hostEntity().level();
-      }
-
-      PartitionType partitionType () const
-      {
-        return hostEntity().partitionType();
-      }
-
-      const Geometry &geometry () const
-      {
-        GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
-        if( !geo )
-        {
-          CoordVector coords( hostEntity().geometry(), grid().coordFunction() );
-          geo = GeometryImpl( type(), coords );
-        }
-        return geo_;
-      }
-
-
-      // Implementation Stuff
-
-      const Grid &grid () const
-      {
-        return *grid_;
-      }
-
-      const HostEntity &hostEntity () const
-      {
-        return *hostEntity_;
-      }
-
       /** \brief (re)initialize the entity
        *
        *  \param[in]  grid        GeometryGrid this entity belongs to
@@ -197,6 +183,75 @@ namespace Dune
         grid_ = &grid;
         hostEntity_ = &hostEntity;
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+      }
+      /** \} */
+
+    private:
+      EntityBase &operator= ( const EntityBase & );
+
+    public:
+      /** \name Methods Shared by Entities of All Codimensions
+       *  \{ */
+
+      /** \brief obtain the name of the corresponding reference element
+       *
+       *  This type can be used to access the DUNE reference element.
+       */
+      GeometryType type () const
+      {
+        return hostEntity().type();
+      }
+
+      /** \brief obtain the level of this entity */
+      int level () const
+      {
+        return hostEntity().level();
+      }
+
+      /** \brief obtain the partition type of this entity */
+      PartitionType partitionType () const
+      {
+        return hostEntity().partitionType();
+      }
+
+      /** obtain the geometry of this entity
+       *
+       *  Each DUNE entity encapsulates a geometry object, representing the map
+       *  from the reference element to world coordinates. Wrapping the geometry
+       *  is the main objective of the GeometryGrid.
+       *
+       *  The GeometryGrid provides geometries of order 1, obtained by
+       *  interpolation of its corners \f$y_i\f$. There corners are calculated
+       *  from the corners \f$x_i\f$ of the host geometry through the
+       *  GeometryGrid's coordinate function \f$c\f$, i.e.,
+       *  \f$y_i = c( x_i )\f$.
+       *
+       *  \returns a const reference to the geometry
+       */
+      const Geometry &geometry () const
+      {
+        GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+        if( !geo )
+        {
+          CoordVector coords( hostEntity().geometry(), grid().coordFunction() );
+          geo = GeometryImpl( type(), coords );
+        }
+        return geo_;
+      }
+      /** \} */
+
+
+      /** \name Methods Supporting the Grid Implementation
+       *  \{ */
+
+      const Grid &grid () const
+      {
+        return *grid_;
+      }
+
+      const HostEntity &hostEntity () const
+      {
+        return *hostEntity_;
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -225,6 +280,7 @@ namespace Dune
       {
         return idSet.template id< codimension >( hostEntity() );
       }
+      /** \} */
     };
 
 
@@ -236,6 +292,8 @@ namespace Dune
      *
      *  This specialization implements the case, where the host grid does not
      *  provide the entity for this codimension, i.e., \em fake = \b true.
+     *
+     *  \nosubgrouping
      */
     template< int codim, class Grid >
     class EntityBase< codim, Grid, true >
@@ -243,26 +301,48 @@ namespace Dune
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
     public:
+      /** \name Attributes
+       *  \{ */
+
+      //! codimensioon of the entity
+      static const int codimension = codim;
+      //! dimension of the grid
+      static const int dimension = Traits :: dimension;
+      //! dimension of the entity
+      static const int mydimension = dimension - codimension;
+      //! dimension of the world
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
+      static const bool fake = true;
+      /** \} */
+
+      /** \name Types Required by DUNE
+       *  \{ */
+
+      //! coordinate type of the grid
       typedef typename Traits :: ctype ctype;
 
-      enum { codimension = codim };
-      enum { dimension = Traits :: dimension };
-      enum { mydimension = dimension - codimension };
-      enum { dimensionworld = Traits :: dimensionworld };
-
+      //! type of corresponding geometry
       typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
-
-      static const bool fake = true;
+      /** \} */
 
     private:
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
     public:
+      /** \name Host Types
+       *  \{ */
+
+      //! type of corresponding host entity
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+      //! type of corresponding host entity pointer
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
 
+      //! type of host elements, i.e., of host entities of codimension 0
       typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      /** \} */
 
     private:
       typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
@@ -280,8 +360,35 @@ namespace Dune
       mutable Geometry geo_;
 
     public:
+      /** \name Construction, Initialization and Destruction
+       *  \{ */
+
+      /** \brief construct an uninitialized entity
+       *
+       *  The default constructor is provided for use with storages. Call
+       *  initialize before using this entity.
+       *
+       *  \note An uninitialized entity shall not be used.
+       */
       EntityBase ()
         : geo_( GeometryImpl() )
+      {}
+
+      /** \brief construct an initialized entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostElement any host element containing the corresponding
+       *                          host entity
+       *  \param[in]  subEntity   number of this entity within the host element
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
+      EntityBase ( const Grid &grid, const HostElement &hostElement, int subEntity )
+        : grid_( &grid ),
+          hostElement_( &hostElement ),
+          subEntity_( subEntity ),
+          geo_( GeometryImpl() )
       {}
 
       EntityBase ( const EntityBase &other )
@@ -291,10 +398,36 @@ namespace Dune
           geo_( GeometryImpl() )
       {}
 
+      /** \brief (re)initialize the entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostElement any host element containing the corresponding
+       *                          host entity
+       *  \param[in]  subEntity   number of this entity within the host element
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
+      void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
+      {
+        grid_ = &grid;
+        hostElement_ = &hostElement;
+        subEntity_ = subEntity;
+        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+      }
+      /** \} */
+
     private:
       EntityBase &operator= ( const EntityBase & );
 
     public:
+      /** \name Methods Shared by Entities of All Codimensions
+       *  \{ */
+
+      /** \brief obtain the name of the corresponding reference element
+       *
+       *  This type can be used to access the DUNE reference element.
+       */
       GeometryType type () const
       {
         const ReferenceElement< ctype, dimension > &refElement
@@ -302,11 +435,13 @@ namespace Dune
         return refElement.type( subEntity_, codimension );
       }
 
+      /** \brief obtain the level of this entity */
       int level () const
       {
         return hostElement().level();
       }
 
+      /** \brief obtain the partition type of this entity */
       PartitionType partitionType () const
       {
         if( !(Capabilities :: isParallel< HostGrid > :: v) )
@@ -333,6 +468,20 @@ namespace Dune
         return type;
       }
 
+      /** obtain the geometry of this entity
+       *
+       *  Each DUNE entity encapsulates a geometry object, representing the map
+       *  from the reference element to world coordinates. Wrapping the geometry
+       *  is the main objective of the GeometryGrid.
+       *
+       *  The GeometryGrid provides geometries of order 1, obtained by
+       *  interpolation of its corners \f$y_i\f$. There corners are calculated
+       *  from the corners \f$x_i\f$ of the host geometry through the
+       *  GeometryGrid's coordinate function \f$c\f$, i.e.,
+       *  \f$y_i = c( x_i )\f$.
+       *
+       *  \returns a const reference to the geometry
+       */
       const Geometry &geometry () const
       {
         GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
@@ -343,9 +492,10 @@ namespace Dune
         }
         return geo_;
       }
+      /** \} */
 
-
-      // Implementation Stuff
+      /** \name Methods Supporting the Grid Implementation
+       *  \{ */
 
       const Grid &grid () const
       {
@@ -361,14 +511,6 @@ namespace Dune
       {
         DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
                     << codimension << "." );
-      }
-
-      void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
-      {
-        grid_ = &grid;
-        hostElement_ = &hostElement;
-        subEntity_ = subEntity;
-        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -396,6 +538,7 @@ namespace Dune
       {
         return idSet.template subId< codimension >( hostElement(), subEntity_ );
       }
+      /** \} */
 
     private:
       PartitionType
@@ -417,6 +560,8 @@ namespace Dune
      *  This specialization implements the extended interface for \em codim = 0.
      *  As all host grids provide this entity, we need only specialize the case
      *  \em fake = \b false.
+     *
+     *  \nosubgrouping
      */
     template< class Grid >
     class EntityBase< 0, Grid, false >
@@ -424,31 +569,60 @@ namespace Dune
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
     public:
+      /** \name Attributes
+       *  \{ */
+
+      //! codimensioon of the entity
+      static const int codimension = 0;
+      //! dimension of the grid
+      static const int dimension = Traits :: dimension;
+      //! dimension of the entity
+      static const int mydimension = dimension - codimension;
+      //! dimension of the world
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      //! \b true, if the entity is faked, i.e., if there is no corresponding host entity
+      static const bool fake = false;
+      /** \} */
+
+      /** \name Types Required by DUNE
+       *  \{ */
+
+      //! coordinate type of the grid
       typedef typename Traits :: ctype ctype;
 
-      enum { codimension = 0 };
-      enum { dimension = Traits :: dimension };
-      enum { mydimension = dimension - codimension };
-      enum { dimensionworld = Traits :: dimensionworld };
-
-      typedef typename Traits :: template Codim< codimension > :: EntityPointer EntityPointer;
+      //! type of corresponding geometry
       typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+      //! type of corresponding local geometry
       typedef typename Traits :: template Codim< codimension > :: LocalGeometry LocalGeometry;
+      //! type of corresponding entity pointer
+      typedef typename Traits :: template Codim< codimension > :: EntityPointer EntityPointer;
 
+      //! type of hierarchic iterator
       typedef typename Traits :: HierarchicIterator HierarchicIterator;
+      //! type of leaf intersection iterator
       typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+      //! type of level intersection iterator
       typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
-      static const bool fake = false;
+      /** \} */
 
     private:
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
     public:
+      /** \name Host Types
+       *  \{ */
+
+      //! type of corresponding host entity
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+      //! type of corresponding host entity pointer
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+
+      //! type of host elements, i.e., of host entities of codimension 0
       typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      /** \} */
 
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
@@ -464,6 +638,9 @@ namespace Dune
       mutable MakeableGeometry geo_;
 
     public:
+      /** \name Construction, Initialization and Destruction
+       *  \{ */
+
       /** \brief construct an uninitialized entity
        *
        *  The default constructor is provided for use with storages. Call
@@ -495,25 +672,64 @@ namespace Dune
           geo_( GeometryImpl() )
       {}
 
+      /** \brief (re)initialize the entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
+      void initialize ( const Grid &grid, const HostEntity &hostEntity )
+      {
+        grid_ = &grid;
+        hostEntity_ = &hostEntity;
+        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
+      }
+      /** \} */
+
     private:
       EntityBase &operator= ( const EntityBase & );
 
     public:
+      /** \name Methods Shared by Entities of All Codimensions
+       *  \{ */
+
+      /** \brief obtain the name of the corresponding reference element
+       *
+       *  This type can be used to access the DUNE reference element.
+       */
       GeometryType type () const
       {
         return hostEntity().type();
       }
 
+      /** \brief obtain the level of this entity */
       int level () const
       {
         return hostEntity().level();
       }
 
+      /** \brief obtain the partition type of this entity */
       PartitionType partitionType () const
       {
         return hostEntity().partitionType();
       }
 
+      /** obtain the geometry of this entity
+       *
+       *  Each DUNE entity encapsulates a geometry object, representing the map
+       *  from the reference element to world coordinates. Wrapping the geometry
+       *  is the main objective of the GeometryGrid.
+       *
+       *  The GeometryGrid provides geometries of order 1, obtained by
+       *  interpolation of its corners \f$y_i\f$. There corners are calculated
+       *  from the corners \f$x_i\f$ of the host geometry through the
+       *  GeometryGrid's coordinate function \f$c\f$, i.e.,
+       *  \f$y_i = c( x_i )\f$.
+       *
+       *  \returns a const reference to the geometry
+       */
       const Geometry &geometry () const
       {
         GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
@@ -525,6 +741,7 @@ namespace Dune
         }
         return geo_;
       }
+      /** \} */
 
       template< int codim >
       int count () const
@@ -638,8 +855,8 @@ namespace Dune
       }
 
 
-      // Implementation Stuff
-
+      /** \name Methods Supporting the Grid Implementation
+       *  \{ */
       const Grid &grid () const
       {
         return *grid_;
@@ -648,21 +865,6 @@ namespace Dune
       const HostEntity &hostEntity () const
       {
         return *hostEntity_;
-      }
-
-      /** \brief (re)initialize the entity
-       *
-       *  \param[in]  grid        GeometryGrid this entity belongs to
-       *  \param[in]  hostEntity  corresponding entity in the host grid
-       *
-       *  \note Both references must remain valid as long as this entity is in
-       *        use.
-       */
-      void initialize ( const Grid &grid, const HostEntity &hostEntity )
-      {
-        grid_ = &grid;
-        hostEntity_ = &hostEntity;
-        Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
       /** \brief obtain the entity's index from a host IndexSet
@@ -690,6 +892,7 @@ namespace Dune
       {
         return idSet.template id< codimension >( hostEntity() );
       }
+      /** \} */
     };
 
 
@@ -731,11 +934,33 @@ namespace Dune
         : Base( Implementation() )
       {}
 
+      /** \brief (re)initialize the entity
+       *
+       *  \note This method may only be used for non-fake entities.
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
       void initialize ( const Grid &grid, const HostEntity &hostEntity )
       {
         getRealImp().initialize( grid, hostEntity );
       }
 
+      /** \brief (re)initialize the entity
+       *
+       *  \note This method may only be used for fake entities.
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostElement any host element containing the corresponding
+       *                          host entity
+       *  \param[in]  subEntity   number of this entity within the host element
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
       void initialize ( const Grid &grid, const HostElement &hostElement, int subEntity )
       {
         getRealImp().initialize( grid, hostElement, subEntity );
