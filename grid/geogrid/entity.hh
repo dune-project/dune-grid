@@ -17,20 +17,62 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
+    /** \class EntityBase
+     *  \brief actual implementation of the entity
+     *
+     *  \tparam  codim  codimension of the entity
+     *  \tparam  Grid   GeometryGrid, this entity belongs to
+     *  \tparam  fake   \b true, if the host grid does not provide this entity
+     *                  (do not specify, the defualt value is already the
+     *                  intended use)
+     */
     template< int codim, class Grid,
         bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
-    class EntityImpl;
+    class EntityBase;
 
+    /** \class Entity
+     *  \brief DUNE-conform implementation of the entity
+     *
+     *  This class merely changes the template parameters of the entity to make
+     *  DUNE happy. The actual implementation of the entity can be found in
+     *  EntityBase.
+     *
+     *  \tparam  codim  codimension of the entity
+     *  \tparam  dim    dimension of the Grid (redundant information)
+     *  \tparam  Grid   GeometryGrid, this entity belongs to
+     */
     template< int codim, int dim, class Grid >
     class Entity;
 
+    /** \class EntityWrapper
+     *  \brief wrapper around the DUNE entity interface
+     *
+     *  This class wraps the DUNE interface for the entity, making creation
+     *  and initialization a little easier. It is similar to
+     *  MakeableInterfaceObject, but specialized for the GeometryGrid entity
+     *  implementation.
+     *
+     *  \note MakeableInterfaceObject cannot be used when a default constructor
+     *        is required. As our storage implementation needs a default
+     *        constructor, we add the wrapper explicitly.
+     *
+     *  \tparam  Entity  an instatiation of Entity
+     */
+    template< class Entity >
+    class EntityWrapper;
 
 
-    // EntityImpl (real)
+
+    // EntityBase (real)
     // -----------------
 
+    /** \copydoc EntityBase
+     *
+     *  This specialization implements the case, where the host grid provides
+     *  the entity for this codimension, i.e., \em fake = \b false.
+     */
     template< int codim, class Grid >
-    class EntityImpl< codim, Grid, false >
+    class EntityBase< codim, Grid, false >
     {
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -68,18 +110,39 @@ namespace Dune
       mutable MakeableGeometry geo_;
 
     public:
-      EntityImpl ()
+      /** \brief construct an uninitialized entity
+       *
+       *  The default constructor is provided for use with storages. Call
+       *  initialize before using this entity.
+       *
+       *  \note An uninitialized entity shall not be used.
+       */
+      EntityBase ()
         : geo_( GeometryImpl() )
       {}
 
-      EntityImpl ( const EntityImpl &other )
+      /** \brief construct an initialized entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
+      EntityBase ( const Grid &grid, const HostEntity &hostEntity )
+        : grid_( &grid ),
+          hostEntity_( &hostEntity ),
+          geo_( GeometryImpl() )
+      {}
+
+      EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
           geo_( GeometryImpl() )
       {}
 
     public:
-      EntityImpl &operator= ( const EntityImpl & );
+      EntityBase &operator= ( const EntityBase & );
 
     public:
       GeometryType type () const
@@ -121,6 +184,14 @@ namespace Dune
         return *hostEntity_;
       }
 
+      /** \brief (re)initialize the entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
       void initialize ( const Grid &grid, const HostEntity &hostEntity )
       {
         grid_ = &grid;
@@ -128,6 +199,13 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
+      /** \brief obtain the entity's index from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
       template< class HostIndexSet >
       typename HostIndexSet :: IndexType
       index ( const HostIndexSet &indexSet ) const
@@ -135,6 +213,13 @@ namespace Dune
         return indexSet.template index< codimension >( hostEntity() );
       }
 
+      /** \brief obtain the entity's id from a host IdSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  idSet  host IdSet to use
+       */
       template< class HostIdSet >
       typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
       {
@@ -144,11 +229,16 @@ namespace Dune
 
 
 
-    // EntityImpl (fake)
+    // EntityBase (fake)
     // -----------------
 
+    /** \copydoc EntityBase
+     *
+     *  This specialization implements the case, where the host grid does not
+     *  provide the entity for this codimension, i.e., \em fake = \b true.
+     */
     template< int codim, class Grid >
-    class EntityImpl< codim, Grid, true >
+    class EntityBase< codim, Grid, true >
     {
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -190,11 +280,11 @@ namespace Dune
       mutable Geometry geo_;
 
     public:
-      EntityImpl ()
+      EntityBase ()
         : geo_( GeometryImpl() )
       {}
 
-      EntityImpl ( const EntityImpl &other )
+      EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostElement_( other.hostElement_ ),
           subEntity_( other.subEntity_ ),
@@ -202,7 +292,7 @@ namespace Dune
       {}
 
     private:
-      EntityImpl &operator= ( const EntityImpl & );
+      EntityBase &operator= ( const EntityBase & );
 
     public:
       GeometryType type () const
@@ -281,12 +371,26 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
+      /** \brief obtain the entity's index from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
       template< class HostIndexSet >
       typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
       }
 
+      /** \brief obtain the entity's id from a host IdSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  idSet  host IdSet to use
+       */
       template< class HostIdSet >
       typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
       {
@@ -305,11 +409,17 @@ namespace Dune
 
 
 
-    // EntityImpl for codimension 0
+    // EntityBase for codimension 0
     // ----------------------------
 
+    /** \copydoc EntityBase
+     *
+     *  This specialization implements the extended interface for \em codim = 0.
+     *  As all host grids provide this entity, we need only specialize the case
+     *  \em fake = \b false.
+     */
     template< class Grid >
-    class EntityImpl< 0, Grid, false >
+    class EntityBase< 0, Grid, false >
     {
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
@@ -354,18 +464,39 @@ namespace Dune
       mutable MakeableGeometry geo_;
 
     public:
-      EntityImpl ()
+      /** \brief construct an uninitialized entity
+       *
+       *  The default constructor is provided for use with storages. Call
+       *  initialize before using this entity.
+       *
+       *  \note An uninitialized entity shall not be used.
+       */
+      EntityBase ()
         : geo_( GeometryImpl() )
       {}
 
-      EntityImpl ( const EntityImpl &other )
+      /** \brief construct an initialized entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
+      EntityBase ( const Grid &grid, const HostEntity &hostEntity )
+        : grid_( &grid ),
+          hostEntity_( &hostEntity ),
+          geo_( GeometryImpl() )
+      {}
+
+      EntityBase ( const EntityBase &other )
         : grid_( other.grid_ ),
           hostEntity_( other.hostEntity_ ),
           geo_( GeometryImpl() )
       {}
 
     private:
-      EntityImpl &operator= ( const EntityImpl & );
+      EntityBase &operator= ( const EntityBase & );
 
     public:
       GeometryType type () const
@@ -519,6 +650,14 @@ namespace Dune
         return *hostEntity_;
       }
 
+      /** \brief (re)initialize the entity
+       *
+       *  \param[in]  grid        GeometryGrid this entity belongs to
+       *  \param[in]  hostEntity  corresponding entity in the host grid
+       *
+       *  \note Both references must remain valid as long as this entity is in
+       *        use.
+       */
       void initialize ( const Grid &grid, const HostEntity &hostEntity )
       {
         grid_ = &grid;
@@ -526,12 +665,26 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
+      /** \brief obtain the entity's index from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  indexSet  host IndexSet to use
+       */
       template< class HostIndexSet >
       typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template index< codimension >( hostEntity() );
       }
 
+      /** \brief obtain the entity's id from a host IdSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param  idSet  host IdSet to use
+       */
       template< class HostIdSet >
       typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
       {
@@ -543,9 +696,9 @@ namespace Dune
 
     template< int codim, int dim, class Grid >
     class Entity
-      : public EntityImpl< codim, Grid >
+      : public EntityBase< codim, Grid >
     {
-      typedef EntityImpl< codim, Grid > Base;
+      typedef EntityBase< codim, Grid > Base;
 
     public:
       Entity ()
@@ -558,9 +711,6 @@ namespace Dune
     };
 
 
-
-    template< class Entity >
-    class EntityWrapper;
 
     template< int codim, int dim, class Grid >
     class EntityWrapper< Dune :: Entity< codim, dim, Grid, Entity > >

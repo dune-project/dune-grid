@@ -257,11 +257,11 @@ namespace Dune
     friend class GeoGrid :: LeafIndexSet< const Grid >;
     friend class GeoGrid :: HierarchicIterator< const Grid >;
 
-    template< int, class, bool > friend class GeoGrid :: EntityImpl;
+    template< int, class, bool > friend class GeoGrid :: EntityBase;
     template< class, bool > friend class GeoGrid :: EntityPointer;
     template< class, class > friend class GeoGrid :: Intersection;
     template< class, class > friend class GeoGrid :: IdSet;
-    template < class > friend class HostGridAccess;
+    template< class > friend class HostGridAccess;
 
     template< int, PartitionIteratorType, class >
     friend class GeoGrid :: LevelIteratorTraits;
