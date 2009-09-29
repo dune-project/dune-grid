@@ -72,14 +72,14 @@ namespace Dune
      <td>false</td><td>true</td><td><em>undefined</em></td></tr>
      <tr>
      <td>3</td><td>on periodic boundary</td>
-     <td>true</td><td>true</td><td>Ghost-/Overlap cell@br (with transformed geometry)</td></tr>
+     <td>true</td><td>true</td><td>Ghost-/Overlap cell<br>(with transformed geometry)</td></tr>
      <tr>
      <td>4</td><td>on processor boundary</td>
      <td>false <em>if grid has no ghosts</em><br>true <em>otherwise</em></td><td>false </td>
      <td>ghost entity <em>(if it exists)</em></td></tr>
      </table>
 
-     -# <b> Inner Intersections: </b> \n
+     -# <b> Inner Intersections: </b> <br>
        The type of the neighboring entity can be determined through
        methods defined on the outside entity.
      -# <b>  Handling physical boundaries: </b>
@@ -88,7 +88,7 @@ namespace Dune
        boundaryID method. On some grids (AluGrid, AlbertaGrid) this
        method returns an integer value which can be individually assigned
        to each boundary intersection of the macro grid and which is
-       prolonged to higher levels during grid refinement. \br
+       prolonged to higher levels during grid refinement.<br>
        A more general concept will be included in latter releases along the
        following guidelines:
        - We require differently constructed geometries outside the domain
@@ -113,7 +113,7 @@ namespace Dune
          not see a jump or something like that)
        - outer() cell has its own index
        - outer() cell has the same id as the corresponding "original" cell
-     -# <b> Processor boundaries: </b> \n
+     -# <b> Processor boundaries: </b> <br>
        At processor boundaries, i.e. when an element has an intersection with
        another element
        in the sequential grid but this element is only stored in other processors

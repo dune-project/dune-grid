@@ -337,7 +337,7 @@ namespace Dune
      *
      *  \returns an EntityPointer to the specified subentity
      *
-     *  \Note: The subentities are numbered 0, ..., count< codim >-1
+     *  \note The subentities are numbered 0, ..., count< codim >-1
      */
     template< int codim >
     typename Codim< codim >::EntityPointer subEntity ( int i ) const
