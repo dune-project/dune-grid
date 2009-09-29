@@ -64,21 +64,31 @@ namespace Dune
       : public DefaultGeometryTraits
         < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
     {
-      typedef DefaultGeometryTraits
-      < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
-      Base;
-
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      // static const bool hybrid = false;
+      typedef DuneCoordTraits< typename HostGrid :: ctype > CoordTraits;
+
+      static const int dimGrid = HostGrid :: dimension;
+      static const int dimWorld = CoordFunction :: dimRange;
+
+      static const bool hybrid = true;
       // static const GeometryType :: BasicType dunetype = GeometryType :: simplex;
+
+      static const GeometryType :: BasicType linetype = GeometryType :: simplex;
 
       template< class Topology >
       struct Mapping
       {
-        typedef typename Base :: template Mapping< Topology > :: Traits Traits;
         typedef GeoGrid :: CornerStorage< Topology, const Grid > CornerStorage;
-        typedef CornerMapping< Topology, Traits, CornerStorage > type;
+        typedef CornerMapping< CoordTraits, Topology, dimWorld, CornerStorage > type;
+      };
+
+      struct Caching
+      {
+        static const EvaluationType evaluateJacobianTransposed = ComputeOnDemand;
+        static const EvaluationType evaluateJacobianInverseTransposed = ComputeOnDemand;
+        static const EvaluationType evaluateIntegrationElement = ComputeOnDemand;
+        static const EvaluationType evaluateNormal = ComputeOnDemand;
       };
     };
 
