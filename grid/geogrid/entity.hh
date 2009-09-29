@@ -10,22 +10,6 @@
 namespace Dune
 {
 
-  // External Forward Declarations
-  // -----------------------------
-
-  template< int codim, class Grid, bool fake >
-  class GeometryGridEntityPointer;
-
-  template< class Grid >
-  class GeometryGridLevelIntersectionIterator;
-
-  template< class Grid >
-  class GeometryGridLeafIntersectionIterator;
-
-  template< class Grid >
-  class GeometryGridHierarchicIterator;
-
-
 
   // Internal Forward Declarations
   // -----------------------------
@@ -63,13 +47,11 @@ namespace Dune
     typedef typename Traits :: HostGrid HostGrid;
     typedef typename Traits :: CoordFunction CoordFunction;
 
-    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
-
+    template< class, bool > friend class GeometryGridEntityPointer;
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
     template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
-    template< class, int > friend class IndexSetter;
 
     typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
     typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
@@ -219,13 +201,11 @@ namespace Dune
     typedef typename Traits :: HostGrid HostGrid;
     typedef typename Traits :: CoordFunction CoordFunction;
 
-    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
-
+    template< class, bool > friend class GeometryGridEntityPointer;
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
     template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
-    template< class, int > friend class IndexSetter;
 
     typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
     typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
@@ -438,13 +418,11 @@ namespace Dune
     typedef typename Traits :: HostGrid HostGrid;
     typedef typename Traits :: CoordFunction CoordFunction;
 
-    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
-
+    template< class, bool > friend class GeometryGridEntityPointer;
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
     template< class, class > friend class GeometryGridIdSet;
     template< class, class > friend class GeometryGridCommDataHandle;
-    template< class, int > friend class IndexSetter;
 
     typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
     typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;

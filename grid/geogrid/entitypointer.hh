@@ -10,62 +10,157 @@
 namespace Dune
 {
 
+  // External Forward Declarations
+  // -----------------------------
+
+  template< int, int, class >
+  class GeometryGridEntityAdapter;
+
+  template< class HostGrid, class CoordFunction >
+  struct GeometryGridExportParams;
+
+  template< class HostGrid, class CordFunction >
+  class GeometryGrid;
+
+
+
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, class Grid,
-      bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v >
+  template< int codim, class Grid >
+  struct GeometryGridEntityPointerTraits;
+
+  template< class Traits, bool fake = Traits :: fake >
   class GeometryGridEntityPointer;
+
+
+
+  // GeometryGridEntityPointerTraits
+  // -------------------------------
+
+  template< int codim, class Grid >
+  struct GeometryGridEntityPointerTraits;
+
+  /** \cond */
+  template< int codim, class Grid >
+  struct GeometryGridEntityPointerTraits< codim, const Grid >
+    : public GeometryGridEntityPointerTraits< codim, Grid >
+  {};
+  /** \endcond */
+
+  template< int codim, class HostGrid, class CoordFunction >
+  struct GeometryGridEntityPointerTraits
+  < codim, GeometryGrid< HostGrid, CoordFunction > >
+    : public GeometryGridExportParams< HostGrid, CoordFunction >
+  {
+    typedef Dune :: GeometryGrid< HostGrid, CoordFunction > Grid;
+
+    static const bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v;
+
+    typedef typename HostGrid :: ctype ctype;
+
+    static const int dimension = HostGrid :: dimension;
+    static const int codimension = codim;
+
+    typedef Dune :: Entity
+    < codimension, dimension, const Grid, GeometryGridEntityAdapter >
+    Entity;
+
+    typedef typename HostGrid :: template Codim< codim > :: Entity HostEntity;
+    typedef typename HostGrid :: template Codim< codim > :: EntityPointer
+    HostEntityPointer;
+    typedef HostEntityPointer HostEntityIterator;
+
+    typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+    typedef typename HostGrid :: template Codim< 0 > :: EntityPointer
+    HostElementPointer;
+    typedef HostElementPointer HostElementIterator;
+  };
 
 
 
   // GeometryGridEntityPointer (real)
   // --------------------------------
 
-  template< int codim, class Grid >
-  class GeometryGridEntityPointer< codim, Grid, false >
+  template< class Traits >
+  class GeometryGridEntityPointer< Traits, false >
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
+    typedef GeometryGridEntityPointer< Traits, false > This;
+
+    typedef typename Traits :: Grid Grid;
+
+    typedef GeometryGridEntityPointerTraits< Traits :: codimension, const Grid >
+    BaseTraits;
+    friend class GeometryGridEntityPointer< BaseTraits, false >;
 
   public:
-    enum { dimension = Traits :: dimension };
-    enum { codimension = codim };
+    static const int dimension = Traits :: dimension;
+    static const int codimension = Traits :: codimension;
 
-    typedef typename Traits :: template Codim< codim > :: Entity Entity;
+    typedef typename Traits :: Entity Entity;
 
-    typedef GeometryGridEntityPointer< codim, Grid > Base;
-    typedef GeometryGridEntityPointer< codim, Grid > base;
+    static const bool fake = Traits :: fake;
 
-    static const bool fake = false;
+    typedef GeometryGridEntityPointer< BaseTraits, fake > Base;
+    typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
-  protected:
-    typedef typename Traits :: HostGrid HostGrid;
-
-    typedef typename HostGrid :: template Codim< codimension > :: EntityPointer
-    HostEntityPointer;
-    typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
-
+  private:
     typedef MakeableInterfaceObject< Entity > MakeableEntity;
     typedef typename MakeableEntity :: ImplementationType EntityImpl;
 
-    HostEntityPointer hostEntityPointer_;
     mutable MakeableEntity virtualEntity_;
+
+  protected:
+    typedef typename Traits :: HostEntityPointer HostEntityPointer;
+    typedef typename Traits :: HostEntityIterator HostEntityIterator;
+    typedef typename Traits :: HostElement HostElement;
+
+    HostEntityIterator hostEntityIterator_;
 
   public:
     GeometryGridEntityPointer ( const Grid &grid,
-                                const HostEntityPointer &hostEntityPointer )
-      : hostEntityPointer_( hostEntityPointer ),
-        virtualEntity_( EntityImpl( grid ) )
+                                const HostEntityIterator &hostEntityIterator )
+      : virtualEntity_( EntityImpl( grid ) ),
+        hostEntityIterator_( hostEntityIterator )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : hostEntityPointer_( hostElement.template entity< codimension >( subEntity ) ),
-        virtualEntity_( EntityImpl( grid ) )
+      : virtualEntity_( EntityImpl( grid ) ),
+        hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
     {}
 
-    bool equals ( const GeometryGridEntityPointer &other ) const
+    GeometryGridEntityPointer ( const This &other )
+      : virtualEntity_( other.grid() ),
+        hostEntityIterator_( other.hostEntityIterator_ )
+    {}
+
+    template< class T >
+    GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
+      : virtualEntity_( other.grid() ),
+        hostEntityIterator_( other.hostEntityIterator_ )
+    {}
+
+    This &operator= ( const This &other )
+    {
+      hostEntityIterator_ = other.hostEntityIterator_;
+      update();
+      return *this;
+    }
+
+    operator Base & ()
+    {
+      return reinterpret_cast< Base & >( *this );
+    }
+
+    operator const Base & () const
+    {
+      return reinterpret_cast< const Base & >( *this );
+    }
+
+    template< class T >
+    bool equals ( const GeometryGridEntityPointer< T, fake > &other ) const
     {
       return (hostEntityPointer() == other.hostEntityPointer());
     }
@@ -74,31 +169,28 @@ namespace Dune
     {
       EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
       if( !impl.isValid() )
-        impl.setToTarget( *hostEntityPointer_ );
+        impl.setToTarget( *hostEntityPointer() );
       return virtualEntity_;
     }
 
-    //! ask for level of entity
     int level () const
     {
-      return hostEntityPointer_.level();
+      return hostEntityPointer().level();
     }
 
     const HostEntityPointer &hostEntityPointer () const
     {
-      return hostEntityPointer_;
+      return hostEntityIterator_;
     }
 
   protected:
     const Grid &grid () const
     {
-      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
-      return impl.grid();
+      return Grid :: getRealImplementation( virtualEntity_ ).grid();
     }
 
-    void setToTarget ( const HostEntityPointer &target )
+    void update ()
     {
-      hostEntityPointer_ = target;
       Grid :: getRealImplementation( virtualEntity_ ).invalidate();
     }
   };
@@ -108,56 +200,91 @@ namespace Dune
   // GeometryGridEntityPointer (fake)
   // --------------------------------
 
-  template< int codim, class Grid >
-  class GeometryGridEntityPointer< codim, Grid, true >
+  template< class Traits >
+  class GeometryGridEntityPointer< Traits, true >
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
+    typedef GeometryGridEntityPointer< Traits, true > This;
+
+    typedef typename Traits :: Grid Grid;
+
+    typedef GeometryGridEntityPointerTraits< Traits :: codimension, const Grid >
+    BaseTraits;
+    friend class GeometryGridEntityPointer< BaseTraits, true >;
 
   public:
-    enum { dimension = Traits :: dimension };
-    enum { codimension = codim };
+    static const int dimension = Traits :: dimension;
+    static const int codimension = Traits :: codimension;
 
-    typedef typename Traits :: template Codim< codim > :: Entity Entity;
+    typedef typename Traits :: Entity Entity;
 
-    typedef GeometryGridEntityPointer< codim, Grid > Base;
-    typedef GeometryGridEntityPointer< codim, Grid > base;
+    static const bool fake = Traits :: fake;
 
-    static const bool fake = true;
+    typedef GeometryGridEntityPointer< BaseTraits, fake > Base;
+    typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
   protected:
-    typedef typename Traits :: HostGrid HostGrid;
-
-    typedef typename HostGrid :: template Codim< codim > :: EntityPointer
-    HostEntityPointer;
-    typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
-    typedef typename HostGrid :: template Codim< 0 > :: EntityPointer
-    HostElementPointer;
+    typedef typename Traits :: HostEntityPointer HostEntityPointer;
+    typedef typename Traits :: HostElementPointer HostElementPointer;
+    typedef typename Traits :: HostElementIterator HostElementIterator;
+    typedef typename Traits :: HostElement HostElement;
 
     typedef MakeableInterfaceObject< Entity > MakeableEntity;
     typedef typename MakeableEntity :: ImplementationType EntityImpl;
 
-    HostElementPointer hostElementPointer_;
-    int subEntity_;
     mutable MakeableEntity virtualEntity_;
+    int subEntity_;
+    HostElementIterator hostElementIterator_;
 
   public:
     GeometryGridEntityPointer ( const Grid &grid,
-                                const HostElementPointer &hostElementPointer,
+                                const HostElementIterator &hostElementIterator,
                                 int subEntity )
-      : hostElementPointer_( hostElementPointer ),
+      : virtualEntity_( EntityImpl( grid ) ),
         subEntity_( subEntity ),
-        virtualEntity_( EntityImpl( grid ) )
+        hostElementIterator_( hostElementIterator )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : hostElementPointer_( hostElement.template entity< 0 >( 0 ) ),
+      : virtualEntity_( EntityImpl( grid ) ),
         subEntity_( subEntity ),
-        virtualEntity_( EntityImpl( grid ) )
+        hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
     {}
 
-    bool equals ( const GeometryGridEntityPointer &other ) const
+    GeometryGridEntityPointer ( const This &other )
+      : virtualEntity_( other.grid() ),
+        subEntity_( other.subEntity_ ),
+        hostElementIterator_( other.hostElementIterator_ )
+    {}
+
+    template< class T >
+    GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
+      : virtualEntity_( other.grid() ),
+        subEntity_( other.subEntity_ ),
+        hostElementIterator_( other.hostElementIterator_ )
+    {}
+
+    This &operator= ( const This &other )
+    {
+      hostElementIterator_ = other.hostElementIterator_;
+      subEntity_ = other.subEntity_;
+      update();
+      return *this;
+    }
+
+    operator Base & ()
+    {
+      return reinterpret_cast< Base & >( *this );
+    }
+
+    operator const Base & () const
+    {
+      return reinterpret_cast< const Base & >( *this );
+    }
+
+    template< class T >
+    bool equals ( const GeometryGridEntityPointer< T, fake > &other ) const
     {
       const int thisSub = subEntity_;
       const int otherSub = other.subEntity_;
@@ -165,16 +292,16 @@ namespace Dune
       if( (thisSub < 0) || (otherSub < 0) )
         return (thisSub * otherSub >= 0);
 
-      const int level = hostElementPointer_.level();
-      if( level != other.hostElementPointer_.level() )
+      const int lvl = level();
+      if( lvl != other.level() )
         return false;
 
-      const typename HostGrid :: Traits :: LevelIndexSet &indexSet
-        = grid().hostGrid().levelIndexSet( level );
+      const typename Traits :: HostGrid :: Traits :: LevelIndexSet &indexSet
+        = grid().hostGrid().levelIndexSet( lvl );
 
-      const HostElement &thisElement = *hostElementPointer_;
+      const HostElement &thisElement = *hostElementPointer();
       assert( indexSet.contains( thisElement ) );
-      const HostElement &otherElement = *(other.hostElementPointer_);
+      const HostElement &otherElement = *(other.hostElementPointer());
       assert( indexSet.contains( otherElement ) );
 
       const int thisIndex
@@ -188,14 +315,13 @@ namespace Dune
     {
       EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
       if( !impl.isValid() )
-        impl.setToTarget( *hostElementPointer_, subEntity_ );
+        impl.setToTarget( *hostElementPointer(), subEntity_ );
       return virtualEntity_;
     }
 
-    //! ask for level of entity
     int level () const
     {
-      return hostElementPointer_.level();
+      return hostElementPointer().level();
     }
 
     const HostEntityPointer &hostEntityPointer () const
@@ -207,34 +333,20 @@ namespace Dune
   protected:
     const Grid &grid () const
     {
-      EntityImpl &impl = Grid :: getRealImplementation( virtualEntity_ );
-      return impl.grid();
+      return Grid :: getRealImplementation( virtualEntity_ ).grid();
+    }
+
+    void update ()
+    {
+      Grid :: getRealImplementation( virtualEntity_ ).invalidate();
     }
 
     const HostElementPointer &hostElementPointer () const
     {
-      return hostElementPointer_;
-    }
-
-    int subEntity () const
-    {
-      return subEntity_;
-    }
-
-    void setToTarget ( const HostEntityPointer &target )
-    {
-      DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
-                  << codimension << "." );
-    }
-
-    void setToTarget ( const HostElementPointer &target, int subEntity )
-    {
-      hostElementPointer_ = target;
-      subEntity_ = subEntity;
-      Grid :: getRealImplementation( virtualEntity_ ).invalidate();
+      return hostElementIterator_;
     }
   };
 
-} // end namespace Dune
+}
 
 #endif

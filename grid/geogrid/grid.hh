@@ -110,21 +110,21 @@ namespace Dune
             Dune :: GenericGeometry :: LocalGeometry >
         LocalGeometry;
 
-        typedef Dune :: Entity
-        < codim, dimension, const Grid, GeometryGridEntityAdapter >
-        Entity;
+        typedef GeometryGridEntityPointerTraits< codim, const Grid >
+        EntityPointerTraits;
         typedef Dune :: EntityPointer
-        < const Grid, GeometryGridEntityPointer< codim, const Grid > >
+        < const Grid, GeometryGridEntityPointer< EntityPointerTraits > >
         EntityPointer;
+        typedef typename EntityPointerTraits :: Entity Entity;
 
         template< PartitionIteratorType pitype >
         struct Partition
         {
           typedef Dune :: LeafIterator
-          < codim, pitype, const Grid, GeometryGridLeafIteratorAdapter >
+          < codim, pitype, const Grid, GeometryGridLeafIterator >
           LeafIterator;
           typedef Dune :: LevelIterator
-          < codim, pitype, const Grid, GeometryGridLevelIteratorAdapter >
+          < codim, pitype, const Grid, GeometryGridLevelIterator >
           LevelIterator;
         };
 
@@ -221,15 +221,15 @@ namespace Dune
     friend class GeometryGridHierarchicIterator< const Grid >;
 
     template< int, class, bool > friend class GeometryGridEntity;
-    template< int, class, bool > friend class GeometryGridEntityPointer;
+    template< class, bool > friend class GeometryGridEntityPointer;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
     template < class > friend class HostGridAccess;
 
-    template< int, PartitionIteratorType, class, bool >
-    friend class GeometryGridLevelIterator;
-    template< int, PartitionIteratorType, class, bool >
-    friend class GeometryGridLeafIterator;
+    template< int, PartitionIteratorType, class >
+    friend class GeometryGridLevelIteratorTraits;
+    template< int, PartitionIteratorType, class >
+    friend class GeometryGridLeafIteratorTraits;
 
   public:
     /** \cond */
@@ -463,7 +463,7 @@ namespace Dune
       typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: begin ) );
+      return MakeableIterator( Impl( *this, level, Impl :: Traits :: begin ) );
     }
 
     template< int codim >
@@ -472,7 +472,7 @@ namespace Dune
       typedef MakeableInterfaceObject< typename Codim< codim > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: end ) );
+      return MakeableIterator( Impl( *this, level, Impl :: Traits :: end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -483,7 +483,7 @@ namespace Dune
       < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: begin ) );
+      return MakeableIterator( Impl( *this, level, Impl :: Traits :: begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -494,7 +494,7 @@ namespace Dune
       < typename Codim< codim > :: template Partition< pitype > :: LevelIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, level, Impl :: end ) );
+      return MakeableIterator( Impl( *this, level, Impl :: Traits :: end ) );
     }
 
     template< int codim >
@@ -503,7 +503,7 @@ namespace Dune
       typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: begin ) );
+      return MakeableIterator( Impl( *this, Impl :: Traits :: begin ) );
     }
 
     template< int codim >
@@ -512,7 +512,7 @@ namespace Dune
       typedef MakeableInterfaceObject< typename Codim< codim > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: end ) );
+      return MakeableIterator( Impl( *this, Impl :: Traits :: end ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -523,7 +523,7 @@ namespace Dune
       < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: begin ) );
+      return MakeableIterator( Impl( *this, Impl :: Traits :: begin ) );
     }
 
     template< int codim, PartitionIteratorType pitype >
@@ -534,7 +534,7 @@ namespace Dune
       < typename Codim< codim > :: template Partition< pitype > :: LeafIterator >
       MakeableIterator;
       typedef typename MakeableIterator :: ImplementationType Impl;
-      return MakeableIterator( Impl( *this, Impl :: end ) );
+      return MakeableIterator( Impl( *this, Impl :: Traits :: end ) );
     }
 
     const GlobalIdSet &globalIdSet () const

@@ -21,19 +21,14 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, PartitionIteratorType pitype, class Grid,
-      bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
+  template< class Traits, bool fake = Traits :: fake >
+  class GeometryGridIterator;
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
   class GeometryGridLeafIterator;
 
   template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLeafIteratorAdapter;
-
-  template< int codim, PartitionIteratorType pitype, class Grid,
-      bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v ) >
   class GeometryGridLevelIterator;
-
-  template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLevelIteratorAdapter;
 
   template< class Grid >
   class GeometryGridHierarchicIterator;
@@ -198,328 +193,277 @@ namespace Dune
 
 
 
-  // GeometryGridLeafIterator (real)
-  // -------------------------------
+  // GeometryGridIterator (real)
+  // ---------------------------
 
-  template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLeafIterator< codim, pitype, Grid, false >
-    : public GeometryGridEntityPointer< codim, Grid, false >
+  template< class Traits >
+  class GeometryGridIterator< Traits, false >
+    : public GeometryGridEntityPointer< Traits, false >
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
-    typedef typename Traits :: HostGrid HostGrid;
+    typedef GeometryGridEntityPointer< Traits, false > ExactBase;
+
+    typedef typename Traits :: Grid Grid;
 
   public:
-    typedef GeometryGridEntityPointer< codim, Grid, false > Base;
-
-    typedef typename HostGrid :: template Codim< codim >
-    :: template Partition< pitype > :: LeafIterator
-    HostIterator;
-
-    enum IteratorType { begin, end };
-
-  private:
-    HostIterator hostIterator_;
+    typedef typename Traits :: IteratorType IteratorType;
 
   protected:
-    using Base :: setToTarget;
+    using ExactBase :: hostEntityIterator_;
+    using ExactBase :: update;
 
   public:
-    GeometryGridLeafIterator ( const Grid &grid, IteratorType type )
-      : Base( grid, getHostIterator( grid, type ) ),
-        hostIterator_( getHostIterator( grid, type ) )
+    GeometryGridIterator ( const Grid &grid, int level, IteratorType type )
+      : ExactBase( grid, Traits :: getHostEntityIterator( grid, level, type ) )
     {}
 
     void increment ()
     {
-      ++hostIterator_;
-      setToTarget( hostIterator_ );
-    }
-
-  private:
-    static HostIterator getHostIterator ( const Grid &grid, IteratorType type )
-    {
-      if( type == begin )
-        return grid.hostGrid().template leafbegin< codim, pitype >();
-      else
-        return grid.hostGrid().template leafend< codim, pitype >();
+      ++hostEntityIterator_;
+      update();
     }
   };
 
 
 
-  // GeometryGridLeafIterator (fake)
-  // -------------------------------
+  // GeometryGridIterator (fake)
+  // ---------------------------
 
-  template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLeafIterator< codim, pitype, Grid, true >
-    : public GeometryGridEntityPointer< codim, Grid, true >
+  template< class Traits >
+  class GeometryGridIterator< Traits, true >
+    : public GeometryGridEntityPointer< Traits, true >
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
-    typedef typename Traits :: HostGrid HostGrid;
+    typedef GeometryGridEntityPointer< Traits, true > ExactBase;
+
+    typedef typename Traits :: Grid Grid;
 
   public:
-    typedef GeometryGridEntityPointer< codim, Grid, true > Base;
+    static const int dimension = Traits :: dimension;
+    static const int codimension = Traits :: codimension;
+
+    typedef typename Traits :: IteratorType IteratorType;
+
+  private:
+    typedef typename Traits :: Filter Filter;
+
+    typedef typename Traits :: HostElement HostElement;
+    typedef typename Traits :: HostElementIterator HostElementIterator;
+    typedef typename Traits :: HostIndexSet HostIndexSet;
+
+    HostElementIterator hostEnd_;
+    const HostIndexSet *hostIndexSet_;
+    std :: vector< bool > visited_;
+
+  protected:
+    using ExactBase :: hostElementIterator_;
+    using ExactBase :: subEntity_;
+    using ExactBase :: update;
+
+  public:
+    GeometryGridIterator ( const Grid &grid, int level, IteratorType type )
+      : ExactBase( grid, Traits :: getHostElementIterator( grid, level, type ), -1 ),
+        hostEnd_( Traits :: getHostElementIterator( grid, level, Traits :: end ) ),
+        hostIndexSet_( &Traits :: getHostIndexSet( grid, level ) )
+    {
+      if( hostElementIterator_ != hostEnd_ )
+      {
+        visited_.resize( hostIndexSet_->size( codimension ), false );
+        increment();
+      }
+    }
+
+    void increment ()
+    {
+      typedef typename Traits :: ctype ctype;
+
+      while( hostElementIterator_ != hostEnd_ )
+      {
+        const HostElement &hostElement = *hostElementIterator_;
+
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension > :: general( hostElement.type() );
+
+        ++subEntity_;
+        const int count = refElement.size( codimension );
+        for( ; subEntity_ < count; ++subEntity_ )
+        {
+          if( !Filter :: apply( refElement, hostElement, subEntity_ ) )
+            continue;
+
+          const size_t index
+            = hostIndexSet_->template subIndex< codimension >( hostElement, subEntity_ );
+          if( !visited_[ index ] )
+          {
+            visited_[ index ] = true;
+            update();
+            return;
+          }
+        }
+        ++hostElementIterator_;
+        subEntity_ = -1;
+      }
+      update();
+    }
+  };
+
+
+
+  // GeometryGridLeafIteratorTraits
+  // ------------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  struct GeometryGridLeafIteratorTraits
+    : public GeometryGridEntityPointerTraits< codim, Grid >
+  {
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+    typedef typename Traits :: HostGrid HostGrid;
 
     typedef GeometryGridPartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
+    static const PartitionIteratorType Entity_Partition = pitype;
+    static const PartitionIteratorType Element_Partition = Filter :: Element_Partition;
+
+    typedef typename HostGrid :: template Codim< codim >
+    :: template Partition< Entity_Partition > :: LeafIterator
+    HostEntityIterator;
     typedef typename HostGrid :: template Codim< 0 >
-    :: template Partition< Filter :: Element_Partition > :: LeafIterator
-    HostIterator;
+    :: template Partition< Element_Partition > :: LeafIterator
+    HostElementIterator;
+
     typedef typename HostGrid :: Traits :: LeafIndexSet HostIndexSet;
 
     enum IteratorType { begin, end };
 
-  private:
-    typedef typename Base :: HostElement HostElement;
+    static HostEntityIterator
+    getHostEntityIterator ( const Grid &grid, int level, IteratorType type )
+    {
+      if( type == begin )
+        return grid.hostGrid().template leafbegin< codim, Entity_Partition >();
+      else
+        return grid.hostGrid().template leafend< codim, Entity_Partition >();
+    }
 
-    HostIterator hostEndIterator_;
-    HostIterator hostIterator_;
+    static HostElementIterator
+    getHostElementIterator ( const Grid &grid, int level, IteratorType type )
+    {
+      if( type == begin )
+        return grid.hostGrid().template leafbegin< 0, Element_Partition >();
+      else
+        return grid.hostGrid().template leafend< 0, Element_Partition >();
+    }
 
-    const HostIndexSet *hostIndexSet_;
-    std :: vector< bool > visited_;
+    static const HostIndexSet &getHostIndexSet ( const Grid &grid, int level )
+    {
+      return grid.hostGrid().leafIndexSet();
+    }
+  };
 
-  protected:
-    using Base :: hostElementPointer;
-    using Base :: subEntity;
-    using Base :: setToTarget;
 
-  public:
+
+  // GeometryGridLeafIterator
+  // ------------------------
+
+  template< int codim, PartitionIteratorType pitype, class Grid >
+  struct GeometryGridLeafIterator
+    : public GeometryGridIterator
+      < GeometryGridLeafIteratorTraits< codim, pitype, Grid > >
+  {
+    typedef GeometryGridLeafIteratorTraits< codim, pitype, Grid > Traits;
+
+    typedef typename Traits :: IteratorType IteratorType;
+
     GeometryGridLeafIterator ( const Grid &grid, IteratorType type )
-      : Base( grid, getHostIterator( grid, type ), -1 ),
-        hostEndIterator_( getHostIterator( grid, end ) ),
-        hostIterator_( getHostIterator( grid, type ) ),
-        hostIndexSet_( &grid.hostGrid().leafIndexSet() )
-    {
-      if( hostIterator_ != hostEndIterator_ )
-      {
-        visited_.resize( hostIndexSet_->size( codim ), false );
-        increment();
-      }
-    }
-
-    void increment ()
-    {
-      typedef typename Traits :: ctype ctype;
-      static const int dimension = Traits :: dimension;
-
-      while( hostIterator_ != hostEndIterator_ )
-      {
-        const HostElement &hostElement = *hostElementPointer();
-
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement.type() );
-
-        const int count = refElement.size( codim );
-        for( int number = subEntity() + 1; number < count; ++number )
-        {
-          if( !Filter :: apply( refElement, hostElement, number ) )
-            continue;
-
-          const size_t index
-            = hostIndexSet_->template subIndex< codim >( hostElement, number );
-          if( !visited_[ index ] )
-          {
-            visited_[ index ] = true;
-            setToTarget( hostIterator_, number );
-            return;
-          }
-        }
-        ++hostIterator_;
-        setToTarget( hostIterator_, -1 );
-      }
-    }
-
-  private:
-    static HostIterator getHostIterator ( const Grid &grid, IteratorType type )
-    {
-      if( type == begin )
-        return grid.hostGrid().template leafbegin< 0, pitype >();
-      else
-        return grid.hostGrid().template leafend< 0, pitype >();
-    }
-  };
-
-
-
-  // GeometryGridLeafIteratorAdapter
-  // -------------------------------
-
-  template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLeafIteratorAdapter
-    : public GeometryGridLeafIterator< codim, pitype, Grid >
-  {
-    typedef GeometryGridLeafIterator< codim, pitype, Grid > BaseType;
-
-  public:
-    typedef typename BaseType :: IteratorType IteratorType;
-
-    GeometryGridLeafIteratorAdapter ( const Grid &grid, IteratorType type )
-      : BaseType( grid, type )
+      : GeometryGridIterator< Traits >( grid, -1, type )
     {}
   };
 
 
 
-  // GeometryGridLeafIterator (real)
+  // GeometryGridLevelIteratorTraits
   // -------------------------------
 
   template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLevelIterator< codim, pitype, Grid, false >
-    : public GeometryGridEntityPointer< codim, Grid, false >
+  struct GeometryGridLevelIteratorTraits
+    : public GeometryGridEntityPointerTraits< codim, Grid >
   {
     typedef typename remove_const< Grid > :: type :: Traits Traits;
+
     typedef typename Traits :: HostGrid HostGrid;
-
-  public:
-    typedef GeometryGridEntityPointer< codim, Grid, false > Base;
-
-    typedef typename HostGrid :: template Codim< codim >
-    :: template Partition< pitype > :: LevelIterator
-    HostIterator;
-
-    enum IteratorType { begin, end };
-
-  private:
-    HostIterator hostIterator_;
-
-  protected:
-    using Base :: setToTarget;
-
-  public:
-    GeometryGridLevelIterator ( const Grid &grid, int level, IteratorType type )
-      : Base( grid, getHostIterator( grid, level, type ) ),
-        hostIterator_( getHostIterator( grid, level, type ) )
-    {}
-
-    void increment ()
-    {
-      ++hostIterator_;
-      setToTarget( hostIterator_ );
-    }
-
-  private:
-    static HostIterator
-    getHostIterator ( const Grid &grid, int level, IteratorType type )
-    {
-      if( type == begin )
-        return grid.hostGrid().template lbegin< codim, pitype >( level );
-      else
-        return grid.hostGrid().template lend< codim, pitype >( level );
-    }
-  };
-
-
-
-  // GeometryGridLevelIterator (fake)
-  // --------------------------------
-
-  template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLevelIterator< codim, pitype, Grid, true >
-    : public GeometryGridEntityPointer< codim, Grid, true >
-  {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
-    typedef typename Traits :: HostGrid HostGrid;
-
-  public:
-    typedef GeometryGridEntityPointer< codim, Grid, true > Base;
 
     typedef GeometryGridPartitionIteratorFilter< codim, pitype, HostGrid > Filter;
 
+    static const PartitionIteratorType Entity_Partition = pitype;
+    static const PartitionIteratorType Element_Partition = Filter :: Element_Partition;
+
+    typedef typename HostGrid :: template Codim< codim >
+    :: template Partition< Entity_Partition > :: LevelIterator
+    HostEntityIterator;
     typedef typename HostGrid :: template Codim< 0 >
-    :: template Partition< Filter :: Element_Partition > :: LevelIterator
-    HostIterator;
+    :: template Partition< Element_Partition > :: LevelIterator
+    HostElementIterator;
+
     typedef typename HostGrid :: Traits :: LevelIndexSet HostIndexSet;
 
     enum IteratorType { begin, end };
 
-  private:
-    typedef typename Base :: HostElement HostElement;
-
-    HostIterator hostEndIterator_;
-    HostIterator hostIterator_;
-
-    const HostIndexSet *hostIndexSet_;
-    std :: vector< bool > visited_;
-
-  protected:
-    using Base :: hostElementPointer;
-    using Base :: subEntity;
-    using Base :: setToTarget;
-
-  public:
-    GeometryGridLevelIterator ( const Grid &grid, int level, IteratorType type )
-      : Base( grid, getHostIterator( grid, level, type ), -1 ),
-        hostEndIterator_( getHostIterator( grid, level, end ) ),
-        hostIterator_( getHostIterator( grid, level, type ) ),
-        hostIndexSet_( &grid.hostGrid().levelIndexSet( level ) )
-    {
-      if( hostIterator_ != hostEndIterator_ )
-      {
-        visited_.resize( hostIndexSet_->size( codim ), false );
-        increment();
-      }
-    }
-
-    void increment ()
-    {
-      typedef typename Traits :: ctype ctype;
-      static const int dimension = Traits :: dimension;
-
-      while( hostIterator_ != hostEndIterator_ )
-      {
-        const HostElement &hostElement = *hostElementPointer();
-
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement.type() );
-
-        const int count = refElement.size( codim );
-        for( int number = subEntity() + 1; number < count; ++number )
-        {
-          if( !Filter :: apply( refElement, hostElement, number ) )
-            continue;
-
-          const size_t index
-            = hostIndexSet_->template subIndex< codim >( hostElement, number );
-          if( !visited_[ index ] )
-          {
-            visited_[ index ] = true;
-            setToTarget( hostIterator_, number );
-            return;
-          }
-        }
-        ++hostIterator_;
-        setToTarget( hostIterator_, -1 );
-      }
-    }
-
-  private:
-    static HostIterator
-    getHostIterator ( const Grid &grid, int level, IteratorType type )
+    static HostEntityIterator
+    getHostEntityIterator ( const Grid &grid, int level, IteratorType type )
     {
       if( type == begin )
-        return grid.hostGrid().template lbegin< 0, pitype >( level );
+        return grid.hostGrid().template lbegin< codim, Entity_Partition >( level );
       else
-        return grid.hostGrid().template lend< 0, pitype >( level );
+        return grid.hostGrid().template lend< codim, Entity_Partition >( level );
+    }
+
+    static HostElementIterator
+    getHostElementIterator ( const Grid &grid, int level, IteratorType type )
+    {
+      if( type == begin )
+        return grid.hostGrid().template lbegin< 0, Element_Partition >( level );
+      else
+        return grid.hostGrid().template lend< 0, Element_Partition >( level );
+    }
+
+    static const HostIndexSet &getHostIndexSet ( const Grid &grid, int level )
+    {
+      return grid.hostGrid().levelIndexSet( level );
     }
   };
 
 
 
-  // GeometryGridLevelIteratorAdapter
-  // --------------------------------
+  // GeometryGridLevelIterator
+  // -------------------------
 
   template< int codim, PartitionIteratorType pitype, class Grid >
-  class GeometryGridLevelIteratorAdapter
-    : public GeometryGridLevelIterator< codim, pitype, Grid >
+  struct GeometryGridLevelIterator
+    : public GeometryGridIterator
+      < GeometryGridLevelIteratorTraits< codim, pitype, Grid > >
   {
-    typedef GeometryGridLevelIterator< codim, pitype, Grid > BaseType;
+    typedef GeometryGridLevelIteratorTraits< codim, pitype, Grid > Traits;
 
-  public:
-    typedef typename BaseType :: IteratorType IteratorType;
+    typedef typename Traits :: IteratorType IteratorType;
 
-    GeometryGridLevelIteratorAdapter ( const Grid &grid, int level, IteratorType type )
-      : BaseType( grid, level, type )
+    GeometryGridLevelIterator ( const Grid &grid, int level, IteratorType type )
+      : GeometryGridIterator< Traits >( grid, level, type )
     {}
+  };
+
+
+
+  // GeometryGridHierarchicIteratorTraits
+  // ------------------------------------
+
+  template< class Grid >
+  struct GeometryGridHierarchicIteratorTraits
+    : public GeometryGridEntityPointerTraits< 0, Grid >
+  {
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+    typedef typename Traits :: HostGrid :: Traits :: HierarchicIterator
+    HostEntityIterator;
+    typedef typename Traits :: HostGrid :: Traits :: HierarchicIterator
+    HostElementIterator;
   };
 
 
@@ -529,30 +473,28 @@ namespace Dune
 
   template< class Grid >
   class GeometryGridHierarchicIterator
-    : public GeometryGridEntityPointer< 0, Grid >
+    : public GeometryGridEntityPointer< GeometryGridHierarchicIteratorTraits< Grid > >
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
-    typedef typename Traits :: HostGrid HostGrid;
+    typedef GeometryGridHierarchicIteratorTraits< Grid > Traits;
 
-  public:
-    typedef GeometryGridEntityPointer< 0, Grid > Base;
+    typedef GeometryGridEntityPointer< Traits > ExactBase;
 
-    typedef typename HostGrid :: Traits :: HierarchicIterator HostIterator;
+  protected:
+    typedef typename Traits :: HostEntityIterator HostEntityIterator;
 
-  private:
-    HostIterator hostIterator_;
+    using ExactBase :: hostEntityIterator_;
+    using ExactBase :: update;
 
   public:
     GeometryGridHierarchicIterator ( const Grid &grid,
-                                     const HostIterator &hostIterator )
-      : Base( grid, hostIterator ),
-        hostIterator_( hostIterator )
+                                     const HostEntityIterator &hostEntityIterator )
+      : ExactBase( grid, hostEntityIterator )
     {}
 
     void increment ()
     {
-      ++hostIterator_;
-      setToTarget( hostIterator_ );
+      ++hostEntityIterator_;
+      update();
     }
   };
 
