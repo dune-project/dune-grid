@@ -112,22 +112,22 @@ namespace Dune
         return hostIntersection().boundaryId();
       }
 
-      const LocalGeometry &intersectionSelfLocal () const
+      const LocalGeometry &geometryInInside () const
       {
-        return hostIntersection().intersectionSelfLocal();
+        return hostIntersection().geometryInInside();
       }
 
-      const LocalGeometry &intersectionNeighborLocal () const
+      const LocalGeometry &geometryInOutside () const
       {
-        return hostIntersection().intersectionNeighborLocal();
+        return hostIntersection().geometryInOutside();
       }
 
-      const Geometry &intersectionGlobal () const
+      const Geometry &geometry () const
       {
-        GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
+        GeometryImpl &geo = Grid::getRealImplementation( geo_ );
         if( !geo )
         {
-          const LocalGeometry &localGeo = intersectionSelfLocal();
+          const LocalGeometry &localGeo = geometryInInside();
           CoordVector coords( inside()->geometry(), localGeo );
           geo = GeometryImpl( localGeo.type(), coords );
         }
@@ -139,14 +139,14 @@ namespace Dune
         return hostIntersection().type();
       }
 
-      int numberInSelf () const
+      int numberInInside () const
       {
-        return hostIntersection().numberInSelf();
+        return hostIntersection().numberInInside();
       }
 
-      int numberInNeighbor () const
+      int numberInOutside () const
       {
-        return hostIntersection().numberInNeighbor();
+        return hostIntersection().numberInOutside();
       }
 
       FieldVector< ctype, dimensionworld >
@@ -154,8 +154,8 @@ namespace Dune
       {
         typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
         const Geometry &geo = inside()->geometry();
-        FieldVector< ctype, dimension > x( intersectionSelfLocal().global( local ) );
-        return Grid :: getRealImplementation( geo ).normal( numberInSelf(), x );
+        FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
+        return Grid::getRealImplementation( geo ).normal( numberInInside(), x );
       }
 
       FieldVector< ctype, dimensionworld >
