@@ -217,7 +217,7 @@ namespace Dune
     template< int, class, bool > friend class GeometryGridEntityPointer;
     template< class, class > friend class GeometryGridIntersection;
     template< class, class > friend class GeometryGridIdSet;
-    template < class > friend class HostEntityAccess;
+    template < class > friend class HostGridAccess;
 
     template< int, PartitionIteratorType, class, bool >
     friend class GeometryGridLevelIterator;
@@ -642,12 +642,14 @@ namespace Dune
     }
 #endif
 
-  private:
+  protected:
     //! Obtain the host grid wrapped by this GeometryGrid
     const HostGrid &hostGrid () const
     {
       return *hostGrid_;
     }
+
+  private:
 
     //! Obtain the host grid wrapped by this GeometryGrid
     HostGrid &hostGrid ()

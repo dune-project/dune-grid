@@ -1,16 +1,16 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GEOGRID_HOST_ENTITY_ACCESS_HH
-#define DUNE_GEOGRID_HOST_ENTITY_ACCESS_HH
+#ifndef DUNE_GEOGRID_HOST_GRID_ACCESS_HH
+#define DUNE_GEOGRID_HOST_GRID_ACCESS_HH
 
 #include <string>
 
 namespace Dune
 {
-  // HostEntityAccess
+  // HostGridAccess
   // ------------
 
-  /** \class HostEntityAccess
+  /** \class HostGridAccess
    *  \brief provides access to HostGrid Entities and EntityPointers
    *
    *  \tparam GeometryGrid
@@ -19,10 +19,10 @@ namespace Dune
    */
 
   template< class GeometryGrid >
-  class HostEntityAccess
+  class HostGridAccess
   {
 
-    typedef HostEntityAccess< GeometryGrid > ThisType;
+    typedef HostGridAccess< GeometryGrid > ThisType;
 
   public:
 
@@ -47,6 +47,13 @@ namespace Dune
       typedef typename GeometryGrid :: HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
     };
 
+    /** \brief Get underlying HostGrid.
+     *  \returns HostGrid
+     */
+    static const HostGrid & hostGrid (const GeometryGrid & grid)
+    {
+      return grid.hostGrid();
+    }
 
     /** \brief Get underlying HostEntity of given GeometryGridEntity.
      *
@@ -79,6 +86,7 @@ namespace Dune
     {
       return grid.template getHostEntityPointer< codim > ( entityPointer );
     }
+
   };
 
 }
