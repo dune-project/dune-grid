@@ -874,21 +874,10 @@ namespace Dune
         return hostEntity().isNew();
       }
 
-      bool wasRefined () const DUNE_DEPRECATED
-      {
-        return hostEntity().isNew();
-      }
-
       bool mightVanish () const
       {
         return hostEntity().mightVanish();
       }
-
-      bool mightBeCoarsened () const DUNE_DEPRECATED
-      {
-        return hostEntity().mightVanish();
-      }
-
 
       /** \name Methods Supporting the Grid Implementation
        *  \{ */

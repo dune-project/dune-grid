@@ -654,21 +654,9 @@ namespace Dune
       return hostGrid().mark( refCount, getHostEntity< 0 >( entity ) );
     }
 
-    bool DUNE_DEPRECATED
-    mark( int refCount, const typename Codim< 0 > :: EntityPointer &ptr )
-    {
-      return hostGrid().mark( refCount, getHostEntityPointer< 0 >( ptr ) );
-    }
-
     int getMark ( const typename Codim< 0 > :: Entity &entity ) const
     {
       return hostGrid().getMark( getHostEntity< 0 >( entity ) );
-    }
-
-    int DUNE_DEPRECATED
-    getMark ( const typename Codim< 0 > :: EntityPointer &ptr ) const
-    {
-      return hostGrid().getMark( getHostEntityPointer< 0 >( ptr ) );
     }
 
     bool preAdapt ()
