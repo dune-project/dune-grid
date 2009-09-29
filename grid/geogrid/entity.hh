@@ -378,7 +378,7 @@ namespace Dune
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( grid_, hostEntity().father() ) );
+      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostEntity().father() ) );
     }
 
     const LocalGeometry &geometryInFather () const
