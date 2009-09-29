@@ -232,9 +232,6 @@ namespace Dune
     /** \name Exported Types
      * \{ */
 
-    //! type of the host grid (template parameter)
-    typedef HostGrid HostGridType;
-
     //! type of the grid traints
     typedef typename GridFamily :: Traits Traits;
 
@@ -511,10 +508,12 @@ namespace Dune
 
     const LevelIndexSet &levelIndexSet ( int level ) const
     {
+      assert( levelIndexSets_.size() == (size_t)(maxLevel()+1) );
       if( (level < 0) || (level > maxLevel()) )
         DUNE_THROW( GridError, "levelIndexSet of nonexisting level " << level << " requested." );
       if( levelIndexSets_[ level ] == 0 )
         levelIndexSets_[ level ] = new LevelIndexSet( *this, level );
+      assert( levelIndexSets_[ level ] );
       return *levelIndexSets_[ level ];
     }
 
@@ -522,13 +521,14 @@ namespace Dune
     {
       if( leafIndexSet_ == 0 )
         leafIndexSet_ = new LeafIndexSet( *this );
+      assert( leafIndexSet_ );
       return *leafIndexSet_;
     }
 
     void globalRefine ( int refCount )
     {
       hostGrid().globalRefine( refCount );
-      updateIndexSets();
+      update();
     }
 
     bool mark( int refCount, const typename Codim< 0 > :: EntityPointer &entity )
@@ -549,7 +549,7 @@ namespace Dune
     bool adapt ()
     {
       bool ret = hostGrid().adapt();
-      updateIndexSets();
+      update();
       return ret;
     }
 
@@ -568,25 +568,20 @@ namespace Dune
       return hostGrid().ghostSize( codim );
     }
 
-
-    /** \brief Size of the overlap on a given level */
     unsigned int overlapSize ( int level, int codim ) const
     {
       return hostGrid().overlapSize( level, codim );
     }
 
-
-    /** \brief Size of the ghost cell layer on a given level */
     unsigned int ghostSize ( int level, int codim ) const
     {
       return hostGrid().ghostSize( level, codim );
     }
 
-
     bool loadBalance ()
     {
       bool ret = hostGrid().loadBalance();
-      updateIndexSets();
+      update();
       return ret;
     }
 
@@ -598,7 +593,7 @@ namespace Dune
 
       WrappedDataHandle wrappedData( *this, data );
       bool ret = hostGrid().loadBalance( wrappedData );
-      updateIndexSets();
+      update();
       return ret;
     }
 
@@ -625,63 +620,28 @@ namespace Dune
       hostGrid().communicate( wrappedData, iftype, dir );
     }
 
+    /** \brief obtain CollectiveCommunication object
+     *
+     *  The CollectiveCommunication object should be used to globally
+     *  communicate information between all processes sharing this grid.
+     *
+     *  \note The CollectiveCommunication object returned is identical to the
+     *        one returned by the host grid.
+     */
     const CollectiveCommunication &comm () const
     {
       return hostGrid().comm();
     }
 
-
-    // **********************************************************
-    // End of Interface Methods
-    // **********************************************************
-
-#if 0
-    HostGrid &getHostGrid() const
-    {
-      return *hostGrid_;
-    }
-#endif
-
-  protected:
-    //! Obtain the host grid wrapped by this GeometryGrid
-    const HostGrid &hostGrid () const
-    {
-      return *hostGrid_;
-    }
-
-  private:
-
-    //! Obtain the host grid wrapped by this GeometryGrid
-    HostGrid &hostGrid ()
-    {
-      return *hostGrid_;
-    }
-
-    //! Obtain the coordinate function
-    const CoordFunction &coordFunction () const
-    {
-      return coordFunction_;
-    }
-
-  protected:
-    using Base :: getRealImplementation;
-
-    template< int codim >
-    static const typename HostGrid :: template Codim< codim > :: Entity &
-    getHostEntity( const typename Codim< codim > :: Entity &entity )
-    {
-      return getRealImplementation( entity ).hostEntity();
-    }
-
-    template< int codim >
-    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
-    getHostEntityPointer( const typename Codim< codim > :: EntityPointer &entity )
-    {
-      return getRealImplementation( entity ).hostEntityPointer();
-    }
-
-  private:
-    void updateIndexSets ()
+    /** \brief update grid caches
+     *
+     *  This method has to be called whenever the underlying host grid changes.
+     *
+     *  \note If you adapt the host grid through this geometry grid's
+     *        adaptation or load balancing methods, update is automatically
+     *        called.
+     */
+    void update ()
     {
       if( leafIndexSet_ != 0 )
         leafIndexSet_->update();
@@ -705,6 +665,41 @@ namespace Dune
       levelIndexSets_.resize( newNumLevels );
       for( int i = updateLevels; i < newNumLevels; ++i )
         levelIndexSets_[ i ] = 0;
+    }
+
+  protected:
+    using Base :: getRealImplementation;
+
+    //! Obtain the host grid wrapped by this GeometryGrid
+    const HostGrid &hostGrid () const
+    {
+      return *hostGrid_;
+    }
+
+    //! Obtain the host grid wrapped by this GeometryGrid
+    HostGrid &hostGrid ()
+    {
+      return *hostGrid_;
+    }
+
+    //! Obtain the coordinate function
+    const CoordFunction &coordFunction () const
+    {
+      return coordFunction_;
+    }
+
+    template< int codim >
+    static const typename HostGrid :: template Codim< codim > :: Entity &
+    getHostEntity( const typename Codim< codim > :: Entity &entity )
+    {
+      return getRealImplementation( entity ).hostEntity();
+    }
+
+    template< int codim >
+    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
+    getHostEntityPointer( const typename Codim< codim > :: EntityPointer &entity )
+    {
+      return getRealImplementation( entity ).hostEntityPointer();
     }
   };
 
