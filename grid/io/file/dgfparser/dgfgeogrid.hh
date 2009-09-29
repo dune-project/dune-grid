@@ -47,7 +47,7 @@ namespace Dune
 
     HostGrid *hostGrid = HostImpl :: generate( macroGrid, filename, communicator );
     assert( hostGrid != 0 );
-    const CoordFunction *coordFunction = new CoordFunction;
+    CoordFunction *coordFunction = new CoordFunction;
     return new Grid( *hostGrid, *coordFunction );
   }
 
