@@ -3,20 +3,24 @@
 #ifndef DUNE_GEOGRID_IDENTITY_HH
 #define DUNE_GEOGRID_IDENTITY_HH
 
-#include <dune/common/fvector.hh>
+#include <dune/grid/geogrid/coordfunction.hh>
 
 namespace Dune
 {
 
   template< class ctype, unsigned int dim >
-  struct IdenticalCoordFunction
+  class IdenticalCoordFunction
+    : public AnalyticalCoordFunction
+      < ctype, dim, dim, IdenticalCoordFunction< ctype, dim > >
   {
-    static const unsigned int dimDomain = dim;
-    static const unsigned int dimRange = dim;
+    typedef IdenticalCoordFunction< ctype, dim > This;
+    typedef AnalyticalCoordFunction< ctype, dim, dim, This > Base;
 
-    typedef Dune :: FieldVector< ctype, dim > Vector;
+  public:
+    typedef typename Base :: DomainVector DomainVector;
+    typedef typename Base :: RangeVector RangeVector;
 
-    void evaluate ( const Vector &x, Vector &y ) const
+    void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
       y = x;
     }
