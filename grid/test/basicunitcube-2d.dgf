@@ -13,7 +13,7 @@ SIMPLEX
 #
 
 GRIDPARAMETER
-NAME AlbertaGrid
+NAME BasicUnitCube
 REFINEMENTEDGE ARBITRARY
-DUMPFILENAME basicunitcube-2d.amc
+DUMPFILENAME basicunitcube-2d.dgf.native
 #

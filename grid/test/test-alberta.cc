@@ -30,6 +30,14 @@
 #include "checkpartition.cc"
 
 
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
+
+
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )
 {

@@ -21,6 +21,19 @@
    @brief Provides a check of the grids index set.
  */
 
+template< class Grid >
+struct EnableLevelIntersectionIteratorCheck
+{
+  static const bool v = true;
+};
+
+template< class Grid >
+struct EnableLevelIntersectionIteratorCheck< const Grid >
+{
+  static const bool v = EnableLevelIntersectionIteratorCheck< Grid >::v;
+};
+
+
 namespace Dune
 {
 
@@ -522,7 +535,7 @@ namespace Dune
           typedef typename GridView :: IntersectionIterator IntersectionIterator;
 
           const std :: string name = grid.name();
-          if( !levelIndex || (name != "AlbertaGrid") )
+          if( !levelIndex || EnableLevelIntersectionIteratorCheck< typename GridView::Grid >::v )
           {
             const IntersectionIterator endnit = view.iend( *it );
             for( IntersectionIterator nit = view.ibegin( *it ); nit != endnit; ++nit )
@@ -536,12 +549,9 @@ namespace Dune
           }
           else
           {
-            static bool called = false;
-            if( !called )
-            {
-              std::cerr << "WARNING: skip indices test using LevelIntersectionIterator for AlbertaGrid!\n";
-              called = true;
-            }
+            static int called = 0;
+            if( called++ == 0 )
+              std::cerr << "Warning: Skipping index test using LevelIntersectionIterator for " << view.grid().name() << "." << std::endl;
           }
         }
       }

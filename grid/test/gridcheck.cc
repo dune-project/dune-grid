@@ -729,11 +729,11 @@ void assertNeighbor (Grid &g)
   {
     ++next;
 
-    // do nothing for AlbertaGrid
-    if( g.name() == "AlbertaGrid" )
+    if( !EnableLevelIntersectionIteratorCheck< Grid >::v )
     {
-      std::cerr << "WARNING: skip indices test using LevelIntersectionIterator "
-                << "for AlbertaGrid!" << std :: endl;
+      static int called = 0;
+      if( called++ == 0 )
+        std::cerr << "Warning: Skipping level neighbor test for " << g.name() << "." << std::endl;
       return;
     }
 
