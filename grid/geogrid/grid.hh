@@ -77,6 +77,13 @@ namespace Dune
 
       static const GeometryType :: BasicType linetype = GeometryType :: simplex;
 
+      template <int codim>
+      struct Codim {
+        enum {fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v)};
+        typedef GeoGrid :: CoordVector<dimGrid-codim,const Grid,fake> CoordVector;
+      };
+      typedef GeoGrid :: IntersectionCoordVector< const Grid > IntersectionCoordVector;
+
       template< class Topology >
       struct Mapping
       {
@@ -673,7 +680,7 @@ namespace Dune
 
     void postAdapt ()
     {
-      return hostGrid().postAdapt();
+      hostGrid().postAdapt();
     }
 
     /** \name Parallel Data Distribution and Communication Methods
@@ -779,6 +786,7 @@ namespace Dune
     {
       return hostGrid().comm();
     }
+#if 0   // data handle interface different between geo and interface
 
     /** \brief rebalance the load each process has to handle
      *
@@ -811,6 +819,7 @@ namespace Dune
      *
      *  \returns \b true, if the grid has changed.
      */
+
     template< class DataHandle, class Data >
     bool loadBalance ( CommDataHandleIF< DataHandle, Data > &datahandle )
     {
@@ -823,7 +832,7 @@ namespace Dune
         update();
       return gridChanged;
     }
-
+#endif
     /** \} */
 
     /** \name Miscellaneous Methods

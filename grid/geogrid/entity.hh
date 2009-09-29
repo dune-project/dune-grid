@@ -126,7 +126,7 @@ namespace Dune
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
+      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: template Codim<codimension> :: CoordVector CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -356,7 +356,7 @@ namespace Dune
       typedef typename HostGrid :: template Codim< dimension > :: EntityPointer
       HostVertexPointer;
 
-      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
+      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: template Codim<codimension> :: CoordVector CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -652,7 +652,7 @@ namespace Dune
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
+      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: template Codim<codimension> :: CoordVector CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;

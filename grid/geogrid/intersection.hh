@@ -60,7 +60,7 @@ namespace Dune
       typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
 
     private:
-      typedef GeoGrid :: IntersectionCoordVector< const Grid > CoordVector;
+      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: IntersectionCoordVector CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
