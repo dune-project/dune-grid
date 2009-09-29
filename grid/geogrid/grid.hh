@@ -279,7 +279,7 @@ namespace Dune
       public GeoGrid :: HierarchicIndexSetProvider< HostGrid, CoordFunction >,
       public GeoGrid :: BackupRestoreFacilities
       < GeometryGrid< HostGrid, CoordFunction >,
-          Capabilities :: hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > > :: v >
+          Capabilities::hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction > >::v >
       /** \endcond */
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;

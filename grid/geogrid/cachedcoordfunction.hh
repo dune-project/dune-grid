@@ -7,9 +7,9 @@
 #include <map>
 #include <vector>
 
-#include <dune/common/interfaces.hh>
 #include <dune/common/typetraits.hh>
 
+#include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/coordfunction.hh>
 
 //#define ALLCODIM_SUBINDEX
@@ -194,8 +194,7 @@ namespace Dune
     typedef typename Base :: RangeVector RangeVector;
 
   private:
-    static const bool hasHierarchicIndexSet
-      = Conversion< HostGrid, HasHierarchicIndexSet > :: exists;
+    static const bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v;
     typedef GeoGrid::CoordCache< HostGrid, RangeVector, hasHierarchicIndexSet > Cache;
 
     const HostGrid &hostGrid_;
