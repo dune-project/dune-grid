@@ -5,6 +5,9 @@
 
 #include <vector>
 
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/indexidset.hh>
+
 namespace Dune
 {
 
@@ -53,7 +56,7 @@ namespace Dune
 
   template< class HostGrid, class CoordFunction >
   class GeometryGridLevelIndexSet< const GeometryGrid< HostGrid, CoordFunction > >
-    : public IndexSetDefaultImplementation
+    : public IndexSet
       < const GeometryGrid< HostGrid, CoordFunction >,
           GeometryGridLevelIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
           GeometryGridLevelIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
@@ -112,6 +115,20 @@ namespace Dune
     int size ( int codim ) const
     {
       return hostIndexSet().size( codim );
+    }
+
+    template< int codim >
+    bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
+    {
+      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().contains( *hostEntity );
+    }
+
+    template< class Entity >
+    bool contains ( const Entity &entity ) const
+    {
+      return contains< Entity :: codimension >( entity );
     }
 
     const std :: vector< GeometryType > &geomTypes ( int codim ) const
@@ -174,7 +191,7 @@ namespace Dune
 
   template< class HostGrid, class CoordFunction >
   class GeometryGridLeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >
-    : public IndexSetDefaultImplementation
+    : public IndexSet
       < const GeometryGrid< HostGrid, CoordFunction >,
           GeometryGridLeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >,
           GeometryGridLeafIndexSetTypes< const GeometryGrid< HostGrid, CoordFunction > > >
@@ -231,6 +248,20 @@ namespace Dune
     int size ( int codim ) const
     {
       return hostIndexSet().size( codim );
+    }
+
+    template< int codim >
+    bool contains ( const typename Grid :: template Codim< codim > :: Entity &entity ) const
+    {
+      typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
+      HostEntityPointer hostEntity = Grid :: template getHostEntity< codim >( entity );
+      return hostIndexSet().contains( *hostEntity );
+    }
+
+    template< class Entity >
+    bool contains ( const Entity &entity ) const
+    {
+      return contains< Entity :: codimension >( entity );
     }
 
     const std :: vector< GeometryType > &geomTypes ( int codim ) const

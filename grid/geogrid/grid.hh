@@ -4,20 +4,14 @@
 #define DUNE_GEOGRID_GRID_HH
 
 #include <string>
-//#include <map>
 
-//#include <dune/common/collectivecommunication.hh>
-//#include <dune/common/bitfield.hh>
 #include <dune/grid/common/grid.hh>
-//#include <dune/common/timer.hh>
-//#include <dune/common/fvector.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/entity.hh>
 #include <dune/grid/geogrid/entitypointer.hh>
 #include <dune/grid/geogrid/intersectioniterator.hh>
 #include <dune/grid/geogrid/iterator.hh>
-#include <dune/grid/geogrid/hierarchiciterator.hh>
 #include <dune/grid/geogrid/indexsets.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>

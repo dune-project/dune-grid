@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
+#include <dune/grid/geogrid/entitypointer.hh>
+
 namespace Dune
 {
 
@@ -108,14 +110,14 @@ namespace Dune
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->inside() ) );
+      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIterator_->inside() ) );
     }
 
     EntityPointer outside () const
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->outside() ) );
+      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIterator_->outside() ) );
     }
 
     bool boundary () const
@@ -291,14 +293,14 @@ namespace Dune
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->inside() ) );
+      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIterator_->inside() ) );
     }
 
     EntityPointer outside () const
     {
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
-      return MakeableEntityPointer( EntityPointerImpl( grid_, hostIterator_->outside() ) );
+      return MakeableEntityPointer( EntityPointerImpl( *grid_, hostIterator_->outside() ) );
     }
 
     bool boundary () const

@@ -340,7 +340,7 @@ namespace Dune
       typedef MakeableInterfaceObject< EntityPointer > MakeableEntityPointer;
       typedef typename MakeableEntityPointer :: ImplementationType EntityPointerImpl;
 
-      EntityPointerImpl impl( grid_, hostEntity().template entity< codim >( i ) );
+      EntityPointerImpl impl( *grid_, hostEntity().template entity< codim >( i ) );
       return MakeableEntityPointer( impl );
     }
 
@@ -413,16 +413,18 @@ namespace Dune
 
     HierarchicIterator hbegin ( int maxLevel ) const
     {
-      typedef MakeableInterfaceObject< HierarchicIterator > MakeableHierarchicIterator;
-      typedef typename MakeableHierarchicIterator :: ImplementationType HierarchicIteratorImpl;
-      return MakeableHierarchicIterator( HierarchicIteratorImpl( grid_, *this, maxLevel ) );
+      typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *grid_, hostEntity().hbegin( maxLevel ) );
+      return MakeableIterator( impl );
     }
 
     HierarchicIterator hend ( int maxLevel ) const
     {
-      typedef MakeableInterfaceObject< HierarchicIterator > MakeableHierarchicIterator;
-      typedef typename MakeableHierarchicIterator :: ImplementationType HierarchicIteratorImpl;
-      return MakeableHierarchicIterator( HierarchicIteratorImpl( grid_, *this, maxLevel, true ) );
+      typedef MakeableInterfaceObject< HierarchicIterator > MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *grid_, hostEntity().hend( maxLevel ) );
+      return MakeableIterator( impl );
     }
 
     bool isRegular () const

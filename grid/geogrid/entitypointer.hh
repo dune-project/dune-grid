@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_ENTITYPOINTER_HH
 #define DUNE_GEOGRID_ENTITYPOINTER_HH
 
+#include <dune/grid/common/grid.hh>
+
 namespace Dune
 {
 
@@ -53,8 +55,8 @@ namespace Dune
     mutable MakeableEntity virtualEntity_;
 
   public:
-    GeometryGridEntityPointer ( const Grid *grid, const HostEntityPointer &hostEntity )
-      : virtualEntity_( EntityImpl( grid, hostEntity ) )
+    GeometryGridEntityPointer ( const Grid &grid, const HostEntityPointer &hostEntity )
+      : virtualEntity_( EntityImpl( &grid, hostEntity ) )
     {}
 
     bool equals ( const GeometryGridEntityPointer &other ) const
