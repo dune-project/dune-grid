@@ -6,11 +6,7 @@ Interval
 2 2
 #
 
-PeriodicFaceTransformation
-1 0, 0 1 + 1 0
-1 0, 0 1 + 0 1
-#
-
 GridParameter
 refinementedge  arbitrary
+overlap 1
 #
