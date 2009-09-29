@@ -34,10 +34,10 @@ namespace Dune
 
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
-    FieldVector< double, dimworld > lower, upper;
-    FieldVector< int, dimworld > anz;
+    FieldVector< double, dim > lower, upper;
+    FieldVector< int, dim > anz;
 
-    for( int i = 0; i < dimworld; ++i )
+    for( int i = 0; i < dim; ++i )
     {
       lower[ i ] = interval.p[ 0 ][ i ];
       upper[ i ] = interval.p[ 1 ][ i ];
