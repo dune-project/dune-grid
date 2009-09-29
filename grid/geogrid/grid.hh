@@ -164,9 +164,8 @@ namespace Dune
 
           typedef GeoGrid :: EntityPointerTraits< codim, const Grid >
           EntityPointerTraits;
-          typedef Dune :: EntityPointer
-          < const Grid, GeoGrid :: EntityPointer< EntityPointerTraits > >
-          EntityPointer;
+          typedef GeoGrid :: EntityPointer< EntityPointerTraits > EntityPointerImpl;
+          typedef Dune :: EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
           typedef typename EntityPointerTraits :: Entity Entity;
 
           template< PartitionIteratorType pitype >
