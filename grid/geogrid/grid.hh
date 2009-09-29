@@ -4,20 +4,19 @@
 #define DUNE_GEOGRID_GRID_HH
 
 #include <string>
-#include <map>
+//#include <map>
 
-#include <dune/common/collectivecommunication.hh>
-#include <dune/grid/common/capabilities.hh>
-#include <dune/common/bitfield.hh>
+//#include <dune/common/collectivecommunication.hh>
+//#include <dune/common/bitfield.hh>
 #include <dune/grid/common/grid.hh>
-#include <dune/common/timer.hh>
-#include <dune/common/fvector.hh>
+//#include <dune/common/timer.hh>
+//#include <dune/common/fvector.hh>
 
+#include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/entity.hh>
 #include <dune/grid/geogrid/entitypointer.hh>
 #include <dune/grid/geogrid/intersectioniterator.hh>
-#include <dune/grid/geogrid/leveliterator.hh>
-#include <dune/grid/geogrid/leafiterator.hh>
+#include <dune/grid/geogrid/iterator.hh>
 #include <dune/grid/geogrid/hierarchiciterator.hh>
 #include <dune/grid/geogrid/indexsets.hh>
 
@@ -43,7 +42,8 @@ namespace Dune
     template< class HostGrid, class CoordFunction >
     struct GeometryTraits< GeometryGrid< HostGrid, CoordFunction > >
       : public DefaultGeometryTraits
-        < typename HostGrid :: ctype, HostGrid :: dimension, CoordFunction :: dimRange >
+        < typename HostGrid :: ctype,
+            HostGrid :: dimension, CoordFunction :: dimRange >
     {};
 
   }
@@ -280,71 +280,100 @@ namespace Dune
       return hostGrid().maxLevel();
     }
 
-
-    //! Iterator to first entity of given codim on level
     template< int codim >
     typename Codim< codim > :: LevelIterator lbegin ( int level ) const
     {
-      return GeometryGridLevelIterator<codim,All_Partition, const Grid >(this, level);
+      typedef MakeableInterfaceObject
+      < typename Codim< codim > :: LevelIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template lbegin< codim >( level ) );
+      return MakeableIterator( impl );
     }
 
-
-    //! one past the end on this level
     template< int codim >
     typename Codim< codim > :: LevelIterator lend ( int level ) const
     {
-      return GeometryGridLevelIterator<codim,All_Partition, const Grid >(this, level, true);
+      typedef MakeableInterfaceObject
+      < typename Codim< codim > :: LevelIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template lend< codim >( level ) );
+      return MakeableIterator( impl );
     }
 
-
-    //! Iterator to first entity of given codim on level
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim > :: template Partition<pitype> :: LevelIterator
     lbegin ( int level ) const
     {
-      return GeometryGridLevelIterator< codim, pitype, const Grid >(this, level);
+      typedef MakeableInterfaceObject
+      < typename Codim< codim >
+          :: template Partition< pitype > :: LevelIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template lbegin< codim, pitype >( level ) );
+      return MakeableIterator( impl );
     }
 
-
-    //! one past the end on this level
     template< int codim, PartitionIteratorType pitype >
     typename Codim< codim > :: template Partition<pitype> :: LevelIterator
     lend ( int level ) const
     {
-      return GeometryGridLevelIterator< codim, pitype, const Grid >(this, level, true);
+      typedef MakeableInterfaceObject
+      < typename Codim< codim >
+          :: template Partition< pitype > :: LevelIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template lend< codim, pitype >( level ) );
+      return MakeableIterator( impl );
     }
 
-
-    //! Iterator to first leaf entity of given codim
     template< int codim >
     typename Codim< codim > :: LeafIterator leafbegin () const
     {
-      return GeometryGridLeafIterator< codim, All_Partition, const Grid >( this );
+      typedef MakeableInterfaceObject
+      < typename Codim< codim > :: LeafIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template leafbegin< codim >() );
+      return MakeableIterator( impl );
     }
 
-
-    //! one past the end of the sequence of leaf entities
     template< int codim >
     typename Codim< codim > :: LeafIterator leafend () const
     {
-      return GeometryGridLeafIterator< codim, All_Partition, const Grid >( this, true );
+      typedef MakeableInterfaceObject
+      < typename Codim< codim > :: LeafIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template leafend< codim >() );
+      return MakeableIterator( impl );
     }
 
-
-    //! Iterator to first leaf entity of given codim
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition<pitype> :: LeafIterator
+    typename Codim< codim > :: template Partition< pitype > :: LeafIterator
     leafbegin () const
     {
-      return GeometryGridLeafIterator< codim, pitype, const Grid >( this );
+      typedef MakeableInterfaceObject
+      < typename Codim< codim >
+          :: template Partition< pitype > :: LeafIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template leafbegin< codim, pitype >() );
+      return MakeableIterator( impl );
     }
 
-    //! one past the end of the sequence of leaf entities
     template< int codim, PartitionIteratorType pitype >
-    typename Codim< codim > :: template Partition<pitype> :: LeafIterator
+    typename Codim< codim > :: template Partition< pitype > :: LeafIterator
     leafend () const
     {
-      return GeometryGridLeafIterator< codim, pitype, const Grid >( this, true );
+      typedef MakeableInterfaceObject
+      < typename Codim< codim >
+          :: template Partition< pitype > :: LeafIterator >
+      MakeableIterator;
+      typedef typename MakeableIterator :: ImplementationType Impl;
+      Impl impl( *this, hostGrid().template leafend< codim, pitype >() );
+      return MakeableIterator( impl );
     }
 
     int size ( int level, int codim ) const
@@ -528,16 +557,14 @@ namespace Dune
   protected:
     using Base :: getRealImplementation;
 
-    //! Returns the hostgrid entity encapsulated in given subgrid entity
     template< int codim >
-    static typename HostGrid :: template Codim< codim > :: EntityPointer
+    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
     getHostEntity( const typename Codim< codim > :: Entity &entity )
     {
       return getRealImplementation( entity ).hostEntity_;
     }
 
   private:
-    //! compute the grid indices and ids
     void updateIndexSets ()
     {
       if( leafIndexSet_ != 0 )
@@ -563,53 +590,8 @@ namespace Dune
       for( int i = updateLevels; i < newNumLevels; ++i )
         levelIndexSets_[ i ] = 0;
     }
-  }; // end Class GeometryGrid
+  };
 
-
-
-  // Capabilities
-  // ------------
-
-  namespace Capabilities
-  {
-    //! \todo Please doc me !
-    template< class HostGrid, class CoordFunction, int codim >
-    struct hasEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
-    {
-      static const bool v = hasEntity< HostGrid, codim > :: v;
-    };
-
-
-    //! \todo Please doc me !
-    template< class HostGrid, class CoordFunction >
-    struct isParallel< GeometryGrid< HostGrid, CoordFunction > >
-    {
-      static const bool v = isParallel< HostGrid > :: v;
-    };
-
-
-    //! \todo Please doc me !
-    template< class HostGrid, class CoordFunction >
-    struct hasHangingNodes< GeometryGrid< HostGrid, CoordFunction > >
-    {
-      static const bool v = hasHangingNodes< HostGrid > :: v;
-    };
-
-    //! \todo Please doc me !
-    template< class HostGrid, class CoordFunction >
-    struct isLevelwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
-    {
-      static const bool v = isLevelwiseConforming< HostGrid > :: v;
-    };
-
-    //! \todo Please doc me !
-    template< class HostGrid, class CoordFunction >
-    struct isLeafwiseConforming< GeometryGrid< HostGrid, CoordFunction > >
-    {
-      static const bool v = isLeafwiseConforming< HostGrid > :: v;
-    };
-  }
-
-} // namespace Dune
+}
 
 #endif
