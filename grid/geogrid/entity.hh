@@ -5,17 +5,13 @@
 
 #include <dune/grid/common/referenceelements.hh>
 
+#include <dune/grid/geogrid/capabilities.hh>
+
 namespace Dune
 {
 
   // External Forward Declarations
   // -----------------------------
-
-  template< class HostGrid, class CoordFunction >
-  class GeometryGridFamily;
-
-  template< class HostGrid, class CoordFunction >
-  class GeometryGrid;
 
   template<int codim, class Grid, bool fake >
   class GeometryGridEntityPointer;
@@ -37,34 +33,38 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, int dim, class Grid >
+  template< int codim, class Grid,
+      bool fake = !(Capabilities :: hasHostEntity< Grid, codim > :: v) >
   class GeometryGridEntity;
+
+  template< int codim, int dim, class Grid >
+  class GeometryGridEntityAdapter;
 
 
 
   // GeometryGridEntity
   // ------------------
 
-  template< int codim, int dim, class HostGrid, class CoordFunction >
-  class GeometryGridEntity< codim, dim, const GeometryGrid< HostGrid, CoordFunction > >
+  template< int codim, class Grid, bool fake >
+  class GeometryGridEntity
   {
-    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
-
-    typedef typename Traits :: Grid Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
   public:
     typedef typename Traits :: ctype ctype;
 
     enum { codimension = codim };
-    enum { dimension = dim };
+    enum { dimension = Traits :: dimension };
     enum { mydimension = dimension - codimension };
     enum { dimensionworld = Traits :: dimensionworld };
 
     typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
 
   private:
-    //friend class GeometryGridEntityPointer< codimension, const Grid >;
-    template< int, class, bool > friend class GeometryGridEntityPointer;
+    typedef typename Traits :: HostGrid HostGrid;
+    typedef typename Traits :: CoordFunction CoordFunction;
+
+    friend class GeometryGridEntityPointer< codimension, const Grid, fake >;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
@@ -186,18 +186,16 @@ namespace Dune
   // GeometryGridEntity for codimension 0
   // ------------------------------------
 
-  template< int dim, class HostGrid, class CoordFunction >
-  class GeometryGridEntity< 0, dim, const GeometryGrid< HostGrid, CoordFunction > >
+  template< class Grid >
+  class GeometryGridEntity< 0, Grid, false >
   {
-    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
-
-    typedef typename Traits :: Grid Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
   public:
     typedef typename Traits :: ctype ctype;
 
     enum { codimension = 0 };
-    enum { dimension = dim };
+    enum { dimension = Traits :: dimension };
     enum { mydimension = dimension - codimension };
     enum { dimensionworld = Traits :: dimensionworld };
 
@@ -210,8 +208,10 @@ namespace Dune
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
   private:
-    //friend class GeometryGridEntityPointer< codimension, const Grid >;
-    template< int, class, bool > friend class GeometryGridEntityPointer;
+    typedef typename Traits :: HostGrid HostGrid;
+    typedef typename Traits :: CoordFunction CoordFunction;
+
+    friend class GeometryGridEntityPointer< codimension, const Grid, false >;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
@@ -459,6 +459,24 @@ namespace Dune
         geoInFather_ = 0;
       }
     }
+  };
+
+
+
+  template< int codim, int dim, class Grid >
+  class GeometryGridEntityAdapter
+    : public GeometryGridEntity< codim, Grid >
+  {
+    typedef GeometryGridEntity< codim, Grid > Base;
+
+  public:
+    GeometryGridEntityAdapter ( const Grid &grid )
+      : Base( grid )
+    {}
+
+    GeometryGridEntityAdapter ( const GeometryGridEntityAdapter &other )
+      : Base( other )
+    {}
   };
 
 }

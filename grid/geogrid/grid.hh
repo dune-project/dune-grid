@@ -106,7 +106,7 @@ namespace Dune
         LocalGeometry;
 
         typedef Dune :: Entity
-        < codim, dimension, const Grid, GeometryGridEntity >
+        < codim, dimension, const Grid, GeometryGridEntityAdapter >
         Entity;
         typedef Dune :: EntityPointer
         < const Grid, GeometryGridEntityPointer< codim, const Grid > >
@@ -204,7 +204,8 @@ namespace Dune
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
     typedef GridDefaultImplementation
-    < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
+    < HostGrid :: dimension, CoordFunction :: dimRange,
+        typename HostGrid :: ctype,
         GeometryGridFamily< HostGrid, CoordFunction > >
     Base;
 
@@ -212,7 +213,7 @@ namespace Dune
     friend class GeometryGridLeafIndexSet< const Grid >;
     friend class GeometryGridHierarchicIterator< const Grid >;
 
-    template< int, int, class > friend class GeometryGridEntity;
+    template< int, class, bool > friend class GeometryGridEntity;
     template< int, class, bool > friend class GeometryGridEntityPointer;
     template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
     template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;

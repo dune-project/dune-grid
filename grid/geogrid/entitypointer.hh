@@ -10,22 +10,11 @@
 namespace Dune
 {
 
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction >
-  class GeometryGridFamily;
-
-  template< class HostGrid, class CoordFunction >
-  class GeometryGrid;
-
-
-
   // Internal Forward Declarations
   // -----------------------------
 
   template< int codim, class Grid,
-      bool fake = Capabilities :: hasHostEntity< Grid, codim > :: v >
+      bool fake = !Capabilities :: hasHostEntity< Grid, codim > :: v >
   class GeometryGridEntityPointer;
 
 
