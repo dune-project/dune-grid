@@ -50,12 +50,6 @@ namespace Dune
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
-      template< class, bool > friend class GeometryGridEntityPointer;
-      template< class > friend class GeometryGridLevelIndexSet;
-      template< class > friend class GeometryGridLeafIndexSet;
-      template< class, class > friend class GeometryGridIdSet;
-      template< class, class > friend class GeometryGridCommDataHandle;
-
     public:
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
@@ -64,7 +58,7 @@ namespace Dune
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-      typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -114,14 +108,17 @@ namespace Dune
         return geo_;
       }
 
-      const HostEntity &hostEntity () const
-      {
-        return *hostEntity_;
-      }
+
+      // Implementation Stuff
 
       const Grid &grid () const
       {
         return *grid_;
+      }
+
+      const HostEntity &hostEntity () const
+      {
+        return *hostEntity_;
       }
 
       void initialize ( const Grid &grid, const HostEntity &hostEntity )
@@ -131,15 +128,15 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
-    private:
-      template< class IndexSet >
-      typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
+      template< class HostIndexSet >
+      typename HostIndexSet :: IndexType
+      index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template index< codimension >( hostEntity() );
       }
 
-      template< class IdSet >
-      typename IdSet :: IdType id ( const IdSet &idSet ) const
+      template< class HostIdSet >
+      typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
       {
         return idSet.template id< codimension >( hostEntity() );
       }
@@ -171,12 +168,6 @@ namespace Dune
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
-      template< class, bool > friend class GeometryGridEntityPointer;
-      template< class > friend class GeometryGridLevelIndexSet;
-      template< class > friend class GeometryGridLeafIndexSet;
-      template< class, class > friend class GeometryGridIdSet;
-      template< class, class > friend class GeometryGridCommDataHandle;
-
     public:
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
@@ -188,7 +179,7 @@ namespace Dune
       typedef typename HostGrid :: template Codim< dimension > :: EntityPointer
       HostVertexPointer;
 
-      typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -263,18 +254,20 @@ namespace Dune
         return geo_;
       }
 
-      const HostEntity &hostEntity () const
-      {
-        DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
-                    << codimension << "." );
-      }
+
+      // Implementation Stuff
 
       const Grid &grid () const
       {
         return *grid_;
       }
 
-      void initialize ( const Grid &grid, const HostEntity &hostEntity )
+      const HostElement &hostElement () const
+      {
+        return *hostElement_;
+      }
+
+      const HostEntity &hostEntity () const
       {
         DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
                     << codimension << "." );
@@ -288,6 +281,18 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
+      template< class HostIndexSet >
+      typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
+      {
+        return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
+      }
+
+      template< class HostIdSet >
+      typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
+      {
+        return idSet.template subId< codimension >( hostElement(), subEntity_ );
+      }
+
     private:
       PartitionType
       vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement,
@@ -295,23 +300,6 @@ namespace Dune
       {
         const int j = refElement.subEntity( subEntity_, codimension, 0, dimension );
         return hostElement().template entity< dimension >( j )->partitionType();
-      }
-
-      const HostElement &hostElement () const
-      {
-        return *hostElement_;
-      }
-
-      template< class IndexSet >
-      typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
-      {
-        return indexSet.template subIndex< codimension >( hostElement(), subEntity_ );
-      }
-
-      template< class IdSet >
-      typename IdSet :: IdType id ( const IdSet &idSet ) const
-      {
-        return idSet.template subId< codimension >( hostElement(), subEntity_ );
       }
     };
 
@@ -347,12 +335,6 @@ namespace Dune
       typedef typename Traits :: HostGrid HostGrid;
       typedef typename Traits :: CoordFunction CoordFunction;
 
-      template< class, bool > friend class GeometryGridEntityPointer;
-      template< class > friend class GeometryGridLevelIndexSet;
-      template< class > friend class GeometryGridLeafIndexSet;
-      template< class, class > friend class GeometryGridIdSet;
-      template< class, class > friend class GeometryGridCommDataHandle;
-
     public:
       typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
       typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
@@ -361,7 +343,7 @@ namespace Dune
     private:
       typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-      typedef GeometryGridCoordVector< mydimension, Grid, fake > CoordVector;
+      typedef GeoGrid :: CoordVector< mydimension, Grid, fake > CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
       typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
@@ -524,14 +506,17 @@ namespace Dune
         return hostEntity().mightBeCoarsened();
       }
 
-      const HostEntity &hostEntity () const
-      {
-        return *hostEntity_;
-      }
+
+      // Implementation Stuff
 
       const Grid &grid () const
       {
         return *grid_;
+      }
+
+      const HostEntity &hostEntity () const
+      {
+        return *hostEntity_;
       }
 
       void initialize ( const Grid &grid, const HostEntity &hostEntity )
@@ -541,15 +526,14 @@ namespace Dune
         Grid :: getRealImplementation( geo_ ) = GeometryImpl();
       }
 
-    private:
-      template< class IndexSet >
-      typename IndexSet :: IndexType index ( const IndexSet &indexSet ) const
+      template< class HostIndexSet >
+      typename HostIndexSet :: IndexType index ( const HostIndexSet &indexSet ) const
       {
         return indexSet.template index< codimension >( hostEntity() );
       }
 
-      template< class IdSet >
-      typename IdSet :: IdType id ( const IdSet &idSet ) const
+      template< class HostIdSet >
+      typename HostIdSet :: IdType id ( const HostIdSet &idSet ) const
       {
         return idSet.template id< codimension >( hostEntity() );
       }

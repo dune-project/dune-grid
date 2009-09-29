@@ -64,7 +64,7 @@ namespace Dune
       template< class Topology >
       struct CornerStorage
       {
-        typedef GeometryGridCornerStorage< Topology, const Grid > Type;
+        typedef GeoGrid :: CornerStorage< Topology, const Grid > Type;
       };
     };
 
@@ -118,18 +118,16 @@ namespace Dune
         enum { dimension = HostGrid :: dimension };
         enum { dimensionworld = CoordFunction :: dimRange };
 
-        typedef Intersection< const Grid, GeometryGridLeafIntersection >
+        typedef Dune :: Intersection< const Grid, GeoGrid :: LeafIntersection >
         LeafIntersection;
-        typedef Intersection< const Grid, GeometryGridLevelIntersection >
+        typedef Dune :: Intersection< const Grid, GeoGrid :: LevelIntersection >
         LevelIntersection;
 
-        typedef IntersectionIterator
-        < const Grid, GeometryGridLeafIntersectionIterator,
-            GeometryGridLeafIntersection >
+        typedef Dune :: IntersectionIterator
+        < const Grid, GeoGrid :: LeafIntersectionIterator, GeoGrid :: LeafIntersection >
         LeafIntersectionIterator;
-        typedef IntersectionIterator
-        < const Grid, GeometryGridLevelIntersectionIterator,
-            GeometryGridLevelIntersection >
+        typedef Dune :: IntersectionIterator
+        < const Grid, GeoGrid :: LevelIntersectionIterator, GeoGrid :: LevelIntersection >
         LevelIntersectionIterator;
 
         typedef Dune :: HierarchicIterator< const Grid, GeoGrid :: HierarchicIterator >
@@ -259,7 +257,7 @@ namespace Dune
 
     template< int, class, bool > friend class GeoGrid :: EntityImpl;
     template< class, bool > friend class GeoGrid :: EntityPointer;
-    template< class, class > friend class GeometryGridIntersection;
+    template< class, class > friend class GeoGrid :: Intersection;
     template< class, class > friend class GeometryGridIdSet;
     template < class > friend class HostGridAccess;
 

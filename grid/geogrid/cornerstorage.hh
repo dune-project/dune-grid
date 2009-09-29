@@ -8,147 +8,152 @@
 namespace Dune
 {
 
-  // GeometryGridCoordVector
-  // -----------------------
-
-  template< int mydim, class Grid, bool fake >
-  class GeometryGridCoordVector;
-
-
-  template< int mydim, class Grid >
-  class GeometryGridCoordVector< mydim, Grid, false >
+  namespace GeoGrid
   {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-    typedef typename Traits :: ctype ctype;
+    // CoordVector
+    // -----------
 
-    static const int dimension = Traits :: dimension;
-    static const int mydimension = mydim;
-    static const int codimension = dimension - mydimension;
-    static const int dimensionworld = Traits :: dimensionworld;
+    template< int mydim, class Grid, bool fake >
+    class CoordVector;
 
-    typedef FieldVector< ctype, dimensionworld > Coordinate;
 
-    typedef typename Traits :: HostGrid HostGrid;
-    typedef typename Traits :: CoordFunction CoordFunction;
-
-    typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
-
-  private:
-    const HostGeometry &hostGeometry_;
-    const CoordFunction &coordFunction_;
-
-  public:
-    GeometryGridCoordVector ( const HostGeometry &hostGeometry,
-                              const CoordFunction &coordFunction )
-      : hostGeometry_( hostGeometry ),
-        coordFunction_( coordFunction )
-    {}
-
-    template< unsigned int numCorners >
-    void calculate ( Coordinate (&corners)[ numCorners ] ) const
+    template< int mydim, class Grid >
+    class CoordVector< mydim, Grid, false >
     {
-      assert( numCorners == hostGeometry_.corners() );
-      for( unsigned int i = 0; i < numCorners; ++i )
-        coordFunction_.evaluate( hostGeometry_[ i ], corners[ i ] );
-    }
-  };
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
 
+      typedef typename Traits :: ctype ctype;
 
-  template< int mydim, class Grid >
-  class GeometryGridCoordVector< mydim, Grid, true >
-  {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
+      static const int dimension = Traits :: dimension;
+      static const int mydimension = mydim;
+      static const int codimension = dimension - mydimension;
+      static const int dimensionworld = Traits :: dimensionworld;
 
-    typedef typename Traits :: ctype ctype;
+      typedef FieldVector< ctype, dimensionworld > Coordinate;
 
-    static const int dimension = Traits :: dimension;
-    static const int mydimension = mydim;
-    static const int codimension = dimension - mydimension;
-    static const int dimensionworld = Traits :: dimensionworld;
+      typedef typename Traits :: HostGrid HostGrid;
+      typedef typename Traits :: CoordFunction CoordFunction;
 
-    typedef FieldVector< ctype, dimensionworld > Coordinate;
+      typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-    typedef typename Traits :: HostGrid HostGrid;
-    typedef typename Traits :: CoordFunction CoordFunction;
+    private:
+      const HostGeometry &hostGeometry_;
+      const CoordFunction &coordFunction_;
 
-    typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
+    public:
+      CoordVector ( const HostGeometry &hostGeometry,
+                    const CoordFunction &coordFunction )
+        : hostGeometry_( hostGeometry ),
+          coordFunction_( coordFunction )
+      {}
 
-  private:
-    const HostGeometry &hostGeometry_;
-    const unsigned int subEntity_;
-    const CoordFunction &coordFunction_;
-
-  public:
-    GeometryGridCoordVector ( const HostGeometry &hostGeometry,
-                              const unsigned int subEntity,
-                              const CoordFunction &coordFunction )
-      : hostGeometry_( hostGeometry ),
-        subEntity_( subEntity ),
-        coordFunction_( coordFunction )
-    {}
-
-    template< unsigned int numCorners >
-    void calculate ( Coordinate (&corners)[ numCorners ] ) const
-    {
-      const ReferenceElement< ctype, dimension > &refElement
-        = ReferenceElements< ctype, dimension > :: general( hostGeometry_.type() );
-      assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
-
-      for( unsigned int i = 0; i < numCorners; ++i )
+      template< unsigned int numCorners >
+      void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
-        const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-        coordFunction_.evaluate( hostGeometry_[ j ], corners[ i ] );
+        assert( numCorners == hostGeometry_.corners() );
+        for( unsigned int i = 0; i < numCorners; ++i )
+          coordFunction_.evaluate( hostGeometry_[ i ], corners[ i ] );
       }
-    }
-  };
+    };
 
 
-
-  // GeometryGridCornerStorage
-  // -------------------------
-
-  template< class Topology, class Grid >
-  class GeometryGridCornerStorage
-  {
-    typedef typename remove_const< Grid > :: type :: Traits Traits;
-
-    typedef typename Traits :: ctype ctype;
-
-    static const int dimension = Traits :: dimension;
-    static const int mydimension = Topology :: dimension;
-    static const int codimension = dimension - mydimension;
-    static const int dimensionworld = Traits :: dimensionworld;
-
-    typedef FieldVector< ctype, dimensionworld > Coordinate;
-
-  public:
-    static const unsigned int size = Topology :: numCorners;
-
-  private:
-    Coordinate coords_[ size ];
-
-  public:
-    template< bool fake >
-    explicit
-    GeometryGridCornerStorage ( const GeometryGridCoordVector< mydimension, Grid, fake > &coords )
+    template< int mydim, class Grid >
+    class CoordVector< mydim, Grid, true >
     {
-      coords.calculate( coords_ );
-    }
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-    template< class Mapping, unsigned int codim >
-    explicit
-    GeometryGridCornerStorage ( const GenericGeometry :: SubMappingCoords< Mapping, codim > &coords )
-    {
-      for( unsigned int i = 0; i < size; ++i )
-        coords_[ i ] = coords[ i ];
-    }
+      typedef typename Traits :: ctype ctype;
 
-    const Coordinate &operator[] ( unsigned int i ) const
+      static const int dimension = Traits :: dimension;
+      static const int mydimension = mydim;
+      static const int codimension = dimension - mydimension;
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      typedef FieldVector< ctype, dimensionworld > Coordinate;
+
+      typedef typename Traits :: HostGrid HostGrid;
+      typedef typename Traits :: CoordFunction CoordFunction;
+
+      typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
+
+    private:
+      const HostGeometry &hostGeometry_;
+      const unsigned int subEntity_;
+      const CoordFunction &coordFunction_;
+
+    public:
+      CoordVector ( const HostGeometry &hostGeometry,
+                    const unsigned int subEntity,
+                    const CoordFunction &coordFunction )
+        : hostGeometry_( hostGeometry ),
+          subEntity_( subEntity ),
+          coordFunction_( coordFunction )
+      {}
+
+      template< unsigned int numCorners >
+      void calculate ( Coordinate (&corners)[ numCorners ] ) const
+      {
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension > :: general( hostGeometry_.type() );
+        assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
+
+        for( unsigned int i = 0; i < numCorners; ++i )
+        {
+          const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
+          coordFunction_.evaluate( hostGeometry_[ j ], corners[ i ] );
+        }
+      }
+    };
+
+
+
+    // CornerStorage
+    // -------------
+
+    template< class Topology, class Grid >
+    class CornerStorage
     {
-      return coords_[ i ];
-    }
-  };
+      typedef typename remove_const< Grid > :: type :: Traits Traits;
+
+      typedef typename Traits :: ctype ctype;
+
+      static const int dimension = Traits :: dimension;
+      static const int mydimension = Topology :: dimension;
+      static const int codimension = dimension - mydimension;
+      static const int dimensionworld = Traits :: dimensionworld;
+
+      typedef FieldVector< ctype, dimensionworld > Coordinate;
+
+    public:
+      static const unsigned int size = Topology :: numCorners;
+
+    private:
+      Coordinate coords_[ size ];
+
+    public:
+      template< bool fake >
+      explicit
+      CornerStorage ( const CoordVector< mydimension, Grid, fake > &coords )
+      {
+        coords.calculate( coords_ );
+      }
+
+      template< class Mapping, unsigned int codim >
+      explicit
+      CornerStorage ( const GenericGeometry :: SubMappingCoords< Mapping, codim > &coords )
+      {
+        for( unsigned int i = 0; i < size; ++i )
+          coords_[ i ] = coords[ i ];
+      }
+
+      const Coordinate &operator[] ( unsigned int i ) const
+      {
+        return coords_[ i ];
+      }
+    };
+
+  }
 
 }
 
