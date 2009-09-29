@@ -11,27 +11,8 @@
 namespace Dune
 {
 
-  // External Forward Declarations
-  // -----------------------------
-
-  template< class HostGrid, class CoordFunction >
-  class GeometryGrid;
-
-
-
   namespace GeoGrid
   {
-
-    // Internal Forward Declarations
-    // -----------------------------
-
-    template< class Grid >
-    class LevelIndexSet;
-
-    template< class Grid >
-    class LeafIndexSet;
-
-
 
     // LevelIteratorProvider
     // ---------------------
