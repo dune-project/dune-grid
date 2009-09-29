@@ -40,11 +40,18 @@ namespace Dune
       FieldMatrix< double, mydim, mydim > id;
       FMatrixHelp::multMatrix( jt, jit, id );
       bool isId = true;
-      for( int i = 0; i < mydim; ++i )
-        for( int j = 0; j < mydim; ++j )
-          isId &= (std::abs( id[ i ][ j ] - (i == j ? 1 : 0) ) < 1e-8);
+      for( int j = 0; j < mydim; ++j )
+        for( int k = 0; k < mydim; ++k )
+          isId &= (std::abs( id[ j ][ k ] - (j == k ? 1 : 0) ) < 1e-8);
       if( !isId )
+      {
         std::cerr << "Error: jacobianTransposed and jacobianInverseTransposed are not inverse to each other." << std::endl;
+        std::cout << "       id != [ ";
+        for( int j = 0; j < mydim; ++j )
+          std::cout << (j > 0 ? " | " : "") << id[ j ];
+        std::cout << " ]" << std::endl;
+      }
+
 
       if( geometry.integrationElement( x ) < 0 )
         std::cerr << "Error: Negative integrationElement found." << std::endl;
