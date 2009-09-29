@@ -1,0 +1,19 @@
+DGF
+
+VERTEX
+ 1  -1
+-1  -1
+ 1   1
+-1   1
+#
+
+SIMPLEX
+0  1  2
+2  1  3
+#
+
+GRIDPARAMETER
+NAME AlbertaGrid
+REFINEMENTEDGE ARBITRARY
+DUMPFILENAME basicunitcube-2d.amc
+#

@@ -1,0 +1,21 @@
+DGF
+
+Interval
+0 0 0
+1 1 1
+2 2 2
+#
+
+PeriodicFaceTransformation
+1 0 0, 0 1 0, 0 0 1 + 1 0 0
+1 0 0, 0 1 0, 0 0 1 + 0 1 0
+1 0 0, 0 1 0, 0 0 1 + 0 0 1
+#
+
+BoundaryDomain
+default         1
+#
+
+GridParameter
+refinementedge  arbitrary
+#
