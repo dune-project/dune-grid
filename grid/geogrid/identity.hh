@@ -16,7 +16,7 @@ namespace Dune
 
     typedef Dune :: FieldVector< ctype, dim > Vector;
 
-    void evaluate ( const Vector &x, Vector &y )
+    void evaluate ( const Vector &x, Vector &y ) const
     {
       y = x;
     }
