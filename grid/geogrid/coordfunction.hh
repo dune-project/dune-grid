@@ -124,10 +124,11 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
-    template< class Index >
-    void evaluate ( const Index &vIdx, RangeVector &y ) const
+    template< class HostEntity >
+    void evaluate ( const HostEntity &hostEntity, unsigned int corner,
+                    RangeVector &y ) const
     {
-      return asImp().evaluate( vIdx, y );
+      return asImp().evaluate( hostEntity, corner, y );
     }
 
   protected:
@@ -165,8 +166,9 @@ namespace Dune
     DiscreteCoordFunction ( const This & );
     This &operator= ( const This & );
 
-    template< class Index >
-    void evaluate ( const Index &vIdx, RangeVector &y ) const;
+    template< class HostEntity >
+    void evaluate ( const HostEntity &hostEntity, unsigned int corner,
+                    RangeVector &y ) const;
   };
 
 

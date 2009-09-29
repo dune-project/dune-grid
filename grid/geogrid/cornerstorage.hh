@@ -5,11 +5,97 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
+#include <dune/grid/geogrid/coordfunction.hh>
+
 namespace Dune
 {
 
   namespace GeoGrid
   {
+
+    // CoordFunctionCaller
+    // -------------------
+
+    template< class HostEntity, class CoordFunctionInterface >
+    class CoordFunctionCaller;
+
+    template< class HostEntity,
+        class ct, unsigned int dimD, unsigned int dimR, class Impl >
+    class CoordFunctionCaller
+    < HostEntity, AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > >
+    {
+      typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >
+      CoordFunctionInterface;
+      typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
+
+      typedef typename HostEntity :: Geometry HostGeometry;
+
+      typedef typename CoordFunctionInterface :: RangeVector RangeVector;
+
+      const HostGeometry &hostGeometry_;
+      const CoordFunctionInterface &coordFunction_;
+
+    public:
+      CoordFunctionCaller ( const HostEntity &hostEntity,
+                            const CoordFunctionInterface &coordFunction )
+        : hostGeometry_( hostEntity.geometry() ),
+          coordFunction_( coordFunction )
+      {}
+
+      void evaluate ( unsigned int i, RangeVector &y ) const
+      {
+        return coordFunction_.evaluate( hostGeometry_[ i ], y );
+      }
+
+      GeometryType type () const
+      {
+        return hostGeometry_.type();
+      }
+
+      unsigned int numCorners () const
+      {
+        return hostGeometry_.corners();
+      }
+    };
+
+    template< class HostEntity, class ct, unsigned int dimR, class Impl >
+    class CoordFunctionCaller
+    < HostEntity, DiscreteCoordFunctionInterface< ct, dimR, Impl > >
+    {
+      typedef DiscreteCoordFunctionInterface< ct, dimR, Impl >
+      CoordFunctionInterface;
+      typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
+
+      typedef typename CoordFunctionInterface :: RangeVector RangeVector;
+
+      const HostEntity &hostEntity_;
+      const CoordFunctionInterface &coordFunction_;
+
+    public:
+      CoordFunctionCaller ( const HostEntity &hostEntity,
+                            const CoordFunctionInterface &coordFunction )
+        : hostEntity_( hostEntity ),
+          coordFunction_( coordFunction )
+      {}
+
+      void evaluate ( unsigned int i, RangeVector &y ) const
+      {
+        return coordFunction_.evaluate( hostEntity_, i, y );
+      }
+
+      GeometryType type () const
+      {
+        return hostEntity_.type();
+      }
+
+      unsigned int numCorners () const
+      {
+        return hostEntity_.geometry().corners();
+      }
+    };
+
+
+
 
     // CoordVector
     // -----------
@@ -37,27 +123,26 @@ namespace Dune
 
       typedef typename HostGrid :: template Codim< codimension > :: Entity
       HostEntity;
-      typedef typename HostGrid :: template Codim< codimension > :: Geometry
-      HostGeometry;
+
+      typedef GeoGrid :: CoordFunctionCaller
+      < HostEntity, typename CoordFunction :: Interface >
+      CoordFunctionCaller;
 
     private:
-      const HostEntity &hostEntity_;
-      const CoordFunction &coordFunction_;
+      const CoordFunctionCaller coordFunctionCaller_;
 
     public:
       CoordVector ( const HostEntity &hostEntity,
                     const CoordFunction &coordFunction )
-        : hostEntity_( hostEntity ),
-          coordFunction_( coordFunction )
+        : coordFunctionCaller_( hostEntity, coordFunction )
       {}
 
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
-        const HostGeometry &hostGeo = hostEntity_.geometry();
-        assert( numCorners == hostGeo.corners() );
+        assert( numCorners == coordFunctionCaller_.numCorners() );
         for( unsigned int i = 0; i < numCorners; ++i )
-          coordFunction_.evaluate( hostGeo[ i ], corners[ i ] );
+          coordFunctionCaller_.evaluate( i, corners[ i ] );
       }
     };
 
@@ -80,34 +165,35 @@ namespace Dune
       typedef typename Traits :: CoordFunction CoordFunction;
 
       typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
-      typedef typename HostGrid :: template Codim< 0 > :: Geometry HostGeometry;
+
+      typedef GeoGrid :: CoordFunctionCaller
+      < HostElement, typename CoordFunction :: Interface >
+      CoordFunctionCaller;
 
     private:
-      const HostElement &hostElement_;
+      const CoordFunctionCaller coordFunctionCaller_;
       const unsigned int subEntity_;
-      const CoordFunction &coordFunction_;
 
     public:
       CoordVector ( const HostElement &hostElement,
                     const unsigned int subEntity,
                     const CoordFunction &coordFunction )
-        : hostElement_( hostElement ),
-          subEntity_( subEntity ),
-          coordFunction_( coordFunction )
+        : coordFunctionCaller_( hostElement, coordFunction ),
+          subEntity_( subEntity )
       {}
 
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
+        const GeometryType type = coordFunctionCaller_.type();
         const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( hostElement_.type() );
+          = ReferenceElements< ctype, dimension > :: general( type );
         assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
 
-        const HostGeometry &hostGeo = hostElement_.geometry();
         for( unsigned int i = 0; i < numCorners; ++i )
         {
           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-          coordFunction_.evaluate( hostGeo[ j ], corners[ i ] );
+          coordFunctionCaller_.evaluate( j, corners[ i ] );
         }
       }
     };
