@@ -869,14 +869,24 @@ namespace Dune
         return hostEntity().isRegular();
       }
 
-      bool wasRefined () const
+      bool isNew () const
       {
-        return hostEntity().wasRefined();
+        return hostEntity().isNew();
       }
 
-      bool mightBeCoarsened () const
+      bool wasRefined () const DUNE_DEPRECATED
       {
-        return hostEntity().mightBeCoarsened();
+        return hostEntity().isNew();
+      }
+
+      bool mightVanish () const
+      {
+        return hostEntity().mightVanish();
+      }
+
+      bool mightBeCoarsened () const DUNE_DEPRECATED
+      {
+        return hostEntity().mightVanish();
       }
 
 
