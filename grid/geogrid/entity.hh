@@ -143,9 +143,10 @@ namespace Dune
       if( geo_ == 0 )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
+        const CoordFunction &coordFunction = grid().coordFunction();
         corners_.resize( hostGeo.corners() );
         for( unsigned int i = 0; i < corners_.size(); ++i )
-          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
         geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
       }
       return *geo_;
@@ -157,12 +158,12 @@ namespace Dune
       return *hostEntity_;
     }
 
-  private:
-    const CoordFunction &coordFunction () const
+    const Grid &grid () const
     {
-      return grid_->coordFunction();
+      return *grid_;
     }
 
+  private:
     bool isValid () const
     {
       return (hostEntity_ != 0);
@@ -321,10 +322,11 @@ namespace Dune
         corners_.resize( refElement.size( subEntity_, codimension, dimension ) );
 
         const HostGeometry &hostGeo = hostElement().geometry();
+        const CoordFunction &coordFunction = grid().coordFunction();
         for( unsigned int i = 0; i < corners_.size(); ++i )
         {
           const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
-          coordFunction().evaluate( hostGeo[ j ], corners_[ i ] );
+          coordFunction.evaluate( hostGeo[ j ], corners_[ i ] );
         }
         geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
       }
@@ -335,6 +337,11 @@ namespace Dune
     {
       DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
                   << codimension << "." );
+    }
+
+    const Grid &grid () const
+    {
+      return *grid_;
     }
 
   private:
@@ -350,11 +357,6 @@ namespace Dune
     {
       assert( isValid() );
       return *hostElement_;
-    }
-
-    const CoordFunction &coordFunction () const
-    {
-      return grid_->coordFunction();
     }
 
     bool isValid () const
@@ -506,9 +508,10 @@ namespace Dune
       if( geo_ == 0 )
       {
         const HostGeometry &hostGeo = hostEntity().geometry();
+        const CoordFunction &coordFunction = grid().coordFunction();
         corners_.resize( hostGeo.corners() );
         for( unsigned int i = 0; i < corners_.size(); ++i )
-          coordFunction().evaluate( hostGeo[ i ], corners_[ i ] );
+          coordFunction.evaluate( hostGeo[ i ], corners_[ i ] );
         geo_ = new MakeableGeometry( GeometryImpl( type(), corners_ ) );
       }
       return *geo_;
@@ -635,12 +638,12 @@ namespace Dune
       return *hostEntity_;
     }
 
-  private:
-    const CoordFunction &coordFunction () const
+    const Grid &grid () const
     {
-      return grid_->coordFunction();
+      return *grid_;
     }
 
+  private:
     bool isValid () const
     {
       return (hostEntity_ != 0);
