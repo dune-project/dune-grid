@@ -145,6 +145,41 @@ namespace Dune
   // GeometryGrid
   // ------------
 
+  /** \class GeometryGrid
+   *  \brief grid wrapper replacing the geometries
+   *
+   *  GeometryGrid wraps another DUNE grid and replaces its geometry by the
+   *  generic geometries from dune-grid. These are linear (respectively
+   *  n-linear) DUNE geometries interpolating some given corners. These corners
+   *  are obtained by mapping the corners of the host grid's geometry (also
+   *  called host geometry) by a coordinate function.
+   *
+   *  An example of a coordinate function is given by the following code:
+   *  \code
+   *  struct ExampleFunction
+   *  {
+   *    enum { dimRange = 3 };
+   *    enum { dimDomain = 2 };
+   *
+   *    void evaluate ( const Dune :: FieldVector< double, dimDomain > &x,
+   *                    Dune :: FieldVector< double, dimRange > &y ) const
+   *    {
+   *      y[ 0 ] = x[ 0 ];
+   *      y[ 1 ] = x[ 1 ];
+   *      y[ 2 ] = x[ 0 ] + x[ 1 ];
+   *    }
+   *  };
+   *  \endcode
+   *
+   *  \note A dune-fem Function can be used as a coordinate function.
+   *        The evaluation of discrete functions would be very expensive,
+   *        though.
+   *
+   *  \tparam HostGrid       DUNE grid to be wrapped (called host grid)
+   *  \tparam CoordFunction  coordinate function
+   *
+   *  \nosubgrouping
+   */
   template< class HostGrid, class CoordFunction >
   class GeometryGrid
     : public GridDefaultImplementation
@@ -152,6 +187,7 @@ namespace Dune
           GeometryGridFamily< HostGrid, CoordFunction > >
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
 
     typedef GridDefaultImplementation
     < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
@@ -170,23 +206,36 @@ namespace Dune
     template< class, class > friend class GeometryGridIdSet;
 
   public:
+    /** \name Exported Types
+     * \{ */
+
+    //! type of the host grid (template parameter)
     typedef HostGrid HostGridType;
 
-    typedef GeometryGridFamily< HostGrid, CoordFunction > GridFamily;
+    //! type of the grid traints
     typedef typename GridFamily :: Traits Traits;
 
+    //! type of vector coordinates (e.g., double)
     typedef typename Traits :: ctype ctype;
 
+    //! iterator over the grid hierarchy
     typedef typename Traits :: HierarchicIterator HierarchicIterator;
+    //! iterator over intersections with other entities on the leaf level
     typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+    //! iterator over intersections with other entities on the same level
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
+    //! index set for the the leaf entities in the hierarchy
     typedef typename Traits :: LeafIndexSet LeafIndexSet;
+    //! index set for one level of entities in the hierarchy
     typedef typename Traits :: LevelIndexSet LevelIndexSet;
 
+    //! set of identifiers that are globally (i.e., within all processes) unique
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    //! set of identifiers that are locally (i.e., only within this process) unique
     typedef typename Traits :: LocalIdSet LocalIdSet;
 
+    //! communicator with all other processes having some part of the grid
     typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
     template< int codim >
@@ -222,6 +271,8 @@ namespace Dune
       typedef typename Partition< All_Partition > :: LevelIterator LevelIterator;
     };
 
+    /** \} */
+
   private:
     HostGrid *const hostGrid_;
     const CoordFunction &coordFunction_;
@@ -232,6 +283,14 @@ namespace Dune
     LocalIdSet localIdSet_;
 
   public:
+    /** \brief constructor
+     *
+     *  The references to host grid and coordinate function are stored in the
+     *  grid. Therefore, they must remain valid until the grid is destroyed.
+     *
+     *  \param hostGrid       reference to the grid to wrap
+     *  \param coordFunction  reference to the coordinate function
+     */
     GeometryGrid ( HostGrid &hostGrid, const CoordFunction &coordFunction )
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
@@ -256,23 +315,86 @@ namespace Dune
       }
     }
 
-    //**********************************************************
-    // The Interface Methods
-    //**********************************************************
+    /** \name Grid Identification
+     *  \{ */
 
+    /** \brief obtain a string naming the grid
+     *
+     *  \returns ''GeometryGrid\< \em host \em grid \em name \>''
+     */
     std :: string name () const
     {
       return std :: string( "GeometryGrid< " )
              + hostGrid().name() + std :: string( " >" );
     }
 
+    /** \} */
 
-    //! Return maximum level defined in this grid. Levels are numbered
-    //! 0 ... maxlevel with 0 the coarsest level.
+
+    /** \name Sizes
+     *  \{ */
+
+    /** \brief obtain maximal grid level
+     *
+     *  Grid levels are numbered 0, ..., L, where L is the value returned by
+     *  this method.
+     *
+     *  \returns maximal grid level
+     */
     int maxLevel () const
     {
       return hostGrid().maxLevel();
     }
+
+    /** \brief obtain number of entites on a level
+     *
+     *  \param[in]  level  level to consider
+     *  \param[in]  codim  codimension to consider
+     *
+     *  \returns number of entities of codimension \em codim on grid level
+     *           \em level.
+     */
+    int size ( int level, int codim ) const
+    {
+      return hostGrid().size( level, codim );
+    }
+
+    /** \brief obtain number of leaf entities
+     *
+     *  \param[in]  codim  codimension to consider
+     *
+     *  \returns number of leaf entities of codimension \em codim
+     */
+    int size ( int codim ) const
+    {
+      return hostGrid().size( codim );
+    }
+
+    /** \brief obtain number of entites on a level
+     *
+     *  \param[in]  level  level to consider
+     *  \param[in]  type   geometry type to consider
+     *
+     *  \returns number of entities with a geometry of type \em type on grid
+     *           level \em level.
+     */
+    int size ( int level, GeometryType type ) const
+    {
+      return hostGrid().size( level, type );
+    }
+
+    /** \brief obtain number of leaf entities
+     *
+     *  \param[in]  type   geometry type to consider
+     *
+     *  \returns number of leaf entities with a geometry of type \em type
+     */
+    int size ( GeometryType type ) const
+    {
+      return hostGrid().size( type );
+    }
+
+    /** \} */
 
     template< int codim >
     typename Codim< codim > :: LevelIterator lbegin ( int level ) const
@@ -368,26 +490,6 @@ namespace Dune
       typedef typename MakeableIterator :: ImplementationType Impl;
       Impl impl( *this, hostGrid().template leafend< codim, pitype >() );
       return MakeableIterator( impl );
-    }
-
-    int size ( int level, int codim ) const
-    {
-      return hostGrid().size( level, codim );
-    }
-
-    int size ( int codim ) const
-    {
-      return hostGrid().size( codim );
-    }
-
-    int size ( int level, GeometryType type ) const
-    {
-      return hostGrid().size( level, type );
-    }
-
-    int size ( GeometryType type ) const
-    {
-      return hostGrid().size( type );
     }
 
     const GlobalIdSet &globalIdSet () const
