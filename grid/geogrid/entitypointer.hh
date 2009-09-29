@@ -35,6 +35,33 @@ namespace Dune
 
 
 
+  /************************************************************************
+  * Warning:
+  *
+  * The wrapped iterators are not directly derived from the entity
+  * pointer. They differ in the type of host iterator they store
+  * internally.
+  * This means that Iterator::Base is not binary compatible with
+  * EntityPointer. Since the DUNE entity pointer interface contains a
+  * dirty reinterpret_cast, this may cause trouble.
+  * In this case, the fields in the entity pointer can be reordered such
+  * that the wrapped iterator is the last field. Then, the copy
+  * constructor for arbitrary entity pointer has to be marked explicit and
+  * a two cast operators of the form
+  *
+  * operator Base & ()
+  * {
+  *   return reinterpret_cast< Base & >( *this );
+  * }
+  *
+  * have to be added.
+  *
+  * This should only be done in the emergency that this code causes a
+  * segmentation fault!
+  ************************************************************************/
+
+
+
   // GeometryGridEntityPointerTraits
   // -------------------------------
 
@@ -104,12 +131,6 @@ namespace Dune
     typedef GeometryGridEntityPointer< BaseTraits, fake > Base;
     typedef GeometryGridEntityPointer< BaseTraits, fake > base;
 
-  private:
-    typedef MakeableInterfaceObject< Entity > MakeableEntity;
-    typedef typename MakeableEntity :: ImplementationType EntityImpl;
-
-    mutable MakeableEntity virtualEntity_;
-
   protected:
     typedef typename Traits :: HostEntityPointer HostEntityPointer;
     typedef typename Traits :: HostEntityIterator HostEntityIterator;
@@ -117,29 +138,35 @@ namespace Dune
 
     HostEntityIterator hostEntityIterator_;
 
+  private:
+    typedef MakeableInterfaceObject< Entity > MakeableEntity;
+    typedef typename MakeableEntity :: ImplementationType EntityImpl;
+
+    mutable MakeableEntity virtualEntity_;
+
   public:
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostEntityIterator &hostEntityIterator )
-      : virtualEntity_( EntityImpl( grid ) ),
-        hostEntityIterator_( hostEntityIterator )
+      : hostEntityIterator_( hostEntityIterator ),
+        virtualEntity_( EntityImpl( grid ) )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
-        hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) )
+      : hostEntityIterator_( hostElement.template entity< codimension >( subEntity ) ),
+        virtualEntity_( EntityImpl( grid ) )
     {}
 
     GeometryGridEntityPointer ( const This &other )
-      : virtualEntity_( other.grid() ),
-        hostEntityIterator_( other.hostEntityIterator_ )
+      : hostEntityIterator_( other.hostEntityIterator_ ),
+        virtualEntity_( other.grid() )
     {}
 
     template< class T >
     GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : virtualEntity_( other.grid() ),
-        hostEntityIterator_( other.hostEntityIterator_ )
+      : hostEntityIterator_( other.hostEntityIterator_ ),
+        virtualEntity_( other.grid() )
     {}
 
     This &operator= ( const This &other )
@@ -147,16 +174,6 @@ namespace Dune
       hostEntityIterator_ = other.hostEntityIterator_;
       update();
       return *this;
-    }
-
-    operator Base & ()
-    {
-      return reinterpret_cast< Base & >( *this );
-    }
-
-    operator const Base & () const
-    {
-      return reinterpret_cast< const Base & >( *this );
     }
 
     template< class T >
@@ -231,38 +248,38 @@ namespace Dune
     typedef MakeableInterfaceObject< Entity > MakeableEntity;
     typedef typename MakeableEntity :: ImplementationType EntityImpl;
 
-    mutable MakeableEntity virtualEntity_;
-    int subEntity_;
     HostElementIterator hostElementIterator_;
+    int subEntity_;
+    mutable MakeableEntity virtualEntity_;
 
   public:
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElementIterator &hostElementIterator,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : hostElementIterator_( hostElementIterator ),
         subEntity_( subEntity ),
-        hostElementIterator_( hostElementIterator )
+        virtualEntity_( EntityImpl( grid ) )
     {}
 
     GeometryGridEntityPointer ( const Grid &grid,
                                 const HostElement &hostElement,
                                 int subEntity )
-      : virtualEntity_( EntityImpl( grid ) ),
+      : hostElementIterator_( hostElement.template entity< 0 >( 0 ) ),
         subEntity_( subEntity ),
-        hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
+        virtualEntity_( EntityImpl( grid ) )
     {}
 
     GeometryGridEntityPointer ( const This &other )
-      : virtualEntity_( other.grid() ),
+      : hostElementIterator_( other.hostElementIterator_ ),
         subEntity_( other.subEntity_ ),
-        hostElementIterator_( other.hostElementIterator_ )
+        virtualEntity_( other.grid() )
     {}
 
     template< class T >
     GeometryGridEntityPointer ( const GeometryGridEntityPointer< T, fake > &other )
-      : virtualEntity_( other.grid() ),
+      : hostElementIterator_( other.hostElementIterator_ ),
         subEntity_( other.subEntity_ ),
-        hostElementIterator_( other.hostElementIterator_ )
+        virtualEntity_( other.grid() )
     {}
 
     This &operator= ( const This &other )
@@ -271,16 +288,6 @@ namespace Dune
       subEntity_ = other.subEntity_;
       update();
       return *this;
-    }
-
-    operator Base & ()
-    {
-      return reinterpret_cast< Base & >( *this );
-    }
-
-    operator const Base & () const
-    {
-      return reinterpret_cast< const Base & >( *this );
     }
 
     template< class T >
