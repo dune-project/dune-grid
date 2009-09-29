@@ -270,28 +270,32 @@ namespace Dune
                       const HostElementIterator &hostElementIterator, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
-          subEntity_( subEntity ),
+          subEntity_( -1 ),
           hostElementIterator_( hostElementIterator )
-      {}
+      {
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const int tid = GenericGeometry::topologyId( hostElementPointer()->type() );
+        if( subEntity != -1 )
+          subEntity_ = Map::template dune2generic( tid, subEntity, codimension );
+      }
 
       EntityPointer ( const Grid &grid, const HostElement &hostElement, int subEntity )
         : grid_( &grid ),
           entity_( 0 ),
-          subEntity_( -1 ),
+          subEntity_( subEntity ),
           hostElementIterator_( hostElement )
-          //hostElementIterator_( hostElement.template entity< 0 >( 0 ) )
-      {
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const int tid = GenericGeometry::topologyId( hostElement.type() );
-        subEntity_ = Map::template generic2dune< codimension >( tid, subEntity );
-      }
+      {}
 
       EntityPointer ( const typename EntityWrapper::Implementation &entity )
         : grid_( &entity.grid() ),
           entity_( 0 ),
-          subEntity_( entity.subEntity() ),
+          subEntity_( -1 ),
           hostElementIterator_( entity.hostElement() )
-      {}
+      {
+        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+        const int tid = GenericGeometry::topologyId( entity.hostElement().type() );
+        subEntity_ = Map::template dune2generic( tid, entity.subEntity(), codimension );
+      }
 
       EntityPointer ( const This &other )
         : grid_( other.grid_ ),
@@ -353,14 +357,8 @@ namespace Dune
         const HostElement &otherElement = *(other.hostElementPointer());
         assert( indexSet.contains( otherElement ) );
 
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const unsigned int thisId = GenericGeometry::topologyId( thisElement.type() );
-        const unsigned int otherId = GenericGeometry::topologyId( otherElement.type() );
-        const int thisGSub = Map::dune2generic( thisId, thisSub, codimension );
-        const int otherGSub = Map::dune2generic( otherId, otherSub, codimension );
-
-        const int thisIndex = indexSet.subIndex( thisElement, thisGSub, codimension );
-        const int otherIndex = indexSet.subIndex( otherElement, otherGSub, codimension );
+        const int thisIndex = indexSet.subIndex( thisElement, thisSub, codimension );
+        const int otherIndex = indexSet.subIndex( otherElement, otherSub, codimension );
         return (thisIndex == otherIndex);
       }
 
@@ -368,8 +366,12 @@ namespace Dune
       {
         if( entity_ == 0 )
         {
+          typedef GenericGeometry::MapNumberingProvider< dimension > Map;
+          const int tid = GenericGeometry::topologyId( hostElementPointer()->type() );
+          const int duneSubEntity = Map::template dune2generic( tid, subEntity_, codimension );
+
           entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
+          entity_->initialize( grid(), *hostElementPointer(), duneSubEntity );
         }
         return *entity_;
       }

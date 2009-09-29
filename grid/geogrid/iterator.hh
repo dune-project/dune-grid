@@ -257,9 +257,9 @@ namespace Dune
       std :: vector< bool > visited_;
 
     protected:
-      using Base :: hostElementIterator_;
-      using Base :: subEntity_;
-      using Base :: releaseEntity;
+      using Base::hostElementIterator_;
+      using Base::subEntity_;
+      using Base::releaseEntity;
 
     public:
       Iterator ( const Grid &grid, int level, IteratorType type )
@@ -289,15 +289,14 @@ namespace Dune
           const int count = refElement.size( codimension );
           for( ; subEntity_ < count; ++subEntity_ )
           {
-            if( !Filter :: apply( refElement, hostElement, subEntity_ ) )
-              continue;
-
             typedef GenericGeometry::MapNumberingProvider< dimension > Map;
             const unsigned int topologyId = GenericGeometry::topologyId( hostElement.type() );
-            const int genericSub = Map::dune2generic( topologyId, subEntity_, codimension );
+            const int duneSubEntity = Map::generic2dune( topologyId, subEntity_, codimension );
 
-            const size_t index
-              = hostIndexSet_->subIndex( hostElement, genericSub, codimension );
+            if( !Filter::apply( refElement, hostElement, duneSubEntity ) )
+              continue;
+
+            const size_t index = hostIndexSet_->subIndex( hostElement, subEntity_, codimension );
             if( !visited_[ index ] )
             {
               visited_[ index ] = true;
