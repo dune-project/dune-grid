@@ -12,6 +12,9 @@ namespace Dune
   // -----------------------------
 
   template< class HostGrid, class CoordFunction >
+  class GeometryGridFamily;
+
+  template< class HostGrid, class CoordFunction >
   class GeometryGrid;
 
   template<int codim, class GridImp>
@@ -39,49 +42,6 @@ namespace Dune
 
 
 
-
-  // GeometryGridMakeableEntity
-  // --------------------------
-
-  template<int codim, int dim, class GridImp>
-  class GeometryGridMakeableEntity :
-    public GridImp::template Codim<codim>::Entity
-  {
-  public:
-
-    // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
-
-    // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
-
-
-    //! \todo Please doc me !
-    GeometryGridMakeableEntity(const GridImp* identityGrid, const HostGridEntityPointer& hostEntity) :
-      GridImp::template Codim<codim>::Entity (GeometryGridEntity<codim, dim, const GridImp>(identityGrid,hostEntity)),
-      identityGrid_(identityGrid)
-    {}
-
-
-    //! \todo Please doc me !
-    void setToTarget(const HostGridEntityPointer& hostEntity) {
-      this->realEntity.setToTarget(hostEntity);
-    }
-
-
-    //! \todo Please doc me !
-    const HostGridEntityPointer& getTarget() {
-      return this->realEntity.hostEntity_;
-    }
-
-
-  private:
-
-    const GridImp* identityGrid_;
-  };
-
-
-
   /** \brief The implementation of entities in a GeometryGrid
    *   \ingroup GeometryGrid
    *
@@ -90,32 +50,32 @@ namespace Dune
    */
   template< int codim, int dim, class HostGrid, class CoordFunction >
   class GeometryGridEntity< codim, dim, const GeometryGrid< HostGrid, CoordFunction > >
-    : public EntityDefaultImplementation
-      < codim, dim, const GeometryGrid< HostGrid, CoordFunction >, GeometryGridEntity >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
 
-    friend class GeometryGridMakeableEntity< codim, dim, const Grid >;
+    typedef typename Traits :: Grid Grid;
 
+  public:
+    typedef typename Traits :: ctype ctype;
+
+    enum { codimension = codim };
+    enum { dimension = dim };
+    enum { mydimension = dimension - codimension };
+    enum { dimensionworld = Traits :: dimensionworld };
+
+    typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+
+  private:
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
     template< class > friend class GeometryGridLocalIdSet;
     template< class > friend class GeometryGridGlobalIdSet;
     template< class, int > friend class IndexSetter;
 
-    typedef typename Grid :: ctype ctype;
+    typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+    typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+    typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: Entity
-    HostEntity;
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: EntityPointer
-    HostEntityPointer;
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: Geometry
-    HostGeometry;
-
-  public:
-    typedef typename Grid :: template Codim< codim > :: Geometry Geometry;
-
-  private:
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
@@ -240,14 +200,29 @@ namespace Dune
    */
   template< int dim, class HostGrid, class CoordFunction >
   class GeometryGridEntity< 0, dim, const GeometryGrid< HostGrid, CoordFunction > >
-    : public EntityDefaultImplementation
-      < 0, dim, const GeometryGrid< HostGrid, CoordFunction >, GeometryGridEntity >
   {
-    enum { codim = 0 };
+    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
 
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
+    typedef typename Traits :: Grid Grid;
 
-    friend class GeometryGridMakeableEntity< codim, dim, const Grid >;
+  public:
+    typedef typename Traits :: ctype ctype;
+
+    enum { codimension = 0 };
+    enum { dimension = dim };
+    enum { mydimension = dimension - codimension };
+    enum { dimensionworld = Traits :: dimensionworld };
+
+    typedef typename Traits :: template Codim< codimension > :: EntityPointer EntityPointer;
+    typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
+    typedef typename Traits :: template Codim< codimension > :: LocalGeometry LocalGeometry;
+
+    typedef typename Traits :: HierarchicIterator HierarchicIterator;
+    typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
+    typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+
+  private:
+    friend class GeometryGridEntityPointer< codimension, const Grid >;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
@@ -255,25 +230,10 @@ namespace Dune
     template< class > friend class GeometryGridGlobalIdSet;
     template< class, int > friend class IndexSetter;
 
-    typedef typename Grid :: ctype ctype;
+    typedef typename HostGrid :: template Codim< codimension > :: Entity HostEntity;
+    typedef typename HostGrid :: template Codim< codimension > :: EntityPointer HostEntityPointer;
+    typedef typename HostGrid :: template Codim< codimension > :: Geometry HostGeometry;
 
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: Entity
-    HostEntity;
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: EntityPointer
-    HostEntityPointer;
-    typedef typename HostGrid :: Traits :: template Codim< codim > :: Geometry
-    HostGeometry;
-
-  public:
-    typedef typename Grid :: template Codim< codim > :: EntityPointer EntityPointer;
-    typedef typename Grid :: template Codim< codim > :: Geometry Geometry;
-    typedef typename Grid :: template Codim< codim > :: LocalGeometry LocalGeometry;
-
-    typedef typename Grid :: HierarchicIterator HierarchicIterator;
-    typedef typename Grid :: LeafIntersectionIterator LeafIntersectionIterator;
-    typedef typename Grid :: LevelIntersectionIterator LevelIntersectionIterator;
-
-  private:
     typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
     typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
     typedef typename GeometryImpl :: GlobalCoordinate GlobalCoordinate;
@@ -420,6 +380,11 @@ namespace Dune
       return MakeableLeafIntersectionIterator( impl );
     }
 
+    bool hasBoundaryIntersections () const
+    {
+      return hostEntity().hasBoundaryIntersections();
+    }
+
     bool isLeaf () const
     {
       return hostEntity().isLeaf();
@@ -456,18 +421,19 @@ namespace Dune
       return MakeableHierarchicIterator( HierarchicIteratorImpl( grid_, *this, maxLevel, true ) );
     }
 
+    bool isRegular () const
+    {
+      return hostEntity().isRegular();
+    }
+
     bool wasRefined () const
     {
-      if( grid_->adaptationStep != Grid :: adaptDone )
-        return false;
-
-      int index = grid_->levelIndexSet( level() ).index( *this );
-      return grid_->refinementMark_[ level ][ index ];
+      return hostEntity().wasRefined();
     }
 
     bool mightBeCoarsened () const
     {
-      return true;
+      return hostEntity().mightBeCoarsened();
     }
 
     const HostEntity &hostEntity () const
@@ -495,7 +461,7 @@ namespace Dune
       }
       hostEntity_ = target;
     }
-  }; // end of GeometryGridEntity codim = 0
+  };
 
 } // namespace Dune
 

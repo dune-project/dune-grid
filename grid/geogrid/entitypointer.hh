@@ -6,65 +6,83 @@
 namespace Dune
 {
 
-  /** Acts as a pointer to an  entities of a given codimension.
-   */
-  template<int codim, class GridImp>
-  class GeometryGridEntityPointer :
-    public EntityPointerDefaultImplementation <codim, GridImp, Dune::GeometryGridEntityPointer<codim,GridImp> >
+  // External Forward Declarations
+  // -----------------------------
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGridFamily;
+
+  template< class HostGrid, class CoordFunction >
+  class GeometryGrid;
+
+
+
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< int codim, class Grid >
+  class GeometryGridEntityPointer;
+
+
+
+  // GeometryGridEntityPointer
+  // -------------------------
+
+  template< int codim, class HostGrid, class CoordFunction >
+  class GeometryGridEntityPointer< codim, const GeometryGrid< HostGrid, CoordFunction > >
   {
-  private:
+    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
 
-    enum { dim = GridImp::dimension };
-
+    typedef typename Traits :: Grid Grid;
 
   public:
+    enum { dimension = Traits :: dimension };
+    enum { codimension = codim };
 
-    typedef typename GridImp::template Codim<codim>::Entity Entity;
+    typedef typename Grid :: template Codim< codim > :: Entity Entity;
 
-    typedef GeometryGridEntityPointer<codim,GridImp> Base;
+    typedef GeometryGridEntityPointer< codim, const Grid > Base;
+    typedef GeometryGridEntityPointer< codim, const Grid > base;
 
-    // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
+  protected:
+    typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
 
-    // EntityPointer to the equivalent entity in the host grid
-    typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::EntityPointer HostGridEntityPointer;
+    typedef MakeableInterfaceObject< Entity > MakeableEntity;
+    typedef typename MakeableEntity :: ImplementationType EntityImpl;
 
+    mutable MakeableEntity virtualEntity_;
 
-    //! constructor
-    GeometryGridEntityPointer (const GridImp* identityGrid, const HostGridEntityPointer& hostEntity_) :
-      identityGrid_(identityGrid),
-      virtualEntity_(identityGrid, hostEntity_)
+  public:
+    GeometryGridEntityPointer ( const Grid *grid, const HostEntityPointer &hostEntity )
+      : virtualEntity_( EntityImpl( grid, hostEntity ) )
     {}
 
-
-    //! equality
-    bool equals(const GeometryGridEntityPointer<codim,GridImp>& i) const {
-      return virtualEntity_.getTarget() == i.virtualEntity_.getTarget();
+    bool equals ( const GeometryGridEntityPointer &other ) const
+    {
+      const HostEntityPointer &thisHostEntity
+        = Grid :: template getHostEntity< codim >( virtualEntity_ );
+      const HostEntityPointer &otherHostEntity
+        = Grid :: template getHostEntity< codim >( other.virtualEntity_ );
+      return (thisHostEntity == otherHostEntity);
     }
 
-
-    //! dereferencing
-    Entity& dereference() const {
+    Entity &dereference () const
+    {
       return virtualEntity_;
     }
 
-
     //! ask for level of entity
-    int level () const {
-      return virtualEntity_.level();
+    int level () const
+    {
+      return dereference().level();
     }
 
-
   protected:
-
-    const GridImp* identityGrid_;
-
-    //! virtual entity
-    mutable GeometryGridMakeableEntity<codim,dim,GridImp> virtualEntity_;
-
-
+    void setToTarget ( const HostEntityPointer &target )
+    {
+      Grid :: getRealImplementation( virtualEntity_ ).setToTarget( target );
+    }
   };
-
 
 } // end namespace Dune
 

@@ -124,8 +124,10 @@ namespace Dune
       typedef GeometryGridLeafIndexSet< const Grid > LeafIndexSet;
       typedef GeometryGridLevelIndexSet< const Grid > LevelIndexSet;
 
-      typedef GeometryGridGlobalIdSet< const Grid > GlobalIdSet;
-      typedef GeometryGridLocalIdSet< const Grid > LocalIdSet;
+      typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: GlobalIdSet >
+      GlobalIdSet;
+      typedef GeometryGridIdSet< const Grid, typename HostGrid :: Traits :: LocalIdSet >
+      LocalIdSet;
 
       typedef typename HostGrid :: Traits :: CollectiveCommunication
       CollectiveCommunication;
@@ -156,17 +158,22 @@ namespace Dune
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
+    typedef GridDefaultImplementation
+    < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
+        GeometryGridFamily< HostGrid, CoordFunction > >
+    Base;
+
     friend class GeometryGridLevelIndexSet< const Grid >;
     friend class GeometryGridLeafIndexSet< const Grid >;
-    friend class GeometryGridGlobalIdSet< const Grid >;
-    friend class GeometryGridLocalIdSet< const Grid >;
     friend class GeometryGridHierarchicIterator< const Grid >;
     friend class GeometryGridLevelIntersectionIterator< const Grid >;
     friend class GeometryGridLeafIntersectionIterator< const Grid >;
 
+    template< int, int, class > friend class GeometryGridEntity;
+    template< int, class > friend class GeometryGridEntityPointer;
     template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
     template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;
-    template< int, int, class > friend class GeometryGridEntity;
+    template< class, class > friend class GeometryGridIdSet;
 
   public:
     /** \todo Should not be public */
@@ -185,6 +192,9 @@ namespace Dune
     typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
+    typedef typename Traits :: GlobalIdSet GlobalIdSet;
+    typedef typename Traits :: LocalIdSet LocalIdSet;
+
     //! Model of Dune::CollectiveCommunication
     typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
 
@@ -199,6 +209,12 @@ namespace Dune
       typedef typename Traits :: HierarchicIterator HierarchicIterator;
       typedef typename Traits :: LeafIntersectionIterator LeafIntersectionIterator;
       typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
+
+      typedef typename Traits :: LeafIndexSet LeafIndexSet;
+      typedef typename Traits :: LevelIndexSet LevelIndexSet;
+
+      typedef typename Traits :: GlobalIdSet GlobalIdSet;
+      typedef typename Traits :: LocalIdSet LocalIdSet;
 
       template< PartitionIteratorType pitype >
       struct Partition
@@ -221,8 +237,9 @@ namespace Dune
     std :: vector
     < GeometryGridLevelIndexSet< const Grid >* > levelIndexSets_;
     GeometryGridLeafIndexSet< const Grid > leafIndexSet_;
-    GeometryGridGlobalIdSet< const Grid > globalIdSet_;
-    GeometryGridLocalIdSet< const Grid > localIdSet_;
+
+    GlobalIdSet globalIdSet_;
+    LocalIdSet localIdSet_;
 
   public:
     /** \brief constructor
@@ -234,8 +251,8 @@ namespace Dune
       : hostGrid_( &hostGrid ),
         coordFunction_( coordFunction ),
         leafIndexSet_( *this ),
-        globalIdSet_( *this ),
-        localIdSet_( *this )
+        globalIdSet_( hostGrid.globalIdSet() ),
+        localIdSet_( hostGrid.localIdSet() )
     {
       setIndices();
     }
@@ -367,15 +384,13 @@ namespace Dune
       return leafIndexSet().size(type);
     }
 
-
-    /** \brief Access to the GlobalIdSet */
-    const typename Traits::GlobalIdSet& globalIdSet() const {
+    const GlobalIdSet &globalIdSet () const
+    {
       return globalIdSet_;
     }
 
-
-    /** \brief Access to the LocalIdSet */
-    const typename Traits::LocalIdSet& localIdSet() const {
+    const LocalIdSet &localIdSet () const
+    {
       return localIdSet_;
     }
 
@@ -555,7 +570,9 @@ namespace Dune
       return coordFunction_;
     }
 
-  public:
+  protected:
+    using Base :: getRealImplementation;
+
     //! Returns the hostgrid entity encapsulated in given subgrid entity
     template< int codim >
     static typename HostGrid :: template Codim< codim > :: EntityPointer
@@ -568,12 +585,6 @@ namespace Dune
     //! compute the grid indices and ids
     void setIndices ()
     {
-      localIdSet_.update();
-      globalIdSet_.update();
-
-      // //////////////////////////////////////////
-      //   Create the index sets
-      // //////////////////////////////////////////
       for( int i = levelIndexSets_.size(); i <= maxLevel(); ++i )
       {
         GeometryGridLevelIndexSet< const Grid > *p

@@ -40,11 +40,15 @@ namespace Dune
   public:
     typedef GeometryGridEntityPointer< codim, const Grid > Base;
 
+  protected:
+    using Base :: setToTarget;
+
+  public:
     explicit GeometryGridLevelIterator ( const Grid *grid, int level )
       : Base( grid, grid->hostGrid().template lbegin< codim >( level ) ),
         hostIterator_( grid->hostGrid().template lbegin< codim >( level ) )
     {
-      this->virtualEntity_.setToTarget( hostIterator_ );
+      setToTarget( hostIterator_ );
     }
 
     GeometryGridLevelIterator( const Grid *grid, int level, bool endDummy )
@@ -55,7 +59,7 @@ namespace Dune
     void increment ()
     {
       ++hostIterator_;
-      this->virtualEntity_.setToTarget( hostIterator_ );
+      setToTarget( hostIterator_ );
     }
   };
 

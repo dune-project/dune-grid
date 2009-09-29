@@ -34,7 +34,7 @@ namespace Dune
       hostGridHierarchicIterator_(startEntity.hostEntity_->hbegin(maxLevel)),
       hostGridHierarchicEndIterator_(startEntity.hostEntity_->hend(maxLevel))
     {
-      this->virtualEntity_.setToTarget(hostGridHierarchicIterator_);
+      setToTarget(hostGridHierarchicIterator_);
     }
 
 
@@ -51,7 +51,7 @@ namespace Dune
     void increment()
     {
       ++hostGridHierarchicIterator_;
-      this->virtualEntity_.setToTarget(hostGridHierarchicIterator_);
+      setToTarget(hostGridHierarchicIterator_);
     }
 
 

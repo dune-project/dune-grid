@@ -25,21 +25,26 @@ namespace Dune
   template< class Grid >
   class GeometryGridLeafIndexSet;
 
+  template< class Grid, class HostIdSet >
+  class GeometryGridIdSet;
+
+
 
   // GeometryGridLevelIndexSetTypes
   // ------------------------------
 
-  template <class GridImp>
+  template< class Grid >
   struct GeometryGridLevelIndexSetTypes
   {
-    //! The types
-    template<int cd>
+    template< int codim >
     struct Codim
     {
-      template<PartitionIteratorType pitype>
+      template< PartitionIteratorType pitype >
       struct Partition
       {
-        typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LevelIterator Iterator;
+        typedef typename Grid :: template Codim< codim >
+        :: template Partition< pitype > :: LevelIterator
+        Iterator;
       };
     };
   };
@@ -140,105 +145,29 @@ namespace Dune
 
 
 
+  // GeometryGridLevelIndexSetTypes
+  // ------------------------------
 
-  /** \todo Take the index types from the host grid */
-  template<class GridImp>
-  class GeometryGridLevelIndexSet :
-    public IndexSetDefaultImplementation<GridImp,GeometryGridLevelIndexSet<GridImp>,GeometryGridLevelIndexSetTypes<GridImp> >
-  {
-  public:
-
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
-
-    enum {dim = GridImp::dimension};
-
-    typedef IndexSet<GridImp,GeometryGridLevelIndexSet<GridImp>,GeometryGridLevelIndexSetTypes<GridImp> > Base;
-
-    //! get index of an entity
-    template<int codim>
-    int index (const typename GridImp::Traits::template Codim<codim>::Entity& e) const
-    {
-      return grid_->hostgrid_->levelIndexSet(level_).template index<codim>(*grid_->template getHostEntity<codim>(e));
-    }
-
-
-    //! get index of subEntity of a codim 0 entity
-    template<int codim>
-    int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid_->hostgrid_->levelIndexSet(level_).template subIndex<codim>(*grid_->template getHostEntity<0>(e), i);
-    }
-
-
-    //! get number of entities of given codim, type and on this level
-    int size (int codim) const {
-      return grid_->hostgrid_->levelIndexSet(level_).size(codim);
-    }
-
-
-    //! get number of entities of given codim, type and on this level
-    int size (GeometryType type) const
-    {
-      return grid_->hostgrid_->levelIndexSet(level_).size(type);
-    }
-
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return grid_->hostgrid_->levelIndexSet(level_).geomTypes(codim);
-    }
-
-
-    //! one past the end on this level
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator begin () const
-    {
-      return grid_->template lbegin<cd,pitype>(level_);
-    }
-
-
-    //! Iterator to one past the last entity of given codim on level for partition type
-    template<int cd, PartitionIteratorType pitype>
-    typename Base::template Codim<cd>::template Partition<pitype>::Iterator end () const
-    {
-      return grid_->template lend<cd,pitype>(level_);
-    }
-
-
-    /** \brief Set up the index set */
-    void update(const GridImp& grid, int level)
-    {
-      grid_ = &grid;
-      level_ = level;
-    }
-
-
-    GridImp* grid_;
-
-    int level_;
-  };
-
-
-
-
-  template <class GridImp>
+  template< class Grid >
   struct GeometryGridLeafIndexSetTypes
   {
-    //! The types
-    template<int cd>
+    template< int codim >
     struct Codim
     {
-      template<PartitionIteratorType pitype>
+      template< PartitionIteratorType pitype >
       struct Partition
       {
-        typedef typename GridImp::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
+        typedef typename Grid :: template Codim< codim >
+        :: template Partition< pitype > :: LeafIterator
+        Iterator;
       };
     };
   };
 
 
 
+  // GeometryGridLevelIndexSet
+  // -------------------------
 
   template< class HostGrid, class CoordFunction >
   class GeometryGridLeafIndexSet< const GeometryGrid< HostGrid, CoordFunction > >
@@ -334,114 +263,48 @@ namespace Dune
 
 
 
+  // GeometryGridIdSet
+  // -----------------
 
-  template <class GridImp>
-  class GeometryGridGlobalIdSet :
-    public IdSet<GridImp,GeometryGridGlobalIdSet<GridImp>,
-        typename remove_const<GridImp>::type::HostGridType::Traits::GlobalIdSet::IdType>
+  template< class Grid, class HostIdSet >
+  class GeometryGridIdSet
+    : public IdSet
+      < Grid, GeometryGridIdSet< Grid, HostIdSet >, typename HostIdSet :: IdType >
   {
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
-
+    const HostIdSet &hostIdSet_;
 
   public:
-    //! constructor stores reference to a grid
-    GeometryGridGlobalIdSet (const GridImp& g) : grid_(&g) {}
+    typedef typename HostIdSet :: IdType IdType;
 
-    //! define the type used for persistent indices
-    typedef typename HostGrid::Traits::GlobalIdSet::IdType GlobalIdType;
+    GeometryGridIdSet ( const HostIdSet &hostIdSet )
+      : hostIdSet_( hostIdSet )
+    {}
 
-
-    //! get id of an entity
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instatiated yet.
-     */
-    template<int cd>
-    GlobalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    template< int codim >
+    IdType id ( const typename Traits :: template Codim< codim > :: Entity &entity ) const
     {
-      // Return id of the host entity
-      return grid_->hostgrid_->globalIdSet().id(*grid_->getRealImplementation(e).hostEntity_);
+      return hostIdSet_.id( *(Grid :: template getHostEntity< codim >( entity )) );
     }
 
-
-    //! get id of subEntity
-    /*
-        We use the remove_const to extract the Type from the mutable class,
-        because the const class is not instatiated yet.
-     */
-    template<int cc>
-    GlobalIdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    template< class Entity >
+    IdType id ( const Entity &entity ) const
     {
-      // Return sub id of the host entity
-      return grid_->hostgrid_->globalIdSet().template subId<cc>(*grid_->getRealImplementation(e).hostEntity_,i);
+      return id< Entity :: codimension >( entity );
     }
 
+    template< int codim >
+    IdType subId ( const typename Traits :: template Codim< 0 > :: Entity &entity, int i) const
+    {
+      return hostIdSet_.subId( *(Grid :: template getHostEntity< 0 >( entity )), i );
+    }
 
-    /** \todo Should be private */
-    void update() {}
-
-
-    const GridImp* grid_;
-  };
-
-
-
-
-  template<class GridImp>
-  class GeometryGridLocalIdSet :
-    public IdSet<GridImp,GeometryGridLocalIdSet<GridImp>,
-        typename remove_const<GridImp>::type::HostGridType::Traits::LocalIdSet::IdType>
-  {
   private:
-
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
-
-
-  public:
-    //! define the type used for persistent local ids
-    typedef typename HostGrid::Traits::LocalIdSet::IdType LocalIdType;
-
-
-    //! constructor stores reference to a grid
-    GeometryGridLocalIdSet (const GridImp& g) : grid_(&g) {}
-
-
-    //! get id of an entity
-    /*
-        We use the remove_const to extract the Type from the mutable class,
-        because the const class is not instatiated yet.
-     */
-    template<int cd>
-    LocalIdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
-    {
-      // Return id of the host entity
-      return grid_->hostgrid_->localIdSet().id(*grid_->getRealImplementation(e).hostEntity_);
-    }
-
-
-    //! get id of subEntity
-    /*
-     * We use the remove_const to extract the Type from the mutable class,
-     * because the const class is not instatiated yet.
-     */
-    template<int cc>
-    LocalIdType subId (const typename remove_const<GridImp>::type::template Codim<0>::Entity& e, int i) const
-    {
-      // Return sub id of the host entity
-      return grid_->hostgrid_->localIdSet().template subId<cc>(*grid_->getRealImplementation(e).hostEntity_,i);
-    }
-
-
-    /** \todo Should be private */
-    void update() {}
-
-
-    const GridImp* grid_;
+    GeometryGridIdSet ( const GeometryGridIdSet & );
+    GeometryGridIdSet &operator= ( const GeometryGridIdSet & );
   };
 
-
-}  // namespace Dune
-
+}
 
 #endif
