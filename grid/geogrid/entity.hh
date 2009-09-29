@@ -17,7 +17,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   class GeometryGrid;
 
-  template<int codim, class GridImp>
+  template<int codim, class Grid, bool fake >
   class GeometryGridEntityPointer;
 
   template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -63,7 +63,8 @@ namespace Dune
     typedef typename Traits :: template Codim< codimension > :: Geometry Geometry;
 
   private:
-    friend class GeometryGridEntityPointer< codimension, const Grid >;
+    //friend class GeometryGridEntityPointer< codimension, const Grid >;
+    template< int, class, bool > friend class GeometryGridEntityPointer;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;
@@ -209,7 +210,8 @@ namespace Dune
     typedef typename Traits :: LevelIntersectionIterator LevelIntersectionIterator;
 
   private:
-    friend class GeometryGridEntityPointer< codimension, const Grid >;
+    //friend class GeometryGridEntityPointer< codimension, const Grid >;
+    template< int, class, bool > friend class GeometryGridEntityPointer;
 
     template< class > friend class GeometryGridLevelIndexSet;
     template< class > friend class GeometryGridLeafIndexSet;

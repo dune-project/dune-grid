@@ -5,6 +5,8 @@
 
 #include <dune/grid/common/grid.hh>
 
+#include <dune/grid/geogrid/capabilities.hh>
+
 namespace Dune
 {
 
@@ -22,7 +24,8 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, class Grid >
+  template< int codim, class Grid,
+      bool fake = Capabilities :: hasHostEntity< Grid, codim > :: v >
   class GeometryGridEntityPointer;
 
 
@@ -30,24 +33,25 @@ namespace Dune
   // GeometryGridEntityPointer
   // -------------------------
 
-  template< int codim, class HostGrid, class CoordFunction >
-  class GeometryGridEntityPointer< codim, const GeometryGrid< HostGrid, CoordFunction > >
+  template< int codim, class Grid, bool fake >
+  class GeometryGridEntityPointer
   {
-    typedef typename GeometryGridFamily< HostGrid, CoordFunction > :: Traits Traits;
-
-    typedef typename Traits :: Grid Grid;
+    typedef typename remove_const< Grid > :: type :: Traits Traits;
 
   public:
     enum { dimension = Traits :: dimension };
     enum { codimension = codim };
 
-    typedef typename Grid :: template Codim< codim > :: Entity Entity;
+    typedef typename Traits :: template Codim< codim > :: Entity Entity;
 
-    typedef GeometryGridEntityPointer< codim, const Grid > Base;
-    typedef GeometryGridEntityPointer< codim, const Grid > base;
+    typedef GeometryGridEntityPointer< codim, Grid > Base;
+    typedef GeometryGridEntityPointer< codim, Grid > base;
 
   protected:
-    typedef typename HostGrid :: template Codim< codim > :: EntityPointer HostEntityPointer;
+    typedef typename Traits :: HostGrid HostGrid;
+
+    typedef typename HostGrid :: template Codim< codim > :: EntityPointer
+    HostEntityPointer;
 
     typedef MakeableInterfaceObject< Entity > MakeableEntity;
     typedef typename MakeableEntity :: ImplementationType EntityImpl;

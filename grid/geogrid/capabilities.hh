@@ -77,6 +77,23 @@ namespace Dune
       static const bool v = false;
     };
 
+
+
+    template< class Grid, int codim >
+    struct hasHostEntity;
+
+    template< class Grid, int codim >
+    struct hasHostEntity< const Grid, codim >
+    {
+      static const bool v = hasHostEntity< Grid, codim > :: v;
+    };
+
+    template< class HostGrid, class CoordFunction, int codim >
+    struct hasHostEntity< GeometryGrid< HostGrid, CoordFunction >, codim >
+    {
+      static const bool v = hasEntity< HostGrid, codim > :: v;
+    };
+
   }
 
 }

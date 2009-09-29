@@ -45,6 +45,18 @@ namespace Dune
 
 
 
+  // GeometryGridExportParams
+  // ------------------------
+
+  template< class HG, class CF >
+  struct GeometryGridExportParams
+  {
+    typedef HG HostGrid;
+    typedef CF CoordFunction;
+  };
+
+
+
   // GeometryGridFamily
   // ------------------
 
@@ -52,6 +64,7 @@ namespace Dune
   struct GeometryGridFamily
   {
     struct Traits
+      : public GeometryGridExportParams< HostGrid, CoordFunction >
     {
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
@@ -183,8 +196,10 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   class GeometryGrid
     : public GridDefaultImplementation
-      < HostGrid :: dimension, CoordFunction :: dimRange, typename HostGrid :: ctype,
-          GeometryGridFamily< HostGrid, CoordFunction > >
+      < HostGrid :: dimension, CoordFunction :: dimRange,
+          typename HostGrid :: ctype,
+          GeometryGridFamily< HostGrid, CoordFunction > >,
+      public GeometryGridExportParams< HostGrid, CoordFunction >
   {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
@@ -198,7 +213,7 @@ namespace Dune
     friend class GeometryGridHierarchicIterator< const Grid >;
 
     template< int, int, class > friend class GeometryGridEntity;
-    template< int, class > friend class GeometryGridEntityPointer;
+    template< int, class, bool > friend class GeometryGridEntityPointer;
     template< int, PartitionIteratorType, class > friend class GeometryGridLevelIterator;
     template< int, PartitionIteratorType, class > friend class GeometryGridLeafIterator;
     template< class, class > friend class GeometryGridIntersection;
@@ -581,7 +596,7 @@ namespace Dune
 
     bool loadBalance ()
     {
-      bool ret = hostGrid().loalBalance();
+      bool ret = hostGrid().loadBalance();
       updateIndexSets();
       return ret;
     }
