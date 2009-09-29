@@ -178,8 +178,14 @@ namespace Dune
           LevelIterator;
         };
 
-        typedef GeoGrid :: LeafIndexSet< const Grid > LeafIndexSet;
-        typedef GeoGrid :: LevelIndexSet< const Grid > LevelIndexSet;
+        typedef GeoGrid :: IndexSet
+        < const Grid, typename HostGrid :: Traits :: LeafIndexSet,
+            LeafIteratorProvider< const Grid > >
+        LeafIndexSet;
+        typedef GeoGrid :: IndexSet
+        < const Grid, typename HostGrid :: Traits :: LevelIndexSet,
+            LevelIteratorProvider< const Grid > >
+        LevelIndexSet;
 
         typedef GeoGrid :: IdSet
         < const Grid, typename HostGrid :: Traits :: GlobalIdSet >
@@ -268,14 +274,13 @@ namespace Dune
         GeoGrid :: GridFamily< HostGrid, CoordFunction > >
     Base;
 
-    friend class GeoGrid :: LevelIndexSet< const Grid >;
-    friend class GeoGrid :: LeafIndexSet< const Grid >;
     friend class GeoGrid :: HierarchicIterator< const Grid >;
 
     template< int, class, bool > friend class GeoGrid :: EntityBase;
     template< class, bool > friend class GeoGrid :: EntityPointer;
     template< class, class > friend class GeoGrid :: Intersection;
     template< class, class > friend class GeoGrid :: IdSet;
+    template< class, class, class > friend class GeoGrid :: IndexSet;
     template< class > friend class HostGridAccess;
 
     template< int, PartitionIteratorType, class >
@@ -609,7 +614,12 @@ namespace Dune
       }
 
       if( levelIndexSets_[ level ] == 0 )
-        levelIndexSets_[ level ] = new LevelIndexSet( *this, level );
+      {
+        typedef GeoGrid :: LevelIteratorProvider< const Grid > IteratorProvider;
+        levelIndexSets_[ level ]
+          = new LevelIndexSet( hostGrid().levelIndexSet( level ),
+                               IteratorProvider( *this, level ) );
+      }
       assert( levelIndexSets_[ level ] );
       return *levelIndexSets_[ level ];
     }
@@ -617,7 +627,11 @@ namespace Dune
     const LeafIndexSet &leafIndexSet () const
     {
       if( leafIndexSet_ == 0 )
-        leafIndexSet_ = new LeafIndexSet( *this );
+      {
+        typedef GeoGrid :: LeafIteratorProvider< const Grid > IteratorProvider;
+        leafIndexSet_ = new LeafIndexSet( hostGrid().leafIndexSet(),
+                                          IteratorProvider( *this ) );
+      }
       assert( leafIndexSet_ );
       return *leafIndexSet_;
     }
