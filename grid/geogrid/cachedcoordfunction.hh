@@ -12,6 +12,8 @@
 
 #include <dune/grid/geogrid/coordfunction.hh>
 
+//#define ALLCODIM_SUBINDEX
+
 namespace Dune
 {
 
@@ -67,26 +69,42 @@ namespace Dune
       template< class Entity >
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
+#ifdef ALLCODIM_SUBINDEX
+        static const int codim = Entity :: codimension;
+        static const int subcodim = dimension - codim;
+        return data_[ indexSet_.template subIndex< codim, subcodim >( entity, corner ) ];
+#else
         return data_[ indexSet_.template subIndex< dimension >( entity, corner ) ];
+#endif
       }
 
+#ifndef ALLCODIM_SUBINDEX
       const Coordinate &operator() ( const Vertex &vertex, unsigned int corner ) const
       {
         assert( corner == 0 );
         return data_[ indexSet_.index( vertex ) ];
       }
+#endif
 
       template< class Entity >
       Coordinate &operator() ( const Entity &entity, unsigned int corner )
       {
+#ifdef ALLCODIM_SUBINDEX
+        static const int codim = Entity :: codimension;
+        static const int subcodim = dimension - codim;
+        return data_[ indexSet_.template subIndex< codim, subcodim >( entity, corner ) ];
+#else
         return data_[ indexSet_.template subIndex< dimension >( entity, corner ) ];
+#endif
       }
 
+#ifndef ALLCODIM_SUBINDEX
       Coordinate &operator() ( const Vertex &vertex, unsigned int corner )
       {
         assert( corner == 0 );
         return data_[ indexSet_.index( vertex ) ];
       }
+#endif
 
       void adapt ()
       {
