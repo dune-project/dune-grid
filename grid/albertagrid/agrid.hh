@@ -78,8 +78,6 @@ namespace Dune
 
     typedef AlbertaGridIndexSet< dim, dimworld > LevelIndexSetImp;
     typedef AlbertaGridIndexSet< dim, dimworld > LeafIndexSetImp;
-    //typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetImp;
-    //typedef DefaultLeafIndexSet< AlbertaGrid<dim,dimworld> > LeafIndexSetImp;
 
     typedef AlbertaGridIdSet< dim, dimworld > IdSetImp;
     typedef unsigned int IdType;
@@ -134,8 +132,8 @@ namespace Dune
         LeafGridView;
       };
 
-      typedef IndexSet< GridImp, LevelIndexSetImp > LevelIndexSet;
-      typedef IndexSet< GridImp, LeafIndexSetImp > LeafIndexSet;
+      typedef IndexSet< GridImp, LevelIndexSetImp, int > LevelIndexSet;
+      typedef IndexSet< GridImp, LeafIndexSetImp, int > LeafIndexSet;
       typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;

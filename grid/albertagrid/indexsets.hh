@@ -45,21 +45,25 @@ namespace Dune
 
   template< int dim, int dimworld >
   class AlbertaGridHierarchicIndexSet
-    : public IndexSet < AlbertaGrid< dim, dimworld >,
-          AlbertaGridHierarchicIndexSet< dim,dimworld > >
+    : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridHierarchicIndexSet< dim,dimworld >, int >
   {
     typedef AlbertaGridHierarchicIndexSet< dim, dimworld > This;
+    typedef IndexSet< AlbertaGrid< dim, dimworld >, This, int > Base;
 
     friend class AlbertaGrid< dim, dimworld >;
 
+  public:
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    typedef typename Grid::Traits Traits;
+    typedef typename Base::IndexType IndexType;
 
     static const int dimension = Grid::dimension;
 
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
+
+  private:
+    typedef typename Grid::Traits Traits;
 
     typedef Alberta::DofVectorPointer< int > IndexVectorPointer;
 
@@ -79,11 +83,6 @@ namespace Dune
   public:
     typedef Alberta::IndexStack IndexStack;
 
-    //! import default implementation of subIndex<cc>
-    //! \todo remove after next release
-    using IndexSet < AlbertaGrid< dim, dimworld >,
-        AlbertaGridHierarchicIndexSet< dim,dimworld > > :: subIndex;
-
     //! return true if entity is contained in set
     template< class Entity >
     bool contains ( const Entity & ) const
@@ -93,7 +92,7 @@ namespace Dune
 
     //! return index of entity
     template< class Entity >
-    int index ( const Entity &entity ) const
+    IndexType index ( const Entity &entity ) const
     {
       const int codim = Entity::codimension;
       return index< codim >( entity );
@@ -101,30 +100,56 @@ namespace Dune
 
     //! return hierarchic index of given entity
     template< int codim >
-    int index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
+    IndexType index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
     {
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      return subIndex( entityImp.elementInfo().el(), codim, entityImp.subEntity() );
+      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), codim );
     }
 
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using Base::subIndex;
+
     //! return subIndex of given enitiy's sub entity
-    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, int codim ) const
+    IndexType subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().generic2alberta( codim, i );
-      return subIndex( entityImp.elementInfo().el(), codim, j );
+      const int j = entityImp.grid().generic2alberta( subcodim, i );
+      return subIndex( entityImp.elementInfo(), j, subcodim );
+    }
+
+    //! return subIndex of given enitiy's sub entity
+    template< int codim >
+    IndexType subIndex ( const typename Traits::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+    {
+      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
+        = Grid::getRealImplementation( entity );
+
+      const GenericReferenceElement< Alberta::Real, dimension > &refElement
+        = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+      const int k = refElement.subEntity( entityImp.subEntity(), codim, i, codim+subcodim );
+
+      const int j = entityImp.grid().generic2alberta( codim+subcodim, k );
+      return subIndex( entityImp.elementInfo(), j, codim+subcodim );
+    }
+
+    //! return subIndex of given enitiy's sub entity
+    template< class Entity >
+    IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
+    {
+      return subIndex< Entity::codimension >( entity, i, subcodim );
     }
 
     //! return size of set for given GeometryType
-    int size ( GeometryType type ) const
+    IndexType size ( const GeometryType &type ) const
     {
       return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
     }
 
     //! return size of set
-    int size ( int codim ) const
+    IndexType size ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return indexStack_[ codim ].size();
@@ -137,18 +162,19 @@ namespace Dune
       return geomTypes_[ codim ];
     }
 
-    int subIndex ( const ElementInfo &elementInfo, int codim, int i ) const
+    IndexType subIndex ( const ElementInfo &elementInfo, int i, unsigned int codim ) const
     {
       assert( !elementInfo == false );
-      return subIndex( elementInfo.el(), codim, i );
+      return subIndex( elementInfo.element(), i, codim );
     }
 
     /** \brief obtain hierarchic subindex
      *
      *  \param[in]  element  pointer to ALBERTA element
      *  \param[in]  i        number of the subelement (in ALBERTA numbering)
+     *  \param[in]  codim    codimension
      */
-    int subIndex ( const Alberta::Element *element, int codim, int i ) const
+    IndexType subIndex ( const Alberta::Element *element, int i, unsigned int codim ) const
     {
       int *array = (int *)entityNumbers_[ codim ];
       const int subIndex = array[ dofNumbering_( element, codim, i ) ];
@@ -405,18 +431,19 @@ namespace Dune
 
   template< int dim, int dimworld >
   class AlbertaGridIndexSet
-    : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld > >
+    : public IndexSet< AlbertaGrid< dim, dimworld >, AlbertaGridIndexSet< dim, dimworld >, int >
   {
     typedef AlbertaGridIndexSet< dim, dimworld > This;
-    typedef IndexSet< AlbertaGrid< dim, dimworld >, This > Base;
+    typedef IndexSet< AlbertaGrid< dim, dimworld >, This, int > Base;
 
   public:
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    static const int dimension = Grid::dimension;
-
     typedef typename Base::IndexType IndexType;
 
+    static const int dimension = Grid::dimension;
+
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
 
   private:
@@ -453,41 +480,68 @@ namespace Dune
         = Grid::getRealImplementation( entity );
       const Alberta::Element *element = entityImp.elementInfo().el();
 
-      const int *const array = indices_[ codim ];
-      const int subIndex = array[ dofNumbering_( element, codim, entityImp.subEntity() ) ];
+      const IndexType *const array = indices_[ codim ];
+      const IndexType subIndex = array[ dofNumbering_( element, codim, entityImp.subEntity() ) ];
 
       return (subIndex >= 0);
     }
 
     template< class Entity >
-    int index ( const Entity &entity ) const
+    IndexType index ( const Entity &entity ) const
     {
       const int codim = Entity::codimension;
       return index< codim >( entity );
     }
 
     template< int codim >
-    int index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
+    IndexType index ( const typename Grid::Traits::template Codim< codim >::Entity &entity ) const
     {
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      return subIndex( entityImp.elementInfo().el(), codim, entityImp.subEntity() );
+      return subIndex( entityImp.elementInfo(), entityImp.subEntity(), codim );
     }
 
-    int subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, int codim ) const
+    //! import default implementation of subIndex<cc>
+    //! \todo remove after next release
+    using Base::subIndex;
+
+    //! return subIndex of given enitiy's sub entity
+    IndexType subIndex ( const typename Traits::template Codim< 0 >::Entity &entity, int i, unsigned int subcodim ) const
     {
       const AlbertaGridEntity< 0, dim, const Grid > &entityImp
         = Grid::getRealImplementation( entity );
-      const int j = entityImp.grid().generic2alberta( codim, i );
-      return subIndex( entityImp.elementInfo().el(), codim, j );
+      const int j = entityImp.grid().generic2alberta( subcodim, i );
+      return subIndex( entityImp.elementInfo(), j, subcodim );
     }
 
-    int size ( GeometryType type ) const
+    //! return subIndex of given enitiy's sub entity
+    template< int codim >
+    IndexType subIndex ( const typename Traits::template Codim< codim >::Entity &entity, int i, unsigned int subcodim ) const
+    {
+      const AlbertaGridEntity< codim, dim, const Grid > &entityImp
+        = Grid::getRealImplementation( entity );
+
+      const GenericReferenceElement< Alberta::Real, dimension > &refElement
+        = GenericReferenceElements< Alberta::Real, dimension >::simplex();
+      const int k = refElement.subEntity( entityImp.subEntity(), codim, i, codim+subcodim );
+
+      const int j = entityImp.grid().generic2alberta( codim+subcodim, k );
+      return subIndex( entityImp.elementInfo(), j, codim+subcodim );
+    }
+
+    //! return subIndex of given enitiy's sub entity
+    template< class Entity >
+    IndexType subIndex ( const Entity &entity, int i, unsigned int subcodim ) const
+    {
+      return subIndex< Entity::codimension >( entity, i, subcodim );
+    }
+
+    IndexType size ( const GeometryType &type ) const
     {
       return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
     }
 
-    int size ( int codim ) const
+    IndexType size ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return size_[ codim ];
@@ -507,7 +561,7 @@ namespace Dune
         delete[] indices_[ codim ];
 
         const unsigned int dofSize = dofNumbering_.size( codim );
-        indices_[ codim ] = new int[ dofSize ];
+        indices_[ codim ] = new IndexType[ dofSize ];
         for( unsigned int i = 0; i < dofSize; ++i )
           indices_[ codim ][ i ] = -1;
 
@@ -524,15 +578,22 @@ namespace Dune
     }
 
   private:
-    /** \brief obtain hierarchic subindex
+    IndexType subIndex ( const ElementInfo &elementInfo, int i, unsigned int codim ) const
+    {
+      assert( !elementInfo == false );
+      return subIndex( elementInfo.element(), i, codim );
+    }
+
+    /** \brief obtain subindex
      *
      *  \param[in]  element  pointer to ALBERTA element
      *  \param[in]  i        number of the subelement (in ALBERTA numbering)
+     *  \param[in]  codim    codimension
      */
-    int subIndex ( const Alberta::Element *element, int codim, int i ) const
+    IndexType subIndex ( const Alberta::Element *element, int i, unsigned int codim ) const
     {
-      const int *const array = indices_[ codim ];
-      const int subIndex = array[ dofNumbering_( element, codim, i ) ];
+      const IndexType *const array = indices_[ codim ];
+      const IndexType subIndex = array[ dofNumbering_( element, codim, i ) ];
       assert( (subIndex >= 0) && (subIndex < size( codim )) );
       return subIndex;
     }
@@ -541,7 +602,7 @@ namespace Dune
     const DofNumbering &dofNumbering_;
 
     // an array of indices for each codimension
-    int *indices_[ dimension+1 ];
+    IndexType *indices_[ dimension+1 ];
 
     // the size of each codimension
     IndexType size_[ dimension+1 ];
@@ -635,6 +696,6 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // HAVE_ALBERTA
+#endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTAGRIDINDEXSETS_HH
