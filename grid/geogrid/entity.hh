@@ -517,11 +517,7 @@ namespace Dune
         GeometryImpl &geo = Grid :: getRealImplementation( geo_ );
         if( !geo )
         {
-          typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-          const unsigned int topologyId = GenericGeometry::topologyId( hostElement().type() );
-          const int duneSubEntity = Map::generic2dune( topologyId, subEntity_, codimension );
-
-          CoordVector coords( hostElement(), duneSubEntity, grid().coordFunction() );
+          CoordVector coords( hostElement(), subEntity_, grid().coordFunction() );
           geo = GeometryImpl( type(), coords );
         }
         return geo_;

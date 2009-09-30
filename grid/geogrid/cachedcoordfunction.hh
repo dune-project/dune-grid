@@ -259,10 +259,7 @@ namespace Dune
     const HostGeometry &hostGeo = hostEntity.geometry();
     const unsigned int numCorners = hostGeo.corners();
     for( unsigned int i = 0; i < numCorners; ++i )
-    {
-      RangeVector &y = cache_( hostEntity, i );
-      calculate( hostGeo, i, y );
-    }
+      calculate( hostGeo, i, cache_( hostEntity, i ) );
   }
 
 }
