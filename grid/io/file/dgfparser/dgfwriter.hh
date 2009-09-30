@@ -46,6 +46,8 @@ namespace Dune
     typedef typename GridView::template Codim< dimGrid >::Iterator VertexIterator;
     typedef typename GridView::IntersectionIterator IntersectionIterator;
 
+    typedef typename IndexSet::IndexType Index;
+
     typedef GenericReferenceElement< typename Grid::ctype, dimGrid > RefElement;
     typedef GenericReferenceElements< typename Grid::ctype, dimGrid > RefElements;
 
@@ -88,11 +90,11 @@ namespace Dune
     // write DGF header
     gridout << "DGF" << std::endl;
 
-    std::vector< unsigned int > vertexIndex( indexSet.size( dimGrid ) );
+    std::vector< Index > vertexIndex( indexSet.size( dimGrid ) );
 
     // write all vertices into the "vertex" block
     gridout << std::endl << "VERTEX" << std::endl;
-    unsigned int vertexCount = 0;
+    Index vertexCount = 0;
     const VertexIterator vend = gridView_.template end< dimGrid >();
     for( VertexIterator vit = gridView_.template begin< dimGrid >(); vit != vend; ++vit )
     {
@@ -111,12 +113,12 @@ namespace Dune
       if( !it->type().isSimplex() )
         continue;
 
-      std::vector< unsigned int > vertices( dimGrid+1 );
-      for( unsigned int i = 0; i < vertices.size(); ++i )
+      std::vector< Index > vertices( dimGrid+1 );
+      for( size_t i = 0; i < vertices.size(); ++i )
         vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
 
       gridout << vertices[ 0 ];
-      for( unsigned int i = 1; i < vertices.size(); ++i )
+      for( size_t i = 1; i < vertices.size(); ++i )
         gridout << " " << vertices[ i ];
       gridout << std::endl;
     }
@@ -129,12 +131,12 @@ namespace Dune
       if( !it->type().isCube() )
         continue;
 
-      std::vector< unsigned int > vertices( 1 << dimGrid );
-      for( unsigned int i = 0; i < vertices.size(); ++i )
+      std::vector< Index > vertices( 1 << dimGrid );
+      for( size_t i = 0; i < vertices.size(); ++i )
         vertices[ i ] = vertexIndex[ indexSet.subIndex( *it, i, dimGrid ) ];
 
       gridout << vertices[ 0 ];
-      for( unsigned int i = 1; i < vertices.size(); ++i )
+      for( size_t i = 1; i < vertices.size(); ++i )
         gridout << " " << vertices[ i ];
       gridout << std::endl;
     }
@@ -165,7 +167,7 @@ namespace Dune
 
         const int faceNumber = iit->indexInInside();
         const unsigned int faceSize = refElement.size( faceNumber, 1, dimGrid );
-        std::vector< unsigned int > vertices( faceSize );
+        std::vector< Index > vertices( faceSize );
         for( unsigned int i = 0; i < faceSize; ++i )
         {
           const int j = refElement.subEntity( faceNumber, 1, i, dimGrid );
