@@ -17,7 +17,6 @@
 
 //- Dune includes
 #include <dune/common/mpihelper.hh>
-#include <dune/grid/common/referenceelements.hh>
 #include <dune/common/stdstreams.hh>
 //- local includes
 

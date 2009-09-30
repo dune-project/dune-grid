@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 namespace Dune
 {
@@ -117,7 +118,6 @@ namespace Dune
   {
     const GenericReferenceElement< double, dimworld > &refCube
       = GenericReferenceElements< double, dimworld >::cube();
-    //ReferenceCube< double, dimworld > refCube;
     const unsigned int size = refCube.size( f, 1, dimworld );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++ i )
@@ -133,7 +133,6 @@ namespace Dune
   {
     const GenericReferenceElement< double, dimworld > &refSimplex
       = GenericReferenceElements< double, dimworld >::simplex();
-    //ReferenceSimplex< double, dimworld > refSimplex;
     const unsigned int size = refSimplex.size( f, 1, dimworld );
     std :: vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )
