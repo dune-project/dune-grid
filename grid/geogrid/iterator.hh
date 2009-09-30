@@ -102,19 +102,18 @@ namespace Dune
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
       {
+        if( element.partitionType() == InteriorEntity )
+          return true;
+
         const int size = refElement.size( subEntity, codim, dimension );
-        bool border = false;
-        bool front = false;
         for( int i = 0; i < size; ++i )
         {
           const int j = refElement.subEntity( subEntity, codim, i, dimension );
           PartitionType type = element.template subEntity< dimension >( j )->partitionType();
-          if( type == OverlapEntity )
+          if( (type == OverlapEntity) || (type == BorderEntity) )
             return true;
-          border |= (type == BorderEntity);
-          front |= (type == FrontEntity);
         }
-        return (border && front);
+        return false;
       }
     };
 
@@ -132,15 +131,7 @@ namespace Dune
       static bool apply ( const ReferenceElement &refElement,
                           const Element &element, int subEntity )
       {
-        const int size = refElement.size( subEntity, codim, dimension );
-        for( int i = 0; i < size; ++i )
-        {
-          const int j = refElement.subEntity( subEntity, codim, i, dimension );
-          PartitionType type = element.template subEntity< dimension >( j )->partitionType();
-          if( type != BorderEntity )
-            return true;
-        }
-        return false;
+        return true;
       }
     };
 
@@ -248,7 +239,7 @@ namespace Dune
 
       HostElementIterator hostEnd_;
       const HostIndexSet *hostIndexSet_;
-      std :: vector< bool > visited_;
+      std::vector< bool > visited_;
 
     protected:
       using Base::hostElementIterator_;
@@ -270,7 +261,7 @@ namespace Dune
 
       void increment ()
       {
-        typedef typename Traits :: ctype ctype;
+        typedef typename Traits::ctype ctype;
 
         while( hostElementIterator_ != hostEnd_ )
         {

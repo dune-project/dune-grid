@@ -487,18 +487,17 @@ namespace Dune
           = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
 
         PartitionType type = vertexPartitionType( refElement, 0 );
-        if( (type == InteriorEntity) || (type == OverlapEntity)
-            || (type == GhostEntity) )
+        if( (type != BorderEntity) && (type != FrontEntity) )
           return type;
 
         const int numVertices = refElement.size( subEntity_, codimension, dimension );
         for( int i = 1; i < numVertices; ++i )
         {
           PartitionType vtxType = vertexPartitionType( refElement, i );
-          if( (vtxType == InteriorEntity) || (vtxType == OverlapEntity)
-              || (vtxType == GhostEntity) )
+          if( (vtxType != BorderEntity) && (vtxType != FrontEntity) )
             return vtxType;
-          assert( type == vtxType );
+          if( type != vtxType )
+            return OverlapEntity;
         }
         assert( (type == BorderEntity) || (type == FrontEntity) );
         return type;
