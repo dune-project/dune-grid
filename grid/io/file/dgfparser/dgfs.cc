@@ -2,10 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 namespace Dune
 {
-
-  template< int dim, int dimworld >
-  inline SGrid< dim, dimworld > *
-  MacroGrid::Impl< SGrid< dim, dimworld > >
+  template< int dim, int dimworld, class ctype >
+  inline SGrid< dim, dimworld, ctype > *
+  MacroGrid::Impl< SGrid< dim, dimworld, ctype > >
   ::generate ( MacroGrid &mg, const char *filename, MPICommunicatorType )
   {
     std::ifstream gridin( filename );
@@ -34,7 +33,7 @@ namespace Dune
 
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
-    FieldVector< double, dim > lower, upper;
+    FieldVector< ctype, dim > lower, upper;
     FieldVector< int, dim > anz;
 
     for( int i = 0; i < dim; ++i )
@@ -50,5 +49,4 @@ namespace Dune
     // - position of the upper right corner of the cube
     return new SGrid< dim, dimworld >( anz, lower, upper );
   }
-
 }
