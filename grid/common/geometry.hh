@@ -15,10 +15,17 @@
 
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
-#include "referenceelements.hh"
 
 namespace Dune
 {
+
+  // External Forward Declarations
+  // -----------------------------
+
+  template< int dim, int dimworld, class ct, class GridFamily >
+  class GridDefaultImplementation;
+
+
 
   //*****************************************************************************
   //
