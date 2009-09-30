@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 
 namespace Dune
@@ -1026,7 +1027,8 @@ namespace Dune
     }
     else if (dimw==3)
     {
-      const ReferenceSimplex<double,3> refElem;
+      const GenericReferenceElement< double, 3 > &refElem
+        = GenericReferenceElements< double, 3 >::simplex();
       for (int i=0; i<nofelements; i++)
       {
         if (elements[i].size()!=size_t(dimw+1))
