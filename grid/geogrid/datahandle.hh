@@ -30,16 +30,12 @@ namespace Dune
 
     template< class Grid, class WrappedHandle >
     class CommDataHandle
-      : public CommDataHandleIF
-        < CommDataHandle< Grid, WrappedHandle >, typename WrappedHandle :: DataType >
+      : public CommDataHandleIF< CommDataHandle< Grid, WrappedHandle >, typename WrappedHandle::DataType >
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
       template< class HostEntity >
       class EntityProxy;
-
-      const Grid &grid_;
-      WrappedHandle &wrappedHandle_;
 
     public:
       CommDataHandle ( const Grid &grid, WrappedHandle &handle )
@@ -82,9 +78,9 @@ namespace Dune
       }
 
     private:
-      void assertHostEntity ( int dim, int codim ) const
+      static void assertHostEntity ( int dim, int codim )
       {
-        if( !Capabilities :: CodimCache< Grid > :: hasHostEntity( codim ) )
+        if( !Capabilities::CodimCache< Grid >::hasHostEntity( codim ) )
           noEntity( codim );
       }
 
@@ -93,18 +89,21 @@ namespace Dune
         DUNE_THROW( NotImplemented, "Host grid has no entities for codimension "
                     << codim << "." );
       }
+
+      const Grid &grid_;
+      WrappedHandle &wrappedHandle_;
     };
 
 
 
     template< class Grid, class WrappedHandle >
     template< class HostEntity >
-    class CommDataHandle< Grid, WrappedHandle > :: EntityProxy
+    class CommDataHandle< Grid, WrappedHandle >::EntityProxy
     {
-      static const int codimension = HostEntity :: codimension;
-      typedef typename Traits :: template Codim< codimension > :: Entity Entity;
-      typedef GeoGrid :: EntityWrapper< Entity > EntityWrapper;
-      typedef GeoGrid :: Storage< EntityWrapper > EntityStorage;
+      static const int codimension = HostEntity::codimension;
+      typedef typename Traits::template Codim< codimension >::Entity Entity;
+      typedef GeoGrid::EntityWrapper< Entity > EntityWrapper;
+      typedef GeoGrid::Storage< EntityWrapper > EntityStorage;
 
       template< bool >
       struct InitializeReal
@@ -126,33 +125,32 @@ namespace Dune
         }
       };
 
-      typedef GenericGeometry :: ProtectedIf
-      < Capabilities :: hasHostEntity< Grid, codimension > :: v,
-          InitializeReal, InitializeFake >
-      Initialize;
-
-      EntityWrapper *entity_;
+      static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codimension >::v;
+      typedef GenericGeometry::ProtectedIf< hasHostEntity, InitializeReal, InitializeFake > Initialize;
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
         : entity_( EntityStorage :: alloc() )
       {
-        Initialize :: apply( *entity_, grid, hostEntity );
+        Initialize::apply( *entity_, grid, hostEntity );
       }
 
       ~EntityProxy ()
       {
-        EntityStorage :: free( entity_ );
+        EntityStorage::free( entity_ );
       }
 
       const Entity &operator* () const
       {
         return *entity_;
       }
+
+    private:
+      EntityWrapper *entity_;
     };
 
   }
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_DATAHANDLE_HH

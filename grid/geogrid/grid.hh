@@ -742,7 +742,7 @@ namespace Dune
                        int level ) const
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeoGrid :: CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+      typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
       WrappedDataHandle wrappedDataHandle( *this, datahandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction, level );
@@ -766,7 +766,7 @@ namespace Dune
                        CommunicationDirection direction ) const
     {
       typedef CommDataHandleIF< DataHandle, Data > DataHandleIF;
-      typedef GeoGrid :: CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
+      typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
       WrappedDataHandle wrappedDataHandle( *this, datahandle );
       hostGrid().communicate( wrappedDataHandle, interface, direction );
