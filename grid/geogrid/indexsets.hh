@@ -49,7 +49,7 @@ namespace Dune
       typedef typename Traits::HostGrid HostGrid;
 
     public:
-      typedef Dune::IndexSet< Grid, This > Base;
+      typedef Dune::IndexSet< Grid, This, typename HostIndexSet::IndexType > Base;
 
       static const int dimension = Grid::dimension;
 
