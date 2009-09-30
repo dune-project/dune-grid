@@ -174,9 +174,6 @@ typedef Dune :: OneDGrid GridType;
   #if HAVE_GRIDTYPE
     #error "Ambiguous definition of GRIDTYPE."
   #endif
-  #if (GRIDDIM != WORLDDIM)
-    #error "SGRID is only available for GRIDDIM=WORLDDIM."
-  #endif
 
   #include <dune/grid/sgrid.hh>
 typedef Dune :: SGrid< dimgrid, dimworld > GridType;
