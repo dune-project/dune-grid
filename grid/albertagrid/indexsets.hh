@@ -65,7 +65,7 @@ namespace Dune
   private:
     typedef typename Grid::Traits Traits;
 
-    typedef Alberta::DofVectorPointer< int > IndexVectorPointer;
+    typedef Alberta::DofVectorPointer< IndexType > IndexVectorPointer;
 
     class InitEntityNumber;
 
@@ -176,8 +176,8 @@ namespace Dune
      */
     IndexType subIndex ( const Alberta::Element *element, int i, unsigned int codim ) const
     {
-      int *array = (int *)entityNumbers_[ codim ];
-      const int subIndex = array[ dofNumbering_( element, codim, i ) ];
+      IndexType *array = (IndexType *)entityNumbers_[ codim ];
+      const IndexType subIndex = array[ dofNumbering_( element, codim, i ) ];
       assert( (subIndex >= 0) && (subIndex < size( codim )) );
       return subIndex;
     }
@@ -235,14 +235,13 @@ namespace Dune
     {
       IndexStack *indexStack;
       if( IndexVectorPointer::supportsAdaptationData )
-        indexStack = dofVector.getAdaptationData< IndexStack >();
+        indexStack = dofVector.template getAdaptationData< IndexStack >();
       else
         indexStack = &Alberta::currentIndexStack[ codim ];
       assert( indexStack != 0 );
       return *indexStack;
     }
 
-  private:
     // access to the dof vectors
     const DofNumbering &dofNumbering_;
 
