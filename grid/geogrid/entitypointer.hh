@@ -330,11 +330,10 @@ namespace Dune
       template< class T >
       bool equals ( const EntityPointer< T, fake > &other ) const
       {
-        const int thisSub = subEntity_;
-        const int otherSub = other.subEntity_;
-
-        if( (thisSub < 0) || (otherSub < 0) )
-          return (thisSub * otherSub >= 0);
+        const bool thisEnd = (subEntity_ < 0);
+        const bool otherEnd = (other.subEntity_ < 0);
+        if( thisEnd || otherEnd )
+          return thisEnd && otherEnd;
 
         const int lvl = level();
         if( lvl != other.level() )
@@ -348,8 +347,8 @@ namespace Dune
         const HostElement &otherElement = *(other.hostElementPointer());
         assert( indexSet.contains( otherElement ) );
 
-        const int thisIndex = indexSet.subIndex( thisElement, thisSub, codimension );
-        const int otherIndex = indexSet.subIndex( otherElement, otherSub, codimension );
+        const int thisIndex = indexSet.subIndex( thisElement, subEntity_, codimension );
+        const int otherIndex = indexSet.subIndex( otherElement, other.subEntity_, codimension );
         return (thisIndex == otherIndex);
       }
 
