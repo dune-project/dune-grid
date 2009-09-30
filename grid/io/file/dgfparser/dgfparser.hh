@@ -171,26 +171,36 @@ namespace Dune
       MacroGrid(filename.c_str(),MPICOMM),
       gridptr_(this->template createGrid<GridType>()),
       emptyParam(),
-      elParam(0), vtxParam(0), nofElParam_(0), nofVtxParam_(0) {
-      if (nofelparams>0) {
+      elParam(0),
+      vtxParam(0),
+      nofElParam_(0),
+      nofVtxParam_(0)
+    {
+      if (nofelparams>0)
+      {
         nofElParam_ = nofelparams;
-        for (size_t i=0; i<elements.size(); i++) {
+        for (size_t i=0; i<elements.size(); i++)
+        {
           std::vector<double> coord;
           DomainType p (0);
           std::vector<double>& param = this->getElParam(i,coord);
           for (int k=0; k<dimw; k++)
             p[k] = coord[k];
+
           elParam.push_back(make_pair(p,param));
         }
       }
-      if (nofvtxparams>0) {
+      if (nofvtxparams>0)
+      {
         nofVtxParam_ = nofvtxparams;
-        for (size_t i=0; i<vtx.size(); i++) {
+        for (size_t i=0; i<vtx.size(); i++)
+        {
           std::vector<double> coord;
           DomainType p (0);
           std::vector<double>& param = getVtxParam(i,coord);
           for (int k=0; k<dimw; k++)
             p[k] = coord[k];
+
           vtxParam.push_back(make_pair(p,param));
         }
       }
