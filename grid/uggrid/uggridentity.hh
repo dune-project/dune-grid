@@ -9,8 +9,6 @@
 
 #include "uggridrenumberer.hh"
 
-#include <dune/grid/common/referenceelements.hh>
-
 
 namespace Dune {
 
