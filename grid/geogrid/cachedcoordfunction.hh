@@ -9,10 +9,10 @@
 
 #include <dune/common/typetraits.hh>
 
+#include <dune/grid/common/gridenums.hh>
+
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/coordfunction.hh>
-
-//#define ALLCODIM_SUBINDEX
 
 namespace Dune
 {
@@ -33,8 +33,8 @@ namespace Dune
 
 
 
-  // GeoGrid :: CoordCache
-  // ---------------------
+  // GeoGrid::CoordCache
+  // -------------------
 
   namespace GeoGrid
   {
@@ -44,16 +44,13 @@ namespace Dune
     {
       typedef CoordCache< HostGrid, Coordinate, true > This;
 
-      static const unsigned int dimension = HostGrid :: dimension;
+      static const unsigned int dimension = HostGrid::dimension;
 
-      typedef typename HostGrid :: template Codim< dimension > :: Entity Vertex;
+      typedef typename HostGrid::template Codim< dimension >::Entity Vertex;
 
-      typedef typename HostGrid :: HierarchicIndexSet HierarchicIndexSet;
+      typedef typename HostGrid::HierarchicIndexSet HierarchicIndexSet;
 
-      typedef std :: vector< Coordinate > DataCache;
-
-      const HierarchicIndexSet &indexSet_;
-      DataCache data_;
+      typedef std::vector< Coordinate > DataCache;
 
     public:
       explicit CoordCache ( const HostGrid &hostGrid )
@@ -61,55 +58,41 @@ namespace Dune
           data_( indexSet_.size( dimension ) )
       {}
 
-    private:
-      CoordCache ( const This & );
-      This &operator= ( const This & );
-
-    public:
       template< class Entity >
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
-#ifdef ALLCODIM_SUBINDEX
-        static const int codim = Entity::codimension;
-        static const int subcodim = dimension - codim;
-        return data_[ indexSet_.template subIndex< codim, subcodim >( entity, corner ) ];
-#else
-        return data_[ indexSet_.template subIndex< dimension >( entity, corner ) ];
-#endif
+        return data_[ indexSet_.subIndex( entity, corner, dimension - Entity::codimension ) ];
       }
 
-#ifndef ALLCODIM_SUBINDEX
       const Coordinate &operator() ( const Vertex &vertex, unsigned int corner ) const
       {
         assert( corner == 0 );
         return data_[ indexSet_.index( vertex ) ];
       }
-#endif
 
       template< class Entity >
       Coordinate &operator() ( const Entity &entity, unsigned int corner )
       {
-#ifdef ALLCODIM_SUBINDEX
-        static const int codim = Entity :: codimension;
-        static const int subcodim = dimension - codim;
-        return data_[ indexSet_.template subIndex< codim, subcodim >( entity, corner ) ];
-#else
-        return data_[ indexSet_.template subIndex< dimension >( entity, corner ) ];
-#endif
+        return data_[ indexSet_.subIndex( entity, corner, dimension - Entity::codimension ) ];
       }
 
-#ifndef ALLCODIM_SUBINDEX
       Coordinate &operator() ( const Vertex &vertex, unsigned int corner )
       {
         assert( corner == 0 );
         return data_[ indexSet_.index( vertex ) ];
       }
-#endif
 
       void adapt ()
       {
         data_.resize( indexSet_.size( dimension ) );
       }
+
+    private:
+      CoordCache ( const This & );
+      This &operator= ( const This & );
+
+      const HierarchicIndexSet &indexSet_;
+      DataCache data_;
     };
 
 
@@ -118,32 +101,24 @@ namespace Dune
     {
       typedef CoordCache< HostGrid, Coordinate, false > This;
 
-      static const unsigned int dimension = HostGrid :: dimension;
+      static const unsigned int dimension = HostGrid::dimension;
 
-      typedef typename HostGrid :: template Codim< dimension > :: Entity Vertex;
+      typedef typename HostGrid::template Codim< dimension >::Entity Vertex;
 
-      typedef typename HostGrid :: Traits :: LocalIdSet LocalIdSet;
-      typedef typename LocalIdSet :: IdType Id;
+      typedef typename HostGrid::Traits::LocalIdSet LocalIdSet;
+      typedef typename LocalIdSet::IdType Id;
 
-      typedef std :: map< Id, Coordinate > DataCache;
-
-      const LocalIdSet &idSet_;
-      mutable DataCache data_;
+      typedef std::map< Id, Coordinate > DataCache;
 
     public:
       explicit CoordCache ( const HostGrid &hostGrid )
         : idSet_( hostGrid.localIdSet() )
       {}
 
-    private:
-      CoordCache ( const This & );
-      This &operator= ( const This & );
-
-    public:
       template< class Entity >
       const Coordinate &operator() ( const Entity &entity, unsigned int corner ) const
       {
-        const Id id = idSet_.template subId< dimension >( entity, corner );
+        const Id id = idSet_.subId( entity, corner, dimension );
         return data_[ id ];
       }
 
@@ -157,7 +132,7 @@ namespace Dune
       template< class Entity >
       Coordinate &operator() ( const Entity &entity, unsigned int corner )
       {
-        const Id id = idSet_.template subId< dimension >( entity, corner );
+        const Id id = idSet_.subId( entity, corner, dimension );
         return data_[ id ];
       }
 
@@ -170,6 +145,13 @@ namespace Dune
 
       void adapt ()
       {}
+
+    private:
+      CoordCache ( const This & );
+      This &operator= ( const This & );
+
+      const LocalIdSet &idSet_;
+      mutable DataCache data_;
     };
 
   }
@@ -186,12 +168,11 @@ namespace Dune
           CachedCoordFunction< HostGrid, CoordFunction > >
   {
     typedef CachedCoordFunction< HostGrid, CoordFunction > This;
-    typedef DiscreteCoordFunction
-    < typename CoordFunction :: ctype, CoordFunction :: dimRange, This >
+    typedef DiscreteCoordFunction< typename CoordFunction::ctype, CoordFunction::dimRange, This >
     Base;
 
   public:
-    typedef typename Base :: RangeVector RangeVector;
+    typedef typename Base::RangeVector RangeVector;
 
   private:
     static const bool hasHierarchicIndexSet = Capabilities::hasHierarchicIndexSet< HostGrid >::v;
@@ -239,25 +220,19 @@ namespace Dune
     void calculate ( const HostGeometry &hostGeometry, unsigned int corner,
                      RangeVector &y ) const
     {
-      const int dimension = HostGeometry::dimension;
-      typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-
-      const int tid = GenericGeometry::topologyId( hostGeometry.type() );
-      const int i = Map::template dune2generic< dimension >( tid, corner );
-      coordFunction_.evaluate( hostGeometry.corner( i ), y );
+      coordFunction_.evaluate( hostGeometry.corner( corner ), y );
     }
   };
 
 
 
   template< class HostGrid, class CoordFunction >
-  inline void CachedCoordFunction< HostGrid, CoordFunction > :: buildCache ()
+  inline void CachedCoordFunction< HostGrid, CoordFunction >::buildCache ()
   {
-    typedef typename HostGrid :: template Codim< 0 > :: Entity Element;
-    typedef typename HostGrid :: template Codim< 0 >
-    :: template Partition< All_Partition > :: LevelIterator
+    typedef typename HostGrid::template Codim< 0 >::Entity Element;
+    typedef typename HostGrid::template Codim< 0 >::template Partition< All_Partition >::LevelIterator
     LevelIterator;
-    typedef typename HostGrid :: Traits :: HierarchicIterator HierarchicIterator;
+    typedef typename HostGrid::Traits::HierarchicIterator HierarchicIterator;
 
     const int maxLevel = hostGrid_.maxLevel();
     const LevelIterator macroEnd = hostGrid_.template lend< 0, All_Partition >( 0 );
@@ -277,7 +252,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   template< class HostEntity >
   inline void CachedCoordFunction< HostGrid, CoordFunction >
-  :: insertEntity ( const HostEntity &hostEntity )
+  ::insertEntity ( const HostEntity &hostEntity )
   {
     typedef typename HostEntity::Geometry HostGeometry;
 
@@ -292,4 +267,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_CACHEDCOORDFUNCTION_HH

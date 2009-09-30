@@ -3,7 +3,6 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
-#include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
@@ -263,7 +262,7 @@ namespace Dune
        *  \internal This method is provided by the entity, because its
        *  implementation is different for fake and non-fake entities.
        *
-       *  \param  indexSet  host IndexSet to use
+       *  \param[in]  indexSet  host IndexSet to use
        */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType
@@ -272,24 +271,20 @@ namespace Dune
         return indexSet.template index< codimension >( hostEntity() );
       }
 
-      template< int subcodim, class HostIndexSet >
-      typename HostIndexSet::IndexType
-      subIndex ( const HostIndexSet &indexSet, int i ) const
-      {
-        DUNE_THROW( NotImplemented, "This function will eventually reappear." );
-#if 0
-        return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
-#endif
-      }
-
+      /** \brief obtain the index of a subentity from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param[in]  indexSet  host IndexSet to use
+       *  \param[in]  i         number of the subentity
+       *  \param[in]  cd        codimension of the subentity
+       */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        DUNE_THROW( NotImplemented, "This function will eventually reappear." );
-#if 0
         return indexSet.subIndex( hostEntity(), i, cd );
-#endif
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -562,7 +557,7 @@ namespace Dune
        *  \internal This method is provided by the entity, because its
        *  implementation is different for fake and non-fake entities.
        *
-       *  \param  indexSet  host IndexSet to use
+       *  \param[in]  indexSet  host IndexSet to use
        */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
@@ -570,39 +565,23 @@ namespace Dune
         return indexSet.subIndex( hostElement(), subEntity_, codimension );
       }
 
-      template< int subcodim, class HostIndexSet >
-      typename HostIndexSet::IndexType
-      subIndex ( const HostIndexSet &indexSet, int i ) const
-      {
-        DUNE_THROW( NotImplemented, "This function will eventually reappear." );
-#if 0
-        const GeometryType type = hostElement().type();
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( type );
-        const int j = refElement.subEntity( duneSubEntity_, codimension, i, subcodim );
-
-        const int realcodim = codimension + subcodim;
-        return indexSet.template subIndex< 0, realcodim >( hostElement(), j );
-#endif
-      }
-
+      /** \brief obtain the index of a subentity from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param[in]  indexSet  host IndexSet to use
+       *  \param[in]  i         number of the subentity
+       *  \param[in]  cd        codimension of the subentity
+       */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        DUNE_THROW( NotImplemented, "This function will eventually reappear." );
-#if 0
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-
-        const int topologyId = GenericGeometry::topologyId( hostElement().type() );
-        const int gi = Map::template dune2generic( topologyId, i, codimension );
-
         const GenericReferenceElement< ctype, dimension > &refElement
-          = GenericReferenceElements< ctype, dimension >::general( type );
-        const int j = refElement.subEntity( duneSubEntity_, codimension, gi, cd );
-
+          = GenericReferenceElements< ctype, dimension >::general( hostElement().type() );
+        const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
         return indexSet.subIndex( hostElement(), j, codimension+cd );
-#endif
       }
 
       /** \brief check whether the entity is contained in a host index set
@@ -962,7 +941,7 @@ namespace Dune
        *  \internal This method is provided by the entity, because its
        *  implementation is different for fake and non-fake entities.
        *
-       *  \param  indexSet  host IndexSet to use
+       *  \param[in]  indexSet  host IndexSet to use
        */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType index ( const HostIndexSet &indexSet ) const
@@ -970,13 +949,15 @@ namespace Dune
         return indexSet.template index< codimension >( hostEntity() );
       }
 
-      template< int subcodim, class HostIndexSet >
-      typename HostIndexSet :: IndexType
-      subIndex ( const HostIndexSet &indexSet, int i ) const
-      {
-        return indexSet.template subIndex< codimension, subcodim >( hostEntity(), i );
-      }
-
+      /** \brief obtain the index of a subentity from a host IndexSet
+       *
+       *  \internal This method is provided by the entity, because its
+       *  implementation is different for fake and non-fake entities.
+       *
+       *  \param[in]  indexSet  host IndexSet to use
+       *  \param[in]  i         number of the subentity
+       *  \param[in]  cd        codimension of the subentity
+       */
       template< class HostIndexSet >
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
@@ -1089,4 +1070,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_ENTITY_HH

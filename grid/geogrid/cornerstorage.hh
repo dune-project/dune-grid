@@ -19,13 +19,10 @@ namespace Dune
     template< class HostEntity, class CoordFunctionInterface >
     class CoordFunctionCaller;
 
-    template< class HostEntity,
-        class ct, unsigned int dimD, unsigned int dimR, class Impl >
-    class CoordFunctionCaller
-    < HostEntity, AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > >
+    template< class HostEntity, class ct, unsigned int dimD, unsigned int dimR, class Impl >
+    class CoordFunctionCaller< HostEntity, AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > >
     {
-      typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >
-      CoordFunctionInterface;
+      typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > CoordFunctionInterface;
       typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
 
       static const int dimension = HostEntity::dimension;
@@ -33,9 +30,6 @@ namespace Dune
       typedef typename HostEntity::Geometry HostGeometry;
 
       typedef typename CoordFunctionInterface::RangeVector RangeVector;
-
-      const HostGeometry &hostGeometry_;
-      const CoordFunctionInterface &coordFunction_;
 
     public:
       CoordFunctionCaller ( const HostEntity &hostEntity,
@@ -46,10 +40,7 @@ namespace Dune
 
       void evaluate ( unsigned int i, RangeVector &y ) const
       {
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const int tid = GenericGeometry::topologyId( type() );
-        const int gi = Map::template dune2generic< dimension >( tid, i );
-        return coordFunction_.evaluate( hostGeometry_.corner( gi ), y );
+        coordFunction_.evaluate( hostGeometry_.corner( i ), y );
       }
 
       GeometryType type () const
@@ -61,20 +52,19 @@ namespace Dune
       {
         return hostGeometry_.corners();
       }
+
+    private:
+      const HostGeometry &hostGeometry_;
+      const CoordFunctionInterface &coordFunction_;
     };
 
     template< class HostEntity, class ct, unsigned int dimR, class Impl >
-    class CoordFunctionCaller
-    < HostEntity, DiscreteCoordFunctionInterface< ct, dimR, Impl > >
+    class CoordFunctionCaller< HostEntity, DiscreteCoordFunctionInterface< ct, dimR, Impl > >
     {
-      typedef DiscreteCoordFunctionInterface< ct, dimR, Impl >
-      CoordFunctionInterface;
+      typedef DiscreteCoordFunctionInterface< ct, dimR, Impl > CoordFunctionInterface;
       typedef CoordFunctionCaller< HostEntity, CoordFunctionInterface > This;
 
-      typedef typename CoordFunctionInterface :: RangeVector RangeVector;
-
-      const HostEntity &hostEntity_;
-      const CoordFunctionInterface &coordFunction_;
+      typedef typename CoordFunctionInterface::RangeVector RangeVector;
 
     public:
       CoordFunctionCaller ( const HostEntity &hostEntity,
@@ -85,7 +75,7 @@ namespace Dune
 
       void evaluate ( unsigned int i, RangeVector &y ) const
       {
-        return coordFunction_.evaluate( hostEntity_, i, y );
+        coordFunction_.evaluate( hostEntity_, i, y );
       }
 
       GeometryType type () const
@@ -97,6 +87,10 @@ namespace Dune
       {
         return hostEntity_.geometry().corners();
       }
+
+    private:
+      const HostEntity &hostEntity_;
+      const CoordFunctionInterface &coordFunction_;
     };
 
 
@@ -112,29 +106,24 @@ namespace Dune
     template< int mydim, class Grid >
     class CoordVector< mydim, Grid, false >
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits :: ctype ctype;
+      typedef typename Traits::ctype ctype;
 
-      static const int dimension = Traits :: dimension;
+      static const int dimension = Traits::dimension;
       static const int mydimension = mydim;
       static const int codimension = dimension - mydimension;
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       typedef FieldVector< ctype, dimensionworld > Coordinate;
 
-      typedef typename Traits :: HostGrid HostGrid;
-      typedef typename Traits :: CoordFunction CoordFunction;
+      typedef typename Traits::HostGrid HostGrid;
+      typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename HostGrid :: template Codim< codimension > :: Entity
-      HostEntity;
+      typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
 
-      typedef GeoGrid :: CoordFunctionCaller
-      < HostEntity, typename CoordFunction :: Interface >
+      typedef GeoGrid :: CoordFunctionCaller< HostEntity, typename CoordFunction::Interface >
       CoordFunctionCaller;
-
-    private:
-      const CoordFunctionCaller coordFunctionCaller_;
 
     public:
       CoordVector ( const HostEntity &hostEntity,
@@ -149,6 +138,9 @@ namespace Dune
         for( unsigned int i = 0; i < numCorners; ++i )
           coordFunctionCaller_.evaluate( i, corners[ i ] );
       }
+
+    private:
+      const CoordFunctionCaller coordFunctionCaller_;
     };
 
 
@@ -157,27 +149,22 @@ namespace Dune
     {
       typedef typename remove_const< Grid > :: type :: Traits Traits;
 
-      typedef typename Traits :: ctype ctype;
+      typedef typename Traits::ctype ctype;
 
-      static const int dimension = Traits :: dimension;
+      static const int dimension = Traits::dimension;
       static const int mydimension = mydim;
       static const int codimension = dimension - mydimension;
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       typedef FieldVector< ctype, dimensionworld > Coordinate;
 
-      typedef typename Traits :: HostGrid HostGrid;
-      typedef typename Traits :: CoordFunction CoordFunction;
+      typedef typename Traits::HostGrid HostGrid;
+      typedef typename Traits::CoordFunction CoordFunction;
 
-      typedef typename HostGrid :: template Codim< 0 > :: Entity HostElement;
+      typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
 
-      typedef GeoGrid :: CoordFunctionCaller
-      < HostElement, typename CoordFunction :: Interface >
+      typedef GeoGrid::CoordFunctionCaller< HostElement, typename CoordFunction::Interface >
       CoordFunctionCaller;
-
-    private:
-      const CoordFunctionCaller coordFunctionCaller_;
-      const unsigned int subEntity_;
 
     public:
       CoordVector ( const HostElement &hostElement,
@@ -191,8 +178,8 @@ namespace Dune
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
         const GeometryType type = coordFunctionCaller_.type();
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension > :: general( type );
+        const GenericReferenceElement< ctype, dimension > &refElement
+          = GenericReferenceElements< ctype, dimension >::general( type );
         assert( numCorners == refElement.size( subEntity_, codimension, dimension ) );
 
         for( unsigned int i = 0; i < numCorners; ++i )
@@ -201,6 +188,10 @@ namespace Dune
           coordFunctionCaller_.evaluate( j, corners[ i ] );
         }
       }
+
+    private:
+      const CoordFunctionCaller coordFunctionCaller_;
+      const unsigned int subEntity_;
     };
 
 
@@ -211,27 +202,21 @@ namespace Dune
     template< class Grid >
     class IntersectionCoordVector
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits :: ctype ctype;
+      typedef typename Traits::ctype ctype;
 
-      static const int dimension = Traits :: dimension;
+      static const int dimension = Traits::dimension;
       static const int codimension = 1;
       static const int mydimension = dimension-codimension;
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       typedef FieldVector< ctype, dimensionworld > Coordinate;
 
-      typedef typename Traits :: HostGrid HostGrid;
+      typedef typename Traits::HostGrid HostGrid;
 
-      typedef typename Traits :: template Codim< 0 > :: Geometry
-      ElementGeometry;
-      typedef typename Traits :: template Codim< codimension > :: LocalGeometry
-      HostLocalGeometry;
-
-    private:
-      const ElementGeometry &elementGeometry_;
-      const HostLocalGeometry &hostLocalGeometry_;
+      typedef typename Traits::template Codim< 0 >::Geometry ElementGeometry;
+      typedef typename Traits::template Codim< codimension >::LocalGeometry HostLocalGeometry;
 
     public:
       IntersectionCoordVector ( const ElementGeometry &elementGeometry,
@@ -243,16 +228,14 @@ namespace Dune
       template< unsigned int numCorners >
       void calculate ( Coordinate (&corners)[ numCorners ] ) const
       {
-        typedef GenericGeometry::MapNumberingProvider< dimension > Map;
-        const int tid = GenericGeometry::topologyId( hostLocalGeometry_.type() );
-
         assert( numCorners == hostLocalGeometry_.corners() );
         for( unsigned int i = 0; i < numCorners; ++i )
-        {
-          const int gi = Map::template dune2generic< dimension >( tid, i );
-          corners[ i ] = elementGeometry_.global( hostLocalGeometry_.corner( gi ) );
-        }
+          corners[ i ] = elementGeometry_.global( hostLocalGeometry_.corner( i ) );
       }
+
+    private:
+      const ElementGeometry &elementGeometry_;
+      const HostLocalGeometry &hostLocalGeometry_;
     };
 
 
@@ -264,19 +247,19 @@ namespace Dune
     template< class Topology, class Grid >
     class CornerStorage
     {
-      typedef typename remove_const< Grid > :: type :: Traits Traits;
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-      typedef typename Traits :: ctype ctype;
+      typedef typename Traits::ctype ctype;
 
-      static const int dimension = Traits :: dimension;
-      static const int mydimension = Topology :: dimension;
+      static const int dimension = Traits::dimension;
+      static const int mydimension = Topology::dimension;
       static const int codimension = dimension - mydimension;
-      static const int dimensionworld = Traits :: dimensionworld;
+      static const int dimensionworld = Traits::dimensionworld;
 
       typedef FieldVector< ctype, dimensionworld > Coordinate;
 
     public:
-      static const unsigned int size = Topology :: numCorners;
+      static const unsigned int size = Topology::numCorners;
 
       template< class SubTopology >
       struct SubStorage
@@ -284,10 +267,6 @@ namespace Dune
         typedef CornerStorage< SubTopology, Grid > type;
       };
 
-    private:
-      Coordinate coords_[ size ];
-
-    public:
       template< bool fake >
       explicit
       CornerStorage ( const CoordVector< mydimension, Grid, fake > &coords )
@@ -302,7 +281,7 @@ namespace Dune
 
       template< class Mapping, unsigned int codim >
       explicit
-      CornerStorage ( const GenericGeometry :: SubMappingCoords< Mapping, codim > &coords )
+      CornerStorage ( const GenericGeometry::SubMappingCoords< Mapping, codim > &coords )
       {
         for( unsigned int i = 0; i < size; ++i )
           coords_[ i ] = coords[ i ];
@@ -312,10 +291,13 @@ namespace Dune
       {
         return coords_[ i ];
       }
+
+    private:
+      Coordinate coords_[ size ];
     };
 
   }
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_CORNERSTORAGE_HH
