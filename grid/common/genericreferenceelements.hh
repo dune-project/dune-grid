@@ -74,7 +74,15 @@ namespace Dune
     template< int codim >
     class MappingArray
       : public std::vector< typename Codim< codim >::Mapping * >
-    {};
+    {
+    public:
+      ~MappingArray()
+      {
+        std::cout << "Destroy MappingArray " << this->size() << "\n";
+        for (int i=0; i<this->size(); i++)
+          delete (*this)[i];
+      }
+    };
 
     typedef GenericGeometry::CodimTable< MappingArray, dim > MappingsTable;
 
