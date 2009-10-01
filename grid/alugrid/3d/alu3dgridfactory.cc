@@ -254,11 +254,12 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid >
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
-    const int falu = ElementTopologyMapping< elementType >::generic2aluFace( f );
+    typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
+    const int falu = ElementTopologyMappingType :: generic2aluFace( f );
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
-      const int j = ElementTopologyMapping< elementType >::faceVertex( falu, i );
-      const int k = ElementTopologyMapping< elementType >::alu2genericVertex( j );
+      const int j = ElementTopologyMappingType :: faceVertex( falu, i );
+      const int k = ElementTopologyMappingType :: alu2genericVertex( j );
       face[ i ] = element[ k ];
     }
   }
