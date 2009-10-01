@@ -78,7 +78,6 @@ namespace Dune
     public:
       ~MappingArray()
       {
-        std::cout << "Destroy MappingArray " << this->size() << "\n";
         for (int i=0; i<this->size(); i++)
           delete (*this)[i];
       }
