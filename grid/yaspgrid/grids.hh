@@ -80,26 +80,16 @@ namespace Dune {
     //! Make an empty YGrid with origin 0
     YGrid () :
       _origin(0), _size(0), _h(0.0), _r(0.0)
-    {
-      _origin = 0;
-      _size = 0;
-      _h = 0.0;
-      _r = 0.0;
-    }
+    {}
 
     //! Make YGrid from origin and size arrays
-    YGrid (iTupel o, iTupel s, fTupel h, fTupel r)
+    YGrid (iTupel o, iTupel s, fTupel h, fTupel r) :
+      _origin(o), _size(s), _h(h), _r(r)
     {
+#ifndef NDEBUG
       for (int i=0; i<d; ++i)
-      {
-        _origin[i] = o[i];
-        _size[i] = s[i];
-        if (_size[i]<0) {
-          _size[i] = 0;
-        }
-        _h[i] = h[i];
-        _r[i] = r[i];
-      }
+        assert (_size[i] >= 0);
+#endif
     }
 
     //! Return origin in direction i
@@ -604,12 +594,10 @@ namespace Dune {
 
     //! Make SubYGrid from origin, size, offset and supersize
     SubYGrid (iTupel origin, iTupel size, iTupel offset, iTupel supersize, fTupel h, fTupel r)
-      : YGrid<d,ct>::YGrid(origin,size,h,r)
+      : YGrid<d,ct>::YGrid(origin,size,h,r), _offset(offset), _supersize(supersize)
     {
       for (int i=0; i<d; ++i)
       {
-        _offset[i] = offset[i];
-        _supersize[i] = supersize[i];
         if (offset[i]<0)
           std::cout << "warning: offset["
           << i <<"] negative in SubYGrid"
@@ -1732,14 +1720,9 @@ namespace Dune {
     //! constructor making a grid
 #if HAVE_MPI
     MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
-      : _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
+      : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
+        _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
     {
-      // store parameters
-      _LL = L;
-      _s = s;
-      _periodic = periodic;
-      _overlap = overlap;
-
       // coarse cell interior  grid obtained through partitioning of global grid
       iTupel o_interior;
       iTupel s_interior;
@@ -1748,7 +1731,6 @@ namespace Dune {
       imbal = _torus.global_max(imbal);
 
       // add level
-      _maxlevel = 0;
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
 
       // output
@@ -1759,21 +1741,15 @@ namespace Dune {
     }
 #else
     MultiYGrid (fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
-      : _torus(tag,s,lb) // torus gets s to compute procs/direction
+      : _LL(L), _s(s), _periodic(periodic), _maxlevel(0), _overlap(overlap),
+        _torus(tag,s,lb) // torus gets s to compute procs/direction
     {
-      // store parameters
-      _LL = L;
-      _s = s;
-      _periodic = periodic;
-      _overlap = overlap;
-
       // coarse cell interior  grid obtained through partitioning of global grid
       iTupel o = iTupel(0);
       iTupel o_interior(o);
       iTupel s_interior(s);
 
       // add level
-      _maxlevel = 0;
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
       // output
       //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
