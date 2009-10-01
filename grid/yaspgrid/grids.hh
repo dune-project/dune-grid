@@ -78,7 +78,8 @@ namespace Dune {
     {}
 
     //! Make an empty YGrid with origin 0
-    YGrid ()
+    YGrid () :
+      _origin(0), _size(0), _h(0.0), _r(0.0)
     {
       _origin = 0;
       _size = 0;
@@ -416,11 +417,11 @@ namespace Dune {
       }
 
     protected:
-      int _index;              //< current lexicographic position in index set
-      iTupel _coord;           //< current position in index set
-      iTupel _increment;       //< increment for next neighbor in direction i
-      iTupel _origin;          //< origin and
-      iTupel _end;             //< last index in direction i
+      int _index;          //< current lexicographic position in index set
+      iTupel _coord;       //< current position in index set
+      iTupel _increment;   //< increment for next neighbor in direction i
+      iTupel _origin;      //< origin and
+      iTupel _end;         //< last index in direction i
     };
 
     //! return iterator to first element of index set
@@ -517,9 +518,9 @@ namespace Dune {
       }
 
     private:
-      fTupel _h;            //!< mesh size per direction
-      fTupel _begin;        //!< position of origin of grid
-      fTupel _position;     //!< current position
+      fTupel _h;        //!< mesh size per direction
+      fTupel _begin;    //!< position of origin of grid
+      fTupel _position; //!< current position
     };
 
     //! return iterator to first element of index set
@@ -541,8 +542,8 @@ namespace Dune {
     //! internal representation uses origin/size
     iTupel _origin;
     iTupel _size;
-    fTupel _h;            //!< mesh size per direction
-    fTupel _r;            //!< shift per direction
+    fTupel _h;        //!< mesh size per direction
+    fTupel _r;        //!< shift per direction
   };
 
   //! Output operator for grids
@@ -581,8 +582,8 @@ namespace Dune {
      It is characterized by an offset and an enclosing grid as
      shown in the following picture:
 
-        \image html  subgrid.png "The SubYGrid is shown in red, blue is the enclosing grid."
-        \image latex subgrid.eps "The SubYGrid is shown in red, blue is the enclosing grid." width=\textwidth
+     \image html  subgrid.png "The SubYGrid is shown in red, blue is the enclosing grid."
+     \image latex subgrid.eps "The SubYGrid is shown in red, blue is the enclosing grid." width=\textwidth
 
      SubYGrid has additional iterators that provide a mapping to
      the consecutive index in the enclosing grid.
@@ -781,22 +782,22 @@ namespace Dune {
       //! move this iterator dist cells in direction i
       void move (int i, int dist)
       {
-        YGrid<d,ct>::Iterator::move(i,dist);            // move base iterator
-        _superindex += dist*_superincrement[i];         // move superindex
+        YGrid<d,ct>::Iterator::move(i,dist);    // move base iterator
+        _superindex += dist*_superincrement[i]; // move superindex
       }
 
       //! Increment iterator to next cell in subgrid
       SubIterator& operator++ ()
       {
-        ++(this->_index);                       // update consecutive index in grid
-        for (int i=0; i<d; i++)                 // check for wrap around
+        ++(this->_index);               // update consecutive index in grid
+        for (int i=0; i<d; i++)         // check for wrap around
         {
-          _superindex += _superincrement[i];               // move on cell in direction i
+          _superindex += _superincrement[i];   // move on cell in direction i
           if (++(this->_coord[i])<=this->_end[i])
             return *this;
           else
           {
-            this->_coord[i]=this->_origin[i];                         // move back to origin in direction i
+            this->_coord[i]=this->_origin[i];         // move back to origin in direction i
             _superindex -= _size[i]*_superincrement[i];
           }
         }
@@ -811,9 +812,9 @@ namespace Dune {
       }
 
     protected:
-      int _superindex;            //!< consecutive index in enclosing grid
-      iTupel _superincrement;     //!< moves consecutive index by one in this direction in supergrid
-      iTupel _size;               //!< size of subgrid
+      int _superindex;        //!< consecutive index in enclosing grid
+      iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
+      iTupel _size;           //!< size of subgrid
     };
 
     //! return subiterator to first element of index set
@@ -871,10 +872,10 @@ namespace Dune {
       //! Increment iterator to next cell with position.
       TransformingSubIterator& operator++ ()
       {
-        ++(this->_index);                               // update consecutive index in subgrid
-        for (int i=0; i<d; i++)                 // check for wrap around
+        ++(this->_index);                       // update consecutive index in subgrid
+        for (int i=0; i<d; i++)         // check for wrap around
         {
-          this->_superindex += this->_superincrement[i];               // move on cell in direction i
+          this->_superindex += this->_superincrement[i];   // move on cell in direction i
           if (++(this->_coord[i])<=this->_end[i])
           {
             _position[i] += _h[i];
@@ -882,7 +883,7 @@ namespace Dune {
           }
           else
           {
-            this->_coord[i]=this->_origin[i];                         // move back to origin in direction i
+            this->_coord[i]=this->_origin[i];         // move back to origin in direction i
             this->_superindex -= this->_size[i]*this->_superincrement[i];
             _position[i] = _begin[i];
           }
@@ -931,9 +932,9 @@ namespace Dune {
       }
 
     private:
-      fTupel _h;            //!< mesh size per direction
-      fTupel _begin;        //!< position of origin of grid
-      fTupel _position;     //!< current position
+      fTupel _h;        //!< mesh size per direction
+      fTupel _begin;    //!< position of origin of grid
+      fTupel _position; //!< current position
     };
 
     //! return iterator to first element of index set
@@ -956,8 +957,8 @@ namespace Dune {
     }
 
   private:
-    iTupel _offset;        //!< offset to origin of the enclosing grid
-    iTupel _supersize;     //!< size of the enclosing grid
+    iTupel _offset;    //!< offset to origin of the enclosing grid
+    iTupel _supersize; //!< size of the enclosing grid
   };
 
 
@@ -999,6 +1000,77 @@ namespace Dune {
     };
   }
 
+  /** \brief Implement the default load balance strategy of yaspgrid
+   */
+  template<int d>
+  class YLoadBalance
+  {
+  public:
+    typedef FieldVector<int, d>  iTupel;
+    virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
+    {
+      double opt=1E100;
+      iTupel trydims;
+
+      optimize_dims(d-1,size,P,dims,trydims,opt);
+    }
+  private:
+    void optimize_dims (int i, const iTupel& size, int P, iTupel& dims, iTupel& trydims, double &opt ) const
+    {
+      if (i>0) // test all subdivisions recursively
+      {
+        for (int k=1; k<=P; k++)
+          if (P%k==0)
+          {
+            // P divisible by k
+            trydims[i] = k;
+            optimize_dims(i-1,size,P/k,dims,trydims,opt);
+          }
+      }
+      else
+      {
+        // found a possible combination
+        trydims[0] = P;
+
+        // check for optimality
+        double m = -1.0;
+
+        for (int k=0; k<d; k++)
+        {
+          double mm=((double)size[k])/((double)trydims[k]);
+          if (fmod((double)size[k],(double)trydims[k])>0.0001) mm*=3;
+          if ( mm > m ) m = mm;
+        }
+        //if (_rank==0) std::cout << "optimize_dims: " << size << " | " << trydims << " norm=" << m << std::endl;
+        if (m<opt)
+        {
+          opt = m;
+          dims = trydims;
+        }
+      }
+    }
+  };
+
+  /** \brief Implement yaspgrid load balance strategy for P=x^{dim} processors
+   */
+  template<int d>
+  class YLoadBalancePowerD : public YLoadBalance<d>
+  {
+  public:
+    typedef FieldVector<int, d>  iTupel;
+    virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
+    {
+      bool found=false;
+      for(int i=1; i<P; ++i)
+        if(power<d>::eval(i)==P) {
+          for(int j=0; j<d; ++j)
+            dims[j]=i;
+          found=true;
+        }
+      if(!found)
+        DUNE_THROW(GridError, "Loadbalancing failed\n");
+    }
+  };
 
   /*! Torus provides all the functionality to handle a toroidal communication structure:
 
@@ -1029,28 +1101,30 @@ namespace Dune {
     };
 
     struct CommTask {
-      int rank;          // process to send to / receive from
-      void *buffer;      // buffer to send / receive
-      int size;          // size of buffer
+      int rank;      // process to send to / receive from
+      void *buffer;  // buffer to send / receive
+      int size;      // size of buffer
 #if HAVE_MPI
-      MPI_Request request;     // used by MPI to handle request
+      MPI_Request request; // used by MPI to handle request
 #else
       int request;
 #endif
-      int flag;          // used by MPI
+      int flag;      // used by MPI
     };
 
   public:
     //! constructor making uninitialized object
-    Torus ()
-    {  }
+    Torus () :
+      _loadbalancer(0)
+    {}
 
     //! make partitioner from communicator and coarse mesh size
 #if HAVE_MPI
-    Torus (MPI_Comm comm, int tag, iTupel size)
+    Torus (MPI_Comm comm, int tag, iTupel size, const YLoadBalance<d>* lb) :
 #else
-    Torus (int tag, iTupel size)
+    Torus (int tag, iTupel size, const YLoadBalance<d>* lb) :
 #endif
+      _loadbalancer(lb)
     {
       // MPI stuff
 #if HAVE_MPI
@@ -1063,20 +1137,10 @@ namespace Dune {
       _tag = tag;
 
       // determine dimensions
-      iTupel dims;
-      double opt=1E100;
-      bool found=false;
-      for(int i=1; i<_procs; ++i)
-        if(power<d>::eval(i)==_procs) {
-          for(int j=0; j<d; ++j)
-            _dims[j]=i;
-          //found=true;
-        }
-      if(!found)
-        optimize_dims(d-1,size,_procs,dims,opt);
-      //	  if (_rank==0) std::cout << "Torus<" << d
-      //							  << ">: mapping " << _procs << " processes onto "
-      //							  << _dims << " torus." << std::endl;
+      _loadbalancer->loadbalance(size, _procs, _dims);
+      // if (_rank==0) std::cout << "Torus<" << d
+      //                         << ">: mapping " << _procs << " processes onto "
+      //                         << _dims << " torus." << std::endl;
 
       // compute increments for lexicographic ordering
       int inc = 1;
@@ -1213,7 +1277,7 @@ namespace Dune {
     //! return true if neighbor with given delta is a neighbor under the given periodicity
     bool is_neighbor (iTupel delta, bTupel periodic) const
     {
-      iTupel coord = rank_to_coord(_rank);     // my own coordinate with 0 <= c_i < dims_i
+      iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
 
 
       for (int i=0; i<d; i++)
@@ -1410,8 +1474,8 @@ namespace Dune {
       for (unsigned int i=0; i<_sendrequests.size(); i++)
         if (_sendrequests[i].rank!=rank())
         {
-          //                    std::cout << "[" << rank() << "]" << " send " << _sendrequests[i].size << " bytes "
-          //                                      << "to " << _sendrequests[i].rank << " p=" << _sendrequests[i].buffer << std::endl;
+          //          std::cout << "[" << rank() << "]" << " send " << _sendrequests[i].size << " bytes "
+          //                    << "to " << _sendrequests[i].rank << " p=" << _sendrequests[i].buffer << std::endl;
           MPI_Isend(_sendrequests[i].buffer, _sendrequests[i].size, MPI_BYTE,
                     _sendrequests[i].rank, _tag, _comm, &(_sendrequests[i].request));
           _sendrequests[i].flag = false;
@@ -1422,8 +1486,8 @@ namespace Dune {
       for (unsigned int i=0; i<_recvrequests.size(); i++)
         if (_recvrequests[i].rank!=rank())
         {
-          //                    std::cout << "[" << rank() << "]"  << " recv " << _recvrequests[i].size << " bytes "
-          //                                      << "fm " << _recvrequests[i].rank << " p=" << _recvrequests[i].buffer << std::endl;
+          //          std::cout << "[" << rank() << "]"  << " recv " << _recvrequests[i].size << " bytes "
+          //                    << "fm " << _recvrequests[i].rank << " p=" << _recvrequests[i].buffer << std::endl;
           MPI_Irecv(_recvrequests[i].buffer, _recvrequests[i].size, MPI_BYTE,
                     _recvrequests[i].rank, _tag, _comm, &(_recvrequests[i].request));
           _recvrequests[i].flag = false;
@@ -1441,7 +1505,7 @@ namespace Dune {
             if (_sendrequests[i].flag)
             {
               sends--;
-              //                                        std::cout << "[" << rank() << "]"  << " send to " << _sendrequests[i].rank << " OK" << std::endl;
+              //                  std::cout << "[" << rank() << "]"  << " send to " << _sendrequests[i].rank << " OK" << std::endl;
             }
           }
       }
@@ -1457,7 +1521,7 @@ namespace Dune {
             if (_recvrequests[i].flag)
             {
               recvs--;
-              //                                        std::cout << "[" << rank() << "]"  << " recv fm " << _recvrequests[i].rank << " OK" << std::endl;
+              //                  std::cout << "[" << rank() << "]"  << " recv fm " << _recvrequests[i].rank << " OK" << std::endl;
             }
 
           }
@@ -1513,55 +1577,20 @@ namespace Dune {
       for (ProcListIterator i=sendbegin(); i!=sendend(); ++i)
       {
         s << "[" << rank() <<  "]: send to   "
-        << "rank=" << i.rank()
-        << " index=" << i.index()
-        << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
+          << "rank=" << i.rank()
+          << " index=" << i.index()
+          << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
       }
       for (ProcListIterator i=recvbegin(); i!=recvend(); ++i)
       {
         s << "[" << rank() <<  "]: recv from "
-        << "rank=" << i.rank()
-        << " index=" << i.index()
-        << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
+          << "rank=" << i.rank()
+          << " index=" << i.index()
+          << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
       }
     }
 
   private:
-
-    void optimize_dims (int i, const iTupel& size, int P, iTupel& dims, double &opt )
-    {
-      if (i>0)     // test all subdivisions recursively
-      {
-        for (int k=1; k<=P; k++)
-          if (P%k==0)
-          {
-            // P divisible by k
-            dims[i] = k;
-            optimize_dims(i-1,size,P/k,dims,opt);
-          }
-      }
-      else
-      {
-        // found a possible combination
-        dims[0] = P;
-
-        // check for optimality
-        double m = -1.0;
-
-        for (int k=0; k<d; k++)
-        {
-          double mm=((double)size[k])/((double)dims[k]);
-          if (fmod((double)size[k],(double)dims[k])>0.0001) mm*=3;
-          if ( mm > m ) m = mm;
-        }
-        //if (_rank==0) std::cout << "optimize_dims: " << size << " | " << dims << " norm=" << m << std::endl;
-        if (m<opt)
-        {
-          opt = m;
-          _dims = dims;
-        }
-      }
-    }
 
     void proclists ()
     {
@@ -1630,6 +1659,9 @@ namespace Dune {
     mutable std::vector<CommTask> _recvrequests;
     mutable std::vector<CommTask> _localsendrequests;
     mutable std::vector<CommTask> _localrecvrequests;
+
+    //! pointer to the load balancer
+    const YLoadBalance<d>* _loadbalancer;
   };
 
   //! Output operator for Torus
@@ -1648,19 +1680,19 @@ namespace Dune {
   public:
     // some data types
     struct Intersection {
-      SubYGrid<d,ct> grid;     // the intersection as a subgrid of local grid
-      int rank;                // rank of process where other grid is stored
-      int distance;            // manhattan distance to other grid
+      SubYGrid<d,ct> grid; // the intersection as a subgrid of local grid
+      int rank;            // rank of process where other grid is stored
+      int distance;        // manhattan distance to other grid
     };
 
-    struct YGridLevel {            // This stores all the information on one grid level
+    struct YGridLevel {        // This stores all the information on one grid level
       // cell (codim 0) data
-      YGrid<d,ct> cell_global;             // the whole cell grid on that level
-      SubYGrid<d,ct> cell_overlap;         // we have no ghost cells, so our part is overlap completely
-      SubYGrid<d,ct> cell_interior;        // interior cells are a subgrid of all cells
+      YGrid<d,ct> cell_global;         // the whole cell grid on that level
+      SubYGrid<d,ct> cell_overlap;     // we have no ghost cells, so our part is overlap completely
+      SubYGrid<d,ct> cell_interior;    // interior cells are a subgrid of all cells
 
-      std::deque<Intersection> send_cell_overlap_overlap;      // each intersection is a subgrid of overlap
-      std::deque<Intersection> recv_cell_overlap_overlap;      // each intersection is a subgrid of overlap
+      std::deque<Intersection> send_cell_overlap_overlap;  // each intersection is a subgrid of overlap
+      std::deque<Intersection> recv_cell_overlap_overlap;  // each intersection is a subgrid of overlap
 
       std::deque<Intersection> send_cell_interior_overlap; // each intersection is a subgrid of overlap
       std::deque<Intersection> recv_cell_overlap_interior; // each intersection is a subgrid of overlap
@@ -1678,11 +1710,11 @@ namespace Dune {
       std::deque<Intersection> send_vertex_overlap_overlapfront; // each intersection is a subgrid of overlapfront
       std::deque<Intersection> recv_vertex_overlapfront_overlap; // each intersection is a subgrid of overlapfront
 
-      std::deque<Intersection> send_vertex_interiorborder_interiorborder;     // each intersection is a subgrid of overlapfront
-      std::deque<Intersection> recv_vertex_interiorborder_interiorborder;     // each intersection is a subgrid of overlapfront
+      std::deque<Intersection> send_vertex_interiorborder_interiorborder; // each intersection is a subgrid of overlapfront
+      std::deque<Intersection> recv_vertex_interiorborder_interiorborder; // each intersection is a subgrid of overlapfront
 
-      std::deque<Intersection> send_vertex_interiorborder_overlapfront;     // each intersection is a subgrid of overlapfront
-      std::deque<Intersection> recv_vertex_overlapfront_interiorborder;     // each intersection is a subgrid of overlapfront
+      std::deque<Intersection> send_vertex_interiorborder_overlapfront; // each intersection is a subgrid of overlapfront
+      std::deque<Intersection> recv_vertex_overlapfront_interiorborder; // each intersection is a subgrid of overlapfront
 
       // general
       MultiYGrid<d,ct>* mg;  // each grid level knows its multigrid
@@ -1699,8 +1731,8 @@ namespace Dune {
 
     //! constructor making a grid
 #if HAVE_MPI
-    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, bTupel periodic, int overlap)
-      : _torus(comm,tag,s)     // torus gets s to compute procs/direction
+    MultiYGrid (MPI_Comm comm, fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+      : _torus(comm,tag,s,lb) // torus gets s to compute procs/direction
     {
       // store parameters
       _LL = L;
@@ -1720,14 +1752,14 @@ namespace Dune {
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
 
       // output
-      //          if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                                                          << ">: coarse grid with size " << s
-      //                                                                          << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
+      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
+      //                                    << ">: coarse grid with size " << s
+      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
       //      print(std::cout);
     }
 #else
-    MultiYGrid (fTupel L, iTupel s, bTupel periodic, int overlap)
-      : _torus(tag,s)     // torus gets s to compute procs/direction
+    MultiYGrid (fTupel L, iTupel s, bTupel periodic, int overlap, const YLoadBalance<d>* lb = defaultLoadbalancer())
+      : _torus(tag,s,lb) // torus gets s to compute procs/direction
     {
       // store parameters
       _LL = L;
@@ -1744,9 +1776,9 @@ namespace Dune {
       _maxlevel = 0;
       _levels[_maxlevel] = makelevel(L,s,periodic,o_interior,s_interior,overlap);
       // output
-      //          if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
-      //                                                                          << ">: coarse grid with size " << s
-      //                                                                          << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
+      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" << d // changed dinfo to cout
+      //                                    << ">: coarse grid with size " << s
+      //                                    << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
       //      print(std::cout);
     }
 #endif
@@ -1766,9 +1798,9 @@ namespace Dune {
       if (keep_overlap) overlap = 2*cg.overlap;else overlap = cg.overlap;
 
       // output
-      //          if (_torus.rank()==0) std::cout << "MultiYGrid<" // changed dinfo to cout
-      //                                                                          << d << ">: refined to size "
-      //                                                                          << s << std::endl;
+      //    if (_torus.rank()==0) std::cout << "MultiYGrid<" // changed dinfo to cout
+      //                                    << d << ">: refined to size "
+      //                                    << s << std::endl;
 
       // the cell interior grid obtained from coarse cell interior grid
       iTupel o_interior;
@@ -1863,7 +1895,7 @@ namespace Dune {
       //! Increment iterator to next finer grid level
       YGridLevelIterator& operator++ ()
       {
-        ++i;         // assumes built-in array
+        ++i; // assumes built-in array
         ++l;
         return *this;
       }
@@ -2118,6 +2150,14 @@ namespace Dune {
       s << std::endl;
     }
 
+  protected:
+    // static method to create the default load balance strategy
+    static const YLoadBalance<d>* defaultLoadbalancer()
+    {
+      static YLoadBalance<d> lb;
+      return & lb;
+    }
+
   private:
     // make a new YGridLevel structure. For that we need
     // L           size of the whole domain in each direction
@@ -2134,12 +2174,12 @@ namespace Dune {
       g.mg = this;
 
       // the global cell grid
-      iTupel o = iTupel(0);     // logical origin is always 0, that is not a restriction
+      iTupel o = iTupel(0); // logical origin is always 0, that is not a restriction
       fTupel h;
       fTupel r;
-      for (int i=0; i<d; i++) h[i] = L[i]/s[i];     // the mesh size in each direction
-      for (int i=0; i<d; i++) r[i] = 0.5*h[i];      // the shift for cell centers
-      g.cell_global = YGrid<d,ct>(o,s,h,r);         // this is the global cell grid
+      for (int i=0; i<d; i++) h[i] = L[i]/s[i]; // the mesh size in each direction
+      for (int i=0; i<d; i++) r[i] = 0.5*h[i];  // the shift for cell centers
+      g.cell_global = YGrid<d,ct>(o,s,h,r);     // this is the global cell grid
 
       // extend the cell interior grid by overlap considering periodicity
       iTupel o_overlap;
@@ -2149,8 +2189,8 @@ namespace Dune {
         if (periodic[i])
         {
           // easy case, extend by 2 overlaps in total
-          o_overlap[i] = o_interior[i]-overlap;                  // Note: origin might be negative now
-          s_overlap[i] = s_interior[i]+2*overlap;                // Note: might be larger than global size
+          o_overlap[i] = o_interior[i]-overlap;      // Note: origin might be negative now
+          s_overlap[i] = s_interior[i]+2*overlap;    // Note: might be larger than global size
         }
         else
         {
@@ -2174,18 +2214,18 @@ namespace Dune {
 
       // now we can do the vertex grids. They are derived completely from the cell grids
       iTupel o_vertex_global, s_vertex_global;
-      for (int i=0; i<d; i++) r[i] = 0.0;      // the shift for vertices is zero, and the mesh size is same as for cells
+      for (int i=0; i<d; i++) r[i] = 0.0;  // the shift for vertices is zero, and the mesh size is same as for cells
 
       // first let's make the global grid
       for (int i=0; i<d; i++) o_vertex_global[i] = g.cell_global.origin(i);
-      for (int i=0; i<d; i++) s_vertex_global[i] = g.cell_global.size(i)+1;     // one more vertices than cells ...
+      for (int i=0; i<d; i++) s_vertex_global[i] = g.cell_global.size(i)+1; // one more vertices than cells ...
       g.vertex_global = YGrid<d,ct>(o_vertex_global,s_vertex_global,h,r);
 
       // now the local grid stored in this processor. All other grids are subgrids of this
       iTupel o_vertex_overlapfront;
       iTupel s_vertex_overlapfront;
       for (int i=0; i<d; i++) o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
-      for (int i=0; i<d; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1;     // one more vertices than cells ...
+      for (int i=0; i<d; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1; // one more vertices than cells ...
       g.vertex_overlapfront = SubYGrid<d,ct>(YGrid<d,ct>(o_vertex_overlapfront,s_vertex_overlapfront,h,r));
 
       // now overlap only (i.e. without front), is subgrid of overlapfront
@@ -2283,11 +2323,11 @@ namespace Dune {
       {
         // determine if we communicate with this neighbor (and what)
         bool skip = false;
-        iTupel coord = _torus.coord();           // my coordinates
-        iTupel delta = i.delta();                // delta to neighbor
-        iTupel nb = coord;                       // the neighbor
+        iTupel coord = _torus.coord();   // my coordinates
+        iTupel delta = i.delta();        // delta to neighbor
+        iTupel nb = coord;               // the neighbor
         for (int k=0; k<d; k++) nb[k] += delta[k];
-        iTupel v = iTupel(0);                            // grid movement
+        iTupel v = iTupel(0);                    // grid movement
 
         for (int k=0; k<d; k++)
         {
@@ -2349,18 +2389,18 @@ namespace Dune {
         // what must be sent to this neighbor
         Intersection send_intersection;
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
-        //                std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
-        //                std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
-        //                std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << send_intersection.grid << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << send_intersection.grid << std::endl;
         send_intersection.rank = i.rank();
         send_intersection.distance = i.distance();
         if (!send_intersection.grid.empty()) sendlist.push_front(send_intersection);
 
         Intersection recv_intersection;
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
-        //                std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
-        //                std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
-        //                std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << recv_intersection.grid << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
+        //        std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << recv_intersection.grid << std::endl;
         recv_intersection.rank = i.rank();
         recv_intersection.distance = i.distance();
         if(!recv_intersection.grid.empty()) recvlist.push_back(recv_intersection);

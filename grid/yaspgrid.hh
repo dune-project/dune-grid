@@ -2355,8 +2355,10 @@ namespace Dune {
 #if HAVE_MPI
     YaspGrid (MPI_Comm comm, Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap)
-      : MultiYGrid<dim,ctype>(comm,L,s,periodic,overlap), ccobj(comm)
+              Dune::FieldVector<bool, dim> periodic, int overlap,
+              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+      : YMG(comm,L,s,periodic,overlap,lb), ccobj(comm),
+        keep_ovlp(true), adaptRefCount(0)
     {
       init();
     }
@@ -2364,8 +2366,10 @@ namespace Dune {
 #else
     YaspGrid (int, Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap)
-      : MultiYGrid<dim,ctype>(L,s,periodic,overlap)
+              Dune::FieldVector<bool, dim> periodic, int overlap,
+              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
+      : YMG(L,s,periodic,overlap,lb),
+        keep_ovlp(true), adaptRefCount(0)
     {
       init();
     }
@@ -2385,11 +2389,14 @@ namespace Dune {
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
-              Dune::FieldVector<bool, dim> periodic, int overlap)
+              Dune::FieldVector<bool, dim> periodic, int overlap,
+              const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
-      : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap), ccobj(MPI_COMM_SELF)
+      : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
+        keep_ovlp(true), adaptRefCount(0)
 #else
-      : MultiYGrid<dim,ctype>(L,s,periodic,overlap)
+      : MultiYGrid<dim,ctype>(L,s,periodic,overlap,lb), keep_ovlp(false),
+        keep_ovlp(true), adaptRefCount(0)
 #endif
     {
       init();
