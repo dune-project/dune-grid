@@ -219,11 +219,8 @@ namespace Dune {
 
     friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
-    typedef typename SelectType<
-        is_same<GridImp,const ALU3dGrid<3, 3, tetra> >::value,
-        ReferenceSimplex<alu3d_ctype, 3>,
-        ReferenceCube<alu3d_ctype, 3>
-        >::Type ReferenceElementType;
+    // type of reference element
+    typedef typename GridImp :: ReferenceElementType ReferenceElementType;
 
   public:
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -269,17 +266,17 @@ namespace Dune {
 
     //! Provide access to mesh entity i of given codimension. Entities
     //!  are numbered 0 ... count<cc>()-1
-    template <int cc>
-    typename Codim<cc>::EntityPointer entity (int i) const;
-
-    template< int codim >
-    typename Codim< codim >::EntityPointer subEntity ( int i ) const
+    template <int codim>
+    typename Codim< codim >::EntityPointer entity (int i) const
     {
       typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
-      return entity< codim >( j );
+      const int j = Numbering::template dune2generic< codim >( tid, i );
+      return subEntity< codim >( j );
     }
+
+    template< int codim >
+    typename Codim< codim >::EntityPointer subEntity ( int i ) const;
 
     /*! Access to intersection with neighboring elements that are leaf
      * elements. A neighbor is an entity of codimension 0
@@ -373,6 +370,11 @@ namespace Dune {
     //! i.e. return global number of vertex i
     //! for use in hierarchical index set
     template<int cc> int getSubIndex (int i) const;
+
+    //! return index of sub entity with codim = cc and local number i
+    //! i.e. return global number of vertex i
+    //! for use in hierarchical index set
+    int subIndex(int i, unsigned int codim) const;
 
     // return reference to internal item
     const IMPLElementType& getItem () const { return *item_; }

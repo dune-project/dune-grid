@@ -34,7 +34,10 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   operator[] (int i) const
   {
-    return geoImpl_[i];
+    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
+    const unsigned int tid = GenericGeometry::topologyId( type() );
+    const int j = Numbering::template dune2generic< mydim >( tid, i );
+    return geoImpl_[ j ];
   }
 
   template< int mydim, int cdim, class GridImp>
@@ -42,10 +45,7 @@ namespace Dune {
   ALU3dGridGeometry<mydim, cdim, GridImp >::
   corner (int i) const
   {
-    typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
-    const unsigned int tid = GenericGeometry::topologyId( type() );
-    const int j = Numbering::template generic2dune< mydim >( tid, i );
-    return geoImpl_[j];
+    return geoImpl_[ i ];
   }
 
 

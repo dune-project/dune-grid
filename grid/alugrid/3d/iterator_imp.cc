@@ -324,22 +324,13 @@ namespace Dune {
   }
 
 
-  template<>
+  template<class GridImp>
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::indexInInside () const
-  {
-    assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
-    return 3 - index_;
-  }
-
-  template<>
-  inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::indexInInside () const
+  ALU3dGridIntersectionIterator< GridImp >::indexInInside () const
   {
     assert(ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
     return index_;
   }
-
 
   template <class GridImp>
   inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
@@ -350,38 +341,46 @@ namespace Dune {
   }
 
 
-  template<>
+  template< class GridImp >
   inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra > >::indexInOutside () const
-  {
-    return 3 - ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
-  }
-
-  template<>
-  inline int
-  ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa > >::indexInOutside () const
+  ALU3dGridIntersectionIterator< GridImp >::indexInOutside () const
   {
     return ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
   }
 
-
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInSelf () const
-  {
-    const int aluTwist = connector_.innerTwist();
-    const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
-
-    return
-      (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
-       mappedZero : -mappedZero-1);
-  }
-
-  template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInSelf () const
+  template< class GridImp >
+  inline int ALU3dGridIntersectionIterator< GridImp >::twistInSelf () const
   {
     return connector_.innerTwist();
   }
+
+  /*
+     template<>
+     inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInSelf () const
+     {
+     const int aluTwist = connector_.innerTwist();
+     const int mappedZero =
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( indexInInside(), 0), aluTwist);
+
+     return
+      (ElementTopo::faceOrientation( indexInInside() ) * sign(aluTwist) < 0 ?
+       mappedZero : -mappedZero-1);
+     }
+
+     template<>
+     inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInSelf () const
+     {
+     return connector_.innerTwist();
+     }
+   */
+
+  /*
+     template<>
+     inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInNeighbor () const
+     {
+     return connector_.outerTwist();
+     }
+   */
 
   template<>
   inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInNeighbor () const
