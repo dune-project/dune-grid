@@ -52,7 +52,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/common/iteratorfacades.hh>
 #include "base.cc" // for RefinementTraits
 
@@ -317,9 +317,8 @@ namespace Dune {
       coords() const
       {
         return static_cast<const Common*>(this)->backend->geometry()
-               .global(ReferenceElements<CoordType, dimension>
-                       ::general(GeometryType(GeometryType::cube, dimension))
-                       .position(0,0));
+               .global(GenericReferenceElements<CoordType, dimension>
+                       ::cube().position(0,0));
       }
 
 

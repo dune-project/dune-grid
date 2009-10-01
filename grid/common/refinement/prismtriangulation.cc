@@ -8,7 +8,7 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include "base.cc"
 #include "simplex.cc"
 
@@ -315,9 +315,8 @@ namespace Dune {
       coords() const
       {
         return geometry()
-               .global(ReferenceElements<CoordType, dimension>
-                       ::general(GeometryType(GeometryType::simplex, dimension))
-                       .position(0,0));
+               .global(GenericReferenceElements<CoordType, dimension>
+                       ::simplex().position(0,0));
       }
 
       template<int dimension, class CoordType>
