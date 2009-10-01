@@ -4,7 +4,7 @@
 #define DUNE_ALU3DGRIDFACEUTILITY_HH
 
 #include <dune/common/misc.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include "mappings.hh"
 #include "alu3dinclude.hh"
@@ -127,24 +127,22 @@ namespace Dune {
     typedef ElementTopologyMapping<type> ElementTopo;
     typedef FaceTopologyMapping<type> FaceTopo;
     typedef NonConformingFaceMapping<type> NonConformingMappingType;
+
     typedef typename SelectType<
         is_same<Int2Type<tetra>,Int2Type<type> >::value,
         ALU3DSPACE LinearSurfaceMapping,
         BilinearSurfaceMapping
         >::Type SurfaceMappingType;
 
-    typedef typename SelectType<
-        is_same<Int2Type<tetra>, Int2Type<type> >::value,
-        ReferenceSimplex<alu3d_ctype, 3>,
-        ReferenceCube<alu3d_ctype, 3>
-        >::Type ReferenceElementType;
+    // type of container for reference elements
+    typedef GenericReferenceElements< alu3d_ctype, 3 > ReferenceElementContainerType;
+    // type of container for reference faces
+    typedef GenericReferenceElements< alu3d_ctype, 2 > ReferenceFaceContainerType;
 
-    typedef typename SelectType<
-        is_same<Int2Type<tetra>, Int2Type<type> >::value,
-        ReferenceSimplex<alu3d_ctype, 2>,
-        ReferenceCube<alu3d_ctype, 2>
-        >::Type ReferenceFaceType;
-
+    // type of reference element
+    typedef GenericReferenceElement<alu3d_ctype, 3> ReferenceElementType;
+    // type of reference face
+    typedef GenericReferenceElement<alu3d_ctype, 2> ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
     enum { dimworld = 3 }; // ALU is a pure 3d grid
@@ -214,14 +212,16 @@ namespace Dune {
 
     inline static const ReferenceElementType& getReferenceElement()
     {
-      static ReferenceElementType refElem;
-      return refElem;
+      return (type == tetra) ?
+             ReferenceElementContainerType :: simplex() :
+             ReferenceElementContainerType :: cube();
     }
 
     inline static const ReferenceFaceType& getReferenceFace()
     {
-      static ReferenceFaceType refFace;
-      return refFace;
+      return (type == tetra) ?
+             ReferenceFaceContainerType :: simplex() :
+             ReferenceFaceContainerType :: cube();
     }
 
   private:

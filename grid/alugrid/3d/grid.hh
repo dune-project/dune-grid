@@ -15,7 +15,7 @@
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/common/grid.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 #include "../defaultindexsets.hh"
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
@@ -277,9 +277,7 @@ namespace Dune {
     typedef typename GridFamily :: LeafIndexSetImp LeafIndexSetImp;
 
     //! reference element type
-    typedef typename SelectType<elType == tetra,
-        ReferenceSimplex<alu3d_ctype, dim>,
-        ReferenceCube   <alu3d_ctype, dim> >::Type ReferenceElementType;
+    typedef GenericReferenceElement< alu3d_ctype, dim >  ReferenceElementType;
 
     //! \brief boundary projection type
     typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
@@ -749,7 +747,7 @@ namespace Dune {
     mutable VertexProvider vertexProvider_;
 
     // the reference element
-    ReferenceElementType referenceElement_;
+    const ReferenceElementType& referenceElement_;
 
     typedef ALU3dGridVertexList VertexListType;
     mutable VertexListType vertexList_[MAXL];

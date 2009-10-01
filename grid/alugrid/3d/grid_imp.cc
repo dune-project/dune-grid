@@ -180,6 +180,9 @@ namespace Dune {
       , hIndexSet_ (*this)
       , globalIdSet_(0), localIdSet_(*this)
       , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
+      , referenceElement_( (elType == tetra) ?
+                           GenericReferenceElements< alu3d_ctype, dim > :: simplex() :
+                           GenericReferenceElements< alu3d_ctype, dim > :: cube() )
       , sizeCache_ (0)
       , lockPostAdapt_(false)
       , vertexProjection_( (bndPrj) ? new ALUGridBoundaryProjectionType( *bndPrj ) : 0 )
