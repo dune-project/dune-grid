@@ -78,7 +78,7 @@ namespace Dune
     public:
       ~MappingArray()
       {
-        for (int i=0; i<this->size(); i++)
+        for (size_t i=0; i<this->size(); i++)
           delete (*this)[i];
       }
     };
