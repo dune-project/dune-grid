@@ -35,6 +35,7 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
+#include <dune/grid/common/referenceelements.hh>
 #include "base.cc"
 #include "simplex.cc"
 
