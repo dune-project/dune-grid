@@ -833,6 +833,24 @@ namespace Dune {
 
   //************************************************************************
 
+  /** \brief a stack of pointers with auto destruction if the stack is
+      destructed
+   */
+  template <class T>
+  class AutoPtrStack : public std::stack<T*>
+  {
+  public:
+    ~AutoPtrStack()
+    {
+      while(! this->empty())
+      {
+        T* e = this->top();
+        delete e;
+        this->pop();
+      }
+    }
+  };
+
   /*! Acts as a pointer to an  entities of a given codimension.
    */
   template<int codim, class GridImp>
@@ -916,7 +934,7 @@ namespace Dune {
       return *e;
     }
 
-    typedef std::stack< Entity* > EntityStackType;
+    typedef AutoPtrStack< Entity > EntityStackType;
     static inline EntityStackType& enStack()
     {
       static EntityStackType eStack;
