@@ -462,6 +462,10 @@ namespace Dune
         return mapping().volume();
       }
 
+      /** \brief Compute the transpose of the Jacobian matrix of the
+       *         transformation from the reference element into the world
+       *         space
+       */
       const JacobianTransposed &jacobianTransposed ( const LocalCoordinate &local ) const
       {
         return mapping().jacobianTransposed( local );
