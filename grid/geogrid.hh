@@ -40,19 +40,25 @@
  *
  *  \section usage Usage
  *
- *  There are three different construction mechanisms for a geometry grid:
- *  - Given a host grid instance and a function mapping
+ *  There are three different construction mechanisms for a geometry grid.
+ *  In each case a instance of the host grid must be provided and in
+ *  addition:
+ *  - a function mapping
  *    global coordinates from the host grid to some space
- *    with larger or equal dimension.
- *  - Given a vector class assining each index of the host grid a coordinate
- *    vector.
- *  - given an implementation of a local function container, i.e., a class with
- *    a method \c localFunction taking a entity of the host grid and returning
- *    a local function object with a \c evaluate method mapping local
+ *    with larger or equal dimension. For an entity \c e of the host grid
+ *    with geometry \c e.g the resulting entity in the \c GeoGrid has
+ *    corners \c F(e.g.corner(i)) where \c F is the global coordinate
+ *    mapping provided. For the GeoGrid geometry the class
+ *    GenericGeometry::CornerMapping is used.
+ *  - a vector like container assinging each index of a codimension \c dim entity
+ *    of the host grid a coordinate vector.
+ *  - an implementation of a local function container, i.e., a class with
+ *    a method \c localFunction taking an entity of the host grid and returning
+ *    a local function object with an \c evaluate method mapping local
  *    coordinates to global coordinates.
- *    It is required, that the resulting global mapping is continuous.
+ *    The user must ensure that the resulting global mapping is continuous.
  *  .
- *  Remark: in the second case no geometry class has to be implemented by the
+ *  Remark: in the second and third case no geometry class has to be implemented by the
  *          host grid.
  *          In the first case the host grid must provide an implementation of
  *          the method <tt>corner</tt> on the geometry class for codimension
