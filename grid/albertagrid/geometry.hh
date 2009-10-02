@@ -10,11 +10,6 @@
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
 
-// set to 1 to use generic geometries in AlbertaGrid
-#ifndef USE_GENERICGEOMETRY
-#define USE_GENERICGEOMETRY 0
-#endif
-
 namespace Dune
 {
 
@@ -178,7 +173,7 @@ namespace Dune
   // AlbertaGridGeometry
   // -------------------
 
-#if USE_GENERICGEOMETRY
+#if DUNE_ALBERTA_USE_GENERICGEOMETRY
   template< int mydim, int cdim, class GridImp >
   class AlbertaGridGeometry
     : public GenericGeometry::BasicGeometry
@@ -210,9 +205,9 @@ namespace Dune
       (*this) = AlbertaGridGeometry( coordReader );
     }
   };
-#endif // #if USE_GENERICGEOMETRY
+#endif // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
 
-#if !USE_GENERICGEOMETRY
+#if !DUNE_ALBERTA_USE_GENERICGEOMETRY
   /** \class AlbertaGridGeometry
    *  \brief geometry implementation for AlbertaGrid
    *
@@ -398,7 +393,7 @@ namespace Dune
     mutable bool calcedDet_; //!< true if determinant was calculated
     mutable ctype elDet_; //!< storage of element determinant
   };
-#endif // #if !USE_GENERICGEOMETRY
+#endif // #if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 
 
 
@@ -424,8 +419,8 @@ namespace Dune
   };
 
 
-#if !USE_GENERICGEOMETRY
-#if !DUNE_ALBERTA_CACHE_COORDINATES && 0
+#if !DUNE_ALBERTA_USE_GENERICGEOMETRY
+#if !DUNE_ALBERTA_CACHE_COORDINATES
   template< int dim, int cdim >
   class AlbertaGridGlobalGeometry< dim, cdim, const AlbertaGrid< dim, cdim > >
   {
@@ -585,7 +580,7 @@ namespace Dune
     ElementInfo elementInfo_;
   };
 #endif // #if !DUNE_ALBERTA_CACHE_COORDINATES
-#endif // #if !USE_GENERICGEOMETRY
+#endif // #if !DUNE_ALBERTA_USE_GENERICGEOMETRY
 
 
 

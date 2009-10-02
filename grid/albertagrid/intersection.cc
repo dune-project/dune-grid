@@ -79,7 +79,7 @@ namespace Dune
   inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
   AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
   {
-#if USE_GENERICGEOMETRY
+#if DUNE_ALBERTA_USE_GENERICGEOMETRY
     //const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
     const GenericReferenceElement< ctype, dimension > &refElement = GenericReferenceElements< ctype, dimension >::simplex();
     const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
@@ -99,7 +99,7 @@ namespace Dune
     jInvT.mv( refNormal, n );
     n *= Grid::getRealImplementation( geoInside ).integrationElement();
     return n;
-#endif // #if USE_GENERICGEOMETRY
+#endif // #if DUNE_ALBERTA_USE_GENERICGEOMETRY
   }
 
   template<>
