@@ -6,6 +6,7 @@
 
 #include <dune/grid/common/referenceelements.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/common/forloop.hh>
 
 #if 0
 namespace Dune
@@ -111,7 +112,7 @@ struct CheckReferenceNumbering
   static void apply ( const Dune::GeometryType &type )
   {
     const ReferenceElement &refElement = RefElements< dim >::get( type );
-    Dune::GenericGeometry::ForLoop< Codim, 0, dim >::apply( refElement );
+    Dune::ForLoop< Codim, 0, dim >::apply( refElement );
     std::cout << std::endl;
   }
 };

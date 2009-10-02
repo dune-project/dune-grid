@@ -46,7 +46,7 @@ namespace Dune
     // Import Types
     // ------------
 
-    using GenericGeometry::ForLoop;
+    using Dune::ForLoop;
     using GenericGeometry::ProtectedIf;
     using GenericGeometry::CodimTable;
 

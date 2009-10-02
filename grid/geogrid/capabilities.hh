@@ -7,6 +7,7 @@
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/genericgeometry/misc.hh>
+#include <dune/common/forloop.hh>
 
 namespace Dune
 {
@@ -135,7 +136,7 @@ namespace Dune
 
       CodimCache ()
       {
-        GenericGeometry :: ForLoop< BuildCache, 0, dimension >
+        Dune :: ForLoop< BuildCache, 0, dimension >
         :: apply( hasHostEntity_ );
       }
 

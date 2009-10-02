@@ -3,7 +3,7 @@
 #ifndef DUNE_DYNAMICCODIMSUBINDEXID_HH
 #define DUNE_DYNAMICCODIMSUBINDEXID_HH
 
-#include <dune/grid/genericgeometry/misc.hh>
+#include <dune/common/forloop.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/common/typetraits.hh>
 
@@ -64,7 +64,7 @@ namespace Dune
     explicit DynamicSubIndex ( const IndexSet &indexSet )
       : indexSet_( indexSet )
     {
-      GenericGeometry::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
+      Dune::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
     }
 
     ~DynamicSubIndex ()
@@ -140,7 +140,7 @@ namespace Dune
     explicit DynamicSubId ( const IdSet &idSet )
       : idSet_( idSet )
     {
-      GenericGeometry::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
+      Dune::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
     }
 
     ~DynamicSubId ()
