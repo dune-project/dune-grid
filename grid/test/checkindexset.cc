@@ -96,7 +96,7 @@ namespace Dune
       typedef Dune::GenericGeometry::MapNumberingProvider< dim > MapNumbering;
 
 #if defined DUNE_ENABLE_OLD_NUMBERING && !defined NEW_SUBENTITY_NUMBERING
-      const unsigned int topologyId = Dune::GenericGeometry::topologyId( type );
+      const unsigned int topologyId = type.topologyId();   // Dune::GenericGeometry::topologyId( type );
       const int duneSubEntity = MapNumbering::generic2dune( topologyId, subEntity, codim );
 #endif
 

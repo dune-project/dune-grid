@@ -1105,11 +1105,13 @@ void gridcheck (Grid &g)
   typedef typename Grid  :: ctype ctype;
   typedef typename Grid  :: GridFamily GridFamily;
 
+#if DUNE_VERBOSE_TESTS
   // print infos
   Dune::gridinfo(g, "GridInfo");
   for(int l=0; l<g.maxLevel(); l++)
     Dune::gridlevellist(g, l, "GridLevelInfo");
   Dune::gridleaflist(g, "GridLeafInfo");
+#endif
 
   // type of GridInterface == GridDefaultImplementation
   typedef Dune::GridDefaultImplementation<dim,dimworld,ctype,GridFamily> GridIF;
