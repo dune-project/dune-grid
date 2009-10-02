@@ -1138,11 +1138,16 @@ void gridcheck (Grid &g)
 
   // check at least if the subId method is there
   {
-    typename Grid::Traits::template Codim<0>::LevelIterator it = g.template lbegin<0>(0);
-    typename Grid::Traits::template Codim<0>::LevelIterator end = g.template lend<0>(0);
+    typename Grid::Traits::template Codim<0>::LevelIterator it = g.template lbegin<0>(g.maxLevel());
+    typename Grid::Traits::template Codim<0>::LevelIterator end = g.template lend<0>(g.maxLevel());
     for (; it != end; ++it)
     {
       g.globalIdSet().subId(*it,0,dim);
+      if(g.globalIdSet().subId(*it,0,dim) != g.globalIdSet().id(*(it->template subEntity<dim>(0))))
+      {
+        std::cerr << "Error: Inconsistent global subId for vertex " << g.globalIdSet().id(*(it->template subEntity<dim>(0))) << std::endl;
+        assert(false);
+      }
 #ifdef DUNE_ENABLE_OLD_NUMBERING
       g.globalIdSet().template subId<dim>(*it,0);
 #endif
