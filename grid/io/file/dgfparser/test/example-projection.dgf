@@ -1,0 +1,14 @@
+DGF
+
+INTERVAL
+-1 -1
+ 1  1
+ 1  1
+#
+
+PROJECTION
+function p(x) = sqrt(2) * x / |x|
+default p
+#
+
+#

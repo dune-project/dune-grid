@@ -7,6 +7,7 @@
 #include <dune/grid/albertagrid/gridfactory.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
 
 #if HAVE_ALBERTA
 
@@ -117,6 +118,15 @@ namespace Dune
 
         factory.insertFaceTransformation( matrix, shift );
       }
+    }
+
+    dgf::ProjectionBlock projectionBlock( file, dimworld );
+    const DuneBoundaryProjection< dimworld > *projection
+      = projectionBlock.template defaultProjection< dimworld >();
+    if( projection != 0 )
+    {
+      std::cout << "inserting boundary projection..." << std::endl;
+      factory.insertBoundaryProjection( *projection );
     }
 
     if( parameter.markLongestEdge() )
