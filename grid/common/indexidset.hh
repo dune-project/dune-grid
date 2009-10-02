@@ -422,7 +422,8 @@ namespace Dune
       typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( e.type() );
       const int j = Numbering::template dune2generic< cc >( tid, i.value() );
-      return asImp().subId(e,j,cc);
+      const unsigned int codim = cc;
+      return asImp().subId(e,j,codim);
     }
 #endif
 
