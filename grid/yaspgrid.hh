@@ -2365,10 +2365,12 @@ namespace Dune {
               const YLoadBalance<dim>* lb = YMG::defaultLoadbalancer())
 #if HAVE_MPI
       : MultiYGrid<dim,ctype>(MPI_COMM_SELF,L,s,periodic,overlap,lb), ccobj(MPI_COMM_SELF),
-        keep_ovlp(true), adaptRefCount(0)
+        keep_ovlp(true),
+        adaptRefCount(0)
 #else
-      : MultiYGrid<dim,ctype>(L,s,periodic,overlap,lb), keep_ovlp(false),
-        keep_ovlp(true), adaptRefCount(0)
+      : MultiYGrid<dim,ctype>(L,s,periodic,overlap,lb),
+        keep_ovlp(false),
+        adaptRefCount(0)
 #endif
     {
       init();
