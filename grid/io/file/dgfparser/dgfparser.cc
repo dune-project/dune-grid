@@ -1084,63 +1084,64 @@ namespace Dune
   }
 
 
-  void DuneGridFormatParser :: setRefinement ( int use1, int use2, int is1, int is2 )
+  void DuneGridFormatParser::setRefinement ( int use1, int use2, int is1, int is2 )
   {
-    if (element == Cube) {
-      std::cerr << "Computing refinement vertex is only implemented for 2d simplex grid!"
-                << std::endl;
-      return;
-    }
-    if (use1>use2) {
-      int tmp=use1;
-      use1=use2;
-      use2=tmp;
-    }
-    if (is1>is2) {
-      int tmp=is1;
-      is1=is2;
-      is2=tmp;
-    }
-    for (int i=0; i<nofelements; i++) {
-      if (elements[i].size()!=size_t(dimw+1))
-        continue;
-      double maxlen=0.0;
-      int vtx1 = is1;
-      int vtx2 = is2;
-      if (vtx1==-1 || vtx2==-1)
-        for (int l=0; l<dimw+1; l++) {
-          int idxl=elements[i][l];
-          for (int k=l+1; k<dimw+1; k++) {
-            int idxk=elements[i][k];
-            double len=pow(vtx[idxk][0]-vtx[idxl][0],2.);
-            for (int p=1; p<dimw; p++)
-              len+=pow(vtx[idxk][p]-vtx[idxl][p],2.);
-            if (len>maxlen) {
-              vtx1=l;
-              vtx2=k;
-              maxlen=len;
+    if( use1 > use2 )
+      std::swap( use1, use2 );
+    if( is1 > is2 )
+      std::swap( is1, is2 );
+
+    if( element != Cube )
+    {
+      for( int i = 0; i < nofelements; ++i )
+      {
+        if( elements[ i ].size() != size_t( dimgrid + 1 ) )
+          continue;
+
+        double maxlen = 0.0;
+        int vtx1 = is1;
+        int vtx2 = is2;
+        if( (vtx1 == -1) || (vtx2 == -1) )
+        {
+          for( int l = 0; l <= dimgrid; ++l )
+          {
+            const int idxl = elements[ i ][ l ];
+            for( int k = l+1; k <= dimgrid; ++k )
+            {
+              const int idxk = elements[ i ][ k ];
+              double len = 0.0;
+              for( int p = 0; p < dimw; ++p )
+              {
+                const double dist = vtx[ idxk ][ p ] - vtx[ idxl ][ p ];
+                len += dist * dist;
+              }
+              if( len > maxlen )
+              {
+                vtx1 = l;
+                vtx2 = k;
+                maxlen = len;
+              }
             }
           }
         }
-      int swapped=0;
-      if (vtx1!=use1) {
-        int tmp=elements[i][vtx1];
-        elements[i][vtx1]=elements[i][use1];
-        elements[i][use1]=tmp;
-        swapped++;
-      }
-      if (vtx2!=use2) {
-        int tmp=elements[i][vtx2];
-        elements[i][vtx2]=elements[i][use2];
-        elements[i][use2]=tmp;
-        swapped++;
-      }
-      if (swapped==1) {
-        int tmp=elements[i][use2];
-        elements[i][use2]=elements[i][use1];
-        elements[i][use1]=tmp;
+
+        int swapped = 0;
+        if( vtx1 != use1 )
+        {
+          std::swap( elements[ i ][ vtx1 ], elements[ i ][ use1 ] );
+          ++swapped;
+        }
+        if( vtx2 != use2 )
+        {
+          std::swap( elements[ i ][ vtx2 ], elements[ i ][ use2 ] );
+          ++swapped;
+        }
+        if( swapped == 1 )
+          std::swap( elements[ i ][ use1 ], elements[ i ][ use2 ] );
       }
     }
+    else
+      std::cerr << "Computing refinement edge is only implemented for 2d simplex grids." << std::endl;
   }
 
 

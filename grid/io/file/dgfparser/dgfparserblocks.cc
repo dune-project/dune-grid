@@ -449,71 +449,87 @@ namespace Dune
         DUNE_THROW( DGFException, "Cannot convert emty cube grid to simplex grid.");
       const int dimworld = vtx[ 0 ].size();
 
+      int dimgrid = 0;
+      for( size_t n = elements[ 0 ].size(); n > 1; ++dimgrid, n /= 2 ) ;
+      if( size_t( 1 << dimgrid ) != elements[ 0 ].size() )
+        DUNE_THROW( DGFException, "cube2simplex: all elements must be cubes." );
+
       dverb << "generating simplices...";
       dverb.flush();
 
-      if( dimworld == 1 )
+      if( dimgrid == 1 )
         return elements.size();
 
-      std :: vector< std :: vector< unsigned int > > cubes;
-      std :: vector< std :: vector< double > > cubeparams;
+      std::vector< std::vector< unsigned int > > cubes;
+      std::vector< std::vector< double > > cubeparams;
       elements.swap( cubes );
       params.swap( cubeparams );
 
-      if(dimworld == 3)
+      if( dimgrid == 3 )
       {
-        elements.resize(6*cubes.size());
-        if (cubeparams.size()>0)
-          params.resize(6*cubes.size());
-        for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
-          elements[countsimpl].resize(4);
-        for (size_t c=0; c<cubes.size(); c++)  {
-          for(int tetra=0; tetra < 6 ; tetra++) {
-            for (int v=0; v<4; v++) {
-              elements[c*6+tetra][v]=
-                cubes[c][offset3[tetra][v][0]+
-                         offset3[tetra][v][1]*2+
-                         offset3[tetra][v][2]*4];
+        elements.resize( 6*cubes.size() );
+        if( cubeparams.size() > 0 )
+          params.resize( 6*cubes.size() );
+        for( size_t countsimpl = 0; countsimpl < elements.size(); ++countsimpl )
+          elements[ countsimpl ].resize( 4 );
+        for( size_t c = 0; c < cubes.size(); ++c )
+        {
+          for( int tetra = 0; tetra < 6; ++tetra )
+          {
+            for( int v = 0; v < 4; ++v )
+            {
+              elements[ c*6+tetra ][ v ]
+                = cubes[ c ][ offset3[ tetra ][ v ][ 0 ] +2*offset3[ tetra ][ v ][ 1 ] +4*offset3[ tetra ][ v ][ 2 ] ];
             }
-            if (cubeparams.size()>0)
-              params[c*6+tetra] = cubeparams[c];
+            if( cubeparams.size() > 0 )
+              params[ c*6+tetra ] = cubeparams[ c ];
           }
         }
       }
-      else if (dimworld==2) {
-        elements.resize(2*cubes.size() );
-        if (cubeparams.size()>0)
-          params.resize(2*cubes.size());
-        for(size_t countsimpl=0; countsimpl < elements.size(); countsimpl++)
-          elements[countsimpl].resize(3);
-        for (size_t c=0; c<cubes.size(); c++) {
+      else if( dimgrid == 2 )
+      {
+        elements.resize( 2*cubes.size() );
+        if( cubeparams.size() > 0 )
+          params.resize( 2*cubes.size() );
+        for( size_t countsimpl = 0; countsimpl < elements.size(); ++countsimpl )
+          elements[ countsimpl ].resize( 3 );
+        for( size_t c = 0; c < cubes.size(); ++c )
+        {
           int diag = 0;
           double mind = 0;
-          for (int d=0; d<2; d++) {
-            double diaglen =
-              pow(vtx[cubes[c][d]][0]-vtx[cubes[c][2+((d+1)%2)]][0],2) +
-              pow(vtx[cubes[c][d]][1]-vtx[cubes[c][2+((d+1)%2)]][1],2);
-            if (diaglen<mind) {
-              mind=diaglen;
+          for( int d = 0; d < 2; ++d )
+          {
+            // let's cut the longer diagonal
+            double diaglen = 0;
+            for( int i = 0; i < dimworld; ++i )
+            {
+              const double dist = vtx[ cubes[ c ][ d ] ][ i ] - vtx[ cubes[ c ][ 3-d ] ][ i ];
+              diaglen += dist*dist;
+            }
+            if( diaglen < mind )
+            {
+              mind = diaglen;
               diag = d;
             }
           }
-
-          if (diag == 0) {
-            int tmp0 = cubes[c][0];
-            cubes[c][0] = cubes[c][1];
-            cubes[c][1] = cubes[c][3];
-            cubes[c][3] = cubes[c][2];
-            cubes[c][2] = tmp0;
+          if( diag == 0 )
+          {
+            int tmp0 = cubes[ c ][ 0 ];
+            cubes[ c ][ 0 ] = cubes[ c ][ 1 ];
+            cubes[ c ][ 1 ] = cubes[ c ][ 3 ];
+            cubes[ c ][ 3 ] = cubes[ c ][ 2 ];
+            cubes[ c ][ 2 ] = tmp0;
           }
-          for(int tetra=0; tetra < 2 ; tetra++) {
-            for (int v=0; v<3; v++) {
-              elements[c*2+tetra][v]=
-                cubes[c][offset2[tetra][v][0]+
-                         offset2[tetra][v][1]*2];
+
+          for( int triangle = 0; triangle < 2; ++triangle )
+          {
+            for( int v = 0; v < 3; ++v )
+            {
+              elements[ c*2+triangle ][ v ]
+                = cubes[ c ][ offset2[ triangle ][ v ][ 0 ] + 2*offset2[ triangle ][ v ][ 1 ] ];
             }
-            if (cubeparams.size()>0)
-              params[c*2+tetra] = cubeparams[c];
+            if( cubeparams.size() > 0 )
+              params[ c*2+triangle ] = cubeparams[ c ];
           }
         }
       }
