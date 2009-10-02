@@ -1135,6 +1135,19 @@ void gridcheck (Grid &g)
   Dune :: checkIndexSet( g, g.leafView(), Dune :: dvverb );
   for( int level = 0; level <= g.maxLevel(); ++level )
     Dune :: checkIndexSet( g, g.levelView( level ), Dune :: dvverb, true );
+
+  // check at least if the subId method is there
+  {
+    typename Grid::Traits::template Codim<0>::LevelIterator it = g.template lbegin<0>(0);
+    typename Grid::Traits::template Codim<0>::LevelIterator end = g.template lend<0>(0);
+    for (; it != end; ++it)
+    {
+      g.globalIdSet().subId(*it,0,dim);
+#ifdef DUNE_ENABLE_OLD_NUMBERING
+      g.globalIdSet().template subId<dim>(*it,0);
+#endif
+    }
+  }
 }
 
 #endif // #ifndef GRIDCHECK_CC
