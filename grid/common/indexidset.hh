@@ -466,23 +466,66 @@ namespace Dune
   template<class GridImp, class IdSetImp, class IdTypeImp>
   class IdSetDefaultImplementation : public IdSet<GridImp,IdSetImp,IdTypeImp>
   {
-  public:
-    //! define the type used for persistent indices
-    typedef IdTypeImp IdType;
+    static const unsigned int dimension = remove_const< GridImp >::type::dimension;
 
-    //! get id of subentity i of codim cc
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
        This default implementation uses the entity's entity() method. This is
        slow but works by default for ervery id set implementation.
      */
-    IdType subId (const typename remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i, int cc) const
+    typedef typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity Element;
+
+  public:
+    //! define the type used for persistent indices
+    typedef IdTypeImp IdType;
+
+    struct Caller
     {
-      return this->id( *(e.subEntity(i), cc) );
+      virtual ~Caller ()
+      {}
+
+      virtual IdType
+      subId ( const IdSetDefaultImplementation &idSet, const Element &e, int i ) const = 0;
+    };
+
+    template< int codim >
+    struct CallerImpl :
+      public Caller
+    {
+      virtual IdType
+      subId ( const IdSetDefaultImplementation &idSet, const Element &e, int i ) const
+      {
+        return idSet.id(*(e.template subEntity<codim>(i)));
+      }
+
+      static void apply ( const Caller *(&caller)[ dimension+1 ] )
+      {
+        caller[ codim ] = new CallerImpl< codim >;
+      }
+    };
+
+  public:
+    IdSetDefaultImplementation()
+    {
+      GenericGeometry::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
     }
 
+    ~IdSetDefaultImplementation()
+    {
+      for( unsigned int codim = 0; codim <= dimension; ++codim )
+        delete caller_[ codim ];
+    }
+
+    //! get id of subentity i of given codim
+    IdType subId(const Element &e, int i, unsigned int codim) const
+    {
+      assert( codim <= dimension );
+      return caller_[ codim ]->subId(*this, e, i);
+    }
+
+  private:
+    const Caller *caller_[ dimension+1 ];
   };
 
 
