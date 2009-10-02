@@ -85,9 +85,11 @@ namespace Dune
     }
 #endif
 
+    //! return subIndex i of given entity for subEntity with codim
     int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      return dynamicSubIndex_( e, i, codim );
+      // call method subIndex on real implementation
+      return GridType::getRealImplementation( e ).subIndex( i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1

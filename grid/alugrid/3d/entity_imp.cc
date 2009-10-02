@@ -418,17 +418,18 @@ namespace Dune {
   inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i, unsigned int codim ) const
   {
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
+
     assert(item_ != 0);
     switch (codim)
     {
     case 0 :
-      return item_->getIndex();
+      return this->getIndex();
     case 1 :
       return (getFace(*item_,i))->getIndex();
     case 2 :
-      return item_->myhedge1( Topo::dune2aluEdge(i) )->getIndex();
+      return item_->myhedge1( Topo::dune2aluEdge( i ) )->getIndex();
     case 3 :
-      return item_->myvertex( Topo::dune2aluVertex(i) )->getIndex();   // element topo
+      return item_->myvertex( Topo::dune2aluVertex( i ) )->getIndex();
     default :
       assert(false);
       abort();
