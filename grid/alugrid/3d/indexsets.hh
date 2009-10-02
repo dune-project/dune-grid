@@ -12,7 +12,6 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/common/dynamicsubindexid.hh>
 
 
 //- Local includes
@@ -52,8 +51,7 @@ namespace Dune
 
     // constructor
     ALU3dGridHierarchicIndexSet( const GridType &grid )
-      : grid_( grid ),
-        dynamicSubIndex_( *this )
+      : grid_( grid )
     {}
 
   public:
@@ -122,9 +120,6 @@ namespace Dune
   private:
     // our Grid
     const GridType & grid_;
-
-    // dynamic caller for subIndex
-    const DynamicSubIndex< GridType, This > dynamicSubIndex_;
   };
 
   //////////////////////////////////////////////////////////////////////
