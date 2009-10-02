@@ -18,7 +18,6 @@
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
 #include <dune/grid/common/indexidset.hh>
-#include <dune/grid/common/dynamicsubindexid.hh>
 #include <dune/grid/common/datahandleif.hh>
 
 
@@ -939,8 +938,7 @@ namespace Dune {
     }
 
     //! subentity persistent index
-    template<int cc>
-    PersistentIndexType subPersistentIndex (int i) const
+    PersistentIndexType subPersistentIndex (int i, int cc) const
     {
       if (cc==0)
         return persistentIndex();
@@ -1068,8 +1066,7 @@ namespace Dune {
     }
 
     //! subentity compressed index
-    template<int cc>
-    int subCompressedIndex (int i) const
+    int subCompressedIndex (int i, int cc) const
     {
       if (cc==0)
         return compressedIndex();
@@ -1165,8 +1162,7 @@ namespace Dune {
     }
 
     //! subentity compressed index
-    template<int cc>
-    int subCompressedLeafIndex (int i) const
+    int subCompressedLeafIndex (int i, int cc) const
     {
       if (cc==0)
         return compressedIndex();
@@ -2013,17 +2009,18 @@ namespace Dune {
 
   template<class GridImp>
   class YaspLevelIndexSet
-    : public IndexSetDefaultImplementation< GridImp, YaspLevelIndexSet< GridImp > >
+    : public IndexSet< GridImp, YaspLevelIndexSet< GridImp >, unsigned int >
   {
     typedef YaspLevelIndexSet< GridImp > This;
-    typedef IndexSetDefaultImplementation< GridImp, This > Base;
+    typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
+    using Base::subIndex;
+
     //! constructor stores reference to a grid and level
     YaspLevelIndexSet ( const GridImp &g, int l )
       : grid( g ),
-        level( l ),
-        dynamicSubIndex_( *this )
+        level( l )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -2034,22 +2031,14 @@ namespace Dune {
     template<int cd>
     int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.template getRealEntity<cd>(e).compressedIndex();
+      return grid.getRealImplementation(e).compressedIndex();
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get index of subentity of a codim 0 entity
-    template<int cc>
-    int DUNE_DEPRECATED subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
-    }
-#endif
-
-    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+    int subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return dynamicSubIndex_( e, i, codim );
+      return grid.getRealImplementation(e).subCompressedIndex(i,codim);
     }
 
     //! get number of entities of given type and level (the level is known to the object)
@@ -2081,7 +2070,6 @@ namespace Dune {
     const GridImp& grid;
     int level;
     std::vector<GeometryType> mytypes[GridImp::dimension+1];
-    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -2089,16 +2077,17 @@ namespace Dune {
 
   template<class GridImp>
   class YaspLeafIndexSet
-    : public IndexSetDefaultImplementation< GridImp, YaspLeafIndexSet< GridImp > >
+    : public IndexSet< GridImp, YaspLeafIndexSet< GridImp >, unsigned int >
   {
     typedef YaspLeafIndexSet< GridImp > This;
-    typedef IndexSetDefaultImplementation< GridImp, This > Base;
+    typedef IndexSet< GridImp, This, unsigned int > Base;
 
   public:
+    using Base::subIndex;
+
     //! constructor stores reference to a grid
     explicit YaspLeafIndexSet ( const GridImp &g )
-      : grid( g ),
-        dynamicSubIndex_( *this )
+      : grid( g )
     {
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
@@ -2114,26 +2103,18 @@ namespace Dune {
     int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       assert(cd==0 || cd==GridImp::dimension);
-      return grid.template getRealEntity<cd>(e).compressedLeafIndex();
+      return grid.getRealImplementation(e).compressedLeafIndex();
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get index of subentity of a codim 0 entity
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cc>
-    int DUNE_DEPRECATED subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
-    {
-      return grid.template getRealEntity<0>(e).template subCompressedLeafIndex<cc>(i);
-    }
-#endif
-
-    int subIndex ( const typename GridImp::Traits::template Codim< 0 >::Entity &e,
+    int subIndex ( const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
                    int i, unsigned int codim ) const
     {
-      return dynamicSubIndex_( e, i, codim );
+      return grid.getRealImplementation(e).subCompressedLeafIndex(i,codim);
     }
 
     //! get number of entities of given type
@@ -2166,7 +2147,6 @@ namespace Dune {
     const GridImp& grid;
     enum { ncodim = remove_const<GridImp>::type::dimension+1 };
     std::vector<GeometryType> mytypes[ncodim];
-    DynamicSubIndex< GridImp, This > dynamicSubIndex_;
   };
 
 
@@ -2180,7 +2160,7 @@ namespace Dune {
   //========================================================================
 
   template<class GridImp>
-  class YaspGlobalIdSet : public IdSetDefaultImplementation<GridImp,YaspGlobalIdSet<GridImp>,
+  class YaspGlobalIdSet : public IdSet<GridImp,YaspGlobalIdSet<GridImp>,
                               typename remove_const<GridImp>::type::PersistentIndexType >
                           /*
                              We used the remove_const to extract the Type from the mutable class,
@@ -2193,10 +2173,11 @@ namespace Dune {
     //! define the type used for persisitent indices
     typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
 
+    using IdSet<GridImp, This, IdType>::subId;
+
     //! constructor stores reference to a grid
     explicit YaspGlobalIdSet ( const GridImp &g )
-      : grid( g ),
-        dynamicSubId_( *this )
+      : grid( g )
     {}
 
     //! get id of an entity
@@ -2207,31 +2188,22 @@ namespace Dune {
     template<int cd>
     IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid.template getRealEntity<cd>(e).persistentIndex();
+      return grid.getRealImplementation(e).persistentIndex();
     }
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
     //! get id of subentity
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    template<int cc>
-    IdType DUNE_DEPRECATED subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i) const
+    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
+                  int i, unsigned int codim ) const
     {
-      return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
-    }
-#endif
-
-    IdType subId ( const typename remove_const< GridImp >::type::Traits::template Codim< 0 >::Entity &e,
-                   int i, unsigned int codim ) const
-    {
-      return dynamicSubId_( e, i, codim );
+      return grid.getRealImplementation(e).subPersistentIndex(i,codim);
     }
 
   private:
     const GridImp& grid;
-    DynamicSubId< GridImp, This > dynamicSubId_;
   };
 
 
@@ -2962,20 +2934,6 @@ namespace Dune {
 
       for(Iterator entry=container.begin(); entry != container.end(); ++entry)
         delete (*entry);
-    }
-
-    template<int codim>
-    YaspEntity<codim,dim,const YaspGrid<dim> >&
-    getRealEntity(typename Traits::template Codim<codim>::Entity& e )
-    {
-      return this->getRealImplementation(e);
-    }
-
-    template<int codim>
-    const YaspEntity<codim,dim,const YaspGrid<dim> >&
-    getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
-    {
-      return this->getRealImplementation(e);
     }
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
