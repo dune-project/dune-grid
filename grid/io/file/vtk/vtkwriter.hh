@@ -20,6 +20,7 @@
 #include <dune/common/smartpointer.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/common/gridenums.hh>
 
 #include "b64enc.hh"
 
