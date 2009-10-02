@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 using namespace Dune;
 
@@ -34,7 +34,7 @@ int main () try
 
   type.makeLine();
 
-  const ReferenceElement<double,1>& referenceLine = ReferenceElements<double, 1>::general(type);
+  const GenericReferenceElement<double,1>& referenceLine = GenericReferenceElements<double, 1>::general(type);
 
   // size(int c)
   testcmp(referenceLine.size(0),1);
@@ -60,7 +60,7 @@ int main () try
 
   type.makeTriangle();
 
-  const ReferenceElement<double,2>& referenceTriangle = ReferenceElements<double, 2>::general(type);
+  const GenericReferenceElement<double,2>& referenceTriangle = GenericReferenceElements<double, 2>::general(type);
 
   // size(int c)
   testcmp(referenceTriangle.size(0),1);
@@ -96,12 +96,12 @@ int main () try
   testcmp(referenceTriangle.subEntity(1,1,0,1),1);
   testcmp(referenceTriangle.subEntity(2,1,0,1),2);
 
-  testcmp(referenceTriangle.subEntity(0,1,0,2),1);
-  testcmp(referenceTriangle.subEntity(0,1,1,2),2);
-  testcmp(referenceTriangle.subEntity(1,1,0,2),2);
-  testcmp(referenceTriangle.subEntity(1,1,1,2),0);
-  testcmp(referenceTriangle.subEntity(2,1,0,2),0);
-  testcmp(referenceTriangle.subEntity(2,1,1,2),1);
+  testcmp(referenceTriangle.subEntity(0,1,0,2),0);
+  testcmp(referenceTriangle.subEntity(0,1,1,2),1);
+  testcmp(referenceTriangle.subEntity(1,1,0,2),0);
+  testcmp(referenceTriangle.subEntity(1,1,1,2),2);
+  testcmp(referenceTriangle.subEntity(2,1,0,2),1);
+  testcmp(referenceTriangle.subEntity(2,1,1,2),2);
 
   testcmp(referenceTriangle.subEntity(0,2,0,2),0);
   testcmp(referenceTriangle.subEntity(1,2,0,2),1);
@@ -125,7 +125,7 @@ int main () try
 
   type.makeQuadrilateral();
 
-  const ReferenceElement<double,2>& referenceQuad = ReferenceElements<double, 2>::general(type);
+  const GenericReferenceElement<double,2>& referenceQuad = GenericReferenceElements<double, 2>::general(type);
 
   // size(int c)
   testcmp(referenceQuad.size(0),1);
@@ -201,7 +201,7 @@ int main () try
 
   type.makeTetrahedron();
 
-  const ReferenceElement<double,3>& referenceTetra = ReferenceElements<double, 3>::general(type);
+  const GenericReferenceElement<double,3>& referenceTetra = GenericReferenceElements<double, 3>::general(type);
 
   // size(int c)
   testcmp(referenceTetra.size(0),1);
@@ -250,7 +250,7 @@ int main () try
 
   type.makePyramid();
 
-  const ReferenceElement<double,3>& referencePyramid = ReferenceElements<double, 3>::general(type);
+  const GenericReferenceElement<double,3>& referencePyramid = GenericReferenceElements<double, 3>::general(type);
 
   // size(int c)
   testcmp(referencePyramid.size(0),1);
@@ -312,7 +312,7 @@ int main () try
 
   type.makePrism();
 
-  const ReferenceElement<double,3>& referencePrism = ReferenceElements<double, 3>::general(type);
+  const GenericReferenceElement<double,3>& referencePrism = GenericReferenceElements<double, 3>::general(type);
 
   // size(int c)
   testcmp(referencePrism.size(0),1);
@@ -327,8 +327,8 @@ int main () try
   testcmp(referencePrism.size(0,0,3),6);
 
   testcmp(referencePrism.size(0,1,1),1);
-  testcmp(referencePrism.size(0,1,2),3);
-  testcmp(referencePrism.size(0,1,3),3);
+  testcmp(referencePrism.size(0,1,2),4);
+  testcmp(referencePrism.size(0,1,3),4);
   testcmp(referencePrism.size(1,1,1),1);
   testcmp(referencePrism.size(1,1,2),4);
   testcmp(referencePrism.size(1,1,3),4);
@@ -336,8 +336,8 @@ int main () try
   testcmp(referencePrism.size(2,1,2),4);
   testcmp(referencePrism.size(2,1,3),4);
   testcmp(referencePrism.size(3,1,1),1);
-  testcmp(referencePrism.size(3,1,2),4);
-  testcmp(referencePrism.size(3,1,3),4);
+  testcmp(referencePrism.size(3,1,2),3);
+  testcmp(referencePrism.size(3,1,3),3);
   testcmp(referencePrism.size(4,1,1),1);
   testcmp(referencePrism.size(4,1,2),3);
   testcmp(referencePrism.size(4,1,3),3);
@@ -355,10 +355,10 @@ int main () try
   // type(int i, int c)
   test(referencePrism.type(0,0).isPrism());
 
-  test(referencePrism.type(0,1).isTriangle());
+  test(referencePrism.type(0,1).isQuadrilateral());
   test(referencePrism.type(1,1).isQuadrilateral());
   test(referencePrism.type(2,1).isQuadrilateral());
-  test(referencePrism.type(3,1).isQuadrilateral());
+  test(referencePrism.type(3,1).isTriangle());
   test(referencePrism.type(4,1).isTriangle());
 
   for (int i=0; i<referencePrism.size(2); i++)
@@ -373,7 +373,7 @@ int main () try
 
   type.makeHexahedron();
 
-  const ReferenceElement<double,3>& referenceHexa = ReferenceElements<double, 3>::general(type);
+  const GenericReferenceElement<double,3>& referenceHexa = GenericReferenceElements<double, 3>::general(type);
 
   // size(int c)
   testcmp(referenceHexa.size(0),1);
