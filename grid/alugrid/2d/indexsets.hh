@@ -548,7 +548,7 @@ namespace Dune
   //! hierarchic index set of ALU3dGrid
   template <int dim, int dimworld>
   class ALU2dGridLocalIdSet :
-    public IdSetDefaultImplementation < ALU2dGrid<dim,dimworld> ,
+    public IdSet < ALU2dGrid<dim,dimworld> ,
         ALU2dGridLocalIdSet<dim,dimworld> ,
         int >
   {
@@ -576,7 +576,7 @@ namespace Dune
 
     //! import default implementation of subId<cc>
     //! \todo remove after next release
-    using IdSetDefaultImplementation < GridType , ALU2dGridLocalIdSet, IdType > :: subId;
+    using IdSet < GridType , ALU2dGridLocalIdSet, IdType > :: subId;
 
     //! return global id of given entity
     template <class EntityType>

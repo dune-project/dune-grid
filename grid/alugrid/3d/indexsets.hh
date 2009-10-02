@@ -294,7 +294,7 @@ namespace Dune
   //! global id set for ALU3dGrid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   class ALU3dGridGlobalIdSet :
-    public IdSetDefaultImplementation  < ALU3dGrid<dim,dimworld,elType> ,
+    public IdSet  < ALU3dGrid<dim,dimworld,elType> ,
         ALU3dGridGlobalIdSet<dim,dimworld,elType> ,
         typename  ALU3dGrid<dim,dimworld,elType>::Traits::GlobalIdType >
     , public ALU3DSPACE AdaptRestrictProlongType
@@ -350,7 +350,7 @@ namespace Dune
 
     //! import default implementation of subId<cc>
     //! \todo remove after next release
-    using IdSetDefaultImplementation < GridType , ALU3dGridGlobalIdSet, IdType > :: subId;
+    using IdSet < GridType , ALU3dGridGlobalIdSet, IdType > :: subId;
 
     //! create id set, only allowed for ALU3dGrid
     ALU3dGridGlobalIdSet(const GridType & grid)
@@ -947,7 +947,7 @@ namespace Dune
   //! hierarchic index set of ALU3dGrid
   template <int dim, int dimworld, ALU3dGridElementType elType>
   class ALU3dGridLocalIdSet :
-    public IdSetDefaultImplementation < ALU3dGrid<dim,dimworld,elType> ,
+    public IdSet < ALU3dGrid<dim,dimworld,elType> ,
         ALU3dGridLocalIdSet<dim,dimworld,elType> ,
         int >
     , public ALU3DSPACE AdaptRestrictProlongType
@@ -981,7 +981,7 @@ namespace Dune
 
     //! import default implementation of subId<cc>
     //! \todo remove after next release
-    using IdSetDefaultImplementation < GridType , ALU3dGridLocalIdSet, IdType > :: subId;
+    using IdSet < GridType , ALU3dGridLocalIdSet, IdType > :: subId;
 
     //! return global id of given entity
     template <class EntityType>
