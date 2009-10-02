@@ -2,7 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <map>
 
-#include <dune/grid/genericgeometry/forloop.hh>
+#include <dune/common/forloop.hh>
 
 template< class GridView >
 class CheckIterators

@@ -6,7 +6,7 @@
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridview.hh>
 #include <dune/grid/common/quadraturerules.hh>
-#include <dune/grid/genericgeometry/forloop.hh>
+#include <dune/common/forloop.hh>
 
 namespace Dune
 {
