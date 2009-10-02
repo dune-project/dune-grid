@@ -1150,7 +1150,7 @@ namespace Dune {
 
   template<class GridImp>
   class SGridGlobalIdSet :
-    public IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>
+    public IdSet<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>
     /*
        We used the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
@@ -1162,7 +1162,7 @@ namespace Dune {
 
     //! import default implementation of subId<cc>
     //! \todo remove after next release
-    using IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>::subId;
+    using IdSet<GridImp,SGridGlobalIdSet<GridImp>, typename remove_const<GridImp>::type::PersistentIndexType>::subId;
 
     //! define the type used for persisitent indices
     /*
