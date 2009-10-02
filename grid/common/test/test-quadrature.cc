@@ -6,7 +6,7 @@
 #include <config.h>
 
 #include <dune/grid/common/quadraturerules.hh>
-#include <dune/grid/common/referenceelements.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 bool success = true;
 
@@ -145,15 +145,15 @@ void checkWeights(Dune::GeometryType t, int p)
     volume += qp->weight();
   }
   if (std::abs(volume -
-               Dune::ReferenceElements<ctype, dim>::general(t).volume())
+               Dune::GenericReferenceElements<ctype, dim>::general(t).volume())
       > 4*dim*(p ? p : 1)*std::numeric_limits<double>::epsilon())
   {
     std::cerr << "Error: Quadrature for " << t << " and order=" << p
               << " does not sum to volume of RefElem" << std::endl;
     std::cerr << "\tSums to " << volume << "( RefElem.volume() = "
-              << Dune::ReferenceElements<ctype, dim>::general(t).volume()
+              << Dune::GenericReferenceElements<ctype, dim>::general(t).volume()
               << ")" << "(difference " << volume -
-    Dune::ReferenceElements<ctype, dim>::general(t).volume()
+    Dune::GenericReferenceElements<ctype, dim>::general(t).volume()
               << ")" << std::endl;
     success = false;
   }
