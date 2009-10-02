@@ -20,21 +20,59 @@ namespace Dune
   const int ElementTopologyMapping<tetra>::
   dune2aluEdge_[EntityCount<tetra>::numEdges] = {0, 1, 3, 2, 4, 5};
 
+  // and inverse mapping
+  template <>
+  const int ElementTopologyMapping<tetra>::
+  alu2duneEdge_[EntityCount<tetra>::numEdges] = {0, 1, 3, 2, 4, 5} ;
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  //              alu hexa                                   dune hexa
+  //
+  //                       y                                          y
+  //   faces              /                                          /
+  //                     /                                          /
+  //              7---------6                                 6---------7
+  //          z  /.        /|                             z  /.        /|
+  //          | / .  1    / |                             | / .  5    / |
+  //          |/  .      /  |                             |/  .      /  |
+  //          4---------5   | <-- 4 (rear)                4---------5   | <-- 3 (rear)
+  //    5 --> |   .     | 3 |                       0 --> |   .     | 1 |
+  //  (left)  |   3.....|...2                     (left)  |   2.....|...3
+  //          |  .      |  /                              |  .      |  /
+  //          | .   2   | / <-- 0 (below)                 | .   2   | / <-- 4 (below)
+  //          |.        |/                                |.        |/
+  //          0---------1 ---x                            0---------1 ---x
+  //
+  //                       y                                       y
+  //             alu      /                           dune        /
+  //  edges              /                                       /
+  //              7---11----6                             6---11----7
+  //          z  /.        /|                         z  /.        /|
+  //          | 9 .      10 |                         | 8 .       9 |
+  //          |/  7      /  6                         |/  2      /  3
+  //          4-----8---5   |                         4----10---5   |
+  //          |   .     |   |                         |   .     |   |
+  //          |   3...5.|...2                         |   2...7.|...3
+  //          2  .      4  /                          0  .      1  /
+  //          | 1       | 3                           | 4       | 5
+  //          |.        |/                            |.        |/
+  //          0-----0---1 ---x                        0-----6---1 ---x
+  //
+  //
+  ////////////////////////////////////////////////////////////////////
   // maps edges in the ALUGrid reference hexa to edges in the Dune Hexa
   template <>
   const int ElementTopologyMapping<hexa>::
   dune2aluEdge_[EntityCount<hexa>::numEdges] = {2, 4, 7, 6, 1, 3,
                                                 0, 5, 9, 10, 8, 11};
-
-  template <>
-  const int ElementTopologyMapping<tetra>::
-  alu2duneEdge_[EntityCount<tetra>::numEdges] = {0, 1, 3, 2, 4, 5} ;
-
   // inverse mapping of the above dune2aluEdge for hexas
   template <>
   const int ElementTopologyMapping<hexa>::
   alu2duneEdge_[EntityCount<hexa>::numEdges] = {6, 4, 0, 5, 1, 7,
                                                 3, 2, 10, 8, 9, 11};
+
+  //////////////////////////////////////////////////////////////////////
 
   template <>
   const int ElementTopologyMapping<tetra>::
@@ -101,11 +139,19 @@ namespace Dune
   const int ElementTopologyMapping<hexa>::
   faceOrientation_[EntityCount<hexa>::numFaces] = {-1, 1, 1, -1, -1, 1};
 
-  template <>
-  const int ElementTopologyMapping<tetra>::
-  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
+  /*
+     template <>
+     const int ElementTopologyMapping<tetra>::
+     dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
                                                        {0, 2, 1},
                                                        {0, 1, 2},
+                                                       {0, 2, 1}};
+   */
+  template <>
+  const int ElementTopologyMapping<tetra>::
+  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
+                                                       {0, 2, 1},
+                                                       {0, 2, 1},
                                                        {0, 2, 1}};
 
   //********************************************************************
