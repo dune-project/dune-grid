@@ -4,10 +4,11 @@
 
 #include <cstring>
 
+#include <dune/common/forloop.hh>
+
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
-#include <dune/grid/genericgeometry/loops.hh>
 
 #ifndef GEOMETRYTYPE
 #error "GEOMETRYTYPE must be one of 'simplex', 'cube', 'prism', 'pyramid'"
@@ -72,7 +73,7 @@ template< int codim >
 void CheckCodim< codim > :: apply ()
 {
   typedef Dune :: GenericGeometry :: Size< Topology, codim > NumSubs;
-  Dune :: GenericGeometry :: ForLoop< CheckSub, 0, NumSubs :: value-1 > :: apply();
+  Dune::ForLoop< CheckSub, 0, NumSubs::value-1 >::apply();
 }
 
 template< int codim >
@@ -89,8 +90,7 @@ void CheckCodim< codim > :: CheckSub< i > :: apply ()
                 << std :: endl;
   }
 
-  Dune :: GenericGeometry :: ForLoop
-  < CheckSubCodim, 0, SubTopology :: dimension > :: apply();
+  Dune::ForLoop< CheckSubCodim, 0, SubTopology::dimension >::apply();
 }
 
 template< int codim >
@@ -115,8 +115,7 @@ void CheckCodim< codim > :: CheckSub< i > :: CheckSubCodim< subcodim > :: apply 
   if( error )
     ++errors;
 
-  Dune :: GenericGeometry :: ForLoop
-  < CheckSubSub, 0, NumSubSubs :: value - 1 > :: apply();
+  Dune::ForLoop< CheckSubSub, 0, NumSubSubs::value - 1 >::apply();
 }
 
 template< int codim >
@@ -179,11 +178,14 @@ int main ( int argc, char **argv )
 
   std :: cerr << "Generic geometry type: " << Topology :: name() << std :: endl;
 
-  Dune :: GenericGeometry :: ForLoop< CheckCodim, 0, Topology :: dimension > :: apply();
+  Dune::ForLoop< CheckCodim, 0, Topology::dimension >::apply();
 
   std :: cerr << "Number of errors: " << errors << std :: endl;
 
+  // ForSubTopology does not exist anymore
+#if 0
   Dune :: GenericGeometry :: ForSubTopology< ForSubTest, XTopology >::apply( );
+#endif
 
   return (errors > 0 ? 1 : 0);
 }

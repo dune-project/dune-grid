@@ -5,9 +5,10 @@
 
 #include <cassert>
 
+#include <dune/common/forloop.hh>
+
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/genericgeometry/misc.hh>
-#include <dune/common/forloop.hh>
 
 namespace Dune
 {
@@ -136,8 +137,7 @@ namespace Dune
 
       CodimCache ()
       {
-        Dune :: ForLoop< BuildCache, 0, dimension >
-        :: apply( hasHostEntity_ );
+        Dune::ForLoop< BuildCache, 0, dimension >::apply( hasHostEntity_ );
       }
 
       static CodimCache &instance ()

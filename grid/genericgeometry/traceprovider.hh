@@ -3,6 +3,7 @@
 #ifndef DUNE_GENERICGEOMETRY_TRACEPROVIDER_HH
 #define DUNE_GENERICGEOMETRY_TRACEPROVIDER_HH
 
+#include <dune/common/forloop.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
 
 namespace Dune

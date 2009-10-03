@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_ENTITY_HH
 
 #include <dune/grid/common/genericreferenceelements.hh>
+#include <dune/grid/common/grid.hh>
 
 #include <dune/grid/geogrid/capabilities.hh>
 #include <dune/grid/geogrid/cornerstorage.hh>

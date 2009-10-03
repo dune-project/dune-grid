@@ -6,6 +6,7 @@
 #include <cassert>
 #include <vector>
 
+#include <dune/common/forloop.hh>
 #include <dune/common/static_assert.hh>
 
 #include <dune/grid/genericgeometry/misc.hh>
