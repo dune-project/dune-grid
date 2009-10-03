@@ -201,14 +201,12 @@ namespace Dune
 
     void create ()
     {
-      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >
-      ::apply( dofNumbering_, *this );
+      ForLoop< CreateEntityNumbers, 0, dimension >::apply( dofNumbering_, *this );
     }
 
     void read ( const std::string &filename )
     {
-      Alberta::ForLoop< CreateEntityNumbers, 0, dimension >
-      ::apply( filename, dofNumbering_.mesh(), *this );
+      ForLoop< CreateEntityNumbers, 0, dimension >::apply( filename, dofNumbering_.mesh(), *this );
     }
 
     bool write ( const std::string &filename ) const
@@ -572,7 +570,7 @@ namespace Dune
         const AlbertaGridEntity< 0, dim, const Grid > &entityImp
           = Grid::getRealImplementation( *it );
         const Alberta::Element *element = entityImp.elementInfo().el();
-        Alberta::ForLoop< Insert, 0, dimension >::apply( element, *this );
+        ForLoop< Insert, 0, dimension >::apply( element, *this );
       }
     }
 

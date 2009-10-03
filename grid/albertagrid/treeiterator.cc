@@ -118,7 +118,7 @@ namespace Dune
       for( Iterator it = begin; it != end; ++it )
       {
         const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
-        Alberta::ForLoop< Codim, firstCodim, dimension >::apply( dofNumbering, marker, elementInfo );
+        ForLoop< Codim, firstCodim, dimension >::apply( dofNumbering, marker, elementInfo );
       }
     }
   };

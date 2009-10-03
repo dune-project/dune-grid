@@ -6,6 +6,7 @@
 #include <cassert>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/forloop.hh>
 
 #include <dune/grid/genericgeometry/codimtable.hh>
 #include <dune/grid/genericgeometry/misc.hh>
@@ -46,7 +47,6 @@ namespace Dune
     // Import Types
     // ------------
 
-    using Dune::ForLoop;
     using GenericGeometry::ProtectedIf;
     using GenericGeometry::CodimTable;
 
