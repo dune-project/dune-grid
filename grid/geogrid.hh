@@ -46,10 +46,10 @@
  *  - a function mapping
  *    global coordinates from the host grid to some space
  *    with larger or equal dimension. For an entity \c e of the host grid
- *    with geometry \c e.g the resulting entity in the \c GeoGrid has
+ *    with geometry \c e.g the resulting entity in the Dune::GeometryGrid has
  *    corners \c F(e.g.corner(i)) where \c F is the global coordinate
- *    mapping provided. For the GeoGrid geometry the class
- *    GenericGeometry::CornerMapping is used.
+ *    mapping provided. For the geometry of the Dune::GeometryGrid the class
+ *    Dune::GenericGeometry::CornerMapping is used.
  *  - a vector like container assinging each index of a codimension \c dim entity
  *    of the host grid a coordinate vector.
  *  - an implementation of a local function container, i.e., a class with
@@ -63,4 +63,39 @@
  *          In the first case the host grid must provide an implementation of
  *          the method <tt>corner</tt> on the geometry class for codimension
  *          zero entity.
+ *
+ *  The approach taken is determined by the second template argument:
+ *  \code
+ *    GeometryGrid<HostGridType,CoordFunction> grid(hostGrid,coordFunction);
+ *  \endcode
+ *  The class \c CoordFunction must either be derived from
+ *  Dune::AnalyticalCoordFunction or from
+ *  Dune::DiscreteCoordFunction.
+ *  An example of a analytical coordinate function is given by the following code:
+ *  \code
+ *  class ExampleFunction
+ *  : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
+ *  {
+ *    typedef ExampleFunction This;
+ *    typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
+ *
+ *  public:
+ *    typedef Base :: DomainVector DomainVector;
+ *    typedef Base :: RangeVector RangeVector;
+ *
+ *    void evaluate ( const DomainVector &x, RangeVector &y ) const
+ *    {
+ *      y[ 0 ] = x[ 0 ];
+ *      y[ 1 ] = x[ 1 ];
+ *      y[ 2 ] = x[ 0 ] + x[ 1 ];
+ *    }
+ *  };
+ *  \endcode
+ *  For a discrete coordinate function a method of the form
+ *  \code
+ *  template< class HostEntity >
+ *  void evaluate ( const HostEntity &hostEntity, unsigned int corner,
+ *                  RangeVector &y ) const
+ *  \endcode
+ *  must be implemented.
  */

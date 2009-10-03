@@ -22,6 +22,18 @@ namespace Dune
   // AnalyticalCoordFunctionInterface
   // --------------------------------
 
+  /** \brief Interface class for using an analytical function to define the
+   *  geometry of a Dune::GeometryGrid. An implementation should be derived
+   *  from Dune::AnalyticalCoordFunction and the evaluate
+   *  method mapping \f$ R^d\to R^r \f$ has to be supplied.
+   *
+   *  \tparam ct coordinate field type (\c ct in Dune::GeometryGrid)
+   *  \tparam dimD dimension of the domain of the mapping (\c dimension
+   *               in the host grid).
+   *  \tparam dimR dimension of the range of the mapping (\c dimensionworld
+   *               in Dune::GeometryGrid)
+   *  \tparam Impl implementation class (BN trick)
+   **/
   template< class ct, unsigned int dimD, unsigned int dimR, class Impl >
   class AnalyticalCoordFunctionInterface
   {
@@ -33,12 +45,17 @@ namespace Dune
     typedef This Interface;
     typedef Impl Implementation;
 
+    //! field type of the coordinate vector
     typedef ct ctype;
 
+    //! dimension of the range vector (dimensionworld of host grid)
     static const unsigned int dimDomain = dimD;
+    //! dimension of the range vector
     static const unsigned int dimRange = dimR;
 
+    //! domain vector for the evaluate method
     typedef FieldVector< ctype, dimDomain > DomainVector;
+    //! range vector for the evaluate method
     typedef FieldVector< ctype, dimRange > RangeVector;
 
   private:
@@ -49,6 +66,7 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
+    //! evaluate method for global mapping
     void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
       return asImp().evaluate( x, y );
@@ -70,7 +88,9 @@ namespace Dune
 
   // AnalyticalCoordFunction
   // -----------------------
-
+  /** @brief Derive an implementation of a discrete coordinate function
+   * from this class.
+   **/
   template< class ct, unsigned int dimD, unsigned int dimR, class Impl >
   class AnalyticalCoordFunction
     : public AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >
@@ -98,6 +118,20 @@ namespace Dune
   // DiscreteCoordFunctionInterface
   // ------------------------------
 
+  /** \brief Interface class for using a discrete function to define the
+   *  geometry of a Dune::GeometryGrid. An implementation should be derived
+   *  from Dune::DiscreteCoordinateFunction and the evaluate method taking an entity
+   *  of the host grid together with the number of a vertex returns the coordinate in
+   *  \f$ R^r \f$
+   *  of that corner. The user must ensure continuity of this mapping.
+   *  In addition an adapt method is provided which is called whenever
+   *  \c adapt() is called on the Dune::GeometryGrid.
+   *
+   *  \tparam ct coordinate field type (\c ct in Dune::GeometryGrid)
+   *  \tparam dimR dimension of the range of the mapping (\c dimensionworld
+   *               in Dune::GeometryGrid)
+   *  \tparam Impl implementation class (BN trick)
+   **/
   template< class ct, unsigned int dimR, class Impl >
   class DiscreteCoordFunctionInterface
   {
@@ -109,10 +143,13 @@ namespace Dune
     typedef This Interface;
     typedef Impl Implementation;
 
+    //! field type of the coordinate vector
     typedef ct ctype;
 
+    //! dimension of the range vector
     static const unsigned int dimRange = dimR;
 
+    //! range vector for the evaluate method
     typedef FieldVector< ctype, dimRange > RangeVector;
 
   private:
@@ -124,6 +161,11 @@ namespace Dune
     This &operator= ( const This & );
 
   public:
+    /** \brief evaluate method
+     *  \param hostEntity an entity of the host grid
+     *  \param corner the local number of the corner in the host entity
+     *  \param y return value for the coordinate of this corner
+     **/
     template< class HostEntity >
     void evaluate ( const HostEntity &hostEntity, unsigned int corner,
                     RangeVector &y ) const
@@ -131,6 +173,9 @@ namespace Dune
       asImp().evaluate( hostEntity, corner, y );
     }
 
+    /** \brief method called from grid.adapt() method to allow adaptation
+     *  of the discrete coordinate function
+     **/
     void adapt ()
     {
       asImp().adapt();
@@ -152,7 +197,10 @@ namespace Dune
 
   // DiscreteCoordFunction
   // ---------------------
-
+  //
+  /** @brief Derive an implementation of a discrete coordinate function
+   * from this class.
+   **/
   template< class ct, unsigned int dimR, class Impl >
   class DiscreteCoordFunction
     : public DiscreteCoordFunctionInterface< ct, dimR, Impl >
