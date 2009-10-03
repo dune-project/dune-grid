@@ -9,6 +9,7 @@
 #include <vector>
 #include <dune/common/exceptions.hh>
 #include <dune/common/helpertemplates.hh>
+#include <dune/common/forloop.hh>
 #include <dune/grid/common/grid.hh>
 
 
@@ -508,7 +509,7 @@ namespace Dune
   public:
     IdSetDefaultImplementation()
     {
-      GenericGeometry::ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
+      ForLoop< CallerImpl, 0, dimension >::apply( caller_ );
     }
 
     ~IdSetDefaultImplementation()
