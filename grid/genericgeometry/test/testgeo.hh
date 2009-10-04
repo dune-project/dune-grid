@@ -9,7 +9,7 @@
 namespace Dune
 {
 
-  template <int d1,int d2> class YaspGrid;
+  template <int d1> class YaspGrid;
   template <int d1,int d2> class AlbertaGrid;
   template< int dim, int dimworld > class ALUSimplexGrid;
   template< int dim, int dimworld, ALU3dGridElementType elType > class ALU3dGrid;
@@ -24,7 +24,7 @@ namespace Dune
   struct Topology;
 
   template< int d >
-  struct Topology< YaspGrid< d, d > >
+  struct Topology< YaspGrid< d > >
   {
     static const GeometryType :: BasicType basicType = GeometryType :: cube;
     static const int dimension = d;
