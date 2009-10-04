@@ -5,8 +5,8 @@
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/typetraits.hh>
 
-#include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
 

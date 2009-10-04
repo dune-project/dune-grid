@@ -6,7 +6,7 @@
 #include <string>
 
 #include <dune/common/static_assert.hh>
-#include <dune/grid/genericgeometry/misc.hh>
+#include <dune/common/typetraits.hh>
 
 namespace Dune
 {

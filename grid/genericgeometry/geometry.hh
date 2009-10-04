@@ -4,6 +4,7 @@
 #define DUNE_GENERICGEOMETRY_GEOMETRY_HH
 
 #include <dune/grid/common/geometry.hh>
+#include <dune/common/typetraits.hh>
 
 #include <dune/grid/genericgeometry/mappingprovider.hh>
 #include <dune/grid/genericgeometry/geometrytraits.hh>

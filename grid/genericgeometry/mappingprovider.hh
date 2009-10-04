@@ -3,6 +3,7 @@
 #ifndef DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 #define DUNE_GENERICGEOMETRY_MAPPINGPROVIDER_HH
 
+#include <dune/common/typetraits.hh>
 #include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/cachedmapping.hh>
 #include <dune/grid/genericgeometry/hybridmapping.hh>

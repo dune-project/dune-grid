@@ -8,8 +8,8 @@
 
 #include <dune/common/forloop.hh>
 #include <dune/common/static_assert.hh>
+#include <dune/common/typetraits.hh>
 
-#include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/codimtable.hh>
 

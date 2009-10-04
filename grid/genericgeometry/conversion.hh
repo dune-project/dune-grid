@@ -6,7 +6,6 @@
 #include <dune/common/static_assert.hh>
 #include <dune/common/geometrytype.hh>
 
-#include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/subtopologies.hh>
 

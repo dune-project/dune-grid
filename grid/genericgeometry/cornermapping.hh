@@ -3,7 +3,6 @@
 #ifndef DUNE_GENERICGEOMETRY_CORNERMAPPING_HH
 #define DUNE_GENERICGEOMETRY_CORNERMAPPING_HH
 
-#include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>

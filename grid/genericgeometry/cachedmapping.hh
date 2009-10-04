@@ -4,7 +4,6 @@
 #define DUNE_GENERICGEOMETRY_MAPPINGS_HH
 #include <dune/common/smallobject.hh>
 
-#include <dune/grid/genericgeometry/misc.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 #include <dune/grid/genericgeometry/referenceelements.hh>
 #include <dune/grid/genericgeometry/matrix.hh>
