@@ -311,7 +311,7 @@ namespace Dune
       typedef GenericGeometry :: DuneGeometryTypeProvider< mydimension, Traits :: linetype >
       DuneGeometryTypeProvider;
 
-      typedef typename ProtectedIf< Traits :: hybrid, Hybrid, NonHybrid > :: Mapping
+      typedef typename SelectType< Traits :: hybrid, Hybrid<true>, NonHybrid<false> > :: Type :: Mapping
       ElementMapping;
       typedef GenericGeometry :: MappingProvider< ElementMapping, codimension >
       MappingProvider;

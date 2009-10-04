@@ -63,7 +63,7 @@ namespace Dune
       mapping ( const GeometryType &type, const CoordVector &coords )
       {
         assert( type.dim() == Mapping :: dimension );
-        typedef ProtectedIf< (Mapping :: dimension >= 3), AllTypes, OnlySimplexCube > Switch;
+        typedef typename SelectType< (Mapping :: dimension >= 3), AllTypes<true>, OnlySimplexCube<false> >::Type Switch;
         return Switch :: mapping( type.basicType(), coords );
       }
     };
@@ -179,7 +179,7 @@ namespace Dune
           < typename SubTopology< Topology, codim, 0 > :: type, GeometryTraits >
       {};
 
-      typedef ProtectedIf< hybrid, HybridFactory, NonHybridFactory > Factory;
+      typedef typename SelectType< hybrid, HybridFactory<true>, NonHybridFactory<false> >::Type Factory;
 
     public:
       typedef typename Factory :: Mapping Mapping;

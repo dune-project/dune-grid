@@ -196,7 +196,7 @@ namespace Dune
       };
 
     public:
-      typedef typename ProtectedIf< isPrism, Prism, Pyramid >::type type;
+      typedef typename SelectType< isPrism, Prism<true>, Pyramid<false> >::Type::type type;
     };
 
     template< unsigned int id >

@@ -180,7 +180,7 @@ namespace Dune
       };
 
     public:
-      typedef typename ProtectedIf< (i < n), PrismSub, BaseSub > :: type type;
+      typedef typename SelectType< (i < n), PrismSub<true>, BaseSub<false> > :: Type :: type type;
     };
 
     template< class BaseTopology, unsigned int dim, unsigned int i >
@@ -229,7 +229,7 @@ namespace Dune
       };
 
     public:
-      typedef typename ProtectedIf< (i < m), BaseSub, PyramidSub > :: type type;
+      typedef typename SelectType< (i < m), BaseSub<true>, PyramidSub<false> > :: Type :: type type;
     };
 
     template< class BaseTopology, unsigned int dim, unsigned int i >
@@ -493,9 +493,9 @@ namespace Dune
       static unsigned int number ( unsigned int i, unsigned int j )
       {
         assert( (j <= SubTopologySize< Topology, codim, subcodim > :: size( i )) );
-        return ProtectedIf
-               < (codim == 0) || (codim == Topology :: dimension), BorderCodim, InnerCodim >
-               :: number( i, j );
+        return SelectType
+               < (codim == 0) || (codim == Topology :: dimension), BorderCodim<true>, InnerCodim<false> >
+               :: Type :: number( i, j );
       }
     };
 
