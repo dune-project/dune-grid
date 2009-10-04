@@ -3,6 +3,7 @@
 #ifndef DUNE_DGFGEOGRID_HH
 #define DUNE_DGFGEOGRID_HH
 
+#include <dune/common/typetraits.hh>
 #include <dune/grid/geogrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 
@@ -40,8 +41,8 @@ namespace Dune
     template< bool >
     struct AnalyticalFactory;
 
-    typedef GenericGeometry :: ProtectedIf
-    < isDiscreteCoordFunction, DiscreteFactory, AnalyticalFactory >
+    typedef typename SelectType
+    < isDiscreteCoordFunction, DiscreteFactory<true>, AnalyticalFactory<false >::Type
     Factory;
 
   public:

@@ -33,7 +33,7 @@ namespace Dune
   ::markSubEntities ( const Iterator &begin, const Iterator &end )
   {
     clear();
-    Alberta::ProtectedIf< (firstCodim <= dimension), MarkSubEntities, NoMarkSubEntities >
+    SelectType< (firstCodim <= dimension), MarkSubEntities<true>, NoMarkSubEntities<false> >::Type
     ::template mark< firstCodim, Iterator >( dofNumbering_, marker_, begin, end );
   }
 

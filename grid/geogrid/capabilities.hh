@@ -8,7 +8,6 @@
 #include <dune/common/forloop.hh>
 
 #include <dune/grid/common/capabilities.hh>
-#include <dune/grid/genericgeometry/misc.hh>
 
 namespace Dune
 {

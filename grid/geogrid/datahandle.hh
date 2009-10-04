@@ -126,7 +126,7 @@ namespace Dune
       };
 
       static const bool hasHostEntity = Capabilities::hasHostEntity< Grid, codimension >::v;
-      typedef GenericGeometry::ProtectedIf< hasHostEntity, InitializeReal, InitializeFake > Initialize;
+      typedef typename SelectType< hasHostEntity, InitializeReal<true>, InitializeFake<false> >::Type Initialize;
 
     public:
       EntityProxy ( const Grid &grid, const HostEntity &hostEntity )
