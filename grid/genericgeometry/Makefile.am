@@ -4,7 +4,7 @@ genericgeometry_HEADERS = cachedmapping.hh              codimtable.hh \
 			  genericreferenceelement.hh    geometry.hh \
 			  geometrytraits.hh             hybridmapping.hh \
 			  mapping.hh                    mappingprovider.hh \
-			  matrix.hh                     misc.hh \
+			  matrix.hh                     \
 			  referencedomain.hh            referenceelements.hh \
 			  referencemappings.hh          referencetopologies.hh \
 			  subtopologies.hh              topologytypes.hh \
