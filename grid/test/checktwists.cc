@@ -102,6 +102,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const LocalGeometry &lGeoIn = intersection.geometryInInside();
   const LocalGeometry &lGeoOut = intersection.geometryInOutside();
 
+  bool twistInside = true ;
+  bool twistOutside = true;
   for( int i = 0; i < numCorners; ++i )
   {
 #if NEW_SUBENTITY_NUMBERING
@@ -117,9 +119,10 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
     if( (xIn - lGeoIn.corner( gi )).two_norm() >= 1e-12 )
     {
-      std::cout << "Error: twisted reference corner( " << iIn << " ) = " << xIn
+      std::cout << "Error: twisted inside reference corner( " << iIn << " ) = " << xIn
                 << " != " << lGeoIn.corner( gi ) << " = local corner( " << i << " )."
                 << std::endl;
+      twistInside = false ;
       ++errors;
     }
 
@@ -127,10 +130,73 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     LocalVector xOut = refOut.position( refOut.subEntity( nOut, 1, iOut, dimension ), dimension );
     if( (xOut - lGeoOut.corner( gi )).two_norm() >= 1e-12 )
     {
-      std::cout << "Error: twisted reference corner( " << iOut << " ) = " << xOut
+      std::cout << "Error: twisted outside reference corner( " << iOut << " ) = " << xOut
                 << " != " << lGeoOut.corner( gi ) << " = local corner( " << i << " )."
                 << std::endl;
+      twistOutside = false;
       ++errors;
+    }
+  }
+
+  // calculate inside twist
+  if( ! twistInside )
+  {
+    for( int nTwist = -numCorners; nTwist<numCorners; ++nTwist )
+    {
+      twistInside = true ;
+      for( int i = 0; i < numCorners; ++i )
+      {
+#if NEW_SUBENTITY_NUMBERING
+        const int gi = i;
+#else
+        const int tid = Dune::GenericGeometry::topologyId( lGeoIn.type() );
+        const int gi = Dune::GenericGeometry::MapNumberingProvider< dimension-1 >::template dune2generic< dimension-1 >( tid, i );
+#endif
+        const int iIn = applyTwist( inverseTwist( nTwist, numCorners ), i, numCorners );
+        LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
+        if( (xIn - lGeoIn.corner( gi )).two_norm() >= 1e-12 )
+        {
+          twistInside = false ;
+        }
+      }
+
+      if( twistInside )
+      {
+        std::cout << "\ninside " << nIn << "\n";
+        std::cout << "twist " << tIn << " should be replaced by " << nTwist << "\n";
+        break ;
+      }
+    }
+  }
+
+  // calculate outside twist
+  if( ! twistOutside )
+  {
+    for( int nTwist = -numCorners; nTwist<numCorners; ++nTwist )
+    {
+      twistOutside = true ;
+      for( int i = 0; i < numCorners; ++i )
+      {
+#if NEW_SUBENTITY_NUMBERING
+        const int gi = i;
+#else
+        const int tid = Dune::GenericGeometry::topologyId( lGeoIn.type() );
+        const int gi = Dune::GenericGeometry::MapNumberingProvider< dimension-1 >::template dune2generic< dimension-1 >( tid, i );
+#endif
+        const int iOut = applyTwist( inverseTwist( nTwist, numCorners ), i, numCorners );
+        LocalVector xOut = refOut.position( refOut.subEntity( nOut, 1, iOut, dimension ), dimension );
+        if( (xOut - lGeoOut.corner( gi )).two_norm() >= 1e-12 )
+        {
+          twistOutside = false;
+        }
+      }
+
+      if( twistOutside )
+      {
+        std::cout << "\noutside " << nOut << "\n";
+        std::cout << "twist " << tOut << " should be replaced by " << nTwist << "\n";
+        break ;
+      }
     }
   }
 
