@@ -12,6 +12,10 @@ namespace Dune {
 
   /** \brief Attributes used in the generic overlap model
 
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
+
      The values are ordered intentionally in order to be able to
      define ranges of partition types.
 
@@ -26,7 +30,12 @@ namespace Dune {
   };
 
   /** \brief Provide names for the partition types
-     @ingroup GIRelatedTypes
+   *
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
    */
   inline std::string PartitionName(PartitionType type)
   {
@@ -46,7 +55,14 @@ namespace Dune {
     }
   }
 
-
+  //! write a PartitionType to a stream
+  /**
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
+   */
   inline std::ostream &operator<< ( std::ostream &out, const PartitionType &type )
   {
     return out << PartitionName( type );
@@ -54,7 +70,12 @@ namespace Dune {
 
 
   /** \brief Parameter to be used for the communication functions
-     @ingroup GIRelatedTypes
+   *
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
    */
   enum InterfaceType {
     InteriorBorder_InteriorBorder_Interface=0,     //!< send/receive interior and border entities
@@ -65,7 +86,12 @@ namespace Dune {
   };
 
   /** \brief Parameter to be used for the parallel level- and leaf iterators
-     @ingroup GIRelatedTypes
+   *
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
    */
   enum PartitionIteratorType {
     Interior_Partition=0,           //!< only interior entities
@@ -77,6 +103,14 @@ namespace Dune {
   };
 
 
+  //! write a PartitionIteratorType to a stream
+  /**
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
+   */
   inline std::ostream &operator<< ( std::ostream &out, const PartitionIteratorType &type )
   {
     static std::string name[ 6 ] = { "interior partition", "interior-border partition", "overlap partition",
@@ -86,7 +120,12 @@ namespace Dune {
 
 
   /** \brief Define a type for communication direction parameter
-     @ingroup GIRelatedTypes
+   *
+   * \code
+   *#include <dune/grid/common/gridenums.hh>
+   * \endcode
+   *
+   * @ingroup GIRelatedTypes
    */
   enum CommunicationDirection {
     ForwardCommunication,         //!< communicate as given in InterfaceType
