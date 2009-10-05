@@ -244,16 +244,14 @@ namespace Dune {
   }
 
   template< class GridImp >
-  inline int ALU2dGridIntersectionBase< GridImp >::twistInSelf () const
+  inline int ALU2dGridIntersectionBase< GridImp >::twistInInside () const
   {
-    //return 0;
     return 0;
   }
 
   template< class GridImp >
-  inline int ALU2dGridIntersectionBase< GridImp >::twistInNeighbor () const
+  inline int ALU2dGridIntersectionBase< GridImp >::twistInOutside () const
   {
-    //return 1;
     return 1;
   }
 
