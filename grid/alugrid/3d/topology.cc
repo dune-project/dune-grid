@@ -139,20 +139,19 @@ namespace Dune
   const int ElementTopologyMapping<hexa>::
   faceOrientation_[EntityCount<hexa>::numFaces] = {-1, 1, 1, -1, -1, 1};
 
-  /*
-     template <>
-     const int ElementTopologyMapping<tetra>::
-     dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
+  template <>
+  const int ElementTopologyMapping<tetra>::
+  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
                                                        {0, 2, 1},
                                                        {0, 1, 2},
                                                        {0, 2, 1}};
-   */
+
   template <>
   const int ElementTopologyMapping<tetra>::
-  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
+  alu2duneFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
+                                                       {0, 1, 2},
                                                        {0, 2, 1},
-                                                       {0, 2, 1},
-                                                       {0, 2, 1}};
+                                                       {0, 1, 2}};
 
   //********************************************************************
   //
@@ -257,13 +256,6 @@ namespace Dune
                                                        {0, 3, 1, 2}, // ok
                                                        {0, 1, 3, 2}}; // ok
 
-  template <>
-  const int ElementTopologyMapping<tetra>::
-  alu2duneFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
-                                                       {0, 1, 2},
-                                                       {0, 2, 1},
-                                                       {0, 1, 2}};
-
   // the inverse mapping to the above dune2aluFaceVertex
   // for hexa (see docu above)
   template <>
@@ -299,7 +291,8 @@ namespace Dune
 
   template <>
   int FaceTopologyMapping<tetra>::
-  invTwist(int index, int faceTwist) {
+  invTwist(int index, int faceTwist)
+  {
     return (faceTwist < 0) ?
            (7 - index + faceTwist)%3 : (3 + index - faceTwist)%3;
   }
@@ -311,7 +304,7 @@ namespace Dune
            (9 - index + faceTwist)%4 : (4 + index - faceTwist)%4;
   }
 
-  // alu traingle face are oriented just the other way then dune faces
+  // alu triangle face are oriented just the other way then dune faces
   // therefore vertex 1 and 2 are swapped because
   // ALUGrid tetra face are oriented just the other way compared to Dune
   // tetra faces, see also gitter_geo.cc of the ALUGrid code
@@ -319,6 +312,10 @@ namespace Dune
   const int FaceTopologyMapping<tetra>::
   dune2aluVertex_[EntityCount<tetra>::numVerticesPerFace] = {0, 2, 1};
 
+  // mapping of twists from alu 2 dune
+  template <>
+  const int FaceTopologyMapping<tetra>::
+  alu2duneTwist_[ 2 * EntityCount<tetra>::numVerticesPerFace] = { -2, -3, -1, 0, 2, 1 };
 
   // the mapping of vertices in the reference quad
   // this is used for hexa face during intersection iterator build
