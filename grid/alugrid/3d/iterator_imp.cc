@@ -349,7 +349,7 @@ namespace Dune {
   }
 
   template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInSelf () const
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInInside () const
   {
     const int aluTwist = connector_.innerTwist();
     const int mappedZero =
@@ -361,13 +361,13 @@ namespace Dune {
   }
 
   template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInSelf () const
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInInside () const
   {
-    return connector_.innerTwist();
+    return connector_.duneTwist( indexInInside(), connector_.innerTwist() );
   }
 
   template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInNeighbor () const
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3,3,hexa> >::twistInOutside () const
   {
     const int aluTwist = connector_.outerTwist();
     const int mappedZero =
@@ -379,9 +379,9 @@ namespace Dune {
   }
 
   template<>
-  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInNeighbor () const
+  inline int ALU3dGridIntersectionIterator< const ALU3dGrid<3 ,3, tetra> >::twistInOutside () const
   {
-    return connector_.outerTwist();
+    return connector_.duneTwist( indexInOutside(), connector_.outerTwist() );
   }
 
   template <class GridImp>
@@ -512,123 +512,6 @@ namespace Dune {
     assert( innerLevel_ == ghost_->level() );
     connector_.updateFaceInfo(newFace,innerLevel_, ghost_->twist(0) );
     geoProvider_.resetFaceGeom();
-  }
-
-  template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::outputElementInfo() const
-  {
-    std::cout << "Starting outputElementInfo\n";
-    // output element corner coordinates
-    std::cout << "Element corner coordinates" << std::endl;
-    for (int i = 0; i < numVertices; ++i) {
-      printToScreen(ElementTopo::alu2duneVertex(i), i,
-                    convert2FV(item_->myvertex(i)->Point()));
-    }
-
-    // output midpoint of faces
-    /* too specific for hexa
-       std::cout << "Midpoint of faces" << std::endl;
-       FieldVector<alu3d_ctype, 2> mid(0.5);
-       for (int i = 0; i < numFaces; ++i) {
-       NormalType c0 =
-        convert2FV(item_->myvertex(i, FaceTopo::dune2aluVertex(0))->Point());
-       NormalType c1 =
-        convert2FV(item_->myvertex(i, FaceTopo::dune2aluVertex(1))->Point());
-       NormalType c2 =
-        convert2FV(item_->myvertex(i, FaceTopo::dune2aluVertex(2))->Point());
-       NormalType c3 =
-        convert2FV(item_->myvertex(i, FaceTopo::dune2aluVertex(3))->Point());
-
-       BilinearSurfaceMapping biMap(c0, c1, c2, c3);
-       NormalType result;
-       biMap.map2world(mid, result);
-
-       printToScreen(ElementTopo::alu2duneFace(i), i, result);
-       } // end for
-
-       // output element reference faces - as calculated in Dune
-       std::cout << "Corner indices (from ReferenceTopologySet)" << std::endl;
-       for (int i = 0; i < numFaces; ++i) {
-       std::cout << "-- Face " << i << "--\n";
-       const int* result;
-       int n;
-       ReferenceTopologySet::getSubEntities< 1, 3 >(hexahedron,
-                                                   i,
-                                                   result,
-                                                   n);
-       for (int j = 0; j < n; ++j) {
-        printToScreen(result[j], ElementTopo::dune2aluVertex(result[j]), j);
-       } // end for
-       } // end for
-     */
-    // output element reference faces - compared with data from Alu
-    std::cout << "Corner indices (from ALU)" << std::endl;
-    for (int i = 0; i < numFaces; ++i) {
-      std::cout << "-- Face " << i << "--\n";
-      for (int j = 0; j < numVerticesPerFace; ++j) {
-        int aluIdx = GEOElementType::prototype[i][j];
-        printToScreen(ElementTopo::alu2duneVertex(aluIdx), aluIdx, j);
-      }
-    }
-
-    std::cout << "Ending outputElementInfo\n" << std::endl;
-  }
-
-  template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::outputFaceInfo() const {
-    std::cout << "Starting outputFaceInfo\n";
-    // output face index (inner, outer)
-    std::cout << "Inner twist" << std::endl;
-    printToScreen(index_,
-                  connector_.innerALUFaceIndex(),
-                  connector_.innerTwist());
-
-    assert(index_ == ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()));
-
-    std::cout << "Outer twist" << std::endl;
-    printToScreen(-1,
-                  connector_.outerALUFaceIndex(),
-                  connector_.outerTwist());
-
-    // output corner coordinates
-    std::cout << "Face corner coordinates (ALU face)" << std::endl;
-    const GEOFaceType& face = connector_.face();
-    for (int i = 0; i < numVerticesPerFace; ++i) {
-      printToScreen(FaceTopo::alu2duneVertex(i), i,
-                    convert2FV(face.myvertex(i)->Point()));
-    }
-
-    std::cout << "Face corner coordinates (intersectionGlobal)" << std::endl;
-    const Geometry& interGlobal = geometry();
-    for (int i = 0; i < numVerticesPerFace; ++i) {
-      printToScreen(i, FaceTopo::dune2aluVertex(i), interGlobal[i]);
-    }
-
-    std::cout << "Ending outputFaceInfo\n" << std::endl;
-  }
-
-  template <class GridImp>
-  void ALU3dGridIntersectionIterator<GridImp>::
-  printToScreen(int duneIdx, int aluIdx) const {
-    printToScreen(duneIdx, aluIdx, "-");
-  }
-
-  template <class GridImp>
-  template <typename T>
-  void ALU3dGridIntersectionIterator<GridImp>::
-  printToScreen(int duneIdx, int aluIdx, const T& info) const {
-    std::cout << duneIdx << ", " << aluIdx << ": " << info << "\n";
-  }
-
-  template <class GridImp>
-  typename ALU3dGridIntersectionIterator<GridImp>::NormalType
-  ALU3dGridIntersectionIterator<GridImp>::
-  convert2FV(const alu3d_ctype (&p)[3]) const {
-    NormalType result;
-    result[0] = p[0];
-    result[1] = p[1];
-    result[2] = p[2];
-    return result;
   }
 
   template <class GridImp>

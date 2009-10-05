@@ -190,10 +190,16 @@ namespace Dune {
     int indexInOutside () const;
 
     //! returns twist of face compared to inner element
-    int twistInSelf() const;
+    int twistInSelf() const { return twistInInside(); }
 
     //! returns twist of face compared to outer element
-    int twistInNeighbor() const;
+    int twistInNeighbor() const { return twistInOutside(); }
+
+    //! returns twist of face compared to inner element
+    int twistInInside() const;
+
+    //! returns twist of face compared to outer element
+    int twistInOutside() const;
 
     //! return unit outer normal, this should be dependent on local
     //! coordinates for higher order boundary
@@ -219,19 +225,6 @@ namespace Dune {
   protected:
     // set interator to end iterator
     void done () ;
-
-    void outputElementInfo() const;
-
-    void outputFaceInfo() const;
-
-    template <typename T>
-    void printToScreen(int duneIdx, int aluIdx,
-                       const T& info) const;
-
-    void printToScreen(int duneIdx, int aluIdx) const;
-
-    // used in printToScreen
-    NormalType convert2FV(const alu3d_ctype (&p)[3]) const;
 
     // reset IntersectionIterator to first neighbour
     void setFirstItem(const HElementType & elem, int wLevel);
