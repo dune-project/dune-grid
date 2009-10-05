@@ -50,15 +50,9 @@
  *    corners \c F(e.g.corner(i)) where \c F is the global coordinate
  *    mapping provided. For the geometry of the Dune::GeometryGrid the class
  *    Dune::GenericGeometry::CornerMapping is used.
- *  - a vector like container assinging each index of a codimension \c dim entity
- *    of the host grid a coordinate vector.
- *  - an implementation of a local function container, i.e., a class with
- *    a method \c localFunction taking an entity of the host grid and returning
- *    a local function object with an \c evaluate method mapping local
- *    coordinates to global coordinates.
- *    The user must ensure that the resulting global mapping is continuous.
+ *  - a vector like container assinging each corner of a host entity a codimension.
  *  .
- *  Remark: in the second and third case no geometry class has to be implemented by the
+ *  Remark: in the second case no geometry class has to be implemented by the
  *          host grid.
  *          In the first case the host grid must provide an implementation of
  *          the method <tt>corner</tt> on the geometry class for codimension
