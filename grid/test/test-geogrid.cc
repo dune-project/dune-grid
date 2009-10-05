@@ -20,6 +20,7 @@
 #include "checkcommunicate.cc"
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
+#include "checkiterators.cc"
 #include "checkpartition.cc"
 #include "checkgeometry.cc"
 
@@ -117,6 +118,10 @@ try
   checkGeometryInFather( geogrid );
   std::cerr << "Checking intersections..." << std::endl;
   checkIntersectionIterator( geogrid, !EnableLevelIntersectionIteratorCheck< GridType >::v );
+
+  checkIterators( geogrid.leafView() );
+  for( int i = 0; i <= geogrid.maxLevel(); ++i )
+    checkIterators( geogrid.levelView( i ) );
 
   checkPartitionType( geogrid.leafView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
