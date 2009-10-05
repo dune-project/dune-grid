@@ -3,8 +3,8 @@
 #ifndef DUNE_GEOGRID_TEST_FUNCTIONS_HH
 #define DUNE_GEOGRID_TEST_FUNCTIONS_HH
 
-#include <dune/grid/geogrid/coordfunction.hh>
-#include <dune/grid/geogrid/identity.hh>
+#include <dune/grid/geometrygrid/coordfunction.hh>
+#include <dune/grid/geometrygrid/identity.hh>
 
 namespace Dune
 {

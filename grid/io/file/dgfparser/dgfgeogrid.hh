@@ -4,7 +4,7 @@
 #define DUNE_DGFGEOGRID_HH
 
 #include <dune/common/typetraits.hh>
-#include <dune/grid/geogrid.hh>
+#include <dune/grid/geometrygrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 
 namespace Dune

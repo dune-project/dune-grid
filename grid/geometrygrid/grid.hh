@@ -8,20 +8,20 @@
 #include <dune/common/static_assert.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/geogrid/capabilities.hh>
-#include <dune/grid/geogrid/entity.hh>
-#include <dune/grid/geogrid/entitypointer.hh>
-#include <dune/grid/geogrid/intersection.hh>
-#include <dune/grid/geogrid/intersectioniterator.hh>
-#include <dune/grid/geogrid/iterator.hh>
-#include <dune/grid/geogrid/idset.hh>
-#include <dune/grid/geogrid/indexsets.hh>
-#include <dune/grid/geogrid/datahandle.hh>
-#include <dune/grid/geogrid/backuprestore.hh>
+#include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/entity.hh>
+#include <dune/grid/geometrygrid/entitypointer.hh>
+#include <dune/grid/geometrygrid/intersection.hh>
+#include <dune/grid/geometrygrid/intersectioniterator.hh>
+#include <dune/grid/geometrygrid/iterator.hh>
+#include <dune/grid/geometrygrid/idset.hh>
+#include <dune/grid/geometrygrid/indexsets.hh>
+#include <dune/grid/geometrygrid/datahandle.hh>
+#include <dune/grid/geometrygrid/backuprestore.hh>
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
-#include <dune/grid/geogrid/identity.hh>
+#include <dune/grid/geometrygrid/identity.hh>
 
 namespace Dune
 {

@@ -5,7 +5,7 @@
 
 #include <dune/grid/genericgeometry/geometry.hh>
 
-#include <dune/grid/geogrid/coordfunction.hh>
+#include <dune/grid/geometrygrid/coordfunction.hh>
 
 namespace Dune
 {

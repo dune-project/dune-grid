@@ -6,8 +6,8 @@
 
 #ifdef COORDFUNCTION
 
-#include <dune/grid/geogrid.hh>
-#include <dune/grid/geogrid/cachedcoordfunction.hh>
+#include <dune/grid/geometrygrid.hh>
+#include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 
 #if HAVE_DUNE_PSG
 #include <dune/grid/io/file/dgfparser/dgfpsggridtype.hh>

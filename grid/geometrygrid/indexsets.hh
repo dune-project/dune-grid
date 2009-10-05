@@ -10,7 +10,7 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/grid/geogrid/capabilities.hh>
+#include <dune/grid/geometrygrid/capabilities.hh>
 
 namespace Dune
 {

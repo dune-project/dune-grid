@@ -11,8 +11,8 @@
 
 #include <dune/grid/common/gridenums.hh>
 
-#include <dune/grid/geogrid/capabilities.hh>
-#include <dune/grid/geogrid/coordfunction.hh>
+#include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/coordfunction.hh>
 
 namespace Dune
 {

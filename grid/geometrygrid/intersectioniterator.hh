@@ -3,9 +3,9 @@
 #ifndef DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 #define DUNE_GEOGRID_INTERSECTIONITERATOR_HH
 
-#include <dune/grid/geogrid/entitypointer.hh>
-#include <dune/grid/geogrid/storage.hh>
-#include <dune/grid/geogrid/intersection.hh>
+#include <dune/grid/geometrygrid/entitypointer.hh>
+#include <dune/grid/geometrygrid/storage.hh>
+#include <dune/grid/geometrygrid/intersection.hh>
 
 namespace Dune
 {

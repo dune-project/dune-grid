@@ -3,8 +3,8 @@
 #ifndef DUNE_GEOGRID_INTERSECTION_HH
 #define DUNE_GEOGRID_INTERSECTION_HH
 
-#include <dune/grid/geogrid/entitypointer.hh>
-#include <dune/grid/geogrid/cornerstorage.hh>
+#include <dune/grid/geometrygrid/entitypointer.hh>
+#include <dune/grid/geometrygrid/cornerstorage.hh>
 
 namespace Dune
 {

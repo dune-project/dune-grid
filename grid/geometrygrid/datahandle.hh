@@ -7,9 +7,9 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/geogrid/capabilities.hh>
-#include <dune/grid/geogrid/entity.hh>
-#include <dune/grid/geogrid/storage.hh>
+#include <dune/grid/geometrygrid/capabilities.hh>
+#include <dune/grid/geometrygrid/entity.hh>
+#include <dune/grid/geometrygrid/storage.hh>
 
 namespace Dune
 {
