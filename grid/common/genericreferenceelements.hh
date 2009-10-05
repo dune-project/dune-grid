@@ -11,6 +11,10 @@
 namespace Dune
 {
 
+  // forward declaration, needed for friend decl
+  template< class ctype, int dim >
+  class GenericReferenceElementContainer;
+
   // GenericReferenceElement
   // -----------------------
 
@@ -34,6 +38,13 @@ namespace Dune
   template< class ctype, int dim >
   class GenericReferenceElement
   {
+    // make copy constructor private
+    GenericReferenceElement(const GenericReferenceElement &);
+
+    // make empty constructor
+    GenericReferenceElement() {};
+    friend class GenericReferenceElementContainer< ctype, dim >;
+
     typedef GenericReferenceElement< ctype, dim > This;
 
     class SubEntityInfo;
