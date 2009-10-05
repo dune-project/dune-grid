@@ -995,6 +995,7 @@ namespace Dune {
   {
   public:
     typedef FieldVector<int, d>  iTupel;
+    virtual ~YLoadBalance() {}
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
       double opt=1E100;
