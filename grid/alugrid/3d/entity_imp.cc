@@ -361,11 +361,11 @@ namespace Dune {
   template <class IMPLElemType, ALU3dGridElementType type>
   struct IndexWrapper<IMPLElemType, type, 3>
   {
-    typedef ElementTopologyMapping<type> Topo;
+    typedef ElementTopologyMapping<type> ElemTopo;
 
     static inline int subIndex(const IMPLElemType &elem, int i)
     {
-      return elem.myvertex( Topo::dune2aluVertex(i) )->getIndex(); // element topo
+      return elem.myvertex( ElemTopo::dune2aluVertex(i) )->getIndex(); // element topo
     }
   };
 
@@ -385,13 +385,13 @@ namespace Dune {
   template <class IMPLElemType, ALU3dGridElementType type>
   struct IndexWrapper<IMPLElemType, type, 2>
   {
-    typedef ElementTopologyMapping<type> Topo;
+    typedef ElementTopologyMapping<type> ElemTopo;
 
     // return subIndex of given edge
     static inline int subIndex(const IMPLElemType &elem, int i)
     {
       // get hedge1 corresponding to dune reference element and return number
-      return elem.myhedge1( Topo::dune2aluEdge(i) )->getIndex();
+      return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
     }
   };
 
@@ -417,7 +417,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i, unsigned int codim ) const
   {
-    typedef ElementTopologyMapping<GridImp::elementType> Topo;
+    typedef ElementTopologyMapping<GridImp::elementType> ElemTopo;
 
     assert(item_ != 0);
     switch (codim)
@@ -427,9 +427,9 @@ namespace Dune {
     case 1 :
       return (getFace(*item_,i))->getIndex();
     case 2 :
-      return item_->myhedge1( Topo::dune2aluEdge( i ) )->getIndex();
+      return item_->myhedge1( ElemTopo::dune2aluEdge( i ) )->getIndex();
     case 3 :
-      return item_->myvertex( Topo::dune2aluVertex( i ) )->getIndex();
+      return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
     default :
       assert(false);
       abort();
