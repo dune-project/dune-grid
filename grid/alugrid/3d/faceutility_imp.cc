@@ -231,6 +231,25 @@ namespace Dune {
   }
 
   template <ALU3dGridElementType type>
+  inline int ALU3dGridFaceInfo<type>::duneTwist(const int faceIdx, const int aluTwist) const
+  {
+    typedef ElementTopologyMapping<type> ElementTopo;
+    typedef FaceTopologyMapping<type> FaceTopo;
+
+    const int mappedZero =
+      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( faceIdx, 0), aluTwist);
+
+    const int twist =
+      (ElementTopo::faceOrientation( faceIdx ) * sign(aluTwist) < 0 ?
+       mappedZero : -mappedZero-1);
+
+    // twist map calculated with grid/test/checktwists.cc
+
+    const int map3d[ 6 ] = { 1, 2, 0, -1, -2, -3 };
+    return map3d[ twist + 3 ];
+  }
+
+  template <ALU3dGridElementType type>
   inline int ALU3dGridFaceInfo<type>::outerTwist() const
   {
     // don't check ghost boundaries here
@@ -368,6 +387,7 @@ namespace Dune {
       geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
+
       this->generatedGlobal_ = true ;
     }
   }
@@ -482,7 +502,8 @@ namespace Dune {
       // Get the coordinates of the face in the reference element of the
       // adjoining inner and outer elements and initialise the respective
       // geometries
-      switch (connector_.conformanceState()) {
+      switch (connector_.conformanceState())
+      {
       case (ConnectorType::CONFORMING) :
         referenceElementCoordinatesRefined(INNER, coordsSelfLocal_);
         // generate outer local geometry only when not at boundary
@@ -512,11 +533,12 @@ namespace Dune {
   template <ALU3dGridElementType type>
   inline int ALU3dGridGeometricFaceInfoBase<type>::
   globalVertexIndex(int duneFaceIndex,
-                    int faceTwist,
-                    int duneFaceVertexIndex) const {
-
-    int localALUIndex = FaceTopo::dune2aluVertex(duneFaceVertexIndex,
-                                                 faceTwist);
+                    int aluFaceTwist,
+                    int duneFaceVertexIndex) const
+  {
+    int localALUIndex =
+      FaceTopo::dune2aluVertex(duneFaceVertexIndex,
+                               aluFaceTwist);
 
     // get local ALU vertex number on the element's face
     int localDuneIndex = ElementTopo::
@@ -525,6 +547,7 @@ namespace Dune {
 
     return refElem_.subEntity(duneFaceIndex, 1, localDuneIndex, 3);
   }
+
 
   template <ALU3dGridElementType type>
   inline void ALU3dGridGeometricFaceInfoBase<type>::
@@ -541,7 +564,8 @@ namespace Dune {
        connector_.innerTwist() :
        connector_.outerTwist());
 
-    for (int i = 0; i < numVerticesPerFace; ++i) {
+    for (int i = 0; i < numVerticesPerFace; ++i)
+    {
       int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i);
       result[i] = refElem_.position(duneVertexIndex, 3);
     }
