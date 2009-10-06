@@ -56,29 +56,6 @@ namespace Dune
         return face_bound[ face ];
       }
     }
-
-#if 0
-    template<>
-    inline int MacroElement< 1 >::boundaryId ( const int face ) const
-    {
-      assert( (face >= 0) && (face < N_VERTICES_MAX) );
-      return vertex_bound[ face ];
-    }
-
-    template<>
-    inline int MacroElement< 2 >::boundaryId ( const int face ) const
-    {
-      assert( (face >= 0) && (face < N_EDGES_MAX) );
-      return edge_bound[ face ];
-    }
-
-    template<>
-    inline int MacroElement< 3 >::boundaryId ( const int face ) const
-    {
-      assert( (face >= 0) && (face < N_FACES_MAX) );
-      return face_bound[ face ];
-    }
-#endif
 #endif // #if DUNE_ALBERTA_VERSION < 0x300
 
 
