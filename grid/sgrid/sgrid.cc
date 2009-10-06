@@ -652,6 +652,23 @@ namespace Dune {
   {
     dune_static_assert(dimworld <= std::numeric_limits<int>::digits,"world dimension too high, must be <= # of bits of int");
 
+#ifndef NDEBUG
+    bool correct = true;
+    for (int i=0; i<dim; i++)
+      if (H_[i] < L_[i])
+        correct = false;
+    if (!correct)
+    {
+      FieldVector<ctype,dim> L, H;
+      for (int i=0; i<dim; ++i)
+      {
+        L[i] = L_[i]; H[i] = H_[i];
+      }
+      DUNE_THROW(GridError, "Orientation of lower left and upper right corner is wrong: lower = "
+                 << L << " upper = " << H);
+    }
+#endif
+
     N = new array<int,dim>[MAXL];
     h = new FieldVector<ctype, dim>[MAXL];
     mapper = new CubeMapper<dim>[MAXL];
