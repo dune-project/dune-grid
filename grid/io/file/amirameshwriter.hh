@@ -27,7 +27,7 @@ namespace Dune {
         \param splitAll If this is set every element of the grid will be split into triangles/tetrahedas.
         Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
         won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
-        If the grid has been split up and contained other types than triangles/tetrahedas you also have to set
+        If the grid has been split up and contains other types than triangles/tetrahedra you also have to set
         GridSplitUp when calling the functions "addVertexData" and "writeBlockVector" to make the data consistent with the grid!
      */
     void addGrid(const GridView& gridView, bool splitAll=false);
