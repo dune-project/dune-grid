@@ -276,7 +276,7 @@ namespace Dune {
   inline typename ALU2dGridEntity<0,dim,GridImp > ::template Codim<cc> :: EntityPointer
   ALU2dGridEntity<0,dim,GridImp> :: entity (int i) const {
     assert(item_ != 0);
-    return ElementWrapper<cc,dim, GridImp>::subEntity (grid_, *item_,i);
+    return ElementWrapper<cc,dim, GridImp>::subEntity (grid_, *item_, i);
   }
 
   template<int dim, class GridImp>
@@ -286,6 +286,25 @@ namespace Dune {
     return ElementWrapper<cc, dim, GridImp>::subBoundary (grid_, *item_,i);
   }
 
+  template<int dim, class GridImp>
+  inline int ALU2dGridEntity<0,dim,GridImp> :: subIndex(int i, unsigned int codim) const
+  {
+    assert( item_ != 0 );
+    switch( codim )
+    {
+    case 0 :
+      return ElementWrapper<0, dim, GridImp>::subIndex (grid_, *item_, i);
+    case 1 :
+      // also apply mapping to generic ref elem by switching edges
+      return ElementWrapper<1, dim, GridImp>::subIndex (grid_, *item_, 2-i);
+    case 2 :
+      return ElementWrapper<2, dim, GridImp>::subIndex (grid_, *item_, i);
+    default :
+      assert( false );
+      abort();
+    }
+    return -1;
+  }
   //***************************************************************
   //  Interface for Adaptation
   //***************************************************************
@@ -596,16 +615,19 @@ namespace Dune {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
-    static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i) {
+    static inline int getElemIndex(GridImp & grid, const HElementType &elem, int i)
+    {
       assert(i < 3 && i >= 0);
       return elem.edge_idx(i);
     }
-    static inline int subIndex(GridImp & grid, const HElementType &elem, int i) {
+    static inline int subIndex(GridImp & grid, const HElementType &elem, int i)
+    {
       assert(i < 3 && i >= 0);
       return elem.edge_idx(i);
     }
     static inline typename ALU2dGridEntity<0,dim,GridImp > :: template Codim<1>:: EntityPointer
-    subEntity(GridImp & grid, const HElementType &elem, int i) {
+    subEntity(GridImp & grid, const HElementType &elem, int i)
+    {
       assert(i < 3 && i >= 0);
       return ALU2dGridEntityPointer<1, GridImp > (grid, elem, i, elem.level());
     }
@@ -613,8 +635,10 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
       return -1;
     }
-    static inline bool isTheSame(const HElementType * elem, int face, const HElementType * org, int org_face) {
-      if (elem == org) {
+    static inline bool isTheSame(const HElementType * elem, int face, const HElementType * org, int org_face)
+    {
+      if (elem == org)
+      {
         if (face == org_face)
           return true;
         else

@@ -333,13 +333,13 @@ namespace Dune {
     template <int cc>
     typename Codim<cc>::EntityPointer entity (int i) const;
 
+    //! Provide access to mesh entity i of given codimension. Entities
+    //!  are numbered 0 ... count<cc>()-1
     template< int codim >
     typename Codim< codim >::EntityPointer subEntity ( int i ) const
     {
-      typedef GenericGeometry::MapNumberingProvider< GridImp::dimension > Numbering;
-      const unsigned int tid = GenericGeometry::topologyId( type() );
-      const int j = Numbering::template generic2dune< codim >( tid, i );
-      return entity< codim >( j );
+      // apply mapping for codim 1
+      return entity< codim >( (codim == 1) ? ( 2 - i ) : i );
     }
 
     //! return partition type of this entity ( see grid.hh )
@@ -440,6 +440,8 @@ namespace Dune {
     //! i.e. return global number of vertex i
     //! for use in hierarchical index set
     template<int cc> int getSubIndex (int i) const;
+
+    int subIndex (int i, unsigned int codim) const;
 
     //! corresponding grid
     const GridImp  & grid_;
