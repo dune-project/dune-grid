@@ -93,6 +93,11 @@ namespace Dune
         return Projection( projection_ );
       };
 
+      Projection projection ( const ElementInfo &elementInfo ) const
+      {
+        return Projection( projection_ );
+      };
+
     private:
       const Projection &projection_;
     };

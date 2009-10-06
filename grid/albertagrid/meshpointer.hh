@@ -8,7 +8,7 @@
  *  \brief  provides a wrapper for ALBERTA's mesh structure
  */
 
-#include <cassert>
+#include <limits>
 #include <string>
 
 #include <dune/grid/albertagrid/misc.hh>
@@ -327,15 +327,22 @@ namespace Dune
       typedef typename ProjectionFactory::Projection Projection;
 
       const MacroElement &macroElement = static_cast< const MacroElement & >( *macroEl );
+
+      MeshPointer< dim > meshPointer( mesh );
+      ElementInfo elementInfo( meshPointer, macroElement, FillFlags::standard );
+      const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
       if( (n > 0) && macroElement.isBoundary( n-1 ) )
       {
-        MeshPointer< dim > meshPointer( mesh );
-        ElementInfo elementInfo( meshPointer, macroElement, FillFlags::standard );
-        const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
         Projection projection = projectionFactory.projection( elementInfo, n-1 );
         return new NodeProjection< dim, Projection >( Library< dimWorld >::boundaryCount++, projection );
       }
-      return 0;
+      else if( (dim < dimWorld) && (n == 0) )
+      {
+        Projection projection = projectionFactory.projection( elementInfo );
+        return new NodeProjection< dim, Projection >( std::numeric_limits< unsigned int >::max(), projection );
+      }
+      else
+        return 0;
     }
 
 
