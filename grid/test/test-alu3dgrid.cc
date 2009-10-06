@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#define NEW_SUBENTITY_NUMBERING 1
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -14,6 +16,7 @@
 #include "checkgeometryinfather.cc"
 #include "checkintersectionit.cc"
 #include "checkcommunicate.cc"
+#include "checktwists.cc"
 
 using namespace Dune;
 
@@ -130,16 +133,28 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   gridcheck(grid);
+
+  // only check twists for simplex grids
+  const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
+
+  if( checkTwist )
+    checkTwists( grid.leafView(), NoMapTwist() );
+
   for(int i=0; i<mxl; i++) {
     grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
+    if( checkTwist )
+      checkTwists( grid.leafView(), NoMapTwist() );
   }
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
   std::cout << "  CHECKING: non-conform" << std::endl;
   gridcheck(grid);
+  std::cout << "  CHECKING: twists " << std::endl;
+  if( checkTwist )
+    checkTwists( grid.leafView(), NoMapTwist() );
 
   // check the method geometryInFather()
   std::cout << "  CHECKING: geometry in father" << std::endl;
@@ -152,6 +167,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   checkIteratorAssignment(grid);
 
   checkLevelIndexNonConform(grid);
+
 
   std::cout << std::endl << std::endl;
 }
