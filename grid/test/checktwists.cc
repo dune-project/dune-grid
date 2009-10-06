@@ -141,7 +141,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   // calculate inside twist
   if( ! twistInside )
   {
-    for( int nTwist = -numCorners; nTwist<numCorners; ++nTwist )
+    for( int nTwist = numCorners-1; nTwist>= -numCorners; --nTwist )
     {
       twistInside = true ;
       for( int i = 0; i < numCorners; ++i )
@@ -172,7 +172,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   // calculate outside twist
   if( ! twistOutside )
   {
-    for( int nTwist = -numCorners; nTwist<numCorners; ++nTwist )
+    for( int nTwist = numCorners-1; nTwist>=-numCorners; --nTwist )
     {
       twistOutside = true ;
       for( int i = 0; i < numCorners; ++i )
@@ -193,7 +193,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
       if( twistOutside )
       {
-        std::cout << "\noutside " << nOut << "\n";
+        std::cout << "\noutside " << nOut << " (inside = " << nIn << ")\n";
         std::cout << "twist " << tOut << " should be replaced by " << nTwist << "\n";
         break ;
       }
