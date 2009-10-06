@@ -315,11 +315,6 @@ namespace Dune
     //! local coordinate in its reference element
     FieldVector<alu2d_ctype,  mydim> local (const FieldVector<alu2d_ctype, cdim>& global) const;
 
-#if 0
-    //! returns true if the point in local coordinates is inside reference element
-    bool checkInside(const FieldVector<alu2d_ctype, mydim>& local) const;
-#endif
-
     //! A(l) , see grid.hh
     alu2d_ctype integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const;
 
@@ -342,7 +337,7 @@ namespace Dune
     // method for elements
     bool buildGeom(const HElementType & item);
     // method for edges
-    bool buildGeom(const HElementType & item, const int face);
+    bool buildGeom(const HElementType & item, const int aluFace);
     // method for vertices
     bool buildGeom(const ALU2DSPACE Vertex & item, const int );
 
@@ -370,6 +365,9 @@ namespace Dune
     inline void unsetUp2Date() const { up2Date_ = false; }
 
   protected:
+    // return reference coordinates of the alu triangle
+    FieldMatrix<alu2d_ctype, 3, 3> calculateReferenceCoords() const;
+
     // implementation of coord and mapping
     mutable GeometryImplType geoImpl_;
     // determinant

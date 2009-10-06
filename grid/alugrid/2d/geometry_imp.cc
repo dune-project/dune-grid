@@ -57,16 +57,18 @@ namespace Dune {
   template <int mydim, int cdim, class GridImp>
   inline const FieldVector<alu2d_ctype, cdim>& ALU2dGridGeometry<mydim, cdim, GridImp> :: operator[] (int i) const
   {
-    return geoImpl_[ i ];
-  }
-
-  //! access to coordinates of corners. Index is the number of the corner
-  template <int mydim, int cdim, class GridImp>
-  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> :: corner(int i) const {
     typedef GenericGeometry::MapNumberingProvider< mydim > Numbering;
     const unsigned int tid = GenericGeometry::topologyId( type() );
     const int j = Numbering::template generic2dune< mydim >( tid, i );
     return this->operator[](j);
+  }
+
+  //! access to coordinates of corners. Index is the number of the corner
+  template <int mydim, int cdim, class GridImp>
+  inline FieldVector<alu2d_ctype, cdim> ALU2dGridGeometry<mydim, cdim, GridImp> ::
+  corner(int i) const
+  {
+    return geoImpl_[ i ];
   }
 
   //! maps a local coordinate within reference element to
@@ -168,17 +170,20 @@ namespace Dune {
   //! built Geometry for edges
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildGeom(const HElementType & item, const int face)
+  buildGeom(const HElementType & item, const int aluFace)
   {
+    // face 1 is twisted
+    const int twist = (aluFace % 2);
+
     // check item
     assert( &item );
 
     // update geometry impl
-    geoImpl_.update( item.getVertex( (face + 1) % 3 )->coord() ,
-                     item.getVertex( (face + 2) % 3 )->coord() );
+    geoImpl_.update( item.getVertex( (aluFace + (1 + twist)) % 3 )->coord() ,
+                     item.getVertex( (aluFace + (2 - twist)) % 3 )->coord() );
 
     // store det
-    det_ = item.sidelength( face );
+    det_ = item.sidelength( aluFace );
 
     // geom is up2date
     up2Date_ = true;
@@ -226,38 +231,46 @@ namespace Dune {
 
   // built Geometry (faceNumber is in generic numbering)
   template <int mydim, int cdim, class GridImp>
+  inline FieldMatrix<alu2d_ctype, 3 , 3> ALU2dGridGeometry<mydim,cdim,GridImp>::
+  calculateReferenceCoords() const
+  {
+    // calculate reference coordinates of aLUGrid reference triangle
+
+    // set all to zero
+    FieldMatrix<alu2d_ctype, 3 , 3> refCoord (0.0);
+
+    // point 1
+    refCoord[1][0] = 1.0;
+    // point 2
+    refCoord[2][1] = 1.0;
+
+    // length of faces
+    refCoord[0][2] = M_SQRT2;
+    refCoord[1][2] = 1.0;
+    refCoord[2][2] = 1.0;
+
+    return refCoord;
+  }
+
+  // built Geometry (faceNumber is in generic numbering)
+  template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildLocalGeom(const int faceNumber, const int twist)
+  buildLocalGeom(const int aluFace, const int twist)
   {
     assert( twist == 0 || twist == 1 );
     assert( mydim == 1 );
 
-    static FieldMatrix<alu2d_ctype, 3 , 3> refCoord (0.0);
-    static bool calculated = false ;
-
-    if( ! calculated )
-    {
-      // point 1
-      refCoord[1][0] = 1;
-      // point 2
-      refCoord[2][1] = 1;
-
-      // length of faces
-      refCoord[0][2] = M_SQRT2;
-      refCoord[1][2] = 1.0;
-      refCoord[2][2] = 1.0;
-
-      calculated = true ;
-    }
+    // get coordinates of reference element
+    static const FieldMatrix<alu2d_ctype, 3, 3> refCoord ( calculateReferenceCoords() );
 
     // just map the point of the global intersection to the local
     // coordinates , this is the default procedure
     // for simplices this is not so bad
-    geoImpl_.update( &refCoord[(2 - faceNumber + (twist%2) + 1)%3][0],
-                     &refCoord[(2 - faceNumber + ((twist+1)%2) + 1)%3][0] );
+    geoImpl_.update( refCoord[( aluFace + ( twist   %2) + 1) % 3],
+                     refCoord[( aluFace + ((twist+1)%2) + 1) % 3] );
 
     // get length of faces
-    det_ = refCoord[2 - faceNumber][2];
+    det_ = refCoord[ aluFace ][2];
 
     // geom is up2date
     up2Date_ = true;
@@ -286,5 +299,4 @@ namespace Dune {
   }
 
 } //end namespace Dune
-
 #endif

@@ -179,19 +179,7 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;
 
-    /*
-       protected:
-       //! return true if either inside or outside have hanging nodes at this
-       //! intersection
-       bool hasHangingNodes () const {
-        assert(current.item_);
-        return this->current.item_->hasHangingNode(this->current.index_)
-     || (current.neigh_) ?
-                   current.neigh_->hasHangingNode(this->current.opposite_):
-                   false;
-       }
-     */
-
+  protected:
     //! return true if intersection is with boundary
     void checkValid () ;
 
@@ -213,8 +201,6 @@ namespace Dune {
     const GridImp & grid_;
     mutable int nFaces_;
     mutable int walkLevel_;
-    mutable bool generatedGlobalGeometry_;
-    mutable bool generatedLocalGeometries_;
 
     // unit outer normal
     mutable NormalType unitOuterNormal_;
