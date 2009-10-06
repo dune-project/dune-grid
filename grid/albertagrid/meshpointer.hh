@@ -45,7 +45,6 @@ namespace Dune
       typedef typename ElementInfo::FillFlags FillFlags;
 
       class BoundaryProvider;
-      class MacroIteratorBase;
 
       template< int dimWorld >
       struct Library
@@ -347,23 +346,22 @@ namespace Dune
 
 
 
-    // MeshPointer::MacroIteratorBase
-    // ------------------------------
+    // MeshPointer::MacroIterator
+    // --------------------------
 
     template< int dim >
-    class MeshPointer< dim >::MacroIteratorBase
+    class MeshPointer< dim >::MacroIterator
     {
-      friend class MacroIterator;
+      typedef MacroIterator This;
+
+      friend class MeshPointer< dim >;
 
     public:
       typedef Alberta::MeshPointer< dim > MeshPointer;
       typedef Alberta::ElementInfo< dim > ElementInfo;
 
     private:
-      MeshPointer mesh_;
-      int index_;
-
-      explicit MacroIteratorBase ( const MeshPointer &mesh, bool end = false )
+      explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
           index_( end ? numMacroElements() : 0 )
       {}
@@ -396,43 +394,6 @@ namespace Dune
         return mesh_;
       }
 
-    private:
-      int numMacroElements () const
-      {
-        return mesh().mesh_->n_macro_el;
-      }
-    };
-
-
-
-    // MeshPointer::MacroIterator
-    // --------------------------
-
-    template< int dim >
-    class MeshPointer< dim >::MacroIterator
-      : public MeshPointer< dim >::MacroIteratorBase
-    {
-      typedef MacroIterator This;
-      typedef MacroIteratorBase Base;
-
-      friend class MeshPointer< dim >;
-
-    public:
-      typedef Alberta::MeshPointer< dim > MeshPointer;
-      typedef Alberta::ElementInfo< dim > ElementInfo;
-
-    private:
-      explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
-        : Base( mesh, end )
-      {}
-
-    public:
-      using Base::done;
-      using Base::equals;
-      using Base::increment;
-      using Base::macroElement;
-      using Base::mesh;
-
       This &operator++ ()
       {
         increment();
@@ -462,6 +423,15 @@ namespace Dune
         else
           return ElementInfo( mesh(), macroElement(), fillFlags );
       }
+
+    private:
+      int numMacroElements () const
+      {
+        return mesh().mesh_->n_macro_el;
+      }
+
+      MeshPointer mesh_;
+      int index_;
     };
 
   }
