@@ -347,7 +347,7 @@ namespace Dune
     bool buildLocalGeom(const GeometryType & geo , const LocalGeomType & lg);
 
     //! build local geometry given local face number
-    bool buildLocalGeom(const int faceNumber, const int twist);
+    bool buildLocalGeometry(const int faceNumber, const int twist);
 
     //! return non-const reference to coord vecs
     FieldVector<alu2d_ctype, cdim>& getCoordVec (int i);
@@ -424,6 +424,57 @@ namespace Dune
     {
       assert( geomCreated(child) );
       return *(geoms_[child]);
+    }
+  };
+
+  template <class LocalGeometry, class LocalGeometryImp>
+  class ALU2DIntersectionGeometryStorage
+  {
+    // one geometry for each face and twist 0 and 1
+    LocalGeometry* geoms_[ 3 ][ 2 ];
+
+  protected:
+    // create empty storage
+    ALU2DIntersectionGeometryStorage ()
+    {
+      for( int i=0; i<3; ++i)
+      {
+        for( int j=0; j<2; ++j)
+        {
+          LocalGeometryImp geo;
+          // build geometry
+          geo.buildLocalGeometry( i, j );
+          // create dune geoemtry
+          geoms_[ i ][ j ] = new LocalGeometry( geo );
+        }
+      }
+    }
+
+  public:
+    // destructor
+    ~ALU2DIntersectionGeometryStorage()
+    {
+      for( size_t i=0; i<3; ++i)
+        for( size_t j=0; j<2; ++j)
+          delete geoms_[ i ][ j ];
+    }
+
+    typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp> ThisType;
+
+    // return reference to local geometry
+    const LocalGeometry& localGeom(const int aluFace, const int twist) const
+    {
+      assert( 0 <= aluFace && aluFace < 3 );
+      assert( twist == 0 || twist == 1 );
+      assert( geoms_[ aluFace ][ twist ] );
+      return *geoms_[ aluFace ][ twist ];
+    }
+
+    // return static instance
+    static const ThisType& instance()
+    {
+      static const ThisType geomStorage;
+      return geomStorage;
     }
   };
 

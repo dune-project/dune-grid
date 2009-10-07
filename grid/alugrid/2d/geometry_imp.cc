@@ -255,7 +255,7 @@ namespace Dune {
   // built Geometry (faceNumber is in generic numbering)
   template <int mydim, int cdim, class GridImp>
   inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
-  buildLocalGeom(const int aluFace, const int twist)
+  buildLocalGeometry(const int aluFace, const int twist)
   {
     assert( twist == 0 || twist == 1 );
     assert( mydim == 1 );
