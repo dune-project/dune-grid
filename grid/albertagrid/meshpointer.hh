@@ -103,14 +103,7 @@ namespace Dune
 
       bool write ( const std::string &filename, Real time ) const;
 
-      void release ()
-      {
-        if( mesh_ != NULL )
-        {
-          ALBERTA free_mesh( mesh_ );
-          mesh_ = NULL;
-        }
-      }
+      void release ();
 
       template< class Functor >
       void hierarchicTraverse ( Functor &functor,
@@ -231,6 +224,32 @@ namespace Dune
     {
       int success = ALBERTA write_mesh_xdr( mesh_, filename.c_str(), time );
       return (success == 0);
+    }
+
+
+    template< int dim >
+    inline void MeshPointer< dim >::release ()
+    {
+      if( mesh_ == NULL )
+        return;
+      // free projections
+      const MacroIterator eit = end();
+      for( MacroIterator it = begin(); it != eit; ++it )
+      {
+        MacroElement &macroEl = const_cast< MacroElement & >( it.macroElement() );
+        for( int i = 0; i <= dim+1; ++i )
+        {
+          if( macroEl.projection[ i ] != NULL )
+          {
+            delete macroEl.projection[ i ];
+            macroEl.projection[ i ] = NULL;
+          }
+        }
+      }
+
+      // free mesh
+      ALBERTA free_mesh( mesh_ );
+      mesh_ = NULL;
     }
 
 
