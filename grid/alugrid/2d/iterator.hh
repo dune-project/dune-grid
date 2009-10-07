@@ -25,6 +25,8 @@ namespace Dune {
   class ALU2dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridGeometry;
+  template <class LocalGeometry, class LocalGeometryImp>
+  class ALU2DIntersectionGeometryStorage;
   template<class GridImp>
   class ALU2dGridHierarchicIterator;
   template<class GridImp>
@@ -82,6 +84,10 @@ namespace Dune {
 
     typedef typename ALU2DSPACE Hmesh_basic::helement_t HElementType ;
 
+    // type of local geometry storage
+    typedef ALU2DIntersectionGeometryStorage<LocalGeometry, LocalGeometryImp>
+    LocalGeometryStorageType ;
+
     typedef ALU2dGridIntersectionBase<GridImp> ThisType;
     friend class LevelIntersectionIteratorWrapper<GridImp>;
     friend class LeafIntersectionIteratorWrapper<GridImp>;
@@ -90,9 +96,9 @@ namespace Dune {
   protected:
     struct impl
     {
-      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false), isNotConform_(false) { }
+      impl() : item_(0) , neigh_(0) , index_(0) , opposite_(0), isBoundary_(false), useOutside_(false) { }
       impl(const impl & org) : item_(org.item_) , neigh_(org.neigh_) , index_(org.index_) , opposite_(org.opposite_),
-                               isBoundary_(org.isBoundary_), isNotConform_(org.isNotConform_) { }
+                               isBoundary_(org.isBoundary_), useOutside_(org.useOutside_) { }
 
       impl & operator = (const impl & org)
       {
@@ -101,16 +107,17 @@ namespace Dune {
         index_ = org.index_;
         opposite_ = org.opposite_;
         isBoundary_ = org.isBoundary_;
-        isNotConform_ = org.isNotConform_;
+        useOutside_ = org.useOutside_;
         return *this;
       }
+
       // current element from which we started the intersection iterator
       mutable HElementType* item_;
       mutable HElementType* neigh_;
       mutable int index_;
       mutable int opposite_;
       mutable bool isBoundary_;
-      mutable bool isNotConform_;
+      mutable bool useOutside_;
     } current;
 
   public:
@@ -170,7 +177,7 @@ namespace Dune {
 
     NormalType & outerNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
     NormalType & integrationOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
-    NormalType & unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
+    NormalType unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const;
 
     const LocalGeometry &geometryInInside () const;
     const LocalGeometry &geometryInOutside () const;
@@ -180,11 +187,16 @@ namespace Dune {
     GeometryType type () const;
 
   protected:
+    virtual bool conforming() const = 0;
+
     //! return true if intersection is with boundary
     void checkValid () ;
 
     // set interator to end iterator
     void done () ;
+
+    // invalidate status of internal objects
+    void unsetUp2Date() ;
 
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
@@ -192,6 +204,7 @@ namespace Dune {
 
     // reset IntersectionIterator to first neighbour
     virtual void setFirstItem(const HElementType & elem, int wLevel);
+
     // the local geometries
     mutable GeometryObject intersectionGlobal_;
     mutable GeometryObject intersectionSelfLocal_;
@@ -199,11 +212,12 @@ namespace Dune {
 
     // reference to grid
     const GridImp & grid_;
+    const LocalGeometryStorageType& localGeomStorage_;
+
     mutable int nFaces_;
     mutable int walkLevel_;
 
     // unit outer normal
-    mutable NormalType unitOuterNormal_;
     mutable NormalType outerNormal_;
 
     // true if end iterator
@@ -281,7 +295,6 @@ namespace Dune {
     {
       return ( this->grid_.nonConform() ) ?
              true : isConform();
-      // ((this->neighbor()) ? (this->current.isNotConform_) : true);
     }
 
 

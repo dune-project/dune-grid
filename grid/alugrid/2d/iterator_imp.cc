@@ -29,6 +29,7 @@ namespace Dune {
     intersectionSelfLocal_(GeometryImp()),
     intersectionNeighborLocal_(GeometryImp()),
     grid_(grid),
+    localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
     walkLevel_(wLevel),
     done_(end)
@@ -52,6 +53,7 @@ namespace Dune {
     intersectionSelfLocal_(GeometryImp()),
     intersectionNeighborLocal_(GeometryImp()),
     grid_(grid),
+    localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(3),
     walkLevel_(wLevel),
     done_(true)
@@ -69,6 +71,7 @@ namespace Dune {
     intersectionSelfLocal_(GeometryImp()),
     intersectionNeighborLocal_(GeometryImp()),
     grid_(org.grid_),
+    localGeomStorage_( LocalGeometryStorageType :: instance() ),
     nFaces_(org.nFaces_),
     walkLevel_(org.walkLevel_),
     done_(org.done_)
@@ -86,9 +89,7 @@ namespace Dune {
     current = org.current;
 
     // unset geometry information
-    this->grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
-    this->grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
-    this->grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
+    unsetUp2Date();
   }
 
   //! check whether entities are the same or whether iterator is done
@@ -134,9 +135,7 @@ namespace Dune {
     this->current.index_ = 0;
     this->current.opposite_ = this->current.item_->opposite(this->current.index_);
 
-    this->grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
-    this->grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
-    this->grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
+    unsetUp2Date();
   }
 
 
@@ -255,7 +254,7 @@ namespace Dune {
     assert(this->current.item_ != 0);
     typedef double (&normal_t)[2];
 
-    if (this->current.isNotConform_ )
+    if( this->current.useOutside_ )
     {
       this->current.neigh_->outernormal( this->current.opposite_, ((normal_t) (&outerNormal_)[0]) );
       outerNormal_ *= -1.0;
@@ -273,11 +272,12 @@ namespace Dune {
   }
 
   template<class GridImp>
-  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType &
-  ALU2dGridIntersectionBase<GridImp> :: unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const {
-    unitOuterNormal_ = this->outerNormal(local);
-    unitOuterNormal_ *= (1.0/unitOuterNormal_.two_norm());
-    return unitOuterNormal_;
+  inline typename ALU2dGridIntersectionBase<GridImp>::NormalType
+  ALU2dGridIntersectionBase<GridImp> :: unitOuterNormal (const FieldVector<alu2d_ctype, dim-1>& local) const
+  {
+    NormalType unitNormal( this->outerNormal(local) );
+    unitNormal *= (1.0/unitNormal.two_norm());
+    return unitNormal;
   }
 
 
@@ -287,24 +287,23 @@ namespace Dune {
   {
     assert(this->current.item_ != 0);
 
-    if( ! this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date() )
+    // only in non-conform situation we use default method
+    if( this->current.useOutside_ )
     {
-      // only in non-conform situation we use default method
-      if( this->current.isNotConform_ )
+      if( ! this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date() )
       {
         this->grid_.getRealImplementation(intersectionSelfLocal_).
         buildLocalGeom( inside()->geometry() , geometry() );
       }
-      else
-      {
-        // use aluFace number here (face 1 is twisted)
-        this->grid_.getRealImplementation(intersectionSelfLocal_).
-        buildLocalGeom( this->current.index_, (this->current.index_ % 2) );
-      }
+      assert(this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date());
+      return intersectionSelfLocal_;
     }
-
-    assert(this->grid_.getRealImplementation(intersectionSelfLocal_).up2Date());
-    return intersectionSelfLocal_;
+    else
+    {
+      // parameters are face and twist
+      return localGeomStorage_.localGeom(  this->current.index_,
+                                           (this->current.index_ % 2) );
+    }
   }
 
   template<class GridImp>
@@ -314,26 +313,27 @@ namespace Dune {
     assert( this->current.item_  );
     assert( this->current.neigh_ );
 
-    if( ! this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date() )
+    // only in non-conform situation we use default method
+    //if( ! this->conforming() )
+    //if( this->current.useOutside_ )
     {
-      // only in non-conform situation we use default method
-      //if( this->current.isNotConform_ )
+      if( ! this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date() )
       {
         // we don't know here wether we have non-conform or conform situation on the neighbor
         this->grid_.getRealImplementation(intersectionNeighborLocal_).
         buildLocalGeom( outside()->geometry(), geometry() );
       }
-      /*
-         else
-         {
-         // use inverse twist to geometryInInside
-         this->grid_.getRealImplementation(intersectionNeighborLocal_).
-          buildLocalGeom( this->current.opposite_, 1 - (this->current.index_ % 2) );
-         }
-       */
+      assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
+      return intersectionNeighborLocal_;
     }
-    assert(this->grid_.getRealImplementation(intersectionNeighborLocal_).up2Date());
-    return intersectionNeighborLocal_;
+    /*
+       else
+       {
+       // parameters are face and twist
+       return localGeomStorage_.localGeom(  this->current.opposite_,
+                                          1 - (this->current.index_ % 2) );
+       }
+     */
   }
 
   template<class GridImp>
@@ -344,7 +344,7 @@ namespace Dune {
 
     if( ! this->grid_.getRealImplementation(intersectionGlobal_).up2Date() )
     {
-      if( this->current.isNotConform_ )
+      if( this->current.useOutside_ )
         this->grid_.getRealImplementation(intersectionGlobal_).
         buildGeom(*(this->current.neigh_), this->current.opposite_);
       else
@@ -363,6 +363,13 @@ namespace Dune {
     return GeometryType( GeometryType::simplex, dimension-1 );
   }
 
+  template< class GridImp >
+  inline void ALU2dGridIntersectionBase< GridImp >:: unsetUp2Date ()
+  {
+    grid_.getRealImplementation(intersectionGlobal_).unsetUp2Date();
+    grid_.getRealImplementation(intersectionSelfLocal_).unsetUp2Date();
+    grid_.getRealImplementation(intersectionNeighborLocal_).unsetUp2Date();
+  }
 
 
   //********************************************************************
@@ -454,9 +461,7 @@ namespace Dune {
       return;
     }
 
-    this->grid_.getRealImplementation(this->intersectionGlobal_).unsetUp2Date();
-    this->grid_.getRealImplementation(this->intersectionSelfLocal_).unsetUp2Date();
-    this->grid_.getRealImplementation(this->intersectionNeighborLocal_).unsetUp2Date();
+    this->unsetUp2Date();
 
     if (neighbourStack_.empty())
     {
@@ -468,9 +473,9 @@ namespace Dune {
       }
 
       if(this->current.item_->hasHangingNode(this->current.index_))
-        this->current.isNotConform_ = true;
+        this->current.useOutside_ = true;
       else
-        this->current.isNotConform_ = false;
+        this->current.useOutside_ = false;
 
       addNeighboursToStack();
       if (neighbourStack_.empty())
@@ -558,7 +563,7 @@ namespace Dune {
       }
     }
     // if more then one element in stack we have non-conform intersection
-    this->current.isNotConform_ = (neighbourStack_.size() > 1);
+    this->current.useOutside_ = (neighbourStack_.size() > 1);
   }
 
   //! reset IntersectionIterator to first neighbour
@@ -595,9 +600,9 @@ namespace Dune {
     this->done_ = false;
 
     if(this->current.item_->hasHangingNode(0))
-      this->current.isNotConform_ = true;
+      this->current.useOutside_ = true;
     else
-      this->current.isNotConform_ = false;
+      this->current.useOutside_ = false;
 
     if(!this->current.neigh_ )
     {
@@ -686,9 +691,7 @@ namespace Dune {
       return ;
     }
 
-    this->grid_.getRealImplementation(this->intersectionGlobal_).unsetUp2Date();
-    this->grid_.getRealImplementation(this->intersectionSelfLocal_).unsetUp2Date();
-    this->grid_.getRealImplementation(this->intersectionNeighborLocal_).unsetUp2Date();
+    this->unsetUp2Date();
 
     // non conform case and we still have neighbours
     if(this->current.item_->hashvtx(this->current.index_) && !nbStack_.empty())
@@ -711,7 +714,7 @@ namespace Dune {
     // non-conform case
     if (this->current.item_->hasHangingNode(this->current.index_))
     {
-      this->current.isNotConform_ = true;
+      this->current.useOutside_ = true;
       // stack should be empty here
       assert( nbStack_.empty() );
 
@@ -741,7 +744,7 @@ namespace Dune {
     //conform case
     else
     {
-      this->current.isNotConform_ = false;
+      this->current.useOutside_ = false;
       this->current.neigh_ = this->current.item_->nbel(this->current.index_);
       if (this->current.neigh_ == 0)
       {
