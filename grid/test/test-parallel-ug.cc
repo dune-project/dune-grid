@@ -122,12 +122,15 @@ void checkConsistency(const GridView &gv)
 {
   typedef typename GridView::template Codim<0>::Entity Element;
   typedef typename GridView::template Codim<0>::Iterator Iterator;
-  typedef typename Element::LeafIntersectionIterator IntersectionIterator;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
   Iterator it = gv.template begin<0>();
   const Iterator &endIt = gv.template end<0>();
+
   for (; it != endIt; ++it) {
-    IntersectionIterator isIt = it->ileafbegin();
-    const IntersectionIterator &isEndIt = it->ileafend();
+
+    IntersectionIterator isIt           = gv.ibegin(*it);
+    const IntersectionIterator &isEndIt = gv.iend(*it);
     int n = 0;
     for (; isIt != isEndIt; ++isIt) {
       isIt->boundary();
@@ -136,7 +139,7 @@ void checkConsistency(const GridView &gv)
         isIt->outside();
       }
       ++ n;
-    };
+    }
 
     assert(n == 2*GridView::dimension);     // quadrilaterals
   }
