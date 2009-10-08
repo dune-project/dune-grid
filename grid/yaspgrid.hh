@@ -2414,7 +2414,7 @@ namespace Dune {
 
     /**
        \brief set options for refinement
-       @param keepPhysicalOverlap [true] keep the physical size of the overlap, [false] keep the number of cells in the overlap
+       @param keepPhysicalOverlap [true] keep the physical size of the overlap, [false] keep the number of cells in the overlap.  Default is [true].
      */
     void refineOptions (bool keepPhysicalOverlap)
     {
