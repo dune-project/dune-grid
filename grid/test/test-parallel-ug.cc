@@ -213,7 +213,7 @@ void createGrid(GridType &grid, int n)
 template <class GridType, int commCodim>
 void testCommunication(GridType &grid)
 {
-  std::cout << "Testing communication for codim " << commCodim << " endities\n";
+  std::cout << "Testing communication for codim " << commCodim << " entities\n";
 
   typedef Dune::LeafMultipleCodimMultipleGeomTypeMapper<GridType,
       LayoutWrapper<commCodim>::template Layout> LeafMapperType;
@@ -348,6 +348,21 @@ void testParallelUG()
   //////////////////////////////////////////////////////
   testCommunication<GridType, 0>(grid);
   testCommunication<GridType, dim>(grid);
+
+  // //////////////////////////////////////////////////
+  //   Refine globally and test again
+  // //////////////////////////////////////////////////
+
+  grid.globalRefine(1);
+
+  for (int i=0; i<=grid.maxLevel(); i++)
+    checkConsistency(grid.levelView(i));
+
+  checkConsistency(grid.leafView());
+
+  testCommunication<GridType, 0>(grid);
+  testCommunication<GridType, dim>(grid);
+
 };
 
 int main (int argc , char **argv) try
