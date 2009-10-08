@@ -213,64 +213,56 @@ void createGrid(GridType &grid, int n)
   factory.createGrid();
 }
 
-template <class GridType, int commCodim>
-void testCommunication(GridType &grid)
+template <class GridView, int commCodim>
+void testCommunication(const GridView &gridView)
 {
   std::cout << "Testing communication for codim " << commCodim << " entities\n";
 
-  typedef Dune::LeafMultipleCodimMultipleGeomTypeMapper<GridType,
-      LayoutWrapper<commCodim>::template Layout> LeafMapperType;
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView,
+      LayoutWrapper<commCodim>::template Layout> MapperType;
 
-  typedef LevelMultipleCodimMultipleGeomTypeMapper<GridType,
-      LayoutWrapper<commCodim>::template Layout> LevelMapperType;
+  MapperType mapper(gridView);
 
-  LevelMapperType levelMapper(grid, 0);
-  LeafMapperType leafMapper(grid);
+  std::cout << "Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
 
-  std::cout << "Level index set has " << levelMapper.size() << " codim " << commCodim << " entities\n";
-  std::cout << "Leaf index set has " << leafMapper.size() << " codim " << commCodim << " entities\n";
-
-  assert(levelMapper.size() == leafMapper.size());
-
-  const int dim = GridType::dimension;
-
-  const typename GridType::LeafGridView &leafGridView = grid.leafView();
+  const int dim = GridView::dimension;
 
   // create the user data arrays
   typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
-  UserDataType userDataSend(leafGridView.size(commCodim), 0.0);
-  UserDataType userDataReceive(leafGridView.size(commCodim), 0.0);
-  UserDataType entityIndex(leafGridView.size(commCodim), -1e10);
-  UserDataType partitionType(leafGridView.size(commCodim), -1e10);
+  UserDataType userDataSend(gridView.size(commCodim), 0.0);
+  UserDataType userDataReceive(gridView.size(commCodim), 0.0);
+  UserDataType entityIndex(gridView.size(commCodim), -1e10);
+  UserDataType partitionType(gridView.size(commCodim), -1e10);
 
   // write the partition type of each entity into the corrosponding
   // result array
-  typename GridType::LeafGridView::template Codim<commCodim>::Iterator
-  it = leafGridView.template begin<commCodim>();
-  const typename GridType::LeafGridView::template Codim<commCodim>::Iterator
-  &endIt = leafGridView.template end<commCodim>();
+  typename GridView::template Codim<commCodim>::Iterator
+  it = gridView.template begin<commCodim>();
+  const typename GridView::template Codim<commCodim>::Iterator
+  &endIt = gridView.template end<commCodim>();
   for (; it != endIt; ++it) {
-    entityIndex[leafMapper.map(*it)] = leafMapper.map(*it);
-    partitionType[leafMapper.map(*it)] = it->partitionType();
+    entityIndex[mapper.map(*it)]   = mapper.map(*it);
+    partitionType[mapper.map(*it)] = it->partitionType();
   };
 
   // initialize data handle (marks the nodes where some data was
   // send or received)
-  typedef DataExchange<LeafMapperType, commCodim> MyDataHandle;
-  MyDataHandle datahandle(leafMapper,
+  typedef DataExchange<MapperType, commCodim> MyDataHandle;
+  MyDataHandle datahandle(mapper,
                           userDataSend,
                           userDataReceive);
+
   // communicate the entities at the interior border to all other
   // processes
-  grid.communicate(datahandle,
-                   Dune::InteriorBorder_All_Interface,
-                   Dune::ForwardCommunication);
+  gridView.grid().communicate(datahandle,
+                              Dune::InteriorBorder_All_Interface,
+                              Dune::ForwardCommunication);
 
   //////////////////////////////////////////////////////
   // Write results to disk
   //////////////////////////////////////////////////////
   std::cout << "Writing data to disk\n";
-  Dune::VTKWriter<typename GridType::LeafGridView> writer(leafGridView);
+  Dune::VTKWriter<GridView> writer(gridView);
   if (commCodim == 0) {
     writer.addCellData(userDataSend, "Send");
     writer.addCellData(userDataReceive, "Receive");
@@ -349,8 +341,8 @@ void testParallelUG()
   //////////////////////////////////////////////////////
   // Test element and node communication
   //////////////////////////////////////////////////////
-  testCommunication<GridType, 0>(grid);
-  testCommunication<GridType, dim>(grid);
+  testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(0));
+  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView());
 
   // //////////////////////////////////////////////////
   //   Refine globally and test again
@@ -363,8 +355,9 @@ void testParallelUG()
 
   checkConsistency(grid.leafView());
 
-  testCommunication<GridType, 0>(grid);
-  testCommunication<GridType, dim>(grid);
+  for (int i=0; i<=grid.maxLevel(); i++)
+    testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i));
+  testCommunication<typename GridType::LeafGridView, dim>(grid.leafView());
 
 };
 
