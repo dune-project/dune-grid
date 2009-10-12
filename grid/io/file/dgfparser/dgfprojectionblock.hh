@@ -52,7 +52,7 @@ namespace Dune
       struct Expression;
 
     private:
-      struct NumberExpression;
+      struct ConstantExpression;
       struct VariableExpression;
       struct FunctionCallExpression;
       struct BracketExpression;
@@ -133,17 +133,21 @@ namespace Dune
     };
 
 
-    struct ProjectionBlock::NumberExpression
+    struct ProjectionBlock::ConstantExpression
       : public Expression
     {
-      explicit NumberExpression ( const double value )
+      explicit ConstantExpression ( const Vector &value )
         : value_( value )
+      {}
+
+      explicit ConstantExpression ( const double &value )
+        : value_( 1, value )
       {}
 
       virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
     private:
-      double value_;
+      Vector value_;
     };
 
 

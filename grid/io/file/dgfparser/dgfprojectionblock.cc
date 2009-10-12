@@ -21,7 +21,7 @@ namespace Dune
     {
       while( getnextline() )
       {
-        //std::cout << "Projection line:";
+        //std::cout << "Projection line:" << std::flush;
         nextToken();
 
         if( token.type == Token::functionKeyword )
@@ -34,8 +34,9 @@ namespace Dune
           nextToken();
           parseDefault();
         }
-        else
+        else if( token.type != Token::endOfLine )
           DUNE_THROW( DGFException, "Error in " << *this << ": Invalid token." );
+        matchToken( Token::endOfLine, "trailing tokens on line." );
       }
     }
 
@@ -59,8 +60,6 @@ namespace Dune
       matchToken( Token::equals, "'=' expected." );
       const Expression *expression = parseExpression( variableName );
 
-      matchToken( Token::endOfLine, "trailing tokens on line." );
-
       //std::cout << std::endl << "Declaring function: " << functionName << "( " << variableName << " )" << std::endl;
       functions_[ functionName ] = expression;
     }
@@ -78,6 +77,19 @@ namespace Dune
         expression = parseExpression( variableName );
         matchToken( Token::closingParen, "')' expected." );
       }
+      // vector constant
+      else if( token.type == Token::openingBracket )
+      {
+        std::vector< double > value;
+        nextToken();
+        while( token.type == Token::number )
+        {
+          value.push_back( token.value );
+          nextToken();
+        }
+        expression = new ConstantExpression( value );
+        matchToken( Token::closingBracket, "']' expected." );
+      }
       // norm expression
       else if( token.type == Token::normDelim )
       {
@@ -88,38 +100,14 @@ namespace Dune
       // number
       else if( token.type == Token::number )
       {
-        expression = new NumberExpression( token.value );
+        expression = new ConstantExpression( token.value );
         nextToken();
       }
       // pi
       else if( token.type == Token::piKeyword )
       {
-        expression = new NumberExpression( M_PI );
+        expression = new ConstantExpression( M_PI );
         nextToken();
-      }
-      // sqrt
-      else if( token.type == Token::sqrtKeyword )
-      {
-        nextToken();
-        matchToken( Token::openingParen, "'(' expected." );
-        expression = new SqrtExpression( parseExpression( variableName ) );
-        matchToken( Token::closingParen, "')' expected." );
-      }
-      // sin
-      else if( token.type == Token::sinKeyword )
-      {
-        nextToken();
-        matchToken( Token::openingParen, "'(' expected." );
-        expression = new SinExpression( parseExpression( variableName ) );
-        matchToken( Token::closingParen, "')' expected." );
-      }
-      // cos
-      else if( token.type == Token::cosKeyword )
-      {
-        nextToken();
-        matchToken( Token::openingParen, "'(' expected." );
-        expression = new CosExpression( parseExpression( variableName ) );
-        matchToken( Token::closingParen, "')' expected." );
       }
       else if( token.type == Token::string )
       {
@@ -173,6 +161,24 @@ namespace Dune
       {
         nextToken();
         expression = new MinusExpression( parsePostfixExpression( variableName ) );
+      }
+      // sqrt
+      else if( token.type == Token::sqrtKeyword )
+      {
+        nextToken();
+        expression = new SqrtExpression( parseUnaryExpression( variableName ) );
+      }
+      // sin
+      else if( token.type == Token::sinKeyword )
+      {
+        nextToken();
+        expression = new SinExpression( parseUnaryExpression( variableName ) );
+      }
+      // cos
+      else if( token.type == Token::cosKeyword )
+      {
+        nextToken();
+        expression = new CosExpression( parseUnaryExpression( variableName ) );
       }
       else
         expression = parsePostfixExpression( variableName );
@@ -239,8 +245,6 @@ namespace Dune
       const std::string functionName = token.literal;
       nextToken();
 
-      matchToken( Token::endOfLine, "trailing tokens on line." );
-
       //std::cout << std::endl << "Default function: " << functionName << std::endl;
       FunctionMap::iterator it = functions_.find( functionName );
       if( it == functions_.end() )
@@ -303,12 +307,13 @@ namespace Dune
         }
         if( c == '.' )
         {
-          line.get();
+          token.literal += line.get();
           c = line.peek();
           double factor = 0.1;
           while( (c >= '0') && (c <= '9') )
           {
             token.value += factor * double( c - '0' );
+            token.literal += line.get();
             factor *= 0.1;
             c = line.peek();
           }
@@ -346,7 +351,7 @@ namespace Dune
       else if( c == EOF )
         token.type = Token::endOfLine;
 
-      //std::cout << " " << token;
+      //std::cout << " " << token << std::flush;
     }
 
 
@@ -398,11 +403,10 @@ namespace Dune
     }
 
 
-    void ProjectionBlock::NumberExpression
+    void ProjectionBlock::ConstantExpression
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
-      result.resize( 1 );
-      result[ 0 ] = value_;
+      result = value_;
     }
 
 
