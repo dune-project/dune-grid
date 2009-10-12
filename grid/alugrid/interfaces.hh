@@ -12,22 +12,6 @@
 
 namespace Dune {
 
-  //! An interface class for cloneable objects
-  struct Cloneable {
-
-    /** \brief Clones the object
-       clone needs to be redefined by an implementation class, with the
-       return type covariantly adapted. Remember to
-       delete the resulting pointer.
-     */
-    virtual Cloneable* clone() const = 0;
-
-    /** \brief Destructor */
-    virtual ~Cloneable()
-    {}
-
-  };
-
   //! Tagging interface to indicate that Grid provides typedef ObjectStreamType
   struct HasObjectStream {};
 
