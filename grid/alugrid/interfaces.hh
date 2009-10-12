@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_INTERFACES_HH
-#define DUNE_INTERFACES_HH
+#ifndef DUNE_ALUGRID_INTERFACES_HH
+#define DUNE_ALUGRID_INTERFACES_HH
 
 #include <dune/common/typetraits.hh>
 
