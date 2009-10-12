@@ -17,7 +17,7 @@
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/iteratorfacades.hh>
-#include <dune/common/smartpointer.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -227,7 +227,7 @@ namespace Dune
 
   public:
     typedef Dune::VTKFunction<Grid> VTKFunction;
-    typedef SmartPointer< Dune::VTKFunction<Grid> > VTKFunctionPtr;
+    typedef shared_ptr< Dune::VTKFunction<Grid> > VTKFunctionPtr;
 
   protected:
     typedef typename std::list<VTKFunctionPtr>::const_iterator FunctionIterator;
@@ -571,7 +571,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p Dune:SmartPointer to the function to visualize
+     * @param p Dune:shared_ptr to the function to visualize
      */
     void addCellData (const VTKFunctionPtr & p)
     {
@@ -618,7 +618,7 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p Dune:SmartPointer to the function to visualize
+     * @param p Dune:shared_ptr to the function to visualize
      */
     void addVertexData (const VTKFunctionPtr & p)
     {

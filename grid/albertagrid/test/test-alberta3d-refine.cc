@@ -11,7 +11,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/geometrytype.hh>
-#include <dune/common/smartpointer.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/quadraturerules.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
@@ -26,7 +26,7 @@ class TriangulatedUnitCubeMaker {
   dune_static_assert(Grid::dimension == 3, "Dimension of grid must be 3");
   dune_static_assert(Grid::dimensionworld == 3, "Dimension of world must be 3");
 public:
-  static Dune::SmartPointer<Grid> create() {
+  static Dune::shared_ptr<Grid> create() {
     Dune::GridFactory<Grid> gf;
     Dune::FieldVector<typename Grid::ctype, 3> pos;
 
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
                 << "bisection algorithm of alberta will run into an endless recursion for" << std::endl
                 << "certain grids.  See Flyspry#569." << std::endl;
       typedef Dune::AlbertaGrid<3, 3> Grid;
-      Dune::SmartPointer<Grid> grid = TriangulatedUnitCubeMaker<Grid>::create();
+      Dune::shared_ptr<Grid> grid = TriangulatedUnitCubeMaker<Grid>::create();
       grid->globalRefine(2);
 
       result = 0;
