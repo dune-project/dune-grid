@@ -1,0 +1,20 @@
+DGF
+
+INTERVAL
+0  0
+1  1
+10 10
+# INTERVAL
+
+PROJECTION
+function angle( x ) = 2 * pi * x[ 1 ]
+function coordfunction( x ) = (x[ 0 ] + 0.2) * (cos angle( x ) * [1 0 0] + sin angle( x ) * [0 1 0]) + x[ 1 ] * [0 0 1]
+# PROJECTION
+
+GRIDPARAMETER
+name            Helix
+refinementedge  arbitrary
+overlap         1
+# GRIDPARAMETER
+
+# DGF
