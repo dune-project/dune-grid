@@ -67,7 +67,7 @@ namespace Dune
 
 
     const ProjectionBlock::Expression *
-    ProjectionBlock::parseUnaryExpression ( const std::string &variableName )
+    ProjectionBlock::parseBasicExpression ( const std::string &variableName )
     {
       const Expression *expression;
 
@@ -91,11 +91,11 @@ namespace Dune
         expression = new NumberExpression( token.value );
         nextToken();
       }
-      // unary minus
-      else if( (token.type == Token::additiveOperator) && (token.symbol == '-') )
+      // pi
+      else if( token.type == Token::piKeyword )
       {
+        expression = new NumberExpression( M_PI );
         nextToken();
-        expression = new MinusExpression( parseExpression( variableName ) );
       }
       // sqrt
       else if( token.type == Token::sqrtKeyword )
@@ -103,6 +103,22 @@ namespace Dune
         nextToken();
         matchToken( Token::openingParen, "'(' expected." );
         expression = new SqrtExpression( parseExpression( variableName ) );
+        matchToken( Token::closingParen, "')' expected." );
+      }
+      // sin
+      else if( token.type == Token::sinKeyword )
+      {
+        nextToken();
+        matchToken( Token::openingParen, "'(' expected." );
+        expression = new SinExpression( parseExpression( variableName ) );
+        matchToken( Token::closingParen, "')' expected." );
+      }
+      // cos
+      else if( token.type == Token::cosKeyword )
+      {
+        nextToken();
+        matchToken( Token::openingParen, "'(' expected." );
+        expression = new CosExpression( parseExpression( variableName ) );
         matchToken( Token::closingParen, "')' expected." );
       }
       else if( token.type == Token::string )
@@ -124,7 +140,42 @@ namespace Dune
         }
       }
       else
-        DUNE_THROW( DGFException, "Error in " << *this << ": " << "unary expression expected." );
+        DUNE_THROW( DGFException, "Error in " << *this << ": " << "basic expression expected." );
+
+      return expression;
+    }
+
+
+    const ProjectionBlock::Expression *
+    ProjectionBlock::parsePostfixExpression ( const std::string &variableName )
+    {
+      const Expression *expression = parseBasicExpression( variableName );
+      if( token.type == Token::openingBracket )
+      {
+        nextToken();
+        if( (token.type != Token::number) || (double( int( token.value ) ) != token.value) )
+          DUNE_THROW( DGFException, "Error in " << *this << ": integral number expected." );
+        expression = new BracketExpression( expression, int( token.value ) );
+        nextToken();
+        matchToken( Token::closingBracket, "']' expected." );
+      }
+      return expression;
+    }
+
+
+    const ProjectionBlock::Expression *
+    ProjectionBlock::parseUnaryExpression ( const std::string &variableName )
+    {
+      const Expression *expression;
+
+      // unary minus
+      if( (token.type == Token::additiveOperator) && (token.symbol == '-') )
+      {
+        nextToken();
+        expression = new MinusExpression( parsePostfixExpression( variableName ) );
+      }
+      else
+        expression = parsePostfixExpression( variableName );
 
       return expression;
     }
@@ -232,6 +283,12 @@ namespace Dune
           token.type = Token::functionKeyword;
         if( token.literal == "sqrt" )
           token.type = Token::sqrtKeyword;
+        if( token.literal == "sin" )
+          token.type = Token::sinKeyword;
+        if( token.literal == "cos" )
+          token.type = Token::cosKeyword;
+        if( token.literal == "pi" )
+          token.type = Token::piKeyword;
       }
       // parse numeric constant
       else if( (c >= '0') && (c <= '9') )
@@ -264,6 +321,10 @@ namespace Dune
         token.setSymbol( Token::openingParen, line.get() );
       else if( c == ')' )
         token.setSymbol( Token::closingParen, line.get() );
+      else if( c == '[' )
+        token.setSymbol( Token::openingBracket, line.get() );
+      else if( c == ']' )
+        token.setSymbol( Token::closingBracket, line.get() );
       else if( c == '|' )
         token.setSymbol( Token::normDelim, line.get() );
       else if( (c == '+') || (c == '-') )
@@ -305,12 +366,22 @@ namespace Dune
         return out << "function";
       case Token::sqrtKeyword :
         return out << "sqrt";
+      case Token::sinKeyword :
+        return out << "sin";
+      case Token::cosKeyword :
+        return out << "cos";
+      case Token::piKeyword :
+        return out << "pi";
       case Token::equals :
         return out << "'='";
       case Token::openingParen :
         return out << "'('";
       case Token::closingParen :
         return out << "')'";
+      case Token::openingBracket :
+        return out << "'['";
+      case Token::closingBracket :
+        return out << "']'";
       case Token::normDelim :
         return out << "'|'";
       case Token::additiveOperator :
@@ -345,9 +416,19 @@ namespace Dune
     void ProjectionBlock::FunctionCallExpression
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
-      Vector v;
-      expression_->evaluate( argument, v );
-      function_->evaluate( v, result );
+      expression_->evaluate( argument, tmp_ );
+      return function_->evaluate( tmp_, result );
+    }
+
+
+    void ProjectionBlock::BracketExpression
+    ::evaluate ( const Vector &argument, Vector &result ) const
+    {
+      expression_->evaluate( argument, result );
+      if( field_ >= result.size() )
+        DUNE_THROW( MathError, "Index out of bounds (" <<  field_ << " not in [ 0, " << result.size() << " [)." );
+      result[ 0 ] = result[ field_ ];
+      result.resize( 1 );
     }
 
 
@@ -384,15 +465,34 @@ namespace Dune
     }
 
 
+    void ProjectionBlock::SinExpression
+    ::evaluate ( const Vector &argument, Vector &result ) const
+    {
+      expression_->evaluate( argument, result );
+      if( result.size() != 1 )
+        DUNE_THROW( MathError, "Cannot calculate the sine of a vector." );
+      result[ 0 ] = sin( result[ 0 ] );
+    }
+
+
+    void ProjectionBlock::CosExpression
+    ::evaluate ( const Vector &argument, Vector &result ) const
+    {
+      expression_->evaluate( argument, result );
+      if( result.size() != 1 )
+        DUNE_THROW( MathError, "Cannot calculate the cosine of a vector." );
+      result[ 0 ] = cos( result[ 0 ] );
+    }
+
+
     void ProjectionBlock::PowerExpression
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
       exprA_->evaluate( argument, result );
-      Vector v;
-      exprB_->evaluate( argument, v );
+      exprB_->evaluate( argument, tmp_ );
 
-      if( (result.size() == 1) && (v.size() == 1) )
-        result[ 0 ] = std::pow( result[ 0 ], v[ 0 ] );
+      if( (result.size() == 1) && (tmp_.size() == 1) )
+        result[ 0 ] = std::pow( result[ 0 ], tmp_[ 0 ] );
       else
         DUNE_THROW( MathError, "Cannot calculate powers of vectors." );
     }
@@ -402,14 +502,13 @@ namespace Dune
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
       exprA_->evaluate( argument, result );
-      Vector v;
-      exprB_->evaluate( argument, v );
+      exprB_->evaluate( argument, tmp_ );
 
-      if( result.size() != v.size() )
+      if( result.size() == tmp_.size() )
       {
         const size_t size = result.size();
         for( size_t i = 0; i < size; ++i )
-          result[ i ] += v[ i ];
+          result[ i ] += tmp_[ i ];
       }
       else
         DUNE_THROW( MathError, "Cannot sum vectors of different size." );
@@ -420,14 +519,13 @@ namespace Dune
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
       exprA_->evaluate( argument, result );
-      Vector v;
-      exprB_->evaluate( argument, v );
+      exprB_->evaluate( argument, tmp_ );
 
-      if( result.size() == v.size() )
+      if( result.size() == tmp_.size() )
       {
         const size_t size = result.size();
         for( size_t i = 0; i < size; ++i )
-          result[ i ] -= v[ i ];
+          result[ i ] -= tmp_[ i ];
       }
       else
         DUNE_THROW( MathError, "Cannot sum vectors of different size." );
@@ -438,30 +536,29 @@ namespace Dune
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
       exprA_->evaluate( argument, result );
-      Vector v;
-      exprB_->evaluate( argument, v );
+      exprB_->evaluate( argument, tmp_ );
 
-      if( result.size() == v.size() )
+      if( result.size() == tmp_.size() )
       {
         double product = 0.0;
         const size_t size = result.size();
         for( size_t i = 0; i < size; ++i )
-          product += result[ i ] * v[ i ];
+          product += result[ i ] * tmp_[ i ];
         result.resize( 1 );
         result[ 0 ] = product;
       }
-      else if( v.size() == 1 )
+      else if( tmp_.size() == 1 )
       {
         const size_t size = result.size();
         for( size_t i = 0; i < size; ++i )
-          result[ i ] *= v[ 0 ];
+          result[ i ] *= tmp_[ 0 ];
       }
       else if( result.size() == 1 )
       {
-        std::swap( result, v );
+        std::swap( result, tmp_ );
         const size_t size = result.size();
         for( size_t i = 0; i < size; ++i )
-          result[ i ] *= v[ 0 ];
+          result[ i ] *= tmp_[ 0 ];
       }
       else
         DUNE_THROW( MathError, "Cannot multiply non-scalar vectors of different size." );
@@ -471,18 +568,15 @@ namespace Dune
     void ProjectionBlock::QuotientExpression
     ::evaluate ( const Vector &argument, Vector &result ) const
     {
-      exprA_->evaluate( argument, result );
-      Vector v;
-      exprB_->evaluate( argument, v );
+      exprB_->evaluate( argument, result );
+      if( result.size() != 1 )
+        DUNE_THROW( MathError, "Cannot divide by a vector." );
+      double factor = 1.0 / result[ 0 ];
 
-      if( v.size() == 1 )
-      {
-        const size_t size = result.size();
-        for( size_t i = 0; i < size; ++i )
-          result[ i ] /= v[ 0 ];
-      }
-      else
-        DUNE_THROW( MathError, "Cannot multiply non-scalar vectors of different size." );
+      exprA_->evaluate( argument, result );
+      const size_t size = result.size();
+      for( size_t i = 0; i < size; ++i )
+        result[ i ] *= factor;
     }
 
   }

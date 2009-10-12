@@ -27,9 +27,9 @@ namespace Dune
         enum Type
         {
           string, number,
-          defaultKeyword, functionKeyword, sqrtKeyword,
+          defaultKeyword, functionKeyword, sqrtKeyword, sinKeyword, cosKeyword, piKeyword,
           equals,
-          openingParen, closingParen, normDelim,
+          openingParen, closingParen, openingBracket, closingBracket, normDelim,
           additiveOperator, multiplicativeOperator, powerOperator,
           endOfLine
         };
@@ -48,13 +48,19 @@ namespace Dune
 
       friend std::ostream &operator<< ( std::ostream &, const Token & );
 
+    public:
       struct Expression;
+
+    private:
       struct NumberExpression;
       struct VariableExpression;
       struct FunctionCallExpression;
+      struct BracketExpression;
       struct MinusExpression;
       struct NormExpression;
       struct SqrtExpression;
+      struct SinExpression;
+      struct CosExpression;
       struct PowerExpression;
       struct SumExpression;
       struct DifferenceExpression;
@@ -78,8 +84,16 @@ namespace Dune
           return 0;
       }
 
+      const Expression *function ( const std::string &name ) const
+      {
+        const FunctionMap::const_iterator it = functions_.find( name );
+        return (it != functions_.end() ? it->second : 0);
+      }
+
     private:
       void parseFunction ();
+      const Expression *parseBasicExpression ( const std::string &variableName );
+      const Expression *parsePostfixExpression ( const std::string &variableName );
       const Expression *parseUnaryExpression ( const std::string &variableName );
       const Expression *parsePowerExpression ( const std::string &variableName );
       const Expression *parseMultiplicativeExpression ( const std::string &variableName );
@@ -153,6 +167,24 @@ namespace Dune
     private:
       const Expression *function_;
       const Expression *expression_;
+
+      mutable Vector tmp_;
+    };
+
+
+    struct ProjectionBlock::BracketExpression
+      : public Expression
+    {
+      BracketExpression ( const Expression *expression, size_t field )
+        : expression_( expression ),
+          field_( field )
+      {}
+
+      virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+    private:
+      const Expression *expression_;
+      size_t field_;
     };
 
 
@@ -198,6 +230,34 @@ namespace Dune
     };
 
 
+    struct ProjectionBlock::SinExpression
+      : public Expression
+    {
+      explicit SinExpression ( const Expression *expression )
+        : expression_( expression )
+      {}
+
+      virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+    private:
+      const Expression *expression_;
+    };
+
+
+    struct ProjectionBlock::CosExpression
+      : public Expression
+    {
+      explicit CosExpression ( const Expression *expression )
+        : expression_( expression )
+      {}
+
+      virtual void evaluate ( const Vector &argument, Vector &result ) const;
+
+    private:
+      const Expression *expression_;
+    };
+
+
     struct ProjectionBlock::PowerExpression
       : public Expression
     {
@@ -211,6 +271,8 @@ namespace Dune
     private:
       const Expression *exprA_;
       const Expression *exprB_;
+
+      mutable Vector tmp_;
     };
 
 
@@ -227,6 +289,8 @@ namespace Dune
     private:
       const Expression *exprA_;
       const Expression *exprB_;
+
+      mutable Vector tmp_;
     };
 
 
@@ -243,6 +307,8 @@ namespace Dune
     private:
       const Expression *exprA_;
       const Expression *exprB_;
+
+      mutable Vector tmp_;
     };
 
 
@@ -259,6 +325,8 @@ namespace Dune
     private:
       const Expression *exprA_;
       const Expression *exprB_;
+
+      mutable Vector tmp_;
     };
 
 
