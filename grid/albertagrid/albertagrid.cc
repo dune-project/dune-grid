@@ -61,7 +61,36 @@ namespace Dune
   }
 
 
-  template < int dim, int dimworld >
+  template< int dim, int dimworld >
+  template< class Proj, class Impl >
+  inline AlbertaGrid< dim, dimworld >
+  ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
+                  const std::string &gridName,
+                  const Alberta::ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
+    : mesh_(),
+      maxlevel_( 0 ),
+      hIndexSet_( dofNumbering_ ),
+      idSet_( hIndexSet_ ),
+      levelIndexVec_( (size_t)MAXL, 0 ),
+      leafIndexSet_ ( 0 ),
+      sizeCache_( 0 ),
+      leafMarkerVector_( dofNumbering_ ),
+      levelMarkerVector_( (size_t)MAXL, MarkerVector( dofNumbering_ ) )
+  {
+    checkAlbertaDimensions< dim, dimworld >();
+
+    mesh_.create( macroData, gridName, projectionFactory );
+    if( !mesh_ )
+      DUNE_THROW( AlbertaError, "Invalid macro data structure." );
+
+    setup();
+    hIndexSet_.create();
+
+    calcExtras();
+  }
+
+
+  template< int dim, int dimworld >
   inline AlbertaGrid< dim, dimworld >
   ::AlbertaGrid ( const Alberta::MacroData< dimension> &macroData,
                   const std::string &gridName,

@@ -61,14 +61,17 @@ namespace Dune
     //! type of matrix from world coordinates to world coordinates
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
-    typedef DuneBoundaryProjection< dimensionworld > BoundaryProjection;
+    typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
 
   private:
     static const int numVertices
       = Alberta::NumSubEntities< dimension, dimension >::value;
 
+    typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::MacroData< dimension > MacroData;
     typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
+
+    class ProjectionFactory;
 
   public:
     //! are boundary ids supported by this factory?
@@ -76,15 +79,9 @@ namespace Dune
     //! is the factory able to create periodic meshes?
     static const bool supportPeriodicity = MacroData::supportPeriodicity;
 
-  private:
-    MacroData macroData_;
-    NumberingMap numberingMap_;
-    const BoundaryProjection *boundaryProjection_;
-
-  public:
     /** default constructor */
     GridFactory ()
-      : boundaryProjection_( 0 )
+      : duneProjection_( 0 )
     {
       macroData_.create();
     }
@@ -140,11 +137,11 @@ namespace Dune
       macroData_.boundaryId( element, numberingMap_.dune2alberta( 1, face ) ) = id;
     }
 
-    virtual void insertBoundaryProjection ( const BoundaryProjection &projection )
+    virtual void insertBoundaryProjection ( const DuneProjection &projection )
     {
-      if( boundaryProjection_ != 0 )
+      if( duneProjection_ != 0 )
         DUNE_THROW( InvalidStateException, "Only one global boundary projection can be attached to a grid." );
-      boundaryProjection_ = &projection;
+      duneProjection_ = &projection;
     }
 
     /** \brief add a face transformation (for periodic identification)
@@ -225,7 +222,8 @@ namespace Dune
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );
       assert( macroData_.checkNeighbors() );
-      return new Grid( macroData_, gridName, boundaryProjection_ );
+      ProjectionFactory projectionFactory( *this );
+      return new Grid( macroData_, gridName, projectionFactory );
     }
 
     /** \brief finalize grid creation and hand over the grid
@@ -282,6 +280,71 @@ namespace Dune
     {
       return write< ascii >( filename );
     }
+
+  private:
+    const DuneProjection *getDuneProjection ( const ElementInfo &elementInfo, const int face ) const
+    {
+      return duneProjection_;
+    }
+
+    const DuneProjection *getDuneProjection ( const ElementInfo &elementInfo ) const
+    {
+      return duneProjection_;
+    }
+
+    MacroData macroData_;
+    NumberingMap numberingMap_;
+    const DuneProjection *duneProjection_;
+  };
+
+
+
+  template< int dim, int dimworld >
+  class GridFactory< AlbertaGrid< dim, dimworld > >::ProjectionFactory
+    : public Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dimworld >, ProjectionFactory >
+  {
+    typedef ProjectionFactory This;
+    typedef Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dimworld >, ProjectionFactory > Base;
+
+    typedef typename Dune::GridFactory< AlbertaGrid< dim, dimworld > > Factory;
+
+  public:
+    typedef typename Base::Projection Projection;
+    typedef typename Base::ElementInfo ElementInfo;
+
+    typedef typename Projection::Projection DuneProjection;
+
+    ProjectionFactory( const GridFactory &gridFactory )
+      : gridFactory_( gridFactory )
+    {}
+
+    bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
+    {
+      return (gridFactory().getDuneProjection( elementInfo, face ) != 0);
+    }
+
+    bool hasProjection ( const ElementInfo &elementInfo ) const
+    {
+      return (gridFactory().getDuneProjection( elementInfo ) != 0);
+    }
+
+    Projection projection ( const ElementInfo &elementInfo, const int face ) const
+    {
+      return Projection( *(gridFactory().getDuneProjection( elementInfo, face )) );
+    };
+
+    Projection projection ( const ElementInfo &elementInfo ) const
+    {
+      return Projection( *(gridFactory().getDuneProjection( elementInfo )) );
+    };
+
+    const GridFactory &gridFactory () const
+    {
+      return gridFactory_;
+    }
+
+  private:
+    const GridFactory &gridFactory_;
   };
 
 }

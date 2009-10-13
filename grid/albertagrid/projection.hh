@@ -14,6 +14,14 @@ namespace Dune
   namespace Alberta
   {
 
+    // Internal Forward Declarations
+    // -----------------------------
+
+    template< class Proj, class Impl >
+    class ProjectionFactory;
+
+
+
     // NoProjection
     // ------------
 
@@ -45,7 +53,7 @@ namespace Dune
 
       typedef Dune::DuneBoundaryProjection< dimWorld > Projection;
 
-      DuneBoundaryProjection ( const Projection &projection )
+      explicit DuneBoundaryProjection ( const Projection &projection )
         : projection_( &projection )
       {}
 
@@ -72,21 +80,117 @@ namespace Dune
 
 
 
+    // ProjectionFactoryInterface
+    // --------------------------
+
+    template< class Proj, class Impl >
+    class ProjectionFactoryInterface
+    {
+      typedef ProjectionFactoryInterface< Proj, Impl > This;
+
+      friend class ProjectionFactory< Proj, Impl >;
+
+    public:
+      typedef Proj Projection;
+
+      static const int dimension = Projection::dimension;
+
+      typedef Alberta::ElementInfo< dimension > ElementInfo;
+
+    private:
+      ProjectionFactoryInterface ()
+      {}
+
+      ProjectionFactoryInterface ( const This &other );
+      This &operator= ( const This &other );
+
+    public:
+      bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
+      {
+        return asImpl().hasProjection( elementInfo, face );
+      }
+
+      bool hasProjection ( const ElementInfo &elementInfo ) const
+      {
+        return asImpl().hasProjection( elementInfo );
+      }
+
+      Projection projection ( const ElementInfo &elementInfo, const int face ) const
+      {
+        return asImpl().projection( elementInfo, face );
+      };
+
+      Projection projection ( const ElementInfo &elementInfo ) const
+      {
+        return asImpl().projection( elementInfo );
+      };
+
+    protected:
+      const Impl &asImpl () const
+      {
+        return static_cast< const Impl & >( *this );
+      }
+    };
+
+
+
+    // ProjectionFactory
+    // -----------------
+
+    template< class Proj, class Impl >
+    class ProjectionFactory
+      : public ProjectionFactoryInterface< Proj, Impl >
+    {
+      typedef ProjectionFactory< Proj, Impl > This;
+      typedef ProjectionFactoryInterface< Proj, Impl > Base;
+
+    public:
+      typedef typename Base::Projection Projection;
+      typedef typename Base::ElementInfo ElementInfo;
+
+    protected:
+      ProjectionFactory ()
+      {}
+
+    private:
+      bool hasProjection ( const ElementInfo &elementInfo, const int face ) const;
+      bool hasProjection ( const ElementInfo &elementInfo ) const;
+
+      Projection projection ( const ElementInfo &elementInfo, const int face ) const;
+      Projection projection ( const ElementInfo &elementInfo ) const;
+    };
+
+
+
     // DuneGlobalBoundaryProjectionFactory
     // -----------------------------------
 
     template< int dim >
-    struct DuneGlobalBoundaryProjectionFactory
+    class DuneGlobalBoundaryProjectionFactory
+      : public ProjectionFactory< DuneBoundaryProjection< dim >, DuneGlobalBoundaryProjectionFactory< dim > >
     {
-      static const int dimension = dim;
+      typedef DuneGlobalBoundaryProjectionFactory< dim > This;
+      typedef ProjectionFactory< DuneBoundaryProjection< dim >, This > Base;
 
-      typedef DuneBoundaryProjection< dimension > Projection;
+    public:
+      typedef typename Base::Projection Projection;
+      typedef typename Base::ElementInfo ElementInfo;
 
-      typedef Alberta::ElementInfo< dimension > ElementInfo;
+      typedef typename Projection::Projection DuneProjection;
 
-      DuneGlobalBoundaryProjectionFactory ( const Projection &projection )
+      DuneGlobalBoundaryProjectionFactory ( const DuneProjection &projection )
         : projection_( projection )
       {}
+
+      bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
+      {
+        return true;
+      }
+
+      bool hasProjection ( const ElementInfo &elementInfo ) const
+      {
+        return true;
+      }
 
       Projection projection ( const ElementInfo &elementInfo, const int face ) const
       {
@@ -99,7 +203,7 @@ namespace Dune
       };
 
     private:
-      const Projection &projection_;
+      const DuneProjection &projection_;
     };
 
 
@@ -124,7 +228,6 @@ namespace Dune
     private:
       unsigned int boundaryIndex_;
     };
-
 
 
 

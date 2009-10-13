@@ -95,8 +95,9 @@ namespace Dune
       int size ( int codim ) const;
 
       void create ( const MacroData< dim > &macroData, const std::string &name );
-      template< class ProjectionFactory >
-      void create ( const MacroData< dim > &macroData, const std::string &name, const ProjectionFactory &projectionFactory );
+      template< class Proj, class Impl >
+      void create ( const MacroData< dim > &macroData, const std::string &name,
+                    const ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
       void create ( const std::string &filename, const std::string &name, bool binary = false );
 
       void read ( const std::string &filename, Real &time );
@@ -177,10 +178,13 @@ namespace Dune
 
 
     template< int dim >
-    template< class ProjectionFactory >
+    template< class Proj, class Impl >
     inline void MeshPointer< dim >
-    ::create ( const MacroData< dim > &macroData, const std::string &name, const ProjectionFactory &projectionFactory )
+    ::create ( const MacroData< dim > &macroData, const std::string &name,
+               const ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
     {
+      typedef ProjectionFactoryInterface< Proj, Impl > ProjectionFactory;
+
       release();
 
       Library< dimWorld >::boundaryCount = 0;
@@ -351,13 +355,25 @@ namespace Dune
       const ProjectionFactory &projectionFactory = *static_cast< const ProjectionFactory * >( Library< dimWorld >::projectionFactory );
       if( (n > 0) && macroElement.isBoundary( n-1 ) )
       {
-        Projection projection = projectionFactory.projection( elementInfo, n-1 );
-        return new NodeProjection< dim, Projection >( Library< dimWorld >::boundaryCount++, projection );
+        const unsigned int boundaryIndex = Library< dimWorld >::boundaryCount++;
+        if( projectionFactory.hasProjection( elementInfo, n-1 ) )
+        {
+          Projection projection = projectionFactory.projection( elementInfo, n-1 );
+          return new NodeProjection< dim, Projection >( boundaryIndex, projection );
+        }
+        else
+          return new BasicNodeProjection( boundaryIndex );
       }
       else if( (dim < dimWorld) && (n == 0) )
       {
-        Projection projection = projectionFactory.projection( elementInfo );
-        return new NodeProjection< dim, Projection >( std::numeric_limits< unsigned int >::max(), projection );
+        const unsigned int boundaryIndex = std::numeric_limits< unsigned int >::max();
+        if( projectionFactory.hasProjection( elementInfo ) )
+        {
+          Projection projection = projectionFactory.projection( elementInfo );
+          return new NodeProjection< dim, Projection >( boundaryIndex, projection );
+        }
+        else
+          return 0;
       }
       else
         return 0;

@@ -233,9 +233,6 @@ namespace Dune
     < dim, dimworld, Alberta::Real, AlbertaGridFamily< dim, dimworld > >
     Base;
 
-    // make Conversion a friend
-    template< class, class > friend class Conversion;
-
     template< int, int, class > friend class AlbertaGridEntity;
 
     friend class AlbertaGridHierarchicIterator< This >;
@@ -308,6 +305,11 @@ namespace Dune
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
                   const std::string &gridName = "AlbertaGrid",
                   const DuneBoundaryProjection< dimensionworld > *projection = 0 );
+
+    template< class Proj, class Impl >
+    AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
+                  const std::string &gridName,
+                  const Alberta::ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
 
     /** \brief create a grid from an ALBERTA macro grid file
      *
