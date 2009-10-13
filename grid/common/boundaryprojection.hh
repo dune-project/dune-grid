@@ -9,20 +9,20 @@
 //- Dune includes
 #include <dune/common/fvector.hh>
 
-namespace Dune {
+#include <dune/grid/common/boundarysegment.hh>
+#include <dune/grid/genericgeometry/mappingprovider.hh>
+#include <dune/grid/genericgeometry/geometrytraits.hh>
+
+namespace Dune
+{
 
   /** \brief Interface class for vertex projection at the boundary.
    */
   template <int dimworld>
-  class DuneBoundaryProjection
+  struct DuneBoundaryProjection
   {
-  public:
     //! \brief type of coordinate vector
     typedef FieldVector< double, dimworld> CoordinateType;
-  protected:
-    //! default constructor
-    DuneBoundaryProjection() {}
-  public:
     //! \brief destructor
     virtual ~DuneBoundaryProjection() {}
 
@@ -30,19 +30,99 @@ namespace Dune {
     virtual CoordinateType operator() (const CoordinateType& global) const = 0;
   };
 
+
+
+  // BoundarySegmentWrapper
+  // ----------------------
+
+  template< int dim, int dimworld >
+  class BoundarySegmentWrapper
+    : public DuneBoundaryProjection< dimworld >
+  {
+    typedef BoundarySegmentWrapper< dim, dimworld > This;
+    typedef DuneBoundaryProjection< dimworld > Base;
+
+    typedef GenericGeometry::DefaultGeometryTraits< double, dim-1, dimworld > GeometryTraits;
+    typedef GenericGeometry::HybridMapping< dim-1, GeometryTraits > FaceMapping;
+    typedef GenericGeometry::MappingProvider< FaceMapping, 0 > FaceMappingProvider;
+
+  public:
+    typedef typename Base::CoordinateType CoordinateType;
+    typedef Dune::BoundarySegment< dim, dimworld > BoundarySegment;
+
+    /** constructor
+     *
+     *  \param[in]  type             geometry type of the boundary face
+     *  \param[in]  vertices         vertices of the boundary face
+     *  \param[in]  boundarySegment  geometric realization of the shaped boundary
+     *
+     *  \note The BoundarySegmentWrapper takes control of the boundary segment.
+     */
+    BoundarySegmentWrapper ( const GeometryType &type,
+                             const std::vector< CoordinateType > &vertices,
+                             const BoundarySegment *boundarySegment )
+      : faceMapping_( FaceMappingProvider::mapping( type, vertices ) ),
+        boundarySegment_( boundarySegment )
+    {
+      faceMapping_->referenceCount = 1;
+    }
+
+    BoundarySegmentWrapper ( const This &other )
+      : faceMapping_( other.faceMapping_ ),
+        boundarySegment_( other.boundarySegment_ )
+    {
+      ++(faceMapping_->referenceCount);
+    }
+
+    ~BoundarySegmentWrapper ()
+    {
+      // we abuse the mapping's reference count to determine when to
+      // destruct the boundary segment
+      if( --(faceMapping_->referenceCount) == 0 )
+      {
+        delete faceMapping_;
+        delete boundarySegment_;
+      }
+    }
+
+    This &operator= ( const This &other ) const
+    {
+      ++(other.faceMapping_->referenceCount);
+      if( --(faceMapping_->referenceCount == 0) )
+      {
+        delete faceMapping_;
+        delete boundarySegment_;
+      }
+      faceMapping_ = other.faceMapping_;
+      boundarySegment_ = other.boundarySegment_;
+      return *this;
+    }
+
+    CoordinateType operator() ( const CoordinateType &global ) const
+    {
+      return boundarySegment() ( faceMapping_->local( global ) );
+    }
+
+    const BoundarySegment &boundarySegment () const
+    {
+      return *boundarySegment_;
+    }
+
+  private:
+    FaceMapping *faceMapping_;
+    const BoundarySegment *boundarySegment_;
+  };
+
+
+
   //////////////////////////////////////////////////////////////////////
   //
   // Example of boundary projection projection to a circle
   //
   //////////////////////////////////////////////////////////////////////
   template <int dimworld>
-  class CircleBoundaryProjection : public DuneBoundaryProjection< dimworld >
+  struct CircleBoundaryProjection : public DuneBoundaryProjection< dimworld >
   {
-  protected:
-    //! radius of circ
-    const double radius_;
-
-  public:
     //! \brief type of coordinate vector
     typedef FieldVector< double, dimworld> CoordinateType;
 
@@ -63,7 +143,12 @@ namespace Dune {
       prj *= factor;
       return prj;
     }
+
+  protected:
+    //! radius of circ
+    const double radius_;
   };
 
 } // end namespace
-#endif
+
+#endif // #ifndef DUNE_BOUNDARYPROJECTION_HH
