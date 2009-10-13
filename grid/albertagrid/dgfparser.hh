@@ -125,9 +125,15 @@ namespace Dune
     const DuneBoundaryProjection< dimworld > *projection
       = projectionBlock.template defaultProjection< dimworld >();
     if( projection != 0 )
-    {
-      std::cout << "inserting boundary projection..." << std::endl;
       factory.insertBoundaryProjection( *projection );
+    const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+    for( size_t i = 0; i < numBoundaryProjections; ++i )
+    {
+      GeometryType type( GeometryType::simplex, dim-1 );
+      const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+      const DuneBoundaryProjection< dimworld > *projection
+        = projectionBlock.template boundaryProjection< dimworld >( i );
+      factory.insertBoundaryProjection( type, vertices, *projection );
     }
 
     if( parameter.markLongestEdge() )
