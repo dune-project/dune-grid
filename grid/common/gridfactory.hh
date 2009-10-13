@@ -27,6 +27,8 @@ namespace Dune {
   class GridFactoryInterface {
 
   protected:
+    /** \brief dimension of the grid */
+    static const int dimension = GridType::dimension;
 
     /** \brief The grid world dimension */
     enum {dimworld = GridType::dimensionworld};
@@ -72,7 +74,8 @@ namespace Dune {
         The grid object takes control of this object and deallocates it when destructing itself.
      */
     virtual void insertBoundarySegment(const std::vector<unsigned int> vertices,
-                                       const BoundarySegment<dimworld>* boundarySegment) {
+                                       const BoundarySegment<dimension,dimworld>* boundarySegment)
+    {
       DUNE_THROW(GridError, "This grid does not support parametrized boundary segments!");
     }
 
