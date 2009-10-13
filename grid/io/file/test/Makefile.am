@@ -5,6 +5,10 @@ if AMIRAMESH
 ALLTESTS += amirameshtest
 endif
 
+if HAVE_ALBERTA
+ALLTESTS += gmshtest-alberta
+endif
+
 # Currently, Star-CD files can only be read into UGGrid objects
 if UG
 ALLTESTS += starcdreadertest
@@ -37,6 +41,10 @@ amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(ALU
 gmshtest_SOURCES = gmshtest.cc
 gmshtest_CXXFLAGS = $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS)
 gmshtest_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
+
+gmshtest_alberta_SOURCES = gmshtest-alberta.cc
+gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS)
+gmshtest_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS) $(GRAPE_LDFLAGS) $(GRAPE_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
