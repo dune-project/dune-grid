@@ -8,7 +8,11 @@
  *  \brief  specialization of the generic GridFactory for AlbertaGrid
  */
 
+#include <algorithm>
 #include <limits>
+#include <map>
+
+#include <dune/common/array.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 
@@ -62,14 +66,21 @@ namespace Dune
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
     typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
+    typedef Dune::BoundarySegment< dimension, dimensionworld > BoundarySegment;
 
   private:
+    typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapper;
+
     static const int numVertices
       = Alberta::NumSubEntities< dimension, dimension >::value;
 
+    typedef Alberta::MacroElement< dimension > MacroElement;
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::MacroData< dimension > MacroData;
     typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
+
+    typedef array< unsigned int, dimension > FaceId;
+    typedef std::map< FaceId, const DuneProjection * > BoundaryProjectionMap;
 
     class ProjectionFactory;
 
@@ -137,11 +148,79 @@ namespace Dune
       macroData_.boundaryId( element, numberingMap_.dune2alberta( 1, face ) ) = id;
     }
 
+    /** \brief insert a boundary projection into the macro grid
+     *
+     *  \param[in]  type        geometry type of boundary face
+     *  \param[in]  vertices    vertices of the boundary face
+     *  \param[in]  projection  boundary projection
+     *
+     *  \note The grid takes control of the projection object.
+     */
+    virtual void
+    insertBoundaryProjection ( const GeometryType &type,
+                               const std::vector< unsigned int > &vertices,
+                               const DuneProjection &projection )
+    {
+      if( (int)type.dim() != dimension-1 )
+        DUNE_THROW( AlbertaError, "Inserting boundary face of wrong dimension: " << type.dim() );
+      if( !type.isSimplex() )
+        DUNE_THROW( AlbertaError, "Alberta supports only simplices." );
+
+      FaceId faceId;
+      if( vertices.size() != faceId.size() )
+        DUNE_THROW( AlbertaError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+      for( size_t i = 0; i < faceId.size(); ++i )
+        faceId[ i ] = vertices[ i ];
+      std::sort( faceId.begin(), faceId.end() );
+
+      if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+        DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+      boundaryProjections_[ faceId ] = &projection;
+    }
+
+
+    /** \brief insert a global (boundary) projection into the macro grid
+     *
+     *  \param[in]  projection  global (boundary) projection
+     *
+     *  \note The grid takes control of the projection object.
+     */
     virtual void insertBoundaryProjection ( const DuneProjection &projection )
     {
       if( duneProjection_ != 0 )
-        DUNE_THROW( InvalidStateException, "Only one global boundary projection can be attached to a grid." );
+        DUNE_THROW( GridError, "Only one global boundary projection can be attached to a grid." );
       duneProjection_ = &projection;
+    }
+
+    /** \brief insert a shaped boundary segment into the macro grid
+     *
+     *  \param[in]  vertices         vertex indices of boundary face
+     *  \param[in]  boundarySegment  geometric realization of shaped boundary
+     *
+     *  \note The grid takes control of the boundary segment.
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int > vertices,
+                            const BoundarySegment *boundarySegment )
+    {
+      FaceId faceId;
+      if( (int)vertices.size() != dimension )
+        DUNE_THROW( AlbertaError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+      for( size_t i = 0; i < faceId.size(); ++i )
+        faceId[ i ] = vertices[ i ];
+      std::sort( faceId.begin(), faceId.end() );
+
+      if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+        DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+      GeometryType type( GeometryType::simplex, dimension-1 );
+      std::vector< WorldVector > coords( dimension );
+      for( int i = 0; i < dimension; ++i )
+      {
+        Alberta::GlobalVector &x = macroData_.vertex( vertices[ i ] );
+        for( int j = 0; j < dimensionworld; ++j )
+          coords[ i ][ j ] = x[ j ];
+      }
+      boundaryProjections_[ faceId ] = new BoundarySegmentWrapper( type, coords, boundarySegment );
     }
 
     /** \brief add a face transformation (for periodic identification)
@@ -284,6 +363,38 @@ namespace Dune
   private:
     const DuneProjection *getDuneProjection ( const ElementInfo &elementInfo, const int face ) const
     {
+      if( !boundaryProjections_.empty() )
+      {
+        const MacroElement &macroElement = elementInfo.macroElement();
+        const typename MacroData::ElementId &elementId = macroData_.element( macroElement.index );
+
+#ifndef NDEBUG
+        for( int i = 0; i <= dimension; ++i )
+        {
+          const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
+          const Alberta::GlobalVector &y = *macroElement.coord[ i ];
+          for( int j = 0; j < dimensionworld; ++j )
+          {
+            if( x[ i ] != y[ i ] )
+              DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
+          }
+        }
+#endif
+
+        FaceId faceId;
+        for( size_t i = 0; i < faceId.size(); ++i )
+        {
+          const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
+          faceId[ i ] = elementId[ k ];
+        }
+        std::sort( faceId.begin(), faceId.end() );
+
+        typedef typename BoundaryProjectionMap::const_iterator Iterator;
+        const Iterator it = boundaryProjections_.find( faceId );
+        if( it != boundaryProjections_.end() )
+          return it->second;
+      }
+
       return duneProjection_;
     }
 
@@ -295,6 +406,7 @@ namespace Dune
     MacroData macroData_;
     NumberingMap numberingMap_;
     const DuneProjection *duneProjection_;
+    BoundaryProjectionMap boundaryProjections_;
   };
 
 
