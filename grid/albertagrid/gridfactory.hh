@@ -159,7 +159,7 @@ namespace Dune
     virtual void
     insertBoundaryProjection ( const GeometryType &type,
                                const std::vector< unsigned int > &vertices,
-                               const DuneProjection &projection )
+                               const DuneProjection *projection )
     {
       if( (int)type.dim() != dimension-1 )
         DUNE_THROW( AlbertaError, "Inserting boundary face of wrong dimension: " << type.dim() );
@@ -175,7 +175,7 @@ namespace Dune
 
       if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
         DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-      boundaryProjections_[ faceId ] = &projection;
+      boundaryProjections_[ faceId ] = projection;
     }
 
 

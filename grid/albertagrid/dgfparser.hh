@@ -133,7 +133,7 @@ namespace Dune
       const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
       const DuneBoundaryProjection< dimworld > *projection
         = projectionBlock.template boundaryProjection< dimworld >( i );
-      factory.insertBoundaryProjection( type, vertices, *projection );
+      factory.insertBoundaryProjection( type, vertices, projection );
     }
 
     if( parameter.markLongestEdge() )
