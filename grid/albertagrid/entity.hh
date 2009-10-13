@@ -26,6 +26,9 @@ namespace Dune
   template< class GridImp >
   class AlbertaGridLeafIntersection;
 
+  template< class GridImp >
+  class AlbertaGridLeafIntersectionIterator;
+
 
 
   // AlbertaGridEntity
