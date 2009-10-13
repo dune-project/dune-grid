@@ -8,6 +8,8 @@ INTERVAL
 
 PROJECTION
 function p(x) = sqrt(2) * x / |x|
+function id(x) = x
+segment 0 1 id
 default p
 #
 

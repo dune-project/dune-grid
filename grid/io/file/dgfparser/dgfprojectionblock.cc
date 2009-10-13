@@ -34,6 +34,11 @@ namespace Dune
           nextToken();
           parseDefault();
         }
+        else if( token.type == Token::segmentKeyword )
+        {
+          nextToken();
+          parseSegment();
+        }
         else if( token.type != Token::endOfLine )
           DUNE_THROW( DGFException, "Error in " << *this << ": Invalid token." );
         matchToken( Token::endOfLine, "trailing tokens on line." );
@@ -253,6 +258,33 @@ namespace Dune
     }
 
 
+    void ProjectionBlock::parseSegment ()
+    {
+      std::vector< unsigned int > faceId;
+      while( token.type == Token::number )
+      {
+        if( double( (unsigned int)token.value ) != token.value )
+          DUNE_THROW( DGFException, "Error in " << *this << ": integral number expected." );
+        faceId.push_back( (unsigned int)token.value );
+        nextToken();
+      }
+
+      if( token.type != Token::string )
+        DUNE_THROW( DGFException, "Error in " << *this << ": function name expected." );
+      const std::string functionName = token.literal;
+      nextToken();
+
+      //std::cout << std::endl << "Boundary projection for face";
+      //for( size_t int i = 0; i < faceId.size(); ++i )
+      //  std::cout << " " << faceId[ i ];
+      //std::cout << ": " << functionName << std::endl;
+      FunctionMap::iterator it = functions_.find( functionName );
+      if( it == functions_.end() )
+        DUNE_THROW( DGFException, "Error in " << *this << ": function " << functionName << " not declared." );
+      boundaryFunctions_.push_back( std::make_pair( faceId, it->second ) );
+    }
+
+
     void ProjectionBlock::matchToken ( const Token::Type &type, const std::string &message )
     {
       if( token.type != type )
@@ -283,15 +315,17 @@ namespace Dune
 
         if( token.literal == "default" )
           token.type = Token::defaultKeyword;
-        if( token.literal == "function" )
+        else if( token.literal == "function" )
           token.type = Token::functionKeyword;
-        if( token.literal == "sqrt" )
+        else if( token.literal == "segment" )
+          token.type = Token::segmentKeyword;
+        else if( token.literal == "sqrt" )
           token.type = Token::sqrtKeyword;
-        if( token.literal == "sin" )
+        else if( token.literal == "sin" )
           token.type = Token::sinKeyword;
-        if( token.literal == "cos" )
+        else if( token.literal == "cos" )
           token.type = Token::cosKeyword;
-        if( token.literal == "pi" )
+        else if( token.literal == "pi" )
           token.type = Token::piKeyword;
       }
       // parse numeric constant
@@ -369,6 +403,8 @@ namespace Dune
         return out << "default";
       case Token::functionKeyword :
         return out << "function";
+      case Token::segmentKeyword :
+        return out << "segment";
       case Token::sqrtKeyword :
         return out << "sqrt";
       case Token::sinKeyword :

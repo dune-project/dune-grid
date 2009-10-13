@@ -27,7 +27,8 @@ namespace Dune
         enum Type
         {
           string, number,
-          defaultKeyword, functionKeyword, sqrtKeyword, sinKeyword, cosKeyword, piKeyword,
+          defaultKeyword, functionKeyword, segmentKeyword,
+          sqrtKeyword, sinKeyword, cosKeyword, piKeyword,
           equals,
           openingParen, closingParen, openingBracket, closingBracket, normDelim,
           additiveOperator, multiplicativeOperator, powerOperator,
@@ -84,6 +85,24 @@ namespace Dune
           return 0;
       }
 
+      size_t numBoundaryProjections () const
+      {
+        return boundaryFunctions_.size();
+      }
+
+      const std::vector< unsigned int > &boundaryFace ( const size_t i ) const
+      {
+        assert( i < numBoundaryProjections() );
+        return boundaryFunctions_[ i ].first;
+      }
+
+      template< int dimworld >
+      const DuneBoundaryProjection< dimworld > *boundaryProjection ( const size_t i ) const
+      {
+        assert( i < numBoundaryProjections() );
+        return new BoundaryProjection< dimworld >( boundaryFunctions_[ i ].second );
+      }
+
       const Expression *function ( const std::string &name ) const
       {
         const FunctionMap::const_iterator it = functions_.find( name );
@@ -99,6 +118,7 @@ namespace Dune
       const Expression *parseMultiplicativeExpression ( const std::string &variableName );
       const Expression *parseExpression ( const std::string &variableName );
       void parseDefault ();
+      void parseSegment ();
 
       void matchToken ( const Token::Type &type, const std::string &message );
       void nextToken ();
@@ -110,12 +130,14 @@ namespace Dune
 
     protected:
       typedef std::map< std::string, const Expression * > FunctionMap;
+      typedef std::pair< std::vector< unsigned int >, const Expression * > BoundaryFunction;
 
       using BasicBlock::line;
 
       Token token;
       FunctionMap functions_;
       const Expression *defaultFunction_;
+      std::vector< BoundaryFunction > boundaryFunctions_;
     };
 
 
