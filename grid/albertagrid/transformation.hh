@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_TRANSFORMATION_HH
 #define DUNE_ALBERTA_TRANSFORMATION_HH
 
+#include <dune/common/fvector.hh>
+
 #include <dune/grid/albertagrid/misc.hh>
 
 #if HAVE_ALBERTA
