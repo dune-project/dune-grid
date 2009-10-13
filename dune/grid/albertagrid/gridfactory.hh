@@ -413,10 +413,10 @@ namespace Dune
 
   template< int dim, int dimworld >
   class GridFactory< AlbertaGrid< dim, dimworld > >::ProjectionFactory
-    : public Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dimworld >, ProjectionFactory >
+    : public Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dim >, ProjectionFactory >
   {
     typedef ProjectionFactory This;
-    typedef Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dimworld >, ProjectionFactory > Base;
+    typedef Alberta::ProjectionFactory< Alberta::DuneBoundaryProjection< dim >, ProjectionFactory > Base;
 
     typedef typename Dune::GridFactory< AlbertaGrid< dim, dimworld > > Factory;
 
