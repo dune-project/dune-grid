@@ -17,6 +17,5 @@ stamp-h1
 dune-grid-*.tar.gz
 dune-grid-?.?
 ltmain.sh
-dune
 am
 .libs
