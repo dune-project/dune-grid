@@ -462,24 +462,24 @@ WARN_LOGFILE           =
 
 INPUT                  = @srcdir@/mainpage \
                          @srcdir@/modules \
-                         @top_srcdir@/grid/genericgeometry/doc/genericgeometrypage \
-                         @top_srcdir@/grid/genericgeometry/doc/genericgeometrytransitionpage \
-                         @top_srcdir@/grid/modules \
-                         @top_srcdir@/grid/albertagrid \
-                         @top_srcdir@/grid/albertagrid.hh \
-                         @top_srcdir@/grid/alugrid.hh \
-                         @top_srcdir@/grid/alugrid \
-                         @top_srcdir@/grid/common \
-                         @top_srcdir@/grid/io \
-                         @top_srcdir@/grid/onedgrid.hh \
-                         @top_srcdir@/grid/sgrid.hh \
-                         @top_srcdir@/grid/uggrid.hh \
-                         @top_srcdir@/grid/uggrid/uggridfactory.hh \
-                         @top_srcdir@/grid/utility \
-                         @top_srcdir@/grid/yaspgrid.hh \
-                         @top_srcdir@/grid/genericgeometry \
-                         @top_srcdir@/grid/geogrid.hh \
-                         @top_srcdir@/grid/geogrid
+                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrypage \
+                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrytransitionpage \
+                         @top_srcdir@/dune/grid/modules \
+                         @top_srcdir@/dune/grid/albertagrid \
+                         @top_srcdir@/dune/grid/albertagrid.hh \
+                         @top_srcdir@/dune/grid/alugrid.hh \
+                         @top_srcdir@/dune/grid/alugrid \
+                         @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/io \
+                         @top_srcdir@/dune/grid/onedgrid.hh \
+                         @top_srcdir@/dune/grid/sgrid.hh \
+                         @top_srcdir@/dune/grid/uggrid.hh \
+                         @top_srcdir@/dune/grid/uggrid/uggridfactory.hh \
+                         @top_srcdir@/dune/grid/utility \
+                         @top_srcdir@/dune/grid/yaspgrid.hh \
+                         @top_srcdir@/dune/grid/genericgeometry \
+                         @top_srcdir@/dune/grid/geogrid.hh \
+                         @top_srcdir@/dune/grid/geogrid
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -519,7 +519,7 @@ EXCLUDE_PATTERNS       = */.svn/* */test/*
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = @top_srcdir@/grid/io/file/dgfparser/test 
+EXAMPLE_PATH           = @top_srcdir@/dune/grid/io/file/dgfparser/test 
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -539,14 +539,14 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = @top_srcdir@/grid/sgrid \
-                         @top_srcdir@/grid/yaspgrid \
-                         @top_srcdir@/grid/common \
-                         @top_srcdir@/grid/io/file/dgfparser/test \
+IMAGE_PATH             = @top_srcdir@/dune/grid/sgrid \
+                         @top_srcdir@/dune/grid/yaspgrid \
+                         @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/io/file/dgfparser/test \
                          @top_srcdir@/doc/appl/refelements \
                          @top_srcdir@/doc/refinement \
-                         @top_srcdir@/grid/genericgeometry/doc \
-                         @top_srcdir@/grid/geogrid
+                         @top_srcdir@/dune/grid/genericgeometry/doc \
+                         @top_srcdir@/dune/grid/geogrid
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
