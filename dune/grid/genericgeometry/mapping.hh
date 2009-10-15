@@ -96,7 +96,7 @@ namespace Dune
           z -= y;
           MatrixHelper :: template xTRightInvA< dimension, dimWorld >( JT, z, dx );
           x -= dx;
-        } while( two_norm2(dx) > 1e-12 ); // use some numeric_limit eps?
+        } while( dx.two_norm2() > 1e-12 ); // use some numeric_limit eps?
       }
 
       bool jacobianTransposed ( const LocalCoordType &x,

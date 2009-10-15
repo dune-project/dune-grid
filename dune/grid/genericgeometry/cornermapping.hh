@@ -169,7 +169,7 @@ namespace Dune
           for( unsigned int i = 0; i < dim-1; ++i )
           {
             Jtop[ i ] -= J[ i ];
-            norm += two_norm2( Jtop[ i ] );
+            norm += Jtop[ i ].two_norm2();
             J[ i ].axpy( xn, Jtop[ i ] );
           }
           affine &= (norm < 1e-12);
@@ -203,7 +203,7 @@ namespace Dune
           for( unsigned int i = 0; i < dim-1; ++i )
           {
             Jtop[ i ] -= Jbottom[ i ];
-            norm += two_norm2( Jtop[ i ] );
+            norm += Jtop[ i ].two_norm2();
             J[ i ].axpy( factor, Jbottom[ i ] );
             J[ i ].axpy( factor*xn, Jtop[ i ] );
           }
