@@ -88,7 +88,10 @@ void test ( const GridViewType &view )
 
   for (; eIt!=eEndIt; ++eIt) {
     const GeometryType& geo = eIt->geometry();
-    CachedMapping< TopologyType, MyGeometryTraits< GeometryType > > map( geo );
+    std::vector< Dune::FieldVector<double, GeometryType::coorddimension> > corners;
+    for (int i=0; i<geo.corners(); i++)
+      corners.push_back( geo.corner(i) );
+    CachedMapping< TopologyType, MyGeometryTraits< GeometryType > > map( corners );
     LocalType x(0.1);
     for (int i=0; i<10000; ++i) {
       // test phi
@@ -143,7 +146,7 @@ void test ( const GridViewType &view )
       for (; iiter != view.iend(*eIt); ++ iiter) {
         LocalFaceType xf(0.1);
         GlobalType n = iiter->integrationOuterNormal(xf);
-        LocalType xx(iiter->intersectionSelfLocal().global(xf));
+        LocalType xx(iiter->geometryInInside().global(xf));
         const unsigned int duneFaceNr = iiter->numberInSelf();
         const unsigned int genericFaceNr
           = MapNumbering< TopologyType > :: template dune2generic< 1 >( duneFaceNr );
