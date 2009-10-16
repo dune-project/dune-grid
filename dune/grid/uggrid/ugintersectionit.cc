@@ -447,7 +447,6 @@ Dune::UGGridLeafIntersectionIterator< GridImp >::geometryInOutside () const
 
       // Actually do the computation
       /** \todo Why is this const_cast necessary? */
-      //UGCtype localCoords[dim];
       UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
                                 const_cast<const double**>(cornerCoords), worldPos,
                                 &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
