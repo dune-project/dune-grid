@@ -542,7 +542,7 @@ namespace Dune {
   inline int ALU2dGridEntityPointer<0, const ALU2dGrid<2,2> >:: level () const
   {
     assert( item_ );
-    return (level_ == -1) ? item_->level() : item_->level();
+    return item_->level();
   }
 
   template<int cd, class GridImp>
