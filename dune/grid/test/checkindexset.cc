@@ -156,8 +156,10 @@ namespace Dune
           sout << global[ j ] << " ";
         sout << "]" << std::endl;
 
+#ifdef DUNE_ENABLE_OLD_NUMBERING
         int oldIndex = lset.template subIndex<0>(en,0);
         oldIndex = 0;
+#endif
 
         for( int j = 0; j < numSubEntities; ++j )
         {
