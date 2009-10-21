@@ -1099,8 +1099,9 @@ namespace Dune
           i[ k-1 ] = 0;
 
         assert( m < vtx.size() );
-        for( int j = 0; j < dimw(); ++j )
-          vtx[ m ][ j ] = interval.p[ 0 ][ j ] + i[ j ]*interval.h[ j ];
+        for( int j = 0; j < dimw(); ++j ) {
+          vtx[ m ][ j ] = interval.p[ 0 ][ j ] + double(i[ j ])*interval.h[ j ];
+        }
         ++m;
 
         // increase i[ k ] and go up for all finished loops
@@ -1123,7 +1124,7 @@ namespace Dune
 
       size_t old_size = cubes.size();
       cubes.resize( old_size + nofhexa( block ) );
-      for( size_t i = 0; i < cubes.size(); ++i )
+      for( size_t i = old_size; i < cubes.size(); ++i )
         cubes[ i ].resize( verticesPerCube );
 
       size_t m = old_size;
@@ -1201,6 +1202,7 @@ namespace Dune
         }
 
         interval.h[ i ] = (right - left) / double( n );
+        assert( interval.h[ i ] > 0);
       }
       intervals_.push_back( interval );
 

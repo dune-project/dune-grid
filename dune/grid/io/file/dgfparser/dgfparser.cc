@@ -83,7 +83,7 @@ namespace Dune
   DuneGridFormatParser :: DuneGridFormatParser ()
     : dimw( -1 ),
       dimgrid( -1 ),
-      vtx(0), nofvtx(0), vtxoffset(0),
+      vtx(0), nofvtx(0), vtxoffset(0), minVertexDistance(1e-12),
       elements(0) , nofelements(0),
       bound(0) , nofbound(0),
       facemap(),
@@ -467,7 +467,8 @@ namespace Dune
       {
         dgf :: SimplexBlock bsimplex( gridin, -1, -1, dimgrid );
         simplexgrid = bsimplex.isactive();
-        info->cube2simplex( element );
+        if (simplexgrid)
+          info->cube2simplex( element );
       }
 
       interval.get( vtx, nofvtx, elements, nofelements );
@@ -476,7 +477,8 @@ namespace Dune
         nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
 
       // remove copies of vertices
-      removeCopies();
+      if ( bvtx.isactive() || interval.numIntervals()>1)
+        removeCopies();
     }
     else
     {
@@ -576,10 +578,10 @@ namespace Dune
     for (size_t i=0; i<vtx.size(); i++) {
       if ((size_t)map[i]!=i) continue;
       for (size_t j=i+1; j<vtx.size(); j++) {
-        double len=pow(vtx[i][0]-vtx[j][0],2.);
+        double len=std::abs(vtx[i][0]-vtx[j][0]);
         for (int p=1; p<dimw; p++)
-          len+=pow(vtx[i][p]-vtx[j][p],2.);
-        if (len<1e-10) {
+          len+=std::abs(vtx[i][p]-vtx[j][p]);
+        if (len<minVertexDistance) {
           map[j]=i;
           for (size_t k=j+1; k<vtx.size(); k++)
             shift[k]++;
