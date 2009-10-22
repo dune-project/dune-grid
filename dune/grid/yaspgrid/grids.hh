@@ -743,6 +743,18 @@ namespace Dune {
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
       }
 
+      //! Return true when two iterators over the same grid are equal (!).
+      bool operator== (const SubIterator& i) const
+      {
+        return _superindex == i._superindex;
+      }
+
+      //! Return true when two iterators over the same grid are not equal (!).
+      bool operator!= (const SubIterator& i) const
+      {
+        return _superindex != i._superindex;
+      }
+
       //! Return consecutive index in enclosing grid
       int superindex () const
       {
@@ -788,6 +800,13 @@ namespace Dune {
             this->_coord[i]=this->_origin[i];         // move back to origin in direction i
             _superindex -= _size[i]*_superincrement[i];
           }
+        }
+        // if we wrapped around, back to to begin(), we must put the iterator to end()
+        if (this->_coord == this->_origin)
+        {
+          for (int i=0; i<d; i++)
+            this->_superindex += (this->_size[i]-1)*this->_superincrement[i];
+          this->_superindex += this->_superincrement[0];
         }
         return *this;
       }
@@ -860,7 +879,7 @@ namespace Dune {
       //! Increment iterator to next cell with position.
       TransformingSubIterator& operator++ ()
       {
-        ++(this->_index);                       // update consecutive index in subgrid
+        ++(this->_index);               // update consecutive index in subgrid
         for (int i=0; i<d; i++)         // check for wrap around
         {
           this->_superindex += this->_superincrement[i];   // move on cell in direction i
@@ -875,6 +894,13 @@ namespace Dune {
             this->_superindex -= this->_size[i]*this->_superincrement[i];
             _position[i] = _begin[i];
           }
+        }
+        // if we wrapped around, back to to begin(), we must put the iterator to end()
+        if (this->_coord == this->_origin)
+        {
+          for (int i=0; i<d; i++)
+            this->_superindex += (this->_size[i]-1)*this->_superincrement[i];
+          this->_superindex += this->_superincrement[0];
         }
         return *this;
       }
