@@ -728,6 +728,8 @@ namespace Dune {
     {
       if (_g.cell_interior().inside(_it.coord())) return InteriorEntity;
       if (_g.cell_overlap().inside(_it.coord())) return OverlapEntity;
+      DUNE_THROW(GridError, "Impossible GhostEntity " << _it.coord() << "\t"
+                                                      << _g.cell_interior().origin() << "/" << _g.cell_interior().size());
       return GhostEntity;
     }
 
