@@ -296,6 +296,9 @@ namespace Dune {
     // get geo face
     const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
+    //assert( duneFace >= 0 && duneFace < 4 );
+    if(duneFace < 0 ) duneFace = 0;
+
     // for all vertices of this face get rotatedIndex
     int rotatedALUIndex[3];
     for (int i = 0; i < 3; ++i)
