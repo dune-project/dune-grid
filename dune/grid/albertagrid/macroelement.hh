@@ -18,10 +18,32 @@ namespace Dune
     struct MacroElement
       : public ALBERTA MACRO_EL
     {
+      const GlobalVector &coordinate ( const int vertex ) const;
+
       int boundaryId ( const int face ) const;
       bool isBoundary ( const int face ) const;
       const MacroElement< dim > *neighbor ( const int face ) const;
     };
+
+
+#if DUNE_ALBERTA_VERSION >= 0x300
+    template< int dim >
+    inline const GlobalVector &MacroElement< dim >::coordinate ( const int vertex ) const
+    {
+      assert( (vertex >= 0) && (vertex < N_VERTICES_MAX) );
+      return *coord[ vertex ];
+    }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+
+
+#if DUNE_ALBERTA_VERSION < 0x300
+    template< int dim >
+    inline const GlobalVector &MacroElement< dim >::coordinate ( const int vertex ) const
+    {
+      assert( (vertex >= 0) && (vertex < N_VERTICES_MAX) );
+      return *((const GlobalVector *)coord[ vertex ]);
+    }
+#endif // #if DUNE_ALBERTA_VERSION < 0x300
 
 
     template< int dim >

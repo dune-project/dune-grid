@@ -604,7 +604,7 @@ namespace Dune
       data_->n_macro_elements = newSize;
       data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
       data_->boundary = memReAlloc( data_->boundary, oldSize*numVertices, newSize*numVertices );
-      assert( data_->mel_vertices != NULL );
+      assert( (newSize == 0) || (data_->mel_vertices != NULL) );
     }
 
   }

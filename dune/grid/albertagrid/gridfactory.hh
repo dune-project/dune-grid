@@ -372,7 +372,7 @@ namespace Dune
         for( int i = 0; i <= dimension; ++i )
         {
           const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
-          const Alberta::GlobalVector &y = *macroElement.coord[ i ];
+          const Alberta::GlobalVector &y = macroElement.coordinate( i );
           for( int j = 0; j < dimensionworld; ++j )
           {
             if( x[ i ] != y[ i ] )
