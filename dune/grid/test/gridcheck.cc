@@ -538,7 +538,7 @@ struct subIndexCheck
       {
         int id_e = levelIndexSet.index( e );
         int id_e_i = levelIndexSet.index( *ep );
-#ifdef DUNE_ENABLE_OLD_NUMBERING
+#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
         int subid_e_i_old = levelIndexSet.template subIndex<cd>( e, i);
         subid_e_i_old = 0;
 #endif
@@ -1150,7 +1150,7 @@ void gridcheck (Grid &g)
         std::cerr << "Error: Inconsistent global subId for vertex " << g.globalIdSet().id(*(it->template subEntity<dim>(0))) << std::endl;
         assert(false);
       }
-#ifdef DUNE_ENABLE_OLD_NUMBERING
+#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
       g.globalIdSet().template subId<dim>(*it,0);
 #endif
     }

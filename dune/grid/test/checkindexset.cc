@@ -156,7 +156,7 @@ namespace Dune
           sout << global[ j ] << " ";
         sout << "]" << std::endl;
 
-#ifdef DUNE_ENABLE_OLD_NUMBERING
+#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
         int oldIndex = lset.template subIndex<0>(en,0);
         oldIndex = 0;
 #endif

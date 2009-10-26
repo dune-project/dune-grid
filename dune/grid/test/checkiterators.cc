@@ -50,8 +50,10 @@ struct CheckIterators< GridView >::CheckCodim
       const typename ElementIterator::Entity &entity = *it;
       for( int i = 0; i < entity.template count< codim >(); ++i )
       {
+#if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
         IdType idOld = idSet.template subId<codim>( entity, i);
         idOld = 0;
+#endif
         IdType id = idSet.subId( entity, i, codim );
         if( count[ id ] != 1 )
         {
