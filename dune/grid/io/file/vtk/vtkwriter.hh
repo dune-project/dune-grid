@@ -640,7 +640,7 @@ namespace Dune
     void addVertexData (const V& v, std::string name)
     {
       VTKFunction* p = new P1VectorWrapper< V >( gridView_, v, name );
-      vertexdata.push_back(p);
+      vertexdata.push_back(VTKFunctionPtr(p));
     }
 
     //! clear list of registered functions
