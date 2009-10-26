@@ -213,7 +213,7 @@ namespace Dune
         const int oldSize = data_->n_total_vertices;
         data_->n_total_vertices = newSize;
         data_->coords = memReAlloc< GlobalVector >( data_->coords, oldSize, newSize );
-        assert( data_->coords != NULL );
+        assert( (data_->coords != NULL) || (newSize == 0) );
       }
     };
 
