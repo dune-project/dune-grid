@@ -298,6 +298,8 @@ namespace Dune
     Grid *createGrid ( const std::string &gridName )
     {
       macroData_.finalize();
+      if( macroData_.elementCount() == 0 )
+        DUNE_THROW( GridError, "Cannot create empty AlbertaGrid." );
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );
       assert( macroData_.checkNeighbors() );
