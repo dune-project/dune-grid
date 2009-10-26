@@ -603,7 +603,7 @@ namespace Dune
     void addCellData (const V& v, std::string name)
     {
       VTKFunction* p = new P0VectorWrapper< V >( gridView_, v, name );
-      celldata.push_back(p);
+      celldata.push_back(VTKFunctionPtr(p));
     }
 
     /**
