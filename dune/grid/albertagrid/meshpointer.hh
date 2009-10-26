@@ -92,6 +92,7 @@ namespace Dune
           return std::string();
       }
 
+      int numMacroElements () const;
       int size ( int codim ) const;
 
       void create ( const MacroData< dim > &macroData, const std::string &name );
@@ -126,6 +127,13 @@ namespace Dune
       initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
     };
 
+
+
+    template< int dim >
+    inline int MeshPointer< dim >::numMacroElements () const
+    {
+      return (mesh_ != NULL ? mesh_->n_macro_el : 0);
+    }
 
 
     template<>
@@ -398,13 +406,13 @@ namespace Dune
     private:
       explicit MacroIterator ( const MeshPointer &mesh, bool end = false )
         : mesh_( mesh ),
-          index_( end ? numMacroElements() : 0 )
+          index_( end ? mesh.numMacroElements() : 0 )
       {}
 
     public:
       bool done () const
       {
-        return (index_ >= numMacroElements());
+        return (index_ >= mesh().numMacroElements());
       }
 
       bool equals ( const MacroIterator &other ) const
@@ -460,11 +468,6 @@ namespace Dune
       }
 
     private:
-      int numMacroElements () const
-      {
-        return mesh().mesh_->n_macro_el;
-      }
-
       MeshPointer mesh_;
       int index_;
     };
