@@ -369,10 +369,10 @@ namespace Dune
     bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &e );
 
     //! uses the interface, mark on entity and refineLocal
-    bool globalRefine ( int refCount );
+    void globalRefine ( int refCount );
 
     template< class DataHandle >
-    bool globalRefine ( int refCount, AdaptDataHandleInterface< This, DataHandle > &handle );
+    void globalRefine ( int refCount, AdaptDataHandleInterface< This, DataHandle > &handle );
 
     /** \copydoc Dune::Grid::adapt() */
     bool adapt ();
