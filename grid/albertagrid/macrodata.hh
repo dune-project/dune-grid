@@ -193,7 +193,7 @@ namespace Dune
         const int oldSize = data_->n_total_vertices;
         data_->n_total_vertices = newSize;
         data_->coords = memReAlloc< GlobalVector >( data_->coords, oldSize, newSize );
-        assert( data_->coords != NULL );
+        assert( (data_->coords != NULL) || (newSize == 0) );
       }
     };
 
@@ -570,7 +570,7 @@ namespace Dune
       data_->n_macro_elements = newSize;
       data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
       data_->boundary = memReAlloc( data_->boundary, oldSize*numVertices, newSize*numVertices );
-      assert( data_->mel_vertices != NULL );
+      assert( (newSize == 0) || (data_->mel_vertices != NULL) );
     }
 #endif // #if DUNE_ALBERTA_VERSION >= 0x200
 
