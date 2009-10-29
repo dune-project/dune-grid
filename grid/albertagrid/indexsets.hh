@@ -253,7 +253,7 @@ namespace Dune
     {
       IndexStack *indexStack;
       if( IndexVectorPointer::supportsAdaptationData )
-        indexStack = dofVector.getAdaptationData< IndexStack >();
+        indexStack = dofVector.template getAdaptationData< IndexStack >();
       else
         indexStack = &Alberta::currentIndexStack[ codim ];
       assert( indexStack != 0 );
