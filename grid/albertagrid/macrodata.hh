@@ -4,6 +4,7 @@
 #define DUNE_ALBERTA_MACRODATA_HH
 
 #include <dune/common/fvector.hh>
+#include <dune/common/fmatrix.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/albertaheader.hh>
