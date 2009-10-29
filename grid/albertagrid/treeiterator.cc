@@ -278,7 +278,7 @@ namespace Dune
       const int face = (dimension == 1 ? (numSubEntities-1)-subEntity_ : subEntity_);
 
       const ALBERTA EL *neighbor = elementInfo.elInfo().neigh[ face ];
-      if( neighbor != NULL )
+      if( (neighbor != NULL) && !elementInfo.isBoundary( face ) )
       {
         // face is reached from element with largest number
         const int elIndex = grid().dofNumbering() ( elementInfo, 0, 0 );
