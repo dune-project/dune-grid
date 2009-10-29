@@ -206,6 +206,8 @@ namespace Dune
     Grid *createGrid ( const std::string &gridName, bool markLongestEdge = false )
     {
       macroData_.finalize();
+      if( macroData_.elementCount() == 0 )
+        DUNE_THROW( GridError, "Cannot create empty AlbertaGrid." );
       if( markLongestEdge )
         macroData_.markLongestEdge();
       return new Grid( macroData_, gridName );
