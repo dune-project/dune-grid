@@ -146,7 +146,6 @@ namespace Dune
     template<int cc>     // this is now the subentity's codim
     int DUNE_DEPRECATED map (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template map<cc>(e,i)));
       typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( e.type() );
       const int j = Numbering::template dune2generic< cc >( tid, i.value() );
@@ -219,7 +218,6 @@ namespace Dune
     template<int cc>     // this is now the subentity's codim
     bool DUNE_DEPRECATED contains (const typename G::Traits::template Codim<0>::Entity& e, deprecated_int i, int& result) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().template contains<cc>(e,i,result)))
       typedef GenericGeometry::MapNumberingProvider< G::dimension > Numbering;
       const unsigned int tid = GenericGeometry::topologyId( e.type() );
       const int j = Numbering::template dune2generic< cc >( tid, i.value() );
