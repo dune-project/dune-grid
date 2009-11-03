@@ -595,9 +595,9 @@ namespace Dune {
     bool loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
     /** \brief The communication interface for all codims on a given level
-       @param T array class holding data associated with the entities
-       @param DataHandle type used to gather/scatter data in and out of the message buffer
+       @param dataHandle type used to gather/scatter data in and out of the message buffer
        @param iftype one of the predifined interface types, throws error if it is not implemented
+       @param dir choose beetween forward and backward communication
        @param level communicate for entities on the given level
 
        Implements a generic communication function sending an object of type P for each entity
@@ -605,15 +605,15 @@ namespace Dune {
        the protocol. Therefore P is called the "protocol class".
      */
     template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    void communicate (DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       DUNE_THROW(NotImplemented, "Level communication has not been implemented yet!");
     }
 
     /** \brief The communication interface for all codims on the leaf level
-       @param T array class holding data associated with the entities
-       @param DataHandle type used to gather/scatter data in and out of the message buffer
+       @param dataHandle type used to gather/scatter data in and out of the message buffer
        @param iftype one of the predifined interface types, throws error if it is not implemented
+       @param dir choose beetween forward and backward communication
 
        Implements a generic communication function sending an object of type P for each entity
        in the intersection of two processors. P has two methods gather and scatter that implement
@@ -741,7 +741,7 @@ namespace Dune {
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
-        \param children For each subface: element index, elementSide, and level
+        \param[out] childElements For each subface: element index, elementSide, and level
      */
     void getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
                               int elementSide,
