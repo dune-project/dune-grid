@@ -138,6 +138,8 @@ namespace Dune {
     IteratorBack *backend;
   };
 
+#ifndef DOXYGEN
+
   template<int dimension, class CoordType>
   template<int codimension>
   VirtualRefinement<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
@@ -199,6 +201,8 @@ namespace Dune {
   VirtualRefinement<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
   coords() const
   { return backend->coords(); }
+
+#endif // DOXYGEN
 
   //
   // The iterator backend
@@ -487,8 +491,8 @@ namespace Dune {
   /*! @brief return a reference to the VirtualRefinement according to
              the parameters
 
-     @param dimension Dimension of the element to refine
-     @param CoordType C++ type of the coordinates
+     @tparam dimension Dimension of the element to refine
+     @tparam CoordType C++ type of the coordinates
 
      @throws NotImplemented There is no Refinement implementation for
                            the specified parameters.
@@ -508,8 +512,8 @@ namespace Dune {
   /*! @brief return a reference to the VirtualRefinement according to
              the parameters
 
-     @param dimension Dimension of the element to refine
-     @param CoordType C++ type of the coordinates
+     @tparam dimension Dimension of the element to refine
+     @tparam CoordType C++ type of the coordinates
 
      @throws NotImplemented There is no Refinement implementation for
                            the specified parameters.
