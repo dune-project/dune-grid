@@ -1389,11 +1389,13 @@ namespace Dune {
     }
 
     /*! The communication interface
-          @param T: array class holding data associated with the entities
-          @param P: type used to gather/scatter data in and out of the message buffer
-          @param codim: communicate entites of given codim
-          @param if: one of the predifined interface types, throws error if it is not implemented
-          @param level: communicate for entities on the given level
+          @tparam T array class holding data associated with the entities
+          @tparam P type used to gather/scatter data in and out of the message buffer
+          @tparam codim communicate entites of given codim
+          @param t array holding data associated with the entities
+          @param iftype one of the predifined interface types, throws error if it is not implemented
+          @param dir choose beetween forward and backward communication
+          @param level communicate for entities on the given level
 
           Implements a generic communication function sending an object of type P for each entity
        in the intersection of two processors. P has two methods gather and scatter that implement
