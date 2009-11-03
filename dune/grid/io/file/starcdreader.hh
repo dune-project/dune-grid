@@ -46,7 +46,7 @@ namespace Dune {
   public:
 
     /** \brief Read grid from a Star-CD file
-     *    \param grid The grid
+     *    \return Pointer to the grid
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
      */
