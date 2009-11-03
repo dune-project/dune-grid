@@ -331,6 +331,7 @@ namespace Dune
       return s;
     }
 
+#ifdef INDEXSET_HAS_ITERATORS
     /** @brief Return true if the given entity is contained in \f$E\f$.
      */
     template<class EntityType>
@@ -347,6 +348,7 @@ namespace Dune
       }
       return false;
     }
+#endif // #ifdef INDEXSET_HAS_ITERATORS
 
   private:
     //!  Barton-Nackman trick
