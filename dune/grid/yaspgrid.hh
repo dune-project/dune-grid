@@ -2320,11 +2320,12 @@ namespace Dune {
     std::string name() const { return "YaspGrid"; };
 
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
-          @param comm MPI communicator where this mesh is distributed to
-          @param L extension of the domain
-          @param s number of cells on coarse mesh in each direction
+       @param comm MPI communicator where this mesh is distributed to
+       @param L extension of the domain
+       @param s number of cells on coarse mesh in each direction
        @param periodic tells if direction is periodic or not
-       @param size of overlap on coarsest grid (same in all directions)
+       @param overlap size of overlap on coarsest grid (same in all directions)
+       @param lb pointer to an overloaded YLoadBalance instance
      */
 #if HAVE_MPI
     YaspGrid (MPI_Comm comm, Dune::FieldVector<ctype, dim> L,
@@ -2359,7 +2360,8 @@ namespace Dune {
        @param L extension of the domain
        @param s number of cells on coarse mesh in each direction
        @param periodic tells if direction is periodic or not
-       @param size of overlap on coarsest grid (same in all directions)
+       @param overlap size of overlap on coarsest grid (same in all directions)
+       @param lb pointer to an overloaded YLoadBalance instance
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               Dune::FieldVector<int, dim> s,
