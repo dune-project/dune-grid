@@ -41,30 +41,6 @@ namespace Dune
      because different implementations for different codimensions may be required
      and virtual functions had to be avoided.
 
-     This relation is shown in the following diagram:
-
-     \dot
-        digraph entity {
-           rankdir=LR;
-           node [ shape=record, fontname=Helvetica, fontsize=10, height=0.25 ];
-           Entity [ label="Dune::Entity\<cd,dim,GridImp,EntityImp\>"
-                    style=filled, bgcolor=lightgrey
-                    shape=record, URL="\ref Dune::Entity"];
-           Element [ label="Dune::Entity\<0,dim,GridImp,EntityImp\>"
-                     URL="\ref Dune::Entity<0,dim,GridImp,EntityImp>"];
-           Vertex [ label="Dune::Entity\<dim,dim,GridImp,EntityImp\>"
-                    URL="\ref Dune::Entity<dim,dim,GridImp,EntityImp>"];
-           Entity -> Element [ dirType="back", arrowType="open",
-                               style="dashed"
-                               fontname=Helvetica, fontsize=8,
-                               label="cd=0" ];
-           Entity -> Vertex [ dirType="back", arrowType="open", style="dashed"
-                               fontname=Helvetica, fontsize=8,
-                               label="cd=dim" ];
-        }
-     \enddot
-
-
      <H3>View concept</H3>
 
      Entities can not be created, assigned or otherwise modified outside
@@ -208,6 +184,8 @@ namespace Dune
      @brief Template specialization of Dune::Entity for Elements (codim==0)
 
      @see Dune::Entity (general version) for the full documentation
+
+     \extends Entity<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
 
      \ingroup GIEntity
      \nosubgrouping
@@ -568,8 +546,7 @@ namespace Dune
      EntityDefaultImplementation provides default implementations for Entity which uses
      the implemented interface which has to be done by the user.
 
-     @note
-     this specialization has an extended interface compared to the general case
+     \extends EntityDefaultImplementation<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
 
      @ingroup GridDevel
    */
