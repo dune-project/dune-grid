@@ -31,7 +31,7 @@
    <!--=============-->
 
    <dl>
-   <dt>Kuhn simplex</dd>
+   <dt>Kuhn simplex</dt>
    <dd>To triangulate hypercubes we use the Kuhn triangulation.  The
       members of this triangulation we call <em>Kuhn simplices</em>.
       The Kuhn simplices are indexed by their corresponding
@@ -141,10 +141,10 @@
    position of the point in gridunits and thus is integer.
 
             n-1                 n-1
-            --		        --  ( n-i+x[i]-1 )
-   I(n, X) = >  N(n-i, x[i]-1) = >   (	         )
-            --		        --  (    n-i     )
-            i=0		        i=0
+            --                  --  ( n-i+x[i]-1 )
+   I(n, X) = >  N(n-i, x[i]-1) = >   (            )
+            --                  --  (    n-i     )
+            i=0                 i=0
 
    Since the dimensions within the Kuhn0 Simplex have a defined order
    (x[0] >= x[1] >= ... >= x[n-1]) they cannot simply be swapped so the
@@ -373,7 +373,8 @@ namespace Dune {
       // map between the reference simplex and some arbitrary kuhn simplex (denoted by it's permutation)
       /*! @brief Map from the reference simplex to some Kuhn simplex
 
-         @param dimension Dimension of the simplices
+         @tparam dimension Dimension of the simplices
+         @tparam CoordType    The C++ type of the coordinates
 
          Runtime is of order O(dimension)
        */
@@ -391,7 +392,8 @@ namespace Dune {
 
       /*! @brief Map from some Kuhn simplex to the reference simplex
 
-         @param dimension Dimension of the simplices
+         @tparam dimension Dimension of the simplices
+         @tparam CoordType    The C++ type of the coordinates
 
          Runtime is of order O(dimension)
        */
@@ -757,12 +759,16 @@ namespace Dune {
         SubEntityIterator(int level, bool end = false);
       };
 
+#ifndef DOXYGEN
+
       template<int dimension, class CoordType>
       template<int codimension>
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       SubEntityIterator(int level, bool end)
         : RefinementIteratorSpecial<dimension, CoordType, codimension>(level, end)
       {}
+
+#endif
 
       // ///////////////
       //

@@ -23,7 +23,7 @@
     @ingroup Refinement
 
    This @ref Refinement implementation uses an SGrid as it's backend.
-   The SGrid is wrapped by @ref RefinementGrid to make it singleton.
+   The SGrid is wrapped by @ref Dune::RefinementImp::HCube::RefinementGrid to make it singleton.
    RefinementImp than adapts the SGrid interface to the @ref Refinement
    interface.
 
@@ -177,15 +177,16 @@ namespace Dune {
       // The backend Grid
       //
 
-      /*! @brief Backend grid for hypercube refinement
+      /*!
+         @brief Backend grid for hypercube refinement
 
-          @param dimension Dimension of the refined hypercube
+         @param dimension Dimension of the refined hypercube
 
-          This grid is used as backend by @ref RefinementImp.  It simply
-          wraps an SGrid to make it a singleton.  We have to use SGrids
-          default CoordType here instead of the one from the refined
-          hypercube, because I know of no way to set the CoordType used
-          by SGrid.
+         This grid is used as backend by @ref RefinementImp.  It simply
+         wraps an SGrid to make it a singleton.  We have to use SGrids
+         default CoordType here instead of the one from the refined
+         hypercube, because I know of no way to set the CoordType used
+         by SGrid.
        */
       template<int dimension>
       class RefinementGrid : public SGrid<dimension, dimension>
@@ -244,9 +245,9 @@ namespace Dune {
 #ifdef DOXYGEN
       /*! @brief SubEntityIterator base class for hypercube refinement
 
-          @param dimension   Dimension of the refined element
-          @param CoordType   Coordinate type of the refined element
-          @param codimension Codimension of the iterator
+          @tparam dimension   Dimension of the refined element
+          @tparam CoordType   Coordinate type of the refined element
+          @tparam codimension Codimension of the iterator
 
           This is the base class for SubEntityIterators.  We have to use
           this construct because RefinementImp<...>::codim<...> cannot
@@ -349,6 +350,8 @@ namespace Dune {
         BackendIterator backend;
       };
 
+#ifndef DOXYGEN
+
       template<int dimension, class CoordType>
       template<int codimension>
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
@@ -380,14 +383,14 @@ namespace Dune {
       { return RefinementGrid<dimension>::instance().levelIndexSet(backend->level()).index(*backend); }
       //      { return backend->index(); }
 
-
-
       template<int dimension, class CoordType>
       template<int codimension>
       const typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry &
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       geometry() const
       { return backend->geometry(); }
+
+#endif // DOXYGEN
 
     } // namespace HCube
 

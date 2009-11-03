@@ -368,6 +368,8 @@ namespace Dune {
         using RefinementIteratorSpecial<dimension, CoordType, codimension>::backend;
       };
 
+#ifndef DOXYGEN
+
       template<int dimension, class CoordType>
       template<int codimension>
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
@@ -381,6 +383,8 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       equals(const This &other) const
       { return kuhnIndex == other.kuhnIndex && backend == other.backend; }
+
+#endif // DOXYGEN
 
       // ///////////
       //
@@ -502,3 +506,4 @@ namespace Dune {
 } // namespace Dune
 
 #endif //DUNE_GRID_COMMON_REFINEMENT_HCUBETRIANGULATION_CC
+xo

@@ -37,10 +37,10 @@ namespace Dune {
        @brief Mapping from geometryType, CoordType and coerceTo to a
               particular @ref Refinement implementation.
 
-       @param geometryType The GeometryType::BasicType of the element to refine
-       @param CoordType    The C++ type of the coordinates
-       @param coerceTo     The GeometryType::BasicType of the subelements
-       @param dimension    The dimension of the refinement.
+       @tparam geometryType The GeometryType::BasicType of the element to refine
+       @tparam CoordType    The C++ type of the coordinates
+       @tparam coerceTo     The GeometryType::BasicType of the subelements
+       @tparam dimension    The dimension of the refinement.
 
        Each @ref Refinement implementation has to define one or more
        specialisations of this struct to declare what it implements.
@@ -99,7 +99,7 @@ namespace Dune {
 #ifdef DOXYGEN
     /*! @brief The Codim struct inherited from the @ref Refinement implementation
 
-       @param codimension There is a different struct Codim for each codimension
+       @tparam codimension There is a different struct Codim for each codimension
      */
     template<int codimension>
     struct Codim
