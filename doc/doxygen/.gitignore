@@ -1,8 +1,10 @@
 .deps
 doxy-header.html
 Doxyfile
+Doxyfile.in
 doxygen-tag
 doxygen.log
+doxyerr.log
 html
 latex
 Makefile
