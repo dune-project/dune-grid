@@ -52,6 +52,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/grid/sgrid.hh>
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/referenceelements.hh>
 #include <dune/common/iteratorfacades.hh>
 #include "base.cc" // for RefinementTraits
 
