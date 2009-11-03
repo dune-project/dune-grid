@@ -79,9 +79,7 @@ namespace Dune
 
     /** @brief Construct mapper from grid and one of its index sets.
 
-       \param grid A Dune grid object.
-       \param indexset IndexSet object returned by grid.
-
+       \param gridView A Dune GridView object.
      */
     MultipleCodimMultipleGeomTypeMapper (const GV& gridView)
       : is(gridView.indexSet())
@@ -272,6 +270,7 @@ namespace Dune
      * using the default constructor.
      *
      * @param grid A reference to a grid.
+     * @param level A valid level of the grid.
      * @param layout A layout object
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)

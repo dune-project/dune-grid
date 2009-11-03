@@ -126,7 +126,7 @@ namespace Dune
 
        \param[in] e Reference to codim 0 entity
        \param[in] i subentity number
-       \param[in] i subentity codim
+       \param[in] cc subentity codim
        \param[out] result integer reference where corresponding index is stored if true
        \return true if entity is in entity set of the mapper
      */
