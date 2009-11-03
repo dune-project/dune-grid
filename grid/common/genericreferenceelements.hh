@@ -149,7 +149,7 @@ namespace Dune
     };
 
     int codim_;
-    std :: vector< int > numbering_[ dim+1 ];
+    std::vector< int > numbering_[ dim+1 ];
     FieldVector< ctype, dim > baryCenter_;
     GeometryType type_;
 
@@ -182,8 +182,11 @@ namespace Dune
       typedef Initialize< Topology, codim > Init;
       typedef GenericGeometry::ReferenceElement< Topology, ctype > RefElement;
 
+      codim_ = codim;
+
       const unsigned int iVariable = i;
       GenericGeometry::ForLoop< Init::template SubCodim, 0, dim-codim >::apply( iVariable, numbering_ );
+
       baryCenter_ = RefElement::template baryCenter< codim >( i );
 
       typedef typename GenericGeometry::SubTopology< Topology, codim, i >::type SubTopology;
