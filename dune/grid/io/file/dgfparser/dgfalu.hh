@@ -93,6 +93,7 @@ namespace Dune
       return MacroGrid::Impl< ALUCubeGrid<dim,dimworld> > :: fileExists( fileName );
     }
   };
+  /** \endcond */
 
   // DGFGridInfo (specialization for ALUGrid)
   // ----------------------------------------
