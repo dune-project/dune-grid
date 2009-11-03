@@ -84,6 +84,7 @@ namespace Dune {
         pred_(OneDGridNullIteratorFactory<1>::null()),
         succ_(OneDGridNullIteratorFactory<1>::null())
     {
+      father_ = OneDGridNullIteratorFactory<1>::null();
       sons_[0] = sons_[1] = OneDGridNullIteratorFactory<1>::null();
     }
 
