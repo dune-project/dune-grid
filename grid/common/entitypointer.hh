@@ -111,7 +111,7 @@ namespace Dune
   protected:
     IteratorImp realIterator;
 
-    /// autocheck wether imp is convertable into imp::base
+    // autocheck whether imp is convertable into imp::base
     typedef typename
     Dune::EnableIfInterOperable<typename IteratorImp::EntityPointerImp,IteratorImp,
         typename IteratorImp::EntityPointerImp>::type base;
