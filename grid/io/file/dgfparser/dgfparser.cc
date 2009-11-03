@@ -476,8 +476,7 @@ namespace Dune
         nofelements = dgf :: SimplexBlock :: cube2simplex( vtx, elements, elParams );
 
       // remove copies of vertices
-      if ( bvtx.isactive() || interval.numIntervals()>1)
-        removeCopies();
+      removeCopies();
     }
     else
     {
