@@ -59,14 +59,18 @@ namespace Dune {
        have to have the psurface library and build Dune with --with-psurface.
        Ask Oliver sander@mi.fu-berlin.de for help.
 
-       @param grid The grid objects that is to be read
        @param filename The name of the grid file
        @param domainFilename The name of the psurface boundary file
      */
     static GridType* read(const std::string& filename,
                           const std::string& domainFilename);
 
-    /** \brief Read a grid with a parametrized boundary into a given grid object */
+    /** \brief Read a grid with a parametrized boundary into a given grid object
+
+       @param grid The grid objects that is to be read
+       @param filename The name of the grid file
+       @param domainFilename The name of the psurface boundary file
+     */
     static void read(GridType& grid,
                      const std::string& filename,
                      const std::string& domainFilename);

@@ -23,7 +23,7 @@ namespace Dune {
   public:
 
     /** \brief Add a grid view to the file
-        \param grid GridView to be written
+        \param gridView GridView to be written
         \param splitAll If this is set every element of the grid will be split into triangles/tetrahedra.
         Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
         won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
@@ -34,7 +34,7 @@ namespace Dune {
 
     /** \brief Add level grid
         \param grid Grid to be written
-        \param indexSet Level of the level grid that is to be written
+        \param level Level of the level grid that is to be written
         \param splitAll If this is set every element of the grid will be split into triangles/tetrahedra.
         Amira doesn't support 2d quad grids so if this is not set for a quadrilateral grid in 2d the file
         won't be readable by standard Amira. See the refinement documentation to see which types can be split up yet.
@@ -56,16 +56,18 @@ namespace Dune {
     void addLeafGrid(const GridType2& grid, bool splitAll=false);
 
     /** \brief Add cell data
-        \param An ISTL compliant vector type
-        \param Grid view that the data belongs to
+        \param data An ISTL compliant vector type
+        \param gridView Grid view that the data belongs to
+        \param GridSplitUp If the grid has been split up into triangles/tetrahedra you have to set GridSplitUp to make the data
+        consistent with the grid
      */
     template <class DataContainer>
     void addCellData(const DataContainer& data, const GridView& gridView, bool GridSplitUp=false);
 
     /** \brief Add vertex data
-        \param An ISTL compliant vector type
-        \param Grid view that the data belongs to
-        \param If the grid has been split up into triangles/tetrahedra you have to set GridSplitUp to make the data
+        \param data An ISTL compliant vector type
+        \param gridView Grid view that the data belongs to
+        \param GridSplitUp If the grid has been split up into triangles/tetrahedra you have to set GridSplitUp to make the data
         consistent with the grid
      */
     template <class DataContainer>
@@ -177,6 +179,7 @@ namespace Dune {
         @param grid The grid objects that the vector lives on
         @param f The vector to be written.  Has to comply with the ISTL conventions
         @param filename The filename
+        @param GridSplitUp set true to split up the grid into triangles/tetrahedra
      */
     template <class VectorType>
     static void writeBlockVector(const GridType& grid,
