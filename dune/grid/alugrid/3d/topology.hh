@@ -75,14 +75,14 @@ namespace Dune {
     //! Maps local vertex index of a face onto a global vertex index
     //! (Dune->ALU3dGrid)
     //! \param face Face index (Dune reference element)
-    //! \param localVertex Local vertex index on face \face (Dune reference
+    //! \param localVertex Local vertex index on face <i>face</i> (Dune reference
     //! element)
     //! \return global vertex index in ALU3dGrid reference element
     static int dune2aluFaceVertex(int face, int localVertex);
     //! Maps local vertex index of a face onto a global vertex index
     //! (ALU3dGrid->Dune)
     //! \param face Face index (ALU3dGrid reference element)
-    //! \param localVertex Local vertex index on face \face
+    //! \param localVertex Local vertex index on face <i>face</i>
     //! (ALU3dGrid reference element)
     //! \return global vertex index in Dune reference element
     static int alu2duneFaceVertex(int face, int localVertex);
@@ -128,20 +128,20 @@ namespace Dune {
     //! Maps vertex index from Dune onto ALU3dGrid reference face
     static int dune2aluVertex(int index);
     //! Maps vertex index from Dune onto ALU3dGrid reference face, where the
-    //! face in the ALU3dGrid has the twist \twist compared to the orientation
+    //! face in the ALU3dGrid has the twist <i>twist</i> compared to the orientation
     //! of the respective face in the reference element
     //! \param index local Dune vertex index on the particular face (i.e. the
-    //! face which has a twist \twist compared to the reference element's face
+    //! face which has a twist <i>twist</i> compared to the reference element's face
     //! \param twist twist of the face in consideration
     //! \return local ALU3dGrid vertex index on reference element face
     static int dune2aluVertex(int index, int twist);
     //! Maps vertex index from ALU3dGrid onto Dune reference face
     static int alu2duneVertex(int index);
     //! Maps vertex index from ALU3dGrid onto Dune reference face, where the
-    //! face in the ALU3dGrid has the twist \twist compared to the orientation
+    //! face in the ALU3dGrid has the twist <i>twist</i> compared to the orientation
     //! of the respective face in the reference element
     //! \param index local ALU3dGrid vertex index on the particular face (i.e.
-    //! the face which has a twist \twist compared to the reference element's
+    //! the face which has a twist <i>twist</i> compared to the reference element's
     //! face
     //! \param twist twist of the face in consideration
     //! \return local Dune vertex index on reference element face

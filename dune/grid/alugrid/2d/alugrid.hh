@@ -11,7 +11,7 @@
 namespace Dune
 {
 
-  /** @copydoc Dune::ALUSimplexGrid
+  /** @copydoc ALUSimplexGrid
       \brief [<em> provides \ref Dune::Grid </em>]
       \brief grid with support for simplicial mesh in 2d.
       \ingroup ALUSimplexGrid

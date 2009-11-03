@@ -430,10 +430,10 @@ namespace Dune {
     bool refineGrid();
 
     //! @copydoc Dune::Grid::getMark
-    int getMark(const typename Traits::template Codim<0>::Entity & ) const;
+    int getMark(const typename Traits::template Codim<0>::Entity & e) const;
 
     //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
+    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & e);
 
     //! return dummy communication
     const CollectiveCommunicationType & comm() const;

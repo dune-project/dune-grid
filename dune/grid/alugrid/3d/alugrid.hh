@@ -30,7 +30,7 @@ namespace Dune
 
 
 
-  /** @copydoc Dune::ALUCubeGrid
+  /** @copydoc ALUCubeGrid
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons.
      @ingroup ALUCubeGrid
@@ -77,8 +77,6 @@ namespace Dune
   #else
     //! \brief constructor for creating ALUCubeGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid hexa format
-    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
-    //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
     ALUCubeGrid(const std::string macroName,
                 const DuneBoundaryProjectionType* bndProject = 0)
       : BaseType(macroName, bndProject)
@@ -167,7 +165,7 @@ namespace Dune
 
 
 
-  /**  @copydoc Dune::ALUSimplexGrid
+  /**  @copydoc ALUSimplexGrid
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief grid with support for simplicial mesh in 3d.
      \ingroup ALUSimplexGrid
@@ -214,8 +212,6 @@ namespace Dune
   #else
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid tetra format
-    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of
-    //!  type MPI_Comm and the default value is MPI_COMM_WORLD)
     ALUSimplexGrid(const std::string macroName,
                    const DuneBoundaryProjectionType* bndProject = 0) :
       BaseType(macroName, bndProject)

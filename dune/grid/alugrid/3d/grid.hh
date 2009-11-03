@@ -568,7 +568,7 @@ namespace Dune {
     bool adapt ();
 
     /** \brief  @copydoc Dune::Grid::adapt()
-        \param rp handler for restriction and prolongation operations
+        \param handle handler for restriction and prolongation operations
         which is a Model of the AdaptDataHandleInterface class.
      */
     template< class GridImp, class DataHandle >
@@ -608,10 +608,10 @@ namespace Dune {
     void updateStatus ();
 
     //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en );
+    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & e);
 
     //! @copydoc Dune::Grid::getMark
-    int getMark( const typename Traits::template Codim<0>::Entity & ) const;
+    int getMark( const typename Traits::template Codim<0>::Entity & e) const;
 
   public:
     template< class IntersectionInterfaceType >
