@@ -278,10 +278,9 @@ namespace Dune
        @param name Name of data (i.e. solution)
        @param data Data vector storing data to display
        @param indexSet The corresponding index set related to the data
-       @param dinf GrapeDataDisplay internal data
        @param polOrd polynominal order of Lagrangespace, only 0 and 1 allowed
        at the momnent
-       @ param continuous continuous or not (i.e polOrd = 0 ==> discontinuous) default is discontinuous
+       @param continuous continuous or not (i.e polOrd = 0 ==> discontinuous) default is discontinuous
      */
     template< class VectorType, class IndexSetType >
     inline void displayVector ( const std::string name,
