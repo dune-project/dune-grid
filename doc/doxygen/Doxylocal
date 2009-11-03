@@ -1,0 +1,63 @@
+INPUT                 += @srcdir@/mainpage \
+                         @srcdir@/modules \
+                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrypage \
+                         @top_srcdir@/dune/grid/genericgeometry/doc/genericgeometrytransitionpage \
+                         @top_srcdir@/dune/grid/modules \
+                         @top_srcdir@/dune/grid/albertagrid \
+                         @top_srcdir@/dune/grid/albertagrid.hh \
+                         @top_srcdir@/dune/grid/alugrid.hh \
+                         @top_srcdir@/dune/grid/alugrid \
+                         @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/genericgeometry \
+                         @top_srcdir@/dune/grid/geometrygrid.hh \
+                         @top_srcdir@/dune/grid/geometrygrid
+                         @top_srcdir@/dune/grid/io \
+                         @top_srcdir@/dune/grid/onedgrid.hh \
+                         @top_srcdir@/dune/grid/sgrid.hh \
+                         @top_srcdir@/dune/grid/uggrid.hh \
+                         @top_srcdir@/dune/grid/uggrid/uggridfactory.hh \
+                         @top_srcdir@/dune/grid/utility \
+                         @top_srcdir@/dune/grid/yaspgrid.hh
+
+# The EXAMPLE_PATH tag can be used to specify one or more files or 
+# directories that contain example code fragments that are included (see 
+# the \include command).
+
+EXAMPLE_PATH          += @top_srcdir@/dune/grid/io/file/dgfparser/test 
+
+# If the value of the EXAMPLE_PATH tag contains directories, you can use the 
+# EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
+# and *.h) to filter out the source-files in the directories. If left 
+# blank all files are included.
+
+EXAMPLE_PATTERNS      += *.dgf
+
+# The IMAGE_PATH tag can be used to specify one or more files or 
+# directories that contain image that are included in the documentation (see 
+# the \image command).
+
+IMAGE_PATH            += @top_srcdir@/dune/grid/sgrid \
+                         @top_srcdir@/dune/grid/yaspgrid \
+                         @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/io/file/dgfparser/test \
+                         @top_srcdir@/doc/appl/refelements \
+                         @top_srcdir@/doc/refinement \
+                         @top_srcdir@/dune/grid/genericgeometry/doc \
+                         @top_srcdir@/dune/grid/geometrygrid
+
+PREDEFINED            += ENABLE_ALUGRID \
+                         HAVE_ALBERTA:=1
+
+EXCLUDE               += @top_srcdir@/dune/grid/io/visual/grape/grapewrapper.hh \
+                         @top_srcdir@/dune/grid/common/quadraturerules \
+                         @top_srcdir@/dune/grid/alugrid/3d/mappings_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/faceutility_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/entity_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/geometry_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/grid_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/iterator_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/3d/topology.cc \
+                         @top_srcdir@/dune/grid/alugrid/2d/entity_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/2d/geometry_imp.cc  \
+                         @top_srcdir@/dune/grid/alugrid/2d/grid_imp.cc \
+                         @top_srcdir@/dune/grid/alugrid/2d/iterator_imp.cc
