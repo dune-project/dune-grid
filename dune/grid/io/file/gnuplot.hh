@@ -41,7 +41,7 @@ namespace Dune {
     }
 
     /** \brief Add cell data
-        \param An ISTL compliant vector type
+        \param data An ISTL compliant vector type
         \param name associated with the data
      */
     template <class DataContainer>
@@ -53,7 +53,7 @@ namespace Dune {
     }
 
     /** \brief Add vertex data
-        \param An ISTL compliant vector type
+        \param data An ISTL compliant vector type
         \param name associated with the data
      */
     template <class DataContainer>
