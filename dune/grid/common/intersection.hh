@@ -79,10 +79,14 @@ namespace Dune
      <td>ghost entity <em>(if it exists)</em></td></tr>
      </table>
 
-     -# <b> Inner Intersections: </b> <br>
+     <dl>
+     <dt>Inner Intersections: </dt>
+     <dd>
        The type of the neighboring entity can be determined through
        methods defined on the outside entity.
-     -# <b>  Handling physical boundaries: </b>
+     </dd>
+     <dt>Handling physical boundaries: </dt>
+     <dd>
        Different types of physical boundaries can be modeled using either
        the global coordinates of the intersection or by using the
        boundaryID method. On some grids (AluGrid, AlbertaGrid) this
@@ -103,7 +107,9 @@ namespace Dune
          point reflection
          reflection combined with translation...
        .
-     -# <b> Handling periodic boundaries: </b>
+     </dd>
+     <dt>Handling periodic boundaries: </dt>
+     <dd>
        - The Intersection stops at periodic boundaries
        - periodic grids are handled in correspondence to parallel grids
        - %At the periodic boundary one can adjust an overlap- or ghost-layer.
@@ -113,14 +119,18 @@ namespace Dune
          not see a jump or something like that)
        - outer() cell has its own index
        - outer() cell has the same id as the corresponding "original" cell
-     -# <b> Processor boundaries: </b> <br>
+       .
+     </dd>
+     <dt>Processor boundaries: </dt>
+     <dd>
        At processor boundaries, i.e. when an element has an intersection with
        another element
        in the sequential grid but this element is only stored in other processors
        the intersection  stops but neither
        neighbor() nor boundary()
        are true.
-     .
+     </dd>
+     </dl>
 
 
      <h2>Geometry of an intersection</h2>
