@@ -277,7 +277,7 @@ namespace Dune {
 
          Runtime is of order O(n).
        */
-      int factorial(int n)
+      inline int factorial(int n)
       {
         int prod = 1;
         for(int i = 1; i <= n; ++i)
@@ -302,7 +302,7 @@ namespace Dune {
 
          Runtime is of order O(min {lower, upper-lower})
        */
-      int binomial(int upper, int lower)
+      inline int binomial(int upper, int lower)
       {
         if(lower > upper - lower)
           lower = upper - lower;
