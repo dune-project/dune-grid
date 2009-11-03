@@ -141,10 +141,10 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       echo "                                   WARNING"
       echo "  -------------------------------------------------------------------------"
       echo "    ALBERTA 3.0 is still under development. Changes made to ALBERTA after"
-      echo "    the release of DUNE 1.2.1 might affect AlbertaGrid in an unpredictable"
+      echo "    the release of DUNE 1.2.2 might affect AlbertaGrid in an unpredictable"
       echo "    way."
       echo
-      echo "    AlbertaGrid has only been tested with ALBERTA 3.0 rc 5."
+      echo "    AlbertaGrid has only been tested with ALBERTA 3.0 rc 6."
       echo
       echo "    If possible, consider using ALBERTA 2.0. It can be downloaded from"
       echo "    www.alberta-fem.de."
