@@ -402,7 +402,7 @@ namespace Dune
     }
 
     /*! @brief return outer normal scaled with the integration element
-          @copydoc outerNormal
+          @copydoc Dune::Intersection::outerNormal
        The normal is scaled with the integration element of the intersection. This
           method is redundant but it may be more efficent to use this function
           rather than computing the integration element via intersectionGlobal().
