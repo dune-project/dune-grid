@@ -212,7 +212,7 @@ namespace Dune
     };
 
   protected:
-    typedef typename std::list<VTKFunction*>::iterator FunctionIterator;
+    typedef typename std::list<VTKFunction*>::const_iterator FunctionIterator;
 
     class CellIterator :
       public ForwardIteratorFacade<CellIterator, Entity, Entity&, int>
