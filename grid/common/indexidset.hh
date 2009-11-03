@@ -13,12 +13,9 @@
 
 #include <dune/grid/common/grid.hh>
 
+#if DUNE_ENABLE_INDEXSET_ITERATORS
 #define INDEXSET_HAS_ITERATORS
-
-#ifdef INDEXSET_HAS_ITERATORS
-#warning "You enabled iterators on index sets. This feature has been deprecated."
-#warning "Please use grid views instead of index sets to get a view on a grid level."
-#warning "To disable this warning, undefine INDEXSET_HAS_ITERATORS in indexidset.hh."
+#warning "You enabled iterators on index sets. This feature has been deprecated and will be removed from future releases."
 #endif
 
 /** @file
