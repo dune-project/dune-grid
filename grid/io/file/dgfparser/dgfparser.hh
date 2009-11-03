@@ -62,6 +62,7 @@ namespace Dune
     std::vector < std::vector <double> > vtx;
     int nofvtx;
     int vtxoffset;
+    double minVertexDistance; // min. L^1 distance of distinct points
     // vector of elements
     std :: vector< std :: vector< unsigned int > > elements;
     int nofelements;
