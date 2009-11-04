@@ -3,6 +3,8 @@
 #ifndef B64ENC_HH
 #define B64ENC_HH
 
+#include <assert.h>
+
 /** @file
     @author Christian Engwer
     @brief Simple base64 encode
