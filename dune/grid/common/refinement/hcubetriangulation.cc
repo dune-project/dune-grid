@@ -506,4 +506,3 @@ namespace Dune {
 } // namespace Dune
 
 #endif //DUNE_GRID_COMMON_REFINEMENT_HCUBETRIANGULATION_CC
-xo
