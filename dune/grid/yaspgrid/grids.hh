@@ -19,6 +19,7 @@
 // local includes
 #include <dune/common/fvector.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/grid.hh>
 
 /*! \file grids.hh
    This is the basis for the yaspgrid implementation of the Dune grid interface.
