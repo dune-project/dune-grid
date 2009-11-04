@@ -10,7 +10,7 @@ INPUT                 += @srcdir@/mainpage \
                          @top_srcdir@/dune/grid/common \
                          @top_srcdir@/dune/grid/genericgeometry \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
-                         @top_srcdir@/dune/grid/geometrygrid
+                         @top_srcdir@/dune/grid/geometrygrid \
                          @top_srcdir@/dune/grid/io \
                          @top_srcdir@/dune/grid/onedgrid.hh \
                          @top_srcdir@/dune/grid/sgrid.hh \
