@@ -6,9 +6,6 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([dune/grid/common/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
-# make dune -> . symlink
-DUNE_SYMLINK
-
 # check all dune-module stuff
 DUNE_CHECK_ALL
 
