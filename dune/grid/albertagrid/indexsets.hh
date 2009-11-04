@@ -640,30 +640,30 @@ namespace Dune
   //! hierarchic index set of AlbertaGrid
   template< int dim, int dimworld >
   class AlbertaGridIdSet
-    : public IdSet
-      < AlbertaGrid< dim, dimworld >, AlbertaGridIdSet< dim, dimworld >, unsigned int >
+    : public IdSet< AlbertaGrid< dim, dimworld >, AlbertaGridIdSet< dim, dimworld >, unsigned int >
   {
     typedef AlbertaGridIdSet< dim, dimworld > This;
-    typedef AlbertaGrid< dim, dimworld > Grid;
-    typedef IdSetDefaultImplementation< Grid, This, unsigned int > Base;
+    typedef IdSet< AlbertaGrid< dim, dimworld >, This, unsigned int > Base;
 
     friend class AlbertaGrid< dim, dimworld >;
-
-    static const int dimension = Grid::dimension;
-
-    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
-
-    const HierarchicIndexSet &hIndexSet_;
-
-    //! create id set, only allowed for AlbertaGrid
-    AlbertaGridIdSet ( const HierarchicIndexSet &hIndexSet )
-      : hIndexSet_( hIndexSet )
-    {}
 
   public:
     //! export type of id
     typedef typename Base::IdType IdType;
 
+  private:
+    typedef AlbertaGrid< dim, dimworld > Grid;
+
+    static const int dimension = Grid::dimension;
+
+    typedef typename Grid::HierarchicIndexSet HierarchicIndexSet;
+
+    // create id set, only allowed for AlbertaGrid
+    AlbertaGridIdSet ( const HierarchicIndexSet &hIndexSet )
+      : hIndexSet_( hIndexSet )
+    {}
+
+  public:
     /** \copydoc IdSet::id(const EntityType &e) const */
     template< class Entity >
     IdType id ( const Entity &e ) const
@@ -689,6 +689,11 @@ namespace Dune
       const IdType index = hIndexSet_.subIndex( e, i, codim );
       return (index << 2) | IdType( codim );
     }
+
+  private:
+    AlbertaGridIdSet ( const This & );
+
+    const HierarchicIndexSet &hIndexSet_;
   };
 
 } // namespace Dune
