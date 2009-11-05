@@ -13,7 +13,7 @@
  */
 
 #include <dune/grid/uggrid.hh>
-#include <dune/doc/grids/gridfactory/hybridtestgrids.hh>
+#include <doc/grids/gridfactory/hybridtestgrids.hh>
 
 #include "gridcheck.cc"
 #include "checkcommunicate.cc"
