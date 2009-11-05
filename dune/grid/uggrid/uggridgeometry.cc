@@ -225,7 +225,7 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
 
 
 template< int mydim, int coorddim, class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+const Dune::FieldMatrix<typename GridImp::ctype, coorddim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   if (jacobianInverseIsUpToDate_)
@@ -252,7 +252,7 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   return jac_inverse_;
 }
 template< int mydim, int coorddim, class GridImp>
-const Dune::FieldMatrix<typename GridImp::ctype, mydim,mydim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
+const Dune::FieldMatrix<typename GridImp::ctype, mydim,coorddim>& Dune::UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   if (jacobianIsUpToDate_)

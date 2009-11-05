@@ -134,9 +134,9 @@ namespace Dune {
     }
 
     //! The inverse transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, mydim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    const FieldMatrix<UGCtype, coorddim,mydim>& jacobianInverseTransposed (const FieldVector<UGCtype, mydim>& local) const;
     //! The transpose of the Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<UGCtype, mydim,mydim>& jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
+    const FieldMatrix<UGCtype, mydim,coorddim>& jacobianTransposed (const FieldVector<UGCtype, mydim>& local) const;
 
 
   private:
