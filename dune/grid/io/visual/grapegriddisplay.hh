@@ -566,6 +566,17 @@ namespace Dune
     return vxMap[geomType][vx];
   }
 
+  // see geldesc.hh for definition of this mapping
+  // this is the same for all namespaces (two_two , and two_three, ...)
+  static const int * const * faceMap = GrapeInterface_three_three::dune2GrapeFace;
+  static inline int mapDune2GrapeFace( int geomType , int duneFace )
+  {
+    enum { usedTypes = GrapeInterface_three_three::numberOfUsedGrapeElementTypes };
+    assert( geomType >= 0 );
+    assert( geomType <  usedTypes ); // at the moment only defined from 2 to 7
+    return faceMap[geomType][ duneFace ];
+  }
+
 } // end namespace Dune
 
 #include "grape/grapegriddisplay.cc"

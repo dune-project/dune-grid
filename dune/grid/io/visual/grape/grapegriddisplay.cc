@@ -106,7 +106,8 @@ namespace Dune
   template <class IntersectionIteratorType>
   inline void GrapeGridDisplay<GridType>::
   checkNeighbors(IntersectionIteratorType & nit,
-                 const IntersectionIteratorType & endnit, DUNE_ELEM * he)
+                 const IntersectionIteratorType & endnit,
+                 DUNE_ELEM * he)
   {
     typedef typename GridType::Traits::template Codim<0>::Entity Entity;
     typedef typename IntersectionIteratorType :: Intersection IntersectionType;
@@ -116,7 +117,7 @@ namespace Dune
     for( ; nit != endnit; ++nit )
     {
       const IntersectionType &intersection = *nit;
-      const int number = intersection.indexInInside();
+      const int number = mapDune2GrapeFace(he->type, intersection.indexInInside());
       assert( (number >= 0) && (number < MAX_EL_FACE) );
 
       if( number != lastElNum )
@@ -224,21 +225,6 @@ namespace Dune
             IntersectionIterator nit    = en.ilevelbegin();
 
             checkNeighbors(nit,endnit,he);
-          }
-
-          // for this type of element we have to swap the faces
-          if(he->type == g_hexahedron)
-          {
-            int help_bnd [MAX_EL_FACE];
-            for(int i=0; i < MAX_EL_FACE; ++i) help_bnd[i] = he->bnd[i] ;
-
-            assert( MAX_EL_FACE == 6 );
-            // do the mapping from dune to grape hexa
-            he->bnd[0] = help_bnd[4];
-            he->bnd[1] = help_bnd[5];
-            he->bnd[3] = help_bnd[1];
-            he->bnd[4] = help_bnd[3];
-            he->bnd[5] = help_bnd[0];
           }
         }
         else

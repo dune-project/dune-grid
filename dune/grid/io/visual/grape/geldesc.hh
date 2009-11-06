@@ -625,7 +625,6 @@ static const int dune2GrapeHexahedron[MAX_EL_DOF] = {0,1,3,2,4,5,7,6};
 
 // For pyramids the vertices 2,3 are swapped (in the generic geometries)
 static const int dune2GrapePyramid[ MAX_EL_DOF ] = {0,1,3,2,4,5,6,7};
-//static const int *dune2GrapePyramid = dune2GrapeDefaultMap;
 
 // mapping from dune to grape
 static const int *
@@ -636,6 +635,37 @@ dune2GrapeVertex[numberOfUsedGrapeElementTypes] = {
   dune2GrapePyramid ,
   dune2GrapePrism ,
   dune2GrapeHexahedron
+};
+////////////////////////////////////////////////////////////////////////
+// face mappings
+////////////////////////////////////////////////////////////////////////
+
+// the mapping of the reference faces
+static const int dune2GrapeDefaultFace[MAX_EL_FACE] = {0,1,2,3,4,5};
+
+// triangle face mapping
+static const int dune2GrapeTriangleFace[MAX_EL_FACE] = {2,1,0,3,4,5};
+
+// tetrahedron face mapping
+static const int dune2GrapeTetrahedronFace[MAX_EL_FACE] = {3,2,1,0,4,5};
+
+// hexahedron face mapping
+static const int dune2GrapeHexahedronFace[MAX_EL_FACE] = {5,3,2,4,0,1};
+
+// using default mapping here
+static const int * dune2GrapeQuadrilateralFace = dune2GrapeDefaultFace;
+static const int * dune2GrapePrismFace         = dune2GrapeDefaultFace;
+static const int * dune2GrapePyramidFace       = dune2GrapeDefaultFace;
+
+// mapping from dune to grape
+static const int *
+dune2GrapeFace[numberOfUsedGrapeElementTypes] = {
+  dune2GrapeTriangleFace ,
+  dune2GrapeQuadrilateralFace ,
+  dune2GrapeTetrahedronFace,
+  dune2GrapePyramidFace ,
+  dune2GrapePrismFace ,
+  dune2GrapeHexahedronFace
 };
 
 static H_ELEMENT_DESCRIPTION * getElementDescription( int type )
