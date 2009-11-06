@@ -30,7 +30,6 @@ namespace Dune
   template<int mydim, int coorddim, class GridImp>            class OneDGridGeometry;
   template<class GridImp>            class OneDGridHierarchicIterator;
   template<class GridImp, bool LeafIterator> class OneDGridIntersectionIterator;
-  class OneDGrid;
 
 }
 
@@ -46,6 +45,8 @@ namespace Dune
 #include "onedgrid/onedgridindexsets.hh"
 
 namespace Dune {
+
+  class OneDGrid;
 
   template<int dim, int dimw>
   struct OneDGridFamily
