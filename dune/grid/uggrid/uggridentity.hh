@@ -7,6 +7,8 @@
  * \brief The UGGridEntity class and its specializations
  */
 
+#include <dune/grid/common/gridenums.hh>
+
 #include "uggridrenumberer.hh"
 
 

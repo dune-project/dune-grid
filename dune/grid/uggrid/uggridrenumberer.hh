@@ -10,6 +10,8 @@
 
 #include <dune/common/geometrytype.hh>
 
+#include <dune/grid/genericgeometry/conversion.hh>
+
 namespace Dune {
 
   /** \brief Empty generic class.  All we need is in the specializations for dim=2 and dim=3
