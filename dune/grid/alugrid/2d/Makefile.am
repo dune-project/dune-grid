@@ -5,4 +5,6 @@ alu2dgrid_HEADERS = alu2dinclude.hh  entity_imp.cc  geometry_imp.cc \
 	alu2dgridfactory.hh alu2dgridfactory.cc \
 	alugrid.hh
 
+headercheck_IGNORE = $(alu2dgrid_HEADERS)
+
 include $(top_srcdir)/am/global-rules
