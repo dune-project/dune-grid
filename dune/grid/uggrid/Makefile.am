@@ -12,6 +12,11 @@ libuggrid_la_LIBADD   = $(UG_LDFLAGS) $(UG_LIBS) $(DUNE_COMMON_LIBS) $(MPI_LDFLA
 
 endif
 
+headercheck_IGNORE = uggridentity.hh uggridentitypointer.hh uggridgeometry.hh \
+                     uggridhieriterator.hh uggridindexsets.hh uggridleafiterator.hh \
+                     uggridleveliterator.hh ugincludes.hh ugintersectionit.hh \
+                     ugwrapper.hh
+
 uggriddir = $(includedir)/dune/grid/uggrid/
 uggrid_HEADERS = uggridfactory.hh uggridgeometry.cc \
   uggridentitypointer.hh uggridhieriterator.cc \
