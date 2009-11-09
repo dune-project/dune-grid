@@ -120,6 +120,7 @@ global(const FieldVector<UGCtype, mydim>& local) const
 
   if (mode_==element_mode) {
 
+    // we are an actual element in UG
     UGCtype* cornerCoords[corners()];
     UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
@@ -127,6 +128,7 @@ global(const FieldVector<UGCtype, mydim>& local) const
     UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
 
   } else {
+    // we are a local element and store the coordinates ourselves
     UG_NS<coorddim>::Local_To_Global(corners(), cornerpointers_, local, globalCoord);
   }
 
