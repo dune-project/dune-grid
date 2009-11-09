@@ -330,6 +330,11 @@ namespace Dune {
       CORNER_COORDINATES(theElement, n, x);
     }
 
+    /** \brief Returns pointers to the coordinate arrays of an UG node */
+    static void Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
+      x[0] = theNode->myvertex->iv.x;
+    }
+
     static int GlobalToLocal(int n, const double** cornerCoords,
                              const double* EvalPoint, double* localCoord) {
       return UG_NAMESPACE ::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
@@ -675,12 +680,20 @@ namespace Dune {
 #endif
     }
 
-    //! \todo Please doc me!
+    /** \brief Compute global coordinates of a point in local coordinates for an element */
     static void Local_To_Global(int n, double** y,
                                 const FieldVector<double, UG_DIM>& local,
                                 FieldVector<double, UG_DIM>& global) {
       using UG::DOUBLE;
       LOCAL_TO_GLOBAL(n,y,local,global);
+    }
+
+    /** \brief Compute global coordinates of a point in local coordinates for a vertex */
+    static void Local_To_Global(int n, double** y,
+                                const FieldVector<double,0>& local,
+                                FieldVector<double, UG_DIM>& global) {
+      for (int i=0; i<UG_DIM; i++)
+        global[i] = y[0][i];
     }
 
     /**
@@ -702,6 +715,13 @@ namespace Dune {
       INVERSE_TRANSFORMATION(n, x, local, mat, det);
       return 0;
     }
+
+    /** \brief Dummy method for vertices */
+    static int Transformation(int n, double** x,
+                              const FieldVector<double, 0>& local, FieldMatrix<double,UG_DIM,0>& mat) {
+      return 0;
+    }
+
     /**
      * \param n Number of corners of the element
      * \param x Coordinates of the corners of the element
@@ -715,6 +735,12 @@ namespace Dune {
       using UG_NAMESPACE ::DOUBLE_VECTOR;
       using UG::DOUBLE;
       TRANSFORMATION(n, x, local, mat);
+      return 0;
+    }
+
+    /** \brief Dummy method for vertices */
+    static int JacobianTransformation(int n, double** x,
+                                      const FieldVector<double, 0>& local, FieldMatrix<double,0,UG_DIM>& mat) {
       return 0;
     }
 
