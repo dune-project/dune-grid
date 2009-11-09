@@ -92,11 +92,6 @@ namespace Dune {
      * local coordinate in its reference element */
     FieldVector<UGCtype, mydim> local (const FieldVector<UGCtype, coorddim>& global) const;
 
-#if 0
-    //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<UGCtype, mydim> &local) const;
-#endif
-
     /**
        Integration over a general element is done by integrating over the reference element
        and using the transformation from the reference element to the global element as follows:
