@@ -166,9 +166,9 @@ namespace Dune {
     mutable array<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
     //! The jacobian inverse transposed
-    mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
+    mutable FieldMatrix<UGCtype,coorddim,mydim> jac_inverse_;
     //! The jacobian transposed
-    mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_;
+    mutable FieldMatrix<UGCtype,mydim,coorddim> jac_;
 
     /** \brief For simplices the Jacobian matrix is a constant, hence it needs
         to be computed only once for each new element.  This can save some
