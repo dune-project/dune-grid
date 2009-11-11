@@ -234,11 +234,13 @@ namespace Dune
     Base;
 
     template< int, int, class > friend class AlbertaGridEntity;
+    template< int, class > friend class AlbertaGridEntityPointer;
 
     friend class AlbertaGridHierarchicIterator< This >;
     friend class AlbertaGridLeafIntersection< const This >;
 
     friend class AlbertaMarkerVector< dim, dimworld >;
+    friend class AlbertaGridIndexSet< dim, dimworld >;
     friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
 
   public:
