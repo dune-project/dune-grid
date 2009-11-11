@@ -27,7 +27,8 @@ endif
 
 ALBERTA_DIM = $(GRIDDIM)
 
-COORDFUNCTION = Helix
+COORDFUNCTION = IdenticalCoordFunction\<double,$(GRIDDIM)\>
+# COORDFUNCTION = Helix
 # COORDFUNCTION = DGFCoordFunction\<$(GRIDDIM),$(GRIDDIM)\>
 # COORDFUNCTION = DGFCoordFunction\<2,3\>
 CACHECOORDFUNCTION = 0
