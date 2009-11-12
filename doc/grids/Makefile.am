@@ -1,0 +1,1 @@
+SUBDIRS = amiramesh  starcd  ugascplusplus

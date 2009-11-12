@@ -30,8 +30,12 @@ AC_CONFIG_FILES([Makefile
     doc/appl/Makefile
     doc/refinement/Makefile
     doc/doxygen/Makefile
-	doc/doxygen/Doxyfile
+    doc/doxygen/Doxyfile
     doc/layout/Makefile
+    doc/grids/Makefile
+    doc/grids/amiramesh/Makefile
+    doc/grids/starcd/Makefile
+    doc/grids/ugascplusplus/Makefile
     doc/Makefile
     grid/Makefile
     grid/test/Makefile
