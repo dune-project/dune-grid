@@ -27,6 +27,11 @@ AC_CONFIG_FILES([Makefile
     doc/refinement/Makefile
     doc/doxygen/Makefile
     doc/doxygen/Doxyfile
+    doc/grids/Makefile
+    doc/grids/amiramesh/Makefile
+    doc/grids/gridfactory/Makefile
+    doc/grids/gmsh/Makefile
+    doc/grids/starcd/Makefile
     doc/Makefile
     dune/Makefile
     dune/grid/Makefile
