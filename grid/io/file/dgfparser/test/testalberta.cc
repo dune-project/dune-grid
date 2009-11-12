@@ -21,8 +21,9 @@ try {
   {
     typedef AlbertaGrid<ALBERTA_DIM,ALBERTA_WORLD_DIM> GridType;
     std::string filename;
-    if(ALBERTA_DIM == 2) filename += SRCDIR "/examplegrid5.dgf";
-    if(ALBERTA_DIM == 3) filename += SRCDIR "/examplegrid6.dgf";
+    const int dimension = ALBERTA_DIM;
+    if(dimension == 2) filename += SRCDIR "/examplegrid5.dgf";
+    if(dimension == 3) filename += SRCDIR "/examplegrid6.dgf";
     GridPtr<GridType> gridptr(filename);
 
     // run grid check to check grid
