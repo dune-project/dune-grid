@@ -348,6 +348,14 @@ namespace Dune
       }
       return false;
     }
+#else
+    /** @brief Return true if the given entity is contained in \f$E\f$.
+     */
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      return true;
+    }
 #endif // #ifdef INDEXSET_HAS_ITERATORS
 
   private:
