@@ -331,12 +331,12 @@ namespace Dune
       return s;
     }
 
-#ifdef INDEXSET_HAS_ITERATORS
     /** @brief Return true if the given entity is contained in \f$E\f$.
      */
     template<class EntityType>
     bool contains (const EntityType& e) const
     {
+#ifdef INDEXSET_HAS_ITERATORS
       enum { cd = EntityType::codimension };
       typedef typename Codim<cd>::template Partition<All_Partition>::Iterator IteratorType;
       IteratorType iend = asImp().template end<cd,All_Partition>();
@@ -347,16 +347,13 @@ namespace Dune
         if (it->level() == e.level() && this->index(*it) == this->index(e)) return true;
       }
       return false;
-    }
 #else
-    /** @brief Return true if the given entity is contained in \f$E\f$.
-     */
-    template<class EntityType>
-    bool contains (const EntityType& e) const
-    {
+#ifdef DUNE_DEVEL_MODE
+      std::cerr << "Warning: method IndexSet::conatins not implemented correctly!" << std::endl;
+#endif
       return true;
-    }
 #endif // #ifdef INDEXSET_HAS_ITERATORS
+    }
 
   private:
     //!  Barton-Nackman trick

@@ -46,6 +46,26 @@ namespace Dune {
       return grid_->getRealImplementation(e).levelIndex();
     }
 
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
+      IteratorType iend = grid_->template lend<cd,All_Partition>(level_);
+      for (IteratorType it = grid_->template lbegin<cd,All_Partition>(level_);
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
+    }
+
     //! get index of subentity of a codim 0 entity
     template<int cc>
     int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
@@ -168,6 +188,26 @@ namespace Dune {
     int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).leafIndex();
+    }
+
+    /** \brief Return true if e is contained in the index set.
+
+       Warning: this implementation takes O(n) time!  It also assumes that e belongs
+       to the correct grid.
+     */
+    template <class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LeafIterator IteratorType;
+      IteratorType iend = grid_.template leafend<cd,All_Partition>();
+      for (IteratorType it = grid_.template leafbegin<cd,All_Partition>();
+           it != iend; ++it)
+      {
+        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+          return true;
+      }
+      return false;
     }
 
     //! get index of subentity of a codim 0 entity

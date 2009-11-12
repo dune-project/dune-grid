@@ -1075,6 +1075,13 @@ namespace Dune {
       return grid.template getRealEntity<cd>(e).compressedIndex();
     }
 
+    // return true if the given entity is contained in \f$E\f$.
+    template< class EntityType >
+    bool contains ( const EntityType &e ) const
+    {
+      return (e.level() == level);
+    }
+
     //! get index of subentity of a codim 0 entity
     template<int cc>
     int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
@@ -1161,6 +1168,13 @@ namespace Dune {
     int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid.template getRealEntity<cd>(e).compressedLeafIndex();
+    }
+
+    // return true if the given entity is contained in \f$E\f$.
+    template< class EntityType >
+    bool contains ( const EntityType &e ) const
+    {
+      return (e.level() == grid.maxLevel());
     }
 
     //! get index of subentity of a codim 0 entity
