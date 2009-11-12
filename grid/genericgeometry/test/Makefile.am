@@ -21,3 +21,8 @@ testgeo_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(PSGINC)
 testgeo_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 include $(top_srcdir)/am/global-rules
+
+genericgeometrytestdir = $(includedir)/dune/grid/genericgeometry/test
+genericgeometrytest_HEADERS = testgeo.hh
+
+EXTRA_DIST=grid2Y.dgf  grid3A.dgf  grid3Y.dgf  octahedron.dgf  unstr_cube.dgf
