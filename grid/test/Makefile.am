@@ -102,7 +102,7 @@ SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersecti
 
 GRIDFILES = \
   simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
-  cube-testgrid-3-3-large.dgf
+  cube-testgrid-3-3-large.dgf grid-1-1.amc  grid-2-2.amc  grid-3-3.amc
 
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = gridcheck.cc $(GRIDFILES) $(SOURCES)
