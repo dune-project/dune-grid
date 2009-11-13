@@ -1,4 +1,4 @@
-ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest
+ALLTESTS = vtktest gnuplottest vtksequencetest subsamplingvtktest gmshtest gmshtest-all
 
 # run amiramesh test only if amiramesh was found
 if AMIRAMESH
@@ -14,6 +14,7 @@ if UG
 ALLTESTS += starcdreadertest
 endif
 
+# whats that for?
 AM_CPPFLAGS += -g -Wall -O0
 
 # programs just to build when "make check" is used
@@ -45,6 +46,10 @@ gmshtest_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
 gmshtest_alberta_SOURCES = gmshtest-alberta.cc
 gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS)
 gmshtest_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS) $(GRAPE_LDFLAGS) $(GRAPE_LIBS)
+
+gmshtest_all_SOURCES = gmshtest-alberta.cc
+gmshtest_all_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
+gmshtest_all_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 starcdreadertest_SOURCES = starcdreadertest.cc
 starcdreadertest_CXXFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS)
