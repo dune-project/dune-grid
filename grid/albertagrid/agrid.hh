@@ -206,6 +206,7 @@ namespace Dune
     template< class, class > friend class Conversion;
 
     template< int, int, class > friend class AlbertaGridEntity;
+    template< int, class > friend class AlbertaGridEntityPointer;
 
     friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
 
