@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <stdio.h>
+#include <cstring>
 
 #include <dune/common/geometrytype.hh>
 #include <dune/common/exceptions.hh>
