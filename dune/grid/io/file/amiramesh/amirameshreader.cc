@@ -8,7 +8,7 @@
 
 #include <amiramesh/AmiraMesh.h>
 
-#if defined HAVE_PSURFACE
+#if HAVE_PSURFACE
 #include <psurface.h>
 #endif
 
@@ -143,7 +143,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
 // //////////////////////////////////////////////////
 // //////////////////////////////////////////////////
-#ifdef HAVE_PSURFACE
+#if HAVE_PSURFACE
 template <int dim>
 class PSurfaceBoundarySegment : public Dune::BoundarySegment<dim>
 {
@@ -193,7 +193,7 @@ template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
                                                    const std::string& filename)
 {
-#ifdef HAVE_PSURFACE
+#if HAVE_PSURFACE
   int point[3] = {-1, -1, -1};
 
   std::string domainname = filename;
@@ -245,7 +245,7 @@ template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
                                                 const std::string& domainFilename)
 {
-#ifndef HAVE_PSURFACE
+#if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
@@ -289,7 +289,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename,
                                            const std::string& domainFilename)
 {
-#ifndef HAVE_PSURFACE
+#if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
              << " psurface library!");
 #else
