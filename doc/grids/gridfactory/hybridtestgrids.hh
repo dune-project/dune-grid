@@ -10,6 +10,7 @@
  */
 
 #include <dune/common/static_assert.hh>
+#include <dune/grid/common/gridfactory.hh>
 
 namespace Dune {
 
