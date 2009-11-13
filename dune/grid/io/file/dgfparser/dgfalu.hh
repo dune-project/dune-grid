@@ -8,6 +8,7 @@
 
 #include <dune/grid/alugrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
 
 namespace Dune
 {

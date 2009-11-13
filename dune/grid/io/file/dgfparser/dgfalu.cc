@@ -54,6 +54,22 @@ namespace Dune
               factory.insertBoundary( n, face, it->second );
           }
         }
+
+        const int dimworld = 3;
+        dgf::ProjectionBlock projectionBlock( file, dimworld );
+        const DuneBoundaryProjection< dimworld > *projection
+          = projectionBlock.defaultProjection< dimworld >();
+        if( projection != 0 )
+          factory.insertBoundaryProjection( *projection );
+        const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+        for( size_t i = 0; i < numBoundaryProjections; ++i )
+        {
+          GeometryType type( GeometryType::simplex, dimworld-1 );
+          const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+          const DuneBoundaryProjection< dimworld > *projection
+            = projectionBlock.boundaryProjection< dimworld >( i );
+          factory.insertBoundaryProjection( type, vertices, projection );
+        }
       }
 
       return factory.createGrid( macroGrid.facemap.empty() );
@@ -116,6 +132,22 @@ namespace Dune
             if( it != macroGrid.facemap.end() )
               factory.insertBoundary( n, face, it->second );
           }
+        }
+
+        const int dimworld = 3;
+        dgf::ProjectionBlock projectionBlock( file, dimworld );
+        const DuneBoundaryProjection< dimworld > *projection
+          = projectionBlock.defaultProjection< dimworld >();
+        if( projection != 0 )
+          factory.insertBoundaryProjection( *projection );
+        const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+        for( size_t i = 0; i < numBoundaryProjections; ++i )
+        {
+          GeometryType type( GeometryType::cube, dimworld-1 );
+          const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+          const DuneBoundaryProjection< dimworld > *projection
+            = projectionBlock.boundaryProjection< dimworld >( i );
+          factory.insertBoundaryProjection( type, vertices, projection );
         }
       }
 
