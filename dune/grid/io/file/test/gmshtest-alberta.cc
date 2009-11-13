@@ -4,7 +4,18 @@
 
 #include <memory>
 
-#include <dune/grid/albertagrid.hh>
+#ifdef ENABLE_ALBERTA
+//#include <dune/grid/albertagrid.hh>
+#endif
+
+#ifdef ENABLE_ALUGRID
+#include <dune/grid/alugrid.hh>
+#endif
+
+#ifdef ENABLE_UG
+#include <dune/grid/uggrid.hh>
+#endif
+
 #include <dune/grid/io/file/gmshreader.hh>
 
 #if HAVE_GRAPE
@@ -15,7 +26,18 @@
 #define GRIDDIM ALBERTA_DIM
 #endif
 
-typedef Dune::AlbertaGrid< GRIDDIM > GridType;
+template <class GridType>
+void checkGmshReader(const char* filename, const int refinements)
+{
+  std::auto_ptr< GridType > grid( Dune::GmshReader< GridType >::read( filename ) );
+  if( refinements > 0 )
+    grid->globalRefine( refinements );
+
+#if HAVE_GRAPE
+  Dune::GrapeGridDisplay< GridType > grape( *grid );
+  grape.display();
+#endif
+}
 
 int main ( int argc, char **argv )
 try
@@ -26,13 +48,23 @@ try
     return 1;
   }
 
-  std::auto_ptr< GridType > grid( Dune::GmshReader< GridType >::read( argv[ 1 ] ) );
+  int refinements = 0;
   if( argc >= 3 )
-    grid->globalRefine( atoi( argv[ 2 ] ) );
+    refinements = atoi( argv[2] );
 
-#if HAVE_GRAPE
-  Dune::GrapeGridDisplay< GridType > grape( *grid );
-  grape.display();
+#ifdef ENABLE_ALBERTA
+  std::cout << "Checking AlbertaGrid \n";
+  //checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
+#endif
+
+#ifdef ENABLE_ALUGRID
+  std::cout << "Checking ALUGrid \n";
+  checkGmshReader< Dune::ALUSimplexGrid< 3, 3 > > ( argv[1], refinements );
+#endif
+
+#ifdef ENABLE_UG
+  std::cout << "Checking UG \n";
+  checkGmshReader< Dune::UGGrid< 3 > > ( argv[1], refinements );
 #endif
 
   return 0;
