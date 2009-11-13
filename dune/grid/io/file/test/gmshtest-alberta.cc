@@ -4,15 +4,15 @@
 
 #include <memory>
 
-#ifdef ENABLE_ALBERTA
+#if HAVE_ALBERTA
 //#include <dune/grid/albertagrid.hh>
 #endif
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
 
-#ifdef ENABLE_UG
+#if HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
 
@@ -52,17 +52,17 @@ try
   if( argc >= 3 )
     refinements = atoi( argv[2] );
 
-#ifdef ENABLE_ALBERTA
+#if HAVE_ALBERTA
   std::cout << "Checking AlbertaGrid \n";
   //checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
   std::cout << "Checking ALUGrid \n";
   checkGmshReader< Dune::ALUSimplexGrid< 3, 3 > > ( argv[1], refinements );
 #endif
 
-#ifdef ENABLE_UG
+#if HAVE_UG
   std::cout << "Checking UG \n";
   checkGmshReader< Dune::UGGrid< 3 > > ( argv[1], refinements );
 #endif

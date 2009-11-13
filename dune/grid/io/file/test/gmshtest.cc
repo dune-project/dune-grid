@@ -3,13 +3,13 @@
 #include "config.h"
 
 #include <dune/grid/sgrid.hh>
-#ifdef ENABLE_UG
+#if HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
-#ifdef ENABLE_ALBERTA
+#if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
 
@@ -34,7 +34,7 @@ int main() try {
   pyramid += "pyramid.msh";
 
   // Test whether unstructured grids can be read and written
-#ifdef ENABLE_UG
+#if HAVE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
   testReadingGrid<UGGrid<2> >( curved2d );
 
@@ -42,7 +42,7 @@ int main() try {
   testReadingGrid<UGGrid<3> >( pyramid );
 #endif
 
-#ifdef ENABLE_ALBERTA
+#if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingGrid<AlbertaGrid<2> >( curved2d );
 
@@ -50,7 +50,7 @@ int main() try {
   testReadingGrid<AlbertaGrid<3> >( pyramid );
 #endif
 
-#ifdef ENABLE_ALUGRID
+#if HAVE_ALUGRID
   //     std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
   //     testReadingGrid<ALUSimplexGrid<2,2> >( cruved2d );
 
