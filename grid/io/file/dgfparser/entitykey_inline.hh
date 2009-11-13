@@ -115,32 +115,16 @@ namespace Dune
   ElementFaceUtil :: generateCubeFace
     ( const std :: vector< unsigned int > &element, int f )
   {
-    ReferenceCube< double, dimworld > ref;
+    static const ReferenceCube< double, dimworld > ref;
     const unsigned int size = ref.size( f, 1, dimworld );
     std :: vector< unsigned int > k( size );
-    /*
-       for (int i=0;i<size;i++) {
-       k[i] = element[ref.subEntity(f,1,i,dimworld)];
-       }
-       if (dimworld==3) {
-       if (f==2 || f==1 || f==5) {
-        int ktmp=k[0];
-        k[0]=k[1];
-        k[1]=ktmp;
-       }
-       else {
-        int ktmp=k[2];
-        k[2]=k[3];
-        k[3]=ktmp;
-       }
-       }
-     */
     const int face = ElementTopologyMapping< hexa > :: dune2aluFace( f );
     for( unsigned int i = 0; i < size; ++i )
     {
       // int idxdune = ref.subEntity(f,1,i,dimworld);
       int idx = ElementTopologyMapping< hexa > :: alu2duneFaceVertex( face, i );
       int idxdune = ref.subEntity( f, 1, idx, dimworld );
+      assert( idxdune < (int) element.size() );
       k[ size - (i+1) ] = element[ idxdune ];
     }
     return DGFEntityKey< unsigned int >( k );
@@ -152,7 +136,7 @@ namespace Dune
   ElementFaceUtil :: generateSimplexFace
     ( const std :: vector< unsigned int > &element, int f )
   {
-    ReferenceSimplex< double, dimworld > ref;
+    static const ReferenceSimplex< double, dimworld > ref;
     const unsigned int size = ref.size( f, 1, dimworld );
     std :: vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )
