@@ -44,8 +44,11 @@ namespace Dune
     // ----------------------
 
     template< int dim >
-    struct DuneBoundaryProjection
+    class DuneBoundaryProjection
     {
+      typedef DuneBoundaryProjection< dim > This;
+
+    public:
       static const int dimension = dim;
 
       typedef Alberta::ElementInfo< dimension > ElementInfo;
@@ -54,8 +57,38 @@ namespace Dune
       typedef Dune::DuneBoundaryProjection< dimWorld > Projection;
 
       explicit DuneBoundaryProjection ( const Projection &projection )
-        : projection_( &projection )
+        : projection_( &projection ),
+          refCount_( new int ( 1 ) )
       {}
+
+      DuneBoundaryProjection ( const This &other )
+        : projection_( other.projection_ ),
+          refCount_( other.refCount_ )
+      {
+        ++(*refCount_);
+      }
+
+      ~DuneBoundaryProjection ()
+      {
+        if( --(*refCount_) == 0 )
+        {
+          delete refCount_;
+          delete projection_;
+        }
+      }
+
+      This &operator= ( const This &other )
+      {
+        ++(*other.refCount_);
+        if( --(*refCount_) == 0 )
+        {
+          delete refCount_;
+          delete projection_;
+        }
+        refCount_ = other.refCount_;
+        projection_ = other.projection_;
+        return *this;
+      }
 
       // note: GlobalVector is an array type; global is the return value
       void operator() ( const ElementInfo &elementInfo, const LocalVector local,
@@ -76,6 +109,7 @@ namespace Dune
 
     private:
       const Projection *projection_;
+      int *refCount_;
     };
 
 
@@ -194,16 +228,16 @@ namespace Dune
 
       Projection projection ( const ElementInfo &elementInfo, const int face ) const
       {
-        return Projection( projection_ );
+        return projection_;
       };
 
       Projection projection ( const ElementInfo &elementInfo ) const
       {
-        return Projection( projection_ );
+        return projection_;
       };
 
     private:
-      const DuneProjection &projection_;
+      const Projection projection_;
     };
 
 
@@ -219,6 +253,9 @@ namespace Dune
       {
         func = 0;
       }
+
+      virtual ~BasicNodeProjection ()
+      {}
 
       unsigned int boundaryIndex () const
       {

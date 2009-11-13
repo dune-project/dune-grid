@@ -253,7 +253,7 @@ namespace Dune
         {
           if( macroEl.projection[ i ] != NULL )
           {
-            delete macroEl.projection[ i ];
+            delete static_cast< BasicNodeProjection * >( macroEl.projection[ i ] );
             macroEl.projection[ i ] = NULL;
           }
         }

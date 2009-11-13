@@ -78,9 +78,10 @@ namespace Dune
     typedef Alberta::ElementInfo< dimension > ElementInfo;
     typedef Alberta::MacroData< dimension > MacroData;
     typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
+    typedef Alberta::DuneBoundaryProjection< dimension > Projection;
 
     typedef array< unsigned int, dimension > FaceId;
-    typedef std::map< FaceId, const DuneProjection * > BoundaryProjectionMap;
+    typedef std::map< FaceId, Projection > BoundaryProjectionMap;
 
     class ProjectionFactory;
 
@@ -92,15 +93,12 @@ namespace Dune
 
     /** default constructor */
     GridFactory ()
-      : duneProjection_( 0 )
+      : globalProjection_( 0 )
     {
       macroData_.create();
     }
 
-    virtual ~GridFactory ()
-    {
-      macroData_.release();
-    }
+    virtual ~GridFactory ();
 
     /** \brief insert a vertex into the macro grid
      *
@@ -173,9 +171,10 @@ namespace Dune
         faceId[ i ] = vertices[ i ];
       std::sort( faceId.begin(), faceId.end() );
 
-      if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      typedef std::pair< typename BoundaryProjectionMap::iterator, bool > InsertResult;
+      const InsertResult result = boundaryProjections_.insert( std::make_pair( faceId, Projection( *projection ) ) );
+      if( !result.second )
         DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-      boundaryProjections_[ faceId ] = projection;
     }
 
 
@@ -187,9 +186,9 @@ namespace Dune
      */
     virtual void insertBoundaryProjection ( const DuneProjection &projection )
     {
-      if( duneProjection_ != 0 )
+      if( globalProjection_ != 0 )
         DUNE_THROW( GridError, "Only one global boundary projection can be attached to a grid." );
-      duneProjection_ = &projection;
+      globalProjection_ = new Projection( projection );
     }
 
     /** \brief insert a shaped boundary segment into the macro grid
@@ -203,16 +202,9 @@ namespace Dune
     insertBoundarySegment ( const std::vector< unsigned int > vertices,
                             const BoundarySegment *boundarySegment )
     {
-      FaceId faceId;
       if( (int)vertices.size() != dimension )
         DUNE_THROW( AlbertaError, "Wrong number of face vertices passed: " << vertices.size() << "." );
-      for( size_t i = 0; i < faceId.size(); ++i )
-        faceId[ i ] = vertices[ i ];
-      std::sort( faceId.begin(), faceId.end() );
 
-      if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
-        DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-      GeometryType type( GeometryType::simplex, dimension-1 );
       std::vector< WorldVector > coords( dimension );
       for( int i = 0; i < dimension; ++i )
       {
@@ -220,7 +212,9 @@ namespace Dune
         for( int j = 0; j < dimensionworld; ++j )
           coords[ i ][ j ] = x[ j ];
       }
-      boundaryProjections_[ faceId ] = new BoundarySegmentWrapper( type, coords, boundarySegment );
+
+      GeometryType type( GeometryType::simplex, dimension-1 );
+      insertBoundaryProjection( type, vertices, new BoundarySegmentWrapper( type, coords, boundarySegment ) );
     }
 
     /** \brief add a face transformation (for periodic identification)
@@ -363,54 +357,19 @@ namespace Dune
     }
 
   private:
-    const DuneProjection *getDuneProjection ( const ElementInfo &elementInfo, const int face ) const
-    {
-      if( !boundaryProjections_.empty() )
-      {
-        const MacroElement &macroElement = elementInfo.macroElement();
-        const typename MacroData::ElementId &elementId = macroData_.element( macroElement.index );
-
-#ifndef NDEBUG
-        for( int i = 0; i <= dimension; ++i )
-        {
-          const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
-          const Alberta::GlobalVector &y = macroElement.coordinate( i );
-          for( int j = 0; j < dimensionworld; ++j )
-          {
-            if( x[ i ] != y[ i ] )
-              DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
-          }
-        }
-#endif
-
-        FaceId faceId;
-        for( size_t i = 0; i < faceId.size(); ++i )
-        {
-          const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
-          faceId[ i ] = elementId[ k ];
-        }
-        std::sort( faceId.begin(), faceId.end() );
-
-        typedef typename BoundaryProjectionMap::const_iterator Iterator;
-        const Iterator it = boundaryProjections_.find( faceId );
-        if( it != boundaryProjections_.end() )
-          return it->second;
-      }
-
-      return duneProjection_;
-    }
-
-    const DuneProjection *getDuneProjection ( const ElementInfo &elementInfo ) const
-    {
-      return duneProjection_;
-    }
-
     MacroData macroData_;
     NumberingMap numberingMap_;
-    const DuneProjection *duneProjection_;
+    const Projection *globalProjection_;
     BoundaryProjectionMap boundaryProjections_;
   };
 
+
+  template< int dim, int dimworld >
+  GridFactory< AlbertaGrid< dim, dimworld > >::~GridFactory ()
+  {
+    //delete globalProjection_;
+    macroData_.release();
+  }
 
 
   template< int dim, int dimworld >
@@ -434,22 +393,37 @@ namespace Dune
 
     bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
     {
-      return (gridFactory().getDuneProjection( elementInfo, face ) != 0);
+      if( !boundaryProjections().empty() )
+      {
+        if( boundaryProjections().find( faceId( elementInfo, face ) ) != boundaryProjections().end() )
+          return true;
+      }
+      return (gridFactory_.globalProjection_ != 0);
     }
 
     bool hasProjection ( const ElementInfo &elementInfo ) const
     {
-      return (gridFactory().getDuneProjection( elementInfo ) != 0);
+      return (gridFactory_.globalProjection_ != 0);
     }
 
     Projection projection ( const ElementInfo &elementInfo, const int face ) const
     {
-      return Projection( *(gridFactory().getDuneProjection( elementInfo, face )) );
+      if( !boundaryProjections().empty() )
+      {
+        typedef typename BoundaryProjectionMap::const_iterator Iterator;
+        const Iterator it = boundaryProjections().find( faceId( elementInfo, face ) );
+        if( it != boundaryProjections().end() )
+          return it->second;
+      }
+
+      assert( gridFactory_.globalProjection_ != 0 );
+      return *gridFactory_.globalProjection_;
     };
 
     Projection projection ( const ElementInfo &elementInfo ) const
     {
-      return Projection( *(gridFactory().getDuneProjection( elementInfo )) );
+      assert( gridFactory_.globalProjection_ != 0 );
+      return *gridFactory_.globalProjection_;
     };
 
     const GridFactory &gridFactory () const
@@ -458,6 +432,39 @@ namespace Dune
     }
 
   private:
+    const BoundaryProjectionMap &boundaryProjections () const
+    {
+      return gridFactory_.boundaryProjections_;
+    }
+
+    FaceId faceId ( const ElementInfo &elementInfo, const int face ) const
+    {
+      const MacroElement &macroElement = elementInfo.macroElement();
+      const typename MacroData::ElementId &elementId = gridFactory_.macroData_.element( macroElement.index );
+
+#ifndef NDEBUG
+      for( int i = 0; i <= dimension; ++i )
+      {
+        const Alberta::GlobalVector &x = gridFactory_.macroData_.vertex( elementId[ i ] );
+        const Alberta::GlobalVector &y = macroElement.coordinate( i );
+        for( int j = 0; j < dimensionworld; ++j )
+        {
+          if( x[ i ] != y[ i ] )
+            DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
+        }
+      }
+#endif
+
+      FaceId faceId;
+      for( size_t i = 0; i < faceId.size(); ++i )
+      {
+        const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
+        faceId[ i ] = elementId[ k ];
+      }
+      std::sort( faceId.begin(), faceId.end() );
+      return faceId;
+    }
+
     const GridFactory &gridFactory_;
   };
 
