@@ -3,13 +3,13 @@
 #include "config.h"
 
 #include <dune/grid/sgrid.hh>
-#ifdef HAVE_UG
+#if HAVE_UG
 #include <dune/grid/uggrid.hh>
 #endif
-#ifdef HAVE_ALBERTA
+#if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#ifdef HAVE_ALUGRID
+#if HAVE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
 
@@ -90,7 +90,7 @@ void testWritingUniformData() {
 int main() try {
 
   // Test whether unstructured grids can be read and written
-#ifdef HAVE_UG
+#if HAVE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
   testReadingUnstructuredGrid<UGGrid<2> >("../../../../doc/grids/amiramesh/hybrid-testgrid-2d.am");
 
@@ -98,7 +98,7 @@ int main() try {
   testReadingUnstructuredGrid<UGGrid<3> >("../../../../doc/grids/amiramesh/hybrid-testgrid-3d.am");
 #endif
 
-#ifdef HAVE_ALBERTA
+#if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingUnstructuredGrid<AlbertaGrid<2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
 
@@ -106,7 +106,7 @@ int main() try {
   testReadingUnstructuredGrid<AlbertaGrid<3> >("../../../../doc/grids/amiramesh/simplex-testgrid-3d.am");
 #endif
 
-#ifdef HAVE_ALUGRID
+#if HAVE_ALUGRID
   std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
   testReadingUnstructuredGrid<ALUSimplexGrid<2,2> >("../../../../doc/grids/amiramesh/simplex-testgrid-2d.am");
 
