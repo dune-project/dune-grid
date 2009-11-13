@@ -134,6 +134,9 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
+    if( boundaryProjections_.size() > 0 )
+      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
+
     globalProjection_ = &bndProjection;
   }
 
@@ -144,11 +147,12 @@ namespace Dune
                              const std::vector< unsigned int > &vertices,
                              const DuneBoundaryProjectionType *projection )
   {
+    if( globalProjection_ )
+      DUNE_THROW(InvalidStateException,"You can only add one globalProjection or projections for each face, but not both");
+
     if( (int)type.dim() != dimension-1 )
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     assert( type.isCube() || type.isSimplex() );
-    //if( !type.isSimplex() || )
-    //  DUNE_THROW( AlbertaError, "Alberta supports only simplices." );
 
     FaceType faceId;
     copyAndSort( vertices, faceId );
@@ -186,10 +190,19 @@ namespace Dune
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
     }
-    boundaryProjections_[ faceId ] = new BoundarySegmentWrapperType( type, coords, boundarySegment );
+    BoundarySegmentWrapperType* prj =
+      new BoundarySegmentWrapperType( type, coords, boundarySegment );
+    boundaryProjections_[ faceId ] = prj;
+#ifndef NDEBUG
+    // consistency check
+    for( size_t i = 0; i < numVx; ++i )
+    {
+      VertexType global = (*prj)( coords [ i ] );
+      if( (global - coords[ i ]).two_norm() > 1e-6 )
+        DUNE_THROW(GridError,"Fuck gmsh");
+    }
+#endif
   }
-
-
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
@@ -285,6 +298,7 @@ namespace Dune
         // generate boundary segment pointer
         FaceType faceId (boundaryId.first);
         std::sort( faceId.begin(), faceId.end() );
+
         // copy pointer
         (*bndProjections)[ segmentIndex ] = boundaryProjections_[ faceId ];
       }
