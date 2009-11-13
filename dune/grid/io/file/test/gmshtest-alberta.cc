@@ -5,7 +5,7 @@
 #include <memory>
 
 #if HAVE_ALBERTA
-//#include <dune/grid/albertagrid.hh>
+#include <dune/grid/albertagrid.hh>
 #endif
 
 #if HAVE_ALUGRID
@@ -54,7 +54,7 @@ try
 
 #if HAVE_ALBERTA
   std::cout << "Checking AlbertaGrid \n";
-  //checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
+  checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
 #if HAVE_ALUGRID
