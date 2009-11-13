@@ -15,6 +15,7 @@
 #include <dune/common/array.hh>
 
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/common/genericreferenceelements.hh>
 
 #include <dune/grid/utility/grapedataioformattypes.hh>
 
@@ -202,15 +203,22 @@ namespace Dune
     insertBoundarySegment ( const std::vector< unsigned int > vertices,
                             const BoundarySegment *boundarySegment )
     {
-      if( (int)vertices.size() != dimension )
-        DUNE_THROW( AlbertaError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+      const GenericReferenceElement< ctype, dimension-1 > &refSimplex
+        = GenericReferenceElements< ctype, dimension-1 >::simplex();
 
-      std::vector< WorldVector > coords( dimension );
+      if( boundarySegment == 0 )
+        DUNE_THROW( GridError, "Trying to insert null as a boundary segment." );
+      if( (int)vertices.size() != refSimplex.size( dimension-1 ) )
+        DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+      std::vector< WorldVector > coords( refSimplex.size( dimension-1 ) );
       for( int i = 0; i < dimension; ++i )
       {
         Alberta::GlobalVector &x = macroData_.vertex( vertices[ i ] );
         for( int j = 0; j < dimensionworld; ++j )
           coords[ i ][ j ] = x[ j ];
+        if( ((*boundarySegment)( refSimplex.position( i, dimension-1 ) ) - coords[ i ]).two_norm() > 1e-6 )
+          DUNE_THROW( GridError, "Boundary segment does not interpolate the corners." );
       }
 
       GeometryType type( GeometryType::simplex, dimension-1 );
@@ -449,7 +457,7 @@ namespace Dune
         const Alberta::GlobalVector &y = macroElement.coordinate( i );
         for( int j = 0; j < dimensionworld; ++j )
         {
-          if( x[ i ] != y[ i ] )
+          if( x[ j ] != y[ j ] )
             DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
         }
       }
