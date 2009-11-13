@@ -167,7 +167,8 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
             const MPI_Comm mpiComm,
 #endif
-            const DuneBoundaryProjectionType* bndPrj
+            const DuneBoundaryProjectionType* bndPrj,
+            const DuneBoundaryProjectionVector* bndVec
             )
     : mygrid_ (0)
 #if ALU3DGRID_PARALLEL
@@ -185,7 +186,9 @@ namespace Dune {
                            GenericReferenceElements< alu3d_ctype, dim > :: cube() )
       , sizeCache_ (0)
       , lockPostAdapt_(false)
-      , vertexProjection_( (bndPrj) ? new ALUGridBoundaryProjectionType( *bndPrj ) : 0 )
+      , bndPrj_ ( bndPrj )
+      , bndVec_ ( bndVec )
+      , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
   {
     makeGeomTypes();
 
@@ -235,6 +238,14 @@ namespace Dune {
   inline ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
   {
     delete vertexProjection_;
+    //delete bndPrj_;
+    if( bndVec_ )
+    {
+      //const size_t bndSize = bndVec_->size();
+      //for(size_t i=0; i<bndSize; ++i) delete (bndVec_ [i]);
+      delete bndVec_;
+      bndVec_ = 0;
+    }
 
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
     delete globalIdSet_; globalIdSet_ = 0;

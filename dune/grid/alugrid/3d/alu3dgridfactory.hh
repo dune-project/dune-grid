@@ -3,6 +3,9 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
+#include <map>
+#include <vector>
+
 #ifdef ENABLE_ALUGRID
 
 #include <dune/common/array.hh>
@@ -33,7 +36,12 @@ namespace Dune
     //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< 3 >  DuneBoundaryProjectionType;
 
+    //! \brief type of boundary segment
+    typedef Dune::BoundarySegment< 3, 3> BoundarySegmentType;
+
   private:
+    typedef Dune::BoundarySegmentWrapper<3, 3> BoundarySegmentWrapperType;
+
     typedef typename Grid::ctype ctype;
 
     static const ALU3dGridElementType elementType = Grid::elementType;
@@ -63,6 +71,9 @@ namespace Dune
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
 
+    typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
+    typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
+
     const std::string filename_;
     bool removeGeneratedFile_;
     MPICommunicatorType communicator_;
@@ -72,7 +83,18 @@ namespace Dune
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
-    const DuneBoundaryProjectionType* bndPrjct_ ;
+    const DuneBoundaryProjectionType* globalProjection_ ;
+    BoundaryProjectionMap boundaryProjections_;
+
+    // copy vertex numbers and store smalled #dimension ones
+    void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
+    {
+      std::vector<unsigned int> tmp( vertices );
+      std::sort( tmp.begin(), tmp.end() );
+
+      // copy only the first dimension vertices (enough for key)
+      for( size_t i = 0; i < faceId.size(); ++i ) faceId[ i ] = tmp[ i ];
+    }
 
   public:
     /** \brief default constructor */
@@ -128,6 +150,30 @@ namespace Dune
      *  \param[in]  id       boundary id to assign to the face
      */
     virtual void insertBoundary ( const int element, const int face, const int id );
+
+    /** \brief insert a boundary projection into the macro grid
+     *
+     *  \param[in]  type        geometry type of boundary face
+     *  \param[in]  vertices    vertices of the boundary face
+     *  \param[in]  projection  boundary projection
+     *
+     *  \note The grid takes control of the projection object.
+     */
+    virtual void
+    insertBoundaryProjection ( const GeometryType &type,
+                               const std::vector< unsigned int > &vertices,
+                               const DuneBoundaryProjectionType *projection );
+
+    /** \brief insert a shaped boundary segment into the macro grid
+     *
+     *  \param[in]  vertices         vertex indices of boundary face
+     *  \param[in]  boundarySegment  geometric realization of shaped boundary
+     *
+     *  \note The grid takes control of the boundary segment.
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int > vertices,
+                            const BoundarySegmentType *boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *

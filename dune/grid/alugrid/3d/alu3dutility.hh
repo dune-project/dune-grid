@@ -63,32 +63,52 @@ namespace Dune {
 
   //! \brief ALUGrid boundary projection implementation
   //!  DuneBndProjection has to fulfil the DuneBoundaryProjection interface
-  template <class DuneBndProjection>
+  template <class GridImp>
   class ALUGridBoundaryProjection : public ALU3DSPACE ProjectVertex
   {
+    typedef GridImp GridType;
   protected:
     //! reference to boundary projection implementation
-    const DuneBndProjection& bndPrj_;
+    const GridType& grid_;
   public:
+    //! type of boundary projection
+    typedef typename GridType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
     //! type of coordinate vector
-    typedef typename DuneBndProjection :: CoordinateType CoordinateType;
+    typedef typename DuneBoundaryProjectionType :: CoordinateType CoordinateType;
 
     //! constructor storing reference to boundary projection implementation
-    ALUGridBoundaryProjection(const DuneBndProjection& bndPrj)
-      : bndPrj_( bndPrj )
+    ALUGridBoundaryProjection(const GridType& grid)
+      : grid_( grid )
     {}
 
-    //! method projection vertices
-    int operator () (const double (&orig)[3], double (&prj)[3]) const
+    //! (old) method projection vertices defaults to segment 0
+    int operator () (const double (&orig)[3],
+                     double (&prj)[3]) const
     {
+      return this->operator()( orig, 0, prj);
+    }
+
+    //! method projection vertices
+    int operator () (const double (&orig)[3],
+                     const int segmentIndex,
+                     double (&prj)[3]) const
+    {
+      // get boundary projection
+      const DuneBoundaryProjectionType& bndPrj = grid_.boundaryProjection( segmentIndex );
+
       // call projection operator
       reinterpret_cast<CoordinateType &> (* (&prj[0])) =
-        bndPrj_( reinterpret_cast<const CoordinateType &> (* (&orig[0])) );
+        bndPrj( reinterpret_cast<const CoordinateType &> (* (&orig[0])) );
 
       // return 1 for success
       return 1;
     }
   };
+
+  /////////////////////////////////////////////////////////////////////////
+  //  some helper functions
+  /////////////////////////////////////////////////////////////////////////
 
   inline const ALU3dImplTraits<tetra>::GEOFaceType*
   getFace(const ALU3DSPACE GEOTetraElementType& elem, int index) {

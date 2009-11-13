@@ -23,7 +23,7 @@ namespace Dune
     : filename_( temporaryFileName() ),
       removeGeneratedFile_( removeGeneratedFile ),
       communicator_( communicator ),
-      bndPrjct_ ( 0 )
+      globalProjection_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -38,7 +38,7 @@ namespace Dune
     : filename_( filename.empty() ? temporaryFileName() : filename ),
       removeGeneratedFile_( filename.empty() ),
       communicator_( communicator ),
-      bndPrjct_ ( 0 )
+      globalProjection_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -134,8 +134,62 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
-    bndPrjct_ = &bndProjection;
+    globalProjection_ = &bndProjection;
   }
+
+
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid > ::
+  insertBoundaryProjection ( const GeometryType &type,
+                             const std::vector< unsigned int > &vertices,
+                             const DuneBoundaryProjectionType *projection )
+  {
+    if( (int)type.dim() != dimension-1 )
+      DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
+    assert( type.isCube() || type.isSimplex() );
+    //if( !type.isSimplex() || )
+    //  DUNE_THROW( AlbertaError, "Alberta supports only simplices." );
+
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+    boundaryProjections_[ faceId ] = projection;
+  }
+
+  template< template< int, int > class ALUGrid >
+  void ALU3dGridFactory< ALUGrid > ::
+  insertBoundarySegment ( const std::vector< unsigned int > vertices,
+                          const BoundarySegmentType *boundarySegment )
+  {
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
+    const size_t numVx = vertices.size();
+    GeometryType type( (numVx == 3) ? GeometryType::simplex : GeometryType::cube, dimension-1 );
+
+    std::vector< VertexType > coords( numVx );
+    for( size_t i = 0; i < numVx; ++i )
+    {
+      // get global coordinate and copy it
+      const VertexType &x = vertices_[ vertices[ i ] ];
+      for( unsigned int j = 0; j < dimensionworld; ++j )
+        coords[ i ][ j ] = x[ j ];
+    }
+    boundaryProjections_[ faceId ] = new BoundarySegmentWrapperType( type, coords, boundarySegment );
+  }
+
+
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
@@ -200,17 +254,40 @@ namespace Dune
       out << std :: endl;
     }
 
-    out << boundaryIds_.size() << std :: endl;
-    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator
-    BoundaryIdIteratorType;
+    const size_t boundarySegments = boundaryIds_.size();
+    out << boundarySegments << std :: endl;
+    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
+
+    BoundaryProjectionVector* bndProjections = 0;
+    const size_t bndProjectionSize = boundaryProjections_.size();
+    if( bndProjectionSize > 0 )
+    {
+      if( bndProjectionSize != boundarySegments )
+        DUNE_THROW(InvalidStateException,"wrong number of boudnary projections");
+      std::cout << "Found boundary segments \n";
+      // the memory is freed by the grid on destruction
+      bndProjections = new BoundaryProjectionVector( boundarySegments );
+    }
+
     const BoundaryIdIteratorType endB = boundaryIds_.end();
-    for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+    int segmentIndex = 0;
+    for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
     {
       const std :: pair< FaceType, int > &boundaryId = *it;
       out << "-" << boundaryId.second << "  " << numFaceCorners;
+
       for( unsigned int i = 0; i < numFaceCorners; ++i )
         out << "  " << boundaryId.first[ i ];
       out << std :: endl;
+
+      if( bndProjectionSize > 0 )
+      {
+        // generate boundary segment pointer
+        FaceType faceId (boundaryId.first);
+        std::sort( faceId.begin(), faceId.end() );
+        // copy pointer
+        (*bndProjections)[ segmentIndex ] = boundaryProjections_[ faceId ];
+      }
     }
 
     for( unsigned int i = 0; i < numVertices; ++i )
@@ -220,17 +297,18 @@ namespace Dune
     vertices_.clear();
     elements_.clear();
     boundaryIds_.clear();
+    boundaryProjections_.clear();
 
 #if ALU3DGRID_PARALLEL
-    Grid *grid = new Grid( filename_, communicator_, bndPrjct_ );
+    Grid *grid = new Grid( filename_, communicator_, globalProjection_ , bndProjections );
 #else
-    Grid *grid = new Grid( filename_, bndPrjct_);
+    Grid *grid = new Grid( filename_, globalProjection_, bndProjections );
 #endif
     if( removeGeneratedFile_ )
       remove( filename_.c_str() );
 
     // remove pointer
-    bndPrjct_ = 0;
+    globalProjection_ = 0;
 
     return grid;
   }

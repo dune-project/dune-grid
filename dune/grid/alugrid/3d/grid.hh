@@ -132,6 +132,7 @@ namespace Dune {
       typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
       typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
+      typedef std::vector< const DuneBoundaryProjectionType *> DuneBoundaryProjectionVector;
 
       template <int cd>
       struct Codim
@@ -281,10 +282,14 @@ namespace Dune {
 
     //! \brief boundary projection type
     typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+    //! \brief boundary projection type
+    typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
   protected:
 
+    friend class ALUGridBoundaryProjection< ThisType >;
     // type of ALUGrid boundary projection wrapper
-    typedef ALUGridBoundaryProjection< DuneBoundaryProjectionType> ALUGridBoundaryProjectionType;
+    typedef ALUGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
+
 
     //! Type of the local id set
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;
@@ -334,9 +339,12 @@ namespace Dune {
 #if ALU3DGRID_PARALLEL
     ALU3dGrid(const std::string macroTriangFilename,
               MPI_Comm mpiComm,
-              const DuneBoundaryProjectionType* bndPrj);
+              const DuneBoundaryProjectionType* bndPrj,
+              const DuneBoundaryProjectionVector* bndVec);
 #else
-    ALU3dGrid(const std::string macroTriangFilename, const DuneBoundaryProjectionType* bndPrj);
+    ALU3dGrid(const std::string macroTriangFilename,
+              const DuneBoundaryProjectionType* bndPrj,
+              const DuneBoundaryProjectionVector* bndVec);
 #endif
   public:
 
@@ -666,6 +674,21 @@ namespace Dune {
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
 
+    //! return boudanry projection for given segment Id
+    const DuneBoundaryProjectionType& boundaryProjection(const int segmentIndex) const
+    {
+      if( bndPrj_ )
+      {
+        return *bndPrj_;
+      }
+      else
+      {
+        assert( bndVec_ );
+        assert( segmentIndex < (int) bndVec_->size() );
+        return *(*bndVec_)[ segmentIndex ];
+      }
+    }
+
     // the real ALU grid
     mutable ALU3DSPACE GitterImplType * mygrid_;
 #if ALU3DGRID_PARALLEL
@@ -837,6 +860,12 @@ namespace Dune {
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
+
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionType* bndPrj_;
+
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionVector* bndVec_;
 
     // boundary projection for vertices
     ALUGridBoundaryProjectionType* vertexProjection_ ;
