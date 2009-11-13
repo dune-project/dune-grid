@@ -3,13 +3,13 @@
 #include "config.h"
 
 #include <dune/grid/sgrid.hh>
-#ifdef HAVE_UG
+#ifdef ENABLE_UG
 #include <dune/grid/uggrid.hh>
 #endif
-#ifdef HAVE_ALBERTA
+#ifdef ENABLE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#ifdef HAVE_ALUGRID
+#ifdef ENABLE_ALUGRID
 #include <dune/grid/alugrid.hh>
 #endif
 
@@ -27,29 +27,35 @@ void testReadingGrid(const std::string& filename) {
 
 int main() try {
 
+  const std::string path("../../../../../doc/grids/gmsh/");
+  std::string curved2d( path );
+  curved2d += "curved2d.msh";
+  std::string pyramid( path );
+  pyramid += "pyramid.msh";
+
   // Test whether unstructured grids can be read and written
-#ifdef HAVE_UG
+#ifdef ENABLE_UG
   std::cout << "reading UGGrid<2>" << std::endl;
-  testReadingGrid<UGGrid<2> >("../../../../doc/grids/gmsh/curved2d.msh");
+  testReadingGrid<UGGrid<2> >( curved2d );
 
   std::cout << "reading UGGrid<3>" << std::endl;
-  testReadingGrid<UGGrid<3> >("../../../../doc/grids/gmsh/pyramid.msh");
+  testReadingGrid<UGGrid<3> >( pyramid );
 #endif
 
-#ifdef HAVE_ALBERTA
+#ifdef ENABLE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
-  testReadingGrid<AlbertaGrid<2> >("../../../../doc/grids/gmsh/curved2d.msh");
+  testReadingGrid<AlbertaGrid<2> >( curved2d );
 
   std::cout << "reading AlbertaGrid<3>" << std::endl;
-  testReadingGrid<AlbertaGrid<3> >("../../../../doc/grids/gmsh/pyramid.msh");
+  testReadingGrid<AlbertaGrid<3> >( pyramid );
 #endif
 
-#ifdef HAVE_ALUGRID
+#ifdef ENABLE_ALUGRID
   //     std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  //     testReadingGrid<ALUSimplexGrid<2,2> >("../../../../doc/grids/gmsh/curved2d.msh");
+  //     testReadingGrid<ALUSimplexGrid<2,2> >( cruved2d );
 
   std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
-  testReadingGrid<ALUSimplexGrid<3,3> >("../../../../doc/grids/gmsh/pyramid.msh");
+  testReadingGrid<ALUSimplexGrid<3,3> >( pyramid );
 #endif
 
   return 0;
