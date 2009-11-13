@@ -277,7 +277,6 @@ namespace Dune
     {
       if( bndProjectionSize != boundarySegments )
         DUNE_THROW(InvalidStateException,"wrong number of boudnary projections");
-      std::cout << "Found boundary segments \n";
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments );
     }
