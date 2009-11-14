@@ -55,8 +55,8 @@ int main() try {
 #endif
 
 #if HAVE_ALUGRID
-  //     std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
-  //     testReadingGrid<ALUSimplexGrid<2,2> >( cruved2d );
+  std::cout << "reading ALUSimplexGrid<2,2>" << std::endl;
+  testReadingGrid<ALUSimplexGrid<2,2> >( curved2d );
 
   std::cout << "reading ALUSimplexGrid<3,3>" << std::endl;
   testReadingGrid<ALUSimplexGrid<3,3> >( pyramid );
