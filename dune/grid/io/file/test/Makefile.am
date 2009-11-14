@@ -41,7 +41,7 @@ amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(ALU
 
 gmshtest_SOURCES = gmshtest.cc
 gmshtest_CXXFLAGS = $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS)
-gmshtest_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
+gmshtest_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 gmshtest_alberta_SOURCES = gmshtest-alberta.cc
 gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS)
