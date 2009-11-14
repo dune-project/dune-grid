@@ -43,11 +43,15 @@ int main() try {
 #endif
 
 #if HAVE_ALBERTA
+#if ALBERTA_DIM==2
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingGrid<AlbertaGrid<2> >( curved2d );
+#endif
 
+#if ALBERTA_DIM==3
   std::cout << "reading AlbertaGrid<3>" << std::endl;
   testReadingGrid<AlbertaGrid<3> >( pyramid );
+#endif
 #endif
 
 #if HAVE_ALUGRID
