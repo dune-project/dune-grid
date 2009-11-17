@@ -167,7 +167,7 @@ namespace Dune
 
        \param[in]  e      reference to codim 0 entity
        \param[in]  i      number subentity of e within the codimension
-       \param[in]  codim  codimension of the subentity we're interesed in
+       \param[in]  codim  codimension of the subentity we're interested in
 
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
