@@ -131,7 +131,7 @@ namespace Dune
     }
 #endif
 
-    /** Obtain a corner of the geometry
+    /** \brief Obtain a corner of the geometry
      *
      *  This method is for convenient access to the corners of the geometry. The
      *  same result could be achieved by by calling
