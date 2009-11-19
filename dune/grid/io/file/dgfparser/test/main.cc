@@ -1,25 +1,44 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
+
+#define DISABLE_DEPRECATED_METHOD_CHECK 1
+#define NEW_SUBENTITY_NUMBERING 1
+
 #include <dune/grid/test/gridcheck.cc>
 #include "../dgfgridtype.hh"
+
+namespace Dune
+{
+
+  template< int dim, int dimworld >
+  class AlbertaGrid;
+
+}
 
 using namespace Dune;
 #if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/visual/grapedatadisplay.hh>
 
+template< int dim, int dimworld >
+struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
 template< class GridView >
-void test ( const GridView &view,std::vector<double>& dat,int nofParams,int cdim)
+void test ( const GridView &view,
+            std::vector< double > &elDat, int nofElParams,
+            std::vector< double > &vtxDat, int nofVtxParams )
 {
   gridcheck( const_cast< typename GridView::Grid & >( view.grid() ) );
-  if (nofParams>0)
+  if( nofElParams + nofVtxParams > 0 )
   {
     GrapeDataDisplay< typename GridView::Grid > disp( view );
-    if (cdim == 0)
-      disp.displayVector("el. Paramters",dat, view.indexSet(), 0, nofParams,false);
-    else
-      disp.displayVector("vtx. Paramters",dat, view.indexSet(), 1, nofParams,true);
+    disp.addVector( "el. Paramters", elDat, view.indexSet(), 0.0, 0, nofElParams, false );
+    disp.addVector( "vtx. Paramters", vtxDat, view.indexSet(), 0.0, 1, nofVtxParams, true );
+    disp.display();
   }
   else
   {
@@ -70,15 +89,17 @@ try {
     std::cout << "Reading Element Parameters:" << std::endl;
     eldat.resize(index.size(0)*grid.nofParameters(0));
     typedef GridView::Codim< 0 >::Iterator IteratorType;
-    IteratorType endit = gridView.end< 0 >();
-    for (IteratorType iter=gridView.begin< 0 >(); iter!=endit; ++iter) {
+    const IteratorType endit = gridView.end< 0 >();
+    for (IteratorType iter=gridView.begin< 0 >(); iter!=endit; ++iter)
+    {
       std::vector<double>& param = grid.parameters(*iter);
-      assert( (int) param.size() == grid.nofParameters(0));
-      for (size_t i=0; i<param.size(); i++) {
-        // std::cout << param[i] << " ";
+      assert( (int) param.size() == grid.nofParameters(0) );
+      for (size_t i=0; i<param.size(); i++)
+      {
+        //std::cout << param[i] << " ";
         eldat[index.index(*iter)*param.size()+i] = param[i];
       }
-      // std::cout << std::endl;
+      //std::cout << std::endl;
     }
   }
   if (grid.nofParameters(GridType::dimension)>0)
@@ -102,12 +123,7 @@ try {
 
   // display
   if (myrank <= 0)
-  {
-    if (0 && grid.nofParameters(0)>0)
-      test(gridView,eldat,grid.nofParameters(0),0);
-    else
-      test(gridView,vtxdat,grid.nofParameters(GridType::dimension),GridType::dimension);
-  }
+    test(gridView,eldat,grid.nofParameters(0),vtxdat,grid.nofParameters(GridType::dimension));
   // refine
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());
