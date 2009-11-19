@@ -146,6 +146,8 @@ namespace Dune
     MPICommunicatorType MPICOMM_;
   };
 
+
+
   //! \brief Class for constructing grids from DGF files.
   //!
   //! The constructor of the class is given the filename of the DGF file.
@@ -158,75 +160,156 @@ namespace Dune
   //! GridPtr<GridType> gridptr(filename, MPI_COMM_WORLD );
   //! GridType & grid = *gridptr;
   //! @endcode
-  template <class GridType>
-  class GridPtr : public MacroGrid {
+  template< class GridType >
+  class GridPtr
+    : public MacroGrid
+  {
+  protected:
+    typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
+
+    struct Compare
+    {
+      bool operator() ( const DomainType &a, const DomainType &b ) const
+      {
+        // returns true, if a < b; c[i] < -eps;
+        const DomainType c = a - b;
+        const double eps = 1e-8;
+
+        for( int i = 0; i < DomainType::dimension; ++i )
+        {
+          if( c[ i ] <= -eps )
+            return true;
+          if( c[ i ] >= eps )
+            return false;
+        }
+        return false;
+      }
+    };
+
+    typedef std::map< DomainType, size_t, Compare > InsertOrderMap;
+    typedef typename InsertOrderMap::const_iterator InsertOrderIterator;
+
     // make operator new and delete private, because this class is only a
     // pointer
     // void * operator new (size_t);
     // void operator delete (void *);
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    //! constructor given the name of a DGF file
-    GridPtr(const std::string filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator()) :
-      MacroGrid(filename.c_str(),MPICOMM),
-      gridptr_(this->template createGrid<GridType>()),
-      emptyParam(),
-      elParam(0),
-      vtxParam(0),
-      nofElParam_(0),
-      nofVtxParam_(0)
-    {
-      if (nofelparams>0)
-      {
-        nofElParam_ = nofelparams;
-        for (size_t i=0; i<elements.size(); i++)
-        {
-          std::vector<double> coord;
-          DomainType p (0);
-          std::vector<double>& param = this->getElParam(i,coord);
-          for (int k=0; k<dimw; k++)
-            p[k] = coord[k];
 
-          elParam.push_back(make_pair(p,param));
+    //! constructor given the name of a DGF file
+    GridPtr( const std::string &filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+      : MacroGrid( filename.c_str(), MPICOMM ),
+        gridptr_( MacroGrid::template createGrid< GridType >() ),
+        emptyParam(),
+        elInsertOrder_(),
+        elParam(0),
+        vtxInsertOrder_(),
+        vtxParam(0),
+        nofVtxParam_(0)
+    {
+      nofElParam_ = nofelparams;
+      if( nofElParam_ > 0 )
+      {
+        const size_t nofElements = elements.size();
+        elParam.resize( nofElements );
+        for( size_t i = 0; i < nofElements; ++i )
+        {
+          std::vector< double > coord;
+          elParam[ i ] = this->getElParam( i, coord );
+          //std::vector<double>& param = this->getElParam(i,coord);
+          assert( dimw == DomainType::dimension );
+          DomainType p;
+          for( int k = 0; k < DomainType::dimension; ++k )
+            p[ k ] = coord[ k ];
+          elInsertOrder_.insert( std::make_pair( p, i ) );
+          //elParam.push_back(std::make_pair(p,param));
         }
       }
-      if (nofvtxparams>0)
-      {
-        nofVtxParam_ = nofvtxparams;
-        for (size_t i=0; i<vtx.size(); i++)
-        {
-          std::vector<double> coord;
-          DomainType p (0);
-          std::vector<double>& param = getVtxParam(i,coord);
-          for (int k=0; k<dimw; k++)
-            p[k] = coord[k];
 
-          vtxParam.push_back(make_pair(p,param));
+      nofVtxParam_ = nofvtxparams;
+      if( nofVtxParam_ > 0 )
+      {
+        const size_t nofVertices = vtx.size();
+        vtxParam.resize( nofVertices );
+        for( size_t i = 0; i < nofVertices; ++i )
+        {
+          std::vector< double > coord;
+          vtxParam[ i ] = this->getVtxParam( i, coord );
+          //std::vector<double>& param = this->getVtxParam(i,coord);
+          assert( dimw == DomainType::dimension );
+          DomainType p;
+          for( int k = 0; k < DomainType::dimension; ++k )
+            p[ k ] = coord[ k ];
+          vtxInsertOrder_.insert( std::make_pair( p, i ) );
+          //vtxParam.push_back(std::make_pair(p,param));
         }
       }
     }
 
     //! Default constructor, creating empty GridPtr
-    GridPtr() : MacroGrid() , gridptr_() ,
-                emptyParam(), elParam(0), vtxParam(0),
-                nofElParam_(0), nofVtxParam_(0) {}
+    GridPtr()
+      : MacroGrid(),
+        gridptr_(),
+        emptyParam(),
+        elInsertOrder_(),
+        elParam(0),
+        vtxInsertOrder_(),
+        vtxParam(0),
+        nofElParam_(0),
+        nofVtxParam_(0)
+    {}
 
     //! Constructor storing given pointer to internal auto pointer
-    GridPtr(GridType * grd) : MacroGrid() , gridptr_(grd),
-                              emptyParam(), elParam(0), vtxParam(0),
-                              nofElParam_(0), nofVtxParam_(0) {}
+    GridPtr( GridType *grd )
+      : MacroGrid(),
+        gridptr_(grd),
+        emptyParam(),
+        elInsertOrder_(),
+        elParam(0),
+        vtxInsertOrder_(),
+        vtxParam(0),
+        nofElParam_(0),
+        nofVtxParam_(0)
+    {}
 
     //! Copy constructor, copies internal auto pointer
-    GridPtr(const GridPtr & org) : gridptr_(org.gridptr_),
-                                   emptyParam(),
-                                   elParam(org.elParam), vtxParam(org.vtxParam),
-                                   nofElParam_(org.nofElParam_),
-                                   nofVtxParam_(org.nofVtxParam_) {}
+    GridPtr( const GridPtr &org )
+      : MacroGrid(),
+        gridptr_(org.gridptr_),
+        emptyParam(),
+        elInsertOrder_( org.elInsertOrder_ ),
+        elParam(org.elParam),
+        vtxInsertOrder_( org.vtxInsertOrder_ ),
+        vtxParam(org.vtxParam),
+        nofElParam_(org.nofElParam_),
+        nofVtxParam_(org.nofVtxParam_)
+    {}
+
+    //! assignment of grid pointer
+    GridPtr &operator= ( const GridPtr &org )
+    {
+      gridptr_ = org.gridptr_;
+      elInsertOrder_ = org.elInsertOrder_;
+      elParam = org.elParam;
+      vtxInsertOrder_ = org.vtxInsertOrder_;
+      vtxParam = org.vtxParam;
+      nofVtxParam_ = org.nofVtxParam_;
+      nofElParam_ = org.nofElParam_;
+      return *this;
+    }
+
+    //! assignment of pointer to internal auto pointer
+    GridPtr & operator = (GridType * grd)
+    {
+      gridptr_ = std::auto_ptr<GridType>(grd);
+      return *this;
+    }
 
     //! return reference to GridType instance
     GridType& operator*() {
       return *gridptr_;
     }
+
     //! return pointer to GridType instance
     GridType* operator->() {
       return gridptr_.operator -> ();
@@ -247,23 +330,6 @@ namespace Dune
       return gridptr_.release();
     }
 
-    //! assignment of grid pointer
-    GridPtr & operator = (const GridPtr & org)
-    {
-      gridptr_ = org.gridptr_;
-      elParam = org.elParam;
-      vtxParam = org.vtxParam;
-      nofVtxParam_ = org.nofVtxParam_;
-      nofElParam_ = org.nofElParam_;
-      return *this;
-    }
-
-    //! assignment of pointer to internal auto pointer
-    GridPtr & operator = (GridType * grd)
-    {
-      gridptr_ = std::auto_ptr<GridType>(grd);
-      return *this;
-    }
     //! get number of parameters defined for a given codimension
     int nofParameters(int cdim) {
       switch (cdim) {
@@ -286,29 +352,34 @@ namespace Dune
           for( int i = 1; i < geo.corners(); ++i )
             coord += geo.corner( i );
           coord /= double( geo.corners() );
-          return elementParams( coord );
+
+          InsertOrderIterator it = elInsertOrder_.find( coord );
+          if( it != elInsertOrder_.end() )
+            return elParam[ it->second ];
+          //return elementParams( coord );
         }
-        else
-          return emptyParam;
+        break;
 
       case GridType::dimension :
         if( vtxParam.size() > 0 )
         {
           const typename Entity::Geometry &geo = entity.geometry();
           DomainType coord( geo.corner( 0 ) );
-          return vertexParams( coord );
-        }
-        else
-          return emptyParam;
 
-      default :
-        return emptyParam;
+          InsertOrderIterator it = vtxInsertOrder_.find( coord );
+          if( it != vtxInsertOrder_.end() )
+            return vtxParam[ it->second ];
+          //return vertexParams( coord );
+        }
+        break;
       }
+      return emptyParam;
     }
 
   protected:
-    typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
-    inline std::vector<double>& elementParams(DomainType& coord) {
+#if 0
+    std::vector<double> &elementParams( const DomainType& coord ) const
+    {
       int idx=0;
       double min=1e10;
       for (size_t i=0; i<elParam.size(); ++i) {
@@ -325,6 +396,9 @@ namespace Dune
       else
         return elParam[idx].second;
     }
+#endif
+
+#if 0
     inline std::vector<double>& vertexParams(DomainType& coord) {
       int idx=0;
       double min=1e10;
@@ -342,11 +416,18 @@ namespace Dune
       else
         return vtxParam[idx].second;
     }
+#endif
+
     // grid auto pointer
     mutable std::auto_ptr<GridType> gridptr_;
     std::vector<double> emptyParam;
     // element and vertex parameters
-    std::vector<std::pair<DomainType,std::vector<double> > > elParam,vtxParam;
+    InsertOrderMap elInsertOrder_;
+    std::vector< std::vector< double > > elParam;
+    InsertOrderMap vtxInsertOrder_;
+    std::vector< std::vector< double > > vtxParam;
+    //std::vector<std::pair<DomainType,std::vector<double> > > elParam;
+    //std::vector<std::pair<DomainType,std::vector<double> > > vtxParam;
     int nofElParam_,nofVtxParam_;
   }; // end of class GridPtr
 
