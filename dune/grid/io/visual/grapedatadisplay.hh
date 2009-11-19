@@ -227,14 +227,14 @@ namespace Dune
     inline static void evalDofNow (EntityType &en, int geomType, DUNE_FDATA *fdata , int localNum, double * val);
 
     // for the data visualization, evaluate linear funcs
-    inline static void evalVectorLinear (EntityType &en, int geomType,
-                                         VectorType & func, const IndexSetImp & set,
-                                         const int * comp, int vend, int localNum, double * val);
+    static void evalVectorLinear ( const EntityType &entity, int geomType,
+                                   VectorType & func, const IndexSetImp &indexSet,
+                                   const int *comp, int vend, int localNum, double *val );
 
     // for the data visualization, evaluate const funcs
-    inline static void evalVectorConst (EntityType &en, int geomType,
-                                        VectorType & func, const IndexSetImp & set,
-                                        const int * comp, int vend, int localNum, double * val);
+    static void evalVectorConst ( const EntityType &entity, int geomType,
+                                  VectorType & func, const IndexSetImp &indexSet,
+                                  const int * comp, int vend, int localNum, double * val);
 
     // calculate min and max value of function
     inline static void calcMinMax(DUNE_FDATA * df);

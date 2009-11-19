@@ -328,29 +328,30 @@ namespace Dune
   //  --EvalVectorData
   //*******************************************************************
   template <class GridType, class VectorType, class IndexSetImp >
-  inline void EvalVectorData<GridType,VectorType,IndexSetImp>::
-  evalVectorLinear (EntityType &en, int geomType,
-                    VectorType & func, const IndexSetImp & set,
-                    const int * comp, int vlength , int localNum, double * val)
+  inline void EvalVectorData<GridType,VectorType,IndexSetImp>
+  ::evalVectorLinear ( const EntityType &entity, int geomType,
+                       VectorType &func, const IndexSetImp &indexSet,
+                       const int *comp, int vlength, int localNum, double *val )
   {
-    if(! set.contains(en) ) return ;
-
-    int idx = vlength * set.template subIndex<dim> (en,localNum) ;
-    val[0] = func[idx + comp[0]];
-    return ;
+    if( indexSet.contains( entity ) )
+    {
+      //int idx = vlength * indexSet.template subIndex<dim> (entity,localNum);
+      int idx = vlength * indexSet.subIndex( entity, localNum, dim );
+      val[ 0 ] = func[ idx + comp[ 0 ] ];
+    }
   }
 
   template <class GridType, class VectorType, class IndexSetImp >
-  inline void EvalVectorData<GridType,VectorType,IndexSetImp>::
-  evalVectorConst (EntityType &en, int geomType,
-                   VectorType & func, const IndexSetImp & set,
-                   const int * comp, int vlength , int localNum, double * val)
+  inline void EvalVectorData<GridType,VectorType,IndexSetImp>
+  ::evalVectorConst ( const EntityType &entity, int geomType,
+                      VectorType &func, const IndexSetImp &indexSet,
+                      const int *comp, int vlength, int localNum, double *val )
   {
-    if(! set.contains(en) ) return ;
-
-    int idx = vlength * set.index(en) ;
-    val[0] = func[idx + comp[0]];
-    return ;
+    if( indexSet.contains( entity ) )
+    {
+      int idx = vlength * indexSet.index( entity );
+      val[ 0 ] = func[ idx + comp[ 0 ] ];
+    }
   }
 
   template <class GridType, class VectorType, class IndexSetImp >
