@@ -198,9 +198,9 @@ int main ()
     Dune::GeometryType cube1d(Dune::GeometryType::cube,1);
     Dune::GeometryType cube2d(Dune::GeometryType::cube,2);
     Dune::GeometryType cube3d(Dune::GeometryType::cube,3);
-    Dune::GeometryType cube4d(Dune::GeometryType::cube,4);
-    Dune::GeometryType cube5d(Dune::GeometryType::cube,5);
-    Dune::GeometryType cube6d(Dune::GeometryType::cube,6);
+    // Dune::GeometryType cube4d(Dune::GeometryType::cube,4);
+    // Dune::GeometryType cube5d(Dune::GeometryType::cube,5);
+    // Dune::GeometryType cube6d(Dune::GeometryType::cube,6);
 
     Dune::GeometryType simplex0d(Dune::GeometryType::simplex,0);
     Dune::GeometryType simplex1d(Dune::GeometryType::simplex,1);
@@ -214,9 +214,9 @@ int main ()
     checkWeights<double, 1>(cube1d);
     checkWeights<double, 2>(cube2d);
     checkWeights<double, 3>(cube3d);
-    checkWeights<double, 4>(cube4d);
-    checkWeights<double, 5>(cube5d);
-    checkWeights<double, 6>(cube6d);
+    // checkWeights<double, 4>(cube4d);
+    // checkWeights<double, 5>(cube5d);
+    // checkWeights<double, 6>(cube6d);
 
     checkWeights<double, 0>(simplex0d);
     checkWeights<double, 1>(simplex1d);
@@ -230,9 +230,9 @@ int main ()
     checkQuadrature<double, 1>(cube1d);
     checkQuadrature<double, 2>(cube2d);
     checkQuadrature<double, 3>(cube3d);
-    checkQuadrature<double, 4>(cube4d);
-    checkQuadrature<double, 5>(cube5d);
-    checkQuadrature<double, 6>(cube6d);
+    // checkQuadrature<double, 4>(cube4d);
+    // checkQuadrature<double, 5>(cube5d);
+    // checkQuadrature<double, 6>(cube6d);
 
     checkQuadrature<double, 0>(simplex0d);
     checkQuadrature<double, 1>(simplex1d);
