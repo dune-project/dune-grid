@@ -106,6 +106,9 @@ namespace Dune
 
   class MacroGrid : protected DuneGridFormatParser
   {
+    template< class GridType >
+    friend class GridPtr;
+
   public:
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
 
@@ -124,7 +127,8 @@ namespace Dune
 
     //! returns pointer to a new instance of type GridType created from a DGF file
     template <class GridType>
-    inline GridType * createGrid () {
+    inline GridType * createGrid ()
+    {
       return Impl<GridType>::generate(*this,filename_,MPICOMM_);
     }
   private:
@@ -162,7 +166,6 @@ namespace Dune
   //! @endcode
   template< class GridType >
   class GridPtr
-    : public MacroGrid
   {
   protected:
     typedef FieldVector<typename GridType::ctype,GridType::dimensionworld> DomainType;
@@ -198,8 +201,7 @@ namespace Dune
 
     //! constructor given the name of a DGF file
     GridPtr( const std::string &filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
-      : MacroGrid( filename.c_str(), MPICOMM ),
-        gridptr_( MacroGrid::template createGrid< GridType >() ),
+      : gridptr_( 0 ),
         emptyParam(),
         elInsertOrder_(),
         elParam(0),
@@ -207,45 +209,50 @@ namespace Dune
         vtxParam(0),
         nofVtxParam_(0)
     {
-      nofElParam_ = nofelparams;
+      MacroGrid macroGrid( filename.c_str(), MPICOMM );
+      gridptr_ = std::auto_ptr< GridType >( macroGrid.template createGrid< GridType >() );
+      nofElParam_ = macroGrid.nofelparams;
       if( nofElParam_ > 0 )
       {
-        const size_t nofElements = elements.size();
-        elParam.resize( nofElements );
+        const size_t nofElements = macroGrid.elements.size();
         for( size_t i = 0; i < nofElements; ++i )
         {
           std::vector< double > coord;
-          elParam[ i ] = this->getElParam( i, coord );
-          assert( dimw == DomainType::dimension );
-          DomainType p;
-          for( int k = 0; k < DomainType::dimension; ++k )
-            p[ k ] = coord[ k ];
+          assert( macroGrid.dimw == DomainType::dimension );
+
+          DomainType p(0);
+          for (size_t k=0; k<macroGrid.elements[i].size(); ++k)
+            for (int j=0; j<DomainType::dimension; ++j)
+              p[j]+=macroGrid.vtx[macroGrid.elements[i][k]][j];
+          p/=double(macroGrid.elements[i].size());
+
           elInsertOrder_.insert( std::make_pair( p, i ) );
         }
+        std::swap( elParam, macroGrid.elParams );
       }
 
-      nofVtxParam_ = nofvtxparams;
+      nofVtxParam_ = macroGrid.nofvtxparams;
       if( nofVtxParam_ > 0 )
       {
-        const size_t nofVertices = vtx.size();
-        vtxParam.resize( nofVertices );
+        const size_t nofVertices = macroGrid.vtx.size();
         for( size_t i = 0; i < nofVertices; ++i )
         {
           std::vector< double > coord;
-          vtxParam[ i ] = this->getVtxParam( i, coord );
-          assert( dimw == DomainType::dimension );
+          assert( macroGrid.dimw == DomainType::dimension );
+
           DomainType p;
           for( int k = 0; k < DomainType::dimension; ++k )
-            p[ k ] = coord[ k ];
+            p[ k ] = macroGrid.vtx[i][k];
+
           vtxInsertOrder_.insert( std::make_pair( p, i ) );
         }
+        std::swap( vtxParam, macroGrid.vtxParams );
       }
     }
 
     //! Default constructor, creating empty GridPtr
     GridPtr()
-      : MacroGrid(),
-        gridptr_(),
+      : gridptr_(),
         emptyParam(),
         elInsertOrder_(),
         elParam(0),
@@ -257,8 +264,7 @@ namespace Dune
 
     //! Constructor storing given pointer to internal auto pointer
     GridPtr( GridType *grd )
-      : MacroGrid(),
-        gridptr_(grd),
+      : gridptr_(grd),
         emptyParam(),
         elInsertOrder_(),
         elParam(0),
@@ -270,8 +276,7 @@ namespace Dune
 
     //! Copy constructor, copies internal auto pointer
     GridPtr( const GridPtr &org )
-      : MacroGrid(),
-        gridptr_(org.gridptr_),
+      : gridptr_(org.gridptr_),
         emptyParam(),
         elInsertOrder_( org.elInsertOrder_ ),
         elParam(org.elParam),
