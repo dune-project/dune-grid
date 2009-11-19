@@ -216,13 +216,11 @@ namespace Dune
         {
           std::vector< double > coord;
           elParam[ i ] = this->getElParam( i, coord );
-          //std::vector<double>& param = this->getElParam(i,coord);
           assert( dimw == DomainType::dimension );
           DomainType p;
           for( int k = 0; k < DomainType::dimension; ++k )
             p[ k ] = coord[ k ];
           elInsertOrder_.insert( std::make_pair( p, i ) );
-          //elParam.push_back(std::make_pair(p,param));
         }
       }
 
@@ -235,13 +233,11 @@ namespace Dune
         {
           std::vector< double > coord;
           vtxParam[ i ] = this->getVtxParam( i, coord );
-          //std::vector<double>& param = this->getVtxParam(i,coord);
           assert( dimw == DomainType::dimension );
           DomainType p;
           for( int k = 0; k < DomainType::dimension; ++k )
             p[ k ] = coord[ k ];
           vtxInsertOrder_.insert( std::make_pair( p, i ) );
-          //vtxParam.push_back(std::make_pair(p,param));
         }
       }
     }
@@ -377,47 +373,6 @@ namespace Dune
     }
 
   protected:
-#if 0
-    std::vector<double> &elementParams( const DomainType& coord ) const
-    {
-      int idx=0;
-      double min=1e10;
-      for (size_t i=0; i<elParam.size(); ++i) {
-        DomainType p(coord);
-        p -= elParam[i].first;
-        double len=p.two_norm();
-        if (min>len) {
-          min=len;
-          idx=i;
-        }
-      }
-      if (idx<0)
-        return emptyParam;
-      else
-        return elParam[idx].second;
-    }
-#endif
-
-#if 0
-    inline std::vector<double>& vertexParams(DomainType& coord) {
-      int idx=0;
-      double min=1e10;
-      for (size_t i=0; i<vtxParam.size(); ++i) {
-        DomainType p(coord);
-        p -= vtxParam[i].first;
-        double len=p.two_norm();
-        if (min>len) {
-          min=len;
-          idx=i;
-        }
-      }
-      if (idx<0)
-        return emptyParam;
-      else
-        return vtxParam[idx].second;
-    }
-#endif
-
     // grid auto pointer
     mutable std::auto_ptr<GridType> gridptr_;
     std::vector<double> emptyParam;
@@ -426,8 +381,6 @@ namespace Dune
     std::vector< std::vector< double > > elParam;
     InsertOrderMap vtxInsertOrder_;
     std::vector< std::vector< double > > vtxParam;
-    //std::vector<std::pair<DomainType,std::vector<double> > > elParam;
-    //std::vector<std::pair<DomainType,std::vector<double> > > vtxParam;
     int nofElParam_,nofVtxParam_;
   }; // end of class GridPtr
 
