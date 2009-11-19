@@ -319,7 +319,6 @@ namespace Dune
     // return vector for copying in combined display
     std::vector < DUNE_FDATA * > & getFdataVec () { return vecFdata_; }
 
-  private:
     /*! add vector to display
        @param data Data vector storing data to display
        @param indexSet The corresponding index set related to the data
@@ -349,6 +348,7 @@ namespace Dune
                           const DATAINFO * dinf, double time ,
                           const int polOrd , const int dimRange, bool continuous );
 
+  private:
     //! hold the diffrent datas on this mesh
     std::vector < DUNE_FDATA * > vecFdata_;
 
