@@ -195,7 +195,6 @@ namespace Dune
       return mapping< codim >( i ).checkInside( local );
     }
 
-
     /** \brief map a local coordinate on subentity (i,codim) into the reference
      *         element
      *
@@ -211,6 +210,11 @@ namespace Dune
      *  \param[in]  c      codimension of subentity E
      *
      *  \note The runtime argument c is redundant and must equal codim.
+     *
+     *  \note This mehtod is just an alias for
+     *  \code
+     *  mapping< codim >( i ).global( local );
+     *  \endcode
      */
     template< int codim >
     FieldVector< ctype, dim >
@@ -233,7 +237,12 @@ namespace Dune
      *
      *  \param[in]  local  coordinates of the point with respect to the reference
      *                     element of E
-     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     *  \param[in]  i      number of subentity E (0 <= i < size( codim ))
+     *
+     *  \note This mehtod is just an alias for
+     *  \code
+     *  mapping< codim >( i ).global( local );
+     *  \endcode
      */
     template< int codim >
     FieldVector< ctype, dim >
@@ -255,7 +264,7 @@ namespace Dune
      *
      *  \tparam     codim  codimension of subentity E
      *
-     *  \param[in]  i      number of subentity E (0 <= i < size( c ))
+     *  \param[in]  i      number of subentity E (0 <= i < size( codim ))
      */
     template< int codim >
     typename Codim< codim >::Mapping &mapping( int i ) const
