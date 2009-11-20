@@ -12,6 +12,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/common/mpihelper.hh>
+#include <dune/grid/common/gridenums.hh>
 
 using namespace Dune;
 
@@ -116,9 +117,8 @@ private:
   UserDataType &userDataReceive_;
 };
 
-
 template <class GridView>
-void checkConsistency(const GridView &gv)
+void checkIntersections(const GridView &gv)
 {
   typedef typename GridView::template Codim<0>::Entity Element;
   typedef typename GridView::template Codim<0>::Iterator Iterator;
@@ -126,8 +126,10 @@ void checkConsistency(const GridView &gv)
 
   Iterator it = gv.template begin<0>();
   const Iterator &endIt = gv.template end<0>();
-
+  // check the intersections
   for (; it != endIt; ++it) {
+    if (it->partitionType() == Dune::GhostEntity)
+      continue;
 
     IntersectionIterator isIt           = gv.ibegin(*it);
     const IntersectionIterator &isEndIt = gv.iend(*it);
@@ -138,10 +140,17 @@ void checkConsistency(const GridView &gv)
       if (isIt->neighbor()) {
         isIt->outside();
       }
+
       ++ n;
     }
 
-    assert(n == 2*GridView::dimension);     // quadrilaterals
+    if (n != 2*GridView::dimension)
+    {
+
+      DUNE_THROW(Dune::InvalidStateException,
+                 "Number of faces for non-ghost cell incorrect. Is "
+                 << n << " but should be " << 2*GridView::dimension);
+    }
   }
 };
 
@@ -218,9 +227,8 @@ void testCommunication(const GridView &gridView)
 {
   std::cout << "Testing communication for codim " << commCodim << " entities\n";
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView,
-      LayoutWrapper<commCodim>::template Layout> MapperType;
-
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
+  MapperType;
   MapperType mapper(gridView);
 
   std::cout << "Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
@@ -334,9 +342,9 @@ void testParallelUG()
             << " edges and " << leafGridView.size(dim)
             << " nodes.\n";
 
-  // iterate over all elements and element intersections
-  checkConsistency(level0GridView);
-  checkConsistency(leafGridView);
+  // some consistency checks for the mappers and the intersections
+  checkIntersections(grid.levelView(0));
+  checkIntersections(grid.leafView());
 
   //////////////////////////////////////////////////////
   // Test element and node communication
@@ -344,16 +352,18 @@ void testParallelUG()
   testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(0));
   testCommunication<typename GridType::LeafGridView, dim>(grid.leafView());
 
-  // //////////////////////////////////////////////////
-  //   Refine globally and test again
-  // //////////////////////////////////////////////////
+  ////////////////////////////////////////////////////
+  //  Refine globally and test again
+  ////////////////////////////////////////////////////
 
+  std::cout << "Global refinement\n";
   grid.globalRefine(1);
 
-  for (int i=0; i<=grid.maxLevel(); i++)
-    checkConsistency(grid.levelView(i));
+  for (int i=0; i<=grid.maxLevel(); i++) {
+    checkIntersections(grid.levelView(i));
+  }
 
-  checkConsistency(grid.leafView());
+  checkIntersections(grid.leafView());
 
   for (int i=0; i<=grid.maxLevel(); i++)
     testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i));
