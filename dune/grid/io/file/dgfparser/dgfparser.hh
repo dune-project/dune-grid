@@ -332,7 +332,7 @@ namespace Dune
     }
 
     //! get number of parameters defined for a given codimension
-    int nofParameters(int cdim) {
+    int nofParameters(int cdim) const {
       switch (cdim) {
       case 0 : return nofElParam_; break;
       case GridType::dimension : return nofVtxParam_; break;
@@ -341,7 +341,7 @@ namespace Dune
     }
     //! get parameters defined for each codim 0 und dim entity on the grid through the grid file
     template <class Entity>
-    std::vector< double > &parameters ( const Entity &entity )
+    const std::vector< double > &parameters ( const Entity &entity ) const
     {
       switch( (int)Entity::codimension )
       {
