@@ -2,6 +2,7 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#define NEW_SUBENTITY_NUMBERING 1
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -177,7 +178,7 @@ void checkALUSerial ( GridType &grid, int maxLevel = 1 )
   // check the intersection iterator and the geometries it returns
   checkIntersectionIterator(grid);
 #endif
-  checkTwists( grid.leafView(), MapTwistAlu2Dune< GridType::elementType >() );
+  // checkTwists( grid.leafView(), MapTwistAlu2Dune< GridType::elementType >() );
 
 #if 0
   // some checks for assignment of iterators

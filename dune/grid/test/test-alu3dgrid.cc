@@ -135,17 +135,17 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   gridcheck(grid);
 
   // only check twists for simplex grids
-  const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
+  // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
 
-  if( checkTwist )
-    checkTwists( grid.leafView(), NoMapTwist() );
+  // if( checkTwist )
+  //  checkTwists( grid.leafView(), NoMapTwist() );
 
   for(int i=0; i<mxl; i++) {
     grid.globalRefine( DGFGridInfo<GridType> :: refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
     gridcheck(grid);
-    if( checkTwist )
-      checkTwists( grid.leafView(), NoMapTwist() );
+    // if( checkTwist )
+    //  checkTwists( grid.leafView(), NoMapTwist() );
   }
 
   // check also non-conform grids
@@ -153,8 +153,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: non-conform" << std::endl;
   gridcheck(grid);
   std::cout << "  CHECKING: twists " << std::endl;
-  if( checkTwist )
-    checkTwists( grid.leafView(), NoMapTwist() );
+  // if( checkTwist )
+  //  checkTwists( grid.leafView(), NoMapTwist() );
 
   // check the method geometryInFather()
   std::cout << "  CHECKING: geometry in father" << std::endl;
