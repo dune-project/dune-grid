@@ -211,7 +211,7 @@ namespace Dune
      *
      *  \note The runtime argument c is redundant and must equal codim.
      *
-     *  \note This mehtod is just an alias for
+     *  \note This method is just an alias for
      *  \code
      *  mapping< codim >( i ).global( local );
      *  \endcode
@@ -239,7 +239,7 @@ namespace Dune
      *                     element of E
      *  \param[in]  i      number of subentity E (0 <= i < size( codim ))
      *
-     *  \note This mehtod is just an alias for
+     *  \note This method is just an alias for
      *  \code
      *  mapping< codim >( i ).global( local );
      *  \endcode
@@ -259,7 +259,7 @@ namespace Dune
      *  \ref Dune::GenericGeometry::HybridMapping HybridMapping that maps
      *  the reference element of E into the current reference element.
      *
-     *  This mehtod can be used in a GenericGeometry to represent subentities
+     *  This method can be used in a GenericGeometry to represent subentities
      *  of the current reference element.
      *
      *  \tparam     codim  codimension of subentity E
