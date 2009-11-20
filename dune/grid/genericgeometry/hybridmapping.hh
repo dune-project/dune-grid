@@ -67,6 +67,15 @@ namespace Dune
     // HybridMapping
     // -------------
 
+    /** \class   HybridMapping
+     *  \ingroup GenericGeometry
+     *  \brief   abstract base class for generic mapping
+     *
+     *  This is the user-visible class of the generic geometries if the
+     *  topology type for each codimension is not unique. It is the abstract
+     *  base class of VirtualMapping, which implements all methods by
+     *  forwarding them to a CachedMapping for the corresponding topology.
+     */
     template< unsigned int dim, class GeometryTraits >
     class HybridMapping
     /** \cond */
@@ -78,12 +87,12 @@ namespace Dune
 
     protected:
       typedef MappingTraits
-      < typename GeometryTraits :: CoordTraits, dim, GeometryTraits :: dimWorld >
+      < typename GeometryTraits::CoordTraits, dim, GeometryTraits::dimWorld >
       Traits;
 
     public:
-      static const unsigned int dimension = Traits :: dimension;
-      static const unsigned int dimWorld = Traits :: dimWorld;
+      static const unsigned int dimension = Traits::dimension;
+      static const unsigned int dimWorld = Traits::dimWorld;
 
       typedef typename Traits::FieldType FieldType;
       typedef typename Traits::LocalCoordType LocalCoordType;
@@ -104,37 +113,50 @@ namespace Dune
       virtual ~HybridMapping ()
       {}
 
+      /** \copydoc CachedMapping::topologyId */
       virtual unsigned int topologyId () const = 0;
 
+      /** \copydoc CachedMapping::corner */
       virtual const GlobalCoordType &corner ( int i ) const = 0;
 
+      /** \copydoc CachedMapping::numCorners */
       virtual int numCorners () const = 0;
 
-      virtual GlobalCoordType global ( const LocalCoordType &local ) const = 0;
+      /** \copydoc CachedMapping::global */
+      virtual GlobalCoordType global ( const LocalCoordType &x ) const = 0;
 
-      virtual LocalCoordType local ( const GlobalCoordType &global ) const = 0;
+      /** \copydoc CachedMapping::local */
+      virtual LocalCoordType local ( const GlobalCoordType &y ) const = 0;
 
-      virtual bool checkInside ( const LocalCoordType &local ) const = 0;
+      /** \copydoc CachedMapping::checkInside */
+      virtual bool checkInside ( const LocalCoordType &x ) const = 0;
 
+      /** \copydoc CachedMapping::affine */
       virtual bool affine () const = 0;
 
-      virtual FieldType integrationElement ( const LocalCoordType &local ) const = 0;
+      /** \copydoc CachedMapping::integrationElement */
+      virtual FieldType integrationElement ( const LocalCoordType &x ) const = 0;
 
+      /** \copydoc CachedMapping::volume */
       virtual FieldType volume () const = 0;
 
+      /** \copydoc CachedMapping::jacobianTransposed */
       virtual const JacobianTransposedType &
-      jacobianTransposed ( const LocalCoordType &local ) const = 0;
+      jacobianTransposed ( const LocalCoordType &x ) const = 0;
 
+      /** \copydoc CachedMapping::jacobianInverseTransposed */
       virtual const JacobianType &
-      jacobianInverseTransposed ( const LocalCoordType &local ) const = 0;
+      jacobianInverseTransposed ( const LocalCoordType &x ) const = 0;
 
+      /** \copydoc CachedMapping::normal */
       virtual GlobalCoordType
-      normal ( int face, const LocalCoordType &local ) const = 0;
+      normal ( int face, const LocalCoordType &x ) const = 0;
 
     protected:
-      using HybridMappingBase< dim, GeometryTraits > :: trace;
+      using HybridMappingBase< dim, GeometryTraits >::trace;
 
     public:
+      /** \copydoc CachedMapping::trace */
       template< int codim >
       typename Codim< codim > :: Trace *trace ( unsigned int i ) const
       {

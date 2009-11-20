@@ -20,8 +20,9 @@ namespace Dune
     // CachedMapping
     // -------------
 
-    /** \class CachedMapping
-     *  \brief caching implementation of the geometric mapping
+    /** \class   CachedMapping
+     *  \ingroup GenericGeometry
+     *  \brief   caching implementation of a geometric mapping
      *
      *  This is the first user-visible class of the generic geometry
      *  implementation and the last class that explicitly depends on the
@@ -271,11 +272,11 @@ namespace Dune
       /** \brief obtain a (covariant) normal to the mappings's image
        *
        *  The returned normal is the Piola transformed (integration) outer
-       *  normal for face i of the reference element.
+       *  normal for the given face of the reference element.
        *
-       *  \param[in]  i  face whose normal should be transformed
-       *  \param[in]  x  local coordinate in which the transformation should be
-       *                 applied
+       *  \param[in]  face  face whose normal should be transformed
+       *  \param[in]  x     local coordinate in which the transformation should be
+       *                    applied
        *
        *  \returns a reference to the (integration) outer normal
        *
