@@ -295,14 +295,15 @@ namespace Dune
 
     /** \brief initialize the reference element
      *
-     *  Initialize the reference element for GeometryType (geoType, dim).
+     *  \tparam  Topology  topology of the desired reference element
      *
-     *  \tparam  geoType  basic geometry of the desired reference element
+     *  \note The dimension of the topology must match dim.
      */
-    template< GeometryType::BasicType geoType >
-    void initialize ()
+    template< class Topology >
+    void initializeTopology ()
     {
-      typedef typename GenericGeometry::Convert< geoType, dim >::type Topology;
+      dune_static_assert( (Topology::dimension == dim),
+                          "Cannot initialize reference element for different dimension." );
       typedef Initialize< Topology > Init;
       typedef GenericGeometry::VirtualMapping< Topology, GeometryTraits > VirtualMapping;
 
@@ -312,6 +313,18 @@ namespace Dune
 
       Dune::ForLoop< Init::template Codim, 0, dim >::apply( info_, mappings_ );
       volume_ = GenericGeometry::ReferenceDomain< Topology >::template volume< double >();
+    }
+
+    /** \brief initialize the reference element
+     *
+     *  Initialize the reference element for GeometryType (geoType, dim).
+     *
+     *  \tparam  geoType  basic geometry of the desired reference element
+     */
+    template< GeometryType::BasicType geoType >
+    void initialize ()
+    {
+      initializeTopology< typename GenericGeometry::Convert< geoType, dim >::type >();
     }
   };
 
