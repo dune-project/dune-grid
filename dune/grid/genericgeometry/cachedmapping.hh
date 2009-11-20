@@ -265,14 +265,17 @@ namespace Dune
       FieldType volume () const
       {
         // do we need a quadrature of higher order, here?
-        const FieldType refVolume = ReferenceElement :: volume();
+        const FieldType refVolume = ReferenceElement::volume();
         return refVolume * integrationElement( baryCenter() );
       }
 
       /** \brief obtain a (covariant) normal to the mappings's image
        *
-       *  The returned normal is the Piola transformed (integration) outer
-       *  normal for the given face of the reference element.
+       *  The returned normal is the (integration) outer normal for the given
+       *  face of the reference element \f$\hat n_{face}\f$, tranformed by the
+       *  inverse Piola transformation, i.e.,
+       *  \f[n(x) = \sqrt{|J^T(x)J(x)|} J^T(x) \hat n_{face},\f]
+       *  where \f$J(x)\f$ denotes the Jacobian of the mapping.
        *
        *  \param[in]  face  face whose normal should be transformed
        *  \param[in]  x     local coordinate in which the transformation should be
