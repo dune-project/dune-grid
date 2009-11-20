@@ -152,7 +152,81 @@ void checkIntersections(const GridView &gv)
                  << n << " but should be " << 2*GridView::dimension);
     }
   }
+}
+
+// some consistency tests for the mappers
+template <int codim, class GridView>
+void checkMappers(const GridView &gridView)
+{
+  typename GridView::template Codim<codim>::Iterator
+  it = gridView.template begin<codim>();
+  const typename GridView::template Codim<codim>::Iterator
+  &endIt = gridView.template end<codim>();
+
+  // make sure the number of entities is the same for
+  // gridView.size() and iterating through the grid
+  int numEntities = 0;
+  for (; it != endIt; ++it)
+    ++ numEntities;
+  if (numEntities != gridView.size(codim)) {
+    DUNE_THROW(InvalidStateException,
+               "Number of codim " << codim
+                                  << " entities is inconsistent (iterator: " << numEntities
+                                  << " grid view: " << gridView.size(codim) << ")");
+  };
+
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper
+  <GridView, LayoutWrapper<codim>::template Layout> MapperType;
+  MapperType mapper(gridView);
+
+  // make sure no entity has two indices
+  std::vector<int> indices(numEntities, -100);
+  it = gridView.template begin<codim>();
+  for (; it != endIt; ++it) {
+    int i = mapper.map(*it);
+    if (i < 0 || i >= numEntities) {
+      DUNE_THROW(InvalidStateException,
+                 "Mapper returns an invalid index for codim " << codim
+                                                              << " entities: " << i
+                                                              << " should be in range [0,"
+                                                              << numEntities -1 <<  "]");
+    };
+    if (indices[i] >= 0) {
+      DUNE_THROW(InvalidStateException,
+                 "Mapper returns index " << i << " twice for codim " << codim
+                                         << " entities.");
+    }
+    indices[i] = i;
+  };
 };
+
+// specializations for non-implementet cases
+template <int dim, int codim, class GridView>
+struct checkMappersWrapper
+{
+  static void check(const GridView &gv)
+  { return checkMappers<codim>(gv); }
+};
+
+// codim 3 entities for 2d grids
+template <class GridView>
+struct checkMappersWrapper<2, 3, GridView>
+{ static void check(const GridView &gv) { } };
+
+// codim 1 entities for 3d grids
+template <class GridView>
+struct checkMappersWrapper<3, 1, GridView>
+{ static void check(const GridView &gv) { } };
+
+// codim 2 entities for 3d grids
+template <class GridView>
+struct checkMappersWrapper<3, 2, GridView>
+{ static void check(const GridView &gv) { } };
+
+// codim 1 entities for 2d grids
+template <class GridView>
+struct checkMappersWrapper<2, 1, GridView>
+{ static void check(const GridView &gv) { } };
 
 template <class Grid>
 void insertVertices(int n, Dune::GridFactory<Grid> &factory, int coordIdx=0)
@@ -330,8 +404,11 @@ void testParallelUG()
   //////////////////////////////////////////////////////
   // Test level and leaf mappers/gridViews
   //////////////////////////////////////////////////////
-  typename GridType::LevelGridView level0GridView = grid.levelView(0);
-  typename GridType::LeafGridView leafGridView = grid.leafView();
+
+  typedef typename GridType::LevelGridView LevelGV;
+  typedef typename GridType::LeafGridView LeafGV;
+  LeafGV leafGridView = grid.leafView();
+  LevelGV level0GridView = grid.levelView(0);
 
   std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
@@ -344,7 +421,17 @@ void testParallelUG()
 
   // some consistency checks for the mappers and the intersections
   checkIntersections(grid.levelView(0));
+  checkMappersWrapper<dim, 0, LevelGV>::check(grid.levelView(0));
+  checkMappersWrapper<dim, 1, LevelGV>::check(grid.levelView(0));
+  checkMappersWrapper<dim, 2, LevelGV>::check(grid.levelView(0));
+  checkMappersWrapper<dim, 3, LevelGV>::check(grid.levelView(0));
+
   checkIntersections(grid.leafView());
+  checkMappersWrapper<dim, 0, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 1, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 2, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 3, LeafGV>::check(grid.leafView());
+
 
   //////////////////////////////////////////////////////
   // Test element and node communication
@@ -361,9 +448,17 @@ void testParallelUG()
 
   for (int i=0; i<=grid.maxLevel(); i++) {
     checkIntersections(grid.levelView(i));
+    checkMappersWrapper<dim, 0, LevelGV>::check(grid.levelView(i));
+    checkMappersWrapper<dim, 1, LevelGV>::check(grid.levelView(i));
+    checkMappersWrapper<dim, 2, LevelGV>::check(grid.levelView(i));
+    checkMappersWrapper<dim, 3, LevelGV>::check(grid.levelView(i));
   }
 
   checkIntersections(grid.leafView());
+  checkMappersWrapper<dim, 0, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 1, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 2, LeafGV>::check(grid.leafView());
+  checkMappersWrapper<dim, 3, LeafGV>::check(grid.leafView());
 
   for (int i=0; i<=grid.maxLevel(); i++)
     testCommunication<typename GridType::LevelGridView, 0>(grid.levelView(i));
