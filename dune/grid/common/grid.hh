@@ -11,6 +11,7 @@
 #include <string>
 
 // dune-common includes
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/helpertemplates.hh>
