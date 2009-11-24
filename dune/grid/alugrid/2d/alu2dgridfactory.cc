@@ -109,7 +109,9 @@ namespace Dune
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std :: ofstream out( filename_.c_str() );
+    std::ofstream out( filename_.c_str() );
+    out.setf( std::ios_base::scientific, std::ios_base::floatfield );
+    out.precision( 16 );
     out << "!Triangles";
 
     const unsigned int numVertices = vertices_.size();
