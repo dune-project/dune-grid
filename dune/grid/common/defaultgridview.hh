@@ -218,7 +218,7 @@ namespace Dune
   private:
     const Grid *grid_;
     const IndexSet *indexSet_;
-    const int level_;
+    int level_;
   };
 
 
