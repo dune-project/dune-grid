@@ -2,8 +2,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <cstdio>
-
 #include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
 
 namespace Dune
@@ -384,7 +382,7 @@ namespace Dune
       else if( c == '/' )
         token.setSymbol( Token::multiplicativeOperator, line.get() );
       // parse end of line
-      else if( c == EOF )
+      else if( c == std::stringstream::traits_type::eof() )
         token.type = Token::endOfLine;
 
       //std::cout << " " << token << std::flush;
