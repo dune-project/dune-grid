@@ -4,6 +4,7 @@
 #define DUNE_DEFAULTGRIDVIEW_HH
 
 #include <dune/common/typetraits.hh>
+#include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridview.hh>
@@ -116,11 +117,13 @@ namespace Dune
         level_( other.level_ )
     {}
 
-  private:
-    // prohibit assignment
-    ThisType &operator= ( const ThisType & );
+    /** \brief assignment from other GridView on the same grid */
+    ThisType &operator= ( const ThisType & other)
+    {
+      if ((this != &other)or (level_ != other.level_))
+        DUNE_THROW(Dune::Exception, "You can only assign a GridView on the same grid and level!");
+    }
 
-  public:
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
@@ -310,11 +313,13 @@ namespace Dune
         indexSet_( other.indexSet_ )
     {}
 
-  private:
-    // prohibit assignment
-    ThisType &operator= ( const ThisType & );
+    /** \brief assignment from other GridView on the same grid */
+    ThisType &operator= ( const ThisType & other)
+    {
+      if (this != &other)
+        DUNE_THROW(Dune::Exception, "You can only assign a GridView on the same grid!");
+    }
 
-  public:
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
