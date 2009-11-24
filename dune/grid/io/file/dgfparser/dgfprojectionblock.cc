@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <cstdio>
+
 #include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
 
 namespace Dune
