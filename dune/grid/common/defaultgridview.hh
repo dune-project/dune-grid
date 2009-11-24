@@ -99,18 +99,14 @@ namespace Dune
 
     enum { conforming = Traits :: conforming };
 
-  private:
-    const Grid &grid_;
-    const IndexSet &indexSet_;
-    const int level_;
-
-  public:
     DefaultLevelGridView ( const Grid &grid, int level )
-      : grid_( grid ),
-        indexSet_( grid.levelIndexSet( level ) ),
+      : grid_( &grid ),
+        indexSet_( &(grid.levelIndexSet( level )) ),
         level_( level )
     {}
 
+    // use default implementation of copy constructor and assignment operator
+#if 0
     DefaultLevelGridView ( const ThisType &other )
       : grid_( other.grid_ ),
         indexSet_( other.indexSet_ ),
@@ -120,20 +116,22 @@ namespace Dune
     /** \brief assignment from other GridView on the same grid */
     ThisType &operator= ( const ThisType & other)
     {
-      if ((this != &other)or (level_ != other.level_))
-        DUNE_THROW(Dune::Exception, "You can only assign a GridView on the same grid and level!");
+      grid_ = other.grid_;
+      indexSet_ = other.indexSet_;
+      level_ = other.level_;
     }
+#endif
 
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
-      return grid_;
+      return *grid_;
     }
 
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return indexSet_;
+      return *indexSet_;
     }
 
     /** \brief obtain numer of entities in a given codimension */
@@ -216,6 +214,11 @@ namespace Dune
     {
       return grid().communicate( data, iftype, dir, level_ );
     }
+
+  private:
+    const Grid *grid_;
+    const IndexSet *indexSet_;
+    const int level_;
   };
 
 
@@ -298,16 +301,14 @@ namespace Dune
 
     enum { conforming = Traits :: conforming };
 
-  private:
-    const Grid &grid_;
-    const IndexSet &indexSet_;
-
   public:
     DefaultLeafGridView ( const Grid &grid )
-      : grid_( grid ),
-        indexSet_( grid.leafIndexSet() )
+      : grid_( &grid ),
+        indexSet_( &(grid.leafIndexSet()) )
     {}
 
+    // use default implementation of copy constructor and assignment operator
+#if 0
     DefaultLeafGridView ( const ThisType &other )
       : grid_( other.grid_ ),
         indexSet_( other.indexSet_ )
@@ -316,20 +317,21 @@ namespace Dune
     /** \brief assignment from other GridView on the same grid */
     ThisType &operator= ( const ThisType & other)
     {
-      if (this != &other)
-        DUNE_THROW(Dune::Exception, "You can only assign a GridView on the same grid!");
+      grid_ = other.grid_;
+      indexSet_ = other.indexSet_;
     }
+#endif
 
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
-      return grid_;
+      return *grid_;
     }
 
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return indexSet_;
+      return *indexSet_;
     }
 
     /** \brief obtain numer of entities in a given codimension */
@@ -412,6 +414,10 @@ namespace Dune
     {
       return grid().communicate( data, iftype, dir );
     }
+
+  private:
+    const Grid *grid_;
+    const IndexSet *indexSet_;
   };
 
 }
