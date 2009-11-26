@@ -17,7 +17,8 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/boundarysegment.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   /**
      \ingroup Gmsh
@@ -36,37 +37,37 @@ namespace Dune {
   };
 
   // arbitrary dimension, implementation is in specialization
-  template<int dimension>
+  template< int dimension, int dimWorld = dimension >
   class GmshReaderLinearBoundarySegment
   {};
 
 
   // linear boundary segments in 1d
-  template<>
-  class GmshReaderLinearBoundarySegment<2> : public Dune::BoundarySegment<2>
+  template< int dimWorld >
+  struct GmshReaderLinearBoundarySegment< 2, dimWorld >
+    : public Dune::BoundarySegment< 2, dimWorld >
   {
-  public:
-    GmshReaderLinearBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_)
-      : p0(p0_), p1(p1_)
+    typedef Dune::FieldVector< double, dimWorld > GlobalVector;
+
+    GmshReaderLinearBoundarySegment ( const GlobalVector &p0, const GlobalVector &p1 )
+      : x_( p0 ), p_( p1 - p0 )
     {}
 
-    virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
+    virtual GlobalVector operator() ( const Dune::FieldVector< double, 1 > &local ) const
     {
-      Dune::FieldVector<double,2> y;
-      y = 0.0;
-      y.axpy(1.0-local[0],p0);
-      y.axpy(local[0],p1);
+      GlobalVector y = x_;
+      y.axpy( local[ 0 ], p_ );
       return y;
     }
 
   private:
-    Dune::FieldVector<double,2> p0,p1;
+    GlobalVector x_, p_;
   };
 
 
 
   // arbitrary dimension, implementation is in specialization
-  template<int dimension>
+  template< int dimension, int dimWorld = dimension >
   class GmshReaderQuadraticBoundarySegment
   {};
 
@@ -82,17 +83,18 @@ namespace Dune {
 
      alpha is determined automatically from the given points.
    */
-  template <>
-  class GmshReaderQuadraticBoundarySegment<2> : public Dune::BoundarySegment<2>
+  template< int dimWorld >
+  struct GmshReaderQuadraticBoundarySegment< 2, dimWorld >
+    : public Dune::BoundarySegment< 2, dimWorld >
   {
-  public:
-    GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,2> p0_, Dune::FieldVector<double,2> p1_,
-                                        Dune::FieldVector<double,2> p2_)
+    typedef Dune::FieldVector< double, dimWorld > GlobalVector;
+
+    GmshReaderQuadraticBoundarySegment ( const GlobalVector &p0_, const GlobalVector &p1_, const GlobalVector &p2_)
       : p0(p0_), p1(p1_), p2(p2_)
     {
-      Dune::FieldVector<double,2> d1(p1);
+      GlobalVector d1 = p1;
       d1 -= p0;
-      Dune::FieldVector<double,2> d2(p2);
+      GlobalVector d2 = p2;
       d2 -= p1;
 
       alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
@@ -100,9 +102,9 @@ namespace Dune {
         DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
     }
 
-    virtual Dune::FieldVector<double,2> operator() (const Dune::FieldVector<double,1>& local) const
+    virtual GlobalVector operator() ( const Dune::FieldVector<double,1> &local ) const
     {
-      Dune::FieldVector<double,2> y;
+      GlobalVector y;
       y = 0.0;
       y.axpy((local[0]-alpha)*(local[0]-1.0)/alpha,p0);
       y.axpy(local[0]*(local[0]-1.0)/(alpha*(alpha-1.0)),p1);
@@ -111,7 +113,7 @@ namespace Dune {
     }
 
   private:
-    Dune::FieldVector<double,2> p0,p1,p2;
+    GlobalVector p0,p1,p2;
     double alpha;
   };
 
@@ -122,10 +124,18 @@ namespace Dune {
   class GmshReaderImp
   {};
 
-  template<typename GridType>
-  class GmshReaderImp<GridType,2>
+  template< class GridType >
+  struct GmshReaderImp< GridType, 2 >
   {
-  public:
+    static const int dim = GridType::dimension;
+    static const int dimWorld = GridType::dimensionworld;
+
+    dune_static_assert( (dimWorld <= 3), "GmshReader requires dimWorld <= 3." );
+
+    typedef FieldVector< double, dimWorld > GlobalVector;
+
+    typedef GmshReaderLinearBoundarySegment< dim, dimWorld > LinearBoundarySegment;
+    typedef GmshReaderQuadraticBoundarySegment< dim, dimWorld > QuadraticBoundarySegment;
 
     template<typename T>
     static void read (Dune::GridFactory<GridType>& factory, const std::string& fileName,
@@ -133,8 +143,7 @@ namespace Dune {
                       std::vector<T>& boundary_id_to_physical_entity,
                       std::vector<T>& element_index_to_physical_entity)
     {
-      // the grid dimension
-      const int dim = GridType::dimension;
+      std::cout << "Reading 2d Gmsh grid..." << std::endl;
 
       // open file name, we use C I/O
       FILE* file = fopen(fileName.c_str(),"r");
@@ -173,19 +182,20 @@ namespace Dune {
       int number_of_nodes;
       fscanf(file,"%d\n",&number_of_nodes);
       if (verbose) std::cout << "file contains " << number_of_nodes << " nodes" << std::endl;
-      std::vector<Dune::FieldVector<double,dim> > nodes(number_of_nodes+1); // store positions
-      for (int i=1; i<=number_of_nodes; i++)
+      std::vector< GlobalVector > nodes( number_of_nodes+1 ); // store positions
+      for( int i = 1; i <= number_of_nodes; ++i )
       {
         int id;
-        double x,y,z;
-        fscanf(file,"%d %lg %lg %lg\n",&id,&x,&y,&z);
+        double x[ 3 ];
+        if( fscanf( file, "%d %lg %lg %lg\n", &id, &x[ 0 ], &x[ 1 ], &x[ 2 ] ) != 4 )
+          DUNE_THROW( Dune::IOError, "Unable to read vertex." );
         //          if (verbose) std::cout << id << " " << x << " " << y << " " << z << std::endl;
-        if (id!=i)
-          DUNE_THROW(Dune::IOError, "expected id " << i);
+        if( id != i )
+          DUNE_THROW( Dune::IOError, "Expected id " << i << "(got id " << id << "." );
 
-        Dune::FieldVector<double,dim> position;
-        position[0] = x; position[1] = y;
-        nodes[i] = position;   // just store node position
+        // just store node position
+        for( int j = 0; j < dimWorld; ++j )
+          nodes[ i ][ j ] = x[ j ];
       }
       fscanf(file,"%s\n",buf);
       if (strcmp(buf,"$EndNodes")!=0)
@@ -263,7 +273,7 @@ namespace Dune {
           element_count++;
           break;
         default :
-          fgets(buf,512,file);     // skip rest of line if no tetrahedron
+          fgets(buf,512,file);     // skip rest of line if no triangle
         }
       }
       if (verbose) std::cout << "number of real vertices = " << number_of_real_vertices << std::endl;
@@ -344,7 +354,7 @@ namespace Dune {
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           if (insert_boundary_segments)
-            factory.insertBoundarySegment(vertices,new GmshReaderLinearBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
+            factory.insertBoundarySegment(vertices, new LinearBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -355,7 +365,7 @@ namespace Dune {
           for (int i=0; i<2; i++)
             vertices[i] = renumber[simplexVertices[i]];     // renumber vertices
           if (insert_boundary_segments)
-            factory.insertBoundarySegment(vertices,new GmshReaderQuadraticBoundarySegment<2>(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]]));
+            factory.insertBoundarySegment(vertices, new QuadraticBoundarySegment(nodes[simplexVertices[0]],nodes[simplexVertices[2]],nodes[simplexVertices[1]]));
           boundary_id_to_physical_entity[boundary_element_count] = physical_entity;
           boundary_element_count++;
           break;
@@ -394,10 +404,10 @@ namespace Dune {
 
 
   // linear boundary segments in 2d
-  template <>
-  class GmshReaderLinearBoundarySegment<3> : public Dune::BoundarySegment<3>
+  template<>
+  struct GmshReaderLinearBoundarySegment< 3, 3 >
+    : public Dune::BoundarySegment< 3 >
   {
-  public:
     GmshReaderLinearBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
                                      Dune::FieldVector<double,3> p2_)
       : p0(p0_), p1(p1_), p2(p2_)
@@ -444,8 +454,9 @@ namespace Dune {
      The parameters alpha, beta, gamma are determined from the given vertices in
      global coordinates.
    */
-  template <>
-  class GmshReaderQuadraticBoundarySegment<3> : public Dune::BoundarySegment<3>
+  template<>
+  class GmshReaderQuadraticBoundarySegment< 3, 3 >
+    : public Dune::BoundarySegment< 3 >
   {
   public:
     GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,

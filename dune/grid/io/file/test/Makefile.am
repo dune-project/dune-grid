@@ -23,6 +23,8 @@ check_PROGRAMS = $(ALLTESTS)
 # list of tests to run
 TESTS = $(ALLTESTS)
 
+GRIDDIM = $(ALBERTA_DIM)
+
 vtktest_SOURCES = vtktest.cc
 vtktest_LDADD = $(LOCAL_LIBS)
 
@@ -44,7 +46,7 @@ gmshtest_CXXFLAGS = $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS)
 gmshtest_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 gmshtest_alberta_SOURCES = gmshtest-alberta.cc
-gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS)
+gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(GRIDDIM)
 gmshtest_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS) $(GRAPE_LDFLAGS) $(GRAPE_LIBS)
 
 gmshtest_all_SOURCES = gmshtest-alberta.cc

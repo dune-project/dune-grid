@@ -57,12 +57,12 @@ try
   checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
-#if HAVE_ALUGRID
+#if HAVE_ALUGRID && (GRIDDIM == 3)
   std::cout << "Checking ALUGrid \n";
   checkGmshReader< Dune::ALUSimplexGrid< 3, 3 > > ( argv[1], refinements );
 #endif
 
-#if HAVE_UG
+#if HAVE_UG && (GRIDDIM == 3)
   std::cout << "Checking UG \n";
   checkGmshReader< Dune::UGGrid< 3 > > ( argv[1], refinements );
 #endif
