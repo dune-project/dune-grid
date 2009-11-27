@@ -53,7 +53,7 @@ try
     refinements = atoi( argv[2] );
 
 #if HAVE_ALBERTA
-  std::cout << "Checking AlbertaGrid \n";
+  std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
   checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
