@@ -41,8 +41,8 @@ namespace Dune
   inline bool
   AlbertaGridEntity< codim, dim, GridImp >::equals ( const This &other ) const
   {
-    const ALBERTA EL *e1 = getElement();
-    const ALBERTA EL *e2 = other.getElement();
+    const Alberta::Element *e1 = elementInfo().el();
+    const Alberta::Element *e2 = other.elementInfo().el();
 
     // if both element null then they are equal
     if( (e1 == NULL) && (e2 == NULL) )
@@ -56,14 +56,6 @@ namespace Dune
   AlbertaGridEntity< codim, dim, GridImp >::getElInfo () const
   {
     return &(elementInfo_.elInfo());
-  }
-
-
-  template< int codim, int dim, class GridImp >
-  inline ALBERTA EL *
-  AlbertaGridEntity< codim, dim, GridImp >::getElement() const
-  {
-    return elementInfo_.el();
   }
 
 
@@ -200,7 +192,7 @@ namespace Dune
   AlbertaGridEntity< 0, dim, GridImp >::equals ( const This &other ) const
   {
     // element pointers are unique
-    return (getElement() == other.getElement());
+    return (elementInfo().el() == other.elementInfo().el());
   }
 
 
@@ -219,14 +211,6 @@ namespace Dune
   AlbertaGridEntity< 0, dim, GridImp >::getElInfo () const
   {
     return &(elementInfo_.elInfo());
-  }
-
-
-  template< int dim, class GridImp >
-  inline ALBERTA EL *
-  AlbertaGridEntity< 0, dim, GridImp >::getElement () const
-  {
-    return elementInfo_.el();
   }
 
 

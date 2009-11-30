@@ -98,8 +98,6 @@ namespace Dune
     //***********************************************
     //! needed for the LevelIterator and LeafIterator
     ALBERTA EL_INFO *getElInfo () const;
-    //! return element for equaltiy in EntityPointer
-    ALBERTA EL *getElement () const;
 
     const ElementInfo &elementInfo () const
     {
@@ -337,9 +335,6 @@ namespace Dune
     {
       return elementInfo_;
     }
-
-    // return element for equaltiy in EntityPointer
-    ALBERTA EL *getElement () const;
 
     void clearElement ();
     void setElement ( const ElementInfo &elementInfo, int subEntity );
