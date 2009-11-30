@@ -34,7 +34,7 @@ namespace Dune
    *  GridFactoryInterface. It provides the following additional features:
    *  - It allows to set boundary ids via insertBoundary. For ALBERTA 1.2,
    *    these boundary ids are ignored, though.
-   *  - For ALBERTA 2.1 and above, you can add face transformation to identify
+   *  - For ALBERTA 3.0 and above, you can add face transformation to identify
    *    faces. This allows the construction of periodic grids.
    *  - The grid can be written in ALBERTA's native format for macro
    *    triangulations via write (both ASCII and XDR format are supported).
@@ -245,37 +245,7 @@ namespace Dune
      *
      *  \note ALBERTA automatically adds the inverse transformation.
      */
-    virtual void
-    insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
-    {
-      // make sure the matrix is orthogonal
-      for( int i = 0; i < dimworld; ++i )
-        for( int j = 0; j < dimworld; ++j )
-        {
-          const ctype delta = (i == j ? ctype( 1 ) : ctype( 0 ));
-          const ctype epsilon = (8*dimworld)*std::numeric_limits< ctype >::epsilon();
-
-          if( std::abs( matrix[ i ] * matrix[ j ] - delta ) > epsilon )
-          {
-            DUNE_THROW( AlbertaError,
-                        "Matrix of face transformation is not orthogonal." );
-          }
-        }
-
-      // copy matrix
-      Alberta::GlobalMatrix M;
-      for( int i = 0; i < dimworld; ++i )
-        for( int j = 0; j < dimworld; ++j )
-          M[ i ][ j ] = matrix[ i ][ j ];
-
-      // copy shift
-      Alberta::GlobalVector t;
-      for( int i = 0; i < dimworld; ++i )
-        t[ i ] = shift[ i ];
-
-      // insert into ALBERTA macro data
-      macroData_.insertWallTrafo( M, t );
-    }
+    void insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift );
 
     /** \brief mark the longest edge as refinemet edge
      *
@@ -401,55 +371,10 @@ namespace Dune
     }
 
   private:
-    unsigned int insertionIndex ( const ElementInfo &elementInfo ) const
-    {
-      const MacroElement &macroElement = elementInfo.macroElement();
-      const unsigned int index = macroElement.index;
+    unsigned int insertionIndex ( const ElementInfo &elementInfo ) const;
+    unsigned int insertionIndex ( const ElementInfo &elementInfo, const int face ) const;
 
-#ifndef NDEBUG
-      const typename MacroData::ElementId &elementId = macroData_.element( index );
-      for( int i = 0; i <= dimension; ++i )
-      {
-        const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
-        const Alberta::GlobalVector &y = macroElement.coordinate( i );
-        for( int j = 0; j < dimensionworld; ++j )
-        {
-          if( x[ j ] != y[ j ] )
-            DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
-        }
-      }
-#endif // #ifndef NDEBUG
-
-      return index;
-    }
-
-
-    unsigned int
-    insertionIndex ( const ElementInfo &elementInfo, const int face ) const
-    {
-      typedef typename BoundaryMap::const_iterator Iterator;
-      const Iterator it = boundaryMap_.find( faceId( elementInfo, face ) );
-      if( it != boundaryMap_.end() )
-        return it->second;
-      else
-        return std::numeric_limits< unsigned int >::max();
-    }
-
-
-    FaceId faceId ( const ElementInfo &elementInfo, const int face ) const
-    {
-      const unsigned int index = insertionIndex( elementInfo );
-      const typename MacroData::ElementId &elementId = macroData_.element( index );
-
-      FaceId faceId;
-      for( size_t i = 0; i < faceId.size(); ++i )
-      {
-        const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
-        faceId[ i ] = elementId[ k ];
-      }
-      std::sort( faceId.begin(), faceId.end() );
-      return faceId;
-    }
+    FaceId faceId ( const ElementInfo &elementInfo, const int face ) const;
 
     MacroData macroData_;
     NumberingMap numberingMap_;
@@ -466,6 +391,104 @@ namespace Dune
     macroData_.release();
   }
 
+
+  template< int dim, int dimworld >
+  inline void
+  GridFactory< AlbertaGrid< dim, dimworld > >
+  ::insertFaceTransformation ( const WorldMatrix &matrix, const WorldVector &shift )
+  {
+    // make sure the matrix is orthogonal
+    for( int i = 0; i < dimworld; ++i )
+      for( int j = 0; j < dimworld; ++j )
+      {
+        const ctype delta = (i == j ? ctype( 1 ) : ctype( 0 ));
+        const ctype epsilon = (8*dimworld)*std::numeric_limits< ctype >::epsilon();
+
+        if( std::abs( matrix[ i ] * matrix[ j ] - delta ) > epsilon )
+        {
+          DUNE_THROW( AlbertaError,
+                      "Matrix of face transformation is not orthogonal." );
+        }
+      }
+
+    // copy matrix
+    Alberta::GlobalMatrix M;
+    for( int i = 0; i < dimworld; ++i )
+      for( int j = 0; j < dimworld; ++j )
+        M[ i ][ j ] = matrix[ i ][ j ];
+
+    // copy shift
+    Alberta::GlobalVector t;
+    for( int i = 0; i < dimworld; ++i )
+      t[ i ] = shift[ i ];
+
+    // insert into ALBERTA macro data
+    macroData_.insertWallTrafo( M, t );
+  }
+
+
+  template< int dim, int dimworld >
+  inline unsigned int
+  GridFactory< AlbertaGrid< dim, dimworld > >
+  ::insertionIndex ( const ElementInfo &elementInfo ) const
+  {
+    const MacroElement &macroElement = elementInfo.macroElement();
+    const unsigned int index = macroElement.index;
+
+#ifndef NDEBUG
+    const typename MacroData::ElementId &elementId = macroData_.element( index );
+    for( int i = 0; i <= dimension; ++i )
+    {
+      const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
+      const Alberta::GlobalVector &y = macroElement.coordinate( i );
+      for( int j = 0; j < dimensionworld; ++j )
+      {
+        if( x[ j ] != y[ j ] )
+          DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
+      }
+    }
+#endif // #ifndef NDEBUG
+
+    return index;
+  }
+
+
+  template< int dim, int dimworld >
+  inline unsigned int
+  GridFactory< AlbertaGrid< dim, dimworld > >
+  ::insertionIndex ( const ElementInfo &elementInfo, const int face ) const
+  {
+    typedef typename BoundaryMap::const_iterator Iterator;
+    const Iterator it = boundaryMap_.find( faceId( elementInfo, face ) );
+    if( it != boundaryMap_.end() )
+      return it->second;
+    else
+      return std::numeric_limits< unsigned int >::max();
+  }
+
+
+  template< int dim, int dimworld >
+  inline typename GridFactory< AlbertaGrid< dim, dimworld > >::FaceId
+  GridFactory< AlbertaGrid< dim, dimworld > >
+  ::faceId ( const ElementInfo &elementInfo, const int face ) const
+  {
+    const unsigned int index = insertionIndex( elementInfo );
+    const typename MacroData::ElementId &elementId = macroData_.element( index );
+
+    FaceId faceId;
+    for( size_t i = 0; i < faceId.size(); ++i )
+    {
+      const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
+      faceId[ i ] = elementId[ k ];
+    }
+    std::sort( faceId.begin(), faceId.end() );
+    return faceId;
+  }
+
+
+
+  // GridFactory::ProjectionFactory
+  // ------------------------------
 
   template< int dim, int dimworld >
   class GridFactory< AlbertaGrid< dim, dimworld > >::ProjectionFactory
