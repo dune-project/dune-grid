@@ -69,6 +69,12 @@ namespace Dune
     typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
     typedef Dune::BoundarySegment< dimension, dimensionworld > BoundarySegment;
 
+    template< int codim >
+    struct Codim
+    {
+      typedef typename Grid::template Codim< codim >::Entity Entity;
+    };
+
   private:
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapper;
 
@@ -364,7 +370,43 @@ namespace Dune
       return write< ascii >( filename );
     }
 
+    virtual unsigned int
+    insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
+    {
+      return insertionIndex( Grid::getRealImplementation( entity ).elementInfo() );
+    }
+
+    virtual unsigned int
+    insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
+    {
+      const int elIndex = insertionIndex( Grid::getRealImplementation( entity ).elementInfo() );
+      const typename MacroData::ElementId &elementId = macroData_.element( elIndex );
+      return elementId[ Grid::getRealImplementation( entity ).subEntity() ];
+    }
+
   private:
+    unsigned int insertionIndex ( const ElementInfo &elementInfo ) const
+    {
+      const MacroElement &macroElement = elementInfo.macroElement();
+      const unsigned int index = macroElement.index;
+
+#ifndef NDEBUG
+      const typename MacroData::ElementId &elementId = macroData_.element( index );
+      for( int i = 0; i <= dimension; ++i )
+      {
+        const Alberta::GlobalVector &x = macroData_.vertex( elementId[ i ] );
+        const Alberta::GlobalVector &y = macroElement.coordinate( i );
+        for( int j = 0; j < dimensionworld; ++j )
+        {
+          if( x[ j ] != y[ j ] )
+            DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
+        }
+      }
+#endif // #ifndef NDEBUG
+
+      return index;
+    }
+
     MacroData macroData_;
     NumberingMap numberingMap_;
     const Projection *globalProjection_;
@@ -447,21 +489,8 @@ namespace Dune
 
     FaceId faceId ( const ElementInfo &elementInfo, const int face ) const
     {
-      const MacroElement &macroElement = elementInfo.macroElement();
-      const typename MacroData::ElementId &elementId = gridFactory_.macroData_.element( macroElement.index );
-
-#ifndef NDEBUG
-      for( int i = 0; i <= dimension; ++i )
-      {
-        const Alberta::GlobalVector &x = gridFactory_.macroData_.vertex( elementId[ i ] );
-        const Alberta::GlobalVector &y = macroElement.coordinate( i );
-        for( int j = 0; j < dimensionworld; ++j )
-        {
-          if( x[ j ] != y[ j ] )
-            DUNE_THROW( GridError, "Vertex in macro element does not coincide with same vertex in macro data structure." );
-        }
-      }
-#endif
+      const unsigned int index = gridFactory_.insertionIndex( elementInfo );
+      const typename MacroData::ElementId &elementId = gridFactory_.macroData_.element( index );
 
       FaceId faceId;
       for( size_t i = 0; i < faceId.size(); ++i )
