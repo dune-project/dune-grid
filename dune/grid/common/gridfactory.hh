@@ -15,7 +15,8 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
 
-namespace Dune {
+namespace Dune
+{
 
   /** \brief Provide a generic factory class for unstructured grids.
 
@@ -24,7 +25,8 @@ namespace Dune {
       This base class declares the interface.
    */
   template <class GridType>
-  class GridFactoryInterface {
+  class GridFactoryInterface
+  {
 
   protected:
     /** \brief dimension of the grid */
@@ -37,6 +39,11 @@ namespace Dune {
     typedef typename GridType::ctype ctype;
 
   public:
+    template< int codim >
+    struct Codim
+    {
+      typedef typename GridType::template Codim< codim >::Entity Entity;
+    };
 
     /** \brief Default constructor */
     GridFactoryInterface()
@@ -84,6 +91,93 @@ namespace Dune {
        The receiver takes responsibility of the memory allocated for the grid
      */
     virtual GridType* createGrid() = 0;
+
+    /** \brief obtain an element's insertion index
+     *
+     *  Data can be associated to the created macro grid using the insertion
+     *  index of each entity that has been inserted during the grid creation
+     *  process.
+     *
+     *  Between grid construction (createGrid) and the first grid
+     *  modification, this method allows to obtain this insertion index from
+     *  the grid factory. This way, data can be stored using the index maps
+     *  provided by the grid.
+     *
+     *  \param[in]  entity  entity whose insertion index is requested
+     *
+     *  \returns insertion index of the entity
+     */
+    virtual unsigned int
+    insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
+    {
+      DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
+    }
+
+    /** \brief obtain a vertex' insertion index
+     *
+     *  Data can be associated to the created macro grid using the insertion
+     *  index of each entity that has been inserted during the grid creation
+     *  process.
+     *
+     *  Between grid construction (createGrid) and the first grid
+     *  modification, this method allows to obtain this insertion index from
+     *  the grid factory. This way, data can be stored using the index maps
+     *  provided by the grid.
+     *
+     *  \param[in]  entity  entity whose insertion index is requested
+     *
+     *  \returns insertion index of the entity
+     */
+    virtual unsigned int
+    insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
+    {
+      DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
+    }
+
+    /** \brief obtain a boundary's insertion index
+     *
+     *  Data can be associated to the created macro grid using the insertion
+     *  index of each entity that has been inserted during the grid creation
+     *  process.
+     *
+     *  Between grid construction (createGrid) and the first grid
+     *  modification, this method allows to obtain this insertion index from
+     *  the grid factory. This way, data can be stored using the index maps
+     *  provided by the grid.
+     *
+     *  \param[in]  intersection  intersection whose insertion index is requested
+     *
+     *  \returns insertion index of the intersection
+     *
+     *  \note The insertion index can only be obtained for boundary
+     *        intersections that were actually inserted
+     *        (see also wasInserted).
+     */
+    virtual unsigned int
+    insertionIndex ( const typename GridType::LeafIntersection &intersection ) const
+    {
+      DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
+    }
+
+
+    /** \brief determine whether an intersection was inserted
+     *
+     *  This method allows checking wheter an intersection was actually
+     *  inserted into the grid factory.
+     *
+     *  \note Not all boundary segments need to be inserted into the grid
+     *        factory.
+     *  \note This method returns \b false for all interior intersections
+     *
+     *  \param[in]  intersection  intersection in question
+     *
+     *  \returns \b true, if the intersection was inserted
+     */
+    virtual bool
+    wasInserted ( const typename GridType::LeafIntersection &intersection ) const
+    {
+      DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
+    }
 
   };
 
