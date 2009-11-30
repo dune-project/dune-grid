@@ -88,7 +88,7 @@ namespace Dune
     typedef Alberta::DuneBoundaryProjection< dimension > Projection;
 
     typedef array< unsigned int, dimension > FaceId;
-    typedef std::map< FaceId, Projection > BoundaryProjectionMap;
+    typedef std::map< FaceId, size_t > BoundaryMap;
 
     class ProjectionFactory;
 
@@ -178,10 +178,11 @@ namespace Dune
         faceId[ i ] = vertices[ i ];
       std::sort( faceId.begin(), faceId.end() );
 
-      typedef std::pair< typename BoundaryProjectionMap::iterator, bool > InsertResult;
-      const InsertResult result = boundaryProjections_.insert( std::make_pair( faceId, Projection( *projection ) ) );
+      typedef std::pair< typename BoundaryMap::iterator, bool > InsertResult;
+      const InsertResult result = boundaryMap_.insert( std::make_pair( faceId, boundaryProjections_.size() ) );
       if( !result.second )
         DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+      boundaryProjections_.push_back( Projection( *projection ) );
     }
 
 
@@ -384,6 +385,21 @@ namespace Dune
       return elementId[ Grid::getRealImplementation( entity ).subEntity() ];
     }
 
+    virtual unsigned int
+    insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      const Grid &grid = Grid::getRealImplementation( intersection ).grid();
+      const ElementInfo &elementInfo = Grid::getRealImplementation( intersection ).elementInfo();
+      const int face = grid.generic2alberta( 1, intersection.indexInInside() );
+      return insertionIndex( elementInfo, face );
+    }
+
+    virtual bool
+    wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return (insertionIndex( intersection ) < std::numeric_limits< unsigned int >::max());
+    }
+
   private:
     unsigned int insertionIndex ( const ElementInfo &elementInfo ) const
     {
@@ -407,10 +423,39 @@ namespace Dune
       return index;
     }
 
+
+    unsigned int
+    insertionIndex ( const ElementInfo &elementInfo, const int face ) const
+    {
+      typedef typename BoundaryMap::const_iterator Iterator;
+      const Iterator it = boundaryMap_.find( faceId( elementInfo, face ) );
+      if( it != boundaryMap_.end() )
+        return it->second;
+      else
+        return std::numeric_limits< unsigned int >::max();
+    }
+
+
+    FaceId faceId ( const ElementInfo &elementInfo, const int face ) const
+    {
+      const unsigned int index = insertionIndex( elementInfo );
+      const typename MacroData::ElementId &elementId = macroData_.element( index );
+
+      FaceId faceId;
+      for( size_t i = 0; i < faceId.size(); ++i )
+      {
+        const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
+        faceId[ i ] = elementId[ k ];
+      }
+      std::sort( faceId.begin(), faceId.end() );
+      return faceId;
+    }
+
     MacroData macroData_;
     NumberingMap numberingMap_;
     const Projection *globalProjection_;
-    BoundaryProjectionMap boundaryProjections_;
+    BoundaryMap boundaryMap_;
+    std::vector< Projection > boundaryProjections_;
   };
 
 
@@ -443,37 +488,29 @@ namespace Dune
 
     bool hasProjection ( const ElementInfo &elementInfo, const int face ) const
     {
-      if( !boundaryProjections().empty() )
-      {
-        if( boundaryProjections().find( faceId( elementInfo, face ) ) != boundaryProjections().end() )
-          return true;
-      }
-      return (gridFactory_.globalProjection_ != 0);
+      return (gridFactory().globalProjection_ != 0)
+             || (gridFactory().insertionIndex( elementInfo, face ) < std::numeric_limits< unsigned int >::max());
     }
 
     bool hasProjection ( const ElementInfo &elementInfo ) const
     {
-      return (gridFactory_.globalProjection_ != 0);
+      return (gridFactory().globalProjection_ != 0);
     }
 
     Projection projection ( const ElementInfo &elementInfo, const int face ) const
     {
-      if( !boundaryProjections().empty() )
-      {
-        typedef typename BoundaryProjectionMap::const_iterator Iterator;
-        const Iterator it = boundaryProjections().find( faceId( elementInfo, face ) );
-        if( it != boundaryProjections().end() )
-          return it->second;
-      }
+      const unsigned int index = gridFactory().insertionIndex( elementInfo, face );
+      if( index < std::numeric_limits< unsigned int >::max() )
+        return gridFactory().boundaryProjections_[ index ];
 
-      assert( gridFactory_.globalProjection_ != 0 );
-      return *gridFactory_.globalProjection_;
+      assert( gridFactory().globalProjection_ != 0 );
+      return *gridFactory().globalProjection_;
     };
 
     Projection projection ( const ElementInfo &elementInfo ) const
     {
-      assert( gridFactory_.globalProjection_ != 0 );
-      return *gridFactory_.globalProjection_;
+      assert( gridFactory().globalProjection_ != 0 );
+      return *gridFactory().globalProjection_;
     };
 
     const GridFactory &gridFactory () const
@@ -482,26 +519,6 @@ namespace Dune
     }
 
   private:
-    const BoundaryProjectionMap &boundaryProjections () const
-    {
-      return gridFactory_.boundaryProjections_;
-    }
-
-    FaceId faceId ( const ElementInfo &elementInfo, const int face ) const
-    {
-      const unsigned int index = gridFactory_.insertionIndex( elementInfo );
-      const typename MacroData::ElementId &elementId = gridFactory_.macroData_.element( index );
-
-      FaceId faceId;
-      for( size_t i = 0; i < faceId.size(); ++i )
-      {
-        const int k = Alberta::MapVertices< dimension, 1 >::apply( face, i );
-        faceId[ i ] = elementId[ k ];
-      }
-      std::sort( faceId.begin(), faceId.end() );
-      return faceId;
-    }
-
     const GridFactory &gridFactory_;
   };
 
