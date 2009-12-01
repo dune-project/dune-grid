@@ -23,13 +23,11 @@ namespace Dune
 {
 
   // forward declarations
-  template<int codim, int dim, class GridImp> class OneDGridEntity;
   template<int codim, class GridImp> class OneDGridEntityPointer;
   template<int codim, PartitionIteratorType pitype, class GridImp> class OneDGridLevelIterator;
 
   template<int mydim, int coorddim, class GridImp>            class OneDGridGeometry;
   template<class GridImp>            class OneDGridHierarchicIterator;
-  template<class GridImp, bool LeafIterator> class OneDGridIntersectionIterator;
 
 }
 
