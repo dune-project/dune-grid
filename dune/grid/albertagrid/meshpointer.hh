@@ -95,13 +95,38 @@ namespace Dune
       int numMacroElements () const;
       int size ( int codim ) const;
 
-      void create ( const MacroData< dim > &macroData, const std::string &name );
-      template< class Proj, class Impl >
-      void create ( const MacroData< dim > &macroData, const std::string &name,
-                    const ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
-      void create ( const std::string &filename, const std::string &name, bool binary = false );
+      // create a mesh from a macrodata structure
+      // params:  macroData - macro data structure
+      //          name      - grid name
+      // returns: number of boundary segments
+      unsigned int create ( const MacroData< dim > &macroData, const std::string &name );
 
-      void read ( const std::string &filename, Real &time );
+      // create a mesh from a macrodata structure, adding projections
+      // params:  macroData         - macro data structure
+      //          name              - grid name
+      //          projectionFactory - factory for the projections
+      // returns: number of boundary segments
+      template< class Proj, class Impl >
+      unsigned int create ( const MacroData< dim > &macroData, const std::string &name,
+                            const ProjectionFactoryInterface< Proj, Impl > &projectionFactory );
+
+      // create a mesh from a file
+      // params:  filename - file name of an Alberta macro triangulation
+      //          name     - grid name
+      //          binary   - read binary?
+      // returns: number of boundary segments
+      unsigned int create ( const std::string &filename, const std::string &name, bool binary = false );
+
+      // read back a mesh from a file
+      // params:  filename - file name of an Alberta save file
+      //          time     - variable to receive the time stored in the file
+      // returns: number of boundary segments
+      //
+      // notes: - projections are not preserved
+      //        - we assume that projections are added in the same order they
+      //          inserted in when the grid was created (otherwise the boundary
+      //          indices change)
+      unsigned int read ( const std::string &filename, Real &time );
 
       bool write ( const std::string &filename, Real time ) const;
 
@@ -171,7 +196,7 @@ namespace Dune
 
 
     template< int dim >
-    inline void MeshPointer< dim >
+    inline unsigned int MeshPointer< dim >
     ::create ( const MacroData< dim > &macroData, const std::string &name )
     {
       release();
@@ -182,12 +207,13 @@ namespace Dune
 #else
       mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection );
 #endif
+      return Library< dimWorld >::boundaryCount;
     }
 
 
     template< int dim >
     template< class Proj, class Impl >
-    inline void MeshPointer< dim >
+    inline unsigned int MeshPointer< dim >
     ::create ( const MacroData< dim > &macroData, const std::string &name,
                const ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
     {
@@ -203,31 +229,36 @@ namespace Dune
       mesh_ = GET_MESH( dim, name.c_str(), macroData, &initNodeProjection< ProjectionFactory > );
 #endif
       Library< dimWorld >::projectionFactory = 0;
+      return Library< dimWorld >::boundaryCount;
     }
 
 
 
 
     template< int dim >
-    inline void MeshPointer< dim >
+    inline unsigned int MeshPointer< dim >
     ::create ( const std::string &filename, const std::string &name, bool binary )
     {
       MacroData< dim > macroData;
       macroData.read( filename, binary );
-      create( macroData, name );
+      const unsigned int boundaryCount = create( macroData, name );
       macroData.release();
+      return boundaryCount;
     }
 
 
     template< int dim >
-    inline void MeshPointer< dim >::read ( const std::string &filename, Real &time )
+    inline unsigned int MeshPointer< dim >::read ( const std::string &filename, Real &time )
     {
       release();
+
+      Library< dimWorld >::boundaryCount = 0;
 #if DUNE_ALBERTA_VERSION >= 0x300
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL, NULL );
 #else
       mesh_ = ALBERTA read_mesh_xdr( filename.c_str(), &time, NULL );
 #endif
+      return Library< dimWorld >::boundaryCount;
     }
 
 
