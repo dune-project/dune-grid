@@ -16,6 +16,14 @@ namespace Dune {
   class OneDGridLeafIntersectionIterator;
   template <class GridImp>
   class OneDGridLevelIntersectionIterator;
+  template<int codim, class GridImp>
+  class OneDGridEntityPointer;
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  class OneDGridLevelIterator;
+  template<class GridImp>
+  class OneDGridHierarchicIterator;
+  template<int mydim, int coorddim, class GridImp>
+  class OneDGridGeometry;
 
   template <int mydim>
   class OneDEntityImp {};

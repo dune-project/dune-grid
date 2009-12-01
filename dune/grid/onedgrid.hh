@@ -19,18 +19,6 @@
  * \brief The OneDGrid class
  */
 
-namespace Dune
-{
-
-  // forward declarations
-  template<int codim, class GridImp> class OneDGridEntityPointer;
-  template<int codim, PartitionIteratorType pitype, class GridImp> class OneDGridLevelIterator;
-
-  template<int mydim, int coorddim, class GridImp>            class OneDGridGeometry;
-  template<class GridImp>            class OneDGridHierarchicIterator;
-
-}
-
 #include "onedgrid/onedgridlist.hh"
 #include "onedgrid/nulliteratorfactory.hh"
 #include "onedgrid/onedgridentity.hh"
