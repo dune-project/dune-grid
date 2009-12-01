@@ -3,6 +3,7 @@
 #ifndef DUNE_ONEDGRID_ENTITY_POINTER_HH
 #define DUNE_ONEDGRID_ENTITY_POINTER_HH
 
+#include "onedgridentity.hh"
 
 namespace Dune {
 

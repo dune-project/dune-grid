@@ -9,6 +9,8 @@
 
 #include <stack>
 
+#include <dune/grid/onedgrid/onedgridentitypointer.hh>
+
 namespace Dune {
 
   //**********************************************************************

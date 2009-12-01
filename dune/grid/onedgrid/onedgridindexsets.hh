@@ -9,6 +9,11 @@
 
 #include <vector>
 
+#include <dune/grid/common/indexidset.hh>
+
+#include <dune/grid/onedgrid/onedgridlist.hh>
+#include <dune/grid/onedgrid/onedgridentity.hh>
+
 namespace Dune {
 
   template<class GridImp>

@@ -3,6 +3,10 @@
 #ifndef DUNE_ONE_D_GEOMETRY_HH
 #define DUNE_ONE_D_GEOMETRY_HH
 
+#include <dune/grid/common/geometry.hh>
+
+#include <dune/grid/onedgrid/onedgridentity.hh>
+
 /** \file
  * \brief The OneDGridElement class and its specializations
  */
@@ -13,6 +17,9 @@ namespace Dune {
   template <int codim, int dim, class GridImp>
   class OneDGridEntity;
 
+  /** \brief Unspecialized class.  Not used for anything */
+  template<int mydim, int coorddim, class GridImp>
+  class OneDGridGeometry;
 
   template<class GridImp>
   class OneDGridGeometry <0, 1, GridImp> :

@@ -3,6 +3,8 @@
 #ifndef DUNE_ONE_D_GRID_LEAFITERATOR_HH
 #define DUNE_ONE_D_GRID_LEAFITERATOR_HH
 
+#include <dune/common/tuples.hh>
+
 #include <dune/grid/onedgrid/onedgridentitypointer.hh>
 
 /** \file

@@ -7,6 +7,8 @@
  * \brief The OneDGridIntersectionIterator class
  */
 
+#include <dune/grid/onedgrid/onedgridentity.hh>
+
 namespace Dune {
 
   //**********************************************************************

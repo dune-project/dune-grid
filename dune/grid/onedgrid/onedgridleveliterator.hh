@@ -7,6 +7,10 @@
  * \brief The OneDGridLevelIterator class
  */
 
+#include <dune/grid/common/gridenums.hh>
+
+#include <dune/grid/onedgrid/onedgridentitypointer.hh>
+
 namespace Dune {
 
 

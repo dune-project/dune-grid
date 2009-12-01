@@ -4,6 +4,12 @@
 #define DUNE_ONE_D_GRID_ENTITY_HH
 
 #include <dune/common/array.hh>
+#include <dune/common/fvector.hh>
+
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/entity.hh>
+
+#include "nulliteratorfactory.hh"
 
 /** \file
  * \brief The OneDGridEntity class and its specializations
