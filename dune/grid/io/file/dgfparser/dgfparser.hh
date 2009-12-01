@@ -390,7 +390,7 @@ namespace Dune
     //! assignment of grid pointer
     GridPtr &operator= ( const GridPtr &org )
     {
-      gridPtr_ = org.gridptr_;
+      gridPtr_ = org.gridPtr_;
       elParam_ = org.elParam_;
       vtxParam_ = org.vtxParam_;
       bndId_ = org.bndId_;
