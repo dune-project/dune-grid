@@ -68,16 +68,16 @@
  * ALUGRID_CUBE | ALUGRID_SIMPLEX | ONEDGRID | SGRID | UGGRID | YASPGRID.
  * This will add the following to the ALL_PKG_CPPFLAGS
  * @code
- * -DGRIDDIM=$(GRIDDIM) -DGRIDTYPE=$(GRIDTYPE)
+ * -DGRIDDIM=$(GRIDDIM) -D$(GRIDTYPE)
  * @endcode
- * No by adding the \c ALL_PKG_CPPFLAGS or \c GRIDDIM_CPPFLAGS to the
+ * Now by adding the \c ALL_PKG_CPPFLAGS or \c GRIDDIM_CPPFLAGS to the
  * programs \c CXXFLAGS one can choose the grids dimension and type by
  * invoking the following make command
  * @code
  *  make GRIDDIM=3 GRIDTYPE=ALBERTAGRID myprogram
  * @endcode
  * Here the value \c 3 for grid dimension and \c ALBERTAGRID for grid type are passed as
- * pre-processoer variables to gridtype.hh and are then used to define the \c typedef \c
+ * pre-processor variables to gridtype.hh and are then used to define the \c typedef \c
  * GridType.
  *
  */
