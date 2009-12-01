@@ -5,7 +5,7 @@ max-area 0.5   % maximum element area restriction
 display 0        % show result using the Tetgen viewer
 
 % to use TetGen from a certain path, uncomment this path line
-path $HOME/bin  % path to Tetgen
+% path $HOME/bin  % path to Tetgen
 #
 vertex 
 0   0  5

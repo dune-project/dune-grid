@@ -1,7 +1,7 @@
 DGF
 Simplexgenerator
 % to use TetGen from a certain path, uncomment this path line
-path $HOME/dune/modules/tetgen1.4.0         % path to Tetgen
+% path $HOME/dune/modules/tetgen1.4.0         % path to Tetgen
 
 % read information from file (uncomment each line seperatly)
 % file BBEETH1M.d_cut mesh

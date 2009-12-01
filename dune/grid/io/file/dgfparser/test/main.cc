@@ -13,6 +13,7 @@
 #include <dune/grid/io/visual/grapedatadisplay.hh>
 #endif
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
 namespace Dune
 {
@@ -51,6 +52,7 @@ void display ( const std::string &name,
   }
 #endif // #if HAVE_GRAPE
   VTKWriter<GridView> vtkWriter(view);
+  // SubsamplingVTKWriter<GridView> vtkWriter(view,6);
   if( nofElParams + nofVtxParams > 0 )
   {
     vtkWriter.addCellData( elDat, "el. Parameters", nofElParams );
