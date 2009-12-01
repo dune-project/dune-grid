@@ -64,22 +64,55 @@ namespace Dune {
   }
 
   template <int dim>
-  class MacroGrid::Impl<YaspGrid<dim> > {
+  struct DGFGridFactory< YaspGrid<dim> > {
+    typedef YaspGrid<dim> Grid;
+    const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
-  public:
-    static YaspGrid<dim>* generate(MacroGrid& mg,
-                                   const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-  };
-  template <int dim>
-  struct DGFGridInfo< YaspGrid<dim> > {
-    static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return pow(0.5,dim);}
+    typedef typename Grid::template Codim<0>::Entity Element;
+    typedef typename Grid::template Codim<dimension>::Entity Vertex;
+    DGFGridFactory( const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+    {
+      generate( filename, MPICOMM );
+    }
+    Grid *grid() const
+    {
+      return grid_;
+    }
+    template <class Intersection>
+    bool wasInserted(const Intersection &intersection) const
+    {
+      return false;
+    }
+    template <class Intersection>
+    int boundaryId(const Intersection &intersection) const
+    {
+      return intersection.boundaryId();
+    }
+    int elementParameters() const
+    {
+      return 0;
+    }
+    std::vector<double>& parameter(const Element &element)
+    {
+      return emptyParam;
+    }
+    int vertexParameters() const
+    {
+      return 0;
+    }
+    std::vector<double>& parameter(const Vertex &vertex)
+    {
+      return emptyParam;
+    }
+  private:
+    void generate( const char* filename, MPICommunicatorType MPICOMM );
+    Grid *grid_;
+    std::vector<double> emptyParam;
   };
 
   template< int dim >
-  inline YaspGrid< dim > *
-  MacroGrid::Impl< YaspGrid< dim > >
-  ::generate ( MacroGrid &mg, const char *filename, MPICommunicatorType MPICOMM )
+  inline void DGFGridFactory< YaspGrid< dim > >
+  ::generate ( const char *filename, MPICommunicatorType MPICOMM )
   {
 
     std::ifstream gridin( filename );
@@ -103,16 +136,13 @@ namespace Dune {
                                                           << "into a YaspGrid< " << dim << " >." );
     }
 
-    mg.element = Cube;
-    mg.dimw = intervalBlock.dimw();
-
     const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
 
     FieldVector<double,dim> lang;
     FieldVector<int,dim>    anz;
     for( int i = 0; i < dim; ++i )
     {
-      // check that start point is > 0.0
+      // check that start point is 0.0
       if( fabs( interval.p[ 0 ][ i ] ) > 1e-10 )
       {
         DUNE_THROW( DGFException,
@@ -159,12 +189,19 @@ namespace Dune {
     // get grid parameters
     dgf::YaspGridParameterBlock grdParam( gridin );
 
-    #if HAVE_MPI
-    return new YaspGrid<dim>(MPICOMM,lang, anz, per , grdParam.overlap() );
-    #else
-    return new YaspGrid<dim>(lang, anz, per , grdParam.overlap() );
-    #endif
+#if HAVE_MPI
+    grid_ = new YaspGrid<dim>(MPICOMM,lang, anz, per , grdParam.overlap() );
+#else
+    grid_ = new YaspGrid<dim>(lang, anz, per , grdParam.overlap() );
+#endif
   }
+
+  template <int dim>
+  struct DGFGridInfo< YaspGrid<dim> > {
+    static int refineStepsForHalf() {return 1;}
+    static double refineWeight() {return pow(0.5,dim);}
+  };
+
 
 }
 #endif
