@@ -57,6 +57,7 @@ namespace Dune {
   template<int codim, class GridImp>            class YaspEntityPointer;
   template<int codim, PartitionIteratorType pitype, class GridImp> class YaspLevelIterator;
   template<class GridImp>            class YaspIntersectionIterator;
+  template<class GridImp>            class YaspIntersection;
   template<class GridImp>            class YaspHierarchicIterator;
   template<class GridImp>            class YaspLevelIndexSet;
   template<class GridImp>            class YaspLeafIndexSet;
@@ -713,10 +714,10 @@ namespace Dune {
     {}
 
     //! level of this element
-    int level () const {return _g.level();}
+    int level () const { return _g.level(); }
 
     //! index is unique and consecutive per level
-    int index () const { return _it.superindex();} // superindex works also for iteration over subgrids
+    int index () const { return _it.superindex(); } // superindex works also for iteration over subgrids
 
     //! globalIndex is unique and consecutive per global level
     int globalIndex () const {
@@ -1441,23 +1442,145 @@ namespace Dune {
     typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
     typedef YaspSpecialGeometry<dim-1,dimworld,GridImp> SpecialGeometry;
     typedef YaspSpecialGeometry<dim-1,dim,GridImp> SpecialLocalGeometry;
-    typedef Dune::Intersection<const GridImp, Dune::YaspIntersectionIterator> Intersection;
+    typedef Dune::Intersection<const GridImp, Dune::YaspIntersection> Intersection;
+    typedef MakeableInterfaceObject<Intersection> MakeableIntersection;
+    typedef Dune::shared_ptr< MakeableIntersection > IntersectionPtr;
 
     //! increment
     void increment()
     {
-      // check end
-      if (_count==2*dim) return;   // end iterator reached, we are done
-      // update count, check end
+      assert(_count < 2*dim);
+      if (_count < 2*dim)
+        _count ++;
+    }
+
+    //! equality
+    bool equals (const YaspIntersectionIterator& other) const
+    {
+      return _insideEntityIndex == other._insideEntityIndex && _count == other._count;
+    }
+
+    //! \brief dereferencing
+    const Intersection & dereference() const
+    {
+      GridImp::getRealImplementation(* _intersection).update(_count);
+      return * _intersection;
+    }
+
+    //! make intersection iterator from entity
+    YaspIntersectionIterator (const YaspEntity<0,dim,GridImp>& myself, bool toend) :
+      _insideEntityIndex(myself.index())
+    {
+      // making an end iterator?
+      if (toend)
+      {
+        // initialize end iterator
+        _count = 2*dim;
+        return;
+      }
+      _count = 0;
+      _intersection =
+        IntersectionPtr(new MakeableIntersection(YaspIntersection<GridImp>(myself)));
+    }
+
+    //! copy constructor
+    YaspIntersectionIterator (const YaspIntersectionIterator& it) :
+      _insideEntityIndex(it._insideEntityIndex),
+      _count(it._count)
+    {
+      // deep copy
+      if (_count < 2*dim)
+        _intersection =
+          IntersectionPtr(new MakeableIntersection(GridImp::getRealImplementation(* it._intersection)));
+    }
+
+    //! assignment
+    YaspIntersectionIterator & operator = (const YaspIntersectionIterator& it)
+    {
+      _insideEntityIndex = it._insideEntityIndex;
+      _count = it._count;
+      // deep copy
+      if (_count < 2*dim)
+        _intersection =
+          IntersectionPtr(new MakeableIntersection(GridImp::getRealImplementation(* it._intersection)));
+    }
+
+  private:
+    int _insideEntityIndex;
+    int _count;
+    /* Intersection */
+    IntersectionPtr _intersection;
+  };
+
+
+  //========================================================================
+  /*!
+     YaspIntersection provides data about intersection with
+     neighboring codim 0 entities.
+   */
+  //========================================================================
+
+  template<class GridImp>
+  class YaspIntersection
+  {
+    enum { dim=GridImp::dimension };
+    enum { dimworld=GridImp::dimensionworld };
+    typedef typename GridImp::ctype ctype;
+    YaspIntersection();
+    YaspIntersection& operator = (const YaspIntersection&);
+  public:
+    // types used from grids
+    typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
+    typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
+    typedef typename GridImp::template Codim<0>::Entity Entity;
+    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<1>::Geometry Geometry;
+    typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+    typedef YaspSpecialEntity<0,dim,GridImp> SpecialEntity;
+    typedef YaspSpecialGeometry<dim-1,dimworld,GridImp> SpecialGeometry;
+    typedef YaspSpecialGeometry<dim-1,dim,GridImp> SpecialLocalGeometry;
+    typedef Dune::Intersection<const GridImp, Dune::YaspIntersectionIterator> Intersection;
+
+    //! increment
+    void update(int count) {
+      // check that there is actually something to do
+      if (count == _count || count >= 2*dim) {
+        return;
+      }
+      if (count == _count+1) {
+        increment();
+        return;
+      }
+      move (count);
+    }
+
+    void move(int count) {
+      // quick and dirty implementation
+      while (_count < _count)
+        increment();
+
+      // // move transforming iterator
+      // _outside.transformingsubiterator().reinit(...);
+
+      // // make up faces
+      // _pos_self_local[0] = 0.0;
+      // _pos_nb_local[0] = 1.0;
+      // _pos_world[0] -= 0.5*_inside.transformingsubiterator().meshsize(0);
+
+      // // make up unit outer normal direction
+      // _normal[_dir] = 2.0*face - 1.0;
+    }
+
+    void increment() {
       _count++;
 
       // update intersection iterator from current position
       if (_face==0)   // direction remains valid
       {
-        _face = 1;         // 0->1, _dir remains
+        _face = 1;     // 0->1, _dir remains
 
         // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,2);         // move two cells in positive direction
+        _outside.transformingsubiterator().move(_dir,2);     // move two cells in positive direction
 
         // make up faces
         _pos_self_local[_dir] = 1.0;
@@ -1470,8 +1593,7 @@ namespace Dune {
       else   // change direction
       {
         // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,-1);         // move one cell back
-        if (_count==2*dim) return;
+        _outside.transformingsubiterator().move(_dir,-1);     // move one cell back
 
         // make up faces
         _pos_self_local[_dir] = 0.5;
@@ -1485,7 +1607,7 @@ namespace Dune {
         _dir += 1;
 
         // move transforming iterator
-        _outside.transformingsubiterator().move(_dir,-1);         // move one cell in negative direction
+        _outside.transformingsubiterator().move(_dir,-1);     // move one cell in negative direction
 
         // make up faces
         _pos_self_local[_dir] = 0.0;
@@ -1497,21 +1619,9 @@ namespace Dune {
       }
     }
 
-    //! equality
-    bool equals (const YaspIntersectionIterator& other) const
-    {
-      return _inside.equals(other._inside) && _outside.equals(other._outside);
-    }
-
-    //! \brief dereferencing
-    const Intersection & dereference() const
-    {
-      return reinterpret_cast<const Intersection&>(*this);
-    }
-
     /*! return true if neighbor ist outside the domain. Still the neighbor might
-        exist in case of periodic boundary conditions, i.e. true is returned
-        if the neighbor is outside the periodic unit cell
+       exist in case of periodic boundary conditions, i.e. true is returned
+       if the neighbor is outside the periodic unit cell
      */
     bool boundary () const
     {
@@ -1591,7 +1701,7 @@ namespace Dune {
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
-          Here returned element is in LOCAL coordinates of the element where iteration started.
+       Here returned element is in LOCAL coordinates of the element where iteration started.
      */
     const LocalGeometry &geometryInInside () const
     {
@@ -1599,7 +1709,7 @@ namespace Dune {
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
-          Here returned element is in LOCAL coordinates of neighbor
+       Here returned element is in LOCAL coordinates of neighbor
      */
     const LocalGeometry &geometryInOutside () const
     {
@@ -1607,7 +1717,7 @@ namespace Dune {
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
-          Here returned element is in LOCAL coordinates of neighbor
+       Here returned element is in LOCAL coordinates of neighbor
      */
     const Geometry &geometry () const
     {
@@ -1632,33 +1742,25 @@ namespace Dune {
       return _count + 1-2*_face;
     }
 
-    //! make intersection iterator from entity
-    YaspIntersectionIterator (const YaspEntity<0,dim,GridImp>& myself, bool toend)
-      :   _inside(myself.gridlevel(),
-                  myself.transformingsubiterator()),
-        _outside(myself.gridlevel(),
-                 myself.transformingsubiterator()),
-        // initialize to first neighbor
-        _count(0),
-        _dir(0),
-        _face(0),
-        _pos_self_local(0.5),
-        _pos_nb_local(0.5),
-        _pos_world(myself.transformingsubiterator().position()),
-        _ext_local(1.0),
-        _normal(0.0),
-        _is_self_local(_pos_self_local,_ext_local,_dir),
-        _is_nb_local(_pos_nb_local,_ext_local,_dir),
-        _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
+    //! make intersection iterator from entity, initialize to first neighbor
+    YaspIntersection (const YaspEntity<0,dim,GridImp>& myself) :
+      _inside(myself.gridlevel(),
+              myself.transformingsubiterator()),
+      _outside(myself.gridlevel(),
+               myself.transformingsubiterator()),
+      // initialize to first neighbor
+      _count(0),
+      _dir(0),
+      _face(0),
+      _pos_self_local(0.5),
+      _pos_nb_local(0.5),
+      _pos_world(myself.transformingsubiterator().position()),
+      _ext_local(1.0),
+      _normal(0.0),
+      _is_self_local(_pos_self_local,_ext_local,_dir),
+      _is_nb_local(_pos_nb_local,_ext_local,_dir),
+      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
     {
-      // making an end iterator?
-      if (toend)
-      {
-        // initialize end iterator
-        _count = 2*dim;
-        return;
-      }
-
       // move transforming iterator
       _outside.transformingsubiterator().move(_dir,-1);
 
@@ -1672,62 +1774,42 @@ namespace Dune {
     }
 
     //! copy constructor
-    YaspIntersectionIterator (const YaspIntersectionIterator& it)
-      :   _inside(it._inside),
-        _outside(it._outside),
-        _count(it._count),
-        _dir(it._dir),
-        _face(it._face),
-        _pos_self_local(it._pos_self_local),
-        _pos_nb_local(it._pos_nb_local),
-        _pos_world(it._pos_world),
-        _ext_local(it._ext_local),
-        _normal(it._normal),
-        // Important: _is_* must be recreated -- not copied!
-        _is_self_local(_pos_self_local,_ext_local,_dir),
-        _is_nb_local(_pos_nb_local,_ext_local,_dir),
-        _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
+    YaspIntersection (const YaspIntersection& it) :
+      _inside(it._inside),
+      _outside(it._outside),
+      _count(it._count),
+      _dir(it._dir),
+      _face(it._face),
+      _pos_self_local(it._pos_self_local),
+      _pos_nb_local(it._pos_nb_local),
+      _pos_world(it._pos_world),
+      _ext_local(it._ext_local),
+      _normal(it._normal),
+      // Important: _is_* must be recreated -- not copied!
+      _is_self_local(_pos_self_local,_ext_local,_dir),
+      _is_nb_local(_pos_nb_local,_ext_local,_dir),
+      _is_global(_pos_world,_inside.transformingsubiterator().meshsize(),_dir)
     {}
-
-    //! assignment
-    YaspIntersectionIterator & operator = (const YaspIntersectionIterator& it)
-    {
-      /* Assign EntityPointers */
-      _inside = it._inside;
-      _outside = it._outside;
-
-      /* Assign current position */
-      _count = it._count;
-      _dir = it._dir;
-      _face = it._face;
-      _pos_self_local = it._pos_self_local;
-      _pos_nb_local = it._pos_nb_local;
-      _pos_world = it._pos_world;
-      _ext_local = it._ext_local;
-      _normal = it._normal;
-
-      return *this;
-    }
 
   private:
     /* EntityPointers (get automatically updated) */
-    YaspEntityPointer<0,GridImp> _inside; //!< entitypointer to myself
-    YaspEntityPointer<0,GridImp> _outside;     //!< outside entitypointer
+    YaspEntityPointer<0,GridImp> _inside;  //!< entitypointer to myself
+    YaspEntityPointer<0,GridImp> _outside;       //!< outside entitypointer
     /* current position */
-    int _count;                           //!< valid neighbor count in 0 .. 2*dim-1
-    int _dir;                             //!< count/2
-    int _face;                            //!< count%2
+    int _count;                             //!< valid neighbor count in 0 .. 2*dim-1
+    int _dir;                               //!< count/2
+    int _face;                              //!< count%2
     /* precalculated data for current position */
     FieldVector<ctype, dim> _pos_self_local; //!< center of face in own local coordinates
-    FieldVector<ctype, dim> _pos_nb_local; //!< center of face in neighbors local coordinates
-    FieldVector<ctype, dimworld>_pos_world;   //!< center of face in world coordinates
-    FieldVector<ctype, dim> _ext_local;   //!< extension of face in local coordinates
+    FieldVector<ctype, dim> _pos_nb_local;  //!< center of face in neighbors local coordinates
+    FieldVector<ctype, dimworld>_pos_world;     //!< center of face in world coordinates
+    FieldVector<ctype, dim> _ext_local;     //!< extension of face in local coordinates
     /* normal vector */
-    FieldVector<ctype, dimworld> _normal; //!< for returning outer normal
+    FieldVector<ctype, dimworld> _normal;   //!< for returning outer normal
     /* geometry objects (get automatically updated) */
-    SpecialLocalGeometry _is_self_local;  //!< intersection in own local coordinates
-    SpecialLocalGeometry _is_nb_local;    //!< intersection in neighbors local coordinates
-    SpecialGeometry _is_global;           //!< intersection in global coordinates
+    SpecialLocalGeometry _is_self_local;    //!< intersection in own local coordinates
+    SpecialLocalGeometry _is_nb_local;      //!< intersection in neighbors local coordinates
+    SpecialGeometry _is_global;             //!< intersection in global coordinates
   };
 
 
@@ -2221,8 +2303,8 @@ namespace Dune {
     typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim>,
         YaspGeometry,YaspEntity,
         YaspEntityPointer,YaspLevelIterator,
-        YaspIntersectionIterator,              // leaf  intersection
-        YaspIntersectionIterator,              // level intersection
+        YaspIntersection,              // leaf  intersection
+        YaspIntersection,              // level intersection
         YaspIntersectionIterator,              // leaf  intersection iter
         YaspIntersectionIterator,              // level intersection iter
         YaspHierarchicIterator,
@@ -2930,6 +3012,8 @@ namespace Dune {
     friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim> >;
     friend class Dune::YaspLeafIndexSet<const Dune::YaspGrid<dim> >;
     friend class Dune::YaspGlobalIdSet<const Dune::YaspGrid<dim> >;
+
+    friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim> >;
 
     template<class T>
     void deallocatePointers(T& container)
