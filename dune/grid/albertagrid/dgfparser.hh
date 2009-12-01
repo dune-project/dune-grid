@@ -14,8 +14,8 @@
 namespace Dune
 {
 
-  template <int dim, int dimworld>
-  struct DGFGridFactory< AlbertaGrid<dim,dimworld> >
+  template< int dim, int dimworld >
+  struct DGFGridFactory< AlbertaGrid< dim, dimworld > >
   {
     typedef AlbertaGrid<dim,dimworld>  Grid;
     const static int dimension = Grid::dimension;
@@ -23,55 +23,69 @@ namespace Dune
     typedef typename Grid::template Codim<0>::Entity Element;
     typedef typename Grid::template Codim<dimension>::Entity Vertex;
     typedef Dune::GridFactory<Grid> GridFactory;
-    DGFGridFactory(const char* filename,
-                   MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
     {
       generate( filename );
     }
-    Grid *grid()
+
+    Grid *grid () const
     {
       return grid_;
     }
-    template <class Intersection>
-    bool wasInserted(const Intersection &intersection)
+
+    template< class Intersection >
+    bool wasInserted ( const Intersection &intersection ) const
     {
       return factory_.wasInserted( intersection );
     }
-    template <class Intersection>
-    int boundaryId(const Intersection &intersection)
+
+    template< class Intersection >
+    int boundaryId ( const Intersection &intersection ) const
     {
       return intersection.boundaryId();
     }
-    int elementParameters()
+
+    template< int codim >
+    int numParameters () const
     {
-      return dgf_.nofelparams;
-    }
-    std::vector<double>& parameter(const Element &element)
-    {
-      if ( elementParameters() > 0 )
-        return dgf_.elParams[ factory_.insertionIndex( element ) ];
+      if( codim == 0 )
+        return dgf_.nofelparams;
+      else if( codim == dimension )
+        return dgf_.nofvtxparams;
       else
-        return emptyParam;
+        return 0;
     }
-    int vertexParameters()
+
+    std::vector< double > &parameter ( const Element &element )
     {
-      return dgf_.nofvtxparams;
+      if( numParameters< 0 >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.elParams[ factory_.insertionIndex( element ) ];
     }
-    std::vector<double>& parameter(const Vertex &vertex)
+
+    std::vector< double > &parameter ( const Vertex &vertex )
     {
-      if ( vertexParameters() > 0 )
-        return dgf_.vtxParams[ factory_.insertionIndex( vertex ) ];
-      else
-        return emptyParam;
+      if( numParameters< dimension >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.vtxParams[ factory_.insertionIndex( vertex ) ];
     }
+
   private:
     void generate( const std::string &filename );
 
     Grid *grid_;
     GridFactory factory_;
     DuneGridFormatParser dgf_;
-    std::vector<double> emptyParam;
   };
+
 
   template< int dim, int dimworld >
   inline void
@@ -205,4 +219,4 @@ namespace Dune
 
 #endif // #if HAVE_ALBERTA
 
-#endif
+#endif // #ifndef DUNE_ALBERTA_DGFPARSER_HH
