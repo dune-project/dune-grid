@@ -12,6 +12,7 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/visual/grapedatadisplay.hh>
 #endif
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 namespace Dune
 {
@@ -30,7 +31,8 @@ struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
 };
 
 template< class GridView >
-void display ( const GridView &view,
+void display ( const std::string &name,
+               const GridView &view,
                std::vector< double > &elDat, int nofElParams,
                std::vector< double > &vtxDat, int nofVtxParams )
 {
@@ -48,6 +50,13 @@ void display ( const GridView &view,
     disp.display();
   }
 #endif // #if HAVE_GRAPE
+  VTKWriter<GridView> vtkWriter(view);
+  if( nofElParams + nofVtxParams > 0 )
+  {
+    vtkWriter.addCellData( elDat, "el. Parameters", nofElParams );
+    vtkWriter.addVertexData( vtxDat, "vtx. Parameters", nofVtxParams );
+  }
+  vtkWriter.write( name );
 }
 
 template< class GridView >
@@ -129,7 +138,7 @@ try {
   GridView gridView = grid->leafView();
   // display
   if( myrank <= 0 )
-    display( gridView, eldat, nofElParams, vtxdat, nofVtxParams );
+    display( argv[1] , gridView, eldat, nofElParams, vtxdat, nofVtxParams );
   // refine
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());
