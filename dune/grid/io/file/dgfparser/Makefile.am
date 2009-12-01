@@ -13,7 +13,7 @@ dgfparserdir = $(includedir)/dune/grid/io/file/dgfparser
 dgfparser_HEADERS = dgfwriter.hh \
 dgfalberta.hh  dgfoned.hh    dgfparserblocks.hh  dgfug.hh    entitykey.hh entitykey_inline.hh \
 dgfalu.hh      dgfparser.hh  dgfyasp.hh  dgfs.hh gridtype.hh \
-dgfalu.cc      dgfoned.cc    dgfug.cc   dgfyasp.cc   dgfs.cc \
+dgfalu.cc      dgfoned.cc    dgfug.cc   dgfs.cc \
 dgfgridtype.hh  dgfexception.hh  dgfgeogrid.hh  dgfprojectionblock.hh
 
 include $(top_srcdir)/am/global-rules
