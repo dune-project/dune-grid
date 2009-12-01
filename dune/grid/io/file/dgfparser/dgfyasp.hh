@@ -64,20 +64,23 @@ namespace Dune {
   }
 
   template <int dim>
-  struct DGFGridFactory< YaspGrid<dim> > {
+  struct DGFGridFactory< YaspGrid<dim> >
+  {
     typedef YaspGrid<dim> Grid;
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    typedef typename Grid::template Codim<0>::Entity Element;
-    typedef typename Grid::template Codim<dimension>::Entity Vertex;
-    DGFGridFactory( const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
     {
-      generate( filename, MPICOMM );
+      generate( filename, comm );
     }
+
     Grid *grid() const
     {
       return grid_;
     }
+
     template <class Intersection>
     bool wasInserted(const Intersection &intersection) const
     {
@@ -88,34 +91,30 @@ namespace Dune {
     {
       return intersection.boundaryId();
     }
-    int elementParameters() const
+
+    template< int codim >
+    int numParameters () const
     {
       return 0;
     }
-    std::vector<double>& parameter(const Element &element)
+
+    template< class Entity >
+    std::vector<double> &parameter ( const Entity &entity )
     {
       return emptyParam;
     }
-    int vertexParameters() const
-    {
-      return 0;
-    }
-    std::vector<double>& parameter(const Vertex &vertex)
-    {
-      return emptyParam;
-    }
+
   private:
-    void generate( const char* filename, MPICommunicatorType MPICOMM );
+    void generate( const std::string &filename, MPICommunicatorType comm );
     Grid *grid_;
     std::vector<double> emptyParam;
   };
 
   template< int dim >
   inline void DGFGridFactory< YaspGrid< dim > >
-  ::generate ( const char *filename, MPICommunicatorType MPICOMM )
+  ::generate ( const std::string &filename, MPICommunicatorType comm )
   {
-
-    std::ifstream gridin( filename );
+    std::ifstream gridin( filename.c_str() );
     dgf::IntervalBlock intervalBlock( gridin );
 
     if( !intervalBlock.isactive() )
@@ -190,9 +189,9 @@ namespace Dune {
     dgf::YaspGridParameterBlock grdParam( gridin );
 
 #if HAVE_MPI
-    grid_ = new YaspGrid<dim>(MPICOMM,lang, anz, per , grdParam.overlap() );
+    grid_ = new YaspGrid< dim >( comm, lang, anz, per, grdParam.overlap() );
 #else
-    grid_ = new YaspGrid<dim>(lang, anz, per , grdParam.overlap() );
+    grid_ = new YaspGrid< dim >( lang, anz, per, grdParam.overlap() );
 #endif
   }
 

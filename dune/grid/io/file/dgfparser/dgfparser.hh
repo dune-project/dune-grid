@@ -158,17 +158,19 @@ namespace Dune
     typedef G Grid;
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    typedef typename Grid::template Codim<0>::Entity Element;
-    typedef typename Grid::template Codim<dimension>::Entity Vertex;
-    DGFGridFactory(const char* filename,
-                   MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
-      : macroGrid_( filename, MPICOMM )
+
+  private:
+    typedef typename Grid::template Codim< 0 >::Entity Element;
+    typedef typename Grid::template Codim< dimension >::Entity Vertex;
+
+  public:
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
+      : macroGrid_( filename.c_str(), comm )
     {
       grid_ = macroGrid_.template createGrid< Grid >();
       assert( macroGrid_.dimw == DomainType::dimension );
 
-      nofElParam_ = macroGrid_.nofelparams;
-      nofVtxParam_ = macroGrid_.nofvtxparams;
       if( macroGrid_.nofelparams > 0 )
       {
         const size_t nofElements = macroGrid_.elements.size();
@@ -207,19 +209,27 @@ namespace Dune
       return grid_;
     }
     template <class Intersection>
-    bool wasInserted(const Intersection &intersection)
+    bool wasInserted(const Intersection &intersection) const
     {
       return intersection.boundary();
     }
     template <class Intersection>
-    int boundaryId(const Intersection &intersection)
+    int boundaryId(const Intersection &intersection) const
     {
       return intersection.boundaryId();
     }
-    int elementParameters()
+
+    template< int codim >
+    int numParameters () const
     {
-      return nofElParam_;
+      if( codim == 0 )
+        return macroGrid_.nofelparams;
+      else if( codim == dimension )
+        return macroGrid_.nofvtxparams;
+      else
+        return 0;
     }
+
     std::vector<double>& parameter(const Element &element)
     {
       const typename Element::Geometry &geo = element.geometry();
@@ -233,10 +243,7 @@ namespace Dune
         return macroGrid_.elParams[ it->second ];
       return emptyParam;
     }
-    int vertexParameters()
-    {
-      return nofVtxParam_;
-    }
+
     std::vector<double>& parameter(const Vertex &vertex)
     {
       const typename Vertex::Geometry &geo = vertex.geometry();
@@ -247,6 +254,7 @@ namespace Dune
         return macroGrid_.vtxParams[ it->second ];
       return emptyParam;
     }
+
   private:
     typedef FieldVector<typename Grid::ctype,Grid::dimensionworld> DomainType;
     struct Compare
@@ -271,7 +279,6 @@ namespace Dune
     typedef typename InsertOrderMap::const_iterator InsertOrderIterator;
     MacroGrid macroGrid_;
     Grid *grid_;
-    int nofElParam_,nofVtxParam_;
     InsertOrderMap elInsertOrder_;
     InsertOrderMap vtxInsertOrder_;
     std::vector<double> emptyParam;
@@ -296,7 +303,8 @@ namespace Dune
     static const int dimension = GridType::dimension;
 
     //! constructor given the name of a DGF file
-    GridPtr( const std::string &filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
+    explicit GridPtr ( const std::string &filename,
+                       MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : gridPtr_( 0 ),
         elParam_(0),
         vtxParam_(0),
@@ -304,15 +312,15 @@ namespace Dune
         nofElParam_(0),
         nofVtxParam_(0)
     {
-      DGFGridFactory<GridType> dgfFactory( filename.c_str(), MPICOMM );
+      DGFGridFactory< GridType > dgfFactory( filename, comm );
       gridPtr_ = std::auto_ptr< GridType >( dgfFactory.grid() );
 
       typedef typename GridType::LeafGridView GridView;
       GridView gridView = gridPtr_->leafView();
       const typename GridView::IndexSet &indexSet = gridView.indexSet();
 
-      nofElParam_ = dgfFactory.elementParameters();
-      nofVtxParam_ = dgfFactory.vertexParameters();
+      nofElParam_ = dgfFactory.template numParameters< 0 >();
+      nofVtxParam_ = dgfFactory.template numParameters< dimension >();
       if ( nofElParam_ > 0 )
         elParam_.resize( indexSet.size(0) );
       if ( nofVtxParam_ > 0 )
