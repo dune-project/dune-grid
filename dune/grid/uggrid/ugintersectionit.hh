@@ -51,7 +51,9 @@ namespace Dune {
         neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         center_(center), neighborCount_(nb)
-    {}
+    {
+      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
+    }
 
     //! The Destructor
     ~UGGridLevelIntersectionIterator() {};
@@ -64,11 +66,12 @@ namespace Dune {
     //! prefix increment
     void increment() {
       neighborCount_++;
+      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
     }
 
     //! \brief dereferencing
     const Intersection & dereference() const {
-      return reinterpret_cast<const Intersection&>(*this);
+      return *intersection;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -174,6 +177,8 @@ namespace Dune {
     //  private methods
     //**********************************************************
 
+    mutable Dune::shared_ptr<Intersection> intersection;
+
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
@@ -229,6 +234,7 @@ namespace Dune {
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
+      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
     }
 
     //! equality
@@ -253,11 +259,12 @@ namespace Dune {
 
       }
 
+      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
     }
 
     //! \brief dereferencing
     const Intersection & dereference() const {
-      return reinterpret_cast<const Intersection&>(*this);
+      return *intersection;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -423,6 +430,8 @@ namespace Dune {
     }
 
     void constructLeafSubfaces();
+
+    mutable Dune::shared_ptr<Intersection> intersection;
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
