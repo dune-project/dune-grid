@@ -4,6 +4,7 @@
 #define DUNE_UGINTERSECTIONIT_HH
 
 #include <dune/common/sllist.hh>
+#include <dune/common/shared_ptr.hh>
 /** \file
  * \brief The UGGridIntersectionIterator class
  */
