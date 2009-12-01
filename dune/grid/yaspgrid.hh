@@ -14,6 +14,7 @@
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/misc.hh>
 #include <dune/common/helpertemplates.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/collectivecommunication.hh>
@@ -1503,6 +1504,7 @@ namespace Dune {
       if (_count < 2*dim)
         _intersection =
           IntersectionPtr(new MakeableIntersection(GridImp::getRealImplementation(* it._intersection)));
+      return *this;
     }
 
   private:
