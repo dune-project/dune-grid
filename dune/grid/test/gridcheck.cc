@@ -1072,7 +1072,6 @@ void iteratorEquals (Grid &g)
   const EntityPointer & re2 = L2;
   EntityPointer & re3 = l1;
   EntityPointer & re4 = h1;
-  std::cout << & re1 << "\t" << & re3 << "\t" << &l1 << std::endl;
 
   // assign
   l1 = l2;
