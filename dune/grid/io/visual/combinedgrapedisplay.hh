@@ -9,8 +9,10 @@
 
 //- Dune includes
 
+#if HAVE_GRAPE
 //- Local includes
 #include "grapedatadisplay.hh"
+#endif
 
 /** @file
    @author Robert Kloefkorn
@@ -27,6 +29,8 @@ namespace Dune
   template<class DisplayType>
   class CombinedGrapeDisplay
   {
+
+#if HAVE_GRAPE
     typedef CombinedGrapeDisplay < DisplayType > MyDisplayType;
 
     typedef typename DisplayType :: MyGridType GridType;
@@ -55,9 +59,6 @@ namespace Dune
     GridPartListIteratorType partIter_;
 
 
-    // pointer to actual display
-    DisplayType * disp_;
-
     DUNE_ELEM * dhel_;
 
     // actual element data
@@ -65,6 +66,10 @@ namespace Dune
 
     // actual dat struct
     DUNE_DAT dune_;
+#endif
+
+    // pointer to actual display
+    DisplayType * disp_;
 
   public:
     // no better way than this canot export HMESH structure to here
@@ -85,6 +90,7 @@ namespace Dune
     //! if discretefunction is NULL, then only the grid is displayed
     inline void display();
 
+#if HAVE_GRAPE
     //! return pointer to Grape Hmesh
     inline void * getHmesh();
 
@@ -172,6 +178,7 @@ namespace Dune
 
     static void * getStackEn(DUNE_DAT *);
     static void freeStackEn(DUNE_DAT *, void *);
+#endif
 
   }; // end class GrapeGridDisplay
 

@@ -54,6 +54,7 @@ namespace Dune
   };
 
 
+#if HAVE_GRAPE
 
   // EvalFunctionData
   // ----------------
@@ -239,7 +240,7 @@ namespace Dune
     // calculate min and max value of function
     inline static void calcMinMax(DUNE_FDATA * df);
   };
-
+#endif
 
   /** \todo Please doc me!
       \ingroup Grape
@@ -256,10 +257,12 @@ namespace Dune
 
     typedef typename GridType :: ctype ctype;
 
+#if HAVE_GRAPE
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
     typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
+#endif
 
   public:
     typedef GridType MyGridType;
@@ -304,14 +307,15 @@ namespace Dune
 
     //! add discrete function to display
     template <class DiscFuncType>
-    inline void addData(const DiscFuncType &func, const DATAINFO * , double time );
-
-    //! add discrete function to display
-    template <class DiscFuncType>
     inline void addData(const DiscFuncType &func, std::string name , double time , bool vector = false );
 
     template< class GV, int dimR, int polOrd >
     void addData ( const GrapeFunction< GV, dimR, polOrd > &function );
+
+#if HAVE_GRAPE
+    //! add discrete function to display
+    template <class DiscFuncType>
+    inline void addData(const DiscFuncType &func, const DATAINFO * , double time );
 
     // retrun whether we have data or not
     bool hasData () { return (vecFdata_.size() > 0); }
@@ -343,6 +347,7 @@ namespace Dune
        at the momnent
        @ param continuous continuous or not (i.e polOrd = 0 ==> discontinuous)
      */
+
     template<class VectorType, class IndexSetType >
     inline void addVector(const VectorType & data, const IndexSetType & indexSet,
                           const DATAINFO * dinf, double time ,
@@ -365,11 +370,13 @@ namespace Dune
     static DUNE_FDATA * createDuneFunc ();
     // delete object DUNE_FDATA
     static void deleteDuneFunc (DUNE_FDATA *);
+#endif
   };
 
   template <typename ctype, int dim, int dimworld, int polOrd>
   class GrapeLagrangePoints
   {
+#if HAVE_GRAPE
     enum { maxPoints = 20 };
     enum { numberOfTypes = (dim == 2) ? 2 : 6 };
 
@@ -423,6 +430,7 @@ namespace Dune
       else
         return GrapeInterface_three_three::getElementDescription(type)->coord[i];
     }
+#endif
   };
 
 } // end namespace Dune

@@ -12,8 +12,10 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/grid.hh>
 
+#if HAVE_GRAPE
 //-local includes
 #include "grape/grapeinclude.hh"
+#endif
 
 /** @file
    @author Robert Kloefkorn
@@ -55,12 +57,24 @@ namespace Dune
     enum { dim = GridType::dimension };
     enum { dimworld = GridType::dimensionworld };
 
+#if HAVE_GRAPE
     // defined in griddisplay.hh
     typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_DAT DUNE_DAT;
     typedef typename GrapeInterface<dim,dimworld>::DUNE_FDATA DUNE_FDATA;
     typedef typename GrapeInterface<dim,dimworld>::F_DATA F_DATA;
     typedef typename GrapeInterface<dim,dimworld>::STACKENTRY STACKENTRY;
+
+    typedef typename std::stack < STACKENTRY * > StackEntryType;
+    typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
+  protected:
+    //! store the actual element pointer
+    DUNE_ELEM hel_;
+    DUNE_DAT dune_;
+    setGridPartIterators_t * setGridPartIter_;
+
+    StackEntryType stackEntry_;
+#endif
 
   public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
@@ -69,7 +83,6 @@ namespace Dune
     typedef typename GridType::Traits::LocalIdSet LocalIdSetType;
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
-    typedef typename std::stack < STACKENTRY * > StackEntryType;
   protected:
     //! the grid we want to display
     const GridType &grid_;
@@ -77,10 +90,7 @@ namespace Dune
     //! true if we can use LevelIntersectionIterator
     const bool hasLevelIntersections_;
 
-    typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
     void * gridPart_;
-
-    setGridPartIterators_t * setGridPartIter_;
 
     //! leaf index set of the grid
     void * indexSet_;
@@ -91,10 +101,6 @@ namespace Dune
     //! my process number
     const int myRank_;
 
-    //! store the actual element pointer
-    DUNE_ELEM hel_;
-    DUNE_DAT dune_;
-
     // no better way than this canot export HMESH structure to here
     //! pointer to hmesh
     void * hmesh_;
@@ -102,8 +108,6 @@ namespace Dune
     typedef std::list<HierarchicIteratorType *> HierarchicIteratorList;
     typedef typename HierarchicIteratorList::iterator ListIteratorType;
     HierarchicIteratorList hierList_;
-
-    StackEntryType stackEntry_;
 
   private:
     //! copy Constructor
@@ -129,6 +133,10 @@ namespace Dune
     //! return rank of this display, for visualisation of parallel grid
     int myRank () const { return myRank_; }
 
+    //! return reference to Dune Grid
+    inline const GridType& getGrid() const ;
+
+#if HAVE_GRAPE
     //! return pointer to Grape Hmesh
     inline void * getHmesh();
 
@@ -138,15 +146,11 @@ namespace Dune
     /** \todo Please doc me! */
     inline void addMyMeshToTimeScene(void * timescene, double time, int proc);
 
-    //! return reference to Dune Grid
-    inline const GridType& getGrid() const ;
-
     bool hasData () { return false; }
 
     // internal vec for local to global methods
     FieldVector<double,dimworld> globalVec_;
     FieldVector<double,dim> localVec_;
-
 
   protected:
     // generate hmesh
@@ -513,10 +517,10 @@ namespace Dune
 
     // push STACKENTRY to stack
     inline static void freeStackEntry(StackEntryType & stackEntry, void * entry);
-
+#endif
   }; // end class GrapeGridDisplay
 
-
+#if HAVE_GRAPE
   /**************************************************************************/
   //  element types, see dune/grid/common/grid.hh
   // and also geldesc.hh for GR_ElementTypes
@@ -576,6 +580,7 @@ namespace Dune
     assert( geomType <  usedTypes ); // at the moment only defined from 2 to 7
     return faceMap[geomType][ duneFace ];
   }
+#endif
 
 } // end namespace Dune
 

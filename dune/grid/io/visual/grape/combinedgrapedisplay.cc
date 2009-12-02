@@ -13,13 +13,16 @@ namespace Dune
   inline CombinedGrapeDisplay<DisplayType>::
   CombinedGrapeDisplay() : disp_(0) , hmesh_ (0)
   {
+#if HAVE_GRAPE
     GrapeInterface<dim,dimworld>::init();
+#endif
   }
 
   template<class DisplayType>
   inline CombinedGrapeDisplay<DisplayType>::
   ~CombinedGrapeDisplay()
   {
+#if HAVE_GRAPE
     if( hmesh_ )
     {
       GrapeInterface<dim,dimworld>::deleteHmesh(hmesh_);
@@ -34,9 +37,10 @@ namespace Dune
        }
      */
     DisplayType::deleteStackEntry(stackEntry_);
+#endif
   }
 
-
+#if HAVE_GRAPE
   //****************************************************************
   //
   // --GridDisplay, Some Subroutines needed in display
@@ -301,14 +305,6 @@ namespace Dune
   }
 
   template<class DisplayType>
-  inline void CombinedGrapeDisplay<DisplayType>::display()
-  {
-    /* call handle mesh in g_hmesh.c */
-    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ );
-    return ;
-  }
-
-  template<class DisplayType>
   inline void * CombinedGrapeDisplay<DisplayType>::getHmesh()
   {
     if(!hmesh_) hmesh_ = setupHmesh();
@@ -356,10 +352,23 @@ namespace Dune
     disp->evalDof(he,df,localNum,val);
     return ;
   }
+#endif
+
+  template<class DisplayType>
+  inline void CombinedGrapeDisplay<DisplayType>::display()
+  {
+#if HAVE_GRAPE
+    /* call handle mesh in g_hmesh.c */
+    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ );
+#endif
+    return ;
+  }
+
 
   template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::addDisplay(DisplayType & disp)
   {
+#if HAVE_GRAPE
     dispList_.push_back( &disp );
     if(!hmesh_) hmesh_ = setupHmesh();
 
@@ -407,8 +416,10 @@ namespace Dune
         }
       }
     }
+#endif
   }
 
+#if HAVE_GRAPE
   template<class DisplayType>
   inline void CombinedGrapeDisplay<DisplayType>::
   addMyMeshToGlobalTimeScene(double time, int proc)
@@ -465,5 +476,6 @@ namespace Dune
     /* return hmesh with no data */
     return GrapeInterface<dim,dimworld>::setupHmesh(noe,nov,maxlevel,dune);
   }
+#endif
 
 } // end namespace Dune

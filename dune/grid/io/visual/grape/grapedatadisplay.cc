@@ -1,11 +1,14 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#if HAVE_GRAPE
 #include "geldesc.hh"
+#endif
 #include <dune/grid/common/genericreferenceelements.hh>
 
 namespace Dune
 {
 
+#if HAVE_GRAPE
   //*******************************************************************
   //
   //  Routines for evaluation of the data
@@ -426,7 +429,7 @@ namespace Dune
     df->maxValue = maxValue;
     df->valuesSet= true;
   }
-
+#endif
 
   //****************************************************************
   //
@@ -436,19 +439,26 @@ namespace Dune
   template <class GridType>
   inline GrapeDataDisplay<GridType>::
   GrapeDataDisplay (const GridType &grid, const int myrank ) :
-    GrapeGridDisplay < GridType > (grid,myrank) , vecFdata_ (0)
+    GrapeGridDisplay < GridType > (grid,myrank)
+#if HAVE_GRAPE
+    , vecFdata_ (0)
+#endif
   {}
 
   template <class GridType>
   template <class GridPartType>
   inline GrapeDataDisplay<GridType>::
   GrapeDataDisplay (const GridPartType &gridPart, const int myrank ) :
-    GrapeGridDisplay < GridType > (gridPart,myrank) , vecFdata_ (0)
+    GrapeGridDisplay < GridType > (gridPart,myrank)
+#if HAVE_GRAPE
+    , vecFdata_ (0)
+#endif
   {}
 
   template <class GridType>
   inline GrapeDataDisplay<GridType>::~GrapeDataDisplay()
   {
+#if HAVE_GRAPE
     GrapeInterface<dim,dimworld>::deleteFunctions(this->hmesh_);
 
     for(size_t i=0 ; i<vecFdata_.size(); i++)
@@ -456,8 +466,10 @@ namespace Dune
       if( vecFdata_[i] ) deleteDuneFunc(vecFdata_[i]);
       vecFdata_[i] = 0;
     }
+#endif
   }
 
+#if HAVE_GRAPE
   template<class GridType>
   inline void GrapeDataDisplay<GridType>::
   deleteDuneFunc(DUNE_FDATA * fd)
@@ -502,6 +514,7 @@ namespace Dune
     func->f_data = (void *) f_data;
     return func;
   }
+#endif
 
 
   //****************************************************************
@@ -514,11 +527,13 @@ namespace Dune
   inline void GrapeDataDisplay<GridType>::
   dataDisplay(const DiscFuncType &func, bool vector)
   {
+#if HAVE_GRAPE
     /* add function data */
     this->addData(func,func.name(),0.0,vector);
 
     /* display mesh */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
+#endif
     return ;
   }
 
@@ -526,8 +541,10 @@ namespace Dune
   inline void GrapeDataDisplay<GridType>::
   display()
   {
+#if HAVE_GRAPE
     /* display mesh without grid mode */
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
+#endif
     return ;
   }
 
@@ -544,12 +561,15 @@ namespace Dune
   inline void GrapeDataDisplay<GridType>::
   addData(const DiscFuncType &func , std::string name , double time , bool vector)
   {
+#if HAVE_GRAPE
     int comp[dim];
     for(int i=0; i<dim; i++) comp[i] = i;
     DATAINFO dinf = { name.c_str() , name.c_str() , 0 , (vector) ? dim : 1 , (int *) &comp };
     addData(func,&dinf,time);
+#endif
   }
 
+#if HAVE_GRAPE
   template<class GridType>
   template<class DiscFuncType>
   inline void GrapeDataDisplay<GridType>::
@@ -642,14 +662,14 @@ namespace Dune
       GrapeInterface<dim,dimworld>::setDefaultIterator(g_GridPart);
     }
   }
-
-
+#endif
 
   template< class GridType >
   template< class GV, int dimR, int polOrd >
   inline void GrapeDataDisplay< GridType >
   ::addData ( const GrapeFunction< GV, dimR, polOrd > &function )
   {
+#if HAVE_GRAPE
     DUNE_FDATA *fdata = createDuneFunc();
     assert( fdata != 0 );
 
@@ -685,6 +705,7 @@ namespace Dune
 
     // make grid view iterator default
     GrapeInterface< dim, dimworld >::setDefaultIterator( g_GridPart );
+#endif
   }
 
 
@@ -699,6 +720,7 @@ namespace Dune
                 const unsigned int dimRange,
                 bool continuous )
   {
+#if HAVE_GRAPE
     typedef typename IndexSetType::IndexType IndexType;
 
     // polOrd < 0 makes no sense
@@ -729,9 +751,11 @@ namespace Dune
 
     // display
     GrapeInterface<dim,dimworld>::handleMesh ( this->hmesh_ );
+#endif
     return;
   }
 
+#if HAVE_GRAPE
   template<class GridType>
   template<class VectorType,class IndexSetType>
   inline void GrapeDataDisplay<GridType>::
@@ -746,10 +770,11 @@ namespace Dune
     DATAINFO dinf = { name.c_str() , name.c_str() , 0 , 1 , 0 };
     /* add function data */
     this->addVector(data,indexSet,&dinf,time,polOrd,dimRange,continuous);
-
     return;
   }
+#endif
 
+#if HAVE_GRAPE
   template<class GridType>
   template<class VectorType, class IndexSetType >
   inline void GrapeDataDisplay<GridType>::
@@ -826,5 +851,6 @@ namespace Dune
       }
     }
   }
+#endif
 
 } // end namespace Dune

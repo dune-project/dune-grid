@@ -14,71 +14,89 @@ namespace Dune
   template<class GridType>
   inline GrapeGridDisplay<GridType>::
   GrapeGridDisplay(const GridType &grid, const int myrank )
-    : grid_(grid)
+    :
+#if HAVE_GRAPE
+      setGridPartIter_(0)
+      , entityIndex(GrapeGridDisplay<GridType>::template getEntityIndex<LeafIndexSetType>)
+      , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>),
+#endif
+      grid_(grid)
       , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , gridPart_(0)
-      , setGridPartIter_(0)
       , indexSet_( (void *)(&grid.leafIndexSet()) )
       , lid_(grid.localIdSet())
       , myRank_(myrank)
       , hmesh_ (0)
-      , entityIndex(GrapeGridDisplay<GridType>::template getEntityIndex<LeafIndexSetType>)
-      , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>)
   {
+#if HAVE_GRAPE
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
+#endif
   }
 
   template<class GridType>
   template<class GridPartType>
   inline GrapeGridDisplay<GridType>::
   GrapeGridDisplay(const GridPartType &gridPart, const int myrank )
-    : grid_(gridPart.grid())
+    :
+#if HAVE_GRAPE
+      setGridPartIter_(&SetIter<GridPartType>::setGPIterator)
+      , entityIndex(GrapeGridDisplay<GridType>::
+                    template getEntityIndex<typename GridPartType::IndexSetType>)
+      , vertexIndex(GrapeGridDisplay<GridType>::
+                    template getVertexIndex<typename GridPartType::IndexSetType>),
+#endif
+      grid_(gridPart.grid())
       , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
       , gridPart_((void *) &gridPart)
-      , setGridPartIter_(&SetIter<GridPartType>::setGPIterator)
       , indexSet_( (void *)(&gridPart.indexSet()) )
       , lid_(grid_.localIdSet())
       , myRank_(myrank)
       , hmesh_ (0)
-      , entityIndex(GrapeGridDisplay<GridType>::
-                    template getEntityIndex<typename GridPartType::IndexSetType>)
-      , vertexIndex(GrapeGridDisplay<GridType>::
-                    template getVertexIndex<typename GridPartType::IndexSetType>)
   {
+#if HAVE_GRAPE
     GrapeInterface<dim,dimworld>::init();
     if(!hmesh_) hmesh_ = setupHmesh();
+#endif
   }
 
   template< class GridType >
   template< class VT >
   inline GrapeGridDisplay< GridType >
   ::GrapeGridDisplay ( const GridView< VT > &gridView, const int myrank )
-    : grid_( gridView.grid() ),
+    :
+#if HAVE_GRAPE
+      setGridPartIter_( &GridViewIterators< VT >::set ),
+      entityIndex( getEntityIndex< typename GridView< VT >::IndexSet > ),
+      vertexIndex( getVertexIndex< typename GridView< VT >::IndexSet > ),
+#endif
+      grid_( gridView.grid() ),
       hasLevelIntersections_( grid_.name() != "AlbertaGrid" ),
       gridPart_( (void *)&gridView ),
-      setGridPartIter_( &GridViewIterators< VT >::set ),
       indexSet_( (void *)&gridView.indexSet() ),
       lid_( grid_.localIdSet() ),
       myRank_( myrank ),
-      hmesh_( 0 ),
-      entityIndex( getEntityIndex< typename GridView< VT >::IndexSet > ),
-      vertexIndex( getVertexIndex< typename GridView< VT >::IndexSet > )
+      hmesh_( 0 )
   {
+#if HAVE_GRAPE
     GrapeInterface< dim, dimworld >::init();
     if( !hmesh_ )
       hmesh_ = setupHmesh();
+#endif
   }
 
   template<class GridType>
   inline GrapeGridDisplay<GridType>::
   ~GrapeGridDisplay()
   {
+#if HAVE_GRAPE
     dune_.delete_iter(&hel_);
     ThisType::deleteStackEntry(stackEntry_);
     deleteHmesh();
+#endif
   }
 
+#if HAVE_GRAPE
   template<class GridType>
   inline void GrapeGridDisplay<GridType>::
   deleteStackEntry(StackEntryType & stackEntry)
@@ -947,14 +965,6 @@ namespace Dune
   }
 
   template<class GridType>
-  inline void GrapeGridDisplay<GridType>::display()
-  {
-    /* call handle mesh in g_hmesh.c */
-    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ , true );
-    return ;
-  }
-
-  template<class GridType>
   inline void * GrapeGridDisplay<GridType>::getHmesh()
   {
     if(!hmesh_) hmesh_ = setupHmesh();
@@ -966,12 +976,6 @@ namespace Dune
   addMyMeshToTimeScene(void * timescene, double time, int proc)
   {
     GrapeInterface<dim,dimworld>::addHmeshToTimeScene(timescene,time,this->getHmesh(),proc);
-  }
-
-  template<class GridType>
-  inline const GridType & GrapeGridDisplay<GridType>::getGrid() const
-  {
-    return grid_;
   }
 
   template<class GridType>
@@ -1066,6 +1070,24 @@ namespace Dune
   {
     MyDisplayType * disp = (MyDisplayType *) dune->all->display;
     MyDisplayType::freeStackEntry(disp->stackEntry_,entry);
+  }
+
+#endif
+
+  template<class GridType>
+  inline void GrapeGridDisplay<GridType>::display()
+  {
+#if HAVE_GRAPE
+    /* call handle mesh in g_hmesh.c */
+    GrapeInterface<dim,dimworld>::handleMesh ( hmesh_ , true );
+#endif
+    return ;
+  }
+
+  template<class GridType>
+  inline const GridType & GrapeGridDisplay<GridType>::getGrid() const
+  {
+    return grid_;
   }
 
 } // end namespace Dune
