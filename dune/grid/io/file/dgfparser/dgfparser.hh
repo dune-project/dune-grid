@@ -382,7 +382,7 @@ namespace Dune
       : gridPtr_(org.gridPtr_),
         elParam_(org.elParam_),
         vtxParam_(org.vtxParam_),
-        bndId_(org.bndId),
+        bndId_(org.bndId_),
         nofElParam_(org.nofElParam_),
         nofVtxParam_(org.nofVtxParam_)
     {}
