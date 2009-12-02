@@ -1068,6 +1068,11 @@ void iteratorEquals (Grid &g)
   IntersectionIterator i2 = l2->ileafbegin();
   EntityPointer e1 = l1;
   EntityPointer e2 = h2;
+  const EntityPointer & re1 = l1;
+  const EntityPointer & re2 = L2;
+  EntityPointer & re3 = l1;
+  EntityPointer & re4 = h1;
+  std::cout << & re1 << "\t" << & re3 << "\t" << &l1 << std::endl;
 
   // assign
   l1 = l2;
@@ -1075,6 +1080,9 @@ void iteratorEquals (Grid &g)
   h1 = h2;
   i1 = i2;
   e1 = e2;
+  e1 = re1;
+  e2 = re2;
+  re3 = re4;
 
   // equals
   #define TestEquals(i) { \
@@ -1147,7 +1155,8 @@ void gridcheck (Grid &g)
       g.globalIdSet().subId(*it,0,dim);
       if(g.globalIdSet().subId(*it,0,dim) != g.globalIdSet().id(*(it->template subEntity<dim>(0))))
       {
-        std::cerr << "Error: Inconsistent global subId for vertex " << g.globalIdSet().id(*(it->template subEntity<dim>(0))) << std::endl;
+        std::cerr << "Error: Inconsistent global subId for vertex 0 (id(subEntity)=" << g.globalIdSet().id(*(it->template subEntity<dim>(0)))
+                  << ", subId=" << g.globalIdSet().subId(*it,0,dim) << ") of cell " << g.globalIdSet().id(*it) << std::endl;
         assert(false);
       }
 #if defined DUNE_ENABLE_OLD_NUMBERING && !DISABLE_DEPRECATED_METHOD_CHECK
