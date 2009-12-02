@@ -1335,9 +1335,9 @@ namespace Dune {
     return true;
   }
 
-  // return Grid type
+  // return Grid name
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline std::string ALU3dGrid<dim, dimworld, elType>::name () const
+  inline std::string ALU3dGrid<dim, dimworld, elType>::name ()
   {
     if(elType == hexa)
       return "ALUCubeGrid";

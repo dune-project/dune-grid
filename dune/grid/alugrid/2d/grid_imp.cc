@@ -220,13 +220,6 @@ namespace Dune {
     return LeafIteratorImp(*this,true);
   }
 
-  //! for grid identification
-  template <int dim, int dimworld>
-  inline std::string ALU2dGrid<dim, dimworld> :: name () const
-  {
-    return ( nrOfHangingNodes_ > 0 ) ? "ALUSimplexGrid" : "ALUConformGrid";
-  }
-
   //! Return maximum level defined in this grid. Levels are numbered
   //! 0 ... maxLevel with 0 the coarsest level.
   template <int dim, int dimworld>

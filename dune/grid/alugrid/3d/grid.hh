@@ -352,7 +352,7 @@ namespace Dune {
     ~ALU3dGrid();
 
     //! \brief for grid identification
-    std::string name () const;
+    static inline std::string name ();
 
     /** \brief  Return maximum level defined in this grid. Levels are numbered
         maxLevel with 0 the coarsest level.

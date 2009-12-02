@@ -294,9 +294,6 @@ namespace Dune {
     //! Desctructor
     ~ALU2dGrid();
 
-    //! for grid identification
-    std::string name () const;
-
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxLevel with 0 the coarsest level.
     int maxLevel() const;
