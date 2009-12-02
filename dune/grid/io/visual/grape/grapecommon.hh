@@ -3,6 +3,8 @@
 #ifndef DUNE_GRAPECOMMON_HH
 #define DUNE_GRAPECOMMON_HH
 
+#if HAVE_GRAPE
+
 /* global variables for maxlevel use */
 static BUTTON * maxlevelButton=0;
 
@@ -43,5 +45,7 @@ struct info
 void setupLeafButton(MANAGER *mgr, void *sc, int yesTimeScene);
 void removeLeafButton(MANAGER *mgr, void *sc);
 void setDefaultIteratorValue(int val);
+
+#endif
 
 #endif

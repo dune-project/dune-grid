@@ -3,6 +3,8 @@
 #ifndef DUNE_GRIDDISPLAY_HH
 #define DUNE_GRIDDISPLAY_HH
 
+#if HAVE_GRAPE
+
 #include <cassert>
 #include <cstdarg>
 #include <cstring>
@@ -249,5 +251,7 @@ namespace Dune
 } // end namespace Dune
 
 #include "grapecommon.cc"
+
+#endif
 
 #endif

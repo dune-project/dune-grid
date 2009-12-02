@@ -3,6 +3,8 @@
 #ifndef __GRAPE_ELDESC_H__
 #define __GRAPE_ELDESC_H__
 
+#if HAVE_GRAPE
+
 #if GRAPE_DIM==3
 typedef HELEMENT3D HELEMENT;
 typedef ELEMENT3D ELEMENT;
@@ -674,4 +676,6 @@ static H_ELEMENT_DESCRIPTION * getElementDescription( int type )
   assert( type <  numberOfUsedGrapeElementTypes );
   return (H_ELEMENT_DESCRIPTION * )elementDescriptions[type];
 }
+#endif
+
 #endif

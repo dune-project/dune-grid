@@ -3,6 +3,8 @@
 #ifndef __GRAPE_HMESH_H__
 #define __GRAPE_HMESH_H__
 
+#if HAVE_GRAPE
+
 enum { MAX_NAME_LENGTH = 32 };
 
 typedef struct dune_elem DUNE_ELEM;
@@ -273,5 +275,7 @@ extern void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , in
 extern void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc);
 extern void tsc_timebar(void *timescene, double t_start, double t_end);
 extern void colorBarMinMax(const double min, const double max);
+
+#endif
 
 #endif

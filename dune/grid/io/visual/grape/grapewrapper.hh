@@ -3,6 +3,8 @@
 #ifndef __GRAPEWRAPPER__
 #define __GRAPEWRAPPER__
 
+#if HAVE_GRAPE
+
 #include <string>
 
 #ifdef __cplusplus
@@ -43,6 +45,8 @@ inline void g_newerrorbox (const char * a, const char * b, int c, const char * d
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

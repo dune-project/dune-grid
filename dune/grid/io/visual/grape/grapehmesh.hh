@@ -1,5 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#if HAVE_GRAPE
 #undef __GRAPE_HMESH_C__
 #undef __GRAPE_HMESH_H__
 #undef __GRAPE_ELDESC_H__
@@ -21,3 +22,5 @@
 #undef HMesh
 #undef GenMesh
 #undef GrapeMesh
+
+#endif
