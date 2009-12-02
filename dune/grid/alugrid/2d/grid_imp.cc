@@ -137,7 +137,7 @@ namespace Dune {
   template<int cd, PartitionIteratorType pitype>
   inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
   ALU2dGrid<dim, dimworld> :: lbegin (int level) const {
-    return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, false);
+    return ALU2dGridLevelIterator<cd, pitype, const ThisType>(*this, level, pitype == Ghost_Partition);
   }
 
   //! one past the end on this level
@@ -181,7 +181,7 @@ namespace Dune {
   template <int codim, PartitionIteratorType pitype>
   inline typename ALU2dGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
   ALU2dGrid<dim, dimworld> :: leafbegin() const {
-    return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, false);
+    return ALU2dGridLeafIterator<codim, pitype, const ThisType> (*this, pitype == Ghost_Partition);
   }
 
   //! General definition for an end iterator on leaf level
