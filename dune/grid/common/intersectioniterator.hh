@@ -189,6 +189,80 @@ namespace Dune
 
   };
 
+  /** \brief specialization of intersection iterator if your grid still follows the old IntersectionIterator semantics
+
+      This class implements a pseudo IntersectionIterator which stores an Intersection<IntersectionIteratorImp> and forwards all calls there.
+
+      For interface documentation please look at Dune::IntersectionIterator
+
+      \deprecated
+
+      \todo clean up this hack (and remove the friend decl in intersection.hh)
+   */
+  template<class GridImp, template<class> class IntersectionIteratorImp>
+  class IntersectionIterator<GridImp, IntersectionIteratorImp, IntersectionIteratorImp>
+  {
+
+    Dune::Intersection<const GridImp, IntersectionIteratorImp> intersection;
+
+  public:
+
+    typedef IntersectionIteratorImp<const GridImp> ImplementationType;
+
+    typedef Dune::Intersection<const GridImp, IntersectionIteratorImp> Intersection;
+
+    const Intersection & operator*() const
+    {
+      return intersection;
+    }
+
+    const Intersection * operator->() const
+    {
+      return & intersection;
+    }
+
+    bool operator==(const IntersectionIterator& rhs) const
+    {
+      return rhs.equals(*this);
+    }
+
+    bool operator!=(const IntersectionIterator& rhs) const
+    {
+      return ! rhs.equals(*this);
+    }
+
+    IntersectionIterator& operator++()
+    {
+      getRealImp().increment();
+      return *this;
+    }
+
+    bool equals(const IntersectionIterator& rhs) const
+    {
+      return getRealImp().equals(rhs.getRealImp());
+    }
+
+    IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
+      intersection(i) {};
+
+    IntersectionIterator(const IntersectionIterator& i) :
+      intersection(i.intersection.getRealImp()) {}
+
+    typedef typename remove_const<GridImp>::type mutableGridImp;
+  protected:
+    // give the GridDefaultImplementation class access to the realImp
+    friend class GridDefaultImplementation<
+        GridImp::dimension, GridImp::dimensionworld,
+        typename GridImp::ctype,
+        typename GridImp::GridFamily> ;
+
+    //! return reference to the real implementation
+    ImplementationType & getRealImp() { return intersection.getRealImp(); }
+    //! return reference to the real implementation
+    const ImplementationType & getRealImp() const { return intersection.getRealImp(); }
+
+  };
+
 } // namespace Dune
 
 #include "intersection.hh"
