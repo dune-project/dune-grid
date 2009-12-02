@@ -5,6 +5,12 @@
 
 #if HAVE_GRAPE
 
+#include "ghmesh.hh"
+
+#ifndef GRAPE_DIM
+#define GRAPE_DIM 3
+#endif
+
 #if GRAPE_DIM==3
 typedef HELEMENT3D HELEMENT;
 typedef ELEMENT3D ELEMENT;

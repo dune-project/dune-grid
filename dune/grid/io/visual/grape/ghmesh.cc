@@ -3,7 +3,6 @@
 #ifndef __GRAPE_HMESH_C__
 #define __GRAPE_HMESH_C__
 
-#include "ghmesh.hh"
 #include "geldesc.hh"
 
 /*****************************************************************************

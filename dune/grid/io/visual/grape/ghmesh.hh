@@ -3,6 +3,18 @@
 #ifndef __GRAPE_HMESH_H__
 #define __GRAPE_HMESH_H__
 
+//- system includes
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <iostream>
+#include <stack>
+#include <set>
+#include <list>
+
+//- Grape includes
+#include "grapecommon.hh"
+
 #if HAVE_GRAPE
 
 enum { MAX_NAME_LENGTH = 32 };

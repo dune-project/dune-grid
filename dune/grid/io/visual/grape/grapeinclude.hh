@@ -3,22 +3,25 @@
 #ifndef DUNE_GRIDDISPLAY_HH
 #define DUNE_GRIDDISPLAY_HH
 
-#if HAVE_GRAPE
-
+#include <cstdlib>
+#include <iostream>
 #include <cassert>
 #include <cstdarg>
 #include <cstring>
+#include <iostream>
+#include <stack>
+#include <map>
+#include <set>
+#include <list>
 
-#include "grapewrapper.hh"
+#if HAVE_GRAPE
 #include "grapecommon.hh"
-
-enum { MAX_EL_DOF  = 8 };
-enum { MAX_EL_FACE = 6 };
 
 namespace GrapeInterface_two_two
 {
 #define GRAPE_DIM 2
 #define GRAPE_DIMWORLD 2
+#undef GRAPE_GRAPEHMESH_HH_INCLUDED
 #include "grapehmesh.hh"
 }
 
@@ -26,6 +29,7 @@ namespace GrapeInterface_two_three
 {
 #define GRAPE_DIM 2
 #define GRAPE_DIMWORLD 3
+#undef GRAPE_GRAPEHMESH_HH_INCLUDED
 #include "grapehmesh.hh"
 }
 
@@ -33,6 +37,7 @@ namespace GrapeInterface_three_three
 {
 #define GRAPE_DIM 3
 #define GRAPE_DIMWORLD 3
+#undef GRAPE_GRAPEHMESH_HH_INCLUDED
 #include "grapehmesh.hh"
 }
 

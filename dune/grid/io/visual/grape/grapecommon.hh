@@ -3,7 +3,13 @@
 #ifndef DUNE_GRAPECOMMON_HH
 #define DUNE_GRAPECOMMON_HH
 
+#include "grapewrapper.hh"
+
 #if HAVE_GRAPE
+
+/* max number for vertices and faces in Grape */
+enum { MAX_EL_DOF  = 8 };
+enum { MAX_EL_FACE = 6 };
 
 /* global variables for maxlevel use */
 static BUTTON * maxlevelButton=0;
