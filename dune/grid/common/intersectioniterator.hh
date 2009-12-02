@@ -242,10 +242,10 @@ namespace Dune
       return getRealImp().equals(rhs.getRealImp());
     }
 
-    IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
+    DUNE_DEPRECATED IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
       intersection(i) {};
 
-    IntersectionIterator(const IntersectionIterator& i) :
+    DUNE_DEPRECATED IntersectionIterator(const IntersectionIterator& i) :
       intersection(i.intersection.getRealImp()) {}
 
     typedef typename remove_const<GridImp>::type mutableGridImp;
