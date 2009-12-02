@@ -81,7 +81,10 @@ if test "x$X_LIBS" != x && test x$with_grape != xno ; then
     DUNE_PKG_LIBS="$DUNE_PKG_LIBS $GRAPE_LIBS"
     DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $GRAPE_CPPFLAGS"
   fi
+elif test "x$X_LIBS" = x ; then 
+  AC_MSG_WARN([X libraries were not found and therefore not Grape check possible! See ./configure --help for X library options.])
 fi
+
 
 # report to summary
 if test x$HAVE_GRAPE = x1 ; then
