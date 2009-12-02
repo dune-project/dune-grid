@@ -6,36 +6,18 @@
 /**
  * @file
  * @author Andreas Dedner
- * @brief  A simple strategy for defining a grid type depending on
- * defines set during the make proecess:
  *
- * @code
- *#if defined ALBERTAGRID && HAVE_ALBERTA
-   typedef Dune::AlbertaGrid<dimworld,dimworld> GridType;
- *#elif defined ALUGRID_CUBE && HAVE_ALUGRID
-   typedef Dune::ALUCubeGrid<dimworld,dimworld> GridType;
- *#elif defined ALUGRID_SIMPLEX && HAVE_ALUGRID
-   typedef Dune::ALUSimplexGrid<dimworld,dimworld> GridType;
- *#elif defined ONEDGRID
-   typedef Dune::OneDGrid GridType;
- *#elif defined SGRID
-   typedef Dune::SGrid<dimworld,dimworld> GridType;
- *#elif defined YASPGRID
-   typedef Dune::YaspGrid<dimworld> GridType;
- *#else
-   // default GridType is YaspGrid
-   typedef Dune::YaspGrid<dimworld> GridType;
- *#endif
- * @endcode
- * The variable dimworld is determined by
- * @code
-   // default value is 2
-   const int dimworld = GRIDDIM;
- * @endcode
- * Remark:
- * -# By defauly Dune::YaspGrid<2> is used.
- * -# For \c ALBERTAGRID or \c ALUGRID with \c dimworld=1 Dune::OneDGrid is used.
-
+ * @brief A simple strategy for defining a grid type depending on
+ *        defines set during the make process.
+ *
+ * Check whether one of \c ALBERTAGRID, \c ALUGRID_CUBE, \c ALUGRID_SIMPLEX,
+ * \c ALUGRID_CONFORM, \c ONEDGRID, \c SGRID, \c UGGRID or \c YASPGRID is
+ * defined, and define the typedef \ref GridType accordingly.  Dimension of
+ * grid and world are taken from dimgrid and dimworld.  If none of the above
+ * are defined, default to \ref YaspGrid and generate a warning.  If more than
+ * one of the above are defined, generate an error.  If the selected grid does
+ * not support that combination of dimgrid and dimworld, generate an error.
+ *
  * To reduce differences between serial and parallel runs as much as possible,
  * the Dune::MPIHelper class is used to toggle these runs.
  * To use this feature, the following code should always be called at the beginning
@@ -63,23 +45,22 @@
    // MPI_Finalize() command is called.
    }
  * @endcode
- * To make use of this feature, one has to configure DUNE by using the
- * \c --with-grid-dim=1|2|3 and optional --with-grid-type=ALBERTAGRID |
- * ALUGRID_CUBE | ALUGRID_SIMPLEX | ONEDGRID | SGRID | UGGRID | YASPGRID.
- * This will add the following to the ALL_PKG_CPPFLAGS
- * @code
- * -DGRIDDIM=$(GRIDDIM) -D$(GRIDTYPE)
- * @endcode
- * Now by adding the \c ALL_PKG_CPPFLAGS or \c GRIDDIM_CPPFLAGS to the
- * programs \c CXXFLAGS one can choose the grids dimension and type by
- * invoking the following make command
+ *
+ * A program that wants to use \ref gridtype.hh should be compiled with
+ * either the <tt>ALL_PKG_CPPFLAGS</tt> or the <tt>GRIDDIM_CPPFLAGS</tt>
+ * included in its <tt>CPPFLAGS</tt>.  It is then possible to specify the
+ * desired grid at make time using something like
  * @code
  *  make GRIDDIM=3 GRIDTYPE=ALBERTAGRID myprogram
  * @endcode
- * Here the value \c 3 for grid dimension and \c ALBERTAGRID for grid type are passed as
- * pre-processor variables to gridtype.hh and are then used to define the \c typedef \c
- * GridType.
- *
+ * However, for this to work, it is neccessary to give the
+ * <tt>--with-grid-dim=...</tt> parameter at configure time.  In addition to
+ * changing the default for \ref GRIDDIM (and thus for \ref dimgrid), this
+ * parameter also enables the infrastructure in the makefiles by including the
+ * following in <tt>ALL_PKG_CPPFLAGS</tt> or the <tt>GRIDDIM_CPPFLAGS</tt>:
+ * @code
+ *  -DGRIDDIM=$(GRIDDIM) -DWORLDDIM=$(WORLDDIM) -D$(GRIDTYPE)
+ * @endcode
  */
 
 #include <dune/grid/utility/griddim.hh>
@@ -225,10 +206,22 @@ typedef Dune :: YaspGrid< dimgrid > GridType;
   #else
     #warning "No GRIDTYPE defined, defaulting to YASPGRID."
 
+//! \cond
     #define YASPGRID
+//! \endcond
     #include <dune/grid/yaspgrid.hh>
+//! Default grid type
+/**
+ * Set with <tt>configure --with-grid-type</tt>.  If unset, defaults to
+ * YaspGrid<dimgrid>.
+ *
+ * \note This is in general not the type of "the" grid, it only provides a
+ *       default for certain cases.
+ */
 typedef Dune :: YaspGrid< dimgrid > GridType;
+//! \cond
     #define HAVE_GRIDTYPE 1
+//! \endcond
   #endif
 #endif
 

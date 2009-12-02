@@ -7,7 +7,12 @@ AC_DEFUN([DUNE_GRID_DIMENSION],[
   AC_ARG_WITH(grid_dim,
               AS_HELP_STRING([--with-grid-dim=1|2|3],
                              [dimension of grid; mainly used to determine grid
-                              dimension during compilation (default=disabled)]),
+                              dimension during compilation (default=disabled).
+                              This option is a prerequisite for
+                              --with-world-dim and --with-grid-type.  Also, if
+                              this option is not given, it is impossible to
+                              overwrite the defaults for GRIDDIM, WORLDDIM and
+                              GRIDTYPE at compile time]),
                               , with_grid_dim=0)
   AC_ARG_WITH(world_dim,
               AS_HELP_STRING([--with-world-dim=1|2|3],
