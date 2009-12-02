@@ -127,10 +127,10 @@ namespace Dune
     typedef typename Base::GlobalCoordReader GlobalCoordReader;
     typedef typename Base::LocalCoordReader LocalCoordReader;
 
+  public:
     using Base::grid;
     using Base::elementInfo;
 
-  public:
     using Base::inside;
 
     AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );

@@ -26,6 +26,7 @@
 #include <dune/common/collectivecommunication.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/adaptcallback.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/defaultgridview.hh>
@@ -235,6 +236,8 @@ namespace Dune
 
     template< int, int, class > friend class AlbertaGridEntity;
     template< int, class > friend class AlbertaGridEntityPointer;
+
+    friend class GridFactory< This >;
 
     friend class AlbertaGridHierarchicIterator< This >;
     friend class AlbertaGridLeafIntersection< const This >;
