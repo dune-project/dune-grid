@@ -108,7 +108,17 @@ namespace Dune
     //! write the appended data sections
     virtual void writeAppendedData (std::ostream& s);
 
+  public:
+    using Base::addVertexData;
+
   private:
+    // hide addVertexData -- adding vertex data directly without a VTKFunction
+    // currently does not work since the P1VectorWrapper used for that uses a
+    // nearest-neighbour search to find the value for the given point.  See
+    // FS#676.
+    template<class V>
+    void addVertexData (const V& v, const std::string &name, int ncomps=1);
+
     unsigned int level;
     bool coerceToSimplex;
   };
