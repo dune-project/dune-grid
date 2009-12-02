@@ -43,7 +43,7 @@ namespace ALUGridSpace {
 
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
-    typename DataCollectorType::DataType tmp_;
+    typedef typename DataCollectorType:: DataType DataType;
   public:
     //! Constructor
     GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
@@ -338,8 +338,6 @@ namespace ALUGridSpace {
     {
       this->realEntity_.setElement(elem);
     }
-
-
   };
 
   //! the corresponding interface class is defined in bsinclude.hh
