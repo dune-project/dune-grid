@@ -156,6 +156,24 @@ namespace Dune
     EntityPointer(const Entity& entity) :
       realIterator( entity.getRealImp() ) {}
 
+    /** \brief Cast to EntityPointer with base class of implementation as engine.
+            This conversion ensures assignablity of LevelIterator, LeafIterator and
+            HierarchicIterator to EntityPointer.
+     */
+    operator EntityPointer<GridImp,base>&()
+    {
+      return *( new (this)EntityPointer<GridImp,base> (*this));
+    };
+
+    /** \brief Cast to EntityPointer with const base class of implementation as engine.
+            This conversion ensures assignablity of LevelIterator, LeafIterator and
+            HierarchicIterator to EntityPointer.
+     */
+    operator const EntityPointer<GridImp,base>&() const
+    {
+      return * (new (const_cast< EntityPointer<GridImp,IteratorImp>* >(this))EntityPointer<GridImp,base> (*this));
+    };
+
     /** \brief Reduce the entity pointers used
         memory to a minimum necessary to store all needed information.
      */
