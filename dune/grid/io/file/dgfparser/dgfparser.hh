@@ -18,6 +18,7 @@
 //- Dune includes
 #include <dune/common/mpihelper.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
 //- local includes
 
