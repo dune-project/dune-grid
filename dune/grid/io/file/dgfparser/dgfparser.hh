@@ -119,15 +119,15 @@ namespace Dune
   protected:
     //! constructor given the name of a DGF file
     MacroGrid(const char* filename, MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
-      : DuneGridFormatParser()
+      : DuneGridFormatParser( rank(MPICOMM), size(MPICOMM) )
         , filename_(filename)
         , MPICOMM_(MPICOMM) {}
 
     //! constructor given the name of a DGF file
-    MacroGrid()
-      : DuneGridFormatParser()
+    MacroGrid(MPICommunicatorType MPICOMM = MPIHelper::getCommunicator())
+      : DuneGridFormatParser( rank(MPICOMM), size(MPICOMM) )
         , filename_(0)
-        , MPICOMM_(MPIHelper::getCommunicator()) {}
+        , MPICOMM_(MPICOMM) {}
 
     //! returns pointer to a new instance of type GridType created from a DGF file
     template <class GridType>
@@ -136,6 +136,22 @@ namespace Dune
       return Impl<GridType>::generate(*this,filename_,MPICOMM_);
     }
   private:
+    static int rank( MPICommunicatorType MPICOMM )
+    {
+      int rank = 0;
+#if HAVE_MPI
+      MPI_Comm_rank( MPICOMM, &rank );
+#endif
+      return rank;
+    }
+    static int size( MPICommunicatorType MPICOMM )
+    {
+      int size = 0;
+#if HAVE_MPI
+      MPI_Comm_size( MPICOMM, &size );
+#endif
+      return size;
+    }
     /** \brief container for the actual grid generation method
      *
      *  For each grid implementation to be used with the DGF parser, this class
@@ -265,7 +281,7 @@ namespace Dune
       {
         // returns true, if a < b; c[i] < -eps;
         const DomainType c = a - b;
-        const double eps = 1e-8;
+        const double eps = 1e-5;
 
         for( int i = 0; i < DomainType::dimension; ++i )
         {
@@ -329,9 +345,10 @@ namespace Dune
         vtxParam_.resize( indexSet.size(dimension) );
       bndId_.resize( indexSet.size(1) );
 
-      typedef typename GridView::template Codim< 0 >::Iterator Iterator;
-      const Iterator enditer = gridView.template end< 0 >();
-      for( Iterator iter = gridView.template begin< 0 >(); iter != enditer; ++iter )
+      const PartitionIteratorType partType = Interior_Partition;
+      typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+      const Iterator enditer = gridView.template end< 0, partType >();
+      for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
       {
         const typename Iterator::Entity &el = *iter;
         if ( nofElParam_ > 0 ) {
@@ -453,12 +470,16 @@ namespace Dune
       switch( (int)Entity::codimension )
       {
       case 0 :
-        if( nofElParam_ > 0 )
+        if( nofElParam_ > 0 ) {
+          assert( gridPtr_->leafView().indexSet().index( entity ) < elParam_.size() );
           return elParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+        }
         break;
       case GridType::dimension :
-        if( nofVtxParam_ > 0 )
+        if( nofVtxParam_ > 0 ) {
+          assert( gridPtr_->leafView().indexSet().index( entity ) < vtxParam_.size() );
           return vtxParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+        }
         break;
       }
       return emptyParam_;
