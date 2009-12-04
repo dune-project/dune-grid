@@ -40,7 +40,7 @@ namespace Dune
     typedef enum {counterclockwise=1,clockwise=-1} orientation_t;
 
     //! constructor
-    DuneGridFormatParser ();
+    DuneGridFormatParser ( int rank, int size );
 
     //! \brief method which reads the dgf file
     //!
@@ -85,6 +85,8 @@ namespace Dune
     std::vector<std::vector<double> > vtxParams,elParams;
     // write information about generation process
     DGFPrintInfo* info;
+    int rank_;
+    int size_;
 
     void generateBoundaries ( std::istream &, bool );
 

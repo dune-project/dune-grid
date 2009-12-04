@@ -80,7 +80,7 @@ namespace Dune
   // DuneGridFormatParser
   // --------------------
 
-  DuneGridFormatParser :: DuneGridFormatParser ()
+  DuneGridFormatParser :: DuneGridFormatParser ( int rank, int size )
     : dimw( -1 ),
       dimgrid( -1 ),
       vtx(0), nofvtx(0), vtxoffset(0), minVertexDistance(1e-12),
@@ -94,7 +94,9 @@ namespace Dune
       nofelparams(0),
       vtxParams(),
       elParams(),
-      info(0)
+      info(0),
+      rank_(rank),
+      size_(size)
   {}
 
 
@@ -416,8 +418,6 @@ namespace Dune
       return false;
     } // not a DGF file, prehaps native file format
 
-    info = new DGFPrintInfo( "dgfparser" );
-
     // initialize variables
     cube2simplex = false;
     simplexgrid = false;
@@ -426,6 +426,11 @@ namespace Dune
     vtxoffset = 0;
     nofvtx=0;
     nofelements=0;
+
+    if (rank_ > 0)
+      return true;
+
+    info = new DGFPrintInfo( "dgfparser" );
 
     dgf :: IntervalBlock interval( gridin );
     dgf :: VertexBlock bvtx( gridin, dimw );
