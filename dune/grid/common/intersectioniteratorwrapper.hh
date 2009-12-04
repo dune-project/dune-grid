@@ -50,10 +50,9 @@ namespace Dune {
 
     //! constructor called from the ibegin and iend method
     template <class EntityImp>
-    IntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end ,
-                                IntersectionIteratorProviderType & storage)
-      : storage_(storage)
-        , it_(*(storage_.getObject(grid,wLevel)))
+    IntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end)
+      : grid_( grid )
+        , it_( grid_.getIntersection(wLevel, (IntersectionIteratorImpl *) 0) )
     {
       if(end)
         it().done();
@@ -63,9 +62,10 @@ namespace Dune {
 
     //! The copy constructor
     IntersectionIteratorWrapper(const ThisType & org)
-      : storage_(org.storage_) , it_(*(storage_.getObjectCopy(org.it_)))
+      : grid_( org.grid_ )
+        , it_( grid_.getIntersectionCopy( org.it() ) )
     {
-      it().assign(org.it_);
+      it().assign(org.it() );
     }
 
     //! the f*cking assignment operator
@@ -78,7 +78,7 @@ namespace Dune {
     //! The Destructor puts internal object back to stack
     ~IntersectionIteratorWrapper()
     {
-      storage_.freeObject( &it_ );
+      grid_.freeIntersection( it() );
     }
 
     //! the equality method
@@ -193,22 +193,40 @@ namespace Dune {
     IntersectionIteratorImp & it() { return it_; }
     const IntersectionIteratorImp & it() const { return it_; }
 
-    IntersectionIteratorProviderType & storage_;
+    const GridImp& grid_;
     IntersectionIteratorImp & it_;
   }; // end class IntersectionIteratorWrapper
+
+  template <class GridImp>
+  class LeafIntersectionWrapper
+    : public IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp>
+  {
+    typedef LeafIntersectionWrapper<GridImp> ThisType;
+    typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
+  public:
+    //! constructor called from the ibegin and iend method
+    template <class EntityImp>
+    LeafIntersectionWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
+      : BaseType(grid,en,wLevel,end)
+    {}
+
+    //! The copy constructor
+    LeafIntersectionWrapper(const ThisType & org)
+      : BaseType(org)
+    {}
+
+  };
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
   //! internal object from a object stack hold by the grid
   template <class GridImp>
   class LeafIntersectionIteratorWrapper
-    : public IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp>
   {
     typedef LeafIntersectionIteratorWrapper<GridImp> ThisType;
-    typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
+    typedef LeafIntersectionWrapper<GridImp> IntersectionImp;
   public:
     typedef Dune :: Intersection
-    < const GridImp, Dune :: LeafIntersectionIteratorWrapper >
-    Intersection;
+    < const GridImp, Dune :: LeafIntersectionWrapper > Intersection;
 
     //! dimension
     enum { dimension      = GridImp :: dimension  };
@@ -234,38 +252,75 @@ namespace Dune {
     //! constructor called from the ibegin and iend method
     template <class EntityImp>
     LeafIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
-      : BaseType(grid,en,wLevel,end,grid.leafIntersetionIteratorProvider())
+      : intersection_( IntersectionImp(grid,en,wLevel,end) )
+        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! The copy constructor
     LeafIntersectionIteratorWrapper(const ThisType & org)
-      : BaseType(org)
+      : intersection_( org.intersection_ )
+        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! the f*cking assignment operator
     ThisType & operator = (const ThisType & org)
     {
-      BaseType::operator = (org);
+      impl_ = org.impl_;
       return *this;
     }
 
+    //! return reference to intersection
     const Intersection &dereference () const
     {
-      return reinterpret_cast< const Intersection & >( *this );
+      return intersection_;
     }
+
+    //! the equality method
+    bool equals (const ThisType & i) const { return impl_.equals(i.impl_); }
+
+    //! increment iterator
+    void increment()
+    {
+      impl_.increment();
+    }
+  protected:
+    // intersection object
+    Intersection intersection_;
+    // reference to real implementation
+    IntersectionImp& impl_;
   }; // end class IntersectionIteratorWrapper
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
   //! internal object from a object stack hold by the grid
   template <class GridImp>
-  class LevelIntersectionIteratorWrapper
+  class LevelIntersectionWrapper
     : public IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp>
   {
-    typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
+    typedef LevelIntersectionWrapper<GridImp> ThisType;
     typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
   public:
+    //! constructor called from the ibegin and iend method
+    template <class EntityImp>
+    LevelIntersectionWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
+      : BaseType(grid,en,wLevel,end)
+    {}
+
+    //! The copy constructor
+    LevelIntersectionWrapper(const ThisType & org)
+      : BaseType(org)
+    {}
+  };
+
+  //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
+  //! internal object from a object stack hold by the grid
+  template <class GridImp>
+  class LevelIntersectionIteratorWrapper
+  {
+    typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
+    typedef LevelIntersectionWrapper<GridImp> IntersectionImp;
+  public:
     typedef Dune :: Intersection
-    < const GridImp, Dune :: LevelIntersectionIteratorWrapper >
+    < const GridImp, Dune :: LevelIntersectionWrapper >
     Intersection;
 
     //! dimension
@@ -292,25 +347,42 @@ namespace Dune {
     //! constructor called from the ibegin and iend method
     template <class EntityImp>
     LevelIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
-      : BaseType(grid,en,wLevel,end,grid.levelIntersetionIteratorProvider())
+      : intersection_( IntersectionImp(grid,en,wLevel,end) )
+        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! The copy constructor
     LevelIntersectionIteratorWrapper(const ThisType & org)
-      : BaseType(org)
+      : intersection_( org.intersection_ )
+        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! the f*cking assignment operator
     ThisType & operator = (const ThisType & org)
     {
-      BaseType::operator = (org);
+      impl_ = org.impl_;
       return *this;
     }
 
+    //! return reference to intersection
     const Intersection &dereference () const
     {
-      return reinterpret_cast< const Intersection & >( *this );
+      return intersection_;
     }
+
+    //! the equality method
+    bool equals (const ThisType & i) const { return impl_.equals(i.impl_); }
+
+    //! increment iterator
+    void increment()
+    {
+      impl_.increment();
+    }
+  protected:
+    // intersection object
+    Intersection intersection_;
+    // reference to real implementation
+    IntersectionImp& impl_;
   }; // end class IntersectionIteratorWrapper
 
 } // end namespace Dune
