@@ -253,19 +253,17 @@ namespace Dune {
     template <class EntityImp>
     LeafIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
       : intersection_( IntersectionImp(grid,en,wLevel,end) )
-        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! The copy constructor
     LeafIntersectionIteratorWrapper(const ThisType & org)
       : intersection_( org.intersection_ )
-        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! the f*cking assignment operator
     ThisType & operator = (const ThisType & org)
     {
-      impl_ = org.impl_;
+      impl() = org.impl();
       return *this;
     }
 
@@ -276,18 +274,21 @@ namespace Dune {
     }
 
     //! the equality method
-    bool equals (const ThisType & i) const { return impl_.equals(i.impl_); }
+    bool equals (const ThisType & i) const { return impl().equals( i.impl() ); }
 
     //! increment iterator
     void increment()
     {
-      impl_.increment();
+      impl().increment();
     }
   protected:
     // intersection object
     Intersection intersection_;
-    // reference to real implementation
-    IntersectionImp& impl_;
+
+    // return reference to real implementation
+    IntersectionImp& impl() { return GridImp :: getRealImplementation( intersection_ ); }
+    // return reference to real implementation
+    const IntersectionImp& impl() const { return GridImp :: getRealImplementation( intersection_ ); }
   }; // end class IntersectionIteratorWrapper
 
   //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
@@ -348,19 +349,17 @@ namespace Dune {
     template <class EntityImp>
     LevelIntersectionIteratorWrapper(const GridImp & grid , const EntityImp & en, int wLevel , bool end )
       : intersection_( IntersectionImp(grid,en,wLevel,end) )
-        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! The copy constructor
     LevelIntersectionIteratorWrapper(const ThisType & org)
       : intersection_( org.intersection_ )
-        , impl_( GridImp::getRealImplementation( intersection_ ) )
     {}
 
     //! the f*cking assignment operator
     ThisType & operator = (const ThisType & org)
     {
-      impl_ = org.impl_;
+      impl() = org.impl();
       return *this;
     }
 
@@ -371,18 +370,21 @@ namespace Dune {
     }
 
     //! the equality method
-    bool equals (const ThisType & i) const { return impl_.equals(i.impl_); }
+    bool equals (const ThisType & i) const { return impl().equals( i.impl() ); }
 
     //! increment iterator
     void increment()
     {
-      impl_.increment();
+      impl().increment();
     }
   protected:
     // intersection object
     Intersection intersection_;
-    // reference to real implementation
-    IntersectionImp& impl_;
+
+    // return reference to real implementation
+    IntersectionImp& impl() { return GridImp :: getRealImplementation( intersection_ ); }
+    // return reference to real implementation
+    const IntersectionImp& impl() const { return GridImp :: getRealImplementation( intersection_ ); }
   }; // end class IntersectionIteratorWrapper
 
 } // end namespace Dune
