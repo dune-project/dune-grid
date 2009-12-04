@@ -64,14 +64,14 @@ void display ( const std::string &name,
 template< class GridView >
 void test ( const GridView &view )
 {
-  gridcheck( const_cast< typename GridView::Grid & >( view.grid() ) );
+  // gridcheck( const_cast< typename GridView::Grid & >( view.grid() ) );
 }
 
 int main(int argc, char ** argv, char ** envp)
 try {
+  // typedef Dune::GridSelector::GridType GridType;
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
-  int myrank = mpiHelper.rank();
 
   if (argc<2)
   {
@@ -91,6 +91,8 @@ try {
   {
     GridPtr< GridType > gridPtr( argv[1], mpiHelper.getCommunicator() );
 
+    gridPtr.loadBalance();
+
     GridView gridView = gridPtr->leafView();
     const IndexSetType &indexSet = gridView.indexSet();
     nofElParams = gridPtr.nofParameters( 0 );
@@ -98,9 +100,10 @@ try {
     {
       std::cout << "Reading Element Parameters:" << std::endl;
       eldat.resize( indexSet.size(0) * nofElParams );
-      typedef GridView::Codim< 0 >::Iterator IteratorType;
-      const IteratorType endit = gridView.end< 0 >();
-      for( IteratorType iter = gridView.begin< 0 >(); iter != endit; ++iter )
+      const PartitionIteratorType partType = All_Partition;
+      typedef GridView::Codim< 0 >::Partition< partType >::Iterator Iterator;
+      const Iterator enditer = gridView.end< 0, partType >();
+      for( Iterator iter = gridView.begin< 0, partType >(); iter != enditer; ++iter )
       {
         const std::vector< double > &param = gridPtr.parameters( *iter );
         assert( param.size() == nofElParams );
@@ -118,9 +121,10 @@ try {
     {
       std::cout << "Reading Vertex Parameters:" << std::endl;
       vtxdat.resize( indexSet.size( GridType::dimension ) * nofVtxParams );
-      typedef GridView::Codim< GridType::dimension >::Iterator IteratorType;
-      IteratorType endit = gridView.end< GridType::dimension >();
-      for( IteratorType iter = gridView.begin< GridType::dimension >(); iter != endit; ++iter )
+      const PartitionIteratorType partType = All_Partition;
+      typedef GridView::Codim< GridType::dimension >::Partition< partType >::Iterator Iterator;
+      const Iterator enditer = gridView.end< GridType::dimension, partType >();
+      for( Iterator iter = gridView.begin< GridType::dimension, partType >(); iter != enditer; ++iter )
       {
         const std::vector< double > &param = gridPtr.parameters( *iter );
         assert( param.size() == nofVtxParams );
@@ -138,9 +142,9 @@ try {
   }
 
   GridView gridView = grid->leafView();
+  std::cout << grid->size(0) << std::endl;
   // display
-  if( myrank <= 0 )
-    display( argv[1] , gridView, eldat, nofElParams, vtxdat, nofVtxParams );
+  display( argv[1] , gridView, eldat, nofElParams, vtxdat, nofVtxParams );
   // refine
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());
