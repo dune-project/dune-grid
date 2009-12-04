@@ -18,6 +18,7 @@
 //- Dune includes
 #include <dune/common/mpihelper.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/datahandleif.hh>
 //- local includes
 
 #include "dgfexception.hh"
@@ -485,7 +486,148 @@ namespace Dune
       return emptyParam_;
     }
 
+    void loadBalance()
+    {
+      DataHandle dh(*this);
+      gridPtr_->loadBalance( dh.interface() );
+      gridPtr_->communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
+    }
+
   protected:
+    template <class Entity>
+    std::vector< double > &params ( const Entity &entity )
+    {
+      switch( (int)Entity::codimension )
+      {
+      case 0 :
+        if( nofElParam_ > 0 ) {
+          if ( gridPtr_->leafView().indexSet().index( entity ) >= elParam_.size() )
+            elParam_.resize( gridPtr_->leafView().indexSet().index( entity ) );
+          return elParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+        }
+        break;
+      case GridType::dimension :
+        if( nofVtxParam_ > 0 ) {
+          if ( gridPtr_->leafView().indexSet().index( entity ) >= vtxParam_.size() )
+            vtxParam_.resize( gridPtr_->leafView().indexSet().index( entity ) );
+          return vtxParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
+        }
+        break;
+      }
+      return emptyParam_;
+    }
+    void setNofParams( int cdim, int nofP )
+    {
+      switch (cdim) {
+      case 0 : nofElParam_ = nofP; break;
+      case GridType::dimension : nofVtxParam_ = nofP; break;
+      }
+    }
+    struct DataHandle : public CommDataHandleIF<DataHandle,double>
+    {
+      DataHandle( GridPtr& gridPtr) :
+        gridPtr_(gridPtr),
+        idSet_(gridPtr->localIdSet())
+      {
+        typedef typename GridType::LeafGridView GridView;
+        GridView gridView = gridPtr_->leafView();
+        const typename GridView::IndexSet &indexSet = gridView.indexSet();
+
+        const PartitionIteratorType partType = Interior_Partition;
+        typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+        const Iterator enditer = gridView.template end< 0, partType >();
+        for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+        {
+          const typename Iterator::Entity &el = *iter;
+          if ( gridPtr_.nofElParam_ > 0 )
+            std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
+          if ( gridPtr_.nofVtxParam_ > 0 )
+          {
+            for ( int v = 0; v < el.template count<dimension>(); ++v)
+            {
+              typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
+              if ( ! gridPtr_.vtxParam_[ index ].empty() )
+                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
+            }
+          }
+        }
+      }
+      ~DataHandle()
+      {
+        typedef typename GridType::LeafGridView GridView;
+        GridView gridView = gridPtr_->leafView();
+        const typename GridView::IndexSet &indexSet = gridView.indexSet();
+
+        if ( gridPtr_.nofElParam_ > 0 )
+          gridPtr_.elParam_.resize( indexSet.size(0) );
+        if ( gridPtr_.nofVtxParam_ > 0 )
+          gridPtr_.vtxParam_.resize( indexSet.size(dimension) );
+
+        const PartitionIteratorType partType = All_Partition;
+        typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+        const Iterator enditer = gridView.template end< 0, partType >();
+        for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+        {
+          const typename Iterator::Entity &el = *iter;
+          if ( gridPtr_.nofElParam_ > 0 )
+          {
+            std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
+            assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == gridPtr_.nofElParam_ );
+          }
+          if ( gridPtr_.nofVtxParam_ > 0 )
+          {
+            for ( int v = 0; v < el.template count<dimension>(); ++v)
+            {
+              typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
+              if ( gridPtr_.vtxParam_[ index ].empty() )
+                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
+              assert( gridPtr_.vtxParam_[ index ].size() == gridPtr_.nofVtxParam_ );
+            }
+          }
+        }
+      }
+      CommDataHandleIF<DataHandle,double> &interface()
+      {
+        return *this;
+      }
+      bool contains (int dim, int codim) const
+      {
+        return (codim==dim || codim==0);
+      }
+      bool fixedsize (int dim, int codim) const
+      {
+        return false;
+      }
+      template<class EntityType>
+      size_t size (const EntityType& e) const
+      {
+        return gridPtr_.nofParameters(e.codimension);
+      }
+      template<class MessageBufferImp, class EntityType>
+      void gather (MessageBufferImp& buff, const EntityType& e) const
+      {
+        const std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
+        const size_t s = v.size();
+        for (size_t i=0; i<s; ++i)
+          buff.write( v[i] );
+        assert( s == gridPtr_.nofParameters(e.codimension) );
+      }
+      template<class MessageBufferImp, class EntityType>
+      void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
+      {
+        std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
+        v.resize( n );
+        gridPtr_.setNofParams( e.codimension, n );
+        for (size_t i=0; i<n; ++i)
+          buff.read( v[i] );
+      }
+    private:
+      typedef typename GridType::LocalIdSet IdSet;
+      GridPtr &gridPtr_;
+      const IdSet &idSet_;
+      mutable std::map< typename IdSet::IdType, std::vector<double> > elData_, vtxData_;
+    };
+
     // grid auto pointer
     mutable std::auto_ptr<GridType> gridPtr_;
     // element and vertex parameters
