@@ -26,6 +26,7 @@ namespace Dune
 
     explicit DGFGridFactory ( const std::string &filename,
                               MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : dgf_( 0, 1 )
     {
       generate( filename );
     }
