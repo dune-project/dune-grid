@@ -162,7 +162,7 @@ namespace Dune
      */
     operator EntityPointer<GridImp,base>&()
     {
-      return *( new (this)EntityPointer<GridImp,base> (*this));
+      return reinterpret_cast<EntityPointer<GridImp,base>&>(*this);
     };
 
     /** \brief Cast to EntityPointer with const base class of implementation as engine.
@@ -171,7 +171,7 @@ namespace Dune
      */
     operator const EntityPointer<GridImp,base>&() const
     {
-      return * (new (const_cast< EntityPointer<GridImp,IteratorImp>* >(this))EntityPointer<GridImp,base> (*this));
+      return reinterpret_cast<const EntityPointer<GridImp,base>&>(*this);
     };
 
     /** \brief Reduce the entity pointers used
