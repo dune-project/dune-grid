@@ -333,6 +333,7 @@ namespace Dune {
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
   public:
+    //typedef Dune :: Intersection< const GridImp, ThisType >
     typedef ALUMemoryProvider< ThisType > StorageType;
 
     //! The default Constructor , level tells on which level we want

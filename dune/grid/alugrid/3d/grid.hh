@@ -121,13 +121,13 @@ namespace Dune {
 
       typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
-      typedef Dune :: Intersection< const GridImp, LeafIntersectionIteratorWrapper > LeafIntersection;
-      typedef Dune :: Intersection< const GridImp, LevelIntersectionIteratorWrapper > LevelIntersection;
+      typedef Dune :: Intersection< const GridImp, LeafIntersectionWrapper > LeafIntersection;
+      typedef Dune :: Intersection< const GridImp, LevelIntersectionWrapper > LevelIntersection;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > IntersectionIterator;
 
-      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionIteratorWrapper > LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionIteratorWrapper > LevelIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper, LeafIntersectionWrapper > LeafIntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
@@ -845,12 +845,34 @@ namespace Dune {
     typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp >   LevelIntersectionIteratorProviderType;
   private:
+    friend class IntersectionIteratorWrapper < const ThisType, LeafIntersectionIteratorImp > ;
+    friend class IntersectionIteratorWrapper < const ThisType, LevelIntersectionIteratorImp > ;
     friend class LeafIntersectionIteratorWrapper < const ThisType > ;
     friend class LevelIntersectionIteratorWrapper< const ThisType > ;
-    // return reference to intersectioniterator storage
-    LeafIntersectionIteratorProviderType & leafIntersetionIteratorProvider() const { return leafInterItProvider_; }
+
+    LeafIntersectionIteratorImp& getIntersection(const int wLevel, const LeafIntersectionIteratorImp* ) const
+    {
+      return * (leafInterItProvider_.getObject( *this, wLevel ));
+    }
+    LeafIntersectionIteratorImp& getIntersectionCopy(const LeafIntersectionIteratorImp& org) const
+    {
+      return * (leafInterItProvider_.getObjectCopy( org ));
+    }
+
+    LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
+    {
+      return * (levelInterItProvider_.getObject( *this, wLevel ));
+    }
+
+    LevelIntersectionIteratorImp& getIntersectionCopy(const LevelIntersectionIteratorImp& org) const
+    {
+      return * (levelInterItProvider_.getObjectCopy( org ));
+    }
+
+    void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }
+    void freeIntersection(LevelIntersectionIteratorImp & it) const { levelInterItProvider_.freeObject( &it ); }
+
     mutable LeafIntersectionIteratorProviderType leafInterItProvider_;
-    LevelIntersectionIteratorProviderType & levelIntersetionIteratorProvider() const { return levelInterItProvider_; }
     mutable LevelIntersectionIteratorProviderType levelInterItProvider_;
 
     friend class ALU3dGridEntityFactory<MyType,0>;
