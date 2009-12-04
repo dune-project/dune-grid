@@ -71,7 +71,7 @@ namespace Dune
       // call element data direct without creating entity pointer
       if( dataHandle_.contains( dimension, 0 ) )
       {
-        inlineEntityData( stream, element );
+        inlineEntityData<0>( stream, element );
       }
 
       // now call all higher codims
@@ -85,7 +85,7 @@ namespace Dune
       // call element data direct without creating entity pointer
       if( dataHandle_.contains( dimension, 0 ) )
       {
-        xtractEntityData( stream, element );
+        xtractEntityData<0>( stream, element );
       }
 
       // now call all higher codims
