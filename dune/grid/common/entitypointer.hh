@@ -52,16 +52,13 @@ namespace Dune
 
       This hierarchy must be mimicked in the implementation (i.e. SGrid):
       \code
-      class SEntityPointer<...> :
-         public Dune::EntityPointerDefault<..., SEntityPointer>;
+      class SEntityPointer<...>;
 
       class SLevelIterator<...> :
-         public SEntityPointer <...>,
-         public Dune::LevelIteratorDefault <..., SLevelIterator>;
+         public SEntityPointer <...>;
 
       class SHierarchicIterator<...> :
-         public SEntityPointer <...>,
-         public Dune::HierarchicIteratorDefault <..., SHierarchicIterator>;
+         public SEntityPointer <...>;
 
       ...
       \endcode
