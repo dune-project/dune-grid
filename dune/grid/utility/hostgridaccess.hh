@@ -83,19 +83,18 @@ namespace Dune
       return grid.template getHostEntity< codim > ( entity );
     }
 
-    /** \brief Get underlying HostEntityPointer of given GeometryGridEntityPointer.
-     *
-     *  Return type is exported by the Codim struct.
-     *  \param[in] grid  GeometryGrid
-     *  \param[in] entityPointer  GeometryGridEntityPointer
-     *  \returns HostEntityPointer
-     */
-    template< int codim >
-    static const typename Codim< codim > :: HostEntityPointer &
-    getHostEntityPointer ( const GeometryGrid &grid,
-                           const typename Codim< codim > :: EntityPointer &entityPointer )
+    template< class Entity >
+    static const typename Codim< Entity::codimension >::HostEntity &
+    getEntity ( const Entity &entity )
     {
-      return grid.template getHostEntityPointer< codim > ( entityPointer );
+      return getEntity< Entity::codimension >( entity );
+    }
+
+    template< int codim >
+    static const typename Codim< codim >::HostEntity &
+    getEntity ( const typename Codim< codim >::Entity &entity )
+    {
+      return GeometryGrid::getRealImplementation( entity ).hostEntity();
     }
 
     static const HostLeafIntersection &
@@ -113,4 +112,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_HOSTGRIDACCESS_HH
