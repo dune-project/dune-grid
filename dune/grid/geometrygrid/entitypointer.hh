@@ -182,7 +182,7 @@ namespace Dune
       template< class T >
       bool equals ( const EntityPointer< T, fake > &other ) const
       {
-        return (hostEntityPointer() == other.hostEntityPointer());
+        return (hostIterator() == other.hostIterator());
       }
 
       Entity &dereference () const
@@ -190,14 +190,14 @@ namespace Dune
         if( entity_ == 0 )
         {
           entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostEntityPointer() );
+          entity_->initialize( grid(), *hostIterator() );
         }
         return *entity_;
       }
 
       int level () const
       {
-        return hostEntityPointer().level();
+        return hostIterator().level();
       }
 
       void compactify ()
@@ -206,7 +206,7 @@ namespace Dune
         releaseEntity();
       }
 
-      const HostEntityPointer &hostEntityPointer () const
+      const HostEntityIterator &hostIterator() const
       {
         return hostEntityIterator_;
       }
@@ -371,12 +371,6 @@ namespace Dune
       {
         hostElementIterator_.compactify();
         releaseEntity();
-      }
-
-      const HostEntityPointer &hostEntityPointer () const
-      {
-        DUNE_THROW( NotImplemented, "HostGrid has no entities of codimension "
-                    << codimension << "." );
       }
 
       const Grid &grid () const

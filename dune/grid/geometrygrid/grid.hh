@@ -887,13 +887,6 @@ namespace Dune
     {
       return getRealImplementation( entity ).hostEntity();
     }
-
-    template< int codim >
-    static const typename HostGrid :: template Codim< codim > :: EntityPointer &
-    getHostEntityPointer( const typename Codim< codim > :: EntityPointer &entity )
-    {
-      return getRealImplementation( entity ).hostEntityPointer();
-    }
   };
 
 
