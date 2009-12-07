@@ -7,6 +7,7 @@
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/dgfprojectionblock.hh>
+#include <dune/grid/utility/hostgridaccess.hh>
 
 namespace Dune
 {
@@ -59,51 +60,18 @@ namespace Dune
 
 
 
-  // MacroGrid::Impl for GeomegryGrid
-  // --------------------------------
+  // DGFCoordFunctionFactory
+  // -----------------------
 
-  /** \cond */
-  template< class HostGrid, class CoordFunction >
-  struct MacroGrid::Impl< GeometryGrid< HostGrid, CoordFunction > >
-  {
-    typedef MPIHelper::MPICommunicator MPICommunicator;
-
-    static const bool isDiscreteCoordFunction
-      = GeoGrid::isDiscreteCoordFunctionInterface< typename CoordFunction::Interface >::value;
-
-  private:
-    template< bool >
-    struct DiscreteFactory;
-
-    template< bool >
-    struct AnalyticalFactory;
-
-    typedef typename SelectType< isDiscreteCoordFunction, DiscreteFactory< true >, AnalyticalFactory< false > >::Type
-    Factory;
-
-  public:
-    static GeometryGrid< HostGrid, CoordFunction > *
-    generate ( MacroGrid &macroGrid, const char *filename,
-               MPICommunicator communicator = MPIHelper::getCommunicator() );
-  };
+  template< class HostGrid, class CoordFunction,
+      bool discrete = GeoGrid::isDiscreteCoordFunctionInterface< typename CoordFunction::Interface >::value >
+  struct DGFCoordFunctionFactory;
 
 
   template< class HostGrid, class CoordFunction >
-  template< bool >
-  struct MacroGrid::Impl< GeometryGrid< HostGrid, CoordFunction > >::DiscreteFactory
+  struct DGFCoordFunctionFactory< HostGrid, CoordFunction, false >
   {
-    static CoordFunction *create ( const HostGrid &hostGrid )
-    {
-      return new CoordFunction( hostGrid );
-    }
-  };
-
-
-  template< class HostGrid, class CoordFunction >
-  template< bool >
-  struct MacroGrid::Impl< GeometryGrid< HostGrid, CoordFunction > >::AnalyticalFactory
-  {
-    static CoordFunction *create ( const HostGrid &hostGrid )
+    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
     {
       return new CoordFunction;
     }
@@ -111,55 +79,92 @@ namespace Dune
 
 
   template< class HostGrid, class CoordFunction >
-  inline GeometryGrid< HostGrid, CoordFunction > *
-  MacroGrid::Impl< GeometryGrid< HostGrid, CoordFunction > >
-  ::generate ( MacroGrid &macroGrid, const char *filename, MPICommunicator communicator )
+  struct DGFCoordFunctionFactory< HostGrid, CoordFunction, true >
   {
-    typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-    typedef MacroGrid::Impl< HostGrid > HostImpl;
-
-    HostGrid *hostGrid = HostImpl::generate( macroGrid, filename, communicator );
-    assert( hostGrid != 0 );
-    CoordFunction *coordFunction = Factory::create( *hostGrid );
-    return new Grid( *hostGrid, *coordFunction );
-  }
-
-
-
-  // MacroGrid::Impl for GeomegryGrid with DGFCoordFunction
-  // ------------------------------------------------------
-
-  template< class HostGrid, int dimD, int dimR >
-  struct MacroGrid::Impl< GeometryGrid< HostGrid, DGFCoordFunction< dimD, dimR > > >
-  {
-    typedef MPIHelper::MPICommunicator MPICommunicator;
-
-    static GeometryGrid< HostGrid, DGFCoordFunction< dimD, dimR > > *
-    generate ( MacroGrid &macroGrid, const char *filename,
-               MPICommunicator communicator = MPIHelper::getCommunicator() );
+    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
+    {
+      return new CoordFunction( hostGrid );
+    }
   };
 
 
   template< class HostGrid, int dimD, int dimR >
-  inline GeometryGrid< HostGrid, DGFCoordFunction< dimD, dimR > > *
-  MacroGrid::Impl< GeometryGrid< HostGrid, DGFCoordFunction< dimD, dimR > > >
-  ::generate ( MacroGrid &macroGrid, const char *filename, MPICommunicator communicator )
+  struct DGFCoordFunctionFactory< HostGrid, DGFCoordFunction< dimD, dimR >, false >
   {
     typedef DGFCoordFunction< dimD, dimR > CoordFunction;
+
+    static CoordFunction *create ( const std::string &filename, const HostGrid &hostGrid )
+    {
+      std::ifstream file( filename.c_str() );
+      dgf::ProjectionBlock projectionBlock( file, dimR );
+      const typename CoordFunction::Expression *expression = projectionBlock.function( "coordfunction" );
+      if( expression == 0 )
+        DUNE_THROW( DGFException, "no coordfunction specified in DGF file." );
+      return new CoordFunction( expression );
+    }
+  };
+
+
+
+  // DGFGridFactory for GeometryGrid
+  // -------------------------------
+
+  template< class HostGrid, class CoordFunction >
+  struct DGFGridFactory< GeometryGrid< HostGrid, CoordFunction > >
+  {
     typedef GeometryGrid< HostGrid, CoordFunction > Grid;
-    typedef MacroGrid::Impl< HostGrid > HostImpl;
 
-    HostGrid *hostGrid = HostImpl::generate( macroGrid, filename, communicator );
-    assert( hostGrid != 0 );
+    const static int dimension = Grid::dimension;
+    typedef MPIHelper::MPICommunicator MPICommunicator;
+    typedef typename Grid::template Codim<0>::Entity Element;
+    typedef typename Grid::template Codim<dimension>::Entity Vertex;
 
-    std::ifstream file( filename );
-    dgf::ProjectionBlock projectionBlock( file, dimR );
-    const typename CoordFunction::Expression *expression = projectionBlock.function( "coordfunction" );
-    if( expression == 0 )
-      DUNE_THROW( DGFException, "no coordfunction specified in DGF file." );
-    CoordFunction *coordFunction = new CoordFunction( expression );
-    return new Grid( *hostGrid, *coordFunction );
-  }
+    typedef DGFCoordFunctionFactory< HostGrid, CoordFunction > CoordFunctionFactory;
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicator comm = MPIHelper::getCommunicator() )
+      : dgfHostFactory_( filename, comm ),
+        grid_( 0 )
+    {
+      HostGrid *hostGrid = dgfHostFactory_.grid();
+      assert( hostGrid != 0 );
+      CoordFunction *coordFunction = CoordFunctionFactory::create( filename, *hostGrid );
+      grid_ = new Grid( *hostGrid, *coordFunction );
+    }
+
+    Grid *grid () const
+    {
+      return grid_;
+    }
+
+    template< class Intersection >
+    bool wasInserted ( const Intersection &intersection ) const
+    {
+      return dgfHostFactory_.wasInserted( HostGridAccess< Grid >::getIntersection( intersection ) );
+    }
+
+    template< class Intersection >
+    int boundaryId ( const Intersection &intersection ) const
+    {
+      return dgfHostFactory_.boundaryId( HostGridAccess< Grid >::getIntersection( intersection ) );
+    }
+
+    template< int codim >
+    int numParameters () const
+    {
+      return dgfHostFactory_.template numParameters< codim >();
+    }
+
+    template< class Entity >
+    std::vector< double > &parameter ( const Entity &entity )
+    {
+      return dgfHostFactory_.parameter( HostGridAccess< Grid >::getEntity( entity ) );
+    }
+
+  private:
+    DGFGridFactory< HostGrid > dgfHostFactory_;
+    Grid *grid_;
+  };
 
 
 
@@ -179,7 +184,6 @@ namespace Dune
       return -1.0;
     }
   };
-  /** \endcond */
 
 }
 
