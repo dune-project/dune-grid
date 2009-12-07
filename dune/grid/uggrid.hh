@@ -91,7 +91,8 @@
 #include "uggrid/uggridgeometry.hh"
 #include "uggrid/uggridentity.hh"
 #include "uggrid/uggridentitypointer.hh"
-#include "uggrid/ugintersectionit.hh"
+#include "uggrid/uggridintersections.hh"
+#include "uggrid/uggridintersectioniterators.hh"
 #include "uggrid/uggridleveliterator.hh"
 #include "uggrid/uggridleafiterator.hh"
 #include "uggrid/uggridhieriterator.hh"
@@ -283,10 +284,10 @@ namespace Dune {
         UGGridEntity,
         UGGridEntityPointer,
         UGGridLevelIterator,
-        UGGridLeafIntersectionIterator,              // leaf  intersection
-        UGGridLevelIntersectionIterator,              // level intersection
-        UGGridLeafIntersectionIterator,              // leaf  intersection iterator
-        UGGridLevelIntersectionIterator,              // level intersection iterator
+        UGGridLeafIntersection,
+        UGGridLevelIntersection,
+        UGGridLeafIntersectionIterator,
+        UGGridLevelIntersectionIterator,
         UGGridHierarchicIterator,
         UGGridLeafIterator,
         UGGridLevelIndexSet< const UGGrid<dim> >,
@@ -353,6 +354,8 @@ namespace Dune {
     friend class UGGridEntity <0,dim,const UGGrid<dim> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim> >;
+    friend class UGGridLeafIntersection<const UGGrid<dim> >;
+    friend class UGGridLevelIntersection<const UGGrid<dim> >;
     friend class UGGridLeafIntersectionIterator<const UGGrid<dim> >;
     friend class UGGridLevelIntersectionIterator<const UGGrid<dim> >;
 

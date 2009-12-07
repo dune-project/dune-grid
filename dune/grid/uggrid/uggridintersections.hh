@@ -1,30 +1,20 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_UGINTERSECTIONIT_HH
-#define DUNE_UGINTERSECTIONIT_HH
+#ifndef DUNE_UGGRID_INTERSECTIONS_HH
+#define DUNE_UGGRID_INTERSECTIONS_HH
 
 #include <dune/common/sllist.hh>
 #include <dune/common/shared_ptr.hh>
+
 /** \file
- * \brief The UGGridIntersectionIterator class
+ * \brief The UGGridLeafIntersection and UGGridLevelIntersection classes
  */
 
 namespace Dune {
 
-  //**********************************************************************
-  //
-  // --UGGridIntersectionIterator
-  // --IntersectionIterator
-  /** \brief Iterator over all element neighbors
-   * \ingroup UGGrid
-     Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
-     a neighbor is an entity of codimension 0 which has a common entity of codimension 1
-     These neighbors are accessed via a IntersectionIterator. This allows the implement
-     non-matching meshes. The number of neigbors may be different from the number
-     of an element!
-   */
+  /** \brief Implementation class for an intersection with an element on the same level */
   template<class GridImp>
-  class UGGridLevelIntersectionIterator
+  class UGGridLevelIntersection
   {
 
     enum {dim=GridImp::dimension};
@@ -36,43 +26,29 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype UGCtype;
 
+    // The corresponding iterator needs to access all members
+    friend class UGGridLevelIntersectionIterator<GridImp>;
+
   public:
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef Dune::Intersection<const GridImp, Dune::UGGridLevelIntersectionIterator> Intersection;
 
     /** The default Constructor makes empty Iterator
         \todo Should be private
      */
-    UGGridLevelIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
+    UGGridLevelIntersection(typename UG_NS<dim>::Element* center, int nb)
       : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         center_(center), neighborCount_(nb)
-    {
-      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
-    }
-
-    //! The Destructor
-    ~UGGridLevelIntersectionIterator() {};
+    {}
 
     //! equality
-    bool equals(const UGGridLevelIntersectionIterator<GridImp>& i) const {
+    bool equals(const UGGridLevelIntersection<GridImp>& i) const {
       return center_==i.center_ && neighborCount_ == i.neighborCount_;
-    }
-
-    //! prefix increment
-    void increment() {
-      neighborCount_++;
-      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
-    }
-
-    //! \brief dereferencing
-    const Intersection & dereference() const {
-      return *intersection;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -157,9 +133,6 @@ namespace Dune {
     {
       integrationOuterNormal_ = outerNormal(local);
 
-      //integrationOuterNormal_ /= integrationOuterNormal_.two_norm();
-      //integrationOuterNormal_ *= geometry().integrationElement(local);
-
       const UGCtype scale = geometry().integrationElement( local ) / integrationOuterNormal_.two_norm();
       integrationOuterNormal_ *= scale;
 
@@ -174,11 +147,6 @@ namespace Dune {
     }
 
   private:
-    //**********************************************************
-    //  private methods
-    //**********************************************************
-
-    mutable Dune::shared_ptr<Intersection> intersection;
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
@@ -197,14 +165,15 @@ namespace Dune {
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
 
-    //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
+    //! count on which neighbor we are looking at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
   };
 
 
+  /** \brief Implementation class for an intersection with an element on the same level */
   template<class GridImp>
-  class UGGridLeafIntersectionIterator
+  class UGGridLeafIntersection
   {
 
     enum {dim=GridImp::dimension};
@@ -219,15 +188,17 @@ namespace Dune {
     // An element face identfied by an element and a face number
     typedef std::pair<typename UG_NS<dim>::Element*, int> Face;
 
+    // The corresponding iterator needs to access all members
+    friend class UGGridLeafIntersectionIterator<GridImp>;
+
   public:
 
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
-    typedef Dune::Intersection<const GridImp, Dune::UGGridLeafIntersectionIterator> Intersection;
 
-    UGGridLeafIntersectionIterator(typename UG_NS<dim>::Element* center, int nb)
+    UGGridLeafIntersection(typename UG_NS<dim>::Element* center, int nb)
       : selfLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighLocal_(UGGridGeometry<dim-1,dimworld,GridImp>()),
         neighGlob_(UGGridGeometry<dim-1,dimworld,GridImp>()),
@@ -235,37 +206,13 @@ namespace Dune {
     {
       if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
         constructLeafSubfaces();
-      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
     }
 
     //! equality
-    bool equals(const UGGridLeafIntersectionIterator<GridImp>& other) const {
+    bool equals(const UGGridLeafIntersection<GridImp>& other) const {
       return center_           == other.center_
              && neighborCount_    == other.neighborCount_
              && subNeighborCount_ == other.subNeighborCount_;
-    }
-
-    //! prefix increment
-    void increment() {
-
-      subNeighborCount_++;
-
-      if (subNeighborCount_ >= leafSubFaces_.size() ) {
-
-        neighborCount_++;
-        subNeighborCount_ = 0;
-
-        if (neighborCount_ < UG_NS<dim>::Sides_Of_Elem(center_))
-          constructLeafSubfaces();
-
-      }
-
-      intersection = Dune::shared_ptr<Intersection>(new Intersection(*this));
-    }
-
-    //! \brief dereferencing
-    const Intersection & dereference() const {
-      return *intersection;
     }
 
     //! return EntityPointer to the Entity on the inside of this intersection
@@ -305,7 +252,7 @@ namespace Dune {
       return UG_NS<dim>::boundaryId(center_, neighborCount_);
     }
 
-    /** \brief Returns false, because UG leaf intersections may be nonconforming */
+    /** \brief Is this intersection conforming? */
     bool conforming() const {
 
       const typename UG_NS<dim>::Element* outside = leafSubFaces_[subNeighborCount_].first;
@@ -431,8 +378,6 @@ namespace Dune {
     }
 
     void constructLeafSubfaces();
-
-    mutable Dune::shared_ptr<Intersection> intersection;
 
     //! vector storing the outer normal
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
