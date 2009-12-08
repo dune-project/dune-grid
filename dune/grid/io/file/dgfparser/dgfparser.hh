@@ -613,7 +613,7 @@ namespace Dune
         const size_t s = v.size();
         for (size_t i=0; i<s; ++i)
           buff.write( v[i] );
-        assert( s == gridPtr_.nofParameters(e.codimension) );
+        assert( s == (size_t)gridPtr_.nofParameters(e.codimension) );
       }
       template<class MessageBufferImp, class EntityType>
       void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
