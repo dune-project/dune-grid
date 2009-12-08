@@ -66,7 +66,7 @@ void doWrite( const GridView &gridView, bool coerceToSimplex)
   std::vector<int> vertexdata(is.size(dim),dim);
   std::vector<int> celldata(is.size(0),0);
 
-  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 2, coerceToSimplex);
+  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, coerceToSimplex);
 #warning disabled due to FS#676: vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
 
