@@ -38,6 +38,8 @@ void check_yasp(bool p0=false) {
   Dune::YaspGrid<dim> grid(Len,s,p,overlap);
 #endif
 
+  gridcheck(grid);
+
   grid.globalRefine(2);
 
   gridcheck(grid);
