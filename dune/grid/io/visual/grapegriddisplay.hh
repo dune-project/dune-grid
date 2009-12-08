@@ -67,14 +67,7 @@ namespace Dune
 
     typedef typename std::stack < STACKENTRY * > StackEntryType;
     typedef void setGridPartIterators_t (DUNE_DAT * , void * gridPart);
-  protected:
-    //! store the actual element pointer
-    DUNE_ELEM hel_;
-    DUNE_DAT dune_;
-    setGridPartIterators_t * setGridPartIter_;
-
-    StackEntryType stackEntry_;
-#endif
+#endif // #if HAVE_GRAPE
 
   public:
     typedef typename GridType::template Codim<0>:: HierarchicIterator
@@ -84,30 +77,8 @@ namespace Dune
     typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType;
 
   protected:
-    //! the grid we want to display
-    const GridType &grid_;
-
-    //! true if we can use LevelIntersectionIterator
-    const bool hasLevelIntersections_;
-
-    void * gridPart_;
-
-    //! leaf index set of the grid
-    void * indexSet_;
-
-    //! leaf index set of the grid
-    const LocalIdSetType & lid_;
-
-    //! my process number
-    const int myRank_;
-
-    // no better way than this canot export HMESH structure to here
-    //! pointer to hmesh
-    void * hmesh_;
-
     typedef std::list<HierarchicIteratorType *> HierarchicIteratorList;
     typedef typename HierarchicIteratorList::iterator ListIteratorType;
-    HierarchicIteratorList hierList_;
 
   private:
     //! copy Constructor
@@ -160,11 +131,6 @@ namespace Dune
     typedef int EntityIndexFuncType (void * iset, const EntityCodim0Type & en);
     // type of vertex method
     typedef int VertexIndexFuncType (void * iset, const EntityCodim0Type & en, int vx);
-
-    // pointer to index method
-    const EntityIndexFuncType * entityIndex;
-    // pointer to vertex method
-    const VertexIndexFuncType * vertexIndex;
 
     // return element index from given index set
     template <class IndexSetType>
@@ -513,7 +479,43 @@ namespace Dune
 
     // push STACKENTRY to stack
     inline static void freeStackEntry(StackEntryType & stackEntry, void * entry);
-#endif
+
+  protected:
+    //! store the actual element pointer
+    DUNE_ELEM hel_;
+    DUNE_DAT dune_;
+    setGridPartIterators_t * setGridPartIter_;
+
+    // pointer to index method
+    const EntityIndexFuncType * entityIndex;
+    // pointer to vertex method
+    const VertexIndexFuncType * vertexIndex;
+
+    StackEntryType stackEntry_;
+#endif // #if HAVE_GRAPE
+
+    // the grid we want to display
+    const GridType &grid_;
+
+    // true if we can use LevelIntersectionIterator
+    const bool hasLevelIntersections_;
+
+    void * gridPart_;
+
+    // leaf index set of the grid
+    void * indexSet_;
+
+    // leaf index set of the grid
+    const LocalIdSetType & lid_;
+
+    // my process number
+    const int myRank_;
+
+    // no better way than this canot export HMESH structure to here
+    // pointer to hmesh
+    void * hmesh_;
+
+    HierarchicIteratorList hierList_;
   }; // end class GrapeGridDisplay
 
 #if HAVE_GRAPE
