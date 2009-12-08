@@ -472,14 +472,16 @@ namespace Dune
       switch( (int)Entity::codimension )
       {
       case 0 :
-        if( nofElParam_ > 0 ) {
-          assert( gridPtr_->leafView().indexSet().index( entity ) < elParam_.size() );
+        if( nofElParam_ > 0 )
+        {
+          assert( (unsigned int)gridPtr_->leafView().indexSet().index( entity ) < elParam_.size() );
           return elParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
         }
         break;
       case GridType::dimension :
-        if( nofVtxParam_ > 0 ) {
-          assert( gridPtr_->leafView().indexSet().index( entity ) < vtxParam_.size() );
+        if( nofVtxParam_ > 0 )
+        {
+          assert( (unsigned int)gridPtr_->leafView().indexSet().index( entity ) < vtxParam_.size() );
           return vtxParam_[ gridPtr_->leafView().indexSet().index( entity ) ];
         }
         break;
@@ -573,7 +575,7 @@ namespace Dune
           if ( gridPtr_.nofElParam_ > 0 )
           {
             std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
-            assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == gridPtr_.nofElParam_ );
+            assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == (unsigned int)gridPtr_.nofElParam_ );
           }
           if ( gridPtr_.nofVtxParam_ > 0 )
           {
@@ -582,7 +584,7 @@ namespace Dune
               typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
               if ( gridPtr_.vtxParam_[ index ].empty() )
                 std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
-              assert( gridPtr_.vtxParam_[ index ].size() == gridPtr_.nofVtxParam_ );
+              assert( gridPtr_.vtxParam_[ index ].size() == (unsigned int)gridPtr_.nofVtxParam_ );
             }
           }
         }
