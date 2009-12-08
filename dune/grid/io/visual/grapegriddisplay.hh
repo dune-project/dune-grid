@@ -148,10 +148,6 @@ namespace Dune
 
     bool hasData () { return false; }
 
-    // internal vec for local to global methods
-    FieldVector<double,dimworld> globalVec_;
-    FieldVector<double,dim> localVec_;
-
   protected:
     // generate hmesh
     inline void * setupHmesh();

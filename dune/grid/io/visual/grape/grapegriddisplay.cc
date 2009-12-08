@@ -722,14 +722,15 @@ namespace Dune
   {
     const int dim = Entity::dimension;
 
+    FieldVector< double, dim > local;
     for( int i = 0; i < dim; ++i )
-      localVec_[ i ] = c[ i ];
+      local[ i ] = c[ i ];
 
     // see hmesh doc page 32, if point is inside, -1 has to be returned
     // otherwise local face , grrrr
     const GenericReferenceElement< double, dim > &refElement
       = GenericReferenceElements< double, dim >::general( entity.type() );
-    return (refElement.checkInside( localVec_ ) ? -1 : 0);
+    return (refElement.checkInside( local ) ? -1 : 0);
   }
 
   // check inside
@@ -748,15 +749,16 @@ namespace Dune
   inline void GrapeGridDisplay<GridType>::
   local_to_world(EntityType &en, const double * c, double * w)
   {
-    enum { dim      = EntityType::dimension };
-    enum { dimworld = EntityType::dimensionworld };
+    const int dim = EntityType::dimension;
+    const int dimworld = EntityType::dimensionworld;
 
-    for(int i=0; i<dim; i++) localVec_[i] = c[i];
+    FieldVector< double, dim > local;
+    for( int i = 0; i < dim; ++i )
+      local[ i ] = c[ i ];
 
-    globalVec_ = en.geometry().global(localVec_);
-
-    for(int i=0; i<dimworld; i++) w[i] = globalVec_[i];
-    return;
+    FieldVector< double, dimworld > global = en.geometry().global( local );
+    for( int i = 0; i < dimworld; ++i )
+      w[ i ] = global[ i ];
   }
 
 
@@ -782,15 +784,16 @@ namespace Dune
 
     const typename Entity::Geometry &geometry = entity.geometry();
 
+    FieldVector< double, dimworld > global;
     for( int i = 0; i < dimworld; ++i )
-      globalVec_[ i ] = w[ i ];
-    localVec_ = geometry.local( globalVec_ );
+      global[ i ] = w[ i ];
+    FieldVector< double, dim > local = geometry.local( global );
     for( int i = 0; i < dim; ++i )
-      c[ i ] = localVec_[ i ];
+      c[ i ] = local[ i ];
 
     const GenericReferenceElement< double, dim > &refElement
       = GenericReferenceElements< double, dim >::general( geometry.type() );
-    return (refElement.checkInside( localVec_ ) ? -1 : 0);
+    return (refElement.checkInside( local ) ? -1 : 0);
   }
 
   // world to local
