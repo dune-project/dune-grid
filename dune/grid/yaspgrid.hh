@@ -1464,7 +1464,7 @@ namespace Dune {
     //! \brief dereferencing
     const Intersection & dereference() const
     {
-      GridImp::getRealImplementation(* _intersection).update(_count);
+      GridImp::getRealImplementation(*const_cast<IntersectionPtr&>(_intersection)).update(_count);
       return * _intersection;
     }
 
