@@ -21,6 +21,7 @@ ALLTESTS = $(TESTALU) $(TESTALBERTA) testsgrid testyasp testoned $(TESTUG)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(ALLTESTS) $(VIEWPROGS)
+EXTRA_PROGRAMS = tester
 
 # list of tests to run
 TESTS = $(ALLTESTS)
@@ -75,7 +76,7 @@ EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
 	examplegrid2e.dgf examplegrid5.dgf examplegrid6.dgf examplegrid7.dgf	\
 	examplegrid9.dgf test3d.dgf test2d.dgf test1d.dgf
 
-CLEANFILES = examplegrid*.dgf.* dgfparser.log
+CLEANFILES = examplegrid*.dgf.* dgfparser.log test?d.dgf.*
 
 include $(top_srcdir)/am/global-rules
 
