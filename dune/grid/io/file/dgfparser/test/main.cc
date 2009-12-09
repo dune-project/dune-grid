@@ -6,6 +6,7 @@
 #define NEW_SUBENTITY_NUMBERING 1
 
 // #include <dune/grid/test/gridcheck.cc>
+#include <dune/grid/utility/griddim.hh>
 #include "../dgfgridtype.hh"
 
 #if HAVE_GRAPE
@@ -69,14 +70,21 @@ void test ( const GridView &view )
 
 int main(int argc, char ** argv, char ** envp)
 try {
-  typedef Dune::GridSelector::GridType GridType;
+  typedef GridSelector::GridType GridType;
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
 
-  if (argc<2)
+  std::string filename;
+
+  if (argc>=2)
   {
-    std::cerr << "supply grid file as parameter!" << std::endl;
-    return 1;
+    filename = argv[1];
+  }
+  else
+  {
+    std::stringstream namestr;
+    namestr << "test" << GridType::dimension << "d.dgf";
+    filename = namestr.str();
   }
 
   std::cout << "tester: start grid reading" << std::endl;
@@ -89,7 +97,7 @@ try {
   size_t nofElParams( 0 ), nofVtxParams( 0 );
   std::vector< double > eldat( 0 ), vtxdat( 0 );
   {
-    GridPtr< GridType > gridPtr( argv[1], mpiHelper.getCommunicator() );
+    GridPtr< GridType > gridPtr( filename.c_str(), mpiHelper.getCommunicator() );
 
     gridPtr.loadBalance();
 
@@ -142,14 +150,16 @@ try {
   }
 
   GridView gridView = grid->leafView();
-  std::cout << grid->size(0) << std::endl;
+  std::cout << "Grid size: " << grid->size(0) << std::endl;
   // display
-  display( argv[1] , gridView, eldat, nofElParams, vtxdat, nofVtxParams );
+  display( filename , gridView, eldat, nofElParams, vtxdat, nofVtxParams );
   // refine
+#if CHECK
   std::cout << "tester: refine grid" << std::endl;
   grid->globalRefine(Dune::DGFGridInfo<GridType>::refineStepsForHalf());
+  std::cout << "Grid size: " << grid->size(0) << std::endl;
   test(gridView);
-
+#endif
   delete grid;
   return 0;
 }
