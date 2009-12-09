@@ -1096,8 +1096,8 @@ void iteratorEquals (Grid &g)
   TestEquals(l1);
   TestEquals(h1);
   TestEquals(L1);
-  if (i1 != l1->ileafend()) TestEquals(i1->inside());
-  if (i1 != l1->ileafend() && i1->neighbor()) TestEquals(i1->outside());
+  if (i1 != l2->ileafend()) TestEquals(i1->inside());
+  if (i1 != l2->ileafend() && i1->neighbor()) TestEquals(i1->outside());
 }
 
 template <class Grid>
