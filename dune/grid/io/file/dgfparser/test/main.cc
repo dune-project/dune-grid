@@ -5,7 +5,7 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 #define NEW_SUBENTITY_NUMBERING 1
 
-#include <dune/grid/test/gridcheck.cc>
+// #include <dune/grid/test/gridcheck.cc>
 #include "../dgfgridtype.hh"
 
 #if HAVE_GRAPE
@@ -15,22 +15,22 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
-namespace Dune
-{
+/*
+   namespace Dune
+   {
 
-  template< int dim, int dimworld >
-  class AlbertaGrid;
+   template< int dim, int dimworld >
+   class AlbertaGrid;
 
-}
+   }
 
+   template< int dim, int dimworld >
+   struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
+   {
+   static const bool v = false;
+   };
+ */
 using namespace Dune;
-
-template< int dim, int dimworld >
-struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
-{
-  static const bool v = false;
-};
-
 template< class GridView >
 void display ( const std::string &name,
                const GridView &view,
@@ -69,7 +69,7 @@ void test ( const GridView &view )
 
 int main(int argc, char ** argv, char ** envp)
 try {
-  // typedef Dune::GridSelector::GridType GridType;
+  typedef Dune::GridSelector::GridType GridType;
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
 
