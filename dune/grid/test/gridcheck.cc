@@ -46,9 +46,9 @@ struct GeometryInterface
     geo.corners();
     geo.corner( 0 );
 
-    typename Geometry::LocalCoordinate v;
+    typename Geometry::LocalCoordinate v(0.0);
     geo.global(v);
-    typename Geometry::GlobalCoordinate g;
+    typename Geometry::GlobalCoordinate g(0.0);
     geo.local(g);
     geo.integrationElement(v);
     geo.jacobianTransposed( v );
