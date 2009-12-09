@@ -3,6 +3,11 @@
 #ifndef DUNE_ALBERTA_MACRODATA_HH
 #define DUNE_ALBERTA_MACRODATA_HH
 
+/** \file
+ *  \author Martin Nolte
+ *  \brief  provides a wrapper for ALBERTA's macro_data structure
+ */
+
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
@@ -32,16 +37,16 @@ namespace Dune
       static const int initialSize = 4096;
 
     public:
+      template< int >
+      struct Library;
+
+      template< int > friend struct InstantiateMacroDataLibrary;
+
+    public:
       typedef int ElementId[ numVertices ];
 
       static const int supportPeriodicity = (DUNE_ALBERTA_VERSION >= 0x300);
 
-    private:
-      Data *data_;
-      int vertexCount_;
-      int elementCount_;
-
-    public:
       MacroData ()
         : data_( NULL ),
           vertexCount_( -1 ),
@@ -191,20 +196,12 @@ namespace Dune
       }
 
     private:
-      Real edgeLength ( const ElementId &e, int edge ) const;
-      int longestEdge ( const ElementId &e ) const;
-
       template< class Vector >
       void copy ( const Vector &x, GlobalVector &y )
       {
         for( int i = 0; i < dimWorld; ++i )
           y[ i ] = x[ i ];
       }
-
-      template< class Type >
-      void rotate ( Type *array, int i, int shift );
-
-      void swap ( int el, int v1, int v2 );
 
       void resizeElements ( const int newSize );
 
@@ -215,8 +212,42 @@ namespace Dune
         data_->coords = memReAlloc< GlobalVector >( data_->coords, oldSize, newSize );
         assert( (data_->coords != NULL) || (newSize == 0) );
       }
+
+    private:
+      Data *data_;
+      int vertexCount_;
+      int elementCount_;
     };
 
+
+
+    // MacroData::Library
+    // ------------------
+
+    template< int dim >
+    template< int >
+    struct MacroData< dim >::Library
+    {
+      typedef Alberta::MacroData< dim > MacroData;
+
+      static bool checkNeighbors ( const MacroData &macroData );
+      static void markLongestEdge ( MacroData &macroData );
+      static void setOrientation ( MacroData &macroData, const Real orientation );
+
+    private:
+      static Real edgeLength ( const MacroData &macroData, const ElementId &e, int edge );
+      static int longestEdge ( const MacroData &macroData, const ElementId &e );
+
+      template< class Type >
+      static void rotate ( Type *array, int i, int shift );
+
+      static void swap ( MacroData &macroData, int el, int v1, int v2 );
+    };
+
+
+
+    // Implementation of MacroData
+    // ---------------------------
 
     template< int dim >
     inline typename MacroData< dim >::ElementId &
@@ -313,127 +344,21 @@ namespace Dune
     template< int dim >
     inline void MacroData< dim >::markLongestEdge ()
     {
-      assert( data_ != NULL );
-      if( dimension == 1 )
-        return;
-
-      const int count = elementCount();
-      for( int i = 0; i < count; ++i )
-      {
-        const int refEdge = RefinementEdge< dimension >::value;
-        const int edge = longestEdge( element( i ) );
-        if( edge == refEdge )
-          continue;
-
-        // shift vertices such that the refinement edge is the longest edge
-        const int shift = edge + (numVertices - refEdge);
-
-        // rotate necessary fields
-        rotate( data_->mel_vertices, i, shift );
-
-        // correct opposite vertices
-#if DUNE_ALBERTA_VERSION >= 0x300
-        if( data_->opp_vertex != NULL )
-        {
-          assert( data_->neigh != NULL );
-          const int shiftBack = numVertices - (shift % numVertices);
-          for( int j = 0; j < numVertices; ++j )
-          {
-            const int nb = data_->neigh[ i*numVertices + j ];
-            if( nb < 0 )
-              continue;
-            const int ov = data_->opp_vertex[ i*numVertices + j ];
-            assert( data_->neigh[ nb*numVertices + ov ] == i );
-            assert( data_->opp_vertex[ nb*numVertices + ov ] == j );
-            data_->opp_vertex[ nb*numVertices + ov ] = (j+shiftBack) % numVertices;
-          }
-          rotate( data_->opp_vertex, i, shift );
-        }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-        // correct neighbors and boundaries
-        rotate( data_->neigh, i, shift );
-        rotate( data_->boundary, i, shift );
-      }
+      Library< dimWorld >::markLongestEdge( *this );
     }
 
 
     template< int dim >
     inline void MacroData< dim >::setOrientation ( const Real orientation )
-    {}
-
-    template<>
-    inline void MacroData< dimWorld >::setOrientation ( const Real orientation )
     {
-      assert( data_ != NULL );
-
-      const int count = elementCount();
-      for( int i = 0; i < count; ++i )
-      {
-        FieldMatrix< Real, dimWorld, dimWorld > jacobian;
-        ElementId &id = element( i );
-
-        const GlobalVector &x = vertex( id[ 0 ] );
-        for( int j = 0; j < dimWorld; ++j )
-        {
-          const GlobalVector &y = vertex( id[ j+1 ] );
-          for( int k = 0; k < dimWorld; ++k )
-            jacobian[ j ][ k ] = y[ k ] - x[ k ];
-        }
-        if( determinant( jacobian ) * orientation < 0 )
-          swap( i, (dimWorld == 3 ? 2 : 0), (dimWorld == 3 ? 3 : 1) );
-      }
+      Library< dimWorld >::setOrientation( *this, orientation );
     }
 
 
     template< int dim >
     inline bool MacroData< dim >::checkNeighbors () const
     {
-      assert( data_ != NULL );
-      if( data_->neigh == NULL )
-        return true;
-
-#if DUNE_ALBERTA_VERSION >= 0x300
-      const bool hasOppVertex = (data_->opp_vertex != NULL);
-#else
-      const bool hasOppVertex = false;
-#endif
-
-      const int count = elementCount();
-      for( int i = 0; i < count; ++i )
-      {
-        for( int j = 0; j <= dimension; ++j )
-        {
-          const int nb = data_->neigh[ i*numVertices + j ];
-          if( nb < 0 )
-            continue;
-          if( nb >= elementCount() )
-            return false;
-
-#if DUNE_ALBERTA_VERSION >= 0x300
-          if( hasOppVertex )
-          {
-            const int ov = data_->opp_vertex[ i*numVertices + j ];
-            if( ov > dimension )
-              return false;
-            if( data_->neigh[ nb*numVertices + ov ] != i )
-              return false;
-            if( data_->opp_vertex[ nb*numVertices + ov ] != j )
-              return false;
-          }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-          if( !hasOppVertex )
-          {
-            bool foundSelf = false;
-            for( int k = 0; k <= dimension; ++k )
-              foundSelf |= (data_->neigh[ nb*numVertices + k ] == i);
-            if( !foundSelf )
-              return false;
-          }
-        }
-      }
-      return true;
+      return Library< dimWorld >::checkNeighbors( *this );
     }
 
 
@@ -504,96 +429,6 @@ namespace Dune
         data_ = ALBERTA read_macro_xdr( filename.c_str() );
       else
         data_ = ALBERTA read_macro( filename.c_str() );
-    }
-
-
-    template< int dim >
-    inline Real MacroData< dim >::edgeLength ( const ElementId &e, int edge ) const
-    {
-      const int i = MapVertices< dim, dim-1 >::apply( edge, 0 );
-      assert( (vertexCount_ < 0) || (e[ i ] < vertexCount_) );
-      const GlobalVector &x = vertex( e[ i ] );
-
-      const int j = MapVertices< dim, dim-1 >::apply( edge, 1 );
-      assert( (vertexCount_ < 0) || (e[ j ] < vertexCount_) );
-      const GlobalVector &y = vertex( e[ j ] );
-
-      Real sum = (y[ 0 ] - x[ 0 ]) * (y[ 0 ] - x[ 0 ]);
-      for( int i = 1; i < dimWorld; ++i )
-        sum += (y[ i ] - x[ i ]) * (y[ i ] - x[ i ]);
-      return sqrt( sum );
-    }
-
-
-    template< int dim >
-    inline int MacroData< dim >::longestEdge ( const ElementId &e ) const
-    {
-      int maxEdge = 0;
-      Real maxLength = edgeLength( e, 0 );
-      for( int i = 1; i < numEdges; ++i )
-      {
-        const Real length = edgeLength( e, i );
-        if( length <= maxLength )
-          continue;
-        maxEdge = i;
-        maxLength = length;
-      }
-      return maxEdge;
-    }
-
-
-    template< int dim >
-    template< class Type >
-    inline void MacroData< dim >::rotate ( Type *array, int i, int shift )
-    {
-      assert( (i >= 0) && (i < data_->n_macro_elements) );
-      if( array == NULL )
-        return;
-
-      const int offset = i*numVertices;
-      Type old[ numVertices ];
-      for( int j = 0; j < numVertices; ++j )
-        old[ j ] = array[ offset + j ];
-      for( int j = 0; j < numVertices; ++j )
-        array[ offset + j ] = old[ (j+shift) % numVertices ];
-    }
-
-
-    template< int dim >
-    inline void MacroData< dim >::swap ( int el, int v1, int v2 )
-    {
-      std::swap( element( el )[ v1 ], element( el )[ v2 ] );
-#if DUNE_ALBERTA_VERSION >= 0x300
-      if( data_->opp_vertex != NULL )
-      {
-        assert( data_->neigh != NULL );
-
-        const int nb1 = neighbor( el, v1 );
-        if( nb1 >= 0 )
-        {
-          const int ov = data_->opp_vertex[ el*numVertices + v1 ];
-          assert( neighbor( nb1, ov ) == el );
-          assert( data_->opp_vertex[ nb1*numVertices + ov ] == v1 );
-          data_->opp_vertex[ nb1*numVertices + ov ] = v2;
-        }
-
-        const int nb2 = neighbor( el, v2 );
-        if( nb2 >= 0 )
-        {
-          const int ov = data_->opp_vertex[ el*numVertices + v2 ];
-          assert( neighbor( nb2, ov ) == el );
-          assert( data_->opp_vertex[ nb2*numVertices + ov ] == v2 );
-          data_->opp_vertex[ nb2*numVertices + ov ] = v1;
-        }
-
-        std::swap( data_->opp_vertex[ el*numVertices + v1 ], data_->opp_vertex[ el*numVertices + v2 ] );
-      }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
-
-      if( data_->neigh != NULL )
-        std::swap( neighbor( el, v1 ), neighbor( el, v2 ) );
-      if( data_->boundary != NULL )
-        std::swap( boundaryId( el, v1 ), boundaryId( el, v2 ) );
     }
 
 
