@@ -29,7 +29,6 @@
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/adaptcallback.hh>
 #include <dune/grid/common/sizecache.hh>
-#include <dune/grid/common/defaultgridview.hh>
 
 //- Local includes
 // some cpp defines and include of alberta.h
@@ -45,6 +44,7 @@
 #include "agmemory.hh"
 
 #include <dune/grid/albertagrid/coordcache.hh>
+#include <dune/grid/albertagrid/gridfamily.hh>
 #include <dune/grid/albertagrid/level.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 #include <dune/grid/albertagrid/intersectioniterator.hh>
@@ -60,90 +60,6 @@
 
 namespace Dune
 {
-
-  // InternalForward Declarations
-  // ----------------------------
-
-  template< int dim, int dimworld >
-  class AlbertaGrid;
-
-
-
-  // AlbertaGridFamily
-  // -----------------
-
-  template <int dim, int dimworld>
-  struct AlbertaGridFamily
-  {
-    typedef AlbertaGrid<dim,dimworld> GridImp;
-
-    typedef AlbertaGridIndexSet< dim, dimworld > LevelIndexSetImp;
-    typedef AlbertaGridIndexSet< dim, dimworld > LeafIndexSetImp;
-
-    typedef AlbertaGridIdSet< dim, dimworld > IdSetImp;
-    typedef unsigned int IdType;
-
-    struct Traits
-    {
-      typedef GridImp Grid;
-
-      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LeafIntersection;
-      typedef Dune::Intersection< const GridImp, AlbertaGridLeafIntersection > LevelIntersection;
-      typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
-      LeafIntersectionIterator;
-      typedef Dune::IntersectionIterator
-      < const GridImp, AlbertaGridLeafIntersectionIterator, AlbertaGridLeafIntersection >
-      LevelIntersectionIterator;
-
-      typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
-
-      typedef IdType GlobalIdType;
-      typedef IdType LocalIdType;
-
-      template <int cd>
-      struct Codim
-      {
-        // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
-        typedef Dune::Geometry<dim-cd, dimworld, const GridImp, AlbertaGridGlobalGeometry> Geometry;
-        typedef Dune::Geometry<dim-cd, dim, const GridImp, AlbertaGridGeometry> LocalGeometry;
-
-        typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
-
-        typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
-        typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
-
-        template <PartitionIteratorType pitype>
-        struct Partition
-        {
-          typedef Dune::LevelIterator<cd,pitype,const GridImp,AlbertaGridLevelIterator> LevelIterator;
-          typedef Dune::LeafIterator<cd,pitype,const GridImp,AlbertaGridLeafIterator> LeafIterator;
-        };
-
-        typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
-        typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
-      };
-
-      template <PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
-        LevelGridView;
-        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
-        LeafGridView;
-      };
-
-      typedef IndexSet< GridImp, LevelIndexSetImp, int > LevelIndexSet;
-      typedef IndexSet< GridImp, LeafIndexSetImp, int > LeafIndexSet;
-      typedef AlbertaGridHierarchicIndexSet< dim, dimworld > HierarchicIndexSet;
-      typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
-      typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
-
-      typedef Dune::CollectiveCommunication< AlbertaGrid<dim,dimworld> > CollectiveCommunication;
-    };
-  };
-
-
 
   // AlbertaGrid
   // -----------
@@ -247,13 +163,13 @@ namespace Dune
     friend class AlbertaGridHierarchicIndexSet< dim, dimworld >;
 
   public:
-    typedef Alberta::Real ctype;
-
-    static const int dimension = dim;
-    static const int dimensionworld = dimworld;
-
     //! the grid family of AlbertaGrid
     typedef AlbertaGridFamily< dim, dimworld > GridFamily;
+
+    typedef typename GridFamily::ctype ctype;
+
+    static const int dimension = GridFamily::dimension;
+    static const int dimensionworld = GridFamily::dimensionworld;
 
     // the Traits
     typedef typename AlbertaGridFamily< dim, dimworld >::Traits Traits;

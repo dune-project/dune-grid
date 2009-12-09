@@ -256,12 +256,12 @@ namespace Dune
     // -------------
 
     template struct Dune::Alberta::MacroData< 1 >::Library< dimWorld >;
-#if DIM_OF_WORLD >= 2
+#if ALBERTA_DIM >= 2
     template struct Dune::Alberta::MacroData< 2 >::Library< dimWorld >;
-#endif // #if DIM_OF_WORLD >= 2
-#if DIM_OF_WORLD >= 3
+#endif // #if ALBERTA_DIM >= 2
+#if ALBERTA_DIM >= 3
     template struct Dune::Alberta::MacroData< 3 >::Library< dimWorld >;
-#endif // #if DIM_OF_WORLD >= 3
+#endif // #if ALBERTA_DIM >= 3
 
   } // end namespace Alberta
 
