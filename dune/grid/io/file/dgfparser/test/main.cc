@@ -146,6 +146,9 @@ try {
       }
     }
 
+    // does a second construction of the grid work?
+    GridPtr< GridType > gridPtr1( filename.c_str(), mpiHelper.getCommunicator() );
+
     grid = gridPtr.release();
   }
 
