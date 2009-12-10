@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
 #include <algorithm>
 #include <stack>
 
@@ -2746,10 +2745,10 @@ namespace Dune {
       int cnt;
 
       // Size computation (requires communication if variable size)
-      std::map<int,int> send_size;    // map rank to total number of objects (of type DataType) to be sent
-      std::map<int,int> recv_size;    // map rank to total number of objects (of type DataType) to be recvd
-      std::map<int,size_t*> send_sizes; // map rank to array giving number of objects per entity to be sent
-      std::map<int,size_t*> recv_sizes; // map rank to array giving number of objects per entity to be recvd
+      std::vector<int> send_size(sendlist->size(),-1);    // map rank to total number of objects (of type DataType) to be sent
+      std::vector<int> recv_size(recvlist->size(),-1);    // map rank to total number of objects (of type DataType) to be recvd
+      std::vector<size_t*> send_sizes(sendlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be sent
+      std::vector<size_t*> recv_sizes(recvlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be recvd
       if (data.fixedsize(dim,codim))
       {
         // fixed size: just take a dummy entity, size can be computed without communication
@@ -2840,12 +2839,13 @@ namespace Dune {
 
           // ... and store it
           recv_size[cnt] = n;
+          ++cnt;
         }
       }
 
 
       // allocate & fill the send buffers & store send request
-      std::map<int,DataType*> sends; // store pointers to send buffers
+      std::vector<DataType*> sends(sendlist->size(), static_cast<DataType*>(0)); // store pointers to send buffers
       cnt=0;
       for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
       {
@@ -2877,7 +2877,7 @@ namespace Dune {
       }
 
       // allocate recv buffers and store receive request
-      std::map<int,DataType*> recvs; // store pointers to send buffers
+      std::vector<DataType*> recvs(recvlist->size(),static_cast<DataType*>(0)); // store pointers to send buffers
       cnt=0;
       for (ISIT is=recvlist->begin(); is!=recvlist->end(); ++is)
       {
