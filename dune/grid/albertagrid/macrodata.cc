@@ -72,51 +72,54 @@ namespace Dune
     }
 
 
-    template< int dim >
-    template< int dimWorld >
-    void MacroData< dim >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
+    template<>
+    template<>
+    void MacroData< 1 >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
     {
       assert( macroData.data_ != NULL );
-      if( dimension == 1 )
-        return;
+    }
+
+
+    template<>
+    template<>
+    void MacroData< 2 >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
+    {
+      assert( macroData.data_ != NULL );
+      std::cerr << "Marking longest edge for refinement..." << std::endl;
 
       const int count = macroData.elementCount();
       for( int i = 0; i < count; ++i )
       {
         const int refEdge = RefinementEdge< dimension >::value;
         const int edge = longestEdge( macroData, macroData.element( i ) );
-        if( edge == refEdge )
-          continue;
+        if( edge != refEdge )
+          rotate( macroData, i, edge + (numVertices - refEdge) );
+      }
+    }
 
-        // shift vertices such that the refinement edge is the longest edge
-        const int shift = edge + (numVertices - refEdge);
 
-        // rotate necessary fields
-        rotate( macroData.data_->mel_vertices, i, shift );
+    template<>
+    template<>
+    void MacroData< 3 >::Library< dimWorld >::markLongestEdge ( MacroData &macroData )
+    {
+      static const int shift[ 6 ] = { 0, 0, 3, 1, 0, 2 };
+      static const int swapSuccessor[ 6 ] = { -1, 1, -1, -1, 3, -1 };
 
-        // correct opposite vertices
-#if DUNE_ALBERTA_VERSION >= 0x300
-        if( macroData.data_->opp_vertex != NULL )
-        {
-          assert( macroData.data_->neigh != NULL );
-          const int shiftBack = numVertices - (shift % numVertices);
-          for( int j = 0; j < numVertices; ++j )
-          {
-            const int nb = macroData.data_->neigh[ i*numVertices + j ];
-            if( nb < 0 )
-              continue;
-            const int ov = macroData.data_->opp_vertex[ i*numVertices + j ];
-            assert( macroData.data_->neigh[ nb*numVertices + ov ] == i );
-            assert( macroData.data_->opp_vertex[ nb*numVertices + ov ] == j );
-            macroData.data_->opp_vertex[ nb*numVertices + ov ] = (j+shiftBack) % numVertices;
-          }
-          rotate( macroData.data_->opp_vertex, i, shift );
-        }
-#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+      assert( macroData.data_ != NULL );
+      std::cerr << "Marking longest edge for refinement..." << std::endl;
 
-        // correct neighbors and boundaries
-        rotate( macroData.data_->neigh, i, shift );
-        rotate( macroData.data_->boundary, i, shift );
+      const int count = macroData.elementCount();
+      for( int i = 0; i < count; ++i )
+      {
+        const int edge = longestEdge( macroData, macroData.element( i ) );
+        if( shift[ edge ] > 0 )
+          rotate( macroData, i, shift[ edge ] );
+        if( swapSuccessor[ edge ] > 0 )
+          swap( macroData, i, swapSuccessor[ edge ], (swapSuccessor[ edge ] + 1) % numVertices );
+
+        const int refEdge = RefinementEdge< dimension >::value;
+        if( longestEdge( macroData, macroData.element( i ) ) != refEdge )
+          DUNE_THROW( InvalidStateException, "Unable to mark longest edge." );
       }
     }
 
@@ -207,6 +210,39 @@ namespace Dune
         old[ j ] = array[ offset + j ];
       for( int j = 0; j < numVertices; ++j )
         array[ offset + j ] = old[ (j+shift) % numVertices ];
+    }
+
+
+    template< int dim >
+    template< int dimWorld >
+    inline void MacroData< dim >::Library< dimWorld >::rotate ( MacroData &macroData, int i, int shift )
+    {
+      // rotate vertices
+      rotate( macroData.data_->mel_vertices, i, shift );
+
+      // correct opposite vertices
+#if DUNE_ALBERTA_VERSION >= 0x300
+      if( macroData.data_->opp_vertex != NULL )
+      {
+        assert( macroData.data_->neigh != NULL );
+        const int shiftBack = numVertices - (shift % numVertices);
+        for( int j = 0; j < numVertices; ++j )
+        {
+          const int nb = macroData.data_->neigh[ i*numVertices + j ];
+          if( nb < 0 )
+            continue;
+          const int ov = macroData.data_->opp_vertex[ i*numVertices + j ];
+          assert( macroData.data_->neigh[ nb*numVertices + ov ] == i );
+          assert( macroData.data_->opp_vertex[ nb*numVertices + ov ] == j );
+          macroData.data_->opp_vertex[ nb*numVertices + ov ] = (j+shiftBack) % numVertices;
+        }
+        rotate( macroData.data_->opp_vertex, i, shift );
+      }
+#endif // #if DUNE_ALBERTA_VERSION >= 0x300
+
+      // correct neighbors and boundaries
+      rotate( macroData.data_->neigh, i, shift );
+      rotate( macroData.data_->boundary, i, shift );
     }
 
 

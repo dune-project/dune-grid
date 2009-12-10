@@ -241,6 +241,7 @@ namespace Dune
       template< class Type >
       static void rotate ( Type *array, int i, int shift );
 
+      static void rotate ( MacroData &macroData, int i, int shift );
       static void swap ( MacroData &macroData, int el, int v1, int v2 );
     };
 
