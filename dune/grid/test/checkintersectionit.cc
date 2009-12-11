@@ -66,6 +66,24 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
   }
 }
 
+template <class GridViewType, class Iterator>
+void checkIntersectionAssignment(const Iterator & l)
+{
+  Iterator l1(l);
+  Iterator l2(l);
+  ++l2;
+
+  typedef typename GridViewType::IntersectionIterator IntersectionIterator;
+  IntersectionIterator it1 = l1->ilevelbegin();
+  IntersectionIterator it2 = l2->ilevelbegin();
+
+  assert(it1 != it2);
+  assert(l1 != l2);
+  it1 = it2;
+  assert(it1 == it2);
+  assert(it1->inside() == l2);
+  assert(it2->inside() == l2);
+}
 
 /** \brief Test the IntersectionIterator
  */
@@ -409,6 +427,9 @@ void checkIntersectionIterator(const GridViewType& view,
                 << sumNormal << std :: endl;
     ++errorState.sumNormalsNonZero;
   }
+
+  // check assignment operator for IntersectionIterator
+  checkIntersectionAssignment<GridViewType>(eIt);
 }
 
 /** \brief Test both IntersectionIterators
