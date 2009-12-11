@@ -2,6 +2,9 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+// compile surface grid support into the lib even for ALBERTA 2.0
+#define DUNE_ALBERTA_SURFACE_GRID 1
+
 #include <dune/grid/albertagrid/dgfparser.hh>
 
 #if HAVE_ALBERTA
@@ -129,9 +132,6 @@ namespace Dune
   // Instantiation
   // -------------
 
-#if DUNE_ALBERTA_VERSION < 0x300
-  template struct DGFGridFactory< AlbertaGrid< Alberta::dimWorld, Alberta::dimWorld > >;
-#else
   template struct DGFGridFactory< AlbertaGrid< 1, Alberta::dimWorld > >;
 #if ALBERTA_DIM >= 2
   template struct DGFGridFactory< AlbertaGrid< 2, Alberta::dimWorld > >;
@@ -139,7 +139,6 @@ namespace Dune
 #if ALBERTA_DIM >= 3
   template struct DGFGridFactory< AlbertaGrid< 3, Alberta::dimWorld > >;
 #endif // #if ALBERTA_DIM >= 3
-#endif
 
 }
 
