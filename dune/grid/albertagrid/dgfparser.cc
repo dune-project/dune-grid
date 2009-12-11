@@ -129,6 +129,9 @@ namespace Dune
   // Instantiation
   // -------------
 
+#if DUNE_ALBERTA_VERSION < 0x300
+  template struct DGFGridFactory< AlbertaGrid< Alberta::dimWorld, Alberta::dimWorld > >;
+#else
   template struct DGFGridFactory< AlbertaGrid< 1, Alberta::dimWorld > >;
 #if ALBERTA_DIM >= 2
   template struct DGFGridFactory< AlbertaGrid< 2, Alberta::dimWorld > >;
@@ -136,6 +139,7 @@ namespace Dune
 #if ALBERTA_DIM >= 3
   template struct DGFGridFactory< AlbertaGrid< 3, Alberta::dimWorld > >;
 #endif // #if ALBERTA_DIM >= 3
+#endif
 
 }
 
