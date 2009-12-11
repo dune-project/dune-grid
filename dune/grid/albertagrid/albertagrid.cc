@@ -14,7 +14,6 @@
 
 #include "geometry.cc"
 #include "entity.cc"
-#include "treeiterator.cc"
 #include "intersection.cc"
 
 namespace Dune

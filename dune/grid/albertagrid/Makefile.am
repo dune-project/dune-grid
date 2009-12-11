@@ -26,7 +26,7 @@ alberta_HEADERS = agrid.hh albertagrid.cc \
   undefine-2.0.hh  undefine-3.0.hh \
   entity.hh  entity.cc  entitypointer.hh  hierarchiciterator.hh \
   algebra.hh  geometry.hh  geometry.cc  projection.hh  transformation.hh \
-  leveliterator.hh  leafiterator.hh  treeiterator.hh  treeiterator.cc \
+  leveliterator.hh  leafiterator.hh  treeiterator.hh \
   intersection.hh  intersection.cc  intersectioniterator.hh \
   capabilities.hh  gridfactory.hh  dgfparser.hh  albertareader.hh \
   gridfamily.hh
