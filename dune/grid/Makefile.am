@@ -26,6 +26,9 @@ ALULIB = alugrid/libalu.la
 
 # construct only from sub-libraries
 libgrid_la_SOURCES =
+# This forces automake to use the C++ linker
+# (see the automake manual, section "Libtool Convenience Libraries")
+nodist_EXTRA_libgrid_la_SOURCES = dummy.cc
 libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(ALBERTALIB) \
   $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB) $(DGFPARSERLIB)
 
