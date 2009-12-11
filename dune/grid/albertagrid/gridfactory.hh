@@ -297,6 +297,8 @@ namespace Dune
      */
     virtual Grid *createGrid ()
     {
+      macroData_.finalize();
+      markLongestEdge();
       return createGrid( "AlbertaGrid" );
     }
 
