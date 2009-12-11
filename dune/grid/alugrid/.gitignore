@@ -1,7 +1,5 @@
-libdunegrid.la
-
-Makefile
 Makefile.in
+Makefile
 
 .deps
 .libs
