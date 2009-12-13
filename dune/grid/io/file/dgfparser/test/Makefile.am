@@ -10,7 +10,7 @@ if ALBERTA
 endif
 
 if UG
-  TESTUG = testug test2ug
+  TESTUG = testug
 endif
 
 if GRAPE
@@ -64,10 +64,6 @@ testug_SOURCES = main.cc
 testug_LDADD = $(LOCAL_LIBS) $(UG_LDFLAGS) $(UG_LIBS)
 endif
 
-GRIDFILES = alberta-testgrid-3-3.al \
-  simplex-testgrid-2-2.dgf simplex-testgrid-3-3-large.dgf simplex-testgrid-3-3.dgf \
-  cube-testgrid-3-3-large.dgf cube-testgrid-3-3.dgf
-
 # gridcheck not used explicitly, we should still ship it :)
 EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
 	examplegrid11.dgf examplegrid12.dgf examplegrid1c.dgf					\
@@ -79,4 +75,3 @@ EXTRA_DIST = examplegrid10a.dgf examplegrid10b.dgf examplegrid10.dgf		\
 CLEANFILES = examplegrid*.dgf.* dgfparser.log test?d.dgf.*
 
 include $(top_srcdir)/am/global-rules
-
