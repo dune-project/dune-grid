@@ -16,7 +16,7 @@ if UG
 if UG_LGMDOMAIN
   UPROG = test-ug-lgm
 else
-  UPROG = test-ug test-parallel-ug
+  UPROG = test-ug test-parallel-ug test-ug-gridfactory
 endif
 if ALUGRID
   DGFALU_UGGRID = test-dgfalu-uggrid-combination
@@ -133,6 +133,11 @@ test_dgfalu_uggrid_combination_SOURCES = test-dgfalu-uggrid-combination.cc
 test_dgfalu_uggrid_combination_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(ALUGRID_CPPFLAGS)
 test_dgfalu_uggrid_combination_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(ALUGRID_LDFLAGS)
 test_dgfalu_uggrid_combination_LDADD = $(LOCAL_LIBS) $(UG_LIBS) $(ALUGRID_LIBS)
+
+test_ug_gridfactory_SOURCES = test-ug-gridfactory.cc
+test_ug_gridfactory_CPPFLAGS = $(AM_CPPFLAGS) $(UG_CPPFLAGS) $(MPI_CPPFLAGS)
+test_ug_gridfactory_LDFLAGS = $(AM_LDFLAGS) $(UG_LDFLAGS) $(MPI_LDFLAGS)
+test_ug_gridfactory_LDADD = $(LOCAL_LIBS) $(UG_LIBS) $(MPI_LIBS)
 
 ## distribution tarball
 SOURCES = gridcheck.cc checkindexset.cc checkgeometryinfather.cc checkintersectionit.cc checkcommunicate.cc checkiterators.cc checktwists.cc check-albertareader.cc basicunitcube.hh checkadaptation.cc checkgeometry.cc checkpartition.cc
