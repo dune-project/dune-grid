@@ -80,6 +80,8 @@ namespace Dune
     typedef S_CHAR BoundaryId;
 #endif
 
+    typedef U_CHAR ElementType;
+
     typedef ALBERTA FE_SPACE DofSpace;
 
 

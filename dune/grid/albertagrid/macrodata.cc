@@ -7,6 +7,7 @@
  *  \brief  provides a wrapper for ALBERTA's macro_data structure
  */
 
+#include <dune/common/array.hh>
 #include <dune/common/forloop.hh>
 
 #if HAVE_ALBERTA
@@ -104,23 +105,54 @@ namespace Dune
     {
       static const int shift[ 6 ] = { 0, 0, 3, 1, 0, 2 };
       static const int swapSuccessor[ 6 ] = { -1, 1, -1, -1, 3, -1 };
+      static const int oldedge[ 6 ][ 6 ]
+        = { { 0, 1, 2, 3, 4, 5 }, { 1, 0, 2, 3, 5, 4 }, { 2, 4, 5, 0, 1, 3 },
+            { 3, 4, 0, 5, 1, 2 }, { 4, 5, 2, 3, 0, 1 }, { 5, 1, 3, 2, 4, 0 } };
+      static const ElementType eltype[ 4 ] = { 1, 0, 0, 1 };
 
       assert( macroData.data_ != NULL );
       std::cerr << "Marking longest edge for refinement..." << std::endl;
 
+      bool warnOpposedLongestEdges = false;
       const int count = macroData.elementCount();
       for( int i = 0; i < count; ++i )
       {
-        const int edge = longestEdge( macroData, macroData.element( i ) );
+        const ElementId &element = macroData.element( i );
+
+        // calculate edge lengths
+        array< Real, 6 > length;
+        for( int j = 0; j < 6; ++j )
+          length[ j ] = edgeLength ( macroData, element, j );
+
+        // find longest edge
+        int edge = 0;
+        for( int k = 1; k < 6; ++k )
+          edge = (length[ k ] > length[ edge ] ? k : edge);
+
+        // mark longest edge as refinement edge
         if( shift[ edge ] > 0 )
           rotate( macroData, i, shift[ edge ] );
         if( swapSuccessor[ edge ] > 0 )
           swap( macroData, i, swapSuccessor[ edge ], (swapSuccessor[ edge ] + 1) % numVertices );
 
+        // make sure that the longest edge is the refinement edge (temporary assertion)
         const int refEdge = RefinementEdge< dimension >::value;
         if( longestEdge( macroData, macroData.element( i ) ) != refEdge )
           DUNE_THROW( InvalidStateException, "Unable to mark longest edge." );
+
+        // improve second refinement edge
+        int lengthFlags = 0;
+        lengthFlags |= int( length[ oldedge[ edge ][ 2 ] ] > length[ oldedge[ edge ][ 1 ] ] );
+        lengthFlags |= int( length[ oldedge[ edge ][ 4 ] ] > length[ oldedge[ edge ][ 3 ] ] ) << 1;
+        warnOpposedLongestEdges |= (length[ oldedge[ edge ][ 5 ] ] > length[ oldedge[ edge ][ (lengthFlags & 1) + 1 ] ]);
+        warnOpposedLongestEdges |= (length[ oldedge[ edge ][ 5 ] ] > length[ oldedge[ edge ][ (lengthFlags >> 1) + 3 ] ]);
+        if( (lengthFlags & 2) != 0 )
+          swap( macroData, i, 0, 1 );
+        macroData.data_->el_type[ i ] = eltype[ lengthFlags ];
       }
+
+      if( warnOpposedLongestEdges )
+        std::cerr << "Warning: There are elements whose longest edges don't share a vertex." << std::endl;
     }
 
 

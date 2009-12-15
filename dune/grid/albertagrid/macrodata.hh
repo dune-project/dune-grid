@@ -137,21 +137,7 @@ namespace Dune
        *  Insert an element into the macro data structure. This may only be
        *  done in insert mode.
        */
-      int insertElement ( const ElementId &id )
-      {
-        assert( elementCount_ >= 0 );
-        if( elementCount_ >= data_->n_macro_elements )
-          resizeElements( 2*elementCount_ );
-
-        ElementId &e = element( elementCount_ );
-        for( int i = 0; i < numVertices; ++i )
-        {
-          e[ i ] = id[ i ];
-          boundaryId( elementCount_, i ) = InteriorBoundary;
-        }
-
-        return elementCount_++;
-      }
+      int insertElement ( const ElementId &id );
 
       /** \brief insert vertex
        *
@@ -293,6 +279,8 @@ namespace Dune
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize );
       data_->boundary = memAlloc< BoundaryId >( initialSize*numVertices );
+      if( dim == 3 )
+        data_->el_type = memAlloc< ElementType >( initialSize );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
@@ -305,6 +293,8 @@ namespace Dune
       release();
       data_ = ALBERTA alloc_macro_data( dim, initialSize, initialSize, 0 );
       data_->boundary = memAlloc< BoundaryId >( initialSize*numVertices );
+      if( dim == 3 )
+        data_->el_type = memAlloc< ElementType >( initialSize );
       vertexCount_ = elementCount_ = 0;
       elementCount_ = 0;
     }
@@ -360,6 +350,26 @@ namespace Dune
     inline bool MacroData< dim >::checkNeighbors () const
     {
       return Library< dimWorld >::checkNeighbors( *this );
+    }
+
+
+    template< int dim >
+    inline int MacroData< dim >::insertElement ( const ElementId &id )
+    {
+      assert( elementCount_ >= 0 );
+      if( elementCount_ >= data_->n_macro_elements )
+        resizeElements( 2*elementCount_ );
+
+      ElementId &e = element( elementCount_ );
+      for( int i = 0; i < numVertices; ++i )
+      {
+        e[ i ] = id[ i ];
+        boundaryId( elementCount_, i ) = InteriorBoundary;
+      }
+      if( dim == 3 )
+        data_->el_type[ elementCount_ ] = 0;
+
+      return elementCount_++;
     }
 
 
@@ -440,6 +450,8 @@ namespace Dune
       data_->n_macro_elements = newSize;
       data_->mel_vertices = memReAlloc( data_->mel_vertices, oldSize*numVertices, newSize*numVertices );
       data_->boundary = memReAlloc( data_->boundary, oldSize*numVertices, newSize*numVertices );
+      if( dim == 3 )
+        data_->el_type = memReAlloc( data_->el_type, oldSize, newSize );
       assert( (newSize == 0) || (data_->mel_vertices != NULL) );
     }
 
