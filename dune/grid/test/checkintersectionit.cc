@@ -66,24 +66,35 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
   }
 }
 
-template <class GridViewType, class Iterator>
-void checkIntersectionAssignment(const Iterator & l)
+
+template< class GridView >
+void checkIntersectionAssignment ( const GridView &view, const typename GridView::template Codim< 0 >::Iterator &l )
 {
-  Iterator l1(l);
-  Iterator l2(l);
+  typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+  Iterator l1( l );
+  Iterator l2( l );
   ++l2;
 
-  typedef typename GridViewType::IntersectionIterator IntersectionIterator;
-  IntersectionIterator it1 = l1->ilevelbegin();
-  IntersectionIterator it2 = l2->ilevelbegin();
+  if( l2 != view.template end< 0 >() )
+  {
+    IntersectionIterator it1 = view.ibegin( *l1 );
+    IntersectionIterator it2 = view.ibegin( *l2 );
 
-  assert(it1 != it2);
-  assert(l1 != l2);
-  it1 = it2;
-  assert(it1 == it2);
-  assert(it1->inside() == l2);
-  assert(it2->inside() == l2);
+    // verify prerequisites
+    assert( l1 != l2 );
+    assert( it1 != it2 );
+    assert( it1->inside() == l1 );
+    assert( it2->inside() == l2 );
+
+    // check assignment
+    it1 = it2;
+    assert( it1 == it2 );
+    assert( it1->inside() == l2 );
+  }
 }
+
 
 /** \brief Test the IntersectionIterator
  */
@@ -429,7 +440,7 @@ void checkIntersectionIterator(const GridViewType& view,
   }
 
   // check assignment operator for IntersectionIterator
-  checkIntersectionAssignment<GridViewType>(eIt);
+  checkIntersectionAssignment( view, eIt );
 }
 
 /** \brief Test both IntersectionIterators
