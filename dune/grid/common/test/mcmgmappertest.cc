@@ -12,7 +12,7 @@
 #include <set>
 
 #include <dune/grid/uggrid.hh>
-#include "../../../doc/grids/gridfactory/hybridtestgrids.hh"
+#include "../../../../doc/grids/gridfactory/hybridtestgrids.hh"
 #include <dune/grid/common/mcmgmapper.hh>
 
 using namespace Dune;

@@ -1,0 +1,15 @@
+Makefile
+Makefile.in
+.deps
+.libs
+mcmgmappertest
+scsgmappertest
+test-quadrature
+referenceelementstest
+checkrefnumbering
+semantic.cache
+*.gcda
+*.gcno
+*.mw
+*.swp
+*_MAS.bak

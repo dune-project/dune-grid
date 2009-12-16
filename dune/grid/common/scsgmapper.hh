@@ -41,16 +41,16 @@ namespace Dune
    * \par c
    *    A valid codimension.
    */
-  template <typename G, typename IS, int c>
+  template <typename GV, int c>
   class SingleCodimSingleGeomTypeMapper :
-    public Mapper<G,SingleCodimSingleGeomTypeMapper<G,IS,c> >
+    public Mapper<typename GV::Grid,SingleCodimSingleGeomTypeMapper<GV,c> >
   {
   public:
 
     //! import the base class implementation of map and contains (including the deprecated version)
     //! \todo remove in after next release
-    using Mapper< G, SingleCodimSingleGeomTypeMapper >::map;
-    using Mapper< G, SingleCodimSingleGeomTypeMapper >::contains;
+    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::map;
+    using Mapper< typename GV::Grid, SingleCodimSingleGeomTypeMapper >::contains;
 
     /** @brief Construct mapper from grid and one fo its index sets.
 
@@ -58,7 +58,13 @@ namespace Dune
        \param indexset IndexSet object returned by grid.
 
      */
-    SingleCodimSingleGeomTypeMapper (const G& grid, const IS& indexset);
+    SingleCodimSingleGeomTypeMapper (const typename GV::Grid& grid, const typename GV::IndexSet& indexset) DUNE_DEPRECATED;
+
+    /** @brief Construct mapper from grid and one of its index sets.
+
+       \param gridView A Dune GridView object.
+     */
+    SingleCodimSingleGeomTypeMapper (const GV& gridView);
 
     /** @brief Map entity to array index.
 
@@ -75,7 +81,7 @@ namespace Dune
        \param codim Codimension of the subentity of e
        \return An index in the range 0 ... Max number of entities in set - 1.
      */
-    int map (const typename G::Traits::template Codim<0>::Entity& e,
+    int map (const typename GV::template Codim<0>::Entity& e,
              int i, unsigned int codim) const;
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -105,7 +111,7 @@ namespace Dune
        \param result integer reference where corresponding index is  stored if true
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const;
+    bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const;
 
     /** @brief Recalculates map after mesh adaptation
      */
@@ -114,54 +120,62 @@ namespace Dune
     }
 
   private:
-    const G& g;
-    const IS& is;
+    const typename GV::IndexSet& is;
   };
 
   /** @} */
 
-  template <typename G, typename IS, int c>
-  SingleCodimSingleGeomTypeMapper<G,IS,c>::SingleCodimSingleGeomTypeMapper (const G& grid, const IS& indexset)
-    : g(grid), is(indexset)
+  template <typename GV, int c>
+  SingleCodimSingleGeomTypeMapper<GV,c>::SingleCodimSingleGeomTypeMapper (const typename GV::Grid& grid, const typename GV::IndexSet& indexset)
+    : is(indexset)
   {
     // check that grid has only a single geometry type
     if (is.geomTypes(c).size() != 1)
       DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
   }
 
-  template <typename G, typename IS, int c>
+  template <typename GV, int c>
+  SingleCodimSingleGeomTypeMapper<GV,c>::SingleCodimSingleGeomTypeMapper (const GV& gridView)
+    : is(gridView.indexSet())
+  {
+    // check that grid has only a single geometry type
+    if (is.geomTypes(c).size() != 1)
+      DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
+  }
+
+  template <typename GV, int c>
   template<class EntityType>
-  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const EntityType& e) const
+  inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const EntityType& e) const
   {
     enum { cc = EntityType::codimension };
     dune_static_assert(cc == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
     return is.index(e);
   }
 
-  template <typename G, typename IS, int c>
-  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::map (const typename G::Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+  template <typename GV, int c>
+  inline int SingleCodimSingleGeomTypeMapper<GV,c>::map (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
   {
     if (codim != c)
       DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
     return is.subIndex(e,i,codim);
   }
 
-  template <typename G, typename IS, int c>
-  inline int SingleCodimSingleGeomTypeMapper<G,IS,c>::size () const
+  template <typename GV, int c>
+  inline int SingleCodimSingleGeomTypeMapper<GV,c>::size () const
   {
     return is.size(c,is.geomTypes(c)[0]);
   }
 
-  template <typename G, typename IS, int c>
+  template <typename GV, int c>
   template<class EntityType>
-  inline bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const EntityType& e, int& result) const
+  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const EntityType& e, int& result) const
   {
     result = map(e);
     return true;
   }
 
-  template <typename G, typename IS, int c>
-  inline bool SingleCodimSingleGeomTypeMapper<G,IS,c>::contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
+  template <typename GV, int c>
+  inline bool SingleCodimSingleGeomTypeMapper<GV,c>::contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, int& result) const
   {
     result = this->map(e,i,cc);
     return true;
@@ -186,13 +200,13 @@ namespace Dune
      A valid codimension.
    */
   template <typename G, int c>
-  class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,c> {
+  class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
   public:
     /* @brief The constructor
        @param grid A reference to a grid.
      */
     LeafSingleCodimSingleGeomTypeMapper (const G& grid)
-      : SingleCodimSingleGeomTypeMapper<G,typename G::Traits::LeafIndexSet,c>(grid,grid.leafIndexSet())
+      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafView())
     {}
   };
 
@@ -210,14 +224,14 @@ namespace Dune
      A valid codimension.
    */
   template <typename G, int c>
-  class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,c> {
+  class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
   public:
     /* @brief The constructor
        @param grid A reference to a grid.
        @param level A valid level of the grid.
      */
     LevelSingleCodimSingleGeomTypeMapper (const G& grid, int level)
-      : SingleCodimSingleGeomTypeMapper<G,typename G::Traits::LevelIndexSet,c>(grid,grid.levelIndexSet(level))
+      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelView(level))
     {}
   };
 
