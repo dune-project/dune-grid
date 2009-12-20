@@ -251,7 +251,6 @@
 #include <dune/common/geometrytype.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/misc.hh>
-#include <dune/common/helpertemplates.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 #include "base.cc"
 

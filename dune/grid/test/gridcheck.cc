@@ -14,7 +14,6 @@
  */
 
 #include <dune/grid/common/capabilities.hh>
-#include <dune/common/helpertemplates.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/genericreferenceelements.hh>

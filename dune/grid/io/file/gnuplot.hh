@@ -14,7 +14,6 @@
 #include <fstream>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/helpertemplates.hh>
 
 #include <dune/grid/common/grid.hh>
 
