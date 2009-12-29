@@ -137,9 +137,11 @@ namespace Dune {
                                  const std::string& filename,
                                  int level,
                                  bool GridSplitUp=false) {
-
       LevelAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.levelView(level),GridSplitUp);
+      if (f.size()==grid.size(level,GridType::dimension))
+        amiramesh.addVertexData(f, grid.levelView(level),GridSplitUp);
+      else
+        amiramesh.addCellData(f, grid.levelView(level),GridSplitUp);
       amiramesh.write(filename);
     }
 
@@ -187,7 +189,11 @@ namespace Dune {
                                  const std::string& filename,
                                  bool GridSplitUp = false) {
       LeafAmiraMeshWriter amiramesh;
-      amiramesh.addVertexData(f, grid.leafView(),GridSplitUp);
+      if (f.size()==grid.size(GridType::dimension))
+        amiramesh.addVertexData(f, grid.leafView(),GridSplitUp);
+      else
+        amiramesh.addCellData(f, grid.leafView(),GridSplitUp);
+
       amiramesh.write(filename);
     }
 
