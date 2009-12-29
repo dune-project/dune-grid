@@ -571,7 +571,7 @@ namespace Dune {
     //===========================================================
 
     //! Return the id of the grid
-    std::string name() const
+    std::string name() const DUNE_DEPRECATED
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().name());
       return asImp().name();

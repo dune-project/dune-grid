@@ -293,7 +293,7 @@ namespace Dune {
     void postAdapt();
 
     /** \brief grid identification */
-    std::string name () const { return "OneDGrid"; }
+    std::string name () const { return "OneDGrid"; } DUNE_DEPRECATED
 
     // **********************************************************
     // End of Interface Methods

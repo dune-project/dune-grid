@@ -352,7 +352,7 @@ namespace Dune
     }
 
     /** \brief return name of the grid */
-    std::string name () const
+    std::string name () const DUNE_DEPRECATED
     {
       return mesh_.name();
     };

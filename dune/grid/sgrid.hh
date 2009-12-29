@@ -1301,7 +1301,7 @@ namespace Dune {
     typedef _ctype ctype;
 
     //! return the name of this grid
-    std::string name() const { return "SGrid"; };
+    std::string name() const { return "SGrid"; } DUNE_DEPRECATED
 
     // constructors
 
