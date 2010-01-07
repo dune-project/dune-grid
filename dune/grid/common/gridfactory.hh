@@ -71,6 +71,9 @@ namespace Dune
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
+
+        Make sure the inserted element is not inverted (this holds even
+        for simplices).  There are grids that can't handle inverted tets.
      */
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices) = 0;
