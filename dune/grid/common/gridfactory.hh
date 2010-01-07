@@ -23,6 +23,48 @@ namespace Dune
       \ingroup GridFactory
 
       This base class declares the interface.
+
+      Example use: create a grid consisting of a cube triangulated into 6
+      tetrahedra:
+      \image html cube-to-tet-6.png "Left: cube with vertex numbers.  Middle: cube triangulated into six tetrahedra.  Right: exploded version of the middle figure, with number for the tetrahedra."
+      \code
+     Dune::GridFactory<Grid> gf;
+
+     Dune::FieldVector<typename Grid::ctype, 3> pos;
+
+     pos[0] = 0; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
+     pos[0] = 1; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
+     pos[0] = 0; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
+     pos[0] = 1; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
+     pos[0] = 0; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
+     pos[0] = 1; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
+     pos[0] = 0; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
+     pos[0] = 1; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
+
+     Dune::GeometryType type;
+     type.makeTetrahedron();
+     std::vector<unsigned int> vid(4);
+
+     vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 5; vid[2] = 1; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 6; vid[2] = 4; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 3; vid[2] = 2; vid[3] = 7; gf.insertElement(type, vid);
+
+     Dune::shared_ptr<Grid> gridp(gf.createGrid());
+      \endcode
+      Make sure that the inserted elements are not inverted, since not all
+      grids support that.  For instance, in the following code snippet the
+      elements 1, 3 and 5 are inverted while elements 0, 2 and 4 are not.
+      \code
+     vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
+     vid[0] = 0; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
+      \endcode
    */
   template <class GridType>
   class GridFactoryInterface
@@ -191,6 +233,8 @@ namespace Dune
 
       This is the unspecialized class, which does nothing.  All work is
       done in the specializations for the different grid types.
+
+      See GridFactoryInterface for an example how to use this class.
    */
   template <class GridType>
   class GridFactory : public GridFactoryInterface<GridType> {
@@ -230,6 +274,9 @@ namespace Dune
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
+
+        Make sure the inserted element is not inverted (this holds even
+        for simplices).  There are grids that can't handle inverted tets.
      */
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices) {

@@ -21,4 +21,7 @@ common_HEADERS = virtualrefinement.cc capabilities.hh \
 
 SUBDIRS = refinement test quadraturerules
 
+dist_noinst_DATA = cube-to-tet-6.png
+
 include $(top_srcdir)/am/global-rules
+include $(top_srcdir)/am/inkscape.am
