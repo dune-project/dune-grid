@@ -536,7 +536,6 @@ namespace Dune
         {
           typedef typename GridView :: IntersectionIterator IntersectionIterator;
 
-          const std :: string name = grid.name();
           if( !levelIndex || EnableLevelIntersectionIteratorCheck< typename GridView::Grid >::v )
           {
             const IntersectionIterator endnit = view.iend( *it );
@@ -553,7 +552,7 @@ namespace Dune
           {
             static int called = 0;
             if( called++ == 0 )
-              std::cerr << "Warning: Skipping index test using LevelIntersectionIterator for " << view.grid().name() << "." << std::endl;
+              std::cerr << "Warning: Skipping index test using LevelIntersectionIterator." << std::endl;
           }
         }
       }

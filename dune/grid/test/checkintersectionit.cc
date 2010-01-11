@@ -216,7 +216,7 @@ void checkIntersectionIterator(const GridViewType& view,
       static bool called = false;
       if(!called)
       {
-        derr << "WARNING: skip reverse intersection iterator test for " << grid.name() << "!"<< std::endl;
+        derr << "Warning: Skipping reverse intersection iterator check." << std::endl;
         called = true;
       }
     }
