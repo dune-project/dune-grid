@@ -51,7 +51,7 @@ namespace Dune
 
 
   template< class Grid >
-  inline unsigned int AlbertaGridIntersectionBase< Grid >::boundaryIndex () const
+  inline size_t AlbertaGridIntersectionBase< Grid >::boundarySegmentIndex () const
   {
     assert( boundary() );
     const Alberta::BasicNodeProjection *projection = elementInfo().boundaryProjection( oppVertex_ );

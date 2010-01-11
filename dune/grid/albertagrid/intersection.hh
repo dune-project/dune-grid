@@ -66,7 +66,7 @@ namespace Dune
 
     bool boundary () const;
     int boundaryId () const;
-    unsigned int boundaryIndex () const;
+    size_t boundarySegmentIndex () const;
 
     int indexInInside () const;
 
