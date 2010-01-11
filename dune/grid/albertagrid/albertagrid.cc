@@ -48,6 +48,7 @@ namespace Dune
   inline AlbertaGrid < dim, dimworld >::AlbertaGrid ()
     : mesh_(),
       maxlevel_( 0 ),
+      numBoundarySegments_( 0 ),
       hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
@@ -68,6 +69,7 @@ namespace Dune
                   const Alberta::ProjectionFactoryInterface< Proj, Impl > &projectionFactory )
     : mesh_(),
       maxlevel_( 0 ),
+      numBoundarySegments_( 0 ),
       hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
@@ -96,6 +98,7 @@ namespace Dune
                   const DuneBoundaryProjection< dimensionworld > *projection )
     : mesh_(),
       maxlevel_( 0 ),
+      numBoundarySegments_( 0 ),
       hIndexSet_( dofNumbering_ ),
       idSet_( hIndexSet_ ),
       levelIndexVec_( (size_t)MAXL, 0 ),
@@ -109,10 +112,10 @@ namespace Dune
     if( projection != 0 )
     {
       Alberta::DuneGlobalBoundaryProjectionFactory< dimension > projectionFactory( *projection );
-      mesh_.create( macroData, gridName, projectionFactory );
+      numBoundarySegments_ = mesh_.create( macroData, gridName, projectionFactory );
     }
     else
-      mesh_.create( macroData, gridName );
+      numBoundarySegments_ = mesh_.create( macroData, gridName );
     if( !mesh_ )
       DUNE_THROW( AlbertaError, "Invalid macro data structure." );
 
@@ -139,7 +142,7 @@ namespace Dune
   {
     checkAlbertaDimensions< dim, dimworld >();
 
-    mesh_.create( macroGridFileName, gridName );
+    numBoundarySegments_ = mesh_.create( macroGridFileName, gridName );
     if( !mesh_ )
     {
       DUNE_THROW( AlbertaIOError,
@@ -722,7 +725,7 @@ namespace Dune
     if( filename.size() <= 0 )
       return false;
 
-    mesh_.read( filename, time );
+    numBoundarySegments_ = mesh_.read( filename, time );
     if( !mesh_ )
       DUNE_THROW( AlbertaIOError, "Could not read grid file: " << filename << "." );
 

@@ -305,6 +305,12 @@ namespace Dune
     //! number of leaf entities per geometry type in this process
     int size (GeometryType type) const;
 
+    //! number of boundary segments within the macro grid
+    size_t numBoundarySegments () const
+    {
+      return numBoundarySegments_;
+    }
+
   public:
     //***************************************************************
     //  Interface for Adaptation
@@ -455,15 +461,6 @@ namespace Dune
     // delete mesh and all vectors
     void removeMesh();
 
-    // pointer to an Albert Mesh, which contains the data
-    MeshPointer mesh_;
-
-    // collective communication
-    CollectiveCommunication comm_;
-
-    // number of maxlevel of the mesh
-    int maxlevel_;
-
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys
     //**********************************************************************
@@ -475,10 +472,6 @@ namespace Dune
 
     friend class AlbertaGridLeafIntersectionIterator< const This >;
 
-  private:
-    mutable EntityProvider entityProvider_;
-
-  public:
     template< int codim >
     static int
     getTwist ( const typename Traits::template Codim< codim >::Entity &entity )
@@ -535,6 +528,20 @@ namespace Dune
     getCoord ( const ElementInfo &elementInfo, int vertex ) const;
 
   private:
+    // pointer to an Albert Mesh, which contains the data
+    MeshPointer mesh_;
+
+    // collective communication
+    CollectiveCommunication comm_;
+
+    // maximum level of the mesh
+    int maxlevel_;
+
+    // number of boundary segments within the macro grid
+    size_t numBoundarySegments_;
+
+    mutable EntityProvider entityProvider_;
+
     // map between ALBERTA and DUNE numbering
     Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > numberingMap_;
     Alberta::NumberingMap< dimension, Alberta::Generic2AlbertaNumbering > genericNumberingMap_;
