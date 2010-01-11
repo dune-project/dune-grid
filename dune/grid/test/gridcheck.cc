@@ -734,7 +734,7 @@ void assertNeighbor (Grid &g)
     {
       static int called = 0;
       if( called++ == 0 )
-        std::cerr << "Warning: Skipping level neighbor test for " << g.name() << "." << std::endl;
+        std::cerr << "Warning: Skipping level neighbor check." << std::endl;
       return;
     }
 
