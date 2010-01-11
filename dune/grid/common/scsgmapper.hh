@@ -32,14 +32,9 @@ namespace Dune
    * version is usually not used directly but is used to implement versions for leafwise and levelwise
    * entity sets.
    *
-   * Template parameters are:
+   * \tparam GV A Dune grid view type
    *
-   * \par G
-   *    A Dune grid type.
-   * \par IS
-   *    LeafIndexSet or LevelIndexSet type of the given grid.
-   * \par c
-   *    A valid codimension.
+   * \tparam c A valid codimension
    */
   template <typename GV, int c>
   class SingleCodimSingleGeomTypeMapper :
