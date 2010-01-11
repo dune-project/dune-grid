@@ -213,6 +213,22 @@ namespace Dune
       return this->real.boundaryId();
     }
 
+    /** \brief index of the boundary segment within the macro grid
+     *
+     *  In many applications, special data needs to be attached to the boundary
+     *  segments of the macro grid (e.g., a function selecting the boundary
+     *  condition).
+     *  Usually, this data is inherited by the children of the boundary segment.
+     *
+     *  In the DUNE framework, data is stored in arrays, addressed by an index,
+     *  in this case the boundarySegmentIndex. The size of these arrays can be
+     *  obtained by the Grid::numBoundarySegments.
+     */
+    size_t boundarySegmentIndex () const
+    {
+      return this->real.boundarySegmentIndex();
+    }
+
     //! @brief return true if intersection is shared with another element.
     bool neighbor () const
     {

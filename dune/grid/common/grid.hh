@@ -624,6 +624,13 @@ namespace Dune {
     //@}
 
 
+    /** \brief returns the number of boundary segments within the macro grid */
+    size_t numBoundarySegments () const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION( asImp().numBoundarySegments());
+      return asImp().numBoundarySegments();
+    }
+
     //===========================================================
     /** @name Views
      */
