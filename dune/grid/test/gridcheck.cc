@@ -1121,7 +1121,15 @@ void checkBoundarySegmentIndex ( const Grid &grid )
       if( !iit->boundary() )
         continue;
       ++numBoundarySegments;
-      ++count[ iit->boundarySegmentIndex() ];
+      const size_t index = iit->boundarySegmentIndex();
+      if( index >= grid.numBoundarySegments() )
+      {
+        std::cerr << "Error: Boundary segment index out of bounds: (index: "
+                  << index << ", size: " << grid.numBoundarySegments() << ")."
+                  << std::endl;
+      }
+      else
+        ++count[ index ];
     }
   }
 
