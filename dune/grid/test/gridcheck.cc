@@ -1099,6 +1099,55 @@ void iteratorEquals (Grid &g)
   if (i1 != l2->ileafend() && i1->neighbor()) TestEquals(i1->outside());
 }
 
+template< class Grid >
+void checkBoundarySegmentIndex ( const Grid &grid )
+{
+  typedef typename Grid::LevelGridView GridView;
+  typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+  size_t numBoundarySegments = 0;
+  std::vector< int > count( grid.numBoundarySegments(), 0 );
+
+  GridView gridView = grid.levelView( 0 );
+  const Iterator end = gridView.template end< 0 >();
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+  {
+    if( !it->hasBoundaryIntersections() )
+      continue;
+    const IntersectionIterator iend = gridView.iend( *it );
+    for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
+    {
+      if( !iit->boundary() )
+        continue;
+      ++numBoundarySegments;
+      ++count[ iit->boundarySegmentIndex() ];
+    }
+  }
+
+  if( numBoundarySegments != grid.numBoundarySegments() )
+  {
+    std::cerr << "Error: Wrong number of boundary segments (reported: "
+              << grid.numBoundarySegments() << ", counted: "
+              << numBoundarySegments << ")." << std::endl;
+  }
+  for( size_t i = 0; i < count.size(); ++i )
+  {
+    if( count[ i ] == 0 )
+    {
+      std::cerr << "Error: Boundary segment indices not consecutive (index "
+                << i << " not used)." << std::endl;
+    }
+    else if( count[ i ] != 1 )
+    {
+      std::cerr << "Error: Boundary segment index not unique within macro grid"
+                << " (index " << i << " used " << count[ i ] << " times)."
+                << std::endl;
+    }
+  }
+}
+
+
 template <class Grid>
 void gridcheck (Grid &g)
 {
@@ -1162,6 +1211,8 @@ void gridcheck (Grid &g)
 #endif
     }
   }
+
+  checkBoundarySegmentIndex( g );
 }
 
 #endif // #ifndef GRIDCHECK_CC
