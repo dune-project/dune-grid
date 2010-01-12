@@ -1099,6 +1099,48 @@ void iteratorEquals (Grid &g)
   if (i1 != l2->ileafend() && i1->neighbor()) TestEquals(i1->outside());
 }
 
+
+template< class Grid, class Entity, class Intersection >
+void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &entity, const Intersection &intersection )
+{
+  typedef typename Entity::HierarchicIterator HierarchicIterator;
+  typedef typename Entity::LocalGeometry GeometryInFather;
+  typedef typename Grid::LevelGridView GridView;
+  typedef typename GridView::IntersectionIterator IntersectionIterator;
+
+  const typename Intersection::LocalGeometry &geoInInside = intersection.geometryInInside();
+
+  const GridView gridView = grid.levelView( entity.level()+1 );
+  const HierarchicIterator hend = entity.hend( entity.level()+1 );
+  for( HierarchicIterator hit = entity.hbegin( entity.level()+1 ); hit != hend; ++hit )
+  {
+    const GeometryInFather &geoInFather = hit->geometryInFather();
+    const Dune::GenericReferenceElement< typename Grid::ctype, Grid::dimension > &refElement
+      = Dune::GenericReferenceElements< typename Grid::ctype, Grid::dimension >::general( geoInFather.type() );
+
+    const IntersectionIterator iend = gridView.iend( *hit );
+    for( IntersectionIterator iit = gridView.ibegin( *hit ); iit != iend; ++iit )
+    {
+      if( !iit->boundary() )
+        continue;
+      const typename GeometryInFather::GlobalCoordinate x
+        = geoInFather.global( refElement.position( iit->indexInInside(), 1 ) );
+      const typename GeometryInFather::GlobalCoordinate y = geoInInside.global( geoInInside.local( x ) );
+      if( (x-y).two_norm2() > 1e-10 )
+        continue;
+      if( iit->boundarySegmentIndex() != intersection.boundarySegmentIndex() )
+      {
+        std::cerr << "Error: Boundary segment index " << intersection.boundarySegmentIndex()
+                  << " not prolonged down (level " << entity.level() << " to " << hit->level() << ")."
+                  << std::endl;
+      }
+      if( !hit->isLeaf() )
+        checkBoundarySegmentIndexProlongation( grid, *hit, *iit );
+    }
+  }
+}
+
+
 template< class GridView >
 void checkBoundarySegmentIndex ( const GridView &gridView )
 {
@@ -1129,6 +1171,8 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
       }
       else
         ++count[ index ];
+      if( !it->isLeaf() )
+        checkBoundarySegmentIndexProlongation( gridView.grid(), *it, *iit );
     }
   }
 
