@@ -1099,17 +1099,16 @@ void iteratorEquals (Grid &g)
   if (i1 != l2->ileafend() && i1->neighbor()) TestEquals(i1->outside());
 }
 
-template< class Grid >
-void checkBoundarySegmentIndex ( const Grid &grid )
+template< class GridView >
+void checkBoundarySegmentIndex ( const GridView &gridView )
 {
-  typedef typename Grid::LevelGridView GridView;
   typedef typename GridView::template Codim< 0 >::Iterator Iterator;
   typedef typename GridView::IntersectionIterator IntersectionIterator;
 
-  size_t numBoundarySegments = 0;
-  std::vector< int > count( grid.numBoundarySegments(), 0 );
+  size_t numBoundarySegments = gridView.grid().numBoundarySegments();
+  size_t countBoundarySegments = 0;
+  std::vector< int > count( numBoundarySegments, 0 );
 
-  GridView gridView = grid.levelView( 0 );
   const Iterator end = gridView.template end< 0 >();
   for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
   {
@@ -1120,12 +1119,12 @@ void checkBoundarySegmentIndex ( const Grid &grid )
     {
       if( !iit->boundary() )
         continue;
-      ++numBoundarySegments;
+      ++countBoundarySegments;
       const size_t index = iit->boundarySegmentIndex();
-      if( index >= grid.numBoundarySegments() )
+      if( index >= numBoundarySegments )
       {
         std::cerr << "Error: Boundary segment index out of bounds: (index: "
-                  << index << ", size: " << grid.numBoundarySegments() << ")."
+                  << index << ", size: " << numBoundarySegments << ")."
                   << std::endl;
       }
       else
@@ -1133,12 +1132,13 @@ void checkBoundarySegmentIndex ( const Grid &grid )
     }
   }
 
-  if( numBoundarySegments != grid.numBoundarySegments() )
+  if( countBoundarySegments != numBoundarySegments )
   {
     std::cerr << "Error: Wrong number of boundary segments (reported: "
-              << grid.numBoundarySegments() << ", counted: "
-              << numBoundarySegments << ")." << std::endl;
+              << numBoundarySegments << ", counted: "
+              << countBoundarySegments << ")." << std::endl;
   }
+
   for( size_t i = 0; i < count.size(); ++i )
   {
     if( count[ i ] == 0 )
@@ -1220,7 +1220,12 @@ void gridcheck (Grid &g)
     }
   }
 
-  checkBoundarySegmentIndex( g );
+  if( EnableLevelIntersectionIteratorCheck< Grid >::v )
+    checkBoundarySegmentIndex( g.levelView( 0 ) );
+  else if( g.maxLevel() == 0 )
+    checkBoundarySegmentIndex( g.leafView() );
+  else
+    std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
 }
 
 #endif // #ifndef GRIDCHECK_CC
