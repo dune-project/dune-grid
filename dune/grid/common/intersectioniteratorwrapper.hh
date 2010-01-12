@@ -103,6 +103,9 @@ namespace Dune {
     //! return information about the Boundary
     int boundaryId () const { return it().boundaryId(); }
 
+    //! return the boundary segment index
+    size_t boundarySegmentIndex() const { return it().boundarySegmentIndex(); }
+
     //! intersection of codimension 1 of this neighbor with element where
     //! iteration started.
     //! Here returned element is in LOCAL coordinates of the element
