@@ -74,6 +74,8 @@ namespace Dune {
 
     friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
+    template< template< int, int > class >
+    friend class ALU3dGridFactory;
   public:
     typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType HElementType;
     typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
@@ -218,6 +220,9 @@ namespace Dune {
     friend class ALU3dGridLeafIterator <3, All_Partition,GridImp>;
 
     friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
+
+    template< template< int, int > class >
+    friend class ALU3dGridFactory;
 
     // type of reference element
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;

@@ -77,6 +77,8 @@ namespace Dune {
   class ALU3dGrid;
   template <class GridImp, int codim>
   struct ALU3dGridEntityFactory;
+  template< template< int, int > class ALUGrid >
+  class ALU3dGridFactory;
 
   //**********************************************************************
   //
@@ -455,6 +457,9 @@ namespace Dune {
 
     //! number of entities per level and geometry type in this process
     int size (int level, GeometryType type) const;
+
+    //! number of boundary segments
+    size_t numBoundarySegments() const;
 
     //! number of leaf entities per geometry type in this process
     int size (GeometryType type) const;

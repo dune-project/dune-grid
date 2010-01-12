@@ -23,7 +23,8 @@ namespace Dune
     : filename_( temporaryFileName() ),
       removeGeneratedFile_( removeGeneratedFile ),
       communicator_( communicator ),
-      globalProjection_ ( 0 )
+      globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -38,7 +39,8 @@ namespace Dune
     : filename_( filename.empty() ? temporaryFileName() : filename ),
       removeGeneratedFile_( filename.empty() ),
       communicator_( communicator ),
-      globalProjection_ ( 0 )
+      globalProjection_ ( 0 ),
+      numFacesInserted_ ( 0 )
   {
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank_ );
@@ -109,6 +111,7 @@ namespace Dune
     }
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
+    ++numFacesInserted_;
   }
 
 

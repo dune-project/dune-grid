@@ -39,6 +39,12 @@ namespace Dune
     //! \brief type of boundary segment
     typedef Dune::BoundarySegment< 3, 3> BoundarySegmentType;
 
+    template< int codim >
+    struct Codim
+    {
+      typedef typename Grid::template Codim< codim >::Entity Entity;
+    };
+
   private:
     typedef Dune::BoundarySegmentWrapper<3, 3> BoundarySegmentWrapperType;
 
@@ -85,6 +91,7 @@ namespace Dune
     BoundaryIdVector boundaryIds_;
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
+    unsigned int numFacesInserted_;
 
     // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
@@ -188,6 +195,27 @@ namespace Dune
     Grid *createGrid ();
 
     Grid *createGrid ( const bool addMissingBoundaries );
+
+    virtual unsigned int
+    insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).getIndex();
+    }
+    virtual unsigned int
+    insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).getIndex();
+    }
+    virtual unsigned int
+    insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+    virtual bool
+    wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return ( insertionIndex(intersection) < numFacesInserted_ );
+    }
 
   private:
     template< class T >

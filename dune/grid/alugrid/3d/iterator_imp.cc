@@ -452,6 +452,14 @@ namespace Dune {
     return (boundary() ? connector_.boundaryFace().bndtype() : 0);
   }
 
+  template<class GridImp>
+  inline size_t
+  ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
+  {
+    assert(item_);
+    return 0; // (boundary() ? connector_.boundaryFace().segmentIndex() : 0);
+  }
+
   template <class GridImp>
   inline void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const
   {

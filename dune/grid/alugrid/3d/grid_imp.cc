@@ -275,6 +275,13 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline size_t ALU3dGrid<dim, dimworld, elType>::numBoundarySegments() const
+  {
+    assert( mygrid_ );
+    return 0; // mygrid_->numMacroBndSegments();
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
   inline void ALU3dGrid<dim, dimworld, elType>::makeGeomTypes()
   {
     if(elType == tetra)
