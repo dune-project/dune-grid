@@ -240,20 +240,23 @@ namespace Dune
 
   // Output to Tetgen/Triangle poly-file
   void DuneGridFormatParser
-  :: writeTetgenPoly ( std :: string &name, std::string &params )
+  :: writeTetgenPoly ( const std :: string &prefixname,
+                       std :: string &extension, std::string &params )
   {
+    std::string name = prefixname;
     if (dimw==2)
     {
       if (facemap.size()+elements.size()>0)
       {
-        name += ".poly";
+        extension = ".poly";
         params = " -Ap ";
       }
       else
       {
-        name += ".node";
+        extension = ".node";
         params = "";
       }
+      name += extension;
       info->print("writting poly file "+name);
       std::ofstream polys(name.c_str());
       writeTetgenPoly(polys);
@@ -262,7 +265,8 @@ namespace Dune
     {
       if (facemap.size()>0 && elements.size()==0)
       {
-        name += ".poly";
+        extension = ".poly";
+        name += extension;
         info->print("writting poly file "+name);
         std::ofstream polys(name.c_str());
         writeTetgenPoly(polys);
@@ -325,6 +329,7 @@ namespace Dune
             out << std::endl;
           }
         }
+        extension = ".node";
         name += ".node";
         if (elements.size()>0)
           params = " -r ";
@@ -741,23 +746,27 @@ namespace Dune
     info->block(para);
 
     // std::string name = "gridparserfile.polylists.tmp";
-    std::string name = para.dumpFileName();
+    std::string suffix;
+    std::string name = para.dumpFileName(); // look if dump file name was provided
     bool tempFile = name.empty();
-    if (tempFile)
+
+    if (para.hasfile()) // a triangle/tetgen file is provided
+      name = para.filename();
+    else if (tempFile) // we have no dump file name and no triangle/tetgen file -> use temporary file
       name = temporaryFileName();
-    const std::string prefixname = name;
-    const std::string inname = name;
-    // "gridparserfile.polylists.tmp";
+
+    // const std::string prefixname = name;
+    // const std::string inname = name;
     std::string params;
 
     if(!para.hasfile()) {
       {
-        writeTetgenPoly(name,params);
+        writeTetgenPoly(name,suffix,params);
       }
     }
     else {
       if (para.filetype().size()==0) {
-        readTetgenTriangle(para.filename());
+        readTetgenTriangle(name);
         return;
       }
       dimw = para.dimension();
@@ -777,14 +786,13 @@ namespace Dune
     {
       std::stringstream command;
       command << std::fixed;
-      std::string suffix;
 
       if (para.haspath())
         command << para.path() << "/";
       command << "triangle -ej " << params;
       if(para.hasfile())
       {
-        name = para.filename();
+        // name = para.filename();
         suffix = "."+para.filetype();
         command << " " << para.parameter() << " ";
       }
@@ -826,7 +834,7 @@ namespace Dune
 
         if(para.hasfile())
         {
-          name = para.filename();
+          // name = para.filename();
           suffix = "."+para.filetype();
           command << " " << para.parameter() << " ";
         }
@@ -857,7 +865,7 @@ namespace Dune
         if (para.maxArea()>0)
           command << "a" << para.maxArea();
 
-        command << " " << inname << ".1";
+        command << " " << name << ".1";
         dverb << "Calling : " << command.str() << std::endl;
         info->print("Calling : "+command.str());
         if( system(command.str().c_str()) < 0 )
@@ -869,18 +877,18 @@ namespace Dune
         if (para.haspath())
           command << para.path() << "/";
 
-        command << "tetview-linux " << prefixname << "." << call_nr << ".ele";
+        command << "tetview-linux " << name << "." << call_nr << ".ele";
         dverb << "Calling : " << command.str() << std::endl;
         if( system(command.str().c_str()) < 0 )
           DUNE_THROW( SystemError, "Unable to call " << command.str() << "." );
       }
     }
     std::stringstream polyname;
-    polyname << inname << "." << call_nr;
+    polyname << name << "." << call_nr;
     readTetgenTriangle(polyname.str());
 
     if ( tempFile &&
-         prefixname.compare(0,12,"TMPDGFParser")==0 )
+         name.compare(0,12,"TMPDGFParser")==0 )
     {
       /*
          std::stringstream command;

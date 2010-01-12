@@ -87,7 +87,7 @@ try {
     filename = namestr.str();
   }
 
-  std::cout << "tester: start grid reading" << std::endl;
+  std::cout << "tester: start grid reading; file " << filename << std::endl;
 
   typedef GridType::LeafGridView GridView;
   typedef GridView::IndexSet IndexSetType;

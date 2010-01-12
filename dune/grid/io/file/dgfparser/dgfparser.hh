@@ -51,7 +51,7 @@ namespace Dune
     bool readDuneGrid( std :: istream &, int dimG = -1, int dimW = -1 );
 
     //! method to write in Tetgen/Triangle Poly Format
-    void writeTetgenPoly ( std :: string &, std :: string & );
+    void writeTetgenPoly ( const std :: string &, std ::string &, std :: string & );
     void writeTetgenPoly ( std::ostream & );
     //! method to write macrogridfiles in alu format (cam be used without dune)
     void writeAlu ( std :: ostream & );
@@ -189,7 +189,6 @@ namespace Dune
       : macroGrid_( filename.c_str(), comm )
     {
       grid_ = macroGrid_.template createGrid< Grid >();
-      assert( macroGrid_.dimw == DomainType::dimension );
 
       if( macroGrid_.nofelparams > 0 )
       {
@@ -261,6 +260,7 @@ namespace Dune
       InsertOrderIterator it = elInsertOrder_.find( coord );
       if( it != elInsertOrder_.end() )
         return macroGrid_.elParams[ it->second ];
+      assert(0);
       return emptyParam;
     }
 
@@ -283,7 +283,7 @@ namespace Dune
       {
         // returns true, if a < b; c[i] < -eps;
         const DomainType c = a - b;
-        const double eps = 1e-5;
+        const double eps = 1e-8;
 
         for( int i = 0; i < DomainType::dimension; ++i )
         {
