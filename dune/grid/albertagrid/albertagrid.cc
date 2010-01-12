@@ -80,7 +80,7 @@ namespace Dune
   {
     checkAlbertaDimensions< dim, dimworld >();
 
-    mesh_.create( macroData, gridName, projectionFactory );
+    numBoundarySegments_ = mesh_.create( macroData, gridName, projectionFactory );
     if( !mesh_ )
       DUNE_THROW( AlbertaError, "Invalid macro data structure." );
 
