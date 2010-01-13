@@ -112,6 +112,11 @@ namespace Dune
         return hostIntersection().boundaryId();
       }
 
+      size_t boundarySegmentIndex () const
+      {
+        return hostIntersection().boundarySegmentIndex();
+      }
+
       const LocalGeometry &geometryInInside () const
       {
         return hostIntersection().geometryInInside();

@@ -519,17 +519,25 @@ namespace Dune
       return hostGrid().size( level, type );
     }
 
-    /** \brief obtain number of leaf entities
+    /** \brief returns the number of boundary segments within the macro grid
      *
-     *  \param[in]  type   geometry type to consider
-     *
-     *  \returns number of leaf entities with a geometry of type \em type
+     *  \returns number of boundary segments within the macro grid
      */
     int size ( GeometryType type ) const
     {
       return hostGrid().size( type );
     }
 
+    /** \brief obtain number of leaf entities
+     *
+     *  \param[in]  type   geometry type to consider
+     *
+     *  \returns number of leaf entities with a geometry of type \em type
+     */
+    size_t numBoundarySegments ( ) const
+    {
+      return hostGrid().numBoundarySegments( );
+    }
     /** \} */
 
     template< int codim >
