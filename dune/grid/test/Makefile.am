@@ -27,12 +27,17 @@ endif
 
 ALBERTA_DIM = $(GRIDDIM)
 
+#
+## Some parameters for te geogrid test
+#
 COORDFUNCTION = IdenticalCoordFunction\<double,$(GRIDDIM)\>
 # COORDFUNCTION = Helix
 # COORDFUNCTION = ThickHelix
 # COORDFUNCTION = DGFCoordFunction\<$(GRIDDIM),$(GRIDDIM)\>
 # COORDFUNCTION = DGFCoordFunction\<2,3\>
 CACHECOORDFUNCTION = 0
+GRIDTYPE=YASPGRID
+GRIDDIM=2
 
 #
 ## define the lists of tests to build and run
