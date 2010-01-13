@@ -538,7 +538,7 @@ namespace Dune {
     /*@}*/
 
     /** \brief return name of the grid */
-    std::string name () const { return "UGGrid"; } DUNE_DEPRECATED
+    std::string name () const DUNE_DEPRECATED { return "UGGrid"; }
 
     /** \brief Size of the overlap on the leaf level */
     unsigned int overlapSize(int codim) const {

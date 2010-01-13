@@ -51,7 +51,7 @@ namespace Dune
     }
 
     //! return name of the grid
-    static inline std::string name () { return "ALUSimplexGrid"; } DUNE_DEPRECATED
+    static inline std::string name () DUNE_DEPRECATED { return "ALUSimplexGrid"; }
 
     enum {dimension=BaseType::dimension,dimensionworld=BaseType::dimensionworld};
     enum { refineStepsForHalf = 1 };

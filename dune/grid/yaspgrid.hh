@@ -2399,7 +2399,7 @@ namespace Dune {
     typedef typename std::deque<IS>::const_iterator ISIT;
 
     //! return the name of this Grid
-    std::string name() const { return "YaspGrid"; } DUNE_DEPRECATED
+    std::string name() const DUNE_DEPRECATED { return "YaspGrid"; }
 
     /*! Constructor for a YaspGrid, they are all forwarded to the base class
        @param comm MPI communicator where this mesh is distributed to
