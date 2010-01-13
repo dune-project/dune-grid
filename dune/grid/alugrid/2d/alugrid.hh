@@ -115,6 +115,9 @@ namespace Dune
     friend class Conversion< ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUSimplexGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
 
+    template< template< int, int > class >
+    friend class ALU2dGridFactory;
+
     //! Copy constructor should not be used
     ALUSimplexGrid( const ALUSimplexGrid & g ) ; // : BaseType(g) {}
 
@@ -316,6 +319,9 @@ namespace Dune
 
     friend class Conversion< ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
     friend class Conversion< const ALUConformGrid<dimension,dimensionworld> , HasHierarchicIndexSet > ;
+
+    template< template< int, int > class >
+    friend class ALU2dGridFactory;
 
     //! Copy constructor should not be used
     ALUConformGrid( const ALUConformGrid & g ) ; // : BaseType(g) {}

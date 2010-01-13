@@ -308,8 +308,10 @@ namespace Dune {
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
     //ALU2dGrid(std::string macroTriangFilename );
-    ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes,
-              const DuneBoundaryProjectionType*, const DuneBoundaryProjectionVector* );
+    ALU2dGrid(const std::string macroTriangFilename,
+              const int nrOfHangingNodes,
+              const DuneBoundaryProjectionType*,
+              const DuneBoundaryProjectionVector* );
 
     //! Constructor which constructs an empty ALU2dGrid
     ALU2dGrid( int );

@@ -7,57 +7,10 @@
 namespace Dune {
 
   //--Grid
-
-#if 0
-  //! Constructor which reads an ALU2dGrid Macro Triang file
-  //! or given GridFile
   template<int dim, int dimworld>
   inline ALU2dGrid<dim, dimworld>::
-  ALU2dGrid(std::string macroTriangFilename,
-            const DuneBoundaryProjectionType* bndPrj,
-            const DuneBoundaryProjectionVector* bndVec )
-    :
-#if ALU2DGRID_PARALLEL
-      comm_( MPIHelper::getCommunicator() ),
-#endif
-      mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename)))
-      , hIndexSet_(*this)
-      , localIdSet_(*this)
-      , levelIndexVec_(MAXL,0)
-      , geomTypes_( dim+1 )
-      , leafIndexSet_(0)
-      , maxLevel_(0)
-      , refineMarked_ (0)
-      , coarsenMarked_ (0)
-      , nrOfHangingNodes_(0)
-      , sizeCache_(0)
-      , lockPostAdapt_(false)
-      , bndPrj_ ( bndPrj )
-      , bndVec_ ( bndVec )
-      , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
-#if ALU2DGRID_PARALLEL
-      , rankManager_( *this )
-#endif
-  {
-#if ALU2DGRID_PARALLEL
-    //abort();
-    rankManager_.initialize();
-    //rankManager_.loadBalance();
-#endif
-
-    assert(mygrid_);
-    if( vertexProjection_ )
-      myGrid().setVertexProjection( vertexProjection_ );
-
-    makeGeomTypes();
-    updateStatus();
-  }
-#endif
-
-  template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::
-  ALU2dGrid(std::string macroTriangFilename,
-            int nrOfHangingNodes,
+  ALU2dGrid(const std::string macroTriangFilename,
+            const int nrOfHangingNodes,
             const DuneBoundaryProjectionType* bndPrj,
             const DuneBoundaryProjectionVector* bndVec )
     :
@@ -148,6 +101,15 @@ namespace Dune {
   inline ALU2dGrid<dim, dimworld>::~ALU2dGrid()
   {
     delete vertexProjection_ ;
+    if( bndVec_ )
+    {
+      const size_t bndSize = bndVec_->size();
+      for(size_t i=0; i<bndSize; ++i)
+      {
+        delete (*bndVec_)[i];
+      }
+      delete bndVec_; bndVec_ = 0;
+    }
 
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
     delete leafIndexSet_; leafIndexSet_ = 0;

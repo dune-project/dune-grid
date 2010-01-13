@@ -23,7 +23,22 @@ namespace Dune
   public:
     typedef ALUGrid< 2, 2 > Grid;
 
+    //! \brief type of boundary projection class
+    typedef DuneBoundaryProjection< 2 >  DuneBoundaryProjectionType;
+
+    //! \brief type of boundary segment
+    typedef Dune::BoundarySegment< 2, 2> BoundarySegmentType;
+
+    template< int codim >
+    struct Codim
+    {
+      typedef typename Grid::template Codim< codim >::Entity Entity;
+    };
+
   private:
+    typedef Dune::BoundarySegmentWrapper<2, 2> BoundarySegmentWrapperType;
+
+
     typedef ALU2dGridFactory< ALUGrid > ThisType;
     typedef GridFactoryInterface< Grid > BaseType;
 
@@ -47,11 +62,27 @@ namespace Dune
     typedef std::vector< ElementType > ElementVector;
     typedef std::vector< std::pair< FaceType, int > > BoundaryIdVector;
 
+    typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
+    typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
+
     const std::string filename_;
     bool removeGeneratedFile_;
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
+    const DuneBoundaryProjectionType* globalProjection_ ;
+    BoundaryProjectionMap boundaryProjections_;
+    unsigned int numFacesInserted_;
+
+    // copy vertex numbers and store smalled #dimension ones
+    void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
+    {
+      std::vector<unsigned int> tmp( vertices );
+      std::sort( tmp.begin(), tmp.end() );
+
+      // copy only the first dimension vertices (enough for key)
+      for( size_t i = 0; i < faceId.size(); ++i ) faceId[ i ] = tmp[ i ];
+    }
 
   public:
     /** \brief default constructor */
@@ -104,6 +135,57 @@ namespace Dune
      */
     virtual void insertBoundary ( const int element, const int face, const int id );
 
+    /** \brief insert a boundary projection into the macro grid
+     *
+     *  \param[in]  type        geometry type of boundary face
+     *  \param[in]  vertices    vertices of the boundary face
+     *  \param[in]  projection  boundary projection
+     *
+     *  \note The grid takes control of the projection object.
+     */
+    virtual void
+    insertBoundaryProjection ( const GeometryType &type,
+                               const std::vector< unsigned int > &vertices,
+                               const DuneBoundaryProjectionType *projection );
+
+    /** \brief insert a shaped boundary segment into the macro grid
+     *
+     *  \param[in]  vertices         vertex indices of boundary face
+     *  \param[in]  boundarySegment  geometric realization of shaped boundary
+     *
+     *  \note The grid takes control of the boundary segment.
+     */
+    virtual void
+    insertBoundarySegment ( const std::vector< unsigned int > vertices,
+                            const BoundarySegmentType *boundarySegment ) ;
+
+    /** \brief insert a boundary projection object, (a copy is made)
+     *
+     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a
+     */
+    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
+
+    virtual unsigned int
+    insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).getIndex();
+    }
+    virtual unsigned int
+    insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).getIndex();
+    }
+    virtual unsigned int
+    insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+    virtual bool
+    wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return ( insertionIndex(intersection) < numFacesInserted_ );
+    }
+
     /** \brief finalize the grid creation and hand over the grid
      *
      *  The called takes responsibility for deleing the grid.
@@ -111,6 +193,8 @@ namespace Dune
     Grid *createGrid ();
 
     Grid *createGrid ( const bool addMissingBoundaries );
+
+
 
   private:
     template< class T >

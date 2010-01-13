@@ -151,10 +151,10 @@ namespace Dune {
     // return internal face
     int getFace() const { return face_; }
 
-  private:
     //! index is unique within the grid hierachie and per codim
     int getIndex () const;
 
+  private:
     //! the grid this entity belongs to
     const GridImp &grid_;
 
@@ -429,12 +429,12 @@ namespace Dune {
     // return internal face
     int getFace() const { return -1; }
 
+    //! index is unique within the grid hierachie and per codim
+    int getIndex () const;
+
   private:
     //! return which number of child we are, i.e. 0 or 1
     int nChild () const;
-
-    //! index is unique within the grid hierachie and per codim
-    int getIndex () const;
 
     //! return index of sub entity with codim = cc and local number i
     //! i.e. return global number of vertex i
