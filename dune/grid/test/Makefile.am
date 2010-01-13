@@ -9,7 +9,7 @@ if ALBERTA
 endif
 
 if ALUGRID
-  ALUPROG = test-alu3dgrid test-alu3dsimplex test-alu3dcube test-alu2dsimplex
+  ALUPROG = test-alugrid
 endif
 
 if UG
@@ -29,6 +29,7 @@ ALBERTA_DIM = $(GRIDDIM)
 
 COORDFUNCTION = IdenticalCoordFunction\<double,$(GRIDDIM)\>
 # COORDFUNCTION = Helix
+# COORDFUNCTION = ThickHelix
 # COORDFUNCTION = DGFCoordFunction\<$(GRIDDIM),$(GRIDDIM)\>
 # COORDFUNCTION = DGFCoordFunction\<2,3\>
 CACHECOORDFUNCTION = 0
@@ -80,36 +81,16 @@ test_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DGRIDDIM=$(GRIDDIM) 
 test_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
 test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS) $(GRAPE_LIBS)
 
-# files for alu3dgrid
-test_alu3dgrid_SOURCES = test-alu3dgrid.cc
-test_alu3dgrid_CXXFLAGS = $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
-test_alu3dgrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(MPI_LDFLAGS)
+# files for alugrid
+test_alugrid_SOURCES = test-alugrid.cc
+test_alugrid_CXXFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS)
+test_alugrid_LDFLAGS = -static
+test_alugrid_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS) $(MPI_LDFLAGS)
 
 test_geogrid_SOURCES = test-geogrid.cc
 test_geogrid_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS) $(AM_CPPFLAGS) -DCOORDFUNCTION=$(COORDFUNCTION) -DCACHECOORDFUNCTION=$(CACHECOORDFUNCTION)
 test_geogrid_LDFLAGS = $(ALL_PKG_LDFLAGS) $(MPI_LDFLAGS)
 test_geogrid_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LIBS) $(MPI_LIBS)
-
-test_alu3dsimplex_SOURCES = test-alu3dsimplex.cc
-if ALBERTA
-test_alu3dsimplex_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS) $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA
-test_alu3dsimplex_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS) $(MPI_LDFLAGS) $(ALBERTA_LDFLAGS)
-test_alu3dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LIBS) $(MPI_LIBS) -lalberta_3d $(ALBERTA_BASE_LIBS)
-else
-test_alu3dsimplex_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
-test_alu3dsimplex_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS) $(MPI_LDFLAGS)
-test_alu3dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LIBS) $(MPI_LIBS)
-endif
-
-test_alu3dcube_SOURCES = test-alu3dcube.cc
-test_alu3dcube_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
-test_alu3dcube_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS) $(MPI_LDFLAGS)
-test_alu3dcube_LDADD = $(LOCAL_LIBS) $(ALUGRID_LIBS) $(MPI_LIBS)
-
-test_alu2dsimplex_SOURCES = test-alu2dsimplex.cc
-test_alu2dsimplex_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(MPI_CPPFLAGS)
-test_alu2dsimplex_LDFLAGS = $(AM_LDFLAGS) $(ALUGRID_LDFLAGS) $(MPI_LDFLAGS)
-test_alu2dsimplex_LDADD = $(LOCAL_LIBS) $(ALUGRID_LIBS) $(MPI_LIBS)
 
 # libdune contains both libugX2 and libugX3, always test both dimensions
 test_ug_SOURCES = test-ug.cc
