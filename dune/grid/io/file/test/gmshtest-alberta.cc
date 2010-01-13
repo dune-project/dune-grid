@@ -18,8 +18,10 @@
 
 #include <dune/grid/io/file/gmshreader.hh>
 
-#if HAVE_GRAPE
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+
+#ifndef ALBERTA_DIM
+#define ALBERTA_DIM 2
 #endif
 
 #ifndef GRIDDIM
@@ -33,10 +35,8 @@ void checkGmshReader(const char* filename, const int refinements)
   if( refinements > 0 )
     grid->globalRefine( refinements );
 
-#if HAVE_GRAPE
   Dune::GrapeGridDisplay< GridType > grape( *grid );
   grape.display();
-#endif
 }
 
 int main ( int argc, char **argv )
@@ -54,12 +54,12 @@ try
 
 #if HAVE_ALBERTA
   std::cout << "Checking AlbertaGrid< " << GRIDDIM << " >..." << std::endl;
-  checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
+  //checkGmshReader< Dune::AlbertaGrid< GRIDDIM > > ( argv[1], refinements );
 #endif
 
-#if HAVE_ALUGRID && (GRIDDIM == 3)
+#if HAVE_ALUGRID
   std::cout << "Checking ALUGrid \n";
-  checkGmshReader< Dune::ALUSimplexGrid< 3, 3 > > ( argv[1], refinements );
+  checkGmshReader< Dune::ALUSimplexGrid< GRIDDIM, GRIDDIM > > ( argv[1], refinements );
 #endif
 
 #if HAVE_UG && (GRIDDIM == 3)
