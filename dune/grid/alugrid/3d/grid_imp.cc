@@ -277,8 +277,12 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline size_t ALU3dGrid<dim, dimworld, elType>::numBoundarySegments() const
   {
-    assert( mygrid_ );
-    return 0; // mygrid_->numMacroBndSegments();
+#ifdef ALUGRID_VERTEX_PROJECTION
+    return myGrid().numMacroBndSegments();
+#else
+    derr << "Method available in any version of ALUGrid > 1.14 \n";
+    return 0;
+#endif
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -442,16 +446,14 @@ namespace Dune {
     // return actual size of hierarchical index set
     // this is always up to date
     // maxIndex is the largest index used + 1
-    assert( mygrid_ );
-    return (*mygrid_).indexManager(codim).getMaxIndex();
+    return myGrid().indexManager(codim).getMaxIndex();
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline int ALU3dGrid<dim, dimworld, elType>::hierSetSize(int codim) const
   {
     // return actual size of hierarchical index set
-    assert( mygrid_ );
-    return (*mygrid_).indexManager(codim).getMaxIndex();
+    return myGrid().indexManager(codim).getMaxIndex();
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>

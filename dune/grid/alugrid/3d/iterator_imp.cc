@@ -457,7 +457,13 @@ namespace Dune {
   ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
   {
     assert(item_);
-    return 0; // (boundary() ? connector_.boundaryFace().segmentIndex() : 0);
+#ifdef ALUGRID_VERTEX_PROJECTION
+    assert( boundary() );
+    return connector_.boundaryFace().segmentIndex();
+#else
+    derr << "Method available in any version of ALUGrid > 1.14 \n";
+    return 0;
+#endif
   }
 
   template <class GridImp>

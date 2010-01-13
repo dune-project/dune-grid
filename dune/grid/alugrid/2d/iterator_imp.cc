@@ -192,7 +192,14 @@ namespace Dune {
   template<class GridImp>
   inline size_t ALU2dGridIntersectionBase<GridImp> :: boundarySegmentIndex() const
   {
+    // only call this method on boundary intersections
+    assert( boundary() );
+#ifdef ALUGRID_VERTEX_PROJECTION
+    return this->current.item_->nbbnd(this->current.index_)->segmentIndex();
+#else
+    derr << "Method available in any version of ALUGrid > 1.14 \n";
     return 0;
+#endif
   }
 
   //! return true if intersection is with neighbor on this level
