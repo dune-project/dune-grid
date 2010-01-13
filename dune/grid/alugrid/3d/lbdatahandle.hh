@@ -104,7 +104,7 @@ namespace Dune
         const int numSubEntities = element.template count< codim >();
         for( int i = 0; i < numSubEntities; ++i )
         {
-          const EntityPointer pEntity = element.template entity< codim >( i );
+          const EntityPointer pEntity = element.template subEntity< codim >( i );
           inlineEntityData< codim >( stream, *pEntity );
         }
       }
@@ -120,7 +120,7 @@ namespace Dune
         const int numSubEntities = element.template count< codim >();
         for( int i = 0; i < numSubEntities; ++i )
         {
-          const EntityPointer pEntity = element.template entity< codim >( i );
+          const EntityPointer pEntity = element.template subEntity< codim >( i );
           xtractEntityData< codim >( stream, *pEntity );
         }
       }
