@@ -197,8 +197,4 @@ BOUNDARYSEGMENTS
 1   73 74 18 72
 #
 
-GRIDPARAMETER
-NAME GeometryGrid< ALUCubeGrid >
-#
-
 #
