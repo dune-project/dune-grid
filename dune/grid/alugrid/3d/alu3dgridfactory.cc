@@ -131,6 +131,7 @@ namespace Dune
     generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.push_back( boundaryId );
+    ++numFacesInserted_;
   }
 
   template< template< int, int > class ALUGrid >
@@ -317,6 +318,7 @@ namespace Dune
     boundaryIds_.clear();
     boundaryProjections_.clear();
 
+    // ALUGrid is taking ownership of the bndProjections pointer
 #if ALU3DGRID_PARALLEL
     Grid *grid = new Grid( filename_, communicator_, globalProjection_ , bndProjections );
 #else

@@ -187,7 +187,7 @@ namespace Dune {
       , sizeCache_ (0)
       , lockPostAdapt_(false)
       , bndPrj_ ( bndPrj )
-      , bndVec_ ( bndVec )
+      , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )
       , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
   {
     makeGeomTypes();
@@ -241,10 +241,12 @@ namespace Dune {
     //delete bndPrj_;
     if( bndVec_ )
     {
-      //const size_t bndSize = bndVec_->size();
-      //for(size_t i=0; i<bndSize; ++i) delete (bndVec_ [i]);
-      delete bndVec_;
-      bndVec_ = 0;
+      const size_t bndSize = bndVec_->size();
+      for(size_t i=0; i<bndSize; ++i)
+      {
+        delete (*bndVec_)[i];
+      }
+      delete bndVec_; bndVec_ = 0;
     }
 
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
