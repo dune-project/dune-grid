@@ -20,8 +20,8 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
-    : filename_ () ,
-      removeGeneratedFile_( removeGeneratedFile ),
+    : // filename_ () ,
+      // removeGeneratedFile_( removeGeneratedFile ),
       communicator_( communicator ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
@@ -36,8 +36,8 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : filename_( filename ),
-      removeGeneratedFile_( filename.empty() ),
+    : // filename_( filename ),
+      // removeGeneratedFile_( filename.empty() ),
       communicator_( communicator ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
@@ -211,13 +211,19 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >::createGrid ()
   {
-    return createGrid( true );
+    return createGrid( true, true, "" );
   }
-
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  {
+    return createGrid( true, true, dgfName );
+  }
+
+  template< template< int, int > class ALUGrid >
+  ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
+  ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
@@ -228,9 +234,9 @@ namespace Dune
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std::string filename ( filename_.empty() ?
-                           temporaryFileName( dgfName ) :
-                           filename_ );
+    std::string filename ( temporary ?
+                           temporaryFileName( name ) :
+                           name );
 
     std::ofstream out( filename.c_str() );
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
@@ -328,7 +334,7 @@ namespace Dune
 #else
     Grid *grid = new Grid( filename, globalProjection_, bndProjections );
 #endif
-    if( removeGeneratedFile_ )
+    if( temporary )
       std::remove( filename.c_str() );
 
     // remove pointer

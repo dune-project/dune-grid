@@ -80,8 +80,8 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    const std::string filename_;
-    bool removeGeneratedFile_;
+    // const std::string filename_;
+    // bool removeGeneratedFile_;
     MPICommunicatorType communicator_;
 #if ALU3DGRID_PARALLEL
     int rank_;
@@ -195,6 +195,8 @@ namespace Dune
     Grid *createGrid ();
 
     Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+
+    Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
