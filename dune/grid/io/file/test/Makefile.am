@@ -9,6 +9,10 @@ if HAVE_ALBERTA
 ALLTESTS += gmshtest-alberta
 endif
 
+if ALUGRID
+ALLTESTS += gmshtest-alugrid
+endif
+
 # Currently, Star-CD files can only be read into UGGrid objects
 if UG
 ALLTESTS += starcdreadertest
@@ -42,12 +46,16 @@ amirameshtest_CXXFLAGS = $(AMIRAMESH_CPPFLAGS) $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS
 amirameshtest_LDADD = $(LOCAL_LIBS) $(AMIRAMESH_LDFLAGS) $(AMIRAMESH_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS)
 
 gmshtest_SOURCES = gmshtest.cc
-gmshtest_CXXFLAGS = $(UG_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(ALUGRID_CPPFLAGS)
+gmshtest_CXXFLAGS = $(ALUGRID_CPPFLAGS)
 gmshtest_LDADD = $(LOCAL_LIBS) $(ALL_PKG_LDFLAGS) $(ALL_PKG_LIBS)
 
 gmshtest_alberta_SOURCES = gmshtest-alberta.cc
 gmshtest_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(GRIDDIM)
 gmshtest_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LDFLAGS) $(ALBERTA_LIBS) $(GRAPE_LDFLAGS) $(GRAPE_LIBS)
+
+gmshtest_alugrid_SOURCES = gmshtest-alberta.cc
+gmshtest_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(ALUGRID_CPPFLAGS) $(GRAPE_CPPFLAGS) -DGRIDDIM=$(GRIDDIM)
+gmshtest_alugrid_LDADD = $(LOCAL_LIBS) $(ALUGRID_LDFLAGS) $(ALUGRID_LIBS) $(GRAPE_LDFLAGS) $(GRAPE_LIBS)
 
 gmshtest_all_SOURCES = gmshtest-alberta.cc
 gmshtest_all_CPPFLAGS = $(AM_CPPFLAGS) $(ALL_PKG_CPPFLAGS)
