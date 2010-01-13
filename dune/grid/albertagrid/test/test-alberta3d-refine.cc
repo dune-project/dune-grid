@@ -54,7 +54,7 @@ public:
     // tet at vertex 6
     vid[0] = 2; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
 
-    return gf.createGrid();
+    return Dune::shared_ptr<Grid>(gf.createGrid());
   }
 };
 
