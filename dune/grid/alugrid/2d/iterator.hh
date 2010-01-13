@@ -150,7 +150,11 @@ namespace Dune {
     //! return true if intersection is with boundary
     bool boundary() const;
 
+    //! return boundary type
     int boundaryId () const;
+
+    //! return the boundary segment index
+    size_t boundarySegmentIndex() const;
 
     //! return true if intersection is with neighbor on this level
     bool neighbor () const;

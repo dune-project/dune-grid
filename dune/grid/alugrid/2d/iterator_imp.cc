@@ -189,6 +189,12 @@ namespace Dune {
     return isBoundaryType;
   }
 
+  template<class GridImp>
+  inline size_t ALU2dGridIntersectionBase<GridImp> :: boundarySegmentIndex() const
+  {
+    return 0;
+  }
+
   //! return true if intersection is with neighbor on this level
   template<class GridImp>
   inline bool ALU2dGridIntersectionBase<GridImp> :: neighbor () const {
