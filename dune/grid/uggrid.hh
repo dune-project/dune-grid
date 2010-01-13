@@ -15,7 +15,7 @@
 
 #include <dune/common/mpihelper.hh>
 
-#if HAVE_MPI
+#ifdef ModelP
 #include <dune/common/mpicollectivecommunication.hh>
 #endif
 
@@ -263,7 +263,7 @@ DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = 0
 
 namespace Dune {
 
-#if HAVE_MPI
+#ifdef ModelP
   template <int dim>
   class CollectiveCommunication<Dune::UGGrid<dim> > : public CollectiveCommunication<MPI_Comm >
   {
