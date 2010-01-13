@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = libdgfparser.la
 libdgfparser_la_SOURCES = dgfparserblocks.cc dgfprojectionblock.cc dgfparser.cc
 libdgfparser_la_LIBADD = $(DUNE_COMMON_LIBS)
 
-AM_CPPFLAGS = $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_CPPFLAGS = @AM_CPPFLAGS@ $(ALL_PKG_CPPFLAGS) $(MPI_CPPFLAGS)
 
 AM_LDFLAGS=
 
