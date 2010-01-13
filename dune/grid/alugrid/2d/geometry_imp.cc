@@ -21,6 +21,9 @@ namespace Dune {
     : geoImpl_()
       , det_(1.0)
       , up2Date_(false)
+#ifndef NDEBUG
+      , haveProjection_ ( false )
+#endif
   {}
 
   //! print the GeometryInformation
@@ -113,7 +116,9 @@ namespace Dune {
   inline alu2d_ctype ALU2dGridGeometry<mydim,cdim,GridImp>::
   integrationElement (const FieldVector<alu2d_ctype, mydim>& local) const
   {
-    assert( std::abs( geoImpl_.mapping().det( local ) - det_ ) < 1e-8 );
+    // only check this if no boundary projection is available
+    assert( ( haveProjection_ ) ? true :
+            std::abs( geoImpl_.mapping().det( local ) - det_ ) < 1e-8 );
     return det_;
   }
 
@@ -282,7 +287,9 @@ namespace Dune {
   // built Geometry
   template <int mydim, int cdim, class GridImp >
   inline bool ALU2dGridGeometry<mydim, cdim,GridImp>::
-  buildGeomInFather(const Geometry & fatherGeom , const Geometry & myGeom)
+  buildGeomInFather(const Geometry & fatherGeom ,
+                    const Geometry & myGeom,
+                    const bool hasBndProjection )
   {
     // update geometry
     geoImpl_.updateLocal( fatherGeom, myGeom );
@@ -294,6 +301,11 @@ namespace Dune {
 
     // geom is up2date
     up2Date_ = true;
+
+#ifndef NDEBUG
+    // set projection information
+    haveProjection_ = hasBndProjection;
+#endif
 
     return true;
   }

@@ -22,7 +22,9 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
+// bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
+#include "../bndprojection.hh"
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -286,12 +288,14 @@ namespace Dune {
     typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
     //! \brief boundary projection type
     typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+
+    //! type of ALUGrid Vertex Projection Interface
+    typedef ALU3DSPACE ProjectVertex ALUGridVertexProjectionType;
   protected:
 
     friend class ALUGridBoundaryProjection< ThisType >;
     // type of ALUGrid boundary projection wrapper
     typedef ALUGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
-
 
     //! Type of the local id set
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: LocalIdSetImp LocalIdSetImp;

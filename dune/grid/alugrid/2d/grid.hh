@@ -23,6 +23,10 @@
 
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
+// bnd projection stuff
+#include <dune/grid/common/boundaryprojection.hh>
+#include "../bndprojection.hh"
+
 //- Local includes
 #include "indexsets.hh"
 #include "../3d/memory.hh"
@@ -111,6 +115,9 @@ namespace Dune {
       typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper, LevelIntersectionWrapper > LevelIntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, ALU2dGridHierarchicIterator> HierarchicIterator;
+
+      typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
+      typedef std::vector< const DuneBoundaryProjectionType *> DuneBoundaryProjectionVector;
 
       template <int cd>
       struct Codim
@@ -261,6 +268,7 @@ namespace Dune {
 
     typedef typename Traits::CollectiveCommunication CollectiveCommunicationType;
 
+
     //! maximal number of levels
     enum {
       //! maximal number of levels is 64
@@ -281,12 +289,28 @@ namespace Dune {
       refineEstimate_ = 40
     };
 
+    //! \brief boundary projection type
+    typedef typename Traits :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+    //! \brief boundary projection type
+    typedef typename Traits :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+
+#ifdef ALUGRID_VERTEX_PROJECTION
+    //! type of ALUGrid Vertex Projection Interface
+    typedef ALU2DSPACE ProjectVertex_t ALUGridVertexProjectionType;
+#endif
 
   protected:
+
+    friend class ALUGridBoundaryProjection< ThisType >;
+    // type of ALUGrid boundary projection wrapper
+    typedef ALUGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
+
     //! Constructor which reads an ALU2dGrid Macro Triang file
     //! or given GridFile
-    ALU2dGrid(std::string macroTriangFilename );
-    ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes );
+    //ALU2dGrid(std::string macroTriangFilename );
+    ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes,
+              const DuneBoundaryProjectionType*, const DuneBoundaryProjectionVector* );
+
     //! Constructor which constructs an empty ALU2dGrid
     ALU2dGrid( int );
 
@@ -534,8 +558,38 @@ namespace Dune {
     // flag to make sure postAdapt is called after adapt
     bool lockPostAdapt_;
 
-    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionType* bndPrj_;
+
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionVector* bndVec_;
+
+    // boundary projection for vertices
+    ALUGridBoundaryProjectionType* vertexProjection_ ;
+
+    //! return boudanry projection for given segment Id
+    const DuneBoundaryProjectionType& boundaryProjection(const int segmentIndex) const
+    {
+      if( bndPrj_ )
+      {
+        return *bndPrj_;
+      }
+      else
+      {
+        assert( bndVec_ );
+        assert( segmentIndex < (int) bndVec_->size() );
+        return *(*bndVec_)[ segmentIndex ];
+      }
+    }
+
   public:
+    //! return true if boudanry projection is set
+    bool hasBoundaryProjection() const
+    {
+      return (vertexProjection_ != 0);
+    }
+
+    // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
     typedef ALU2dGridLeafIntersectionIterator <const ThisType>  LeafIntersectionIteratorImp;
     typedef ALU2dGridLevelIntersectionIterator<const ThisType> LevelIntersectionIteratorImp;
 

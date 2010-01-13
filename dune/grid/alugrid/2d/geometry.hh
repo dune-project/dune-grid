@@ -356,7 +356,9 @@ namespace Dune
     void print (std::ostream& ss) const;
 
     //! build geometry with local coords of child in reference element
-    inline bool buildGeomInFather(const Geometry &fatherGeom , const Geometry & myGeom);
+    inline bool buildGeomInFather(const Geometry &fatherGeom ,
+                                  const Geometry & myGeom,
+                                  const bool hasBndProjection = false );
 
     // returns true if geometry is up-2-date
     inline bool up2Date() const { return up2Date_; }
@@ -375,6 +377,12 @@ namespace Dune
 
     //! is true if geom is up2date
     mutable bool up2Date_;
+
+#ifndef NDEBUG
+    //! true if boundary projection is set
+    mutable bool haveProjection_;
+#endif
+
   };
 
   template <class GeometryImp, int nChild>
@@ -417,7 +425,8 @@ namespace Dune
       GeometryImp * g = new GeometryImp(ImplType());
       geoms_[child] = g;
       GeometryImp & geo = *g;
-      grid.getRealImplementation(geo).buildGeomInFather( father, son );
+      grid.getRealImplementation(geo).
+      buildGeomInFather( father, son, grid.hasBoundaryProjection() );
     }
     // return reference to local geometry
     const GeometryImp & operator [] (int child) const

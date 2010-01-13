@@ -27,14 +27,23 @@ namespace Dune
     enum { dimworld = 2 };
 
   public:
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+
     //! \brief constructor for creating ALUSimplexGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
-    ALUSimplexGrid(const std::string macroName )
-      : BaseType(macroName,1)
+    ALUSimplexGrid(const std::string macroName,
+                   const DuneBoundaryProjectionType* bndProject  = 0,
+                   const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType(macroName,1, bndProject, bndVector)
     {
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
+
     //! constructor creating empty grid
     ALUSimplexGrid( ) : BaseType(1)
     {
@@ -221,10 +230,18 @@ namespace Dune
     enum { dim      = 2 };
     enum { dimworld = 2 };
   public:
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
+
+    //! type of boundary projection
+    typedef BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+
     //! \brief constructor for creating ALUConformGrid from given macro grid file
     //! \param macroName filename for macro grid in ALUGrid triangle format
-    ALUConformGrid(const std::string macroName )
-      : BaseType(macroName)
+    ALUConformGrid(const std::string macroName,
+                   const DuneBoundaryProjectionType* bndProject  = 0,
+                   const DuneBoundaryProjectionVector* bndVector = 0 )
+      : BaseType(macroName, 0, bndProject, bndVector)
     {
       std::cout << "\nCreated serial ALUConformGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";

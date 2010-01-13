@@ -8,10 +8,14 @@ namespace Dune {
 
   //--Grid
 
+#if 0
   //! Constructor which reads an ALU2dGrid Macro Triang file
   //! or given GridFile
   template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename )
+  inline ALU2dGrid<dim, dimworld>::
+  ALU2dGrid(std::string macroTriangFilename,
+            const DuneBoundaryProjectionType* bndPrj,
+            const DuneBoundaryProjectionVector* bndVec )
     :
 #if ALU2DGRID_PARALLEL
       comm_( MPIHelper::getCommunicator() ),
@@ -28,6 +32,9 @@ namespace Dune {
       , nrOfHangingNodes_(0)
       , sizeCache_(0)
       , lockPostAdapt_(false)
+      , bndPrj_ ( bndPrj )
+      , bndVec_ ( bndVec )
+      , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
 #if ALU2DGRID_PARALLEL
       , rankManager_( *this )
 #endif
@@ -39,18 +46,27 @@ namespace Dune {
 #endif
 
     assert(mygrid_);
+    if( vertexProjection_ )
+      myGrid().setVertexProjection( vertexProjection_ );
+
     makeGeomTypes();
     updateStatus();
   }
+#endif
 
   template<int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(std::string macroTriangFilename, int nrOfHangingNodes )
+  inline ALU2dGrid<dim, dimworld>::
+  ALU2dGrid(std::string macroTriangFilename,
+            int nrOfHangingNodes,
+            const DuneBoundaryProjectionType* bndPrj,
+            const DuneBoundaryProjectionVector* bndVec )
     :
 #if ALU2DGRID_PARALLEL
       comm_( MPIHelper::getCommunicator() ),
 #endif
       mygrid_ (new ALU2DSPACE Hmesh(checkMacroGridFile(macroTriangFilename),
-                                    nrOfHangingNodes, ALU2DSPACE Refco::quart))
+                                    nrOfHangingNodes, (nrOfHangingNodes == 0) ?
+                                    ALU2DSPACE Refco::ref_1 : ALU2DSPACE Refco::quart))
       , hIndexSet_(*this)
       , localIdSet_(*this)
       , levelIndexVec_( MAXL, 0 )
@@ -59,9 +75,12 @@ namespace Dune {
       , maxLevel_(0)
       , refineMarked_ (0)
       , coarsenMarked_ (0)
-      , nrOfHangingNodes_(nrOfHangingNodes)
+      , nrOfHangingNodes_( nrOfHangingNodes )
       , sizeCache_(0)
       , lockPostAdapt_(false)
+      , bndPrj_ ( bndPrj )
+      , bndVec_ ( bndVec )
+      , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
 #if ALU2DGRID_PARALLEL
       , rankManager_( *this )
 #endif
@@ -72,6 +91,13 @@ namespace Dune {
 #endif
 
     assert(mygrid_);
+
+#ifdef ALUGRID_VERTEX_PROJECTION
+    // this feature is available in ALUGrid-1.15
+    if( vertexProjection_ )
+      myGrid().setVertexProjection( vertexProjection_ );
+#endif
+
     makeGeomTypes();
     updateStatus();
   }
@@ -95,11 +121,38 @@ namespace Dune {
       , nrOfHangingNodes_(nrOfHangingNodes)
       , sizeCache_(0)
       , lockPostAdapt_(false)
+      , bndPrj_ ( 0 )
+      , bndVec_ ( 0 )
+      , vertexProjection_( 0 )
 #if ALU2DGRID_PARALLEL
       , rankManager_( *this )
 #endif
   {
     makeGeomTypes();
+  }
+
+  template <int dim, int dimworld>
+  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(const ALU2dGrid<dim, dimworld> & g)
+    : mygrid_ (0)
+      , maxLevel_(0)
+      , coarsenMarked_(0) , refineMarked_(0)
+      , geomTypes_(dim+1,1)
+      , hIndexSet_(*this)
+      , localIdSet_ (*this)
+      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
+  {
+    DUNE_THROW(GridError,"Do not use copy constructor of ALU2dGrid! \n");
+  }
+
+  template <int dim, int dimworld>
+  inline ALU2dGrid<dim, dimworld>::~ALU2dGrid()
+  {
+    delete vertexProjection_ ;
+
+    for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
+    delete leafIndexSet_; leafIndexSet_ = 0;
+    delete sizeCache_; sizeCache_ = 0;
+    delete mygrid_;
   }
 
   //! Iterator to first entity of given codim on level
@@ -624,28 +677,6 @@ namespace Dune {
     return comm_;
   }
 
-
-  template <int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::ALU2dGrid(const ALU2dGrid<dim, dimworld> & g)
-    : mygrid_ (0)
-      , maxLevel_(0)
-      , coarsenMarked_(0) , refineMarked_(0)
-      , geomTypes_(dim+1,1)
-      , hIndexSet_(*this)
-      , localIdSet_ (*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-  {
-    DUNE_THROW(GridError,"Do not use copy constructor of ALU2dGrid! \n");
-  }
-
-  template <int dim, int dimworld>
-  inline ALU2dGrid<dim, dimworld>::~ALU2dGrid()
-  {
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
-    delete leafIndexSet_; leafIndexSet_ = 0;
-    delete sizeCache_; sizeCache_ = 0;
-    delete mygrid_;
-  }
 
   // **************************************************************
   // ***************************************************************

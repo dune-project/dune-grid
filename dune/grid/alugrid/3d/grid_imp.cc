@@ -209,7 +209,7 @@ namespace Dune {
                                                , mpAccess_
 #endif
 #ifdef ALUGRID_VERTEX_PROJECTION
-                                               , vertexProjection_ // only for newer versions
+                                               , vertexProjection_ // only available in ALUGrid-1.15 or newer
 #endif
                                                );
     }
