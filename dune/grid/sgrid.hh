@@ -719,6 +719,12 @@ namespace Dune {
       if (boundary()) return count + 1;
       return 0;
     };
+
+    int boundarySegmentIndex () const {
+      if (boundary()) return count;
+      return -1;
+    };
+
     //! return true if neighbor on this level exists
     bool neighbor () const;
 
@@ -1301,7 +1307,7 @@ namespace Dune {
     typedef _ctype ctype;
 
     //! return the name of this grid
-    std::string name() const { return "SGrid"; } DUNE_DEPRECATED
+    std::string name() const DUNE_DEPRECATED { return "SGrid"; }
 
     // constructors
 
@@ -1312,7 +1318,7 @@ namespace Dune {
 
        Note: The origin of the cube is always at (0,0,...,0), only the extend is given.
      */
-    SGrid (const int* N_, const ctype* H_);
+    SGrid (const int * const N_, const ctype * const H_);
 
     /*! @brief Make an SGrid from position, extend and number of cells per direction
 
@@ -1321,7 +1327,7 @@ namespace Dune {
        \param[in] H_ position of the upper right corner of the cube
 
      */
-    SGrid (const int* N_, const ctype* L_, const ctype* H_);
+    SGrid (const int * const N_, const ctype * const L_, const ctype * const H_);
 
     /*! @brief Make an SGrid from position, extend and number of cells per direction
 
