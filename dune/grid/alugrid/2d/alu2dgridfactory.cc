@@ -18,7 +18,7 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( bool removeGeneratedFile )
-    : filename_( temporaryFileName() ),
+    : filename_(),
       removeGeneratedFile_( removeGeneratedFile ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
@@ -28,7 +28,7 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( const std::string &filename )
-    : filename_( filename.empty() ? temporaryFileName() : filename ),
+    : filename_( filename ),
       removeGeneratedFile_( filename.empty() ),
       globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
@@ -183,12 +183,16 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 2, 2 > *ALU2dGridFactory<ALUGrid>::
-  createGrid ( const bool addMissingBoundaries )
+  createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std::ofstream out( filename_.c_str() );
+    std::string filename ( filename_.empty() ?
+                           temporaryFileName( dgfName ) :
+                           filename_ );
+
+    std::ofstream out( filename.c_str() );
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
     out.precision( 16 );
     out << "!Triangles";
@@ -278,9 +282,9 @@ namespace Dune
     boundaryProjections_.clear();
 
     // ALUGrid is taking ownership of the bndProjections pointer
-    Grid *grid = new Grid( filename_, globalProjection_ , bndProjections );
+    Grid *grid = new Grid( filename, globalProjection_ , bndProjections );
     if( removeGeneratedFile_ )
-      remove( filename_.c_str() );
+      remove( filename.c_str() );
 
     // remove pointer
     globalProjection_ = 0;
@@ -291,10 +295,19 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   inline std::string
-  ALU2dGridFactory<ALUGrid>::temporaryFileName ()
+  ALU2dGridFactory<ALUGrid>::temporaryFileName ( const std::string& dgfName )
   {
+    std::string filename ( dgfName );
+    if( filename.empty() )
+    {
+      filename = "ALU2dGrid.XXXXXX";
+    }
+    else
+    {
+      filename += ".XXXXXX";
+    }
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, "ALU2dGrid.XXXXXX" );
+    std :: strcpy( filetemp, filename.c_str() );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
       DUNE_THROW( IOError, "Unable to create temporary file." );

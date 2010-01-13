@@ -20,7 +20,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                         bool removeGeneratedFile )
-    : filename_( temporaryFileName() ),
+    : filename_ () ,
       removeGeneratedFile_( removeGeneratedFile ),
       communicator_( communicator ),
       globalProjection_ ( 0 ),
@@ -36,7 +36,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
   :: ALU3dGridFactory ( const std::string &filename,
                         const MPICommunicatorType &communicator )
-    : filename_( filename.empty() ? temporaryFileName() : filename ),
+    : filename_( filename ),
       removeGeneratedFile_( filename.empty() ),
       communicator_( communicator ),
       globalProjection_ ( 0 ),
@@ -217,7 +217,7 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
-  ::createGrid ( const bool addMissingBoundaries )
+  ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
 #if ALU3DGRID_PARALLEL
     if( rank_ != 0 )
@@ -228,7 +228,11 @@ namespace Dune
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std::ofstream out( filename_.c_str() );
+    std::string filename ( filename_.empty() ?
+                           temporaryFileName( dgfName ) :
+                           filename_ );
+
+    std::ofstream out( filename.c_str() );
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
     out.precision( 16 );
     if( elementType == tetra )
@@ -320,12 +324,12 @@ namespace Dune
 
     // ALUGrid is taking ownership of the bndProjections pointer
 #if ALU3DGRID_PARALLEL
-    Grid *grid = new Grid( filename_, communicator_, globalProjection_ , bndProjections );
+    Grid *grid = new Grid( filename, communicator_, globalProjection_ , bndProjections );
 #else
-    Grid *grid = new Grid( filename_, globalProjection_, bndProjections );
+    Grid *grid = new Grid( filename, globalProjection_, bndProjections );
 #endif
     if( removeGeneratedFile_ )
-      remove( filename_.c_str() );
+      std::remove( filename.c_str() );
 
     // remove pointer
     globalProjection_ = 0;
@@ -336,10 +340,19 @@ namespace Dune
 
   template< template< int, int > class ALUGrid >
   inline std::string
-  ALU3dGridFactory< ALUGrid >::temporaryFileName ()
+  ALU3dGridFactory< ALUGrid >::temporaryFileName ( const std::string& dgfName )
   {
+    std::string filename ( dgfName );
+    if( filename.empty() )
+    {
+      filename = "ALU3dGrid.XXXXXX";
+    }
+    else
+    {
+      filename += ".XXXXXX";
+    }
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, "ALU3dGrid.XXXXXX" );
+    std :: strcpy( filetemp, filename.c_str() );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
       DUNE_THROW( IOError, "Unable to create temporary file." );

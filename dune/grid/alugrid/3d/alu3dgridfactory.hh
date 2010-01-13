@@ -194,7 +194,7 @@ namespace Dune
      */
     Grid *createGrid ();
 
-    Grid *createGrid ( const bool addMissingBoundaries );
+    Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
@@ -222,7 +222,7 @@ namespace Dune
     static void exchange ( T &x, T &y );
 
     void assertGeometryType( const GeometryType &geometry );
-    static std::string temporaryFileName ();
+    static std::string temporaryFileName (const std::string& dgfName );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void correctElementOrientation ();
     void recreateBoundaryIds ( const int defaultId = 1 );
