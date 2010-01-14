@@ -129,6 +129,84 @@ namespace Dune
   };
   /** \endcond */
 
+  // DGFGridFactory for AluSimplexGrid
+  // ------------------------------
+
+  // template< int dim, int dimworld > // for a first version
+  template < int dim >
+  struct DGFGridFactory< ALUSimplexGrid< dim, 3 > >
+  {
+    typedef ALUSimplexGrid<3,3>  Grid;
+    const static int dimension = Grid::dimension;
+    typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    typedef typename Grid::template Codim<0>::Entity Element;
+    typedef typename Grid::template Codim<dimension>::Entity Vertex;
+    typedef Dune::GridFactory<Grid> GridFactory;
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : factory_(comm),
+        dgf_( 0, 1 )
+    {
+      generate( filename, comm );
+    }
+
+    Grid *grid () const
+    {
+      return grid_;
+    }
+
+    template< class Intersection >
+    bool wasInserted ( const Intersection &intersection ) const
+    {
+      return factory_.wasInserted( intersection );
+    }
+
+    template< class Intersection >
+    int boundaryId ( const Intersection &intersection ) const
+    {
+      return intersection.boundaryId();
+    }
+
+    template< int codim >
+    int numParameters () const
+    {
+      if( codim == 0 )
+        return dgf_.nofelparams;
+      else if( codim == dimension )
+        return dgf_.nofvtxparams;
+      else
+        return 0;
+    }
+
+    std::vector< double > &parameter ( const Element &element )
+    {
+      if( numParameters< 0 >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.elParams[ factory_.insertionIndex( element ) ];
+    }
+
+    std::vector< double > &parameter ( const Vertex &vertex )
+    {
+      if( numParameters< dimension >() <= 0 )
+      {
+        DUNE_THROW( InvalidStateException,
+                    "Calling DGFGridFactory::parameter is only allowed if there are parameters." );
+      }
+      return dgf_.vtxParams[ factory_.insertionIndex( vertex ) ];
+    }
+
+  private:
+    void generate( const std::string &filename,
+                   MPICommunicatorType comm );
+
+    Grid *grid_;
+    GridFactory factory_;
+    DuneGridFormatParser dgf_;
+  };
 }
 
 #include "dgfalu.cc"
