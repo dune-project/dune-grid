@@ -53,7 +53,7 @@ namespace Dune
       out << "                 " << totalbndseg
           << " bnd-segs in grid" << std::endl;
       out << "                 " << bnddomain
-          << " bnd-segs a boundary domain" << std::endl;
+          << " bnd-segs in a boundary domain" << std::endl;
       out << "                 " << defsegs
           << " bnd-seg assigned default value" << std::endl;
       out << "                 " << remaining
@@ -1208,12 +1208,28 @@ namespace Dune
   inline std::string
   DuneGridFormatParser::temporaryFileName ()
   {
+    char tempname[ FILENAME_MAX ];
+    std :: strcpy( tempname, "TMPDGFParser.XXXXXX" );
+
+    std::string fulltempname;
+#ifdef P_tmpdir
+    fulltempname = std::string(P_tmpdir) + "/" + tempname;
+#else
+    fulltempname = "." + "/" + tempname;
+#endif
+
     char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, "TMPDGFParser.XXXXXX" );
+    std :: strcpy( filetemp, fulltempname.c_str() );
     const int fd = mkstemp( filetemp );
     if( fd < 0 )
-      DUNE_THROW( IOError, "Unable to create temporary file: " +
-                  std :: string( filetemp) );
+    {
+      fulltempname = std::string(P_tmpdir) + "/" + tempname;
+      std :: strcpy( filetemp, fulltempname.c_str() );
+      const int fd = mkstemp( filetemp );
+      if ( fd < 0 )
+        DUNE_THROW( IOError, "Unable to create temporary file: " +
+                    std::string( filetemp ) );
+    }
     close( fd );
     remove( filetemp );
     return std :: string( filetemp );
