@@ -15,7 +15,8 @@ DUNE_AUTOBUILD_FLAGS
 # preset variable to path such that #include <dune/...> works
 AC_SUBST(AM_CPPFLAGS, '$(DUNE_CPPFLAGS) -I$(top_srcdir)')
 AC_SUBST(AM_LDFLAGS, '$(DUNE_LDFLAGS) $(DUNE_LIBS)')
-AC_SUBST([LOCAL_LIBS], '$(top_builddir)/dune/grid/libgrid.la')
+#AC_SUBST([LOCAL_LIBS], '$(top_builddir)/dune/grid/libgrid.la')
+AC_SUBST([LOCAL_LIBS], '-L$(top_builddir)/lib -ldunegrid')
 
 DUNE_SUMMARY_ALL
 

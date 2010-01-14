@@ -1,22 +1,22 @@
 # $Id$
 
 if ALBERTA
-noinst_LTLIBRARIES = libalbertagrid_1.la libalbertagrid_2.la libalbertagrid_3.la
+noinst_LTLIBRARIES = libalbertagrid_1d.la libalbertagrid_2d.la libalbertagrid_3d.la
 
 libalbertagrid_sources = dgfparser.cc  elementinfo.cc  indexsets.cc  macrodata.cc  meshpointer.cc
 libalbertagrid_cppflags = $(AM_CPPFLAGS) $(ALBERTA_INCLUDE_CPPFLAGS) -DENABLE_ALBERTA
 
-libalbertagrid_1_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_1_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=1
-libalbertagrid_1_la_LIBADD = $(DUNE_COMMON_LIBS)
+libalbertagrid_1d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_1d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=1
+libalbertagrid_1d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_1d
 
-libalbertagrid_2_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_2_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=2
-libalbertagrid_2_la_LIBADD = $(DUNE_COMMON_LIBS)
+libalbertagrid_2d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_2d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=2
+libalbertagrid_2d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_2d
 
-libalbertagrid_3_la_SOURCES = $(libalbertagrid_sources)
-libalbertagrid_3_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=3
-libalbertagrid_3_la_LIBADD = $(DUNE_COMMON_LIBS)
+libalbertagrid_3d_la_SOURCES = $(libalbertagrid_sources)
+libalbertagrid_3d_la_CPPFLAGS = $(libalbertagrid_cppflags) -DALBERTA_DIM=3
+libalbertagrid_3d_la_LIBADD = $(DUNE_COMMON_LIBS) $(ALBERTA_BASE_LIBS) -lalberta_3d
 endif
 
 albertadir = $(includedir)/dune/grid/albertagrid/

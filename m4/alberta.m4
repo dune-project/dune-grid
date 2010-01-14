@@ -126,6 +126,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       # define varaible lib name depending on problem and world dim, to change
       # afterwards easily 
       variablealbertalibname='alberta_$(ALBERTA_DIM)d'
+      variabledunealbertagridlibname='dunealbertagrid_$(ALBERTA_DIM)d'
 
       # we do not check libraries for ALBERTA 3.0 (linking would require libtool)
       if test "$ALBERTA_VERSION" == "3.0" ; then
@@ -142,7 +143,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
            AC_MSG_WARN(-lalberta_3d not found!)])
       fi
       ALBERTA_BASE_LIBS="$ALBERTA_LIBS $ALBERTA_EXTRA"
-      ALBERTA_LIBS="-l$variablealbertalibname $ALBERTA_BASE_LIBS"
+      ALBERTA_LIBS="-l$variabledunealbertagridlibname -l$variablealbertalibname $ALBERTA_BASE_LIBS"
     fi
 
   fi  # end of alberta check (--without wasn't set)

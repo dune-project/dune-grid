@@ -14,12 +14,6 @@ if UG
   UGLIB = uggrid/libuggrid.la
 endif
 
-if ALBERTA
-  ALBERTALIB = albertagrid/libalbertagrid_1.la \
-               albertagrid/libalbertagrid_2.la \
-               albertagrid/libalbertagrid_3.la
-endif
-
 # the ALUGrid lib contains items that are needed
 # in any case, so no dependency from ALUGRID flag
 ALULIB = alugrid/libalu.la
@@ -29,7 +23,7 @@ libgrid_la_SOURCES =
 # This forces automake to use the C++ linker
 # (see the automake manual, section "Libtool Convenience Libraries")
 nodist_EXTRA_libgrid_la_SOURCES = dummy.cc
-libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) $(ALBERTALIB) \
+libgrid_la_LIBADD = $(ONEDLIB) $(UGLIB) $(ALULIB) \
   $(COMMONLIB) $(DUNE_COMMON_LIBS) $(AMIRALIB) $(DGFPARSERLIB)
 
 # These libraries do not need other libraries besides lcommon
