@@ -50,7 +50,9 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   AC_REQUIRE([AC_PROG_F77])
   AC_REQUIRE([AC_PATH_XTRA])
   AC_REQUIRE([DUNE_PATH_OPENGL])
-  AC_REQUIRE([DUNE_ALBERTA_DIMENSION])
+
+  variablealbertadim='$(WORLDDIM)'
+  AC_SUBST([ALBERTA_DIM], [$variablealbertadim]) 
 
   AC_ARG_WITH(alberta,
     AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
@@ -89,7 +91,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     REM_CPPFLAGS=$CPPFLAGS
 
     LDFLAGS="$LDFLAGS -L$ALBERTA_LIB_PATH"
-    CPPFLAGS="$CPPFLAGS -I$ALBERTA_INCLUDE_PATH -DDIM_OF_WORLD=$with_alberta_dim -DEL_INDEX=0"
+    CPPFLAGS="$CPPFLAGS -I$ALBERTA_INCLUDE_PATH -DDIM_OF_WORLD=3 -DEL_INDEX=0"
 
     ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTA_INCLUDE_PATH"
     ALBERTA_DIM_CPPFLAGS='-DALBERTA_DIM=$(ALBERTA_DIM)'
@@ -196,27 +198,4 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   LDFLAGS="$ac_save_LDFLAGS"
 
   DUNE_ADD_SUMMARY_ENTRY([ALBERTA],[$with_alberta])
-])
-
-# asks for alberta-dim to pass on to Alberta
-AC_DEFUN([DUNE_ALBERTA_DIMENSION],[
-  AC_REQUIRE([DUNE_GRID_DIMENSION])
-
-  AC_ARG_WITH(alberta_dim,
-              AC_HELP_STRING([--with-alberta-dim=1|2|3],
-                [dimension of world enclosing the ALBERTA grid (default=world-dim if delivered, otherwise 2)]),,
-              with_alberta_dim=0)
-
-  if test x$with_alberta_dim != x0 ; then
-    variablealbertadim=$with_alberta_dim
-  else
-    with_alberta_dim=2
-    if test x$with_world_dim != x0 || test x$with_grid_dim != x0 ; then
-      variablealbertadim='$(WORLDDIM)'
-    else
-      variablealbertadim=2
-    fi
-  fi
-
-  AC_SUBST(ALBERTA_DIM, $variablealbertadim ) 
 ])
