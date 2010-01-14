@@ -6,6 +6,7 @@
 #define DUNE_GRIDINFO_HH
 
 #include <iostream>
+#include <typeinfo>
 #include <dune/common/exceptions.hh>
 #include "grid.hh"
 #include "genericreferenceelements.hh"
@@ -34,7 +35,7 @@ namespace Dune
     const int dimworld = G::dimensionworld;
 
     // grid type and dimension
-    std::cout << prefix << "=> " << grid.name()
+    std::cout << prefix << "=> " << typeid(G).name()
               << "(dim=" << dim
               << ",dimworld=" << dimworld
               << ")" << std::endl;
