@@ -84,9 +84,10 @@ AC_DEFUN([DUNE_PATH_UG],[
           HAVE_UG="0"
       
         # If MPI is installed look for the parallel UG
-        if test x"$MPI_LDFLAGS" != x""; then
+        if test x"$with_mpi" != x"no"; then
             AC_MSG_CHECKING([UG libraries (parallel)])
-            LIBS="$UG_LIBS $MPI_LDFLAGS"
+            LIBS="$UG_LIBS $DUNEMPILIBS $LIBS"
+            LDFLAGS="$LDFLAGS $DUNEMPILDFLAGS"
             CPPFLAGS="$UG_CPPFLAGS -DModelP -D_2"
             AC_TRY_LINK(
               [#include "initug.h"
@@ -95,7 +96,7 @@ AC_DEFUN([DUNE_PATH_UG],[
               [UG_LDFLAGS="$LDFLAGS"
            UG_CPPFLAGS="$UG_CPPFLAGS -DModelP"
            HAVE_UG="1"
-           UG_LIBS="$UG_LIBS $MPI_LDFLAGS"
+           UG_LIBS="$UG_LIBS $DUNEMPILIBS"
            with_ug="yes (parallel)"
            AC_MSG_RESULT(yes)
               ],

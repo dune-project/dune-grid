@@ -1,3 +1,4 @@
+dnl -*- autoconf -*-
 # searches for alugrid-headers and libs
 
 AC_DEFUN([DUNE_PATH_ALUGRID],[
@@ -71,7 +72,7 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
     AC_MSG_WARN([alugrid_serial.h not found in $ALUGRID_INCLUDE_PATH]))
    
   ALU3D_INC_FLAG_PARA="-I$ALUGRID_INCLUDE_PATH/parallel"
-  CPPFLAGS="$CPPFLAGS $ALU3D_INC_FLAG_PARA $MPI_CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS $ALU3D_INC_FLAG_PARA $DUNEMPICPPFLAGS"
   # check for parallel header 
   AC_CHECK_HEADERS([alugrid_parallel.h], 
      [ALUGRID_CPPFLAGS="$ALU3D_INC_FLAG $ALU3D_INC_FLAG_PARA"
@@ -86,8 +87,8 @@ if test x$with_alugrid != x && test x$with_alugrid != xno ; then
   # if header is found...
   if test x$HAVE_ALUGRID = x1 ; then
     AC_CHECK_LIB(alugrid,[malloc],
-    [ALUGRID_LIBS="-lalugrid $MPI_LDFLAGS"
-           ALUGRID_LDFLAGS="-L$ALUGRID_LIB_PATH $MPI_LDFLAGS"
+    [ALUGRID_LIBS="-lalugrid $DUNEMPILIBS"
+           ALUGRID_LDFLAGS="-L$ALUGRID_LIB_PATH $DUNEMPILDFLAGS"
            LIBS="$LIBS $ALUGRID_LIBS"],
 	  [HAVE_ALUGRID="0"
 	  AC_MSG_WARN(libalugrid not found!)])
