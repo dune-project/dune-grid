@@ -74,7 +74,7 @@ AC_DEFUN([DUNE_PATH_UG],[
 
       # define LTCXXCOMPILE like it will be defined in the Makefile
       ac_save_CXX="$CXX"
-      LTCXXLINK="$srcdir/libtool --tag=CXX --mode=link $CXX $CXXFLAGS $LDFLAGS"
+      LTCXXLINK="./libtool --tag=CXX --mode=link $CXX $CXXFLAGS $LDFLAGS"
       CXX="$LTCXXLINK"
 
       if test x$HAVE_UG = x1; then
