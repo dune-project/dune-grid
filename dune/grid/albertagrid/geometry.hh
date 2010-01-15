@@ -287,6 +287,12 @@ namespace Dune
       return coord_[ i ];
     }
 
+    /** \brief return center of geometry */
+    GlobalVector center () const
+    {
+      return centroid_;
+    }
+
     /** \brief deprecated way of obtaining the i-th corner */
     const GlobalVector &operator[] ( const int i ) const
     {
@@ -378,6 +384,9 @@ namespace Dune
 
     //! the vertex coordinates
     CoordMatrix coord_;
+
+    //! the center/centroid
+    GlobalVector centroid_;
 
     // storage for the transposed of the jacobian
     mutable JacobianTransposed jT_;
@@ -495,6 +504,16 @@ namespace Dune
     const GlobalVector &operator[] ( const int i ) const
     {
       return reinterpret_cast< const GlobalVector & >( elementInfo_.coordinate( i ) );
+    }
+
+    /** \brief return center of geometry */
+    GlobalVector center () const
+    {
+      GlobalVector centroid_;
+      for (int i=0; i<numCorners; i++)
+        centroid_ += corner(i);
+      centroid_ *= 1.0 / numCorners;
+      return centroid_;
     }
 
     /** \brief map a point from the refence element to the geometry */

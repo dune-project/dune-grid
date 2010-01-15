@@ -91,8 +91,13 @@ namespace Dune
     builtJT_ = false;
     builtJTInv_ = false;
 
-    for( int i = 0; i <= mydimension; ++i )
+    for( int i = 0; i < numCorners; ++i )
+    {
       coordReader.coordinate( i, coord_[ i ] );
+      centroid_ += coord_[ i ];
+    }
+
+    centroid_ *= 1.0 / numCorners;
 
     elDet_ = (coordReader.hasDeterminant() ? coordReader.determinant() : elDeterminant());
     assert( std::abs( elDet_ ) > 0.0 );
