@@ -439,29 +439,6 @@ namespace Dune
 
 
   template< template< int, int > class ALUGrid >
-  inline std::string
-  ALU3dGridFactory< ALUGrid >::temporaryFileName ( const std::string& dgfName )
-  {
-    std::string filename ( dgfName );
-    if( filename.empty() )
-    {
-      filename = "ALU3dGrid.XXXXXX";
-    }
-    else
-    {
-      filename += ".XXXXXX";
-    }
-    char filetemp[ FILENAME_MAX ];
-    std :: strcpy( filetemp, filename.c_str() );
-    const int fd = mkstemp( filetemp );
-    if( fd < 0 )
-      DUNE_THROW( IOError, "Unable to create temporary file." );
-    close( fd );
-    return std :: string( filetemp );
-  }
-
-
-  template< template< int, int > class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid >
   ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
