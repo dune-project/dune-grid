@@ -101,9 +101,16 @@ namespace Dune {
       return 1<<mydim;
     }
 
+    //! return i'th corner of the geometry
     FieldVector< ctype, cdim > corner ( const int i ) const
     {
       return c[i];
+    }
+
+    //! return center of the geometry
+    FieldVector<ctype, cdim > center ( ) const
+    {
+      return s;
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
@@ -187,7 +194,14 @@ namespace Dune {
       return 1;
     }
 
+    //! return i'th corner of the geometry
     FieldVector<ctype, cdim > corner ( const int i ) const
+    {
+      return s;
+    }
+
+    //! return center of the geometry
+    FieldVector<ctype, cdim > center ( ) const
     {
       return s;
     }
