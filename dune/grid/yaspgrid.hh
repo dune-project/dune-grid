@@ -174,12 +174,18 @@ namespace Dune {
     }
 
     //! access to coordinates of corners. Index is the number of the corner
-    const FieldVector<ctype, cdim>& operator[] (int i) const
+    const FieldVector<ctype, cdim>& operator[] (int i) const DUNE_DEPRECATED
+    {
+      return corner(i);
+    }
+
+    //! access to coordinates of corners. Index is the number of the corner
+    FieldVector< ctype, cdim > corner ( const int i ) const
     {
       assert( i >= 0 && i < (int) coord_.N() );
       FieldVector<ctype, cdim>& c = coord_[i];
       int bit=0;
-      for (int k=0; k<cdim; k++)   // run over all directions in world
+      for (int k=0; k<cdim; k++) // run over all directions in world
       {
         if (k==missing)
         {
@@ -187,19 +193,20 @@ namespace Dune {
           continue;
         }
         //k is not the missing direction
-        if (i&(1<<bit))          // check whether bit is set or not
-          c[k] = midpoint[k]+0.5*extension[k];         // bit is 1 in i
+        if (i&(1<<bit))    // check whether bit is set or not
+          c[k] = midpoint[k]+0.5*extension[k];     // bit is 1 in i
         else
-          c[k] = midpoint[k]-0.5*extension[k];         // bit is 0 in i
-        bit++;         // we have processed a direction
+          c[k] = midpoint[k]-0.5*extension[k];     // bit is 0 in i
+        bit++;   // we have processed a direction
       }
 
       return c;
     }
 
-    FieldVector< ctype, cdim > corner ( const int i ) const
+    //! access to the center/centroid
+    FieldVector< ctype, cdim > center ( ) const
     {
-      return (*this)[ i ];
+      return midpoint;
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
@@ -333,7 +340,7 @@ namespace Dune {
     // Possibly we should change this in the interface ...
     mutable FieldMatrix<ctype, mydim, cdim> JT;   // the transposed of the jacobian
     mutable FieldMatrix<ctype, cdim, mydim> Jinv; // the transposed of the jacobian inverse
-    mutable FieldMatrix<ctype,  Power_m_p<2,mydim>::power, cdim> coord_; // the coordinates
+    mutable FieldMatrix<ctype, Power_m_p<2,mydim>::power, cdim> coord_; // the coordinates
 
     const YaspGeometry<mydim,cdim,GridImp>&
     operator = (const YaspGeometry<mydim,cdim,GridImp>& g);
@@ -369,19 +376,26 @@ namespace Dune {
     //! access to coordinates of corners. Index is the number of the corner
     const FieldVector<ctype, mydim>& operator[] (int i) const
     {
+      return corner(i);
+    }
+
+    //! access to coordinates of corners. Index is the number of the corner
+    FieldVector< ctype, mydim > corner ( const int i ) const
+    {
       assert( i >= 0 && i < (int) coord_.N() );
       FieldVector<ctype, mydim>& c = coord_[i];
       for (int k=0; k<mydim; k++)
         if (i&(1<<k))
-          c[k] = midpoint[k]+0.5*extension[k];       // kth bit is 1 in i
+          c[k] = midpoint[k]+0.5*extension[k];     // kth bit is 1 in i
         else
-          c[k] = midpoint[k]-0.5*extension[k];       // kth bit is 0 in i
+          c[k] = midpoint[k]-0.5*extension[k];     // kth bit is 0 in i
       return c;
     }
 
-    FieldVector< ctype, mydim > corner ( const int i ) const
+    //! access to the center/centroid
+    FieldVector< ctype, mydim > center ( ) const
     {
-      return (*this)[ i ];
+      return midpoint;
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
@@ -520,9 +534,16 @@ namespace Dune {
       return position;
     }
 
+    //! access to coordinates of corners. Index is the number of the corner
     FieldVector< ctype, cdim > corner ( const int i ) const
     {
-      return (*this)[ i ];
+      return position;
+    }
+
+    //! access to the center/centroid
+    FieldVector< ctype, cdim > center ( ) const
+    {
+      return position;
     }
 
     /*! determinant of the jacobian of the mapping
