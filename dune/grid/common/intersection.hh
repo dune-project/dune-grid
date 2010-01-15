@@ -438,6 +438,17 @@ namespace Dune
       return this->real.unitOuterNormal(local);
     }
 
+    /*! @brief Return unit outer normal (length == 1)
+
+       The returned vector is the normal at the center() of the
+       intersection's geometry.
+       It is scaled to have unit length.
+     */
+    GlobalCoordinate centerUnitOuterNormal () const
+    {
+      return this->real.centerUnitOuterNormal();
+    }
+
     //===========================================================
     /** @name Implementor interface
      */
@@ -485,21 +496,36 @@ namespace Dune
     enum { dimworld=GridImp::dimensionworld };
     typedef typename GridImp::ctype ct;
   public:
+
     //! return unit outer normal, this should be dependent on
     //! local coordinates for higher order boundary
     //! the normal is scaled with the integration element of the intersection.
     FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
-      FieldVector<ct, dimworld> n = unitOuterNormal(local);
+      FieldVector<ct, dimworld> n = asImp().unitOuterNormal(local);
       n *= asImp().intersectionGlobal().integrationElement(local);
       return n;
     }
+
     //! return unit outer normal
     FieldVector<ct, dimworld> unitOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
       FieldVector<ct, dimworld> n = asImp().outerNormal(local);
       n /= n.two_norm();
       return n;
+    }
+
+    //! return unit outer normal at center of intersection geometry
+    FieldVector<ct, dimworld> centerUnitOuterNormal () const
+    {
+      // For now, we do this...
+      GeometryType type = asImp().geometry().type();
+      const GenericReferenceElement<ct, dim-1> & refElement =
+        GenericReferenceElements<ct, dim-1>::general(type);
+      return asImp().unitOuterNormal(refElement.position(0,0));
+      // But later, if we change the meaning of center(),
+      // we may have to change to this...
+      // return asImp().unitOuterNormal(asImp().local(asImp().center()));
     }
 
   private:

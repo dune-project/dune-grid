@@ -736,6 +736,11 @@ namespace Dune {
     //! return unit outer normal
     FieldVector<ctype, GridImp::dimensionworld> unitOuterNormal (const FieldVector<ctype, GridImp::dimension-1>& local) const
     {
+      return centerUnitOuterNormal();
+    }
+    //! return unit outer normal at center of intersection geometry
+    FieldVector<ctype, GridImp::dimensionworld> centerUnitOuterNormal () const
+    {
       // while we are at it, compute normal direction
       FieldVector<ctype, dimworld> normal(0.0);
       if (count%2)

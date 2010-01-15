@@ -1690,6 +1690,12 @@ namespace Dune {
       return _normal;
     }
 
+    //! return unit outer normal at center of intersection geometry
+    FieldVector<ctype, dimworld> centerUnitOuterNormal () const
+    {
+      return _normal;
+    }
+
     //! return unit outer normal, this should be dependent on
     //! local coordinates for higher order boundary
     //! the normal is scaled with the integration element of the intersection.

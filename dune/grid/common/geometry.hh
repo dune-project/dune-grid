@@ -218,6 +218,20 @@ namespace Dune
       return realGeometry.volume();
     }
 
+    /** \brief return center of geometry
+     *  Note that this method is still subject to a change of name and semantics.
+     *  At the moment, the center is not required to be the centroid of the
+     *  geometry, or even the centroid of its corners. This makes the current
+     *  default implementation acceptable, which maps the centroid of the
+     *  reference element to the geometry.
+     *  We may change the name (and semantic) of the method to centroid() if we
+     *  find reasonably efficient ways to implement it properly.
+     */
+    GlobalCoordinate center () const
+    {
+      return realGeometry.center();
+    }
+
     /** \brief Return the transposed of the Jacobian
      *
      *  The Jacobian is defined in the documentation of
@@ -317,6 +331,20 @@ namespace Dune
       return refElement.volume() * asImp().integrationElement(localBaryCenter);
     }
 
+    //! return center of the geometry
+    FieldVector<ctype, cdim> center () const
+    {
+      GeometryType type = asImp().type();
+
+      // get corresponding reference element
+      const GenericReferenceElement< ctype , mydim > & refElement =
+        GenericReferenceElements< ctype, mydim >::general(type);
+
+      // center is (for now) the centroid of the reference element mapped to
+      // this geometry.
+      return asImp().global(refElement.position(0,0));
+    }
+
   private:
     //!  Barton-Nackman trick
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
@@ -351,7 +379,16 @@ namespace Dune
     }
 
     //! return volume of the geometry
-    ctype volume () const { return 1.0; }
+    ctype volume () const
+    {
+      return 1.0;
+    }
+
+    //! return center of the geometry
+    FieldVector<ctype, cdim> center () const
+    {
+      return asImp()[0];
+    }
 
   private:
     //!  Barton-Nackman trick
