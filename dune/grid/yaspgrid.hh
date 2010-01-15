@@ -2689,6 +2689,12 @@ namespace Dune {
       return size(maxLevel(),type);
     }
 
+    //! \brief returns the number of boundary segments within the macro grid
+    size_t numBoundarySegments () const
+    {
+      return 2*dim;
+    }
+
     /*! The new communication interface
 
        communicate objects for all codims on a given level
