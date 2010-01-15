@@ -68,11 +68,32 @@ namespace Dune
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
       }
     }
+
+    //! \brief constructor called from ALUGridFactory
+    //! for creating ALUCubeGrid from given macro grid file
+    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of type MPI_Comm)
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
+    //! \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
+    //! \param macroName filename from which ALUGrid is being generated
+    ALUCubeGrid(MPI_Comm mpiComm,
+                const DuneBoundaryProjectionType* bndProject ,
+                const DuneBoundaryProjectionVector* bndVector,
+                const std::string macroName ) :
+      BaseType("", mpiComm, bndProject, bndVector)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated parallel ALUCubeGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
+    }
+
     //! \brief constructor creating empty grid
-    ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD,
-                const DuneBoundaryProjectionType* bndProject = 0,
-                const DuneBoundaryProjectionVector* bndVector= 0 ) :
-      BaseType("",mpiComm, bndProject, bndVector)
+    ALUCubeGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
+      BaseType("", mpiComm,
+               (const DuneBoundaryProjectionType *) 0,
+               (const DuneBoundaryProjectionVector* ) 0)
     {
       if(this->comm().rank() == 0)
       {
@@ -86,6 +107,21 @@ namespace Dune
                 const DuneBoundaryProjectionType* bndProject = 0,
                 const DuneBoundaryProjectionVector* bndVector= 0 )
       : BaseType(macroName, bndProject, bndVector)
+    {
+      std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
+    //! \brief constructor called from ALUGridFactory
+    //! for creating ALUCubeGrid from given macro grid file
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
+    //! \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
+    //! \param macroName filename from which ALUGrid is being generated
+    ALUCubeGrid(const DuneBoundaryProjectionType* bndProject ,
+                const DuneBoundaryProjectionVector* bndVector,
+                const std::string macroName)
+      : BaseType("", bndProject, bndVector)
     {
       std::cout << "\nCreated serial ALUCubeGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
@@ -212,11 +248,32 @@ namespace Dune
         std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
       }
     }
-    //! constructor creating empty grid, empty string creates empty grid
-    ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD,
-                   const DuneBoundaryProjectionType* bndProject = 0,
-                   const DuneBoundaryProjectionVector* bndVector = 0 ) :
+
+    //! \brief constructor called from ALUGridFactory
+    //! for creating ALUSimplexGrid from given macro grid file
+    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of type MPI_Comm)
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
+    //!  \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
+    //! \param macroName filename from which ALUGrid is being generated
+    ALUSimplexGrid(MPI_Comm mpiComm,
+                   const DuneBoundaryProjectionType* bndProject ,
+                   const DuneBoundaryProjectionVector* bndVector,
+                   const std::string macroName) :
       BaseType("", mpiComm, bndProject, bndVector)
+    {
+      if(this->comm().rank() == 0)
+      {
+        std::cout << "\nCreated parallel ALUSimplexGrid<"<<dim<<","<<dimworld;
+        std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+      }
+    }
+
+    //! constructor creating empty grid, empty string creates empty grid
+    ALUSimplexGrid(MPI_Comm mpiComm = MPI_COMM_WORLD) :
+      BaseType("", mpiComm,
+               (const DuneBoundaryProjectionType *) 0,
+               (const DuneBoundaryProjectionVector* ) 0)
     {
       if(this->comm().rank() == 0)
       {
@@ -234,6 +291,23 @@ namespace Dune
       std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
       std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
     }
+
+    //! \brief constructor called from ALUGridFactory
+    //! for creating ALUSimplexGrid from given macro grid file
+    //! \param mpiComm MPI Communicator (when HAVE_MPI == 1 then mpiComm is of type MPI_Comm)
+    //! \param bndProject global boundary projection pointer
+    //! \param bndVector  pointer to vector holding boundary projection for each boundary segment
+    //!  \note ALUGrid takes ownership of this pointer and will delete it in the desctructor
+    //! \param macroName filename from which ALUGrid is being generated
+    ALUSimplexGrid(const DuneBoundaryProjectionType* bndProject,
+                   const DuneBoundaryProjectionVector* bndVector,
+                   const std::string macroName ) :
+      BaseType("", bndProject, bndVector)
+    {
+      std::cout << "\nCreated serial ALUSimplexGrid<"<<dim<<","<<dimworld;
+      std::cout <<"> from macro grid file '" << macroName << "'. \n\n";
+    }
+
     //! constructor creating empty grid
     ALUSimplexGrid() :
       BaseType("", (const DuneBoundaryProjectionType*) 0, (const DuneBoundaryProjectionVector*) 0)

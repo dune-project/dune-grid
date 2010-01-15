@@ -234,58 +234,74 @@ namespace Dune
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std::string filename ( temporary ?
-                           temporaryFileName( name ) :
-                           name );
-
-    std::ofstream out( filename.c_str() );
-    out.setf( std::ios_base::scientific, std::ios_base::floatfield );
-    out.precision( 16 );
-    if( elementType == tetra )
-      out << "!Tetrahedra";
-    else
-      out << "!Hexahedra";
-
-    const unsigned int numVertices = vertices_.size();
-    // print information about vertices and elements
-    // to header to have an easy check
-    out << "  ( noVertices = " << numVertices;
-    out << " | noElements = " << elements_.size() << " )" << std :: endl;
-
-    // now start writing grid
-    out << numVertices << std :: endl;
-    typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
-    const VertexIteratorType endV = vertices_.end();
-    for( VertexIteratorType it = vertices_.begin(); it != endV; ++it )
+    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
+    // if dump file should be written
+    if( ! temporary )
     {
-      const VertexType &vertex = *it;
-      out << vertex[ 0 ];
-      for( unsigned int i = 1; i < dimensionworld; ++i )
-        out << " " << vertex[ i ];
-      out << std :: endl;
-    }
+      std::string filename ( name );
 
-    out << elements_.size() << std :: endl;
-    typedef typename ElementVector::iterator ElementIteratorType;
-    const ElementIteratorType endE = elements_.end();
-    for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
-    {
-      array< unsigned int, numCorners > element;
-      for( unsigned int i = 0; i < numCorners; ++i )
+      std::ofstream out( filename.c_str() );
+      out.setf( std::ios_base::scientific, std::ios_base::floatfield );
+      out.precision( 16 );
+      if( elementType == tetra )
+        out << "!Tetrahedra";
+      else
+        out << "!Hexahedra";
+
+      const unsigned int numVertices = vertices_.size();
+      // print information about vertices and elements
+      // to header to have an easy check
+      out << "  ( noVertices = " << numVertices;
+      out << " | noElements = " << elements_.size() << " )" << std :: endl;
+
+      // now start writing grid
+      out << numVertices << std :: endl;
+      typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
+      const VertexIteratorType endV = vertices_.end();
+      for( VertexIteratorType it = vertices_.begin(); it != endV; ++it )
       {
-        const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-        element[ j ] = (*it)[ i ];
+        const VertexType &vertex = *it;
+        out << vertex[ 0 ];
+        for( unsigned int i = 1; i < dimensionworld; ++i )
+          out << " " << vertex[ i ];
+        out << std :: endl;
       }
 
-      out << element[ 0 ];
-      for( unsigned int i = 1; i < numCorners; ++i )
-        out << "  " << element[ i ];
-      out << std :: endl;
+      out << elements_.size() << std :: endl;
+      typedef typename ElementVector::iterator ElementIteratorType;
+      const ElementIteratorType endE = elements_.end();
+      for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
+      {
+        array< unsigned int, numCorners > element;
+        for( unsigned int i = 0; i < numCorners; ++i )
+        {
+          const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+          element[ j ] = (*it)[ i ];
+        }
+
+        out << element[ 0 ];
+        for( unsigned int i = 1; i < numCorners; ++i )
+          out << "  " << element[ i ];
+        out << std :: endl;
+      }
+
+      const BoundaryIdIteratorType endB = boundaryIds_.end();
+      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+      {
+        const std :: pair< FaceType, int > &boundaryId = *it;
+        out << "-" << boundaryId.second << "  " << numFaceCorners;
+
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          out << "  " << boundaryId.first[ i ];
+        out << std :: endl;
+      }
+
+      for( unsigned int i = 0; i < numVertices; ++i )
+        out << i << "  -1" << std :: endl;
+      out.close();
     }
 
     const size_t boundarySegments = boundaryIds_.size();
-    out << boundarySegments << std :: endl;
-    typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
 
     BoundaryProjectionVector* bndProjections = 0;
     const size_t bndProjectionSize = boundaryProjections_.size();
@@ -295,50 +311,129 @@ namespace Dune
         DUNE_THROW(InvalidStateException,"wrong number of boudnary projections");
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments );
-    }
-
-    const BoundaryIdIteratorType endB = boundaryIds_.end();
-    int segmentIndex = 0;
-    for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
-    {
-      const std :: pair< FaceType, int > &boundaryId = *it;
-      out << "-" << boundaryId.second << "  " << numFaceCorners;
-
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
-        out << "  " << boundaryId.first[ i ];
-      out << std :: endl;
-
-      if( bndProjectionSize > 0 )
+      const BoundaryIdIteratorType endB = boundaryIds_.end();
+      int segmentIndex = 0;
+      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
       {
         // generate boundary segment pointer
-        FaceType faceId (boundaryId.first);
+        FaceType faceId ( (*it).first);
         std::sort( faceId.begin(), faceId.end() );
 
         // copy pointer
         (*bndProjections)[ segmentIndex ] = boundaryProjections_[ faceId ];
       }
+
+      // free memory
+      boundaryProjections_.clear();
     }
 
-    for( unsigned int i = 0; i < numVertices; ++i )
-      out << i << "  -1" << std :: endl;
-    out.close();
-
-    vertices_.clear();
-    elements_.clear();
-    boundaryIds_.clear();
-    boundaryProjections_.clear();
-
-    // ALUGrid is taking ownership of the bndProjections pointer
+    // ALUGrid is taking ownership of bndProjections
+    // and is going to delete this pointer
 #if ALU3DGRID_PARALLEL
-    Grid *grid = new Grid( filename, communicator_, globalProjection_ , bndProjections );
+    Grid *grid = new Grid( communicator_, globalProjection_, bndProjections , name );
 #else
-    Grid *grid = new Grid( filename, globalProjection_, bndProjections );
+    Grid *grid = new Grid( globalProjection_, bndProjections , name );
 #endif
-    if( temporary )
-      std::remove( filename.c_str() );
+    assert( grid );
 
     // remove pointer
     globalProjection_ = 0;
+
+    {
+      // create ALUGrid macro grid builder
+      typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
+      BuilderIF& builder = dynamic_cast<BuilderIF &> (grid->myGrid().container());
+      ALU3DSPACE MacroGridBuilder mgb ( builder
+#ifdef ALUGRID_VERTEX_PROJECTION
+                                        , grid->myGrid().vertexProjection()
+#endif
+                                        );
+
+      // now start writing grid
+      //
+      const int vxSize = vertices_.size();
+      for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
+      {
+        const VertexType &vertex = vertices_[ vxIdx ];
+        // insert vertex
+        mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ],  vxIdx );
+      }
+
+      // clear vertices
+      vertices_.resize( 0 );
+
+      typedef typename ElementVector::iterator ElementIteratorType;
+      const ElementIteratorType endE = elements_.end();
+      for( ElementIteratorType it = elements_.begin(); it != endE; ++it )
+      {
+        if( elementType == hexa )
+        {
+          int element[ 8 ];
+          for( unsigned int i = 0; i < 8; ++i )
+          {
+            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+            element[ j ] = (*it)[ i ];
+          }
+          mgb.InsertUniqueHexa( element );
+        }
+        else if( elementType == tetra )
+        {
+          int element[ 4 ];
+          for( unsigned int i = 0; i < 4; ++i )
+          {
+            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+            element[ j ] = (*it)[ i ];
+          }
+          mgb.InsertUniqueTetra( element );
+        }
+        else
+        {
+          DUNE_THROW(NotImplemented,"Wrong element type");
+        }
+      }
+
+      // clear elements
+      elements_.resize( 0 );
+
+      const BoundaryIdIteratorType endB = boundaryIds_.end();
+      int segmentIndex = 0;
+      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
+      {
+        const std :: pair< FaceType, int > &boundaryId = *it;
+        ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
+
+        if( elementType == hexa )
+        {
+          int bndface[ 4 ];
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+          {
+            bndface[ i ] = boundaryId.first[ i ];
+          }
+          mgb.InsertUniqueHbnd4( bndface, bndType );
+        }
+        else if( elementType == tetra )
+        {
+          int bndface[ 3 ];
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+          {
+            bndface[ i ] = boundaryId.first[ i ];
+          }
+          mgb.InsertUniqueHbnd3( bndface, bndType );
+        }
+        else
+        {
+          DUNE_THROW(NotImplemented,"Wrong element type");
+        }
+      }
+
+      // free memory
+      boundaryIds_.clear();
+    }
+
+    // reset wasRefined flags
+    grid->postAdapt();
+    // update additional information on grid
+    grid->calcExtras();
 
     return grid;
   }
