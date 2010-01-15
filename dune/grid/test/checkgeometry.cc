@@ -52,7 +52,6 @@ namespace Dune
         std::cout << " ]" << std::endl;
       }
 
-
       if( geometry.integrationElement( x ) < 0 )
         std::cerr << "Error: Negative integrationElement found." << std::endl;
 
@@ -63,6 +62,19 @@ namespace Dune
             jtj[ i ][ j ] += jt[ i ][ k ] * jt[ j ][ k ];
       if( std::abs( std::sqrt( jtj.determinant() ) - geometry.integrationElement( x ) ) > 1e-8 )
         std::cerr << "Error: integrationElement is not consistent with jacobianTransposed." << std::endl;
+    }
+
+    {
+      // get reference element
+      typedef typename Grid::ctype ctype;
+      GeometryType type = geometry.type();
+      const GenericReferenceElement< ctype , mydim > & refElement =
+        GenericReferenceElements< ctype, mydim >::general(type);
+      // center is (for now) the centroid of the reference element mapped to
+      // this geometry.
+      const FieldVector<ctype, cdim> center = geometry.global(refElement.position(0,0));
+      if( std::abs( (geometry.center() - center).two_norm() ) > 1e-8 )
+        DUNE_THROW(Exception, "center() is not consistent with global(refElem.position(0,0)).");
     }
   }
 
