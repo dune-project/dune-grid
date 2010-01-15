@@ -1698,6 +1698,14 @@ namespace Dune {
       return 0;
     }
 
+    //! identifier for boundary segment from macro grid
+    //! (attach your boundary condition as needed)
+    int boundarySegmentIndex() const
+    {
+      if(boundary()) return indexInInside();
+      return -1;
+    }
+
     //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
     FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const
     {
