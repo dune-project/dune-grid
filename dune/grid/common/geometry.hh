@@ -149,7 +149,7 @@ namespace Dune
      */
     GlobalCoordinate corner ( int i ) const
     {
-      return realGeometry.corner( i );
+      return realGeometry.corner(i);
     }
 
     /** \brief Evaluate the map \f$ g\f$.
@@ -363,7 +363,7 @@ namespace Dune
     //! return the only coordinate
     FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
     {
-      return asImp()[0];
+      return asImp().corner(0);
     }
 
     //! return empty vector
@@ -387,7 +387,7 @@ namespace Dune
     //! return center of the geometry
     FieldVector<ctype, cdim> center () const
     {
-      return asImp()[0];
+      return asImp().corner(0);
     }
 
   private:
