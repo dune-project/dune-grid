@@ -218,7 +218,7 @@ namespace Dune
   ALUGrid< 3, 3 > *ALU3dGridFactory< ALUGrid >
   ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
-    return createGrid( true, true, dgfName );
+    return createGrid( addMissingBoundaries, true, dgfName );
   }
 
   template< template< int, int > class ALUGrid >
@@ -396,8 +396,7 @@ namespace Dune
       elements_.resize( 0 );
 
       const BoundaryIdIteratorType endB = boundaryIds_.end();
-      int segmentIndex = 0;
-      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
+      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
       {
         const std :: pair< FaceType, int > &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
