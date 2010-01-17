@@ -39,14 +39,21 @@ namespace Dune
     template< class HostGrid, class CoordFunction >
     struct isParallel< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = isParallel< HostGrid > :: v;
+      static const bool v = isParallel< HostGrid >::v;
+    };
+
+
+    template< class HostGrid, class CoordFunction, int codim >
+    struct canCommunicate< GeometryGrid< HostGrid, CoordFunction >, codim >
+    {
+      static const bool v = canCommunicate< HostGrid, codim >::v;
     };
 
 
     template< class HostGrid, class CoordFunction >
     struct hasHangingNodes< GeometryGrid< HostGrid, CoordFunction > >
     {
-      static const bool v = hasHangingNodes< HostGrid > :: v;
+      static const bool v = hasHangingNodes< HostGrid >::v;
     };
 
     template< class HostGrid, class CoordFunction >

@@ -32,6 +32,19 @@ namespace Dune
       static const bool v = false;
     };
 
+    /** \brief specialize with 'true' for all codims that a grid can communicate data on (default=false)
+     *
+     *  \note Being able to communicate data on a codimension implies that the
+     *        grid provides entities for that codimension.
+     *
+     *  \ingroup GICapabilities
+     */
+    template< class Grid, int codim >
+    struct canCommunicate
+    {
+      static const bool v = false;
+    };
+
     /** \brief Specialize with 'true' if implementation guarantees conforming level grids. (default=false)
         \ingroup GICapabilities
      */
@@ -125,6 +138,12 @@ namespace Dune
     struct isParallel<const Grid>
     {
       static const bool v = Dune::Capabilities::isParallel<Grid>::v;
+    };
+
+    template< class Grid, int codim >
+    struct canCommunicate< const Grid, codim >
+    {
+      static const bool v = Dune::Capabilities::canCommunicate< Grid, codim >::v;
     };
 
     template<class Grid>

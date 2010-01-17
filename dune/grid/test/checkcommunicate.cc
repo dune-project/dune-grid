@@ -44,14 +44,23 @@ using namespace Dune;
    methods.
  ******/
 /*******************************************************************/
-namespace {
-  template <class GridType,int c> struct NextCodim {
-    static const bool next = Dune::Capabilities::hasEntity<GridType, c-1>::v;
-    static const int calc = ((next) ? c-1 : NextCodim<GridType,c-1>::calc);
+namespace
+{
+
+  template< class Grid, int codim = Grid::dimension+1 >
+  struct NextCodim
+  {
+    static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, codim-1 >::v;
+
+    static const int v = (canCommunicate ? codim-1 : NextCodim< Grid, codim-1 >::v);
   };
-  template <class GridType> struct NextCodim<GridType,0> {
-    static const int calc = -1;
+
+  template< class Grid >
+  struct NextCodim< Grid, 0 >
+  {
+    static const int v = -1;
   };
+
 }
 
 
@@ -490,7 +499,7 @@ public:
     }
 
     // for automatic testing of all codims
-    CheckCommunication< GridView, NextCodim< Grid, cdim > :: calc, OutputStream >
+    CheckCommunication< GridView, NextCodim< Grid, cdim >::v, OutputStream >
     test( gridView_, sout_, level_ );
   }
 };
@@ -512,14 +521,14 @@ void checkCommunication( const Grid &grid, int level, OutputStream &sout )
   {
     typedef typename Grid :: template Partition< All_Partition > :: LeafGridView GridView;
     GridView gridView = grid.leafView();
-    CheckCommunication< GridView, GridView :: dimension, OutputStream >
+    CheckCommunication< GridView, NextCodim< Grid >::v, OutputStream >
     test( gridView, sout, level );
   }
   else
   {
     typedef typename Grid :: template Partition< All_Partition > :: LevelGridView GridView;
     GridView gridView = grid.levelView( level );
-    CheckCommunication< GridView, GridView :: dimension, OutputStream >
+    CheckCommunication< GridView, NextCodim< Grid >::v, OutputStream >
     test( gridView, sout, level );
   }
 }

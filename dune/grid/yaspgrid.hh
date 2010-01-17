@@ -3245,6 +3245,18 @@ namespace Dune {
       static const bool v = true;
     };
 
+    template< int dim >
+    struct canCommunicate< YaspGrid< dim >, 0 >
+    {
+      static const bool v = true;
+    };
+
+    template< int dim >
+    struct canCommunicate< YaspGrid< dim >, dim >
+    {
+      static const bool v = true;
+    };
+
     /** \brief YaspGrid is parallel
        \ingroup YaspGrid
      */

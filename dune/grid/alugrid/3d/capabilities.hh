@@ -56,6 +56,12 @@ namespace Dune
       static const bool v = true;
     };
 
+    template< int codim >
+    struct canCommunicate< ALUCubeGrid< 3, 3 >, codim >
+    {
+      static const bool v = true;
+    };
+
     /** \brief ALUCubeGrid has conforming level grids
        \ingroup ALUCubeGrid
      */
@@ -109,7 +115,13 @@ namespace Dune
        \ingroup ALUSimplexGrid
      */
     template<>
-    struct isParallel< const ALUSimplexGrid< 3, 3 > >
+    struct isParallel< ALUSimplexGrid< 3, 3 > >
+    {
+      static const bool v = true;
+    };
+
+    template< int codim >
+    struct canCommunicate< ALUSimplexGrid< 3, 3 >, codim >
     {
       static const bool v = true;
     };
