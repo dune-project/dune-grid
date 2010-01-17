@@ -437,6 +437,17 @@ namespace Dune
         return mapping().local( global );
       }
 
+      /** \brief return center of element */
+      GlobalCoordinate center ( ) const
+      {
+        // get corresponding reference element
+        const GenericReferenceElement< ctype , mydim > & refElement =
+          GenericReferenceElements< ctype, mydim >::general(type());
+
+        // center is (for now) the centroid of the reference element mapped to
+        // this geometry.
+        return global(refElement.position(0,0));
+      }
 #if 0
       /** \brief Return true if a given point is within the parameter domain */
       bool checkInside ( const LocalCoordinate &local ) const
