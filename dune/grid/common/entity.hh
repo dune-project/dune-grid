@@ -361,11 +361,19 @@ namespace Dune
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
        The given entity resulted directly from a subdivision of its father
-       entity. For the macro elements dereferencing the EntityPointer is undefined.
+       entity. If hasFather() returns false, the behavior of this method is undefined.
      */
     EntityPointer father () const
     {
       return realEntity.father();
+    }
+
+    /**\brief Return true if entity has a father entity which can be accessed
+       using the father() method.
+     */
+    bool hasFather () const
+    {
+      return realEntity.hasFather();
     }
 
     //! Returns true if the entity is contained in the leaf grid
