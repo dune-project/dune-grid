@@ -329,6 +329,13 @@ namespace Dune {
     typename GridImp::template Codim<0>::EntityPointer father () const {
       return typename GridImp::template Codim<0>::EntityPointer (UG_NS<dim>::EFather(target_));
     }
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      DUNE_THROW(Dune::NotImplemented,
+                 "Default implementation does not work due to vertical load balancing");
+      return (level()>0);
+    }
 
     /*! Location of this element relative to the reference element element of the father.
        This is sufficient to interpolate all dofs in conforming case.
