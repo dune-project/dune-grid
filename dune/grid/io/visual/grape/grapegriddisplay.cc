@@ -4,7 +4,18 @@
 
 namespace Dune
 {
-
+  template <int d, int w>
+  class AlbertaGrid;
+  template <class G>
+  struct HasLevelIntersections
+  {
+    static const bool value = true;
+  };
+  template <int d, int w>
+  struct HasLevelIntersections<AlbertaGrid<d,w> >
+  {
+    static const bool value = false;
+  };
   //****************************************************************
   //
   // --GrapeGridDisplay, GrapeGridDisplay for given grid
@@ -21,7 +32,8 @@ namespace Dune
       , vertexIndex(GrapeGridDisplay<GridType>::template getVertexIndex<LeafIndexSetType>),
 #endif
       grid_(grid)
-      , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      // , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      , hasLevelIntersections_(HasLevelIntersections<GridType>::value)
       , gridPart_(0)
       , indexSet_( (void *)(&grid.leafIndexSet()) )
       , lid_(grid.localIdSet())
@@ -47,7 +59,8 @@ namespace Dune
                     template getVertexIndex<typename GridPartType::IndexSetType>),
 #endif
       grid_(gridPart.grid())
-      , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      // , hasLevelIntersections_(grid_.name() != "AlbertaGrid")
+      , hasLevelIntersections_(HasLevelIntersections<GridType>::value)
       , gridPart_((void *) &gridPart)
       , indexSet_( (void *)(&gridPart.indexSet()) )
       , lid_(grid_.localIdSet())
@@ -71,7 +84,8 @@ namespace Dune
       vertexIndex( getVertexIndex< typename GridView< VT >::IndexSet > ),
 #endif
       grid_( gridView.grid() ),
-      hasLevelIntersections_( grid_.name() != "AlbertaGrid" ),
+      // hasLevelIntersections_( grid_.name() != "AlbertaGrid" ),
+      hasLevelIntersections_(HasLevelIntersections<GridType>::value),
       gridPart_( (void *)&gridView ),
       indexSet_( (void *)&gridView.indexSet() ),
       lid_( grid_.localIdSet() ),
@@ -1013,7 +1027,7 @@ namespace Dune
 
     setIterationMethods(dune,0);
 
-    std::string gridName( grid_.name() );
+    std::string gridName( "Grid" );
     /* return hmesh with no data */
     return GrapeInterface<dim,dimworld>::
            setupHmesh(noe,nov,maxlevel,dune, gridName.c_str());
