@@ -51,7 +51,7 @@ void checkGeometryInFather(const GridType& grid)
       checkGeometry( eIt->geometry() );
 
       // check the father method
-      if( eIt->level () > 0 )
+      if( eIt->hasFather() )
       {
         typedef typename GridType::template Codim<0>::EntityPointer EntityPointer;
         EntityPointer father = eIt->father();
@@ -59,8 +59,10 @@ void checkGeometryInFather(const GridType& grid)
         // check geometry
         checkGeometry( father->geometry() );
 
-        while ( father->level() > 0 )
+        while ( father->hasFather() )
         {
+          if( father->level() == 0 )
+            DUNE_THROW( GridError, "A level zero entity returns hasFather()=true." );
           EntityPointer grandPa = father->father();
           typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
 
@@ -100,12 +102,12 @@ void checkGeometryInFather(const GridType& grid)
         {
           ++countChildren;
           int count = sons->level();
-          if( sons->level() > 0 )
+          if( sons->hasFather() )
           {
             typedef typename GridType::template Codim<0>::EntityPointer EntityPointer;
             EntityPointer father = sons->father();
             --count;
-            while ( father->level() > 0 )
+            while ( father->hasFather() )
             {
               father = father->father();
               --count;
@@ -118,74 +120,76 @@ void checkGeometryInFather(const GridType& grid)
           DUNE_THROW(GridError, "leaf entity has children ==> entity is not leaf");
       }
 
-      // Get geometry in father
-      typedef typename GridType::template Codim<0>::Entity::Geometry Geometry;
-      typedef typename GridType::template Codim<0>::Entity::LocalGeometry LocalGeometry;
-
-      const LocalGeometry& geometryInFather = eIt->geometryInFather();
-
-      // //////////////////////////////////////////////////////
-      //   Check for types and constants
-      // //////////////////////////////////////////////////////
-
-      dune_static_assert((is_same<
-                              typename Geometry::ctype,
-                              typename GridType::ctype>::value == true),"Geometry has wrong ctype");
-
-      dune_static_assert((static_cast<int>(Geometry::dimension)
-                          == static_cast<int>(GridType::dimension)),"Geometry has wrong dimension");
-
-      dune_static_assert((static_cast<int>(Geometry::mydimension)
-                          == static_cast<int>(GridType::dimension)),"Geometry has wrong mydimension");
-
-      dune_static_assert((static_cast<int>(Geometry::coorddimension)
-                          == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong coorddimension");
-
-      dune_static_assert((static_cast<int>(Geometry::dimensionworld)
-                          == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong dimensionworld");
-
-      // ///////////////////////////////////////////////////////
-      //   Check the different methods
-      // ///////////////////////////////////////////////////////
-      if (geometryInFather.type() != eIt->type())
-        DUNE_THROW(GridError, "Type of geometry and geometryInFather differ!");
-
-      if (geometryInFather.corners() != eIt->geometry().corners())
-        DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
-
-      // Compute the element center just to have an argument for the following methods
-      typename LocalGeometry::GlobalCoordinate center(0);
-
-      for (int j=0; j<geometryInFather.corners(); j++)
-        center += geometryInFather.corner( j );
-
-      if (geometryInFather.integrationElement(center) <=0)
-        DUNE_THROW(GridError, "nonpositive integration element found!");
-
-      /** \todo Missing local() */
-      /** \todo Missing global() */
-      /** \todo Missing jacobianInverse() */
-      /** \todo Missing checkInside() */
-
-      // /////////////////////////////////////////////////////////////////////////////////////
-      // Check whether the positions of the vertices of geometryInFather coincide
-      // with the ones computed 'by hand'.  This only works if the grids really are nested!
-      // /////////////////////////////////////////////////////////////////////////////////////
-      for( int j=0; j < geometryInFather.corners(); ++j )
+      if ( eIt->hasFather() )
       {
-        const typename Geometry::GlobalCoordinate cornerInFather
-          = eIt->father()->geometry().global( geometryInFather.corner( j ) );
-        const typename Geometry::GlobalCoordinate &cornerInSon = eIt->geometry().corner( j );
+        // Get geometry in father
+        typedef typename GridType::template Codim<0>::Entity::Geometry Geometry;
+        typedef typename GridType::template Codim<0>::Entity::LocalGeometry LocalGeometry;
 
-        if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
+        const LocalGeometry& geometryInFather = eIt->geometryInFather();
+
+        // //////////////////////////////////////////////////////
+        //   Check for types and constants
+        // //////////////////////////////////////////////////////
+
+        dune_static_assert((is_same<
+                                typename Geometry::ctype,
+                                typename GridType::ctype>::value == true),"Geometry has wrong ctype");
+
+        dune_static_assert((static_cast<int>(Geometry::dimension)
+                            == static_cast<int>(GridType::dimension)),"Geometry has wrong dimension");
+
+        dune_static_assert((static_cast<int>(Geometry::mydimension)
+                            == static_cast<int>(GridType::dimension)),"Geometry has wrong mydimension");
+
+        dune_static_assert((static_cast<int>(Geometry::coorddimension)
+                            == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong coorddimension");
+
+        dune_static_assert((static_cast<int>(Geometry::dimensionworld)
+                            == static_cast<int>(GridType::dimensionworld)),"Geometry has wrong dimensionworld");
+
+        // ///////////////////////////////////////////////////////
+        //   Check the different methods
+        // ///////////////////////////////////////////////////////
+        if (geometryInFather.type() != eIt->type())
+          DUNE_THROW(GridError, "Type of geometry and geometryInFather differ!");
+
+        if (geometryInFather.corners() != eIt->geometry().corners())
+          DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
+
+        // Compute the element center just to have an argument for the following methods
+        typename LocalGeometry::GlobalCoordinate center(0);
+
+        for (int j=0; j<geometryInFather.corners(); j++)
+          center += geometryInFather.corner( j );
+
+        if (geometryInFather.integrationElement(center) <=0)
+          DUNE_THROW(GridError, "nonpositive integration element found!");
+
+        /** \todo Missing local() */
+        /** \todo Missing global() */
+        /** \todo Missing jacobianInverse() */
+        /** \todo Missing checkInside() */
+
+        // /////////////////////////////////////////////////////////////////////////////////////
+        // Check whether the positions of the vertices of geometryInFather coincide
+        // with the ones computed 'by hand'.  This only works if the grids really are nested!
+        // /////////////////////////////////////////////////////////////////////////////////////
+        for( int j=0; j < geometryInFather.corners(); ++j )
         {
-          ++differentVertexCoords;
-          std :: cout << "geometryInFather yields different vertex position "
-                      << "(son: " << cornerInSon
-                      << ", father: " << cornerInFather << ")." << std :: endl;
+          const typename Geometry::GlobalCoordinate cornerInFather
+            = eIt->father()->geometry().global( geometryInFather.corner( j ) );
+          const typename Geometry::GlobalCoordinate &cornerInSon = eIt->geometry().corner( j );
+
+          if( (cornerInFather - cornerInSon).infinity_norm() > 1e-7 )
+          {
+            ++differentVertexCoords;
+            std :: cout << "geometryInFather yields different vertex position "
+                        << "(son: " << cornerInSon
+                        << ", father: " << cornerInFather << ")." << std :: endl;
+          }
         }
       }
-
     }
 
   }

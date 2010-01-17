@@ -298,9 +298,12 @@ struct EntityInterface<Grid, 0, dim, true>
     <Grid, dim, Dune::Capabilities::hasEntity<Grid, dim>::v >();
 
     // grid hierarchy
-    e.father();
-    e.geometryInFather();
-
+    if ( e.hasFather() )
+    {
+      const typename Entity::EntityPointer fatherPtr = e.father();
+      const Entity &father = *fatherPtr;
+      e.geometryInFather();
+    }
 
     // intersection iterator
     if (checkLevelIter) {
