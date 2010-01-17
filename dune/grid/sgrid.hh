@@ -110,7 +110,7 @@ namespace Dune {
     //! return center of the geometry
     FieldVector<ctype, cdim > center ( ) const
     {
-      return s;
+      return centroid;
     }
 
     //! maps a local coordinate within reference element to global coordinate in element
@@ -162,7 +162,8 @@ namespace Dune {
     SGeometry () : builtinverse(false) {};
 
   private:
-    FieldVector<ctype, cdim> s;             //!< position of element
+    FieldVector<ctype, cdim> s;              //!< position of element
+    FieldVector<ctype, cdim> centroid;       //!< centroid of element
     FieldMatrix<ctype,mydim,cdim> A;         //!< direction vectors as matrix
     array<FieldVector<ctype, cdim>, 1<<mydim> c;     //!< coordinate vectors of corners
     mutable FieldMatrix<ctype,cdim,mydim> Jinv;           //!< storage for inverse of jacobian
@@ -1454,6 +1455,11 @@ namespace Dune {
       return size(maxLevel(),type);
     }
 
+    //! \brief returns the number of boundary segments within the macro grid
+    size_t numBoundarySegments () const
+    {
+      return 2*dim;
+    }
 
     //! number of grid entities of all level for given codim
     int global_size (int codim) const;

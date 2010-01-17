@@ -38,6 +38,12 @@ namespace Dune {
         mask = mask<<1;
       }
     }
+
+    // compute centroid
+    centroid = 0.0;
+    for (int i=0; i<(1<<mydim); i++)
+      centroid += c[i];
+    centroid *= 1.0/(1<<mydim);
   }
 
   template<int mydim, int cdim, class GridImp>
