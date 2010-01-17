@@ -13,89 +13,6 @@
 namespace Dune
 {
 
-  /** \cond */
-  template <int dim,int dimworld>
-  class MacroGrid::Impl<ALUCubeGrid<dim,dimworld> > {
-    friend class MacroGrid::Impl< ALUConformGrid<dim,dimworld> >;
-  public:
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    static ALUCubeGrid<dim,dimworld>*
-    generate(MacroGrid& mg,
-             const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() );
-
-    template <class GridImp>
-    static GridImp* callDirectly( const char* gridname,
-                                  const int rank,
-                                  const char *filename,
-                                  MPICommunicatorType communicator );
-
-    static bool fileExists ( const char *fileName )
-    {
-      std :: ifstream testfile( fileName );
-      if( !testfile )
-        return false;
-      testfile.close();
-      return true;
-    }
-  };
-  /** \endcond */
-
-  /** \cond */
-  template <int dim,int dimworld>
-  class MacroGrid::Impl< ALUSimplexGrid<dim,dimworld> >
-  {
-  public:
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-    static ALUSimplexGrid<dim,dimworld>*
-    generate(MacroGrid& mg,
-             const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
-    {
-      // call generic generation of confrom grid (is the same)
-      return MacroGrid::Impl< ALUConformGrid<dim,dimworld> > :: template
-             generate< ALUSimplexGrid<dim,dimworld> >
-               ("ALUSimplexGrid< 2 , 2 >", mg, filename, MPICOMM );
-    }
-  };
-  /** \endcond */
-
-
-  /** \cond */
-  template <int dim,int dimworld>
-  class MacroGrid::Impl< ALUConformGrid<dim,dimworld> >
-  {
-    friend class MacroGrid::Impl< ALUSimplexGrid<dim,dimworld> >;
-  public:
-    // type of MPI communicator
-    typedef MPIHelper::MPICommunicator MPICommunicatorType;
-
-    static ALUConformGrid<dim,dimworld>*
-    generate(MacroGrid& mg,
-             const char* filename,
-             MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
-    {
-      return MacroGrid::Impl< ALUConformGrid<dim,dimworld> > ::
-             template generate < ALUConformGrid<dim,dimworld> >
-               ("ALUConformGrid< 2 , 2 >", mg, filename, MPICOMM );
-    }
-
-    // generic 2d grid generation method
-    template <class GridImp>
-    static GridImp*
-    generate(const char* gridname,
-             MacroGrid& mg,
-             const char* filename,
-             MPICommunicatorType MPICOMM );
-
-
-    static bool fileExists ( const char *fileName )
-    {
-      return MacroGrid::Impl< ALUCubeGrid<dim,dimworld> > :: fileExists( fileName );
-    }
-  };
-  /** \endcond */
-
   // DGFGridInfo (specialization for ALUGrid)
   // ----------------------------------------
 
@@ -133,23 +50,26 @@ namespace Dune
   // ------------------------------
 
   // template< int dim, int dimworld > // for a first version
-  template < int dim >
-  struct DGFGridFactory< ALUSimplexGrid< dim, 3 > >
+  template < class G >
+  struct DGFBaseFactory
   {
-    typedef ALUSimplexGrid<3,3>  Grid;
+    typedef G Grid;
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     typedef typename Grid::template Codim<0>::Entity Element;
     typedef typename Grid::template Codim<dimension>::Entity Vertex;
     typedef Dune::GridFactory<Grid> GridFactory;
 
-    explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+    explicit DGFBaseFactory ( const std::string &filename )
+      : factory_( ),
+        dgf_( 0, 1 )
+    {}
+
+    explicit DGFBaseFactory ( const std::string &filename,
+                              MPICommunicatorType comm )
       : factory_(comm),
         dgf_( 0, 1 )
-    {
-      generate( filename, comm );
-    }
+    {}
 
     Grid *grid () const
     {
@@ -199,13 +119,102 @@ namespace Dune
       return dgf_.vtxParams[ factory_.insertionIndex( vertex ) ];
     }
 
-  private:
-    void generate( const std::string &filename,
-                   MPICommunicatorType comm );
+  protected:
+    static Grid* callDirectly( const char* gridname,
+                               const int rank,
+                               const char *filename,
+                               MPICommunicatorType communicator )
+    {
+  #if ALU3DGRID_PARALLEL
+      std :: stringstream tmps;
+      tmps << filename << "." << rank;
+      const std :: string &tmp = tmps.str();
 
+      if( fileExists( tmp.c_str() ) )
+        return new Grid( tmp.c_str(), communicator );
+  #endif
+      if( fileExists( filename ) )
+      {
+        if( rank == 0 )
+          return new Grid( filename );
+        else
+          return new Grid( );
+      }
+      DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
+                                                 << filename << "'." );
+    }
+    static bool fileExists ( const char *fileName )
+    {
+      std :: ifstream testfile( fileName );
+      if( !testfile )
+        return false;
+      testfile.close();
+      return true;
+    }
     Grid *grid_;
     GridFactory factory_;
     DuneGridFormatParser dgf_;
+  };
+
+  template <>
+  struct DGFGridFactory< ALUSimplexGrid<3,3> > :
+    public DGFBaseFactory< ALUSimplexGrid<3,3> >
+  {
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : DGFBaseFactory< ALUSimplexGrid<3,3> >( filename, comm )
+    {
+      generate( filename, comm );
+    }
+  protected:
+    void generate( const std::string &filename,
+                   MPICommunicatorType comm );
+
+  };
+  template <>
+  struct DGFGridFactory< ALUCubeGrid<3,3> > :
+    public DGFBaseFactory< ALUCubeGrid<3,3> >
+  {
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : DGFBaseFactory< ALUCubeGrid<3,3> >( filename, comm )
+    {
+      generate( filename, comm );
+    }
+  protected:
+    void generate( const std::string &filename,
+                   MPICommunicatorType comm );
+
+  };
+  template <>
+  struct DGFGridFactory< ALUConformGrid<2,2> > :
+    public DGFBaseFactory< ALUConformGrid<2,2> >
+  {
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : DGFBaseFactory< ALUConformGrid<2,2> >( filename )
+    {
+      generate( filename, comm );
+    }
+  protected:
+    void generate( const std::string &filename,
+                   MPICommunicatorType comm );
+
+  };
+  template <>
+  struct DGFGridFactory< ALUSimplexGrid<2,2> > :
+    public DGFBaseFactory< ALUSimplexGrid<2,2> >
+  {
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+      : DGFBaseFactory< ALUSimplexGrid<2,2> >( filename )
+    {
+      generate( filename, comm );
+    }
+  protected:
+    void generate( const std::string &filename,
+                   MPICommunicatorType comm );
+
   };
 }
 

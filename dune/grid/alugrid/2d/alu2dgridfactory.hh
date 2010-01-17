@@ -65,8 +65,8 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    const std::string filename_;
-    bool removeGeneratedFile_;
+    // const std::string filename_;
+    // bool removeGeneratedFile_;
     VertexVector vertices_;
     ElementVector elements_;
     BoundaryIdVector boundaryIds_;
@@ -192,7 +192,9 @@ namespace Dune
      */
     Grid *createGrid ();
 
-    Grid *createGrid ( const bool addMissingBoundaries , const std::string dgfName = "" );
+    Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+
+    Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
   private:
     template< class T >

@@ -18,19 +18,18 @@ namespace Dune
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( bool removeGeneratedFile )
-    : filename_(),
-      removeGeneratedFile_( removeGeneratedFile ),
-      globalProjection_ ( 0 ),
+  // : filename_(),
+  //  removeGeneratedFile_( removeGeneratedFile ),
+    : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
-
 
   template< template< int, int > class ALUGrid >
   ALU2dGridFactory<ALUGrid>
   :: ALU2dGridFactory ( const std::string &filename )
-    : filename_( filename ),
-      removeGeneratedFile_( filename.empty() ),
-      globalProjection_ ( 0 ),
+  //: filename_( filename ),
+  //  removeGeneratedFile_( filename.empty() ),
+    : globalProjection_ ( 0 ),
       numFacesInserted_ ( 0 )
   {}
 
@@ -175,22 +174,28 @@ namespace Dune
   }
 
   template< template< int, int > class ALUGrid >
-  ALUGrid< 2, 2 > *ALU2dGridFactory<ALUGrid>::createGrid ()
+  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >::createGrid ()
   {
-    return createGrid( true );
+    return createGrid( true, true, "" );
   }
 
+  template< template< int, int > class ALUGrid >
+  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >
+  ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  {
+    return createGrid( addMissingBoundaries, true, dgfName );
+  }
 
   template< template< int, int > class ALUGrid >
-  ALUGrid< 2, 2 > *ALU2dGridFactory<ALUGrid>::
-  createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  ALUGrid< 2, 2 > *ALU2dGridFactory< ALUGrid >
+  ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     if( addMissingBoundaries )
       recreateBoundaryIds();
 
-    std::string filename ( filename_.empty() ?
-                           temporaryFileName( dgfName ) :
-                           filename_ );
+    std::string filename ( temporary ?
+                           temporaryFileName( name ) :
+                           name );
 
     std::ofstream out( filename.c_str() );
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
@@ -283,7 +288,7 @@ namespace Dune
 
     // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid = new Grid( filename, globalProjection_ , bndProjections );
-    if( removeGeneratedFile_ )
+    if( temporary )
       remove( filename.c_str() );
 
     // remove pointer

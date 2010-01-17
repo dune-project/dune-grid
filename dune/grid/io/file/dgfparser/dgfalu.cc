@@ -4,15 +4,13 @@
 namespace Dune
 {
 
-  // template< int dim, int dimworld >
-  template <int dim> // for a first version
-  void DGFGridFactory< ALUSimplexGrid< dim, 3 > >
+  void DGFGridFactory< ALUSimplexGrid< 3, 3 > >
   ::generate( const std::string &filename,
               MPICommunicatorType communicator )
   {
-    static const int dimworld = 3; // for a first version
+    const int dimworld = 3;
     dgf_.element = DuneGridFormatParser::Simplex;
-    dgf_.dimgrid = dim;
+    dgf_.dimgrid = dimworld;
     dgf_.dimw = dimworld;
     int rank = 0;
 #if ALU3DGRID_PARALLEL
@@ -20,36 +18,37 @@ namespace Dune
 #endif
 
     std::ifstream file( filename.c_str() );
-    if( dgf_.readDuneGrid( file, 3, 3 ) )
+    if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
-      if( dgf_.dimw != 3 )
+      if( dgf_.dimw != dimworld )
         DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
                                                << "dimension " << dgf_.dimw
                                                << " and cannot be used to initialize an "
-                                               << "ALUGrid of dimension 3." );
-      dgf_.setOrientation( 2, 3 );
+                                               << "ALUGrid of dimension " << dimension << ".");
+      if (dimworld == 3)
+        dgf_.setOrientation( 2, 3 );
 
       dgf::GridParameterBlock parameter( file );
       if( rank == 0 )
       {
         for( int n = 0; n < dgf_.nofvtx; ++n )
         {
-          FieldVector< double, 3 > pos;
-          for( unsigned int i = 0; i < 3; ++i )
+          FieldVector< double, dimworld > pos;
+          for( int i = 0; i < dimworld; ++i )
             pos[ i ] = dgf_.vtx[ n ][ i ];
           factory_.insertVertex( pos );
         }
 
-        GeometryType elementType( GeometryType::simplex, 3 );
+        GeometryType elementType( GeometryType::simplex, dimworld );
         for( int n = 0; n < dgf_.nofelements; ++n )
         {
           factory_.insertElement( elementType, dgf_.elements[ n ] );
-          for( int face = 0; face <= 3; ++face )
+          for( int face = 0; face <= dimworld; ++face )
           {
             typedef MacroGrid::facemap_t::key_type Key;
             typedef MacroGrid::facemap_t::iterator Iterator;
 
-            const Key key = ElementFaceUtil::generateFace( 3, dgf_.elements[ n ], face );
+            const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
             const Iterator it = dgf_.facemap.find( key );
             if( it != dgf_.facemap.end() )
               factory_.insertBoundary( n, face, it->second );
@@ -79,149 +78,63 @@ namespace Dune
     }
     else
     {
-      grid_ = MacroGrid :: Impl< ALUCubeGrid< 3, 3 > > ::
-              callDirectly < ALUSimplexGrid< 3, 3 > >
-                ("ALUSimplexGrid< 3 , 3 >", rank, filename.c_str(), communicator);
+      grid_ =  callDirectly ("ALUSimplexGrid< 3 , 3 >", rank, filename.c_str(), communicator);
     }
   }
-
-#if 0
-  template<>
-  inline ALUSimplexGrid< 3, 3 > *MacroGrid :: Impl< ALUSimplexGrid< 3, 3 > >
-  :: generate ( MacroGrid &macroGrid,
-                const char *filename,
-                MPICommunicatorType communicator )
+  void DGFGridFactory< ALUCubeGrid< 3, 3 > >
+  ::generate( const std::string &filename,
+              MPICommunicatorType communicator )
   {
-    macroGrid.element = Simplex;
-
+    const int dimworld = 3;
+    dgf_.element = DuneGridFormatParser::Cube;
+    dgf_.dimgrid = dimworld;
+    dgf_.dimw = dimworld;
     int rank = 0;
 #if ALU3DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    std::ifstream file( filename );
-    if( macroGrid.readDuneGrid( file, 3, 3 ) )
+    std::ifstream file( filename.c_str() );
+    if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
-      if( macroGrid.dimw != 3 )
+      if( dgf_.dimw != dimworld )
         DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
-                                               << "dimension " << macroGrid.dimw
+                                               << "dimension " << dgf_.dimw
                                                << " and cannot be used to initialize an "
-                                               << "ALUGrid of dimension 3." );
-      macroGrid.setOrientation( 2, 3 );
+                                               << "ALUGrid of dimension " << dimension << ".");
 
       dgf::GridParameterBlock parameter( file );
-      GridFactory< ALUSimplexGrid< 3, 3 > > factory( parameter.dumpFileName(), communicator );
       if( rank == 0 )
       {
-        for( int n = 0; n < macroGrid.nofvtx; ++n )
+        for( int n = 0; n < dgf_.nofvtx; ++n )
         {
-          FieldVector< double, 3 > pos;
-          for( unsigned int i = 0; i < 3; ++i )
-            pos[ i ] = macroGrid.vtx[ n ][ i ];
-          factory.insertVertex( pos );
+          FieldVector< double, dimworld > pos;
+          for( int i = 0; i < dimworld; ++i )
+            pos[ i ] = dgf_.vtx[ n ][ i ];
+          factory_.insertVertex( pos );
         }
 
-        GeometryType elementType( GeometryType::simplex, 3 );
-        for( int n = 0; n < macroGrid.nofelements; ++n )
+        GeometryType elementType( GeometryType::cube, dimworld );
+        for( int n = 0; n < dgf_.nofelements; ++n )
         {
-          factory.insertElement( elementType, macroGrid.elements[ n ] );
-          for( int face = 0; face <= 3; ++face )
+          factory_.insertElement( elementType, dgf_.elements[ n ] );
+          for( int face = 0; face < 2*dimworld; ++face )
           {
             typedef MacroGrid::facemap_t::key_type Key;
             typedef MacroGrid::facemap_t::iterator Iterator;
 
-            const Key key = ElementFaceUtil::generateFace( 3, macroGrid.elements[ n ], face );
-            const Iterator it = macroGrid.facemap.find( key );
-            if( it != macroGrid.facemap.end() )
-              factory.insertBoundary( n, face, it->second );
+            const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+            const Iterator it = dgf_.facemap.find( key );
+            if( it != dgf_.facemap.end() )
+              factory_.insertBoundary( n, face, it->second );
           }
         }
 
-        const int dimworld = 3;
         dgf::ProjectionBlock projectionBlock( file, dimworld );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.defaultProjection< dimworld >();
         if( projection != 0 )
-          factory.insertBoundaryProjection( *projection );
-        const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
-        for( size_t i = 0; i < numBoundaryProjections; ++i )
-        {
-          GeometryType type( GeometryType::simplex, dimworld-1 );
-          const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
-          const DuneBoundaryProjection< dimworld > *projection
-            = projectionBlock.boundaryProjection< dimworld >( i );
-          factory.insertBoundaryProjection( type, vertices, projection );
-        }
-      }
-
-      return factory.createGrid( macroGrid.facemap.empty(), filename );
-    }
-    else
-    {
-      return MacroGrid :: Impl< ALUCubeGrid< 3, 3 > > ::
-             callDirectly < ALUSimplexGrid< 3, 3 > >
-               ("ALUSimplexGrid< 3 , 3 >", rank, filename, communicator);
-    }
-  }
-#endif
-
-
-  template<>
-  inline ALUCubeGrid< 3, 3 > *MacroGrid :: Impl< ALUCubeGrid< 3, 3 > >
-  :: generate ( MacroGrid &macroGrid,
-                const char *filename,
-                MPICommunicatorType communicator )
-  {
-    macroGrid.element = Cube;
-
-    int rank = 0;
-#if ALU3DGRID_PARALLEL
-    MPI_Comm_rank( communicator, &rank );
-#endif
-
-    std :: ifstream file( filename );
-    if( macroGrid.readDuneGrid( file, 3, 3 ) )
-    {
-      if( macroGrid.dimw != 3 )
-        DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
-                                               << "dimension " << macroGrid.dimw
-                                               << " and cannot be used to initialize an "
-                                               << "ALUGrid of dimension 3." );
-
-      dgf::GridParameterBlock parameter( file );
-      GridFactory< ALUCubeGrid< 3, 3 > > factory( parameter.dumpFileName(), communicator );
-      if( rank == 0 )
-      {
-        for( int n = 0; n < macroGrid.nofvtx; ++n )
-        {
-          FieldVector< double, 3 > pos;
-          for( unsigned int i = 0; i < 3; ++i )
-            pos[ i ] = macroGrid.vtx[ n ][ i ];
-          factory.insertVertex( pos );
-        }
-
-        GeometryType elementType( GeometryType::cube, 3 );
-        for( int n = 0; n < macroGrid.nofelements; ++n )
-        {
-          factory.insertElement( elementType, macroGrid.elements[ n ] );
-          for( int face = 0; face < 6; ++face )
-          {
-            typedef MacroGrid::facemap_t::key_type Key;
-            typedef MacroGrid::facemap_t::iterator Iterator;
-
-            const Key key = ElementFaceUtil::generateFace( 3, macroGrid.elements[ n ], face );
-            const Iterator it = macroGrid.facemap.find( key );
-            if( it != macroGrid.facemap.end() )
-              factory.insertBoundary( n, face, it->second );
-          }
-        }
-
-        const int dimworld = 3;
-        dgf::ProjectionBlock projectionBlock( file, dimworld );
-        const DuneBoundaryProjection< dimworld > *projection
-          = projectionBlock.defaultProjection< dimworld >();
-        if( projection != 0 )
-          factory.insertBoundaryProjection( *projection );
+          factory_.insertBoundaryProjection( *projection );
         const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
         for( size_t i = 0; i < numBoundaryProjections; ++i )
         {
@@ -229,117 +142,180 @@ namespace Dune
           const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
           const DuneBoundaryProjection< dimworld > *projection
             = projectionBlock.boundaryProjection< dimworld >( i );
-          factory.insertBoundaryProjection( type, vertices, projection );
+          factory_.insertBoundaryProjection( type, vertices, projection );
         }
       }
 
-      return factory.createGrid( macroGrid.facemap.empty(), filename );
+      if ( ! parameter.dumpFileName().empty() )
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
+      else
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
     }
     else
     {
-      return callDirectly< ALUCubeGrid< 3, 3 > >
-               ("ALUCubeGrid< 3 , 3 >", rank, filename, communicator);
+      grid_ =  callDirectly ("ALUCubeGrid< 3 , 3 >", rank, filename.c_str(), communicator);
     }
   }
 
-  template <>
-  template <class GridImp>
-  inline GridImp*  MacroGrid :: Impl< ALUCubeGrid< 3, 3 > >
-  :: callDirectly( const char* gridname,
-                   const int rank,
-                   const char* filename,
-                   MPICommunicatorType communicator )
+  void DGFGridFactory< ALUSimplexGrid< 2, 2 > >
+  ::generate( const std::string &filename,
+              MPICommunicatorType communicator )
   {
-#if ALU3DGRID_PARALLEL
-    std :: stringstream tmps;
-    tmps << filename << "." << rank;
-    const std :: string &tmp = tmps.str();
-
-    if( fileExists( tmp.c_str() ) )
-      return new GridImp( tmp.c_str(), communicator );
-#endif
-    if( fileExists( filename ) )
-    {
-      if( rank == 0 )
-        return new GridImp( filename );
-      else
-        return new GridImp( );
-    }
-    DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
-                                               << filename << "'." );
-  }
-
-  template <>
-  template <class GridImp>
-  inline GridImp* MacroGrid :: Impl< ALUConformGrid< 2, 2 > >
-  :: generate ( const char* gridname,
-                MacroGrid &macroGrid,
-                const char* filename,
-                MPICommunicatorType communicator )
-  {
-    macroGrid.element = Simplex;
-
+    const int dimworld = 2;
+    dgf_.element = DuneGridFormatParser::Simplex;
+    dgf_.dimgrid = dimworld;
+    dgf_.dimw = dimworld;
     int rank = 0;
 #if ALU2DGRID_PARALLEL
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    std :: ifstream file( filename );
-    if( macroGrid.readDuneGrid( file, 2, 2 ) )
+    std::ifstream file( filename.c_str() );
+    if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
     {
-      if( macroGrid.dimw != 2 )
+      if( dgf_.dimw != dimworld )
         DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
-                                               << "dimension " << macroGrid.dimw
+                                               << "dimension " << dgf_.dimw
                                                << " and cannot be used to initialize an "
-                                               << "ALUGrid of dimension 2." );
+                                               << "ALUGrid of dimension " << dimension << ".");
 
       dgf::GridParameterBlock parameter( file );
 
-      // for parallel runs only rank 0 should create dumpFile
-      // all other processors create temporary file
-      typedef GridFactory< GridImp > GridFactoryType;
-      std::auto_ptr< GridFactoryType > factPtr
-        ( ( rank == 0 ) ?
-        new GridFactoryType( parameter.dumpFileName() ) :
-        new GridFactoryType( )
-        );
-
-      // get reference
-      GridFactoryType& factory = * factPtr;
-
-      for( int n = 0; n < macroGrid.nofvtx; ++n )
+      if( rank == 0 )
       {
-        FieldVector< double, 2 > pos;
-        for( unsigned int i = 0; i < 2; ++i )
-          pos[ i ] = macroGrid.vtx[ n ][ i ];
-        factory.insertVertex( pos );
-      }
-
-      GeometryType elementType( GeometryType::simplex, 2 );
-      for( int n = 0; n < macroGrid.nofelements; ++n )
-      {
-        factory.insertElement( elementType, macroGrid.elements[ n ] );
-        for( int face = 0; face < 3; ++face )
+        for( int n = 0; n < dgf_.nofvtx; ++n )
         {
-          typedef MacroGrid::facemap_t::key_type Key;
-          typedef MacroGrid::facemap_t::iterator Iterator;
+          FieldVector< double, dimworld > pos;
+          for( int i = 0; i < dimworld; ++i )
+            pos[ i ] = dgf_.vtx[ n ][ i ];
+          factory_.insertVertex( pos );
+        }
 
-          const Key key = ElementFaceUtil::generateFace( 2, macroGrid.elements[ n ], face );
-          const Iterator it = macroGrid.facemap.find( key );
-          if( it != macroGrid.facemap.end() )
-            factory.insertBoundary( n, face, it->second );
+        GeometryType elementType( GeometryType::simplex, dimworld );
+        for( int n = 0; n < dgf_.nofelements; ++n )
+        {
+          factory_.insertElement( elementType, dgf_.elements[ n ] );
+          for( int face = 0; face <= dimworld; ++face )
+          {
+            typedef MacroGrid::facemap_t::key_type Key;
+            typedef MacroGrid::facemap_t::iterator Iterator;
+
+            const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+            const Iterator it = dgf_.facemap.find( key );
+            if( it != dgf_.facemap.end() )
+              factory_.insertBoundary( n, face, it->second );
+          }
+        }
+
+        dgf::ProjectionBlock projectionBlock( file, dimworld );
+        const DuneBoundaryProjection< dimworld > *projection
+          = projectionBlock.defaultProjection< dimworld >();
+        if( projection != 0 )
+          factory_.insertBoundaryProjection( *projection );
+        const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+        for( size_t i = 0; i < numBoundaryProjections; ++i )
+        {
+          GeometryType type( GeometryType::simplex, dimworld-1 );
+          const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+          const DuneBoundaryProjection< dimworld > *projection
+            = projectionBlock.boundaryProjection< dimworld >( i );
+          factory_.insertBoundaryProjection( type, vertices, projection );
         }
       }
-      return factory.createGrid( macroGrid.facemap.empty(), filename );
+
+      if ( ! parameter.dumpFileName().empty() )
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
+      else
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
     }
     else
     {
-      if( fileExists( filename ) )
-        return new GridImp( filename );
+      if( fileExists( filename.c_str() ) )
+        grid_ = new Grid( filename );
+      else
+        DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '"
+                    << filename << "'." );
     }
-    DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
-                                               << filename << "'." );
   }
+  void DGFGridFactory< ALUConformGrid< 2, 2 > >
+  ::generate( const std::string &filename,
+              MPICommunicatorType communicator )
+  {
+    const int dimworld = 2;
+    dgf_.element = DuneGridFormatParser::Simplex;
+    dgf_.dimgrid = dimworld;
+    dgf_.dimw = dimworld;
+    int rank = 0;
+#if ALU2DGRID_PARALLEL
+    MPI_Comm_rank( communicator, &rank );
+#endif
 
+    std::ifstream file( filename.c_str() );
+    if( dgf_.readDuneGrid( file, dimworld, dimworld ) )
+    {
+      if( dgf_.dimw != dimworld )
+        DUNE_THROW( DGFException, "Macrofile " << filename << " is for "
+                                               << "dimension " << dgf_.dimw
+                                               << " and cannot be used to initialize an "
+                                               << "ALUGrid of dimension " << dimension << ".");
+
+      dgf::GridParameterBlock parameter( file );
+
+      if( rank == 0 )
+      {
+        for( int n = 0; n < dgf_.nofvtx; ++n )
+        {
+          FieldVector< double, dimworld > pos;
+          for( int i = 0; i < dimworld; ++i )
+            pos[ i ] = dgf_.vtx[ n ][ i ];
+          factory_.insertVertex( pos );
+        }
+
+        GeometryType elementType( GeometryType::simplex, dimworld );
+        for( int n = 0; n < dgf_.nofelements; ++n )
+        {
+          factory_.insertElement( elementType, dgf_.elements[ n ] );
+          for( int face = 0; face <= dimworld; ++face )
+          {
+            typedef MacroGrid::facemap_t::key_type Key;
+            typedef MacroGrid::facemap_t::iterator Iterator;
+
+            const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[ n ], face );
+            const Iterator it = dgf_.facemap.find( key );
+            if( it != dgf_.facemap.end() )
+              factory_.insertBoundary( n, face, it->second );
+          }
+        }
+
+        dgf::ProjectionBlock projectionBlock( file, dimworld );
+        const DuneBoundaryProjection< dimworld > *projection
+          = projectionBlock.defaultProjection< dimworld >();
+        if( projection != 0 )
+          factory_.insertBoundaryProjection( *projection );
+        const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+        for( size_t i = 0; i < numBoundaryProjections; ++i )
+        {
+          GeometryType type( GeometryType::cube, dimworld-1 );
+          const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+          const DuneBoundaryProjection< dimworld > *projection
+            = projectionBlock.boundaryProjection< dimworld >( i );
+          factory_.insertBoundaryProjection( type, vertices, projection );
+        }
+      }
+
+      if ( ! parameter.dumpFileName().empty() )
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
+      else
+        grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
+    }
+    else
+    {
+      if( fileExists( filename.c_str() ) )
+        grid_ = new Grid( filename );
+      else
+        DUNE_THROW( GridError, "Unable to create a 2d ALUGrid from '"
+                    << filename << "'." );
+    }
+  }
 } // end namespace Dune
   /** \endcond */

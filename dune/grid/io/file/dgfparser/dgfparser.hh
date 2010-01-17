@@ -37,6 +37,8 @@ namespace Dune
   {
     template< class GridType >
     friend class DGFGridFactory;
+    template< class GridType >
+    friend class DGFBaseFactory;
   public:
     typedef enum {Simplex,Cube,General} element_t;
     typedef enum {counterclockwise=1,clockwise=-1} orientation_t;
