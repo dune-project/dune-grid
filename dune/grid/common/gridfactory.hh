@@ -101,7 +101,7 @@ namespace Dune
        the pointer handed over to you by the method createGrid() is
        the one you supplied here.
      */
-    GridFactoryInterface(GridType* grid)
+    DUNE_DEPRECATED GridFactoryInterface(GridType* grid)
     {}
 
     virtual ~GridFactoryInterface ()
@@ -260,7 +260,7 @@ namespace Dune
        the pointer handed over to you by the method createGrid() is
        the one you supplied here.
      */
-    GridFactory(GridType* grid)
+    DUNE_DEPRECATED GridFactory(GridType* grid)
     {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }
