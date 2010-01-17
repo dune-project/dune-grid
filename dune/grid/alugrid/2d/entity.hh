@@ -313,6 +313,12 @@ namespace Dune {
     //! Assumes that meshes are nested.
     EntityPointer father () const;
 
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      return (this->level()>0);
+    }
+
     /*! Inter-level access to son elements on higher levels<=maxlevel.
        This is provided for sparsely stored nested unstructured meshes.
        Returns iterator to first son.

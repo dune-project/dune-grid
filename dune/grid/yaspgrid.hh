@@ -820,6 +820,11 @@ namespace Dune {
 
       return YaspEntityPointer<0,GridImp>(cg,cg.cell_overlap().tsubbegin(coord));
     }
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      return (_g.level()>0);
+    }
 
     /*! Location of this element relative to the reference element element of the father.
           This is sufficient to interpolate all dofs in conforming case.

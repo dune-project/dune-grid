@@ -533,6 +533,12 @@ namespace Dune {
      */
     EntityPointer father () const;
 
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      return (this->level()>0);
+    }
+
     //! return true if the entity is leaf
     bool isLeaf () const
     {

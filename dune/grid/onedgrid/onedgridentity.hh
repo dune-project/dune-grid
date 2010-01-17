@@ -352,6 +352,11 @@ namespace Dune {
     OneDGridEntityPointer<0, GridImp> father () const {
       return OneDGridEntityPointer<0,GridImp>(target_->father_);
     }
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      return (this->level()>0);
+    }
 
     /*! Location of this element relative to the reference element
        of the father. This is sufficient to interpolate all

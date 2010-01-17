@@ -885,6 +885,11 @@ namespace Dune
         return MakeableEntityPointer( EntityPointerImpl( *grid_, hostEntity().father() ) );
       }
 
+      bool hasFather () const
+      {
+        return hostEntity().hasFather();
+      }
+
       const LocalGeometry &geometryInFather () const
       {
         return hostEntity().geometryInFather();

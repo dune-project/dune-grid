@@ -292,6 +292,11 @@ namespace Dune
     //! Inter-level access to father element on coarser grid.
     //! Assumes that meshes are nested.
     EntityPointer father () const;
+    //! returns true if father entity exists
+    bool hasFather () const
+    {
+      return (this->level()>0);
+    }
 
     /** \brief Location of this element relative to the father's reference element
      *
