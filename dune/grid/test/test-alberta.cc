@@ -31,7 +31,7 @@
 
 
 template< int dim, int dimworld >
-struct EnableLevelIntersectionIteratorCheck< AlbertaGrid< dim, dimworld > >
+struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > >
 {
   static const bool v = false;
 };
@@ -63,11 +63,12 @@ template< class Grid >
 void checkProjectedUnitCube ()
 {
   std::cout << ">>> Checking projected unit cube..." << std::endl;
-  CircleBoundaryProjection< Grid::dimensionworld > projection;
-  GridFactory< Grid > gridFactory;
+  Dune::CircleBoundaryProjection< Grid::dimensionworld > projection;
+  Dune::GridFactory< Grid > gridFactory;
   BasicUnitCube< Grid::dimension >::insertVertices( gridFactory, -1.0, 1.0 );
   BasicUnitCube< Grid::dimension >::insertSimplices( gridFactory );
   gridFactory.insertBoundaryProjection( projection );
+  gridFactory.markLongestEdge();
   Grid *grid = gridFactory.createGrid();
   for( int i = 0; i < 2; ++i )
   {
@@ -140,7 +141,7 @@ try {
     }
 
     // check dgf grid width half refinement
-    const int stepsForHalf = DGFGridInfo< GridType >::refineStepsForHalf();
+    const int stepsForHalf = Dune::DGFGridInfo< GridType >::refineStepsForHalf();
     std::cout << ">>> Refining grid (" << stepsForHalf
               << " times) and checking again..." << std::endl;
     grid.globalRefine( stepsForHalf );

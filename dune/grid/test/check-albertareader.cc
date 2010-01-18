@@ -16,8 +16,8 @@ void checkAlbertaReader ()
   std::ostringstream filename;
   filename << "grid-" << Grid::dimension << "-" << Grid::dimensionworld << ".amc";
 
-  AlbertaReader< Grid > reader;
-  GridFactory< Grid > factory;
+  Dune::AlbertaReader< Grid > reader;
+  Dune::GridFactory< Grid > factory;
   reader.readGrid( filename.str(), factory );
 
   // create grid and just check the macro grid

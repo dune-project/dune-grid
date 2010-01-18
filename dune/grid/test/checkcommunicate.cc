@@ -11,8 +11,6 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/genericreferenceelements.hh>
 
-using namespace Dune;
-
 /*  Communication Test for Parallel Grids
  *  -------------------------------------
  *
@@ -68,9 +66,7 @@ template <class IndexSetImp,
     class GlobalIdSetImp,
     class DataVectorType >
 class ExampleDataHandle
-  : public CommDataHandleIF <
-        ExampleDataHandle<IndexSetImp,GlobalIdSetImp,DataVectorType> ,
-        typename DataVectorType :: value_type >
+  : public Dune::CommDataHandleIF< ExampleDataHandle< IndexSetImp, GlobalIdSetImp, DataVectorType >, typename DataVectorType::value_type >
 {
   const IndexSetImp & iset_;
   const GlobalIdSetImp & ids_;
@@ -127,7 +123,7 @@ public:
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
       const Vector corner = geometry.corner( i );
       for( int j = 0; j < Geometry::dimensionworld; ++j )
         buff.write( corner[ j ] );
@@ -157,7 +153,7 @@ public:
     buff.read(x); // flag
 
     // for ghost entities x > 0 must be true
-    assert( ( e.partitionType() == GhostEntity ) ? (x>=0.0) : 1);
+    assert( ( e.partitionType() == Dune::GhostEntity ) ? (x>=0.0) : 1);
 
     if (x>=0)
     { // only overwrite existing data if flag = 1, i.e.,
@@ -178,7 +174,7 @@ public:
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
       const Vector corner = geometry.corner( i );
       for( int j = 0; j < Geometry::dimensionworld; ++j )
       {
@@ -219,7 +215,7 @@ class CheckCommunication
 
   typedef typename Grid :: ctype ctype;
 
-  typedef FieldVector< ctype, dimworld > CoordinateVector;
+  typedef Dune::FieldVector< ctype, dimworld > CoordinateVector;
   typedef std :: vector< double > ArrayType;
 
   CoordinateVector upwind_;
@@ -273,9 +269,9 @@ class CheckCommunication
 
           const typename Intersection::LocalGeometry &geoInSelf = intersection.geometryInInside();
 
-          const GenericReferenceElement< ctype, dim-1 > &faceRefElement
-            = GenericReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
-          const FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
+          const Dune::GenericReferenceElement< ctype, dim-1 > &faceRefElement
+            = Dune::GenericReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
+          const Dune::FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
 
           const CoordinateVector normal = intersection.integrationOuterNormal( bary );
           double calc = normal * upwind_;
@@ -286,8 +282,8 @@ class CheckCommunication
           const bool proceedAnyway = (level_ < 0 ? false : !intersection.neighbor());
           if( (calc > -1e-8) || intersection.boundary() || proceedAnyway )
           {
-            const GenericReferenceElement< ctype, dim > &insideRefElem
-              = GenericReferenceElements< ctype, dim >::general( entity.type() );
+            const Dune::GenericReferenceElement< ctype, dim > &insideRefElem
+              = Dune::GenericReferenceElements< ctype, dim >::general( entity.type() );
 
             const int indexInInside = intersection.indexInInside();
             for( int i = 0; i < insideRefElem.size( indexInInside, 1, cdim ); ++i )
@@ -316,8 +312,8 @@ class CheckCommunication
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
-              const GenericReferenceElement< ctype, dim > &outsideRefElem
-                = GenericReferenceElements< ctype, dim >::general( neigh.type() );
+              const Dune::GenericReferenceElement< ctype, dim > &outsideRefElem
+                = Dune::GenericReferenceElements< ctype, dim >::general( neigh.type() );
 
               const int indexInOutside = intersection.indexInOutside();
               for( int i = 0; i < outsideRefElem.size( indexInOutside, 1, cdim ); ++i )
@@ -420,8 +416,8 @@ class CheckCommunication
 
             for( int j = 0; j < numVertices; )
             {
-              const GenericReferenceElement< double, dim > &refElem
-                = GenericReferenceElements< double, dim >::general( entity.type() );
+              const Dune::GenericReferenceElement< double, dim > &refElem
+                = Dune::GenericReferenceElements< double, dim >::general( entity.type() );
               const int vx = refElem.subEntity( i, cdim, j, dim );
 
               sout_ << "index: " << indexSet_.subIndex( entity, vx, dim )
@@ -463,12 +459,12 @@ class CheckCommunication
     // call communication of grid
     try
     {
-      gridView_.communicate(dh,InteriorBorder_All_Interface,ForwardCommunication);
+      gridView_.communicate(dh,Dune::InteriorBorder_All_Interface,Dune::ForwardCommunication);
       // make sure backward communication does the same, this should change nothing
-      gridView_.communicate(dh,InteriorBorder_All_Interface,BackwardCommunication);
+      gridView_.communicate(dh,Dune::InteriorBorder_All_Interface,Dune::BackwardCommunication);
       //gridView_.communicate(dh,All_All_Interface,ForwardCommunication);
     }
-    catch( const Dune :: NotImplemented &exception )
+    catch( const Dune::NotImplemented &exception )
     {
       if( myrank == 0 )
       {
@@ -519,14 +515,14 @@ void checkCommunication( const Grid &grid, int level, OutputStream &sout )
 {
   if( level < 0 )
   {
-    typedef typename Grid :: template Partition< All_Partition > :: LeafGridView GridView;
+    typedef typename Grid::template Partition< Dune::All_Partition >::LeafGridView GridView;
     GridView gridView = grid.leafView();
     CheckCommunication< GridView, NextCodim< Grid >::v, OutputStream >
     test( gridView, sout, level );
   }
   else
   {
-    typedef typename Grid :: template Partition< All_Partition > :: LevelGridView GridView;
+    typedef typename Grid::template Partition< Dune::All_Partition >::LevelGridView GridView;
     GridView gridView = grid.levelView( level );
     CheckCommunication< GridView, NextCodim< Grid >::v, OutputStream >
     test( gridView, sout, level );

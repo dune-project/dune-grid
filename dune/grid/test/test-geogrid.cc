@@ -61,25 +61,24 @@ struct EnableLevelIntersectionIteratorCheck< Dune::GeometryGrid< HostGrid, Coord
 };
 
 
+typedef Dune::COORDFUNCTION AnalyticalCoordFunction;
 
-using namespace Dune;
-
-typedef COORDFUNCTION AnalyticalCoordFunctionType;
+typedef Dune::GridSelector::GridType Grid;
 
 #if CACHECOORDFUNCTION
-typedef CachedCoordFunction< GridType, AnalyticalCoordFunctionType > CoordFunctionType;
+typedef Dune::CachedCoordFunction< Grid, AnalyticalCoordFunction > CoordFunction;
 #else
-typedef AnalyticalCoordFunctionType CoordFunctionType;
+typedef AnalyticalCoordFunction CoordFunction;
 #endif
 
-typedef GeometryGrid< GridType, CoordFunctionType > GeometryGridType;
+typedef Dune::GeometryGrid< Grid, CoordFunction > GeometryGrid;
 
 
 
 int main ( int argc, char **argv )
 try
 {
-  MPIHelper::instance( argc, argv );
+  Dune::MPIHelper::instance( argc, argv );
 
   if( argc < 2 )
   {
@@ -87,8 +86,8 @@ try
     return 1;
   }
 
-  GridPtr< GeometryGridType > pgeogrid( argv[ 1 ] );
-  GeometryGridType &geogrid = *pgeogrid;
+  Dune::GridPtr< GeometryGrid > pgeogrid( argv[ 1 ] );
+  GeometryGrid &geogrid = *pgeogrid;
 
   geogrid.globalRefine( 1 );
   geogrid.loadBalance();
@@ -104,7 +103,7 @@ try
   std::cerr << "Checking geometry in father..." << std::endl;
   checkGeometryInFather( geogrid );
   std::cerr << "Checking intersections..." << std::endl;
-  checkIntersectionIterator( geogrid, !EnableLevelIntersectionIteratorCheck< GridType >::v );
+  checkIntersectionIterator( geogrid, !EnableLevelIntersectionIteratorCheck< Grid >::v );
 
   checkIterators( geogrid.leafView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
@@ -116,7 +115,7 @@ try
 
   std::cerr << "Checking communication..." << std::endl;
   checkCommunication( geogrid, -1, std::cout );
-  if( EnableLevelIntersectionIteratorCheck< GridType >::v )
+  if( EnableLevelIntersectionIteratorCheck< Grid >::v )
   {
     for( int i = 0; i <= geogrid.maxLevel(); ++i )
       checkCommunication( geogrid, i, std::cout );
@@ -124,7 +123,7 @@ try
 
   return 0;
 }
-catch( const Exception &e )
+catch( const Dune::Exception &e )
 {
   std::cerr << e << std::endl;
   return 1;

@@ -41,9 +41,9 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
 #endif
 
-  typedef FieldVector< typename Geometry::ctype, Geometry::coorddimension >
+  typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
-  typedef FieldVector< typename LocalGeometry::ctype, LocalGeometry::coorddimension >
+  typedef Dune::FieldVector< typename LocalGeometry::ctype, LocalGeometry::coorddimension >
   LocalVector;
 
   if( !intersection.neighbor() || intersection.boundary() || !intersection.conforming() )
