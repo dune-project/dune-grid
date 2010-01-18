@@ -91,12 +91,14 @@ namespace Dune
     builtJT_ = false;
     builtJTInv_ = false;
 
+    // copy corners
     for( int i = 0; i < numCorners; ++i )
-    {
       coordReader.coordinate( i, coord_[ i ] );
-      centroid_ += coord_[ i ];
-    }
 
+    // calculate centroid
+    centroid_ = coord_[ 0 ];
+    for( int i = 1; i < numCorners; ++i )
+      centroid_ += coord_[ i ];
     centroid_ *= 1.0 / numCorners;
 
     elDet_ = (coordReader.hasDeterminant() ? coordReader.determinant() : elDeterminant());

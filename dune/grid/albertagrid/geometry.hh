@@ -509,10 +509,10 @@ namespace Dune
     /** \brief return center of geometry */
     GlobalVector center () const
     {
-      GlobalVector centroid_;
-      for (int i=0; i<numCorners; i++)
-        centroid_ += corner(i);
-      centroid_ *= 1.0 / numCorners;
+      GlobalVector centroid_ = corner( 0 );
+      for( int i = 1; i < numCorners; ++i )
+        centroid_ += corner( i );
+      centroid_ *= ctype( 1 ) / ctype( numCorners );
       return centroid_;
     }
 
