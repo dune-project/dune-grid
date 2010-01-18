@@ -199,8 +199,7 @@ namespace Dune {
 
     // find reference point, subtract 1 from all odd directions
     for (int i=0; i<dim; i++)
-      if (t[i]%2==1)
-        t[i] -= 1;
+      t[i] -= t[i]%2;
     __As[dir] =grid->pos(l,t);     // all components of t are even
 
     // make element
@@ -292,19 +291,10 @@ namespace Dune {
     // look for odd coordinates
     FieldVector<ctype, dim> delta;
     for (int i=0; i<dim; i++)
-      if (zz[i]%2)
-      {
-        // component i is odd
-        zz[i] -= 1;
-        zz[i] /= 2;
-        delta[i] = 1.0;
-      }
-      else
-      {
-        // component i is even
-        zz[i] /= 2;
-        delta[i] = 0.0;
-      }
+    {
+      delta[i] = zz[i] % 2;
+      zz[i] = zz[i] / 2;
+    }
 
     // zz is now the reduced coordinate of the father, compute index
     int partition = grid->partition(l,z);
@@ -432,10 +422,7 @@ namespace Dune {
 
     // and compute compressed coordinates of neighbor
     array<int,dim> zrednb = zred;
-    if (count%2)
-      zrednb[count/2] += 1;           // odd
-    else
-      zrednb[count/2] -= 1;           // even
+    zrednb[count/2] += -1+2*(count%2);     // (count%2) ? +1 : -1
 
     // now check if neighbor exists
     is_on_boundary = !grid->exists(grid->getRealImplementation(self).l,zrednb);
@@ -692,6 +679,22 @@ namespace Dune {
     mapper[0].make(N[0]);
     for (int i=0; i<dim; i++)
       h[0][i] = (H[i]-low[i])/((ctype)N[0][i]);
+
+    // define boudary segments
+    boundarysize = 0;
+    {
+      array<int, dim-1> bN;
+      for (int dir = 0; dir < dim; dir++)
+      {
+        // extent of this face
+        for (int i=0; i<dir; i++) bN[i] = N[0][i];
+        for (int i=dir+1; i<dim; i++) bN[i-1] = N[0][i];
+        // setup mapper for this face
+        boundarymapper[dir].make(bN);
+        // compute size
+        boundarysize += 2 * boundarymapper[dir].elements(0);
+      }
+    }
 
     dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
     for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];

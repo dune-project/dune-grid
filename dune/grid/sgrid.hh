@@ -742,7 +742,8 @@ namespace Dune {
     };
 
     int boundarySegmentIndex () const {
-      if (boundary()) return count;
+      if (boundary())
+        return grid->boundarySegmentIndex(self.level(), count, zred);
       return -1;
     };
 
@@ -1464,7 +1465,7 @@ namespace Dune {
     //! \brief returns the number of boundary segments within the macro grid
     size_t numBoundarySegments () const
     {
-      return 2*dim;
+      return boundarysize;
     }
 
     //! number of grid entities of all level for given codim
@@ -1632,6 +1633,25 @@ namespace Dune {
     //! given reduced coordinates of an element, determine if element is in the grid
     bool exists (int level, const array<int,dim>& zred) const;
 
+    // compute boundary segment index for a given zentity and a face
+    int boundarySegmentIndex (int l, int face, const array<int,dim> & zentity) const
+    {
+      array<int,dim-1> zface;
+      int dir = face/2;
+      int side = face%2;
+      // compute z inside the global face
+      for (int i=0; i<dir; i++) zface[i] = zentity[i]/(1<<l);
+      for (int i=dir+1; i<dim; i++) zface[i-1] = zentity[i]/(1<<l);
+      zface = boundarymapper[dir].expand(zface, 0);
+      // compute index in the face
+      int index = boundarymapper[dir].n(zface);
+      // compute offset
+      for (int i=0; i<dir; i++)
+        index += 2*boundarymapper[i].elements(0);
+      index += side*boundarymapper[dir].elements(0);
+      return index;
+    }
+
     // compute persistent index for a given zentity
     PersistentIndexType persistentIndex (int l, int codim, const array<int,dim> & zentity) const
     {
@@ -1713,6 +1733,10 @@ namespace Dune {
     array<int,dim> *N;              // number of elements per direction
     FieldVector<ctype, dim> *h;    // mesh size per direction
     mutable CubeMapper<dim> *mapper;     // a mapper for each level
+
+    // boundary segement index set
+    array<CubeMapper<dim-1>, dim> boundarymapper; // a mapper for each coarse grid face
+    int boundarysize;
 
     // faster implementation of subIndex
     mutable array <int,dim> zrefStatic;   // for subIndex of SEntity
