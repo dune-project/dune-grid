@@ -81,8 +81,7 @@ namespace Dune
       typedef HostEntityPointer HostEntityIterator;
 
       typedef typename HostGrid::template Codim< 0 >::Entity HostElement;
-      typedef typename HostGrid::template Codim< 0 >::EntityPointer HostElementPointer;
-      typedef HostElementPointer HostElementIterator;
+      typedef typename HostGrid::template Codim< 0 >::EntityPointer HostElementIterator;
     };
 
 
@@ -258,7 +257,6 @@ namespace Dune
 
     protected:
       typedef typename Traits::HostEntityPointer HostEntityPointer;
-      typedef typename Traits::HostElementPointer HostElementPointer;
       typedef typename Traits::HostElementIterator HostElementIterator;
       typedef typename Traits::HostElement HostElement;
 
@@ -342,9 +340,9 @@ namespace Dune
         const typename Traits::HostGrid::Traits::LevelIndexSet &indexSet
           = grid().hostGrid().levelIndexSet( lvl );
 
-        const HostElement &thisElement = *hostElementPointer();
+        const HostElement &thisElement = *hostElementIterator();
         assert( indexSet.contains( thisElement ) );
-        const HostElement &otherElement = *(other.hostElementPointer());
+        const HostElement &otherElement = *(other.hostElementIterator());
         assert( indexSet.contains( otherElement ) );
 
         const int thisIndex = indexSet.subIndex( thisElement, subEntity_, codimension );
@@ -357,14 +355,14 @@ namespace Dune
         if( entity_ == 0 )
         {
           entity_ = EntityStorage::alloc();
-          entity_->initialize( grid(), *hostElementPointer(), subEntity_ );
+          entity_->initialize( grid(), *hostElementIterator(), subEntity_ );
         }
         return *entity_;
       }
 
       int level () const
       {
-        return hostElementPointer().level();
+        return hostElementIterator().level();
       }
 
       void compactify ()
@@ -385,7 +383,7 @@ namespace Dune
         entity_ = 0;
       }
 
-      const HostElementPointer &hostElementPointer () const
+      const HostElementIterator &hostElementIterator () const
       {
         return hostElementIterator_;
       }
@@ -395,4 +393,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_ENTITYPOINTER_HH
