@@ -5,7 +5,7 @@
 #
 
 if ALBERTA
-  APROG = test-alberta
+  APROG = test-alberta test-alberta-generic
 endif
 
 if ALUGRID
@@ -89,6 +89,11 @@ test_alberta_SOURCES = test-alberta.cc
 test_alberta_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS) -DGRIDDIM=$(GRIDDIM) $(GRAPE_CPPFLAGS)
 test_alberta_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(GRAPE_LDFLAGS)
 test_alberta_LDADD = $(LOCAL_LIBS) $(ALBERTA_LIBS) $(GRAPE_LIBS)
+
+test_alberta_generic_SOURCES = $(test_alberta_SOURCES)
+test_alberta_generic_CPPFLAGS = $(test_alberta_CPPFLAGS) -DDUNE_ALBERTA_USE_GENERICGEOMETRY=1
+test_alberta_generic_LDFLAGS = $(test_alberta_LDLFAGS)
+test_alberta_generic_LDADD = $(test_alberta_LDADD)
 
 # files for alugrid
 test_alugrid_SOURCES = test-alugrid.cc
