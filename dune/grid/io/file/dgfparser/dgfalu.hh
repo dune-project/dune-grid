@@ -68,7 +68,7 @@ namespace Dune
     explicit DGFBaseFactory ( const std::string &filename,
                               MPICommunicatorType comm )
       : factory_(comm),
-        dgf_( 0, 1 )
+        dgf_( rank(comm), 1 )
     {}
 
     Grid *grid () const
@@ -150,6 +150,14 @@ namespace Dune
         return false;
       testfile.close();
       return true;
+    }
+    static int rank( MPICommunicatorType MPICOMM )
+    {
+      int rank = 0;
+#if HAVE_MPI
+      MPI_Comm_rank( MPICOMM, &rank );
+#endif
+      return rank;
     }
     Grid *grid_;
     GridFactory factory_;
