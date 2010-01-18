@@ -80,12 +80,17 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const {
+    int boundaryId () const DUNE_DEPRECATED {
+      return boundarySegmentIndex();
+    }
+
+    //! return information about the Boundary
+    int boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
-        DUNE_THROW(GridError, "Calling boundaryId() for a non-boundary intersection!");
+        DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
 #endif
-      return UG_NS<dim>::boundaryId(center_, neighborCount_);
+      return UG_NS<dim>::boundarySegmentIndex(center_, neighborCount_);
     }
 
     /** \brief Returns true, because UG level intersections are always conforming */
@@ -244,12 +249,17 @@ namespace Dune {
     }
 
     //! return information about the Boundary
-    int boundaryId () const {
+    int boundaryId () const DUNE_DEPRECATED {
+      return boundarySegmentIndex();
+    }
+
+    //! return information about the Boundary
+    int boundarySegmentIndex () const {
 #ifndef NDEBUG
       if (!boundary())
-        DUNE_THROW(GridError, "Calling boundaryId() for a non-boundary intersection!");
+        DUNE_THROW(GridError, "Calling boundarySegmentIndex() for a non-boundary intersection!");
 #endif
-      return UG_NS<dim>::boundaryId(center_, neighborCount_);
+      return UG_NS<dim>::boundarySegmentIndex(center_, neighborCount_);
     }
 
     /** \brief Is this intersection conforming? */
