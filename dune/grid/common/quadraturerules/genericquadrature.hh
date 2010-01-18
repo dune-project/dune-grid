@@ -239,7 +239,7 @@ namespace Dune
       explicit GenericQuadrature ( unsigned int order )
         : Base( Topology::id )
       {
-        OneDQuadrature onedQuad( order );
+        OneDQuadrature onedQuad( OneDQuadrature::minPoints(order) );
         BaseQuadrature baseQuad( order );
 
         const unsigned int baseQuadSize = baseQuad.size();
@@ -302,7 +302,7 @@ namespace Dune
       explicit GenericQuadrature ( unsigned int order )
         : Base( Topology::id )
       {
-        OneDQuadrature onedQuad( order + dimension-1 );
+        OneDQuadrature onedQuad( OneDQuadrature::minPoints(order + dimension-1 ) );
         BaseQuadrature baseQuad( order );
 
         const unsigned int baseQuadSize = baseQuad.size();

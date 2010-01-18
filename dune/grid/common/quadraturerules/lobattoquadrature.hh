@@ -76,6 +76,11 @@ namespace Dune
           Base::push_back( q );
         }
       }
+      // order is the maximal order of polynomials which can be exactly integrated
+      static unsigned int minPoints( unsigned int order )
+      {
+        return (order+4)/2;
+      }
     };
 #endif // #if HAVE_ALGLIB
 

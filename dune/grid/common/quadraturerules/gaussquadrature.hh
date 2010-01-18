@@ -35,17 +35,23 @@ namespace Dune
 
     public:
       typedef F Field;
+      // n is number of points required
       explicit GaussPoints ( unsigned int n )
       {
         Base::reserve( n );
         const QuadratureRule<Field,1>& points =
           QuadratureRules<Field,1>::rule(GeometryType(GeometryType::cube,1),
-                                         2*n-1, QuadratureType::Gauss);
+                                         2*n-2, QuadratureType::Gauss);
         for( unsigned int i = 0; i < n; ++i )
         {
           QuadraturePoint<Field,1> q( points[i].position()[0], points[i].weight() );
           Base::push_back( q );
         }
+      }
+      // order is the maximal order of polynomials which can be exactly integrated
+      static unsigned int minPoints( unsigned int order )
+      {
+        return (order+2)/2;
       }
     };
 
@@ -86,6 +92,11 @@ namespace Dune
           QuadraturePoint<Field,1> q( (p( i ) + Field( 1 )) * half, w( i )*half );
           Base::push_back( q );
         }
+      }
+      // order is the maximal order of polynomials which can be exactly integrated
+      static unsigned int minPoints( unsigned int order )
+      {
+        return (order+2)/2;
       }
     };
 #endif
