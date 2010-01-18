@@ -72,9 +72,13 @@ namespace Dune
 
     GeometryType type () const;
 
-    const NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
-    const NormalVector outerNormal ( const LocalCoordType &local ) const;
-    const NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
+    NormalVector centerIntegrationOuterNormal () const;
+    NormalVector centerOuterNormal () const;
+    NormalVector centerUnitOuterNormal () const;
+
+    NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
+    NormalVector outerNormal ( const LocalCoordType &local ) const;
+    NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
 
 
     AlbertaTransformation transformation () const;

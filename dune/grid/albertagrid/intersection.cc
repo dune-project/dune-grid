@@ -76,11 +76,10 @@ namespace Dune
 
 
   template< class Grid >
-  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::centerIntegrationOuterNormal () const
   {
 #if DUNE_ALBERTA_USE_GENERICGEOMETRY
-    //const FieldVector< ctype, dimension > localInInside = geometryInInside().global( local );
     const GenericReferenceElement< ctype, dimension > &refElement = GenericReferenceElements< ctype, dimension >::simplex();
     const FieldVector< ctype, dimension > &localInInside = refElement.position( indexInInside(), 1 );
     return Grid::getRealImplementation( inside()->geometry() ).normal( indexInInside(), localInInside );
@@ -103,8 +102,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::NormalVector
-  AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  inline AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 1, 1 > >::centerIntegrationOuterNormal () const
   {
     const Alberta::GlobalVector &oppCoord = grid().getCoord( elementInfo(), oppVertex_ );
     const Alberta::GlobalVector &myCoord = grid().getCoord( elementInfo(), 1-oppVertex_ );
@@ -114,8 +113,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::NormalVector
-  AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  inline AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 2, 2 > >::centerIntegrationOuterNormal () const
   {
     const Alberta::GlobalVector &coordOne = grid().getCoord( elementInfo(), (oppVertex_+1)%3 );
     const Alberta::GlobalVector &coordTwo = grid().getCoord( elementInfo(), (oppVertex_+2)%3 );
@@ -127,8 +126,8 @@ namespace Dune
   }
 
   template<>
-  inline const AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::NormalVector
-  AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::integrationOuterNormal ( const LocalCoordType &local ) const
+  inline AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::NormalVector
+  AlbertaGridIntersectionBase< const AlbertaGrid< 3, 3 > >::centerIntegrationOuterNormal () const
   {
     // in this case the orientation is negative, multiply by -1
     const ALBERTA EL_INFO &elInfo = elementInfo().elInfo();
@@ -162,20 +161,44 @@ namespace Dune
 
 
   template< class Grid >
-  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::outerNormal( const LocalCoordType &local ) const
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::centerOuterNormal() const
   {
-    return integrationOuterNormal( local );
+    return centerIntegrationOuterNormal();
   }
 
 
   template< class Grid >
-  inline const typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::unitOuterNormal ( const LocalCoordType &local ) const
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::centerUnitOuterNormal () const
   {
-    NormalVector normal = outerNormal( local );
+    NormalVector normal = centerOuterNormal();
     normal *= (1.0 / normal.two_norm());
     return normal;
+  }
+
+
+  template< class Grid >
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
+  {
+    return centerIntegrationOuterNormal();
+  }
+
+
+  template< class Grid >
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::outerNormal( const LocalCoordType &local ) const
+  {
+    return centerOuterNormal();
+  }
+
+
+  template< class Grid >
+  inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
+  AlbertaGridIntersectionBase< Grid >::unitOuterNormal ( const LocalCoordType &local ) const
+  {
+    return centerUnitOuterNormal();
   }
 
 
