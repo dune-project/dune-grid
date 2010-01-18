@@ -284,6 +284,7 @@ namespace Dune
           out << "  " << element[ i ];
         out << std :: endl;
       }
+      out << boundaryIds_.size() << std :: endl;
 
       const BoundaryIdIteratorType endB = boundaryIds_.end();
       for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
