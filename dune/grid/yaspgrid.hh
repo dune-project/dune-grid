@@ -820,6 +820,7 @@ namespace Dune {
 
       return YaspEntityPointer<0,GridImp>(cg,cg.cell_overlap().tsubbegin(coord));
     }
+
     //! returns true if father entity exists
     bool hasFather () const
     {
@@ -1707,6 +1708,41 @@ namespace Dune {
     //! (attach your boundary condition as needed)
     int boundarySegmentIndex() const
     {
+      if(! boundary()) return -1;
+      // level of entity, direction and side of intersection
+      int level = _inside.level();
+      int dir = _count/2;
+      int side = _count%2;
+      // size of global macro grid
+      const FieldVector<int, dim>& size =
+        _inside.gridlevel().mg()->begin().cell_global().size();
+      // gobal position of the cell on macro grid
+      FieldVector<int, dim> pos = _inside.transformingsubiterator().coord();
+      pos /= (1<<level);
+      // for (int k=0; k<dim; k++) coord[k] = coord[k]/(1<<level);
+      // compute index in the face
+      int offset = 1;
+      int index = 0;
+      for (int k=dim-1; k>=0; k--)
+      {
+        if (k == dir) continue;
+        index += pos[k] * offset;
+        offset *= size[k];
+      }
+      // compute offset
+      for (int k=0; k<=dir; k++)
+      {
+        offset = 1;
+        for (int l=0; l<dim; l++)
+        {
+          if (l==k) continue;
+          offset *= size[l];
+        }
+        int factor = 2*(k<dir) + side*(k==dir);
+        index += factor * offset;
+      }
+      return index;
+
       if(boundary()) return indexInInside();
       return -1;
     }
@@ -2410,7 +2446,25 @@ namespace Dune {
       indexsets.push_back( new YaspLevelIndexSet<const YaspGrid<dim> >(*this,0) );
       theleafindexset.push_back( new YaspLeafIndexSet<const YaspGrid<dim> >(*this) );
       theglobalidset.push_back( new YaspGlobalIdSet<const YaspGrid<dim> >(*this) );
+      boundarysegmentssize();
     }
+
+    void boundarysegmentssize()
+    {
+      const FieldVector<int, dim> & size = MultiYGrid<dim,ctype>::begin().cell_global().size();
+      nBSegments = 0;
+      for (int k=0; k<dim; k++)
+      {
+        int offset = 1;
+        for (int l=0; l<dim; l++)
+        {
+          if (l==k) continue;
+          offset *= size[l];
+        }
+        nBSegments += 2*offset;
+      }
+    }
+
   public:
     //! define type used for coordinates in grid module
     typedef yaspgrid_ctype ctype;
@@ -2697,7 +2751,7 @@ namespace Dune {
     //! \brief returns the number of boundary segments within the macro grid
     size_t numBoundarySegments () const
     {
-      return 2*dim;
+      return nBSegments;
     }
 
     /*! The new communication interface
@@ -3054,6 +3108,7 @@ namespace Dune {
     std::vector<YaspLevelIndexSet<const YaspGrid<dim> >*> indexsets;
     std::vector<YaspLeafIndexSet<const YaspGrid<dim> >*> theleafindexset;
     std::vector<YaspGlobalIdSet<const YaspGrid<dim> >*> theglobalidset;
+    int nBSegments;
 
     // Index classes need access to the real entity
     friend class Dune::YaspLevelIndexSet<const Dune::YaspGrid<dim> >;
