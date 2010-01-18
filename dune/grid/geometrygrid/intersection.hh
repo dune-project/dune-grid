@@ -45,29 +45,25 @@ namespace Dune
     {
       typedef GeometryGrid< HostGrid, CoordFunction > Grid;
 
-      typedef typename HostIntersection :: Geometry HostGeometry;
-      typedef typename HostIntersection :: LocalGeometry HostLocalGeometry;
+      typedef typename HostIntersection::Geometry HostGeometry;
+      typedef typename HostIntersection::LocalGeometry HostLocalGeometry;
 
     public:
-      typedef typename Grid :: ctype ctype;
+      typedef typename Grid::ctype ctype;
 
-      enum { dimension = Grid :: dimension };
-      enum { dimensionworld = Grid :: dimensionworld };
+      enum { dimension = Grid::dimension };
+      enum { dimensionworld = Grid::dimensionworld };
 
-      typedef typename Grid :: template Codim< 0 > :: Entity Entity;
-      typedef typename Grid :: template Codim< 0 > :: EntityPointer EntityPointer;
-      typedef typename Grid :: template Codim< 1 > :: Geometry Geometry;
-      typedef typename Grid :: template Codim< 1 > :: LocalGeometry LocalGeometry;
+      typedef typename Grid::template Codim< 0 >::Entity Entity;
+      typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
+      typedef typename Grid::template Codim< 1 >::Geometry Geometry;
+      typedef typename Grid::template Codim< 1 >::LocalGeometry LocalGeometry;
 
     private:
-      typedef typename GenericGeometry :: GlobalGeometryTraits<Grid> :: IntersectionCoordVector CoordVector;
+      typedef typename GenericGeometry::GlobalGeometryTraits< Grid >::IntersectionCoordVector CoordVector;
 
       typedef MakeableInterfaceObject< Geometry > MakeableGeometry;
-      typedef typename MakeableGeometry :: ImplementationType GeometryImpl;
-
-      const EntityPointer *inside_;
-      const HostIntersection *hostIntersection_;
-      mutable MakeableGeometry geo_;
+      typedef typename MakeableGeometry::ImplementationType GeometryImpl;
 
     public:
       Intersection ()
@@ -157,7 +153,7 @@ namespace Dune
       FieldVector< ctype, dimensionworld >
       integrationOuterNormal ( const FieldVector< ctype, dimension-1 > &local ) const
       {
-        typedef typename Grid :: template Codim< 0 > :: Geometry Geometry;
+        typedef typename Grid::template Codim< 0 >::Geometry Geometry;
         const Geometry &geo = inside()->geometry();
         FieldVector< ctype, dimension > x( geometryInInside().global( local ) );
         return Grid::getRealImplementation( geo ).normal( indexInInside(), x );
@@ -177,6 +173,13 @@ namespace Dune
         return normal;
       }
 
+      FieldVector< ctype, dimensionworld > centerUnitOuterNormal () const
+      {
+        const GenericReferenceElement< ctype, dimension-1 > &refFace
+          = GenericReferenceElements< ctype, dimension-1 >::general( type() );
+        return unitOuterNormal( refFace.position( 0, 0 ) );
+      }
+
       const HostIntersection &hostIntersection () const
       {
         assert( isValid() );
@@ -193,7 +196,7 @@ namespace Dune
     protected:
       const Grid &grid () const
       {
-        return Grid :: getRealImplementation( inside() ).grid();
+        return Grid::getRealImplementation( inside() ).grid();
       }
 
       bool isValid () const
@@ -205,6 +208,11 @@ namespace Dune
       {
         hostIntersection_ = 0;
       }
+
+    private:
+      const EntityPointer *inside_;
+      const HostIntersection *hostIntersection_;
+      mutable MakeableGeometry geo_;
     };
 
 
@@ -275,4 +283,4 @@ namespace Dune
 
 }
 
-#endif
+#endif // #ifndef DUNE_GEOGRID_INTERSECTION_HH
