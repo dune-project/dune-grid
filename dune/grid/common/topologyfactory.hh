@@ -7,6 +7,7 @@
 #include <map>
 
 #include <dune/common/fvector.hh>
+#include <dune/grid/genericgeometry/conversion.hh>
 #include <dune/grid/genericgeometry/topologytypes.hh>
 
 namespace Dune
@@ -45,6 +46,11 @@ namespace Dune
       GenericGeometry::IfTopology< Maker, dimension >::apply( topologyId, key, object );
       return object;
     }
+    //! dynamically create objects
+    static Object *create(const Dune::GeometryType &gt, const Key &key)
+    {
+      return create( GenericGeometry::topologyId(gt) ,key);
+    }
     //! statically create objects
     template <class Topology>
     static Object *create(const Key &key)
@@ -79,13 +85,18 @@ namespace Dune
     static const unsigned int dimension = Factory::dimension;
     typedef typename Factory::Key Key;
     typedef const typename Factory::Object Object;
-    //! @copydoc TopologyFactory::create
+    //! @copydoc TopologyFactory::create(const unsigned int topologyId,const Key &key)
     static Object *create ( const unsigned int topologyId, const Key &key )
     {
       assert( topologyId < numTopologies );
       return instance().getObject( topologyId, key );
     }
-    //! statically create objects
+    //! @copydoc TopologyFactory::create(const Dune::GeometryType &gt,const Key &key)
+    static Object *create(const Dune::GeometryType &gt, const Key &key)
+    {
+      return create( GenericGeometry::topologyId(gt) ,key);
+    }
+    //! @copydoc TopologyFactory::create(const Key &key)
     template< class Topology >
     static Object *create ( const Key &key )
     {
