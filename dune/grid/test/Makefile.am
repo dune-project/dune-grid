@@ -25,6 +25,12 @@ else
 endif
 endif
 
+#
+## Defines for gridtype.hh
+#
+GRIDTYPE=YASPGRID
+GRIDDIM=2
+
 ALBERTA_DIM = $(GRIDDIM)
 
 #
@@ -36,8 +42,6 @@ COORDFUNCTION = IdenticalCoordFunction\<double,$(GRIDDIM)\>
 # COORDFUNCTION = DGFCoordFunction\<$(GRIDDIM),$(GRIDDIM)\>
 # COORDFUNCTION = DGFCoordFunction\<2,3\>
 CACHECOORDFUNCTION = 0
-GRIDTYPE=YASPGRID
-GRIDDIM=2
 
 #
 ## define the lists of tests to build and run
@@ -55,8 +59,6 @@ check_PROGRAMS = $(NORMALTESTS)
 #
 ## common flags
 #
-
-GRIDDIM=2
 
 # paranoia
 DUNE_EXTRA_CHECKS = -DDUNE_DEVEL_MODE
