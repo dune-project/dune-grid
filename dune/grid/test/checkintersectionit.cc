@@ -152,6 +152,8 @@ void checkIntersectionIterator(const GridViewType& view,
   {
     const int indexInInside  = iIt->indexInInside();
 
+    const GenericReferenceElement< ctype, dim-1 > &refFace = GenericReferenceElements< ctype, dim-1 >::general( iIt->type() );
+
     // //////////////////////////////////////////////////////////////////////
     //   Compute the integral of the outer normal over the whole element.
     //   This has to be zero.
@@ -387,7 +389,15 @@ void checkIntersectionIterator(const GridViewType& view,
 
       if( (globalPos - localPos).infinity_norm() > 1e-6 )
         DUNE_THROW( GridError, "entity.geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x ) at x = " << quad[ i ].position() << "." );
+    }
 
+    if( (iIt->centerUnitOuterNormal() - iIt->unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
+    {
+      std::cerr << "Error: centerUnitOuterNormal() does not match unitOuterNormal( "
+                << refFace.position( 0, 0 ) << " )." << std::endl;
+      std::cerr << "       centerUnitOuterNormal = " << iIt->centerUnitOuterNormal()
+                << ", unitOuterNormal( " << refFace.position( 0, 0 ) << " ) = "
+                << iIt->unitOuterNormal( refFace.position( 0, 0 ) ) << std::endl;
     }
 
     // ////////////////////////////////////////////////////////////////
