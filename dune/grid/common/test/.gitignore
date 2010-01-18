@@ -5,6 +5,7 @@ Makefile.in
 mcmgmappertest
 scsgmappertest
 test-quadrature
+test-genericquadrature
 referenceelementstest
 checkrefnumbering
 semantic.cache

@@ -5,7 +5,7 @@ TESTPROGS = mcmgmappertest
 endif
 
 # which tests to run
-TESTS = test-quadrature referenceelementstest checkrefnumbering scsgmappertest $(TESTPROGS)
+TESTS = test-quadrature test-genericquadrature referenceelementstest checkrefnumbering scsgmappertest $(TESTPROGS)
 
 # programs just to build when "make check" is used
 check_PROGRAMS = $(TESTS)
@@ -30,5 +30,8 @@ checkrefnumbering_LDADD = $(LOCAL_LIBS)
 
 test_quadrature_SOURCES = test-quadrature.cc
 test_quadrature_LDADD = $(LOCAL_LIBS)
+
+test_genericquadrature_SOURCES = test-genericquadrature.cc
+test_genericquadrature_LDADD = $(LOCAL_LIBS)
 
 include $(top_srcdir)/am/global-rules
