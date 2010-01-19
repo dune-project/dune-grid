@@ -2,9 +2,31 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
-#include <dune/common/exceptions.hh>
+#include <dune/grid/common/grid.hh>  // for the exceptions
 
 #include "boundaryextractor.hh"
+
+bool Dune::BoundaryExtractor::oppositeOrientation(const UGGridBoundarySegment<3>& a,
+                                                  const UGGridBoundarySegment<3>& b)
+{
+  if (a[3]==-1) {   // implies b[3]==-1, too
+
+    // triangles
+    return (a[0]==b[2] && a[1]==b[1] && a[2]==b[0])
+           || (a[0]==b[1] && a[1]==b[0] && a[2]==b[2])
+           || (a[0]==b[0] && a[1]==b[2] && a[2]==b[1]);
+
+  } else {
+
+    // quadrilaterals
+    return (a[0]==b[3] && a[1]==b[2] && a[2]==b[1] && a[3]==b[0])
+           || (a[0]==b[2] && a[1]==b[1] && a[2]==b[0] && a[3]==b[3])
+           || (a[0]==b[1] && a[1]==b[0] && a[2]==b[3] && a[3]==b[2])
+           || (a[0]==b[0] && a[1]==b[3] && a[2]==b[2] && a[3]==b[1]);
+
+  }
+
+}
 
 void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
                                                      const std::vector<unsigned int>& elementVertices,
@@ -118,12 +140,21 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
       if (v[2]==v[3])
         v[3] = -1;
 
-      // Check if new face exists already in the list
-      // (then it is no boundary face)
-
+      // Find out if the element face has already been encountered.  Then it is not a boundary face.
       std::pair<std::set<UGGridBoundarySegment<3> >::iterator,bool> status = boundarySegments.insert(v);
-      if (!status.second)         //  Not inserted because already existing
+
+      if (!status.second) {           //  Not inserted because already existing
+
+        // Test whether the face vertices are oriented in opposite directions.
+        // If not, UG will barf because it cannot extract the boundary lines
+        // from inconsistently oriented grids.
+        if (!oppositeOrientation(*status.first, v))
+          DUNE_THROW(GridError, "The grid is not consistently oriented!"
+                     << "  Mismatch at element face: " << v[0] << " " << v[1] << " " << v[2] << " " << v[3]);
+
         boundarySegments.erase(status.first);
+
+      }
 
     }
 

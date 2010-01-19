@@ -130,10 +130,18 @@ namespace Dune {
 
   };
 
+  /** \brief Extracts the boundary faces and nodes from a set grid given as a set of elements
+   */
   class BoundaryExtractor {
 
     typedef std::set<UGGridBoundarySegment<2> >::iterator SetIterator2d;
     typedef std::set<UGGridBoundarySegment<3> >::iterator SetIterator3d;
+
+    /** \brief True if two segments are oppositely oriented
+
+       It is assumed that they consist of the same vertices.
+     */
+    static bool oppositeOrientation(const UGGridBoundarySegment<3>& a, const UGGridBoundarySegment<3>& b);
 
   public:
 
