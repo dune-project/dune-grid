@@ -80,8 +80,6 @@ namespace Dune
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
 
-    // const std::string filename_;
-    // bool removeGeneratedFile_;
     MPICommunicatorType communicator_;
 #if ALU3DGRID_PARALLEL
     int rank_;
