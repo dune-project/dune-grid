@@ -145,10 +145,20 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const {
+    const FieldVector<UGCtype, GridImp::dimensionworld>& unitOuterNormal (const FieldVector<UGCtype, GridImp::dimension-1>& local) const
+    {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
       return unitOuterNormal_;
+    }
+
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& centerUnitOuterNormal () const
+    {
+      GeometryType type = geometry().type();
+      const GenericReferenceElement<UGCtype, dim-1> & refElement =
+        GenericReferenceElements<UGCtype, dim-1>::general(type);
+      return unitOuterNormal(refElement.position(0,0));
     }
 
   private:
@@ -368,7 +378,14 @@ namespace Dune {
       return unitOuterNormal_;
     }
 
-
+    //! return outer normal
+    const FieldVector<UGCtype, GridImp::dimensionworld>& centerUnitOuterNormal () const
+    {
+      GeometryType type = geometry().type();
+      const GenericReferenceElement<UGCtype, dim-1> & refElement =
+        GenericReferenceElements<UGCtype, dim-1>::general(type);
+      return unitOuterNormal(refElement.position(0,0));
+    }
 
   private:
     //**********************************************************
