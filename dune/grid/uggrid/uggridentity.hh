@@ -329,12 +329,11 @@ namespace Dune {
     typename GridImp::template Codim<0>::EntityPointer father () const {
       return typename GridImp::template Codim<0>::EntityPointer (UG_NS<dim>::EFather(target_));
     }
+
     //! returns true if father entity exists
     bool hasFather () const
     {
-      DUNE_THROW(Dune::NotImplemented,
-                 "Default implementation does not work due to vertical load balancing");
-      return (level()>0);
+      return UG_NS<dim>::EFather(target_) != NULL;
     }
 
     /*! Location of this element relative to the reference element element of the father.
