@@ -211,6 +211,16 @@ namespace Dune {
       return leafIndexSet().size(type);
     }
 
+    /** \brief Return the number of coarse grid boundary segments.
+
+       For this grid implementation, the return value is always 2, because only connected domains
+       are supported, and then the coarse grid boundary consists of two points.
+     */
+    size_t numBoundarySegments() const
+    {
+      return 2;
+    }
+
     /** \brief The processor overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
     int overlapSize(int codim) const {

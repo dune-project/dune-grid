@@ -165,7 +165,13 @@ namespace Dune {
 
     //! return information about the Boundary
     int boundaryId () const {
-      return 1;
+      return boundarySegmentIndex();
+    }
+
+    //! return index of the boundary segment
+    int boundarySegmentIndex () const {
+      /** \todo It is hardwired here that the domain is connected, i.e., the boundary consists of two points */
+      return (neighbor_==0) ? 0 : 1;
     }
 
     //! Here returned element is in LOCAL coordinates of the element
@@ -444,7 +450,13 @@ namespace Dune {
 
     //! return information about the Boundary
     int boundaryId () const {
-      return 1;
+      return boundarySegmentIndex();
+    }
+
+    //! return index of the boundary segment
+    int boundarySegmentIndex () const {
+      /** \todo It is hardwired here that the domain is connected, i.e., the boundary consists of two points */
+      return (neighbor_==0) ? 0 : 1;
     }
 
     //! Here returned element is in LOCAL coordinates of the element
