@@ -6,34 +6,52 @@
 #   ALBERTA_DIM
 #     value of --with-alberta-dim, or taken from --world-dim, or 2 per default
 #
-#   ALBERTA_BASE_LIBS = -lalberta_util $ALBERTA_EXTRA
+#   ALBERTAROOT = /usr/local/alberta
+#     Root dir of the alberta installation.  Set from --with-alberta=...
+#
+#   ALBERTA_BASE_LIBS = $(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA
 #     LIBS that are always required independent of dimension
 #
-#   ALBERTA_LIBS = -lalberta_$(ALBERTA_DIM)d $ALBERTA_BASE_LIBS
+#   DUNEALBERTA_LIBPATHFLAGS = -L$(top_builddir)/lib
+#     Library path required for libalbertagrid.  The above value is apropriate
+#     when building dune-grid itself.  Other modules will call
+#     DUNE_GRID_CHECK_MODULE to check for dune-grid, so DUNE_GRID_CHECK_MODULE
+#     will reset DUNEALBERTA_LIBPATHFLAGS to something more apropriate.
+#
+#   ALBERTA_LIBPATHFLAGS = -L$(ALBERTAROOT)/lib
+#     Library path required for alberta
+#
+#   ALBERTA_LIBS = $(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_$(ALBERTA_DIM)d \
+#              $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d \
+#              $(ALBERTA_BASE_LIBS)
 #     All LIBS required for the configured dimension
 #
-#   ALBERTA_INCLUDE_CPPFLAGS = -I$ALBERTAROOT/include/alberta
+#   ALBERTA1D_LIBS, ALBERTA2D_LIBS, ALBERTA3D_LIBS
+#     Likewise, but with the given dimension hardcoded.
+#
+#   ALBERTA_INCLUDE_CPPFLAGS = -I$(ALBERTAROOT)/include/alberta
 #     Include path required for Alberta.
 #
 #   ALBERTA_DIM_CPPFLAGS = -DALBERTA_DIM=$(ALBERTA_DIM)
 #     Pass the configured dimension as a CPP define
 #
 #   ALBERTA_CPPFLAGS = $(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA
-#     All CPPFLAGS required for the configure dimension
+#     All CPPFLAGS required for the configured dimension
 #
-#   ALBERTA_LDFLAGS = -L$ALBERTAROOT/lib
-#     Library path required for alberta
+#   ALBERTA1D_CPPFLAGS, ALBERTA2D_CPPFLAGS, ALBERTA3D_CPPFLAGS
+#     Likewise, but with the given dimension hardcoded.
+#
+#   ALBERTA_LDFLAGS =
+#     Just for consistency.
+#
+#   ALBERTA1D_LDFLAGS, ALBERTA2D_LDFLAGS, ALBERTA3D_LDFLAGS
+#     Just for consistency.
 #
 #   If you want to use the the configured dimension, you have to use
-#   ALBERTA_LIBS, ALBERTA_CPPFLAGS and ALBERTA_LDFLAGS.
+#   $(ALBERTA_LIBS), $(ALBERTA_CPPFLAGS) and $(ALBERTA_LDFLAGS).
 #
-#   If want to use a specific dimension DIM, you have to use
-#     -ldunealbertagrid_$(DIM)d -lalberta_$(DIM)d $(ALBERTA_BASE_LIBS)
-#   for the LIBS,
-#     $(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=$(DIM) -DENABLE_ALBERTA
-#   for CPPFLAGS and
-#     $(ALBERTA_LDFLAGS)
-#   for the LDFLAGS.
+#   If want to use a specific dimension, say 2, you have to use
+#   $(ALBERTA2D_LIBS), $(ALBERTA2D_CPPFLAGS) and $(ALBERTA2D_LDFLAGS).
 #
 # Defines the folling CPP macro
 #   ALBERTA_DIM
@@ -52,8 +70,7 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
   AC_REQUIRE([AC_PATH_XTRA])
   AC_REQUIRE([DUNE_PATH_OPENGL])
 
-  variablealbertadim='$(WORLDDIM)'
-  AC_SUBST([ALBERTA_DIM], [$variablealbertadim]) 
+  ALBERTA_DIM='$(WORLDDIM)'
 
   AC_ARG_WITH(alberta,
     AC_HELP_STRING([--with-alberta=PATH],[directory where ALBERTA (ALBERTA
@@ -82,54 +99,44 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
       AC_MSG_WARN([ALBERTA directory '$with_alberta' does not exist])
     fi
 
-
-    ALBERTA_LIB_PATH="$ALBERTAROOT/lib"
-    # take both include paths 
-    ALBERTA_INCLUDE_PATH="$ALBERTAROOT/include/alberta"
     ALBERTA_VERSION="2.0"
 
     # set variables so that tests can use them
-    REM_CPPFLAGS=$CPPFLAGS
-
-    LDFLAGS="$LDFLAGS -L$ALBERTA_LIB_PATH"
-    CPPFLAGS="$CPPFLAGS -I$ALBERTA_INCLUDE_PATH -DDIM_OF_WORLD=3 -DEL_INDEX=0"
-
-    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTA_INCLUDE_PATH"
+    ALBERTA_INCLUDE_CPPFLAGS="-I$ALBERTAROOT/include/alberta"
     ALBERTA_DIM_CPPFLAGS='-DALBERTA_DIM=$(ALBERTA_DIM)'
     ALBERTA_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) $(ALBERTA_DIM_CPPFLAGS) -DENABLE_ALBERTA'
+    ALBERTA1D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=1 -DENABLE_ALBERTA'
+    ALBERTA2D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=2 -DENABLE_ALBERTA'
+    ALBERTA3D_CPPFLAGS='$(ALBERTA_INCLUDE_CPPFLAGS) -DALBERTA_DIM=3 -DENABLE_ALBERTA'
 
     # check for header
+    CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS -DDIM_OF_WORLD=3 -DEL_INDEX=0"
     AC_CHECK_HEADER([alberta.h], [HAVE_ALBERTA="1"],
-      AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_PATH]))
+      AC_MSG_WARN([alberta.h not found in $ALBERTA_INCLUDE_CPPFLAGS]))
 
     if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_MEMBER([struct el_info.wall_bound],[ALBERTA_VERSION="3.0"],[AC_MSG_WARN([version 3 not found, now looking for version 2])],[#include <alberta.h>])
     fi
 
-    CPPFLAGS="$REM_CPPFLAGS -I$ALBERTA_INCLUDE_PATH"
-    REM_CPPFLAGS=
+    CPPFLAGS="$ac_save_CPPFLAGS $ALBERTA_INCLUDE_CPPFLAGS"
 
     # TODO: check if static flag exists 
     # link_static_flag defines the flag for the linker to link only static
     # didnt work, with $link_static_flag, so quick hack here
 
     # check for libalberta_util...
+    ALBERTA_LIBPATHFLAGS='-L$(ALBERTAROOT)/lib'
+    DUNEALBERTA_LIBPATHFLAGS='-L$(top_builddir)/lib'
+    LDFLAGS="$LDFLAGS -L$ALBERTAROOT/lib"
     if test "x$HAVE_ALBERTA" = "x1" ; then
       AC_CHECK_LIB(alberta_util,[alberta_calloc],
-        [ALBERTA_LIBS="-lalberta_util"
-         ALBERTA_LDFLAGS="-L$ALBERTA_LIB_PATH"
-         LIBS="$LIBS $ALBERTA_LIBS"],
+        [LIBS="-lalberta_util $LIBS"],
         [HAVE_ALBERTA="0"
          AC_MSG_WARN(-lalberta_util not found!)])
     fi
 
     # check for ALBERTA grid library...
     if test "x$HAVE_ALBERTA" = "x1" ; then
-      # construct libname
-      # define varaible lib name depending on problem and world dim, to change
-      # afterwards easily 
-      variablealbertalibname='alberta_$(ALBERTA_DIM)d'
-      variabledunealbertagridlibname='dunealbertagrid_$(ALBERTA_DIM)d'
 
       # we do not check libraries for ALBERTA 3.0 (linking would require libtool)
       if test "$ALBERTA_VERSION" == "3.0" ; then
@@ -145,21 +152,25 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
           [HAVE_ALBERTA="0"
            AC_MSG_WARN(-lalberta_3d not found!)])
       fi
-      ALBERTA_BASE_LIBS="$ALBERTA_LIBS $ALBERTA_EXTRA"
-      ALBERTA_LIBS="-l$variabledunealbertagridlibname -l$variablealbertalibname $ALBERTA_BASE_LIBS"
+      ALBERTA_BASE_LIBS="\$(ALBERTA_LIBPATHFLAGS) -lalberta_util $ALBERTA_EXTRA"
+      # define varaible lib name depending on problem and world dim, to change
+      # afterwards easily 
+      ALBERTA_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_$(ALBERTA_DIM)d $(ALBERTA_LIBPATHFLAGS) -lalberta_$(ALBERTA_DIM)d $(ALBERTA_BASE_LIBS)'
+      ALBERTA1D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_1d $(ALBERTA_LIBPATHFLAGS) -lalberta_1d $(ALBERTA_BASE_LIBS)'
+      ALBERTA2D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_2d $(ALBERTA_LIBPATHFLAGS) -lalberta_2d $(ALBERTA_BASE_LIBS)'
+      ALBERTA3D_LIBS='$(DUNEALBERTA_LIBPATHFLAGS) -ldunealbertagrid_3d $(ALBERTA_LIBPATHFLAGS) -lalberta_3d $(ALBERTA_BASE_LIBS)'
     fi
 
   fi  # end of alberta check (--without wasn't set)
 
+  # clear all the LDFLAGS variables explicitly
+  ALBERTA_LDFLAGS=
+  ALBERTA1D_LDFLAGS=
+  ALBERTA2D_LDFLAGS=
+  ALBERTA3D_LDFLAGS=
+
   # survived all tests?
   if test "x$HAVE_ALBERTA" = "x1" ; then
-    AC_SUBST([ALBERTAROOT])
-    AC_SUBST(ALBERTA_BASE_LIBS, $ALBERTA_BASE_LIBS)
-    AC_SUBST(ALBERTA_LIBS, $ALBERTA_LIBS)
-    AC_SUBST(ALBERTA_LDFLAGS, $ALBERTA_LDFLAGS)
-    AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, $ALBERTA_INCLUDE_CPPFLAGS)
-    AC_SUBST(ALBERTA_DIM_CPPFLAGS, $ALBERTA_DIM_CPPFLAGS)
-    AC_SUBST(ALBERTA_CPPFLAGS, $ALBERTA_CPPFLAGS)
     AC_DEFINE(HAVE_ALBERTA, ENABLE_ALBERTA,
       [This is only true if alberta-library was found by configure 
        _and_ if the application uses the ALBERTA_CPPFLAGS])
@@ -173,25 +184,56 @@ AC_DEFUN([DUNE_PATH_ALBERTA],[
     fi
 
     # add to global list
-    DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $ALBERTA_LDFLAGS"
-    DUNE_PKG_LIBS="$DUNE_PKG_LIBS $ALBERTA_LIBS"
-    DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $ALBERTA_CPPFLAGS"
+    DUNE_ADD_ALL_PKG([Alberta], [$ALBERTA_CPPFLAGS], [$ALBERTA_LDFLAGS], [$ALBERTA_LIBS])
 
     # set variable for summary
     with_alberta="yes (Version $ALBERTA_VERSION)"
   else
-    AC_SUBST([ALBERTAROOT], [""])
-    AC_SUBST(ALBERTA_BASE_LIBS, "")
-    AC_SUBST(ALBERTA_LIBS, "")
-    AC_SUBST(ALBERTA_LDFLAGS, "")
-    AC_SUBST(ALBERTA_INCLUDE_CPPFLAGS, "")
-    AC_SUBST(ALBERTA_DIM_CPPFLAGS, "")
-    AC_SUBST(ALBERTA_CPPFLAGS, "")
+    # clear all variables
+    ALBERTA_DIM= 
+    ALBERTAROOT= 
+    ALBERTA_BASE_LIBS=
+    DUNEALBERTA_LIBPATHFLAGS=
+    ALBERTA_LIBPATHFLAGS=
+    ALBERTA_LIBS=
+    ALBERTA1D_LIBS=
+    ALBERTA2D_LIBS=
+    ALBERTA3D_LIBS=
+    ALBERTA_INCLUDE_CPPFLAGS=
+    ALBERTA_DIM_CPPFLAGS=
+    ALBERTA_CPPFLAGS=
+    ALBERTA1D_CPPFLAGS=
+    ALBERTA2D_CPPFLAGS=
+    ALBERTA3D_CPPFLAGS=
+    ALBERTA_LDFLAGS=
+    ALBERTA1D_LDFLAGS=
+    ALBERTA2D_LDFLAGS=
+    ALBERTA3D_LDFLAGS=
 
     # set variable for summary
     with_alberta="no"
   fi
     
+  AC_SUBST([ALBERTA_DIM]) 
+  AC_SUBST([ALBERTAROOT]) 
+  AC_SUBST([ALBERTA_BASE_LIBS])
+  AC_SUBST([DUNEALBERTA_LIBPATHFLAGS])
+  AC_SUBST([ALBERTA_LIBPATHFLAGS])
+  AC_SUBST([ALBERTA_LIBS])
+  AC_SUBST([ALBERTA1D_LIBS])
+  AC_SUBST([ALBERTA2D_LIBS])
+  AC_SUBST([ALBERTA3D_LIBS])
+  AC_SUBST([ALBERTA_INCLUDE_CPPFLAGS])
+  AC_SUBST([ALBERTA_DIM_CPPFLAGS])
+  AC_SUBST([ALBERTA_CPPFLAGS])
+  AC_SUBST([ALBERTA1D_CPPFLAGS])
+  AC_SUBST([ALBERTA2D_CPPFLAGS])
+  AC_SUBST([ALBERTA3D_CPPFLAGS])
+  AC_SUBST([ALBERTA_LDFLAGS])
+  AC_SUBST([ALBERTA1D_LDFLAGS])
+  AC_SUBST([ALBERTA2D_LDFLAGS])
+  AC_SUBST([ALBERTA3D_LDFLAGS])
+
   # also tell automake
   AM_CONDITIONAL(ALBERTA, test x$HAVE_ALBERTA = x1)
 
