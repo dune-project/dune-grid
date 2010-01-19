@@ -1,6 +1,6 @@
 # $Id: Makefile.am 2248 2006-02-10 15:30:52Z joe $
 
-quadraturerulesdir = $(include_dir)/dune/grid/common/quadraturerules
+quadraturerulesdir = $(includedir)/dune/grid/common/quadraturerules
 quadraturerules_HEADERS = gaussquadrature.hh  genericquadrature.hh  lobattoquadrature.hh
 
 noinst_LTLIBRARIES = libquadraturerules.la
