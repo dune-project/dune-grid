@@ -258,14 +258,14 @@ createGrid()
   // ///////////////////////////////////////////
   //   Create the domain data structure
   // ///////////////////////////////////////////
-  unsigned int noOfBSegments = boundarySegments.size();
+  grid_->numBoundarySegments_ = boundarySegments.size();
   std::string domainName = grid_->name_ + "_Domain";
   const double midPoint[3] = {0, 0, 0};
 
   if (UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
                                     midPoint,               // Midpoint of a circle enclosing the grid, only needed for the UG graphics
                                     1,                      // Radius of the enclosing circle
-                                    noOfBSegments,
+                                    grid_->numBoundarySegments_,
                                     noOfBNodes,
                                     false) == NULL)                 // The domain is not convex
     DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");

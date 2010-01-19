@@ -34,7 +34,8 @@ Dune::UGGrid < dim >::UGGrid(unsigned int heapSize)
     closureType_(GREEN),
     someElementHasBeenMarkedForRefinement_(false),
     someElementHasBeenMarkedForCoarsening_(false),
-    heapSize_(heapSize)
+    heapSize_(heapSize),
+    numBoundarySegments_(0)
 {
   if (numOfUGGrids==0) {
 

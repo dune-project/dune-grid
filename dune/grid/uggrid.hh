@@ -469,6 +469,13 @@ namespace Dune {
       return this->leafIndexSet().size(type);
     }
 
+    /** \brief Return the number of boundary segments */
+    size_t numBoundarySegments() const {
+      // The number is stored as a member of UGGrid upon grid creation.
+      // The corresponding data structure is not exported by UG.  (It is in ug/dom/std/std_internal.h)
+      return numBoundarySegments_;
+    }
+
     /** \brief Access to the GlobalIdSet */
     const typename Traits::GlobalIdSet& globalIdSet() const
     {
@@ -877,8 +884,15 @@ namespace Dune {
      */
     unsigned int heapSize_;
 
-    /** \brief The classes implementing the geometry of the boundary segments */
+    /** \brief The classes implementing the geometry of the boundary segments, if requested */
     std::vector<const BoundarySegment<dim>*> boundarySegments_;
+
+    /** \brief Overall number of coarse grid boundary segments.
+
+       This includes the number of linear segments.
+       Hence numBoundarySegments_ >= boundarySegments_.size()   (greater than or equal)
+     */
+    unsigned int numBoundarySegments_;
 
   }; // end Class UGGrid
 
