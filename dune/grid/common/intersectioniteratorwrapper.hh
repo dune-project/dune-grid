@@ -171,6 +171,16 @@ namespace Dune {
       return it().unitOuterNormal( local );
     }
 
+    //! return unit outer normal, this should be dependent on local
+    //! coordinates for higher order boundary
+    const NormalType centerUnitOuterNormal ( ) const
+    {
+      GeometryType type = geometry().type();
+      const GenericReferenceElement<ctype, dim-1> & refElement =
+        GenericReferenceElements<ctype, dim-1>::general(type);
+      return unitOuterNormal(refElement.position(0,0));
+    }
+
     //! return outer normal, this should be dependent on local
     //! coordinates for higher order boundary
     const NormalType outerNormal ( const FieldVector< ctype, dim-1 > &local ) const
