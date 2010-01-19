@@ -224,7 +224,9 @@ namespace Dune
     typedef typename std :: vector< std :: pair< FaceType, int > > :: iterator BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
+#if ALU3DGRID_PARALLEL
     if( rank_ == 0 )
+#endif
     {
       correctElementOrientation();
       if( addMissingBoundaries )
@@ -339,7 +341,9 @@ namespace Dune
     globalProjection_ = 0;
 
     // insert grid using ALUGrid macro grid builder
+#if ALU3DGRID_PARALLEL
     if( rank_ == 0 )
+#endif
     {
       // create ALUGrid macro grid builder
       typedef ALU3DSPACE Gitter :: Geometric :: BuilderIF BuilderIF;
