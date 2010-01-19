@@ -24,7 +24,7 @@ namespace Dune {
 
   /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  class UGGridBoundarySegment<2> : public FieldVector<int,2> {
+  class UGGridBoundarySegment<2> : public array<int,2> {
 
   public:
 
@@ -36,7 +36,7 @@ namespace Dune {
     /** \brief Compare the vertex lists modulo permutation */
     bool operator<(const UGGridBoundarySegment<2>& other) const {
 
-      FieldVector<int,2> sorted1, sorted2;
+      array<int,2> sorted1, sorted2;
 
       // ////////////////////////////////////////////////////////////////////////////
       // Sort the two arrays to get rid of cyclic permutations in mirror symmetry
@@ -58,22 +58,16 @@ namespace Dune {
       // ////////////////////////////////////////////////////////////////////////////
       //   Compare the two sorted arrays
       // ////////////////////////////////////////////////////////////////////////////
-      for (int i=0; i<2; i++) {
-        if (sorted1[i]<sorted2[i])
-          return true;
-        else if (sorted1[i]>sorted2[i])
-          return false;
-      }
 
-      // The sorted arrays are identical
-      return false;
+      return sorted1 < sorted2;
+
     }
 
   };
 
   /** \brief Specialization of the boundary segment class for 2d */
   template <>
-  class UGGridBoundarySegment<3> : public FieldVector<int,4> {
+  class UGGridBoundarySegment<3> : public array<int,4> {
 
   public:
 
@@ -94,25 +88,19 @@ namespace Dune {
         return false;
 
       // ////////////////////////////////////////////////////////////////////////////
-      // Sort the two arrays to get rid of cyclic permutations in mirror symmetry
+      // Sort the two arrays to get rid of cyclic permutations and mirror symmetry
       // ////////////////////////////////////////////////////////////////////////////
 
-      // bubble sort
+      // bubble sort: sort and compare together until the first nonmatching digits are found
       for (int i=numVertices()-1; i>=0; i--) {
 
         for (int j=0; j<i; j++) {
 
-          if (sorted1[j] > sorted1[j+1]) {
-            int tmp = sorted1[j];
-            sorted1[j] = sorted1[j+1];
-            sorted1[j+1] = tmp;
-          }
+          if (sorted1[j] > sorted1[j+1])
+            std::swap(sorted1[j], sorted1[j+1]);
 
-          if (sorted2[j] > sorted2[j+1]) {
-            int tmp = sorted2[j];
-            sorted2[j] = sorted2[j+1];
-            sorted2[j+1] = tmp;
-          }
+          if (sorted2[j] > sorted2[j+1])
+            std::swap(sorted2[j], sorted2[j+1]);
 
         }
 
