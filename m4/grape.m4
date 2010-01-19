@@ -1,8 +1,21 @@
+## -*- autoconf -*-
 # $Id: grape.m4 5710 2009-11-13 17:09:45Z robertk $
 # searches for albert-headers and libs
 
 # grape.h und libgr.a/libgr.so are located in the same discretory 
 
+# DUNE_PATH_GRAPE()
+#
+# configure shell/makefile variables:
+#   GRAPE_CPPFLAGS
+#   GRAPE_LDFLAGS
+#   GRAPE_LIBS
+#
+# preprocessor defines:
+#   HAVE_GRAPE ("ENABLE_GRAPE" or undefined)
+#
+# automake conditionals:
+#   GRAPE
 AC_DEFUN([DUNE_PATH_GRAPE],[
   AC_REQUIRE([AC_PROG_CC])
   AC_REQUIRE([AC_PATH_XTRA])
@@ -18,7 +31,7 @@ ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_LIBS="$LIBS"
 
 # don't even start testing if X wasn't found
-if test "x$X_LIBS" != x && test x$with_grape != xno ; then
+if test "x$no_x" != xyes && test x$with_grape != xno ; then
 
   LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
 
@@ -61,9 +74,9 @@ if test "x$X_LIBS" != x && test x$with_grape != xno ; then
     fi  
 
     AC_CHECK_LIB(gr, grape, 
-      [GRAPE_LDFLAGS="-L$GRAPEROOT $GL_LDFLAGS $GRAPE_LINKER_FLAGS"
+      [GRAPE_LDFLAGS="$GL_LDFLAGS $GRAPE_LINKER_FLAGS"
        GRAPE_CPPFLAGS="$CPPFLAGS"
-       GRAPE_LIBS="-lgr $GL_LIBS -lXext"], 
+       GRAPE_LIBS="-L$GRAPEROOT -lgr $GL_LIBS -lXext"], 
       [HAVE_GRAPE="0"])
   fi
 
@@ -77,9 +90,7 @@ if test "x$X_LIBS" != x && test x$with_grape != xno ; then
            _and_ if the application uses the GRAPE_CPPFLAGS])
 
     # add to global list
-    DUNE_PKG_LDFLAGS="$DUNE_PKG_LDFLAGS $GRAPE_LDFLAGS"
-    DUNE_PKG_LIBS="$DUNE_PKG_LIBS $GRAPE_LIBS"
-    DUNE_PKG_CPPFLAGS="$DUNE_PKG_CPPFLAGS $GRAPE_CPPFLAGS"
+    DUNE_ADD_ALL_PKG([GRAPE], [$GRAPE_CPPFLAGS], [$GRAPE_LDFLAGS], [$GRAPE_LIBS])
   fi
 elif test "x$X_LIBS" = x ; then 
   AC_MSG_WARN([X libraries were not found and therefore not Grape check possible! See ./configure --help for X library options.])
