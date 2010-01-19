@@ -34,7 +34,7 @@ GRIDDIM=2
 ALBERTA_DIM = $(GRIDDIM)
 
 #
-## Some parameters for te geogrid test
+## Some parameters for the geogrid test
 #
 COORDFUNCTION = IdenticalCoordFunction\<double,$(GRIDDIM)\>
 # COORDFUNCTION = Helix
