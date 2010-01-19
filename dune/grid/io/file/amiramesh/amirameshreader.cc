@@ -369,7 +369,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
 
   dune_static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
 
-  dverb << "This is the AmiraMesh reader for " << grid.name() << "!" << std::endl;
+  dverb << "This is the AmiraMesh reader for file '" << filename << "'!" << std::endl;
 
   // Create a grid factory
   GridFactory<GridType> factory(&grid);
