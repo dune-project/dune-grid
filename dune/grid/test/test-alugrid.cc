@@ -294,7 +294,7 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef ALUSimplexGrid<2,2> GridType;
-        std::string filename("simplex-testgrid-2-2.dgf");
+        std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
         std::cout << "READING from " << filename << std::endl;
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr, 2, display);
@@ -308,7 +308,7 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef ALUConformGrid<2,2> GridType;
-        std::string filename("simplex-testgrid-2-2.dgf");
+        std::string filename(SRCDIR "simplex-testgrid-2-2.dgf");
         GridPtr<GridType> gridPtr(filename);
         checkALUSerial(*gridPtr, 2, display);
 
@@ -321,7 +321,7 @@ int main (int argc , char **argv) {
 #ifndef NO_3D
       if( testALU3dCube )
       {
-        std::string filename( "simplex-testgrid-3-3.dgf" );
+        std::string filename(SRCDIR "simplex-testgrid-3-3.dgf");
 
         typedef ALUCubeGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
@@ -346,7 +346,7 @@ int main (int argc , char **argv) {
 
       if( testALU3dSimplex )
       {
-        std::string filename( "simplex-testgrid-3-3.dgf" );
+        std::string filename(SRCDIR "simplex-testgrid-3-3.dgf");
 
         typedef ALUSimplexGrid<3,3> GridType;
         GridPtr<GridType> gridPtr(filename);
