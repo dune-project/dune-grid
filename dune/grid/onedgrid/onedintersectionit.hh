@@ -219,19 +219,23 @@ namespace Dune {
 
     //! return outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
-      return outerNormal_;
+      return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
-    const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
-    {
-      return outerNormal(local);
+    const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+      return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      return outerNormal(local);
+      return centerUnitOuterNormal();
+    }
+
+    //! return unit outer normal at center of intersection
+    const FieldVector<typename GridImp::ctype, dimworld>& centerUnitOuterNormal () const {
+      outerNormal_[0] = (neighbor_==0) ? -1 : 1;
+      return outerNormal_;
     }
 
   private:
@@ -504,19 +508,24 @@ namespace Dune {
 
     //! return outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      outerNormal_[0] = ((neighbor_%2)==0) ? -1 : 1;
-      return outerNormal_;
+      return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
     const FieldVector<typename GridImp::ctype, dimworld>& integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
     {
-      return outerNormal(local);
+      return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
     const FieldVector<typename GridImp::ctype, dimworld>& unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
-      return outerNormal(local);
+      return centerUnitOuterNormal();
+    }
+
+    //! return unit outer normal at center of intersection
+    const FieldVector<typename GridImp::ctype, dimworld>& centerUnitOuterNormal () const {
+      outerNormal_[0] = ((neighbor_%2)==0) ? -1 : 1;
+      return outerNormal_;
     }
 
   private:
