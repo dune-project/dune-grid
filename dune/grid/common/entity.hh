@@ -328,6 +328,10 @@ namespace Dune
        which has an intersection of codimension 1 in common with this entity.
        Access to those neighbors is provided using the IntersectionIterator.
        This method returns an iterator refering to the first neighbor.
+
+       \note If the partitionType of the Entity is GhostEntity,
+             this method might give you only one neighbor, which is the
+             interior Entity the GhostEntity is connected to.
      */
     LeafIntersectionIterator ileafbegin () const
     {
@@ -335,6 +339,10 @@ namespace Dune
     }
 
     /**\brief Reference to an IntersectionIterator one past the last intersection
+
+       \note If the partitionType of the Entity is GhostEntity,
+             this method might give you only one neighbor, which is the
+             interior Entity the GhostEntity is connected to.
      */
     LeafIntersectionIterator ileafend () const
     {
@@ -346,6 +354,10 @@ namespace Dune
        which has an intersection of codimension 1 in common with this entity.
        Access to those neighbors is provided using the IntersectionIterator.
        This method returns an iterator refering to the first neighbor.
+
+       \note If the partitionType of the Entity is GhostEntity,
+             this method might give you only one neighbor, which is the
+             interior Entity the GhostEntity is connected to.
      */
     LevelIntersectionIterator ilevelbegin () const
     {
@@ -353,6 +365,10 @@ namespace Dune
     }
 
     /**\brief Reference to an IntersectionIterator one past the last intersection
+
+       \note If the partitionType of the Entity is GhostEntity,
+             this method might give you only one neighbor, which is the
+             interior Entity the GhostEntity is connected to.
      */
     LevelIntersectionIterator ilevelend () const
     {
@@ -361,7 +377,12 @@ namespace Dune
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
        The given entity resulted directly from a subdivision of its father
-       entity. If hasFather() returns false, the behavior of this method is undefined.
+       entity. For the macro elements dereferencing the EntityPointer is undefined.
+
+       \note If the partitionType of the Entity is GhostEntity,
+             it is not guaranteed that this method is working
+             or implemented in general.
+             For some grids it might be available, though.
      */
     EntityPointer father () const
     {
@@ -399,6 +420,11 @@ namespace Dune
        may be visited several times.
        If we store interpolation matrices, this is tolerable. We assume that on-the-fly
        implementation of interpolation is only done for simple discretizations.
+
+       \note If the partitionType of the Entity is GhostEntity,
+             it is not guaranteed that this method is working
+             or implemented in general.
+             For some grids it might be available, though.
      */
     const LocalGeometry& geometryInFather () const
     {
@@ -410,6 +436,11 @@ namespace Dune
 
        \param[in] maxlevel Iterator does not stop at elements with level greater than maxlevel.
        \return Iterator to the first son (level is not greater than maxlevel)
+
+       \note If the partitionType of the Entity is GhostEntity,
+           it is not guaranteed that this method is working
+           or implemented in general.
+           For some grids it might be available, though.
      */
     HierarchicIterator hbegin (int maxlevel) const
     {
@@ -417,6 +448,11 @@ namespace Dune
     }
 
     /** \brief Returns iterator to one past the last son element
+
+       \note If the partitionType of the Entity is GhostEntity,
+             it is not guaranteed that this method is working
+             or implemented in general.
+             For some grids it might be available, though.
      */
     HierarchicIterator hend (int maxlevel) const
     {
