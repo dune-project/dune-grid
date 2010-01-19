@@ -5,6 +5,8 @@
 
 #include <config.h>
 
+#include <dune/common/misc.hh>
+
 #include <dune/grid/common/genericreferenceelements.hh>
 #include <dune/grid/common/quadraturerules/gaussquadrature.hh>
 
@@ -21,35 +23,43 @@ bool success = true;
  */
 
 template <class ctype, int dim>
-ctype analyticSolution (Dune::GeometryType t, int p, int x) {
+ctype analyticalSolution (Dune::GeometryType t, int p, int direction )
+{
   using Dune::GeometryType;
-  ctype exact=0;
+  ctype exact = 0;
   switch (t.basicType())
   {
   case GeometryType::cube :
     exact=1.0/(p+1);
     break;
+
   case GeometryType::simplex :
     /* 1/(prod(k=1..dim,(p+k)) */
-    exact = 1.0;
-    for (int k=1; k<=dim; k++) exact*=(p+k);
-    exact = 1.0/exact;
+    exact = ctype( 1 );
+    for( int k = 1; k <= dim; ++k )
+      exact *= p+k;
+    exact = ctype( 1 ) / exact;
     break;
+
   case GeometryType::prism :
-    switch(x) {
-    case 0 :
-      exact=1.0/((p+2)*(p+1));
-      break;
-    case 1 :
-      exact=1.0/((p+2)*(p+1));
-      break;
-    case 2 :
-      exact=1.0/(2*(p+1));
-      break;
-    };
+  {
+    const int pdim = (dim > 0 ? dim-1 : 0);
+    if( direction < dim-1 )
+    {
+      GeometryType nt( GeometryType::simplex, dim-1 );
+      if( dim > 0 )
+        exact = analyticalSolution< ctype, pdim >( nt, p, direction );
+      else
+        exact = ctype( 1 );
+    }
+    else
+      exact = ctype( 1 ) / ctype( Dune::Factorial< pdim >::factorial * (p+1));
     break;
+  }
+
   case GeometryType::pyramid :
-    switch(x) {
+    switch( direction )
+    {
     case 0 :
     case 1 :
       exact=1.0/((p+3)*(p+1));
@@ -79,20 +89,18 @@ void checkQuadrature(Dune::GeometryType t, int maxorder)
     for (typename Quadrature::Iterator qp=qr.begin(); qp!=qr.end(); ++qp)
     {
       // pos of integration point
-      FieldVector<ctype,dim> const& x = qp->point();
-      ctype weight = qp->weight();
+      const FieldVector< ctype, dim > &x = qp->point();
+      const ctype weight = qp->weight();
 
       for (int d=0; d<dim; d++)
-      {
         integral[d] += weight*std::pow(x[d],p);
-      }
     }
 
     ctype maxRelativeError = 0;
     int dir = -1;
-    for (int d=0; d<dim; d++)
+    for( int d=0; d<dim; d++ )
     {
-      ctype exact = analyticSolution<ctype,dim>(t,p,d);
+      ctype exact = analyticalSolution<ctype,dim>(t,p,d);
       ctype relativeError = std::abs(integral[d]-exact) /
                             (std::abs(integral[d])+std::abs(exact));
       if (relativeError > maxRelativeError)
@@ -108,7 +116,7 @@ void checkQuadrature(Dune::GeometryType t, int maxorder)
       std::cerr << "Error: Quadrature for " << t << " and order=" << p << " failed" << std::endl;
       for (int d=0; d<dim; d++)
       {
-        ctype exact = analyticSolution<ctype,dim>(t,p,d);
+        ctype exact = analyticalSolution<ctype,dim>(t,p,d);
         ctype relativeError = std::abs(integral[d]-exact) /
                               (std::abs(integral[d])+std::abs(exact));
         std::cerr << "       relative error " << relativeError << " in direction " << d << " (exact = " << exact << " numerical = " << integral[d] << ")" << std::endl;
@@ -167,6 +175,8 @@ int main ()
     Dune::GeometryType simplex4d(Dune::GeometryType::simplex,4);
 
     Dune::GeometryType prism3d(Dune::GeometryType::prism,3);
+    Dune::GeometryType prism4d(Dune::GeometryType::prism,4);
+
     Dune::GeometryType pyramid3d(Dune::GeometryType::pyramid,3);
 
     checkWeights<double, 0>(cube0d,8);
@@ -181,6 +191,8 @@ int main ()
     checkWeights<double, 3>(simplex3d,8);
 
     checkWeights<double, 3>(prism3d,8);
+    checkWeights<double, 4>(prism4d,8);
+
     checkWeights<double, 3>(pyramid3d,8);
 
     checkQuadrature<double, 0>(cube0d,8);
@@ -196,10 +208,12 @@ int main ()
     checkQuadrature<double, 4>(simplex4d,8);
 
     checkQuadrature<double, 3>(prism3d,8);
-    checkQuadrature<double, 3>(pyramid3d,8);
+    checkQuadrature<double, 4>(prism4d,8);
 
+    checkQuadrature<double, 3>(pyramid3d,8);
   }
-  catch (Dune::Exception &e) {
+  catch( const Dune::Exception &e )
+  {
     std::cerr << e << std::endl;
     return 1;
   }
