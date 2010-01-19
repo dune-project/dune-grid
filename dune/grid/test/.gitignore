@@ -2,16 +2,12 @@ Makefile
 Makefile.in
 .deps
 .libs
-test-alu2dsimplex
-test-alu3dsimplex
-test-alu3dcube
-test-alu3dgrid
+test-alugrid
 test-alberta
 test-geogrid
 test-sgrid
 test-oned
 test-ug
-test-ug-gridfactory
 test-parallel-ug
 test-yaspgrid
 test-dgfalu-uggrid-combination
